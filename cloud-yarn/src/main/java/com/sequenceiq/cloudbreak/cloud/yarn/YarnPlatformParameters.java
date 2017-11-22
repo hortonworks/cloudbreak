@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.cloud.yarn;
 
-import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.TTL;
 import static com.sequenceiq.cloudbreak.cloud.model.Orchestrator.orchestrator;
 import static com.sequenceiq.cloudbreak.cloud.model.VmType.vmType;
 
@@ -130,7 +129,8 @@ public class YarnPlatformParameters implements PlatformParameters {
     @Override
     public List<StackParamValidation> additionalStackParameters() {
         List<StackParamValidation> additionalStackParameterValidations = Lists.newArrayList();
-        additionalStackParameterValidations.add(new StackParamValidation(TTL, false, String.class, Optional.of("^[0-9]*$")));
+        additionalStackParameterValidations.add(new StackParamValidation(YarnConstants.YARN_LIFETIME_PARAMETER, false, Integer.class, Optional.empty()));
+        additionalStackParameterValidations.add(new StackParamValidation(YarnConstants.YARN_QUEUE_PARAMETER, false, String.class, Optional.empty()));
         return additionalStackParameterValidations;
     }
 

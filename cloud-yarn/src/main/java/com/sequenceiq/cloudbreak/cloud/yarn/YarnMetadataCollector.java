@@ -23,13 +23,14 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.yarn.auth.YarnClientUtil;
+import com.sequenceiq.cloudbreak.cloud.yarn.client.YarnClient;
+import com.sequenceiq.cloudbreak.cloud.yarn.client.api.YarnResourceConstants;
+import com.sequenceiq.cloudbreak.cloud.yarn.client.model.core.Container;
+import com.sequenceiq.cloudbreak.cloud.yarn.client.model.request.ApplicationDetailRequest;
+import com.sequenceiq.cloudbreak.cloud.yarn.client.model.response.ApplicationDetailResponse;
+import com.sequenceiq.cloudbreak.cloud.yarn.client.model.response.ApplicationErrorResponse;
+import com.sequenceiq.cloudbreak.cloud.yarn.client.model.response.ResponseContext;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
-import com.sequenceiq.cloudbreak.orchestrator.yarn.api.YarnResourceConstants;
-import com.sequenceiq.cloudbreak.orchestrator.yarn.client.YarnClient;
-import com.sequenceiq.cloudbreak.orchestrator.yarn.model.core.Container;
-import com.sequenceiq.cloudbreak.orchestrator.yarn.model.request.ApplicationDetailRequest;
-import com.sequenceiq.cloudbreak.orchestrator.yarn.model.response.ApplicationDetailResponse;
-import com.sequenceiq.cloudbreak.orchestrator.yarn.model.response.ResponseContext;
 
 @Service
 public class YarnMetadataCollector implements MetadataCollector {
@@ -74,8 +75,9 @@ public class YarnMetadataCollector implements MetadataCollector {
                 }
                 return cloudVmMetaDataStatuses;
             } else {
-                // TODO error handling
-                throw new CloudConnectorException("ERROR!!!");
+                ApplicationErrorResponse errorResponse = responseContext.getResponseError();
+                throw new CloudConnectorException(String.format("Failed to get yarn application details: HTTP Return: %d Error: %s",
+                        responseContext.getStatusCode(), errorResponse == null ? "unknown" : errorResponse.getDiagnostics()));
             }
         } catch (MalformedURLException ex) {
             throw new CloudConnectorException("Failed to get yarn application details", ex);

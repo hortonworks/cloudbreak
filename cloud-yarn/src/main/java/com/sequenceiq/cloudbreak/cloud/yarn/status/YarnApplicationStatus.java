@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.yarn.status;
 
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
-import com.sequenceiq.cloudbreak.orchestrator.yarn.model.core.ApplicationState;
+import com.sequenceiq.cloudbreak.cloud.yarn.client.model.core.ApplicationState;
 
 public class YarnApplicationStatus {
     private YarnApplicationStatus() {
@@ -25,7 +25,6 @@ public class YarnApplicationStatus {
                 return ResourceStatus.CREATED;
             default:
                 return ResourceStatus.IN_PROGRESS;
-
         }
     }
 

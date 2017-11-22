@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.controller.validation.stack;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Map;
 
@@ -36,6 +37,9 @@ public class ParametersTypeValidator implements ParameterValidator {
                     } catch (Exception ignored) {
                         try {
                             entry.getClazz().getConstructor(String.class).newInstance(parameters.get(entry.getName()).toString());
+                        } catch (InvocationTargetException ex) {
+                            Throwable cause = ex.getCause();
+                            throw new BadRequestException(cause.getClass() + ":" + cause.getMessage(), cause);
                         } catch (Exception ex) {
                             throw new BadRequestException(ex.getMessage());
                         }

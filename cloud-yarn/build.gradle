@@ -10,13 +10,15 @@ jar {
 }
 
 dependencies {
-
     compile project(':cloud-api')
     compile project(':cloud-common')
     compile project(':cloud-reactor')
-    compile project(':orchestrator-yarn')
 
     compile group: 'org.slf4j',                     name: 'slf4j-api',                      version: slf4jApiVersion
+
+    compile group: 'com.sun.jersey',                name: 'jersey-core',                    version: '1.19.1'
+    compile group: 'com.sun.jersey',                name: 'jersey-client',                    version: '1.19.1'
+    compile group: 'com.sun.jersey',                name: 'jersey-json',                    version: '1.19.1'
 
     testCompile group: 'org.mockito',               name: 'mockito-all',                    version: mockitoAllVersion
     testCompile group: 'junit',                     name: 'junit',                          version: junitVersion

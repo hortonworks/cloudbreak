@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.common.type.ResourceType.YARN_APPLICATIO
 
 import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
@@ -13,6 +14,7 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.google.common.base.Splitter;
@@ -32,22 +34,22 @@ import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.TlsInfo;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.yarn.auth.YarnClientUtil;
+import com.sequenceiq.cloudbreak.cloud.yarn.client.YarnClient;
+import com.sequenceiq.cloudbreak.cloud.yarn.client.api.YarnResourceConstants;
+import com.sequenceiq.cloudbreak.cloud.yarn.client.exception.YarnClientException;
+import com.sequenceiq.cloudbreak.cloud.yarn.client.model.core.Artifact;
+import com.sequenceiq.cloudbreak.cloud.yarn.client.model.core.ConfigFile;
+import com.sequenceiq.cloudbreak.cloud.yarn.client.model.core.ConfigFileType;
+import com.sequenceiq.cloudbreak.cloud.yarn.client.model.core.Configuration;
+import com.sequenceiq.cloudbreak.cloud.yarn.client.model.core.Resource;
+import com.sequenceiq.cloudbreak.cloud.yarn.client.model.core.YarnComponent;
+import com.sequenceiq.cloudbreak.cloud.yarn.client.model.request.ApplicationDetailRequest;
+import com.sequenceiq.cloudbreak.cloud.yarn.client.model.request.CreateApplicationRequest;
+import com.sequenceiq.cloudbreak.cloud.yarn.client.model.request.DeleteApplicationRequest;
+import com.sequenceiq.cloudbreak.cloud.yarn.client.model.response.ApplicationDetailResponse;
+import com.sequenceiq.cloudbreak.cloud.yarn.client.model.response.ApplicationErrorResponse;
+import com.sequenceiq.cloudbreak.cloud.yarn.client.model.response.ResponseContext;
 import com.sequenceiq.cloudbreak.cloud.yarn.status.YarnApplicationStatus;
-import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
-import com.sequenceiq.cloudbreak.orchestrator.yarn.api.YarnResourceConstants;
-import com.sequenceiq.cloudbreak.orchestrator.yarn.client.YarnClient;
-import com.sequenceiq.cloudbreak.orchestrator.yarn.model.core.Artifact;
-import com.sequenceiq.cloudbreak.orchestrator.yarn.model.core.ConfigFile;
-import com.sequenceiq.cloudbreak.orchestrator.yarn.model.core.ConfigFileType;
-import com.sequenceiq.cloudbreak.orchestrator.yarn.model.core.Configuration;
-import com.sequenceiq.cloudbreak.orchestrator.yarn.model.core.Resource;
-import com.sequenceiq.cloudbreak.orchestrator.yarn.model.core.YarnComponent;
-import com.sequenceiq.cloudbreak.orchestrator.yarn.model.request.ApplicationDetailRequest;
-import com.sequenceiq.cloudbreak.orchestrator.yarn.model.request.CreateApplicationRequest;
-import com.sequenceiq.cloudbreak.orchestrator.yarn.model.request.DeleteApplicationRequest;
-import com.sequenceiq.cloudbreak.orchestrator.yarn.model.response.ApplicationDetailResponse;
-import com.sequenceiq.cloudbreak.orchestrator.yarn.model.response.ApplicationErrorResponse;
-import com.sequenceiq.cloudbreak.orchestrator.yarn.model.response.ResponseContext;
 
 @Service
 public class YarnResourceConnector implements ResourceConnector<Object> {
@@ -56,18 +58,23 @@ public class YarnResourceConnector implements ResourceConnector<Object> {
     @Inject
     private YarnClientUtil yarnClientUtil;
 
-    // TODO from parameter
-    private int maxResourceNameLength = 50;
+    @Value("${cb.max.yarn.resource.name.length:}")
+    private int maxResourceNameLength;
+
+    @Value("${cb.yarn.defaultQueue}")
+    private String defaultQueue;
+
+    @Value("${cb.yarn.defaultLifeTime:}")
+    private int defaultLifeTime;
 
     @Override
     public List<CloudResourceStatus> launch(AuthenticatedContext authenticatedContext, CloudStack stack, PersistenceNotifier persistenceNotifier,
             AdjustmentType adjustmentType, Long threshold) throws Exception {
         CreateApplicationRequest createApplicationRequest = new CreateApplicationRequest();
         createApplicationRequest.setName(createApplicationName(authenticatedContext));
-        // TODO default from application.yml
-        createApplicationRequest.setQueue(stack.getParameters().getOrDefault(YarnConstants.YARN_QUEUE_PARAMETER, "default-developers"));
-        // TODO lifetime from parameter or unlimited
-        createApplicationRequest.setLifetime(600);
+        createApplicationRequest.setQueue(stack.getParameters().getOrDefault(YarnConstants.YARN_QUEUE_PARAMETER, defaultQueue));
+        String lifeTimeStr = stack.getParameters().get(YarnConstants.YARN_LIFETIME_PARAMETER);
+        createApplicationRequest.setLifetime(lifeTimeStr != null ? Integer.parseInt(lifeTimeStr) : defaultLifeTime);
 
         Artifact artifact = new Artifact();
         artifact.setId(stack.getImage().getImageName());
@@ -78,8 +85,9 @@ public class YarnResourceConnector implements ResourceConnector<Object> {
             YarnComponent component = new YarnComponent();
             component.setName(group.getName());
             component.setNumberOfContainers(group.getInstancesSize());
-            // TODO launch command
-            component.setLaunchCommand("/bootstrap/privileged-start-services-script");
+            String userData = stack.getImage().getUserData(group.getType());
+            component.setLaunchCommand(String.format("/bootstrap/start-systemd %s %s %s", Base64.getEncoder().encodeToString(userData.getBytes()),
+                    stack.getLoginUserName(), stack.getPublicKey()));
             component.setArtifact(artifact);
             component.setDependencies(new ArrayList<>());
             InstanceTemplate instanceTemplate = group.getReferenceInstanceConfiguration().getTemplate();
@@ -88,17 +96,16 @@ public class YarnResourceConnector implements ResourceConnector<Object> {
             resource.setMemory(instanceTemplate.getParameter(YarnConstants.YARN_MEMORY_PARAMETER, Integer.class));
             component.setResource(resource);
             component.setRunPrivilegedContainer(true);
-            String userData = stack.getImage().getUserData(group.getType());
-            ConfigFile configFile = new ConfigFile();
+            ConfigFile configFileJson = new ConfigFile();
             Map<String, String> propsMap = Maps.newHashMap();
             propsMap.put("userData", Base64.getEncoder().encodeToString(userData.getBytes()));
             propsMap.put("sshUser", stack.getLoginUserName());
             propsMap.put("sshPubKey", stack.getPublicKey());
-            configFile.setProps(propsMap);
-            configFile.setDestFile("/etc/cloudbreak.properties");
-            configFile.setType(ConfigFileType.PROPERTIES.name());
+            configFileJson.setProps(propsMap);
+            configFileJson.setDestFile("/etc/cloudbreak-config.json");
+            configFileJson.setType(ConfigFileType.JSON.name());
             Configuration configuration = new Configuration();
-            configuration.setFiles(Collections.singletonList(configFile));
+            configuration.setFiles(Arrays.asList(configFileJson));
             component.setConfiguration(configuration);
             components.add(component);
         }
@@ -167,7 +174,7 @@ public class YarnResourceConnector implements ResourceConnector<Object> {
                         deleteApplicationRequest.setName(yarnApplicationName);
                         yarnClient.deleteApplication(deleteApplicationRequest);
                         LOGGER.info("Yarn Applicatin has been deleted");
-                    } catch (MalformedURLException | CloudbreakOrchestratorFailedException e) {
+                    } catch (MalformedURLException | YarnClientException e) {
                         throw new CloudConnectorException("Stack cannot be deleted", e);
                     }
                     break;
@@ -201,7 +208,6 @@ public class YarnResourceConnector implements ResourceConnector<Object> {
 
     @Override
     public TlsInfo getTlsInfo(AuthenticatedContext authenticatedContext, CloudStack cloudStack) {
-        // TODO private ip or public ip is used for tls
         return new TlsInfo(false);
     }
 

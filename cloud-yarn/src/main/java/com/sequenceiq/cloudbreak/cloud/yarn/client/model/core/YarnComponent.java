@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.orchestrator.yarn.model.core;
+package com.sequenceiq.cloudbreak.cloud.yarn.client.model.core;
 
 import java.util.List;
 
@@ -20,6 +20,8 @@ public class YarnComponent implements JsonEntity {
     private Resource resource;
 
     private Boolean runPrivilegedContainer;
+
+    private Configuration configuration;
 
     @JsonProperty("run_privileged_container")
     public Boolean getRunPrivilegedContainer() {
@@ -78,5 +80,13 @@ public class YarnComponent implements JsonEntity {
 
     public void setDependencies(List<Dependency> dependencies) {
         this.dependencies = dependencies;
+    }
+
+    public Configuration getConfiguration() {
+        return configuration;
+    }
+
+    public void setConfiguration(Configuration configuration) {
+        this.configuration = configuration;
     }
 }

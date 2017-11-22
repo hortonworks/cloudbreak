@@ -3,8 +3,8 @@ package com.sequenceiq.cloudbreak.cloud.yarn.auth;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
-import com.sequenceiq.cloudbreak.orchestrator.yarn.client.YarnClient;
-import com.sequenceiq.cloudbreak.orchestrator.yarn.client.YarnHttpClient;
+import com.sequenceiq.cloudbreak.cloud.yarn.client.YarnClient;
+import com.sequenceiq.cloudbreak.cloud.yarn.client.YarnHttpClient;
 
 @Component
 public class YarnClientUtil {

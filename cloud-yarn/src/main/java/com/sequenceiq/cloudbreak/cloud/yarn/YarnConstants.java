@@ -14,6 +14,8 @@ public class YarnConstants {
 
     public static final String YARN_QUEUE_PARAMETER = "yarnQueue";
 
+    public static final String YARN_LIFETIME_PARAMETER = "lifeTime";
+
     public static final String YARN_CPUS_PARAMETER = "yarnCpus";
 
     public static final String YARN_MEMORY_PARAMETER = "yarnMemory";
