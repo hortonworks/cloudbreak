@@ -1,0 +1,47 @@
+version: 2
+jobs:
+#  unit-test:
+#    docker:
+#      - image: circleci/golang:1.9
+#    steps:
+#      - checkout
+#      - run: make deps
+#      - run: make vet
+#      - run: make test
+
+  integration-test:
+    machine:
+      services:
+        - docker
+    steps:
+      - checkout    
+      - run:
+          name: Install make uuid 
+          command: sudo apt-get install -y uuid-runtime make 
+      - run:
+          name: Install bats
+          command: | 
+            curl -o "/tmp/bats.tar.gz" -L "https://github.com/sstephenson/bats/archive/v0.4.0.tar.gz"
+            tar -x -z -f "/tmp/bats.tar.gz" -C /tmp/ 
+            sudo bash "/tmp/bats-0.4.0/install.sh" /usr/local 
+            rm -rf /tmp/* 
+      - run: |
+          make build-docker
+          sudo mv build/Linux/cb /usr/local/bin/
+      - run:
+          name: run cbm
+          command: cd tests/ && make cbm
+      - run:
+          name: run test
+          command: cd tests/ && make integration-test
+
+workflows:
+  version: 2
+  test:
+    jobs:
+       - integration-test
+#      - unit-test
+#      - integration-test:
+#          requires:
+#            - unit-test
+

@@ -1,0 +1,133 @@
+traefik:
+    ports:
+        - "172.17.0.1:8081:8080"
+        - 80:80
+        - 443:443
+    links:
+        - consul
+        - identity
+        - sultans
+    volumes:
+        - /var/run/docker.sock:/var/run/docker.sock
+        - ./certs:/certs/traefik
+    log_opt:
+        max-size: "10M"
+        max-file: "5"
+    image: traefik:v1.3.8-alpine
+    restart: on-failure
+    command: --debug --web --InsecureSkipVerify=true         --defaultEntryPoints=http,https         --entryPoints='Name:http Address::80 Redirect.EntryPoint:https'         --entryPoints='Name:https Address::443 TLS:/certs/traefik/client.pem,/certs/traefik/client-key.pem'         --maxidleconnsperhost=100         --traefikLogsFile=/opt/traefik/log/traefik.log         --accessLogsFile=/opt/traefik/log/access.log         --docker         --consul --consul.endpoint=consul:8500
+haveged:
+    labels:
+      - traefik.enable=false
+    privileged: true
+    log_opt:
+        max-size: "10M"
+        max-file: "5"
+    image: hortonworks/haveged:1.1.0
+
+consul:
+    labels:
+      - traefik.enable=false
+    privileged: true
+    environment:
+        - http_proxy=
+        - https_proxy=
+    volumes:
+        - "/var/run/docker.sock:/var/run/docker.sock"
+        - consul-data:/data
+    ports:
+        - "172.17.0.1:53:8600/udp"
+        - "8400:8400"
+        - "8500:8500"
+    hostname: node1
+    log_opt:
+        max-size: "10M"
+        max-file: "5"
+    image: gliderlabs/consul-server:0.5
+    command: --bootstrap --advertise 172.17.0.1 -recursor 169.254.169.254
+
+registrator:
+    labels:
+      - traefik.enable=false
+    privileged: true
+    volumes:
+        - "/var/run/docker.sock:/tmp/docker.sock"
+    log_opt:
+        max-size: "10M"
+        max-file: "5"
+    image: gliderlabs/registrator:v5
+    links:
+        - consul
+    command: consul://consul:8500
+
+identity:
+    labels:
+      - traefik.port=8080
+      - traefik.frontend.rule=PathPrefix:/identity/check_token,/identity/oauth,/identity/Users,/identity/login.do,/identity/Groups;PathPrefixStrip:/identity
+      - traefik.backend=identity-backend
+      - traefik.frontend.priority=10
+    ports:
+        - 8089:8080
+    environment:
+        - http_proxy=
+        - https_proxy=
+        - SERVICE_NAME=identity
+    dns: 172.17.0.1
+    volumes:
+      - ./uaa.yml:/uaa/uaa.yml
+    log_opt:
+        max-size: "10M"
+        max-file: "5"
+    image: hortonworks/cloudbreak-uaa:3.6.5
+
+cloudbreak:
+    labels:
+      - traefik.port=8080
+      - traefik.frontend.rule=PathPrefix:/cb/
+      - traefik.backend=cloudbreak-backend
+      - traefik.frontend.priority=10
+    ports:
+        - 8080:8080
+    dns: 172.17.0.1
+    links:
+        - consul
+    log_opt:
+        max-size: "10M"
+        max-file: "5"
+    image: afarsang/cbm:latest
+    command: bash
+
+sultans:
+    environment:
+        - http_proxy=
+        - https_proxy=
+        - SL_CLIENT_ID=sultans
+        - 'SL_CLIENT_SECRET=cbsecret2015'
+        - SERVICE_NAME=sultans
+        - SL_PORT=3000
+        - SL_SMTP_SENDER_HOST=smtp.service.consul
+        - SL_SMTP_SENDER_PORT=25
+        - SL_SMTP_SENDER_USERNAME=admin
+        - "SL_SMTP_SENDER_PASSWORD=cloudbreak"
+        - SL_SMTP_SENDER_FROM=noreply@hortonworks.com
+        - HWX_CLOUD_COLLECTOR=aws-marketplace@hortonworks.com
+        - HWX_CLOUD_USER=admin@example.com
+        - SL_SMARTSENSE_CONFIGURE=false
+        - SL_CB_ADDRESS=https://127.0.0.1
+        - SL_ADDRESS=https://127.0.0.1/sl
+        - SL_HWX_CLOUD_DEFAULT_REGION=
+        - NODE_TLS_REJECT_UNAUTHORIZED=0
+        - SL_UAA_SERVICEID=identity.service.consul
+        - SL_DISPLAY_TERMS_AND_SERVICES=
+    labels:
+      - traefik.port=3000
+      - traefik.frontend.rule=PathPrefixStrip:/sl
+      - traefik.backend=sultans-backend
+      - traefik.frontend.priority=10
+    ports:
+        - 3001:3000
+    dns: 172.17.0.1
+    log_opt:
+        max-size: "10M"
+        max-file: "5"
+    image: hortonworks/hdc-auth:2.1.0-dev.374

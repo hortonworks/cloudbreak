@@ -1,0 +1,84 @@
+zones:
+ internal:
+   hostnames:
+     - 172.17.0.1
+     - 127.0.0.1
+     - node1.node.dc1.consul
+     - identity.service.consul
+     - example.com
+
+oauth:
+  client:
+    override: true
+    autoapprove:
+      - cloudbreak_shell
+  clients:
+    sultans:
+      id: sultans
+      secret: 'cbsecret2015'
+      authorized-grant-types: client_credentials
+      scope: scim.read,scim.write,password.write
+      authorities: uaa.resource,scim.read,scim.write,password.write
+    uluwatu:
+      id: uluwatu
+      secret: 'cbsecret2015'
+      authorized-grant-types: authorization_code,client_credentials
+      scope: cloudbreak.blueprints,cloudbreak.credentials,cloudbreak.stacks,cloudbreak.templates,cloudbreak.networks,cloudbreak.securitygroups,openid,cloudbreak.usages.global,cloudbreak.usages.account,cloudbreak.usages.user,cloudbreak.events,periscope.cluster,cloudbreak.recipes,cloudbreak.blueprints.read,cloudbreak.templates.read,cloudbreak.credentials.read,cloudbreak.recipes.read,cloudbreak.networks.read,cloudbreak.securitygroups.read,cloudbreak.stacks.read,cloudbreak.sssdconfigs,cloudbreak.sssdconfigs.read,cloudbreak.platforms,cloudbreak.platforms.read
+      authorities: cloudbreak.subscribe
+      redirect-uri: https://127.0.0.1/authorize
+    cloudbreak:
+      id: cloudbreak
+      secret: 'cbsecret2015'
+      authorized-grant-types: client_credentials
+      scope: scim.read
+      authorities: uaa.resource,scim.read
+    periscope:
+      id: periscope
+      secret: 'cbsecret2015'
+      authorized-grant-types: client_credentials
+      scope: none
+      authorities: cloudbreak.autoscale,uaa.resource,scim.read
+    cloudbreak_shell:
+      id: cloudbreak_shell
+      authorized-grant-types: implicit
+      scope: cloudbreak.networks,cloudbreak.securitygroups,cloudbreak.templates,cloudbreak.blueprints,cloudbreak.credentials,cloudbreak.stacks,cloudbreak.events,cloudbreak.usages.global,cloudbreak.usages.account,cloudbreak.usages.user,cloudbreak.recipes,openid,cloudbreak.blueprints.read,cloudbreak.templates.read,cloudbreak.credentials.read,cloudbreak.recipes.read,cloudbreak.networks.read,cloudbreak.securitygroups.read,cloudbreak.stacks.read,cloudbreak.sssdconfigs,cloudbreak.sssdconfigs.read,cloudbreak.platforms,cloudbreak.platforms.read,periscope.cluster
+      authorities: uaa.none
+      redirect-uri: http://cloudbreak.shell
+    flex_usage_client:
+      id: flex_usage_client
+      secret: 'cbsecret2015'
+      authorized-grant-types: client_credentials
+      scope: none
+      authorities: cloudbreak.flex
+scim:
+  username_pattern: '[a-z0-9+\-_.@]+'
+  groups:
+    openid: Default group
+    cloudbreak.networks: Default group
+    cloudbreak.securitygroups: Default group
+    cloudbreak.templates: Default group
+    cloudbreak.blueprints: Default group
+    cloudbreak.credentials: Default group
+    cloudbreak.stacks: Default group
+    sequenceiq.cloudbreak.admin: Default group
+    sequenceiq.cloudbreak.user: Default group
+    sequenceiq.account.seq1234567.SequenceIQ: Default group
+    cloudbreak.events: Default group
+    cloudbreak.usages.global: Default group
+    cloudbreak.usages.account: Default group
+    cloudbreak.usages.user: Default group
+    periscope.cluster: Default group
+    cloudbreak.recipes: Default group
+    cloudbreak.blueprints.read: Default group
+    cloudbreak.templates.read: Default group
+    cloudbreak.credentials.read: Default group
+    cloudbreak.recipes.read: Default group
+    cloudbreak.networks.read: Default group
+    cloudbreak.securitygroups.read: Default group
+    cloudbreak.stacks.read: Default group
+    cloudbreak.sssdconfigs: Default group
+    cloudbreak.sssdconfigs.read: Default group
+    cloudbreak.platforms: Default group
+    cloudbreak.platforms.read: Default group
+  users:
+    - admin@example.com|cloudbreak|admin@example.com|Joe|Admin|openid,cloudbreak.networks,cloudbreak.securitygroups,cloudbreak.templates,cloudbreak.blueprints,cloudbreak.credentials,cloudbreak.stacks,sequenceiq.cloudbreak.admin,sequenceiq.cloudbreak.user,sequenceiq.account.seq1234567.SequenceIQ,cloudbreak.events,cloudbreak.usages.global,cloudbreak.usages.account,cloudbreak.usages.user,periscope.cluster,cloudbreak.recipes,cloudbreak.blueprints.read,cloudbreak.templates.read,cloudbreak.credentials.read,cloudbreak.recipes.read,cloudbreak.networks.read,cloudbreak.securitygroups.read,cloudbreak.stacks.read,cloudbreak.sssdconfigs,cloudbreak.sssdconfigs.read,cloudbreak.platforms,cloudbreak.platforms.read
