@@ -205,10 +205,12 @@ func main() {
 							Name:   "keystone-v3",
 							Usage:  "creates a new keystone version 3 openstack credential",
 							Before: ConfigRead,
-							Flags:  cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlTenantUser, cb.FlTenantPassword, cb.FlUserDomain, cb.FlKeystoneScope, cb.FlEndpoint, cb.FlFacing).AddAuthenticationFlags().Build(),
+							Flags: cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlTenantUser, cb.FlTenantPassword,
+								cb.FlUserDomain, cb.FlProjectDomainName, cb.FlProjectName, cb.FlDomainName, cb.FlKeystoneScope, cb.FlEndpoint, cb.FlFacing).AddAuthenticationFlags().Build(),
 							Action: cb.CreateOpenstackCredential,
 							BashComplete: func(c *cli.Context) {
-								for _, f := range cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlTenantUser, cb.FlTenantPassword, cb.FlUserDomain, cb.FlKeystoneScope, cb.FlEndpoint, cb.FlFacing).AddAuthenticationFlags().Build() {
+								for _, f := range cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlTenantUser, cb.FlTenantPassword,
+									cb.FlUserDomain, cb.FlProjectDomainName, cb.FlProjectName, cb.FlDomainName, cb.FlKeystoneScope, cb.FlEndpoint, cb.FlFacing).AddAuthenticationFlags().Build() {
 									printFlagCompletion(f)
 								}
 							},

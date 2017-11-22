@@ -12,7 +12,7 @@ func TestGetNodesByBlueprint(t *testing.T) {
 
 	expectedNodes := []node{
 		node{"master", "GATEWAY", 1},
-		node{"slave_1", "CORE", 9},
+		node{"slave_1", "CORE", 3},
 		node{"slave_2", "CORE", 3},
 		node{"slave_3", "CORE", 1},
 	}

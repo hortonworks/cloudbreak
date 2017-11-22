@@ -196,6 +196,24 @@ var (
 			Name: "user-domain",
 		},
 	}
+	FlProjectDomainName = StringFlag{
+		RequiredFlag: OPTIONAL,
+		StringFlag: cli.StringFlag{
+			Name: "project-domain-name",
+		},
+	}
+	FlDomainName = StringFlag{
+		RequiredFlag: OPTIONAL,
+		StringFlag: cli.StringFlag{
+			Name: "domain-name",
+		},
+	}
+	FlProjectName = StringFlag{
+		RequiredFlag: OPTIONAL,
+		StringFlag: cli.StringFlag{
+			Name: "project-name",
+		},
+	}
 	FlFacing = StringFlag{
 		RequiredFlag: OPTIONAL,
 		StringFlag: cli.StringFlag{

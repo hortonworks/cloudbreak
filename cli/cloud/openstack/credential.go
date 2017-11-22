@@ -11,8 +11,8 @@ const (
 	SCOPE_TEMPLATE = "cb-keystone-v3-%s-scope"
 )
 
-var FACINGS []string = []string{"public", "admin", "internal"}
-var SCOPES []string = []string{"default", "project", "domain"}
+var FACINGS = []string{"public", "admin", "internal"}
+var SCOPES = []string{"default", "project", "domain"}
 
 func (p *OpenstackProvider) GetCredentialParameters(stringFinder func(string) string, boolFinder func(string) bool) (map[string]interface{}, error) {
 	facing, err := validateAndGet(stringFinder("facing"), FACINGS)
@@ -33,6 +33,9 @@ func (p *OpenstackProvider) GetCredentialParameters(stringFinder func(string) st
 		credentialMap["keystoneAuthScope"] = fmt.Sprintf(SCOPE_TEMPLATE, scope)
 		credentialMap["selector"] = credentialMap["keystoneAuthScope"]
 		credentialMap["userDomain"] = stringFinder("user-domain")
+		setIfSpecified(stringFinder, "project-domain-name", "projectDomainName", credentialMap)
+		setIfSpecified(stringFinder, "domain-name", "domainName", credentialMap)
+		setIfSpecified(stringFinder, "project-name", "projectName", credentialMap)
 	} else {
 		credentialMap["keystoneVersion"] = KEYSTONE_V2
 		credentialMap["selector"] = KEYSTONE_V2
@@ -52,4 +55,11 @@ func validateAndGet(value string, values []string) (string, error) {
 		}
 	}
 	return "", errors.New(fmt.Sprintf("%s not allowed", value))
+}
+
+func setIfSpecified(stringFinder func(string) string, flagName, propertyName string, credentialMap map[string]interface{}) {
+	property := stringFinder(flagName)
+	if len(property) > 0 {
+		credentialMap[propertyName] = property
+	}
 }
