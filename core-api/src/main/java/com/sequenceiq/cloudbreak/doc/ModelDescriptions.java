@@ -447,4 +447,9 @@ public class ModelDescriptions {
         public static final String IMAGE_CATALOG_URL = "custom image catalog's URL";
         public static final String DEFAULT = "true if image catalog is the default one";
     }
+
+    public static class SecurityRulesModelDescription {
+        public static final String CORE = "security rules for core type";
+        public static final String GATEWAY = "security rules for gateway type";
+    }
 }

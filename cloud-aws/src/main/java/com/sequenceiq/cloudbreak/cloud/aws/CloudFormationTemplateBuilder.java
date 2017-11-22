@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.aws;
 
 import static com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils.processTemplateIntoString;
-import static org.apache.commons.lang3.StringUtils.isNoneEmpty;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -71,20 +70,9 @@ public class CloudFormationTemplateBuilder {
         model.put("existingRole", context.instanceProfileAvailable);
         model.put("cbSubnet", (isNullOrEmptyList(context.existingSubnetCidr)) ? Lists.newArrayList(context.defaultSubnet)
                 : context.existingSubnetCidr);
-        if (isNoneEmpty(context.cloudbreakPublicIp)) {
-            model.put("cloudbreakPublicIp", context.cloudbreakPublicIp);
-        }
-        if (isNoneEmpty(context.defaultGatewayCidr)) {
-            model.put("defaultGatewayCidr", context.defaultGatewayCidr);
-        }
-        if (isNoneEmpty(context.defaultInboundSecurityGroup)) {
-            model.put("defaultInboundSecurityGroup", context.defaultInboundSecurityGroup);
-        }
-        model.put("gatewayPort", context.gatewayPort);
         model.put("dedicatedInstances", areDedicatedInstancesRequested(context.stack));
         model.put("availabilitySetNeeded", context.ac.getCloudContext().getLocation().getAvailabilityZone().value() != null);
         model.put("mapPublicIpOnLaunch", context.mapPublicIpOnLaunch);
-        model.put("knoxPort", context.knoxPort);
         try {
             String template = processTemplateIntoString(new Template("aws-template", context.template, freemarkerConfiguration), model);
             return template.replaceAll("\\t|\\n| [\\s]+", "");
@@ -137,16 +125,6 @@ public class CloudFormationTemplateBuilder {
         private boolean instanceProfileAvailable;
 
         private String defaultSubnet;
-
-        private String defaultInboundSecurityGroup;
-
-        private String cloudbreakPublicIp;
-
-        private int gatewayPort;
-
-        private String defaultGatewayCidr;
-
-        private int knoxPort;
 
         private Map<String, String> snapshotId = new HashMap<>();
 
@@ -202,31 +180,6 @@ public class CloudFormationTemplateBuilder {
 
         public ModelContext withDefaultSubnet(String subnet) {
             defaultSubnet = subnet;
-            return this;
-        }
-
-        public ModelContext withCloudbreakPublicIp(String publicIp) {
-            cloudbreakPublicIp = publicIp;
-            return this;
-        }
-
-        public ModelContext withDefaultInboundSecurityGroup(String securityGroup) {
-            defaultInboundSecurityGroup = securityGroup;
-            return this;
-        }
-
-        public ModelContext withGatewayPort(int gatewayPort) {
-            this.gatewayPort = gatewayPort;
-            return this;
-        }
-
-        public ModelContext withDefaultGatewayCidr(String defaultGatewayCidr) {
-            this.defaultGatewayCidr = defaultGatewayCidr;
-            return this;
-        }
-
-        public ModelContext withKnoxPort(int knoxPort) {
-            this.knoxPort = knoxPort;
             return this;
         }
 

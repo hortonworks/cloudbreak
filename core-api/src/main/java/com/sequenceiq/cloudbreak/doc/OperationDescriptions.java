@@ -294,4 +294,8 @@ public class OperationDescriptions {
         public static final String DELETE_PUBLIC_BY_NAME = "delete public (owned) or private Image Catalog by id";
         public static final String PUT_PUBLIC_BY_NAME = "update public (owned) or private Image Catalog by id";
     }
+
+    public static class SecurityRuleOpDescription {
+        public static final String GET_DEFAULT_PUBLIC_IPS = "get default public IPs";
+    }
 }
