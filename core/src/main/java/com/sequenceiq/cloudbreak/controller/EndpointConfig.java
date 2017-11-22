@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.controller.mapper.HttpMessageNotReadableExcepti
 import com.sequenceiq.cloudbreak.controller.mapper.HttpRequestMethodNotSupportedExceptionMapper;
 import com.sequenceiq.cloudbreak.controller.mapper.MethodArgumentNotValidExceptionMapper;
 import com.sequenceiq.cloudbreak.controller.mapper.NotFoundExceptionMapper;
+import com.sequenceiq.cloudbreak.controller.mapper.OperationExceptionMapper;
 import com.sequenceiq.cloudbreak.controller.mapper.RuntimeExceptionMapper;
 import com.sequenceiq.cloudbreak.controller.mapper.SmartSenseNotFoundExceptionMapper;
 import com.sequenceiq.cloudbreak.controller.mapper.SpringAccessDeniedExceptionMapper;
@@ -89,6 +90,7 @@ public class EndpointConfig extends ResourceConfig {
     }
 
     private void registerExceptionMappers() {
+        register(OperationExceptionMapper.class);
         register(AccessDeniedExceptionMapper.class);
         register(AuthenticationCredentialsNotFoundExceptionMapper.class);
         register(BadRequestExceptionMapper.class);
