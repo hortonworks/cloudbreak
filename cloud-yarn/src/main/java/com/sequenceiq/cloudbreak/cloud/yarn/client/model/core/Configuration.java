@@ -1,9 +1,13 @@
-package com.sequenceiq.cloudbreak.orchestrator.yarn.model.core;
+package com.sequenceiq.cloudbreak.cloud.yarn.client.model.core;
 
 import java.util.List;
 import java.util.Map;
 
-public class Configuration {
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.sequenceiq.cloudbreak.api.model.JsonEntity;
+
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class Configuration  implements JsonEntity {
     private Map<String, String> properties;
 
     private Map<String, String> env;
