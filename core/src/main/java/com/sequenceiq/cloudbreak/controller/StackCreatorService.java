@@ -11,13 +11,13 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.api.model.StackRequest;
 import com.sequenceiq.cloudbreak.api.model.StackResponse;
 import com.sequenceiq.cloudbreak.api.model.StackValidationRequest;
-import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.controller.validation.StackSensitiveDataPropagator;
 import com.sequenceiq.cloudbreak.controller.validation.filesystem.FileSystemValidator;
 import com.sequenceiq.cloudbreak.controller.validation.stack.StackValidator;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.StackValidation;
@@ -61,11 +61,6 @@ public class StackCreatorService {
     @Inject
     private AccountPreferencesValidator accountPreferencesValidator;
 
-    public StackResponse createStack(IdentityUser user, StackV2Request stackV2Request, boolean publicInAccount) throws Exception {
-        StackRequest stackRequest = conversionService.convert(stackV2Request, StackRequest.class);
-        return createStack(user, stackRequest, publicInAccount);
-    }
-
     public StackResponse createStack(IdentityUser user, StackRequest stackRequest, boolean publicInAccount) throws Exception {
         stackRequest.setAccount(user.getAccount());
         stackRequest.setOwner(user.getUserId());
@@ -81,9 +76,11 @@ public class StackCreatorService {
             stackService.validateOrchestrator(stack.getOrchestrator());
         }
 
+        Blueprint blueprint = null;
         if (stackRequest.getClusterRequest() != null) {
             StackValidationRequest stackValidationRequest = conversionService.convert(stackRequest, StackValidationRequest.class);
             StackValidation stackValidation = conversionService.convert(stackValidationRequest, StackValidation.class);
+            blueprint = stackValidation.getBlueprint();
             stackService.validateStack(stackValidation, stackRequest.getClusterRequest().getValidateBlueprint());
             CloudCredential cloudCredential = credentialToCloudCredentialConverter.convert(stackValidation.getCredential());
             fileSystemValidator.validateFileSystem(stackValidationRequest.getPlatform(), cloudCredential, stackValidationRequest.getFileSystem());
@@ -91,10 +88,10 @@ public class StackCreatorService {
         }
 
         stack = stackService.create(user, stack, stackRequest.getAmbariVersion(), stackRequest.getHdpVersion(),
-                stackRequest.getImageCatalog(), Optional.ofNullable(stackRequest.getImageId()));
+            stackRequest.getImageCatalog(), Optional.ofNullable(stackRequest.getImageId()));
 
         if (stackRequest.getClusterRequest() != null) {
-            Cluster cluster = clusterCreationService.prepare(stackRequest.getClusterRequest(), stack, user);
+            Cluster cluster = clusterCreationService.prepare(stackRequest.getClusterRequest(), stack, blueprint, user);
             stack.setCluster(cluster);
         }
         return conversionService.convert(stack, StackResponse.class);

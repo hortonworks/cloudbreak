@@ -23,6 +23,9 @@ public class StackValidationRequest implements JsonEntity {
     @ApiModelProperty(ClusterModelDescription.BLUEPRINT_ID)
     private Long blueprintId;
 
+    @ApiModelProperty(ClusterModelDescription.BLUEPRINT_NAME)
+    private String blueprintName;
+
     @ApiModelProperty(ClusterModelDescription.BLUEPRINT)
     private BlueprintRequest blueprint;
 
@@ -104,6 +107,14 @@ public class StackValidationRequest implements JsonEntity {
 
     public BlueprintRequest getBlueprint() {
         return blueprint;
+    }
+
+    public String getBlueprintName() {
+        return blueprintName;
+    }
+
+    public void setBlueprintName(String blueprintName) {
+        this.blueprintName = blueprintName;
     }
 
     public void setBlueprint(BlueprintRequest blueprint) {

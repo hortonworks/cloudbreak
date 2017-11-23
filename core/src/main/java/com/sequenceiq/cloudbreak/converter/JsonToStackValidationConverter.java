@@ -13,7 +13,6 @@ import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.model.BlueprintRequest;
 import com.sequenceiq.cloudbreak.api.model.CredentialRequest;
 import com.sequenceiq.cloudbreak.api.model.HostGroupRequest;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupRequest;
@@ -54,7 +53,7 @@ public class JsonToStackValidationConverter extends AbstractConversionServiceAwa
         stackValidation.setInstanceGroups(instanceGroups);
         stackValidation.setHostGroups(convertHostGroupsFromJson(instanceGroups, stackValidationRequest.getHostGroups()));
         try {
-            validateBlueprint(stackValidationRequest.getBlueprintId(), stackValidationRequest.getBlueprint(), stackValidation);
+            validateBlueprint(stackValidationRequest, stackValidation);
         } catch (AccessDeniedException e) {
             throw new AccessDeniedException(
                     String.format("Access to blueprint '%s' is denied or blueprint doesn't exist.", stackValidationRequest.getBlueprintId()), e);
@@ -98,12 +97,15 @@ public class JsonToStackValidationConverter extends AbstractConversionServiceAwa
         }
     }
 
-    private void validateBlueprint(Long blueprintId, BlueprintRequest blueprintRequest, StackValidation stackValidation) {
-        if (blueprintId != null) {
-            Blueprint blueprint = blueprintService.get(blueprintId);
+    private void validateBlueprint(StackValidationRequest stackValidationRequest, StackValidation stackValidation) {
+        if (stackValidationRequest.getBlueprintId() != null) {
+            Blueprint blueprint = blueprintService.get(stackValidationRequest.getBlueprintId());
             stackValidation.setBlueprint(blueprint);
-        } else if (blueprintRequest != null) {
-            Blueprint blueprint = conversionService.convert(blueprintRequest, Blueprint.class);
+        } else if (stackValidationRequest.getBlueprintName() != null) {
+            Blueprint blueprint = blueprintService.get(stackValidationRequest.getBlueprintName(), stackValidationRequest.getAccount());
+            stackValidation.setBlueprint(blueprint);
+        } else if (stackValidationRequest.getBlueprint() != null) {
+            Blueprint blueprint = conversionService.convert(stackValidationRequest.getBlueprint(), Blueprint.class);
             stackValidation.setBlueprint(blueprint);
         } else {
             throw new BadRequestException("Blueprint does not configured for the validation request!");

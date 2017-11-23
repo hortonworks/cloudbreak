@@ -80,25 +80,27 @@ public class ClusterDecorator {
     @Inject
     private RdsConnectionValidator rdsConnectionValidator;
 
-    public Cluster decorate(Cluster subject, ClusterRequest request, IdentityUser user, Long stackId) {
+    public Cluster decorate(Cluster subject, ClusterRequest request, Blueprint blueprint, IdentityUser user, Long stackId) {
         Stack stack = stackService.getByIdWithLists(stackId);
-
-        if (request.getBlueprintId() != null) {
-            subject.setBlueprint(blueprintService.get(request.getBlueprintId()));
-        } else if (request.getBlueprint() != null) {
-            Blueprint blueprint = conversionService.convert(request.getBlueprint(), Blueprint.class);
-            blueprint.setPublicInAccount(stack.isPublicInAccount());
-            blueprint = blueprintService.create(user, blueprint, new ArrayList<>());
+        if (blueprint != null) {
             subject.setBlueprint(blueprint);
-        } else if (!Strings.isNullOrEmpty(request.getBlueprintName())) {
-            subject.setBlueprint(blueprintService.get(request.getBlueprintName(), user.getAccount()));
         } else {
-            throw new BadRequestException("Blueprint does not configured for the cluster!");
+            if (request.getBlueprintId() != null) {
+                subject.setBlueprint(blueprintService.get(request.getBlueprintId()));
+            } else if (request.getBlueprint() != null) {
+                Blueprint newBlueprint = conversionService.convert(request.getBlueprint(), Blueprint.class);
+                newBlueprint.setPublicInAccount(stack.isPublicInAccount());
+                newBlueprint = blueprintService.create(user, newBlueprint, new ArrayList<>());
+                subject.setBlueprint(newBlueprint);
+            } else if (!Strings.isNullOrEmpty(request.getBlueprintName())) {
+                subject.setBlueprint(blueprintService.get(request.getBlueprintName(), user.getAccount()));
+            } else {
+                throw new BadRequestException("Blueprint does not configured for the cluster!");
+            }
         }
         subject.setHostGroups(convertHostGroupsFromJson(stack, user, subject, request.getHostGroups()));
         if (request.getValidateBlueprint()) {
-            Blueprint blueprint = request.getBlueprintId() != null ? blueprintService.get(request.getBlueprintId()) : subject.getBlueprint();
-            blueprintValidator.validateBlueprintForStack(blueprint, subject.getHostGroups(), stack.getInstanceGroups());
+            blueprintValidator.validateBlueprintForStack(subject.getBlueprint(), subject.getHostGroups(), stack.getInstanceGroups());
         }
         subject.setTopologyValidation(request.getValidateBlueprint());
         prepareRds(subject, user, request.getRdsConfigIds(), request.getRdsConfigJsons(), stack);
