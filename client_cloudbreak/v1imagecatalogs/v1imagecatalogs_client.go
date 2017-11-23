@@ -25,7 +25,37 @@ type Client struct {
 }
 
 /*
-GetImagesByProvider determines available images for the cloudbreak version by the given provider
+DeletePublicImageCatalogByName deletes public owned or private image catalog by id
+
+Provides an interface to determine available Virtual Machine images for the given version of Cloudbreak.
+*/
+func (a *Client) DeletePublicImageCatalogByName(params *DeletePublicImageCatalogByNameParams) error {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewDeletePublicImageCatalogByNameParams()
+	}
+
+	_, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "deletePublicImageCatalogByName",
+		Method:             "DELETE",
+		PathPattern:        "/v1/imagecatalogs/account/{name}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &DeletePublicImageCatalogByNameReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return err
+	}
+	return nil
+
+}
+
+/*
+GetImagesByProvider determines available images for the cloudbreak version by the given provider and default image catalog url
 
 Provides an interface to determine available Virtual Machine images for the given version of Cloudbreak.
 */
@@ -51,6 +81,216 @@ func (a *Client) GetImagesByProvider(params *GetImagesByProviderParams) (*GetIma
 		return nil, err
 	}
 	return result.(*GetImagesByProviderOK), nil
+
+}
+
+/*
+GetPublicImageCatalogsByID gets custom image catalog by name
+
+Provides an interface to determine available Virtual Machine images for the given version of Cloudbreak.
+*/
+func (a *Client) GetPublicImageCatalogsByID(params *GetPublicImageCatalogsByIDParams) (*GetPublicImageCatalogsByIDOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetPublicImageCatalogsByIDParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "getPublicImageCatalogsById",
+		Method:             "GET",
+		PathPattern:        "/v1/imagecatalogs/account/{name}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &GetPublicImageCatalogsByIDReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*GetPublicImageCatalogsByIDOK), nil
+
+}
+
+/*
+GetPublicImagesByProviderAndCustomImageCatalog determines available images for the cloudbreak version by the given provider and given image catalog url
+
+Provides an interface to determine available Virtual Machine images for the given version of Cloudbreak.
+*/
+func (a *Client) GetPublicImagesByProviderAndCustomImageCatalog(params *GetPublicImagesByProviderAndCustomImageCatalogParams) (*GetPublicImagesByProviderAndCustomImageCatalogOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetPublicImagesByProviderAndCustomImageCatalogParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "getPublicImagesByProviderAndCustomImageCatalog",
+		Method:             "GET",
+		PathPattern:        "/v1/imagecatalogs/account/{name}/{platform}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &GetPublicImagesByProviderAndCustomImageCatalogReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*GetPublicImagesByProviderAndCustomImageCatalogOK), nil
+
+}
+
+/*
+GetPublicsImageCatalogs lists available custom image catalogs as public resources
+
+Provides an interface to determine available Virtual Machine images for the given version of Cloudbreak.
+*/
+func (a *Client) GetPublicsImageCatalogs(params *GetPublicsImageCatalogsParams) (*GetPublicsImageCatalogsOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetPublicsImageCatalogsParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "getPublicsImageCatalogs",
+		Method:             "GET",
+		PathPattern:        "/v1/imagecatalogs/account",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &GetPublicsImageCatalogsReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*GetPublicsImageCatalogsOK), nil
+
+}
+
+/*
+PostPrivateImageCatalog creates image catalog as private resources
+
+Provides an interface to determine available Virtual Machine images for the given version of Cloudbreak.
+*/
+func (a *Client) PostPrivateImageCatalog(params *PostPrivateImageCatalogParams) (*PostPrivateImageCatalogOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewPostPrivateImageCatalogParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "postPrivateImageCatalog",
+		Method:             "POST",
+		PathPattern:        "/v1/imagecatalogs/user",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &PostPrivateImageCatalogReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*PostPrivateImageCatalogOK), nil
+
+}
+
+/*
+PostPublicImageCatalog creates image catalog as public resources
+
+Provides an interface to determine available Virtual Machine images for the given version of Cloudbreak.
+*/
+func (a *Client) PostPublicImageCatalog(params *PostPublicImageCatalogParams) (*PostPublicImageCatalogOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewPostPublicImageCatalogParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "postPublicImageCatalog",
+		Method:             "POST",
+		PathPattern:        "/v1/imagecatalogs/account",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &PostPublicImageCatalogReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*PostPublicImageCatalogOK), nil
+
+}
+
+/*
+PutPublicImageCatalog updates public owned or private image catalog by id
+
+Provides an interface to determine available Virtual Machine images for the given version of Cloudbreak.
+*/
+func (a *Client) PutPublicImageCatalog(params *PutPublicImageCatalogParams) (*PutPublicImageCatalogOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewPutPublicImageCatalogParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "putPublicImageCatalog",
+		Method:             "PUT",
+		PathPattern:        "/v1/imagecatalogs/account",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &PutPublicImageCatalogReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*PutPublicImageCatalogOK), nil
+
+}
+
+/*
+PutSetDefaultImageCatalogByName updates public owned or private image catalog by id
+
+Provides an interface to determine available Virtual Machine images for the given version of Cloudbreak.
+*/
+func (a *Client) PutSetDefaultImageCatalogByName(params *PutSetDefaultImageCatalogByNameParams) (*PutSetDefaultImageCatalogByNameOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewPutSetDefaultImageCatalogByNameParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "putSetDefaultImageCatalogByName",
+		Method:             "PUT",
+		PathPattern:        "/v1/imagecatalogs/setdefault/{name}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &PutSetDefaultImageCatalogByNameReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*PutSetDefaultImageCatalogByNameOK), nil
 
 }
 
