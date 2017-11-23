@@ -32,11 +32,8 @@ import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.model.StackRequest;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
-import com.sequenceiq.cloudbreak.cloud.model.StackParamValidation;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.type.OrchestratorConstants;
-import com.sequenceiq.cloudbreak.controller.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
@@ -52,7 +49,6 @@ import com.sequenceiq.cloudbreak.domain.StackStatus;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.service.account.AccountPreferencesService;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterService;
-import com.sequenceiq.cloudbreak.service.stack.StackParameterService;
 
 @Component
 public class JsonToStackConverter extends AbstractConversionServiceAwareConverter<StackRequest, Stack> {
@@ -62,12 +58,6 @@ public class JsonToStackConverter extends AbstractConversionServiceAwareConverte
     @Inject
     @Qualifier("conversionService")
     private ConversionService conversionService;
-
-    @Inject
-    private AuthenticatedUserService authenticatedUserService;
-
-    @Inject
-    private StackParameterService stackParameterService;
 
     @Inject
     private CloudParameterService cloudParameterService;
@@ -104,7 +94,6 @@ public class JsonToStackConverter extends AbstractConversionServiceAwareConverte
         Set<InstanceGroup> instanceGroups = convertInstanceGroups(source, stack);
         stack.setInstanceGroups(instanceGroups);
         stack.setFailurePolicy(getConversionService().convert(source.getFailurePolicy(), FailurePolicy.class));
-        stack.setParameters(getValidParameters(source));
         stack.setCreated(Calendar.getInstance().getTimeInMillis());
         stack.setPlatformVariant(source.getPlatformVariant());
         stack.setOrchestrator(getConversionService().convert(source.getOrchestrator(), Orchestrator.class));
@@ -203,22 +192,6 @@ public class JsonToStackConverter extends AbstractConversionServiceAwareConverte
                 source.setCloudPlatform(platform);
             }
         }
-    }
-
-    private Map<String, String> getValidParameters(StackRequest stackRequest) {
-        Map<String, String> params = new HashMap<>();
-        Map<String, String> userParams = stackRequest.getParameters();
-        if (userParams != null) {
-            IdentityUser user = authenticatedUserService.getCbUser();
-            for (StackParamValidation stackParamValidation : stackParameterService.getStackParams(user, stackRequest.getName(), stackRequest)) {
-                String paramName = stackParamValidation.getName();
-                String value = userParams.get(paramName);
-                if (value != null) {
-                    params.put(paramName, value);
-                }
-            }
-        }
-        return params;
     }
 
     private Set<InstanceGroup> convertInstanceGroups(StackRequest source, Stack stack) {

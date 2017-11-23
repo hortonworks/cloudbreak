@@ -2,7 +2,9 @@ package com.sequenceiq.cloudbreak.service.decorator;
 
 import static com.sequenceiq.cloudbreak.common.type.CloudConstants.BYOS;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -24,8 +26,11 @@ import com.sequenceiq.cloudbreak.cloud.model.InstanceGroupParameterResponse;
 import com.sequenceiq.cloudbreak.cloud.model.Orchestrator;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformOrchestrators;
+import com.sequenceiq.cloudbreak.cloud.model.StackParamValidation;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.controller.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
+import com.sequenceiq.cloudbreak.controller.validation.stack.StackValidator;
 import com.sequenceiq.cloudbreak.controller.validation.template.TemplateValidator;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.FailurePolicy;
@@ -41,7 +46,7 @@ import com.sequenceiq.cloudbreak.service.flex.FlexSubscriptionService;
 import com.sequenceiq.cloudbreak.service.network.NetworkService;
 import com.sequenceiq.cloudbreak.service.securitygroup.SecurityGroupService;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterService;
-import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderCredentialAdapter;
+import com.sequenceiq.cloudbreak.service.stack.StackParameterService;
 import com.sequenceiq.cloudbreak.service.stack.flow.ConsulUtils.ConsulServers;
 import com.sequenceiq.cloudbreak.service.template.TemplateService;
 
@@ -51,6 +56,15 @@ public class StackDecorator {
     private static final Logger LOGGER = LoggerFactory.getLogger(StackDecorator.class);
 
     private static final double ONE_HUNDRED = 100.0;
+
+    @Inject
+    private AuthenticatedUserService authenticatedUserService;
+
+    @Inject
+    private StackValidator stackValidator;
+
+    @Inject
+    private StackParameterService stackParameterService;
 
     @Inject
     private CredentialService credentialService;
@@ -71,9 +85,6 @@ public class StackDecorator {
     private TemplateValidator templateValidator;
 
     @Inject
-    private ServiceProviderCredentialAdapter credentialAdapter;
-
-    @Inject
     @Qualifier("conversionService")
     private ConversionService conversionService;
 
@@ -84,12 +95,11 @@ public class StackDecorator {
     private FlexSubscriptionService flexSubscriptionService;
 
     public Stack decorate(Stack subject, StackRequest request, IdentityUser user) {
-        prepareCredential(subject, request.getCredentialId(), request.getCredentialName(), user);
+        prepareCredential(subject, request, user);
         prepareDomainIfDefined(subject, request, user);
-        Object credentialId = request.getCredentialId();
+        Long credentialId = request.getCredentialId();
         String credentialName = request.getCredentialName();
         if (credentialId != null || subject.getCredential() != null || credentialName != null) {
-            prepareCredential(subject, credentialId, credentialName, user);
             subject.setCloudPlatform(subject.getCredential().cloudPlatform());
             if (subject.getInstanceGroups() == null || (request.getNetworkId() == null && subject.getNetwork() == null
                     && !BYOS.equals(subject.getCredential().cloudPlatform()))) {
@@ -107,15 +117,35 @@ public class StackDecorator {
         return subject;
     }
 
-    private void prepareCredential(Stack subject, Object credentialId, String credentialName, IdentityUser user) {
-        if (credentialId != null) {
-            Credential credential = credentialService.get((Long) credentialId);
-            subject.setCredential(credential);
+    private void prepareCredential(Stack subject, StackRequest request, IdentityUser user) {
+        if (subject.getCredential() == null) {
+            if (request.getCredentialId() != null) {
+                Credential credential = credentialService.get(request.getCredentialId());
+                subject.setCredential(credential);
+            }
+            if (request.getCredentialName() != null) {
+                Credential credential = credentialService.getPublicCredential(request.getCredentialName(), user);
+                subject.setCredential(credential);
+            }
         }
-        if (credentialName != null) {
-            Credential credential = credentialService.getPublicCredential(credentialName, user);
-            subject.setCredential(credential);
+        subject.setParameters(getValidParameters(subject, request));
+    }
+
+    private Map<String, String> getValidParameters(Stack stack, StackRequest stackRequest) {
+        Map<String, String> params = new HashMap<>();
+        Map<String, String> userParams = stackRequest.getParameters();
+        if (userParams != null) {
+            List<StackParamValidation> stackParams = stackParameterService.getStackParams(stackRequest.getName(), stack.getCredential());
+            for (StackParamValidation stackParamValidation : stackParams) {
+                String paramName = stackParamValidation.getName();
+                String value = userParams.get(paramName);
+                if (value != null) {
+                    params.put(paramName, value);
+                }
+            }
+            stackValidator.validate(params, stackParams);
         }
+        return params;
     }
 
     private void prepareNetwork(Stack subject, Object networkId) {
@@ -193,7 +223,6 @@ public class StackDecorator {
             if (credentialForStack.getId() == null) {
                 credentialForStack.setPublicInAccount(subject.isPublicInAccount());
                 credentialForStack.setCloudPlatform(getCloudPlatform(subject, request, credentialForStack.cloudPlatform()));
-                credentialForStack = credentialAdapter.init(credentialForStack);
                 credentialForStack = credentialService.create(user, credentialForStack);
             }
             subject.setCredential(credentialForStack);

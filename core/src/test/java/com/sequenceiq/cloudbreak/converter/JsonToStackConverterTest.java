@@ -91,7 +91,7 @@ public class JsonToStackConverterTest extends AbstractJsonConverterTest<StackReq
                 stack,
                 Arrays.asList("description", "statusReason", "cluster", "credential", "gatewayPort", "template", "network", "securityConfig", "securityGroup",
                         "version", "created", "platformVariant", "cloudPlatform", "saltPassword", "stackTemplate", "flexSubscription", "datalakeId",
-                        "customHostname", "customDomain", "clusterNameAsSubdomain", "hostgroupNameAsHostname", "loginUserName"));
+                        "customHostname", "customDomain", "clusterNameAsSubdomain", "hostgroupNameAsHostname", "loginUserName", "parameters"));
         Assert.assertEquals("YARN", stack.getRegion());
     }
 
