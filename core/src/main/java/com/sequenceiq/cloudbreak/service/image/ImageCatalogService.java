@@ -28,6 +28,7 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakVersion;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.controller.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
@@ -120,10 +121,8 @@ public class ImageCatalogService {
         try {
             return imageCatalogRepository.save(imageCatalog);
         } catch (DataIntegrityViolationException ex) {
-            String msg = String.format("Image catalog exists with the given name [%s] for the account [%s]",
-                    imageCatalog.getImageCatalogName(), imageCatalog.getAccount());
-            LOGGER.warn(msg);
-            throw new BadRequestException(getProperSqlErrorMessage(ex));
+            String msg = String.format("Error with resource [%s], error: [%s]", APIResourceType.IMAGE_CATALOG, getProperSqlErrorMessage(ex));
+            throw new BadRequestException(msg);
         }
     }
 

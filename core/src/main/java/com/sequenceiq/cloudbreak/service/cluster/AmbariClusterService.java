@@ -211,7 +211,8 @@ public class AmbariClusterService implements ClusterService {
             cluster = clusterRepository.save(cluster);
             clusterComponentConfigProvider.store(components, cluster);
         } catch (DataIntegrityViolationException ex) {
-            throw new BadRequestException(getProperSqlErrorMessage(ex));
+            String msg = String.format("Error with resource [%s], error: [%s]", APIResourceType.CLUSTER, getProperSqlErrorMessage(ex));
+            throw new BadRequestException(msg);
         }
         if (stack.isAvailable()) {
             flowManager.triggerClusterInstall(stack.getId());

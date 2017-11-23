@@ -15,6 +15,7 @@ import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.Topology;
@@ -71,7 +72,8 @@ public class TopologyService {
         try {
             savedTopology = topologyRepository.save(topology);
         } catch (DataIntegrityViolationException ex) {
-            throw new BadRequestException(getProperSqlErrorMessage(ex));
+            String msg = String.format("Error with resource [%s], error: [%s]", APIResourceType.TOPOLOGY, getProperSqlErrorMessage(ex));
+            throw new BadRequestException(msg);
         }
         return savedTopology;
     }

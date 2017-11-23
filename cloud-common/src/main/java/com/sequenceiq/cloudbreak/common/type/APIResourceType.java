@@ -15,6 +15,7 @@ public enum APIResourceType {
     RDS_CONFIG("rds"),
     LDAP_CONFIG("ldap"),
     SMARTSENSE_SUBSCRIPTION("sss"),
+    IMAGE_CATALOG("ic"),
     FLEX_SUBSCRIPTION("fs");
 
     private final String namePrefix;
