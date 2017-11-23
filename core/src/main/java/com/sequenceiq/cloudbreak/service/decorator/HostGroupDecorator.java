@@ -30,7 +30,6 @@ import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.recipe.RecipeService;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @Component
 public class HostGroupDecorator {
@@ -47,9 +46,6 @@ public class HostGroupDecorator {
 
     @Inject
     private HostGroupService hostGroupService;
-
-    @Inject
-    private StackService stackService;
 
     @Inject
     private RecipeService recipeService;
@@ -91,10 +87,8 @@ public class HostGroupDecorator {
     }
 
     private void prepareRecipesByName(HostGroup subject, IdentityUser user, Set<String> recipeNames) {
-        for (String recipeName : recipeNames) {
-            Recipe recipe = recipeService.getPublicRecipe(recipeName, user);
-            subject.getRecipes().add(recipe);
-        }
+        Set<Recipe> recipes = recipeService.getPublicRecipes(user, recipeNames);
+        subject.getRecipes().addAll(recipes);
     }
 
     private void prepareRecipesByRequests(HostGroup subject, IdentityUser user, Set<RecipeRequest> recipes, Boolean publicInAccount) {

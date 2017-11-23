@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.service.recipe;
 import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
 
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.transaction.Transactional;
@@ -72,6 +73,16 @@ public class RecipeService {
             throw new NotFoundException(String.format("Recipe '%s' not found.", name));
         }
         return recipe;
+    }
+
+    public Set<Recipe> getPublicRecipes(IdentityUser user, Set<String> recipeNames) {
+        Set<Recipe> recipes = recipeRepository.findByNameInAccount(recipeNames, user.getAccount());
+        if (recipeNames.size() != recipes.size()) {
+            Set<String> foundRecipes = recipes.stream().map(Recipe::getName).collect(Collectors.toSet());
+            String missingRecipes = recipeNames.stream().filter(r -> !foundRecipes.contains(r)).collect(Collectors.joining(","));
+            throw new NotFoundException(String.format("Recipes '%s' not found.", missingRecipes));
+        }
+        return recipes;
     }
 
     public Recipe getPublicRecipe(String name, IdentityUser user) {
