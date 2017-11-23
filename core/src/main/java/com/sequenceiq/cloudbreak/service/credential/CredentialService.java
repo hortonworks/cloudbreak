@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.credential;
 
+import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
+
 import java.util.Date;
 import java.util.Map;
 import java.util.Set;
@@ -20,14 +22,12 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.api.model.CloudbreakEventsJson;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
-import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.repository.CredentialRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.AuthorizationService;
-import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
 import com.sequenceiq.cloudbreak.service.notification.Notification;
 import com.sequenceiq.cloudbreak.service.notification.NotificationSender;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderCredentialAdapter;
@@ -127,7 +127,7 @@ public class CredentialService {
             userProfileCredentialHandler.createProfilePreparation(credential);
             sendCredentialCreatedNotification(credential);
         } catch (DataIntegrityViolationException ex) {
-            throw new DuplicateKeyValueException(APIResourceType.CREDENTIAL, credential.getName(), ex);
+            throw new BadRequestException(getProperSqlErrorMessage(ex));
         }
         return savedCredential;
     }

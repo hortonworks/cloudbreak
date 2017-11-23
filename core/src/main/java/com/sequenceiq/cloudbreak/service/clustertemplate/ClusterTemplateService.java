@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.clustertemplate;
 
+import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
+
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -14,13 +16,12 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
-import com.sequenceiq.cloudbreak.common.type.APIResourceType;
+import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.ClusterTemplate;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.ClusterTemplateRepository;
 import com.sequenceiq.cloudbreak.service.AuthorizationService;
-import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
 
 @Service
 @Transactional
@@ -76,7 +77,7 @@ public class ClusterTemplateService {
         try {
             savedClusterTemplate = clusterTemplateRepository.save(clusterTemplate);
         } catch (DataIntegrityViolationException ex) {
-            throw new DuplicateKeyValueException(APIResourceType.CLUSTER_TEMPLATE, clusterTemplate.getName(), ex);
+            throw new BadRequestException(getProperSqlErrorMessage(ex));
         }
         return savedClusterTemplate;
     }

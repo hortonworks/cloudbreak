@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.controller;
 
+import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
+
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,11 +15,9 @@ import com.sequenceiq.cloudbreak.api.endpoint.v1.RdsConfigEndpoint;
 import com.sequenceiq.cloudbreak.api.model.RDSConfigRequest;
 import com.sequenceiq.cloudbreak.api.model.RDSConfigResponse;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
-import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.controller.validation.rds.RdsConnectionValidator;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
-import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 
 @Component
@@ -107,8 +107,8 @@ public class RdsConfigController extends NotificationController implements RdsCo
         try {
             rdsConfig = rdsConfigService.create(user, rdsConfig);
             notify(user, ResourceEvent.RDS_CONFIG_CREATED);
-        } catch (DataIntegrityViolationException e) {
-            throw new DuplicateKeyValueException(APIResourceType.RDS_CONFIG, rdsConfig.getName(), e);
+        } catch (DataIntegrityViolationException ex) {
+            throw new BadRequestException(getProperSqlErrorMessage(ex));
         }
         return conversionService.convert(rdsConfig, RDSConfigResponse.class);
     }

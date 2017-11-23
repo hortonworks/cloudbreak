@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.api.model.Status.REQUESTED;
 import static com.sequenceiq.cloudbreak.api.model.Status.START_REQUESTED;
 import static com.sequenceiq.cloudbreak.api.model.Status.STOP_REQUESTED;
 import static com.sequenceiq.cloudbreak.api.model.Status.UPDATE_REQUESTED;
+import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
 
 import java.io.IOException;
 import java.security.KeyPair;
@@ -210,7 +211,7 @@ public class AmbariClusterService implements ClusterService {
             cluster = clusterRepository.save(cluster);
             clusterComponentConfigProvider.store(components, cluster);
         } catch (DataIntegrityViolationException ex) {
-            throw new DuplicateKeyValueException(APIResourceType.CLUSTER, cluster.getName(), ex);
+            throw new BadRequestException(getProperSqlErrorMessage(ex));
         }
         if (stack.isAvailable()) {
             flowManager.triggerClusterInstall(stack.getId());
