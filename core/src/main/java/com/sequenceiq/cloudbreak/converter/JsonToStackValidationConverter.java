@@ -13,7 +13,6 @@ import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.model.CredentialRequest;
 import com.sequenceiq.cloudbreak.api.model.HostGroupRequest;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupRequest;
 import com.sequenceiq.cloudbreak.api.model.NetworkRequest;
@@ -59,7 +58,7 @@ public class JsonToStackValidationConverter extends AbstractConversionServiceAwa
                     String.format("Access to blueprint '%s' is denied or blueprint doesn't exist.", stackValidationRequest.getBlueprintId()), e);
         }
         try {
-            validateCredential(stackValidationRequest.getCredentialId(), stackValidationRequest.getCredential(), stackValidation);
+            validateCredential(stackValidationRequest, stackValidation);
         } catch (AccessDeniedException e) {
             throw new AccessDeniedException(
                     String.format("Access to credential '%s' is denied or credential doesn't exist.", stackValidationRequest.getCredentialId()), e);
@@ -81,19 +80,22 @@ public class JsonToStackValidationConverter extends AbstractConversionServiceAwa
             Network network = conversionService.convert(networkRequest, Network.class);
             stackValidation.setNetwork(network);
         } else if (!BYOS.equals(stackValidation.getCredential().cloudPlatform())) {
-            throw new BadRequestException("Network does not configured for the validation request!");
+            throw new BadRequestException("Network is not configured for the validation request!");
         }
     }
 
-    private void validateCredential(Long credentialId, CredentialRequest credentialRequest, StackValidation stackValidation) {
-        if (credentialId != null) {
-            Credential credential = credentialService.get(credentialId);
+    private void validateCredential(StackValidationRequest stackValidationRequest, StackValidation stackValidation) {
+        if (stackValidationRequest.getCredentialId() != null) {
+            Credential credential = credentialService.get(stackValidationRequest.getCredentialId());
             stackValidation.setCredential(credential);
-        } else if (credentialRequest != null) {
-            Credential credential = conversionService.convert(credentialRequest, Credential.class);
+        } else if (stackValidationRequest.getCredentialName() != null) {
+            Credential credential = credentialService.get(stackValidationRequest.getCredentialName(), stackValidationRequest.getAccount());
+            stackValidation.setCredential(credential);
+        } else if (stackValidationRequest.getCredential() != null) {
+            Credential credential = conversionService.convert(stackValidationRequest.getCredential(), Credential.class);
             stackValidation.setCredential(credential);
         } else {
-            throw new BadRequestException("Credential does not configured for the validation request!");
+            throw new BadRequestException("Credential is not configured for the validation request!");
         }
     }
 
@@ -108,7 +110,7 @@ public class JsonToStackValidationConverter extends AbstractConversionServiceAwa
             Blueprint blueprint = conversionService.convert(stackValidationRequest.getBlueprint(), Blueprint.class);
             stackValidation.setBlueprint(blueprint);
         } else {
-            throw new BadRequestException("Blueprint does not configured for the validation request!");
+            throw new BadRequestException("Blueprint is not configured for the validation request!");
         }
     }
 

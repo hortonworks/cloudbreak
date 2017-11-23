@@ -42,7 +42,6 @@ import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.ClusterComponent;
 import com.sequenceiq.cloudbreak.domain.Component;
-import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -90,6 +89,10 @@ public class ClusterCreationSetupService {
     private BlueprintService blueprintService;
 
     public void validate(ClusterRequest request, Stack stack, IdentityUser user) {
+        validate(request, null, stack, user);
+    }
+
+    public void validate(ClusterRequest request, CloudCredential cloudCredential, Stack stack, IdentityUser user) {
         if (request.getEnableSecurity() && request.getKerberos() == null) {
             throw new BadRequestException("If the security is enabled the kerberos parameters cannot be empty");
         }
@@ -97,10 +100,11 @@ public class ClusterCreationSetupService {
         if (!stack.isAvailable() && BYOS.equals(stack.cloudPlatform())) {
             throw new BadRequestException("Stack is not in 'AVAILABLE' status, cannot create cluster now.");
         }
-        Credential credential = stack.getCredential();
-        CloudCredential cloudCredential = credentialToCloudCredentialConverter.convert(credential);
-
-        fileSystemValidator.validateFileSystem(stack.cloudPlatform(), cloudCredential, request.getFileSystem());
+        CloudCredential credential = cloudCredential;
+        if (credential == null) {
+            credential = credentialToCloudCredentialConverter.convert(stack.getCredential());
+        }
+        fileSystemValidator.validateFileSystem(stack.cloudPlatform(), credential, request.getFileSystem());
     }
 
     public Cluster prepare(ClusterRequest request, Stack stack, IdentityUser user) throws Exception {

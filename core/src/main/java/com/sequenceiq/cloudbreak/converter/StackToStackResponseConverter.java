@@ -28,16 +28,15 @@ import com.sequenceiq.cloudbreak.api.model.StackAuthenticationResponse;
 import com.sequenceiq.cloudbreak.api.model.StackResponse;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.CloudbreakDetails;
-import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
+import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.json.Json;
-import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
@@ -58,9 +57,6 @@ public class StackToStackResponseConverter extends AbstractConversionServiceAwar
 
     @Inject
     private ClusterComponentConfigProvider clusterComponentConfigProvider;
-
-    @Inject
-    private HostMetadataRepository hostMetadataRepository;
 
     @Override
     public StackResponse convert(Stack source) {
@@ -107,7 +103,7 @@ public class StackToStackResponseConverter extends AbstractConversionServiceAwar
             stackJson.setNetworkId(source.getNetwork().getId());
             stackJson.setNetwork(getConversionService().convert(source.getNetwork(), NetworkResponse.class));
         }
-        stackJson.setParameters(new HashMap(source.getParameters()));
+        stackJson.setParameters(source.getParameters());
         stackJson.setPlatformVariant(source.getPlatformVariant());
         if (source.getOrchestrator() != null) {
             stackJson.setOrchestrator(getConversionService().convert(source.getOrchestrator(), OrchestratorResponse.class));

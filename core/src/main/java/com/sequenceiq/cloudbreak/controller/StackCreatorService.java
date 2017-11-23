@@ -15,7 +15,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.controller.validation.StackSensitiveDataPropagator;
 import com.sequenceiq.cloudbreak.controller.validation.filesystem.FileSystemValidator;
-import com.sequenceiq.cloudbreak.controller.validation.stack.StackValidator;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Cluster;
@@ -40,9 +39,6 @@ public class StackCreatorService {
     private AuthenticatedUserService authenticatedUserService;
 
     @Inject
-    private StackValidator stackValidator;
-
-    @Inject
     private CredentialToCloudCredentialConverter credentialToCloudCredentialConverter;
 
     @Inject
@@ -64,7 +60,6 @@ public class StackCreatorService {
     public StackResponse createStack(IdentityUser user, StackRequest stackRequest, boolean publicInAccount) throws Exception {
         stackRequest.setAccount(user.getAccount());
         stackRequest.setOwner(user.getUserId());
-        stackValidator.validate(user, stackRequest);
         Stack stack = conversionService.convert(stackRequest, Stack.class);
         MDCBuilder.buildMdcContext(stack);
         stack = stackSensitiveDataPropagator.propagate(stackRequest.getCredentialSource(), stack, user);
@@ -82,9 +77,9 @@ public class StackCreatorService {
             StackValidation stackValidation = conversionService.convert(stackValidationRequest, StackValidation.class);
             blueprint = stackValidation.getBlueprint();
             stackService.validateStack(stackValidation, stackRequest.getClusterRequest().getValidateBlueprint());
-            CloudCredential cloudCredential = credentialToCloudCredentialConverter.convert(stackValidation.getCredential());
+            CloudCredential cloudCredential = credentialToCloudCredentialConverter.convert(stack.getCredential());
             fileSystemValidator.validateFileSystem(stackValidationRequest.getPlatform(), cloudCredential, stackValidationRequest.getFileSystem());
-            clusterCreationService.validate(stackRequest.getClusterRequest(), stack, user);
+            clusterCreationService.validate(stackRequest.getClusterRequest(), cloudCredential, stack, user);
         }
 
         stack = stackService.create(user, stack, stackRequest.getAmbariVersion(), stackRequest.getHdpVersion(),
