@@ -23,26 +23,26 @@ public class AmbariStackDetailsJson implements JsonEntity {
     @ApiModelProperty(AmbariStackDetailsDescription.OS)
     private String os;
 
-    @ApiModelProperty(value = AmbariStackDetailsDescription.STACK_REPO_ID, required = true)
+    @ApiModelProperty(value = AmbariStackDetailsDescription.STACK_REPO_ID)
     private String stackRepoId;
 
-    @ApiModelProperty(value = AmbariStackDetailsDescription.STACK_BASE_URL, required = true)
+    @ApiModelProperty(value = AmbariStackDetailsDescription.STACK_BASE_URL)
     private String stackBaseURL;
 
-    @ApiModelProperty(value = AmbariStackDetailsDescription.UTILS_REPO_ID, required = true)
+    @ApiModelProperty(value = AmbariStackDetailsDescription.UTILS_REPO_ID)
     private String utilsRepoId;
 
-    @ApiModelProperty(value = AmbariStackDetailsDescription.UTILS_BASE_URL, required = true)
+    @ApiModelProperty(value = AmbariStackDetailsDescription.UTILS_BASE_URL)
     private String utilsBaseURL;
 
     @NotNull
     @ApiModelProperty(value = AmbariStackDetailsDescription.VERIFY, required = true)
     private Boolean verify;
 
-    @ApiModelProperty(value = AmbariStackDetailsDescription.REPOSITORY_VERSION, required = true)
+    @ApiModelProperty(value = AmbariStackDetailsDescription.REPOSITORY_VERSION)
     private String repositoryVersion;
 
-    @ApiModelProperty(value = AmbariStackDetailsDescription.VDF_URL, required = true)
+    @ApiModelProperty(value = AmbariStackDetailsDescription.VDF_URL)
     private String versionDefinitionFileUrl;
 
     public String getStack() {

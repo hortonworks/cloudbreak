@@ -157,7 +157,7 @@ public class AmbariRepositoryVersionService {
         try {
             Image image = componentConfigProvider.getImage(stackId);
             if (!StringUtils.isEmpty(image.getOsType())) {
-                vdfStackRepoKeyFilter = vdfStackRepoKeyFilter + image.getOsType();
+                vdfStackRepoKeyFilter += image.getOsType();
             }
         } catch (CloudbreakImageNotFoundException e) {
             LOGGER.error(String.format("Could not get Image Component for stack: '%s'.", stackId), e);
