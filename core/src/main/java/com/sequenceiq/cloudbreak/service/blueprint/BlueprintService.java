@@ -79,7 +79,7 @@ public class BlueprintService {
     public Blueprint get(String name, String account) {
         Blueprint blueprint = blueprintRepository.findOneByName(name, account);
         if (blueprint == null) {
-            throw new NotFoundException(String.format("Credential '%s' not found in %s account.", name, account));
+            throw new NotFoundException(String.format("Blueprint '%s' not found in %s account.", name, account));
         } else {
             return blueprint;
         }
