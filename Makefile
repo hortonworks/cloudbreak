@@ -16,7 +16,7 @@ endif
 deps:
 	go get -u github.com/golang/dep/cmd/dep
 	go get -u golang.org/x/tools/cmd/goimports
-	curl -o $(GOPATH)/bin/swagger -L'#' https://github.com/go-swagger/go-swagger/releases/download/$(shell curl -s https://api.github.com/repos/go-swagger/go-swagger/releases/latest | jq -r .tag_name)/swagger_$(shell echo `uname`|tr '[:upper:]' '[:lower:]')_amd64
+	curl -o $(GOPATH)/bin/swagger -L'#' https://github.com/go-swagger/go-swagger/releases/download/0.12.0/swagger_$(shell echo `uname`|tr '[:upper:]' '[:lower:]')_amd64
 	chmod +x $(GOPATH)/bin/swagger
 
 format:
