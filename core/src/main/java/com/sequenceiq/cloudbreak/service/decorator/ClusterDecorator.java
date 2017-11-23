@@ -80,8 +80,7 @@ public class ClusterDecorator {
     @Inject
     private RdsConnectionValidator rdsConnectionValidator;
 
-    public Cluster decorate(Cluster subject, ClusterRequest request, Blueprint blueprint, IdentityUser user, Long stackId) {
-        Stack stack = stackService.getByIdWithLists(stackId);
+    public Cluster decorate(Cluster subject, ClusterRequest request, Blueprint blueprint, IdentityUser user, Stack stack) {
         if (blueprint != null) {
             subject.setBlueprint(blueprint);
         } else {

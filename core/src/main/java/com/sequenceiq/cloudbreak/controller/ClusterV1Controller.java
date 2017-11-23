@@ -55,7 +55,7 @@ public class ClusterV1Controller implements ClusterV1Endpoint {
     public ClusterResponse post(Long stackId, ClusterRequest request) throws Exception {
         IdentityUser user = authenticatedUserService.getCbUser();
 
-        Stack stack = stackService.getById(stackId);
+        Stack stack = stackService.getByIdWithLists(stackId);
 
         clusterCreationSetupService.validate(request, stack, user);
         Cluster cluster = clusterCreationSetupService.prepare(request, stack, user);
