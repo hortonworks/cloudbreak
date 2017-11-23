@@ -40,6 +40,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudbreakDetails;
 import com.sequenceiq.cloudbreak.cloud.model.StackTemplate;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
+import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.CloudbreakApiException;
@@ -365,7 +366,8 @@ public class StackService {
                 savedStack = stackRepository.findOneWithLists(savedStack.getId());
             }
         } catch (DataIntegrityViolationException ex) {
-            throw new BadRequestException(getProperSqlErrorMessage(ex));
+            String msg = String.format("Error with resource [%s], error: [%s]", APIResourceType.STACK, getProperSqlErrorMessage(ex));
+            throw new BadRequestException(msg);
         } catch (CloudbreakSecuritySetupException e) {
             LOGGER.error("Storing of security credentials failed", e);
             throw new CloudbreakApiException("Storing security credentials failed", e);

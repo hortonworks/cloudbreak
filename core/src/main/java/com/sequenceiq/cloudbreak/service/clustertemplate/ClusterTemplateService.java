@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
+import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.ClusterTemplate;
@@ -77,7 +78,8 @@ public class ClusterTemplateService {
         try {
             savedClusterTemplate = clusterTemplateRepository.save(clusterTemplate);
         } catch (DataIntegrityViolationException ex) {
-            throw new BadRequestException(getProperSqlErrorMessage(ex));
+            String msg = String.format("Error with resource [%s], error: [%s]", APIResourceType.CLUSTER_TEMPLATE, getProperSqlErrorMessage(ex));
+            throw new BadRequestException(msg);
         }
         return savedClusterTemplate;
     }

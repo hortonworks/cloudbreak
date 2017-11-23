@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v1.RdsConfigEndpoint;
 import com.sequenceiq.cloudbreak.api.model.RDSConfigRequest;
 import com.sequenceiq.cloudbreak.api.model.RDSConfigResponse;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.controller.validation.rds.RdsConnectionValidator;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
@@ -108,7 +109,8 @@ public class RdsConfigController extends NotificationController implements RdsCo
             rdsConfig = rdsConfigService.create(user, rdsConfig);
             notify(user, ResourceEvent.RDS_CONFIG_CREATED);
         } catch (DataIntegrityViolationException ex) {
-            throw new BadRequestException(getProperSqlErrorMessage(ex));
+            String msg = String.format("Error with resource [%s], error: [%s]", APIResourceType.RDS_CONFIG, getProperSqlErrorMessage(ex));
+            throw new BadRequestException(msg);
         }
         return conversionService.convert(rdsConfig, RDSConfigResponse.class);
     }

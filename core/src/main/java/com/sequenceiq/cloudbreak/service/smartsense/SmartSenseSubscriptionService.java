@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.model.SmartSenseSubscriptionJson;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.SmartSenseSubscription;
@@ -58,9 +59,8 @@ public class SmartSenseSubscriptionService {
             LOGGER.info("SmartSense subscription has been created: {}", subscription);
             return subscription;
         } catch (DataIntegrityViolationException ex) {
-            String msg = String.format("The subscription id: '%s' has already taken by an other SmartSenseSubscription.", subscription.getSubscriptionId());
-            LOGGER.warn(msg);
-            throw new BadRequestException(getProperSqlErrorMessage(ex));
+            String msg = String.format("Error with resource [%s], error: [%s]", APIResourceType.SMARTSENSE_SUBSCRIPTION, getProperSqlErrorMessage(ex));
+            throw new BadRequestException(msg);
         }
     }
 
