@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.smartsense;
 
+import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
+
 import java.util.Iterator;
 import java.util.Optional;
 import java.util.regex.Pattern;
@@ -21,7 +23,6 @@ import com.sequenceiq.cloudbreak.domain.SmartSenseSubscription;
 import com.sequenceiq.cloudbreak.repository.FlexSubscriptionRepository;
 import com.sequenceiq.cloudbreak.repository.SmartSenseSubscriptionRepository;
 import com.sequenceiq.cloudbreak.service.AuthorizationService;
-import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 
 @Service
 public class SmartSenseSubscriptionService {
@@ -56,9 +57,10 @@ public class SmartSenseSubscriptionService {
             subscription = repository.save(subscription);
             LOGGER.info("SmartSense subscription has been created: {}", subscription);
             return subscription;
-        } catch (DataIntegrityViolationException dex) {
+        } catch (DataIntegrityViolationException ex) {
             String msg = String.format("The subscription id: '%s' has already taken by an other SmartSenseSubscription.", subscription.getSubscriptionId());
-            throw new CloudbreakServiceException(msg, dex);
+            LOGGER.warn(msg);
+            throw new BadRequestException(getProperSqlErrorMessage(ex));
         }
     }
 

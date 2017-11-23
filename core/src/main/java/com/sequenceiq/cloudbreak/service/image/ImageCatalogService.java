@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.image;
 
+import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
 import static java.util.Collections.emptyList;
 
 import java.util.Collection;
@@ -28,6 +29,7 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.controller.AuthenticatedUserService;
+import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
@@ -117,11 +119,11 @@ public class ImageCatalogService {
     public ImageCatalog create(ImageCatalog imageCatalog) throws CloudbreakImageCatalogException {
         try {
             return imageCatalogRepository.save(imageCatalog);
-        } catch (DataIntegrityViolationException e) {
+        } catch (DataIntegrityViolationException ex) {
             String msg = String.format("Image catalog exists with the given name [%s] for the account [%s]",
                     imageCatalog.getImageCatalogName(), imageCatalog.getAccount());
             LOGGER.warn(msg);
-            throw new CloudbreakImageCatalogException(msg);
+            throw new BadRequestException(getProperSqlErrorMessage(ex));
         }
     }
 
