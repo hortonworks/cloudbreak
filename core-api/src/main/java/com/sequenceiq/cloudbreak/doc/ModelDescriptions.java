@@ -43,6 +43,7 @@ public class ModelDescriptions {
         public static final String VOLUME_SIZE = "size of volumes";
         public static final String VOLUME_TYPE = "type of the volumes";
         public static final String INSTANCE_TYPE = "type of the instance";
+        public static final String CUSTOM_INSTANCE_TYPE = "custom instancetype definition";
         public static final String PARAMETERS = "cloud specific parameters for template";
     }
 
@@ -211,6 +212,7 @@ public class ModelDescriptions {
         public static final String IMAGES_REGEX = "images regex";
         public static final String TAG_SPECIFICATIONS = "tag specifications";
         public static final String SPECIAL_PARAMETERS = "custom parameters";
+        public static final String PLATFORM_SPECIFIC_SPECIAL_PARAMETERS = "platform specific custom parameters";
         public static final String ORCHESTRATORS = "orchestrators";
         public static final String DEFAULT_ORCHESTRATORS = "default orchestrators";
         public static final String VIRTUAL_MACHNES = "virtual machines";

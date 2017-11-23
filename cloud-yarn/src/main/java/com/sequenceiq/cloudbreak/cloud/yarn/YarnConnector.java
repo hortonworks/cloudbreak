@@ -30,9 +30,6 @@ public class YarnConnector implements CloudConnector {
     private YarnProvisionSetup provisionSetup;
 
     @Inject
-    private YarnTagValidator validator;
-
-    @Inject
     private YarnCredentialConnector credentialConnector;
 
     @Inject
@@ -62,7 +59,7 @@ public class YarnConnector implements CloudConnector {
 
     @Override
     public List<Validator> validators() {
-        return Collections.singletonList(validator);
+        return Collections.emptyList();
     }
 
     @Override

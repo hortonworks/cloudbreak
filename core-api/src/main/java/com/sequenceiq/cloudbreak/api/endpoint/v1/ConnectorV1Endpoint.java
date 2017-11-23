@@ -26,6 +26,7 @@ import com.sequenceiq.cloudbreak.api.model.PlatformVariantsJson;
 import com.sequenceiq.cloudbreak.api.model.PlatformVirtualMachinesJson;
 import com.sequenceiq.cloudbreak.api.model.RecommendationRequestJson;
 import com.sequenceiq.cloudbreak.api.model.RecommendationResponse;
+import com.sequenceiq.cloudbreak.api.model.SpecialParametersJson;
 import com.sequenceiq.cloudbreak.api.model.TagSpecificationsJson;
 import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
@@ -142,7 +143,7 @@ public interface ConnectorV1Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ConnectorOpDescription.GET_SPECIALS, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES,
             nickname = "getSpecialProperties")
-    Map<String, Boolean> getSpecialProperties();
+    SpecialParametersJson getSpecialProperties();
 
     @POST
     @Path("networks")

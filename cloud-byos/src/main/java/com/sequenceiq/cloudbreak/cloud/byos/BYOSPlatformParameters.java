@@ -14,6 +14,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.api.model.SpecialParameters;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZones;
@@ -136,4 +137,8 @@ public class BYOSPlatformParameters implements PlatformParameters {
         return BYOSConstants.BYOS_PLATFORM.value();
     }
 
+    @Override
+    public SpecialParameters specialParameters() {
+        return new SpecialParameters(Collections.emptyMap());
+    }
 }

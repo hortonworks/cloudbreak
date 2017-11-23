@@ -6,9 +6,13 @@ import java.util.function.Supplier;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Suppliers;
+import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
+import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.model.DiskType;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
@@ -31,33 +35,58 @@ public class TemplateValidator {
     private final Supplier<Map<Platform, Map<String, VolumeParameterType>>> diskMappings =
             Suppliers.memoize(() -> cloudParameterService.getDiskTypes().getDiskMappings());
 
+    private final Supplier<Map<Platform, PlatformParameters>> platformParameters =
+            Suppliers.memoize(() -> cloudParameterService.getPlatformParameters());
+
     public void validateTemplateRequest(Template value) {
-        VmType vmType = null;
-        VolumeParameterType volumeParameterType = null;
-        Platform platform = Platform.platform(value.cloudPlatform());
-        Map<Platform, Collection<VmType>> machines = virtualMachines.get();
-        if (machines.containsKey(platform) && !machines.get(platform).isEmpty()) {
-            for (VmType type : machines.get(platform)) {
-                if (type.value().equals(value.getInstanceType())) {
-                    vmType = type;
+        if (StringUtils.isEmpty(value.getInstanceType())) {
+            validateCustomInstanceType(value);
+        } else {
+            VmType vmType = null;
+            VolumeParameterType volumeParameterType = null;
+            Platform platform = Platform.platform(value.cloudPlatform());
+            Map<Platform, Collection<VmType>> machines = virtualMachines.get();
+            if (machines.containsKey(platform) && !machines.get(platform).isEmpty()) {
+                for (VmType type : machines.get(platform)) {
+                    if (type.value().equals(value.getInstanceType())) {
+                        vmType = type;
+                    }
+                }
+                if (vmType == null) {
+                    throw new BadRequestException(
+                            String.format("The '%s' instance type isn't supported by '%s' platform", value.getInstanceType(), platform.value()));
                 }
             }
-            if (vmType == null) {
-                throw new BadRequestException(
-                        String.format("The '%s' instance type isn't supported by '%s' platform", value.getInstanceType(), platform.value()));
+            Map<Platform, Map<String, VolumeParameterType>> disks = diskMappings.get();
+            if (disks.containsKey(platform) && !disks.get(platform).isEmpty()) {
+                Map<String, VolumeParameterType> map = disks.get(platform);
+                volumeParameterType = map.get(value.getVolumeType());
+                if (volumeParameterType == null) {
+                    throw new BadRequestException(
+                            String.format("The '%s' volume type isn't supported by '%s' platform", value.getVolumeType(), platform.value()));
+                }
             }
-        }
-        Map<Platform, Map<String, VolumeParameterType>> disks = diskMappings.get();
-        if (disks.containsKey(platform) && !disks.get(platform).isEmpty()) {
-            Map<String, VolumeParameterType> map = disks.get(platform);
-            volumeParameterType = map.get(value.getVolumeType());
-            if (volumeParameterType == null) {
-                throw new BadRequestException(
-                        String.format("The '%s' volume type isn't supported by '%s' platform", value.getVolumeType(), platform.value()));
-            }
-        }
 
-        validateVolume(value, vmType, platform, volumeParameterType);
+            validateVolume(value, vmType, platform, volumeParameterType);
+        }
+    }
+
+    private void validateCustomInstanceType(Template template) {
+        Map<String, Object> params = template.getAttributes().getMap();
+        Platform platform = Platform.platform(template.cloudPlatform());
+        PlatformParameters pps = platformParameters.get().get(platform);
+        if (pps != null) {
+            Boolean customInstanceType = pps.specialParameters().getSpecialParameters().get(PlatformParametersConsts.CUSTOM_INSTANCETYPE);
+            if (BooleanUtils.isTrue(customInstanceType)) {
+                if (params.get(PlatformParametersConsts.CUSTOM_INSTANCETYPE_CPUS) == null
+                        || params.get(PlatformParametersConsts.CUSTOM_INSTANCETYPE_MEMORY) == null) {
+                    throw new BadRequestException(String.format("Missing 'cpus' or 'memory' param for custom instancetype on %s platform",
+                            template.cloudPlatform()));
+                }
+            } else {
+                throw new BadRequestException(String.format("Custom instancetype is not supported on %s platform", template.cloudPlatform()));
+            }
+        }
     }
 
     private void validateVolume(Template value, VmType vmType, Platform platform, VolumeParameterType volumeParameterType) {

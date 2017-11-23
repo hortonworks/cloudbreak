@@ -86,8 +86,12 @@ public class PlatformParameterV1Controller implements ConnectorV1Endpoint {
         map.put("regions", conversionService.convert(regions, PlatformRegionsJson.class));
         map.put("orchestrators", conversionService.convert(orchestrators, PlatformOrchestratorsJson.class));
         map.put("tagspecifications", conversionService.convert(platformParameters, TagSpecificationsJson.class));
-        map.put("specialParameters", conversionService.convert(specialParameters, SpecialParametersJson.class));
-
+        Map<String, Boolean> globalParameters = conversionService.convert(specialParameters, Map.class);
+        Map<String, Map<String, Boolean>> platformSpecificParameters = conversionService.convert(platformParameters, Map.class);
+        SpecialParametersJson specialParametersJson = new SpecialParametersJson();
+        specialParametersJson.setSpecialParameters(globalParameters);
+        specialParametersJson.setPlatformSpecificSpecialParameters(platformSpecificParameters);
+        map.put("specialParameters", specialParametersJson);
         return map;
     }
 
@@ -173,8 +177,15 @@ public class PlatformParameterV1Controller implements ConnectorV1Endpoint {
     }
 
     @Override
-    public Map<String, Boolean> getSpecialProperties() {
-        return cloudParameterService.getSpecialParameters().getSpecialParameters();
+    public SpecialParametersJson getSpecialProperties() {
+        SpecialParameters specialParameters = cloudParameterService.getSpecialParameters();
+        Map<Platform, PlatformParameters> platformParameters = cloudParameterService.getPlatformParameters();
+        Map<String, Boolean> globalParameters = conversionService.convert(specialParameters, Map.class);
+        Map<String, Map<String, Boolean>> platformSpecificParameters = conversionService.convert(platformParameters, Map.class);
+        SpecialParametersJson specialParametersJson = new SpecialParametersJson();
+        specialParametersJson.setSpecialParameters(globalParameters);
+        specialParametersJson.setPlatformSpecificSpecialParameters(platformSpecificParameters);
+        return specialParametersJson;
     }
 
     @Override

@@ -28,6 +28,7 @@ public class TemplateV2RequestToTemplateRequestConverter extends AbstractConvers
         template.setInstanceType(source.getInstanceType());
         String volumeType = source.getVolumeType();
         template.setVolumeType(volumeType == null ? "HDD" : volumeType);
+        template.setCustomInstanceType(source.getCustomInstanceType());
         template.setParameters(source.getParameters());
         return template;
     }

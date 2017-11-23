@@ -14,13 +14,15 @@ import java.util.Optional;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.sequenceiq.cloudbreak.api.model.SpecialParameters;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
+import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZones;
 import com.sequenceiq.cloudbreak.cloud.model.DiskType;
@@ -35,7 +37,6 @@ import com.sequenceiq.cloudbreak.cloud.model.TagSpecification;
 import com.sequenceiq.cloudbreak.cloud.model.VmRecommendations;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.model.VmTypes;
-import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
 import com.sequenceiq.cloudbreak.cloud.service.CloudbreakResourceReaderService;
 import com.sequenceiq.cloudbreak.common.type.OrchestratorConstants;
 
@@ -55,10 +56,6 @@ public class YarnPlatformParameters implements PlatformParameters {
 
     @Inject
     private Environment environment;
-
-    @Inject
-    @Qualifier("YarnTagSpecification")
-    private TagSpecification tagSpecification;
 
     private Map<Region, List<AvailabilityZone>> regions;
 
@@ -80,21 +77,13 @@ public class YarnPlatformParameters implements PlatformParameters {
 
     @Override
     public DiskTypes diskTypes() {
-        // TODO: YCloud has both SSD & HDD in their respective queues
-        Collection<DiskType> diskTypes = new ArrayList<>();
-        DiskType defaultDiskType = DiskType.diskType("HDD");
-        Map<DiskType, DisplayName> displayNames = new HashMap<>();
-        Map<String, VolumeParameterType> diskMappings = new HashMap<>();
-        diskMappings.put("HDD", VolumeParameterType.MAGNETIC);
-        diskMappings.put("SSD", VolumeParameterType.SSD);
-
-
-        return new DiskTypes(diskTypes, defaultDiskType, diskMappings, displayNames);
+        return new DiskTypes(Collections.emptyList(), DiskType.diskType(""), Collections.emptyMap(), Collections.emptyMap());
     }
 
     @Override
     public Regions regions() {
         // TODO: YCloud has dev, prod instances, which *might* be considered as regions
+        // TODO: currently only have one region: "local" but it is not used
         return new Regions(regions.keySet(), defaultRegion, regionDisplayNames);
     }
 
@@ -143,7 +132,7 @@ public class YarnPlatformParameters implements PlatformParameters {
 
     @Override
     public TagSpecification tagSpecification() {
-        return tagSpecification;
+        return null;
     }
 
     @Override
@@ -164,6 +153,13 @@ public class YarnPlatformParameters implements PlatformParameters {
     @Override
     public String platforName() {
         return YarnConstants.YARN_PLATFORM.value();
+    }
+
+    @Override
+    public SpecialParameters specialParameters() {
+        Map<String, Boolean> specialParameters = Maps.newHashMap();
+        specialParameters.put(PlatformParametersConsts.CUSTOM_INSTANCETYPE, Boolean.TRUE);
+        return new SpecialParameters(specialParameters);
     }
 
     private Collection<VmType> virtualMachines(Boolean extended) {
