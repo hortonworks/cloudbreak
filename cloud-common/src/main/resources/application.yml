@@ -140,8 +140,8 @@ cb:
             redhat6: http://public-repo-1.hortonworks.com/HDP/centos6/2.x/updates/2.5.5.0
             redhat7: http://public-repo-1.hortonworks.com/HDP/centos7/2.x/updates/2.5.5.0
             repository-version: 2.5.3.0-37
-            vdf-centos6: http://public-repo-1.hortonworks.com/HDP/centos6/2.x/updates/2.5.3.0/HDP-2.5.3.0-37.xml
-            vdf-centos7: http://public-repo-1.hortonworks.com/HDP/centos7/2.x/updates/2.5.3.0/HDP-2.5.3.0-37.xml
+            vdf-redhat6: http://public-repo-1.hortonworks.com/HDP/centos6/2.x/updates/2.5.3.0/HDP-2.5.3.0-37.xml
+            vdf-redhat7: http://public-repo-1.hortonworks.com/HDP/centos7/2.x/updates/2.5.3.0/HDP-2.5.3.0-37.xml
           util:
             repoid: HDP-UTILS-1.1.0.21
             redhat6: http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.21/repos/centos6
