@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.repository;
 
+import java.util.Collection;
 import java.util.Set;
 
 import org.springframework.data.jpa.repository.Query;
@@ -12,11 +13,11 @@ import com.sequenceiq.cloudbreak.domain.Recipe;
 @EntityType(entityClass = Recipe.class)
 public interface RecipeRepository extends CrudRepository<Recipe, Long> {
 
-    @Override
-    Recipe findOne(@Param("id") Long id);
-
     @Query("SELECT r FROM Recipe r WHERE r.name= :name AND r.account= :account")
     Recipe findByNameInAccount(@Param("name") String name, @Param("account") String account);
+
+    @Query("SELECT r FROM Recipe r WHERE r.name IN :names AND r.account= :account")
+    Set<Recipe> findByNameInAccount(@Param("names") Collection<String> names, @Param("account") String account);
 
     @Query("SELECT r FROM Recipe r WHERE (r.account= :account AND r.publicInAccount= true AND r.recipeType "
             + "NOT IN ('LEGACY','MIGRATED')) OR (r.owner= :owner AND r.recipeType NOT IN ('LEGACY','MIGRATED'))")
