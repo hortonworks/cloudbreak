@@ -8,7 +8,10 @@ import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.base.Strings;
+import com.google.common.collect.Maps;
+import com.sequenceiq.cloudbreak.api.model.CustomInstanceType;
 import com.sequenceiq.cloudbreak.api.model.TemplateRequest;
+import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
@@ -38,11 +41,16 @@ public class JsonToTemplateConverter extends AbstractConversionServiceAwareConve
         template.setVolumeCount(source.getVolumeCount());
         template.setVolumeSize(source.getVolumeSize());
         template.setCloudPlatform(source.getCloudPlatform());
-        template.setInstanceType(source.getInstanceType());
+        template.setInstanceType(source.getInstanceType() == null ? "" : source.getInstanceType());
         String volumeType = source.getVolumeType();
         template.setVolumeType(volumeType == null ? "HDD" : volumeType);
-        Map<String, Object> parameters = source.getParameters();
-        if (parameters != null && !parameters.isEmpty()) {
+        Map<String, Object> parameters = source.getParameters() == null ? Maps.newHashMap() : source.getParameters();
+        CustomInstanceType customInstanceType = source.getCustomInstanceType();
+        if (customInstanceType != null) {
+            parameters.put(PlatformParametersConsts.CUSTOM_INSTANCETYPE_MEMORY, customInstanceType.getMemory());
+            parameters.put(PlatformParametersConsts.CUSTOM_INSTANCETYPE_CPUS, customInstanceType.getCpus());
+        }
+        if (!parameters.isEmpty()) {
             try {
                 template.setAttributes(new Json(parameters));
             } catch (JsonProcessingException ignored) {

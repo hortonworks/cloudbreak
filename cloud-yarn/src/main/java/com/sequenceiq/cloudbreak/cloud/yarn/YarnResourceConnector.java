@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.api.model.AdjustmentType;
+import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
@@ -86,14 +87,14 @@ public class YarnResourceConnector implements ResourceConnector<Object> {
             component.setName(group.getName());
             component.setNumberOfContainers(group.getInstancesSize());
             String userData = stack.getImage().getUserData(group.getType());
-            component.setLaunchCommand(String.format("/bootstrap/start-systemd %s %s %s", Base64.getEncoder().encodeToString(userData.getBytes()),
+            component.setLaunchCommand(String.format("/bootstrap/start-systemd '%s' '%s' '%s'", Base64.getEncoder().encodeToString(userData.getBytes()),
                     stack.getLoginUserName(), stack.getPublicKey()));
             component.setArtifact(artifact);
             component.setDependencies(new ArrayList<>());
             InstanceTemplate instanceTemplate = group.getReferenceInstanceConfiguration().getTemplate();
             Resource resource = new Resource();
-            resource.setCpus(instanceTemplate.getParameter(YarnConstants.YARN_CPUS_PARAMETER, Integer.class));
-            resource.setMemory(instanceTemplate.getParameter(YarnConstants.YARN_MEMORY_PARAMETER, Integer.class));
+            resource.setCpus(instanceTemplate.getParameter(PlatformParametersConsts.CUSTOM_INSTANCETYPE_CPUS, Integer.class));
+            resource.setMemory(instanceTemplate.getParameter(PlatformParametersConsts.CUSTOM_INSTANCETYPE_MEMORY, Integer.class));
             component.setResource(resource);
             component.setRunPrivilegedContainer(true);
             ConfigFile configFileJson = new ConfigFile();

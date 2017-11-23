@@ -28,9 +28,11 @@ public abstract class TemplateBase implements JsonEntity {
     @ApiModelProperty(TemplateModelDescription.VOLUME_TYPE)
     private String volumeType;
 
-    @NotNull
-    @ApiModelProperty(value = TemplateModelDescription.INSTANCE_TYPE, required = true)
+    @ApiModelProperty(value = TemplateModelDescription.INSTANCE_TYPE)
     private String instanceType;
+
+    @ApiModelProperty(value = TemplateModelDescription.CUSTOM_INSTANCE_TYPE)
+    private CustomInstanceType customInstanceType;
 
     @ApiModelProperty(ModelDescriptions.TOPOLOGY_ID)
     private Long topologyId;
@@ -81,5 +83,13 @@ public abstract class TemplateBase implements JsonEntity {
 
     public void setTopologyId(Long topologyId) {
         this.topologyId = topologyId;
+    }
+
+    public CustomInstanceType getCustomInstanceType() {
+        return customInstanceType;
+    }
+
+    public void setCustomInstanceType(CustomInstanceType customInstanceType) {
+        this.customInstanceType = customInstanceType;
     }
 }

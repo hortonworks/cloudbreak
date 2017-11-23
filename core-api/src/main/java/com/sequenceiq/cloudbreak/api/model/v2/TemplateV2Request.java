@@ -3,9 +3,8 @@ package com.sequenceiq.cloudbreak.api.model.v2;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.validation.constraints.NotNull;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.sequenceiq.cloudbreak.api.model.CustomInstanceType;
 import com.sequenceiq.cloudbreak.api.model.JsonEntity;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.TemplateModelDescription;
 
@@ -28,9 +27,11 @@ public class TemplateV2Request implements JsonEntity {
     @ApiModelProperty(TemplateModelDescription.VOLUME_TYPE)
     private String volumeType;
 
-    @NotNull
-    @ApiModelProperty(value = TemplateModelDescription.INSTANCE_TYPE, required = true)
+    @ApiModelProperty(value = TemplateModelDescription.INSTANCE_TYPE)
     private String instanceType;
+
+    @ApiModelProperty(value = TemplateModelDescription.CUSTOM_INSTANCE_TYPE)
+    private CustomInstanceType customInstanceType;
 
     public Integer getVolumeSize() {
         return volumeSize;
@@ -72,6 +73,11 @@ public class TemplateV2Request implements JsonEntity {
         this.instanceType = instanceType;
     }
 
+    public CustomInstanceType getCustomInstanceType() {
+        return customInstanceType;
+    }
 
-
+    public void setCustomInstanceType(CustomInstanceType customInstanceType) {
+        this.customInstanceType = customInstanceType;
+    }
 }

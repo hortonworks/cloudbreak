@@ -28,6 +28,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Lists;
+import com.sequenceiq.cloudbreak.api.model.SpecialParameters;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZones;
@@ -190,6 +191,11 @@ public class OpenStackParameters implements PlatformParameters {
     @Override
     public VmRecommendations recommendedVms() {
         return vmRecommendations;
+    }
+
+    @Override
+    public SpecialParameters specialParameters() {
+        return new SpecialParameters(Collections.emptyMap());
     }
 
     private Collection<VmType> virtualMachines(Boolean extended) {

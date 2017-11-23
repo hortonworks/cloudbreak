@@ -16,6 +16,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.ui.freemarker.FreeMarkerConfigurationFactoryBean;
 
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
+import com.sequenceiq.cloudbreak.api.model.SpecialParameters;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZones;
@@ -137,6 +138,11 @@ public class UserDataBuilderTest {
             @Override
             public Map<AvailabilityZone, VmTypes> vmTypesPerAvailabilityZones(Boolean extended) {
                 return Collections.emptyMap();
+            }
+
+            @Override
+            public SpecialParameters specialParameters() {
+                return new SpecialParameters(Collections.emptyMap());
             }
         };
     }

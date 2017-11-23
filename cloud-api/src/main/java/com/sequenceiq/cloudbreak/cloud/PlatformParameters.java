@@ -14,6 +14,7 @@ import java.util.Set;
 import java.util.TreeMap;
 
 import com.google.common.collect.Maps;
+import com.sequenceiq.cloudbreak.api.model.SpecialParameters;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZones;
 import com.sequenceiq.cloudbreak.cloud.model.DiskTypes;
@@ -122,6 +123,8 @@ public interface PlatformParameters {
     String getDefaultRegionString();
 
     String platforName();
+
+    SpecialParameters specialParameters();
 
     default Map<String, InstanceGroupParameterResponse> collectInstanceGroupParameters(Set<InstanceGroupParameterRequest> instanceGroupParameterRequest) {
         return new HashMap<>();
