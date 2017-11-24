@@ -12,6 +12,7 @@ import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
 import com.sequenceiq.cloudbreak.domain.Cluster;
+import com.sequenceiq.cloudbreak.domain.view.ClusterView;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
@@ -37,8 +38,13 @@ public class ClusterResetService {
         flowMessageService.fireEventAndLog(stackId, Msg.AMBARI_CLUSTER_RESET, Status.UPDATE_IN_PROGRESS.name());
     }
 
+    public void handleResetClusterFinished(ClusterView clusterView) {
+        clusterService.cleanupKerberosCredential(clusterView.getId());
+    }
+
     public void handleResetClusterFailure(StackView stackView, Exception exception) {
         Cluster cluster = clusterService.retrieveClusterByStackId(stackView.getId());
+        clusterService.cleanupKerberosCredential(cluster.getId());
         String errorMessage = exception instanceof CloudbreakException && exception.getCause() != null
                 ? exception.getCause().getMessage() : exception.getMessage();
         clusterService.updateClusterStatusByStackId(stackView.getId(), Status.CREATE_FAILED, errorMessage);

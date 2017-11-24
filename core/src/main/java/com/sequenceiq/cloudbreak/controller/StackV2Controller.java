@@ -150,6 +150,7 @@ public class StackV2Controller extends NotificationController implements StackV2
     @Override
     public Response putReinstall(String name, ReinstallRequestV2 reinstallRequestV2) throws CloudbreakSecuritySetupException {
         IdentityUser user = authenticatedUserService.getCbUser();
+        reinstallRequestV2.setAccount(user.getAccount());
         Stack stack = stackService.getPublicStack(name, user);
         UpdateClusterJson updateClusterJson = conversionService.convert(reinstallRequestV2, UpdateClusterJson.class);
         return clusterCommonController.put(stack.getId(), updateClusterJson);

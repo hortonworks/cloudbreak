@@ -28,6 +28,7 @@ public class KerberosRequest implements JsonEntity {
 
     private String realm;
 
+    @ApiModelProperty(StackModelDescription.KERBEROS_PRINCIPAL)
     private String principal;
 
     private String ldapUrl;

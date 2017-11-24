@@ -17,8 +17,8 @@ import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver
 import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
 import com.sequenceiq.cloudbreak.domain.Cluster;
-import com.sequenceiq.cloudbreak.domain.view.OrchestratorView;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.view.OrchestratorView;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
@@ -93,7 +93,11 @@ public class ClusterCreationService {
         clusterService.updateClusterStatusByStackId(stackView.getId(), AVAILABLE);
         stackUpdater.updateStackStatus(stackView.getId(), DetailedStackStatus.AVAILABLE, "Cluster creation finished.");
         flowMessageService.fireEventAndLog(stackView.getId(), Msg.AMBARI_CLUSTER_BUILT, AVAILABLE.name(), ambariIp);
+
         Cluster cluster = clusterService.getById(stackView.getClusterView().getId());
+
+        clusterService.cleanupKerberosCredential(cluster);
+
         if (cluster.getEmailNeeded()) {
             emailSenderService.sendProvisioningSuccessEmail(cluster.getOwner(), stackView.getClusterView().getEmailTo(), ambariIp,
                     cluster.getName(), cluster.getGateway().getEnableGateway());
@@ -101,16 +105,19 @@ public class ClusterCreationService {
         }
     }
 
-    public void handleClusterCreationFailure(StackView stack, Exception exception) {
-        if (stack.getClusterView() != null) {
-            Cluster cluster = clusterService.getById(stack.getClusterView().getId());
+    public void handleClusterCreationFailure(StackView stackView, Exception exception) {
+        if (stackView.getClusterView() != null) {
+            Cluster cluster = clusterService.getById(stackView.getClusterView().getId());
+
+            clusterService.cleanupKerberosCredential(cluster);
+
             String errorMessage = exception instanceof CloudbreakException && exception.getCause() != null
                     ? exception.getCause().getMessage() : exception.getMessage();
-            clusterService.updateClusterStatusByStackId(stack.getId(), CREATE_FAILED, errorMessage);
-            stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.AVAILABLE);
-            flowMessageService.fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_CREATE_FAILED, CREATE_FAILED.name(), errorMessage);
+            clusterService.updateClusterStatusByStackId(stackView.getId(), CREATE_FAILED, errorMessage);
+            stackUpdater.updateStackStatus(stackView.getId(), DetailedStackStatus.AVAILABLE);
+            flowMessageService.fireEventAndLog(stackView.getId(), Msg.AMBARI_CLUSTER_CREATE_FAILED, CREATE_FAILED.name(), errorMessage);
             try {
-                OrchestratorType orchestratorType = orchestratorTypeResolver.resolveType(stack.getOrchestrator().getType());
+                OrchestratorType orchestratorType = orchestratorTypeResolver.resolveType(stackView.getOrchestrator().getType());
                 if (cluster != null && orchestratorType.containerOrchestrator()) {
                     clusterTerminationService.deleteClusterContainers(cluster);
                 }
@@ -119,8 +126,8 @@ public class ClusterCreationService {
             }
 
             if (cluster != null && cluster.getEmailNeeded()) {
-                emailSenderService.sendProvisioningFailureEmail(cluster.getOwner(), stack.getClusterView().getEmailTo(), cluster.getName());
-                flowMessageService.fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_NOTIFICATION_EMAIL, AVAILABLE.name());
+                emailSenderService.sendProvisioningFailureEmail(cluster.getOwner(), stackView.getClusterView().getEmailTo(), cluster.getName());
+                flowMessageService.fireEventAndLog(stackView.getId(), Msg.AMBARI_CLUSTER_NOTIFICATION_EMAIL, AVAILABLE.name());
             }
         } else {
             LOGGER.error("Cluster was null. Flow action was not required.");
