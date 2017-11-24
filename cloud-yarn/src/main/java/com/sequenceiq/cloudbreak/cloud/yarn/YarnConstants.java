@@ -2,10 +2,11 @@ package com.sequenceiq.cloudbreak.cloud.yarn;
 
 import static com.sequenceiq.cloudbreak.common.type.CloudConstants.YARN;
 
+import com.sequenceiq.cloudbreak.cloud.CloudConstant;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 
-public class YarnConstants {
+public class YarnConstants implements CloudConstant {
     public static final Platform YARN_PLATFORM = Platform.platform(YARN);
 
     public static final Variant YARN_VARIANT = Variant.variant(YARN);
@@ -19,4 +20,13 @@ public class YarnConstants {
     private YarnConstants() {
     }
 
+    @Override
+    public Platform platform() {
+        return YarnConstants.YARN_PLATFORM;
+    }
+
+    @Override
+    public Variant variant() {
+        return YarnConstants.YARN_VARIANT;
+    }
 }
