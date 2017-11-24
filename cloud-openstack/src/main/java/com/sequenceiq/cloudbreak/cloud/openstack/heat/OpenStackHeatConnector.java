@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.Authenticator;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
+import com.sequenceiq.cloudbreak.cloud.CloudConstant;
 import com.sequenceiq.cloudbreak.cloud.CredentialConnector;
 import com.sequenceiq.cloudbreak.cloud.InstanceConnector;
 import com.sequenceiq.cloudbreak.cloud.MetadataCollector;
@@ -62,6 +63,9 @@ public class OpenStackHeatConnector implements CloudConnector {
     @Inject
     private OpenStackParameters openStackParameters;
 
+    @Inject
+    private OpenStackConstants openStackConstants;
+
     @Override
     public Platform platform() {
         return OpenStackConstants.OPENSTACK_PLATFORM;
@@ -100,6 +104,11 @@ public class OpenStackHeatConnector implements CloudConnector {
     @Override
     public PlatformResources platformResources() {
         return openStackPlatformResources;
+    }
+
+    @Override
+    public CloudConstant cloudConstant() {
+        return openStackConstants;
     }
 
     @Override

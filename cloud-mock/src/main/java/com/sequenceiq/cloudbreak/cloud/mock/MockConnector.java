@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.Authenticator;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
+import com.sequenceiq.cloudbreak.cloud.CloudConstant;
 import com.sequenceiq.cloudbreak.cloud.CredentialConnector;
 import com.sequenceiq.cloudbreak.cloud.InstanceConnector;
 import com.sequenceiq.cloudbreak.cloud.MetadataCollector;
@@ -46,6 +47,9 @@ public class MockConnector implements CloudConnector {
 
     @Inject
     private MockPlatformParameters mockPlatformParameters;
+
+    @Inject
+    private MockConstants mockConstants;
 
     @Override
     public Authenticator authentication() {
@@ -90,6 +94,11 @@ public class MockConnector implements CloudConnector {
     @Override
     public PlatformResources platformResources() {
         return mockPlatformResources;
+    }
+
+    @Override
+    public CloudConstant cloudConstant() {
+        return mockConstants;
     }
 
     @Override

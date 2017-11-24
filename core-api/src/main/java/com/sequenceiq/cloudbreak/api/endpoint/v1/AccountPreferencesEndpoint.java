@@ -52,6 +52,13 @@ public interface AccountPreferencesEndpoint {
     Map<String, Boolean> isPlatformSelectionDisabled();
 
     @GET
+    @Path("/platformenabled")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = AccountPreferencesDescription.PLATFORM_ENABLEMENT, produces = ContentType.JSON,
+            notes = Notes.ACCOUNT_PREFERENCES_NOTES)
+    Map<String, Boolean> platformEnablement();
+
+    @GET
     @Path("validate")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = AccountPreferencesDescription.VALIDATE, produces = ContentType.JSON, notes = Notes.ACCOUNT_PREFERENCES_NOTES,

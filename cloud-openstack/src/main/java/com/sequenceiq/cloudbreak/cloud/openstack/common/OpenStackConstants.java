@@ -1,9 +1,13 @@
 package com.sequenceiq.cloudbreak.cloud.openstack.common;
 
+import org.springframework.stereotype.Service;
+
+import com.sequenceiq.cloudbreak.cloud.CloudConstant;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 
-public class OpenStackConstants {
+@Service
+public class OpenStackConstants implements CloudConstant {
 
     public static final Platform OPENSTACK_PLATFORM = Platform.platform("OPENSTACK");
 
@@ -30,6 +34,16 @@ public class OpenStackConstants {
     public static final String NETWORKING_OPTION = "networkingOption";
 
     private OpenStackConstants() {
+    }
+
+    @Override
+    public Platform platform() {
+        return OPENSTACK_PLATFORM;
+    }
+
+    @Override
+    public Variant variant() {
+        return OpenStackVariant.HEAT.variant();
     }
 
     public enum OpenStackVariant {

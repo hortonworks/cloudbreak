@@ -1,6 +1,9 @@
 package com.sequenceiq.cloudbreak.service.account;
 
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -9,6 +12,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.cloud.CloudConstant;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
@@ -25,6 +29,9 @@ public class SimpleAccountPreferencesService implements AccountPreferencesServic
 
     @Inject
     private AccountPreferencesRepository repository;
+
+    @Inject
+    private List<CloudConstant> cloudConstants;
 
     @Override
     public AccountPreferences save(AccountPreferences accountPreferences) {
@@ -46,6 +53,26 @@ public class SimpleAccountPreferencesService implements AccountPreferencesServic
     @Override
     public Boolean isPlatformSelectionDisabled() {
         return !StringUtils.isEmpty(enabledPlatforms);
+    }
+
+    @Override
+    public Map<String, Boolean> platformEnablement() {
+        Map<String, Boolean> result = new HashMap<>();
+        if (StringUtils.isEmpty(enabledPlatforms)) {
+            for (CloudConstant cloudConstant : cloudConstants) {
+                result.put(cloudConstant.platform().value(), true);
+            }
+        } else {
+            for (String platform : enabledPlatforms.split(",")) {
+                result.put(platform, true);
+            }
+            for (CloudConstant cloudConstant : cloudConstants) {
+                if (!result.keySet().contains(cloudConstant.platform().value())) {
+                    result.put(cloudConstant.platform().value(), false);
+                }
+            }
+        }
+        return result;
     }
 
     @Override

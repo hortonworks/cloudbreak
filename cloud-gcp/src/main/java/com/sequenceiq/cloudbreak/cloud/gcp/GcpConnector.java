@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.Authenticator;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
+import com.sequenceiq.cloudbreak.cloud.CloudConstant;
 import com.sequenceiq.cloudbreak.cloud.CredentialConnector;
 import com.sequenceiq.cloudbreak.cloud.InstanceConnector;
 import com.sequenceiq.cloudbreak.cloud.MetadataCollector;
@@ -49,6 +50,9 @@ public class GcpConnector implements CloudConnector {
 
     @Inject
     private GcpMetadataCollector metadataCollector;
+
+    @Inject
+    private GcpConstants gcpConstants;
 
     @Override
     public Authenticator authentication() {
@@ -93,6 +97,11 @@ public class GcpConnector implements CloudConnector {
     @Override
     public PlatformResources platformResources() {
         return gcpPlatformResources;
+    }
+
+    @Override
+    public CloudConstant cloudConstant() {
+        return gcpConstants;
     }
 
     @Override

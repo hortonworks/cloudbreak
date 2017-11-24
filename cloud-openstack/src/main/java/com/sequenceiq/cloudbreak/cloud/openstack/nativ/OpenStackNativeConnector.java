@@ -7,6 +7,7 @@ import javax.inject.Inject;
 
 import com.sequenceiq.cloudbreak.cloud.Authenticator;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
+import com.sequenceiq.cloudbreak.cloud.CloudConstant;
 import com.sequenceiq.cloudbreak.cloud.CredentialConnector;
 import com.sequenceiq.cloudbreak.cloud.InstanceConnector;
 import com.sequenceiq.cloudbreak.cloud.MetadataCollector;
@@ -54,6 +55,9 @@ public class OpenStackNativeConnector implements CloudConnector {
 
     @Inject
     private OpenStackNativeMetaDataCollector metadataCollector;
+
+    @Inject
+    private OpenStackConstants openStackConstants;
 
     @Override
     public Platform platform() {
@@ -108,6 +112,11 @@ public class OpenStackNativeConnector implements CloudConnector {
     @Override
     public PlatformResources platformResources() {
         return openStackPlatformResources;
+    }
+
+    @Override
+    public CloudConstant cloudConstant() {
+        return openStackConstants;
     }
 
 }
