@@ -62,7 +62,7 @@ func CreateLDAP(c *cli.Context) error {
 	groupObjectClass := c.String(FlLdapGroupObjectClass.Name)
 
 	server := c.String(FlLdapServer.Name)
-	public := c.Bool(FlPublic.Name)
+	public := c.Bool(FlPublicOptional.Name)
 
 	portSeparatorIndex := strings.LastIndex(server, ":")
 	if (!strings.Contains(server, "ldap://") && !strings.Contains(server, "ldaps://")) || portSeparatorIndex == -1 {
@@ -71,7 +71,7 @@ func CreateLDAP(c *cli.Context) error {
 	serverPort, _ := strconv.Atoi(server[portSeparatorIndex+1:])
 	protocol := server[0:strings.Index(server, ":")]
 
-	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServerOptional.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 
 	return createLDAPImpl(cbClient.Cloudbreak.V1ldap, int32(serverPort), name, server, protocol, domain, bindDn, bindPassword, directoryType,
 		userSearchBase, userNameAttribute, userObjectClass, groupSearchBase, groupMemberAttribute, groupNameAttribute, groupObjectClass, public)
@@ -125,9 +125,9 @@ func ListLdaps(c *cli.Context) error {
 	checkRequiredFlags(c)
 	defer utils.TimeTrack(time.Now(), "list ldap configs")
 
-	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServerOptional.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 
-	output := utils.Output{Format: c.String(FlOutput.Name)}
+	output := utils.Output{Format: c.String(FlOutputOptional.Name)}
 	return listLdapsImpl(cbClient.Cloudbreak.V1ldap, output.WriteList)
 }
 
@@ -167,7 +167,7 @@ func DeleteLdap(c *cli.Context) error {
 
 	ldapName := c.String(FlName.Name)
 	log.Infof("[DeleteLdap] delete ldap config by name: %s", ldapName)
-	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServerOptional.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 
 	if err := cbClient.Cloudbreak.V1ldap.DeletePublicLdap(v1ldap.NewDeletePublicLdapParams().WithName(ldapName)); err != nil {
 		utils.LogErrorAndExit(err)

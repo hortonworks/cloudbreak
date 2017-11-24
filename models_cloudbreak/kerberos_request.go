@@ -39,7 +39,7 @@ type KerberosRequest struct {
 	// Min Length: 5
 	Password string `json:"password,omitempty"`
 
-	// principal
+	// kerberos principal
 	Principal string `json:"principal,omitempty"`
 
 	// realm

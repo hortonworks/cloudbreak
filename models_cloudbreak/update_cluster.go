@@ -34,6 +34,14 @@ type UpdateCluster struct {
 	// Unique: true
 	Hostgroups []*HostGroupRequest `json:"hostgroups"`
 
+	// kerberos admin password
+	// Max Length: 50
+	// Min Length: 5
+	KerberosPassword string `json:"kerberosPassword,omitempty"`
+
+	// kerberos principal
+	KerberosPrincipal string `json:"kerberosPrincipal,omitempty"`
+
 	// request status
 	Status string `json:"status,omitempty"`
 
@@ -51,6 +59,10 @@ type UpdateCluster struct {
 /* polymorph UpdateCluster hostGroupAdjustment false */
 
 /* polymorph UpdateCluster hostgroups false */
+
+/* polymorph UpdateCluster kerberosPassword false */
+
+/* polymorph UpdateCluster kerberosPrincipal false */
 
 /* polymorph UpdateCluster status false */
 
@@ -73,6 +85,11 @@ func (m *UpdateCluster) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateHostgroups(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateKerberosPassword(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -157,6 +174,23 @@ func (m *UpdateCluster) validateHostgroups(formats strfmt.Registry) error {
 			}
 		}
 
+	}
+
+	return nil
+}
+
+func (m *UpdateCluster) validateKerberosPassword(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.KerberosPassword) { // not required
+		return nil
+	}
+
+	if err := validate.MinLength("kerberosPassword", "body", string(m.KerberosPassword), 5); err != nil {
+		return err
+	}
+
+	if err := validate.MaxLength("kerberosPassword", "body", string(m.KerberosPassword), 50); err != nil {
+		return err
 	}
 
 	return nil

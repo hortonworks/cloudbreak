@@ -45,10 +45,10 @@ func CreateStack(c *cli.Context) {
 	defer utils.TimeTrack(time.Now(), "create cluster")
 
 	req := assembleStackRequest(c)
-	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
-	cbClient.createStack(req, c.Bool(FlPublic.Name))
+	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServerOptional.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+	cbClient.createStack(req, c.Bool(FlPublicOptional.Name))
 
-	if c.Bool(FlWait.Name) {
+	if c.Bool(FlWaitOptional.Name) {
 		cbClient.waitForOperationToFinish(*req.Name, AVAILABLE, AVAILABLE)
 	}
 }
@@ -101,8 +101,8 @@ func DescribeStack(c *cli.Context) {
 	checkRequiredFlags(c)
 	defer utils.TimeTrack(time.Now(), "describe stack")
 
-	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
-	output := utils.Output{Format: c.String(FlOutput.Name)}
+	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServerOptional.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+	output := utils.Output{Format: c.String(FlOutputOptional.Name)}
 	resp, err := cbClient.Cloudbreak.V1stacks.GetPublicStack(v1stacks.NewGetPublicStackParams().WithName(c.String(FlName.Name)))
 	if err != nil {
 		utils.LogErrorAndExit(err)
@@ -119,7 +119,7 @@ func ScaleStack(c *cli.Context) {
 	}
 	defer utils.TimeTrack(time.Now(), "scale stack")
 
-	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServerOptional.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 	req := &models_cloudbreak.StackScaleRequestV2{
 		DesiredCount: &(&types.I32{I: int32(desiredCount)}).I,
 		Group:        &(&types.S{S: c.String(FlGroupName.Name)}).S,
@@ -132,7 +132,7 @@ func ScaleStack(c *cli.Context) {
 	}
 	log.Infof("[ScaleStack] stack scaled, name: %s", name)
 
-	if c.Bool(FlWait.Name) {
+	if c.Bool(FlWaitOptional.Name) {
 		cbClient.waitForOperationToFinish(name, AVAILABLE, AVAILABLE)
 	}
 }
@@ -141,7 +141,7 @@ func StartStack(c *cli.Context) {
 	checkRequiredFlags(c)
 	defer utils.TimeTrack(time.Now(), "start stack")
 
-	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServerOptional.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 	name := c.String(FlName.Name)
 	log.Infof("[StartStack] starting stack, name: %s", name)
 	err := cbClient.Cloudbreak.V2stacks.PutstartStackV2(v2stacks.NewPutstartStackV2Params().WithName(name))
@@ -150,7 +150,7 @@ func StartStack(c *cli.Context) {
 	}
 	log.Infof("[StartStack] stack started, name: %s", name)
 
-	if c.Bool(FlWait.Name) {
+	if c.Bool(FlWaitOptional.Name) {
 		cbClient.waitForOperationToFinish(name, AVAILABLE, AVAILABLE)
 	}
 }
@@ -159,7 +159,7 @@ func StopStack(c *cli.Context) {
 	checkRequiredFlags(c)
 	defer utils.TimeTrack(time.Now(), "stop stack")
 
-	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServerOptional.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 	name := c.String(FlName.Name)
 	log.Infof("[StopStack] stopping stack, name: %s", name)
 	err := cbClient.Cloudbreak.V2stacks.PutstopStackV2(v2stacks.NewPutstopStackV2Params().WithName(name))
@@ -168,7 +168,7 @@ func StopStack(c *cli.Context) {
 	}
 	log.Infof("[StopStack] stack stopted, name: %s", name)
 
-	if c.Bool(FlWait.Name) {
+	if c.Bool(FlWaitOptional.Name) {
 		cbClient.waitForOperationToFinish(name, STOPPED, STOPPED)
 	}
 }
@@ -177,7 +177,7 @@ func SyncStack(c *cli.Context) {
 	checkRequiredFlags(c)
 	defer utils.TimeTrack(time.Now(), "sync stack")
 
-	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServerOptional.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 	name := c.String(FlName.Name)
 	log.Infof("[SyncStack] syncing stack, name: %s", name)
 	err := cbClient.Cloudbreak.V2stacks.PutsyncStackV2(v2stacks.NewPutsyncStackV2Params().WithName(name))
@@ -191,7 +191,7 @@ func RepairStack(c *cli.Context) {
 	checkRequiredFlags(c)
 	defer utils.TimeTrack(time.Now(), "repair stack")
 
-	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServerOptional.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 	name := c.String(FlName.Name)
 	log.Infof("[RepairStack] repairing stack, name: %s", name)
 	err := cbClient.Cloudbreak.V2stacks.PutrepairStackV2(v2stacks.NewPutrepairStackV2Params().WithName(name))
@@ -200,22 +200,71 @@ func RepairStack(c *cli.Context) {
 	}
 	log.Infof("[RepairStack] stack repaired, name: %s", name)
 
-	if c.Bool(FlWait.Name) {
+	if c.Bool(FlWaitOptional.Name) {
 		cbClient.waitForOperationToFinish(name, AVAILABLE, AVAILABLE)
 	}
+}
+
+func ReinstallStack(c *cli.Context) {
+	checkRequiredFlags(c)
+	defer utils.TimeTrack(time.Now(), "reinstall stack")
+
+	req := assembleReinstallRequest(c)
+	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServerOptional.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+	name := c.String(FlName.Name)
+	log.Infof("[RepairStack] reinstalling stack, name: %s", name)
+	err := cbClient.Cloudbreak.V2stacks.PutreinstallStackV2(v2stacks.NewPutreinstallStackV2Params().WithName(name).WithBody(req))
+	if err != nil {
+		utils.LogErrorAndExit(err)
+	}
+	log.Infof("[ReinstallStack] stack reinstalled, name: %s", name)
+
+	if c.Bool(FlWaitOptional.Name) {
+		cbClient.waitForOperationToFinish(name, AVAILABLE, AVAILABLE)
+	}
+}
+
+func assembleReinstallRequest(c *cli.Context) *models_cloudbreak.ReinstallRequestV2 {
+	path := c.String(FlInputJson.Name)
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		utils.LogErrorAndExit(err)
+	}
+
+	log.Infof("[assembleReinstallRequest] read cluster reinstall json from file: %s", path)
+	content := utils.ReadFile(path)
+
+	var req models_cloudbreak.ReinstallRequestV2
+	err := json.Unmarshal(content, &req)
+	if err != nil {
+		msg := fmt.Sprintf(`Invalid json format: %s. Please make sure that the json is valid (check for commas and double quotes).`, err.Error())
+		utils.LogErrorMessageAndExit(msg)
+	}
+
+	bpName := c.String(FlBlueprintNameOptional.Name)
+	if len(bpName) != 0 {
+		req.BlueprintName = &bpName
+	}
+	if len(*req.BlueprintName) == 0 {
+		utils.LogErrorMessageAndExit("Name of the blueprint must be set either in the template or with the --blueprint-name command line option.")
+	}
+
+	req.KerberosPassword = c.String(FlKerberosPasswordOptional.Name)
+	req.KerberosPrincipal = c.String(FlKerberosPrincipalOptional.Name)
+
+	return &req
 }
 
 func DeleteStack(c *cli.Context) {
 	checkRequiredFlags(c)
 	defer utils.TimeTrack(time.Now(), "delete stack")
 
-	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServerOptional.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 	name := c.String(FlName.Name)
 	stack := cbClient.getStackByName(name)
-	cbClient.deleteStack(name, c.Bool(FlForce.Name), *stack.Public)
+	cbClient.deleteStack(name, c.Bool(FlForceOptional.Name), *stack.Public)
 	log.Infof("[DeleteStack] stack deleted, name: %s", name)
 
-	if c.Bool(FlWait.Name) {
+	if c.Bool(FlWaitOptional.Name) {
 		cbClient.waitForOperationToFinish(name, DELETE_COMPLETED, SKIP)
 	}
 }
@@ -224,8 +273,8 @@ func ListStacks(c *cli.Context) {
 	checkRequiredFlags(c)
 	defer utils.TimeTrack(time.Now(), "list stacks")
 
-	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
-	output := utils.Output{Format: c.String(FlOutput.Name)}
+	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServerOptional.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+	output := utils.Output{Format: c.String(FlOutputOptional.Name)}
 	listStacksImpl(cbClient.Cloudbreak.V1stacks, output.WriteList)
 }
 

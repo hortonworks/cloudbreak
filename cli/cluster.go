@@ -15,7 +15,7 @@ func ChangeAmbariPassword(c *cli.Context) {
 	checkRequiredFlags(c)
 	defer utils.TimeTrack(time.Now(), "update ambari password")
 
-	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServerOptional.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 	name := c.String(FlName.Name)
 	log.Infof("[ChangeAmbariPassword] updating ambari password, name: %s", name)
 	req := &models_cloudbreak.UserNamePassword{

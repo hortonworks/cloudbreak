@@ -11,7 +11,7 @@ var REQUIRED = RequiredFlag{true}
 var OPTIONAL = RequiredFlag{false}
 
 var (
-	FlDebug = BoolFlag{
+	FlDebugOptional = BoolFlag{
 		RequiredFlag: OPTIONAL,
 		BoolFlag: cli.BoolFlag{
 			Name:   "debug",
@@ -19,7 +19,7 @@ var (
 			EnvVar: "DEBUG",
 		},
 	}
-	FlWait = BoolFlag{
+	FlWaitOptional = BoolFlag{
 		RequiredFlag: OPTIONAL,
 		BoolFlag: cli.BoolFlag{
 			Name:  "wait",
@@ -33,7 +33,7 @@ var (
 			Usage: "user provided file with json content",
 		},
 	}
-	FlOutput = StringFlag{
+	FlOutputOptional = StringFlag{
 		RequiredFlag: OPTIONAL,
 		StringFlag: cli.StringFlag{
 			Name:   "output",
@@ -41,7 +41,7 @@ var (
 			EnvVar: "CB_OUT_FORMAT",
 		},
 	}
-	FlProfile = StringFlag{
+	FlProfileOptional = StringFlag{
 		RequiredFlag: OPTIONAL,
 		StringFlag: cli.StringFlag{
 			Name:   "profile",
@@ -49,14 +49,14 @@ var (
 			EnvVar: "CB_PROFILE",
 		},
 	}
-	FlForce = BoolFlag{
+	FlForceOptional = BoolFlag{
 		RequiredFlag: OPTIONAL,
 		BoolFlag: cli.BoolFlag{
 			Name:  "force",
 			Usage: "force the operation",
 		},
 	}
-	FlServer = StringFlag{
+	FlServerOptional = StringFlag{
 		RequiredFlag: OPTIONAL,
 		StringFlag: cli.StringFlag{
 			Name:   "server",
@@ -110,14 +110,14 @@ var (
 			Usage: "name of resource",
 		},
 	}
-	FlDescription = StringFlag{
+	FlDescriptionOptional = StringFlag{
 		RequiredFlag: OPTIONAL,
 		StringFlag: cli.StringFlag{
 			Name:  "description",
 			Usage: "description of resource",
 		},
 	}
-	FlPublic = BoolFlag{
+	FlPublicOptional = BoolFlag{
 		RequiredFlag: OPTIONAL,
 		BoolFlag: cli.BoolFlag{
 			Name:  "public",
@@ -184,7 +184,7 @@ var (
 			Name: "endpoint",
 		},
 	}
-	FlKeystoneScope = StringFlag{
+	FlKeystoneScopeOptional = StringFlag{
 		RequiredFlag: OPTIONAL,
 		StringFlag: cli.StringFlag{
 			Name: "keystone-scope",
@@ -196,25 +196,25 @@ var (
 			Name: "user-domain",
 		},
 	}
-	FlProjectDomainName = StringFlag{
+	FlProjectDomainNameOptional = StringFlag{
 		RequiredFlag: OPTIONAL,
 		StringFlag: cli.StringFlag{
 			Name: "project-domain-name",
 		},
 	}
-	FlDomainName = StringFlag{
+	FlDomainNameOptional = StringFlag{
 		RequiredFlag: OPTIONAL,
 		StringFlag: cli.StringFlag{
 			Name: "domain-name",
 		},
 	}
-	FlProjectName = StringFlag{
+	FlProjectNameOptional = StringFlag{
 		RequiredFlag: OPTIONAL,
 		StringFlag: cli.StringFlag{
 			Name: "project-name",
 		},
 	}
-	FlFacing = StringFlag{
+	FlFacingOptional = StringFlag{
 		RequiredFlag: OPTIONAL,
 		StringFlag: cli.StringFlag{
 			Name: "facing",
@@ -259,13 +259,20 @@ var (
 		},
 	}
 	FlBlueprintName = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "blueprint-name",
+			Usage: "name of the blueprint",
+		},
+	}
+	FlBlueprintNameOptional = StringFlag{
 		RequiredFlag: OPTIONAL,
 		StringFlag: cli.StringFlag{
 			Name:  "blueprint-name",
 			Usage: "name of the blueprint",
 		},
 	}
-	FlBlueprintFile = StringFlag{
+	FlBlueprintFileOptional = StringFlag{
 		RequiredFlag: OPTIONAL,
 		StringFlag: cli.StringFlag{
 			Name:  "blueprint-file",
@@ -405,6 +412,20 @@ var (
 			Usage: "ldap group search base (e.g: OU=scopes,DC=ad,DC=cb,DC=com)",
 		},
 	}
+	FlKerberosPasswordOptional = StringFlag{
+		RequiredFlag: OPTIONAL,
+		StringFlag: cli.StringFlag{
+			Name:  "kerberos-password",
+			Usage: "kerberos password",
+		},
+	}
+	FlKerberosPrincipalOptional = StringFlag{
+		RequiredFlag: OPTIONAL,
+		StringFlag: cli.StringFlag{
+			Name:  "kerberos-principal",
+			Usage: "kerberos principal",
+		},
+	}
 )
 
 type RequiredFlag struct {
@@ -500,28 +521,28 @@ func (fb *FlagBuilder) AddFlags(flags ...cli.Flag) *FlagBuilder {
 }
 
 func (fb *FlagBuilder) AddAuthenticationFlags() *FlagBuilder {
-	for _, f := range []cli.Flag{FlServer, FlUsername, FlPassword, FlProfile} {
+	for _, f := range []cli.Flag{FlServerOptional, FlUsername, FlPassword, FlProfileOptional} {
 		fb.flags = append(fb.flags, f)
 	}
 	return fb
 }
 
 func (fb *FlagBuilder) AddResourceDefaultFlags() *FlagBuilder {
-	for _, f := range []cli.Flag{FlName, FlDescription, FlPublic} {
+	for _, f := range []cli.Flag{FlName, FlDescriptionOptional, FlPublicOptional} {
 		fb.flags = append(fb.flags, f)
 	}
 	return fb
 }
 
 func (fb *FlagBuilder) AddResourceFlagsWithOptionalName() *FlagBuilder {
-	for _, f := range []cli.Flag{FlNameOptional, FlDescription, FlPublic} {
+	for _, f := range []cli.Flag{FlNameOptional, FlDescriptionOptional, FlPublicOptional} {
 		fb.flags = append(fb.flags, f)
 	}
 	return fb
 }
 
 func (fb *FlagBuilder) AddOutputFlag() *FlagBuilder {
-	fb.flags = append(fb.flags, FlOutput)
+	fb.flags = append(fb.flags, FlOutputOptional)
 	return fb
 }
 

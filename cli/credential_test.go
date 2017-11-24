@@ -36,7 +36,7 @@ func (m *mockCredentialCreate) PostPrivateCredential(params *v1credentials.PostP
 func TestCreateCredentialPublic(t *testing.T) {
 	boolFinder := func(in string) bool {
 		switch in {
-		case FlPublic.Name:
+		case FlPublicOptional.Name:
 			return true
 		default:
 			return false

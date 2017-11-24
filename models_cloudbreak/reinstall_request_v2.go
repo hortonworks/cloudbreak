@@ -30,6 +30,14 @@ type ReinstallRequestV2 struct {
 	// collection of instance groupst
 	// Unique: true
 	InstanceGroups []*InstanceGroupsV2 `json:"instanceGroups"`
+
+	// kerberos admin password
+	// Max Length: 50
+	// Min Length: 5
+	KerberosPassword string `json:"kerberosPassword,omitempty"`
+
+	// kerberos principal
+	KerberosPrincipal string `json:"kerberosPrincipal,omitempty"`
 }
 
 /* polymorph ReinstallRequestV2 ambariStackDetails false */
@@ -37,6 +45,10 @@ type ReinstallRequestV2 struct {
 /* polymorph ReinstallRequestV2 blueprintName false */
 
 /* polymorph ReinstallRequestV2 instanceGroups false */
+
+/* polymorph ReinstallRequestV2 kerberosPassword false */
+
+/* polymorph ReinstallRequestV2 kerberosPrincipal false */
 
 // Validate validates this reinstall request v2
 func (m *ReinstallRequestV2) Validate(formats strfmt.Registry) error {
@@ -53,6 +65,11 @@ func (m *ReinstallRequestV2) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateInstanceGroups(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateKerberosPassword(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -117,6 +134,23 @@ func (m *ReinstallRequestV2) validateInstanceGroups(formats strfmt.Registry) err
 			}
 		}
 
+	}
+
+	return nil
+}
+
+func (m *ReinstallRequestV2) validateKerberosPassword(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.KerberosPassword) { // not required
+		return nil
+	}
+
+	if err := validate.MinLength("kerberosPassword", "body", string(m.KerberosPassword), 5); err != nil {
+		return err
+	}
+
+	if err := validate.MaxLength("kerberosPassword", "body", string(m.KerberosPassword), 50); err != nil {
+		return err
 	}
 
 	return nil

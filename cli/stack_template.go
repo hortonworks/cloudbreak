@@ -99,19 +99,19 @@ func generateStackTemplateImpl(mode cloud.NetworkMode, stringFinder func(string)
 	}
 
 	nodes := defaultNodes
-	if bpName := stringFinder(FlBlueprintName.Name); len(bpName) != 0 {
-		bpResp := fetchBlueprint(bpName, getBlueprintClient(stringFinder(FlServer.Name), stringFinder(FlUsername.Name), stringFinder(FlPassword.Name)))
+	if bpName := stringFinder(FlBlueprintNameOptional.Name); len(bpName) != 0 {
+		bpResp := fetchBlueprint(bpName, getBlueprintClient(stringFinder(FlServerOptional.Name), stringFinder(FlUsername.Name), stringFinder(FlPassword.Name)))
 		bp, err := base64.StdEncoding.DecodeString(bpResp.AmbariBlueprint)
 		if err != nil {
 			utils.LogErrorAndExit(err)
 		}
 		nodes = getNodesByBlueprint(bp)
-	} else if bpFile := stringFinder(FlBlueprintFile.Name); len(bpFile) != 0 {
+	} else if bpFile := stringFinder(FlBlueprintFileOptional.Name); len(bpFile) != 0 {
 		bp := utils.ReadFile(bpFile)
 		nodes = getNodesByBlueprint(bp)
 	}
-	for _, n := range nodes {
-		template.InstanceGroups = append(template.InstanceGroups, convertNodeToInstanceGroup(n))
+	for _, node := range nodes {
+		template.InstanceGroups = append(template.InstanceGroups, convertNodeToInstanceGroup(node))
 	}
 
 	if mode != cloud.EXISTING_NETWORK_EXISTING_SUBNET && mode != cloud.LEGACY_NETWORK {
@@ -182,32 +182,76 @@ func convertNodeToHostGroup(node node) *models_cloudbreak.HostGroupRequest {
 
 func convertNodeToInstanceGroup(node node) *models_cloudbreak.InstanceGroupsV2 {
 	ig := &models_cloudbreak.InstanceGroupsV2{
-		Template: &models_cloudbreak.TemplateV2Request{
-			InstanceType: &(&types.S{S: "____"}).S,
-			VolumeType:   "____",
-			VolumeCount:  1,
-			VolumeSize:   10,
-		},
+		Template:  getDefaultTemplate(),
 		Group:     &node.name,
 		NodeCount: &node.count,
 		Type:      node.groupType,
 		SecurityGroup: &models_cloudbreak.SecurityGroupV2Request{
-			SecurityRules: []*models_cloudbreak.SecurityRuleRequest{
-				getDefaultSecurityRule("22"),
-			},
+			SecurityRules: getDefaultSecurityRules(node),
 		},
-	}
-	if node.groupType == models_cloudbreak.InstanceGroupResponseTypeGATEWAY {
-		ig.SecurityGroup.SecurityRules = append(ig.SecurityGroup.SecurityRules, getDefaultSecurityRule("443"))
-		ig.SecurityGroup.SecurityRules = append(ig.SecurityGroup.SecurityRules, getDefaultSecurityRule("9443"))
 	}
 	return ig
 }
 
-func getDefaultSecurityRule(port string) *models_cloudbreak.SecurityRuleRequest {
-	return &models_cloudbreak.SecurityRuleRequest{
-		Subnet:   &(&types.S{S: "0.0.0.0/0"}).S,
-		Protocol: &(&types.S{S: "tcp"}).S,
-		Ports:    &port,
+func getDefaultTemplate() *models_cloudbreak.TemplateV2Request {
+	return &models_cloudbreak.TemplateV2Request{
+		InstanceType: &(&types.S{S: "____"}).S,
+		VolumeType:   "____",
+		VolumeCount:  1,
+		VolumeSize:   10,
 	}
+}
+
+func getDefaultSecurityRules(node node) []*models_cloudbreak.SecurityRuleRequest {
+	ruleGen := func(port string) *models_cloudbreak.SecurityRuleRequest {
+		return &models_cloudbreak.SecurityRuleRequest{
+			Subnet:   &(&types.S{S: "0.0.0.0/0"}).S,
+			Protocol: &(&types.S{S: "tcp"}).S,
+			Ports:    &port,
+		}
+	}
+	rules := []*models_cloudbreak.SecurityRuleRequest{
+		ruleGen("22"),
+	}
+	if node.groupType == models_cloudbreak.InstanceGroupResponseTypeGATEWAY {
+		rules = append(rules, ruleGen("443"))
+		rules = append(rules, ruleGen("9443"))
+	}
+	return rules
+}
+
+func GenerateReinstallTemplate(c *cli.Context) {
+	checkRequiredFlags(c)
+
+	template := &models_cloudbreak.ReinstallRequestV2{
+		BlueprintName:  &(&types.S{S: c.String(FlBlueprintName.Name)}).S,
+		InstanceGroups: []*models_cloudbreak.InstanceGroupsV2{},
+	}
+
+	bpName := c.String(FlBlueprintNameOptional.Name)
+	bpResp := fetchBlueprint(bpName, getBlueprintClient(c.String(FlServerOptional.Name), c.String(FlUsername.Name), c.String(FlPassword.Name)))
+	bp, err := base64.StdEncoding.DecodeString(bpResp.AmbariBlueprint)
+	if err != nil {
+		utils.LogErrorAndExit(err)
+	}
+
+	for _, node := range getNodesByBlueprint(bp) {
+		ig := &models_cloudbreak.InstanceGroupsV2{
+			Group:        &(&types.S{S: node.name}).S,
+			NodeCount:    &(&types.I32{I: node.count}).I,
+			RecoveryMode: "AUTO",
+			SecurityGroup: &models_cloudbreak.SecurityGroupV2Request{
+				SecurityRules: getDefaultSecurityRules(node),
+			},
+			Template: getDefaultTemplate(),
+			Type:     node.groupType,
+		}
+		template.InstanceGroups = append(template.InstanceGroups, ig)
+	}
+
+	resp, err := json.MarshalIndent(template, "", "\t")
+	if err != nil {
+		utils.LogErrorAndExit(err)
+	}
+	fmt.Printf("%s\n", string(resp))
 }
