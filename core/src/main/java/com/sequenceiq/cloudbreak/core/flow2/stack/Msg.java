@@ -7,6 +7,7 @@ public enum Msg {
     STACK_INFRASTRUCTURE_STARTED("stack.infrastructure.started"),
     STACK_BILLING_STARTED("stack.billing.started"),
     STACK_BILLING_STOPPED("stack.billing.stopped"),
+    STACK_BILLING_TERMINATED("stack.billing.terminated"),
     STACK_INFRASTRUCTURE_STOPPING("stack.infrastructure.stopping"),
     STACK_INFRASTRUCTURE_STOPPED("stack.infrastructure.stopped"),
     STACK_NOTIFICATION_EMAIL("stack.notification.email"),
