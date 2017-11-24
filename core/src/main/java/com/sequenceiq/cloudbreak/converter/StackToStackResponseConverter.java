@@ -186,8 +186,17 @@ public class StackToStackResponseConverter extends AbstractConversionServiceAwar
         try {
             if (source.getCluster() != null) {
                 StackRepoDetails stackRepoDetails = clusterComponentConfigProvider.getHDPRepo(source.getCluster().getId());
-                if (stackRepoDetails != null) {
-                    stackJson.setHdpVersion(stackRepoDetails.getHdpVersion());
+                if (stackRepoDetails != null && stackRepoDetails.getStack() != null) {
+                    for (String key : stackRepoDetails.getStack().keySet()) {
+                        if (!"repoid".equals(key)) {
+                            String[] split = stackRepoDetails.getStack().get(key).split("/");
+                            stackJson.setHdpVersion(split[split.length - 1]);
+                            break;
+                        }
+                    }
+                    if (stackJson.getHdpVersion() == null) {
+                        stackJson.setHdpVersion(stackRepoDetails.getHdpVersion());
+                    }
                 }
 
                 AmbariRepo ambariRepo = clusterComponentConfigProvider.getAmbariRepo(source.getCluster().getId());
