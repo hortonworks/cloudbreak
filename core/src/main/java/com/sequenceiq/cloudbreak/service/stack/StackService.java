@@ -332,32 +332,65 @@ public class StackService {
         stack.setAccount(user.getAccount());
         stack.setGatewayPort(nginxPort);
         setPlatformVariant(stack);
+        String stackName = stack.getName();
         MDCBuilder.buildMdcContext(stack);
         try {
             if (!stack.getStackAuthentication().passwordAuthenticationRequired() && !Strings.isNullOrEmpty(stack.getStackAuthentication().getPublicKey())) {
+                long start = System.currentTimeMillis();
                 rsaPublicKeyValidator.validate(stack.getStackAuthentication().getPublicKey());
+                LOGGER.info("RSA key has been validated in {} ms fot stack {}", System.currentTimeMillis() - start, stackName);
             }
             if (stack.getOrchestrator() != null) {
                 orchestratorRepository.save(stack.getOrchestrator());
             }
             stack.getStackAuthentication().setLoginUserName(SSH_USER_CB);
+
+            long start = System.currentTimeMillis();
             String template = connector.getTemplate(stack);
+            LOGGER.info("Get cluster template took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+
+            start = System.currentTimeMillis();
             savedStack = stackRepository.save(stack);
+            LOGGER.info("Stackrepository save took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+
+            start = System.currentTimeMillis();
             addTemplateForStack(stack, template);
+            LOGGER.info("Save cluster template took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+
+            start = System.currentTimeMillis();
             addCloudbreakDetailsForStack(stack);
+            LOGGER.info("Add Cloudbreak template took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+
             MDCBuilder.buildMdcContext(savedStack);
+
+            start = System.currentTimeMillis();
             instanceGroupRepository.save(savedStack.getInstanceGroups());
+            LOGGER.info("Instance groups saved in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
             if (!BYOS.equals(savedStack.cloudPlatform())) {
+                start = System.currentTimeMillis();
                 SecurityConfig securityConfig = tlsSecurityService.storeSSHKeys();
+                LOGGER.info("Generating SSH keys took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+
+                start = System.currentTimeMillis();
                 securityConfig.setSaltPassword(PasswordUtil.generatePassword());
                 securityConfig.setSaltBootPassword(PasswordUtil.generatePassword());
                 securityConfig.setKnoxMasterSecret(PasswordUtil.generatePassword());
+                LOGGER.info("Generating salt passwords took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+
                 securityConfig.setStack(stack);
+                start = System.currentTimeMillis();
                 securityConfigRepository.save(securityConfig);
+                LOGGER.info("Security config save took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
                 savedStack.setSecurityConfig(securityConfig);
+
+                start = System.currentTimeMillis();
                 imageService.create(savedStack, connector.getPlatformParameters(stack), ambariVersion, hdpVersion, imageCatalog, imageId);
+                LOGGER.info("Image creation took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+
+                start = System.currentTimeMillis();
                 flowManager.triggerProvisioning(savedStack.getId());
+                LOGGER.info("Stack provision triggered in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
             } else {
                 savedStack = stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.PROVISIONED);
                 savedStack.setCreated(new Date().getTime());

@@ -4,6 +4,8 @@ import java.util.Optional;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
@@ -28,6 +30,8 @@ import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @Service
 public class StackCreatorService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(StackCreatorService.class);
 
     @Inject
     private StackDecorator stackDecorator;
@@ -60,12 +64,27 @@ public class StackCreatorService {
     public StackResponse createStack(IdentityUser user, StackRequest stackRequest, boolean publicInAccount) throws Exception {
         stackRequest.setAccount(user.getAccount());
         stackRequest.setOwner(user.getUserId());
+
+        long start = System.currentTimeMillis();
         Stack stack = conversionService.convert(stackRequest, Stack.class);
+        String stackName = stack.getName();
+        LOGGER.info("Stack request converted to stack in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+
         MDCBuilder.buildMdcContext(stack);
+
+        start = System.currentTimeMillis();
         stack = stackSensitiveDataPropagator.propagate(stackRequest.getCredentialSource(), stack, user);
+        LOGGER.info("Stack propagated with sensitive data in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+
+        start = System.currentTimeMillis();
         stack = stackDecorator.decorate(stack, stackRequest, user);
+        LOGGER.info("Stack object has been decorated in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+
         stack.setPublicInAccount(publicInAccount);
+
+        start = System.currentTimeMillis();
         validateAccountPreferences(stack, user);
+        LOGGER.info("Account preferences has been validated in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
         if (stack.getOrchestrator() != null && stack.getOrchestrator().getApiEndpoint() != null) {
             stackService.validateOrchestrator(stack.getOrchestrator());
@@ -73,23 +92,46 @@ public class StackCreatorService {
 
         Blueprint blueprint = null;
         if (stackRequest.getClusterRequest() != null) {
+            start = System.currentTimeMillis();
             StackValidationRequest stackValidationRequest = conversionService.convert(stackRequest, StackValidationRequest.class);
+            LOGGER.info("Stack validation request has been created in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+
+            start = System.currentTimeMillis();
             StackValidation stackValidation = conversionService.convert(stackValidationRequest, StackValidation.class);
+            LOGGER.info("Stack validation object has been created in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+
             blueprint = stackValidation.getBlueprint();
+
+            start = System.currentTimeMillis();
             stackService.validateStack(stackValidation, stackRequest.getClusterRequest().getValidateBlueprint());
+            LOGGER.info("Stack has been validated in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+
             CloudCredential cloudCredential = credentialToCloudCredentialConverter.convert(stack.getCredential());
+
+            start = System.currentTimeMillis();
             fileSystemValidator.validateFileSystem(stackValidationRequest.getPlatform(), cloudCredential, stackValidationRequest.getFileSystem());
+            LOGGER.info("Filesystem has been validated in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+
+            start = System.currentTimeMillis();
             clusterCreationService.validate(stackRequest.getClusterRequest(), cloudCredential, stack, user);
+            LOGGER.info("Cluster has been validated in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
         }
 
+        start = System.currentTimeMillis();
         stack = stackService.create(user, stack, stackRequest.getAmbariVersion(), stackRequest.getHdpVersion(),
             stackRequest.getImageCatalog(), Optional.ofNullable(stackRequest.getImageId()));
+        LOGGER.info("Stack object and its dependencies has been created in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
         if (stackRequest.getClusterRequest() != null) {
+            start = System.currentTimeMillis();
             Cluster cluster = clusterCreationService.prepare(stackRequest.getClusterRequest(), stack, blueprint, user);
+            LOGGER.info("Cluster object and its dependencies has been created in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
             stack.setCluster(cluster);
         }
-        return conversionService.convert(stack, StackResponse.class);
+        start = System.currentTimeMillis();
+        StackResponse response = conversionService.convert(stack, StackResponse.class);
+        LOGGER.info("Stack response has been created in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+        return response;
     }
 
     private void validateAccountPreferences(Stack stack, IdentityUser user) {

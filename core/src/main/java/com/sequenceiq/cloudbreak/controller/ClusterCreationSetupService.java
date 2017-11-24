@@ -112,8 +112,17 @@ public class ClusterCreationSetupService {
     }
 
     public Cluster prepare(ClusterRequest request, Stack stack, Blueprint blueprint, IdentityUser user) throws Exception {
+        String stackName = stack.getName();
+
+        long start = System.currentTimeMillis();
         Cluster cluster = conversionService.convert(request, Cluster.class);
+        LOGGER.info("Cluster conversion took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+
+        start = System.currentTimeMillis();
         cluster = clusterDecorator.decorate(cluster, request, blueprint, user, stack);
+        LOGGER.info("Cluster object decorated in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+
+        start = System.currentTimeMillis();
         List<ClusterComponent> components = new ArrayList<>();
         Set<Component> allComponent = componentConfigProvider.getAllComponentsByStackIdAndType(stack.getId(),
                 Sets.newHashSet(ComponentType.AMBARI_REPO_DETAILS, ComponentType.HDP_REPO_DETAILS));
@@ -126,7 +135,13 @@ public class ClusterCreationSetupService {
         components = addAmbariRepoConfig(stackAmbariRepoConfig, components, request.getAmbariRepoDetailsJson(), cluster);
         components = addHDPRepoConfig(blueprint, stackHdpRepoConfig, components, request, cluster, user, stackImageComponent);
         components = addAmbariDatabaseConfig(components, request.getAmbariDatabaseDetails(), cluster);
-        return clusterService.create(user, stack, cluster, components);
+        LOGGER.info("Cluster components saved in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+
+        start = System.currentTimeMillis();
+        Cluster savedCluster = clusterService.create(user, stack, cluster, components);
+        LOGGER.info("Cluster object creation took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+
+        return savedCluster;
     }
 
     private List<ClusterComponent> addAmbariRepoConfig(Optional<Component> stackAmbariRepoConfig, List<ClusterComponent> components,
