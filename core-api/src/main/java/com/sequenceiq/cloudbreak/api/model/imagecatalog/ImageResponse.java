@@ -1,8 +1,11 @@
 package com.sequenceiq.cloudbreak.api.model.imagecatalog;
 
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
+
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.api.model.JsonEntity;
 
@@ -34,6 +37,7 @@ public class ImageResponse implements JsonEntity {
     private Map<String, Map<String, String>> imageSetsByProvider;
 
     @JsonProperty("stackDetails")
+    @JsonInclude(NON_EMPTY)
     private StackDetailsJson stackDetails;
 
     public String getDate() {
