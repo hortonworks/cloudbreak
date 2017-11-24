@@ -64,7 +64,7 @@ public class StackTerminationService {
         LOGGER.info("Terminate stack result: {}", payload);
         Stack stack = context.getStack();
         terminationService.finalizeTermination(stack.getId(), true);
-        flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_BILLING_STOPPED, BillingStatus.BILLING_STOPPED.name());
+        flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_BILLING_TERMINATED, BillingStatus.BILLING_TERMINATED.name());
         flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_DELETE_COMPLETED, DELETE_COMPLETED.name());
         clusterService.updateClusterStatusByStackId(stack.getId(), DELETE_COMPLETED);
         if (stack.getCluster() != null && stack.getCluster().getEmailNeeded()) {
