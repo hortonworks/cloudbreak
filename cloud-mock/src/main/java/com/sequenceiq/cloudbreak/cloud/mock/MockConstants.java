@@ -1,9 +1,13 @@
 package com.sequenceiq.cloudbreak.cloud.mock;
 
+import org.springframework.stereotype.Service;
+
+import com.sequenceiq.cloudbreak.cloud.CloudConstant;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 
-class MockConstants {
+@Service
+class MockConstants implements CloudConstant {
 
     static final String MOCK = "MOCK";
 
@@ -12,5 +16,15 @@ class MockConstants {
     static final Variant MOCK_VARIANT = Variant.variant(MOCK);
 
     private MockConstants() {
+    }
+
+    @Override
+    public Platform platform() {
+        return MOCK_PLATFORM;
+    }
+
+    @Override
+    public Variant variant() {
+        return MOCK_VARIANT;
     }
 }

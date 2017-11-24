@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.Authenticator;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
+import com.sequenceiq.cloudbreak.cloud.CloudConstant;
 import com.sequenceiq.cloudbreak.cloud.CredentialConnector;
 import com.sequenceiq.cloudbreak.cloud.InstanceConnector;
 import com.sequenceiq.cloudbreak.cloud.MetadataCollector;
@@ -49,6 +50,9 @@ public class BYOSConnector implements CloudConnector {
 
     @Inject
     private BYOSPlatformParameters platformParameters;
+
+    @Inject
+    private BYOSConstants byosConstants;
 
     @Override
     public Authenticator authentication() {
@@ -93,6 +97,11 @@ public class BYOSConnector implements CloudConnector {
     @Override
     public PlatformResources platformResources() {
         return byosPlatformResources;
+    }
+
+    @Override
+    public CloudConstant cloudConstant() {
+        return byosConstants;
     }
 
     @Override

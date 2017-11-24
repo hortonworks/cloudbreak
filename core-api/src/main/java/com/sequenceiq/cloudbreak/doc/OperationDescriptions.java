@@ -177,6 +177,7 @@ public class OperationDescriptions {
     public static class AccountPreferencesDescription {
         public static final String GET_PRIVATE = "retrieve account preferences for admin user";
         public static final String IS_PLATFORM_SELECTION_DISABLED = "is platform selection disabled";
+        public static final String PLATFORM_ENABLEMENT = "is platform selection enabled";
         public static final String PUT_PRIVATE = "update account preferences of admin user";
         public static final String POST_PRIVATE = "post account preferences of admin user";
         public static final String VALIDATE = "validate account preferences of all stacks";

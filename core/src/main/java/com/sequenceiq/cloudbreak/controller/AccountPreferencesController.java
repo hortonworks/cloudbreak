@@ -60,6 +60,11 @@ public class AccountPreferencesController implements AccountPreferencesEndpoint 
     }
 
     @Override
+    public Map<String, Boolean> platformEnablement() {
+        return service.platformEnablement();
+    }
+
+    @Override
     public Response validate() {
         IdentityUser user = authenticatedUserService.getCbUser();
         if (user.getRoles().contains(IdentityUserRole.ADMIN)) {

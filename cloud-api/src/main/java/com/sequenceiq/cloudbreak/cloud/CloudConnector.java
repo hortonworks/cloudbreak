@@ -72,4 +72,11 @@ public interface CloudConnector extends CloudPlatformAware {
      */
     PlatformResources platformResources();
 
+    /**
+     * Access to the {@link CloudConstant} object.
+     *
+     * @return the {@link CloudConstant} object
+     */
+    CloudConstant cloudConstant();
+
 }

@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.Authenticator;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
+import com.sequenceiq.cloudbreak.cloud.CloudConstant;
 import com.sequenceiq.cloudbreak.cloud.CredentialConnector;
 import com.sequenceiq.cloudbreak.cloud.InstanceConnector;
 import com.sequenceiq.cloudbreak.cloud.MetadataCollector;
@@ -53,6 +54,9 @@ public class AwsConnector implements CloudConnector {
     @Inject
     private AwsAuthenticator awsAuthenticator;
 
+    @Inject
+    private AwsConstants awsConstants;
+
     @Override
     public Platform platform() {
         return AwsConstants.AWS_PLATFORM;
@@ -91,6 +95,11 @@ public class AwsConnector implements CloudConnector {
     @Override
     public PlatformResources platformResources() {
         return awsPlatformResources;
+    }
+
+    @Override
+    public CloudConstant cloudConstant() {
+        return awsConstants;
     }
 
     @Override
