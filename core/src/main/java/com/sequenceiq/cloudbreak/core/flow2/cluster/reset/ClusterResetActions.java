@@ -80,6 +80,7 @@ public class ClusterResetActions {
         return new AbstractClusterResetAction<StartAmbariSuccess>(StartAmbariSuccess.class) {
             @Override
             protected void doExecute(ClusterViewContext context, StartAmbariSuccess payload, Map<Object, Object> variables) throws Exception {
+                clusterResetService.handleResetClusterFinished(context.getClusterView());
                 sendEvent(context);
             }
 

@@ -20,17 +20,20 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -76,6 +79,7 @@ import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.StackStatus;
 import com.sequenceiq.cloudbreak.domain.StopRestrictionReason;
@@ -662,13 +666,43 @@ public class AmbariClusterService implements ClusterService {
     }
 
     @Override
-    public Cluster recreate(Long stackId, Long blueprintId, Set<HostGroup> hostGroups, boolean validateBlueprint, StackRepoDetails stackRepoDetails) {
+    public void cleanupKerberosCredential(Long clusterId) {
+        cleanupKerberosCredential(clusterRepository.findById(clusterId));
+    }
+
+    @Override
+    public void cleanupKerberosCredential(Cluster cluster) {
+        if (cluster.isSecure() && cluster.getKerberosConfig() != null) {
+            KerberosConfig kerberosConfig = cluster.getKerberosConfig();
+            kerberosConfig.setKerberosPassword(null);
+            kerberosConfig.setKerberosPrincipal(null);
+
+            kerberosConfigRepository.save(kerberosConfig);
+        }
+    }
+
+    @Override
+    public Cluster recreate(Long stackId, Long blueprintId, Set<HostGroup> hostGroups, boolean validateBlueprint, StackRepoDetails stackRepoDetails,
+            String kerberosPassword, String kerberosPrincipal) {
         if (blueprintId == null || hostGroups == null) {
             throw new BadRequestException("Blueprint id and hostGroup assignments can not be null.");
         }
-        Blueprint blueprint = blueprintService.get(blueprintId);
         Stack stack = stackService.getByIdWithLists(stackId);
         Cluster cluster = getCluster(stack);
+        if (cluster != null && stack.getCluster().isSecure()) {
+            List<String> missing = Stream.of(Pair.of("password", kerberosPassword), Pair.of("principal", kerberosPrincipal))
+                    .filter(p -> !StringUtils.hasLength(p.getRight()))
+                    .map(Pair::getLeft).collect(Collectors.toList());
+            if (!missing.isEmpty()) {
+                throw new BadRequestException(String.format("Missing Kerberos credential detail(s): %s", String.join(", ", missing)));
+            }
+            KerberosConfig kerberosConfig = cluster.getKerberosConfig();
+            kerberosConfig.setKerberosPassword(kerberosPassword);
+            kerberosConfig.setKerberosPrincipal(kerberosPrincipal);
+
+            kerberosConfigRepository.save(kerberosConfig);
+        }
+        Blueprint blueprint = blueprintService.get(blueprintId);
         AmbariDatabase ambariDatabase = clusterComponentConfigProvider.getAmbariDatabase(cluster.getId());
         if (ambariDatabase != null && !DatabaseVendor.EMBEDDED.value().equals(ambariDatabase.getVendor())) {
             throw new BadRequestException("Ambari doesn't support resetting external DB automatically. To reset Ambari Server schema you must first drop "

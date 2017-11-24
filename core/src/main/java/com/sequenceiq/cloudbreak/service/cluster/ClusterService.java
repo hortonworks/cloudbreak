@@ -55,7 +55,8 @@ public interface ClusterService {
 
     Cluster updateClusterMetadata(Long stackId);
 
-    Cluster recreate(Long stackId, Long blueprintId, Set<HostGroup> hostGroups, boolean validateBlueprint, StackRepoDetails stackRepoDetails);
+    Cluster recreate(Long stackId, Long blueprintId, Set<HostGroup> hostGroups, boolean validateBlueprint, StackRepoDetails stackRepoDetails,
+            String kerberosPassword, String kerberosPrincipal);
 
     void updateUserNamePassword(Long stackId, UserNamePasswordJson userNamePasswordJson);
 
@@ -72,4 +73,8 @@ public interface ClusterService {
     void failureReport(Long stackId, List<String> failedNodes) throws CloudbreakSecuritySetupException;
 
     void repairCluster(Long stackId, List<String> hostGroups, boolean removeOnly);
+
+    void cleanupKerberosCredential(Long clusterId);
+
+    void cleanupKerberosCredential(Cluster cluster);
 }

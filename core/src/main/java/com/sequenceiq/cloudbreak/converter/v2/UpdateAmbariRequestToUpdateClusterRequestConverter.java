@@ -27,6 +27,8 @@ public class UpdateAmbariRequestToUpdateClusterRequestConverter extends Abstract
     public UpdateClusterJson convert(ReinstallRequestV2 source) {
         UpdateClusterJson updateStackJson = new UpdateClusterJson();
         updateStackJson.setValidateBlueprint(true);
+        updateStackJson.setKerberosPassword(source.getKerberosPassword());
+        updateStackJson.setKerberosPrincipal(source.getKerberosPrincipal());
         Blueprint blueprint = blueprintRepository.findOneByName(source.getBlueprintName(), source.getAccount());
         if (blueprint != null) {
             updateStackJson.setBlueprintId(blueprint.getId());

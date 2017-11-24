@@ -4,12 +4,13 @@ import java.util.Set;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.api.model.v2.InstanceGroupV2Request;
-import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -18,7 +19,7 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ReinstallRequestV2 implements JsonEntity {
 
-    @ApiModelProperty(ModelDescriptions.StackModelDescription.INSTANCE_GROUPS)
+    @ApiModelProperty(StackModelDescription.INSTANCE_GROUPS)
     private Set<InstanceGroupV2Request> instanceGroups;
 
     @Valid
@@ -28,6 +29,13 @@ public class ReinstallRequestV2 implements JsonEntity {
     @NotNull
     @ApiModelProperty(ClusterModelDescription.BLUEPRINT_NAME)
     private String blueprintName;
+
+    @ApiModelProperty(StackModelDescription.KERBEROS_PASSWORD)
+    @Size(max = 50, min = 5, message = "The length of the Kerberos password has to be in range of 5 to 50")
+    private String kerberosPassword;
+
+    @ApiModelProperty(StackModelDescription.KERBEROS_PRINCIPAL)
+    private String kerberosPrincipal;
 
     private String account;
 
@@ -55,6 +63,22 @@ public class ReinstallRequestV2 implements JsonEntity {
 
     public void setBlueprintName(String blueprintName) {
         this.blueprintName = blueprintName;
+    }
+
+    public String getKerberosPassword() {
+        return kerberosPassword;
+    }
+
+    public void setKerberosPassword(String kerberosPassword) {
+        this.kerberosPassword = kerberosPassword;
+    }
+
+    public String getKerberosPrincipal() {
+        return kerberosPrincipal;
+    }
+
+    public void setKerberosPrincipal(String kerberosPrincipal) {
+        this.kerberosPrincipal = kerberosPrincipal;
     }
 
     @JsonIgnore
