@@ -184,21 +184,32 @@ public class AmbariClusterService implements ClusterService {
     @Transactional(TxType.NEVER)
     public Cluster create(IdentityUser user, Stack stack, Cluster cluster, List<ClusterComponent> components) {
         LOGGER.info("Cluster requested [BlueprintId: {}]", cluster.getBlueprint().getId());
+        String stackName = stack.getName();
         if (stack.getCluster() != null) {
             throw new BadRequestException(String.format("A cluster is already created on this stack! [cluster: '%s']", stack.getCluster().getName()));
         }
+        long start = System.currentTimeMillis();
         if (clusterRepository.findByNameInAccount(cluster.getName(), user.getAccount()) != null) {
             throw new DuplicateKeyValueException(APIResourceType.CLUSTER, cluster.getName());
         }
+        LOGGER.info("Cluster name collision check took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+
         if (Status.CREATE_FAILED.equals(stack.getStatus())) {
             throw new BadRequestException("Stack creation failed, cannot create cluster.");
         }
+
+        start = System.currentTimeMillis();
         for (HostGroup hostGroup : cluster.getHostGroups()) {
             constraintRepository.save(hostGroup.getConstraint());
         }
+        LOGGER.info("Host group constrainst saved in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+
+        start = System.currentTimeMillis();
         if (cluster.getFileSystem() != null) {
             fileSystemRepository.save(cluster.getFileSystem());
         }
+        LOGGER.info("Filesystem config saved in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+
         if (cluster.getKerberosConfig() != null) {
             kerberosConfigRepository.save(cluster.getKerberosConfig());
         }
@@ -206,9 +217,16 @@ public class AmbariClusterService implements ClusterService {
         cluster.setOwner(user.getUserId());
         cluster.setAccount(user.getAccount());
         stack.setCluster(cluster);
+
+        start = System.currentTimeMillis();
         generateSignKeys(cluster.getGateway());
+        LOGGER.info("Sign key generated in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+
         try {
+            start = System.currentTimeMillis();
             cluster = clusterRepository.save(cluster);
+            LOGGER.info("Cluster object saved in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+
             clusterComponentConfigProvider.store(components, cluster);
         } catch (DataIntegrityViolationException ex) {
             String msg = String.format("Error with resource [%s], error: [%s]", APIResourceType.CLUSTER, getProperSqlErrorMessage(ex));
