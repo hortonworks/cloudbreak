@@ -109,7 +109,7 @@ cb:
 
   platform.default:
     variants: OPENSTACK:HEAT
-    regions: AWS:eu-west-1,AZURE:North Europe,GCP:europe-west1
+    regions: AWS:eu-west-1,AZURE:North Europe,GCP:europe-west1,YARN:default
 
   gcp:
     hostkey.verify: false

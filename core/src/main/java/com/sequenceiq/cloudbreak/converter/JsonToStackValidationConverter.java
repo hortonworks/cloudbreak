@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.converter;
 
-import static com.sequenceiq.cloudbreak.common.type.CloudConstants.BYOS;
-
 import java.util.HashSet;
 import java.util.Set;
 
@@ -16,7 +14,10 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.model.HostGroupRequest;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupRequest;
 import com.sequenceiq.cloudbreak.api.model.NetworkRequest;
+import com.sequenceiq.cloudbreak.api.model.SpecialParameters;
 import com.sequenceiq.cloudbreak.api.model.StackValidationRequest;
+import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
+import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Constraint;
@@ -28,6 +29,7 @@ import com.sequenceiq.cloudbreak.domain.StackValidation;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.network.NetworkService;
+import com.sequenceiq.cloudbreak.service.stack.CloudParameterCache;
 
 @Component
 public class JsonToStackValidationConverter extends AbstractConversionServiceAwareConverter<StackValidationRequest, StackValidation> {
@@ -44,6 +46,9 @@ public class JsonToStackValidationConverter extends AbstractConversionServiceAwa
     @Inject
     @Qualifier("conversionService")
     private ConversionService conversionService;
+
+    @Inject
+    private CloudParameterCache cloudParameterCache;
 
     @Override
     public StackValidation convert(StackValidationRequest stackValidationRequest) {
@@ -73,13 +78,15 @@ public class JsonToStackValidationConverter extends AbstractConversionServiceAwa
     }
 
     private void validateNetwork(Long networkId, NetworkRequest networkRequest, StackValidation stackValidation) {
+        SpecialParameters specialParameters =
+                cloudParameterCache.getPlatformParameters().get(Platform.platform(stackValidation.getCredential().cloudPlatform())).specialParameters();
         if (networkId != null) {
             Network network = networkService.get(networkId);
             stackValidation.setNetwork(network);
         } else if (networkRequest != null) {
             Network network = conversionService.convert(networkRequest, Network.class);
             stackValidation.setNetwork(network);
-        } else if (!BYOS.equals(stackValidation.getCredential().cloudPlatform())) {
+        } else if (specialParameters.getSpecialParameters().get(PlatformParametersConsts.NETWORK_IS_MANDATORY)) {
             throw new BadRequestException("Network is not configured for the validation request!");
         }
     }

@@ -29,7 +29,6 @@ import org.springframework.stereotype.Service;
 
 import com.google.api.client.util.Lists;
 import com.google.common.base.Strings;
-import com.sequenceiq.cloudbreak.api.model.SpecialParameters;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.gcp.model.MachineDefinitionView;
 import com.sequenceiq.cloudbreak.cloud.gcp.model.MachineDefinitionWrapper;
@@ -324,11 +323,6 @@ public class GcpPlatformParameters implements PlatformParameters {
     @Override
     public VmRecommendations recommendedVms() {
         return vmRecommendations;
-    }
-
-    @Override
-    public SpecialParameters specialParameters() {
-        return new SpecialParameters(Collections.emptyMap());
     }
 
     private VmType defaultVirtualMachine() {

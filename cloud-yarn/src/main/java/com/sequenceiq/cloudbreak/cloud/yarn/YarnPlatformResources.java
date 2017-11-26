@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.yarn;
 
+import java.util.Collections;
 import java.util.Map;
 
 import org.springframework.stereotype.Service;
@@ -19,36 +20,36 @@ import com.sequenceiq.cloudbreak.cloud.model.Region;
 public class YarnPlatformResources implements PlatformResources {
     @Override
     public CloudNetworks networks(CloudCredential cloudCredential, Region region, Map<String, String> filters) throws Exception {
-        return null;
+        return new CloudNetworks();
     }
 
     @Override
     public CloudSshKeys sshKeys(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
-        return null;
+        return new CloudSshKeys();
     }
 
     @Override
     public CloudSecurityGroups securityGroups(CloudCredential cloudCredential, Region region, Map<String, String> filters) throws Exception {
-        return null;
+        return new CloudSecurityGroups();
     }
 
     @Override
     public CloudRegions regions(CloudCredential cloudCredential, Region region, Map<String, String> filters) throws Exception {
-        return null;
+        return new CloudRegions(Collections.emptyMap(), Collections.emptyMap(), "");
     }
 
     @Override
     public CloudVmTypes virtualMachines(CloudCredential cloudCredential, Region region, Map<String, String> filters) throws Exception {
-        return null;
+        return new CloudVmTypes();
     }
 
     @Override
     public CloudGateWays gateways(CloudCredential cloudCredential, Region region, Map<String, String> filters) throws Exception {
-        return null;
+        return new CloudGateWays();
     }
 
     @Override
     public CloudIpPools publicIpPool(CloudCredential cloudCredential, Region region, Map<String, String> filters) throws Exception {
-        return null;
+        return new CloudIpPools();
     }
 }

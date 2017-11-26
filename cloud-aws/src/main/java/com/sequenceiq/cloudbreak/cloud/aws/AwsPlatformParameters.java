@@ -33,7 +33,6 @@ import org.springframework.stereotype.Service;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.api.model.InstanceProfileStrategy;
-import com.sequenceiq.cloudbreak.api.model.SpecialParameters;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZones;
@@ -338,11 +337,6 @@ public class AwsPlatformParameters implements PlatformParameters {
     @Override
     public String platforName() {
         return AwsConstants.AWS_PLATFORM.value();
-    }
-
-    @Override
-    public SpecialParameters specialParameters() {
-        return new SpecialParameters(Collections.emptyMap());
     }
 
     public enum AwsDiskType {
