@@ -32,7 +32,6 @@ import org.springframework.stereotype.Service;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.api.model.ArmAttachedStorageOption;
-import com.sequenceiq.cloudbreak.api.model.SpecialParameters;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
@@ -348,10 +347,5 @@ public class AzurePlatformParameters implements PlatformParameters {
             LOGGER.error("Cannot initialize Virtual machine recommendations for Azure", e);
         }
         return result;
-    }
-
-    @Override
-    public SpecialParameters specialParameters() {
-        return new SpecialParameters(Collections.emptyMap());
     }
 }

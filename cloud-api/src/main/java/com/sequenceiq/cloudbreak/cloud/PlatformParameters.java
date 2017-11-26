@@ -124,7 +124,12 @@ public interface PlatformParameters {
 
     String platforName();
 
-    SpecialParameters specialParameters();
+    default SpecialParameters specialParameters() {
+        Map<String, Boolean> specialParameters = Maps.newHashMap();
+        specialParameters.put(PlatformParametersConsts.CUSTOM_INSTANCETYPE, Boolean.FALSE);
+        specialParameters.put(PlatformParametersConsts.NETWORK_IS_MANDATORY, Boolean.TRUE);
+        return new SpecialParameters(specialParameters);
+    }
 
     default Map<String, InstanceGroupParameterResponse> collectInstanceGroupParameters(Set<InstanceGroupParameterRequest> instanceGroupParameterRequest) {
         return new HashMap<>();

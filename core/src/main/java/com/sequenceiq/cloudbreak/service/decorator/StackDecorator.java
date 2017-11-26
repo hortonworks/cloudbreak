@@ -10,6 +10,7 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.BooleanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -21,6 +22,8 @@ import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.model.AdjustmentType;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.model.StackRequest;
+import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
+import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceGroupParameterRequest;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceGroupParameterResponse;
 import com.sequenceiq.cloudbreak.cloud.model.Orchestrator;
@@ -45,6 +48,7 @@ import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.flex.FlexSubscriptionService;
 import com.sequenceiq.cloudbreak.service.network.NetworkService;
 import com.sequenceiq.cloudbreak.service.securitygroup.SecurityGroupService;
+import com.sequenceiq.cloudbreak.service.stack.CloudParameterCache;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterService;
 import com.sequenceiq.cloudbreak.service.stack.StackParameterService;
 import com.sequenceiq.cloudbreak.service.stack.flow.ConsulUtils.ConsulServers;
@@ -94,6 +98,9 @@ public class StackDecorator {
     @Inject
     private FlexSubscriptionService flexSubscriptionService;
 
+    @Inject
+    private CloudParameterCache cloudParameterCache;
+
     public Stack decorate(Stack subject, StackRequest request, IdentityUser user) {
         prepareCredential(subject, request, user);
         prepareDomainIfDefined(subject, request, user);
@@ -101,9 +108,13 @@ public class StackDecorator {
         String credentialName = request.getCredentialName();
         if (credentialId != null || subject.getCredential() != null || credentialName != null) {
             subject.setCloudPlatform(subject.getCredential().cloudPlatform());
-            if (subject.getInstanceGroups() == null || (request.getNetworkId() == null && subject.getNetwork() == null
-                    && !BYOS.equals(subject.getCredential().cloudPlatform()))) {
-                throw new BadRequestException("Instance groups and network must be specified!");
+            if (subject.getInstanceGroups() == null) {
+                throw new BadRequestException("Instance groups must be specified!");
+            }
+            PlatformParameters pps = cloudParameterCache.getPlatformParameters().get(Platform.platform(subject.cloudPlatform()));
+            Boolean mandatoryNetwork = pps.specialParameters().getSpecialParameters().get(PlatformParametersConsts.NETWORK_IS_MANDATORY);
+            if (BooleanUtils.isTrue(mandatoryNetwork) && request.getNetworkId() == null && subject.getNetwork() == null) {
+                throw new BadRequestException("Network must be specified!");
             }
             prepareNetwork(subject, request.getNetworkId());
             prepareOrchestratorIfNotExist(subject, subject.getCredential());

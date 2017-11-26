@@ -38,12 +38,9 @@ public class JsonToTemplateConverter extends AbstractConversionServiceAwareConve
         }
         template.setDescription(source.getDescription());
         template.setStatus(ResourceStatus.USER_MANAGED);
-        template.setVolumeCount(source.getVolumeCount());
-        template.setVolumeSize(source.getVolumeSize());
+        convertVolume(source, template);
         template.setCloudPlatform(source.getCloudPlatform());
         template.setInstanceType(source.getInstanceType() == null ? "" : source.getInstanceType());
-        String volumeType = source.getVolumeType();
-        template.setVolumeType(volumeType == null ? "HDD" : volumeType);
         Map<String, Object> parameters = source.getParameters() == null ? Maps.newHashMap() : source.getParameters();
         CustomInstanceType customInstanceType = source.getCustomInstanceType();
         if (customInstanceType != null) {
@@ -61,5 +58,14 @@ public class JsonToTemplateConverter extends AbstractConversionServiceAwareConve
             template.setTopology(topologyService.getById(source.getTopologyId()));
         }
         return template;
+    }
+
+    private void convertVolume(TemplateRequest source, Template template) {
+        String volumeType = source.getVolumeType();
+        template.setVolumeType(volumeType == null ? "HDD" : volumeType);
+        Integer volumeCount = source.getVolumeCount();
+        template.setVolumeCount(volumeCount == null ? Integer.valueOf(0) : volumeCount);
+        Integer volumeSize = source.getVolumeSize();
+        template.setVolumeSize(volumeSize == null ? Integer.valueOf(0) : volumeSize);
     }
 }

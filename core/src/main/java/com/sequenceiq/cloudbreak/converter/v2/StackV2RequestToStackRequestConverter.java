@@ -17,7 +17,9 @@ import com.sequenceiq.cloudbreak.api.model.NetworkRequest;
 import com.sequenceiq.cloudbreak.api.model.StackRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.InstanceGroupV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
+import com.sequenceiq.cloudbreak.controller.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
+import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 
 @Component
 public class StackV2RequestToStackRequestConverter extends AbstractConversionServiceAwareConverter<StackV2Request, StackRequest> {
@@ -27,6 +29,12 @@ public class StackV2RequestToStackRequestConverter extends AbstractConversionSer
     @Inject
     @Qualifier("conversionService")
     private ConversionService conversionService;
+
+    @Inject
+    private CredentialService credentialService;
+
+    @Inject
+    private AuthenticatedUserService authenticatedUserService;
 
     @Override
     public StackRequest convert(StackV2Request source) {
@@ -73,6 +81,10 @@ public class StackV2RequestToStackRequestConverter extends AbstractConversionSer
             }
             stackRequest.getClusterRequest().setName(source.getName());
         }
+        if (stackRequest.getAccount() == null) {
+            stackRequest.setAccount(authenticatedUserService.getCbUser().getAccount());
+        }
+        stackRequest.setCloudPlatform(credentialService.get(stackRequest.getCredentialName(), stackRequest.getAccount()).cloudPlatform());
         return stackRequest;
     }
 }

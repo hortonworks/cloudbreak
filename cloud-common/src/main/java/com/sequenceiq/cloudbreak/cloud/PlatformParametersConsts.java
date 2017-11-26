@@ -10,8 +10,9 @@ public class PlatformParametersConsts {
 
     public static final String CUSTOM_INSTANCETYPE_MEMORY = "memory";
 
+    public static final String NETWORK_IS_MANDATORY = "networkIsMandatory";
+
     private PlatformParametersConsts() {
 
     }
-
 }
