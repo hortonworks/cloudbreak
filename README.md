@@ -1,6 +1,7 @@
 # Cloudbreak
 
 [![Build Status][circle-ci-badge]][circle-ci]
+[![Maintainability](https://api.codeclimate.com/v1/badges/566493a63aaaf0c61bd4/maintainability)](https://codeclimate.com/github/hortonworks/cloudbreak/maintainability)
 ![Build Status][docker-io]
 
 [circle-ci-badge]: https://img.shields.io/circleci/project/github/hortonworks/cloudbreak.svg
