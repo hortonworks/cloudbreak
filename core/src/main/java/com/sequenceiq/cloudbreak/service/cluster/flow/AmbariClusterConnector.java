@@ -91,7 +91,7 @@ import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.AzureFileSystemC
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.BlueprintConfigurationEntry;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.BlueprintProcessor;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.ContainerExecutorConfigProvider;
-import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.DruidSupersetConfigProvider;
+import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.SupersetConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.LlapConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.RDSConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.SmartSenseConfigProvider;
@@ -206,7 +206,7 @@ public class AmbariClusterConnector {
     private ZeppelinConfigProvider zeppelinConfigProvider;
 
     @Inject
-    private DruidSupersetConfigProvider druidSupersetConfigProvider;
+    private SupersetConfigProvider supersetConfigProvider;
 
     @Inject
     private LlapConfigProvider llapConfigProvider;
@@ -339,7 +339,7 @@ public class AmbariClusterConnector {
         }
         blueprintText = smartSenseConfigProvider.addToBlueprint(stack, blueprintText);
         blueprintText = zeppelinConfigProvider.addToBlueprint(stack, blueprintText);
-        blueprintText = druidSupersetConfigProvider.addToBlueprint(stack, blueprintText);
+        blueprintText = supersetConfigProvider.addToBlueprint(stack, blueprintText);
         // quick fix: this should be configured by StackAdvisor, but that's not working as of now
         blueprintText = llapConfigProvider.addToBlueprint(stack, blueprintText);
         if (!orchestratorTypeResolver.resolveType(stack.getOrchestrator()).containerOrchestrator()) {

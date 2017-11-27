@@ -44,7 +44,7 @@ public enum ExposedService {
     RANGER("Ranger Admin UI", "RANGER_ADMIN", "", "RANGERUI", "/ranger/"),
     KIBANA("Kibana", "KIBANA", "", "", ""),
     ELASTIC_SEARCH("Elastic Search", "ELASTIC_SEARCH", "", "", ""),
-    DRUID_SUPERSET("Druid Superset", "DRUID_SUPERSET", "", "", "");
+    SUPERSET("Superset", "SUPERSET", "", "", "");
 
     private final String serviceName;
     private final String portName;
