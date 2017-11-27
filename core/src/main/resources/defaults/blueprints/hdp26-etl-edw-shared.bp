@@ -105,7 +105,7 @@
         }
       },
       {
-        "druid-superset": {
+        "superset": {
           "properties_attributes": {},
           "properties": {
             "SECRET_KEY": "123admin123",
@@ -265,7 +265,7 @@
             "provision_action": "INSTALL_ONLY"
           },
           {
-            "name": "DRUID_SUPERSET",
+            "name": "SUPERSET",
             "provision_action": "INSTALL_ONLY"
           }
         ],

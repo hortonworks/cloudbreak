@@ -27,28 +27,32 @@ public class DruidSupersetConfigProvider {
     public String addToBlueprint(Stack stack, String blueprintText) {
         if (blueprintProcessor.componentExistsInBlueprint("DRUID_SUPERSET", blueprintText)) {
             LOGGER.info("Druid Superset exists in Blueprint");
-            List<BlueprintConfigurationEntry> configs = getConfigs(stack.getCluster());
+            List<BlueprintConfigurationEntry> configs = getConfigs(stack.getCluster(), "druid-superset-env");
+            blueprintText = blueprintProcessor.addConfigEntries(blueprintText, configs, false);
+        } else if (blueprintProcessor.componentExistsInBlueprint("SUPERSET", blueprintText)) {
+            LOGGER.info("Superset exists in Blueprint");
+            List<BlueprintConfigurationEntry> configs = getConfigs(stack.getCluster(), "superset-env");
             blueprintText = blueprintProcessor.addConfigEntries(blueprintText, configs, false);
         }
         return blueprintText;
     }
 
-    private List<BlueprintConfigurationEntry> getConfigs(Cluster cluster) {
+    private List<BlueprintConfigurationEntry> getConfigs(Cluster cluster, String configFile) {
         List<BlueprintConfigurationEntry> configs = new ArrayList<>();
         String cbUser;
         cbUser = userDetailsService.getDetails(cluster.getOwner(), UserFilterField.USERID)
                 .getUsername();
 
-        configs.add(new BlueprintConfigurationEntry("druid-superset-env", "superset_admin_password",
+        configs.add(new BlueprintConfigurationEntry(configFile, "superset_admin_password",
                 cluster.getPassword()
         ));
-        configs.add(new BlueprintConfigurationEntry("druid-superset-env", "superset_admin_firstname",
+        configs.add(new BlueprintConfigurationEntry(configFile, "superset_admin_firstname",
                 cluster.getUserName()
         ));
-        configs.add(new BlueprintConfigurationEntry("druid-superset-env", "superset_admin_lastname",
+        configs.add(new BlueprintConfigurationEntry(configFile, "superset_admin_lastname",
                 cluster.getUserName()
         ));
-        configs.add(new BlueprintConfigurationEntry("druid-superset-env", "superset_admin_email",
+        configs.add(new BlueprintConfigurationEntry(configFile, "superset_admin_email",
                 cbUser
         ));
 
