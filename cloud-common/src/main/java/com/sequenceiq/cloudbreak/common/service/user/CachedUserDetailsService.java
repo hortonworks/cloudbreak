@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.common.service.user;
 
+import static org.springframework.ldap.query.LdapQueryBuilder.query;
+
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -20,6 +22,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.ldap.core.AttributesMapper;
+import org.springframework.ldap.core.LdapTemplate;
+import org.springframework.ldap.query.LdapQuery;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -42,14 +47,6 @@ public class CachedUserDetailsService {
 
     private static final String UAA_DATE_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
 
-    private static final String FIELD_SEPARATOR = ";";
-
-    private static final int COMPACT_USER_ID_PART = 0;
-
-    private static final int COMPACT_USERNAME_PART = 1;
-
-    private static final int COMPACT_EMAIL_PART = 2;
-
     @Inject
     @Named("identityServerUrl")
     private String identityServerUrl;
@@ -66,6 +63,9 @@ public class CachedUserDetailsService {
     @Inject
     private IdentityClient identityClient;
 
+    @Inject
+    private LdapTemplate ldapTemplate;
+
     private WebTarget identityWebTarget;
 
     @PostConstruct
@@ -76,12 +76,19 @@ public class CachedUserDetailsService {
 
     @Cacheable(cacheNames = "userCache", key = "#username")
     public IdentityUser getDetails(String username, UserFilterField filterField, String clientSecret) {
-
-        int userEmailSeparator = username.indexOf(FIELD_SEPARATOR);
-        if (userEmailSeparator != -1) {
-            String[] fields = username.split(FIELD_SEPARATOR);
-            return new IdentityUser(fields[COMPACT_USER_ID_PART], fields[COMPACT_USERNAME_PART],
-                fields[COMPACT_USERNAME_PART], Collections.singletonList(IdentityUserRole.ADMIN), "", "", new Date());
+        LdapQuery query = query().base("CN=Users,Dc=ad,DC=seq,DC=com").where("mail").is(username);
+        List<IdentityUser> users = ldapTemplate.search(query, (AttributesMapper<IdentityUser>) attrs ->
+            new IdentityUser(
+                (String) attrs.get("cn").get(),
+                (String) attrs.get("mail").get(),
+                (String) attrs.get("cn").get(),
+                Collections.singletonList(IdentityUserRole.ADMIN),
+                (String) attrs.get("givenName").get(),
+                (String) attrs.get("displayName").get(),
+                new Date())
+        );
+        if (!users.isEmpty()) {
+            return users.get(0);
         }
 
         WebTarget target;
