@@ -707,6 +707,30 @@ func main() {
 			},
 		},
 		{
+			Name:   "list-regions",
+			Usage:  "lists the available regions",
+			Flags:  cb.NewFlagBuilder().AddAuthenticationFlags().AddFlags(cb.FlCredential).AddOutputFlag().Build(),
+			Before: ConfigRead,
+			Action: cb.ListRegions,
+			BashComplete: func(c *cli.Context) {
+				for _, f := range cb.NewFlagBuilder().AddAuthenticationFlags().AddFlags(cb.FlCredential).AddOutputFlag().Build() {
+					printFlagCompletion(f)
+				}
+			},
+		},
+		{
+			Name:   "list-availability-zones",
+			Usage:  "lists the available availabilityzones in a region",
+			Flags:  cb.NewFlagBuilder().AddAuthenticationFlags().AddFlags(cb.FlCredential, cb.FlRegion).AddOutputFlag().Build(),
+			Before: ConfigRead,
+			Action: cb.ListAvailabilityZones,
+			BashComplete: func(c *cli.Context) {
+				for _, f := range cb.NewFlagBuilder().AddAuthenticationFlags().AddFlags(cb.FlCredential, cb.FlRegion).AddOutputFlag().Build() {
+					printFlagCompletion(f)
+				}
+			},
+		},
+		{
 			Name:  "create-ldap",
 			Usage: "create a new LDAP",
 			Flags: cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlLdapServer, cb.FlLdapDomain,

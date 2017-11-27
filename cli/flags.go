@@ -426,6 +426,20 @@ var (
 			Usage: "kerberos principal",
 		},
 	}
+	FlCredential = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "credential",
+			Usage: "name of the credential",
+		},
+	}
+	FlRegion = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "region",
+			Usage: "name of the region",
+		},
+	}
 )
 
 type RequiredFlag struct {
