@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"sort"
 
 	log "github.com/Sirupsen/logrus"
 	cb "github.com/hortonworks/cb-cli/cli"
@@ -73,6 +74,12 @@ func printFlagCompletion(f cli.Flag) {
 	fmt.Printf("--%s\n", f.GetName())
 }
 
+func sortByName(commands []cli.Command) {
+	sort.Slice(commands, func(i, j int) bool {
+		return commands[i].Name < commands[j].Name
+	})
+}
+
 func main() {
 	defer func() {
 		if r := recover(); r != nil {
@@ -122,33 +129,33 @@ func main() {
 			},
 		},
 		{
-			Name:  "create-credential",
-			Usage: "creates a new credential",
+			Name:  "blueprint",
+			Usage: "blueprint related operations",
 			Subcommands: []cli.Command{
 				{
-					Name:  "aws",
-					Usage: "creates a new aws credential",
+					Name:  "create",
+					Usage: "adds a new Ambari blueprint from a file or from a URL",
 					Subcommands: []cli.Command{
 						{
-							Name:   "role-based",
-							Usage:  "creates a new role based aws credential",
+							Name:   "from-url",
+							Flags:  cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlURL).AddAuthenticationFlags().Build(),
 							Before: ConfigRead,
-							Flags:  cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlRoleARN).AddAuthenticationFlags().Build(),
-							Action: cb.CreateAwsCredential,
+							Action: cb.CreateBlueprintFromUrl,
+							Usage:  "creates a blueprint by downloading it from a URL location",
 							BashComplete: func(c *cli.Context) {
-								for _, f := range cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlRoleARN).AddAuthenticationFlags().Build() {
+								for _, f := range cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlURL).AddAuthenticationFlags().Build() {
 									printFlagCompletion(f)
 								}
 							},
 						},
 						{
-							Name:   "key-based",
-							Usage:  "creates a new key based aws credential",
+							Name:   "from-file",
+							Flags:  cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlFile).AddAuthenticationFlags().Build(),
 							Before: ConfigRead,
-							Flags:  cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlAccessKey, cb.FlSecretKey).AddAuthenticationFlags().Build(),
-							Action: cb.CreateAwsCredential,
+							Action: cb.CreateBlueprintFromFile,
+							Usage:  "creates a blueprint by reading it from a local file",
 							BashComplete: func(c *cli.Context) {
-								for _, f := range cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlAccessKey, cb.FlSecretKey).AddAuthenticationFlags().Build() {
+								for _, f := range cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlFile).AddAuthenticationFlags().Build() {
 									printFlagCompletion(f)
 								}
 							},
@@ -156,129 +163,362 @@ func main() {
 					},
 				},
 				{
-					Name:  "azure",
-					Usage: "creates a new azure credential",
-					Subcommands: []cli.Command{
-						{
-							Name:   "app-based",
-							Usage:  "creates a new app based azure credential",
-							Before: ConfigRead,
-							Flags:  cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlSubscriptionId, cb.FlTenantId, cb.FlAppId, cb.FlAppPassword).AddAuthenticationFlags().Build(),
-							Action: cb.CreateAzureCredential,
-							BashComplete: func(c *cli.Context) {
-								for _, f := range cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlSubscriptionId, cb.FlTenantId, cb.FlAppId, cb.FlAppPassword).AddAuthenticationFlags().Build() {
-									printFlagCompletion(f)
-								}
-							},
-						},
-					},
-				},
-				{
-					Name:   "gcp",
-					Usage:  "creates a new gcp credential",
+					Name:   "delete",
+					Usage:  "deletes a blueprint",
+					Flags:  cb.NewFlagBuilder().AddFlags(cb.FlName).AddAuthenticationFlags().Build(),
 					Before: ConfigRead,
-					Flags:  cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlProjectId, cb.FlServiceAccountId, cb.FlServiceAccountPrivateKeyFile).AddAuthenticationFlags().Build(),
-					Action: cb.CreateGcpCredential,
+					Action: cb.DeleteBlueprint,
 					BashComplete: func(c *cli.Context) {
-						for _, f := range cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlProjectId, cb.FlServiceAccountId, cb.FlServiceAccountPrivateKeyFile).AddAuthenticationFlags().Build() {
+						for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlName).AddAuthenticationFlags().Build() {
 							printFlagCompletion(f)
 						}
 					},
 				},
 				{
-					Name:  "openstack",
-					Usage: "creates a new openstack credential",
-					Subcommands: []cli.Command{
-						{
-							Name:   "keystone-v2",
-							Usage:  "creates a new keystone version 2 openstack credential",
-							Before: ConfigRead,
-							Flags:  cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlTenantUser, cb.FlTenantPassword, cb.FlTenantName, cb.FlEndpoint, cb.FlFacingOptional).AddAuthenticationFlags().Build(),
-							Action: cb.CreateOpenstackCredential,
-							BashComplete: func(c *cli.Context) {
-								for _, f := range cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlTenantUser, cb.FlTenantPassword, cb.FlTenantName, cb.FlEndpoint, cb.FlFacingOptional).AddAuthenticationFlags().Build() {
-									printFlagCompletion(f)
-								}
-							},
-						},
-						{
-							Name:   "keystone-v3",
-							Usage:  "creates a new keystone version 3 openstack credential",
-							Before: ConfigRead,
-							Flags: cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlTenantUser, cb.FlTenantPassword,
-								cb.FlUserDomain, cb.FlProjectDomainNameOptional, cb.FlProjectNameOptional, cb.FlDomainNameOptional, cb.FlKeystoneScopeOptional, cb.FlEndpoint, cb.FlFacingOptional).AddAuthenticationFlags().Build(),
-							Action: cb.CreateOpenstackCredential,
-							BashComplete: func(c *cli.Context) {
-								for _, f := range cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlTenantUser, cb.FlTenantPassword,
-									cb.FlUserDomain, cb.FlProjectDomainNameOptional, cb.FlProjectNameOptional, cb.FlDomainNameOptional, cb.FlKeystoneScopeOptional, cb.FlEndpoint, cb.FlFacingOptional).AddAuthenticationFlags().Build() {
-									printFlagCompletion(f)
-								}
-							},
-						},
+					Name:   "describe",
+					Usage:  "describes a blueprint",
+					Before: ConfigRead,
+					Flags:  cb.NewFlagBuilder().AddFlags(cb.FlName).AddAuthenticationFlags().AddOutputFlag().Build(),
+					Action: cb.DescribeBlueprint,
+					BashComplete: func(c *cli.Context) {
+						for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlName).AddAuthenticationFlags().AddOutputFlag().Build() {
+							printFlagCompletion(f)
+						}
+					},
+				},
+				{
+					Name:   "list",
+					Usage:  "lists the available blueprints",
+					Flags:  cb.NewFlagBuilder().AddAuthenticationFlags().AddOutputFlag().Build(),
+					Before: ConfigRead,
+					Action: cb.ListBlueprints,
+					BashComplete: func(c *cli.Context) {
+						for _, f := range cb.NewFlagBuilder().AddAuthenticationFlags().AddOutputFlag().Build() {
+							printFlagCompletion(f)
+						}
 					},
 				},
 			},
 		},
 		{
-			Name:   "describe-credential",
-			Usage:  "describes a credential",
-			Before: ConfigRead,
-			Flags:  cb.NewFlagBuilder().AddFlags(cb.FlName).AddAuthenticationFlags().AddOutputFlag().Build(),
-			Action: cb.DescribeCredential,
-			BashComplete: func(c *cli.Context) {
-				for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlName).AddAuthenticationFlags().AddOutputFlag().Build() {
-					printFlagCompletion(f)
-				}
-			},
-		},
-		{
-			Name:   "list-credentials",
-			Usage:  "lists the credentials",
-			Before: ConfigRead,
-			Flags:  cb.NewFlagBuilder().AddAuthenticationFlags().AddOutputFlag().Build(),
-			Action: cb.ListCredentials,
-			BashComplete: func(c *cli.Context) {
-				for _, f := range cb.NewFlagBuilder().AddAuthenticationFlags().AddOutputFlag().Build() {
-					printFlagCompletion(f)
-				}
-			},
-		},
-		{
-			Name:   "delete-credential",
-			Usage:  "deletes a credential",
-			Flags:  cb.NewFlagBuilder().AddFlags(cb.FlName).AddAuthenticationFlags().Build(),
-			Before: ConfigRead,
-			Action: cb.DeleteCredential,
-			BashComplete: func(c *cli.Context) {
-				for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlName).AddAuthenticationFlags().Build() {
-					printFlagCompletion(f)
-				}
-			},
-		},
-		{
-			Name:  "create-blueprint",
-			Usage: "adds a new Ambari blueprint from a file or from a URL",
+			Name:  "cluster",
+			Usage: "cluster related operations",
 			Subcommands: []cli.Command{
 				{
-					Name:   "from-url",
-					Flags:  cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlURL).AddAuthenticationFlags().Build(),
+					Name:   "change-ambari-password",
+					Usage:  "changes Ambari password",
 					Before: ConfigRead,
-					Action: cb.CreateBlueprintFromUrl,
-					Usage:  "creates a blueprint by downloading it from a URL location",
+					Flags:  cb.NewFlagBuilder().AddFlags(cb.FlName, cb.FlOldPassword, cb.FlNewPassword, cb.FlAmbariUser).AddAuthenticationFlags().AddOutputFlag().Build(),
+					Action: cb.ChangeAmbariPassword,
 					BashComplete: func(c *cli.Context) {
-						for _, f := range cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlURL).AddAuthenticationFlags().Build() {
+						for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlName, cb.FlOldPassword, cb.FlNewPassword, cb.FlAmbariUser).AddAuthenticationFlags().AddOutputFlag().Build() {
 							printFlagCompletion(f)
 						}
 					},
 				},
 				{
-					Name:   "from-file",
-					Flags:  cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlFile).AddAuthenticationFlags().Build(),
-					Before: ConfigRead,
-					Action: cb.CreateBlueprintFromFile,
-					Usage:  "creates a blueprint by reading it from a local file",
+					Name:      "create",
+					Usage:     "creates a new cluster",
+					Flags:     cb.NewFlagBuilder().AddResourceFlagsWithOptionalName().AddFlags(cb.FlInputJson, cb.FlAmbariPasswordOptional, cb.FlWaitOptional).AddAuthenticationFlags().Build(),
+					Before:    ConfigRead,
+					Action:    cb.CreateStack,
+					ArgsUsage: cb.StackTemplateHelp,
 					BashComplete: func(c *cli.Context) {
-						for _, f := range cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlFile).AddAuthenticationFlags().Build() {
+						for _, f := range cb.NewFlagBuilder().AddResourceFlagsWithOptionalName().AddFlags(cb.FlInputJson, cb.FlAmbariPasswordOptional, cb.FlWaitOptional).AddAuthenticationFlags().Build() {
+							printFlagCompletion(f)
+						}
+					},
+				},
+				{
+					Name:   "delete",
+					Usage:  "deletes a cluster",
+					Flags:  cb.NewFlagBuilder().AddFlags(cb.FlName, cb.FlForceOptional, cb.FlWaitOptional).AddAuthenticationFlags().Build(),
+					Before: ConfigRead,
+					Action: cb.DeleteStack,
+					BashComplete: func(c *cli.Context) {
+						for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlName, cb.FlForceOptional, cb.FlWaitOptional).AddAuthenticationFlags().Build() {
+							printFlagCompletion(f)
+						}
+					},
+				},
+				{
+					Name:   "describe",
+					Usage:  "describes a cluster",
+					Before: ConfigRead,
+					Flags:  cb.NewFlagBuilder().AddFlags(cb.FlName).AddAuthenticationFlags().AddOutputFlag().Build(),
+					Action: cb.DescribeStack,
+					BashComplete: func(c *cli.Context) {
+						for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlName).AddAuthenticationFlags().AddOutputFlag().Build() {
+							printFlagCompletion(f)
+						}
+					},
+				},
+				{
+					Name:  "generate-template",
+					Usage: "creates a cluster JSON template",
+					Subcommands: []cli.Command{
+						{
+							Name:  "aws",
+							Usage: "creates an aws cluster JSON template",
+							Subcommands: []cli.Command{
+								{
+									Name:   "new-network",
+									Usage:  "creates an aws cluster JSON template with new network",
+									Before: ConfigRead,
+									Flags:  cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional).AddAuthenticationFlags().Build(),
+									Action: cb.GenerateAwsStackTemplate,
+									BashComplete: func(c *cli.Context) {
+										for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional).AddAuthenticationFlags().Build() {
+											printFlagCompletion(f)
+										}
+									},
+								},
+								{
+									Name:   "existing-network",
+									Usage:  "creates an aws cluster JSON template with existing network",
+									Before: ConfigRead,
+									Flags:  cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional).AddAuthenticationFlags().Build(),
+									Action: cb.GenerateAwsStackTemplate,
+									BashComplete: func(c *cli.Context) {
+										for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional).AddAuthenticationFlags().Build() {
+											printFlagCompletion(f)
+										}
+									},
+								},
+								{
+									Name:   "existing-subnet",
+									Usage:  "creates an aws cluster JSON template with existing subnet",
+									Before: ConfigRead,
+									Flags:  cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional).AddAuthenticationFlags().Build(),
+									Action: cb.GenerateAwsStackTemplate,
+									BashComplete: func(c *cli.Context) {
+										for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional).AddAuthenticationFlags().Build() {
+											printFlagCompletion(f)
+										}
+									},
+								},
+							},
+						},
+						{
+							Name:  "azure",
+							Usage: "creates an azure cluster JSON template",
+							Subcommands: []cli.Command{
+								{
+									Name:   "new-network",
+									Usage:  "creates an azure cluster JSON template with new network",
+									Before: ConfigRead,
+									Flags:  cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional).AddAuthenticationFlags().Build(),
+									Action: cb.GenerateAzureStackTemplate,
+									BashComplete: func(c *cli.Context) {
+										for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional).AddAuthenticationFlags().Build() {
+											printFlagCompletion(f)
+										}
+									},
+								},
+								{
+									Name:   "existing-subnet",
+									Usage:  "creates an azure cluster JSON template with existing subnet",
+									Before: ConfigRead,
+									Flags:  cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional).AddAuthenticationFlags().Build(),
+									Action: cb.GenerateAzureStackTemplate,
+									BashComplete: func(c *cli.Context) {
+										for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional).AddAuthenticationFlags().Build() {
+											printFlagCompletion(f)
+										}
+									},
+								},
+							},
+						},
+						{
+							Name:  "gcp",
+							Usage: "creates an gcp cluster JSON template",
+							Subcommands: []cli.Command{
+								{
+									Name:   "new-network",
+									Usage:  "creates a gcp cluster JSON template with new network",
+									Before: ConfigRead,
+									Flags:  cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional).AddAuthenticationFlags().Build(),
+									Action: cb.GenerateGcpStackTemplate,
+									BashComplete: func(c *cli.Context) {
+										for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional).AddAuthenticationFlags().Build() {
+											printFlagCompletion(f)
+										}
+									},
+								},
+								{
+									Name:   "existing-network",
+									Usage:  "creates a gcp cluster JSON template with existing network",
+									Before: ConfigRead,
+									Flags:  cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional).AddAuthenticationFlags().Build(),
+									Action: cb.GenerateGcpStackTemplate,
+									BashComplete: func(c *cli.Context) {
+										for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional).AddAuthenticationFlags().Build() {
+											printFlagCompletion(f)
+										}
+									},
+								},
+								{
+									Name:   "existing-subnet",
+									Usage:  "creates a gcp cluster JSON template with existing subnet",
+									Before: ConfigRead,
+									Flags:  cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional).AddAuthenticationFlags().Build(),
+									Action: cb.GenerateGcpStackTemplate,
+									BashComplete: func(c *cli.Context) {
+										for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional).AddAuthenticationFlags().Build() {
+											printFlagCompletion(f)
+										}
+									},
+								},
+								{
+									Name:   "legacy-network",
+									Usage:  "creates a gcp cluster JSON template with legacy network",
+									Before: ConfigRead,
+									Flags:  cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional).AddAuthenticationFlags().Build(),
+									Action: cb.GenerateGcpStackTemplate,
+									BashComplete: func(c *cli.Context) {
+										for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional).AddAuthenticationFlags().Build() {
+											printFlagCompletion(f)
+										}
+									},
+								},
+							},
+						},
+						{
+							Name:  "openstack",
+							Usage: "creates an openstack cluster JSON template",
+							Subcommands: []cli.Command{
+								{
+									Name:   "new-network",
+									Usage:  "creates a openstack cluster JSON template with new network",
+									Before: ConfigRead,
+									Flags:  cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional).AddAuthenticationFlags().Build(),
+									Action: cb.GenerateOpenstackStackTemplate,
+									BashComplete: func(c *cli.Context) {
+										for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional).AddAuthenticationFlags().Build() {
+											printFlagCompletion(f)
+										}
+									},
+								},
+								{
+									Name:   "existing-network",
+									Usage:  "creates a openstack cluster JSON template with existing network",
+									Before: ConfigRead,
+									Flags:  cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional).AddAuthenticationFlags().Build(),
+									Action: cb.GenerateOpenstackStackTemplate,
+									BashComplete: func(c *cli.Context) {
+										for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional).AddAuthenticationFlags().Build() {
+											printFlagCompletion(f)
+										}
+									},
+								},
+								{
+									Name:   "existing-subnet",
+									Usage:  "creates a openstack cluster JSON template with existing subnet",
+									Before: ConfigRead,
+									Flags:  cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional).AddAuthenticationFlags().Build(),
+									Action: cb.GenerateOpenstackStackTemplate,
+									BashComplete: func(c *cli.Context) {
+										for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional).AddAuthenticationFlags().Build() {
+											printFlagCompletion(f)
+										}
+									},
+								},
+							},
+						},
+					},
+				},
+				{
+					Name:   "generate-reinstall-template",
+					Usage:  "generates reinstall template",
+					Before: ConfigRead,
+					Flags:  cb.NewFlagBuilder().AddFlags(cb.FlBlueprintName).AddAuthenticationFlags().AddOutputFlag().Build(),
+					Action: cb.GenerateReinstallTemplate,
+					BashComplete: func(c *cli.Context) {
+						for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlBlueprintName).AddAuthenticationFlags().AddOutputFlag().Build() {
+							printFlagCompletion(f)
+						}
+					},
+				},
+				{
+					Name:   "list",
+					Usage:  "lists the running clusters",
+					Flags:  cb.NewFlagBuilder().AddAuthenticationFlags().AddOutputFlag().Build(),
+					Before: ConfigRead,
+					Action: cb.ListStacks,
+					BashComplete: func(c *cli.Context) {
+						for _, f := range cb.NewFlagBuilder().AddAuthenticationFlags().AddOutputFlag().Build() {
+							printFlagCompletion(f)
+						}
+					},
+				},
+				{
+					Name:   "reinstall",
+					Usage:  "reinstalls a cluster",
+					Before: ConfigRead,
+					Flags:  cb.NewFlagBuilder().AddFlags(cb.FlName, cb.FlBlueprintNameOptional, cb.FlKerberosPasswordOptional, cb.FlKerberosPrincipalOptional, cb.FlInputJson, cb.FlWaitOptional).AddAuthenticationFlags().AddOutputFlag().Build(),
+					Action: cb.ReinstallStack,
+					BashComplete: func(c *cli.Context) {
+						for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlName, cb.FlBlueprintNameOptional, cb.FlKerberosPasswordOptional, cb.FlKerberosPrincipalOptional, cb.FlInputJson, cb.FlWaitOptional).AddAuthenticationFlags().AddOutputFlag().Build() {
+							printFlagCompletion(f)
+						}
+					},
+				},
+				{
+					Name:   "repair",
+					Usage:  "repaires a cluster",
+					Before: ConfigRead,
+					Flags:  cb.NewFlagBuilder().AddFlags(cb.FlName, cb.FlWaitOptional).AddAuthenticationFlags().AddOutputFlag().Build(),
+					Action: cb.RepairStack,
+					BashComplete: func(c *cli.Context) {
+						for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlName, cb.FlWaitOptional).AddAuthenticationFlags().AddOutputFlag().Build() {
+							printFlagCompletion(f)
+						}
+					},
+				},
+				{
+					Name:   "scale",
+					Usage:  "scales a cluster",
+					Before: ConfigRead,
+					Flags:  cb.NewFlagBuilder().AddFlags(cb.FlName, cb.FlGroupName, cb.FlDesiredNodeCount, cb.FlWaitOptional).AddAuthenticationFlags().AddOutputFlag().Build(),
+					Action: cb.ScaleStack,
+					BashComplete: func(c *cli.Context) {
+						for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlName, cb.FlGroupName, cb.FlDesiredNodeCount, cb.FlWaitOptional).AddAuthenticationFlags().AddOutputFlag().Build() {
+							printFlagCompletion(f)
+						}
+					},
+				},
+				{
+					Name:   "start",
+					Usage:  "starts a cluster",
+					Before: ConfigRead,
+					Flags:  cb.NewFlagBuilder().AddFlags(cb.FlName, cb.FlWaitOptional).AddAuthenticationFlags().AddOutputFlag().Build(),
+					Action: cb.StartStack,
+					BashComplete: func(c *cli.Context) {
+						for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlName, cb.FlWaitOptional).AddAuthenticationFlags().AddOutputFlag().Build() {
+							printFlagCompletion(f)
+						}
+					},
+				},
+				{
+					Name:   "stop",
+					Usage:  "stops a cluster",
+					Before: ConfigRead,
+					Flags:  cb.NewFlagBuilder().AddFlags(cb.FlName, cb.FlWaitOptional).AddAuthenticationFlags().AddOutputFlag().Build(),
+					Action: cb.StopStack,
+					BashComplete: func(c *cli.Context) {
+						for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlName, cb.FlWaitOptional).AddAuthenticationFlags().AddOutputFlag().Build() {
+							printFlagCompletion(f)
+						}
+					},
+				},
+				{
+					Name:   "sync",
+					Usage:  "synchronizes a cluster",
+					Before: ConfigRead,
+					Flags:  cb.NewFlagBuilder().AddFlags(cb.FlName).AddAuthenticationFlags().AddOutputFlag().Build(),
+					Action: cb.SyncStack,
+					BashComplete: func(c *cli.Context) {
+						for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlName).AddAuthenticationFlags().AddOutputFlag().Build() {
 							printFlagCompletion(f)
 						}
 					},
@@ -286,384 +526,187 @@ func main() {
 			},
 		},
 		{
-			Name:   "describe-blueprint",
-			Usage:  "describes a blueprint",
-			Before: ConfigRead,
-			Flags:  cb.NewFlagBuilder().AddFlags(cb.FlName).AddAuthenticationFlags().AddOutputFlag().Build(),
-			Action: cb.DescribeBlueprint,
-			BashComplete: func(c *cli.Context) {
-				for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlName).AddAuthenticationFlags().AddOutputFlag().Build() {
-					printFlagCompletion(f)
-				}
-			},
-		},
-		{
-			Name:   "list-blueprints",
-			Usage:  "lists the available blueprints",
-			Flags:  cb.NewFlagBuilder().AddAuthenticationFlags().AddOutputFlag().Build(),
-			Before: ConfigRead,
-			Action: cb.ListBlueprints,
-			BashComplete: func(c *cli.Context) {
-				for _, f := range cb.NewFlagBuilder().AddAuthenticationFlags().AddOutputFlag().Build() {
-					printFlagCompletion(f)
-				}
-			},
-		},
-		{
-			Name:   "delete-blueprint",
-			Usage:  "deletes a blueprint",
-			Flags:  cb.NewFlagBuilder().AddFlags(cb.FlName).AddAuthenticationFlags().Build(),
-			Before: ConfigRead,
-			Action: cb.DeleteBlueprint,
-			BashComplete: func(c *cli.Context) {
-				for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlName).AddAuthenticationFlags().Build() {
-					printFlagCompletion(f)
-				}
-			},
-		},
-		{
-			Name:  "generate-cluster-template",
-			Usage: "creates a cluster JSON template",
+			Name:  "credential",
+			Usage: "credential related operations",
 			Subcommands: []cli.Command{
 				{
-					Name:  "aws",
-					Usage: "creates an aws cluster JSON template",
+					Name:  "create",
+					Usage: "creates a new credential",
 					Subcommands: []cli.Command{
 						{
-							Name:   "new-network",
-							Usage:  "creates an aws cluster JSON template with new network",
+							Name:  "aws",
+							Usage: "creates a new aws credential",
+							Subcommands: []cli.Command{
+								{
+									Name:   "role-based",
+									Usage:  "creates a new role based aws credential",
+									Before: ConfigRead,
+									Flags:  cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlRoleARN).AddAuthenticationFlags().Build(),
+									Action: cb.CreateAwsCredential,
+									BashComplete: func(c *cli.Context) {
+										for _, f := range cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlRoleARN).AddAuthenticationFlags().Build() {
+											printFlagCompletion(f)
+										}
+									},
+								},
+								{
+									Name:   "key-based",
+									Usage:  "creates a new key based aws credential",
+									Before: ConfigRead,
+									Flags:  cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlAccessKey, cb.FlSecretKey).AddAuthenticationFlags().Build(),
+									Action: cb.CreateAwsCredential,
+									BashComplete: func(c *cli.Context) {
+										for _, f := range cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlAccessKey, cb.FlSecretKey).AddAuthenticationFlags().Build() {
+											printFlagCompletion(f)
+										}
+									},
+								},
+							},
+						},
+						{
+							Name:  "azure",
+							Usage: "creates a new azure credential",
+							Subcommands: []cli.Command{
+								{
+									Name:   "app-based",
+									Usage:  "creates a new app based azure credential",
+									Before: ConfigRead,
+									Flags:  cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlSubscriptionId, cb.FlTenantId, cb.FlAppId, cb.FlAppPassword).AddAuthenticationFlags().Build(),
+									Action: cb.CreateAzureCredential,
+									BashComplete: func(c *cli.Context) {
+										for _, f := range cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlSubscriptionId, cb.FlTenantId, cb.FlAppId, cb.FlAppPassword).AddAuthenticationFlags().Build() {
+											printFlagCompletion(f)
+										}
+									},
+								},
+							},
+						},
+						{
+							Name:   "gcp",
+							Usage:  "creates a new gcp credential",
 							Before: ConfigRead,
-							Flags:  cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional).AddAuthenticationFlags().Build(),
-							Action: cb.GenerateAwsStackTemplate,
+							Flags:  cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlProjectId, cb.FlServiceAccountId, cb.FlServiceAccountPrivateKeyFile).AddAuthenticationFlags().Build(),
+							Action: cb.CreateGcpCredential,
 							BashComplete: func(c *cli.Context) {
-								for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional).AddAuthenticationFlags().Build() {
+								for _, f := range cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlProjectId, cb.FlServiceAccountId, cb.FlServiceAccountPrivateKeyFile).AddAuthenticationFlags().Build() {
 									printFlagCompletion(f)
 								}
 							},
 						},
 						{
-							Name:   "existing-network",
-							Usage:  "creates an aws cluster JSON template with existing network",
-							Before: ConfigRead,
-							Flags:  cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional).AddAuthenticationFlags().Build(),
-							Action: cb.GenerateAwsStackTemplate,
-							BashComplete: func(c *cli.Context) {
-								for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional).AddAuthenticationFlags().Build() {
-									printFlagCompletion(f)
-								}
-							},
-						},
-						{
-							Name:   "existing-subnet",
-							Usage:  "creates an aws cluster JSON template with existing subnet",
-							Before: ConfigRead,
-							Flags:  cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional).AddAuthenticationFlags().Build(),
-							Action: cb.GenerateAwsStackTemplate,
-							BashComplete: func(c *cli.Context) {
-								for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional).AddAuthenticationFlags().Build() {
-									printFlagCompletion(f)
-								}
+							Name:  "openstack",
+							Usage: "creates a new openstack credential",
+							Subcommands: []cli.Command{
+								{
+									Name:   "keystone-v2",
+									Usage:  "creates a new keystone version 2 openstack credential",
+									Before: ConfigRead,
+									Flags:  cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlTenantUser, cb.FlTenantPassword, cb.FlTenantName, cb.FlEndpoint, cb.FlFacingOptional).AddAuthenticationFlags().Build(),
+									Action: cb.CreateOpenstackCredential,
+									BashComplete: func(c *cli.Context) {
+										for _, f := range cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlTenantUser, cb.FlTenantPassword, cb.FlTenantName, cb.FlEndpoint, cb.FlFacingOptional).AddAuthenticationFlags().Build() {
+											printFlagCompletion(f)
+										}
+									},
+								},
+								{
+									Name:   "keystone-v3",
+									Usage:  "creates a new keystone version 3 openstack credential",
+									Before: ConfigRead,
+									Flags: cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlTenantUser, cb.FlTenantPassword,
+										cb.FlUserDomain, cb.FlProjectDomainNameOptional, cb.FlProjectNameOptional, cb.FlDomainNameOptional, cb.FlKeystoneScopeOptional, cb.FlEndpoint, cb.FlFacingOptional).AddAuthenticationFlags().Build(),
+									Action: cb.CreateOpenstackCredential,
+									BashComplete: func(c *cli.Context) {
+										for _, f := range cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlTenantUser, cb.FlTenantPassword,
+											cb.FlUserDomain, cb.FlProjectDomainNameOptional, cb.FlProjectNameOptional, cb.FlDomainNameOptional, cb.FlKeystoneScopeOptional, cb.FlEndpoint, cb.FlFacingOptional).AddAuthenticationFlags().Build() {
+											printFlagCompletion(f)
+										}
+									},
+								},
 							},
 						},
 					},
 				},
 				{
-					Name:  "azure",
-					Usage: "creates an azure cluster JSON template",
-					Subcommands: []cli.Command{
-						{
-							Name:   "new-network",
-							Usage:  "creates an azure cluster JSON template with new network",
-							Before: ConfigRead,
-							Flags:  cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional).AddAuthenticationFlags().Build(),
-							Action: cb.GenerateAzureStackTemplate,
-							BashComplete: func(c *cli.Context) {
-								for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional).AddAuthenticationFlags().Build() {
-									printFlagCompletion(f)
-								}
-							},
-						},
-						{
-							Name:   "existing-subnet",
-							Usage:  "creates an azure cluster JSON template with existing subnet",
-							Before: ConfigRead,
-							Flags:  cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional).AddAuthenticationFlags().Build(),
-							Action: cb.GenerateAzureStackTemplate,
-							BashComplete: func(c *cli.Context) {
-								for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional).AddAuthenticationFlags().Build() {
-									printFlagCompletion(f)
-								}
-							},
-						},
+					Name:   "delete",
+					Usage:  "deletes a credential",
+					Flags:  cb.NewFlagBuilder().AddFlags(cb.FlName).AddAuthenticationFlags().Build(),
+					Before: ConfigRead,
+					Action: cb.DeleteCredential,
+					BashComplete: func(c *cli.Context) {
+						for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlName).AddAuthenticationFlags().Build() {
+							printFlagCompletion(f)
+						}
 					},
 				},
 				{
-					Name:  "gcp",
-					Usage: "creates an gcp cluster JSON template",
-					Subcommands: []cli.Command{
-						{
-							Name:   "new-network",
-							Usage:  "creates a gcp cluster JSON template with new network",
-							Before: ConfigRead,
-							Flags:  cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional).AddAuthenticationFlags().Build(),
-							Action: cb.GenerateGcpStackTemplate,
-							BashComplete: func(c *cli.Context) {
-								for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional).AddAuthenticationFlags().Build() {
-									printFlagCompletion(f)
-								}
-							},
-						},
-						{
-							Name:   "existing-network",
-							Usage:  "creates a gcp cluster JSON template with existing network",
-							Before: ConfigRead,
-							Flags:  cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional).AddAuthenticationFlags().Build(),
-							Action: cb.GenerateGcpStackTemplate,
-							BashComplete: func(c *cli.Context) {
-								for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional).AddAuthenticationFlags().Build() {
-									printFlagCompletion(f)
-								}
-							},
-						},
-						{
-							Name:   "existing-subnet",
-							Usage:  "creates a gcp cluster JSON template with existing subnet",
-							Before: ConfigRead,
-							Flags:  cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional).AddAuthenticationFlags().Build(),
-							Action: cb.GenerateGcpStackTemplate,
-							BashComplete: func(c *cli.Context) {
-								for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional).AddAuthenticationFlags().Build() {
-									printFlagCompletion(f)
-								}
-							},
-						},
-						{
-							Name:   "legacy-network",
-							Usage:  "creates a gcp cluster JSON template with legacy network",
-							Before: ConfigRead,
-							Flags:  cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional).AddAuthenticationFlags().Build(),
-							Action: cb.GenerateGcpStackTemplate,
-							BashComplete: func(c *cli.Context) {
-								for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional).AddAuthenticationFlags().Build() {
-									printFlagCompletion(f)
-								}
-							},
-						},
+					Name:   "describe",
+					Usage:  "describes a credential",
+					Before: ConfigRead,
+					Flags:  cb.NewFlagBuilder().AddFlags(cb.FlName).AddAuthenticationFlags().AddOutputFlag().Build(),
+					Action: cb.DescribeCredential,
+					BashComplete: func(c *cli.Context) {
+						for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlName).AddAuthenticationFlags().AddOutputFlag().Build() {
+							printFlagCompletion(f)
+						}
 					},
 				},
 				{
-					Name:  "openstack",
-					Usage: "creates an openstack cluster JSON template",
-					Subcommands: []cli.Command{
-						{
-							Name:   "new-network",
-							Usage:  "creates a openstack cluster JSON template with new network",
-							Before: ConfigRead,
-							Flags:  cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional).AddAuthenticationFlags().Build(),
-							Action: cb.GenerateOpenstackStackTemplate,
-							BashComplete: func(c *cli.Context) {
-								for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional).AddAuthenticationFlags().Build() {
-									printFlagCompletion(f)
-								}
-							},
-						},
-						{
-							Name:   "existing-network",
-							Usage:  "creates a openstack cluster JSON template with existing network",
-							Before: ConfigRead,
-							Flags:  cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional).AddAuthenticationFlags().Build(),
-							Action: cb.GenerateOpenstackStackTemplate,
-							BashComplete: func(c *cli.Context) {
-								for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional).AddAuthenticationFlags().Build() {
-									printFlagCompletion(f)
-								}
-							},
-						},
-						{
-							Name:   "existing-subnet",
-							Usage:  "creates a openstack cluster JSON template with existing subnet",
-							Before: ConfigRead,
-							Flags:  cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional).AddAuthenticationFlags().Build(),
-							Action: cb.GenerateOpenstackStackTemplate,
-							BashComplete: func(c *cli.Context) {
-								for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional).AddAuthenticationFlags().Build() {
-									printFlagCompletion(f)
-								}
-							},
-						},
+					Name:   "list",
+					Usage:  "lists the credentials",
+					Before: ConfigRead,
+					Flags:  cb.NewFlagBuilder().AddAuthenticationFlags().AddOutputFlag().Build(),
+					Action: cb.ListCredentials,
+					BashComplete: func(c *cli.Context) {
+						for _, f := range cb.NewFlagBuilder().AddAuthenticationFlags().AddOutputFlag().Build() {
+							printFlagCompletion(f)
+						}
 					},
 				},
 			},
 		},
 		{
-			Name:      "create-cluster",
-			Usage:     "creates a new cluster",
-			Flags:     cb.NewFlagBuilder().AddResourceFlagsWithOptionalName().AddFlags(cb.FlInputJson, cb.FlAmbariPasswordOptional, cb.FlWaitOptional).AddAuthenticationFlags().Build(),
-			Before:    ConfigRead,
-			Action:    cb.CreateStack,
-			ArgsUsage: cb.StackTemplateHelp,
-			BashComplete: func(c *cli.Context) {
-				for _, f := range cb.NewFlagBuilder().AddResourceFlagsWithOptionalName().AddFlags(cb.FlInputJson, cb.FlAmbariPasswordOptional, cb.FlWaitOptional).AddAuthenticationFlags().Build() {
-					printFlagCompletion(f)
-				}
-			},
-		},
-		{
-			Name:   "describe-cluster",
-			Usage:  "describes a cluster",
-			Before: ConfigRead,
-			Flags:  cb.NewFlagBuilder().AddFlags(cb.FlName).AddAuthenticationFlags().AddOutputFlag().Build(),
-			Action: cb.DescribeStack,
-			BashComplete: func(c *cli.Context) {
-				for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlName).AddAuthenticationFlags().AddOutputFlag().Build() {
-					printFlagCompletion(f)
-				}
-			},
-		},
-		{
-			Name:   "scale-cluster",
-			Usage:  "scales a cluster",
-			Before: ConfigRead,
-			Flags:  cb.NewFlagBuilder().AddFlags(cb.FlName, cb.FlGroupName, cb.FlDesiredNodeCount, cb.FlWaitOptional).AddAuthenticationFlags().AddOutputFlag().Build(),
-			Action: cb.ScaleStack,
-			BashComplete: func(c *cli.Context) {
-				for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlName, cb.FlGroupName, cb.FlDesiredNodeCount, cb.FlWaitOptional).AddAuthenticationFlags().AddOutputFlag().Build() {
-					printFlagCompletion(f)
-				}
-			},
-		},
-		{
-			Name:   "start-cluster",
-			Usage:  "starts a cluster",
-			Before: ConfigRead,
-			Flags:  cb.NewFlagBuilder().AddFlags(cb.FlName, cb.FlWaitOptional).AddAuthenticationFlags().AddOutputFlag().Build(),
-			Action: cb.StartStack,
-			BashComplete: func(c *cli.Context) {
-				for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlName, cb.FlWaitOptional).AddAuthenticationFlags().AddOutputFlag().Build() {
-					printFlagCompletion(f)
-				}
-			},
-		},
-		{
-			Name:   "stop-cluster",
-			Usage:  "stops a cluster",
-			Before: ConfigRead,
-			Flags:  cb.NewFlagBuilder().AddFlags(cb.FlName, cb.FlWaitOptional).AddAuthenticationFlags().AddOutputFlag().Build(),
-			Action: cb.StopStack,
-			BashComplete: func(c *cli.Context) {
-				for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlName, cb.FlWaitOptional).AddAuthenticationFlags().AddOutputFlag().Build() {
-					printFlagCompletion(f)
-				}
-			},
-		},
-		{
-			Name:   "sync-cluster",
-			Usage:  "synchronizes a cluster",
-			Before: ConfigRead,
-			Flags:  cb.NewFlagBuilder().AddFlags(cb.FlName).AddAuthenticationFlags().AddOutputFlag().Build(),
-			Action: cb.SyncStack,
-			BashComplete: func(c *cli.Context) {
-				for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlName).AddAuthenticationFlags().AddOutputFlag().Build() {
-					printFlagCompletion(f)
-				}
-			},
-		},
-		{
-			Name:   "repair-cluster",
-			Usage:  "repaires a cluster",
-			Before: ConfigRead,
-			Flags:  cb.NewFlagBuilder().AddFlags(cb.FlName, cb.FlWaitOptional).AddAuthenticationFlags().AddOutputFlag().Build(),
-			Action: cb.RepairStack,
-			BashComplete: func(c *cli.Context) {
-				for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlName, cb.FlWaitOptional).AddAuthenticationFlags().AddOutputFlag().Build() {
-					printFlagCompletion(f)
-				}
-			},
-		},
-		{
-			Name:   "generate-reinstall-template",
-			Usage:  "generates reinstall template",
-			Before: ConfigRead,
-			Flags:  cb.NewFlagBuilder().AddFlags(cb.FlBlueprintName).AddAuthenticationFlags().AddOutputFlag().Build(),
-			Action: cb.GenerateReinstallTemplate,
-			BashComplete: func(c *cli.Context) {
-				for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlBlueprintName).AddAuthenticationFlags().AddOutputFlag().Build() {
-					printFlagCompletion(f)
-				}
-			},
-		},
-		{
-			Name:   "reinstall-cluster",
-			Usage:  "reinstalls a cluster",
-			Before: ConfigRead,
-			Flags:  cb.NewFlagBuilder().AddFlags(cb.FlName, cb.FlBlueprintNameOptional, cb.FlKerberosPasswordOptional, cb.FlKerberosPrincipalOptional, cb.FlInputJson, cb.FlWaitOptional).AddAuthenticationFlags().AddOutputFlag().Build(),
-			Action: cb.ReinstallStack,
-			BashComplete: func(c *cli.Context) {
-				for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlName, cb.FlBlueprintNameOptional, cb.FlKerberosPasswordOptional, cb.FlKerberosPrincipalOptional, cb.FlInputJson, cb.FlWaitOptional).AddAuthenticationFlags().AddOutputFlag().Build() {
-					printFlagCompletion(f)
-				}
-			},
-		},
-		{
-			Name:   "change-ambari-password",
-			Usage:  "changes Ambari password",
-			Before: ConfigRead,
-			Flags:  cb.NewFlagBuilder().AddFlags(cb.FlName, cb.FlOldPassword, cb.FlNewPassword, cb.FlAmbariUser).AddAuthenticationFlags().AddOutputFlag().Build(),
-			Action: cb.ChangeAmbariPassword,
-			BashComplete: func(c *cli.Context) {
-				for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlName, cb.FlOldPassword, cb.FlNewPassword, cb.FlAmbariUser).AddAuthenticationFlags().AddOutputFlag().Build() {
-					printFlagCompletion(f)
-				}
-			},
-		},
-		{
-			Name:   "list-clusters",
-			Usage:  "lists the running clusters",
-			Flags:  cb.NewFlagBuilder().AddAuthenticationFlags().AddOutputFlag().Build(),
-			Before: ConfigRead,
-			Action: cb.ListStacks,
-			BashComplete: func(c *cli.Context) {
-				for _, f := range cb.NewFlagBuilder().AddAuthenticationFlags().AddOutputFlag().Build() {
-					printFlagCompletion(f)
-				}
-			},
-		},
-		{
-			Name:   "delete-cluster",
-			Usage:  "deletes a cluster",
-			Flags:  cb.NewFlagBuilder().AddFlags(cb.FlName, cb.FlForceOptional, cb.FlWaitOptional).AddAuthenticationFlags().Build(),
-			Before: ConfigRead,
-			Action: cb.DeleteStack,
-			BashComplete: func(c *cli.Context) {
-				for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlName, cb.FlForceOptional, cb.FlWaitOptional).AddAuthenticationFlags().Build() {
-					printFlagCompletion(f)
-				}
-			},
-		},
-		{
-			Name:  "create-recipe",
-			Usage: "adds a new recipe from a file or from a URL",
+			Name:  "ldap",
+			Usage: "ldap related operations",
 			Subcommands: []cli.Command{
 				{
-					Name:   "from-url",
-					Flags:  cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlExecutionType, cb.FlURL).AddAuthenticationFlags().Build(),
+					Name:  "create",
+					Usage: "create a new LDAP",
+					Flags: cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlLdapServer, cb.FlLdapDomain,
+						cb.FlLdapBindDN, cb.FlLdapBindPassword, cb.FlLdapDirectoryType, cb.FlLdapUserSearchBase,
+						cb.FlLdapUserNameAttribute, cb.FlLdapUserObjectClass, cb.FlLdapGroupMemberAttribute,
+						cb.FlLdapGroupNameAttribute, cb.FlLdapGroupObjectClass, cb.FlLdapGroupSearchBase).AddAuthenticationFlags().Build(),
 					Before: ConfigRead,
-					Action: cb.CreateRecipeFromUrl,
-					Usage:  "creates a recipe by downloading it from a URL location",
+					Action: cb.CreateLDAP,
 					BashComplete: func(c *cli.Context) {
-						for _, f := range cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlExecutionType, cb.FlURL).AddAuthenticationFlags().Build() {
+						for _, f := range cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlLdapServer, cb.FlLdapDomain,
+							cb.FlLdapBindDN, cb.FlLdapBindPassword, cb.FlLdapDirectoryType, cb.FlLdapUserSearchBase,
+							cb.FlLdapUserNameAttribute, cb.FlLdapUserObjectClass, cb.FlLdapGroupMemberAttribute,
+							cb.FlLdapGroupNameAttribute, cb.FlLdapGroupObjectClass, cb.FlLdapGroupSearchBase).AddAuthenticationFlags().Build() {
 							printFlagCompletion(f)
 						}
 					},
 				},
 				{
-					Name:   "from-file",
-					Flags:  cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlExecutionType, cb.FlFile).AddAuthenticationFlags().Build(),
+					Name:   "delete",
+					Usage:  "delete an LDAP",
+					Flags:  cb.NewFlagBuilder().AddFlags(cb.FlName).AddOutputFlag().AddAuthenticationFlags().Build(),
 					Before: ConfigRead,
-					Action: cb.CreateRecipeFromFile,
-					Usage:  "creates a recipe by reading it from a local file",
+					Action: cb.DeleteLdap,
 					BashComplete: func(c *cli.Context) {
-						for _, f := range cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlExecutionType, cb.FlFile).AddAuthenticationFlags().Build() {
+						for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlName).AddOutputFlag().AddAuthenticationFlags().Build() {
+							printFlagCompletion(f)
+						}
+					},
+				},
+				{
+					Name:   "list",
+					Usage:  "list the available ldaps",
+					Flags:  cb.NewFlagBuilder().AddOutputFlag().AddAuthenticationFlags().Build(),
+					Before: ConfigRead,
+					Action: cb.ListLdaps,
+					BashComplete: func(c *cli.Context) {
+						for _, f := range cb.NewFlagBuilder().AddOutputFlag().AddAuthenticationFlags().Build() {
 							printFlagCompletion(f)
 						}
 					},
@@ -671,108 +714,115 @@ func main() {
 			},
 		},
 		{
-			Name:   "describe-recipe",
-			Usage:  "describes a recipe",
-			Before: ConfigRead,
-			Flags:  cb.NewFlagBuilder().AddFlags(cb.FlName).AddAuthenticationFlags().AddOutputFlag().Build(),
-			Action: cb.DescribeRecipe,
-			BashComplete: func(c *cli.Context) {
-				for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlName).AddAuthenticationFlags().AddOutputFlag().Build() {
-					printFlagCompletion(f)
-				}
+			Name:  "recipe",
+			Usage: "recipe related operations",
+			Subcommands: []cli.Command{
+				{
+					Name:  "create",
+					Usage: "adds a new recipe from a file or from a URL",
+					Subcommands: []cli.Command{
+						{
+							Name:   "from-url",
+							Flags:  cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlExecutionType, cb.FlURL).AddAuthenticationFlags().Build(),
+							Before: ConfigRead,
+							Action: cb.CreateRecipeFromUrl,
+							Usage:  "creates a recipe by downloading it from a URL location",
+							BashComplete: func(c *cli.Context) {
+								for _, f := range cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlExecutionType, cb.FlURL).AddAuthenticationFlags().Build() {
+									printFlagCompletion(f)
+								}
+							},
+						},
+						{
+							Name:   "from-file",
+							Flags:  cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlExecutionType, cb.FlFile).AddAuthenticationFlags().Build(),
+							Before: ConfigRead,
+							Action: cb.CreateRecipeFromFile,
+							Usage:  "creates a recipe by reading it from a local file",
+							BashComplete: func(c *cli.Context) {
+								for _, f := range cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlExecutionType, cb.FlFile).AddAuthenticationFlags().Build() {
+									printFlagCompletion(f)
+								}
+							},
+						},
+					},
+				},
+				{
+					Name:   "delete",
+					Usage:  "deletes a recipe",
+					Flags:  cb.NewFlagBuilder().AddFlags(cb.FlName).AddOutputFlag().AddAuthenticationFlags().Build(),
+					Before: ConfigRead,
+					Action: cb.DeleteRecipe,
+					BashComplete: func(c *cli.Context) {
+						for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlName).AddOutputFlag().AddAuthenticationFlags().Build() {
+							printFlagCompletion(f)
+						}
+					},
+				},
+				{
+					Name:   "describe",
+					Usage:  "describes a recipe",
+					Before: ConfigRead,
+					Flags:  cb.NewFlagBuilder().AddFlags(cb.FlName).AddAuthenticationFlags().AddOutputFlag().Build(),
+					Action: cb.DescribeRecipe,
+					BashComplete: func(c *cli.Context) {
+						for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlName).AddAuthenticationFlags().AddOutputFlag().Build() {
+							printFlagCompletion(f)
+						}
+					},
+				},
+				{
+					Name:   "list",
+					Usage:  "lists the available recipes",
+					Flags:  cb.NewFlagBuilder().AddAuthenticationFlags().AddOutputFlag().Build(),
+					Before: ConfigRead,
+					Action: cb.ListRecipes,
+					BashComplete: func(c *cli.Context) {
+						for _, f := range cb.NewFlagBuilder().AddAuthenticationFlags().AddOutputFlag().Build() {
+							printFlagCompletion(f)
+						}
+					},
+				},
 			},
 		},
 		{
-			Name:   "list-recipes",
-			Usage:  "lists the available recipes",
-			Flags:  cb.NewFlagBuilder().AddAuthenticationFlags().AddOutputFlag().Build(),
-			Before: ConfigRead,
-			Action: cb.ListRecipes,
-			BashComplete: func(c *cli.Context) {
-				for _, f := range cb.NewFlagBuilder().AddAuthenticationFlags().AddOutputFlag().Build() {
-					printFlagCompletion(f)
-				}
+			Name:  "region",
+			Usage: "cloud provider region related operations",
+			Subcommands: []cli.Command{
+				{
+					Name:   "list",
+					Usage:  "lists the available regions",
+					Flags:  cb.NewFlagBuilder().AddAuthenticationFlags().AddFlags(cb.FlCredential).AddOutputFlag().Build(),
+					Before: ConfigRead,
+					Action: cb.ListRegions,
+					BashComplete: func(c *cli.Context) {
+						for _, f := range cb.NewFlagBuilder().AddAuthenticationFlags().AddFlags(cb.FlCredential).AddOutputFlag().Build() {
+							printFlagCompletion(f)
+						}
+					},
+				},
 			},
 		},
 		{
-			Name:   "delete-recipe",
-			Usage:  "deletes a recipe",
-			Flags:  cb.NewFlagBuilder().AddFlags(cb.FlName).AddOutputFlag().AddAuthenticationFlags().Build(),
-			Before: ConfigRead,
-			Action: cb.DeleteRecipe,
-			BashComplete: func(c *cli.Context) {
-				for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlName).AddOutputFlag().AddAuthenticationFlags().Build() {
-					printFlagCompletion(f)
-				}
-			},
-		},
-		{
-			Name:   "list-regions",
-			Usage:  "lists the available regions",
-			Flags:  cb.NewFlagBuilder().AddAuthenticationFlags().AddFlags(cb.FlCredential).AddOutputFlag().Build(),
-			Before: ConfigRead,
-			Action: cb.ListRegions,
-			BashComplete: func(c *cli.Context) {
-				for _, f := range cb.NewFlagBuilder().AddAuthenticationFlags().AddFlags(cb.FlCredential).AddOutputFlag().Build() {
-					printFlagCompletion(f)
-				}
-			},
-		},
-		{
-			Name:   "list-availability-zones",
-			Usage:  "lists the available availabilityzones in a region",
-			Flags:  cb.NewFlagBuilder().AddAuthenticationFlags().AddFlags(cb.FlCredential, cb.FlRegion).AddOutputFlag().Build(),
-			Before: ConfigRead,
-			Action: cb.ListAvailabilityZones,
-			BashComplete: func(c *cli.Context) {
-				for _, f := range cb.NewFlagBuilder().AddAuthenticationFlags().AddFlags(cb.FlCredential, cb.FlRegion).AddOutputFlag().Build() {
-					printFlagCompletion(f)
-				}
-			},
-		},
-		{
-			Name:  "create-ldap",
-			Usage: "create a new LDAP",
-			Flags: cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlLdapServer, cb.FlLdapDomain,
-				cb.FlLdapBindDN, cb.FlLdapBindPassword, cb.FlLdapDirectoryType, cb.FlLdapUserSearchBase,
-				cb.FlLdapUserNameAttribute, cb.FlLdapUserObjectClass, cb.FlLdapGroupMemberAttribute,
-				cb.FlLdapGroupNameAttribute, cb.FlLdapGroupObjectClass, cb.FlLdapGroupSearchBase).AddAuthenticationFlags().Build(),
-			Before: ConfigRead,
-			Action: cb.CreateLDAP,
-			BashComplete: func(c *cli.Context) {
-				for _, f := range cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlLdapServer, cb.FlLdapDomain,
-					cb.FlLdapBindDN, cb.FlLdapBindPassword, cb.FlLdapDirectoryType, cb.FlLdapUserSearchBase,
-					cb.FlLdapUserNameAttribute, cb.FlLdapUserObjectClass, cb.FlLdapGroupMemberAttribute,
-					cb.FlLdapGroupNameAttribute, cb.FlLdapGroupObjectClass, cb.FlLdapGroupSearchBase).AddAuthenticationFlags().Build() {
-					printFlagCompletion(f)
-				}
-			},
-		},
-		{
-			Name:   "list-ldaps",
-			Usage:  "list the available ldaps",
-			Flags:  cb.NewFlagBuilder().AddOutputFlag().AddAuthenticationFlags().Build(),
-			Before: ConfigRead,
-			Action: cb.ListLdaps,
-			BashComplete: func(c *cli.Context) {
-				for _, f := range cb.NewFlagBuilder().AddOutputFlag().AddAuthenticationFlags().Build() {
-					printFlagCompletion(f)
-				}
-			},
-		},
-		{
-			Name:   "delete-ldap",
-			Usage:  "delete an LDAP",
-			Flags:  cb.NewFlagBuilder().AddFlags(cb.FlName).AddOutputFlag().AddAuthenticationFlags().Build(),
-			Before: ConfigRead,
-			Action: cb.DeleteLdap,
-			BashComplete: func(c *cli.Context) {
-				for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlName).AddOutputFlag().AddAuthenticationFlags().Build() {
-					printFlagCompletion(f)
-				}
+			Name:  "availability-zone",
+			Usage: "cloud provider availability zone operations",
+			Subcommands: []cli.Command{
+				{
+					Name:   "list",
+					Usage:  "lists the available availabilityzones in a region",
+					Flags:  cb.NewFlagBuilder().AddAuthenticationFlags().AddFlags(cb.FlCredential, cb.FlRegion).AddOutputFlag().Build(),
+					Before: ConfigRead,
+					Action: cb.ListAvailabilityZones,
+					BashComplete: func(c *cli.Context) {
+						for _, f := range cb.NewFlagBuilder().AddAuthenticationFlags().AddFlags(cb.FlCredential, cb.FlRegion).AddOutputFlag().Build() {
+							printFlagCompletion(f)
+						}
+					},
+				},
 			},
 		},
 	}
+	sortByName(app.Commands)
 
 	// internal commands
 	app.Commands = append(app.Commands, []cli.Command{
