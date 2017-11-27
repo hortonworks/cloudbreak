@@ -20,6 +20,9 @@ public class RemoteTokenConfig {
     @Value("${cb.client.secret}")
     private String clientSecret;
 
+    @Value("${cb.jwt.signKey}")
+    private String jwtSignKey;
+
     @Inject
     @Named("identityServerUrl")
     private String identityServerUrl;
@@ -29,7 +32,7 @@ public class RemoteTokenConfig {
 
     @Bean
     public ResourceServerTokenServices remoteTokenServices() {
-        return new CachedRemoteTokenService(clientId, clientSecret, identityServerUrl, identityClient);
+        return new CachedRemoteTokenService(clientId, clientSecret, identityServerUrl, jwtSignKey, identityClient);
     }
 
 }
