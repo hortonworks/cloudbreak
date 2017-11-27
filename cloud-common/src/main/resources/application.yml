@@ -47,6 +47,13 @@ cb:
     cert.file: database.crt
     ssl: false
 
+  ldap:
+    url:
+    baseDN:
+    userDN:
+    password:
+    mailAttribute: mail
+
   aws:
     spotinstances.enabled: true
     hostkey.verify: false

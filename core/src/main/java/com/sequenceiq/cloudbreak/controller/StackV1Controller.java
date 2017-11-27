@@ -29,9 +29,6 @@ public class StackV1Controller extends NotificationController implements StackV1
     private StackCreatorService stackCreatorService;
 
     @Autowired
-    private AuthenticatedUserService authenticatedUserService;
-
-    @Autowired
     private StackCommonService stackCommonService;
 
     @Override
