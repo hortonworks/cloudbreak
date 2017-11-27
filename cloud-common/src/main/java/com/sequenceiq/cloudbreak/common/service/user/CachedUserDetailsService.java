@@ -1,9 +1,12 @@
 package com.sequenceiq.cloudbreak.common.service.user;
 
+import static org.springframework.ldap.query.LdapQueryBuilder.query;
+
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -19,6 +22,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.ldap.CommunicationException;
+import org.springframework.ldap.core.AttributesMapper;
+import org.springframework.ldap.core.LdapTemplate;
+import org.springframework.ldap.core.support.LdapContextSource;
+import org.springframework.ldap.query.LdapQuery;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -54,8 +62,14 @@ public class CachedUserDetailsService {
     @Value("${cert.ignorePreValidation}")
     private boolean ignorePreValidation;
 
+    @Value("${cb.ldap.mailAttribute}")
+    private String mailAttribute;
+
     @Inject
     private IdentityClient identityClient;
+
+    @Inject
+    private LdapTemplate ldapTemplate;
 
     private WebTarget identityWebTarget;
 
@@ -67,6 +81,21 @@ public class CachedUserDetailsService {
 
     @Cacheable(cacheNames = "userCache", key = "#username")
     public IdentityUser getDetails(String username, UserFilterField filterField, String clientSecret) {
+        LdapContextSource contextSource = (LdapContextSource) ldapTemplate.getContextSource();
+        if (!contextSource.getUserDn().isEmpty()) {
+            try {
+                IdentityUser user = getIdentityUserFromLdap(username, filterField);
+                if (user != null) {
+                    return user;
+                }
+            } catch (CommunicationException e) {
+                LOGGER.error("Failed to connect to LDAP", e);
+            }
+        }
+        return getIdentityUser(username, filterField, clientSecret);
+    }
+
+    private IdentityUser getIdentityUser(String username, UserFilterField filterField, String clientSecret) {
         WebTarget target;
 
         LOGGER.info("Load user details: {}", username);
@@ -91,6 +120,9 @@ public class CachedUserDetailsService {
             if (UserFilterField.USERNAME.equals(filterField)) {
                 userNode = root.get("resources").get(0);
             }
+            if (userNode == null) {
+                throw new UserDetailsUnavailableException("User details cannot be retrieved from identity server.");
+            }
             for (JsonNode node : userNode.get("groups")) {
                 String group = node.get("display").asText();
                 if (group.startsWith("sequenceiq.account")) {
@@ -108,6 +140,33 @@ public class CachedUserDetailsService {
         } catch (IOException e) {
             throw new UserDetailsUnavailableException("User details cannot be retrieved from identity server.", e);
         }
+    }
+
+    private IdentityUser getIdentityUserFromLdap(String username, UserFilterField filterField) {
+        LdapQuery query;
+        switch (filterField) {
+            case USERNAME:
+                query = query().where(mailAttribute).is(username);
+                break;
+            case USERID:
+                query = query().where(mailAttribute).is(username);
+                break;
+            default:
+                query = query().where(mailAttribute).is(username);
+        }
+        List<IdentityUser> users = ldapTemplate.search(query, (AttributesMapper<IdentityUser>) attrs ->
+            new IdentityUser(
+                (String) attrs.get("cn").get(),
+                (String) attrs.get(mailAttribute).get(),
+                (String) attrs.get("cn").get(),
+                Collections.singletonList(IdentityUserRole.ADMIN),
+                "", "",
+                new Date())
+        );
+        if (!users.isEmpty()) {
+            return users.get(0);
+        }
+        return null;
     }
 
     private IdentityUser createIdentityUser(List<IdentityUserRole> roles, String account, JsonNode userNode) {
