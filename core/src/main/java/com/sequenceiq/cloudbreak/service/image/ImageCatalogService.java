@@ -93,7 +93,13 @@ public class ImageCatalogService {
     }
 
     public Images getImages(String name, String provider) throws CloudbreakImageCatalogException {
-        ImageCatalog imageCatalog = get(name);
+        ImageCatalog imageCatalog = null;
+        try {
+            imageCatalog = get(name);
+        } catch (NotFoundException ignore) {
+
+        }
+
         if (imageCatalog == null) {
             return emptyImages();
         }
@@ -119,6 +125,10 @@ public class ImageCatalogService {
 
     public ImageCatalog create(ImageCatalog imageCatalog) throws CloudbreakImageCatalogException {
         try {
+            if (isEnvDefault(imageCatalog.getImageCatalogName())) {
+                throw new BadRequestException(String
+                        .format("%s cannot be created because it is an environment default image catalog.", imageCatalog.getImageCatalogName()));
+            }
             return imageCatalogRepository.save(imageCatalog);
         } catch (DataIntegrityViolationException ex) {
             String msg = String.format("Error with resource [%s], error: [%s]", APIResourceType.IMAGE_CATALOG, getProperSqlErrorMessage(ex));
@@ -127,6 +137,9 @@ public class ImageCatalogService {
     }
 
     public void delete(String name) {
+        if (isEnvDefault(name)) {
+            throw new BadRequestException(String.format("%s cannot be deleted because it is an environment default image catalog.", name));
+        }
         ImageCatalog imageCatalog = get(name);
         authorizationService.hasWritePermission(imageCatalog);
         imageCatalog.setArchived(true);
@@ -136,15 +149,19 @@ public class ImageCatalogService {
     }
 
     public ImageCatalog get(String name) {
-        IdentityUser user = authenticatedUserService.getCbUser();
-        return imageCatalogRepository.findByName(name, user.getUserId(), user.getAccount());
+        if (isEnvDefault(name)) {
+            return getCloudbreakDefaultImageCatalog();
+        } else {
+            IdentityUser user = authenticatedUserService.getCbUser();
+            return imageCatalogRepository.findByName(name, user.getUserId(), user.getAccount());
+        }
     }
 
     public ImageCatalog setAsDefault(String name) {
 
         removeDefaultFlag();
 
-        if (!CLOUDBREAK_DEFAULT_CATALOG_NAME.equals(name)) {
+        if (!isEnvDefault(name)) {
             ImageCatalog imageCatalog = get(name);
             checkImageCatalog(imageCatalog, name);
 
@@ -152,9 +169,13 @@ public class ImageCatalogService {
 
             setImageCatalogAsDefault(imageCatalog);
 
-            return imageCatalogRepository.save(imageCatalog);
+            return imageCatalog;
         }
         return getCloudbreakDefaultImageCatalog();
+    }
+
+    public boolean isEnvDefault(String name) {
+        return CLOUDBREAK_DEFAULT_CATALOG_NAME.equals(name);
     }
 
     private void setImageCatalogAsDefault(ImageCatalog imageCatalog) {
@@ -298,6 +319,11 @@ public class ImageCatalogService {
     private ImageCatalog getDefaultImageCatalog() {
         IdentityUser user = authenticatedUserService.getCbUser();
         return userProfileService.get(user.getAccount(), user.getUserId()).getImageCatalog();
+    }
+
+    public String getDefaultImageCatalogName() {
+        ImageCatalog imageCatalog = getDefaultImageCatalog();
+        return imageCatalog == null ? null : imageCatalog.getImageCatalogName();
     }
 
     private UserProfile getUserProfile() {

@@ -16,6 +16,11 @@ public class ImageCatalogResponse extends ImageCatalogBase {
     @ApiModelProperty(value = ModelDescriptions.PUBLIC_IN_ACCOUNT, required = true)
     private boolean publicInAccount;
 
+    //CHECKSTYLE:OFF
+    @ApiModelProperty(value = ModelDescriptions.ImageCatalogDescription.DEFAULT, required = true)
+    private boolean isDefault;
+    //CHECKSTYLE:ON
+
     public Long getId() {
         return id;
     }
@@ -32,4 +37,11 @@ public class ImageCatalogResponse extends ImageCatalogBase {
         this.publicInAccount = publicInAccount;
     }
 
+    public boolean isDefault() {
+        return isDefault;
+    }
+
+    public void setDefault(boolean b) {
+        this.isDefault = b;
+    }
 }
