@@ -108,6 +108,9 @@ public class ClusterResponse implements JsonEntity {
     @ApiModelProperty(ClusterModelDescription.CUSTOM_QUEUE)
     private String customQueue;
 
+    @ApiModelProperty(ClusterModelDescription.CREATION_FINISHED)
+    private Long creationFinished;
+
     public String getDescription() {
         return description;
     }
@@ -356,5 +359,13 @@ public class ClusterResponse implements JsonEntity {
 
     public void setExecutorType(ExecutorType executorType) {
         this.executorType = executorType;
+    }
+
+    public Long getCreationFinished() {
+        return creationFinished;
+    }
+
+    public void setCreationFinished(Long creationFinished) {
+        this.creationFinished = creationFinished;
     }
 }
