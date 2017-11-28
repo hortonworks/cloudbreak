@@ -8,26 +8,14 @@ OPENSTACK_ARGS=" --name cli-openstack --tenant-user testuser  --tenant-password 
 AZURE_ARGS="--name cli-azure --subscription-id aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaa --tenant-id aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaa --app-id aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaa --app-password testpassword"
 GCP_ARGS="--name cli-gcp --project-id testprojet --service-account-id testuser@siq-haas.iam.gserviceaccount.com --service-account-private-key-file test.p12"
 
-CB_BIN="/usr/local/bin/cb"
+CB_BIN="cb"
 
 function configure-cb() {
     $CB_BIN configure "$@" $COMMON_ARGS_WO_CLUSTER
 }
 
-function describe-cluster() {
-    $CB_BIN cluster describe "$@"
-}
-
-function start-cluster() {
-    $CB_BIN cluster start "$@"
-}
-
-function stop-cluster() {
-    $CB_BIN cluster stop "$@"
-}
-
-function list-clusters() {
-    $CB_BIN cluster list
+function generate-cluster-template() {
+    $CB_BIN cluster generate-template "$@"
 }
 
 function list-blueprints() {
@@ -45,7 +33,6 @@ function list-blueprints() {
  function describe-blueprint() {
     $CB_BIN blueprint describe --name "$@"
  }
-
 
 function create-credential-aws-key() {
         $CB_BIN credential create aws key-based "$@" $AWS_ARGS_KEY
@@ -82,24 +69,8 @@ function delete-credential() {
         $CB_BIN credential delete --name cli-aws-role
    }
 
-function create-cluster() {
-    $CB_BIN cluster create "$@"
-}
-
-function delete-cluster() {
-    $CB_BIN cluster delete "$@"
-}
-
-function create-recipe-pre-ambari-start-url() {
-    $CB_BIN recipe  create from-url  --name recipe-post-cli --execution-type pre-ambari-start --url ${RECIPE_URL}
-}
-
-function create-recipe-post-ambari-start-url() {
-    $CB_BIN  recipe create from-url  --name recipe-pre-cli --execution-type post-ambari-start --url ${RECIPE_URL}
-}
-
-function create-recipe-post-cluster-install-url() {
-    $CB_BIN  recipe create from-url  --name recipe-pre-cli --execution-type post-cluster-install --url ${RECIPE_URL}
+function create-recipe(){
+    $CB_BIN recipe create "$@"
 }
 
 function list-recipes() {
@@ -107,27 +78,77 @@ function list-recipes() {
 }
 
 function delete-recipe() {
-    $CB_BIN recipe  delete --name recipe-pre-cli
+    $CB_BIN recipe delete "$@"
 }
 
 function describe-recipe() {
-    $CB_BIN  recipe describe --name recipe-pre-cli
+    $CB_BIN  recipe describe "$@"
+}
+
+function create-cluster() {
+    $CB_BIN cluster create "$@"
+}
+
+function start-cluster() {
+    $CB_BIN cluster start "$@"
+}
+
+function stop-cluster() {
+    $CB_BIN cluster stop "$@"
+}
+
+function list-clusters() {
+    $CB_BIN cluster list
+}
+
+function delete-cluster() {
+    $CB_BIN cluster delete "$@"
+}
+
+function describe-cluster() {
+    $CB_BIN cluster describe "$@"
 }
 
 function scale-cluster() {
-    $CB_BIN  cluster  scale "$@"
+    $CB_BIN  cluster scale "$@"
 }
 
 function repair-cluster() {
-    $CB_BIN  cluster  repair --name ${CLUSTER_NAME}
+    $CB_BIN  cluster repair "$@"
 }
 
 function sync-cluster() {
-    $CB_BIN cluster  sync --nanme ${CLUSTER_NAME}
-
+    $CB_BIN cluster sync "$@"
 }
 
 function change-ambari-password() {
-    $CB_BIN  change-ambari-password --name ${CLUSTER_NAME} --ambari-user admin --old-password admin --new-password adminnew
+    $CB_BIN  cluster change-ambari-password "$@"
+}
 
+function reinstall-cluster() {
+    $CB_BIN cluster reinstall "$@"
+}
+
+function generate-reinstall-template() {
+    $CB_BIN cluster generate-reinstall-template "$@"
+}
+
+function list-ldaps() {
+    $CB_BIN  ldap list "$@"
+}
+
+function create-ldap() {
+    $CB_BIN  ldap create "$@"
+}
+
+function delete-ldap() {
+    $CB_BIN  ldap delete "$@"
+}
+
+function availability-zone-list() {
+    $CB_BIN  availability-zone list "$@"
+}
+
+function region-list() {
+    $CB_BIN  region list "$@"
 }

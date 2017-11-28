@@ -18,7 +18,6 @@ load commands
   [[ $status -eq 1 ]]
 }
 
-
 @test "delete cluster" {
   delete-cluster --name aaaaa
 }
@@ -95,3 +94,8 @@ load commands
   create-cluster --cli-input-json template_wo_pwd.json --name aaaaa --input-json-param-password 1234
 }
 
+@test "re-install cluster" {
+  skip "i dont have error - possibly bug"
+  run reinstall-cluster --name test --cli-input-json template.json --name aaaaa
+  [[ $status -eq 1 ]]
+}

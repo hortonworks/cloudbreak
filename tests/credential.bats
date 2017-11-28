@@ -36,18 +36,16 @@ load commands
 }
 
 @test "Check delete openstack credential" {
-  CHECK_RESULT=$( delete-credential )
+  CHECK_RESULT=$( delete-credential --name testcred)
   echo $CHECK_RESULT >&2
 }
 
 @test "Check credentials are listed" {
   CHECK_RESULT=$( list-credentials )
-  #[ $(echo $CHECK_RESULT | jq 'contains([{"Name": "openstack","Description": "1","CloudPlatform": "OPENSTACK"}])' ) == true ]
   [ $(echo $CHECK_RESULT |  jq ' .[] | [to_entries[].key] == ["Name","Description","CloudPlatform"]' ) == true ]
 }
 
-@test "Check openstack credential is described" {
-  CHECK_RESULT=$( describe-credential )
-  #[ $(echo $CHECK_RESULT | jq 'contains({"Name": "aeiou","Description": "aeiou","CloudPlatform": "aeiou"})' ) == true ]
+@test "Check credential is described" {
+  CHECK_RESULT=$( describe-credential --name testcred)
   [ $(echo $CHECK_RESULT |  jq ' . | [to_entries[].key] == ["Name","Description","CloudPlatform"]' ) == true ]
 }
