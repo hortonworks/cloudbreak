@@ -40,6 +40,7 @@ public class InstanceGroupV2Request implements JsonEntity {
     @ApiModelProperty(InstanceGroupModelDescription.PARAMETERS)
     private Map<String, Object> parameters = new HashMap<>();
 
+    @NotNull
     @ApiModelProperty(InstanceGroupModelDescription.TEMPLATE)
     private TemplateV2Request template;
 
