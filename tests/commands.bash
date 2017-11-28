@@ -146,9 +146,9 @@ function delete-ldap() {
 }
 
 function availability-zone-list() {
-    $CB_BIN  availability-zone list "$@"
+    $CB_BIN  cloud availability-zones "$@"
 }
 
 function region-list() {
-    $CB_BIN  region list "$@"
+    $CB_BIN  cloud regions "$@"
 }

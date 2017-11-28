@@ -201,6 +201,36 @@ func main() {
 			},
 		},
 		{
+			Name:  "cloud",
+			Usage: "information about cloud provider resources",
+			Subcommands: []cli.Command{
+				{
+					Name:   "availability-zones",
+					Usage:  "lists the available availabilityzones in a region",
+					Flags:  cb.NewFlagBuilder().AddAuthenticationFlags().AddFlags(cb.FlCredential, cb.FlRegion).AddOutputFlag().Build(),
+					Before: ConfigRead,
+					Action: cb.ListAvailabilityZones,
+					BashComplete: func(c *cli.Context) {
+						for _, f := range cb.NewFlagBuilder().AddAuthenticationFlags().AddFlags(cb.FlCredential, cb.FlRegion).AddOutputFlag().Build() {
+							printFlagCompletion(f)
+						}
+					},
+				},
+				{
+					Name:   "regions",
+					Usage:  "lists the available regions",
+					Flags:  cb.NewFlagBuilder().AddAuthenticationFlags().AddFlags(cb.FlCredential).AddOutputFlag().Build(),
+					Before: ConfigRead,
+					Action: cb.ListRegions,
+					BashComplete: func(c *cli.Context) {
+						for _, f := range cb.NewFlagBuilder().AddAuthenticationFlags().AddFlags(cb.FlCredential).AddOutputFlag().Build() {
+							printFlagCompletion(f)
+						}
+					},
+				},
+			},
+		},
+		{
 			Name:  "cluster",
 			Usage: "cluster related operations",
 			Subcommands: []cli.Command{
@@ -779,42 +809,6 @@ func main() {
 					Action: cb.ListRecipes,
 					BashComplete: func(c *cli.Context) {
 						for _, f := range cb.NewFlagBuilder().AddAuthenticationFlags().AddOutputFlag().Build() {
-							printFlagCompletion(f)
-						}
-					},
-				},
-			},
-		},
-		{
-			Name:  "region",
-			Usage: "cloud provider region related operations",
-			Subcommands: []cli.Command{
-				{
-					Name:   "list",
-					Usage:  "lists the available regions",
-					Flags:  cb.NewFlagBuilder().AddAuthenticationFlags().AddFlags(cb.FlCredential).AddOutputFlag().Build(),
-					Before: ConfigRead,
-					Action: cb.ListRegions,
-					BashComplete: func(c *cli.Context) {
-						for _, f := range cb.NewFlagBuilder().AddAuthenticationFlags().AddFlags(cb.FlCredential).AddOutputFlag().Build() {
-							printFlagCompletion(f)
-						}
-					},
-				},
-			},
-		},
-		{
-			Name:  "availability-zone",
-			Usage: "cloud provider availability zone operations",
-			Subcommands: []cli.Command{
-				{
-					Name:   "list",
-					Usage:  "lists the available availabilityzones in a region",
-					Flags:  cb.NewFlagBuilder().AddAuthenticationFlags().AddFlags(cb.FlCredential, cb.FlRegion).AddOutputFlag().Build(),
-					Before: ConfigRead,
-					Action: cb.ListAvailabilityZones,
-					BashComplete: func(c *cli.Context) {
-						for _, f := range cb.NewFlagBuilder().AddAuthenticationFlags().AddFlags(cb.FlCredential, cb.FlRegion).AddOutputFlag().Build() {
 							printFlagCompletion(f)
 						}
 					},

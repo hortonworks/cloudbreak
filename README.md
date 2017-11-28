@@ -20,21 +20,20 @@ USAGE:
    cb [global options] command [command options] [arguments...]
 
 VERSION:
-   snapshot-2017-11-27T14:17:07
+   snapshot-2017-11-28T14:44:42
 
 AUTHOR(S):
    Hortonworks
 
 COMMANDS:
-     availability-zone       cloud provider availability zone operations
-     blueprint               blueprint related operations
-     cluster                 cluster related operations
-     configure               configure the server address and credentials used to communicate with this server
-     credential              credential related operations
-     ldap                    ldap related operations
-     recipe                  recipe related operations
-     region                  cloud provider region related operations
-     help, h                 Shows a list of commands or help for one command
+     blueprint   blueprint related operations
+     cloud       information about cloud provider resources
+     cluster     cluster related operations
+     configure   configure the server address and credentials used to communicate with this server
+     credential  credential related operations
+     ldap        ldap related operations
+     recipe      recipe related operations
+     help, h     Shows a list of commands or help for one command
 
 GLOBAL OPTIONS:
    --debug        debug mode [$DEBUG]
