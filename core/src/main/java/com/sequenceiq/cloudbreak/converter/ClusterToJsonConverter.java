@@ -158,6 +158,7 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
         convertContainerConfig(source, clusterResponse);
         convertComponentConfig(clusterResponse, source);
         convertAmbariDatabaseComponentConfig(clusterResponse, source);
+        clusterResponse.setCreationFinished(source.getCreationFinished());
         return clusterResponse;
     }
 

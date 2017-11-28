@@ -182,6 +182,7 @@ public class ModelDescriptions {
         public static final String RDS_CONFIGS = "details of the external database for Hadoop components";
         public static final String RDS_CONNECTION_RESULT = "result of RDS connection test";
         public static final String LDAP_CONNECTION_RESULT = "result of Ldap connection test";
+        public static final String CREATION_FINISHED = "Epoch time of cluster creation finish";
     }
 
     public static class GatewayModelDescription {
