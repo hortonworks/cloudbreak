@@ -1,9 +1,12 @@
 package com.sequenceiq.cloudbreak.common.service.user;
 
+import static org.springframework.ldap.query.LdapQueryBuilder.query;
+
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -19,6 +22,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.ldap.core.AttributesMapper;
+import org.springframework.ldap.core.LdapTemplate;
+import org.springframework.ldap.query.LdapQuery;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -57,6 +63,9 @@ public class CachedUserDetailsService {
     @Inject
     private IdentityClient identityClient;
 
+    @Inject
+    private LdapTemplate ldapTemplate;
+
     private WebTarget identityWebTarget;
 
     @PostConstruct
@@ -67,6 +76,21 @@ public class CachedUserDetailsService {
 
     @Cacheable(cacheNames = "userCache", key = "#username")
     public IdentityUser getDetails(String username, UserFilterField filterField, String clientSecret) {
+        LdapQuery query = query().base("CN=Users,Dc=ad,DC=seq,DC=com").where("mail").is(username);
+        List<IdentityUser> users = ldapTemplate.search(query, (AttributesMapper<IdentityUser>) attrs ->
+            new IdentityUser(
+                (String) attrs.get("cn").get(),
+                (String) attrs.get("mail").get(),
+                (String) attrs.get("cn").get(),
+                Collections.singletonList(IdentityUserRole.ADMIN),
+                (String) attrs.get("givenName").get(),
+                (String) attrs.get("displayName").get(),
+                new Date())
+        );
+        if (!users.isEmpty()) {
+            return users.get(0);
+        }
+
         WebTarget target;
 
         LOGGER.info("Load user details: {}", username);

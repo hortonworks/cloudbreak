@@ -24,7 +24,6 @@ public class ScimAccountGroupReaderFilter extends OncePerRequestFilter {
     @Inject
     private UserDetailsService userDetailsService;
 
-    // @SuppressWarnings("unchecked")
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException,
             IOException {
