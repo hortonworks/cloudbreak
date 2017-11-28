@@ -1,5 +1,5 @@
 #!/usr/bin/env bats
-load commands
+load ../commands
 
 @test "list clusters" {
   [[ $(list-clusters | jq ' length ' ) == $( curl -ks $CLOUD_URL/cb/api/v1/stacks/account  | jq 'length' ) ]]
@@ -66,7 +66,7 @@ load commands
 }
 
 @test "scale cluster" {
-  scale-cluster --name aaaaa --group-name a --desire-node-count 5
+  scale-cluster --name aaaaa --group-name a --desired-node-count 5
 }
 
 @test "scale cluster not in apropriate status" {

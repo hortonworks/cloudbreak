@@ -1,72 +1,62 @@
-COMMON_ARGS_WO_CLUSTER=" --server ${CLOUD_URL} --username ${EMAIL} --password ${PASSWORD}  "
-COMMON_ARGS=" --cluster-name testcluster --server ${CLOUD_URL} --username ${EMAIL} --password ${PASSWORD} "
-
-AWS_ARGS_KEY=" --name cli-aws-key --access-key testaccess --secret-key testsecretkey "
-AWS_ARGS_ROLE=" --name cli-aws-role --role-arn  testawsrole "
-
-OPENSTACK_ARGS=" --name cli-openstack --tenant-user testuser  --tenant-password testpassword --tenant-name testtenant --endpoint http://1.1.1.1:5000/v2.0"
-AZURE_ARGS="--name cli-azure --subscription-id aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaa --tenant-id aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaa --app-id aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaa --app-password testpassword"
-GCP_ARGS="--name cli-gcp --project-id testprojet --service-account-id testuser@siq-haas.iam.gserviceaccount.com --service-account-private-key-file test.p12"
-
 CB_BIN="cb"
 
 function configure-cb() {
-    $CB_BIN configure "$@" $COMMON_ARGS_WO_CLUSTER
+  $CB_BIN configure "$@"
 }
 
 function generate-cluster-template() {
-    $CB_BIN cluster generate-template "$@"
+  $CB_BIN cluster generate-template "$@"
 }
 
 function list-blueprints() {
-     $CB_BIN blueprint list
+  $CB_BIN blueprint list
  }
 
  function create-blueprint {
-     $CB_BIN blueprint  create "$@"
+   $CB_BIN blueprint  create "$@"
  }
 
   function delete-blueprint() {
-     $CB_BIN blueprint delete --name "$@"
+   $CB_BIN blueprint delete "$@"
  }
 
  function describe-blueprint() {
-    $CB_BIN blueprint describe --name "$@"
+   $CB_BIN blueprint describe "$@"
  }
 
-function create-credential-aws-key() {
-        $CB_BIN credential create aws key-based "$@" $AWS_ARGS_KEY
-   }
+ function create-credential-aws-key() {
+   $CB_BIN credential create aws key-based "$@"
+ }
 
-function create-credential-aws-role() {
-        $CB_BIN credential create aws role-based "$@" $AWS_ARGS_ROLE
-   }
+ function create-credential-aws-role() {
+  $CB_BIN credential create aws role-based "$@"
+ }
 
 function create-credential-openstack-v2() {
-        $CB_BIN credential create openstack keystone-v2 "$@" $OPENSTACK_ARGS
+        $CB_BIN credential create openstack keystone-v2 "$@"
    }
 
 function create-credential-openstack-v3() {
-        $CB_BIN credential create openstack keystone-v3 "$@" $OPENSTACK_ARGS
+        $CB_BIN credential create openstack keystone-v3 "$@"
    }
 
 function create-credential-azure() {
-        $CB_BIN credential create azure app-based "$@" $AZURE_ARGS
+        $CB_BIN credential create azure app-based "$@"
    }
 
 function create-credential-gcp() {
-        $CB_BIN credential create gcp "$@" $GCP_ARGS
+        $CB_BIN credential create gcp "$@"
    }
 
 function list-credentials() {
-        $CB_BIN credential  list
+        $CB_BIN credential list
    }
 
 function describe-credential() {
-        $CB_BIN credential describe --name openstack
+        $CB_BIN credential describe "$@"
    }
 function delete-credential() {
-        $CB_BIN credential delete --name cli-aws-role
+        $CB_BIN credential delete "$@"
    }
 
 function create-recipe(){
@@ -82,7 +72,7 @@ function delete-recipe() {
 }
 
 function describe-recipe() {
-    $CB_BIN  recipe describe "$@"
+    $CB_BIN recipe describe "$@"
 }
 
 function create-cluster() {
@@ -151,4 +141,32 @@ function availability-zone-list() {
 
 function region-list() {
     $CB_BIN  cloud regions "$@"
+}
+
+function instance-list() {
+    $CB_BIN  cloud instances "$@"
+}
+
+function volume-list() {
+    $CB_BIN  cloud volumes "$@"
+}
+
+function list-image-catalog() {
+    $CB_BIN  imagecatalog list "$@"
+}
+
+function create-image-catalog() {
+    $CB_BIN  imagecatalog create "$@"
+}
+
+function get-images() {
+    $CB_BIN  imagecatalog images "$@"
+}
+
+function delete-image-catalog() {
+    $CB_BIN  imagecatalog delete "$@"
+}
+
+function set-default-image-catalog() {
+    $CB_BIN  imagecatalog set-default "$@"
 }

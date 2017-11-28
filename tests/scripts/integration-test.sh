@@ -10,4 +10,4 @@ export EMAIL=admin@example.com
 export PASSWORD=cloudbreak
 #could be a bug:
 cb configure --server $CLOUD_URL --username $EMAIL --password $PASSWORD
-bats *.bats
+bats integration/*.bats

@@ -1,5 +1,7 @@
 #!/usr/bin/env bats
-load commands
+load ../commands
+
+BLUEPRINT_NAME="Data Science: Apache Spark 1.6, Apache Zeppelin 0.7.0"
 
 @test "generate template azure existing" {
   generate-cluster-template azure existing-subnet| jq '. "network" | [to_entries[].key] == ["subnetCIDR"]'
@@ -56,5 +58,7 @@ load commands
 }
 
 @test "Generate reinstall template" {
-  generate-reinstall-template --name aaaaa --blueprint-name test.bp | jq '."blueprintName" == ["test.bp"]'
+   skip "To do"
+   CHECK_RESULT=$( generate-reinstall-template --blueprint-name $BLUEPRINT_NAME )
+   #[ $(echo $CHECK_RESULT | jq '."blueprintName" == $BLUEPRINT_NAME' ) == true ]
 }
