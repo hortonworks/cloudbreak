@@ -228,6 +228,60 @@ func main() {
 						}
 					},
 				},
+				{
+					Name:  "volumes",
+					Usage: "list the available volume types",
+					Subcommands: []cli.Command{
+						{
+							Name:   "aws",
+							Usage:  "list the available aws volume types",
+							Flags:  cb.NewFlagBuilder().AddAuthenticationFlags().AddOutputFlag().Build(),
+							Before: ConfigRead,
+							Action: cb.ListAwsVolumeTypes,
+							BashComplete: func(c *cli.Context) {
+								for _, f := range cb.NewFlagBuilder().AddAuthenticationFlags().AddOutputFlag().Build() {
+									printFlagCompletion(f)
+								}
+							},
+						},
+						{
+							Name:   "azure",
+							Usage:  "list the available azure volume types",
+							Flags:  cb.NewFlagBuilder().AddAuthenticationFlags().AddOutputFlag().Build(),
+							Before: ConfigRead,
+							Action: cb.ListAzureVolumeTypes,
+							BashComplete: func(c *cli.Context) {
+								for _, f := range cb.NewFlagBuilder().AddAuthenticationFlags().AddOutputFlag().Build() {
+									printFlagCompletion(f)
+								}
+							},
+						},
+						{
+							Name:   "gcp",
+							Usage:  "list the available gcp volume types",
+							Flags:  cb.NewFlagBuilder().AddAuthenticationFlags().AddOutputFlag().Build(),
+							Before: ConfigRead,
+							Action: cb.ListGcpVolumeTypes,
+							BashComplete: func(c *cli.Context) {
+								for _, f := range cb.NewFlagBuilder().AddAuthenticationFlags().AddOutputFlag().Build() {
+									printFlagCompletion(f)
+								}
+							},
+						},
+					},
+				},
+				{
+					Name:   "instances",
+					Usage:  "list the available instance types",
+					Flags:  cb.NewFlagBuilder().AddAuthenticationFlags().AddFlags(cb.FlCredential, cb.FlRegion, cb.FlAvailabilityZoneOptional).AddOutputFlag().Build(),
+					Before: ConfigRead,
+					Action: cb.ListInstanceTypes,
+					BashComplete: func(c *cli.Context) {
+						for _, f := range cb.NewFlagBuilder().AddAuthenticationFlags().AddFlags(cb.FlCredential, cb.FlRegion, cb.FlAvailabilityZoneOptional).AddOutputFlag().Build() {
+							printFlagCompletion(f)
+						}
+					},
+				},
 			},
 		},
 		{

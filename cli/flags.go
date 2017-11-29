@@ -440,6 +440,13 @@ var (
 			Usage: "name of the region",
 		},
 	}
+	FlAvailabilityZoneOptional = StringFlag{
+		RequiredFlag: OPTIONAL,
+		StringFlag: cli.StringFlag{
+			Name:  "availability-zone",
+			Usage: "name of the availability zone",
+		},
+	}
 )
 
 type RequiredFlag struct {
