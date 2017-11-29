@@ -69,7 +69,7 @@ public class BlueprintService {
 
     @PostAuthorize("hasPermission(returnObject,'read')")
     public Blueprint getByName(String name, IdentityUser user) {
-        Blueprint blueprint = blueprintRepository.findByNameInAccount(name, user.getAccount(), user.getUsername());
+        Blueprint blueprint = blueprintRepository.findByNameInAccount(name, user.getAccount(), user.getUserId());
         if (blueprint == null) {
             throw new NotFoundException(String.format("Blueprint '%s' not found.", name));
         }

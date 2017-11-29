@@ -62,7 +62,7 @@ public class ClusterTemplateService {
 
     @PostAuthorize("hasPermission(returnObject,'read')")
     public ClusterTemplate getByName(String name, IdentityUser user) {
-        ClusterTemplate clusterTemplate = clusterTemplateRepository.findByNameInAccount(name, user.getAccount(), user.getUsername());
+        ClusterTemplate clusterTemplate = clusterTemplateRepository.findByNameInAccount(name, user.getAccount(), user.getUserId());
         if (clusterTemplate == null) {
             throw new NotFoundException(String.format("Blueprint '%s' not found.", name));
         }
