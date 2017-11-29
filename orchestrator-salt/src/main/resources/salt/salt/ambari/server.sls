@@ -138,3 +138,22 @@ install_hdf_mpack:
     - unless: test -f /var/hdf_mpack_installed
 
 {% endif %}
+
+{% if not ambari.is_local_ldap and not ambari.ldap.protocol.startswith('ldaps') %}
+
+/opt/ambari-server/setup-ldap.sh:
+  file.managed:
+    - makedirs: True
+    - source: salt://ambari/scripts/setup-ldap.sh
+    - template: jinja
+    - context:
+      ldap: {{ ambari.ldap }}
+    - mode: 744
+
+setup_ldap:
+  cmd.run:
+    - name: /opt/ambari-server/setup-ldap.sh
+    - shell: /bin/bash
+    - unless: test -f /var/ldap_setup_success
+
+{% endif %}

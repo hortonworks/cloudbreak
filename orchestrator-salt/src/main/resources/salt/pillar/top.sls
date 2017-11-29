@@ -28,6 +28,7 @@ base:
     - ambari.credentials
     - prometheus.server
     - grafana.repo
+    - gateway.ldap
 
   'roles:ambari_server_standby':
     - match: grain
@@ -35,6 +36,7 @@ base:
     - ambari.credentials
     - prometheus.server
     - grafana.repo
+    - gateway.ldap
 
   'roles:knox_gateway':
     - match: grain
