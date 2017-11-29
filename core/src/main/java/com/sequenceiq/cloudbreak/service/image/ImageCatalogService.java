@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import com.sequenceiq.cloudbreak.cloud.model.Versioned;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV2;
@@ -115,6 +116,23 @@ public class ImageCatalogService {
             throw new CloudbreakImageNotFoundException(String.format("Could not find any image with id: '%s'.", imageId));
         }
         return image.get();
+    }
+
+    public Image getImageByCatalogName(String imageId, String catalogName) throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
+        Image image;
+        if (StringUtils.isEmpty(catalogName)) {
+            image = getImage(imageId);
+        } else {
+            ImageCatalog imageCatalog = get(catalogName);
+            if (imageCatalog != null) {
+                image = getImage(imageCatalog.getImageCatalogUrl(), imageId);
+            } else {
+                String msg = String.format("The specified image catalog '%s' could not be found.", catalogName);
+                LOGGER.error(msg);
+                throw new CloudbreakImageNotFoundException(msg);
+            }
+        }
+        return image;
     }
 
     public ImageCatalog create(ImageCatalog imageCatalog) throws CloudbreakImageCatalogException {

@@ -118,8 +118,7 @@ public class StackCreatorService {
         }
 
         start = System.currentTimeMillis();
-        stack = stackService.create(user, stack, stackRequest.getAmbariVersion(), stackRequest.getHdpVersion(),
-            stackRequest.getImageCatalog(), Optional.ofNullable(stackRequest.getImageId()));
+        stack = stackService.create(user, stack, stackRequest.getImageCatalog(), Optional.ofNullable(stackRequest.getImageId()));
         LOGGER.info("Stack object and its dependencies has been created in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
         if (stackRequest.getClusterRequest() != null) {
