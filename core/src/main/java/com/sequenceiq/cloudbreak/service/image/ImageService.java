@@ -55,7 +55,7 @@ public class ImageService {
     }
 
     @Transactional(TxType.NEVER)
-    public void create(Stack stack, PlatformParameters params, String ambariVersion, String hdpVersion, String imageCatalog, Optional<String> imageId)
+    public void create(Stack stack, PlatformParameters params, String imageCatalog, Optional<String> imageId)
             throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         try {
             Platform platform = platform(stack.cloudPlatform());
@@ -68,7 +68,7 @@ public class ImageService {
             Map<InstanceGroupType, String> userData = userDataBuilder.buildUserData(platform, cbSshKeyDer, cbSshKey, sshUser, params,
                     stack.getSecurityConfig().getSaltBootPassword());
 
-            com.sequenceiq.cloudbreak.cloud.model.catalog.Image imgFromCatalog = determineImageFromCatalog(imageId, platformString);
+            com.sequenceiq.cloudbreak.cloud.model.catalog.Image imgFromCatalog = determineImageFromCatalog(imageId, platformString, imageCatalog);
             LOGGER.info("Determined image from catalog: {}", imgFromCatalog);
 
             String imageName = determineImageName(platformString, region, imgFromCatalog);
@@ -81,11 +81,11 @@ public class ImageService {
         }
     }
 
-    private com.sequenceiq.cloudbreak.cloud.model.catalog.Image determineImageFromCatalog(Optional<String> imageId, String platformString)
+    private com.sequenceiq.cloudbreak.cloud.model.catalog.Image determineImageFromCatalog(Optional<String> imageId, String platformString, String catalogName)
             throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         com.sequenceiq.cloudbreak.cloud.model.catalog.Image imgFromCatalog = null;
         if (imageId.isPresent()) {
-            imgFromCatalog = imageCatalogService.getImage(imageId.get());
+            imgFromCatalog = imageCatalogService.getImageByCatalogName(imageId.get(), catalogName);
         } else {
             LOGGER.warn("Image id hasn't been specified for the stack, falling back to a base image.");
             imgFromCatalog = imageCatalogService.getBaseImages(platformString).stream().findFirst().get();

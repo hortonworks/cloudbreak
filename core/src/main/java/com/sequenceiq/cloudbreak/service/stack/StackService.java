@@ -327,7 +327,7 @@ public class StackService {
     }
 
     @Transactional(TxType.NEVER)
-    public Stack create(IdentityUser user, Stack stack, String ambariVersion, String hdpVersion, String imageCatalog, Optional<String> imageId) {
+    public Stack create(IdentityUser user, Stack stack, String imageCatalog, Optional<String> imageId) {
         Stack savedStack;
         stack.setOwner(user.getUserId());
         stack.setAccount(user.getAccount());
@@ -386,7 +386,7 @@ public class StackService {
                 savedStack.setSecurityConfig(securityConfig);
 
                 start = System.currentTimeMillis();
-                imageService.create(savedStack, connector.getPlatformParameters(stack), ambariVersion, hdpVersion, imageCatalog, imageId);
+                imageService.create(savedStack, connector.getPlatformParameters(stack), imageCatalog, imageId);
                 LOGGER.info("Image creation took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
                 start = System.currentTimeMillis();
