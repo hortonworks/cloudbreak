@@ -71,6 +71,10 @@ base:
     - match: grain
     - pre-recipes.post-ambari-start
 
+  'G@roles:ambari_server and G@recipes:post-ambari-start':
+    - match: compound
+    - ambari.sync-ldap
+
   'recipes:post-cluster-install':
     - match: grain
     - post-recipes
