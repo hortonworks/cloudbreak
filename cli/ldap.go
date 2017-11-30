@@ -60,6 +60,7 @@ func CreateLDAP(c *cli.Context) error {
 	groupMemberAttribute := c.String(FlLdapGroupMemberAttribute.Name)
 	groupNameAttribute := c.String(FlLdapGroupNameAttribute.Name)
 	groupObjectClass := c.String(FlLdapGroupObjectClass.Name)
+	ambariAdminGroup := c.String(FlLdapAmbariAdminGroup.Name)
 
 	server := c.String(FlLdapServer.Name)
 	public := c.Bool(FlPublicOptional.Name)
@@ -74,12 +75,12 @@ func CreateLDAP(c *cli.Context) error {
 	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServerOptional.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 
 	return createLDAPImpl(cbClient.Cloudbreak.V1ldap, int32(serverPort), name, server, protocol, domain, bindDn, bindPassword, directoryType,
-		userSearchBase, userNameAttribute, userObjectClass, groupSearchBase, groupMemberAttribute, groupNameAttribute, groupObjectClass, public)
+		userSearchBase, userNameAttribute, userObjectClass, groupSearchBase, groupMemberAttribute, groupNameAttribute, groupObjectClass, ambariAdminGroup, public)
 }
 
 func createLDAPImpl(ldapClient ldapClient, port int32, name, server, protocol, domain, bindDn, bindPassword, directoryType,
 	userSearchBase, userNameAttribute, userObjectClass, groupSearchBase, groupMemberAttribute, groupNameAttribute,
-	groupObjectClass string, public bool) error {
+	groupObjectClass, ambariAdminGroup string, public bool) error {
 	defer utils.TimeTrack(time.Now(), "create ldap")
 
 	host := server[strings.LastIndex(server, "/")+1 : strings.LastIndex(server, ":")]
@@ -99,6 +100,7 @@ func createLDAPImpl(ldapClient ldapClient, port int32, name, server, protocol, d
 		GroupNameAttribute:   groupNameAttribute,
 		GroupObjectClass:     groupObjectClass,
 		GroupSearchBase:      groupSearchBase,
+		AmbariAdminGroup:     ambariAdminGroup,
 	}
 
 	log.Infof("[createLDAPImpl] create ldap with name: %s", name)

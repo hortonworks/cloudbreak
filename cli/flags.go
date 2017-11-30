@@ -412,6 +412,13 @@ var (
 			Usage: "ldap group search base (e.g: OU=scopes,DC=ad,DC=cb,DC=com)",
 		},
 	}
+	FlLdapAmbariAdminGroup = StringFlag{
+		RequiredFlag: OPTIONAL,
+		StringFlag: cli.StringFlag{
+			Name:  "ldap-ambari-admin-group",
+			Usage: "ldap group of Ambari administrators",
+		},
+	}
 	FlKerberosPasswordOptional = StringFlag{
 		RequiredFlag: OPTIONAL,
 		StringFlag: cli.StringFlag{
