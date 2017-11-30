@@ -106,6 +106,7 @@ func generateStackTemplateImpl(mode cloud.NetworkMode, stringFinder func(string)
 			utils.LogErrorAndExit(err)
 		}
 		nodes = getNodesByBlueprint(bp)
+		template.ClusterRequest.AmbariRequest.BlueprintName = bpName
 	} else if bpFile := stringFinder(FlBlueprintFileOptional.Name); len(bpFile) != 0 {
 		bp := utils.ReadFile(bpFile)
 		nodes = getNodesByBlueprint(bp)
