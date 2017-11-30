@@ -85,6 +85,36 @@ func (a *Client) IsPlatformSelectionDisabled(params *IsPlatformSelectionDisabled
 }
 
 /*
+PlatformEnablement is platform selection enabled
+
+Account related preferences that could be managed by the account admins and different restrictions could be added to Cloudbreak resources.
+*/
+func (a *Client) PlatformEnablement(params *PlatformEnablementParams) (*PlatformEnablementOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewPlatformEnablementParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "platformEnablement",
+		Method:             "GET",
+		PathPattern:        "/v1/accountpreferences/platformenabled",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &PlatformEnablementReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*PlatformEnablementOK), nil
+
+}
+
+/*
 PostAccountPreferencesEndpoint posts account preferences of admin user
 
 Account related preferences that could be managed by the account admins and different restrictions could be added to Cloudbreak resources.

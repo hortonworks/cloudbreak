@@ -9,11 +9,11 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/go-openapi/errors"
 	"github.com/go-openapi/runtime"
-	"github.com/go-openapi/swag"
 
 	strfmt "github.com/go-openapi/strfmt"
+
+	"github.com/hortonworks/cb-cli/models_cloudbreak"
 )
 
 // GetSpecialPropertiesReader is a Reader for the GetSpecialProperties structure.
@@ -47,7 +47,7 @@ func NewGetSpecialPropertiesOK() *GetSpecialPropertiesOK {
 successful operation
 */
 type GetSpecialPropertiesOK struct {
-	Payload GetSpecialPropertiesOKBody
+	Payload *models_cloudbreak.SpecialParametersJSON
 }
 
 func (o *GetSpecialPropertiesOK) Error() string {
@@ -56,30 +56,12 @@ func (o *GetSpecialPropertiesOK) Error() string {
 
 func (o *GetSpecialPropertiesOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
+	o.Payload = new(models_cloudbreak.SpecialParametersJSON)
+
 	// response payload
-	if err := consumer.Consume(response.Body(), &o.Payload); err != nil && err != io.EOF {
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
 		return err
 	}
 
-	return nil
-}
-
-/*GetSpecialPropertiesOKBody get special properties o k body
-swagger:model GetSpecialPropertiesOKBody
-*/
-
-type GetSpecialPropertiesOKBody map[string]bool
-
-// Validate validates this get special properties o k body
-func (o GetSpecialPropertiesOKBody) Validate(formats strfmt.Registry) error {
-	var res []error
-
-	if swag.IsZero(o) { // not required
-		return nil
-	}
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
 	return nil
 }

@@ -26,6 +26,9 @@ type StackValidationRequest struct {
 	// blueprint id for the cluster
 	BlueprintID int64 `json:"blueprintId,omitempty"`
 
+	// blueprint name for the cluster
+	BlueprintName string `json:"blueprintName,omitempty"`
+
 	// stack related credential
 	Credential *CredentialRequest `json:"credential,omitempty"`
 
@@ -62,6 +65,8 @@ type StackValidationRequest struct {
 /* polymorph StackValidationRequest blueprint false */
 
 /* polymorph StackValidationRequest blueprintId false */
+
+/* polymorph StackValidationRequest blueprintName false */
 
 /* polymorph StackValidationRequest credential false */
 

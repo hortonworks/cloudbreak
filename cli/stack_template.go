@@ -195,7 +195,7 @@ func convertNodeToInstanceGroup(node node) *models_cloudbreak.InstanceGroupsV2 {
 
 func getDefaultTemplate() *models_cloudbreak.TemplateV2Request {
 	return &models_cloudbreak.TemplateV2Request{
-		InstanceType: &(&types.S{S: "____"}).S,
+		InstanceType: "____",
 		VolumeType:   "____",
 		VolumeCount:  1,
 		VolumeSize:   10,

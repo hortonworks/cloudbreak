@@ -58,6 +58,9 @@ type ClusterResponse struct {
 	// config recommendation strategy
 	ConfigStrategy string `json:"configStrategy,omitempty"`
 
+	// Epoch time of cluster creation finish
+	CreationFinished int64 `json:"creationFinished,omitempty"`
+
 	// custom containers
 	CustomContainers *CustomContainerResponse `json:"customContainers,omitempty"`
 
@@ -142,6 +145,8 @@ type ClusterResponse struct {
 /* polymorph ClusterResponse cluster false */
 
 /* polymorph ClusterResponse configStrategy false */
+
+/* polymorph ClusterResponse creationFinished false */
 
 /* polymorph ClusterResponse customContainers false */
 

@@ -37,6 +37,9 @@ type BaseImageResponse struct {
 	// os
 	Os string `json:"os,omitempty"`
 
+	// os type
+	OsType string `json:"osType,omitempty"`
+
 	// repo
 	Repo map[string]string `json:"repo,omitempty"`
 
@@ -61,6 +64,8 @@ type BaseImageResponse struct {
 /* polymorph BaseImageResponse images false */
 
 /* polymorph BaseImageResponse os false */
+
+/* polymorph BaseImageResponse osType false */
 
 /* polymorph BaseImageResponse repo false */
 

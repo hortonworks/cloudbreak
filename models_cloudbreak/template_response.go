@@ -22,6 +22,9 @@ type TemplateResponse struct {
 	// Required: true
 	CloudPlatform *string `json:"cloudPlatform"`
 
+	// custom instancetype definition
+	CustomInstanceType *CustomInstanceType `json:"customInstanceType,omitempty"`
+
 	// description of the resource
 	// Max Length: 1000
 	// Min Length: 0
@@ -31,8 +34,7 @@ type TemplateResponse struct {
 	ID int64 `json:"id,omitempty"`
 
 	// type of the instance
-	// Required: true
-	InstanceType *string `json:"instanceType"`
+	InstanceType string `json:"instanceType,omitempty"`
 
 	// name of the resource
 	// Required: true
@@ -60,6 +62,8 @@ type TemplateResponse struct {
 }
 
 /* polymorph TemplateResponse cloudPlatform false */
+
+/* polymorph TemplateResponse customInstanceType false */
 
 /* polymorph TemplateResponse description false */
 
@@ -90,12 +94,12 @@ func (m *TemplateResponse) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
-	if err := m.validateDescription(formats); err != nil {
+	if err := m.validateCustomInstanceType(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
 
-	if err := m.validateInstanceType(formats); err != nil {
+	if err := m.validateDescription(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -130,6 +134,25 @@ func (m *TemplateResponse) validateCloudPlatform(formats strfmt.Registry) error 
 	return nil
 }
 
+func (m *TemplateResponse) validateCustomInstanceType(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.CustomInstanceType) { // not required
+		return nil
+	}
+
+	if m.CustomInstanceType != nil {
+
+		if err := m.CustomInstanceType.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("customInstanceType")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
 func (m *TemplateResponse) validateDescription(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Description) { // not required
@@ -141,15 +164,6 @@ func (m *TemplateResponse) validateDescription(formats strfmt.Registry) error {
 	}
 
 	if err := validate.MaxLength("description", "body", string(*m.Description), 1000); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (m *TemplateResponse) validateInstanceType(formats strfmt.Registry) error {
-
-	if err := validate.Required("instanceType", "body", m.InstanceType); err != nil {
 		return err
 	}
 

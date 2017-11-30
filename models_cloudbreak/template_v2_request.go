@@ -10,7 +10,6 @@ import (
 
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
-	"github.com/go-openapi/validate"
 )
 
 // TemplateV2Request template v2 request
@@ -18,9 +17,11 @@ import (
 
 type TemplateV2Request struct {
 
+	// custom instancetype definition
+	CustomInstanceType *CustomInstanceType `json:"customInstanceType,omitempty"`
+
 	// type of the instance
-	// Required: true
-	InstanceType *string `json:"instanceType"`
+	InstanceType string `json:"instanceType,omitempty"`
 
 	// cloud specific parameters for template
 	Parameters map[string]interface{} `json:"parameters,omitempty"`
@@ -34,6 +35,8 @@ type TemplateV2Request struct {
 	// type of the volumes
 	VolumeType string `json:"volumeType,omitempty"`
 }
+
+/* polymorph TemplateV2Request customInstanceType false */
 
 /* polymorph TemplateV2Request instanceType false */
 
@@ -49,7 +52,7 @@ type TemplateV2Request struct {
 func (m *TemplateV2Request) Validate(formats strfmt.Registry) error {
 	var res []error
 
-	if err := m.validateInstanceType(formats); err != nil {
+	if err := m.validateCustomInstanceType(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -60,10 +63,20 @@ func (m *TemplateV2Request) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *TemplateV2Request) validateInstanceType(formats strfmt.Registry) error {
+func (m *TemplateV2Request) validateCustomInstanceType(formats strfmt.Registry) error {
 
-	if err := validate.Required("instanceType", "body", m.InstanceType); err != nil {
-		return err
+	if swag.IsZero(m.CustomInstanceType) { // not required
+		return nil
+	}
+
+	if m.CustomInstanceType != nil {
+
+		if err := m.CustomInstanceType.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("customInstanceType")
+			}
+			return err
+		}
 	}
 
 	return nil

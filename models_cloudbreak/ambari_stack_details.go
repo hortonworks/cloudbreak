@@ -21,25 +21,24 @@ type AmbariStackDetails struct {
 	// operating system for the stack, like redhat6
 	Os string `json:"os,omitempty"`
 
+	// version of the repository for VDF file creation in Ambari
+	RepositoryVersion string `json:"repositoryVersion,omitempty"`
+
 	// name of the stack, like HDP
 	// Required: true
 	Stack *string `json:"stack"`
 
 	// url of the stack repository
-	// Required: true
-	StackBaseURL *string `json:"stackBaseURL"`
+	StackBaseURL string `json:"stackBaseURL,omitempty"`
 
 	// id of the stack repository
-	// Required: true
-	StackRepoID *string `json:"stackRepoId"`
+	StackRepoID string `json:"stackRepoId,omitempty"`
 
 	// url of the stack utils repository
-	// Required: true
-	UtilsBaseURL *string `json:"utilsBaseURL"`
+	UtilsBaseURL string `json:"utilsBaseURL,omitempty"`
 
 	// id of the stack utils repository
-	// Required: true
-	UtilsRepoID *string `json:"utilsRepoId"`
+	UtilsRepoID string `json:"utilsRepoId,omitempty"`
 
 	// whether to verify or not the repo url
 	// Required: true
@@ -48,9 +47,14 @@ type AmbariStackDetails struct {
 	// version of the stack
 	// Required: true
 	Version *string `json:"version"`
+
+	// local path on the Ambari server or URL that point to the desired VDF file
+	VersionDefinitionFileURL string `json:"versionDefinitionFileUrl,omitempty"`
 }
 
 /* polymorph AmbariStackDetails os false */
+
+/* polymorph AmbariStackDetails repositoryVersion false */
 
 /* polymorph AmbariStackDetails stack false */
 
@@ -66,31 +70,13 @@ type AmbariStackDetails struct {
 
 /* polymorph AmbariStackDetails version false */
 
+/* polymorph AmbariStackDetails versionDefinitionFileUrl false */
+
 // Validate validates this ambari stack details
 func (m *AmbariStackDetails) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateStack(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
-	if err := m.validateStackBaseURL(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
-	if err := m.validateStackRepoID(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
-	if err := m.validateUtilsBaseURL(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
-	if err := m.validateUtilsRepoID(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -114,42 +100,6 @@ func (m *AmbariStackDetails) Validate(formats strfmt.Registry) error {
 func (m *AmbariStackDetails) validateStack(formats strfmt.Registry) error {
 
 	if err := validate.Required("stack", "body", m.Stack); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (m *AmbariStackDetails) validateStackBaseURL(formats strfmt.Registry) error {
-
-	if err := validate.Required("stackBaseURL", "body", m.StackBaseURL); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (m *AmbariStackDetails) validateStackRepoID(formats strfmt.Registry) error {
-
-	if err := validate.Required("stackRepoId", "body", m.StackRepoID); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (m *AmbariStackDetails) validateUtilsBaseURL(formats strfmt.Registry) error {
-
-	if err := validate.Required("utilsBaseURL", "body", m.UtilsBaseURL); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (m *AmbariStackDetails) validateUtilsRepoID(formats strfmt.Registry) error {
-
-	if err := validate.Required("utilsRepoId", "body", m.UtilsRepoID); err != nil {
 		return err
 	}
 

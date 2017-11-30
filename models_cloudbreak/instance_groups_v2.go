@@ -44,7 +44,8 @@ type InstanceGroupsV2 struct {
 	SecurityGroup *SecurityGroupV2Request `json:"securityGroup,omitempty"`
 
 	// instancegroup related template
-	Template *TemplateV2Request `json:"template,omitempty"`
+	// Required: true
+	Template *TemplateV2Request `json:"template"`
 
 	// type of the instance group
 	Type string `json:"type,omitempty"`
@@ -212,8 +213,8 @@ func (m *InstanceGroupsV2) validateSecurityGroup(formats strfmt.Registry) error 
 
 func (m *InstanceGroupsV2) validateTemplate(formats strfmt.Registry) error {
 
-	if swag.IsZero(m.Template) { // not required
-		return nil
+	if err := validate.Required("template", "body", m.Template); err != nil {
+		return err
 	}
 
 	if m.Template != nil {

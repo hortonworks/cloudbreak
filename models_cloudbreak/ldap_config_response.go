@@ -20,6 +20,9 @@ import (
 
 type LdapConfigResponse struct {
 
+	// LDAP group for Ambari administrators
+	AmbariAdminGroup string `json:"ambariAdminGroup,omitempty"`
+
 	// bind distinguished name for connection test and group search (e.g. cn=admin,dc=example,dc=org)
 	// Required: true
 	BindDn *string `json:"bindDn"`
@@ -80,6 +83,8 @@ type LdapConfigResponse struct {
 	// Required: true
 	UserSearchBase *string `json:"userSearchBase"`
 }
+
+/* polymorph LdapConfigResponse ambariAdminGroup false */
 
 /* polymorph LdapConfigResponse bindDn false */
 
