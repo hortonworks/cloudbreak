@@ -9,5 +9,6 @@
   "userSearchBase": "cn=users,dc=example,dc=org",
   "groupSearchBase": "cn=groups,dc=example,dc=org",
   "userNameAttribute": "cn",
-  "domain": "ad.hdc.com"
+  "domain": "ad.hdc.com",
+  "ambariAdminGroup": "ambariadmins"
 }

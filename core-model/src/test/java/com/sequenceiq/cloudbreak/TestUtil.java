@@ -446,6 +446,7 @@ public class TestUtil {
         config.setGroupObjectClass("groupOfNames");
         config.setGroupNameAttribute("cn");
         config.setGroupMemberAttribute("member");
+        config.setAmbariAdminGroup("ambariadmins");
         return config;
     }
 

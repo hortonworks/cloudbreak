@@ -14,6 +14,11 @@
 {% set ldap = salt['pillar.get']('ldap') %}
 {% set username = salt['pillar.get']('ambari:username') %}
 {% set password = salt['pillar.get']('ambari:password') %}
+{% if salt['pillar.get']('ldap:protocol').startswith('ldaps') %}
+  {% set secure_ldap = 'true' %}
+{% else %}
+  {% set secure_ldap = 'false' %}
+{% endif %}
 
 {% set ambari = {} %}
 {% do ambari.update({
@@ -25,6 +30,7 @@
     'cluster_domain': cluster_domain,
     'is_container_executor': is_container_executor,
     'is_local_ldap': is_local_ldap,
+    'secure_ldap': secure_ldap,
     'ldap': ldap,
     'username': username,
     'password': password

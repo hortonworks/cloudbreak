@@ -92,7 +92,7 @@ public class RecipeEngine {
     public void executePostAmbariStartRecipes(Stack stack, Set<HostGroup> hostGroups) throws CloudbreakException {
         Orchestrator orchestrator = stack.getOrchestrator();
         if (recipesFound(hostGroups) && recipesSupportedOnOrchestrator(orchestrator)
-            && (stack.getCluster() != null && stack.getCluster().getLdapConfig() != null)) {
+            && stack.getCluster() != null && stack.getCluster().getLdapConfig() != null) {
             orchestratorRecipeExecutor.postAmbariStartRecipes(stack);
         }
     }

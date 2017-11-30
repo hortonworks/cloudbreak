@@ -1,9 +1,11 @@
 #/bin/bash
 
+set -ex
+
 ambari-server setup-ldap \
   --ldap-url="{{ ldap.serverHost }}:{{ ldap.serverPort }}" \
   --ldap-secondary-url="{{ ldap.serverHost }}:{{ ldap.serverPort }}" \
-  --ldap-ssl="false" \
+  --ldap-ssl="{{ ambari.secure_ldap }}" \
   --ldap-user-class="{{ ldap.userObjectClass }}" \
   --ldap-user-attr="{{ ldap.groupNameAttribute }}" \
   --ldap-group-class="{{ ldap.groupObjectClass }}" \
