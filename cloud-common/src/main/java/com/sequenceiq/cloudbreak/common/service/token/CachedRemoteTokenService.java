@@ -94,9 +94,8 @@ public class CachedRemoteTokenService implements ResourceServerTokenServices {
             Map<String, Object> userMap = objectMapper.readValue(userClaim.toString(), new MapTypeReference());
             String exp = claims.get("exp").toString();
             tokenMap.put("exp", Long.valueOf(exp));
-            Object userName = userMap.get("username");
             Object email = userMap.get("email");
-            tokenMap.put("user_id", userName);
+            tokenMap.put("user_id", email);
             tokenMap.put("user_name", email);
             tokenMap.put("scope", Arrays.asList("cloudbreak.networks.read", "periscope.cluster", "cloudbreak.usages.user", "cloudbreak.recipes", "openid",
                 "cloudbreak.templates.read", "cloudbreak.usages.account", "cloudbreak.events", "cloudbreak.stacks.read",
