@@ -406,6 +406,7 @@ public class ModelDescriptions {
         public static final String GROUP_OBJECT_CLASS = "Group Object Class (defaults to groupOfNames)";
         public static final String GROUP_ID_ATTRIBUTE = "Group Id Attribute (defaults to cn)";
         public static final String GROUP_MEMBER_ATTRIBUTE = "Group Member Attribute (defaults to member)";
+        public static final String AMBARI_ADMIN_GROUP = "LDAP group for Ambari administrators";
     }
 
     public static class RDSConfigModelDescription {

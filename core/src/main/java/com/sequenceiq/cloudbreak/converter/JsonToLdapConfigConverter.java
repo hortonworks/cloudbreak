@@ -40,6 +40,7 @@ public class JsonToLdapConfigConverter extends AbstractConversionServiceAwareCon
         config.setGroupObjectClass(json.getGroupObjectClass() != null ? json.getGroupObjectClass() : "groupOfNames");
         config.setGroupNameAttribute(json.getGroupNameAttribute() != null ? json.getGroupNameAttribute() : "cn");
         config.setGroupMemberAttribute(json.getGroupMemberAttribute() != null ? json.getGroupMemberAttribute() : "member");
+        config.setAmbariAdminGroup(json.getAmbariAdminGroup());
         return config;
     }
 }

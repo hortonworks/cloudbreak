@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.domain;
 
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -75,6 +74,8 @@ public class LdapConfig implements ProvisionEntity {
     private String groupMemberAttribute;
 
     private String domain;
+
+    private String ambariAdminGroup;
 
     public Long getId() {
         return id;
@@ -234,5 +235,13 @@ public class LdapConfig implements ProvisionEntity {
 
     public void setDomain(String domain) {
         this.domain = domain;
+    }
+
+    public String getAmbariAdminGroup() {
+        return ambariAdminGroup;
+    }
+
+    public void setAmbariAdminGroup(String ambariAdminGroup) {
+        this.ambariAdminGroup = ambariAdminGroup;
     }
 }
