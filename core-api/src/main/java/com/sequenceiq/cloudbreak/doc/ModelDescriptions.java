@@ -253,6 +253,7 @@ public class ModelDescriptions {
         public static final String VERIFY = "whether to verify or not the repo url";
         public static final String REPOSITORY_VERSION = "version of the repository for VDF file creation in Ambari";
         public static final String VDF_URL = "local path on the Ambari server or URL that point to the desired VDF file";
+        public static final String MPACK_URL = "url the MPACK that needs to be installed before HDF installation";
     }
 
     public static class RDSConfig {
