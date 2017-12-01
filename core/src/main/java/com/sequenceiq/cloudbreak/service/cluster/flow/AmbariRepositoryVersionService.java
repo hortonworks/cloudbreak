@@ -145,6 +145,7 @@ public class AmbariRepositoryVersionService {
         }
 
         if (vdfUrl.isPresent()) {
+            LOGGER.info("VDF request has been sent to Ambari with VDF url: '{}'.", vdfUrl.get());
             String vdf = ambariClient.createVersionDefinition(vdfUrl.get());
             LOGGER.info("VDF request has been sent to Ambari: '{}'.", JsonUtil.minify(vdf));
         } else {

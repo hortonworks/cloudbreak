@@ -47,6 +47,10 @@ public class JsonToHDPRepoConverter extends AbstractConversionServiceAwareConver
             stack.put(StackRepoDetails.CUSTOM_VDF_REPO_KEY, source.getVersionDefinitionFileUrl());
         }
 
+        if (!StringUtils.isEmpty(source.getMpackUrl())) {
+            stack.put(StackRepoDetails.MPACK_TAG, source.getMpackUrl());
+        }
+
         repo.setStack(stack);
         repo.setUtil(util);
         repo.setVerify(source.getVerify());

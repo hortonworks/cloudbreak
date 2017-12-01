@@ -45,6 +45,9 @@ public class AmbariStackDetailsJson implements JsonEntity {
     @ApiModelProperty(value = AmbariStackDetailsDescription.VDF_URL)
     private String versionDefinitionFileUrl;
 
+    @ApiModelProperty(value = AmbariStackDetailsDescription.MPACK_URL)
+    private String mpackUrl;
+
     public String getStack() {
         return stack;
     }
@@ -123,5 +126,13 @@ public class AmbariStackDetailsJson implements JsonEntity {
 
     public void setVersionDefinitionFileUrl(String versionDefinitionFileUrl) {
         this.versionDefinitionFileUrl = versionDefinitionFileUrl;
+    }
+
+    public String getMpackUrl() {
+        return mpackUrl;
+    }
+
+    public void setMpackUrl(String mpackUrl) {
+        this.mpackUrl = mpackUrl;
     }
 }
