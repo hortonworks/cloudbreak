@@ -29,7 +29,8 @@ start_nginx() {
   sudo mkdir -p /etc/nginx/sites-enabled/
   sudo mv /tmp/ssl.conf /etc/nginx/sites-enabled/ssl.conf
   sudo mkdir -p /usr/share/nginx/json/
-  sudo service nginx restart
+  # sudo service nginx restart
+  sudo pkill -1 -P 1 nginx
   sudo chkconfig nginx on
 }
 

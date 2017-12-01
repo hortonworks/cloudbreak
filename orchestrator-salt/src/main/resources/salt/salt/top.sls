@@ -4,7 +4,7 @@ base:
     - unbound
     - java
     - metadata
-    - nginx
+    # - nginx
     - docker
 
   'roles:kerberos_server_master':

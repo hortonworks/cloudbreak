@@ -97,17 +97,21 @@ public class YarnResourceConnector implements ResourceConnector<Object> {
             resource.setMemory(instanceTemplate.getParameter(PlatformParametersConsts.CUSTOM_INSTANCETYPE_MEMORY, Integer.class));
             component.setResource(resource);
             component.setRunPrivilegedContainer(true);
-            Map<String, String> propsMap = Maps.newHashMap();
-            propsMap.put("site.cb-conf.userData", Base64.getEncoder().encodeToString(userData.getBytes()));
-            propsMap.put("site.cb-conf.sshUser", stack.getLoginUserName());
-            propsMap.put("site.cb-conf.sshPubKey", stack.getPublicKey());
-            ConfigFile configFileJson = new ConfigFile();
-            configFileJson.setSrcFile("cb-conf");
-            configFileJson.setDestFile("/etc/cloudbreak-config.json");
-            configFileJson.setType(ConfigFileType.JSON.name());
+
             Configuration configuration = new Configuration();
+            Map<String, String> propsMap = Maps.newHashMap();
+            propsMap.put("conf.cb-conf.per.component", "true");
+            propsMap.put("site.cb-conf.userData", "'" + Base64.getEncoder().encodeToString(userData.getBytes()) + "'");
+            propsMap.put("site.cb-conf.sshUser", "'" + stack.getLoginUserName() + "'");
+            propsMap.put("site.cb-conf.groupname", "'" + group.getName() + "'");
+            propsMap.put("site.cb-conf.sshPubKey", "'" + stack.getPublicKey() + "'");
             configuration.setProperties(propsMap);
-            configuration.setFiles(Arrays.asList(configFileJson));
+            ConfigFile configFileProps = new ConfigFile();
+            configFileProps.setType(ConfigFileType.PROPERTIES.name());
+            configFileProps.setSrcFile("cb-conf");
+            configFileProps.setDestFile("/etc/cloudbreak-config.props");
+            configuration.setFiles(Arrays.asList(configFileProps));
+
             component.setConfiguration(configuration);
             components.add(component);
         }
