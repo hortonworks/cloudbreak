@@ -5,13 +5,14 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.jwt.Jwt;
 import org.springframework.security.jwt.JwtHelper;
-import org.springframework.security.jwt.crypto.sign.MacSigner;
+import org.springframework.security.jwt.crypto.sign.RsaVerifier;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.exceptions.InvalidTokenException;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
@@ -62,7 +63,7 @@ public class CachedRemoteTokenService implements ResourceServerTokenServices {
     @Override
     @Cacheable(cacheNames = "tokenCache", key = "#accessToken")
     public OAuth2Authentication loadAuthentication(String accessToken) throws AuthenticationException, InvalidTokenException {
-        if (jwtSignKey == null) {
+        if (StringUtils.isBlank(jwtSignKey)) {
             return getOAuth2Authentication(accessToken);
         }
         Jwt jwtToken = JwtHelper.decode(accessToken);
@@ -86,8 +87,7 @@ public class CachedRemoteTokenService implements ResourceServerTokenServices {
 
     private OAuth2Authentication getSSOAuthentication(String accessToken) {
         try {
-            // Jwt jwt = JwtHelper.decodeAndVerify(accessToken, new RsaVerifier(jwtSignKey));
-            Jwt jwt = JwtHelper.decodeAndVerify(accessToken, new MacSigner(jwtSignKey));
+            Jwt jwt = JwtHelper.decodeAndVerify(accessToken, new RsaVerifier(jwtSignKey));
             Map<String, Object> claims = objectMapper.readValue(jwt.getClaims(), new MapTypeReference());
             Object userClaim = claims.get("user");
             Map<String, Object> tokenMap = new HashMap<>();

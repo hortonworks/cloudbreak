@@ -20,7 +20,7 @@ public class RemoteTokenConfig {
     @Value("${cb.client.secret}")
     private String clientSecret;
 
-    @Value("${cb.jwt.signKey}")
+    @Value("${cb.jwt.signKey:}")
     private String jwtSignKey;
 
     @Inject
