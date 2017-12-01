@@ -27,7 +27,7 @@ public interface ClusterService {
 
     Cluster create(IdentityUser user, Stack stack, Cluster clusterRequest, List<ClusterComponent> component);
 
-    void delete(Long stackId);
+    void delete(Long stackId, Boolean withStackDelete, Boolean deleteDependencies);
 
     Cluster retrieveClusterByStackId(Long stackId);
 

@@ -262,14 +262,14 @@ public class AmbariClusterService implements ClusterService {
     }
 
     @Override
-    public void delete(Long stackId) {
+    public void delete(Long stackId, Boolean withStackDelete, Boolean deleteDependencies) {
         Stack stack = stackService.get(stackId);
         authorizationService.hasWritePermission(stack);
-        if (stack.getCluster() != null && Status.DELETE_COMPLETED.equals(stack.getCluster().getStatus())) {
+        if (stack.getCluster() == null || stack.getCluster() != null && Status.DELETE_COMPLETED.equals(stack.getCluster().getStatus())) {
             throw new BadRequestException("Clusters is already deleted.");
         }
         LOGGER.info("Cluster delete requested.");
-        flowManager.triggerClusterTermination(stackId);
+        flowManager.triggerClusterTermination(stackId, withStackDelete, deleteDependencies);
     }
 
     @Override
@@ -325,14 +325,8 @@ public class AmbariClusterService implements ClusterService {
 
     @Override
     public String getClusterJson(String ambariIp, Long stackId) {
-        Stack stack = stackService.get(stackId);
-        if (stack.getAmbariIp() == null) {
-            throw new NotFoundException(String.format("Ambari server is not available for the stack.[id: %s]", stackId));
-        }
-        Cluster cluster = stack.getCluster();
         try {
-            HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfigForPrimaryGateway(stackId, cluster.getAmbariIp());
-            AmbariClient ambariClient = ambariClientProvider.getAmbariClient(clientConfig, stack.getGatewayPort(), cluster);
+            AmbariClient ambariClient = getAmbariClient(stackId);
             String clusterJson = ambariClient.getClusterAsJson();
             if (clusterJson == null) {
                 throw new BadRequestException(String.format("Cluster response coming from Ambari server was null. [Ambari Server IP: '%s']", ambariIp));
@@ -614,13 +608,8 @@ public class AmbariClusterService implements ClusterService {
     @Transactional(TxType.NEVER)
     public Cluster updateClusterMetadata(Long stackId) {
         Stack stack = stackService.getById(stackId);
-        Cluster cluster = stack.getCluster();
-        if (cluster == null) {
-            throw new BadRequestException(String.format("There is no cluster installed on stack '%s'.", stackId));
-        }
         try {
-            HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfigForPrimaryGateway(stackId, cluster.getAmbariIp());
-            AmbariClient ambariClient = ambariClientProvider.getAmbariClient(clientConfig, stack.getGatewayPort(), cluster);
+            AmbariClient ambariClient = getAmbariClient(stack);
             Map<String, Integer> hostGroupCounter = new HashMap<>();
             Set<HostMetadata> hosts = hostMetadataRepository.findHostsInCluster(stack.getCluster().getId());
             Map<String, String> hostStatuses = ambariClient.getHostStatuses();
@@ -637,11 +626,11 @@ public class AmbariClusterService implements ClusterService {
                     }
                 }
             }
-            hostGroupCounter(cluster.getId(), hostGroupCounter);
+            hostGroupCounter(stack.getCluster().getId(), hostGroupCounter);
         } catch (CloudbreakSecuritySetupException e) {
             throw new CloudbreakServiceException(e);
         }
-        return cluster;
+        return stack.getCluster();
     }
 
     private void hostGroupCounter(Long clusterId, Map<String, Integer> hostGroupCounter) {
@@ -718,7 +707,7 @@ public class AmbariClusterService implements ClusterService {
             containerOrchestrator = false;
         }
         if (containerOrchestrator) {
-            clusterTerminationService.deleteClusterContainers(cluster.getId());
+            clusterTerminationService.deleteClusterComponents(cluster.getId());
             cluster = clusterRepository.findById(stack.getCluster().getId());
         }
 
@@ -870,13 +859,11 @@ public class AmbariClusterService implements ClusterService {
     }
 
     private void validateComponentsCategory(Stack stack, String hostGroup) throws CloudbreakSecuritySetupException {
-        Cluster cluster = stack.getCluster();
-        HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfigForPrimaryGateway(stack.getId(), cluster.getAmbariIp());
-        AmbariClient ambariClient = ambariClientProvider.getAmbariClient(clientConfig, stack.getGatewayPort(), cluster);
-        Blueprint blueprint = cluster.getBlueprint();
+        Blueprint blueprint = stack.getCluster().getBlueprint();
         try {
             JsonNode root = JsonUtil.readTree(blueprint.getBlueprintText());
             String blueprintName = root.path("Blueprints").path("blueprint_name").asText();
+            AmbariClient ambariClient = getAmbariClient(stack);
             Map<String, String> categories = ambariClient.getComponentsCategory(blueprintName, hostGroup);
             for (Entry<String, String> entry : categories.entrySet()) {
                 if (entry.getValue().equalsIgnoreCase(MASTER_CATEGORY)) {
@@ -956,10 +943,8 @@ public class AmbariClusterService implements ClusterService {
     @Override
     public ConfigsResponse retrieveOutputs(Long stackId, Set<BlueprintParameterJson> requests) throws CloudbreakSecuritySetupException, IOException {
         Stack stack = stackService.get(stackId);
+        AmbariClient ambariClient = getAmbariClient(stack);
         Cluster cluster = stack.getCluster();
-        HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfigForPrimaryGateway(stack.getId(), cluster.getAmbariIp());
-
-        AmbariClient ambariClient = ambariClientProvider.getAmbariClient(clientConfig, stack.getGatewayPort(), cluster);
 
         List<String> targets = new ArrayList<>();
         Map<String, String> bpI = new HashMap<>();
@@ -1042,7 +1027,14 @@ public class AmbariClusterService implements ClusterService {
 
     private AmbariClient getAmbariClient(Long stackId) throws CloudbreakSecuritySetupException {
         Stack stack = stackService.getByIdWithLists(stackId);
-        HttpClientConfig httpClientConfig = tlsSecurityService.buildTLSClientConfigForPrimaryGateway(stackId, stack.getAmbariIp());
+        return getAmbariClient(stack);
+    }
+
+    private AmbariClient getAmbariClient(Stack stack) throws CloudbreakSecuritySetupException {
+        if (stack.getAmbariIp() == null) {
+            throw new NotFoundException(String.format("Ambari server is not available for the stack.[id: %s]", stack.getId()));
+        }
+        HttpClientConfig httpClientConfig = tlsSecurityService.buildTLSClientConfigForPrimaryGateway(stack.getId(), stack.getAmbariIp());
         AmbariClient ambariClient = ambariClientProvider.getAmbariClient(httpClientConfig, stack.getGatewayPort(), stack.getCluster());
         return ambariClient;
     }

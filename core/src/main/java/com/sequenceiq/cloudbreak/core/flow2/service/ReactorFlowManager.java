@@ -186,16 +186,22 @@ public class ReactorFlowManager {
         notify(selector, new StackEvent(selector, stackId));
     }
 
-    public void triggerClusterTermination(Long stackId) {
+    public void triggerClusterTermination(Long stackId, Boolean withStackDelete, Boolean deleteDependencies) {
         Stack stack = stackService.get(stackId);
         if (BYOS.equals(stack.cloudPlatform())) {
             String selector = FlowChainTriggers.BYOS_CLUSTER_TERMINATION_TRIGGER_EVENT;
             notify(selector, new StackEvent(selector, stackId, null));
         } else {
-            String selector = ClusterTerminationEvent.TERMINATION_EVENT.event();
-            notify(selector, new StackEvent(selector, stackId));
+            Boolean secure = stack.getCluster().isSecure();
+            if (withStackDelete) {
+                String selector = secure ? FlowChainTriggers.PROPER_TERMINATION_TRIGGER_EVENT : FlowChainTriggers.TERMINATION_TRIGGER_EVENT;
+                notify(selector, new TerminationEvent(selector, stackId, false, deleteDependencies));
+                cancelRunningFlows(stackId);
+            } else {
+                String selector = (secure ? ClusterTerminationEvent.PROPER_TERMINATION_EVENT : ClusterTerminationEvent.TERMINATION_EVENT).event();
+                notify(selector, new StackEvent(selector, stackId));
+            }
         }
-        cancelRunningFlows(stackId);
     }
 
     public void triggerManualRepairFlow(Long stackId) {

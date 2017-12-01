@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.core.flow;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyObject;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -23,7 +24,10 @@ import com.sequenceiq.cloudbreak.api.model.HostGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.cloud.Acceptable;
 import com.sequenceiq.cloudbreak.cloud.reactor.ErrorHandlerAwareReactorEventFactory;
+import com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainTriggers;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.termination.ClusterTerminationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
+import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.repair.UnhealthyInstances;
 
@@ -45,7 +49,7 @@ public class ReactorFlowManagerTest {
     private StackService stackService;
 
     @InjectMocks
-    private ReactorFlowManager flowManager;
+    private ReactorFlowManager underTest;
 
     private final Long stackId = 1L;
 
@@ -67,7 +71,9 @@ public class ReactorFlowManagerTest {
                 return stackId;
             }
         };
-        when(stackService.get(anyLong())).thenReturn(TestUtil.stack());
+        Stack stack = TestUtil.stack();
+        stack.setCluster(TestUtil.cluster());
+        when(stackService.get(anyLong())).thenReturn(stack);
         when(stackService.getById(anyLong())).thenReturn(TestUtil.stack());
         when(stackService.getByIdView(anyLong())).thenReturn(TestUtil.stackView());
         when(eventFactory.createEventWithErrHandler(anyObject())).thenReturn(new Event<>(acceptable));
@@ -78,40 +84,78 @@ public class ReactorFlowManagerTest {
         InstanceGroupAdjustmentJson instanceGroupAdjustment = new InstanceGroupAdjustmentJson();
         HostGroupAdjustmentJson hostGroupAdjustment = new HostGroupAdjustmentJson();
 
-        flowManager.triggerProvisioning(stackId);
-        flowManager.triggerClusterInstall(stackId);
-        flowManager.triggerClusterReInstall(stackId);
-        flowManager.triggerStackStop(stackId);
-        flowManager.triggerStackStart(stackId);
-        flowManager.triggerClusterStop(stackId);
-        flowManager.triggerClusterStart(stackId);
-        flowManager.triggerTermination(stackId, false, false);
-        flowManager.triggerTermination(stackId, false, true);
-        flowManager.triggerStackUpscale(stackId, instanceGroupAdjustment, true);
-        flowManager.triggerStackDownscale(stackId, instanceGroupAdjustment);
-        flowManager.triggerStackRemoveInstance(stackId, "instanceId");
-        flowManager.triggerClusterUpscale(stackId, hostGroupAdjustment);
-        flowManager.triggerClusterDownscale(stackId, hostGroupAdjustment);
-        flowManager.triggerClusterSync(stackId);
-        flowManager.triggerStackSync(stackId);
-        flowManager.triggerFullSync(stackId);
-        flowManager.triggerClusterCredentialReplace(stackId, "admin", "admin1");
-        flowManager.triggerClusterCredentialUpdate(stackId, "admin1");
-        flowManager.triggerClusterTermination(stackId);
-        flowManager.triggerClusterUpgrade(stackId);
-        flowManager.triggerManualRepairFlow(stackId);
-        flowManager.triggerStackRepairFlow(stackId, new UnhealthyInstances());
-        flowManager.triggerClusterRepairFlow(stackId, new HashMap<>(), true);
-        flowManager.triggerEphemeralUpdate(stackId);
+        underTest.triggerProvisioning(stackId);
+        underTest.triggerClusterInstall(stackId);
+        underTest.triggerClusterReInstall(stackId);
+        underTest.triggerStackStop(stackId);
+        underTest.triggerStackStart(stackId);
+        underTest.triggerClusterStop(stackId);
+        underTest.triggerClusterStart(stackId);
+        underTest.triggerTermination(stackId, false, false);
+        underTest.triggerTermination(stackId, false, true);
+        underTest.triggerStackUpscale(stackId, instanceGroupAdjustment, true);
+        underTest.triggerStackDownscale(stackId, instanceGroupAdjustment);
+        underTest.triggerStackRemoveInstance(stackId, "instanceId");
+        underTest.triggerClusterUpscale(stackId, hostGroupAdjustment);
+        underTest.triggerClusterDownscale(stackId, hostGroupAdjustment);
+        underTest.triggerClusterSync(stackId);
+        underTest.triggerStackSync(stackId);
+        underTest.triggerFullSync(stackId);
+        underTest.triggerClusterCredentialReplace(stackId, "admin", "admin1");
+        underTest.triggerClusterCredentialUpdate(stackId, "admin1");
+        underTest.triggerClusterTermination(stackId, false, false);
+        underTest.triggerClusterTermination(stackId, true, false);
+        underTest.triggerClusterUpgrade(stackId);
+        underTest.triggerManualRepairFlow(stackId);
+        underTest.triggerStackRepairFlow(stackId, new UnhealthyInstances());
+        underTest.triggerClusterRepairFlow(stackId, new HashMap<>(), true);
+        underTest.triggerEphemeralUpdate(stackId);
 
-        int count = 0;
-        for (Method method : flowManager.getClass().getDeclaredMethods()) {
+        // Not start from 0 because flow cancellations
+        int count = 5;
+        for (Method method : underTest.getClass().getDeclaredMethods()) {
             if (method.getName().startsWith("trigger")) {
                 count++;
             }
         }
-        // Termination triggers flow cancellation
-        count += 4;
         verify(reactor, times(count)).notify((Object) anyObject(), any(Event.class));
+    }
+
+    @Test
+    public void testClusterTerminationOnlyNotSecuredCluster() {
+        underTest.triggerClusterTermination(1L, false, false);
+
+        verify(reactor).notify(eq(ClusterTerminationEvent.TERMINATION_EVENT.event()), any(Event.class));
+    }
+
+    @Test
+    public void testClusterTerminationOnlySecuredCluster() {
+        Stack stack = TestUtil.stack();
+        stack.setCluster(TestUtil.cluster());
+        stack.getCluster().setSecure(true);
+        when(stackService.get(anyLong())).thenReturn(stack);
+
+        underTest.triggerClusterTermination(1L, false, false);
+
+        verify(reactor).notify(eq(ClusterTerminationEvent.PROPER_TERMINATION_EVENT.event()), any(Event.class));
+    }
+
+    @Test
+    public void testClusterTerminationNotSecuredClusterAndStack() {
+        underTest.triggerClusterTermination(1L, true, false);
+
+        verify(reactor).notify(eq(FlowChainTriggers.TERMINATION_TRIGGER_EVENT), any(Event.class));
+    }
+
+    @Test
+    public void testClusterTerminationSecuredClusterAndStack() {
+        Stack stack = TestUtil.stack();
+        stack.setCluster(TestUtil.cluster());
+        stack.getCluster().setSecure(true);
+        when(stackService.get(anyLong())).thenReturn(stack);
+
+        underTest.triggerClusterTermination(1L, true, false);
+
+        verify(reactor).notify(eq(FlowChainTriggers.PROPER_TERMINATION_TRIGGER_EVENT), any(Event.class));
     }
 }

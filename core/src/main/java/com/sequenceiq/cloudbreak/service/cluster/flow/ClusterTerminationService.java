@@ -25,6 +25,8 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.model.FileSystemConfiguration;
 import com.sequenceiq.cloudbreak.api.model.FileSystemType;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
+import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorType;
+import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ContainerOrchestratorResolver;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Constraint;
@@ -68,15 +70,28 @@ public class ClusterTerminationService {
     private ContainerRepository containerRepository;
 
     @Inject
+    private OrchestratorTypeResolver orchestratorTypeResolver;
+
+    @Inject
     private ContainerOrchestratorResolver containerOrchestratorResolver;
 
     @Inject
     private ComponentConfigProvider componentConfigProvider;
 
-    public Boolean deleteClusterContainers(Long clusterId) {
+    public Boolean deleteClusterComponents(Long clusterId) {
         Cluster cluster = clusterRepository.findById(clusterId);
         if (cluster == null) {
             LOGGER.warn("Failed to delete containers of cluster (id:'{}'), because the cluster could not be found in the database.", clusterId);
+            return Boolean.TRUE;
+        }
+        OrchestratorType orchestratorType;
+        try {
+            orchestratorType = orchestratorTypeResolver.resolveType(cluster.getStack().getOrchestrator().getType());
+        } catch (CloudbreakException e) {
+            throw new TerminationFailedException(String.format("Failed to delete containers of cluster (id:'%s',name:'%s').",
+                    cluster.getId(), cluster.getName()), e);
+        }
+        if (orchestratorType.hostOrchestrator()) {
             return Boolean.TRUE;
         }
         return deleteClusterContainers(cluster);

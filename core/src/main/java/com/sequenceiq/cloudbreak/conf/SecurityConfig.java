@@ -61,6 +61,8 @@ public class SecurityConfig {
 
         private static final String[] STACK_URL_PATTERNS = {API_ROOT_CONTEXT + "/v1/stacks/**", API_ROOT_CONTEXT + "/v2/stacks/**"};
 
+        private static final String[] CLUSTER_URL_PATTERNS = {API_ROOT_CONTEXT + "/v1/clusters/**"};
+
         private static final String[] STACK_TEMPLATE_URL_PATTERNS = {API_ROOT_CONTEXT + "/v1/clustertemplates/**"};
 
         private static final String ACCOUNT_PREFERENCES = API_ROOT_CONTEXT + "/v1/accountpreferences/**";
@@ -124,6 +126,9 @@ public class SecurityConfig {
                     .antMatchers(HttpMethod.GET, STACK_URL_PATTERNS)
                     .access("#oauth2.hasScope('cloudbreak.stacks.read') or #oauth2.hasScope('cloudbreak.stacks')"
                             + " or #oauth2.hasScope('cloudbreak.autoscale')")
+                    .antMatchers(HttpMethod.GET, CLUSTER_URL_PATTERNS)
+                    .access("#oauth2.hasScope('cloudbreak.stacks.read') or #oauth2.hasScope('cloudbreak.stacks')"
+                            + " or #oauth2.hasScope('cloudbreak.autoscale')")
                     .antMatchers(HttpMethod.GET, IMAGE_CATALOG_PATTERN)
                     .access("#oauth2.hasScope('cloudbreak.templates.read') or #oauth2.hasScope('cloudbreak.templates')")
                     .antMatchers(HttpMethod.GET, ACCOUNT_PREFERENCES)
@@ -137,6 +142,7 @@ public class SecurityConfig {
                     .antMatchers(NETWORK_URL_PATTERNS).access("#oauth2.hasScope('cloudbreak.networks')")
                     .antMatchers(SECURITYGROUP_URL_PATTERNS).access("#oauth2.hasScope('cloudbreak.securitygroups')")
                     .antMatchers(STACK_URL_PATTERNS).access("#oauth2.hasScope('cloudbreak.stacks') or #oauth2.hasScope('cloudbreak.autoscale')")
+                    .antMatchers(CLUSTER_URL_PATTERNS).access("#oauth2.hasScope('cloudbreak.stacks') or #oauth2.hasScope('cloudbreak.autoscale')")
                     .antMatchers(STACK_TEMPLATE_URL_PATTERNS).access("#oauth2.hasScope('cloudbreak.stacks')")
                     .antMatchers(SECURITY_RULE_URL_PATTERNS).access("#oauth2.hasScope('cloudbreak.securitygroups')")
                     .antMatchers(ACCOUNT_PREFERENCES)

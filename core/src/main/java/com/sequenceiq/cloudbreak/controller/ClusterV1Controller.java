@@ -98,10 +98,10 @@ public class ClusterV1Controller implements ClusterV1Endpoint {
     }
 
     @Override
-    public void delete(Long stackId) {
+    public void delete(Long stackId, Boolean withStackDelete, Boolean deleteDependencies) {
         Stack stack = stackService.get(stackId);
         MDCBuilder.buildMdcContext(stack);
-        clusterService.delete(stackId);
+        clusterService.delete(stackId, withStackDelete, deleteDependencies);
     }
 
     @Override

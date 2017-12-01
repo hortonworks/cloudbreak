@@ -8,7 +8,9 @@ import static com.sequenceiq.cloudbreak.service.PollingResult.isTimeout;
 import static com.sequenceiq.cloudbreak.service.cluster.flow.AmbariOperationService.AMBARI_POLLING_INTERVAL;
 import static com.sequenceiq.cloudbreak.service.cluster.flow.AmbariOperationService.MAX_ATTEMPTS_FOR_AMBARI_SERVER_STARTUP;
 import static com.sequenceiq.cloudbreak.service.cluster.flow.AmbariOperationService.MAX_ATTEMPTS_FOR_HOSTS;
+import static com.sequenceiq.cloudbreak.service.cluster.flow.AmbariOperationType.DISABLE_KERBEROS_STATE;
 import static com.sequenceiq.cloudbreak.service.cluster.flow.AmbariOperationType.INSTALL_AMBARI_PROGRESS_STATE;
+import static com.sequenceiq.cloudbreak.service.cluster.flow.AmbariOperationType.PREPARE_DEKERBERIZING;
 import static com.sequenceiq.cloudbreak.service.cluster.flow.AmbariOperationType.SMOKE_TEST_AMBARI_PROGRESS_STATE;
 import static com.sequenceiq.cloudbreak.service.cluster.flow.AmbariOperationType.START_AMBARI_PROGRESS_STATE;
 import static com.sequenceiq.cloudbreak.service.cluster.flow.AmbariOperationType.START_OPERATION_STATE;
@@ -28,6 +30,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.annotation.Resource;
 import javax.inject.Inject;
@@ -108,6 +111,7 @@ import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.flow.AmbariStartupListenerTask;
 import com.sequenceiq.cloudbreak.service.stack.flow.AmbariStartupPollerObject;
 import com.sequenceiq.cloudbreak.util.AmbariClientExceptionUtil;
@@ -265,6 +269,9 @@ public class AmbariClusterConnector {
     @Inject
     private AmbariRepositoryVersionService ambariRepositoryVersionService;
 
+    @Inject
+    private StackService stackService;
+
     public void waitForAmbariServer(Stack stack) throws CloudbreakException {
         AmbariClient defaultAmbariClient = getDefaultAmbariClient(stack);
         AmbariClient cloudbreakAmbariClient = getAmbariClient(stack);
@@ -328,6 +335,47 @@ public class AmbariClusterConnector {
             throw new AmbariOperationFailedException("Ambari could not create the cluster: " + errorMessage, hre);
         } catch (Exception e) {
             LOGGER.error("Error while building the Ambari cluster. Message {}, throwable: {}", e.getMessage(), e);
+            throw new AmbariOperationFailedException(e.getMessage(), e);
+        }
+    }
+
+    public void prepareClusterToDekerberizing(Long stackId) {
+        try {
+            Stack stack = stackService.getByIdWithLists(stackId);
+            AmbariClient ambariClient = getAmbariClient(stack);
+            Map<String, Integer> operationRequests = new HashMap<>();
+            Stream.of("ZOOKEEPER", "HDFS", "YARN", "MAPREDUCE2", "KERBEROS").forEach(s -> {
+                int opId = s.equals("ZOOKEEPER") ? ambariClient.startService(s) : ambariClient.stopService(s);
+                if (opId != -1) {
+                    operationRequests.put(s + "_SERVICE_STATE", opId);
+                }
+            });
+            if (operationRequests.isEmpty()) {
+                return;
+            }
+            PollingResult pollingResult = ambariOperationService.waitForOperations(stack, ambariClient, operationRequests, PREPARE_DEKERBERIZING);
+            checkPollingResult(pollingResult, cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_PREPARE_DEKERBERIZING_FAILED.code()));
+        } catch (CancellationException cancellationException) {
+            throw cancellationException;
+        } catch (Exception e) {
+            throw new AmbariOperationFailedException(e.getMessage(), e);
+        }
+    }
+
+    public void disableKerberos(Long stackId) {
+        try {
+            Stack stack = stackService.getByIdWithLists(stackId);
+            AmbariClient ambariClient = getAmbariClient(stack);
+            int opId = ambariClient.disableKerberos();
+            if (opId == -1) {
+                return;
+            }
+            Map<String, Integer> operationRequests = singletonMap("DISABLE_KERBEROS_REQUEST", opId);
+            PollingResult pollingResult = ambariOperationService.waitForOperations(stack, ambariClient, operationRequests, DISABLE_KERBEROS_STATE);
+            checkPollingResult(pollingResult, cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_DISABLE_KERBEROS_FAILED.code()));
+        } catch (CancellationException cancellationException) {
+            throw cancellationException;
+        } catch (Exception e) {
             throw new AmbariOperationFailedException(e.getMessage(), e);
         }
     }
@@ -919,6 +967,8 @@ public class AmbariClusterConnector {
         AMBARI_CLUSTER_HOST_JOIN_FAILED("ambari.cluster.host.join.failed"),
         AMBARI_CLUSTER_INSTALL_FAILED("ambari.cluster.install.failed"),
         AMBARI_CLUSTER_UPSCALE_FAILED("ambari.cluster.upscale.failed"),
+        AMBARI_CLUSTER_PREPARE_DEKERBERIZING_FAILED("ambari.cluster.prepare.dekerberizing.failed"),
+        AMBARI_CLUSTER_DISABLE_KERBEROS_FAILED("ambari.cluster.disable.kerberos.failed"),
         AMBARI_CLUSTER_MR_SMOKE_FAILED("ambari.cluster.mr.smoke.failed"),
         AMBARI_CLUSTER_SERVICES_STARTING("ambari.cluster.services.starting"),
         AMBARI_CLUSTER_SERVICES_STARTED("ambari.cluster.services.started"),
