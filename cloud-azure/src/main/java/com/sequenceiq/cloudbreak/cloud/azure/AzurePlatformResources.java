@@ -107,7 +107,7 @@ public class AzurePlatformResources implements PlatformResources {
                 Map<String, Object> properties = new HashMap<>();
                 properties.put("resourceGroupName", securityGroup.resourceGroupName());
                 properties.put("networkInterfaceIds", securityGroup.networkInterfaceIds());
-                CloudSecurityGroup cloudSecurityGroup = new CloudSecurityGroup(securityGroup.name(), securityGroup.key(), properties);
+                CloudSecurityGroup cloudSecurityGroup = new CloudSecurityGroup(securityGroup.name(), securityGroup.id(), properties);
                 if (result.get(actualRegion) == null) {
                     result.put(actualRegion, new HashSet<>());
                 }

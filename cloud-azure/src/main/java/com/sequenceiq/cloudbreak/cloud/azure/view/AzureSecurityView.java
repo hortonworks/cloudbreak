@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.PortDefinition;
 import com.sequenceiq.cloudbreak.cloud.model.SecurityRule;
@@ -12,6 +14,8 @@ import com.sequenceiq.cloudbreak.cloud.model.SecurityRule;
 public class AzureSecurityView {
 
     private final Map<String, List<AzurePortView>> ports = new HashMap<>();
+
+    private final Map<String, String> securityGroupIds = new HashMap<>();
 
     public AzureSecurityView(List<Group> groups) {
         for (Group group : groups) {
@@ -27,6 +31,9 @@ public class AzureSecurityView {
                 }
             }
             ports.put(group.getName(), groupPorts);
+            if (StringUtils.isNotBlank(group.getSecurity().getCloudSecurityId())) {
+                securityGroupIds.put(group.getName(), group.getSecurity().getCloudSecurityId());
+            }
         }
     }
 
@@ -34,4 +41,7 @@ public class AzureSecurityView {
         return ports;
     }
 
+    public Map<String, String> getSecurityGroupIds() {
+        return securityGroupIds;
+    }
 }

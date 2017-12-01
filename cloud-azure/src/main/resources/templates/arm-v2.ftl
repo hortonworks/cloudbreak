@@ -118,7 +118,9 @@
                  <#if !noFirewallRules>
                  "dependsOn": [
                     <#list igs as group>
+                        <#if ! securityGroups[group.name]?? || ! securityGroups[group.name]?has_content>
                         "[concat('Microsoft.Network/networkSecurityGroups/', variables('${group.compressedName}secGroupName'))]"<#if (group_index + 1) != igs?size>,</#if>
+                        </#if>
                     </#list>
                  ],
                  </#if>
@@ -150,6 +152,7 @@
              </#if>
              <#if !noFirewallRules>
              <#list igs as group>
+             <#if ! securityGroups[group.name]?? || ! securityGroups[group.name]?has_content>
              {
                "apiVersion": "2015-05-01-preview",
                "type": "Microsoft.Network/networkSecurityGroups",
@@ -176,9 +179,9 @@
                            "priority": 101,
                            "direction": "Outbound"
                        }
-                   },
+                   }
                    <#list securities[group.name] as port>
-                   {
+                   ,{
                        "name": "endpoint${port_index}inr",
                        "properties": {
                            "protocol": "${port.capitalProtocol}",
@@ -190,11 +193,12 @@
                            "priority": ${port_index + 102},
                            "direction": "Inbound"
                        }
-                   }<#if (port_index + 1) != securities[group.name]?size>,</#if>
+                   }
                    </#list>
                    ]
                }
              },
+             </#if>
              </#list>
              </#if>
              <#list groups?keys as instanceGroup>
@@ -235,10 +239,16 @@
                    </#if>
                    "dependsOn": [
                        <#if !noFirewallRules>
+                       <#if ! securityGroups[instance.groupName]?? || ! securityGroups[instance.groupName]?has_content>
                        "[concat('Microsoft.Network/networkSecurityGroups/', variables('${instance.groupName?replace('_', '')}secGroupName'))]"
                        </#if>
+                       </#if>
                        <#if !noPublicIp>
-                       <#if !noFirewallRules>,</#if>
+                       <#if !noFirewallRules>
+                       <#if ! securityGroups[instance.groupName]?? || ! securityGroups[instance.groupName]?has_content>
+                       ,
+                       </#if>
+                       </#if>
                        "[concat('Microsoft.Network/publicIPAddresses/', parameters('publicIPNamePrefix'), '${instance.instanceId}')]"
                        </#if>
                        <#if !existingVPC>
@@ -249,7 +259,11 @@
                    "properties": {
                        <#if !noFirewallRules>
                        "networkSecurityGroup":{
+                           <#if securityGroups[instance.groupName]?? && securityGroups[instance.groupName]?has_content>
+                           "id": "${securityGroups[instance.groupName]}"
+                           <#else>
                             "id": "[resourceId('Microsoft.Network/networkSecurityGroups/', variables('${instance.groupName?replace('_', '')}secGroupName'))]"
+                           </#if>
                        },
                        </#if>
                        "ipConfigurations": [
