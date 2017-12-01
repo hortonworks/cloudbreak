@@ -176,7 +176,6 @@ public class ClusterToJsonConverterTest extends AbstractEntityConverterTest<Clus
             Object[] args = invocation.getArguments();
             return args[1];
         });
-        given(ambariViewProvider.isViewDefinitionNotProvided(any(Cluster.class))).willReturn(false);
         given(blueprintValidator.getHostGroupNode(any(Blueprint.class))).willReturn(jsonNode);
         given(jsonNode.iterator()).willReturn(mockIterator);
         given(mockIterator.hasNext()).willReturn(true).willReturn(false);

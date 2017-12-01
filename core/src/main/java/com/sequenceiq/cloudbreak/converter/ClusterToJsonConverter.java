@@ -24,7 +24,6 @@ import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.api.client.repackaged.com.google.common.base.Strings;
-import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.api.model.AmbariDatabaseDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.AmbariRepoDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsResponse;
@@ -38,7 +37,6 @@ import com.sequenceiq.cloudbreak.api.model.HostGroupResponse;
 import com.sequenceiq.cloudbreak.api.model.LdapConfigResponse;
 import com.sequenceiq.cloudbreak.api.model.Port;
 import com.sequenceiq.cloudbreak.api.model.RDSConfigResponse;
-import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariDatabase;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
@@ -47,7 +45,6 @@ import com.sequenceiq.cloudbreak.controller.json.JsonHelper;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.BlueprintValidator;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.StackServiceComponentDescriptor;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.StackServiceComponentDescriptors;
-import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.ExposedServices;
@@ -57,9 +54,6 @@ import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.service.ClusterComponentConfigProvider;
-import com.sequenceiq.cloudbreak.service.TlsSecurityService;
-import com.sequenceiq.cloudbreak.service.cluster.AmbariClientProvider;
-import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariViewProvider;
 import com.sequenceiq.cloudbreak.service.network.NetworkUtils;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
@@ -84,15 +78,6 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
 
     @Inject
     private RdsConfigService rdsConfigService;
-
-    @Inject
-    private TlsSecurityService tlsSecurityService;
-
-    @Inject
-    private AmbariClientProvider ambariClientProvider;
-
-    @Inject
-    private AmbariViewProvider ambariViewProvider;
 
     @Inject
     private JsonHelper jsonHelper;
@@ -133,7 +118,6 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
         if (source.getLdapConfig() != null) {
             clusterResponse.setLdapConfigId(source.getLdapConfig().getId());
         }
-        source = provideViewDefinitions(source);
         if (source.getAttributes() != null) {
             clusterResponse.setAttributes(source.getAttributes().getMap());
         }
@@ -264,22 +248,6 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
         }
     }
 
-    private Cluster provideViewDefinitions(Cluster source) {
-        if (!Strings.isNullOrEmpty(source.getAmbariIp()) && !source.getStatus().isStopPhaseActive()
-                && (source.getAttributes().getValue() == null || ambariViewProvider.isViewDefinitionNotProvided(source))) {
-            try {
-                HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfigForPrimaryGateway(source.getStack().getId(), source.getAmbariIp());
-                AmbariClient ambariClient = ambariClientProvider.getAmbariClient(clientConfig, source.getStack().getGatewayPort(), source);
-                return ambariViewProvider.provideViewInformation(ambariClient, source);
-            } catch (CloudbreakSecuritySetupException e) {
-                LOGGER.error("Unable to setup ambari client tls configs: ", e);
-            } catch (Exception ex) {
-                LOGGER.error("Unable to provide view definition on cluster with name {} and id {}: ", source.getName(), source.getId(), ex);
-            }
-        }
-        return source;
-    }
-
     private Set<BlueprintInputJson> convertBlueprintInputs(Json inputs) {
         Set<BlueprintInputJson> blueprintInputJsons = new HashSet<>();
         try {
@@ -340,7 +308,7 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
     }
 
     private void collectServicePorts(Map<String, String> result, Iterable<Port> ports, String ambariIp, String serviceAddress,
-            StackServiceComponentDescriptor componentDescriptor, Cluster cluster) throws IOException {
+        StackServiceComponentDescriptor componentDescriptor, Cluster cluster) throws IOException {
         if (componentDescriptor != null && componentDescriptor.isMaster()) {
             List<String> exposedServices = new ArrayList<>();
             Gateway gateway = cluster.getGateway();
@@ -355,21 +323,21 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
     }
 
     private void collectServicePort(Map<String, String> result, Port port, String serviceAddress, String ambariIp,
-            StackServiceComponentDescriptor componentDescriptor, Collection<String> exposedServices, Gateway gateway) {
+        StackServiceComponentDescriptor componentDescriptor, Collection<String> exposedServices, Gateway gateway) {
         if (port.getExposedService().getServiceName().equals(componentDescriptor.getName())) {
             if (gateway.getEnableGateway() && ambariIp != null) {
                 String url;
                 if (GatewayType.CENTRAL == gateway.getGatewayType()) {
                     url = String.format("/%s/%s%s", gateway.getPath(), gateway.getTopologyName(),
-                            port.getExposedService().getKnoxUrl());
+                        port.getExposedService().getKnoxUrl());
                 } else {
                     url = String.format("https://%s:8443/%s/%s%s", ambariIp, gateway.getPath(), gateway.getTopologyName(),
-                            port.getExposedService().getKnoxUrl());
+                        port.getExposedService().getKnoxUrl());
                 }
                 // filter out what is not exposed
                 // filter out what is not expected to be exposed e.g Zeppelin WS since it does not have Knox Url
                 if (!Strings.isNullOrEmpty(port.getExposedService().getKnoxUrl())
-                        && exposedServices.contains(port.getExposedService().getKnoxService())) {
+                    && exposedServices.contains(port.getExposedService().getKnoxService())) {
                     result.put(port.getExposedService().getPortName(), url);
                 }
             } else if (serviceAddress != null) {
