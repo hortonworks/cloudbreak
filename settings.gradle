@@ -19,8 +19,6 @@ include 'cloud-yarn'
 include 'core-api'
 include 'shell'
 include 'autoscale'
-include 'auth'
-include 'web'
 include 'autoscale-api'
 include 'structuredevent-model'
 
