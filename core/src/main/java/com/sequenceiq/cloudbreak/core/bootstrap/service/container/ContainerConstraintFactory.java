@@ -13,7 +13,6 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -44,9 +43,6 @@ public class ContainerConstraintFactory {
     private static final int AMBARI_PORT = 8080;
 
     private static final String HOSTNAME_SEPARATOR = "|";
-
-    @Value("#{'${cb.byos.dfs.data.dir}'.split(',')}")
-    private List<String> byosDfsDataDirs;
 
     @Inject
     private InstanceMetaDataRepository instanceMetaDataRepository;
@@ -126,13 +122,6 @@ public class ContainerConstraintFactory {
             builder.withDiskSize(hgConstraint.getConstraintTemplate().getDisk());
             Map<String, String> dataVolumeBinds = new HashMap<>();
             dataVolumeBinds.put("/var/log/ambari-agent-container", CONTAINER_VOLUME_PATH);
-            if (byosDfsDataDirs != null && !byosDfsDataDirs.isEmpty()) {
-                for (String dataDir : byosDfsDataDirs) {
-                    if (!"".equals(dataDir)) {
-                        dataVolumeBinds.put(dataDir, dataDir);
-                    }
-                }
-            }
             builder.addVolumeBindings(dataVolumeBinds);
             builder.cmd(new String[]{String.format(
                     "/usr/sbin/init systemd.setenv=AMBARI_SERVER_ADDR=%s systemd.setenv=USE_CONSUL_DNS=false", ambariServerHost)});

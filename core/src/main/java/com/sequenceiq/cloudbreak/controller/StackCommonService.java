@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.controller;
 
-import static com.sequenceiq.cloudbreak.common.type.CloudConstants.BYOS;
-
 import java.util.Map;
 import java.util.Set;
 
@@ -148,12 +146,10 @@ public class StackCommonService implements StackEndpoint {
         MDCBuilder.buildMdcContext(stack);
         if (updateRequest.getStatus() != null) {
             stackService.updateStatus(id, updateRequest.getStatus(), updateRequest.getWithClusterEvent());
-        } else if (!BYOS.equals(stack.cloudPlatform())) {
+        } else {
             Integer scalingAdjustment = updateRequest.getInstanceGroupAdjustment().getScalingAdjustment();
             validateAccountPreferences(id, scalingAdjustment);
             stackService.updateNodeCount(id, updateRequest.getInstanceGroupAdjustment(), updateRequest.getWithClusterEvent());
-        } else if (BYOS.equals(stack.cloudPlatform())) {
-            return Response.status(Status.BAD_REQUEST).build();
         }
         return Response.status(Status.NO_CONTENT).build();
     }

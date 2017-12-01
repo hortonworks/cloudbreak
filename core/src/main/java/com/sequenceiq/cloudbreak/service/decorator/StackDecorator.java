@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.service.decorator;
 
-import static com.sequenceiq.cloudbreak.common.type.CloudConstants.BYOS;
-
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -162,8 +160,7 @@ public class StackDecorator {
     private void prepareNetwork(Stack subject, Object networkId) {
         if (networkId != null) {
             subject.setNetwork(networkService.getById((Long) networkId));
-            if (subject.getOrchestrator() != null && ((subject.getOrchestrator().getApiEndpoint() != null || subject.getOrchestrator().getType() == null)
-                    && !BYOS.equals(subject.cloudPlatform()))) {
+            if (subject.getOrchestrator() != null && (subject.getOrchestrator().getApiEndpoint() != null || subject.getOrchestrator().getType() == null)) {
                 throw new BadRequestException("Orchestrator cannot be configured for the stack!");
             }
         }
@@ -252,7 +249,7 @@ public class StackDecorator {
 
     private void validate(Stack stack) {
         long instanceGroups = stack.getInstanceGroups().stream().filter(ig -> InstanceGroupType.GATEWAY.equals(ig.getInstanceGroupType())).count();
-        if (instanceGroups == 0 && !BYOS.equals(stack.cloudPlatform())) {
+        if (instanceGroups == 0) {
             throw new BadRequestException("Gateway instance group not configured");
         }
         int minNodeCount = ConsulServers.SINGLE_NODE_COUNT_LOW.getMin();

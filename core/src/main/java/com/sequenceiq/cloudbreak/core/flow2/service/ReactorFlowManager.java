@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.core.flow2.service;
 
-import static com.sequenceiq.cloudbreak.common.type.CloudConstants.BYOS;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.CLUSTER_CREATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.start.ClusterStartEvent.CLUSTER_START_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.sync.ClusterSyncEvent.CLUSTER_SYNC_EVENT;
@@ -41,7 +40,6 @@ import com.sequenceiq.cloudbreak.core.flow2.event.StackScaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackSyncTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.instance.termination.InstanceTerminationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationEvent;
-import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterRepairTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.EphemeralClusterUpdateTriggerEvent;
@@ -187,20 +185,14 @@ public class ReactorFlowManager {
     }
 
     public void triggerClusterTermination(Long stackId, Boolean withStackDelete, Boolean deleteDependencies) {
-        Stack stack = stackService.get(stackId);
-        if (BYOS.equals(stack.cloudPlatform())) {
-            String selector = FlowChainTriggers.BYOS_CLUSTER_TERMINATION_TRIGGER_EVENT;
-            notify(selector, new StackEvent(selector, stackId, null));
+        Boolean secure = stackService.get(stackId).getCluster().isSecure();
+        if (withStackDelete) {
+            String selector = secure ? FlowChainTriggers.PROPER_TERMINATION_TRIGGER_EVENT : FlowChainTriggers.TERMINATION_TRIGGER_EVENT;
+            notify(selector, new TerminationEvent(selector, stackId, false, deleteDependencies));
+            cancelRunningFlows(stackId);
         } else {
-            Boolean secure = stack.getCluster().isSecure();
-            if (withStackDelete) {
-                String selector = secure ? FlowChainTriggers.PROPER_TERMINATION_TRIGGER_EVENT : FlowChainTriggers.TERMINATION_TRIGGER_EVENT;
-                notify(selector, new TerminationEvent(selector, stackId, false, deleteDependencies));
-                cancelRunningFlows(stackId);
-            } else {
-                String selector = (secure ? ClusterTerminationEvent.PROPER_TERMINATION_EVENT : ClusterTerminationEvent.TERMINATION_EVENT).event();
-                notify(selector, new StackEvent(selector, stackId));
-            }
+            String selector = (secure ? ClusterTerminationEvent.PROPER_TERMINATION_EVENT : ClusterTerminationEvent.TERMINATION_EVENT).event();
+            notify(selector, new StackEvent(selector, stackId));
         }
     }
 

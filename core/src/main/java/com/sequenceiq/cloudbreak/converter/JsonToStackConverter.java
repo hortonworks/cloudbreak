@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.converter;
 
 import static com.gs.collections.impl.utility.StringIterate.isEmpty;
 import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
-import static com.sequenceiq.cloudbreak.common.type.CloudConstants.BYOS;
 import static org.apache.commons.lang3.StringUtils.isNoneEmpty;
 
 import java.io.IOException;
@@ -113,17 +112,12 @@ public class JsonToStackConverter extends AbstractConversionServiceAwareConverte
     }
 
     private void validateStackAuthentication(StackRequest source) {
-        if (!BYOS.equals(source.getCloudPlatform())) {
-            if (source.getStackAuthentication() == null) {
-                throw new BadRequestException("You shoud define authentication for stack!");
-            } else {
-                if (Strings.isNullOrEmpty(source.getStackAuthentication().getPublicKey())
-                        && Strings.isNullOrEmpty(source.getStackAuthentication().getPublicKeyId())) {
-                    throw new BadRequestException("You should define the publickey or publickeyid!");
-                }
-            }
-        }
-        if (source.getStackAuthentication() != null && source.getStackAuthentication().getLoginUserName() != null) {
+        if (source.getStackAuthentication() == null) {
+            throw new BadRequestException("You shoud define authentication for stack!");
+        } else if (Strings.isNullOrEmpty(source.getStackAuthentication().getPublicKey())
+                && Strings.isNullOrEmpty(source.getStackAuthentication().getPublicKeyId())) {
+            throw new BadRequestException("You should define the publickey or publickeyid!");
+        } else if (source.getStackAuthentication() != null && source.getStackAuthentication().getLoginUserName() != null) {
             throw new BadRequestException("You can not modify the default user!");
         }
     }

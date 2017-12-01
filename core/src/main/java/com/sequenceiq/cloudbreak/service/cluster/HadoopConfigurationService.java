@@ -14,7 +14,6 @@ import java.util.Set;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -38,9 +37,6 @@ public class HadoopConfigurationService {
     private final Map<String, ServiceConfig> serviceConfigs = new HashMap<>();
 
     private final Map<String, Map<String, String>> bpConfigs = new HashMap<>();
-
-    @Value("#{'${cb.byos.dfs.data.dir}'.split('\\,')}")
-    private List<String> byosDfsDataDirs;
 
     @PostConstruct
     public void init() throws IOException {
@@ -144,7 +140,7 @@ public class HadoopConfigurationService {
     }
 
     private boolean configUpdateNeeded(HostGroup hostGroup) {
-        return hostGroup.getConstraint().getInstanceGroup() != null || (byosDfsDataDirs != null && !byosDfsDataDirs.isEmpty());
+        return hostGroup.getConstraint().getInstanceGroup() != null;
     }
 
     private List<ConfigProperty> toList(JsonNode nodes) {
@@ -188,14 +184,8 @@ public class HadoopConfigurationService {
             value = property.getPrefix() + getLogVolume(directory);
         } else if (volumeCount != null && volumeCount > 0) {
             value = global ? property.getPrefix() + getLogVolume(directory) : buildVolumePathString(volumeCount, directory);
-        } else if (byosDataDirIsSet()) {
-            value = global ? property.getPrefix() + byosDfsDataDirs.get(0) + '/' + directory : buildVolumePathString(byosDfsDataDirs, directory);
         }
         return value;
-    }
-
-    private boolean byosDataDirIsSet() {
-        return byosDfsDataDirs != null && !byosDfsDataDirs.isEmpty() && byosDfsDataDirs.get(0) != null && !byosDfsDataDirs.get(0).isEmpty();
     }
 
     private String getServiceName(String componentName) {

@@ -114,9 +114,6 @@ cb:
   gcp:
     hostkey.verify: false
 
-  byos:
-    dfs.data.dir: /hadoopfs/fs0
-
   nginx:
     port: 9443
 

@@ -161,7 +161,6 @@ public class ModelDescriptions {
         public static final String CUSTOM_CONTAINERS = "custom containers";
         public static final String CUSTOM_QUEUE = "custom queue for yarn orchestrator";
         public static final String EXECUTOR_TYPE = "executor type of cluster";
-        public static final String BYOS_REQUEST = "byos specific requests for cluster";
         public static final String CONNECTED_CLUSTER = "cluster can connect to a datalake you can define the parameters here";
         public static final String CLUSTER_ATTRIBUTES = "Additional information for ambari cluster";
         public static final String RDSCONFIG_IDS = "RDS configuration ids for the cluster";
