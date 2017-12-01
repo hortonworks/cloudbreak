@@ -9,7 +9,7 @@ public class TerminationEvent extends StackEvent {
     private Boolean forced = Boolean.FALSE;
 
     public TerminationEvent(String selector, Long stackId, Boolean forced, Boolean deleteDependencies) {
-        super(selector, stackId);
+        super(selector, stackId, null);
         this.deleteDependencies = deleteDependencies;
         this.forced = forced;
     }

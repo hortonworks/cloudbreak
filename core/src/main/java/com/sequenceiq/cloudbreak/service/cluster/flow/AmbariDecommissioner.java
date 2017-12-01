@@ -535,7 +535,9 @@ public class AmbariDecommissioner {
         try {
             for (String service : collectServicesToStart(ambariClient, runningComponents)) {
                 int requestId = ambariClient.startService(service);
-                requests.put(service + "_START", requestId);
+                if (requestId != -1) {
+                    requests.put(service + "_START", requestId);
+                }
             }
         } catch (Exception e) {
             LOGGER.error("Failed to start HDFS/YARN/HBASE services", e);

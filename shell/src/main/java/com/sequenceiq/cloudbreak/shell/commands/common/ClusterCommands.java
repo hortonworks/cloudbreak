@@ -455,7 +455,7 @@ public class ClusterCommands implements BaseCommands {
             } else {
                 stackId = shellContext.getStackId();
             }
-            shellContext.cloudbreakClient().clusterEndpoint().delete(Long.valueOf(stackId));
+            shellContext.cloudbreakClient().clusterEndpoint().delete(Long.valueOf(stackId), false, false);
             return "Cluster deletion started with stack id: " + stackId;
         } catch (Exception ex) {
             throw shellContext.exceptionTransformer().transformToRuntimeException(ex);

@@ -68,7 +68,7 @@ public class TerminationService {
             String terminatedName = stack.getName() + DELIMITER + now.getTime();
             Cluster cluster = stack.getCluster();
             if (cluster != null && orchestratorTypeResolver.resolveType(stack.getOrchestrator()).containerOrchestrator()) {
-                clusterTerminationService.deleteClusterContainers(cluster.getId());
+                clusterTerminationService.deleteClusterComponents(cluster.getId());
                 clusterTerminationService.finalizeClusterTermination(cluster.getId());
             } else {
                 if (!force && cluster != null) {
