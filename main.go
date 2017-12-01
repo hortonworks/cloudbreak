@@ -217,6 +217,18 @@ func main() {
 					},
 				},
 				{
+					Name:   "instances",
+					Usage:  "lists the available instance types",
+					Flags:  cb.NewFlagBuilder().AddAuthenticationFlags().AddFlags(cb.FlCredential, cb.FlRegion, cb.FlAvailabilityZoneOptional).AddOutputFlag().Build(),
+					Before: ConfigRead,
+					Action: cb.ListInstanceTypes,
+					BashComplete: func(c *cli.Context) {
+						for _, f := range cb.NewFlagBuilder().AddAuthenticationFlags().AddFlags(cb.FlCredential, cb.FlRegion, cb.FlAvailabilityZoneOptional).AddOutputFlag().Build() {
+							printFlagCompletion(f)
+						}
+					},
+				},
+				{
 					Name:   "regions",
 					Usage:  "lists the available regions",
 					Flags:  cb.NewFlagBuilder().AddAuthenticationFlags().AddFlags(cb.FlCredential).AddOutputFlag().Build(),
@@ -230,7 +242,7 @@ func main() {
 				},
 				{
 					Name:  "volumes",
-					Usage: "list the available volume types",
+					Usage: "lists the available volume types",
 					Subcommands: []cli.Command{
 						{
 							Name:   "aws",
@@ -268,18 +280,6 @@ func main() {
 								}
 							},
 						},
-					},
-				},
-				{
-					Name:   "instances",
-					Usage:  "list the available instance types",
-					Flags:  cb.NewFlagBuilder().AddAuthenticationFlags().AddFlags(cb.FlCredential, cb.FlRegion, cb.FlAvailabilityZoneOptional).AddOutputFlag().Build(),
-					Before: ConfigRead,
-					Action: cb.ListInstanceTypes,
-					BashComplete: func(c *cli.Context) {
-						for _, f := range cb.NewFlagBuilder().AddAuthenticationFlags().AddFlags(cb.FlCredential, cb.FlRegion, cb.FlAvailabilityZoneOptional).AddOutputFlag().Build() {
-							printFlagCompletion(f)
-						}
 					},
 				},
 			},
@@ -750,8 +750,9 @@ func main() {
 			},
 		},
 		{
-			Name:  "ldap",
-			Usage: "ldap related operations",
+			Name:   "ldap",
+			Usage:  "ldap related operations",
+			Hidden: true,
 			Subcommands: []cli.Command{
 				{
 					Name:  "create",
