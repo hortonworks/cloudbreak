@@ -12,7 +12,9 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.jwt.Jwt;
 import org.springframework.security.jwt.JwtHelper;
+import org.springframework.security.jwt.crypto.sign.MacSigner;
 import org.springframework.security.jwt.crypto.sign.RsaVerifier;
+import org.springframework.security.jwt.crypto.sign.SignatureVerifier;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.exceptions.InvalidTokenException;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
@@ -87,7 +89,8 @@ public class CachedRemoteTokenService implements ResourceServerTokenServices {
 
     private OAuth2Authentication getSSOAuthentication(String accessToken) {
         try {
-            Jwt jwt = JwtHelper.decodeAndVerify(accessToken, new RsaVerifier(jwtSignKey));
+            SignatureVerifier verifier = isAssymetricKey(jwtSignKey) ? new RsaVerifier(jwtSignKey) : new MacSigner(jwtSignKey);
+            Jwt jwt = JwtHelper.decodeAndVerify(accessToken, verifier);
             Map<String, Object> claims = objectMapper.readValue(jwt.getClaims(), new MapTypeReference());
             Object userClaim = claims.get("user");
             Map<String, Object> tokenMap = new HashMap<>();
@@ -116,6 +119,10 @@ public class CachedRemoteTokenService implements ResourceServerTokenServices {
             LOGGER.error("Failed to parse the JWT token", e);
             throw new InvalidTokenException("The specified JWT token is invalid", e);
         }
+    }
+
+    private boolean isAssymetricKey(String key) {
+        return key.startsWith("-----BEGIN");
     }
 
     private static class MapTypeReference extends TypeReference<Map<String, Object>> {

@@ -11,14 +11,13 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.security.jwt.crypto.sign.InvalidSignatureException;
 import org.springframework.security.oauth2.common.exceptions.InvalidTokenException;
+import org.springframework.security.oauth2.provider.OAuth2Authentication;
 
 import com.sequenceiq.cloudbreak.client.IdentityClient;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CachedRemoteTokenServiceTest {
-
-    private CachedRemoteTokenService cachedRemoteTokenService;
 
     private final String token;
 
@@ -32,9 +31,9 @@ public class CachedRemoteTokenServiceTest {
     @Test
     public void testLoadAuthenticationForInvalidPublicKey() throws IOException {
         String publicKey = FileReaderUtils.readFileFromClasspath("invalid_token_key.pub");
-        cachedRemoteTokenService = new CachedRemoteTokenService("clientId", "clientSecret", "http://localhost:8089", publicKey, identityClient);
+        CachedRemoteTokenService tokenService = new CachedRemoteTokenService("clientId", "clientSecret", "http://localhost:8089", publicKey, identityClient);
         try {
-            cachedRemoteTokenService.loadAuthentication(token);
+            tokenService.loadAuthentication(token);
         } catch (InvalidSignatureException e) {
             Assert.assertEquals("RSA Signature did not match content", e.getMessage());
         }
@@ -43,20 +42,50 @@ public class CachedRemoteTokenServiceTest {
     @Test
     public void testLoadAuthenticationForValidPublicKey() throws IOException {
         String publicKey = FileReaderUtils.readFileFromClasspath("valid_token_key.pub");
-        cachedRemoteTokenService = new CachedRemoteTokenService("clientId", "clientSecret", "http://localhost:8089", publicKey, identityClient);
+        CachedRemoteTokenService tokenService = new CachedRemoteTokenService("clientId", "clientSecret", "http://localhost:8089", publicKey, identityClient);
         try {
-            cachedRemoteTokenService.loadAuthentication(token);
+            tokenService.loadAuthentication(token);
         } catch (InvalidTokenException e) {
             Assert.assertEquals("The token has expired", e.getMessage());
         }
     }
 
     @Test
+    public void testLoadAuthenticationForInvalidMacKeyUsed() throws IOException {
+        CachedRemoteTokenService tokenService = new CachedRemoteTokenService("clientId", "clientSecret", "http://localhost:8089", "alma", identityClient);
+        try {
+            tokenService.loadAuthentication(token);
+        } catch (InvalidSignatureException e) {
+            Assert.assertEquals("Calculated signature did not match actual value", e.getMessage());
+        }
+    }
+
+    @Test
+    public void testLoadAuthenticationForValidMacKey() throws IOException {
+        String ssoToken = FileReaderUtils.readFileFromClasspath("sso_token_mac_signed.txt");
+        CachedRemoteTokenService tokenService = new CachedRemoteTokenService("clientId", "clientSecret", "http://localhost:8089", "alma", identityClient);
+        OAuth2Authentication oAuth2Authentication = tokenService.loadAuthentication(ssoToken);
+        Object principal = oAuth2Authentication.getPrincipal();
+        Assert.assertEquals("user1@acme1.com", principal);
+    }
+
+    @Test
+    public void testLoadAuthenticationForInvalidMacKey() throws IOException {
+        String ssoToken = FileReaderUtils.readFileFromClasspath("sso_token_mac_signed.txt");
+        CachedRemoteTokenService tokenService = new CachedRemoteTokenService("clientId", "clientSecret", "http://localhost:8089", "korte", identityClient);
+        try {
+            tokenService.loadAuthentication(ssoToken);
+        } catch (InvalidSignatureException e) {
+            Assert.assertEquals("Calculated signature did not match actual value", e.getMessage());
+        }
+    }
+
+    @Test
     public void testLoadAuthenticationWhenNoPublicKeyProvided() {
         when(identityClient.loadAuthentication(token, "clientSecret")).thenThrow(new InvalidTokenException("invalid_token"));
-        cachedRemoteTokenService = new CachedRemoteTokenService("clientId", "clientSecret", "http://localhost:8089", null, identityClient);
+        CachedRemoteTokenService tokenService = new CachedRemoteTokenService("clientId", "clientSecret", "http://localhost:8089", null, identityClient);
         try {
-            cachedRemoteTokenService.loadAuthentication(token);
+            tokenService.loadAuthentication(token);
         } catch (InvalidTokenException e) {
             Assert.assertEquals("invalid_token", e.getMessage());
         }
@@ -67,9 +96,9 @@ public class CachedRemoteTokenServiceTest {
         String oauthToken = FileReaderUtils.readFileFromClasspath("oauth_token.txt");
         when(identityClient.loadAuthentication(oauthToken, "clientSecret")).thenThrow(new InvalidTokenException("invalid_token"));
         String publicKey = FileReaderUtils.readFileFromClasspath("valid_token_key.pub");
-        cachedRemoteTokenService = new CachedRemoteTokenService("clientId", "clientSecret", "http://localhost:8089", publicKey, identityClient);
+        CachedRemoteTokenService tokenService = new CachedRemoteTokenService("clientId", "clientSecret", "http://localhost:8089", publicKey, identityClient);
         try {
-            cachedRemoteTokenService.loadAuthentication(oauthToken);
+            tokenService.loadAuthentication(oauthToken);
         } catch (InvalidTokenException e) {
             Assert.assertEquals("invalid_token", e.getMessage());
         }
@@ -79,8 +108,8 @@ public class CachedRemoteTokenServiceTest {
     public void testLoadAuthenticationWithOauthValidKey() throws IOException {
         String oauthToken = FileReaderUtils.readFileFromClasspath("oauth_token.txt");
         String publicKey = FileReaderUtils.readFileFromClasspath("valid_token_key.pub");
-        cachedRemoteTokenService = new CachedRemoteTokenService("clientId", "clientSecret", "http://localhost:8089", publicKey, identityClient);
-        cachedRemoteTokenService.loadAuthentication(oauthToken);
+        CachedRemoteTokenService tokenService = new CachedRemoteTokenService("clientId", "clientSecret", "http://localhost:8089", publicKey, identityClient);
+        tokenService.loadAuthentication(oauthToken);
     }
 
 }
