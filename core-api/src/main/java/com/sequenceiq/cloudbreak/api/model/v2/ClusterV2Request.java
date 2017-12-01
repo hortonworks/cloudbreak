@@ -51,10 +51,6 @@ public class ClusterV2Request implements JsonEntity {
     @ApiModelProperty(ClusterModelDescription.AMBARI_REQUEST)
     private AmbariV2Request ambariRequest;
 
-    @Valid
-    @ApiModelProperty(ClusterModelDescription.BYOS_REQUEST)
-    private ByosV2Request byosRequest;
-
     public Boolean getEmailNeeded() {
         return emailNeeded;
     }
@@ -127,13 +123,5 @@ public class ClusterV2Request implements JsonEntity {
 
     public void setAmbariRequest(AmbariV2Request ambariRequest) {
         this.ambariRequest = ambariRequest;
-    }
-
-    public ByosV2Request getByosRequest() {
-        return byosRequest;
-    }
-
-    public void setByosRequest(ByosV2Request byosRequest) {
-        this.byosRequest = byosRequest;
     }
 }

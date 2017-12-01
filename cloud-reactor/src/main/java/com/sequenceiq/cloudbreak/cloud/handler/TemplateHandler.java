@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.cloud.handler;
 
-import static com.sequenceiq.cloudbreak.common.type.CloudConstants.BYOS;
-
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -33,17 +31,12 @@ public class TemplateHandler implements CloudPlatformEventHandler<GetPlatformTem
         LOGGER.info("Received event: {}", platformTemplateRequestEvent);
         GetPlatformTemplateRequest request = platformTemplateRequestEvent.getData();
         String template = null;
-        if (!BYOS.equals(request.getCloudContext().getPlatformVariant().getVariant().value())) {
-            try {
-                CloudConnector connector = cloudPlatformConnectors.get(request.getCloudContext().getPlatformVariant());
-                if (connector != null) {
-                    template = connector.resources().getStackTemplate();
-                } else {
-                    throw new TemplatingDoesNotSupportedException();
-                }
-            } catch (TemplatingDoesNotSupportedException ignored) {
-                template = null;
+        try {
+            CloudConnector connector = cloudPlatformConnectors.get(request.getCloudContext().getPlatformVariant());
+            if (connector != null) {
+                template = connector.resources().getStackTemplate();
             }
+        } catch (TemplatingDoesNotSupportedException ignored) {
         }
         GetPlatformTemplateResult getPlatformTemplateResult = new GetPlatformTemplateResult(request, template);
         request.getResult().onNext(getPlatformTemplateResult);

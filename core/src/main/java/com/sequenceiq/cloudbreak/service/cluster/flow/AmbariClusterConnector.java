@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow;
 
-import static com.sequenceiq.cloudbreak.common.type.CloudConstants.BYOS;
 import static com.sequenceiq.cloudbreak.service.PollingResult.isExited;
 import static com.sequenceiq.cloudbreak.service.PollingResult.isFailure;
 import static com.sequenceiq.cloudbreak.service.PollingResult.isSuccess;
@@ -517,9 +516,6 @@ public class AmbariClusterConnector {
     public int startCluster(Stack stack) throws CloudbreakException {
         AmbariClient ambariClient = getAmbariClient(stack);
         waitForAmbariToStart(stack);
-        if (!BYOS.equals(stack.cloudPlatform())) {
-            startAmbariAgents(stack);
-        }
         return startAllServices(stack, ambariClient);
     }
 

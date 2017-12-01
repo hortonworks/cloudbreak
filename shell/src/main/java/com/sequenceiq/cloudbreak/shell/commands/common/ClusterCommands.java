@@ -127,12 +127,6 @@ public class ClusterCommands implements BaseCommands {
             @CliOption(key = "configStrategy", help = "Config recommendation strategy") ConfigStrategy strategy,
             @CliOption(key = "enableKnoxGateway", help = "Enable Knox Gateway",
                     unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean enableKnoxGateway,
-            @CliOption(key = "ambariServerImage", help = "Name of the ambari server image in case of BYOS orchestrator")
-                    String ambariServerImage,
-            @CliOption(key = "ambariAgentImage", help = "Name of the ambari agent image in case of BYOS orchestrator")
-                    String ambariAgentImage,
-            @CliOption(key = "ambariDbImage", help = "Name of the ambari db image in case of BYOS orchestrator")
-                    String ambariDbImage,
             @CliOption(key = "customQueue", help = "Name of the custom queue for yarn orchestrator",
                     unspecifiedDefaultValue = "default", specifiedDefaultValue = "default") String customQueue,
             @CliOption(key = "executorType", help = "Executor type of yarn") String executorType,
@@ -169,15 +163,6 @@ public class ClusterCommands implements BaseCommands {
             if (shellContext.isYarnMode()) {
                 CustomContainerRequest customContainerRequest = new CustomContainerRequest();
                 Map<String, String> images = new HashMap<>();
-                if (!Strings.isNullOrEmpty(ambariServerImage)) {
-                    images.put("ambari-server", ambariServerImage);
-                }
-                if (!Strings.isNullOrEmpty(ambariAgentImage)) {
-                    images.put("ambari-agent", ambariAgentImage);
-                }
-                if (!Strings.isNullOrEmpty(ambariDbImage)) {
-                    images.put("ambari_db", ambariDbImage);
-                }
                 if (!images.isEmpty()) {
                     customContainerRequest.setDefinitions(images);
                     clusterRequest.setCustomContainer(customContainerRequest);

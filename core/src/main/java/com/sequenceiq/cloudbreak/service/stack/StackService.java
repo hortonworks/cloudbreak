@@ -3,11 +3,8 @@ package com.sequenceiq.cloudbreak.service.stack;
 import static com.sequenceiq.cloudbreak.api.model.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.model.Status.STOPPED;
 import static com.sequenceiq.cloudbreak.api.model.Status.STOP_REQUESTED;
-import static com.sequenceiq.cloudbreak.api.model.StatusRequest.FULL_SYNC;
-import static com.sequenceiq.cloudbreak.common.type.CloudConstants.BYOS;
 import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -362,36 +359,29 @@ public class StackService {
             instanceGroupRepository.save(savedStack.getInstanceGroups());
             LOGGER.info("Instance groups saved in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
-            if (!BYOS.equals(savedStack.cloudPlatform())) {
-                start = System.currentTimeMillis();
-                SecurityConfig securityConfig = tlsSecurityService.storeSSHKeys();
-                LOGGER.info("Generating SSH keys took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+            start = System.currentTimeMillis();
+            SecurityConfig securityConfig = tlsSecurityService.storeSSHKeys();
+            LOGGER.info("Generating SSH keys took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
-                start = System.currentTimeMillis();
-                securityConfig.setSaltPassword(PasswordUtil.generatePassword());
-                securityConfig.setSaltBootPassword(PasswordUtil.generatePassword());
-                securityConfig.setKnoxMasterSecret(PasswordUtil.generatePassword());
-                LOGGER.info("Generating salt passwords took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+            start = System.currentTimeMillis();
+            securityConfig.setSaltPassword(PasswordUtil.generatePassword());
+            securityConfig.setSaltBootPassword(PasswordUtil.generatePassword());
+            securityConfig.setKnoxMasterSecret(PasswordUtil.generatePassword());
+            LOGGER.info("Generating salt passwords took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
-                securityConfig.setStack(stack);
-                start = System.currentTimeMillis();
-                securityConfigRepository.save(securityConfig);
-                LOGGER.info("Security config save took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
-                savedStack.setSecurityConfig(securityConfig);
+            securityConfig.setStack(stack);
+            start = System.currentTimeMillis();
+            securityConfigRepository.save(securityConfig);
+            LOGGER.info("Security config save took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+            savedStack.setSecurityConfig(securityConfig);
 
-                start = System.currentTimeMillis();
-                imageService.create(savedStack, connector.getPlatformParameters(stack), imageCatalog, imageId);
-                LOGGER.info("Image creation took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+            start = System.currentTimeMillis();
+            imageService.create(savedStack, connector.getPlatformParameters(stack), imageCatalog, imageId);
+            LOGGER.info("Image creation took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
-                start = System.currentTimeMillis();
-                flowManager.triggerProvisioning(savedStack.getId());
-                LOGGER.info("Stack provision triggered in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
-            } else {
-                savedStack = stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.PROVISIONED);
-                savedStack.setCreated(new Date().getTime());
-                save(savedStack);
-                savedStack = stackRepository.findOneWithLists(savedStack.getId());
-            }
+            start = System.currentTimeMillis();
+            flowManager.triggerProvisioning(savedStack.getId());
+            LOGGER.info("Stack provision triggered in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
         } catch (DataIntegrityViolationException ex) {
             String msg = String.format("Error with resource [%s], error: [%s]", APIResourceType.STACK, getProperSqlErrorMessage(ex));
             throw new BadRequestException(msg);
@@ -438,13 +428,6 @@ public class StackService {
         Cluster cluster = null;
         if (stack.getCluster() != null) {
             cluster = clusterRepository.findOneWithLists(stack.getCluster().getId());
-        }
-        if (BYOS.equals(stack.cloudPlatform()) && status.equals(FULL_SYNC)) {
-            stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.PROVISIONED);
-            return;
-        } else if (BYOS.equals(stack.cloudPlatform())) {
-            LOGGER.warn("The status of a 'Bring your own stack' type of infrastructure cannot be changed.");
-            return;
         }
         switch (status) {
             case SYNC:

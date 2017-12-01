@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.controller;
 
-import static com.sequenceiq.cloudbreak.common.type.CloudConstants.BYOS;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -98,9 +96,6 @@ public class ClusterCreationSetupService {
             throw new BadRequestException("If the security is enabled the kerberos parameters cannot be empty");
         }
         MDCBuilder.buildUserMdcContext(user);
-        if (!stack.isAvailable() && BYOS.equals(stack.cloudPlatform())) {
-            throw new BadRequestException("Stack is not in 'AVAILABLE' status, cannot create cluster now.");
-        }
         CloudCredential credential = cloudCredential;
         if (credential == null) {
             credential = credentialToCloudCredentialConverter.convert(stack.getCredential());

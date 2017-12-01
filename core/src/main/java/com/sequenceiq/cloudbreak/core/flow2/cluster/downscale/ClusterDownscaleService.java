@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.core.flow2.cluster.downscale;
 
 import static com.sequenceiq.cloudbreak.api.model.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.model.Status.UPDATE_FAILED;
-import static com.sequenceiq.cloudbreak.common.type.CloudConstants.BYOS;
 
 import java.util.List;
 import java.util.Set;
@@ -20,9 +19,9 @@ import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
-import com.sequenceiq.cloudbreak.domain.view.ClusterView;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
+import com.sequenceiq.cloudbreak.domain.view.ClusterView;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
@@ -81,11 +80,9 @@ public class ClusterDownscaleService {
             hostGroup.getHostMetadata().removeAll(hostMetaToRemove);
             hostGroupService.save(hostGroup);
         });
-        if (!BYOS.equals(stackView.cloudPlatform())) {
-            LOGGER.info("Start updating metadata");
-            for (String hostName : hostNames) {
-                stackService.updateMetaDataStatus(stackView.getId(), hostName, InstanceStatus.DECOMMISSIONED);
-            }
+        LOGGER.info("Start updating metadata");
+        for (String hostName : hostNames) {
+            stackService.updateMetaDataStatus(stackView.getId(), hostName, InstanceStatus.DECOMMISSIONED);
         }
         clusterService.updateClusterStatusByStackId(stackView.getId(), AVAILABLE);
         flowMessageService.fireEventAndLog(stackId, Msg.AMBARI_CLUSTER_SCALED_DOWN, AVAILABLE.name());

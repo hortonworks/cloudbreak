@@ -43,10 +43,6 @@ public class ClusterV2RequestToClusterRequestConverter extends AbstractConversio
             cluster.setUserName(source.getAmbariRequest().getUserName());
             cluster.setValidateBlueprint(source.getAmbariRequest().getValidateBlueprint());
         }
-        if (source.getByosRequest() != null) {
-            cluster.setCustomContainer(source.getByosRequest().getCustomContainer());
-            cluster.setCustomQueue(source.getByosRequest().getCustomQueue());
-        }
         cluster.setHostGroups(new HashSet<>());
         return cluster;
     }

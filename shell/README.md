@@ -439,11 +439,9 @@ Here is the list of all the available options:
 
 | Parameter name | Parameter type | Description                          |
 | -------------- | -------------- | ------------------------------------ |
-| --ambariAgentImage | string | Name of the ambari agent image in case of BYOS orchestrator |
 | --ambariDbImage | string | Name of the ambari db image in case of BYOS orchestrator |
 | --ambariRepoBaseURL | string | Ambari repo base url (e.g. http://public-repo-1.hortonworks.com/ambari/centos6/2.x/updates) |
 | --ambariRepoGpgKey | string | Ambari repo GPG key url |
-| --ambariServerImage | string | Name of the ambari server image in case of BYOS orchestrator |
 | --ambariVersion | string | Ambari version (e.g. 2.4.0.0-748) |
 | --configStrategy | string | Config recommendation strategy |
 | --connectionPassword | string | Password to use for the jdbc connection for HIVE metastore |
@@ -464,7 +462,7 @@ Here is the list of all the available options:
 | --kerberosPrincipal | string | Kerberos principal (e.g. admin/admin) |
 | --kerberosRealm | string | Kerberos realm (e.g. custom.com)|
 | --kerberosUrl | string | Kerberos url (e.g. 10.0.0.4) |
-| --os | string | Stack OS to select package manager, default is RedHat | 
+| --os | string | Stack OS to select package manager, default is RedHat |
 | --password | string | Password of the Ambari server (default is 'admin') |
 | --stack | string | Stack definition name (e.g. HDP) |
 | --stackBaseURL | string | Stack URL (e.g. http://public-repo-1.hortonworks.com/HDP/centos7/2.x/updates/2.6.0.3) |
@@ -612,7 +610,7 @@ For the full list of available commands please check below. Please note that all
 
 ## Example command file
 
-The example below works with a default installation of Cloudbreak, using **Google Cloud Platform** (`credential`, `template` and `region` is provider specific). For examples of how to create credentials for different cloud providers follow this [link](https://github.com/sequenceiq/cloudbreak-shell#create-a-cloud-credential). 
+The example below works with a default installation of Cloudbreak, using **Google Cloud Platform** (`credential`, `template` and `region` is provider specific). For examples of how to create credentials for different cloud providers follow this [link](https://github.com/sequenceiq/cloudbreak-shell#create-a-cloud-credential).
 
 Make sure you change all the values when creating the credential.
 
