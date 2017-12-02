@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.gcp;
 
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -19,6 +20,8 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import com.google.api.services.compute.Compute;
+import com.google.api.services.compute.model.Firewall;
+import com.google.api.services.compute.model.FirewallList;
 import com.google.api.services.compute.model.MachineType;
 import com.google.api.services.compute.model.MachineTypeList;
 import com.google.api.services.compute.model.Network;
@@ -35,6 +38,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudIpPools;
 import com.sequenceiq.cloudbreak.cloud.model.CloudNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.CloudNetworks;
 import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
+import com.sequenceiq.cloudbreak.cloud.model.CloudSecurityGroup;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSecurityGroups;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSshKeys;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
@@ -100,8 +104,20 @@ public class GcpPlatformResources implements PlatformResources {
     }
 
     @Override
-    public CloudSecurityGroups securityGroups(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
-        return new CloudSecurityGroups();
+    public CloudSecurityGroups securityGroups(CloudCredential cloudCredential, Region region, Map<String, String> filters) throws IOException {
+        Compute compute = GcpStackUtil.buildCompute(cloudCredential);
+        String projectId = GcpStackUtil.getProjectId(cloudCredential);
+
+        Map<String, Set<CloudSecurityGroup>> result = new HashMap<>();
+        if (compute != null) {
+            FirewallList firewallList = compute.firewalls().list(projectId).execute();
+            for (Firewall firewall : firewallList.getItems()) {
+                CloudSecurityGroup cloudSecurityGroup = new CloudSecurityGroup(firewall.getName(), firewall.getName(), Collections.emptyMap());
+                result.computeIfAbsent(firewall.getNetwork(), k -> new HashSet<>()).add(cloudSecurityGroup);
+            }
+        }
+
+        return new CloudSecurityGroups(result);
     }
 
     @Override
