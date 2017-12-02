@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.group;
 
+import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.isExistingNetwork;
 import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.noFirewallRules;
 import static com.sequenceiq.cloudbreak.common.type.ResourceType.GCP_FIREWALL_IN;
 
@@ -9,14 +10,16 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.compute.Compute;
-import com.google.api.services.compute.Compute.Firewalls.Insert;
+import com.google.api.services.compute.ComputeRequest;
 import com.google.api.services.compute.model.Firewall;
 import com.google.api.services.compute.model.Firewall.Allowed;
 import com.google.api.services.compute.model.Operation;
+import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.GcpResourceException;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
@@ -51,6 +54,37 @@ public class GcpFirewallInResourceBuilder extends AbstractGcpGroupBuilder {
             throws Exception {
         String projectId = context.getProjectId();
 
+        ComputeRequest<Operation> firewallRequest;
+
+        if (StringUtils.isNotBlank(security.getCloudSecurityId()) && isExistingNetwork(network)) {
+            firewallRequest = updateExistingFirewallForNewTargets(context, auth, group, security);
+        } else {
+            firewallRequest = createNewFirewallRule(context, auth, group, security, buildableResource, projectId);
+        }
+        try {
+            Operation operation = firewallRequest.execute();
+            if (operation.getHttpErrorStatusCode() != null) {
+                throw new GcpResourceException(operation.getHttpErrorMessage(), resourceType(), buildableResource.getName());
+            }
+            return createOperationAwareCloudResource(buildableResource, operation);
+        } catch (GoogleJsonResponseException e) {
+            throw new GcpResourceException(checkException(e), resourceType(), buildableResource.getName());
+        }
+    }
+
+    private Compute.Firewalls.Update updateExistingFirewallForNewTargets(GcpContext context, AuthenticatedContext auth, Group group, Security security)
+            throws java.io.IOException {
+        Firewall firewall = context.getCompute().firewalls().get(context.getProjectId(), security.getCloudSecurityId()).execute();
+        if (firewall.getTargetTags() == null) {
+            firewall.setTargetTags(Lists.newArrayListWithCapacity(1));
+        }
+        firewall.getTargetTags().add(GcpStackUtil.getGroupClusterTag(auth.getCloudContext(), group));
+        return context.getCompute().firewalls().update(context.getProjectId(), firewall.getName(), firewall);
+    }
+
+    private ComputeRequest<Operation> createNewFirewallRule(GcpContext context, AuthenticatedContext auth, Group group, Security security,
+            CloudResource buildableResource, String projectId) throws IOException {
+        ComputeRequest<Operation> firewallRequest;
         List<String> sourceRanges = getSourceRanges(security);
 
         Firewall firewall = new Firewall();
@@ -67,16 +101,7 @@ public class GcpFirewallInResourceBuilder extends AbstractGcpGroupBuilder {
         firewall.setNetwork(String.format("https://www.googleapis.com/compute/v1/projects/%s/global/networks/%s",
                 projectId, context.getParameter(GcpNetworkResourceBuilder.NETWORK_NAME, String.class)));
 
-        Insert firewallInsert = context.getCompute().firewalls().insert(projectId, firewall);
-        try {
-            Operation operation = firewallInsert.execute();
-            if (operation.getHttpErrorStatusCode() != null) {
-                throw new GcpResourceException(operation.getHttpErrorMessage(), resourceType(), buildableResource.getName());
-            }
-            return createOperationAwareCloudResource(buildableResource, operation);
-        } catch (GoogleJsonResponseException e) {
-            throw new GcpResourceException(checkException(e), resourceType(), buildableResource.getName());
-        }
+        return context.getCompute().firewalls().insert(projectId, firewall);
     }
 
     @Override
