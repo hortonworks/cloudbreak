@@ -29,8 +29,13 @@ start_nginx() {
   sudo mkdir -p /etc/nginx/sites-enabled/
   sudo mv /tmp/ssl.conf /etc/nginx/sites-enabled/ssl.conf
   sudo mkdir -p /usr/share/nginx/json/
-  # sudo service nginx restart
-  sudo pkill -1 -P 1 nginx
+  # FIXME (BUG-92636): CLOUD_PLATFORM is not provided, need to check for YCloud through cloudbreak-config.props
+  # FIXME (BUG-92276): It is not possible to restart nginx if systemd is non pid-1
+  if [[ -d /yarn-private ]]; then
+      sudo pkill -1 -P 1 nginx
+  else
+      sudo service nginx restart
+  fi
   sudo chkconfig nginx on
 }
 

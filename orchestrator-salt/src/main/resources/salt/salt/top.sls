@@ -4,7 +4,9 @@ base:
     - unbound
     - java
     - metadata
-    # - nginx
+{% if not salt['file.directory_exists']('/yarn-private') %}  # FIXME (BUG-92637): must be disabled for YCloud
+    - nginx
+{% endif %}
     - docker
 
   'roles:kerberos_server_master':
