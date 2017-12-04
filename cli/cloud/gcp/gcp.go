@@ -10,6 +10,7 @@ func init() {
 }
 
 type GcpProvider struct {
+	cloud.DefaultCloudProvider
 }
 
 func (p *GcpProvider) GetName() *string {

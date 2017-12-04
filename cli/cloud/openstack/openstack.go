@@ -10,6 +10,7 @@ func init() {
 }
 
 type OpenstackProvider struct {
+	cloud.DefaultCloudProvider
 }
 
 func (p *OpenstackProvider) GetName() *string {

@@ -10,6 +10,7 @@ func init() {
 }
 
 type AzureProvider struct {
+	cloud.DefaultCloudProvider
 }
 
 func (p *AzureProvider) GetName() *string {

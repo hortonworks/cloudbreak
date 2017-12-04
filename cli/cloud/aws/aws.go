@@ -10,6 +10,7 @@ func init() {
 }
 
 type AwsProvider struct {
+	cloud.DefaultCloudProvider
 }
 
 func (p *AwsProvider) GetName() *string {

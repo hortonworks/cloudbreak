@@ -11,6 +11,7 @@ import (
 	_ "github.com/hortonworks/cb-cli/cli/cloud/azure"
 	_ "github.com/hortonworks/cb-cli/cli/cloud/gcp"
 	_ "github.com/hortonworks/cb-cli/cli/cloud/openstack"
+	_ "github.com/hortonworks/cb-cli/cli/cloud/yarn"
 	"github.com/hortonworks/cb-cli/cli/utils"
 	"github.com/urfave/cli"
 )
@@ -342,6 +343,18 @@ func main() {
 					Usage: "creates a cluster JSON template",
 					Subcommands: []cli.Command{
 						{
+							Name:   "yarn",
+							Usage:  "creates an yarn cluster JSON template",
+							Before: ConfigRead,
+							Flags:  cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional).AddAuthenticationFlags().Build(),
+							Action: cb.GenerateYarnStackTemplate,
+							BashComplete: func(c *cli.Context) {
+								for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional).AddAuthenticationFlags().Build() {
+									printFlagCompletion(f)
+								}
+							},
+						},
+						{
 							Name:  "aws",
 							Usage: "creates an aws cluster JSON template",
 							Subcommands: []cli.Command{
@@ -515,10 +528,10 @@ func main() {
 					Name:   "generate-reinstall-template",
 					Usage:  "generates reinstall template",
 					Before: ConfigRead,
-					Flags:  cb.NewFlagBuilder().AddFlags(cb.FlBlueprintName).AddAuthenticationFlags().AddOutputFlag().Build(),
+					Flags:  cb.NewFlagBuilder().AddFlags(cb.FlName, cb.FlBlueprintName).AddAuthenticationFlags().AddOutputFlag().Build(),
 					Action: cb.GenerateReinstallTemplate,
 					BashComplete: func(c *cli.Context) {
-						for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlBlueprintName).AddAuthenticationFlags().AddOutputFlag().Build() {
+						for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlName, cb.FlBlueprintName).AddAuthenticationFlags().AddOutputFlag().Build() {
 							printFlagCompletion(f)
 						}
 					},

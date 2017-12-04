@@ -56,5 +56,5 @@ load commands
 }
 
 @test "Generate reinstall template" {
-  generate-reinstall-template --blueprint-name test.bp | jq '."blueprintName" == ["test.bp"]'
+  generate-reinstall-template --name aaaaa --blueprint-name test.bp | jq '."blueprintName" == ["test.bp"]'
 }

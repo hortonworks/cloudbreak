@@ -111,6 +111,18 @@ func DescribeStack(c *cli.Context) {
 	output.Write(stackHeader, &stackDetailsOut{resp.Payload, resp.Payload})
 }
 
+type getPublicStack interface {
+	GetPublicStack(client *v1stacks.GetPublicStackParams) (*v1stacks.GetPublicStackOK, error)
+}
+
+func fetchStack(name string, client getPublicStack) *models_cloudbreak.StackResponse {
+	resp, err := client.GetPublicStack(v1stacks.NewGetPublicStackParams().WithName(name))
+	if err != nil {
+		utils.LogErrorAndExit(err)
+	}
+	return resp.Payload
+}
+
 func ScaleStack(c *cli.Context) {
 	checkRequiredFlags(c)
 	desiredCount, err := strconv.Atoi(c.String(FlDesiredNodeCount.Name))
