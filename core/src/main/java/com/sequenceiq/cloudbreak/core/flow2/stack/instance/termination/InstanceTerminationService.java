@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.instance.termination;
 
 import static com.sequenceiq.cloudbreak.api.model.Status.AVAILABLE;
+import static com.sequenceiq.cloudbreak.api.model.Status.DELETE_FAILED;
 import static com.sequenceiq.cloudbreak.api.model.Status.UPDATE_IN_PROGRESS;
 
 import java.util.Collections;
@@ -90,6 +91,6 @@ public class InstanceTerminationService {
         Exception ex = payload.getException();
         LOGGER.error("Error during instance terminating flow:", ex);
         stackUpdater.updateStackStatus(stackId, DetailedStackStatus.AVAILABLE, "Instance termination failed. " + ex.getMessage());
-        flowMessageService.fireEventAndLog(stackId, Msg.STACK_REMOVING_INSTANCE_FAILED, AVAILABLE.name(), ex.getMessage());
+        flowMessageService.fireEventAndLog(stackId, Msg.STACK_REMOVING_INSTANCE_FAILED, DELETE_FAILED.name(), ex.getMessage());
     }
 }

@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.datalake;
 
 import static com.sequenceiq.cloudbreak.api.model.Status.AVAILABLE;
+import static com.sequenceiq.cloudbreak.api.model.Status.UPDATE_FAILED;
 import static com.sequenceiq.cloudbreak.api.model.Status.UPDATE_IN_PROGRESS;
 
 import javax.inject.Inject;
@@ -40,6 +41,6 @@ public class EphemeralClusterService {
     public void updateClusterFailed(long stackId, Exception exception) {
         clusterService.updateClusterStatusByStackId(stackId, AVAILABLE);
         stackUpdater.updateStackStatus(stackId, DetailedStackStatus.AVAILABLE, "Ephemeral cluster update failed " + exception.getMessage());
-        flowMessageService.fireEventAndLog(stackId, Msg.STACK_DATALAKE_UPDATE_FAILED, AVAILABLE.name());
+        flowMessageService.fireEventAndLog(stackId, Msg.STACK_DATALAKE_UPDATE_FAILED, UPDATE_FAILED.name());
     }
 }

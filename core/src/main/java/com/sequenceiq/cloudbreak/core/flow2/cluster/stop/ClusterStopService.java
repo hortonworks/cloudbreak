@@ -56,7 +56,7 @@ public class ClusterStopService {
         ClusterView cluster = stackView.getClusterView();
         clusterService.updateClusterStatusByStackId(stackView.getId(), Status.STOP_FAILED);
         stackUpdater.updateStackStatus(stackView.getId(), DetailedStackStatus.AVAILABLE, "The Ambari cluster could not be stopped: " + errorReason);
-        flowMessageService.fireEventAndLog(stackView.getId(), Msg.AMBARI_CLUSTER_STOP_FAILED, Status.AVAILABLE.name(), errorReason);
+        flowMessageService.fireEventAndLog(stackView.getId(), Msg.AMBARI_CLUSTER_STOP_FAILED, Status.STOP_FAILED.name(), errorReason);
         if (cluster.getEmailNeeded()) {
             emailSenderService.sendStopFailureEmail(stackView.getClusterView().getOwner(), stackView.getClusterView().getEmailTo(),
                     stackUtil.extractAmbariIp(stackView), cluster.getName());
