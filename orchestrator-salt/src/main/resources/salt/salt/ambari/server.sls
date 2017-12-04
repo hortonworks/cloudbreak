@@ -1,17 +1,10 @@
 {%- from 'ambari/settings.sls' import ambari with context %}
 
-{% if not ambari.is_predefined_repo %}
-
 include:
-  - ambari.repo
+  - ambari.server-install
+  - ambari.setup-sso
 
-ambari-server:
-  pkg.installed:
-    - require:
-      - sls: ambari.repo
-    - version: {{ ambari.version }}
-
-{% else %}
+{% if ambari.is_predefined_repo %}
 
 lazy_view_load:
   file.append:
