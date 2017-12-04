@@ -12,6 +12,7 @@
 {%- set cluster_domain = salt['pillar.get']('hosts')[salt['network.interface_ip']('eth0')]['domain'] %}
 {% set is_local_ldap = salt['pillar.get']('ldap:local', False) %}
 {% set ldap = salt['pillar.get']('ldap') %}
+{% set gateway = salt['pillar.get']('gateway') %}
 {% set username = salt['pillar.get']('ambari:username') %}
 {% set password = salt['pillar.get']('ambari:password') %}
 {% if salt['pillar.get']('ldap:protocol').startswith('ldaps') %}
@@ -32,6 +33,7 @@
     'is_local_ldap': is_local_ldap,
     'secure_ldap': secure_ldap,
     'ldap': ldap,
+    'gateway': gateway,
     'username': username,
     'password': password
 }) %}

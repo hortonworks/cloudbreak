@@ -117,6 +117,11 @@ public class JsonToClusterConverter extends AbstractConversionServiceAwareConver
             if (cloudGatewayJson.getPath() != null) {
                 gateway.setPath(cloudGatewayJson.getPath());
             }
+            if (cloudGatewayJson.getSsoProvider() != null) {
+                gateway.setSsoProvider(cloudGatewayJson.getSsoProvider());
+            } else {
+                gateway.setSsoProvider("/" + gateway.getPath() + "/knoxsso/api/v1/websso");
+            }
             if (cloudGatewayJson.getSsoType() != null) {
                 gateway.setSsoType(cloudGatewayJson.getSsoType());
             }
@@ -134,9 +139,6 @@ public class JsonToClusterConverter extends AbstractConversionServiceAwareConver
         if (gatewayJson != null) {
             if (gatewayJson.getGatewayType() != null) {
                 gateway.setGatewayType(gatewayJson.getGatewayType());
-            }
-            if (gatewayJson.getSsoProvider() != null) {
-                gateway.setSsoProvider(gatewayJson.getSsoProvider());
             }
 
             if (gatewayJson.getEnableGateway() != null) {
