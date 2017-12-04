@@ -440,7 +440,7 @@ public class TestUtil {
         config.setUserNameAttribute("cn=admin,dc=example,dc=org");
         config.setDomain("ad.hdc.com");
         config.setServerPort(389);
-        config.setProtocol("ldap://");
+        config.setProtocol("ldap");
         config.setDirectoryType(DirectoryType.ACTIVE_DIRECTORY);
         config.setUserObjectClass("person");
         config.setGroupObjectClass("groupOfNames");

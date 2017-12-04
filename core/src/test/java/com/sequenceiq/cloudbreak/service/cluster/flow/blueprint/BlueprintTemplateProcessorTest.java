@@ -60,6 +60,9 @@ public class BlueprintTemplateProcessorTest {
         Assert.assertTrue(result.contains("{{ zookeeper_quorum }}"));
         Assert.assertTrue(result.contains("{{default('/configurations/hadoop-env/hdfs_log_dir_prefix', '/var/log/hadoop')}}"));
         Assert.assertTrue(result.contains(cluster.getName()));
+        Assert.assertTrue(result.contains("jdbc:postgresql://10.1.1.1:5432/ranger"));
+        Assert.assertTrue(result.contains("cn=users,dc=example,dc=org"));
+        Assert.assertTrue(result.contains("ldap://localhost:389"));
     }
 
     private Cluster cluster() {

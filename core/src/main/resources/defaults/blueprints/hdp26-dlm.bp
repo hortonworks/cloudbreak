@@ -135,6 +135,9 @@
       {
         "ranger-admin-site": {
           "properties": {
+            "ranger.sso.enabled": "true",
+            "ranger.sso.providerurl": "{{{ gateway.ssoProvider }}}",
+            "ranger.sso.publicKey": "{{{ gateway.escSignCert }}}",
             "ranger.jpa.jdbc.driver": "org.postgresql.Driver",
             "ranger.audit.source.type": "solr",
             "ranger.authentication.method": "{{{ ldapConfig.directoryType }}}",
@@ -167,6 +170,22 @@
             "beacon_store_user": "beaconuser",
             "beacon_store_db_name": "beacondb",
             "beacon_store_password": "beaconpassword"
+          }
+        }
+      },
+      {
+        "beacon-security-site" : {
+          "properties" : {
+           "beacon.sso.knox.authentication.enabled": "true",
+           "beacon.sso.knox.providerurl": "{{{ gateway.ssoProvider }}}",
+           "beacon.sso.knox.publicKey": "{{{ gateway.escSignCert }}}"
+          }
+        }
+      },
+      {
+        "knoxsso-topology" : {
+          "properties" : {
+            "content" : "\n      <topology>\n          <gateway>\n              <provider>\n                  <role>webappsec</role>\n                  <name>WebAppSec</name>\n                  <enabled>true</enabled>\n                  <param><name>xframe.options.enabled</name><value>true</value></param>\n              </provider>\n\n              <provider>\n                  <role>authentication</role>\n                  <name>ShiroProvider</name>\n                  <enabled>true</enabled>\n                  <param>\n                      <name>sessionTimeout</name>\n                      <value>30</value>\n                  </param>\n                  <param>\n                      <name>redirectToUrl</name>\n                      <value>/gateway/knoxsso/knoxauth/login.html</value>\n                  </param>\n                  <param>\n                      <name>restrictedCookies</name>\n                      <value>rememberme,WWW-Authenticate</value>\n                  </param>\n                  <param>\n                      <name>main.ldapRealm</name>\n                      <value>org.apache.hadoop.gateway.shirorealm.KnoxLdapRealm</value>\n                  </param>\n                  <param>\n                      <name>main.ldapContextFactory</name>\n                      <value>org.apache.hadoop.gateway.shirorealm.KnoxLdapContextFactory</value>\n                  </param>\n                  <param>\n                      <name>main.ldapRealm.contextFactory</name>\n                      <value>$ldapContextFactory</value>\n                  </param>\n\n            <param>\n                <name>main.ldapRealm.contextFactory.url</name>\n                <value>{{{ ldapConfig.connectionURL }}}</value>\n            </param>\n\n            <param>\n                <name>main.ldapRealm.contextFactory.systemUsername</name>\n                <value>{{{ ldapConfig.bindDn }}}</value>\n            </param>\n            <param>\n                <name>main.ldapRealm.contextFactory.systemPassword</name>\n                <value>{{{ ldapConfig.bindPassword }}}</value>\n            </param>\n            <param>\n                <name>main.ldapRealm.searchBase</name>\n                <value>{{{ ldapConfig.userSearchBase }}}</value>\n            </param>\n            <param>\n                <name>main.ldapRealm.userSearchAttributeName</name>\n                <value>{{{ ldapConfig.userNameAttribute }}}</value>\n            </param>\n            <param>\n                <name>main.ldapRealm.userObjectClass</name>\n                <value>{{{ ldapConfig.userObjectClass }}}</value>\n            </param>\n\n                  <param>\n                      <name>main.ldapRealm.authenticationCachingEnabled</name>\n                      <value>false</value>\n                  </param>\n                  <param>\n                      <name>main.ldapRealm.contextFactory.authenticationMechanism</name>\n                      <value>simple</value>\n                  </param>\n                  <param>\n                      <name>urls./**</name>\n                      <value>authcBasic</value>\n                  </param>\n              </provider>\n\n              <provider>\n                  <role>identity-assertion</role>\n                  <name>Default</name>\n                  <enabled>true</enabled>\n              </provider>\n          </gateway>\n\n          <application>\n            <name>knoxauth</name>\n          </application>\n\n          <service>\n              <role>KNOXSSO</role>\n              <param>\n                  <name>knoxsso.cookie.secure.only</name>\n                  <value>false</value>\n              </param>\n              <param>\n                  <name>knoxsso.token.ttl</name>\n                  <value>30000</value>\n              </param>\n              <param>\n                 <name>knoxsso.redirect.whitelist.regex</name>\n                 <value>.*</value>\n              </param>\n          </service>\n\n      </topology>"
           }
         }
       }

@@ -37,7 +37,6 @@ public class AmbariClusterTemplateService {
         String clusterName = cluster.getName();
         String blueprintName = cluster.getBlueprint().getAmbariName();
         String configStrategy = cluster.getConfigStrategy().name();
-        Boolean hideQuickLinks = cluster.getGateway().getEnableGateway();
         String clusterTemplate;
 
         if (ambariClient.getClusterName() == null) {
@@ -47,10 +46,10 @@ public class AmbariClusterTemplateService {
                     KerberosConfig kerberosConfig = cluster.getKerberosConfig();
                     String principal = kerberosPrincipalResolver.resolvePrincipalForKerberos(kerberosConfig);
                     clusterTemplate = ambariClient.createSecureCluster(clusterName, blueprintName, hostGroupMappings, configStrategy,
-                            cluster.getPassword(), principal, kerberosConfig.getKerberosPassword(), KEY_TYPE, hideQuickLinks, repositoryVersion);
+                            cluster.getPassword(), principal, kerberosConfig.getKerberosPassword(), KEY_TYPE, false, repositoryVersion);
                 } else {
                     clusterTemplate = ambariClient.createCluster(clusterName, blueprintName, hostGroupMappings, configStrategy,
-                            ambariAuthenticationProvider.getAmbariPassword(cluster), hideQuickLinks, repositoryVersion);
+                            ambariAuthenticationProvider.getAmbariPassword(cluster), false, repositoryVersion);
                 }
                 LOGGER.info("Submitted cluster creation template: {}", JsonUtil.minify(clusterTemplate));
             } catch (Exception exception) {

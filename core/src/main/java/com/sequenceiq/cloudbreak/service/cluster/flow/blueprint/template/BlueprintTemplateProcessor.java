@@ -59,6 +59,7 @@ public class BlueprintTemplateProcessor {
                 .withAmbariDatabase(clusterComponentConfigProvider.getAmbariDatabase(cluster.getId()))
                 .withClusterName(cluster.getName())
                 .withLdap(cluster.getLdapConfig())
+                .withGateway(cluster.getGateway())
                 .withRdsConfigs(rdsConfigs)
                 .withCustomProperties(blueprintInputs)
                 .build();

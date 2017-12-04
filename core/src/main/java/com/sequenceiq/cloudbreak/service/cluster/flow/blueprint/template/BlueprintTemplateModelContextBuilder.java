@@ -7,13 +7,17 @@ import java.util.Optional;
 import java.util.Set;
 
 import com.sequenceiq.cloudbreak.cloud.model.AmbariDatabase;
+import com.sequenceiq.cloudbreak.domain.Gateway;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.template.views.DatabaseView;
+import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.template.views.GatewayView;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.template.views.LdapView;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.template.views.RdsView;
 
 public class BlueprintTemplateModelContextBuilder {
+
+    private final Map<String, String> customProperties = new HashMap<>();
 
     private Optional<RdsView> rangerRds = Optional.empty();
 
@@ -25,9 +29,9 @@ public class BlueprintTemplateModelContextBuilder {
 
     private Optional<DatabaseView> ambariDatabase = Optional.empty();
 
-    private String clusterName;
+    private Optional<GatewayView> gateway = Optional.empty();
 
-    private final Map<String, String> customProperties = new HashMap<>();
+    private String clusterName;
 
     public BlueprintTemplateModelContextBuilder withRdsConfig(RDSConfig rdsConfig) {
         if (rdsConfig != null) {
@@ -61,6 +65,11 @@ public class BlueprintTemplateModelContextBuilder {
         return this;
     }
 
+    public BlueprintTemplateModelContextBuilder withGateway(Gateway gatewayConfig) {
+        gateway = Optional.ofNullable(gateway == null ? null : new GatewayView(gatewayConfig));
+        return this;
+    }
+
     public BlueprintTemplateModelContextBuilder withAmbariDatabase(AmbariDatabase ambariDatabase) {
         this.ambariDatabase = Optional.ofNullable(ambariDatabase == null ? null : new DatabaseView(ambariDatabase));
         return this;
@@ -86,6 +95,7 @@ public class BlueprintTemplateModelContextBuilder {
     public Map<String, Object> build() {
         Map<String, Object> blueprintTemplateModelContext = new HashMap<>();
         blueprintTemplateModelContext.put("ldapConfig", ldap.orElse(null));
+        blueprintTemplateModelContext.put("gateway", gateway.orElse(null));
         blueprintTemplateModelContext.put("hiveRds", hiveRds.orElse(null));
         blueprintTemplateModelContext.put("rangerRds", rangerRds.orElse(null));
         blueprintTemplateModelContext.put("druidRds", druidRds.orElse(null));

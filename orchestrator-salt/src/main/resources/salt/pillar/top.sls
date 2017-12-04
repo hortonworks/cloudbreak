@@ -28,6 +28,7 @@ base:
     - ambari.credentials
     - prometheus.server
     - grafana.repo
+    - gateway.init
     - gateway.ldap
 
   'roles:ambari_server_standby':
@@ -36,6 +37,7 @@ base:
     - ambari.credentials
     - prometheus.server
     - grafana.repo
+    - gateway.init
     - gateway.ldap
 
   'roles:knox_gateway':

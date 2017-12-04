@@ -11,6 +11,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.validation.ldapconfig.LdapConfigValidator;
+import com.sequenceiq.cloudbreak.domain.LdapConfig;
 
 @RunWith(MockitoJUnitRunner.class)
 public class LdapConfigValidatorTest {
@@ -28,8 +29,10 @@ public class LdapConfigValidatorTest {
 
     @Test
     public void testInvalidLdapConnection() {
+        LdapConfig ldapConfig = TestUtil.ldapConfig();
+        ldapConfig.setProtocol("ldap://");
         thrown.expect(BadRequestException.class);
         thrown.expectMessage("Invalid name: /localhost:389");
-        underTest.validateLdapConnection(TestUtil.ldapConfig());
+        underTest.validateLdapConnection(ldapConfig);
     }
 }
