@@ -76,10 +76,11 @@ public class GcpPlatformResources implements PlatformResources {
                 properties.put("creationTimestamp", Strings.nullToEmpty(network.getCreationTimestamp()));
 
                 Map<String, String> subnets = new HashMap<>();
-                for (Subnetwork subnetwork : subnetworkList) {
-                    if (network.getSubnetworks() != null
-                            && network.getSubnetworks().contains(subnetwork.getSelfLink())) {
-                        subnets.put(subnetwork.getName(), subnetwork.getName());
+                if (subnetworkList != null && network.getSubnetworks() != null) {
+                    for (Subnetwork subnetwork : subnetworkList) {
+                        if (network.getSubnetworks().contains(subnetwork.getSelfLink())) {
+                            subnets.put(subnetwork.getName(), subnetwork.getName());
+                        }
                     }
                 }
 
@@ -87,11 +88,8 @@ public class GcpPlatformResources implements PlatformResources {
                 cloudNetworks.add(cloudNetwork);
             }
 
-            for (Region actualRegion : gcpPlatformParameters.regions().types()) {
-                if (regionMatch(actualRegion, region)) {
-                    result.put(actualRegion.value(), cloudNetworks);
-                }
-            }
+            result.put(region.value(), cloudNetworks);
+
         }
         return new CloudNetworks(result);
     }
