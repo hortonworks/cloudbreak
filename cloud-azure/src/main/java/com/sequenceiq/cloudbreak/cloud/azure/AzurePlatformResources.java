@@ -11,6 +11,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -82,11 +83,11 @@ public class AzurePlatformResources implements PlatformResources {
                 properties.put("resourceGroupName", network.resourceGroupName());
 
                 CloudNetwork cloudNetwork = new CloudNetwork(network.name(), network.id(), subnets, properties);
-                if (result.get(actualRegion) == null) {
-                    result.put(actualRegion, new HashSet<>());
-                }
                 result.get(actualRegion).add(cloudNetwork);
             }
+        }
+        if (result.isEmpty() && Objects.nonNull(region)) {
+            result.put(region.value(), new HashSet<>());
         }
         return new CloudNetworks(result);
     }
@@ -108,11 +109,11 @@ public class AzurePlatformResources implements PlatformResources {
                 properties.put("resourceGroupName", securityGroup.resourceGroupName());
                 properties.put("networkInterfaceIds", securityGroup.networkInterfaceIds());
                 CloudSecurityGroup cloudSecurityGroup = new CloudSecurityGroup(securityGroup.name(), securityGroup.id(), properties);
-                if (result.get(actualRegion) == null) {
-                    result.put(actualRegion, new HashSet<>());
-                }
                 result.get(actualRegion).add(cloudSecurityGroup);
             }
+        }
+        if (result.isEmpty() && Objects.nonNull(region)) {
+            result.put(region.value(), new HashSet<>());
         }
         return new CloudSecurityGroups(result);
     }
