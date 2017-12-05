@@ -74,6 +74,17 @@ public class OrchestratorRecipeExecutor {
         }
     }
 
+    public void preTerminationRecipes(Stack stack) throws CloudbreakException {
+        HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
+        GatewayConfig gatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
+        try {
+            hostOrchestrator.preTerminationRecipes(gatewayConfig, collectNodes(stack),
+                    clusterDeletionBasedModel(stack.getId(), stack.getCluster().getId()));
+        } catch (CloudbreakOrchestratorFailedException e) {
+            throw new CloudbreakException(e);
+        }
+    }
+
     public void postInstall(Stack stack) throws CloudbreakException {
         HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
         GatewayConfig gatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);

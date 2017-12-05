@@ -310,20 +310,12 @@ public class StackService {
         return stack;
     }
 
-    public void delete(String name, IdentityUser user, Boolean deleteDependencies) {
+    public void delete(String name, IdentityUser user, Boolean forced, Boolean deleteDependencies) {
         Stack stack = stackRepository.findByNameInAccountOrOwner(name, user.getAccount(), user.getUserId());
         if (stack == null) {
             throw new NotFoundException(String.format("Stack '%s' not found", name));
         }
-        delete(stack, deleteDependencies);
-    }
-
-    public void forceDelete(String name, IdentityUser user, Boolean deleteDependencies) {
-        Stack stack = stackRepository.findByNameInAccountOrOwner(name, user.getAccount(), user.getUserId());
-        if (stack == null) {
-            throw new NotFoundException(String.format("Stack '%s' not found", name));
-        }
-        forceDelete(stack, deleteDependencies);
+        delete(stack, forced, deleteDependencies);
     }
 
     @Transactional(TxType.NEVER)
@@ -418,20 +410,12 @@ public class StackService {
         stack.setPlatformVariant(connector.checkAndGetPlatformVariant(stack).value());
     }
 
-    public void delete(Long id, IdentityUser user, Boolean deleteDependencies) {
+    public void delete(Long id, IdentityUser user, Boolean forced, Boolean deleteDependencies) {
         Stack stack = stackRepository.findByIdInAccount(id, user.getAccount());
         if (stack == null) {
             throw new NotFoundException(String.format("Stack '%s' not found", id));
         }
-        delete(stack, deleteDependencies);
-    }
-
-    public void forceDelete(Long id, IdentityUser user, Boolean deleteDependencies) {
-        Stack stack = stackRepository.findByIdInAccount(id, user.getAccount());
-        if (stack == null) {
-            throw new NotFoundException(String.format("Stack '%s' not found", id));
-        }
-        forceDelete(stack, deleteDependencies);
+        delete(stack, forced, deleteDependencies);
     }
 
     public void removeInstance(IdentityUser user, Long stackId, String instanceId) {
@@ -664,21 +648,11 @@ public class StackService {
         }
     }
 
-    private void delete(Stack stack, Boolean deleteDependencies) {
+    private void delete(Stack stack, Boolean forced, Boolean deleteDependencies) {
         authorizationService.hasWritePermission(stack);
         LOGGER.info("Stack delete requested.");
         if (!stack.isDeleteCompleted()) {
-            flowManager.triggerTermination(stack.getId(), deleteDependencies);
-        } else {
-            LOGGER.info("Stack is already deleted.");
-        }
-    }
-
-    private void forceDelete(Stack stack, Boolean deleteDependencies) {
-        authorizationService.hasWritePermission(stack);
-        LOGGER.info("Stack forced delete requested.");
-        if (!stack.isDeleteCompleted()) {
-            flowManager.triggerForcedTermination(stack.getId(), deleteDependencies);
+            flowManager.triggerTermination(stack.getId(), forced, deleteDependencies);
         } else {
             LOGGER.info("Stack is already deleted.");
         }

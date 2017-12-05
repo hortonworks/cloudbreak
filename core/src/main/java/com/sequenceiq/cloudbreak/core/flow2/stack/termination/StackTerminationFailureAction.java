@@ -43,8 +43,8 @@ public class StackTerminationFailureAction extends AbstractStackFailureAction<St
     @Override
     protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
         Boolean deleteDependencies = Boolean.valueOf(String.valueOf(variables.get("DELETEDEPENDENCIES")));
-        stackTerminationService.handleStackTerminationError(context.getStackView(), payload,
-            variables.get("FORCEDTERMINATION") != null, deleteDependencies);
+        boolean forced = variables.get("FORCEDTERMINATION") != null && Boolean.valueOf(variables.get("FORCEDTERMINATION").toString());
+        stackTerminationService.handleStackTerminationError(context.getStackView(), payload, forced, deleteDependencies);
         metricService.incrementMetricCounter(MetricType.STACK_TERMINATION_FAILED, context.getStackView());
         sendEvent(context);
     }

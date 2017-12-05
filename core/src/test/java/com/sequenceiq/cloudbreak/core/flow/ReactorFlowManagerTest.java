@@ -85,8 +85,8 @@ public class ReactorFlowManagerTest {
         flowManager.triggerStackStart(stackId);
         flowManager.triggerClusterStop(stackId);
         flowManager.triggerClusterStart(stackId);
-        flowManager.triggerTermination(stackId, false);
-        flowManager.triggerForcedTermination(stackId, false);
+        flowManager.triggerTermination(stackId, false, false);
+        flowManager.triggerTermination(stackId, false, true);
         flowManager.triggerStackUpscale(stackId, instanceGroupAdjustment, true);
         flowManager.triggerStackDownscale(stackId, instanceGroupAdjustment);
         flowManager.triggerStackRemoveInstance(stackId, "instanceId");
@@ -111,7 +111,7 @@ public class ReactorFlowManagerTest {
             }
         }
         // Termination triggers flow cancellation
-        count += 3;
+        count += 4;
         verify(reactor, times(count)).notify((Object) anyObject(), any(Event.class));
     }
 }

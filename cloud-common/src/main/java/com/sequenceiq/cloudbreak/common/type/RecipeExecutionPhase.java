@@ -7,6 +7,7 @@ public enum RecipeExecutionPhase {
     PRE("pre"),
     POST("post"),
     PRE_AMBARI_START("pre-ambari-start"),
+    PRE_TERMINATION("pre-termination"),
     POST_AMBARI_START("post-ambari-start"),
     POST_CLUSTER_INSTALL("post-cluster-install");
 
@@ -20,6 +21,8 @@ public enum RecipeExecutionPhase {
         switch (recipeType) {
             case PRE_AMBARI_START:
                 return PRE_AMBARI_START;
+            case PRE_TERMINATION:
+                return PRE_TERMINATION;
             case POST_AMBARI_START:
                 return POST_AMBARI_START;
             case POST_CLUSTER_INSTALL:

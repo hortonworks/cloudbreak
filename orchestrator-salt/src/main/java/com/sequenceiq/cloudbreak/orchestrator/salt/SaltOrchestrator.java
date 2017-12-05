@@ -385,8 +385,14 @@ public class SaltOrchestrator implements HostOrchestrator {
 
     @Override
     public void postAmbariStartRecipes(GatewayConfig gatewayConfig, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel)
-        throws CloudbreakOrchestratorFailedException {
+            throws CloudbreakOrchestratorFailedException {
         executeRecipes(gatewayConfig, allNodes, exitCriteriaModel, RecipeExecutionPhase.POST_AMBARI_START);
+    }
+
+    @Override
+    public void preTerminationRecipes(GatewayConfig gatewayConfig, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel)
+            throws CloudbreakOrchestratorFailedException {
+        executeRecipes(gatewayConfig, allNodes, exitCriteriaModel, RecipeExecutionPhase.PRE_TERMINATION);
     }
 
     @Override
@@ -466,7 +472,7 @@ public class SaltOrchestrator implements HostOrchestrator {
 
     @SuppressFBWarnings("REC_CATCH_EXCEPTION")
     private void executeRecipes(GatewayConfig gatewayConfig, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel, RecipeExecutionPhase phase)
-        throws CloudbreakOrchestratorFailedException {
+            throws CloudbreakOrchestratorFailedException {
         try (SaltConnector sc = new SaltConnector(gatewayConfig, restDebug)) {
             // add 'recipe' grain to all nodes
             Set<String> targets = allNodes.stream().map(Node::getPrivateIp).collect(Collectors.toSet());
@@ -547,7 +553,7 @@ public class SaltOrchestrator implements HostOrchestrator {
     }
 
     private void uploadRecipe(SaltConnector sc, Set<String> targets, ExitCriteriaModel exitModel,
-        String name, String recipe, RecipeExecutionPhase phase) throws CloudbreakOrchestratorFailedException {
+            String name, String recipe, RecipeExecutionPhase phase) throws CloudbreakOrchestratorFailedException {
         byte[] recipeBytes = recipe.getBytes(StandardCharsets.UTF_8);
         LOGGER.info("Upload '{}' recipe: {}", phase.value(), name);
         String folder = phase.isPreRecipe() ? "pre-recipes" : "post-recipes";

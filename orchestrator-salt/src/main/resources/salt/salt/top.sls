@@ -77,6 +77,10 @@ base:
     - match: compound
     - ambari.sync-ldap
 
+  'recipes:pre-termination':
+    - match: grain
+    - pre-recipes.pre-termination
+
   'recipes:post-cluster-install':
     - match: grain
     - post-recipes
