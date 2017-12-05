@@ -24,9 +24,7 @@ public class TerminateStackRequest<T> extends CloudStackRequest<T> {
     //BEGIN GENERATED CODE
     @Override
     public String toString() {
-        return "TerminateStackRequest{" +
-                ", cloudResources=" + cloudResources +
-                '}';
+        return getClass().getSimpleName() + "{, cloudResources=" + cloudResources + '}';
     }
     //END GENERATED CODE
 

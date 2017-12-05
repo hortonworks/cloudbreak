@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.api.model.HostGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.cloud.Acceptable;
+import com.sequenceiq.cloudbreak.cloud.reactor.ErrorHandlerAwareReactorEventFactory;
 import com.sequenceiq.cloudbreak.common.type.ScalingType;
 import com.sequenceiq.cloudbreak.controller.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.controller.FlowsAlreadyRunningException;
@@ -41,8 +42,6 @@ import com.sequenceiq.cloudbreak.core.flow2.event.StackSyncTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.instance.termination.InstanceTerminationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationEvent;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.cloud.reactor.ErrorHandlerAwareReactorEventFactory;
-import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterRepairTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.EphemeralClusterUpdateTriggerEvent;
@@ -114,29 +113,9 @@ public class ReactorFlowManager {
         notify(selector, event);
     }
 
-    public void triggerTermination(Long stackId, Boolean deleteDependencies) {
-        StackView stack = stackService.getByIdView(stackId);
-
-        if (BYOS.equals(stack.cloudPlatform())) {
-            String selector = FlowChainTriggers.BYOS_CLUSTER_TERMINATION_TRIGGER_EVENT;
-            notify(selector, new TerminationEvent(selector, stackId, null, deleteDependencies));
-        } else {
-            String selector = StackTerminationEvent.TERMINATION_EVENT.event();
-            notify(selector, new TerminationEvent(selector, stackId, deleteDependencies));
-        }
-        cancelRunningFlows(stackId);
-    }
-
-    public void triggerForcedTermination(Long stackId, Boolean deleteDependencies) {
-        Stack stack = stackService.get(stackId);
-
-        if (BYOS.equals(stack.cloudPlatform())) {
-            String selector = FlowChainTriggers.BYOS_CLUSTER_TERMINATION_TRIGGER_EVENT;
-            notify(selector, new TerminationEvent(selector, stackId, null, deleteDependencies));
-        } else {
-            String selector = StackTerminationEvent.FORCE_TERMINATION_EVENT.event();
-            notify(selector, new TerminationEvent(selector, stackId, deleteDependencies));
-        }
+    public void triggerTermination(Long stackId, Boolean forced, Boolean deleteDependencies) {
+        String selector = StackTerminationEvent.TERMINATION_EVENT.event();
+        notify(selector, new TerminationEvent(selector, stackId, forced, deleteDependencies));
         cancelRunningFlows(stackId);
     }
 

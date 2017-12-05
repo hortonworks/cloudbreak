@@ -97,6 +97,13 @@ public class RecipeEngine {
         }
     }
 
+    public void executePreTerminationRecipes(Stack stack, Set<HostGroup> hostGroups) throws CloudbreakException {
+        Orchestrator orchestrator = stack.getOrchestrator();
+        if (recipesFound(hostGroups) && recipesSupportedOnOrchestrator(orchestrator)) {
+            orchestratorRecipeExecutor.preTerminationRecipes(stack);
+        }
+    }
+
     public void executePostInstall(Stack stack) throws CloudbreakException {
         Orchestrator orchestrator = stack.getOrchestrator();
         if (recipesSupportedOnOrchestrator(orchestrator)) {

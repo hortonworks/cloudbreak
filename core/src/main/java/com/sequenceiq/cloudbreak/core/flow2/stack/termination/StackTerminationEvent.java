@@ -2,12 +2,16 @@ package com.sequenceiq.cloudbreak.core.flow2.stack.termination;
 
 import com.sequenceiq.cloudbreak.cloud.event.resource.TerminateStackResult;
 import com.sequenceiq.cloudbreak.core.flow2.FlowEvent;
+import com.sequenceiq.cloudbreak.reactor.api.event.EventSelectorUtil;
+import com.sequenceiq.cloudbreak.reactor.api.event.recipe.StackPreTerminationFailed;
+import com.sequenceiq.cloudbreak.reactor.api.event.recipe.StackPreTerminationSuccess;
 
 public enum StackTerminationEvent implements FlowEvent {
     TERMINATION_EVENT("STACK_TERMINATE_TRIGGER_EVENT"),
-    FORCE_TERMINATION_EVENT("STACK_FORCE_TERMINATE_TRIGGER_EVENT"),
-    TERMINATION_FINISHED_EVENT(TerminateStackResult.selector(TerminateStackResult.class)),
-    TERMINATION_FAILED_EVENT(TerminateStackResult.failureSelector(TerminateStackResult.class)),
+    PRE_TERMINATION_FAILED_EVENT(EventSelectorUtil.selector(StackPreTerminationFailed.class)),
+    PRE_TERMINATION_FINISHED_EVENT(EventSelectorUtil.selector(StackPreTerminationSuccess.class)),
+    TERMINATION_FINISHED_EVENT(EventSelectorUtil.selector(TerminateStackResult.class)),
+    TERMINATION_FAILED_EVENT(EventSelectorUtil.failureSelector(TerminateStackResult.class)),
     TERMINATION_FINALIZED_EVENT("TERMINATESTACKFINALIZED"),
     STACK_TERMINATION_FAIL_HANDLED_EVENT("TERMINATIONFAILHANDLED");
 

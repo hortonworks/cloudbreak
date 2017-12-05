@@ -7,8 +7,8 @@ enum StackTerminationState implements FlowState {
     INIT_STATE,
     TERMINATION_FAILED_STATE(StackTerminationFailureAction.class),
     TERMINATION_STATE(StackTerminationAction.class),
-    FORCE_TERMINATION_STATE(StackForceTerminationAction.class),
     TERMINATION_FINISHED_STATE(StackTerminationFinishedAction.class),
+    PRE_TERMINATION_STATE(StackPreTerminationAction.class),
     FINAL_STATE;
 
     private Class<? extends AbstractAction> action;

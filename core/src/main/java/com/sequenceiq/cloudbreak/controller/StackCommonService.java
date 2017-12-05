@@ -128,31 +128,19 @@ public class StackCommonService implements StackEndpoint {
     @Override
     public void delete(Long id, Boolean forced, Boolean deleteDependencies) {
         IdentityUser user = authenticatedUserService.getCbUser();
-        if (forced) {
-            stackService.forceDelete(id, user, deleteDependencies);
-        } else {
-            stackService.delete(id, user, deleteDependencies);
-        }
+        stackService.delete(id, user, forced, deleteDependencies);
     }
 
     @Override
     public void deletePrivate(String name, Boolean forced, Boolean deleteDependencies) {
         IdentityUser user = authenticatedUserService.getCbUser();
-        if (forced) {
-            stackService.forceDelete(name, user, deleteDependencies);
-        } else {
-            stackService.delete(name, user, deleteDependencies);
-        }
+        stackService.delete(name, user, forced, deleteDependencies);
     }
 
     @Override
     public void deletePublic(String name, Boolean forced, Boolean deleteDependencies) {
         IdentityUser user = authenticatedUserService.getCbUser();
-        if (forced) {
-            stackService.forceDelete(name, user, deleteDependencies);
-        } else {
-            stackService.delete(name, user, deleteDependencies);
-        }
+        stackService.delete(name, user, forced, deleteDependencies);
     }
 
     public Response put(Long id, UpdateStackJson updateRequest) {
