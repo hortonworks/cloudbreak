@@ -198,37 +198,32 @@ public class AwsPlatformResources implements PlatformResources {
     @Override
     public CloudNetworks networks(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
         Map<String, Set<CloudNetwork>> result = new HashMap<>();
-        for (Region actualRegion : awsPlatformParameters.regions().types()) {
-            // If region is provided then should filter for those region
-            if (regionMatch(actualRegion, region)) {
-                Set<CloudNetwork> cloudNetworks = new HashSet<>();
-                AmazonEC2Client ec2Client = awsClient.createAccess(new AwsCredentialView(cloudCredential), actualRegion.value());
+        Set<CloudNetwork> cloudNetworks = new HashSet<>();
+        AmazonEC2Client ec2Client = awsClient.createAccess(new AwsCredentialView(cloudCredential), region.value());
 
-                //create vpc filter view
-                PlatformResourceVpcFilterView filter = new PlatformResourceVpcFilterView(filters);
+        //create vpc filter view
+        PlatformResourceVpcFilterView filter = new PlatformResourceVpcFilterView(filters);
 
-                DescribeVpcsRequest describeVpcsRequest = new DescribeVpcsRequest();
-                // If the filtervalue is provided then we should filter only for those vpc
-                if (!Strings.isNullOrEmpty(filter.getVpcId())) {
-                    describeVpcsRequest.withVpcIds(filter.getVpcId());
-                }
-                for (Vpc vpc : ec2Client.describeVpcs(describeVpcsRequest).getVpcs()) {
-                    Map<String, String> subnetMap = new HashMap<>();
-                    List<Subnet> subnets = ec2Client.describeSubnets(createVpcDescribeRequest(vpc)).getSubnets();
-                    Map<String, Object> properties = new HashMap<>();
-                    properties.put("cidrBlock", vpc.getCidrBlock());
-                    properties.put("default", vpc.getIsDefault());
-                    properties.put("dhcpOptionsId", vpc.getDhcpOptionsId());
-                    properties.put("instanceTenancy", vpc.getInstanceTenancy());
-                    properties.put("state", vpc.getState());
-                    for (Subnet subnet : subnets) {
-                        subnetMap.put(subnet.getSubnetId(), subnet.getSubnetId());
-                    }
-                    cloudNetworks.add(new CloudNetwork(vpc.getVpcId(), vpc.getVpcId(), subnetMap, properties));
-                }
-                result.put(actualRegion.value(), cloudNetworks);
-            }
+        DescribeVpcsRequest describeVpcsRequest = new DescribeVpcsRequest();
+        // If the filtervalue is provided then we should filter only for those vpc
+        if (!Strings.isNullOrEmpty(filter.getVpcId())) {
+            describeVpcsRequest.withVpcIds(filter.getVpcId());
         }
+        for (Vpc vpc : ec2Client.describeVpcs(describeVpcsRequest).getVpcs()) {
+            Map<String, String> subnetMap = new HashMap<>();
+            List<Subnet> subnets = ec2Client.describeSubnets(createVpcDescribeRequest(vpc)).getSubnets();
+            Map<String, Object> properties = new HashMap<>();
+            properties.put("cidrBlock", vpc.getCidrBlock());
+            properties.put("default", vpc.getIsDefault());
+            properties.put("dhcpOptionsId", vpc.getDhcpOptionsId());
+            properties.put("instanceTenancy", vpc.getInstanceTenancy());
+            properties.put("state", vpc.getState());
+            for (Subnet subnet : subnets) {
+                subnetMap.put(subnet.getSubnetId(), subnet.getSubnetId());
+            }
+            cloudNetworks.add(new CloudNetwork(vpc.getVpcId(), vpc.getVpcId(), subnetMap, properties));
+        }
+        result.put(region.value(), cloudNetworks);
         return new CloudNetworks(result);
     }
 
@@ -269,39 +264,33 @@ public class AwsPlatformResources implements PlatformResources {
     @Override
     public CloudSecurityGroups securityGroups(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
         Map<String, Set<CloudSecurityGroup>> result = new HashMap<>();
-        for (Region actualRegion : awsPlatformParameters.regions().types()) {
-            // If region is provided then should filter for those region
-            if (regionMatch(actualRegion, region)) {
-                Set<CloudSecurityGroup> cloudSecurityGroups = new HashSet<>();
-                AmazonEC2Client ec2Client = awsClient.createAccess(new AwsCredentialView(cloudCredential), actualRegion.value());
+        Set<CloudSecurityGroup> cloudSecurityGroups = new HashSet<>();
+        AmazonEC2Client ec2Client = awsClient.createAccess(new AwsCredentialView(cloudCredential), region.value());
 
-                //create securitygroup filter view
-                PlatformResourceSecurityGroupFilterView filter = new PlatformResourceSecurityGroupFilterView(filters);
+        //create securitygroup filter view
+        PlatformResourceSecurityGroupFilterView filter = new PlatformResourceSecurityGroupFilterView(filters);
 
-                DescribeSecurityGroupsRequest describeSecurityGroupsRequest = new DescribeSecurityGroupsRequest();
-                // If the filtervalue is provided then we should filter only for those securitygroups
-                if (!Strings.isNullOrEmpty(filter.getVpcId())) {
-                    describeSecurityGroupsRequest.withFilters(new Filter("vpc-id", singletonList(filter.getVpcId())));
-                }
-                if (!Strings.isNullOrEmpty(filter.getGroupId())) {
-                    describeSecurityGroupsRequest.withGroupIds(filter.getGroupId());
-                }
-                if (!Strings.isNullOrEmpty(filter.getGroupName())) {
-                    describeSecurityGroupsRequest.withGroupNames(filter.getGroupName());
-                }
-
-                for (SecurityGroup securityGroup : ec2Client.describeSecurityGroups(describeSecurityGroupsRequest).getSecurityGroups()) {
-                    Map<String, Object> properties = new HashMap<>();
-                    properties.put("vpcId", securityGroup.getVpcId());
-                    properties.put("description", securityGroup.getDescription());
-                    properties.put("ipPermissions", securityGroup.getIpPermissions());
-                    properties.put("ipPermissionsEgress", securityGroup.getIpPermissionsEgress());
-                    cloudSecurityGroups.add(new CloudSecurityGroup(securityGroup.getGroupName(), securityGroup.getGroupId(), properties));
-                }
-                result.put(actualRegion.value(), cloudSecurityGroups);
-            }
+        DescribeSecurityGroupsRequest describeSecurityGroupsRequest = new DescribeSecurityGroupsRequest();
+        // If the filtervalue is provided then we should filter only for those securitygroups
+        if (!Strings.isNullOrEmpty(filter.getVpcId())) {
+            describeSecurityGroupsRequest.withFilters(new Filter("vpc-id", singletonList(filter.getVpcId())));
+        }
+        if (!Strings.isNullOrEmpty(filter.getGroupId())) {
+            describeSecurityGroupsRequest.withGroupIds(filter.getGroupId());
+        }
+        if (!Strings.isNullOrEmpty(filter.getGroupName())) {
+            describeSecurityGroupsRequest.withGroupNames(filter.getGroupName());
         }
 
+        for (SecurityGroup securityGroup : ec2Client.describeSecurityGroups(describeSecurityGroupsRequest).getSecurityGroups()) {
+            Map<String, Object> properties = new HashMap<>();
+            properties.put("vpcId", securityGroup.getVpcId());
+            properties.put("description", securityGroup.getDescription());
+            properties.put("ipPermissions", securityGroup.getIpPermissions());
+            properties.put("ipPermissionsEgress", securityGroup.getIpPermissionsEgress());
+            cloudSecurityGroups.add(new CloudSecurityGroup(securityGroup.getGroupName(), securityGroup.getGroupId(), properties));
+        }
+        result.put(region.value(), cloudSecurityGroups);
         return new CloudSecurityGroups(result);
     }
 

@@ -21,5 +21,10 @@ public class Network extends DynamicModel {
         return subnet;
     }
 
-
+    @Override
+    public String toString() {
+        return "Network{"
+                + "subnet=" + subnet
+                + '}';
+    }
 }

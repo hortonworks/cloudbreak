@@ -89,4 +89,18 @@ public class Group extends DynamicModel {
     public InstanceAuthentication getInstanceAuthentication() {
         return instanceAuthentication;
     }
+
+    @Override
+    public String toString() {
+        return "Group{"
+                + "name='" + name + '\''
+                + ", type=" + type
+                + ", instances=" + instances
+                + ", security=" + security
+                + ", publicKey='" + publicKey + '\''
+                + ", loginUserName='" + loginUserName + '\''
+                + ", instanceAuthentication=" + instanceAuthentication
+                + ", skeleton=" + skeleton
+                + '}';
+    }
 }
