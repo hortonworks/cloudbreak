@@ -126,6 +126,46 @@ public class HeatTemplateBuilderTest {
     }
 
     @Test
+    public void buildTestWithExistingNetworkAndExistingSubnetAndAssignFloatingIpWithExistingSecurityGroups() throws Exception {
+        //GIVEN
+        boolean existingNetwork = true;
+        boolean existingSubnet = true;
+        NeutronNetworkView neutronNetworkView = createNeutronNetworkView("floating_pool_id");
+        Group group = groups.get(0);
+        groups.clear();
+        String cloudSecurityId = "sec-group-id";
+        Security security = new Security(Collections.emptyList(), cloudSecurityId);
+        Group groupWithSecGroup = new Group(group.getName(), InstanceGroupType.CORE, group.getInstances(), security, null,
+                group.getInstanceAuthentication(), group.getInstanceAuthentication().getLoginUserName(), group.getInstanceAuthentication().getPublicKey());
+        groups.add(groupWithSecGroup);
+
+        //WHEN
+        when(openStackUtil.adjustStackNameLength(Mockito.anyString())).thenReturn("t");
+
+        ModelContext modelContext = new ModelContext();
+        modelContext.withExistingNetwork(existingNetwork);
+        modelContext.withExistingSubnet(existingSubnet);
+        modelContext.withGroups(groups);
+        modelContext.withInstanceUserData(image);
+        modelContext.withLocation(location());
+        modelContext.withStackName(stackName);
+        modelContext.withNeutronNetworkView(neutronNetworkView);
+        modelContext.withTemplateString(heatTemplateBuilder.getTemplate());
+
+        String templateString = heatTemplateBuilder.build(modelContext);
+        //THEN
+        assertThat(templateString, not(containsString("cb-sec-group_" + 't')));
+        assertThat(templateString, not(containsString("type: OS::Neutron::SecurityGroup")));
+        assertThat(templateString, containsString(cloudSecurityId));
+        assertThat(templateString, containsString("app_net_id"));
+        assertThat(templateString, not(containsString("app_network")));
+        assertThat(templateString, containsString("subnet_id"));
+        assertThat(templateString, not(containsString("app_subnet")));
+        assertThat(templateString, containsString("network_id"));
+        assertThat(templateString, containsString("public_net_id"));
+    }
+
+    @Test
     public void buildTestWithExistingSubnetAndAssignFloatingIpWithoutExistingNetwork() throws Exception {
         //GIVEN
         boolean existingNetwork = false;

@@ -154,7 +154,18 @@ ${core_user_data}
         - subnet_id: { get_resource: app_subnet }
       </#if>
       </#if>
-      security_groups: [ { get_resource: security_group_${agent.instance.groupName} } ]
+      security_groups: [
+        <#assign groupNames = []>
+        <#list groups as group>
+            <#assign groupNames += [group.name]>
+        </#list>
+        <#assign group_idx = groupNames?seq_index_of(agent.instance.groupName)>
+        <#if  -1 < group_idx && groups[group_idx].security.cloudSecurityId?has_content>
+        ${groups[group_idx].security.cloudSecurityId}
+        <#else>
+        { get_resource: security_group_${agent.instance.groupName} }
+        </#if>
+      ]
 
   <#if network.assignFloatingIp>
   ambari_server_floatingip_${agent.instanceId}:
@@ -166,7 +177,7 @@ ${core_user_data}
   </#list>
 
   <#list groups as group>
-
+  <#if ! group.security.cloudSecurityId?has_content>
   security_group_${group.name}:
     type: OS::Neutron::SecurityGroup
     properties:
@@ -191,7 +202,7 @@ ${core_user_data}
         port_range_max: 65535},
         {remote_ip_prefix: 0.0.0.0/0,
         protocol: icmp}]
-
+  </#if>
   </#list>
 
 outputs:
