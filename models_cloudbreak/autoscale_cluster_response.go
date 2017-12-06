@@ -600,7 +600,7 @@ var autoscaleClusterResponseTypeStatusPropEnum []interface{}
 
 func init() {
 	var res []string
-	if err := json.Unmarshal([]byte(`["REQUESTED","CREATE_IN_PROGRESS","AVAILABLE","UPDATE_IN_PROGRESS","UPDATE_REQUESTED","UPDATE_FAILED","CREATE_FAILED","ENABLE_SECURITY_FAILED","DELETE_IN_PROGRESS","DELETE_FAILED","DELETE_COMPLETED","STOPPED","STOP_REQUESTED","START_REQUESTED","STOP_IN_PROGRESS","START_IN_PROGRESS","START_FAILED","STOP_FAILED","WAIT_FOR_SYNC"]`), &res); err != nil {
+	if err := json.Unmarshal([]byte(`["REQUESTED","CREATE_IN_PROGRESS","AVAILABLE","UPDATE_IN_PROGRESS","UPDATE_REQUESTED","UPDATE_FAILED","CREATE_FAILED","ENABLE_SECURITY_FAILED","PRE_DELETE_IN_PROGRESS","DELETE_IN_PROGRESS","DELETE_FAILED","DELETE_COMPLETED","STOPPED","STOP_REQUESTED","START_REQUESTED","STOP_IN_PROGRESS","START_IN_PROGRESS","START_FAILED","STOP_FAILED","WAIT_FOR_SYNC"]`), &res); err != nil {
 		panic(err)
 	}
 	for _, v := range res {
@@ -625,6 +625,8 @@ const (
 	AutoscaleClusterResponseStatusCREATEFAILED string = "CREATE_FAILED"
 	// AutoscaleClusterResponseStatusENABLESECURITYFAILED captures enum value "ENABLE_SECURITY_FAILED"
 	AutoscaleClusterResponseStatusENABLESECURITYFAILED string = "ENABLE_SECURITY_FAILED"
+	// AutoscaleClusterResponseStatusPREDELETEINPROGRESS captures enum value "PRE_DELETE_IN_PROGRESS"
+	AutoscaleClusterResponseStatusPREDELETEINPROGRESS string = "PRE_DELETE_IN_PROGRESS"
 	// AutoscaleClusterResponseStatusDELETEINPROGRESS captures enum value "DELETE_IN_PROGRESS"
 	AutoscaleClusterResponseStatusDELETEINPROGRESS string = "DELETE_IN_PROGRESS"
 	// AutoscaleClusterResponseStatusDELETEFAILED captures enum value "DELETE_FAILED"

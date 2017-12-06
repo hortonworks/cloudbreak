@@ -109,7 +109,7 @@ var autoscaleStackResponseTypeClusterStatusPropEnum []interface{}
 
 func init() {
 	var res []string
-	if err := json.Unmarshal([]byte(`["REQUESTED","CREATE_IN_PROGRESS","AVAILABLE","UPDATE_IN_PROGRESS","UPDATE_REQUESTED","UPDATE_FAILED","CREATE_FAILED","ENABLE_SECURITY_FAILED","DELETE_IN_PROGRESS","DELETE_FAILED","DELETE_COMPLETED","STOPPED","STOP_REQUESTED","START_REQUESTED","STOP_IN_PROGRESS","START_IN_PROGRESS","START_FAILED","STOP_FAILED","WAIT_FOR_SYNC"]`), &res); err != nil {
+	if err := json.Unmarshal([]byte(`["REQUESTED","CREATE_IN_PROGRESS","AVAILABLE","UPDATE_IN_PROGRESS","UPDATE_REQUESTED","UPDATE_FAILED","CREATE_FAILED","ENABLE_SECURITY_FAILED","PRE_DELETE_IN_PROGRESS","DELETE_IN_PROGRESS","DELETE_FAILED","DELETE_COMPLETED","STOPPED","STOP_REQUESTED","START_REQUESTED","STOP_IN_PROGRESS","START_IN_PROGRESS","START_FAILED","STOP_FAILED","WAIT_FOR_SYNC"]`), &res); err != nil {
 		panic(err)
 	}
 	for _, v := range res {
@@ -134,6 +134,8 @@ const (
 	AutoscaleStackResponseClusterStatusCREATEFAILED string = "CREATE_FAILED"
 	// AutoscaleStackResponseClusterStatusENABLESECURITYFAILED captures enum value "ENABLE_SECURITY_FAILED"
 	AutoscaleStackResponseClusterStatusENABLESECURITYFAILED string = "ENABLE_SECURITY_FAILED"
+	// AutoscaleStackResponseClusterStatusPREDELETEINPROGRESS captures enum value "PRE_DELETE_IN_PROGRESS"
+	AutoscaleStackResponseClusterStatusPREDELETEINPROGRESS string = "PRE_DELETE_IN_PROGRESS"
 	// AutoscaleStackResponseClusterStatusDELETEINPROGRESS captures enum value "DELETE_IN_PROGRESS"
 	AutoscaleStackResponseClusterStatusDELETEINPROGRESS string = "DELETE_IN_PROGRESS"
 	// AutoscaleStackResponseClusterStatusDELETEFAILED captures enum value "DELETE_FAILED"
@@ -205,7 +207,7 @@ var autoscaleStackResponseTypeStatusPropEnum []interface{}
 
 func init() {
 	var res []string
-	if err := json.Unmarshal([]byte(`["REQUESTED","CREATE_IN_PROGRESS","AVAILABLE","UPDATE_IN_PROGRESS","UPDATE_REQUESTED","UPDATE_FAILED","CREATE_FAILED","ENABLE_SECURITY_FAILED","DELETE_IN_PROGRESS","DELETE_FAILED","DELETE_COMPLETED","STOPPED","STOP_REQUESTED","START_REQUESTED","STOP_IN_PROGRESS","START_IN_PROGRESS","START_FAILED","STOP_FAILED","WAIT_FOR_SYNC"]`), &res); err != nil {
+	if err := json.Unmarshal([]byte(`["REQUESTED","CREATE_IN_PROGRESS","AVAILABLE","UPDATE_IN_PROGRESS","UPDATE_REQUESTED","UPDATE_FAILED","CREATE_FAILED","ENABLE_SECURITY_FAILED","PRE_DELETE_IN_PROGRESS","DELETE_IN_PROGRESS","DELETE_FAILED","DELETE_COMPLETED","STOPPED","STOP_REQUESTED","START_REQUESTED","STOP_IN_PROGRESS","START_IN_PROGRESS","START_FAILED","STOP_FAILED","WAIT_FOR_SYNC"]`), &res); err != nil {
 		panic(err)
 	}
 	for _, v := range res {
@@ -230,6 +232,8 @@ const (
 	AutoscaleStackResponseStatusCREATEFAILED string = "CREATE_FAILED"
 	// AutoscaleStackResponseStatusENABLESECURITYFAILED captures enum value "ENABLE_SECURITY_FAILED"
 	AutoscaleStackResponseStatusENABLESECURITYFAILED string = "ENABLE_SECURITY_FAILED"
+	// AutoscaleStackResponseStatusPREDELETEINPROGRESS captures enum value "PRE_DELETE_IN_PROGRESS"
+	AutoscaleStackResponseStatusPREDELETEINPROGRESS string = "PRE_DELETE_IN_PROGRESS"
 	// AutoscaleStackResponseStatusDELETEINPROGRESS captures enum value "DELETE_IN_PROGRESS"
 	AutoscaleStackResponseStatusDELETEINPROGRESS string = "DELETE_IN_PROGRESS"
 	// AutoscaleStackResponseStatusDELETEFAILED captures enum value "DELETE_FAILED"

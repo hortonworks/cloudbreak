@@ -20,6 +20,9 @@ type ImageCatalogRequest struct {
 
 	// name of the resource
 	// Required: true
+	// Max Length: 100
+	// Min Length: 5
+	// Pattern: ([a-z][-a-z0-9]*[a-z0-9])
 	Name *string `json:"name"`
 
 	// custom image catalog's URL
@@ -54,6 +57,18 @@ func (m *ImageCatalogRequest) Validate(formats strfmt.Registry) error {
 func (m *ImageCatalogRequest) validateName(formats strfmt.Registry) error {
 
 	if err := validate.Required("name", "body", m.Name); err != nil {
+		return err
+	}
+
+	if err := validate.MinLength("name", "body", string(*m.Name), 5); err != nil {
+		return err
+	}
+
+	if err := validate.MaxLength("name", "body", string(*m.Name), 100); err != nil {
+		return err
+	}
+
+	if err := validate.Pattern("name", "body", string(*m.Name), `([a-z][-a-z0-9]*[a-z0-9])`); err != nil {
 		return err
 	}
 

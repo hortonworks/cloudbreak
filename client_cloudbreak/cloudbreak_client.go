@@ -11,9 +11,9 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/hortonworks/cb-cli/client_cloudbreak/cluster"
 	"github.com/hortonworks/cb-cli/client_cloudbreak/v1accountpreferences"
 	"github.com/hortonworks/cb-cli/client_cloudbreak/v1blueprints"
+	"github.com/hortonworks/cb-cli/client_cloudbreak/v1clusters"
 	"github.com/hortonworks/cb-cli/client_cloudbreak/v1clustertemplates"
 	"github.com/hortonworks/cb-cli/client_cloudbreak/v1connectors"
 	"github.com/hortonworks/cb-cli/client_cloudbreak/v1constraints"
@@ -81,11 +81,11 @@ func New(transport runtime.ClientTransport, formats strfmt.Registry) *Cloudbreak
 	cli := new(Cloudbreak)
 	cli.Transport = transport
 
-	cli.Cluster = cluster.New(transport, formats)
-
 	cli.V1accountpreferences = v1accountpreferences.New(transport, formats)
 
 	cli.V1blueprints = v1blueprints.New(transport, formats)
+
+	cli.V1clusters = v1clusters.New(transport, formats)
 
 	cli.V1clustertemplates = v1clustertemplates.New(transport, formats)
 
@@ -179,11 +179,11 @@ func (cfg *TransportConfig) WithSchemes(schemes []string) *TransportConfig {
 
 // Cloudbreak is a client for cloudbreak
 type Cloudbreak struct {
-	Cluster *cluster.Client
-
 	V1accountpreferences *v1accountpreferences.Client
 
 	V1blueprints *v1blueprints.Client
+
+	V1clusters *v1clusters.Client
 
 	V1clustertemplates *v1clustertemplates.Client
 
@@ -240,11 +240,11 @@ type Cloudbreak struct {
 func (c *Cloudbreak) SetTransport(transport runtime.ClientTransport) {
 	c.Transport = transport
 
-	c.Cluster.SetTransport(transport)
-
 	c.V1accountpreferences.SetTransport(transport)
 
 	c.V1blueprints.SetTransport(transport)
+
+	c.V1clusters.SetTransport(transport)
 
 	c.V1clustertemplates.SetTransport(transport)
 

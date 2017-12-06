@@ -18,6 +18,9 @@ import (
 
 type AmbariStackDetails struct {
 
+	// url the MPACK that needs to be installed before HDF installation
+	MpackURL string `json:"mpackUrl,omitempty"`
+
 	// operating system for the stack, like redhat6
 	Os string `json:"os,omitempty"`
 
@@ -51,6 +54,8 @@ type AmbariStackDetails struct {
 	// local path on the Ambari server or URL that point to the desired VDF file
 	VersionDefinitionFileURL string `json:"versionDefinitionFileUrl,omitempty"`
 }
+
+/* polymorph AmbariStackDetails mpackUrl false */
 
 /* polymorph AmbariStackDetails os false */
 

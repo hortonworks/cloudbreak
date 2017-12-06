@@ -129,7 +129,7 @@ var recipeResponseTypeRecipeTypePropEnum []interface{}
 
 func init() {
 	var res []string
-	if err := json.Unmarshal([]byte(`["PRE_AMBARI_START","POST_AMBARI_START","POST_CLUSTER_INSTALL"]`), &res); err != nil {
+	if err := json.Unmarshal([]byte(`["PRE_AMBARI_START","PRE_TERMINATION","POST_AMBARI_START","POST_CLUSTER_INSTALL"]`), &res); err != nil {
 		panic(err)
 	}
 	for _, v := range res {
@@ -140,6 +140,8 @@ func init() {
 const (
 	// RecipeResponseRecipeTypePREAMBARISTART captures enum value "PRE_AMBARI_START"
 	RecipeResponseRecipeTypePREAMBARISTART string = "PRE_AMBARI_START"
+	// RecipeResponseRecipeTypePRETERMINATION captures enum value "PRE_TERMINATION"
+	RecipeResponseRecipeTypePRETERMINATION string = "PRE_TERMINATION"
 	// RecipeResponseRecipeTypePOSTAMBARISTART captures enum value "POST_AMBARI_START"
 	RecipeResponseRecipeTypePOSTAMBARISTART string = "POST_AMBARI_START"
 	// RecipeResponseRecipeTypePOSTCLUSTERINSTALL captures enum value "POST_CLUSTER_INSTALL"
