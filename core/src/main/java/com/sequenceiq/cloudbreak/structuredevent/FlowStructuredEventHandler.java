@@ -2,8 +2,6 @@ package com.sequenceiq.cloudbreak.structuredevent;
 
 import javax.inject.Inject;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.messaging.Message;
 import org.springframework.statemachine.StateMachine;
@@ -19,7 +17,6 @@ import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEvent;
 @Component
 @Scope("prototype")
 public class FlowStructuredEventHandler<S, E> extends StateMachineListenerAdapter<S, E> {
-    private static final Logger LOGGER = LoggerFactory.getLogger(FlowStructuredEventHandler.class);
 
     @Inject
     private StructuredEventClient structuredEventClient;

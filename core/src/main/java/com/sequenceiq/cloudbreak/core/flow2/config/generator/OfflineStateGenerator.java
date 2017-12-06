@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.core.flow2.config;
+package com.sequenceiq.cloudbreak.core.flow2.config.generator;
 
 import java.io.File;
 import java.io.IOException;
@@ -11,15 +11,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
-import org.springframework.context.ApplicationContext;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.support.AbstractApplicationContext;
+import org.springframework.core.convert.ConversionService;
+import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.StateMachine;
 import org.springframework.statemachine.transition.Transition;
 
+import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.cloud.event.Payload;
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.AbstractAction;
@@ -27,8 +31,10 @@ import com.sequenceiq.cloudbreak.core.flow2.CommonContext;
 import com.sequenceiq.cloudbreak.core.flow2.Flow;
 import com.sequenceiq.cloudbreak.core.flow2.FlowEvent;
 import com.sequenceiq.cloudbreak.core.flow2.FlowState;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.EphemeralClusterFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.downscale.ClusterDownscaleFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationFlowConfig;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.repair.ChangePrimaryGatewayFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.reset.ClusterResetFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.start.ClusterStartFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.stop.ClusterStopFlowConfig;
@@ -37,6 +43,8 @@ import com.sequenceiq.cloudbreak.core.flow2.cluster.termination.ClusterTerminati
 import com.sequenceiq.cloudbreak.core.flow2.cluster.upgrade.ClusterUpgradeFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.upscale.ClusterUpscaleFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.userpasswd.ClusterCredentialChangeFlowConfig;
+import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration;
+import com.sequenceiq.cloudbreak.core.flow2.config.FlowConfiguration;
 import com.sequenceiq.cloudbreak.core.flow2.stack.downscale.StackDownscaleConfig;
 import com.sequenceiq.cloudbreak.core.flow2.stack.instance.termination.InstanceTerminationFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationFlowConfig;
@@ -46,6 +54,16 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.stop.StackStopFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.stack.sync.StackSyncFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleConfig;
+import com.sequenceiq.cloudbreak.domain.Credential;
+import com.sequenceiq.cloudbreak.domain.FlexSubscription;
+import com.sequenceiq.cloudbreak.domain.Network;
+import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.service.ha.CloudbreakNodeConfig;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.structuredevent.FlowStructuredEventHandler;
+import com.sequenceiq.cloudbreak.structuredevent.StructuredEventClient;
+import com.sequenceiq.cloudbreak.structuredevent.StructuredFlowEventFactory;
 
 public class OfflineStateGenerator {
 
@@ -53,6 +71,7 @@ public class OfflineStateGenerator {
 
     private static final List<FlowConfiguration<? extends FlowEvent>> CONFIGS =
             Arrays.asList(
+                    new ChangePrimaryGatewayFlowConfig(),
                     new ClusterCreationFlowConfig(),
                     new ClusterCredentialChangeFlowConfig(),
                     new ClusterDownscaleFlowConfig(),
@@ -63,6 +82,7 @@ public class OfflineStateGenerator {
                     new ClusterTerminationFlowConfig(),
                     new ClusterUpgradeFlowConfig(),
                     new ClusterUpscaleFlowConfig(),
+                    new EphemeralClusterFlowConfig(),
                     new InstanceTerminationFlowConfig(),
                     new ManualStackRepairTriggerFlowConfig(),
                     new StackCreationFlowConfig(),
@@ -74,7 +94,11 @@ public class OfflineStateGenerator {
                     new StackUpscaleConfig()
             );
 
-    private static final ApplicationContext APP_CONTEXT = new CustomApplicationContext();
+    private static final CustomApplicationContext APP_CONTEXT = new CustomApplicationContext();
+
+    static {
+        APP_CONTEXT.refresh();
+    }
 
     private final FlowConfiguration flowConfiguration;
 
@@ -90,7 +114,7 @@ public class OfflineStateGenerator {
 
     private void generate() throws Exception {
         StringBuilder builder = new StringBuilder("digraph {\n");
-        injectAppContext(flowConfiguration);
+        inject(flowConfiguration, "applicationContext", APP_CONTEXT);
         Flow flow = initializeFlow();
         StateMachine<FlowState, FlowEvent> stateMachine = getStateMachine(flow);
         FlowState init = stateMachine.getInitialState().getId();
@@ -166,10 +190,23 @@ public class OfflineStateGenerator {
         Files.write(Paths.get(String.format("%s/%s.dot", OUT_PATH, flowConfiguration.getClass().getSimpleName())), content.getBytes("UTF-8"));
     }
 
-    private static void injectAppContext(FlowConfiguration flowConfiguration) throws IllegalAccessException, NoSuchFieldException {
-        Field applicationContext = flowConfiguration.getClass().getSuperclass().getDeclaredField("applicationContext");
-        applicationContext.setAccessible(true);
-        applicationContext.set(flowConfiguration, APP_CONTEXT);
+    private static void inject(Object target, String name, Object value) {
+        Field field = null;
+        try {
+            field = target.getClass().getDeclaredField(name);
+        } catch (NoSuchFieldException ignored) {
+        }
+        if (field == null) {
+            try {
+                field = target.getClass().getSuperclass().getDeclaredField(name);
+            } catch (NoSuchFieldException ignored) {
+            }
+        }
+        try {
+            field.setAccessible(true);
+            field.set(target, value);
+        } catch (NullPointerException | IllegalAccessException ignored) {
+        }
     }
 
     static class CustomApplicationContext extends AbstractApplicationContext {
@@ -181,7 +218,6 @@ public class OfflineStateGenerator {
 
         @Override
         protected void refreshBeanFactory() throws BeansException {
-
         }
 
         @Override
@@ -190,7 +226,241 @@ public class OfflineStateGenerator {
         }
 
         @Override
+        protected ConfigurableListableBeanFactory obtainFreshBeanFactory() {
+            return new CustomBeanFactory();
+        }
+
+        @Override
         public ConfigurableListableBeanFactory getBeanFactory() {
+            return obtainFreshBeanFactory();
+        }
+    }
+
+    enum FlowStructuredEventHandlerParams {
+        INIT_STATE, FINAL_STATE, FLOW_TYPE, FLOW_ID, STACK_ID
+    }
+
+    static class CustomBeanFactory extends DefaultListableBeanFactory {
+        @Override
+        public <T> T getBean(Class<T> requiredType, Object... args) throws BeansException {
+            FlowStructuredEventHandler bean = new FlowStructuredEventHandler(args[FlowStructuredEventHandlerParams.INIT_STATE.ordinal()],
+                    args[FlowStructuredEventHandlerParams.FINAL_STATE.ordinal()], (String) args[FlowStructuredEventHandlerParams.FLOW_TYPE.ordinal()],
+                    (String) args[FlowStructuredEventHandlerParams.FLOW_ID.ordinal()], (Long) args[FlowStructuredEventHandlerParams.STACK_ID.ordinal()]);
+
+            inject(bean, "structuredEventClient", (StructuredEventClient) structuredEvent -> {
+            });
+            StructuredFlowEventFactory factory = new StructuredFlowEventFactory();
+            inject(bean, "structuredFlowEventFactory", factory);
+            inject(factory, "cloudbreakNodeConfig", new CloudbreakNodeConfig());
+            inject(factory, "conversionService", new CustomConversionService());
+            StackService stackService = new StackService();
+            inject(factory, "stackService", stackService);
+            inject(stackService, "stackRepository", new CustomStackRepository());
+
+            return (T) bean;
+        }
+    }
+
+    static class CustomStackRepository implements StackRepository {
+
+        CustomStackRepository() {
+        }
+
+        @Override
+        public Stack findByAmbari(String ambariIp) {
+            return null;
+        }
+
+        @Override
+        public Set<Stack> findForUserWithLists(String user) {
+            return null;
+        }
+
+        @Override
+        public Set<Stack> findForUser(String user) {
+            return null;
+        }
+
+        @Override
+        public Set<Stack> findPublicInAccountForUser(String user, String account) {
+            return null;
+        }
+
+        @Override
+        public Set<Stack> findAllInAccountWithLists(String account) {
+            return null;
+        }
+
+        @Override
+        public Set<Stack> findAllInAccount(String account) {
+            return null;
+        }
+
+        @Override
+        public Stack findOneWithLists(Long id) {
+            return new Stack();
+        }
+
+        @Override
+        public Set<Stack> findEphemeralClusters(Long id) {
+            return null;
+        }
+
+        @Override
+        public List<Stack> findAllStackForTemplate(Long id) {
+            return null;
+        }
+
+        @Override
+        public List<Object[]> findStackStatuses(Set<Long> ids) {
+            return null;
+        }
+
+        @Override
+        public Stack findStackForCluster(Long id) {
+            return null;
+        }
+
+        @Override
+        public Stack findByIdInAccount(Long id, String account) {
+            return null;
+        }
+
+        @Override
+        public Stack findByNameInAccountOrOwner(String name, String account, String owner) {
+            return null;
+        }
+
+        @Override
+        public Stack findByNameInAccountWithLists(String name, String account) {
+            return null;
+        }
+
+        @Override
+        public Stack findByNameInAccount(String name, String account) {
+            return null;
+        }
+
+        @Override
+        public Stack findByNameInUserWithLists(String name, String owner) {
+            return null;
+        }
+
+        @Override
+        public Stack findByNameInUser(String name, String owner) {
+            return null;
+        }
+
+        @Override
+        public List<Stack> findAllAlive() {
+            return null;
+        }
+
+        @Override
+        public List<Stack> findAllAliveAndProvisioned() {
+            return null;
+        }
+
+        @Override
+        public List<Stack> findByStatuses(List<Status> statuses) {
+            return null;
+        }
+
+        @Override
+        public Set<Stack> findAliveOnes() {
+            return null;
+        }
+
+        @Override
+        public Long countByFlexSubscription(FlexSubscription flexSubscription) {
+            return null;
+        }
+
+        @Override
+        public Long countByCredential(Credential credential) {
+            return null;
+        }
+
+        @Override
+        public Long countByNetwork(Network network) {
+            return null;
+        }
+
+        @Override
+        public <S extends Stack> S save(S entity) {
+            return null;
+        }
+
+        @Override
+        public <S extends Stack> Iterable<S> save(Iterable<S> entities) {
+            return null;
+        }
+
+        @Override
+        public Stack findOne(Long aLong) {
+            return new Stack();
+        }
+
+        @Override
+        public boolean exists(Long aLong) {
+            return false;
+        }
+
+        @Override
+        public Iterable<Stack> findAll() {
+            return null;
+        }
+
+        @Override
+        public Iterable<Stack> findAll(Iterable<Long> longs) {
+            return null;
+        }
+
+        @Override
+        public long count() {
+            return 0;
+        }
+
+        @Override
+        public void delete(Long aLong) {
+
+        }
+
+        @Override
+        public void delete(Stack entity) {
+
+        }
+
+        @Override
+        public void delete(Iterable<? extends Stack> entities) {
+
+        }
+
+        @Override
+        public void deleteAll() {
+
+        }
+    }
+
+    static class CustomConversionService implements ConversionService {
+
+        @Override
+        public boolean canConvert(Class<?> sourceType, Class<?> targetType) {
+            return false;
+        }
+
+        @Override
+        public boolean canConvert(TypeDescriptor sourceType, TypeDescriptor targetType) {
+            return false;
+        }
+
+        @Override
+        public <T> T convert(Object source, Class<T> targetType) {
+            return null;
+        }
+
+        @Override
+        public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
             return null;
         }
     }
