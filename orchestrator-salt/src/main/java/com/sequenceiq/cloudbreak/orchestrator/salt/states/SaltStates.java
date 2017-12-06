@@ -91,10 +91,8 @@ public class SaltStates {
             LOGGER.info("Collect missing targets from host: {}", stringMapEntry.getKey());
             logRunnerInfos(stringMapEntry);
             for (RunnerInfo targetObject : stringMapEntry.getValue()) {
-                if (targetObject.getResult()) {
-                    LOGGER.info("{} finished in {} ms.", targetObject.getComment(), targetObject.getDuration());
-                } else {
-                    LOGGER.info("{} job state is {}.", targetObject.getComment(), targetObject.getResult());
+                if (!targetObject.getResult()) {
+                    LOGGER.info("SaltStates: State id: {} job state is has failed.", targetObject.getStateId(), targetObject.getComment());
                     missingTargetsWithErrors.put(stringMapEntry.getKey(), targetObject.getComment());
                 }
             }
@@ -107,7 +105,7 @@ public class SaltStates {
         runnerInfos.sort(Collections.reverseOrder(new DurationComparator()));
         double sum = runnerInfos.stream().mapToDouble(runnerInfo -> runnerInfo.getDuration()).sum();
         try {
-            LOGGER.info("Salt states executed on: {} within: {} sec, details {}", stringMapEntry.getKey(),
+            LOGGER.info("SaltStates executed on: {} within: {} sec, details {}", stringMapEntry.getKey(),
                     TimeUnit.MILLISECONDS.toSeconds(Math.round(sum)), JsonUtil.writeValueAsString(runnerInfos));
         } catch (JsonProcessingException ignored) {
             LOGGER.warn("Failed to serialise runnerInfos. Salt states executed on: {} within: {} sec", stringMapEntry.getKey(),
