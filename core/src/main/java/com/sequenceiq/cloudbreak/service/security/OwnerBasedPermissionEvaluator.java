@@ -19,7 +19,6 @@ import org.springframework.util.ReflectionUtils;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
 import com.sequenceiq.cloudbreak.common.service.user.UserFilterField;
-import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
 
 @Service
@@ -38,7 +37,7 @@ public class OwnerBasedPermissionEvaluator implements PermissionEvaluator {
     public boolean hasPermission(Authentication authentication, Object target, Object permission) {
         Permission p = Permission.valueOf(permission.toString().toUpperCase());
         if (target == null) {
-            throw new NotFoundException("Resource not found.");
+            return false;
         }
         OAuth2Authentication oauth = (OAuth2Authentication) authentication;
         if (oauth.getUserAuthentication() == null) {

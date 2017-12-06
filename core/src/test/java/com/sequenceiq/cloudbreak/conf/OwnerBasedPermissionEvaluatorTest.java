@@ -20,7 +20,6 @@ import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
 import com.sequenceiq.cloudbreak.common.service.user.UserFilterField;
-import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.security.OwnerBasedPermissionEvaluator;
 import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
@@ -46,9 +45,10 @@ public class OwnerBasedPermissionEvaluatorTest {
         stack = TestUtil.stack();
     }
 
-    @Test(expected = NotFoundException.class)
+    @Test
     public void testTargetNotFound() {
-        underTest.hasPermission(null, null, "read");
+        boolean result  = underTest.hasPermission(null, null, "read");
+        Assert.assertFalse(result);
     }
 
     @Test

@@ -14,7 +14,6 @@ import org.springframework.util.ReflectionUtils;
 import com.sequenceiq.cloudbreak.common.service.user.UserFilterField;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.PeriscopeUser;
-import com.sequenceiq.periscope.service.NotFoundException;
 
 @Service
 @Lazy
@@ -27,7 +26,7 @@ public class OwnerBasedPermissionEvaluator implements PermissionEvaluator {
     @Override
     public boolean hasPermission(Authentication authentication, Object targetDomainObject, Object permission) {
         if (targetDomainObject == null) {
-            throw new NotFoundException("Resource not found.");
+            return false;
         }
         try {
             PeriscopeUser user = userDetailsService.getDetails((String) authentication.getPrincipal(), UserFilterField.USERNAME);
