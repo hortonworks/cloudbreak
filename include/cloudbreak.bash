@@ -383,16 +383,34 @@ cloudbreak-generate-cert() {
     else
       info "Generating Cloudbreak client certificate and private key in ${CBD_CERT_ROOT_PATH} with ${PUBLIC_IP} into ${CBD_CERT_ROOT_PATH}/traefik."
       mkdir -p "${CBD_CERT_ROOT_PATH}/traefik"
+      if is_linux; then
+        run_as_user="-u $(id -u $(whoami)):$(id -g $(whoami))"
+      fi
+    
+      cbd_ca_cert_gen_out=$(mktemp)
       docker run \
           --label cbreak.sidekick=true \
-          -u $(id -u $(whoami)):$(id -g $(whoami)) \
+          $run_as_user \
           -v ${CBD_CERT_ROOT_PATH}:/certs \
-          ehazlett/certm:${DOCKER_TAG_CERT_TOOL} -d /certs/traefik ca generate -o=local &> /dev/null
+          ehazlett/certm:${DOCKER_TAG_CERT_TOOL} \
+          -d /certs/traefik ca generate -o=local &> $cbd_ca_cert_gen_out || CA_CERT_EXIT_CODE=$? && true;
+      if [[ $CA_CERT_EXIT_CODE -ne 0 ]]; then
+          cat $cbd_ca_cert_gen_out;
+          exit 1;
+      fi
+
+      cbd_client_cert_gen_out=$(mktemp)
       docker run \
           --label cbreak.sidekick=true \
-          -u $(id -u $(whoami)):$(id -g $(whoami)) \
+          $run_as_user \
           -v ${CBD_CERT_ROOT_PATH}:/certs \
-          ehazlett/certm:${DOCKER_TAG_CERT_TOOL} -d /certs/traefik client generate --common-name=${PUBLIC_IP} -o=local &> /dev/null
+          ehazlett/certm:${DOCKER_TAG_CERT_TOOL} \
+          -d /certs/traefik client generate --common-name=${PUBLIC_IP} -o=local &> $cbd_client_cert_gen_out || CLIENT_CERT_EXIT_CODE=$? && true;
+      if [[ $CLIENT_CERT_EXIT_CODE -ne 0 ]]; then
+         cat $cbd_client_cert_gen_out;
+         exit 1;
+      fi
+
       owner=$(ls -od ${CBD_CERT_ROOT_PATH} | tr -s ' ' | cut -d ' ' -f 3)
       [[ "$owner" != "$(whoami)" ]] && sudo chown -R $(whoami):$(id -gn) ${CBD_CERT_ROOT_PATH}
       mv "${CBD_CERT_ROOT_PATH}/traefik/cert.pem" "${CBD_CERT_ROOT_PATH}/traefik/client.pem"
