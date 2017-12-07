@@ -60,7 +60,7 @@
           "properties": {
             "druid.metadata.storage.type": "derby",
             "druid.metadata.storage.connector.connectURI": "jdbc:derby://localhost:1527/druid;create=true",
-            "druid.extensions.loadList": "[\"postgresql-metadata-storage\", \"druid-s3-extensions\"]",
+            "druid.extensions.loadList": "[\"postgresql-metadata-storage\", \"druid-s3-extensions\", \"druid-hdfs-storage\"]",
             "druid.selectors.indexing.serviceName": "druid/overlord"
           }
         }
@@ -184,24 +184,19 @@
             "name": "ZOOKEEPER_SERVER"
           },
           {
-            "name": "DRUID_OVERLORD",
-            "provision_action": "INSTALL_ONLY"
+            "name": "DRUID_OVERLORD"
           },
           {
-            "name": "DRUID_COORDINATOR",
-            "provision_action": "INSTALL_ONLY"
+            "name": "DRUID_COORDINATOR"
           },
           {
-            "name": "DRUID_ROUTER",
-            "provision_action": "INSTALL_ONLY"
+            "name": "DRUID_ROUTER"
           },
           {
-            "name": "DRUID_BROKER",
-            "provision_action": "INSTALL_ONLY"
+            "name": "DRUID_BROKER"
           },
           {
-            "name": "SUPERSET",
-            "provision_action": "INSTALL_ONLY"
+            "name": "SUPERSET"
           }
         ],
         "cardinality": "1"
@@ -229,12 +224,10 @@
             "name": "NODEMANAGER"
           },
           {
-            "name": "DRUID_MIDDLEMANAGER",
-            "provision_action": "INSTALL_ONLY"
+            "name": "DRUID_MIDDLEMANAGER"
           },
           {
-            "name": "DRUID_HISTORICAL",
-            "provision_action": "INSTALL_ONLY"
+            "name": "DRUID_HISTORICAL"
           }
         ],
         "cardinality": "1+"
