@@ -83,7 +83,7 @@ public class AzurePlatformResources implements PlatformResources {
                 properties.put("resourceGroupName", network.resourceGroupName());
 
                 CloudNetwork cloudNetwork = new CloudNetwork(network.name(), network.id(), subnets, properties);
-                result.get(actualRegion).add(cloudNetwork);
+                result.computeIfAbsent(actualRegion, s -> new HashSet<>()).add(cloudNetwork);
             }
         }
         if (result.isEmpty() && Objects.nonNull(region)) {
