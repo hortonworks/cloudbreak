@@ -227,13 +227,15 @@ cloudbreak-conf-defaults() {
     if [[ ! -z "$CB_TEMPLATE_DEFAULTS" ]]; then
         env-import CB_TEMPLATE_DEFAULTS
     fi;
+    if [[ ! -z "$CB_DEFAULT_GATEWAY_CIDR" ]]; then
+        env-import CB_DEFAULT_GATEWAY_CIDR
+    fi;
     env-import CB_LOCAL_DEV_BIND_ADDR "192.168.64.1"
     env-import ADDRESS_RESOLVING_TIMEOUT 120000
     env-import CB_UI_MAX_WAIT 400
     env-import CB_HOST_DISCOVERY_CUSTOM_DOMAIN ""
     env-import CB_SMARTSENSE_CONFIGURE "false"
     env-import TRAEFIK_MAX_IDLE_CONNECTION 100
-    env-import DEFAULT_INBOUND_ACCESS_IP ""
     env-import CB_AWS_DEFAULT_INBOUND_SECURITY_GROUP ""
     env-import CB_AWS_VPC ""
     env-import CB_MAX_SALT_NEW_SERVICE_RETRY 90
