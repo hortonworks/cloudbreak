@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.termination;
 
-import static com.sequenceiq.cloudbreak.api.model.Status.PRE_DELETE_IN_PROGRESS;
+import static com.sequenceiq.cloudbreak.api.model.Status.DELETE_IN_PROGRESS;
 
 import java.util.Map;
 
@@ -57,11 +57,12 @@ public class StackPreTerminationAction extends AbstractStackTerminationAction<Te
             StackPreTerminationFailed terminateStackResult = new StackPreTerminationFailed(payload.getStackId(), new IllegalArgumentException(statusReason));
             sendEvent(context.getFlowId(), StackTerminationEvent.TERMINATION_FAILED_EVENT.event(), terminateStackResult);
         } else {
-            putClusterToPreDeleteInProgressState(stack);
-            stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.PRE_DELETE_IN_PROGRESS, "Pre-terminating the cluster and its infrastructure.");
-            cloudbreakEventService.fireCloudbreakEvent(context.getStack().getId(), PRE_DELETE_IN_PROGRESS.name(),
-                    messagesService.getMessage(Msg.STACK_PRE_DELETE_IN_PROGRESS.code()));
+            putClusterToDeleteInProgressState(stack);
+            stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.DELETE_IN_PROGRESS, "Terminating the cluster and its infrastructure.");
+            cloudbreakEventService.fireCloudbreakEvent(context.getStack().getId(), DELETE_IN_PROGRESS.name(),
+                    messagesService.getMessage(Msg.STACK_DELETE_IN_PROGRESS.code()));
             sendEvent(context);
+            LOGGER.debug("Assembling terminate stack event for stack: {}", stack);
             LOGGER.info("Triggering terminate stack event: {}", payload);
         }
     }
@@ -71,10 +72,10 @@ public class StackPreTerminationAction extends AbstractStackTerminationAction<Te
         return new StackPreTerminationRequest(context.getStack().getId());
     }
 
-    private void putClusterToPreDeleteInProgressState(Stack stack) {
+    private void putClusterToDeleteInProgressState(Stack stack) {
         Cluster cluster = stack.getCluster();
         if (cluster != null) {
-            cluster.setStatus(PRE_DELETE_IN_PROGRESS);
+            cluster.setStatus(DELETE_IN_PROGRESS);
             clusterService.updateCluster(cluster);
         }
     }
