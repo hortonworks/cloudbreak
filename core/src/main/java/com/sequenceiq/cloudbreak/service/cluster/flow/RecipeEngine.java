@@ -41,7 +41,7 @@ import com.sequenceiq.cloudbreak.util.JsonUtil;
 @Component
 public class RecipeEngine {
 
-    public static final Set<String> DEFAULT_RECIPES =  Collections.unmodifiableSet(Sets.newHashSet("hdfs-home", "smartsense-capture-schedule"));
+    public static final Set<String> DEFAULT_RECIPES = Collections.unmodifiableSet(Sets.newHashSet("hdfs-home", "smartsense-capture-schedule"));
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RecipeEngine.class);
 
@@ -92,14 +92,14 @@ public class RecipeEngine {
     public void executePostAmbariStartRecipes(Stack stack, Set<HostGroup> hostGroups) throws CloudbreakException {
         Orchestrator orchestrator = stack.getOrchestrator();
         if (recipesFound(hostGroups) && recipesSupportedOnOrchestrator(orchestrator)
-            && stack.getCluster() != null && stack.getCluster().getLdapConfig() != null) {
+                && stack.getCluster() != null && stack.getCluster().getLdapConfig() != null) {
             orchestratorRecipeExecutor.postAmbariStartRecipes(stack);
         }
     }
 
     public void executePreTerminationRecipes(Stack stack, Set<HostGroup> hostGroups) throws CloudbreakException {
         Orchestrator orchestrator = stack.getOrchestrator();
-        if (recipesFound(hostGroups) && recipesSupportedOnOrchestrator(orchestrator)) {
+        if (recipesFound(hostGroups, RecipeType.PRE_TERMINATION) && recipesSupportedOnOrchestrator(orchestrator)) {
             orchestratorRecipeExecutor.preTerminationRecipes(stack);
         }
     }
@@ -174,6 +174,17 @@ public class RecipeEngine {
         for (HostGroup hostGroup : hostGroups) {
             if (!hostGroup.getRecipes().isEmpty()) {
                 return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean recipesFound(Set<HostGroup> hostGroups, RecipeType recipeType) {
+        for (HostGroup hostGroup : hostGroups) {
+            for (Recipe recipe : hostGroup.getRecipes()) {
+                if (recipe.getRecipeType() == recipeType) {
+                    return true;
+                }
             }
         }
         return false;
