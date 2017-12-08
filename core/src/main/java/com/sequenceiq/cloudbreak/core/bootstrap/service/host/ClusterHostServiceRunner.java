@@ -21,6 +21,7 @@ import javax.transaction.Transactional;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
+import com.google.gson.Gson;
 import com.sequenceiq.cloudbreak.api.model.ExecutorType;
 import com.sequenceiq.cloudbreak.api.model.ExposedService;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariDatabase;
@@ -54,6 +55,7 @@ import com.sequenceiq.cloudbreak.service.SmartSenseCredentialConfigService;
 import com.sequenceiq.cloudbreak.service.blueprint.ComponentLocatorService;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariAuthenticationProvider;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.BlueprintProcessor;
+import com.sequenceiq.cloudbreak.service.cluster.flow.kerberos.KerberosDetailService;
 
 @Component
 public class ClusterHostServiceRunner {
@@ -88,6 +90,11 @@ public class ClusterHostServiceRunner {
     @Inject
     private SmartSenseCredentialConfigService smartSenseCredentialConfigService;
 
+    @Inject
+    private KerberosDetailService kerberosDetailService;
+
+    private final Gson gson = new Gson();
+
     @Transactional
     public void runAmbariServices(Stack stack, Cluster cluster) throws CloudbreakException {
         try {
@@ -109,19 +116,24 @@ public class ClusterHostServiceRunner {
         Map<String, SaltPillarProperties> servicePillar = new HashMap<>();
         saveDatalakeNameservers(stack, servicePillar);
         saveSharedRangerService(stack, servicePillar);
-        if (cluster.isSecure()) {
-            Map<String, Object> krb = new HashMap<>();
-            Map<String, String> kerberosConf = new HashMap<>();
+        if (cluster.isSecure() && kerberosDetailService.isAmbariManagedKrb5Conf(cluster.getKerberosConfig())) {
+            Map<String, String> kerberosPillarConf = new HashMap<>();
             KerberosConfig kerberosConfig = cluster.getKerberosConfig();
-            putIfNotNull(kerberosConf, kerberosConfig.getKerberosMasterKey(), "masterKey");
-            putIfNotNull(kerberosConf, kerberosConfig.getKerberosAdmin(), "user");
-            putIfNotNull(kerberosConf, kerberosConfig.getKerberosPassword(), "password");
-            putIfNotNull(kerberosConf, kerberosConfig.getKerberosUrl(), "url");
-            putIfNotNull(kerberosConf, kerberosConfig.getKerberosRealm(), "realm");
-            putIfNotNull(kerberosConf, cluster.getUserName(), "clusterUser");
-            putIfNotNull(kerberosConf, cluster.getPassword(), "clusterPassword");
-            krb.put("kerberos", kerberosConf);
-            servicePillar.put("kerberos", new SaltPillarProperties("/kerberos/init.sls", krb));
+            putIfNotNull(kerberosPillarConf, kerberosConfig.getKerberosMasterKey(), "masterKey");
+            putIfNotNull(kerberosPillarConf, kerberosConfig.getKerberosAdmin(), "user");
+            putIfNotNull(kerberosPillarConf, kerberosConfig.getKerberosPassword(), "password");
+            if (StringUtils.isEmpty(kerberosConfig.getKerberosDescriptor())) {
+                putIfNotNull(kerberosPillarConf, kerberosConfig.getKerberosUrl(), "url");
+                putIfNotNull(kerberosPillarConf, kerberosConfig.getKerberosRealm(), "realm");
+            } else {
+                Map<String, Object> kerberosEnv = (Map<String, Object>) gson.fromJson(kerberosConfig.getKerberosDescriptor(), Map.class).get("kerberos-env");
+                Map<String, Object> properties = (Map<String, Object>) kerberosEnv.get("properties");
+                putIfNotNull(kerberosPillarConf, properties.get("kdc_hosts"), "url");
+                putIfNotNull(kerberosPillarConf, properties.get("realm"), "realm");
+            }
+            putIfNotNull(kerberosPillarConf, cluster.getUserName(), "clusterUser");
+            putIfNotNull(kerberosPillarConf, cluster.getPassword(), "clusterPassword");
+            servicePillar.put("kerberos", new SaltPillarProperties("/kerberos/init.sls", singletonMap("kerberos", kerberosPillarConf)));
         }
         servicePillar.put("discovery", new SaltPillarProperties("/discovery/init.sls", singletonMap("platform", stack.cloudPlatform())));
         saveGatewayPillar(primaryGatewayConfig, cluster, servicePillar);
@@ -283,9 +295,9 @@ public class ClusterHostServiceRunner {
         return agents;
     }
 
-    private void putIfNotNull(Map<String, String> context, String variable, String key) {
+    private void putIfNotNull(Map<String, String> context, Object variable, String key) {
         if (variable != null) {
-            context.put(key, variable);
+            context.put(key, variable.toString());
         }
     }
 

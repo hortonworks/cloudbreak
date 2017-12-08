@@ -50,18 +50,20 @@ public class JsonToClusterConverter extends AbstractConversionServiceAwareConver
         Boolean enableSecurity = source.getEnableSecurity();
         cluster.setSecure(enableSecurity == null ? Boolean.FALSE : enableSecurity);
         convertKnox(source, cluster);
-        KerberosRequest kerberos = source.getKerberos();
+        KerberosRequest kerberosSource = source.getKerberos();
         KerberosConfig kerberosConfig = new KerberosConfig();
-        if (source.getKerberos() != null) {
-            kerberosConfig.setKerberosMasterKey(kerberos.getMasterKey());
-            kerberosConfig.setKerberosAdmin(kerberos.getAdmin());
-            kerberosConfig.setKerberosPassword(kerberos.getPassword());
-            kerberosConfig.setKerberosUrl(kerberos.getUrl());
-            kerberosConfig.setKerberosRealm(kerberos.getRealm());
-            kerberosConfig.setKerberosTcpAllowed(kerberos.getTcpAllowed());
-            kerberosConfig.setKerberosPrincipal(kerberos.getPrincipal());
-            kerberosConfig.setKerberosLdapUrl(kerberos.getLdapUrl());
-            kerberosConfig.setKerberosContainerDn(kerberos.getContainerDn());
+        if (kerberosSource != null) {
+            kerberosConfig.setKerberosMasterKey(kerberosSource.getMasterKey());
+            kerberosConfig.setKerberosAdmin(kerberosSource.getAdmin());
+            kerberosConfig.setKerberosPassword(kerberosSource.getPassword());
+            kerberosConfig.setKerberosUrl(kerberosSource.getUrl());
+            kerberosConfig.setKerberosRealm(kerberosSource.getRealm());
+            kerberosConfig.setKerberosTcpAllowed(kerberosSource.getTcpAllowed());
+            kerberosConfig.setKerberosPrincipal(kerberosSource.getPrincipal());
+            kerberosConfig.setKerberosLdapUrl(kerberosSource.getLdapUrl());
+            kerberosConfig.setKerberosContainerDn(kerberosSource.getContainerDn());
+            kerberosConfig.setKerberosDescriptor(kerberosSource.getDescriptor());
+            kerberosConfig.setKrb5Conf(kerberosSource.getKrb5Conf());
         }
         cluster.setKerberosConfig(kerberosConfig);
         cluster.setConfigStrategy(source.getConfigStrategy());

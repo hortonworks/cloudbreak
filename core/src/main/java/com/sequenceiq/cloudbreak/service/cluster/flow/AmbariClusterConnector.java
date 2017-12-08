@@ -101,12 +101,7 @@ import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.SmartSenseConfig
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.ZeppelinConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.template.BlueprintTemplateProcessor;
 import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemConfigurator;
-import com.sequenceiq.cloudbreak.service.cluster.flow.kerberos.KerberosContainerDnResolver;
-import com.sequenceiq.cloudbreak.service.cluster.flow.kerberos.KerberosDomainResolver;
-import com.sequenceiq.cloudbreak.service.cluster.flow.kerberos.KerberosHostResolver;
-import com.sequenceiq.cloudbreak.service.cluster.flow.kerberos.KerberosLdapResolver;
-import com.sequenceiq.cloudbreak.service.cluster.flow.kerberos.KerberosRealmResolver;
-import com.sequenceiq.cloudbreak.service.cluster.flow.kerberos.KerberosTypeResolver;
+import com.sequenceiq.cloudbreak.service.cluster.flow.kerberos.KerberosBlueprintService;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
@@ -124,15 +119,9 @@ public class AmbariClusterConnector {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AmbariClusterConnector.class);
 
-    private static final String REALM = "NODE.DC1.CONSUL";
-
-    private static final String DOMAIN = "node.dc1.consul";
-
     private static final String FQDN = "fqdn";
 
     private static final String ADMIN = "admin";
-
-    private static final Integer KERBEROS_DB_PROPAGATION_PORT = 6318;
 
     @Inject
     private StackRepository stackRepository;
@@ -237,22 +226,7 @@ public class AmbariClusterConnector {
     private AmbariViewProvider ambariViewProvider;
 
     @Inject
-    private KerberosHostResolver kerberosHostResolver;
-
-    @Inject
-    private KerberosLdapResolver kerberosLdapResolver;
-
-    @Inject
-    private KerberosContainerDnResolver kerberosContainerDnResolver;
-
-    @Inject
-    private KerberosTypeResolver kerberosTypeResolver;
-
-    @Inject
-    private KerberosDomainResolver kerberosDomainResolver;
-
-    @Inject
-    private KerberosRealmResolver kerberosRealmResolver;
+    private KerberosBlueprintService kerberosBlueprintService;
 
     @Inject
     private AmbariAuthenticationProvider ambariAuthenticationProvider;
@@ -758,30 +732,7 @@ public class AmbariClusterConnector {
                 blueprintText = addHDFConfigToBlueprint(stack, ambariClient, blueprintText);
             }
             if (cluster.isSecure()) {
-                String gatewayHost = cluster.getAmbariIp();
-                if (stack.getInstanceGroups() != null && !stack.getInstanceGroups().isEmpty()) {
-                    Integer propagationPort = stack.getGatewayInstanceMetadata().size() > 1 ? KERBEROS_DB_PROPAGATION_PORT : null;
-                    gatewayHost = stack.getPrimaryGatewayInstance().getDiscoveryFQDN();
-                    String domain = gatewayHost.substring(gatewayHost.indexOf('.') + 1);
-                    blueprintText = ambariClient.extendBlueprintWithKerberos(blueprintText,
-                            kerberosTypeResolver.resolveTypeForKerberos(cluster.getKerberosConfig()),
-                            kerberosHostResolver.resolveHostForKerberos(cluster, gatewayHost),
-                            kerberosRealmResolver.getRealm(domain, cluster.getKerberosConfig()),
-                            kerberosDomainResolver.getDomains(domain),
-                            kerberosLdapResolver.resolveLdapUrlForKerberos(cluster.getKerberosConfig()),
-                            kerberosContainerDnResolver.resolveContainerDnForKerberos(cluster.getKerberosConfig()),
-                            !cluster.getKerberosConfig().getKerberosTcpAllowed(), propagationPort);
-                } else {
-                    // TODO this won't work on yarn, but it doesn't work anyway
-                    blueprintText = ambariClient.extendBlueprintWithKerberos(blueprintText,
-                            kerberosTypeResolver.resolveTypeForKerberos(cluster.getKerberosConfig()),
-                            gatewayHost,
-                            REALM,
-                            DOMAIN,
-                            kerberosLdapResolver.resolveLdapUrlForKerberos(cluster.getKerberosConfig()),
-                            kerberosContainerDnResolver.resolveContainerDnForKerberos(cluster.getKerberosConfig()),
-                            !cluster.getKerberosConfig().getKerberosTcpAllowed(), null);
-                }
+                blueprintText = kerberosBlueprintService.extendBlueprintWithKerberos(stack, blueprintText, ambariClient);
             }
             LOGGER.info("Adding generated blueprint to Ambari: {}", JsonUtil.minify(blueprintText));
             ambariClient.addBlueprint(blueprintText, cluster.getTopologyValidation());
