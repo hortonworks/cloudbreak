@@ -13,7 +13,6 @@ import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.reactor.api.event.EventSelectorUtil;
-import com.sequenceiq.cloudbreak.reactor.api.event.recipe.StackPreTerminationFailed;
 import com.sequenceiq.cloudbreak.reactor.api.event.recipe.StackPreTerminationRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.recipe.StackPreTerminationSuccess;
 import com.sequenceiq.cloudbreak.reactor.handler.ReactorEventHandler;
@@ -44,7 +43,6 @@ public class StackPreTerminationHandler implements ReactorEventHandler<StackPreT
     @Override
     public void accept(Event<StackPreTerminationRequest> requestEvent) {
         StackPreTerminationRequest request = requestEvent.getData();
-        Selectable result;
         Stack stack = stackService.getByIdWithLists(request.getStackId());
         try {
             Cluster cluster = stack.getCluster();
@@ -52,12 +50,11 @@ public class StackPreTerminationHandler implements ReactorEventHandler<StackPreT
                 Set<HostGroup> hostGroups = hostGroupService.getByCluster(cluster.getId());
                 recipeEngine.executePreTerminationRecipes(stack, hostGroups);
             }
-            result = new StackPreTerminationSuccess(stack.getId());
         } catch (Exception ex) {
             LOGGER.error("Pre-termination failed: {}", ex.getMessage(), ex);
-            result = new StackPreTerminationFailed(request.getStackId(), ex);
         }
 
+        Selectable result = new StackPreTerminationSuccess(stack.getId());
         eventBus.notify(result.selector(), new Event<>(requestEvent.getHeaders(), result));
     }
 
