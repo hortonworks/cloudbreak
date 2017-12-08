@@ -19,6 +19,15 @@ func (e *RESTError) Error() string {
 	return fmt.Sprintf("status code: %d, message: %+v ", e.Code, e.Response)
 }
 
+func (e *RESTError) ShortError() string {
+	pattern := "Exception: "
+	message := fmt.Sprintf("%+v", e.Response)
+	if idx := strings.LastIndex(message, pattern); idx > -1 {
+		message = message[idx+len(pattern):]
+	}
+	return fmt.Sprintf("status code: %d, message: %+v ", e.Code, message)
+}
+
 func LogMissingParameterMessageAndExit(c *cli.Context, message string) {
 	LogMissingParameterAndExit(c, nil, message)
 }
@@ -40,7 +49,12 @@ func LogMissingParameterAndExit(c *cli.Context, missingFlags []string, message .
 }
 
 func LogErrorAndExit(err error) {
-	LogErrorMessage(err.Error())
+	if e, ok := err.(*RESTError); ok {
+		LogErrorMessage(e.ShortError())
+		log.Debug(e.Error())
+	} else {
+		LogErrorMessage(err.Error())
+	}
 	panic(err.Error())
 }
 

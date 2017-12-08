@@ -24,7 +24,7 @@ load ../utils/mock_parameters
 }
 
 @test "Check cluster describe FAILED" {
-  OUTPUT=$(describe-cluster --name az404 2>&1 | tail -n 2 | head -n 1)
+  OUTPUT=$(describe-cluster --name az404 2>&1 | tail -n 3 | head -n 1)
 
   [[ "${OUTPUT}" == *"status code: 404, message: Stack 'az404' not found"* ]]
   [[ "${OUTPUT}" == *"error"* ]]
@@ -38,7 +38,7 @@ load ../utils/mock_parameters
 }
 
 @test "Check cluster delete FAILED" {
-  OUTPUT=$(delete-cluster --name az404 2>&1 | tail -n 3 | head -n 1)
+  OUTPUT=$(delete-cluster --name az404 2>&1 | tail -n 4 | head -n 1)
 
   [[ "${OUTPUT}" == *"status code: 404, message: Stack 'az404' not found"* ]]
   [[ "${OUTPUT}" == *"error"* ]]
@@ -52,7 +52,7 @@ load ../utils/mock_parameters
 }
 
 @test "Check cluster start FAILED" {
-  OUTPUT=$(start-cluster --name azstatus 2>&1 | tail -n 2 | head -n 1)
+  OUTPUT=$(start-cluster --name azstatus 2>&1 | tail -n 3 | head -n 1)
   echo  $OUTPUT
 
   [[ "${OUTPUT}" == *"status code: 404, message: Stack 'azstatus' not found"* ]]
@@ -67,7 +67,7 @@ load ../utils/mock_parameters
 }
 
 @test "Check cluster stop FAILED" {
-  OUTPUT=$(stop-cluster --name azstatus 2>&1 | tail -n 2 | head -n 1)
+  OUTPUT=$(stop-cluster --name azstatus 2>&1 | tail -n 3 | head -n 1)
 
   [[ "${OUTPUT}" == *"status code: 404, message: Stack 'azstatus' not found"* ]]
   [[ "${OUTPUT}" == *"error"* ]]
@@ -81,7 +81,7 @@ load ../utils/mock_parameters
 }
 
 @test "Check cluster sync FAILED" {
-  OUTPUT=$(sync-cluster --name azstatus 2>&1 | tail -n 2 | head -n 1)
+  OUTPUT=$(sync-cluster --name azstatus 2>&1 | tail -n 3 | head -n 1)
 
   [[ "${OUTPUT}" == *"status code: 404, message: Stack 'azstatus' not found"* ]]
   [[ "${OUTPUT}" == *"error"* ]]
@@ -95,7 +95,7 @@ load ../utils/mock_parameters
 }
 
 @test "Check cluster repair FAILED" {
-  OUTPUT=$(repair-cluster --name azstatus 2>&1 | tail -n 2 | head -n 1)
+  OUTPUT=$(repair-cluster --name azstatus 2>&1 | tail -n 3 | head -n 1)
 
   [[ "${OUTPUT}" == *"status code: 404, message: Stack 'azstatus' not found"* ]]
   [[ "${OUTPUT}" == *"error"* ]]
@@ -109,7 +109,7 @@ load ../utils/mock_parameters
 }
 
 @test "Check cluster scale FAILED" {
-  OUTPUT=$(scale-cluster --name azstatus --group-name worker --desired-node-count 6 2>&1 | tail -n 2 | head -n 1)
+  OUTPUT=$(scale-cluster --name azstatus --group-name worker --desired-node-count 6 2>&1 | tail -n 3 | head -n 1)
 
   [[ "${OUTPUT}" == *"status code: 404, message: Stack 'azstatus' not found"* ]]
   [[ "${OUTPUT}" == *"error"* ]]
@@ -146,7 +146,7 @@ load ../utils/mock_parameters
 }
 
 @test "Check cluster re-install" {
-  OUTPUT=$(reinstall-cluster --name test --cli-input-json templates/reinstall-template.json --name aaaaa 2>&1 | tail -n 2 | head -n 1)
+  OUTPUT=$(reinstall-cluster --name test --cli-input-json templates/reinstall-template.json --name aaaaa 2>&1 | tail -n 3 | head -n 1)
 
   [[ "${OUTPUT}" == *"status code: 404, message: Stack 'aaaaa' not found"* ]]
   [[ "${OUTPUT}" == *"error"* ]]
