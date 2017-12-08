@@ -109,7 +109,7 @@ public class AzurePlatformResources implements PlatformResources {
                 properties.put("resourceGroupName", securityGroup.resourceGroupName());
                 properties.put("networkInterfaceIds", securityGroup.networkInterfaceIds());
                 CloudSecurityGroup cloudSecurityGroup = new CloudSecurityGroup(securityGroup.name(), securityGroup.id(), properties);
-                result.get(actualRegion).add(cloudSecurityGroup);
+                result.computeIfAbsent(actualRegion, s -> new HashSet<>()).add(cloudSecurityGroup);
             }
         }
         if (result.isEmpty() && Objects.nonNull(region)) {
