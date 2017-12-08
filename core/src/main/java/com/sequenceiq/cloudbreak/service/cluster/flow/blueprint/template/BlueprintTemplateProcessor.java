@@ -19,6 +19,7 @@ import com.github.jknack.handlebars.Template;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.service.ClusterComponentConfigProvider;
+import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 @Component
 public class BlueprintTemplateProcessor {
@@ -32,7 +33,7 @@ public class BlueprintTemplateProcessor {
         long started = System.currentTimeMillis();
         String generateBlueprint = generateBlueprintWithParameters(blueprintText, cluster, rdsConfigs);
         long generationTime = System.currentTimeMillis() - started;
-        LOGGER.info("The blueprint was generated successfully under {} ms, the generated blueprint is: {}", generationTime, generateBlueprint);
+        LOGGER.info("The blueprint was generated successfully under {} ms, the generated blueprint is: {}", generationTime, JsonUtil.minify(generateBlueprint));
         return generateBlueprint;
     }
 

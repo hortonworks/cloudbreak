@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -51,7 +52,7 @@ public class AmbariClusterTemplateService {
                     clusterTemplate = ambariClient.createCluster(clusterName, blueprintName, hostGroupMappings, configStrategy,
                             ambariAuthenticationProvider.getAmbariPassword(cluster), false, repositoryVersion);
                 }
-                LOGGER.info("Submitted cluster creation template: {}", JsonUtil.minify(clusterTemplate));
+                LOGGER.info("Submitted cluster creation template: {}", JsonUtil.minify(clusterTemplate, Collections.singleton("credentials")));
             } catch (Exception exception) {
                 String msg = "Ambari client failed to apply cluster creation template.";
                 LOGGER.error(msg, exception);
