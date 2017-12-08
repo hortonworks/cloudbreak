@@ -59,6 +59,8 @@ public class Gateway implements ProvisionEntity {
 
     private String signCert;
 
+    private String tokenCert;
+
     public Long getId() {
         return id;
     }
@@ -153,5 +155,13 @@ public class Gateway implements ProvisionEntity {
 
     public void setSignPub(String signPub) {
         this.signPub = signPub;
+    }
+
+    public String getTokenCert() {
+        return tokenCert;
+    }
+
+    public void setTokenCert(String tokenCert) {
+        this.tokenCert = tokenCert;
     }
 }

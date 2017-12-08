@@ -125,8 +125,7 @@ public class JsonToClusterConverter extends AbstractConversionServiceAwareConver
             if (cloudGatewayJson.getSsoType() != null) {
                 gateway.setSsoType(cloudGatewayJson.getSsoType());
             }
-            gateway.setSignCert(cloudGatewayJson.getSignCert());
-            gateway.setSignPub(cloudGatewayJson.getSignPub());
+            gateway.setTokenCert(cloudGatewayJson.getTokenCert());
         }
 
         convertExposedServices(cloudGatewayJson, gateway);

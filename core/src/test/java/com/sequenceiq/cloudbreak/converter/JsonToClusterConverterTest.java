@@ -61,7 +61,7 @@ public class JsonToClusterConverterTest extends AbstractJsonConverterTest<Cluste
         assertAllFieldsNotNull(result, Arrays.asList("stack", "blueprint", "creationStarted", "creationFinished", "upSince", "statusReason", "ambariIp",
                 "ambariStackDetails", "fileSystem", "certDir", "rdsConfigs", "ldapConfig", "attributes", "blueprintCustomProperties", "uptime"));
 
-        assertAllFieldsNotNull(result.getGateway(), Arrays.asList("id", "ssoProvider", "signKey", "signPub", "signCert"));
+        assertAllFieldsNotNull(result.getGateway(), Arrays.asList("id", "ssoProvider", "signKey", "signPub", "signCert", "tokenCert"));
     }
 
     @Override

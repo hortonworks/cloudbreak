@@ -200,6 +200,7 @@ public class ClusterHostServiceRunner {
         gateway.put("signpub", cluster.getGateway().getSignPub());
         gateway.put("signcert", cluster.getGateway().getSignCert());
         gateway.put("signkey", cluster.getGateway().getSignKey());
+        gateway.put("tokencert", cluster.getGateway().getTokenCert());
         gateway.put("mastersecret", cluster.getStack().getSecurityConfig().getKnoxMasterSecret());
 
         Json exposedJson = cluster.getGateway().getExposedServices();
