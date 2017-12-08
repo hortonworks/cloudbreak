@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.util;
 
 import java.io.IOException;
 import java.io.Reader;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -40,8 +42,16 @@ public class JsonUtil {
     }
 
     public static String minify(String content) {
+        return minify(content, Collections.emptySet());
+    }
+
+    public static String minify(String content, Collection<String> toCleanup) {
         try {
-            return readTree(content).toString();
+            JsonNode node = readTree(content);
+            if (!toCleanup.isEmpty() && node instanceof ObjectNode) {
+                ((ObjectNode) node).remove(toCleanup);
+            }
+            return node.toString();
         } catch (IOException ignored) {
             return "INVALID_JSON_CONTENT";
         }
