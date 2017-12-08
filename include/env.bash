@@ -94,6 +94,7 @@ CB_INSTANCE_REGION - Cloud region of the Cloudbreak instance
 CB_INSTANCE_UUID - Unique identifier of Cloudbreak deployment
 CB_JAVA_OPTS - Extra Java options for Autoscale and Cloudbreak
 CB_LOG_LEVEL - Log level of the Cloudbreak service
+CB_DEFAULT_GATEWAY_CIDR - Cidr for default security rules
 CB_MAX_SALT_NEW_SERVICE_RETRY - Salt orchestrator max retry count
 CB_MAX_SALT_RECIPE_EXECUTION_RETRY - Salt orchestrator max retry count for recipes
 CB_PLATFORM_DEFAULT_REGIONS - Comma separated list of default regions by platform (AWS:eu-west-1)
@@ -119,7 +120,6 @@ COMMON_DB_VOL - Name of the database volume
 COMPOSE_HTTP_TIMEOUT - Docker Compose execution timeout
 DB_DUMP_VOLUME - Name of the database dump volume
 DB_MIGRATION_LOG - Database migration log file
-DEFAULT_INBOUND_ACCESS_IP - Opens default ports on AWS instances for Address
 DOCKER_CONSUL_OPTIONS - Extra options for Consul
 DOCKER_IMAGE_CBD_SMARTSENSE - SmartSense Docker image name
 DOCKER_IMAGE_CLOUDBREAK - Cloudbreak Docker image name
