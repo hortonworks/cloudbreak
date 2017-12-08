@@ -29,6 +29,8 @@ public class GatewayView {
 
     private final String signCert;
 
+    private final String tokenCert;
+
     public GatewayView(Gateway gateway) {
         this.enableGateway = gateway.getEnableGateway();
         this.gatewayType = gateway.getGatewayType();
@@ -40,6 +42,7 @@ public class GatewayView {
         this.signKey = gateway.getSignKey();
         this.signPub = gateway.getSignPub();
         this.signCert = gateway.getSignCert();
+        this.tokenCert = gateway.getTokenCert();
     }
 
     public Boolean getEnableGateway() {
@@ -94,6 +97,7 @@ public class GatewayView {
         return StringEscapeUtils.escapeJson(signCert);
     }
 
-
-
+    public String getTokenCert() {
+        return tokenCert;
+    }
 }

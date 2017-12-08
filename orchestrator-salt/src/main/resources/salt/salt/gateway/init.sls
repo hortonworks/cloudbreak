@@ -89,6 +89,16 @@ knox-create-sign-jks:
     - user: knox
     - group: knox
 
+{% if salt['pillar.get']('gateway:tokencert') != None %}
+/usr/hdp/current/knox-server/conf/topologies/token.xml:
+  file.managed:
+    - source: salt://gateway/config/token.xml.j2
+    - template: jinja
+    - user: knox
+    - group: knox
+
+{% endif %}
+
 {% else %}
 
 /usr/hdp/current/knox-server/conf/topologies/knoxsso.xml:

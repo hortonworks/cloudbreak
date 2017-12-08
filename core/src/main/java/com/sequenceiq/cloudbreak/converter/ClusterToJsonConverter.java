@@ -220,13 +220,11 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
             }
         }
         cloudGatewayJson.setPath(gateway.getPath());
-        cloudGatewayJson.setSignCert(gateway.getSignCert());
-        cloudGatewayJson.setSignPub(gateway.getSignPub());
+        cloudGatewayJson.setTokenCert(gateway.getTokenCert());
         cloudGatewayJson.setSsoProvider(gateway.getSsoProvider());
         cloudGatewayJson.setSsoType(gateway.getSsoType());
         cloudGatewayJson.setGatewayType(gateway.getGatewayType());
         clusterResponse.setGateway(cloudGatewayJson);
-
     }
 
     private void convertContainerConfig(Cluster source, ClusterResponse clusterResponse) {

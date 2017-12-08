@@ -13,7 +13,7 @@ ambari_sso_enabled:
 ambari_sso_providerurl:
   file.append:
     - name: /etc/ambari-server/conf/ambari.properties
-    - text: authentication.jwt.providerUrl={{ ambari.gateway.ssoprovider }}
+    - text: authentication.jwt.providerUrl=https://{{ ambari.gateway.address }}:8443{{ ambari.gateway.ssoprovider }}
     - unless: grep "authentication.jwt.providerUrl" /etc/ambari-server/conf/ambari.properties
     - require:
       - pkg: ambari-server

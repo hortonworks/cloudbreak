@@ -3,7 +3,11 @@ package com.sequenceiq.cloudbreak.api.model;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.GatewayModelDescription;
+import com.sequenceiq.cloudbreak.json.Base64Deserializer;
+import com.sequenceiq.cloudbreak.json.Base64Serializer;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -28,10 +32,9 @@ public class GatewayJson implements JsonEntity {
     private String ssoProvider;
 
     @ApiModelProperty(GatewayModelDescription.KNOX_SSO_CERT)
-    private String signCert;
-
-    @ApiModelProperty(GatewayModelDescription.KNOX_SSO_PUB_KEY)
-    private String signPub;
+    @JsonSerialize(using = Base64Serializer.class)
+    @JsonDeserialize(using = Base64Deserializer.class)
+    private String tokenCert;
 
     @ApiModelProperty(GatewayModelDescription.KNOX_GATEWAY_TYPE)
     private GatewayType gatewayType;
@@ -79,20 +82,12 @@ public class GatewayJson implements JsonEntity {
         this.ssoProvider = ssoProvider;
     }
 
-    public String getSignCert() {
-        return signCert;
+    public String getTokenCert() {
+        return tokenCert;
     }
 
-    public void setSignCert(String signCert) {
-        this.signCert = signCert;
-    }
-
-    public String getSignPub() {
-        return signPub;
-    }
-
-    public void setSignPub(String signPub) {
-        this.signPub = signPub;
+    public void setTokenCert(String tokenCert) {
+        this.tokenCert = tokenCert;
     }
 
     public GatewayType getGatewayType() {
