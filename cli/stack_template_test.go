@@ -1,9 +1,10 @@
 package cli
 
 import (
-	"github.com/hortonworks/cb-cli/cli/cloud"
 	"io/ioutil"
 	"testing"
+
+	"github.com/hortonworks/cb-cli/cli/cloud"
 )
 
 func TestGetNodesByBlueprint(t *testing.T) {
@@ -12,10 +13,10 @@ func TestGetNodesByBlueprint(t *testing.T) {
 	nodes := getNodesByBlueprint(bp)
 
 	expectedNodes := []cloud.Node{
-		{"master", "GATEWAY", 1},
-		{"slave_1", "CORE", 3},
-		{"slave_2", "CORE", 3},
-		{"slave_3", "CORE", 1},
+		{Name: "master", GroupType: "GATEWAY", Count: 1},
+		{Name: "slave_1", GroupType: "CORE", Count: 3},
+		{Name: "slave_2", GroupType: "CORE", Count: 3},
+		{Name: "slave_3", GroupType: "CORE", Count: 1},
 	}
 	for i, n := range expectedNodes {
 		node := nodes[i]

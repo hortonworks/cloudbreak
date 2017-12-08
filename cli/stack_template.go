@@ -14,9 +14,9 @@ import (
 )
 
 var defaultNodes = []cloud.Node{
-	{"master", models_cloudbreak.InstanceGroupResponseTypeGATEWAY, 1},
-	{"worker", models_cloudbreak.InstanceGroupResponseTypeCORE, 3},
-	{"compute", models_cloudbreak.InstanceGroupResponseTypeCORE, 0},
+	{Name: "master", GroupType: models_cloudbreak.InstanceGroupResponseTypeGATEWAY, Count: 1},
+	{Name: "worker", GroupType: models_cloudbreak.InstanceGroupResponseTypeCORE, Count: 3},
+	{Name: "compute", GroupType: models_cloudbreak.InstanceGroupResponseTypeCORE, Count: 0},
 }
 
 var maxCardinality = map[string]int{
@@ -161,7 +161,7 @@ func getNodesByBlueprint(bp []byte) []cloud.Node {
 		if hg["name"] == nil {
 			utils.LogErrorMessageAndExit("host group name not found in blueprint")
 		}
-		node := cloud.Node{hg["name"].(string), models_cloudbreak.InstanceGroupResponseTypeCORE, int32(count)}
+		node := cloud.Node{Name: hg["name"].(string), GroupType: models_cloudbreak.InstanceGroupResponseTypeCORE, Count: int32(count)}
 		nodes = append(nodes, &node)
 		if gateway == nil || gateway.Count > node.Count {
 			gateway = &node

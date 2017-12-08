@@ -454,6 +454,13 @@ var (
 			Usage: "name of the availability zone",
 		},
 	}
+	FlImageCatalog = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "imagecatalog",
+			Usage: "name of the imagecatalog",
+		},
+	}
 )
 
 type RequiredFlag struct {

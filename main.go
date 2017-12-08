@@ -769,7 +769,7 @@ func main() {
 			Subcommands: []cli.Command{
 				{
 					Name:  "create",
-					Usage: "create a new LDAP",
+					Usage: "creates a new LDAP",
 					Flags: cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlLdapServer, cb.FlLdapDomain,
 						cb.FlLdapBindDN, cb.FlLdapBindPassword, cb.FlLdapDirectoryType, cb.FlLdapUserSearchBase,
 						cb.FlLdapUserNameAttribute, cb.FlLdapUserObjectClass, cb.FlLdapGroupMemberAttribute,
@@ -787,7 +787,7 @@ func main() {
 				},
 				{
 					Name:   "delete",
-					Usage:  "delete an LDAP",
+					Usage:  "deletes an LDAP",
 					Flags:  cb.NewFlagBuilder().AddFlags(cb.FlName).AddOutputFlag().AddAuthenticationFlags().Build(),
 					Before: ConfigRead,
 					Action: cb.DeleteLdap,
@@ -805,6 +805,114 @@ func main() {
 					Action: cb.ListLdaps,
 					BashComplete: func(c *cli.Context) {
 						for _, f := range cb.NewFlagBuilder().AddOutputFlag().AddAuthenticationFlags().Build() {
+							printFlagCompletion(f)
+						}
+					},
+				},
+			},
+		},
+		{
+			Name:  "imagecatalog",
+			Usage: "imagecatalog related operations",
+			Subcommands: []cli.Command{
+				{
+					Name:   "create",
+					Usage:  "creates a new imagecatalog from a URL",
+					Flags:  cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlURL).AddAuthenticationFlags().Build(),
+					Before: ConfigRead,
+					Action: cb.CreateImagecatalogFromUrl,
+					BashComplete: func(c *cli.Context) {
+						for _, f := range cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlURL).AddAuthenticationFlags().Build() {
+							printFlagCompletion(f)
+						}
+					},
+				},
+				{
+					Name:   "delete",
+					Usage:  "deletes an imagecatalog",
+					Flags:  cb.NewFlagBuilder().AddFlags(cb.FlName).AddOutputFlag().AddAuthenticationFlags().Build(),
+					Before: ConfigRead,
+					Action: cb.DeleteImagecatalog,
+					BashComplete: func(c *cli.Context) {
+						for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlName).AddOutputFlag().AddAuthenticationFlags().Build() {
+							printFlagCompletion(f)
+						}
+					},
+				},
+				{
+					Name:  "images",
+					Usage: "lists available images from imagecatalog",
+					Subcommands: []cli.Command{
+						{
+							Name:   "aws",
+							Usage:  "lists available aws images from an imagecatalog",
+							Flags:  cb.NewFlagBuilder().AddFlags(cb.FlImageCatalog, cb.FlRegion).AddOutputFlag().AddAuthenticationFlags().Build(),
+							Before: ConfigRead,
+							Action: cb.ListAwsImages,
+							BashComplete: func(c *cli.Context) {
+								for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlImageCatalog, cb.FlRegion).AddOutputFlag().AddAuthenticationFlags().Build() {
+									printFlagCompletion(f)
+								}
+							},
+						},
+						{
+							Name:   "azure",
+							Usage:  "lists available azure images from an imagecatalog",
+							Flags:  cb.NewFlagBuilder().AddFlags(cb.FlImageCatalog, cb.FlRegion).AddOutputFlag().AddAuthenticationFlags().Build(),
+							Before: ConfigRead,
+							Action: cb.ListAzureImages,
+							BashComplete: func(c *cli.Context) {
+								for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlImageCatalog, cb.FlRegion).AddOutputFlag().AddAuthenticationFlags().Build() {
+									printFlagCompletion(f)
+								}
+							},
+						},
+						{
+							Name:   "gcp",
+							Usage:  "lists available gcp images from an imagecatalog",
+							Flags:  cb.NewFlagBuilder().AddFlags(cb.FlImageCatalog, cb.FlRegion).AddOutputFlag().AddAuthenticationFlags().Build(),
+							Before: ConfigRead,
+							Action: cb.ListGcpImages,
+							BashComplete: func(c *cli.Context) {
+								for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlImageCatalog, cb.FlRegion).AddOutputFlag().AddAuthenticationFlags().Build() {
+									printFlagCompletion(f)
+								}
+							},
+						},
+						{
+							Name:   "openstack",
+							Usage:  "lists available openstack images from an imagecatalog",
+							Flags:  cb.NewFlagBuilder().AddFlags(cb.FlImageCatalog, cb.FlRegion).AddOutputFlag().AddAuthenticationFlags().Build(),
+							Before: ConfigRead,
+							Action: cb.ListOpenstackImages,
+							BashComplete: func(c *cli.Context) {
+								for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlImageCatalog, cb.FlRegion).AddOutputFlag().AddAuthenticationFlags().Build() {
+									printFlagCompletion(f)
+								}
+							},
+						},
+					},
+				},
+				{
+					Name:   "list",
+					Usage:  "lists the available imagecatalogs",
+					Flags:  cb.NewFlagBuilder().AddAuthenticationFlags().AddOutputFlag().Build(),
+					Before: ConfigRead,
+					Action: cb.ListImagecatalogs,
+					BashComplete: func(c *cli.Context) {
+						for _, f := range cb.NewFlagBuilder().AddAuthenticationFlags().AddOutputFlag().Build() {
+							printFlagCompletion(f)
+						}
+					},
+				},
+				{
+					Name:   "set-default",
+					Usage:  "sets the default imagecatalog",
+					Flags:  cb.NewFlagBuilder().AddFlags(cb.FlName).AddOutputFlag().AddAuthenticationFlags().Build(),
+					Before: ConfigRead,
+					Action: cb.SetDefaultImagecatalog,
+					BashComplete: func(c *cli.Context) {
+						for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlName).AddOutputFlag().AddAuthenticationFlags().Build() {
 							printFlagCompletion(f)
 						}
 					},
