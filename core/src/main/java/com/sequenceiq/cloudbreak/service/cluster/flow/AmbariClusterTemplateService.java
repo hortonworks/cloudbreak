@@ -15,7 +15,7 @@ import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariAuthenticationProvider;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariServiceException;
-import com.sequenceiq.cloudbreak.service.cluster.flow.kerberos.KerberosPrincipalResolver;
+import com.sequenceiq.cloudbreak.service.cluster.flow.kerberos.KerberosDetailService;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 @Service
@@ -26,7 +26,7 @@ public class AmbariClusterTemplateService {
     private static final String KEY_TYPE = "PERSISTED";
 
     @Inject
-    private KerberosPrincipalResolver kerberosPrincipalResolver;
+    private KerberosDetailService kerberosDetailService;
 
     @Inject
     private AmbariAuthenticationProvider ambariAuthenticationProvider;
@@ -45,9 +45,10 @@ public class AmbariClusterTemplateService {
                 String repositoryVersion = ambariRepositoryVersionService.getRepositoryVersion(cluster.getId(), cluster.getStack().getOrchestrator());
                 if (cluster.isSecure()) {
                     KerberosConfig kerberosConfig = cluster.getKerberosConfig();
-                    String principal = kerberosPrincipalResolver.resolvePrincipalForKerberos(kerberosConfig);
+                    String principal = kerberosDetailService.resolvePrincipalForKerberos(kerberosConfig);
                     clusterTemplate = ambariClient.createSecureCluster(clusterName, blueprintName, hostGroupMappings, configStrategy,
-                            cluster.getPassword(), principal, kerberosConfig.getKerberosPassword(), KEY_TYPE, false, repositoryVersion);
+                            ambariAuthenticationProvider.getAmbariPassword(cluster), principal, kerberosConfig.getKerberosPassword(), KEY_TYPE, false,
+                            repositoryVersion);
                 } else {
                     clusterTemplate = ambariClient.createCluster(clusterName, blueprintName, hostGroupMappings, configStrategy,
                             ambariAuthenticationProvider.getAmbariPassword(cluster), false, repositoryVersion);

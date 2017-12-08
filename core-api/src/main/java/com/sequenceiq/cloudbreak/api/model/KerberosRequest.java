@@ -37,6 +37,10 @@ public class KerberosRequest implements JsonEntity {
 
     private Boolean tcpAllowed = false;
 
+    private String descriptor;
+
+    private String krb5Conf;
+
     public String getMasterKey() {
         return masterKey;
     }
@@ -107,5 +111,21 @@ public class KerberosRequest implements JsonEntity {
 
     public void setContainerDn(String containerDn) {
         this.containerDn = containerDn;
+    }
+
+    public String getDescriptor() {
+        return descriptor;
+    }
+
+    public void setDescriptor(String descriptor) {
+        this.descriptor = descriptor;
+    }
+
+    public String getKrb5Conf() {
+        return krb5Conf;
+    }
+
+    public void setKrb5Conf(String krb5Conf) {
+        this.krb5Conf = krb5Conf;
     }
 }

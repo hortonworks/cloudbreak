@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.domain;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -41,6 +42,14 @@ public class KerberosConfig implements ProvisionEntity {
     private String kerberosLdapUrl;
 
     private String kerberosContainerDn;
+
+    @Type(type = "encrypted_string")
+    @Column(columnDefinition = "TEXT")
+    private String kerberosDescriptor;
+
+    @Type(type = "encrypted_string")
+    @Column(columnDefinition = "TEXT")
+    private String krb5Conf;
 
     public Long getId() {
         return id;
@@ -120,5 +129,21 @@ public class KerberosConfig implements ProvisionEntity {
 
     public void setKerberosContainerDn(String kerberosContainerDn) {
         this.kerberosContainerDn = kerberosContainerDn;
+    }
+
+    public String getKerberosDescriptor() {
+        return kerberosDescriptor;
+    }
+
+    public void setKerberosDescriptor(String kerberosDescriptor) {
+        this.kerberosDescriptor = kerberosDescriptor;
+    }
+
+    public String getKrb5Conf() {
+        return krb5Conf;
+    }
+
+    public void setKrb5Conf(String krb5Conf) {
+        this.krb5Conf = krb5Conf;
     }
 }
