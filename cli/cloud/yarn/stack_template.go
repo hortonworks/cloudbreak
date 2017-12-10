@@ -7,5 +7,5 @@ func (p *YarnProvider) GetNetworkParamatersTemplate(mode cloud.NetworkMode) map[
 }
 
 func (p *YarnProvider) GetParamatersTemplate() map[string]string {
-	return nil
+	return map[string]string{"yarnQueue": "default-developers"}
 }
