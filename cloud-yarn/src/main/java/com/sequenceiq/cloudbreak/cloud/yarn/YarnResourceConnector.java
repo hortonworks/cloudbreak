@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
+import com.sequenceiq.cloudbreak.cloud.exception.CloudOperationNotSupportedException;
 import com.sequenceiq.cloudbreak.cloud.exception.TemplatingDoesNotSupportedException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
@@ -198,18 +199,18 @@ public class YarnResourceConnector implements ResourceConnector<Object> {
 
     @Override
     public List<CloudResourceStatus> upscale(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources) {
-        return null;
+        throw new CloudOperationNotSupportedException("Upscale stack operation is not supported on YARN");
     }
 
     @Override
     public List<CloudResourceStatus> downscale(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources,
             List<CloudInstance> vms, Object resourcesToRemove) {
-        return null;
+        throw new CloudOperationNotSupportedException("Downscale stack operation is not supported on YARN");
     }
 
     @Override
     public Object collectResourcesToRemove(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources, List<CloudInstance> vms) {
-        return null;
+        throw new CloudOperationNotSupportedException("Downscale resources collection operation is not supported on YARN");
     }
 
     @Override

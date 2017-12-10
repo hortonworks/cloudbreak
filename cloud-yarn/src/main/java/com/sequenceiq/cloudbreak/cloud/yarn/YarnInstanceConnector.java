@@ -19,17 +19,17 @@ public class YarnInstanceConnector implements InstanceConnector {
 
     @Override
     public List<CloudVmInstanceStatus> start(AuthenticatedContext authenticatedContext, List<CloudResource> resources, List<CloudInstance> vms) {
-        return null;
+        throw new CloudOperationNotSupportedException("Start instances operation is not supported on YARN");
     }
 
     @Override
     public List<CloudVmInstanceStatus> stop(AuthenticatedContext authenticatedContext, List<CloudResource> resources, List<CloudInstance> vms) {
-        return null;
+        throw new CloudOperationNotSupportedException("Stop instances operation is not supported on YARN");
     }
 
     @Override
     public List<CloudVmInstanceStatus> check(AuthenticatedContext authenticatedContext, List<CloudInstance> vms) {
-        return null;
+        throw new CloudOperationNotSupportedException("Instances' states check operation is not supported on YARN");
     }
 
     @Override

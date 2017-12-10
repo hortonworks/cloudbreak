@@ -30,6 +30,7 @@ import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.service.stack.CloudParameterCache;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @Component
@@ -52,6 +53,9 @@ public class StackV2Controller extends NotificationController implements StackV2
     @Autowired
     @Qualifier("conversionService")
     private ConversionService conversionService;
+
+    @Autowired
+    private CloudParameterCache cloudParameterCache;
 
     @Override
     public Set<StackResponse> getPrivates() {
@@ -97,6 +101,9 @@ public class StackV2Controller extends NotificationController implements StackV2
     public Response putScaling(String name, StackScaleRequestV2 updateRequest) throws CloudbreakSecuritySetupException {
         IdentityUser user = authenticatedUserService.getCbUser();
         Stack stack = stackService.getPublicStack(name, user);
+        if (!cloudParameterCache.isScalingSupported(stack.cloudPlatform())) {
+            throw new BadRequestException(String.format("Scaling is not supported on %s cloudplatform", stack.cloudPlatform()));
+        }
         updateRequest.setStackId(stack.getId());
         UpdateStackJson updateStackJson = conversionService.convert(updateRequest, UpdateStackJson.class);
         if (updateStackJson.getInstanceGroupAdjustment().getScalingAdjustment() > 0) {
@@ -111,6 +118,9 @@ public class StackV2Controller extends NotificationController implements StackV2
     public Response putStart(String name) {
         IdentityUser user = authenticatedUserService.getCbUser();
         Stack stack = stackService.getPublicStack(name, user);
+        if (!cloudParameterCache.isStartStopSupported(stack.cloudPlatform())) {
+            throw new BadRequestException(String.format("Start is not supported on %s cloudplatform", stack.cloudPlatform()));
+        }
         UpdateStackJson updateStackJson = new UpdateStackJson();
         updateStackJson.setStatus(StatusRequest.STARTED);
         updateStackJson.setWithClusterEvent(true);
@@ -121,6 +131,9 @@ public class StackV2Controller extends NotificationController implements StackV2
     public Response putStop(String name) {
         IdentityUser user = authenticatedUserService.getCbUser();
         Stack stack = stackService.getPublicStack(name, user);
+        if (!cloudParameterCache.isStartStopSupported(stack.cloudPlatform())) {
+            throw new BadRequestException(String.format("Stop is not supported on %s cloudplatform", stack.cloudPlatform()));
+        }
         UpdateStackJson updateStackJson = new UpdateStackJson();
         updateStackJson.setStatus(StatusRequest.STOPPED);
         updateStackJson.setWithClusterEvent(true);
