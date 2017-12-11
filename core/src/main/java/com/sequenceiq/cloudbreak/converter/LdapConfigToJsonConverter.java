@@ -27,7 +27,7 @@ public class LdapConfigToJsonConverter extends AbstractConversionServiceAwareCon
         json.setGroupObjectClass(config.getGroupObjectClass());
         json.setGroupNameAttribute(config.getGroupNameAttribute());
         json.setGroupMemberAttribute(config.getGroupMemberAttribute());
-        json.setAmbariAdminGroup(config.getAmbariAdminGroup());
+        json.setAdminGroup(config.getAdminGroup());
         return json;
     }
 }
