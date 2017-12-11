@@ -134,11 +134,11 @@ install_hdf_mpack:
 
 {% if not ambari.is_local_ldap %}
 
-{% if ambari.ldap.ambariAdminGroup is defined and ambari.ldap.ambariAdminGroup is not none %}
+{% if ambari.ldap.adminGroup is defined and ambari.ldap.adminGroup is not none %}
 set_ambari_administrators:
   file.append:
     - name: /etc/ambari-server/conf/ambari.properties
-    - text: authorization.ldap.adminGroupMappingRules={{ ambari.ldap.ambariAdminGroup }}
+    - text: authorization.ldap.adminGroupMappingRules={{ ambari.ldap.adminGroup }}
     - unless: grep "authorization.ldap.adminGroupMappingRules" /etc/ambari-server/conf/ambari.properties
 {% endif %}
 
