@@ -64,6 +64,8 @@ func getExecutionType(executionType string) string {
 		return "POST_AMBARI_START"
 	case "post-cluster-install":
 		return "POST_CLUSTER_INSTALL"
+	case "pre-termination":
+		return "PRE_TERMINATION"
 	default:
 		utils.LogErrorMessageAndExit("Recipe type not supported")
 		panic(3)

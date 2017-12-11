@@ -20,6 +20,12 @@ RECIPE_URL=https://gist.githubusercontent.com/aszegedi/4fc4a6a2fd319da436df6441c
    [ $status = 0 ]
  }
 
+ @test "Check recipe create from url pre-termination" {
+   run create-recipe from-url --name recipe --execution-type pre-termination --url ${RECIPE_URL}
+   echo $output
+   [ $status = 0 ]
+ }
+
 @test "Check recipe create from file pre-ambari-start" {
    run create-recipe from-file --name recipe --execution-type pre-ambari-start --url ${RECIPE_URL}
    echo $output
@@ -34,6 +40,12 @@ RECIPE_URL=https://gist.githubusercontent.com/aszegedi/4fc4a6a2fd319da436df6441c
 
  @test "Check recipe create from file post-cluster-install" {
    run create-recipe from-file --name recipe --execution-type post-cluster-install --url ${RECIPE_URL}
+   echo $output
+   [ $status = 0 ]
+ }
+
+ @test "Check recipe create from file pre-termination" {
+   run create-recipe from-file --name recipe --execution-type pre-termination --url ${RECIPE_URL}
    echo $output
    [ $status = 0 ]
  }
