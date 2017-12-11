@@ -32,17 +32,14 @@ type GatewayJSON struct {
 	// Knox gateway path
 	Path string `json:"path,omitempty"`
 
-	// SSO Provider certificate
-	SignCert string `json:"signCert,omitempty"`
-
-	// SSO Provider pub key
-	SignPub string `json:"signPub,omitempty"`
-
 	// SSO provider cluster name
 	SsoProvider string `json:"ssoProvider,omitempty"`
 
 	// Knox SSO type
 	SsoType string `json:"ssoType,omitempty"`
+
+	// SSO Provider certificate
+	TokenCert string `json:"tokenCert,omitempty"`
 
 	// Knox topology name
 	TopologyName string `json:"topologyName,omitempty"`
@@ -56,13 +53,11 @@ type GatewayJSON struct {
 
 /* polymorph GatewayJson path false */
 
-/* polymorph GatewayJson signCert false */
-
-/* polymorph GatewayJson signPub false */
-
 /* polymorph GatewayJson ssoProvider false */
 
 /* polymorph GatewayJson ssoType false */
+
+/* polymorph GatewayJson tokenCert false */
 
 /* polymorph GatewayJson topologyName false */
 
