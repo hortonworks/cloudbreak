@@ -30,6 +30,7 @@ type ldap struct {
 	GroupNameAttribute   string `json:"GroupNameAttribute,omitempty" yaml:"GroupNameAttribute,omitempty"`
 	GroupObjectClass     string `json:"GroupObjectClass,omitempty" yaml:"GroupObjectClass,omitempty"`
 	GroupSearchBase      string `json:"GroupSearchBase,omitempty" yaml:"GroupSearchBase,omitempty"`
+	AdminGroup           string `json:"adminGroup,omitempty" yaml:"adminGroup,omitempty"`
 }
 
 func (l *ldap) DataAsStringArray() []string {
@@ -60,7 +61,7 @@ func CreateLDAP(c *cli.Context) error {
 	groupMemberAttribute := c.String(FlLdapGroupMemberAttribute.Name)
 	groupNameAttribute := c.String(FlLdapGroupNameAttribute.Name)
 	groupObjectClass := c.String(FlLdapGroupObjectClass.Name)
-	ambariAdminGroup := c.String(FlLdapAmbariAdminGroup.Name)
+	adminGroup := c.String(FlLdapAdminGroup.Name)
 
 	server := c.String(FlLdapServer.Name)
 	public := c.Bool(FlPublicOptional.Name)
@@ -75,12 +76,12 @@ func CreateLDAP(c *cli.Context) error {
 	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServerOptional.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 
 	return createLDAPImpl(cbClient.Cloudbreak.V1ldap, int32(serverPort), name, server, protocol, domain, bindDn, bindPassword, directoryType,
-		userSearchBase, userNameAttribute, userObjectClass, groupSearchBase, groupMemberAttribute, groupNameAttribute, groupObjectClass, ambariAdminGroup, public)
+		userSearchBase, userNameAttribute, userObjectClass, groupSearchBase, groupMemberAttribute, groupNameAttribute, groupObjectClass, adminGroup, public)
 }
 
 func createLDAPImpl(ldapClient ldapClient, port int32, name, server, protocol, domain, bindDn, bindPassword, directoryType,
 	userSearchBase, userNameAttribute, userObjectClass, groupSearchBase, groupMemberAttribute, groupNameAttribute,
-	groupObjectClass, ambariAdminGroup string, public bool) error {
+	groupObjectClass, adminGroup string, public bool) error {
 	defer utils.TimeTrack(time.Now(), "create ldap")
 
 	host := server[strings.LastIndex(server, "/")+1 : strings.LastIndex(server, ":")]
@@ -100,7 +101,7 @@ func createLDAPImpl(ldapClient ldapClient, port int32, name, server, protocol, d
 		GroupNameAttribute:   groupNameAttribute,
 		GroupObjectClass:     groupObjectClass,
 		GroupSearchBase:      groupSearchBase,
-		AmbariAdminGroup:     ambariAdminGroup,
+		AdminGroup:           adminGroup,
 	}
 
 	log.Infof("[createLDAPImpl] create ldap with name: %s", name)
@@ -155,6 +156,7 @@ func listLdapsImpl(ldapClient ldapClient, writer func([]string, []utils.Row)) er
 			GroupNameAttribute:   l.GroupNameAttribute,
 			GroupObjectClass:     l.GroupObjectClass,
 			GroupSearchBase:      l.GroupSearchBase,
+			AdminGroup:           l.AdminGroup,
 		}
 		tableRows = append(tableRows, row)
 	}

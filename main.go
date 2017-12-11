@@ -773,14 +773,14 @@ func main() {
 					Flags: cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlLdapServer, cb.FlLdapDomain,
 						cb.FlLdapBindDN, cb.FlLdapBindPassword, cb.FlLdapDirectoryType, cb.FlLdapUserSearchBase,
 						cb.FlLdapUserNameAttribute, cb.FlLdapUserObjectClass, cb.FlLdapGroupMemberAttribute,
-						cb.FlLdapGroupNameAttribute, cb.FlLdapGroupObjectClass, cb.FlLdapGroupSearchBase, cb.FlLdapAmbariAdminGroup).AddAuthenticationFlags().Build(),
+						cb.FlLdapGroupNameAttribute, cb.FlLdapGroupObjectClass, cb.FlLdapGroupSearchBase, cb.FlLdapAdminGroup).AddAuthenticationFlags().Build(),
 					Before: ConfigRead,
 					Action: cb.CreateLDAP,
 					BashComplete: func(c *cli.Context) {
 						for _, f := range cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlLdapServer, cb.FlLdapDomain,
 							cb.FlLdapBindDN, cb.FlLdapBindPassword, cb.FlLdapDirectoryType, cb.FlLdapUserSearchBase,
 							cb.FlLdapUserNameAttribute, cb.FlLdapUserObjectClass, cb.FlLdapGroupMemberAttribute,
-							cb.FlLdapGroupNameAttribute, cb.FlLdapGroupObjectClass, cb.FlLdapGroupSearchBase, cb.FlLdapAmbariAdminGroup).AddAuthenticationFlags().Build() {
+							cb.FlLdapGroupNameAttribute, cb.FlLdapGroupObjectClass, cb.FlLdapGroupSearchBase, cb.FlLdapAdminGroup).AddAuthenticationFlags().Build() {
 							printFlagCompletion(f)
 						}
 					},
