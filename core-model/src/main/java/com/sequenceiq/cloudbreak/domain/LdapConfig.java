@@ -75,7 +75,7 @@ public class LdapConfig implements ProvisionEntity {
 
     private String domain;
 
-    private String ambariAdminGroup;
+    private String adminGroup;
 
     public Long getId() {
         return id;
@@ -237,11 +237,11 @@ public class LdapConfig implements ProvisionEntity {
         this.domain = domain;
     }
 
-    public String getAmbariAdminGroup() {
-        return ambariAdminGroup;
+    public String getAdminGroup() {
+        return adminGroup;
     }
 
-    public void setAmbariAdminGroup(String ambariAdminGroup) {
-        this.ambariAdminGroup = ambariAdminGroup;
+    public void setAdminGroup(String adminGroup) {
+        this.adminGroup = adminGroup;
     }
 }

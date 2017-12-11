@@ -63,8 +63,8 @@ public abstract class LdapConfigBase implements JsonEntity {
     @ApiModelProperty(LdapConfigModelDescription.GROUP_MEMBER_ATTRIBUTE)
     private String groupMemberAttribute;
 
-    @ApiModelProperty(LdapConfigModelDescription.AMBARI_ADMIN_GROUP)
-    private String ambariAdminGroup;
+    @ApiModelProperty(LdapConfigModelDescription.ADMIN_GROUP)
+    private String adminGroup;
 
     public String getDescription() {
         return description;
@@ -178,11 +178,11 @@ public abstract class LdapConfigBase implements JsonEntity {
         this.groupMemberAttribute = groupMemberAttribute;
     }
 
-    public String getAmbariAdminGroup() {
-        return ambariAdminGroup;
+    public String getAdminGroup() {
+        return adminGroup;
     }
 
-    public void setAmbariAdminGroup(String ambariAdminGroup) {
-        this.ambariAdminGroup = ambariAdminGroup;
+    public void setAdminGroup(String adminGroup) {
+        this.adminGroup = adminGroup;
     }
 }

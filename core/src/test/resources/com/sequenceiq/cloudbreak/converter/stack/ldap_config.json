@@ -10,5 +10,5 @@
   "groupSearchBase": "cn=groups,dc=example,dc=org",
   "userNameAttribute": "cn",
   "domain": "ad.hdc.com",
-  "ambariAdminGroup": "ambariadmins"
+  "adminGroup": "ambariadmins"
 }
