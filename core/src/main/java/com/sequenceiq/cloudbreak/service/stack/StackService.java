@@ -185,6 +185,7 @@ public class StackService {
         return convertStacks(stackRepository.findForUserWithLists(user.getUserId()));
     }
 
+    @Transactional(TxType.NEVER)
     public Set<StackResponse> retrieveAccountStacks(IdentityUser user) {
         if (user.getRoles().contains(IdentityUserRole.ADMIN)) {
             return convertStacks(stackRepository.findAllInAccountWithLists(user.getAccount()));
@@ -201,8 +202,10 @@ public class StackService {
         return stackRepository.findForUser(owner);
     }
 
+    @Transactional(TxType.NEVER)
+    @PostAuthorize("hasPermission(returnObject,'read')")
     public StackResponse getJsonById(Long id, Set<String> entry) {
-        Stack stack = get(id);
+        Stack stack = getByIdWithLists(id);
         StackResponse stackResponse = conversionService.convert(stack, StackResponse.class);
         stackResponse = stackResponseDecorator.decorate(stackResponse, stack, entry);
         return stackResponse;
