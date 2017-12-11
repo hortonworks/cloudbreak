@@ -9,6 +9,7 @@ import java.util.stream.Stream;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.Response;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -46,7 +47,8 @@ public class CachedImageCatalogProvider {
             if (catalogUrl.startsWith("http")) {
                 Client client = RestClientUtil.get();
                 WebTarget target = client.target(catalogUrl);
-                catalog = target.request().get().readEntity(CloudbreakImageCatalogV2.class);
+                Response response = target.request().get();
+                catalog = checkResponse(target, response);
             } else {
                 String content = readCatalogFromFile(catalogUrl);
                 catalog = JsonUtil.readValue(content, CloudbreakImageCatalogV2.class);
@@ -62,6 +64,17 @@ public class CachedImageCatalogProvider {
             throw new CloudbreakImageCatalogException(e.getMessage(), e);
         } catch (IOException e) {
             throw new CloudbreakImageCatalogException(String.format("Failed to read image catalog from file: '%s'", catalogUrl), e);
+        }
+        return catalog;
+    }
+
+    private CloudbreakImageCatalogV2 checkResponse(WebTarget target, Response response) throws CloudbreakImageCatalogException {
+        CloudbreakImageCatalogV2 catalog;
+        if (!response.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL)) {
+            throw new CloudbreakImageCatalogException(String.format("Failed to get image catalog from '%s' due to: '%s'",
+                    target.getUri().toString(), response.getStatusInfo().getReasonPhrase()));
+        } else {
+            catalog =  response.readEntity(CloudbreakImageCatalogV2.class);
         }
         return catalog;
     }
