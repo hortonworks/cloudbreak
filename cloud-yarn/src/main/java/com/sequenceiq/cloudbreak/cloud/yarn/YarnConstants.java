@@ -2,10 +2,13 @@ package com.sequenceiq.cloudbreak.cloud.yarn;
 
 import static com.sequenceiq.cloudbreak.common.type.CloudConstants.YARN;
 
+import org.springframework.stereotype.Service;
+
 import com.sequenceiq.cloudbreak.cloud.CloudConstant;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 
+@Service
 public class YarnConstants implements CloudConstant {
     public static final Platform YARN_PLATFORM = Platform.platform(YARN);
 
