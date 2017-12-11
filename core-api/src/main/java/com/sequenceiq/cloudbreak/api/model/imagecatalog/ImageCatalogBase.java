@@ -20,6 +20,8 @@ public class ImageCatalogBase {
     private String name;
 
     @NotNull
+    @Pattern(regexp = "^http[s]?://.*",
+            message = "The URL should start with the protocol (http, https)")
     @ApiModelProperty(value = ModelDescriptions.ImageCatalogDescription.IMAGE_CATALOG_URL, required = true)
     private String url;
 
