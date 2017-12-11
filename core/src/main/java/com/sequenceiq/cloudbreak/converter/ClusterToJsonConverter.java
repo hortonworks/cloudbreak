@@ -102,6 +102,7 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
         clusterResponse.setId(source.getId());
         clusterResponse.setName(source.getName());
         clusterResponse.setStatus(source.getStatus());
+        clusterResponse.setSecure(source.isSecure());
         clusterResponse.setStatusReason(source.getStatusReason());
         if (source.getBlueprint() != null) {
             clusterResponse.setBlueprintId(source.getBlueprint().getId());
