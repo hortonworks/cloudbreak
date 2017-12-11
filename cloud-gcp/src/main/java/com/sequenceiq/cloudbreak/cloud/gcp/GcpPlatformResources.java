@@ -112,12 +112,19 @@ public class GcpPlatformResources implements PlatformResources {
         if (compute != null) {
             FirewallList firewallList = compute.firewalls().list(projectId).execute();
             for (Firewall firewall : firewallList.getItems()) {
-                CloudSecurityGroup cloudSecurityGroup = new CloudSecurityGroup(firewall.getName(), firewall.getName(), Collections.emptyMap());
-                result.computeIfAbsent(firewall.getNetwork(), k -> new HashSet<>()).add(cloudSecurityGroup);
+                Map<String, Object> properties = new HashMap<>();
+                properties.put("network", getNetworkName(firewall));
+                CloudSecurityGroup cloudSecurityGroup = new CloudSecurityGroup(firewall.getName(), firewall.getName(), properties);
+                result.computeIfAbsent(region.value(), k -> new HashSet<>()).add(cloudSecurityGroup);
             }
         }
 
         return new CloudSecurityGroups(result);
+    }
+
+    private String getNetworkName(Firewall firewall) {
+        String [] splittedNetworkName = firewall.getNetwork().split("/");
+        return splittedNetworkName[splittedNetworkName.length - 1];
     }
 
     @Override
