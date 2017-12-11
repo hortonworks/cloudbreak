@@ -23,7 +23,7 @@ public class SecurityRuleService {
     @Value("${cb.ssh.port:22}")
     private String sshPort;
 
-    @Value("#{'${cb.default.gateway.cidr:}'.split(',')}")
+    @Value("#{'${cb.default.gateway.cidr:0.0.0.0/0}'.split(',')}")
     private Set<String> defaultGatewayCidr;
 
     public SecurityRulesResponse getPublicIps() {
