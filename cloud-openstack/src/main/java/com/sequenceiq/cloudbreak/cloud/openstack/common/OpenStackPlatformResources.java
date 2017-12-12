@@ -55,7 +55,7 @@ public class OpenStackPlatformResources implements PlatformResources {
 
     public static final int DEFAULT_MAXIMUM_VOLUME_SIZE = 1023;
 
-    public static final int DEFAULT_MINIMUM_VOLUME_COUNT = 1;
+    public static final int DEFAULT_MINIMUM_VOLUME_COUNT = 0;
 
     @Inject
     private OpenStackClient openStackClient;
