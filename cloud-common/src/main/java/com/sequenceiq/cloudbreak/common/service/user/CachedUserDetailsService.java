@@ -43,6 +43,8 @@ public class CachedUserDetailsService {
 
     private static final String UAA_DATE_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
 
+    private static final String EMAIL_SEPARATOR = "@";
+
     @Inject
     @Named("identityServerUrl")
     private String identityServerUrl;
@@ -77,7 +79,11 @@ public class CachedUserDetailsService {
         } catch (UserDetailsUnavailableException e) {
             if (jwtSignKey != null) {
                 LOGGER.info("{} Assume SSO token", e.getMessage());
-                return new IdentityUser(username, username, username, singletonList(IdentityUserRole.ADMIN), "", "", new Date());
+                String account = username;
+                if (username.contains(EMAIL_SEPARATOR)) {
+                    account = username.substring(username.indexOf(EMAIL_SEPARATOR) + 1);
+                }
+                return new IdentityUser(username, username, account, singletonList(IdentityUserRole.ADMIN), "", "", new Date());
             }
             throw e;
         }
