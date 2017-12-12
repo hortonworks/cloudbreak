@@ -19,6 +19,7 @@ import org.springframework.stereotype.Component;
 
 import com.google.api.client.util.Joiner;
 import com.sequenceiq.cloudbreak.api.model.Status;
+import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.HostOrchestratorResolver;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
@@ -75,11 +76,23 @@ public class OrchestratorRecipeExecutor {
     }
 
     public void preTerminationRecipes(Stack stack) throws CloudbreakException {
+        preTerminationRecipesOnNodes(stack, collectNodes(stack));
+    }
+
+    public void preTerminationRecipes(Stack stack, Set<String> hostNames) throws CloudbreakException {
+        preTerminationRecipesOnNodes(stack, collectNodes(stack, hostNames));
+    }
+
+    public void preTerminationRecipesOnNodes(Stack stack, Set<Node> nodes) throws CloudbreakException {
+
+        if (stack.getCluster() == null) {
+            throw new NotFoundException("Cluster does not found, pre-termination will not be run.");
+        }
+
         HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
         GatewayConfig gatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
         try {
-            hostOrchestrator.preTerminationRecipes(gatewayConfig, collectNodes(stack),
-                    clusterDeletionBasedModel(stack.getId(), stack.getCluster().getId()));
+            hostOrchestrator.preTerminationRecipes(gatewayConfig, nodes, clusterDeletionBasedModel(stack.getId(), stack.getCluster().getId()));
         } catch (CloudbreakOrchestratorFailedException e) {
             throw new CloudbreakException(e);
         }
@@ -110,6 +123,18 @@ public class OrchestratorRecipeExecutor {
         for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
             for (InstanceMetaData im : instanceGroup.getInstanceMetaData()) {
                 agents.add(new Node(im.getPrivateIp(), im.getPublicIp(), im.getDiscoveryFQDN(), im.getInstanceGroupName()));
+            }
+        }
+        return agents;
+    }
+
+    private Set<Node> collectNodes(Stack stack, Set<String> hostNames) {
+        Set<Node> agents = new HashSet<>();
+        for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
+            for (InstanceMetaData im : instanceGroup.getInstanceMetaData()) {
+                if (hostNames.contains(im.getDiscoveryFQDN())) {
+                    agents.add(new Node(im.getPrivateIp(), im.getPublicIp(), im.getDiscoveryFQDN(), im.getInstanceGroupName()));
+                }
             }
         }
         return agents;

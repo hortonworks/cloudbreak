@@ -1,17 +1,25 @@
 package com.sequenceiq.cloudbreak.reactor;
 
+import java.util.Collections;
+import java.util.Map;
 import java.util.Set;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.domain.HostGroup;
+import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.reactor.api.event.EventSelectorUtil;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.DecommissionRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.DecommissionResult;
 import com.sequenceiq.cloudbreak.reactor.handler.ReactorEventHandler;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariDecommissioner;
+import com.sequenceiq.cloudbreak.service.cluster.flow.RecipeEngine;
+import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 import reactor.bus.Event;
@@ -19,6 +27,8 @@ import reactor.bus.EventBus;
 
 @Component
 public class DecommissionHandler implements ReactorEventHandler<DecommissionRequest> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(DecommissionHandler.class);
 
     @Inject
     private EventBus eventBus;
@@ -28,6 +38,12 @@ public class DecommissionHandler implements ReactorEventHandler<DecommissionRequ
 
     @Inject
     private AmbariDecommissioner ambariDecommissioner;
+
+    @Inject
+    private RecipeEngine recipeEngine;
+
+    @Inject
+    private HostGroupService hostGroupService;
 
     @Override
     public String selector() {
@@ -40,11 +56,27 @@ public class DecommissionHandler implements ReactorEventHandler<DecommissionRequ
         DecommissionResult result;
         try {
             Stack stack = stackService.getByIdWithLists(request.getStackId());
-            Set<String> hostNames = ambariDecommissioner.decommissionAmbariNodes(stack, request.getHostGroupName(), request.getHostNames());
+            Map<String, HostMetadata> hostsToRemove = ambariDecommissioner.collectHostsToRemove(stack, request.getHostGroupName(), request.getHostNames());
+            Set<String> hostNames;
+            if (!hostsToRemove.isEmpty()) {
+                executePreTerminationRecipes(stack, request.getHostGroupName(), hostsToRemove.keySet());
+                hostNames = ambariDecommissioner.decommissionAmbariNodes(stack, hostsToRemove);
+            } else {
+                hostNames = request.getHostNames();
+            }
             result = new DecommissionResult(request, hostNames);
         } catch (Exception e) {
             result = new DecommissionResult(e.getMessage(), e, request);
         }
         eventBus.notify(result.selector(), new Event<>(event.getHeaders(), result));
+    }
+
+    private void executePreTerminationRecipes(Stack stack, String hostGroupName, Set<String> hostNames) {
+        try {
+            HostGroup hostGroup = hostGroupService.getByClusterIdAndName(stack.getCluster().getId(), hostGroupName);
+            recipeEngine.executePreTerminationRecipes(stack, Collections.singleton(hostGroup), hostNames);
+        } catch (Exception ex) {
+            LOGGER.error(ex.getLocalizedMessage(), ex);
+        }
     }
 }
