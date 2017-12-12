@@ -65,24 +65,24 @@ public class ClusterCommonService {
         UserNamePasswordJson userNamePasswordJson = updateJson.getUserNamePasswordJson();
         if (userNamePasswordJson != null) {
             ambariUserNamePasswordChange(stackId, stack, userNamePasswordJson);
-            return Response.status(Status.ACCEPTED).build();
+            return Response.status(Status.NO_CONTENT).build();
         }
 
         if (updateJson.getStatus() != null) {
             LOGGER.info("Cluster status update request received. Stack id:  {}, status: {} ", stackId, updateJson.getStatus());
             clusterService.updateStatus(stackId, updateJson.getStatus());
-            return Response.status(Status.ACCEPTED).build();
+            return Response.status(Status.NO_CONTENT).build();
         }
 
         if (updateJson.getBlueprintId() != null && updateJson.getHostgroups() != null && stack.getCluster().isCreateFailed()) {
             LOGGER.info("Cluster rebuild request received. Stack id:  {}", stackId);
             recreateCluster(stackId, updateJson);
-            return Response.status(Status.ACCEPTED).build();
+            return Response.status(Status.NO_CONTENT).build();
         }
 
         if (updateJson.getHostGroupAdjustment() != null) {
             clusterHostgroupAdjustmentChange(stackId, updateJson, stack);
-            return Response.status(Status.ACCEPTED).build();
+            return Response.status(Status.NO_CONTENT).build();
         }
         LOGGER.error("Invalid cluster update request received. Stack id: {}", stackId);
         throw new BadRequestException("Invalid update cluster request!");

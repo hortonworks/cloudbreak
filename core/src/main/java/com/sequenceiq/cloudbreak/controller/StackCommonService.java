@@ -180,14 +180,14 @@ public class StackCommonService implements StackEndpoint {
         stackService.validateStack(stackValidation, true);
         CloudCredential cloudCredential = credentialToCloudCredentialConverter.convert(stackValidation.getCredential());
         fileSystemValidator.validateFileSystem(request.getPlatform(), cloudCredential, request.getFileSystem());
-        return Response.status(Status.ACCEPTED).build();
+        return Response.status(Status.NO_CONTENT).build();
     }
 
     @Override
     public Response deleteInstance(Long stackId, String instanceId) {
         IdentityUser user = authenticatedUserService.getCbUser();
         stackService.removeInstance(user, stackId, instanceId);
-        return Response.status(Status.ACCEPTED).build();
+        return Response.status(Status.NO_CONTENT).build();
     }
 
     @Override
