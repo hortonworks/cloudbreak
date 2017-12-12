@@ -11,7 +11,6 @@ import javax.transaction.Transactional.TxType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
@@ -53,9 +52,10 @@ public class NetworkService {
         }
     }
 
-    @PostAuthorize("hasPermission(returnObject,'read')")
     public Network get(Long id) {
-        return getById(id);
+        Network network = getById(id);
+        authorizationService.hasReadPermission(network);
+        return network;
     }
 
     public Network getById(Long id) {

@@ -9,13 +9,12 @@ import javax.transaction.Transactional.TxType;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
-import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -54,14 +53,13 @@ public class TemplateService {
         }
     }
 
-    @PostAuthorize("hasPermission(returnObject,'read')")
     public Template get(Long id) {
         Template template = templateRepository.findOne(id);
         if (template == null) {
             throw new NotFoundException(String.format(TEMPLATE_NOT_FOUND_MSG, id));
-        } else {
-            return template;
         }
+        authorizationService.hasReadPermission(template);
+        return template;
     }
 
     @Transactional(TxType.NEVER)
@@ -95,14 +93,13 @@ public class TemplateService {
         }
     }
 
-    @PostAuthorize("hasPermission(returnObject,'read')")
     public Template getPublicTemplate(String name, IdentityUser user) {
         Template template = templateRepository.findOneByName(name, user.getAccount());
         if (template == null) {
             throw new NotFoundException(String.format(TEMPLATE_NOT_FOUND_MSG, name));
-        } else {
-            return template;
         }
+        authorizationService.hasReadPermission(template);
+        return template;
     }
 
     public void delete(String templateName, IdentityUser user) {

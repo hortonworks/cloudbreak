@@ -10,7 +10,6 @@ import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
 
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
@@ -48,12 +47,12 @@ public class RecipeService {
         }
     }
 
-    @PostAuthorize("hasPermission(returnObject,'read')")
     public Recipe get(Long id) {
         Recipe recipe = recipeRepository.findOne(id);
         if (recipe == null) {
             throw new NotFoundException(String.format("Recipe '%s' not found", id));
         }
+        authorizationService.hasReadPermission(recipe);
         return recipe;
     }
 

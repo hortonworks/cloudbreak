@@ -10,13 +10,12 @@ import javax.transaction.Transactional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
-import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.Cluster;
@@ -53,14 +52,13 @@ public class ConstraintTemplateService {
                 : constraintTemplateRepository.findPublicInAccountForUser(user.getUserId(), user.getAccount());
     }
 
-    @PostAuthorize("hasPermission(returnObject,'read')")
     public ConstraintTemplate get(Long id) {
         ConstraintTemplate constraintTemplate = constraintTemplateRepository.findOne(id);
         if (constraintTemplate == null) {
             throw new NotFoundException(String.format(CONSTRAINT_NOT_FOUND_MSG, id));
-        } else {
-            return constraintTemplate;
         }
+        authorizationService.hasReadPermission(constraintTemplate);
+        return constraintTemplate;
     }
 
     public ConstraintTemplate create(IdentityUser user, ConstraintTemplate constraintTemplate) {
@@ -90,14 +88,13 @@ public class ConstraintTemplateService {
         delete(constraintTemplate);
     }
 
-    @PostAuthorize("hasPermission(returnObject,'read')")
     public ConstraintTemplate getPublicTemplate(String name, IdentityUser user) {
         ConstraintTemplate constraintTemplate = constraintTemplateRepository.findOneByName(name, user.getAccount());
         if (constraintTemplate == null) {
             throw new NotFoundException(String.format(CONSTRAINT_NOT_FOUND_MSG, name));
-        } else {
-            return constraintTemplate;
         }
+        authorizationService.hasReadPermission(constraintTemplate);
+        return constraintTemplate;
     }
 
     public ConstraintTemplate getPrivateTemplate(String name, IdentityUser user) {

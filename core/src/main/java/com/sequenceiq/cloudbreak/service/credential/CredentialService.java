@@ -16,7 +16,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
-import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.model.CloudbreakEventsJson;
@@ -70,24 +69,22 @@ public class CredentialService {
         }
     }
 
-    @PostAuthorize("hasPermission(returnObject,'read')")
     public Credential get(Long id) {
         Credential credential = credentialRepository.findOne(id);
         if (credential == null) {
             throw new NotFoundException(String.format("Credential '%s' not found.", id));
-        } else {
-            return credential;
         }
+        authorizationService.hasReadPermission(credential);
+        return credential;
     }
 
-    @PostAuthorize("hasPermission(returnObject,'read')")
     public Credential get(String name, String account) {
         Credential credential = credentialRepository.findOneByName(name, account);
         if (credential == null) {
             throw new NotFoundException(String.format("Credential '%s' not found in %s account.", name, account));
-        } else {
-            return credential;
         }
+        authorizationService.hasReadPermission(credential);
+        return credential;
     }
 
     @Transactional(TxType.NEVER)
