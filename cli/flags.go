@@ -255,7 +255,7 @@ var (
 		RequiredFlag: REQUIRED,
 		StringFlag: cli.StringFlag{
 			Name:  "url",
-			Usage: "URL location of the Ambari blueprint JSON file",
+			Usage: "URL location of the JSON file",
 		},
 	}
 	FlBlueprintName = StringFlag{

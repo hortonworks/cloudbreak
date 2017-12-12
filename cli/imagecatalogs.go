@@ -1,9 +1,7 @@
 package cli
 
 import (
-	"fmt"
 	"strconv"
-	"strings"
 	"time"
 
 	log "github.com/Sirupsen/logrus"
@@ -161,14 +159,14 @@ func listImages(c *cli.Context) {
 
 	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServerOptional.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 	output := utils.Output{Format: c.String(FlOutputOptional.Name)}
-	listImagesImpl(cbClient.Cloudbreak.V1imagecatalogs, output.WriteList, c.String(FlImageCatalog.Name), c.String(FlRegion.Name))
+	listImagesImpl(cbClient.Cloudbreak.V1imagecatalogs, output.WriteList, c.String(FlImageCatalog.Name))
 }
 
 type getPublicImagesClient interface {
 	GetPublicImagesByProviderAndCustomImageCatalog(*v1imagecatalogs.GetPublicImagesByProviderAndCustomImageCatalogParams) (*v1imagecatalogs.GetPublicImagesByProviderAndCustomImageCatalogOK, error)
 }
 
-func listImagesImpl(client getPublicImagesClient, writer func([]string, []utils.Row), imagecatalog string, region string) {
+func listImagesImpl(client getPublicImagesClient, writer func([]string, []utils.Row), imagecatalog string) {
 	log.Infof("[listImagesImpl] sending list images request")
 	provider := cloud.GetProvider().GetName()
 	imageResp, err := client.GetPublicImagesByProviderAndCustomImageCatalog(v1imagecatalogs.NewGetPublicImagesByProviderAndCustomImageCatalogParams().WithName(imagecatalog).WithPlatform(*provider))
@@ -178,15 +176,7 @@ func listImagesImpl(client getPublicImagesClient, writer func([]string, []utils.
 
 	tableRows := []utils.Row{}
 	for _, i := range imageResp.Payload.BaseImages {
-		imageprovider, ok := i.Images[strings.ToLower(*provider)]
-		if !ok {
-			utils.LogErrorMessageAndExit(fmt.Sprintf("No images for %v provider", *provider))
-		}
-		imageid, ok := imageprovider[region]
-		if !ok {
-			imageid = imageprovider["default"]
-		}
-		tableRows = append(tableRows, &imageOut{i.Date, i.Description, i.Version, imageid})
+		tableRows = append(tableRows, &imageOut{i.Date, i.Description, i.Version, i.UUID})
 	}
 
 	writer(imageHeader, tableRows)

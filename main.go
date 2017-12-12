@@ -846,11 +846,11 @@ func main() {
 						{
 							Name:   "aws",
 							Usage:  "lists available aws images from an imagecatalog",
-							Flags:  cb.NewFlagBuilder().AddFlags(cb.FlImageCatalog, cb.FlRegion).AddOutputFlag().AddAuthenticationFlags().Build(),
+							Flags:  cb.NewFlagBuilder().AddFlags(cb.FlImageCatalog).AddOutputFlag().AddAuthenticationFlags().Build(),
 							Before: ConfigRead,
 							Action: cb.ListAwsImages,
 							BashComplete: func(c *cli.Context) {
-								for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlImageCatalog, cb.FlRegion).AddOutputFlag().AddAuthenticationFlags().Build() {
+								for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlImageCatalog).AddOutputFlag().AddAuthenticationFlags().Build() {
 									printFlagCompletion(f)
 								}
 							},
@@ -858,11 +858,11 @@ func main() {
 						{
 							Name:   "azure",
 							Usage:  "lists available azure images from an imagecatalog",
-							Flags:  cb.NewFlagBuilder().AddFlags(cb.FlImageCatalog, cb.FlRegion).AddOutputFlag().AddAuthenticationFlags().Build(),
+							Flags:  cb.NewFlagBuilder().AddFlags(cb.FlImageCatalog).AddOutputFlag().AddAuthenticationFlags().Build(),
 							Before: ConfigRead,
 							Action: cb.ListAzureImages,
 							BashComplete: func(c *cli.Context) {
-								for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlImageCatalog, cb.FlRegion).AddOutputFlag().AddAuthenticationFlags().Build() {
+								for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlImageCatalog).AddOutputFlag().AddAuthenticationFlags().Build() {
 									printFlagCompletion(f)
 								}
 							},
@@ -870,11 +870,11 @@ func main() {
 						{
 							Name:   "gcp",
 							Usage:  "lists available gcp images from an imagecatalog",
-							Flags:  cb.NewFlagBuilder().AddFlags(cb.FlImageCatalog, cb.FlRegion).AddOutputFlag().AddAuthenticationFlags().Build(),
+							Flags:  cb.NewFlagBuilder().AddFlags(cb.FlImageCatalog).AddOutputFlag().AddAuthenticationFlags().Build(),
 							Before: ConfigRead,
 							Action: cb.ListGcpImages,
 							BashComplete: func(c *cli.Context) {
-								for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlImageCatalog, cb.FlRegion).AddOutputFlag().AddAuthenticationFlags().Build() {
+								for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlImageCatalog).AddOutputFlag().AddAuthenticationFlags().Build() {
 									printFlagCompletion(f)
 								}
 							},
@@ -882,11 +882,11 @@ func main() {
 						{
 							Name:   "openstack",
 							Usage:  "lists available openstack images from an imagecatalog",
-							Flags:  cb.NewFlagBuilder().AddFlags(cb.FlImageCatalog, cb.FlRegion).AddOutputFlag().AddAuthenticationFlags().Build(),
+							Flags:  cb.NewFlagBuilder().AddFlags(cb.FlImageCatalog).AddOutputFlag().AddAuthenticationFlags().Build(),
 							Before: ConfigRead,
 							Action: cb.ListOpenstackImages,
 							BashComplete: func(c *cli.Context) {
-								for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlImageCatalog, cb.FlRegion).AddOutputFlag().AddAuthenticationFlags().Build() {
+								for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlImageCatalog).AddOutputFlag().AddAuthenticationFlags().Build() {
 									printFlagCompletion(f)
 								}
 							},

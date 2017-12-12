@@ -50,9 +50,7 @@ func (*mockGetPublicImagesClient) GetPublicImagesByProviderAndCustomImageCatalog
 				Date:        "1111-11-11",
 				Version:     "1.1.1",
 				Description: "images",
-				Images: map[string]map[string]string{
-					"aws": {"region": "image", "default": "defaultimage"},
-				},
+				UUID:        "uuid",
 			},
 		},
 	}
@@ -62,29 +60,12 @@ func (*mockGetPublicImagesClient) GetPublicImagesByProviderAndCustomImageCatalog
 func TestListImagesImpl(t *testing.T) {
 	var rows []utils.Row
 	cloud.SetProviderType(cloud.AWS)
-	region := "region"
-	listImagesImpl(new(mockGetPublicImagesClient), func(h []string, r []utils.Row) { rows = r }, "catalog", region)
+	listImagesImpl(new(mockGetPublicImagesClient), func(h []string, r []utils.Row) { rows = r }, "catalog")
 	if len(rows) != 1 {
 		t.Fatalf("row number doesn't match 1 == %d", len(rows))
 	}
 	for _, r := range rows {
-		expected := "1111-11-11 images 1.1.1 image"
-		if strings.Join(r.DataAsStringArray(), " ") != expected {
-			t.Errorf("row data not match %s == %s", expected, strings.Join(r.DataAsStringArray(), " "))
-		}
-	}
-}
-
-func TestFallBackToDefaultListImagesImpl(t *testing.T) {
-	var rows []utils.Row
-	cloud.SetProviderType(cloud.AWS)
-	region := "notexists"
-	listImagesImpl(new(mockGetPublicImagesClient), func(h []string, r []utils.Row) { rows = r }, "catalog", region)
-	if len(rows) != 1 {
-		t.Fatalf("row number doesn't match 1 == %d", len(rows))
-	}
-	for _, r := range rows {
-		expected := "1111-11-11 images 1.1.1 defaultimage"
+		expected := "1111-11-11 images 1.1.1 uuid"
 		if strings.Join(r.DataAsStringArray(), " ") != expected {
 			t.Errorf("row data not match %s == %s", expected, strings.Join(r.DataAsStringArray(), " "))
 		}
