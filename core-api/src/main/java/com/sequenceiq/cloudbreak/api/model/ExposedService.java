@@ -35,7 +35,7 @@ public enum ExposedService {
     OOZIE("Oozie", "OOZIE_SERVER", "/oozie", "", ""),
     ACCUMULO_MASTER("Accumulo Master", "Accumulo Master", "", "", ""),
     ACCUMULO_TSERVER("Accumulo Tserver", "Accumulo Tserver", "", "", ""),
-    ATLAS("Atlas", "ATLAS_SERVER", "", "", ""),
+    ATLAS("Atlas", "ATLAS_SERVER", "", "ATLAS", "/atlas/"),
     KNOX_GW("Knox GW", "Knox GW", "", "", ""),
     SPARK_HISTORY_SERVER("Spark History Server", "SPARK_JOBHISTORYSERVER", "", "SPARKHISTORYUI", "/sparkhistory/"),
     CONTAINER_LOGS("Container logs", "Container logs", "", "", ""),

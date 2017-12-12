@@ -121,13 +121,15 @@ public class JsonToClusterConverter extends AbstractConversionServiceAwareConver
             }
             if (cloudGatewayJson.getSsoProvider() != null) {
                 gateway.setSsoProvider(cloudGatewayJson.getSsoProvider());
-            } else {
-                gateway.setSsoProvider("/" + gateway.getPath() + "/knoxsso/api/v1/websso");
             }
             if (cloudGatewayJson.getSsoType() != null) {
                 gateway.setSsoType(cloudGatewayJson.getSsoType());
             }
             gateway.setTokenCert(cloudGatewayJson.getTokenCert());
+        }
+
+        if (gateway.getSsoProvider() == null) {
+            gateway.setSsoProvider("/" + gateway.getPath() + "/knoxsso/api/v1/websso");
         }
 
         convertExposedServices(cloudGatewayJson, gateway);

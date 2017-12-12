@@ -94,7 +94,11 @@ public class GatewayView {
     }
 
     public String getEscSignCert() {
-        return StringEscapeUtils.escapeJson(signCert);
+        String cert = null;
+        if (signCert != null) {
+            cert = StringEscapeUtils.escapeJson(signCert.replaceAll("-----BEGIN CERTIFICATE-----|-----END CERTIFICATE-----", "").trim());
+        }
+        return cert;
     }
 
     public String getTokenCert() {

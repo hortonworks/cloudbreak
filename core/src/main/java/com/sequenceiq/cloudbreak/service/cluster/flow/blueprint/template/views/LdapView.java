@@ -5,8 +5,6 @@ import com.sequenceiq.cloudbreak.domain.LdapConfig;
 
 public class LdapView {
 
-    private String connectionURL;
-
     private final String bindDn;
 
     private final String bindPassword;
@@ -28,6 +26,8 @@ public class LdapView {
     private final String groupMemberAttribute;
 
     private final String domain;
+
+    private String connectionURL;
 
     public LdapView(LdapConfig ldapConfig) {
         connectionURL = ldapConfig.getProtocol() + "://" + ldapConfig.getServerHost();
@@ -61,6 +61,13 @@ public class LdapView {
 
     public DirectoryType getDirectoryType() {
         return directoryType;
+    }
+
+    public String getDirectoryTypeShort() {
+        if (directoryType == DirectoryType.ACTIVE_DIRECTORY) {
+            return "ad";
+        }
+        return "ldap";
     }
 
     public String getUserSearchBase() {
