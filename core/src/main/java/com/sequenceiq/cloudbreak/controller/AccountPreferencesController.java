@@ -70,7 +70,7 @@ public class AccountPreferencesController implements AccountPreferencesEndpoint 
         if (user.getRoles().contains(IdentityUserRole.ADMIN)) {
             validator.validate();
         }
-        return Response.status(Status.ACCEPTED).build();
+        return Response.status(Status.NO_CONTENT).build();
     }
 
     private AccountPreferencesJson convert(AccountPreferences preferences) {
