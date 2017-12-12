@@ -11,7 +11,6 @@ import javax.transaction.Transactional.TxType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
@@ -51,21 +50,21 @@ public class ClusterTemplateService {
         }
     }
 
-    @PostAuthorize("hasPermission(returnObject,'read')")
     public ClusterTemplate get(Long id) {
         ClusterTemplate clusterTemplate = clusterTemplateRepository.findOne(id);
         if (clusterTemplate == null) {
             throw new NotFoundException(String.format("ClusterTemplate '%s' not found.", id));
         }
+        authorizationService.hasReadPermission(clusterTemplate);
         return clusterTemplate;
     }
 
-    @PostAuthorize("hasPermission(returnObject,'read')")
     public ClusterTemplate getByName(String name, IdentityUser user) {
         ClusterTemplate clusterTemplate = clusterTemplateRepository.findByNameInAccount(name, user.getAccount(), user.getUserId());
         if (clusterTemplate == null) {
             throw new NotFoundException(String.format("Blueprint '%s' not found.", name));
         }
+        authorizationService.hasReadPermission(clusterTemplate);
         return clusterTemplate;
     }
 

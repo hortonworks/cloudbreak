@@ -11,7 +11,6 @@ import javax.transaction.Transactional.TxType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
@@ -53,12 +52,12 @@ public class SecurityGroupService {
         }
     }
 
-    @PostAuthorize("hasPermission(returnObject,'read')")
     public SecurityGroup get(Long id) {
         SecurityGroup securityGroup = groupRepository.findById(id);
         if (securityGroup == null) {
             throw new NotFoundException(String.format("SecurityGroup '%s' not found", id));
         }
+        authorizationService.hasReadPermission(securityGroup);
         return securityGroup;
     }
 

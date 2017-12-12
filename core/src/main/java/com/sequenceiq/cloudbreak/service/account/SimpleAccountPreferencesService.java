@@ -9,7 +9,6 @@ import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.CloudConstant;
@@ -18,6 +17,7 @@ import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.AccountPreferences;
 import com.sequenceiq.cloudbreak.repository.AccountPreferencesRepository;
+import com.sequenceiq.cloudbreak.service.AuthorizationService;
 
 @Service
 public class SimpleAccountPreferencesService implements AccountPreferencesService {
@@ -33,15 +33,18 @@ public class SimpleAccountPreferencesService implements AccountPreferencesServic
     @Inject
     private List<CloudConstant> cloudConstants;
 
+    @Inject
+    private AuthorizationService authorizationService;
+
     @Override
     public AccountPreferences save(AccountPreferences accountPreferences) {
         return repository.save(accountPreferences);
     }
 
     @Override
-    @PostAuthorize("hasPermission(returnObject,'read')")
     public AccountPreferences saveOne(IdentityUser user, AccountPreferences accountPreferences) {
         accountPreferences.setAccount(user.getAccount());
+        authorizationService.hasReadPermission(accountPreferences);
         return repository.save(accountPreferences);
     }
 
@@ -88,7 +91,6 @@ public class SimpleAccountPreferencesService implements AccountPreferencesServic
     }
 
     @Override
-    @PostAuthorize("hasPermission(returnObject,'read')")
     public AccountPreferences getOneById(Long id, IdentityUser user) {
         AccountPreferences accountPreferences = repository.findOne(id);
         if (!user.getRoles().contains(IdentityUserRole.ADMIN)) {
@@ -97,9 +99,9 @@ public class SimpleAccountPreferencesService implements AccountPreferencesServic
             throw new BadRequestException(String.format("AccountPreferences could not find with id: %s", id));
         } else if (!accountPreferences.getAccount().equals(user.getAccount())) {
             throw new BadRequestException("AccountPreferences are only available for the owner admin user!");
-        } else {
-            return accountPreferences;
         }
+        authorizationService.hasReadPermission(accountPreferences);
+        return accountPreferences;
     }
 
     @Override

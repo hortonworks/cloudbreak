@@ -11,7 +11,6 @@ import javax.transaction.Transactional.TxType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
@@ -49,9 +48,10 @@ public class TopologyService {
     @Inject
     private AuthorizationService authorizationService;
 
-    @PostAuthorize("hasPermission(returnObject,'read')")
     public Topology get(Long id) {
-        return getById(id);
+        Topology topology = getById(id);
+        authorizationService.hasReadPermission(topology);
+        return topology;
     }
 
     public Topology getById(Long id) {

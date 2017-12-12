@@ -15,7 +15,6 @@ import javax.transaction.Transactional.TxType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.ambari.client.AmbariClient;
@@ -58,32 +57,31 @@ public class BlueprintService {
         }
     }
 
-    @PostAuthorize("hasPermission(returnObject,'read')")
     public Blueprint get(Long id) {
         Blueprint blueprint = blueprintRepository.findOne(id);
         if (blueprint == null) {
             throw new NotFoundException(String.format("Blueprint '%s' not found.", id));
         }
+        authorizationService.hasReadPermission(blueprint);
         return blueprint;
     }
 
-    @PostAuthorize("hasPermission(returnObject,'read')")
     public Blueprint getByName(String name, IdentityUser user) {
         Blueprint blueprint = blueprintRepository.findByNameInAccount(name, user.getAccount(), user.getUserId());
         if (blueprint == null) {
             throw new NotFoundException(String.format("Blueprint '%s' not found.", name));
         }
+        authorizationService.hasReadPermission(blueprint);
         return blueprint;
     }
 
-    @PostAuthorize("hasPermission(returnObject,'read')")
     public Blueprint get(String name, String account) {
         Blueprint blueprint = blueprintRepository.findOneByName(name, account);
         if (blueprint == null) {
             throw new NotFoundException(String.format("Blueprint '%s' not found in %s account.", name, account));
-        } else {
-            return blueprint;
         }
+        authorizationService.hasReadPermission(blueprint);
+        return blueprint;
     }
 
     @Transactional(TxType.NEVER)

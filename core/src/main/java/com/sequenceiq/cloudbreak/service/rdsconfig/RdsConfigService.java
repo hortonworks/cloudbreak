@@ -7,13 +7,12 @@ import javax.transaction.Transactional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
 import com.sequenceiq.cloudbreak.api.model.RdsType;
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
@@ -65,12 +64,12 @@ public class RdsConfigService {
         }
     }
 
-    @PostAuthorize("hasPermission(returnObject,'read')")
     public RDSConfig get(Long id) {
         RDSConfig rdsConfig = rdsConfigRepository.findById(id);
         if (rdsConfig == null) {
             throw new NotFoundException(String.format("RDS configuration '%s' not found.", id));
         }
+        authorizationService.hasReadPermission(rdsConfig);
         return rdsConfig;
     }
 

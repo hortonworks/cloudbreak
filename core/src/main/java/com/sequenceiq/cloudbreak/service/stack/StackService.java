@@ -24,7 +24,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
@@ -203,20 +202,20 @@ public class StackService {
     }
 
     @Transactional(TxType.NEVER)
-    @PostAuthorize("hasPermission(returnObject,'read')")
     public StackResponse getJsonById(Long id, Set<String> entry) {
         Stack stack = getByIdWithLists(id);
+        authorizationService.hasReadPermission(stack);
         StackResponse stackResponse = conversionService.convert(stack, StackResponse.class);
         stackResponse = stackResponseDecorator.decorate(stackResponse, stack, entry);
         return stackResponse;
     }
 
-    @PostAuthorize("hasPermission(returnObject,'read')")
     public Stack get(Long id) {
         Stack stack = stackRepository.findOne(id);
         if (stack == null) {
             throw new NotFoundException(String.format("Stack '%s' not found", id));
         }
+        authorizationService.hasReadPermission(stack);
         return stack;
     }
 
@@ -293,23 +292,23 @@ public class StackService {
         return stackResponse;
     }
 
-    @PostAuthorize("hasPermission(returnObject,'read')")
     public StackResponse getPublicStackJsonByName(String name, IdentityUser identityUser, Set<String> entries) {
         Stack stack = stackRepository.findByNameInAccountWithLists(name, identityUser.getAccount());
         if (stack == null) {
             throw new NotFoundException(String.format("Stack '%s' not found", name));
         }
+        authorizationService.hasReadPermission(stack);
         StackResponse stackResponse = conversionService.convert(stack, StackResponse.class);
         stackResponse = stackResponseDecorator.decorate(stackResponse, stack, entries);
         return stackResponse;
     }
 
-    @PostAuthorize("hasPermission(returnObject,'read')")
     public Stack getPublicStack(String name, IdentityUser identityUser) {
         Stack stack = stackRepository.findByNameInAccount(name, identityUser.getAccount());
         if (stack == null) {
             throw new NotFoundException(String.format("Stack '%s' not found", name));
         }
+        authorizationService.hasReadPermission(stack);
         return stack;
     }
 

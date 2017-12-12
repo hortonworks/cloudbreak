@@ -9,7 +9,6 @@ import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
 
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
@@ -47,12 +46,12 @@ public class LdapConfigService {
         }
     }
 
-    @PostAuthorize("hasPermission(returnObject,'read')")
     public LdapConfig get(Long id) {
         LdapConfig ldapConfig = ldapConfigRepository.findOne(id);
         if (ldapConfig == null) {
             throw new NotFoundException(String.format("LdapConfig '%s' not found", id));
         }
+        authorizationService.hasReadPermission(ldapConfig);
         return ldapConfig;
     }
 
