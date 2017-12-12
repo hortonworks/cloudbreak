@@ -225,4 +225,22 @@
     </service>
     {%- endif %}
 
+    {% if ('ATLAS' in salt['pillar.get']('gateway:exposed')) and ('ATLAS_SERVER' in salt['pillar.get']('gateway:location')) -%}
+    <!-- https://{{ salt['grains.get']('gateway-address')[0] }}:8443/gateway/hdc/atlas/ -->
+
+    <service>
+        <role>ATLAS</role>
+        {% for hostloc in salt['pillar.get']('gateway:location')['ATLAS_SERVER'] -%}
+        <url>http://{{ hostloc }}:21000</url>
+        {%- endfor %}
+    </service>
+
+    <service>
+        <role>ATLAS-API</role>
+        {% for hostloc in salt['pillar.get']('gateway:location')['ATLAS_SERVER'] -%}
+        <url>http://{{ hostloc }}:21000</url>
+        {%- endfor %}
+    </service>
+    {%- endif %}
+
 </topology>
