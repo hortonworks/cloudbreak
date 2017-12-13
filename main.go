@@ -620,6 +620,55 @@ func main() {
 						}
 					},
 				},
+				{
+					Name:   "tags",
+					Hidden: true,
+					Usage:  "default tags related operations",
+					Subcommands: []cli.Command{
+						{
+							Name:  "account",
+							Usage: "manipulates default tags for the account",
+							Subcommands: []cli.Command{
+								{
+									Name:   "add",
+									Usage:  "adds a new default tag to the account",
+									Before: ConfigRead,
+									Flags:  cb.NewFlagBuilder().AddFlags(cb.FlKey, cb.FlValue).AddAuthenticationFlags().AddOutputFlag().Build(),
+									Action: cb.AddAccountTag,
+									BashComplete: func(c *cli.Context) {
+										for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlKey, cb.FlValue).AddAuthenticationFlags().AddOutputFlag().Build() {
+											printFlagCompletion(f)
+										}
+									},
+								},
+								{
+									Name:   "delete",
+									Usage:  "deletes a default tag of the account",
+									Before: ConfigRead,
+									Flags:  cb.NewFlagBuilder().AddFlags(cb.FlKey).AddAuthenticationFlags().AddOutputFlag().Build(),
+									Action: cb.DeleteAccountTag,
+									BashComplete: func(c *cli.Context) {
+										for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlKey).AddAuthenticationFlags().AddOutputFlag().Build() {
+											printFlagCompletion(f)
+										}
+									},
+								},
+								{
+									Name:   "list",
+									Usage:  "lists the default tags for the account",
+									Before: ConfigRead,
+									Flags:  cb.NewFlagBuilder().AddAuthenticationFlags().AddOutputFlag().Build(),
+									Action: cb.ListAccountTags,
+									BashComplete: func(c *cli.Context) {
+										for _, f := range cb.NewFlagBuilder().AddAuthenticationFlags().AddOutputFlag().Build() {
+											printFlagCompletion(f)
+										}
+									},
+								},
+							},
+						},
+					},
+				},
 			},
 		},
 		{

@@ -461,6 +461,20 @@ var (
 			Usage: "name of the imagecatalog",
 		},
 	}
+	FlKey = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "key",
+			Usage: "key of the tag",
+		},
+	}
+	FlValue = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "value",
+			Usage: "value of the tag",
+		},
+	}
 )
 
 type RequiredFlag struct {
