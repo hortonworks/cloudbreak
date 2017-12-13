@@ -23,6 +23,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.model.AmbariDatabaseDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.AmbariRepoDetailsJson;
+import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.ClusterRequest;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariDatabase;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
@@ -125,7 +126,7 @@ public class ClusterCreationSetupService {
         start = System.currentTimeMillis();
         List<ClusterComponent> components = new ArrayList<>();
         Set<Component> allComponent = componentConfigProvider.getAllComponentsByStackIdAndType(stack.getId(),
-                Sets.newHashSet(ComponentType.AMBARI_REPO_DETAILS, ComponentType.HDP_REPO_DETAILS));
+                Sets.newHashSet(ComponentType.AMBARI_REPO_DETAILS, ComponentType.HDP_REPO_DETAILS, ComponentType.IMAGE));
         Optional<Component> stackAmbariRepoConfig = allComponent.stream().filter(c -> c.getComponentType().equals(ComponentType.AMBARI_REPO_DETAILS)
                 && c.getName().equalsIgnoreCase(ComponentType.AMBARI_REPO_DETAILS.name())).findAny();
         Optional<Component> stackHdpRepoConfig = allComponent.stream().filter(c -> c.getComponentType().equals(ComponentType.HDP_REPO_DETAILS)
@@ -167,8 +168,10 @@ public class ClusterCreationSetupService {
 
         Json stackRepoDetailsJson;
         if (!stackHdpRepoConfig.isPresent()) {
-            if (request.getAmbariStackDetails() != null) {
-                StackRepoDetails stackRepoDetails = conversionService.convert(request.getAmbariStackDetails(), StackRepoDetails.class);
+            AmbariStackDetailsJson ambariStackDetails = request.getAmbariStackDetails();
+            if (ambariStackDetails != null) {
+                ambariStackDetails = setOsTypeFromImageIfMissing(cluster, stackImageComponent, ambariStackDetails);
+                StackRepoDetails stackRepoDetails = conversionService.convert(ambariStackDetails, StackRepoDetails.class);
                 stackRepoDetailsJson = new Json(stackRepoDetails);
             } else {
                 StackRepoDetails repo = defaultHDPInfo(blueprint, request, user).getRepo();
@@ -181,6 +184,21 @@ public class ClusterCreationSetupService {
         ClusterComponent hdpRepoComponent = new ClusterComponent(ComponentType.HDP_REPO_DETAILS, stackRepoDetailsJson, cluster);
         components.add(hdpRepoComponent);
         return components;
+    }
+
+    private AmbariStackDetailsJson setOsTypeFromImageIfMissing(Cluster cluster, Optional<Component> stackImageComponent,
+            AmbariStackDetailsJson ambariStackDetails) {
+        if (org.apache.commons.lang3.StringUtils.isBlank(ambariStackDetails.getOs()) && stackImageComponent.isPresent()) {
+            try {
+                Image image = stackImageComponent.get().getAttributes().get(Image.class);
+                if (org.apache.commons.lang3.StringUtils.isNotBlank(image.getOsType())) {
+                    ambariStackDetails.setOs(image.getOsType());
+                }
+            } catch (IOException e) {
+                LOGGER.error("Couldn't convert image component for stack: {} {}", cluster.getStack().getId(), cluster.getStack().getName(), e);
+            }
+        }
+        return ambariStackDetails;
     }
 
     private StackInfo defaultHDPInfo(Blueprint blueprint, ClusterRequest request, IdentityUser user) {
