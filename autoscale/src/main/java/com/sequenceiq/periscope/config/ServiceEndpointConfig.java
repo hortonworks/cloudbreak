@@ -14,10 +14,10 @@ public class ServiceEndpointConfig {
     @Value("${periscope.address.resolving.timeout:60000}")
     private int resolvingTimeout;
 
-    @Value("${periscope.db.tcp.addr:}")
+    @Value("${periscope.db.port.5432.tcp.addr:}")
     private String dbHost;
 
-    @Value("${periscope.db.tcp.port:}")
+    @Value("${periscope.db.port.5432.tcp.port:}")
     private String dbPort;
 
     @Value("${periscope.db.serviceid:}")

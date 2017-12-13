@@ -1,6 +1,15 @@
 server:
   contextPath: "/as"
 
+periscope:
+  db.env:
+    user: postgres
+    pass:
+    db: periscopedb
+    schema: public
+    cert.file: database.crt
+    ssl: false
+
 cb:
   server:
     contextPath: "/cb"

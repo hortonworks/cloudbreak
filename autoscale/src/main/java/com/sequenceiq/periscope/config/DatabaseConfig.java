@@ -1,5 +1,7 @@
 package com.sequenceiq.periscope.config;
 
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.sql.SQLException;
 import java.util.Properties;
 
@@ -28,20 +30,29 @@ import com.sequenceiq.cloudbreak.util.DatabaseUtil;
 @Configuration
 @EnableTransactionManagement
 public class DatabaseConfig {
-    @Value("${periscope.db.user:postgres}")
+    @Value("${periscope.db.env.user:postgres}")
     private String dbUser;
 
-    @Value("${periscope.db.pass:}")
+    @Value("${periscope.db.env.pass:}")
     private String dbPassword;
 
-    @Value("${periscope.db.name:periscopedb}")
+    @Value("${periscope.db.env.db:periscopedb}")
     private String dbName;
 
-    @Value("${periscope.db.schema.name:" + DatabaseUtil.DEFAULT_SCHEMA_NAME + '}')
+    @Value("${periscope.db.env.schema:" + DatabaseUtil.DEFAULT_SCHEMA_NAME + '}')
     private String dbSchemaName;
 
-    @Value("${periscope.db.hbm2ddl.strategy:validate}")
+    @Value("${periscope.db.env.ssl:}")
+    private boolean ssl;
+
+    @Value("#{'${periscope.cert.dir:}/${periscope.db.env.cert.file:}'}")
+    private String certFile;
+
+    @Value("${periscope.hbm2ddl.strategy:validate}")
     private String hbm2ddlStrategy;
+
+    @Value("${periscope.hibernate.debug:false}")
+    private boolean debug;
 
     @Inject
     @Named("databaseAddress")
@@ -52,6 +63,13 @@ public class DatabaseConfig {
         DatabaseUtil.createSchemaIfNeeded("postgresql", databaseAddress, dbName, dbUser, dbPassword, dbSchemaName);
         SimpleDriverDataSource dataSource = new SimpleDriverDataSource();
         dataSource.setDriverClass(Driver.class);
+        if (ssl && Files.exists(Paths.get(certFile))) {
+            Properties properties = new Properties();
+            properties.setProperty("ssl", "true");
+            properties.setProperty("sslfactory", "org.postgresql.ssl.SingleCertValidatingFactory");
+            properties.setProperty("sslfactoryarg", "file://" + certFile);
+            dataSource.setConnectionProperties(properties);
+        }
         dataSource.setUrl(String.format("jdbc:postgresql://%s/%s?currentSchema=%s", databaseAddress, dbName, dbSchemaName));
         dataSource.setUsername(dbUser);
         dataSource.setPassword(dbPassword);
@@ -96,7 +114,9 @@ public class DatabaseConfig {
     private Properties jpaProperties() {
         Properties properties = new Properties();
         properties.setProperty("hibernate.hbm2ddl.auto", hbm2ddlStrategy);
-        properties.setProperty("hibernate.show_sql", "false");
+        properties.setProperty("hibernate.show_sql", Boolean.toString(debug));
+        properties.setProperty("hibernate.format_sql", Boolean.toString(debug));
+        properties.setProperty("hibernate.use_sql_comments", Boolean.toString(debug));
         properties.setProperty("hibernate.dialect", "org.hibernate.dialect.PostgreSQLDialect");
         properties.setProperty("hibernate.default_schema", dbSchemaName);
         return properties;
