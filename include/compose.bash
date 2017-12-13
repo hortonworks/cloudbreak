@@ -610,13 +610,13 @@ periscope:
     environment:
         - http_proxy=$CB_HTTP_PROXY
         - https_proxy=$CB_HTTPS_PROXY
-        - PERISCOPE_DB_HBM2DDL_STRATEGY
-        - PERISCOPE_DB_TCP_ADDR
-        - PERISCOPE_DB_TCP_PORT
-        - PERISCOPE_DB_USER
-        - PERISCOPE_DB_PASS
-        - PERISCOPE_DB_NAME
-        - PERISCOPE_DB_SCHEMA_NAME
+        - PERISCOPE_HBM2DDL_STRATEGY
+        - PERISCOPE_DB_PORT_5432_TCP_ADDR
+        - PERISCOPE_DB_PORT_5432_TCP_PORT
+        - PERISCOPE_DB_ENV_USER
+        - PERISCOPE_DB_ENV_PASS
+        - PERISCOPE_DB_ENV_DB
+        - PERISCOPE_DB_ENV_SCHEMA
         - SERVICE_NAME=periscope
           #- SERVICE_CHECK_HTTP=/info
         - 'CB_JAVA_OPTS=$(escape-string-compose-yaml "$CB_JAVA_OPTS" \')'

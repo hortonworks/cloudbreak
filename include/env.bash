@@ -149,13 +149,13 @@ IDENTITY_DB_PASS - Password for the Identity database authentication
 IDENTITY_DB_URL - Url for the Identity database connection included the port number
 IDENTITY_DB_USER - User for the Identity database authentication
 LOCAL_SMTP_PASSWORD - Default password for the internal mail server
-PERISCOPE_DB_HBM2DDL_STRATEGY - Configures hibernate.hbm2ddl.auto in Autoscale
-PERISCOPE_DB_NAME - Name of the Autoscale database
-PERISCOPE_DB_PASS - Password for the Autoscale database authentication
-PERISCOPE_DB_SCHEMA_NAME - Used schema in the Autoscale database
-PERISCOPE_DB_USER - User for the Autoscale database authentication
-PERISCOPE_DB_TCP_ADDR - Address of the Autoscale database
-PERISCOPE_DB_TCP_PORT - Port number of the Autoscale database
+PERISCOPE_HBM2DDL_STRATEGY - Configures hibernate.hbm2ddl.auto in Autoscale
+PERISCOPE_DB_ENV_DB - Name of the Autoscale database
+PERISCOPE_DB_ENV_PASS - Password for the Autoscale database authentication
+PERISCOPE_DB_ENV_SCHEMA - Used schema in the Autoscale database
+PERISCOPE_DB_ENV_USER - User for the Autoscale database authentication
+PERISCOPE_DB_PORT_5432_TCP_ADDR - Address of the Autoscale database
+PERISCOPE_DB_PORT_5432_TCP_PORT - Port number of the Autoscale database
 PERISCOPE_LOG_LEVEL - Log level of the Autoscale service
 PERISCOPE_SCHEMA_MIGRATION_AUTO - Flag for Autoscale automatic database schema update
 PUBLIC_IP - Ip address or hostname of the public interface
