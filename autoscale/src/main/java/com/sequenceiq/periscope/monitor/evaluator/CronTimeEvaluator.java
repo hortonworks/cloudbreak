@@ -32,6 +32,9 @@ public class CronTimeEvaluator extends AbstractEventPublisher implements Evaluat
     @Inject
     private ClusterService clusterService;
 
+    @Inject
+    private DateUtils dateUtils;
+
     private long clusterId;
 
     @Override
@@ -40,7 +43,7 @@ public class CronTimeEvaluator extends AbstractEventPublisher implements Evaluat
     }
 
     private boolean isTrigger(TimeAlert alert) {
-        return DateUtils.isTrigger(alert.getCron(), alert.getTimeZone(), MonitorUpdateRate.CLUSTER_UPDATE_RATE);
+        return dateUtils.isTrigger(alert.getCron(), alert.getTimeZone(), MonitorUpdateRate.CLUSTER_UPDATE_RATE);
     }
 
     private boolean isPolicyAttached(BaseAlert alert) {
