@@ -35,7 +35,6 @@ cloudbreak-conf-tags() {
     env-import DOCKER_TAG_CLOUDBREAK 2.3.0-dev.12
     env-import DOCKER_TAG_ULUWATU 2.3.0-dev.12
     env-import DOCKER_TAG_SULTANS 2.3.0-dev.12
-    env-import DOCKER_TAG_CLOUDBREAK_SHELL 2.3.0-dev.12
     env-import DOCKER_TAG_POSTGRES 9.6.1-alpine
     env-import DOCKER_TAG_LOGROTATE 1.0.0
     env-import DOCKER_TAG_CBD_SMARTSENSE 0.12.0
@@ -44,7 +43,6 @@ cloudbreak-conf-tags() {
     env-import DOCKER_IMAGE_CLOUDBREAK_WEB hortonworks/hdc-web
     env-import DOCKER_IMAGE_CLOUDBREAK_AUTH hortonworks/hdc-auth
     env-import DOCKER_IMAGE_CLOUDBREAK_PERISCOPE hortonworks/cloudbreak-autoscale
-    env-import DOCKER_IMAGE_CLOUDBREAK_SHELL hortonworks/cloudbreak-shell
     env-import DOCKER_IMAGE_CBD_SMARTSENSE hortonworks/cbd-smartsense
 
     env-import CB_DEFAULT_SUBSCRIPTION_ADDRESS http://uluwatu.service.consul:3000/notifications
@@ -301,60 +299,6 @@ cloudbreak-conf-java() {
     env-import CB_JAVA_OPTS ""
     env-import CB_HTTP_PROXY ""
     env-import CB_HTTPS_PROXY ""
-}
-
-util-cloudbreak-shell() {
-    declare desc="Starts an interactive CloudbreakShell"
-
-    _cloudbreak-shell -it
-}
-
-util-cloudbreak-shell-remote(){
-    declare desc="Show CloudbreakShell run command"
-
-    cloudbreak-config
-
-    echo "If you want to run CloudbreakShell on your local machine then please copy and paste the next command and fill your password:"
-    echo docker run -it \
-        --rm --name cloudbreak-shell \
-        -e CLOUDBREAK_ADDRESS=\'https://$PUBLIC_IP\' \
-        -e IDENTITY_ADDRESS=\'https://$PUBLIC_IP/identity\' \
-        -e SEQUENCEIQ_USER=\'$UAA_DEFAULT_USER_EMAIL\' \
-        -e SEQUENCEIQ_PASSWORD=\'****\' \
-        -w /data \
-        -v $PWD:/data \
-        $DOCKER_IMAGE_CLOUDBREAK_SHELL:$DOCKER_TAG_CLOUDBREAK_SHELL --cert.validation=false
-
-}
-
-util-cloudbreak-shell-quiet() {
-    declare desc="Starts a non-interactive CloudbreakShell, commands from stdin."
-    _cloudbreak-shell -i
-}
-
-_cloudbreak-shell() {
-
-    cloudbreak-config
-
-    local passwd="$UAA_DEFAULT_USER_PW"
-    if ! [[ "$passwd" ]]; then
-        read -s -t 10 -p "password:" passwd
-        echo
-    fi
-
-    docker run "$@" \
-        --name cloudbreak-shell \
-        --label cbreak.sidekick=true \
-        --dns=$PRIVATE_IP \
-        -e CLOUDBREAK_ADDRESS=http://cloudbreak.service.consul:8080 \
-        -e IDENTITY_ADDRESS=http://identity.service.consul:$UAA_PORT \
-        -e SEQUENCEIQ_USER=$UAA_DEFAULT_USER_EMAIL \
-        -e SEQUENCEIQ_PASSWORD="$passwd" \
-        -w /data \
-        -v $PWD:/data \
-        $DOCKER_IMAGE_CLOUDBREAK_SHELL:$DOCKER_TAG_CLOUDBREAK_SHELL
-
-    docker-kill-all-sidekicks
 }
 
 escape-string-env() {

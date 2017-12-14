@@ -595,9 +595,6 @@ main() {
     cmd-export migrate-cmd migrate
 
     cmd-export-ns util "Util namespace"
-    cmd-export util-cloudbreak-shell
-    cmd-export util-cloudbreak-shell-quiet
-    cmd-export util-cloudbreak-shell-remote
     cmd-export util-token
     cmd-export util-token-debug
     cmd-export util-local-dev
