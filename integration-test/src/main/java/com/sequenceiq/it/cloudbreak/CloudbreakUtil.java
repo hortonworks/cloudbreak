@@ -30,8 +30,8 @@ import com.sequenceiq.cloudbreak.api.model.StackResponse;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.it.IntegrationTestContext;
-import com.sequenceiq.periscope.api.endpoint.HistoryEndpoint;
-import com.sequenceiq.periscope.api.model.HistoryJson;
+import com.sequenceiq.periscope.api.endpoint.v1.HistoryEndpoint;
+import com.sequenceiq.periscope.api.model.AutoscaleClusterHistoryResponse;
 import com.sequenceiq.periscope.client.AutoscaleClient;
 
 
@@ -236,8 +236,8 @@ public class CloudbreakUtil {
             LOGGER.info("Waiting for auto scaling event is success ...");
             sleep();
             HistoryEndpoint historyEndpoint = autoscaleClient.historyEndpoint();
-            List<HistoryJson> historyJson = historyEndpoint.getHistory(clusterId);
-            for (HistoryJson elem : historyJson) {
+            List<AutoscaleClusterHistoryResponse> autoscaleClusterHistoryResponse = historyEndpoint.getHistory(clusterId);
+            for (AutoscaleClusterHistoryResponse elem : autoscaleClusterHistoryResponse) {
                 if ((elem.getTimestamp() > currentTime) && "SUCCESS".equals(elem.getScalingStatus().toString())) {
                     exitCriteria = Boolean.TRUE;
                 }

@@ -18,11 +18,11 @@ import com.sequenceiq.cloudbreak.client.ConfigKey;
 import com.sequenceiq.cloudbreak.client.IdentityClient;
 import com.sequenceiq.cloudbreak.client.RestClientUtil;
 import com.sequenceiq.periscope.api.AutoscaleApi;
-import com.sequenceiq.periscope.api.endpoint.AlertEndpoint;
-import com.sequenceiq.periscope.api.endpoint.ClusterEndpoint;
-import com.sequenceiq.periscope.api.endpoint.ConfigurationEndpoint;
-import com.sequenceiq.periscope.api.endpoint.HistoryEndpoint;
-import com.sequenceiq.periscope.api.endpoint.PolicyEndpoint;
+import com.sequenceiq.periscope.api.endpoint.v1.AlertEndpoint;
+import com.sequenceiq.periscope.api.endpoint.v1.AutoScaleClusterV1Endpoint;
+import com.sequenceiq.periscope.api.endpoint.v1.ConfigurationEndpoint;
+import com.sequenceiq.periscope.api.endpoint.v1.HistoryEndpoint;
+import com.sequenceiq.periscope.api.endpoint.v1.PolicyEndpoint;
 
 import net.jodah.expiringmap.ExpirationPolicy;
 import net.jodah.expiringmap.ExpiringMap;
@@ -55,7 +55,7 @@ public class AutoscaleClient {
 
     private AlertEndpoint alertEndpoint;
 
-    private ClusterEndpoint clusterEndpoint;
+    private AutoScaleClusterV1Endpoint autoScaleClusterV1Endpoint;
 
     private ConfigurationEndpoint configurationEndpoint;
 
@@ -112,7 +112,7 @@ public class AutoscaleClient {
         headers.add("Authorization", "Bearer " + token);
         t = client.target(autoscaleAddress).path(AutoscaleApi.API_ROOT_CONTEXT);
         alertEndpoint = newResource(AlertEndpoint.class, headers);
-        clusterEndpoint = newResource(ClusterEndpoint.class, headers);
+        autoScaleClusterV1Endpoint = newResource(AutoScaleClusterV1Endpoint.class, headers);
         configurationEndpoint = newResource(ConfigurationEndpoint.class, headers);
         historyEndpoint = newResource(HistoryEndpoint.class, headers);
         policyEndpoint = newResource(PolicyEndpoint.class, headers);
@@ -128,9 +128,9 @@ public class AutoscaleClient {
         return alertEndpoint;
     }
 
-    public ClusterEndpoint clusterEndpoint() {
+    public AutoScaleClusterV1Endpoint clusterEndpoint() {
         refresh();
-        return clusterEndpoint;
+        return autoScaleClusterV1Endpoint;
     }
 
     public ConfigurationEndpoint configurationEndpoint() {

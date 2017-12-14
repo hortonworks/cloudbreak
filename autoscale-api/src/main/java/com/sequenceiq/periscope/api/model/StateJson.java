@@ -18,4 +18,16 @@ public class StateJson implements Json {
     public void setState(ClusterState state) {
         this.state = state;
     }
+
+    public static StateJson running() {
+        StateJson stateJson = new StateJson();
+        stateJson.setState(ClusterState.RUNNING);
+        return stateJson;
+    }
+
+    public static StateJson suspended() {
+        StateJson stateJson = new StateJson();
+        stateJson.setState(ClusterState.SUSPENDED);
+        return stateJson;
+    }
 }

@@ -58,7 +58,8 @@ public class SecurityConfig {
         public void configure(HttpSecurity http) throws Exception {
             http.addFilterAfter(scimAccountGroupReaderFilter, AbstractPreAuthenticatedProcessingFilter.class)
                     .authorizeRequests()
-                    .antMatchers(API_ROOT_CONTEXT + "/clusters/**").access("#oauth2.hasScope('cloudbreak.stacks') and #oauth2.hasScope('periscope.cluster')")
+                    .antMatchers(API_ROOT_CONTEXT + "/v1/clusters/**").access("#oauth2.hasScope('cloudbreak.stacks') and #oauth2.hasScope('periscope.cluster')")
+                    .antMatchers(API_ROOT_CONTEXT + "/v2/clusters/**").access("#oauth2.hasScope('cloudbreak.stacks') and #oauth2.hasScope('periscope.cluster')")
                     .antMatchers(API_ROOT_CONTEXT + "/swagger.json").permitAll()
                     .antMatchers(API_ROOT_CONTEXT + "/api-docs/**").permitAll()
                     .antMatchers(API_ROOT_CONTEXT + "/**").denyAll()

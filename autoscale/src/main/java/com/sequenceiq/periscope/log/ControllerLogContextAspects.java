@@ -22,7 +22,7 @@ public class ControllerLogContextAspects {
     @Inject
     private AuthenticatedUserService authenticatedUserService;
 
-    @Pointcut("execution(public * com.sequenceiq.periscope.rest.controller.*Controller.*(..))")
+    @Pointcut("execution(public * com.sequenceiq.periscope.controller.*Controller.*(..))")
     public void interceptControllerMethodCalls() {
     }
 

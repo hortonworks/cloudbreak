@@ -1,7 +1,5 @@
 package com.sequenceiq.periscope.api.model;
 
-import java.util.List;
-
 import javax.validation.constraints.NotNull;
 
 import com.sequenceiq.periscope.doc.ApiDescription.ClusterJsonsProperties;
@@ -22,18 +20,6 @@ public class ClusterBaseJson implements Json {
     @ApiModelProperty(ClusterJsonsProperties.STACK_ID)
     @NotNull
     private Long stackId;
-
-    @ApiModelProperty(ClusterJsonsProperties.METRIC_ALERTS)
-    private List<MetricAlertJson> metricAlerts;
-
-    @ApiModelProperty(ClusterJsonsProperties.TIME_ALERTS)
-    private List<TimeAlertJson> timeAlerts;
-
-    @ApiModelProperty(ClusterJsonsProperties.PROMETHEUS_ALERTS)
-    private List<PrometheusAlertJson> prometheusAlerts;
-
-    @ApiModelProperty(ClusterJsonsProperties.SCALING_CONFIGURATION)
-    private ScalingConfigurationJson scalingConfiguration;
 
     public ClusterBaseJson() {
     }
@@ -77,35 +63,4 @@ public class ClusterBaseJson implements Json {
         this.stackId = stackId;
     }
 
-    public List<MetricAlertJson> getMetricAlerts() {
-        return metricAlerts;
-    }
-
-    public void setMetricAlerts(List<MetricAlertJson> metricAlerts) {
-        this.metricAlerts = metricAlerts;
-    }
-
-    public List<TimeAlertJson> getTimeAlerts() {
-        return timeAlerts;
-    }
-
-    public void setTimeAlerts(List<TimeAlertJson> timeAlerts) {
-        this.timeAlerts = timeAlerts;
-    }
-
-    public List<PrometheusAlertJson> getPrometheusAlerts() {
-        return prometheusAlerts;
-    }
-
-    public void setPrometheusAlerts(List<PrometheusAlertJson> prometheusAlerts) {
-        this.prometheusAlerts = prometheusAlerts;
-    }
-
-    public ScalingConfigurationJson getScalingConfiguration() {
-        return scalingConfiguration;
-    }
-
-    public void setScalingConfiguration(ScalingConfigurationJson scalingConfiguration) {
-        this.scalingConfiguration = scalingConfiguration;
-    }
 }

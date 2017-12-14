@@ -238,4 +238,8 @@ public class History {
     public void setHostGroup(String hostGroup) {
         this.hostGroup = hostGroup;
     }
+
+    public void setClusterId(long clusterId) {
+        this.clusterId = clusterId;
+    }
 }

@@ -16,18 +16,20 @@ import com.sequenceiq.it.cloudbreak.AbstractCloudbreakIntegrationTest;
 import com.sequenceiq.it.cloudbreak.CloudbreakITContextConstants;
 import com.sequenceiq.it.cloudbreak.CloudbreakUtil;
 import com.sequenceiq.it.cloudbreak.scaling.ScalingUtil;
-import com.sequenceiq.periscope.api.endpoint.AlertEndpoint;
-import com.sequenceiq.periscope.api.endpoint.ClusterEndpoint;
-import com.sequenceiq.periscope.api.endpoint.ConfigurationEndpoint;
-import com.sequenceiq.periscope.api.endpoint.PolicyEndpoint;
+import com.sequenceiq.periscope.api.endpoint.v1.AlertEndpoint;
+import com.sequenceiq.periscope.api.endpoint.v1.AutoScaleClusterV1Endpoint;
+import com.sequenceiq.periscope.api.endpoint.v1.ConfigurationEndpoint;
+import com.sequenceiq.periscope.api.endpoint.v1.PolicyEndpoint;
 import com.sequenceiq.periscope.api.model.AdjustmentType;
 import com.sequenceiq.periscope.api.model.AlertOperator;
 import com.sequenceiq.periscope.api.model.AlertState;
-import com.sequenceiq.periscope.api.model.ClusterAutoscaleState;
-import com.sequenceiq.periscope.api.model.ClusterJson;
-import com.sequenceiq.periscope.api.model.PrometheusAlertJson;
-import com.sequenceiq.periscope.api.model.ScalingConfigurationJson;
-import com.sequenceiq.periscope.api.model.ScalingPolicyJson;
+import com.sequenceiq.periscope.api.model.AutoscaleClusterState;
+import com.sequenceiq.periscope.api.model.AutoscaleClusterResponse;
+import com.sequenceiq.periscope.api.model.PrometheusAlertRequest;
+import com.sequenceiq.periscope.api.model.PrometheusAlertResponse;
+import com.sequenceiq.periscope.api.model.ScalingConfigurationRequest;
+import com.sequenceiq.periscope.api.model.ScalingPolicyRequest;
+import com.sequenceiq.periscope.api.model.ScalingPolicyResponse;
 import com.sequenceiq.periscope.client.AutoscaleClient;
 
 
@@ -49,12 +51,12 @@ public class AutoscalingUtil extends AbstractCloudbreakIntegrationTest {
     static long getPeriscopeClusterId(AutoscaleClient autoscaleClient, String stackId) {
         Long clusterId = null;
         int retryCount = 0;
-        ClusterEndpoint clusterEndpoint = autoscaleClient.clusterEndpoint();
+        AutoScaleClusterV1Endpoint autoScaleClusterV1Endpoint = autoscaleClient.clusterEndpoint();
         while (clusterId == null && retryCount < 30) {
             LOGGER.info("Waiting for having Prometheus cluster id ...");
             CloudbreakUtil.sleep();
-            List<ClusterJson> clusterJson = clusterEndpoint.getClusters();
-            for (ClusterJson elem : clusterJson) {
+            List<AutoscaleClusterResponse> autoscaleClusterResponse = autoScaleClusterV1Endpoint.getClusters();
+            for (AutoscaleClusterResponse elem : autoscaleClusterResponse) {
                 if (String.valueOf(elem.getStackId()).equals(stackId)) {
                     clusterId = elem.getId();
                 }
@@ -67,28 +69,28 @@ public class AutoscalingUtil extends AbstractCloudbreakIntegrationTest {
 
     static void createPrometheusAlert(AutoscaleClient autoscaleClient, Long clusterId, String alertName, String alertOperator,
             String alertRuleName, int period, Double threshold) {
-        PrometheusAlertJson prometheusAlertJson = new PrometheusAlertJson();
-        prometheusAlertJson.setAlertName(alertName);
+        PrometheusAlertRequest prometheusAlertRequest = new PrometheusAlertRequest();
+        prometheusAlertRequest.setAlertName(alertName);
         if ("more".equals(alertOperator)) {
 
-            prometheusAlertJson.setAlertOperator(AlertOperator.MORE_THAN);
+            prometheusAlertRequest.setAlertOperator(AlertOperator.MORE_THAN);
         } else {
-            prometheusAlertJson.setAlertOperator(AlertOperator.LESS_THAN);
+            prometheusAlertRequest.setAlertOperator(AlertOperator.LESS_THAN);
         }
-        prometheusAlertJson.setAlertRuleName(alertRuleName);
-        prometheusAlertJson.setAlertState(AlertState.OK);
-        prometheusAlertJson.setPeriod(period);
-        prometheusAlertJson.setThreshold(threshold);
+        prometheusAlertRequest.setAlertRuleName(alertRuleName);
+        prometheusAlertRequest.setAlertState(AlertState.OK);
+        prometheusAlertRequest.setPeriod(period);
+        prometheusAlertRequest.setThreshold(threshold);
         AlertEndpoint alertEndpoint = autoscaleClient.alertEndpoint();
-        alertEndpoint.createPrometheusAlert(clusterId, prometheusAlertJson);
+        alertEndpoint.createPrometheusAlert(clusterId, prometheusAlertRequest);
     }
 
     static Long getAlertId(AutoscaleClient autoscaleClient, Long clusterId, String alertName) {
         Long alertId = null;
         AlertEndpoint alertEndpoint = autoscaleClient.alertEndpoint();
-        List<PrometheusAlertJson> prometheusAlertJsons = alertEndpoint.getPrometheusAlerts(clusterId);
+        List<PrometheusAlertResponse> prometheusAlertResponses = alertEndpoint.getPrometheusAlerts(clusterId);
 
-        for (PrometheusAlertJson entry : prometheusAlertJsons) {
+        for (PrometheusAlertResponse entry : prometheusAlertResponses) {
             if (entry.getAlertName().equals(alertName)) {
                 alertId = entry.getId();
             }
@@ -100,17 +102,17 @@ public class AutoscalingUtil extends AbstractCloudbreakIntegrationTest {
     static void createPolicy(AutoscaleClient autoscaleClient, String policyName, Long clusterId, Long alertId, String hostGroup,
             int scalingAdjustment) {
         Boolean policyCreated = Boolean.FALSE;
-        ScalingPolicyJson scalingPolicyJson = new ScalingPolicyJson();
-        scalingPolicyJson.setName(policyName);
-        scalingPolicyJson.setAdjustmentType(AdjustmentType.NODE_COUNT);
-        scalingPolicyJson.setAlertId(alertId);
-        scalingPolicyJson.setScalingAdjustment(scalingAdjustment);
-        scalingPolicyJson.setHostGroup(hostGroup);
+        ScalingPolicyRequest scalingPolicyRequest = new ScalingPolicyRequest();
+        scalingPolicyRequest.setName(policyName);
+        scalingPolicyRequest.setAdjustmentType(AdjustmentType.NODE_COUNT);
+        scalingPolicyRequest.setAlertId(alertId);
+        scalingPolicyRequest.setScalingAdjustment(scalingAdjustment);
+        scalingPolicyRequest.setHostGroup(hostGroup);
         PolicyEndpoint policyEndpoint = autoscaleClient.policyEndpoint();
-        policyEndpoint.addScaling(clusterId, scalingPolicyJson);
+        policyEndpoint.addScalingPolicy(clusterId, scalingPolicyRequest);
 
-        List<ScalingPolicyJson> policies = policyEndpoint.getScaling(clusterId);
-        for (ScalingPolicyJson policy : policies) {
+        List<ScalingPolicyResponse> policies = policyEndpoint.getScalingPolicies(clusterId);
+        for (ScalingPolicyResponse policy : policies) {
             if (policy.getAlertId() == alertId) {
                 policyCreated = Boolean.TRUE;
             }
@@ -120,13 +122,13 @@ public class AutoscalingUtil extends AbstractCloudbreakIntegrationTest {
 
     static void configureAutoScaling(AutoscaleClient autoscaleClient, Long clusterId, int cooldown, int clusterMinsize, int clusterMaxSize) {
         ConfigurationEndpoint configurationEndpoint = autoscaleClient.configurationEndpoint();
-        ScalingConfigurationJson scalingConfigurationJson = new ScalingConfigurationJson();
-        scalingConfigurationJson.setCoolDown(cooldown);
-        scalingConfigurationJson.setMinSize(clusterMinsize);
-        scalingConfigurationJson.setMaxSize(clusterMaxSize);
-        configurationEndpoint.setScalingConfiguration(clusterId, scalingConfigurationJson);
+        ScalingConfigurationRequest scalingConfigurationRequest = new ScalingConfigurationRequest();
+        scalingConfigurationRequest.setCoolDown(cooldown);
+        scalingConfigurationRequest.setMinSize(clusterMinsize);
+        scalingConfigurationRequest.setMaxSize(clusterMaxSize);
+        configurationEndpoint.setScalingConfiguration(clusterId, scalingConfigurationRequest);
 
-        ScalingConfigurationJson scalingConfigurationTest = configurationEndpoint.getScalingConfiguration(clusterId);
+        ScalingConfigurationRequest scalingConfigurationTest = configurationEndpoint.getScalingConfiguration(clusterId);
         Assert.assertEquals(cooldown, scalingConfigurationTest.getCoolDown());
         Assert.assertEquals(clusterMinsize, scalingConfigurationTest.getMinSize());
         Assert.assertEquals(clusterMaxSize, scalingConfigurationTest.getMaxSize());
@@ -166,9 +168,9 @@ public class AutoscalingUtil extends AbstractCloudbreakIntegrationTest {
     }
 
     static void switchAutoscaling(AutoscaleClient autoscaleClient, Long clusterId, boolean enableAutoscaling) {
-        ClusterEndpoint clusterEndpoint = autoscaleClient.clusterEndpoint();
-        ClusterAutoscaleState json = new ClusterAutoscaleState();
+        AutoScaleClusterV1Endpoint autoScaleClusterV1Endpoint = autoscaleClient.clusterEndpoint();
+        AutoscaleClusterState json = new AutoscaleClusterState();
         json.setEnableAutoscaling(enableAutoscaling);
-        clusterEndpoint.setAutoscaleState(clusterId, json);
+        autoScaleClusterV1Endpoint.setAutoscaleState(clusterId, json);
     }
 }

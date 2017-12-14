@@ -64,7 +64,8 @@ dependencies {
     testCompile group: 'junit',                     name: 'junit',                                  version: '4.11'
     testCompile group: 'org.mockito',               name: 'mockito-all',                            version: '1.9.5'
     testCompile group: 'org.springframework',       name: 'spring-test',                            version: springFrameworkVersion
-    testCompile group: 'org.springframework.boot',  name: 'spring-boot-starter-test',                version: springBootVersion
+    testCompile group: 'org.springframework.boot',  name: 'spring-boot-starter-test',               version: springBootVersion
+    testCompile group: 'com.openpojo',              name: 'openpojo',                               version: '0.8.6'
 
     compile project(':core-api')
     compile project(':autoscale-api')

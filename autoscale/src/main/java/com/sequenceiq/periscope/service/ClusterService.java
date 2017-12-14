@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Lists;
 import com.sequenceiq.periscope.api.model.ClusterState;
-import com.sequenceiq.periscope.api.model.ScalingConfigurationJson;
+import com.sequenceiq.periscope.api.model.ScalingConfigurationRequest;
 import com.sequenceiq.periscope.domain.Ambari;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.PeriscopeUser;
@@ -98,6 +98,10 @@ public class ClusterService {
         return clusterRepository.findOne(clusterId);
     }
 
+    public Cluster findOneByStackId(Long stackId) {
+        return clusterRepository.findByStackId(stackId);
+    }
+
     public Cluster save(Cluster cluster) {
         return clusterRepository.save(cluster);
     }
@@ -116,7 +120,7 @@ public class ClusterService {
         clusterRepository.delete(cluster);
     }
 
-    public void updateScalingConfiguration(Long clusterId, ScalingConfigurationJson scalingConfiguration) {
+    public void updateScalingConfiguration(Long clusterId, ScalingConfigurationRequest scalingConfiguration) {
         Cluster cluster = findOneById(clusterId);
         cluster.setMinSize(scalingConfiguration.getMinSize());
         cluster.setMaxSize(scalingConfiguration.getMaxSize());
@@ -124,9 +128,9 @@ public class ClusterService {
         save(cluster);
     }
 
-    public ScalingConfigurationJson getScalingConfiguration(Long clusterId) {
+    public ScalingConfigurationRequest getScalingConfiguration(Long clusterId) {
         Cluster cluster = findOneById(clusterId);
-        ScalingConfigurationJson configuration = new ScalingConfigurationJson();
+        ScalingConfigurationRequest configuration = new ScalingConfigurationRequest();
         configuration.setCoolDown(cluster.getCoolDown());
         configuration.setMaxSize(cluster.getMaxSize());
         configuration.setMinSize(cluster.getMinSize());
