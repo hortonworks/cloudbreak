@@ -36,7 +36,6 @@ pages:
             - 'Provisioning - CLI': openstack_cb_shell.md
     - Reference:
         - API : api.md
-        - CLI/Shell : shell.md
         - Auto-Scaling : periscope.md
         - Recipes: recipes.md
         - Blueprints : blueprints.md

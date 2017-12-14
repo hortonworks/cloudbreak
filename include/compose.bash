@@ -42,7 +42,6 @@ compose-pull() {
     [ -f docker-compose.yml ] || deployer-generate
 
     dockerCompose pull
-    docker pull "${DOCKER_IMAGE_CLOUDBREAK_SHELL}:${DOCKER_TAG_CLOUDBREAK_SHELL}"
 }
 
 compose-pull-parallel() {
@@ -50,7 +49,7 @@ compose-pull-parallel() {
     cloudbreak-conf-tags
 
     [ -f docker-compose.yml ] || deployer-generate
-    (sed -n "s/.*image://p" docker-compose.yml ; echo "${DOCKER_IMAGE_CLOUDBREAK_SHELL}:${DOCKER_TAG_CLOUDBREAK_SHELL}") |sort -u|xargs -n1 -P 20 docker pull
+    sed -n "s/.*image://p" docker-compose.yml|sort -u|xargs -n1 -P 20 docker pull
 }
 
 compose-up() {
