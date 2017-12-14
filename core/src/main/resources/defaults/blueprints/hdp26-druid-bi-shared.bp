@@ -145,7 +145,7 @@
         }
       },
       {
-        "superset": {
+        "druid-superset": {
           "properties_attributes": {},
           "properties": {
             "SECRET_KEY" : "123admin123",
@@ -208,7 +208,7 @@
             "name": "DRUID_BROKER"
           },
           {
-            "name": "SUPERSET"
+            "name": "DRUID_SUPERSET"
           },
           {
             "name": "HDFS_CLIENT"
