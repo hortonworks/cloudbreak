@@ -302,12 +302,12 @@ func main() {
 					},
 				},
 				{
-					Name:      "create",
-					Usage:     "creates a new cluster",
-					Flags:     cb.NewFlagBuilder().AddResourceFlagsWithOptionalName().AddFlags(cb.FlInputJson, cb.FlAmbariPasswordOptional, cb.FlWaitOptional).AddAuthenticationFlags().Build(),
-					Before:    ConfigRead,
-					Action:    cb.CreateStack,
-					ArgsUsage: cb.StackTemplateHelp,
+					Name:        "create",
+					Usage:       "creates a new cluster",
+					Description: `use 'cb cluster generate-template' for cluster request JSON generation`,
+					Flags:       cb.NewFlagBuilder().AddResourceFlagsWithOptionalName().AddFlags(cb.FlInputJson, cb.FlAmbariPasswordOptional, cb.FlWaitOptional).AddAuthenticationFlags().Build(),
+					Before:      ConfigRead,
+					Action:      cb.CreateStack,
 					BashComplete: func(c *cli.Context) {
 						for _, f := range cb.NewFlagBuilder().AddResourceFlagsWithOptionalName().AddFlags(cb.FlInputJson, cb.FlAmbariPasswordOptional, cb.FlWaitOptional).AddAuthenticationFlags().Build() {
 							printFlagCompletion(f)
@@ -339,8 +339,9 @@ func main() {
 					},
 				},
 				{
-					Name:  "generate-template",
-					Usage: "creates a cluster JSON template",
+					Name:        "generate-template",
+					Usage:       "creates a cluster JSON template",
+					Description: cb.StackTemplateDescription,
 					Subcommands: []cli.Command{
 						{
 							Name:   "yarn",

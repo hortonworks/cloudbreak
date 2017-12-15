@@ -11,61 +11,21 @@ import (
 	"github.com/urfave/cli"
 )
 
-var StackTemplateHelp = `
-{
-	"availabilityZone": "____",							// Availability zone of the cluster on AZURE it is the same as the region
-	"clusterRequest": {
-		"ambariRequest": {
-			"blueprintName": "____",					// Name of the selected blueprint
-			"password": "",								// Password of the Ambari user
-			"userName": "____"							// Name of the Ambari user
-		}
-	},
-	"credentialName": "____",							// Name of the selected credential
-	"instanceGroups": [
-		{
-			"group": "master",							// Name of the instance group
-			"nodeCount": 1,								// Number of nodes in the group
-			"securityGroup": {
-				"securityRules": [
-					{
-						"ports": "22",
-						"protocol": "tcp",
-						"subnet": "0.0.0.0/0"
-					},
-					{
-						"ports": "443",
-						"protocol": "tcp",
-						"subnet": "0.0.0.0/0"
-					},
-					{
-						"ports": "9443",
-						"protocol": "tcp",
-						"subnet": "0.0.0.0/0"
-					}
-				]
-			},
-			"template": {
-				"instanceType": "____",					// Name of the selected template
-				"parameters": {
-					"encrypted": false,
-					"sshLocation": "0.0.0.0/0"
-				},
-				"volumeCount": 1,						// Number of volumes
-				"volumeSize": 10						// Size of Volumes in Gb
-			},
-			"type": "GATEWAY"							// Type of the group [GATEWAY, CORE]
-		}
-	],
-	"name": "____",										// Name of the cluster
-	"orchestrator": {
-		"type": "SALT"									// Type of the orhestrator [SALT, CONTAINER]
-	},
-	"region": "____",									// Region of the cluster
-	"stackAuthentication": {
-		"publicKey": "____"								// Public key
-	}
-}`
+var StackTemplateDescription = `Template parameters to fill in the generated template:
+		userName:	Name of the Ambari user
+		password:	Password of the Ambari user
+		name:	Name of the cluster
+		region:	Region of the cluster
+		availabilityZone:	Availability zone of the cluster, on AZURE it is the same as the region
+		blueprintName:	Name of the selected blueprint
+		credentialName:	Name of the selected credential
+		instanceGroups.group:	Name of the instance group
+		instanceGroups.nodeCount:	Number of nodes in the group
+		instanceGroups.template.instanceType:	Name of the selected template
+		instanceGroups.template.volumeCount:	Number of volumes
+		instanceGroups.template.volumeSize:	Size of Volumes in Gb
+		stackAuthentication.publicKey:	Public key
+`
 
 var AppHelpTemplate = `NAME:
    Cloudbreak command line tool
@@ -114,7 +74,10 @@ var SubCommandHelpTemplate = `NAME:
    Cloudbreak command line tool
 
 USAGE:
-   {{.HelpName}} command{{if .VisibleFlags}} [command options]{{end}} {{if .ArgsUsage}}{{.ArgsUsage}}{{else}}[arguments...]{{end}}
+   {{.HelpName}} command{{if .VisibleFlags}} [command options]{{end}} {{if .ArgsUsage}}{{.ArgsUsage}}{{else}}[arguments...]{{end}} {{if .Description}}
+
+DESCRIPTION:
+   {{.Description}}{{end}}
 
 COMMANDS:{{range .VisibleCategories}}{{if .Name}}
    {{.Name}}:{{end}}{{range .VisibleCommands}}
