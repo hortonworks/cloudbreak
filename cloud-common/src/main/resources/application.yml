@@ -119,8 +119,8 @@ cb:
 
   ambari:
     repo:
-      version: 2.6.0.0
-      baseurl: http://public-repo-1.hortonworks.com/ambari/centos6/2.x/updates/2.6.0.0
+      version: 2.5.1.0
+      baseurl: http://public-repo-1.hortonworks.com/ambari/centos6/2.x/updates/2.5.1.0
       gpgkey: http://public-repo-1.hortonworks.com/ambari/centos6/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins
     database:
       vendor: embedded
