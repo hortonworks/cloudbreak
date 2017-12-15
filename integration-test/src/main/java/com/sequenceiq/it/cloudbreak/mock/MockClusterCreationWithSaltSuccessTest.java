@@ -48,6 +48,7 @@ import com.sequenceiq.it.spark.ambari.AmbariClustersHostsResponse;
 import com.sequenceiq.it.spark.ambari.AmbariHostsResponse;
 import com.sequenceiq.it.spark.ambari.AmbariServicesComponentsResponse;
 import com.sequenceiq.it.spark.ambari.AmbariStatusResponse;
+import com.sequenceiq.it.spark.ambari.AmbariVersionDefinitionResponse;
 import com.sequenceiq.it.spark.ambari.EmptyAmbariClusterResponse;
 import com.sequenceiq.it.spark.ambari.EmptyAmbariResponse;
 import com.sequenceiq.it.spark.salt.SaltApiRunPostResponse;
@@ -188,7 +189,8 @@ public class MockClusterCreationWithSaltSuccessTest extends AbstractMockIntegrat
         get(AMBARI_API_ROOT + "/check", new AmbariCheckResponse());
         post(AMBARI_API_ROOT + "/users", new EmptyAmbariResponse());
         get(AMBARI_API_ROOT + "/clusters/:cluster/hosts", new AmbariClustersHostsResponse(instanceMap, "SUCCESSFUL"));
-        put(AMBARI_API_ROOT + "/stacks/HDP/versions/:version/operating_systems/:os/repositories/:hdpversion", new EmptyAmbariResponse());
+        put(AMBARI_API_ROOT + "/stacks/HDP/versions/:version/operating_systems/:os/repositories/:hdpversion", new AmbariVersionDefinitionResponse());
+        get(AMBARI_API_ROOT + "/version_definitions", new AmbariVersionDefinitionResponse());
         post(AMBARI_API_ROOT + "/version_definitions", new EmptyAmbariResponse());
     }
 
