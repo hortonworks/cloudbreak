@@ -66,7 +66,7 @@
         }
       },
       {
-        "druid-superset": {
+        "superset": {
           "properties_attributes": {},
           "properties": {
             "SECRET_KEY": "123admin123",
@@ -184,24 +184,19 @@
             "name": "ZOOKEEPER_SERVER"
           },
           {
-            "name": "DRUID_OVERLORD",
-            "provision_action": "INSTALL_ONLY"
+            "name": "DRUID_OVERLORD"
           },
           {
-            "name": "DRUID_COORDINATOR",
-            "provision_action": "INSTALL_ONLY"
+            "name": "DRUID_COORDINATOR"
           },
           {
-            "name": "DRUID_ROUTER",
-            "provision_action": "INSTALL_ONLY"
+            "name": "DRUID_ROUTER"
           },
           {
-            "name": "DRUID_BROKER",
-            "provision_action": "INSTALL_ONLY"
+            "name": "DRUID_BROKER"
           },
           {
-            "name": "DRUID_SUPERSET",
-            "provision_action": "INSTALL_ONLY"
+            "name": "SUPERSET"
           }
         ],
         "cardinality": "1"
@@ -229,12 +224,10 @@
             "name": "NODEMANAGER"
           },
           {
-            "name": "DRUID_MIDDLEMANAGER",
-            "provision_action": "INSTALL_ONLY"
+            "name": "DRUID_MIDDLEMANAGER"
           },
           {
-            "name": "DRUID_HISTORICAL",
-            "provision_action": "INSTALL_ONLY"
+            "name": "DRUID_HISTORICAL"
           }
         ],
         "cardinality": "1+"
