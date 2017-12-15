@@ -17,10 +17,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.sequenceiq.ambari.client.services.StackService;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
+import com.sequenceiq.cloudbreak.controller.json.JsonHelper;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
@@ -50,6 +53,9 @@ public class AmbariRepositoryVersionService {
 
     @Inject
     private ComponentConfigProvider componentConfigProvider;
+
+    @Inject
+    private JsonHelper jsonHelper;
 
     public String getRepositoryVersion(long clusterId, Orchestrator orchestrator) throws CloudbreakException {
         StackRepoDetails stackRepoDetails = getStackRepoDetails(clusterId, orchestrator);
@@ -146,8 +152,17 @@ public class AmbariRepositoryVersionService {
 
         if (vdfUrl.isPresent()) {
             LOGGER.info("VDF request has been sent to Ambari with VDF url: '{}'.", vdfUrl.get());
-            String vdf = ambariClient.createVersionDefinition(vdfUrl.get());
-            LOGGER.info("VDF request has been sent to Ambari: '{}'.", JsonUtil.minify(vdf));
+            String repoId = stackRepoDetails.getStack().get(StackRepoDetails.REPO_ID_TAG);
+            String repoVersion = stackRepoDetails.getStack().get(StackRepoDetails.REPOSITORY_VERSION);
+            String versionDefJson = ambariClient.getVersionDefinition(repoId, repoVersion);
+            JsonNode versionDefNode = jsonHelper.createJsonFromString(versionDefJson);
+            ArrayNode versionDefItems = (ArrayNode) versionDefNode.path("items");
+            if (versionDefItems.size() == 0) {
+                String vdf = ambariClient.createVersionDefinition(vdfUrl.get());
+                LOGGER.info("VDF request has been sent to Ambari: '{}'.", JsonUtil.minify(vdf));
+            } else {
+                LOGGER.info("VDF url is already set for: {} {}.", repoId, repoVersion);
+            }
         } else {
             LOGGER.error("Couldn't determine any VDF file, let Ambari to start with defaults");
         }
