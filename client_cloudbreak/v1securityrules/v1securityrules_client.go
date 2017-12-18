@@ -25,32 +25,32 @@ type Client struct {
 }
 
 /*
-GetPublicIps gets default public ips
+GetDefaultSecurityRules gets default security rules
 
 Security Rules operations
 */
-func (a *Client) GetPublicIps(params *GetPublicIpsParams) (*GetPublicIpsOK, error) {
+func (a *Client) GetDefaultSecurityRules(params *GetDefaultSecurityRulesParams) (*GetDefaultSecurityRulesOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewGetPublicIpsParams()
+		params = NewGetDefaultSecurityRulesParams()
 	}
 
 	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "getPublicIps",
+		ID:                 "getDefaultSecurityRules",
 		Method:             "GET",
-		PathPattern:        "/v1/securityrules/defaultpublicips",
+		PathPattern:        "/v1/securityrules/defaultsecurityrules",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &GetPublicIpsReader{formats: a.formats},
+		Reader:             &GetDefaultSecurityRulesReader{formats: a.formats},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*GetPublicIpsOK), nil
+	return result.(*GetDefaultSecurityRulesOK), nil
 
 }
 
