@@ -77,7 +77,7 @@ func (r *instanceOut) GetName() string {
 }
 
 func ListRegions(c *cli.Context) {
-	checkRequiredFlags(c)
+	checkRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "list regions")
 
 	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServerOptional.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
@@ -86,7 +86,7 @@ func ListRegions(c *cli.Context) {
 }
 
 func ListAvailabilityZones(c *cli.Context) {
-	checkRequiredFlags(c)
+	checkRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "list availability zones")
 
 	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServerOptional.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
@@ -110,7 +110,7 @@ func ListGcpVolumeTypes(c *cli.Context) {
 }
 
 func listVolumeTypes(c *cli.Context) {
-	checkRequiredFlags(c)
+	checkRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "list volume types")
 
 	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServerOptional.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
@@ -119,7 +119,7 @@ func listVolumeTypes(c *cli.Context) {
 }
 
 func ListInstanceTypes(c *cli.Context) {
-	checkRequiredFlags(c)
+	checkRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "list instance types")
 
 	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServerOptional.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))

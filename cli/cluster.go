@@ -12,7 +12,7 @@ import (
 )
 
 func ChangeAmbariPassword(c *cli.Context) {
-	checkRequiredFlags(c)
+	checkRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "update ambari password")
 
 	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServerOptional.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))

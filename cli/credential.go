@@ -33,7 +33,7 @@ func CreateOpenstackCredential(c *cli.Context) {
 }
 
 func createCredential(c *cli.Context) {
-	checkRequiredFlags(c)
+	checkRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "create credential")
 
 	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServerOptional.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
@@ -82,7 +82,7 @@ func createCredentialImpl(stringFinder func(string) string, boolFinder func(stri
 }
 
 func DescribeCredential(c *cli.Context) {
-	checkRequiredFlags(c)
+	checkRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "describe credential")
 
 	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServerOptional.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
@@ -97,7 +97,7 @@ func DescribeCredential(c *cli.Context) {
 }
 
 func DeleteCredential(c *cli.Context) {
-	checkRequiredFlags(c)
+	checkRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "delete credential")
 
 	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServerOptional.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
@@ -110,7 +110,7 @@ func DeleteCredential(c *cli.Context) {
 }
 
 func ListCredentials(c *cli.Context) {
-	checkRequiredFlags(c)
+	checkRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "list credentials")
 
 	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServerOptional.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))

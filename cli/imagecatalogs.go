@@ -38,7 +38,7 @@ func (r *imageOut) DataAsStringArray() []string {
 }
 
 func CreateImagecatalogFromUrl(c *cli.Context) {
-	checkRequiredFlags(c)
+	checkRequiredFlagsAndArguments(c)
 
 	log.Infof("[CreateImagecatalogFromUrl] creating imagecatalog from a URL")
 	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServerOptional.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
@@ -80,7 +80,7 @@ func createImagecatalogImpl(client imagecatalogClient, name string, public bool,
 }
 
 func ListImagecatalogs(c *cli.Context) {
-	checkRequiredFlags(c)
+	checkRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "list imagecatalogs")
 
 	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServerOptional.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
@@ -108,7 +108,7 @@ func listImagecatalogsImpl(client getPublicsImagecatalogsClient, writer func([]s
 }
 
 func DeleteImagecatalog(c *cli.Context) {
-	checkRequiredFlags(c)
+	checkRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "delete imagecatalog")
 
 	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServerOptional.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
@@ -121,7 +121,7 @@ func DeleteImagecatalog(c *cli.Context) {
 }
 
 func SetDefaultImagecatalog(c *cli.Context) {
-	checkRequiredFlags(c)
+	checkRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "set default imagecatalog")
 
 	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServerOptional.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
@@ -154,7 +154,7 @@ func ListOpenstackImages(c *cli.Context) {
 }
 
 func listImages(c *cli.Context) {
-	checkRequiredFlags(c)
+	checkRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "list available images")
 
 	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServerOptional.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))

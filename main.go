@@ -114,6 +114,9 @@ func main() {
 	cli.HelpPrinter = cb.PrintHelp
 	cli.CommandHelpTemplate = cb.CommandHelpTemplate
 	cli.SubcommandHelpTemplate = cb.SubCommandHelpTemplate
+	app.CommandNotFound = func(c *cli.Context, command string) {
+		fmt.Fprintf(c.App.Writer, "Command not found: %q\n", command)
+	}
 
 	app.Commands = []cli.Command{
 		{

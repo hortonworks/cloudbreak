@@ -46,7 +46,7 @@ func (c ConfigList) Yaml() string {
 }
 
 func Configure(c *cli.Context) {
-	checkRequiredFlags(c)
+	checkRequiredFlagsAndArguments(c)
 
 	err := writeConfigToFile(GetHomeDirectory(), c.String(FlServerOptional.Name), c.String(FlUsername.Name), c.String(FlPassword.Name), c.String(FlOutputOptional.Name), c.String(FlProfileOptional.Name))
 	if err != nil {

@@ -27,7 +27,7 @@ func (r *recipeOut) DataAsStringArray() []string {
 }
 
 func CreateRecipeFromUrl(c *cli.Context) {
-	checkRequiredFlags(c)
+	checkRequiredFlagsAndArguments(c)
 
 	log.Infof("[CreateRecipeFromUrl] creating recipe from a URL")
 	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServerOptional.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
@@ -42,7 +42,7 @@ func CreateRecipeFromUrl(c *cli.Context) {
 }
 
 func CreateRecipeFromFile(c *cli.Context) {
-	checkRequiredFlags(c)
+	checkRequiredFlagsAndArguments(c)
 
 	log.Infof("[CreateRecipeFromFile] creating recipe from a file")
 	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServerOptional.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
@@ -106,7 +106,7 @@ func createRecipeImpl(client recipeClient, name string, description string, publ
 }
 
 func DescribeRecipe(c *cli.Context) {
-	checkRequiredFlags(c)
+	checkRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "describe recipe")
 
 	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServerOptional.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
@@ -120,7 +120,7 @@ func DescribeRecipe(c *cli.Context) {
 }
 
 func DeleteRecipe(c *cli.Context) {
-	checkRequiredFlags(c)
+	checkRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "delete recipe")
 
 	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServerOptional.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
@@ -133,7 +133,7 @@ func DeleteRecipe(c *cli.Context) {
 }
 
 func ListRecipes(c *cli.Context) {
-	checkRequiredFlags(c)
+	checkRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "list recipes")
 
 	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServerOptional.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))

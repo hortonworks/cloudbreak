@@ -45,7 +45,7 @@ type ldapClient interface {
 }
 
 func CreateLDAP(c *cli.Context) error {
-	checkRequiredFlags(c)
+	checkRequiredFlagsAndArguments(c)
 
 	name := c.String(FlName.Name)
 	domain := c.String(FlLdapDomain.Name)
@@ -125,7 +125,7 @@ func createLDAPImpl(ldapClient ldapClient, port int32, name, server, protocol, d
 }
 
 func ListLdaps(c *cli.Context) error {
-	checkRequiredFlags(c)
+	checkRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "list ldap configs")
 
 	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServerOptional.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
@@ -166,7 +166,7 @@ func listLdapsImpl(ldapClient ldapClient, writer func([]string, []utils.Row)) er
 }
 
 func DeleteLdap(c *cli.Context) error {
-	checkRequiredFlags(c)
+	checkRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "delete an ldap")
 
 	ldapName := c.String(FlName.Name)

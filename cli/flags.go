@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"fmt"
 	"reflect"
 
 	"github.com/hortonworks/cb-cli/cli/utils"
@@ -513,6 +514,11 @@ func optionalFlags(flags []cli.Flag) []cli.Flag {
 	return required
 }
 
+func checkRequiredFlagsAndArguments(c *cli.Context) {
+	checkRequiredFlags(c)
+	argumentsNotAllowed(c)
+}
+
 func checkRequiredFlags(c *cli.Context) {
 	missingFlags := make([]string, 0)
 	for _, f := range c.Command.Flags {
@@ -522,6 +528,13 @@ func checkRequiredFlags(c *cli.Context) {
 	}
 	if len(missingFlags) > 0 {
 		utils.LogMissingParameterAndExit(c, missingFlags)
+	}
+}
+
+func argumentsNotAllowed(c *cli.Context) {
+	args := c.Args()
+	if len(args) > 0 {
+		utils.LogErrorAndExit(fmt.Errorf("Argument %q is not allowed for this command", args.Get(0)))
 	}
 }
 

@@ -198,7 +198,7 @@ func convertNodeToInstanceGroup(provider cloud.CloudProvider, node cloud.Node) *
 }
 
 func GenerateReinstallTemplate(c *cli.Context) {
-	checkRequiredFlags(c)
+	checkRequiredFlagsAndArguments(c)
 
 	template := &models_cloudbreak.ReinstallRequestV2{
 		BlueprintName:  &(&types.S{S: c.String(FlBlueprintName.Name)}).S,

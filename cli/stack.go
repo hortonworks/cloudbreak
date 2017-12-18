@@ -41,7 +41,7 @@ func (s *stackDetailsOut) DataAsStringArray() []string {
 }
 
 func CreateStack(c *cli.Context) {
-	checkRequiredFlags(c)
+	checkRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "create cluster")
 
 	req := assembleStackRequest(c)
@@ -98,7 +98,7 @@ func convertResponseToStack(s *models_cloudbreak.StackResponse) *stackOut {
 }
 
 func DescribeStack(c *cli.Context) {
-	checkRequiredFlags(c)
+	checkRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "describe stack")
 
 	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServerOptional.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
@@ -124,7 +124,7 @@ func fetchStack(name string, client getPublicStack) *models_cloudbreak.StackResp
 }
 
 func ScaleStack(c *cli.Context) {
-	checkRequiredFlags(c)
+	checkRequiredFlagsAndArguments(c)
 	desiredCount, err := strconv.Atoi(c.String(FlDesiredNodeCount.Name))
 	if err != nil {
 		utils.LogErrorMessageAndExit("Unable to parse as number: " + c.String(FlDesiredNodeCount.Name))
@@ -150,7 +150,7 @@ func ScaleStack(c *cli.Context) {
 }
 
 func StartStack(c *cli.Context) {
-	checkRequiredFlags(c)
+	checkRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "start stack")
 
 	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServerOptional.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
@@ -168,7 +168,7 @@ func StartStack(c *cli.Context) {
 }
 
 func StopStack(c *cli.Context) {
-	checkRequiredFlags(c)
+	checkRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "stop stack")
 
 	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServerOptional.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
@@ -186,7 +186,7 @@ func StopStack(c *cli.Context) {
 }
 
 func SyncStack(c *cli.Context) {
-	checkRequiredFlags(c)
+	checkRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "sync stack")
 
 	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServerOptional.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
@@ -200,7 +200,7 @@ func SyncStack(c *cli.Context) {
 }
 
 func RepairStack(c *cli.Context) {
-	checkRequiredFlags(c)
+	checkRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "repair stack")
 
 	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServerOptional.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
@@ -218,7 +218,7 @@ func RepairStack(c *cli.Context) {
 }
 
 func ReinstallStack(c *cli.Context) {
-	checkRequiredFlags(c)
+	checkRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "reinstall stack")
 
 	req := assembleReinstallRequest(c)
@@ -267,7 +267,7 @@ func assembleReinstallRequest(c *cli.Context) *models_cloudbreak.ReinstallReques
 }
 
 func DeleteStack(c *cli.Context) {
-	checkRequiredFlags(c)
+	checkRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "delete stack")
 
 	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServerOptional.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
@@ -282,7 +282,7 @@ func DeleteStack(c *cli.Context) {
 }
 
 func ListStacks(c *cli.Context) {
-	checkRequiredFlags(c)
+	checkRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "list stacks")
 
 	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServerOptional.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))

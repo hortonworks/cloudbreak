@@ -30,7 +30,7 @@ var StackTemplateDescription = `Template parameters to fill in the generated tem
 var AppHelpTemplate = `NAME:
    Cloudbreak command line tool
 USAGE:
-   {{if .UsageText}}{{.UsageText}}{{else}}{{.Name}} {{if .VisibleFlags}}[global options]{{end}}{{if .Commands}} command [command options]{{end}} {{if .ArgsUsage}}{{.ArgsUsage}}{{else}}[arguments...]{{end}}{{end}}
+   {{if .UsageText}}{{.UsageText}}{{else}}{{.Name}} {{if .VisibleFlags}}[global options]{{end}}{{if .Commands}} command [command options]{{end}} {{if .ArgsUsage}}{{.ArgsUsage}}{{end}}{{end}}
    {{if .Version}}{{if not .HideVersion}}
 VERSION:
    {{.Version}}
@@ -54,7 +54,7 @@ var CommandHelpTemplate = `NAME:
    Cloudbreak command line tool
 
 USAGE:
-   {{.HelpName}}{{if .VisibleFlags}} [command options]{{end}} {{if .ArgsUsage}}{{.ArgsUsage}}{{else}}[arguments...]{{end}}{{if .Category}}
+   {{.HelpName}}{{if .VisibleFlags}} [command options]{{end}} {{if .ArgsUsage}}{{.ArgsUsage}}{{end}}{{if .Category}}
 
 CATEGORY:
    {{.Category}}{{end}}{{if .Description}}
@@ -74,7 +74,7 @@ var SubCommandHelpTemplate = `NAME:
    Cloudbreak command line tool
 
 USAGE:
-   {{.HelpName}} command{{if .VisibleFlags}} [command options]{{end}} {{if .ArgsUsage}}{{.ArgsUsage}}{{else}}[arguments...]{{end}} {{if .Description}}
+   {{.HelpName}} command{{if .VisibleFlags}} [command options]{{end}} {{if .ArgsUsage}}{{.ArgsUsage}}{{end}} {{if .Description}}
 
 DESCRIPTION:
    {{.Description}}{{end}}
@@ -95,7 +95,7 @@ var HiddenAppHelpTemplate = `NAME:
    Cloudbreak command line tool
 
 USAGE:
-   {{if .UsageText}}{{.UsageText}}{{else}}{{.HelpName}} {{if .VisibleFlags}}[global options]{{end}}{{if .Commands}} command [command options]{{end}} {{if .ArgsUsage}}{{.ArgsUsage}}{{else}}[arguments...]{{end}}{{end}}
+   {{if .UsageText}}{{.UsageText}}{{else}}{{.HelpName}} {{if .VisibleFlags}}[global options]{{end}}{{if .Commands}} command [command options]{{end}} {{if .ArgsUsage}}{{.ArgsUsage}}{{end}}{{end}}
    {{if .Version}}{{if not .HideVersion}}
 VERSION:
    {{.Version}}
