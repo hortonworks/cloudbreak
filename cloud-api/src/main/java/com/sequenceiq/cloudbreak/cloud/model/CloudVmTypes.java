@@ -33,4 +33,12 @@ public class CloudVmTypes {
     public void setDefaultCloudVmResponses(Map<String, VmType> defaultCloudVmResponses) {
         this.defaultCloudVmResponses = defaultCloudVmResponses;
     }
+
+    @Override
+    public String toString() {
+        return "CloudVmTypes{"
+                + "cloudVmResponses=" + cloudVmResponses
+                + ", defaultCloudVmResponses=" + defaultCloudVmResponses
+                + '}';
+    }
 }

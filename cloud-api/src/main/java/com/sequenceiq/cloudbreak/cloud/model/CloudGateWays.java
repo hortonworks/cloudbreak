@@ -18,4 +18,11 @@ public class CloudGateWays {
     public Map<String, Set<CloudGateWay>> getCloudGateWayResponses() {
         return cloudGateWayResponses;
     }
+
+    @Override
+    public String toString() {
+        return "CloudGateWays{"
+                + "cloudGateWayResponses=" + cloudGateWayResponses
+                + '}';
+    }
 }

@@ -44,4 +44,13 @@ public class CloudRegions {
     public void setDefaultRegion(String defaultRegion) {
         this.defaultRegion = defaultRegion;
     }
+
+    @Override
+    public String toString() {
+        return "CloudRegions{"
+                + "cloudRegions=" + cloudRegions
+                + ", displayNames=" + displayNames
+                + ", defaultRegion='" + defaultRegion + '\''
+                + '}';
+    }
 }

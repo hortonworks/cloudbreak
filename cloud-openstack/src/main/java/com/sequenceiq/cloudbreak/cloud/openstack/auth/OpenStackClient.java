@@ -15,6 +15,8 @@ import org.openstack4j.model.identity.v3.Endpoint;
 import org.openstack4j.model.identity.v3.Service;
 import org.openstack4j.model.identity.v3.Token;
 import org.openstack4j.openstack.OSFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -26,6 +28,8 @@ import com.sequenceiq.cloudbreak.cloud.openstack.view.KeystoneCredentialView;
 
 @Component
 public class OpenStackClient {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(OpenStackClient.class);
 
     @Value("${cb.openstack.api.debug:}")
     private boolean debug;
@@ -165,6 +169,7 @@ public class OpenStackClient {
                 }
             }
         }
+        LOGGER.info("regions from openstack: {}", regions);
         return regions;
     }
 

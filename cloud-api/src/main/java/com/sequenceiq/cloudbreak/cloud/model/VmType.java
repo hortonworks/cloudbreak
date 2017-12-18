@@ -49,4 +49,12 @@ public class VmType extends StringType {
     public boolean isMetaSet() {
         return metaData != null;
     }
+
+    @Override
+    public String toString() {
+        return "VmType{"
+                + "metaData=" + metaData
+                + ", extended=" + extended
+                + '}';
+    }
 }

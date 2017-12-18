@@ -18,4 +18,11 @@ public class CloudIpPools {
     public Map<String, Set<CloudIpPool>> getCloudIpPools() {
         return cloudIpPools;
     }
+
+    @Override
+    public String toString() {
+        return "CloudIpPools{"
+                + "cloudIpPools=" + cloudIpPools
+                + '}';
+    }
 }

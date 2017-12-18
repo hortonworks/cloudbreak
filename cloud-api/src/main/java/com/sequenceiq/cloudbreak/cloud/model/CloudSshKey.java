@@ -34,4 +34,12 @@ public class CloudSshKey {
         this.properties = properties;
     }
 
+    @Override
+    public String toString() {
+        return "CloudSshKey{"
+                + "name='" + name + '\''
+                + ", properties="
+                + properties
+                + '}';
+    }
 }
