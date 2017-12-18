@@ -59,8 +59,10 @@ public class AmbariRepositoryVersionService {
 
     public String getRepositoryVersion(long clusterId, Orchestrator orchestrator) throws CloudbreakException {
         StackRepoDetails stackRepoDetails = getStackRepoDetails(clusterId, orchestrator);
+        AmbariRepo ambariRepoDetails = clusterComponentConfigProvider.getAmbariRepo(clusterId);
+        long ambariVersion = extractAmbariVersion(ambariRepoDetails);
         String result = "";
-        if (stackRepoDetails != null) {
+        if (stackRepoDetails != null && ambariVersion >= AMBARI_VERSION_OF_NEW_API) {
             Optional<String> repositoryVersion = Optional.ofNullable(stackRepoDetails.getStack().get(StackRepoDetails.REPOSITORY_VERSION));
             result = repositoryVersion.orElse("");
         }
