@@ -9,6 +9,7 @@ import javax.annotation.PostConstruct;
 
 import org.openstack4j.api.OSClient;
 import org.openstack4j.api.types.Facing;
+import org.openstack4j.core.transport.Config;
 import org.openstack4j.model.common.Identifier;
 import org.openstack4j.model.identity.v2.Access;
 import org.openstack4j.model.identity.v3.Endpoint;
@@ -34,9 +35,17 @@ public class OpenStackClient {
     @Value("${cb.openstack.api.debug:}")
     private boolean debug;
 
+    @Value("${cb.openstack.disable.ssl.verification:false}")
+    private boolean disableSSLVerification;
+
+    private Config config = Config.newConfig();
+
     @PostConstruct
     public void init() {
         OSFactory.enableHttpLoggingFilter(debug);
+        if (disableSSLVerification) {
+            config.withSSLVerificationDisabled();
+        }
     }
 
     public AuthenticatedContext createAuthenticatedContext(CloudContext cloudContext, CloudCredential cloudCredential) {
@@ -98,7 +107,7 @@ public class OpenStackClient {
         KeystoneCredentialView osCredential = createKeystoneCredential(cloudCredential);
 
         if (KeystoneCredentialView.CB_KEYSTONE_V2.equals(osCredential.getVersion())) {
-            Access access = OSFactory.builderV2().endpoint(osCredential.getEndpoint())
+            Access access = OSFactory.builderV2().withConfig(config).endpoint(osCredential.getEndpoint())
                     .credentials(osCredential.getUserName(), osCredential.getPassword())
                     .tenantName(osCredential.getTenantName())
                     .authenticate()
@@ -112,20 +121,20 @@ public class OpenStackClient {
         KeystoneCredentialView osCredential = createKeystoneCredential(cloudCredential);
 
         if (KeystoneCredentialView.CB_KEYSTONE_V3_DEFAULT_SCOPE.equals(osCredential.getScope())) {
-            Token token = OSFactory.builderV3().endpoint(osCredential.getEndpoint())
+            Token token = OSFactory.builderV3().withConfig(config).endpoint(osCredential.getEndpoint())
                     .credentials(osCredential.getUserName(), osCredential.getPassword(), Identifier.byName(osCredential.getUserDomain()))
                     .authenticate()
                     .getToken();
             return token;
         } else if (KeystoneCredentialView.CB_KEYSTONE_V3_DOMAIN_SCOPE.equals(osCredential.getScope())) {
-            Token token = OSFactory.builderV3().endpoint(osCredential.getEndpoint())
+            Token token = OSFactory.builderV3().withConfig(config).endpoint(osCredential.getEndpoint())
                     .credentials(osCredential.getUserName(), osCredential.getPassword(), Identifier.byName(osCredential.getUserDomain()))
                     .scopeToDomain(Identifier.byName(osCredential.getDomainName()))
                     .authenticate()
                     .getToken();
             return token;
         } else if (KeystoneCredentialView.CB_KEYSTONE_V3_PROJECT_SCOPE.equals(osCredential.getScope())) {
-            Token token = OSFactory.builderV3().endpoint(osCredential.getEndpoint())
+            Token token = OSFactory.builderV3().withConfig(config).endpoint(osCredential.getEndpoint())
                     .credentials(osCredential.getUserName(), osCredential.getPassword(), Identifier.byName(osCredential.getUserDomain()))
                     .scopeToProject(Identifier.byName(osCredential.getProjectName()), Identifier.byName(osCredential.getProjectDomain()))
                     .authenticate()
