@@ -73,6 +73,18 @@ public class VmTypeMeta {
         this.properties = properties;
     }
 
+    @Override
+    public String toString() {
+        return "VmTypeMeta{"
+                + "magneticConfig=" + magneticConfig
+                + ", autoAttachedConfig=" + autoAttachedConfig
+                + ", ssdConfig=" + ssdConfig
+                + ", ephemeralConfig=" + ephemeralConfig
+                + ", st1Config=" + st1Config
+                + ", properties=" + properties
+                + '}';
+    }
+
     public static class VmTypeMetaBuilder {
 
         private VolumeParameterConfig magneticConfig;

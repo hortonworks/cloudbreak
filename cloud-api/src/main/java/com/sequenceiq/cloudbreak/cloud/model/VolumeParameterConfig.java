@@ -49,4 +49,15 @@ public class VolumeParameterConfig {
     public Integer maximumNumber() {
         return maximumNumber;
     }
+
+    @Override
+    public String toString() {
+        return "VolumeParameterConfig{"
+                + "volumeParameterType=" + volumeParameterType
+                + ", minimumSize=" + minimumSize
+                + ", maximumSize=" + maximumSize
+                + ", minimumNumber=" + minimumNumber
+                + ", maximumNumber=" + maximumNumber
+                + '}';
+    }
 }

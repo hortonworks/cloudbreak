@@ -51,4 +51,14 @@ public class CloudNetwork {
     public void setProperties(Map<String, Object> properties) {
         this.properties = properties;
     }
+
+    @Override
+    public String toString() {
+        return "CloudNetwork{"
+                + "name='" + name + '\''
+                + ", id='" + id + '\''
+                + ", subnets=" + subnets
+                + ", properties=" + properties
+                + '}';
+    }
 }
