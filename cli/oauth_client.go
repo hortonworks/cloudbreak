@@ -20,9 +20,15 @@ import (
 	"github.com/go-openapi/strfmt"
 	"github.com/hortonworks/cb-cli/cli/utils"
 	apiclient "github.com/hortonworks/cb-cli/client_cloudbreak"
+	"github.com/urfave/cli"
 )
 
-var PREFIX_TRIM []string = []string{"http://", "https://"}
+const (
+	OAUTH2 = "oauth2"
+	BASIC  = "basic"
+)
+
+var PREFIX_TRIM = []string{"http://", "https://"}
 
 type Cloudbreak struct {
 	Cloudbreak *apiclient.Cloudbreak
@@ -42,18 +48,38 @@ var TransportConfig = &http.Transport{
 
 var LoggedTransportConfig = httplogger.NewLoggedTransport(TransportConfig, newLogger())
 
-func NewCloudbreakOAuth2HTTPClient(address string, username string, password string) *Cloudbreak {
+func NewCloudbreakHTTPClientFromContext(c *cli.Context) *Cloudbreak {
+	return NewCloudbreakHTTPClient(c.String(FlServerOptional.Name), c.String(FlUsername.Name), c.String(FlPassword.Name), c.String(FlAuthTypeOptional.Name))
+}
+
+func NewCloudbreakHTTPClient(address, username, password, authType string) *Cloudbreak {
 	for _, v := range PREFIX_TRIM {
 		address = strings.TrimPrefix(address, v)
 	}
-
-	token, err := getOAuth2Token("https://"+address+"/identity/oauth/authorize", username, password, "cloudbreak_shell")
-	if err != nil {
-		utils.LogErrorAndExit(err)
+	basePath := "/cb/api"
+	slashIndex := strings.Index(address, "/")
+	if slashIndex != -1 {
+		basePath = address[slashIndex:] + "/cb/api"
+		address = address[0:slashIndex]
 	}
 
-	cbTransport := &transport{client.New(address, "/cb/api", []string{"https"})}
-	cbTransport.Runtime.DefaultAuthentication = client.BearerToken(token)
+	cbTransport := &transport{client.New(address, basePath, []string{"https"})}
+
+	switch authType {
+	case OAUTH2:
+		token, err := getOAuth2Token("https://"+address+"/identity/oauth/authorize", username, password, "cloudbreak_shell")
+		if err != nil {
+			utils.LogErrorAndExit(err)
+		}
+		cbTransport.Runtime.DefaultAuthentication = client.BearerToken(token)
+		break
+	case BASIC:
+		cbTransport.Runtime.DefaultAuthentication = client.BasicAuth(username, password)
+		break
+	default:
+		utils.LogErrorAndExit(errors.New(fmt.Sprintf("invalid authentication type, accepted values: [%s, %s]", OAUTH2, BASIC)))
+	}
+
 	cbTransport.Runtime.Transport = LoggedTransportConfig
 	return &Cloudbreak{Cloudbreak: apiclient.New(cbTransport, strfmt.Default)}
 }
@@ -67,14 +93,14 @@ func getOAuth2Token(identityUrl string, username string, password string, client
 	req.Header.Add("Accept", "application/x-www-form-urlencoded")
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 
-	client := &http.Client{
+	c := &http.Client{
 		Transport: LoggedTransportConfig,
 		CheckRedirect: func(req *http.Request, via []*http.Request) error {
 			return errors.New("Don't redirect!")
 		},
 	}
 
-	resp, err := client.Do(req)
+	resp, err := c.Do(req)
 
 	if resp == nil && err == nil {
 		return "", errors.New(fmt.Sprintf("Unkown error while connnecting to %s as user: %s", identityUrl, username))
@@ -88,8 +114,8 @@ func getOAuth2Token(identityUrl string, username string, password string, client
 	}
 
 	location := resp.Header.Get("Location")
-	regexp := regexp.MustCompile("access_token=(.*)&expires_in")
-	tokenBytes := regexp.Find([]byte(location))
+	reg := regexp.MustCompile("access_token=(.*)&expires_in")
+	tokenBytes := reg.Find([]byte(location))
 	tokenString := string(tokenBytes)
 	token := tokenString[13 : len(tokenString)-11]
 	return token, nil

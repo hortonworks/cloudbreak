@@ -50,6 +50,14 @@ var (
 			EnvVar: "CB_PROFILE",
 		},
 	}
+	FlAuthTypeOptional = StringFlag{
+		RequiredFlag: OPTIONAL,
+		StringFlag: cli.StringFlag{
+			Name:   "auth-type",
+			Usage:  "authentication method to use, values: [" + OAUTH2 + ", " + BASIC + "]",
+			EnvVar: "CB_AUTH_TYPE",
+		},
+	}
 	FlForceOptional = BoolFlag{
 		RequiredFlag: OPTIONAL,
 		BoolFlag: cli.BoolFlag{
@@ -583,7 +591,7 @@ func (fb *FlagBuilder) AddFlags(flags ...cli.Flag) *FlagBuilder {
 }
 
 func (fb *FlagBuilder) AddAuthenticationFlags() *FlagBuilder {
-	for _, f := range []cli.Flag{FlServerOptional, FlUsername, FlPassword, FlProfileOptional} {
+	for _, f := range []cli.Flag{FlServerOptional, FlUsername, FlPassword, FlProfileOptional, FlAuthTypeOptional} {
 		fb.flags = append(fb.flags, f)
 	}
 	return fb

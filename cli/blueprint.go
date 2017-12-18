@@ -15,7 +15,7 @@ import (
 	"github.com/urfave/cli"
 )
 
-var blueprintHeader []string = []string{"Name", "Description", "HDP Version", "Hostgroup Count", "Tags"}
+var blueprintHeader = []string{"Name", "Description", "HDP Version", "Hostgroup Count", "Tags"}
 
 type blueprintOut struct {
 	Name           string `json:"Name" yaml:"Name"`
@@ -33,7 +33,7 @@ func CreateBlueprintFromUrl(c *cli.Context) {
 	checkRequiredFlagsAndArguments(c)
 
 	log.Infof("[CreateBlueprintFromUrl] creating blueprint from a URL")
-	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServerOptional.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+	cbClient := NewCloudbreakHTTPClientFromContext(c)
 	urlLocation := c.String(FlURL.Name)
 	createBlueprintImpl(
 		cbClient.Cloudbreak.V1blueprints,
@@ -47,7 +47,7 @@ func CreateBlueprintFromFile(c *cli.Context) {
 	checkRequiredFlagsAndArguments(c)
 
 	log.Infof("[CreateBlueprintFromFile] creating blueprint from a file")
-	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServerOptional.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+	cbClient := NewCloudbreakHTTPClientFromContext(c)
 	fileLocation := c.String(FlFile.Name)
 	createBlueprintImpl(
 		cbClient.Cloudbreak.V1blueprints,
@@ -89,7 +89,7 @@ func DescribeBlueprint(c *cli.Context) {
 	checkRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "describe blueprint")
 
-	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServerOptional.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+	cbClient := NewCloudbreakHTTPClientFromContext(c)
 	output := utils.Output{Format: c.String(FlOutputOptional.Name)}
 	bp := fetchBlueprint(c.String(FlName.Name), cbClient.Cloudbreak.V1blueprints)
 	output.Write(blueprintHeader, convertResponseToBlueprint(bp))
@@ -111,7 +111,7 @@ func DeleteBlueprint(c *cli.Context) {
 	checkRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "delete blueprint")
 
-	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServerOptional.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+	cbClient := NewCloudbreakHTTPClientFromContext(c)
 	deleteBlueprintsImpl(cbClient.Cloudbreak.V1blueprints, c.String(FlName.Name))
 }
 
@@ -128,7 +128,7 @@ func ListBlueprints(c *cli.Context) {
 	checkRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "get public blueprints")
 
-	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServerOptional.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+	cbClient := NewCloudbreakHTTPClientFromContext(c)
 	output := utils.Output{Format: c.String(FlOutputOptional.Name)}
 	listBlueprintsImpl(cbClient.Cloudbreak.V1blueprints, output.WriteList)
 }

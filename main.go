@@ -5,6 +5,7 @@ import (
 	"os"
 	"sort"
 
+	"errors"
 	log "github.com/Sirupsen/logrus"
 	cb "github.com/hortonworks/cb-cli/cli"
 	_ "github.com/hortonworks/cb-cli/cli/cloud/aws"
@@ -31,6 +32,8 @@ func ConfigRead(c *cli.Context) error {
 	password := c.String(cb.FlPassword.Name)
 	output := c.String(cb.FlOutputOptional.Name)
 	profile := c.String(cb.FlProfileOptional.Name)
+	authType := c.String(cb.FlAuthTypeOptional.Name)
+
 	if len(profile) == 0 {
 		profile = "default"
 	}
@@ -42,6 +45,18 @@ func ConfigRead(c *cli.Context) error {
 
 	if len(output) == 0 {
 		c.Set(cb.FlOutputOptional.Name, config.Output)
+	}
+
+	if len(authType) == 0 {
+		authType = config.AuthType
+		if len(authType) == 0 {
+			c.Set(cb.FlAuthTypeOptional.Name, cb.OAUTH2)
+		} else {
+			if authType != cb.OAUTH2 && authType != cb.BASIC {
+				utils.LogErrorAndExit(errors.New(fmt.Sprintf("invalid authentication type, accepted values: [%s, %s]", cb.OAUTH2, cb.BASIC)))
+			}
+			c.Set(cb.FlAuthTypeOptional.Name, authType)
+		}
 	}
 
 	if len(server) == 0 || len(username) == 0 || len(password) == 0 {
@@ -124,10 +139,10 @@ func main() {
 			Description: fmt.Sprintf("it will save the provided server address and credential "+
 				"to %s/%s/%s", cb.GetHomeDirectory(), cb.Config_dir, cb.Config_file),
 			Usage:  "configure the server address and credentials used to communicate with this server",
-			Flags:  cb.NewFlagBuilder().AddFlags(cb.FlServerRequired, cb.FlUsernameRequired, cb.FlPassword, cb.FlProfileOptional).AddOutputFlag().Build(),
+			Flags:  cb.NewFlagBuilder().AddFlags(cb.FlServerRequired, cb.FlUsernameRequired, cb.FlPassword, cb.FlProfileOptional, cb.FlAuthTypeOptional).AddOutputFlag().Build(),
 			Action: cb.Configure,
 			BashComplete: func(c *cli.Context) {
-				for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlServerRequired, cb.FlUsernameRequired, cb.FlPassword, cb.FlProfileOptional).AddOutputFlag().Build() {
+				for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlServerRequired, cb.FlUsernameRequired, cb.FlPassword, cb.FlProfileOptional, cb.FlAuthTypeOptional).AddOutputFlag().Build() {
 					printFlagCompletion(f)
 				}
 			},

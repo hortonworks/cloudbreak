@@ -36,7 +36,7 @@ func createCredential(c *cli.Context) {
 	checkRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "create credential")
 
-	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServerOptional.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+	cbClient := NewCloudbreakHTTPClientFromContext(c)
 	createCredentialImpl(c.String, c.Bool, cbClient.Cloudbreak.V1credentials)
 }
 
@@ -85,7 +85,7 @@ func DescribeCredential(c *cli.Context) {
 	checkRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "describe credential")
 
-	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServerOptional.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+	cbClient := NewCloudbreakHTTPClientFromContext(c)
 	output := utils.Output{Format: c.String(FlOutputOptional.Name)}
 	resp, err := cbClient.Cloudbreak.V1credentials.GetPublicCredential(v1credentials.NewGetPublicCredentialParams().WithName(c.String(FlName.Name)))
 	if err != nil {
@@ -100,7 +100,7 @@ func DeleteCredential(c *cli.Context) {
 	checkRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "delete credential")
 
-	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServerOptional.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+	cbClient := NewCloudbreakHTTPClientFromContext(c)
 	name := c.String(FlName.Name)
 	log.Infof("[DeleteCredential] sending delete credential request with name: %s", name)
 	if err := cbClient.Cloudbreak.V1credentials.DeletePublicCredential(v1credentials.NewDeletePublicCredentialParams().WithName(name)); err != nil {
@@ -113,7 +113,7 @@ func ListCredentials(c *cli.Context) {
 	checkRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "list credentials")
 
-	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServerOptional.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+	cbClient := NewCloudbreakHTTPClientFromContext(c)
 	output := utils.Output{Format: c.String(FlOutputOptional.Name)}
 	listCredentialsImpl(cbClient.Cloudbreak.V1credentials, output.WriteList)
 }

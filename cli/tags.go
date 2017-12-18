@@ -9,7 +9,7 @@ import (
 	"github.com/urfave/cli"
 )
 
-var accountTagHeader []string = []string{"Key", "Value"}
+var accountTagHeader = []string{"Key", "Value"}
 
 type accountTagOut struct {
 	Key   string `json:"Key" yaml:"Key"`
@@ -24,7 +24,7 @@ func ListAccountTags(c *cli.Context) {
 	checkRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "list default tags for account")
 
-	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServerOptional.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+	cbClient := NewCloudbreakHTTPClientFromContext(c)
 	output := utils.Output{Format: c.String(FlOutputOptional.Name)}
 	listAccountTagsImpl(cbClient.Cloudbreak.V1accountpreferences, output.WriteList)
 }
@@ -33,7 +33,7 @@ func AddAccountTag(c *cli.Context) {
 	checkRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "add a default tag for account")
 
-	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServerOptional.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+	cbClient := NewCloudbreakHTTPClientFromContext(c)
 	addAccountTagsImpl(cbClient.Cloudbreak.V1accountpreferences, c.String(FlKey.Name), c.String(FlValue.Name))
 }
 
@@ -41,7 +41,7 @@ func DeleteAccountTag(c *cli.Context) {
 	checkRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "delete a default tag of the account")
 
-	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServerOptional.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+	cbClient := NewCloudbreakHTTPClientFromContext(c)
 	deleteAccountTagsImpl(cbClient.Cloudbreak.V1accountpreferences, c.String(FlKey.Name))
 }
 

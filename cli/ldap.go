@@ -73,7 +73,7 @@ func CreateLDAP(c *cli.Context) error {
 	serverPort, _ := strconv.Atoi(server[portSeparatorIndex+1:])
 	protocol := server[0:strings.Index(server, ":")]
 
-	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServerOptional.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+	cbClient := NewCloudbreakHTTPClientFromContext(c)
 
 	return createLDAPImpl(cbClient.Cloudbreak.V1ldap, int32(serverPort), name, server, protocol, domain, bindDn, bindPassword, directoryType,
 		userSearchBase, userNameAttribute, userObjectClass, groupSearchBase, groupMemberAttribute, groupNameAttribute, groupObjectClass, adminGroup, public)
@@ -128,7 +128,7 @@ func ListLdaps(c *cli.Context) error {
 	checkRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "list ldap configs")
 
-	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServerOptional.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+	cbClient := NewCloudbreakHTTPClientFromContext(c)
 
 	output := utils.Output{Format: c.String(FlOutputOptional.Name)}
 	return listLdapsImpl(cbClient.Cloudbreak.V1ldap, output.WriteList)
@@ -171,7 +171,7 @@ func DeleteLdap(c *cli.Context) error {
 
 	ldapName := c.String(FlName.Name)
 	log.Infof("[DeleteLdap] delete ldap config by name: %s", ldapName)
-	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServerOptional.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+	cbClient := NewCloudbreakHTTPClientFromContext(c)
 
 	if err := cbClient.Cloudbreak.V1ldap.DeletePublicLdap(v1ldap.NewDeletePublicLdapParams().WithName(ldapName)); err != nil {
 		utils.LogErrorAndExit(err)

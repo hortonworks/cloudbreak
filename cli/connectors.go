@@ -80,7 +80,7 @@ func ListRegions(c *cli.Context) {
 	checkRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "list regions")
 
-	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServerOptional.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+	cbClient := NewCloudbreakHTTPClientFromContext(c)
 	output := utils.Output{Format: c.String(FlOutputOptional.Name)}
 	listRegionsImpl(cbClient.Cloudbreak.V2connectors, output.WriteList, c.String(FlCredential.Name))
 }
@@ -89,7 +89,7 @@ func ListAvailabilityZones(c *cli.Context) {
 	checkRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "list availability zones")
 
-	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServerOptional.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+	cbClient := NewCloudbreakHTTPClientFromContext(c)
 	output := utils.Output{Format: c.String(FlOutputOptional.Name)}
 	listAvailabilityZonesImpl(cbClient.Cloudbreak.V2connectors, output.WriteList, c.String(FlCredential.Name), c.String(FlRegion.Name))
 }
@@ -113,7 +113,7 @@ func listVolumeTypes(c *cli.Context) {
 	checkRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "list volume types")
 
-	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServerOptional.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+	cbClient := NewCloudbreakHTTPClientFromContext(c)
 	output := utils.Output{Format: c.String(FlOutputOptional.Name)}
 	listVolumeTypesImpl(cbClient.Cloudbreak.V1connectors, output.WriteList)
 }
@@ -122,7 +122,7 @@ func ListInstanceTypes(c *cli.Context) {
 	checkRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "list instance types")
 
-	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServerOptional.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+	cbClient := NewCloudbreakHTTPClientFromContext(c)
 	output := utils.Output{Format: c.String(FlOutputOptional.Name)}
 	listInstanceTypesImpl(cbClient.Cloudbreak.V2connectors, output.WriteList, c.String(FlCredential.Name), c.String(FlRegion.Name), c.String(FlAvailabilityZoneOptional.Name))
 }

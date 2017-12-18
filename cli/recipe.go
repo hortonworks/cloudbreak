@@ -14,7 +14,7 @@ import (
 	"github.com/urfave/cli"
 )
 
-var recipeHeader []string = []string{"Name", "Description", "Execution Type"}
+var recipeHeader = []string{"Name", "Description", "Execution Type"}
 
 type recipeOut struct {
 	Name          string `json:"Name" yaml:"Name"`
@@ -30,7 +30,7 @@ func CreateRecipeFromUrl(c *cli.Context) {
 	checkRequiredFlagsAndArguments(c)
 
 	log.Infof("[CreateRecipeFromUrl] creating recipe from a URL")
-	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServerOptional.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+	cbClient := NewCloudbreakHTTPClientFromContext(c)
 	urlLocation := c.String(FlURL.Name)
 	createRecipeImpl(
 		cbClient.Cloudbreak.V1recipes,
@@ -45,7 +45,7 @@ func CreateRecipeFromFile(c *cli.Context) {
 	checkRequiredFlagsAndArguments(c)
 
 	log.Infof("[CreateRecipeFromFile] creating recipe from a file")
-	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServerOptional.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+	cbClient := NewCloudbreakHTTPClientFromContext(c)
 	fileLocation := c.String(FlFile.Name)
 	createRecipeImpl(
 		cbClient.Cloudbreak.V1recipes,
@@ -109,7 +109,7 @@ func DescribeRecipe(c *cli.Context) {
 	checkRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "describe recipe")
 
-	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServerOptional.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+	cbClient := NewCloudbreakHTTPClientFromContext(c)
 	output := utils.Output{Format: c.String(FlOutputOptional.Name)}
 	resp, err := cbClient.Cloudbreak.V1recipes.GetPublicRecipe(v1recipes.NewGetPublicRecipeParams().WithName(c.String(FlName.Name)))
 	if err != nil {
@@ -123,7 +123,7 @@ func DeleteRecipe(c *cli.Context) {
 	checkRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "delete recipe")
 
-	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServerOptional.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+	cbClient := NewCloudbreakHTTPClientFromContext(c)
 	name := c.String(FlName.Name)
 	log.Infof("[DeleteRecipe] sending delete recipe request with name: %s", name)
 	if err := cbClient.Cloudbreak.V1recipes.DeletePublicRecipe(v1recipes.NewDeletePublicRecipeParams().WithName(name)); err != nil {
@@ -136,7 +136,7 @@ func ListRecipes(c *cli.Context) {
 	checkRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "list recipes")
 
-	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServerOptional.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+	cbClient := NewCloudbreakHTTPClientFromContext(c)
 	output := utils.Output{Format: c.String(FlOutputOptional.Name)}
 	listRecipesImpl(cbClient.Cloudbreak.V1recipes, output.WriteList)
 }

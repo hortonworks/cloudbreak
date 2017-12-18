@@ -41,7 +41,7 @@ func CreateImagecatalogFromUrl(c *cli.Context) {
 	checkRequiredFlagsAndArguments(c)
 
 	log.Infof("[CreateImagecatalogFromUrl] creating imagecatalog from a URL")
-	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServerOptional.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+	cbClient := NewCloudbreakHTTPClientFromContext(c)
 	createImagecatalogImpl(
 		cbClient.Cloudbreak.V1imagecatalogs,
 		c.String(FlName.Name),
@@ -83,7 +83,7 @@ func ListImagecatalogs(c *cli.Context) {
 	checkRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "list imagecatalogs")
 
-	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServerOptional.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+	cbClient := NewCloudbreakHTTPClientFromContext(c)
 	output := utils.Output{Format: c.String(FlOutputOptional.Name)}
 	listImagecatalogsImpl(cbClient.Cloudbreak.V1imagecatalogs, output.WriteList)
 }
@@ -111,7 +111,7 @@ func DeleteImagecatalog(c *cli.Context) {
 	checkRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "delete imagecatalog")
 
-	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServerOptional.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+	cbClient := NewCloudbreakHTTPClientFromContext(c)
 	name := c.String(FlName.Name)
 	log.Infof("[DeleteImagecatalog] sending delete imagecatalog request with name: %s", name)
 	if err := cbClient.Cloudbreak.V1imagecatalogs.DeletePublicImageCatalogByName(v1imagecatalogs.NewDeletePublicImageCatalogByNameParams().WithName(name)); err != nil {
@@ -124,7 +124,7 @@ func SetDefaultImagecatalog(c *cli.Context) {
 	checkRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "set default imagecatalog")
 
-	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServerOptional.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+	cbClient := NewCloudbreakHTTPClientFromContext(c)
 	name := c.String(FlName.Name)
 	log.Infof("[SetDefautlImagecatalog] sending set default imagecatalog request with name: %s", name)
 	if _, err := cbClient.Cloudbreak.V1imagecatalogs.PutSetDefaultImageCatalogByName(v1imagecatalogs.NewPutSetDefaultImageCatalogByNameParams().WithName(name)); err != nil {
@@ -157,7 +157,7 @@ func listImages(c *cli.Context) {
 	checkRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "list available images")
 
-	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServerOptional.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+	cbClient := NewCloudbreakHTTPClientFromContext(c)
 	output := utils.Output{Format: c.String(FlOutputOptional.Name)}
 	listImagesImpl(cbClient.Cloudbreak.V1imagecatalogs, output.WriteList, c.String(FlImageCatalog.Name))
 }

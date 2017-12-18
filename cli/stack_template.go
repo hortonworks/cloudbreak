@@ -28,13 +28,13 @@ var maxCardinality = map[string]int{
 	"ALL": 3,
 }
 
-var getBlueprintClient = func(server, userName, password string) getPublicBlueprint {
-	cbClient := NewCloudbreakOAuth2HTTPClient(server, userName, password)
+var getBlueprintClient = func(server, userName, password, authType string) getPublicBlueprint {
+	cbClient := NewCloudbreakHTTPClient(server, userName, password, authType)
 	return cbClient.Cloudbreak.V1blueprints
 }
 
-var stackClient = func(server, userName, password string) getPublicStack {
-	cbClient := NewCloudbreakOAuth2HTTPClient(server, userName, password)
+var stackClient = func(server, userName, password, authType string) getPublicStack {
+	cbClient := NewCloudbreakHTTPClient(server, userName, password, authType)
 	return cbClient.Cloudbreak.V1stacks
 }
 
@@ -85,7 +85,7 @@ func getString(skippedFields map[string]bool, fieldName string, defaultValue str
 	return defaultValue
 }
 
-func generateStackTemplateImpl(mode cloud.NetworkMode, stringFinder func(string) string, getBlueprintClient func(string, string, string) getPublicBlueprint) error {
+func generateStackTemplateImpl(mode cloud.NetworkMode, stringFinder func(string) string, getBlueprintClient func(string, string, string, string) getPublicBlueprint) error {
 	provider := cloud.GetProvider()
 	skippedFields := provider.SkippedFields()
 
@@ -109,7 +109,7 @@ func generateStackTemplateImpl(mode cloud.NetworkMode, stringFinder func(string)
 
 	nodes := defaultNodes
 	if bpName := stringFinder(FlBlueprintNameOptional.Name); len(bpName) != 0 {
-		bpResp := fetchBlueprint(bpName, getBlueprintClient(stringFinder(FlServerOptional.Name), stringFinder(FlUsername.Name), stringFinder(FlPassword.Name)))
+		bpResp := fetchBlueprint(bpName, getBlueprintClient(stringFinder(FlServerOptional.Name), stringFinder(FlUsername.Name), stringFinder(FlPassword.Name), stringFinder(FlAuthTypeOptional.Name)))
 		bp, err := base64.StdEncoding.DecodeString(bpResp.AmbariBlueprint)
 		if err != nil {
 			utils.LogErrorAndExit(err)
@@ -206,14 +206,14 @@ func GenerateReinstallTemplate(c *cli.Context) {
 	}
 
 	stackName := c.String(FlName.Name)
-	stackResp := fetchStack(stackName, stackClient(c.String(FlServerOptional.Name), c.String(FlUsername.Name), c.String(FlPassword.Name)))
+	stackResp := fetchStack(stackName, stackClient(c.String(FlServerOptional.Name), c.String(FlUsername.Name), c.String(FlPassword.Name), c.String(FlAuthTypeOptional.Name)))
 	provider, ok := cloud.CloudProviders[cloud.CloudType(stackResp.CloudPlatform)]
 	if !ok {
 		utils.LogErrorMessageAndExit("Not supported CloudProvider: " + stackResp.CloudPlatform)
 	}
 
 	bpName := c.String(FlBlueprintNameOptional.Name)
-	bpResp := fetchBlueprint(bpName, getBlueprintClient(c.String(FlServerOptional.Name), c.String(FlUsername.Name), c.String(FlPassword.Name)))
+	bpResp := fetchBlueprint(bpName, getBlueprintClient(c.String(FlServerOptional.Name), c.String(FlUsername.Name), c.String(FlPassword.Name), c.String(FlAuthTypeOptional.Name)))
 	bp, err := base64.StdEncoding.DecodeString(bpResp.AmbariBlueprint)
 	if err != nil {
 		utils.LogErrorAndExit(err)
