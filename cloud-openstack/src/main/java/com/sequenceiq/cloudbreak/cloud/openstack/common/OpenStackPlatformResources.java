@@ -22,6 +22,9 @@ import org.openstack4j.model.compute.SecGroupExtension;
 import org.openstack4j.model.network.Network;
 import org.openstack4j.model.network.Router;
 import org.openstack4j.model.network.Subnet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
@@ -51,11 +54,19 @@ import com.sequenceiq.cloudbreak.cloud.openstack.view.KeystoneCredentialView;
 @Service
 public class OpenStackPlatformResources implements PlatformResources {
 
-    public static final int DEFAULT_MINIMUM_VOLUME_SIZE = 10;
+    private static final Logger LOGGER = LoggerFactory.getLogger(OpenStackPlatformResources.class);
 
-    public static final int DEFAULT_MAXIMUM_VOLUME_SIZE = 1023;
+    @Value("${cb.openstack.default.minimum.volume.size:10}")
+    private int defaultMinimumVolumeSize;
 
-    public static final int DEFAULT_MINIMUM_VOLUME_COUNT = 0;
+    @Value("${cb.openstack.default.maximum.volume.size:1023}")
+    private int defaultMaximumVolumeSize;
+
+    @Value("${cb.openstack.default.minimum.volume.count:0}")
+    private int defaultMinimumVolumeCount;
+
+    @Value("${cb.openstack.default.maximum.volume.count:100}")
+    private int defaultMaximumVolumeCount;
 
     @Inject
     private OpenStackClient openStackClient;
@@ -66,7 +77,8 @@ public class OpenStackPlatformResources implements PlatformResources {
         KeystoneCredentialView osCredential = openStackClient.createKeystoneCredential(cloudCredential);
 
         Set<CloudNetwork> cloudNetworks = new HashSet<>();
-        for (Network network : osClient.networking().network().list()) {
+        List<? extends Network> networks = getNetworks(osClient);
+        for (Network network : networks) {
             Map<String, Object> properties = new HashMap<>();
             properties.put("networkType", network.getNetworkType());
             properties.put("providerPhyNet", network.getProviderPhyNet());
@@ -76,6 +88,7 @@ public class OpenStackPlatformResources implements PlatformResources {
             Map<String, String> subnets = new HashMap<>();
 
             List<? extends Subnet> neutronSubnets = network.getNeutronSubnets();
+            LOGGER.info("neutron subnets for {}: {}", network.getName(), neutronSubnets);
             if (neutronSubnets != null) {
                 for (Subnet neutronSubnet : neutronSubnets) {
                     if (neutronSubnet != null) {
@@ -90,6 +103,7 @@ public class OpenStackPlatformResources implements PlatformResources {
 
         Map<String, Set<CloudNetwork>> result = new HashMap<>(1);
         result.put(region.value() == null ? osCredential.getTenantName() : region.value(), cloudNetworks);
+        LOGGER.info("openstack cloud networks result: {}", result);
         return new CloudNetworks(result);
     }
 
@@ -114,6 +128,7 @@ public class OpenStackPlatformResources implements PlatformResources {
 
         Map<String, Set<CloudSshKey>> result = new HashMap<>();
         result.put(region.value() == null ? osCredential.getTenantName() : region.value(), cloudSshKeys);
+        LOGGER.info("openstack cloud ssh keys result: {}", result);
         return new CloudSshKeys(result);
     }
 
@@ -123,7 +138,9 @@ public class OpenStackPlatformResources implements PlatformResources {
         KeystoneCredentialView osCredential = openStackClient.createKeystoneCredential(cloudCredential);
 
         Set<CloudSecurityGroup> cloudSecurityGroups = new HashSet<>();
-        for (SecGroupExtension secGroup : osClient.compute().securityGroups().list()) {
+        List<? extends SecGroupExtension> osSecurityGroups = osClient.compute().securityGroups().list();
+        LOGGER.info("security groups from openstack: {}", osSecurityGroups);
+        for (SecGroupExtension secGroup : osSecurityGroups) {
             Map<String, Object> properties = new HashMap<>();
             properties.put("tenantId", secGroup.getTenantId());
             properties.put("rules", secGroup.getRules());
@@ -134,30 +151,35 @@ public class OpenStackPlatformResources implements PlatformResources {
 
         Map<String, Set<CloudSecurityGroup>> result = new HashMap<>();
         result.put(region.value() == null ? osCredential.getTenantName() : region.value(), cloudSecurityGroups);
+        LOGGER.info("openstack security groups result: {}", result);
         return new CloudSecurityGroups(result);
     }
 
     @Override
     @Cacheable(cacheNames = "cloudResourceRegionCache", key = "#cloudCredential?.id")
     public CloudRegions regions(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
-        Set<String> regionFromOpenStack = openStackClient.getRegion(cloudCredential);
+        Set<String> regionsFromOpenStack = openStackClient.getRegion(cloudCredential);
         OSClient osClient = openStackClient.createOSClient(cloudCredential);
 
         Map<Region, List<com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone>> cloudRegions = new HashMap<>();
         Map<Region, String> displayNames = new HashMap<>();
-        for (String regionOne : regionFromOpenStack) {
+        for (String regionFromOpenStack : regionsFromOpenStack) {
             List<AvailabilityZone> availabilityZones = new ArrayList<>();
-            for (org.openstack4j.model.compute.ext.AvailabilityZone availabilityZone : osClient.compute().zones().list()) {
+            List<? extends org.openstack4j.model.compute.ext.AvailabilityZone> zonesFromOS = osClient.compute().zones().list();
+            LOGGER.info("zones from openstack for {}: {}", regionFromOpenStack, zonesFromOS);
+            for (org.openstack4j.model.compute.ext.AvailabilityZone availabilityZone : zonesFromOS) {
                 availabilityZones.add(availabilityZone(availabilityZone.getZoneName()));
             }
-            cloudRegions.put(region(regionOne), availabilityZones);
-            displayNames.put(region(regionOne), regionOne);
+            cloudRegions.put(region(regionFromOpenStack), availabilityZones);
+            displayNames.put(region(regionFromOpenStack), regionFromOpenStack);
         }
         String defaultRegion = null;
         if (cloudRegions.keySet().size() > 0) {
             defaultRegion = ((Region) cloudRegions.keySet().toArray()[0]).value();
         }
-        return new CloudRegions(cloudRegions, displayNames, defaultRegion);
+        CloudRegions regions = new CloudRegions(cloudRegions, displayNames, defaultRegion);
+        LOGGER.info("openstack regions result: {}", regions);
+        return regions;
     }
 
     @Override
@@ -174,7 +196,9 @@ public class OpenStackPlatformResources implements PlatformResources {
             }
             defaultCloudVmResponses.put(cloudRegion.value(), types.size() > 0 ? (VmType) types.toArray()[0] : null);
         }
-        return new CloudVmTypes(cloudVmResponses, defaultCloudVmResponses);
+        CloudVmTypes cloudVmTypes = new CloudVmTypes(cloudVmResponses, defaultCloudVmResponses);
+        LOGGER.info("openstack virtual machine types: {}", cloudVmTypes);
+        return cloudVmTypes;
     }
 
     private Set<VmType> collectVmTypes(OSClient osClient) {
@@ -185,7 +209,7 @@ public class OpenStackPlatformResources implements PlatformResources {
             for (VolumeParameterType volumeParameterType : values()) {
                 switch (volumeParameterType) {
                     case MAGNETIC:
-                        builder.withMagneticConfig(volumeParameterConfig(MAGNETIC, flavor));
+                        builder.withMagneticConfig(volumeParameterConfig(MAGNETIC));
                         break;
                     case SSD:
                         builder.withSsdConfig(null);
@@ -206,17 +230,20 @@ public class OpenStackPlatformResources implements PlatformResources {
             VmType vmType = VmType.vmTypeWithMeta(flavor.getName(), builder.create(), true);
             types.add(vmType);
         }
+        LOGGER.info("openstack collect vm types result: {}", types);
         return types;
     }
 
     @Override
-    public CloudGateWays gateways(CloudCredential cloudCredential, Region region, Map<String, String> filters) throws Exception {
+    public CloudGateWays gateways(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
         OSClient osClient = openStackClient.createOSClient(cloudCredential);
         Map<String, Set<CloudGateWay>> resultCloudGateWayMap = new HashMap<>();
         CloudRegions regions = regions(cloudCredential, region, filters);
         for (Map.Entry<Region, List<AvailabilityZone>> regionListEntry : regions.getCloudRegions().entrySet()) {
             Set<CloudGateWay> cloudGateWays = new HashSet<>();
-            for (Router router : osClient.networking().router().list()) {
+            List<? extends Router> routerList = osClient.networking().router().list();
+            LOGGER.info("routers from openstack: {}", routerList);
+            for (Router router : routerList) {
                 CloudGateWay cloudGateWay = new CloudGateWay();
                 cloudGateWay.setId(router.getId());
                 cloudGateWay.setName(router.getName());
@@ -229,17 +256,19 @@ public class OpenStackPlatformResources implements PlatformResources {
                 resultCloudGateWayMap.put(availabilityZone.value(), cloudGateWays);
             }
         }
-        return new CloudGateWays(resultCloudGateWayMap);
+        CloudGateWays cloudGateWays = new CloudGateWays(resultCloudGateWayMap);
+        LOGGER.info("openstack cloudgateway result: {}", cloudGateWays);
+        return cloudGateWays;
     }
 
     @Override
-    public CloudIpPools publicIpPool(CloudCredential cloudCredential, Region region, Map<String, String> filters) throws Exception {
+    public CloudIpPools publicIpPool(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
         OSClient osClient = openStackClient.createOSClient(cloudCredential);
         Map<String, Set<CloudIpPool>> cloudIpPools = new HashMap<>();
         CloudRegions regions = regions(cloudCredential, region, filters);
         for (Map.Entry<Region, List<AvailabilityZone>> regionListEntry : regions.getCloudRegions().entrySet()) {
             Set<CloudIpPool> cloudGateWays = new HashSet<>();
-            List<? extends Network> networks = osClient.networking().network().list();
+            List<? extends Network> networks = getNetworks(osClient);
             List<? extends Network> networksWithExternalRouter = networks.stream().filter(Network::isRouterExternal).collect(Collectors.toList());
             for (Network network : networksWithExternalRouter) {
                 CloudIpPool cloudIpPool = new CloudIpPool();
@@ -251,16 +280,23 @@ public class OpenStackPlatformResources implements PlatformResources {
                 cloudIpPools.put(availabilityZone.value(), cloudGateWays);
             }
         }
+        LOGGER.info("openstack public ip pool result: {}", cloudIpPools);
         return new CloudIpPools(cloudIpPools);
     }
 
-    private VolumeParameterConfig volumeParameterConfig(VolumeParameterType volumeParameterType, Flavor flavor) {
+    private VolumeParameterConfig volumeParameterConfig(VolumeParameterType volumeParameterType) {
         return new VolumeParameterConfig(
                 volumeParameterType,
-                Integer.valueOf(DEFAULT_MINIMUM_VOLUME_SIZE),
-                Integer.valueOf(DEFAULT_MAXIMUM_VOLUME_SIZE),
-                Integer.valueOf(DEFAULT_MINIMUM_VOLUME_COUNT),
-                flavor.getDisk());
+                defaultMinimumVolumeSize,
+                defaultMaximumVolumeSize,
+                defaultMinimumVolumeCount,
+                defaultMaximumVolumeCount);
+    }
+
+    private List<? extends Network> getNetworks(OSClient osClient) {
+        List<? extends Network> networks = osClient.networking().network().list();
+        LOGGER.info("networks from openstack: {}", networks);
+        return networks;
     }
 
 }

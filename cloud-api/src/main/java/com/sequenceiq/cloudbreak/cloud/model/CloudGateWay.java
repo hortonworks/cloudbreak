@@ -43,4 +43,13 @@ public class CloudGateWay {
     public void setProperties(Map<String, Object> properties) {
         this.properties = properties;
     }
+
+    @Override
+    public String toString() {
+        return "CloudGateWay{"
+                + "name='" + name + '\''
+                + ", id='" + id + '\''
+                + ", properties=" + properties
+                + '}';
+    }
 }
