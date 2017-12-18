@@ -26,7 +26,7 @@ public class SecurityRuleService {
     @Value("#{'${cb.default.gateway.cidr:0.0.0.0/0}'.split(',')}")
     private Set<String> defaultGatewayCidr;
 
-    public SecurityRulesResponse getPublicIps() {
+    public SecurityRulesResponse getDefaultSecurityRules() {
 
         SecurityRulesResponse ret = new SecurityRulesResponse();
 

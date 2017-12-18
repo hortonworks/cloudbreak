@@ -297,6 +297,6 @@ public class OperationDescriptions {
     }
 
     public static class SecurityRuleOpDescription {
-        public static final String GET_DEFAULT_PUBLIC_IPS = "get default public IPs";
+        public static final String GET_DEFAULT_SECURITY_RULES = "get default security rules";
     }
 }

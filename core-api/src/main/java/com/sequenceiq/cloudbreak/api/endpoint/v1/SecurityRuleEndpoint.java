@@ -21,9 +21,9 @@ import io.swagger.annotations.ApiOperation;
 public interface SecurityRuleEndpoint {
 
     @GET
-    @Path("defaultpublicips")
+    @Path("defaultsecurityrules")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.SecurityRuleOpDescription.GET_DEFAULT_PUBLIC_IPS, produces = ContentType.JSON, notes = Notes.SECURITY_RULE_NOTES,
-            nickname = "getPublicIps")
-    SecurityRulesResponse getPublicIps();
+    @ApiOperation(value = OperationDescriptions.SecurityRuleOpDescription.GET_DEFAULT_SECURITY_RULES, produces = ContentType.JSON,
+            notes = Notes.SECURITY_RULE_NOTES, nickname = "getDefaultSecurityRules")
+    SecurityRulesResponse getDefaultSecurityRules();
 }

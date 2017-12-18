@@ -15,7 +15,7 @@ public class SecurityRuleController implements SecurityRuleEndpoint {
     private SecurityRuleService securityRuleService;
 
     @Override
-    public SecurityRulesResponse getPublicIps() {
-        return securityRuleService.getPublicIps();
+    public SecurityRulesResponse getDefaultSecurityRules() {
+        return securityRuleService.getDefaultSecurityRules();
     }
 }
