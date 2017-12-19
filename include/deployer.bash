@@ -102,6 +102,14 @@ cbd-update-release() {
     if [[ ${binver} != ${lastver} ]]; then
         debug upgrade needed |yellow
 
+        info "Backing up databases"
+        debug "Backup $CB_DB_ENV_DB on volume $COMMON_DB_VOL"
+        db-dump $COMMON_DB_VOL $CB_DB_ENV_DB
+        debug "Backup $PERISCOPE_DB_ENV_DB on volume $COMMON_DB_VOL"
+        db-dump $COMMON_DB_VOL $PERISCOPE_DB_ENV_DB
+        debug "Backup $IDENTITY_DB_NAME on volume $COMMON_DB_VOL"
+        db-dump $COMMON_DB_VOL $IDENTITY_DB_NAME
+
         local url=https://github.com/hortonworks/cloudbreak-deployer/releases/download/v${lastver}/cloudbreak-deployer_${lastver}_${osarch}.tgz
         info "Updating $SELF_EXECUTABLE from url: $url"
         curl -Ls $url | tar -zx -C $TEMP_DIR
