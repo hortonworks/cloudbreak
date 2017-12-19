@@ -56,18 +56,18 @@ func NewCloudbreakHTTPClient(address, username, password, authType string) *Clou
 	for _, v := range PREFIX_TRIM {
 		address = strings.TrimPrefix(address, v)
 	}
-	basePath := "/cb/api"
+	basePath := ""
 	slashIndex := strings.Index(address, "/")
 	if slashIndex != -1 {
-		basePath = address[slashIndex:] + "/cb/api"
+		basePath = address[slashIndex:]
 		address = address[0:slashIndex]
 	}
 
-	cbTransport := &transport{client.New(address, basePath, []string{"https"})}
+	cbTransport := &transport{client.New(address, basePath+"/cb/api", []string{"https"})}
 
 	switch authType {
 	case OAUTH2:
-		token, err := getOAuth2Token("https://"+address+"/identity/oauth/authorize", username, password, "cloudbreak_shell")
+		token, err := getOAuth2Token("https://"+address+basePath+"/identity/oauth/authorize", username, password, "cloudbreak_shell")
 		if err != nil {
 			utils.LogErrorAndExit(err)
 		}
