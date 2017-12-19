@@ -1,11 +1,12 @@
 package com.sequenceiq.cloudbreak.cloud.model.component;
 
+import java.io.Serializable;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class StackRepoDetails {
+public class StackRepoDetails implements Serializable {
 
     public static final String REPO_ID_TAG = "repoid";
 
