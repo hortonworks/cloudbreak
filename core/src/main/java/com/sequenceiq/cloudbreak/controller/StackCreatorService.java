@@ -18,6 +18,7 @@ import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.controller.validation.StackSensitiveDataPropagator;
 import com.sequenceiq.cloudbreak.controller.validation.filesystem.FileSystemValidator;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
+import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -53,6 +54,9 @@ public class StackCreatorService {
 
     @Inject
     private StackService stackService;
+
+    @Inject
+    private ReactorFlowManager flowManager;
 
     @Inject
     @Qualifier("conversionService")
@@ -121,16 +125,31 @@ public class StackCreatorService {
         stack = stackService.create(user, stack, stackRequest.getImageCatalog(), Optional.ofNullable(stackRequest.getImageId()));
         LOGGER.info("Stack object and its dependencies has been created in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
-        if (stackRequest.getClusterRequest() != null) {
-            start = System.currentTimeMillis();
-            Cluster cluster = clusterCreationService.prepare(stackRequest.getClusterRequest(), stack, blueprint, user);
-            LOGGER.info("Cluster object and its dependencies has been created in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
-            stack.setCluster(cluster);
-        }
+        createClusterIfNeed(user, stackRequest, stack, stackName, blueprint);
+
         start = System.currentTimeMillis();
         StackResponse response = conversionService.convert(stack, StackResponse.class);
         LOGGER.info("Stack response has been created in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+
+        start = System.currentTimeMillis();
+        flowManager.triggerProvisioning(stack.getId());
+        LOGGER.info("Stack provision triggered in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+
         return response;
+    }
+
+    private void createClusterIfNeed(IdentityUser user, StackRequest stackRequest, Stack stack, String stackName, Blueprint blueprint) throws Exception {
+        if (stackRequest.getClusterRequest() != null) {
+            try {
+                long start = System.currentTimeMillis();
+                Cluster cluster = clusterCreationService.prepare(stackRequest.getClusterRequest(), stack, blueprint, user);
+                LOGGER.info("Cluster object and its dependencies has been created in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+                stack.setCluster(cluster);
+            } catch (BadRequestException e) {
+                stackService.delete(stack);
+                throw e;
+            }
+        }
     }
 
     private void validateAccountPreferences(Stack stack, IdentityUser user) {
