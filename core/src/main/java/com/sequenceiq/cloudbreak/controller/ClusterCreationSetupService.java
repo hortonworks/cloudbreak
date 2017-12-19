@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.apache.commons.lang3.SerializationUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.convert.ConversionService;
@@ -169,7 +170,7 @@ public class ClusterCreationSetupService {
                 StackRepoDetails stackRepoDetails = conversionService.convert(ambariStackDetails, StackRepoDetails.class);
                 stackRepoDetailsJson = new Json(stackRepoDetails);
             } else {
-                StackRepoDetails repo = defaultHDPInfo(blueprint, request, user).getRepo();
+                StackRepoDetails repo = SerializationUtils.clone(defaultHDPInfo(blueprint, request, user).getRepo());
                 pruneVDFUrlsByOsType(cluster, stackImageComponent, repo);
                 stackRepoDetailsJson = new Json(repo);
             }

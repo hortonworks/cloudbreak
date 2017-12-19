@@ -155,6 +155,10 @@ public class AmbariRepositoryVersionService {
         if (vdfUrl.isPresent()) {
             LOGGER.info("VDF request has been sent to Ambari with VDF url: '{}'.", vdfUrl.get());
             String repoId = stackRepoDetails.getStack().get(StackRepoDetails.REPO_ID_TAG);
+            int ind = repoId.indexOf('-');
+            if (ind != -1) {
+                repoId = repoId.substring(0, ind);
+            }
             String repoVersion = stackRepoDetails.getStack().get(StackRepoDetails.REPOSITORY_VERSION);
             String versionDefJson = ambariClient.getVersionDefinition(repoId, repoVersion);
             JsonNode versionDefNode = jsonHelper.createJsonFromString(versionDefJson);
