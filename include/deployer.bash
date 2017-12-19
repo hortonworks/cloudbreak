@@ -362,7 +362,17 @@ is-sub-path() {
 }
 
 deployer-delete() {
-    declare desc="Deletes yaml files, and all dbs"
+    declare desc="Deletes yaml files, and all dbs. You can use '--force' to avoid confirm dialog"
+    if [[ "$1" != "--force" ]] ; then
+        read -r -p "Are you sure you would like to wipe all Cloudbreak related data? [y/N] " response
+        if [[ "$response" =~ ^([yY][eE][sS]|[yY])+$ ]]; then
+            debug "Delete confirmed"
+        else
+            info "Delete terminated for user request"
+            _exit 0
+        fi
+    fi
+
     cloudbreak-delete-dbs
     rm -f *.yml
 }
