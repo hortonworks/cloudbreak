@@ -287,4 +287,13 @@ public class PkiUtil {
     private static String clarifyPemKey(String rawPem) {
         return "-----BEGIN RSA PRIVATE KEY-----\n" + rawPem.replaceAll("-----(.*)-----|\n", "") + "\n-----END RSA PRIVATE KEY-----";
     }
+
+    /**
+     * Strips the headers and the footers (like -----BEGIN CERTIFICATE-----) and trims the pem text.
+     * @param pem pem or pkcs text
+     * @return stripped text
+     */
+    public static String stripHeaders(String pem) {
+        return pem.replaceAll("-----(.*)-----", "").trim();
+    }
 }
