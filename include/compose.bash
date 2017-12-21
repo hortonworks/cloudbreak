@@ -383,7 +383,8 @@ commondb:
         max-size: "10M"
         max-file: "5"
     image: postgres:$DOCKER_TAG_POSTGRES
-    command: 'postgres -c max_connections=300'
+    entrypoint: ["/bin/bash"]
+    command: -c 'cd /var/lib/postgresql; touch .ash_history .psql_history; chown -R postgres:postgres /var/lib/postgresql; (/docker-entrypoint.sh postgres -c max_connections=300) & PGPID="\$\$!"; echo "PGPID \$\$PGPID"; trap "kill \$\$PGPID; wait \$\$PGPID" SIGINT SIGTERM; cd /var/lib/postgresql; (tail -f .*history) & wait "\$\$PGPID"'
 
 identity:
     labels:
