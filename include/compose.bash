@@ -120,11 +120,15 @@ compose-get-container() {
 compose-logs() {
     declare desc='Follow all logs. Starts from begining. Separate service names by space to filter, e.g. "cbd logs cloudbreak uluwatu"'
 
+    disable_cbd_output_copy_to_log
+
     dockerCompose logs -f "$@"
 }
 
 compose-logs-tail() {
     declare desc='Same as "logs" but doesnt includes previous messages'
+
+    disable_cbd_output_copy_to_log
 
     dockerCompose logs -f --tail=1 "$@"
 }
