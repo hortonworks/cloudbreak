@@ -136,6 +136,8 @@ public class ClusterHostServiceRunner {
             servicePillar.put("kerberos", new SaltPillarProperties("/kerberos/init.sls", singletonMap("kerberos", kerberosPillarConf)));
         }
         servicePillar.put("discovery", new SaltPillarProperties("/discovery/init.sls", singletonMap("platform", stack.cloudPlatform())));
+        servicePillar.put("metadata", new SaltPillarProperties("/metadata/init.sls",
+                singletonMap("cluster", singletonMap("name", stack.getCluster().getName()))));
         saveGatewayPillar(primaryGatewayConfig, cluster, servicePillar);
         AmbariRepo ambariRepo = clusterComponentConfigProvider.getAmbariRepo(cluster.getId());
         if (ambariRepo != null) {
