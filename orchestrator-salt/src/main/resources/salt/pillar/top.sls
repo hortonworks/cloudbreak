@@ -8,6 +8,7 @@ base:
     - unbound.forwarders
     - datalake.init
     - docker
+    - metadata.init
 
   'roles:gateway':
     - match: grain
