@@ -15,6 +15,7 @@ import org.springframework.util.StringUtils;
 
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.ConnectorV1Endpoint;
+import com.sequenceiq.cloudbreak.api.model.PlatformAccessConfigsResponse;
 import com.sequenceiq.cloudbreak.api.model.PlatformDisksJson;
 import com.sequenceiq.cloudbreak.api.model.PlatformGatewaysResponse;
 import com.sequenceiq.cloudbreak.api.model.PlatformIpPoolsResponse;
@@ -35,6 +36,7 @@ import com.sequenceiq.cloudbreak.api.model.SpecialParameters;
 import com.sequenceiq.cloudbreak.api.model.SpecialParametersJson;
 import com.sequenceiq.cloudbreak.api.model.TagSpecificationsJson;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
+import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfigs;
 import com.sequenceiq.cloudbreak.cloud.model.CloudGateWays;
 import com.sequenceiq.cloudbreak.cloud.model.CloudIpPools;
 import com.sequenceiq.cloudbreak.cloud.model.CloudNetworks;
@@ -248,6 +250,16 @@ public class PlatformParameterV1Controller implements ConnectorV1Endpoint {
         CloudIpPools cloudIpPools = cloudParameterService.getPublicIpPools(convert.getCredential(), convert.getRegion(),
                 convert.getPlatformVariant(), convert.getFilters());
         return conversionService.convert(cloudIpPools, PlatformIpPoolsResponse.class);
+    }
+
+    @Override
+    public PlatformAccessConfigsResponse getAccessConfigs(PlatformResourceRequestJson resourceRequestJson) {
+        resourceRequestJson = prepareAccountAndOwner(resourceRequestJson, authenticatedUserService.getCbUser());
+        PlatformResourceRequest convert = conversionService.convert(resourceRequestJson, PlatformResourceRequest.class);
+
+        CloudAccessConfigs cloudAccessConfigs = cloudParameterService.getCloudAccessConfigs(convert.getCredential(), convert.getRegion(),
+                convert.getPlatformVariant(), convert.getFilters());
+        return conversionService.convert(cloudAccessConfigs, PlatformAccessConfigsResponse.class);
     }
 
     private PlatformResourceRequestJson prepareAccountAndOwner(PlatformResourceRequestJson resourceRequestJson, IdentityUser user) {

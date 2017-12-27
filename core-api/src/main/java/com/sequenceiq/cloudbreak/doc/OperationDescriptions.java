@@ -242,6 +242,7 @@ public class OperationDescriptions {
         public static final String GET_VMTYPES_BY_CREDENTIAL = "retrive vmtype properties by credential";
         public static final String GET_GATEWAYS = "retrive gateways with properties";
         public static final String GET_IPPOOLS = "retrive ip pools with properties";
+        public static final String GET_ACCESSCONFIGS = "retrive access configs with properties";
     }
 
     public static class SettingsOpDescription {

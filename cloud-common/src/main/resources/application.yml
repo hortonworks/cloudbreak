@@ -7,7 +7,6 @@ spring:
     prefer-file-system-access: false
   datasource:
     maxActive: 30
-
 rest:
   debug: false
 cert:
@@ -15,6 +14,7 @@ cert:
   ignorePreValidation: false
 
 cb:
+  enabledplatforms: AZURE,AWS,GCP,OPENSTACK
   publicip:
   etc.config.dir: /etc/cloudbreak
   threadpool:

@@ -30,6 +30,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.PlatformResources;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
+import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfigs;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudGateWay;
 import com.sequenceiq.cloudbreak.cloud.model.CloudGateWays;
@@ -282,6 +283,11 @@ public class OpenStackPlatformResources implements PlatformResources {
         }
         LOGGER.info("openstack public ip pool result: {}", cloudIpPools);
         return new CloudIpPools(cloudIpPools);
+    }
+
+    @Override
+    public CloudAccessConfigs accessConfigs(CloudCredential cloudCredential, Region region, Map<String, String> filters) throws Exception {
+        return new CloudAccessConfigs(new HashSet<>());
     }
 
     private VolumeParameterConfig volumeParameterConfig(VolumeParameterType volumeParameterType) {

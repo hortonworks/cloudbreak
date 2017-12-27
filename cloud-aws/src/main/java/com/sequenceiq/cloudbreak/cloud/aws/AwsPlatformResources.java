@@ -23,6 +23,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
+import com.amazonaws.AmazonServiceException;
 import com.amazonaws.regions.RegionUtils;
 import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.DescribeAvailabilityZonesRequest;
@@ -42,10 +43,16 @@ import com.amazonaws.services.ec2.model.KeyPairInfo;
 import com.amazonaws.services.ec2.model.SecurityGroup;
 import com.amazonaws.services.ec2.model.Subnet;
 import com.amazonaws.services.ec2.model.Vpc;
+import com.amazonaws.services.identitymanagement.AmazonIdentityManagement;
+import com.amazonaws.services.identitymanagement.model.InstanceProfile;
+import com.amazonaws.services.identitymanagement.model.ListInstanceProfilesResult;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.cloud.PlatformResources;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
+import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
+import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfig;
+import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfigs;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudGateWay;
 import com.sequenceiq.cloudbreak.cloud.model.CloudGateWays;
@@ -81,6 +88,8 @@ import com.sequenceiq.cloudbreak.util.JsonUtil;
 @Service
 public class AwsPlatformResources implements PlatformResources {
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsPlatformResources.class);
+
+    private static final int UNAUTHORIZED = 403;
 
     @Inject
     private AwsClient awsClient;
@@ -394,5 +403,41 @@ public class AwsPlatformResources implements PlatformResources {
     @Override
     public CloudIpPools publicIpPool(CloudCredential cloudCredential, Region region, Map<String, String> filters) throws Exception {
         return new CloudIpPools();
+    }
+
+    @Override
+    public CloudAccessConfigs accessConfigs(CloudCredential cloudCredential, Region region, Map<String, String> filters) throws Exception {
+        String queryFailedMessage = "Could not get instance profile roles from Amazon: ";
+
+        CloudAccessConfigs cloudAccessConfigs = new CloudAccessConfigs(new HashSet<>());
+        AwsCredentialView awsCredentialView = new AwsCredentialView(cloudCredential);
+        AmazonIdentityManagement client = awsClient.createAmazonIdentityManagement(awsCredentialView);
+        try {
+            ListInstanceProfilesResult listRolesResult = client.listInstanceProfiles();
+            for (InstanceProfile instanceProfile : listRolesResult.getInstanceProfiles()) {
+                Map<String, Object> properties = new HashMap<>();
+                properties.put("arn", instanceProfile.getArn());
+                properties.put("creationDate", instanceProfile.getCreateDate().toString());
+
+                cloudAccessConfigs.getCloudAccessConfigs().add(
+                        new CloudAccessConfig(
+                                instanceProfile.getInstanceProfileName(),
+                                instanceProfile.getInstanceProfileId(),
+                                properties));
+            }
+        } catch (AmazonServiceException ase) {
+            if (ase.getStatusCode() == UNAUTHORIZED) {
+                String policyMessage = "Could not get instance profile roles because the user does not have enough permission.";
+                LOGGER.info(policyMessage + ase);
+                throw new CloudConnectorException(policyMessage, ase);
+            } else {
+                LOGGER.error(queryFailedMessage, ase);
+                throw new CloudConnectorException(queryFailedMessage + ase.getMessage(), ase);
+            }
+        } catch (Exception e) {
+            LOGGER.error(queryFailedMessage, e);
+            throw new CloudConnectorException(queryFailedMessage + e.getMessage(), e);
+        }
+        return cloudAccessConfigs;
     }
 }
