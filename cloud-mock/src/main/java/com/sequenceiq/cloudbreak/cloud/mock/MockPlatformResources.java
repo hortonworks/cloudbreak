@@ -1,11 +1,13 @@
 package com.sequenceiq.cloudbreak.cloud.mock;
 
+import java.util.HashSet;
 import java.util.Map;
 
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.PlatformResources;
+import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfigs;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudGateWays;
 import com.sequenceiq.cloudbreak.cloud.model.CloudIpPools;
@@ -54,5 +56,10 @@ public class MockPlatformResources implements PlatformResources {
     @Override
     public CloudIpPools publicIpPool(CloudCredential cloudCredential, Region region, Map<String, String> filters) throws Exception {
         return new CloudIpPools();
+    }
+
+    @Override
+    public CloudAccessConfigs accessConfigs(CloudCredential cloudCredential, Region region, Map<String, String> filters) throws Exception {
+        return new CloudAccessConfigs(new HashSet<>());
     }
 }

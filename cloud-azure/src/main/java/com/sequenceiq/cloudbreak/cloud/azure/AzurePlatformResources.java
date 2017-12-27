@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.cloud.PlatformResources;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClientService;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
+import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfigs;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudGateWays;
 import com.sequenceiq.cloudbreak.cloud.model.CloudIpPools;
@@ -180,6 +181,11 @@ public class AzurePlatformResources implements PlatformResources {
     @Override
     public CloudIpPools publicIpPool(CloudCredential cloudCredential, Region region, Map<String, String> filters) throws Exception {
         return new CloudIpPools();
+    }
+
+    @Override
+    public CloudAccessConfigs accessConfigs(CloudCredential cloudCredential, Region region, Map<String, String> filters) throws Exception {
+        return new CloudAccessConfigs(new HashSet<>());
     }
 
     private VolumeParameterConfig volumeParameterConfig(VolumeParameterType volumeParameterType, VirtualMachineSize virtualMachineSize) {

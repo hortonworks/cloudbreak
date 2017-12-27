@@ -13,6 +13,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
+import com.sequenceiq.cloudbreak.api.model.PlatformAccessConfigsResponse;
 import com.sequenceiq.cloudbreak.api.model.PlatformDisksJson;
 import com.sequenceiq.cloudbreak.api.model.PlatformGatewaysResponse;
 import com.sequenceiq.cloudbreak.api.model.PlatformIpPoolsResponse;
@@ -179,4 +180,12 @@ public interface ConnectorV1Endpoint {
     @ApiOperation(value = ConnectorOpDescription.GET_IPPOOLS, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES,
             nickname = "getIpPoolsCredentialId")
     PlatformIpPoolsResponse getIpPoolsCredentialId(PlatformResourceRequestJson resourceRequestJson);
+
+    @POST
+    @Path("accessconfigs")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = ConnectorOpDescription.GET_ACCESSCONFIGS, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES,
+            nickname = "getAccessConfigs")
+    PlatformAccessConfigsResponse getAccessConfigs(PlatformResourceRequestJson resourceRequestJson);
+
 }

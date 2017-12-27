@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cloud;
 import java.util.Map;
 
 import com.google.common.base.Strings;
+import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfigs;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudGateWays;
 import com.sequenceiq.cloudbreak.cloud.model.CloudIpPools;
@@ -73,6 +74,14 @@ public interface PlatformResources {
      * @return the {@link CloudIpPool} contains every ip pool per region
      */
     CloudIpPools publicIpPool(CloudCredential cloudCredential, Region region, Map<String, String> filters) throws Exception;
+
+    /**
+     * Return the accessConfigs
+     * @param region region of the resources (if null then the method will query every region)
+     * @param filters the filter statement
+     * @return the {@link CloudAccessConfigs} contains every accessrole
+     */
+    CloudAccessConfigs accessConfigs(CloudCredential cloudCredential, Region region, Map<String, String> filters) throws Exception;
 
     default boolean regionMatch(Region actualRegion, Region expectedRegion) {
         if (expectedRegion != null && !Strings.isNullOrEmpty(expectedRegion.value())) {

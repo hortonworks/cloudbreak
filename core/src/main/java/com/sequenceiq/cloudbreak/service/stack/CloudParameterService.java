@@ -17,6 +17,8 @@ import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetDiskTypesRequest;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetDiskTypesResult;
+import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformCloudAccessConfigsRequest;
+import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformCloudAccessConfigsResult;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformCloudGatewaysRequest;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformCloudGatewaysResult;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformCloudIpPoolsRequest;
@@ -45,6 +47,7 @@ import com.sequenceiq.cloudbreak.cloud.event.platform.GetVirtualMachineTypesRequ
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetVirtualMachineTypesResult;
 import com.sequenceiq.cloudbreak.cloud.event.platform.PlatformParametersRequest;
 import com.sequenceiq.cloudbreak.cloud.event.platform.PlatformParametersResult;
+import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfigs;
 import com.sequenceiq.cloudbreak.cloud.model.CloudGateWays;
 import com.sequenceiq.cloudbreak.cloud.model.CloudIpPools;
 import com.sequenceiq.cloudbreak.cloud.model.CloudNetworks;
@@ -369,6 +372,26 @@ public class CloudParameterService {
             return res.getCloudIpPools();
         } catch (InterruptedException e) {
             LOGGER.error("Error while getting the platform publicIpPools", e);
+            throw new OperationException(e);
+        }
+    }
+
+    public CloudAccessConfigs getCloudAccessConfigs(Credential credential, String region, String variant, Map<String, String> filters) {
+        LOGGER.debug("Get platform accessConfigs");
+        ExtendedCloudCredential cloudCredential = credentialToExtendedCloudCredentialConverter.convert(credential);
+        GetPlatformCloudAccessConfigsRequest getPlatformCloudAccessConfigsRequest =
+                new GetPlatformCloudAccessConfigsRequest(cloudCredential, cloudCredential, variant, region, filters);
+        eventBus.notify(getPlatformCloudAccessConfigsRequest.selector(), Event.wrap(getPlatformCloudAccessConfigsRequest));
+        try {
+            GetPlatformCloudAccessConfigsResult res = getPlatformCloudAccessConfigsRequest.await();
+            LOGGER.info("Platform accessConfigs result: {}", res);
+            if (res.getStatus().equals(EventStatus.FAILED)) {
+                LOGGER.error("Failed to get platform accessConfigs", res.getErrorDetails());
+                throw new OperationException(res.getErrorDetails());
+            }
+            return res.getCloudAccessConfigs();
+        } catch (InterruptedException e) {
+            LOGGER.error("Error while getting the platform accessConfigs", e);
             throw new OperationException(e);
         }
     }
