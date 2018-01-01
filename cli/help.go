@@ -8,6 +8,8 @@ import (
 	"text/tabwriter"
 	"text/template"
 
+	"github.com/hortonworks/cb-cli/cli/utils"
+
 	"github.com/urfave/cli"
 )
 
@@ -126,7 +128,9 @@ func HiddenCommands(app cli.App) []cli.Command {
 
 func ShowHiddenCommands(c *cli.Context) error {
 	cli.AppHelpTemplate = HiddenAppHelpTemplate
-	cli.ShowAppHelp(c)
+	if err := cli.ShowAppHelp(c); err != nil {
+		utils.LogErrorAndExit(err)
+	}
 	return nil
 }
 
@@ -139,8 +143,7 @@ func PrintHelp(out io.Writer, templ string, data interface{}) {
 	}
 	w := tabwriter.NewWriter(out, 1, 8, 2, ' ', 0)
 	t := template.Must(template.New("help").Funcs(funcMap).Parse(templ))
-	err := t.Execute(w, data)
-	if err != nil {
+	if err := t.Execute(w, data); err != nil {
 		// If the writer is closed, t.Execute will fail, and there's nothing
 		// we can do to recover.
 		if os.Getenv("CLI_TEMPLATE_ERROR_DEBUG") != "" {
@@ -148,5 +151,7 @@ func PrintHelp(out io.Writer, templ string, data interface{}) {
 		}
 		return
 	}
-	w.Flush()
+	if err := w.Flush(); err != nil {
+		utils.LogErrorAndExit(err)
+	}
 }

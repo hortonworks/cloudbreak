@@ -4,7 +4,8 @@ COMMON_ARGS_WO_CLUSTER=" --server ${CLOUD_URL} --username ${EMAIL} --password ${
 
 AWS_ARGS_KEY=" --name cli-aws-key --access-key testaccess --secret-key testsecretkey "
 AWS_ARGS_ROLE=" --name cli-aws-role --role-arn  testawsrole "
-OPENSTACK_ARGS=" --name cli-openstack --tenant-user testuser  --tenant-password testpassword --tenant-name testtenant --endpoint http://1.1.1.1:5000/v2.0"
+OPENSTACK_ARGS_V2=" --name cli-openstack --tenant-user testuser  --tenant-password testpassword --tenant-name testtenant --endpoint http://1.1.1.1:5000/v2.0"
+OPENSTACK_ARGS_V3=" --name cli-openstack --tenant-user testuser  --tenant-password testpassword --user-domain testtenant --endpoint http://1.1.1.1:5000/v2.0"
 GCP_ARGS=" --name cli-gcp --project-id testprojet --service-account-id testuser@siq-haas.iam.gserviceaccount.com --service-account-private-key-file test.p12"
 AZURE_ARGS=" --name cli-azure --subscription-id aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaa --tenant-id aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaa --app-id aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaa --app-password testpassword"
 
@@ -30,12 +31,12 @@ AZURE_ARGS=" --name cli-azure --subscription-id aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaa
 }
 
 @test "Check create openstack credential" {
-  CHECK_RESULT=$( create-credential-openstack-v2 $OPENSTACK_ARGS )
+  CHECK_RESULT=$( create-credential-openstack-v2 $OPENSTACK_ARGS_V2 )
   echo $CHECK_RESULT >&2
 }
 
 @test "Check create openstack credential" {
-  CHECK_RESULT=$( create-credential-openstack-v3 $OPENSTACK_ARGS )
+  CHECK_RESULT=$( create-credential-openstack-v3 $OPENSTACK_ARGS_V3 )
   echo $CHECK_RESULT >&2
 }
 

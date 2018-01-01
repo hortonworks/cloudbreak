@@ -46,7 +46,7 @@ RECIPE_FILE="e2e/recipe.sh"
  }
 
  @test "Check recipe create from file pre-termination" {
-   run create-recipe from-file --name recipe --execution-type pre-termination --url ${RECIPE_URL}
+   run create-recipe from-file --name recipe --execution-type pre-termination --file ${RECIPE_FILE}
    echo $output
    [ $status = 0 ]
  }

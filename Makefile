@@ -13,11 +13,14 @@ ifeq ($(CB_PORT),)
         CB_PORT = 9091
 endif
 
-deps:
+deps: deps-errcheck
 	go get -u github.com/golang/dep/cmd/dep
 	go get -u golang.org/x/tools/cmd/goimports
 	curl -o $(GOPATH)/bin/swagger -L'#' https://github.com/go-swagger/go-swagger/releases/download/0.12.0/swagger_$(shell echo `uname`|tr '[:upper:]' '[:lower:]')_amd64
 	chmod +x $(GOPATH)/bin/swagger
+
+deps-errcheck:
+	go get -u github.com/kisielk/errcheck
 
 format:
 	@gofmt -w ${GOFILES_NOVENDOR}
@@ -28,6 +31,9 @@ vet:
 test:
 	go test -race ./...
 
+errcheck:
+	errcheck -ignoretests ./...
+
 coverage:
 	go test github.com/hortonworks/cb-cli/cli -cover
 
@@ -36,11 +42,11 @@ coverage-html:
 	@go tool cover -html=fmt
 	@rm -f fmt
 
-build: format vet test build-darwin build-linux build-windows
+build: errcheck format vet test build-darwin build-linux build-windows
 
 build-docker:
 	@#USER_NS='-u $(shell id -u $(whoami)):$(shell id -g $(whoami))'
-	docker run --rm ${USER_NS} -v "${PWD}":/go/src/github.com/hortonworks/cb-cli -w /go/src/github.com/hortonworks/cb-cli -e VERSION=${VERSION} golang:1.9 make build
+	docker run --rm ${USER_NS} -v "${PWD}":/go/src/github.com/hortonworks/cb-cli -w /go/src/github.com/hortonworks/cb-cli -e VERSION=${VERSION} golang:1.9 make deps-errcheck build
 
 build-darwin:
 	GOOS=darwin CGO_ENABLED=0 go build -a ${LDFLAGS} -o build/Darwin/${BINARY} main.go

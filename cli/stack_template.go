@@ -138,7 +138,9 @@ func generateStackTemplateImpl(mode cloud.NetworkMode, stringFinder func(string)
 
 func getNodesByBlueprint(bp []byte) []cloud.Node {
 	var bpJson map[string]interface{}
-	json.Unmarshal(bp, &bpJson)
+	if err := json.Unmarshal(bp, &bpJson); err != nil {
+		utils.LogErrorAndExit(err)
+	}
 	nodes := []*cloud.Node{}
 	if bpJson["host_groups"] == nil {
 		utils.LogErrorMessageAndExit("host_groups not found in blueprint")

@@ -174,6 +174,8 @@ func decodeAndParseToJson(encodedBlueprint string) map[string]interface{} {
 	}
 	log.Debugf("[decodeAndParseToJson] parse blueprint to JSON")
 	var blueprintJson map[string]interface{}
-	json.Unmarshal(b, &blueprintJson)
+	if err = json.Unmarshal(b, &blueprintJson); err != nil {
+		utils.LogErrorAndExit(err)
+	}
 	return blueprintJson
 }

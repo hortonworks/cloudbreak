@@ -16,7 +16,7 @@ load ../commands
 }
 
 @test "Get images - openstack" {
-  CHECK_RESULT=$( get-images openstack --imagecatalog a --region b )
+  CHECK_RESULT=$( get-images openstack --imagecatalog a )
   echo $CHECK_RESULT >&2
 }
 

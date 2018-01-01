@@ -47,10 +47,12 @@ func main() {
 	}
 
 	var buf bytes.Buffer
-	if err := format.Node(&buf, fset, file); err != nil {
+	if err = format.Node(&buf, fset, file); err != nil {
 		panic(err)
 	}
-	ioutil.WriteFile(src, buf.Bytes(), 0644)
+	if err = ioutil.WriteFile(src, buf.Bytes(), 0644); err != nil {
+		panic(err)
+	}
 }
 
 func removeStatement() {

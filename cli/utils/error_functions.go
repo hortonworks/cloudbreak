@@ -33,7 +33,9 @@ func LogMissingParameterAndExit(c *cli.Context, missingFlags []string, message .
 	} else {
 		LogErrorMessage(message[0])
 	}
-	cli.ShowSubcommandHelp(c)
+	if err := cli.ShowSubcommandHelp(c); err != nil {
+		LogErrorAndExit(err)
+	}
 	panic("missing")
 }
 

@@ -6,6 +6,7 @@ import (
 	"sort"
 
 	"errors"
+
 	log "github.com/Sirupsen/logrus"
 	cb "github.com/hortonworks/cb-cli/cli"
 	_ "github.com/hortonworks/cb-cli/cli/cloud/aws"
@@ -43,19 +44,25 @@ func ConfigRead(c *cli.Context) error {
 		utils.LogErrorAndExit(err)
 	}
 
+	set := func(name, value string) {
+		if err := c.Set(name, value); err != nil {
+			log.Debug(err)
+		}
+	}
+
 	if len(output) == 0 {
-		c.Set(cb.FlOutputOptional.Name, config.Output)
+		set(cb.FlOutputOptional.Name, config.Output)
 	}
 
 	if len(authType) == 0 {
 		authType = config.AuthType
 		if len(authType) == 0 {
-			c.Set(cb.FlAuthTypeOptional.Name, cb.OAUTH2)
+			set(cb.FlAuthTypeOptional.Name, cb.OAUTH2)
 		} else {
 			if authType != cb.OAUTH2 && authType != cb.BASIC {
 				utils.LogErrorAndExit(errors.New(fmt.Sprintf("invalid authentication type, accepted values: [%s, %s]", cb.OAUTH2, cb.BASIC)))
 			}
-			c.Set(cb.FlAuthTypeOptional.Name, authType)
+			set(cb.FlAuthTypeOptional.Name, authType)
 		}
 	}
 
@@ -69,13 +76,13 @@ func ConfigRead(c *cli.Context) error {
 		PrintConfig(*config)
 
 		if len(server) == 0 {
-			c.Set(cb.FlServerOptional.Name, config.Server)
+			set(cb.FlServerOptional.Name, config.Server)
 		}
 		if len(username) == 0 {
-			c.Set(cb.FlUsername.Name, config.Username)
+			set(cb.FlUsername.Name, config.Username)
 		}
 		if len(password) == 0 {
-			c.Set(cb.FlPassword.Name, config.Password)
+			set(cb.FlPassword.Name, config.Password)
 		}
 	}
 	return nil
@@ -1072,5 +1079,7 @@ func main() {
 		},
 	}...)
 
-	app.Run(os.Args)
+	if err := app.Run(os.Args); err != nil {
+		panic(err)
+	}
 }

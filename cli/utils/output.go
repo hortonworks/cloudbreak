@@ -29,7 +29,9 @@ func (o *Output) Write(header []string, row Row) {
 		enc := json.NewEncoder(buf)
 		enc.SetEscapeHTML(false)
 		enc.SetIndent("", "  ")
-		enc.Encode(row)
+		if err := enc.Encode(row); err != nil {
+			LogErrorAndExit(err)
+		}
 		fmt.Println(buf.String())
 	}
 }

@@ -42,7 +42,11 @@ func ReadContentFromURL(urlLocation string, client *http.Client) []byte {
 	if err != nil {
 		LogErrorAndExit(err)
 	}
-	defer resp.Body.Close()
+	defer func() {
+		if err := resp.Body.Close(); err != nil {
+			LogErrorAndExit(err)
+		}
+	}()
 	if resp.StatusCode != 200 {
 		LogErrorMessageAndExit(fmt.Sprintf("Couldn't download content from URL, response code is %d, expected: 200.", resp.StatusCode))
 	}
