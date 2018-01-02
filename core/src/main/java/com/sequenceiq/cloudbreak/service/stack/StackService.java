@@ -379,6 +379,9 @@ public class StackService {
             imageService.create(savedStack, connector.getPlatformParameters(stack), imageCatalog, imageId);
             LOGGER.info("Image creation took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
+            start = System.currentTimeMillis();
+            flowManager.triggerProvisioning(savedStack.getId());
+            LOGGER.info("Stack provision triggered in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
         } catch (DataIntegrityViolationException ex) {
             String msg = String.format("Error with resource [%s], error: [%s]", APIResourceType.STACK, getProperSqlErrorMessage(ex));
             throw new BadRequestException(msg);
@@ -449,12 +452,12 @@ public class StackService {
 
     private Set<StackResponse> convertStacks(Set<Stack> stacks) {
         return (Set<StackResponse>) conversionService.convert(stacks, TypeDescriptor.forObject(stacks),
-                TypeDescriptor.collection(Set.class, TypeDescriptor.valueOf(StackResponse.class)));
+            TypeDescriptor.collection(Set.class, TypeDescriptor.valueOf(StackResponse.class)));
     }
 
     private Set<AutoscaleStackResponse> convertStacksForAutoscale(Set<Stack> stacks) {
         return (Set<AutoscaleStackResponse>) conversionService.convert(stacks, TypeDescriptor.forObject(stacks),
-                TypeDescriptor.collection(Set.class, TypeDescriptor.valueOf(AutoscaleStackResponse.class)));
+            TypeDescriptor.collection(Set.class, TypeDescriptor.valueOf(AutoscaleStackResponse.class)));
     }
 
     private void repairFailedNodes(Stack stack) {
@@ -490,10 +493,10 @@ public class StackService {
             eventService.fireCloudbreakEvent(stack.getId(), STOPPED.name(), statusDesc);
         } else if (reason != StopRestrictionReason.NONE) {
             throw new BadRequestException(
-                    String.format("Cannot stop a stack '%s'. Reason: %s", stack.getId(), reason.getReason()));
+                String.format("Cannot stop a stack '%s'. Reason: %s", stack.getId(), reason.getReason()));
         } else if (!stack.isAvailable() && !stack.isStopFailed()) {
             throw new BadRequestException(
-                    String.format("Cannot update the status of stack '%s' to STOPPED, because it isn't in AVAILABLE state.", stack.getId()));
+                String.format("Cannot update the status of stack '%s' to STOPPED, because it isn't in AVAILABLE state.", stack.getId()));
         } else if ((cluster != null && !cluster.isStopped()) && !stack.isStopFailed()) {
             if (updateCluster) {
                 setStackStatusToStopRequested(stack);
@@ -520,7 +523,7 @@ public class StackService {
             eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(), statusDesc);
         } else if ((!stack.isStopped() || (cluster != null && !cluster.isStopped())) && !stack.isStartFailed()) {
             throw new BadRequestException(
-                    String.format("Cannot update the status of stack '%s' to STARTED, because it isn't in STOPPED state.", stack.getId()));
+                String.format("Cannot update the status of stack '%s' to STARTED, because it isn't in STOPPED state.", stack.getId()));
         } else if (stack.isStopped() || stack.isStartFailed()) {
             stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.START_REQUESTED);
             flowManager.triggerStackStart(stack.getId());
@@ -593,14 +596,14 @@ public class StackService {
             InstanceGroup instanceGroup = stack.getInstanceGroupByInstanceGroupName(instanceGroupAdjustmentJson.getInstanceGroup());
             if (-1 * instanceGroupAdjustmentJson.getScalingAdjustment() > instanceGroup.getNodeCount()) {
                 throw new BadRequestException(String.format("There are %s instances in instance group '%s'. Cannot remove %s instances.",
-                        instanceGroup.getNodeCount(), instanceGroup.getGroupName(),
-                        -1 * instanceGroupAdjustmentJson.getScalingAdjustment()));
+                    instanceGroup.getNodeCount(), instanceGroup.getGroupName(),
+                    -1 * instanceGroupAdjustmentJson.getScalingAdjustment()));
             }
             int removableHosts = instanceMetaDataRepository.findRemovableInstances(stack.getId(), instanceGroupAdjustmentJson.getInstanceGroup()).size();
             if (removableHosts < -1 * instanceGroupAdjustmentJson.getScalingAdjustment()) {
                 throw new BadRequestException(
-                        String.format("There are %s unregistered instances in instance group '%s' but %s were requested. Decommission nodes from the cluster!",
-                                removableHosts, instanceGroup.getGroupName(), instanceGroupAdjustmentJson.getScalingAdjustment() * -1));
+                    String.format("There are %s unregistered instances in instance group '%s' but %s were requested. Decommission nodes from the cluster!",
+                        removableHosts, instanceGroup.getGroupName(), instanceGroupAdjustmentJson.getScalingAdjustment() * -1));
             }
         }
     }
@@ -608,10 +611,10 @@ public class StackService {
     private void validateHostGroupAdjustment(InstanceGroupAdjustmentJson instanceGroupAdjustmentJson, Stack stack, Integer adjustment) {
         Blueprint blueprint = stack.getCluster().getBlueprint();
         Optional<HostGroup> hostGroup = stack.getCluster().getHostGroups().stream()
-                .filter(input -> input.getConstraint().getInstanceGroup().getGroupName().equals(instanceGroupAdjustmentJson.getInstanceGroup())).findFirst();
+            .filter(input -> input.getConstraint().getInstanceGroup().getGroupName().equals(instanceGroupAdjustmentJson.getInstanceGroup())).findFirst();
         if (!hostGroup.isPresent()) {
             throw new BadRequestException(String.format("Instancegroup '%s' not found or not part of stack '%s'",
-                    instanceGroupAdjustmentJson.getInstanceGroup(), stack.getName()));
+                instanceGroupAdjustmentJson.getInstanceGroup(), stack.getName()));
         }
         blueprintValidator.validateHostGroupScalingRequest(blueprint, hostGroup.get(), adjustment);
     }
@@ -619,7 +622,7 @@ public class StackService {
     private void validateStackStatus(Stack stack) {
         if (!stack.isAvailable()) {
             throw new BadRequestException(String.format("Stack '%s' is currently in '%s' state. Node count can only be updated if it's running.", stack.getId(),
-                    stack.getStatus()));
+                stack.getStatus()));
         }
     }
 
@@ -628,10 +631,6 @@ public class StackService {
         if (instanceGroup == null) {
             throw new BadRequestException(String.format("Stack '%s' does not have an instanceGroup named '%s'.", stack.getId(), instanceGroupName));
         }
-    }
-
-    public void delete(Stack stack) {
-        stackRepository.delete(stack.getId());
     }
 
     private void delete(Stack stack, Boolean forced, Boolean deleteDependencies) {

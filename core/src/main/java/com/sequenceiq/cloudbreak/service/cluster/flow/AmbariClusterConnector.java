@@ -282,7 +282,7 @@ public class AmbariClusterConnector {
             blueprintText = updateBlueprintConfiguration(stack, blueprintText, rdsConfigs, fs);
 
             AmbariClient ambariClient = getAmbariClient(stack);
-            ambariRepositoryVersionService.setBaseRepoURL(cluster.getId(), stack.getOrchestrator(), ambariClient);
+            ambariRepositoryVersionService.setBaseRepoURL(stack.getId(), cluster.getId(), stack.getOrchestrator(), ambariClient);
             addBlueprint(stack, ambariClient, blueprintText);
 
             Set<HostMetadata> hostsInCluster = hostMetadataRepository.findHostsInCluster(cluster.getId());
