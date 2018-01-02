@@ -7,6 +7,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javax.ws.rs.ProcessingException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
@@ -74,7 +75,12 @@ public class CachedImageCatalogProvider {
             throw new CloudbreakImageCatalogException(String.format("Failed to get image catalog from '%s' due to: '%s'",
                     target.getUri().toString(), response.getStatusInfo().getReasonPhrase()));
         } else {
-            catalog =  response.readEntity(CloudbreakImageCatalogV2.class);
+            try {
+                catalog = response.readEntity(CloudbreakImageCatalogV2.class);
+            } catch (ProcessingException e) {
+                throw new CloudbreakImageCatalogException(String.format("Failed to process image catalog from '%s' due to: '%s'",
+                        target.getUri().toString(), e.getMessage()));
+            }
         }
         return catalog;
     }
