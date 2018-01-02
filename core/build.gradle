@@ -1,3 +1,6 @@
+import org.ajoberstar.grgit.Grgit
+import com.github.zafarkhaja.semver.Version
+
 buildscript {
   repositories {
     maven { url 'http://repo.spring.io/libs-release' }
@@ -10,6 +13,7 @@ buildscript {
     classpath "com.smokejumperit.gradle.license:Gradle-License-Report:0.0.2"
     classpath "gradle.plugin.com.palantir:jacoco-coverage:0.4.0"
     classpath "gradle.plugin.com.github.jk1:gradle-license-report:0.3.4"
+    classpath "org.ajoberstar:gradle-git:1.7.2"
   }
 }
 
@@ -20,6 +24,7 @@ plugins {
 
 apply plugin: 'org.springframework.boot'
 apply plugin: 'info.solidsoft.pitest'
+apply plugin: 'org.ajoberstar.grgit'
 
 bootRun {
   systemProperty 'spring.profiles.active', System.properties['spring.profiles.active']
@@ -152,8 +157,30 @@ class BuildInfoTask extends DefaultTask {
 
   @TaskAction
   def writeBuildInfo() {
+    File applicationDestination
+
+    // For Local-dev
+    if (buildVersion == "unspecified") {
+      def grgit = Grgit.open(project.file('./..'))
+      def tempBuildVersion = grgit.describe()
+      try {
+        Version v = Version.valueOf(tempBuildVersion)
+        Version.Builder builder = new Version.Builder()
+        builder.setNormalVersion(v.getNormalVersion())
+        builder.setPreReleaseVersion(v.getPreReleaseVersion().split('-')[0])
+        buildVersion = builder.build().toString()
+        project.logger.info("Determined version: " + buildVersion)
+
+      } catch (e) {
+        project.logger.error("Unable to parse git tag as version: " + buildVersion)
+        throw e
+      }
+      applicationDestination = new File("./out/production/resources")
+    } else {
+      applicationDestination = new File(applicationPropertiesPath + "/resources/main")
+    }
+
     destination.mkdirs()
-    File applicationDestination = new File(applicationPropertiesPath + "/resources/main")
     String activeProfile = determineActiveProfile()
     applicationDestination.mkdirs()
     new File(destination, "build.info").withWriter { out ->
