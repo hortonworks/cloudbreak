@@ -23,9 +23,11 @@ import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.amazonaws.AmazonServiceException;
+import com.amazonaws.internal.SdkInternalList;
 import com.amazonaws.services.identitymanagement.AmazonIdentityManagement;
 import com.amazonaws.services.identitymanagement.model.InstanceProfile;
 import com.amazonaws.services.identitymanagement.model.ListInstanceProfilesResult;
+import com.amazonaws.services.identitymanagement.model.Role;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfigs;
@@ -136,6 +138,10 @@ public class AwsPlatformResourcesTest {
         instanceProfile.setCreateDate(new Date());
         instanceProfile.setInstanceProfileId(String.format("profilId-%s", i));
         instanceProfile.setInstanceProfileName(String.format("profilName-%s", i));
+        SdkInternalList<Role> roles = new SdkInternalList();
+        Role role = new Role();
+        role.setRoleName(String.format("roleArn-%s", i));
+        roles.add(role);
         return instanceProfile;
     }
 }
