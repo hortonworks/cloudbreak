@@ -11,6 +11,7 @@ import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.model.CredentialRequest;
+import com.sequenceiq.it.cloudbreak.v2.CloudbreakV2Constants;
 
 public class OpenStackCredentialCreationTest extends AbstractCloudbreakIntegrationTest {
     @Value("${integrationtest.openstackcredential.name}")
@@ -57,5 +58,6 @@ public class OpenStackCredentialCreationTest extends AbstractCloudbreakIntegrati
         // THEN
         Assert.assertNotNull(id);
         getItContext().putContextParam(CloudbreakITContextConstants.CREDENTIAL_ID, id, true);
+        getItContext().putContextParam(CloudbreakV2Constants.CREDENTIAL_NAME, credentialName);
     }
 }

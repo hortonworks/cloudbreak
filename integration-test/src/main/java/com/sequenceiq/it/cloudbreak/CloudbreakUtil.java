@@ -22,6 +22,7 @@ import org.testng.Assert;
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.EventEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.StackV1Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v2.StackV2Endpoint;
 import com.sequenceiq.cloudbreak.api.model.CloudbreakEventsJson;
 import com.sequenceiq.cloudbreak.api.model.HostGroupResponse;
 import com.sequenceiq.cloudbreak.api.model.HostMetadataResponse;
@@ -123,7 +124,17 @@ public class CloudbreakUtil {
     public static void checkClusterAvailability(StackV1Endpoint stackV1Endpoint, String port, String stackId, String ambariUser, String ambariPassowrd,
             boolean checkAmbari) {
         StackResponse stackResponse = stackV1Endpoint.get(Long.valueOf(stackId), new HashSet<>());
+        checkClusterAvailability(stackResponse, port, stackId, ambariUser, ambariPassowrd, checkAmbari);
+    }
 
+    public static void checkClusterAvailability(StackV2Endpoint stackV2Endpoint, String port, String stackId, String ambariUser, String ambariPassowrd,
+            boolean checkAmbari) {
+        StackResponse stackResponse = stackV2Endpoint.get(Long.valueOf(stackId), new HashSet<>());
+        checkClusterAvailability(stackResponse, port, stackId, ambariUser, ambariPassowrd, checkAmbari);
+    }
+
+    private static void checkClusterAvailability(StackResponse stackResponse, String port, String stackId, String ambariUser, String ambariPassowrd,
+            boolean checkAmbari) {
         Assert.assertEquals(stackResponse.getCluster().getStatus(), Status.AVAILABLE, "The cluster hasn't been started!");
         Assert.assertEquals(stackResponse.getStatus(), Status.AVAILABLE, "The stack hasn't been started!");
 
@@ -140,7 +151,15 @@ public class CloudbreakUtil {
 
     public static void checkClusterStopped(StackV1Endpoint stackV1Endpoint, String port, String stackId, String ambariUser, String ambariPassword) {
         StackResponse stackResponse = stackV1Endpoint.get(Long.valueOf(stackId), new HashSet<>());
+        checkClusterStopped(port, ambariUser, ambariPassword, stackResponse);
+    }
 
+    public static void checkClusterStopped(StackV2Endpoint stackV1Endpoint, String port, String stackId, String ambariUser, String ambariPassword) {
+        StackResponse stackResponse = stackV1Endpoint.get(Long.valueOf(stackId), new HashSet<>());
+        checkClusterStopped(port, ambariUser, ambariPassword, stackResponse);
+    }
+
+    private static void checkClusterStopped(String port, String ambariUser, String ambariPassword, StackResponse stackResponse) {
         Assert.assertEquals(stackResponse.getCluster().getStatus(), Status.STOPPED, "The cluster is not stopped!");
         Assert.assertEquals(stackResponse.getStatus(), Status.STOPPED, "The stack is not stopped!");
 
@@ -162,6 +181,16 @@ public class CloudbreakUtil {
         String ambariIp = itContext.getContextParam(CloudbreakITContextConstants.AMBARI_IP_ID);
         if (StringUtils.isEmpty(ambariIp)) {
             StackResponse stackResponse = stackV1Endpoint.get(Long.valueOf(stackId), new HashSet<>());
+            ambariIp = stackResponse.getCluster().getAmbariServerIp();
+            Assert.assertNotNull(ambariIp, "The Ambari IP is not available!");
+            itContext.putContextParam(CloudbreakITContextConstants.AMBARI_IP_ID, ambariIp);
+        }
+        return ambariIp;
+    }
+
+    public static String getAmbariIp(StackResponse stackResponse, IntegrationTestContext itContext) {
+        String ambariIp = itContext.getContextParam(CloudbreakITContextConstants.AMBARI_IP_ID);
+        if (StringUtils.isEmpty(ambariIp)) {
             ambariIp = stackResponse.getCluster().getAmbariServerIp();
             Assert.assertNotNull(ambariIp, "The Ambari IP is not available!");
             itContext.putContextParam(CloudbreakITContextConstants.AMBARI_IP_ID, ambariIp);

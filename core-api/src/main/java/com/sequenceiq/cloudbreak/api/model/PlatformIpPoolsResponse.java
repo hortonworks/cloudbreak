@@ -11,6 +11,9 @@ public class PlatformIpPoolsResponse implements JsonEntity {
 
     private Map<String, Set<IpPoolJson>> ippools = new HashMap<>();
 
+    public PlatformIpPoolsResponse() {
+    }
+
     public PlatformIpPoolsResponse(Map<String, Set<IpPoolJson>> ippools) {
         this.ippools = ippools;
     }
