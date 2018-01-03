@@ -418,7 +418,10 @@ public class AwsPlatformResources implements PlatformResources {
                 Map<String, Object> properties = new HashMap<>();
                 properties.put("arn", instanceProfile.getArn());
                 properties.put("creationDate", instanceProfile.getCreateDate().toString());
-
+                if (!instanceProfile.getRoles().isEmpty()) {
+                    String roleName = instanceProfile.getRoles().get(0).getArn();
+                    properties.put("roleArn", Strings.isNullOrEmpty(roleName) ? instanceProfile.getArn() : roleName);
+                }
                 cloudAccessConfigs.getCloudAccessConfigs().add(
                         new CloudAccessConfig(
                                 instanceProfile.getInstanceProfileName(),
