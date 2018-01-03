@@ -32,6 +32,7 @@ import com.sequenceiq.cloudbreak.client.CloudbreakClient.CloudbreakClientBuilder
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.SuiteContext;
 import com.sequenceiq.it.cloudbreak.config.ITProps;
+import com.sequenceiq.it.cloudbreak.v2.CloudbreakV2Constants;
 import com.sequenceiq.it.config.IntegrationTestConfiguration;
 import com.sequenceiq.it.util.CleanupService;
 
@@ -109,7 +110,7 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
         String password = itContext.getContextParam(IntegrationTestContext.AUTH_PASSWORD);
 
         CloudbreakClient cloudbreakClient = new CloudbreakClientBuilder(cbServerRoot, identity, "cloudbreak_shell")
-                .withCertificateValidation(false).withDebug(true).withCredential(user, password).build();
+                .withCertificateValidation(false).withIgnorePreValidation(true).withDebug(true).withCredential(user, password).build();
         itContext.putContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, cloudbreakClient);
         if (cleanUpBeforeStart) {
             cleanUpService.deleteTestStacksAndResources(cloudbreakClient);
@@ -203,6 +204,7 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
         if (StringUtils.hasLength(stackName)) {
             Long resourceId = endpoint.getPublic(stackName, new HashSet<>()).getId();
             itContext.putContextParam(CloudbreakITContextConstants.STACK_ID, resourceId.toString());
+            itContext.putContextParam(CloudbreakV2Constants.STACK_NAME, stackName);
         }
     }
 

@@ -12,6 +12,7 @@ import org.testng.Assert;
 
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.StackV1Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v2.StackV2Endpoint;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupResponse;
 import com.sequenceiq.cloudbreak.api.model.StackResponse;
 import com.sequenceiq.cloudbreak.api.model.Status;
@@ -40,7 +41,15 @@ public class ScalingUtil {
 
     public static void checkStackScaled(StackV1Endpoint stackV1Endpoint, String stackId, int expectedNodeCount) {
         StackResponse stackResponse = stackV1Endpoint.get(Long.valueOf(stackId), new HashSet<>());
+        checkStackScaled(expectedNodeCount, stackResponse);
+    }
 
+    public static void checkStackScaled(StackV2Endpoint stackV2Endpoint, String stackId, int expectedNodeCount) {
+        StackResponse stackResponse = stackV2Endpoint.get(Long.valueOf(stackId), new HashSet<>());
+        checkStackScaled(expectedNodeCount, stackResponse);
+    }
+
+    private static void checkStackScaled(int expectedNodeCount, StackResponse stackResponse) {
         Assert.assertEquals(stackResponse.getStatus(), Status.AVAILABLE, "The stack hasn't been started!");
         Assert.assertEquals(expectedNodeCount, getNodeCount(stackResponse),
                 "After scaling, the number of the nodes in stack differs from the expected number!");
@@ -49,11 +58,19 @@ public class ScalingUtil {
     public static void checkClusterScaled(StackV1Endpoint stackV1Endpoint, String port, String stackId, String ambariUser, String ambariPassword,
             int expectedNodeCount, IntegrationTestContext itContext) {
         StackResponse stackResponse = stackV1Endpoint.get(Long.valueOf(stackId), new HashSet<>());
+        checkClusterScaled(CloudbreakUtil.getAmbariIp(stackResponse, itContext), port, ambariUser, ambariPassword, expectedNodeCount, stackResponse);
+    }
 
+    public static void checkClusterScaled(StackV2Endpoint stackV2Endpoint, String port, String stackId, String ambariUser, String ambariPassword,
+            int expectedNodeCount, IntegrationTestContext itContext) {
+        StackResponse stackResponse = stackV2Endpoint.get(Long.valueOf(stackId), new HashSet<>());
+        checkClusterScaled(CloudbreakUtil.getAmbariIp(stackResponse, itContext), port, ambariUser, ambariPassword, expectedNodeCount, stackResponse);
+    }
+
+    private static void checkClusterScaled(String ambariIp, String port, String ambariUser, String ambariPassword, int expectedNodeCount,
+            StackResponse stackResponse) {
         Assert.assertEquals(stackResponse.getCluster().getStatus(), Status.AVAILABLE, "The cluster hasn't been started!");
         Assert.assertEquals(stackResponse.getStatus(), Status.AVAILABLE, "The stack hasn't been started!");
-
-        String ambariIp = CloudbreakUtil.getAmbariIp(stackV1Endpoint, stackId, itContext);
 
         AmbariClient ambariClient = new AmbariClient(ambariIp, port, ambariUser, ambariPassword);
         Assert.assertEquals(ambariClient.healthCheck(), "RUNNING", "The Ambari server is not running!");
@@ -64,6 +81,11 @@ public class ScalingUtil {
 
     public static int getNodeCountStack(StackV1Endpoint stackV1Endpoint, String stackId) {
         StackResponse stackResponse = stackV1Endpoint.get(Long.valueOf(stackId), new HashSet<>());
+        return getNodeCount(stackResponse);
+    }
+
+    public static int getNodeCountStack(StackV2Endpoint stackV2Endpoint, String stackId) {
+        StackResponse stackResponse = stackV2Endpoint.get(Long.valueOf(stackId), new HashSet<>());
         return getNodeCount(stackResponse);
     }
 
