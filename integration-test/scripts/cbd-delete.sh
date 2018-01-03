@@ -3,4 +3,4 @@
 cd $INTEGCB_LOCATION
 
 ./cbd kill
-./cbd delete
+./cbd delete --force
