@@ -73,7 +73,7 @@ func assembleStackRequest(c *cli.Context) *models_cloudbreak.StackV2Request {
 	if len(name) != 0 {
 		req.Name = &name
 	}
-	if len(*req.Name) == 0 {
+	if req.Name == nil || len(*req.Name) == 0 {
 		utils.LogErrorMessageAndExit("Name of the cluster must be set either in the template or with the --name command line option.")
 	}
 
