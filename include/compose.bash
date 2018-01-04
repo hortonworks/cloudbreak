@@ -6,6 +6,7 @@ compose-init() {
     deps-require docker-compose 1.13.0
     env-import CB_COMPOSE_PROJECT cbreak
     env-import COMPOSE_HTTP_TIMEOUT 120
+    env-import DOCKER_STOP_TIMEOUT 60
     env-import CBD_LOG_NAME cbreak
     env-import ULUWATU_VOLUME_HOST /dev/null
     env-import ULUWATU_CONTAINER_PATH /hortonworks-cloud-web
@@ -59,7 +60,7 @@ compose-up() {
 compose-kill() {
     declare desc="Kills and removes all cloudbreak related container"
 
-    dockerCompose stop
+    dockerCompose stop --timeout ${DOCKER_STOP_TIMEOUT}
     dockerCompose rm -f
 }
 
@@ -310,7 +311,7 @@ logspout:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     entrypoint: ["/bin/sh"]
-    command: -c 'sleep 1; ROUTE_URIS=\$\$LOGSINK_PORT_3333_TCP /bin/logspout'
+    command: -c 'sleep 1; (ROUTE_URIS=\$\$LOGSINK_PORT_3333_TCP /bin/logspout) & LSPID=\$\$!; trap "kill \$\$LSPID; wait \$\$LSPID" SIGINT SIGTERM; wait \$\$LSPID'
     log_opt:
         max-size: "10M"
         max-file: "5"
@@ -337,6 +338,8 @@ mail:
         - SERVICE_NAME=smtp
         - maildomain=example.com
         - 'smtp_user=admin:$(escape-string-compose-yaml $LOCAL_SMTP_PASSWORD \')'
+    entrypoint: ["/bin/sh"]
+    command: -c '/opt/install.sh; (/usr/bin/supervisord -c /etc/supervisor/supervisord.conf) & SUPERVISORDPID="\$\$!"; trap "kill \$\$SUPERVISORDPID; wait \$\$SUPERVISORDPID" INT TERM; wait \$\$SUPERVISORDPID'
     log_opt:
         max-size: "10M"
         max-file: "5"
