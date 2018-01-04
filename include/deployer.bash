@@ -539,7 +539,26 @@ is_command_needs_profile() {
     [[ ' '"aws bash-complete help init machine version update delete"' ' != *" $1 "* ]]
 }
 
+copy_cbd_output_to_log() {
+    echo "$(date +"%Y-%m-%d %T") $(whoami) $@" >> .cbd_output_history
+
+    # Save descriptors
+    exec 3>&1 4>&2
+
+    # Redirect stdout ( > ) into a named pipe ( >() ) running "tee"
+    exec > >(tee -ia .cbd_output_history)
+
+    # stderr to stdout
+    exec 2>&1
+}
+
+disable_cbd_output_copy_to_log() {
+    #restore descriptors
+    exec 1>&3 2>&4
+}
 main() {
+    copy_cbd_output_to_log $@
+
 	set -eo pipefail; [[ "$TRACE" ]] && set -x
 
     CBD_PROFILE="Profile"
@@ -623,6 +642,8 @@ main() {
     if [[ "$DEBUG" ]]; then
         cmd-export fn-call fn
     fi
+
+    echo "$(date +"%Y-%m-%d %T") $(whoami) $@" >> .cbd_history
 
 	if [[ "${!#}" == "-h" || "${!#}" == "--help" ]]; then
 		local args=("$@")
