@@ -12,5 +12,5 @@ func (p *AzureProvider) GetNetworkParamatersTemplate(mode cloud.NetworkMode) map
 }
 
 func (p *AzureProvider) GetParamatersTemplate() map[string]string {
-	return nil
+	return map[string]string{"encryptStorage": "false"}
 }
