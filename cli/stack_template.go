@@ -195,6 +195,7 @@ func convertNodeToInstanceGroup(provider cloud.CloudProvider, node cloud.Node) *
 		NodeCount:     &node.Count,
 		Type:          node.GroupType,
 		SecurityGroup: provider.GenerateDefaultSecurityGroup(node),
+		Parameters:    provider.GetInstanceGroupParamatersTemplate(node),
 	}
 	return ig
 }

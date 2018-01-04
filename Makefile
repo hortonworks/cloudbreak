@@ -3,7 +3,7 @@ BINARY=cb
 VERSION ?= snapshot
 BUILD_TIME=$(shell date +%FT%T)
 LDFLAGS=-ldflags "-X github.com/hortonworks/cb-cli/cli.Version=${VERSION} -X github.com/hortonworks/cb-cli/cli.BuildTime=${BUILD_TIME}"
-GOFILES_NOVENDOR = $(shell find . -type f -name '*.go' -not -path "./vendor/*")
+GOFILES_NOVENDOR = $(shell find . -type f -name '*.go' -not -path "./vendor/*" -not -path "./.git/*")
 CB_IP = $(shell echo \${IP})
 ifeq ($(CB_IP),)
         CB_IP = 192.168.64.1

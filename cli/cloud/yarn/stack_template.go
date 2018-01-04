@@ -9,3 +9,7 @@ func (p *YarnProvider) GetNetworkParamatersTemplate(mode cloud.NetworkMode) map[
 func (p *YarnProvider) GetParamatersTemplate() map[string]string {
 	return map[string]string{"yarnQueue": "default-developers"}
 }
+
+func (p *YarnProvider) GetInstanceGroupParamatersTemplate(node cloud.Node) map[string]interface{} {
+	return nil
+}

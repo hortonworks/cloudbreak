@@ -3,11 +3,29 @@ package utils
 import (
 	"fmt"
 	"io/ioutil"
+	"math/rand"
 	"net/http"
 	"strings"
+	"time"
 
 	log "github.com/Sirupsen/logrus"
 )
+
+var r *rand.Rand
+
+const randbytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+
+func init() {
+	r = rand.New(rand.NewSource(time.Now().UnixNano()))
+}
+
+func RandStr(n int) string {
+	b := make([]byte, n)
+	for i := range b {
+		b[i] = randbytes[rand.Intn(len(randbytes))]
+	}
+	return string(b)
+}
 
 func SafeInt32Convert(value *int32) int32 {
 	if value == nil {

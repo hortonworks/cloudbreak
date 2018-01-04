@@ -16,6 +16,8 @@ import (
 	"github.com/urfave/cli"
 )
 
+const availabilitySet = "availabilitySet"
+
 var stackHeader []string = []string{"Name", "Description", "CloudPlatform", "StackStatus", "ClusterStatus"}
 
 type stackOut struct {
@@ -72,6 +74,13 @@ func assembleStackRequest(c *cli.Context) *models_cloudbreak.StackV2Request {
 	name := c.String(FlName.Name)
 	if len(name) != 0 {
 		req.Name = &name
+		for _, ig := range req.InstanceGroups {
+			if _, ok := ig.Parameters[availabilitySet]; ok {
+				as := ig.Parameters[availabilitySet].(map[string]interface{})
+				as["name"] = *req.Name + "-" + *ig.Group + "-as"
+				ig.Parameters[availabilitySet] = as
+			}
+		}
 	}
 	if req.Name == nil || len(*req.Name) == 0 {
 		utils.LogErrorMessageAndExit("Name of the cluster must be set either in the template or with the --name command line option.")

@@ -2,6 +2,17 @@ package utils
 
 import "testing"
 
+func TestRandStr(t *testing.T) {
+	res1 := RandStr(10)
+	res2 := RandStr(10)
+	if len(res1) != 10 || len(res2) != 10 {
+		t.Errorf("Wrong length of random strings")
+	}
+	if res1 == res2 {
+		t.Errorf("Random strings are equals")
+	}
+}
+
 func TestSafeInt32ConvertIsNil(t *testing.T) {
 	expected := int32(0)
 	resp := SafeInt32Convert(nil)
