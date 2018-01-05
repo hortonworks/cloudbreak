@@ -65,6 +65,9 @@ public class AzureTemplateBuilder {
                     azureStorage.getArmAttachedStorageOption(cloudStack.getParameters()));
             AzureSecurityView armSecurityView = new AzureSecurityView(cloudStack.getGroups());
 
+            // needed for pre 1.16.5 templates
+            model.put("existingSubnetName", azureUtils.getCustomSubnetIds(network).stream().findFirst().orElse(""));
+
             model.put("customImageId", customImageId);
             model.put("storage_account_name", rootDiskStorage);
             model.put("image_storage_container_name", AzureStorage.IMAGES);

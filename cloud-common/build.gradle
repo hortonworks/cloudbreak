@@ -43,3 +43,18 @@ dependencies {
     testCompile group: 'junit',                             name: 'junit',                          version: junitVersion
     testCompile group: 'org.mockito',                       name: 'mockito-all',                    version: mockitoAllVersion
 }
+
+task testJar(type: Jar, dependsOn: testClasses) {
+  baseName = "test-${project.archivesBaseName}"
+  classifier 'test'
+  from sourceSets.test.output
+  from sourceSets.main.output
+}
+
+configurations {
+  tests
+}
+
+artifacts {
+  tests testJar
+}

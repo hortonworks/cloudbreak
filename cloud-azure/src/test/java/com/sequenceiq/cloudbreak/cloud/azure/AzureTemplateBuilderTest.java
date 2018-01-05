@@ -4,30 +4,35 @@ import static com.sequenceiq.cloudbreak.cloud.azure.subnetstrategy.AzureSubnetSt
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assume.assumeTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
+import static org.mockito.MockitoAnnotations.initMocks;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.commons.codec.binary.Base64;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.ui.freemarker.FreeMarkerConfigurationFactoryBean;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.sequenceiq.cloudbreak.api.model.ArmAttachedStorageOption;
@@ -54,10 +59,11 @@ import com.sequenceiq.cloudbreak.cloud.model.Security;
 import com.sequenceiq.cloudbreak.cloud.model.SecurityRule;
 import com.sequenceiq.cloudbreak.cloud.model.Subnet;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
+import com.sequenceiq.cloudbreak.util.Version;
 
 import freemarker.template.Configuration;
 
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(Parameterized.class)
 public class AzureTemplateBuilderTest {
 
     public static final String CORE_CUSTOM_DATA = "CORE";
@@ -65,6 +71,8 @@ public class AzureTemplateBuilderTest {
     public static final String GATEWAY_CUSTOM_DATA = "GATEWAY";
 
     public static final String CUSTOM_IMAGE_NAME = "cloudbreak-image.vhd";
+
+    public static final String LATEST_TEMPLATE_PATH = "templates/arm-v2.ftl";
 
     @Mock
     private AzureUtils azureUtils;
@@ -106,15 +114,34 @@ public class AzureTemplateBuilderTest {
 
     private final Map<String, String> tags = new HashMap<>();
 
+    private String templatePath;
+
+    public AzureTemplateBuilderTest(String templatePath) {
+        this.templatePath = templatePath;
+    }
+
+    @Parameterized.Parameters(name = "{0}")
+    public static Iterable<? extends Object> getTemplatesPath() {
+        List<String> templates = Lists.newArrayList(LATEST_TEMPLATE_PATH);
+        File[] templateFiles = new File(AzureTemplateBuilderTest.class.getClassLoader().getResource("templates").getPath()).listFiles();
+        List<String> olderTemplates = Arrays.stream(templateFiles).map(file -> {
+            String[] path = file.getPath().split("/");
+            return "templates/" + path[path.length - 1];
+        }).collect(Collectors.toList());
+        templates.addAll(olderTemplates);
+        return templates;
+    }
+
     @Before
     public void setUp() throws Exception {
+        initMocks(this);
         FreeMarkerConfigurationFactoryBean factoryBean = new FreeMarkerConfigurationFactoryBean();
         factoryBean.setPreferFileSystemAccess(false);
         factoryBean.setTemplateLoaderPath("classpath:/");
         factoryBean.afterPropertiesSet();
         Configuration configuration = factoryBean.getObject();
         ReflectionTestUtils.setField(azureTemplateBuilder, "freemarkerConfiguration", configuration);
-        ReflectionTestUtils.setField(azureTemplateBuilder, "armTemplatePath", "templates/arm-v2.ftl");
+        ReflectionTestUtils.setField(azureTemplateBuilder, "armTemplatePath", templatePath);
         ReflectionTestUtils.setField(azureTemplateBuilder, "armTemplateParametersPath", "templates/parameters.ftl");
         Map<InstanceGroupType, String> userData = ImmutableMap.of(
                 InstanceGroupType.CORE, CORE_CUSTOM_DATA,
@@ -207,6 +234,7 @@ public class AzureTemplateBuilderTest {
 
     @Test
     public void buildNoPublicIpNoFirewallButExistingNetwork() {
+        assumeTrue(isTemplateVarsionGreaterOrEqualThan("1.16.5"));
         //GIVEN
         when(azureUtils.isExistingNetwork(any())).thenReturn(true);
         when(azureUtils.getCustomNetworkId(any())).thenReturn("existingNetworkName");
@@ -628,5 +656,14 @@ public class AzureTemplateBuilderTest {
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("projectId", projectId);
         return new CloudCredential(1L, "test", parameters);
+    }
+
+    private boolean isTemplateVarsionGreaterOrEqualThan(String version) {
+        if (LATEST_TEMPLATE_PATH.equals(templatePath)) {
+            return true;
+        }
+        String[] splittedName = templatePath.split("-");
+        String templateVersion = splittedName[splittedName.length - 1].replaceAll("\\.ftl", "");
+        return Version.versionCompare(templateVersion, version) > -1;
     }
 }
