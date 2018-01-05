@@ -21,15 +21,19 @@ public class Image {
 
     private final String osType;
 
+    private final String imageCatalogUrl;
+
     public Image(String imageName, Map<InstanceGroupType, String> userdata) {
-        this(imageName, userdata, "");
+        this(imageName, userdata, "", "");
     }
 
     public Image(@JsonProperty("imageName") String imageName,
             @JsonProperty("userdata") Map<InstanceGroupType, String> userdata,
-            @JsonProperty("osType") String osType) {
+            @JsonProperty("osType") String osType,
+            @JsonProperty("imageCatalogUrl") String imageCatalogUrl) {
         this.imageName = imageName;
         this.userdata = userdata != null ? ImmutableMap.copyOf(userdata) : null;
+        this.imageCatalogUrl = imageCatalogUrl;
         this.osType = osType;
     }
 
@@ -49,11 +53,16 @@ public class Image {
         return osType;
     }
 
+    public String getImageCatalogUrl() {
+        return imageCatalogUrl;
+    }
+
     @Override
     public String toString() {
         return "Image{"
                 + "imageName='" + imageName + '\''
                 + ", osType='" + osType + '\''
+                + ", imageCatalogUrl='" + imageCatalogUrl + '\''
                 + ", userdata=" + userdata + '}';
     }
 }
