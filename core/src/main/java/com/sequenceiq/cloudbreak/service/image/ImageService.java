@@ -68,29 +68,31 @@ public class ImageService {
             Map<InstanceGroupType, String> userData = userDataBuilder.buildUserData(platform, cbSshKeyDer, cbSshKey, sshUser, params,
                     stack.getSecurityConfig().getSaltBootPassword());
 
-            com.sequenceiq.cloudbreak.cloud.model.catalog.Image imgFromCatalog = determineImageFromCatalog(imageId, platformString, imageCatalog);
+            StatedImage imgFromCatalog = determineImageFromCatalog(imageId, platformString, imageCatalog);
             LOGGER.info("Determined image from catalog: {}", imgFromCatalog);
 
-            String imageName = determineImageName(platformString, region, imgFromCatalog);
-            LOGGER.info("Selected VM image for CloudPlatform '{}' and region '{}' is: {}", platformString, region, imageName);
+            String imageName = determineImageName(platformString, region, imgFromCatalog.getImage());
+            String catalogUrl = imgFromCatalog.getImageCatalogUrl();
+            LOGGER.info("Selected VM image for CloudPlatform '{}' and region '{}' is: {} from: {} image catalog",
+                    platformString, region, imageName, catalogUrl);
 
-            List<Component> components = getComponents(stack, userData, imgFromCatalog, imageName);
+            List<Component> components = getComponents(stack, userData, imgFromCatalog.getImage(), imageName, catalogUrl);
             componentConfigProvider.store(components);
         } catch (JsonProcessingException e) {
             throw new CloudbreakServiceException("Failed to create json", e);
         }
     }
 
-    private com.sequenceiq.cloudbreak.cloud.model.catalog.Image determineImageFromCatalog(Optional<String> imageId, String platformString, String catalogName)
+    private StatedImage determineImageFromCatalog(Optional<String> imageId, String platformString, String catalogName)
             throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
-        com.sequenceiq.cloudbreak.cloud.model.catalog.Image imgFromCatalog = null;
+        StatedImage statedImage = null;
         if (imageId.isPresent()) {
-            imgFromCatalog = imageCatalogService.getImageByCatalogName(imageId.get(), catalogName);
+            statedImage = imageCatalogService.getImageByCatalogName(imageId.get(), catalogName);
         } else {
             LOGGER.warn("Image id hasn't been specified for the stack, falling back to a base image.");
-            imgFromCatalog = imageCatalogService.getBaseImages(platformString).stream().findFirst().get();
+            statedImage = imageCatalogService.getBaseImage(platformString);
         }
-        return imgFromCatalog;
+        return statedImage;
     }
 
     private String determineImageName(String platformString, String region, com.sequenceiq.cloudbreak.cloud.model.catalog.Image imgFromCatalog)
@@ -126,9 +128,9 @@ public class ImageService {
     }
 
     private List<Component> getComponents(Stack stack, Map<InstanceGroupType, String> userData,
-            com.sequenceiq.cloudbreak.cloud.model.catalog.Image imgFromCatalog, String imageName) throws JsonProcessingException {
+            com.sequenceiq.cloudbreak.cloud.model.catalog.Image imgFromCatalog, String imageName, String imageCatalogUrl) throws JsonProcessingException {
         List<Component> components = new ArrayList<>();
-        Image image = new Image(imageName, userData, imgFromCatalog.getOsType());
+        Image image = new Image(imageName, userData, imageCatalogUrl, imgFromCatalog.getOsType());
         Component imageComponent = new Component(ComponentType.IMAGE, ComponentType.IMAGE.name(), new Json(image), stack);
         components.add(imageComponent);
 

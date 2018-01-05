@@ -56,6 +56,7 @@ public class ModelDescriptions {
 
     public static class ImageModelDescription {
         public static final String IMAGE_NAME = "name of the image";
+        public static final String IMAGE_CATALOG_URL = "url of the image catalog";
     }
 
     public static class CloudbreakDetailsModelDescription {
