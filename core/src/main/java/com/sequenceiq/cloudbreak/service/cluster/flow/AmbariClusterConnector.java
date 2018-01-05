@@ -516,6 +516,7 @@ public class AmbariClusterConnector {
     public int startCluster(Stack stack) throws CloudbreakException {
         AmbariClient ambariClient = getAmbariClient(stack);
         waitForAmbariToStart(stack);
+        startAmbariAgents(stack);
         return startAllServices(stack, ambariClient);
     }
 
