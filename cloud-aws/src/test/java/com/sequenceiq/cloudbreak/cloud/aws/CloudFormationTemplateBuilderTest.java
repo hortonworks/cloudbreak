@@ -4,15 +4,19 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.assertThat;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.ui.freemarker.FreeMarkerConfigurationFactoryBean;
 
@@ -42,8 +46,10 @@ import com.sequenceiq.cloudbreak.cloud.model.Volume;
 
 import freemarker.template.Configuration;
 
-
+@RunWith(Parameterized.class)
 public class CloudFormationTemplateBuilderTest {
+
+    public static final String LATEST_AWS_CLOUD_FORMATION_TEMPLATE_PATH = "templates/aws-cf-stack.ftl";
 
     private final CloudFormationTemplateBuilder cloudFormationTemplateBuilder = new CloudFormationTemplateBuilder();
 
@@ -59,6 +65,24 @@ public class CloudFormationTemplateBuilderTest {
 
     private String existingSubnetCidr;
 
+    private String templatePath;
+
+    public CloudFormationTemplateBuilderTest(String templatePath) {
+        this.templatePath = templatePath;
+    }
+
+    @Parameterized.Parameters(name = "{0}")
+    public static Iterable<? extends Object> getTemplatesPath() {
+        List<String> templates = Lists.newArrayList(LATEST_AWS_CLOUD_FORMATION_TEMPLATE_PATH);
+        File[] templateFiles = new File(CloudFormationTemplateBuilderTest.class.getClassLoader().getResource("templates").getPath()).listFiles();
+        List<String> olderTemplates = Arrays.stream(templateFiles).map(file -> {
+            String[] path = file.getPath().split("/");
+            return "templates/" + path[path.length - 1];
+        }).collect(Collectors.toList());
+        templates.addAll(olderTemplates);
+        return templates;
+    }
+
     @Before
     public void setUp() throws Exception {
         FreeMarkerConfigurationFactoryBean factoryBean = new FreeMarkerConfigurationFactoryBean();
@@ -68,8 +92,7 @@ public class CloudFormationTemplateBuilderTest {
         Configuration configuration = factoryBean.getObject();
         ReflectionTestUtils.setField(cloudFormationTemplateBuilder, "freemarkerConfiguration", configuration);
 
-        String awsCloudFormationTemplatePath = "templates/aws-cf-stack.ftl";
-        awsCloudFormationTemplate = configuration.getTemplate(awsCloudFormationTemplatePath, "UTF-8").toString();
+        awsCloudFormationTemplate = configuration.getTemplate(templatePath, "UTF-8").toString();
         authenticatedContext = authenticatedContext();
         existingSubnetCidr = "testSubnet";
 

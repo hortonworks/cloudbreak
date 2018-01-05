@@ -4,8 +4,11 @@ package com.sequenceiq.cloudbreak.cloud.openstack.heat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assume.assumeTrue;
 import static org.mockito.Mockito.when;
+import static org.mockito.MockitoAnnotations.initMocks;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -13,19 +16,22 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.ui.freemarker.FreeMarkerConfigurationFactoryBean;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
@@ -47,7 +53,7 @@ import com.sequenceiq.cloudbreak.cloud.openstack.view.NeutronNetworkView;
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
 
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(Parameterized.class)
 public class HeatTemplateBuilderTest {
 
     @Mock
@@ -65,15 +71,34 @@ public class HeatTemplateBuilderTest {
 
     private Image image;
 
+    private String templatePath;
+
+    public HeatTemplateBuilderTest(String templatePath) {
+        this.templatePath = templatePath;
+    }
+
+    @Parameterized.Parameters(name = "{0}")
+    public static Iterable<? extends Object> getTemplatesPath() {
+        List<String> templates = Lists.newArrayList("templates/openstack-heat.ftl");
+        File[] templateFiles = new File(HeatTemplateBuilderTest.class.getClassLoader().getResource("templates").getPath()).listFiles();
+        List<String> olderTemplates = Arrays.stream(templateFiles).map(file -> {
+            String[] path = file.getPath().split("/");
+            return "templates/" + path[path.length - 1];
+        }).collect(Collectors.toList());
+        templates.addAll(olderTemplates);
+        return templates;
+    }
+
     @Before
     public void setup() throws IOException, TemplateException {
+        initMocks(this);
         FreeMarkerConfigurationFactoryBean factoryBean = new FreeMarkerConfigurationFactoryBean();
         factoryBean.setPreferFileSystemAccess(false);
         factoryBean.setTemplateLoaderPath("classpath:/");
         factoryBean.afterPropertiesSet();
         Configuration configuration = factoryBean.getObject();
         ReflectionTestUtils.setField(heatTemplateBuilder, "freemarkerConfiguration", configuration);
-        ReflectionTestUtils.setField(heatTemplateBuilder, "openStackHeatTemplatePath", "templates/openstack-heat.ftl");
+        ReflectionTestUtils.setField(heatTemplateBuilder, "openStackHeatTemplatePath", templatePath);
 
         stackName = "testStack";
         groups = new ArrayList<>(1);
@@ -127,6 +152,7 @@ public class HeatTemplateBuilderTest {
 
     @Test
     public void buildTestWithExistingNetworkAndExistingSubnetAndAssignFloatingIpWithExistingSecurityGroups() throws Exception {
+        assumeTrue("Template doesn't support this feature, required version is '2.x' at least", isTemplateMajorVersionGreaterOrEqualThan(2));
         //GIVEN
         boolean existingNetwork = true;
         boolean existingSubnet = true;
@@ -481,6 +507,16 @@ public class HeatTemplateBuilderTest {
     private Location location() {
         Region r = Region.region("local");
         return Location.location(r);
+    }
+
+    private boolean isTemplateMajorVersionGreaterOrEqualThan(int majorVersion) {
+        String[] splittedName = templatePath.split("-");
+        String templateMajorVersion = splittedName[splittedName.length - 1].split("\\.")[0];
+        if (StringUtils.isNumeric(templateMajorVersion)) {
+            return Integer.parseInt(templateMajorVersion) >= majorVersion;
+        }
+        // template has no version, we assume it is the latest one
+        return true;
     }
 
 }
