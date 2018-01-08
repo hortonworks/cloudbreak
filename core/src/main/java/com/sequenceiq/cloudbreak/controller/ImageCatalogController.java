@@ -61,7 +61,8 @@ public class ImageCatalogController implements ImageCatalogEndpoint {
 
     @Override
     public ImagesResponse getImagesByProviderFromImageCatalog(String name, String platform) throws Exception {
-        return conversionService.convert(imageCatalogService.getImages(name, platform), ImagesResponse.class);
+        Images images = imageCatalogService.getImages(name, platform).getImages();
+        return conversionService.convert(images, ImagesResponse.class);
     }
 
     @Override
