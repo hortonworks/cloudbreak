@@ -142,10 +142,11 @@ public class AzureClient {
         azure.resourceGroups().deleteByName(name);
     }
 
-    public ResourceGroup createResourceGroup(String name, String region) {
+    public ResourceGroup createResourceGroup(String name, String region, Map<String, String> tags) {
         return handleAuthException(() ->
                 azure.resourceGroups().define(name)
                 .withRegion(region)
+                .withTags(tags)
                 .create()
         );
     }
@@ -202,12 +203,14 @@ public class AzureClient {
         handleAuthException(() -> azure.storageAccounts().deleteByResourceGroup(resourceGroup, storageName));
     }
 
-    public StorageAccount createStorageAccount(String resourceGroup, String storageName, String storageLocation, SkuName accType, Boolean encryted) {
+    public StorageAccount createStorageAccount(String resourceGroup, String storageName, String storageLocation, SkuName accType, Boolean encryted,
+            Map<String, String> tags) {
         return handleAuthException(() -> {
             StorageAccount.DefinitionStages.WithCreate withCreate = azure.storageAccounts()
                     .define(storageName)
                     .withRegion(storageLocation)
                     .withExistingResourceGroup(resourceGroup)
+                    .withTags(tags)
                     .withSku(accType);
             if (encryted) {
                 withCreate.withEncryption();
