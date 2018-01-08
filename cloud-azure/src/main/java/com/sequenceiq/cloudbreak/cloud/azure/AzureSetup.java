@@ -82,13 +82,13 @@ public class AzureSetup implements Setup {
                 armStorage.getArmAttachedStorageOption(stack.getParameters()));
         String resourceGroupName = azureUtils.getResourceGroupName(ac.getCloudContext());
         if (!client.resourceGroupExists(resourceGroupName)) {
-            client.createResourceGroup(resourceGroupName, region);
+            client.createResourceGroup(resourceGroupName, region, stack.getTags());
         }
         if (!client.resourceGroupExists(imageResourceGroupName)) {
-            client.createResourceGroup(imageResourceGroupName, region);
+            client.createResourceGroup(imageResourceGroupName, region, stack.getTags());
         }
         armStorage.createStorage(client, imageStorageName, AzureDiskType.LOCALLY_REDUNDANT, imageResourceGroupName, region,
-                armStorage.isEncrytionNeeded(stack.getParameters()));
+                armStorage.isEncrytionNeeded(stack.getParameters()), stack.getTags());
         client.createContainerInStorage(imageResourceGroupName, imageStorageName, IMAGES);
         if (!storageContainsImage(client, imageResourceGroupName, imageStorageName, image.getImageName())) {
             client.copyImageBlobInStorageContainer(imageResourceGroupName, imageStorageName, IMAGES, image.getImageName());
@@ -134,7 +134,7 @@ public class AzureSetup implements Setup {
             AzureClient client = ac.getParameter(AzureClient.class);
             persistenceNotifier.notifyAllocation(cloudResource, ac.getCloudContext());
             if (!client.resourceGroupExists(storageGroup)) {
-                client.createResourceGroup(storageGroup, region);
+                client.createResourceGroup(storageGroup, region, stack.getTags());
             }
         } catch (Exception ex) {
             throw new CloudConnectorException(ex);

@@ -84,10 +84,11 @@ public class AzureStorage {
         return buildStorageName(armAttachedStorageOption, acv, vmId, cloudContext, storageType);
     }
 
-    public void createStorage(AzureClient client, String osStorageName, AzureDiskType storageType, String storageGroup, String region, Boolean encrypted)
+    public void createStorage(AzureClient client, String osStorageName, AzureDiskType storageType, String storageGroup, String region, Boolean encrypted,
+            Map<String, String> tags)
             throws CloudException {
         if (!storageAccountExist(client, osStorageName)) {
-            client.createStorageAccount(storageGroup, osStorageName, region, SkuName.fromString(storageType.value()), encrypted);
+            client.createStorageAccount(storageGroup, osStorageName, region, SkuName.fromString(storageType.value()), encrypted, tags);
         }
     }
 
