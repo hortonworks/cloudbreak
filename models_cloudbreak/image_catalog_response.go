@@ -38,6 +38,7 @@ type ImageCatalogResponse struct {
 
 	// custom image catalog's URL
 	// Required: true
+	// Pattern: ^http[s]?://.*
 	URL *string `json:"url"`
 }
 
@@ -123,6 +124,10 @@ func (m *ImageCatalogResponse) validatePublicInAccount(formats strfmt.Registry) 
 func (m *ImageCatalogResponse) validateURL(formats strfmt.Registry) error {
 
 	if err := validate.Required("url", "body", m.URL); err != nil {
+		return err
+	}
+
+	if err := validate.Pattern("url", "body", string(*m.URL), `^http[s]?://.*`); err != nil {
 		return err
 	}
 

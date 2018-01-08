@@ -24,9 +24,6 @@ type ClusterV2Request struct {
 	// ambari specific requests
 	AmbariRequest *AmbariV2Request `json:"ambariRequest,omitempty"`
 
-	// byos specific requests for cluster
-	ByosRequest *ByosV2Request `json:"byosRequest,omitempty"`
-
 	// send email about the result of the cluster installation
 	EmailNeeded *bool `json:"emailNeeded,omitempty"`
 
@@ -53,8 +50,6 @@ type ClusterV2Request struct {
 
 /* polymorph ClusterV2Request ambariRequest false */
 
-/* polymorph ClusterV2Request byosRequest false */
-
 /* polymorph ClusterV2Request emailNeeded false */
 
 /* polymorph ClusterV2Request emailTo false */
@@ -74,11 +69,6 @@ func (m *ClusterV2Request) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateAmbariRequest(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
-	if err := m.validateByosRequest(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -120,25 +110,6 @@ func (m *ClusterV2Request) validateAmbariRequest(formats strfmt.Registry) error 
 		if err := m.AmbariRequest.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("ambariRequest")
-			}
-			return err
-		}
-	}
-
-	return nil
-}
-
-func (m *ClusterV2Request) validateByosRequest(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.ByosRequest) { // not required
-		return nil
-	}
-
-	if m.ByosRequest != nil {
-
-		if err := m.ByosRequest.Validate(formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("byosRequest")
 			}
 			return err
 		}

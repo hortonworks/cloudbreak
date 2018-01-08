@@ -55,6 +55,36 @@ func (a *Client) CreateRecommendation(params *CreateRecommendationParams) (*Crea
 }
 
 /*
+GetAccessConfigs retrives access configs with properties
+
+Each cloud provider has it's own specific resources like instance types and disk types. These endpoints are collecting them.
+*/
+func (a *Client) GetAccessConfigs(params *GetAccessConfigsParams) (*GetAccessConfigsOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetAccessConfigsParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "getAccessConfigs",
+		Method:             "POST",
+		PathPattern:        "/v1/connectors/accessconfigs",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &GetAccessConfigsReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*GetAccessConfigsOK), nil
+
+}
+
+/*
 GetDisktypeByType retrives disks by type
 
 Each cloud provider has it's own specific resources like instance types and disk types. These endpoints are collecting them.

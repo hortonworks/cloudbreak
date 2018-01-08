@@ -23,6 +23,9 @@ type KerberosRequest struct {
 	// Min Length: 5
 	Admin string `json:"admin,omitempty"`
 
+	// kerberos admin server URL
+	AdminURL string `json:"adminUrl,omitempty"`
+
 	// container dn
 	ContainerDn string `json:"containerDn,omitempty"`
 
@@ -54,11 +57,13 @@ type KerberosRequest struct {
 	// tcp allowed
 	TCPAllowed *bool `json:"tcpAllowed,omitempty"`
 
-	// url
+	// kerberos KDC server URL
 	URL string `json:"url,omitempty"`
 }
 
 /* polymorph KerberosRequest admin false */
+
+/* polymorph KerberosRequest adminUrl false */
 
 /* polymorph KerberosRequest containerDn false */
 
