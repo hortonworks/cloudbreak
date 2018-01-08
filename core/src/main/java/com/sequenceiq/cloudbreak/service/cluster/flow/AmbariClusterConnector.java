@@ -282,7 +282,8 @@ public class AmbariClusterConnector {
             blueprintText = updateBlueprintConfiguration(stack, blueprintText, rdsConfigs, fs);
 
             AmbariClient ambariClient = getAmbariClient(stack);
-            ambariRepositoryVersionService.setBaseRepoURL(stack.getId(), cluster.getId(), stack.getOrchestrator(), ambariClient);
+
+            ambariRepositoryVersionService.setBaseRepoURL(stack.getName(), cluster.getId(), stack.getOrchestrator(), ambariClient);
             addBlueprint(stack, ambariClient, blueprintText, hostGroups);
 
             Set<HostMetadata> hostsInCluster = hostMetadataRepository.findHostsInCluster(cluster.getId());
@@ -417,7 +418,7 @@ public class AmbariClusterConnector {
         if (!upscaleHostNames.isEmpty()) {
             recipeEngine.executePostAmbariStartRecipes(stack, Sets.newHashSet(hostGroup));
             PollingResult pollingResult = ambariOperationService.waitForOperations(stack, ambariClient,
-                installServices(upscaleHostNames, stack, ambariClient, hostGroup.getName()), UPSCALE_AMBARI_PROGRESS_STATE);
+                    installServices(upscaleHostNames, stack, ambariClient, hostGroup.getName()), UPSCALE_AMBARI_PROGRESS_STATE);
             checkPollingResult(pollingResult, cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_UPSCALE_FAILED.code()));
         }
     }
