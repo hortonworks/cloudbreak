@@ -121,6 +121,7 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
             if (!client.templateDeploymentExists(resourceGroupName, stackName)) {
                 Deployment templateDeployment = client.createTemplateDeployment(resourceGroupName, stackName, template, parameters);
                 LOGGER.info("created template deployment for launch: {}", templateDeployment.exportTemplate().template());
+                client.collectAndSaveNetworkAndSubnet(resourceGroupName, stackName, notifier, ac.getCloudContext());
             }
         } catch (CloudException e) {
             LOGGER.error("Provisioning error, cloud exception happened: ", e);
@@ -170,6 +171,9 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
                     } catch (RuntimeException e) {
                         throw new CloudConnectorException(String.format("Invalid resource exception: %s", e.getMessage()), e);
                     }
+                    break;
+                case AZURE_NETWORK:
+                case AZURE_SUBNET:
                     break;
                 default:
                     throw new CloudConnectorException(String.format("Invalid resource type: %s", resource.getType()));
