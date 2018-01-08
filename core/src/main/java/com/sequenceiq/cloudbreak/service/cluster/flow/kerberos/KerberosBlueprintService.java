@@ -60,9 +60,11 @@ public class KerberosBlueprintService {
     private String extendBlueprintWithKerberos(String blueprintText, Cluster cluster, String gatewayHost, String realm, String domain, Integer propagationPort,
             KerberosService kerberosService) {
         KerberosConfig kerberosConfig = cluster.getKerberosConfig();
+        String kdcHosts = kerberosDetailService.resolveHostForKerberos(cluster, gatewayHost);
         blueprintText = kerberosService.extendBlueprintWithKerberos(blueprintText,
                 kerberosDetailService.resolveTypeForKerberos(kerberosConfig),
-                kerberosDetailService.resolveHostForKerberos(cluster, gatewayHost),
+                kdcHosts,
+                kerberosDetailService.resolveHostForKdcAdmin(cluster, kdcHosts),
                 realm,
                 kerberosDetailService.getDomains(domain),
                 kerberosDetailService.resolveLdapUrlForKerberos(kerberosConfig),

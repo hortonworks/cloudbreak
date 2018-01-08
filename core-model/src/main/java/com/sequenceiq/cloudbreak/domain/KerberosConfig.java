@@ -32,6 +32,9 @@ public class KerberosConfig implements ProvisionEntity {
     private String kerberosUrl;
 
     @Type(type = "encrypted_string")
+    private String kdcAdminUrl;
+
+    @Type(type = "encrypted_string")
     private String kerberosRealm;
 
     private Boolean kerberosTcpAllowed;
@@ -89,6 +92,14 @@ public class KerberosConfig implements ProvisionEntity {
 
     public void setKerberosUrl(String kerberosUrl) {
         this.kerberosUrl = kerberosUrl;
+    }
+
+    public String getKdcAdminUrl() {
+        return kdcAdminUrl;
+    }
+
+    public void setKdcAdminUrl(String kdcAdminUrl) {
+        this.kdcAdminUrl = kdcAdminUrl;
     }
 
     public String getKerberosRealm() {

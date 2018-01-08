@@ -124,11 +124,13 @@ public class ClusterHostServiceRunner {
             putIfNotNull(kerberosPillarConf, kerberosConfig.getKerberosPassword(), "password");
             if (StringUtils.isEmpty(kerberosConfig.getKerberosDescriptor())) {
                 putIfNotNull(kerberosPillarConf, kerberosConfig.getKerberosUrl(), "url");
+                putIfNotNull(kerberosPillarConf, kerberosConfig.getKdcAdminUrl(), "adminUrl");
                 putIfNotNull(kerberosPillarConf, kerberosConfig.getKerberosRealm(), "realm");
             } else {
                 Map<String, Object> kerberosEnv = (Map<String, Object>) gson.fromJson(kerberosConfig.getKerberosDescriptor(), Map.class).get("kerberos-env");
                 Map<String, Object> properties = (Map<String, Object>) kerberosEnv.get("properties");
                 putIfNotNull(kerberosPillarConf, properties.get("kdc_hosts"), "url");
+                putIfNotNull(kerberosPillarConf, properties.get("admin_server_host"), "adminUrl");
                 putIfNotNull(kerberosPillarConf, properties.get("realm"), "realm");
             }
             putIfNotNull(kerberosPillarConf, cluster.getUserName(), "clusterUser");

@@ -25,8 +25,12 @@ public class KerberosDetailService {
         return "mit-kdc";
     }
 
-    public String resolveHostForKerberos(Cluster cluster, String gatewayHost) {
-        return Strings.isNullOrEmpty(cluster.getKerberosConfig().getKerberosUrl()) ? gatewayHost : cluster.getKerberosConfig().getKerberosUrl();
+    public String resolveHostForKerberos(Cluster cluster, String defaultHost) {
+        return Strings.isNullOrEmpty(cluster.getKerberosConfig().getKerberosUrl()) ? defaultHost : cluster.getKerberosConfig().getKerberosUrl();
+    }
+
+    public String resolveHostForKdcAdmin(Cluster cluster, String defaultHost) {
+        return Strings.isNullOrEmpty(cluster.getKerberosConfig().getKdcAdminUrl()) ? defaultHost : cluster.getKerberosConfig().getKdcAdminUrl();
     }
 
     public String getRealm(String gwDomain, KerberosConfig kerberosConfig) {
