@@ -24,7 +24,11 @@ public class KerberosRequest implements JsonEntity {
     @Size(max = 50, min = 5, message = "The length of the Kerberos password has to be in range of 5 to 50")
     private String password;
 
+    @ApiModelProperty(StackModelDescription.KERBEROS_KDC_URL)
     private String url;
+
+    @ApiModelProperty(StackModelDescription.KERBEROS_ADMIN_URL)
+    private String adminUrl;
 
     private String realm;
 
@@ -71,6 +75,14 @@ public class KerberosRequest implements JsonEntity {
 
     public void setUrl(String url) {
         this.url = url;
+    }
+
+    public String getAdminUrl() {
+        return adminUrl;
+    }
+
+    public void setAdminUrl(String adminUrl) {
+        this.adminUrl = adminUrl;
     }
 
     public String getRealm() {

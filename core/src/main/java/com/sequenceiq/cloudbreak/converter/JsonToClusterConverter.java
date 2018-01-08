@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -57,6 +58,7 @@ public class JsonToClusterConverter extends AbstractConversionServiceAwareConver
             kerberosConfig.setKerberosAdmin(kerberosSource.getAdmin());
             kerberosConfig.setKerberosPassword(kerberosSource.getPassword());
             kerberosConfig.setKerberosUrl(kerberosSource.getUrl());
+            kerberosConfig.setKdcAdminUrl(Optional.ofNullable(kerberosSource.getAdminUrl()).orElse(kerberosSource.getUrl()));
             kerberosConfig.setKerberosRealm(kerberosSource.getRealm());
             kerberosConfig.setKerberosTcpAllowed(kerberosSource.getTcpAllowed());
             kerberosConfig.setKerberosPrincipal(kerberosSource.getPrincipal());

@@ -3,6 +3,7 @@
 {% set password = salt['pillar.get']('kerberos:password') %}
 {% set user = salt['pillar.get']('kerberos:user') %}
 {% set url = salt['pillar.get']('kerberos:url') %}
+{% set adminUrl = salt['pillar.get']('kerberos:adminUrl') %}
 {% set clusterUser = salt['pillar.get']('kerberos:clusterUser') %}
 {% set clusterPassword = salt['pillar.get']('kerberos:clusterPassword') %}
 
@@ -24,6 +25,7 @@
     'password': password,
     'user': user,
     'url': url,
+    'adminUrl': adminUrl,
     'kdcs': servers|join(" "),
     'enable_iprop': enable_iprop,
     'clusterUser': clusterUser,

@@ -90,6 +90,8 @@ public class ModelDescriptions {
         public static final String KERBEROS_MASTER_KEY = "kerberos master key";
         public static final String KERBEROS_ADMIN = "kerberos admin user";
         public static final String KERBEROS_PASSWORD = "kerberos admin password";
+        public static final String KERBEROS_KDC_URL = "kerberos KDC server URL";
+        public static final String KERBEROS_ADMIN_URL = "kerberos admin server URL";
         public static final String KERBEROS_PRINCIPAL = "kerberos principal";
         public static final String PARAMETERS = "additional cloud specific parameters for stack";
         public static final String FAILURE_ACTION = "action on failure";
