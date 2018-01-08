@@ -115,7 +115,7 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
             if (AzureUtils.hasUnmanagedDisk(stack)) {
                 Map<String, AzureDiskType> storageAccounts = azureStackView.getStorageAccounts();
                 for (Entry<String, AzureDiskType> entry : storageAccounts.entrySet()) {
-                    azureStorage.createStorage(client, entry.getKey(), entry.getValue(), resourceGroupName, region, encrytionNeeded);
+                    azureStorage.createStorage(client, entry.getKey(), entry.getValue(), resourceGroupName, region, encrytionNeeded, stack.getTags());
                 }
             }
             if (!client.templateDeploymentExists(resourceGroupName, stackName)) {
@@ -241,7 +241,7 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
             Map<String, AzureDiskType> storageAccounts = azureStackView.getStorageAccounts();
             for (Entry<String, AzureDiskType> entry : storageAccounts.entrySet()) {
                 azureStorage.createStorage(client, entry.getKey(), entry.getValue(), resourceGroupName, region,
-                        azureStorage.isEncrytionNeeded(stack.getParameters()));
+                        azureStorage.isEncrytionNeeded(stack.getParameters()), stack.getTags());
             }
             Deployment templateDeployment = client.createTemplateDeployment(stackName, stackName, template, parameters);
             LOGGER.info("created template deployment for upscale: {}", templateDeployment.exportTemplate().template());
