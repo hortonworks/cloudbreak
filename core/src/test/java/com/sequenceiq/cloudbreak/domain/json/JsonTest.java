@@ -41,7 +41,7 @@ public class JsonTest {
     public void testMultipleSerialisationWithOtherConstructorOfImage() throws IOException {
         Map<InstanceGroupType, String> userData = new HashMap<>();
         userData.put(InstanceGroupType.CORE, "CORE");
-        Image image = new Image("cb-centos66-amb200-2015-05-25", userData, "http://imagecatalog.url", null);
+        Image image = new Image("cb-centos66-amb200-2015-05-25", userData, null, "http://imagecatalog.url");
         Json json = new Json(image);
         String expected = json.getValue();
         Image covertedAgain = json.get(Image.class);
