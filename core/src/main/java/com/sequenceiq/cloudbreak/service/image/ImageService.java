@@ -130,7 +130,7 @@ public class ImageService {
     private List<Component> getComponents(Stack stack, Map<InstanceGroupType, String> userData,
             com.sequenceiq.cloudbreak.cloud.model.catalog.Image imgFromCatalog, String imageName, String imageCatalogUrl) throws JsonProcessingException {
         List<Component> components = new ArrayList<>();
-        Image image = new Image(imageName, userData, imageCatalogUrl, imgFromCatalog.getOsType());
+        Image image = new Image(imageName, userData, imgFromCatalog.getOsType(), imageCatalogUrl);
         Component imageComponent = new Component(ComponentType.IMAGE, ComponentType.IMAGE.name(), new Json(image), stack);
         components.add(imageComponent);
 
