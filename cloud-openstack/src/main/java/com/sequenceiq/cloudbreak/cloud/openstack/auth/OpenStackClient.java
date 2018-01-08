@@ -3,14 +3,20 @@ package com.sequenceiq.cloudbreak.cloud.openstack.auth;
 import static com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackConstants.FACING;
 
 import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.commons.lang3.StringUtils;
 import org.openstack4j.api.OSClient;
 import org.openstack4j.api.types.Facing;
 import org.openstack4j.core.transport.Config;
 import org.openstack4j.model.common.Identifier;
+import org.openstack4j.model.heat.Resource;
 import org.openstack4j.model.identity.v2.Access;
 import org.openstack4j.model.identity.v3.Endpoint;
 import org.openstack4j.model.identity.v3.Service;
@@ -21,14 +27,33 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.openstack.view.KeystoneCredentialView;
+import com.sequenceiq.cloudbreak.common.type.ResourceType;
 
 @Component
 public class OpenStackClient {
+
+    public static final String OS_NEUTRON_SUBNET = "OS::Neutron::Subnet";
+
+    public static final String OS_NEUTRON_NET = "OS::Neutron::Net";
+
+    public static final String OS_NEUTRON_FLOATING_IP = "OS::Neutron::FloatingIP";
+
+    public static final String OS_TROVE_INSTANCE = "OS::Trove::Instance";
+
+    public static final String OS_CINDER_VOLUME_ATTACHMENT = "OS::Cinder::VolumeAttachment";
+
+    public static final String OS_NEUTRON_PORT = "OS::Neutron::Port";
+
+    public static final String OS_NEUTRON_SECURITY_GROUP = "OS::Neutron::SecurityGroup";
+
+    public static final String OS_NEUTRON_ROUTER = "OS::Neutron::Router";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OpenStackClient.class);
 
@@ -101,6 +126,59 @@ public class OpenStackClient {
 
     public KeystoneCredentialView createKeystoneCredential(AuthenticatedContext authenticatedContext) {
         return new KeystoneCredentialView(authenticatedContext);
+    }
+
+    public List<CloudResource> getResources(String stackName, CloudCredential cloudCredential) {
+        return Lists.newArrayList(createOSClient(cloudCredential).heat().resources().list(stackName)
+                .stream()
+                .map(r -> {
+                    Optional<ResourceType> type = getType(r);
+                    if (type.isPresent()) {
+                        return new CloudResource.Builder()
+                                .name(r.getPhysicalResourceId())
+                                .type(type.get())
+                                .build();
+                    }
+                    return null;
+                })
+                .filter(r -> Objects.nonNull(r) && StringUtils.isNotBlank(r.getName()))
+                .collect(Collectors.toMap(CloudResource::getName, cloudResource -> cloudResource))
+                .values());
+    }
+
+    private Optional<ResourceType> getType(Resource resource) {
+        ResourceType result = null;
+        switch (resource.getType()) {
+            case OS_NEUTRON_SUBNET:
+                result = ResourceType.OPENSTACK_SUBNET;
+                break;
+            case OS_NEUTRON_NET:
+                result = ResourceType.OPENSTACK_NETWORK;
+                break;
+            case OS_TROVE_INSTANCE:
+                result = ResourceType.OPENSTACK_INSTANCE;
+                break;
+            case OS_CINDER_VOLUME_ATTACHMENT:
+                result = ResourceType.OPENSTACK_ATTACHED_DISK;
+                break;
+            case OS_NEUTRON_PORT:
+                result = ResourceType.OPENSTACK_PORT;
+                break;
+            case OS_NEUTRON_SECURITY_GROUP:
+                result = ResourceType.OPENSTACK_SECURITY_GROUP;
+                break;
+            case OS_NEUTRON_FLOATING_IP:
+                result = ResourceType.OPENSTACK_FLOATING_IP;
+                break;
+            case OS_NEUTRON_ROUTER:
+                result = ResourceType.OPENSTACK_ROUTER;
+                break;
+            default:
+                LOGGER.warn("Not a valid resource type for OS: {}", resource.getType());
+                break;
+        }
+
+        return Optional.ofNullable(result);
     }
 
     private Access createAccess(CloudCredential cloudCredential) {

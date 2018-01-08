@@ -72,6 +72,10 @@ public class CloudResource extends DynamicModel {
         return sb.toString();
     }
 
+    public static Builder builder() {
+        return new Builder();
+    }
+
     public static class Builder {
         private ResourceType type;
 

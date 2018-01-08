@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.converter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -44,6 +45,10 @@ import com.sequenceiq.cloudbreak.service.image.ImageService;
 @Component
 public class StackToStackResponseConverter extends AbstractConversionServiceAwareConverter<Stack, StackResponse> {
     private static final Logger LOGGER = LoggerFactory.getLogger(StackToStackResponseConverter.class);
+
+    private static final String SUBNET_ID = "subnetId";
+
+    private static final String NETWORK_ID = "networkId";
 
     @Inject
     @Qualifier("conversionService")
@@ -132,12 +137,35 @@ public class StackToStackResponseConverter extends AbstractConversionServiceAwar
         stackJson.setNodeCount(nodeCount);
     }
 
-    private void putSubnetIdIntoResponse(Stack source, StackResponse stackJson) {
-        List<Resource> resourcesByType = source.getResourcesByType(ResourceType.AWS_SUBNET);
-        Optional<Resource> awsSubnet = resourcesByType.stream().findFirst();
-        if (awsSubnet.isPresent()) {
-            String subnetId = awsSubnet.get().getResourceName();
-            stackJson.getParameters().put(ResourceType.AWS_SUBNET.name(), subnetId);
+    private void putSubnetIdIntoResponse(Stack source, StackResponse stackResponse) {
+        if (stackResponse.getNetwork() != null) {
+            findAndAddResource(source, stackResponse.getNetwork().getParameters(), SUBNET_ID, ResourceType.AWS_SUBNET);
+            findAndAddResource(source, stackResponse.getNetwork().getParameters(), SUBNET_ID, ResourceType.OPENSTACK_SUBNET);
+            findAndAddResource(source, stackResponse.getNetwork().getParameters(), SUBNET_ID, ResourceType.GCP_SUBNET);
+            findAndAddResource(source, stackResponse.getNetwork().getParameters(), SUBNET_ID, ResourceType.AZURE_SUBNET);
+        }
+
+        findAndAddResource(source, stackResponse.getParameters(), ResourceType.AWS_SUBNET.name(), ResourceType.AWS_SUBNET);
+    }
+
+    private void putVpcIdIntoResponse(Stack source, StackResponse stackResponse) {
+        if (stackResponse.getNetwork() != null) {
+            findAndAddResource(source, stackResponse.getNetwork().getParameters(), NETWORK_ID, ResourceType.AWS_VPC);
+            findAndAddResource(source, stackResponse.getNetwork().getParameters(), NETWORK_ID, ResourceType.OPENSTACK_NETWORK);
+            findAndAddResource(source, stackResponse.getNetwork().getParameters(), NETWORK_ID, ResourceType.GCP_NETWORK);
+            findAndAddResource(source, stackResponse.getNetwork().getParameters(), NETWORK_ID, ResourceType.AZURE_NETWORK);
+        }
+
+        findAndAddResource(source, stackResponse.getParameters(), ResourceType.AWS_VPC.name(), ResourceType.AWS_VPC);
+    }
+
+    private void findAndAddResource(Stack source, Map parameters, String key, ResourceType resourceType) {
+        List<Resource> resourcesByType = source.getResourcesByType(resourceType);
+        Optional<Resource> resource = resourcesByType.stream().findFirst();
+
+        if (resource.isPresent()) {
+            String resourceName = resource.get().getResourceName();
+            parameters.put(key, resourceName);
         }
     }
 
@@ -147,15 +175,6 @@ public class StackToStackResponseConverter extends AbstractConversionServiceAwar
         if (accessRoleArnOptional.isPresent()) {
             String s3AccessRoleArn = accessRoleArnOptional.get().getResourceName();
             stackResponse.getParameters().put(ResourceType.AWS_S3_ROLE.name(), s3AccessRoleArn);
-        }
-    }
-
-    private void putVpcIdIntoResponse(Stack source, StackResponse stackJson) {
-        List<Resource> resourcesByType = source.getResourcesByType(ResourceType.AWS_VPC);
-        Optional<Resource> awsVpc = resourcesByType.stream().findFirst();
-        if (awsVpc.isPresent()) {
-            String vpcId = awsVpc.get().getResourceName();
-            stackJson.getParameters().put(ResourceType.AWS_VPC.name(), vpcId);
         }
     }
 

@@ -30,6 +30,10 @@ public enum ResourceType {
     GCP_FIREWALL_INTERNAL,
     GCP_INSTANCE,
 
+    //AZURE
+    AZURE_NETWORK,
+    AZURE_SUBNET,
+
     // ARM
     ARM_TEMPLATE,
 

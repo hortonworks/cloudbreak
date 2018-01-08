@@ -64,7 +64,11 @@ import com.microsoft.azure.storage.blob.CopyState;
 import com.microsoft.azure.storage.blob.ListBlobItem;
 import com.microsoft.rest.LogLevel;
 import com.sequenceiq.cloudbreak.client.ProviderAuthenticationFailedException;
+import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
+import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
+import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
+import com.sequenceiq.cloudbreak.common.type.ResourceType;
 
 public class AzureClient {
 
@@ -519,6 +523,18 @@ public class AzureClient {
             }
         }
         return resultList;
+    }
+
+    public void collectAndSaveNetworkAndSubnet(String resourceGroupName, String virtualNetwork, PersistenceNotifier notifier, CloudContext cloudContext) {
+        Optional<Subnet> first = getSubnets(resourceGroupName, virtualNetwork).values().stream().findFirst();
+        if (first.isPresent()) {
+            Subnet subnet = first.get();
+            String subnetName = subnet.name();
+            String networkName = subnet.parent().name();
+
+            notifier.notifyAllocation(CloudResource.builder().name(networkName).type(ResourceType.AZURE_NETWORK).build(), cloudContext);
+            notifier.notifyAllocation(CloudResource.builder().name(subnetName).type(ResourceType.AZURE_SUBNET).build(), cloudContext);
+        }
     }
 
     private Set<VirtualMachineSize> getAllElement(PagedList<VirtualMachineSize> virtualMachineSizes, Set<VirtualMachineSize> resultList) {
