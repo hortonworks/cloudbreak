@@ -1,12 +1,16 @@
 package com.sequenceiq.cloudbreak.controller;
 
+import static com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails.CUSTOM_VDF_REPO_KEY;
+import static com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails.VDF_REPO_KEY_PREFIX;
+import static com.sequenceiq.cloudbreak.service.cluster.flow.AmbariRepositoryVersionService.AMBARI_VERSION_2_6_0_0;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -38,6 +42,7 @@ import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.controller.validation.filesystem.FileSystemValidator;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
+import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.ClusterComponent;
@@ -49,6 +54,7 @@ import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintUtils;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
+import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariRepositoryVersionService;
 import com.sequenceiq.cloudbreak.service.decorator.ClusterDecorator;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
@@ -87,6 +93,9 @@ public class ClusterCreationSetupService {
 
     @Inject
     private BlueprintService blueprintService;
+
+    @Inject
+    private AmbariRepositoryVersionService ambariRepositoryVersionService;
 
     public void validate(ClusterRequest request, Stack stack, IdentityUser user) {
         validate(request, null, stack, user);
@@ -129,9 +138,14 @@ public class ClusterCreationSetupService {
                 && c.getName().equalsIgnoreCase(ComponentType.HDP_REPO_DETAILS.name())).findAny();
         Optional<Component> stackImageComponent = allComponent.stream().filter(c -> c.getComponentType().equals(ComponentType.IMAGE)
                 && c.getName().equalsIgnoreCase(ComponentType.IMAGE.name())).findAny();
-        components = addAmbariRepoConfig(stackAmbariRepoConfig, components, request.getAmbariRepoDetailsJson(), cluster);
-        components = addHDPRepoConfig(blueprint, stackHdpRepoConfig, components, request, cluster, user, stackImageComponent);
-        components = addAmbariDatabaseConfig(components, request.getAmbariDatabaseDetails(), cluster);
+        ClusterComponent ambariRepoConfig = determineAmbariRepoConfig(stackAmbariRepoConfig, request.getAmbariRepoDetailsJson(), cluster);
+        components.add(ambariRepoConfig);
+        ClusterComponent hdpRepoConfig = determineHDPRepoConfig(blueprint, stack.getId(), stackHdpRepoConfig, request, cluster, user, stackImageComponent);
+        components.add(hdpRepoConfig);
+
+        checkVDFFile(ambariRepoConfig, hdpRepoConfig, stackName);
+
+        components.add(addAmbariDatabaseConfig(request.getAmbariDatabaseDetails(), cluster));
         LOGGER.info("Cluster components saved in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
         start = System.currentTimeMillis();
@@ -141,25 +155,33 @@ public class ClusterCreationSetupService {
         return savedCluster;
     }
 
-    private List<ClusterComponent> addAmbariRepoConfig(Optional<Component> stackAmbariRepoConfig, List<ClusterComponent> components,
+    private void checkVDFFile(ClusterComponent ambariRepoConfig, ClusterComponent hdpRepoConfig, String stackName) throws IOException {
+        AmbariRepo ambariRepo = ambariRepoConfig.getAttributes().get(AmbariRepo.class);
+
+        if (ambariRepositoryVersionService.isNewerOrEqualAmbariApi(AMBARI_VERSION_2_6_0_0, ambariRepo::getVersion)
+                && !containsVDFUrl(hdpRepoConfig.getAttributes())) {
+            throw new BadRequestException(String.format("Couldn't determine any VDF file for the stack: %s", stackName));
+        }
+    }
+
+    private ClusterComponent determineAmbariRepoConfig(Optional<Component> stackAmbariRepoConfig,
             AmbariRepoDetailsJson ambariRepoDetailsJson, Cluster cluster) throws JsonProcessingException {
         // If it is not predefined in image catalog
+        ClusterComponent component;
         if (!stackAmbariRepoConfig.isPresent()) {
             if (ambariRepoDetailsJson == null) {
                 ambariRepoDetailsJson = new AmbariRepoDetailsJson();
             }
             AmbariRepo ambariRepo = conversionService.convert(ambariRepoDetailsJson, AmbariRepo.class);
-            ClusterComponent component = new ClusterComponent(ComponentType.AMBARI_REPO_DETAILS, new Json(ambariRepo), cluster);
-            components.add(component);
+            component = new ClusterComponent(ComponentType.AMBARI_REPO_DETAILS, new Json(ambariRepo), cluster);
         } else {
-            ClusterComponent ambariRepo = new ClusterComponent(ComponentType.AMBARI_REPO_DETAILS, stackAmbariRepoConfig.get().getAttributes(), cluster);
-            components.add(ambariRepo);
+            component = new ClusterComponent(ComponentType.AMBARI_REPO_DETAILS, stackAmbariRepoConfig.get().getAttributes(), cluster);
         }
-        return components;
+        return component;
     }
 
-    private List<ClusterComponent> addHDPRepoConfig(Blueprint blueprint, Optional<Component> stackHdpRepoConfig,
-            List<ClusterComponent> components, ClusterRequest request, Cluster cluster, IdentityUser user, Optional<Component> stackImageComponent)
+    private ClusterComponent determineHDPRepoConfig(Blueprint blueprint, long stackId, Optional<Component> stackHdpRepoConfig,
+            ClusterRequest request, Cluster cluster, IdentityUser user, Optional<Component> stackImageComponent)
             throws JsonProcessingException {
 
         Json stackRepoDetailsJson;
@@ -170,16 +192,16 @@ public class ClusterCreationSetupService {
                 StackRepoDetails stackRepoDetails = conversionService.convert(ambariStackDetails, StackRepoDetails.class);
                 stackRepoDetailsJson = new Json(stackRepoDetails);
             } else {
-                StackRepoDetails repo = SerializationUtils.clone(defaultHDPInfo(blueprint, request, user).getRepo());
-                pruneVDFUrlsByOsType(cluster, stackImageComponent, repo);
-                stackRepoDetailsJson = new Json(repo);
+                StackRepoDetails stackRepoDetails = SerializationUtils.clone(defaultHDPInfo(blueprint, request, user).getRepo());
+                Optional<String> vdfUrl = getVDFUrlByOsType(stackId, stackRepoDetails);
+                vdfUrl.ifPresent(s -> stackRepoDetails.getStack().put(CUSTOM_VDF_REPO_KEY, s));
+                stackRepoDetailsJson = new Json(stackRepoDetails);
             }
         } else {
             stackRepoDetailsJson = stackHdpRepoConfig.get().getAttributes();
         }
-        ClusterComponent hdpRepoComponent = new ClusterComponent(ComponentType.HDP_REPO_DETAILS, stackRepoDetailsJson, cluster);
-        components.add(hdpRepoComponent);
-        return components;
+
+        return new ClusterComponent(ComponentType.HDP_REPO_DETAILS, stackRepoDetailsJson, cluster);
     }
 
     private AmbariStackDetailsJson setOsTypeFromImageIfMissing(Cluster cluster, Optional<Component> stackImageComponent,
@@ -195,6 +217,15 @@ public class ClusterCreationSetupService {
             }
         }
         return ambariStackDetails;
+    }
+
+    private boolean containsVDFUrl(Json stackRepoDetailsJson) {
+        try {
+            return stackRepoDetailsJson.get(StackRepoDetails.class).getStack().containsKey(CUSTOM_VDF_REPO_KEY);
+        } catch (IOException e) {
+            LOGGER.error("JSON parse error.", e);
+        }
+        return false;
     }
 
     private StackInfo defaultHDPInfo(Blueprint blueprint, ClusterRequest request, IdentityUser user) {
@@ -242,34 +273,31 @@ public class ClusterCreationSetupService {
         return root;
     }
 
-    private void pruneVDFUrlsByOsType(Cluster cluster, Optional<Component> stackImageComponent, StackRepoDetails repo) {
-        if (stackImageComponent.isPresent()) {
-            try {
-                Image imageComponent = stackImageComponent.get().getAttributes().get(Image.class);
-                if (!StringUtils.isEmpty(stackImageComponent)) {
-                    String osType = imageComponent.getOsType();
-                    Set<String> vdfUrlKeysToRemove = repo.getStack().keySet().stream()
-                            .filter(key -> key.startsWith(StackRepoDetails.VDF_REPO_KEY_PREFIX))
-                            .filter(key -> !StringUtils.isEmpty(osType) && !key.equalsIgnoreCase(StackRepoDetails.VDF_REPO_KEY_PREFIX + osType))
-                            .collect(Collectors.toSet());
-
-                    vdfUrlKeysToRemove.forEach(key -> repo.getStack().remove(key));
-                }
-            } catch (IOException e) {
-                LOGGER.warn("Could not get Image component from database for cluster: " + cluster.getId(), e);
-            }
-        }
-    }
-
-    private List<ClusterComponent> addAmbariDatabaseConfig(List<ClusterComponent> components, AmbariDatabaseDetailsJson ambariRepoDetailsJson, Cluster cluster)
+    private ClusterComponent addAmbariDatabaseConfig(AmbariDatabaseDetailsJson ambariRepoDetailsJson, Cluster cluster)
             throws JsonProcessingException {
         if (ambariRepoDetailsJson == null) {
             ambariRepoDetailsJson = new AmbariDatabaseDetailsJson();
         }
         AmbariDatabase ambariDatabase = conversionService.convert(ambariRepoDetailsJson, AmbariDatabase.class);
-        ClusterComponent component = new ClusterComponent(ComponentType.AMBARI_DATABASE_DETAILS, new Json(ambariDatabase), cluster);
-        components.add(component);
-        return components;
+        return new ClusterComponent(ComponentType.AMBARI_DATABASE_DETAILS, new Json(ambariDatabase), cluster);
+    }
+
+    private Optional<String> getVDFUrlByOsType(Long stackId, StackRepoDetails stackRepoDetails) {
+        String vdfStackRepoKeyFilter = VDF_REPO_KEY_PREFIX;
+        try {
+            Image image = componentConfigProvider.getImage(stackId);
+            if (!StringUtils.isEmpty(image.getOsType())) {
+                vdfStackRepoKeyFilter += image.getOsType();
+            }
+        } catch (CloudbreakImageNotFoundException e) {
+            LOGGER.error(String.format("Could not get Image Component for stack: '%s'.", stackId), e);
+        }
+
+        final String filter = vdfStackRepoKeyFilter;
+        return stackRepoDetails.getStack().entrySet().stream()
+                .filter(entry -> entry.getKey().startsWith(filter))
+                .map(Map.Entry::getValue)
+                .findFirst();
     }
 
 }
