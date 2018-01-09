@@ -32,7 +32,7 @@ public class PollResourcesStateTask extends AbstractPollTask<ResourcesStatePolle
     }
 
     @Override
-    protected ResourcesStatePollerResult doCall() throws Exception {
+    protected ResourcesStatePollerResult doCall() {
         List<CloudResourceStatus> results = resourceConnector.check(getAuthenticatedContext(), cloudResource);
         CloudResourceStatus status = ResourceStatusLists.aggregate(results);
         return new ResourcesStatePollerResult(getAuthenticatedContext().getCloudContext(), status.getStatus(), status.getStatusReason(), results);
