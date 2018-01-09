@@ -21,7 +21,6 @@ import javax.transaction.Transactional;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
-import com.google.gson.Gson;
 import com.sequenceiq.cloudbreak.api.model.ExecutorType;
 import com.sequenceiq.cloudbreak.api.model.ExposedService;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariDatabase;
@@ -93,8 +92,6 @@ public class ClusterHostServiceRunner {
     @Inject
     private KerberosDetailService kerberosDetailService;
 
-    private final Gson gson = new Gson();
-
     @Transactional
     public void runAmbariServices(Stack stack, Cluster cluster) throws CloudbreakException {
         try {
@@ -116,7 +113,7 @@ public class ClusterHostServiceRunner {
         Map<String, SaltPillarProperties> servicePillar = new HashMap<>();
         saveDatalakeNameservers(stack, servicePillar);
         saveSharedRangerService(stack, servicePillar);
-        if (cluster.isSecure() && kerberosDetailService.isAmbariManagedKrb5Conf(cluster.getKerberosConfig())) {
+        if (cluster.isSecure() && kerberosDetailService.isAmbariManagedKerberosPackages(cluster.getKerberosConfig())) {
             Map<String, String> kerberosPillarConf = new HashMap<>();
             KerberosConfig kerberosConfig = cluster.getKerberosConfig();
             putIfNotNull(kerberosPillarConf, kerberosConfig.getKerberosMasterKey(), "masterKey");
@@ -127,8 +124,7 @@ public class ClusterHostServiceRunner {
                 putIfNotNull(kerberosPillarConf, kerberosConfig.getKdcAdminUrl(), "adminUrl");
                 putIfNotNull(kerberosPillarConf, kerberosConfig.getKerberosRealm(), "realm");
             } else {
-                Map<String, Object> kerberosEnv = (Map<String, Object>) gson.fromJson(kerberosConfig.getKerberosDescriptor(), Map.class).get("kerberos-env");
-                Map<String, Object> properties = (Map<String, Object>) kerberosEnv.get("properties");
+                Map<String, Object> properties = kerberosDetailService.getKerberosEnvProperties(kerberosConfig);
                 putIfNotNull(kerberosPillarConf, properties.get("kdc_hosts"), "url");
                 putIfNotNull(kerberosPillarConf, properties.get("admin_server_host"), "adminUrl");
                 putIfNotNull(kerberosPillarConf, properties.get("realm"), "realm");
