@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.converter;
 
 import org.springframework.stereotype.Component;
 
+import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.api.model.NetworkResponse;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.json.Json;
@@ -20,7 +21,7 @@ public class NetworkToJsonConverter extends AbstractConversionServiceAwareConver
         json.setPublicInAccount(source.isPublicInAccount());
         Json attributes = source.getAttributes();
         if (attributes != null) {
-            json.setParameters(attributes.getMap());
+            json.setParameters(Maps.newHashMap(attributes.getMap()));
         }
         if (source.getTopology() != null) {
             json.setTopologyId(source.getTopology().getId());

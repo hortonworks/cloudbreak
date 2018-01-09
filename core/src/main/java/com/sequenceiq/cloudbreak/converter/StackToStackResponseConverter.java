@@ -16,6 +16,7 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.stereotype.Component;
 
+import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.api.model.CloudbreakDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.ClusterResponse;
 import com.sequenceiq.cloudbreak.api.model.CredentialResponse;
@@ -108,7 +109,7 @@ public class StackToStackResponseConverter extends AbstractConversionServiceAwar
             stackJson.setNetworkId(source.getNetwork().getId());
             stackJson.setNetwork(getConversionService().convert(source.getNetwork(), NetworkResponse.class));
         }
-        stackJson.setParameters(source.getParameters());
+        stackJson.setParameters(Maps.newHashMap(source.getParameters()));
         stackJson.setPlatformVariant(source.getPlatformVariant());
         if (source.getOrchestrator() != null) {
             stackJson.setOrchestrator(getConversionService().convert(source.getOrchestrator(), OrchestratorResponse.class));
