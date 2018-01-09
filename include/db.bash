@@ -161,7 +161,7 @@ db-stop-database() {
     declare desc="Stop a postgresql database if needed"
     declare contName=${1:? required: contName}
 
-    docker stop $contName | debug-cat
+    docker stop -t ${DOCKER_STOP_TIMEOUT} $contName | debug-cat
     if [[ "$REMOVE_CONTAINER" ]]; then
         docker rm -f $contName | debug-cat
     fi

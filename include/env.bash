@@ -142,6 +142,7 @@ DOCKER_TAG_SULTANS - Authentication service container version
 DOCKER_TAG_TRAEFIK - Traefik container version
 DOCKER_TAG_UAA - Identity container version
 DOCKER_TAG_ULUWATU - Web UI container version
+DOCKER_STOP_TIMEOUT - Specify a shutdown timeout in seconds for containers
 IDENTITY_DB_NAME - Name of the Identity database
 IDENTITY_DB_PASS - Password for the Identity database authentication
 IDENTITY_DB_URL - Url for the Identity database connection included the port number

@@ -28,7 +28,7 @@ cloudbreak-conf-tags() {
     env-import DOCKER_TAG_CONSUL 0.5
     env-import DOCKER_TAG_REGISTRATOR v5
     env-import DOCKER_TAG_POSTFIX latest
-    env-import DOCKER_TAG_UAA 3.6.5
+    env-import DOCKER_TAG_UAA 3.6.5-pgupdate
     env-import DOCKER_TAG_AMBASSADOR 0.5.0
     env-import DOCKER_TAG_CERT_TOOL 0.2.0
     env-import DOCKER_TAG_PERISCOPE 2.4.0-dev.22
@@ -36,7 +36,7 @@ cloudbreak-conf-tags() {
     env-import DOCKER_TAG_ULUWATU 2.4.0-dev.22
     env-import DOCKER_TAG_SULTANS 2.4.0-dev.22
     env-import DOCKER_TAG_POSTGRES 9.6.1-alpine
-    env-import DOCKER_TAG_LOGROTATE 1.0.0
+    env-import DOCKER_TAG_LOGROTATE 1.0.1
     env-import DOCKER_TAG_CBD_SMARTSENSE 0.12.0
 
     env-import DOCKER_IMAGE_CLOUDBREAK hortonworks/cloudbreak
@@ -245,6 +245,8 @@ cloudbreak-conf-defaults() {
     env-validate CB_INSTANCE_UUID *" "* "space"
 
     env-import CB_SMARTSENSE_ID ""
+
+    env-import DOCKER_STOP_TIMEOUT 60
 }
 
 cloudbreak-conf-autscale() {
@@ -593,8 +595,8 @@ util-local-dev() {
     fi
 
     debug stopping original cloudbreak container
-    dockerCompose stop cloudbreak
-    dockerCompose stop periscope
+    dockerCompose stop --timeout ${DOCKER_STOP_TIMEOUT} cloudbreak
+    dockerCompose stop --timeout ${DOCKER_STOP_TIMEOUT} periscope
 
     docker rm -f cloudbreak-proxy 2> /dev/null || :
     docker rm -f periscope-proxy 2> /dev/null || :
