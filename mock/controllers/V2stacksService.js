@@ -1051,7 +1051,7 @@ exports.getPublicStackV2 = function(args, res, next) {
         "parameters":
         {
           "facing":"internal",
-          "endpoint":"http://openstack.eng.hortonworks.com:5000/v2.0",
+          "endpoint":"http://openstack.eng.com:3000/v2.0",
           "selector":"cb-keystone-v2",
           "keystoneVersion":"cb-keystone-v2",
           "userName":"cloudbreak",
@@ -1523,7 +1523,7 @@ exports.getPublicsStackV2 = function(args, res, next) {
         "parameters":
         {
           "facing":"internal",
-          "endpoint":"http://openstack.eng.hortonworks.com:5000/v2.0",
+          "endpoint":"http://openstack.eng.com:3000/v2.0",
           "selector":"cb-keystone-v2",
           "keystoneVersion":"cb-keystone-v2",
           "userName":"cloudbreak",
@@ -2396,11 +2396,11 @@ exports.getPublicsStackV2 = function(args, res, next) {
       "cloudPlatform":"AZURE",
       "parameters":
       {
-        "tenantId":"b60c9401-2154-40aa-9cff-5e3d1a20085d",
+        "tenantId":"a12b1234-1234-12aa-3bcc-4d5e6f78900g",
         "spDisplayName":null,
-        "subscriptionId":"a9d4456e-349f-44f6-bc73-54a8d523e504",
+        "subscriptionId":"a12b1234-1234-12aa-3bcc-4d5e6f78900g",
         "roleType":null,
-        "accessKey":"3f3eec06-4240-4acb-8225-7056c5aafe16"
+        "accessKey":"a12b1234-1234-12aa-3bcc-4d5e6f78900g"
       },
       "description":"",
       "topologyId":null,
@@ -3212,7 +3212,7 @@ exports.getStackV2 = function(args, res, next) {
         "parameters":
         {
           "facing":"internal",
-          "endpoint":"http://openstack.eng.hortonworks.com:5000/v2.0",
+          "endpoint":"http://openstack.eng.com:3000/v2.0",
           "selector":"cb-keystone-v2",
           "keystoneVersion":"cb-keystone-v2",
           "userName":"cloudbreak",
@@ -3677,7 +3677,7 @@ exports.postPrivateStackV2 = function(args, res, next) {
         "parameters":
         {
           "facing":"internal",
-          "endpoint":"http://openstack.eng.hortonworks.com:5000/v2.0",
+          "endpoint":"http://openstack.eng.com:3000/v2.0",
           "selector":"cb-keystone-v2",
           "keystoneVersion":"cb-keystone-v2",
           "userName":"cloudbreak",
