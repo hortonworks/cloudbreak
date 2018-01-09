@@ -221,7 +221,7 @@ public class OpenStackResourceConnector implements ResourceConnector<Object> {
 
     private void collectResourcesIfNeed(AuthenticatedContext authenticatedContext, String stackName, List<CloudResource> list) {
         if (list.isEmpty()) {
-            openStackClient.getResources(stackName, authenticatedContext.getCloudCredential());
+            list.addAll(openStackClient.getResources(stackName, authenticatedContext.getCloudCredential()));
         }
     }
 

@@ -174,7 +174,7 @@ public class OpenStackClient {
                 result = ResourceType.OPENSTACK_ROUTER;
                 break;
             default:
-                LOGGER.warn("Not a valid resource type for OS: {}", resource.getType());
+                LOGGER.debug("Not a valid resource type for OS: {}", resource.getType());
                 break;
         }
 
