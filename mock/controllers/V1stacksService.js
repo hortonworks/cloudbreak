@@ -1523,7 +1523,7 @@ exports.getPublicsStack = function(args, res, next) {
         "parameters":
         {
           "facing":"internal",
-          "endpoint":"http://openstack.eng.hortonworks.com:5000/v2.0",
+          "endpoint":"http://openstack.eng.com:3000/v2.0",
           "selector":"cb-keystone-v2",
           "keystoneVersion":"cb-keystone-v2",
           "userName":"cloudbreak",
