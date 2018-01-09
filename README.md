@@ -58,7 +58,8 @@ REQUIRED OPTIONS:
 OPTIONS:
    --password value  password [$CB_PASSWORD]
    --profile value   selects a config profile to use [$CB_PROFILE]
-   --output value    supported formats: json, yaml, table (default: "json") [$CB_OUT_FORMAT]```
+   --output value    supported formats: json, yaml, table (default: "json") [$CB_OUT_FORMAT]
+```
 
 ### Configure
 Although there is an option to provide some global flags to every command to which Cloudbreak to connect to, it is recommended to save the configuration.
