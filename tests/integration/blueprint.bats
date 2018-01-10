@@ -32,7 +32,7 @@ BLUEPRINT_URL=https://gist.githubusercontent.com/mhalmy/8309c7e4a4649fa85f38b260
 }
 
 @test "Check blueprint describe" {
-  run describe-blueprint --name testbp
+  run describe-blueprint --name "EDW-Analytics: Apache Hive 2 LLAP, Apache Zeppelin 0.7.0"
   echo $output
   [ $(echo $output |  jq ' . | [to_entries[].key] == ["Name","Description","HDPVersion","HostgroupCount","Tags"]' ) == true ]
 }

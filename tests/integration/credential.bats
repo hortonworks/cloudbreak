@@ -51,8 +51,10 @@ AZURE_ARGS=" --name cli-azure --subscription-id aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaa
 }
 
 @test "Check credentials are listed" {
-  CHECK_RESULT=$( list-credentials )
-  [ $(echo $CHECK_RESULT |  jq ' .[] | [to_entries[].key] == ["Name","Description","CloudPlatform"]' ) == true ]
+  for OUTPUT in $(list-credentials  | jq ' .[] | [to_entries[].key] == ["Name","Description","CloudPlatform"]' );
+  do
+    [[ "$OUTPUT" == "true" ]]
+  done
 }
 
 @test "Check credential is described" {

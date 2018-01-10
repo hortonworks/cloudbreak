@@ -6,7 +6,10 @@ load ../commands
 }
 
 @test "list clusters attributes" {
-  [[ $(list-clusters | jq ' .[] | [to_entries[].key] == ["Name","Description","CloudPlatform","StackStatus","ClusterStatus"]' ) == "true" ]]
+  for OUTPUT in $(list-clusters | jq ' .[] | [to_entries[].key] == ["Name","Description","CloudPlatform","StackStatus","ClusterStatus"]' );
+  do
+    [[ "$OUTPUT" == "true" ]]
+  done
 }
 
 @test "describe cluster" {
