@@ -56,9 +56,3 @@ BLUEPRINT_NAME="Data Science: Apache Spark 1.6, Apache Zeppelin 0.7.0"
    CHECK_RESULT=$( generate-cluster-template gcp existing-subnet )
    [ $(echo $CHECK_RESULT | jq ' ."network"| ."parameters" | [to_entries[].key] == ["networkId","noFirewallRules","noPublicIp","subnetId"]') == true ]
 }
-
-@test "Generate reinstall template" {
-   skip "To do"
-   CHECK_RESULT=$( generate-reinstall-template --blueprint-name $BLUEPRINT_NAME )
-   #[ $(echo $CHECK_RESULT | jq '."blueprintName" == $BLUEPRINT_NAME' ) == true ]
-}

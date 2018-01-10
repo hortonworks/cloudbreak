@@ -3,10 +3,11 @@ load ../resources
 
 AWS_CRED_NAME=cli-cred-aws
 AWS_ARGS_ROLE=" --name $AWS_CRED_NAME --role-arn $AWS_ROLE_ARN "
-CLUSTER_NAME=cli-test
+CLUSTER_NAME=cli-aws
 DELAY=$(($SECONDS+2100))
 INPUT_JSON_FILE=aws-template.json
 REGION=eu-west-1
+BLUEPRINT_NAME=`26EDW-ETL: Apache Hive 1.2.1, Apache Spark 1.6`
 
 @test "Check create credential - aws role based" {
   run create-credential-aws-role $AWS_ARGS_ROLE
@@ -65,13 +66,6 @@ REGION=eu-west-1
   [[ $(list-clusters | jq ' .[0] | [to_entries[].key] == ["Name","Description","CloudPlatform","StackStatus","ClusterStatus"]' ) == "true" ]]
 }
 
-@test "Cluster is synced" {
-  skip
-  run sync-cluster --name $CLUSTER_NAME
-  echo $output
-  [ $status = 0 ]
-}
-
 @test "Cluster is described" {
   param=$CLUSTER_NAME
   export param
@@ -108,6 +102,7 @@ REGION=eu-west-1
 }
 
 @test "Cluster upscaling" {
+  skip
   CHECK_RESULT=$( describe-cluster --name $CLUSTER_NAME | jq ' ."instanceGroups" | .[] | select(."group"=="compute") | . "nodeCount" ')
   INSTANCE_COUNT_DESIRED=$(($CHECK_RESULT + 1))
   echo $INSTANCE_COUNT_DESIRED > /tmp/clitestutil
@@ -115,11 +110,12 @@ REGION=eu-west-1
   [ $status = 0 ]
 }
 
-@test "Cluster upscaling - check cluster available" {
+@test "Cluster upscaling - check cluster is available" {
+  skip
   INSTANCE_COUNT_DESIRED=`cat /tmp/clitestutil`
   echo $INSTANCE_COUNT_DESIRED
 
-  run wait-cluster-status $DELAY $CLUSTER_NAME AVAILABLE
+  run wait-stack-cluster-status $DELAY $CLUSTER_NAME AVAILABLE
   status_available=$status
 
   run node-count-are-equal $CLUSTER_NAME
@@ -127,10 +123,13 @@ REGION=eu-west-1
   INSTANCE_COUNT_CURRENT=$(describe-cluster --name $CLUSTER_NAME | jq ' ."instanceGroups" | .[] | select(."group"=="compute") | . "nodeCount" ')
   echo $INSTANCE_COUNT_CURRENT
 
+  STATUS_REASON=`cat /tmp/status_reason`
+  echo $STATUS_REASON
   [ $status_available = 0 ] && [ $status = 0 ] && [ $INSTANCE_COUNT_DESIRED = $INSTANCE_COUNT_CURRENT ]
 }
 
 @test "Cluster downscaling" {
+  skip
   CHECK_RESULT=$( describe-cluster --name $CLUSTER_NAME | jq ' ."instanceGroups" | .[] | select(."group"=="compute") | . "nodeCount" ')
   INSTANCE_COUNT_DESIRED=$(($CHECK_RESULT - 1))
   echo $INSTANCE_COUNT_DESIRED > /tmp/clitestutil
@@ -140,11 +139,12 @@ REGION=eu-west-1
   [ $status = 0 ]
 }
 
-@test "Cluster downscaling - check stack available" {
+@test "Cluster downscaling - check cluster is available" {
+  skip
   INSTANCE_COUNT_DESIRED=`cat /tmp/clitestutil`
   echo $INSTANCE_COUNT_DESIRED
 
-  run wait-stack-status $DELAY $CLUSTER_NAME AVAILABLE
+  run wait-stack-cluster-status $DELAY $CLUSTER_NAME AVAILABLE
   status_available=$status
 
   run node-count-are-equal $CLUSTER_NAME
@@ -152,7 +152,23 @@ REGION=eu-west-1
   INSTANCE_COUNT_CURRENT=$(describe-cluster --name $CLUSTER_NAME | jq ' ."instanceGroups" | .[] | select(."group"=="compute") | . "nodeCount" ')
   echo $INSTANCE_COUNT_CURRENT
 
+  STATUS_REASON=`cat /tmp/status_reason`
+  echo $STATUS_REASON
+
   [ $status_available = 0 ] && [ $status = 0 ] && [ $INSTANCE_COUNT_DESIRED = $INSTANCE_COUNT_CURRENT ]
+
+}
+
+@test "Generate reinstall template" {
+  CHECK_RESULT=$( generate-reinstall-template --name $CLUSTER_NAME --blueprint-name $BLUEPRINT_NAME )
+  echo $CHECK_RESULT
+  [ $( echo $CHECK_RESULT | jq -r '."blueprintName" ') == $BLUEPRINT_NAME ]
+}
+
+@test "Cluster is synced" {
+  run sync-cluster --name $CLUSTER_NAME
+  echo $output
+  [ $status = 0 ]
 }
 
 @test "Teardown: delete cluster, credential" {
@@ -167,6 +183,9 @@ REGION=eu-west-1
 }
 
 @test "Teardown: delete testutil" {
+  CHECK_RESULT=$( rm -f /tmp/status_reason )
+  echo $CHECK_RESULT >&2
+
   CHECK_RESULT=$( rm -f /tmp/clitestutil )
   echo $CHECK_RESULT >&2
 }

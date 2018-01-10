@@ -52,9 +52,3 @@ BLUEPRINT_FILE="test.bp"
   CHECK_RESULT=$( delete-blueprint --name cli-bp-file )
   echo $CHECK_RESULT >&2
 }
-
-@test "List all default blueprints" {
-skip "To do"
-  CHECK_RESULT=$( list-blueprint)
-  echo $CHECK_RESULT >&2
-}

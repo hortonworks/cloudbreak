@@ -1,7 +1,7 @@
 load ../commands
 
 @test "List imagecatalog" {
-  CHECK_RESULT=$( list-image-catalog $AWS_ARGS_ROLE )
+  CHECK_RESULT=$( list-image-catalog )
   [ $(echo $CHECK_RESULT |  jq ' .[0] | [to_entries[].key] == ["Name","Default","URL"]' ) == true ]
 }
 
