@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.image;
 
 import static com.sequenceiq.cloudbreak.service.image.StatedImage.statedImage;
 import static com.sequenceiq.cloudbreak.service.image.StatedImages.statedImages;
+import static com.sequenceiq.cloudbreak.util.NameUtil.generateArchiveName;
 import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
 import static java.util.Collections.emptyList;
 
@@ -160,6 +161,7 @@ public class ImageCatalogService {
         authorizationService.hasWritePermission(imageCatalog);
         imageCatalog.setArchived(true);
         setImageCatalogAsDefault(null);
+        imageCatalog.setImageCatalogName(generateArchiveName(name));
         imageCatalogRepository.save(imageCatalog);
         LOGGER.info("Image catalog has been archived: {}", imageCatalog);
     }
