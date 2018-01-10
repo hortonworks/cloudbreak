@@ -13,7 +13,7 @@ load ../parameters
 @test "Check blueprint create from url - url does not exist" {
   OUTPUT=$(DEBUG=1 create-blueprint from-url --name test --url https://something123456789.com 2>&1 | sed -e '$!d')
 
-  [[ "${OUTPUT}" == *"Get https://something123456789.com: dial tcp: lookup something123456789.com on 52.34.239.202:53: no such host"* ]]
+  [[ "${OUTPUT}" == *"Get https://something123456789.com: dial tcp: lookup something123456789.com"* ]]
   [[ "${OUTPUT}" == *"error"* ]]
 }
 
