@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.azure.client;
 
+import static java.util.Collections.emptyMap;
+
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -490,11 +492,21 @@ public class AzureClient {
     }
 
     public Subnet getSubnetProperties(String resourceGroup, String virtualNetwork, String subnet) {
-        return handleAuthException(() -> azure.networks().getByResourceGroup(resourceGroup, virtualNetwork).subnets().get(subnet));
+        return handleAuthException(() -> {
+            Network networkByResourceGroup = getNetworkByResourceGroup(resourceGroup, virtualNetwork);
+            return networkByResourceGroup == null ? null : networkByResourceGroup.subnets().get(subnet);
+        });
+    }
+
+    private Network getNetworkByResourceGroup(String resourceGroup, String virtualNetwork) {
+        return azure.networks().getByResourceGroup(resourceGroup, virtualNetwork);
     }
 
     public Map<String, Subnet> getSubnets(String resourceGroup, String virtualNetwork) {
-        return handleAuthException(() -> azure.networks().getByResourceGroup(resourceGroup, virtualNetwork).subnets());
+        return handleAuthException(() -> {
+            Network network = getNetworkByResourceGroup(resourceGroup, virtualNetwork);
+            return network == null ? emptyMap() : network.subnets();
+        });
     }
 
     public NetworkSecurityGroup getSecurityGroupProperties(String resourceGroup, String securityGroup) {
