@@ -37,6 +37,12 @@ public class AzureConnector implements CloudConnector {
     private AzureResourceGroupValidator azureResourceGroupValidator;
 
     @Inject
+    private AzureSubnetValidator azureSubnetValidator;
+
+    @Inject
+    private AzureStorageValidator azureStorageValidator;
+
+    @Inject
     private AzureCredentialConnector azureCredentialConnector;
 
     @Inject
@@ -69,7 +75,7 @@ public class AzureConnector implements CloudConnector {
 
     @Override
     public List<Validator> validators() {
-        return Arrays.asList(azureTagValidator, azureResourceGroupValidator);
+        return Arrays.asList(azureTagValidator, azureResourceGroupValidator, azureSubnetValidator, azureStorageValidator);
     }
 
     @Override

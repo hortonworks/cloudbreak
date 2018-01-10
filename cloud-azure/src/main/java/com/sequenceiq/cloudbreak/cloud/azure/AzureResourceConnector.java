@@ -100,16 +100,15 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
         String stackName = azureUtils.getStackName(ac.getCloudContext());
         String resourceGroupName = azureUtils.getResourceGroupName(ac.getCloudContext());
         AzureClient client = ac.getParameter(AzureClient.class);
+
         AzureStackView azureStackView = getAzureStack(azureCredentialView, ac.getCloudContext(), stack,
                 getNumberOfAvailableIPsInSubnets(client, stack.getNetwork()));
-        azureUtils.validateStorageType(stack);
 
         String customImageId = azureStorage.getCustomImageId(client, ac, stack);
         String template = azureTemplateBuilder.build(stackName, customImageId, azureCredentialView, azureStackView, ac.getCloudContext(), stack);
         String parameters = azureTemplateBuilder.buildParameters(ac.getCloudCredential(), stack.getNetwork(), stack.getImage());
         Boolean encrytionNeeded = azureStorage.isEncrytionNeeded(stack.getParameters());
 
-        azureUtils.validateSubnetRules(client, stack.getNetwork());
         try {
             String region = ac.getCloudContext().getLocation().getRegion().value();
             if (AzureUtils.hasUnmanagedDisk(stack)) {
@@ -121,7 +120,9 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
             if (!client.templateDeploymentExists(resourceGroupName, stackName)) {
                 Deployment templateDeployment = client.createTemplateDeployment(resourceGroupName, stackName, template, parameters);
                 LOGGER.info("created template deployment for launch: {}", templateDeployment.exportTemplate().template());
-                client.collectAndSaveNetworkAndSubnet(resourceGroupName, stackName, notifier, ac.getCloudContext());
+                if (!azureUtils.isExistingNetwork(stack.getNetwork())) {
+                    client.collectAndSaveNetworkAndSubnet(resourceGroupName, stackName, notifier, ac.getCloudContext());
+                }
             }
         } catch (CloudException e) {
             LOGGER.error("Provisioning error, cloud exception happened: ", e);

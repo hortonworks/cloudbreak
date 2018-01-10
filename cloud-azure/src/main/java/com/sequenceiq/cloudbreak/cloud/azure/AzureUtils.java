@@ -201,6 +201,11 @@ public class AzureUtils {
             for (String subnetId : subnetIds) {
                 try {
                     Subnet subnet = client.getSubnetProperties(resourceGroupName, networkId, subnetId);
+                    if (subnet == null) {
+                        throw new CloudConnectorException(
+                                String.format("Subnet [%s] does not found with resourceGroupName [%s] and network [%s]", subnetId, resourceGroupName, networkId)
+                        );
+                    }
                     NetworkSecurityGroup networkSecurityGroup = subnet.getNetworkSecurityGroup();
                     if (networkSecurityGroup != null) {
                         validateSecurityGroup(client, networkSecurityGroup);
