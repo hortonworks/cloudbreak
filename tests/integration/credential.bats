@@ -1,63 +1,79 @@
+#!/usr/bin/env bash
+
 load ../commands
+load ../parameters
 
-COMMON_ARGS_WO_CLUSTER=" --server ${CLOUD_URL} --username ${EMAIL} --password ${PASSWORD}  "
+@test "Check CB configure" {
+  OUTPUT=$(DEBUG=1 configure-cb $COMMON_ARGS_WO_CLUSTER 2>&1 | sed -e '$!d')
 
-AWS_ARGS_KEY=" --name cli-aws-key --access-key testaccess --secret-key testsecretkey "
-AWS_ARGS_ROLE=" --name cli-aws-role --role-arn  testawsrole "
-OPENSTACK_ARGS_V2=" --name cli-openstack --tenant-user testuser  --tenant-password testpassword --tenant-name testtenant --endpoint http://1.1.1.1:5000/v2.0"
-OPENSTACK_ARGS_V3=" --name cli-openstack --tenant-user testuser  --tenant-password testpassword --user-domain testtenant --endpoint http://1.1.1.1:5000/v2.0"
-GCP_ARGS=" --name cli-gcp --project-id testprojet --service-account-id testuser@siq-haas.iam.gserviceaccount.com --service-account-private-key-file test.p12"
-AZURE_ARGS=" --name cli-azure --subscription-id aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaa --tenant-id aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaa --app-id aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaa --app-password testpassword"
-
-@test "Check configure" {
-  CHECK_RESULT=$( configure-cb $COMMON_ARGS_WO_CLUSTER)
-  echo $CHECK_RESULT >&2
+  [[ "${OUTPUT}" == *"writing credentials to file:"* ]]
+  [[ "${OUTPUT}" != *"error"* ]]
 }
 
-@test "Check create aws credential role based" {
-  echo $AWS_ARGS_ROLE
-  CHECK_RESULT=$( create-credential-aws-role $AWS_ARGS_ROLE )
-  echo $CHECK_RESULT >&2
+@test "Check credential create AWS role based" {
+  OUTPUT=$(DEBUG=1 create-credential-aws-role $AWS_ARGS_ROLE 2>&1 | tail -n 2 | head -n 1)
+
+  [[ "${OUTPUT}" == *"credential created: aeiou"* ]]
+  [[ "${OUTPUT}" != *"error"* ]]
 }
 
-@test "Check create aws credential key based" {
-  CHECK_RESULT=$( create-credential-aws-key $AWS_ARGS_KEY )
-  echo $CHECK_RESULT >&2
+@test "Check credential create AWS key based" {
+  OUTPUT=$(DEBUG=1 create-credential-aws-key $AWS_ARGS_KEY 2>&1 | tail -n 2 | head -n 1)
+
+  [[ "${OUTPUT}" == *"credential created: aeiou"* ]]
+  [[ "${OUTPUT}" != *"error"* ]]
 }
 
-@test "Check create azure credential" {
-  CHECK_RESULT=$( create-credential-azure $AZURE_ARGS )
-  echo $CHECK_RESULT >&2
+@test "Check credential create Azure" {
+  OUTPUT=$(DEBUG=1 create-credential-azure $AZURE_ARGS 2>&1 | tail -n 2 | head -n 1)
+
+  [[ "${OUTPUT}" == *"credential created: aeiou"* ]]
+  [[ "${OUTPUT}" != *"error"* ]]
 }
 
-@test "Check create openstack credential" {
-  CHECK_RESULT=$( create-credential-openstack-v2 $OPENSTACK_ARGS_V2 )
-  echo $CHECK_RESULT >&2
+@test "Check credential create OpenStack V2" {
+  OUTPUT=$(DEBUG=1 create-credential-openstack-v2 $OPENSTACK_ARGS_V2 2>&1 | tail -n 2 | head -n 1)
+
+  [[ "${OUTPUT}" == *"credential created: aeiou"* ]]
+  [[ "${OUTPUT}" != *"error"* ]]
 }
 
-@test "Check create openstack credential" {
-  CHECK_RESULT=$( create-credential-openstack-v3 $OPENSTACK_ARGS_V3 )
-  echo $CHECK_RESULT >&2
+@test "Check credential create OpenStack V3" {
+  OUTPUT=$(DEBUG=1 create-credential-openstack-v3 $OPENSTACK_ARGS_V3 2>&1 | tail -n 2 | head -n 1)
+
+  [[ "${OUTPUT}" == *"credential created: aeiou"* ]]
+  [[ "${OUTPUT}" != *"error"* ]]
 }
 
-@test "Check create gcp credential" {
-  CHECK_RESULT=$( create-credential-gcp $GCP_ARGS )
-  echo $CHECK_RESULT >&2
+@test "Check credential create GCP" {
+  OUTPUT=$(DEBUG=1 create-credential-gcp $GCP_ARGS 2>&1 | tail -n 2 | head -n 1)
+
+  [[ "${OUTPUT}" == *"credential created: aeiou"* ]]
+  [[ "${OUTPUT}" != *"error"* ]]
 }
 
-@test "Check delete credential" {
-  CHECK_RESULT=$( delete-credential --name testcred )
-  echo $CHECK_RESULT >&2
+@test "Check credential delete" {
+  OUTPUT=$(DEBUG=1 delete-credential --name "${OPENSTACK_CREDENTIAL_NAME}" 2>&1 | tail -n 2 | head -n 1)
+
+  [[ "${OUTPUT}" == *"credential deleted, name: ${OPENSTACK_CREDENTIAL_NAME}"* ]]
+  [[ "${OUTPUT}" != *"error"* ]]
 }
 
-@test "Check credentials are listed" {
+@test "Check credential list" {
   for OUTPUT in $(list-credentials  | jq ' .[] | [to_entries[].key] == ["Name","Description","CloudPlatform"]' );
   do
     [[ "$OUTPUT" == "true" ]]
   done
 }
 
-@test "Check credential is described" {
-  CHECK_RESULT=$( describe-credential --name testcred)
-  [ $(echo $CHECK_RESULT |  jq ' . | [to_entries[].key] == ["Name","Description","CloudPlatform"]' ) == true ]
+@test "Check credential described result" {
+  OUTPUT=$(describe-credential --name "${OPENSTACK_CREDENTIAL_NAME}" | jq .Name -r)
+
+  [[ "${OUTPUT}" == "${OPENSTACK_CREDENTIAL_NAME}" ]]
+}
+
+@test "Check credential described structure" {
+  OUTPUT=$(describe-credential --name "${OPENSTACK_CREDENTIAL_NAME}" |  jq ' . | [to_entries[].key] == ["Name","Description","CloudPlatform"]')
+
+  [[ "${OUTPUT}" == "true" ]]
 }

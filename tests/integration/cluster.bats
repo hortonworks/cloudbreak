@@ -1,104 +1,160 @@
 #!/usr/bin/env bats
-load ../commands
 
-@test "list clusters" {
-  [[ $(list-clusters | jq ' length ' ) == $( curl -ks $CLOUD_URL/cb/api/v1/stacks/account  | jq 'length' ) ]]
+load ../commands
+load ../parameters
+
+@test "Check cluster list" {
+  CB_CLUSTERS=$(list-clusters | jq 'length')
+  API_CLUSTERS=$(curl -ks "${CLOUD_URL}"/cb/api/v1/stacks/account | jq 'length')
+
+  [[ CB_CLUSTERS -eq API_CLUSTERS ]]
 }
 
 @test "list clusters attributes" {
-  for OUTPUT in $(list-clusters | jq ' .[] | [to_entries[].key] == ["Name","Description","CloudPlatform","StackStatus","ClusterStatus"]' );
+  for OUTPUT in $(list-clusters | jq ' .[] | [to_entries[].key] == ["Name","Description","CloudPlatform","StackStatus","ClusterStatus"]');
   do
     [[ "$OUTPUT" == "true" ]]
   done
 }
 
-@test "describe cluster" {
-  describe-cluster --name aaaaa
+@test "Check cluster describe result" {
+  OUTPUT=$(describe-cluster --name "${CLUSTER_NAME}" | jq .name -r)
+
+  [[ "${OUTPUT}" == "${CLUSTER_NAME}" ]]
 }
 
-@test "describer cluster not found" {
-  run describe-cluster --name az404
-  [[ $status -eq 1 ]]
+@test "Check cluster describe FAILED" {
+  OUTPUT=$(DEBUG=1 describe-cluster --name az404 2>&1 | tail -n 2 | head -n 1)
+
+  [[ "${OUTPUT}" == *"status code: 404, message: Stack 'az404' not found"* ]]
+  [[ "${OUTPUT}" == *"error"* ]]
 }
 
-@test "delete cluster" {
-  delete-cluster --name aaaaa
+@test "Check cluster delete SUCCESS" {
+  OUTPUT=$(DEBUG=1 cb cluster delete --name "${CLUSTER_NAME}" 2>&1 | tail -n 2 | head -n 1)
+
+  [[ "${OUTPUT}" == *"stack deleted, name: openstack-cluster"* ]]
+  [[ "${OUTPUT}" != *"error"* ]]
 }
 
-@test "delete cluster not found" {
-  run delete-cluster --name az404
-  [[ $status -eq 1 ]]
+@test "Check cluster delete FAILED" {
+  OUTPUT=$(DEBUG=1 cb cluster delete --name az404 2>&1 | tail -n 3 | head -n 1)
+
+  [[ "${OUTPUT}" == *"status code: 404, message: Stack 'az404' not found"* ]]
+  [[ "${OUTPUT}" == *"error"* ]]
 }
 
-@test "start cluster" {
-  start-cluster --name aaaaa
+@test "Check cluster start SUCCESS" {
+  OUTPUT=$(DEBUG=1 start-cluster --name "${CLUSTER_NAME}" 2>&1 | tail -n 2 | head -n 1)
+
+  [[ "${OUTPUT}" == *"stack started, name: openstack-cluster"* ]]
+  [[ "${OUTPUT}" != *"error"* ]]
 }
 
-@test "start cluster not in apropriate status" {
-  run start-cluster --name azstatus
-  [[ $status -eq 1 ]]
+@test "Check cluster start FAILED" {
+  OUTPUT=$(DEBUG=1 start-cluster --name azstatus 2>&1 | tail -n 2 | head -n 1)
+
+  [[ "${OUTPUT}" == *"status code: 400, message: Cannot update the status of stack 'x' to STARTED, because something something dark side"* ]]
+  [[ "${OUTPUT}" == *"error"* ]]
 }
 
-@test "stop cluster" {
-  stop-cluster --name aaaaa
+@test "Check clusters top SUCCESS" {
+  OUTPUT=$(DEBUG=1 stop-cluster --name "${CLUSTER_NAME}" 2>&1 | tail -n 2 | head -n 1)
+
+  [[ "${OUTPUT}" == *"stack stopted, name: openstack-cluster"* ]]
+  [[ "${OUTPUT}" != *"error"* ]]
 }
 
-@test "stop cluster not in apropriate status" {
-  run stop-cluster --name azstatus
-  [[ $status -eq 1 ]]
+@test "Check cluster stop FAILED" {
+  OUTPUT=$(DEBUG=1 stop-cluster --name azstatus 2>&1 | tail -n 2 | head -n 1)
+
+  [[ "${OUTPUT}" == *"status code: 400, message: Cannot update the status of stack"* ]]
+  [[ "${OUTPUT}" == *"error"* ]]
 }
 
-@test "sync cluster" {
-  sync-cluster --name aaaaa
+@test "Check cluster sync SUCCESS" {
+  OUTPUT=$(DEBUG=1 sync-cluster --name "${CLUSTER_NAME}" 2>&1 | tail -n 2 | head -n 1)
+
+  [[ "${OUTPUT}" == *"stack synced, name: openstack-cluster"* ]]
+  [[ "${OUTPUT}" != *"error"* ]]
 }
 
-@test "sync cluster not in apropriate status" {
+@test "Check cluster sync FAILED" {
   skip "mock is not ready"
-  run sync-cluster --name azstatus
-  [[ $status -eq 1 ]]
+
+  OUTPUT=$(DEBUG=1 sync-cluster --name azstatus 2>&1 | tail -n 2 | head -n 1)
+
+  [[ "${OUTPUT}" == *"status code: 400, message"* ]]
+  [[ "${OUTPUT}" == *"error"* ]]
 }
 
-@test "repair cluster" {
-  repair-cluster --name aaaaa
+@test "Check cluster repair SUCCESS" {
+  OUTPUT=$(DEBUG=1 repair-cluster --name "${CLUSTER_NAME}" 2>&1 | tail -n 2 | head -n 1)
+
+  [[ "${OUTPUT}" == *"stack repaired, name: openstack-cluster"* ]]
+  [[ "${OUTPUT}" != *"error"* ]]
 }
 
-@test "repair cluster not in apropriate status" {
+@test "Check cluster repair FAILED" {
   skip "mock is not ready"
-  run repair-cluster --name azstatus
-  [[ $status -eq 1 ]]
+
+  OUTPUT=$(DEBUG=1 repair-cluster --name azstatus 2>&1 | tail -n 2 | head -n 1)
+
+  [[ "${OUTPUT}" == *"status code: 400, message"* ]]
+  [[ "${OUTPUT}" == *"error"* ]]
 }
 
-@test "scale cluster" {
-  scale-cluster --name aaaaa --group-name a --desired-node-count 5
+@test "Check cluster scale SUCCESS" {
+  OUTPUT=$(DEBUG=1 scale-cluster --name "${CLUSTER_NAME}" --group-name worker --desired-node-count 5 2>&1 | tail -n 2 | head -n 1)
+
+  [[ "${OUTPUT}" == *"stack scaled, name: openstack-cluster"* ]]
+  [[ "${OUTPUT}" != *"error"* ]]
 }
 
-@test "scale cluster not in apropriate status" {
+@test "Check cluster scale FAILED" {
   skip "mock is not ready"
-  run scale-cluster --name azstatus --group-name a --desired-node-count 6
-  [[ $status -eq 1 ]]
+
+  OUTPUT=$(DEBUG=1 scale-cluster --name azstatus --group-name worker --desired-node-count 6 2>&1 | tail -n 2 | head -n 1)
+
+  [[ "${OUTPUT}" == *"status code: 400, message"* ]]
+  [[ "${OUTPUT}" == *"error"* ]]
 }
 
-@test "create cluster valid" {
-  create-cluster --cli-input-json template.json --name aaaaa
+@test "Check cluster create SUCCESS" {
+  OUTPUT=$(DEBUG=1 create-cluster --cli-input-json template.json --name aaaaa 2>&1 | tail -n 2 | head -n 1)
+
+  [[ "${OUTPUT}" == *"stack created: openstack-cluster"* ]]
+  [[ "${OUTPUT}" != *"error"* ]]
 }
 
-@test "create cluster wo name" {
-  run create-cluster --cli-input-json template.json 
-  [[ $status -eq 1 ]]
+@test "Check cluster create without name" {
+  OUTPUT=$(DEBUG=1 create-cluster --cli-input-json template.json 2>&1 | tail -n 2 | head -n 1)
+
+  [[ "${OUTPUT}" == *"Name of the cluster must be set either in the template or with the --name command line option."* ]]
+  [[ "${OUTPUT}" == *"error"* ]]
 }
 
-@test "create cluster wo pwd" {
+@test "Check cluster create without password" {
   skip "i dont have error - possibly bug"
-  run create-cluster --cli-input-json template_wo_pwd.json --name aaaaa
-  [[ $status -eq 1 ]]
+
+  OUTPUT=$(DEBUG=1 create-cluster --cli-input-json template_wo_pwd.json --name aaaaa 2>&1 | tail -n 2 | head -n 1)
+
+  [[ "${OUTPUT}" == *"Password"* ]]
+  [[ "${OUTPUT}" == *"error"* ]]
 }
 
-@test "create cluster wo pwd given in the cmd" {
-  create-cluster --cli-input-json template_wo_pwd.json --name aaaaa --input-json-param-password 1234
+@test "Check cluster create without password by parameter" {
+  OUTPUT=$(DEBUG=1 create-cluster --cli-input-json template_wo_pwd.json --name aaaaa --input-json-param-password 1234 2>&1 | tail -n 2 | head -n 1)
+
+  [[ "${OUTPUT}" == *"stack created: openstack-cluster"* ]]
+  [[ "${OUTPUT}" != *"error"* ]]
 }
 
-@test "re-install cluster" {
+@test "Check cluster re-install" {
   skip "i dont have error - possibly bug"
-  run reinstall-cluster --name test --cli-input-json template.json --name aaaaa
-  [[ $status -eq 1 ]]
+
+  OUTPUT=$(DEBUG=1 reinstall-cluster --name test --cli-input-json template.json --name aaaaa 2>&1 | tail -n 2 | head -n 1)
+
+  [[ "${OUTPUT}" == *""* ]]
+  [[ "${OUTPUT}" == *"error"* ]]
 }
