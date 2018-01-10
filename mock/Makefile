@@ -1,5 +1,6 @@
 IMAGE = hortonworks/cloudbreak-mock
 VERSION ?= $(shell git  describe --tags --abbrev=0)
+BRANCH ?=$(shell git branch | grep \* | cut -d ' ' -f2)
 UNAME = $(shell uname)
 
 deps:
