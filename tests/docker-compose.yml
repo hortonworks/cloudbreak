@@ -94,7 +94,7 @@ cloudbreak:
     log_opt:
         max-size: "10M"
         max-file: "5"
-    image: afarsang/cbm:latest
+    image: hortonworks/cloudbreak-mock:latest
     command: bash
 
 sultans:
