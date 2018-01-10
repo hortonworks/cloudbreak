@@ -73,7 +73,7 @@ public class ImageCatalogServiceTest {
     @Test
     public void testGetImagesWhenExactVersionExistsInCatalog() throws Exception {
         String cbVersion = "1.16.4";
-        StatedImages images = underTest.getImages("", "aws", cbVersion);
+        StatedImages images = underTest.getImages("", "default", "aws", cbVersion);
 
         boolean exactImageIdMatch = images.getImages().getHdpImages().stream()
                 .anyMatch(img -> img.getUuid().equals("2.5.1.9-4-ccbb32dc-6c9f-43f1-8a09-64b598fda733-2.6.1.4-2"));
@@ -82,7 +82,7 @@ public class ImageCatalogServiceTest {
 
     @Test
     public void testGetImagesWhenSimilarDevVersionDoesntExistInCatalogShouldReturnWithReleasedVersionIfExists() throws Exception {
-        StatedImages images = underTest.getImages("", "aws", "1.16.4-dev.132");
+        StatedImages images = underTest.getImages("", "default", "aws", "1.16.4-dev.132");
 
         boolean match = images.getImages().getHdpImages().stream()
                 .anyMatch(img -> img.getUuid().equals("2.5.1.9-4-ccbb32dc-6c9f-43f1-8a09-64b598fda733-2.6.1.4-2"));
@@ -91,7 +91,7 @@ public class ImageCatalogServiceTest {
 
     @Test
     public void testGetImagesWhenSimilarRcVersionDoesntExistInCatalogShouldReturnWithReleasedVersionIfExists() throws Exception {
-        StatedImages images = underTest.getImages("", "aws", "1.16.4-rc.13");
+        StatedImages images = underTest.getImages("", "default", "aws", "1.16.4-rc.13");
 
         boolean match = images.getImages().getHdpImages().stream()
                 .anyMatch(img -> img.getUuid().equals("2.5.1.9-4-ccbb32dc-6c9f-43f1-8a09-64b598fda733-2.6.1.4-2"));
@@ -100,7 +100,7 @@ public class ImageCatalogServiceTest {
 
     @Test
     public void testGetImagesWhenSimilarDevVersionExistsInCatalog() throws Exception {
-        StatedImages images = underTest.getImages("", "aws", "2.1.0-dev.4000");
+        StatedImages images = underTest.getImages("", "default", "aws", "2.1.0-dev.4000");
 
         boolean hdfImgMatch = images.getImages().getHdfImages().stream()
                 .anyMatch(ambariImage -> ambariImage.getUuid().equals("9958938a-1261-48e2-aff9-dbcb2cebf6cd"));
@@ -113,7 +113,7 @@ public class ImageCatalogServiceTest {
 
     @Test
     public void testGetImagesWhenSimilarRcVersionExistsInCatalog() throws Exception {
-        StatedImages images = underTest.getImages("", "aws", "2.0.0-rc.4");
+        StatedImages images = underTest.getImages("", "default", "aws", "2.0.0-rc.4");
 
         boolean allMatch = images.getImages().getHdpImages().stream()
                 .allMatch(img -> img.getUuid().equals("2.4.2.2-1-9e3ccdca-fa64-42eb-ab29-b1450767bbd8-2.5.0.1-265")
@@ -123,7 +123,7 @@ public class ImageCatalogServiceTest {
 
     @Test
     public void testGetImagesWhenExactVersionExistsInCatalogForPlatform() throws Exception {
-        StatedImages images = underTest.getImages("", "AWS", "1.16.4");
+        StatedImages images = underTest.getImages("", "default", "AWS", "1.16.4");
         boolean exactImageIdMatch = images.getImages().getHdpImages().stream()
                 .anyMatch(img -> img.getUuid().equals("2.5.1.9-4-ccbb32dc-6c9f-43f1-8a09-64b598fda733-2.6.1.4-2"));
         Assert.assertTrue("Result doesn't contain the required Ambari image with id for the platform.", exactImageIdMatch);
@@ -131,7 +131,7 @@ public class ImageCatalogServiceTest {
 
     @Test
     public void testGetImagesWhenExactVersionDoesnotExistInCatalogForPlatform() throws Exception {
-        StatedImages images = underTest.getImages("", "owncloud", "1.16.4");
+        StatedImages images = underTest.getImages("", "default", "owncloud", "1.16.4");
 
         boolean noMatch = images.getImages().getBaseImages().isEmpty()
                 && images.getImages().getHdpImages().isEmpty()

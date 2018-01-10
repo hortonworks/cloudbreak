@@ -10,8 +10,8 @@ import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.SmartSenseSubscriptionEndpoint;
 import com.sequenceiq.cloudbreak.api.model.SmartSenseSubscriptionJson;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
-import com.sequenceiq.cloudbreak.converter.JsonToSmartSenseSubscriptionConverter;
-import com.sequenceiq.cloudbreak.converter.SmartSenseSubscriptionToJsonConverter;
+import com.sequenceiq.cloudbreak.converter.SmartSenseSubscriptionRequestToSmartSenseSubscriptionConverter;
+import com.sequenceiq.cloudbreak.converter.SmartSenseSubscriptionToSmartSenseSubscriptionJsonConverter;
 import com.sequenceiq.cloudbreak.domain.SmartSenseSubscription;
 import com.sequenceiq.cloudbreak.service.smartsense.SmartSenseSubscriptionService;
 
@@ -25,10 +25,10 @@ public class SmartSenseSubscriptionController implements SmartSenseSubscriptionE
     private AuthenticatedUserService authenticatedUserService;
 
     @Inject
-    private SmartSenseSubscriptionToJsonConverter toJsonConverter;
+    private SmartSenseSubscriptionToSmartSenseSubscriptionJsonConverter toJsonConverter;
 
     @Inject
-    private JsonToSmartSenseSubscriptionConverter toSmartSenseSubscriptionConverter;
+    private SmartSenseSubscriptionRequestToSmartSenseSubscriptionConverter toSmartSenseSubscriptionConverter;
 
     @Override
     public SmartSenseSubscriptionJson get() {

@@ -25,7 +25,7 @@ public abstract class SecurityRuleBase implements JsonEntity {
     private String protocol;
 
     @ApiModelProperty(SecurityRuleModelDescription.MODIFIABLE)
-    private boolean modifiable;
+    private Boolean modifiable;
 
     protected SecurityRuleBase() {
     }
@@ -58,11 +58,11 @@ public abstract class SecurityRuleBase implements JsonEntity {
         this.protocol = protocol;
     }
 
-    public boolean isModifiable() {
+    public Boolean isModifiable() {
         return modifiable;
     }
 
-    public void setModifiable(boolean modifiable) {
+    public void setModifiable(Boolean modifiable) {
         this.modifiable = modifiable;
     }
 }

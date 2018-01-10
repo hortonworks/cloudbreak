@@ -12,7 +12,7 @@ import com.sequenceiq.cloudbreak.domain.FlexSubscription;
 public class FlexSubscriptionToJsonConverter extends AbstractConversionServiceAwareConverter<FlexSubscription, FlexSubscriptionResponse> {
 
     @Inject
-    private SmartSenseSubscriptionToJsonConverter smartSenseSubscriptionToJsonConverter;
+    private SmartSenseSubscriptionToSmartSenseSubscriptionJsonConverter smartSenseSubscriptionToSmartSenseSubscriptionJsonConverter;
 
     @Override
     public FlexSubscriptionResponse convert(FlexSubscription source) {
@@ -24,7 +24,8 @@ public class FlexSubscriptionToJsonConverter extends AbstractConversionServiceAw
         json.setPublicInAccount(source.isPublicInAccount());
         json.setSubscriptionId(source.getSubscriptionId());
         json.setSmartSenseSubscriptionId(source.getSmartSenseSubscription().getId());
-        SmartSenseSubscriptionJson smartSenseSubscriptionJson = smartSenseSubscriptionToJsonConverter.convert(source.getSmartSenseSubscription());
+        SmartSenseSubscriptionJson smartSenseSubscriptionJson =
+                smartSenseSubscriptionToSmartSenseSubscriptionJsonConverter.convert(source.getSmartSenseSubscription());
         json.setSmartSenseSubscription(smartSenseSubscriptionJson);
         json.setDefault(source.isDefault());
         json.setUsedForController(source.isUsedForController());

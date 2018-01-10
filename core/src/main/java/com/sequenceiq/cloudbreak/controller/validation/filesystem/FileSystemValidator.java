@@ -22,7 +22,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.FileSystem;
 import com.sequenceiq.cloudbreak.cloud.reactor.ErrorHandlerAwareReactorEventFactory;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
-import com.sequenceiq.cloudbreak.converter.spi.FileSystemRequestToFileSystemConverter;
+import com.sequenceiq.cloudbreak.converter.spi.FileSystemRequestToSpiFileSystemConverter;
 import com.sequenceiq.cloudbreak.service.stack.connector.OperationException;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
@@ -40,7 +40,7 @@ public class FileSystemValidator {
     private ErrorHandlerAwareReactorEventFactory eventFactory;
 
     @Inject
-    private FileSystemRequestToFileSystemConverter converter;
+    private FileSystemRequestToSpiFileSystemConverter converter;
 
     public void validateFileSystem(String platform, CloudCredential cloudCredential, FileSystemRequest fileSystemRequest) {
         if (fileSystemRequest == null) {

@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.api.model;
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.AmbariRepoDetailsDescription;
 
 import io.swagger.annotations.ApiModel;
@@ -10,6 +11,7 @@ import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel("AmbariRepoDetails")
 @JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class AmbariRepoDetailsJson implements JsonEntity {
 
     @NotNull

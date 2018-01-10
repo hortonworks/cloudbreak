@@ -8,9 +8,12 @@ public class StatedImage {
 
     private String imageCatalogUrl;
 
-    private StatedImage(Image image, String imageCatalogUrl) {
+    private String imageCatalogName;
+
+    private StatedImage(Image image, String imageCatalogUrl, String imageCatalogName) {
         this.image = image;
         this.imageCatalogUrl = imageCatalogUrl;
+        this.imageCatalogName = imageCatalogName;
     }
 
     public Image getImage() {
@@ -21,7 +24,11 @@ public class StatedImage {
         return imageCatalogUrl;
     }
 
-    public static StatedImage statedImage(Image image, String imageCatalogUrl) {
-        return new StatedImage(image, imageCatalogUrl);
+    public String getImageCatalogName() {
+        return imageCatalogName;
+    }
+
+    public static StatedImage statedImage(Image image, String imageCatalogUrl, String imageCatalogName) {
+        return new StatedImage(image, imageCatalogUrl, imageCatalogName);
     }
 }

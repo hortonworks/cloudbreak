@@ -11,6 +11,7 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.model.JsonEntity;
 import com.sequenceiq.cloudbreak.api.model.RecoveryMode;
@@ -22,6 +23,7 @@ import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel("instanceGroupsV2")
 @JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class InstanceGroupV2Request implements JsonEntity {
 
     @Min(value = 0, message = "The node count has to be greater or equals than 0")

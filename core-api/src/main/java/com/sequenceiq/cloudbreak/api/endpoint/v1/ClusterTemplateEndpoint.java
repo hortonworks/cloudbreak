@@ -13,6 +13,7 @@ import javax.ws.rs.core.MediaType;
 
 import com.sequenceiq.cloudbreak.api.model.ClusterTemplateRequest;
 import com.sequenceiq.cloudbreak.api.model.ClusterTemplateResponse;
+import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
 import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.doc.Notes;
@@ -32,6 +33,13 @@ public interface ClusterTemplateEndpoint {
     @ApiOperation(value = ClusterTemplateOpDescription.GET_BY_ID, produces = ContentType.JSON, notes = Notes.CLUSTER_TEMPLATE_NOTES,
             nickname = "getClusterTemplate")
     ClusterTemplateResponse get(@PathParam("id") Long id);
+
+    @GET
+    @Path("cluster/user/{name}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = ClusterTemplateOpDescription.GET_BY_CLUSTER_NAME, produces = ContentType.JSON, notes = Notes.CLUSTER_TEMPLATE_NOTES,
+            nickname = "getClusterTemplateFromClusterName")
+    StackV2Request fromClusterName(@PathParam("name") String name);
 
     @DELETE
     @Path("{id}")

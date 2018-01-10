@@ -19,7 +19,7 @@ public abstract class BaseAlert {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "alert_generator")
     @SequenceGenerator(name = "alert_generator", sequenceName = "alert_id_seq", allocationSize = 1)
-    private long id;
+    private Long id;
 
     private String name;
 
@@ -28,11 +28,11 @@ public abstract class BaseAlert {
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     private ScalingPolicy scalingPolicy;
 
-    public long getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
