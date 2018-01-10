@@ -9,11 +9,11 @@ import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 
 public class JsonToStackRepoDetailsConverterTest extends AbstractJsonConverterTest<AmbariStackDetailsJson> {
-    private JsonToHDPRepoConverter underTest;
+    private HDPRepoRequestToHDPRepoConverter underTest;
 
     @Before
     public void setUp() {
-        underTest = new JsonToHDPRepoConverter();
+        underTest = new HDPRepoRequestToHDPRepoConverter();
     }
 
     @Test

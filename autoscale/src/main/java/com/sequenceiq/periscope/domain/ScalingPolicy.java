@@ -24,7 +24,7 @@ public class ScalingPolicy {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "policy_generator")
     @SequenceGenerator(name = "policy_generator", sequenceName = "scalingpolicy_id_seq", allocationSize = 1)
-    private long id;
+    private Long id;
 
     private String name;
 
@@ -41,11 +41,11 @@ public class ScalingPolicy {
     @Column(name = "host_group")
     private String hostGroup;
 
-    public long getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

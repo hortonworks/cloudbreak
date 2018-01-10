@@ -23,14 +23,14 @@ import com.sequenceiq.cloudbreak.domain.HostGroup;
 public class HostGroupToJsonEntityConverterTest extends AbstractEntityConverterTest<HostGroup> {
 
     @InjectMocks
-    private HostGroupToJsonConverter underTest;
+    private HostGroupToHostGroupResponseConverter underTest;
 
     @Mock
     private ConversionService conversionService;
 
     @Before
     public void setUp() {
-        underTest = new HostGroupToJsonConverter();
+        underTest = new HostGroupToHostGroupResponseConverter();
         MockitoAnnotations.initMocks(this);
         when(conversionService.convert(any(Class.class), any(Class.class))).thenReturn(new ConstraintJson());
     }

@@ -32,6 +32,7 @@ import com.sequenceiq.cloudbreak.api.model.InstanceGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.model.StackResponse;
 import com.sequenceiq.cloudbreak.api.model.StatusRequest;
+import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
 import com.sequenceiq.cloudbreak.cloud.model.CloudbreakDetails;
 import com.sequenceiq.cloudbreak.cloud.model.StackTemplate;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
@@ -298,6 +299,15 @@ public class StackService {
         StackResponse stackResponse = conversionService.convert(stack, StackResponse.class);
         stackResponse = stackResponseDecorator.decorate(stackResponse, stack, entries);
         return stackResponse;
+    }
+
+    public StackV2Request gettPublicStackCliJsonByName(String name, IdentityUser identityUser) {
+        Stack stack = stackRepository.findByNameInAccountWithLists(name, identityUser.getAccount());
+        if (stack == null) {
+            throw new NotFoundException(String.format("Stack '%s' not found", name));
+        }
+        authorizationService.hasReadPermission(stack);
+        return conversionService.convert(stack, StackV2Request.class);
     }
 
     public Stack getPublicStack(String name, IdentityUser identityUser) {

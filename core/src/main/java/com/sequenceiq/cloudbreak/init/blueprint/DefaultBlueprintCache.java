@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.sequenceiq.cloudbreak.api.model.BlueprintRequest;
-import com.sequenceiq.cloudbreak.converter.JsonToBlueprintConverter;
+import com.sequenceiq.cloudbreak.converter.BlueprintRequestToBlueprintConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.BlueprintInputParameters;
 import com.sequenceiq.cloudbreak.domain.json.Json;
@@ -33,7 +33,7 @@ public class DefaultBlueprintCache {
     private BlueprintUtils blueprintUtils;
 
     @Inject
-    private JsonToBlueprintConverter converter;
+    private BlueprintRequestToBlueprintConverter converter;
 
     private Map<String, Blueprint> defaultBlueprints = new HashMap<>();
 

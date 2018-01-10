@@ -15,6 +15,12 @@ public class ImageJson implements JsonEntity {
     @ApiModelProperty(ImageModelDescription.IMAGE_CATALOG_URL)
     private String imageCatalogUrl;
 
+    @ApiModelProperty(ImageModelDescription.IMAGE_ID)
+    private String imageId;
+
+    @ApiModelProperty(ImageModelDescription.IMAGE_CATALOG_NAME)
+    private String imageCatalogName;
+
     public String getImageName() {
         return imageName;
     }
@@ -29,5 +35,21 @@ public class ImageJson implements JsonEntity {
 
     public void setImageCatalogUrl(String imageCatalogUrl) {
         this.imageCatalogUrl = imageCatalogUrl;
+    }
+
+    public String getImageId() {
+        return imageId;
+    }
+
+    public void setImageId(String imageId) {
+        this.imageId = imageId;
+    }
+
+    public String getImageCatalogName() {
+        return imageCatalogName;
+    }
+
+    public void setImageCatalogName(String imageCatalogName) {
+        this.imageCatalogName = imageCatalogName;
     }
 }

@@ -72,11 +72,13 @@ public class ImageService {
             LOGGER.info("Determined image from catalog: {}", imgFromCatalog);
 
             String imageName = determineImageName(platformString, region, imgFromCatalog.getImage());
-            String catalogUrl = imgFromCatalog.getImageCatalogUrl();
             LOGGER.info("Selected VM image for CloudPlatform '{}' and region '{}' is: {} from: {} image catalog",
-                    platformString, region, imageName, catalogUrl);
+                    platformString, region, imageName, imgFromCatalog.getImageCatalogUrl());
 
-            List<Component> components = getComponents(stack, userData, imgFromCatalog.getImage(), imageName, catalogUrl);
+            List<Component> components = getComponents(stack, userData, imgFromCatalog.getImage(), imageName,
+                    imgFromCatalog.getImageCatalogUrl(),
+                    imgFromCatalog.getImageCatalogName(),
+                    imgFromCatalog.getImage().getUuid());
             componentConfigProvider.store(components);
         } catch (JsonProcessingException e) {
             throw new CloudbreakServiceException("Failed to create json", e);
@@ -128,9 +130,10 @@ public class ImageService {
     }
 
     private List<Component> getComponents(Stack stack, Map<InstanceGroupType, String> userData,
-            com.sequenceiq.cloudbreak.cloud.model.catalog.Image imgFromCatalog, String imageName, String imageCatalogUrl) throws JsonProcessingException {
+            com.sequenceiq.cloudbreak.cloud.model.catalog.Image imgFromCatalog,
+            String imageName, String imageCatalogUrl, String imageCatalogName, String imageId) throws JsonProcessingException {
         List<Component> components = new ArrayList<>();
-        Image image = new Image(imageName, userData, imgFromCatalog.getOsType(), imageCatalogUrl);
+        Image image = new Image(imageName, userData, imgFromCatalog.getOsType(), imageCatalogUrl, imageCatalogName, imageId);
         Component imageComponent = new Component(ComponentType.IMAGE, ComponentType.IMAGE.name(), new Json(image), stack);
         components.add(imageComponent);
 

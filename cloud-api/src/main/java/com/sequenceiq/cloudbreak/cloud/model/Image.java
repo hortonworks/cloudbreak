@@ -23,18 +23,22 @@ public class Image {
 
     private final String imageCatalogUrl;
 
-    public Image(String imageName, Map<InstanceGroupType, String> userdata) {
-        this(imageName, userdata, "", "");
-    }
+    private final String imageId;
+
+    private final String imageCatalogName;
 
     public Image(@JsonProperty("imageName") String imageName,
             @JsonProperty("userdata") Map<InstanceGroupType, String> userdata,
             @JsonProperty("osType") String osType,
-            @JsonProperty("imageCatalogUrl") String imageCatalogUrl) {
+            @JsonProperty("imageCatalogUrl") String imageCatalogUrl,
+            @JsonProperty("imageCatalogName") String imageCatalogName,
+            @JsonProperty("imageId") String imageId) {
         this.imageName = imageName;
         this.userdata = userdata != null ? ImmutableMap.copyOf(userdata) : null;
         this.imageCatalogUrl = imageCatalogUrl;
         this.osType = osType;
+        this.imageCatalogName = imageCatalogName;
+        this.imageId = imageId;
     }
 
     public String getImageName() {
@@ -57,12 +61,22 @@ public class Image {
         return imageCatalogUrl;
     }
 
+    public String getImageId() {
+        return imageId;
+    }
+
+    public String getImageCatalogName() {
+        return imageCatalogName;
+    }
+
     @Override
     public String toString() {
         return "Image{"
                 + "imageName='" + imageName + '\''
                 + ", osType='" + osType + '\''
                 + ", imageCatalogUrl='" + imageCatalogUrl + '\''
+                + ", imageId='" + imageId + '\''
+                + ", imageCatalogName='" + imageCatalogName + '\''
                 + ", userdata=" + userdata + '}';
     }
 }

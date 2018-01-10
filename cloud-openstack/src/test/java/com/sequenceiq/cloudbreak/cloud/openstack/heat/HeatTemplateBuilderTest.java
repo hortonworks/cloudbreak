@@ -117,7 +117,7 @@ public class HeatTemplateBuilderTest {
                 InstanceGroupType.CORE, "CORE",
                 InstanceGroupType.GATEWAY, "GATEWAY"
         );
-        image = new Image("cb-centos66-amb200-2015-05-25", userData);
+        image = new Image("cb-centos66-amb200-2015-05-25", userData, "redhat6", "url", "default", null);
     }
 
     @Test

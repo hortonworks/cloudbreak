@@ -109,6 +109,7 @@ public class OperationDescriptions {
         public static final String GET_PRIVATE_BY_NAME = "retrieve a private cluster template by name";
         public static final String GET_PUBLIC_BY_NAME = "retrieve a public or private (owned) cluster template by name";
         public static final String GET_BY_ID = "retrieve cluster template by id";
+        public static final String GET_BY_CLUSTER_NAME = "retrieve cluster template by cluster name";
         public static final String DELETE_PRIVATE_BY_NAME = "delete private cluster template by name";
         public static final String DELETE_PUBLIC_BY_NAME = "delete public (owned) or private cluster template by name";
         public static final String DELETE_BY_ID = "delete cluster template by id";
