@@ -1,11 +1,11 @@
 package com.sequenceiq.cloudbreak.service.credential;
 
+import static com.sequenceiq.cloudbreak.util.NameUtil.generateArchiveName;
 import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
 
 import java.util.Date;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 
 import javax.inject.Inject;
 import javax.transaction.Transactional;
@@ -197,10 +197,5 @@ public class CredentialService {
         credential.setArchived(true);
         credential.setTopology(null);
         credentialRepository.save(credential);
-    }
-
-    private String generateArchiveName(String name) {
-        //generate new name for the archived credential to by pass unique constraint
-        return new StringBuilder().append(name).append('_').append(UUID.randomUUID()).toString();
     }
 }

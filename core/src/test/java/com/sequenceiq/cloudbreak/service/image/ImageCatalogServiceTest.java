@@ -19,19 +19,35 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV2;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.controller.AuthenticatedUserService;
+import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
+import com.sequenceiq.cloudbreak.domain.UserProfile;
 import com.sequenceiq.cloudbreak.repository.ImageCatalogRepository;
+import com.sequenceiq.cloudbreak.service.AuthorizationService;
+import com.sequenceiq.cloudbreak.service.user.UserProfileService;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ImageCatalogServiceTest {
 
+    public static final String USER_ID = "userId";
+
+    public static final String USERNAME = "username";
+
+    public static final String ACCOUNT = "account";
+
     @Mock
     private ImageCatalogProvider imageCatalogProvider;
 
     @Mock
     private AuthenticatedUserService authenticatedUserService;
+
+    @Mock
+    private AuthorizationService authorizationService;
+
+    @Mock
+    private UserProfileService userProfileService;
 
     @Mock
     private ImageCatalogRepository imageCatalogRepository;
@@ -45,9 +61,13 @@ public class ImageCatalogServiceTest {
         CloudbreakImageCatalogV2 catalog = JsonUtil.readValue(catalogJson, CloudbreakImageCatalogV2.class);
         when(imageCatalogProvider.getImageCatalogV2("")).thenReturn(catalog);
 
-        IdentityUser user = new IdentityUser("userId", "username", "account",
-                Collections.emptyList(), "givenName", "familyName", new Date());
+        IdentityUser user = getIdentityUser();
         when(authenticatedUserService.getCbUser()).thenReturn(user);
+    }
+
+    private IdentityUser getIdentityUser() {
+        return new IdentityUser(USER_ID, USERNAME, ACCOUNT,
+                Collections.emptyList(), "givenName", "familyName", new Date());
     }
 
     @Test
@@ -142,5 +162,53 @@ public class ImageCatalogServiceTest {
         Assert.assertTrue("HDF images should be empty!", images.getHdfImages().isEmpty());
         Assert.assertTrue("HDP images should be empty!", images.getHdpImages().isEmpty());
 
+    }
+
+    @Test
+    public void testDeleteImageCatalog() {
+        String name = "img-name";
+        IdentityUser user = getIdentityUser();
+        UserProfile userProfile = new UserProfile();
+        ImageCatalog imageCatalog = new ImageCatalog();
+        imageCatalog.setImageCatalogName(name);
+        imageCatalog.setArchived(false);
+        when(authenticatedUserService.getCbUser()).thenReturn(user);
+        when(imageCatalogRepository.findByName(name, user.getUserId(), user.getAccount())).thenReturn(imageCatalog);
+        when(userProfileService.get(user.getAccount(), user.getUserId())).thenReturn(userProfile);
+        underTest.delete(name);
+
+        verify(imageCatalogRepository, times(1)).save(imageCatalog);
+
+        Assert.assertTrue(imageCatalog.isArchived());
+        Assert.assertTrue(imageCatalog.getImageCatalogName().startsWith(name) && imageCatalog.getImageCatalogName().indexOf("_") == name.length());
+    }
+
+    @Test(expected = BadRequestException.class)
+    public void testDeleteImageCatalogWhenEnvDefault() {
+        String name = "cloudbreak-default";
+        underTest.delete(name);
+    }
+
+    @Test
+    public void testGet() {
+        String name = "img-name";
+        ImageCatalog imageCatalog = new ImageCatalog();
+        IdentityUser user = getIdentityUser();
+        when(authenticatedUserService.getCbUser()).thenReturn(user);
+        when(imageCatalogRepository.findByName(name, user.getUserId(), user.getAccount())).thenReturn(imageCatalog);
+        ImageCatalog actual = underTest.get(name);
+
+        Assert.assertEquals(actual, imageCatalog);
+    }
+
+    @Test
+    public void testGetWhenEnvDefault() {
+        String name = "cloudbreak-default";
+        ImageCatalog actual = underTest.get(name);
+
+        verify(imageCatalogRepository, times(0)).findByName(name, USER_ID, ACCOUNT);
+
+        Assert.assertEquals(actual.getImageCatalogName(), name);
+        Assert.assertNull(actual.getId());
     }
 }
