@@ -158,7 +158,7 @@ public class ClusterCreationSetupService {
     private void checkVDFFile(ClusterComponent ambariRepoConfig, ClusterComponent hdpRepoConfig, String stackName) throws IOException {
         AmbariRepo ambariRepo = ambariRepoConfig.getAttributes().get(AmbariRepo.class);
 
-        if (ambariRepositoryVersionService.isNewerOrEqualAmbariApi(AMBARI_VERSION_2_6_0_0, ambariRepo::getVersion)
+        if (ambariRepositoryVersionService.isVersionNewerOrEqualThanLimited(ambariRepo::getVersion, AMBARI_VERSION_2_6_0_0)
                 && !containsVDFUrl(hdpRepoConfig.getAttributes())) {
             throw new BadRequestException(String.format("Couldn't determine any VDF file for the stack: %s", stackName));
         }

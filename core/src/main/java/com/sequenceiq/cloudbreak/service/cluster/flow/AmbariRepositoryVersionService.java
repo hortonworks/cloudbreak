@@ -57,7 +57,7 @@ public class AmbariRepositoryVersionService {
         StackRepoDetails stackRepoDetails = getStackRepoDetails(clusterId, orchestrator);
         AmbariRepo ambariRepoDetails = clusterComponentConfigProvider.getAmbariRepo(clusterId);
         String result = "";
-        if (stackRepoDetails != null && isNewerOrEqualAmbariApi(AMBARI_VERSION_2_6_0_0, ambariRepoDetails::getVersion)) {
+        if (stackRepoDetails != null && isVersionNewerOrEqualThanLimited(ambariRepoDetails::getVersion, AMBARI_VERSION_2_6_0_0)) {
             Optional<String> repositoryVersion = Optional.ofNullable(stackRepoDetails.getStack().get(StackRepoDetails.REPOSITORY_VERSION));
             result = repositoryVersion.orElse("");
         }
@@ -70,10 +70,10 @@ public class AmbariRepositoryVersionService {
             try {
                 LOGGER.info("Use specific Ambari repository: {}", stackRepoDetails);
                 AmbariRepo ambariRepoDetails = clusterComponentConfigProvider.getAmbariRepo(clusterId);
-                if (isNewerOrEqualAmbariApi(AMBARI_VERSION_2_6_0_0, ambariRepoDetails::getVersion)) {
-                    setRepositoryVersionOnApi(ambariClient, stackRepoDetails);
-                } else {
+                if (isVersionNewerOrEqualThanLimited(ambariRepoDetails::getVersion, AMBARI_VERSION_2_6_0_0)) {
                     addVersionDefinitionFileToAmbari(stackName, ambariClient, stackRepoDetails);
+                } else {
+                    setRepositoryVersionOnApi(ambariClient, stackRepoDetails);
                 }
             } catch (HttpResponseException e) {
                 String exceptionErrorMsg = AmbariClientExceptionUtil.getErrorMessage(e);
@@ -85,9 +85,9 @@ public class AmbariRepositoryVersionService {
         }
     }
 
-    public boolean isNewerOrEqualAmbariApi(Versioned newerVersion, Versioned currentVersion) {
+    public boolean isVersionNewerOrEqualThanLimited(Versioned currentVersion, Versioned limitedAPIVersion) {
         VersionComparator versionComparator = new VersionComparator();
-        return versionComparator.compare(newerVersion, currentVersion) > -1;
+        return versionComparator.compare(currentVersion, limitedAPIVersion) > -1;
     }
 
     private StackRepoDetails getStackRepoDetails(long clusterId, Orchestrator orchestrator) throws CloudbreakException {
