@@ -116,15 +116,17 @@ public class ModelDescriptions {
         public static final String GATEWAY_PORT = "port of the gateway secured proxy";
         public static final String AMBARI_VERSION = "specific version of ambari";
         public static final String HDP_VERSION = "specific version of HDP";
-        public static final String IMAGE_CATALOG = "custom image catalog URL";
         public static final String CLOUDBREAK_DETAILS = "details of the Cloudbreak that provisioned the stack";
         public static final String S3_ACCESS_ROLE_ARN = "S3 access role arn";
         public static final String VPC_ID = "cluster vpc id";
         public static final String SUBNET_ID = "cluster subnet id";
         public static final String FILE_SYSTEM = "external file system configuration";
         public static final String INSTANCE_GROUPS = "collection of instance groupst";
+        public static final String IMAGE_SETTINGS = "settings for custom images";
+        public static final String IMAGE_CATALOG = "custom image catalog URL";
         public static final String IMAGE_ID = "virtual machine image id from ImageCatalog, machines of the cluster will be started from this image";
         public static final String INSTANCE_GROUP_ADJUSTMENT = "instance group adjustment";
+        public static final String TAGS = "stack related tags";
         public static final String APPLICATION_TAGS = "stack related application tags";
         public static final String DEFAULT_TAGS = "stack related default tags";
         public static final String USERDEFINED_TAGS = "stack related userdefined tags";
@@ -144,6 +146,9 @@ public class ModelDescriptions {
         public static final String CUSTOM_HOSTNAME = "custom hostname for nodes in the stack";
         public static final String CLUSTER_NAME_AS_SUBDOMAIN = "using the cluster name to create subdomain";
         public static final String HOSTGROUP_NAME_AS_HOSTNAME = "using the hostgroup names to create hostnames";
+        public static final String CUSTOM_DOMAIN_SETTINGS = "settings related to custom domain names";
+        public static final String GENERAL_SETTINGS = "general configuration parameters for a cluster (e.g. 'name', 'credentialname')";
+        public static final String PLACEMENT_SETTINGS = "placement configuration parameters for a cluster (e.g. 'region', 'availabilityZone')";
     }
 
     public static class ClusterModelDescription {

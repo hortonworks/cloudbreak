@@ -1,8 +1,5 @@
 package com.sequenceiq.cloudbreak.api.model.v2;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import javax.validation.Valid;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -11,7 +8,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.cloudbreak.api.model.ExecutorType;
 import com.sequenceiq.cloudbreak.api.model.FileSystemRequest;
 import com.sequenceiq.cloudbreak.api.model.JsonEntity;
-import com.sequenceiq.cloudbreak.api.model.RDSConfigRequest;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
 
@@ -35,12 +31,8 @@ public class ClusterV2Request implements JsonEntity {
     @ApiModelProperty(ClusterModelDescription.LDAP_CONFIG_NAME)
     private String ldapConfigName;
 
-    @ApiModelProperty(ClusterModelDescription.RDSCONFIG_IDS)
-    private Set<Long> rdsConfigIds = new HashSet<>();
-
-    @Valid
     @ApiModelProperty(ClusterModelDescription.RDS_CONFIGS)
-    private Set<RDSConfigRequest> rdsConfigJsons = new HashSet<>();
+    private RdsConfigs rdsConfigs;
 
     @Valid
     @ApiModelProperty(StackModelDescription.FILE_SYSTEM)
@@ -51,7 +43,7 @@ public class ClusterV2Request implements JsonEntity {
 
     @Valid
     @ApiModelProperty(ClusterModelDescription.AMBARI_REQUEST)
-    private AmbariV2Request ambariRequest;
+    private AmbariV2Request ambari;
 
     public Boolean getEmailNeeded() {
         return emailNeeded;
@@ -59,22 +51,6 @@ public class ClusterV2Request implements JsonEntity {
 
     public void setEmailNeeded(Boolean emailNeeded) {
         this.emailNeeded = emailNeeded;
-    }
-
-    public Set<Long> getRdsConfigIds() {
-        return rdsConfigIds;
-    }
-
-    public void setRdsConfigIds(Set<Long> rdsConfigIds) {
-        this.rdsConfigIds = rdsConfigIds;
-    }
-
-    public Set<RDSConfigRequest> getRdsConfigJsons() {
-        return rdsConfigJsons;
-    }
-
-    public void setRdsConfigJsons(Set<RDSConfigRequest> rdsConfigJsons) {
-        this.rdsConfigJsons = rdsConfigJsons;
     }
 
     public FileSystemRequest getFileSystem() {
@@ -119,11 +95,19 @@ public class ClusterV2Request implements JsonEntity {
         return executorType;
     }
 
-    public AmbariV2Request getAmbariRequest() {
-        return ambariRequest;
+    public AmbariV2Request getAmbari() {
+        return ambari;
     }
 
-    public void setAmbariRequest(AmbariV2Request ambariRequest) {
-        this.ambariRequest = ambariRequest;
+    public void setAmbari(AmbariV2Request ambari) {
+        this.ambari = ambari;
+    }
+
+    public RdsConfigs getRdsConfigs() {
+        return rdsConfigs;
+    }
+
+    public void setRdsConfigs(RdsConfigs rdsConfigs) {
+        this.rdsConfigs = rdsConfigs;
     }
 }

@@ -8,7 +8,7 @@ import com.sequenceiq.cloudbreak.doc.ModelDescriptions.RDSConfig;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-@ApiModel("RDSConfig")
+@ApiModel("RdsConfig")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class RDSConfigRequest extends RDSConfigJson {
 
