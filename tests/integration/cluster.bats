@@ -10,7 +10,7 @@ load ../parameters
   [[ CB_CLUSTERS -eq API_CLUSTERS ]]
 }
 
-@test "list clusters attributes" {
+@test "Check cluster list attributes" {
   for OUTPUT in $(list-clusters | jq ' .[] | [to_entries[].key] == ["Name","Description","CloudPlatform","StackStatus","ClusterStatus"]');
   do
     [[ "$OUTPUT" == "true" ]]
@@ -54,7 +54,7 @@ load ../parameters
 @test "Check cluster start FAILED" {
   OUTPUT=$(DEBUG=1 start-cluster --name azstatus 2>&1 | tail -n 2 | head -n 1)
 
-  [[ "${OUTPUT}" == *"status code: 400, message: Cannot update the status of stack 'x' to STARTED, because something something dark side"* ]]
+  [[ "${OUTPUT}" == *"status code: 400, message: Stack 'azstatus' not found"* ]]
   [[ "${OUTPUT}" == *"error"* ]]
 }
 
@@ -68,7 +68,7 @@ load ../parameters
 @test "Check cluster stop FAILED" {
   OUTPUT=$(DEBUG=1 stop-cluster --name azstatus 2>&1 | tail -n 2 | head -n 1)
 
-  [[ "${OUTPUT}" == *"status code: 400, message: Cannot update the status of stack"* ]]
+  [[ "${OUTPUT}" == *"status code: 400, message: Stack 'azstatus' not found"* ]]
   [[ "${OUTPUT}" == *"error"* ]]
 }
 
@@ -80,11 +80,9 @@ load ../parameters
 }
 
 @test "Check cluster sync FAILED" {
-  skip "mock is not ready"
-
   OUTPUT=$(DEBUG=1 sync-cluster --name azstatus 2>&1 | tail -n 2 | head -n 1)
 
-  [[ "${OUTPUT}" == *"status code: 400, message"* ]]
+  [[ "${OUTPUT}" == *"status code: 400, message: Stack 'azstatus' not found"* ]]
   [[ "${OUTPUT}" == *"error"* ]]
 }
 
@@ -96,11 +94,9 @@ load ../parameters
 }
 
 @test "Check cluster repair FAILED" {
-  skip "mock is not ready"
-
   OUTPUT=$(DEBUG=1 repair-cluster --name azstatus 2>&1 | tail -n 2 | head -n 1)
 
-  [[ "${OUTPUT}" == *"status code: 400, message"* ]]
+  [[ "${OUTPUT}" == *"status code: 400, message: Stack 'azstatus' not found"* ]]
   [[ "${OUTPUT}" == *"error"* ]]
 }
 
@@ -112,11 +108,9 @@ load ../parameters
 }
 
 @test "Check cluster scale FAILED" {
-  skip "mock is not ready"
-
   OUTPUT=$(DEBUG=1 scale-cluster --name azstatus --group-name worker --desired-node-count 6 2>&1 | tail -n 2 | head -n 1)
 
-  [[ "${OUTPUT}" == *"status code: 400, message"* ]]
+  [[ "${OUTPUT}" == *"status code: 400, message: Stack 'azstatus' not found"* ]]
   [[ "${OUTPUT}" == *"error"* ]]
 }
 
@@ -135,11 +129,11 @@ load ../parameters
 }
 
 @test "Check cluster create without password" {
-  skip "i dont have error - possibly bug"
+  skip "BUG-94445"
 
   OUTPUT=$(DEBUG=1 create-cluster --cli-input-json template_wo_pwd.json --name aaaaa 2>&1 | tail -n 2 | head -n 1)
 
-  [[ "${OUTPUT}" == *"Password"* ]]
+  [[ "${OUTPUT}" == *"status code: 400, message: ambariRequest password may not be null"* ]]
   [[ "${OUTPUT}" == *"error"* ]]
 }
 
@@ -151,10 +145,10 @@ load ../parameters
 }
 
 @test "Check cluster re-install" {
-  skip "i dont have error - possibly bug"
+  skip "BUG-94446"
 
   OUTPUT=$(DEBUG=1 reinstall-cluster --name test --cli-input-json template.json --name aaaaa 2>&1 | tail -n 2 | head -n 1)
 
-  [[ "${OUTPUT}" == *""* ]]
+  [[ "${OUTPUT}" == *"status code: 400, message: Stack 'aaaaa' not found"* ]]
   [[ "${OUTPUT}" == *"error"* ]]
 }
