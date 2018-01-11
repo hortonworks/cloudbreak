@@ -88,6 +88,17 @@ public class MockClusterCreationWithSaltSuccessTest extends AbstractMockIntegrat
         Set<HostGroupRequest> hostGroupJsons1 = convertHostGroups(hostgroups, runRecipesOnHosts);
         itContext.putContextParam(CloudbreakITContextConstants.AMBARI_USER_ID, ambariUser);
         itContext.putContextParam(CloudbreakITContextConstants.AMBARI_PASSWORD_ID, ambariPassword);
+
+        Map<String, CloudVmMetaDataStatus> instanceMap = itContext.getContextParam(CloudbreakITContextConstants.MOCK_INSTANCE_MAP, Map.class);
+        if (instanceMap == null || instanceMap.isEmpty()) {
+            throw new IllegalStateException("instance map should not be empty!");
+        }
+
+        initSpark();
+        addSaltMappings(instanceMap);
+        addAmbariMappings(instanceMap);
+        customMappings(instanceMap);
+
         // WHEN
         ClusterRequest clusterRequest = new ClusterRequest();
         clusterRequest.setName(clusterName);
@@ -108,16 +119,7 @@ public class MockClusterCreationWithSaltSuccessTest extends AbstractMockIntegrat
         gatewayJson.setEnableGateway(Boolean.TRUE);
         gatewayJson.setExposedServices(ImmutableList.of("ALL"));
         clusterRequest.setGateway(gatewayJson);
-        initSpark();
 
-        Map<String, CloudVmMetaDataStatus> instanceMap = itContext.getContextParam(CloudbreakITContextConstants.MOCK_INSTANCE_MAP, Map.class);
-
-        if (instanceMap == null || instanceMap.isEmpty()) {
-            throw new IllegalStateException("instance map should not be empty!");
-        }
-
-        addSaltMappings(instanceMap);
-        addAmbariMappings(instanceMap);
 
         ClusterV1Endpoint clusterV1Endpoint = getCloudbreakClient().clusterEndpoint();
         Long clusterId = clusterV1Endpoint.post(Long.valueOf(stackId), clusterRequest).getId();
@@ -127,7 +129,12 @@ public class MockClusterCreationWithSaltSuccessTest extends AbstractMockIntegrat
         CloudbreakUtil.checkClusterAvailability(getCloudbreakClient().stackV1Endpoint(), ambariPort, stackIdStr, ambariUser, ambariPassword, checkAmbari);
 
         verifyCalls(instanceMap, clusterName);
+        customVerifiers(instanceMap, clusterId, clusterName);
     }
+
+    protected void customMappings(Map<String, CloudVmMetaDataStatus> instanceMap) { }
+
+    protected void customVerifiers(Map<String, CloudVmMetaDataStatus> instanceMap, Long clusterId, String clusterName) { }
 
     private void verifyCalls(Map<String, CloudVmMetaDataStatus> instanceMap, String clusterName) {
         verify(SALT_BOOT_ROOT + "/health", "GET").exactTimes(1).verify();

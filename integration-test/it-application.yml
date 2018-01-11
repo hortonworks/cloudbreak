@@ -8,6 +8,8 @@ integrationtest:
     defaultBlueprintName: hdp-small-default
     outputdir: /it
     command: suites
-    suiteFiles: /it/src/main/resources/testsuites/mock/mock-scaling-salt.yaml
+    suiteFiles:
+      - /it/src/main/resources/testsuites/mock/mock-scaling-salt.yaml
+      - /it/src/main/resources/testsuites/mock/mock-kerberized-clustercreate-salt.yaml
     cleanup:
       cleanupBeforeStart: true
