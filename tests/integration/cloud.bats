@@ -1,35 +1,42 @@
 load ../commands
 load ../resources
-
-AWS_CRED_NAME=testcred
-REGION=eu-west-1
+load ../parameters
 
 @test "Check availability zone list" {
-  CHECK_RESULT=$( availability-zone-list --credential testcred --region testregion )
-  echo $CHECK_RESULT >&2
+  OUTPUT=$(availability-zone-list --credential "${OS_CREDENTIAL_NAME}" --region testregion 2>&1 | awk '{printf "%s",$0} END {print ""}' | awk 'match($0, /{[^{}]+}/) { print substr($0, RSTART, RLENGTH)}')
+  [[ $(echo "${OUTPUT}" | jq ' . |  [to_entries[].key] == ["credentialName"]') == true ]]
+  [[ $(echo "${OUTPUT}" | jq -r ."credentialName") == "${OS_CREDENTIAL_NAME}" ]]
 }
 
  @test "Check regions are listed" {
-  CHECK_RESULT=$( region-list --credential $AWS_CRED_NAME )
-  [ $(echo $CHECK_RESULT |  jq ' .[0] | [to_entries[].key] == ["Name","Description"]' ) == true ]
+  OUTPUT=$(region-list --credential "${OS_CREDENTIAL_NAME}" |  jq ' .[0] | [to_entries[].key] == ["Name","Description"]' )
+  [[ "$OUTPUT" == "true" ]]
 }
 
 @test "Check instances are listed" {
-  run instance-list --credential $AWS_CRED_NAME --region $REGION
-  [ $status = 1 ]
+  OUTPUT=$(instance-list --credential "${OS_CREDENTIAL_NAME}" --region testregion 2>&1 | awk '{printf "%s",$0} END {print ""}' | awk 'match($0, /{[^{}]+}/) { print substr($0, RSTART, RLENGTH)}')
+  [[ $(echo "${OUTPUT}" | jq ' . |  [to_entries[].key] == ["credentialName","region"]') == true ]]
+  [[ $(echo "${OUTPUT}" | jq -r ."credentialName") == "${OS_CREDENTIAL_NAME}" ]]
+  [[ $(echo "${OUTPUT}" | jq -r ."region") == testregion ]]
 }
 
 @test "Check volumes are listed - aws" {
-  CHECK_RESULT=$( volume-list aws )
-  [ $(echo $CHECK_RESULT |  jq ' .[0] | [to_entries[].key] == ["Name","Description"]' ) == true ]
+  for OUTPUT in $(volume-list aws | jq ' .[0] | [to_entries[].key] == ["Name","Description"]');
+  do
+    [[ "$OUTPUT" == "true" ]]
+  done
 }
 
 @test "Check volumes are listed - azure" {
-  CHECK_RESULT=$( volume-list azure )
-  [ $(echo $CHECK_RESULT |  jq ' .[0] | [to_entries[].key] == ["Name","Description"]' ) == true ]
+  for OUTPUT in $(volume-list azure | jq ' .[0] | [to_entries[].key] == ["Name","Description"]');
+  do
+    [[ "$OUTPUT" == "true" ]]
+  done
 }
 
 @test "Check volumes are listed - gcp" {
-  CHECK_RESULT=$( volume-list gcp )
-  [ $(echo $CHECK_RESULT |  jq ' .[0] | [to_entries[].key] == ["Name","Description"]' ) == true ]
+  for OUTPUT in $(volume-list gcp | jq ' .[0] | [to_entries[].key] == ["Name","Description"]');
+  do
+    [[ "$OUTPUT" == "true" ]]
+  done
 }

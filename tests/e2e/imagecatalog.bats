@@ -1,35 +1,42 @@
 load ../commands
-
-IMAGE_CATALOG_NAME=cli-ic-5
-IMAGE_CATALOG_NAME_ORIG=cloudbreak-default
-IMAGE_CATALOG_URL=https://s3-eu-west-1.amazonaws.com/cloudbreak-info/v2-dev-cb-image-catalog.json
+load ../parameters
 
 @test "Create image catalog" {
-  CHECK_RESULT=$( create-image-catalog --name $IMAGE_CATALOG_NAME --url $IMAGE_CATALOG_URL )
-  echo $CHECK_RESULT >&2
+  OUTPUT=$(create-image-catalog --name "${IMAGE_CATALOG_NAME}" --url "${IMAGE_CATALOG_URL}" 2>&1 | tail -n 2 | head -n 1)
+
+  [[ "${OUTPUT}" == *"imagecatalog created"* ]]
+  [[ "${OUTPUT}" != *"error"* ]]
 }
 
 @test "Get images - openstack" {
-  CHECK_RESULT=$( get-images openstack --imagecatalog $IMAGE_CATALOG_NAME )
-  echo $CHECK_RESULT >&2
+  for OUTPUT in $(get-images openstack --imagecatalog "${IMAGE_CATALOG_NAME}" | jq ' .[0] | [to_entries[].key] == ["Date","Description","Version","ImageID"]');
+  do
+    [[ "$OUTPUT" == "true" ]]
+  done
 }
 
 @test "Set default image catalog" {
-  CHECK_RESULT=$( set-default-image-catalog --name $IMAGE_CATALOG_NAME )
-  echo $CHECK_RESULT >&2
+  OUTPUT=$(set-default-image-catalog --name "${IMAGE_CATALOG_NAME}" 2>&1 | awk '{printf "%s",$0} END {print ""}' | grep -o '{.*}' | jq ' . | [to_entries[].key] == ["name","url","id","publicInAccount","default"]')
+
+  [[ "${OUTPUT}" ==  true ]]
 }
 
 @test "Set original image catalog back" {
-  CHECK_RESULT=$( set-default-image-catalog --name $IMAGE_CATALOG_NAME_ORIG )
-  echo $CHECK_RESULT >&2
+  OUTPUT=$(set-default-image-catalog --name "${IMAGE_CATALOG_NAME_DEFAULT}" 2>&1 | awk '{printf "%s",$0} END {print ""}' | grep -o '{.*}' | jq ' . | [to_entries[].key] == ["name","url","publicInAccount","default"]')
+
+  [[ "${OUTPUT}" ==  true ]]
 }
 
 @test "List image catalog" {
-  CHECK_RESULT=$( list-image-catalog )
-  [ $(echo $CHECK_RESULT |  jq ' .[0] | [to_entries[].key] == ["Name","Default","URL"]' ) == true ]
+  for OUTPUT in $(list-image-catalog  | jq ' .[0] | [to_entries[].key] == ["Name","Default","URL"]');
+  do
+    [[ "$OUTPUT" == "true" ]]
+  done
 }
 
 @test "Delete image catalog" {
-  CHECK_RESULT=$( delete-image-catalog --name $IMAGE_CATALOG_NAME )
-  echo $CHECK_RESULT >&2
+  OUTPUT=$(delete-image-catalog --name "${IMAGE_CATALOG_NAME}" 2>&1 | tail -n 2 | head -n 1)
+
+  [[ "${OUTPUT}" == *"imagecatalog deleted, name: ${IMAGE_CATALOG_NAME}"* ]]
+  [[ "${OUTPUT}" != *"error"* ]]
 }

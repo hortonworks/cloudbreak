@@ -1,58 +1,68 @@
 #!/usr/bin/env bats
 load ../commands
 
-BLUEPRINT_NAME="Data Science: Apache Spark 1.6, Apache Zeppelin 0.7.0"
 
-@test "generate template azure existing" {
-  generate-cluster-template azure existing-subnet| jq '. "network" | [to_entries[].key] == ["subnetCIDR"]'
+@test "Check generate cluster template azure new network" {
+  OUTPUT=$(generate-cluster-template azure new-network | jq '. "network" | [to_entries[].key] == ["subnetCIDR"]')
+
+  [[ "${OUTPUT}" == "true" ]]
 }
 
-@test "generate template azure new" {
-  generate-cluster-template azure new-network| jq '. "network" | [to_entries[].key] == ["parameters"]'
+@test "Check generate cluster template azure existing subnet" {
+  OUTPUT=$(generate-cluster-template azure existing-subnet | jq ' ."network"| ."parameters" | [to_entries[].key] == ["networkId","noFirewallRules","noPublicIp","resourceGroupName","subnetId"]')
+
+  [[ "${OUTPUT}" == "true" ]]
 }
 
-@test "generate template aws existing netw" {
-  generate-cluster-template aws existing-network | jq '. "network" | [to_entries[].key] == ["parameters","subnetCIDR"]'
+@test "Check generate cluster template aws new network" {
+  OUTPUT=$(generate-cluster-template aws new-network | jq '. "network" | [to_entries[].key] == ["subnetCIDR"]')
+
+  [[ "${OUTPUT}" == "true" ]]
 }
 
-@test "generate template aws existing subnet" {
-  generate-cluster-template aws existing-subnet | jq '. "network" | [to_entries[].key] == ["parameters"]'
-}
+@test "Check generate cluster template aws existing network" {
+  OUTPUT=$(generate-cluster-template aws existing-network | jq ' ."network"| ."parameters" | [to_entries[].key] == ["internetGatewayId","vpcId"]')
 
-@test "generate template aws new" {
-  generate-cluster-template aws new-network| jq '. "network" | [to_entries[].key] == ["subnetCIDR"]'
+  [[ "${OUTPUT}" == "true" ]]
+}
+@test "Check generate cluster template aws existing subnet" {
+  OUTPUT=$(generate-cluster-template aws existing-subnet | jq ' ."network"| ."parameters" | [to_entries[].key] == ["subnetId","vpcId"]')
+
+  [[ "${OUTPUT}" == "true" ]]
 }
 
 @test "Check generate cluster template openstack new network" {
-   CHECK_RESULT=$( generate-cluster-template openstack new-network )
-   [ $(echo $CHECK_RESULT | jq ' ."network"| ."parameters" | [to_entries[].key] == ["publicNetId"]') == true ] &&
-   [ $(echo $CHECK_RESULT | jq '."network" | ."subnetCIDR" != ""' ) == true ]
+  OUTPUT=$(generate-cluster-template openstack new-network)
+  [ $(echo $OUTPUT | jq ' ."network"| ."parameters" | [to_entries[].key] == ["publicNetId"]') == true ] &&
+  [ $(echo $OUTPUT | jq '."network" | ."subnetCIDR" != ""' ) == true ]
 }
 
 @test "Check generate cluster template openstack existing network" {
-    CHECK_RESULT=$( generate-cluster-template openstack existing-network )
-   [ $(echo $CHECK_RESULT | jq ' ."network"| ."parameters" | [to_entries[].key] == ["networkId","publicNetId","routerId" ]' ) == true ] &&
-   [ $(echo $CHECK_RESULT | jq '."network" | ."subnetCIDR" != ""' ) == true ]
+  OUTPUT=$(generate-cluster-template openstack existing-network)
+  [ $(echo $OUTPUT | jq ' ."network"| ."parameters" | [to_entries[].key] == ["networkId","publicNetId","routerId" ]' ) == true ] &&
+  [ $(echo $OUTPUT | jq '."network" | ."subnetCIDR" != ""' ) == true ]
 }
 
 @test "Check generate cluster template openstack existing subnet" {
-    CHECK_RESULT=$( generate-cluster-template openstack existing-subnet )
-   [ $(echo $CHECK_RESULT | jq ' ."network"| ."parameters" | [to_entries[].key] == ["networkId","networkingOption","publicNetId","subnetId"]') == true ]
+  OUTPUT=$(generate-cluster-template openstack existing-subnet | jq ' ."network"| ."parameters" | [to_entries[].key] == ["networkId","networkingOption","publicNetId","subnetId"]')
+
+  [[ "${OUTPUT}" == "true" ]]
 }
 
 @test "Check generate cluster template gcp new network" {
-   CHECK_RESULT=$( generate-cluster-template gcp new-network )
-   [ $(echo $CHECK_RESULT | jq '."network"| [to_entries[].key] == ["subnetCIDR"]') == true ] &&
-   [ $(echo $CHECK_RESULT | jq '."network" | ."subnetCIDR" != ""' ) == true ]
+  OUTPUT=$(generate-cluster-template gcp new-network)
+  [ $(echo $OUTPUT | jq '."network"| [to_entries[].key] == ["subnetCIDR"]') == true ] &&
+  [ $(echo $OUTPUT | jq '."network" | ."subnetCIDR" != ""' ) == true ]
 }
 
 @test "Check generate cluster template gcp existing network" {
-   CHECK_RESULT=$( generate-cluster-template gcp existing-network )
-   [ $(echo $CHECK_RESULT | jq ' ."network"| ."parameters" | [to_entries[].key] == ["networkId"]') == true ] &&
-   [ $(echo $CHECK_RESULT | jq '."network" | ."subnetCIDR" != ""' ) == true ]
+  OUTPUT=$(generate-cluster-template gcp existing-network)
+  [ $(echo $OUTPUT | jq ' ."network"| ."parameters" | [to_entries[].key] == ["networkId"]') == true ] &&
+  [ $(echo $OUTPUT | jq '."network" | ."subnetCIDR" != ""' ) == true ]
 }
 
 @test "Check generate cluster template gcp existing subnet" {
-   CHECK_RESULT=$( generate-cluster-template gcp existing-subnet )
-   [ $(echo $CHECK_RESULT | jq ' ."network"| ."parameters" | [to_entries[].key] == ["networkId","noFirewallRules","noPublicIp","subnetId"]') == true ]
+  OUTPUT=$(generate-cluster-template gcp existing-subnet | jq ' ."network"| ."parameters" | [to_entries[].key] == ["networkId","noFirewallRules","noPublicIp","subnetId"]')
+
+  [[ "${OUTPUT}" == "true" ]]
 }
