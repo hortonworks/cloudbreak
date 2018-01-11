@@ -4331,7 +4331,12 @@ exports.putreinstallStackV2 = function(args, res, next) {
    * body ReinstallRequestV2  (optional)
    * no response value expected for this operation
    **/
-  res.end();
+    if (args.name.value === 'aaaaa') {
+        res.statusCode=400
+        res.end(JSON.stringify({"message":"Stack 'aaaaa' not found"}));
+    } else {
+        res.end();
+    }
 }
 
 exports.putrepairStackV2 = function(args, res, next) {
@@ -4342,7 +4347,12 @@ exports.putrepairStackV2 = function(args, res, next) {
    * name String 
    * no response value expected for this operation
    **/
-  res.end();
+    if (args.name.value === 'azstatus') {
+        res.statusCode=400
+        res.end(JSON.stringify({"message":"Stack 'azstatus' not found"}));
+    } else {
+        res.end();
+    }
 }
 
 exports.putscalingStackV2 = function(args, res, next) {
@@ -4354,7 +4364,12 @@ exports.putscalingStackV2 = function(args, res, next) {
    * body StackScaleRequestV2  (optional)
    * no response value expected for this operation
    **/
-  res.end();
+    if (args.name.value === 'azstatus') {
+        res.statusCode=400
+        res.end(JSON.stringify({"message":"Stack 'azstatus' not found"}));
+    } else {
+        res.end();
+    }
 }
 
 exports.putstartStackV2 = function(args, res, next) {
@@ -4367,7 +4382,7 @@ exports.putstartStackV2 = function(args, res, next) {
    **/
     if (args.name.value === 'azstatus') {
         res.statusCode=400
-        res.end(JSON.stringify({"message":"Cannot update the status of stack 'x' to STARTED, because something something dark side"}));
+        res.end(JSON.stringify({"message":"Stack 'azstatus' not found"}));
     } else {
         res.end();
     }
@@ -4383,7 +4398,7 @@ exports.putstopStackV2 = function(args, res, next) {
    **/
     if (args.name.value === 'azstatus') {
         res.statusCode=400
-        res.end(JSON.stringify({"message":"Cannot update the status of stack 'x' to STOPPED, because something something dark side"}));
+        res.end(JSON.stringify({"message":"Stack 'azstatus' not found"}));
     } else {
         res.end();
     }
@@ -4397,7 +4412,12 @@ exports.putsyncStackV2 = function(args, res, next) {
    * name String 
    * no response value expected for this operation
    **/
-  res.end();
+    if (args.name.value === 'azstatus') {
+        res.statusCode=400
+        res.end(JSON.stringify({"message":"Stack 'azstatus' not found"}));
+    } else {
+        res.end();
+    }
 }
 
 exports.statusStackV2 = function(args, res, next) {
