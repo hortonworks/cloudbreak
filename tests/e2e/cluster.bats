@@ -1,5 +1,6 @@
 load ../commands
 load ../resources
+load ../parameters
 
 AWS_CRED_NAME=cli-cred-aws
 AWS_ARGS_ROLE=" --name $AWS_CRED_NAME --role-arn $AWS_ROLE_ARN "
@@ -7,7 +8,7 @@ CLUSTER_NAME=cli-aws
 DELAY=$(($SECONDS+2100))
 INPUT_JSON_FILE=aws-template.json
 REGION=eu-west-1
-BLUEPRINT_NAME=`26EDW-ETL: Apache Hive 1.2.1, Apache Spark 1.6`
+: ${BLUEPRINT_NAME:="EDW-Analytics: Apache Hive 2 LLAP, Apache Zeppelin 0.7.0"}
 
 @test "Check create credential - aws role based" {
   run create-credential-aws-role $AWS_ARGS_ROLE
@@ -160,9 +161,9 @@ BLUEPRINT_NAME=`26EDW-ETL: Apache Hive 1.2.1, Apache Spark 1.6`
 }
 
 @test "Generate reinstall template" {
-  CHECK_RESULT=$( generate-reinstall-template --name $CLUSTER_NAME --blueprint-name $BLUEPRINT_NAME )
+  CHECK_RESULT=$( generate-reinstall-template --name hm-cl --blueprint-name "${BLUEPRINT_NAME}" | jq .blueprintName -r)
   echo $CHECK_RESULT
-  [ $( echo $CHECK_RESULT | jq -r '."blueprintName" ') == $BLUEPRINT_NAME ]
+  [[ "${CHECK_RESULT}" == "${BLUEPRINT_NAME}" ]]
 }
 
 @test "Cluster is synced" {
