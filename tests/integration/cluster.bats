@@ -5,7 +5,7 @@ load ../parameters
 
 @test "Check cluster list" {
   CB_CLUSTERS=$(list-clusters | jq 'length')
-  API_CLUSTERS=$(curl -ks "${CLOUD_URL}"/cb/api/v1/stacks/account | jq 'length')
+  API_CLUSTERS=$(curl -ks "${BASE_URL}"/cb/api/v1/stacks/account | jq 'length')
 
   [[ CB_CLUSTERS -eq API_CLUSTERS ]]
 }

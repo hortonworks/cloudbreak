@@ -53,9 +53,9 @@ load ../parameters
 }
 
 @test "Check credential delete" {
-  OUTPUT=$(DEBUG=1 delete-credential --name "${OPENSTACK_CREDENTIAL_NAME}" 2>&1 | tail -n 2 | head -n 1)
+  OUTPUT=$(DEBUG=1 delete-credential --name "${OS_CREDENTIAL_NAME}" 2>&1 | tail -n 2 | head -n 1)
 
-  [[ "${OUTPUT}" == *"credential deleted, name: ${OPENSTACK_CREDENTIAL_NAME}"* ]]
+  [[ "${OUTPUT}" == *"credential deleted, name: ${OS_CREDENTIAL_NAME}"* ]]
   [[ "${OUTPUT}" != *"error"* ]]
 }
 
@@ -67,13 +67,13 @@ load ../parameters
 }
 
 @test "Check credential described result" {
-  OUTPUT=$(describe-credential --name "${OPENSTACK_CREDENTIAL_NAME}" | jq .Name -r)
+  OUTPUT=$(describe-credential --name "${OS_CREDENTIAL_NAME}" | jq .Name -r)
 
-  [[ "${OUTPUT}" == "${OPENSTACK_CREDENTIAL_NAME}" ]]
+  [[ "${OUTPUT}" == "${OS_CREDENTIAL_NAME}" ]]
 }
 
 @test "Check credential described structure" {
-  OUTPUT=$(describe-credential --name "${OPENSTACK_CREDENTIAL_NAME}" |  jq ' . | [to_entries[].key] == ["Name","Description","CloudPlatform"]')
+  OUTPUT=$(describe-credential --name "${OS_CREDENTIAL_NAME}" |  jq ' . | [to_entries[].key] == ["Name","Description","CloudPlatform"]')
 
   [[ "${OUTPUT}" == "true" ]]
 }

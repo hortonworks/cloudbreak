@@ -5,9 +5,9 @@ curl 'https://127.0.0.1/cb/api/v1/blueprints/account' -H 'accept: application/js
 
 curl -sX POST --insecure  -H "Accept: application/x-www-form-urlencoded" --data-urlencode 'credentials={"username":"admin@example.com","password":"cloudbreak"}' "https://127.0.0.1/identity/oauth/authorize?response_type=token&client_id=cloudbreak_shell" -w '%{redirect_url}'
 
-export CLOUD_URL=https://127.0.0.1
-export EMAIL=admin@example.com
-export PASSWORD=cloudbreak
+export BASE_URL=https://127.0.0.1
+export USERNAME_CLI=admin@example.com
+export PASSWORD_CLI=cloudbreak
 #could be a bug:
-cb configure --server $CLOUD_URL --username $EMAIL --password $PASSWORD
+cb configure --server $BASE_URL --username $USERNAME_CLI --password $PASSWORD_CLI
 bats integration/*.bats

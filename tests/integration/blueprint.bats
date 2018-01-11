@@ -52,7 +52,7 @@ load ../parameters
 
 @test "Check blueprint list" {
   CB_BLUEPRINTS=$(list-blueprints | jq 'length')
-  API_BLUEPRINTS=$(curl -ks "${CLOUD_URL}"/cb/api/v1/blueprints/user | jq 'length')
+  API_BLUEPRINTS=$(curl -ks "${BASE_URL}"/cb/api/v1/blueprints/user | jq 'length')
 
   [[ $CB_BLUEPRINTS -eq $API_BLUEPRINTS ]]
 }
