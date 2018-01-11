@@ -6,16 +6,11 @@ import java.util.List;
 import java.util.Map;
 
 import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
-import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.cloudbreak.api.model.FailurePolicyRequest;
 import com.sequenceiq.cloudbreak.api.model.JsonEntity;
-import com.sequenceiq.cloudbreak.api.model.OnFailureAction;
-import com.sequenceiq.cloudbreak.api.model.OrchestratorRequest;
 import com.sequenceiq.cloudbreak.api.model.StackAuthenticationRequest;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
 
@@ -26,24 +21,15 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class StackV2Request implements JsonEntity {
-    @Size(max = 40, min = 5, message = "The length of the name has to be in range of 5 to 40")
-    @Pattern(regexp = "([a-z][-a-z0-9]*[a-z0-9])",
-            message = "The name can only contain lowercase alphanumeric characters and hyphens and has start with an alphanumeric character")
-    @NotNull
-    @ApiModelProperty(value = StackModelDescription.STACK_NAME, required = true)
-    private String name;
 
-    @ApiModelProperty(StackModelDescription.AVAILABILITY_ZONE)
-    private String availabilityZone;
+    @ApiModelProperty(StackModelDescription.GENERAL_SETTINGS)
+    private GeneralSettings general;
 
-    @ApiModelProperty(StackModelDescription.REGION)
-    private String region;
+    @ApiModelProperty(StackModelDescription.PLACEMENT_SETTINGS)
+    private PlacementSettings placement;
 
     @ApiModelProperty(StackModelDescription.PLATFORM_VARIANT)
     private String platformVariant;
-
-    @ApiModelProperty(StackModelDescription.FAILURE_ACTION)
-    private OnFailureAction onFailureAction = OnFailureAction.DO_NOTHING;
 
     @ApiModelProperty(StackModelDescription.AMBARI_VERSION)
     private String ambariVersion;
@@ -54,30 +40,11 @@ public class StackV2Request implements JsonEntity {
     @ApiModelProperty(StackModelDescription.PARAMETERS)
     private Map<String, String> parameters = new HashMap<>();
 
-    @ApiModelProperty(StackModelDescription.CUSTOM_DOMAIN)
-    private String customDomain;
+    @ApiModelProperty(StackModelDescription.CUSTOM_DOMAIN_SETTINGS)
+    private CustomDomainSettings customDomain;
 
-    @ApiModelProperty(StackModelDescription.CUSTOM_HOSTNAME)
-    private String customHostname;
-
-    @ApiModelProperty(StackModelDescription.CLUSTER_NAME_AS_SUBDOMAIN)
-    private boolean clusterNameAsSubdomain;
-
-    @ApiModelProperty(StackModelDescription.HOSTGROUP_NAME_AS_HOSTNAME)
-    private boolean hostgroupNameAsHostname;
-
-    @ApiModelProperty(StackModelDescription.APPLICATION_TAGS)
-    private Map<String, String> applicationTags = new HashMap<>();
-
-    @ApiModelProperty(StackModelDescription.USERDEFINED_TAGS)
-    private Map<String, String> userDefinedTags = new HashMap<>();
-
-    @ApiModelProperty(StackModelDescription.DEFAULT_TAGS)
-    private Map<String, String> defaultTags = new HashMap<>();
-
-    @Valid
-    @ApiModelProperty(StackModelDescription.ORCHESTRATOR)
-    private OrchestratorRequest orchestrator;
+    @ApiModelProperty(StackModelDescription.TAGS)
+    private Tags tags;
 
     @Valid
     @ApiModelProperty(value = StackModelDescription.INSTANCE_GROUPS, required = true)
@@ -93,21 +60,15 @@ public class StackV2Request implements JsonEntity {
     @ApiModelProperty(StackModelDescription.NETWORK)
     private NetworkV2Request network;
 
-    @ApiModelProperty(StackModelDescription.IMAGE_CATALOG)
-    private String imageCatalog;
-
-    @ApiModelProperty(StackModelDescription.IMAGE_ID)
-    private String imageId;
+    @ApiModelProperty(StackModelDescription.IMAGE_SETTINGS)
+    private ImageSettings imageSettings;
 
     @ApiModelProperty(StackModelDescription.FLEX_ID)
     private Long flexId;
 
-    @ApiModelProperty(StackModelDescription.CREDENTIAL_NAME)
-    private String credentialName;
-
     @Valid
     @ApiModelProperty(StackModelDescription.CLUSTER_REQUEST)
-    private ClusterV2Request clusterRequest;
+    private ClusterV2Request cluster;
 
     @ApiModelProperty(hidden = true)
     private String owner;
@@ -126,36 +87,12 @@ public class StackV2Request implements JsonEntity {
         this.failurePolicy = failurePolicy;
     }
 
-    public OrchestratorRequest getOrchestrator() {
-        return orchestrator;
-    }
-
-    public void setOrchestrator(OrchestratorRequest orchestrator) {
-        this.orchestrator = orchestrator;
-    }
-
-    public String getImageCatalog() {
-        return imageCatalog;
-    }
-
-    public void setImageCatalog(String imageCatalog) {
-        this.imageCatalog = imageCatalog;
-    }
-
     public List<InstanceGroupV2Request> getInstanceGroups() {
         return instanceGroups;
     }
 
     public void setInstanceGroups(List<InstanceGroupV2Request> instanceGroups) {
         this.instanceGroups = instanceGroups;
-    }
-
-    public String getImageId() {
-        return imageId;
-    }
-
-    public void setImageId(String imageId) {
-        this.imageId = imageId;
     }
 
     public Long getFlexId() {
@@ -166,12 +103,12 @@ public class StackV2Request implements JsonEntity {
         this.flexId = flexId;
     }
 
-    public ClusterV2Request getClusterRequest() {
-        return clusterRequest;
+    public ClusterV2Request getCluster() {
+        return cluster;
     }
 
-    public void setClusterRequest(ClusterV2Request clusterRequest) {
-        this.clusterRequest = clusterRequest;
+    public void setCluster(ClusterV2Request cluster) {
+        this.cluster = cluster;
     }
 
     public String getOwner() {
@@ -196,46 +133,6 @@ public class StackV2Request implements JsonEntity {
 
     public void setStackAuthentication(StackAuthenticationRequest stackAuthentication) {
         this.stackAuthentication = stackAuthentication;
-    }
-
-    public String getCredentialName() {
-        return credentialName;
-    }
-
-    public void setCredentialName(String credentialName) {
-        this.credentialName = credentialName;
-    }
-
-    public OnFailureAction getOnFailureAction() {
-        return onFailureAction;
-    }
-
-    public void setOnFailureAction(OnFailureAction onFailureAction) {
-        this.onFailureAction = onFailureAction;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getRegion() {
-        return region;
-    }
-
-    public void setRegion(String region) {
-        this.region = region;
-    }
-
-    public String getAvailabilityZone() {
-        return availabilityZone;
-    }
-
-    public void setAvailabilityZone(String availabilityZone) {
-        this.availabilityZone = availabilityZone;
     }
 
     public Map<String, String> getParameters() {
@@ -270,68 +167,52 @@ public class StackV2Request implements JsonEntity {
         this.hdpVersion = hdpVersion;
     }
 
-    public String getCustomDomain() {
-        return customDomain;
-    }
-
-    public void setCustomDomain(String customDomain) {
-        this.customDomain = customDomain;
-    }
-
-    public String getCustomHostname() {
-        return customHostname;
-    }
-
-    public void setCustomHostname(String customHostname) {
-        this.customHostname = customHostname;
-    }
-
-    public boolean isClusterNameAsSubdomain() {
-        return clusterNameAsSubdomain;
-    }
-
-    public void setClusterNameAsSubdomain(boolean clusterNameAsSubdomain) {
-        this.clusterNameAsSubdomain = clusterNameAsSubdomain;
-    }
-
-    public boolean isHostgroupNameAsHostname() {
-        return hostgroupNameAsHostname;
-    }
-
-    public void setHostgroupNameAsHostname(boolean hostgroupNameAsHostname) {
-        this.hostgroupNameAsHostname = hostgroupNameAsHostname;
-    }
-
-    public Map<String, String> getApplicationTags() {
-        return applicationTags;
-    }
-
-    public void setApplicationTags(Map<String, String> applicationTags) {
-        this.applicationTags = applicationTags;
-    }
-
-    public Map<String, String> getUserDefinedTags() {
-        return userDefinedTags;
-    }
-
-    public void setUserDefinedTags(Map<String, String> userDefinedTags) {
-        this.userDefinedTags = userDefinedTags;
-    }
-
-    public Map<String, String> getDefaultTags() {
-        return defaultTags;
-    }
-
-    public void setDefaultTags(Map<String, String> defaultTags) {
-        this.defaultTags = defaultTags;
-    }
-
     public NetworkV2Request getNetwork() {
         return network;
     }
 
     public void setNetwork(NetworkV2Request network) {
         this.network = network;
+    }
+
+    public CustomDomainSettings getCustomDomain() {
+        return customDomain;
+    }
+
+    public void setCustomDomain(CustomDomainSettings customDomain) {
+        this.customDomain = customDomain;
+    }
+
+    public GeneralSettings getGeneral() {
+        return general;
+    }
+
+    public void setGeneral(GeneralSettings general) {
+        this.general = general;
+    }
+
+    public Tags getTags() {
+        return tags;
+    }
+
+    public void setTags(Tags tags) {
+        this.tags = tags;
+    }
+
+    public ImageSettings getImageSettings() {
+        return imageSettings;
+    }
+
+    public void setImageSettings(ImageSettings imageSettings) {
+        this.imageSettings = imageSettings;
+    }
+
+    public PlacementSettings getPlacement() {
+        return placement;
+    }
+
+    public void setPlacement(PlacementSettings placement) {
+        this.placement = placement;
     }
 
     public String getOwnerEmail() {

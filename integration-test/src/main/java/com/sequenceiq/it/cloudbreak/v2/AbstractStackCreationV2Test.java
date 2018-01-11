@@ -14,12 +14,14 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.api.model.GatewayJson;
 import com.sequenceiq.cloudbreak.api.model.KerberosRequest;
-import com.sequenceiq.cloudbreak.api.model.OrchestratorRequest;
 import com.sequenceiq.cloudbreak.api.model.StackAuthenticationRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.AmbariV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.ClusterV2Request;
+import com.sequenceiq.cloudbreak.api.model.v2.GeneralSettings;
+import com.sequenceiq.cloudbreak.api.model.v2.ImageSettings;
 import com.sequenceiq.cloudbreak.api.model.v2.InstanceGroupV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.NetworkV2Request;
+import com.sequenceiq.cloudbreak.api.model.v2.PlacementSettings;
 import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.AbstractCloudbreakIntegrationTest;
@@ -46,22 +48,23 @@ public class AbstractStackCreationV2Test extends AbstractCloudbreakIntegrationTe
         Assert.assertNotNull(instanceGroupV2RequestMap, "InstanceGroup map is mandatory");
 
         StackV2Request stackV2Request = new StackV2Request();
-        stackV2Request.setName(stackName);
-        stackV2Request.setCredentialName(credentialName);
-        stackV2Request.setRegion(region);
-        stackV2Request.setAvailabilityZone(availabilityZone);
-        if (StringUtils.hasText(imageCatalog)) {
-            stackV2Request.setImageCatalog(imageCatalog);
-        }
-        if (StringUtils.hasText(imageId)) {
-            stackV2Request.setImageId(imageId);
+        GeneralSettings gs = new GeneralSettings();
+        stackV2Request.setGeneral(gs);
+        gs.setName(stackName);
+        gs.setCredentialName(credentialName);
+
+        PlacementSettings ps = new PlacementSettings();
+        stackV2Request.setPlacement(ps);
+        ps.setRegion(region);
+        ps.setAvailabilityZone(availabilityZone);
+
+        if (StringUtils.hasText(imageCatalog) || StringUtils.hasText(imageId)) {
+            ImageSettings is = new ImageSettings();
+            is.setImageCatalog(imageCatalog);
+            is.setImageId(imageId);
+            stackV2Request.setImageSettings(is);
         }
         stackV2Request.setInstanceGroups(Lists.newArrayList(instanceGroupV2RequestMap.values()));
-
-        // Default request parameters
-        OrchestratorRequest orchestratorRequest = new OrchestratorRequest();
-        orchestratorRequest.setType("SALT");
-        stackV2Request.setOrchestrator(orchestratorRequest);
 
         itContext.putContextParam(CloudbreakV2Constants.STACK_CREATION_REQUEST, stackV2Request);
     }
@@ -93,9 +96,9 @@ public class AbstractStackCreationV2Test extends AbstractCloudbreakIntegrationTe
 
         StackV2Request stackV2Request = itContext.getContextParam(CloudbreakV2Constants.STACK_CREATION_REQUEST, StackV2Request.class);
         ClusterV2Request clusterV2Request = new ClusterV2Request();
-        stackV2Request.setClusterRequest(clusterV2Request);
+        stackV2Request.setCluster(clusterV2Request);
         AmbariV2Request ambariV2Request = new AmbariV2Request();
-        clusterV2Request.setAmbariRequest(ambariV2Request);
+        clusterV2Request.setAmbari(ambariV2Request);
         ambariV2Request.setBlueprintName(blueprintName);
         ambariV2Request.setUserName(itContext.getContextParam(CloudbreakITContextConstants.AMBARI_USER_ID));
         ambariV2Request.setPassword(itContext.getContextParam(CloudbreakITContextConstants.AMBARI_PASSWORD_ID));
@@ -123,7 +126,7 @@ public class AbstractStackCreationV2Test extends AbstractCloudbreakIntegrationTe
         // THEN
         Assert.assertNotNull(stackId);
         itContext.putContextParam(CloudbreakITContextConstants.STACK_ID, stackId, true);
-        itContext.putContextParam(CloudbreakV2Constants.STACK_NAME, stackV2Request.getName());
+        itContext.putContextParam(CloudbreakV2Constants.STACK_NAME, stackV2Request.getGeneral().getName());
         Map<String, String> desiredStatuses = new HashMap<>();
         desiredStatuses.put("status", "AVAILABLE");
         desiredStatuses.put("clusterStatus", "AVAILABLE");

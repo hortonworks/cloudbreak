@@ -54,7 +54,7 @@ public class MockStackCreationV2Test extends AbstractStackCreationV2Test {
         String stackName = getItContext().getContextParam(CloudbreakV2Constants.STACK_NAME);
         stackCreationMock.verifyCalls(stackName);
         StackV2Request stackV2Request = getItContext().getContextParam(CloudbreakV2Constants.STACK_CREATION_REQUEST, StackV2Request.class);
-        AmbariV2Request ambariV2Request = stackV2Request.getClusterRequest().getAmbariRequest();
+        AmbariV2Request ambariV2Request = stackV2Request.getCluster().getAmbari();
         if (ambariV2Request.getEnableSecurity()) {
             KerberosRequest kerberosRequest = ambariV2Request.getKerberos();
             stackCreationMock.verifyKerberosCalls(stackName, kerberosRequest.getAdmin(), kerberosRequest.getPassword());

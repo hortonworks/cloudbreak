@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.model.FileSystemRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.AmbariV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.ClusterV2Request;
+import com.sequenceiq.cloudbreak.api.model.v2.RdsConfigs;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
@@ -21,16 +22,20 @@ public class ClusterToClusterV2RequestConverter extends AbstractConversionServic
     @Override
     public ClusterV2Request convert(Cluster source) {
         ClusterV2Request clusterV2Request = new ClusterV2Request();
-        clusterV2Request.setAmbariRequest(getConversionService().convert(source, AmbariV2Request.class));
+        clusterV2Request.setAmbari(getConversionService().convert(source, AmbariV2Request.class));
         clusterV2Request.setEmailNeeded(source.getEmailNeeded());
         clusterV2Request.setEmailTo(source.getEmailTo());
         clusterV2Request.setExecutorType(null);
         clusterV2Request.setFileSystem(getConversionService().convert(source.getFileSystem(), FileSystemRequest.class));
         clusterV2Request.setLdapConfigName(source.getLdapConfig() == null ? null : source.getLdapConfig().getName());
         clusterV2Request.setName(source.getName());
-        clusterV2Request.setRdsConfigIds(new HashSet<>());
-        for (RDSConfig rdsConfig : source.getRdsConfigs()) {
-            clusterV2Request.getRdsConfigIds().add(rdsConfig.getId());
+        if (source.getRdsConfigs() != null && source.getRdsConfigs().size() > 0) {
+            RdsConfigs rdsConfigs = new RdsConfigs();
+            rdsConfigs.setIds(new HashSet<>());
+            for (RDSConfig conf : source.getRdsConfigs()) {
+                rdsConfigs.getIds().add(conf.getId());
+            }
+            clusterV2Request.setRdsConfigs(rdsConfigs);
         }
         return clusterV2Request;
     }

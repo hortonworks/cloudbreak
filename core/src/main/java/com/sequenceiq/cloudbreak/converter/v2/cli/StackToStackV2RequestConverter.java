@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.converter.v2.cli;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 
 import javax.inject.Inject;
@@ -12,12 +11,16 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Strings;
-import com.sequenceiq.cloudbreak.api.model.OrchestratorRequest;
 import com.sequenceiq.cloudbreak.api.model.StackAuthenticationRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.ClusterV2Request;
+import com.sequenceiq.cloudbreak.api.model.v2.CustomDomainSettings;
+import com.sequenceiq.cloudbreak.api.model.v2.GeneralSettings;
+import com.sequenceiq.cloudbreak.api.model.v2.ImageSettings;
 import com.sequenceiq.cloudbreak.api.model.v2.InstanceGroupV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.NetworkV2Request;
+import com.sequenceiq.cloudbreak.api.model.v2.PlacementSettings;
 import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
+import com.sequenceiq.cloudbreak.api.model.v2.Tags;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
@@ -39,23 +42,16 @@ public class StackToStackV2RequestConverter extends AbstractConversionServiceAwa
     @Override
     public StackV2Request convert(Stack source) {
         StackV2Request stackV2Request = new StackV2Request();
-
-        stackV2Request.setName("");
-        stackV2Request.setRegion(source.getRegion());
-        stackV2Request.setAvailabilityZone(source.getAvailabilityZone());
-        stackV2Request.setCredentialName(source.getCredential().getName());
-        stackV2Request.setOnFailureAction(null);
-        stackV2Request.setClusterNameAsSubdomain(source.isClusterNameAsSubdomain());
-        stackV2Request.setCustomHostname(source.getCustomHostname());
-        stackV2Request.setCustomDomain(source.getCustomDomain());
+        stackV2Request.setGeneral(getGeneralSettings("", source.getCredential().getName()));
+        stackV2Request.setPlacement(getPlacementSettings(source.getRegion(), source.getAvailabilityZone()));
+        stackV2Request.setCustomDomain(getCustomDomainSettings(source.getCustomDomain(), source.getCustomHostname(),
+                source.isHostgroupNameAsHostname(), source.isClusterNameAsSubdomain()));
         stackV2Request.setFlexId(source.getFlexSubscription() == null ? null : source.getFlexSubscription().getId());
-        stackV2Request.setHostgroupNameAsHostname(source.isHostgroupNameAsHostname());
         stackV2Request.setParameters(source.getParameters());
         stackV2Request.setInstanceGroups(new ArrayList<>());
-        stackV2Request.setOrchestrator(getConversionService().convert(source.getOrchestrator(), OrchestratorRequest.class));
         stackV2Request.setStackAuthentication(getConversionService().convert(source.getStackAuthentication(), StackAuthenticationRequest.class));
         stackV2Request.setNetwork(getConversionService().convert(source.getNetwork(), NetworkV2Request.class));
-        stackV2Request.setClusterRequest(getConversionService().convert(source.getCluster(), ClusterV2Request.class));
+        stackV2Request.setCluster(getConversionService().convert(source.getCluster(), ClusterV2Request.class));
         for (InstanceGroup instanceGroup : source.getInstanceGroups()) {
             InstanceGroupV2Request instanceGroupV2Request = getConversionService().convert(instanceGroup, InstanceGroupV2Request.class);
             instanceGroupV2Request = collectInformationsFromActualHostgroup(source, instanceGroup, instanceGroupV2Request);
@@ -66,11 +62,37 @@ public class StackToStackV2RequestConverter extends AbstractConversionServiceAwa
         return stackV2Request;
     }
 
+    private PlacementSettings getPlacementSettings(String region, String availabilityZone) {
+        PlacementSettings ps = new PlacementSettings();
+        ps.setRegion(region);
+        ps.setAvailabilityZone(availabilityZone);
+        return ps;
+    }
+
+    private CustomDomainSettings getCustomDomainSettings(String customDomain, String customHostname,
+            boolean hostgroupNameAsHostname, boolean clusterNameAsSubdomain) {
+        CustomDomainSettings cd = new CustomDomainSettings();
+        cd.setCustomDomain(customDomain);
+        cd.setCustomHostname(customHostname);
+        cd.setHostgroupNameAsHostname(hostgroupNameAsHostname);
+        cd.setClusterNameAsSubdomain(clusterNameAsSubdomain);
+        return cd;
+    }
+
+    private GeneralSettings getGeneralSettings(String name, String credentialName) {
+        GeneralSettings gs = new GeneralSettings();
+        gs.setName(name);
+        gs.setCredentialName(credentialName);
+        return gs;
+    }
+
     private void prepareImage(Stack source, StackV2Request stackV2Request) {
         try {
             Image image = componentConfigProvider.getImage(source.getId());
-            stackV2Request.setImageId(Strings.isNullOrEmpty(image.getImageId()) ? "" : image.getImageId());
-            stackV2Request.setImageCatalog(Strings.isNullOrEmpty(image.getImageCatalogName()) ? "" : image.getImageCatalogName());
+            ImageSettings is = new ImageSettings();
+            is.setImageId(Strings.isNullOrEmpty(image.getImageId()) ? "" : image.getImageId());
+            is.setImageCatalog(Strings.isNullOrEmpty(image.getImageCatalogName()) ? "" : image.getImageCatalogName());
+            stackV2Request.setImageSettings(is);
         } catch (CloudbreakImageNotFoundException e) {
             LOGGER.error(e.toString());
         }
@@ -97,13 +119,15 @@ public class StackToStackV2RequestConverter extends AbstractConversionServiceAwa
     private void prepareTags(Stack source, StackV2Request stackV2Request) {
         try {
             StackTags stackTags = source.getTags().get(StackTags.class);
-            stackV2Request.setApplicationTags(null);
-            stackV2Request.setDefaultTags(null);
-            stackV2Request.setUserDefinedTags(stackTags.getUserDefinedTags());
+            if (stackTags.getUserDefinedTags() != null) {
+                Tags tags = new Tags();
+                tags.setApplicationTags(null);
+                tags.setDefaultTags(null);
+                tags.setUserDefinedTags(stackTags.getUserDefinedTags());
+                stackV2Request.setTags(tags);
+            }
         } catch (IOException e) {
-            stackV2Request.setApplicationTags(new HashMap<>());
-            stackV2Request.setDefaultTags(new HashMap<>());
-            stackV2Request.setUserDefinedTags(new HashMap<>());
+            stackV2Request.setTags(null);
         }
     }
 
