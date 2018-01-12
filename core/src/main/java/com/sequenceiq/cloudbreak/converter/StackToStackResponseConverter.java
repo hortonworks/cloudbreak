@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.api.model.CloudbreakDetailsJson;
@@ -207,14 +208,11 @@ public class StackToStackResponseConverter extends AbstractConversionServiceAwar
             if (source.getCluster() != null) {
                 StackRepoDetails stackRepoDetails = clusterComponentConfigProvider.getHDPRepo(source.getCluster().getId());
                 if (stackRepoDetails != null && stackRepoDetails.getStack() != null) {
-                    for (String key : stackRepoDetails.getStack().keySet()) {
-                        if (!"repoid".equals(key)) {
-                            String[] split = stackRepoDetails.getStack().get(key).split("/");
-                            stackJson.setHdpVersion(split[split.length - 1]);
-                            break;
-                        }
-                    }
-                    if (stackJson.getHdpVersion() == null) {
+
+                    String repositoryVersion = stackRepoDetails.getStack().get(StackRepoDetails.REPOSITORY_VERSION);
+                    if (!StringUtils.isEmpty(repositoryVersion)) {
+                        stackJson.setHdpVersion(repositoryVersion);
+                    } else {
                         stackJson.setHdpVersion(stackRepoDetails.getHdpVersion());
                     }
                 }
