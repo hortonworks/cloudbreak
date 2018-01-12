@@ -42,11 +42,83 @@ java -jar /usr/local/Cellar/swagger-codegen/2.2.3/libexec/swagger-codegen-cli.ja
 * `/usr/local/Cellar/swagger-codegen/2.2.3/libexec/swagger-codegen-cli.jar`: the Swagger Codegen CLI path on OS X. This can be vary on different OSs and with different installs. You can read more about this at [Swagger Codegen CLI Installation](https://github.com/swagger-api/swagger-codegen#table-of-contents).
 * `javascript_api_client`: the destination folder for the generated client. This is also can be vary based on your decision. 
 
-## Fix basePath in the generated Swagger YML
-Change `basePath: "/api"` to `basePath: "/cb/api"` at [/api/swagger.yaml](api/swagger.yaml).
+## Upgrade Swagger YML
+
+### Base Path
+Change `basePath: "/api"` to `basePath: "/cb"` at [/api/swagger.yaml](api/swagger.yaml).
+
+### New Info and Health Services
+Introduce brand new Services for Cloudbreak Info and Health.
+
+1. In the `tags` section:
+```
+tags:
+- name: "info"
+- name: "health"
+```
+2. In the beginning of the `paths`:
+```
+paths:
+  /info:
+    get:
+      tags:
+      - "info"
+      summary: "retrieve Cloudbreak version for user"
+      description: "Cloudbreak version information."
+      operationId: "getCloudbreakInfo"
+      schemes:
+      - "http"
+      - "https"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters: []
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/Info"
+      x-swagger-router-controller: "Info"
+  /health:
+    get:
+      tags:
+      - "health"
+      summary: "retrieve Cloudbreak server status for user"
+      description: "Cloudbreak server status."
+      operationId: "getCloudbreakHealth"
+      schemes:
+      - "http"
+      - "https"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters: []
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/Info"
+      x-swagger-router-controller: "Info"
+```
+3. In the end of `definitions`:
+```
+definitions:
+```
+...
+```
+  Info:
+    type: "object"
+```
+
+### Extend Paths
+Exend all the `paths:` with `/api`, for example change `/v1/accountpreferences/isplatformselectiondisabled:` to `/api/v1/accountpreferences/isplatformselectiondisabled:`
 
 ## Provide responses to all the needed Services
-Here is an example for `V1credentialsService.js`:
+Introduce brand new Services for Cloudbreak Info and Health here as well. The new files should be [Info.js](controllers/Info.js) and [InfoService.js](controllers/InfoService.js).
+
+For existing services here is an example for `V1credentialsService.js`:
 ```
 exports.getPublicsCredential = function(args, res, next) {
   /**
