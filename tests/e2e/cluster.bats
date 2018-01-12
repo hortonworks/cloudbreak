@@ -161,7 +161,7 @@ REGION=eu-west-1
 }
 
 @test "Generate reinstall template" {
-  CHECK_RESULT=$( generate-reinstall-template --name hm-cl --blueprint-name "${BLUEPRINT_NAME}" | jq .blueprintName -r)
+  CHECK_RESULT=$( generate-reinstall-template --name $CLUSTER_NAME --blueprint-name "${BLUEPRINT_NAME}" | jq .blueprintName -r)
   echo $CHECK_RESULT
   [[ "${CHECK_RESULT}" == "${BLUEPRINT_NAME}" ]]
 }
