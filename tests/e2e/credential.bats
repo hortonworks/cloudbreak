@@ -1,6 +1,6 @@
 load ../commands
 
-AWS_CRED_NAME="cli-cred-aws"
+AWS_CRED_NAME="cli-cred-aws-test"
 AWS_ARGS_ROLE=" --name $AWS_CRED_NAME --role-arn $AWS_ROLE_ARN "
 
 @test "Check create credential aws role based" {
