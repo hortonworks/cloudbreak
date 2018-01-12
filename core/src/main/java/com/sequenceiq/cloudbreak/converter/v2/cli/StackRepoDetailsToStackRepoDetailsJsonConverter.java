@@ -26,6 +26,7 @@ public class StackRepoDetailsToStackRepoDetailsJsonConverter
 
         Map<String, String> stack = source.getStack();
         ambariStackDetailsJson.setStackRepoId(stack.get(StackRepoDetails.REPO_ID_TAG));
+        ambariStackDetailsJson.setStack(stack.get(StackRepoDetails.REPO_ID_TAG));
         ambariStackDetailsJson.setRepositoryVersion(stack.get(StackRepoDetails.REPOSITORY_VERSION));
         ambariStackDetailsJson.setVersionDefinitionFileUrl(stack.get(StackRepoDetails.CUSTOM_VDF_REPO_KEY));
         ambariStackDetailsJson.setMpackUrl(stack.get(StackRepoDetails.MPACK_TAG));
