@@ -12,7 +12,7 @@ exports.getCloudbreakInfo = function(args, res, next) {
         "app":
         {
             "name":"cloudbreak",
-            "version":"2.4.0-dev.49"
+            "version":"MOCK"
         }
     };
     if (Object.keys(examples).length > 0) {
