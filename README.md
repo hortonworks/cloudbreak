@@ -143,6 +143,18 @@ The `-Dcb.cert.dir=FULL_PATH_OF_THE_CERTS_DIR_GENERATED_BY_CBD` value above need
 The `-Dcb.client.secret=CB_SECRET_GENERATED_BY_CBD` value has to be replaced with the value of UAA_DEFAULT_SECRET from the cdb-local/Profile file.
 The databse migration is ran automatically by Cloudbreak, this automated migration could be turn off through the `-Dcb.schema.migration.auto=false` VM option.
 
+### Configure Before launch task
+
+In order to be able to determine the local Cloudbreak version automatically, a `Before launch` task has to be configured for the project in IntelliJ Idea. The required steps are the following:
+
+1. Open `Run/Debug Configurations` for the project
+2. Select your project's application
+3. Click on `Add` in the `Before launch` panel
+4. Select `Run Gradle Task` with the following parameters
+    1. `Gradle project`: cloudbreak:core
+    2. `Tasks`: buildInfo
+5. Confirm and restart the application
+    
 ## Command line
 
 To run Cloudbreak from command line you have to list the JVM parameters from above for gradle:
