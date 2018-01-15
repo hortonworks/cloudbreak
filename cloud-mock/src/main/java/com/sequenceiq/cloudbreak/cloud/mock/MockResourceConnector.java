@@ -5,7 +5,8 @@ import static com.sequenceiq.cloudbreak.cloud.model.ResourceStatus.CREATED;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Value;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Service;
 
 import com.mashape.unirest.http.Unirest;
@@ -27,9 +28,8 @@ import com.sequenceiq.cloudbreak.common.type.ResourceType;
 
 @Service
 public class MockResourceConnector implements ResourceConnector<Object> {
-
-    @Value("${mock.spi.endpoint:https://localhost:9443}")
-    private String mockServerAddress;
+    @Inject
+    private MockCredentialViewFactory mockCredentialViewFactory;
 
     @Override
     public List<CloudResourceStatus> launch(AuthenticatedContext authenticatedContext, CloudStack stack, PersistenceNotifier persistenceNotifier,
@@ -105,7 +105,8 @@ public class MockResourceConnector implements ResourceConnector<Object> {
     public List<CloudResourceStatus> downscale(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources,
             List<CloudInstance> vms, Object resourcesToRemove) {
         try {
-            Unirest.post(mockServerAddress + "/spi/terminate_instances").body(vms).asString();
+            MockCredentialView mockCredentialView = mockCredentialViewFactory.createCredetialView(authenticatedContext.getCloudCredential());
+            Unirest.post(mockCredentialView.getMockEndpoint() + "/spi/terminate_instances").body(vms).asString();
         } catch (UnirestException e) {
             throw new RuntimeException("rest error", e);
         }

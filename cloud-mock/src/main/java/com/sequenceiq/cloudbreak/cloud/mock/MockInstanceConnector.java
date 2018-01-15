@@ -5,9 +5,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.mashape.unirest.http.Unirest;
@@ -26,8 +27,8 @@ public class MockInstanceConnector implements InstanceConnector {
 
     private static final String CB_FINGERPRINT = "ce:50:66:23:96:08:04:ea:01:62:9b:18:f9:ee:ac:aa (RSA)";
 
-    @Value("${mock.spi.endpoint:https://localhost:9443}")
-    private String mockServerAddress;
+    @Inject
+    private MockCredentialViewFactory mockCredentialViewFactory;
 
     @Override
     public List<CloudVmInstanceStatus> start(AuthenticatedContext authenticatedContext, List<CloudResource> resources, List<CloudInstance> vms) {
@@ -53,8 +54,9 @@ public class MockInstanceConnector implements InstanceConnector {
     public List<CloudVmInstanceStatus> check(AuthenticatedContext authenticatedContext, List<CloudInstance> vms) {
 
         try {
-            LOGGER.info("collect instance statuses from mock spi, server address: " + mockServerAddress);
-            CloudVmInstanceStatus[] cloudVmInstanceStatusArray = Unirest.post(mockServerAddress + "/spi/cloud_instance_statuses")
+            MockCredentialView mockCredentialView = mockCredentialViewFactory.createCredetialView(authenticatedContext.getCloudCredential());
+            LOGGER.info("collect instance statuses from mock spi, server address: " + mockCredentialView.getMockEndpoint());
+            CloudVmInstanceStatus[] cloudVmInstanceStatusArray = Unirest.post(mockCredentialView.getMockEndpoint() + "/spi/cloud_instance_statuses")
                     .asObject(CloudVmInstanceStatus[].class).getBody();
             LOGGER.info("collected instance statuses: " + Arrays.toString(cloudVmInstanceStatusArray));
             List<CloudVmInstanceStatus> cloudVmInstanceStatuses = new ArrayList<>();

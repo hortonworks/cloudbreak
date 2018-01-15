@@ -17,10 +17,16 @@ import spark.Request;
 import spark.Response;
 
 public class AmbariClusterResponse extends ITResponse {
+    private String clusterName;
 
     private final Map<String, CloudVmMetaDataStatus> instanceMap;
 
     public AmbariClusterResponse(Map<String, CloudVmMetaDataStatus> instanceMap) {
+        this(instanceMap, "ambari_cluster");
+    }
+
+    public AmbariClusterResponse(Map<String, CloudVmMetaDataStatus> instanceMap, String clusterName) {
+        this.clusterName = clusterName;
         this.instanceMap = instanceMap;
     }
 
@@ -36,7 +42,7 @@ public class AmbariClusterResponse extends ITResponse {
 
         ArrayNode items = rootNode.putArray("items");
         items.addObject()
-                .set("Clusters", getObjectMapper().valueToTree(new Clusters("ambari_cluster")));
+                .set("Clusters", getObjectMapper().valueToTree(new Clusters(clusterName)));
         return rootNode;
     }
 }

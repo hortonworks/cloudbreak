@@ -3,9 +3,10 @@ package com.sequenceiq.cloudbreak.cloud.mock;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.mashape.unirest.http.Unirest;
@@ -21,14 +22,15 @@ public class MockMetadataCollector implements MetadataCollector {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MockMetadataCollector.class);
 
-    @Value("${mock.spi.endpoint:https://localhost:9443}")
-    private String mockServerAddress;
+    @Inject
+    private MockCredentialViewFactory mockCredentialViewFactory;
 
     @Override
     public List<CloudVmMetaDataStatus> collect(AuthenticatedContext authenticatedContext, List<CloudResource> resources, List<CloudInstance> vms) {
         try {
-            LOGGER.info("collect metadata from mock spi, server address: " + mockServerAddress);
-            CloudVmMetaDataStatus[] response = Unirest.post(mockServerAddress + "/spi/cloud_metadata_statuses")
+            MockCredentialView mockCredentialView = mockCredentialViewFactory.createCredetialView(authenticatedContext.getCloudCredential());
+            LOGGER.info("collect metadata from mock spi, server address: " + mockCredentialView.getMockEndpoint());
+            CloudVmMetaDataStatus[] response = Unirest.post(mockCredentialView.getMockEndpoint() + "/spi/cloud_metadata_statuses")
                     .body(vms)
                     .asObject(CloudVmMetaDataStatus[].class).getBody();
             return Arrays.asList(response);

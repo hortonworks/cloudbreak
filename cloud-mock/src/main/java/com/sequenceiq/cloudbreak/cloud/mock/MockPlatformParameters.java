@@ -14,6 +14,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -37,6 +38,7 @@ import com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta;
 import com.sequenceiq.cloudbreak.cloud.model.VmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterConfig;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
+import com.sequenceiq.cloudbreak.cloud.service.CloudbreakResourceReaderService;
 import com.sequenceiq.cloudbreak.common.type.OrchestratorConstants;
 
 @Service
@@ -84,6 +86,9 @@ public class MockPlatformParameters implements PlatformParameters {
 
     @Value("${cb.platform.default.regions:}")
     private String defaultRegions;
+
+    @Inject
+    private CloudbreakResourceReaderService cloudbreakResourceReaderService;
 
     private Map<Region, List<AvailabilityZone>> regions;
 
@@ -194,7 +199,7 @@ public class MockPlatformParameters implements PlatformParameters {
 
     @Override
     public String resourceDefinition(String resource) {
-        return MOCK_RESOURCE_DEFINITION;
+        return cloudbreakResourceReaderService.resourceDefinition("mock", resource);
     }
 
     @Override

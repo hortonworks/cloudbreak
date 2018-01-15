@@ -1,22 +1,15 @@
 package com.sequenceiq.it.cloudbreak.mock;
 
-import static com.sequenceiq.it.spark.ITResponse.IMAGE_CATALOG;
-import static com.sequenceiq.it.spark.ITResponse.MOCK_ROOT;
-import static spark.Spark.get;
-import static spark.Spark.port;
-import static spark.Spark.post;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.WebTarget;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.StringUtils;
 import org.testng.Assert;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
@@ -30,24 +23,35 @@ import com.sequenceiq.cloudbreak.api.model.OnFailureAction;
 import com.sequenceiq.cloudbreak.api.model.OrchestratorRequest;
 import com.sequenceiq.cloudbreak.api.model.StackAuthenticationRequest;
 import com.sequenceiq.cloudbreak.api.model.StackRequest;
-import com.sequenceiq.cloudbreak.client.RestClientUtil;
-import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 import com.sequenceiq.it.IntegrationTestContext;
-import com.sequenceiq.it.cloudbreak.AbstractMockIntegrationTest;
+import com.sequenceiq.it.cloudbreak.AbstractCloudbreakIntegrationTest;
 import com.sequenceiq.it.cloudbreak.CloudbreakITContextConstants;
 import com.sequenceiq.it.cloudbreak.CloudbreakUtil;
 import com.sequenceiq.it.cloudbreak.InstanceGroup;
-import com.sequenceiq.it.cloudbreak.mock.json.CBVersion;
-import com.sequenceiq.it.spark.spi.CloudMetaDataStatuses;
+import com.sequenceiq.it.cloudbreak.v2.CloudbreakV2Constants;
+import com.sequenceiq.it.cloudbreak.v2.mock.StackCreationMock;
 import com.sequenceiq.it.util.ResourceUtil;
 
-public class MockStackCreationWithSaltSuccessTest extends AbstractMockIntegrationTest {
-
-    @Value("${mock.server.address:localhost}")
-    private String mockServerAddress;
-
+public class MockStackCreationWithSaltSuccessTest extends AbstractCloudbreakIntegrationTest {
     @Value("${integrationtest.publicKeyFile}")
     private String defaultPublicKeyFile;
+
+    @BeforeClass
+    @Parameters({"stackName", "mockPort", "sshPort"})
+    public void configMockServer(String stackName, @Optional("9443") int mockPort, @Optional("2020") int sshPort) {
+        IntegrationTestContext itContext = getItContext();
+        List<InstanceGroup> instanceGroups = itContext.getContextParam(CloudbreakITContextConstants.TEMPLATE_ID, List.class);
+        int numberOfServers = 0;
+        for (InstanceGroup ig : instanceGroups) {
+            numberOfServers += ig.getNodeCount();
+        }
+        StackCreationMock stackCreationMock = (StackCreationMock) applicationContext.getBean(
+                StackCreationMock.NAME, mockPort, sshPort, numberOfServers);
+        stackCreationMock.addSPIEndpoints();
+        stackCreationMock.mockImageCatalogResponse(itContext);
+        itContext.putContextParam(CloudbreakV2Constants.MOCK_SERVER, stackCreationMock);
+        itContext.putContextParam(CloudbreakITContextConstants.MOCK_INSTANCE_MAP, stackCreationMock.getInstanceMap());
+    }
 
     @BeforeMethod
     public void setContextParams() {
@@ -71,7 +75,6 @@ public class MockStackCreationWithSaltSuccessTest extends AbstractMockIntegratio
         List<InstanceGroup> instanceGroups = itContext.getContextParam(CloudbreakITContextConstants.TEMPLATE_ID, List.class);
         List<InstanceGroupRequest> igMap = new ArrayList<>();
 
-        int numberOfServers = 0;
         for (InstanceGroup ig : instanceGroups) {
             InstanceGroupRequest instanceGroupRequest = new InstanceGroupRequest();
             instanceGroupRequest.setGroup(ig.getName());
@@ -79,13 +82,7 @@ public class MockStackCreationWithSaltSuccessTest extends AbstractMockIntegratio
             instanceGroupRequest.setTemplateId(Long.valueOf(ig.getTemplateId()));
             instanceGroupRequest.setType(InstanceGroupType.valueOf(ig.getType()));
             igMap.add(instanceGroupRequest);
-            numberOfServers += ig.getNodeCount();
         }
-
-        Map<String, CloudVmMetaDataStatus> instanceMap = new HashMap<>();
-
-        MockInstanceUtil mockInstanceUtil = new MockInstanceUtil(mockServerAddress, sshPort);
-        mockInstanceUtil.addInstance(instanceMap, numberOfServers);
 
         String credentialId = itContext.getContextParam(CloudbreakITContextConstants.CREDENTIAL_ID);
         String networkId = itContext.getContextParam(CloudbreakITContextConstants.NETWORK_ID);
@@ -119,10 +116,6 @@ public class MockStackCreationWithSaltSuccessTest extends AbstractMockIntegratio
             map.put("persistentStorage", persistentStorage);
         }
         stackRequest.setParameters(map);
-        port(mockPort);
-        addSPIEndpoints(instanceMap);
-        mockImageCatalogResponse(itContext);
-        initSpark();
 
         // WHEN
         String stackId = getCloudbreakClient().stackV1Endpoint().postPrivate(stackRequest).getId().toString();
@@ -131,20 +124,11 @@ public class MockStackCreationWithSaltSuccessTest extends AbstractMockIntegratio
         itContext.putCleanUpParam(CloudbreakITContextConstants.STACK_ID, stackId);
         CloudbreakUtil.waitAndCheckStackStatus(getCloudbreakClient(), stackId, "AVAILABLE");
         itContext.putContextParam(CloudbreakITContextConstants.STACK_ID, stackId);
-        itContext.putContextParam(CloudbreakITContextConstants.MOCK_INSTANCE_MAP, instanceMap);
     }
 
-    private void addSPIEndpoints(Map<String, CloudVmMetaDataStatus> instanceMap) {
-        post(MOCK_ROOT + "/cloud_metadata_statuses", new CloudMetaDataStatuses(instanceMap), gson()::toJson);
-    }
-
-    private void mockImageCatalogResponse(IntegrationTestContext itContext) {
-        get(IMAGE_CATALOG, (request, response) -> {
-            String cbServerRoot = itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_SERVER_ROOT);
-            Client client = RestClientUtil.get();
-            WebTarget target = client.target(cbServerRoot + "/info");
-            CBVersion cbVersion = target.request().get().readEntity(CBVersion.class);
-            return responseFromJsonFile("imagecatalog/catalog.json").replace("CB_VERSION", cbVersion.getApp().getVersion());
-        });
+    @AfterClass
+    public void breakDown() {
+        StackCreationMock stackCreationMock = getItContext().getContextParam(CloudbreakV2Constants.MOCK_SERVER, StackCreationMock.class);
+        stackCreationMock.stop();
     }
 }
