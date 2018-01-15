@@ -5,11 +5,15 @@ import javax.validation.constraints.Size;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
+import com.sequenceiq.cloudbreak.validation.ValidKerberos;
+import com.sequenceiq.cloudbreak.validation.ValidKerberosDescriptor;
+import com.sequenceiq.cloudbreak.validation.ValidJson;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel
+@ValidKerberos
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class KerberosRequest implements JsonEntity {
@@ -43,8 +47,10 @@ public class KerberosRequest implements JsonEntity {
 
     private Boolean tcpAllowed = false;
 
+    @ValidKerberosDescriptor
     private String descriptor;
 
+    @ValidJson(message = "The krb5 configuration must be a valid JSON")
     private String krb5Conf;
 
     public String getMasterKey() {

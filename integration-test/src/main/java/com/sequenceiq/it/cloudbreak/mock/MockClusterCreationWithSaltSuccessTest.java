@@ -82,11 +82,14 @@ public class MockClusterCreationWithSaltSuccessTest extends AbstractCloudbreakIn
         clusterRequest.setBlueprintId(Long.valueOf(blueprintId));
         clusterRequest.setHostGroups(hostGroupJsons1);
 
-        KerberosRequest kerberosRequest = new KerberosRequest();
-        kerberosRequest.setAdmin(kerberosAdmin);
-        kerberosRequest.setPassword(kerberosPassword);
-        kerberosRequest.setMasterKey(kerberosMasterKey);
-        clusterRequest.setKerberos(kerberosRequest);
+        if (enableSecurity) {
+            KerberosRequest kerberosRequest = new KerberosRequest();
+            kerberosRequest.setAdmin(kerberosAdmin);
+            kerberosRequest.setPassword(kerberosPassword);
+            kerberosRequest.setMasterKey(kerberosMasterKey);
+            clusterRequest.setKerberos(kerberosRequest);
+        }
+
         GatewayJson gatewayJson = new GatewayJson();
         gatewayJson.setEnableGateway(Boolean.TRUE);
         gatewayJson.setExposedServices(ImmutableList.of("ALL"));
