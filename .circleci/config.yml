@@ -65,6 +65,12 @@ jobs:
             mkdir -p ~/junit/
             cp integration-test/test-output/junitreports/* ~/junit/
           when: always
+      - run:
+          name: cleanup
+          command: |
+            sudo rm -rf integration-test/integcb/.deps
+            sudo rm -rf integration-test/integcb/.schema
+            sudo rm -rf integration-test/src
       - store_test_results:
           path: ~/junit
       - store_artifacts:

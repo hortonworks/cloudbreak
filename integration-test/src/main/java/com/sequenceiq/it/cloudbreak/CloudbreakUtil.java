@@ -16,6 +16,8 @@ import javax.ws.rs.core.Response.Status.Family;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.testng.Assert;
 
@@ -35,16 +37,24 @@ import com.sequenceiq.periscope.api.endpoint.v1.HistoryEndpoint;
 import com.sequenceiq.periscope.api.model.AutoscaleClusterHistoryResponse;
 import com.sequenceiq.periscope.client.AutoscaleClient;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
+@Component
 public class CloudbreakUtil {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CloudbreakUtil.class);
 
     private static final int MAX_RETRY = 360;
 
-    private static final int POLLING_INTERVAL = 10000;
+    private static int pollingInterval = 10000;
 
     private CloudbreakUtil() {
+    }
+
+    @SuppressFBWarnings("ST_WRITE_TO_STATIC_FROM_INSTANCE_METHOD")
+    @Value("${integrationtest.testsuite.pollingInterval:10000}")
+    public void setPollingInterval(int pollingInterval) {
+        this.pollingInterval = pollingInterval;
     }
 
     public static void checkResponse(String operation, Response response) {
@@ -221,7 +231,7 @@ public class CloudbreakUtil {
         } while (!checkStatuses(currentStatuses, desiredStatuses) && !checkFailedStatuses(currentStatuses) && retryCount < MAX_RETRY);
 
         LOGGER.info("Status(es) {} for {} are in desired status(es) {}", desiredStatuses.keySet(), stackId, currentStatuses.values());
-        if (currentStatuses.containsValue("FAILED") || checkNotExpectedDelete(currentStatuses, desiredStatuses)) {
+        if (currentStatuses.values().stream().anyMatch(cs -> cs.contains("FAILED")) || checkNotExpectedDelete(currentStatuses, desiredStatuses)) {
             waitResult = WaitResult.FAILED;
         }
         if (retryCount == MAX_RETRY) {
@@ -319,7 +329,7 @@ public class CloudbreakUtil {
 
     public static void sleep() {
         try {
-            Thread.sleep(POLLING_INTERVAL);
+            Thread.sleep(pollingInterval);
         } catch (InterruptedException e) {
             LOGGER.warn("Ex during wait", e);
         }

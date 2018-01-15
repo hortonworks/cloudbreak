@@ -7,6 +7,7 @@ import javax.ws.rs.core.Response;
 
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
@@ -29,8 +30,8 @@ public class StackScalingV2Test extends AbstractCloudbreakIntegrationTest {
     }
 
     @Test
-    @Parameters({"hostGroup", "desiredCount"})
-    public void testStackScaling(String hostGroup, int desiredCount) throws Exception {
+    @Parameters({"hostGroup", "desiredCount", "checkAmbari"})
+    public void testStackScaling(String hostGroup, int desiredCount, @Optional("true") boolean checkAmbari) throws Exception {
         // GIVEN
         IntegrationTestContext itContext = getItContext();
         String stackName = itContext.getContextParam(CloudbreakV2Constants.STACK_NAME);
@@ -49,7 +50,10 @@ public class StackScalingV2Test extends AbstractCloudbreakIntegrationTest {
         desiredStatuses.put("status", "AVAILABLE");
         desiredStatuses.put("clusterStatus", "AVAILABLE");
         CloudbreakUtil.waitAndCheckStatuses(getCloudbreakClient(), stackId, desiredStatuses);
-        ScalingUtil.checkStackScaled(getCloudbreakClient().stackV2Endpoint(), stackId, desiredCount);
-        ScalingUtil.checkClusterScaled(getCloudbreakClient().stackV2Endpoint(), ambariPort, stackId, ambariUser, ambariPassword, desiredCount, itContext);
+        ScalingUtil.checkStackScaled(getCloudbreakClient().stackV2Endpoint(), stackId, hostGroup, desiredCount);
+        if (checkAmbari) {
+            int nodeCount = ScalingUtil.getNodeCountStack(getCloudbreakClient().stackV2Endpoint(), stackId);
+            ScalingUtil.checkClusterScaled(getCloudbreakClient().stackV2Endpoint(), ambariPort, stackId, ambariUser, ambariPassword, nodeCount, itContext);
+        }
     }
 }

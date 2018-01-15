@@ -8,6 +8,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Variant;
 
 @Service
 class MockConstants implements CloudConstant {
+    public static final String MOCK_ENDPOINT_PARAMETER = "mockEndpoint";
 
     static final String MOCK = "MOCK";
 

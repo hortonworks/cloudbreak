@@ -39,6 +39,18 @@ public class ScalingUtil {
         return nodeCount;
     }
 
+    private static int getNodeCount(StackResponse stackResponse, String instanceGroup) {
+        List<InstanceGroupResponse> instanceGroups = stackResponse.getInstanceGroups();
+        int nodeCount = 0;
+        for (InstanceGroupResponse ig : instanceGroups) {
+            if (ig.getGroup().equals(instanceGroup)) {
+                nodeCount = ig.getNodeCount();
+                break;
+            }
+        }
+        return nodeCount;
+    }
+
     public static void checkStackScaled(StackV1Endpoint stackV1Endpoint, String stackId, int expectedNodeCount) {
         StackResponse stackResponse = stackV1Endpoint.get(Long.valueOf(stackId), new HashSet<>());
         checkStackScaled(expectedNodeCount, stackResponse);
@@ -49,9 +61,20 @@ public class ScalingUtil {
         checkStackScaled(expectedNodeCount, stackResponse);
     }
 
+    public static void checkStackScaled(StackV2Endpoint stackV2Endpoint, String stackId, String instanceGroup, int expectedNodeCount) {
+        StackResponse stackResponse = stackV2Endpoint.get(Long.valueOf(stackId), new HashSet<>());
+        checkStackScaled(instanceGroup, expectedNodeCount, stackResponse);
+    }
+
     private static void checkStackScaled(int expectedNodeCount, StackResponse stackResponse) {
         Assert.assertEquals(stackResponse.getStatus(), Status.AVAILABLE, "The stack hasn't been started!");
         Assert.assertEquals(expectedNodeCount, getNodeCount(stackResponse),
+                "After scaling, the number of the nodes in stack differs from the expected number!");
+    }
+
+    private static void checkStackScaled(String instanceGroup, int expectedNodeCount, StackResponse stackResponse) {
+        Assert.assertEquals(stackResponse.getStatus(), Status.AVAILABLE, "The stack hasn't been started!");
+        Assert.assertEquals(expectedNodeCount, getNodeCount(stackResponse, instanceGroup),
                 "After scaling, the number of the nodes in stack differs from the expected number!");
     }
 
