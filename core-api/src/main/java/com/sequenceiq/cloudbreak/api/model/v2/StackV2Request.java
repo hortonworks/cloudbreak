@@ -89,6 +89,7 @@ public class StackV2Request implements JsonEntity {
     @ApiModelProperty(StackModelDescription.AUTHENTICATION)
     private StackAuthenticationRequest stackAuthentication;
 
+    @Valid
     @ApiModelProperty(StackModelDescription.NETWORK)
     private NetworkV2Request network;
 

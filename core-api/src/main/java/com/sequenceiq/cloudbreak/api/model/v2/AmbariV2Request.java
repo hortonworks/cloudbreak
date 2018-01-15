@@ -53,6 +53,7 @@ public class AmbariV2Request implements JsonEntity {
     @ApiModelProperty(value = ModelDescriptions.StackModelDescription.PASSWORD, required = true)
     private String password;
 
+    @Valid
     private KerberosRequest kerberos;
 
     @ApiModelProperty(ModelDescriptions.ClusterModelDescription.VALIDATE_BLUEPRINT)
