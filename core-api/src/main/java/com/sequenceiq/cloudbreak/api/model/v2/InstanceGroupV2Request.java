@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import javax.validation.Valid;
 import javax.validation.constraints.Digits;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
@@ -46,6 +47,7 @@ public class InstanceGroupV2Request implements JsonEntity {
     @ApiModelProperty(InstanceGroupModelDescription.TEMPLATE)
     private TemplateV2Request template;
 
+    @Valid
     @ApiModelProperty(InstanceGroupModelDescription.SECURITYGROUP)
     private SecurityGroupV2Request securityGroup;
 

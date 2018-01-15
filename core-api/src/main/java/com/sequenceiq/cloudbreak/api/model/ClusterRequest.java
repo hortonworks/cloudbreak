@@ -67,6 +67,7 @@ public class ClusterRequest implements JsonEntity {
     @ApiModelProperty(value = StackModelDescription.PASSWORD, required = true)
     private String password;
 
+    @Valid
     private KerberosRequest kerberos;
 
     @ApiModelProperty(ClusterModelDescription.LDAP_CONFIG_ID)

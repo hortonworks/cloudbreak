@@ -8,13 +8,13 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class StackAuthenticationBase implements JsonEntity {
 
-    @ApiModelProperty(value = ModelDescriptions.StackAuthenticationBase.PUBLIC_KEY)
+    @ApiModelProperty(ModelDescriptions.StackAuthenticationBase.PUBLIC_KEY)
     private String publicKey;
 
-    @ApiModelProperty(value = ModelDescriptions.StackAuthenticationBase.PUBLIC_KEY_ID)
+    @ApiModelProperty(ModelDescriptions.StackAuthenticationBase.PUBLIC_KEY_ID)
     private String publicKeyId;
 
-    @ApiModelProperty(value = ModelDescriptions.StackAuthenticationBase.LOGIN_USERNAME)
+    @ApiModelProperty(ModelDescriptions.StackAuthenticationBase.LOGIN_USERNAME)
     private String loginUserName;
 
     public String getPublicKey() {
