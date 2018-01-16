@@ -176,6 +176,11 @@ public class CleanupService {
         return true;
     }
 
+    public boolean deleteImageCatalog(CloudbreakClient cloudbreakClient, String name) {
+        cloudbreakClient.imageCatalogEndpoint().deletePublic(name);
+        return true;
+    }
+
     public boolean deleteRdsConfigs(CloudbreakClient cloudbreakClient, String rdsConfigId) {
         if (rdsConfigId != null) {
             cloudbreakClient.rdsConfigEndpoint().delete(Long.valueOf(rdsConfigId));

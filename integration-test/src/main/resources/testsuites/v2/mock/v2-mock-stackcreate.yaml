@@ -12,6 +12,7 @@ tests:
     classes:
       - com.sequenceiq.it.TestSuiteInitializer
       - com.sequenceiq.it.cloudbreak.CloudbreakTestSuiteInitializer
+      - com.sequenceiq.it.MockSuiteInitializer
 
   - name: start ssh server on port 2021
     classes:
