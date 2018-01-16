@@ -51,7 +51,7 @@ func CreateStack(c *cli.Context) {
 	cbClient.createStack(req, c.Bool(FlPublicOptional.Name))
 
 	if c.Bool(FlWaitOptional.Name) {
-		cbClient.waitForOperationToFinish(*req.Name, AVAILABLE, AVAILABLE)
+		cbClient.waitForOperationToFinish(*req.General.Name, AVAILABLE, AVAILABLE)
 	}
 }
 
@@ -73,23 +73,23 @@ func assembleStackRequest(c *cli.Context) *models_cloudbreak.StackV2Request {
 
 	name := c.String(FlName.Name)
 	if len(name) != 0 {
-		req.Name = &name
+		req.General.Name = &name
 		for _, ig := range req.InstanceGroups {
 			if _, ok := ig.Parameters[availabilitySet]; ok {
 				as := ig.Parameters[availabilitySet].(map[string]interface{})
-				as["name"] = *req.Name + "-" + *ig.Group + "-as"
+				as["name"] = *req.General.Name + "-" + *ig.Group + "-as"
 				ig.Parameters[availabilitySet] = as
 			}
 		}
 	}
-	if req.Name == nil || len(*req.Name) == 0 {
+	if req.General.Name == nil || len(*req.General.Name) == 0 {
 		utils.LogErrorMessageAndExit("Name of the cluster must be set either in the template or with the --name command line option.")
 	}
 
 	ambariPassword := c.String(FlAmbariPasswordOptional.Name)
 	if len(ambariPassword) != 0 {
-		if req.ClusterRequest != nil && req.ClusterRequest.AmbariRequest != nil {
-			req.ClusterRequest.AmbariRequest.Password = &ambariPassword
+		if req.Cluster != nil && req.Cluster.Ambari != nil {
+			req.Cluster.Ambari.Password = &ambariPassword
 		} else {
 			utils.LogErrorMessageAndExit("Missing clusterRequest.ambariRequest node in JSON")
 		}

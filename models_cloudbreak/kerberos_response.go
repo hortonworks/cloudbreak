@@ -6,6 +6,8 @@ package models_cloudbreak
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"encoding/json"
+
 	strfmt "github.com/go-openapi/strfmt"
 
 	"github.com/go-openapi/errors"
@@ -44,6 +46,9 @@ type KerberosResponse struct {
 	// tcp allowed
 	TCPAllowed *bool `json:"tcpAllowed,omitempty"`
 
+	// type
+	Type string `json:"type,omitempty"`
+
 	// kerberos KDC server URL
 	URL string `json:"url,omitempty"`
 }
@@ -64,6 +69,8 @@ type KerberosResponse struct {
 
 /* polymorph KerberosResponse tcpAllowed false */
 
+/* polymorph KerberosResponse type false */
+
 /* polymorph KerberosResponse url false */
 
 // Validate validates this kerberos response
@@ -71,6 +78,11 @@ func (m *KerberosResponse) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateAdmin(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateType(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -92,6 +104,51 @@ func (m *KerberosResponse) validateAdmin(formats strfmt.Registry) error {
 	}
 
 	if err := validate.MaxLength("admin", "body", string(m.Admin), 15); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+var kerberosResponseTypeTypePropEnum []interface{}
+
+func init() {
+	var res []string
+	if err := json.Unmarshal([]byte(`["CB_MANAGED","EXISTING_AD","EXISTING_MIT","CUSTOM"]`), &res); err != nil {
+		panic(err)
+	}
+	for _, v := range res {
+		kerberosResponseTypeTypePropEnum = append(kerberosResponseTypeTypePropEnum, v)
+	}
+}
+
+const (
+	// KerberosResponseTypeCBMANAGED captures enum value "CB_MANAGED"
+	KerberosResponseTypeCBMANAGED string = "CB_MANAGED"
+	// KerberosResponseTypeEXISTINGAD captures enum value "EXISTING_AD"
+	KerberosResponseTypeEXISTINGAD string = "EXISTING_AD"
+	// KerberosResponseTypeEXISTINGMIT captures enum value "EXISTING_MIT"
+	KerberosResponseTypeEXISTINGMIT string = "EXISTING_MIT"
+	// KerberosResponseTypeCUSTOM captures enum value "CUSTOM"
+	KerberosResponseTypeCUSTOM string = "CUSTOM"
+)
+
+// prop value enum
+func (m *KerberosResponse) validateTypeEnum(path, location string, value string) error {
+	if err := validate.Enum(path, location, value, kerberosResponseTypeTypePropEnum); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *KerberosResponse) validateType(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Type) { // not required
+		return nil
+	}
+
+	// value enum
+	if err := m.validateTypeEnum("type", "body", m.Type); err != nil {
 		return err
 	}
 

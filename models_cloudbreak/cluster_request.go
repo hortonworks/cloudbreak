@@ -121,7 +121,7 @@ type ClusterRequest struct {
 
 	// details of the external database for Hadoop components
 	// Unique: true
-	RdsConfigJsons []*RDSConfig `json:"rdsConfigJsons"`
+	RdsConfigJsons []*RdsConfig `json:"rdsConfigJsons"`
 
 	// ambari username
 	// Required: true

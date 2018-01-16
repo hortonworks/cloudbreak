@@ -65,7 +65,7 @@ for the test rds connection util operation typically these are written to a http
 type TestRdsConnectionUtilParams struct {
 
 	/*Body*/
-	Body *models_cloudbreak.RDSConfig
+	Body *models_cloudbreak.RdsConfig
 
 	timeout    time.Duration
 	Context    context.Context
@@ -106,13 +106,13 @@ func (o *TestRdsConnectionUtilParams) SetHTTPClient(client *http.Client) {
 }
 
 // WithBody adds the body to the test rds connection util params
-func (o *TestRdsConnectionUtilParams) WithBody(body *models_cloudbreak.RDSConfig) *TestRdsConnectionUtilParams {
+func (o *TestRdsConnectionUtilParams) WithBody(body *models_cloudbreak.RdsConfig) *TestRdsConnectionUtilParams {
 	o.SetBody(body)
 	return o
 }
 
 // SetBody adds the body to the test rds connection util params
-func (o *TestRdsConnectionUtilParams) SetBody(body *models_cloudbreak.RDSConfig) {
+func (o *TestRdsConnectionUtilParams) SetBody(body *models_cloudbreak.RdsConfig) {
 	o.Body = body
 }
 
@@ -125,7 +125,7 @@ func (o *TestRdsConnectionUtilParams) WriteToRequest(r runtime.ClientRequest, re
 	var res []error
 
 	if o.Body == nil {
-		o.Body = new(models_cloudbreak.RDSConfig)
+		o.Body = new(models_cloudbreak.RdsConfig)
 	}
 
 	if err := r.SetBodyParam(o.Body); err != nil {

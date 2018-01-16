@@ -90,18 +90,22 @@ func generateStackTemplateImpl(mode cloud.NetworkMode, stringFinder func(string)
 	skippedFields := provider.SkippedFields()
 
 	template := models_cloudbreak.StackV2Request{
-		ClusterRequest: &models_cloudbreak.ClusterV2Request{
-			AmbariRequest: &models_cloudbreak.AmbariV2Request{
-				BlueprintName: "____",
-				UserName:      &(&types.S{S: "____"}).S,
-				Password:      &(&types.S{S: ""}).S,
+		Cluster: &models_cloudbreak.ClusterV2Request{
+			Ambari: &models_cloudbreak.AmbariV2Request{
+				BlueprintName:   "____",
+				BlueprintInputs: []*models_cloudbreak.BlueprintInput{},
+				UserName:        &(&types.S{S: "____"}).S,
+				Password:        &(&types.S{S: ""}).S,
 			},
 		},
-		Name:                &(&types.S{S: ""}).S,
-		CredentialName:      "____",
-		AvailabilityZone:    getString(skippedFields, cloud.AVAILABILITY_ZONE_FIELD, "____"),
-		Region:              getString(skippedFields, cloud.REGION_FIELD, "____"),
-		Orchestrator:        &models_cloudbreak.OrchestratorRequest{Type: &(&types.S{S: "SALT"}).S},
+		General: &models_cloudbreak.GeneralSettings{
+			Name:           &(&types.S{S: ""}).S,
+			CredentialName: "____",
+		},
+		Placement: &models_cloudbreak.PlacementSettings{
+			Region:           getString(skippedFields, cloud.REGION_FIELD, "____"),
+			AvailabilityZone: getString(skippedFields, cloud.AVAILABILITY_ZONE_FIELD, "____"),
+		},
 		InstanceGroups:      []*models_cloudbreak.InstanceGroupsV2{},
 		Network:             provider.GenerateDefaultNetwork(provider.GetNetworkParamatersTemplate(mode), mode),
 		StackAuthentication: &models_cloudbreak.StackAuthentication{PublicKey: "____"},
@@ -115,7 +119,7 @@ func generateStackTemplateImpl(mode cloud.NetworkMode, stringFinder func(string)
 			utils.LogErrorAndExit(err)
 		}
 		nodes = getNodesByBlueprint(bp)
-		template.ClusterRequest.AmbariRequest.BlueprintName = bpName
+		template.Cluster.Ambari.BlueprintName = bpName
 	} else if bpFile := stringFinder(FlBlueprintFileOptional.Name); len(bpFile) != 0 {
 		bp := utils.ReadFile(bpFile)
 		nodes = getNodesByBlueprint(bp)
@@ -196,6 +200,7 @@ func convertNodeToInstanceGroup(provider cloud.CloudProvider, node cloud.Node) *
 		Type:          node.GroupType,
 		SecurityGroup: provider.GenerateDefaultSecurityGroup(node),
 		Parameters:    provider.GetInstanceGroupParamatersTemplate(node),
+		RecipeNames:   []string{},
 	}
 	return ig
 }

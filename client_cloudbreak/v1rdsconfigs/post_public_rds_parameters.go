@@ -65,7 +65,7 @@ for the post public rds operation typically these are written to a http.Request
 type PostPublicRdsParams struct {
 
 	/*Body*/
-	Body *models_cloudbreak.RDSConfig
+	Body *models_cloudbreak.RdsConfig
 
 	timeout    time.Duration
 	Context    context.Context
@@ -106,13 +106,13 @@ func (o *PostPublicRdsParams) SetHTTPClient(client *http.Client) {
 }
 
 // WithBody adds the body to the post public rds params
-func (o *PostPublicRdsParams) WithBody(body *models_cloudbreak.RDSConfig) *PostPublicRdsParams {
+func (o *PostPublicRdsParams) WithBody(body *models_cloudbreak.RdsConfig) *PostPublicRdsParams {
 	o.SetBody(body)
 	return o
 }
 
 // SetBody adds the body to the post public rds params
-func (o *PostPublicRdsParams) SetBody(body *models_cloudbreak.RDSConfig) {
+func (o *PostPublicRdsParams) SetBody(body *models_cloudbreak.RdsConfig) {
 	o.Body = body
 }
 
@@ -125,7 +125,7 @@ func (o *PostPublicRdsParams) WriteToRequest(r runtime.ClientRequest, reg strfmt
 	var res []error
 
 	if o.Body == nil {
-		o.Body = new(models_cloudbreak.RDSConfig)
+		o.Body = new(models_cloudbreak.RdsConfig)
 	}
 
 	if err := r.SetBodyParam(o.Body); err != nil {

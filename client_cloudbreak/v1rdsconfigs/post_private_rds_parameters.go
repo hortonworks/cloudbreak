@@ -65,7 +65,7 @@ for the post private rds operation typically these are written to a http.Request
 type PostPrivateRdsParams struct {
 
 	/*Body*/
-	Body *models_cloudbreak.RDSConfig
+	Body *models_cloudbreak.RdsConfig
 
 	timeout    time.Duration
 	Context    context.Context
@@ -106,13 +106,13 @@ func (o *PostPrivateRdsParams) SetHTTPClient(client *http.Client) {
 }
 
 // WithBody adds the body to the post private rds params
-func (o *PostPrivateRdsParams) WithBody(body *models_cloudbreak.RDSConfig) *PostPrivateRdsParams {
+func (o *PostPrivateRdsParams) WithBody(body *models_cloudbreak.RdsConfig) *PostPrivateRdsParams {
 	o.SetBody(body)
 	return o
 }
 
 // SetBody adds the body to the post private rds params
-func (o *PostPrivateRdsParams) SetBody(body *models_cloudbreak.RDSConfig) {
+func (o *PostPrivateRdsParams) SetBody(body *models_cloudbreak.RdsConfig) {
 	o.Body = body
 }
 
@@ -125,7 +125,7 @@ func (o *PostPrivateRdsParams) WriteToRequest(r runtime.ClientRequest, reg strfm
 	var res []error
 
 	if o.Body == nil {
-		o.Body = new(models_cloudbreak.RDSConfig)
+		o.Body = new(models_cloudbreak.RdsConfig)
 	}
 
 	if err := r.SetBodyParam(o.Body); err != nil {

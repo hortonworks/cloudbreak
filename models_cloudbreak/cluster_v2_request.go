@@ -7,7 +7,6 @@ package models_cloudbreak
 
 import (
 	"encoding/json"
-	"strconv"
 
 	strfmt "github.com/go-openapi/strfmt"
 
@@ -22,7 +21,7 @@ import (
 type ClusterV2Request struct {
 
 	// ambari specific requests
-	AmbariRequest *AmbariV2Request `json:"ambariRequest,omitempty"`
+	Ambari *AmbariV2Request `json:"ambari,omitempty"`
 
 	// send email about the result of the cluster installation
 	EmailNeeded *bool `json:"emailNeeded,omitempty"`
@@ -39,16 +38,11 @@ type ClusterV2Request struct {
 	// LDAP config name for the cluster
 	LdapConfigName string `json:"ldapConfigName,omitempty"`
 
-	// RDS configuration ids for the cluster
-	// Unique: true
-	RdsConfigIds []int64 `json:"rdsConfigIds"`
-
 	// details of the external database for Hadoop components
-	// Unique: true
-	RdsConfigJsons []*RDSConfig `json:"rdsConfigJsons"`
+	RdsConfigs *RdsConfigs `json:"rdsConfigs,omitempty"`
 }
 
-/* polymorph ClusterV2Request ambariRequest false */
+/* polymorph ClusterV2Request ambari false */
 
 /* polymorph ClusterV2Request emailNeeded false */
 
@@ -60,15 +54,13 @@ type ClusterV2Request struct {
 
 /* polymorph ClusterV2Request ldapConfigName false */
 
-/* polymorph ClusterV2Request rdsConfigIds false */
-
-/* polymorph ClusterV2Request rdsConfigJsons false */
+/* polymorph ClusterV2Request rdsConfigs false */
 
 // Validate validates this cluster v2 request
 func (m *ClusterV2Request) Validate(formats strfmt.Registry) error {
 	var res []error
 
-	if err := m.validateAmbariRequest(formats); err != nil {
+	if err := m.validateAmbari(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -83,12 +75,7 @@ func (m *ClusterV2Request) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
-	if err := m.validateRdsConfigIds(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
-	if err := m.validateRdsConfigJsons(formats); err != nil {
+	if err := m.validateRdsConfigs(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -99,17 +86,17 @@ func (m *ClusterV2Request) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *ClusterV2Request) validateAmbariRequest(formats strfmt.Registry) error {
+func (m *ClusterV2Request) validateAmbari(formats strfmt.Registry) error {
 
-	if swag.IsZero(m.AmbariRequest) { // not required
+	if swag.IsZero(m.Ambari) { // not required
 		return nil
 	}
 
-	if m.AmbariRequest != nil {
+	if m.Ambari != nil {
 
-		if err := m.AmbariRequest.Validate(formats); err != nil {
+		if err := m.Ambari.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("ambariRequest")
+				return ve.ValidateName("ambari")
 			}
 			return err
 		}
@@ -178,45 +165,20 @@ func (m *ClusterV2Request) validateFileSystem(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *ClusterV2Request) validateRdsConfigIds(formats strfmt.Registry) error {
+func (m *ClusterV2Request) validateRdsConfigs(formats strfmt.Registry) error {
 
-	if swag.IsZero(m.RdsConfigIds) { // not required
+	if swag.IsZero(m.RdsConfigs) { // not required
 		return nil
 	}
 
-	if err := validate.UniqueItems("rdsConfigIds", "body", m.RdsConfigIds); err != nil {
-		return err
-	}
+	if m.RdsConfigs != nil {
 
-	return nil
-}
-
-func (m *ClusterV2Request) validateRdsConfigJsons(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.RdsConfigJsons) { // not required
-		return nil
-	}
-
-	if err := validate.UniqueItems("rdsConfigJsons", "body", m.RdsConfigJsons); err != nil {
-		return err
-	}
-
-	for i := 0; i < len(m.RdsConfigJsons); i++ {
-
-		if swag.IsZero(m.RdsConfigJsons[i]) { // not required
-			continue
-		}
-
-		if m.RdsConfigJsons[i] != nil {
-
-			if err := m.RdsConfigJsons[i].Validate(formats); err != nil {
-				if ve, ok := err.(*errors.Validation); ok {
-					return ve.ValidateName("rdsConfigJsons" + "." + strconv.Itoa(i))
-				}
-				return err
+		if err := m.RdsConfigs.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("rdsConfigs")
 			}
+			return err
 		}
-
 	}
 
 	return nil

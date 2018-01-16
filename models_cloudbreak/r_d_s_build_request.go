@@ -24,7 +24,7 @@ type RDSBuildRequest struct {
 
 	// rds config request
 	// Required: true
-	RdsConfigRequest *RDSConfig `json:"rdsConfigRequest"`
+	RdsConfigRequest *RdsConfig `json:"rdsConfigRequest"`
 }
 
 /* polymorph RDSBuildRequest clusterName false */

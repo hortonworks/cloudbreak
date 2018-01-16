@@ -16,10 +16,10 @@ import (
 	"github.com/go-openapi/validate"
 )
 
-// RDSConfig r d s config
-// swagger:model RDSConfig
+// RdsConfig rds config
+// swagger:model RdsConfig
 
-type RDSConfig struct {
+type RdsConfig struct {
 
 	// Password to use for the jdbc connection
 	// Required: true
@@ -57,26 +57,26 @@ type RDSConfig struct {
 	Validated *bool `json:"validated,omitempty"`
 }
 
-/* polymorph RDSConfig connectionPassword false */
+/* polymorph RdsConfig connectionPassword false */
 
-/* polymorph RDSConfig connectionURL false */
+/* polymorph RdsConfig connectionURL false */
 
-/* polymorph RDSConfig connectionUserName false */
+/* polymorph RdsConfig connectionUserName false */
 
-/* polymorph RDSConfig databaseType false */
+/* polymorph RdsConfig databaseType false */
 
-/* polymorph RDSConfig hdpVersion false */
+/* polymorph RdsConfig hdpVersion false */
 
-/* polymorph RDSConfig name false */
+/* polymorph RdsConfig name false */
 
-/* polymorph RDSConfig properties false */
+/* polymorph RdsConfig properties false */
 
-/* polymorph RDSConfig type false */
+/* polymorph RdsConfig type false */
 
-/* polymorph RDSConfig validated false */
+/* polymorph RdsConfig validated false */
 
-// Validate validates this r d s config
-func (m *RDSConfig) Validate(formats strfmt.Registry) error {
+// Validate validates this rds config
+func (m *RdsConfig) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateConnectionPassword(formats); err != nil {
@@ -125,7 +125,7 @@ func (m *RDSConfig) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *RDSConfig) validateConnectionPassword(formats strfmt.Registry) error {
+func (m *RdsConfig) validateConnectionPassword(formats strfmt.Registry) error {
 
 	if err := validate.Required("connectionPassword", "body", m.ConnectionPassword); err != nil {
 		return err
@@ -134,7 +134,7 @@ func (m *RDSConfig) validateConnectionPassword(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *RDSConfig) validateConnectionURL(formats strfmt.Registry) error {
+func (m *RdsConfig) validateConnectionURL(formats strfmt.Registry) error {
 
 	if err := validate.Required("connectionURL", "body", m.ConnectionURL); err != nil {
 		return err
@@ -147,7 +147,7 @@ func (m *RDSConfig) validateConnectionURL(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *RDSConfig) validateConnectionUserName(formats strfmt.Registry) error {
+func (m *RdsConfig) validateConnectionUserName(formats strfmt.Registry) error {
 
 	if err := validate.Required("connectionUserName", "body", m.ConnectionUserName); err != nil {
 		return err
@@ -156,7 +156,7 @@ func (m *RDSConfig) validateConnectionUserName(formats strfmt.Registry) error {
 	return nil
 }
 
-var rDSConfigTypeDatabaseTypePropEnum []interface{}
+var rdsConfigTypeDatabaseTypePropEnum []interface{}
 
 func init() {
 	var res []string
@@ -164,24 +164,24 @@ func init() {
 		panic(err)
 	}
 	for _, v := range res {
-		rDSConfigTypeDatabaseTypePropEnum = append(rDSConfigTypeDatabaseTypePropEnum, v)
+		rdsConfigTypeDatabaseTypePropEnum = append(rdsConfigTypeDatabaseTypePropEnum, v)
 	}
 }
 
 const (
-	// RDSConfigDatabaseTypePOSTGRES captures enum value "POSTGRES"
-	RDSConfigDatabaseTypePOSTGRES string = "POSTGRES"
+	// RdsConfigDatabaseTypePOSTGRES captures enum value "POSTGRES"
+	RdsConfigDatabaseTypePOSTGRES string = "POSTGRES"
 )
 
 // prop value enum
-func (m *RDSConfig) validateDatabaseTypeEnum(path, location string, value string) error {
-	if err := validate.Enum(path, location, value, rDSConfigTypeDatabaseTypePropEnum); err != nil {
+func (m *RdsConfig) validateDatabaseTypeEnum(path, location string, value string) error {
+	if err := validate.Enum(path, location, value, rdsConfigTypeDatabaseTypePropEnum); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (m *RDSConfig) validateDatabaseType(formats strfmt.Registry) error {
+func (m *RdsConfig) validateDatabaseType(formats strfmt.Registry) error {
 
 	if err := validate.Required("databaseType", "body", m.DatabaseType); err != nil {
 		return err
@@ -195,7 +195,7 @@ func (m *RDSConfig) validateDatabaseType(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *RDSConfig) validateHdpVersion(formats strfmt.Registry) error {
+func (m *RdsConfig) validateHdpVersion(formats strfmt.Registry) error {
 
 	if err := validate.Required("hdpVersion", "body", m.HdpVersion); err != nil {
 		return err
@@ -204,7 +204,7 @@ func (m *RDSConfig) validateHdpVersion(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *RDSConfig) validateName(formats strfmt.Registry) error {
+func (m *RdsConfig) validateName(formats strfmt.Registry) error {
 
 	if err := validate.Required("name", "body", m.Name); err != nil {
 		return err
@@ -213,7 +213,7 @@ func (m *RDSConfig) validateName(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *RDSConfig) validateProperties(formats strfmt.Registry) error {
+func (m *RdsConfig) validateProperties(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Properties) { // not required
 		return nil
@@ -244,7 +244,7 @@ func (m *RDSConfig) validateProperties(formats strfmt.Registry) error {
 	return nil
 }
 
-var rDSConfigTypeTypePropEnum []interface{}
+var rdsConfigTypeTypePropEnum []interface{}
 
 func init() {
 	var res []string
@@ -252,28 +252,28 @@ func init() {
 		panic(err)
 	}
 	for _, v := range res {
-		rDSConfigTypeTypePropEnum = append(rDSConfigTypeTypePropEnum, v)
+		rdsConfigTypeTypePropEnum = append(rdsConfigTypeTypePropEnum, v)
 	}
 }
 
 const (
-	// RDSConfigTypeHIVE captures enum value "HIVE"
-	RDSConfigTypeHIVE string = "HIVE"
-	// RDSConfigTypeRANGER captures enum value "RANGER"
-	RDSConfigTypeRANGER string = "RANGER"
-	// RDSConfigTypeDRUID captures enum value "DRUID"
-	RDSConfigTypeDRUID string = "DRUID"
+	// RdsConfigTypeHIVE captures enum value "HIVE"
+	RdsConfigTypeHIVE string = "HIVE"
+	// RdsConfigTypeRANGER captures enum value "RANGER"
+	RdsConfigTypeRANGER string = "RANGER"
+	// RdsConfigTypeDRUID captures enum value "DRUID"
+	RdsConfigTypeDRUID string = "DRUID"
 )
 
 // prop value enum
-func (m *RDSConfig) validateTypeEnum(path, location string, value string) error {
-	if err := validate.Enum(path, location, value, rDSConfigTypeTypePropEnum); err != nil {
+func (m *RdsConfig) validateTypeEnum(path, location string, value string) error {
+	if err := validate.Enum(path, location, value, rdsConfigTypeTypePropEnum); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (m *RDSConfig) validateType(formats strfmt.Registry) error {
+func (m *RdsConfig) validateType(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Type) { // not required
 		return nil
@@ -288,7 +288,7 @@ func (m *RDSConfig) validateType(formats strfmt.Registry) error {
 }
 
 // MarshalBinary interface implementation
-func (m *RDSConfig) MarshalBinary() ([]byte, error) {
+func (m *RdsConfig) MarshalBinary() ([]byte, error) {
 	if m == nil {
 		return nil, nil
 	}
@@ -296,8 +296,8 @@ func (m *RDSConfig) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (m *RDSConfig) UnmarshalBinary(b []byte) error {
-	var res RDSConfig
+func (m *RdsConfig) UnmarshalBinary(b []byte) error {
+	var res RdsConfig
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}
