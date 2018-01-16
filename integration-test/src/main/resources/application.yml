@@ -175,3 +175,9 @@ integrationtest:
         # Recipe test with cluster creation and upscale
         GCP_UP_RECIPE_TEST:
         - classpath:/testsuites/gcp/recipe/gcp-clustercreate-up.yaml
+
+mock:
+  server:
+    address: localhost
+  imagecatalog:
+      url: https://localhost:9443/imagecatalog
