@@ -29,7 +29,7 @@ public class MockSuiteInitializer extends AbstractTestNGSpringContextTests {
 
     private static final String MOCK_IMAGE_CATALOG_NAME = "mock-image-catalog-name";
 
-    @Value("${mock.image.catalog.url:https://localhost:9443/imagecatalog}")
+    @Value("${mock.imagecatalog.url:https://localhost:9443/imagecatalog}")
     private String imageCatalogUrl;
 
     @Value("${integrationtest.testsuite.cleanUpOnFailure}")
