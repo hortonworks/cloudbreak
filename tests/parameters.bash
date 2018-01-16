@@ -1,5 +1,26 @@
 #!/bin/bash
 
+# Here is an explanation for variable definitions:
+#
+# For example `: ${AZURE_CREDENTIAL_NAME:="azure"}`:
+# sets AZURE_CREDENTIAL_NAME to "azure" if AZURE_CREDENTIAL_NAME is either unset or null.
+# However `${AZURE_CREDENTIAL_NAME="azure"}` (with NO `:`) only sets the value of AZURE_CREDENTIAL_NAME if AZURE_CREDENTIAL_NAME is currently unset
+# i.e., it won't change AZURE_CREDENTIAL_NAME from "" to value.
+#
+# The equivalent code:
+# ```
+# if [[ -z $AZURE_CREDENTIAL_NAME ]]
+# then
+#   AZURE_CREDENTIAL_NAME="azure"
+# fi
+# ```
+#
+# You can also execute a command and set the value to returned value (output). For example if the variable NOW is not already set,
+# execute command date and set the variable to the today's date:
+# ```
+# : ${NOW:=$(date +"%m-%d-%Y")}
+# ```
+
 # Blueprints
 : ${BLUEPRINT_URL:=https://gist.githubusercontent.com/mhalmy/8309c7e4a4649fa85f38b260a38146af/raw/5c3534c7f1849ffea64a81d467d5eee801858ff7/test.bp}
 : ${BLUEPRINT_NAME:="EDW-Analytics: Apache Hive 2 LLAP, Apache Zeppelin 0.7.0"}
