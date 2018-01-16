@@ -32,8 +32,11 @@ import javax.security.auth.x500.X500Principal;
 import org.apache.commons.codec.binary.Base64;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.asn1.x509.BasicConstraints;
+import org.bouncycastle.asn1.x509.Extension;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.X509v3CertificateBuilder;
+import org.bouncycastle.cert.jcajce.JcaX509ExtensionUtils;
 import org.bouncycastle.crypto.CryptoException;
 import org.bouncycastle.crypto.digests.SHA256Digest;
 import org.bouncycastle.crypto.engines.RSAEngine;
@@ -43,15 +46,22 @@ import org.bouncycastle.crypto.signers.PSSSigner;
 import org.bouncycastle.crypto.util.PrivateKeyFactory;
 import org.bouncycastle.openssl.PEMKeyPair;
 import org.bouncycastle.openssl.PEMParser;
+import org.bouncycastle.openssl.PKCS8Generator;
 import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
+import org.bouncycastle.openssl.jcajce.JcaPKCS8Generator;
+import org.bouncycastle.openssl.jcajce.JceOpenSSLPKCS8EncryptorBuilder;
 import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.DefaultDigestAlgorithmIdentifierFinder;
 import org.bouncycastle.operator.DefaultSignatureAlgorithmIdentifierFinder;
+import org.bouncycastle.operator.OperatorCreationException;
+import org.bouncycastle.operator.OutputEncryptor;
 import org.bouncycastle.operator.bc.BcRSAContentSignerBuilder;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.bouncycastle.pkcs.PKCS10CertificationRequest;
 import org.bouncycastle.pkcs.PKCS10CertificationRequestBuilder;
 import org.bouncycastle.pkcs.jcajce.JcaPKCS10CertificationRequestBuilder;
+import org.bouncycastle.util.io.pem.PemGenerationException;
+import org.bouncycastle.util.io.pem.PemObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,13 +71,15 @@ public class PkiUtil {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PkiUtil.class);
 
-    private static final int KEY_SIZE = 2048;
+    private static final int KEY_SIZE = 4096;
 
     private static final int CERT_VALIDITY_YEAR = 10;
 
     private static final Integer SALT_LENGTH = 20;
 
     private static final Integer MAX_CACHE_SIZE = 200;
+
+    private static SecureRandom secureRandom = new SecureRandom();
 
     private static final Map<String, RSAKeyParameters> CACHE =
             Collections.synchronizedMap(new LinkedHashMap<String, RSAKeyParameters>(MAX_CACHE_SIZE * 4 / 3, 0.75f, true) {
@@ -136,7 +148,7 @@ public class PkiUtil {
     public static X509Certificate cert(KeyPair identity, String publicAddress, KeyPair signKey) {
         try {
             PKCS10CertificationRequest csr = generateCsr(identity, publicAddress);
-            return selfsign(csr, publicAddress, signKey);
+            return selfsign(csr, publicAddress, identity, signKey);
 
         } catch (Exception e) {
             throw new PkiException("Failed to create signed cert for the cluster!", e);
@@ -167,6 +179,14 @@ public class PkiUtil {
         }
     }
 
+    public static String convert(PemObject pemObject) {
+        try {
+            return convertToString(pemObject);
+        } catch (Exception e) {
+            throw new PkiException("Failed to convert Private Key for the cluster!", e);
+        }
+    }
+
     public static String convertOpenSshPublicKey(PublicKey publicKey) {
         ByteArrayOutputStream byteOs = new ByteArrayOutputStream();
         DataOutputStream dos = new DataOutputStream(byteOs);
@@ -191,8 +211,23 @@ public class PkiUtil {
         }
     }
 
-    private static X509Certificate selfsign(PKCS10CertificationRequest inputCSR, String publicAddress, KeyPair signKey)
-            throws Exception {
+    public static PemObject encryptPrivateKey(PrivateKey privateKey, String password)
+        throws PemGenerationException, OperatorCreationException {
+        // OpenSSL uses des-ede3-cbc which is implemented in PKCS8Generator.DES3_CBC, however we cannot
+        // use it without installing "Unlimited Strength JCE Policy files".
+        // We are using PBE_SHA1_3DES instead.
+        JceOpenSSLPKCS8EncryptorBuilder encryptorBuilder = new JceOpenSSLPKCS8EncryptorBuilder(
+            PKCS8Generator.PBE_SHA1_RC4_128);
+        encryptorBuilder.setRandom(secureRandom);
+        encryptorBuilder.setPasssword(password.toCharArray());
+        OutputEncryptor oe = encryptorBuilder.build();
+
+        JcaPKCS8Generator gen = new JcaPKCS8Generator(privateKey, oe);
+        return gen.generate();
+    }
+
+    private static X509Certificate selfsign(PKCS10CertificationRequest inputCSR, String publicAddress,
+            KeyPair subject, KeyPair signKey) throws Exception {
 
         AlgorithmIdentifier sigAlgId = new DefaultSignatureAlgorithmIdentifierFinder()
                 .find("SHA256withRSA");
@@ -210,6 +245,17 @@ public class PkiUtil {
         X509v3CertificateBuilder myCertificateGenerator = new X509v3CertificateBuilder(
                 new X500Name(String.format("cn=%s", publicAddress)), new BigInteger("1"), currentTime, expiryTime, inputCSR.getSubject(),
                 inputCSR.getSubjectPublicKeyInfo());
+
+        JcaX509ExtensionUtils extUtils = new JcaX509ExtensionUtils();
+
+        myCertificateGenerator.addExtension(Extension.subjectKeyIdentifier, false,
+                extUtils.createSubjectKeyIdentifier(subject.getPublic()));
+
+        myCertificateGenerator.addExtension(Extension.authorityKeyIdentifier, false,
+                extUtils.createAuthorityKeyIdentifier(signKey.getPublic()));
+
+        myCertificateGenerator.addExtension(Extension.basicConstraints, false,
+                new BasicConstraints(true));
 
         ContentSigner sigGen = new BcRSAContentSignerBuilder(sigAlgId, digAlgId)
                 .build(akp);
@@ -240,5 +286,14 @@ public class PkiUtil {
 
     private static String clarifyPemKey(String rawPem) {
         return "-----BEGIN RSA PRIVATE KEY-----\n" + rawPem.replaceAll("-----(.*)-----|\n", "") + "\n-----END RSA PRIVATE KEY-----";
+    }
+
+    /**
+     * Strips the headers and the footers (like -----BEGIN CERTIFICATE-----) and trims the pem text.
+     * @param pem pem or pkcs text
+     * @return stripped text
+     */
+    public static String stripHeaders(String pem) {
+        return pem.replaceAll("-----(.*)-----", "").trim();
     }
 }
