@@ -24,17 +24,17 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.api.model.AdjustmentType;
 import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
+import com.sequenceiq.cloudbreak.api.model.DirectoryType;
 import com.sequenceiq.cloudbreak.api.model.ExecutorType;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.model.InstanceMetadataType;
 import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
+import com.sequenceiq.cloudbreak.api.model.RecipeType;
 import com.sequenceiq.cloudbreak.api.model.RecoveryMode;
+import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
-import com.sequenceiq.cloudbreak.api.model.DirectoryType;
-import com.sequenceiq.cloudbreak.api.model.RecipeType;
-import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
@@ -47,6 +47,7 @@ import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
@@ -333,6 +334,10 @@ public class TestUtil {
     }
 
     public static Cluster cluster(Blueprint blueprint, Stack stack, Long id) {
+        return cluster(blueprint, stack, id, null);
+    }
+
+    public static Cluster cluster(Blueprint blueprint, Stack stack, Long id, KerberosConfig kerberosConfig) {
         Cluster cluster = new Cluster();
         cluster.setAmbariIp("50.51.52.100");
         cluster.setStack(stack);
@@ -370,7 +375,21 @@ public class TestUtil {
         } catch (JsonProcessingException ignored) {
             cluster.setAttributes(null);
         }
+
+        if (kerberosConfig != null) {
+            cluster.setSecure(true);
+            cluster.setKerberosConfig(kerberosConfig);
+        }
         return cluster;
+    }
+
+    public static KerberosConfig kerberosConfig() {
+        KerberosConfig kerberosConfig = new KerberosConfig();
+        kerberosConfig.setKerberosMasterKey("mk");
+        kerberosConfig.setKerberosAdmin("admin");
+        kerberosConfig.setKerberosPassword("passwd");
+        kerberosConfig.setKerberosTcpAllowed(true);
+        return kerberosConfig;
     }
 
     public static HostGroup hostGroup() {
@@ -451,9 +470,13 @@ public class TestUtil {
     }
 
     public static Blueprint blueprint(String name) {
+        return blueprint(name, "{\"host_groups\":[{\"name\":\"slave_1\",\"components\":[{\"name\":\"DATANODE\"}]}]}");
+    }
+
+    public static Blueprint blueprint(String name, String blueprintText) {
         Blueprint blueprint = new Blueprint();
         blueprint.setId(1L);
-        blueprint.setBlueprintText("{\"host_groups\":[{\"name\":\"slave_1\",\"components\":[{\"name\":\"DATANODE\"}]}]}");
+        blueprint.setBlueprintText(blueprintText);
         blueprint.setName(name);
         blueprint.setAmbariName("multi-node-yarn");
         blueprint.setStatus(ResourceStatus.DEFAULT);

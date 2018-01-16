@@ -14,7 +14,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.net.ConnectException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -188,7 +187,7 @@ public class AmbariClusterHostServiceTypeTest {
     }
 
     @Test
-    public void testUpdateHostsForDownscaleFilterAllHosts() throws ConnectException, CloudbreakSecuritySetupException {
+    public void testUpdateHostsForDownscaleFilterAllHosts() throws CloudbreakSecuritySetupException {
         HostGroupAdjustmentJson json = new HostGroupAdjustmentJson();
         json.setHostGroup("slave_1");
         json.setScalingAdjustment(-1);
@@ -209,7 +208,7 @@ public class AmbariClusterHostServiceTypeTest {
     }
 
     @Test
-    public void testUpdateHostsForDownscaleCannotGoBelowReplication() throws ConnectException, CloudbreakSecuritySetupException {
+    public void testUpdateHostsForDownscaleCannotGoBelowReplication() throws CloudbreakSecuritySetupException {
         HostGroupAdjustmentJson json = new HostGroupAdjustmentJson();
         json.setHostGroup("slave_1");
         json.setScalingAdjustment(-1);
@@ -234,7 +233,7 @@ public class AmbariClusterHostServiceTypeTest {
     }
 
     @Test
-    public void testUpdateHostsForDownscaleFilterOneHost() throws ConnectException, CloudbreakSecuritySetupException {
+    public void testUpdateHostsForDownscaleFilterOneHost() throws CloudbreakSecuritySetupException {
         HostGroupAdjustmentJson json = new HostGroupAdjustmentJson();
         json.setHostGroup("slave_1");
         json.setScalingAdjustment(-1);
@@ -281,7 +280,7 @@ public class AmbariClusterHostServiceTypeTest {
     }
 
     @Test
-    public void testUpdateHostsForDownscaleSelectNodesWithLessData() throws ConnectException, CloudbreakSecuritySetupException {
+    public void testUpdateHostsForDownscaleSelectNodesWithLessData() throws CloudbreakSecuritySetupException {
         HostGroupAdjustmentJson json = new HostGroupAdjustmentJson();
         json.setHostGroup("slave_1");
         json.setScalingAdjustment(-1);

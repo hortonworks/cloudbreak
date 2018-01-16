@@ -44,7 +44,8 @@ public class KerberosValidator implements ConstraintValidator<ValidKerberos, Ker
                     boolean match = true;
                     for (Field field : clazz.getDeclaredFields()) {
                         Object value = clazz.getDeclaredMethod("get" + StringUtils.capitalize(field.getName())).invoke(request);
-                        match = type.fields.get(field.getName()) == null ? !hasLength(value) : !type.fields.get(field.getName()) || hasLength(value);
+                        Boolean required = type.fields.get(field.getName());
+                        match = required == null ? !hasLength(value) : !required || hasLength(value);
                         if (!match) {
                             break;
                         }
