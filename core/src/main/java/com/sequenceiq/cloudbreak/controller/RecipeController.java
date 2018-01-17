@@ -90,6 +90,13 @@ public class RecipeController extends NotificationController implements RecipeEn
         executeAndNotify(user -> recipeService.delete(name, user), ResourceEvent.RECIPE_DELETED);
     }
 
+    @Override
+    public RecipeRequest getRequestfromName(String name) {
+        IdentityUser user = authenticatedUserService.getCbUser();
+        Recipe recipe = recipeService.getPublicRecipe(name, user);
+        return conversionService.convert(recipe, RecipeRequest.class);
+    }
+
     private RecipeResponse createRecipe(IdentityUser user, RecipeRequest recipeRequest, boolean publicInAccount) {
         Recipe recipe = conversionService.convert(recipeRequest, Recipe.class);
         recipe.setPublicInAccount(publicInAccount);

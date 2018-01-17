@@ -11,7 +11,6 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.ClusterTemplateEndpoint;
 import com.sequenceiq.cloudbreak.api.model.ClusterTemplateRequest;
 import com.sequenceiq.cloudbreak.api.model.ClusterTemplateResponse;
-import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.domain.ClusterTemplate;
@@ -78,12 +77,6 @@ public class ClusterTemplateController extends NotificationController implements
     public ClusterTemplateResponse get(Long id) {
         ClusterTemplate clusterTemplate = clusterTemplateService.get(id);
         return conversionService.convert(clusterTemplate, ClusterTemplateResponse.class);
-    }
-
-    @Override
-    public StackV2Request fromClusterName(String name) {
-        IdentityUser user = authenticatedUserService.getCbUser();
-        return stackService.gettPublicStackCliJsonByName(name, user);
     }
 
     @Override

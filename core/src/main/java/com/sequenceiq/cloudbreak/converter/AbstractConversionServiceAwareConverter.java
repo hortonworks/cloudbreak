@@ -1,7 +1,10 @@
 package com.sequenceiq.cloudbreak.converter;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -10,6 +13,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.converter.ConverterRegistry;
+
+import com.google.common.base.Strings;
 
 public abstract class AbstractConversionServiceAwareConverter<S, T> implements Converter<S, T> {
 
@@ -38,5 +43,17 @@ public abstract class AbstractConversionServiceAwareConverter<S, T> implements C
             }
         }
         return targets;
+    }
+
+    protected Map<String, Object> cleanMap(Map<String, Object> input) {
+        Map<String, Object> result = new HashMap<>();
+        for (Map.Entry<String, Object> entry : input.entrySet()) {
+            if (!Objects.isNull(input.get(entry.getKey()))
+                    && !input.get(entry.getKey()).equals("null")
+                    && !Strings.isNullOrEmpty(input.get(entry.getKey()).toString())) {
+                result.put(entry.getKey(), input.get(entry.getKey()));
+            }
+        }
+        return result;
     }
 }

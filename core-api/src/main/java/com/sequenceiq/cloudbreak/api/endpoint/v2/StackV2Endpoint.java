@@ -227,4 +227,11 @@ public interface StackV2Endpoint extends StackEndpoint {
     @ApiOperation(value = OperationDescriptions.StackOpDescription.GET_ALL, produces = ContentType.JSON, notes = Notes.STACK_NOTES,
             nickname = "getAllStackV2")
     Set<AutoscaleStackResponse> getAllForAutoscale();
+
+    @GET
+    @Path("{name}/request")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = OperationDescriptions.StackOpDescription.GET_BY_STACK_NAME, produces = ContentType.JSON, notes = Notes.STACK_NOTES,
+            nickname = "getClusterRequestFromName")
+    StackV2Request getRequestfromName(@PathParam("name") String name);
 }

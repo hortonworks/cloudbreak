@@ -104,6 +104,13 @@ public class CredentialController extends NotificationController implements Cred
         return interactiveLogin(user, credentialRequest, true);
     }
 
+    @Override
+    public CredentialRequest getRequestfromName(String name) {
+        IdentityUser user = authenticatedUserService.getCbUser();
+        Credential credential = credentialService.getPublicCredential(name, user);
+        return conversionService.convert(credential, CredentialRequest.class);
+    }
+
     private Map<String, String> interactiveLogin(IdentityUser user, CredentialRequest credentialRequest, boolean publicInAccount) {
         Credential credential = convert(credentialRequest, publicInAccount);
         return credentialService.interactiveLogin(user, credential);

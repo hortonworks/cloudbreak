@@ -17,6 +17,7 @@ import javax.ws.rs.core.MediaType;
 
 import com.sequenceiq.cloudbreak.api.model.BlueprintRequest;
 import com.sequenceiq.cloudbreak.api.model.BlueprintResponse;
+import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions.BlueprintOpDescription;
 
@@ -96,4 +97,10 @@ public interface BlueprintEndpoint {
             nickname = "deletePublicBlueprint")
     void deletePublic(@PathParam("name") String name);
 
+    @GET
+    @Path("{id}/request")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = BlueprintOpDescription.GET_BY_BLUEPRINT_ID, produces = ContentType.JSON, notes = BLUEPRINT_NOTES,
+            nickname = "getBlueprintRequestFromId")
+    BlueprintRequest getRequestfromId(@PathParam("id") Long id);
 }

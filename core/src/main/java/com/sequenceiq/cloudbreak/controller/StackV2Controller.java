@@ -213,6 +213,12 @@ public class StackV2Controller extends NotificationController implements StackV2
     }
 
     @Override
+    public StackV2Request getRequestfromName(String name) {
+        IdentityUser user = authenticatedUserService.getCbUser();
+        return stackService.getStackRequestByName(name, user);
+    }
+
+    @Override
     public StackResponse postPrivate(StackV2Request stackRequest) throws Exception {
         return stackCommonService.postPrivate(conversionService.convert(stackRequest, StackRequest.class));
     }
