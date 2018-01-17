@@ -179,5 +179,6 @@ integrationtest:
 mock:
   server:
     address: localhost
-  imagecatalog:
+  image:
+    catalog:
       url: https://localhost:9443/imagecatalog

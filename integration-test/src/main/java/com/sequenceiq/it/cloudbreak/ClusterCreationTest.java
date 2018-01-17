@@ -71,11 +71,13 @@ public class ClusterCreationTest extends AbstractCloudbreakIntegrationTest {
             clusterRequest = setFileSystem(itContext, clusterRequest);
         }
 
-        KerberosRequest kerberosRequest = new KerberosRequest();
-        kerberosRequest.setAdmin(kerberosAdmin);
-        kerberosRequest.setPassword(kerberosPassword);
-        kerberosRequest.setMasterKey(kerberosMasterKey);
-        clusterRequest.setKerberos(kerberosRequest);
+        if (enableSecurity) {
+            KerberosRequest kerberosRequest = new KerberosRequest();
+            kerberosRequest.setAdmin(kerberosAdmin);
+            kerberosRequest.setPassword(kerberosPassword);
+            kerberosRequest.setMasterKey(kerberosMasterKey);
+            clusterRequest.setKerberos(kerberosRequest);
+        }
 
         ClusterV1Endpoint clusterV1Endpoint = getCloudbreakClient().clusterEndpoint();
         Long clusterId = clusterV1Endpoint.post(Long.valueOf(stackId), clusterRequest).getId();
