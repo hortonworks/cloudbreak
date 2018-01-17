@@ -301,7 +301,7 @@ public class StackService {
         return stackResponse;
     }
 
-    public StackV2Request gettPublicStackCliJsonByName(String name, IdentityUser identityUser) {
+    public StackV2Request getStackRequestByName(String name, IdentityUser identityUser) {
         Stack stack = stackRepository.findByNameInAccountWithLists(name, identityUser.getAccount());
         if (stack == null) {
             throw new NotFoundException(String.format("Stack '%s' not found", name));

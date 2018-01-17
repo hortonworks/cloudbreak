@@ -81,6 +81,12 @@ public class ImageCatalogController implements ImageCatalogEndpoint {
         return conversionService.convert(imageCatalogService.setAsDefault(name), ImageCatalogResponse.class);
     }
 
+    @Override
+    public ImageCatalogRequest getRequestfromName(String name) {
+        ImageCatalog imageCatalog = imageCatalogService.get(name);
+        return conversionService.convert(imageCatalog, ImageCatalogRequest.class);
+    }
+
     private ImageCatalogResponse createImageCatalog(ImageCatalogRequest imageCatalogRequest, boolean publicInAccount) throws Exception {
         IdentityUser identityUser = authenticatedUserService.getCbUser();
         ImageCatalog imageCatalog = conversionService.convert(imageCatalogRequest, ImageCatalog.class);

@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.api.model.imagecatalog.ImagesResponse;
 import com.sequenceiq.cloudbreak.api.model.imagecatalog.UpdateImageCatalogRequest;
 import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
+import com.sequenceiq.cloudbreak.doc.Notes;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions;
 
 import io.swagger.annotations.Api;
@@ -93,5 +94,12 @@ public interface ImageCatalogEndpoint {
     @ApiOperation(value = OperationDescriptions.ImageCatalogOpDescription.PUT_PUBLIC_BY_NAME, produces = ContentType.JSON, notes = IMAGE_CATALOG_NOTES,
             nickname = "putSetDefaultImageCatalogByName")
     ImageCatalogResponse putSetDefaultByName(@PathParam("name") String name);
+
+    @GET
+    @Path("{name}/request")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = OperationDescriptions.ImageCatalogOpDescription.GET_BY_IMAGE_CATALOG_NAME, produces = ContentType.JSON,
+            notes = Notes.IMAGE_CATALOG_NOTES, nickname = "getImageCatalogRequestFromName")
+    ImageCatalogRequest getRequestfromName(@PathParam("name") String name);
 
 }

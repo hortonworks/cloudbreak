@@ -96,4 +96,11 @@ public interface RecipeEndpoint {
     @ApiOperation(value = RecipeOpDescription.DELETE_PRIVATE_BY_NAME, produces = ContentType.JSON, notes = Notes.RECIPE_NOTES,
             nickname = "deletePrivateRecipe")
     void deletePrivate(@PathParam("name") String name);
+
+    @GET
+    @Path("{name}/request")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = RecipeOpDescription.GET_BY_RECIPE_NAME, produces = ContentType.JSON, notes = Notes.RECIPE_NOTES,
+            nickname = "getRecipeRequestFromName")
+    RecipeRequest getRequestfromName(@PathParam("name") String name);
 }

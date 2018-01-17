@@ -12,6 +12,7 @@ public class OperationDescriptions {
         public static final String DELETE_PRIVATE_BY_NAME = "delete private blueprint by name";
         public static final String DELETE_PUBLIC_BY_NAME = "delete public (owned) or private blueprint by name";
         public static final String DELETE_BY_ID = "delete blueprint by id";
+        public static final String GET_BY_BLUEPRINT_ID = "retrieve blueprint request by blueprint name";
     }
 
     public static class TemplateOpDescription {
@@ -62,6 +63,7 @@ public class OperationDescriptions {
         public static final String GET_JKS_FILE = "retrieve azure JKS file by credential id";
         public static final String PUT_CERTIFICATE_BY_ID = "update azure credential by credential id";
         public static final String GET_SSH_FILE = "retrieve azure ssh key file for credential by credential id";
+        public static final String GET_BY_CREDENTIAL_NAME = "retrieve credential request by credential name";
     }
 
     public static class StackOpDescription {
@@ -85,6 +87,7 @@ public class OperationDescriptions {
         public static final String DELETE_INSTANCE_BY_ID = "delete instance resource from stack";
         public static final String GET_PLATFORM_VARIANTS = "retrieve available platform variants";
         public static final String GET_ALL = "retrieve all stacks";
+        public static final String GET_BY_STACK_NAME = "retrieve stack request by stack name";
     }
 
     public static class ClusterOpDescription {
@@ -109,7 +112,6 @@ public class OperationDescriptions {
         public static final String GET_PRIVATE_BY_NAME = "retrieve a private cluster template by name";
         public static final String GET_PUBLIC_BY_NAME = "retrieve a public or private (owned) cluster template by name";
         public static final String GET_BY_ID = "retrieve cluster template by id";
-        public static final String GET_BY_CLUSTER_NAME = "retrieve cluster template by cluster name";
         public static final String DELETE_PRIVATE_BY_NAME = "delete private cluster template by name";
         public static final String DELETE_PUBLIC_BY_NAME = "delete public (owned) or private cluster template by name";
         public static final String DELETE_BY_ID = "delete cluster template by id";
@@ -126,6 +128,7 @@ public class OperationDescriptions {
         public static final String DELETE_PRIVATE_BY_NAME = "delete private recipe by name";
         public static final String DELETE_PUBLIC_BY_NAME = "delete public (owned) or private recipe by name";
         public static final String DELETE_BY_ID = "delete recipe by id";
+        public static final String GET_BY_RECIPE_NAME = "retrieve recipe request by recipe name";
     }
 
     public static class UsagesOpDescription {
@@ -296,6 +299,7 @@ public class OperationDescriptions {
         public static final String POST_PRIVATE = "create Image Catalog as private resources";
         public static final String DELETE_PUBLIC_BY_NAME = "delete public (owned) or private Image Catalog by id";
         public static final String PUT_PUBLIC_BY_NAME = "update public (owned) or private Image Catalog by id";
+        public static final String GET_BY_IMAGE_CATALOG_NAME = "retrieve imagecatalog request by imagecatalog name";
     }
 
     public static class SecurityRuleOpDescription {

@@ -111,4 +111,11 @@ public interface CredentialEndpoint {
     @ApiOperation(value = CredentialOpDescription.INTERACTIVE_LOGIN, produces = ContentType.JSON, notes = Notes.CREDENTIAL_NOTES,
             nickname = "publicInteractiveLoginCredential")
     Map<String, String> publicInteractiveLogin(@Valid CredentialRequest credentialRequest);
+
+    @GET
+    @Path("{name}/request")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = CredentialOpDescription.GET_BY_CREDENTIAL_NAME, produces = ContentType.JSON, notes = Notes.CREDENTIAL_NOTES,
+            nickname = "getCredentialRequestFromName")
+    CredentialRequest getRequestfromName(@PathParam("name") String name);
 }

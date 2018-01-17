@@ -102,6 +102,12 @@ public class BlueprintController extends NotificationController implements Bluep
     }
 
     @Override
+    public BlueprintRequest getRequestfromId(Long id) {
+        Blueprint blueprint = blueprintService.get(id);
+        return conversionService.convert(blueprint, BlueprintRequest.class);
+    }
+
+    @Override
     public void deletePrivate(String name) {
         executeAndNotify(user -> blueprintService.delete(name, user), ResourceEvent.BLUEPRINT_DELETED);
     }
