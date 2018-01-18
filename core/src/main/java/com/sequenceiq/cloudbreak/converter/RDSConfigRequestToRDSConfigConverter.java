@@ -13,9 +13,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.model.RDSConfigRequest;
 import com.sequenceiq.cloudbreak.api.model.RdsConfigPropertyJson;
-import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.api.model.RdsType;
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
+import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.service.MissingResourceNameGenerator;
@@ -43,8 +43,9 @@ public class RDSConfigRequestToRDSConfigConverter extends AbstractConversionServ
         rdsConfig.setHdpVersion(source.getHdpVersion());
         rdsConfig.setType(source.getType() == null ? RdsType.HIVE : source.getType());
         try {
-            Json json = new Json(convertPropertiesToJson(source.getProperties()));
-            rdsConfig.setAttributes(source.getProperties() == null ? new Json(new HashMap<>()) : json);
+            Json json = source.getProperties() == null ? new Json(new HashMap<>())
+                : new Json(convertPropertiesToJson(source.getProperties()));
+            rdsConfig.setAttributes(json);
         } catch (JsonProcessingException ignored) {
             rdsConfig.setAttributes(null);
         }
