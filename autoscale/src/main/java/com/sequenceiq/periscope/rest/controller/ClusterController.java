@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import com.sequenceiq.periscope.api.endpoint.ClusterEndpoint;
 import com.sequenceiq.periscope.api.model.AmbariJson;
@@ -124,7 +125,9 @@ public class ClusterController implements ClusterEndpoint {
                     cluster = clusterService.update(clusterId, resolvedAmbari);
                 }
             }
-            createHistoryAndNotification(cluster);
+            if (!StringUtils.isEmpty(json.getClusterState()) || clusterId == null) {
+                createHistoryAndNotification(cluster);
+            }
             return createClusterJsonResponse(cluster);
         }
     }
