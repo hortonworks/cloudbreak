@@ -31,9 +31,9 @@ import com.sequenceiq.cloudbreak.doc.OperationDescriptions.ClusterOpDescription;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
-@Path("/v1/clusters")
+@Path("/v1/stacks")
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/v1/clusters", description = ControllerDescription.CLUSTER_DESCRIPTION, protocols = "http,https")
+@Api(value = "/v1/stacks", description = ControllerDescription.CLUSTER_DESCRIPTION, protocols = "http,https")
 public interface ClusterV1Endpoint {
 
     @POST
