@@ -2,7 +2,6 @@ package com.sequenceiq.periscope.monitor.evaluator;
 
 import static com.sequenceiq.periscope.api.model.ClusterState.PENDING;
 import static com.sequenceiq.periscope.api.model.ClusterState.RUNNING;
-import static com.sequenceiq.periscope.api.model.ClusterState.SUSPENDED;
 
 import java.util.Optional;
 
@@ -80,7 +79,7 @@ public class ClusterCreationEvaluator implements Runnable {
         if (clusterOptional.isPresent()) {
             cluster = clusterOptional.get();
             MDCBuilder.buildMdcContext(cluster);
-            if (PENDING.equals(cluster.getState()) || SUSPENDED.equals(cluster.getState())) {
+            if (PENDING.equals(cluster.getState())) {
                 ambariHealthCheck(cluster.getUser(), resolvedAmbari);
                 LOGGER.info("Update cluster and set it's state to 'RUNNING' for Ambari host: {}", resolvedAmbari.getAmbari().getHost());
                 cluster = clusterService.update(cluster.getId(), resolvedAmbari, false, RUNNING);
