@@ -18,10 +18,10 @@ create_certificates_certm() {
   CBD_CERT_ROOT_PATH=/etc/certs
 
   sudo certm -d $CBD_CERT_ROOT_PATH ca generate -o=gateway --overwrite
-  sudo certm -d $CBD_CERT_ROOT_PATH client generate --common-name=${publicIp} -o=gateway --overwrite
-  sudo mv $CBD_CERT_ROOT_PATH/cert.pem $CBD_CERT_ROOT_PATH/cluster.pem
-  sudo cp /etc/certs/cluster.pem /tmp/cluster.pem
-  sudo mv $CBD_CERT_ROOT_PATH/key.pem $CBD_CERT_ROOT_PATH/cluster-key.pem
+  sudo certm -d $CBD_CERT_ROOT_PATH server generate -o=gateway --host localhost --host 127.0.0.1 --host ${publicIp}
+  sudo mv $CBD_CERT_ROOT_PATH/server.pem $CBD_CERT_ROOT_PATH/cluster.pem
+  sudo cp $CBD_CERT_ROOT_PATH/cluster.pem /tmp/cluster.pem
+  sudo mv $CBD_CERT_ROOT_PATH/server-key.pem $CBD_CERT_ROOT_PATH/cluster-key.pem
   sudo rm $CBD_CERT_ROOT_PATH/ca-key.pem
 }
 
