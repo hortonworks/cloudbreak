@@ -58,6 +58,7 @@ build-windows:
 	GOOS=windows CGO_ENABLED=0 go build -a ${LDFLAGS} -o build/Windows/${BINARY}.exe main.go
 
 generate-swagger:
+	rm -rf client_cloudbreak models_cloudbreak
 	swagger generate client -f http://$(CB_IP):$(CB_PORT)/cb/api/swagger.json -c client_cloudbreak -m models_cloudbreak
 	make fix-swagger
 

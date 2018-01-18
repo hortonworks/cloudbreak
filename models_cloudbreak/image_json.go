@@ -17,9 +17,24 @@ import (
 
 type ImageJSON struct {
 
+	// name of the image catalog
+	ImageCatalogName string `json:"imageCatalogName,omitempty"`
+
+	// url of the image catalog
+	ImageCatalogURL string `json:"imageCatalogUrl,omitempty"`
+
+	// id of the image
+	ImageID string `json:"imageId,omitempty"`
+
 	// name of the image
 	ImageName string `json:"imageName,omitempty"`
 }
+
+/* polymorph ImageJson imageCatalogName false */
+
+/* polymorph ImageJson imageCatalogUrl false */
+
+/* polymorph ImageJson imageId false */
 
 /* polymorph ImageJson imageName false */
 
