@@ -29,6 +29,25 @@ import com.sequenceiq.cloudbreak.service.security.ScimAccountGroupReaderFilter;
 @Configuration
 public class SecurityConfig {
 
+    @Value("${cb.client.secret}")
+    private String clientSecret;
+
+    @Bean("PBEStringCleanablePasswordEncryptor")
+    @Scope("prototype")
+    public PBEStringCleanablePasswordEncryptor encryptor() {
+        PBEStringCleanablePasswordEncryptor encryptor = new StandardPBEStringEncryptor();
+        encryptor.setPassword(clientSecret);
+        return encryptor;
+    }
+
+    @Bean("LegacyPBEStringCleanablePasswordEncryptor")
+    @Scope("prototype")
+    public PBEStringCleanablePasswordEncryptor legacyEncryptor() {
+        PBEStringCleanablePasswordEncryptor encryptor = new StandardPBEStringEncryptor();
+        encryptor.setPassword("cbsecret2015");
+        return encryptor;
+    }
+
     @EnableGlobalMethodSecurity(prePostEnabled = true)
     protected static class MethodSecurityConfig extends GlobalMethodSecurityConfiguration {
 
@@ -69,30 +88,11 @@ public class SecurityConfig {
 
         private static final String SECURITY_RULE_URL_PATTERNS = API_ROOT_CONTEXT + "/v1/securityrules/**";
 
-        @Value("${cb.client.secret}")
-        private String clientSecret;
-
         @Inject
         private ResourceServerTokenServices resourceServerTokenServices;
 
         @Inject
         private ScimAccountGroupReaderFilter scimAccountGroupReaderFilter;
-
-        @Bean("PBEStringCleanablePasswordEncryptor")
-        @Scope("prototype")
-        public PBEStringCleanablePasswordEncryptor encryptor() {
-            PBEStringCleanablePasswordEncryptor encryptor = new StandardPBEStringEncryptor();
-            encryptor.setPassword(clientSecret);
-            return encryptor;
-        }
-
-        @Bean("LegacyPBEStringCleanablePasswordEncryptor")
-        @Scope("prototype")
-        public PBEStringCleanablePasswordEncryptor legacyEncryptor() {
-            PBEStringCleanablePasswordEncryptor encryptor = new StandardPBEStringEncryptor();
-            encryptor.setPassword("cbsecret2015");
-            return encryptor;
-        }
 
         @Override
         public void configure(ResourceServerSecurityConfigurer resources) {

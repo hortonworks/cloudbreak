@@ -32,7 +32,7 @@ import io.swagger.jaxrs.config.SwaggerContextService;
 
 @ApplicationPath(AutoscaleApi.API_ROOT_CONTEXT)
 @Component
-public class EndpointConfig  extends ResourceConfig {
+public class EndpointConfig extends ResourceConfig {
 
     public EndpointConfig() throws IOException {
         registerEndpoints();

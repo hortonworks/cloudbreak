@@ -7,6 +7,8 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
 
+import org.hibernate.annotations.Type;
+
 @Entity
 public class Ambari {
 
@@ -21,9 +23,11 @@ public class Ambari {
     @Column(name = "ambari_port")
     private String port;
 
+    @Type(type = "encrypted_string")
     @Column(name = "ambari_user")
     private String user;
 
+    @Type(type = "encrypted_string")
     @Column(name = "ambari_pass")
     private String pass;
 
