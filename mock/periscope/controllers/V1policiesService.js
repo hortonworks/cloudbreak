@@ -11,13 +11,13 @@ exports.addScalingPolicy = function(args, res, next) {
    **/
   var examples = {};
   examples['application/json'] = {
-  "adjustmentType" : "NODE_COUNT",
-  "name" : "aeiou",
-  "scalingAdjustment" : 0,
-  "alertId" : 6,
-  "hostGroup" : "aeiou",
-  "id" : 1
-};
+      "name": "testing",
+      "adjustmentType": "NODE_COUNT",
+      "scalingAdjustment": 1,
+      "alertId": 1,
+      "hostGroup": "worker",
+      "id" : 4
+  };
   if (Object.keys(examples).length > 0) {
     res.setHeader('Content-Type', 'application/json');
     res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
@@ -35,7 +35,21 @@ exports.deleteScalingPolicy = function(args, res, next) {
    * policyId Long 
    * no response value expected for this operation
    **/
-  res.end();
+  var examples = {};
+    examples['application/json'] = {
+        "name": "testing",
+        "adjustmentType": "NODE_COUNT",
+        "scalingAdjustment": 1,
+        "alertId": 1,
+        "hostGroup": "worker",
+        "id" : 4
+    };
+    if (Object.keys(examples).length > 0) {
+        res.setHeader('Content-Type', 'application/json');
+        res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
+    } else {
+        res.end();
+    }
 }
 
 exports.getScalingPolicies = function(args, res, next) {
@@ -47,14 +61,31 @@ exports.getScalingPolicies = function(args, res, next) {
    * returns List
    **/
   var examples = {};
-  examples['application/json'] = [ {
-  "adjustmentType" : "NODE_COUNT",
-  "name" : "aeiou",
-  "scalingAdjustment" : 0,
-  "alertId" : 6,
-  "hostGroup" : "aeiou",
-  "id" : 1
-} ];
+  examples['application/json'] =
+  [
+    {
+      "name": "datanodehealth",
+      "adjustmentType": "NODE_COUNT",
+      "scalingAdjustment": 1,
+      "alertId": 1,
+      "hostGroup": "worker",
+      "id" : 1
+    },{
+      "name": "datanodeprocess",
+      "adjustmentType": "NODE_COUNT",
+      "scalingAdjustment": 1,
+      "alertId": 2,
+      "hostGroup": "worker",
+      "id" : 2
+    },{
+      "name": "every5",
+      "adjustmentType": "NODE_COUNT",
+      "scalingAdjustment": 1,
+      "alertId": 3,
+      "hostGroup": "worker",
+      "id" : 3
+    }
+  ];
   if (Object.keys(examples).length > 0) {
     res.setHeader('Content-Type', 'application/json');
     res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));

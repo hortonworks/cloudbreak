@@ -11,7 +11,7 @@ exports.getHistory = function(args, res, next) {
   var examples = {};
   examples['application/json'] = [ {
   "scalingStatus" : "FAILED",
-  "cbStackId" : 1,
+  "cbStackId" : args.clusterId.value,
   "statusReason" : "aeiou",
   "alertType" : "METRIC",
   "adjustmentType" : "NODE_COUNT",
@@ -45,7 +45,7 @@ exports.getHistoryById = function(args, res, next) {
   var examples = {};
   examples['application/json'] = {
   "scalingStatus" : "FAILED",
-  "cbStackId" : 1,
+  "cbStackId" : args.clusterId.value,
   "statusReason" : "aeiou",
   "alertType" : "METRIC",
   "adjustmentType" : "NODE_COUNT",

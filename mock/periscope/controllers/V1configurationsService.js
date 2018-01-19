@@ -10,10 +10,10 @@ exports.getScalingConfiguration = function(args, res, next) {
    **/
   var examples = {};
   examples['application/json'] = {
-  "cooldown" : 1,
-  "minSize" : 0,
-  "maxSize" : 6
-};
+      "minSize": 3,
+      "maxSize": 10,
+      "cooldown": 30
+  };
   if (Object.keys(examples).length > 0) {
     res.setHeader('Content-Type', 'application/json');
     res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
@@ -33,10 +33,10 @@ exports.setScalingConfiguration = function(args, res, next) {
    **/
   var examples = {};
   examples['application/json'] = {
-  "cooldown" : 1,
-  "minSize" : 0,
-  "maxSize" : 6
-};
+      "minSize": 3,
+      "maxSize": 10,
+      "cooldown": 30
+  };
   if (Object.keys(examples).length > 0) {
     res.setHeader('Content-Type', 'application/json');
     res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));

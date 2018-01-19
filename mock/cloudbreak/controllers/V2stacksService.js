@@ -1666,7 +1666,7 @@ exports.getPublicsStackV2 = function(args, res, next) {
           "metadata":[]
         },{
           "templateId":1,
-          "securityGroupId":1,
+          "securityGroupId":2,
           "nodeCount":1,
           "group":"master",
           "type":"GATEWAY",
@@ -2141,8 +2141,8 @@ exports.getPublicsStackV2 = function(args, res, next) {
           }
         ]
       },{
-        "templateId":11543,
-        "securityGroupId":3235,
+        "templateId":2,
+        "securityGroupId":3,
         "nodeCount":1,
         "group":"worker",
         "type":"CORE",

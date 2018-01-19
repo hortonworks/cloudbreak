@@ -22,7 +22,7 @@ exports.disableAutoscaleStateByCloudbreakCluster = function(args, res, next) {
   var examples = {};
   examples['application/json'] = {
   "port" : "aeiou",
-  "stackId" : 0,
+  "stackId" : args.cbClusterId.value,
   "host" : "aeiou",
   "metricAlerts" : [ {
     "scalingPolicy" : {
@@ -90,7 +90,7 @@ exports.enableAutoscaleStateByCloudbreakCluster = function(args, res, next) {
   var examples = {};
   examples['application/json'] = {
   "port" : "aeiou",
-  "stackId" : 0,
+  "stackId" : args.cbClusterId.value,
   "host" : "aeiou",
   "metricAlerts" : [ {
     "scalingPolicy" : {
@@ -141,7 +141,29 @@ exports.enableAutoscaleStateByCloudbreakCluster = function(args, res, next) {
 };
   if (Object.keys(examples).length > 0) {
     res.setHeader('Content-Type', 'application/json');
-    res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
+    if (args.cbClusterId.value == 4) {
+      var responseJson = {
+          "host": "35.187.4.62",
+          "port": "9443",
+          "user": "admin",
+          "stackId": 4,
+          "id": 4,
+          "state": "RUNNING",
+          "autoscalingEnabled": true,
+          "metricAlerts": null,
+          "timeAlerts": null,
+          "prometheusAlerts": null,
+          "scalingConfiguration":
+              {
+                  "minSize": 3,
+                  "maxSize": 100,
+                  "cooldown": 30
+              }
+      };
+      res.end(JSON.stringify(responseJson));
+    } else {
+      res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
+    }
   } else {
     res.end();
   }
@@ -281,15 +303,66 @@ exports.getByCloudbreakCluster = function(args, res, next) {
           "stackId":4,
           "id":4,
           "state":"RUNNING",
-          "autoscalingEnabled":false,
-          "metricAlerts":null,
-          "timeAlerts":null,
-          "prometheusAlerts":null,
-          "scalingConfiguration":
-          {
-            "minSize":3,
-            "maxSize":100,
-            "cooldown":30
+          "autoscalingEnabled":true,
+          "metricAlerts":
+          [
+            {
+              "alertName": "datanodehealthsummary",
+              "description": null,
+              "id": 1,
+              "alertDefinition": "datanode_health_summary",
+              "period": 2,
+              "alertState": "CRITICAL",
+              "scalingPolicyId": 1,
+              "scalingPolicy": {
+                  "name": "datanodehealth",
+                  "adjustmentType": "NODE_COUNT",
+                  "scalingAdjustment": 1,
+                  "alertId": 1,
+                  "hostGroup": "worker"
+              }
+            },{
+              "alertName": "datanodeprocess",
+              "description": null,
+              "id": 2,
+              "alertDefinition": "datanode_process",
+              "period": 5,
+              "alertState": "CRITICAL",
+              "scalingPolicyId": 2,
+              "scalingPolicy":
+              {
+                "name": "datanodeprocess",
+                "adjustmentType": "NODE_COUNT",
+                "scalingAdjustment": 1,
+                "alertId": 2,
+                "hostGroup": "worker"
+              }
+            }
+          ],
+          "timeAlerts":
+          [
+            {
+              "alertName": "every5minutes",
+              "description": null,
+              "id": 3,
+              "timeZone": "Etc/GMT",
+              "cron": "0 0/5 * * * ?",
+              "scalingPolicyId": 3,
+              "scalingPolicy":
+              {
+                "name": "every5",
+                "adjustmentType": "NODE_COUNT",
+                "scalingAdjustment": 1,
+                "alertId": 3,
+                "hostGroup": "worker"
+              }
+            }
+          ],
+          "prometheusAlerts": null,
+          "scalingConfiguration": {
+            "minSize": 3,
+            "maxSize": 10,
+            "cooldown": 30
           }
         };
         res.end(JSON.stringify(responseJson));
@@ -314,7 +387,7 @@ exports.modifyByCloudbreakCluster = function(args, res, next) {
   var examples = {};
   examples['application/json'] = {
   "port" : "aeiou",
-  "stackId" : 0,
+  "stackId" : args.cbClusterId.value,
   "host" : "aeiou",
   "metricAlerts" : [ {
     "scalingPolicy" : {
@@ -382,7 +455,7 @@ exports.runByCloudbreakCluster = function(args, res, next) {
   var examples = {};
   examples['application/json'] = {
   "port" : "aeiou",
-  "stackId" : 0,
+  "stackId" : args.cbClusterId.value,
   "host" : "aeiou",
   "metricAlerts" : [ {
     "scalingPolicy" : {
@@ -450,7 +523,7 @@ exports.suspendByCloudbreakCluster = function(args, res, next) {
   var examples = {};
   examples['application/json'] = {
   "port" : "aeiou",
-  "stackId" : 0,
+  "stackId" : args.cbClusterId.value,
   "host" : "aeiou",
   "metricAlerts" : [ {
     "scalingPolicy" : {

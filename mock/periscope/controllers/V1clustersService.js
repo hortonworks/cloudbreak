@@ -11,7 +11,7 @@ exports.addCluster = function(args, res, next) {
   var examples = {};
   examples['application/json'] = {
   "port" : "aeiou",
-  "stackId" : 0,
+  "stackId" : args.clusterId.value,
   "host" : "aeiou",
   "metricAlerts" : [ {
     "scalingPolicy" : {
@@ -90,7 +90,7 @@ exports.getCluster = function(args, res, next) {
   var examples = {};
   examples['application/json'] = {
   "port" : "aeiou",
-  "stackId" : 0,
+  "stackId" : args.clusterId.value,
   "host" : "aeiou",
   "metricAlerts" : [ {
     "scalingPolicy" : {
@@ -157,7 +157,7 @@ exports.getClusters = function(args, res, next) {
   var examples = {};
   examples['application/json'] = [ {
   "port" : "aeiou",
-  "stackId" : 0,
+  "stackId" : args.clusterId.value,
   "host" : "aeiou",
   "metricAlerts" : [ {
     "scalingPolicy" : {
@@ -226,7 +226,7 @@ exports.modifyCluster = function(args, res, next) {
   var examples = {};
   examples['application/json'] = {
   "port" : "aeiou",
-  "stackId" : 0,
+  "stackId" : args.clusterId.value,
   "host" : "aeiou",
   "metricAlerts" : [ {
     "scalingPolicy" : {
@@ -295,7 +295,7 @@ exports.setAutoscaleState = function(args, res, next) {
   var examples = {};
   examples['application/json'] = {
   "port" : "aeiou",
-  "stackId" : 0,
+  "stackId" : args.clusterId.value,
   "host" : "aeiou",
   "metricAlerts" : [ {
     "scalingPolicy" : {
@@ -364,7 +364,7 @@ exports.setState = function(args, res, next) {
   var examples = {};
   examples['application/json'] = {
   "port" : "aeiou",
-  "stackId" : 0,
+  "stackId" : args.cbClusterId.value,
   "host" : "aeiou",
   "metricAlerts" : [ {
     "scalingPolicy" : {
