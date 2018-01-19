@@ -797,6 +797,18 @@ func main() {
 								},
 							},
 						},
+						{
+							Name:   "from-file",
+							Usage:  "creates a new credential from input json file",
+							Flags:  cb.NewFlagBuilder().AddResourceFlagsWithOptionalName().AddFlags(cb.FlInputJson).AddAuthenticationFlags().Build(),
+							Before: ConfigRead,
+							Action: cb.CreateCredentialFromFile,
+							BashComplete: func(c *cli.Context) {
+								for _, f := range cb.NewFlagBuilder().AddResourceFlagsWithOptionalName().AddFlags(cb.FlInputJson).AddAuthenticationFlags().Build() {
+									printFlagCompletion(f)
+								}
+							},
+						},
 					},
 				},
 				{

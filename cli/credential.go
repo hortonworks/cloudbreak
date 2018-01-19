@@ -1,6 +1,9 @@
 package cli
 
 import (
+	"encoding/json"
+	"fmt"
+	"os"
 	"time"
 
 	log "github.com/Sirupsen/logrus"
@@ -32,6 +35,42 @@ func CreateOpenstackCredential(c *cli.Context) {
 	createCredential(c)
 }
 
+func CreateCredentialFromFile(c *cli.Context) {
+	checkRequiredFlagsAndArguments(c)
+	defer utils.TimeTrack(time.Now(), "create credential")
+
+	req := assembleCredentialRequest(c)
+	cbClient := NewCloudbreakHTTPClientFromContext(c)
+	postCredential(cbClient.Cloudbreak.V1credentials, c.Bool(FlPublicOptional.Name), req)
+}
+
+func assembleCredentialRequest(c *cli.Context) *models_cloudbreak.CredentialRequest {
+	path := c.String(FlInputJson.Name)
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		utils.LogErrorAndExit(err)
+	}
+
+	log.Infof("[assembleCredentialRequest] read credential json from file: %s", path)
+	content := utils.ReadFile(path)
+
+	var req models_cloudbreak.CredentialRequest
+	err := json.Unmarshal(content, &req)
+	if err != nil {
+		msg := fmt.Sprintf(`Invalid json format: %s. Please make sure that the json is valid (check for commas and double quotes).`, err.Error())
+		utils.LogErrorMessageAndExit(msg)
+	}
+
+	credName := c.String(FlNameOptional.Name)
+	if len(credName) != 0 {
+		req.Name = &credName
+	}
+	if req.Name == nil || len(*req.Name) == 0 {
+		utils.LogErrorMessageAndExit("Name of the credential must be set either in the template or with the --name command line option.")
+	}
+
+	return &req
+}
+
 func createCredential(c *cli.Context) {
 	checkRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "create credential")
@@ -59,25 +98,28 @@ func createCredentialImpl(stringFinder func(string) string, boolFinder func(stri
 		CloudPlatform: provider.GetName(),
 		Parameters:    credentialMap,
 	}
-
-	var credential *models_cloudbreak.CredentialResponse
 	public := boolFinder(FlPublicOptional.Name)
+	return postCredential(client, public, credReq)
+}
+
+func postCredential(client createCredentialClient, public bool, credReq *models_cloudbreak.CredentialRequest) *models_cloudbreak.CredentialResponse {
+	var credential *models_cloudbreak.CredentialResponse
 	if public {
-		log.Infof("[createCredentialImpl] sending create public credential request")
+		log.Infof("[postCredential] sending create public credential request")
 		resp, err := client.PostPublicCredential(v1credentials.NewPostPublicCredentialParams().WithBody(credReq))
 		if err != nil {
 			utils.LogErrorAndExit(err)
 		}
 		credential = resp.Payload
 	} else {
-		log.Infof("[createCredentialImpl] sending create private credential request")
+		log.Infof("[postCredential] sending create private credential request")
 		resp, err := client.PostPrivateCredential(v1credentials.NewPostPrivateCredentialParams().WithBody(credReq))
 		if err != nil {
 			utils.LogErrorAndExit(err)
 		}
 		credential = resp.Payload
 	}
-	log.Infof("[createCredentialImpl] credential created: %s (id: %d)", *credential.Name, credential.ID)
+	log.Infof("[postCredential] credential created: %s (id: %d)", *credential.Name, credential.ID)
 	return credential
 }
 
