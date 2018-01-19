@@ -273,6 +273,27 @@ exports.getByCloudbreakCluster = function(args, res, next) {
         };
         res.end(JSON.stringify(responseJson));
         break;
+      case 4:
+        var responseJson = {
+          "host":"35.187.4.62",
+          "port":"9443",
+          "user":"admin",
+          "stackId":4,
+          "id":4,
+          "state":"RUNNING",
+          "autoscalingEnabled":false,
+          "metricAlerts":null,
+          "timeAlerts":null,
+          "prometheusAlerts":null,
+          "scalingConfiguration":
+          {
+            "minSize":3,
+            "maxSize":100,
+            "cooldown":30
+          }
+        };
+        res.end(JSON.stringify(responseJson));
+        break;
       default:
         res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
     }
