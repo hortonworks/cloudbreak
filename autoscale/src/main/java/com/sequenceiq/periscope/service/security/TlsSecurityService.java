@@ -26,7 +26,7 @@ public class TlsSecurityService {
         byte[] serverCert = Base64.encode(response.getServerCert());
         byte[] clientKey = Base64.encode(response.getClientKey());
         byte[] clientCert = Base64.encode(response.getClientCert());
-        return new SecurityConfig(clientKey, clientCert, serverCert);
+        return new SecurityConfig(new String(clientKey), new String(clientCert), new String(serverCert));
     }
 
     public TlsConfiguration getConfiguration(Cluster cluster) {

@@ -55,7 +55,6 @@ dependencies {
     compile group: 'dnsjava',                       name: 'dnsjava',                                version: '2.1.7'
     compile group: 'org.mybatis',                   name: 'mybatis-migrations',                     version: '3.2.0'
 
-
     compile group: 'io.springfox',                  name: 'springfox-swagger2',                     version: '2.5.0'
     compile group: 'io.springfox',                  name: 'springfox-core',                         version: '2.5.0'
     compile group: 'io.springfox',                  name: 'springfox-swagger-ui',                   version: '2.5.0'

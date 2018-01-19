@@ -12,6 +12,7 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 import org.apache.commons.codec.binary.Base64;
+import org.hibernate.annotations.Type;
 
 @Entity
 @Table(name = "SecurityConfig")
@@ -23,14 +24,17 @@ public class SecurityConfig {
     @SequenceGenerator(name = "securityconfig_generator", sequenceName = "securityconfig_id_seq", allocationSize = 1)
     private Long id;
 
-    @Column
-    private byte[] clientKey;
+    @Type(type = "encrypted_string")
+    @Column(columnDefinition = "TEXT")
+    private String clientKey;
 
-    @Column
-    private byte[] clientCert;
+    @Type(type = "encrypted_string")
+    @Column(columnDefinition = "TEXT")
+    private String clientCert;
 
-    @Column
-    private byte[] serverCert;
+    @Type(type = "encrypted_string")
+    @Column(columnDefinition = "TEXT")
+    private String serverCert;
 
     @OneToOne
     private Cluster cluster;
@@ -38,7 +42,7 @@ public class SecurityConfig {
     public SecurityConfig() {
     }
 
-    public SecurityConfig(byte[] clientKey, byte[] clientCert, byte[] serverCert) {
+    public SecurityConfig(String clientKey, String clientCert, String serverCert) {
         this.clientKey = clientKey;
         this.clientCert = clientCert;
         this.serverCert = serverCert;
@@ -72,27 +76,27 @@ public class SecurityConfig {
         this.cluster = cluster;
     }
 
-    public byte[] getClientKey() {
+    public String getClientKey() {
         return clientKey;
     }
 
-    public byte[] getClientCert() {
+    public String getClientCert() {
         return clientCert;
     }
 
-    public byte[] getServerCert() {
+    public String getServerCert() {
         return serverCert;
     }
 
-    public void setClientKey(byte[] clientKey) {
+    public void setClientKey(String clientKey) {
         this.clientKey = clientKey;
     }
 
-    public void setClientCert(byte[] clientCert) {
+    public void setClientCert(String clientCert) {
         this.clientCert = clientCert;
     }
 
-    public void setServerCert(byte[] serverCert) {
+    public void setServerCert(String serverCert) {
         this.serverCert = serverCert;
     }
 
