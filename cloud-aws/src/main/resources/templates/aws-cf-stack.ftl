@@ -316,6 +316,10 @@
       }
     },
 
+
+    asdasd
+    
+
     "AmbariNodeLaunchConfig${group.groupName?replace('_', '')}"  : {
       "Type" : "AWS::AutoScaling::LaunchConfiguration",
       "Properties" : {
