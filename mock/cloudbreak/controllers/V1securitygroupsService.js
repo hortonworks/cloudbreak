@@ -312,8 +312,67 @@ exports.getPublicsSecurityGroup = function(args, res, next) {
         }
       ],
       "publicInAccount":false
-    }
-  ];
+    }, {
+      "description": null,
+      "securityGroupId": null,
+      "cloudPlatform": "GCP",
+      "name": "sg23b6d523-fe70-48cb-a42d-5348f550e456",
+      "id": 7,
+      "owner": "8781acdb-4d87-4dff-814c-35c191031ad3",
+      "account": "8781acdb-4d87-4dff-814c-35c191031ad3",
+      "securityRules":
+      [
+        {
+            "subnet": "0.0.0.0/0",
+            "ports": "22",
+            "protocol": "tcp",
+            "modifiable": false,
+            "id": 4808
+        },
+        {
+            "subnet": "0.0.0.0/0",
+            "ports": "22",
+            "protocol": "tcp",
+            "modifiable": false,
+            "id": 4807
+        },
+        {
+            "subnet": "0.0.0.0/0",
+            "ports": "443",
+            "protocol": "tcp",
+            "modifiable": false,
+            "id": 4809
+        },
+        {
+            "subnet": "0.0.0.0/0",
+            "ports": "9443",
+            "protocol": "tcp",
+            "modifiable": false,
+            "id": 4806
+        }
+      ],
+      "publicInAccount": false
+  },{
+    "description": null,
+    "securityGroupId": null,
+    "cloudPlatform": "GCP",
+    "name": "sgfa2d1b3a-05e2-4e7c-aa66-f8160fa3471d",
+    "id": 8,
+    "owner": "8781acdb-4d87-4dff-814c-35c191031ad3",
+    "account": "8781acdb-4d87-4dff-814c-35c191031ad3",
+    "securityRules":
+    [
+      {
+        "subnet": "0.0.0.0/0",
+        "ports": "22",
+        "protocol": "tcp",
+        "modifiable": false,
+        "id": 4810
+      }
+    ],
+    "publicInAccount": false
+  }
+];
   if (Object.keys(examples).length > 0) {
     res.setHeader('Content-Type', 'application/json');
     res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));

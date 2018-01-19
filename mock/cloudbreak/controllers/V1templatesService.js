@@ -215,8 +215,24 @@ exports.getPublicsTemplate = function(args, res, next) {
       "volumeCount":1,
       "volumeSize":100,
       "public":false
+    },{
+      "cloudPlatform": "GCP",
+      "parameters":
+      {
+         "encrypted": false
+      },
+      "description": "",
+      "volumeType": "pd-standard",
+      "instanceType": "n1-standard-4",
+      "customInstanceType": null,
+      "topologyId": null,
+      "name": "t2c7d1a00-45f0-4dca-a6bd-ac992e761d90",
+      "id": 5,
+      "volumeCount": 1,
+      "volumeSize": 100,
+      "public": false
     }
-  ];
+];
   if (Object.keys(examples).length > 0) {
     res.setHeader('Content-Type', 'application/json');
     res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));

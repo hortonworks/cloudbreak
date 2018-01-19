@@ -209,6 +209,24 @@ exports.getPublicsNetwork = function(args, res, next) {
       "name":"nceddf172-7b62-41cc-b9ef-e6bdf15b08ea",
       "id":3,
       "publicInAccount":false
+    },{
+      "description": null,
+      "subnetCIDR": "10.0.0.0/16",
+      "cloudPlatform": "GCP",
+      "parameters": {
+          "subnetId": "gcpcluster-20180119120325",
+          "publicNetId": null,
+          "routerId": null,
+          "internetGatewayId": null,
+          "vpcId": null,
+          "noFirewallRules": false,
+          "networkId": "gcpcluster-20180119120314",
+          "noPublicIp": false
+      },
+      "topologyId": null,
+      "name": "n5001012c-3a70-4c3e-b944-2f8703354dcc",
+      "id": 4,
+      "publicInAccount": false
     }
   ];
   if (Object.keys(examples).length > 0) {
