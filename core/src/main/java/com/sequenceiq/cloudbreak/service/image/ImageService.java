@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.StackDetails;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
+import com.sequenceiq.cloudbreak.converter.AmbariRepoDetailsJsonToAmbariRepoConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.Component;
@@ -49,6 +50,9 @@ public class ImageService {
 
     @Inject
     private ImageCatalogService imageCatalogService;
+
+    @Inject
+    private AmbariRepoDetailsJsonToAmbariRepoConverter ambariRepoDetailsJsonToAmbariRepoConverter;
 
     public Image getImage(Long stackId) throws CloudbreakImageNotFoundException {
         return componentConfigProvider.getImage(stackId);
@@ -131,14 +135,14 @@ public class ImageService {
 
     private List<Component> getComponents(Stack stack, Map<InstanceGroupType, String> userData,
             com.sequenceiq.cloudbreak.cloud.model.catalog.Image imgFromCatalog,
-            String imageName, String imageCatalogUrl, String imageCatalogName, String imageId) throws JsonProcessingException {
+            String imageName, String imageCatalogUrl, String imageCatalogName, String imageId) throws JsonProcessingException, CloudbreakImageCatalogException {
         List<Component> components = new ArrayList<>();
         Image image = new Image(imageName, userData, imgFromCatalog.getOsType(), imageCatalogUrl, imageCatalogName, imageId);
         Component imageComponent = new Component(ComponentType.IMAGE, ComponentType.IMAGE.name(), new Json(image), stack);
         components.add(imageComponent);
 
         if (imgFromCatalog.getStackDetails() != null) {
-            components.add(getAmbariComponent(stack, imgFromCatalog.getVersion()));
+            components.add(getAmbariComponent(stack, imgFromCatalog));
             StackDetails stackDetails = imgFromCatalog.getStackDetails();
 
             Component stackRepoComponent;
@@ -156,10 +160,9 @@ public class ImageService {
         return components;
     }
 
-    private Component getAmbariComponent(Stack stack, String version) throws JsonProcessingException {
-        AmbariRepo ambariRepo = new AmbariRepo();
-        ambariRepo.setPredefined(Boolean.TRUE);
-        ambariRepo.setVersion(version);
+    private Component getAmbariComponent(Stack stack, com.sequenceiq.cloudbreak.cloud.model.catalog.Image imgFromCatalog)
+            throws JsonProcessingException, CloudbreakImageCatalogException {
+        AmbariRepo ambariRepo = ambariRepoDetailsJsonToAmbariRepoConverter.convert(imgFromCatalog.getRepo(), imgFromCatalog.getVersion(), Boolean.TRUE);
         return new Component(ComponentType.AMBARI_REPO_DETAILS, ComponentType.AMBARI_REPO_DETAILS.name(),
                 new Json(ambariRepo), stack);
     }
