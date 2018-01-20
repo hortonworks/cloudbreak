@@ -21,7 +21,6 @@ public class CredentialToCredentialRequestConverter
         credentialRequest.setDescription(source.getDescription());
         credentialRequest.setCloudPlatform(source.cloudPlatform());
         credentialRequest.setParameters(cleanMap(source.getAttributes().getMap()));
-        credentialRequest.getParameters().remove("selector");
         return credentialRequest;
     }
 
