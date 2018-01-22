@@ -52,7 +52,7 @@ import com.sequenceiq.cloudbreak.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.SmartSenseCredentialConfigService;
 import com.sequenceiq.cloudbreak.service.blueprint.ComponentLocatorService;
-import com.sequenceiq.cloudbreak.service.cluster.AmbariAuthenticationProvider;
+import com.sequenceiq.cloudbreak.service.cluster.AmbariSecurityConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.BlueprintProcessor;
 import com.sequenceiq.cloudbreak.service.cluster.flow.kerberos.KerberosDetailService;
 
@@ -84,7 +84,7 @@ public class ClusterHostServiceRunner {
     private ComponentLocatorService componentLocator;
 
     @Inject
-    private AmbariAuthenticationProvider ambariAuthenticationProvider;
+    private AmbariSecurityConfigProvider ambariSecurityConfigProvider;
 
     @Inject
     private SmartSenseCredentialConfigService smartSenseCredentialConfigService;
@@ -147,8 +147,9 @@ public class ClusterHostServiceRunner {
         saveDockerPillar(cluster.getExecutorType(), servicePillar);
         saveHDPPillar(cluster.getId(), servicePillar);
         Map<String, Object> credentials = new HashMap<>();
-        credentials.put("username", ambariAuthenticationProvider.getAmbariUserName(stack.getCluster()));
-        credentials.put("password", ambariAuthenticationProvider.getAmbariPassword(stack.getCluster()));
+        credentials.put("username", ambariSecurityConfigProvider.getAmbariUserName(stack.getCluster()));
+        credentials.put("password", ambariSecurityConfigProvider.getAmbariPassword(stack.getCluster()));
+        credentials.put("securityMasterKey", ambariSecurityConfigProvider.getAmbariSecurityMasterKey(cluster));
         servicePillar.put("ambari-credentials", new SaltPillarProperties("/ambari/credentials.sls", singletonMap("ambari", credentials)));
         if (smartSenseCredentialConfigService.areCredentialsSpecified()) {
             Map<String, Object> smartSenseCredentials = smartSenseCredentialConfigService.getCredentials();

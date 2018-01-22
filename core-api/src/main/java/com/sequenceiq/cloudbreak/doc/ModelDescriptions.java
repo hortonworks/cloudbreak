@@ -188,6 +188,7 @@ public class ModelDescriptions {
         public static final String RDS_CONNECTION_RESULT = "result of RDS connection test";
         public static final String LDAP_CONNECTION_RESULT = "result of Ldap connection test";
         public static final String CREATION_FINISHED = "Epoch time of cluster creation finish";
+        public static final String AMBARI_SECURITY_MASTER_KEY = "a master key for encrypting the passwords in Ambari";
     }
 
     public static class GatewayModelDescription {

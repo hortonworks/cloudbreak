@@ -38,7 +38,8 @@ public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterT
         Cluster result = underTest.convert(getRequest("stack/cluster.json"));
         // THEN
         assertAllFieldsNotNull(result, Arrays.asList("stack", "blueprint", "creationStarted", "creationFinished", "upSince", "statusReason", "ambariIp",
-                "ambariStackDetails", "fileSystem", "certDir", "rdsConfigs", "ldapConfig", "attributes", "blueprintCustomProperties", "uptime"));
+                "ambariStackDetails", "fileSystem", "certDir", "rdsConfigs", "ldapConfig", "attributes", "blueprintCustomProperties", "uptime",
+                "ambariSecurityMasterKey"));
     }
 
     @Test
@@ -49,7 +50,8 @@ public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterT
         Cluster result = underTest.convert(getRequest("stack/cluster-with-file-system.json"));
         // THEN
         assertAllFieldsNotNull(result, Arrays.asList("stack", "blueprint", "creationStarted", "creationFinished", "upSince", "statusReason", "ambariIp",
-                "ambariStackDetails", "certDir", "rdsConfigs", "ldapConfig", "attributes", "blueprintCustomProperties", "uptime"));
+                "ambariStackDetails", "certDir", "rdsConfigs", "ldapConfig", "attributes", "blueprintCustomProperties", "uptime",
+                "ambariSecurityMasterKey"));
     }
 
     @Test
@@ -59,7 +61,8 @@ public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterT
         Cluster result = underTest.convert(getRequest("stack/cluster-no-gateway.json"));
         // THEN
         assertAllFieldsNotNull(result, Arrays.asList("stack", "blueprint", "creationStarted", "creationFinished", "upSince", "statusReason", "ambariIp",
-                "ambariStackDetails", "fileSystem", "certDir", "rdsConfigs", "ldapConfig", "attributes", "blueprintCustomProperties", "uptime"));
+                "ambariStackDetails", "fileSystem", "certDir", "rdsConfigs", "ldapConfig", "attributes", "blueprintCustomProperties", "uptime",
+                "ambariSecurityMasterKey"));
 
         assertAllFieldsNotNull(result.getGateway(), Arrays.asList("id", "ssoProvider", "signKey", "signPub", "signCert", "tokenCert"));
     }

@@ -94,6 +94,7 @@ public class ClusterRequestToClusterConverter extends AbstractConversionServiceA
         } catch (JsonProcessingException ignored) {
             cluster.setCustomContainerDefinition(null);
         }
+        cluster.setAmbariSecurityMasterKey(source.getAmbariSecurityMasterKey());
         return cluster;
     }
 

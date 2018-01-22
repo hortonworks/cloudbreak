@@ -85,7 +85,7 @@ import com.sequenceiq.cloudbreak.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.PollingResult;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
-import com.sequenceiq.cloudbreak.service.cluster.AmbariAuthenticationProvider;
+import com.sequenceiq.cloudbreak.service.cluster.AmbariSecurityConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariClientProvider;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariOperationFailedException;
 import com.sequenceiq.cloudbreak.service.cluster.HadoopConfigurationService;
@@ -229,7 +229,7 @@ public class AmbariClusterConnector {
     private KerberosBlueprintService kerberosBlueprintService;
 
     @Inject
-    private AmbariAuthenticationProvider ambariAuthenticationProvider;
+    private AmbariSecurityConfigProvider ambariSecurityConfigProvider;
 
     @Inject
     private OrchestratorTypeResolver orchestratorTypeResolver;
@@ -497,8 +497,8 @@ public class AmbariClusterConnector {
         String userName = cluster.getUserName();
         String password = cluster.getPassword();
         AmbariClient ambariClient = getDefaultAmbariClient(stack);
-        String cloudbreakUserName = ambariAuthenticationProvider.getAmbariUserName(cluster);
-        String cloudbreakPassword = ambariAuthenticationProvider.getAmbariPassword(cluster);
+        String cloudbreakUserName = ambariSecurityConfigProvider.getAmbariUserName(cluster);
+        String cloudbreakPassword = ambariSecurityConfigProvider.getAmbariPassword(cluster);
         createAmbariUser(cloudbreakUserName, cloudbreakPassword, stack, ambariClient);
         if (ADMIN.equals(userName)) {
             if (!ADMIN.equals(password)) {

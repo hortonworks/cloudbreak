@@ -6,7 +6,9 @@ import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 
 @Service
-public class AmbariAuthenticationProvider {
+public class AmbariSecurityConfigProvider {
+
+    private static final String DEFAULT_AMBARI_SECURITY_MASTER_KEY = "bigdata";
 
     public String getAmbariUserName(Cluster cluster) {
         if (Strings.isNullOrEmpty(cluster.getCloudbreakAmbariUser())) {
@@ -20,5 +22,13 @@ public class AmbariAuthenticationProvider {
             return cluster.getPassword();
         }
         return cluster.getCloudbreakAmbariPassword();
+    }
+
+    public String getAmbariSecurityMasterKey(Cluster cluster) {
+        String securityMasterKey = cluster.getAmbariSecurityMasterKey();
+        if (Strings.isNullOrEmpty(securityMasterKey)) {
+            securityMasterKey = DEFAULT_AMBARI_SECURITY_MASTER_KEY;
+        }
+        return securityMasterKey;
     }
 }

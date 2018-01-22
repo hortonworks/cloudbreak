@@ -61,6 +61,7 @@ extend_hadoop_classpath:
     - template: jinja
     - context:
       ambari_database: {{ ambari.ambari_database }}
+      security_master_key: {{ ambari.security_master_key }}
     - mode: 744
 
 set_install_timeout:
