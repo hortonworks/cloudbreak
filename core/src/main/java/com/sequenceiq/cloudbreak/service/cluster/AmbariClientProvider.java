@@ -18,7 +18,7 @@ public class AmbariClientProvider {
     private static final String HTTP_PORT = "8080";
 
     @Inject
-    private AmbariAuthenticationProvider ambariAuthenticationProvider;
+    private AmbariSecurityConfigProvider ambariSecurityConfigProvider;
 
     /**
      * Create a new Ambari client. If the kerberos security is enabled on the cluster it will
@@ -31,7 +31,7 @@ public class AmbariClientProvider {
      */
     public AmbariClient getAmbariClient(HttpClientConfig clientConfig, Integer httpsPort, Cluster cluster) {
         return getAmbariClient(clientConfig, httpsPort,
-                ambariAuthenticationProvider.getAmbariUserName(cluster), ambariAuthenticationProvider.getAmbariPassword(cluster));
+                ambariSecurityConfigProvider.getAmbariUserName(cluster), ambariSecurityConfigProvider.getAmbariPassword(cluster));
     }
 
     /**

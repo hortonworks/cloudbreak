@@ -15,6 +15,7 @@
 {% set gateway = salt['pillar.get']('gateway') %}
 {% set username = salt['pillar.get']('ambari:username') %}
 {% set password = salt['pillar.get']('ambari:password') %}
+{% set security_master_key = salt['pillar.get']('ambari:securityMasterKey') %}
 {% if salt['pillar.get']('ldap:protocol').startswith('ldaps') %}
   {% set secure_ldap = 'true' %}
 {% else %}
@@ -35,5 +36,6 @@
     'ldap': ldap,
     'gateway': gateway,
     'username': username,
-    'password': password
+    'password': password,
+    'security_master_key': security_master_key
 }) %}

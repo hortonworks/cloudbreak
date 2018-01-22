@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
-import com.sequenceiq.cloudbreak.service.cluster.AmbariAuthenticationProvider;
+import com.sequenceiq.cloudbreak.service.cluster.AmbariSecurityConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariServiceException;
 import com.sequenceiq.cloudbreak.service.cluster.flow.kerberos.KerberosDetailService;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
@@ -29,7 +29,7 @@ public class AmbariClusterTemplateService {
     private KerberosDetailService kerberosDetailService;
 
     @Inject
-    private AmbariAuthenticationProvider ambariAuthenticationProvider;
+    private AmbariSecurityConfigProvider ambariSecurityConfigProvider;
 
     @Inject
     private AmbariRepositoryVersionService ambariRepositoryVersionService;
@@ -47,11 +47,11 @@ public class AmbariClusterTemplateService {
                     KerberosConfig kerberosConfig = cluster.getKerberosConfig();
                     String principal = kerberosDetailService.resolvePrincipalForKerberos(kerberosConfig);
                     clusterTemplate = ambariClient.createSecureCluster(clusterName, blueprintName, hostGroupMappings, configStrategy,
-                            ambariAuthenticationProvider.getAmbariPassword(cluster), principal, kerberosConfig.getKerberosPassword(), KEY_TYPE, false,
+                            ambariSecurityConfigProvider.getAmbariPassword(cluster), principal, kerberosConfig.getKerberosPassword(), KEY_TYPE, false,
                             repositoryVersion);
                 } else {
                     clusterTemplate = ambariClient.createCluster(clusterName, blueprintName, hostGroupMappings, configStrategy,
-                            ambariAuthenticationProvider.getAmbariPassword(cluster), false, repositoryVersion);
+                            ambariSecurityConfigProvider.getAmbariPassword(cluster), false, repositoryVersion);
                 }
                 LOGGER.info("Submitted cluster creation template: {}", JsonUtil.minify(clusterTemplate, Collections.singleton("credentials")));
             } catch (Exception exception) {

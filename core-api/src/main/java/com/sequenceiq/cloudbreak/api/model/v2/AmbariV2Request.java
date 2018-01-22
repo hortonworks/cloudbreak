@@ -83,6 +83,10 @@ public class AmbariV2Request implements JsonEntity {
     @ApiModelProperty(ModelDescriptions.ClusterModelDescription.CONNECTED_CLUSTER)
     private ConnectedClusterRequest connectedCluster;
 
+    @ApiModelProperty(ModelDescriptions.ClusterModelDescription.AMBARI_SECURITY_MASTER_KEY)
+    @Size(max = 100, min = 5, message = "The length of the password has to be in range of 5 to 100")
+    private String ambariSecurityMasterKey;
+
     public Long getBlueprintId() {
         return blueprintId;
     }
@@ -202,5 +206,13 @@ public class AmbariV2Request implements JsonEntity {
 
     public void setConnectedCluster(ConnectedClusterRequest connectedCluster) {
         this.connectedCluster = connectedCluster;
+    }
+
+    public String getAmbariSecurityMasterKey() {
+        return ambariSecurityMasterKey;
+    }
+
+    public void setAmbariSecurityMasterKey(String ambariSecurityMasterKey) {
+        this.ambariSecurityMasterKey = ambariSecurityMasterKey;
     }
 }

@@ -159,6 +159,9 @@ public class Cluster implements ProvisionEntity {
 
     private String uptime;
 
+    @Type(type = "encrypted_string")
+    private String ambariSecurityMasterKey;
+
     public Stack getStack() {
         return stack;
     }
@@ -507,4 +510,11 @@ public class Cluster implements ProvisionEntity {
         this.uptime = uptime;
     }
 
+    public String getAmbariSecurityMasterKey() {
+        return ambariSecurityMasterKey;
+    }
+
+    public void setAmbariSecurityMasterKey(String ambariSecurityMasterKey) {
+        this.ambariSecurityMasterKey = ambariSecurityMasterKey;
+    }
 }
