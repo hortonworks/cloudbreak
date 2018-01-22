@@ -6,6 +6,13 @@ include:
 knox:
   pkg.installed
 
+/var/run/knox:
+  file.directory:
+    - user: knox
+    - group: knox
+    - mode: 755
+    - makedirs: True
+
 #/usr/hdp/current/knox-server/conf/topologies/admin.xml:
 #  file.absent
 
