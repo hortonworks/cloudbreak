@@ -9,7 +9,7 @@ exports.createRecommendation = function(args, res, next) {
    * returns RecommendationResponse
    **/
   var examples = {};
-  examples['application/json'] = 
+  examples['application/json'] =
 	{
 	"recommendations":{
 
@@ -861,47 +861,47 @@ exports.createRecommendation = function(args, res, next) {
 }
 
 exports.getAccessConfigs = function(args, res, next) {
-  /**
-   * retrive access configs with properties
-   * Each cloud provider has it's own specific resources like instance types and disk types. These endpoints are collecting them.
-   *
-   * body PlatformResourceRequestJson  (optional)
-   * returns PlatformAccessConfigsResponse
-   **/
-  var examples = {};
-  examples['application/json'] = {
-  "accessConfigs" : [ {
-    "name" : "aeiou",
-    "id" : "aeiou",
-    "properties" : {
-      "key" : "{}"
+    /**
+     * retrive access configs with properties
+     * Each cloud provider has it's own specific resources like instance types and disk types. These endpoints are collecting them.
+     *
+     * body PlatformResourceRequestJson  (optional)
+     * returns PlatformAccessConfigsResponse
+     **/
+    var examples = {};
+    examples['application/json'] = {
+        "accessConfigs" : [ {
+            "name" : "aeiou",
+            "id" : "aeiou",
+            "properties" : {
+                "key" : "{}"
+            }
+        } ]
+    };
+    if (Object.keys(examples).length > 0) {
+        res.setHeader('Content-Type', 'application/json');
+        res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
+    } else {
+        res.end();
     }
-  } ]
-};
-  if (Object.keys(examples).length > 0) {
-    res.setHeader('Content-Type', 'application/json');
-    res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
-  } else {
-    res.end();
-  }
 }
 
 exports.getDisktypeByType = function(args, res, next) {
-  /**
-   * retrive disks by type
-   * Each cloud provider has it's own specific resources like instance types and disk types. These endpoints are collecting them.
-   *
-   * type String 
-   * returns List
-   **/
-  var examples = {};
-  examples['application/json'] = [ "aeiou" ];
-  if (Object.keys(examples).length > 0) {
-    res.setHeader('Content-Type', 'application/json');
-    res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
-  } else {
-    res.end();
-  }
+    /**
+     * retrive disks by type
+     * Each cloud provider has it's own specific resources like instance types and disk types. These endpoints are collecting them.
+     *
+     * type String
+     * returns List
+     **/
+    var examples = {};
+    examples['application/json'] = [ "aeiou" ];
+    if (Object.keys(examples).length > 0) {
+        res.setHeader('Content-Type', 'application/json');
+        res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
+    } else {
+        res.end();
+    }
 }
 
 exports.getDisktypes = function(args, res, next) {
@@ -999,7 +999,7 @@ exports.getGatewaysCredentialId = function(args, res, next) {
    * returns PlatformGatewaysResponse
    **/
   var examples = {};
-  examples['application/json'] = 
+  examples['application/json'] =
   {
   	"gateways":
   	{
@@ -1025,7 +1025,7 @@ exports.getIpPoolsCredentialId = function(args, res, next) {
    * returns PlatformIpPoolsResponse
    **/
   var examples = {};
-  examples['application/json'] = 
+  examples['application/json'] =
   {
   	"ippools":
   	{
@@ -1043,45 +1043,45 @@ exports.getIpPoolsCredentialId = function(args, res, next) {
 }
 
 exports.getOchestratorsByType = function(args, res, next) {
-  /**
-   * retrive orchestrators by type
-   * Each cloud provider has it's own specific resources like instance types and disk types. These endpoints are collecting them.
-   *
-   * type String 
-   * returns List
-   **/
-  var examples = {};
-  examples['application/json'] = [ "aeiou" ];
-  if (Object.keys(examples).length > 0) {
-    res.setHeader('Content-Type', 'application/json');
-    res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
-  } else {
-    res.end();
-  }
+    /**
+     * retrive orchestrators by type
+     * Each cloud provider has it's own specific resources like instance types and disk types. These endpoints are collecting them.
+     *
+     * type String
+     * returns List
+     **/
+    var examples = {};
+    examples['application/json'] = [ "aeiou" ];
+    if (Object.keys(examples).length > 0) {
+        res.setHeader('Content-Type', 'application/json');
+        res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
+    } else {
+        res.end();
+    }
 }
 
 exports.getOrchestratortypes = function(args, res, next) {
-  /**
-   * retrive available orchestrator types
-   * Each cloud provider has it's own specific resources like instance types and disk types. These endpoints are collecting them.
-   *
-   * returns PlatformOrchestratorsJson
-   **/
-  var examples = {};
-  examples['application/json'] = {
-  "defaults" : {
-    "key" : "aeiou"
-  },
-  "orchestrators" : {
-    "key" : [ "aeiou" ]
-  }
-};
-  if (Object.keys(examples).length > 0) {
-    res.setHeader('Content-Type', 'application/json');
-    res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
-  } else {
-    res.end();
-  }
+    /**
+     * retrive available orchestrator types
+     * Each cloud provider has it's own specific resources like instance types and disk types. These endpoints are collecting them.
+     *
+     * returns PlatformOrchestratorsJson
+     **/
+    var examples = {};
+    examples['application/json'] = {
+        "defaults" : {
+            "key" : "aeiou"
+        },
+        "orchestrators" : {
+            "key" : [ "aeiou" ]
+        }
+    };
+    if (Object.keys(examples).length > 0) {
+        res.setHeader('Content-Type', 'application/json');
+        res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
+    } else {
+        res.end();
+    }
 }
 
 exports.getPlatformNetworks = function(args, res, next) {
@@ -1093,7 +1093,7 @@ exports.getPlatformNetworks = function(args, res, next) {
    * returns Map
    **/
   var examples = {};
-  examples['application/json'] = 
+  examples['application/json'] =
   {
   	"RegionOne":
   	[
@@ -1187,129 +1187,129 @@ exports.getPlatformSShKeys = function(args, res, next) {
 }
 
 exports.getPlatformSecurityGroups = function(args, res, next) {
-  /**
-   * retrive securitygroups properties
-   * Each cloud provider has it's own specific resources like instance types and disk types. These endpoints are collecting them.
-   *
-   * body PlatformResourceRequestJson  (optional)
-   * returns Map
-   **/
-  var examples = {};
-  examples['application/json'] = {
-  "key" : [ {
-    "groupName" : "aeiou",
-    "groupId" : "aeiou",
-    "properties" : {
-      "key" : "{}"
+    /**
+     * retrive securitygroups properties
+     * Each cloud provider has it's own specific resources like instance types and disk types. These endpoints are collecting them.
+     *
+     * body PlatformResourceRequestJson  (optional)
+     * returns Map
+     **/
+    var examples = {};
+    examples['application/json'] = {
+        "key" : [ {
+            "groupName" : "aeiou",
+            "groupId" : "aeiou",
+            "properties" : {
+                "key" : "{}"
+            }
+        } ]
+    };
+    if (Object.keys(examples).length > 0) {
+        res.setHeader('Content-Type', 'application/json');
+        res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
+    } else {
+        res.end();
     }
-  } ]
-};
-  if (Object.keys(examples).length > 0) {
-    res.setHeader('Content-Type', 'application/json');
-    res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
-  } else {
-    res.end();
-  }
 }
 
 exports.getPlatformVariantByType = function(args, res, next) {
-  /**
-   * retrive a platform variant by type
-   * Each cloud provider has it's own specific resources like instance types and disk types. These endpoints are collecting them.
-   *
-   * type String 
-   * returns List
-   **/
-  var examples = {};
-  examples['application/json'] = [ "aeiou" ];
-  if (Object.keys(examples).length > 0) {
-    res.setHeader('Content-Type', 'application/json');
-    res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
-  } else {
-    res.end();
-  }
+    /**
+     * retrive a platform variant by type
+     * Each cloud provider has it's own specific resources like instance types and disk types. These endpoints are collecting them.
+     *
+     * type String
+     * returns List
+     **/
+    var examples = {};
+    examples['application/json'] = [ "aeiou" ];
+    if (Object.keys(examples).length > 0) {
+        res.setHeader('Content-Type', 'application/json');
+        res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
+    } else {
+        res.end();
+    }
 }
 
 exports.getPlatformVariants = function(args, res, next) {
-  /**
-   * retrive available platform variants
-   * Each cloud provider has it's own specific resources like instance types and disk types. These endpoints are collecting them.
-   *
-   * returns PlatformVariantsJson
-   **/
-  var examples = {};
-  examples['application/json'] = {
-  "platformToVariants" : {
-    "key" : [ "aeiou" ]
-  },
-  "defaultVariants" : {
-    "key" : "aeiou"
-  }
-};
-  if (Object.keys(examples).length > 0) {
-    res.setHeader('Content-Type', 'application/json');
-    res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
-  } else {
-    res.end();
-  }
+    /**
+     * retrive available platform variants
+     * Each cloud provider has it's own specific resources like instance types and disk types. These endpoints are collecting them.
+     *
+     * returns PlatformVariantsJson
+     **/
+    var examples = {};
+    examples['application/json'] = {
+        "platformToVariants" : {
+            "key" : [ "aeiou" ]
+        },
+        "defaultVariants" : {
+            "key" : "aeiou"
+        }
+    };
+    if (Object.keys(examples).length > 0) {
+        res.setHeader('Content-Type', 'application/json');
+        res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
+    } else {
+        res.end();
+    }
 }
 
 exports.getPlatforms = function(args, res, next) {
-  /**
-   * retrive available platforms
-   * Each cloud provider has it's own specific resources like instance types and disk types. These endpoints are collecting them.
-   *
-   * extended Boolean  (optional)
-   * returns Map
-   **/
-  var examples = {};
-  examples['application/json'] = {
-  "key" : "{}"
-};
-  if (Object.keys(examples).length > 0) {
-    res.setHeader('Content-Type', 'application/json');
-    res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
-  } else {
-    res.end();
-  }
+    /**
+     * retrive available platforms
+     * Each cloud provider has it's own specific resources like instance types and disk types. These endpoints are collecting them.
+     *
+     * extended Boolean  (optional)
+     * returns Map
+     **/
+    var examples = {};
+    examples['application/json'] = {
+        "key" : "{}"
+    };
+    if (Object.keys(examples).length > 0) {
+        res.setHeader('Content-Type', 'application/json');
+        res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
+    } else {
+        res.end();
+    }
 }
 
 exports.getRegionAvByType = function(args, res, next) {
-  /**
-   * retrive availability zones by type
-   * Each cloud provider has it's own specific resources like instance types and disk types. These endpoints are collecting them.
-   *
-   * type String 
-   * returns Map
-   **/
-  var examples = {};
-  examples['application/json'] = {
-  "key" : [ "aeiou" ]
-};
-  if (Object.keys(examples).length > 0) {
-    res.setHeader('Content-Type', 'application/json');
-    res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
-  } else {
-    res.end();
-  }
+    /**
+     * retrive availability zones by type
+     * Each cloud provider has it's own specific resources like instance types and disk types. These endpoints are collecting them.
+     *
+     * type String
+     * returns Map
+     **/
+    var examples = {};
+    examples['application/json'] = {
+        "key" : [ "aeiou" ]
+    };
+    if (Object.keys(examples).length > 0) {
+        res.setHeader('Content-Type', 'application/json');
+        res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
+    } else {
+        res.end();
+    }
 }
 
 exports.getRegionRByType = function(args, res, next) {
-  /**
-   * retrive regions by type
-   * Each cloud provider has it's own specific resources like instance types and disk types. These endpoints are collecting them.
-   *
-   * type String 
-   * returns List
-   **/
-  var examples = {};
-  examples['application/json'] = [ "aeiou" ];
-  if (Object.keys(examples).length > 0) {
-    res.setHeader('Content-Type', 'application/json');
-    res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
-  } else {
-    res.end();
-  }
+    /**
+     * retrive regions by type
+     * Each cloud provider has it's own specific resources like instance types and disk types. These endpoints are collecting them.
+     *
+     * type String
+     * returns List
+     **/
+    var examples = {};
+    examples['application/json'] = [ "aeiou" ];
+    if (Object.keys(examples).length > 0) {
+        res.setHeader('Content-Type', 'application/json');
+        res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
+    } else {
+        res.end();
+    }
 }
 
 exports.getRegions = function(args, res, next) {
@@ -1320,7 +1320,7 @@ exports.getRegions = function(args, res, next) {
    * returns PlatformRegionsJson
    **/
   var examples = {};
-  examples['application/json'] = 
+  examples['application/json'] =
   {
     "regions":
     [
@@ -1348,150 +1348,150 @@ exports.getRegions = function(args, res, next) {
 }
 
 exports.getSpecialProperties = function(args, res, next) {
-  /**
-   * retrive special properties
-   * Each cloud provider has it's own specific resources like instance types and disk types. These endpoints are collecting them.
-   *
-   * returns SpecialParametersJson
-   **/
-  var examples = {};
-  examples['application/json'] = {
-  "platformSpecificSpecialParameters" : {
-    "key" : {
-      "key" : true
+    /**
+     * retrive special properties
+     * Each cloud provider has it's own specific resources like instance types and disk types. These endpoints are collecting them.
+     *
+     * returns SpecialParametersJson
+     **/
+    var examples = {};
+    examples['application/json'] = {
+        "platformSpecificSpecialParameters" : {
+            "key" : {
+                "key" : true
+            }
+        },
+        "specialParameters" : {
+            "key" : true
+        }
+    };
+    if (Object.keys(examples).length > 0) {
+        res.setHeader('Content-Type', 'application/json');
+        res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
+    } else {
+        res.end();
     }
-  },
-  "specialParameters" : {
-    "key" : true
-  }
-};
-  if (Object.keys(examples).length > 0) {
-    res.setHeader('Content-Type', 'application/json');
-    res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
-  } else {
-    res.end();
-  }
 }
 
 exports.getTagSpecifications = function(args, res, next) {
-  /**
-   * retrive tag specifications
-   * Each cloud provider has it's own specific resources like instance types and disk types. These endpoints are collecting them.
-   *
-   * returns TagSpecificationsJson
-   **/
-  var examples = {};
-  examples['application/json'] = {
-  "specifications" : {
-    "key" : {
-      "key" : "{}"
+    /**
+     * retrive tag specifications
+     * Each cloud provider has it's own specific resources like instance types and disk types. These endpoints are collecting them.
+     *
+     * returns TagSpecificationsJson
+     **/
+    var examples = {};
+    examples['application/json'] = {
+        "specifications" : {
+            "key" : {
+                "key" : "{}"
+            }
+        }
+    };
+    if (Object.keys(examples).length > 0) {
+        res.setHeader('Content-Type', 'application/json');
+        res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
+    } else {
+        res.end();
     }
-  }
-};
-  if (Object.keys(examples).length > 0) {
-    res.setHeader('Content-Type', 'application/json');
-    res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
-  } else {
-    res.end();
-  }
 }
 
 exports.getVmTypes = function(args, res, next) {
-  /**
-   * retrive available vm types
-   * Each cloud provider has it's own specific resources like instance types and disk types. These endpoints are collecting them.
-   *
-   * extended Boolean  (optional)
-   * returns PlatformVirtualMachinesJson
-   **/
-  var examples = {};
-  examples['application/json'] = {
-  "defaultVmTypePerZones" : {
-    "key" : {
-      "key" : "aeiou"
-    }
-  },
-  "defaultVirtualMachines" : {
-    "key" : "aeiou"
-  },
-  "virtualMachines" : {
-    "key" : [ {
-      "vmTypeMetaJson" : {
-        "configs" : [ {
-          "volumeParameterType" : "aeiou",
-          "minimumSize" : 0,
-          "maximumNumber" : 5,
-          "maximumSize" : 6,
-          "minimumNumber" : 1
-        } ],
-        "properties" : {
-          "key" : "aeiou"
+    /**
+     * retrive available vm types
+     * Each cloud provider has it's own specific resources like instance types and disk types. These endpoints are collecting them.
+     *
+     * extended Boolean  (optional)
+     * returns PlatformVirtualMachinesJson
+     **/
+    var examples = {};
+    examples['application/json'] = {
+        "defaultVmTypePerZones" : {
+            "key" : {
+                "key" : "aeiou"
+            }
+        },
+        "defaultVirtualMachines" : {
+            "key" : "aeiou"
+        },
+        "virtualMachines" : {
+            "key" : [ {
+                "vmTypeMetaJson" : {
+                    "configs" : [ {
+                        "volumeParameterType" : "aeiou",
+                        "minimumSize" : 0,
+                        "maximumNumber" : 5,
+                        "maximumSize" : 6,
+                        "minimumNumber" : 1
+                    } ],
+                    "properties" : {
+                        "key" : "aeiou"
+                    }
+                },
+                "value" : "aeiou"
+            } ]
+        },
+        "vmTypesPerZones" : {
+            "key" : {
+                "key" : [ "" ]
+            }
         }
-      },
-      "value" : "aeiou"
-    } ]
-  },
-  "vmTypesPerZones" : {
-    "key" : {
-      "key" : [ "" ]
+    };
+    if (Object.keys(examples).length > 0) {
+        res.setHeader('Content-Type', 'application/json');
+        res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
+    } else {
+        res.end();
     }
-  }
-};
-  if (Object.keys(examples).length > 0) {
-    res.setHeader('Content-Type', 'application/json');
-    res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
-  } else {
-    res.end();
-  }
 }
 
 exports.getVmTypesByType = function(args, res, next) {
-  /**
-   * retrive available vm types
-   * Each cloud provider has it's own specific resources like instance types and disk types. These endpoints are collecting them.
-   *
-   * type String 
-   * extended Boolean  (optional)
-   * returns PlatformVirtualMachinesJson
-   **/
-  var examples = {};
-  examples['application/json'] = {
-  "defaultVmTypePerZones" : {
-    "key" : {
-      "key" : "aeiou"
-    }
-  },
-  "defaultVirtualMachines" : {
-    "key" : "aeiou"
-  },
-  "virtualMachines" : {
-    "key" : [ {
-      "vmTypeMetaJson" : {
-        "configs" : [ {
-          "volumeParameterType" : "aeiou",
-          "minimumSize" : 0,
-          "maximumNumber" : 5,
-          "maximumSize" : 6,
-          "minimumNumber" : 1
-        } ],
-        "properties" : {
-          "key" : "aeiou"
+    /**
+     * retrive available vm types
+     * Each cloud provider has it's own specific resources like instance types and disk types. These endpoints are collecting them.
+     *
+     * type String
+     * extended Boolean  (optional)
+     * returns PlatformVirtualMachinesJson
+     **/
+    var examples = {};
+    examples['application/json'] = {
+        "defaultVmTypePerZones" : {
+            "key" : {
+                "key" : "aeiou"
+            }
+        },
+        "defaultVirtualMachines" : {
+            "key" : "aeiou"
+        },
+        "virtualMachines" : {
+            "key" : [ {
+                "vmTypeMetaJson" : {
+                    "configs" : [ {
+                        "volumeParameterType" : "aeiou",
+                        "minimumSize" : 0,
+                        "maximumNumber" : 5,
+                        "maximumSize" : 6,
+                        "minimumNumber" : 1
+                    } ],
+                    "properties" : {
+                        "key" : "aeiou"
+                    }
+                },
+                "value" : "aeiou"
+            } ]
+        },
+        "vmTypesPerZones" : {
+            "key" : {
+                "key" : [ "" ]
+            }
         }
-      },
-      "value" : "aeiou"
-    } ]
-  },
-  "vmTypesPerZones" : {
-    "key" : {
-      "key" : [ "" ]
+    };
+    if (Object.keys(examples).length > 0) {
+        res.setHeader('Content-Type', 'application/json');
+        res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
+    } else {
+        res.end();
     }
-  }
-};
-  if (Object.keys(examples).length > 0) {
-    res.setHeader('Content-Type', 'application/json');
-    res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
-  } else {
-    res.end();
-  }
 }
 

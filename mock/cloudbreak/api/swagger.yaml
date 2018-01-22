@@ -14,38 +14,37 @@ info:
     \ Ambari, Docker lightweight containers, Swarm and Consul.\nFor further product\
     \ documentation follow the link: <a href=\"http://hortonworks.com/apache/cloudbreak/\"\
     >http://hortonworks.com/apache/cloudbreak/</a>"
-  version: "2.3.0-dev.64"
+  version: "2.4.0-dev.86"
   title: "Cloudbreak API"
 basePath: "/cb"
 tags:
 - name: "info"
 - name: "health"
-- name: "v1clusters"
-- name: "v1recipes"
-- name: "v1smartsensesubscriptions"
-- name: "v1settings"
-- name: "v1imagecatalogs"
-- name: "v1users"
-- name: "v1securitygroups"
-- name: "v1connectors"
-- name: "v2connectors"
-- name: "v1subscriptions"
-- name: "v1flexsubscriptions"
-- name: "v2stacks"
-- name: "v1networks"
-- name: "v1stacks"
-- name: "v1securityrules"
-- name: "v1rdsconfigs"
-- name: "v1credentials"
-- name: "v1blueprints"
-- name: "v1accountpreferences"
-- name: "v1templates"
-- name: "v1usages"
-- name: "v1topologies"
 - name: "v1clustertemplates"
-- name: "v1util"
-- name: "v1events"
+- name: "v1securitygroups"
+- name: "v2connectors"
+- name: "v1credentials"
+- name: "v1connectors"
 - name: "v1ldap"
+- name: "v1securityrules"
+- name: "v2stacks"
+- name: "v1users"
+- name: "v1blueprints"
+- name: "v1flexsubscriptions"
+- name: "v1stacks"
+- name: "v1settings"
+- name: "v1templates"
+- name: "v1imagecatalogs"
+- name: "v1subscriptions"
+- name: "v1topologies"
+- name: "v1recipes"
+- name: "v1events"
+- name: "v1networks"
+- name: "v1accountpreferences"
+- name: "v1usages"
+- name: "v1smartsensesubscriptions"
+- name: "v1rdsconfigs"
+- name: "v1util"
 - name: "v1constraints"
 schemes:
 - "http"
@@ -546,75 +545,20 @@ paths:
         default:
           description: "successful operation"
       x-swagger-router-controller: "V1blueprints"
-  /api/v1/clusters/account/{name}/cluster:
+  /api/v1/blueprints/{id}/request:
     get:
       tags:
-      - "v1clusters"
-      summary: "retrieve cluster by stack name (public)"
-      description: "Clusters are materialised Hadoop services on a given infrastructure.\
-        \ They are built based on a Blueprint (running the components and services\
-        \ specified) and on a configured infrastructure Stack. Once a cluster is created\
-        \ and launched, it can be used the usual way as any Hadoop cluster. We suggest\
-        \ to start with the Cluster's Ambari UI for an overview of your cluster."
-      operationId: "getPublicCluster"
-      schemes:
-      - "http"
-      - "https"
-      consumes:
-      - "application/json"
-      produces:
-      - "application/json"
-      parameters:
-      - name: "name"
-        in: "path"
-        required: true
-        type: "string"
-      responses:
-        200:
-          description: "successful operation"
-          schema:
-            $ref: "#/definitions/ClusterResponse"
-      x-swagger-router-controller: "V1clusters"
-  /api/v1/clusters/user/{name}/cluster:
-    get:
-      tags:
-      - "v1clusters"
-      summary: "retrieve cluster by stack name (private)"
-      description: "Clusters are materialised Hadoop services on a given infrastructure.\
-        \ They are built based on a Blueprint (running the components and services\
-        \ specified) and on a configured infrastructure Stack. Once a cluster is created\
-        \ and launched, it can be used the usual way as any Hadoop cluster. We suggest\
-        \ to start with the Cluster's Ambari UI for an overview of your cluster."
-      operationId: "getPrivateCluster"
-      schemes:
-      - "http"
-      - "https"
-      consumes:
-      - "application/json"
-      produces:
-      - "application/json"
-      parameters:
-      - name: "name"
-        in: "path"
-        required: true
-        type: "string"
-      responses:
-        200:
-          description: "successful operation"
-          schema:
-            $ref: "#/definitions/ClusterResponse"
-      x-swagger-router-controller: "V1clusters"
-  /api/v1/clusters/{id}/cluster:
-    get:
-      tags:
-      - "v1clusters"
-      summary: "retrieve cluster by stack id"
-      description: "Clusters are materialised Hadoop services on a given infrastructure.\
-        \ They are built based on a Blueprint (running the components and services\
-        \ specified) and on a configured infrastructure Stack. Once a cluster is created\
-        \ and launched, it can be used the usual way as any Hadoop cluster. We suggest\
-        \ to start with the Cluster's Ambari UI for an overview of your cluster."
-      operationId: "getCluster"
+      - "v1blueprints"
+      summary: "retrieve blueprint request by blueprint name"
+      description: "Ambari Blueprints are a declarative definition of a Hadoop cluster.\
+        \ With a Blueprint, you specify a stack, the component layout and the configurations\
+        \ to materialize a Hadoop cluster instance. Hostgroups defined in blueprints\
+        \ can be associated to different templates, thus you can spin up a highly\
+        \ available cluster running on different instance types. This will give you\
+        \ the option to group your Hadoop services based on resource needs (e.g. high\
+        \ I/O, CPU or memory) and create an infrastructure which fits your workload\
+        \ best."
+      operationId: "getBlueprintRequestFromId"
       schemes:
       - "http"
       - "https"
@@ -632,267 +576,8 @@ paths:
         200:
           description: "successful operation"
           schema:
-            $ref: "#/definitions/ClusterResponse"
-      x-swagger-router-controller: "V1clusters"
-    post:
-      tags:
-      - "v1clusters"
-      summary: "create cluster for stack"
-      description: "Clusters are materialised Hadoop services on a given infrastructure.\
-        \ They are built based on a Blueprint (running the components and services\
-        \ specified) and on a configured infrastructure Stack. Once a cluster is created\
-        \ and launched, it can be used the usual way as any Hadoop cluster. We suggest\
-        \ to start with the Cluster's Ambari UI for an overview of your cluster."
-      operationId: "postCluster"
-      schemes:
-      - "http"
-      - "https"
-      consumes:
-      - "application/json"
-      produces:
-      - "application/json"
-      parameters:
-      - name: "id"
-        in: "path"
-        required: true
-        type: "integer"
-        format: "int64"
-      - in: "body"
-        name: "body"
-        required: false
-        schema:
-          $ref: "#/definitions/ClusterRequest"
-      responses:
-        200:
-          description: "successful operation"
-          schema:
-            $ref: "#/definitions/ClusterResponse"
-      x-swagger-router-controller: "V1clusters"
-    put:
-      tags:
-      - "v1clusters"
-      summary: "update cluster by stack id"
-      description: "Clusters are materialised Hadoop services on a given infrastructure.\
-        \ They are built based on a Blueprint (running the components and services\
-        \ specified) and on a configured infrastructure Stack. Once a cluster is created\
-        \ and launched, it can be used the usual way as any Hadoop cluster. We suggest\
-        \ to start with the Cluster's Ambari UI for an overview of your cluster."
-      operationId: "putCluster"
-      schemes:
-      - "http"
-      - "https"
-      consumes:
-      - "application/json"
-      produces:
-      - "application/json"
-      parameters:
-      - name: "id"
-        in: "path"
-        required: true
-        type: "integer"
-        format: "int64"
-      - in: "body"
-        name: "body"
-        required: false
-        schema:
-          $ref: "#/definitions/UpdateCluster"
-      responses:
-        default:
-          description: "successful operation"
-      x-swagger-router-controller: "V1clusters"
-    delete:
-      tags:
-      - "v1clusters"
-      summary: "delete cluster on a specific stack"
-      description: "Clusters are materialised Hadoop services on a given infrastructure.\
-        \ They are built based on a Blueprint (running the components and services\
-        \ specified) and on a configured infrastructure Stack. Once a cluster is created\
-        \ and launched, it can be used the usual way as any Hadoop cluster. We suggest\
-        \ to start with the Cluster's Ambari UI for an overview of your cluster."
-      operationId: "deleteCluster"
-      schemes:
-      - "http"
-      - "https"
-      consumes:
-      - "application/json"
-      produces:
-      - "application/json"
-      parameters:
-      - name: "id"
-        in: "path"
-        required: true
-        type: "integer"
-        format: "int64"
-      - name: "withStackDelete"
-        in: "query"
-        required: false
-        type: "boolean"
-        default: false
-      - name: "deleteDependencies"
-        in: "query"
-        required: false
-        type: "boolean"
-        default: false
-      responses:
-        default:
-          description: "successful operation"
-      x-swagger-router-controller: "V1clusters"
-  /api/v1/clusters/{id}/cluster/config:
-    post:
-      tags:
-      - "v1clusters"
-      summary: "get cluster properties with blueprint outputs"
-      description: "Clusters are materialised Hadoop services on a given infrastructure.\
-        \ They are built based on a Blueprint (running the components and services\
-        \ specified) and on a configured infrastructure Stack. Once a cluster is created\
-        \ and launched, it can be used the usual way as any Hadoop cluster. We suggest\
-        \ to start with the Cluster's Ambari UI for an overview of your cluster."
-      operationId: "getConfigsCluster"
-      schemes:
-      - "http"
-      - "https"
-      consumes:
-      - "application/json"
-      produces:
-      - "application/json"
-      parameters:
-      - name: "id"
-        in: "path"
-        required: true
-        type: "integer"
-        format: "int64"
-      - in: "body"
-        name: "body"
-        required: false
-        schema:
-          $ref: "#/definitions/ConfigsRequest"
-      responses:
-        200:
-          description: "successful operation"
-          schema:
-            $ref: "#/definitions/ConfigsResponse"
-      x-swagger-router-controller: "V1clusters"
-  /api/v1/clusters/{id}/cluster/failurereport:
-    post:
-      tags:
-      - "v1clusters"
-      summary: "failure report"
-      description: "Endpoint to report the failed nodes in the given cluster. If recovery\
-        \ mode for the node's hostgroup is AUTO then autorecovery would be started.\
-        \ If recovery mode for the node's hostgroup is MANUAL, the nodes will be marked\
-        \ as unhealthy."
-      operationId: "failureReportCluster"
-      schemes:
-      - "http"
-      - "https"
-      consumes:
-      - "application/json"
-      produces:
-      - "application/json"
-      parameters:
-      - name: "id"
-        in: "path"
-        required: true
-        type: "integer"
-        format: "int64"
-      - in: "body"
-        name: "body"
-        required: false
-        schema:
-          $ref: "#/definitions/FailureReport"
-      responses:
-        default:
-          description: "successful operation"
-      x-swagger-router-controller: "V1clusters"
-  /api/v1/clusters/{id}/cluster/full:
-    get:
-      tags:
-      - "v1clusters"
-      summary: "retrieve cluster by stack id"
-      description: "Clusters are materialised Hadoop services on a given infrastructure.\
-        \ They are built based on a Blueprint (running the components and services\
-        \ specified) and on a configured infrastructure Stack. Once a cluster is created\
-        \ and launched, it can be used the usual way as any Hadoop cluster. We suggest\
-        \ to start with the Cluster's Ambari UI for an overview of your cluster."
-      operationId: "getFullCluster"
-      schemes:
-      - "http"
-      - "https"
-      consumes:
-      - "application/json"
-      produces:
-      - "application/json"
-      parameters:
-      - name: "id"
-        in: "path"
-        required: true
-        type: "integer"
-        format: "int64"
-      responses:
-        200:
-          description: "successful operation"
-          schema:
-            $ref: "#/definitions/AutoscaleClusterResponse"
-      x-swagger-router-controller: "V1clusters"
-  /api/v1/clusters/{id}/cluster/manualrepair:
-    post:
-      tags:
-      - "v1clusters"
-      summary: "repair the cluster"
-      description: "Removing the failed nodes and starting new nodes to substitute\
-        \ them."
-      operationId: "repairCluster"
-      schemes:
-      - "http"
-      - "https"
-      consumes:
-      - "application/json"
-      produces:
-      - "application/json"
-      parameters:
-      - name: "id"
-        in: "path"
-        required: true
-        type: "integer"
-        format: "int64"
-      - in: "body"
-        name: "body"
-        required: false
-        schema:
-          $ref: "#/definitions/ClusterRepairRequest"
-      responses:
-        default:
-          description: "successful operation"
-      x-swagger-router-controller: "V1clusters"
-  /api/v1/clusters/{id}/cluster/upgrade:
-    post:
-      tags:
-      - "v1clusters"
-      summary: "upgrade the Ambari version"
-      description: "Ambari is used to provision the Hadoop clusters."
-      operationId: "upgradeCluster"
-      schemes:
-      - "http"
-      - "https"
-      consumes:
-      - "application/json"
-      produces:
-      - "application/json"
-      parameters:
-      - name: "id"
-        in: "path"
-        required: true
-        type: "integer"
-        format: "int64"
-      - in: "body"
-        name: "body"
-        required: false
-        schema:
-          $ref: "#/definitions/AmbariRepoDetails"
-      responses:
-        default:
-          description: "successful operation"
-      x-swagger-router-controller: "V1clusters"
+            $ref: "#/definitions/BlueprintRequest"
+      x-swagger-router-controller: "V1blueprints"
   /api/v1/clustertemplates/account:
     get:
       tags:
@@ -2348,6 +2033,37 @@ paths:
         default:
           description: "successful operation"
       x-swagger-router-controller: "V1credentials"
+  /api/v1/credentials/{name}/request:
+    get:
+      tags:
+      - "v1credentials"
+      summary: "retrieve credential request by credential name"
+      description: "Cloudbreak is launching Hadoop clusters on the user's behalf -\
+        \ on different cloud providers. One key point is that Cloudbreak does not\
+        \ store your Cloud provider account details (such as username, password, keys,\
+        \ private SSL certificates, etc). We work around the concept that Identity\
+        \ and Access Management is fully controlled by you - the end user. The Cloudbreak\
+        \ deployer is purely acting on behalf of the end user - without having access\
+        \ to the user's account."
+      operationId: "getCredentialRequestFromName"
+      schemes:
+      - "http"
+      - "https"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "name"
+        in: "path"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/CredentialRequest"
+      x-swagger-router-controller: "V1credentials"
   /api/v1/events:
     get:
       tags:
@@ -2998,6 +2714,32 @@ paths:
           description: "successful operation"
           schema:
             $ref: "#/definitions/ImageCatalogResponse"
+      x-swagger-router-controller: "V1imagecatalogs"
+  /api/v1/imagecatalogs/{name}/request:
+    get:
+      tags:
+      - "v1imagecatalogs"
+      summary: "retrieve imagecatalog request by imagecatalog name"
+      description: "Provides an interface to determine available Virtual Machine images\
+        \ for the given version of Cloudbreak."
+      operationId: "getImageCatalogRequestFromName"
+      schemes:
+      - "http"
+      - "https"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "name"
+        in: "path"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/ImageCatalogRequest"
       x-swagger-router-controller: "V1imagecatalogs"
   /api/v1/imagecatalogs/{platform}:
     get:
@@ -4030,6 +3772,32 @@ paths:
         default:
           description: "successful operation"
       x-swagger-router-controller: "V1recipes"
+  /api/v1/recipes/{name}/request:
+    get:
+      tags:
+      - "v1recipes"
+      summary: "retrieve recipe request by recipe name"
+      description: "Recipes are basically script extensions to a cluster that run\
+        \ on a set of nodes before or after the Ambari cluster installation."
+      operationId: "getRecipeRequestFromName"
+      schemes:
+      - "http"
+      - "https"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "name"
+        in: "path"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/RecipeRequest"
+      x-swagger-router-controller: "V1recipes"
   /api/v1/securitygroups/account:
     get:
       tags:
@@ -4718,6 +4486,35 @@ paths:
         default:
           description: "successful operation"
       x-swagger-router-controller: "V1stacks"
+  /api/v1/stacks/account/{name}/cluster:
+    get:
+      tags:
+      - "v1stacks"
+      summary: "retrieve cluster by stack name (public)"
+      description: "Clusters are materialised Hadoop services on a given infrastructure.\
+        \ They are built based on a Blueprint (running the components and services\
+        \ specified) and on a configured infrastructure Stack. Once a cluster is created\
+        \ and launched, it can be used the usual way as any Hadoop cluster. We suggest\
+        \ to start with the Cluster's Ambari UI for an overview of your cluster."
+      operationId: "getPublicCluster"
+      schemes:
+      - "http"
+      - "https"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "name"
+        in: "path"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/ClusterResponse"
+      x-swagger-router-controller: "V1stacks"
   /api/v1/stacks/all:
     get:
       tags:
@@ -4930,6 +4727,35 @@ paths:
         default:
           description: "successful operation"
       x-swagger-router-controller: "V1stacks"
+  /api/v1/stacks/user/{name}/cluster:
+    get:
+      tags:
+      - "v1stacks"
+      summary: "retrieve cluster by stack name (private)"
+      description: "Clusters are materialised Hadoop services on a given infrastructure.\
+        \ They are built based on a Blueprint (running the components and services\
+        \ specified) and on a configured infrastructure Stack. Once a cluster is created\
+        \ and launched, it can be used the usual way as any Hadoop cluster. We suggest\
+        \ to start with the Cluster's Ambari UI for an overview of your cluster."
+      operationId: "getPrivateCluster"
+      schemes:
+      - "http"
+      - "https"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "name"
+        in: "path"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/ClusterResponse"
+      x-swagger-router-controller: "V1stacks"
   /api/v1/stacks/validate:
     post:
       tags:
@@ -5093,6 +4919,295 @@ paths:
           description: "successful operation"
           schema:
             $ref: "#/definitions/CertificateResponse"
+      x-swagger-router-controller: "V1stacks"
+  /api/v1/stacks/{id}/cluster:
+    get:
+      tags:
+      - "v1stacks"
+      summary: "retrieve cluster by stack id"
+      description: "Clusters are materialised Hadoop services on a given infrastructure.\
+        \ They are built based on a Blueprint (running the components and services\
+        \ specified) and on a configured infrastructure Stack. Once a cluster is created\
+        \ and launched, it can be used the usual way as any Hadoop cluster. We suggest\
+        \ to start with the Cluster's Ambari UI for an overview of your cluster."
+      operationId: "getCluster"
+      schemes:
+      - "http"
+      - "https"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "id"
+        in: "path"
+        required: true
+        type: "integer"
+        format: "int64"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/ClusterResponse"
+      x-swagger-router-controller: "V1stacks"
+    post:
+      tags:
+      - "v1stacks"
+      summary: "create cluster for stack"
+      description: "Clusters are materialised Hadoop services on a given infrastructure.\
+        \ They are built based on a Blueprint (running the components and services\
+        \ specified) and on a configured infrastructure Stack. Once a cluster is created\
+        \ and launched, it can be used the usual way as any Hadoop cluster. We suggest\
+        \ to start with the Cluster's Ambari UI for an overview of your cluster."
+      operationId: "postCluster"
+      schemes:
+      - "http"
+      - "https"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "id"
+        in: "path"
+        required: true
+        type: "integer"
+        format: "int64"
+      - in: "body"
+        name: "body"
+        required: false
+        schema:
+          $ref: "#/definitions/ClusterRequest"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/ClusterResponse"
+      x-swagger-router-controller: "V1stacks"
+    put:
+      tags:
+      - "v1stacks"
+      summary: "update cluster by stack id"
+      description: "Clusters are materialised Hadoop services on a given infrastructure.\
+        \ They are built based on a Blueprint (running the components and services\
+        \ specified) and on a configured infrastructure Stack. Once a cluster is created\
+        \ and launched, it can be used the usual way as any Hadoop cluster. We suggest\
+        \ to start with the Cluster's Ambari UI for an overview of your cluster."
+      operationId: "putCluster"
+      schemes:
+      - "http"
+      - "https"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "id"
+        in: "path"
+        required: true
+        type: "integer"
+        format: "int64"
+      - in: "body"
+        name: "body"
+        required: false
+        schema:
+          $ref: "#/definitions/UpdateCluster"
+      responses:
+        default:
+          description: "successful operation"
+      x-swagger-router-controller: "V1stacks"
+    delete:
+      tags:
+      - "v1stacks"
+      summary: "delete cluster on a specific stack"
+      description: "Clusters are materialised Hadoop services on a given infrastructure.\
+        \ They are built based on a Blueprint (running the components and services\
+        \ specified) and on a configured infrastructure Stack. Once a cluster is created\
+        \ and launched, it can be used the usual way as any Hadoop cluster. We suggest\
+        \ to start with the Cluster's Ambari UI for an overview of your cluster."
+      operationId: "deleteCluster"
+      schemes:
+      - "http"
+      - "https"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "id"
+        in: "path"
+        required: true
+        type: "integer"
+        format: "int64"
+      - name: "withStackDelete"
+        in: "query"
+        required: false
+        type: "boolean"
+        default: false
+      - name: "deleteDependencies"
+        in: "query"
+        required: false
+        type: "boolean"
+        default: false
+      responses:
+        default:
+          description: "successful operation"
+      x-swagger-router-controller: "V1stacks"
+  /api/v1/stacks/{id}/cluster/config:
+    post:
+      tags:
+      - "v1stacks"
+      summary: "get cluster properties with blueprint outputs"
+      description: "Clusters are materialised Hadoop services on a given infrastructure.\
+        \ They are built based on a Blueprint (running the components and services\
+        \ specified) and on a configured infrastructure Stack. Once a cluster is created\
+        \ and launched, it can be used the usual way as any Hadoop cluster. We suggest\
+        \ to start with the Cluster's Ambari UI for an overview of your cluster."
+      operationId: "getConfigsCluster"
+      schemes:
+      - "http"
+      - "https"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "id"
+        in: "path"
+        required: true
+        type: "integer"
+        format: "int64"
+      - in: "body"
+        name: "body"
+        required: false
+        schema:
+          $ref: "#/definitions/ConfigsRequest"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/ConfigsResponse"
+      x-swagger-router-controller: "V1stacks"
+  /api/v1/stacks/{id}/cluster/failurereport:
+    post:
+      tags:
+      - "v1stacks"
+      summary: "failure report"
+      description: "Endpoint to report the failed nodes in the given cluster. If recovery\
+        \ mode for the node's hostgroup is AUTO then autorecovery would be started.\
+        \ If recovery mode for the node's hostgroup is MANUAL, the nodes will be marked\
+        \ as unhealthy."
+      operationId: "failureReportCluster"
+      schemes:
+      - "http"
+      - "https"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "id"
+        in: "path"
+        required: true
+        type: "integer"
+        format: "int64"
+      - in: "body"
+        name: "body"
+        required: false
+        schema:
+          $ref: "#/definitions/FailureReport"
+      responses:
+        default:
+          description: "successful operation"
+      x-swagger-router-controller: "V1stacks"
+  /api/v1/stacks/{id}/cluster/full:
+    get:
+      tags:
+      - "v1stacks"
+      summary: "retrieve cluster by stack id"
+      description: "Clusters are materialised Hadoop services on a given infrastructure.\
+        \ They are built based on a Blueprint (running the components and services\
+        \ specified) and on a configured infrastructure Stack. Once a cluster is created\
+        \ and launched, it can be used the usual way as any Hadoop cluster. We suggest\
+        \ to start with the Cluster's Ambari UI for an overview of your cluster."
+      operationId: "getFullCluster"
+      schemes:
+      - "http"
+      - "https"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "id"
+        in: "path"
+        required: true
+        type: "integer"
+        format: "int64"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/AutoscaleClusterResponse"
+      x-swagger-router-controller: "V1stacks"
+  /api/v1/stacks/{id}/cluster/manualrepair:
+    post:
+      tags:
+      - "v1stacks"
+      summary: "repair the cluster"
+      description: "Removing the failed nodes and starting new nodes to substitute\
+        \ them."
+      operationId: "repairCluster"
+      schemes:
+      - "http"
+      - "https"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "id"
+        in: "path"
+        required: true
+        type: "integer"
+        format: "int64"
+      - in: "body"
+        name: "body"
+        required: false
+        schema:
+          $ref: "#/definitions/ClusterRepairRequest"
+      responses:
+        default:
+          description: "successful operation"
+      x-swagger-router-controller: "V1stacks"
+  /api/v1/stacks/{id}/cluster/upgrade:
+    post:
+      tags:
+      - "v1stacks"
+      summary: "upgrade the Ambari version"
+      description: "Ambari is used to provision the Hadoop clusters."
+      operationId: "upgradeCluster"
+      schemes:
+      - "http"
+      - "https"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "id"
+        in: "path"
+        required: true
+        type: "integer"
+        format: "int64"
+      - in: "body"
+        name: "body"
+        required: false
+        schema:
+          $ref: "#/definitions/AmbariRepoDetails"
+      responses:
+        default:
+          description: "successful operation"
       x-swagger-router-controller: "V1stacks"
   /api/v1/stacks/{id}/status:
     get:
@@ -6853,6 +6968,35 @@ paths:
               type: "object"
               properties: {}
       x-swagger-router-controller: "V2stacks"
+  /api/v2/stacks/{name}/request:
+    get:
+      tags:
+      - "v2stacks"
+      summary: "retrieve stack request by stack name"
+      description: "Stacks are template instances - a running cloud infrastructure\
+        \ created based on a template. Stacks are always launched on behalf of a cloud\
+        \ user account. Stacks support a wide range of resources, allowing you to\
+        \ build a highly available, reliable, and scalable infrastructure for your\
+        \ application needs."
+      operationId: "getClusterRequestFromName"
+      schemes:
+      - "http"
+      - "https"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "name"
+        in: "path"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/StackV2Request"
+      x-swagger-router-controller: "V2stacks"
   /api/v2/stacks/{stackId}/{instanceId}:
     delete:
       tags:
@@ -6976,6 +7120,85 @@ definitions:
         enum:
         - "MANUAL"
         - "AUTO"
+  PlatformRegionsJson:
+    type: "object"
+    properties:
+      regions:
+        type: "object"
+        description: "regions"
+        additionalProperties:
+          type: "array"
+          items:
+            type: "string"
+      displayNames:
+        type: "object"
+        description: "regions with displayNames"
+        additionalProperties:
+          type: "object"
+          additionalProperties:
+            type: "string"
+      availabilityZones:
+        type: "object"
+        description: "availability zones"
+        additionalProperties:
+          type: "object"
+          additionalProperties:
+            type: "array"
+            items:
+              type: "string"
+      defaultRegions:
+        type: "object"
+        description: "default regions"
+        additionalProperties:
+          type: "string"
+  RDSConfig:
+    type: "object"
+    required:
+    - "connectionPassword"
+    - "connectionURL"
+    - "connectionUserName"
+    - "databaseType"
+    - "hdpVersion"
+    - "name"
+    properties:
+      connectionURL:
+        type: "string"
+        description: "JDBC connection URL in the form of jdbc:<db-type>://<address>:<port>/<db>"
+        pattern: "^jdbc:postgresql://[-\\w\\.]*:\\d{1,5}/?\\w*"
+      databaseType:
+        type: "string"
+        description: "Type of the external database (allowed values: MYSQL, POSTGRES)"
+        enum:
+        - "POSTGRES"
+      hdpVersion:
+        type: "string"
+        description: "HDP version for the RDS configuration"
+      validated:
+        type: "boolean"
+        description: "If true, then the RDS configuration will be validated"
+        default: false
+      type:
+        type: "string"
+        description: "Type of rds (HIVE or RANGER)"
+        enum:
+        - "HIVE"
+        - "RANGER"
+        - "DRUID"
+      properties:
+        type: "array"
+        description: "custom properties for rds connection"
+        uniqueItems: true
+        items:
+          $ref: "#/definitions/RdsConfigProperty"
+      name:
+        type: "string"
+        description: "Name of the RDS configuration resource"
+      connectionUserName:
+        type: "string"
+        description: "Username to use for the jdbc connection"
+      connectionPassword:
+        type: "string"
+        description: "Password to use for the jdbc connection"
   ClusterRequest:
     type: "object"
     required:
@@ -7108,85 +7331,6 @@ definitions:
         description: "cluster can connect to a datalake you can define the parameters\
           \ here"
         $ref: "#/definitions/ConnectedClusterRequest"
-  RDSConfig:
-    type: "object"
-    required:
-    - "connectionPassword"
-    - "connectionURL"
-    - "connectionUserName"
-    - "databaseType"
-    - "hdpVersion"
-    - "name"
-    properties:
-      connectionURL:
-        type: "string"
-        description: "JDBC connection URL in the form of jdbc:<db-type>://<address>:<port>/<db>"
-        pattern: "^jdbc:postgresql://[-\\w\\.]*:\\d{1,5}/?\\w*"
-      databaseType:
-        type: "string"
-        description: "Type of the external database (allowed values: MYSQL, POSTGRES)"
-        enum:
-        - "POSTGRES"
-      hdpVersion:
-        type: "string"
-        description: "HDP version for the RDS configuration"
-      validated:
-        type: "boolean"
-        description: "If true, then the RDS configuration will be validated"
-        default: false
-      type:
-        type: "string"
-        description: "Type of rds (HIVE or RANGER)"
-        enum:
-        - "HIVE"
-        - "RANGER"
-        - "DRUID"
-      properties:
-        type: "array"
-        description: "custom properties for rds connection"
-        uniqueItems: true
-        items:
-          $ref: "#/definitions/RdsConfigProperty"
-      name:
-        type: "string"
-        description: "Name of the RDS configuration resource"
-      connectionUserName:
-        type: "string"
-        description: "Username to use for the jdbc connection"
-      connectionPassword:
-        type: "string"
-        description: "Password to use for the jdbc connection"
-  PlatformRegionsJson:
-    type: "object"
-    properties:
-      regions:
-        type: "object"
-        description: "regions"
-        additionalProperties:
-          type: "array"
-          items:
-            type: "string"
-      displayNames:
-        type: "object"
-        description: "regions with displayNames"
-        additionalProperties:
-          type: "object"
-          additionalProperties:
-            type: "string"
-      availabilityZones:
-        type: "object"
-        description: "availability zones"
-        additionalProperties:
-          type: "object"
-          additionalProperties:
-            type: "array"
-            items:
-              type: "string"
-      defaultRegions:
-        type: "object"
-        description: "default regions"
-        additionalProperties:
-          type: "string"
   SecurityGroupResponse:
     type: "object"
     required:
@@ -7242,21 +7386,6 @@ definitions:
         additionalProperties:
           type: "object"
           properties: {}
-  StackRepoDetailsJson:
-    type: "object"
-    properties:
-      stack:
-        type: "object"
-        additionalProperties:
-          type: "string"
-      util:
-        type: "object"
-        additionalProperties:
-          type: "string"
-      knox:
-        type: "object"
-        additionalProperties:
-          type: "string"
   OrchestratorResponse:
     type: "object"
     required:
@@ -7274,6 +7403,21 @@ definitions:
       type:
         type: "string"
         description: "type of the orchestrator"
+  StackRepoDetailsJson:
+    type: "object"
+    properties:
+      stack:
+        type: "object"
+        additionalProperties:
+          type: "string"
+      util:
+        type: "object"
+        additionalProperties:
+          type: "string"
+      knox:
+        type: "object"
+        additionalProperties:
+          type: "string"
   HardwareInfoResponse:
     type: "object"
     properties:
@@ -7316,6 +7460,23 @@ definitions:
       kerberosPrincipal:
         type: "string"
         description: "kerberos principal"
+  OrchestratorRequest:
+    type: "object"
+    required:
+    - "type"
+    properties:
+      parameters:
+        type: "object"
+        description: "orchestrator specific parameters, like authentication details"
+        additionalProperties:
+          type: "object"
+          properties: {}
+      apiEndpoint:
+        type: "string"
+        description: "endpoint for the container orchestration api"
+      type:
+        type: "string"
+        description: "type of the orchestrator"
   UpdateImageCatalogRequest:
     type: "object"
     required:
@@ -7337,23 +7498,6 @@ definitions:
         type: "integer"
         format: "int64"
         description: "id of the resource"
-  OrchestratorRequest:
-    type: "object"
-    required:
-    - "type"
-    properties:
-      parameters:
-        type: "object"
-        description: "orchestrator specific parameters, like authentication details"
-        additionalProperties:
-          type: "object"
-          properties: {}
-      apiEndpoint:
-        type: "string"
-        description: "endpoint for the container orchestration api"
-      type:
-        type: "string"
-        description: "type of the orchestrator"
   AutoscaleStackResponse:
     type: "object"
     required:
@@ -7897,13 +8041,6 @@ definitions:
         description: "name of the created dbs"
         additionalProperties:
           type: "string"
-  CustomContainerResponse:
-    type: "object"
-    properties:
-      definitions:
-        type: "object"
-        additionalProperties:
-          type: "string"
   DiskResponse:
     type: "object"
     properties:
@@ -7913,6 +8050,13 @@ definitions:
         type: "string"
       displayName:
         type: "string"
+  CustomContainerResponse:
+    type: "object"
+    properties:
+      definitions:
+        type: "object"
+        additionalProperties:
+          type: "string"
   NetworkResponse:
     type: "object"
     required:
@@ -7974,47 +8118,6 @@ definitions:
         type: "integer"
         format: "int64"
         description: "id of the resource"
-  HostGroupResponse:
-    type: "object"
-    required:
-    - "constraint"
-    - "name"
-    properties:
-      name:
-        type: "string"
-        description: "name of the resource"
-      constraint:
-        description: "instance group or resource constraint for a hostgroup"
-        $ref: "#/definitions/Constraint"
-      recipeIds:
-        type: "array"
-        description: "referenced recipe ids"
-        uniqueItems: true
-        items:
-          type: "integer"
-          format: "int64"
-      recoveryMode:
-        type: "string"
-        description: "recovery mode of the hostgroup's nodes"
-        enum:
-        - "MANUAL"
-        - "AUTO"
-      id:
-        type: "integer"
-        format: "int64"
-        description: "id of the resource"
-      recipes:
-        type: "array"
-        description: "referenced recipes"
-        uniqueItems: true
-        items:
-          $ref: "#/definitions/RecipeResponse"
-      metadata:
-        type: "array"
-        description: "metadata of hosts"
-        uniqueItems: true
-        items:
-          $ref: "#/definitions/HostMetadata"
   LdapConfigResponse:
     type: "object"
     required:
@@ -8090,6 +8193,47 @@ definitions:
         type: "boolean"
         description: "resource is visible in account"
         default: false
+  HostGroupResponse:
+    type: "object"
+    required:
+    - "constraint"
+    - "name"
+    properties:
+      name:
+        type: "string"
+        description: "name of the resource"
+      constraint:
+        description: "instance group or resource constraint for a hostgroup"
+        $ref: "#/definitions/Constraint"
+      recipeIds:
+        type: "array"
+        description: "referenced recipe ids"
+        uniqueItems: true
+        items:
+          type: "integer"
+          format: "int64"
+      recoveryMode:
+        type: "string"
+        description: "recovery mode of the hostgroup's nodes"
+        enum:
+        - "MANUAL"
+        - "AUTO"
+      id:
+        type: "integer"
+        format: "int64"
+        description: "id of the resource"
+      recipes:
+        type: "array"
+        description: "referenced recipes"
+        uniqueItems: true
+        items:
+          $ref: "#/definitions/RecipeResponse"
+      metadata:
+        type: "array"
+        description: "metadata of hosts"
+        uniqueItems: true
+        items:
+          $ref: "#/definitions/HostMetadata"
   HostMetadata:
     type: "object"
     required:
@@ -8128,15 +8272,6 @@ definitions:
       defaultVirtualMachine:
         description: "default virtual machines"
         $ref: "#/definitions/VmTypeJson"
-  BlueprintParameter:
-    type: "object"
-    properties:
-      name:
-        type: "string"
-      description:
-        type: "string"
-      referenceConfiguration:
-        type: "string"
   SecurityRuleRequest:
     type: "object"
     required:
@@ -8160,6 +8295,15 @@ definitions:
         type: "boolean"
         description: "flag for making the rule modifiable"
         default: false
+  BlueprintParameter:
+    type: "object"
+    properties:
+      name:
+        type: "string"
+      description:
+        type: "string"
+      referenceConfiguration:
+        type: "string"
   AmbariRepoDetails:
     type: "object"
     required:
@@ -8359,21 +8503,6 @@ definitions:
         additionalProperties:
           type: "object"
           properties: {}
-  ImagesResponse:
-    type: "object"
-    properties:
-      baseImages:
-        type: "array"
-        items:
-          $ref: "#/definitions/BaseImageResponse"
-      hdpImages:
-        type: "array"
-        items:
-          $ref: "#/definitions/ImageResponse"
-      hdfImages:
-        type: "array"
-        items:
-          $ref: "#/definitions/ImageResponse"
   ClusterV2Request:
     type: "object"
     properties:
@@ -8412,6 +8541,21 @@ definitions:
       ambariRequest:
         description: "ambari specific requests"
         $ref: "#/definitions/AmbariV2Request"
+  ImagesResponse:
+    type: "object"
+    properties:
+      baseImages:
+        type: "array"
+        items:
+          $ref: "#/definitions/BaseImageResponse"
+      hdpImages:
+        type: "array"
+        items:
+          $ref: "#/definitions/ImageResponse"
+      hdfImages:
+        type: "array"
+        items:
+          $ref: "#/definitions/ImageResponse"
   GatewayJson:
     type: "object"
     properties:
@@ -8754,13 +8898,6 @@ definitions:
         type: "integer"
         format: "int64"
         description: "Epoch time of cluster creation finish"
-  RdsConfigProperty:
-    type: "object"
-    properties:
-      name:
-        type: "string"
-      value:
-        type: "string"
   VmTypeJson:
     type: "object"
     properties:
@@ -8768,6 +8905,13 @@ definitions:
         type: "string"
       vmTypeMetaJson:
         $ref: "#/definitions/VmTypeMetaJson"
+  RdsConfigProperty:
+    type: "object"
+    properties:
+      name:
+        type: "string"
+      value:
+        type: "string"
   PlatformOrchestratorsJson:
     type: "object"
     properties:
@@ -8857,26 +9001,6 @@ definitions:
             type: "object"
             additionalProperties:
               type: "string"
-  AmbariAddress:
-    type: "object"
-    required:
-    - "ambariAddress"
-    properties:
-      ambariAddress:
-        type: "string"
-        description: "ambari server address"
-  NetworkV2Request:
-    type: "object"
-    properties:
-      subnetCIDR:
-        type: "string"
-        description: "the subnet definition of the network in CIDR format"
-      parameters:
-        type: "object"
-        description: "provider specific parameters of the specified network"
-        additionalProperties:
-          type: "object"
-          properties: {}
   SecurityRulesResponse:
     type: "object"
     properties:
@@ -8890,6 +9014,26 @@ definitions:
         description: "security rules for gateway type"
         items:
           $ref: "#/definitions/SecurityRuleResponse"
+  NetworkV2Request:
+    type: "object"
+    properties:
+      subnetCIDR:
+        type: "string"
+        description: "the subnet definition of the network in CIDR format"
+      parameters:
+        type: "object"
+        description: "provider specific parameters of the specified network"
+        additionalProperties:
+          type: "object"
+          properties: {}
+  AmbariAddress:
+    type: "object"
+    required:
+    - "ambariAddress"
+    properties:
+      ambariAddress:
+        type: "string"
+        description: "ambari server address"
   AmbariV2Request:
     type: "object"
     required:
@@ -9054,6 +9198,36 @@ definitions:
       instanceGroupAdjustment:
         description: "instance group adjustment"
         $ref: "#/definitions/InstanceGroupAdjustment"
+  PlatformVariantsJson:
+    type: "object"
+    properties:
+      platformToVariants:
+        type: "object"
+        description: "platform variants"
+        additionalProperties:
+          type: "array"
+          items:
+            type: "string"
+      defaultVariants:
+        type: "object"
+        description: "default variants"
+        additionalProperties:
+          type: "string"
+  SpecialParametersJson:
+    type: "object"
+    properties:
+      specialParameters:
+        type: "object"
+        description: "custom parameters"
+        additionalProperties:
+          type: "boolean"
+      platformSpecificSpecialParameters:
+        type: "object"
+        description: "platform specific custom parameters"
+        additionalProperties:
+          type: "object"
+          additionalProperties:
+            type: "boolean"
   HostGroupAdjustment:
     type: "object"
     required:
@@ -9075,36 +9249,6 @@ definitions:
         type: "boolean"
         description: "validate node count during downscale"
         default: false
-  SpecialParametersJson:
-    type: "object"
-    properties:
-      specialParameters:
-        type: "object"
-        description: "custom parameters"
-        additionalProperties:
-          type: "boolean"
-      platformSpecificSpecialParameters:
-        type: "object"
-        description: "platform specific custom parameters"
-        additionalProperties:
-          type: "object"
-          additionalProperties:
-            type: "boolean"
-  PlatformVariantsJson:
-    type: "object"
-    properties:
-      platformToVariants:
-        type: "object"
-        description: "platform variants"
-        additionalProperties:
-          type: "array"
-          items:
-            type: "string"
-      defaultVariants:
-        type: "object"
-        description: "default variants"
-        additionalProperties:
-          type: "string"
   OperationDetails:
     type: "object"
     properties:
@@ -9148,32 +9292,6 @@ definitions:
         description: "list of security rules that relates to the security group"
         items:
           $ref: "#/definitions/SecurityRuleRequest"
-  FileSystem:
-    type: "object"
-    required:
-    - "name"
-    - "type"
-    properties:
-      name:
-        type: "string"
-        description: "name of the filesystem"
-      type:
-        type: "string"
-        description: "type of the filesystem"
-        enum:
-        - "WASB_INTEGRATED"
-        - "GCS"
-        - "WASB"
-        - "ADLS"
-      defaultFs:
-        type: "boolean"
-        description: "true if fs.defaultFS should point to this filesystem"
-        default: false
-      properties:
-        type: "object"
-        description: "configuration of the filesystem access as key-value pairs"
-        additionalProperties:
-          type: "string"
   TemplateV2Request:
     type: "object"
     properties:
@@ -9200,6 +9318,32 @@ definitions:
       customInstanceType:
         description: "custom instancetype definition"
         $ref: "#/definitions/CustomInstanceType"
+  FileSystem:
+    type: "object"
+    required:
+    - "name"
+    - "type"
+    properties:
+      name:
+        type: "string"
+        description: "name of the filesystem"
+      type:
+        type: "string"
+        description: "type of the filesystem"
+        enum:
+        - "WASB_INTEGRATED"
+        - "GCS"
+        - "WASB"
+        - "ADLS"
+      defaultFs:
+        type: "boolean"
+        description: "true if fs.defaultFS should point to this filesystem"
+        default: false
+      properties:
+        type: "object"
+        description: "configuration of the filesystem access as key-value pairs"
+        additionalProperties:
+          type: "string"
   StackAuthenticationResponse:
     type: "object"
     properties:
@@ -9535,6 +9679,30 @@ definitions:
         additionalProperties:
           type: "object"
           properties: {}
+  PlatformResourceRequestJson:
+    type: "object"
+    properties:
+      credentialId:
+        type: "integer"
+        format: "int64"
+        description: "credential resource id for the request"
+      credentialName:
+        type: "string"
+        description: "credential resource name for the request"
+      region:
+        type: "string"
+        description: "Related region"
+      platformVariant:
+        type: "string"
+        description: "cloud provider api variant"
+      filters:
+        type: "object"
+        description: "filter for resources"
+        additionalProperties:
+          type: "string"
+      availabilityZone:
+        type: "string"
+        description: "related availability zone"
   BlueprintResponse:
     type: "object"
     required:
@@ -9576,30 +9744,6 @@ definitions:
         type: "boolean"
         description: "resource is visible in account"
         default: false
-  PlatformResourceRequestJson:
-    type: "object"
-    properties:
-      credentialId:
-        type: "integer"
-        format: "int64"
-        description: "credential resource id for the request"
-      credentialName:
-        type: "string"
-        description: "credential resource name for the request"
-      region:
-        type: "string"
-        description: "Related region"
-      platformVariant:
-        type: "string"
-        description: "cloud provider api variant"
-      filters:
-        type: "object"
-        description: "filter for resources"
-        additionalProperties:
-          type: "string"
-      availabilityZone:
-        type: "string"
-        description: "related availability zone"
   CredentialSourceRequest:
     type: "object"
     required:
@@ -9740,6 +9884,22 @@ definitions:
       securityGroup:
         description: "instancegroup related securitygroup"
         $ref: "#/definitions/SecurityGroupRequest"
+  ClusterTemplateRequest:
+    type: "object"
+    required:
+    - "name"
+    properties:
+      name:
+        type: "string"
+        description: "name of the cluster template"
+      template:
+        type: "string"
+        description: "stringified template JSON"
+      type:
+        type: "string"
+        description: "type of the cluster template"
+        enum:
+        - "QUICK_START"
   PlatformDisksJson:
     type: "object"
     properties:
@@ -9769,22 +9929,6 @@ definitions:
           type: "object"
           additionalProperties:
             type: "string"
-  ClusterTemplateRequest:
-    type: "object"
-    required:
-    - "name"
-    properties:
-      name:
-        type: "string"
-        description: "name of the cluster template"
-      template:
-        type: "string"
-        description: "stringified template JSON"
-      type:
-        type: "string"
-        description: "type of the cluster template"
-        enum:
-        - "QUICK_START"
   ConstraintTemplateRequest:
     type: "object"
     required:
@@ -9894,16 +10038,6 @@ definitions:
       kerberosPrincipal:
         type: "string"
         description: "kerberos principal"
-  FailureReport:
-    type: "object"
-    required:
-    - "failedNodes"
-    properties:
-      failedNodes:
-        type: "array"
-        description: "List of failed nodes"
-        items:
-          type: "string"
   CredentialRequest:
     type: "object"
     required:
@@ -9934,6 +10068,16 @@ definitions:
         type: "integer"
         format: "int64"
         description: "id of the topology the resource belongs to"
+  FailureReport:
+    type: "object"
+    required:
+    - "failedNodes"
+    properties:
+      failedNodes:
+        type: "array"
+        description: "List of failed nodes"
+        items:
+          type: "string"
   StackAuthentication:
     type: "object"
     properties:
@@ -10198,16 +10342,6 @@ definitions:
       default:
         type: "boolean"
         default: false
-  SubscriptionRequest:
-    type: "object"
-    required:
-    - "endpointUrl"
-    properties:
-      endpointUrl:
-        type: "string"
-        description: "url of the endpoint"
-        pattern: "^(https?:\\/\\/)((([\\da-z\\.-]+)\\.([a-z]{2,6}))|localhost|[1-9][0-9]{0,2}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3})(:[1-9][0-9]{1,4})?\\\
-          /([\\/\\w\\.-]*)\\/?$"
   StackV2Request:
     type: "object"
     required:
@@ -10309,12 +10443,31 @@ definitions:
       clusterRequest:
         description: "cluster request object on stack"
         $ref: "#/definitions/ClusterV2Request"
+  SubscriptionRequest:
+    type: "object"
+    required:
+    - "endpointUrl"
+    properties:
+      endpointUrl:
+        type: "string"
+        description: "url of the endpoint"
+        pattern: "^(https?:\\/\\/)((([\\da-z\\.-]+)\\.([a-z]{2,6}))|localhost|[1-9][0-9]{0,2}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3})(:[1-9][0-9]{1,4})?\\\
+          /([\\/\\w\\.-]*)\\/?$"
   ImageJson:
     type: "object"
     properties:
       imageName:
         type: "string"
         description: "name of the image"
+      imageCatalogUrl:
+        type: "string"
+        description: "url of the image catalog"
+      imageId:
+        type: "string"
+        description: "id of the image"
+      imageCatalogName:
+        type: "string"
+        description: "name of the image catalog"
   PlatformGatewaysResponse:
     type: "object"
     properties:
@@ -10352,16 +10505,6 @@ definitions:
       bindPassword:
         type: "string"
         description: "password for the provided bind DN"
-  PlatformSshKeyResponse:
-    type: "object"
-    properties:
-      name:
-        type: "string"
-      properties:
-        type: "object"
-        additionalProperties:
-          type: "object"
-          properties: {}
   ClusterTemplateResponse:
     type: "object"
     required:
@@ -10382,6 +10525,16 @@ definitions:
         type: "integer"
         format: "int64"
         description: "id of the resource"
+  PlatformSshKeyResponse:
+    type: "object"
+    properties:
+      name:
+        type: "string"
+      properties:
+        type: "object"
+        additionalProperties:
+          type: "object"
+          properties: {}
   RecipeResponse:
     type: "object"
     required:
@@ -10651,6 +10804,10 @@ definitions:
         maxLength: 50
       url:
         type: "string"
+        description: "kerberos KDC server URL"
+      adminUrl:
+        type: "string"
+        description: "kerberos admin server URL"
       realm:
         type: "string"
       principal:
@@ -10666,13 +10823,6 @@ definitions:
       descriptor:
         type: "string"
       krb5Conf:
-        type: "string"
-  BlueprintInput:
-    type: "object"
-    properties:
-      name:
-        type: "string"
-      propertyValue:
         type: "string"
   LdapConfigRequest:
     type: "object"
@@ -10747,6 +10897,13 @@ definitions:
       bindPassword:
         type: "string"
         description: "password for the provided bind DN"
+  BlueprintInput:
+    type: "object"
+    properties:
+      name:
+        type: "string"
+      propertyValue:
+        type: "string"
   ClusterRepairRequest:
     type: "object"
     required:

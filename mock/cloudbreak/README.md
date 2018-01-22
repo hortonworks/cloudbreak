@@ -113,7 +113,7 @@ definitions:
 ```
 
 ### Extend Paths
-Exend all the `paths:` with `/api`, for example change `/v1/accountpreferences/isplatformselectiondisabled:` to `/api/v1/accountpreferences/isplatformselectiondisabled:`
+Extend all the `paths:` with `/api`, for example change `/v1/accountpreferences/isplatformselectiondisabled:` to `/api/v1/accountpreferences/isplatformselectiondisabled:`
 
 ## Provide responses to all the needed Services
 Introduce brand new Services for Cloudbreak Info and Health here as well. The new files should be [Info.js](controllers/Info.js) and [InfoService.js](controllers/InfoService.js).
@@ -209,6 +209,7 @@ docker build -t hortonworks/cloudbreak-mock .
 First, initialize Cloudbreak Mock by updating the CBD Profile file with the following content:
 ```
 export DOCKER_IMAGE_CLOUDBREAK=hortonworks/cloudbreak-mock
+export DOCKER_TAG_CLOUDBREAK=latest
 ```
 
 ## Start Cloudbreak Mock
