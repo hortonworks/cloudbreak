@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -19,14 +21,14 @@ public class PollingService<T> {
      * @param interval    sleeps this many milliseconds between status checking attempts
      * @param maxAttempts signals how many times will the status check be executed before timeout
      */
-    public PollingResult pollWithTimeout(StatusCheckerTask<T> statusCheckerTask, T t, int interval, int maxAttempts, int maxFailure) {
+    public Pair<PollingResult, Exception> pollWithTimeout(StatusCheckerTask<T> statusCheckerTask, T t, long interval, int maxAttempts, int maxFailure) {
         boolean success = false;
         boolean timeout = false;
         int attempts = 0;
         int failures = 0;
         Exception actual = null;
         boolean exit = statusCheckerTask.exitPolling(t);
-        while (!success && !timeout && !exit) {
+        while (!timeout && !exit) {
             LOGGER.info("Polling attempt {}.", attempts);
             try {
                 success = statusCheckerTask.checkStatus(t);
@@ -38,11 +40,10 @@ public class PollingService<T> {
             if (failures >= maxFailure) {
                 LOGGER.info("Polling failure reached the limit which was {}, poller will drop the last exception.", maxFailure);
                 statusCheckerTask.handleException(actual);
-                return PollingResult.FAILURE;
-            }
-            if (success) {
+                return new ImmutablePair<>(PollingResult.FAILURE, actual);
+            } else if (success) {
                 LOGGER.info(statusCheckerTask.successMessage(t));
-                return PollingResult.SUCCESS;
+                return new ImmutablePair<>(PollingResult.SUCCESS, actual);
             }
             sleep(interval);
             attempts++;
@@ -54,19 +55,17 @@ public class PollingService<T> {
         if (timeout) {
             LOGGER.info("Poller timeout.");
             statusCheckerTask.handleTimeout(t);
-            return PollingResult.TIMEOUT;
-        } else if (exit) {
-            LOGGER.info("Poller exiting.");
-            return PollingResult.EXIT;
+            return new ImmutablePair<>(PollingResult.TIMEOUT, actual);
         }
-        return PollingResult.SUCCESS;
+        LOGGER.info("Poller exiting.");
+        return new ImmutablePair<>(PollingResult.EXIT, actual);
     }
 
     public PollingResult pollWithTimeoutSingleFailure(StatusCheckerTask<T> statusCheckerTask, T t, int interval, int maxAttempts) {
-        return pollWithTimeout(statusCheckerTask, t, interval, maxAttempts, 1);
+        return pollWithTimeout(statusCheckerTask, t, interval, maxAttempts, 1).getLeft();
     }
 
-    private void sleep(int duration) {
+    private void sleep(long duration) {
         try {
             Thread.sleep(duration);
         } catch (InterruptedException e) {

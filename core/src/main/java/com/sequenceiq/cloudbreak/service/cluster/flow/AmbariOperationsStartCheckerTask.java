@@ -39,8 +39,12 @@ public class AmbariOperationsStartCheckerTask extends ClusterBasedStatusCheckerT
                     }
                 }
                 if (failed) {
-                    throw new AmbariOperationFailedException(String.format("Ambari operation start failed: [component:'%s', requestID: '%s']", request.getKey(),
-                            request.getValue()));
+                    Map<String, ?> requests = (Map<String, ?>) ambariClient.getRequestStatus(request.getValue()).get("Requests");
+                    String context = (String) requests.get("request_context");
+                    String status = (String) requests.get("request_status");
+                    throw new AmbariOperationFailedException(
+                            String.format("Ambari operation start failed: [component:'%s', requestID: '%s', context: '%s', status: '%s']",
+                            request.getKey(), request.getValue(), context, status));
                 }
             }
             if (PENDING.compareTo(installProgress) == 0) {
@@ -64,5 +68,4 @@ public class AmbariOperationsStartCheckerTask extends ClusterBasedStatusCheckerT
     public void handleException(Exception e) {
         LOGGER.error("Ambari operation start failed.", e);
     }
-
 }

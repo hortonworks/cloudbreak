@@ -237,7 +237,8 @@ public class AmbariDecommissioner {
             List<String> hostList = new ArrayList<>(hostsToRemove.keySet());
             Map<String, Integer> decommissionRequests = decommissionComponents(ambariClient, hostList, runningComponents);
             if (!decommissionRequests.isEmpty()) {
-                pollingResult = ambariOperationService.waitForOperations(stack, ambariClient, decommissionRequests, DECOMMISSION_AMBARI_PROGRESS_STATE);
+                pollingResult =
+                        ambariOperationService.waitForOperations(stack, ambariClient, decommissionRequests, DECOMMISSION_AMBARI_PROGRESS_STATE).getLeft();
             }
             if (isSuccess(pollingResult)) {
                 pollingResult = waitForDataNodeDecommission(stack, ambariClient, hostList, runningComponents);
@@ -446,7 +447,7 @@ public class AmbariDecommissioner {
 
     private PollingResult waitForHostsToLeave(Stack stack, AmbariClient ambariClient, List<String> hostNames) {
         return ambariHostLeave.pollWithTimeout(hostsLeaveStatusCheckerTask, new AmbariHostsWithNames(stack, ambariClient, hostNames),
-                AMBARI_POLLING_INTERVAL, MAX_ATTEMPTS_FOR_HOSTS, AmbariOperationService.MAX_FAILURE_COUNT);
+                AMBARI_POLLING_INTERVAL, MAX_ATTEMPTS_FOR_HOSTS, AmbariOperationService.MAX_FAILURE_COUNT).getLeft();
     }
 
     private PollingResult waitForDataNodeDecommission(Stack stack, AmbariClient ambariClient, List<String> hosts,
@@ -457,7 +458,7 @@ public class AmbariDecommissioner {
 
         LOGGER.info("Waiting for DataNodes to move the blocks to other nodes. stack id: {}", stack.getId());
         return ambariOperationService.waitForOperations(stack, ambariClient, dnDecommissionStatusCheckerTask, Collections.emptyMap(),
-                DECOMMISSION_SERVICES_AMBARI_PROGRESS_STATE);
+                DECOMMISSION_SERVICES_AMBARI_PROGRESS_STATE).getLeft();
     }
 
     private PollingResult waitForRegionServerDecommission(Stack stack, AmbariClient ambariClient, List<String> hosts,
@@ -529,7 +530,7 @@ public class AmbariDecommissioner {
             if (!hosts.isEmpty()) {
                 int requestId = ambariClient.stopAllComponentsOnHosts(hosts);
                 return ambariOperationService.waitForOperations(stack, ambariClient, singletonMap("Stopping components on the decommissioned hosts", requestId),
-                        STOP_SERVICES_AMBARI_PROGRESS_STATE);
+                        STOP_SERVICES_AMBARI_PROGRESS_STATE).getLeft();
             }
             return SUCCESS;
         } catch (HttpResponseException e) {
@@ -553,7 +554,7 @@ public class AmbariDecommissioner {
         }
 
         if (!requests.isEmpty()) {
-            return ambariOperationService.waitForOperations(stack, ambariClient, requests, START_SERVICES_AMBARI_PROGRESS_STATE);
+            return ambariOperationService.waitForOperations(stack, ambariClient, requests, START_SERVICES_AMBARI_PROGRESS_STATE).getLeft();
         } else {
             return SUCCESS;
         }
