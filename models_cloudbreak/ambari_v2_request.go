@@ -27,6 +27,11 @@ type AmbariV2Request struct {
 	// details of the Ambari package repository
 	AmbariRepoDetailsJSON *AmbariRepoDetails `json:"ambariRepoDetailsJson,omitempty"`
 
+	// a master key for encrypting the passwords in Ambari
+	// Max Length: 100
+	// Min Length: 5
+	AmbariSecurityMasterKey string `json:"ambariSecurityMasterKey,omitempty"`
+
 	// details of the Ambari stack
 	AmbariStackDetails *AmbariStackDetails `json:"ambariStackDetails,omitempty"`
 
@@ -79,6 +84,8 @@ type AmbariV2Request struct {
 
 /* polymorph AmbariV2Request ambariRepoDetailsJson false */
 
+/* polymorph AmbariV2Request ambariSecurityMasterKey false */
+
 /* polymorph AmbariV2Request ambariStackDetails false */
 
 /* polymorph AmbariV2Request blueprintCustomProperties false */
@@ -115,6 +122,11 @@ func (m *AmbariV2Request) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateAmbariRepoDetailsJSON(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateAmbariSecurityMasterKey(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -198,6 +210,23 @@ func (m *AmbariV2Request) validateAmbariRepoDetailsJSON(formats strfmt.Registry)
 			}
 			return err
 		}
+	}
+
+	return nil
+}
+
+func (m *AmbariV2Request) validateAmbariSecurityMasterKey(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.AmbariSecurityMasterKey) { // not required
+		return nil
+	}
+
+	if err := validate.MinLength("ambariSecurityMasterKey", "body", string(m.AmbariSecurityMasterKey), 5); err != nil {
+		return err
+	}
+
+	if err := validate.MaxLength("ambariSecurityMasterKey", "body", string(m.AmbariSecurityMasterKey), 100); err != nil {
+		return err
 	}
 
 	return nil

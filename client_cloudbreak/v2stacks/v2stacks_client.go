@@ -205,6 +205,36 @@ func (a *Client) GetCertificateStackV2(params *GetCertificateStackV2Params) (*Ge
 }
 
 /*
+GetClusterRequestFromName retrieves stack request by stack name
+
+Stacks are template instances - a running cloud infrastructure created based on a template. Stacks are always launched on behalf of a cloud user account. Stacks support a wide range of resources, allowing you to build a highly available, reliable, and scalable infrastructure for your application needs.
+*/
+func (a *Client) GetClusterRequestFromName(params *GetClusterRequestFromNameParams) (*GetClusterRequestFromNameOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetClusterRequestFromNameParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "getClusterRequestFromName",
+		Method:             "GET",
+		PathPattern:        "/v2/stacks/{name}/request",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &GetClusterRequestFromNameReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*GetClusterRequestFromNameOK), nil
+
+}
+
+/*
 GetPrivateStackV2 retrieves a private stack by name
 
 Stacks are template instances - a running cloud infrastructure created based on a template. Stacks are always launched on behalf of a cloud user account. Stacks support a wide range of resources, allowing you to build a highly available, reliable, and scalable infrastructure for your application needs.

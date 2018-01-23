@@ -86,6 +86,9 @@ type ClusterResponse struct {
 	// id of the resource
 	ID int64 `json:"id,omitempty"`
 
+	// kerberos response
+	KerberosResponse *KerberosResponse `json:"kerberosResponse,omitempty"`
+
 	// LDAP config for the cluster
 	LdapConfig *LdapConfigResponse `json:"ldapConfig,omitempty"`
 
@@ -164,6 +167,8 @@ type ClusterResponse struct {
 
 /* polymorph ClusterResponse id false */
 
+/* polymorph ClusterResponse kerberosResponse false */
+
 /* polymorph ClusterResponse ldapConfig false */
 
 /* polymorph ClusterResponse ldapConfigId false */
@@ -236,6 +241,11 @@ func (m *ClusterResponse) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateHostGroups(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateKerberosResponse(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -523,6 +533,25 @@ func (m *ClusterResponse) validateHostGroups(formats strfmt.Registry) error {
 			}
 		}
 
+	}
+
+	return nil
+}
+
+func (m *ClusterResponse) validateKerberosResponse(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.KerberosResponse) { // not required
+		return nil
+	}
+
+	if m.KerberosResponse != nil {
+
+		if err := m.KerberosResponse.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("kerberosResponse")
+			}
+			return err
+		}
 	}
 
 	return nil

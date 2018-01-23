@@ -265,6 +265,36 @@ func (a *Client) GetRecipe(params *GetRecipeParams) (*GetRecipeOK, error) {
 }
 
 /*
+GetRecipeRequestFromName retrieves recipe request by recipe name
+
+Recipes are basically script extensions to a cluster that run on a set of nodes before or after the Ambari cluster installation.
+*/
+func (a *Client) GetRecipeRequestFromName(params *GetRecipeRequestFromNameParams) (*GetRecipeRequestFromNameOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetRecipeRequestFromNameParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "getRecipeRequestFromName",
+		Method:             "GET",
+		PathPattern:        "/v1/recipes/{name}/request",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &GetRecipeRequestFromNameReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*GetRecipeRequestFromNameOK), nil
+
+}
+
+/*
 PostPrivateRecipe creates recipe as private resource
 
 Recipes are basically script extensions to a cluster that run on a set of nodes before or after the Ambari cluster installation.

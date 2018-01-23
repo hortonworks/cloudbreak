@@ -86,6 +86,9 @@ type AutoscaleClusterResponse struct {
 	// id of the resource
 	ID int64 `json:"id,omitempty"`
 
+	// kerberos response
+	KerberosResponse *KerberosResponse `json:"kerberosResponse,omitempty"`
+
 	// LDAP config for the cluster
 	LdapConfig *LdapConfigResponse `json:"ldapConfig,omitempty"`
 
@@ -167,6 +170,8 @@ type AutoscaleClusterResponse struct {
 
 /* polymorph AutoscaleClusterResponse id false */
 
+/* polymorph AutoscaleClusterResponse kerberosResponse false */
+
 /* polymorph AutoscaleClusterResponse ldapConfig false */
 
 /* polymorph AutoscaleClusterResponse ldapConfigId false */
@@ -241,6 +246,11 @@ func (m *AutoscaleClusterResponse) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateHostGroups(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateKerberosResponse(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -528,6 +538,25 @@ func (m *AutoscaleClusterResponse) validateHostGroups(formats strfmt.Registry) e
 			}
 		}
 
+	}
+
+	return nil
+}
+
+func (m *AutoscaleClusterResponse) validateKerberosResponse(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.KerberosResponse) { // not required
+		return nil
+	}
+
+	if m.KerberosResponse != nil {
+
+		if err := m.KerberosResponse.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("kerberosResponse")
+			}
+			return err
+		}
 	}
 
 	return nil

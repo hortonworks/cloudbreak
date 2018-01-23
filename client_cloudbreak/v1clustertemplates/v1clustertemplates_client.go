@@ -145,36 +145,6 @@ func (a *Client) GetClusterTemplate(params *GetClusterTemplateParams) (*GetClust
 }
 
 /*
-GetClusterTemplateFromClusterName retrieves cluster template by cluster name
-
-Cluster templates are stored cluster configurations, which configurations are reusable any time
-*/
-func (a *Client) GetClusterTemplateFromClusterName(params *GetClusterTemplateFromClusterNameParams) (*GetClusterTemplateFromClusterNameOK, error) {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewGetClusterTemplateFromClusterNameParams()
-	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "getClusterTemplateFromClusterName",
-		Method:             "GET",
-		PathPattern:        "/v1/clustertemplates/cluster/user/{name}",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
-		Params:             params,
-		Reader:             &GetClusterTemplateFromClusterNameReader{formats: a.formats},
-		Context:            params.Context,
-		Client:             params.HTTPClient,
-	})
-	if err != nil {
-		return nil, err
-	}
-	return result.(*GetClusterTemplateFromClusterNameOK), nil
-
-}
-
-/*
 GetPrivateClusterTemplate retrieves a private cluster template by name
 
 Cluster templates are stored cluster configurations, which configurations are reusable any time
