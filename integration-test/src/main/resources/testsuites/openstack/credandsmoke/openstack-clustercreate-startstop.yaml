@@ -23,6 +23,13 @@ tests:
     classes:
       - com.sequenceiq.it.cloudbreak.OpenStackNetworkCreationTest
 
+  - name: create security group
+    parameters:
+      name: it-os-credandsmoke-secgroup-ss
+      provider: OPENSTACK
+    classes:
+      - com.sequenceiq.it.cloudbreak.SecurityGroupCreationTest
+
   - name: create gateway template
     parameters:
       templateName: it-openstack-credandsmoke-gateway-ss
