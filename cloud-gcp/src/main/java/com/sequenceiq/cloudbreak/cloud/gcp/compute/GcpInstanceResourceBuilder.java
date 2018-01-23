@@ -4,8 +4,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,6 +44,7 @@ import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
+import com.sequenceiq.cloudbreak.common.service.DefaultCostTaggingService;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 
 @Component
@@ -55,6 +59,9 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
     private static final String PREEMPTIBLE = "preemptible";
 
     private static final int ORDER = 3;
+
+    @Inject
+    private DefaultCostTaggingService defaultCostTaggingService;
 
     @Override
     public List<CloudResource> create(GcpContext context, long privateId, AuthenticatedContext auth, Group group, Image image) {
@@ -96,13 +103,24 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
 
         Tags tags = new Tags();
         List<String> tagList = new ArrayList<>();
+        Map<String, String> labels = new HashMap<>();
         String groupname = group.getName().toLowerCase().replaceAll("[^A-Za-z0-9 ]", "");
         tagList.add(groupname);
+        Map<String, String> instanceTag = defaultCostTaggingService.prepareInstanceTagging();
+        for (Map.Entry<String, String> entry : instanceTag.entrySet()) {
+            tagList.add(String.format("%s-%s", entry.getKey(), entry.getValue()));
+            labels.put(entry.getKey(), entry.getValue());
+        }
+
         tagList.add(GcpStackUtil.getClusterTag(auth.getCloudContext()));
         tagList.add(GcpStackUtil.getGroupClusterTag(auth.getCloudContext(), group));
         customTags.entrySet().forEach(e -> tagList.add(e.getKey() + '-' + e.getValue()));
+
+        labels.putAll(customTags);
         tags.setItems(tagList);
+
         instance.setTags(tags);
+        instance.setLabels(labels);
 
         Metadata metadata = new Metadata();
         metadata.setItems(new ArrayList<>());

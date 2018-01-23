@@ -74,7 +74,6 @@ public class GcpFirewallInternalResourceBuilder extends AbstractGcpNetworkBuilde
         }
         firewall.setNetwork(String.format("https://www.googleapis.com/compute/v1/projects/%s/global/networks/%s", projectId,
                 context.getParameter(GcpNetworkResourceBuilder.NETWORK_NAME, String.class)));
-
         Insert firewallInsert = context.getCompute().firewalls().insert(projectId, firewall);
         try {
             Operation operation = firewallInsert.execute();

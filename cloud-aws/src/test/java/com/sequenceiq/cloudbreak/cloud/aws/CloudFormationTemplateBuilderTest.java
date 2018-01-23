@@ -3,6 +3,8 @@ package com.sequenceiq.cloudbreak.cloud.aws;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.when;
+import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -17,6 +19,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.ui.freemarker.FreeMarkerConfigurationFactoryBean;
 
@@ -43,6 +47,8 @@ import com.sequenceiq.cloudbreak.cloud.model.Security;
 import com.sequenceiq.cloudbreak.cloud.model.SecurityRule;
 import com.sequenceiq.cloudbreak.cloud.model.Subnet;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
+import com.sequenceiq.cloudbreak.common.service.DefaultCostTaggingService;
+import com.sequenceiq.cloudbreak.common.type.CloudbreakResourceType;
 
 import freemarker.template.Configuration;
 
@@ -51,6 +57,10 @@ public class CloudFormationTemplateBuilderTest {
 
     public static final String LATEST_AWS_CLOUD_FORMATION_TEMPLATE_PATH = "templates/aws-cf-stack.ftl";
 
+    @Mock
+    private DefaultCostTaggingService defaultCostTaggingService;
+
+    @InjectMocks
     private final CloudFormationTemplateBuilder cloudFormationTemplateBuilder = new CloudFormationTemplateBuilder();
 
     private CloudStack cloudStack;
@@ -66,6 +76,8 @@ public class CloudFormationTemplateBuilderTest {
     private String existingSubnetCidr;
 
     private String templatePath;
+
+    private Map<String, String> defaultTags = new HashMap<>();
 
     public CloudFormationTemplateBuilderTest(String templatePath) {
         this.templatePath = templatePath;
@@ -85,6 +97,7 @@ public class CloudFormationTemplateBuilderTest {
 
     @Before
     public void setUp() throws Exception {
+        initMocks(this);
         FreeMarkerConfigurationFactoryBean factoryBean = new FreeMarkerConfigurationFactoryBean();
         factoryBean.setPreferFileSystemAccess(false);
         factoryBean.setTemplateLoaderPath("classpath:/");
@@ -121,6 +134,14 @@ public class CloudFormationTemplateBuilderTest {
         parameters.put("attachedStorageOption", "attachedStorageOptionTest");
         Map<String, String> tags = new HashMap<>();
         tags.put("testtagkey", "testtagvalue");
+
+        defaultTags.put(CloudbreakResourceType.DISK.templateVariable(), CloudbreakResourceType.DISK.key());
+        defaultTags.put(CloudbreakResourceType.INSTANCE.templateVariable(), CloudbreakResourceType.INSTANCE.key());
+        defaultTags.put(CloudbreakResourceType.IP.templateVariable(), CloudbreakResourceType.IP.key());
+        defaultTags.put(CloudbreakResourceType.NETWORK.templateVariable(), CloudbreakResourceType.NETWORK.key());
+        defaultTags.put(CloudbreakResourceType.SECURITY.templateVariable(), CloudbreakResourceType.SECURITY.key());
+        defaultTags.put(CloudbreakResourceType.STORAGE.templateVariable(), CloudbreakResourceType.STORAGE.key());
+        defaultTags.put(CloudbreakResourceType.TEMPLATE.templateVariable(), CloudbreakResourceType.TEMPLATE.key());
         cloudStack = new CloudStack(groups, network, image, parameters, tags, null,
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey());
     }
@@ -144,6 +165,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withEnableInstanceProfile(enableInstanceProfile)
                 .withInstanceProfileAvailable(instanceProfileAvailable)
                 .withTemplate(awsCloudFormationTemplate);
+        when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
 
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
@@ -173,6 +195,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withEnableInstanceProfile(enableInstanceProfile)
                 .withInstanceProfileAvailable(instanceProfileAvailable)
                 .withTemplate(awsCloudFormationTemplate);
+        when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
 
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
@@ -195,6 +218,7 @@ public class CloudFormationTemplateBuilderTest {
         boolean mapPublicIpOnLaunch = true;
         boolean enableInstanceProfile = false;
         boolean instanceProfileAvailable = true;
+
         //WHEN
         modelContext = new ModelContext()
                 .withAuthenticatedContext(authenticatedContext)
@@ -206,6 +230,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withEnableInstanceProfile(enableInstanceProfile)
                 .withInstanceProfileAvailable(instanceProfileAvailable)
                 .withTemplate(awsCloudFormationTemplate);
+        when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
 
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
@@ -228,6 +253,7 @@ public class CloudFormationTemplateBuilderTest {
         boolean mapPublicIpOnLaunch = true;
         boolean enableInstanceProfile = true;
         boolean instanceProfileAvailable = false;
+
         //WHEN
         modelContext = new ModelContext()
                 .withAuthenticatedContext(authenticatedContext)
@@ -239,6 +265,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withEnableInstanceProfile(enableInstanceProfile)
                 .withInstanceProfileAvailable(instanceProfileAvailable)
                 .withTemplate(awsCloudFormationTemplate);
+        when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
 
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
@@ -261,6 +288,7 @@ public class CloudFormationTemplateBuilderTest {
         boolean mapPublicIpOnLaunch = true;
         boolean enableInstanceProfile = false;
         boolean instanceProfileAvailable = false;
+
         //WHEN
         modelContext = new ModelContext()
                 .withAuthenticatedContext(authenticatedContext)
@@ -272,6 +300,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withEnableInstanceProfile(enableInstanceProfile)
                 .withInstanceProfileAvailable(instanceProfileAvailable)
                 .withTemplate(awsCloudFormationTemplate);
+        when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
 
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
@@ -294,6 +323,7 @@ public class CloudFormationTemplateBuilderTest {
         boolean mapPublicIpOnLaunch = false;
         boolean enableInstanceProfile = true;
         boolean instanceProfileAvailable = true;
+
         //WHEN
         modelContext = new ModelContext()
                 .withAuthenticatedContext(authenticatedContext)
@@ -305,6 +335,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withEnableInstanceProfile(enableInstanceProfile)
                 .withInstanceProfileAvailable(instanceProfileAvailable)
                 .withTemplate(awsCloudFormationTemplate);
+        when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
 
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
@@ -327,6 +358,7 @@ public class CloudFormationTemplateBuilderTest {
         boolean mapPublicIpOnLaunch = false;
         boolean enableInstanceProfile = false;
         boolean instanceProfileAvailable = true;
+
         //WHEN
         modelContext = new ModelContext()
                 .withAuthenticatedContext(authenticatedContext)
@@ -338,6 +370,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withEnableInstanceProfile(enableInstanceProfile)
                 .withInstanceProfileAvailable(instanceProfileAvailable)
                 .withTemplate(awsCloudFormationTemplate);
+        when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
 
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
@@ -371,6 +404,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withEnableInstanceProfile(enableInstanceProfile)
                 .withInstanceProfileAvailable(instanceProfileAvailable)
                 .withTemplate(awsCloudFormationTemplate);
+        when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
 
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
@@ -393,6 +427,7 @@ public class CloudFormationTemplateBuilderTest {
         boolean mapPublicIpOnLaunch = false;
         boolean enableInstanceProfile = false;
         boolean instanceProfileAvailable = false;
+
         //WHEN
         modelContext = new ModelContext()
                 .withAuthenticatedContext(authenticatedContext)
@@ -404,6 +439,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withEnableInstanceProfile(enableInstanceProfile)
                 .withInstanceProfileAvailable(instanceProfileAvailable)
                 .withTemplate(awsCloudFormationTemplate);
+        when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
 
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
@@ -426,6 +462,7 @@ public class CloudFormationTemplateBuilderTest {
         boolean mapPublicIpOnLaunch = false;
         boolean enableInstanceProfile = true;
         boolean instanceProfileAvailable = true;
+
         //WHEN
         modelContext = new ModelContext()
                 .withAuthenticatedContext(authenticatedContext)
@@ -437,6 +474,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withEnableInstanceProfile(enableInstanceProfile)
                 .withInstanceProfileAvailable(instanceProfileAvailable)
                 .withTemplate(awsCloudFormationTemplate);
+        when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
 
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
@@ -459,6 +497,7 @@ public class CloudFormationTemplateBuilderTest {
         boolean mapPublicIpOnLaunch = false;
         boolean enableInstanceProfile = false;
         boolean instanceProfileAvailable = true;
+
         //WHEN
         modelContext = new ModelContext()
                 .withAuthenticatedContext(authenticatedContext)
@@ -470,6 +509,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withEnableInstanceProfile(enableInstanceProfile)
                 .withInstanceProfileAvailable(instanceProfileAvailable)
                 .withTemplate(awsCloudFormationTemplate);
+        when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
 
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
@@ -492,6 +532,7 @@ public class CloudFormationTemplateBuilderTest {
         boolean mapPublicIpOnLaunch = false;
         boolean enableInstanceProfile = true;
         boolean instanceProfileAvailable = false;
+
         //WHEN
         modelContext = new ModelContext()
                 .withAuthenticatedContext(authenticatedContext)
@@ -503,6 +544,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withEnableInstanceProfile(enableInstanceProfile)
                 .withInstanceProfileAvailable(instanceProfileAvailable)
                 .withTemplate(awsCloudFormationTemplate);
+        when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
 
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
@@ -525,6 +567,7 @@ public class CloudFormationTemplateBuilderTest {
         boolean mapPublicIpOnLaunch = false;
         boolean enableInstanceProfile = false;
         boolean instanceProfileAvailable = false;
+
         //WHEN
         modelContext = new ModelContext()
                 .withAuthenticatedContext(authenticatedContext)
@@ -536,6 +579,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withEnableInstanceProfile(enableInstanceProfile)
                 .withInstanceProfileAvailable(instanceProfileAvailable)
                 .withTemplate(awsCloudFormationTemplate);
+        when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
 
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
@@ -558,6 +602,7 @@ public class CloudFormationTemplateBuilderTest {
         boolean mapPublicIpOnLaunch = false;
         boolean enableInstanceProfile = true;
         boolean instanceProfileAvailable = true;
+
         //WHEN
         modelContext = new ModelContext()
                 .withAuthenticatedContext(authenticatedContext)
@@ -569,6 +614,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withEnableInstanceProfile(enableInstanceProfile)
                 .withInstanceProfileAvailable(instanceProfileAvailable)
                 .withTemplate(awsCloudFormationTemplate);
+        when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
 
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
@@ -591,6 +637,7 @@ public class CloudFormationTemplateBuilderTest {
         boolean mapPublicIpOnLaunch = false;
         boolean enableInstanceProfile = true;
         boolean instanceProfileAvailable = false;
+
         //WHEN
         modelContext = new ModelContext()
                 .withAuthenticatedContext(authenticatedContext)
@@ -602,6 +649,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withEnableInstanceProfile(enableInstanceProfile)
                 .withInstanceProfileAvailable(instanceProfileAvailable)
                 .withTemplate(awsCloudFormationTemplate);
+        when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
 
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
@@ -624,6 +672,7 @@ public class CloudFormationTemplateBuilderTest {
         boolean mapPublicIpOnLaunch = false;
         boolean enableInstanceProfile = false;
         boolean instanceProfileAvailable = true;
+
         //WHEN
         modelContext = new ModelContext()
                 .withAuthenticatedContext(authenticatedContext)
@@ -635,6 +684,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withEnableInstanceProfile(enableInstanceProfile)
                 .withInstanceProfileAvailable(instanceProfileAvailable)
                 .withTemplate(awsCloudFormationTemplate);
+        when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
 
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
@@ -657,6 +707,8 @@ public class CloudFormationTemplateBuilderTest {
         boolean mapPublicIpOnLaunch = false;
         boolean enableInstanceProfile = false;
         boolean instanceProfileAvailable = false;
+        when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
+
         //WHEN
         modelContext = new ModelContext()
                 .withAuthenticatedContext(authenticatedContext)
@@ -668,6 +720,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withEnableInstanceProfile(enableInstanceProfile)
                 .withInstanceProfileAvailable(instanceProfileAvailable)
                 .withTemplate(awsCloudFormationTemplate);
+        when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
 
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN

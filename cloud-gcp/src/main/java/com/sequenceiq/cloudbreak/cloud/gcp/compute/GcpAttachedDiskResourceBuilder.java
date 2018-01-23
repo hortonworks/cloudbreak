@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.gcp.compute;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -32,6 +33,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
+import com.sequenceiq.cloudbreak.common.service.DefaultCostTaggingService;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 
 @Component
@@ -40,6 +42,9 @@ public class GcpAttachedDiskResourceBuilder extends AbstractGcpComputeBuilder {
     @Inject
     @Qualifier("intermediateBuilderExecutor")
     private AsyncTaskExecutor intermediateBuilderExecutor;
+
+    @Inject
+    private DefaultCostTaggingService defaultCostTaggingService;
 
     @Override
     public List<CloudResource> create(GcpContext context, long privateId, AuthenticatedContext auth, Group group, Image image) {
@@ -71,7 +76,7 @@ public class GcpAttachedDiskResourceBuilder extends AbstractGcpComputeBuilder {
         Compute compute = context.getCompute();
         List<Future<Void>> futures = new ArrayList<>();
         for (CloudResource cloudResource : buildableResource) {
-            Disk disk = createDisk(volume, projectId, location.getAvailabilityZone(), cloudResource.getName());
+            Disk disk = createDisk(volume, projectId, location.getAvailabilityZone(), cloudResource.getName(), tags);
             Future<Void> submit = intermediateBuilderExecutor.submit(new Callable<Void>() {
                 @Override
                 public Void call() throws Exception {
@@ -119,11 +124,17 @@ public class GcpAttachedDiskResourceBuilder extends AbstractGcpComputeBuilder {
         return 1;
     }
 
-    private Disk createDisk(Volume volume, String projectId, AvailabilityZone availabilityZone, String resourceName) {
+    private Disk createDisk(Volume volume, String projectId, AvailabilityZone availabilityZone, String resourceName, Map<String, String> tags) {
         Disk disk = new Disk();
         disk.setSizeGb((long) volume.getSize());
         disk.setName(resourceName);
         disk.setType(GcpDiskType.getUrl(projectId, availabilityZone, volume.getType()));
+
+        Map<String, String> customTags = new HashMap<>();
+        customTags.putAll(tags);
+        customTags.putAll(defaultCostTaggingService.prepareDiskTagging());
+        disk.setLabels(customTags);
+
         return disk;
     }
 }

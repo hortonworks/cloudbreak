@@ -7,6 +7,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.InvalidKeyException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -148,11 +149,16 @@ public class AzureClient {
         azure.resourceGroups().deleteByName(name);
     }
 
-    public ResourceGroup createResourceGroup(String name, String region, Map<String, String> tags) {
+    public ResourceGroup createResourceGroup(String name, String region, Map<String, String> tags, Map<String, String> costFollowerTags) {
+        Map<String, String> resultTags = new HashMap<>();
+        for (Map.Entry<String, String> entry : costFollowerTags.entrySet()) {
+            resultTags.put(entry.getKey(), entry.getValue());
+        }
+        resultTags.putAll(tags);
         return handleAuthException(() ->
                 azure.resourceGroups().define(name)
                 .withRegion(region)
-                .withTags(tags)
+                .withTags(resultTags)
                 .create()
         );
     }
@@ -210,13 +216,18 @@ public class AzureClient {
     }
 
     public StorageAccount createStorageAccount(String resourceGroup, String storageName, String storageLocation, SkuName accType, Boolean encryted,
-            Map<String, String> tags) {
+            Map<String, String> tags, Map<String, String> costFollowerTags) {
+        Map<String, String> resultTags = new HashMap<>();
+        for (Map.Entry<String, String> entry : costFollowerTags.entrySet()) {
+            resultTags.put(entry.getKey(), entry.getValue());
+        }
+        resultTags.putAll(tags);
         return handleAuthException(() -> {
             StorageAccount.DefinitionStages.WithCreate withCreate = azure.storageAccounts()
                     .define(storageName)
                     .withRegion(storageLocation)
                     .withExistingResourceGroup(resourceGroup)
-                    .withTags(tags)
+                    .withTags(resultTags)
                     .withSku(accType);
             if (encryted) {
                 withCreate.withEncryption();

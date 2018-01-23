@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -50,6 +51,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.Security;
 import com.sequenceiq.cloudbreak.cloud.model.SecurityRule;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
+import com.sequenceiq.cloudbreak.common.service.DefaultCostTaggingService;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -83,6 +85,9 @@ public class GcpInstanceResourceBuilderTest {
 
     @Mock
     private Insert insert;
+
+    @Mock
+    private DefaultCostTaggingService defaultCostTaggingService;
 
     @Captor
     private ArgumentCaptor<Instance> instanceArg;
@@ -131,6 +136,7 @@ public class GcpInstanceResourceBuilderTest {
         when(instances.insert(anyString(), anyString(), instanceArg.capture())).thenReturn(insert);
         when(insert.setPrettyPrint(anyBoolean())).thenReturn(insert);
         when(insert.execute()).thenReturn(operation);
+        when(defaultCostTaggingService.prepareInstanceTagging()).thenReturn(new HashMap<>());
 
         builder.build(context, privateId, authenticatedContext, group, image, buildableResources, Collections.emptyMap());
 
@@ -152,6 +158,7 @@ public class GcpInstanceResourceBuilderTest {
         when(instances.insert(anyString(), anyString(), instanceArg.capture())).thenReturn(insert);
         when(insert.setPrettyPrint(anyBoolean())).thenReturn(insert);
         when(insert.execute()).thenReturn(operation);
+        when(defaultCostTaggingService.prepareInstanceTagging()).thenReturn(new HashMap<>());
 
         builder.build(context, privateId, authenticatedContext, group, image, buildableResources, Collections.emptyMap());
 
@@ -173,6 +180,7 @@ public class GcpInstanceResourceBuilderTest {
         when(instances.insert(anyString(), anyString(), instanceArg.capture())).thenReturn(insert);
         when(insert.setPrettyPrint(anyBoolean())).thenReturn(insert);
         when(insert.execute()).thenReturn(operation);
+        when(defaultCostTaggingService.prepareInstanceTagging()).thenReturn(new HashMap<>());
 
         builder.build(context, privateId, authenticatedContext, group, image, buildableResources, Collections.emptyMap());
 

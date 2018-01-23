@@ -32,6 +32,7 @@ public enum ResourceType {
 
     //AZURE
     AZURE_NETWORK,
+    AZURE_STORAGE,
     AZURE_SUBNET,
 
     // ARM

@@ -126,6 +126,7 @@
                  </#if>
                  <#if userDefinedTags?? && userDefinedTags?has_content>
                  "tags": {
+                      "cb-resource-type": "${network_resource}",
                       <#list userDefinedTags?keys as key>
                       "${key}": "${userDefinedTags[key]}"<#if (key_index + 1) != userDefinedTags?size>,</#if>
                       </#list>
@@ -160,6 +161,7 @@
                "location": "[parameters('region')]",
                <#if userDefinedTags?? && userDefinedTags?has_content>
                "tags": {
+                    "cb-resource-type": "${network_resource}",
                     <#list userDefinedTags?keys as key>
                     "${key}": "${userDefinedTags[key]}"<#if (key_index + 1) != userDefinedTags?size>,</#if>
                     </#list>
@@ -211,6 +213,7 @@
                    "location": "[parameters('region')]",
                    <#if userDefinedTags?? && userDefinedTags?has_content>
                    "tags": {
+                        "cb-resource-type": "${ipaddress_resource}",
                         <#list userDefinedTags?keys as key>
                         "${key}": "${userDefinedTags[key]}"<#if (key_index + 1) != userDefinedTags?size>,</#if>
                         </#list>
@@ -232,6 +235,7 @@
                    "location": "[parameters('region')]",
                    <#if userDefinedTags?? && userDefinedTags?has_content>
                    "tags": {
+                        "cb-resource-type": "${network_resource}",
                         <#list userDefinedTags?keys as key>
                         "${key}": "${userDefinedTags[key]}"<#if (key_index + 1) != userDefinedTags?size>,</#if>
                         </#list>
@@ -303,6 +307,7 @@
                    ],
                    <#if userDefinedTags?? && userDefinedTags?has_content>
                    "tags": {
+                        "cb-resource-type": "${instance_resource}",
                         <#list userDefinedTags?keys as key>
                         "${key}": "${userDefinedTags[key]}"<#if (key_index + 1) != userDefinedTags?size>,</#if>
                         </#list>

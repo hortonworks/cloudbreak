@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
+import com.sequenceiq.cloudbreak.common.service.DefaultCostTaggingService;
 
 import freemarker.template.Configuration;
 import freemarker.template.Template;
@@ -49,6 +50,9 @@ public class AzureTemplateBuilder {
 
     @Inject
     private AzureStorage azureStorage;
+
+    @Inject
+    private DefaultCostTaggingService defaultCostTaggingService;
 
     public String build(String stackName, String customImageId, AzureCredentialView armCredentialView, AzureStackView armStack, CloudContext cloudContext,
             CloudStack cloudStack) {
@@ -89,6 +93,7 @@ public class AzureTemplateBuilder {
             model.put("noPublicIp", azureUtils.isPrivateIp(network));
             model.put("noFirewallRules", azureUtils.isNoSecurityGroups(network));
             model.put("userDefinedTags", cloudStack.getTags());
+            model.putAll(defaultCostTaggingService.prepareAllTagsForTemplate());
             String generatedTemplate = processTemplateIntoString(getTemplate(cloudStack), model);
             LOGGER.debug("Generated Arm template: {}", generatedTemplate);
             return generatedTemplate;

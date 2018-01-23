@@ -43,7 +43,7 @@ public class ClusterToAmbariV2RequestRequestConverter extends AbstractConversion
         ambariV2Request.setEnableSecurity(source.isSecure());
         ambariV2Request.setGateway(null);
         ambariV2Request.setKerberos(getConversionService().convert(source.getKerberosConfig(), KerberosRequest.class));
-        ambariV2Request.setPassword(source.getPassword());
+        ambariV2Request.setPassword("");
         ambariV2Request.setUserName(source.getUserName());
         ambariV2Request.setValidateBlueprint(null);
         return ambariV2Request;

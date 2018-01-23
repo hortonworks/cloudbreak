@@ -115,6 +115,9 @@ public class StackV2Request implements JsonEntity {
     @ApiModelProperty(hidden = true)
     private String account;
 
+    @ApiModelProperty(hidden = true)
+    private String ownerEmail;
+
     public FailurePolicyRequest getFailurePolicy() {
         return failurePolicy;
     }
@@ -329,5 +332,13 @@ public class StackV2Request implements JsonEntity {
 
     public void setNetwork(NetworkV2Request network) {
         this.network = network;
+    }
+
+    public String getOwnerEmail() {
+        return ownerEmail;
+    }
+
+    public void setOwnerEmail(String ownerEmail) {
+        this.ownerEmail = ownerEmail;
     }
 }
