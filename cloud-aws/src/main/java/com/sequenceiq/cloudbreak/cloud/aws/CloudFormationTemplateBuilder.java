@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
+import com.sequenceiq.cloudbreak.common.service.DefaultCostTaggingService;
 
 import freemarker.template.Configuration;
 import freemarker.template.Template;
@@ -29,6 +30,9 @@ import freemarker.template.TemplateException;
 public class CloudFormationTemplateBuilder {
     @Inject
     private Configuration freemarkerConfiguration;
+
+    @Inject
+    private DefaultCostTaggingService defaultCostTaggingService;
 
     public String build(ModelContext context) {
         Map<String, Object> model = new HashMap<>();
@@ -73,6 +77,7 @@ public class CloudFormationTemplateBuilder {
         model.put("dedicatedInstances", areDedicatedInstancesRequested(context.stack));
         model.put("availabilitySetNeeded", context.ac.getCloudContext().getLocation().getAvailabilityZone().value() != null);
         model.put("mapPublicIpOnLaunch", context.mapPublicIpOnLaunch);
+        model.putAll(defaultCostTaggingService.prepareAllTagsForTemplate());
         try {
             String template = processTemplateIntoString(new Template("aws-template", context.template, freemarkerConfiguration), model);
             return template.replaceAll("\\t|\\n| [\\s]+", "");

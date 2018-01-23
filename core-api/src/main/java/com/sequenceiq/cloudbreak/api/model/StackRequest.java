@@ -59,6 +59,9 @@ public class StackRequest extends StackBase {
     @ApiModelProperty(hidden = true)
     private String account;
 
+    @ApiModelProperty(hidden = true)
+    private String ownerEmail;
+
     public FailurePolicyRequest getFailurePolicy() {
         return failurePolicy;
     }
@@ -169,5 +172,13 @@ public class StackRequest extends StackBase {
 
     public void setCredentialName(String credentialName) {
         this.credentialName = credentialName;
+    }
+
+    public String getOwnerEmail() {
+        return ownerEmail;
+    }
+
+    public void setOwnerEmail(String ownerEmail) {
+        this.ownerEmail = ownerEmail;
     }
 }

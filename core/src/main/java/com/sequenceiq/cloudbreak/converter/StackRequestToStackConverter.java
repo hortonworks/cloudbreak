@@ -32,6 +32,7 @@ import com.sequenceiq.cloudbreak.api.model.StackRequest;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
+import com.sequenceiq.cloudbreak.common.service.DefaultCostTaggingService;
 import com.sequenceiq.cloudbreak.common.type.OrchestratorConstants;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
@@ -67,6 +68,9 @@ public class StackRequestToStackConverter extends AbstractConversionServiceAware
     @Inject
     private AccountPreferencesService accountPreferencesService;
 
+    @Inject
+    private DefaultCostTaggingService defaultCostTaggingService;
+
     @Value("${cb.platform.default.regions:}")
     private String defaultRegions;
 
@@ -79,7 +83,7 @@ public class StackRequestToStackConverter extends AbstractConversionServiceAware
         setPlatform(source);
         stack.setCloudPlatform(source.getCloudPlatform());
         Map<String, String> sourceTags = source.getApplicationTags();
-        stack.setTags(getTags(mergeTags(sourceTags, source.getUserDefinedTags(), getDefaultTags(source.getAccount()))));
+        stack.setTags(getTags(mergeTags(sourceTags, source.getUserDefinedTags(), getDefaultTags(source))));
         if (sourceTags != null && sourceTags.get("datalakeId") != null) {
             stack.setDatalakeId(Long.valueOf(String.valueOf(sourceTags.get("datalakeId"))));
         }
@@ -133,13 +137,14 @@ public class StackRequestToStackConverter extends AbstractConversionServiceAware
         }
     }
 
-    private Map<String, String> getDefaultTags(String account) {
+    private Map<String, String> getDefaultTags(StackRequest source) {
         Map<String, String> result = new HashMap<>();
         try {
-            AccountPreferences pref = accountPreferencesService.getByAccount(account);
+            AccountPreferences pref = accountPreferencesService.getByAccount(source.getAccount());
             if (pref != null && pref.getDefaultTags() != null && StringUtils.isNoneBlank(pref.getDefaultTags().getValue())) {
                 result = pref.getDefaultTags().get(Map.class);
             }
+            result.putAll(defaultCostTaggingService.prepareDefaultTags(source.getAccount(), source.getOwnerEmail(), result, source.getCloudPlatform()));
         } catch (IOException e) {
             LOGGER.debug("Exception during reading default tags.", e);
         }

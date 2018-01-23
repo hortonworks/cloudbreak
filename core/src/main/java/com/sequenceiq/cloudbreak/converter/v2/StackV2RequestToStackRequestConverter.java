@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
 
+import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.model.ClusterRequest;
 import com.sequenceiq.cloudbreak.api.model.HostGroupRequest;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupRequest;
@@ -71,8 +72,9 @@ public class StackV2RequestToStackRequestConverter extends AbstractConversionSer
         stackRequest.setImageId(source.getImageId());
         stackRequest.setFlexId(source.getFlexId());
         stackRequest.setCredentialName(source.getCredentialName());
-        stackRequest.setOwner(source.getOwner());
-        stackRequest.setAccount(source.getAccount());
+        stackRequest.setOwner(Strings.isNullOrEmpty(source.getOwner()) ? authenticatedUserService.getCbUser().getUserId() : source.getOwner());
+        stackRequest.setAccount(Strings.isNullOrEmpty(source.getAccount()) ? authenticatedUserService.getCbUser().getAccount() : source.getAccount());
+        stackRequest.setOwnerEmail(Strings.isNullOrEmpty(source.getOwnerEmail()) ? authenticatedUserService.getCbUser().getUsername() : source.getOwnerEmail());
         if (source.getClusterRequest() != null) {
             stackRequest.setClusterRequest(conversionService.convert(source.getClusterRequest(), ClusterRequest.class));
             for (InstanceGroupV2Request instanceGroupV2Request : source.getInstanceGroups()) {
@@ -80,9 +82,6 @@ public class StackV2RequestToStackRequestConverter extends AbstractConversionSer
                 stackRequest.getClusterRequest().getHostGroups().add(convert);
             }
             stackRequest.getClusterRequest().setName(source.getName());
-        }
-        if (stackRequest.getAccount() == null) {
-            stackRequest.setAccount(authenticatedUserService.getCbUser().getAccount());
         }
         stackRequest.setCloudPlatform(credentialService.get(stackRequest.getCredentialName(), stackRequest.getAccount()).cloudPlatform());
         return stackRequest;

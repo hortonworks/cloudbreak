@@ -43,6 +43,8 @@ dependencies {
     compile group: 'org.jasypt',                            name: 'jasypt-hibernate4',              version: jasyptVersion
     testCompile group: 'junit',                             name: 'junit',                          version: junitVersion
     testCompile group: 'org.mockito',                       name: 'mockito-all',                    version: mockitoAllVersion
+    testCompile group: 'org.springframework.boot',          name:'spring-boot-starter-test',        version:springBootVersion
+
 }
 
 task testJar(type: Jar, dependsOn: testClasses) {

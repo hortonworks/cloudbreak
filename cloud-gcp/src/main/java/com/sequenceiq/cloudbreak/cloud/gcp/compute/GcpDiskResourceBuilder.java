@@ -1,8 +1,11 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.compute;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
@@ -20,12 +23,16 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
+import com.sequenceiq.cloudbreak.common.service.DefaultCostTaggingService;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 
 @Component
 public class GcpDiskResourceBuilder extends AbstractGcpComputeBuilder {
 
     private static final long DEFAULT_ROOT_DISK_SIZE = 50L;
+
+    @Inject
+    private DefaultCostTaggingService defaultCostTaggingService;
 
     @Override
     public List<CloudResource> create(GcpContext context, long privateId, AuthenticatedContext auth, Group group, Image image) {
@@ -44,6 +51,11 @@ public class GcpDiskResourceBuilder extends AbstractGcpComputeBuilder {
         disk.setSizeGb(DEFAULT_ROOT_DISK_SIZE);
         disk.setName(buildableResources.get(0).getName());
         disk.setKind(GcpDiskType.HDD.getUrl(projectId, location.getAvailabilityZone()));
+
+        Map<String, String> customTags = new HashMap<>();
+        customTags.putAll(tags);
+        customTags.putAll(defaultCostTaggingService.prepareDiskTagging());
+        disk.setLabels(customTags);
 
         Insert insDisk = context.getCompute().disks().insert(projectId, location.getAvailabilityZone().value(), disk);
         insDisk.setSourceImage(GcpStackUtil.getAmbariImage(projectId, image.getImageName()));

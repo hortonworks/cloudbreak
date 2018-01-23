@@ -22,8 +22,8 @@ public class KerberosToKerberosRequestConverter extends AbstractConversionServic
         kerberosRequest.setDescriptor(source.getDescriptor());
         kerberosRequest.setKrb5Conf(source.getKrb5Conf());
         kerberosRequest.setLdapUrl(source.getLdapUrl());
-        kerberosRequest.setMasterKey(source.getMasterKey());
-        kerberosRequest.setPassword(source.getPassword());
+        kerberosRequest.setMasterKey("");
+        kerberosRequest.setPassword("");
         kerberosRequest.setPrincipal(source.getPrincipal());
         kerberosRequest.setRealm(source.getRealm());
         kerberosRequest.setTcpAllowed(source.getTcpAllowed());

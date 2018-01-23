@@ -42,6 +42,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.FileSystem;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
+import com.sequenceiq.cloudbreak.common.service.DefaultCostTaggingService;
 import com.sequenceiq.cloudbreak.common.type.ImageStatus;
 import com.sequenceiq.cloudbreak.common.type.ImageStatusResult;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
@@ -59,6 +60,9 @@ public class AzureSetup implements Setup {
     @Inject
     private AzureStorage armStorage;
 
+    @Inject
+    private DefaultCostTaggingService defaultCostTaggingService;
+
     @Override
     public void prepareImage(AuthenticatedContext ac, CloudStack stack, Image image) {
         LOGGER.info("prepare image: {}", image);
@@ -70,7 +74,7 @@ public class AzureSetup implements Setup {
             copyVhdImageIfNecessary(ac, stack, image, imageResourceGroupName, region, client);
         } catch (Exception ex) {
             LOGGER.error("Could not create image with the specified parameters: {}", ex);
-            throw new CloudConnectorException("Image creation failed because " + image.getImageName() + "does not exist or Cloudbreak could not reach.", ex);
+            throw new CloudConnectorException("Image creation failed because " + image.getImageName() + " does not exist or Cloudbreak could not reach.", ex);
         }
         LOGGER.debug("prepare image has been executed");
     }
@@ -82,10 +86,10 @@ public class AzureSetup implements Setup {
                 armStorage.getArmAttachedStorageOption(stack.getParameters()));
         String resourceGroupName = azureUtils.getResourceGroupName(ac.getCloudContext());
         if (!client.resourceGroupExists(resourceGroupName)) {
-            client.createResourceGroup(resourceGroupName, region, stack.getTags());
+            client.createResourceGroup(resourceGroupName, region, stack.getTags(), defaultCostTaggingService.prepareTemplateTagging());
         }
         if (!client.resourceGroupExists(imageResourceGroupName)) {
-            client.createResourceGroup(imageResourceGroupName, region, stack.getTags());
+            client.createResourceGroup(imageResourceGroupName, region, stack.getTags(), defaultCostTaggingService.prepareTemplateTagging());
         }
         armStorage.createStorage(client, imageStorageName, AzureDiskType.LOCALLY_REDUNDANT, imageResourceGroupName, region,
                 armStorage.isEncrytionNeeded(stack.getParameters()), stack.getTags());
@@ -134,7 +138,7 @@ public class AzureSetup implements Setup {
             AzureClient client = ac.getParameter(AzureClient.class);
             persistenceNotifier.notifyAllocation(cloudResource, ac.getCloudContext());
             if (!client.resourceGroupExists(storageGroup)) {
-                client.createResourceGroup(storageGroup, region, stack.getTags());
+                client.createResourceGroup(storageGroup, region, stack.getTags(), defaultCostTaggingService.prepareTemplateTagging());
             }
         } catch (Exception ex) {
             throw new CloudConnectorException(ex);

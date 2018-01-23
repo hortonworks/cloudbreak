@@ -68,6 +68,7 @@ public class StackCreatorService {
     public StackResponse createStack(IdentityUser user, StackRequest stackRequest, boolean publicInAccount) throws Exception {
         stackRequest.setAccount(user.getAccount());
         stackRequest.setOwner(user.getUserId());
+        stackRequest.setOwnerEmail(user.getUsername());
 
         long start = System.currentTimeMillis();
         Stack stack = conversionService.convert(stackRequest, Stack.class);

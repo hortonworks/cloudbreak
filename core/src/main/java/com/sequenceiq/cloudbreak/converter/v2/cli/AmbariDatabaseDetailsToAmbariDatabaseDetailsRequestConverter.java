@@ -22,7 +22,7 @@ public class AmbariDatabaseDetailsToAmbariDatabaseDetailsRequestConverter
             ambariDatabaseDetailsJson.setHost(source.getHost());
             ambariDatabaseDetailsJson.setName(source.getName());
             ambariDatabaseDetailsJson.setPort(source.getPort());
-            ambariDatabaseDetailsJson.setPassword(source.getPassword());
+            ambariDatabaseDetailsJson.setPassword("");
             ambariDatabaseDetailsJson.setUserName(source.getUserName());
             ambariDatabaseDetailsJson.setVendor(DatabaseVendor.fromValue(source.getVendor()));
             return ambariDatabaseDetailsJson;

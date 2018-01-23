@@ -2,11 +2,14 @@ package com.sequenceiq.cloudbreak.converter;
 
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyMap;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 
 import org.junit.Assert;
@@ -24,6 +27,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.model.OrchestratorRequest;
 import com.sequenceiq.cloudbreak.api.model.StackRequest;
+import com.sequenceiq.cloudbreak.common.service.DefaultCostTaggingService;
 import com.sequenceiq.cloudbreak.controller.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
@@ -60,6 +64,9 @@ public class StackRequestToStackConverterTest extends AbstractJsonConverterTest<
     @Mock
     private AccountPreferencesService accountPreferencesService;
 
+    @Mock
+    private DefaultCostTaggingService defaultCostTaggingService;
+
     @Before
     public void setUp() {
         underTest = new StackRequestToStackConverter();
@@ -84,6 +91,7 @@ public class StackRequestToStackConverterTest extends AbstractJsonConverterTest<
         //given(stackParameterService.getStackParams(any(IdentityUser.class), any(StackRequest.class))).willReturn(new ArrayList<>());
         given(orchestratorTypeResolver.resolveType(any(Orchestrator.class))).willReturn(OrchestratorType.HOST);
         given(orchestratorTypeResolver.resolveType(any(String.class))).willReturn(OrchestratorType.HOST);
+        given(defaultCostTaggingService.prepareDefaultTags(any(String.class), any(String.class), anyMap(), anyString())).willReturn(new HashMap<>());
         // WHEN
         Stack stack = underTest.convert(getRequest("stack/stack.json"));
         // THEN
@@ -113,6 +121,7 @@ public class StackRequestToStackConverterTest extends AbstractJsonConverterTest<
         //given(stackParameterService.getStackParams(any(IdentityUser.class), any(StackRequest.class))).willReturn(new ArrayList<>());
         given(orchestratorTypeResolver.resolveType(any(Orchestrator.class))).willReturn(OrchestratorType.HOST);
         given(orchestratorTypeResolver.resolveType(any(String.class))).willReturn(OrchestratorType.HOST);
+        given(defaultCostTaggingService.prepareDefaultTags(any(String.class), any(String.class), anyMap(), anyString())).willReturn(new HashMap<>());
         thrown.expect(BadRequestException.class);
         thrown.expectMessage("You can not modify the default user!");
         // WHEN
@@ -142,6 +151,7 @@ public class StackRequestToStackConverterTest extends AbstractJsonConverterTest<
         //given(stackParameterService.getStackParams(any(IdentityUser.class), any(StackRequest.class))).willReturn(new ArrayList<>());
         given(orchestratorTypeResolver.resolveType(any(Orchestrator.class))).willReturn(OrchestratorType.HOST);
         given(orchestratorTypeResolver.resolveType(any(String.class))).willReturn(OrchestratorType.HOST);
+        given(defaultCostTaggingService.prepareDefaultTags(any(String.class), any(String.class), anyMap(), anyString())).willReturn(new HashMap<>());
         thrown.expect(BadRequestException.class);
         thrown.expectMessage("No default region is specified. Region cannot be empty.");
 
@@ -175,6 +185,7 @@ public class StackRequestToStackConverterTest extends AbstractJsonConverterTest<
         //given(stackParameterService.getStackParams(any(IdentityUser.class), any(StackRequest.class))).willReturn(new ArrayList<>());
         given(orchestratorTypeResolver.resolveType(any(Orchestrator.class))).willReturn(OrchestratorType.HOST);
         given(orchestratorTypeResolver.resolveType(any(String.class))).willReturn(OrchestratorType.HOST);
+        given(defaultCostTaggingService.prepareDefaultTags(any(String.class), any(String.class), anyMap(), anyString())).willReturn(new HashMap<>());
 
         // WHEN
         StackRequest stackRequest = getRequest("stack/stack.json");
