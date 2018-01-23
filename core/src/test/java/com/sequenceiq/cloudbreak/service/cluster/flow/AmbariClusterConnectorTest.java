@@ -20,6 +20,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -210,9 +211,9 @@ public class AmbariClusterConnectorTest {
                 anyInt())).thenReturn(PollingResult.SUCCESS);
         when(hostGroupRepository.findHostGroupsInCluster(anyLong())).thenReturn(cluster.getHostGroups());
         when(ambariOperationService.waitForOperations(any(Stack.class), any(AmbariClient.class), anyMap(), any(AmbariOperationType.class)))
-                .thenReturn(PollingResult.SUCCESS);
+                .thenReturn(new ImmutablePair<>(PollingResult.SUCCESS, null));
         when(ambariOperationService.waitForOperations(any(Stack.class), any(AmbariClient.class), any(StatusCheckerTask.class), anyMap(),
-                any(AmbariOperationType.class))).thenReturn(PollingResult.SUCCESS);
+                any(AmbariOperationType.class))).thenReturn(new ImmutablePair<>(PollingResult.SUCCESS, null));
         when(clusterRepository.save(any(Cluster.class))).thenReturn(cluster);
         when(instanceMetadataRepository.save(anyCollection())).thenReturn(stack.getRunningInstanceMetaData());
         when(ambariClient.deleteUser(anyString())).thenReturn("");
@@ -236,8 +237,8 @@ public class AmbariClusterConnectorTest {
 
     @Test
     public void testInstallAmbariWhenReachedMaxPollingEventsShouldInstallationFailed() throws Exception {
-        when(ambariOperationService.waitForOperations(any(Stack.class), any(AmbariClient.class), anyMap(), any(AmbariOperationType.class)))
-                .thenReturn(PollingResult.TIMEOUT);
+        when(ambariOperationService.waitForOperationsToStart(any(Stack.class), any(AmbariClient.class), anyMap(), any(AmbariOperationType.class)))
+                .thenReturn(new ImmutablePair<>(PollingResult.TIMEOUT, null));
         when(orchestratorTypeResolver.resolveType(any(Orchestrator.class))).thenReturn(OrchestratorType.HOST);
         when(clusterComponentConfigProvider.getHDPRepo(any())).thenAnswer((Answer<StackRepoDetails>) invocation -> {
             StackRepoDetails stackRepoDetails = new StackRepoDetails();
