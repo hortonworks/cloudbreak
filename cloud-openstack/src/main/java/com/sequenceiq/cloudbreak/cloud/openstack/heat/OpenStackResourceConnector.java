@@ -240,9 +240,6 @@ public class OpenStackResourceConnector implements ResourceConnector<Object> {
                 .collect(Collectors.toList());
 
         resourceForTermination.forEach(r -> terminateHeatStack(authenticatedContext, cloudStack, r));
-        if (resourceForTermination.isEmpty()) {
-            throw new CloudConnectorException("HEAT_STACK resource type is needed for stack termination!");
-        }
         return check(authenticatedContext, resourceForTermination);
     }
 
