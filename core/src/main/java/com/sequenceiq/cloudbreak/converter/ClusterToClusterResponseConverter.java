@@ -34,6 +34,7 @@ import com.sequenceiq.cloudbreak.api.model.CustomContainerResponse;
 import com.sequenceiq.cloudbreak.api.model.GatewayJson;
 import com.sequenceiq.cloudbreak.api.model.GatewayType;
 import com.sequenceiq.cloudbreak.api.model.HostGroupResponse;
+import com.sequenceiq.cloudbreak.api.model.KerberosResponse;
 import com.sequenceiq.cloudbreak.api.model.LdapConfigResponse;
 import com.sequenceiq.cloudbreak.api.model.Port;
 import com.sequenceiq.cloudbreak.api.model.RDSConfigResponse;
@@ -51,6 +52,7 @@ import com.sequenceiq.cloudbreak.domain.ExposedServices;
 import com.sequenceiq.cloudbreak.domain.Gateway;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.service.ClusterComponentConfigProvider;
@@ -102,7 +104,6 @@ public class ClusterToClusterResponseConverter extends AbstractConversionService
         clusterResponse.setId(source.getId());
         clusterResponse.setName(source.getName());
         clusterResponse.setStatus(source.getStatus());
-        clusterResponse.setSecure(source.isSecure());
         clusterResponse.setStatusReason(source.getStatusReason());
         if (source.getBlueprint() != null) {
             clusterResponse.setBlueprintId(source.getBlueprint().getId());
@@ -144,6 +145,21 @@ public class ClusterToClusterResponseConverter extends AbstractConversionService
         convertComponentConfig(clusterResponse, source);
         convertAmbariDatabaseComponentConfig(clusterResponse, source);
         clusterResponse.setCreationFinished(source.getCreationFinished());
+        KerberosConfig kerberosConfig = source.getKerberosConfig();
+        if (source.isSecure() && kerberosConfig != null) {
+            clusterResponse.setSecure(source.isSecure());
+            KerberosResponse kerberosResponse = new KerberosResponse();
+            kerberosResponse.setAdmin(kerberosConfig.getKerberosAdmin());
+            kerberosResponse.setUrl(kerberosConfig.getKerberosUrl());
+            kerberosResponse.setAdminUrl(kerberosConfig.getKdcAdminUrl());
+            kerberosResponse.setRealm(kerberosConfig.getKerberosRealm());
+            kerberosResponse.setDescriptor(kerberosConfig.getKerberosDescriptor());
+            kerberosResponse.setKrb5Conf(kerberosConfig.getKrb5Conf());
+            kerberosResponse.setLdapUrl(kerberosConfig.getKerberosLdapUrl());
+            kerberosResponse.setContainerDn(kerberosConfig.getKerberosContainerDn());
+            kerberosResponse.setTcpAllowed(kerberosConfig.getKerberosTcpAllowed());
+            clusterResponse.setKerberosResponse(kerberosResponse);
+        }
         return clusterResponse;
     }
 
