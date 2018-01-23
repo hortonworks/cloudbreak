@@ -111,6 +111,8 @@ public class ClusterResponse implements JsonEntity {
     @ApiModelProperty(ClusterModelDescription.CREATION_FINISHED)
     private Long creationFinished;
 
+    private KerberosResponse kerberosResponse;
+
     public String getDescription() {
         return description;
     }
@@ -367,5 +369,13 @@ public class ClusterResponse implements JsonEntity {
 
     public void setCreationFinished(Long creationFinished) {
         this.creationFinished = creationFinished;
+    }
+
+    public KerberosResponse getKerberosResponse() {
+        return kerberosResponse;
+    }
+
+    public void setKerberosResponse(KerberosResponse kerberosResponse) {
+        this.kerberosResponse = kerberosResponse;
     }
 }
