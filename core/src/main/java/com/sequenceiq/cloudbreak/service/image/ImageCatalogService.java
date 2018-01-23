@@ -7,6 +7,8 @@ import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
 import static java.util.Collections.emptyList;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -24,6 +26,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import com.sequenceiq.cloudbreak.cloud.model.Versioned;
@@ -46,6 +49,8 @@ import com.sequenceiq.cloudbreak.service.user.UserProfileService;
 
 @Component
 public class ImageCatalogService {
+
+    public static final String UNDEFINED = "";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ImageCatalogService.class);
 
@@ -82,17 +87,25 @@ public class ImageCatalogService {
         return getImages(getImageDefaultCatalogUrl(), getDefaultImageCatalogName(), provider, cbVersion);
     }
 
-    public StatedImage getBaseImage(String platform) throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
+    public StatedImage getDefaultImage(String platform, String clusterType, String clusterVersion)
+            throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         StatedImages statedImages = getImages(platform);
-        List<Image> baseImages = statedImages.getImages().getBaseImages();
-        if (baseImages.isEmpty()) {
-            String msg = String.format("Could not find any base image for platform '%s' and Cloudbreak version '%s'.", platform, cbVersion);
+        List<Image> images = getImagesForClusterType(statedImages, clusterType);
+        Optional<Image> selectedImage = Optional.empty();
+        if (!CollectionUtils.isEmpty(images)) {
+            selectedImage = images.stream().filter(i -> {
+                String[] repoIdParts = i.getStackDetails().getRepo().getStack().get("repoid").split("-");
+                return repoIdParts.length > 1 && repoIdParts[1].equals(clusterVersion);
+            }).max(Comparator.comparing(Image::getDate));
+        }
+        if (!selectedImage.isPresent()) {
+            selectedImage = statedImages.getImages().getBaseImages().stream().max(Comparator.comparing(Image::getDate));
+        }
+        if (!selectedImage.isPresent()) {
+            String msg = String.format("Could not find any image for platform '%s' and Cloudbreak version '%s'.", platform, cbVersion);
             throw new CloudbreakImageNotFoundException(msg);
         }
-        Image image = baseImages.stream().findFirst().get();
-        return statedImage(image,
-                statedImages.getImageCatalogUrl(),
-                statedImages.getImageCatalogName());
+        return statedImage(selectedImage.get(), statedImages.getImageCatalogUrl(), statedImages.getImageCatalogName());
     }
 
     public StatedImages getImages(String name, String provider) throws CloudbreakImageCatalogException {
@@ -252,7 +265,7 @@ public class ImageCatalogService {
     }
 
     public StatedImages getImages(String imageCatalogUrl, String imageCatalogName, String platform, String cbVersion) throws CloudbreakImageCatalogException {
-        LOGGER.info("Determine images for imageCatalogUrl: '{}', platform: '{}' and Cloudbreak version: '{}'.", platform, cbVersion);
+        LOGGER.info("Determine images for imageCatalogUrl: '{}', platform: '{}' and Cloudbreak version: '{}'.", imageCatalogUrl, platform, cbVersion);
         StatedImages images;
         CloudbreakImageCatalogV2 imageCatalog = imageCatalogProvider.getImageCatalogV2(imageCatalogUrl);
         if (imageCatalog != null) {
@@ -359,5 +372,16 @@ public class ImageCatalogService {
     private UserProfile getUserProfile() {
         IdentityUser cbUser = authenticatedUserService.getCbUser();
         return userProfileService.get(cbUser.getAccount(), cbUser.getUserId());
+    }
+
+    private List<Image> getImagesForClusterType(StatedImages statedImages, String clusterType) {
+        switch (clusterType) {
+            case "HDP":
+                return statedImages.getImages().getHdpImages();
+            case "HDF":
+                return statedImages.getImages().getHdfImages();
+            default:
+                return Collections.emptyList();
+        }
     }
 }

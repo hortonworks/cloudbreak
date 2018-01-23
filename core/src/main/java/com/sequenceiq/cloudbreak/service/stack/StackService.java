@@ -328,7 +328,7 @@ public class StackService {
     }
 
     @Transactional(TxType.NEVER)
-    public Stack create(IdentityUser user, Stack stack, String imageCatalog, Optional<String> imageId) {
+    public Stack create(IdentityUser user, Stack stack, String imageCatalog, Optional<String> imageId, Optional<Blueprint> blueprint) {
         Stack savedStack;
         stack.setOwner(user.getUserId());
         stack.setAccount(user.getAccount());
@@ -386,7 +386,7 @@ public class StackService {
             savedStack.setSecurityConfig(securityConfig);
 
             start = System.currentTimeMillis();
-            imageService.create(savedStack, connector.getPlatformParameters(stack), imageCatalog, imageId);
+            imageService.create(savedStack, connector.getPlatformParameters(stack), imageCatalog, imageId, blueprint);
             LOGGER.info("Image creation took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
         } catch (DataIntegrityViolationException ex) {

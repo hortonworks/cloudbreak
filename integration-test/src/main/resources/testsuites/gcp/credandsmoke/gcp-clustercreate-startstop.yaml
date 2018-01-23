@@ -16,6 +16,13 @@ tests:
     classes:
       - com.sequenceiq.it.cloudbreak.GcpCredentialCreationTest
 
+  - name: create security group
+    parameters:
+      name: it-gcp-credandsmoke-secgroup-ss
+      provider: GCP
+    classes:
+      - com.sequenceiq.it.cloudbreak.SecurityGroupCreationTest
+
   - name: create gateway template
     parameters:
       gcpName: it-gcp-credandsmoke-gateway-ss

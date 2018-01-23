@@ -123,7 +123,7 @@ public class StackCreatorService {
         }
 
         start = System.currentTimeMillis();
-        stack = stackService.create(user, stack, stackRequest.getImageCatalog(), Optional.ofNullable(stackRequest.getImageId()));
+        stack = stackService.create(user, stack, stackRequest.getImageCatalog(), Optional.ofNullable(stackRequest.getImageId()), Optional.ofNullable(blueprint));
         LOGGER.info("Stack object and its dependencies has been created in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
         createClusterIfNeed(user, stackRequest, stack, stackName, blueprint);
