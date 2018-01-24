@@ -536,7 +536,7 @@ _exit() {
 }
 
 is_command_needs_profile() {
-    [[ ' '"aws bash-complete help init machine version update delete"' ' != *" $1 "* ]]
+    [[ ' '"bash-complete help init machine version update delete"' ' != *" $1 "* ]]
 }
 
 copy_cbd_output_to_log() {
