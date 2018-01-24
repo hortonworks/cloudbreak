@@ -1,6 +1,7 @@
 base:
   '*':
     - ambari.repo
+    - ambari.gpl
     - hdp.repo
     - nodes.hosts
     - discovery.init

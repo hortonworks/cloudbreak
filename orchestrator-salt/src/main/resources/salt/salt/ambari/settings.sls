@@ -6,6 +6,7 @@
 
 {%- set server_address = salt['mine.get']('G@roles:ambari_server', 'network.ipaddrs', expr_form = 'compound').values()[0][0] %}
 {% set is_predefined_repo = salt['pillar.get']('ambari:repo:predefined') %}
+{% set is_gpl_repo_enabled = salt['pillar.get']('ambari:gpl:enabled') %}
 {% set is_container_executor = salt['pillar.get']('docker:enableContainerExecutor') %}
 {% set version = salt['pillar.get']('ambari:repo:version') %}
 {% set ambari_database = salt['pillar.get']('ambari:database') %}
@@ -27,6 +28,7 @@
     'is_systemd' : is_systemd,
     'server_address' : server_address,
     'is_predefined_repo' : is_predefined_repo,
+    'is_gpl_repo_enabled' : is_gpl_repo_enabled,
     'version': version,
     'ambari_database': ambari_database,
     'cluster_domain': cluster_domain,

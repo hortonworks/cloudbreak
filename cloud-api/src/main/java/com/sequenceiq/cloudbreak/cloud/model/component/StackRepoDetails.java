@@ -22,6 +22,8 @@ public class StackRepoDetails implements Serializable {
 
     private Map<String, String> util;
 
+    private boolean enableGplRepo;
+
     private Map<String, String> knox;
 
     private boolean verify = true;
@@ -66,6 +68,14 @@ public class StackRepoDetails implements Serializable {
 
     public void setHdpVersion(String hdpVersion) {
         this.hdpVersion = hdpVersion;
+    }
+
+    public boolean isEnableGplRepo() {
+        return enableGplRepo;
+    }
+
+    public void setEnableGplRepo(boolean enableGplRepo) {
+        this.enableGplRepo = enableGplRepo;
     }
 
     @Override

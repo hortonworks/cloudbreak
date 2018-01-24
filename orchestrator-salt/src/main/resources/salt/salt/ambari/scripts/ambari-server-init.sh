@@ -12,10 +12,17 @@ fi
 : ${JAVA_HOME:="/usr/lib/jvm/java"}
 echo "JAVA_HOME set to $JAVA_HOME"
 
+GPL_SWITCH=""
+
+if [[ '{{ is_gpl_repo_enabled }}' = 'True' ]]; then
+   echo "GPL accepted, enable LZO"
+   GPL_SWITCH="--enable-lzo-under-gpl-license"
+fi
+
 config_remote_jdbc() {
     if [[ '{{ ambari_database.vendor }}' = 'embedded' ]]; then
         echo Configure local jdbc connection
-        ambari-server setup --silent --java-home $JAVA_HOME
+        ambari-server setup --silent $GPL_SWITCH --java-home $JAVA_HOME
     else
         echo Configure remote jdbc connection
         local specoptions=''
@@ -32,7 +39,7 @@ config_remote_jdbc() {
             echo File not found /var/lib/ambari-server/resources/Ambari-DDL-{{ ambari_database.fancyName }}-CREATE.sql
             exit 1
         fi
-        ambari-server setup --silent --verbose --java-home $JAVA_HOME \
+        ambari-server setup --silent $GPL_SWITCH --verbose --java-home $JAVA_HOME \
             --database {{ ambari_database.vendor }} --databasehost {{ ambari_database.host }} --databaseport {{ ambari_database.port }} --databasename '{{ ambari_database.name }}' \
             --databaseusername '{{ ambari_database.userName }}' --databasepassword '{{ ambari_database.password }}' $specoptions
     fi
@@ -58,7 +65,7 @@ find_and_distribute_latest_jdbc_driver() {
     fi
     ln -s $latest /usr/share/java # this is for ambari-server setup
     ln -s $latest $JAVA_HOME/jre/lib/ext # this is for ambari-server start -> database check
-    ambari-server setup --jdbc-db=$1 --jdbc-driver=${latest}
+    ambari-server setup --jdbc-db=$1 --jdbc-driver=${latest} $GPL_SWITCH
     echo ${latest}
 }
 

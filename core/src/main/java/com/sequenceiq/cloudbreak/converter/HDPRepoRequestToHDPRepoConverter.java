@@ -53,6 +53,7 @@ public class HDPRepoRequestToHDPRepoConverter extends AbstractConversionServiceA
 
         repo.setStack(stack);
         repo.setUtil(util);
+        repo.setEnableGplRepo(source.isEnableGplRepo());
         repo.setVerify(source.getVerify());
         repo.setHdpVersion(source.getVersion());
         return repo;
