@@ -1,3 +1,5 @@
+#!/usr/bin/env bats
+
 load ../commands
 load ../resources
 load ../parameters

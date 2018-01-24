@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/env bats
 
 load ../commands
 load ../parameters
