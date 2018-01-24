@@ -37,6 +37,9 @@ public class AmbariStackDetailsJson implements JsonEntity {
     @ApiModelProperty(value = AmbariStackDetailsDescription.UTILS_BASE_URL)
     private String utilsBaseURL;
 
+    @ApiModelProperty(value = AmbariStackDetailsDescription.ENABLE_GPL_REPO)
+    private boolean enableGplRepo;
+
     @NotNull
     @ApiModelProperty(value = AmbariStackDetailsDescription.VERIFY, required = true)
     private Boolean verify;
@@ -136,5 +139,13 @@ public class AmbariStackDetailsJson implements JsonEntity {
 
     public void setMpackUrl(String mpackUrl) {
         this.mpackUrl = mpackUrl;
+    }
+
+    public boolean isEnableGplRepo() {
+        return enableGplRepo;
+    }
+
+    public void setEnableGplRepo(boolean enableGplRepo) {
+        this.enableGplRepo = enableGplRepo;
     }
 }

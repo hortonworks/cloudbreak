@@ -260,6 +260,7 @@ public class ModelDescriptions {
         public static final String UTILS_REPO_ID = "id of the stack utils repository";
         public static final String STACK_BASE_URL = "url of the stack repository";
         public static final String UTILS_BASE_URL = "url of the stack utils repository";
+        public static final String ENABLE_GPL_REPO = "enable gpl repository";
         public static final String VERIFY = "whether to verify or not the repo url";
         public static final String REPOSITORY_VERSION = "version of the repository for VDF file creation in Ambari";
         public static final String VDF_URL = "local path on the Ambari server or URL that point to the desired VDF file";

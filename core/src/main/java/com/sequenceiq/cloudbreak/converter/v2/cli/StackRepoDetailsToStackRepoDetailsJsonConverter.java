@@ -46,7 +46,7 @@ public class StackRepoDetailsToStackRepoDetailsJsonConverter
             ambariStackDetailsJson.setUtilsBaseURL(util.get(REDHAT_7));
         }
 
-
+        ambariStackDetailsJson.setEnableGplRepo(source.isEnableGplRepo());
         ambariStackDetailsJson.setVerify(source.isVerify());
         ambariStackDetailsJson.setVersion(source.getHdpVersion());
         return ambariStackDetailsJson;

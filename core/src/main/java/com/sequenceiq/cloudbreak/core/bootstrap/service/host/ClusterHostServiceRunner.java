@@ -145,6 +145,8 @@ public class ClusterHostServiceRunner {
         if (ambariRepo != null) {
             servicePillar.put("ambari-repo", new SaltPillarProperties("/ambari/repo.sls", singletonMap("ambari", singletonMap("repo", ambariRepo))));
         }
+        servicePillar.put("ambari-gpl-repo", new SaltPillarProperties("/ambari/gpl.sls", singletonMap("ambari", singletonMap("gpl", singletonMap("enabled",
+                clusterComponentConfigProvider.getHDPRepo(cluster.getId()).isEnableGplRepo())))));
         AmbariDatabase ambariDb = clusterComponentConfigProvider.getAmbariDatabase(cluster.getId());
         servicePillar.put("ambari-database", new SaltPillarProperties("/ambari/database.sls", singletonMap("ambari", singletonMap("database", ambariDb))));
         saveLdapPillar(cluster.getLdapConfig(), servicePillar);

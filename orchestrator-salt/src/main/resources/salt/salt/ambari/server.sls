@@ -62,6 +62,7 @@ extend_hadoop_classpath:
     - context:
       ambari_database: {{ ambari.ambari_database }}
       security_master_key: {{ ambari.security_master_key }}
+      is_gpl_repo_enabled: {{ ambari.is_gpl_repo_enabled }}
     - mode: 744
 
 set_install_timeout:

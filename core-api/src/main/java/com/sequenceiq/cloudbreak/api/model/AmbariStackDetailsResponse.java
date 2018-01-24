@@ -13,6 +13,8 @@ public class AmbariStackDetailsResponse implements JsonEntity {
 
     private Map<String, String> util;
 
+    private Boolean enableGplRepo;
+
     private Map<String, String> knox;
 
     private boolean verify = true;
@@ -57,6 +59,14 @@ public class AmbariStackDetailsResponse implements JsonEntity {
 
     public void setHdpVersion(String hdpVersion) {
         this.hdpVersion = hdpVersion;
+    }
+
+    public Boolean getEnableGplRepo() {
+        return enableGplRepo;
+    }
+
+    public void setEnableGplRepo(Boolean enableGplRepo) {
+        this.enableGplRepo = enableGplRepo;
     }
 
     @Override

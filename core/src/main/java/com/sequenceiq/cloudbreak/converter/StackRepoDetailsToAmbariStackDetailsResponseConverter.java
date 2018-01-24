@@ -17,6 +17,7 @@ public class StackRepoDetailsToAmbariStackDetailsResponseConverter
         ambariRepoDetailsJson.setKnox(source.getKnox());
         ambariRepoDetailsJson.setStack(source.getStack());
         ambariRepoDetailsJson.setUtil(source.getUtil());
+        ambariRepoDetailsJson.setEnableGplRepo(source.isEnableGplRepo());
         return ambariRepoDetailsJson;
     }
 }
