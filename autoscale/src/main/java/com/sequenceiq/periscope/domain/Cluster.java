@@ -24,7 +24,7 @@ import com.sequenceiq.periscope.model.AmbariStack;
 @Entity
 public class Cluster {
 
-    private static final int DEFAULT_MIN_SIZE = 3;
+    private static final int DEFAULT_MIN_SIZE = 2;
 
     private static final int DEFAULT_MAX_SIZE = 100;
 
