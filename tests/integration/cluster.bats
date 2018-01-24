@@ -55,7 +55,7 @@ load ../parameters
   OUTPUT=$(start-cluster --name azstatus 2>&1 | tail -n 2 | head -n 1)
   echo  $OUTPUT
 
-  [[ "${OUTPUT}" == *"status code: 400, message: Stack 'azstatus' not found"* ]]
+  [[ "${OUTPUT}" == *"status code: 404, message: Stack 'azstatus' not found"* ]]
   [[ "${OUTPUT}" == *"error"* ]]
 }
 
@@ -69,7 +69,7 @@ load ../parameters
 @test "Check cluster stop FAILED" {
   OUTPUT=$(stop-cluster --name azstatus 2>&1 | tail -n 2 | head -n 1)
 
-  [[ "${OUTPUT}" == *"status code: 400, message: Stack 'azstatus' not found"* ]]
+  [[ "${OUTPUT}" == *"status code: 404, message: Stack 'azstatus' not found"* ]]
   [[ "${OUTPUT}" == *"error"* ]]
 }
 
@@ -83,7 +83,7 @@ load ../parameters
 @test "Check cluster sync FAILED" {
   OUTPUT=$(sync-cluster --name azstatus 2>&1 | tail -n 2 | head -n 1)
 
-  [[ "${OUTPUT}" == *"status code: 400, message: Stack 'azstatus' not found"* ]]
+  [[ "${OUTPUT}" == *"status code: 404, message: Stack 'azstatus' not found"* ]]
   [[ "${OUTPUT}" == *"error"* ]]
 }
 
@@ -97,7 +97,7 @@ load ../parameters
 @test "Check cluster repair FAILED" {
   OUTPUT=$(repair-cluster --name azstatus 2>&1 | tail -n 2 | head -n 1)
 
-  [[ "${OUTPUT}" == *"status code: 400, message: Stack 'azstatus' not found"* ]]
+  [[ "${OUTPUT}" == *"status code: 404, message: Stack 'azstatus' not found"* ]]
   [[ "${OUTPUT}" == *"error"* ]]
 }
 
@@ -111,7 +111,7 @@ load ../parameters
 @test "Check cluster scale FAILED" {
   OUTPUT=$(scale-cluster --name azstatus --group-name worker --desired-node-count 6 2>&1 | tail -n 2 | head -n 1)
 
-  [[ "${OUTPUT}" == *"status code: 400, message: Stack 'azstatus' not found"* ]]
+  [[ "${OUTPUT}" == *"status code: 404, message: Stack 'azstatus' not found"* ]]
   [[ "${OUTPUT}" == *"error"* ]]
 }
 
@@ -134,7 +134,7 @@ load ../parameters
 
   OUTPUT=$(create-cluster --cli-input-json templates/template_wo_pwd.json --name aaaaa 2>&1 | tail -n 2 | head -n 1)
 
-  [[ "${OUTPUT}" == *"status code: 400, message: ambariRequest password may not be null"* ]]
+  [[ "${OUTPUT}" == *"status code: 404, message: ambariRequest password may not be null"* ]]
   [[ "${OUTPUT}" == *"error"* ]]
 }
 
@@ -150,6 +150,6 @@ load ../parameters
 
   OUTPUT=$(reinstall-cluster --name test --cli-input-json templates/template.json --name aaaaa 2>&1 | tail -n 2 | head -n 1)
 
-  [[ "${OUTPUT}" == *"status code: 400, message: Stack 'aaaaa' not found"* ]]
+  [[ "${OUTPUT}" == *"status code: 404, message: Stack 'aaaaa' not found"* ]]
   [[ "${OUTPUT}" == *"error"* ]]
 }
