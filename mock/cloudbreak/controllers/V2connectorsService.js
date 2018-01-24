@@ -9,25 +9,7 @@ exports.getRegionsByCredentialId = function(args, res, next) {
    * returns RegionResponse
    **/
   var examples = {};
-  examples['application/json'] =
-  {
-    "regions":
-    [
-      "RegionOne"
-    ],
-    "displayNames":
-    {
-      "RegionOne":"RegionOne"
-    },
-    "availabilityZones":
-    {
-      "RegionOne":
-      [
-        "nova","hw-re","LRI"
-      ]
-    },
-    "defaultRegion":"RegionOne"
-  };
+  examples['application/json'] = require('../responses/connectors/regions.json');
   if (Object.keys(examples).length > 0) {
     res.setHeader('Content-Type', 'application/json');
     res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));

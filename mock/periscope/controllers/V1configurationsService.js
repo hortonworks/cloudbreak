@@ -9,11 +9,7 @@ exports.getScalingConfiguration = function(args, res, next) {
    * returns ScalingConfiguration
    **/
   var examples = {};
-  examples['application/json'] = {
-      "minSize": 3,
-      "maxSize": 10,
-      "cooldown": 30
-  };
+  examples['application/json'] = require('../responses/configurations/default-configuration.json');
   if (Object.keys(examples).length > 0) {
     res.setHeader('Content-Type', 'application/json');
     res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
@@ -32,11 +28,7 @@ exports.setScalingConfiguration = function(args, res, next) {
    * returns ScalingConfiguration
    **/
   var examples = {};
-  examples['application/json'] = {
-      "minSize": 3,
-      "maxSize": 10,
-      "cooldown": 30
-  };
+  examples['application/json'] = require('../responses/configurations/default-configuration.json');
   if (Object.keys(examples).length > 0) {
     res.setHeader('Content-Type', 'application/json');
     res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));

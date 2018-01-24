@@ -46,30 +46,7 @@ exports.getUserProfile = function(args, res, next) {
    * returns UserProfileResponse
    **/
   var examples = {};
-  examples['application/json'] =
-  {
-    "credential":
-    {
-      "name":"openstack",
-      "cloudPlatform":"OPENSTACK",
-      "parameters":
-      {
-        "facing":"internal",
-        "endpoint":"http://openstack.eng.com:3000/v2.0",
-        "selector":"cb-keystone-v2",
-        "keystoneVersion":"cb-keystone-v2",
-        "userName":"cloudbreak",
-        "tenantName":"cloudbreak"
-      },
-      "description":"",
-      "topologyId":null,
-      "id":1,
-      "public":false
-    },
-    "owner":"a0b9ae1b-8dc5-45ad-bada-567170cac68f",
-    "account":"a0b9ae1b-8dc5-45ad-bada-567170cac68f",
-    "uiProperties":{}
-  };
+  examples['application/json'] = require('../responses/users/default-profile.json');
   if (Object.keys(examples).length > 0) {
     res.setHeader('Content-Type', 'application/json');
     res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));

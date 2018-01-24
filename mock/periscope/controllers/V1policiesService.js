@@ -10,14 +10,7 @@ exports.addScalingPolicy = function(args, res, next) {
    * returns ScalingPolicyResponse
    **/
   var examples = {};
-  examples['application/json'] = {
-      "name": "testing",
-      "adjustmentType": "NODE_COUNT",
-      "scalingAdjustment": 1,
-      "alertId": 1,
-      "hostGroup": "worker",
-      "id" : 4
-  };
+  examples['application/json'] = require('../responses/policies/test-policy.json');
   if (Object.keys(examples).length > 0) {
     res.setHeader('Content-Type', 'application/json');
     res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
@@ -36,14 +29,7 @@ exports.deleteScalingPolicy = function(args, res, next) {
    * no response value expected for this operation
    **/
   var examples = {};
-    examples['application/json'] = {
-        "name": "testing",
-        "adjustmentType": "NODE_COUNT",
-        "scalingAdjustment": 1,
-        "alertId": 1,
-        "hostGroup": "worker",
-        "id" : 4
-    };
+    examples['application/json'] = require('../responses/policies/test-policy.json');
     if (Object.keys(examples).length > 0) {
         res.setHeader('Content-Type', 'application/json');
         res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
@@ -61,31 +47,7 @@ exports.getScalingPolicies = function(args, res, next) {
    * returns List
    **/
   var examples = {};
-  examples['application/json'] =
-  [
-    {
-      "name": "datanodehealth",
-      "adjustmentType": "NODE_COUNT",
-      "scalingAdjustment": 1,
-      "alertId": 1,
-      "hostGroup": "worker",
-      "id" : 1
-    },{
-      "name": "datanodeprocess",
-      "adjustmentType": "NODE_COUNT",
-      "scalingAdjustment": 1,
-      "alertId": 2,
-      "hostGroup": "worker",
-      "id" : 2
-    },{
-      "name": "every5",
-      "adjustmentType": "NODE_COUNT",
-      "scalingAdjustment": 1,
-      "alertId": 3,
-      "hostGroup": "worker",
-      "id" : 3
-    }
-  ];
+  examples['application/json'] = require('../responses/policies/policies.json');
   if (Object.keys(examples).length > 0) {
     res.setHeader('Content-Type', 'application/json');
     res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));

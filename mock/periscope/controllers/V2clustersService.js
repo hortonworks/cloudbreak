@@ -142,24 +142,7 @@ exports.enableAutoscaleStateByCloudbreakCluster = function(args, res, next) {
   if (Object.keys(examples).length > 0) {
     res.setHeader('Content-Type', 'application/json');
     if (args.cbClusterId.value == 4) {
-      var responseJson = {
-          "host": "35.187.4.62",
-          "port": "9443",
-          "user": "admin",
-          "stackId": 4,
-          "id": 4,
-          "state": "RUNNING",
-          "autoscalingEnabled": true,
-          "metricAlerts": null,
-          "timeAlerts": null,
-          "prometheusAlerts": null,
-          "scalingConfiguration":
-              {
-                  "minSize": 3,
-                  "maxSize": 100,
-                  "cooldown": 30
-              }
-      };
+      var responseJson = require('../responses/clusters/4.json');
       res.end(JSON.stringify(responseJson));
     } else {
       res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
@@ -233,138 +216,19 @@ exports.getByCloudbreakCluster = function(args, res, next) {
     res.setHeader('Content-Type', 'application/json');
     switch(args.cbClusterId.value){
       case 1:
-        var responseJson = {
-          "host":null,
-          "port":"9443",
-          "user":"admin",
-          "stackId":1,
-          "id":1,
-          "state":"CREATE_FAILED",
-          "autoscalingEnabled":false,
-          "metricAlerts":null,
-          "timeAlerts":null,
-          "prometheusAlerts":null,
-          "scalingConfiguration":
-          {  
-            "minSize":3,
-            "maxSize":100,
-            "cooldown":30
-          }
-        };
+        var responseJson = require('../responses/clusters/1.json');
         res.end(JSON.stringify(responseJson));
         break;
       case 2:
-        var responseJson = {
-          "host":"52.16.174.228",
-          "port":"9443",
-          "user":"admin",
-          "stackId":2,
-          "id":2,
-          "state":"UPDATE_IN_PROGRESS",
-          "autoscalingEnabled":false,
-          "metricAlerts":null,
-          "timeAlerts":null,
-          "prometheusAlerts":null,
-          "scalingConfiguration":
-          {  
-            "minSize":3,
-            "maxSize":100,
-            "cooldown":30
-          }
-        };
+        var responseJson = require('../responses/clusters/2.json');
         res.end(JSON.stringify(responseJson));
         break;
       case 3:
-        var responseJson = {
-          "host":null,
-          "port":"9443",
-          "user":"admin",
-          "stackId":3,
-          "id":3,
-          "state":"CREATE_IN_PROGRESS",
-          "autoscalingEnabled":false,
-          "metricAlerts":null,
-          "timeAlerts":null,
-          "prometheusAlerts":null,
-          "scalingConfiguration":
-          {  
-            "minSize":3,
-            "maxSize":100,
-            "cooldown":30
-          }
-        };
+        var responseJson = require('../responses/clusters/3.json');
         res.end(JSON.stringify(responseJson));
         break;
       case 4:
-        var responseJson = {
-          "host":"35.187.4.62",
-          "port":"9443",
-          "user":"admin",
-          "stackId":4,
-          "id":4,
-          "state":"RUNNING",
-          "autoscalingEnabled":true,
-          "metricAlerts":
-          [
-            {
-              "alertName": "datanodehealthsummary",
-              "description": null,
-              "id": 1,
-              "alertDefinition": "datanode_health_summary",
-              "period": 2,
-              "alertState": "CRITICAL",
-              "scalingPolicyId": 1,
-              "scalingPolicy": {
-                  "name": "datanodehealth",
-                  "adjustmentType": "NODE_COUNT",
-                  "scalingAdjustment": 1,
-                  "alertId": 1,
-                  "hostGroup": "worker"
-              }
-            },{
-              "alertName": "datanodeprocess",
-              "description": null,
-              "id": 2,
-              "alertDefinition": "datanode_process",
-              "period": 5,
-              "alertState": "CRITICAL",
-              "scalingPolicyId": 2,
-              "scalingPolicy":
-              {
-                "name": "datanodeprocess",
-                "adjustmentType": "NODE_COUNT",
-                "scalingAdjustment": 1,
-                "alertId": 2,
-                "hostGroup": "worker"
-              }
-            }
-          ],
-          "timeAlerts":
-          [
-            {
-              "alertName": "every5minutes",
-              "description": null,
-              "id": 3,
-              "timeZone": "Etc/GMT",
-              "cron": "0 0/5 * * * ?",
-              "scalingPolicyId": 3,
-              "scalingPolicy":
-              {
-                "name": "every5",
-                "adjustmentType": "NODE_COUNT",
-                "scalingAdjustment": 1,
-                "alertId": 3,
-                "hostGroup": "worker"
-              }
-            }
-          ],
-          "prometheusAlerts": null,
-          "scalingConfiguration": {
-            "minSize": 3,
-            "maxSize": 10,
-            "cooldown": 30
-          }
-        };
+        var responseJson = require('../responses/clusters/4.json');
         res.end(JSON.stringify(responseJson));
         break;
       default:

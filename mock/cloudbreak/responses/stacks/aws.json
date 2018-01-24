@@ -1,0 +1,640 @@
+{
+  "name": "aws-cluster",
+  "availabilityZone": "eu-west-1a",
+  "region": "eu-west-1",
+  "platformVariant": "AWS",
+  "credentialId": 4,
+  "onFailureAction": "DO_NOTHING",
+  "networkId": 2,
+  "ambariVersion": "2.6.0.0",
+  "hdpVersion": "2.6.3.0-235",
+  "parameters": {
+    "instanceProfileStrategy": "CREATE",
+    "AWS_SUBNET": "subnet-445d0c1f",
+    "AWS_S3_ROLE": "arn:aws:iam::755047402263:role/aws-cluster-3938-S3AccessRole-1WONDIIEGB2GR",
+    "AWS_VPC": "vpc-3c0ae35a"
+  },
+  "customDomain": null,
+  "customHostname": null,
+  "clusterNameAsSubdomain": false,
+  "hostgroupNameAsHostname": false,
+  "applicationTags": {},
+  "userDefinedTags": {
+    "kisnyul": "pityuka"
+  },
+  "defaultTags": {},
+  "id": 2,
+  "owner": "a0b9ae1b-8dc5-45ad-bada-567170cac68f",
+  "account": "a0b9ae1b-8dc5-45ad-bada-567170cac68f",
+  "status": "UPDATE_IN_PROGRESS",
+  "cluster": {
+    "id": 2,
+    "name": "aws-cluster",
+    "status": "REQUESTED",
+    "hoursUp": 0,
+    "minutesUp": 0,
+    "cluster": null,
+    "blueprintId": 7,
+    "blueprint": {
+      "ambariBlueprint": "eyJCbHVlcHJpbnRzIjp7ImJsdWVwcmludF9uYW1lIjoiaGRwMjYtZWR3LWFuYWx5dGljcyIsInN0YWNrX25hbWUiOiJIRFAiLCJzdGFja192ZXJzaW9uIjoiMi42In0sInNldHRpbmdzIjpbeyJyZWNvdmVyeV9zZXR0aW5ncyI6W119LHsic2VydmljZV9zZXR0aW5ncyI6W3sibmFtZSI6IkhJVkUiLCJjcmVkZW50aWFsX3N0b3JlX2VuYWJsZWQiOiJmYWxzZSJ9XX0seyJjb21wb25lbnRfc2V0dGluZ3MiOltdfV0sImNvbmZpZ3VyYXRpb25zIjpbeyJoaXZlLWludGVyYWN0aXZlLWVudiI6eyJlbmFibGVfaGl2ZV9pbnRlcmFjdGl2ZSI6InRydWUifX0seyJjb3JlLXNpdGUiOnsiZnMudHJhc2guaW50ZXJ2YWwiOiI0MzIwIn19LHsiaGRmcy1zaXRlIjp7ImRmcy5uYW1lbm9kZS5zYWZlbW9kZS50aHJlc2hvbGQtcGN0IjoiMC45OSJ9fSx7ImhpdmUtaW50ZXJhY3RpdmUtc2l0ZSI6eyJoaXZlLmV4ZWMub3JjLnNwbGl0LnN0cmF0ZWd5IjoiQkkiLCJoaXZlLnN0YXRzLmZldGNoLmJpdHZlY3RvciI6InRydWUiLCJoaXZlLm1ldGFzdG9yZS5yYXdzdG9yZS5pbXBsIjoib3JnLmFwYWNoZS5oYWRvb3AuaGl2ZS5tZXRhc3RvcmUuY2FjaGUuQ2FjaGVkU3RvcmUifX0seyJoaXZlLXNpdGUiOnsiaGl2ZS5leGVjLmNvbXByZXNzLm91dHB1dCI6InRydWUiLCJoaXZlLm1lcmdlLm1hcGZpbGVzIjoidHJ1ZSIsImhpdmUuc2VydmVyMi50ZXouaW5pdGlhbGl6ZS5kZWZhdWx0LnNlc3Npb25zIjoidHJ1ZSIsImhpdmUuc2VydmVyMi50cmFuc3BvcnQubW9kZSI6Imh0dHAifX0seyJtYXByZWQtc2l0ZSI6eyJtYXByZWR1Y2Uuam9iLnJlZHVjZS5zbG93c3RhcnQuY29tcGxldGVkbWFwcyI6IjAuNyIsIm1hcHJlZHVjZS5tYXAub3V0cHV0LmNvbXByZXNzIjoidHJ1ZSIsIm1hcHJlZHVjZS5vdXRwdXQuZmlsZW91dHB1dGZvcm1hdC5jb21wcmVzcyI6InRydWUifX0seyJ0ZXotc2l0ZSI6eyJ0ZXoucnVudGltZS5zaHVmZmxlLnBhcmFsbGVsLmNvcGllcyI6IjQiLCJ0ZXoucnVudGltZS5lbmFibGUuZmluYWwtbWVyZ2UuaW4ub3V0cHV0IjoiZmFsc2UiLCJ0ZXouYW0uYW0tcm0uaGVhcnRiZWF0LmludGVydmFsLW1zLm1heCI6IjIwMDAifX0seyJ5YXJuLXNpdGUiOnsieWFybi5hY2wuZW5hYmxlIjoidHJ1ZSJ9fV0sImhvc3RfZ3JvdXBzIjpbeyJuYW1lIjoibWFzdGVyIiwiY29uZmlndXJhdGlvbnMiOltdLCJjb21wb25lbnRzIjpbeyJuYW1lIjoiQVBQX1RJTUVMSU5FX1NFUlZFUiJ9LHsibmFtZSI6IkhDQVQifSx7Im5hbWUiOiJIREZTX0NMSUVOVCJ9LHsibmFtZSI6IkhJU1RPUllTRVJWRVIifSx7Im5hbWUiOiJISVZFX0NMSUVOVCJ9LHsibmFtZSI6IkhJVkVfTUVUQVNUT1JFIn0seyJuYW1lIjoiSElWRV9TRVJWRVIifSx7Im5hbWUiOiJISVZFX1NFUlZFUl9JTlRFUkFDVElWRSJ9LHsibmFtZSI6IkpPVVJOQUxOT0RFIn0seyJuYW1lIjoiTElWWV9TRVJWRVIifSx7Im5hbWUiOiJNQVBSRURVQ0UyX0NMSUVOVCJ9LHsibmFtZSI6Ik1FVFJJQ1NfQ09MTEVDVE9SIn0seyJuYW1lIjoiTUVUUklDU19NT05JVE9SIn0seyJuYW1lIjoiTVlTUUxfU0VSVkVSIn0seyJuYW1lIjoiTkFNRU5PREUifSx7Im5hbWUiOiJQSUcifSx7Im5hbWUiOiJSRVNPVVJDRU1BTkFHRVIifSx7Im5hbWUiOiJTRUNPTkRBUllfTkFNRU5PREUifSx7Im5hbWUiOiJTTElERVIifSx7Im5hbWUiOiJTUEFSS19DTElFTlQifSx7Im5hbWUiOiJTUEFSS19KT0JISVNUT1JZU0VSVkVSIn0seyJuYW1lIjoiVEVaX0NMSUVOVCJ9LHsibmFtZSI6IldFQkhDQVRfU0VSVkVSIn0seyJuYW1lIjoiWUFSTl9DTElFTlQifSx7Im5hbWUiOiJaRVBQRUxJTl9NQVNURVIifSx7Im5hbWUiOiJaT09LRUVQRVJfQ0xJRU5UIn0seyJuYW1lIjoiWk9PS0VFUEVSX1NFUlZFUiJ9XSwiY2FyZGluYWxpdHkiOiIxIn0seyJuYW1lIjoid29ya2VyIiwiY29uZmlndXJhdGlvbnMiOltdLCJjb21wb25lbnRzIjpbeyJuYW1lIjoiSElWRV9DTElFTlQifSx7Im5hbWUiOiJURVpfQ0xJRU5UIn0seyJuYW1lIjoiU1BBUktfQ0xJRU5UIn0seyJuYW1lIjoiREFUQU5PREUifSx7Im5hbWUiOiJNRVRSSUNTX01PTklUT1IifSx7Im5hbWUiOiJOT0RFTUFOQUdFUiJ9XSwiY2FyZGluYWxpdHkiOiIxKyJ9LHsibmFtZSI6ImNvbXB1dGUiLCJjb25maWd1cmF0aW9ucyI6W10sImNvbXBvbmVudHMiOlt7Im5hbWUiOiJISVZFX0NMSUVOVCJ9LHsibmFtZSI6IlRFWl9DTElFTlQifSx7Im5hbWUiOiJTUEFSS19DTElFTlQifSx7Im5hbWUiOiJNRVRSSUNTX01PTklUT1IifSx7Im5hbWUiOiJOT0RFTUFOQUdFUiJ9XSwiY2FyZGluYWxpdHkiOiIxKyJ9XX0=",
+      "description": "Useful for EDW analytics using Hive LLAP",
+      "inputs": [],
+      "name": "EDW-Analytics: Apache Hive 2 LLAP, Apache Zeppelin 0.7.0",
+      "id": 7,
+      "hostGroupCount": 3,
+      "status": "DEFAULT",
+      "public": true
+    },
+    "description": "",
+    "statusReason": null,
+    "ambariServerIp": "52.16.174.228",
+    "ambariServerUrl": "https://52.16.174.228/ambari/",
+    "userName": "admin",
+    "secure": false,
+    "hostGroups": [
+      {
+        "name": "worker",
+        "constraint": {
+          "instanceGroupName": "worker",
+          "constraintTemplateName": null,
+          "hostCount": 1
+        },
+        "recipeIds": [
+          1
+        ],
+        "recoveryMode": "AUTO",
+        "id": 4,
+        "recipes": [
+          {
+            "name": "pre-start",
+            "description": "",
+            "recipeType": "PRE_AMBARI_START",
+            "content": "IyEvYmluL2Jhc2gKdG91Y2ggL3ByZS1pbnN0YWxsCmVjaG8gIkhlbGxvIFByZS1JbnN0YWxsIiA+PiAvcHJlLWluc3RhbGw=",
+            "uri": "https://gist.githubusercontent.com/aszegedi/a31408e3110eee0ffa34d29db25519d4/raw/be9fc7198d64a9a98ce319a867a6c5e6270386b4/pre-install.sh",
+            "id": 1,
+            "public": true
+          }
+        ],
+        "metadata": []
+      },
+      {
+        "name": "compute",
+        "constraint": {
+          "instanceGroupName": "compute",
+          "constraintTemplateName": null,
+          "hostCount": 0
+        },
+        "recipeIds": [
+          1
+        ],
+        "recoveryMode": "AUTO",
+        "id": 5,
+        "recipes": [
+          {
+            "name": "pre-start",
+            "description": "",
+            "recipeType": "PRE_AMBARI_START",
+            "content": "IyEvYmluL2Jhc2gKdG91Y2ggL3ByZS1pbnN0YWxsCmVjaG8gIkhlbGxvIFByZS1JbnN0YWxsIiA+PiAvcHJlLWluc3RhbGw=",
+            "uri": "https://gist.githubusercontent.com/aszegedi/a31408e3110eee0ffa34d29db25519d4/raw/be9fc7198d64a9a98ce319a867a6c5e6270386b4/pre-install.sh",
+            "id": 1,
+            "public": true
+          }
+        ],
+        "metadata": []
+      },
+      {
+        "name": "master",
+        "constraint": {
+          "instanceGroupName": "master",
+          "constraintTemplateName": null,
+          "hostCount": 1
+        },
+        "recipeIds": [
+          1
+        ],
+        "recoveryMode": "AUTO",
+        "id": 6,
+        "recipes": [
+          {
+            "name": "pre-start",
+            "description": "",
+            "recipeType": "PRE_AMBARI_START",
+            "content": "IyEvYmluL2Jhc2gKdG91Y2ggL3ByZS1pbnN0YWxsCmVjaG8gIkhlbGxvIFByZS1JbnN0YWxsIiA+PiAvcHJlLWluc3RhbGw=",
+            "uri": "https://gist.githubusercontent.com/aszegedi/a31408e3110eee0ffa34d29db25519d4/raw/be9fc7198d64a9a98ce319a867a6c5e6270386b4/pre-install.sh",
+            "id": 1,
+            "public": true
+          }
+        ],
+        "metadata": []
+      }
+    ],
+    "rdsConfigIds": [],
+    "rdsConfigs": [],
+    "serviceEndPoints": {
+      "Hive Server": "http://52.16.174.228:10000",
+      "Zeppelin UI": "http://52.16.174.228:9995",
+      "Job History Server": "http://52.16.174.228:19888",
+      "Name Node": "http://52.16.174.228:50070",
+      "Zeppelin Web Socket": "http://52.16.174.228:9996",
+      "Resource Manager": "http://52.16.174.228:8088",
+      "Spark History Server": "http://52.16.174.228:18080"
+    },
+    "configStrategy": "ALWAYS_APPLY_DONT_OVERRIDE_CUSTOM_VALUES",
+    "ldapConfigId": null,
+    "ldapConfig": null,
+    "attributes": {},
+    "blueprintInputs": [],
+    "blueprintCustomProperties": null,
+    "executorType": "DEFAULT",
+    "gateway": {
+      "enableGateway": false,
+      "path": "aws-cluster",
+      "topologyName": "services",
+      "exposedServices": [],
+      "ssoProvider": "/aws-cluster/knoxsso/api/v1/websso",
+      "tokenCert": null,
+      "gatewayType": "INDIVIDUAL",
+      "ssoType": "NONE"
+    },
+    "customContainers": {
+      "definitions": {}
+    },
+    "ambariStackDetails": {
+      "stack": {
+        "repoid": "HDP",
+        "repository-version": "2.6.3.0-235",
+        "redhat6": null,
+        "vdf-url": "http://public-repo-1.hortonworks.com/HDP/centos6/2.x/updates/2.6.3.0/HDP-2.6.3.0-235.xml"
+      },
+      "util": {
+        "repoid": null,
+        "redhat6": null
+      },
+      "knox": null,
+      "verify": false,
+      "hdpVersion": "2.6"
+    },
+    "ambariRepoDetailsJson": {
+      "version": "2.6.0.0",
+      "baseUrl": "http://public-repo-1.hortonworks.com/ambari/centos6/2.x/updates/2.6.0.0",
+      "gpgKeyUrl": "http://public-repo-1.hortonworks.com/ambari/centos6/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins"
+    },
+    "ambariDatabaseDetails": {
+      "vendor": null,
+      "name": "postgres",
+      "host": "localhost",
+      "port": 5432,
+      "userName": null,
+      "password": null
+    },
+    "customQueue": "default",
+    "creationFinished": null
+  },
+  "statusReason": "Running cluster services.",
+  "credential": {
+    "name": "amazon",
+    "cloudPlatform": "AWS",
+    "parameters": {
+      "smartSenseId": "null",
+      "selector": "role-based"
+    },
+    "description": "",
+    "topologyId": null,
+    "id": 4,
+    "public": false
+  },
+  "network": {
+    "description": null,
+    "subnetCIDR": "10.0.0.0/16",
+    "cloudPlatform": "AWS",
+    "parameters": {
+      "publicNetId": null,
+      "routerId": null,
+      "internetGatewayId": null,
+      "networkId": null,
+      "vpcId": null
+    },
+    "topologyId": null,
+    "name": "n7c98594f-1afa-4e79-8c77-7697a7d4346f",
+    "id": 2,
+    "publicInAccount": false
+  },
+  "instanceGroups": [
+    {
+      "templateId": 2,
+      "securityGroupId": 3,
+      "nodeCount": 0,
+      "group": "compute",
+      "type": "CORE",
+      "parameters": {},
+      "template": {
+        "cloudPlatform": "AWS",
+        "parameters": {
+          "encrypted": false
+        },
+        "description": "",
+        "volumeType": "standard",
+        "instanceType": "m4.xlarge",
+        "customInstanceType": null,
+        "topologyId": null,
+        "name": "tb9d8d756-81e4-471f-a7a9-a188fa1ce85b",
+        "id": 2,
+        "volumeCount": 1,
+        "volumeSize": 100,
+        "public": false
+      },
+      "securityGroup": {
+        "description": null,
+        "securityGroupId": null,
+        "cloudPlatform": "AWS",
+        "name": "sge019005d-5be5-46aa-b181-4f76ab7677a8",
+        "id": 3,
+        "owner": "a0b9ae1b-8dc5-45ad-bada-567170cac68f",
+        "account": "a0b9ae1b-8dc5-45ad-bada-567170cac68f",
+        "securityRules": [
+          {
+            "subnet": "0.0.0.0/0",
+            "ports": "22",
+            "protocol": "tcp",
+            "modifiable": false,
+            "id": 4206
+          }
+        ],
+        "publicInAccount": false
+      },
+      "id": 4,
+      "metadata": []
+    },
+    {
+      "templateId": 3,
+      "securityGroupId": 4,
+      "nodeCount": 1,
+      "group": "master",
+      "type": "GATEWAY",
+      "parameters": {},
+      "template": {
+        "cloudPlatform": "AWS",
+        "parameters": {
+          "encrypted": false
+        },
+        "description": "",
+        "volumeType": "standard",
+        "instanceType": "m4.4xlarge",
+        "customInstanceType": null,
+        "topologyId": null,
+        "name": "t7b01713b-522e-41b6-bbfc-5c60da63d050",
+        "id": 3,
+        "volumeCount": 1,
+        "volumeSize": 100,
+        "public": false
+      },
+      "securityGroup": {
+        "description": null,
+        "securityGroupId": null,
+        "cloudPlatform": "AWS",
+        "name": "sg8cb22ed9-d776-4fc1-8b75-65e0fb6d5616",
+        "id": 4,
+        "owner": "a0b9ae1b-8dc5-45ad-bada-567170cac68f",
+        "account": "a0b9ae1b-8dc5-45ad-bada-567170cac68f",
+        "securityRules": [
+          {
+            "subnet": "0.0.0.0/0",
+            "ports": "9443",
+            "protocol": "tcp",
+            "modifiable": false,
+            "id": 4202
+          },
+          {
+            "subnet": "0.0.0.0/0",
+            "ports": "22",
+            "protocol": "tcp",
+            "modifiable": false,
+            "id": 4203
+          },
+          {
+            "subnet": "0.0.0.0/0",
+            "ports": "443",
+            "protocol": "tcp",
+            "modifiable": false,
+            "id": 4205
+          },
+          {
+            "subnet": "0.0.0.0/0",
+            "ports": "22",
+            "protocol": "tcp",
+            "modifiable": false,
+            "id": 4204
+          }
+        ],
+        "publicInAccount": false
+      },
+      "id": 5,
+      "metadata": [
+        {
+          "privateIp": "10.0.252.128",
+          "publicIp": "52.16.174.228",
+          "sshPort": 22,
+          "instanceId": "i-0f66703ef1de45e84",
+          "ambariServer": true,
+          "discoveryFQDN": "ip-10-0-252-128.eu-west-1.compute.internal",
+          "instanceGroup": "master",
+          "instanceStatus": "CREATED",
+          "instanceType": "GATEWAY_PRIMARY"
+        }
+      ]
+    },
+    {
+      "templateId": 2,
+      "securityGroupId": 3,
+      "nodeCount": 1,
+      "group": "worker",
+      "type": "CORE",
+      "parameters": {},
+      "template": {
+        "cloudPlatform": "AWS",
+        "parameters": {
+          "encrypted": false
+        },
+        "description": "",
+        "volumeType": "standard",
+        "instanceType": "m4.xlarge",
+        "customInstanceType": null,
+        "topologyId": null,
+        "name": "tb9d8d756-81e4-471f-a7a9-a188fa1ce85b",
+        "id": 2,
+        "volumeCount": 1,
+        "volumeSize": 100,
+        "public": false
+      },
+      "securityGroup": {
+        "description": null,
+        "securityGroupId": null,
+        "cloudPlatform": "AWS",
+        "name": "sg4c745e66-82a8-48f1-96a4-88ae3cf9cfd8",
+        "id": 3,
+        "owner": "a0b9ae1b-8dc5-45ad-bada-567170cac68f",
+        "account": "a0b9ae1b-8dc5-45ad-bada-567170cac68f",
+        "securityRules": [
+          {
+            "subnet": "0.0.0.0/0",
+            "ports": "22",
+            "protocol": "tcp",
+            "modifiable": false,
+            "id": 4207
+          }
+        ],
+        "publicInAccount": false
+      },
+      "id": 6,
+      "metadata": [
+        {
+          "privateIp": "10.0.125.204",
+          "publicIp": "52.51.255.205",
+          "sshPort": 22,
+          "instanceId": "i-084488aa2fc89ca7e",
+          "ambariServer": false,
+          "discoveryFQDN": "ip-10-0-125-204.eu-west-1.compute.internal",
+          "instanceGroup": "worker",
+          "instanceStatus": "CREATED",
+          "instanceType": "CORE"
+        }
+      ]
+    }
+  ],
+  "failurePolicy": null,
+  "orchestrator": {
+    "parameters": {},
+    "apiEndpoint": "52.16.174.228:9443",
+    "type": "SALT"
+  },
+  "created": 1515151753768,
+  "gatewayPort": 9443,
+  "image": {
+    "imageName": "ami-590ba020"
+  },
+  "cloudbreakDetails": {
+    "version": "2.4.0-dev.1"
+  },
+  "flexSubscription": null,
+  "stackAuthentication": {
+    "publicKey": null,
+    "publicKeyId": "seq-master",
+    "loginUserName": "cloudbreak"
+  },
+  "nodeCount": 2,
+  "hardwareInfos": [
+    {
+      "instanceMetaData": {
+        "privateIp": "10.0.112.219",
+        "publicIp": "52.16.174.228",
+        "sshPort": 22,
+        "instanceId": "i-06cc1ee28d1de5d16",
+        "ambariServer": true,
+        "discoveryFQDN": null,
+        "instanceGroup": "master",
+        "instanceStatus": "CREATED",
+        "instanceType": "GATEWAY_PRIMARY"
+      },
+      "hostMetadata": null
+    },
+    {
+      "instanceMetaData": {
+        "privateIp": "10.0.25.233",
+        "publicIp": "34.244.57.143",
+        "sshPort": 22,
+        "instanceId": "i-0d2e9558ccd985d34",
+        "ambariServer": false,
+        "discoveryFQDN": null,
+        "instanceGroup": "worker",
+        "instanceStatus": "CREATED",
+        "instanceType": "CORE"
+      },
+      "hostMetadata": null
+    }
+  ],
+  "cloudbreakEvents": [
+    {
+      "eventType": "UPDATE_IN_PROGRESS",
+      "eventTimestamp": 1516614533290,
+      "eventMessage": "Starting Ambari cluster services",
+      "owner": "a0b9ae1b-8dc5-45ad-bada-567170cac68f",
+      "account": "a0b9ae1b-8dc5-45ad-bada-567170cac68f",
+      "cloud": "AWS",
+      "region": "europe-west1",
+      "availabilityZone": "europe-west-1a",
+      "blueprintId": 7,
+      "blueprintName": "hdp26-edw-analytics",
+      "clusterId": 2,
+      "clusterName": "aws-cluster",
+      "stackId": 2,
+      "stackName": "aws-cluster",
+      "stackStatus": "UPDATE_IN_PROGRESS",
+      "nodeCount": 2,
+      "instanceGroup": null,
+      "clusterStatus": "REQUESTED"
+    },
+    {
+      "eventType": "UPDATE_IN_PROGRESS",
+      "eventTimestamp": 1516614530100,
+      "eventMessage": "Setting up infrastructure metadata",
+      "owner": "a0b9ae1b-8dc5-45ad-bada-567170cac68f",
+      "account": "a0b9ae1b-8dc5-45ad-bada-567170cac68f",
+      "cloud": "AWS",
+      "region": "europe-west1",
+      "availabilityZone": "europe-west-1a",
+      "blueprintId": 7,
+      "blueprintName": "hdp26-edw-analytics",
+      "clusterId": 2,
+      "clusterName": "aws-cluster",
+      "stackId": 2,
+      "stackName": "aws-cluster",
+      "stackStatus": "UPDATE_IN_PROGRESS",
+      "nodeCount": 2,
+      "instanceGroup": null,
+      "clusterStatus": "REQUESTED"
+    },
+    {
+      "eventType": "UPDATE_IN_PROGRESS",
+      "eventTimestamp": 1516614496559,
+      "eventMessage": "Bootstrapping infrastructure cluster",
+      "owner": "a0b9ae1b-8dc5-45ad-bada-567170cac68f",
+      "account": "a0b9ae1b-8dc5-45ad-bada-567170cac68f",
+      "cloud": "AWS",
+      "region": "europe-west1",
+      "availabilityZone": "europe-west-1a",
+      "blueprintId": 7,
+      "blueprintName": "hdp26-edw-analytics",
+      "clusterId": 2,
+      "clusterName": "aws-cluster",
+      "stackId": 2,
+      "stackName": "aws-cluster",
+      "stackStatus": "UPDATE_IN_PROGRESS",
+      "nodeCount": 2,
+      "instanceGroup": null,
+      "clusterStatus": "REQUESTED"
+    },
+    {
+      "eventType": "AVAILABLE",
+      "eventTimestamp": 1516614495241,
+      "eventMessage": "Infrastructure successfully provisioned",
+      "owner": "a0b9ae1b-8dc5-45ad-bada-567170cac68f",
+      "account": "a0b9ae1b-8dc5-45ad-bada-567170cac68f",
+      "cloud": "AWS",
+      "region": "europe-west1",
+      "availabilityZone": "europe-west-1a",
+      "blueprintId": 7,
+      "blueprintName": "hdp26-edw-analytics",
+      "clusterId": 2,
+      "clusterName": "aws-cluster",
+      "stackId": 2,
+      "stackName": "aws-cluster",
+      "stackStatus": "CREATE_IN_PROGRESS",
+      "nodeCount": 2,
+      "instanceGroup": null,
+      "clusterStatus": "REQUESTED"
+    },
+    {
+      "eventType": "BILLING_STARTED",
+      "eventTimestamp": 1516614495123,
+      "eventMessage": "Billing started, Infrastructure successfully provisioned",
+      "owner": "a0b9ae1b-8dc5-45ad-bada-567170cac68f",
+      "account": "a0b9ae1b-8dc5-45ad-bada-567170cac68f",
+      "cloud": "AWS",
+      "region": "europe-west1",
+      "availabilityZone": "europe-west-1a",
+      "blueprintId": 7,
+      "blueprintName": "hdp26-edw-analytics",
+      "clusterId": 2,
+      "clusterName": "aws-cluster",
+      "stackId": 2,
+      "stackName": "aws-cluster",
+      "stackStatus": "CREATE_IN_PROGRESS",
+      "nodeCount": 2,
+      "instanceGroup": null,
+      "clusterStatus": "REQUESTED"
+    },
+    {
+      "eventType": "UPDATE_IN_PROGRESS",
+      "eventTimestamp": 1516614476373,
+      "eventMessage": "Infrastructure metadata collection finished",
+      "owner": "a0b9ae1b-8dc5-45ad-bada-567170cac68f",
+      "account": "a0b9ae1b-8dc5-45ad-bada-567170cac68f",
+      "cloud": "AWS",
+      "region": "europe-west1",
+      "availabilityZone": "europe-west-1a",
+      "blueprintId": 7,
+      "blueprintName": "hdp26-edw-analytics",
+      "clusterId": 2,
+      "clusterName": "aws-cluster",
+      "stackId": 2,
+      "stackName": "aws-cluster",
+      "stackStatus": "CREATE_IN_PROGRESS",
+      "nodeCount": 2,
+      "instanceGroup": null,
+      "clusterStatus": "REQUESTED"
+    },
+    {
+      "eventType": "UPDATE_IN_PROGRESS",
+      "eventTimestamp": 1516614471209,
+      "eventMessage": "Infrastructure creation took 116 seconds",
+      "owner": "a0b9ae1b-8dc5-45ad-bada-567170cac68f",
+      "account": "a0b9ae1b-8dc5-45ad-bada-567170cac68f",
+      "cloud": "AWS",
+      "region": "europe-west1",
+      "availabilityZone": "europe-west-1a",
+      "blueprintId": 7,
+      "blueprintName": "hdp26-edw-analytics",
+      "clusterId": 2,
+      "clusterName": "aws-cluster",
+      "stackId": 2,
+      "stackName": "aws-cluster",
+      "stackStatus": "CREATE_IN_PROGRESS",
+      "nodeCount": 2,
+      "instanceGroup": null,
+      "clusterStatus": "REQUESTED"
+    },
+    {
+      "eventType": "CREATE_IN_PROGRESS",
+      "eventTimestamp": 1516614354582,
+      "eventMessage": "Creating infrastructure",
+      "owner": "a0b9ae1b-8dc5-45ad-bada-567170cac68f",
+      "account": "a0b9ae1b-8dc5-45ad-bada-567170cac68f",
+      "cloud": "AWS",
+      "region": "europe-west1",
+      "availabilityZone": "europe-west-1a",
+      "blueprintId": 7,
+      "blueprintName": "hdp26-edw-analytics",
+      "clusterId": 2,
+      "clusterName": "aws-cluster",
+      "stackId": 2,
+      "stackName": "aws-cluster",
+      "stackStatus": "CREATE_IN_PROGRESS",
+      "nodeCount": 0,
+      "instanceGroup": null,
+      "clusterStatus": "REQUESTED"
+    },
+    {
+      "eventType": "CREATE_IN_PROGRESS",
+      "eventTimestamp": 1516614353296,
+      "eventMessage": "Setting up HDP image",
+      "owner": "a0b9ae1b-8dc5-45ad-bada-567170cac68f",
+      "account": "a0b9ae1b-8dc5-45ad-bada-567170cac68f",
+      "cloud": "AWS",
+      "region": "europe-west1",
+      "availabilityZone": "europe-west-1a",
+      "blueprintId": 7,
+      "blueprintName": "hdp26-edw-analytics",
+      "clusterId": 2,
+      "clusterName": "aws-cluster",
+      "stackId": 2,
+      "stackName": "aws-cluster",
+      "stackStatus": "CREATE_IN_PROGRESS",
+      "nodeCount": 0,
+      "instanceGroup": null,
+      "clusterStatus": "REQUESTED"
+    }
+  ],
+  "cloudbreakUsages": [],
+  "cloudPlatform": "AWS",
+  "public": false
+}

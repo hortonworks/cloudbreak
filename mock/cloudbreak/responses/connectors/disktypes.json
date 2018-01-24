@@ -1,0 +1,84 @@
+{
+  "diskTypes": {
+    "AZURE": [
+      "Standard_LRS",
+      "Standard_GRS",
+      "Premium_LRS"
+    ],
+    "OPENSTACK": [
+      "HDD"
+    ],
+    "GCP": [
+      "pd-ssd",
+      "pd-standard"
+    ],
+    "AWS": [
+      "standard",
+      "ephemeral",
+      "gp2",
+      "st1"
+    ],
+    "YARN": [],
+    "MOCK": [
+      "magnetic",
+      "ssd",
+      "ephemeral"
+    ]
+  },
+  "defaultDisks": {
+    "AZURE": "Standard_LRS",
+    "OPENSTACK": "HDD",
+    "GCP": "pd-standard",
+    "AWS": "standard",
+    "YARN": "",
+    "MOCK": "magnetic"
+  },
+  "diskMappings": {
+    "AZURE": {
+      "Standard_LRS": "MAGNETIC",
+      "Premium_LRS": "MAGNETIC",
+      "Standard_GRS": "MAGNETIC"
+    },
+    "OPENSTACK": {
+      "HDD": "MAGNETIC"
+    },
+    "GCP": {
+      "pd-standard": "MAGNETIC",
+      "pd-ssd": "SSD"
+    },
+    "AWS": {
+      "standard": "MAGNETIC",
+      "st1": "ST1",
+      "gp2": "SSD",
+      "ephemeral": "EPHEMERAL"
+    },
+    "YARN": {},
+    "MOCK": {
+      "ssd": "SSD",
+      "magnetic": "MAGNETIC",
+      "ephemeral": "EPHEMERAL"
+    }
+  },
+  "displayNames": {
+    "AZURE": {
+      "Standard_LRS": "Locally-redundant storage",
+      "Premium_LRS": "Premium locally-redundant storage",
+      "Standard_GRS": "Geo-redundant storage"
+    },
+    "OPENSTACK": {
+      "HDD": "HDD"
+    },
+    "GCP": {
+      "pd-standard": "Standard persistent disks (HDD)",
+      "pd-ssd": "Solid-state persistent disks (SSD)"
+    },
+    "AWS": {
+      "standard": "Magnetic",
+      "st1": "Throughput Optimized HDD",
+      "gp2": "General Purpose (SSD)",
+      "ephemeral": "Ephemeral"
+    },
+    "YARN": {},
+    "MOCK": {}
+  }
+}

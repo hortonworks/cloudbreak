@@ -1,0 +1,532 @@
+{
+  "name": "openstack-cluster",
+  "availabilityZone": "nova",
+  "region": "RegionOne",
+  "platformVariant": "HEAT",
+  "credentialId": 1,
+  "onFailureAction": "DO_NOTHING",
+  "networkId": 1,
+  "ambariVersion": "2.6.0.0",
+  "hdpVersion": "2.6.3.0-235",
+  "parameters": {},
+  "customDomain": null,
+  "customHostname": null,
+  "clusterNameAsSubdomain": false,
+  "hostgroupNameAsHostname": false,
+  "applicationTags": {},
+  "userDefinedTags": {
+    "kisnyul": "pityuka"
+  },
+  "defaultTags": {},
+  "id": 1,
+  "owner": "a0b9ae1b-8dc5-45ad-bada-567170cac68f",
+  "account": "a0b9ae1b-8dc5-45ad-bada-567170cac68f",
+  "status": "CREATE_FAILED",
+  "cluster": {
+    "id": 1,
+    "name": "openstack-cluster",
+    "status": "REQUESTED",
+    "hoursUp": 0,
+    "minutesUp": 0,
+    "cluster": null,
+    "blueprintId": 7,
+    "blueprint": {
+      "ambariBlueprint": "eyJCbHVlcHJpbnRzIjp7ImJsdWVwcmludF9uYW1lIjoiaGRwMjYtZWR3LWFuYWx5dGljcyIsInN0YWNrX25hbWUiOiJIRFAiLCJzdGFja192ZXJzaW9uIjoiMi42In0sInNldHRpbmdzIjpbeyJyZWNvdmVyeV9zZXR0aW5ncyI6W119LHsic2VydmljZV9zZXR0aW5ncyI6W3sibmFtZSI6IkhJVkUiLCJjcmVkZW50aWFsX3N0b3JlX2VuYWJsZWQiOiJmYWxzZSJ9XX0seyJjb21wb25lbnRfc2V0dGluZ3MiOltdfV0sImNvbmZpZ3VyYXRpb25zIjpbeyJoaXZlLWludGVyYWN0aXZlLWVudiI6eyJlbmFibGVfaGl2ZV9pbnRlcmFjdGl2ZSI6InRydWUifX0seyJjb3JlLXNpdGUiOnsiZnMudHJhc2guaW50ZXJ2YWwiOiI0MzIwIn19LHsiaGRmcy1zaXRlIjp7ImRmcy5uYW1lbm9kZS5zYWZlbW9kZS50aHJlc2hvbGQtcGN0IjoiMC45OSJ9fSx7ImhpdmUtaW50ZXJhY3RpdmUtc2l0ZSI6eyJoaXZlLmV4ZWMub3JjLnNwbGl0LnN0cmF0ZWd5IjoiQkkiLCJoaXZlLnN0YXRzLmZldGNoLmJpdHZlY3RvciI6InRydWUiLCJoaXZlLm1ldGFzdG9yZS5yYXdzdG9yZS5pbXBsIjoib3JnLmFwYWNoZS5oYWRvb3AuaGl2ZS5tZXRhc3RvcmUuY2FjaGUuQ2FjaGVkU3RvcmUifX0seyJoaXZlLXNpdGUiOnsiaGl2ZS5leGVjLmNvbXByZXNzLm91dHB1dCI6InRydWUiLCJoaXZlLm1lcmdlLm1hcGZpbGVzIjoidHJ1ZSIsImhpdmUuc2VydmVyMi50ZXouaW5pdGlhbGl6ZS5kZWZhdWx0LnNlc3Npb25zIjoidHJ1ZSIsImhpdmUuc2VydmVyMi50cmFuc3BvcnQubW9kZSI6Imh0dHAifX0seyJtYXByZWQtc2l0ZSI6eyJtYXByZWR1Y2Uuam9iLnJlZHVjZS5zbG93c3RhcnQuY29tcGxldGVkbWFwcyI6IjAuNyIsIm1hcHJlZHVjZS5tYXAub3V0cHV0LmNvbXByZXNzIjoidHJ1ZSIsIm1hcHJlZHVjZS5vdXRwdXQuZmlsZW91dHB1dGZvcm1hdC5jb21wcmVzcyI6InRydWUifX0seyJ0ZXotc2l0ZSI6eyJ0ZXoucnVudGltZS5zaHVmZmxlLnBhcmFsbGVsLmNvcGllcyI6IjQiLCJ0ZXoucnVudGltZS5lbmFibGUuZmluYWwtbWVyZ2UuaW4ub3V0cHV0IjoiZmFsc2UiLCJ0ZXouYW0uYW0tcm0uaGVhcnRiZWF0LmludGVydmFsLW1zLm1heCI6IjIwMDAifX0seyJ5YXJuLXNpdGUiOnsieWFybi5hY2wuZW5hYmxlIjoidHJ1ZSJ9fV0sImhvc3RfZ3JvdXBzIjpbeyJuYW1lIjoibWFzdGVyIiwiY29uZmlndXJhdGlvbnMiOltdLCJjb21wb25lbnRzIjpbeyJuYW1lIjoiQVBQX1RJTUVMSU5FX1NFUlZFUiJ9LHsibmFtZSI6IkhDQVQifSx7Im5hbWUiOiJIREZTX0NMSUVOVCJ9LHsibmFtZSI6IkhJU1RPUllTRVJWRVIifSx7Im5hbWUiOiJISVZFX0NMSUVOVCJ9LHsibmFtZSI6IkhJVkVfTUVUQVNUT1JFIn0seyJuYW1lIjoiSElWRV9TRVJWRVIifSx7Im5hbWUiOiJISVZFX1NFUlZFUl9JTlRFUkFDVElWRSJ9LHsibmFtZSI6IkpPVVJOQUxOT0RFIn0seyJuYW1lIjoiTElWWV9TRVJWRVIifSx7Im5hbWUiOiJNQVBSRURVQ0UyX0NMSUVOVCJ9LHsibmFtZSI6Ik1FVFJJQ1NfQ09MTEVDVE9SIn0seyJuYW1lIjoiTUVUUklDU19NT05JVE9SIn0seyJuYW1lIjoiTVlTUUxfU0VSVkVSIn0seyJuYW1lIjoiTkFNRU5PREUifSx7Im5hbWUiOiJQSUcifSx7Im5hbWUiOiJSRVNPVVJDRU1BTkFHRVIifSx7Im5hbWUiOiJTRUNPTkRBUllfTkFNRU5PREUifSx7Im5hbWUiOiJTTElERVIifSx7Im5hbWUiOiJTUEFSS19DTElFTlQifSx7Im5hbWUiOiJTUEFSS19KT0JISVNUT1JZU0VSVkVSIn0seyJuYW1lIjoiVEVaX0NMSUVOVCJ9LHsibmFtZSI6IldFQkhDQVRfU0VSVkVSIn0seyJuYW1lIjoiWUFSTl9DTElFTlQifSx7Im5hbWUiOiJaRVBQRUxJTl9NQVNURVIifSx7Im5hbWUiOiJaT09LRUVQRVJfQ0xJRU5UIn0seyJuYW1lIjoiWk9PS0VFUEVSX1NFUlZFUiJ9XSwiY2FyZGluYWxpdHkiOiIxIn0seyJuYW1lIjoid29ya2VyIiwiY29uZmlndXJhdGlvbnMiOltdLCJjb21wb25lbnRzIjpbeyJuYW1lIjoiSElWRV9DTElFTlQifSx7Im5hbWUiOiJURVpfQ0xJRU5UIn0seyJuYW1lIjoiU1BBUktfQ0xJRU5UIn0seyJuYW1lIjoiREFUQU5PREUifSx7Im5hbWUiOiJNRVRSSUNTX01PTklUT1IifSx7Im5hbWUiOiJOT0RFTUFOQUdFUiJ9XSwiY2FyZGluYWxpdHkiOiIxKyJ9LHsibmFtZSI6ImNvbXB1dGUiLCJjb25maWd1cmF0aW9ucyI6W10sImNvbXBvbmVudHMiOlt7Im5hbWUiOiJISVZFX0NMSUVOVCJ9LHsibmFtZSI6IlRFWl9DTElFTlQifSx7Im5hbWUiOiJTUEFSS19DTElFTlQifSx7Im5hbWUiOiJNRVRSSUNTX01PTklUT1IifSx7Im5hbWUiOiJOT0RFTUFOQUdFUiJ9XSwiY2FyZGluYWxpdHkiOiIxKyJ9XX0=",
+      "description": "Useful for EDW analytics using Hive LLAP",
+      "inputs": [],
+      "name": "EDW-Analytics: Apache Hive 2 LLAP, Apache Zeppelin 0.7.0",
+      "id": 7,
+      "hostGroupCount": 3,
+      "status": "DEFAULT",
+      "public": true
+    },
+    "description": "",
+    "statusReason": null,
+    "ambariServerIp": null,
+    "ambariServerUrl": null,
+    "userName": "admin",
+    "secure": false,
+    "hostGroups": [
+      {
+        "name": "worker",
+        "constraint": {
+          "instanceGroupName": "worker",
+          "constraintTemplateName": null,
+          "hostCount": 1
+        },
+        "recipeIds": [
+          1
+        ],
+        "recoveryMode": "AUTO",
+        "id": 1,
+        "recipes": [
+          {
+            "name": "pre-start",
+            "description": "",
+            "recipeType": "PRE_AMBARI_START",
+            "content": "IyEvYmluL2Jhc2gKdG91Y2ggL3ByZS1pbnN0YWxsCmVjaG8gIkhlbGxvIFByZS1JbnN0YWxsIiA+PiAvcHJlLWluc3RhbGw=",
+            "uri": "https://gist.githubusercontent.com/aszegedi/a31408e3110eee0ffa34d29db25519d4/raw/be9fc7198d64a9a98ce319a867a6c5e6270386b4/pre-install.sh",
+            "id": 1,
+            "public": true
+          }
+        ],
+        "metadata": []
+      },
+      {
+        "name": "compute",
+        "constraint": {
+          "instanceGroupName": "compute",
+          "constraintTemplateName": null,
+          "hostCount": 0
+        },
+        "recipeIds": [
+          1
+        ],
+        "recoveryMode": "AUTO",
+        "id": 2,
+        "recipes": [
+          {
+            "name": "pre-start",
+            "description": "",
+            "recipeType": "PRE_AMBARI_START",
+            "content": "IyEvYmluL2Jhc2gKdG91Y2ggL3ByZS1pbnN0YWxsCmVjaG8gIkhlbGxvIFByZS1JbnN0YWxsIiA+PiAvcHJlLWluc3RhbGw=",
+            "uri": "https://gist.githubusercontent.com/aszegedi/a31408e3110eee0ffa34d29db25519d4/raw/be9fc7198d64a9a98ce319a867a6c5e6270386b4/pre-install.sh",
+            "id": 1,
+            "public": true
+          }
+        ],
+        "metadata": []
+      },
+      {
+        "name": "master",
+        "constraint": {
+          "instanceGroupName": "master",
+          "constraintTemplateName": null,
+          "hostCount": 1
+        },
+        "recipeIds": [
+          1
+        ],
+        "recoveryMode": "AUTO",
+        "id": 3,
+        "recipes": [
+          {
+            "name": "pre-start",
+            "description": "",
+            "recipeType": "PRE_AMBARI_START",
+            "content": "IyEvYmluL2Jhc2gKdG91Y2ggL3ByZS1pbnN0YWxsCmVjaG8gIkhlbGxvIFByZS1JbnN0YWxsIiA+PiAvcHJlLWluc3RhbGw=",
+            "uri": "https://gist.githubusercontent.com/aszegedi/a31408e3110eee0ffa34d29db25519d4/raw/be9fc7198d64a9a98ce319a867a6c5e6270386b4/pre-install.sh",
+            "id": 1,
+            "public": true
+          }
+        ],
+        "metadata": []
+      }
+    ],
+    "rdsConfigIds": [],
+    "rdsConfigs": [],
+    "serviceEndPoints": {},
+    "configStrategy": "ALWAYS_APPLY_DONT_OVERRIDE_CUSTOM_VALUES",
+    "ldapConfigId": null,
+    "ldapConfig": null,
+    "attributes": {},
+    "blueprintInputs": [],
+    "blueprintCustomProperties": null,
+    "executorType": "DEFAULT",
+    "gateway": {
+      "enableGateway": false,
+      "path": "openstack-cluster",
+      "topologyName": "services",
+      "exposedServices": [],
+      "ssoProvider": "/openstack-cluster/knoxsso/api/v1/websso",
+      "tokenCert": null,
+      "gatewayType": "INDIVIDUAL",
+      "ssoType": "NONE"
+    },
+    "customContainers": {
+      "definitions": {}
+    },
+    "ambariStackDetails": {
+      "stack": {
+        "repoid": "HDP",
+        "repository-version": "2.6.3.0-235",
+        "redhat7": null,
+        "vdf-url": "http://public-repo-1.hortonworks.com/HDP/centos7/2.x/updates/2.6.3.0/HDP-2.6.3.0-235.xml"
+      },
+      "util": {
+        "repoid": null,
+        "redhat7": null
+      },
+      "knox": null,
+      "verify": false,
+      "hdpVersion": "2.6"
+    },
+    "ambariRepoDetailsJson": {
+      "version": "2.6.0.0",
+      "baseUrl": "http://public-repo-1.hortonworks.com/ambari/centos6/2.x/updates/2.6.0.0",
+      "gpgKeyUrl": "http://public-repo-1.hortonworks.com/ambari/centos6/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins"
+    },
+    "ambariDatabaseDetails": {
+      "vendor": null,
+      "name": "postgres",
+      "host": "localhost",
+      "port": 5432,
+      "userName": null,
+      "password": null
+    },
+    "customQueue": "default",
+    "creationFinished": null
+  },
+  "statusReason": "Failed to create the stack for CloudContext{id=3937, name='openstack-cluster', platform='StringType{value='OPENSTACK'}', owner='a0b9ae1b-8dc5-45ad-bada-567170cac68f'} due to: Resource CREATE failed: ConnectionError: resources.ambari_master_0: ('Connection aborted.', BadStatusLine(\"''\",))",
+  "credential": {
+    "name": "openstack",
+    "cloudPlatform": "OPENSTACK",
+    "parameters": {
+      "facing": "internal",
+      "endpoint": "http://openstack.eng.com:3000/v2.0",
+      "selector": "cb-keystone-v2",
+      "keystoneVersion": "cb-keystone-v2",
+      "userName": "cloudbreak",
+      "tenantName": "cloudbreak"
+    },
+    "description": "",
+    "topologyId": null,
+    "id": 1,
+    "public": false
+  },
+  "network": {
+    "description": null,
+    "subnetCIDR": null,
+    "cloudPlatform": "OPENSTACK",
+    "parameters": {
+      "publicNetId": null,
+      "routerId": null,
+      "internetGatewayId": null,
+      "subnetId": "0404bf21-db5f-4987-8576-e65a4a99b14e",
+      "networkingOption": "self-service",
+      "networkId": "a5ad7a1d-d3a6-4180-8d61-07a23f6fb449"
+    },
+    "topologyId": null,
+    "name": "ncc1f02de-0ff6-404b-ad4e-526cfb620d87",
+    "id": 1,
+    "publicInAccount": false
+  },
+  "instanceGroups": [
+    {
+      "templateId": 1,
+      "securityGroupId": 1,
+      "nodeCount": 1,
+      "group": "worker",
+      "type": "CORE",
+      "parameters": {},
+      "template": {
+        "cloudPlatform": "OPENSTACK",
+        "parameters": {
+          "encrypted": false
+        },
+        "description": "",
+        "volumeType": "HDD",
+        "instanceType": "cloudbreak",
+        "customInstanceType": null,
+        "topologyId": null,
+        "name": "taef3eebf-c93c-49c9-af5d-37d1ec97d160",
+        "id": 1,
+        "volumeCount": 0,
+        "volumeSize": 100,
+        "public": false
+      },
+      "securityGroup": {
+        "description": null,
+        "securityGroupId": null,
+        "cloudPlatform": "OPENSTACK",
+        "name": "sga9cd44e7-a324-4828-8101-0a273d7fe4a2",
+        "id": 1,
+        "owner": "a0b9ae1b-8dc5-45ad-bada-567170cac68f",
+        "account": "a0b9ae1b-8dc5-45ad-bada-567170cac68f",
+        "securityRules": [
+          {
+            "subnet": "0.0.0.0/0",
+            "ports": "22",
+            "protocol": "tcp",
+            "modifiable": false,
+            "id": 1
+          }
+        ],
+        "publicInAccount": false
+      },
+      "id": 1,
+      "metadata": [
+        {
+          "privateIp": null,
+          "publicIp": null,
+          "sshPort": null,
+          "instanceId": null,
+          "ambariServer": null,
+          "discoveryFQDN": null,
+          "instanceGroup": "worker",
+          "instanceStatus": "REQUESTED",
+          "instanceType": null
+        }
+      ]
+    },
+    {
+      "templateId": 1,
+      "securityGroupId": 1,
+      "nodeCount": 0,
+      "group": "compute",
+      "type": "CORE",
+      "parameters": {},
+      "template": {
+        "cloudPlatform": "OPENSTACK",
+        "parameters": {
+          "encrypted": false
+        },
+        "description": "",
+        "volumeType": "HDD",
+        "instanceType": "cloudbreak",
+        "customInstanceType": null,
+        "topologyId": null,
+        "name": "t2655eeae-a4e5-43f4-9af7-3365ed493776",
+        "id": 1,
+        "volumeCount": 0,
+        "volumeSize": 100,
+        "public": false
+      },
+      "securityGroup": {
+        "description": null,
+        "securityGroupId": null,
+        "cloudPlatform": "OPENSTACK",
+        "name": "sgb4c28e84-fa47-4ce9-bf85-f1fabcb9c774",
+        "id": 1,
+        "owner": "a0b9ae1b-8dc5-45ad-bada-567170cac68f",
+        "account": "a0b9ae1b-8dc5-45ad-bada-567170cac68f",
+        "securityRules": [
+          {
+            "subnet": "0.0.0.0/0",
+            "ports": "22",
+            "protocol": "tcp",
+            "modifiable": false,
+            "id": 1
+          }
+        ],
+        "publicInAccount": false
+      },
+      "id": 2,
+      "metadata": []
+    },
+    {
+      "templateId": 1,
+      "securityGroupId": 2,
+      "nodeCount": 1,
+      "group": "master",
+      "type": "GATEWAY",
+      "parameters": {},
+      "template": {
+        "cloudPlatform": "OPENSTACK",
+        "parameters": {
+          "encrypted": false
+        },
+        "description": "",
+        "volumeType": "HDD",
+        "instanceType": "cloudbreak",
+        "customInstanceType": null,
+        "topologyId": null,
+        "name": "t6445f510-d972-4914-9192-9dfe9d841ec9",
+        "id": 1,
+        "volumeCount": 0,
+        "volumeSize": 100,
+        "public": false
+      },
+      "securityGroup": {
+        "description": null,
+        "securityGroupId": null,
+        "cloudPlatform": "OPENSTACK",
+        "name": "sgcc9c4d11-0926-4e5e-b6c3-8206fbca2c5a",
+        "id": 2,
+        "owner": "a0b9ae1b-8dc5-45ad-bada-567170cac68f",
+        "account": "a0b9ae1b-8dc5-45ad-bada-567170cac68f",
+        "securityRules": [
+          {
+            "subnet": "0.0.0.0/0",
+            "ports": "443",
+            "protocol": "tcp",
+            "modifiable": false,
+            "id": 4200
+          },
+          {
+            "subnet": "0.0.0.0/0",
+            "ports": "22",
+            "protocol": "tcp",
+            "modifiable": false,
+            "id": 4199
+          },
+          {
+            "subnet": "0.0.0.0/0",
+            "ports": "22",
+            "protocol": "tcp",
+            "modifiable": false,
+            "id": 4198
+          },
+          {
+            "subnet": "0.0.0.0/0",
+            "ports": "9443",
+            "protocol": "tcp",
+            "modifiable": false,
+            "id": 4197
+          }
+        ],
+        "publicInAccount": false
+      },
+      "id": 3,
+      "metadata": [
+        {
+          "privateIp": null,
+          "publicIp": null,
+          "sshPort": null,
+          "instanceId": null,
+          "ambariServer": null,
+          "discoveryFQDN": null,
+          "instanceGroup": "master",
+          "instanceStatus": "REQUESTED",
+          "instanceType": null
+        }
+      ]
+    }
+  ],
+  "failurePolicy": null,
+  "orchestrator": {
+    "parameters": {},
+    "apiEndpoint": null,
+    "type": "SALT"
+  },
+  "created": 1515151198060,
+  "gatewayPort": 9443,
+  "image": {
+    "imageName": "hdc-hdp--1711101841"
+  },
+  "cloudbreakDetails": {
+    "version": "2.4.0-dev.1"
+  },
+  "flexSubscription": null,
+  "stackAuthentication": {
+    "publicKey": null,
+    "publicKeyId": "seq-master",
+    "loginUserName": "cloudbreak"
+  },
+  "nodeCount": 2,
+  "hardwareInfos": [
+    {
+      "instanceMetaData": {
+        "privateIp": null,
+        "publicIp": null,
+        "sshPort": null,
+        "instanceId": null,
+        "ambariServer": null,
+        "discoveryFQDN": null,
+        "instanceGroup": "master",
+        "instanceStatus": "REQUESTED",
+        "instanceType": null
+      },
+      "hostMetadata": null
+    },
+    {
+      "instanceMetaData": {
+        "privateIp": null,
+        "publicIp": null,
+        "sshPort": null,
+        "instanceId": null,
+        "ambariServer": null,
+        "discoveryFQDN": null,
+        "instanceGroup": "worker",
+        "instanceStatus": "REQUESTED",
+        "instanceType": null
+      },
+      "hostMetadata": null
+    }
+  ],
+  "cloudbreakEvents": [
+    {
+      "eventType": "CREATE_FAILED",
+      "eventTimestamp": 1516640709889,
+      "eventMessage": "Infrastructure creation failed. Reason: Failed to create the stack for CloudContext{id=1, name='aszegedi-testing-os', platform='StringType{value='OPENSTACK'}', owner='8781acdb-4d87-4dff-814c-35c191031ad3'} due to: Resource CREATE failed: ResourceInError: resources.ambari_volume_master_0_0: Went to status error due to \"Unknown\"",
+      "owner": "a0b9ae1b-8dc5-45ad-bada-567170cac68f",
+      "account": "a0b9ae1b-8dc5-45ad-bada-567170cac68f",
+      "cloud": "OPENSTACK",
+      "region": "RegionOne",
+      "availabilityZone": "nova",
+      "blueprintId": 7,
+      "blueprintName": "hdp26-edw-analytics",
+      "clusterId": 1,
+      "clusterName": "openstack-cluster",
+      "stackId": 1,
+      "stackName": "openstack-cluster",
+      "stackStatus": "CREATE_FAILED",
+      "nodeCount": 2,
+      "instanceGroup": null,
+      "clusterStatus": "REQUESTED"
+    },
+    {
+      "eventType": "UPDATE_IN_PROGRESS",
+      "eventTimestamp": 1516640709548,
+      "eventMessage": "Infrastructure creation failed. Reason: Failed to create the stack for CloudContext{id=1, name='aszegedi-testing-os', platform='StringType{value='OPENSTACK'}', owner='8781acdb-4d87-4dff-814c-35c191031ad3'} due to: Resource CREATE failed: ResourceInError: resources.ambari_volume_master_0_0: Went to status error due to \"Unknown\"",
+      "owner": "a0b9ae1b-8dc5-45ad-bada-567170cac68f",
+      "account": "a0b9ae1b-8dc5-45ad-bada-567170cac68f",
+      "cloud": "OPENSTACK",
+      "region": "RegionOne",
+      "availabilityZone": "nova",
+      "blueprintId": 7,
+      "blueprintName": "hdp26-edw-analytics",
+      "clusterId": 1,
+      "clusterName": "openstack-cluster",
+      "stackId": 1,
+      "stackName": "openstack-cluster",
+      "stackStatus": "CREATE_IN_PROGRESS",
+      "nodeCount": 2,
+      "instanceGroup": null,
+      "clusterStatus": "REQUESTED"
+    },
+    {
+      "eventType": "CREATE_IN_PROGRESS",
+      "eventTimestamp": 1516635337828,
+      "eventMessage": "Creating infrastructure",
+      "owner": "a0b9ae1b-8dc5-45ad-bada-567170cac68f",
+      "account": "a0b9ae1b-8dc5-45ad-bada-567170cac68f",
+      "cloud": "OPENSTACK",
+      "region": "RegionOne",
+      "availabilityZone": "nova",
+      "blueprintId": 7,
+      "blueprintName": "hdp26-edw-analytics",
+      "clusterId": 1,
+      "clusterName": "openstack-cluster",
+      "stackId": 1,
+      "stackName": "openstack-cluster",
+      "stackStatus": "CREATE_IN_PROGRESS",
+      "nodeCount": 0,
+      "instanceGroup": null,
+      "clusterStatus": "REQUESTED"
+    },
+    {
+      "eventType": "CREATE_IN_PROGRESS",
+      "eventTimestamp": 1516635333877,
+      "eventMessage": "Setting up HDP image",
+      "owner": "a0b9ae1b-8dc5-45ad-bada-567170cac68f",
+      "account": "a0b9ae1b-8dc5-45ad-bada-567170cac68f",
+      "cloud": "OPENSTACK",
+      "region": "RegionOne",
+      "availabilityZone": "nova",
+      "blueprintId": 7,
+      "blueprintName": "hdp26-edw-analytics",
+      "clusterId": 1,
+      "clusterName": "openstack-cluster",
+      "stackId": 1,
+      "stackName": "openstack-cluster",
+      "stackStatus": "CREATE_IN_PROGRESS",
+      "nodeCount": 0,
+      "instanceGroup": null,
+      "clusterStatus": "REQUESTED"
+    }
+  ],
+  "cloudbreakUsages": [],
+  "cloudPlatform": "OPENSTACK",
+  "public": false
+}

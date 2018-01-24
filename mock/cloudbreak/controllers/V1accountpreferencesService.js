@@ -36,14 +36,7 @@ exports.isPlatformSelectionDisabled = function(args, res, next) {
      * returns Map
      **/
     var examples = {};
-    examples['application/json'] = {
-        "AZURE":true,
-        "OPENSTACK":true,
-        "GCP":true,
-        "AWS":true,
-        "YARN":false,
-        "MOCK":false
-    };
+    examples['application/json'] = require('../responses/accountpreferences/platforms.json');
     if (Object.keys(examples).length > 0) {
         res.setHeader('Content-Type', 'application/json');
         res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
@@ -60,14 +53,7 @@ exports.platformEnablement = function(args, res, next) {
      * returns Map
      **/
     var examples = {};
-    examples['application/json'] = {
-        "AZURE":true,
-        "OPENSTACK":true,
-        "GCP":true,
-        "AWS":true,
-        "YARN":false,
-        "MOCK":false
-    };
+    examples['application/json'] = require('../responses/accountpreferences/platforms.json');
     if (Object.keys(examples).length > 0) {
         res.setHeader('Content-Type', 'application/json');
         res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));

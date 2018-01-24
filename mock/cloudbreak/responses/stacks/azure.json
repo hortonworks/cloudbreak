@@ -1,0 +1,437 @@
+{
+  "name": "azure-cluster",
+  "availabilityZone": null,
+  "region": "North Europe",
+  "platformVariant": "AZURE",
+  "credentialId": 2,
+  "onFailureAction": "DO_NOTHING",
+  "networkId": 3,
+  "ambariVersion": "2.6.0.0",
+  "hdpVersion": "2.6.3.0-235",
+  "parameters": {
+    "encryptStorage": "false"
+  },
+  "customDomain": null,
+  "customHostname": null,
+  "clusterNameAsSubdomain": false,
+  "hostgroupNameAsHostname": false,
+  "applicationTags": {},
+  "userDefinedTags": {
+    "kisnyul": "pityuka"
+  },
+  "defaultTags": {},
+  "id": 3,
+  "owner": "a0b9ae1b-8dc5-45ad-bada-567170cac68f",
+  "account": "a0b9ae1b-8dc5-45ad-bada-567170cac68f",
+  "status": "CREATE_IN_PROGRESS",
+  "cluster": {
+    "id": 3,
+    "name": "azure-cluster",
+    "status": "REQUESTED",
+    "hoursUp": 0,
+    "minutesUp": 0,
+    "cluster": null,
+    "blueprintId": 7,
+    "blueprint": {
+      "ambariBlueprint": "eyJCbHVlcHJpbnRzIjp7ImJsdWVwcmludF9uYW1lIjoiaGRwMjYtZWR3LWFuYWx5dGljcyIsInN0YWNrX25hbWUiOiJIRFAiLCJzdGFja192ZXJzaW9uIjoiMi42In0sInNldHRpbmdzIjpbeyJyZWNvdmVyeV9zZXR0aW5ncyI6W119LHsic2VydmljZV9zZXR0aW5ncyI6W3sibmFtZSI6IkhJVkUiLCJjcmVkZW50aWFsX3N0b3JlX2VuYWJsZWQiOiJmYWxzZSJ9XX0seyJjb21wb25lbnRfc2V0dGluZ3MiOltdfV0sImNvbmZpZ3VyYXRpb25zIjpbeyJoaXZlLWludGVyYWN0aXZlLWVudiI6eyJlbmFibGVfaGl2ZV9pbnRlcmFjdGl2ZSI6InRydWUifX0seyJjb3JlLXNpdGUiOnsiZnMudHJhc2guaW50ZXJ2YWwiOiI0MzIwIn19LHsiaGRmcy1zaXRlIjp7ImRmcy5uYW1lbm9kZS5zYWZlbW9kZS50aHJlc2hvbGQtcGN0IjoiMC45OSJ9fSx7ImhpdmUtaW50ZXJhY3RpdmUtc2l0ZSI6eyJoaXZlLmV4ZWMub3JjLnNwbGl0LnN0cmF0ZWd5IjoiQkkiLCJoaXZlLnN0YXRzLmZldGNoLmJpdHZlY3RvciI6InRydWUiLCJoaXZlLm1ldGFzdG9yZS5yYXdzdG9yZS5pbXBsIjoib3JnLmFwYWNoZS5oYWRvb3AuaGl2ZS5tZXRhc3RvcmUuY2FjaGUuQ2FjaGVkU3RvcmUifX0seyJoaXZlLXNpdGUiOnsiaGl2ZS5leGVjLmNvbXByZXNzLm91dHB1dCI6InRydWUiLCJoaXZlLm1lcmdlLm1hcGZpbGVzIjoidHJ1ZSIsImhpdmUuc2VydmVyMi50ZXouaW5pdGlhbGl6ZS5kZWZhdWx0LnNlc3Npb25zIjoidHJ1ZSIsImhpdmUuc2VydmVyMi50cmFuc3BvcnQubW9kZSI6Imh0dHAifX0seyJtYXByZWQtc2l0ZSI6eyJtYXByZWR1Y2Uuam9iLnJlZHVjZS5zbG93c3RhcnQuY29tcGxldGVkbWFwcyI6IjAuNyIsIm1hcHJlZHVjZS5tYXAub3V0cHV0LmNvbXByZXNzIjoidHJ1ZSIsIm1hcHJlZHVjZS5vdXRwdXQuZmlsZW91dHB1dGZvcm1hdC5jb21wcmVzcyI6InRydWUifX0seyJ0ZXotc2l0ZSI6eyJ0ZXoucnVudGltZS5zaHVmZmxlLnBhcmFsbGVsLmNvcGllcyI6IjQiLCJ0ZXoucnVudGltZS5lbmFibGUuZmluYWwtbWVyZ2UuaW4ub3V0cHV0IjoiZmFsc2UiLCJ0ZXouYW0uYW0tcm0uaGVhcnRiZWF0LmludGVydmFsLW1zLm1heCI6IjIwMDAifX0seyJ5YXJuLXNpdGUiOnsieWFybi5hY2wuZW5hYmxlIjoidHJ1ZSJ9fV0sImhvc3RfZ3JvdXBzIjpbeyJuYW1lIjoibWFzdGVyIiwiY29uZmlndXJhdGlvbnMiOltdLCJjb21wb25lbnRzIjpbeyJuYW1lIjoiQVBQX1RJTUVMSU5FX1NFUlZFUiJ9LHsibmFtZSI6IkhDQVQifSx7Im5hbWUiOiJIREZTX0NMSUVOVCJ9LHsibmFtZSI6IkhJU1RPUllTRVJWRVIifSx7Im5hbWUiOiJISVZFX0NMSUVOVCJ9LHsibmFtZSI6IkhJVkVfTUVUQVNUT1JFIn0seyJuYW1lIjoiSElWRV9TRVJWRVIifSx7Im5hbWUiOiJISVZFX1NFUlZFUl9JTlRFUkFDVElWRSJ9LHsibmFtZSI6IkpPVVJOQUxOT0RFIn0seyJuYW1lIjoiTElWWV9TRVJWRVIifSx7Im5hbWUiOiJNQVBSRURVQ0UyX0NMSUVOVCJ9LHsibmFtZSI6Ik1FVFJJQ1NfQ09MTEVDVE9SIn0seyJuYW1lIjoiTUVUUklDU19NT05JVE9SIn0seyJuYW1lIjoiTVlTUUxfU0VSVkVSIn0seyJuYW1lIjoiTkFNRU5PREUifSx7Im5hbWUiOiJQSUcifSx7Im5hbWUiOiJSRVNPVVJDRU1BTkFHRVIifSx7Im5hbWUiOiJTRUNPTkRBUllfTkFNRU5PREUifSx7Im5hbWUiOiJTTElERVIifSx7Im5hbWUiOiJTUEFSS19DTElFTlQifSx7Im5hbWUiOiJTUEFSS19KT0JISVNUT1JZU0VSVkVSIn0seyJuYW1lIjoiVEVaX0NMSUVOVCJ9LHsibmFtZSI6IldFQkhDQVRfU0VSVkVSIn0seyJuYW1lIjoiWUFSTl9DTElFTlQifSx7Im5hbWUiOiJaRVBQRUxJTl9NQVNURVIifSx7Im5hbWUiOiJaT09LRUVQRVJfQ0xJRU5UIn0seyJuYW1lIjoiWk9PS0VFUEVSX1NFUlZFUiJ9XSwiY2FyZGluYWxpdHkiOiIxIn0seyJuYW1lIjoid29ya2VyIiwiY29uZmlndXJhdGlvbnMiOltdLCJjb21wb25lbnRzIjpbeyJuYW1lIjoiSElWRV9DTElFTlQifSx7Im5hbWUiOiJURVpfQ0xJRU5UIn0seyJuYW1lIjoiU1BBUktfQ0xJRU5UIn0seyJuYW1lIjoiREFUQU5PREUifSx7Im5hbWUiOiJNRVRSSUNTX01PTklUT1IifSx7Im5hbWUiOiJOT0RFTUFOQUdFUiJ9XSwiY2FyZGluYWxpdHkiOiIxKyJ9LHsibmFtZSI6ImNvbXB1dGUiLCJjb25maWd1cmF0aW9ucyI6W10sImNvbXBvbmVudHMiOlt7Im5hbWUiOiJISVZFX0NMSUVOVCJ9LHsibmFtZSI6IlRFWl9DTElFTlQifSx7Im5hbWUiOiJTUEFSS19DTElFTlQifSx7Im5hbWUiOiJNRVRSSUNTX01PTklUT1IifSx7Im5hbWUiOiJOT0RFTUFOQUdFUiJ9XSwiY2FyZGluYWxpdHkiOiIxKyJ9XX0=",
+      "description": "Useful for EDW analytics using Hive LLAP",
+      "inputs": [],
+      "name": "EDW-Analytics: Apache Hive 2 LLAP, Apache Zeppelin 0.7.0",
+      "id": 7,
+      "hostGroupCount": 3,
+      "status": "DEFAULT",
+      "public": true
+    },
+    "description": "",
+    "statusReason": null,
+    "ambariServerIp": null,
+    "ambariServerUrl": null,
+    "userName": "admin",
+    "secure": false,
+    "hostGroups": [
+      {
+        "name": "worker",
+        "constraint": {
+          "instanceGroupName": "worker",
+          "constraintTemplateName": null,
+          "hostCount": 1
+        },
+        "recipeIds": [],
+        "recoveryMode": "AUTO",
+        "id": 7,
+        "recipes": [],
+        "metadata": []
+      },
+      {
+        "name": "compute",
+        "constraint": {
+          "instanceGroupName": "compute",
+          "constraintTemplateName": null,
+          "hostCount": 0
+        },
+        "recipeIds": [],
+        "recoveryMode": "AUTO",
+        "id": 8,
+        "recipes": [],
+        "metadata": []
+      },
+      {
+        "name": "master",
+        "constraint": {
+          "instanceGroupName": "master",
+          "constraintTemplateName": null,
+          "hostCount": 1
+        },
+        "recipeIds": [],
+        "recoveryMode": "AUTO",
+        "id": 9,
+        "recipes": [],
+        "metadata": []
+      }
+    ],
+    "rdsConfigIds": [],
+    "rdsConfigs": [],
+    "serviceEndPoints": {},
+    "configStrategy": "ALWAYS_APPLY_DONT_OVERRIDE_CUSTOM_VALUES",
+    "ldapConfigId": null,
+    "ldapConfig": null,
+    "attributes": {},
+    "blueprintInputs": [],
+    "blueprintCustomProperties": null,
+    "executorType": "DEFAULT",
+    "gateway": {
+      "enableGateway": false,
+      "path": "azure-cluster",
+      "topologyName": "services",
+      "exposedServices": [],
+      "ssoProvider": "/azure-cluster/knoxsso/api/v1/websso",
+      "tokenCert": null,
+      "gatewayType": "INDIVIDUAL",
+      "ssoType": "NONE"
+    },
+    "customContainers": {
+      "definitions": {}
+    },
+    "ambariStackDetails": {
+      "stack": {
+        "repoid": "HDP",
+        "repository-version": "2.6.3.0-235",
+        "redhat7": null,
+        "vdf-url": "http://public-repo-1.hortonworks.com/HDP/centos7/2.x/updates/2.6.3.0/HDP-2.6.3.0-235.xml"
+      },
+      "util": {
+        "repoid": null,
+        "redhat7": null
+      },
+      "knox": null,
+      "verify": false,
+      "hdpVersion": "2.6"
+    },
+    "ambariRepoDetailsJson": {
+      "version": "2.6.0.0",
+      "baseUrl": "http://public-repo-1.hortonworks.com/ambari/centos6/2.x/updates/2.6.0.0",
+      "gpgKeyUrl": "http://public-repo-1.hortonworks.com/ambari/centos6/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins"
+    },
+    "ambariDatabaseDetails": {
+      "vendor": null,
+      "name": "postgres",
+      "host": "localhost",
+      "port": 5432,
+      "userName": null,
+      "password": null
+    },
+    "customQueue": "default",
+    "creationFinished": null
+  },
+  "statusReason": "Image setup",
+  "credential": {
+    "name": "azure",
+    "cloudPlatform": "AZURE",
+    "parameters": {
+      "tenantId": "a12b1234-1234-12aa-3bcc-4d5e6f78900g",
+      "spDisplayName": null,
+      "subscriptionId": "a12b1234-1234-12aa-3bcc-4d5e6f78900g",
+      "roleType": null,
+      "accessKey": "a12b1234-1234-12aa-3bcc-4d5e6f78900g"
+    },
+    "description": "",
+    "topologyId": null,
+    "id": 2,
+    "public": false
+  },
+  "network": {
+    "description": null,
+    "subnetCIDR": "10.0.0.0/16",
+    "cloudPlatform": "AZURE",
+    "parameters": {
+      "publicNetId": null,
+      "routerId": null,
+      "internetGatewayId": null,
+      "noPublicIp": false,
+      "noFirewallRules": false,
+      "networkId": null,
+      "vpcId": null
+    },
+    "topologyId": null,
+    "name": "nceddf172-7b62-41cc-b9ef-e6bdf15b08ea",
+    "id": 3,
+    "publicInAccount": false
+  },
+  "instanceGroups": [
+    {
+      "templateId": 4,
+      "securityGroupId": 5,
+      "nodeCount": 1,
+      "group": "master",
+      "type": "GATEWAY",
+      "parameters": {},
+      "template": {
+        "cloudPlatform": "AZURE",
+        "parameters": {
+          "encrypted": false,
+          "managedDisk": true
+        },
+        "description": "",
+        "volumeType": "Standard_LRS",
+        "instanceType": "Standard_D3_v2",
+        "customInstanceType": null,
+        "topologyId": null,
+        "name": "t38826b32-a741-473a-9ab9-0510b4fd7829",
+        "id": 4,
+        "volumeCount": 1,
+        "volumeSize": 100,
+        "public": false
+      },
+      "securityGroup": {
+        "description": null,
+        "securityGroupId": null,
+        "cloudPlatform": "AZURE",
+        "name": "sgebd08127-2a83-4165-b944-c868894fe45a",
+        "id": 5,
+        "owner": "a0b9ae1b-8dc5-45ad-bada-567170cac68f",
+        "account": "a0b9ae1b-8dc5-45ad-bada-567170cac68f",
+        "securityRules": [
+          {
+            "subnet": "0.0.0.0/0",
+            "ports": "443",
+            "protocol": "tcp",
+            "modifiable": false,
+            "id": 4211
+          },
+          {
+            "subnet": "0.0.0.0/0",
+            "ports": "22",
+            "protocol": "tcp",
+            "modifiable": false,
+            "id": 4210
+          },
+          {
+            "subnet": "0.0.0.0/0",
+            "ports": "9443",
+            "protocol": "tcp",
+            "modifiable": false,
+            "id": 4208
+          },
+          {
+            "subnet": "0.0.0.0/0",
+            "ports": "22",
+            "protocol": "tcp",
+            "modifiable": false,
+            "id": 4209
+          }
+        ],
+        "publicInAccount": false
+      },
+      "id": 7,
+      "metadata": []
+    },
+    {
+      "templateId": 4,
+      "securityGroupId": 6,
+      "nodeCount": 1,
+      "group": "worker",
+      "type": "CORE",
+      "parameters": {},
+      "template": {
+        "cloudPlatform": "AZURE",
+        "parameters": {
+          "encrypted": false,
+          "managedDisk": true
+        },
+        "description": "",
+        "volumeType": "Standard_LRS",
+        "instanceType": "Standard_D3_v2",
+        "customInstanceType": null,
+        "topologyId": null,
+        "name": "t38826b32-a741-473a-9ab9-0510b4fd7829",
+        "id": 4,
+        "volumeCount": 1,
+        "volumeSize": 100,
+        "public": false
+      },
+      "securityGroup": {
+        "description": null,
+        "securityGroupId": null,
+        "cloudPlatform": "AZURE",
+        "name": "sg17b54a58-abb4-4eaa-9558-4d9596a28ce1",
+        "id": 6,
+        "owner": "a0b9ae1b-8dc5-45ad-bada-567170cac68f",
+        "account": "a0b9ae1b-8dc5-45ad-bada-567170cac68f",
+        "securityRules": [
+          {
+            "subnet": "0.0.0.0/0",
+            "ports": "22",
+            "protocol": "tcp",
+            "modifiable": false,
+            "id": 4212
+          }
+        ],
+        "publicInAccount": false
+      },
+      "id": 8,
+      "metadata": []
+    },
+    {
+      "templateId": 4,
+      "securityGroupId": 6,
+      "nodeCount": 0,
+      "group": "compute",
+      "type": "CORE",
+      "parameters": {},
+      "template": {
+        "cloudPlatform": "AZURE",
+        "parameters": {
+          "encrypted": false,
+          "managedDisk": true
+        },
+        "description": "",
+        "volumeType": "Standard_LRS",
+        "instanceType": "Standard_D3_v2",
+        "customInstanceType": null,
+        "topologyId": null,
+        "name": "t38826b32-a741-473a-9ab9-0510b4fd7829",
+        "id": 4,
+        "volumeCount": 1,
+        "volumeSize": 100,
+        "public": false
+      },
+      "securityGroup": {
+        "description": null,
+        "securityGroupId": null,
+        "cloudPlatform": "AZURE",
+        "name": "sg17b54a58-abb4-4eaa-9558-4d9596a28ce1",
+        "id": 6,
+        "owner": "a0b9ae1b-8dc5-45ad-bada-567170cac68f",
+        "account": "a0b9ae1b-8dc5-45ad-bada-567170cac68f",
+        "securityRules": [
+          {
+            "subnet": "0.0.0.0/0",
+            "ports": "22",
+            "protocol": "tcp",
+            "modifiable": false,
+            "id": 4212
+          }
+        ],
+        "publicInAccount": false
+      },
+      "id": 9,
+      "metadata": []
+    }
+  ],
+  "failurePolicy": null,
+  "orchestrator": {
+    "parameters": {},
+    "apiEndpoint": null,
+    "type": "SALT"
+  },
+  "created": 1515152314614,
+  "gatewayPort": 9443,
+  "image": {
+    "imageName": "https://sequenceiqnortheurope2.blob.core.windows.net/images/hdc-hdp--1710161226.vhd"
+  },
+  "cloudbreakDetails": {
+    "version": "2.4.0-dev.1"
+  },
+  "flexSubscription": null,
+  "stackAuthentication": {
+    "publicKey": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC0Rfl2G2vDs6yc19RxCqReunFgpYj+ucyLobpTCBtfDwzIbJot2Fmife6M42mBtiTmAK6x8kcUEeab6CB4MUzsqF7vGTFUjwWirG/XU5pYXFUBhi8xzey+KS9KVrQ+UuKJh/AN9iSQeMV+rgT1yF5+etVH+bK1/37QCKp3+mCqjFzPyQOrvkGZv4sYyRwX7BKBLleQmIVWpofpjT7BfcCxH877RzC5YMIi65aBc82Dl6tH6OEiP7mzByU52yvH6JFuwZ/9fWj1vXCWJzxx2w0F1OU8Zwg8gNNzL+SVb9+xfBE7xBHMpYFg72hBWPh862Ce36F4NZd3MpWMSjMmpDPh",
+    "publicKeyId": null,
+    "loginUserName": "cloudbreak"
+  },
+  "nodeCount": 2,
+  "hardwareInfos": [
+    {
+      "instanceMetaData": {
+        "privateIp": null,
+        "publicIp": null,
+        "sshPort": null,
+        "instanceId": null,
+        "ambariServer": null,
+        "discoveryFQDN": null,
+        "instanceGroup": "master",
+        "instanceStatus": "REQUESTED",
+        "instanceType": null
+      },
+      "hostMetadata": null
+    },
+    {
+      "instanceMetaData": {
+        "privateIp": null,
+        "publicIp": null,
+        "sshPort": null,
+        "instanceId": null,
+        "ambariServer": null,
+        "discoveryFQDN": null,
+        "instanceGroup": "worker",
+        "instanceStatus": "REQUESTED",
+        "instanceType": null
+      },
+      "hostMetadata": null
+    }
+  ],
+  "cloudbreakEvents": [
+    {
+      "eventType": "CREATE_IN_PROGRESS",
+      "eventTimestamp": 1516614354582,
+      "eventMessage": "Creating infrastructure",
+      "owner": "a0b9ae1b-8dc5-45ad-bada-567170cac68f",
+      "account": "a0b9ae1b-8dc5-45ad-bada-567170cac68f",
+      "cloud": "AZURE",
+      "region": "North Europe",
+      "availabilityZone": null,
+      "blueprintId": 7,
+      "blueprintName": "hdp26-edw-analytics",
+      "clusterId": 3,
+      "clusterName": "azure-cluster",
+      "stackId": 3,
+      "stackName": "azure-cluster",
+      "stackStatus": "CREATE_IN_PROGRESS",
+      "nodeCount": 0,
+      "instanceGroup": null,
+      "clusterStatus": "REQUESTED"
+    },
+    {
+      "eventType": "CREATE_IN_PROGRESS",
+      "eventTimestamp": 1516614353296,
+      "eventMessage": "Setting up HDP image",
+      "owner": "a0b9ae1b-8dc5-45ad-bada-567170cac68f",
+      "account": "a0b9ae1b-8dc5-45ad-bada-567170cac68f",
+      "cloud": "AZURE",
+      "region": "North Europe",
+      "availabilityZone": null,
+      "blueprintId": 7,
+      "blueprintName": "hdp26-edw-analytics",
+      "clusterId": 3,
+      "clusterName": "azure-cluster",
+      "stackId": 3,
+      "stackName": "azure-cluster",
+      "stackStatus": "CREATE_IN_PROGRESS",
+      "nodeCount": 0,
+      "instanceGroup": null,
+      "clusterStatus": "REQUESTED"
+    }
+  ],
+  "cloudbreakUsages": [],
+  "cloudPlatform": "AZURE",
+  "public": false
+}
