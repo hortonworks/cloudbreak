@@ -8660,7 +8660,12 @@ exports.putstartStackV2 = function(args, res, next) {
      * name String
      * no response value expected for this operation
      **/
-    res.end();
+    if (args.name.value === 'azstatus') {
+        res.statusCode=404
+        res.end(JSON.stringify({"message":"Stack 'azstatus' not found"}));
+    } else {
+        res.end();
+    }
 }
 
 exports.putstopStackV2 = function(args, res, next) {
@@ -8671,7 +8676,12 @@ exports.putstopStackV2 = function(args, res, next) {
      * name String
      * no response value expected for this operation
      **/
-    res.end();
+    if (args.name.value === 'azstatus') {
+        res.statusCode=404
+        res.end(JSON.stringify({"message":"Stack 'azstatus' not found"}));
+    } else {
+        res.end();
+    }
 }
 
 exports.putsyncStackV2 = function(args, res, next) {
