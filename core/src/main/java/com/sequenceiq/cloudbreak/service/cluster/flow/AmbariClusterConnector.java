@@ -284,7 +284,7 @@ public class AmbariClusterConnector {
 
             AmbariClient ambariClient = getAmbariClient(stack);
             ambariRepositoryVersionService.setBaseRepoURL(stack.getId(), cluster.getId(), stack.getOrchestrator(), ambariClient);
-            addBlueprint(stack, ambariClient, blueprintText);
+            addBlueprint(stack, ambariClient, blueprintText, hostGroups);
 
             Set<HostMetadata> hostsInCluster = hostMetadataRepository.findHostsInCluster(cluster.getId());
             PollingResult waitForHostsResult = waitForHosts(stack, ambariClient, hostsInCluster);
@@ -717,7 +717,7 @@ public class AmbariClusterConnector {
         return stopped;
     }
 
-    private void addBlueprint(Stack stack, AmbariClient ambariClient, String blueprintText) {
+    private void addBlueprint(Stack stack, AmbariClient ambariClient, String blueprintText, Set<HostGroup> hostGroups) {
         try {
             Cluster cluster = stack.getCluster();
             StackRepoDetails stackRepoDetails = clusterComponentConfigProvider.getHDPRepo(cluster.getId());
@@ -729,7 +729,7 @@ public class AmbariClusterConnector {
                 blueprintText = ambariClient.extendBlueprintGlobalConfiguration(blueprintText, globalConfig);
                 blueprintText = addHBaseClient(blueprintText);
             } else {
-                blueprintText = addHDFConfigToBlueprint(stack, ambariClient, blueprintText);
+                blueprintText = addHDFConfigToBlueprint(stack, ambariClient, blueprintText, hostGroups);
             }
             if (cluster.isSecure()) {
                 blueprintText = kerberosBlueprintService.extendBlueprintWithKerberos(stack, blueprintText, ambariClient);
@@ -748,8 +748,11 @@ public class AmbariClusterConnector {
         }
     }
 
-    private String addHDFConfigToBlueprint(Stack stack, BlueprintService ambariClient, String blueprintText) {
-        List<String> nifiFqdns = stack.getInstanceGroupByInstanceGroupName("NiFi").getAllInstanceMetaData().stream()
+    private String addHDFConfigToBlueprint(Stack stack, BlueprintService ambariClient, String blueprintText, Set<HostGroup> hostGroups) {
+        Set<String> nifiMasters = blueprintProcessor.getHostGroupsWithComponent(blueprintText, "NIFI_MASTER");
+        Set<InstanceGroup> nifiIgs = hostGroups.stream().filter(hg -> nifiMasters.contains(hg.getName())).map(hg -> hg.getConstraint()
+                .getInstanceGroup()).collect(Collectors.toSet());
+        List<String> nifiFqdns = nifiIgs.stream().flatMap(ig -> instanceMetadataRepository.findAliveInstancesInInstanceGroup(ig.getId()).stream())
                 .map(InstanceMetaData::getDiscoveryFQDN).collect(Collectors.toList());
         AtomicInteger index = new AtomicInteger(0);
         String nodeIdentities = nifiFqdns.stream()
