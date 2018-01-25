@@ -5,6 +5,9 @@ import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import io.swagger.annotations.ApiModel;
+
+@ApiModel("PlatformSecurityGroupResponse")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class PlatformSecurityGroupResponse implements JsonEntity {
 

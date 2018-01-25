@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -19,14 +18,11 @@ import com.sequenceiq.cloudbreak.api.model.PlatformAccessConfigsResponse;
 import com.sequenceiq.cloudbreak.api.model.PlatformDisksJson;
 import com.sequenceiq.cloudbreak.api.model.PlatformGatewaysResponse;
 import com.sequenceiq.cloudbreak.api.model.PlatformIpPoolsResponse;
-import com.sequenceiq.cloudbreak.api.model.PlatformNetworkResponse;
 import com.sequenceiq.cloudbreak.api.model.PlatformNetworksResponse;
 import com.sequenceiq.cloudbreak.api.model.PlatformOrchestratorsJson;
 import com.sequenceiq.cloudbreak.api.model.PlatformRegionsJson;
 import com.sequenceiq.cloudbreak.api.model.PlatformResourceRequestJson;
-import com.sequenceiq.cloudbreak.api.model.PlatformSecurityGroupResponse;
 import com.sequenceiq.cloudbreak.api.model.PlatformSecurityGroupsResponse;
-import com.sequenceiq.cloudbreak.api.model.PlatformSshKeyResponse;
 import com.sequenceiq.cloudbreak.api.model.PlatformSshKeysResponse;
 import com.sequenceiq.cloudbreak.api.model.PlatformVariantsJson;
 import com.sequenceiq.cloudbreak.api.model.PlatformVirtualMachinesJson;
@@ -206,30 +202,30 @@ public class PlatformParameterV1Controller implements ConnectorV1Endpoint {
     }
 
     @Override
-    public Map<String, Set<PlatformNetworkResponse>> getCloudNetworks(PlatformResourceRequestJson resourceRequestJson) {
+    public PlatformNetworksResponse getCloudNetworks(PlatformResourceRequestJson resourceRequestJson) {
         resourceRequestJson = prepareAccountAndOwner(resourceRequestJson, authenticatedUserService.getCbUser());
         PlatformResourceRequest convert = conversionService.convert(resourceRequestJson, PlatformResourceRequest.class);
         CloudNetworks cloudNetworks = cloudParameterService.getCloudNetworks(convert.getCredential(), convert.getRegion(),
                 convert.getPlatformVariant(), convert.getFilters());
-        return conversionService.convert(cloudNetworks, PlatformNetworksResponse.class).getNetworks();
+        return conversionService.convert(cloudNetworks, PlatformNetworksResponse.class);
     }
 
     @Override
-    public Map<String, Set<PlatformSshKeyResponse>> getCloudSshKeys(PlatformResourceRequestJson resourceRequestJson) {
+    public PlatformSshKeysResponse getCloudSshKeys(PlatformResourceRequestJson resourceRequestJson) {
         resourceRequestJson = prepareAccountAndOwner(resourceRequestJson, authenticatedUserService.getCbUser());
         PlatformResourceRequest convert = conversionService.convert(resourceRequestJson, PlatformResourceRequest.class);
         CloudSshKeys cloudSshKeys = cloudParameterService.getCloudSshKeys(convert.getCredential(), convert.getRegion(),
                 convert.getPlatformVariant(), convert.getFilters());
-        return conversionService.convert(cloudSshKeys, PlatformSshKeysResponse.class).getSshKeys();
+        return conversionService.convert(cloudSshKeys, PlatformSshKeysResponse.class);
     }
 
     @Override
-    public Map<String, Set<PlatformSecurityGroupResponse>> getSecurityGroups(PlatformResourceRequestJson resourceRequestJson) {
+    public PlatformSecurityGroupsResponse getSecurityGroups(PlatformResourceRequestJson resourceRequestJson) {
         resourceRequestJson = prepareAccountAndOwner(resourceRequestJson, authenticatedUserService.getCbUser());
         PlatformResourceRequest convert = conversionService.convert(resourceRequestJson, PlatformResourceRequest.class);
         CloudSecurityGroups securityGroups = cloudParameterService.getSecurityGroups(convert.getCredential(), convert.getRegion(),
                 convert.getPlatformVariant(), convert.getFilters());
-        return conversionService.convert(securityGroups, PlatformSecurityGroupsResponse.class).getSecurityGroups();
+        return conversionService.convert(securityGroups, PlatformSecurityGroupsResponse.class);
     }
 
     @Override
