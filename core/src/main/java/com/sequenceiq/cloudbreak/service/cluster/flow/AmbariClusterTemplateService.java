@@ -47,7 +47,7 @@ public class AmbariClusterTemplateService {
                     KerberosConfig kerberosConfig = cluster.getKerberosConfig();
                     String principal = kerberosDetailService.resolvePrincipalForKerberos(kerberosConfig);
                     clusterTemplate = ambariClient.createSecureCluster(clusterName, blueprintName, hostGroupMappings, configStrategy,
-                            ambariSecurityConfigProvider.getAmbariPassword(cluster), principal, kerberosConfig.getKerberosPassword(), KEY_TYPE, false,
+                            ambariSecurityConfigProvider.getAmbariPassword(cluster), principal, kerberosConfig.getPassword(), KEY_TYPE, false,
                             repositoryVersion);
                 } else {
                     clusterTemplate = ambariClient.createCluster(clusterName, blueprintName, hostGroupMappings, configStrategy,

@@ -58,6 +58,7 @@ import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.network.NetworkUtils;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
+import com.sequenceiq.cloudbreak.type.KerberosType;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 
 @Component
@@ -149,15 +150,16 @@ public class ClusterToClusterResponseConverter extends AbstractConversionService
         if (source.isSecure() && kerberosConfig != null) {
             clusterResponse.setSecure(source.isSecure());
             KerberosResponse kerberosResponse = new KerberosResponse();
-            kerberosResponse.setAdmin(kerberosConfig.getKerberosAdmin());
-            kerberosResponse.setUrl(kerberosConfig.getKerberosUrl());
-            kerberosResponse.setAdminUrl(kerberosConfig.getKdcAdminUrl());
-            kerberosResponse.setRealm(kerberosConfig.getKerberosRealm());
-            kerberosResponse.setDescriptor(kerberosConfig.getKerberosDescriptor());
+            kerberosResponse.setType(KerberosType.valueOf(kerberosConfig));
+            kerberosResponse.setAdmin(kerberosConfig.getAdmin());
+            kerberosResponse.setUrl(kerberosConfig.getUrl());
+            kerberosResponse.setAdminUrl(kerberosConfig.getAdminUrl());
+            kerberosResponse.setRealm(kerberosConfig.getRealm());
+            kerberosResponse.setDescriptor(kerberosConfig.getDescriptor());
             kerberosResponse.setKrb5Conf(kerberosConfig.getKrb5Conf());
-            kerberosResponse.setLdapUrl(kerberosConfig.getKerberosLdapUrl());
-            kerberosResponse.setContainerDn(kerberosConfig.getKerberosContainerDn());
-            kerberosResponse.setTcpAllowed(kerberosConfig.getKerberosTcpAllowed());
+            kerberosResponse.setLdapUrl(kerberosConfig.getLdapUrl());
+            kerberosResponse.setContainerDn(kerberosConfig.getContainerDn());
+            kerberosResponse.setTcpAllowed(kerberosConfig.getTcpAllowed());
             clusterResponse.setKerberosResponse(kerberosResponse);
         }
         return clusterResponse;

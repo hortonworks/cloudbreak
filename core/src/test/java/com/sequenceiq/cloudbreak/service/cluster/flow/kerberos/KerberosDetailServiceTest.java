@@ -23,14 +23,14 @@ public class KerberosDetailServiceTest {
     @Test
     public void testAmbariManagedKerberosTrue() throws IOException {
         KerberosConfig config = new KerberosConfig();
-        config.setKerberosDescriptor("{\"kerberos-env\":{\"properties\":{\"install_packages\":true}}}");
+        config.setDescriptor("{\"kerberos-env\":{\"properties\":{\"install_packages\":true}}}");
         Assert.assertTrue(underTest.isAmbariManagedKerberosPackages(config));
     }
 
     @Test
     public void testAmbariManagedKerberosFalse() throws IOException {
         KerberosConfig config = new KerberosConfig();
-        config.setKerberosDescriptor("{\"kerberos-env\":{\"properties\":{\"install_packages\":false}}}");
+        config.setDescriptor("{\"kerberos-env\":{\"properties\":{\"install_packages\":false}}}");
         Assert.assertFalse(underTest.isAmbariManagedKerberosPackages(config));
     }
 }

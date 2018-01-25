@@ -16,17 +16,17 @@ public class KerberosToKerberosRequestConverter extends AbstractConversionServic
     @Override
     public KerberosRequest convert(KerberosConfig source) {
         KerberosRequest kerberosRequest = new KerberosRequest();
-        kerberosRequest.setAdmin(source.getKerberosAdmin());
-        kerberosRequest.setAdminUrl(source.getKdcAdminUrl());
-        kerberosRequest.setContainerDn(source.getKerberosContainerDn());
-        kerberosRequest.setDescriptor(source.getKerberosDescriptor());
+        kerberosRequest.setAdmin(source.getAdmin());
+        kerberosRequest.setAdminUrl(source.getAdminUrl());
+        kerberosRequest.setContainerDn(source.getContainerDn());
+        kerberosRequest.setDescriptor(source.getDescriptor());
         kerberosRequest.setKrb5Conf(source.getKrb5Conf());
-        kerberosRequest.setLdapUrl(source.getKerberosLdapUrl());
-        kerberosRequest.setMasterKey(source.getKerberosMasterKey());
-        kerberosRequest.setPassword(source.getKerberosPassword());
-        kerberosRequest.setPrincipal(source.getKerberosPrincipal());
-        kerberosRequest.setRealm(source.getKerberosRealm());
-        kerberosRequest.setTcpAllowed(source.getKerberosTcpAllowed());
+        kerberosRequest.setLdapUrl(source.getLdapUrl());
+        kerberosRequest.setMasterKey(source.getMasterKey());
+        kerberosRequest.setPassword(source.getPassword());
+        kerberosRequest.setPrincipal(source.getPrincipal());
+        kerberosRequest.setRealm(source.getRealm());
+        kerberosRequest.setTcpAllowed(source.getTcpAllowed());
         return kerberosRequest;
     }
 

@@ -54,17 +54,17 @@ public class ClusterRequestToClusterConverter extends AbstractConversionServiceA
         KerberosRequest kerberosSource = source.getKerberos();
         KerberosConfig kerberosConfig = new KerberosConfig();
         if (kerberosSource != null) {
-            kerberosConfig.setKerberosMasterKey(kerberosSource.getMasterKey());
-            kerberosConfig.setKerberosAdmin(kerberosSource.getAdmin());
-            kerberosConfig.setKerberosPassword(kerberosSource.getPassword());
-            kerberosConfig.setKerberosUrl(kerberosSource.getUrl());
-            kerberosConfig.setKdcAdminUrl(Optional.ofNullable(kerberosSource.getAdminUrl()).orElse(kerberosSource.getUrl()));
-            kerberosConfig.setKerberosRealm(kerberosSource.getRealm());
-            kerberosConfig.setKerberosTcpAllowed(kerberosSource.getTcpAllowed());
-            kerberosConfig.setKerberosPrincipal(kerberosSource.getPrincipal());
-            kerberosConfig.setKerberosLdapUrl(kerberosSource.getLdapUrl());
-            kerberosConfig.setKerberosContainerDn(kerberosSource.getContainerDn());
-            kerberosConfig.setKerberosDescriptor(kerberosSource.getDescriptor());
+            kerberosConfig.setMasterKey(kerberosSource.getMasterKey());
+            kerberosConfig.setAdmin(kerberosSource.getAdmin());
+            kerberosConfig.setPassword(kerberosSource.getPassword());
+            kerberosConfig.setUrl(kerberosSource.getUrl());
+            kerberosConfig.setAdminUrl(Optional.ofNullable(kerberosSource.getAdminUrl()).orElse(kerberosSource.getUrl()));
+            kerberosConfig.setRealm(kerberosSource.getRealm());
+            kerberosConfig.setTcpAllowed(kerberosSource.getTcpAllowed());
+            kerberosConfig.setPrincipal(kerberosSource.getPrincipal());
+            kerberosConfig.setLdapUrl(kerberosSource.getLdapUrl());
+            kerberosConfig.setContainerDn(kerberosSource.getContainerDn());
+            kerberosConfig.setDescriptor(kerberosSource.getDescriptor());
             kerberosConfig.setKrb5Conf(kerberosSource.getKrb5Conf());
         }
         cluster.setKerberosConfig(kerberosConfig);

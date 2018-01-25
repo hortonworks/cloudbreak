@@ -385,10 +385,10 @@ public class TestUtil {
 
     public static KerberosConfig kerberosConfig() {
         KerberosConfig kerberosConfig = new KerberosConfig();
-        kerberosConfig.setKerberosMasterKey("mk");
-        kerberosConfig.setKerberosAdmin("admin");
-        kerberosConfig.setKerberosPassword("passwd");
-        kerberosConfig.setKerberosTcpAllowed(true);
+        kerberosConfig.setMasterKey("mk");
+        kerberosConfig.setAdmin("admin");
+        kerberosConfig.setPassword("passwd");
+        kerberosConfig.setTcpAllowed(true);
         return kerberosConfig;
     }
 

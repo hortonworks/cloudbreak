@@ -116,13 +116,13 @@ public class ClusterHostServiceRunner {
         if (cluster.isSecure() && kerberosDetailService.isAmbariManagedKerberosPackages(cluster.getKerberosConfig())) {
             Map<String, String> kerberosPillarConf = new HashMap<>();
             KerberosConfig kerberosConfig = cluster.getKerberosConfig();
-            putIfNotNull(kerberosPillarConf, kerberosConfig.getKerberosMasterKey(), "masterKey");
-            putIfNotNull(kerberosPillarConf, kerberosConfig.getKerberosAdmin(), "user");
-            putIfNotNull(kerberosPillarConf, kerberosConfig.getKerberosPassword(), "password");
-            if (StringUtils.isEmpty(kerberosConfig.getKerberosDescriptor())) {
-                putIfNotNull(kerberosPillarConf, kerberosConfig.getKerberosUrl(), "url");
-                putIfNotNull(kerberosPillarConf, kerberosConfig.getKdcAdminUrl(), "adminUrl");
-                putIfNotNull(kerberosPillarConf, kerberosConfig.getKerberosRealm(), "realm");
+            putIfNotNull(kerberosPillarConf, kerberosConfig.getMasterKey(), "masterKey");
+            putIfNotNull(kerberosPillarConf, kerberosConfig.getAdmin(), "user");
+            putIfNotNull(kerberosPillarConf, kerberosConfig.getPassword(), "password");
+            if (StringUtils.isEmpty(kerberosConfig.getDescriptor())) {
+                putIfNotNull(kerberosPillarConf, kerberosConfig.getUrl(), "url");
+                putIfNotNull(kerberosPillarConf, kerberosConfig.getAdminUrl(), "adminUrl");
+                putIfNotNull(kerberosPillarConf, kerberosConfig.getRealm(), "realm");
             } else {
                 Map<String, Object> properties = kerberosDetailService.getKerberosEnvProperties(kerberosConfig);
                 putIfNotNull(kerberosPillarConf, properties.get("kdc_hosts"), "url");

@@ -20,38 +20,48 @@ public class KerberosConfig implements ProvisionEntity {
     private Long id;
 
     @Type(type = "encrypted_string")
-    private String kerberosMasterKey;
+    @Column(name = "kerberosmasterkey")
+    private String masterKey;
 
     @Type(type = "encrypted_string")
-    private String kerberosAdmin;
+    @Column(name = "kerberosadmin")
+    private String admin;
 
     @Type(type = "encrypted_string")
-    private String kerberosPassword;
+    @Column(name = "kerberospassword")
+    private String password;
 
     @Type(type = "encrypted_string")
-    private String kerberosUrl;
+    @Column(name = "kerberosurl")
+    private String url;
 
     @Type(type = "encrypted_string")
-    private String kdcAdminUrl;
+    @Column(name = "kdcadminurl")
+    private String adminUrl;
 
     @Type(type = "encrypted_string")
-    private String kerberosRealm;
+    @Column(name = "kerberosrealm")
+    private String realm;
 
-    private Boolean kerberosTcpAllowed;
-
-    @Type(type = "encrypted_string")
-    private String kerberosPrincipal;
-
-    private String kerberosLdapUrl;
-
-    private String kerberosContainerDn;
+    @Column(name = "kerberostcpallowed")
+    private Boolean tcpAllowed;
 
     @Type(type = "encrypted_string")
-    @Column(columnDefinition = "TEXT")
-    private String kerberosDescriptor;
+    @Column(name = "kerberosprincipal")
+    private String principal;
+
+    @Column(name = "kerberosldapurl")
+    private String ldapUrl;
+
+    @Column(name = "kerberoscontainerdn")
+    private String containerDn;
 
     @Type(type = "encrypted_string")
-    @Column(columnDefinition = "TEXT")
+    @Column(name = "kerberosdescriptor", columnDefinition = "TEXT")
+    private String descriptor;
+
+    @Type(type = "encrypted_string")
+    @Column(name = "krb5conf", columnDefinition = "TEXT")
     private String krb5Conf;
 
     public Long getId() {
@@ -62,92 +72,92 @@ public class KerberosConfig implements ProvisionEntity {
         this.id = id;
     }
 
-    public String getKerberosMasterKey() {
-        return kerberosMasterKey;
+    public String getMasterKey() {
+        return masterKey;
     }
 
-    public void setKerberosMasterKey(String kerberosMasterKey) {
-        this.kerberosMasterKey = kerberosMasterKey;
+    public void setMasterKey(String masterKey) {
+        this.masterKey = masterKey;
     }
 
-    public String getKerberosAdmin() {
-        return kerberosAdmin;
+    public String getAdmin() {
+        return admin;
     }
 
-    public void setKerberosAdmin(String kerberosAdmin) {
-        this.kerberosAdmin = kerberosAdmin;
+    public void setAdmin(String admin) {
+        this.admin = admin;
     }
 
-    public String getKerberosPassword() {
-        return kerberosPassword;
+    public String getPassword() {
+        return password;
     }
 
-    public void setKerberosPassword(String kerberosPassword) {
-        this.kerberosPassword = kerberosPassword;
+    public void setPassword(String password) {
+        this.password = password;
     }
 
-    public String getKerberosUrl() {
-        return kerberosUrl;
+    public String getUrl() {
+        return url;
     }
 
-    public void setKerberosUrl(String kerberosUrl) {
-        this.kerberosUrl = kerberosUrl;
+    public void setUrl(String url) {
+        this.url = url;
     }
 
-    public String getKdcAdminUrl() {
-        return kdcAdminUrl;
+    public String getAdminUrl() {
+        return adminUrl;
     }
 
-    public void setKdcAdminUrl(String kdcAdminUrl) {
-        this.kdcAdminUrl = kdcAdminUrl;
+    public void setAdminUrl(String adminUrl) {
+        this.adminUrl = adminUrl;
     }
 
-    public String getKerberosRealm() {
-        return kerberosRealm;
+    public String getRealm() {
+        return realm;
     }
 
-    public void setKerberosRealm(String kerberosRealm) {
-        this.kerberosRealm = kerberosRealm;
+    public void setRealm(String realm) {
+        this.realm = realm;
     }
 
-    public Boolean getKerberosTcpAllowed() {
-        return kerberosTcpAllowed;
+    public Boolean getTcpAllowed() {
+        return tcpAllowed;
     }
 
-    public void setKerberosTcpAllowed(Boolean kerberosTcpAllowed) {
-        this.kerberosTcpAllowed = kerberosTcpAllowed;
+    public void setTcpAllowed(Boolean tcpAllowed) {
+        this.tcpAllowed = tcpAllowed;
     }
 
-    public String getKerberosPrincipal() {
-        return kerberosPrincipal;
+    public String getPrincipal() {
+        return principal;
     }
 
-    public void setKerberosPrincipal(String kerberosPrincipal) {
-        this.kerberosPrincipal = kerberosPrincipal;
+    public void setPrincipal(String principal) {
+        this.principal = principal;
     }
 
-    public String getKerberosLdapUrl() {
-        return kerberosLdapUrl;
+    public String getLdapUrl() {
+        return ldapUrl;
     }
 
-    public void setKerberosLdapUrl(String kerberosLdapUrl) {
-        this.kerberosLdapUrl = kerberosLdapUrl;
+    public void setLdapUrl(String ldapUrl) {
+        this.ldapUrl = ldapUrl;
     }
 
-    public String getKerberosContainerDn() {
-        return kerberosContainerDn;
+    public String getContainerDn() {
+        return containerDn;
     }
 
-    public void setKerberosContainerDn(String kerberosContainerDn) {
-        this.kerberosContainerDn = kerberosContainerDn;
+    public void setContainerDn(String containerDn) {
+        this.containerDn = containerDn;
     }
 
-    public String getKerberosDescriptor() {
-        return kerberosDescriptor;
+    public String getDescriptor() {
+        return descriptor;
     }
 
-    public void setKerberosDescriptor(String kerberosDescriptor) {
-        this.kerberosDescriptor = kerberosDescriptor;
+    public void setDescriptor(String descriptor) {
+        this.descriptor = descriptor;
     }
 
     public String getKrb5Conf() {
