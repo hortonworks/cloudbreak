@@ -29,7 +29,7 @@ public class ExistingSshKeySelectionTest extends AbstractCloudbreakIntegrationTe
         resourceRequestJson.setRegion(region);
         resourceRequestJson.setAvailabilityZone(availabilityZone);
         // WHEN
-        Map<String, Set<PlatformSshKeyResponse>> response = getCloudbreakClient().connectorV1Endpoint().getCloudSshKeys(resourceRequestJson);
+        Map<String, Set<PlatformSshKeyResponse>> response = getCloudbreakClient().connectorV1Endpoint().getCloudSshKeys(resourceRequestJson).getSshKeys();
         // THEN
         Set<PlatformSshKeyResponse> regionKeys = response.get(region);
         Assert.assertNotNull(regionKeys, "keys cannot be null for " + region);
