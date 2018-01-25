@@ -251,7 +251,8 @@ aws-generate-inline-role-policy() {
                 "ec2:DescribeVpcs",
                 "ec2:DescribeSpotInstanceRequests",
                 "ec2:DescribeVpcAttribute",
-                "ec2:ImportKeyPair"
+                "ec2:ImportKeyPair",
+                "ec2:AttachInternetGateway"
             ],
             "Resource": [
                 "*"
