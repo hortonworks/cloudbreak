@@ -59,7 +59,7 @@ resources:
         cidr: { get_param: app_net_cidr }
   </#if>
 
-  <#if !existingNetwork>
+  <#if !existingNetwork && network.assignFloatingIp>
   router:
       type: OS::Neutron::Router
 
@@ -72,13 +72,13 @@ resources:
         </#if>
   </#if>
 
-  <#if !existingSubnet>
+  <#if !existingSubnet && (existingNetwork || network.assignFloatingIp)>
   router_interface:
       type: OS::Neutron::RouterInterface
       properties:
         <#if existingNetwork>
         router_id: { get_param: router_id }
-        <#else>
+        <#elseif network.assignFloatingIp>
         router_id: { get_resource: router }
         </#if>
         subnet_id: { get_resource: app_subnet }
