@@ -663,8 +663,8 @@ public class AmbariClusterService implements ClusterService {
     public void cleanupKerberosCredential(Cluster cluster) {
         if (cluster.isSecure() && cluster.getKerberosConfig() != null) {
             KerberosConfig kerberosConfig = cluster.getKerberosConfig();
-            kerberosConfig.setKerberosPassword(null);
-            kerberosConfig.setKerberosPrincipal(null);
+            kerberosConfig.setPassword(null);
+            kerberosConfig.setPrincipal(null);
 
             kerberosConfigRepository.save(kerberosConfig);
         }
@@ -686,8 +686,8 @@ public class AmbariClusterService implements ClusterService {
                 throw new BadRequestException(String.format("Missing Kerberos credential detail(s): %s", String.join(", ", missing)));
             }
             KerberosConfig kerberosConfig = cluster.getKerberosConfig();
-            kerberosConfig.setKerberosPassword(kerberosPassword);
-            kerberosConfig.setKerberosPrincipal(kerberosPrincipal);
+            kerberosConfig.setPassword(kerberosPassword);
+            kerberosConfig.setPrincipal(kerberosPrincipal);
 
             kerberosConfigRepository.save(kerberosConfig);
         }

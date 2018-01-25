@@ -44,11 +44,14 @@ import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariViewProvider;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
+import com.sequenceiq.cloudbreak.type.KerberosType;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 
 public class ClusterToClusterResponseConverterTest extends AbstractEntityConverterTest<Cluster> {
@@ -101,6 +104,9 @@ public class ClusterToClusterResponseConverterTest extends AbstractEntityConvert
     @Mock
     private RdsConfigService rdsConfigService;
 
+    @Mock
+    private ClusterComponentConfigProvider componentConfigProvider;
+
     private StackServiceComponentDescriptor stackServiceComponentDescriptor;
 
     @Before
@@ -117,7 +123,6 @@ public class ClusterToClusterResponseConverterTest extends AbstractEntityConvert
         // GIVEN
         mockAll();
         getSource().setConfigStrategy(ConfigStrategy.NEVER_APPLY);
-        given(stackServiceComponentDescs.get(anyString())).willReturn(stackServiceComponentDescriptor);
         given(stackUtil.extractAmbariIp(any(Stack.class))).willReturn("10.0.0.1");
         // WHEN
         ClusterResponse result = underTest.convert(getSource());
@@ -133,7 +138,6 @@ public class ClusterToClusterResponseConverterTest extends AbstractEntityConvert
         // GIVEN
         mockAll();
         getSource().setUpSince(null);
-        given(stackServiceComponentDescs.get(anyString())).willReturn(stackServiceComponentDescriptor);
         // WHEN
         ClusterResponse result = underTest.convert(getSource());
         // THEN
@@ -160,6 +164,25 @@ public class ClusterToClusterResponseConverterTest extends AbstractEntityConvert
         // THEN
         verify(blueprintValidator, times(0)).createHostGroupMap(anySet());
 
+    }
+
+    @Test
+    public void testConvertWithKerberosConfig() throws IOException {
+        // GIVEN
+        mockAll();
+        // WHEN
+        Cluster source = getSource();
+        source.setSecure(true);
+        KerberosConfig kerberosConfig = new KerberosConfig();
+        kerberosConfig.setId(1L);
+        kerberosConfig.setMasterKey("mk");
+        kerberosConfig.setAdmin("adm");
+        kerberosConfig.setPassword("pwd");
+        kerberosConfig.setTcpAllowed(true);
+        source.setKerberosConfig(kerberosConfig);
+        ClusterResponse result = underTest.convert(source);
+        // THEN
+        assertEquals(KerberosType.CB_MANAGED, result.getKerberosResponse().getType());
     }
 
     @Override
@@ -191,6 +214,8 @@ public class ClusterToClusterResponseConverterTest extends AbstractEntityConvert
         given(mockComponentIterator.next()).willReturn(nameJsonNode);
         given(nameJsonNode.get(anyString())).willReturn(nameJsonNode);
         given(nameJsonNode.asText()).willReturn("dummyName");
+        given(componentConfigProvider.getAmbariRepo(any(Set.class))).willReturn(null);
+        given(stackServiceComponentDescs.get(anyString())).willReturn(stackServiceComponentDescriptor);
     }
 
     private StackServiceComponentDescriptor createStackServiceComponentDescriptor() {

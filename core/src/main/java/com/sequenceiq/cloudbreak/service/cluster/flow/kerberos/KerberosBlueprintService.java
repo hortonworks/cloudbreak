@@ -36,8 +36,8 @@ public class KerberosBlueprintService {
             String gatewayHost = stack.getPrimaryGatewayInstance().getDiscoveryFQDN();
             String domain = gatewayHost.substring(gatewayHost.indexOf('.') + 1);
             blueprintText = extendBlueprintWithKerberos(blueprintText, cluster, gatewayHost, domain, propagationPort, kerberosService);
-            if (StringUtils.hasLength(kerberosConfig.getKerberosDescriptor())) {
-                blueprintText = replaceConfiguratin(blueprintText, "kerberos-env", kerberosConfig.getKerberosDescriptor());
+            if (StringUtils.hasLength(kerberosConfig.getDescriptor())) {
+                blueprintText = replaceConfiguratin(blueprintText, "kerberos-env", kerberosConfig.getDescriptor());
             }
             if (StringUtils.hasLength(kerberosConfig.getKrb5Conf())) {
                 blueprintText = replaceConfiguratin(blueprintText, "krb5-conf", kerberosConfig.getKrb5Conf());
@@ -69,7 +69,7 @@ public class KerberosBlueprintService {
                 kerberosDetailService.getDomains(domain),
                 kerberosDetailService.resolveLdapUrlForKerberos(kerberosConfig),
                 kerberosDetailService.resolveContainerDnForKerberos(kerberosConfig),
-                !kerberosConfig.getKerberosTcpAllowed(), propagationPort);
+                !kerberosConfig.getTcpAllowed(), propagationPort);
         return blueprintText;
     }
 

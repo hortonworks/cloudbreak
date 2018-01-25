@@ -74,11 +74,11 @@ public class KerberosBlueprintServiceTest {
         String blueprintText = FileReaderUtils.readFileFromClasspath("blueprints/bp-not-kerberized.bp");
         Blueprint blueprint = TestUtil.blueprint("name", blueprintText);
         KerberosConfig kerberosConfig = new KerberosConfig();
-        kerberosConfig.setKerberosDescriptor("{\"kerberos-env\":{\"properties\":{\"install_packages\":false,\"realm\":\"REALM.BP\",\"kdc_type\":\"mit-kdc\","
+        kerberosConfig.setDescriptor("{\"kerberos-env\":{\"properties\":{\"install_packages\":false,\"realm\":\"REALM.BP\",\"kdc_type\":\"mit-kdc\","
             + "\"kdc_hosts\":\"kdc_host.bp\",\"admin_server_host\":\"admin_server_host.bp\",\"encryption_types\":\"enc_types.bp\",\"ldap_url\":\"\","
             + "\"container_dn\":\"\"}}}");
         kerberosConfig.setKrb5Conf("{\"krb5-conf\":{\"properties\":{\"domains\":\".domains.bp\",\"manage_krb5_conf\":\"true\",\"content\":\"content.bp\"}}}");
-        kerberosConfig.setKerberosTcpAllowed(true);
+        kerberosConfig.setTcpAllowed(true);
         when(stack.getCluster()).thenReturn(TestUtil.cluster(blueprint, stack, 1L, kerberosConfig));
 
         String actualBlueprint = underTest.extendBlueprintWithKerberos(stack, blueprint.getBlueprintText(), kerberosService);
@@ -92,14 +92,14 @@ public class KerberosBlueprintServiceTest {
         String blueprintText = FileReaderUtils.readFileFromClasspath("blueprints/bp-not-kerberized.bp");
         Blueprint blueprint = TestUtil.blueprint("name", blueprintText);
         KerberosConfig kerberosConfig = new KerberosConfig();
-        kerberosConfig.setKerberosPrincipal("principal.conf");
-        kerberosConfig.setKerberosPrincipal("passwd.conf");
-        kerberosConfig.setKerberosUrl("url.conf");
-        kerberosConfig.setKdcAdminUrl("adminUrl.conf");
-        kerberosConfig.setKerberosRealm("realm.conf");
-        kerberosConfig.setKerberosLdapUrl("ldapUrl.conf");
-        kerberosConfig.setKerberosContainerDn("containerDn.conf");
-        kerberosConfig.setKerberosTcpAllowed(true);
+        kerberosConfig.setPrincipal("principal.conf");
+        kerberosConfig.setPrincipal("passwd.conf");
+        kerberosConfig.setUrl("url.conf");
+        kerberosConfig.setAdminUrl("adminUrl.conf");
+        kerberosConfig.setRealm("realm.conf");
+        kerberosConfig.setLdapUrl("ldapUrl.conf");
+        kerberosConfig.setContainerDn("containerDn.conf");
+        kerberosConfig.setTcpAllowed(true);
         when(stack.getCluster()).thenReturn(TestUtil.cluster(blueprint, stack, 1L, kerberosConfig));
 
         String actualBlueprint = underTest.extendBlueprintWithKerberos(stack, blueprint.getBlueprintText(), kerberosService);
