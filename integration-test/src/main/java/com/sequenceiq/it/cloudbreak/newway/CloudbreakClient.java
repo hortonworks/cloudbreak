@@ -1,0 +1,58 @@
+package com.sequenceiq.it.cloudbreak.newway;
+
+import com.sequenceiq.it.IntegrationTestContext;
+
+import java.util.function.Function;
+
+public class CloudbreakClient extends Entity {
+    public static final String CLOUDBREAK_CLIENT = "CLOUDBREAK_CLIENT";
+
+    private com.sequenceiq.cloudbreak.client.CloudbreakClient cloudbreakClient;
+
+    CloudbreakClient(String newId) {
+        super(newId);
+    }
+
+    CloudbreakClient() {
+        this(CLOUDBREAK_CLIENT);
+    }
+
+    public void setCloudbreakClient(com.sequenceiq.cloudbreak.client.CloudbreakClient cloudbreakClient) {
+        this.cloudbreakClient = cloudbreakClient;
+    }
+
+    public com.sequenceiq.cloudbreak.client.CloudbreakClient getCloudbreakClient() {
+        return cloudbreakClient;
+    }
+
+    public static Function<IntegrationTestContext, CloudbreakClient> getTestContextCloudbreakClient(String key) {
+        return (testContext) -> testContext.getContextParam(key, CloudbreakClient.class);
+    }
+
+    public static Function<IntegrationTestContext, CloudbreakClient> getTestContextCloudbreakClient() {
+        return getTestContextCloudbreakClient(CLOUDBREAK_CLIENT);
+    }
+
+    public static CloudbreakClient isCreated() {
+        CloudbreakClient client = new CloudbreakClient();
+        client.setCreationStrategy(CloudbreakClient::defaultCloudbreakClientCreationStrategy);
+        return client;
+    }
+
+    public static void defaultCloudbreakClientCreationStrategy(IntegrationTestContext integrationTestContext, Entity entity) {
+        CloudbreakClient clientEntity = (CloudbreakClient) entity;
+        com.sequenceiq.cloudbreak.client.CloudbreakClient client;
+        client = new com.sequenceiq.cloudbreak.client.CloudbreakClient.CloudbreakClientBuilder(
+                integrationTestContext.getContextParam(CloudbreakTest.CLOUDBREAK_SERVER_ROOT),
+                integrationTestContext.getContextParam(CloudbreakTest.IDENTITY_URL),
+                "cloudbreak_shell")
+                .withCertificateValidation(false)
+                .withDebug(true)
+                .withCredential(integrationTestContext.getContextParam(CloudbreakTest.USER),
+                        integrationTestContext.getContextParam(CloudbreakTest.PASSWORD))
+                .withIgnorePreValidation(true)
+                .build();
+        clientEntity.setCloudbreakClient(client);
+    }
+}
+
