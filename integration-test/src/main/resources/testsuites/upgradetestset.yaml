@@ -1,0 +1,17 @@
+name: upgrade_test_suite
+parallel: "instances"
+parameters:
+  cleanUp: true
+  gcpClusterName: "it-gcp-cred-ss"
+  azureClusterName: "it-azure-cred"
+  awsClusterName: "it-aws-cred"
+  provider: "gcp,azure,aws"
+
+tests:
+  - name: upgrade_test
+    parameters:
+      provider: gcp,aws,azure
+    classes:
+      - com.sequenceiq.it.cloudbreak.ClusterTestFactory
+
+

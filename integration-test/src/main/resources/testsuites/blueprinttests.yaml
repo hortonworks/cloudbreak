@@ -1,0 +1,16 @@
+name: Resource_tests
+parallel: "instances"
+parameters:
+  cleanUp: false
+
+tests:
+  - name: blueprint_test
+    classes:
+      - com.sequenceiq.it.cloudbreak.BlueprintTests
+
+  - name: cluster_test
+    parameters:
+      provider: gcp
+    classes:
+      - com.sequenceiq.it.cloudbreak.ClusterTestFactory
+
