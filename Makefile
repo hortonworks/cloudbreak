@@ -88,7 +88,8 @@ release: build
 	tar -zcvf release/cb-cli_${VERSION}_Windows_x86_64.tgz -C build/Windows "${BINARY}.exe"
 
 release-docker:
-	docker run --rm -v "${PWD}":/go/src/github.com/hortonworks/cb-cli -w /go/src/github.com/hortonworks/cb-cli -e VERSION=${VERSION} -e GITHUB_ACCESS_TOKEN=${GITHUB_TOKEN} golang:1.9 bash -c "make deps && make release"
+	@#USER_NS='-u $(shell id -u $(whoami)):$(shell id -g $(whoami))'
+	docker run --rm ${USER_NS} -v "${PWD}":/go/src/github.com/hortonworks/cb-cli -w /go/src/github.com/hortonworks/cb-cli -e VERSION=${VERSION} -e GITHUB_ACCESS_TOKEN=${GITHUB_TOKEN} golang:1.9 bash -c "make deps && make build"
 
 upload_s3:
 	ls -1 release | xargs -I@ aws s3 cp release/@ s3://cb-cli/@ --acl public-read
