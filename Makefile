@@ -71,9 +71,9 @@ fix-swagger:
 	$(info fixed on master https://github.com/go-swagger/go-swagger/issues/1197#issuecomment-335610396)
 	go run swagger_fix/main.go --src models_cloudbreak/platform_gateways_response.go --operation remove-statement --exp validateGateways:range-0,for-0,if-1
 	go run swagger_fix/main.go --src models_cloudbreak/platform_ip_pools_response.go --operation remove-statement --exp validateIppools:range-0,for-0,if-1
-	go run swagger_fix/main.go --src client_cloudbreak/v1connectors/get_platform_networks_responses.go --operation remove-statement --exp Validate:range-0,for-0,if-1
-	go run swagger_fix/main.go --src client_cloudbreak/v1connectors/get_platform_s_sh_keys_responses.go --operation remove-statement --exp Validate:range-0,for-0,if-1
-	go run swagger_fix/main.go --src client_cloudbreak/v1connectors/get_platform_security_groups_responses.go --operation remove-statement --exp Validate:range-0,for-0,if-1
+	go run swagger_fix/main.go --src models_cloudbreak/platform_networks_response.go --operation remove-statement --exp validateNetworks:range-0,for-0,if-1
+	go run swagger_fix/main.go --src models_cloudbreak/platform_ssh_keys_response.go --operation remove-statement --exp validateSSHKeys:range-0,for-0,if-1
+	go run swagger_fix/main.go --src models_cloudbreak/platform_security_groups_response.go --operation remove-statement --exp validateSecurityGroups:range-0,for-0,if-1
 	goimports -l -w models_cloudbreak
 	goimports -l -w client_cloudbreak
 	@gofmt -w ${GOFILES_NOVENDOR}
