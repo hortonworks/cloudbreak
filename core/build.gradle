@@ -157,7 +157,7 @@ class BuildInfoTask extends DefaultTask {
 
   @TaskAction
   def writeBuildInfo() {
-    File applicationDestination
+    List<File> applicationDestinations = []
 
     // For Local-dev
     if (buildVersion == "unspecified") {
@@ -175,26 +175,29 @@ class BuildInfoTask extends DefaultTask {
         project.logger.error("Unable to parse git tag as version: " + buildVersion)
         throw e
       }
-      applicationDestination = new File("./out/production/resources")
+      applicationDestinations += project.file("out/production/resources")
+      applicationDestinations += project.file("build/resources/main")
     } else {
-      applicationDestination = new File(applicationPropertiesPath + "/resources/main")
+      applicationDestinations += new File(applicationPropertiesPath + "/resources/main")
     }
 
     destination.mkdirs()
     String activeProfile = determineActiveProfile()
-    applicationDestination.mkdirs()
     new File(destination, "build.info").withWriter { out ->
       [
               "ARTIFACT_BASENAME=" + basename,
               "ARTIFACT_VERSION=" + buildVersion,
       ].each { out.println it }
     }
-    new File(applicationDestination, "application.properties").withWriter { out ->
-      [
-              "info.app.name=" + basename,
-              "info.app.version=" + buildVersion,
-              "spring.profiles.active=" + activeProfile
-      ].each { out.println it }
+    applicationDestinations.each {
+      it.mkdirs()
+      new File(it, "application.properties").withWriter { out ->
+        [
+                "info.app.name=" + basename,
+                "info.app.version=" + buildVersion,
+                "spring.profiles.active=" + activeProfile
+        ].each { out.println it }
+      }
     }
   }
 
