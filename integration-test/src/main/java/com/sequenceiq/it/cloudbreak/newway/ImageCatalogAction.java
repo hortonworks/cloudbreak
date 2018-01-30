@@ -1,8 +1,8 @@
 package com.sequenceiq.it.cloudbreak.newway;
 
-import com.sequenceiq.it.IntegrationTestContext;
-
 import java.util.HashSet;
+
+import com.sequenceiq.it.IntegrationTestContext;
 
 public class ImageCatalogAction {
 
@@ -26,7 +26,7 @@ public class ImageCatalogAction {
                 CloudbreakClient.class);
         imageCatalogEntity.setResponse(
                 client.getCloudbreakClient()
-                        .imageCatalogEndpoint().getPublicByName(imageCatalogEntity.getName()));
+                        .imageCatalogEndpoint().getPublicByName(imageCatalogEntity.getName(), false));
     }
 
     public static void getAll(IntegrationTestContext integrationTestContext, Entity entity) throws Exception {

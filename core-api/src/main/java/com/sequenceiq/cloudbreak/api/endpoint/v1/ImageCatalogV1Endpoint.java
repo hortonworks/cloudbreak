@@ -13,6 +13,7 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import com.sequenceiq.cloudbreak.api.model.imagecatalog.ImageCatalogRequest;
@@ -30,7 +31,7 @@ import io.swagger.annotations.ApiOperation;
 @Path("/v1/imagecatalogs")
 @Consumes(MediaType.APPLICATION_JSON)
 @Api(value = "/v1/imagecatalogs", description = ControllerDescription.IMAGE_CATALOG_DESCRIPTION, protocols = "http,https")
-public interface ImageCatalogEndpoint {
+public interface ImageCatalogV1Endpoint {
 
     @GET
     @Path("account")
@@ -43,8 +44,8 @@ public interface ImageCatalogEndpoint {
     @Path("account/{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.ImageCatalogOpDescription.GET_PUBLIC_IMAGE_CATALOG_BY_NAME, produces = ContentType.JSON,
-            notes = IMAGE_CATALOG_NOTES, nickname = "getPublicImageCatalogsById")
-    ImageCatalogResponse getPublicByName(@PathParam("name") String name) throws Exception;
+            notes = IMAGE_CATALOG_NOTES, nickname = "getPublicImageCatalogsByName")
+    ImageCatalogResponse getPublicByName(@PathParam("name") String name, @QueryParam("withImages") boolean withImages) throws Exception;
 
     @GET
     @Path("account/{name}/{platform}")

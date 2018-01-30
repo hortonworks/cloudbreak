@@ -9,7 +9,7 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v1.ImageCatalogEndpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v1.ImageCatalogV1Endpoint;
 import com.sequenceiq.cloudbreak.api.model.imagecatalog.ImageCatalogRequest;
 import com.sequenceiq.cloudbreak.api.model.imagecatalog.ImageCatalogResponse;
 import com.sequenceiq.cloudbreak.api.model.imagecatalog.ImagesResponse;
@@ -21,7 +21,7 @@ import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 
 @Component
-public class ImageCatalogController implements ImageCatalogEndpoint {
+public class ImageCatalogV1Controller implements ImageCatalogV1Endpoint {
 
     @Inject
     private ImageCatalogService imageCatalogService;
@@ -39,8 +39,14 @@ public class ImageCatalogController implements ImageCatalogEndpoint {
     }
 
     @Override
-    public ImageCatalogResponse getPublicByName(String name) throws Exception {
-        return convert(imageCatalogService.get(name));
+    public ImageCatalogResponse getPublicByName(String name, boolean withImages) throws Exception {
+
+        ImageCatalogResponse imageCatalogResponse = convert(imageCatalogService.get(name));
+        Images images = imageCatalogService.propagateImagesIfRequested(name, withImages);
+        if (images != null) {
+            imageCatalogResponse.setImagesResponse(conversionService.convert(images, ImagesResponse.class));
+        }
+        return imageCatalogResponse;
     }
 
     @Override

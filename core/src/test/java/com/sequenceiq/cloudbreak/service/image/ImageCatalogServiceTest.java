@@ -15,7 +15,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import com.google.common.collect.ImmutableSet;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV2;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.controller.AuthenticatedUserService;
@@ -78,6 +80,30 @@ public class ImageCatalogServiceTest {
         boolean exactImageIdMatch = images.getImages().getHdpImages().stream()
                 .anyMatch(img -> img.getUuid().equals("2.5.1.9-4-ccbb32dc-6c9f-43f1-8a09-64b598fda733-2.6.1.4-2"));
         Assert.assertTrue("Result doesn't contain the required Ambari image with id.", exactImageIdMatch);
+    }
+
+    @Test
+    public void testGetImagesWhenExactVersionExistsInCatalogAndMorePlatformRequested() throws Exception {
+        String cbVersion = "1.12.0";
+        StatedImages images = underTest.getImages("", "default", ImmutableSet.of("aws", "azure"), cbVersion);
+        boolean awsAndAzureWerePresentedInTheTest = false;
+        Assert.assertEquals(2, images.getImages().getHdpImages().size());
+        for (Image image : images.getImages().getHdpImages()) {
+            boolean containsAws = images.getImages().getHdpImages().stream()
+                    .anyMatch(img -> img.getImageSetsByProvider().entrySet().stream().anyMatch(
+                            platformImages -> platformImages.getKey().equals("aws")));
+            boolean containsAzure = images.getImages().getHdpImages().stream()
+                    .anyMatch(img -> img.getImageSetsByProvider().entrySet().stream().anyMatch(
+                            platformImages -> platformImages.getKey().equals("azure_rm")));
+            if (image.getImageSetsByProvider().size() == 2) {
+                awsAndAzureWerePresentedInTheTest = true;
+                Assert.assertTrue("Result doesn't contain the required Ambari image with id.", containsAws && containsAzure);
+            } else if (image.getImageSetsByProvider().size() == 1) {
+                Assert.assertTrue("Result doesn't contain the required Ambari image with id.", containsAws || containsAzure);
+
+            }
+        }
+        Assert.assertTrue(awsAndAzureWerePresentedInTheTest);
     }
 
     @Test

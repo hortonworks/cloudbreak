@@ -21,6 +21,9 @@ public class ImageCatalogResponse extends ImageCatalogBase {
     private boolean isDefault;
     //CHECKSTYLE:ON
 
+    @ApiModelProperty(value = ModelDescriptions.ImageCatalogDescription.IMAGE_RESPONSES)
+    private ImagesResponse imagesResponse;
+
     public Long getId() {
         return id;
     }
@@ -43,5 +46,13 @@ public class ImageCatalogResponse extends ImageCatalogBase {
 
     public void setDefault(boolean b) {
         this.isDefault = b;
+    }
+
+    public ImagesResponse getImagesResponse() {
+        return imagesResponse;
+    }
+
+    public void setImagesResponse(ImagesResponse imagesResponse) {
+        this.imagesResponse = imagesResponse;
     }
 }

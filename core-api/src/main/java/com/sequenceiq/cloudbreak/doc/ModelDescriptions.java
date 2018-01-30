@@ -465,6 +465,7 @@ public class ModelDescriptions {
     public static class ImageCatalogDescription {
         public static final String IMAGE_CATALOG_URL = "custom image catalog's URL";
         public static final String DEFAULT = "true if image catalog is the default one";
+        public static final String IMAGE_RESPONSES = "image response in imagecatalog";
     }
 
     public static class SecurityRulesModelDescription {

@@ -16,7 +16,7 @@ import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v1.ImageCatalogEndpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v1.ImageCatalogV1Endpoint;
 import com.sequenceiq.cloudbreak.api.model.imagecatalog.ImageCatalogRequest;
 import com.sequenceiq.cloudbreak.api.model.imagecatalog.ImageCatalogResponse;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
@@ -66,15 +66,15 @@ public class MockSuiteInitializer extends AbstractTestNGSpringContextTests {
         createMockImageCatalog(cloudbreakClient.imageCatalogEndpoint());
     }
 
-    private boolean isImageCatalogExists(ImageCatalogEndpoint endpoint, String mockImageCatalogName) throws Exception {
+    private boolean isImageCatalogExists(ImageCatalogV1Endpoint endpoint, String mockImageCatalogName) throws Exception {
         try {
-            return endpoint.getPublicByName(mockImageCatalogName) != null;
+            return endpoint.getPublicByName(mockImageCatalogName, false) != null;
         } catch (ForbiddenException e) {
             return false;
         }
     }
 
-    private void createMockImageCatalog(ImageCatalogEndpoint endpoint) throws Exception {
+    private void createMockImageCatalog(ImageCatalogV1Endpoint endpoint) throws Exception {
         if (!isImageCatalogExists(endpoint, MOCK_IMAGE_CATALOG_NAME)) {
             ImageCatalogRequest imageCatalogRequest = new ImageCatalogRequest();
             imageCatalogRequest.setName(MOCK_IMAGE_CATALOG_NAME);
