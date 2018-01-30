@@ -291,6 +291,7 @@ public class OperationDescriptions {
     public static class ImageCatalogOpDescription {
         public static final String GET_PUBLICS_IMAGE_CATALOGS = "list available custom image catalogs as public resources";
         public static final String GET_PUBLIC_IMAGE_CATALOG_BY_NAME = "get custom image catalog by name";
+        public static final String GET_PUBLIC_IMAGE_CATALOG_BY_ID = "get custom image catalog by id";
         public static final String GET_IMAGES_BY_PROVIDER = "determines available images for the Cloudbreak version "
                 + "by the given provider and default image catalog url";
         public static final String GET_IMAGES_BY_PROVIDER_AND_CUSTOM_IMAGE_CATALOG = "determines available images for the Cloudbreak version "

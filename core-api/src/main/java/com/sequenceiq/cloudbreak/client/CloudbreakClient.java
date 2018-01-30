@@ -27,7 +27,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v1.ConstraintTemplateEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.CredentialEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.EventEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.FlexSubscriptionEndpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v1.ImageCatalogEndpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v1.ImageCatalogV1Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.LdapConfigEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.NetworkEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.RdsConfigEndpoint;
@@ -119,7 +119,7 @@ public class CloudbreakClient {
 
     private EndpointWrapper<FlexSubscriptionEndpoint> flexSubscriptionEndpoint;
 
-    private EndpointWrapper<ImageCatalogEndpoint> imageCatalogEndpoint;
+    private EndpointWrapper<ImageCatalogV1Endpoint> imageCatalogEndpoint;
 
     private CloudbreakClient(String cloudbreakAddress, String identityServerAddress, String user, String password, String clientId, ConfigKey configKey) {
         client = RestClientUtil.get(configKey);
@@ -196,7 +196,7 @@ public class CloudbreakClient {
         ldapConfigEndpoint = newResource(ldapConfigEndpoint, LdapConfigEndpoint.class, headers);
         smartSenseSubscriptionEndpoint = newResource(smartSenseSubscriptionEndpoint, SmartSenseSubscriptionEndpoint.class, headers);
         flexSubscriptionEndpoint = newResource(flexSubscriptionEndpoint, FlexSubscriptionEndpoint.class, headers);
-        imageCatalogEndpoint = newResource(imageCatalogEndpoint, ImageCatalogEndpoint.class, headers);
+        imageCatalogEndpoint = newResource(imageCatalogEndpoint, ImageCatalogV1Endpoint.class, headers);
         LOGGER.info("Endpoints have been renewed for CloudbreakClient");
     }
 
@@ -314,7 +314,7 @@ public class CloudbreakClient {
         return flexSubscriptionEndpoint.getEndpointProxy();
     }
 
-    public ImageCatalogEndpoint imageCatalogEndpoint() {
+    public ImageCatalogV1Endpoint imageCatalogEndpoint() {
         refresh();
         return imageCatalogEndpoint.getEndpointProxy();
     }
