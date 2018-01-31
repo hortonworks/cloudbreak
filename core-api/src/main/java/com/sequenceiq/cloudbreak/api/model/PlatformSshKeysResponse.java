@@ -11,6 +11,9 @@ public class PlatformSshKeysResponse implements JsonEntity {
 
     private Map<String, Set<PlatformSshKeyResponse>> sshKeys = new HashMap<>();
 
+    public PlatformSshKeysResponse() {
+    }
+
     public PlatformSshKeysResponse(Map<String, Set<PlatformSshKeyResponse>> sshKeys) {
         this.sshKeys = sshKeys;
     }

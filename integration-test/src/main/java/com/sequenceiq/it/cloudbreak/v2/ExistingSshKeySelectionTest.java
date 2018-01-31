@@ -1,6 +1,5 @@
 package com.sequenceiq.it.cloudbreak.v2;
 
-import java.util.Map;
 import java.util.Set;
 
 import org.springframework.util.StringUtils;
@@ -11,6 +10,7 @@ import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.model.PlatformResourceRequestJson;
 import com.sequenceiq.cloudbreak.api.model.PlatformSshKeyResponse;
+import com.sequenceiq.cloudbreak.api.model.PlatformSshKeysResponse;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.AbstractCloudbreakIntegrationTest;
 
@@ -29,9 +29,9 @@ public class ExistingSshKeySelectionTest extends AbstractCloudbreakIntegrationTe
         resourceRequestJson.setRegion(region);
         resourceRequestJson.setAvailabilityZone(availabilityZone);
         // WHEN
-        Map<String, Set<PlatformSshKeyResponse>> response = getCloudbreakClient().connectorV1Endpoint().getCloudSshKeys(resourceRequestJson).getSshKeys();
+        PlatformSshKeysResponse response = getCloudbreakClient().connectorV1Endpoint().getCloudSshKeys(resourceRequestJson);
         // THEN
-        Set<PlatformSshKeyResponse> regionKeys = response.get(region);
+        Set<PlatformSshKeyResponse> regionKeys = response.getSshKeys().get(region);
         Assert.assertNotNull(regionKeys, "keys cannot be null for " + region);
         java.util.Optional<PlatformSshKeyResponse> selected = regionKeys.stream().filter(rk -> rk.getName().equals(selectedKeyName)).findFirst();
         Assert.assertTrue(selected.isPresent(), "the sshkey list doesn't contain [" + selectedKeyName + "]");

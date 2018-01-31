@@ -11,6 +11,9 @@ public class PlatformNetworksResponse implements JsonEntity {
 
     private Map<String, Set<PlatformNetworkResponse>> networks = new HashMap<>();
 
+    public PlatformNetworksResponse() {
+    }
+
     public PlatformNetworksResponse(Map<String, Set<PlatformNetworkResponse>> networks) {
         this.networks = networks;
     }

@@ -11,6 +11,9 @@ public class PlatformGatewaysResponse implements JsonEntity {
 
     private Map<String, Set<CloudGatewayJson>> gateways = new HashMap<>();
 
+    public PlatformGatewaysResponse() {
+    }
+
     public PlatformGatewaysResponse(Map<String, Set<CloudGatewayJson>> gateways) {
         this.gateways = gateways;
     }
