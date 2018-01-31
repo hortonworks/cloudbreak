@@ -46,11 +46,19 @@ limitations under the License.
         <description>The directory within GATEWAY_HOME that contains gateway topology files and deployments.</description>
     </property>
 
+    {% if salt['pillar.get']('gateway:kerberos') is defined and salt['pillar.get']('gateway:kerberos') == True %}
+    <property>
+        <name>gateway.hadoop.kerberos.secured</name>
+        <value>true</value>
+        <description>Boolean flag indicating whether the Hadoop cluster protected by Gateway is secured with Kerberos</description>
+    </property>
+    {% else %}
     <property>
         <name>gateway.hadoop.kerberos.secured</name>
         <value>false</value>
         <description>Boolean flag indicating whether the Hadoop cluster protected by Gateway is secured with Kerberos</description>
     </property>
+    {% endif %}
 
     <property>
         <name>java.security.krb5.conf</name>

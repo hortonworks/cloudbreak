@@ -4,6 +4,7 @@ import static org.hamcrest.Matchers.is;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -24,9 +25,12 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.Sets;
+import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Constraint;
+import com.sequenceiq.cloudbreak.domain.Gateway;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 
@@ -52,6 +56,8 @@ public class BlueprintValidatorTest {
     private static final String SL_MIN0_MAX3 = "slavecomp1";
 
     private static final String SL_MIN5_MAX6 = "slavecomp2";
+
+    private static final String KNOX = "KNOX_GATEWAY";
 
     private static final String UNKNOWN = "unknown";
 
@@ -253,12 +259,212 @@ public class BlueprintValidatorTest {
         // THEN throw exception
     }
 
+    @Test
+    public void testKnoxWithoutKerberos() throws IOException {
+        // GIVEN
+        Blueprint blueprint = createBlueprint();
+        Set<InstanceGroup> instanceGroups = createInstanceGroups();
+        Set<HostGroup> hostGroups = createHostGroups(instanceGroups);
+        instanceGroups.add(createInstanceGroup("gateway", 1));
+        JsonNode blueprintJsonTree = createJsonTree();
+        BDDMockito.given(objectMapper.readTree(BLUEPRINT_STRING)).willReturn(blueprintJsonTree);
+        Cluster cluster = new Cluster();
+        cluster.setSecure(false);
+
+        // WHEN
+        underTest.validateBlueprintForStack(cluster, blueprint, hostGroups, instanceGroups);
+
+        // THEN no exception thrown
+    }
+
+    @Test
+    public void testKerberosWithoutKnox() throws IOException {
+        // GIVEN
+        Blueprint blueprint = createBlueprint();
+        Set<InstanceGroup> instanceGroups = createInstanceGroups();
+        Set<HostGroup> hostGroups = createHostGroups(instanceGroups);
+        instanceGroups.add(createInstanceGroup("gateway", 1));
+        JsonNode blueprintJsonTree = createJsonTree();
+        BDDMockito.given(objectMapper.readTree(BLUEPRINT_STRING)).willReturn(blueprintJsonTree);
+        Cluster cluster = new Cluster();
+        cluster.setSecure(true);
+
+        // WHEN
+        underTest.validateBlueprintForStack(cluster, blueprint, hostGroups, instanceGroups);
+
+        // THEN no exception thrown
+    }
+
+    @Test
+    public void testKnoxWithNoCluster() throws IOException {
+        // GIVEN
+        Blueprint blueprint = createBlueprint();
+        Set<InstanceGroup> instanceGroups = createInstanceGroups();
+        Set<HostGroup> hostGroups = createHostGroups(instanceGroups);
+        instanceGroups.add(createInstanceGroup("gateway", 1));
+        JsonNode blueprintJsonTree = createJsonTree();
+        BDDMockito.given(objectMapper.readTree(BLUEPRINT_STRING)).willReturn(blueprintJsonTree);
+
+        // WHEN
+        underTest.validateBlueprintForStack(null, blueprint, hostGroups, instanceGroups);
+
+        // THEN no exception thrown
+    }
+
+    @Test
+    public void testKnoxValidationWithNoGateway() throws IOException {
+        // GIVEN
+        Blueprint blueprint = createBlueprint();
+        Set<InstanceGroup> instanceGroups = createInstanceGroups();
+        Set<HostGroup> hostGroups = createHostGroups(instanceGroups);
+        instanceGroups.add(createInstanceGroup("gateway", 1));
+        JsonNode blueprintJsonTree = createJsonTree();
+        BDDMockito.given(objectMapper.readTree(BLUEPRINT_STRING)).willReturn(blueprintJsonTree);
+        Cluster cluster = new Cluster();
+        cluster.setSecure(true);
+
+        // WHEN
+        underTest.validateBlueprintForStack(cluster, blueprint, hostGroups, instanceGroups);
+
+        // THEN no exception thrown
+    }
+
+    @Test
+    public void testKnoxWithKerberosButNoKnoxInTheBlueprintForAllNodes() throws IOException {
+        // GIVEN
+        Blueprint blueprint = createBlueprint();
+        Set<InstanceGroup> instanceGroups = new HashSet<>();
+        instanceGroups.add(createInstanceGroup("gateway1", 1, InstanceGroupType.GATEWAY));
+        instanceGroups.add(createInstanceGroup("gateway2", 1, InstanceGroupType.GATEWAY));
+        instanceGroups.add(createInstanceGroup("master", 1, InstanceGroupType.CORE));
+        Set<HostGroup> hostGroups = createHostGroups(instanceGroups);
+
+        JsonNodeFactory jsonNodeFactory = JsonNodeFactory.instance;
+        ObjectNode rootNode = jsonNodeFactory.objectNode();
+        ArrayNode hostGroupsNode = rootNode.putArray("host_groups");
+        addHostGroup(hostGroupsNode, "gateway1", SL_MIN0_MAX3, MA_MIN1_MAX1);
+        addHostGroup(hostGroupsNode, "gateway2", SL_MIN0_MAX3, MA_MIN1_MAX3);
+        addHostGroup(hostGroupsNode, "master", SL_MIN0_MAX3, MA_MIN1_MAX5);
+        BDDMockito.given(objectMapper.readTree(BLUEPRINT_STRING)).willReturn(rootNode);
+
+        Cluster cluster = new Cluster();
+        cluster.setSecure(true);
+        Gateway gateway = new Gateway();
+        gateway.setEnableGateway(true);
+        cluster.setGateway(gateway);
+        thrown.expect(BadRequestException.class);
+        thrown.expectMessage("In case of Knox and Kerberos each 'Ambari Server' node must include the 'KNOX_GATEWAY' service. "
+            + "The following host groups are missing the service: gateway1,gateway2");
+
+        // WHEN
+        underTest.validateBlueprintForStack(cluster, blueprint, hostGroups, instanceGroups);
+
+        // THEN exception thrown
+    }
+
+    @Test
+    public void testKnoxWithKerberosButOneNodeMissingKnox() throws IOException {
+        // GIVEN
+        Blueprint blueprint = createBlueprint();
+        Set<InstanceGroup> instanceGroups = new HashSet<>();
+        instanceGroups.add(createInstanceGroup("gateway1", 1, InstanceGroupType.GATEWAY));
+        instanceGroups.add(createInstanceGroup("gateway2", 1, InstanceGroupType.GATEWAY));
+        instanceGroups.add(createInstanceGroup("master", 1, InstanceGroupType.CORE));
+        Set<HostGroup> hostGroups = createHostGroups(instanceGroups);
+
+        JsonNodeFactory jsonNodeFactory = JsonNodeFactory.instance;
+        ObjectNode rootNode = jsonNodeFactory.objectNode();
+        ArrayNode hostGroupsNode = rootNode.putArray("host_groups");
+        addHostGroup(hostGroupsNode, "gateway1", SL_MIN0_MAX3, KNOX);
+        addHostGroup(hostGroupsNode, "gateway2", SL_MIN0_MAX3, MA_MIN1_MAX3);
+        addHostGroup(hostGroupsNode, "master", SL_MIN0_MAX3, MA_MIN1_MAX5);
+        BDDMockito.given(objectMapper.readTree(BLUEPRINT_STRING)).willReturn(rootNode);
+
+        Cluster cluster = new Cluster();
+        cluster.setSecure(true);
+        Gateway gateway = new Gateway();
+        gateway.setEnableGateway(true);
+        cluster.setGateway(gateway);
+        thrown.expect(BadRequestException.class);
+        thrown.expectMessage("In case of Knox and Kerberos each 'Ambari Server' node must include the 'KNOX_GATEWAY' service. "
+            + "The following host groups are missing the service: gateway2");
+
+        // WHEN
+        underTest.validateBlueprintForStack(cluster, blueprint, hostGroups, instanceGroups);
+
+        // THEN exception thrown
+    }
+
+    @Test
+    public void testKnoxWithKerberosAndNonGwHasKnox() throws IOException {
+        // GIVEN
+        Blueprint blueprint = createBlueprint();
+        Set<InstanceGroup> instanceGroups = new HashSet<>();
+        instanceGroups.add(createInstanceGroup("gateway1", 1, InstanceGroupType.GATEWAY));
+        instanceGroups.add(createInstanceGroup("gateway2", 1, InstanceGroupType.GATEWAY));
+        instanceGroups.add(createInstanceGroup("master", 1, InstanceGroupType.CORE));
+        Set<HostGroup> hostGroups = createHostGroups(instanceGroups);
+
+        JsonNodeFactory jsonNodeFactory = JsonNodeFactory.instance;
+        ObjectNode rootNode = jsonNodeFactory.objectNode();
+        ArrayNode hostGroupsNode = rootNode.putArray("host_groups");
+        addHostGroup(hostGroupsNode, "gateway1", SL_MIN0_MAX3, MA_MIN1_MAX3);
+        addHostGroup(hostGroupsNode, "gateway2", SL_MIN0_MAX3, MA_MIN1_MAX3);
+        addHostGroup(hostGroupsNode, "master", SL_MIN0_MAX3, KNOX);
+        BDDMockito.given(objectMapper.readTree(BLUEPRINT_STRING)).willReturn(rootNode);
+
+        Cluster cluster = new Cluster();
+        cluster.setSecure(true);
+        Gateway gateway = new Gateway();
+        gateway.setEnableGateway(true);
+        cluster.setGateway(gateway);
+        thrown.expect(BadRequestException.class);
+        thrown.expectMessage("In case of Knox and Kerberos each 'Ambari Server' node must include the 'KNOX_GATEWAY' service. "
+            + "The following host groups are missing the service: gateway1,gateway2");
+
+        // WHEN
+        underTest.validateBlueprintForStack(cluster, blueprint, hostGroups, instanceGroups);
+
+        // THEN exception thrown
+    }
+
+    @Test
+    public void testKnoxWithKerberosAndEachGwHasKnox() throws IOException {
+        // GIVEN
+        Blueprint blueprint = createBlueprint();
+        Set<InstanceGroup> instanceGroups = new HashSet<>();
+        instanceGroups.add(createInstanceGroup("gateway1", 1, InstanceGroupType.GATEWAY));
+        instanceGroups.add(createInstanceGroup("gateway2", 1, InstanceGroupType.GATEWAY));
+        instanceGroups.add(createInstanceGroup("master", 1, InstanceGroupType.CORE));
+        Set<HostGroup> hostGroups = createHostGroups(instanceGroups);
+
+        JsonNodeFactory jsonNodeFactory = JsonNodeFactory.instance;
+        ObjectNode rootNode = jsonNodeFactory.objectNode();
+        ArrayNode hostGroupsNode = rootNode.putArray("host_groups");
+        addHostGroup(hostGroupsNode, "gateway1", SL_MIN0_MAX3, KNOX);
+        addHostGroup(hostGroupsNode, "gateway2", KNOX, MA_MIN1_MAX3);
+        addHostGroup(hostGroupsNode, "master", SL_MIN0_MAX3, MA_MIN1_MAX5);
+        BDDMockito.given(objectMapper.readTree(BLUEPRINT_STRING)).willReturn(rootNode);
+
+        Cluster cluster = new Cluster();
+        cluster.setSecure(true);
+        Gateway gateway = new Gateway();
+        gateway.setEnableGateway(true);
+        cluster.setGateway(gateway);
+
+        // WHEN
+        underTest.validateBlueprintForStack(cluster, blueprint, hostGroups, instanceGroups);
+
+        // THEN no exception thrown
+    }
+
     private void setupStackServiceComponentDescriptors() {
         BDDMockito.given(stackServiceComponentDescriptors.get(MA_MIN1_MAX5)).willReturn(new StackServiceComponentDescriptor(MA_MIN1_MAX5, "MASTER", 1, 5));
         BDDMockito.given(stackServiceComponentDescriptors.get(MA_MIN1_MAX1)).willReturn(new StackServiceComponentDescriptor(MA_MIN1_MAX1, "MASTER", 1, 1));
         BDDMockito.given(stackServiceComponentDescriptors.get(MA_MIN1_MAX3)).willReturn(new StackServiceComponentDescriptor(MA_MIN1_MAX3, "MASTER", 1, 3));
         BDDMockito.given(stackServiceComponentDescriptors.get(SL_MIN0_MAX3)).willReturn(new StackServiceComponentDescriptor(SL_MIN0_MAX3, "SLAVE", 0, 3));
         BDDMockito.given(stackServiceComponentDescriptors.get(SL_MIN5_MAX6)).willReturn(new StackServiceComponentDescriptor(SL_MIN5_MAX6, "SLAVE", 5, 6));
+        BDDMockito.given(stackServiceComponentDescriptors.get(KNOX)).willReturn(new StackServiceComponentDescriptor(KNOX, "MASTER", 0, 10));
     }
 
     private Blueprint createBlueprint() {
@@ -276,9 +482,14 @@ public class BlueprintValidatorTest {
     }
 
     private InstanceGroup createInstanceGroup(String groupName, int nodeCount) {
+        return createInstanceGroup(groupName, nodeCount, InstanceGroupType.CORE);
+    }
+
+    private InstanceGroup createInstanceGroup(String groupName, int nodeCount, InstanceGroupType instanceGroupType) {
         InstanceGroup group = new InstanceGroup();
         group.setGroupName(groupName);
         group.setNodeCount(nodeCount);
+        group.setInstanceGroupType(instanceGroupType);
         return group;
     }
 

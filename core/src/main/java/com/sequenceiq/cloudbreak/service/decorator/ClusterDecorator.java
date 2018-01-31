@@ -99,7 +99,7 @@ public class ClusterDecorator {
         }
         subject.setHostGroups(convertHostGroupsFromJson(stack, user, subject, request.getHostGroups()));
         if (request.getValidateBlueprint()) {
-            blueprintValidator.validateBlueprintForStack(subject.getBlueprint(), subject.getHostGroups(), stack.getInstanceGroups());
+            blueprintValidator.validateBlueprintForStack(subject, subject.getBlueprint(), subject.getHostGroups(), stack.getInstanceGroups());
         }
         subject.setTopologyValidation(request.getValidateBlueprint());
         prepareRds(subject, user, request.getRdsConfigIds(), request.getRdsConfigJsons(), stack);

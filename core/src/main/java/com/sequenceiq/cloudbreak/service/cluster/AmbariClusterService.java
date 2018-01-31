@@ -698,7 +698,7 @@ public class AmbariClusterService implements ClusterService {
                 + "and then create it using DDL scripts from /var/lib/ambari-server/resources");
         }
         if (validateBlueprint) {
-            blueprintValidator.validateBlueprintForStack(blueprint, hostGroups, stack.getInstanceGroups());
+            blueprintValidator.validateBlueprintForStack(cluster, blueprint, hostGroups, stack.getInstanceGroups());
         }
         Boolean containerOrchestrator;
         try {
