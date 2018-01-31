@@ -1,5 +1,10 @@
 package com.sequenceiq.it.cloudbreak.newway.cloud;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.model.OrchestratorRequest;
 import com.sequenceiq.cloudbreak.api.model.SecurityRuleRequest;
@@ -13,11 +18,6 @@ import com.sequenceiq.it.cloudbreak.newway.Entity;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
 import com.sequenceiq.it.cloudbreak.newway.StackEntity;
 import com.sequenceiq.it.cloudbreak.newway.TestParameter;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 public abstract class CloudProviderHelper extends CloudProvider {
 
@@ -64,7 +64,6 @@ public abstract class CloudProviderHelper extends CloudProvider {
                 .withAvailabilityZone(availabilityZone())
                 .withInstanceGroups(instanceGroups())
                 .withNetwork(network())
-                .withOrchestrator(orchestrator())
                 .withParameters(parameters())
                 .withStackAuthentication(stackauth());
     }
@@ -81,7 +80,6 @@ public abstract class CloudProviderHelper extends CloudProvider {
                 .withAvailabilityZone(availabilityZone())
                 .withInstanceGroups(instanceGroups())
                 .withNetwork(network())
-                .withOrchestrator(orchestrator())
                 .withParameters(parameters())
                 .withStackAuthentication(stackauth());
     }

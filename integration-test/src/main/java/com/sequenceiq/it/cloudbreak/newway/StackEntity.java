@@ -1,22 +1,29 @@
 package com.sequenceiq.it.cloudbreak.newway;
 
-import com.sequenceiq.cloudbreak.api.model.OrchestratorRequest;
+import java.util.List;
+import java.util.Map;
+
 import com.sequenceiq.cloudbreak.api.model.StackAuthenticationRequest;
 import com.sequenceiq.cloudbreak.api.model.StackResponse;
 import com.sequenceiq.cloudbreak.api.model.v2.ClusterV2Request;
+import com.sequenceiq.cloudbreak.api.model.v2.CustomDomainSettings;
+import com.sequenceiq.cloudbreak.api.model.v2.GeneralSettings;
+import com.sequenceiq.cloudbreak.api.model.v2.ImageSettings;
 import com.sequenceiq.cloudbreak.api.model.v2.InstanceGroupV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.NetworkV2Request;
+import com.sequenceiq.cloudbreak.api.model.v2.PlacementSettings;
 import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
-
-import java.util.List;
-import java.util.Map;
+import com.sequenceiq.cloudbreak.api.model.v2.Tags;
 
 public class StackEntity extends AbstractCloudbreakEntity<StackV2Request, StackResponse> {
     public static final String STACK = "STACK";
 
     StackEntity(String newId) {
         super(newId);
-        setRequest(new StackV2Request());
+        StackV2Request r = new StackV2Request();
+        r.setGeneral(new GeneralSettings());
+        r.setPlacement(new PlacementSettings());
+        setRequest(r);
     }
 
     StackEntity() {
@@ -24,28 +31,31 @@ public class StackEntity extends AbstractCloudbreakEntity<StackV2Request, StackR
     }
 
     public StackEntity withName(String name) {
-        getRequest().setName(name);
+        getRequest().getGeneral().setName(name);
         setName(name);
         return this;
     }
 
     public StackEntity withCredentialName(String credentialName) {
-        getRequest().setCredentialName(credentialName);
+        getRequest().getGeneral().setCredentialName(credentialName);
         return this;
     }
 
     public StackEntity withClusterRequest(ClusterV2Request clusterRequest) {
-        getRequest().setClusterRequest(clusterRequest);
+        getRequest().setCluster(clusterRequest);
         return this;
     }
 
     public StackEntity withAvailabilityZone(String availabilityZone) {
-        getRequest().setAvailabilityZone(availabilityZone);
+        getRequest().getPlacement().setAvailabilityZone(availabilityZone);
         return this;
     }
 
     public StackEntity withClusterNameAsSubdomain(boolean b) {
-        getRequest().setClusterNameAsSubdomain(b);
+        if (getRequest().getCustomDomain() == null) {
+            getRequest().setCustomDomain(new CustomDomainSettings());
+        }
+        getRequest().getCustomDomain().setClusterNameAsSubdomain(b);
         return this;
     }
 
@@ -55,12 +65,18 @@ public class StackEntity extends AbstractCloudbreakEntity<StackV2Request, StackR
     }
 
     public StackEntity withImageCatalog(String imageCatalog) {
-        getRequest().setImageCatalog(imageCatalog);
+        if (getRequest().getImageSettings() == null) {
+            getRequest().setImageSettings(new ImageSettings());
+        }
+        getRequest().getImageSettings().setImageCatalog(imageCatalog);
         return this;
     }
 
     public StackEntity withImageId(String imageId) {
-        getRequest().setImageId(imageId);
+        if (getRequest().getImageSettings() == null) {
+            getRequest().setImageSettings(new ImageSettings());
+        }
+        getRequest().getImageSettings().setImageId(imageId);
         return this;
     }
 
@@ -74,18 +90,13 @@ public class StackEntity extends AbstractCloudbreakEntity<StackV2Request, StackR
         return this;
     }
 
-    public StackEntity withOrchestrator(OrchestratorRequest orchestrator) {
-        getRequest().setOrchestrator(orchestrator);
-        return this;
-    }
-
     public StackEntity withParameters(Map<String, String> parameters) {
         getRequest().setParameters(parameters);
         return this;
     }
 
     public StackEntity withRegion(String region) {
-        getRequest().setRegion(region);
+        getRequest().getPlacement().setRegion(region);
         return this;
     }
 
@@ -95,7 +106,10 @@ public class StackEntity extends AbstractCloudbreakEntity<StackV2Request, StackR
     }
 
     public StackEntity withUserDefinedTags(Map<String, String> tags) {
-        getRequest().setUserDefinedTags(tags);
+        if (getRequest().getTags() == null) {
+            getRequest().setTags(new Tags());
+        }
+        getRequest().getTags().setUserDefinedTags(tags);
         return this;
     }
 
