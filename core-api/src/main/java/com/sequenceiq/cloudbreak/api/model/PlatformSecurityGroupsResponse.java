@@ -11,6 +11,9 @@ public class PlatformSecurityGroupsResponse implements JsonEntity {
 
     private Map<String, Set<PlatformSecurityGroupResponse>> securityGroups = new HashMap<>();
 
+    public PlatformSecurityGroupsResponse() {
+    }
+
     public PlatformSecurityGroupsResponse(Map<String, Set<PlatformSecurityGroupResponse>> securityGroups) {
         this.securityGroups = securityGroups;
     }
