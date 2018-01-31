@@ -221,6 +221,7 @@ public class ClusterHostServiceRunner {
         gateway.put("signkey", cluster.getGateway().getSignKey());
         gateway.put("tokencert", cluster.getGateway().getTokenCert());
         gateway.put("mastersecret", cluster.getStack().getSecurityConfig().getKnoxMasterSecret());
+        gateway.put("kerberos", cluster.isSecure());
 
         Json exposedJson = cluster.getGateway().getExposedServices();
         if (exposedJson != null && StringUtils.isNoneEmpty(exposedJson.getValue())) {
