@@ -1,6 +1,7 @@
 package com.sequenceiq.it.spark;
 
 import static com.sequenceiq.it.spark.ITResponse.AMBARI_API_ROOT;
+import static com.sequenceiq.it.spark.ITResponse.IMAGE_CATALOG;
 import static com.sequenceiq.it.spark.ITResponse.MOCK_ROOT;
 import static com.sequenceiq.it.spark.ITResponse.SALT_API_ROOT;
 import static com.sequenceiq.it.spark.ITResponse.SALT_BOOT_ROOT;
@@ -17,6 +18,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -27,6 +29,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.WebTarget;
+
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,10 +41,12 @@ import org.springframework.http.HttpStatus;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
+import com.sequenceiq.cloudbreak.client.RestClientUtil;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 import com.sequenceiq.cloudbreak.orchestrator.model.GenericResponse;
 import com.sequenceiq.cloudbreak.orchestrator.model.GenericResponses;
 import com.sequenceiq.it.cloudbreak.mock.MockInstanceUtil;
+import com.sequenceiq.it.cloudbreak.mock.json.CBVersion;
 import com.sequenceiq.it.spark.ambari.AmbariCheckResponse;
 import com.sequenceiq.it.spark.ambari.AmbariClusterRequestsResponse;
 import com.sequenceiq.it.spark.ambari.AmbariClusterResponse;
@@ -47,6 +54,7 @@ import com.sequenceiq.it.spark.ambari.AmbariClustersHostsResponse;
 import com.sequenceiq.it.spark.ambari.AmbariHostsResponse;
 import com.sequenceiq.it.spark.ambari.AmbariServicesComponentsResponse;
 import com.sequenceiq.it.spark.ambari.AmbariStatusResponse;
+import com.sequenceiq.it.spark.ambari.AmbariVersionDefinitionResponse;
 import com.sequenceiq.it.spark.ambari.AmbariViewResponse;
 import com.sequenceiq.it.spark.ambari.EmptyAmbariClusterResponse;
 import com.sequenceiq.it.spark.ambari.EmptyAmbariResponse;
@@ -68,8 +76,11 @@ public class MockSparkServer {
 
     private static final String MOCK_SERVER_ADDRESS;
 
+    private static final String CB_SERVER_ADDRESS;
+
     static {
         MOCK_SERVER_ADDRESS = Optional.ofNullable(System.getenv("MOCK_SERVER_ADDRESS")).orElse("mockhosts.service.consul");
+        CB_SERVER_ADDRESS = Optional.ofNullable(System.getenv("CB_SERVER_ADDRESS")).orElse("cb.service.consul");
     }
 
     private MockSparkServer() {
@@ -81,6 +92,7 @@ public class MockSparkServer {
         addAmbariMappings(instanceMap);
         addSaltMappings(instanceMap);
         addSPIEndpoints(instanceMap);
+        mockImageCatalogResponse();
     }
 
     private static void setup() {
@@ -90,6 +102,16 @@ public class MockSparkServer {
         before((req, res) -> {
             res.type("application/json");
             LOGGER.info(req.requestMethod() + " " + req.url());
+        });
+    }
+
+    public static void mockImageCatalogResponse() {
+        get(IMAGE_CATALOG, (request, response) -> {
+            Client client = RestClientUtil.get();
+            WebTarget target = client.target(new URI("https://" + CB_SERVER_ADDRESS + "/cb/info"));
+            CBVersion cbVersion = target.request().get().readEntity(CBVersion.class);
+            String version = cbVersion.getApp().getVersion();
+            return responseFromJsonFile("imagecatalog/catalog.json").replace("CB_VERSION", version);
         });
     }
 
@@ -129,6 +151,8 @@ public class MockSparkServer {
         post(AMBARI_API_ROOT + "/users", new EmptyAmbariResponse());
         get(AMBARI_API_ROOT + "/check", new AmbariCheckResponse());
         put(AMBARI_API_ROOT + "/stacks/HDP/versions/:version/operating_systems/:os/repositories/:hdpversion", new EmptyAmbariResponse());
+        get(AMBARI_API_ROOT + "/version_definitions", new AmbariVersionDefinitionResponse());
+        post(AMBARI_API_ROOT + "/version_definitions", new EmptyAmbariResponse());
     }
 
     private static void addSaltMappings(Map<String, CloudVmMetaDataStatus> instanceMap) {

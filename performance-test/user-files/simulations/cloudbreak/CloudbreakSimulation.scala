@@ -10,9 +10,10 @@ class CloudbreakSimulation extends Simulation {
   val r = scala.util.Random
 
   val host = sys.env("CB_PERFTEST_HOST")
+  val mockHost = sys.env.getOrElse("CB_MOCK_HOST", "mockhosts.service.consul")
   val delayBeforeTermination = sys.env.get("CB_DELAY_BEFORE_TERM").filter(_.trim.nonEmpty).map(_.toInt).getOrElse(60)
-  val numberOfUsers = sys.env.getOrElse("CB_NUMBER_OF_USERS", "10").toInt
-  val rampupSeconds = sys.env.getOrElse("CB_RAMPUP_SECONDS", "10").toInt
+  val numberOfUsers = sys.env.getOrElse("CB_NUMBER_OF_USERS", "3").toInt
+  val rampupSeconds = sys.env.getOrElse("CB_RAMPUP_SECONDS", "5").toInt
 
   val httpConf = http
     .baseURL("https://" + host)
@@ -34,7 +35,46 @@ class CloudbreakSimulation extends Simulation {
       .disableFollowRedirect
       .check(status.is(302), headerRegex("Location", """access_token=(.*?)&""").saveAs("token"))
 
-  val scn = scenario("get templates/securitygroups")
+  val scn2 = scenario("cluster creation v2")
+    .feed(Feeders.userFeeder)
+    .exec(Utils.addVariableToSession(_, "mockHost", mockHost))
+    .exec(getToken)
+    .exec(InfoRequests.queryCbVersion)
+
+    //init
+    .exec(Utils.addVariableToSession(_, "imagecatalogName", "mock-catalog-" + r.alphanumeric.take(10).mkString.toLowerCase))
+    .exec(ImageCatalogRequests.createMock)
+    .pause(1)
+
+    .exec(CredentialRequests.queryCredentials)
+    .exec(Utils.addVariableToSession(_, "blueprintName", "multinode-hdfs-yarn-" + r.alphanumeric.take(10).mkString.toLowerCase))
+    .exec(BlueprintRequests.createBlueprint)
+    .pause(1)
+    .exec(Utils.addVariableToSession(_, "credentialName", "mock-credential-" + r.alphanumeric.take(10).mkString.toLowerCase))
+    .exec(CredentialRequests.createMock)
+    .pause(1)
+    .exec(Utils.printSession(_))
+
+    //create cluster
+    .exec(Utils.addVariableToSession(_, "stackName", "perftest-" + r.alphanumeric.take(10).mkString.toLowerCase))
+    .exec(StackRequests.createMockStackV2)
+    .pause(4)
+    .exec(Utils.printSession(_))
+    .pause(delayBeforeTermination)
+
+    //delete
+    .exec(StackRequests.deleteStack)
+    .exec(Utils.addVariableToSession(_, "stackStatus", ""))
+    .asLongAs(s => !"DELETE_COMPLETED".equals(s("stackStatus").as[String])) {
+        pause(10)
+        .exec(StackRequests.getStack)
+    }
+    .exec(BlueprintRequests.deleteBlueprint)
+    .exec(CredentialRequests.deleteMock)
+    .exec(ImageCatalogRequests.deleteMock)
+
+
+  val scn = scenario("cluster creation")
     .feed(Feeders.userFeeder)
     .exec(getToken)
     //init
@@ -76,5 +116,5 @@ class CloudbreakSimulation extends Simulation {
     .exec(TemplateRequests.deleteMock)
 
 
-  setUp(scn.inject(rampUsers(numberOfUsers) over (rampupSeconds seconds)).protocols(httpConf))
+  setUp(scn2.inject(rampUsers(numberOfUsers) over (rampupSeconds seconds)).protocols(httpConf))
 }
