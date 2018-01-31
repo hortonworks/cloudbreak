@@ -7,18 +7,9 @@ import javax.net.ssl.SSLContext;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 
-import org.apache.http.config.Registry;
-import org.apache.http.config.RegistryBuilder;
-import org.apache.http.conn.socket.ConnectionSocketFactory;
-import org.apache.http.conn.socket.PlainConnectionSocketFactory;
-import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.ssl.SSLContexts;
-import org.glassfish.jersey.apache.connector.ApacheClientProperties;
-import org.glassfish.jersey.apache.connector.ApacheConnectorProvider;
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.client.ClientProperties;
-import org.glassfish.jersey.client.JerseyClientBuilder;
 import org.glassfish.jersey.filter.LoggingFilter;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.slf4j.Logger;
@@ -28,11 +19,7 @@ public class RestClientUtil {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RestClientUtil.class);
 
-    // apache http connection pool defaults are constraining
-    // https://hc.apache.org/httpcomponents-client-ga/tutorial/html/connmgmt.html
-    private static final int MAX_TOTAL_CONNECTION = 100;
-
-    private static final int MAX_PER_ROUTE_CONNECTION = 20;
+    private static final int CONNECT_TIMEOUT_MS = 20_000;
 
     private static final ConcurrentMap<ConfigKey, Client> CLIENTS = new ConcurrentHashMap<>();
 
@@ -55,33 +42,21 @@ public class RestClientUtil {
 
     public static Client createClient(String serverCert, String clientCert, String clientKey, boolean debug, Class debugClass) throws Exception {
         SSLContext sslContext = SSLContexts.custom()
-                .loadTrustMaterial(KeyStoreUtil.createTrustStore(serverCert), null)
-                .loadKeyMaterial(KeyStoreUtil.createKeyStore(clientCert, clientKey), "consul".toCharArray())
-                .build();
+            .loadTrustMaterial(KeyStoreUtil.createTrustStore(serverCert), null)
+            .loadKeyMaterial(KeyStoreUtil.createKeyStore(clientCert, clientKey), "consul".toCharArray())
+            .build();
 
         ClientConfig config = new ClientConfig();
         config.property(ClientProperties.FOLLOW_REDIRECTS, "false");
-
-        RegistryBuilder<ConnectionSocketFactory> registryBuilder = RegistryBuilder.create();
-        registryBuilder.register("http", PlainConnectionSocketFactory.getSocketFactory());
-        registryBuilder.register("https", new SSLConnectionSocketFactory(sslContext));
-
-        PoolingHttpClientConnectionManager connectionManager =
-                new PoolingHttpClientConnectionManager(registryBuilder.build());
-
-        connectionManager.setMaxTotal(MAX_TOTAL_CONNECTION);
-        connectionManager.setDefaultMaxPerRoute(MAX_PER_ROUTE_CONNECTION);
-
-        // tell the jersey config about the connection manager
-        config.property(ApacheClientProperties.CONNECTION_MANAGER, connectionManager);
-        config.connectorProvider(new ApacheConnectorProvider());
+        config.property(ClientProperties.CONNECT_TIMEOUT, CONNECT_TIMEOUT_MS);
         config.register(MultiPartFeature.class);
 
-        ClientBuilder builder = JerseyClientBuilder.newBuilder().withConfig(config);
+        ClientBuilder builder = ClientBuilder.newBuilder().withConfig(config);
+        builder.sslContext(sslContext);
+        builder.hostnameVerifier(CertificateTrustManager.hostnameVerifier());
 
         if (debug) {
-            builder = builder.register(new LoggingFilter(java.util.logging.Logger.getLogger(debugClass.getName()),
-                    true));
+            builder = builder.register(new LoggingFilter(java.util.logging.Logger.getLogger(debugClass.getName()), true));
         }
 
         Client client = builder.build();
@@ -93,32 +68,18 @@ public class RestClientUtil {
         LOGGER.debug("Constructing jax rs client: {}", configKey);
         ClientConfig config = new ClientConfig();
         config.property(ClientProperties.FOLLOW_REDIRECTS, "false");
-
-        PoolingHttpClientConnectionManager connectionManager;
-
-        if (configKey.isSecure()) {
-            connectionManager = new PoolingHttpClientConnectionManager();
-        } else {
-            Registry<ConnectionSocketFactory> socketFactoryRegistry = RegistryBuilder.<ConnectionSocketFactory>create()
-                    .register("http", PlainConnectionSocketFactory.getSocketFactory())
-                    .register("https", new SSLConnectionSocketFactory(CertificateTrustManager.sslContext(), CertificateTrustManager.hostnameVerifier()))
-                    .build();
-
-            connectionManager = new PoolingHttpClientConnectionManager(socketFactoryRegistry);
-        }
-        connectionManager.setMaxTotal(MAX_TOTAL_CONNECTION);
-        connectionManager.setDefaultMaxPerRoute(MAX_PER_ROUTE_CONNECTION);
-
-        // tell the jersey config about the connection manager
-        config.property(ApacheClientProperties.CONNECTION_MANAGER, connectionManager);
-
-        config.connectorProvider(new ApacheConnectorProvider());
+        config.property(ClientProperties.CONNECT_TIMEOUT, CONNECT_TIMEOUT_MS);
         config.register(MultiPartFeature.class);
 
-        ClientBuilder builder = JerseyClientBuilder.newBuilder().withConfig(config);
+        ClientBuilder builder = ClientBuilder.newBuilder().withConfig(config);
 
         if (configKey.isDebug()) {
             builder = builder.register(new LoggingFilter(java.util.logging.Logger.getLogger(RestClientUtil.class.getName()), true));
+        }
+
+        if (!configKey.isSecure()) {
+            builder.sslContext(CertificateTrustManager.sslContext());
+            builder.hostnameVerifier(CertificateTrustManager.hostnameVerifier());
         }
 
         Client client = builder.build();
