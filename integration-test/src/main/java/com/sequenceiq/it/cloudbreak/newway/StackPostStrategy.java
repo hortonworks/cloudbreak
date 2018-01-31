@@ -1,8 +1,8 @@
 package com.sequenceiq.it.cloudbreak.newway;
 
-import com.sequenceiq.it.IntegrationTestContext;
-
 import static com.sequenceiq.it.cloudbreak.newway.CloudbreakClient.getTestContextCloudbreakClient;
+
+import com.sequenceiq.it.IntegrationTestContext;
 
 public class StackPostStrategy implements Strategy {
     @Override
@@ -11,13 +11,13 @@ public class StackPostStrategy implements Strategy {
         CloudbreakClient client = getTestContextCloudbreakClient().apply(integrationTestContext);
 
         Credential credential = Credential.getTestContextCredential().apply(integrationTestContext);
-        if (credential != null && stackEntity.getRequest().getCredentialName() == null) {
-            stackEntity.getRequest().setCredentialName(credential.getName());
+        if (credential != null && stackEntity.getRequest().getGeneral().getCredentialName() == null) {
+            stackEntity.getRequest().getGeneral().setCredentialName(credential.getName());
         }
 
         Cluster cluster = Cluster.getTestContextCluster().apply(integrationTestContext);
-        if (cluster != null && stackEntity.getRequest().getClusterRequest() == null) {
-            stackEntity.getRequest().setClusterRequest(cluster.getRequest());
+        if (cluster != null && stackEntity.getRequest().getCluster() == null) {
+            stackEntity.getRequest().setCluster(cluster.getRequest());
         }
 
         stackEntity.setResponse(

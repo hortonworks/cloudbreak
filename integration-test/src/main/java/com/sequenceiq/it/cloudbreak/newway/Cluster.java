@@ -1,14 +1,15 @@
 package com.sequenceiq.it.cloudbreak.newway;
 
+import java.util.Set;
+import java.util.function.Function;
+
 import com.sequenceiq.cloudbreak.api.model.ExecutorType;
 import com.sequenceiq.cloudbreak.api.model.FileSystemRequest;
 import com.sequenceiq.cloudbreak.api.model.RDSConfigRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.AmbariV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.ClusterV2Request;
+import com.sequenceiq.cloudbreak.api.model.v2.RdsConfigs;
 import com.sequenceiq.it.IntegrationTestContext;
-
-import java.util.Set;
-import java.util.function.Function;
 
 public class Cluster extends Entity  {
     public static final String CLUSTER_REQUEST = "CLUSTER_REQUEST";
@@ -49,7 +50,7 @@ public class Cluster extends Entity  {
     }
 
     public Cluster withAmbariRequest(AmbariV2Request ambariRequest) {
-        getRequest().setAmbariRequest(ambariRequest);
+        getRequest().setAmbari(ambariRequest);
         return this;
     }
 
@@ -79,12 +80,18 @@ public class Cluster extends Entity  {
     }
 
     public Cluster withRdsConfigIds(Set<Long> ids) {
-        getRequest().setRdsConfigIds(ids);
+        if (getRequest().getRdsConfigs() == null) {
+            getRequest().setRdsConfigs(new RdsConfigs());
+        }
+        getRequest().getRdsConfigs().setIds(ids);
         return this;
     }
 
     public Cluster withRdsConfigJsons(Set<RDSConfigRequest> rdsConfigRequests) {
-        getRequest().setRdsConfigJsons(rdsConfigRequests);
+        if (getRequest().getRdsConfigs() == null) {
+            getRequest().setRdsConfigs(new RdsConfigs());
+        }
+        getRequest().getRdsConfigs().setConfigs(rdsConfigRequests);
         return this;
     }
 
