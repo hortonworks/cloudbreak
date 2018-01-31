@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -18,8 +19,10 @@ import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Maps;
+import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 
@@ -27,12 +30,18 @@ import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 public class BlueprintValidator {
     private static final Logger LOGGER = LoggerFactory.getLogger(BlueprintValidator.class);
 
+    private static final String KNOX = "KNOX_GATEWAY";
+
     private ObjectMapper objectMapper = new ObjectMapper();
 
     @Inject
     private StackServiceComponentDescriptors stackServiceComponentDescs;
 
     public void validateBlueprintForStack(Blueprint blueprint, Set<HostGroup> hostGroups, Set<InstanceGroup> instanceGroups) {
+        validateBlueprintForStack(null, blueprint, hostGroups, instanceGroups);
+    }
+
+    public void validateBlueprintForStack(Cluster cluster, Blueprint blueprint, Set<HostGroup> hostGroups, Set<InstanceGroup> instanceGroups) {
         try {
             JsonNode hostGroupsNode = getHostGroupNode(blueprint);
             validateHostGroups(hostGroupsNode, hostGroups, instanceGroups);
@@ -42,6 +51,7 @@ public class BlueprintValidator {
                 validateHostGroup(hostGroupNode, hostGroupMap, blueprintServiceComponentMap);
             }
             validateBlueprintServiceComponents(blueprintServiceComponentMap);
+            validateKnoxWithKerberos(cluster, instanceGroups, blueprintServiceComponentMap);
         } catch (IOException e) {
             throw new BadRequestException(String.format("Blueprint [%s] can not be parsed from JSON.", blueprint.getId()));
         }
@@ -122,7 +132,7 @@ public class BlueprintValidator {
     }
 
     private void validateHostGroup(JsonNode hostGroupNode, Map<String, HostGroup> hostGroupMap,
-            Map<String, BlueprintServiceComponent> blueprintServiceComponentMap) {
+        Map<String, BlueprintServiceComponent> blueprintServiceComponentMap) {
         String hostGroupName = getHostGroupName(hostGroupNode);
         HostGroup hostGroup = getHostGroup(hostGroupMap, hostGroupName);
         JsonNode componentsNode = getComponentsNode(hostGroupNode);
@@ -192,6 +202,27 @@ public class BlueprintValidator {
             blueprintServiceComponentMap.put(componentName, blueprintServiceComponent);
         } else {
             blueprintServiceComponent.update(hostGroup);
+        }
+    }
+
+    private void validateKnoxWithKerberos(Cluster cluster, Set<InstanceGroup> instanceGroups, Map<String, BlueprintServiceComponent> componentMap) {
+        if (cluster != null && cluster.isSecure() && cluster.getGateway() != null && cluster.getGateway().getEnableGateway()) {
+            List<String> missingNodes = instanceGroups.stream()
+                .filter(s -> {
+                    if (!s.getInstanceGroupType().equals(InstanceGroupType.GATEWAY)) {
+                        return false;
+                    }
+                    return componentMap.values().stream()
+                        .filter(c -> c.getHostgroups().contains(s.getGroupName()))
+                        .noneMatch(c -> c.getName().equals(KNOX));
+                })
+                .map(InstanceGroup::getGroupName)
+                .collect(Collectors.toList());
+            if (!missingNodes.isEmpty()) {
+                Collections.sort(missingNodes);
+                throw new BadRequestException("In case of Knox and Kerberos each 'Ambari Server' node must include the 'KNOX_GATEWAY' service. "
+                    + "The following host groups are missing the service: " + String.join(",", missingNodes));
+            }
         }
     }
 }

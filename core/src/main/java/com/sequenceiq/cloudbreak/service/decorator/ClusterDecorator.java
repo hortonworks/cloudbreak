@@ -141,7 +141,7 @@ public class ClusterDecorator implements Decorator<Cluster> {
             } else if (requestBlueprint != null) {
                 blueprint = subject.getBlueprint();
             }
-            blueprintValidator.validateBlueprintForStack(blueprint, subject.getHostGroups(), stack.getInstanceGroups());
+            blueprintValidator.validateBlueprintForStack(subject, blueprint, subject.getHostGroups(), stack.getInstanceGroups());
         }
         subject.setTopologyValidation(validate);
         prepareSssd(subject, user, sssdConfigId, requestSssd, stack);
