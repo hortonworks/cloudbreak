@@ -24,4 +24,6 @@ public interface BlueprintProcessor {
     String addComponentToHostgroups(String component, Collection<String> hostGroupNames, String blueprintText);
 
     Map<String, Set<String>> getComponentsByHostGroup(String blueprintText);
+
+    boolean hivaDatabaseConfigurationExistsInBlueprint(String blueprintText);
 }

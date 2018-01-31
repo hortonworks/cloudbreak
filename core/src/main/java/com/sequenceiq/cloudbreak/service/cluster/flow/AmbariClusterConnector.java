@@ -85,9 +85,9 @@ import com.sequenceiq.cloudbreak.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.PollingResult;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
-import com.sequenceiq.cloudbreak.service.cluster.AmbariSecurityConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariClientProvider;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariOperationFailedException;
+import com.sequenceiq.cloudbreak.service.cluster.AmbariSecurityConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.HadoopConfigurationService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.AutoRecoveryConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.AzureFileSystemConfigProvider;
@@ -106,6 +106,7 @@ import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
+import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.flow.AmbariStartupListenerTask;
 import com.sequenceiq.cloudbreak.service.stack.flow.AmbariStartupPollerObject;
@@ -208,6 +209,9 @@ public class AmbariClusterConnector {
     private RDSConfigProvider rdsConfigProvider;
 
     @Inject
+    private RdsConfigService rdsConfigService;
+
+    @Inject
     private ContainerExecutorConfigProvider containerExecutorConfigProvider;
 
     @Inject
@@ -275,12 +279,8 @@ public class AmbariClusterConnector {
             Map<String, List<Map<String, String>>> hostGroupMappings = buildHostGroupAssociations(hostGroups);
 
             recipeEngine.executePostAmbariStartRecipes(stack, hostGroups);
-            Set<RDSConfig> rdsConfigs = rdsConfigRepository.findByClusterId(stack.getOwner(), stack.getAccount(), cluster.getId());
 
-            String blueprintText = updateBlueprintWithInputs(cluster, cluster.getBlueprint(), rdsConfigs);
-
-            FileSystem fs = cluster.getFileSystem();
-            blueprintText = updateBlueprintConfiguration(stack, blueprintText, rdsConfigs, fs);
+            String blueprintText = generateBlueprintText(stack, cluster);
 
             AmbariClient ambariClient = getAmbariClient(stack);
 
@@ -315,6 +315,18 @@ public class AmbariClusterConnector {
             LOGGER.error("Error while building the Ambari cluster. Message {}, throwable: {}", e.getMessage(), e);
             throw new AmbariOperationFailedException(e.getMessage(), e);
         }
+    }
+
+    private String generateBlueprintText(Stack stack, Cluster cluster) throws IOException, CloudbreakException {
+        Blueprint blueprint = cluster.getBlueprint();
+
+        Set<RDSConfig> rdsConfigs = rdsConfigProvider.createPostgresRdsConfigIfNeeded(stack, cluster, blueprint);
+
+        String blueprintText = updateBlueprintWithInputs(cluster, blueprint, rdsConfigs);
+
+        FileSystem fs = cluster.getFileSystem();
+        blueprintText = updateBlueprintConfiguration(stack, blueprintText, rdsConfigs, fs);
+        return blueprintText;
     }
 
     public void prepareClusterToDekerberizing(Long stackId) {

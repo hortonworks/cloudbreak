@@ -19,6 +19,14 @@ import com.sequenceiq.cloudbreak.util.JsonUtil;
 @Component
 public class JacksonBlueprintProcessor implements BlueprintProcessor {
 
+    public static final String JAVAX_JDO_OPTION_CONNECTION_URL = "javax.jdo.option.ConnectionURL";
+
+    public static final String JAVAX_JDO_OPTION_CONNECTION_DRIVER_NAME = "javax.jdo.option.ConnectionDriverName";
+
+    public static final String JAVAX_JDO_OPTION_CONNECTION_USER_NAME = "javax.jdo.option.ConnectionUserName";
+
+    public static final String JAVAX_JDO_OPTION_CONNECTION_PASSWORD = "javax.jdo.option.ConnectionPassword";
+
     private static final String CONFIGURATIONS_NODE = "configurations";
 
     private static final String SETTINGS_NODE = "settings";
@@ -28,6 +36,8 @@ public class JacksonBlueprintProcessor implements BlueprintProcessor {
     private static final String BLUEPRINTS = "Blueprints";
 
     private static final String STACK_VERSION = "stack_version";
+
+    private static final String HIVE_SITE = "hive-site";
 
     @Override
     public String addConfigEntries(String originalBlueprint, List<BlueprintConfigurationEntry> configurationEntries, boolean override) {
@@ -222,6 +232,25 @@ public class JacksonBlueprintProcessor implements BlueprintProcessor {
         } catch (IOException e) {
             throw new BlueprintProcessingException("Failed to remove component('" + component + "') from the blueprint.", e);
         }
+    }
+
+    public boolean hivaDatabaseConfigurationExistsInBlueprint(String blueprintText) {
+        try {
+            ObjectNode root = (ObjectNode) JsonUtil.readTree(blueprintText);
+            JsonNode configurationsNode = root.path(CONFIGURATIONS_NODE);
+            if (configurationsNode.isArray()) {
+                ArrayNode arrayConfNode = (ArrayNode) configurationsNode;
+                JsonNode hiveSite = arrayConfNode.findValue(HIVE_SITE);
+                return hiveSite != null
+                        && hiveSite.findValue(JAVAX_JDO_OPTION_CONNECTION_URL) != null
+                        && hiveSite.findValue(JAVAX_JDO_OPTION_CONNECTION_DRIVER_NAME) != null
+                        && hiveSite.findValue(JAVAX_JDO_OPTION_CONNECTION_USER_NAME) != null
+                        && hiveSite.findValue(JAVAX_JDO_OPTION_CONNECTION_PASSWORD) != null;
+            }
+        } catch (IOException e) {
+            throw new BlueprintProcessingException("Failed to check hiva databse config in blueprint.", e);
+        }
+        return false;
     }
 
     private boolean componentExistsInHostgroup(String component, JsonNode hostGroupNode) {
