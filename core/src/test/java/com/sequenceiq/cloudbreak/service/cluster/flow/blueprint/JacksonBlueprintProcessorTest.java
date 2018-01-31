@@ -296,6 +296,57 @@ public class JacksonBlueprintProcessorTest {
         Assert.assertEquals(res.replaceAll("\\s", ""), result.replaceAll("\\s", ""));
     }
 
+    @Test
+    public void testHiveDbConfigExists() throws Exception {
+        String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints/test-bp-existing-hive-db.bp");
+        boolean result = underTest.hivaDatabaseConfigurationExistsInBlueprint(testBlueprint);
+        Assert.assertTrue(result);
+    }
+
+    @Test
+    public void testHiveDbConfigExistsWithoutConfigBlock() throws Exception {
+        String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints/test-bp-without-config-block.bp");
+        boolean result = underTest.hivaDatabaseConfigurationExistsInBlueprint(testBlueprint);
+        Assert.assertFalse(result);
+    }
+
+    @Test
+    public void testHiveDbConfigExistsWithEmptyConfigBlock() throws Exception {
+        String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints/test-bp-with-empty-config-block.bp");
+        boolean result = underTest.hivaDatabaseConfigurationExistsInBlueprint(testBlueprint);
+        Assert.assertFalse(result);
+    }
+
+    @Test
+    public void testHiveDbConfigExistsMissingConfig() throws Exception {
+        String originalBlueprint = FileReaderUtils.readFileFromClasspath("blueprints/test-bp-existing-hive-db.bp");
+        String testBlueprint = skipLine(originalBlueprint, JacksonBlueprintProcessor.JAVAX_JDO_OPTION_CONNECTION_DRIVER_NAME);
+        boolean result = underTest.hivaDatabaseConfigurationExistsInBlueprint(testBlueprint);
+        Assert.assertFalse(result);
+        testBlueprint = skipLine(originalBlueprint, JacksonBlueprintProcessor.JAVAX_JDO_OPTION_CONNECTION_PASSWORD);
+        result = underTest.hivaDatabaseConfigurationExistsInBlueprint(testBlueprint);
+        Assert.assertFalse(result);
+        testBlueprint = skipLine(originalBlueprint, JacksonBlueprintProcessor.JAVAX_JDO_OPTION_CONNECTION_URL);
+        result = underTest.hivaDatabaseConfigurationExistsInBlueprint(testBlueprint);
+        Assert.assertFalse(result);
+        testBlueprint = skipLine(originalBlueprint, JacksonBlueprintProcessor.JAVAX_JDO_OPTION_CONNECTION_USER_NAME);
+        result = underTest.hivaDatabaseConfigurationExistsInBlueprint(testBlueprint);
+        Assert.assertFalse(result);
+    }
+
+    private String skipLine(String originalBlueprint, String toSkipString) {
+        String[] split = originalBlueprint.split(System.lineSeparator());
+        StringBuilder sb = new StringBuilder();
+        for (String line : split) {
+            if (!line.contains(toSkipString)) {
+                sb.append(line);
+            } else if (!line.endsWith(",")) {
+                sb.append("\"fixJson\": \"random\"");
+            }
+        }
+        return sb.toString();
+    }
+
     private boolean componentExistsInHostgroup(String component, JsonNode hostGroupNode) {
         boolean componentExists = false;
         Iterator<JsonNode> components = hostGroupNode.path("components").elements();

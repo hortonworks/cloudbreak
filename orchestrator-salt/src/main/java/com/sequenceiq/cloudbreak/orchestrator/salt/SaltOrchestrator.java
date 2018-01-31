@@ -163,6 +163,9 @@ public class SaltOrchestrator implements HostOrchestrator {
             if (primaryGateway.getKnoxGatewayEnabled()) {
                 runSaltCommand(sc, new GrainAddRunner(gatewayTargets, allNodes, "gateway"), exitModel);
             }
+
+            setPostgreRoleIfNeeded(allNodes, saltConfig, exitModel, sc, server);
+
             // ambari server
             runSaltCommand(sc, new GrainAddRunner(server, allNodes, "ambari_server"), exitModel);
             // ambari server standby
@@ -197,6 +200,13 @@ public class SaltOrchestrator implements HostOrchestrator {
             throw new CloudbreakOrchestratorFailedException(e);
         }
         LOGGER.info("Run services on nodes finished: {}", allNodes);
+    }
+
+    private void setPostgreRoleIfNeeded(Set<Node> allNodes, SaltConfig saltConfig, ExitCriteriaModel exitModel, SaltConnector sc, Set<String> server)
+            throws ExecutionException, InterruptedException {
+        if (saltConfig.getServicePillarConfig().containsKey("postgresql-server")) {
+            runSaltCommand(sc, new GrainAddRunner(server, allNodes, "postgresql_server"), exitModel);
+        }
     }
 
     private void uploadGrains(Set<Node> allNodes, Map<String, Map<String, String>> grainsProperties, ExitCriteriaModel exitModel, SaltConnector sc)

@@ -56,14 +56,15 @@ import com.sequenceiq.cloudbreak.service.PollingResult;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.StatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
-import com.sequenceiq.cloudbreak.service.cluster.AmbariSecurityConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariClientProvider;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariOperationFailedException;
+import com.sequenceiq.cloudbreak.service.cluster.AmbariSecurityConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.HadoopConfigurationService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.AutoRecoveryConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.BlueprintProcessor;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.DruidSupersetConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.LlapConfigProvider;
+import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.RDSConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.SmartSenseConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.ZeppelinConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.template.BlueprintTemplateProcessor;
@@ -185,6 +186,9 @@ public class AmbariClusterConnectorTest {
     @Mock
     private AmbariRepositoryVersionService ambariRepositoryVersionService;
 
+    @Mock
+    private RDSConfigProvider rdsConfigProvider;
+
     @InjectMocks
     private final AmbariClusterConnector underTest = new AmbariClusterConnector();
 
@@ -225,6 +229,7 @@ public class AmbariClusterConnectorTest {
         when(stackRepository.findOneWithLists(anyLong())).thenReturn(stack);
         when(stackRepository.findOne(anyLong())).thenReturn(stack);
         when(clusterRepository.findOneWithLists(anyLong())).thenReturn(cluster);
+        when(rdsConfigProvider.createPostgresRdsConfigIfNeeded(any(Stack.class), any(Cluster.class), any(Blueprint.class))).thenReturn(new HashSet<>());
     }
 
     @Test

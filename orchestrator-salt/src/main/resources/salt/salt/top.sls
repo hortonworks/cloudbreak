@@ -42,6 +42,10 @@ base:
     - match: grain
     - smartsense.agent-update
 
+  'roles:postgresql_server':
+    - match: grain
+    - postgresql.postgres-install
+
   'G@roles:ambari_server and not G@roles:smartsense':
     - match: compound
     - prometheus.server

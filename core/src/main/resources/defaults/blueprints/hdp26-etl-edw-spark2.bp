@@ -94,9 +94,6 @@
             "name": "METRICS_MONITOR"
           },
           {
-            "name": "MYSQL_SERVER"
-          },
-          {
             "name": "NAMENODE"
           },
           {

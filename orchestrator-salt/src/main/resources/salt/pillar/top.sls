@@ -23,6 +23,10 @@ base:
     - match: grain
     - kerberos.init
 
+  'roles:postgresql_server':
+    - match: grain
+    - postgresql.postgre
+
   'roles:ambari_server':
     - match: grain
     - ambari.database

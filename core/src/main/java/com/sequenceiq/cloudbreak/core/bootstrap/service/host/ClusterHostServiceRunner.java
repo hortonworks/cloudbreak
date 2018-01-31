@@ -54,6 +54,7 @@ import com.sequenceiq.cloudbreak.service.SmartSenseCredentialConfigService;
 import com.sequenceiq.cloudbreak.service.blueprint.ComponentLocatorService;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariSecurityConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.BlueprintProcessor;
+import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.HiveConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.flow.kerberos.KerberosDetailService;
 
 @Component
@@ -91,6 +92,9 @@ public class ClusterHostServiceRunner {
 
     @Inject
     private KerberosDetailService kerberosDetailService;
+
+    @Inject
+    private HiveConfigProvider hiveConfigProvider;
 
     @Transactional
     public void runAmbariServices(Stack stack, Cluster cluster) throws CloudbreakException {
@@ -155,6 +159,8 @@ public class ClusterHostServiceRunner {
             Map<String, Object> smartSenseCredentials = smartSenseCredentialConfigService.getCredentials();
             servicePillar.put("smartsense-credentials", new SaltPillarProperties("/smartsense/credentials.sls", smartSenseCredentials));
         }
+
+        hiveConfigProvider.decorateServicePillarWithPostgresIfNeeded(servicePillar, cluster.getBlueprint());
 
         return new SaltConfig(servicePillar, createGrainProperties(gatewayConfigs));
     }

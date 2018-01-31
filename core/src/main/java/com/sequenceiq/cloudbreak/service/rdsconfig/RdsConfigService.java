@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.google.common.base.Preconditions;
 import com.sequenceiq.cloudbreak.api.model.RdsType;
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
@@ -93,6 +94,13 @@ public class RdsConfigService {
         LOGGER.debug("Creating RDS configuration: [User: '{}', Account: '{}']", user.getUsername(), user.getAccount());
         rdsConfig.setOwner(user.getUserId());
         rdsConfig.setAccount(user.getAccount());
+        return rdsConfigRepository.save(rdsConfig);
+    }
+
+    public RDSConfig create(RDSConfig rdsConfig) {
+        Preconditions.checkNotNull(rdsConfig.getOwner(), "Owner cannot be null");
+        Preconditions.checkNotNull(rdsConfig.getAccount(), "Account cannot be null");
+        LOGGER.debug("Creating RDS configuration: [User: '{}', Account: '{}']", rdsConfig.getOwner(), rdsConfig.getAccount());
         return rdsConfigRepository.save(rdsConfig);
     }
 
