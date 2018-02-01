@@ -146,8 +146,9 @@ func (e *ErrorMessage) String() string {
 		result = e.Message
 	} else if len(e.ValidationError) > 0 {
 		var validationErrors []string
-		for _, v := range e.ValidationError {
-			validationErrors = append(validationErrors, v)
+		for k, v := range e.ValidationError {
+			message := fmt.Sprintf("'%v' - %v", strings.TrimPrefix(k, "postPrivate.arg0."), v)
+			validationErrors = append(validationErrors, message)
 		}
 		result = strings.Join(validationErrors, ",")
 	}
