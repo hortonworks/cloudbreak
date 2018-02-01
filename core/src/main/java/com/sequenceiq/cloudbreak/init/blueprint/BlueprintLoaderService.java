@@ -31,8 +31,9 @@ public class BlueprintLoaderService {
     private BlueprintRepository blueprintRepository;
 
     public boolean addingDefaultBlueprintsAreNecessaryForTheUser(Set<Blueprint> blueprints) {
+        Map<String, Blueprint> defaultBlueprints = defaultBlueprintCache.defaultBlueprints();
         for (Blueprint blueprintFromDatabase : blueprints) {
-            Blueprint defaultBlueprint = defaultBlueprintCache.defaultBlueprints().get(blueprintFromDatabase.getName());
+            Blueprint defaultBlueprint = defaultBlueprints.get(blueprintFromDatabase.getName());
             if (mustUpdateTheExistingBlueprint(blueprintFromDatabase, defaultBlueprint)) {
                 return true;
             }
@@ -82,10 +83,10 @@ public class BlueprintLoaderService {
     private Set<Blueprint> addMissingBlueprints(IdentityUser user, Set<Blueprint> blueprints) {
         Set<Blueprint> resultList = new HashSet<>();
         LOGGER.info("Adding default blueprints which are missing for the user.");
-        for (String diffBlueprintName : collectDeviationOfExistingBlueprintsAndDefaultBlueprints(blueprints)) {
-            Blueprint blueprintFromCache = defaultBlueprintCache.defaultBlueprints().get(diffBlueprintName);
-            LOGGER.info("Default Blueprint '{}' needs to add for the '{}' user because the default blueprint missing.", diffBlueprintName, user.getUserId());
-            resultList.add(prepateBlueprint(user, blueprintFromCache, blueprintFromCache));
+        for (Map.Entry<String, Blueprint> diffBlueprint : collectDeviationOfExistingBlueprintsAndDefaultBlueprints(blueprints).entrySet()) {
+            LOGGER.info("Default Blueprint '{}' needs to add for the '{}' user because the default blueprint missing.",
+                    diffBlueprint.getKey(), user.getUserId());
+            resultList.add(setupBlueprint(user, diffBlueprint.getValue()));
         }
         LOGGER.info("Finished to add default blueprints which are missing for the user.");
         return resultList;
@@ -94,8 +95,9 @@ public class BlueprintLoaderService {
     private Set<Blueprint> updateDefaultBlueprints(IdentityUser user, Set<Blueprint> blueprints) {
         Set<Blueprint> resultList = new HashSet<>();
         LOGGER.info("Updating default blueprints which are contains text modifications.");
+        Map<String, Blueprint> defaultBlueprints = defaultBlueprintCache.defaultBlueprints();
         for (Blueprint blueprintFromDatabase : blueprints) {
-            Blueprint newBlueprint = defaultBlueprintCache.defaultBlueprints().get(blueprintFromDatabase.getName());
+            Blueprint newBlueprint = defaultBlueprints.get(blueprintFromDatabase.getName());
             if (defaultBlueprintExistInTheCache(newBlueprint)
                     && (defaultBlueprintContainsNewTexts(blueprintFromDatabase, newBlueprint)
                     || defaultBlueprintContainsNewDescription(blueprintFromDatabase, newBlueprint))) {
@@ -109,10 +111,7 @@ public class BlueprintLoaderService {
     }
 
     private Blueprint prepateBlueprint(IdentityUser user, Blueprint blueprintFromDatabase, Blueprint newBlueprint) {
-        blueprintFromDatabase.setAccount(user.getAccount());
-        blueprintFromDatabase.setOwner(user.getUserId());
-        blueprintFromDatabase.setPublicInAccount(true);
-        blueprintFromDatabase.setStatus(DEFAULT);
+        setupBlueprint(user, blueprintFromDatabase);
         blueprintFromDatabase.setBlueprintText(newBlueprint.getBlueprintText());
         blueprintFromDatabase.setDescription(newBlueprint.getDescription());
         blueprintFromDatabase.setHostGroupCount(newBlueprint.getHostGroupCount());
@@ -121,9 +120,17 @@ public class BlueprintLoaderService {
         return blueprintFromDatabase;
     }
 
-    private Set<String> collectDeviationOfExistingBlueprintsAndDefaultBlueprints(Set<Blueprint> blueprints) {
+    private Blueprint setupBlueprint(IdentityUser user, Blueprint blueprint) {
+        blueprint.setAccount(user.getAccount());
+        blueprint.setOwner(user.getUserId());
+        blueprint.setPublicInAccount(true);
+        blueprint.setStatus(DEFAULT);
+        return blueprint;
+    }
+
+    private Map<String, Blueprint> collectDeviationOfExistingBlueprintsAndDefaultBlueprints(Set<Blueprint> blueprints) {
         LOGGER.info("Collecting Blueprints which are missing from the defaults.");
-        Set<String> diff = new HashSet<>();
+        Map<String, Blueprint> diff = new HashMap<>();
         for (Map.Entry<String, Blueprint> stringBlueprintEntry : defaultBlueprintCache.defaultBlueprints().entrySet()) {
             boolean contains = false;
             for (Blueprint blueprint : blueprints) {
@@ -133,7 +140,7 @@ public class BlueprintLoaderService {
                 }
             }
             if (!contains) {
-                diff.add(stringBlueprintEntry.getKey());
+                diff.put(stringBlueprintEntry.getKey(), stringBlueprintEntry.getValue());
             }
         }
         LOGGER.info("Finished to collect the default blueprints which are missing: {}.", diff);
