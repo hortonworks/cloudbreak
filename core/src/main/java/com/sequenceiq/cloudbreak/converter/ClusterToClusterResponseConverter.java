@@ -19,7 +19,6 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -58,7 +57,6 @@ import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.network.NetworkUtils;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
-import com.sequenceiq.cloudbreak.type.KerberosType;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 
 @Component
@@ -75,9 +73,6 @@ public class ClusterToClusterResponseConverter extends AbstractConversionService
 
     @Inject
     private StackServiceComponentDescriptors stackServiceComponentDescs;
-
-    @Inject
-    private ConversionService conversionService;
 
     @Inject
     private RdsConfigService rdsConfigService;
@@ -149,18 +144,7 @@ public class ClusterToClusterResponseConverter extends AbstractConversionService
         KerberosConfig kerberosConfig = source.getKerberosConfig();
         if (source.isSecure() && kerberosConfig != null) {
             clusterResponse.setSecure(source.isSecure());
-            KerberosResponse kerberosResponse = new KerberosResponse();
-            kerberosResponse.setType(KerberosType.valueOf(kerberosConfig));
-            kerberosResponse.setAdmin(kerberosConfig.getAdmin());
-            kerberosResponse.setUrl(kerberosConfig.getUrl());
-            kerberosResponse.setAdminUrl(kerberosConfig.getAdminUrl());
-            kerberosResponse.setRealm(kerberosConfig.getRealm());
-            kerberosResponse.setDescriptor(kerberosConfig.getDescriptor());
-            kerberosResponse.setKrb5Conf(kerberosConfig.getKrb5Conf());
-            kerberosResponse.setLdapUrl(kerberosConfig.getLdapUrl());
-            kerberosResponse.setContainerDn(kerberosConfig.getContainerDn());
-            kerberosResponse.setTcpAllowed(kerberosConfig.getTcpAllowed());
-            clusterResponse.setKerberosResponse(kerberosResponse);
+            clusterResponse.setKerberosResponse(getConversionService().convert(source.getKerberosConfig(), KerberosResponse.class));
         }
         return clusterResponse;
     }
@@ -169,12 +153,12 @@ public class ClusterToClusterResponseConverter extends AbstractConversionService
         try {
             AmbariRepo ambariRepo = componentConfigProvider.getAmbariRepo(source.getComponents());
             if (ambariRepo != null) {
-                AmbariRepoDetailsJson ambariRepoDetailsJson = conversionService.convert(ambariRepo, AmbariRepoDetailsJson.class);
+                AmbariRepoDetailsJson ambariRepoDetailsJson = getConversionService().convert(ambariRepo, AmbariRepoDetailsJson.class);
                 response.setAmbariRepoDetailsJson(ambariRepoDetailsJson);
             }
             StackRepoDetails stackRepoDetails = componentConfigProvider.getStackRepo(source.getComponents());
             if (stackRepoDetails != null) {
-                AmbariStackDetailsResponse ambariRepoDetailsJson = conversionService.convert(stackRepoDetails, AmbariStackDetailsResponse.class);
+                AmbariStackDetailsResponse ambariRepoDetailsJson = getConversionService().convert(stackRepoDetails, AmbariStackDetailsResponse.class);
                 response.setAmbariStackDetails(ambariRepoDetailsJson);
             }
         } catch (RuntimeException e) {
@@ -187,7 +171,7 @@ public class ClusterToClusterResponseConverter extends AbstractConversionService
         try {
             AmbariDatabase ambariDatabase = componentConfigProvider.getAmbariDatabase(source.getComponents());
             if (ambariDatabase != null) {
-                AmbariDatabaseDetailsJson ambariRepoDetailsJson = conversionService.convert(ambariDatabase, AmbariDatabaseDetailsJson.class);
+                AmbariDatabaseDetailsJson ambariRepoDetailsJson = getConversionService().convert(ambariDatabase, AmbariDatabaseDetailsJson.class);
                 response.setAmbariDatabaseDetails(ambariRepoDetailsJson);
             }
         } catch (RuntimeException e) {

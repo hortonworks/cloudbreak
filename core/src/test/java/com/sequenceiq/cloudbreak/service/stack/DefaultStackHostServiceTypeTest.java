@@ -134,7 +134,7 @@ public class DefaultStackHostServiceTypeTest {
         given(clusterRepository.findOneWithLists(anyLong())).willReturn(stack.getCluster());
         given(stackUpdater.updateStackStatus(anyLong(), any(DetailedStackStatus.class))).willReturn(stack);
         thrown.expect(BadRequestException.class);
-        thrown.expectMessage("Cannot update the status of stack '1' to STOPPED, because it isn't in AVAILABLE state.");
+        thrown.expectMessage("Cannot update the status of stack 'simplestack' to STOPPED, because it isn't in AVAILABLE state.");
         underTest.updateStatus(1L, StatusRequest.STOPPED, true);
         verify(flowManager, times(1)).triggerStackStop(anyObject());
     }
@@ -146,7 +146,7 @@ public class DefaultStackHostServiceTypeTest {
         given(clusterRepository.findOneWithLists(anyLong())).willReturn(stack.getCluster());
         given(stackUpdater.updateStackStatus(anyLong(), any(DetailedStackStatus.class))).willReturn(stack);
         thrown.expect(BadRequestException.class);
-        thrown.expectMessage("Cannot update the status of stack '1' to STOPPED, because the cluster is not in STOPPED state.");
+        thrown.expectMessage("Cannot update the status of stack 'simplestack' to STOPPED, because the cluster is not in STOPPED state.");
         underTest.updateStatus(1L, StatusRequest.STOPPED, false);
     }
 
@@ -167,7 +167,7 @@ public class DefaultStackHostServiceTypeTest {
         given(clusterRepository.findOneWithLists(anyLong())).willReturn(stack.getCluster());
         given(stackUpdater.updateStackStatus(anyLong(), any(DetailedStackStatus.class))).willReturn(stack);
         thrown.expect(BadRequestException.class);
-        thrown.expectMessage("Cannot update the status of stack '1' to STARTED, because it isn't in STOPPED state.");
+        thrown.expectMessage("Cannot update the status of stack 'simplestack' to STARTED, because it isn't in STOPPED state.");
         underTest.updateStatus(1L, StatusRequest.STARTED, true);
     }
 
@@ -188,7 +188,7 @@ public class DefaultStackHostServiceTypeTest {
         given(clusterRepository.findOneWithLists(anyLong())).willReturn(stack.getCluster());
         given(stackUpdater.updateStackStatus(anyLong(), any(DetailedStackStatus.class))).willReturn(stack);
         thrown.expect(BadRequestException.class);
-        thrown.expectMessage("Cannot update the status of stack '1' to STARTED, because it isn't in STOPPED state.");
+        thrown.expectMessage("Cannot update the status of stack 'simplestack' to STARTED, because it isn't in STOPPED state.");
         underTest.updateStatus(1L, StatusRequest.STARTED, true);
     }
 
@@ -199,7 +199,7 @@ public class DefaultStackHostServiceTypeTest {
         given(clusterRepository.findOneWithLists(anyLong())).willReturn(stack.getCluster());
         given(stackUpdater.updateStackStatus(anyLong(), any(DetailedStackStatus.class))).willReturn(stack);
         thrown.expect(BadRequestException.class);
-        thrown.expectMessage("Cannot stop a stack '1'. Reason: Instances with ephemeral volumes cannot be stopped.");
+        thrown.expectMessage("Cannot stop a stack 'simplestack'. Reason: Instances with ephemeral volumes cannot be stopped.");
         underTest.updateStatus(1L, StatusRequest.STOPPED, true);
     }
 
@@ -210,13 +210,14 @@ public class DefaultStackHostServiceTypeTest {
         given(clusterRepository.findOneWithLists(anyLong())).willReturn(stack.getCluster());
         given(stackUpdater.updateStackStatus(anyLong(), any(DetailedStackStatus.class))).willReturn(stack);
         thrown.expect(BadRequestException.class);
-        thrown.expectMessage("Cannot stop a stack '1'. Reason: Spot instances cannot be stopped.");
+        thrown.expectMessage("Cannot stop a stack 'simplestack'. Reason: Spot instances cannot be stopped.");
         underTest.updateStatus(1L, StatusRequest.STOPPED, true);
     }
 
     private Stack stack(Status stackStatus, Status clusterStatus) {
         Credential gcpCredential = new Credential();
         Stack stack = new Stack();
+        stack.setName("simplestack");
         stack.setStackStatus(new StackStatus(stack, stackStatus, "", DetailedStackStatus.UNKNOWN));
         stack.setCredential(gcpCredential);
         stack.setId(1L);

@@ -6,7 +6,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Optional;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -21,7 +20,6 @@ import com.sequenceiq.cloudbreak.api.model.CustomContainerRequest;
 import com.sequenceiq.cloudbreak.api.model.ExposedService;
 import com.sequenceiq.cloudbreak.api.model.FileSystemBase;
 import com.sequenceiq.cloudbreak.api.model.GatewayJson;
-import com.sequenceiq.cloudbreak.api.model.KerberosRequest;
 import com.sequenceiq.cloudbreak.api.model.SSOType;
 import com.sequenceiq.cloudbreak.controller.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.domain.Cluster;
@@ -51,23 +49,10 @@ public class ClusterRequestToClusterConverter extends AbstractConversionServiceA
         Boolean enableSecurity = source.getEnableSecurity();
         cluster.setSecure(enableSecurity == null ? Boolean.FALSE : enableSecurity);
         convertKnox(source, cluster);
-        KerberosRequest kerberosSource = source.getKerberos();
-        KerberosConfig kerberosConfig = new KerberosConfig();
-        if (kerberosSource != null) {
-            kerberosConfig.setMasterKey(kerberosSource.getMasterKey());
-            kerberosConfig.setAdmin(kerberosSource.getAdmin());
-            kerberosConfig.setPassword(kerberosSource.getPassword());
-            kerberosConfig.setUrl(kerberosSource.getUrl());
-            kerberosConfig.setAdminUrl(Optional.ofNullable(kerberosSource.getAdminUrl()).orElse(kerberosSource.getUrl()));
-            kerberosConfig.setRealm(kerberosSource.getRealm());
-            kerberosConfig.setTcpAllowed(kerberosSource.getTcpAllowed());
-            kerberosConfig.setPrincipal(kerberosSource.getPrincipal());
-            kerberosConfig.setLdapUrl(kerberosSource.getLdapUrl());
-            kerberosConfig.setContainerDn(kerberosSource.getContainerDn());
-            kerberosConfig.setDescriptor(kerberosSource.getDescriptor());
-            kerberosConfig.setKrb5Conf(kerberosSource.getKrb5Conf());
+        if (source.getKerberos() != null) {
+            KerberosConfig kerberosConfig = getConversionService().convert(source.getKerberos(), KerberosConfig.class);
+            cluster.setKerberosConfig(kerberosConfig);
         }
-        cluster.setKerberosConfig(kerberosConfig);
         cluster.setConfigStrategy(source.getConfigStrategy());
         cluster.setEmailTo(source.getEmailTo());
         FileSystemBase fileSystem = source.getFileSystem();

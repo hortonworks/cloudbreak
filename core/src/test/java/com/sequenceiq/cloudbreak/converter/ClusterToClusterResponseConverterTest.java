@@ -44,14 +44,12 @@ import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
-import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariViewProvider;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
-import com.sequenceiq.cloudbreak.type.KerberosType;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 
 public class ClusterToClusterResponseConverterTest extends AbstractEntityConverterTest<Cluster> {
@@ -164,25 +162,6 @@ public class ClusterToClusterResponseConverterTest extends AbstractEntityConvert
         // THEN
         verify(blueprintValidator, times(0)).createHostGroupMap(anySet());
 
-    }
-
-    @Test
-    public void testConvertWithKerberosConfig() throws IOException {
-        // GIVEN
-        mockAll();
-        // WHEN
-        Cluster source = getSource();
-        source.setSecure(true);
-        KerberosConfig kerberosConfig = new KerberosConfig();
-        kerberosConfig.setId(1L);
-        kerberosConfig.setMasterKey("mk");
-        kerberosConfig.setAdmin("adm");
-        kerberosConfig.setPassword("pwd");
-        kerberosConfig.setTcpAllowed(true);
-        source.setKerberosConfig(kerberosConfig);
-        ClusterResponse result = underTest.convert(source);
-        // THEN
-        assertEquals(KerberosType.CB_MANAGED, result.getKerberosResponse().getType());
     }
 
     @Override
