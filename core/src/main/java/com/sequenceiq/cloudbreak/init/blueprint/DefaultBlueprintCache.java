@@ -8,6 +8,7 @@ import java.util.Map;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.SerializationUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -63,7 +64,9 @@ public class DefaultBlueprintCache {
     }
 
     public Map<String, Blueprint> defaultBlueprints() {
-        return defaultBlueprints;
+        Map<String, Blueprint> result = new HashMap<>();
+        defaultBlueprints.entrySet().stream().forEach(e -> result.put(e.getKey(), SerializationUtils.clone(e.getValue())));
+        return result;
     }
 
     public List<String> blueprintArray() {
