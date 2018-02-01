@@ -119,23 +119,20 @@ cb:
 
   hive.database:
     user: hive
-    password: hiveSecurePassword
     db: hive
     port: 5432
-    host: localhost
 
   ambari:
     repo:
-      version: 2.6.1.0
-      baseurl: http://public-repo-1.hortonworks.com/ambari/centos6/2.x/updates/2.6.1.0
-      gpgkey: http://public-repo-1.hortonworks.com/ambari/centos6/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins
+      version: 2.6.1.2-2
+      baseurl: http://private-repo-1.hortonworks.com/ambari/centos6/2.x/updates/2.6.1.2-2
+      gpgkey: http://private-repo-1.hortonworks.com/ambari/centos6/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins
     database:
       vendor: embedded
       host: localhost
       port: 5432
       name: postgres
       username: ambari
-      password: bigdata
 
   hdp:
     entries:

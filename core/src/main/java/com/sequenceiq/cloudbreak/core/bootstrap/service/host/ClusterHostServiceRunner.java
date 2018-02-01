@@ -160,7 +160,7 @@ public class ClusterHostServiceRunner {
             servicePillar.put("smartsense-credentials", new SaltPillarProperties("/smartsense/credentials.sls", smartSenseCredentials));
         }
 
-        hiveConfigProvider.decorateServicePillarWithPostgresIfNeeded(servicePillar, cluster.getBlueprint());
+        hiveConfigProvider.decorateServicePillarWithPostgresIfNeeded(servicePillar, stack, cluster);
 
         return new SaltConfig(servicePillar, createGrainProperties(gatewayConfigs));
     }

@@ -63,8 +63,8 @@ import com.sequenceiq.cloudbreak.service.cluster.HadoopConfigurationService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.AutoRecoveryConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.BlueprintProcessor;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.DruidSupersetConfigProvider;
+import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.HiveConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.LlapConfigProvider;
-import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.RDSConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.SmartSenseConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.ZeppelinConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.template.BlueprintTemplateProcessor;
@@ -187,7 +187,7 @@ public class AmbariClusterConnectorTest {
     private AmbariRepositoryVersionService ambariRepositoryVersionService;
 
     @Mock
-    private RDSConfigProvider rdsConfigProvider;
+    private HiveConfigProvider hiveConfigProvider;
 
     @InjectMocks
     private final AmbariClusterConnector underTest = new AmbariClusterConnector();
@@ -229,7 +229,7 @@ public class AmbariClusterConnectorTest {
         when(stackRepository.findOneWithLists(anyLong())).thenReturn(stack);
         when(stackRepository.findOne(anyLong())).thenReturn(stack);
         when(clusterRepository.findOneWithLists(anyLong())).thenReturn(cluster);
-        when(rdsConfigProvider.createPostgresRdsConfigIfNeeded(any(Stack.class), any(Cluster.class), any(Blueprint.class))).thenReturn(new HashSet<>());
+        when(hiveConfigProvider.createPostgresRdsConfigIfNeeded(any(Stack.class), any(Cluster.class))).thenReturn(new HashSet<>());
     }
 
     @Test

@@ -95,6 +95,7 @@ import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.BlueprintConfigu
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.BlueprintProcessor;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.ContainerExecutorConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.DruidSupersetConfigProvider;
+import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.HiveConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.LlapConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.RDSConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.SmartSenseConfigProvider;
@@ -106,7 +107,6 @@ import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
-import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.flow.AmbariStartupListenerTask;
 import com.sequenceiq.cloudbreak.service.stack.flow.AmbariStartupPollerObject;
@@ -209,9 +209,6 @@ public class AmbariClusterConnector {
     private RDSConfigProvider rdsConfigProvider;
 
     @Inject
-    private RdsConfigService rdsConfigService;
-
-    @Inject
     private ContainerExecutorConfigProvider containerExecutorConfigProvider;
 
     @Inject
@@ -249,6 +246,9 @@ public class AmbariClusterConnector {
 
     @Inject
     private StackService stackService;
+
+    @Inject
+    private HiveConfigProvider hiveConfigProvider;
 
     public void waitForAmbariServer(Stack stack) throws CloudbreakException {
         AmbariClient defaultAmbariClient = getDefaultAmbariClient(stack);
@@ -320,7 +320,7 @@ public class AmbariClusterConnector {
     private String generateBlueprintText(Stack stack, Cluster cluster) throws IOException, CloudbreakException {
         Blueprint blueprint = cluster.getBlueprint();
 
-        Set<RDSConfig> rdsConfigs = rdsConfigProvider.createPostgresRdsConfigIfNeeded(stack, cluster, blueprint);
+        Set<RDSConfig> rdsConfigs = hiveConfigProvider.createPostgresRdsConfigIfNeeded(stack, cluster);
 
         String blueprintText = updateBlueprintWithInputs(cluster, blueprint, rdsConfigs);
 
