@@ -349,7 +349,7 @@ public class AmbariClusterService implements ClusterService {
         Stack stack = stackService.get(stackId);
         Cluster cluster = stack.getCluster();
         if (cluster == null) {
-            throw new BadRequestException(String.format("There is no cluster installed on stack '%s'.", stackId));
+            throw new BadRequestException(String.format("There is no cluster installed on stack '%s'.", stack.getName()));
         }
         boolean downscaleRequest = validateRequest(stack, hostGroupAdjustment);
         if (downscaleRequest) {
@@ -366,7 +366,7 @@ public class AmbariClusterService implements ClusterService {
         Stack stack = stackService.getByIdWithLists(stackId);
         Cluster cluster = stack.getCluster();
         if (cluster == null) {
-            throw new BadRequestException(String.format("There is no cluster installed on stack '%s'.", stackId));
+            throw new BadRequestException(String.format("There is no cluster installed on stack '%s'.", stack.getName()));
         }
         switch (statusRequest) {
             case SYNC:
