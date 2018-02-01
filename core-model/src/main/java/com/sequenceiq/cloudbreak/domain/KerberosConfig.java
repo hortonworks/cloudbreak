@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.domain;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -9,6 +11,8 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 import org.hibernate.annotations.Type;
+
+import com.sequenceiq.cloudbreak.type.KerberosType;
 
 @Entity
 @Table(name = "KerberosConfig")
@@ -18,6 +22,9 @@ public class KerberosConfig implements ProvisionEntity {
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "kerberosconfig_generator")
     @SequenceGenerator(name = "kerberosconfig_generator", sequenceName = "kerberosconfig_id_seq", allocationSize = 1)
     private Long id;
+
+    @Enumerated(EnumType.STRING)
+    private KerberosType type;
 
     @Type(type = "encrypted_string")
     @Column(name = "kerberosmasterkey")
@@ -70,6 +77,14 @@ public class KerberosConfig implements ProvisionEntity {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public KerberosType getType() {
+        return type;
+    }
+
+    public void setType(KerberosType type) {
+        this.type = type;
     }
 
     public String getMasterKey() {

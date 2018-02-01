@@ -4,14 +4,13 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.KerberosResponse;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
-import com.sequenceiq.cloudbreak.type.KerberosType;
 
 @Component
 public class KerberosConfigToKerberosResponseConverter extends AbstractConversionServiceAwareConverter<KerberosConfig, KerberosResponse> {
     @Override
     public KerberosResponse convert(KerberosConfig source) {
         KerberosResponse kerberosResponse = new KerberosResponse();
-        kerberosResponse.setType(KerberosType.valueOf(source));
+        kerberosResponse.setType(source.getType());
         kerberosResponse.setAdmin(source.getAdmin());
         kerberosResponse.setUrl(source.getUrl());
         kerberosResponse.setAdminUrl(source.getAdminUrl());
