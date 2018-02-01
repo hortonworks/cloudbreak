@@ -300,7 +300,7 @@ public class BlueprintValidatorTest {
         // THEN no exception thrown
     }
 
-    @Test
+    @Test(expected = BadRequestException.class)
     public void testKnoxWithKerberosButNoKnoxInTheBlueprintForAllNodes() throws IOException {
         // GIVEN
         Blueprint blueprint = createBlueprint();
@@ -323,9 +323,6 @@ public class BlueprintValidatorTest {
         Gateway gateway = new Gateway();
         gateway.setEnableGateway(true);
         cluster.setGateway(gateway);
-        thrown.expect(BadRequestException.class);
-        thrown.expectMessage("In case of Knox and Kerberos each 'Ambari Server' node must include the 'KNOX_GATEWAY' service. "
-            + "The following host groups are missing the service: gateway1,gateway2");
 
         // WHEN
         underTest.validateBlueprintForStack(cluster, blueprint, hostGroups, instanceGroups);
@@ -333,7 +330,7 @@ public class BlueprintValidatorTest {
         // THEN exception thrown
     }
 
-    @Test
+    @Test(expected = BadRequestException.class)
     public void testKnoxWithKerberosButOneNodeMissingKnox() throws IOException {
         // GIVEN
         Blueprint blueprint = createBlueprint();
@@ -356,9 +353,6 @@ public class BlueprintValidatorTest {
         Gateway gateway = new Gateway();
         gateway.setEnableGateway(true);
         cluster.setGateway(gateway);
-        thrown.expect(BadRequestException.class);
-        thrown.expectMessage("In case of Knox and Kerberos each 'Ambari Server' node must include the 'KNOX_GATEWAY' service. "
-            + "The following host groups are missing the service: gateway2");
 
         // WHEN
         underTest.validateBlueprintForStack(cluster, blueprint, hostGroups, instanceGroups);
@@ -366,7 +360,7 @@ public class BlueprintValidatorTest {
         // THEN exception thrown
     }
 
-    @Test
+    @Test(expected = BadRequestException.class)
     public void testKnoxWithKerberosAndNonGwHasKnox() throws IOException {
         // GIVEN
         Blueprint blueprint = createBlueprint();
@@ -389,9 +383,6 @@ public class BlueprintValidatorTest {
         Gateway gateway = new Gateway();
         gateway.setEnableGateway(true);
         cluster.setGateway(gateway);
-        thrown.expect(BadRequestException.class);
-        thrown.expectMessage("In case of Knox and Kerberos each 'Ambari Server' node must include the 'KNOX_GATEWAY' service. "
-            + "The following host groups are missing the service: gateway1,gateway2");
 
         // WHEN
         underTest.validateBlueprintForStack(cluster, blueprint, hostGroups, instanceGroups);
