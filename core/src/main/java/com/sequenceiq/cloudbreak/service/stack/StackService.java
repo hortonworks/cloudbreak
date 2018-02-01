@@ -500,16 +500,17 @@ public class StackService {
             eventService.fireCloudbreakEvent(stack.getId(), STOPPED.name(), statusDesc);
         } else if (reason != StopRestrictionReason.NONE) {
             throw new BadRequestException(
-                    String.format("Cannot stop a stack '%s'. Reason: %s", stack.getId(), reason.getReason()));
+                    String.format("Cannot stop a stack '%s'. Reason: %s", stack.getName(), reason.getReason()));
         } else if (!stack.isAvailable() && !stack.isStopFailed()) {
             throw new BadRequestException(
-                    String.format("Cannot update the status of stack '%s' to STOPPED, because it isn't in AVAILABLE state.", stack.getId()));
+                    String.format("Cannot update the status of stack '%s' to STOPPED, because it isn't in AVAILABLE state.", stack.getName()));
         } else if ((cluster != null && !cluster.isStopped()) && !stack.isStopFailed()) {
             if (updateCluster) {
                 setStackStatusToStopRequested(stack);
                 ambariClusterService.updateStatus(stack.getId(), StatusRequest.STOPPED);
             } else {
-                throw new BadRequestException("Cannot update the status of stack '1' to STOPPED, because the cluster is not in STOPPED state.");
+                throw new BadRequestException(String.format("Cannot update the status of stack '%s' to STOPPED, because the cluster is not in STOPPED state.",
+                        stack.getName()));
             }
         } else {
             stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.STOP_REQUESTED);
@@ -530,7 +531,7 @@ public class StackService {
             eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(), statusDesc);
         } else if ((!stack.isStopped() || (cluster != null && !cluster.isStopped())) && !stack.isStartFailed()) {
             throw new BadRequestException(
-                    String.format("Cannot update the status of stack '%s' to STARTED, because it isn't in STOPPED state.", stack.getId()));
+                    String.format("Cannot update the status of stack '%s' to STARTED, because it isn't in STOPPED state.", stack.getName()));
         } else if (stack.isStopped() || stack.isStartFailed()) {
             stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.START_REQUESTED);
             flowManager.triggerStackStart(stack.getId());
@@ -597,7 +598,7 @@ public class StackService {
 
     private void validateScalingAdjustment(InstanceGroupAdjustmentJson instanceGroupAdjustmentJson, Stack stack) {
         if (0 == instanceGroupAdjustmentJson.getScalingAdjustment()) {
-            throw new BadRequestException(String.format("Requested scaling adjustment on stack '%s' is 0. Nothing to do.", stack.getId()));
+            throw new BadRequestException(String.format("Requested scaling adjustment on stack '%s' is 0. Nothing to do.", stack.getName()));
         }
         if (0 > instanceGroupAdjustmentJson.getScalingAdjustment()) {
             InstanceGroup instanceGroup = stack.getInstanceGroupByInstanceGroupName(instanceGroupAdjustmentJson.getInstanceGroup());
@@ -628,15 +629,15 @@ public class StackService {
 
     private void validateStackStatus(Stack stack) {
         if (!stack.isAvailable()) {
-            throw new BadRequestException(String.format("Stack '%s' is currently in '%s' state. Node count can only be updated if it's running.", stack.getId(),
-                    stack.getStatus()));
+            throw new BadRequestException(String.format("Stack '%s' is currently in '%s' state. Node count can only be updated if it's running.",
+                    stack.getName(), stack.getStatus()));
         }
     }
 
     private void validateInstanceGroup(Stack stack, String instanceGroupName) {
         InstanceGroup instanceGroup = stack.getInstanceGroupByInstanceGroupName(instanceGroupName);
         if (instanceGroup == null) {
-            throw new BadRequestException(String.format("Stack '%s' does not have an instanceGroup named '%s'.", stack.getId(), instanceGroupName));
+            throw new BadRequestException(String.format("Stack '%s' does not have an instanceGroup named '%s'.", stack.getName(), instanceGroupName));
         }
     }
 

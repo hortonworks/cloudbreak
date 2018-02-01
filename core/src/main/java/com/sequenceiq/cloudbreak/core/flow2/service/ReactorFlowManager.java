@@ -40,6 +40,7 @@ import com.sequenceiq.cloudbreak.core.flow2.event.StackScaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackSyncTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.instance.termination.InstanceTerminationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationEvent;
+import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterRepairTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.EphemeralClusterUpdateTriggerEvent;
@@ -224,7 +225,8 @@ public class ReactorFlowManager {
                 accepted = event.getData().accepted().await(WAIT_FOR_ACCEPT, TimeUnit.SECONDS);
             }
             if (accepted == null || !accepted) {
-                throw new FlowsAlreadyRunningException(String.format("Stack %d has flows under operation, request not allowed.", event.getData().getStackId()));
+                Stack stack = stackService.get(event.getData().getStackId());
+                throw new FlowsAlreadyRunningException(String.format("Stack %s has flows under operation, request not allowed.", stack.getName()));
             }
         } catch (InterruptedException e) {
             throw new CloudbreakApiException(e.getMessage());
