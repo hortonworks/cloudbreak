@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.model.AmbariDatabaseDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.DatabaseVendor;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariDatabase;
+import com.sequenceiq.cloudbreak.util.PasswordUtil;
 
 @Component
 public class AmbariDatabaseDetailsJsonToAmbariDatabaseConverter extends AbstractConversionServiceAwareConverter<AmbariDatabaseDetailsJson, AmbariDatabase> {
@@ -25,9 +26,6 @@ public class AmbariDatabaseDetailsJsonToAmbariDatabaseConverter extends Abstract
     @Value("${cb.ambari.database.username}")
     private String userName;
 
-    @Value("${cb.ambari.database.password}")
-    private String password;
-
     @Override
     public AmbariDatabase convert(AmbariDatabaseDetailsJson source) {
         AmbariDatabase ambariDatabase;
@@ -43,7 +41,7 @@ public class AmbariDatabaseDetailsJsonToAmbariDatabaseConverter extends Abstract
 
     private AmbariDatabase getDefault() {
         DatabaseVendor databaseVendor = DatabaseVendor.fromValue(vendor);
-        return new AmbariDatabase(databaseVendor.value(), databaseVendor.fancyName(), name, host, port, userName, password);
+        return new AmbariDatabase(databaseVendor.value(), databaseVendor.fancyName(), name, host, port, userName, PasswordUtil.generatePassword());
     }
 
 

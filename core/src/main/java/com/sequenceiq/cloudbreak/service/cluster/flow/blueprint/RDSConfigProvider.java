@@ -15,13 +15,12 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.RDSDatabase;
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
-import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
-import com.sequenceiq.cloudbreak.repository.RdsConfigRepository;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
+import com.sequenceiq.cloudbreak.util.PasswordUtil;
 
 @Component
 public class RDSConfigProvider {
@@ -29,13 +28,7 @@ public class RDSConfigProvider {
     private static final Logger LOGGER = LoggerFactory.getLogger(RDSConfigProvider.class);
 
     @Inject
-    private HiveConfigProvider hiveConfigProvider;
-
-    @Inject
     private RdsConfigService rdsConfigService;
-
-    @Inject
-    private RdsConfigRepository rdsConfigRepository;
 
     @Inject
     private ClusterRepository clusterRepository;
@@ -68,33 +61,28 @@ public class RDSConfigProvider {
         return bpConfigs;
     }
 
-    public Set<RDSConfig> createPostgresRdsConfigIfNeeded(Stack stack, Cluster cluster, Blueprint blueprint) {
-        Set<RDSConfig> rdsConfigs = rdsConfigRepository.findByClusterId(stack.getOwner(), stack.getAccount(), cluster.getId());
-        if (hiveConfigProvider.isRdsConfigNeedForHiveMetastore(blueprint)) {
-            LOGGER.info("Creating postgres RDSConfig");
-            RDSConfig rdsConfig = new RDSConfig();
-            rdsConfig.setName(stack.getName() + stack.getId());
-            rdsConfig.setConnectionUserName(hiveConfigProvider.getHiveDbUser());
-            rdsConfig.setConnectionPassword(hiveConfigProvider.getHiveDbPassword());
-            rdsConfig.setConnectionURL(
-                    "jdbc:postgresql://" + hiveConfigProvider.getHiveDbHost() + ":" + hiveConfigProvider.getHiveDbPort() + "/" + hiveConfigProvider.getHiveDb()
-            );
-            rdsConfig.setDatabaseType(RDSDatabase.POSTGRES);
-            rdsConfig.setStatus(ResourceStatus.DEFAULT);
-            rdsConfig.setOwner(stack.getOwner());
-            rdsConfig.setAccount(stack.getAccount());
-            rdsConfig.setClusters(Collections.singleton(cluster));
-            rdsConfig = rdsConfigService.create(rdsConfig);
+    public void createHivePostgresRdsConfig(Stack stack, Cluster cluster, Set<RDSConfig> rdsConfigs, String dbUserName, String dbPort, String dbName) {
+        RDSConfig rdsConfig = new RDSConfig();
+        rdsConfig.setName(stack.getName() + stack.getId());
+        rdsConfig.setConnectionUserName(dbUserName);
+        rdsConfig.setConnectionPassword(PasswordUtil.generatePassword());
+        String primaryGatewayIp = stack.getPrimaryGatewayInstance().getPrivateIp();
+        rdsConfig.setConnectionURL(
+                "jdbc:postgresql://" + primaryGatewayIp + ":" + dbPort + "/" + dbName
+        );
+        rdsConfig.setDatabaseType(RDSDatabase.POSTGRES);
+        rdsConfig.setStatus(ResourceStatus.DEFAULT);
+        rdsConfig.setOwner(stack.getOwner());
+        rdsConfig.setAccount(stack.getAccount());
+        rdsConfig.setClusters(Collections.singleton(cluster));
+        rdsConfig = rdsConfigService.create(rdsConfig);
 
-            if (rdsConfigs == null) {
-                rdsConfigs = new HashSet<>();
-                cluster.setRdsConfigs(rdsConfigs);
-            }
-            rdsConfigs.add(rdsConfig);
-            cluster.setRdsConfigs(rdsConfigs);
-            clusterRepository.save(cluster);
+        if (rdsConfigs == null) {
+            rdsConfigs = new HashSet<>();
         }
-        return rdsConfigs;
+        rdsConfigs.add(rdsConfig);
+        cluster.setRdsConfigs(rdsConfigs);
+        clusterRepository.save(cluster);
     }
 
     private String parseDatabaseTypeFromJdbcUrl(String jdbcUrl) {
