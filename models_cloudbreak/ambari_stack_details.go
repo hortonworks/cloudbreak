@@ -18,6 +18,9 @@ import (
 
 type AmbariStackDetails struct {
 
+	// enable gpl repository
+	EnableGplRepo *bool `json:"enableGplRepo,omitempty"`
+
 	// url the MPACK that needs to be installed before HDF installation
 	MpackURL string `json:"mpackUrl,omitempty"`
 
@@ -54,6 +57,8 @@ type AmbariStackDetails struct {
 	// local path on the Ambari server or URL that point to the desired VDF file
 	VersionDefinitionFileURL string `json:"versionDefinitionFileUrl,omitempty"`
 }
+
+/* polymorph AmbariStackDetails enableGplRepo false */
 
 /* polymorph AmbariStackDetails mpackUrl false */
 

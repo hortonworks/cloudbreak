@@ -17,6 +17,9 @@ import (
 
 type AmbariStackDetailsResponse struct {
 
+	// enable gpl repo
+	EnableGplRepo *bool `json:"enableGplRepo,omitempty"`
+
 	// hdp version
 	HdpVersion string `json:"hdpVersion,omitempty"`
 
@@ -32,6 +35,8 @@ type AmbariStackDetailsResponse struct {
 	// verify
 	Verify *bool `json:"verify,omitempty"`
 }
+
+/* polymorph AmbariStackDetailsResponse enableGplRepo false */
 
 /* polymorph AmbariStackDetailsResponse hdpVersion false */
 
