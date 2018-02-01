@@ -64,6 +64,7 @@ import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.json.JsonToString;
 import com.sequenceiq.cloudbreak.domain.view.StackStatusView;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
+import com.sequenceiq.cloudbreak.type.KerberosType;
 
 public class TestUtil {
 
@@ -385,6 +386,7 @@ public class TestUtil {
 
     public static KerberosConfig kerberosConfig() {
         KerberosConfig kerberosConfig = new KerberosConfig();
+        kerberosConfig.setType(KerberosType.CB_MANAGED);
         kerberosConfig.setMasterKey("mk");
         kerberosConfig.setAdmin("admin");
         kerberosConfig.setPassword("passwd");

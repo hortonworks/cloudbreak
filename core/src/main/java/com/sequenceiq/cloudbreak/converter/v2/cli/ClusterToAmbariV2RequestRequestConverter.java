@@ -46,6 +46,9 @@ public class ClusterToAmbariV2RequestRequestConverter extends AbstractConversion
         ambariV2Request.setPassword("");
         ambariV2Request.setUserName(source.getUserName());
         ambariV2Request.setValidateBlueprint(null);
+        if (source.isSecure() && source.getKerberosConfig() != null) {
+            ambariV2Request.setKerberos(getConversionService().convert(source.getKerberosConfig(), KerberosRequest.class));
+        }
         return ambariV2Request;
     }
 
