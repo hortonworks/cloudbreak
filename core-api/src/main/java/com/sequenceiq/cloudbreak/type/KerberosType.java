@@ -10,6 +10,8 @@ import java.util.stream.Stream;
 
 import org.springframework.util.StringUtils;
 
+import com.sequenceiq.cloudbreak.api.model.KerberosRequest;
+
 public enum KerberosType {
     CB_MANAGED("*tcpAllowed", "*masterKey", "*admin", "*password"),
     EXISTING_AD("*tcpAllowed", "*principal", "*password", "*url", "adminUrl", "*realm", "*ldapUrl", "*containerDn"),
@@ -24,12 +26,10 @@ public enum KerberosType {
                 n -> n.indexOf('*') == 0));
     }
 
-    public static KerberosType valueOf(Object request) {
+    public static KerberosType valueOf(KerberosRequest request) {
         Class<?> clazz = request.getClass();
         Map<Field, Method> declaredPairs = collectFieldMethodPairs(clazz.getDeclaredFields(), clazz.getDeclaredMethods());
-        if (clazz.getSuperclass() != null) {
-            declaredPairs.putAll(collectFieldMethodPairs(clazz.getSuperclass().getDeclaredFields(), clazz.getSuperclass().getDeclaredMethods()));
-        }
+        declaredPairs.putAll(collectFieldMethodPairs(clazz.getSuperclass().getDeclaredFields(), clazz.getSuperclass().getDeclaredMethods()));
         try {
             for (KerberosType type : KerberosType.values()) {
                 boolean match = true;
