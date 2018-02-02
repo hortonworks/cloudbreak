@@ -1,13 +1,10 @@
 package com.sequenceiq.periscope.utils;
 
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.when;
-
-import java.text.ParseException;
 
 import org.joda.time.DateTime;
 import org.junit.Before;
@@ -29,16 +26,6 @@ public class DateUtilsTest {
     @Before
     public void setUp() {
 
-    }
-
-    @Test
-    public void testCronExpressionValidThenShouldReturnTrue() throws ParseException {
-        assertNotNull(underTest.getCronExpression("0 0 12 * * ?"));
-    }
-
-    @Test(expected = ParseException.class)
-    public void testCronExpressionInValidThenShouldReturnParseException() throws ParseException {
-        assertNotNull(underTest.getCronExpression("0 0 ! * * ?"));
     }
 
     @Test

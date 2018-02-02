@@ -20,6 +20,7 @@ import com.sequenceiq.periscope.api.model.PrometheusAlertRequest;
 import com.sequenceiq.periscope.api.model.PrometheusAlertResponse;
 import com.sequenceiq.periscope.api.model.TimeAlertRequest;
 import com.sequenceiq.periscope.api.model.TimeAlertResponse;
+import com.sequenceiq.periscope.api.model.TimeAlertValidationRequest;
 import com.sequenceiq.periscope.converter.MetricAlertRequestConverter;
 import com.sequenceiq.periscope.converter.MetricAlertResponseConverter;
 import com.sequenceiq.periscope.converter.PrometheusAlertRequestConverter;
@@ -109,6 +110,12 @@ public class AlertController implements AlertEndpoint {
     @Override
     public void deleteTimeAlert(Long clusterId, Long alertId) {
         alertService.deleteTimeAlert(clusterId, alertId);
+    }
+
+    @Override
+    public Boolean validateCronExpression(Long clusterId, TimeAlertValidationRequest json) throws ParseException {
+        dateUtils.getCronExpression(json.getCronExpression());
+        return true;
     }
 
     @Override

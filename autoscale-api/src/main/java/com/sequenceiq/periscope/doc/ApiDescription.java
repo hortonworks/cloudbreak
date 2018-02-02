@@ -21,6 +21,7 @@ public class ApiDescription {
         public static final String TIME_BASED_PUT = "modify alert which time based";
         public static final String TIME_BASED_GET = "retrieve alert which time based";
         public static final String TIME_BASED_DELETE = "delete alert which time based";
+        public static final String TIME_BASED_CRON = "cron expression validation";
 
         public static final String PROMETHEUS_BASED_POST = "create alert which prometheus based";
         public static final String PROMETHEUS_BASED_PUT = "modify alert which prometheus based";
