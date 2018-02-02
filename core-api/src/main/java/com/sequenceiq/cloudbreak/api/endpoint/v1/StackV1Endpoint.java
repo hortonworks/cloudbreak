@@ -40,16 +40,16 @@ import io.swagger.annotations.ApiOperation;
 @Api(value = "/v1/stacks", description = ControllerDescription.STACK_DESCRIPTION, protocols = "http,https")
 public interface StackV1Endpoint extends StackEndpoint {
 
-    @POST
-    @Path("user")
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = StackOpDescription.POST_PRIVATE, produces = ContentType.JSON, notes = Notes.STACK_NOTES, nickname = "postPrivateStack")
+//    @POST
+//    @Path("user")
+//    @Produces(MediaType.APPLICATION_JSON)
+//    @ApiOperation(value = StackOpDescription.POST_PRIVATE, produces = ContentType.JSON, notes = Notes.STACK_NOTES, nickname = "postPrivateStack")
     StackResponse postPrivate(@Valid StackRequest stackRequest) throws Exception;
 
-    @POST
-    @Path("account")
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = StackOpDescription.POST_PUBLIC, produces = ContentType.JSON, notes = Notes.STACK_NOTES, nickname = "postPublicStack")
+//    @POST
+//    @Path("account")
+//    @Produces(MediaType.APPLICATION_JSON)
+//    @ApiOperation(value = StackOpDescription.POST_PUBLIC, produces = ContentType.JSON, notes = Notes.STACK_NOTES, nickname = "postPublicStack")
     StackResponse postPublic(@Valid StackRequest stackRequest) throws Exception;
 
     @GET
