@@ -13,13 +13,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import com.sequenceiq.cloudbreak.api.model.SmartSenseSubscriptionJson;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
-import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.SmartSenseSubscription;
 import com.sequenceiq.cloudbreak.repository.FlexSubscriptionRepository;
 import com.sequenceiq.cloudbreak.repository.SmartSenseSubscriptionRepository;
@@ -107,20 +108,18 @@ public class SmartSenseSubscriptionService {
         }
     }
 
-    public SmartSenseSubscription getDefault(IdentityUser cbUser) {
+    @PostAuthorize("hasPermission(returnObject,'read')")
+    public SmartSenseSubscription getDefaultForUser(IdentityUser cbUser) {
         SmartSenseSubscription subscription = null;
-        try {
-            subscription = repository.findByAccountAndOwner(cbUser.getAccount(), cbUser.getUserId());
-            if (!defaultSmartsenseId.isEmpty() && !defaultSmartsenseId.equals(subscription.getSubscriptionId())) {
-                subscription.setSubscriptionId(defaultSmartsenseId);
-                repository.save(subscription);
-            }
-        } catch (NotFoundException ignored) {
-            LOGGER.info("Default SmartSense subscription not found");
+        subscription = repository.findByAccountAndOwner(cbUser.getAccount(), cbUser.getUserId());
+        if (subscription != null && !StringUtils.isEmpty(defaultSmartsenseId) && !defaultSmartsenseId.equals(subscription.getSubscriptionId())) {
+            LOGGER.info("Upgrading default SmartSense subscription");
+            subscription.setSubscriptionId(defaultSmartsenseId);
+            repository.save(subscription);
         }
         return Optional.ofNullable(subscription).orElseGet(() -> {
             SmartSenseSubscription newSubscription = null;
-            if (!defaultSmartsenseId.isEmpty()) {
+            if (!StringUtils.isEmpty(defaultSmartsenseId)) {
                 LOGGER.info("Generating default SmartSense subscription");
                 newSubscription = new SmartSenseSubscription();
                 newSubscription.setSubscriptionId(defaultSmartsenseId);

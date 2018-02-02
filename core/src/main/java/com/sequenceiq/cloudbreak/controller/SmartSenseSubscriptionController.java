@@ -33,7 +33,7 @@ public class SmartSenseSubscriptionController implements SmartSenseSubscriptionE
     @Override
     public SmartSenseSubscriptionJson get() {
         IdentityUser cbUser = authenticatedUserService.getCbUser();
-        SmartSenseSubscription subscription = smartSenseSubService.getDefault(cbUser);
+        SmartSenseSubscription subscription = smartSenseSubService.getDefaultForUser(cbUser);
         if (subscription == null) {
             throw new SmartSenseNotFoundException("SmartSense subscription not found");
         }
