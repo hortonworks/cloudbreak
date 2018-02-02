@@ -1,3 +1,5 @@
+all: cbm integration-test
+
 cbm: 
 	./scripts/cbm.sh
 integration-test:
