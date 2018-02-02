@@ -126,8 +126,12 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
         metadata.setItems(new ArrayList<>());
 
         Items sshMetaData = new Items();
-        sshMetaData.setKey("sshKeys");
+        sshMetaData.setKey("ssh-keys");
         sshMetaData.setValue(group.getInstanceAuthentication().getLoginUserName() + ":" + group.getInstanceAuthentication().getPublicKey());
+
+        Items blockProjectWideSsh = new Items();
+        blockProjectWideSsh.setKey("block-project-ssh-keys");
+        blockProjectWideSsh.setValue("TRUE");
 
         Items startupScript = new Items();
         startupScript.setKey("startup-script");
@@ -135,6 +139,7 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
 
         metadata.getItems().add(sshMetaData);
         metadata.getItems().add(startupScript);
+        metadata.getItems().add(blockProjectWideSsh);
         instance.setMetadata(metadata);
 
         Insert insert = compute.instances().insert(projectId, location.getAvailabilityZone().value(), instance);
