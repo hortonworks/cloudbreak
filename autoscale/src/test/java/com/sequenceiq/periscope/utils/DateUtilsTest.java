@@ -1,5 +1,6 @@
 package com.sequenceiq.periscope.utils;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -16,6 +17,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.quartz.CronExpression;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DateUtilsTest {
@@ -34,6 +36,30 @@ public class DateUtilsTest {
     @Test
     public void testCronExpressionValidThenShouldReturnTrue() throws ParseException {
         assertNotNull(underTest.getCronExpression("0 0 12 * * ?"));
+    }
+
+    @Test
+    public void testCronExpressionIfTheUserSendingOnlyFiveSegment() throws ParseException {
+        CronExpression cronExpression = underTest.getCronExpression("0 8 * * 5");
+        assertEquals("0 8 * * 5 ?", cronExpression.getCronExpression());
+        assertNotNull(cronExpression);
+    }
+
+    @Test
+    public void testCronExpressionIfTheUserSendingOnlyFourSegment() throws ParseException {
+        CronExpression cronExpression = underTest.getCronExpression("0 8 * *");
+        assertEquals("0 8 * * * ?", cronExpression.getCronExpression());
+        assertNotNull(cronExpression);
+    }
+
+    @Test(expected = ParseException.class)
+    public void testCronExpressionIfTheUserSendingOnlyThreeSegment() throws ParseException {
+        assertNotNull(underTest.getCronExpression("0 8 *"));
+    }
+
+    @Test(expected = ParseException.class)
+    public void testCronExpressionIfTheUserSendingOnlyTwoSegment() throws ParseException {
+        assertNotNull(underTest.getCronExpression("0 8"));
     }
 
     @Test(expected = ParseException.class)

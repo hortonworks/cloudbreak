@@ -14,6 +14,12 @@ import org.springframework.stereotype.Service;
 @Service
 public final class DateUtils {
 
+    public static final int DAY_OF_WEEK_FIELD = 5;
+
+    public static final int MINIMAL_CRON_SEGMENT_LENGTH = 6;
+
+    public static final int MINIMAL_USER_DEFINED_CRON_SEGMENT_LENGTH = 3;
+
     private static final Logger LOGGER = LoggerFactory.getLogger(DateUtils.class);
 
     @Inject
@@ -34,6 +40,17 @@ public final class DateUtils {
     }
 
     public CronExpression getCronExpression(String cron) throws ParseException {
+        String[] splits = cron.split("\\s+");
+        if (splits.length < MINIMAL_CRON_SEGMENT_LENGTH && splits.length > MINIMAL_USER_DEFINED_CRON_SEGMENT_LENGTH) {
+            for (int i = splits.length; i < MINIMAL_CRON_SEGMENT_LENGTH; i++) {
+                switch (i) {
+                    case DAY_OF_WEEK_FIELD:  cron = String.format("%s ?", cron);
+                        break;
+                    default: cron = String.format("%s *", cron);
+                        break;
+                }
+            }
+        }
         return new CronExpression(cron);
     }
 
