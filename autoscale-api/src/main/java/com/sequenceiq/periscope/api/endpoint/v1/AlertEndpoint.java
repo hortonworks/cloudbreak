@@ -29,6 +29,7 @@ import com.sequenceiq.periscope.api.model.PrometheusAlertRequest;
 import com.sequenceiq.periscope.api.model.PrometheusAlertResponse;
 import com.sequenceiq.periscope.api.model.TimeAlertRequest;
 import com.sequenceiq.periscope.api.model.TimeAlertResponse;
+import com.sequenceiq.periscope.api.model.TimeAlertValidationRequest;
 import com.sequenceiq.periscope.doc.ApiDescription.AlertOpDescription;
 
 import io.swagger.annotations.Api;
@@ -96,6 +97,12 @@ public interface AlertEndpoint {
     void deleteTimeAlert(@PathParam("clusterId") Long clusterId, @PathParam("alertId") Long alertId);
 
     @POST
+    @Path("time/validate")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = AlertOpDescription.TIME_BASED_CRON, produces = JSON, notes = TIME_BASED_NOTES)
+    Boolean validateCronExpression(@PathParam("clusterId") Long clusterId, @Valid TimeAlertValidationRequest json) throws ParseException;
+
+    @POST
     @Path("prometheus")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = AlertOpDescription.PROMETHEUS_BASED_POST, produces = JSON, notes = PROMETHEUS_BASED_NOTES)
@@ -125,4 +132,5 @@ public interface AlertEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = AlertOpDescription.METRIC_BASED_DEFINITIONS, produces = JSON, notes = PROMETHEUS_BASED_DEFINITIONS)
     List<AlertRuleDefinitionEntry> getPrometheusDefinitions(@PathParam("clusterId") Long clusterId);
+
 }
