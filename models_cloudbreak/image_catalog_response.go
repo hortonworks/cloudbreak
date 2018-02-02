@@ -25,6 +25,9 @@ type ImageCatalogResponse struct {
 	// Required: true
 	ID *int64 `json:"id"`
 
+	// image response in imagecatalog
+	ImagesResponse *ImagesResponse `json:"imagesResponse,omitempty"`
+
 	// name of the resource
 	// Required: true
 	// Max Length: 100
@@ -46,6 +49,8 @@ type ImageCatalogResponse struct {
 
 /* polymorph ImageCatalogResponse id false */
 
+/* polymorph ImageCatalogResponse imagesResponse false */
+
 /* polymorph ImageCatalogResponse name false */
 
 /* polymorph ImageCatalogResponse publicInAccount false */
@@ -57,6 +62,11 @@ func (m *ImageCatalogResponse) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateID(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateImagesResponse(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -86,6 +96,25 @@ func (m *ImageCatalogResponse) validateID(formats strfmt.Registry) error {
 
 	if err := validate.Required("id", "body", m.ID); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func (m *ImageCatalogResponse) validateImagesResponse(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.ImagesResponse) { // not required
+		return nil
+	}
+
+	if m.ImagesResponse != nil {
+
+		if err := m.ImagesResponse.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("imagesResponse")
+			}
+			return err
+		}
 	}
 
 	return nil
