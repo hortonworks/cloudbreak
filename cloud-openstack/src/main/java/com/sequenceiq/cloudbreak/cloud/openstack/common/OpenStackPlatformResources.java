@@ -1,11 +1,9 @@
 package com.sequenceiq.cloudbreak.cloud.openstack.common;
 
-import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 import static com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType.MAGNETIC;
 import static com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType.values;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -162,20 +160,15 @@ public class OpenStackPlatformResources implements PlatformResources {
         Set<String> regionsFromOpenStack = openStackClient.getRegion(cloudCredential);
         OSClient osClient = openStackClient.createOSClient(cloudCredential);
 
-        Map<Region, List<com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone>> cloudRegions = new HashMap<>();
+        Map<Region, List<AvailabilityZone>> cloudRegions = new HashMap<>();
         Map<Region, String> displayNames = new HashMap<>();
         for (String regionFromOpenStack : regionsFromOpenStack) {
-            List<AvailabilityZone> availabilityZones = new ArrayList<>();
-            List<? extends org.openstack4j.model.compute.ext.AvailabilityZone> zonesFromOS = osClient.compute().zones().list();
-            LOGGER.info("zones from openstack for {}: {}", regionFromOpenStack, zonesFromOS);
-            for (org.openstack4j.model.compute.ext.AvailabilityZone availabilityZone : zonesFromOS) {
-                availabilityZones.add(availabilityZone(availabilityZone.getZoneName()));
-            }
+            List<AvailabilityZone> availabilityZones = openStackClient.getZones(osClient, regionFromOpenStack);
             cloudRegions.put(region(regionFromOpenStack), availabilityZones);
             displayNames.put(region(regionFromOpenStack), regionFromOpenStack);
         }
         String defaultRegion = null;
-        if (cloudRegions.keySet().size() > 0) {
+        if (!cloudRegions.keySet().isEmpty()) {
             defaultRegion = ((Region) cloudRegions.keySet().toArray()[0]).value();
         }
         CloudRegions regions = new CloudRegions(cloudRegions, displayNames, defaultRegion);
@@ -190,21 +183,32 @@ public class OpenStackPlatformResources implements PlatformResources {
         Map<String, Set<VmType>> cloudVmResponses = new HashMap<>();
         Map<String, VmType> defaultCloudVmResponses = new HashMap<>();
         CloudRegions regions = regions(cloudCredential, region, filters);
-        for (Region cloudRegion : regions.getCloudRegions().keySet()) {
+
+        regions.getCloudRegions().forEach((cloudRegion, availabilityZones) -> {
             Set<VmType> types = collectVmTypes(osClient);
-            for (AvailabilityZone availabilityZone : regions.getCloudRegions().get(cloudRegion)) {
-                cloudVmResponses.put(availabilityZone.value(), types);
-            }
-            defaultCloudVmResponses.put(cloudRegion.value(), types.size() > 0 ? (VmType) types.toArray()[0] : null);
-        }
+            convertVmSizeToGB(types);
+            availabilityZones.forEach(availabilityZone -> cloudVmResponses.put(availabilityZone.value(), types));
+            defaultCloudVmResponses.put(cloudRegion.value(), types.isEmpty() ? null : (VmType) types.toArray()[0]);
+        });
+
         CloudVmTypes cloudVmTypes = new CloudVmTypes(cloudVmResponses, defaultCloudVmResponses);
         LOGGER.info("openstack virtual machine types: {}", cloudVmTypes);
         return cloudVmTypes;
     }
 
+    private void convertVmSizeToGB(Set<VmType> types) {
+        types.stream()
+                .filter(t -> t.getMetaData().getProperties().containsKey(VmTypeMeta.MEMORY))
+                .forEach(t -> {
+                    String memory = t.getMetaData().getProperties().get(VmTypeMeta.MEMORY);
+                    String formattedSize = ConversionUtil.convertToGB(memory);
+                    t.getMetaData().getProperties().put(VmTypeMeta.MEMORY, formattedSize);
+                });
+    }
+
     private Set<VmType> collectVmTypes(OSClient osClient) {
         Set<VmType> types = new HashSet<>();
-        for (Flavor flavor : osClient.compute().flavors().list()) {
+        for (Flavor flavor : openStackClient.getFlavors(osClient)) {
             VmTypeMeta.VmTypeMetaBuilder builder = VmTypeMeta.VmTypeMetaBuilder.builder()
                     .withCpuAndMemory(flavor.getVcpus(), flavor.getRam());
             for (VolumeParameterType volumeParameterType : values()) {

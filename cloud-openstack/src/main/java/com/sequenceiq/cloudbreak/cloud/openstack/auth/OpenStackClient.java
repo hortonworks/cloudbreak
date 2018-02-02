@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.openstack.auth;
 
+import static com.google.common.collect.Lists.newArrayList;
+import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
 import static com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackConstants.FACING;
 
 import java.util.HashSet;
@@ -16,6 +18,8 @@ import org.openstack4j.api.OSClient;
 import org.openstack4j.api.types.Facing;
 import org.openstack4j.core.transport.Config;
 import org.openstack4j.model.common.Identifier;
+import org.openstack4j.model.compute.Flavor;
+import org.openstack4j.model.compute.ext.AvailabilityZone;
 import org.openstack4j.model.heat.Resource;
 import org.openstack4j.model.identity.v2.Access;
 import org.openstack4j.model.identity.v3.Endpoint;
@@ -27,7 +31,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
@@ -129,7 +132,7 @@ public class OpenStackClient {
     }
 
     public List<CloudResource> getResources(String stackName, CloudCredential cloudCredential) {
-        return Lists.newArrayList(createOSClient(cloudCredential).heat().resources().list(stackName)
+        return newArrayList(createOSClient(cloudCredential).heat().resources().list(stackName)
                 .stream()
                 .map(r -> {
                     Optional<ResourceType> type = getType(r);
@@ -258,6 +261,16 @@ public class OpenStackClient {
         }
         LOGGER.info("regions from openstack: {}", regions);
         return regions;
+    }
+
+    public List<com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone> getZones(OSClient osClient, String regionFromOpenStack) {
+        List<? extends AvailabilityZone> zonesFromOS = osClient.compute().zones().list();
+        LOGGER.info("zones from openstack for {}: {}", regionFromOpenStack, zonesFromOS);
+        return zonesFromOS.stream().map(z -> availabilityZone(z.getZoneName())).collect(Collectors.toList());
+    }
+
+    public List<Flavor> getFlavors(OSClient osClient) {
+        return (List<Flavor>) osClient.compute().flavors().list();
     }
 
 }
