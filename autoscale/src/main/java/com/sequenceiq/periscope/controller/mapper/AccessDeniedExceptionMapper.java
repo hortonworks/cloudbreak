@@ -1,9 +1,9 @@
 package com.sequenceiq.periscope.controller.mapper;
 
-import java.nio.file.AccessDeniedException;
-
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.Provider;
+
+import org.springframework.security.access.AccessDeniedException;
 
 @Provider
 public class AccessDeniedExceptionMapper extends BaseExceptionMapper<AccessDeniedException> {
