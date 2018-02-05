@@ -1,12 +1,6 @@
 package com.sequenceiq.it.cloudbreak.newway.cloud;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
-import com.sequenceiq.cloudbreak.api.model.OrchestratorRequest;
 import com.sequenceiq.cloudbreak.api.model.SecurityRuleRequest;
 import com.sequenceiq.cloudbreak.api.model.StackAuthenticationRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.AmbariV2Request;
@@ -18,6 +12,11 @@ import com.sequenceiq.it.cloudbreak.newway.Entity;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
 import com.sequenceiq.it.cloudbreak.newway.StackEntity;
 import com.sequenceiq.it.cloudbreak.newway.TestParameter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public abstract class CloudProviderHelper extends CloudProvider {
 
@@ -29,27 +28,38 @@ public abstract class CloudProviderHelper extends CloudProvider {
 
     public static final int BEGIN_INDEX = 4;
 
-    public static CloudProvider[] providerFactory(String provider) {
+    private static final Logger LOGGER = LoggerFactory.getLogger(CloudProviderHelper.class);
+
+    private TestParameter testParameter;
+
+    public CloudProviderHelper(TestParameter testParameter) {
+        LOGGER.info("TestParemeters length: {}", testParameter.size());
+        this.testParameter = testParameter;
+    }
+
+    public static CloudProvider[] providerFactory(String provider, TestParameter testParameter) {
         CloudProvider[] results;
         String[] providerArray = provider.split(",");
         results = new CloudProvider[providerArray.length];
         for (int i = 0; i < providerArray.length; i++) {
+            LOGGER.info("Provider: \'{}\'", providerArray[i].toLowerCase().trim());
             CloudProvider cloudProvider;
-            switch (providerArray[i].toLowerCase()) {
+            switch (providerArray[i].toLowerCase().trim()) {
                 case AwsCloudProvider.AWS:
-                    cloudProvider = new AwsCloudProvider();
+                    cloudProvider = new AwsCloudProvider(testParameter);
                     break;
                 case AzureCloudProvider.AZURE:
-                    cloudProvider = new AzureCloudProvider();
+                    cloudProvider = new AzureCloudProvider(testParameter);
                     break;
                 case GcpCloudProvider.GCP:
-                    cloudProvider = new GcpCloudProvider();
+                    cloudProvider = new GcpCloudProvider(testParameter);
                     break;
                 case OpenstackCloudProvider.OPENSTACK:
-                    cloudProvider = new OpenstackCloudProvider();
+                    cloudProvider = new OpenstackCloudProvider(testParameter);
                     break;
                 default:
-                    cloudProvider = new AwsCloudProvider();
+                    LOGGER.warn("could not determine cloud provider!");
+                    cloudProvider = null;
 
             }
             results[i] = cloudProvider;
@@ -64,7 +74,6 @@ public abstract class CloudProviderHelper extends CloudProvider {
                 .withAvailabilityZone(availabilityZone())
                 .withInstanceGroups(instanceGroups())
                 .withNetwork(network())
-                .withParameters(parameters())
                 .withStackAuthentication(stackauth());
     }
 
@@ -80,17 +89,10 @@ public abstract class CloudProviderHelper extends CloudProvider {
                 .withAvailabilityZone(availabilityZone())
                 .withInstanceGroups(instanceGroups())
                 .withNetwork(network())
-                .withParameters(parameters())
                 .withStackAuthentication(stackauth());
     }
 
     abstract StackAuthenticationRequest stackauth();
-
-    Map<String, String> parameters() {
-        Map<String, String> params = new HashMap<String, String>();
-        params.put("instanceProfileStrategy", "CREATE");
-        return params;
-    }
 
     abstract NetworkV2Request network();
 
@@ -102,17 +104,11 @@ public abstract class CloudProviderHelper extends CloudProvider {
         return requests;
     }
 
-    OrchestratorRequest orchestrator() {
-        OrchestratorRequest request = new OrchestratorRequest();
-        request.setType("SALT");
-        return request;
-    }
-
     @Override
     public AmbariV2Request ambariRequestWithBlueprintId(Long id) {
         AmbariV2Request req = new AmbariV2Request();
-        req.setUserName(TestParameter.get(DEFAULT_AMBARI_USER));
-        req.setPassword(TestParameter.get(DEFAULT_AMBARI_PASSWORD));
+        req.setUserName(getTestParameter().get(DEFAULT_AMBARI_USER));
+        req.setPassword(getTestParameter().get(DEFAULT_AMBARI_PASSWORD));
         req.setBlueprintId(id);
         return req;
     }
@@ -120,8 +116,8 @@ public abstract class CloudProviderHelper extends CloudProvider {
     @Override
     public AmbariV2Request ambariRequestWithBlueprintName(String name) {
         AmbariV2Request req = new AmbariV2Request();
-        req.setUserName(TestParameter.get(DEFAULT_AMBARI_USER));
-        req.setPassword(TestParameter.get(DEFAULT_AMBARI_PASSWORD));
+        req.setUserName(getTestParameter().get(DEFAULT_AMBARI_USER));
+        req.setPassword(getTestParameter().get(DEFAULT_AMBARI_PASSWORD));
         req.setBlueprintName(name);
         return req;
     }
@@ -173,5 +169,9 @@ public abstract class CloudProviderHelper extends CloudProvider {
         rules.add(a);
 
         return rules;
+    }
+
+    public TestParameter getTestParameter() {
+        return testParameter;
     }
 }

@@ -21,7 +21,8 @@ public class GcpCloudProvider extends CloudProviderHelper {
 
     private static final String GCP_CLUSTER_DEFAULT_NAME = "gcp-cluster";
 
-    public GcpCloudProvider() {
+    public GcpCloudProvider(TestParameter testParameter) {
+        super(testParameter);
     }
 
     @Override
@@ -30,13 +31,13 @@ public class GcpCloudProvider extends CloudProviderHelper {
                 .withName(CREDNAME)
                 .withDescription(CREDDESC)
                 .withCloudPlatform(GCP_CAPITAL)
-                .withParameters(azureCredentialDetails());
+                .withParameters(gcpCredentialDetails());
     }
 
     @Override
     String availabilityZone() {
         String availabilityZone = "europe-west1-b";
-        String availabilityZoneParam = TestParameter.get("gcpAvailabilityZone");
+        String availabilityZoneParam = getTestParameter().get("gcpAvailabilityZone");
 
         return availabilityZoneParam == null ? availabilityZone : availabilityZoneParam;
     }
@@ -44,7 +45,7 @@ public class GcpCloudProvider extends CloudProviderHelper {
     @Override
     String region() {
         String region = "europe-west1";
-        String regionParam = TestParameter.get("gcpRegion");
+        String regionParam = getTestParameter().get("gcpRegion");
 
         return regionParam == null ? region : regionParam;
     }
@@ -53,7 +54,7 @@ public class GcpCloudProvider extends CloudProviderHelper {
     StackAuthenticationRequest stackauth() {
         StackAuthenticationRequest stackauth = new StackAuthenticationRequest();
         String defaultValue = "seq-master";
-        String param = TestParameter.get("gcpPublicKeyId");
+        String param = getTestParameter().get("gcpPublicKeyId");
         stackauth.setPublicKeyId(param == null ? defaultValue : param);
         return stackauth;
     }
@@ -62,19 +63,19 @@ public class GcpCloudProvider extends CloudProviderHelper {
     TemplateV2Request template() {
         TemplateV2Request t = new TemplateV2Request();
         String instanceTypeDefaultValue = "n1-highcpu-4";
-        String instanceTypeParam = TestParameter.get("gcpInstanceType");
+        String instanceTypeParam = getTestParameter().get("gcpInstanceType");
         t.setInstanceType(instanceTypeParam == null ? instanceTypeDefaultValue : instanceTypeParam);
 
         int volumeCountDefault = 1;
-        String volumeCountParam = TestParameter.get("gcpInstanceVolumeCount");
+        String volumeCountParam = getTestParameter().get("gcpInstanceVolumeCount");
         t.setVolumeCount(volumeCountParam == null ? volumeCountDefault : Integer.parseInt(volumeCountParam));
 
         int volumeSizeDefault = 10;
-        String volumeSizeParam = TestParameter.get("gcpInstanceVolumeSize");
+        String volumeSizeParam = getTestParameter().get("gcpInstanceVolumeSize");
         t.setVolumeSize(volumeSizeParam == null ? volumeSizeDefault : Integer.parseInt(volumeSizeParam));
 
         String volumeTypeDefault = "pd-standard";
-        String volumeTypeParam = TestParameter.get("gcpInstanceVolumeType");
+        String volumeTypeParam = getTestParameter().get("gcpInstanceVolumeType");
         t.setVolumeType(volumeTypeParam == null ? volumeTypeDefault : volumeTypeParam);
 
         return t;
@@ -82,15 +83,15 @@ public class GcpCloudProvider extends CloudProviderHelper {
 
     @Override
     public String getClusterDefaultName() {
-        String clustername = TestParameter.get("gcpClusterName");
+        String clustername = getTestParameter().get("gcpClusterName");
         return clustername == null ? GCP_CLUSTER_DEFAULT_NAME : clustername;
     }
 
-    Map<String, Object> azureCredentialDetails() {
+    Map<String, Object> gcpCredentialDetails() {
         Map<String, Object> map = new HashMap<String, Object>();
-        map.put("projectId", TestParameter.get("integrationtest.gcpcredential.projectId"));
-        map.put("serviceAccountId", TestParameter.get("integrationtest.gcpcredential.serviceAccountId"));
-        map.put("serviceAccountPrivateKey", TestParameter.get("integrationtest.gcpcredential.p12File")
+        map.put("projectId", getTestParameter().get("integrationtest.gcpcredential.projectId"));
+        map.put("serviceAccountId", getTestParameter().get("integrationtest.gcpcredential.serviceAccountId"));
+        map.put("serviceAccountPrivateKey", getTestParameter().get("integrationtest.gcpcredential.p12File")
                 .substring(CloudProviderHelper.BEGIN_INDEX));
         return map;
     }

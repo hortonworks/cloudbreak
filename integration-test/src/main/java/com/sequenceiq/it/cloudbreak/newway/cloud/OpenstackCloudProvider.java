@@ -22,7 +22,8 @@ public class OpenstackCloudProvider extends CloudProviderHelper {
 
     private static final String OPENSTACK_CLUSTER_DEFAULT_NAME = "openstack-cluster";
 
-    public OpenstackCloudProvider() {
+    public OpenstackCloudProvider(TestParameter testParameter) {
+        super(testParameter);
     }
 
     @Override
@@ -42,7 +43,7 @@ public class OpenstackCloudProvider extends CloudProviderHelper {
     @Override
     String region() {
         String region = "local";
-        String regionParam = TestParameter.get("openstackRegion");
+        String regionParam = getTestParameter().get("openstackRegion");
 
         return regionParam == null ? region : regionParam;
     }
@@ -50,7 +51,9 @@ public class OpenstackCloudProvider extends CloudProviderHelper {
     @Override
     StackAuthenticationRequest stackauth() {
         StackAuthenticationRequest stackauth = new StackAuthenticationRequest();
-        stackauth.setPublicKeyId(TestParameter.get("openstackPublicKeyId"));
+        String defaultValue = "seq-master";
+        String param = getTestParameter().get("openstackPublicKeyId");
+        stackauth.setPublicKeyId(param == null ? defaultValue : param);
         return stackauth;
     }
 
@@ -58,19 +61,19 @@ public class OpenstackCloudProvider extends CloudProviderHelper {
     TemplateV2Request template() {
         TemplateV2Request t = new TemplateV2Request();
         String instanceTypeDefaultValue = "m1.large";
-        String instanceTypeParam = TestParameter.get("openstackInstanceType");
+        String instanceTypeParam = getTestParameter().get("openstackInstanceType");
         t.setInstanceType(instanceTypeParam == null ? instanceTypeDefaultValue : instanceTypeParam);
 
         int volumeCountDefault = 1;
-        String volumeCountParam = TestParameter.get("openstackInstanceVolumeCount");
+        String volumeCountParam = getTestParameter().get("openstackInstanceVolumeCount");
         t.setVolumeCount(volumeCountParam == null ? volumeCountDefault : Integer.parseInt(volumeCountParam));
 
         int volumeSizeDefault = 10;
-        String volumeSizeParam = TestParameter.get("openstackInstanceVolumeSize");
+        String volumeSizeParam = getTestParameter().get("openstackInstanceVolumeSize");
         t.setVolumeSize(volumeSizeParam == null ? volumeSizeDefault : Integer.parseInt(volumeSizeParam));
 
         String volumeTypeDefault = "HDD";
-        String volumeTypeParam = TestParameter.get("openstackInstanceVolumeType");
+        String volumeTypeParam = getTestParameter().get("openstackInstanceVolumeType");
         t.setVolumeType(volumeTypeParam == null ? volumeTypeDefault : volumeTypeParam);
 
         return t;
@@ -78,16 +81,16 @@ public class OpenstackCloudProvider extends CloudProviderHelper {
 
     @Override
     public String getClusterDefaultName() {
-        String clustername = TestParameter.get("openstackClusterName");
+        String clustername = getTestParameter().get("openstackClusterName");
         return clustername == null ? OPENSTACK_CLUSTER_DEFAULT_NAME : clustername;
     }
 
     Map<String, Object> azureCredentialDetails() {
         Map<String, Object> map = new HashMap<String, Object>();
-        map.put("tenantName", TestParameter.get("integrationtest.openstackcredential.tenantName"));
-        map.put("userName", TestParameter.get("integrationtest.openstackcredential.userName"));
-        map.put("password", TestParameter.get("integrationtest.openstackcredential.password"));
-        map.put("endpoint", TestParameter.get("integrationtest.openstackcredential.endpoint"));
+        map.put("tenantName", getTestParameter().get("integrationtest.openstackcredential.tenantName"));
+        map.put("userName", getTestParameter().get("integrationtest.openstackcredential.userName"));
+        map.put("password", getTestParameter().get("integrationtest.openstackcredential.password"));
+        map.put("endpoint", getTestParameter().get("integrationtest.openstackcredential.endpoint"));
         map.put("keystoneVersion", "cb-keystone-v2");
         map.put("selector", "cb-keystone-v2");
         return map;

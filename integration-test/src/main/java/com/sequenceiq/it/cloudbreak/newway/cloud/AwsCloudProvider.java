@@ -16,7 +16,7 @@ public class AwsCloudProvider extends CloudProviderHelper {
 
     public static final String AWS_CAPITAL = "AWS";
 
-    public static final String AWS_CLUSTER_DEFAULT_NAME = "aws-cluster";
+    public static final String AWS_CLUSTER_DEFAULT_NAME = "aws-cluster-2";
 
     public static final String KEY_BASED_CREDENTIAL = "key";
 
@@ -24,14 +24,15 @@ public class AwsCloudProvider extends CloudProviderHelper {
 
     private static final String CREDDESC = "test credential";
 
-    public AwsCloudProvider() {
+    public AwsCloudProvider(TestParameter testParameter) {
+        super(testParameter);
     }
 
     @Override
     public CredentialEntity aValidCredential() {
-        String credentialType = TestParameter.get("awsCredentialType");
+        String credentialType = getTestParameter().get("awsCredentialType");
         Map<String, Object> credentialParameters;
-        if (credentialType == null || KEY_BASED_CREDENTIAL.equals(credentialType)) {
+        if (KEY_BASED_CREDENTIAL.equals(credentialType)) {
             credentialParameters = awsCredentialDetailsKey();
         } else {
             credentialParameters = awsCredentialDetailsArn();
@@ -46,14 +47,14 @@ public class AwsCloudProvider extends CloudProviderHelper {
     private Map<String, Object> awsCredentialDetailsArn() {
         Map<String, Object> map = new HashMap<String, Object>();
         map.put("selector", "role-based");
-        map.put("secretKey", TestParameter.get("integrationtest.awscredential.roleArn"));
+        map.put("roleArn", getTestParameter().get("integrationtest.awscredential.roleArn"));
         return map;
     }
 
     @Override
     String availabilityZone() {
         String availabilityZone = "eu-west-1a";
-        String availabilityZoneParam = TestParameter.get("awsAvailabilityZone");
+        String availabilityZoneParam = getTestParameter().get("awsAvailabilityZone");
 
         return availabilityZoneParam == null ? availabilityZone : availabilityZoneParam;
     }
@@ -61,7 +62,7 @@ public class AwsCloudProvider extends CloudProviderHelper {
     @Override
     String region() {
         String region = "eu-west-1";
-        String regionParam = TestParameter.get("awsRegion");
+        String regionParam = getTestParameter().get("awsRegion");
 
         return regionParam == null ? region : regionParam;
     }
@@ -70,7 +71,7 @@ public class AwsCloudProvider extends CloudProviderHelper {
     StackAuthenticationRequest stackauth() {
         StackAuthenticationRequest stackauth = new StackAuthenticationRequest();
         String defaultValue = "seq-master";
-        String param = TestParameter.get("awsPublicKeyId");
+        String param = getTestParameter().get("awsPublicKeyId");
         stackauth.setPublicKeyId(param == null ? defaultValue : param);
         return stackauth;
     }
@@ -79,34 +80,34 @@ public class AwsCloudProvider extends CloudProviderHelper {
     TemplateV2Request template() {
         TemplateV2Request t = new TemplateV2Request();
         String instanceTypeDefaultValue = "m4.xlarge";
-        String instanceTypeParam = TestParameter.get("awsInstanceType");
+        String instanceTypeParam = getTestParameter().get("awsInstanceType");
         t.setInstanceType(instanceTypeParam == null ? instanceTypeDefaultValue : instanceTypeParam);
 
         int volumeCountDefault = 1;
-        String volumeCountParam = TestParameter.get("awsInstanceVolumeCount");
+        String volumeCountParam = getTestParameter().get("awsInstanceVolumeCount");
         t.setVolumeCount(volumeCountParam == null ? volumeCountDefault : Integer.parseInt(volumeCountParam));
 
         int volumeSizeDefault = 10;
-        String volumeSizeParam = TestParameter.get("awsInstanceVolumeSize");
+        String volumeSizeParam = getTestParameter().get("awsInstanceVolumeSize");
         t.setVolumeSize(volumeSizeParam == null ? volumeSizeDefault : Integer.parseInt(volumeSizeParam));
 
         String volumeTypeDefault = "gp2";
-        String volumeTypeParam = TestParameter.get("awsInstanceVolumeType");
+        String volumeTypeParam = getTestParameter().get("awsInstanceVolumeType");
         t.setVolumeType(volumeTypeParam == null ? volumeTypeDefault : volumeTypeParam);
         return t;
     }
 
     @Override
     public String getClusterDefaultName() {
-        String clustername = TestParameter.get("awsClusterName");
+        String clustername = getTestParameter().get("awsClusterName");
         return clustername == null ? AWS_CLUSTER_DEFAULT_NAME : clustername;
     }
 
     Map<String, Object> awsCredentialDetailsKey() {
         Map<String, Object> map = new HashMap<String, Object>();
         map.put("selector", "key-based");
-        map.put("accessKey", TestParameter.get("integrationtest.awscredential.accessKey"));
-        map.put("secretKey", TestParameter.get("integrationtest.awscredential.secretKey"));
+        map.put("accessKey", getTestParameter().get("integrationtest.awscredential.accessKey"));
+        map.put("secretKey", getTestParameter().get("integrationtest.awscredential.secretKey"));
 
         return map;
     }

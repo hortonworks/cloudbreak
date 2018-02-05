@@ -1,27 +1,34 @@
 package com.sequenceiq.it.cloudbreak.newway;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.HashMap;
 import java.util.Map;
 
 public class TestParameter {
-    private static Map<String, String> parameters;
+    private static final Logger LOGGER = LoggerFactory.getLogger(TestParameter.class);
 
-    private TestParameter() {
-    }
+    private Map<String, String> parameters;
 
-    public static void init() {
+    TestParameter() {
         parameters = new HashMap<>();
     }
 
-    public static String get(String key) {
+    public String get(String key) {
+        LOGGER.info("Aquiring key {} resulting: {}", key, parameters.get(key));
         return parameters.get(key);
     }
 
-    public static void put(String key, String value) {
+    public void put(String key, String value) {
         parameters.put(key, value);
     }
 
-    public static void putAll(Map<String, String> all) {
+    public void putAll(Map<String, String> all) {
         parameters.putAll(all);
+    }
+
+    public int size() {
+        return parameters.size();
     }
 }
