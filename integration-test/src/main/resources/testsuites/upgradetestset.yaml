@@ -1,4 +1,6 @@
 name: upgrade_test_suite
+listeners:
+  - com.sequenceiq.it.cloudbreak.newway.priority.PriorityMethodInterceptor
 parallel: "instances"
 parameters:
   cleanUp: true
@@ -10,8 +12,8 @@ parameters:
 tests:
   - name: upgrade_test
     parameters:
-      provider: gcp,aws,azure
+      providers: gcp,aws,azure
     classes:
-      - com.sequenceiq.it.cloudbreak.ClusterTestFactory
+      - com.sequenceiq.it.cloudbreak.UpgradeTestFactory
 
 

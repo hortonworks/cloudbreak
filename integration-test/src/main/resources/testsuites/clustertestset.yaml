@@ -1,0 +1,13 @@
+name: Cluster_tests
+parallel: instances
+listeners:
+  - com.sequenceiq.it.cloudbreak.newway.priority.PriorityMethodInterceptor
+parameters:
+  cleanUp: false
+
+tests:
+  - name: cluster_test
+    parameters:
+      providers: openstack,gcp,azure,aws
+    classes:
+      - com.sequenceiq.it.cloudbreak.ClusterTestFactory

@@ -7,6 +7,7 @@ import com.sequenceiq.it.cloudbreak.newway.StackOperation;
 import com.sequenceiq.it.cloudbreak.newway.TestParameter;
 import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProvider;
 import com.sequenceiq.it.cloudbreak.newway.cloud.GcpCloudProvider;
+import com.sequenceiq.it.cloudbreak.newway.priority.Priority;
 import org.testng.annotations.Test;
 
 public class UpgradeTests extends CloudbreakTest {
@@ -16,9 +17,15 @@ public class UpgradeTests extends CloudbreakTest {
     private CloudProvider cloudProvider;
 
     public UpgradeTests() {
-        this.cloudProvider = new GcpCloudProvider();
+        this.cloudProvider = new GcpCloudProvider(getTestParameter());
     }
 
+    public UpgradeTests(CloudProvider cp, TestParameter tp) {
+        this.cloudProvider = new GcpCloudProvider(getTestParameter());
+        setTestParameter(tp);
+    }
+
+    @Priority(10)
     @Test
     public void testGetClusterExistingAfterUpgrade() throws Exception {
         given(CloudbreakClient.isCreated());
@@ -29,6 +36,7 @@ public class UpgradeTests extends CloudbreakTest {
         then(Stack.checkClusterHasAmbariRunning());
     }
 
+    @Priority(20)
     @Test
     public void testScaleExistingClusterAfterUpgrade() throws Exception {
         given(CloudbreakClient.isCreated());
@@ -44,6 +52,7 @@ public class UpgradeTests extends CloudbreakTest {
         then(Stack.checkClusterHasAmbariRunning());
     }
 
+    @Priority(30)
     @Test
     public void testStopExistingClusterAfterUpgrade() throws Exception {
         given(CloudbreakClient.isCreated());
@@ -56,6 +65,7 @@ public class UpgradeTests extends CloudbreakTest {
         then(Stack.waitAndCheckClusterAndStackStoppedStatus());
     }
 
+    @Priority(40)
     @Test
     public void testStartExistingClusterAfterUpgrade() throws Exception {
         given(CloudbreakClient.isCreated());
@@ -69,9 +79,10 @@ public class UpgradeTests extends CloudbreakTest {
         then(Stack.checkClusterHasAmbariRunning());
     }
 
+    @Priority(50)
     @Test
     public void terminateCluster() throws Exception {
-        if ("false".equals(TestParameter.get("cleanUp"))) {
+        if ("false".equals(getTestParameter().get("cleanUp"))) {
             return;
         }
         given(CloudbreakClient.isCreated());
