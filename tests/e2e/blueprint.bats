@@ -1,5 +1,6 @@
+#!/usr/bin/env bash
 load ../commands
-load ../parameters
+load ../utils/e2e_parameters
 
 @test "Check blueprint create from url" {
   OUTPUT=$(create-blueprint from-url --name cli-bp-url --url "${BLUEPRINT_URL}" 2>&1 | tail -n 2 | head -n 1)

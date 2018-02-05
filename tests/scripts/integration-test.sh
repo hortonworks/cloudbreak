@@ -12,4 +12,4 @@ export USERNAME_CLI=admin@example.com
 export PASSWORD_CLI=cloudbreak
 #could be a bug:
 cb configure --server $BASE_URL --username $USERNAME_CLI --password $PASSWORD_CLI
-bats integration/*.bats
+bats --tap -d integration/*.bats | tee report.tap

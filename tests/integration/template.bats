@@ -2,7 +2,6 @@
 
 load ../commands
 
-
 @test "Check generate cluster template azure new network" {
   OUTPUT=$(generate-cluster-template azure new-network | jq '. "network" | [to_entries[].key] == ["subnetCIDR"]')
 

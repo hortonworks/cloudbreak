@@ -2,7 +2,7 @@
 
 load ../commands
 load ../resources
-load ../parameters
+load ../utils/mock_parameters
 
 @test "Check availability zone list" {
   OUTPUT=$(availability-zone-list --credential "${OS_CREDENTIAL_NAME}" --region testregion 2>&1 | awk '{printf "%s",$0} END {print ""}' | awk 'match($0, /{[^{}]+}/) { print substr($0, RSTART, RLENGTH)}')

@@ -1,7 +1,7 @@
 #!/usr/bin/env bats
 
 load ../commands
-load ../parameters
+load ../utils/mock_parameters
 
 @test "Check cluster list" {
   CB_CLUSTERS=$(list-clusters | jq 'length')
@@ -146,9 +146,7 @@ load ../parameters
 }
 
 @test "Check cluster re-install" {
-  skip "BUG-94446"
-
-  OUTPUT=$(reinstall-cluster --name test --cli-input-json templates/template.json --name aaaaa 2>&1 | tail -n 2 | head -n 1)
+  OUTPUT=$(reinstall-cluster --name test --cli-input-json templates/reinstall-template.json --name aaaaa 2>&1 | tail -n 2 | head -n 1)
 
   [[ "${OUTPUT}" == *"status code: 404, message: Stack 'aaaaa' not found"* ]]
   [[ "${OUTPUT}" == *"error"* ]]

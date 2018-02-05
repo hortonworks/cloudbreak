@@ -1,7 +1,7 @@
 #!/usr/bin/env bats
 
 load ../commands
-load ../parameters
+load ../utils/mock_parameters
 
 @test "Check recipe create from url pre-ambari-start" {
   OUTPUT=$(create-recipe from-url --name recipe --execution-type pre-ambari-start --url ${RECIPE_URL} 2>&1 | awk '{printf "%s",$0} END {print ""}' | awk 'match($0, /{[^{}]+}/) { print substr($0, RSTART, RLENGTH)}')

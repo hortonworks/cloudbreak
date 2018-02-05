@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 function wait-stack-status() {
     param1=$3
     export param1
@@ -11,23 +13,31 @@ function wait-stack-status() {
 }
 
 function stack-is-status() {
-    param1=$2
-    export param1
-    is_status=false
-	is_status=$(describe-cluster --name $1 | jq -r '."status"==env.param1')
-	[ $is_status == true ]
+    is_status="false"
+
+	is_status=$(cb cluster describe --name $1 | jq -r '."status" == "$2"')
+
+    if [[ "${is_status}" == "false" ]]; then
+        echo $(cb cluster describe --name $1 | jq -r '."statusReason"')
+    else
+        echo "${is_status}"
+    fi
 }
 
 function wait-cluster-status() {
-    param1=$3
-    export param1
-    is_status=false
-    while [ $SECONDS -lt $1 ] && [ $is_status == false ]
+    is_status="false"
+
+    while [ $SECONDS -lt $1 ] && [ "${is_status}" == "false" ]
     do
-	sleep 30
-	is_status=$(describe-cluster --name $2 | jq -r ' ."cluster" | ."status"==env.param1')
+    	sleep 30
+	    is_status=$(cb cluster describe --name $2 | jq -r '."status" == "$3"')
     done
-    [ $is_status == true ]
+
+    if [[ "${is_status}" == "false" ]]; then
+        echo $(cb cluster describe --name $2 | jq -r '."statusReason"')
+    else
+        echo "${is_status}"
+    fi
 }
 
 function cluster-is-status() {
@@ -99,3 +109,14 @@ function wait-cluster-delete() {
     [ $is_status == true ]
 }
 
+function remove-stuck-cluster() {
+  if [[ $(cb cluster list | jq -r '.[].Name' | grep "$1") ]]; then
+    cb --debug cluster delete --name "$1" --wait
+  fi
+}
+
+function remove-stuck-credential() {
+  if [[ $(cb credential list | jq -r '.[].Name' | grep "$1") ]]; then
+    cb --debug credential delete --name "$1"
+  fi
+}

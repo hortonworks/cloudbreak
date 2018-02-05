@@ -2,16 +2,16 @@
 
 # Here is an explanation for variable definitions:
 #
-# For example `: ${AZURE_CREDENTIAL_NAME:="azure"}`:
-# sets AZURE_CREDENTIAL_NAME to "azure" if AZURE_CREDENTIAL_NAME is either unset or null.
-# However `${AZURE_CREDENTIAL_NAME="azure"}` (with NO `:`) only sets the value of AZURE_CREDENTIAL_NAME if AZURE_CREDENTIAL_NAME is currently unset
-# i.e., it won't change AZURE_CREDENTIAL_NAME from "" to value.
+# For example `: ${ARM_CREDENTIAL_NAME:="azure"}`:
+# sets ARM_CREDENTIAL_NAME to "azure" if ARM_CREDENTIAL_NAME is either unset or null.
+# However `${ARM_CREDENTIAL_NAME="azure"}` (with NO `:`) only sets the value of ARM_CREDENTIAL_NAME if ARM_CREDENTIAL_NAME is currently unset
+# i.e., it won't change ARM_CREDENTIAL_NAME from "" to value.
 #
 # The equivalent code:
 # ```
-# if [[ -z $AZURE_CREDENTIAL_NAME ]]
+# if [[ -z $ARM_CREDENTIAL_NAME ]]
 # then
-#   AZURE_CREDENTIAL_NAME="azure"
+#   ARM_CREDENTIAL_NAME="azure"
 # fi
 # ```
 #
@@ -45,7 +45,7 @@
 : ${AWS_CLUSTER_NAME:="aws-cluster"}
 
 # Credentials
-: ${AZURE_CREDENTIAL_NAME:="azure"}
+: ${ARM_CREDENTIAL_NAME:="azure"}
 : ${AWS_CREDENTIAL_NAME:="amazon"}
 : ${GCP_CREDENTIAL_NAME:="google"}
 : ${OS_CREDENTIAL_NAME:="openstack"}
@@ -66,10 +66,10 @@
 : ${OS_COMPUTE_SECURITY_GROUP:="aszegedi-compute"}
 
 # Azure
-: ${AZURE_SUBSCRIPTION_ID:="a12b1234-1234-12aa-3bcc-4d5e6f78900g"}
-: ${AZURE_TENANT_ID:="a12b1234-1234-12aa-3bcc-4d5e6f78900g"}
-: ${AZURE_APP_ID:="a12b1234-1234-12aa-3bcc-4d5e6f78900g"}
-: ${AZURE_PASSWORD:="password123"}
+: ${ARM_SUBSCRIPTION_ID:="a12b1234-1234-12aa-3bcc-4d5e6f78900g"}
+: ${ARM_TENANT_ID:="a12b1234-1234-12aa-3bcc-4d5e6f78900g"}
+: ${ARM_APP_ID:="a12b1234-1234-12aa-3bcc-4d5e6f78900g"}
+: ${ARM_PASSWORD:="password123"}
 
 # AWS
 : ${AWS_ROLE_ARN:="arn:aws:iam::1234567890:role/auto-test"}
@@ -88,6 +88,6 @@ AWS_ARGS_ROLE=" --role-arn  ${AWS_ROLE_ARN}"
 OPENSTACK_ARGS_V2=" --name ${OS_CREDENTIAL_NAME} --tenant-user ${OS_USERNAME} --tenant-password ${OS_PASSWORD} --tenant-name ${OS_TENANT_NAME} --endpoint ${OS_V2_ENDPOINT}"
 OPENSTACK_ARGS_V3=" --name ${OS_CREDENTIAL_NAME} --tenant-user ${OS_USERNAME} --tenant-password ${OS_PASSWORD} --user-domain ${OS_USER_DOMAIN} --endpoint ${OS_V3_ENDPOINT}"
 GCP_ARGS=" --name ${GCP_CREDENTIAL_NAME} --project-id ${GCP_PROJECT_ID} --service-account-id ${GCP_ACCOUNT_EMAIL} --service-account-private-key-file ${P12_PATH}"
-AZURE_ARGS=" --name ${AZURE_CREDENTIAL_NAME} --subscription-id ${AZURE_SUBSCRIPTION_ID} --tenant-id ${AZURE_TENANT_ID} --app-id ${AZURE_APP_ID} --app-password ${AZURE_PASSWORD}"
+ARM_ARGS=" --name ${ARM_CREDENTIAL_NAME} --subscription-id ${ARM_SUBSCRIPTION_ID} --tenant-id ${ARM_TENANT_ID} --app-id ${ARM_APP_ID} --app-password ${ARM_PASSWORD}"
 
 COMMON_ARGS_WO_CLUSTER=" --server ${BASE_URL} --username ${USERNAME_CLI} --password ${PASSWORD_CLI}  "

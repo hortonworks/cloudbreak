@@ -1,6 +1,6 @@
 #!/usr/bin/env bats
 load ../commands
-load ../parameters
+load ../utils/e2e_parameters
 
 @test "Check create credential - aws role based" {
   OUTPUT=$(create-credential-aws-role --name ${TEST_CREDENTIAL_NAME} $AWS_ARGS_ROLE 2>&1 | tail -n 2 | head -n 1)

@@ -1,5 +1,6 @@
+#!/usr/bin/env bash
 load ../commands
-load ../parameters
+load ../utils/e2e_parameters
 
 @test "Check recipe create from url pre-ambari-start" {
   OUTPUT=$(create-recipe from-url --name ${RECIPE_NAME} --execution-type pre-ambari-start --url ${RECIPE_URL} 2>&1 | awk '{printf "%s",$0} END {print ""}' | awk 'match($0, /{[^{}]+}/) { print substr($0, RSTART, RLENGTH)}')

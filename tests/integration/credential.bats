@@ -1,7 +1,7 @@
 #!/usr/bin/env bats
 
 load ../commands
-load ../parameters
+load ../utils/mock_parameters
 
 @test "Check CB configure" {
   OUTPUT=$(configure-cb $COMMON_ARGS_WO_CLUSTER 2>&1 | sed -e '$!d')
