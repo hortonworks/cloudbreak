@@ -3,15 +3,16 @@ package com.sequenceiq.it.cloudbreak.newway;
 import com.sequenceiq.it.IntegrationTestContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.EnumerablePropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.PropertySource;
+import org.springframework.util.StringUtils;
 import org.testng.ITestContext;
 import org.testng.annotations.BeforeTest;
 
+import javax.inject.Inject;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -41,7 +42,7 @@ public class CloudbreakTest extends GherkinTest {
     @Value("${integrationtest.uaa.password}")
     private String defaultUaaPassword;
 
-    @Autowired
+    @Inject
     private Environment environment;
 
     private TestParameter testParameter;
@@ -90,8 +91,7 @@ public class CloudbreakTest extends GherkinTest {
                     LOGGER.info("processing property source ::: " + propertySource.getName());
                     for (String key : ((EnumerablePropertySource) propertySource).getPropertyNames()) {
                         String value = propertySource.getProperty(key).toString();
-                        if (!"".equals(value)) {
-                            LOGGER.info(" +++ " + key + " - " + value);
+                        if (StringUtils.isEmpty(value)) {
                             rtn.put(key, propertySource.getProperty(key).toString());
                         }
                     }

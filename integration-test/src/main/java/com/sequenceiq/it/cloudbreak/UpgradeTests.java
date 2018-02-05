@@ -21,7 +21,7 @@ public class UpgradeTests extends CloudbreakTest {
     }
 
     public UpgradeTests(CloudProvider cp, TestParameter tp) {
-        this.cloudProvider = new GcpCloudProvider(getTestParameter());
+        this.cloudProvider = cp;
         setTestParameter(tp);
     }
 
