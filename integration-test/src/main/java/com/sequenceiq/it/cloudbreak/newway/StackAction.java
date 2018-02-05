@@ -7,17 +7,6 @@ public class StackAction {
     private StackAction() {
     }
 
-    public static void post(IntegrationTestContext integrationTestContext, Entity entity) throws Exception {
-        StackEntity stackEntity = (StackEntity) entity;
-        CloudbreakClient client;
-        client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT,
-                CloudbreakClient.class);
-        stackEntity.setResponse(
-                client.getCloudbreakClient()
-                        .stackV2Endpoint()
-                        .postPrivate(stackEntity.getRequest()));
-    }
-
     public static void get(IntegrationTestContext integrationTestContext, Entity entity) {
         StackEntity stackEntity = (StackEntity) entity;
         CloudbreakClient client;
@@ -45,14 +34,14 @@ public class StackAction {
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT,
                 CloudbreakClient.class);
         client.getCloudbreakClient().stackV2Endpoint()
-                .deletePrivate(stackEntity.getName(), false, true);
+                .deletePrivate(stackEntity.getName(), false, false);
     }
 
     public static void createInGiven(IntegrationTestContext integrationTestContext, Entity entity) throws Exception {
         try {
             get(integrationTestContext, entity);
         } catch (Exception e) {
-            post(integrationTestContext, entity);
+            new StackPostStrategy().doAction(integrationTestContext, entity);
         }
     }
 }

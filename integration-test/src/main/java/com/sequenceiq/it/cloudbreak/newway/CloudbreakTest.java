@@ -3,14 +3,18 @@ package com.sequenceiq.it.cloudbreak.newway;
 import com.sequenceiq.it.IntegrationTestContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
-import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.env.EnumerablePropertySource;
+import org.springframework.core.env.Environment;
+import org.springframework.core.env.PropertySource;
 import org.testng.ITestContext;
 import org.testng.annotations.BeforeTest;
-import org.testng.annotations.Listeners;
 
-@Listeners({CustomInvocationHandler.class})
+import java.util.HashMap;
+import java.util.Map;
+
 public class CloudbreakTest extends GherkinTest {
     public static final String CLOUDBREAK_SERVER_ROOT = "CLOUDBREAK_SERVER_ROOT";
 
@@ -37,12 +41,19 @@ public class CloudbreakTest extends GherkinTest {
     @Value("${integrationtest.uaa.password}")
     private String defaultUaaPassword;
 
+    @Autowired
+    private Environment environment;
+
+    private TestParameter testParameter;
+
     public CloudbreakTest() {
         try {
             super.springTestContextBeforeTestClass();
             super.springTestContextPrepareTestInstance();
         } catch (Exception e) {
         }
+
+        testParameter = new TestParameter();
 
         LOGGER.info("CloudbreakTest default values ::: ");
         IntegrationTestContext testContext = getItContext();
@@ -52,19 +63,42 @@ public class CloudbreakTest extends GherkinTest {
         testContext.putContextParam(PASSWORD, defaultUaaPassword);
     }
 
-    @BeforeTest
+    public TestParameter getTestParameter() {
+        return testParameter;
+    }
+
+    public void setTestParameter(TestParameter tp) {
+        testParameter = tp;
+    }
+
+    @BeforeTest(alwaysRun = true)
     public void digestParameters(ITestContext testngContext) {
-        TestParameter.init();
-
-        YamlPropertiesFactoryBean yaml = new YamlPropertiesFactoryBean();
-        yaml.setResources(new FileSystemResource("application.yml"));
-        yaml.getObject().entrySet().stream().forEach(
-                entry -> TestParameter.put((String) entry.getKey(), entry.getValue().toString())
-        );
-
         LOGGER.info("CloudbreakTest load test parameters ::: ");
         if (testngContext != null) {
-            TestParameter.putAll(testngContext.getCurrentXmlTest().getAllParameters());
+            getTestParameter().putAll(testngContext.getCurrentXmlTest().getAllParameters());
         }
+
+        LOGGER.info("Application.yml based parameters ::: ");
+        getTestParameter().putAll(getAllKnownProperties(environment));
+    }
+
+    private Map<String, String> getAllKnownProperties(Environment env) {
+        Map<String, String> rtn = new HashMap<>();
+        if (env instanceof ConfigurableEnvironment) {
+            for (PropertySource<?> propertySource : ((ConfigurableEnvironment) env).getPropertySources()) {
+                if (propertySource instanceof EnumerablePropertySource) {
+                    LOGGER.info("processing property source ::: " + propertySource.getName());
+                    for (String key : ((EnumerablePropertySource) propertySource).getPropertyNames()) {
+                        String value = propertySource.getProperty(key).toString();
+                        if (!"".equals(value)) {
+                            LOGGER.info(" +++ " + key + " - " + value);
+                            rtn.put(key, propertySource.getProperty(key).toString());
+                        }
+                    }
+                }
+            }
+        }
+        return rtn;
     }
 }
+

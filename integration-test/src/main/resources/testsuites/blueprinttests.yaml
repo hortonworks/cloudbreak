@@ -8,9 +8,3 @@ tests:
     classes:
       - com.sequenceiq.it.cloudbreak.BlueprintTests
 
-  - name: cluster_test
-    parameters:
-      provider: gcp
-    classes:
-      - com.sequenceiq.it.cloudbreak.ClusterTestFactory
-

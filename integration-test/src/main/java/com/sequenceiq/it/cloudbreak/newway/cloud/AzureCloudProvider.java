@@ -21,7 +21,8 @@ public class AzureCloudProvider extends CloudProviderHelper {
 
     private static final String AZURE_CLUSTER_DEFAULT_NAME = "azure-cluster";
 
-    public AzureCloudProvider() {
+    public AzureCloudProvider(TestParameter testParameter) {
+        super(testParameter);
     }
 
     @Override
@@ -41,7 +42,7 @@ public class AzureCloudProvider extends CloudProviderHelper {
     @Override
     String region() {
         String region = "North Europe";
-        String regionParam = TestParameter.get("azureRegion");
+        String regionParam = getTestParameter().get("azureRegion");
 
         return regionParam == null ? region : regionParam;
     }
@@ -49,7 +50,7 @@ public class AzureCloudProvider extends CloudProviderHelper {
     @Override
     StackAuthenticationRequest stackauth() {
         StackAuthenticationRequest stackauth = new StackAuthenticationRequest();
-        stackauth.setPublicKey(TestParameter.get("integrationtest.publicKeyFile").substring(BEGIN_INDEX));
+        stackauth.setPublicKey(getTestParameter().get("integrationtest.publicKeyFile").substring(BEGIN_INDEX));
         return stackauth;
     }
 
@@ -57,19 +58,19 @@ public class AzureCloudProvider extends CloudProviderHelper {
     TemplateV2Request template() {
         TemplateV2Request t = new TemplateV2Request();
         String instanceTypeDefaultValue = "Standard_D3_v2";
-        String instanceTypeParam = TestParameter.get("azureInstanceType");
+        String instanceTypeParam = getTestParameter().get("azureInstanceType");
         t.setInstanceType(instanceTypeParam == null ? instanceTypeDefaultValue : instanceTypeParam);
 
         int volumeCountDefault = 1;
-        String volumeCountParam = TestParameter.get("azureInstanceVolumeCount");
+        String volumeCountParam = getTestParameter().get("azureInstanceVolumeCount");
         t.setVolumeCount(volumeCountParam == null ? volumeCountDefault : Integer.parseInt(volumeCountParam));
 
         int volumeSizeDefault = 10;
-        String volumeSizeParam = TestParameter.get("azureInstanceVolumeSize");
+        String volumeSizeParam = getTestParameter().get("azureInstanceVolumeSize");
         t.setVolumeSize(volumeSizeParam == null ? volumeSizeDefault : Integer.parseInt(volumeSizeParam));
 
         String volumeTypeDefault = "Standard_LRS";
-        String volumeTypeParam = TestParameter.get("azureInstanceVolumeType");
+        String volumeTypeParam = getTestParameter().get("azureInstanceVolumeType");
         t.setVolumeType(volumeTypeParam == null ? volumeTypeDefault : volumeTypeParam);
 
         Map<String, Object> params = new HashMap<>();
@@ -81,16 +82,16 @@ public class AzureCloudProvider extends CloudProviderHelper {
 
     @Override
     public String getClusterDefaultName() {
-        String clustername = TestParameter.get("azureClusterName");
+        String clustername = getTestParameter().get("azureClusterName");
         return clustername == null ? AZURE_CLUSTER_DEFAULT_NAME : clustername;
     }
 
     Map<String, Object> azureCredentialDetails() {
         Map<String, Object> map = new HashMap<String, Object>();
-        map.put("accessKey", TestParameter.get("integrationtest.azurermcredential.accessKey"));
-        map.put("secretKey", TestParameter.get("integrationtest.azurermcredential.secretKey"));
-        map.put("subscriptionId", TestParameter.get("integrationtest.azurermcredential.subscriptionId"));
-        map.put("tenantId", TestParameter.get("integrationtest.azurermcredential.tenantId"));
+        map.put("accessKey", getTestParameter().get("integrationtest.azurermcredential.accessKey"));
+        map.put("secretKey", getTestParameter().get("integrationtest.azurermcredential.secretKey"));
+        map.put("subscriptionId", getTestParameter().get("integrationtest.azurermcredential.subscriptionId"));
+        map.put("tenantId", getTestParameter().get("integrationtest.azurermcredential.tenantId"));
 
         return map;
     }

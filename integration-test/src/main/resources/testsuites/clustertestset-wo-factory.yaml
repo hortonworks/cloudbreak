@@ -1,0 +1,34 @@
+name: Cluster_tests
+parallel: instances
+parameters:
+  cleanUp: false
+
+tests:
+  - name: aws_cluster_test
+    parameters:
+      provider: aws
+    classes:
+      - name: com.sequenceiq.it.cloudbreak.ClusterTests
+        excludedMethods:
+          - testScaleCluster
+  - name: openstack_cluster_test
+    parameters:
+      provider: openstack
+    classes:
+      - name: com.sequenceiq.it.cloudbreak.ClusterTests
+        excludedMethods:
+          - testScaleCluster
+  - name: azure_cluster_test
+    parameters:
+      provider: azure
+    classes:
+      - name: com.sequenceiq.it.cloudbreak.ClusterTests
+        excludedMethods:
+          - testScaleCluster
+  - name: gcp_cluster_test
+    parameters:
+      provider: gcp
+    classes:
+      - name: com.sequenceiq.it.cloudbreak.ClusterTests
+        excludedMethods:
+          - testScaleCluster
