@@ -265,7 +265,7 @@ func assembleReinstallRequest(c *cli.Context) *models_cloudbreak.ReinstallReques
 	if len(bpName) != 0 {
 		req.BlueprintName = &bpName
 	}
-	if len(*req.BlueprintName) == 0 {
+	if req.BlueprintName == nil || len(*req.BlueprintName) == 0 {
 		utils.LogErrorMessageAndExit("Name of the blueprint must be set either in the template or with the --blueprint-name command line option.")
 	}
 
