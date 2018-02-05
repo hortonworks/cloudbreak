@@ -25,7 +25,7 @@ load ../utils/mock_parameters
 }
 
 @test "Check credential create Azure" {
-  OUTPUT=$(create-credential-azure $AZURE_ARGS 2>&1 | tail -n 2 | head -n 1)
+  OUTPUT=$(create-credential-azure $ARM_ARGS 2>&1 | tail -n 2 | head -n 1)
 
   [[ "${OUTPUT}" == *"credential created: aeiou"* ]]
   [[ "${OUTPUT}" != *"error"* ]]
