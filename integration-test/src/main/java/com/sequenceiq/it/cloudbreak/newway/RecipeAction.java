@@ -50,4 +50,9 @@ public class RecipeAction {
     public static void createInGiven(IntegrationTestContext integrationTestContext, Entity entity) {
         post(integrationTestContext, entity);
     }
+
+    public static void createDeleteInGiven(IntegrationTestContext integrationTestContext, Entity entity) {
+        post(integrationTestContext, entity);
+        delete(integrationTestContext, entity);
+    }
 }

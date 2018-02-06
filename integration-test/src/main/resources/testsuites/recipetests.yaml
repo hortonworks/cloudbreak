@@ -1,0 +1,9 @@
+name: Recipe_tests
+parallel: "instances"
+parameters:
+  cleanUp: false
+
+tests:
+  - name: recipe_test
+    classes:
+      - com.sequenceiq.it.cloudbreak.RecipeTests
