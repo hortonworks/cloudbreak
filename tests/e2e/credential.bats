@@ -1,4 +1,5 @@
 #!/usr/bin/env bats
+
 load ../commands
 load ../utils/e2e_parameters
 
