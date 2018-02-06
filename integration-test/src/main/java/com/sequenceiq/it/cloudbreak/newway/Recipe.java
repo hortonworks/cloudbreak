@@ -1,9 +1,9 @@
 package com.sequenceiq.it.cloudbreak.newway;
 
-import com.sequenceiq.it.IntegrationTestContext;
-
 import java.util.function.BiConsumer;
 import java.util.function.Function;
+
+import com.sequenceiq.it.IntegrationTestContext;
 
 public class Recipe extends RecipeEntity {
 
@@ -25,8 +25,14 @@ public class Recipe extends RecipeEntity {
         return recipe;
     }
 
+    public static Recipe isCreatedDeleted() {
+        Recipe recipe = new Recipe();
+        recipe.setCreationStrategy(RecipeAction::createDeleteInGiven);
+        return recipe;
+    }
+
     public static Action<Recipe> post(String key) {
-        return new Action<Recipe>(getTestContext(key), CredentialAction::post);
+        return new Action<Recipe>(getTestContext(key), RecipeAction::post);
     }
 
     public static Action<Recipe> post() {
