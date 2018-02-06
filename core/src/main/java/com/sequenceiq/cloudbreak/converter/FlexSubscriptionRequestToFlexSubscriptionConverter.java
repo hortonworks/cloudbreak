@@ -22,7 +22,7 @@ public class FlexSubscriptionRequestToFlexSubscriptionConverter extends Abstract
         FlexSubscription subscription = new FlexSubscription();
         subscription.setName(source.getName());
         subscription.setSubscriptionId(source.getSubscriptionId());
-        subscription.setDefault(source.isDefault());
+        subscription.setDefault(source.getUsedAsDefault());
         subscription.setUsedForController(source.isUsedForController());
         Long smartSenseSubscriptionId = source.getSmartSenseSubscriptionId();
         try {
