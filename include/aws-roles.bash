@@ -252,7 +252,14 @@ aws-generate-inline-role-policy() {
                 "ec2:DescribeSpotInstanceRequests",
                 "ec2:DescribeVpcAttribute",
                 "ec2:ImportKeyPair",
-                "ec2:AttachInternetGateway"
+                "ec2:AttachInternetGateway",
+                "ec2:DeleteVpc",
+                "ec2:DeleteSecurityGroup",
+                "ec2:DeleteRouteTable",
+                "ec2:DeleteInternetGateway",
+                "ec2:DeleteRouteTable",
+                "ec2:DeleteRoute",
+                "ec2:DetachInternetGateway"
             ],
             "Resource": [
                 "*"
