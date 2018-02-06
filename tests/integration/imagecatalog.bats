@@ -1,6 +1,6 @@
 #!/usr/bin/env bats
 
-load ../commands
+load ../utils/commands
 
 @test "List imagecatalog" {
   for OUTPUT in $(list-image-catalog  | jq ' .[0] | [to_entries[].key] == ["Name","Default","URL"]');

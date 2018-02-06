@@ -1,119 +1,145 @@
 {
-  "cluster": {
-    "ambari": {
-      "blueprintInputs": [],
-      "blueprintName": "EDW-ETL: Apache Hive 1.2.1, Apache Spark 1.6",
-      "password": "admin",
-      "userName": "admin"
-    }
-  },
   "general": {
     "credentialName": "openstack",
     "name": ""
   },
   "placement": {
-    "region": "local",
-    "availabilityZone": "null"
+    "availabilityZone": "nova",
+    "region": "RegionOne"
+  },
+  "tags": {
+    "userDefinedTags": {
+      "kisnyul": "pityuka",
+      "+-=. _:/@": "+-=. _:/@"
+
+    }
+  },
+  "cluster": {
+    "ambari": {
+      "userName": "admin",
+      "password": "Admin123!@#\"",
+      "blueprintName": "EDW-Analytics: Apache Hive 2 LLAP, Apache Zeppelin 0.7.0",
+      "ambariStackDetails": {
+        "stack": "HDP",
+        "version": "2.6",
+        "verify": false,
+        "enableGplRepo": false
+      },
+      "gateway": {
+        "enableGateway": false,
+        "gatewayType": "INDIVIDUAL"
+      },
+      "validateBlueprint": false,
+      "ambariSecurityMasterKey": ""
+    }
+  },
+  "imageSettings": {
+    "imageId": "7325f106-ab4f-481f-70a4-a5c5e5a18d3c",
+    "imageCatalog": "cloudbreak-default"
   },
   "instanceGroups": [
     {
+      "parameters": {},
+      "template": {
+        "parameters": {
+          "encrypted": false
+        },
+        "instanceType": "cloudbreak",
+        "volumeType": "HDD",
+        "volumeCount": 0,
+        "volumeSize": 100
+      },
+      "nodeCount": 1,
       "group": "master",
-      "nodeCount": 1,
+      "type": "GATEWAY",
+      "recoveryMode": "MANUAL",
       "recipeNames": [],
       "securityGroup": {
         "securityRules": [
           {
-            "ports": "22",
-            "protocol": "tcp",
-            "subnet": "0.0.0.0/0"
-          },
-          {
-            "ports": "443",
-            "protocol": "tcp",
-            "subnet": "0.0.0.0/0"
-          },
-          {
+            "subnet": "0.0.0.0/0",
             "ports": "9443",
+            "protocol": "tcp"
+          },
+          {
+            "subnet": "0.0.0.0/0",
+            "ports": "22",
+            "protocol": "tcp"
+          },
+          {
+            "subnet": "0.0.0.0/0",
             "protocol": "tcp",
-            "subnet": "0.0.0.0/0"
+            "ports": "22"
+          },
+          {
+            "subnet": "0.0.0.0/0",
+            "protocol": "tcp",
+            "ports": "443"
           }
         ]
-      },
-      "template": {
-        "instanceType": "m1.large",
-        "volumeCount": 1,
-        "volumeSize": 10
-      },
-      "type": "GATEWAY"
+      }
     },
     {
+      "parameters": {},
+      "template": {
+        "parameters": {
+          "encrypted": false
+        },
+        "instanceType": "cloudbreak",
+        "volumeType": "HDD",
+        "volumeCount": 0,
+        "volumeSize": 100
+      },
+      "nodeCount": 3,
       "group": "worker",
-      "nodeCount": 1,
+      "type": "CORE",
+      "recoveryMode": "MANUAL",
       "recipeNames": [],
       "securityGroup": {
         "securityRules": [
           {
-            "ports": "22",
+            "subnet": "0.0.0.0/0",
             "protocol": "tcp",
-            "subnet": "0.0.0.0/0"
-          },
-          {
-            "ports": "443",
-            "protocol": "tcp",
-            "subnet": "0.0.0.0/0"
-          },
-          {
-            "ports": "9443",
-            "protocol": "tcp",
-            "subnet": "0.0.0.0/0"
+            "ports": "22"
           }
         ]
-      },
-      "template": {
-        "instanceType": "m1.large",
-        "volumeCount": 1,
-        "volumeSize": 10
-      },
-      "type": "CORE"
+      }
     },
     {
+      "parameters": {},
+      "template": {
+        "parameters": {
+          "encrypted": false
+        },
+        "instanceType": "cloudbreak",
+        "volumeType": "HDD",
+        "volumeCount": 0,
+        "volumeSize": 100
+      },
+      "nodeCount": 0,
       "group": "compute",
-      "nodeCount": 1,
+      "type": "CORE",
+      "recoveryMode": "MANUAL",
       "recipeNames": [],
       "securityGroup": {
         "securityRules": [
           {
-            "ports": "22",
+            "subnet": "0.0.0.0/0",
             "protocol": "tcp",
-            "subnet": "0.0.0.0/0"
-          },
-          {
-            "ports": "443",
-            "protocol": "tcp",
-            "subnet": "0.0.0.0/0"
-          },
-          {
-            "ports": "9443",
-            "protocol": "tcp",
-            "subnet": "0.0.0.0/0"
+            "ports": "22"
           }
         ]
-      },
-      "template": {
-        "instanceType": "m1.large",
-        "volumeCount": 1,
-        "volumeSize": 10
-      },
-      "type": "CORE"
+      }
     }
   ],
   "network": {
     "parameters": {
-      "publicNetId": "999e09bc-cf75-4a19-98fb-c0b4ddee6d93"
-    },
-    "subnetCIDR": "10.0.0.0/16"
+      "subnetId": "0404bf21-db5f-4987-8576-e65a4a99b14e",
+      "networkingOption": "self-service",
+      "networkId": "a5ad7a1d-d3a6-4180-8d61-07a23f6fb449"
+    }
   },
   "stackAuthentication": {
-    "publicKey": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC0Rfl2G2vDs6yc19RxCqReunFgpYj+ucyLobpTCBtfDwzIbJot2Fmife6M42mBtiTmAK6x8kcUEeab6CB4MUzsqF7vGTFUjwWirG/XU5pYXFUBhi8xzey+KS9KVrQ+UuKJh/AN9iSQeMV+rgT1yF5+etVH+bK1/37QCKp3+mCqjFzPyQOrvkGZv4sYyRwX7BKBLleQmIVWpofpjT7BfcCxH877RzC5YMIi65aBc82Dl6tH6OEiP7mzByU52yvH6JFuwZ/9fWj1vXCWJzxx2w0F1OU8Zwg8gNNzL+SVb9+xfBE7xBHMpYFg72hBWPh862Ce36F4NZd3MpWMSjMmpDPh"
+    "publicKeyId": "seq-master"
   }
 }

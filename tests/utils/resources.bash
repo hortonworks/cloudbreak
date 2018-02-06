@@ -1,28 +1,27 @@
 #!/usr/bin/env bash
 
-function wait-stack-status() {
-    param1=$3
-    export param1
-    is_status=false
-    while [ $SECONDS -lt $1 ] && [ $is_status == false ]
-    do
-	sleep 30
-	is_status=$(describe-cluster --name $2 | jq -r '."status"==env.param1')
-    done
-    [ $is_status == true ]
-}
-
-function stack-is-status() {
-    is_status="false"
-
-	is_status=$(cb cluster describe --name $1 | jq -r '."status" == "$2"')
-
-    if [[ "${is_status}" == "false" ]]; then
-        echo $(cb cluster describe --name $1 | jq -r '."statusReason"')
-    else
-        echo "${is_status}"
-    fi
-}
+# Clusbreak statuses are implemented as:
+# https://github.com/hortonworks/cloudbreak/blob/master/core-api/src/main/java/com/sequenceiq/cloudbreak/api/model/Status.java
+# REQUESTED,
+# CREATE_IN_PROGRESS,
+# AVAILABLE,
+# UPDATE_IN_PROGRESS,
+# UPDATE_REQUESTED,
+# UPDATE_FAILED,
+# CREATE_FAILED,
+# ENABLE_SECURITY_FAILED,
+# PRE_DELETE_IN_PROGRESS,
+# DELETE_IN_PROGRESS,
+# DELETE_FAILED,
+# DELETE_COMPLETED,
+# STOPPED,
+# STOP_REQUESTED,
+# START_REQUESTED,
+# STOP_IN_PROGRESS,
+# START_IN_PROGRESS,
+# START_FAILED,
+# STOP_FAILED,
+# WAIT_FOR_SYNC
 
 function wait-cluster-status() {
     is_status="false"
@@ -33,7 +32,7 @@ function wait-cluster-status() {
 	    is_status=$(cb cluster describe --name $2 | jq -r '."status" == "$3"')
     done
 
-    if [[ "${is_status}" == "false" ]]; then
+    if [[ "${is_status}" != "true" ]]; then
         echo $(cb cluster describe --name $2 | jq -r '."statusReason"')
     else
         echo "${is_status}"
@@ -41,11 +40,15 @@ function wait-cluster-status() {
 }
 
 function cluster-is-status() {
-    param1=$2
-    export param1
-    is_status=false
-	is_status=$(describe-cluster --name $1 | jq -r ' ."cluster" | ."status"==env.param1')
-    [ $is_status == true ]
+    is_status="false"
+
+	is_status=$(cb cluster describe --name $1 | jq -r '."status" == "$2"')
+
+    if [[ "${is_status}" != "true" ]]; then
+        echo $(cb cluster describe --name $1 | jq -r '."statusReason"')
+    else
+        echo "${is_status}"
+    fi
 }
 
 function wait-stack-cluster-status() {
@@ -110,13 +113,14 @@ function wait-cluster-delete() {
 }
 
 function remove-stuck-cluster() {
-  if [[ $(cb cluster list | jq -r '.[].Name' | grep "$1") ]]; then
-    cb --debug cluster delete --name "$1" --wait
+  if [[ $(cb cluster list | jq -r '.[].Name' | grep $1) ]]; then
+    cb cluster delete --name $1 --wait
   fi
 }
 
 function remove-stuck-credential() {
-  if [[ $(cb credential list | jq -r '.[].Name' | grep "$1") ]]; then
-    cb --debug credential delete --name "$1"
+  if [[ $(cb credential list | jq -r '.[].Name' | grep $1) ]]; then
+    cb credential delete --name $1
   fi
 }
+

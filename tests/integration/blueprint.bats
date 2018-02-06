@@ -1,6 +1,6 @@
 #!/usr/bin/env bats
 
-load ../commands
+load ../utils/commands
 load ../utils/mock_parameters
 
 @test "Check blueprint create from url" {

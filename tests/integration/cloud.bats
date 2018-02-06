@@ -1,7 +1,7 @@
 #!/usr/bin/env bats
 
-load ../commands
-load ../resources
+load ../utils/commands
+load ../utils/resources
 load ../utils/mock_parameters
 
 @test "Check availability zone list" {

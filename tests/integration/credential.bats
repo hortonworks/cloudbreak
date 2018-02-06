@@ -1,6 +1,6 @@
 #!/usr/bin/env bats
 
-load ../commands
+load ../utils/commands
 load ../utils/mock_parameters
 
 @test "Check CB configure" {
@@ -11,14 +11,14 @@ load ../utils/mock_parameters
 }
 
 @test "Check credential create AWS role based" {
-  OUTPUT=$(create-credential-aws-role --name "${AWS_CREDENTIAL_NAME}" $AWS_ARGS_ROLE 2>&1 | tail -n 2 | head -n 1)
+  OUTPUT=$(create-credential-aws-role $AWS_ARGS_ROLE 2>&1 | tail -n 2 | head -n 1)
 
   [[ "${OUTPUT}" == *"credential created: aeiou"* ]]
   [[ "${OUTPUT}" != *"error"* ]]
 }
 
 @test "Check credential create AWS key based" {
-  OUTPUT=$(create-credential-aws-key --name "${AWS_CREDENTIAL_NAME}" $AWS_ARGS_KEY 2>&1 | tail -n 2 | head -n 1)
+  OUTPUT=$(create-credential-aws-key $AWS_ARGS_KEY 2>&1 | tail -n 2 | head -n 1)
 
   [[ "${OUTPUT}" == *"credential created: aeiou"* ]]
   [[ "${OUTPUT}" != *"error"* ]]
@@ -32,14 +32,14 @@ load ../utils/mock_parameters
 }
 
 @test "Check credential create OpenStack V2" {
-  OUTPUT=$(create-credential-openstack-v2 $OPENSTACK_ARGS_V2 2>&1 | tail -n 2 | head -n 1)
+  OUTPUT=$(create-credential-openstack-v2 $OS_ARGS_V2 2>&1 | tail -n 2 | head -n 1)
 
   [[ "${OUTPUT}" == *"credential created: aeiou"* ]]
   [[ "${OUTPUT}" != *"error"* ]]
 }
 
 @test "Check credential create OpenStack V3" {
-  OUTPUT=$(create-credential-openstack-v3 $OPENSTACK_ARGS_V3 2>&1 | tail -n 2 | head -n 1)
+  OUTPUT=$(create-credential-openstack-v3 $OS_ARGS_V3 2>&1 | tail -n 2 | head -n 1)
 
   [[ "${OUTPUT}" == *"credential created: aeiou"* ]]
   [[ "${OUTPUT}" != *"error"* ]]

@@ -1,35 +1,35 @@
 #!/usr/bin/env bash
 
-load ../commands
-load ../resources
-load ../utils/e2e_parameters
+load ../utils/commands
+load ../utils/resources
 
 DELAY=$(($SECONDS+2100))
 
-@test "PRECONDITION - Create new AWS Role Based credential" {
-  run remove-stuck-credential "${AWS_CREDENTIAL_NAME}"
+@test "PRECONDITION: Create new OpenStack V2 credential" {
+  run remove-stuck-credential "${OS_CREDENTIAL_NAME}"
+  echo "$output" >&2
 
-  OUTPUT=$(create-credential-aws-role --name "${AWS_CREDENTIAL_NAME}" $AWS_ARGS_ROLE 2>&1 | tail -n 2 | head -n 1)
-
-  echo "${OUTPUT}" >&2
-
-  [[ "${OUTPUT}" == *"credential created: ${AWS_CREDENTIAL_NAME}"* ]]
-  [[ "${OUTPUT}" != *"error"* ]]
-}
-
-@test "Create new AWS cluster" {
-  run remove-stuck-cluster "${AWS_CLUSTER_NAME}"
-
-  OUTPUT=$(create-cluster --name "${AWS_CLUSTER_NAME}" --cli-input-json $AWS_INPUT_JSON_FILE 2>&1 | tail -n 2 | head -n 1)
+  OUTPUT=$(create-credential-openstack-v2 $OS_ARGS_V2 2>&1 | tail -n 2 | head -n 1)
 
   echo "${OUTPUT}" >&2
 
-  [[ "${OUTPUT}" == *"stack created: ${AWS_CLUSTER_NAME}"* ]]
+  [[ "${OUTPUT}" == *"credential created: ${OS_CREDENTIAL_NAME}"* ]]
   [[ "${OUTPUT}" != *"error"* ]]
 }
 
-@test "Cluster create - wait for cluster is created" {
-  run wait-cluster-status $DELAY "${AWS_CLUSTER_NAME}" "AVAILABLE"
+@test "Create new OpenStack cluster" {
+  run remove-stuck-cluster "${OS_CLUSTER_NAME}"
+
+  OUTPUT=$(create-cluster --name "${OS_CLUSTER_NAME}" --cli-input-json $OS_INPUT_JSON_FILE 2>&1 | tail -n 2 | head -n 1)
+
+  echo "${OUTPUT}" >&2
+
+  [[ "${OUTPUT}" == *"stack created: ${OS_CLUSTER_NAME}"* ]]
+  [[ "${OUTPUT}" != *"error"* ]]
+}
+
+@test "Wait for new cluster is created" {
+  run wait-cluster-status $DELAY "${OS_CLUSTER_NAME}" "AVAILABLE"
 
   echo "$output" >&2
 
@@ -37,41 +37,55 @@ DELAY=$(($SECONDS+2100))
   [ "$output" = "true" ]
 }
 
-@test "Change ambari pwd" {
-  OUTPUT=$(change-ambari-password --name "${AWS_CLUSTER_NAME}" --old-password admin --new-password 4321 --ambari-user admin 2>&1 | awk '{printf "%s",$0} END {print ""}' | grep -o '{.*}' | jq ' . |  [to_entries[].key] == ["oldPassword","password","userName"]')
+@test "Change Ambari password for previously created cluster" {
+  run cluster-is-status "${OS_CLUSTER_NAME}" "AVAILABLE"
+  if [[ "$output" != "true" ]]; then
+    skip "Cluster is NOT created yet!"
+  fi
+
+  OUTPUT=$(change-ambari-password --name "${OS_CLUSTER_NAME}" --old-password admin --new-password 4321 --ambari-user admin 2>&1 | awk '{printf "%s",$0} END {print ""}' | grep -o '{.*}' | jq ' . |  [to_entries[].key] == ["oldPassword","password","userName"]')
 
   [[ "${OUTPUT}" ==  true ]]
 }
 
-@test "Cluster is listed" {
+@test "Previously created cluster should be listed" {
+  run cluster-is-status "${OS_CLUSTER_NAME}" "AVAILABLE"
+  if [[ "$output" != "true" ]]; then
+    skip "Cluster is NOT created yet!"
+  fi
+
   for OUTPUT in $(list-clusters | jq ' .[] | [to_entries[].key] == ["Name","Description","CloudPlatform","StackStatus","ClusterStatus"]');
   do
     [[ "$OUTPUT" == "true" ]]
   done
- }
+}
 
-@test "Cluster is described" {
-  OUTPUT=$(describe-cluster --name "${AWS_CLUSTER_NAME}" | jq '. "name" == "${AWS_CLUSTER_NAME}"')
+@test "Previously created cluster should be described" {
+  run cluster-is-status "${OS_CLUSTER_NAME}" "AVAILABLE"
+  if [[ "$output" != "true" ]]; then
+    skip "Cluster is NOT created yet!"
+  fi
+
+  OUTPUT=$(describe-cluster --name "${OS_CLUSTER_NAME}" | jq '. "name" == "${OS_CLUSTER_NAME}"')
 
   [[ "$OUTPUT" == "true" ]]
 }
 
-@test "Stop cluster" {
-  run stack-is-status "${AWS_CLUSTER_NAME}" "AVAILABLE"
-
-  if [[ $status -eq 1 ]]; then
-    skip "Cluster is not available skipping stop test"
-  else
-    OUTPUT=$(stop-cluster --name "${AWS_CLUSTER_NAME}")
-
-    echo $OUTPUT >&2
-
-    [[ "${OUTPUT}" != *"error"* ]]
+@test "Previously created cluster can be stop" {
+  run cluster-is-status "${OS_CLUSTER_NAME}" "AVAILABLE"
+  if [[ "$output" != "true" ]]; then
+    skip "Cluster is NOT created yet!"
   fi
+
+  OUTPUT=$(stop-cluster --name "${OS_CLUSTER_NAME}")
+
+  echo $OUTPUT >&2
+
+  [[ "${OUTPUT}" != *"error"* ]]
 }
 
-@test "Stop cluster - waiting for cluster is stopped" {
-  run wait-cluster-status $DELAY "${AWS_CLUSTER_NAME}" "STOPPED"
+@test "Previously created cluster should be stopped" {
+  run wait-cluster-status $DELAY "${OS_CLUSTER_NAME}" "STOPPED"
 
   echo "$output" >&2
 
@@ -79,22 +93,21 @@ DELAY=$(($SECONDS+2100))
   [ "$output" = "true" ]
 }
 
-@test "Start cluster" {
-  run stack-is-status "${AWS_CLUSTER_NAME}" "STOPPED"
-
-  if [ $status -eq 1 ]; then
-    skip "Cluster is not stopped skipping start test"
-  else
-    OUTPUT=$( start-cluster --name "${AWS_CLUSTER_NAME}")
-
-    echo $OUTPUT >&2
-
-    [[ "${OUTPUT}" != *"error"* ]]
+@test "Previously created cluster can be start" {
+  run cluster-is-status "${OS_CLUSTER_NAME}" "STOPPED"
+  if [[ "$output" != "true" ]]; then
+    skip "Cluster has not been stopped"
   fi
+
+  OUTPUT=$(start-cluster --name "${OS_CLUSTER_NAME}")
+
+  echo $OUTPUT >&2
+
+  [[ "${OUTPUT}" != *"error"* ]]
 }
 
-@test "Start cluster - waiting for cluster is available" {
-  run wait-cluster-status $DELAY "${AWS_CLUSTER_NAME}" "AVAILABLE"
+@test "Previously created cluster should be started" {
+  run wait-cluster-status $DELAY "${OS_CLUSTER_NAME}" "AVAILABLE"
 
   echo "$output" >&2
 
@@ -102,26 +115,36 @@ DELAY=$(($SECONDS+2100))
   [ "$output" = "true" ]
 }
 
-@test "Cluster upscaling" {
-  skip
-  CHECK_RESULT=$( describe-cluster --name "${AWS_CLUSTER_NAME}" | jq ' ."instanceGroups" | .[] | select(."group"=="compute") | . "nodeCount" ')
+@test "Previously created cluster can be upscale" {
+  run cluster-is-status "${OS_CLUSTER_NAME}" "AVAILABLE"
+  if [[ "$output" != "true" ]]; then
+    skip "Cluster is NOT created yet!"
+  fi
+
+  CHECK_RESULT=$(describe-cluster --name "${OS_CLUSTER_NAME}" | jq ' ."instanceGroups" | .[] | select(."group"=="compute") | . "nodeCount"')
   INSTANCE_COUNT_DESIRED=$(($CHECK_RESULT + 1))
+
   echo $INSTANCE_COUNT_DESIRED > /tmp/clitestutil
-  run scale-cluster --name "${AWS_CLUSTER_NAME}" --group-name compute --desired-node-count $INSTANCE_COUNT_DESIRED
-  [ $status = 0 ]
+
+  run scale-cluster --name "${OS_CLUSTER_NAME}" --group-name compute --desired-node-count $INSTANCE_COUNT_DESIRED
+  [ $status -eq 0 ]
 }
 
-@test "Cluster upscaling - check cluster is available" {
-  skip
+@test "Previously created cluster should be upscaled" {
+  run cluster-is-status "${OS_CLUSTER_NAME}" "AVAILABLE"
+  if [[ "$output" != "true" ]]; then
+    skip "Cluster is NOT created yet!"
+  fi
+
   INSTANCE_COUNT_DESIRED=`cat /tmp/clitestutil`
   echo $INSTANCE_COUNT_DESIRED
 
-  run wait-stack-cluster-status $DELAY "${AWS_CLUSTER_NAME}" AVAILABLE
+  run wait-stack-cluster-status $DELAY "${OS_CLUSTER_NAME}" AVAILABLE
   status_available=$status
 
-  run node-count-are-equal $AWS_CLUSTER_NAME
+  run node-count-are-equal $OS_CLUSTER_NAME
 
-  INSTANCE_COUNT_CURRENT=$(describe-cluster --name "${AWS_CLUSTER_NAME}" | jq ' ."instanceGroups" | .[] | select(."group"=="compute") | . "nodeCount" ')
+  INSTANCE_COUNT_CURRENT=$(describe-cluster --name "${OS_CLUSTER_NAME}" | jq ' ."instanceGroups" | .[] | select(."group"=="compute") | . "nodeCount" ')
   echo $INSTANCE_COUNT_CURRENT
 
   STATUS_REASON=`cat /tmp/status_reason`
@@ -129,28 +152,37 @@ DELAY=$(($SECONDS+2100))
   [ $status_available = 0 ] && [ $status = 0 ] && [ $INSTANCE_COUNT_DESIRED = $INSTANCE_COUNT_CURRENT ]
 }
 
-@test "Cluster downscaling" {
-  skip
-  CHECK_RESULT=$( describe-cluster --name "${AWS_CLUSTER_NAME}" | jq ' ."instanceGroups" | .[] | select(."group"=="compute") | . "nodeCount" ')
+@test "Previously created cluster can be downscale" {
+  run cluster-is-status "${OS_CLUSTER_NAME}" "AVAILABLE"
+  if [[ "$output" != "true" ]]; then
+    skip "Cluster is NOT created yet!"
+  fi
+
+  CHECK_RESULT=$( describe-cluster --name "${OS_CLUSTER_NAME}" | jq ' ."instanceGroups" | .[] | select(."group"=="compute") | . "nodeCount" ')
   INSTANCE_COUNT_DESIRED=$(($CHECK_RESULT - 1))
+
   echo $INSTANCE_COUNT_DESIRED > /tmp/clitestutil
 
-  run scale-cluster --name "${AWS_CLUSTER_NAME}" --group-name compute --desired-node-count $INSTANCE_COUNT_DESIRED
-  echo $output
-  [ $status = 0 ]
+  run scale-cluster --name "${OS_CLUSTER_NAME}" --group-name compute --desired-node-count $INSTANCE_COUNT_DESIRED
+  echo "$output" >&2
+  [ $status -eq 0 ]
 }
 
-@test "Cluster downscaling - check cluster is available" {
-  skip
+@test "Previously created cluster should be downscaled" {
+  run cluster-is-status "${OS_CLUSTER_NAME}" "AVAILABLE"
+  if [[ "$output" != "true" ]]; then
+    skip "Cluster is NOT created yet!"
+  fi
+
   INSTANCE_COUNT_DESIRED=`cat /tmp/clitestutil`
   echo $INSTANCE_COUNT_DESIRED
 
-  run wait-stack-cluster-status $DELAY "${AWS_CLUSTER_NAME}" AVAILABLE
+  run wait-stack-cluster-status $DELAY "${OS_CLUSTER_NAME}" AVAILABLE
   status_available=$status
 
-  run node-count-are-equal "${AWS_CLUSTER_NAME}"
+  run node-count-are-equal "${OS_CLUSTER_NAME}"
 
-  INSTANCE_COUNT_CURRENT=$(describe-cluster --name "${AWS_CLUSTER_NAME}" | jq ' ."instanceGroups" | .[] | select(."group"=="compute") | . "nodeCount" ')
+  INSTANCE_COUNT_CURRENT=$(describe-cluster --name "${OS_CLUSTER_NAME}" | jq ' ."instanceGroups" | .[] | select(."group"=="compute") | . "nodeCount" ')
   echo $INSTANCE_COUNT_CURRENT
 
   STATUS_REASON=`cat /tmp/status_reason`
@@ -160,25 +192,25 @@ DELAY=$(($SECONDS+2100))
 }
 
 @test "Generate reinstall template" {
-  OUTPUT=$(generate-reinstall-template --name "${AWS_CLUSTER_NAME}" --blueprint-name "${BLUEPRINT_NAME}" | jq .blueprintName -r)
+  OUTPUT=$(generate-reinstall-template --name "${OS_CLUSTER_NAME}" --blueprint-name "${BLUEPRINT_NAME}" | jq .blueprintName -r)
 
   echo "${OUTPUT}" >&2
 
   [[ "${OUTPUT}" == "${BLUEPRINT_NAME}" ]]
 }
 
-@test "Teardown: delete cluster, credential" {
-  OUTPUT=$(delete-cluster --name "${AWS_CLUSTER_NAME}")
+@test "TEARDOWN: Delete cluster then credential" {
+  OUTPUT=$(delete-cluster --name "${OS_CLUSTER_NAME}" --wait)
   echo "${OUTPUT}" >&2
 
-  run wait-cluster-delete $DELAY "${AWS_CLUSTER_NAME}"
+  run wait-cluster-delete $DELAY "${OS_CLUSTER_NAME}"
   [ $status = 0 ]
 
-  CHECK_RESULT=$( delete-credential --name "${AWS_CREDENTIAL_NAME}" )
+  CHECK_RESULT=$( delete-credential --name "${OS_CREDENTIAL_NAME}" )
   echo $CHECK_RESULT >&2
 }
 
-@test "Teardown: delete testutil" {
+@test "TEARDOWN: Delete temporary files" {
   CHECK_RESULT=$( rm -f /tmp/status_reason )
   echo $CHECK_RESULT >&2
 

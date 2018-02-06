@@ -1,6 +1,6 @@
 #!/usr/bin/env bats
 
-load ../commands
+load ../utils/commands
 
 @test "list ldaps" {
   list-ldaps 

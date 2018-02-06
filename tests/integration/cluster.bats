@@ -1,6 +1,6 @@
 #!/usr/bin/env bats
 
-load ../commands
+load ../utils/commands
 load ../utils/mock_parameters
 
 @test "Check cluster list" {
@@ -18,9 +18,9 @@ load ../utils/mock_parameters
 }
 
 @test "Check cluster describe result" {
-  OUTPUT=$(describe-cluster --name "${OPENSTACK_CLUSTER_NAME}" | jq .name -r)
+  OUTPUT=$(describe-cluster --name "${OS_CLUSTER_NAME}" | jq .name -r)
 
-  [[ "${OUTPUT}" == "${OPENSTACK_CLUSTER_NAME}" ]]
+  [[ "${OUTPUT}" == "${OS_CLUSTER_NAME}" ]]
 }
 
 @test "Check cluster describe FAILED" {
@@ -31,7 +31,7 @@ load ../utils/mock_parameters
 }
 
 @test "Check cluster delete SUCCESS" {
-  OUTPUT=$(delete-cluster --name "${OPENSTACK_CLUSTER_NAME}" 2>&1 | tail -n 2 | head -n 1)
+  OUTPUT=$(delete-cluster --name "${OS_CLUSTER_NAME}" 2>&1 | tail -n 2 | head -n 1)
 
   [[ "${OUTPUT}" == *"stack deleted, name: openstack-cluster"* ]]
   [[ "${OUTPUT}" != *"error"* ]]
@@ -45,7 +45,7 @@ load ../utils/mock_parameters
 }
 
 @test "Check cluster start SUCCESS" {
-  OUTPUT=$(start-cluster --name "${OPENSTACK_CLUSTER_NAME}" 2>&1 | tail -n 2 | head -n 1)
+  OUTPUT=$(start-cluster --name "${OS_CLUSTER_NAME}" 2>&1 | tail -n 2 | head -n 1)
 
   [[ "${OUTPUT}" == *"stack started, name: openstack-cluster"* ]]
   [[ "${OUTPUT}" != *"error"* ]]
@@ -60,7 +60,7 @@ load ../utils/mock_parameters
 }
 
 @test "Check clusters top SUCCESS" {
-  OUTPUT=$(stop-cluster --name "${OPENSTACK_CLUSTER_NAME}" 2>&1 | tail -n 2 | head -n 1)
+  OUTPUT=$(stop-cluster --name "${OS_CLUSTER_NAME}" 2>&1 | tail -n 2 | head -n 1)
 
   [[ "${OUTPUT}" == *"stack stopted, name: openstack-cluster"* ]]
   [[ "${OUTPUT}" != *"error"* ]]
@@ -74,7 +74,7 @@ load ../utils/mock_parameters
 }
 
 @test "Check cluster sync SUCCESS" {
-  OUTPUT=$(sync-cluster --name "${OPENSTACK_CLUSTER_NAME}" 2>&1 | tail -n 2 | head -n 1)
+  OUTPUT=$(sync-cluster --name "${OS_CLUSTER_NAME}" 2>&1 | tail -n 2 | head -n 1)
 
   [[ "${OUTPUT}" == *"stack synced, name: openstack-cluster"* ]]
   [[ "${OUTPUT}" != *"error"* ]]
@@ -88,7 +88,7 @@ load ../utils/mock_parameters
 }
 
 @test "Check cluster repair SUCCESS" {
-  OUTPUT=$(repair-cluster --name "${OPENSTACK_CLUSTER_NAME}" 2>&1 | tail -n 2 | head -n 1)
+  OUTPUT=$(repair-cluster --name "${OS_CLUSTER_NAME}" 2>&1 | tail -n 2 | head -n 1)
 
   [[ "${OUTPUT}" == *"stack repaired, name: openstack-cluster"* ]]
   [[ "${OUTPUT}" != *"error"* ]]
@@ -102,7 +102,7 @@ load ../utils/mock_parameters
 }
 
 @test "Check cluster scale SUCCESS" {
-  OUTPUT=$(scale-cluster --name "${OPENSTACK_CLUSTER_NAME}" --group-name worker --desired-node-count 5 2>&1 | tail -n 2 | head -n 1)
+  OUTPUT=$(scale-cluster --name "${OS_CLUSTER_NAME}" --group-name worker --desired-node-count 5 2>&1 | tail -n 2 | head -n 1)
 
   [[ "${OUTPUT}" == *"stack scaled, name: openstack-cluster"* ]]
   [[ "${OUTPUT}" != *"error"* ]]

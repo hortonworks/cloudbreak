@@ -38,10 +38,10 @@
 
 # Input JSON files
 : ${AWS_INPUT_JSON_FILE:="templates/aws-template.json"}
-: ${OPENSTACK_INPUT_JSON_FILE:="templates/openstack-template.json"}
+: ${OS_INPUT_JSON_FILE:="templates/openstack-template.json"}
 
 # Clusters
-: ${OPENSTACK_CLUSTER_NAME:="openstack-cluster"}
+: ${OS_CLUSTER_NAME:="openstack-cluster"}
 : ${AWS_CLUSTER_NAME:="aws-cluster"}
 
 # Credentials
@@ -49,7 +49,6 @@
 : ${AWS_CREDENTIAL_NAME:="amazon"}
 : ${GCP_CREDENTIAL_NAME:="google"}
 : ${OS_CREDENTIAL_NAME:="openstack"}
-: ${TEST_CREDENTIAL_NAME:="test-cred"}
 
 # OpenStack
 : ${OS_V2_ENDPOINT:=http://openstack.eng.com:3000/v2.0}
@@ -64,6 +63,7 @@
 : ${OS_MASTER_SECURITY_GROUP:="aszegedi-master"}
 : ${OS_WORKER_SECURITY_GROUP:="aszegedi-worker"}
 : ${OS_COMPUTE_SECURITY_GROUP:="aszegedi-compute"}
+: ${OS_REGION="RegionOne"}
 
 # Azure
 : ${ARM_SUBSCRIPTION_ID:="a12b1234-1234-12aa-3bcc-4d5e6f78900g"}
@@ -83,11 +83,11 @@
 : ${P12_PATH:=keys/test.p12}
 
 # Credential Arguments
-AWS_ARGS_KEY=" --access-key ${AWS_ACCESS_KEY_ID} --secret-key ${AWS_SECRET_ACCESS_KEY}"
-AWS_ARGS_ROLE=" --role-arn  ${AWS_ROLE_ARN}"
-OPENSTACK_ARGS_V2=" --name ${OS_CREDENTIAL_NAME} --tenant-user ${OS_USERNAME} --tenant-password ${OS_PASSWORD} --tenant-name ${OS_TENANT_NAME} --endpoint ${OS_V2_ENDPOINT}"
-OPENSTACK_ARGS_V3=" --name ${OS_CREDENTIAL_NAME} --tenant-user ${OS_USERNAME} --tenant-password ${OS_PASSWORD} --user-domain ${OS_USER_DOMAIN} --endpoint ${OS_V3_ENDPOINT}"
-GCP_ARGS=" --name ${GCP_CREDENTIAL_NAME} --project-id ${GCP_PROJECT_ID} --service-account-id ${GCP_ACCOUNT_EMAIL} --service-account-private-key-file ${P12_PATH}"
-ARM_ARGS=" --name ${ARM_CREDENTIAL_NAME} --subscription-id ${ARM_SUBSCRIPTION_ID} --tenant-id ${ARM_TENANT_ID} --app-id ${ARM_APP_ID} --app-password ${ARM_PASSWORD}"
+AWS_ARGS_KEY="--name ${AWS_CREDENTIAL_NAME}-key --access-key ${AWS_ACCESS_KEY_ID} --secret-key ${AWS_SECRET_ACCESS_KEY}"
+AWS_ARGS_ROLE="--name ${AWS_CREDENTIAL_NAME}-role --role-arn  ${AWS_ROLE_ARN}"
+OS_ARGS_V2="--name ${OS_CREDENTIAL_NAME}-v2 --tenant-user ${OS_USERNAME} --tenant-password ${OS_PASSWORD} --tenant-name ${OS_TENANT_NAME} --endpoint ${OS_V2_ENDPOINT}"
+OS_ARGS_V3="--name ${OS_CREDENTIAL_NAME}-v3 --tenant-user ${OS_USERNAME} --tenant-password ${OS_PASSWORD} --user-domain ${OS_USER_DOMAIN} --endpoint ${OS_V3_ENDPOINT}"
+GCP_ARGS="--name ${GCP_CREDENTIAL_NAME} --project-id ${GCP_PROJECT_ID} --service-account-id ${GCP_ACCOUNT_EMAIL} --service-account-private-key-file ${P12_PATH}"
+ARM_ARGS="--name ${ARM_CREDENTIAL_NAME} --subscription-id ${ARM_SUBSCRIPTION_ID} --tenant-id ${ARM_TENANT_ID} --app-id ${ARM_APP_ID} --app-password ${ARM_PASSWORD}"
 
 COMMON_ARGS_WO_CLUSTER=" --server ${BASE_URL} --username ${USERNAME_CLI} --password ${PASSWORD_CLI}  "

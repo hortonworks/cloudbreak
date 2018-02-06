@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-load ../commands
-load ../utils/e2e_parameters
+
+load ../utils/commands
 
 @test "Create new image catalog with DEV URL" {
   OUTPUT=$(create-image-catalog --name "${IMAGE_CATALOG_NAME}" --url "${IMAGE_CATALOG_URL}" 2>&1 | tail -n 2 | head -n 1)
