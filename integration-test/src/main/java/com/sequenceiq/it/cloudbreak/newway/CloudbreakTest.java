@@ -91,7 +91,7 @@ public class CloudbreakTest extends GherkinTest {
                     LOGGER.info("processing property source ::: " + propertySource.getName());
                     for (String key : ((EnumerablePropertySource) propertySource).getPropertyNames()) {
                         String value = propertySource.getProperty(key).toString();
-                        if (StringUtils.isEmpty(value)) {
+                        if (!StringUtils.isEmpty(value)) {
                             rtn.put(key, propertySource.getProperty(key).toString());
                         }
                     }
