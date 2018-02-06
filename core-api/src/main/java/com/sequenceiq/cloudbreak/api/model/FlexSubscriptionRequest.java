@@ -25,10 +25,8 @@ public class FlexSubscriptionRequest implements JsonEntity {
     @ApiModelProperty(value = FlexSubscriptionModelDescription.SMARTSENSE_SUBSCRIPTION_ID, readOnly = true)
     private Long smartSenseSubscriptionId;
 
-    //CHECKSTYLE:OFF
     @ApiModelProperty(FlexSubscriptionModelDescription.IS_DEFAULT)
-    private boolean isDefault;
-    //CHECKSTYLE:ON
+    private boolean usedAsDefault;
 
     @ApiModelProperty(FlexSubscriptionModelDescription.USED_FOR_CONTROLLER)
     private boolean usedForController;
@@ -57,12 +55,12 @@ public class FlexSubscriptionRequest implements JsonEntity {
         this.smartSenseSubscriptionId = smartSenseSubscriptionId;
     }
 
-    public boolean isDefault() {
-        return isDefault;
+    public boolean getUsedAsDefault() {
+        return usedAsDefault;
     }
 
-    public void setDefault(boolean aDefault) {
-        isDefault = aDefault;
+    public void setUsedAsDefault(boolean usedAsDefault) {
+        this.usedAsDefault = usedAsDefault;
     }
 
     public boolean isUsedForController() {
