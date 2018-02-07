@@ -472,4 +472,8 @@ public class ModelDescriptions {
         public static final String CORE = "security rules for core type";
         public static final String GATEWAY = "security rules for gateway type";
     }
+
+    public static class RepositoryConfigValidationDescription {
+        public static final String FIELDS = "Indicates the request's value with the same key is valid and reachable by Cloudbreak or not";
+    }
 }
