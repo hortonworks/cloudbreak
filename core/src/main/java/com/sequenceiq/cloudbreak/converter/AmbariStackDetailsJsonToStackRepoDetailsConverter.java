@@ -2,16 +2,17 @@ package com.sequenceiq.cloudbreak.converter;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Stream;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
 import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 
 @Component
-public class HDPRepoRequestToHDPRepoConverter extends AbstractConversionServiceAwareConverter<AmbariStackDetailsJson, StackRepoDetails> {
+public class AmbariStackDetailsJsonToStackRepoDetailsConverter extends AbstractConversionServiceAwareConverter<AmbariStackDetailsJson, StackRepoDetails> {
 
     private static final String REDHAT_6 = "redhat6";
 
@@ -22,21 +23,31 @@ public class HDPRepoRequestToHDPRepoConverter extends AbstractConversionServiceA
         StackRepoDetails repo = new StackRepoDetails();
         Map<String, String> stack = new HashMap<>();
         Map<String, String> util = new HashMap<>();
-        validateRepoFieldsExistence(source);
+
+        boolean baseRepoRequiredFieldsExists = Stream.of(source.getStackRepoId(), source.getStackBaseURL(), source.getUtilsRepoId(), source.getUtilsBaseURL())
+                .noneMatch(StringUtils::isEmpty);
+
+        if (!isVdfRequiredFieldsExists(source) && !baseRepoRequiredFieldsExists) {
+            String msg = "The 'repositoryVersion', 'versionDefinitionFileUrl' or "
+                    + "'stackBaseURL', 'stackRepoId', 'utilsBaseUrl', 'utilsRepoId' fields must be specified!";
+            throw new BadRequestException(msg);
+        }
 
         stack.put("repoid", source.getStackRepoId());
         util.put("repoid", source.getUtilsRepoId());
 
-        String stackBaseURL = source.getStackBaseURL();
-        String utilsBaseURL = source.getUtilsBaseURL();
-        if (source.getOs() == null) {
-            stack.put(REDHAT_6, stackBaseURL);
-            stack.put(REDHAT_7, stackBaseURL);
-            util.put(REDHAT_6, utilsBaseURL);
-            util.put(REDHAT_7, utilsBaseURL);
-        } else {
-            stack.put(source.getOs(), stackBaseURL);
-            util.put(source.getOs(), utilsBaseURL);
+        if (baseRepoRequiredFieldsExists) {
+            String stackBaseURL = source.getStackBaseURL();
+            String utilsBaseURL = source.getUtilsBaseURL();
+            if (source.getOs() == null) {
+                stack.put(REDHAT_6, stackBaseURL);
+                stack.put(REDHAT_7, stackBaseURL);
+                util.put(REDHAT_6, utilsBaseURL);
+                util.put(REDHAT_7, utilsBaseURL);
+            } else {
+                stack.put(source.getOs(), stackBaseURL);
+                util.put(source.getOs(), utilsBaseURL);
+            }
         }
 
         if (!StringUtils.isEmpty(source.getRepositoryVersion())) {
@@ -59,19 +70,7 @@ public class HDPRepoRequestToHDPRepoConverter extends AbstractConversionServiceA
         return repo;
     }
 
-    private void validateRepoFieldsExistence(AmbariStackDetailsJson source) {
-        boolean vdfRequiredFieldsExists = !StringUtils.isEmpty(source.getRepositoryVersion())
-                && !StringUtils.isEmpty(source.getVersionDefinitionFileUrl());
-
-        boolean customBaseRepoRequiredFieldsExists = !StringUtils.isEmpty(source.getStackBaseURL())
-                && !StringUtils.isEmpty(source.getStackRepoId())
-                && !StringUtils.isEmpty(source.getUtilsBaseURL())
-                && !StringUtils.isEmpty(source.getUtilsRepoId());
-
-        if (!vdfRequiredFieldsExists && !customBaseRepoRequiredFieldsExists) {
-            String msg = "The 'repositoryVersion', 'versionDefinitionFileUrl' or "
-                    + "'stackBaseURL', 'stackRepoId', 'utilsBaseUrl', 'utilsRepoId' fields must be specified!";
-            throw new BadRequestException(msg);
-        }
+    private boolean isVdfRequiredFieldsExists(AmbariStackDetailsJson source) {
+        return Stream.of(source.getRepositoryVersion(), source.getVersionDefinitionFileUrl()).noneMatch(StringUtils::isEmpty);
     }
 }
