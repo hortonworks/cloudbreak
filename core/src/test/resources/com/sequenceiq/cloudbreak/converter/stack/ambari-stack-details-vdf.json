@@ -1,0 +1,8 @@
+{
+  "stack": "HDP",
+  "version" : "2.2",
+  "os" : "redhat6",
+  "versionDefinitionFileUrl": "http://vdf-file/path",
+  "repositoryVersion": "2.1.1.1",
+  "verify" : true
+}
