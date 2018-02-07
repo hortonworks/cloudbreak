@@ -27,6 +27,7 @@ public class ControllerDescription {
     public static final String SMARTSENSE_SUBSCRIPTION_DESCRIPTION = "Operations on SmartSense subscriptions";
     public static final String FLEX_SUBSCRIPTION_DESCRIPTION = "Operations on Flex subscriptions";
     public static final String IMAGE_CATALOG_DESCRIPTION = "Operations on Image catalogs";
+    public static final String REPOSITORY_CONFIGS_VALIDATION_DESCRIPTION = "Operations to validate repository configs";
 
     private ControllerDescription() {
     }

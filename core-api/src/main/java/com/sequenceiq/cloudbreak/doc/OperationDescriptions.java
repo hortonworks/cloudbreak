@@ -306,4 +306,8 @@ public class OperationDescriptions {
     public static class SecurityRuleOpDescription {
         public static final String GET_DEFAULT_SECURITY_RULES = "get default security rules";
     }
+
+    public static class RepositoryConfigsValidationOpDescription {
+        public static final String POST_REPOSITORY_CONFIGS_VALIDATION = "validate repository configs fields, check their availability";
+    }
 }
