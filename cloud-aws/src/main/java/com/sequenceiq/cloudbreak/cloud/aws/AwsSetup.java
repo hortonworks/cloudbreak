@@ -13,17 +13,14 @@ import org.springframework.stereotype.Component;
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.ec2.AmazonEC2Client;
-import com.amazonaws.services.ec2.model.AmazonEC2Exception;
 import com.amazonaws.services.ec2.model.DescribeInternetGatewaysRequest;
 import com.amazonaws.services.ec2.model.DescribeInternetGatewaysResult;
 import com.amazonaws.services.ec2.model.DescribeKeyPairsRequest;
 import com.amazonaws.services.ec2.model.DescribeKeyPairsResult;
 import com.amazonaws.services.ec2.model.DescribeSubnetsRequest;
 import com.amazonaws.services.ec2.model.DescribeSubnetsResult;
-import com.amazonaws.services.ec2.model.InstanceType;
 import com.amazonaws.services.ec2.model.InternetGateway;
 import com.amazonaws.services.ec2.model.InternetGatewayAttachment;
-import com.amazonaws.services.ec2.model.RunInstancesRequest;
 import com.amazonaws.services.ec2.model.Subnet;
 import com.amazonaws.services.identitymanagement.AmazonIdentityManagement;
 import com.amazonaws.services.identitymanagement.model.AttachedPolicy;
@@ -105,7 +102,6 @@ public class AwsSetup implements Setup {
         verifySpotInstances(stack);
         AwsCredentialView awsCredentialView = new AwsCredentialView(ac.getCloudCredential());
         AwsInstanceProfileView awsInstanceProfileView = new AwsInstanceProfileView(stack);
-        validateImageOptIn(awsCredentialView, region, stack.getImage().getImageName());
         if (awsClient.roleBasedCredential(awsCredentialView) && awsInstanceProfileView.isCreateInstanceProfile()) {
             validateInstanceProfileCreation(awsCredentialView);
         }
@@ -134,36 +130,6 @@ public class AwsSetup implements Setup {
                     throw new CloudConnectorException(String.format("Spot instances are not supported on this AMI: %s", stack.getImage()));
                 }
             }
-        }
-    }
-
-    private void validateImageOptIn(AwsCredentialView credentialView, String region, String imageName) {
-        try {
-            AmazonEC2Client amazonEC2Client = awsClient.createAccess(credentialView, region);
-            RunInstancesRequest request = new RunInstancesRequest()
-                    .withMinCount(1)
-                    .withMaxCount(1)
-                    .withImageId(imageName)
-                    .withInstanceType(InstanceType.M3Xlarge);
-            amazonEC2Client.dryRun(request);
-            LOGGER.info("Dry run succeeded, AMI '{}' is safe to launch.", imageName);
-        } catch (AmazonClientException ex) {
-            if (ex.getCause() != null && (ex.getCause() instanceof AmazonEC2Exception)) {
-                AmazonEC2Exception e = (AmazonEC2Exception) ex.getCause();
-                String errorMessage = e.getErrorMessage();
-                if (e.getErrorCode().equals("OptInRequired")) {
-                    int marketplaceLinkIndex = errorMessage.indexOf(MARKETPLACE_HTTP_LINK);
-                    if (marketplaceLinkIndex != -1) {
-                        errorMessage = IMAGE_OPT_IN_REQUIRED_MSG + " " + LINK_TO_MARKETPLACE_MSG + errorMessage.substring(marketplaceLinkIndex);
-                    } else {
-                        errorMessage = IMAGE_OPT_IN_REQUIRED_MSG;
-                    }
-                    throw new CloudConnectorException(errorMessage, e);
-                }
-            }
-            LOGGER.error(String.format("Image opt-in could not be validated for AMI '%s'.", imageName), ex);
-        } catch (Exception e) {
-            LOGGER.error(String.format("Image opt-in could not be validated for AMI '%s'.", imageName), e);
         }
     }
 
