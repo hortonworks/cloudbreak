@@ -54,7 +54,5 @@ init-hive-db:
       - DATABASE:  {{ pillar['postgres']['database'] }}
 
 reload-postgresql:
-  service.running:
-    - enable: True
-    - reload: True
-    - name: postgresql
+  cmd.run:
+    - name: service postgresql reload
