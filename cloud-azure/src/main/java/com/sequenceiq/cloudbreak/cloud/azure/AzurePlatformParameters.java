@@ -232,7 +232,7 @@ public class AzurePlatformParameters implements PlatformParameters {
 
     @Override
     public String resourceDefinition(String resource) {
-        return FileReaderUtils.readFileFromClasspathQuietly("definitions/azure-" + resource + ".json");
+        return cloudbreakResourceReaderService.resourceDefinition("azure", resource);
     }
 
     @Override
