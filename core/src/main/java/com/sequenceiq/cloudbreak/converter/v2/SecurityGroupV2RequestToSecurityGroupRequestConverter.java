@@ -22,8 +22,9 @@ public class SecurityGroupV2RequestToSecurityGroupRequestConverter
         SecurityGroupRequest entity = new SecurityGroupRequest();
         entity.setName(missingResourceNameGenerator.generateName(APIResourceType.SECURITY_GROUP));
         entity.setSecurityGroupId(source.getSecurityGroupId());
-        entity.setSecurityRules(source.getSecurityRules());
-        entity.setSecurityGroupId(source.getSecurityGroupId());
+        if (source.getSecurityRules() != null) {
+            entity.setSecurityRules(source.getSecurityRules());
+        }
         return entity;
     }
 }
