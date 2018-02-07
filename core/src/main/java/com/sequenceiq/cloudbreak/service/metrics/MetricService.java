@@ -1,11 +1,13 @@
 package com.sequenceiq.cloudbreak.service.metrics;
 
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.springframework.boot.actuate.metrics.CounterService;
 import org.springframework.boot.actuate.metrics.GaugeService;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.common.type.MetricType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
@@ -20,6 +22,20 @@ public class MetricService {
 
     @Inject
     private GaugeService gaugeService;
+
+    @PostConstruct
+    public void init() {
+        for (MetricType metricType : MetricType.values()) {
+            String metricName = metricType.getMetricName();
+            if (metricName.startsWith("stack") || metricName.startsWith("cluster")) {
+                incrementMetricCounter(metricName + '.' + CloudConstants.AWS.toLowerCase());
+                incrementMetricCounter(metricName + '.' + CloudConstants.AZURE.toLowerCase());
+                incrementMetricCounter(metricName + '.' + CloudConstants.GCP.toLowerCase());
+                incrementMetricCounter(metricName + '.' + CloudConstants.OPENSTACK.toLowerCase());
+                incrementMetricCounter(metricName + '.' + CloudConstants.YARN.toLowerCase());
+            }
+        }
+    }
 
     /**
      * Increment a counter based metric.
