@@ -225,10 +225,10 @@ subprojects {
     repositories {
       mavenDeployer {
         configuration = configurations.deployerJars
-        repository(url: "s3://maven.sequenceiq.com/releases") {
+        repository(url: "s3://maven.hortonworks-cloud/releases") {
           authentication(userName: "$System.env.AWS_ACCESS_KEY", passphrase: "$System.env.AWS_SECRET_ACCESS_KEY")
         }
-        snapshotRepository(url: "s3://maven.sequenceiq.com/snapshots") {
+        snapshotRepository(url: "s3://maven.hortonworks-cloud/snapshots") {
           authentication(userName: "$System.env.AWS_ACCESS_KEY", passphrase: "$System.env.AWS_SECRET_ACCESS_KEY")
         }
       }
@@ -276,7 +276,7 @@ subprojects {
 
   repositories {
     mavenCentral()
-    maven { url "http://maven.sequenceiq.com/releases" }
+    maven { url "https://s3-eu-west-1.amazonaws.com/maven.hortonworks-cloud/releases" }
     maven { url "https://repo.spring.io/release" }
     mavenLocal()
   }
