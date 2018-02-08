@@ -29,7 +29,7 @@
         </sift>
     </appender>
 
-    <root level="${CB_LOG_LEVEL:-INFO}">
+    <root level="${CB_ROOT_LOG_LEVEL:-INFO}">
         <appender-ref ref="CB_NODEID_BASED"/>
         <appender-ref ref="STDOUT"/>
     </root>
