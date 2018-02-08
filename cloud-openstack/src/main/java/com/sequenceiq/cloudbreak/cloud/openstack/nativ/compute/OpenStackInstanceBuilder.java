@@ -57,7 +57,8 @@ public class OpenStackInstanceBuilder extends AbstractOpenStackComputeResourceBu
             CloudResource port = getPort(context.getComputeResources(privateId));
             KeystoneCredentialView osCredential = new KeystoneCredentialView(auth);
             NovaInstanceView novaInstanceView = new NovaInstanceView(context.getName(), template, group.getType(), group.getLoginUserName());
-            String imageId = osClient.images().list(Collections.singletonMap("name", image.getImageName())).get(0).getId();
+            String imageId = osClient.imagesV2().list(Collections.singletonMap("name", image.getImageName())).get(0).getId();
+            LOGGER.info("Selected image id: {}", imageId);
             Map<String, String> metadata = mergeMetadata(novaInstanceView.getMetadataMap(), tags);
             ServerCreateBuilder serverCreateBuilder = Builders.server()
                     .name(resource.getName())
