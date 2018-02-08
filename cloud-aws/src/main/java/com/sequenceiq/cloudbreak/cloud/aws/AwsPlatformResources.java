@@ -243,7 +243,7 @@ public class AwsPlatformResources implements PlatformResources {
     @Override
     public CloudSshKeys sshKeys(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
         Map<String, Set<CloudSshKey>> result = new HashMap<>();
-        for (Region actualRegion : awsPlatformParameters.regions().types()) {
+        for (Region actualRegion : regions(cloudCredential, region, new HashMap<>()).getCloudRegions().keySet()) {
             // If region is provided then should filter for those region
             if (regionMatch(actualRegion, region)) {
                 Set<CloudSshKey> cloudSshKeys = new HashSet<>();
@@ -305,7 +305,7 @@ public class AwsPlatformResources implements PlatformResources {
 
     @Override
     @Cacheable(cacheNames = "cloudResourceRegionCache", key = "#cloudCredential?.id")
-    public CloudRegions regions(CloudCredential cloudCredential, Region region, Map<String, String> filters) throws Exception {
+    public CloudRegions regions(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
         AmazonEC2Client ec2Client = awsClient.createAccess(cloudCredential);
         Map<Region, List<AvailabilityZone>> regionListMap = new HashMap<>();
         Map<Region, String> displayNames = new HashMap<>();

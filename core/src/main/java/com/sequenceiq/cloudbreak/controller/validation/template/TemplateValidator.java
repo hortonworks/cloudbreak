@@ -1,7 +1,9 @@
 package com.sequenceiq.cloudbreak.controller.validation.template;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Supplier;
 
 import javax.inject.Inject;
@@ -13,6 +15,7 @@ import org.springframework.stereotype.Component;
 import com.google.common.base.Suppliers;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
+import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.DiskType;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
@@ -20,6 +23,8 @@ import com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterConfig;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
+import com.sequenceiq.cloudbreak.controller.validation.LocationService;
+import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterService;
 
@@ -29,8 +34,8 @@ public class TemplateValidator {
     @Inject
     private CloudParameterService cloudParameterService;
 
-    private final Supplier<Map<Platform, Collection<VmType>>> virtualMachines =
-            Suppliers.memoize(() -> cloudParameterService.getVmtypes(null, true).getVirtualMachines());
+    @Inject
+    private LocationService locationService;
 
     private final Supplier<Map<Platform, Map<String, VolumeParameterType>>> diskMappings =
             Suppliers.memoize(() -> cloudParameterService.getDiskTypes().getDiskMappings());
@@ -38,18 +43,24 @@ public class TemplateValidator {
     private final Supplier<Map<Platform, PlatformParameters>> platformParameters =
             Suppliers.memoize(() -> cloudParameterService.getPlatformParameters());
 
-    public void validateTemplateRequest(Template value) {
+    public void validateTemplateRequest(Credential credential, Template value, String region, String availabilityZone, String variant) {
+
+
+        CloudVmTypes cloudVmTypes = cloudParameterService.getVmTypesV2(credential, region, variant, new HashMap<>());
+
         if (StringUtils.isEmpty(value.getInstanceType())) {
             validateCustomInstanceType(value);
         } else {
             VmType vmType = null;
             VolumeParameterType volumeParameterType = null;
             Platform platform = Platform.platform(value.cloudPlatform());
-            Map<Platform, Collection<VmType>> machines = virtualMachines.get();
-            if (machines.containsKey(platform) && !machines.get(platform).isEmpty()) {
-                for (VmType type : machines.get(platform)) {
+            Map<String, Set<VmType>> machines = cloudVmTypes.getCloudVmResponses();
+            String locationString = locationService.location(region, availabilityZone);
+            if (machines.containsKey(locationString) && !machines.get(locationString).isEmpty()) {
+                for (VmType type : machines.get(locationString)) {
                     if (type.value().equals(value.getInstanceType())) {
                         vmType = type;
+                        break;
                     }
                 }
                 if (vmType == null) {

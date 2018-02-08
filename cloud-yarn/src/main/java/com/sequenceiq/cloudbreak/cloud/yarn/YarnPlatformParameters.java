@@ -19,19 +19,14 @@ import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.api.model.SpecialParameters;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
-import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
-import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZones;
 import com.sequenceiq.cloudbreak.cloud.model.DiskType;
 import com.sequenceiq.cloudbreak.cloud.model.DiskTypes;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformOrchestrator;
-import com.sequenceiq.cloudbreak.cloud.model.Region;
-import com.sequenceiq.cloudbreak.cloud.model.Regions;
 import com.sequenceiq.cloudbreak.cloud.model.ScriptParams;
 import com.sequenceiq.cloudbreak.cloud.model.StackParamValidation;
 import com.sequenceiq.cloudbreak.cloud.model.TagSpecification;
 import com.sequenceiq.cloudbreak.cloud.model.VmRecommendations;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
-import com.sequenceiq.cloudbreak.cloud.model.VmTypes;
 import com.sequenceiq.cloudbreak.cloud.service.CloudbreakResourceReaderService;
 import com.sequenceiq.cloudbreak.common.type.OrchestratorConstants;
 
@@ -51,26 +46,6 @@ public class YarnPlatformParameters implements PlatformParameters {
     @Override
     public DiskTypes diskTypes() {
         return new DiskTypes(Collections.emptyList(), DiskType.diskType(""), Collections.emptyMap(), Collections.emptyMap());
-    }
-
-    @Override
-    public Regions regions() {
-        return new Regions(Lists.newArrayList(), Region.region(""), Maps.newHashMap());
-    }
-
-    @Override
-    public VmTypes vmTypes(Boolean extended) {
-        return new VmTypes(virtualMachines(extended), defaultVirtualMachine());
-    }
-
-    @Override
-    public Map<AvailabilityZone, VmTypes> vmTypesPerAvailabilityZones(Boolean extended) {
-        return Maps.newHashMap();
-    }
-
-    @Override
-    public AvailabilityZones availabilityZones() {
-        return new AvailabilityZones(Maps.newHashMap());
     }
 
     @Override
@@ -101,16 +76,6 @@ public class YarnPlatformParameters implements PlatformParameters {
     @Override
     public VmRecommendations recommendedVms() {
         return null;
-    }
-
-    @Override
-    public String getDefaultRegionsConfigString() {
-        return "";
-    }
-
-    @Override
-    public String getDefaultRegionString() {
-        return "";
     }
 
     @Override

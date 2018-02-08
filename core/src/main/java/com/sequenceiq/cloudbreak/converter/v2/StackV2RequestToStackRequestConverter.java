@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.api.model.StackRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.InstanceGroupV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
 import com.sequenceiq.cloudbreak.controller.AuthenticatedUserService;
+import com.sequenceiq.cloudbreak.controller.validation.template.TemplateValidator;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 
@@ -37,6 +38,9 @@ public class StackV2RequestToStackRequestConverter extends AbstractConversionSer
 
     @Inject
     private AuthenticatedUserService authenticatedUserService;
+
+    @Inject
+    private TemplateValidator templateValidator;
 
     @Override
     public StackRequest convert(StackV2Request source) {

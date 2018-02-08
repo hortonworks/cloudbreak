@@ -1,4 +1,4 @@
-##Creating the aws-zone-vm.json files
+## Creating the aws-zone-vm.json files
 
 from the cloud-aws directory run the following make command:
 

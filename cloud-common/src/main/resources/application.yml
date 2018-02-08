@@ -109,7 +109,7 @@ cb:
 
   platform.default:
     variants: OPENSTACK:HEAT
-    regions: AWS:eu-west-1,AZURE:North Europe,GCP:europe-west1,YARN:default
+    regions: AWS:eu-west-1,AZURE:North Europe,GCP:europe-west1,YARN:default,MOCK:USA
 
   gcp:
     hostkey.verify: false
@@ -188,6 +188,7 @@ cb:
             redhat7: http://public-repo-1.hortonworks.com/HDP/centos7/2.x/updates/2.6.1.0
 
   smartsense.configure: false
+  smartsense.enabled: true
   smartsense.id.pattern: A-9990%s-C-%s
 
   structuredevent:

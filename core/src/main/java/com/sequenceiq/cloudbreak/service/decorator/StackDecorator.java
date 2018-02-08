@@ -176,8 +176,10 @@ public class StackDecorator {
                 if (template.getId() == null) {
                     template.setPublicInAccount(subject.isPublicInAccount());
                     template.setCloudPlatform(getCloudPlatform(subject, request, template.cloudPlatform()));
-                    templateValidator.validateTemplateRequest(instanceGroup.getTemplate());
-                    template = templateDecorator.decorate(template);
+                    templateValidator.validateTemplateRequest(credential, instanceGroup.getTemplate(), request.getRegion(),
+                            request.getAvailabilityZone(), request.getPlatformVariant());
+                    template = templateDecorator.decorate(credential, template, request.getRegion(),
+                            request.getAvailabilityZone(), request.getPlatformVariant());
                     template = templateService.create(user, template);
                 }
                 instanceGroup.setTemplate(template);

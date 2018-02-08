@@ -50,7 +50,6 @@ public class InstanceGroupRequestToInstanceGroupConverter extends AbstractConver
         }
         if (json.getTemplate() != null) {
             Template template = getConversionService().convert(json.getTemplate(), Template.class);
-            templateValidator.validateTemplateRequest(template);
             instanceGroup.setTemplate(template);
         }
         if (json.getSecurityGroup() != null) {

@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.AccountPreferencesJson;
@@ -14,11 +15,15 @@ import com.sequenceiq.cloudbreak.domain.json.Json;
 
 @Component
 public class AccountPreferencesToAccountPreferencesJsonConverter extends AbstractConversionServiceAwareConverter<AccountPreferences, AccountPreferencesJson> {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(AccountPreferencesToAccountPreferencesJsonConverter.class);
 
     private static final long HOUR_IN_MS = 3600000L;
 
     private static final long ZERO = 0L;
+
+    @Value("${cb.smartsense.enabled:true}")
+    private boolean smartsenseEnabled;
 
     @Override
     public AccountPreferencesJson convert(AccountPreferences source) {
@@ -32,6 +37,7 @@ public class AccountPreferencesToAccountPreferencesJsonConverter extends Abstrac
         json.setUserTimeToLive(userTimeToLive);
         json.setMaxNumberOfClustersPerUser(source.getMaxNumberOfClustersPerUser());
         json.setPlatforms(source.getPlatforms());
+        json.setSmartsenseEnabled(smartsenseEnabled);
         convertTags(json, source.getDefaultTags());
         return json;
     }

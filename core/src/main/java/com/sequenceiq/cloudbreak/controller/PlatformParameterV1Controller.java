@@ -70,8 +70,8 @@ public class PlatformParameterV1Controller implements ConnectorV1Endpoint {
     public Map<String, Object> getPlatforms(Boolean extended) {
         PlatformVariants pv = cloudParameterService.getPlatformVariants();
         PlatformDisks diskTypes = cloudParameterService.getDiskTypes();
-        PlatformVirtualMachines vmtypes = cloudParameterService.getVmtypes(null, extended);
         PlatformRegions regions = cloudParameterService.getRegions();
+        PlatformVirtualMachines vmtypes = new PlatformVirtualMachines();
         PlatformOrchestrators orchestrators = cloudParameterService.getOrchestrators();
         Map<Platform, PlatformParameters> platformParameters = cloudParameterService.getPlatformParameters();
         SpecialParameters specialParameters = cloudParameterService.getSpecialParameters();
@@ -80,8 +80,8 @@ public class PlatformParameterV1Controller implements ConnectorV1Endpoint {
 
         map.put("variants", conversionService.convert(pv, PlatformVariantsJson.class));
         map.put("disks", conversionService.convert(diskTypes, PlatformDisksJson.class));
-        map.put("virtualMachines", conversionService.convert(vmtypes, PlatformVirtualMachinesJson.class));
         map.put("regions", conversionService.convert(regions, PlatformRegionsJson.class));
+        map.put("virtualMachines", conversionService.convert(vmtypes, PlatformVirtualMachinesJson.class));
         map.put("orchestrators", conversionService.convert(orchestrators, PlatformOrchestratorsJson.class));
         map.put("tagspecifications", conversionService.convert(platformParameters, TagSpecificationsJson.class));
         Map<String, Boolean> globalParameters = conversionService.convert(specialParameters, Map.class);
@@ -132,18 +132,6 @@ public class PlatformParameterV1Controller implements ConnectorV1Endpoint {
         Collection<String> strings = conversionService.convert(orchestrators, PlatformOrchestratorsJson.class)
                 .getOrchestrators().get(type.toUpperCase());
         return strings == null ? new ArrayList<>() : strings;
-    }
-
-    @Override
-    public PlatformVirtualMachinesJson getVmTypes(Boolean extended) {
-        PlatformVirtualMachines vmtypes = cloudParameterService.getVmtypes(null, extended);
-        return conversionService.convert(vmtypes, PlatformVirtualMachinesJson.class);
-    }
-
-    @Override
-    public PlatformVirtualMachinesJson getVmTypes(String type, Boolean extended) {
-        PlatformVirtualMachines vmtypes = cloudParameterService.getVmtypes(type.toUpperCase(), extended);
-        return conversionService.convert(vmtypes, PlatformVirtualMachinesJson.class);
     }
 
     @Override

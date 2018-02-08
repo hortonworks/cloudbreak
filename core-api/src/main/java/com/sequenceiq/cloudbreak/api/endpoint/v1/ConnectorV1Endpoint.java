@@ -23,7 +23,6 @@ import com.sequenceiq.cloudbreak.api.model.PlatformResourceRequestJson;
 import com.sequenceiq.cloudbreak.api.model.PlatformSecurityGroupsResponse;
 import com.sequenceiq.cloudbreak.api.model.PlatformSshKeysResponse;
 import com.sequenceiq.cloudbreak.api.model.PlatformVariantsJson;
-import com.sequenceiq.cloudbreak.api.model.PlatformVirtualMachinesJson;
 import com.sequenceiq.cloudbreak.api.model.RecommendationRequestJson;
 import com.sequenceiq.cloudbreak.api.model.RecommendationResponse;
 import com.sequenceiq.cloudbreak.api.model.SpecialParametersJson;
@@ -88,20 +87,6 @@ public interface ConnectorV1Endpoint {
     @ApiOperation(value = ConnectorOpDescription.GET_ORCHESTRATORS_BY_TYPES, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES,
             nickname = "getOchestratorsByType")
     Collection<String> getOchestratorsByType(@PathParam("type") String type);
-
-    @GET
-    @Path("vmtypes")
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ConnectorOpDescription.GET_VM_TYPES, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES,
-            nickname = "getVmTypes")
-    PlatformVirtualMachinesJson getVmTypes(@QueryParam("extended") Boolean extended);
-
-    @GET
-    @Path("vmtypes/{type}")
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ConnectorOpDescription.GET_VM_TYPES, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES,
-            nickname = "getVmTypesByType")
-    PlatformVirtualMachinesJson getVmTypes(@PathParam("type") String type, @QueryParam("extended") Boolean extended);
 
     @GET
     @Path("regions")
