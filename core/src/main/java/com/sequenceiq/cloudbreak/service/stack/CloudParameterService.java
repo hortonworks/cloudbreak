@@ -43,8 +43,6 @@ import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformVmTypesRequest;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformVmTypesResult;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetVirtualMachineRecommendationResponse;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetVirtualMachineRecommendtaionRequest;
-import com.sequenceiq.cloudbreak.cloud.event.platform.GetVirtualMachineTypesRequest;
-import com.sequenceiq.cloudbreak.cloud.event.platform.GetVirtualMachineTypesResult;
 import com.sequenceiq.cloudbreak.cloud.event.platform.PlatformParametersRequest;
 import com.sequenceiq.cloudbreak.cloud.event.platform.PlatformParametersResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfigs;
@@ -63,7 +61,6 @@ import com.sequenceiq.cloudbreak.cloud.model.PlatformDisks;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformOrchestrators;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformRegions;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformVariants;
-import com.sequenceiq.cloudbreak.cloud.model.PlatformVirtualMachines;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.model.VmRecommendations;
 import com.sequenceiq.cloudbreak.cloud.reactor.ErrorHandlerAwareReactorEventFactory;
@@ -131,27 +128,6 @@ public class CloudParameterService {
             return res.getPlatformDisks();
         } catch (InterruptedException e) {
             LOGGER.error("Error while getting the platform disk types", e);
-            throw new OperationException(e);
-        }
-    }
-
-    public PlatformVirtualMachines getVmtypes(String type, Boolean extended) {
-        if (extended == null) {
-            extended = true;
-        }
-        LOGGER.debug("Get platform vm types");
-        GetVirtualMachineTypesRequest getVirtualMachineTypesRequest = new GetVirtualMachineTypesRequest(type, extended);
-        eventBus.notify(getVirtualMachineTypesRequest.selector(), eventFactory.createEvent(getVirtualMachineTypesRequest));
-        try {
-            GetVirtualMachineTypesResult res = getVirtualMachineTypesRequest.await();
-            LOGGER.info("Platform vm types result: {}", res);
-            if (res.getStatus().equals(EventStatus.FAILED)) {
-                LOGGER.error("Failed to get platform vm types", res.getErrorDetails());
-                throw new OperationException(res.getErrorDetails());
-            }
-            return res.getPlatformVirtualMachines();
-        } catch (InterruptedException e) {
-            LOGGER.error("Error while getting the platform vm types", e);
             throw new OperationException(e);
         }
     }

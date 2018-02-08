@@ -17,20 +17,14 @@ import org.springframework.ui.freemarker.FreeMarkerConfigurationFactoryBean;
 
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
-import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
-import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZones;
 import com.sequenceiq.cloudbreak.cloud.model.DiskType;
 import com.sequenceiq.cloudbreak.cloud.model.DiskTypes;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformOrchestrator;
-import com.sequenceiq.cloudbreak.cloud.model.Region;
-import com.sequenceiq.cloudbreak.cloud.model.Regions;
 import com.sequenceiq.cloudbreak.cloud.model.ScriptParams;
 import com.sequenceiq.cloudbreak.cloud.model.StackParamValidation;
 import com.sequenceiq.cloudbreak.cloud.model.TagSpecification;
 import com.sequenceiq.cloudbreak.cloud.model.VmRecommendations;
-import com.sequenceiq.cloudbreak.cloud.model.VmType;
-import com.sequenceiq.cloudbreak.cloud.model.VmTypes;
 import com.sequenceiq.cloudbreak.common.type.OrchestratorConstants;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
@@ -79,16 +73,6 @@ public class UserDataBuilderTest {
             }
 
             @Override
-            public Regions regions() {
-                return new Regions(new ArrayList<>(), Region.region(""), new HashMap<>());
-            }
-
-            @Override
-            public AvailabilityZones availabilityZones() {
-                return new AvailabilityZones(new HashMap<>());
-            }
-
-            @Override
             public String resourceDefinition(String resource) {
                 return "";
             }
@@ -115,29 +99,10 @@ public class UserDataBuilderTest {
             }
 
             @Override
-            public String getDefaultRegionsConfigString() {
-                return "TEST";
-            }
-
-            @Override
-            public String getDefaultRegionString() {
-                return "TEST";
-            }
-
-            @Override
             public String platforName() {
                 return "TEST";
             }
 
-            @Override
-            public VmTypes vmTypes(Boolean extended) {
-                return new VmTypes(new ArrayList<>(), VmType.vmType(""));
-            }
-
-            @Override
-            public Map<AvailabilityZone, VmTypes> vmTypesPerAvailabilityZones(Boolean extended) {
-                return Collections.emptyMap();
-            }
         };
     }
 }

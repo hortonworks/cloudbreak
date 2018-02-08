@@ -1,9 +1,5 @@
 package com.sequenceiq.cloudbreak.cloud;
 
-import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
-import static org.apache.commons.lang3.StringUtils.isNoneEmpty;
-import static org.springframework.util.StringUtils.isEmpty;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -16,22 +12,18 @@ import java.util.TreeMap;
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.api.model.SpecialParameters;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
-import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZones;
 import com.sequenceiq.cloudbreak.cloud.model.DiskTypes;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceGroupParameterRequest;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceGroupParameterResponse;
-import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformOrchestrator;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.RegionSpecification;
-import com.sequenceiq.cloudbreak.cloud.model.Regions;
 import com.sequenceiq.cloudbreak.cloud.model.RegionsSpecification;
 import com.sequenceiq.cloudbreak.cloud.model.ScriptParams;
 import com.sequenceiq.cloudbreak.cloud.model.StackParamValidation;
 import com.sequenceiq.cloudbreak.cloud.model.StringTypesCompare;
 import com.sequenceiq.cloudbreak.cloud.model.TagSpecification;
 import com.sequenceiq.cloudbreak.cloud.model.VmRecommendations;
-import com.sequenceiq.cloudbreak.cloud.model.VmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.generic.StringType;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
@@ -53,34 +45,6 @@ public interface PlatformParameters {
      * @return the {@link DiskTypes} of a platform
      */
     DiskTypes diskTypes();
-
-    /**
-     * Regions of a platform
-     *
-     * @return the {@link Regions} of a platform
-     */
-    Regions regions();
-
-    /**
-     * Virtual machine types of a platform
-     *
-     * @return the {@link VmTypes} of a platform
-     */
-    VmTypes vmTypes(Boolean extended);
-
-    /**
-     * Virtual machine types of a platform in availability zones.
-     *
-     * @return the {@link AvailabilityZone}, {@link VmTypes} map of a platform
-     */
-    Map<AvailabilityZone, VmTypes> vmTypesPerAvailabilityZones(Boolean extended);
-
-    /**
-     * Return the availability zones of a platform
-     *
-     * @return the {@link AvailabilityZones} of a platform
-     */
-    AvailabilityZones availabilityZones();
 
     /**
      * Return the definition of a resource in JSON format.
@@ -118,10 +82,6 @@ public interface PlatformParameters {
      */
     VmRecommendations recommendedVms();
 
-    String getDefaultRegionsConfigString();
-
-    String getDefaultRegionString();
-
     String platforName();
 
     default SpecialParameters specialParameters() {
@@ -141,30 +101,6 @@ public interface PlatformParameters {
         Map<S, O> treeMap = new TreeMap<>((o1, o2) -> o2.value().compareTo(o1.value()));
         treeMap.putAll(unsortMap);
         return treeMap;
-    }
-
-    default Region getRegionByName(String name) {
-        for (Region region : regions().types()) {
-            if (name.equals(region.value())) {
-                return region;
-            }
-        }
-        return null;
-    }
-
-    default Region getDefaultRegion() {
-        Map<Platform, Region> regions = Maps.newHashMap();
-        if (isNoneEmpty(getDefaultRegionsConfigString())) {
-            for (String entry : getDefaultRegionsConfigString().split(",")) {
-                String[] keyValue = entry.split(":");
-                regions.put(platform(keyValue[0]), Region.region(keyValue[1]));
-            }
-            Region platformRegion = regions.get(platform(platforName()));
-            if (platformRegion != null && !isEmpty(platformRegion.value())) {
-                return getRegionByName(platformRegion.value());
-            }
-        }
-        return getRegionByName(getDefaultRegionString());
     }
 
     default <T extends StringType> T nthElement(Collection<T> data, int n) {
@@ -188,5 +124,4 @@ public interface PlatformParameters {
         }
         return sortMap(regions);
     }
-
 }

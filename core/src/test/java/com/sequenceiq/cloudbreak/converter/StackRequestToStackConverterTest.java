@@ -4,6 +4,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyMap;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -24,8 +25,11 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import com.sequenceiq.cloudbreak.api.model.FailurePolicyRequest;
+import com.sequenceiq.cloudbreak.api.model.InstanceGroupRequest;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.model.OrchestratorRequest;
+import com.sequenceiq.cloudbreak.api.model.StackAuthenticationRequest;
 import com.sequenceiq.cloudbreak.api.model.StackRequest;
 import com.sequenceiq.cloudbreak.common.service.DefaultCostTaggingService;
 import com.sequenceiq.cloudbreak.controller.AuthenticatedUserService;
@@ -82,13 +86,13 @@ public class StackRequestToStackConverterTest extends AbstractJsonConverterTest<
         ReflectionTestUtils.setField(underTest, "defaultRegions", "AWS:eu-west-2");
         given(conversionService.convert(any(Object.class), any(TypeDescriptor.class), any(TypeDescriptor.class)))
                 .willReturn(new HashSet<>(Collections.singletonList(instanceGroup)));
-        given(conversionService.convert(any(Object.class), any(Class.class)))
-                .willReturn(new StackAuthentication())
-                .willReturn(instanceGroup)
-                .willReturn(instanceGroup)
-                .willReturn(new FailurePolicy())
-                .willReturn(new Orchestrator());
-        //given(stackParameterService.getStackParams(any(IdentityUser.class), any(StackRequest.class))).willReturn(new ArrayList<>());
+        given(conversionService.convert(any(Object.class), any(TypeDescriptor.class), any(TypeDescriptor.class)))
+                .willReturn(new HashSet<>(Collections.singletonList(instanceGroup)));
+
+        given(conversionService.convert(any(StackAuthenticationRequest.class), eq(StackAuthentication.class))).willReturn(new StackAuthentication());
+        given(conversionService.convert(any(FailurePolicyRequest.class), eq(FailurePolicy.class))).willReturn(new FailurePolicy());
+        given(conversionService.convert(any(InstanceGroupRequest.class), eq(InstanceGroup.class))).willReturn(instanceGroup);
+        given(conversionService.convert(any(OrchestratorRequest.class), eq(Orchestrator.class))).willReturn(new Orchestrator());
         given(orchestratorTypeResolver.resolveType(any(Orchestrator.class))).willReturn(OrchestratorType.HOST);
         given(orchestratorTypeResolver.resolveType(any(String.class))).willReturn(OrchestratorType.HOST);
         given(defaultCostTaggingService.prepareDefaultTags(any(String.class), any(String.class), anyMap(), anyString())).willReturn(new HashMap<>());
@@ -112,13 +116,10 @@ public class StackRequestToStackConverterTest extends AbstractJsonConverterTest<
         ReflectionTestUtils.setField(underTest, "defaultRegions", "AWS:eu-west-2");
         given(conversionService.convert(any(Object.class), any(TypeDescriptor.class), any(TypeDescriptor.class)))
                 .willReturn(new HashSet<>(Collections.singletonList(instanceGroup)));
-        given(conversionService.convert(any(Object.class), any(Class.class)))
-                .willReturn(new StackAuthentication())
-                .willReturn(instanceGroup)
-                .willReturn(instanceGroup)
-                .willReturn(new FailurePolicy())
-                .willReturn(new Orchestrator());
-        //given(stackParameterService.getStackParams(any(IdentityUser.class), any(StackRequest.class))).willReturn(new ArrayList<>());
+        given(conversionService.convert(any(StackAuthenticationRequest.class), eq(StackAuthentication.class))).willReturn(new StackAuthentication());
+        given(conversionService.convert(any(FailurePolicyRequest.class), eq(FailurePolicy.class))).willReturn(new FailurePolicy());
+        given(conversionService.convert(any(InstanceGroupRequest.class), eq(InstanceGroup.class))).willReturn(instanceGroup);
+        given(conversionService.convert(any(OrchestratorRequest.class), eq(Orchestrator.class))).willReturn(new Orchestrator());
         given(orchestratorTypeResolver.resolveType(any(Orchestrator.class))).willReturn(OrchestratorType.HOST);
         given(orchestratorTypeResolver.resolveType(any(String.class))).willReturn(OrchestratorType.HOST);
         given(defaultCostTaggingService.prepareDefaultTags(any(String.class), any(String.class), anyMap(), anyString())).willReturn(new HashMap<>());
@@ -143,12 +144,10 @@ public class StackRequestToStackConverterTest extends AbstractJsonConverterTest<
         // GIVEN
         given(conversionService.convert(any(Object.class), any(TypeDescriptor.class), any(TypeDescriptor.class)))
                 .willReturn(new HashSet<>(Collections.singletonList(instanceGroup)));
-        given(conversionService.convert(any(Object.class), any(Class.class)))
-                .willReturn(instanceGroup)
-                .willReturn(instanceGroup)
-                .willReturn(new FailurePolicy())
-                .willReturn(new Orchestrator());
-        //given(stackParameterService.getStackParams(any(IdentityUser.class), any(StackRequest.class))).willReturn(new ArrayList<>());
+        given(conversionService.convert(any(StackAuthenticationRequest.class), eq(StackAuthentication.class))).willReturn(new StackAuthentication());
+        given(conversionService.convert(any(FailurePolicyRequest.class), eq(FailurePolicy.class))).willReturn(new FailurePolicy());
+        given(conversionService.convert(any(InstanceGroupRequest.class), eq(InstanceGroup.class))).willReturn(instanceGroup);
+        given(conversionService.convert(any(OrchestratorRequest.class), eq(Orchestrator.class))).willReturn(new Orchestrator());
         given(orchestratorTypeResolver.resolveType(any(Orchestrator.class))).willReturn(OrchestratorType.HOST);
         given(orchestratorTypeResolver.resolveType(any(String.class))).willReturn(OrchestratorType.HOST);
         given(defaultCostTaggingService.prepareDefaultTags(any(String.class), any(String.class), anyMap(), anyString())).willReturn(new HashMap<>());
@@ -162,41 +161,6 @@ public class StackRequestToStackConverterTest extends AbstractJsonConverterTest<
         stackRequest.setOrchestrator(orchestratorRequest);
         stackRequest.setRegion(null);
         underTest.convert(stackRequest);
-    }
-
-    @Test
-    public void testForNoRegionAndDefaultRegion() throws CloudbreakException {
-        InstanceGroup instanceGroup = mock(InstanceGroup.class);
-        when(instanceGroup.getInstanceGroupType()).thenReturn(InstanceGroupType.GATEWAY);
-        StackAuthentication stackAuthentication = new StackAuthentication();
-        stackAuthentication.setPublicKey("ssh-key dsfsdfsdfsdf");
-        stackAuthentication.setLoginUserName("cloudbreak");
-
-        // GIVEN
-        ReflectionTestUtils.setField(underTest, "defaultRegions", "AWS:eu-west-1");
-        given(conversionService.convert(any(Object.class), any(TypeDescriptor.class), any(TypeDescriptor.class)))
-                .willReturn(new HashSet<>(Collections.singletonList(instanceGroup)));
-        given(conversionService.convert(any(Object.class), any(Class.class)))
-                .willReturn(stackAuthentication)
-                .willReturn(instanceGroup)
-                .willReturn(instanceGroup)
-                .willReturn(new FailurePolicy())
-                .willReturn(new Orchestrator());
-        //given(stackParameterService.getStackParams(any(IdentityUser.class), any(StackRequest.class))).willReturn(new ArrayList<>());
-        given(orchestratorTypeResolver.resolveType(any(Orchestrator.class))).willReturn(OrchestratorType.HOST);
-        given(orchestratorTypeResolver.resolveType(any(String.class))).willReturn(OrchestratorType.HOST);
-        given(defaultCostTaggingService.prepareDefaultTags(any(String.class), any(String.class), anyMap(), anyString())).willReturn(new HashMap<>());
-
-        // WHEN
-        StackRequest stackRequest = getRequest("stack/stack.json");
-        OrchestratorRequest orchestratorRequest = new OrchestratorRequest();
-        orchestratorRequest.setType("SALT");
-        stackRequest.setOrchestrator(orchestratorRequest);
-        stackRequest.setRegion(null);
-        Stack stack = underTest.convert(stackRequest);
-
-        // THEN
-        Assert.assertEquals("eu-west-1", stack.getRegion());
     }
 
     @Override

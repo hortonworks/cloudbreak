@@ -94,8 +94,6 @@ public class StackRequestToStackConverter extends AbstractConversionServiceAware
         stack.setAvailabilityZone(source.getAvailabilityZone());
         stack.setOnFailureActionAction(source.getOnFailureAction());
         stack.setStackStatus(new StackStatus(stack, DetailedStackStatus.PROVISION_REQUESTED.getStatus(), "", DetailedStackStatus.PROVISION_REQUESTED));
-        Set<InstanceGroup> instanceGroups = convertInstanceGroups(source, stack);
-        stack.setInstanceGroups(instanceGroups);
         stack.setFailurePolicy(getConversionService().convert(source.getFailurePolicy(), FailurePolicy.class));
         stack.setCreated(Calendar.getInstance().getTimeInMillis());
         stack.setPlatformVariant(source.getPlatformVariant());
@@ -103,6 +101,8 @@ public class StackRequestToStackConverter extends AbstractConversionServiceAware
         if (source.getCredential() != null) {
             stack.setCredential(getConversionService().convert(source.getCredential(), Credential.class));
         }
+        Set<InstanceGroup> instanceGroups = convertInstanceGroups(source, stack);
+        stack.setInstanceGroups(instanceGroups);
         if (source.getNetwork() != null) {
             stack.setNetwork(getConversionService().convert(source.getNetwork(), Network.class));
         }

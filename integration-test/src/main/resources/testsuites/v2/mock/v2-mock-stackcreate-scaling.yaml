@@ -1,7 +1,7 @@
 name: Mock_V2_StackCreation_And_Scaling_Test
 parameters:
   cloudProvider: MOCK
-  region: europe
+  region: Europe
   availabilityZone: europe-b
   blueprintName: "Data Science: Apache Spark 1.6, Apache Zeppelin 0.7.0"
 

@@ -18,7 +18,6 @@ import com.sequenceiq.cloudbreak.cloud.credential.CredentialNotifier;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContextBuilder;
-import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredentialStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CredentialStatus;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
@@ -68,11 +67,9 @@ public class GcpCredentialConnector implements CredentialConnector {
     }
 
     private void listDisks(GcpContext gcpContext, Compute compute) throws IOException {
-        for (AvailabilityZone gcpZone : gcpPlatformParameters.availabilityZones().getAllAvailabilityZone()) {
-            try {
-                compute.disks().list(gcpContext.getProjectId(), gcpZone.value()).execute();
-            } catch (NullPointerException ignore) {
-            }
+        try {
+            compute.regions().list(gcpContext.getProjectId());
+        } catch (NullPointerException ignore) {
         }
     }
 

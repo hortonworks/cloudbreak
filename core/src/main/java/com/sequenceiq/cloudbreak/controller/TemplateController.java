@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.PathVariable;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v1.TemplateEndpoint;
-import com.sequenceiq.cloudbreak.api.model.TemplateRequest;
 import com.sequenceiq.cloudbreak.api.model.TemplateResponse;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
@@ -36,18 +35,6 @@ public class TemplateController extends NotificationController implements Templa
     @Autowired
     @Qualifier("conversionService")
     private ConversionService conversionService;
-
-    @Override
-    public TemplateResponse postPrivate(TemplateRequest templateRequest) {
-        IdentityUser user = authenticatedUserService.getCbUser();
-        return createTemplate(user, templateRequest, false);
-    }
-
-    @Override
-    public TemplateResponse postPublic(TemplateRequest templateRequest) {
-        IdentityUser user = authenticatedUserService.getCbUser();
-        return createTemplate(user, templateRequest, true);
-    }
 
     @Override
     public Set<TemplateResponse> getPrivates() {
@@ -96,21 +83,6 @@ public class TemplateController extends NotificationController implements Templa
     @Override
     public void deletePrivate(String name) {
         executeAndNotify(user -> templateService.delete(name, user), ResourceEvent.TEMPLATE_DELETED);
-    }
-
-    private TemplateResponse createTemplate(IdentityUser user, TemplateRequest templateRequest, boolean publicInAccount) {
-        Template template = convert(templateRequest, publicInAccount);
-        templateValidator.validateTemplateRequest(template);
-        template = templateDecorator.decorate(template);
-        template = templateService.create(user, template);
-        notify(user, ResourceEvent.TEMPLATE_CREATED);
-        return conversionService.convert(template, TemplateResponse.class);
-    }
-
-    private Template convert(TemplateRequest templateRequest, boolean publicInAccount) {
-        Template converted = conversionService.convert(templateRequest, Template.class);
-        converted.setPublicInAccount(publicInAccount);
-        return converted;
     }
 
     private TemplateResponse convert(Template template) {
