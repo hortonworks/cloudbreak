@@ -108,6 +108,7 @@ public class ClusterToClusterResponseConverter extends AbstractConversionService
         long uptime = stackUtil.getUptimeForCluster(source, source.isAvailable());
         int minutes = (int) ((uptime / (MILLIS_PER_SECOND * SECONDS_PER_MINUTE)) % SECONDS_PER_MINUTE);
         int hours = (int) (uptime / (MILLIS_PER_SECOND * SECONDS_PER_MINUTE * SECONDS_PER_MINUTE));
+        clusterResponse.setUptime(uptime);
         clusterResponse.setHoursUp(hours);
         clusterResponse.setMinutesUp(minutes);
 

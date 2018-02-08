@@ -113,6 +113,9 @@ public class ClusterResponse implements JsonEntity {
 
     private KerberosResponse kerberosResponse;
 
+    @ApiModelProperty(ClusterModelDescription.UPTIME)
+    private Long uptime;
+
     public String getDescription() {
         return description;
     }
@@ -377,5 +380,13 @@ public class ClusterResponse implements JsonEntity {
 
     public void setKerberosResponse(KerberosResponse kerberosResponse) {
         this.kerberosResponse = kerberosResponse;
+    }
+
+    public Long getUptime() {
+        return uptime;
+    }
+
+    public void setUptime(Long uptime) {
+        this.uptime = uptime;
     }
 }
