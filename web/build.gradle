@@ -6,7 +6,7 @@ buildscript {
 
   dependencies {
     classpath "com.moowork.gradle:gradle-node-plugin:0.11"
-    classpath "com.moowork.gradle:gradle-grunt-plugin:0.11-fixed-grunt"
+    classpath "com.moowork.gradle:gradle-grunt-plugin:0.13"
   }
 }
 

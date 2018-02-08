@@ -223,10 +223,10 @@ subprojects {
     repositories {
       mavenDeployer {
         configuration = configurations.deployerJars
-        repository(url: "s3://maven.sequenceiq.com/releases") {
+        repository(url: "s3://maven.hortonworks-cloud/releases") {
           authentication(userName: "$System.env.AWS_ACCESS_KEY", passphrase: "$System.env.AWS_SECRET_ACCESS_KEY")
         }
-        snapshotRepository(url: "s3://maven.sequenceiq.com/snapshots") {
+        snapshotRepository(url: "s3://maven.hortonworks-cloud/snapshots") {
           authentication(userName: "$System.env.AWS_ACCESS_KEY", passphrase: "$System.env.AWS_SECRET_ACCESS_KEY")
         }
       }
