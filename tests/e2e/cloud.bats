@@ -3,7 +3,7 @@
 load ../utils/commands
 load ../utils/resources
 
-@test "PRECONDITION: Create new OpenStack V2 credential" {
+@test "PRECONDITION: Create new ["${OS_CREDENTIAL_NAME}"] OpenStack V2 credential" {
   run remove-stuck-credential "${OS_CREDENTIAL_NAME}"
   echo "$output" >&2
 
@@ -61,7 +61,7 @@ load ../utils/resources
   done
 }
 
-@test "Previously OpenStack V2 credential is deleted" {
+@test "TEARDOWN: Delete ["${OS_CREDENTIAL_NAME}"] OpenStack credential" {
   OUTPUT=$(delete-credential --name "${OS_CREDENTIAL_NAME}" 2>&1 | tail -n 2 | head -n 1)
 
   echo "${OUTPUT}" >&2
