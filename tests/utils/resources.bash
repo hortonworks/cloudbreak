@@ -30,6 +30,10 @@ function wait-cluster-status() {
     do
     	sleep 30
 	    is_status=$(cb cluster describe --name $2 | jq -r '."status" == "$3"')
+	    failed=$(cb cluster describe --name $2 | jq -r '."status" == "CREATE_FAILED"')
+	    if [[ "${failed}" == "true" ]]; then
+	        SECONDS=$1
+	    fi
     done
 
     if [[ "${is_status}" != "true" ]]; then
@@ -97,19 +101,23 @@ function node-count-are-equal() {
 }
 
 function wait-cluster-delete() {
-    param1=$2
-    export param1
-    is_status=false
-    while [ $SECONDS -lt $1 ] && [ $is_status == false ]
+    still_exist=5
+
+    while [ $SECONDS -lt $1 ] && [ $still_exist -gt 0 ]
     do
-	sleep 30
-    tmp=$(list-clusters | jq '.[] |  select(."Name" == env.param1) ' )
-	if [$tmp == ""] ; then
-	   is_status=true
-	fi
+    	sleep 30
+	    still_exist=$(list-clusters | jq -r '.[] | select(.ClusterName=="$2") | length')
+	    failed=$(cb cluster describe --name $2 | jq -r '."status" == "DELETE_FAILED"')
+	    if [[ "${failed}" == "true" ]]; then
+	        SECONDS=$1
+	    fi
     done
-    echo $is_status
-    [ $is_status == true ]
+
+    if [[ $still_exist -ne 0 ]]; then
+        echo $(cb cluster describe --name $2 | jq -r '."statusReason"')
+    else
+        echo "true"
+    fi
 }
 
 function remove-stuck-cluster() {
