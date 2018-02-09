@@ -238,6 +238,13 @@ DELAY=$(($SECONDS+2100))
 
 @test "TEARDOWN: Delete ["${OS_CLUSTER_NAME}"] OpenStack cluster" {
   cb cluster delete --name "${OS_CLUSTER_NAME}" --wait
+
+  run cluster-is-status "${OS_CLUSTER_NAME}" "DELETE_COMPLETED"
+
+  echo "$output" >&2
+
+  [ $status -eq 0 ]
+  [ "$output" = "true" ]
 }
 
 @test "TEARDOWN: Wait for "${OS_CLUSTER_NAME}" cluster is terminated" {
