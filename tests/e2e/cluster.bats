@@ -5,7 +5,7 @@ load ../utils/resources
 
 DELAY=$(($SECONDS+2100))
 
-@test "PRECONDITION: Cleanup stuck OpenStack ["${OS_CLUSTER_NAME}"] cluster" {
+@test "SETUP: Cleanup stuck OpenStack ["${OS_CLUSTER_NAME}"] cluster" {
   run remove-stuck-cluster "${OS_CLUSTER_NAME}"
 
   echo "$output" >&2
@@ -13,20 +13,20 @@ DELAY=$(($SECONDS+2100))
   [ $status -eq 0 ]
 }
 
-@test "PRECONDITION: Cleanup stuck OpenStack ["${OS_CREDENTIAL_NAME}"] credential" {
-  run remove-stuck-credential "${OS_CREDENTIAL_NAME}"
+@test "SETUP: Cleanup stuck OpenStack ["${OS_CREDENTIAL_NAME}"cluster] credential" {
+  run remove-stuck-credential "${OS_CREDENTIAL_NAME}cluster"
 
   echo "$output" >&2
 
   [ $status -eq 0 ]
 }
 
-@test "PRECONDITION: Create new ["${OS_CREDENTIAL_NAME}"] OpenStack V2 credential" {
-  OUTPUT=$(create-credential-openstack-v2 $OS_ARGS_V2 2>&1 | tail -n 2 | head -n 1)
+@test "SETUP: Create new ["${OS_CREDENTIAL_NAME}"cluster] OpenStack V2 credential" {
+  OUTPUT=$(create-credential-openstack-v2 --name "${OS_CREDENTIAL_NAME}cluster" $OS_ARGS_V2 2>&1 | tail -n 2 | head -n 1)
 
   echo "${OUTPUT}" >&2
 
-  [[ "${OUTPUT}" == *"credential created: ${OS_CREDENTIAL_NAME}"* ]]
+  [[ "${OUTPUT}" == *"credential created: ${OS_CREDENTIAL_NAME}cluster"* ]]
   [[ "${OUTPUT}" != *"error"* ]]
 }
 
@@ -39,7 +39,7 @@ DELAY=$(($SECONDS+2100))
   [[ "${OUTPUT}" != *"error"* ]]
 }
 
-@test "Wait for ["${OS_CREDENTIAL_NAME}"] cluster is created" {
+@test "Wait for ["${OS_CLUSTER_NAME}"] cluster is created" {
   run wait-cluster-status $DELAY "${OS_CLUSTER_NAME}" "AVAILABLE"
 
   echo "$output" >&2
@@ -48,7 +48,7 @@ DELAY=$(($SECONDS+2100))
   [ "$output" = "true" ]
 }
 
-@test "Change Ambari password for ["${OS_CREDENTIAL_NAME}"] cluster" {
+@test "Change Ambari password for ["${OS_CLUSTER_NAME}"] cluster" {
   run cluster-is-status "${OS_CLUSTER_NAME}" "AVAILABLE"
   if [[ "$output" != "true" ]]; then
     skip "Cluster is NOT created yet!"
@@ -59,7 +59,7 @@ DELAY=$(($SECONDS+2100))
   [[ "${OUTPUT}" ==  true ]]
 }
 
-@test "["${OS_CREDENTIAL_NAME}"] cluster should be listed" {
+@test "["${OS_CLUSTER_NAME}"] cluster should be listed" {
   run cluster-is-status "${OS_CLUSTER_NAME}" "AVAILABLE"
   if [[ "$output" != "true" ]]; then
     skip "Cluster is NOT created yet!"
@@ -71,7 +71,7 @@ DELAY=$(($SECONDS+2100))
   done
 }
 
-@test "["${OS_CREDENTIAL_NAME}"] cluster should be described" {
+@test "["${OS_CLUSTER_NAME}"] cluster should be described" {
   run cluster-is-status "${OS_CLUSTER_NAME}" "AVAILABLE"
   if [[ "$output" != "true" ]]; then
     skip "Cluster is NOT created yet!"
@@ -82,7 +82,7 @@ DELAY=$(($SECONDS+2100))
   [[ "$OUTPUT" == "true" ]]
 }
 
-@test "["${OS_CREDENTIAL_NAME}"] cluster can be stop" {
+@test "["${OS_CLUSTER_NAME}"] cluster can be stop" {
   run cluster-is-status "${OS_CLUSTER_NAME}" "AVAILABLE"
   if [[ "$output" != "true" ]]; then
     skip "Cluster is NOT created yet!"
@@ -95,7 +95,7 @@ DELAY=$(($SECONDS+2100))
   [[ "${OUTPUT}" != *"error"* ]]
 }
 
-@test "["${OS_CREDENTIAL_NAME}"] cluster should be stopped" {
+@test "["${OS_CLUSTER_NAME}"] cluster should be stopped" {
   run cluster-is-status "${OS_CLUSTER_NAME}" "STOP_IN_PROGRESS"
   if [[ "$output" != "true" ]]; then
     skip "Cluster Stop has not been requested!"
@@ -109,7 +109,7 @@ DELAY=$(($SECONDS+2100))
   [ "$output" = "true" ]
 }
 
-@test "["${OS_CREDENTIAL_NAME}"] cluster can be start" {
+@test "["${OS_CLUSTER_NAME}"] cluster can be start" {
   run cluster-is-status "${OS_CLUSTER_NAME}" "STOPPED"
   if [[ "$output" != "true" ]]; then
     skip "Cluster has not been stopped"
@@ -122,7 +122,7 @@ DELAY=$(($SECONDS+2100))
   [[ "${OUTPUT}" != *"error"* ]]
 }
 
-@test "["${OS_CREDENTIAL_NAME}"] cluster should be started" {
+@test "["${OS_CLUSTER_NAME}"] cluster should be started" {
   run cluster-is-status "${OS_CLUSTER_NAME}" "START_IN_PROGRESS"
   if [[ "$output" != "true" ]]; then
     skip "Cluster Start has not been requested"
@@ -136,7 +136,7 @@ DELAY=$(($SECONDS+2100))
   [ "$output" = "true" ]
 }
 
-@test "["${OS_CREDENTIAL_NAME}"] cluster can be upscale" {
+@test "["${OS_CLUSTER_NAME}"] cluster can be upscale" {
   run cluster-is-status "${OS_CLUSTER_NAME}" "AVAILABLE"
   if [[ "$output" != "true" ]]; then
     skip "Cluster is NOT created yet!"
@@ -151,7 +151,7 @@ DELAY=$(($SECONDS+2100))
   [ $status -eq 0 ]
 }
 
-@test "["${OS_CREDENTIAL_NAME}"] cluster upscale should be started" {
+@test "["${OS_CLUSTER_NAME}"] cluster upscale should be started" {
   run cluster-is-status "${OS_CLUSTER_NAME}" "UPDATE_IN_PROGRESS"
   if [[ "$output" != "true" ]]; then
     skip "Cluster upscale has not been requested!"
@@ -164,7 +164,7 @@ DELAY=$(($SECONDS+2100))
   [ "$output" = "true" ]
 }
 
-@test "["${OS_CREDENTIAL_NAME}"] cluster should be upscaled" {
+@test "["${OS_CLUSTER_NAME}"] cluster should be upscaled" {
   run cluster-is-status "${OS_CLUSTER_NAME}" "AVAILABLE"
   if [[ "$output" != "true" ]]; then
     skip "Cluster upscale has not been done!"
@@ -182,7 +182,7 @@ DELAY=$(($SECONDS+2100))
   [[ $INSTANCE_COUNT_DESIRED -eq $INSTANCE_COUNT_CURRENT ]]
 }
 
-@test "["${OS_CREDENTIAL_NAME}"] cluster can be downscale" {
+@test "["${OS_CLUSTER_NAME}"] cluster can be downscale" {
   run cluster-is-status "${OS_CLUSTER_NAME}" "AVAILABLE"
   if [[ "$output" != "true" ]]; then
     skip "Cluster is NOT created yet!"
@@ -197,7 +197,7 @@ DELAY=$(($SECONDS+2100))
   [ $status -eq 0 ]
 }
 
-@test "["${OS_CREDENTIAL_NAME}"] cluster downscale should be started" {
+@test "["${OS_CLUSTER_NAME}"] cluster downscale should be started" {
   run cluster-is-status "${OS_CLUSTER_NAME}" "UPDATE_IN_PROGRESS"
   if [[ "$output" != "true" ]]; then
     skip "Cluster downscale has not been requested!"
@@ -210,7 +210,7 @@ DELAY=$(($SECONDS+2100))
   [ "$output" = "true" ]
 }
 
-@test "["${OS_CREDENTIAL_NAME}"] cluster should be downscaled" {
+@test "["${OS_CLUSTER_NAME}"] cluster should be downscaled" {
   run cluster-is-status "${OS_CLUSTER_NAME}" "AVAILABLE"
   if [[ "$output" != "true" ]]; then
     skip "Cluster downscale has not been done!"
@@ -240,7 +240,7 @@ DELAY=$(($SECONDS+2100))
   cb cluster delete --name "${OS_CLUSTER_NAME}" --wait
 }
 
-@test "TEARDOWN: Wait for "${OS_CREDENTIAL_NAME}" cluster is terminated" {
+@test "TEARDOWN: Wait for "${OS_CLUSTER_NAME}" cluster is terminated" {
   run cluster-is-status "${OS_CLUSTER_NAME}" "DELETE_IN_PROGRESS"
   if [[ "$output" != "true" ]]; then
     skip "Cluster has already been terminated!"
@@ -254,8 +254,13 @@ DELAY=$(($SECONDS+2100))
   [ "$output" = "true" ]
 }
 
-@test "TEARDOWN: Delete ["${OS_CREDENTIAL_NAME}"] OpenStack credential" {
-  cb credential delete --name "${OS_CREDENTIAL_NAME}"
+@test "TEARDOWN: Delete ["${OS_CREDENTIAL_NAME}"cluster] OpenStack credential" {
+  OUTPUT=$(delete-credential --name "${OS_CREDENTIAL_NAME}cluster" 2>&1 | tail -n 2 | head -n 1)
+
+  echo "${OUTPUT}" >&2
+
+  [[ "${OUTPUT}" == *"credential deleted, name: ${OS_CREDENTIAL_NAME}cluster"* ]]
+  [[ "${OUTPUT}" != *"error"* ]]
 }
 
 @test "TEARDOWN: Delete status temp file" {

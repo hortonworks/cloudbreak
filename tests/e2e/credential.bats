@@ -1,11 +1,18 @@
 #!/usr/bin/env bats
 
 load ../utils/commands
+load ../utils/resources
 
-@test "Create new ["${OS_CREDENTIAL_NAME}"] OpenStack V2 credential" {
+@test "SETUP: Cleanup stuck OpenStack ["${OS_CREDENTIAL_NAME}"] credential" {
   run remove-stuck-credential "${OS_CREDENTIAL_NAME}"
 
-  OUTPUT=$(create-credential-openstack-v2 $OS_ARGS_V2 2>&1 | tail -n 2 | head -n 1)
+  echo "$output" >&2
+
+  [ $status -eq 0 ]
+}
+
+@test "Create new ["${OS_CREDENTIAL_NAME}"] OpenStack V2 credential" {
+  OUTPUT=$(create-credential-openstack-v2 --name "${OS_CREDENTIAL_NAME}" $OS_ARGS_V2 2>&1 | tail -n 2 | head -n 1)
 
   echo "${OUTPUT}" >&2
 
@@ -28,7 +35,7 @@ load ../utils/commands
   [[ "${OUTPUT}" == "${OS_CREDENTIAL_NAME}" ]]
 }
 
-@test "Delete ["${OS_CREDENTIAL_NAME}"] OpenStack V2 credential" {
+@test "TEARDOWN: Delete ["${OS_CREDENTIAL_NAME}"] OpenStack credential" {
   OUTPUT=$(delete-credential --name "${OS_CREDENTIAL_NAME}" 2>&1 | tail -n 2 | head -n 1)
 
   echo "${OUTPUT}" >&2
