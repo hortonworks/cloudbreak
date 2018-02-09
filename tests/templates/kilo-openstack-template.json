@@ -1,16 +1,11 @@
 {
-  "general": {
-    "name": "",
-    "credentialName": "openstackcluster"
-  },
   "placement": {
     "availabilityZone": "nova",
     "region": "RegionOne"
   },
-  "parameters": {},
-  "customDomain": {
-    "clusterNameAsSubdomain": false,
-    "hostgroupNameAsHostname": false
+  "general": {
+    "name": "",
+    "credentialName": "openstackcluster"
   },
   "tags": {
     "userDefinedTags": {
@@ -18,47 +13,45 @@
       "+-=. _:/@": "+-=. _:/@"
     }
   },
+  "cluster": {
+    "ambari": {
+      "userName": "admin",
+      "password": "Admin123!@#\"",
+      "blueprintName": "EDW-Analytics: Apache Hive 2 LLAP, Apache Zeppelin 0.7.0",
+      "ambariStackDetails": {
+        "stack": "HDP",
+        "version": "2.6",
+        "verify": false,
+        "enableGplRepo": false
+      },
+      "gateway": {
+        "enableGateway": false,
+        "gatewayType": "INDIVIDUAL"
+      },
+      "validateBlueprint": false,
+      "ambariSecurityMasterKey": ""
+    }
+  },
+  "imageSettings": {
+    "imageId": "6c626ab8-5089-40d1-5c98-327b8dfe6bfb",
+    "imageCatalog": "cloudbreak-default"
+  },
   "instanceGroups": [
     {
-      "nodeCount": 0,
-      "group": "compute",
-      "type": "CORE",
       "parameters": {},
       "template": {
-        "volumeCount": 1,
-        "volumeSize": 100,
         "parameters": {
           "encrypted": false
         },
+        "instanceType": "m1.large",
         "volumeType": "HDD",
-        "instanceType": "m1.large"
+        "volumeCount": 1,
+        "volumeSize": 100
       },
-      "securityGroup": {
-        "securityRules": [
-          {
-            "subnet": "0.0.0.0/0",
-            "ports": "22",
-            "protocol": "tcp"
-          }
-        ]
-      },
-      "recipeNames": [],
-      "recoveryMode": "MANUAL"
-    },
-    {
       "nodeCount": 1,
       "group": "master",
       "type": "GATEWAY",
-      "parameters": {},
-      "template": {
-        "volumeCount": 1,
-        "volumeSize": 100,
-        "parameters": {
-          "encrypted": false
-        },
-        "volumeType": "HDD",
-        "instanceType": "m1.large"
-      },
+      "recoveryMode": "MANUAL",
       "securityGroup": {
         "securityRules": [
           {
@@ -73,84 +66,75 @@
           },
           {
             "subnet": "0.0.0.0/0",
-            "ports": "443",
-            "protocol": "tcp"
+            "protocol": "tcp",
+            "ports": "22"
           },
           {
             "subnet": "0.0.0.0/0",
-            "ports": "22",
-            "protocol": "tcp"
+            "protocol": "tcp",
+            "ports": "443"
           }
         ]
-      },
-      "recipeNames": [],
-      "recoveryMode": "MANUAL"
+      }
     },
     {
-      "nodeCount": 1,
-      "group": "worker",
-      "type": "CORE",
       "parameters": {},
       "template": {
-        "volumeCount": 1,
-        "volumeSize": 100,
         "parameters": {
           "encrypted": false
         },
+        "instanceType": "m1.large",
         "volumeType": "HDD",
-        "instanceType": "m1.large"
+        "volumeCount": 1,
+        "volumeSize": 100
       },
+      "nodeCount": 1,
+      "group": "worker",
+      "type": "CORE",
+      "recoveryMode": "MANUAL",
       "securityGroup": {
         "securityRules": [
           {
             "subnet": "0.0.0.0/0",
-            "ports": "22",
-            "protocol": "tcp"
+            "protocol": "tcp",
+            "ports": "22"
           }
         ]
+      }
+    },
+    {
+      "parameters": {},
+      "template": {
+        "parameters": {
+          "encrypted": false
+        },
+        "instanceType": "m1.large",
+        "volumeType": "HDD",
+        "volumeCount": 1,
+        "volumeSize": 100
       },
-      "recipeNames": [],
-      "recoveryMode": "MANUAL"
+      "nodeCount": 0,
+      "group": "compute",
+      "type": "CORE",
+      "recoveryMode": "MANUAL",
+      "securityGroup": {
+        "securityRules": [
+          {
+            "subnet": "0.0.0.0/0",
+            "protocol": "tcp",
+            "ports": "22"
+          }
+        ]
+      }
     }
   ],
-  "stackAuthentication": {
-    "publicKeyId": "seq-master"
-  },
   "network": {
-    "subnetCIDR": "10.0.0.0/16",
     "parameters": {
       "networkingOption": "self-service"
-    }
+    },
+    "subnetCIDR": "10.0.0.0/16"
   },
-  "imageSettings": {
-    "imageCatalog": "cloudbreak-default",
-    "imageId": "6c626ab8-5089-40d1-5c98-327b8dfe6bfb"
-  },
-  "cluster": {
-    "emailNeeded": false,
-    "ambari": {
-      "blueprintName": "EDW-Analytics: Apache Hive 2 LLAP, Apache Zeppelin 0.7.0",
-      "enableSecurity": false,
-      "userName": "admin",
-      "password": "Admin123!@#\"",
-      "ambariStackDetails": {
-        "stack": "HDP-2.6",
-        "version": "2.6.4.0",
-        "os": "redhat7",
-        "stackRepoId": "HDP-2.6",
-        "stackBaseURL": "http://public-repo-1.hortonworks.com/HDP/centos7/2.x/updates/2.6.4.0",
-        "utilsRepoId": "HDP-UTILS-1.1.0.22",
-        "utilsBaseURL": "http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/centos7",
-        "enableGplRepo": false,
-        "verify": true,
-        "repositoryVersion": "2.6.4.0-91",
-        "versionDefinitionFileUrl": "http://public-repo-1.hortonworks.com/HDP/centos7/2.x/updates/2.6.4.0/HDP-2.6.4.0-91.xml"
-      },
-      "ambariRepoDetailsJson": {
-        "version": "2.6.1.3",
-        "baseUrl": "http://public-repo-1.hortonworks.com/ambari/centos6/2.x/updates/2.6.1.3"
-      },
-      "blueprintInputs": []
-    }
+  "stackAuthentication": {
+    "publicKeyId": "seq-master"
   }
 }
