@@ -229,6 +229,11 @@ DELAY=$(($SECONDS+2100))
 }
 
 @test "Generate reinstall template" {
+  run is-cluster-present "${OS_CLUSTER_NAME}"
+  if [[ "$output" != "true" ]]; then
+    skip "Cluster is not present!"
+  fi
+
   OUTPUT=$(generate-reinstall-template --name "${OS_CLUSTER_NAME}" --blueprint-name "${BLUEPRINT_NAME}" | jq .blueprintName -r)
 
   echo "${OUTPUT}" >&2

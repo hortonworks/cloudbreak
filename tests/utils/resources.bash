@@ -120,6 +120,12 @@ function wait-cluster-delete() {
     fi
 }
 
+function is-cluster-present() {
+  if [[ $(cb cluster list | jq -r '.[].Name' | grep $1) ]]; then
+    echo "true"
+  fi
+}
+
 function remove-stuck-cluster() {
   if [[ $(cb cluster list | jq -r '.[].Name' | grep $1) ]]; then
     cb cluster delete --name $1 --wait
