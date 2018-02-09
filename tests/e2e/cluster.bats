@@ -237,7 +237,7 @@ DELAY=$(($SECONDS+2100))
 }
 
 @test "TEARDOWN: Delete ["${OS_CLUSTER_NAME}"] OpenStack cluster" {
-  delete-cluster --name "${OS_CLUSTER_NAME}" --wait
+  cb cluster delete --name "${OS_CLUSTER_NAME}" --wait
 }
 
 @test "TEARDOWN: Wait for "${OS_CREDENTIAL_NAME}" cluster is terminated" {
@@ -255,8 +255,7 @@ DELAY=$(($SECONDS+2100))
 }
 
 @test "TEARDOWN: Delete ["${OS_CREDENTIAL_NAME}"] OpenStack credential" {
-  OUTPUT=$(delete-credential --name "${OS_CREDENTIAL_NAME}")
-  echo "${OUTPUT}" >&2
+  cb credential delete --name "${OS_CREDENTIAL_NAME}"
 }
 
 @test "TEARDOWN: Delete status temp file" {
