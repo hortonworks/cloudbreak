@@ -2,7 +2,7 @@
 
 load ../utils/commands
 
-@test "PRECONDITION - Create new OpenStack V2 credential" {
+@test "PRECONDITION: Create new OpenStack V2 credential" {
   run remove-stuck-credential "${OS_CREDENTIAL_NAME}"
   echo "$output" >&2
 
