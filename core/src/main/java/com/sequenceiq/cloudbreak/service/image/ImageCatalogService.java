@@ -132,7 +132,7 @@ public class ImageCatalogService {
     }
 
     public StatedImage getImage(String imageId) throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
-        return getImage(defaultCatalogUrl, "cloudbreak-default", imageId);
+        return getImage(defaultCatalogUrl, CLOUDBREAK_DEFAULT_CATALOG_NAME, imageId);
     }
 
     public StatedImage getImage(String catalogUrl, String catalogName, String imageId) throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {

@@ -130,7 +130,7 @@ public class ClusterV1Controller implements ClusterV1Endpoint {
     }
 
     @Override
-    public Response repairCluster(Long stackId, ClusterRepairRequest clusterRepairRequest) throws CloudbreakSecuritySetupException {
+    public Response repairCluster(Long stackId, ClusterRepairRequest clusterRepairRequest) {
         clusterService.repairCluster(stackId, clusterRepairRequest.getHostGroups(), clusterRepairRequest.isRemoveOnly());
         return Response.accepted().build();
     }
