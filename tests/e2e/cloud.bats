@@ -1,6 +1,7 @@
 #!/usr/bin/env bats
 
 load ../utils/commands
+load ../utils/resources
 
 @test "PRECONDITION: Create new OpenStack V2 credential" {
   run remove-stuck-credential "${OS_CREDENTIAL_NAME}"
