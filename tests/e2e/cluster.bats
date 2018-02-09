@@ -85,6 +85,11 @@ DELAY=$(($SECONDS+2100))
 }
 
 @test "Previously created cluster should be stopped" {
+  run cluster-is-status "${OS_CLUSTER_NAME}" "STOP_IN_PROGRESS"
+  if [[ "$output" != "true" ]]; then
+    skip "Cluster Stop has not been requested!"
+  fi
+
   run wait-cluster-status $DELAY "${OS_CLUSTER_NAME}" "STOPPED"
 
   echo "$output" >&2
@@ -107,6 +112,11 @@ DELAY=$(($SECONDS+2100))
 }
 
 @test "Previously created cluster should be started" {
+  run cluster-is-status "${OS_CLUSTER_NAME}" "START_IN_PROGRESS"
+  if [[ "$output" != "true" ]]; then
+    skip "Cluster Start has not been requested"
+  fi
+
   run wait-cluster-status $DELAY "${OS_CLUSTER_NAME}" "AVAILABLE"
 
   echo "$output" >&2
@@ -130,26 +140,35 @@ DELAY=$(($SECONDS+2100))
   [ $status -eq 0 ]
 }
 
+@test "Previously created cluster upscale should be started" {
+  run cluster-is-status "${OS_CLUSTER_NAME}" "UPDATE_IN_PROGRESS"
+  if [[ "$output" != "true" ]]; then
+    skip "Cluster upscale has not been requested!"
+  fi
+
+  run wait-cluster-status $DELAY "${OS_CLUSTER_NAME}" "AVAILABLE"
+  echo "$output" >&2
+
+  [ $status -eq 0 ]
+  [ "$output" = "true" ]
+}
+
 @test "Previously created cluster should be upscaled" {
   run cluster-is-status "${OS_CLUSTER_NAME}" "AVAILABLE"
   if [[ "$output" != "true" ]]; then
-    skip "Cluster is NOT created yet!"
+    skip "Cluster upscale has not been done!"
   fi
 
   INSTANCE_COUNT_DESIRED=`cat /tmp/clitestutil`
   echo $INSTANCE_COUNT_DESIRED
-
-  run wait-stack-cluster-status $DELAY "${OS_CLUSTER_NAME}" AVAILABLE
-  status_available=$status
-
-  run node-count-are-equal $OS_CLUSTER_NAME
 
   INSTANCE_COUNT_CURRENT=$(describe-cluster --name "${OS_CLUSTER_NAME}" | jq ' ."instanceGroups" | .[] | select(."group"=="compute") | . "nodeCount" ')
   echo $INSTANCE_COUNT_CURRENT
 
   STATUS_REASON=`cat /tmp/status_reason`
   echo $STATUS_REASON
-  [ $status_available = 0 ] && [ $status = 0 ] && [ $INSTANCE_COUNT_DESIRED = $INSTANCE_COUNT_CURRENT ]
+
+  [[ $INSTANCE_COUNT_DESIRED -eq $INSTANCE_COUNT_CURRENT ]]
 }
 
 @test "Previously created cluster can be downscale" {
@@ -164,23 +183,30 @@ DELAY=$(($SECONDS+2100))
   echo $INSTANCE_COUNT_DESIRED > /tmp/clitestutil
 
   run scale-cluster --name "${OS_CLUSTER_NAME}" --group-name compute --desired-node-count $INSTANCE_COUNT_DESIRED
-  echo "$output" >&2
   [ $status -eq 0 ]
+}
+
+@test "Previously created cluster downscale should be started" {
+  run cluster-is-status "${OS_CLUSTER_NAME}" "UPDATE_IN_PROGRESS"
+  if [[ "$output" != "true" ]]; then
+    skip "Cluster downscale has not been requested!"
+  fi
+
+  run wait-cluster-status $DELAY "${OS_CLUSTER_NAME}" "AVAILABLE"
+  echo "$output" >&2
+
+  [ $status -eq 0 ]
+  [ "$output" = "true" ]
 }
 
 @test "Previously created cluster should be downscaled" {
   run cluster-is-status "${OS_CLUSTER_NAME}" "AVAILABLE"
   if [[ "$output" != "true" ]]; then
-    skip "Cluster is NOT created yet!"
+    skip "Cluster downscale has not been done!"
   fi
 
   INSTANCE_COUNT_DESIRED=`cat /tmp/clitestutil`
   echo $INSTANCE_COUNT_DESIRED
-
-  run wait-stack-cluster-status $DELAY "${OS_CLUSTER_NAME}" AVAILABLE
-  status_available=$status
-
-  run node-count-are-equal "${OS_CLUSTER_NAME}"
 
   INSTANCE_COUNT_CURRENT=$(describe-cluster --name "${OS_CLUSTER_NAME}" | jq ' ."instanceGroups" | .[] | select(."group"=="compute") | . "nodeCount" ')
   echo $INSTANCE_COUNT_CURRENT
@@ -188,7 +214,7 @@ DELAY=$(($SECONDS+2100))
   STATUS_REASON=`cat /tmp/status_reason`
   echo $STATUS_REASON
 
-  [ $status_available = 0 ] && [ $status = 0 ] && [ $INSTANCE_COUNT_DESIRED = $INSTANCE_COUNT_CURRENT ]
+  [[ $INSTANCE_COUNT_DESIRED = $INSTANCE_COUNT_CURRENT ]]
 }
 
 @test "Generate reinstall template" {
@@ -199,21 +225,22 @@ DELAY=$(($SECONDS+2100))
   [[ "${OUTPUT}" == "${BLUEPRINT_NAME}" ]]
 }
 
-@test "TEARDOWN: Delete cluster then credential" {
+@test "TEARDOWN: Delete cluster" {
   OUTPUT=$(delete-cluster --name "${OS_CLUSTER_NAME}" --wait)
   echo "${OUTPUT}" >&2
-
-  run wait-cluster-delete $DELAY "${OS_CLUSTER_NAME}"
-  [ $status = 0 ]
-
-  CHECK_RESULT=$( delete-credential --name "${OS_CREDENTIAL_NAME}" )
-  echo $CHECK_RESULT >&2
 }
 
-@test "TEARDOWN: Delete temporary files" {
-  CHECK_RESULT=$( rm -f /tmp/status_reason )
-  echo $CHECK_RESULT >&2
+@test "TEARDOWN: Delete credential" {
+  OUTPUT=$(delete-credential --name "${OS_CREDENTIAL_NAME}")
+  echo "${OUTPUT}" >&2
+}
 
-  CHECK_RESULT=$( rm -f /tmp/clitestutil )
-  echo $CHECK_RESULT >&2
+@test "TEARDOWN: Delete status temp file" {
+  OUTPUT=$(rm -f /tmp/status_reason)
+  echo "${OUTPUT}" >&2
+}
+
+@test "TEARDOWN: Delete util temp file" {
+  OUTPUT=$(rm -f /tmp/clitestutil)
+  echo "${OUTPUT}" >&2
 }
