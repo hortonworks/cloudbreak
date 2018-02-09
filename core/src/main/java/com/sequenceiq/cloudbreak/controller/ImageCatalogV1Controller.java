@@ -34,12 +34,12 @@ public class ImageCatalogV1Controller implements ImageCatalogV1Endpoint {
     private ConversionService conversionService;
 
     @Override
-    public List<ImageCatalogResponse> getPublics() throws Exception {
+    public List<ImageCatalogResponse> getPublics() {
         return toJsonList(imageCatalogService.getAllPublicInAccount(), ImageCatalogResponse.class);
     }
 
     @Override
-    public ImageCatalogResponse getPublicByName(String name, boolean withImages) throws Exception {
+    public ImageCatalogResponse getPublicByName(String name, boolean withImages) {
 
         ImageCatalogResponse imageCatalogResponse = convert(imageCatalogService.get(name));
         Images images = imageCatalogService.propagateImagesIfRequested(name, withImages);

@@ -34,11 +34,11 @@ public class Image {
             @JsonProperty(value = "description", required = true) String description,
             @JsonProperty(value = "os", required = true) String os,
             @JsonProperty(value = "uuid", required = true) String uuid,
-            @JsonProperty(value = "version") String version,
-            @JsonProperty(value = "repo") Map<String, String> repo,
+            @JsonProperty("version") String version,
+            @JsonProperty("repo") Map<String, String> repo,
             @JsonProperty(value = "images", required = true) Map<String, Map<String, String>> imageSetsByProvider,
-            @JsonProperty(value = "stack-details") StackDetails stackDetails,
-            @JsonProperty(value = "os_type") String osType) {
+            @JsonProperty("stack-details") StackDetails stackDetails,
+            @JsonProperty("os_type") String osType) {
         this.date = date;
         this.description = description;
         this.os = os;

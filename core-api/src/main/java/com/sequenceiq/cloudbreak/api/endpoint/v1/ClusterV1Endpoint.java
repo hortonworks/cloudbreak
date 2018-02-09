@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v1;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
@@ -99,7 +100,7 @@ public interface ClusterV1Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ClusterOpDescription.UPGRADE_AMBARI, produces = ContentType.JSON, notes = Notes.AMBARI_NOTES,
             nickname = "upgradeCluster")
-    Response upgradeCluster(@PathParam("id") Long stackId, AmbariRepoDetailsJson ambariRepoDetails);
+    Response upgradeCluster(@PathParam("id") Long stackId, @NotNull AmbariRepoDetailsJson ambariRepoDetails);
 
     @POST
     @Path("{id}/cluster/failurereport")

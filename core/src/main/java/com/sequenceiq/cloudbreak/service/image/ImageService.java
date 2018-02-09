@@ -9,11 +9,13 @@ import java.util.Map;
 import java.util.Optional;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -27,7 +29,6 @@ import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.StackDetails;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
-import com.sequenceiq.cloudbreak.converter.AmbariRepoDetailsJsonToAmbariRepoConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
@@ -57,7 +58,8 @@ public class ImageService {
     private ImageCatalogService imageCatalogService;
 
     @Inject
-    private AmbariRepoDetailsJsonToAmbariRepoConverter ambariRepoDetailsJsonToAmbariRepoConverter;
+    @Named("conversionService")
+    private ConversionService conversionService;
 
     @Inject
     private BlueprintUtils blueprintUtils;
@@ -169,12 +171,10 @@ public class ImageService {
             Component stackRepoComponent;
             if (!imgFromCatalog.getStackDetails().getRepo().getKnox().isEmpty()) {
                 StackRepoDetails hdfRepo = createHDFRepo(stackDetails);
-                stackRepoComponent = new Component(ComponentType.HDF_REPO_DETAILS, ComponentType.HDF_REPO_DETAILS.name(),
-                        new Json(hdfRepo), stack);
+                stackRepoComponent = new Component(ComponentType.HDF_REPO_DETAILS, ComponentType.HDF_REPO_DETAILS.name(), new Json(hdfRepo), stack);
             } else {
                 StackRepoDetails repo = createHDPRepo(stackDetails);
-                stackRepoComponent = new Component(ComponentType.HDP_REPO_DETAILS, ComponentType.HDP_REPO_DETAILS.name(),
-                        new Json(repo), stack);
+                stackRepoComponent = new Component(ComponentType.HDP_REPO_DETAILS, ComponentType.HDP_REPO_DETAILS.name(), new Json(repo), stack);
             }
             components.add(stackRepoComponent);
         }
@@ -183,9 +183,13 @@ public class ImageService {
 
     private Component getAmbariComponent(Stack stack, com.sequenceiq.cloudbreak.cloud.model.catalog.Image imgFromCatalog)
             throws JsonProcessingException, CloudbreakImageCatalogException {
-        AmbariRepo ambariRepo = ambariRepoDetailsJsonToAmbariRepoConverter.convert(imgFromCatalog.getRepo(), imgFromCatalog.getVersion(), Boolean.TRUE);
-        return new Component(ComponentType.AMBARI_REPO_DETAILS, ComponentType.AMBARI_REPO_DETAILS.name(),
-                new Json(ambariRepo), stack);
+        if (imgFromCatalog.getRepo() != null && imgFromCatalog.getRepo().size() == 1) {
+            AmbariRepo ambariRepo = conversionService.convert(imgFromCatalog, AmbariRepo.class);
+            ambariRepo.setPredefined(Boolean.TRUE);
+            return new Component(ComponentType.AMBARI_REPO_DETAILS, ComponentType.AMBARI_REPO_DETAILS.name(), new Json(ambariRepo), stack);
+        } else {
+            throw new CloudbreakImageCatalogException(String.format("Invalid Ambari repo present in image catalog: '%s'.", imgFromCatalog.getRepo()));
+        }
     }
 
     private StackRepoDetails createHDPRepo(StackDetails hdpStack) {

@@ -5,12 +5,12 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.model.AmbariRepoDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.imagecatalog.BaseImageResponse;
 import com.sequenceiq.cloudbreak.api.model.imagecatalog.ImageResponse;
 import com.sequenceiq.cloudbreak.api.model.imagecatalog.ImagesResponse;
@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cloud.model.component.DefaultHDFEntries;
 import com.sequenceiq.cloudbreak.cloud.model.component.DefaultHDPEntries;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackInfo;
+import com.sequenceiq.cloudbreak.service.DefaultAmbariRepoService;
 
 @Component
 public class ImagesToImagesResponseJsonConverter extends AbstractConversionServiceAwareConverter<Images, ImagesResponse> {
@@ -35,7 +36,7 @@ public class ImagesToImagesResponseJsonConverter extends AbstractConversionServi
     private DefaultHDFEntries defaultHDFEntries;
 
     @Inject
-    private AmbariRepoDetailsJsonToAmbariRepoConverter ambariRepoConverter;
+    private DefaultAmbariRepoService defaultAmbariRepoService;
 
     @Override
     public ImagesResponse convert(Images source) {
@@ -65,23 +66,24 @@ public class ImagesToImagesResponseJsonConverter extends AbstractConversionServi
     }
 
     private List<BaseImageResponse> getBaseImageResponses(Images source) {
-        List<BaseImageResponse> baseImages = new ArrayList<>();
         List<StackDetailsJson> defaultHdpStacks = getDefaultStackInfos(defaultHDPEntries.getEntries().values());
         List<StackDetailsJson> defaultHdfStacks = getDefaultStackInfos(defaultHDFEntries.getEntries().values());
-        AmbariRepo ambariRepoDetails = ambariRepoConverter.convert(new AmbariRepoDetailsJson());
-        Map<String, String> repoJson = new HashMap<>();
-        repoJson.put("baseurl", ambariRepoDetails.getBaseUrl());
-        repoJson.put("gpgkey", ambariRepoDetails.getGpgKeyUrl());
-
-        for (Image baseImg : source.getBaseImages()) {
-            BaseImageResponse imgJson = new BaseImageResponse();
-            copyImageFieldsToJson(baseImg, imgJson);
-            imgJson.setHdpStacks(defaultHdpStacks);
-            imgJson.setHdfStacks(defaultHdfStacks);
-            imgJson.setVersion(ambariRepoDetails.getVersion());
-            imgJson.setRepo(repoJson);
-            baseImages.add(imgJson);
-        }
+        List<BaseImageResponse> baseImages = source.getBaseImages().stream()
+            .filter(i -> defaultAmbariRepoService.getDefault(i.getOsType()) != null)
+            .map(i -> {
+                BaseImageResponse imgJson = new BaseImageResponse();
+                copyImageFieldsToJson(i, imgJson);
+                imgJson.setHdpStacks(defaultHdpStacks);
+                imgJson.setHdfStacks(defaultHdfStacks);
+                imgJson.setVersion(defaultAmbariRepoService.getVersion());
+                AmbariRepo ambariRepo = defaultAmbariRepoService.getDefault(i.getOsType());
+                Map<String, String> repoJson = new HashMap<>();
+                repoJson.put("baseurl", ambariRepo.getBaseUrl());
+                repoJson.put("gpgkey", ambariRepo.getGpgKeyUrl());
+                imgJson.setRepo(repoJson);
+                return imgJson;
+            })
+            .collect(Collectors.toList());
         return baseImages;
     }
 
