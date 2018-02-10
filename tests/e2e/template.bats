@@ -5,30 +5,30 @@ load ../utils/commands
 @test "Check generate cluster template azure new network" {
   OUTPUT=$(generate-cluster-template azure new-network | jq '. "network" | [to_entries[].key] == ["subnetCIDR"]')
 
-  [[ "${OUTPUT}" == "true" ]]
+  [[ "${OUTPUT}" == true ]]
 }
 
 @test "Check generate cluster template azure existing subnet" {
   OUTPUT=$(generate-cluster-template azure existing-subnet | jq ' ."network"| ."parameters" | [to_entries[].key] == ["networkId","noFirewallRules","noPublicIp","resourceGroupName","subnetId"]')
 
-  [[ "${OUTPUT}" == "true" ]]
+  [[ "${OUTPUT}" == true ]]
 }
 
 @test "Check generate cluster template aws new network" {
   OUTPUT=$(generate-cluster-template aws new-network | jq '. "network" | [to_entries[].key] == ["subnetCIDR"]')
 
-  [[ "${OUTPUT}" == "true" ]]
+  [[ "${OUTPUT}" == true ]]
 }
 
 @test "Check generate cluster template aws existing network" {
   OUTPUT=$(generate-cluster-template aws existing-network | jq ' ."network"| ."parameters" | [to_entries[].key] == ["internetGatewayId","vpcId"]')
 
-  [[ "${OUTPUT}" == "true" ]]
+  [[ "${OUTPUT}" == true ]]
 }
 @test "Check generate cluster template aws existing subnet" {
   OUTPUT=$(generate-cluster-template aws existing-subnet | jq ' ."network"| ."parameters" | [to_entries[].key] == ["subnetId","vpcId"]')
 
-  [[ "${OUTPUT}" == "true" ]]
+  [[ "${OUTPUT}" == true ]]
 }
 
 @test "Check generate cluster template openstack new network" {
@@ -46,7 +46,7 @@ load ../utils/commands
 @test "Check generate cluster template openstack existing subnet" {
   OUTPUT=$(generate-cluster-template openstack existing-subnet | jq ' ."network"| ."parameters" | [to_entries[].key] == ["networkId","networkingOption","publicNetId","subnetId"]')
 
-  [[ "${OUTPUT}" == "true" ]]
+  [[ "${OUTPUT}" == true ]]
 }
 
 @test "Check generate cluster template gcp new network" {
@@ -64,5 +64,5 @@ load ../utils/commands
 @test "Check generate cluster template gcp existing subnet" {
   OUTPUT=$(generate-cluster-template gcp existing-subnet | jq ' ."network"| ."parameters" | [to_entries[].key] == ["networkId","noFirewallRules","noPublicIp","subnetId"]')
 
-  [[ "${OUTPUT}" == "true" ]]
+  [[ "${OUTPUT}" == true ]]
 }

@@ -12,7 +12,7 @@ load ../utils/commands
 @test "Get images - openstack" {
   for OUTPUT in $(get-images openstack --imagecatalog "${IMAGE_CATALOG_NAME}" | jq ' .[0] | [to_entries[].key] == ["Date","Description","Version","ImageID"]');
   do
-    [[ "$OUTPUT" == "true" ]]
+    [[ "$OUTPUT" == true ]]
   done
 }
 
@@ -31,7 +31,7 @@ load ../utils/commands
 @test "List image catalog" {
   for OUTPUT in $(list-image-catalog  | jq ' .[0] | [to_entries[].key] == ["Name","Default","URL"]');
   do
-    [[ "$OUTPUT" == "true" ]]
+    [[ "$OUTPUT" == true ]]
   done
 }
 

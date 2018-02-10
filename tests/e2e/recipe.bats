@@ -12,14 +12,14 @@ load ../utils/commands
 @test "Check recipes are listed" {
   for OUTPUT in $(list-recipes | jq ' .[] | [to_entries[].key] == ["Name","Description","ExecutionType"]');
   do
-    [[ "$OUTPUT" == "true" ]]
+    [[ "$OUTPUT" == true ]]
   done
 }
 
 @test "Check recipe is described" {
   OUTPUT=$( describe-recipe --name ${RECIPE_NAME} | jq ' . | [to_entries[].key] == ["Name","Description","ExecutionType"]')
 
-  [[ "$OUTPUT" == "true" ]]
+  [[ "$OUTPUT" == true ]]
 }
 
 @test "Check recipe delete" {

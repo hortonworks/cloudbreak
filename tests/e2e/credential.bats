@@ -23,7 +23,7 @@ load ../utils/resources
 @test "List ["${OS_CREDENTIAL_NAME}"] OpenStack V2 credential" {
   for OUTPUT in $(list-credentials  | jq ' .[] | [to_entries[].key] == ["Name","Description","CloudPlatform"]');
   do
-    [[ "$OUTPUT" == "true" ]]
+    [[ "$OUTPUT" == true ]]
   done
 }
 

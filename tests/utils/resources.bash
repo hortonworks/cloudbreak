@@ -24,32 +24,30 @@
 # WAIT_FOR_SYNC
 
 function wait-cluster-status() {
-    is_status="false"
-    failed="false"
+    is_status_available=false
 
-    while [ $SECONDS -lt $1 ] && [ "${is_status}" == "false" ] && [ "${failed}" == "false" ]
+    while [ $SECONDS -lt "${1}" ] && [ "${is_status_available}" == false ]
     do
     	sleep 30
-	    is_status=$(cb cluster describe --name $2 | jq -r '."status" == "$3"')
-	    failed=$(cb cluster describe --name $2 | jq -r '."status" == "CREATE_FAILED"')
+	    is_status_available=$(cb cluster describe --name "${2}" | jq -r '."status" == "CREATE_FAILED" or ."status" == "${3}"')
     done
 
-    if [[ "${is_status}" != "true" ]]; then
-        echo $(cb cluster describe --name $2 | jq -r '."statusReason"')
+    if [[ "${is_status_available}" != true ]]; then
+        echo $(cb cluster describe --name "${2}" | jq -r '."statusReason"')
     else
-        echo "${is_status}"
+        echo "${is_status_available}"
     fi
 }
 
 function is-cluster-status() {
-    is_status="false"
+    status_is=false
 
-	is_status=$(cb cluster describe --name $1 | jq -r '."status" == "$2"')
+	status_is=$(cb cluster describe --name "${1}" | jq -r '."status" == "${2}"')
 
-    if [[ "${is_status}" != "true" ]]; then
-        echo $(cb cluster describe --name $1 | jq -r '."statusReason"')
+    if [[ "${status_is}" != true ]]; then
+        echo $(cb cluster describe --name "${1}" | jq -r '."statusReason"')
     else
-        echo "${is_status}"
+        echo "${status_is}"
     fi
 }
 
@@ -99,38 +97,38 @@ function node-count-are-equal() {
 }
 
 function wait-cluster-delete() {
-    still_exist="true"
-    failed="false"
+    still_exist=true
+    delete_failed=false
 
-    while [ $SECONDS -lt $1 ] && [ "${still_exist}" == "true" ] && [ "${failed}" == "false" ]
+    while [ $SECONDS -lt "${1}" ] && [ "${still_exist}" == true ] && [ "${delete_failed}" == false ]
     do
     	sleep 30
-	    still_exist=$(cb cluster list | jq -r '.[].Name == "$2"')
-	    failed=$(cb cluster describe --name $2 | jq -r '."status" == "DELETE_FAILED"')
+	    still_exist=$(cb cluster list | jq -r '.[].Name == "${2}"')
+	    delete_failed=$(cb cluster describe --name "${2}" | jq -r '."status" == "DELETE_FAILED"')
     done
 
-    if [[ "${still_exist}" == "true" ]]; then
-        echo $(cb cluster describe --name $2 | jq -r '."statusReason"')
+    if [[ "${still_exist}" == true ]]; then
+        echo $(cb cluster describe --name "${2}" | jq -r '."statusReason"')
     else
         echo "${still_exist}"
     fi
 }
 
 function is-cluster-present() {
-  if [[ $(cb cluster list | jq -r '.[].Name == "$1"') ]]; then
-    echo "true"
+  if [[ $(cb cluster list | jq -r '.[].Name == "${1}"') ]]; then
+    echo true
   fi
 }
 
 function remove-stuck-cluster() {
-  if [[ $(cb cluster list | jq -r '.[].Name == "$1"') ]]; then
-    cb cluster delete --name $1 --wait
+  if [[ $(cb cluster list | jq -r '.[].Name == "${1}"') ]]; then
+    cb cluster delete --name "${1}" --wait
   fi
 }
 
 function remove-stuck-credential() {
-  if [[ $(cb credential list | jq -r '.[].Name == "$1"') ]]; then
-    cb credential delete --name $1
+  if [[ $(cb credential list | jq -r '.[].Name == "${1}"') ]]; then
+    cb credential delete --name "${1}"
   fi
 }
 

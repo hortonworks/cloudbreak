@@ -16,3 +16,6 @@ e2e-test:
 
 run-e2e-suite:
 	$(call run_test,${test})
+
+run-e2e-regression:
+	bats --tap e2e/*.bats | tee regressiontest-results.tap

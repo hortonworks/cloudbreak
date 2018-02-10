@@ -27,7 +27,7 @@ load ../utils/resources
 
   echo "${OUTPUT}" >&2
 
-  [[ "${OUTPUT}" == "true" ]]
+  [[ "${OUTPUT}" == true ]]
 }
 
 @test "Instances are listed" {
@@ -43,21 +43,21 @@ load ../utils/resources
 @test "AWS volumes are listed" {
   for OUTPUT in $(volume-list aws | jq ' .[0] | [to_entries[].key] == ["Name","Description"]');
   do
-    [[ "${OUTPUT}" == "true" ]]
+    [[ "${OUTPUT}" == true ]]
   done
 }
 
 @test "Azure volumes are listed" {
   for OUTPUT in $(volume-list azure | jq ' .[0] | [to_entries[].key] == ["Name","Description"]');
   do
-    [[ "${OUTPUT}" == "true" ]]
+    [[ "${OUTPUT}" == true ]]
   done
 }
 
 @test "GCP volumes are listed" {
   for OUTPUT in $(volume-list gcp | jq ' .[0] | [to_entries[].key] == ["Name","Description"]');
   do
-    [[ "${OUTPUT}" == "true" ]]
+    [[ "${OUTPUT}" == true ]]
   done
 }
 

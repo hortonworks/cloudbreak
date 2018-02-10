@@ -48,12 +48,12 @@ UTILS_TEMPFILE="clitestutil"
   echo "$output" >&2
 
   [ $status -eq 0 ]
-  [ "$output" = "true" ]
+  [ "$output" = true ]
 }
 
 @test "Change Ambari password for ["${OS_CLUSTER_NAME}"] cluster" {
   run is-cluster-status "${OS_CLUSTER_NAME}" "AVAILABLE"
-  if [[ "$output" != "true" ]]; then
+  if [[ "$output" != true ]]; then
     skip "Cluster is NOT created yet!"
   fi
 
@@ -64,30 +64,30 @@ UTILS_TEMPFILE="clitestutil"
 
 @test "["${OS_CLUSTER_NAME}"] cluster should be listed" {
   run is-cluster-status "${OS_CLUSTER_NAME}" "AVAILABLE"
-  if [[ "$output" != "true" ]]; then
+  if [[ "$output" != true ]]; then
     skip "Cluster is NOT created yet!"
   fi
 
   for OUTPUT in $(list-clusters | jq ' .[] | [to_entries[].key] == ["Name","Description","CloudPlatform","StackStatus","ClusterStatus"]');
   do
-    [[ "$OUTPUT" == "true" ]]
+    [[ "$OUTPUT" == true ]]
   done
 }
 
 @test "["${OS_CLUSTER_NAME}"] cluster should be described" {
   run is-cluster-status "${OS_CLUSTER_NAME}" "AVAILABLE"
-  if [[ "$output" != "true" ]]; then
+  if [[ "$output" != true ]]; then
     skip "Cluster is NOT created yet!"
   fi
 
   OUTPUT=$(describe-cluster --name "${OS_CLUSTER_NAME}" | jq '. "name" == "${OS_CLUSTER_NAME}"')
 
-  [[ "$OUTPUT" == "true" ]]
+  [[ "$OUTPUT" == true ]]
 }
 
 @test "["${OS_CLUSTER_NAME}"] cluster can be stop" {
   run is-cluster-status "${OS_CLUSTER_NAME}" "AVAILABLE"
-  if [[ "$output" != "true" ]]; then
+  if [[ "$output" != true ]]; then
     skip "Cluster is NOT created yet!"
   fi
 
@@ -100,7 +100,7 @@ UTILS_TEMPFILE="clitestutil"
 
 @test "["${OS_CLUSTER_NAME}"] cluster should be stopped" {
   run is-cluster-status "${OS_CLUSTER_NAME}" "STOP_IN_PROGRESS"
-  if [[ "$output" != "true" ]]; then
+  if [[ "$output" != true ]]; then
     skip "Cluster Stop has not been requested!"
   fi
 
@@ -109,12 +109,12 @@ UTILS_TEMPFILE="clitestutil"
   echo "$output" >&2
 
   [ $status -eq 0 ]
-  [ "$output" = "true" ]
+  [ "$output" = true ]
 }
 
 @test "["${OS_CLUSTER_NAME}"] cluster can be start" {
   run is-cluster-status "${OS_CLUSTER_NAME}" "STOPPED"
-  if [[ "$output" != "true" ]]; then
+  if [[ "$output" != true ]]; then
     skip "Cluster has not been stopped"
   fi
 
@@ -127,7 +127,7 @@ UTILS_TEMPFILE="clitestutil"
 
 @test "["${OS_CLUSTER_NAME}"] cluster should be started" {
   run is-cluster-status "${OS_CLUSTER_NAME}" "START_IN_PROGRESS"
-  if [[ "$output" != "true" ]]; then
+  if [[ "$output" != true ]]; then
     skip "Cluster Start has not been requested"
   fi
 
@@ -136,12 +136,12 @@ UTILS_TEMPFILE="clitestutil"
   echo "$output" >&2
 
   [ $status -eq 0 ]
-  [ "$output" = "true" ]
+  [ "$output" = true ]
 }
 
 @test "["${OS_CLUSTER_NAME}"] cluster can be upscale" {
   run is-cluster-status "${OS_CLUSTER_NAME}" "AVAILABLE"
-  if [[ "$output" != "true" ]]; then
+  if [[ "$output" != true ]]; then
     skip "Cluster is NOT created yet!"
   fi
 
@@ -156,7 +156,7 @@ UTILS_TEMPFILE="clitestutil"
 
 @test "["${OS_CLUSTER_NAME}"] cluster upscale should be started" {
   run is-cluster-status "${OS_CLUSTER_NAME}" "UPDATE_IN_PROGRESS"
-  if [[ "$output" != "true" ]]; then
+  if [[ "$output" != true ]]; then
     skip "Cluster upscale has not been requested!"
   fi
 
@@ -164,12 +164,12 @@ UTILS_TEMPFILE="clitestutil"
   echo "$output" >&2
 
   [ $status -eq 0 ]
-  [ "$output" = "true" ]
+  [ "$output" = true ]
 }
 
 @test "["${OS_CLUSTER_NAME}"] cluster should be upscaled" {
   run is-cluster-status "${OS_CLUSTER_NAME}" "AVAILABLE"
-  if [[ "$output" != "true" ]]; then
+  if [[ "$output" != true ]]; then
     skip "Cluster upscale has not been done!"
   fi
 
@@ -187,7 +187,7 @@ UTILS_TEMPFILE="clitestutil"
 
 @test "["${OS_CLUSTER_NAME}"] cluster can be downscale" {
   run is-cluster-status "${OS_CLUSTER_NAME}" "AVAILABLE"
-  if [[ "$output" != "true" ]]; then
+  if [[ "$output" != true ]]; then
     skip "Cluster is NOT created yet!"
   fi
 
@@ -202,7 +202,7 @@ UTILS_TEMPFILE="clitestutil"
 
 @test "["${OS_CLUSTER_NAME}"] cluster downscale should be started" {
   run is-cluster-status "${OS_CLUSTER_NAME}" "UPDATE_IN_PROGRESS"
-  if [[ "$output" != "true" ]]; then
+  if [[ "$output" != true ]]; then
     skip "Cluster downscale has not been requested!"
   fi
 
@@ -210,12 +210,12 @@ UTILS_TEMPFILE="clitestutil"
   echo "$output" >&2
 
   [ $status -eq 0 ]
-  [ "$output" = "true" ]
+  [ "$output" = true ]
 }
 
 @test "["${OS_CLUSTER_NAME}"] cluster should be downscaled" {
   run is-cluster-status "${OS_CLUSTER_NAME}" "AVAILABLE"
-  if [[ "$output" != "true" ]]; then
+  if [[ "$output" != true ]]; then
     skip "Cluster downscale has not been done!"
   fi
 
@@ -233,7 +233,7 @@ UTILS_TEMPFILE="clitestutil"
 
 @test "Generate reinstall template" {
   run is-cluster-present "${OS_CLUSTER_NAME}"
-  if [[ "$output" != "true" ]]; then
+  if [[ "$output" != true ]]; then
     skip "Cluster is not present!"
   fi
 
@@ -255,7 +255,7 @@ UTILS_TEMPFILE="clitestutil"
 
 @test "TEARDOWN: Wait for "${OS_CLUSTER_NAME}" cluster is terminated" {
   run is-cluster-status "${OS_CLUSTER_NAME}" "DELETE_IN_PROGRESS"
-  if [[ "$output" != "true" ]]; then
+  if [[ "$output" != true ]]; then
     skip "Cluster has already been terminated!"
   fi
 
@@ -264,7 +264,7 @@ UTILS_TEMPFILE="clitestutil"
   echo "$output" >&2
 
   [ $status -eq 0 ]
-  [ "$output" != "true" ]
+  [ "$output" != true ]
 }
 
 @test "TEARDOWN: Delete ["${OS_CREDENTIAL_NAME}"cluster] OpenStack credential" {

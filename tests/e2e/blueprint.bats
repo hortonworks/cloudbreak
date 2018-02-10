@@ -46,7 +46,7 @@ load ../utils/commands
 @test "Check blueprint list" {
   for OUTPUT in $(list-blueprints | jq ' .[0] | [to_entries[].key] == ["Name","Description","HDPVersion","HostgroupCount","Tags"]');
   do
-    [[ "$OUTPUT" == "true" ]]
+    [[ "$OUTPUT" == true ]]
   done
 }
 
