@@ -245,7 +245,7 @@ UTILS_TEMPFILE="clitestutil"
 }
 
 @test "TEARDOWN: Delete ["${OS_CLUSTER_NAME}"] OpenStack cluster" {
-  OUTPUT=$(delete-cluster-wait "${OS_CLUSTER_NAME}" 2>&1 | tail -n 4 | head -n 1)
+  OUTPUT=$(delete-cluster "${OS_CLUSTER_NAME}" --wait 2>&1 | tail -n 4 | head -n 1)
 
   echo "${OUTPUT}" >&2
 

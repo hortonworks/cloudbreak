@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
 
 function cb-command() {
-  DEBUG=1 "cb" "$@"
+  DEBUG=1 "cb" "${@}"
 }
 
 function configure-cb() {
-  cb-command configure "$@"
+  cb-command configure "${@}"
 }
 
 function generate-cluster-template() {
-  cb-command cluster generate-template "$@"
+  cb-command cluster generate-template "${@}"
 }
 
 function list-blueprints() {
@@ -17,39 +17,39 @@ function list-blueprints() {
 }
 
  function create-blueprint {
-  cb-command blueprint create "$@"
+  cb-command blueprint create "${@}"
 }
 
  function delete-blueprint() {
-  cb-command blueprint delete "$@"
+  cb-command blueprint delete "${@}"
 }
 
  function describe-blueprint() {
-  cb-command blueprint describe "$@"
+  cb-command blueprint describe "${@}"
 }
 
  function create-credential-aws-key() {
-  cb-command credential create aws key-based "$@"
+  cb-command credential create aws key-based "${@}"
 }
 
  function create-credential-aws-role() {
-  cb-command credential create aws role-based "$@"
+  cb-command credential create aws role-based "${@}"
 }
 
 function create-credential-openstack-v2() {
-  cb-command credential create openstack keystone-v2 "$@"
+  cb-command credential create openstack keystone-v2 "${@}"
 }
 
 function create-credential-openstack-v3() {
-  cb-command credential create openstack keystone-v3 "$@"
+  cb-command credential create openstack keystone-v3 "${@}"
 }
 
 function create-credential-azure() {
-  cb-command credential create azure app-based "$@"
+  cb-command credential create azure app-based "${@}"
 }
 
 function create-credential-gcp() {
-  cb-command credential create gcp "$@"
+  cb-command credential create gcp "${@}"
 }
 
 function list-credentials() {
@@ -57,15 +57,15 @@ function list-credentials() {
 }
 
 function describe-credential() {
-  cb-command credential describe "$@"
+  cb-command credential describe "${@}"
 }
 
 function delete-credential() {
-  cb-command credential delete --name "$@"
+  cb-command credential delete --name "${@}"
 }
 
 function create-recipe(){
-  cb-command recipe create "$@"
+  cb-command recipe create "${@}"
 }
 
 function list-recipes() {
@@ -73,109 +73,105 @@ function list-recipes() {
 }
 
 function delete-recipe() {
-  cb-command recipe delete "$@"
+  cb-command recipe delete "${@}"
 }
 
 function describe-recipe() {
-  cb-command recipe describe "$@"
+  cb-command recipe describe "${@}"
 }
 
 function create-cluster() {
-  cb-command cluster create "$@"
+  cb-command cluster create "${@}"
 }
 
 function start-cluster() {
-  cb-command cluster start "$@"
+  cb-command cluster start "${@}"
 }
 
 function stop-cluster() {
-  cb-command cluster stop "$@"
+  cb-command cluster stop "${@}"
 }
 
 function list-clusters() {
   cb-command cluster list
 }
 
-function delete-cluster-wait() {
-  cb-command cluster delete --name "$@" --wait
-}
-
 function delete-cluster() {
-  cb-command cluster delete --name "$@"
+  cb-command cluster delete --name "${@}"
 }
 
 function describe-cluster() {
-  cb-command cluster describe "$@"
+  cb-command cluster describe "${@}"
 }
 
 function scale-cluster() {
-  cb-command cluster scale "$@"
+  cb-command cluster scale "${@}"
 }
 
 function repair-cluster() {
-  cb-command cluster repair "$@"
+  cb-command cluster repair "${@}"
 }
 
 function sync-cluster() {
-  cb-command cluster sync "$@"
+  cb-command cluster sync "${@}"
 }
 
 function change-ambari-password() {
-  cb-command cluster change-ambari-password "$@"
+  cb-command cluster change-ambari-password "${@}"
 }
 
 function reinstall-cluster() {
-  cb-command cluster reinstall "$@"
+  cb-command cluster reinstall "${@}"
 }
 
 function generate-reinstall-template() {
-  cb-command cluster generate-reinstall-template "$@"
+  cb-command cluster generate-reinstall-template "${@}"
 }
 
 function list-ldaps() {
-  cb-command ldap list "$@"
+  cb-command ldap list "${@}"
 }
 
 function create-ldap() {
-  cb-command ldap create "$@"
+  cb-command ldap create "${@}"
 }
 
 function delete-ldap() {
-  cb-command ldap delete "$@"
+  cb-command ldap delete "${@}"
 }
 
 function availability-zone-list() {
-  cb-command cloud availability-zones "$@"
+  cb-command cloud availability-zones "${@}"
 }
 
 function region-list() {
-  cb-command cloud regions "$@"
+  cb-command cloud regions "${@}"
 }
 
 function instance-list() {
-  cb-command cloud instances "$@"
+  cb-command cloud instances "${@}"
 }
 
 function volume-list() {
-  cb-command cloud volumes "$@"
+  cb-command cloud volumes "${@}"
 }
 
 function list-image-catalog() {
-  cb-command imagecatalog list "$@"
+  cb-command imagecatalog list "${@}"
 }
 
 function create-image-catalog() {
-  cb-command imagecatalog create "$@"
+  cb-command imagecatalog create "${@}"
 }
 
 function get-images() {
-  cb-command imagecatalog images "$@"
+  cb-command imagecatalog images "${@}"
 }
 
 function delete-image-catalog() {
-  cb-command imagecatalog delete "$@"
+  cb-command imagecatalog delete "${@}"
 }
 
 function set-default-image-catalog() {
-  cb-command imagecatalog set-default "$@"
+  cb-command imagecatalog set-default "${@}"
 }
