@@ -25,11 +25,13 @@
 
 function wait-cluster-status() {
     is_status_available=false
+    create_failed=false
 
-    while [ $SECONDS -lt "${1}" ] && [ "${is_status_available}" == false ]
+    while [ $SECONDS -lt "${1}" ] && [ "${is_status_available}" == false ] && [ "${create_failed}" == false ]
     do
     	sleep 30
-	    is_status_available=$(cb cluster describe --name "${2}" | jq -r '."status" == "CREATE_FAILED" or ."status" == "${3}"')
+	    is_status_available=$(cb cluster describe --name "${2}" | jq -r '."status" == "${3}"')
+	    create_failed=$(cb cluster describe --name "${2}" | jq -r '."status" == "CREATE_FAILED"')
     done
 
     if [[ "${is_status_available}" != true ]]; then

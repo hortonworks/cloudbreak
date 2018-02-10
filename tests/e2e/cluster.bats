@@ -245,12 +245,11 @@ UTILS_TEMPFILE="clitestutil"
 }
 
 @test "TEARDOWN: Delete ["${OS_CLUSTER_NAME}"] OpenStack cluster" {
-  OUTPUT=$(delete-cluster "${OS_CLUSTER_NAME}" --wait 2>&1 | tail -n 4 | head -n 1)
+  run delete-cluster-wait "${OS_CLUSTER_NAME}"
 
-  echo "${OUTPUT}" >&2
+  echo "$output" >&2
 
-  [[ "${OUTPUT}" == *"[waitForClusterToFinishImpl] stack status: DELETE_COMPLETED, cluster status"* ]]
-  [[ "${OUTPUT}" != *"error"* ]]
+  [ $status -eq 0 ]
 }
 
 @test "TEARDOWN: Wait for "${OS_CLUSTER_NAME}" cluster is terminated" {
@@ -268,12 +267,11 @@ UTILS_TEMPFILE="clitestutil"
 }
 
 @test "TEARDOWN: Delete ["${OS_CREDENTIAL_NAME}"cluster] OpenStack credential" {
-  OUTPUT=$(delete-credential "${OS_CREDENTIAL_NAME}cluster" 2>&1 | tail -n 2 | head -n 1)
+  run delete-credential "${OS_CREDENTIAL_NAME}cluster"
 
-  echo "${OUTPUT}" >&2
+  echo "$output" >&2
 
-  [[ "${OUTPUT}" == *"[DeleteCredential] credential deleted, name: ${OS_CREDENTIAL_NAME}cluster"* ]]
-  [[ "${OUTPUT}" != *"error"* ]]
+  [ $status -eq 0 ]
 }
 
 @test "TEARDOWN: Delete status temp file" {

@@ -100,6 +100,10 @@ function delete-cluster() {
   cb-command cluster delete --name "${@}"
 }
 
+function delete-cluster-wait() {
+  cb-command cluster delete --name "${1}" --wait
+}
+
 function describe-cluster() {
   cb-command cluster describe "${@}"
 }
