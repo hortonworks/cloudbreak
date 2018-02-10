@@ -62,10 +62,10 @@ load ../utils/resources
 }
 
 @test "TEARDOWN: Delete ["${OS_CREDENTIAL_NAME}"cloud] OpenStack credential" {
-  OUTPUT=$(delete-credential --name "${OS_CREDENTIAL_NAME}cloud" 2>&1 | tail -n 2 | head -n 1)
+  OUTPUT=$(delete-credential "${OS_CREDENTIAL_NAME}cloud" 2>&1 | tail -n 2 | head -n 1)
 
   echo "${OUTPUT}" >&2
 
-  [[ "${OUTPUT}" == *"credential deleted, name: ${OS_CREDENTIAL_NAME}cloud"* ]]
+  [[ "${OUTPUT}" == *"[DeleteCredential] credential deleted, name: ${OS_CREDENTIAL_NAME}cloud"* ]]
   [[ "${OUTPUT}" != *"error"* ]]
 }

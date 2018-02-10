@@ -242,14 +242,12 @@ DELAY=$(($SECONDS+2100))
 }
 
 @test "TEARDOWN: Delete ["${OS_CLUSTER_NAME}"] OpenStack cluster" {
-  cb cluster delete --name "${OS_CLUSTER_NAME}" --wait
+  OUTPUT=$(delete-cluster-wait "${OS_CLUSTER_NAME}" 2>&1 | tail -n 4 | head -n 1)
 
-  run cluster-is-status "${OS_CLUSTER_NAME}" "DELETE_COMPLETED"
+  echo "${OUTPUT}" >&2
 
-  echo "$output" >&2
-
-  [ $status -eq 0 ]
-  [ "$output" = "true" ]
+  [[ "${OUTPUT}" == *"[waitForClusterToFinishImpl] stack status: DELETE_COMPLETED, cluster status"* ]]
+  [[ "${OUTPUT}" != *"error"* ]]
 }
 
 @test "TEARDOWN: Wait for "${OS_CLUSTER_NAME}" cluster is terminated" {
@@ -267,11 +265,11 @@ DELAY=$(($SECONDS+2100))
 }
 
 @test "TEARDOWN: Delete ["${OS_CREDENTIAL_NAME}"cluster] OpenStack credential" {
-  OUTPUT=$(delete-credential --name "${OS_CREDENTIAL_NAME}cluster" 2>&1 | tail -n 2 | head -n 1)
+  OUTPUT=$(delete-credential "${OS_CREDENTIAL_NAME}cluster" 2>&1 | tail -n 2 | head -n 1)
 
   echo "${OUTPUT}" >&2
 
-  [[ "${OUTPUT}" == *"credential deleted, name: ${OS_CREDENTIAL_NAME}cluster"* ]]
+  [[ "${OUTPUT}" == *"[DeleteCredential] credential deleted, name: ${OS_CREDENTIAL_NAME}cluster"* ]]
   [[ "${OUTPUT}" != *"error"* ]]
 }
 

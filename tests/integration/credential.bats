@@ -53,7 +53,7 @@ load ../utils/mock_parameters
 }
 
 @test "Check credential delete" {
-  OUTPUT=$(delete-credential --name "${OS_CREDENTIAL_NAME}" 2>&1 | tail -n 2 | head -n 1)
+  OUTPUT=$(delete-credential "${OS_CREDENTIAL_NAME}" 2>&1 | tail -n 2 | head -n 1)
 
   [[ "${OUTPUT}" == *"credential deleted, name: ${OS_CREDENTIAL_NAME}"* ]]
   [[ "${OUTPUT}" != *"error"* ]]

@@ -31,14 +31,14 @@ load ../utils/mock_parameters
 }
 
 @test "Check cluster delete SUCCESS" {
-  OUTPUT=$(delete-cluster --name "${OS_CLUSTER_NAME}" 2>&1 | tail -n 2 | head -n 1)
+  OUTPUT=$(delete-cluster "${OS_CLUSTER_NAME}" 2>&1 | tail -n 2 | head -n 1)
 
   [[ "${OUTPUT}" == *"stack deleted, name: openstack-cluster"* ]]
   [[ "${OUTPUT}" != *"error"* ]]
 }
 
 @test "Check cluster delete FAILED" {
-  OUTPUT=$(delete-cluster --name az404 2>&1 | tail -n 4 | head -n 1)
+  OUTPUT=$(delete-cluster az404 2>&1 | tail -n 4 | head -n 1)
 
   [[ "${OUTPUT}" == *"status code: 404, message: Stack 'az404' not found"* ]]
   [[ "${OUTPUT}" == *"error"* ]]

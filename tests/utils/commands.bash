@@ -61,7 +61,7 @@ function describe-credential() {
 }
 
 function delete-credential() {
-  cb-command credential delete "$@"
+  cb-command credential delete --name "$@"
 }
 
 function create-recipe(){
@@ -96,8 +96,12 @@ function list-clusters() {
   cb-command cluster list
 }
 
+function delete-cluster-wait() {
+  cb-command cluster delete --name "$@" --wait
+}
+
 function delete-cluster() {
-  cb-command cluster delete "$@"
+  cb-command cluster delete --name "$@"
 }
 
 function describe-cluster() {

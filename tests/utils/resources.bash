@@ -101,19 +101,19 @@ function node-count-are-equal() {
 }
 
 function wait-cluster-delete() {
-    still_exist=5
+    still_exist="true"
 
-    while [ $SECONDS -lt $1 ] && [ $still_exist -gt 0 ]
+    while [ $SECONDS -lt $1 ] && [ "${still_exist}" == "true" ]
     do
     	sleep 30
-	    still_exist=$(list-clusters | jq -r '.[] | select(.ClusterName=="$2") | length')
+	    still_exist=$(cb cluster list | jq -r '.[].Name == "$1"')
 	    failed=$(cb cluster describe --name $2 | jq -r '."status" == "DELETE_FAILED"')
 	    if [[ "${failed}" == "true" ]]; then
 	        SECONDS=$1
 	    fi
     done
 
-    if [[ $still_exist -ne 0 ]]; then
+    if [[ "${still_exist}" == "true" ]]; then
         echo $(cb cluster describe --name $2 | jq -r '."statusReason"')
     else
         echo "true"
@@ -121,19 +121,19 @@ function wait-cluster-delete() {
 }
 
 function is-cluster-present() {
-  if [[ $(cb cluster list | jq -r '.[].Name' | grep $1) ]]; then
+  if [[ $(cb cluster list | jq -r '.[].Name == "$1"') == true ]]; then
     echo "true"
   fi
 }
 
 function remove-stuck-cluster() {
-  if [[ $(cb cluster list | jq -r '.[].Name' | grep $1) ]]; then
+  if [[ $(cb cluster list | jq -r '.[].Name == "$1"') == true ]]; then
     cb cluster delete --name $1 --wait
   fi
 }
 
 function remove-stuck-credential() {
-  if [[ $(cb credential list | jq -r '.[].Name' | grep $1) ]]; then
+  if [[ $(cb credential list | jq -r '.[].Name == "$1"') == true ]]; then
     cb credential delete --name $1
   fi
 }
