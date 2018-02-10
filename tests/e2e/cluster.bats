@@ -4,6 +4,9 @@ load ../utils/commands
 load ../utils/resources
 
 DELAY=$(($SECONDS+2100))
+REINSTALL_TEMPFILE="reinstall-template.json"
+STATUS_TEMPFILE="status_reason"
+UTILS_TEMPFILE="clitestutil"
 
 @test "SETUP: Cleanup stuck OpenStack ["${OS_CLUSTER_NAME}"] cluster" {
   run remove-stuck-cluster "${OS_CLUSTER_NAME}"
@@ -49,7 +52,7 @@ DELAY=$(($SECONDS+2100))
 }
 
 @test "Change Ambari password for ["${OS_CLUSTER_NAME}"] cluster" {
-  run cluster-is-status "${OS_CLUSTER_NAME}" "AVAILABLE"
+  run is-cluster-status "${OS_CLUSTER_NAME}" "AVAILABLE"
   if [[ "$output" != "true" ]]; then
     skip "Cluster is NOT created yet!"
   fi
@@ -60,7 +63,7 @@ DELAY=$(($SECONDS+2100))
 }
 
 @test "["${OS_CLUSTER_NAME}"] cluster should be listed" {
-  run cluster-is-status "${OS_CLUSTER_NAME}" "AVAILABLE"
+  run is-cluster-status "${OS_CLUSTER_NAME}" "AVAILABLE"
   if [[ "$output" != "true" ]]; then
     skip "Cluster is NOT created yet!"
   fi
@@ -72,7 +75,7 @@ DELAY=$(($SECONDS+2100))
 }
 
 @test "["${OS_CLUSTER_NAME}"] cluster should be described" {
-  run cluster-is-status "${OS_CLUSTER_NAME}" "AVAILABLE"
+  run is-cluster-status "${OS_CLUSTER_NAME}" "AVAILABLE"
   if [[ "$output" != "true" ]]; then
     skip "Cluster is NOT created yet!"
   fi
@@ -83,7 +86,7 @@ DELAY=$(($SECONDS+2100))
 }
 
 @test "["${OS_CLUSTER_NAME}"] cluster can be stop" {
-  run cluster-is-status "${OS_CLUSTER_NAME}" "AVAILABLE"
+  run is-cluster-status "${OS_CLUSTER_NAME}" "AVAILABLE"
   if [[ "$output" != "true" ]]; then
     skip "Cluster is NOT created yet!"
   fi
@@ -96,7 +99,7 @@ DELAY=$(($SECONDS+2100))
 }
 
 @test "["${OS_CLUSTER_NAME}"] cluster should be stopped" {
-  run cluster-is-status "${OS_CLUSTER_NAME}" "STOP_IN_PROGRESS"
+  run is-cluster-status "${OS_CLUSTER_NAME}" "STOP_IN_PROGRESS"
   if [[ "$output" != "true" ]]; then
     skip "Cluster Stop has not been requested!"
   fi
@@ -110,7 +113,7 @@ DELAY=$(($SECONDS+2100))
 }
 
 @test "["${OS_CLUSTER_NAME}"] cluster can be start" {
-  run cluster-is-status "${OS_CLUSTER_NAME}" "STOPPED"
+  run is-cluster-status "${OS_CLUSTER_NAME}" "STOPPED"
   if [[ "$output" != "true" ]]; then
     skip "Cluster has not been stopped"
   fi
@@ -123,7 +126,7 @@ DELAY=$(($SECONDS+2100))
 }
 
 @test "["${OS_CLUSTER_NAME}"] cluster should be started" {
-  run cluster-is-status "${OS_CLUSTER_NAME}" "START_IN_PROGRESS"
+  run is-cluster-status "${OS_CLUSTER_NAME}" "START_IN_PROGRESS"
   if [[ "$output" != "true" ]]; then
     skip "Cluster Start has not been requested"
   fi
@@ -137,7 +140,7 @@ DELAY=$(($SECONDS+2100))
 }
 
 @test "["${OS_CLUSTER_NAME}"] cluster can be upscale" {
-  run cluster-is-status "${OS_CLUSTER_NAME}" "AVAILABLE"
+  run is-cluster-status "${OS_CLUSTER_NAME}" "AVAILABLE"
   if [[ "$output" != "true" ]]; then
     skip "Cluster is NOT created yet!"
   fi
@@ -145,14 +148,14 @@ DELAY=$(($SECONDS+2100))
   CHECK_RESULT=$(describe-cluster --name "${OS_CLUSTER_NAME}" | jq ' ."instanceGroups" | .[] | select(."group"=="compute") | . "nodeCount"')
   INSTANCE_COUNT_DESIRED=$(($CHECK_RESULT + 1))
 
-  echo $INSTANCE_COUNT_DESIRED > /tmp/clitestutil
+  echo $INSTANCE_COUNT_DESIRED > "${UTILS_TEMPFILE}"
 
   run scale-cluster --name "${OS_CLUSTER_NAME}" --group-name compute --desired-node-count $INSTANCE_COUNT_DESIRED
   [ $status -eq 0 ]
 }
 
 @test "["${OS_CLUSTER_NAME}"] cluster upscale should be started" {
-  run cluster-is-status "${OS_CLUSTER_NAME}" "UPDATE_IN_PROGRESS"
+  run is-cluster-status "${OS_CLUSTER_NAME}" "UPDATE_IN_PROGRESS"
   if [[ "$output" != "true" ]]; then
     skip "Cluster upscale has not been requested!"
   fi
@@ -165,25 +168,25 @@ DELAY=$(($SECONDS+2100))
 }
 
 @test "["${OS_CLUSTER_NAME}"] cluster should be upscaled" {
-  run cluster-is-status "${OS_CLUSTER_NAME}" "AVAILABLE"
+  run is-cluster-status "${OS_CLUSTER_NAME}" "AVAILABLE"
   if [[ "$output" != "true" ]]; then
     skip "Cluster upscale has not been done!"
   fi
 
-  INSTANCE_COUNT_DESIRED=`cat /tmp/clitestutil`
+  INSTANCE_COUNT_DESIRED=`cat "${UTILS_TEMPFILE}"`
   echo $INSTANCE_COUNT_DESIRED
 
   INSTANCE_COUNT_CURRENT=$(describe-cluster --name "${OS_CLUSTER_NAME}" | jq ' ."instanceGroups" | .[] | select(."group"=="compute") | . "nodeCount" ')
   echo $INSTANCE_COUNT_CURRENT
 
-  STATUS_REASON=`cat /tmp/status_reason`
+  STATUS_REASON=`cat "${STATUS_TEMPFILE}"`
   echo $STATUS_REASON
 
   [[ $INSTANCE_COUNT_DESIRED -eq $INSTANCE_COUNT_CURRENT ]]
 }
 
 @test "["${OS_CLUSTER_NAME}"] cluster can be downscale" {
-  run cluster-is-status "${OS_CLUSTER_NAME}" "AVAILABLE"
+  run is-cluster-status "${OS_CLUSTER_NAME}" "AVAILABLE"
   if [[ "$output" != "true" ]]; then
     skip "Cluster is NOT created yet!"
   fi
@@ -191,14 +194,14 @@ DELAY=$(($SECONDS+2100))
   CHECK_RESULT=$( describe-cluster --name "${OS_CLUSTER_NAME}" | jq ' ."instanceGroups" | .[] | select(."group"=="compute") | . "nodeCount" ')
   INSTANCE_COUNT_DESIRED=$(($CHECK_RESULT - 1))
 
-  echo $INSTANCE_COUNT_DESIRED > /tmp/clitestutil
+  echo $INSTANCE_COUNT_DESIRED > "${UTILS_TEMPFILE}"
 
   run scale-cluster --name "${OS_CLUSTER_NAME}" --group-name compute --desired-node-count $INSTANCE_COUNT_DESIRED
   [ $status -eq 0 ]
 }
 
 @test "["${OS_CLUSTER_NAME}"] cluster downscale should be started" {
-  run cluster-is-status "${OS_CLUSTER_NAME}" "UPDATE_IN_PROGRESS"
+  run is-cluster-status "${OS_CLUSTER_NAME}" "UPDATE_IN_PROGRESS"
   if [[ "$output" != "true" ]]; then
     skip "Cluster downscale has not been requested!"
   fi
@@ -211,18 +214,18 @@ DELAY=$(($SECONDS+2100))
 }
 
 @test "["${OS_CLUSTER_NAME}"] cluster should be downscaled" {
-  run cluster-is-status "${OS_CLUSTER_NAME}" "AVAILABLE"
+  run is-cluster-status "${OS_CLUSTER_NAME}" "AVAILABLE"
   if [[ "$output" != "true" ]]; then
     skip "Cluster downscale has not been done!"
   fi
 
-  INSTANCE_COUNT_DESIRED=`cat /tmp/clitestutil`
+  INSTANCE_COUNT_DESIRED=`cat "${UTILS_TEMPFILE}"`
   echo $INSTANCE_COUNT_DESIRED
 
   INSTANCE_COUNT_CURRENT=$(describe-cluster --name "${OS_CLUSTER_NAME}" | jq ' ."instanceGroups" | .[] | select(."group"=="compute") | . "nodeCount" ')
   echo $INSTANCE_COUNT_CURRENT
 
-  STATUS_REASON=`cat /tmp/status_reason`
+  STATUS_REASON=`cat "${STATUS_TEMPFILE}"`
   echo $STATUS_REASON
 
   [[ $INSTANCE_COUNT_DESIRED = $INSTANCE_COUNT_CURRENT ]]
@@ -234,11 +237,11 @@ DELAY=$(($SECONDS+2100))
     skip "Cluster is not present!"
   fi
 
-  OUTPUT=$(generate-reinstall-template --name "${OS_CLUSTER_NAME}" --blueprint-name "${BLUEPRINT_NAME}" | jq .blueprintName -r)
+  OUTPUT=$(generate-reinstall-template --name "${OS_CLUSTER_NAME}" --blueprint-name "${BLUEPRINT_NAME}" > "${REINSTALL_TEMPFILE}")
 
   echo "${OUTPUT}" >&2
 
-  [[ "${OUTPUT}" == "${BLUEPRINT_NAME}" ]]
+  [[ -f "${REINSTALL_TEMPFILE}" ]]
 }
 
 @test "TEARDOWN: Delete ["${OS_CLUSTER_NAME}"] OpenStack cluster" {
@@ -251,7 +254,7 @@ DELAY=$(($SECONDS+2100))
 }
 
 @test "TEARDOWN: Wait for "${OS_CLUSTER_NAME}" cluster is terminated" {
-  run cluster-is-status "${OS_CLUSTER_NAME}" "DELETE_IN_PROGRESS"
+  run is-cluster-status "${OS_CLUSTER_NAME}" "DELETE_IN_PROGRESS"
   if [[ "$output" != "true" ]]; then
     skip "Cluster has already been terminated!"
   fi
@@ -261,7 +264,7 @@ DELAY=$(($SECONDS+2100))
   echo "$output" >&2
 
   [ $status -eq 0 ]
-  [ "$output" = "true" ]
+  [ "$output" != "true" ]
 }
 
 @test "TEARDOWN: Delete ["${OS_CREDENTIAL_NAME}"cluster] OpenStack credential" {
@@ -274,11 +277,16 @@ DELAY=$(($SECONDS+2100))
 }
 
 @test "TEARDOWN: Delete status temp file" {
-  OUTPUT=$(rm -f /tmp/status_reason)
+  OUTPUT=$(rm -f "${STATUS_TEMPFILE}")
   echo "${OUTPUT}" >&2
 }
 
 @test "TEARDOWN: Delete util temp file" {
-  OUTPUT=$(rm -f /tmp/clitestutil)
+  OUTPUT=$(rm -f "${UTILS_TEMPFILE}")
+  echo "${OUTPUT}" >&2
+}
+
+@test "TEARDOWN: Delete reinstall temp file" {
+  OUTPUT=$(rm -f "${REINSTALL_TEMPFILE}")
   echo "${OUTPUT}" >&2
 }

@@ -1,6 +1,6 @@
 define run_test
-    @echo ::: ${1} tests have been launched :::
-    bats --tap e2e/${1}.bats | tee e2e/${1}-result.tap
+    @echo ::: ${1} E2E tests have been launched :::
+    bats --tap e2e/${1}.bats | tee ${1}-result.tap
 endef
 
 all: cbm integration-test
@@ -14,5 +14,5 @@ integration-test:
 e2e-test:
 	./scripts/e2e-test.sh
 
-run-test:
+run-e2e-suite:
 	$(call run_test,${test})
