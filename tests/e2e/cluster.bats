@@ -10,27 +10,14 @@ UTILS_TEMPFILE="clitestutil"
 
 @test "SETUP: Cleanup stuck OpenStack ["${OS_CLUSTER_NAME}"] cluster" {
   run remove-stuck-cluster "${OS_CLUSTER_NAME}"
-
-  echo "$output" >&2
-
-  [ $status -eq 0 ]
 }
 
 @test "SETUP: Cleanup stuck OpenStack ["${OS_CREDENTIAL_NAME}"cluster] credential" {
   run remove-stuck-credential "${OS_CREDENTIAL_NAME}cluster"
-
-  echo "$output" >&2
-
-  [ $status -eq 0 ]
 }
 
 @test "SETUP: Create new ["${OS_CREDENTIAL_NAME}"cluster] OpenStack V2 credential" {
-  OUTPUT=$(create-credential-openstack-v2 --name "${OS_CREDENTIAL_NAME}cluster" $OS_ARGS_V2 2>&1 | tail -n 2 | head -n 1)
-
-  echo "${OUTPUT}" >&2
-
-  [[ "${OUTPUT}" == *"credential created: ${OS_CREDENTIAL_NAME}cluster"* ]]
-  [[ "${OUTPUT}" != *"error"* ]]
+  run create-credential-openstack-v2 --name "${OS_CREDENTIAL_NAME}cluster" $OS_ARGS_V2
 }
 
 @test "Create new ["${OS_CLUSTER_NAME}"] OpenStack cluster" {
@@ -245,11 +232,7 @@ UTILS_TEMPFILE="clitestutil"
 }
 
 @test "TEARDOWN: Delete ["${OS_CLUSTER_NAME}"] OpenStack cluster" {
-  run delete-cluster-wait "${OS_CLUSTER_NAME}" --wait 2>&1 | tail -n 4 | head -n 1
-
-  echo "$output" >&2
-
-  [ $status -eq 0 ]
+  run remove-stuck-cluster "${OS_CLUSTER_NAME}"
 }
 
 @test "TEARDOWN: Wait for "${OS_CLUSTER_NAME}" cluster is terminated" {
@@ -259,32 +242,20 @@ UTILS_TEMPFILE="clitestutil"
   fi
 
   run wait-cluster-delete $DELAY "${OS_CLUSTER_NAME}"
-
-  echo "$output" >&2
-
-  [ $status -eq 0 ]
-  [ "$output" != true ]
 }
 
 @test "TEARDOWN: Delete ["${OS_CREDENTIAL_NAME}"cluster] OpenStack credential" {
-  run delete-credential "${OS_CREDENTIAL_NAME}cluster" 2>&1 | tail -n 2 | head -n 1
-
-  echo "$output" >&2
-
-  [ $status -eq 0 ]
+  run remove-stuck-credential "${OS_CREDENTIAL_NAME}cluster"
 }
 
 @test "TEARDOWN: Delete status temp file" {
-  OUTPUT=$(rm -f "${STATUS_TEMPFILE}")
-  echo "${OUTPUT}" >&2
+  rm -f "${STATUS_TEMPFILE}"
 }
 
 @test "TEARDOWN: Delete util temp file" {
-  OUTPUT=$(rm -f "${UTILS_TEMPFILE}")
-  echo "${OUTPUT}" >&2
+  rm -f "${UTILS_TEMPFILE}"
 }
 
 @test "TEARDOWN: Delete reinstall temp file" {
-  OUTPUT=$(rm -f "${REINSTALL_TEMPFILE}")
-  echo "${OUTPUT}" >&2
+  rm -f "${REINSTALL_TEMPFILE}"
 }

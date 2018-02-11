@@ -5,10 +5,6 @@ load ../utils/resources
 
 @test "SETUP: Cleanup stuck OpenStack ["${OS_CREDENTIAL_NAME}"] credential" {
   run remove-stuck-credential "${OS_CREDENTIAL_NAME}"
-
-  echo "$output" >&2
-
-  [ $status -eq 0 ]
 }
 
 @test "Create new ["${OS_CREDENTIAL_NAME}"] OpenStack V2 credential" {
@@ -36,10 +32,5 @@ load ../utils/resources
 }
 
 @test "TEARDOWN: Delete ["${OS_CREDENTIAL_NAME}"] OpenStack credential" {
-  OUTPUT=$(delete-credential "${OS_CREDENTIAL_NAME}" 2>&1 | tail -n 2 | head -n 1)
-
-  echo "${OUTPUT}" >&2
-
-  [[ "${OUTPUT}" == *"[DeleteCredential] credential deleted, name: ${OS_CREDENTIAL_NAME}"* ]]
-  [[ "${OUTPUT}" != *"error"* ]]
+  run remove-stuck-credential "${OS_CREDENTIAL_NAME}"
 }
