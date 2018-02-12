@@ -42,7 +42,7 @@ public class GcpCredentialConnector implements CredentialConnector {
             if (compute == null) {
                 throw new CloudConnectorException("Problem with your credential key please use the correct format.");
             }
-            listDisks(gcpContext, compute);
+            preCheckOfGooglePermission(gcpContext, compute);
         } catch (GoogleJsonResponseException e) {
             String errorMessage = e.getDetails().getMessage();
             LOGGER.error(errorMessage, e);
@@ -66,10 +66,11 @@ public class GcpCredentialConnector implements CredentialConnector {
         throw new UnsupportedOperationException("Interactive login not supported on GCP");
     }
 
-    private void listDisks(GcpContext gcpContext, Compute compute) throws IOException {
+    private void preCheckOfGooglePermission(GcpContext gcpContext, Compute compute) throws IOException {
         try {
             compute.regions().list(gcpContext.getProjectId());
         } catch (NullPointerException ignore) {
+            LOGGER.error(String.format("Google authentication failed for project-id '%s' because of a null value:", gcpContext.getProjectId()), ignore);
         }
     }
 
