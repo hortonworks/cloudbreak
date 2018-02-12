@@ -86,12 +86,57 @@ public class AzureCloudProvider extends CloudProviderHelper {
         return clustername == null ? AZURE_CLUSTER_DEFAULT_NAME : clustername;
     }
 
-    Map<String, Object> azureCredentialDetails() {
+    @Override
+    public String getPlatform() {
+        return AZURE_CAPITAL;
+    }
+
+    public Map<String, Object> azureCredentialDetails() {
         Map<String, Object> map = new HashMap<String, Object>();
         map.put("accessKey", getTestParameter().get("integrationtest.azurermcredential.accessKey"));
         map.put("secretKey", getTestParameter().get("integrationtest.azurermcredential.secretKey"));
         map.put("subscriptionId", getTestParameter().get("integrationtest.azurermcredential.subscriptionId"));
         map.put("tenantId", getTestParameter().get("integrationtest.azurermcredential.tenantId"));
+
+        return map;
+    }
+
+    public Map<String, Object> azureCredentialDetailsInvalidAccessKey() {
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put("accessKey", "12345abcdefg789");
+        map.put("secretKey", getTestParameter().get("integrationtest.azurermcredential.secretKey"));
+        map.put("subscriptionId", getTestParameter().get("integrationtest.azurermcredential.subscriptionId"));
+        map.put("tenantId", getTestParameter().get("integrationtest.azurermcredential.tenantId"));
+
+        return map;
+    }
+
+    public Map<String, Object> azureCredentialDetailsInvalidSecretKey() {
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put("accessKey", getTestParameter().get("integrationtest.azurermcredential.accessKey"));
+        map.put("secretKey", "12345abcdefg789");
+        map.put("subscriptionId", getTestParameter().get("integrationtest.azurermcredential.subscriptionId"));
+        map.put("tenantId", getTestParameter().get("integrationtest.azurermcredential.tenantId"));
+
+        return map;
+    }
+
+    public Map<String, Object> azureCredentialDetailsInvalidSubscriptionID() {
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put("accessKey", getTestParameter().get("integrationtest.azurermcredential.accessKey"));
+        map.put("secretKey", getTestParameter().get("integrationtest.azurermcredential.secretKey"));
+        map.put("subscriptionId", "12345abcdefg789");
+        map.put("tenantId", getTestParameter().get("integrationtest.azurermcredential.tenantId"));
+
+        return map;
+    }
+
+    public Map<String, Object> azureCredentialDetailsInvalidTenantID() {
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put("accessKey", getTestParameter().get("integrationtest.azurermcredential.accessKey"));
+        map.put("secretKey", getTestParameter().get("integrationtest.azurermcredential.secretKey"));
+        map.put("subscriptionId", getTestParameter().get("integrationtest.azurermcredential.subscriptionId"));
+        map.put("tenantId", "12345abcdefg789");
 
         return map;
     }

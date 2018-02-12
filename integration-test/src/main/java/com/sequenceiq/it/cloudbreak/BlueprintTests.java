@@ -113,8 +113,8 @@ public class BlueprintTests extends CloudbreakTest {
         when(Blueprint.post());
     }
 
-    //BUG-95609
-    @Test(expectedExceptions = BadRequestException.class, enabled = false)
+    //BUG-95609 - Won't fix issue
+    @Test(expectedExceptions = BadRequestException.class)
     public void testCreateLongDescriptionBlueprint() throws Exception {
         given(CloudbreakClient.isCreated());
         given(Blueprint.request()

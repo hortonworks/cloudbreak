@@ -1,14 +1,14 @@
 package com.sequenceiq.it.cloudbreak.newway.cloud;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import com.sequenceiq.cloudbreak.api.model.StackAuthenticationRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.NetworkV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.TemplateV2Request;
 import com.sequenceiq.it.cloudbreak.newway.Credential;
 import com.sequenceiq.it.cloudbreak.newway.CredentialEntity;
 import com.sequenceiq.it.cloudbreak.newway.TestParameter;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class GcpCloudProvider extends CloudProviderHelper {
     public static final String GCP = "gcp";
@@ -86,12 +86,47 @@ public class GcpCloudProvider extends CloudProviderHelper {
         return clustername == null ? GCP_CLUSTER_DEFAULT_NAME : clustername;
     }
 
-    Map<String, Object> gcpCredentialDetails() {
+    @Override
+    public String getPlatform() {
+        return GCP_CAPITAL;
+    }
+
+    public Map<String, Object> gcpCredentialDetails() {
         Map<String, Object> map = new HashMap<String, Object>();
         map.put("projectId", getTestParameter().get("integrationtest.gcpcredential.projectId"));
         map.put("serviceAccountId", getTestParameter().get("integrationtest.gcpcredential.serviceAccountId"));
         map.put("serviceAccountPrivateKey", getTestParameter().get("integrationtest.gcpcredential.p12File")
                 .substring(CloudProviderHelper.BEGIN_INDEX));
+
+        return map;
+    }
+
+    public Map<String, Object> gcpCredentialDetailsEmptyP12File() {
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put("projectId", getTestParameter().get("integrationtest.gcpcredential.projectId"));
+        map.put("serviceAccountId", getTestParameter().get("integrationtest.gcpcredential.serviceAccountId"));
+        map.put("serviceAccountPrivateKey", "");
+
+        return map;
+    }
+
+    public Map<String, Object> gcpCredentialDetailsEmptyProjectId() {
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put("projectId", "");
+        map.put("serviceAccountId", getTestParameter().get("integrationtest.gcpcredential.serviceAccountId"));
+        map.put("serviceAccountPrivateKey", getTestParameter().get("integrationtest.gcpcredential.p12File")
+                .substring(CloudProviderHelper.BEGIN_INDEX));
+
+        return map;
+    }
+
+    public Map<String, Object> gcpCredentialDetailsEmptyServiceAccount() {
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put("projectId", getTestParameter().get("integrationtest.gcpcredential.projectId"));
+        map.put("serviceAccountId", "");
+        map.put("serviceAccountPrivateKey", getTestParameter().get("integrationtest.gcpcredential.p12File")
+                .substring(CloudProviderHelper.BEGIN_INDEX));
+
         return map;
     }
 

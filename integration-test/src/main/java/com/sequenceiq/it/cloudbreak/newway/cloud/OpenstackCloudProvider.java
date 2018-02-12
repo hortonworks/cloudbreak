@@ -32,7 +32,7 @@ public class OpenstackCloudProvider extends CloudProviderHelper {
                 .withName(CREDNAME)
                 .withDescription(CREDDESC)
                 .withCloudPlatform(OPENSTACK_CAPITAL)
-                .withParameters(azureCredentialDetails());
+                .withParameters(openstackCredentialDetails());
     }
 
     @Override
@@ -87,7 +87,12 @@ public class OpenstackCloudProvider extends CloudProviderHelper {
         return clustername == null ? OPENSTACK_CLUSTER_DEFAULT_NAME : clustername;
     }
 
-    Map<String, Object> azureCredentialDetails() {
+    @Override
+    public String getPlatform() {
+        return OPENSTACK_CAPITAL;
+    }
+
+    public Map<String, Object> openstackCredentialDetails() {
         Map<String, Object> map = new HashMap<String, Object>();
         map.put("tenantName", getTestParameter().get("integrationtest.openstackcredential.tenantName"));
         map.put("userName", getTestParameter().get("integrationtest.openstackcredential.userName"));
@@ -95,6 +100,48 @@ public class OpenstackCloudProvider extends CloudProviderHelper {
         map.put("endpoint", getTestParameter().get("integrationtest.openstackcredential.endpoint"));
         map.put("keystoneVersion", "cb-keystone-v2");
         map.put("selector", "cb-keystone-v2");
+
+        return map;
+    }
+
+    public Map<String, Object> openstackV3CredentialDetails() {
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put("tenantName", getTestParameter().get("integrationtest.openstackV3credential.tenantName"));
+        map.put("userDomain", getTestParameter().get("integrationtest.openstackV3credential.userDomain"));
+        map.put("userName", getTestParameter().get("integrationtest.openstackV3credential.userName"));
+        map.put("password", getTestParameter().get("integrationtest.openstackV3credential.password"));
+        map.put("endpoint", getTestParameter().get("integrationtest.openstackV3credential.endpoint"));
+        map.put("projectDomainName", getTestParameter().get("integrationtest.openstackV3credential.projectDomainName"));
+        map.put("projectName", getTestParameter().get("integrationtest.openstackV3credential.projectName"));
+        map.put("keystoneAuthScope", getTestParameter().get("integrationtest.openstackV3credential.keystoneAuthScope"));
+        map.put("keystoneVersion", "cb-keystone-v3");
+        map.put("apiFacing", getTestParameter().get("integrationtest.openstackV3credential.apiFacing"));
+        map.put("selector", "cb-keystone-v3-project-scope");
+
+        return map;
+    }
+
+    public Map<String, Object> openstackCredentialDetailsInvalidUser() {
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put("tenantName", getTestParameter().get("integrationtest.openstackcredential.tenantName"));
+        map.put("userName", "kisnyul");
+        map.put("password", getTestParameter().get("integrationtest.openstackcredential.password"));
+        map.put("endpoint", getTestParameter().get("integrationtest.openstackcredential.endpoint"));
+        map.put("keystoneVersion", "cb-keystone-v2");
+        map.put("selector", "cb-keystone-v2");
+
+        return map;
+    }
+
+    public Map<String, Object> openstackCredentialDetailsInvalidEndpoint() {
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put("tenantName", getTestParameter().get("integrationtest.openstackcredential.tenantName"));
+        map.put("userName", getTestParameter().get("integrationtest.openstackcredential.userName"));
+        map.put("password", getTestParameter().get("integrationtest.openstackcredential.password"));
+        map.put("endpoint", "https://index.hu/");
+        map.put("keystoneVersion", "cb-keystone-v2");
+        map.put("selector", "cb-keystone-v2");
+
         return map;
     }
 
