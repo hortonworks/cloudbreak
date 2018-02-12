@@ -39,8 +39,6 @@ import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
 @Service
 public class MockPlatformResources implements PlatformResources {
 
-    private static final String MOCK_RESOURCE_DEFINITION = "{}";
-
     private static final String[] EUROPE_AVAILABILITY_ZONES = {"europe-a", "europe-b"};
 
     private static final String[] USA_AVAILABILITY_ZONES = {"usa-a", "usa-b", "usa-c"};
@@ -189,17 +187,17 @@ public class MockPlatformResources implements PlatformResources {
     }
 
     private Region getDefaultRegion() {
-        Map<Platform, Region> regions = Maps.newHashMap();
+        Map<Platform, Region> defaultRegionsMap = Maps.newHashMap();
         if (isNoneEmpty(defaultRegions)) {
             for (String entry : defaultRegions.split(",")) {
                 String[] keyValue = entry.split(":");
-                regions.put(platform(keyValue[0]), Region.region(keyValue[1]));
+                defaultRegionsMap.put(platform(keyValue[0]), Region.region(keyValue[1]));
             }
-            Region platformRegion = regions.get(platform(MockConstants.MOCK));
+            Region platformRegion = defaultRegionsMap.get(platform(MockConstants.MOCK));
             if (platformRegion != null && !isEmpty(platformRegion.value())) {
                 return getRegionByName(platformRegion.value());
             }
         }
-        return getRegionByName(defaultRegion);
+        return regions.keySet().iterator().next();
     }
 }
