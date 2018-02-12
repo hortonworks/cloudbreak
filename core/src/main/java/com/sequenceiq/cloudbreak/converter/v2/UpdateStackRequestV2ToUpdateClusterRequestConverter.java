@@ -33,7 +33,7 @@ public class UpdateStackRequestV2ToUpdateClusterRequestConverter extends Abstrac
             hostGroupAdjustmentJson.setWithStackUpdate(true);
             hostGroupAdjustmentJson.setValidateNodeCount(true);
             hostGroupAdjustmentJson.setHostGroup(source.getGroup());
-            int scaleNumber = source.getDesiredCount() - hostGroup.getConstraint().getHostCount();
+            int scaleNumber = source.getDesiredCount() - hostGroup.getHostMetadata().size();
             hostGroupAdjustmentJson.setScalingAdjustment(scaleNumber);
             updateStackJson.setHostGroupAdjustment(hostGroupAdjustmentJson);
         } else {

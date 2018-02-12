@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow;
 
+import static com.sequenceiq.cloudbreak.api.model.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.orchestrator.container.DockerContainer.AMBARI_AGENT;
 import static com.sequenceiq.cloudbreak.service.PollingResult.SUCCESS;
 import static com.sequenceiq.cloudbreak.service.PollingResult.isSuccess;
@@ -36,6 +37,7 @@ import org.springframework.stereotype.Component;
 import com.google.common.collect.Sets;
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
+import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
@@ -43,6 +45,8 @@ import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorType;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ContainerOrchestratorResolver;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.HostOrchestratorResolver;
+import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
+import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Container;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
@@ -140,6 +144,9 @@ public class AmbariDecommissioner {
 
     @Inject
     private HostOrchestratorResolver hostOrchestratorResolver;
+
+    @Inject
+    private FlowMessageService flowMessageService;
 
     @PostConstruct
     public void init() {
@@ -333,6 +340,8 @@ public class AmbariDecommissioner {
                     String.format("Trying to move '%s' bytes worth of data to nodes with '%s' bytes of capacity is not allowed", usedSpace, remainingSpace)
             );
         }
+
+        flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_SELECT_FOR_DOWNSCALE, AVAILABLE.name(), selectedNodes.keySet());
         return convert(selectedNodes, filteredHostList);
     }
 
@@ -348,22 +357,22 @@ public class AmbariDecommissioner {
         }
     }
 
-    private Map<String, Long> selectNodes(Map<String, Long> sortedAscending, List<HostMetadata> filteredHostList, int removeCount) {
+    protected Map<String, Long> selectNodes(Map<String, Long> sortedAscending, List<HostMetadata> filteredHostList, int removeCount) {
         LOGGER.info("sortedAscending: {}, filteredHostList: {}", sortedAscending, filteredHostList);
-        Map<String, Long> select = new HashMap<>();
-        int i = 0;
-        for (Entry<String, Long> entry : sortedAscending.entrySet()) {
-            if (i < removeCount) {
-                for (HostMetadata hostMetadata : filteredHostList) {
-                    if (hostMetadata.getHostName().equalsIgnoreCase(entry.getKey())) {
-                        select.put(entry.getKey(), entry.getValue());
-                        i++;
-                        break;
-                    }
-                }
-            } else {
-                break;
-            }
+
+        Map<String, Long> select  = filteredHostList
+                .stream()
+                .filter(hostMetadata -> hostMetadata.getHostMetadataState() == HostMetadataState.UNHEALTHY
+                        && sortedAscending.containsKey(hostMetadata.getHostName()))
+                .limit(removeCount)
+                .collect(Collectors.toMap(HostMetadata::getHostName, o -> 0L));
+
+        if (select.size() < removeCount) {
+            Set<String> hostNames = filteredHostList.stream().map(a -> a.getHostName().toLowerCase()).collect(Collectors.toSet());
+            sortedAscending.entrySet().stream()
+                    .filter(entry -> !select.keySet().contains(entry.getKey()) && hostNames.contains(entry.getKey().toLowerCase()))
+                    .limit(removeCount - select.size())
+                    .forEach(entry -> select.put(entry.getKey(), entry.getValue()));
         }
         return select;
     }
@@ -400,16 +409,9 @@ public class AmbariDecommissioner {
     }
 
     private List<HostMetadata> convert(Map<String, Long> selectedNodes, List<HostMetadata> filteredHostList) {
-        List<HostMetadata> result = new ArrayList<>();
-        for (String host : selectedNodes.keySet()) {
-            for (HostMetadata hostMetadata : filteredHostList) {
-                if (hostMetadata.getHostName().equalsIgnoreCase(host)) {
-                    result.add(hostMetadata);
-                    break;
-                }
-            }
-        }
-        return result;
+        return filteredHostList.stream()
+                .filter(a -> selectedNodes.keySet().contains(a.getHostName()))
+                .collect(Collectors.toList());
     }
 
     private PollingResult removeHostsFromOrchestrator(Stack stack, AmbariClient ambariClient, List<String> hostNames) throws CloudbreakException {

@@ -14,6 +14,8 @@ import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 @EntityType(entityClass = InstanceMetaData.class)
 public interface InstanceMetaDataRepository extends CrudRepository<InstanceMetaData, Long> {
 
+    Set<InstanceMetaData> findAllByInstanceIdIn(Iterable<String> instanceId);
+
     @Query("SELECT i FROM InstanceMetaData i WHERE i.instanceGroup.stack.id= :stackId AND i.instanceStatus <> 'TERMINATED'")
     Set<InstanceMetaData> findNotTerminatedForStack(@Param("stackId") Long stackId);
 
@@ -48,5 +50,4 @@ public interface InstanceMetaDataRepository extends CrudRepository<InstanceMetaD
 
     @Query("SELECT i FROM InstanceMetaData i WHERE i.instanceMetadataType = 'GATEWAY_PRIMARY' AND i.instanceGroup.stack.id= :stackId")
     InstanceMetaData getPrimaryGatewayInstanceMetadata(@Param("stackId") Long stackId);
-
 }
