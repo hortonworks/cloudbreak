@@ -1,11 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.openstack.heat;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackConstants.NETWORK_ID;
-import static com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackConstants.SUBNET_ID;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -23,6 +20,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
+import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.api.model.AdjustmentType;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -39,12 +37,12 @@ import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.TlsInfo;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.openstack.auth.OpenStackClient;
+import com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackConstants;
 import com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackUtils;
 import com.sequenceiq.cloudbreak.cloud.openstack.heat.HeatTemplateBuilder.ModelContext;
 import com.sequenceiq.cloudbreak.cloud.openstack.view.KeystoneCredentialView;
 import com.sequenceiq.cloudbreak.cloud.openstack.view.NeutronNetworkView;
 import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
-import com.sequenceiq.cloudbreak.cloud.task.PollTask;
 import com.sequenceiq.cloudbreak.cloud.task.PollTaskFactory;
 import com.sequenceiq.cloudbreak.cloud.task.ResourcesStatePollerResult;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
@@ -76,6 +74,9 @@ public class OpenStackResourceConnector implements ResourceConnector<Object> {
 
     @Inject
     private PollTaskFactory pollTaskFactory;
+
+    @Inject
+    private PersistenceNotifier persistenceNotifier;
 
     @SuppressWarnings("unchecked")
     @Override
@@ -110,23 +111,13 @@ public class OpenStackResourceConnector implements ResourceConnector<Object> {
             if (stack.getInstanceAuthentication().getPublicKeyId() == null) {
                 createKeyPair(authenticatedContext, stack, client);
             }
-
             Stack heatStack = client
                     .heat()
                     .stacks()
                     .create(Builders.stack().name(stackName).template(heatTemplate).disableRollback(false)
                             .parameters(parameters).timeoutMins(OPERATION_TIMEOUT).build());
-
-            CloudResource cloudResource = new Builder().type(ResourceType.HEAT_STACK).name(heatStack.getId()).build();
-            try {
-                notifier.notifyAllocation(cloudResource, authenticatedContext.getCloudContext());
-            } catch (RuntimeException ignored) {
-                //Rollback
-                terminate(authenticatedContext, stack, Collections.singletonList(cloudResource));
-            }
-            resources = check(authenticatedContext, Collections.singletonList(cloudResource));
-
-            collectResources(authenticatedContext, notifier);
+            List<CloudResource> cloudResources = collectResources(authenticatedContext, notifier, heatStack, stack, neutronNetworkView);
+            resources = check(authenticatedContext, cloudResources);
         } else {
             LOGGER.info("Heat stack already exists: {}", existingStack.getName());
             CloudResource cloudResource = new Builder().type(ResourceType.HEAT_STACK).name(existingStack.getId()).build();
@@ -136,27 +127,29 @@ public class OpenStackResourceConnector implements ResourceConnector<Object> {
         return resources;
     }
 
-    private void collectResources(AuthenticatedContext authenticatedContext, PersistenceNotifier notifier) {
-        PollTask<ResourcesStatePollerResult> task = createTask(authenticatedContext);
+    private List<CloudResource> collectResources(AuthenticatedContext authenticatedContext, PersistenceNotifier notifier, Stack heatStack, CloudStack stack,
+            NeutronNetworkView neutronNetworkView) {
+        List<CloudResource> cloudResources = Lists.newArrayList();
 
+        CloudResource heatResource = new Builder().type(ResourceType.HEAT_STACK).name(heatStack.getId()).build();
         try {
-            ResourcesStatePollerResult call = task.call();
-            if (!task.completed(call)) {
-                call = syncPollingScheduler.schedule(task);
-            }
-            List<CloudResourceStatus> results = call.getResults();
-            results.forEach(r -> notifier.notifyAllocation(r.getCloudResource(), authenticatedContext.getCloudContext()));
-        } catch (Exception e) {
-            LOGGER.error("Error in OS resource polling.", e);
+            notifier.notifyAllocation(heatResource, authenticatedContext.getCloudContext());
+        } catch (RuntimeException ignored) {
+            //Rollback
+            terminate(authenticatedContext, stack, Collections.singletonList(heatResource));
         }
-    }
-
-    private PollTask<ResourcesStatePollerResult> createTask(AuthenticatedContext authenticatedContext) {
-        return pollTaskFactory.newPollResourcesStateTask(authenticatedContext,
-                Arrays.asList(
-                        CloudResource.builder().type(ResourceType.OPENSTACK_NETWORK).name(NETWORK_ID).build(),
-                        CloudResource.builder().type(ResourceType.OPENSTACK_SUBNET).name(SUBNET_ID).build()),
-                true);
+        cloudResources.add(heatResource);
+        if (!neutronNetworkView.isProviderNetwork()) {
+            if (!neutronNetworkView.isExistingNetwork()) {
+                CloudResource r = CloudResource.builder().type(ResourceType.OPENSTACK_NETWORK).name(OpenStackConstants.NETWORK_ID).build();
+                cloudResources.add(r);
+            }
+            if (!neutronNetworkView.isExistingSubnet()) {
+                CloudResource r = CloudResource.builder().type(ResourceType.OPENSTACK_SUBNET).name(OpenStackConstants.SUBNET_ID).build();
+                cloudResources.add(r);
+            }
+        }
+        return cloudResources;
     }
 
     private void createKeyPair(AuthenticatedContext authenticatedContext, CloudStack stack, OSClient client) {
@@ -178,34 +171,47 @@ public class OpenStackResourceConnector implements ResourceConnector<Object> {
 
     @Override
     public List<CloudResourceStatus> check(AuthenticatedContext authenticatedContext, List<CloudResource> resources) {
-        List<CloudResourceStatus> result = new ArrayList<>(resources.size());
+        List<CloudResourceStatus> results = newArrayList();
         OSClient client = openStackClient.createOSClient(authenticatedContext);
-
         String stackName = utils.getStackName(authenticatedContext);
-        List<CloudResource> list = newArrayList();
+        List<CloudResource> osResourceList = openStackClient.getResources(stackName, authenticatedContext.getCloudCredential());
+        List<CloudResource> otherResources = newArrayList();
+        CloudResourceStatus heatStatus = null;
         for (CloudResource resource : resources) {
-            checkByResourceType(authenticatedContext, result, client, stackName, list, resource);
+            if (resource.getType() == ResourceType.HEAT_STACK) {
+                heatStatus = checkByResourceType(authenticatedContext, client, stackName, osResourceList, resource);
+                results.add(heatStatus);
+            } else {
+                otherResources.add(resource);
+            }
         }
-        return result;
+        if (heatStatus != null) {
+            for (CloudResource resource : otherResources) {
+                if (heatStatus.getStatus() == ResourceStatus.CREATED) {
+                    results.add(checkByResourceType(authenticatedContext, client, stackName, osResourceList, resource));
+                } else {
+                    results.add(new CloudResourceStatus(resource, ResourceStatus.CREATED));
+                }
+            }
+        }
+        return results;
     }
 
-    private void checkByResourceType(AuthenticatedContext authenticatedContext, List<CloudResourceStatus> result, OSClient client,
+    private CloudResourceStatus checkByResourceType(AuthenticatedContext authenticatedContext, OSClient client,
             String stackName, List<CloudResource> list, CloudResource resource) {
+        CloudResourceStatus result = null;
         switch (resource.getType()) {
             case HEAT_STACK:
                 String heatStackId = resource.getName();
                 LOGGER.info("Checking OpenStack Heat stack status of: {}", stackName);
                 Stack heatStack = client.heat().stacks().getDetails(stackName, heatStackId);
-                CloudResourceStatus heatResourceStatus = utils.heatStatus(resource, heatStack);
-                result.add(heatResourceStatus);
+                result = utils.heatStatus(resource, heatStack);
                 break;
             case OPENSTACK_NETWORK:
-                collectResourcesIfNeed(authenticatedContext, stackName, list);
-                result.add(getCloudResourceStatus(list, ResourceType.OPENSTACK_NETWORK));
+                result = checkResourceStatus(authenticatedContext, stackName, list, resource, ResourceType.OPENSTACK_NETWORK);
                 break;
             case OPENSTACK_SUBNET:
-                collectResourcesIfNeed(authenticatedContext, stackName, list);
-                result.add(getCloudResourceStatus(list, ResourceType.OPENSTACK_SUBNET));
+                result = checkResourceStatus(authenticatedContext, stackName, list, resource, ResourceType.OPENSTACK_SUBNET);
                 break;
             case OPENSTACK_ROUTER:
             case OPENSTACK_INSTANCE:
@@ -217,20 +223,25 @@ public class OpenStackResourceConnector implements ResourceConnector<Object> {
             default:
                 throw new CloudConnectorException(String.format("Invalid resource type: %s", resource.getType()));
         }
+        return result;
     }
 
-    private void collectResourcesIfNeed(AuthenticatedContext authenticatedContext, String stackName, List<CloudResource> list) {
-        if (list.isEmpty()) {
-            list.addAll(openStackClient.getResources(stackName, authenticatedContext.getCloudCredential()));
+    private CloudResourceStatus checkResourceStatus(AuthenticatedContext authenticatedContext, String stackName, List<CloudResource> list,
+            CloudResource resource, ResourceType openstackNetwork) {
+        CloudResourceStatus result;
+        result = getCloudResourceStatus(list, openstackNetwork, resource);
+        if (result.getStatus().isPermanent()) {
+            persistenceNotifier.notifyAllocation(result.getCloudResource(), authenticatedContext.getCloudContext());
         }
+        return result;
     }
 
-    private CloudResourceStatus getCloudResourceStatus(List<CloudResource> resources, ResourceType resourceType) {
+    private CloudResourceStatus getCloudResourceStatus(List<CloudResource> resources, ResourceType resourceType, CloudResource resource) {
         return resources.stream()
                 .filter(r -> r.getType() == resourceType)
                 .findFirst()
                 .map(cloudResource -> new CloudResourceStatus(cloudResource, ResourceStatus.UPDATED))
-                .orElseGet(() -> new CloudResourceStatus(null, ResourceStatus.IN_PROGRESS));
+                .orElseGet(() -> new CloudResourceStatus(resource, ResourceStatus.IN_PROGRESS));
     }
 
     @Override
