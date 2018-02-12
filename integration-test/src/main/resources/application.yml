@@ -45,13 +45,28 @@ integrationtest:
        accessKey:
        secretKey:
 
-    # openstack credential details
+    # openstack Keystone V2 credential details
     openstackcredential:
        name:
        tenantName:
        userName:
        password:
        endpoint:
+
+    # openstack Keystone V3 credential details
+    openstackV3credential:
+      name:
+      tenantName:
+      userDomain:
+      userName:
+      password:
+      endpoint:
+      projectDomainName:
+      projectName:
+      keystoneAuthScope:
+      keystoneVersion:
+      apiFacing:
+      selector:
 
     # azure rm credential details
     azurermcredential:

@@ -55,4 +55,14 @@ class CredentialAction {
             post(integrationTestContext, entity);
         }
     }
+
+    public static void createDeleteInGiven(IntegrationTestContext integrationTestContext, Entity entity) {
+        try {
+            get(integrationTestContext, entity);
+        } catch (Exception e) {
+            post(integrationTestContext, entity);
+            delete(integrationTestContext, entity);
+        }
+    }
+
 }

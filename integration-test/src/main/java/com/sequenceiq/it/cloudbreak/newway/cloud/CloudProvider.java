@@ -17,4 +17,6 @@ public abstract class CloudProvider {
     public abstract AmbariV2Request ambariRequestWithBlueprintName(String blueprintHdp26EdwanalyticsName);
 
     public abstract String getClusterDefaultName();
+
+    public abstract String getPlatform();
 }

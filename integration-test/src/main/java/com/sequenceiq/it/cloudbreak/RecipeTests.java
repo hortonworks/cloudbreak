@@ -15,7 +15,6 @@ import org.testng.annotations.Test;
 import com.google.api.client.repackaged.org.apache.commons.codec.binary.Base64;
 import com.sequenceiq.cloudbreak.api.model.RecipeResponse;
 import com.sequenceiq.cloudbreak.api.model.RecipeType;
-import com.sequenceiq.it.cloudbreak.newway.Blueprint;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
 import com.sequenceiq.it.cloudbreak.newway.Recipe;
@@ -125,7 +124,7 @@ public class RecipeTests extends CloudbreakTest {
         );
     }
 
-    @Test(expectedExceptions = BadRequestException.class, enabled = false)
+    @Test(expectedExceptions = BadRequestException.class)
     public void testCreateSpecialNameRecipe() throws Exception {
         given(CloudbreakClient.isCreated());
         given(Recipe.request()
@@ -134,7 +133,7 @@ public class RecipeTests extends CloudbreakTest {
                         .withRecipeType(RecipeType.POST_AMBARI_START)
                         .withContent(getRecipeFile(VALID_RECIPE_SCRIPT_FILE))
         );
-        when(Blueprint.post());
+        when(Recipe.post());
     }
 
     @Test(expectedExceptions = BadRequestException.class)

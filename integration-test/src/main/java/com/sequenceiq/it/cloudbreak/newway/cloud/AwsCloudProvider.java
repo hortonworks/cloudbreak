@@ -44,10 +44,19 @@ public class AwsCloudProvider extends CloudProviderHelper {
                 .withParameters(credentialParameters);
     }
 
-    private Map<String, Object> awsCredentialDetailsArn() {
+    public Map<String, Object> awsCredentialDetailsArn() {
         Map<String, Object> map = new HashMap<String, Object>();
         map.put("selector", "role-based");
         map.put("roleArn", getTestParameter().get("integrationtest.awscredential.roleArn"));
+
+        return map;
+    }
+
+    public Map<String, Object> awsCredentialDetailsInvalidArn() {
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put("selector", "role-based");
+        map.put("roleArn", "arn:aws:iam::123456789012:role/fake");
+
         return map;
     }
 
@@ -102,11 +111,34 @@ public class AwsCloudProvider extends CloudProviderHelper {
         return clustername == null ? AWS_CLUSTER_DEFAULT_NAME : clustername;
     }
 
-    Map<String, Object> awsCredentialDetailsKey() {
+    @Override
+    public String getPlatform() {
+        return AWS_CAPITAL;
+    }
+
+    public Map<String, Object> awsCredentialDetailsKey() {
         Map<String, Object> map = new HashMap<String, Object>();
         map.put("selector", "key-based");
         map.put("accessKey", getTestParameter().get("integrationtest.awscredential.accessKey"));
         map.put("secretKey", getTestParameter().get("integrationtest.awscredential.secretKey"));
+
+        return map;
+    }
+
+    public Map<String, Object> awsCredentialDetailsInvalidAccessKey() {
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put("selector", "key-based");
+        map.put("accessKey", "ABCDEFGHIJKLMNOPQRST");
+        map.put("secretKey", getTestParameter().get("integrationtest.awscredential.secretKey"));
+
+        return map;
+    }
+
+    public Map<String, Object> awsCredentialDetailsInvalidSecretKey() {
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put("selector", "key-based");
+        map.put("accessKey", getTestParameter().get("integrationtest.awscredential.accessKey"));
+        map.put("secretKey", "123456789ABCDEFGHIJKLMNOP0123456789=ABC+");
 
         return map;
     }
