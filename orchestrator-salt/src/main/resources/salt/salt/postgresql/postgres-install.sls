@@ -22,6 +22,26 @@ init-pg-database:
     - name: find /var/lib/pgsql/ -name PG_VERSION | grep -q "data/PG_VERSION" || postgresql-setup initdb
     - runas: postgres
 {% else %}
+remove-old-postgres:
+  pkg.removed:
+    - pkgs:
+      - postgresql92-server-compat
+      - postgresql92-server
+      - postgresql92
+      - postgresql92-libs
+      - postgresql-server
+      - postgresql-libs
+      - postgresql
+
+ensure-postgres-home:
+  user.present:
+    - name: postgres
+    - home: /var/lib/pgsql
+
+remove-postgres-sysconfig:
+  file.absent:
+    - name: /etc/sysconfig/pgsql/postgresql
+
 install-postgres:
   pkg.installed:
     - pkgs:
