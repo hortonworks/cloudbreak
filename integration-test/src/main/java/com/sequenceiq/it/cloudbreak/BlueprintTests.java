@@ -53,7 +53,7 @@ public class BlueprintTests extends CloudbreakTest {
     private String errorMessage = "";
 
     @Test
-    public void createValidBlueprint() throws Exception {
+    public void testCreateValidBlueprint() throws Exception {
         given(CloudbreakClient.isCreated());
         given(Blueprint.request()
                 .withName(VALID_BP_NAME)
@@ -68,7 +68,7 @@ public class BlueprintTests extends CloudbreakTest {
     }
 
     @Test(expectedExceptions = BadRequestException.class)
-    public void createAgainBlueprint() throws Exception {
+    public void testCreateAgainBlueprint() throws Exception {
         given(CloudbreakClient.isCreated());
         given(Blueprint.isCreated()
                 .withName(AGAIN_BP_NAME));
@@ -77,110 +77,75 @@ public class BlueprintTests extends CloudbreakTest {
                 .withDescription(BP_DESCRIPTION)
                 .withAmbariBlueprint(getBlueprintFile()));
         when(Blueprint.post());
-        then(Blueprint.assertThis(
-                (blueprint, t) -> {
-                    Assert.assertNotNull(blueprint.getResponse());
-                })
-        );
     }
 
+    //"The length of the blueprint's name has to be in range of 1 to 100"
     @Test(expectedExceptions = BadRequestException.class)
-    public void createInvalidShortBlueprint() throws Exception {
+    public void testCreateInvalidShortBlueprint() throws Exception {
         given(CloudbreakClient.isCreated());
         given(Blueprint.request()
                 .withName(INVALID_SHORT_BP_NAME)
                 .withDescription(BP_DESCRIPTION)
                 .withAmbariBlueprint(getBlueprintFile()));
         when(Blueprint.post());
-        //"The length of the blueprint's name has to be in range of 1 to 100"
-        then(Blueprint.assertThis(
-                (blueprint, t) -> {
-                    Assert.assertNotEquals(blueprint.getResponse().getName(), INVALID_SHORT_BP_NAME);
-                })
-        );
     }
 
+    //"The length of the blueprint's name has to be in range of 1 to 100"
     @Test(expectedExceptions = BadRequestException.class)
-    public void createInvalidLongBlueprint() throws Exception {
+    public void testCreateInvalidLongBlueprint() throws Exception {
         given(CloudbreakClient.isCreated());
         given(Blueprint.request()
                 .withName(INVALID_LONG_BP_NAME)
                 .withDescription(BP_DESCRIPTION)
                 .withAmbariBlueprint(getBlueprintFile()));
         when(Blueprint.post());
-        //"The length of the blueprint's name has to be in range of 1 to 100"
-        then(Blueprint.assertThis(
-                (blueprint, t) -> {
-                    Assert.assertNotEquals(blueprint.getResponse().getName(), INVALID_LONG_BP_NAME);
-                })
-        );
     }
 
+    //"The length of the blueprint's name has to be in range of 1 to 100"
     //BUG-95607
     @Test(expectedExceptions = BadRequestException.class, enabled = false)
-    public void createSpecialCharacterBlueprint() throws Exception {
+    public void testCreateSpecialCharacterBlueprint() throws Exception {
         given(CloudbreakClient.isCreated());
         given(Blueprint.request()
                 .withName(SPECIAL_BP_NAME)
                 .withDescription(BP_DESCRIPTION)
                 .withAmbariBlueprint(getBlueprintFile()));
         when(Blueprint.post());
-        //"The length of the blueprint's name has to be in range of 1 to 100"
-        then(Blueprint.assertThis(
-                (blueprint, t) -> {
-                    Assert.assertNotEquals(blueprint.getResponse().getName(), SPECIAL_BP_NAME);
-                })
-        );
     }
 
     //BUG-95609
     @Test(expectedExceptions = BadRequestException.class, enabled = false)
-    public void createLongDescriptionBlueprint() throws Exception {
+    public void testCreateLongDescriptionBlueprint() throws Exception {
         given(CloudbreakClient.isCreated());
         given(Blueprint.request()
                 .withName(LONG_DC_BP_NAME)
                 .withDescription(INVALID_LONG_DESCRIPTION)
                 .withAmbariBlueprint(getBlueprintFile()));
         when(Blueprint.post());
-        then(Blueprint.assertThis(
-                (blueprint, t) -> {
-                    Assert.assertNotEquals(blueprint.getResponse().getName(), SPECIAL_BP_NAME);
-                })
-        );
     }
 
     @Test(expectedExceptions = BadRequestException.class)
-    public void createEmptyJSONBlueprintException() throws Exception {
+    public void testCreateEmptyJSONBlueprintException() throws Exception {
         given(CloudbreakClient.isCreated());
         given(Blueprint.request()
                 .withName(EMPTY_BP_NAME)
                 .withDescription(BP_DESCRIPTION)
                 .withAmbariBlueprint(getEmptyBlueprintFile()));
         when(Blueprint.post());
-        then(Blueprint.assertThis(
-                (blueprint, t) -> {
-                    Assert.assertNull(blueprint.getResponse());
-                })
-        );
     }
 
     @Test(expectedExceptions = BadRequestException.class)
-    public void createEmptyFileBlueprintException() throws Exception {
+    public void testCreateEmptyFileBlueprintException() throws Exception {
         given(CloudbreakClient.isCreated());
         given(Blueprint.request()
                 .withName(EMPTY_BP_NAME)
                 .withDescription(BP_DESCRIPTION)
                 .withAmbariBlueprint(getBlueprintUrl()));
         when(Blueprint.post());
-        then(Blueprint.assertThis(
-                (blueprint, t) -> {
-                    Assert.assertNull(blueprint.getResponse());
-                })
-        );
     }
 
     @Test
-    public void createEmptyJSONBlueprintMessage() throws Exception {
+    public void testCreateEmptyJSONBlueprintMessage() throws Exception {
         given(CloudbreakClient.isCreated());
         given(Blueprint.request()
                 .withName(EMPTY_BP_NAME)
@@ -201,22 +166,17 @@ public class BlueprintTests extends CloudbreakTest {
     }
 
     @Test(expectedExceptions = BadRequestException.class)
-    public void createInvalidURLBlueprintException() throws Exception {
+    public void testCreateInvalidURLBlueprintException() throws Exception {
         given(CloudbreakClient.isCreated());
         given(Blueprint.request()
                 .withName(INVALIDURL_BP_NAME)
                 .withDescription(BP_DESCRIPTION)
                 .withAmbariBlueprint(getBlueprintInvalidUrl()));
         when(Blueprint.post());
-        then(Blueprint.assertThis(
-                (blueprint, t) -> {
-                    Assert.assertNull(blueprint.getResponse());
-                })
-        );
     }
 
     @Test
-    public void createInvalidURLBlueprintMessage() throws Exception {
+    public void testCreateInvalidURLBlueprintMessage() throws Exception {
         given(CloudbreakClient.isCreated());
         given(Blueprint.request()
                 .withName(INVALIDURL_BP_NAME)
@@ -237,7 +197,7 @@ public class BlueprintTests extends CloudbreakTest {
     }
 
     @Test
-    public void deleteValidBlueprint() throws Exception {
+    public void testDeleteValidBlueprint() throws Exception {
         given(CloudbreakClient.isCreated());
         given(Blueprint.request()
                 .withName(DELETE_BP_NAME));
@@ -250,7 +210,7 @@ public class BlueprintTests extends CloudbreakTest {
     }
 
     @BeforeTest
-    public void createDeleteBlueprint() throws Exception {
+    public void testCreateDeleteBlueprint() throws Exception {
         given(CloudbreakClient.isCreated());
         given(Blueprint.request()
                 .withName(DELETE_BP_NAME)
