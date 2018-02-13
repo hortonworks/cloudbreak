@@ -1,6 +1,6 @@
 {
   "inputs": [],
-  "description": "Useful for data science with Spark 2.1 and Zeppelin",
+  "description": "Useful for data science with Spark and Zeppelin",
   "blueprint": {
     "Blueprints": {
       "blueprint_name": "hdp26-data-science-spark2",
