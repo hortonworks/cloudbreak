@@ -1,7 +1,7 @@
 name: Mock_simple_salt_smoketest
 parameters: {
   cloudProvider: MOCK,
-  blueprintName: "Data Science: Apache Spark 1.6, Apache Zeppelin 0.7.0"
+  blueprintName: "Data Science: Apache Spark 2, Apache Zeppelin"
 }
 
 tests:
