@@ -1,6 +1,6 @@
 {
   "inputs": [],
-  "description": "Useful for ETL data processing with Hive and Spark 2.1",
+  "description": "Useful for ETL data processing with Hive and Spark",
   "blueprint": {
     "Blueprints": {
       "blueprint_name": "hdp26-etl-edw-spark2",
