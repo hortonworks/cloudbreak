@@ -183,9 +183,11 @@ public class ImageService {
 
     private Component getAmbariComponent(Stack stack, com.sequenceiq.cloudbreak.cloud.model.catalog.Image imgFromCatalog)
             throws JsonProcessingException, CloudbreakImageCatalogException {
-        if (imgFromCatalog.getRepo() != null && imgFromCatalog.getRepo().size() == 1) {
+        if (imgFromCatalog.getRepo() != null) {
             AmbariRepo ambariRepo = conversionService.convert(imgFromCatalog, AmbariRepo.class);
-            ambariRepo.setPredefined(Boolean.TRUE);
+            if (ambariRepo.getBaseUrl() == null) {
+                throw new CloudbreakImageCatalogException(String.format("Ambari repo not found in image for os: '%s'.", imgFromCatalog.getOsType()));
+            }
             return new Component(ComponentType.AMBARI_REPO_DETAILS, ComponentType.AMBARI_REPO_DETAILS.name(), new Json(ambariRepo), stack);
         } else {
             throw new CloudbreakImageCatalogException(String.format("Invalid Ambari repo present in image catalog: '%s'.", imgFromCatalog.getRepo()));
