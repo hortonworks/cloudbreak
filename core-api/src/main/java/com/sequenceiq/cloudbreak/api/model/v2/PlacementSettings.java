@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.api.model.v2;
 
+import javax.validation.constraints.NotNull;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.cloudbreak.api.model.JsonEntity;
@@ -15,6 +17,7 @@ public class PlacementSettings implements JsonEntity {
     @ApiModelProperty(ModelDescriptions.StackModelDescription.AVAILABILITY_ZONE)
     private String availabilityZone;
 
+    @NotNull
     @ApiModelProperty(ModelDescriptions.StackModelDescription.REGION)
     private String region;
 

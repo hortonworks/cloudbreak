@@ -5,7 +5,6 @@ import java.util.Set;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
-import org.springframework.security.access.prepost.PostAuthorize;
 
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.Topology;
@@ -13,11 +12,9 @@ import com.sequenceiq.cloudbreak.domain.Topology;
 @EntityType(entityClass = Credential.class)
 public interface CredentialRepository extends CrudRepository<Credential, Long> {
 
-    @PostAuthorize("hasPermission(returnObject,'read')")
     @Override
     Credential findOne(@Param("id") Long id);
 
-    @PostAuthorize("hasPermission(returnObject,'read')")
     @Query("SELECT b FROM Credential b WHERE b.name= :name AND b.account= :account AND b.archived IS FALSE")
     Credential findOneByName(@Param("name") String name, @Param("account") String account);
 

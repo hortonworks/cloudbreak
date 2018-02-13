@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.model.CloudbreakEventsJson;
@@ -23,7 +24,6 @@ import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
-import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.repository.CredentialRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
@@ -72,7 +72,16 @@ public class CredentialService {
     public Credential get(Long id) {
         Credential credential = credentialRepository.findOne(id);
         if (credential == null) {
-            throw new NotFoundException(String.format("Credential '%s' not found.", id));
+            throw new AccessDeniedException(String.format("Access is denied: Credential '%d'.", id));
+        }
+        authorizationService.hasReadPermission(credential);
+        return credential;
+    }
+
+    public Credential get(Long id, String account) {
+        Credential credential = credentialRepository.findByIdInAccount(id, account);
+        if (credential == null) {
+            throw new AccessDeniedException(String.format("Access is denied: Credential '%d' in %s account.", id, account));
         }
         authorizationService.hasReadPermission(credential);
         return credential;
@@ -81,7 +90,7 @@ public class CredentialService {
     public Credential get(String name, String account) {
         Credential credential = credentialRepository.findOneByName(name, account);
         if (credential == null) {
-            throw new NotFoundException(String.format("Credential '%s' not found in %s account.", name, account));
+            throw new AccessDeniedException(String.format("Access is denied: Credential '%s' in %s account.", name, account));
         }
         authorizationService.hasReadPermission(credential);
         return credential;
@@ -145,26 +154,26 @@ public class CredentialService {
     public Credential getPublicCredential(String name, IdentityUser user) {
         Credential credential = credentialRepository.findOneByName(name, user.getAccount());
         if (credential == null) {
-            throw new NotFoundException(String.format("Credential '%s' not found.", name));
-        } else {
-            return credential;
+            throw new AccessDeniedException(String.format("Access is denied: Credential '%s'", name));
         }
+        authorizationService.hasReadPermission(credential);
+        return credential;
     }
 
     public Credential getPrivateCredential(String name, IdentityUser user) {
         Credential credential = credentialRepository.findByNameInUser(name, user.getUserId());
         if (credential == null) {
-            throw new NotFoundException(String.format("Credential '%s' not found.", name));
-        } else {
-            return credential;
+            throw new AccessDeniedException(String.format("Access is denied: Credential '%s'.", name));
         }
+        authorizationService.hasReadPermission(credential);
+        return credential;
     }
 
     @Transactional(TxType.NEVER)
     public void delete(Long id, IdentityUser user) {
         Credential credential = credentialRepository.findByIdInAccount(id, user.getAccount());
         if (credential == null) {
-            throw new NotFoundException(String.format("Credential '%s' not found.", id));
+            throw new AccessDeniedException(String.format("Access is denied: Credential '%d'.", id));
         }
         delete(credential);
     }
@@ -173,7 +182,7 @@ public class CredentialService {
     public void delete(String name, IdentityUser user) {
         Credential credential = credentialRepository.findByNameInAccount(name, user.getAccount(), user.getUserId());
         if (credential == null) {
-            throw new NotFoundException(String.format("Credential '%s' not found.", name));
+            throw new AccessDeniedException(String.format("Access is denied: Credential '%s'.", name));
         }
         delete(credential);
     }

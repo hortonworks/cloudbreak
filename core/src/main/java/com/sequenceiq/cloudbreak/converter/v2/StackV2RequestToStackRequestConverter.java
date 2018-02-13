@@ -47,8 +47,10 @@ public class StackV2RequestToStackRequestConverter extends AbstractConversionSer
         StackRequest stackRequest = new StackRequest();
 
         stackRequest.setName(source.getGeneral().getName());
-        stackRequest.setAvailabilityZone(source.getPlacement().getAvailabilityZone());
-        stackRequest.setRegion(source.getPlacement().getRegion());
+        if (source.getPlacement() != null) {
+            stackRequest.setAvailabilityZone(source.getPlacement().getAvailabilityZone());
+            stackRequest.setRegion(source.getPlacement().getRegion());
+        }
         stackRequest.setPlatformVariant(source.getPlatformVariant());
         stackRequest.setAmbariVersion(source.getAmbariVersion());
         stackRequest.setHdpVersion(source.getHdpVersion());

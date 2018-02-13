@@ -18,7 +18,7 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public abstract class StackBase implements JsonEntity {
     @Size(max = 40, min = 5, message = "The length of the name has to be in range of 5 to 40")
-    @Pattern(regexp = "([a-z][-a-z0-9]*[a-z0-9])",
+    @Pattern(regexp = "(^[a-z][-a-z0-9]*[a-z0-9]$)",
             message = "The name can only contain lowercase alphanumeric characters and hyphens and has start with an alphanumeric character")
     @NotNull
     @ApiModelProperty(value = StackModelDescription.STACK_NAME, required = true)
