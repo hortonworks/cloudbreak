@@ -11,11 +11,9 @@ public class ImageToAmbariRepoConverter extends AbstractConversionServiceAwareCo
     @Override
     public AmbariRepo convert(Image image) {
         AmbariRepo ambariRepo = new AmbariRepo();
+        ambariRepo.setPredefined(Boolean.TRUE);
         ambariRepo.setVersion(image.getVersion());
-        // ambariRepo.setBaseUrl(image.getRepo().get(image.getOsType()));
-        for (String baseUrl : image.getRepo().values()) {
-            ambariRepo.setBaseUrl(baseUrl);
-        }
+        ambariRepo.setBaseUrl(image.getRepo().get(image.getOsType()));
         return ambariRepo;
     }
 }
