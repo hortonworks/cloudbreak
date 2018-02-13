@@ -12,7 +12,7 @@ import io.swagger.annotations.ApiModelProperty;
 public abstract class RecipeBase implements JsonEntity {
 
     @Size(max = 100, min = 5, message = "The length of the recipe's name has to be in range of 5 to 100")
-    @Pattern(regexp = "([a-z][-a-z0-9]*[a-z0-9])",
+    @Pattern(regexp = "(^[a-z][-a-z0-9]*[a-z0-9]$)",
             message = "The recipe's name can only contain lowercase alphanumeric characters and hyphens and has start with an alphanumeric character")
     @ApiModelProperty(ModelDescriptions.NAME)
     private String name;

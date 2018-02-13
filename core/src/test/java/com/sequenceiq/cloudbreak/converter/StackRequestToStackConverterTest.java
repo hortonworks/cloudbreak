@@ -45,6 +45,8 @@ import com.sequenceiq.cloudbreak.domain.StackAuthentication;
 import com.sequenceiq.cloudbreak.service.account.AccountPreferencesService;
 import com.sequenceiq.cloudbreak.service.stack.StackParameterService;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 public class StackRequestToStackConverterTest extends AbstractJsonConverterTest<StackRequest> {
 
     @Rule
@@ -105,6 +107,33 @@ public class StackRequestToStackConverterTest extends AbstractJsonConverterTest<
                         "version", "created", "platformVariant", "cloudPlatform", "saltPassword", "stackTemplate", "flexSubscription", "datalakeId",
                         "customHostname", "customDomain", "clusterNameAsSubdomain", "hostgroupNameAsHostname", "loginUserName", "parameters"));
         Assert.assertEquals("YARN", stack.getRegion());
+    }
+
+    @SuppressFBWarnings(value = "DLS_DEAD_LOCAL_STORE")
+    @Test
+    public void testConvertWithNoGateway() throws CloudbreakException {
+        InstanceGroup instanceGroup = mock(InstanceGroup.class);
+        when(instanceGroup.getInstanceGroupType()).thenReturn(InstanceGroupType.CORE);
+
+        // GIVEN
+        ReflectionTestUtils.setField(underTest, "defaultRegions", "AWS:eu-west-2");
+        given(conversionService.convert(any(Object.class), any(TypeDescriptor.class), any(TypeDescriptor.class)))
+                .willReturn(new HashSet<>(Collections.singletonList(instanceGroup)));
+        given(conversionService.convert(any(Object.class), any(TypeDescriptor.class), any(TypeDescriptor.class)))
+                .willReturn(new HashSet<>(Collections.singletonList(instanceGroup)));
+
+        given(conversionService.convert(any(StackAuthenticationRequest.class), eq(StackAuthentication.class))).willReturn(new StackAuthentication());
+        given(conversionService.convert(any(FailurePolicyRequest.class), eq(FailurePolicy.class))).willReturn(new FailurePolicy());
+        given(conversionService.convert(any(InstanceGroupRequest.class), eq(InstanceGroup.class))).willReturn(instanceGroup);
+        given(conversionService.convert(any(OrchestratorRequest.class), eq(Orchestrator.class))).willReturn(new Orchestrator());
+        given(orchestratorTypeResolver.resolveType(any(String.class))).willReturn(OrchestratorType.HOST);
+        // WHEN
+        try {
+            Stack stack = underTest.convert(getRequest("stack/stack.json"));
+        } catch (BadRequestException e) {
+            //THEN
+            Assert.assertEquals("Ambari server must be specified", e.getMessage());
+        }
     }
 
     @Test

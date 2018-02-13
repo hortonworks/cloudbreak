@@ -14,7 +14,7 @@ import io.swagger.annotations.ApiModelProperty;
 public abstract class ConstraintTemplateBase implements JsonEntity {
 
     @Size(max = 100, min = 5, message = "The length of the constraint template's name has to be in range of 5 to 100")
-    @Pattern(regexp = "([a-z][-a-z0-9]*[a-z0-9])",
+    @Pattern(regexp = "(^[a-z][-a-z0-9]*[a-z0-9]$)",
             message = "The name of the constraint template can only contain lowercase characters and hyphens")
     @NotNull
     @ApiModelProperty(value = ModelDescriptions.NAME, required = true)

@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -22,9 +23,12 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class StackV2Request implements JsonEntity {
 
+    @Valid
+    @NotNull
     @ApiModelProperty(StackModelDescription.GENERAL_SETTINGS)
     private GeneralSettings general;
 
+    @Valid
     @ApiModelProperty(StackModelDescription.PLACEMENT_SETTINGS)
     private PlacementSettings placement;
 
@@ -46,6 +50,7 @@ public class StackV2Request implements JsonEntity {
     @ApiModelProperty(StackModelDescription.TAGS)
     private Tags tags;
 
+    @NotNull
     @Valid
     @ApiModelProperty(value = StackModelDescription.INSTANCE_GROUPS, required = true)
     private List<InstanceGroupV2Request> instanceGroups = new ArrayList<>();

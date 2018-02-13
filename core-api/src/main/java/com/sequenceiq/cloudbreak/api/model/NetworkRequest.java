@@ -12,7 +12,7 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class NetworkRequest extends NetworkBase {
 
-    @Pattern(regexp = "([a-z][-a-z0-9]*[a-z0-9])",
+    @Pattern(regexp = "(^[a-z][-a-z0-9]*[a-z0-9]$)",
             message = "The network's name can only contain lowercase alphanumeric characters and hyphens and has start with an alphanumeric character")
     @ApiModelProperty(value = ModelDescriptions.NAME, required = true)
     private String name;

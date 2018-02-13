@@ -117,7 +117,7 @@ public class StackRequestToStackConverter extends AbstractConversionServiceAware
 
     private void validateStackAuthentication(StackRequest source) {
         if (source.getStackAuthentication() == null) {
-            throw new BadRequestException("You shoud define authentication for stack!");
+            throw new BadRequestException("You should define authentication for stack!");
         } else if (Strings.isNullOrEmpty(source.getStackAuthentication().getPublicKey())
                 && Strings.isNullOrEmpty(source.getStackAuthentication().getPublicKeyId())) {
             throw new BadRequestException("You should define the publickey or publickeyid!");

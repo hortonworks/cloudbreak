@@ -21,7 +21,7 @@ import io.swagger.annotations.ApiModelProperty;
 public class ClusterRequest implements JsonEntity {
 
     @Size(max = 40, min = 5, message = "The length of the cluster's name has to be in range of 5 to 40")
-    @Pattern(regexp = "([a-z][-a-z0-9]*[a-z0-9])",
+    @Pattern(regexp = "(^[a-z][-a-z0-9]*[a-z0-9]$)",
         message = "The name of the cluster can only contain lowercase alphanumeric characters and hyphens and has to start with an alphanumeric character")
     @NotNull
     @ApiModelProperty(value = ModelDescriptions.NAME, required = true)
@@ -56,7 +56,7 @@ public class ClusterRequest implements JsonEntity {
     private Boolean enableSecurity = Boolean.FALSE;
 
     @Size(max = 15, min = 5, message = "The length of the username has to be in range of 5 to 15")
-    @Pattern(regexp = "([a-z][-a-z0-9]*[a-z0-9])",
+    @Pattern(regexp = "(^[a-z][-a-z0-9]*[a-z0-9]$)",
         message = "The username can only contain lowercase alphanumeric characters and hyphens and has start with an alphanumeric character")
     @NotNull
     @ApiModelProperty(value = StackModelDescription.USERNAME, required = true)
