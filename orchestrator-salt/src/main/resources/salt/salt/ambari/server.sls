@@ -49,11 +49,6 @@ extend_hadoop_classpath:
   cmd.run:
     - name: /opt/hadoop-classpath.sh
 
-/var/lib/ambari-server/jdbc-drivers:
-  cmd.run:
-    - name: cp -R /opt/jdbc-drivers /var/lib/ambari-server/jdbc-drivers
-    - unless: ls -1 /var/lib/ambari-server/jdbc-drivers
-
 /opt/ambari-server/ambari-server-init.sh:
   file.managed:
     - makedirs: True
