@@ -19,13 +19,14 @@ import (
 type GeneralSettings struct {
 
 	// credential resource name for the stack
-	CredentialName string `json:"credentialName,omitempty"`
+	// Required: true
+	CredentialName *string `json:"credentialName"`
 
 	// name of the stack
 	// Required: true
 	// Max Length: 40
 	// Min Length: 5
-	// Pattern: ([a-z][-a-z0-9]*[a-z0-9])
+	// Pattern: (^[a-z][-a-z0-9]*[a-z0-9]$)
 	Name *string `json:"name"`
 }
 
@@ -37,6 +38,11 @@ type GeneralSettings struct {
 func (m *GeneralSettings) Validate(formats strfmt.Registry) error {
 	var res []error
 
+	if err := m.validateCredentialName(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
 	if err := m.validateName(formats); err != nil {
 		// prop
 		res = append(res, err)
@@ -45,6 +51,15 @@ func (m *GeneralSettings) Validate(formats strfmt.Registry) error {
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (m *GeneralSettings) validateCredentialName(formats strfmt.Registry) error {
+
+	if err := validate.Required("credentialName", "body", m.CredentialName); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -62,7 +77,7 @@ func (m *GeneralSettings) validateName(formats strfmt.Registry) error {
 		return err
 	}
 
-	if err := validate.Pattern("name", "body", string(*m.Name), `([a-z][-a-z0-9]*[a-z0-9])`); err != nil {
+	if err := validate.Pattern("name", "body", string(*m.Name), `(^[a-z][-a-z0-9]*[a-z0-9]$)`); err != nil {
 		return err
 	}
 

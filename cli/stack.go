@@ -73,16 +73,21 @@ func assembleStackRequest(c *cli.Context) *models_cloudbreak.StackV2Request {
 
 	name := c.String(FlName.Name)
 	if len(name) != 0 {
+		if req.General == nil {
+			req.General = &models_cloudbreak.GeneralSettings{}
+		}
 		req.General.Name = &name
-		for _, ig := range req.InstanceGroups {
-			if _, ok := ig.Parameters[availabilitySet]; ok {
-				as := ig.Parameters[availabilitySet].(map[string]interface{})
-				as["name"] = *req.General.Name + "-" + *ig.Group + "-as"
-				ig.Parameters[availabilitySet] = as
+		if req.InstanceGroups != nil {
+			for _, ig := range req.InstanceGroups {
+				if _, ok := ig.Parameters[availabilitySet]; ok {
+					as := ig.Parameters[availabilitySet].(map[string]interface{})
+					as["name"] = *req.General.Name + "-" + *ig.Group + "-as"
+					ig.Parameters[availabilitySet] = as
+				}
 			}
 		}
 	}
-	if req.General.Name == nil || len(*req.General.Name) == 0 {
+	if req.General == nil || req.General.Name == nil || len(*req.General.Name) == 0 {
 		utils.LogErrorMessageAndExit("Name of the cluster must be set either in the template or with the --name command line option.")
 	}
 

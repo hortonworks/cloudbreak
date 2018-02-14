@@ -10,6 +10,7 @@ import (
 
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
+	"github.com/go-openapi/validate"
 )
 
 // PlacementSettings placement settings
@@ -21,7 +22,8 @@ type PlacementSettings struct {
 	AvailabilityZone string `json:"availabilityZone,omitempty"`
 
 	// region of the stack
-	Region string `json:"region,omitempty"`
+	// Required: true
+	Region *string `json:"region"`
 }
 
 /* polymorph PlacementSettings availabilityZone false */
@@ -32,9 +34,23 @@ type PlacementSettings struct {
 func (m *PlacementSettings) Validate(formats strfmt.Registry) error {
 	var res []error
 
+	if err := m.validateRegion(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (m *PlacementSettings) validateRegion(formats strfmt.Registry) error {
+
+	if err := validate.Required("region", "body", m.Region); err != nil {
+		return err
+	}
+
 	return nil
 }
 

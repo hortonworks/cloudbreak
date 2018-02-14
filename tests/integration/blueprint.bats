@@ -11,14 +11,14 @@ load ../utils/mock_parameters
 }
 
 @test "Check blueprint create from url - url does not exist" {
-  OUTPUT=$(create-blueprint from-url --name test --url https://something123456789.com 2>&1 | sed -e '$!d')
+  OUTPUT=$(create-blueprint from-url --name test --url https://something123456789.com 2>&1 | sed -e '$d' | sed -e '$!d')
 
   [[ "${OUTPUT}" == *"Get https://something123456789.com: dial tcp: lookup something123456789.com"* ]]
   [[ "${OUTPUT}" == *"error"* ]]
 }
 
 @test "Check blueprint create from url - invalid url no protocol" {
-  OUTPUT=$(create-blueprint from-url --name test --url something.com 2>&1 | sed -e '$!d')
+  OUTPUT=$(create-blueprint from-url --name test --url something.com 2>&1 | sed -e '$d' | sed -e '$!d')
 
   [[ "${OUTPUT}" == *"Get something.com: unsupported protocol scheme"* ]]
   [[ "${OUTPUT}" == *"error"* ]]
@@ -33,7 +33,7 @@ load ../utils/mock_parameters
 }
 
 @test "Check blueprint create from file - file does not exist" {
-  OUTPUT=$(create-blueprint from-file --name testbp --file notexists.bp 2>&1 | sed -e '$!d')
+  OUTPUT=$(create-blueprint from-file --name testbp --file notexists.bp 2>&1 | sed -e '$d' | sed -e '$!d')
 
   [[ "${OUTPUT}" == *"no such file or directory"* ]]
   [[ "${OUTPUT}" == *"error"* ]]

@@ -26,7 +26,7 @@ type UpdateImageCatalogRequest struct {
 	// Required: true
 	// Max Length: 100
 	// Min Length: 5
-	// Pattern: ([a-z][-a-z0-9]*[a-z0-9])
+	// Pattern: (^[a-z][-a-z0-9]*[a-z0-9]$)
 	Name *string `json:"name"`
 
 	// custom image catalog's URL
@@ -89,7 +89,7 @@ func (m *UpdateImageCatalogRequest) validateName(formats strfmt.Registry) error 
 		return err
 	}
 
-	if err := validate.Pattern("name", "body", string(*m.Name), `([a-z][-a-z0-9]*[a-z0-9])`); err != nil {
+	if err := validate.Pattern("name", "body", string(*m.Name), `(^[a-z][-a-z0-9]*[a-z0-9]$)`); err != nil {
 		return err
 	}
 

@@ -39,7 +39,7 @@ type AutoscaleStackResponse struct {
 	// Required: true
 	// Max Length: 40
 	// Min Length: 5
-	// Pattern: ([a-z][-a-z0-9]*[a-z0-9])
+	// Pattern: (^[a-z][-a-z0-9]*[a-z0-9]$)
 	Name *string `json:"name"`
 
 	// id of the resource owner that is provided by OAuth provider
@@ -196,7 +196,7 @@ func (m *AutoscaleStackResponse) validateName(formats strfmt.Registry) error {
 		return err
 	}
 
-	if err := validate.Pattern("name", "body", string(*m.Name), `([a-z][-a-z0-9]*[a-z0-9])`); err != nil {
+	if err := validate.Pattern("name", "body", string(*m.Name), `(^[a-z][-a-z0-9]*[a-z0-9]$)`); err != nil {
 		return err
 	}
 

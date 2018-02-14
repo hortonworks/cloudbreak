@@ -106,7 +106,7 @@ type ClusterRequest struct {
 	// Required: true
 	// Max Length: 40
 	// Min Length: 5
-	// Pattern: ([a-z][-a-z0-9]*[a-z0-9])
+	// Pattern: (^[a-z][-a-z0-9]*[a-z0-9]$)
 	Name *string `json:"name"`
 
 	// ambari password
@@ -127,7 +127,7 @@ type ClusterRequest struct {
 	// Required: true
 	// Max Length: 15
 	// Min Length: 5
-	// Pattern: ([a-z][-a-z0-9]*[a-z0-9])
+	// Pattern: (^[a-z][-a-z0-9]*[a-z0-9]$)
 	UserName *string `json:"userName"`
 
 	// validate blueprint
@@ -697,7 +697,7 @@ func (m *ClusterRequest) validateName(formats strfmt.Registry) error {
 		return err
 	}
 
-	if err := validate.Pattern("name", "body", string(*m.Name), `([a-z][-a-z0-9]*[a-z0-9])`); err != nil {
+	if err := validate.Pattern("name", "body", string(*m.Name), `(^[a-z][-a-z0-9]*[a-z0-9]$)`); err != nil {
 		return err
 	}
 
@@ -779,7 +779,7 @@ func (m *ClusterRequest) validateUserName(formats strfmt.Registry) error {
 		return err
 	}
 
-	if err := validate.Pattern("userName", "body", string(*m.UserName), `([a-z][-a-z0-9]*[a-z0-9])`); err != nil {
+	if err := validate.Pattern("userName", "body", string(*m.UserName), `(^[a-z][-a-z0-9]*[a-z0-9]$)`); err != nil {
 		return err
 	}
 

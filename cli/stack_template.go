@@ -85,6 +85,13 @@ func getString(skippedFields map[string]bool, fieldName string, defaultValue str
 	return defaultValue
 }
 
+func getStringPointer(skippedFields map[string]bool, fieldName string, defaultValue string) *string {
+	if _, skipped := skippedFields[fieldName]; skipped {
+		return &(&types.S{S: ""}).S
+	}
+	return &defaultValue
+}
+
 func generateStackTemplateImpl(mode cloud.NetworkMode, stringFinder func(string) string, getBlueprintClient func(string, string, string, string) getPublicBlueprint) error {
 	provider := cloud.GetProvider()
 	skippedFields := provider.SkippedFields()
@@ -100,10 +107,10 @@ func generateStackTemplateImpl(mode cloud.NetworkMode, stringFinder func(string)
 		},
 		General: &models_cloudbreak.GeneralSettings{
 			Name:           &(&types.S{S: ""}).S,
-			CredentialName: "____",
+			CredentialName: &(&types.S{S: "____"}).S,
 		},
 		Placement: &models_cloudbreak.PlacementSettings{
-			Region:           getString(skippedFields, cloud.REGION_FIELD, "____"),
+			Region:           getStringPointer(skippedFields, cloud.REGION_FIELD, "____"),
 			AvailabilityZone: getString(skippedFields, cloud.AVAILABILITY_ZONE_FIELD, "____"),
 		},
 		InstanceGroups:      []*models_cloudbreak.InstanceGroupsV2{},

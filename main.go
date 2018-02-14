@@ -106,6 +106,7 @@ func sortByName(commands []cli.Command) {
 func main() {
 	defer func() {
 		if r := recover(); r != nil {
+			log.Debug(r)
 			os.Exit(1)
 		}
 	}()

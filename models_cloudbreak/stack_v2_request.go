@@ -36,7 +36,8 @@ type StackV2Request struct {
 	FlexID int64 `json:"flexId,omitempty"`
 
 	// general configuration parameters for a cluster (e.g. 'name', 'credentialname')
-	General *GeneralSettings `json:"general,omitempty"`
+	// Required: true
+	General *GeneralSettings `json:"general"`
 
 	// specific version of HDP
 	HdpVersion string `json:"hdpVersion,omitempty"`
@@ -216,8 +217,8 @@ func (m *StackV2Request) validateFailurePolicy(formats strfmt.Registry) error {
 
 func (m *StackV2Request) validateGeneral(formats strfmt.Registry) error {
 
-	if swag.IsZero(m.General) { // not required
-		return nil
+	if err := validate.Required("general", "body", m.General); err != nil {
+		return err
 	}
 
 	if m.General != nil {

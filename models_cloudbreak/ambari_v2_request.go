@@ -73,7 +73,7 @@ type AmbariV2Request struct {
 	// Required: true
 	// Max Length: 15
 	// Min Length: 5
-	// Pattern: ([a-z][-a-z0-9]*[a-z0-9])
+	// Pattern: (^[a-z][-a-z0-9]*[a-z0-9]$)
 	UserName *string `json:"userName"`
 
 	// validate blueprint
@@ -415,7 +415,7 @@ func (m *AmbariV2Request) validateUserName(formats strfmt.Registry) error {
 		return err
 	}
 
-	if err := validate.Pattern("userName", "body", string(*m.UserName), `([a-z][-a-z0-9]*[a-z0-9])`); err != nil {
+	if err := validate.Pattern("userName", "body", string(*m.UserName), `(^[a-z][-a-z0-9]*[a-z0-9]$)`); err != nil {
 		return err
 	}
 
