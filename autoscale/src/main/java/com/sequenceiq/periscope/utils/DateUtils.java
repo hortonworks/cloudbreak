@@ -54,8 +54,8 @@ public final class DateUtils {
         }
         try {
             return new CronSequenceGenerator(cron);
-        } catch (Exception e) {
-            throw new ParseException(e.getMessage(), 0);
+        } catch (Exception ex) {
+            throw new ParseException(ex.getMessage(), 0);
         }
 
     }

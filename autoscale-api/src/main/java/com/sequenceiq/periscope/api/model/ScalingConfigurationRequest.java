@@ -1,5 +1,6 @@
 package com.sequenceiq.periscope.api.model;
 
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -22,6 +23,7 @@ public class ScalingConfigurationRequest implements Json {
     @ApiModelProperty(ScalingConfigurationJsonProperties.COOLDOWN)
     @JsonProperty("cooldown")
     @NotNull
+    @Min(1)
     private int coolDown;
 
     public ScalingConfigurationRequest() {
