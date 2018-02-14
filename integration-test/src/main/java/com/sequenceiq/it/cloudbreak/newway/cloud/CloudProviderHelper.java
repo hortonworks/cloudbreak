@@ -28,6 +28,8 @@ public abstract class CloudProviderHelper extends CloudProvider {
 
     public static final int BEGIN_INDEX = 4;
 
+    public static final String INTEGRATIONTEST_PUBLIC_KEY_FILE = "integrationtest.publicKeyFile";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(CloudProviderHelper.class);
 
     private TestParameter testParameter;
