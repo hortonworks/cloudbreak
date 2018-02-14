@@ -37,12 +37,15 @@ public class OpenstackCloudProvider extends CloudProviderHelper {
 
     @Override
     String availabilityZone() {
-        return null;
+        String az = "nova";
+        String azParam = getTestParameter().get("openstackAvailabilityZone");
+
+        return azParam == null ? az : azParam;
     }
 
     @Override
     String region() {
-        String region = "local";
+        String region = "RegionOne";
         String regionParam = getTestParameter().get("openstackRegion");
 
         return regionParam == null ? region : regionParam;
@@ -51,9 +54,8 @@ public class OpenstackCloudProvider extends CloudProviderHelper {
     @Override
     StackAuthenticationRequest stackauth() {
         StackAuthenticationRequest stackauth = new StackAuthenticationRequest();
-        String defaultValue = "seq-master";
-        String param = getTestParameter().get("openstackPublicKeyId");
-        stackauth.setPublicKeyId(param == null ? defaultValue : param);
+
+        stackauth.setPublicKey(getTestParameter().get(CloudProviderHelper.INTEGRATIONTEST_PUBLIC_KEY_FILE).substring(BEGIN_INDEX));
         return stackauth;
     }
 

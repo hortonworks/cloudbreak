@@ -70,9 +70,8 @@ public class AwsCloudProvider extends CloudProviderHelper {
     @Override
     StackAuthenticationRequest stackauth() {
         StackAuthenticationRequest stackauth = new StackAuthenticationRequest();
-        String defaultValue = "seq-master";
-        String param = getTestParameter().get("awsPublicKeyId");
-        stackauth.setPublicKeyId(param == null ? defaultValue : param);
+
+        stackauth.setPublicKey(getTestParameter().get(CloudProviderHelper.INTEGRATIONTEST_PUBLIC_KEY_FILE).substring(BEGIN_INDEX));
         return stackauth;
     }
 
