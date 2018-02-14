@@ -4,6 +4,7 @@ import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.AmbariRepoDetailsDescription;
 
 import io.swagger.annotations.ApiModel;
@@ -11,7 +12,7 @@ import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel("AmbariRepoDetails")
 @JsonIgnoreProperties(ignoreUnknown = true)
-@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonInclude(Include.NON_NULL)
 public class AmbariRepoDetailsJson implements JsonEntity {
 
     @NotNull
@@ -22,8 +23,7 @@ public class AmbariRepoDetailsJson implements JsonEntity {
     @ApiModelProperty(value = AmbariRepoDetailsDescription.AMBARI_BASE_URL, required = true)
     private String baseUrl;
 
-    @NotNull
-    @ApiModelProperty(value = AmbariRepoDetailsDescription.AMBARI_REPO_GPG_KEY, required = true)
+    @ApiModelProperty(AmbariRepoDetailsDescription.AMBARI_REPO_GPG_KEY)
     private String gpgKeyUrl;
 
     public String getVersion() {
