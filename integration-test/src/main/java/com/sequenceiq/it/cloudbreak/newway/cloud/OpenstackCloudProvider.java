@@ -1,14 +1,14 @@
 package com.sequenceiq.it.cloudbreak.newway.cloud;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.sequenceiq.cloudbreak.api.model.StackAuthenticationRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.NetworkV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.TemplateV2Request;
 import com.sequenceiq.it.cloudbreak.newway.Credential;
 import com.sequenceiq.it.cloudbreak.newway.CredentialEntity;
 import com.sequenceiq.it.cloudbreak.newway.TestParameter;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public class OpenstackCloudProvider extends CloudProviderHelper {
 
@@ -68,7 +68,7 @@ public class OpenstackCloudProvider extends CloudProviderHelper {
         String volumeCountParam = getTestParameter().get("openstackInstanceVolumeCount");
         t.setVolumeCount(volumeCountParam == null ? volumeCountDefault : Integer.parseInt(volumeCountParam));
 
-        int volumeSizeDefault = 10;
+        int volumeSizeDefault = 50;
         String volumeSizeParam = getTestParameter().get("openstackInstanceVolumeSize");
         t.setVolumeSize(volumeSizeParam == null ? volumeSizeDefault : Integer.parseInt(volumeSizeParam));
 
