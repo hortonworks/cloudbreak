@@ -264,66 +264,6 @@ func (a *Client) GetTemplate(params *GetTemplateParams) (*GetTemplateOK, error) 
 
 }
 
-/*
-PostPrivateTemplate creates template as private resource
-
-A template gives developers and systems administrators an easy way to create and manage a collection of cloud infrastructure related resources, maintaining and updating them in an orderly and predictable fashion. Templates are cloud specific - and on top of the infrastructural setup they collect the information such as the used machine images, the datacenter location, instance types, and can capture and control region-specific infrastructure variations. We support heterogenous clusters - this one Hadoop cluster can be built by combining different templates.
-*/
-func (a *Client) PostPrivateTemplate(params *PostPrivateTemplateParams) (*PostPrivateTemplateOK, error) {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewPostPrivateTemplateParams()
-	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "postPrivateTemplate",
-		Method:             "POST",
-		PathPattern:        "/v1/templates/user",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
-		Params:             params,
-		Reader:             &PostPrivateTemplateReader{formats: a.formats},
-		Context:            params.Context,
-		Client:             params.HTTPClient,
-	})
-	if err != nil {
-		return nil, err
-	}
-	return result.(*PostPrivateTemplateOK), nil
-
-}
-
-/*
-PostPublicTemplate creates template as public resource
-
-A template gives developers and systems administrators an easy way to create and manage a collection of cloud infrastructure related resources, maintaining and updating them in an orderly and predictable fashion. Templates are cloud specific - and on top of the infrastructural setup they collect the information such as the used machine images, the datacenter location, instance types, and can capture and control region-specific infrastructure variations. We support heterogenous clusters - this one Hadoop cluster can be built by combining different templates.
-*/
-func (a *Client) PostPublicTemplate(params *PostPublicTemplateParams) (*PostPublicTemplateOK, error) {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewPostPublicTemplateParams()
-	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "postPublicTemplate",
-		Method:             "POST",
-		PathPattern:        "/v1/templates/account",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
-		Params:             params,
-		Reader:             &PostPublicTemplateReader{formats: a.formats},
-		Context:            params.Context,
-		Client:             params.HTTPClient,
-	})
-	if err != nil {
-		return nil, err
-	}
-	return result.(*PostPublicTemplateOK), nil
-
-}
-
 // SetTransport changes the transport on the client
 func (a *Client) SetTransport(transport runtime.ClientTransport) {
 	a.transport = transport

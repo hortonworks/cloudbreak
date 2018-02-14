@@ -44,6 +44,9 @@ type AccountPreference struct {
 	// list of the cloudplatforms visible on the UI
 	Platforms string `json:"platforms,omitempty"`
 
+	// smartsense enabled on the UI
+	SmartsenseEnabled *bool `json:"smartsenseEnabled,omitempty"`
+
 	// lifecycle of the account and its clusters in hours (0 for immortal account)
 	// Required: true
 	// Minimum: 0
@@ -63,6 +66,8 @@ type AccountPreference struct {
 /* polymorph AccountPreference maxNumberOfNodesPerCluster false */
 
 /* polymorph AccountPreference platforms false */
+
+/* polymorph AccountPreference smartsenseEnabled false */
 
 /* polymorph AccountPreference userTimeToLive false */
 

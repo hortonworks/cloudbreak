@@ -24,6 +24,7 @@ import (
 	"github.com/hortonworks/cb-cli/client_cloudbreak/v1networks"
 	"github.com/hortonworks/cb-cli/client_cloudbreak/v1rdsconfigs"
 	"github.com/hortonworks/cb-cli/client_cloudbreak/v1recipes"
+	"github.com/hortonworks/cb-cli/client_cloudbreak/v1repositoryconfigs"
 	"github.com/hortonworks/cb-cli/client_cloudbreak/v1securitygroups"
 	"github.com/hortonworks/cb-cli/client_cloudbreak/v1securityrules"
 	"github.com/hortonworks/cb-cli/client_cloudbreak/v1settings"
@@ -105,6 +106,8 @@ func New(transport runtime.ClientTransport, formats strfmt.Registry) *Cloudbreak
 	cli.V1rdsconfigs = v1rdsconfigs.New(transport, formats)
 
 	cli.V1recipes = v1recipes.New(transport, formats)
+
+	cli.V1repositoryconfigs = v1repositoryconfigs.New(transport, formats)
 
 	cli.V1securitygroups = v1securitygroups.New(transport, formats)
 
@@ -202,6 +205,8 @@ type Cloudbreak struct {
 
 	V1recipes *v1recipes.Client
 
+	V1repositoryconfigs *v1repositoryconfigs.Client
+
 	V1securitygroups *v1securitygroups.Client
 
 	V1securityrules *v1securityrules.Client
@@ -260,6 +265,8 @@ func (c *Cloudbreak) SetTransport(transport runtime.ClientTransport) {
 	c.V1rdsconfigs.SetTransport(transport)
 
 	c.V1recipes.SetTransport(transport)
+
+	c.V1repositoryconfigs.SetTransport(transport)
 
 	c.V1securitygroups.SetTransport(transport)
 

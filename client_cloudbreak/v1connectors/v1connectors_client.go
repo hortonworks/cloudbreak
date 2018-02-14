@@ -594,66 +594,6 @@ func (a *Client) GetTagSpecifications(params *GetTagSpecificationsParams) (*GetT
 
 }
 
-/*
-GetVMTypes retrives available vm types
-
-Each cloud provider has it's own specific resources like instance types and disk types. These endpoints are collecting them.
-*/
-func (a *Client) GetVMTypes(params *GetVMTypesParams) (*GetVMTypesOK, error) {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewGetVMTypesParams()
-	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "getVmTypes",
-		Method:             "GET",
-		PathPattern:        "/v1/connectors/vmtypes",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
-		Params:             params,
-		Reader:             &GetVMTypesReader{formats: a.formats},
-		Context:            params.Context,
-		Client:             params.HTTPClient,
-	})
-	if err != nil {
-		return nil, err
-	}
-	return result.(*GetVMTypesOK), nil
-
-}
-
-/*
-GetVMTypesByType retrives available vm types
-
-Each cloud provider has it's own specific resources like instance types and disk types. These endpoints are collecting them.
-*/
-func (a *Client) GetVMTypesByType(params *GetVMTypesByTypeParams) (*GetVMTypesByTypeOK, error) {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewGetVMTypesByTypeParams()
-	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "getVmTypesByType",
-		Method:             "GET",
-		PathPattern:        "/v1/connectors/vmtypes/{type}",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
-		Params:             params,
-		Reader:             &GetVMTypesByTypeReader{formats: a.formats},
-		Context:            params.Context,
-		Client:             params.HTTPClient,
-	})
-	if err != nil {
-		return nil, err
-	}
-	return result.(*GetVMTypesByTypeOK), nil
-
-}
-
 // SetTransport changes the transport on the client
 func (a *Client) SetTransport(transport runtime.ClientTransport) {
 	a.transport = transport

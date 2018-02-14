@@ -121,6 +121,9 @@ type ClusterResponse struct {
 	// status message of the cluster
 	StatusReason string `json:"statusReason,omitempty"`
 
+	// duration - how long the cluster is running in milliseconds
+	Uptime int64 `json:"uptime,omitempty"`
+
 	// ambari username
 	UserName string `json:"userName,omitempty"`
 }
@@ -188,6 +191,8 @@ type ClusterResponse struct {
 /* polymorph ClusterResponse status false */
 
 /* polymorph ClusterResponse statusReason false */
+
+/* polymorph ClusterResponse uptime false */
 
 /* polymorph ClusterResponse userName false */
 

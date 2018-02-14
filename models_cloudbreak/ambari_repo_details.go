@@ -23,8 +23,7 @@ type AmbariRepoDetails struct {
 	BaseURL *string `json:"baseUrl"`
 
 	// gpg key of the Ambari repository
-	// Required: true
-	GpgKeyURL *string `json:"gpgKeyUrl"`
+	GpgKeyURL string `json:"gpgKeyUrl,omitempty"`
 
 	// version of the Ambari
 	// Required: true
@@ -46,11 +45,6 @@ func (m *AmbariRepoDetails) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
-	if err := m.validateGpgKeyURL(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
 	if err := m.validateVersion(formats); err != nil {
 		// prop
 		res = append(res, err)
@@ -65,15 +59,6 @@ func (m *AmbariRepoDetails) Validate(formats strfmt.Registry) error {
 func (m *AmbariRepoDetails) validateBaseURL(formats strfmt.Registry) error {
 
 	if err := validate.Required("baseUrl", "body", m.BaseURL); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (m *AmbariRepoDetails) validateGpgKeyURL(formats strfmt.Registry) error {
-
-	if err := validate.Required("gpgKeyUrl", "body", m.GpgKeyURL); err != nil {
 		return err
 	}
 

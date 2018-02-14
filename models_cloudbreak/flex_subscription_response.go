@@ -22,9 +22,6 @@ type FlexSubscriptionResponse struct {
 	// Read Only: true
 	Account string `json:"account,omitempty"`
 
-	// default
-	Default *bool `json:"default,omitempty"`
-
 	// id of the resource
 	// Read Only: true
 	ID int64 `json:"id,omitempty"`
@@ -54,13 +51,14 @@ type FlexSubscriptionResponse struct {
 	// Pattern: ^(FLEX-[0-9]{10}$)
 	SubscriptionID string `json:"subscriptionId,omitempty"`
 
+	// true if the flex subscription is the default one
+	UsedAsDefault *bool `json:"usedAsDefault,omitempty"`
+
 	// true if the flex subscription was used for the controller
 	UsedForController *bool `json:"usedForController,omitempty"`
 }
 
 /* polymorph FlexSubscriptionResponse account false */
-
-/* polymorph FlexSubscriptionResponse default false */
 
 /* polymorph FlexSubscriptionResponse id false */
 
@@ -75,6 +73,8 @@ type FlexSubscriptionResponse struct {
 /* polymorph FlexSubscriptionResponse smartSenseSubscriptionId false */
 
 /* polymorph FlexSubscriptionResponse subscriptionId false */
+
+/* polymorph FlexSubscriptionResponse usedAsDefault false */
 
 /* polymorph FlexSubscriptionResponse usedForController false */
 

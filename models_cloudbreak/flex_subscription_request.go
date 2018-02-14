@@ -18,9 +18,6 @@ import (
 
 type FlexSubscriptionRequest struct {
 
-	// default
-	Default *bool `json:"default,omitempty"`
-
 	// name of the resource
 	// Required: true
 	Name *string `json:"name"`
@@ -34,17 +31,20 @@ type FlexSubscriptionRequest struct {
 	// Pattern: ^(FLEX-[0-9]{10}$)
 	SubscriptionID string `json:"subscriptionId,omitempty"`
 
+	// true if the flex subscription is the default one
+	UsedAsDefault *bool `json:"usedAsDefault,omitempty"`
+
 	// true if the flex subscription was used for the controller
 	UsedForController *bool `json:"usedForController,omitempty"`
 }
-
-/* polymorph FlexSubscriptionRequest default false */
 
 /* polymorph FlexSubscriptionRequest name false */
 
 /* polymorph FlexSubscriptionRequest smartSenseSubscriptionId false */
 
 /* polymorph FlexSubscriptionRequest subscriptionId false */
+
+/* polymorph FlexSubscriptionRequest usedAsDefault false */
 
 /* polymorph FlexSubscriptionRequest usedForController false */
 

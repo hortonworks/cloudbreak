@@ -33,7 +33,7 @@ type RecipeResponse struct {
 
 	// name of the resource
 	// Max Length: 100
-	// Min Length: 1
+	// Min Length: 5
 	// Pattern: ([a-z][-a-z0-9]*[a-z0-9])
 	Name string `json:"name,omitempty"`
 
@@ -110,7 +110,7 @@ func (m *RecipeResponse) validateName(formats strfmt.Registry) error {
 		return nil
 	}
 
-	if err := validate.MinLength("name", "body", string(m.Name), 1); err != nil {
+	if err := validate.MinLength("name", "body", string(m.Name), 5); err != nil {
 		return err
 	}
 

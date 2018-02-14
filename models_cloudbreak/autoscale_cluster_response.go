@@ -124,6 +124,9 @@ type AutoscaleClusterResponse struct {
 	// status message of the cluster
 	StatusReason string `json:"statusReason,omitempty"`
 
+	// duration - how long the cluster is running in milliseconds
+	Uptime int64 `json:"uptime,omitempty"`
+
 	// ambari username
 	UserName string `json:"userName,omitempty"`
 }
@@ -193,6 +196,8 @@ type AutoscaleClusterResponse struct {
 /* polymorph AutoscaleClusterResponse status false */
 
 /* polymorph AutoscaleClusterResponse statusReason false */
+
+/* polymorph AutoscaleClusterResponse uptime false */
 
 /* polymorph AutoscaleClusterResponse userName false */
 
