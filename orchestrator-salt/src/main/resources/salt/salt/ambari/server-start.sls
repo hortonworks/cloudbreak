@@ -1,5 +1,10 @@
 {%- from 'ambari/settings.sls' import ambari with context %}
 
+/var/lib/ambari-server/jdbc-drivers:
+  cmd.run:
+    - name: cp -R /opt/jdbc-drivers /var/lib/ambari-server/jdbc-drivers
+    - unless: ls -1 /var/lib/ambari-server/jdbc-drivers
+
 {% if ambari.is_systemd %}
 
 /etc/systemd/system/ambari-server.service:
