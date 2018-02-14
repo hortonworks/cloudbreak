@@ -70,7 +70,11 @@
       },
       {
         "yarn-site": {
-          "yarn.acl.enable": "true"
+          "yarn.acl.enable": "true",
+          "yarn.scheduler.capacity.root.default.capacity":"50",
+          "yarn.scheduler.capacity.root.llap.capacity":"50",
+          "yarn.scheduler.capacity.root.default.maximum-capacity":"50",
+          "yarn.scheduler.capacity.root.llap.maximum-capacity":"50"
         }
       }
     ],
