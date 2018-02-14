@@ -11,5 +11,7 @@ UPDATE blueprint SET name = 'EDW-ETL: Apache Hive, Apache Spark 2' WHERE status 
 -- SQL to undo the change goes here.
 
 UPDATE blueprint SET status = 'DEFAULT' WHERE status = 'DEFAULT_DELETED' AND name LIKE '%Apache Spark 1.6%';
-
--- no other undo since it does not make sense to write it back to the invalid names
+UPDATE blueprint SET name = 'BI: Druid 0.9.2 (Technical Preview)' WHERE status = 'DEFAULT' AND name = 'BI: Druid (Technical Preview)';
+UPDATE blueprint SET name = 'Data Science: Apache Spark 2.1, Apache Zeppelin 0.7.0' WHERE status = 'DEFAULT' AND name = 'Data Science: Apache Spark 2, Apache Zeppelin';
+UPDATE blueprint SET name = 'EDW-Analytics: Apache Hive 2 LLAP, Apache Zeppelin 0.7.0' WHERE status = 'DEFAULT' AND name = 'EDW-Analytics: Apache Hive 2 LLAP, Apache Zeppelin';
+UPDATE blueprint SET name = 'EDW-ETL: Apache Hive 1.2.1, Apache Spark 2.1' WHERE status = 'DEFAULT' AND name = 'EDW-ETL: Apache Hive, Apache Spark 2';
