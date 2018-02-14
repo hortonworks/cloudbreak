@@ -443,17 +443,6 @@ deployer-login() {
     echo "  $UAA_DEFAULT_USER_EMAIL" | blue
     info "password:"
     echo "  ****" | blue
-
-    info "creating config file for hdc cli: $HOME/.hdc/config"
-    mkdir -p $HOME/.hdc
-    cat > $HOME/.hdc/config <<EOF
-username: $UAA_DEFAULT_USER_EMAIL
-server: $ULU_HOST_ADDRESS
-EOF
-    if [[ "$UAA_DEFAULT_USER_PW" ]]; then
-        echo "password: \"$(escape-string-yaml $UAA_DEFAULT_USER_PW \")\"" >> $HOME/.hdc/config
-    fi
-
 }
 
 start-cmd() {
