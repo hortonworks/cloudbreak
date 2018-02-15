@@ -166,7 +166,6 @@ TRAEFIK_MAX_IDLE_CONNECTION - Configures --maxidleconnsperhost for Traefik
 UAA_CLOUDBREAK_ID - Identity of the Cloudbreak scope in Identity
 UAA_CLOUDBREAK_SECRET - Secret of the Cloudbreak scope in Identity
 UAA_CLOUDBREAK_SHELL_ID - Identity of the Cloudbreak Shell scope in Identity
-UAA_DEFAULT_ACCOUNT - Default account for users as an Identity group
 UAA_DEFAULT_SECRET - Default secret for all the scopes and encryptions
 UAA_DEFAULT_USER_EMAIL - Email address of default admin user
 UAA_DEFAULT_USER_FIRSTNAME - First name of default admin user
