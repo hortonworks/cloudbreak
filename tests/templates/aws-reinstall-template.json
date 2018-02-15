@@ -1,5 +1,5 @@
 {
-  "blueprintName": "EDW-ETL: Apache Hive 1.2.1, Apache Spark 1.6",
+  "blueprintName": "EDW-ETL: Apache Hive, Apache Spark 2",
   "instanceGroups": [
     {
       "group": "master",
