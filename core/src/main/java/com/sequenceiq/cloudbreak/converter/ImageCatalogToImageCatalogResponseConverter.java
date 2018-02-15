@@ -22,7 +22,7 @@ public class ImageCatalogToImageCatalogResponseConverter extends AbstractConvers
         imageCatalogResponse.setUrl(source.getImageCatalogUrl());
 
         String imageCatalogName = source.getImageCatalogName();
-        imageCatalogResponse.setDefault(isDefault(imageCatalogName));
+        imageCatalogResponse.setUsedAsDefault(isDefault(imageCatalogName));
         imageCatalogResponse.setName(imageCatalogName);
 
         return imageCatalogResponse;
