@@ -101,7 +101,7 @@ func listImagecatalogsImpl(client getPublicsImagecatalogsClient, writer func([]s
 
 	tableRows := []utils.Row{}
 	for _, ic := range imagecatalogResp.Payload {
-		tableRows = append(tableRows, &imagecatalogOut{*ic.Name, *ic.Default, *ic.URL})
+		tableRows = append(tableRows, &imagecatalogOut{*ic.Name, ic.UsedAsDefault, *ic.URL})
 	}
 
 	writer(imagecatalogHeader, tableRows)

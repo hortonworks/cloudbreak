@@ -18,9 +18,9 @@ type mockGetPublicsImagecatalogsClient struct {
 func (*mockGetPublicsImagecatalogsClient) GetPublicsImageCatalogs(params *v1imagecatalogs.GetPublicsImageCatalogsParams) (*v1imagecatalogs.GetPublicsImageCatalogsOK, error) {
 	resp := []*models_cloudbreak.ImageCatalogResponse{
 		&models_cloudbreak.ImageCatalogResponse{
-			Name:    &(&types.S{S: "test"}).S,
-			Default: &(&types.B{B: true}).B,
-			URL:     &(&types.S{S: "testurl"}).S,
+			Name:          &(&types.S{S: "test"}).S,
+			UsedAsDefault: (&types.B{B: true}).B,
+			URL:           &(&types.S{S: "testurl"}).S,
 		},
 	}
 	return &v1imagecatalogs.GetPublicsImageCatalogsOK{Payload: resp}, nil

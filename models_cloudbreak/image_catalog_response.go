@@ -18,9 +18,6 @@ import (
 
 type ImageCatalogResponse struct {
 
-	// default
-	Default *bool `json:"default,omitempty"`
-
 	// id of the resource
 	// Required: true
 	ID *int64 `json:"id"`
@@ -43,9 +40,11 @@ type ImageCatalogResponse struct {
 	// Required: true
 	// Pattern: ^http[s]?://.*
 	URL *string `json:"url"`
-}
 
-/* polymorph ImageCatalogResponse default false */
+	// true if image catalog is the default one
+	// Required: true
+	UsedAsDefault bool `json:"usedAsDefault"`
+}
 
 /* polymorph ImageCatalogResponse id false */
 
@@ -56,6 +55,8 @@ type ImageCatalogResponse struct {
 /* polymorph ImageCatalogResponse publicInAccount false */
 
 /* polymorph ImageCatalogResponse url false */
+
+/* polymorph ImageCatalogResponse usedAsDefault false */
 
 // Validate validates this image catalog response
 func (m *ImageCatalogResponse) Validate(formats strfmt.Registry) error {
@@ -82,6 +83,11 @@ func (m *ImageCatalogResponse) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateURL(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateUsedAsDefault(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -157,6 +163,15 @@ func (m *ImageCatalogResponse) validateURL(formats strfmt.Registry) error {
 	}
 
 	if err := validate.Pattern("url", "body", string(*m.URL), `^http[s]?://.*`); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *ImageCatalogResponse) validateUsedAsDefault(formats strfmt.Registry) error {
+
+	if err := validate.Required("usedAsDefault", "body", bool(m.UsedAsDefault)); err != nil {
 		return err
 	}
 
