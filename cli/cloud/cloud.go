@@ -43,7 +43,7 @@ type CloudProvider interface {
 	GetCredentialParameters(func(string) string, func(string) bool) (map[string]interface{}, error)
 	GetNetworkParamatersTemplate(NetworkMode) map[string]interface{}
 	GetInstanceGroupParamatersTemplate(node Node) map[string]interface{}
-	GetParamatersTemplate() map[string]string
+	GetParamatersTemplate() map[string]interface{}
 	SkippedFields() map[string]bool
 	GenerateDefaultTemplate() *models_cloudbreak.TemplateV2Request
 	GenerateDefaultNetwork(networkParameters map[string]interface{}, mode NetworkMode) *models_cloudbreak.NetworkV2Request

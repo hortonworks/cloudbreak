@@ -53,7 +53,7 @@ type StackV2Request struct {
 	Network *NetworkV2Request `json:"network,omitempty"`
 
 	// additional cloud specific parameters for stack
-	Parameters map[string]string `json:"parameters,omitempty"`
+	Parameters map[string]interface{} `json:"parameters,omitempty"`
 
 	// placement configuration parameters for a cluster (e.g. 'region', 'availabilityZone')
 	Placement *PlacementSettings `json:"placement,omitempty"`

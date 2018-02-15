@@ -13,8 +13,8 @@ func (p *AwsProvider) GetNetworkParamatersTemplate(mode cloud.NetworkMode) map[s
 	}
 }
 
-func (p *AwsProvider) GetParamatersTemplate() map[string]string {
-	return map[string]string{"instanceProfileStrategy": "CREATE"}
+func (p *AwsProvider) GetParamatersTemplate() map[string]interface{} {
+	return map[string]interface{}{"instanceProfileStrategy": "CREATE"}
 }
 
 func (p *AwsProvider) GetInstanceGroupParamatersTemplate(node cloud.Node) map[string]interface{} {

@@ -15,7 +15,7 @@ func (p *GcpProvider) GetNetworkParamatersTemplate(mode cloud.NetworkMode) map[s
 	}
 }
 
-func (p *GcpProvider) GetParamatersTemplate() map[string]string {
+func (p *GcpProvider) GetParamatersTemplate() map[string]interface{} {
 	return nil
 }
 

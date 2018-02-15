@@ -15,7 +15,7 @@ func (p *OpenstackProvider) GetNetworkParamatersTemplate(mode cloud.NetworkMode)
 	}
 }
 
-func (p *OpenstackProvider) GetParamatersTemplate() map[string]string {
+func (p *OpenstackProvider) GetParamatersTemplate() map[string]interface{} {
 	return nil
 }
 
