@@ -16,8 +16,14 @@ public class TestParameter {
     }
 
     public String get(String key) {
-        LOGGER.info("Aquiring key {} resulting: {}", key, parameters.get(key));
-        return parameters.get(key);
+        String valueAsProperty = parameters.get(key);
+        if (valueAsProperty == null) {
+            LOGGER.info("key has not been found as property, trying as environment variable");
+            valueAsProperty = parameters.get(key.toUpperCase().replaceAll("\\.", "_"));
+        }
+        LOGGER.info("Aquiring key {} resulting: {}", key, valueAsProperty);
+
+        return valueAsProperty;
     }
 
     public void put(String key, String value) {
