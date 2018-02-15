@@ -72,9 +72,9 @@ set_install_timeout:
     - source: salt://ambari/scripts/javaagent.sh
     - mode: 744
 
-modify_hadoop_env_template:
-  cmd.run:
-    - name: /opt/javaagent.sh
+#modify_hadoop_env_template:
+#  cmd.run:
+#    - name: /opt/javaagent.sh
 
 {% if ambari.is_container_executor %}
 
