@@ -16,10 +16,8 @@ public class ImageCatalogResponse extends ImageCatalogBase {
     @ApiModelProperty(value = ModelDescriptions.PUBLIC_IN_ACCOUNT, required = true)
     private boolean publicInAccount;
 
-    //CHECKSTYLE:OFF
     @ApiModelProperty(value = ModelDescriptions.ImageCatalogDescription.DEFAULT, required = true)
-    private boolean isDefault;
-    //CHECKSTYLE:ON
+    private boolean usedAsDefault;
 
     @ApiModelProperty(value = ModelDescriptions.ImageCatalogDescription.IMAGE_RESPONSES)
     private ImagesResponse imagesResponse;
@@ -40,12 +38,12 @@ public class ImageCatalogResponse extends ImageCatalogBase {
         this.publicInAccount = publicInAccount;
     }
 
-    public boolean isDefault() {
-        return isDefault;
+    public boolean isUsedAsDefault() {
+        return usedAsDefault;
     }
 
-    public void setDefault(boolean b) {
-        this.isDefault = b;
+    public void setUsedAsDefault(boolean usedAsDefault) {
+        this.usedAsDefault = usedAsDefault;
     }
 
     public ImagesResponse getImagesResponse() {
