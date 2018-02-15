@@ -102,6 +102,14 @@ public class OpenstackCloudProvider extends CloudProviderHelper {
     NetworkV2Request network() {
         NetworkV2Request network = new NetworkV2Request();
         network.setSubnetCIDR("10.0.0.0/16");
+
+        Map<String, Object> parameters = new HashMap<>();
+
+        String defaultNetId = "999e09bc-cf75-4a19-98fb-c0b4ddee6d93";
+        String netIdParameter = getTestParameter().get("integrationtest.openstack.publicNetId");
+        parameters.put("networkingOption", "self-service");
+        parameters.put("publicNetId", netIdParameter == null ? defaultNetId : netIdParameter);
+        network.setParameters(parameters);
         return network;
     }
 }
