@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.converter.v2;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -54,7 +56,7 @@ public class StackV2RequestToStackRequestConverter extends AbstractConversionSer
         stackRequest.setPlatformVariant(source.getPlatformVariant());
         stackRequest.setAmbariVersion(source.getAmbariVersion());
         stackRequest.setHdpVersion(source.getHdpVersion());
-        stackRequest.setParameters(source.getParameters());
+        stackRequest.setParameters(convertParameters(source.getParameters()));
         if (source.getCustomDomain() != null) {
             stackRequest.setCustomDomain(source.getCustomDomain().getCustomDomain());
             stackRequest.setCustomHostname(source.getCustomDomain().getCustomHostname());
@@ -91,6 +93,17 @@ public class StackV2RequestToStackRequestConverter extends AbstractConversionSer
         convertClusterRequest(source, stackRequest);
         stackRequest.setCloudPlatform(credentialService.get(stackRequest.getCredentialName(), stackRequest.getAccount()).cloudPlatform());
         return stackRequest;
+    }
+
+    private Map<String, String> convertParameters(Map<String, ? extends Object> map) {
+        if (map == null) {
+            return null;
+        }
+        Map<String, String> result = new HashMap<>();
+        for (Map.Entry<String, ? extends Object> e : map.entrySet()) {
+            result.put(e.getKey(), e.getValue().toString());
+        }
+        return result;
     }
 
     private void convertClusterRequest(StackV2Request source, StackRequest stackRequest) {

@@ -42,7 +42,7 @@ public class StackV2Request implements JsonEntity {
     private String hdpVersion;
 
     @ApiModelProperty(StackModelDescription.PARAMETERS)
-    private Map<String, String> parameters = new HashMap<>();
+    private Map<String, ? extends Object> parameters = new HashMap<>();
 
     @ApiModelProperty(StackModelDescription.CUSTOM_DOMAIN_SETTINGS)
     private CustomDomainSettings customDomain;
@@ -140,11 +140,11 @@ public class StackV2Request implements JsonEntity {
         this.stackAuthentication = stackAuthentication;
     }
 
-    public Map<String, String> getParameters() {
+    public Map<String, ? extends Object> getParameters() {
         return parameters;
     }
 
-    public void setParameters(Map<String, String> parameters) {
+    public void setParameters(Map<String, ? extends Object> parameters) {
         this.parameters = parameters;
     }
 
