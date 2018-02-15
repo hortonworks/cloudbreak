@@ -8,6 +8,7 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.compute.Compute;
@@ -38,11 +39,16 @@ public class GcpCredentialConnector implements CredentialConnector {
         LOGGER.info("Verify credential: {}", authenticatedContext.getCloudCredential());
         GcpContext gcpContext = gcpContextBuilder.contextInit(authenticatedContext.getCloudContext(), authenticatedContext, null, null, false);
         try {
+            if (!StringUtils.hasLength(gcpContext.getProjectId())) {
+                throw new CloudConnectorException("Project id is missing.");
+            } else if (!StringUtils.hasLength(gcpContext.getServiceAccountId())) {
+                throw new CloudConnectorException("Service account id is missing.");
+            }
             Compute compute = gcpContext.getCompute();
             if (compute == null) {
                 throw new CloudConnectorException("Problem with your credential key please use the correct format.");
             }
-            preCheckOfGooglePermission(gcpContext, compute);
+            preCheckOfGooglePermission(gcpContext);
         } catch (GoogleJsonResponseException e) {
             String errorMessage = e.getDetails().getMessage();
             LOGGER.error(errorMessage, e);
@@ -66,9 +72,9 @@ public class GcpCredentialConnector implements CredentialConnector {
         throw new UnsupportedOperationException("Interactive login not supported on GCP");
     }
 
-    private void preCheckOfGooglePermission(GcpContext gcpContext, Compute compute) throws IOException {
+    private void preCheckOfGooglePermission(GcpContext gcpContext) throws IOException {
         try {
-            compute.regions().list(gcpContext.getProjectId());
+            gcpContext.getCompute().regions().list(gcpContext.getProjectId());
         } catch (NullPointerException ignore) {
             LOGGER.error(String.format("Google authentication failed for project-id '%s' because of a null value:", gcpContext.getProjectId()), ignore);
         }

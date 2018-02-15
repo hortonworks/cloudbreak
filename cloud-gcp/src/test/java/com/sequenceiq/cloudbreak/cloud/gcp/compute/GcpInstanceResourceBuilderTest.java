@@ -96,7 +96,7 @@ public class GcpInstanceResourceBuilderTest {
     private final GcpInstanceResourceBuilder builder = new GcpInstanceResourceBuilder();
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         privateId = 0L;
         name = "master";
         flavor = "m1.medium";
@@ -112,8 +112,9 @@ public class GcpInstanceResourceBuilderTest {
         CloudCredential cloudCredential = new CloudCredential(privateId, "credentialname");
         cloudCredential.putParameter("projectId", "projectId");
         String projectId = GcpStackUtil.getProjectId(cloudCredential);
+        String serviceAccountId = GcpStackUtil.getServiceAccountId(cloudCredential);
         authenticatedContext = new AuthenticatedContext(cloudContext, cloudCredential);
-        context = new GcpContext(cloudContext.getName(), location, projectId, compute, false, 30, false);
+        context = new GcpContext(cloudContext.getName(), location, projectId, serviceAccountId, compute, false, 30, false);
         List<CloudResource> networkResources = Arrays.asList(new Builder().type(ResourceType.GCP_NETWORK).name("network-test").build());
         context.addNetworkResources(networkResources);
         operation = new Operation();
