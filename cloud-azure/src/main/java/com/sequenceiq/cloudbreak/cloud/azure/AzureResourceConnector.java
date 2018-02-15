@@ -190,21 +190,20 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
             try {
                 try {
                     retryService.testWith2SecDelayMax5Times(() -> {
-                        boolean exists = client.resourceGroupExists(resource.getName());
-                        if (!exists) {
+                        if (!client.resourceGroupExists(resource.getName())) {
                             throw new ActionWentFail("Resource group not exists");
                         }
-                        return exists;
+                        return true;
                     });
                     client.deleteResourceGroup(resource.getName());
                 } catch (ActionWentFail ignored) {
                     LOGGER.info(String.format("Resource group not found with name: %s", resource.getName()));
                 }
-                if (azureStorage.isPersistentStorage(azureStorage.getPersistentStorageName(stack.getParameters()))) {
+                if (azureStorage.isPersistentStorage(azureStorage.getPersistentStorageName(stack))) {
                     CloudContext cloudCtx = authenticatedContext.getCloudContext();
-                    String imageStorageName = azureStorage.getImageStorageName(new AzureCredentialView(authenticatedContext.getCloudCredential()), cloudCtx,
-                            azureStorage.getPersistentStorageName(stack.getParameters()), azureStorage.getArmAttachedStorageOption(stack.getParameters()));
-                    String imageResourceGroupName = azureStorage.getImageResourceGroupName(cloudCtx, stack.getParameters());
+                    AzureCredentialView azureCredentialView = new AzureCredentialView(authenticatedContext.getCloudCredential());
+                    String imageStorageName = azureStorage.getImageStorageName(azureCredentialView, cloudCtx, stack);
+                    String imageResourceGroupName = azureStorage.getImageResourceGroupName(cloudCtx, stack);
                     String diskContainer = azureStorage.getDiskContainerName(cloudCtx);
                     deleteContainer(client, imageResourceGroupName, imageStorageName, diskContainer);
                 }
@@ -387,7 +386,7 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
                             (String) instanceResources.get(ATTACHED_DISK_STORAGE_NAME), diskContainer);
                     deleteManagedDisks((List<String>) instanceResources.get(MANAGED_DISK_IDS), client);
                     if (azureStorage.getArmAttachedStorageOption(stack.getParameters()) == ArmAttachedStorageOption.PER_VM) {
-                        azureStorage.deleteStorage(ac, client, (String) instanceResources.get(ATTACHED_DISK_STORAGE_NAME), resourceGroupName);
+                        azureStorage.deleteStorage(client, (String) instanceResources.get(ATTACHED_DISK_STORAGE_NAME), resourceGroupName);
                     }
                 }
             } catch (CloudConnectorException e) {

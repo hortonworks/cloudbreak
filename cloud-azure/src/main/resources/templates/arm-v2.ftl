@@ -357,6 +357,10 @@
                                "vhd" : {
                                     "uri" : "[concat(variables('osDiskVhdName'), '${instance.instanceId}','.vhd')]"
                                },
+                               <#else>
+                               "managedDisk": {
+                                    "storageAccountType": "${instance.attachedDiskStorageType}"
+                               },
                                </#if>
                                "name" : "[concat(parameters('vmNamePrefix'),'-osDisk', '${instance.instanceId}')]",
                                "osType" : "linux",
@@ -376,6 +380,10 @@
                                    <#if instance.managedDisk == false>
                                    "vhd": {
                                         "Uri": "[concat('${instance.attachedDiskStorageUrl}',parameters('userDataStorageContainerName'),'/',parameters('vmNamePrefix'),'datadisk','${instance.instanceId}', '${volume_index}', '.vhd')]"
+                                   },
+                                   <#else>
+                                   "managedDisk": {
+                                        "storageAccountType": "${instance.attachedDiskStorageType}"
                                    },
                                    </#if>
                                    "caching": "None",

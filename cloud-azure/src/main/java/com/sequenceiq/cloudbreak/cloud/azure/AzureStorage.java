@@ -10,6 +10,7 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.text.WordUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.google.common.base.Strings;
@@ -24,12 +25,11 @@ import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.common.service.DefaultCostTaggingService;
-//import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
 
 @Service
 public class AzureStorage {
 
-    public static final String IMAGES = "images";
+    public static final String IMAGES_CONTAINER = "images";
 
     public static final String STORAGE_BLOB_PATTERN = "https://%s.blob.core.windows.net/";
 
@@ -40,6 +40,12 @@ public class AzureStorage {
     private static final int MAX_LENGTH_OF_NAME_SLICE = 8;
 
     private static final int MAX_LENGTH_OF_RESOURCE_NAME = 24;
+
+    @Value("${cb.azure.image.store.prefix:cbimg}")
+    private String imageStorePrefix;
+
+    @Value("${cb.azure.image.store.resourcegroup:cloudbreak-images}")
+    private String imageStoreResourceGroup;
 
     @Inject
     private AzureUtils armUtils;
@@ -56,12 +62,10 @@ public class AzureStorage {
     }
 
     public String getCustomImageId(AzureClient client, AuthenticatedContext ac, CloudStack stack) {
-        String imageResourceGroupName = getImageResourceGroupName(ac.getCloudContext(), stack.getParameters());
+        String imageResourceGroupName = getImageResourceGroupName(ac.getCloudContext(), stack);
         AzureCredentialView acv = new AzureCredentialView(ac.getCloudCredential());
-        ArmAttachedStorageOption armAttachedStorageOption = getArmAttachedStorageOption(stack.getParameters());
-        String persistentStorageName = getPersistentStorageName(stack.getParameters());
-        String imageStorageName = getImageStorageName(acv, ac.getCloudContext(), persistentStorageName, armAttachedStorageOption);
-        String imageBlobUri = client.getImageBlobUri(imageResourceGroupName, imageStorageName, IMAGES, stack.getImage().getImageName());
+        String imageStorageName = getImageStorageName(acv, ac.getCloudContext(), stack);
+        String imageBlobUri = client.getImageBlobUri(imageResourceGroupName, imageStorageName, IMAGES_CONTAINER, stack.getImage().getImageName());
         String region = ac.getCloudContext().getLocation().getRegion().value();
         return getCustomImageId(imageBlobUri, imageResourceGroupName, region, client);
     }
@@ -72,15 +76,23 @@ public class AzureStorage {
         return customImageId;
     }
 
-    public String getImageStorageName(AzureCredentialView acv, CloudContext cloudContext, String persistentStorageName,
-            ArmAttachedStorageOption armAttachedStorageOption) {
+    public String getImageStorageName(AzureCredentialView acv, CloudContext cloudContext, CloudStack stack) {
         String storageName;
-        if (isPersistentStorage(persistentStorageName)) {
-            storageName = getPersistentStorageName(persistentStorageName, acv, cloudContext.getLocation().getRegion().value());
+        if (isLegacyImageStore(stack)) {
+            String persistentStorageName = getPersistentStorageName(stack);
+            if (isPersistentStorage(persistentStorageName)) {
+                storageName = getPersistentStorageName(persistentStorageName, acv, cloudContext.getLocation().getRegion().value());
+            } else {
+                storageName = buildStorageName(getArmAttachedStorageOption(stack.getParameters()), acv, null, cloudContext, AzureDiskType.LOCALLY_REDUNDANT);
+            }
         } else {
-            storageName = buildStorageName(armAttachedStorageOption, acv, null, cloudContext, AzureDiskType.LOCALLY_REDUNDANT);
+            storageName = getPersistentStorageName(imageStorePrefix, acv, cloudContext.getLocation().getRegion().value());
         }
         return storageName;
+    }
+
+    private boolean isLegacyImageStore(CloudStack stack) {
+        return stack.getParameters().get("legacyImageStore") != null;
     }
 
     public String getAttachedDiskStorageName(ArmAttachedStorageOption armAttachedStorageOption, AzureCredentialView acv, Long vmId, CloudContext cloudContext,
@@ -97,7 +109,7 @@ public class AzureStorage {
         }
     }
 
-    public void deleteStorage(AuthenticatedContext authenticatedContext, AzureClient client, String osStorageName, String storageGroup)
+    public void deleteStorage(AzureClient client, String osStorageName, String storageGroup)
             throws CloudException {
         if (storageAccountExist(client, osStorageName)) {
             client.deleteStorageAccount(storageGroup, osStorageName);
@@ -144,8 +156,8 @@ public class AzureStorage {
         return armUtils.getStackName(cloudContext);
     }
 
-    public String getPersistentStorageName(Map<String, String> parameters) {
-        return parameters.get("persistentStorage");
+    public String getPersistentStorageName(CloudStack stack) {
+        return stack.getParameters().get("persistentStorage");
     }
 
     public Boolean isEncrytionNeeded(Map<String, String> parameters) {
@@ -156,11 +168,15 @@ public class AzureStorage {
         return !Strings.isNullOrEmpty(persistentStorageName);
     }
 
-    public String getImageResourceGroupName(CloudContext cloudContext, Map<String, String> parameters) {
-        if (isPersistentStorage(getPersistentStorageName(parameters))) {
-            return getPersistentStorageName(parameters);
+    public String getImageResourceGroupName(CloudContext cloudContext, CloudStack stack) {
+        if (isLegacyImageStore(stack)) {
+            if (isPersistentStorage(getPersistentStorageName(stack))) {
+                return getPersistentStorageName(stack);
+            }
+            return armUtils.getResourceGroupName(cloudContext);
+        } else {
+            return imageStoreResourceGroup;
         }
-        return armUtils.getResourceGroupName(cloudContext);
     }
 
     private boolean storageAccountExist(AzureClient client, String storageName) {

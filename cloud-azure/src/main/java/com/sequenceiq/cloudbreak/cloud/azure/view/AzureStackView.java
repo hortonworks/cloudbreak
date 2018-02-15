@@ -47,13 +47,13 @@ public class AzureStackView {
             for (CloudInstance instance : group.getInstances()) {
                 InstanceTemplate template = instance.getTemplate();
                 String attachedDiskStorageName = armStorageView.getAttachedDiskStorageName(template);
-                boolean managedDisk = Boolean.TRUE.equals(instance.getTemplate().getParameter("managedDisk", Boolean.class));
+                boolean managedDisk = !Boolean.FALSE.equals(instance.getTemplate().getParameter("managedDisk", Boolean.class));
                 AzureInstanceView azureInstance = new AzureInstanceView(stackName, stackNamePrefixLength, instance, group.getType(), attachedDiskStorageName,
                         template.getVolumeType(), group.getName(), instanceGroupView.getAvailabilitySetName(), managedDisk,
                         getInstanceSubnetId(instance, subnetStrategy));
                 existingInstances.add(azureInstance);
             }
-            boolean managedDisk = Boolean.TRUE.equals(group.getReferenceInstanceConfiguration().getTemplate()
+            boolean managedDisk = !Boolean.FALSE.equals(group.getReferenceInstanceConfiguration().getTemplate()
                     .getParameter("managedDisk", Boolean.class));
             instanceGroupView.setManagedDisk(managedDisk);
             instanceGroupNames.add(group.getName());

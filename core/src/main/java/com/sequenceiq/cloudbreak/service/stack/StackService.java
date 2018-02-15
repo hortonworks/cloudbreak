@@ -93,8 +93,6 @@ import com.sequenceiq.cloudbreak.util.PasswordUtil;
 @Transactional
 public class StackService {
 
-    private static final String SSH_USER_CENT = "centos";
-
     private static final String SSH_USER_CB = "cloudbreak";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StackService.class);
