@@ -493,29 +493,42 @@ public class StackService {
     }
 
     private void triggerStackStopIfNeeded(Stack stack, Cluster cluster, boolean updateCluster) {
+        if (!isStopNeeded(stack)) {
+            return;
+        }
+        if (cluster != null && !cluster.isStopped() && !stack.isStopFailed()) {
+            if (!updateCluster) {
+                throw new BadRequestException(String.format("Cannot update the status of stack '%s' to STOPPED, because the cluster is not in STOPPED state.",
+                        stack.getName()));
+            } else if (cluster.isClusterReadyForStop() || cluster.isStopFailed()) {
+                setStackStatusToStopRequested(stack);
+                ambariClusterService.updateStatus(stack.getId(), StatusRequest.STOPPED);
+            } else {
+                throw new BadRequestException(String.format("Cannot update the status of cluster '%s' to STOPPED, because the cluster's state is %s.",
+                        cluster.getName(), cluster.getStatus()));
+            }
+        } else {
+            stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.STOP_REQUESTED);
+            flowManager.triggerStackStop(stack.getId());
+        }
+    }
+
+    private boolean isStopNeeded(Stack stack) {
+        boolean result = true;
         StopRestrictionReason reason = stack.isInfrastructureStoppable();
         if (stack.isStopped()) {
             String statusDesc = cloudbreakMessagesService.getMessage(Msg.STACK_STOP_IGNORED.code());
             LOGGER.info(statusDesc);
             eventService.fireCloudbreakEvent(stack.getId(), STOPPED.name(), statusDesc);
+            result = false;
         } else if (reason != StopRestrictionReason.NONE) {
             throw new BadRequestException(
                     String.format("Cannot stop a stack '%s'. Reason: %s", stack.getName(), reason.getReason()));
         } else if (!stack.isAvailable() && !stack.isStopFailed()) {
             throw new BadRequestException(
                     String.format("Cannot update the status of stack '%s' to STOPPED, because it isn't in AVAILABLE state.", stack.getName()));
-        } else if ((cluster != null && !cluster.isStopped()) && !stack.isStopFailed()) {
-            if (updateCluster) {
-                setStackStatusToStopRequested(stack);
-                ambariClusterService.updateStatus(stack.getId(), StatusRequest.STOPPED);
-            } else {
-                throw new BadRequestException(String.format("Cannot update the status of stack '%s' to STOPPED, because the cluster is not in STOPPED state.",
-                        stack.getName()));
-            }
-        } else {
-            stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.STOP_REQUESTED);
-            flowManager.triggerStackStop(stack.getId());
         }
+        return result;
     }
 
     private void setStackStatusToStopRequested(Stack stack) {
@@ -547,6 +560,7 @@ public class StackService {
         validateInstanceGroup(stack, instanceGroupAdjustmentJson.getInstanceGroup());
         validateScalingAdjustment(instanceGroupAdjustmentJson, stack);
         if (withClusterEvent) {
+            validateClusterStatus(stack);
             validateHostGroupAdjustment(instanceGroupAdjustmentJson, stack, instanceGroupAdjustmentJson.getScalingAdjustment());
         }
         if (instanceGroupAdjustmentJson.getScalingAdjustment() > 0) {
@@ -631,6 +645,14 @@ public class StackService {
         if (!stack.isAvailable()) {
             throw new BadRequestException(String.format("Stack '%s' is currently in '%s' state. Node count can only be updated if it's running.",
                     stack.getName(), stack.getStatus()));
+        }
+    }
+
+    private void validateClusterStatus(Stack stack) {
+        Cluster cluster = stack.getCluster();
+        if (cluster != null && !cluster.isAvailable()) {
+            throw new BadRequestException(String.format("Cluster '%s' is currently in '%s' state. Node count can only be updated if it's running.",
+                    cluster.getName(), cluster.getStatus()));
         }
     }
 
