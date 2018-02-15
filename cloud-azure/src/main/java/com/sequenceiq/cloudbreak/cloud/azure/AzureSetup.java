@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
-import static com.sequenceiq.cloudbreak.cloud.azure.AzureStorage.IMAGES;
+import static com.sequenceiq.cloudbreak.cloud.azure.AzureStorage.IMAGES_CONTAINER;
 
 import java.net.URISyntaxException;
 import java.net.UnknownHostException;
@@ -67,7 +67,7 @@ public class AzureSetup implements Setup {
     public void prepareImage(AuthenticatedContext ac, CloudStack stack, Image image) {
         LOGGER.info("prepare image: {}", image);
 
-        String imageResourceGroupName = armStorage.getImageResourceGroupName(ac.getCloudContext(), stack.getParameters());
+        String imageResourceGroupName = armStorage.getImageResourceGroupName(ac.getCloudContext(), stack);
         String region = ac.getCloudContext().getLocation().getRegion().value();
         AzureClient client = ac.getParameter(AzureClient.class);
         try {
@@ -80,10 +80,9 @@ public class AzureSetup implements Setup {
     }
 
     private void copyVhdImageIfNecessary(AuthenticatedContext ac, CloudStack stack, Image image, String imageResourceGroupName,
-            String region, AzureClient client) throws Exception {
+            String region, AzureClient client) {
         AzureCredentialView acv = new AzureCredentialView(ac.getCloudCredential());
-        String imageStorageName = armStorage.getImageStorageName(acv, ac.getCloudContext(), armStorage.getPersistentStorageName(stack.getParameters()),
-                armStorage.getArmAttachedStorageOption(stack.getParameters()));
+        String imageStorageName = armStorage.getImageStorageName(acv, ac.getCloudContext(), stack);
         String resourceGroupName = azureUtils.getResourceGroupName(ac.getCloudContext());
         if (!client.resourceGroupExists(resourceGroupName)) {
             client.createResourceGroup(resourceGroupName, region, stack.getTags(), defaultCostTaggingService.prepareTemplateTagging());
@@ -93,22 +92,21 @@ public class AzureSetup implements Setup {
         }
         armStorage.createStorage(client, imageStorageName, AzureDiskType.LOCALLY_REDUNDANT, imageResourceGroupName, region,
                 armStorage.isEncrytionNeeded(stack.getParameters()), stack.getTags());
-        client.createContainerInStorage(imageResourceGroupName, imageStorageName, IMAGES);
+        client.createContainerInStorage(imageResourceGroupName, imageStorageName, IMAGES_CONTAINER);
         if (!storageContainsImage(client, imageResourceGroupName, imageStorageName, image.getImageName())) {
-            client.copyImageBlobInStorageContainer(imageResourceGroupName, imageStorageName, IMAGES, image.getImageName());
+            client.copyImageBlobInStorageContainer(imageResourceGroupName, imageStorageName, IMAGES_CONTAINER, image.getImageName());
         }
     }
 
     @Override
     public ImageStatusResult checkImageStatus(AuthenticatedContext ac, CloudStack stack, Image image) {
-        String imageResourceGroupName = armStorage.getImageResourceGroupName(ac.getCloudContext(), stack.getParameters());
+        String imageResourceGroupName = armStorage.getImageResourceGroupName(ac.getCloudContext(), stack);
         AzureClient client = ac.getParameter(AzureClient.class);
 
         AzureCredentialView acv = new AzureCredentialView(ac.getCloudCredential());
-        String imageStorageName = armStorage.getImageStorageName(acv, ac.getCloudContext(), armStorage.getPersistentStorageName(stack.getParameters()),
-                armStorage.getArmAttachedStorageOption(stack.getParameters()));
+        String imageStorageName = armStorage.getImageStorageName(acv, ac.getCloudContext(), stack);
         try {
-            CopyState copyState = client.getCopyStatus(imageResourceGroupName, imageStorageName, IMAGES, image.getImageName());
+            CopyState copyState = client.getCopyStatus(imageResourceGroupName, imageStorageName, IMAGES_CONTAINER, image.getImageName());
             if (CopyStatus.SUCCESS.equals(copyState.getStatus())) {
                 if (AzureUtils.hasManagedDisk(stack)) {
                     String customImageId = armStorage.getCustomImageId(client, ac, stack);
@@ -200,7 +198,7 @@ public class AzureSetup implements Setup {
     }
 
     private boolean storageContainsImage(AzureClient client, String groupName, String storageName, String image) {
-        List<ListBlobItem> listBlobItems = client.listBlobInStorage(groupName, storageName, IMAGES);
+        List<ListBlobItem> listBlobItems = client.listBlobInStorage(groupName, storageName, IMAGES_CONTAINER);
         for (ListBlobItem listBlobItem : listBlobItems) {
             if (getNameFromConnectionString(listBlobItem.getUri().getPath()).equals(image.split("/")[image.split("/").length - 1])) {
                 return true;

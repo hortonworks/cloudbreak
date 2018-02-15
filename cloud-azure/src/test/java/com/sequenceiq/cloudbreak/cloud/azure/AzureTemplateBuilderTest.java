@@ -27,7 +27,6 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.ui.freemarker.FreeMarkerConfigurationFactoryBean;
 
@@ -35,7 +34,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
-import com.sequenceiq.cloudbreak.api.model.ArmAttachedStorageOption;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.cloud.azure.subnetstrategy.AzureSubnetStrategy;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureCredentialView;
@@ -204,8 +202,7 @@ public class AzureTemplateBuilderTest {
         azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy);
         //WHEN
         when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
-        when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), Mockito.anyString(),
-                any(ArmAttachedStorageOption.class))).thenReturn("test");
+        when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
         when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
         String templateString = azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack);
         //THEN
@@ -236,8 +233,7 @@ public class AzureTemplateBuilderTest {
         azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy);
         //WHEN
         when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
-        when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), Mockito.anyString(),
-                any(ArmAttachedStorageOption.class))).thenReturn("test");
+        when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
         when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
         String templateString = azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack);
         //THEN
@@ -273,8 +269,7 @@ public class AzureTemplateBuilderTest {
         azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy);
 
         //WHEN
-        when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), Mockito.anyString(),
-                any(ArmAttachedStorageOption.class))).thenReturn("test");
+        when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
         when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
         String templateString = azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack);
         //THEN
@@ -303,8 +298,7 @@ public class AzureTemplateBuilderTest {
         azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy);
 
         //WHEN
-        when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), Mockito.anyString(),
-                any(ArmAttachedStorageOption.class))).thenReturn("test");
+        when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
         when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
         String templateString = azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack);
         //THEN
@@ -333,8 +327,7 @@ public class AzureTemplateBuilderTest {
         azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy);
 
         //WHEN
-        when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), Mockito.anyString(),
-                any(ArmAttachedStorageOption.class))).thenReturn("test");
+        when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
         when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
         String templateString = azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack);
         //THEN
@@ -365,8 +358,7 @@ public class AzureTemplateBuilderTest {
         //WHEN
         when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
 
-        when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), Mockito.anyString(),
-                any(ArmAttachedStorageOption.class))).thenReturn("test");
+        when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
         when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
         String templateString = azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack);
         //THEN
@@ -392,8 +384,7 @@ public class AzureTemplateBuilderTest {
         //WHEN
         when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
 
-        when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), Mockito.anyString(),
-                any(ArmAttachedStorageOption.class))).thenReturn("test");
+        when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
         when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
         String templateString = azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack);
         //THEN
@@ -419,8 +410,7 @@ public class AzureTemplateBuilderTest {
         //WHEN
         when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
 
-        when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), Mockito.anyString(),
-                any(ArmAttachedStorageOption.class))).thenReturn("test");
+        when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
         when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
         String templateString = azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack);
         //THEN
@@ -446,8 +436,7 @@ public class AzureTemplateBuilderTest {
         //WHEN
         when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
 
-        when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), Mockito.anyString(),
-                any(ArmAttachedStorageOption.class))).thenReturn("test");
+        when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
         when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
         String templateString = azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack);
         //THEN
@@ -475,8 +464,7 @@ public class AzureTemplateBuilderTest {
         //WHEN
         when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
 
-        when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), Mockito.anyString(),
-                any(ArmAttachedStorageOption.class))).thenReturn("test");
+        when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
         when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
         String templateString = azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack);
         //THEN
@@ -505,8 +493,7 @@ public class AzureTemplateBuilderTest {
         //WHEN
         when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
 
-        when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), Mockito.anyString(),
-                any(ArmAttachedStorageOption.class))).thenReturn("test");
+        when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
         when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
         String templateString = azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack);
         //THEN
@@ -538,8 +525,7 @@ public class AzureTemplateBuilderTest {
         //WHEN
         when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
 
-        when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), Mockito.anyString(),
-                any(ArmAttachedStorageOption.class))).thenReturn("test");
+        when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
         when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
         String templateString = azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack);
         //THEN
@@ -569,8 +555,7 @@ public class AzureTemplateBuilderTest {
         //WHEN
         when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
 
-        when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), Mockito.anyString(),
-                any(ArmAttachedStorageOption.class))).thenReturn("test");
+        when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
         when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
         String templateString = azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack);
         //THEN
@@ -598,8 +583,7 @@ public class AzureTemplateBuilderTest {
         //WHEN
         when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
 
-        when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), Mockito.anyString(),
-                any(ArmAttachedStorageOption.class))).thenReturn("test");
+        when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
         when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
         String templateString = azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack);
         //THEN
@@ -627,8 +611,7 @@ public class AzureTemplateBuilderTest {
         //WHEN
         when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
 
-        when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), Mockito.anyString(),
-                any(ArmAttachedStorageOption.class))).thenReturn("test");
+        when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
         when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
         String templateString = azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack);
         //THEN
@@ -656,8 +639,7 @@ public class AzureTemplateBuilderTest {
         //WHEN
         when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
 
-        when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), Mockito.anyString(),
-                any(ArmAttachedStorageOption.class))).thenReturn("test");
+        when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
         when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
         String templateString = azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack);
         //THEN
@@ -687,8 +669,7 @@ public class AzureTemplateBuilderTest {
         //WHEN
         when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
 
-        when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), Mockito.anyString(),
-                any(ArmAttachedStorageOption.class))).thenReturn("test");
+        when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
         when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
         String templateString = azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack);
         //THEN
