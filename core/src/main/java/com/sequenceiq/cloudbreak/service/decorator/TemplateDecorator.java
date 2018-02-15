@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.decorator;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -36,11 +37,11 @@ public class TemplateDecorator {
         PlatformDisks platformDisks = cloudParameterService.getDiskTypes();
         CloudVmTypes vmTypesV2 = cloudParameterService.getVmTypesV2(credential, region, variant, new HashMap<>());
         String locationString = locationService.location(region, availabilityZone);
-        VolumeParameterConfig config = null;
+        VolumeParameterConfig config;
         try {
             Platform platform = Platform.platform(subject.cloudPlatform());
             VmType vmType = vmTypesV2.getCloudVmResponses()
-                    .get(locationString)
+                    .getOrDefault(locationString, Collections.emptySet())
                     .stream()
                     .filter(curr -> curr.value().equals(subject.getInstanceType())).findFirst().get();
             Map<String, VolumeParameterType> map = platformDisks.getDiskMappings().get(platform);
@@ -52,7 +53,7 @@ public class TemplateDecorator {
             config = VolumeParameterConfig.EMPTY;
         }
 
-        if (config != null && config.volumeParameterType() != null) {
+        if (config.volumeParameterType() != null) {
             if (subject.getVolumeCount() == null) {
                 subject.setVolumeCount(config.maximumNumber());
             }
