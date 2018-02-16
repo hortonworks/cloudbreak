@@ -130,6 +130,7 @@
   ],
   "network": {
     "parameters": {
+      "publicNetId": "999e09bc-cf75-4a19-98fb-c0b4ddee6d93",
       "networkingOption": "self-service"
     },
     "subnetCIDR": "10.0.0.0/16"
