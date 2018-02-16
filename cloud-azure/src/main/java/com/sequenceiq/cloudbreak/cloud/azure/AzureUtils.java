@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.text.WordUtils;
 import org.slf4j.Logger;
@@ -68,6 +70,9 @@ public class AzureUtils {
 
     @Value("${cb.max.azure.resource.name.length:}")
     private int maxResourceNameLength;
+
+    @Inject
+    private AzurePremiumValidatorService azurePremiumValidatorService;
 
     public CloudResource getTemplateResource(List<CloudResource> resourceList) {
         for (CloudResource resource : resourceList) {
@@ -223,7 +228,13 @@ public class AzureUtils {
             String flavor = template.getFlavor();
             String volumeType = template.getVolumeType();
             AzureDiskType diskType = AzureDiskType.getByValue(volumeType);
-            if (AzureDiskType.PREMIUM_LOCALLY_REDUNDANT.equals(diskType) && !flavor.contains("_DS")) {
+            validateStorageTypeForGroup(diskType, flavor);
+        }
+    }
+
+    public void validateStorageTypeForGroup(AzureDiskType diskType, String flavor) {
+        if (azurePremiumValidatorService.premiumDiskTypeConfigured(diskType)) {
+            if (!azurePremiumValidatorService.validPremiumConfiguration(flavor)) {
                 throw new CloudConnectorException("Only the DS instance types supports the premium storage.");
             }
         }

@@ -1,24 +1,41 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.times;
 
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 
+@RunWith(MockitoJUnitRunner.class)
 public class AzureUtilsTest {
 
     private static final String MAX_RESOURCE_NAME_LENGTH = "50";
 
-    private AzureUtils subject;
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
+
+    @Mock
+    private AzurePremiumValidatorService azurePremiumValidatorService;
+
+    @InjectMocks
+    private AzureUtils underTest;
 
     @Before
     public void setUp() {
-        subject = new AzureUtils();
-        ReflectionTestUtils.setField(subject, "maxResourceNameLength", Integer.parseInt(MAX_RESOURCE_NAME_LENGTH));
+        ReflectionTestUtils.setField(underTest, "maxResourceNameLength", Integer.parseInt(MAX_RESOURCE_NAME_LENGTH));
     }
 
     @Test
@@ -27,7 +44,7 @@ public class AzureUtilsTest {
         CloudContext context = new CloudContext(7899L, "thisisaverylongazureresourcenamewhichneedstobeshortened", "dummy1", "dummy2");
 
         //WHEN
-        String testResult = subject.getStackName(context);
+        String testResult = underTest.getStackName(context);
 
         //THEN
         Assert.assertNotNull("The generated name must not be null!", testResult);
@@ -35,4 +52,49 @@ public class AzureUtilsTest {
         Assert.assertTrue("The resource name length is wrong", testResult.length() == Integer.parseInt(MAX_RESOURCE_NAME_LENGTH));
 
     }
+
+    @Test
+    public void validateStorageTypeForGroupWhenPremiumStorageConfiguredAndFlavorNotPremiumThenShouldThrowCloudConnectorException() {
+        thrown.expect(CloudConnectorException.class);
+
+        String flavor = "Standard_A10";
+        AzureDiskType azureDiskType = AzureDiskType.PREMIUM_LOCALLY_REDUNDANT;
+
+        when(azurePremiumValidatorService.premiumDiskTypeConfigured(azureDiskType)).thenReturn(true);
+        when(azurePremiumValidatorService.validPremiumConfiguration(flavor)).thenReturn(false);
+
+        underTest.validateStorageTypeForGroup(azureDiskType, flavor);
+
+        verify(azurePremiumValidatorService, times(1)).premiumDiskTypeConfigured(azureDiskType);
+        verify(azurePremiumValidatorService, times(1)).validPremiumConfiguration(flavor);
+
+    }
+
+    @Test
+    public void validateStorageTypeForGroupWhenPremiumStorageNotConfiguredThenShouldNotCallInstanceValidation() {
+        String flavor = "Standard_A10";
+        AzureDiskType azureDiskType = AzureDiskType.GEO_REDUNDANT;
+
+        when(azurePremiumValidatorService.premiumDiskTypeConfigured(azureDiskType)).thenReturn(false);
+
+        underTest.validateStorageTypeForGroup(azureDiskType, flavor);
+
+        verify(azurePremiumValidatorService, times(1)).premiumDiskTypeConfigured(azureDiskType);
+        verify(azurePremiumValidatorService, times(0)).validPremiumConfiguration(flavor);
+    }
+
+    @Test
+    public void validateStorageTypeForGroupWhenPremiumStorageConfiguredAndFlavorIsPremiumThenShouldEverythinGoesFine() {
+        String flavor = "Standard_DS10";
+        AzureDiskType azureDiskType = AzureDiskType.PREMIUM_LOCALLY_REDUNDANT;
+
+        when(azurePremiumValidatorService.premiumDiskTypeConfigured(azureDiskType)).thenReturn(true);
+        when(azurePremiumValidatorService.validPremiumConfiguration(flavor)).thenReturn(true);
+
+        underTest.validateStorageTypeForGroup(azureDiskType, flavor);
+
+        verify(azurePremiumValidatorService, times(1)).validPremiumConfiguration(flavor);
+        verify(azurePremiumValidatorService, times(1)).premiumDiskTypeConfigured(azureDiskType);
+    }
+
 }
