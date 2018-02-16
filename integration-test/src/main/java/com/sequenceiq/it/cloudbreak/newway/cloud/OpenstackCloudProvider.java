@@ -62,7 +62,7 @@ public class OpenstackCloudProvider extends CloudProviderHelper {
     @Override
     TemplateV2Request template() {
         TemplateV2Request t = new TemplateV2Request();
-        String instanceTypeDefaultValue = "m1.large";
+        String instanceTypeDefaultValue = "m1.xlarge";
         String instanceTypeParam = getTestParameter().get("openstackInstanceType");
         t.setInstanceType(instanceTypeParam == null ? instanceTypeDefaultValue : instanceTypeParam);
 
