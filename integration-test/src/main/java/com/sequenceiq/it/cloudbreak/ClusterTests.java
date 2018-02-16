@@ -1,5 +1,12 @@
 package com.sequenceiq.it.cloudbreak;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.testng.annotations.BeforeTest;
+import org.testng.annotations.Optional;
+import org.testng.annotations.Parameters;
+import org.testng.annotations.Test;
+
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
 import com.sequenceiq.it.cloudbreak.newway.Cluster;
@@ -10,16 +17,10 @@ import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProvider;
 import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProviderHelper;
 import com.sequenceiq.it.cloudbreak.newway.cloud.OpenstackCloudProvider;
 import com.sequenceiq.it.cloudbreak.newway.priority.Priority;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.testng.annotations.BeforeTest;
-import org.testng.annotations.Optional;
-import org.testng.annotations.Parameters;
-import org.testng.annotations.Test;
 
 public class ClusterTests extends CloudbreakTest {
 
-    private static final String BLUEPRINT_HDP26_EDWANALYTICS_NAME = "EDW-Analytics: Apache Hive 2 LLAP, Apache Zeppelin";
+    private static final String BLUEPRINT_HDP26_NAME = "Data Science: Apache Spark 2, Apache Zeppelin";
 
     private static final int DESIRED_COUNT = 4;
 
@@ -54,7 +55,7 @@ public class ClusterTests extends CloudbreakTest {
         given(CloudbreakClient.isCreated());
         given(cloudProvider.aValidCredential());
         given(Cluster.request()
-                .withAmbariRequest(cloudProvider.ambariRequestWithBlueprintName(BLUEPRINT_HDP26_EDWANALYTICS_NAME)));
+                .withAmbariRequest(cloudProvider.ambariRequestWithBlueprintName(BLUEPRINT_HDP26_NAME)));
         given(cloudProvider.aValidStackRequest());
         when(Stack.post());
         then(Stack.waitAndCheckClusterAndStackAvailabilityStatus());
