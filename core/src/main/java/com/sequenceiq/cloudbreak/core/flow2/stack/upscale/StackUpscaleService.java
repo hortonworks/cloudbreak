@@ -130,7 +130,7 @@ public class StackUpscaleService {
         updateNodeCount(context.getStack().getId(), context.getCloudStack().getGroups(), results, false);
         Set<Resource> resourceSet = transformResults(results, context.getStack());
         if (resourceSet.isEmpty()) {
-            throw new OperationException("Failed to upscale the cluster since all create request failed: " + results.get(0).getStatusReason());
+            throw new OperationException("Failed to upscale the cluster since all create request failed. Resource set is empty");
         }
         LOGGER.debug("Adding new instances to the stack is DONE");
         return resourceSet;

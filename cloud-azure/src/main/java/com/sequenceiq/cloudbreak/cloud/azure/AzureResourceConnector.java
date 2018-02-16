@@ -249,9 +249,9 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
             }
             Deployment templateDeployment = client.createTemplateDeployment(stackName, stackName, template, parameters);
             LOGGER.info("created template deployment for upscale: {}", templateDeployment.exportTemplate().template());
-            List<CloudResourceStatus> check = new ArrayList<>(1);
-            check.add(new CloudResourceStatus(resources.get(0), ResourceStatus.IN_PROGRESS));
-            return check;
+            CloudResource armTemplate = resources.stream().filter(r -> r.getType() == ResourceType.ARM_TEMPLATE).findFirst()
+                    .orElseThrow(() -> new CloudConnectorException(String.format("Arm Template not found for: %s  ", stackName)));
+            return Collections.singletonList(new CloudResourceStatus(armTemplate, ResourceStatus.IN_PROGRESS));
         } catch (CloudException e) {
             LOGGER.error("Upscale error, cloud exception happened: ", e);
             if (e.body() != null && e.body().details() != null) {
