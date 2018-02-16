@@ -17,13 +17,13 @@ load ../utils/commands
 }
 
 @test "Set default image catalog" {
-  OUTPUT=$(set-default-image-catalog --name "${IMAGE_CATALOG_NAME}" 2>&1 | awk '{printf "%s",$0} END {print ""}' | grep -o '{.*}' | jq ' . | [to_entries[].key] == ["name","url","id","publicInAccount","default"]')
+  OUTPUT=$(set-default-image-catalog --name "${IMAGE_CATALOG_NAME}" 2>&1 | awk '{printf "%s",$0} END {print ""}' | grep -o '{.*}' | jq ' . | [to_entries[].key] == ["name","url","id","publicInAccount","usedAsDefault"]')
 
   [[ "${OUTPUT}" ==  true ]]
 }
 
 @test "Set original image catalog back" {
-  OUTPUT=$(set-default-image-catalog --name "${IMAGE_CATALOG_NAME_DEFAULT}" 2>&1 | awk '{printf "%s",$0} END {print ""}' | grep -o '{.*}' | jq ' . | [to_entries[].key] == ["name","url","publicInAccount","default"]')
+  OUTPUT=$(set-default-image-catalog --name "${IMAGE_CATALOG_NAME_DEFAULT}" 2>&1 | awk '{printf "%s",$0} END {print ""}' | grep -o '{.*}' | jq ' . | [to_entries[].key] == ["name","url","publicInAccount","usedAsDefault"]')
 
   [[ "${OUTPUT}" ==  true ]]
 }
