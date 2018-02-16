@@ -61,7 +61,7 @@ public class GcpCloudProvider extends CloudProviderHelper {
     @Override
     TemplateV2Request template() {
         TemplateV2Request t = new TemplateV2Request();
-        String instanceTypeDefaultValue = "n1-highcpu-4";
+        String instanceTypeDefaultValue = "n1-standard-4";
         String instanceTypeParam = getTestParameter().get("gcpInstanceType");
         t.setInstanceType(instanceTypeParam == null ? instanceTypeDefaultValue : instanceTypeParam);
 
