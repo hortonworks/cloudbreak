@@ -19,7 +19,7 @@ public class AzureCloudProvider extends CloudProviderHelper {
 
     private static final String CREDDESC = "test credential";
 
-    private static final String AZURE_CLUSTER_DEFAULT_NAME = "azure-cluster";
+    private static final String AZURE_CLUSTER_DEFAULT_NAME = "azure";
 
     public AzureCloudProvider(TestParameter testParameter) {
         super(testParameter);
