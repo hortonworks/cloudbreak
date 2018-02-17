@@ -11,6 +11,7 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import com.sequenceiq.it.cloudbreak.newway.log.ReportListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -80,6 +81,7 @@ public class IntegrationTestApp implements CommandLineRunner {
         testng.addListener(new ThreadLocalTestListener());
         testng.addListener(new HTMLReporter());
         testng.addListener(new JUnitXMLReporter());
+        testng.addListener(new ReportListener());
         setupSuites(testng);
         testng.run();
     }

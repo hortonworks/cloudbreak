@@ -55,11 +55,17 @@ public class ClusterTests extends CloudbreakTest {
         given(CloudbreakClient.isCreated());
         given(cloudProvider.aValidCredential());
         given(Cluster.request()
-                .withAmbariRequest(cloudProvider.ambariRequestWithBlueprintName(BLUEPRINT_HDP26_NAME)));
-        given(cloudProvider.aValidStackRequest());
-        when(Stack.post());
-        then(Stack.waitAndCheckClusterAndStackAvailabilityStatus());
-        then(Stack.checkClusterHasAmbariRunning());
+                .withAmbariRequest(cloudProvider.ambariRequestWithBlueprintName(BLUEPRINT_HDP26_NAME)),
+                "a cluster request");
+        given(cloudProvider.aValidStackRequest(), "a stack request");
+        when(Stack.post(), "post the stack request");
+        then(Stack.waitAndCheckClusterAndStackAvailabilityStatus(),
+                "wait and check availability");
+        then(Stack.checkClusterHasAmbariRunning(
+                getTestParameter().get(CloudProviderHelper.DEFAULT_AMBARI_PORT),
+                getTestParameter().get(CloudProviderHelper.DEFAULT_AMBARI_USER),
+                getTestParameter().get(CloudProviderHelper.DEFAULT_AMBARI_PASSWORD)),
+                "check ambari is running and components available");
     }
 
     @Priority(20)
@@ -67,39 +73,47 @@ public class ClusterTests extends CloudbreakTest {
     public void testScaleCluster() throws Exception {
         given(CloudbreakClient.isCreated());
         given(cloudProvider.aValidCredential());
-        given(cloudProvider.aValidStackIsCreated());
+        given(cloudProvider.aValidStackIsCreated(), "a stack is created");
         given(StackOperation.request()
                 .withGroupName(COMPUTE_HOST_GROUP)
-                .withDesiredCount(DESIRED_COUNT));
-        when(StackOperation.scale());
+                .withDesiredCount(DESIRED_COUNT), "a scale request to " + COMPUTE_HOST_GROUP);
+        when(StackOperation.scale(), "scale");
         when(Stack.get());
-        then(Stack.waitAndCheckClusterAndStackAvailabilityStatus());
-        then(Stack.checkClusterHasAmbariRunning());
+        then(Stack.waitAndCheckClusterAndStackAvailabilityStatus(), "wait for availability");
+        then(Stack.checkClusterHasAmbariRunning(
+                getTestParameter().get(CloudProviderHelper.DEFAULT_AMBARI_PORT),
+                getTestParameter().get(CloudProviderHelper.DEFAULT_AMBARI_USER),
+                getTestParameter().get(CloudProviderHelper.DEFAULT_AMBARI_PASSWORD)),
+                "check ambari");
     }
 
     @Priority(30)
     @Test
-    public void testStopClusterAfterUpgrade() throws Exception {
+    public void testStopCluster() throws Exception {
         given(CloudbreakClient.isCreated());
         given(cloudProvider.aValidCredential());
-        given(cloudProvider.aValidStackIsCreated());
+        given(cloudProvider.aValidStackIsCreated(), "a stack is created");
         given(StackOperation.request());
         when(StackOperation.stop());
         when(Stack.get());
-        then(Stack.waitAndCheckClusterAndStackStoppedStatus());
+        then(Stack.waitAndCheckClusterAndStackStoppedStatus(), "stack has been stopped");
     }
 
     @Priority(40)
     @Test
-    public void testStartClusterAfterUpgrade() throws Exception {
+    public void testStartCluster() throws Exception {
         given(CloudbreakClient.isCreated());
         given(cloudProvider.aValidCredential());
-        given(cloudProvider.aValidStackIsCreated());
+        given(cloudProvider.aValidStackIsCreated(), "a stack is created");
         given(StackOperation.request());
         when(StackOperation.start());
         when(Stack.get());
-        then(Stack.waitAndCheckClusterAndStackAvailabilityStatus());
-        then(Stack.checkClusterHasAmbariRunning());
+        then(Stack.waitAndCheckClusterAndStackAvailabilityStatus(), "stack has been started");
+        then(Stack.checkClusterHasAmbariRunning(
+                getTestParameter().get(CloudProviderHelper.DEFAULT_AMBARI_PORT),
+                getTestParameter().get(CloudProviderHelper.DEFAULT_AMBARI_USER),
+                getTestParameter().get(CloudProviderHelper.DEFAULT_AMBARI_PASSWORD)),
+                "ambari check");
     }
 
     @Priority(50)
@@ -107,8 +121,8 @@ public class ClusterTests extends CloudbreakTest {
     public void testTerminateCluster() throws Exception {
         given(CloudbreakClient.isCreated());
         given(cloudProvider.aValidCredential());
-        given(cloudProvider.aValidStackIsCreated());
+        given(cloudProvider.aValidStackIsCreated(), "a stack is created");
         when(Stack.delete());
-        then(Stack.waitAndCheckClusterDeleted());
+        then(Stack.waitAndCheckClusterDeleted(), "stack has been deleted");
     }
 }

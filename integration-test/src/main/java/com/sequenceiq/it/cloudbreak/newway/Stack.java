@@ -2,7 +2,6 @@ package com.sequenceiq.it.cloudbreak.newway;
 
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.CloudbreakUtil;
-import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProviderHelper;
 import org.testng.Assert;
 
 import java.util.function.BiConsumer;
@@ -94,14 +93,14 @@ public class Stack extends StackEntity {
         });
     }
 
-    public static Assertion checkClusterHasAmbariRunning() {
+    public static Assertion checkClusterHasAmbariRunning(String ambariPort, String ambariUser, String ambariPassword) {
         return Stack.assertThis((stack, t) -> {
             CloudbreakClient client = CloudbreakClient.getTestContextCloudbreakClient().apply(t);
             CloudbreakUtil.checkClusterAvailability(client.getCloudbreakClient().stackV2Endpoint(),
-                    CloudProviderHelper.DEFAULT_AMBARI_PORT,
+                    ambariPort,
                     stack.getResponse().getId().toString(),
-                    CloudProviderHelper.DEFAULT_AMBARI_USER,
-                    CloudProviderHelper.DEFAULT_AMBARI_PASSWORD,
+                    ambariUser,
+                    ambariPassword,
                     true);
         });
     }

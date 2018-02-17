@@ -7,6 +7,7 @@ import javax.ws.rs.core.Response;
 
 import com.sequenceiq.cloudbreak.api.model.StackScaleRequestV2;
 import com.sequenceiq.it.IntegrationTestContext;
+import com.sequenceiq.it.cloudbreak.newway.log.Log;
 
 public class StackOperation extends AbstractCloudbreakEntity<StackScaleRequestV2, Response> {
     public static final String SCALE = "SCALE";
@@ -49,6 +50,7 @@ public class StackOperation extends AbstractCloudbreakEntity<StackScaleRequestV2
         client = CloudbreakClient.getTestContextCloudbreakClient().apply(integrationTestContext);
         StackEntity stack;
         stack = Stack.getTestContextStack().apply(integrationTestContext);
+        Log.log(" scale " + stack.getRequest().getGeneral().getName());
         stackOperation.setResponse(
                 client.getCloudbreakClient().stackV2Endpoint()
                         .putScaling(stack.getRequest().getGeneral().getName(), stackOperation.getRequest()));
@@ -60,6 +62,7 @@ public class StackOperation extends AbstractCloudbreakEntity<StackScaleRequestV2
         client = CloudbreakClient.getTestContextCloudbreakClient().apply(integrationTestContext);
         StackEntity stack;
         stack = Stack.getTestContextStack().apply(integrationTestContext);
+        Log.log(" start " + stack.getRequest().getGeneral().getName());
         stackOperation.setResponse(
                 client.getCloudbreakClient().stackV2Endpoint()
                         .putStart(stack.getRequest().getGeneral().getName()));
@@ -71,6 +74,7 @@ public class StackOperation extends AbstractCloudbreakEntity<StackScaleRequestV2
         client = CloudbreakClient.getTestContextCloudbreakClient().apply(integrationTestContext);
         StackEntity stack;
         stack = Stack.getTestContextStack().apply(integrationTestContext);
+        Log.log(" stop " + stack.getRequest().getGeneral().getName());
         stackOperation.setResponse(
                 client.getCloudbreakClient().stackV2Endpoint()
                         .putStop(stack.getRequest().getGeneral().getName()));
@@ -82,6 +86,7 @@ public class StackOperation extends AbstractCloudbreakEntity<StackScaleRequestV2
         client = CloudbreakClient.getTestContextCloudbreakClient().apply(integrationTestContext);
         StackEntity stack;
         stack = Stack.getTestContextStack().apply(integrationTestContext);
+        Log.log(" sync " + stack.getRequest().getGeneral().getName());
         stackOperation.setResponse(
                 client.getCloudbreakClient().stackV2Endpoint()
                         .putSync(stack.getRequest().getGeneral().getName()));

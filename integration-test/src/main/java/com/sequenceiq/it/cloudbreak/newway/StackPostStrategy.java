@@ -1,7 +1,7 @@
 package com.sequenceiq.it.cloudbreak.newway;
 
 import static com.sequenceiq.it.cloudbreak.newway.CloudbreakClient.getTestContextCloudbreakClient;
-import static com.sequenceiq.it.cloudbreak.newway.Log.logJSON;
+import static com.sequenceiq.it.cloudbreak.newway.log.Log.logJSON;
 
 import com.sequenceiq.it.IntegrationTestContext;
 import org.slf4j.Logger;
