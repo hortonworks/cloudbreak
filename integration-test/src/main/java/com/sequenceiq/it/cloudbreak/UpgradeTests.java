@@ -6,6 +6,7 @@ import com.sequenceiq.it.cloudbreak.newway.Stack;
 import com.sequenceiq.it.cloudbreak.newway.StackOperation;
 import com.sequenceiq.it.cloudbreak.newway.TestParameter;
 import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProvider;
+import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProviderHelper;
 import com.sequenceiq.it.cloudbreak.newway.cloud.GcpCloudProvider;
 import com.sequenceiq.it.cloudbreak.newway.priority.Priority;
 import org.testng.annotations.Test;
@@ -33,7 +34,10 @@ public class UpgradeTests extends CloudbreakTest {
         given(Stack.request().withName(cloudProvider.getClusterDefaultName()));
         when(Stack.get());
         then(Stack.waitAndCheckClusterAndStackAvailabilityStatus());
-        then(Stack.checkClusterHasAmbariRunning());
+        then(Stack.checkClusterHasAmbariRunning(
+                getTestParameter().get(CloudProviderHelper.DEFAULT_AMBARI_PORT),
+                getTestParameter().get(CloudProviderHelper.DEFAULT_AMBARI_USER),
+                getTestParameter().get(CloudProviderHelper.DEFAULT_AMBARI_PASSWORD)));
     }
 
     @Priority(20)
@@ -49,8 +53,10 @@ public class UpgradeTests extends CloudbreakTest {
         when(StackOperation.scale());
         when(Stack.get());
         then(Stack.waitAndCheckClusterAndStackAvailabilityStatus());
-        then(Stack.checkClusterHasAmbariRunning());
-    }
+        then(Stack.checkClusterHasAmbariRunning(
+                getTestParameter().get(CloudProviderHelper.DEFAULT_AMBARI_PORT),
+                getTestParameter().get(CloudProviderHelper.DEFAULT_AMBARI_USER),
+                getTestParameter().get(CloudProviderHelper.DEFAULT_AMBARI_PASSWORD)));    }
 
     @Priority(30)
     @Test
@@ -76,8 +82,10 @@ public class UpgradeTests extends CloudbreakTest {
         when(StackOperation.start());
         when(Stack.get());
         then(Stack.waitAndCheckClusterAndStackAvailabilityStatus());
-        then(Stack.checkClusterHasAmbariRunning());
-    }
+        then(Stack.checkClusterHasAmbariRunning(
+                getTestParameter().get(CloudProviderHelper.DEFAULT_AMBARI_PORT),
+                getTestParameter().get(CloudProviderHelper.DEFAULT_AMBARI_USER),
+                getTestParameter().get(CloudProviderHelper.DEFAULT_AMBARI_PASSWORD)));    }
 
     @Priority(50)
     @Test
