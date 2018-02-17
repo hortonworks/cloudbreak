@@ -88,7 +88,7 @@
         "volumeCount": 1,
         "volumeSize": 100
       },
-      "nodeCount": 1,
+      "nodeCount": 3,
       "group": "worker",
       "type": "CORE",
       "recoveryMode": "MANUAL",

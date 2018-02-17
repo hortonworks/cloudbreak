@@ -24,113 +24,135 @@
 # WAIT_FOR_SYNC
 
 function wait-cluster-status() {
+    wait_cluster_name=$1
+    cluster_status=${2:-AVAILABLE}
     is_status_available=false
     create_failed=false
+    countup=0
 
-    while [ $SECONDS -lt "${1}" ] && [ "${is_status_available}" == false ] && [ "${create_failed}" == false ]
+    while [ "$countup" -lt 100 ] && [ "$is_status_available" == false ] && [ "$create_failed" == false ]
     do
+    	countup=$(($countup+1))
     	sleep 30
-	    is_status_available=$(cb cluster describe --name "${2}" | jq -r '."status" == "${3}"')
-	    create_failed=$(cb cluster describe --name "${2}" | jq -r '."status" == "CREATE_FAILED"')
+	    if [[ $(cb cluster describe --name "$wait_cluster_name" | jq -r .status) == "$cluster_status" ]]; then
+            is_status_available=true
+        fi
+	    if [[ $(cb cluster describe --name "$wait_cluster_name" | jq -r .cluster.status) == "CREATE_FAILED" ]]; then
+            create_failed=true
+        fi
     done
 
-    if [[ "${is_status_available}" != true ]]; then
-        echo $(cb cluster describe --name "${2}" | jq -r '."statusReason"')
+    if [[ "$is_status_available" != true ]]; then
+        echo $(cb cluster describe --name "$wait_cluster_name" | jq -r .statusReason)
     else
-        echo "${is_status_available}"
+        echo "$is_status_available"
+    fi
+}
+
+function wait-stack-status() {
+    wait_stack_name=$1
+    stack_status=${2:-AVAILABLE}
+    is_status_available=false
+    create_failed=false
+    countup=0
+
+    while [ "$countup" -lt 100 ] && [ "$is_status_available" == false ] && [ "$create_failed" == false ]
+    do
+    	countup=$(($countup+1))
+    	sleep 30
+	    if [[ $(cb cluster describe --name "$wait_stack_name" | jq -r .cluster.status) == "$stack_status" ]]; then
+            is_status_available=true
+        fi
+	    if [[ $(cb cluster describe --name "$wait_stack_name" | jq -r .cluster.status) == "CREATE_FAILED" ]]; then
+            create_failed=true
+        fi
+    done
+
+    if [[ "$is_status_available" != true ]]; then
+        echo $(cb cluster describe --name "$wait_stack_name" | jq -r .statusReason)
+    else
+        echo "$is_status_available"
     fi
 }
 
 function is-cluster-status() {
+    status_cluster_name=$1
+    cluster_status=${2:-AVAILABLE}
     status_is=false
 
-	status_is=$(cb cluster describe --name "${1}" | jq -r '."status" == "${2}"')
+    if [[ $(cb cluster describe --name "$status_cluster_name" | jq -r .status) == "$cluster_status" ]]; then
+        status_is=true
+    fi
 
-    if [[ "${status_is}" != true ]]; then
-        echo $(cb cluster describe --name "${1}" | jq -r '."statusReason"')
+    if [[ "$status_is" != true ]]; then
+        echo $(cb cluster describe --name "$status_cluster_name" | jq -r .statusReason)
     else
-        echo "${status_is}"
+        echo "$status_is"
     fi
 }
 
-function wait-stack-cluster-status() {
-    param1=$3
-    export param1
-    is_status=false
-    has_failure=false
-    while [ $SECONDS -lt $1 ] && [ $is_status == false ] && [ $has_failure == false ]
-    do
-	sleep 30
-	stack_status=$(describe-cluster --name $2 | jq -r '."status"')
-	cluster_status=$(describe-cluster --name $2 | jq -r ' ."cluster" | ."status"')
+function is-stack-status() {
+    status_stack_name=$1
+    stack_status=${2:-AVAILABLE}
+    status_is=false
 
-	is_stack_status=$(describe-cluster --name $2 | jq -r '."status"==env.param1')
-	is_cluster_status=$(describe-cluster --name $2 | jq -r ' ."cluster" | ."status"==env.param1')
-
-	is_status= is_cluster_status && is_stack_status
-	is_status=true
-
-    status_reason_stack=$(describe-cluster --name $2 | jq -r '."status"==env.param1')
-	status_reason_cluster=$(describe-cluster --name $2 | jq -r ' ."cluster" | ."statusReason"')
-
-    if [ $cluster_status = UPDATE_FAILED ] || [ $cluster_status = CREATE_FAILED ] || [ $stack_status = UPDATE_FAILED ] || [ $stack_status = CREATE_FAILED ]; then
-      has_failure=true
+    if [[ $(cb cluster describe --name "$status_stack_name" | jq -r .cluster.status) == "$stack_status" ]]; then
+        status_is=true
     fi
-    done
-    echo $status_reason_stack >> status_reason
-	echo $status_reason_cluster >> status_reason
-    [ $is_status == true ]
-}
 
-function stack-cluster-is-status() {
-    param1=$2
-    export param1
-    is_status=false
-    is_status_stack=$(describe-cluster --name $1 | jq -r '."status"==env.param1')
-	is_status_cluster=$(describe-cluster --name $1 | jq -r ' ."cluster" | ."status"==env.param1')
-	is_status= is_status_stack && is_status_cluster
-    [ $is_status == true ]
-}
-
-function node-count-are-equal() {
-    NODES_COUNT_CLUSTER=$( describe-cluster --name $1 | jq ' ."instanceGroups" | .[] | select(."group"=="compute") | . "nodeCount" ')
-    NODES_COUNT_STACK=$( describe-cluster --name $1 | jq ' ."cluster"  | . "hostGroups" | . [] | . "constraint" | select(."instanceGroupName" == "compute") | . "hostCount"')
-    [ $NODES_COUNT_CLUSTER = $NODES_COUNT_STACK ]
+    if [[ "$status_is" != true ]]; then
+        echo $(cb cluster describe --name "$status_stack_name" | jq -r .statusReason)
+    else
+        echo "$status_is"
+    fi
 }
 
 function wait-cluster-delete() {
+    delete_cluster_name=$1
     still_exist=true
     delete_failed=false
+    countup=0
 
-    while [ $SECONDS -lt "${1}" ] && [ "${still_exist}" == true ] && [ "${delete_failed}" == false ]
+    while [ "$countup" -lt 100 ] && [ "$still_exist" == true ] && [ "$delete_failed" == false ]
     do
+    	countup=$(($countup+1))
     	sleep 30
-	    still_exist=$(cb cluster list | jq -r '.[].Name == "${2}"')
-	    delete_failed=$(cb cluster describe --name "${2}" | jq -r '."status" == "DELETE_FAILED"')
+	    if [[ $(cb cluster list | jq -r .[].Name) != "$delete_cluster_name" ]]; then
+            still_exist=false
+        fi
+	    if [[ $(cb cluster describe --name "$delete_cluster_name" | jq -r .status) == "DELETE_FAILED" ]]; then
+            delete_failed=true
+        fi
     done
 
-    if [[ "${still_exist}" == true ]]; then
-        echo $(cb cluster describe --name "${2}" | jq -r '."statusReason"')
+    if [[ "$still_exist" == true ]]; then
+        echo $(cb cluster describe --name "$delete_cluster_name" | jq -r .statusReason)
     else
-        echo "${still_exist}"
+        echo "$still_exist"
     fi
 }
 
 function is-cluster-present() {
-  if [[ $(cb cluster list | jq -r '.[].Name == "${1}"') ]]; then
+  present_cluster_name=$1
+
+  if [[ $(cb cluster list | jq -r .[].Name) == "$present_cluster_name" ]]; then
     echo true
   fi
 }
 
 function remove-stuck-cluster() {
-  if [[ $(cb cluster list | jq -r '.[].Name == "${1}"') ]]; then
-    cb cluster delete --name "${1}" --wait
+  remove_cluster_name=$1
+
+  if [[ $(cb cluster list | jq -r .[].Name) == "$remove_cluster_name" ]]; then
+    cb cluster delete --name "$remove_cluster_name" --wait
   fi
 }
 
 function remove-stuck-credential() {
-  if [[ $(cb credential list | jq -r '.[].Name == "${1}"') ]]; then
-    cb credential delete --name "${1}"
+  remove_credential_name=$1
+
+  if [[ $(cb credential describe --name "$remove_credential_name" | jq -r .Name) == "$remove_credential_name" ]]; then
+    cb credential delete --name "$remove_credential_name"
   fi
 }
 

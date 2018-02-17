@@ -13,7 +13,7 @@ load ../utils/commands
 }
 
 @test "Check blueprint create from url - url does not exist" {
-  OUTPUT=$(create-blueprint from-url --name test --url https://something123456789.com 2>&1 | tail -n 2)
+  OUTPUT=$(create-blueprint from-url --name test --url https://something123456789.com 2>&1 | tail -n 2 | head -n 1)
 
   echo "${OUTPUT}" >&2
 
@@ -22,7 +22,7 @@ load ../utils/commands
 }
 
 @test "Check blueprint create from url - invalid url no protocol" {
-  OUTPUT=$(create-blueprint from-url --name test --url something.com 2>&1 | tail -n 2 )
+  OUTPUT=$(create-blueprint from-url --name test --url something.com 2>&1 | tail -n 2 | head -n 1)
 
   echo "${OUTPUT}" >&2
 
@@ -40,7 +40,7 @@ load ../utils/commands
 }
 
 @test "Check blueprint create from file - file does not exist" {
-  OUTPUT=$(create-blueprint from-file --name testbp --file notexists.bp 2>&1 | tail -n 2)
+  OUTPUT=$(create-blueprint from-file --name testbp --file notexists.bp 2>&1 | tail -n 2 | head -n 1)
 
   echo "${OUTPUT}" >&2
 

@@ -8,11 +8,11 @@ load ../utils/resources
 }
 
 @test "Create new ["${OS_CREDENTIAL_NAME}"] OpenStack V2 credential" {
-  OUTPUT=$(create-credential-openstack-v2 --name "${OS_CREDENTIAL_NAME}" $OS_ARGS_V2 2>&1 | tail -n 2 | head -n 1)
+  OUTPUT=$(create-credential-openstack-v2 --name "${OS_CREDENTIAL_NAME}" $OS_ARGS_V2 2>&1 | tail -n 3 | head -n 1)
 
   echo "${OUTPUT}" >&2
 
-  [[ "${OUTPUT}" == *"credential created: ${OS_CREDENTIAL_NAME}"* ]]
+  [[ "${OUTPUT}" == *"${OS_CREDENTIAL_NAME}"* ]]
   [[ "${OUTPUT}" != *"error"* ]]
 }
 
