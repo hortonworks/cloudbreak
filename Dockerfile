@@ -1,16 +1,13 @@
-FROM alpine
+FROM golang:1.9.2
+LABEL maintainer=Hortonworks
 
 COPY . /go/src/github.com/hortonworks/cb-cli
 WORKDIR /go/src/github.com/hortonworks/cb-cli
 
-RUN apk update \
-    && apk add --no-cache -t build-deps musl-dev go git \
-    && cd /go/src/github.com/hortonworks/cb-cli \
-    && export GOPATH=/go \
-    && export PATH=$PATH:/$GOPATH/bin \
-    && go get github.com/golang/dep/cmd/dep \
-    && go build -o /bin/cb-cli  \
-    && rm -rf /go \
-    && apk del --purge build-deps
+RUN make build-linux
 
-ENTRYPOINT ["/bin/cb-cli"]
+FROM alpine
+
+COPY --from=0 /go/src/github.com/hortonworks/cb-cli/build/Linux/cb /usr/local/bin
+
+ENTRYPOINT ["cb"]
