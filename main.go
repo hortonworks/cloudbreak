@@ -897,6 +897,42 @@ func main() {
 						}
 					},
 				},
+				{
+					Name:  "user",
+					Usage: "manage LDAP users",
+					Subcommands: []cli.Command{
+						{
+							Name:  "create",
+							Usage: "create a new LDAP user in the given base",
+							Flags: cb.NewFlagBuilder().AddFlags(cb.FlLdapServer,
+								cb.FlLdapBindDN, cb.FlLdapBindPassword, cb.FlLdapUserToCreate, cb.FlLdapUserToCreatePassword,
+								cb.FlLdapUserToCreateBase, cb.FlLdapUserToCreateGroups, cb.FlLdapDirectoryType).Build(),
+							Action: cb.CreateLdapUser,
+							BashComplete: func(c *cli.Context) {
+								for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlLdapServer,
+									cb.FlLdapBindDN, cb.FlLdapBindPassword, cb.FlLdapUserToCreate, cb.FlLdapUserToCreatePassword,
+									cb.FlLdapUserToCreateBase, cb.FlLdapUserToCreateGroups, cb.FlLdapDirectoryType).Build() {
+									printFlagCompletion(f)
+								}
+							},
+						},
+						{
+							Name:  "delete",
+							Usage: "delete a user from LDAP",
+							Flags: cb.NewFlagBuilder().AddFlags(cb.FlLdapServer,
+								cb.FlLdapBindDN, cb.FlLdapBindPassword, cb.FlLdapUserToDelete,
+								cb.FlLdapUserToDeleteBase, cb.FlLdapDirectoryType).Build(),
+							Action: cb.DeleteLdapUser,
+							BashComplete: func(c *cli.Context) {
+								for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlLdapServer,
+									cb.FlLdapBindDN, cb.FlLdapBindPassword, cb.FlLdapUserToDelete,
+									cb.FlLdapUserToDeleteBase, cb.FlLdapDirectoryType).Build() {
+									printFlagCompletion(f)
+								}
+							},
+						},
+					},
+				},
 			},
 		},
 		{

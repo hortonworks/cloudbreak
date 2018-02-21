@@ -3,12 +3,15 @@ package cli
 import (
 	"time"
 
+	"errors"
 	"fmt"
 	log "github.com/Sirupsen/logrus"
 	"github.com/hortonworks/cb-cli/cli/utils"
 	"github.com/hortonworks/cb-cli/client_cloudbreak/v1ldap"
 	"github.com/hortonworks/cb-cli/models_cloudbreak"
 	"github.com/urfave/cli"
+	"golang.org/x/text/encoding/unicode"
+	ldaputils "gopkg.in/ldap.v2"
 	"strconv"
 	"strings"
 )
@@ -178,4 +181,116 @@ func DeleteLdap(c *cli.Context) error {
 	}
 	log.Infof("[DeleteLdap] ldap config deleted: %s", ldapName)
 	return nil
+}
+
+func CreateLdapUser(c *cli.Context) error {
+	checkRequiredFlagsAndArguments(c)
+	defer utils.TimeTrack(time.Now(), "create ldap user")
+
+	directoryType := c.String(FlLdapDirectoryType.Name)
+	validateDirectoryTypeToManageUsers(directoryType)
+
+	bindUser := c.String(FlLdapBindDN.Name)
+	bindPassword := c.String(FlLdapBindPassword.Name)
+	ldapServer := c.String(FlLdapServer.Name)
+	userName := c.String(FlLdapUserToCreate.Name)
+	password := c.String(FlLdapUserToCreatePassword.Name)
+	baseDn := c.String(FlLdapUserToCreateBase.Name)
+	groups := c.String(FlLdapUserToCreateGroups.Name)
+
+	ldap := connectLdap(ldapServer, bindUser, bindPassword)
+	defer ldap.Close()
+
+	encoder := unicode.UTF16(unicode.LittleEndian, unicode.IgnoreBOM).NewEncoder()
+	utfLePassword, err := encoder.String("\"" + password + "\"")
+	if err != nil {
+		utils.LogErrorAndExit(err)
+	}
+
+	// NORMAL_ACCOUNT (512) + DONT_EXPIRE_PASSWORD (65536)
+	accountControl := "66048"
+	userAttributes := []ldaputils.Attribute{
+		{Type: "objectclass", Vals: []string{"person", "user"}},
+		{Type: "givenName", Vals: []string{userName}},
+		{Type: "sn", Vals: []string{userName}},
+		{Type: "sAMAccountName", Vals: []string{userName}},
+		{Type: "userAccountControl", Vals: []string{accountControl}},
+		{Type: "unicodePwd", Vals: []string{utfLePassword}},
+	}
+
+	userDn := fmt.Sprintf("CN=%s,%s", userName, baseDn)
+	log.Infof("[CreateLdapUser] create user: %s", userDn)
+	addRequest := &ldaputils.AddRequest{
+		Attributes: userAttributes,
+		DN:         userDn,
+	}
+	if err := ldap.Add(addRequest); err != nil {
+		utils.LogErrorAndExit(err)
+	}
+	log.Infof("[CreateLdapUser] user successfully created: %s", userDn)
+
+	if len(groups) > 0 {
+		groupArray := utils.DelimitedStringToArray(groups, ";")
+		for _, group := range groupArray {
+			log.Infof("[CreateLdapUser] add user %s to group: %s", userDn, group)
+			modifyAttributes := []ldaputils.PartialAttribute{
+				{Type: "member", Vals: []string{userDn}},
+			}
+			modifyRequest := &ldaputils.ModifyRequest{
+				DN:            group,
+				AddAttributes: modifyAttributes,
+			}
+			if err := ldap.Modify(modifyRequest); err != nil {
+				utils.LogErrorAndExit(err)
+			}
+			log.Infof("[CreateLdapUser] user %s successfully added to group: %s", userDn, group)
+		}
+	}
+
+	return nil
+}
+
+func DeleteLdapUser(c *cli.Context) error {
+	checkRequiredFlagsAndArguments(c)
+	defer utils.TimeTrack(time.Now(), "delete ldap user")
+
+	directoryType := c.String(FlLdapDirectoryType.Name)
+	validateDirectoryTypeToManageUsers(directoryType)
+
+	bindUser := c.String(FlLdapBindDN.Name)
+	bindPassword := c.String(FlLdapBindPassword.Name)
+	ldapServer := c.String(FlLdapServer.Name)
+	userName := c.String(FlLdapUserToDelete.Name)
+	baseDn := c.String(FlLdapUserToDeleteBase.Name)
+
+	ldap := connectLdap(ldapServer, bindUser, bindPassword)
+	defer ldap.Close()
+
+	dn := fmt.Sprintf("CN=%s,%s", userName, baseDn)
+	delRequest := &ldaputils.DelRequest{DN: dn}
+	if err := ldap.Del(delRequest); err != nil {
+		utils.LogErrorAndExit(err)
+	}
+	log.Infof("[DeleteLdapUser] user successfully deleted: %s", dn)
+
+	return nil
+}
+
+func connectLdap(ldapServer, bindUser, bindPassword string) *ldaputils.Conn {
+	ldap, err := ldaputils.Dial("tcp", ldapServer)
+	if err != nil {
+		utils.LogErrorAndExit(err)
+	}
+	log.Infof("[connectLdap] connecting to LDAP %s with bind %s", ldapServer, bindUser)
+	if err = ldap.Bind(bindUser, bindPassword); err != nil {
+		utils.LogErrorAndExit(err)
+	}
+	log.Info("[connectLdap] successfully connected to LDAP")
+	return ldap
+}
+
+func validateDirectoryTypeToManageUsers(directoryType string) {
+	if len(directoryType) == 0 || (len(directoryType) > 0 && "ACTIVE_DIRECTORY" != directoryType) {
+		utils.LogErrorAndExit(errors.New("only ACTIVE_DIRECTORY is supported at the moment"))
+	}
 }

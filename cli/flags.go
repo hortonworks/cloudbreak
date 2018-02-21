@@ -428,6 +428,48 @@ var (
 			Usage: "ldap group of administrators",
 		},
 	}
+	FlLdapUserToCreate = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "ldap-user-to-create",
+			Usage: "name of the ldap user (e.g user will create CN=user)",
+		},
+	}
+	FlLdapUserToCreatePassword = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "ldap-user-to-create-password",
+			Usage: "password of the user",
+		},
+	}
+	FlLdapUserToCreateBase = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "ldap-user-to-create-base",
+			Usage: "base DN where the user will be created (e.g: CN=Users,DC=ad,DC=cb,DC=com)",
+		},
+	}
+	FlLdapUserToCreateGroups = StringFlag{
+		RequiredFlag: OPTIONAL,
+		StringFlag: cli.StringFlag{
+			Name:  "ldap-user-to-create-groups",
+			Usage: "semicolon separated list of group DNs that the user will be added to (e.g: OU=cloudbreak,CN=Users,DC=ad,DC=cb,DC=com;)",
+		},
+	}
+	FlLdapUserToDelete = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "ldap-user-to-delete",
+			Usage: "name of the ldap user to delete",
+		},
+	}
+	FlLdapUserToDeleteBase = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "ldap-user-to-delete-base",
+			Usage: "base DN from where the user will be deleted (e.g: CN=Users,DC=ad,DC=cb,DC=com)",
+		},
+	}
 	FlKerberosPasswordOptional = StringFlag{
 		RequiredFlag: OPTIONAL,
 		StringFlag: cli.StringFlag{

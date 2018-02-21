@@ -74,3 +74,11 @@ func ReadContentFromURL(urlLocation string, client *http.Client) []byte {
 	}
 	return content
 }
+
+// Returns a slice of strings. If the string is empty it will return an empty slice.
+func DelimitedStringToArray(text, delimiter string) []string {
+	if len(text) == 0 {
+		return make([]string, 0)
+	}
+	return strings.Split(text, delimiter)
+}

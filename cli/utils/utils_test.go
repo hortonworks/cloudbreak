@@ -1,6 +1,9 @@
 package utils
 
-import "testing"
+import (
+	"reflect"
+	"testing"
+)
 
 func TestRandStr(t *testing.T) {
 	res1 := RandStr(10)
@@ -57,5 +60,32 @@ func TestReadFile(t *testing.T) {
 
 	if "content\n" != string(content) {
 		t.Errorf("content not match content == %s", string(content))
+	}
+}
+
+func TestSemicolonDelimiterConvert(t *testing.T) {
+	result := DelimitedStringToArray("simple;test", ";")
+
+	expected := []string{"simple", "test"}
+	if !reflect.DeepEqual(expected, result) {
+		t.Errorf("content not match content == %s", result)
+	}
+}
+
+func TestSemicolonDelimiterConvertToInvalidString(t *testing.T) {
+	result := DelimitedStringToArray("simple,test", ";")
+
+	expected := []string{"simple,test"}
+	if !reflect.DeepEqual(expected, result) {
+		t.Errorf("content not match content == %s", result)
+	}
+}
+
+func TestSemicolonDelimiterConvertToEmptyString(t *testing.T) {
+	result := DelimitedStringToArray("", ";")
+
+	expected := make([]string, 0)
+	if !reflect.DeepEqual(expected, result) {
+		t.Errorf("content not match content == %s", result)
 	}
 }
