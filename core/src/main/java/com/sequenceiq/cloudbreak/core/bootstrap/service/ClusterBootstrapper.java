@@ -22,9 +22,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
+import com.sequenceiq.cloudbreak.common.model.OrchestratorType;
 import com.sequenceiq.cloudbreak.common.service.HostDiscoveryService;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
-import com.sequenceiq.cloudbreak.core.CloudbreakException;
+import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ContainerBootstrapApiCheckerTask;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ContainerClusterAvailabilityCheckerTask;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ContainerOrchestratorResolver;

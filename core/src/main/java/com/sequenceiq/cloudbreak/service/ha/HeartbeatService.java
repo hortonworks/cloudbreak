@@ -34,6 +34,7 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationFl
 import com.sequenceiq.cloudbreak.domain.CloudbreakNode;
 import com.sequenceiq.cloudbreak.domain.FlowLog;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.ha.CloudbreakNodeConfig;
 import com.sequenceiq.cloudbreak.repository.CloudbreakNodeRepository;
 import com.sequenceiq.cloudbreak.repository.FlowLogRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;

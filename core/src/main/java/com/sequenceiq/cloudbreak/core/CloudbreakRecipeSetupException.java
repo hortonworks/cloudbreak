@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.core;
 
+import com.sequenceiq.cloudbreak.service.CloudbreakException;
+
 public class CloudbreakRecipeSetupException extends CloudbreakException {
     public CloudbreakRecipeSetupException(String message) {
         super(message);

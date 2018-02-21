@@ -52,6 +52,8 @@ public interface ClusterService {
 
     Cluster updateCluster(Cluster cluster);
 
+    Cluster updateCreationDateOnCluster(Cluster cluster);
+
     Cluster updateClusterMetadata(Long stackId);
 
     Cluster recreate(Long stackId, Long blueprintId, Set<HostGroup> hostGroups, boolean validateBlueprint, StackRepoDetails stackRepoDetails,

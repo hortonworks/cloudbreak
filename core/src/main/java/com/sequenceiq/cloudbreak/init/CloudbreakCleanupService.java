@@ -41,7 +41,7 @@ import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.flowlog.FlowLogService;
-import com.sequenceiq.cloudbreak.service.ha.CloudbreakNodeConfig;
+import com.sequenceiq.cloudbreak.ha.CloudbreakNodeConfig;
 import com.sequenceiq.cloudbreak.service.ha.HeartbeatService;
 import com.sequenceiq.cloudbreak.service.usages.UsageService;
 

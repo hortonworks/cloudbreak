@@ -11,7 +11,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.EventSelectorUtil;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.CollectDownscaleCandidatesRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.CollectDownscaleCandidatesResult;
 import com.sequenceiq.cloudbreak.reactor.handler.ReactorEventHandler;
-import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariDecommissioner;
+import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariDecommissioner;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 import reactor.bus.Event;

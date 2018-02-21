@@ -8,7 +8,7 @@ import java.util.Map;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
-import com.sequenceiq.cloudbreak.service.cluster.ConfigParam;
+import com.sequenceiq.cloudbreak.blueprint.ConfigParam;
 
 @Component
 public class NameNodeFilter implements HostFilter {

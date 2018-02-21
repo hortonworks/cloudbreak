@@ -35,7 +35,7 @@ import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.common.service.DefaultCostTaggingService;
 import com.sequenceiq.cloudbreak.common.type.OrchestratorConstants;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
-import com.sequenceiq.cloudbreak.core.CloudbreakException;
+import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
 import com.sequenceiq.cloudbreak.domain.AccountPreferences;
 import com.sequenceiq.cloudbreak.domain.Credential;

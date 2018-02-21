@@ -21,7 +21,7 @@ import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
 import com.sequenceiq.cloudbreak.domain.FlexSubscription;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.service.ha.CloudbreakNodeConfig;
+import com.sequenceiq.cloudbreak.ha.CloudbreakNodeConfig;
 
 @Service
 public class UsageGeneratorService {

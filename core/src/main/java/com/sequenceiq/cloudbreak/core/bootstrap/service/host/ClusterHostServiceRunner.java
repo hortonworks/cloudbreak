@@ -23,11 +23,13 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.ExecutorType;
 import com.sequenceiq.cloudbreak.api.model.ExposedService;
+import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessor;
+import com.sequenceiq.cloudbreak.blueprint.kerberos.KerberosDetailService;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariDatabase;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
-import com.sequenceiq.cloudbreak.core.CloudbreakException;
+import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.ExposedServices;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
@@ -52,10 +54,8 @@ import com.sequenceiq.cloudbreak.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.SmartSenseCredentialConfigService;
 import com.sequenceiq.cloudbreak.service.blueprint.ComponentLocatorService;
-import com.sequenceiq.cloudbreak.service.cluster.AmbariSecurityConfigProvider;
-import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.BlueprintProcessor;
+import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariSecurityConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.HiveConfigProvider;
-import com.sequenceiq.cloudbreak.service.cluster.flow.kerberos.KerberosDetailService;
 
 @Component
 public class ClusterHostServiceRunner {

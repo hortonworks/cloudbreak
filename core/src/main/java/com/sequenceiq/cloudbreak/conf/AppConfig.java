@@ -47,12 +47,13 @@ import org.springframework.web.filter.GenericFilterBean;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.api.model.FileSystemType;
+import com.sequenceiq.cloudbreak.blueprint.filesystem.FileSystemConfigurator;
 import com.sequenceiq.cloudbreak.client.ConfigKey;
 import com.sequenceiq.cloudbreak.client.IdentityClient;
 import com.sequenceiq.cloudbreak.client.RestClientUtil;
 import com.sequenceiq.cloudbreak.concurrent.MDCCleanerTaskDecorator;
-import com.sequenceiq.cloudbreak.controller.validation.blueprint.StackServiceComponentDescriptor;
-import com.sequenceiq.cloudbreak.controller.validation.blueprint.StackServiceComponentDescriptors;
+import com.sequenceiq.cloudbreak.blueprint.validation.StackServiceComponentDescriptor;
+import com.sequenceiq.cloudbreak.blueprint.validation.StackServiceComponentDescriptors;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteria;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ExecutorBasedParallelOrchestratorComponentRunner;
 import com.sequenceiq.cloudbreak.orchestrator.container.ContainerOrchestrator;
@@ -60,7 +61,6 @@ import com.sequenceiq.cloudbreak.orchestrator.executor.ParallelOrchestratorCompo
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
 import com.sequenceiq.cloudbreak.service.StackUnderOperationService;
-import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemConfigurator;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 

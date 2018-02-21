@@ -7,6 +7,7 @@ import java.util.List;
 import org.apache.commons.codec.binary.Base64;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.common.model.recipe.RecipeScript;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 
 @Component

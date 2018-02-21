@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.google.common.base.Strings;
+import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessor;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.DiskTypes;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
@@ -26,11 +27,10 @@ import com.sequenceiq.cloudbreak.cloud.model.VmRecommendation;
 import com.sequenceiq.cloudbreak.cloud.model.VmRecommendations;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
-import com.sequenceiq.cloudbreak.controller.validation.blueprint.StackServiceComponentDescriptors;
+import com.sequenceiq.cloudbreak.blueprint.validation.StackServiceComponentDescriptors;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.PlatformResourceRequest;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
-import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.BlueprintProcessor;
 
 @Service
 public class CloudResourceAdvisor {
@@ -98,10 +98,10 @@ public class CloudResourceAdvisor {
     private Blueprint getBlueprint(String blueprintName, Long blueprintId, IdentityUser cbUser) {
         Blueprint bp;
         try {
-            LOGGER.debug("Try to get blueprint by id: {}.", blueprintId);
+            LOGGER.debug("Try to get validation by id: {}.", blueprintId);
             bp = blueprintService.get(blueprintId);
         } catch (NumberFormatException e) {
-            LOGGER.debug("Try to get blueprint by name: {}.", blueprintName);
+            LOGGER.debug("Try to get validation by name: {}.", blueprintName);
             bp = blueprintService.getByName(blueprintName, cbUser);
         }
         return bp;

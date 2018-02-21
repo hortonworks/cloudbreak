@@ -22,8 +22,8 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.io.BaseEncoding;
 import com.sequenceiq.cloudbreak.client.KeyStoreUtil;
-import com.sequenceiq.cloudbreak.core.CloudbreakException;
-import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorType;
+import com.sequenceiq.cloudbreak.service.CloudbreakException;
+import com.sequenceiq.cloudbreak.common.model.OrchestratorType;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;

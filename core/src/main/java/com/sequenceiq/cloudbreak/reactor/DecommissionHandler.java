@@ -18,7 +18,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.EventSelectorUtil;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.DecommissionRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.DecommissionResult;
 import com.sequenceiq.cloudbreak.reactor.handler.ReactorEventHandler;
-import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariDecommissioner;
+import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariDecommissioner;
 import com.sequenceiq.cloudbreak.service.cluster.flow.RecipeEngine;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;

@@ -61,7 +61,7 @@ public class StackValidationRequestToStackValidationConverter extends AbstractCo
             validateBlueprint(stackValidationRequest, stackValidation);
         } catch (AccessDeniedException e) {
             throw new AccessDeniedException(
-                    String.format("Access to blueprint '%s' is denied or blueprint doesn't exist.", stackValidationRequest.getBlueprintId()), e);
+                    String.format("Access to validation '%s' is denied or validation doesn't exist.", stackValidationRequest.getBlueprintId()), e);
         }
         try {
             validateCredential(stackValidationRequest, stackValidation);

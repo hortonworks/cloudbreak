@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.BlueprintParameterJson;
 import com.sequenceiq.cloudbreak.api.model.BlueprintResponse;
-import com.sequenceiq.cloudbreak.controller.json.JsonHelper;
+import com.sequenceiq.cloudbreak.json.JsonHelper;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.BlueprintInputParameters;
 import com.sequenceiq.cloudbreak.domain.BlueprintParameter;

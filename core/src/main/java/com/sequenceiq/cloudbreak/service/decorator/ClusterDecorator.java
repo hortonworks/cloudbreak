@@ -27,7 +27,7 @@ import com.sequenceiq.cloudbreak.api.model.RDSConfigRequest;
 import com.sequenceiq.cloudbreak.api.model.RdsType;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
-import com.sequenceiq.cloudbreak.controller.validation.blueprint.BlueprintValidator;
+import com.sequenceiq.cloudbreak.blueprint.validation.BlueprintValidator;
 import com.sequenceiq.cloudbreak.controller.validation.ldapconfig.LdapConfigValidator;
 import com.sequenceiq.cloudbreak.controller.validation.rds.RdsConnectionValidator;
 import com.sequenceiq.cloudbreak.domain.Blueprint;

@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.service.ClusterBasedStatusCheckerTask;
+import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariHostsWithNames;
 
 @Component
 public class AmbariHostsLeaveStatusCheckerTask extends ClusterBasedStatusCheckerTask<AmbariHostsWithNames> {
