@@ -207,6 +207,7 @@ public class OperationDescriptions {
         public static final String TEST_LDAP_CONNECTION_BY_ID = "tests an already exists LDAP connection";
         public static final String TEST_DATABASE = "tests a database connection parameters";
         public static final String CREATE_DATABASE = "create a database connection parameters";
+        public static final String CHECK_CLIENT_VERSION = "checks the client version";
     }
 
     public static class RdsConfigOpDescription {

@@ -6,6 +6,7 @@ import java.util.Set;
 import javax.inject.Inject;
 import javax.validation.Valid;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v1.UtilEndpoint;
@@ -17,6 +18,7 @@ import com.sequenceiq.cloudbreak.api.model.RDSBuildRequest;
 import com.sequenceiq.cloudbreak.api.model.RDSConfigRequest;
 import com.sequenceiq.cloudbreak.api.model.RdsBuildResult;
 import com.sequenceiq.cloudbreak.api.model.RdsTestResult;
+import com.sequenceiq.cloudbreak.api.model.VersionCheckResult;
 import com.sequenceiq.cloudbreak.controller.validation.ldapconfig.LdapConfigValidator;
 import com.sequenceiq.cloudbreak.controller.validation.rds.RdsConnectionBuilder;
 import com.sequenceiq.cloudbreak.controller.validation.rds.RdsConnectionValidator;
@@ -24,6 +26,7 @@ import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.repository.LdapConfigRepository;
 import com.sequenceiq.cloudbreak.repository.RdsConfigRepository;
+import com.sequenceiq.cloudbreak.util.ClientVersionUtil;
 
 @Component
 public class UtilController implements UtilEndpoint {
@@ -44,6 +47,9 @@ public class UtilController implements UtilEndpoint {
 
     @Inject
     private LdapConfigRepository ldapConfigRepository;
+
+    @Value("${info.app.version:}")
+    private String cbVersion;
 
     @Override
     public RdsTestResult testRdsConnection(@Valid RDSConfigRequest rdsConfigRequest) {
@@ -121,6 +127,16 @@ public class UtilController implements UtilEndpoint {
             ldapTestResult.setConnectionResult(e.getMessage());
         }
         return ldapTestResult;
+    }
+
+    @Override
+    public VersionCheckResult checkClientVersion(String version) {
+        boolean compatible = ClientVersionUtil.checkVersion(cbVersion, version);
+        if (compatible) {
+            return new VersionCheckResult(true);
+
+        }
+        return new VersionCheckResult(false, String.format("Versions not compatible: [server: '%s', client: '%s']", cbVersion, version));
     }
 
     @Override
