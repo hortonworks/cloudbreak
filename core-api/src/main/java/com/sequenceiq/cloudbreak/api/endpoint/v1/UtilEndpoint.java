@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.api.model.RDSBuildRequest;
 import com.sequenceiq.cloudbreak.api.model.RDSConfigRequest;
 import com.sequenceiq.cloudbreak.api.model.RdsBuildResult;
 import com.sequenceiq.cloudbreak.api.model.RdsTestResult;
+import com.sequenceiq.cloudbreak.api.model.VersionCheckResult;
 import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions.UtilityOpDescription;
@@ -57,6 +58,13 @@ public interface UtilEndpoint {
     @ApiOperation(value = UtilityOpDescription.TEST_LDAP_CONNECTION_BY_ID, produces = ContentType.JSON,
             nickname = "testLdapConnectionByIdUtil")
     LdapTestResult testLdapConnectionById(@PathParam("id") Long id);
+
+    @GET
+    @Path("client/{version}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = UtilityOpDescription.CHECK_CLIENT_VERSION, produces = ContentType.JSON,
+            nickname = "checkClientVersion")
+    VersionCheckResult checkClientVersion(@PathParam("version") String version);
 
     @POST
     @Path("ambari-database")
