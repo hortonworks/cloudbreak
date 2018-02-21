@@ -82,8 +82,6 @@ public abstract class CloudProviderHelper extends CloudProvider {
 
     abstract String availabilityZone();
 
-    abstract String region();
-
     @Override
     public Entity aValidStackIsCreated() {
         return Stack.isCreated()

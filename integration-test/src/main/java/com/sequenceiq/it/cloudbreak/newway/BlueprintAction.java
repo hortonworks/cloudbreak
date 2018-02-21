@@ -3,6 +3,8 @@ package com.sequenceiq.it.cloudbreak.newway;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.newway.log.Log;
 
+import java.io.IOException;
+
 class BlueprintAction {
 
     private BlueprintAction() {
@@ -20,7 +22,7 @@ class BlueprintAction {
                         .postPrivate(blueprintEntity.getRequest()));
     }
 
-    public static void get(IntegrationTestContext integrationTestContext, Entity entity) {
+    public static void get(IntegrationTestContext integrationTestContext, Entity entity) throws IOException {
         BlueprintEntity blueprintEntity = (BlueprintEntity) entity;
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT,
@@ -30,6 +32,7 @@ class BlueprintAction {
                 client.getCloudbreakClient()
                         .blueprintEndpoint()
                         .getPrivate(blueprintEntity.getName()));
+        Log.logJSON(" get " + blueprintEntity.getName() + " blueprint response: ", blueprintEntity.getResponse());
     }
 
     public static void getAll(IntegrationTestContext integrationTestContext, Entity entity) {

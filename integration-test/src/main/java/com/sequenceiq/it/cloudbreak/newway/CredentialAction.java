@@ -3,6 +3,8 @@ package com.sequenceiq.it.cloudbreak.newway;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.newway.log.Log;
 
+import java.io.IOException;
+
 class CredentialAction {
 
     private CredentialAction() {
@@ -13,23 +15,24 @@ class CredentialAction {
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT,
                 CloudbreakClient.class);
-        Log.log(" post private credential. ");
+        Log.log(" post " + credentialEntity.getName() + " private credential. ");
         credentialEntity.setResponse(
                 client.getCloudbreakClient()
                         .credentialEndpoint()
                         .postPrivate(credentialEntity.getRequest()));
     }
 
-    public static void get(IntegrationTestContext integrationTestContext, Entity entity) {
+    public static void get(IntegrationTestContext integrationTestContext, Entity entity) throws IOException {
         CredentialEntity credentialEntity = (CredentialEntity) entity;
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT,
                 CloudbreakClient.class);
-        Log.log(" get private credential. ");
+        Log.log(" get " + credentialEntity.getName() + " private credential. ");
         credentialEntity.setResponse(
                 client.getCloudbreakClient()
                         .credentialEndpoint()
                         .getPrivate(credentialEntity.getName()));
+        Log.logJSON(" get credential response: ", credentialEntity.getResponse());
     }
 
     public static void getAll(IntegrationTestContext integrationTestContext, Entity entity) {
@@ -47,7 +50,7 @@ class CredentialAction {
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT,
                 CloudbreakClient.class);
-        Log.log(" delete private credential. ");
+        Log.log(" delete " + credentialEntity.getName() + " private credential. ");
         client.getCloudbreakClient().credentialEndpoint()
                 .deletePrivate(credentialEntity.getName());
     }

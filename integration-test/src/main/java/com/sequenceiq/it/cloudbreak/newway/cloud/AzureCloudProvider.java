@@ -1,8 +1,5 @@
 package com.sequenceiq.it.cloudbreak.newway.cloud;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import com.sequenceiq.cloudbreak.api.model.StackAuthenticationRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.NetworkV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.TemplateV2Request;
@@ -10,12 +7,15 @@ import com.sequenceiq.it.cloudbreak.newway.Credential;
 import com.sequenceiq.it.cloudbreak.newway.CredentialEntity;
 import com.sequenceiq.it.cloudbreak.newway.TestParameter;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class AzureCloudProvider extends CloudProviderHelper {
     public static final String AZURE = "azure";
 
     public static final String AZURE_CAPITAL = "AZURE";
 
-    private static final String CREDNAME = "itsazurermcredandsmokecred";
+    public static final String CREDNAME = "itsazurermcredandsmokecred";
 
     private static final String CREDDESC = "test credential";
 
@@ -40,7 +40,7 @@ public class AzureCloudProvider extends CloudProviderHelper {
     }
 
     @Override
-    String region() {
+    public String region() {
         String region = "North Europe";
         String regionParam = getTestParameter().get("azureRegion");
 
@@ -87,8 +87,20 @@ public class AzureCloudProvider extends CloudProviderHelper {
     }
 
     @Override
+    NetworkV2Request network() {
+        NetworkV2Request network = new NetworkV2Request();
+        network.setSubnetCIDR("10.0.0.0/16");
+        return network;
+    }
+
+    @Override
     public String getPlatform() {
         return AZURE_CAPITAL;
+    }
+
+    @Override
+    public String getCredentialName() {
+        return CREDNAME;
     }
 
     public Map<String, Object> azureCredentialDetails() {
@@ -139,12 +151,5 @@ public class AzureCloudProvider extends CloudProviderHelper {
         map.put("tenantId", "12345abcdefg789");
 
         return map;
-    }
-
-    @Override
-    NetworkV2Request network() {
-        NetworkV2Request network = new NetworkV2Request();
-        network.setSubnetCIDR("10.0.0.0/16");
-        return network;
     }
 }
