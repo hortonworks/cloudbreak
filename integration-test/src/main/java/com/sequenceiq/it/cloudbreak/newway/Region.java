@@ -1,62 +1,39 @@
 package com.sequenceiq.it.cloudbreak.newway;
 
-import com.sequenceiq.cloudbreak.api.model.PlatformRegionsJson;
+import com.sequenceiq.cloudbreak.api.model.PlatformResourceRequestJson;
+import com.sequenceiq.cloudbreak.api.model.RegionResponse;
 import com.sequenceiq.it.IntegrationTestContext;
 
-import java.util.Collection;
-import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 public class Region extends Entity {
     public static final String REGION = "REGION";
 
-    private PlatformRegionsJson platformRegionsResponse;
+    private PlatformResourceRequestJson platformResourceRequest;
 
-    private String type;
-
-    private Collection<String> regionRResponse;
-
-    private Map<String, Collection<String>> regionAvResponse;
+    private RegionResponse regionResponse;
 
     public Region(String id) {
         super(id);
+        platformResourceRequest = new PlatformResourceRequestJson();
     }
 
     public Region() {
         this(REGION);
     }
 
-    public Collection<String> getRegionRResponse() {
-        return regionRResponse;
+    public void setPlatformResourceRequest(PlatformResourceRequestJson platformResourceRequest) {
+        this.platformResourceRequest = platformResourceRequest;
     }
 
-    public Map<String, Collection<String>> getRegionAvResponse() {
-        return regionAvResponse;
+    public RegionResponse getRegionResponse() {
+        return regionResponse;
     }
 
-    public PlatformRegionsJson getPlatformRegionsResponse() {
-        return platformRegionsResponse;
-    }
-
-    public void setPlatformRegionsResponse(PlatformRegionsJson platformRegionsResponse) {
-        this.platformRegionsResponse = platformRegionsResponse;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public void withType(String type) {
-        this.type = type;
-    }
-
-    public void setRegionRResponse(Collection<String> regionRResponse) {
-        this.regionRResponse = regionRResponse;
-    }
-
-    public void setRegionAvResponse(Map<String, Collection<String>> regionAvResponse) {
-        this.regionAvResponse = regionAvResponse;
+    public Region withCredential(Long credentialId) {
+        platformResourceRequest.setCredentialId(credentialId);
+        return this;
     }
 
     static Function<IntegrationTestContext, Region> getTestContext(String key) {
@@ -72,30 +49,22 @@ public class Region extends Entity {
     }
 
     public static Action<Region> getPlatformRegions(String key) {
-        return new Action<>(getTestContext(key), RegionAction::getPlatformRegions);
+        return new Action<>(getTestContext(key), RegionAction::getRegionsByCredentialId);
     }
 
     public static Action<Region> getPlatformRegions() {
         return getPlatformRegions(REGION);
     }
 
-    public static Action<Region> getRegionAvByType(String key) {
-        return new Action<>(getTestContext(key), RegionAction::getRegionAvByType);
-    }
-
-    public static Action<Region> getRegionAvByType() {
-        return getPlatformRegions(REGION);
-    }
-
-    public static Action<Region> getRegionRByType(String key) {
-        return new Action<>(getTestContext(key), RegionAction::getRegionRByType);
-    }
-
-    public static Action<Region> getRegionRByType() {
-        return getPlatformRegions(REGION);
-    }
-
     public static Assertion<Region> assertThis(BiConsumer<Region, IntegrationTestContext> check) {
         return new Assertion<>(getTestContext(GherkinTest.RESULT), check);
+    }
+
+    public PlatformResourceRequestJson getPlatformResourceRequest() {
+        return platformResourceRequest;
+    }
+
+    public void setRegionResponse(RegionResponse regionResponse) {
+        this.regionResponse = regionResponse;
     }
 }

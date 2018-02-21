@@ -19,4 +19,8 @@ public abstract class CloudProvider {
     public abstract String getClusterDefaultName();
 
     public abstract String getPlatform();
+
+    public abstract String getCredentialName();
+
+    public abstract String region();
 }

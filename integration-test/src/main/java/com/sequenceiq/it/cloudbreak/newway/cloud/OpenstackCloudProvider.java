@@ -1,8 +1,5 @@
 package com.sequenceiq.it.cloudbreak.newway.cloud;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import com.sequenceiq.cloudbreak.api.model.StackAuthenticationRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.NetworkV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.TemplateV2Request;
@@ -10,13 +7,16 @@ import com.sequenceiq.it.cloudbreak.newway.Credential;
 import com.sequenceiq.it.cloudbreak.newway.CredentialEntity;
 import com.sequenceiq.it.cloudbreak.newway.TestParameter;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class OpenstackCloudProvider extends CloudProviderHelper {
 
     public static final String OPENSTACK = "openstack";
 
     public static final String OPENSTACK_CAPITAL = "OPENSTACK";
 
-    static final String CREDNAME = "testopenstackcred";
+    public static final String CREDNAME = "testopenstackcred";
 
     static final String CREDDESC = "test credential";
 
@@ -44,7 +44,7 @@ public class OpenstackCloudProvider extends CloudProviderHelper {
     }
 
     @Override
-    String region() {
+    public String region() {
         String region = "RegionOne";
         String regionParam = getTestParameter().get("openstackRegion");
 
@@ -88,8 +88,28 @@ public class OpenstackCloudProvider extends CloudProviderHelper {
     }
 
     @Override
+    NetworkV2Request network() {
+        NetworkV2Request network = new NetworkV2Request();
+        network.setSubnetCIDR("10.0.0.0/16");
+
+        Map<String, Object> parameters = new HashMap<>();
+
+        String defaultNetId = "999e09bc-cf75-4a19-98fb-c0b4ddee6d93";
+        String netIdParameter = getTestParameter().get("integrationtest.openstack.publicNetId");
+        parameters.put("networkingOption", "self-service");
+        parameters.put("publicNetId", netIdParameter == null ? defaultNetId : netIdParameter);
+        network.setParameters(parameters);
+        return network;
+    }
+
+    @Override
     public String getPlatform() {
         return OPENSTACK_CAPITAL;
+    }
+
+    @Override
+    public String getCredentialName() {
+        return CREDNAME;
     }
 
     public Map<String, Object> openstackCredentialDetails() {
@@ -143,20 +163,5 @@ public class OpenstackCloudProvider extends CloudProviderHelper {
         map.put("selector", "cb-keystone-v2");
 
         return map;
-    }
-
-    @Override
-    NetworkV2Request network() {
-        NetworkV2Request network = new NetworkV2Request();
-        network.setSubnetCIDR("10.0.0.0/16");
-
-        Map<String, Object> parameters = new HashMap<>();
-
-        String defaultNetId = "999e09bc-cf75-4a19-98fb-c0b4ddee6d93";
-        String netIdParameter = getTestParameter().get("integrationtest.openstack.publicNetId");
-        parameters.put("networkingOption", "self-service");
-        parameters.put("publicNetId", netIdParameter == null ? defaultNetId : netIdParameter);
-        network.setParameters(parameters);
-        return network;
     }
 }

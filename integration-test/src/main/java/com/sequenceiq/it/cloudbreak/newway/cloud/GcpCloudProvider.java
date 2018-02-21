@@ -15,7 +15,7 @@ public class GcpCloudProvider extends CloudProviderHelper {
 
     public static final String GCP_CAPITAL = "GCP";
 
-    private static final String CREDNAME = "its-gcp-credandsmoke-cred-ss";
+    public static final String CREDNAME = "its-gcp-credandsmoke-cred-ss";
 
     private static final String CREDDESC = "test credential";
 
@@ -43,7 +43,7 @@ public class GcpCloudProvider extends CloudProviderHelper {
     }
 
     @Override
-    String region() {
+    public String region() {
         String region = "europe-west1";
         String regionParam = getTestParameter().get("gcpRegion");
 
@@ -87,8 +87,20 @@ public class GcpCloudProvider extends CloudProviderHelper {
     }
 
     @Override
+    NetworkV2Request network() {
+        NetworkV2Request network = new NetworkV2Request();
+        network.setSubnetCIDR("10.0.0.0/16");
+        return network;
+    }
+
+    @Override
     public String getPlatform() {
         return GCP_CAPITAL;
+    }
+
+    @Override
+    public String getCredentialName() {
+        return CREDNAME;
     }
 
     public Map<String, Object> gcpCredentialDetails() {
@@ -128,12 +140,5 @@ public class GcpCloudProvider extends CloudProviderHelper {
                 .substring(CloudProviderHelper.BEGIN_INDEX));
 
         return map;
-    }
-
-    @Override
-    NetworkV2Request network() {
-        NetworkV2Request network = new NetworkV2Request();
-        network.setSubnetCIDR("10.0.0.0/16");
-        return network;
     }
 }

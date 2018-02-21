@@ -1,0 +1,26 @@
+name: Connectors_test
+parameters:
+  cleanUp: true
+
+tests:
+  - name: region_os_test
+    parameters:
+      provider: openstack
+    classes:
+      - com.sequenceiq.it.cloudbreak.ConnectorsTests
+  - name: region_aws_test
+    parameters:
+      provider: aws
+    classes:
+      - com.sequenceiq.it.cloudbreak.ConnectorsTests
+  - name: region_azure_test
+    parameters:
+      provider: azure
+    classes:
+      - com.sequenceiq.it.cloudbreak.ConnectorsTests
+  - name: region_gcp_test
+    parameters:
+      provider: gcp
+    classes:
+      - com.sequenceiq.it.cloudbreak.ConnectorsTests
+
