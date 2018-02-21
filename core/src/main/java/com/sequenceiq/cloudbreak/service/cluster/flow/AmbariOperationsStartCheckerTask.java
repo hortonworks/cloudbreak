@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.service.ClusterBasedStatusCheckerTask;
-import com.sequenceiq.cloudbreak.service.cluster.AmbariOperationFailedException;
+import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariOperationFailedException;
 
 @Component
 public class AmbariOperationsStartCheckerTask extends ClusterBasedStatusCheckerTask<AmbariOperations> {

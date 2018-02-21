@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.domain.Cluster;
+import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariSecurityConfigProvider;
 
 @Service
 public class AmbariClientProvider {

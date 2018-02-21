@@ -8,7 +8,8 @@ import com.sequenceiq.cloudbreak.reactor.api.event.EventSelectorUtil;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.DisableKerberosRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.DisableKerberosResult;
 import com.sequenceiq.cloudbreak.reactor.handler.ReactorEventHandler;
-import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariClusterConnector;
+import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariClusterConnector;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 import reactor.bus.Event;
 import reactor.bus.EventBus;
@@ -22,6 +23,9 @@ public class DisableKerberosHandler implements ReactorEventHandler<DisableKerber
     @Inject
     private AmbariClusterConnector ambariClusterConnector;
 
+    @Inject
+    private StackService stackService;
+
     @Override
     public String selector() {
         return EventSelectorUtil.selector(DisableKerberosRequest.class);
@@ -31,7 +35,7 @@ public class DisableKerberosHandler implements ReactorEventHandler<DisableKerber
     public void accept(Event<DisableKerberosRequest> event) {
         DisableKerberosResult result;
         try {
-            ambariClusterConnector.disableKerberos(event.getData().getStackId());
+            ambariClusterConnector.disableSecurity(stackService.getByIdWithLists(event.getData().getStackId()));
             result = new DisableKerberosResult(event.getData());
         } catch (Exception e) {
             result = new DisableKerberosResult(e.getMessage(), e, event.getData());

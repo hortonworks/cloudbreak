@@ -1,0 +1,45 @@
+apply plugin: 'java'
+
+repositories {
+    mavenCentral()
+}
+
+jar {
+    baseName = 'blueprint-manager'
+}
+
+dependencies {
+    compile("com.sequenceiq:${ambariClientName}:${ambariClientVersion}") {
+        exclude group: 'org.slf4j'
+    }
+
+    compile project(':orchestrator-api')
+    compile project(':core-model')
+    compile project(':cloud-api')
+
+    compile group: 'com.github.jknack',             name: 'handlebars',                     version: '4.0.6'
+
+    testCompile (group: 'junit', name: 'junit', version: '4+') {
+        exclude group: 'org.hamcrest'
+    }
+    testCompile ('org.mockito:mockito-core:1+') {
+        exclude group: 'org.hamcrest'
+    }
+    testCompile project(path: ':core-model', configuration: 'tests')
+    testCompile 'org.hamcrest:java-hamcrest:2.0.0.0'
+
+}
+
+task testJar(type: Jar, dependsOn: testClasses) {
+    baseName = "test-${project.archivesBaseName}"
+    from sourceSets.test.output
+    from sourceSets.main.output
+}
+
+configurations {
+    tests
+}
+
+artifacts {
+    tests testJar
+}

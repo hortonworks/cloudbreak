@@ -11,7 +11,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.WaitForAmbariServerFa
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.WaitForAmbariServerRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.WaitForAmbariServerSuccess;
 import com.sequenceiq.cloudbreak.reactor.handler.ReactorEventHandler;
-import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariClusterConnector;
+import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariClusterConnector;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 import reactor.bus.Event;
@@ -39,7 +39,7 @@ public class WaitingAmbariServerHandler implements ReactorEventHandler<WaitForAm
         Selectable response;
         try {
             Stack stack = stackService.getById(stackId);
-            ambariClusterConnector.waitForAmbariServer(stack);
+            ambariClusterConnector.waitForServer(stack);
             response = new WaitForAmbariServerSuccess(stackId);
         } catch (Exception e) {
             response = new WaitForAmbariServerFailed(stackId, e);

@@ -81,8 +81,8 @@ public class BlueprintLoaderService {
     private Set<Blueprint> addMissingBlueprints(IdentityUser user, Iterable<Blueprint> blueprints) {
         Set<Blueprint> resultList = new HashSet<>();
         LOGGER.info("Adding default blueprints which are missing for the user.");
-        for (Entry<String, Blueprint> diffBlueprint : collectDeviationOfExistingBlueprintsAndDefaultBlueprints(blueprints).entrySet()) {
-            LOGGER.info("Default Blueprint '{}' needs to add for the '{}' user because the default blueprint missing.",
+        for (Map.Entry<String, Blueprint> diffBlueprint : collectDeviationOfExistingBlueprintsAndDefaultBlueprints(blueprints).entrySet()) {
+            LOGGER.info("Default Blueprint '{}' needs to add for the '{}' user because the default validation missing.",
                     diffBlueprint.getKey(), user.getUserId());
             resultList.add(setupBlueprint(user, diffBlueprint.getValue()));
         }
@@ -99,7 +99,7 @@ public class BlueprintLoaderService {
             if (defaultBlueprintExistInTheCache(newBlueprint)
                     && (defaultBlueprintContainsNewTexts(blueprintFromDatabase, newBlueprint)
                     || defaultBlueprintContainsNewDescription(blueprintFromDatabase, newBlueprint))) {
-                LOGGER.info("Default Blueprint '{}' needs to modify for the '{}' user because the blueprint text changed.",
+                LOGGER.info("Default Blueprint '{}' needs to modify for the '{}' user because the validation text changed.",
                         blueprintFromDatabase.getName(), user.getUserId());
                 resultList.add(prepateBlueprint(user, blueprintFromDatabase, newBlueprint));
             }

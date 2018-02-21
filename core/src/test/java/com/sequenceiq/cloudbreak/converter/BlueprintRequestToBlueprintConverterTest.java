@@ -13,9 +13,9 @@ import org.mockito.MockitoAnnotations;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.api.model.BlueprintRequest;
-import com.sequenceiq.cloudbreak.controller.json.JsonHelper;
+import com.sequenceiq.cloudbreak.json.JsonHelper;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.service.blueprint.BlueprintUtils;
+import com.sequenceiq.cloudbreak.blueprint.utils.BlueprintUtils;
 
 public class BlueprintRequestToBlueprintConverterTest extends AbstractJsonConverterTest<BlueprintRequest> {
 

@@ -23,7 +23,12 @@ import com.sequenceiq.cloudbreak.api.model.FileSystemConfiguration;
 import com.sequenceiq.cloudbreak.api.model.FileSystemType;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.model.RecipeType;
-import com.sequenceiq.cloudbreak.core.CloudbreakException;
+import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessor;
+import com.sequenceiq.cloudbreak.blueprint.SmartsenseConfigurationLocator;
+import com.sequenceiq.cloudbreak.blueprint.smartsense.SmartSenseConfigProvider;
+import com.sequenceiq.cloudbreak.blueprint.filesystem.FileSystemConfigurator;
+import com.sequenceiq.cloudbreak.common.model.recipe.RecipeScript;
+import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Credential;
@@ -33,9 +38,7 @@ import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.BlueprintProcessor;
-import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.SmartSenseConfigProvider;
-import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemConfigurator;
+import com.sequenceiq.cloudbreak.service.smartsense.SmartSenseSubscriptionService;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
@@ -64,7 +67,13 @@ public class RecipeEngine {
     @Inject
     private SmartSenseConfigProvider smartSenseConfigProvider;
 
-    public void uploadRecipes(Stack stack, Collection<HostGroup> hostGroups) throws CloudbreakException {
+    @Inject
+    private SmartsenseConfigurationLocator smartsenseConfigurationLocator;
+
+    @Inject
+    private SmartSenseSubscriptionService smartSenseSubscriptionService;
+
+    public void uploadRecipes(Stack stack, Set<HostGroup> hostGroups) throws CloudbreakException {
         Orchestrator orchestrator = stack.getOrchestrator();
         if (recipesSupportedOnOrchestrator(orchestrator)) {
             addFsRecipes(stack, hostGroups);
@@ -219,7 +228,7 @@ public class RecipeEngine {
         try {
             Cluster cluster = stack.getCluster();
             String blueprintText = cluster.getBlueprint().getBlueprintText();
-            if (smartSenseConfigProvider.smartSenseIsConfigurable(blueprintText)) {
+            if (smartsenseConfigurationLocator.smartsenseConfigurable(blueprintText, smartSenseSubscriptionService.getDefault())) {
                 for (HostGroup hostGroup : hostGroups) {
                     if (isComponentPresent(blueprintText, "HST_AGENT", hostGroup)) {
                         String script = FileReaderUtils.readFileFromClasspath("scripts/smartsense-capture-schedule.sh");

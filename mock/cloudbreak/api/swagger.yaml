@@ -5918,7 +5918,7 @@ paths:
         name: "body"
         required: false
         schema:
-          $ref: "#/definitions/LdapValidationRequest"
+          $ref: "#/definitions/LdapblueprintRequest"
       responses:
         200:
           description: "successful operation"
@@ -6658,7 +6658,7 @@ paths:
         name: "body"
         required: false
         schema:
-          $ref: "#/definitions/StackValidationRequest"
+          $ref: "#/definitions/StackblueprintRequest"
       responses:
         default:
           description: "successful operation"
@@ -9275,7 +9275,7 @@ definitions:
       defaultRegion:
         type: "string"
         description: "default regions"
-  StackValidationRequest:
+  StackblueprintRequest:
     type: "object"
     required:
     - "hostGroups"
@@ -10229,7 +10229,7 @@ definitions:
           uniqueItems: true
           items:
             $ref: "#/definitions/CloudGatewayJson"
-  LdapValidationRequest:
+  LdapblueprintRequest:
     type: "object"
     required:
     - "bindDn"

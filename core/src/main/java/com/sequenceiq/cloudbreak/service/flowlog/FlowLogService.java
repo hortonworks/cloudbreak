@@ -19,7 +19,7 @@ import com.sequenceiq.cloudbreak.domain.FlowChainLog;
 import com.sequenceiq.cloudbreak.domain.FlowLog;
 import com.sequenceiq.cloudbreak.repository.FlowChainLogRepository;
 import com.sequenceiq.cloudbreak.repository.FlowLogRepository;
-import com.sequenceiq.cloudbreak.service.ha.CloudbreakNodeConfig;
+import com.sequenceiq.cloudbreak.ha.CloudbreakNodeConfig;
 
 @Service
 @Transactional

@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
-import com.sequenceiq.cloudbreak.service.cluster.ConfigParam;
+import com.sequenceiq.cloudbreak.blueprint.ConfigParam;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 @Component

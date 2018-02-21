@@ -39,8 +39,8 @@ import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.ResourceRepository;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
-import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariClusterConnector;
-import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariDecommissioner;
+import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariClusterConnector;
+import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariDecommissioner;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -255,7 +255,7 @@ public class StackSyncService {
                         throw new NotFoundException(String.format("Host not found with id '%s'", instanceMetaData.getDiscoveryFQDN()));
                     }
                 } else {
-                    if (ambariClusterConnector.isAmbariAvailable(stack)) {
+                    if (ambariClusterConnector.available(stack)) {
                         if (ambariDecommissioner.deleteHostFromAmbari(stack, hostMetadata)) {
                             hostMetadataRepository.delete(hostMetadata.getId());
                             eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(),

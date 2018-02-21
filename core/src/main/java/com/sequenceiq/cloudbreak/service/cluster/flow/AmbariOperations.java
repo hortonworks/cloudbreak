@@ -5,6 +5,7 @@ import java.util.Map;
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.StackContext;
+import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariOperationType;
 
 public class AmbariOperations extends StackContext {
 
