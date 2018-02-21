@@ -37,17 +37,6 @@ public class BlueprintTests extends CloudbreakTest {
 
     public static final String BP_DESCRIPTION = "temporary blueprint for API E2E tests";
 
-    public static final String INVALID_LONG_DESCRIPTION = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-            + "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-            + "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-            + "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-            + "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-            + "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-            + "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-            + "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-            + "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-            + "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
-
     private static final Logger LOGGER = LoggerFactory.getLogger(CloudbreakTest.class);
 
     private String errorMessage = "";
@@ -109,17 +98,6 @@ public class BlueprintTests extends CloudbreakTest {
         given(Blueprint.request()
                 .withName(SPECIAL_BP_NAME)
                 .withDescription(BP_DESCRIPTION)
-                .withAmbariBlueprint(getBlueprintFile()));
-        when(Blueprint.post());
-    }
-
-    //BUG-95609 - Won't fix issue
-    @Test(expectedExceptions = BadRequestException.class)
-    public void testCreateLongDescriptionBlueprint() throws Exception {
-        given(CloudbreakClient.isCreated());
-        given(Blueprint.request()
-                .withName(LONG_DC_BP_NAME)
-                .withDescription(INVALID_LONG_DESCRIPTION)
                 .withAmbariBlueprint(getBlueprintFile()));
         when(Blueprint.post());
     }
