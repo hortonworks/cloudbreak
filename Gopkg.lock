@@ -63,7 +63,10 @@
 [[projects]]
   branch = "master"
   name = "github.com/go-openapi/runtime"
-  packages = [".","client"]
+  packages = [
+    ".",
+    "client"
+  ]
   revision = "bf2ff8f7150788b1c7256abb0805ba0410cbbabb"
 
 [[projects]]
@@ -93,7 +96,11 @@
 [[projects]]
   branch = "master"
   name = "github.com/mailru/easyjson"
-  packages = ["buffer","jlexer","jwriter"]
+  packages = [
+    "buffer",
+    "jlexer",
+    "jwriter"
+  ]
   revision = "2a92e673c9a6302dd05c3a691ae1f24aef46457d"
 
 [[projects]]
@@ -126,13 +133,31 @@
 
 [[projects]]
   name = "golang.org/x/net"
-  packages = ["context","context/ctxhttp","idna"]
+  packages = [
+    "context",
+    "context/ctxhttp",
+    "idna"
+  ]
   revision = "07b51741c1d6423d4a6abab1c49940ec09cb1aaf"
 
 [[projects]]
   branch = "master"
   name = "golang.org/x/text"
-  packages = ["internal/gen","internal/triegen","internal/ucd","transform","unicode/cldr","unicode/norm","width"]
+  packages = [
+    "encoding",
+    "encoding/internal",
+    "encoding/internal/identifier",
+    "encoding/unicode",
+    "internal/gen",
+    "internal/triegen",
+    "internal/ucd",
+    "internal/utf8internal",
+    "runes",
+    "transform",
+    "unicode/cldr",
+    "unicode/norm",
+    "width"
+  ]
   revision = "bd91bbf73e9a4a801adbfb97133c992678533126"
 
 [[projects]]
@@ -142,9 +167,24 @@
   revision = "9bd2f442688b66c5289262d70f537c2ecf81d7de"
 
 [[projects]]
+  name = "gopkg.in/asn1-ber.v1"
+  packages = ["."]
+  revision = "379148ca0225df7a432012b8df0355c2a2063ac0"
+  version = "v1.2"
+
+[[projects]]
+  name = "gopkg.in/ldap.v2"
+  packages = ["."]
+  revision = "bb7a9ca6e4fbc2129e3db588a34bc970ffe811a9"
+  version = "v2.5.1"
+
+[[projects]]
   branch = "v2"
   name = "gopkg.in/mgo.v2"
-  packages = ["bson","internal/json"]
+  packages = [
+    "bson",
+    "internal/json"
+  ]
   revision = "3f83fa5005286a7fe593b055f0d7771a7dce4655"
 
 [[projects]]
@@ -155,6 +195,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "a41427caa57106e1b0dfff4a0acc6b067ab4ee6a122f48aaacb03e20f00e6adb"
+  inputs-digest = "4313ba8c67100349a779c3bea0a079c7e4d47278df0229df4c57ac7ae22981f4"
   solver-name = "gps-cdcl"
   solver-version = 1
