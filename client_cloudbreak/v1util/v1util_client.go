@@ -25,6 +25,34 @@ type Client struct {
 }
 
 /*
+CheckClientVersion checks the client version
+*/
+func (a *Client) CheckClientVersion(params *CheckClientVersionParams) (*CheckClientVersionOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewCheckClientVersionParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "checkClientVersion",
+		Method:             "GET",
+		PathPattern:        "/v1/util/client/{version}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &CheckClientVersionReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*CheckClientVersionOK), nil
+
+}
+
+/*
 CreateRDSDatabaseUtil creates a database connection parameters
 */
 func (a *Client) CreateRDSDatabaseUtil(params *CreateRDSDatabaseUtilParams) (*CreateRDSDatabaseUtilOK, error) {

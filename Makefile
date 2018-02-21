@@ -1,8 +1,9 @@
 BINARY=cb
 
-VERSION ?= snapshot
+VERSION ?= $(shell git describe --tags --abbrev=0)-snapshot
 BUILD_TIME=$(shell date +%FT%T)
 LDFLAGS=-ldflags "-X github.com/hortonworks/cb-cli/cli.Version=${VERSION} -X github.com/hortonworks/cb-cli/cli.BuildTime=${BUILD_TIME}"
+LDFLAGS_NOVER=-ldflags "-X github.com/hortonworks/cb-cli/cli.Version=snapshot -X github.com/hortonworks/cb-cli/cli.BuildTime=${BUILD_TIME}"
 GOFILES_NOVENDOR = $(shell find . -type f -name '*.go' -not -path "./vendor/*" -not -path "./.git/*")
 CB_IP = $(shell echo \${IP})
 ifeq ($(CB_IP),)
@@ -44,17 +45,28 @@ coverage-html:
 
 build: errcheck format vet test build-darwin build-linux build-windows
 
+build-version: errcheck format vet test build-darwin-version build-linux-version build-windows-version
+
 build-docker:
 	@#USER_NS='-u $(shell id -u $(whoami)):$(shell id -g $(whoami))'
 	docker run --rm ${USER_NS} -v "${PWD}":/go/src/github.com/hortonworks/cb-cli -w /go/src/github.com/hortonworks/cb-cli -e VERSION=${VERSION} golang:1.9 make deps-errcheck build
 
 build-darwin:
-	GOOS=darwin CGO_ENABLED=0 go build -a ${LDFLAGS} -o build/Darwin/${BINARY} main.go
+	GOOS=darwin CGO_ENABLED=0 go build -a ${LDFLAGS_NOVER} -o build/Darwin/${BINARY} main.go
 
 build-linux:
-	GOOS=linux CGO_ENABLED=0 go build -a ${LDFLAGS} -o build/Linux/${BINARY} main.go
+	GOOS=linux CGO_ENABLED=0 go build -a ${LDFLAGS_NOVER} -o build/Linux/${BINARY} main.go
 
 build-windows:
+	GOOS=windows CGO_ENABLED=0 go build -a ${LDFLAGS_NOVER} -o build/Windows/${BINARY}.exe main.go
+
+build-darwin-version:
+	GOOS=darwin CGO_ENABLED=0 go build -a ${LDFLAGS} -o build/Darwin/${BINARY} main.go
+
+build-linux-version:
+	GOOS=linux CGO_ENABLED=0 go build -a ${LDFLAGS} -o build/Linux/${BINARY} main.go
+
+build-windows-version:
 	GOOS=windows CGO_ENABLED=0 go build -a ${LDFLAGS} -o build/Windows/${BINARY}.exe main.go
 
 generate-swagger:

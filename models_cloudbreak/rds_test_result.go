@@ -18,7 +18,7 @@ import (
 
 type RdsTestResult struct {
 
-	// result of RDS connection test
+	// result of Ldap connection test
 	// Required: true
 	ConnectionResult *string `json:"connectionResult"`
 }

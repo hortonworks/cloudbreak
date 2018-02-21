@@ -48,6 +48,7 @@ func CreateStack(c *cli.Context) {
 
 	req := assembleStackRequest(c)
 	cbClient := NewCloudbreakHTTPClientFromContext(c)
+	utils.CheckClientVersion(cbClient.Cloudbreak.V1util, Version)
 	cbClient.createStack(req, c.Bool(FlPublicOptional.Name))
 
 	if c.Bool(FlWaitOptional.Name) {
