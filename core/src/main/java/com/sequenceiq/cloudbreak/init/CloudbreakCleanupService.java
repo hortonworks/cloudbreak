@@ -96,6 +96,7 @@ public class CloudbreakCleanupService implements ApplicationListener<ContextRefr
         List<Stack> stacksToSync = resetStackStatus(stackIdsUnderOperation);
         List<Cluster> clustersToSync = resetClusterStatus(stacksToSync, stackIdsUnderOperation);
         triggerSyncs(stacksToSync, clustersToSync);
+        flowLogService.purgeTerminatedStacksFlowLogs();
     }
 
     private List<Stack> resetStackStatus(Collection<Long> excludeStackIds) {
