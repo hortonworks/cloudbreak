@@ -3,6 +3,7 @@ package utils
 import (
 	"fmt"
 	"reflect"
+	"regexp"
 	"runtime"
 	"strings"
 
@@ -20,10 +21,10 @@ func (e *RESTError) Error() string {
 }
 
 func (e *RESTError) ShortError() string {
-	pattern := "Exception: "
+	re := regexp.MustCompile("^Failed to convert from type .*] (.*)$")
 	message := fmt.Sprintf("%+v", e.Response)
-	if idx := strings.LastIndex(message, pattern); idx > -1 {
-		message = message[idx+len(pattern):]
+	if m := re.FindStringSubmatch(message); len(m) > 1 {
+		message = m[1]
 	}
 	return fmt.Sprintf("status code: %d, message: %+v ", e.Code, message)
 }
