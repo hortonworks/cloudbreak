@@ -3,7 +3,7 @@ define run_test
     bats --tap e2e/${1}.bats | tee ${1}-result.tap
 endef
 
-all: cbm integration-test
+all: cbm docker-integration-test stop-cbm generate-xunit-result
 
 cbm: 
 	./scripts/cbm.sh
@@ -14,8 +14,24 @@ integration-test:
 e2e-test:
 	./scripts/e2e-test.sh
 
+docker-integration-test:
+	./scripts/docker-integration-test.sh
+
+docker-e2e-test:
+	./scripts/run-e2e-test.sh
+
 run-e2e-suite:
 	$(call run_test,${test})
 
 run-e2e-regression:
 	bats --tap e2e/*.bats | tee regressiontest-results.tap
+
+generate-xunit-result:
+	./scripts/generate-xunit-result.sh
+stop-cbm:
+	docker-compose down
+
+clean-test-result:
+	rm -f test-result.tap
+
+clean: stop-cbm clean-test-result

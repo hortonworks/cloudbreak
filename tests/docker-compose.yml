@@ -3,10 +3,10 @@ traefik:
         - "172.17.0.1:8081:8080"
         - 80:80
         - 443:443
+        - 9090:8080
     links:
-        - consul
         - identity
-        - sultans
+        - consul
     volumes:
         - /var/run/docker.sock:/var/run/docker.sock
         - ./certs:/certs/traefik
@@ -15,7 +15,7 @@ traefik:
         max-file: "5"
     image: traefik:v1.3.8-alpine
     restart: on-failure
-    command: --debug --web --InsecureSkipVerify=true         --defaultEntryPoints=http,https         --entryPoints='Name:http Address::80 Redirect.EntryPoint:https'         --entryPoints='Name:https Address::443 TLS:/certs/traefik/client.pem,/certs/traefik/client-key.pem'         --maxidleconnsperhost=100         --traefikLogsFile=/opt/traefik/log/traefik.log         --accessLogsFile=/opt/traefik/log/access.log         --docker         --consul --consul.endpoint=consul:8500
+    command: --debug --web --InsecureSkipVerify=true         --defaultEntryPoints=http,https         --entryPoints='Name:http Address::80 Redirect.EntryPoint:https'         --entryPoints='Name:https Address::443 TLS:/certs/traefik/client.pem,/certs/traefik/client-key.pem'         --maxidleconnsperhost=100         --traefikLogsFile=/opt/traefik/log/traefik.log         --accessLogsFile=/opt/traefik/log/access.log         --docker         --consul --consul.endpoint=consul:8500 
 haveged:
     labels:
       - traefik.enable=false
@@ -44,7 +44,7 @@ consul:
         max-size: "10M"
         max-file: "5"
     image: gliderlabs/consul-server:0.5
-    command: --bootstrap --advertise 172.17.0.1 -recursor 169.254.169.254
+    command: --bootstrap --advertise 172.17.0.1 -recursor 169.254.169.254 
 
 registrator:
     labels:
@@ -89,8 +89,6 @@ cloudbreak:
     ports:
         - 8080:8080
     dns: 172.17.0.1
-    links:
-        - consul
     log_opt:
         max-size: "10M"
         max-file: "5"
@@ -131,3 +129,11 @@ sultans:
         max-size: "10M"
         max-file: "5"
     image: hortonworks/hdc-auth:2.1.0-dev.374
+test:
+   volumes:
+    - .:/work
+    - ../build/Linux:/usr/local/bin
+   working_dir: /work
+   net: host
+   image: afarsang/docker-bats-jq
+   command: ./scripts/integration-test.sh 

@@ -97,6 +97,12 @@ upload_s3:
 linux-test: build-linux
 	docker run --rm -it -v ${PWD}/build/Linux/:/usr/sbin/ --name "${BINARY}" alpine sh
 
+integration-test: build-docker
+	make -C tests all
+
+e2e-test:
+	make -C docker-integration-test
+
 .DEFAULT_GOAL := build
 
 .PHONY: build release

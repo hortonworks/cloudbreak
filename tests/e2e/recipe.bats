@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+load ../utils/e2e_parameters
 load ../utils/commands
 
 @test "Check recipe create from url pre-ambari-start" {

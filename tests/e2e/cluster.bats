@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+load ../utils/e2e_parameters
 load ../utils/commands
 load ../utils/resources
 
