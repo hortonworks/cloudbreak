@@ -41,6 +41,27 @@ func (l *ldap) DataAsStringArray() []string {
 		l.UserObjectClass, l.GroupMemberAttribute, l.GroupNameAttribute, l.GroupObjectClass, l.GroupSearchBase}
 }
 
+var LdapUsers = []string{"Distinguished Names", "Member of Group"}
+
+type ldapUserSearchResult struct {
+	Name     string `json:"Name" yaml:"Name"`
+	MemberOf string `json:"MemberOf" yaml:"MemberOf"`
+}
+
+func (l *ldapUserSearchResult) DataAsStringArray() []string {
+	return []string{l.Name, l.MemberOf}
+}
+
+var LdapGroups = []string{"Distinguished Names"}
+
+type ldapGroupSearchResult struct {
+	Name string `json:"Name" yaml:"Name"`
+}
+
+func (l *ldapGroupSearchResult) DataAsStringArray() []string {
+	return []string{l.Name}
+}
+
 type ldapClient interface {
 	PostPrivateLdap(params *v1ldap.PostPrivateLdapParams) (*v1ldap.PostPrivateLdapOK, error)
 	PostPublicLdap(params *v1ldap.PostPublicLdapParams) (*v1ldap.PostPublicLdapOK, error)
@@ -313,6 +334,79 @@ func DeleteLdapGroup(c *cli.Context) error {
 	return nil
 }
 
+func ListLdapUsers(c *cli.Context) error {
+	checkRequiredFlagsAndArguments(c)
+	defer utils.TimeTrack(time.Now(), "list ldap users")
+
+	directoryType := c.String(FlLdapDirectoryType.Name)
+	validateDirectoryTypeToManageUsers(directoryType)
+
+	bindUser := c.String(FlLdapBindDN.Name)
+	bindPassword := c.String(FlLdapBindPassword.Name)
+	ldapServer := c.String(FlLdapServer.Name)
+	searchBase := c.String(FlLdapUserSearchBase.Name)
+
+	ldap := connectLdap(ldapServer, bindUser, bindPassword)
+	defer ldap.Close()
+
+	searchReq := ldaputils.NewSearchRequest(searchBase,
+		ldaputils.ScopeWholeSubtree, ldaputils.NeverDerefAliases, 0, 0, false,
+		"(&(objectClass=user))", []string{"dn", "memberOf"}, nil,
+	)
+
+	result := ldapSearch(ldap, searchReq)
+	searchResults := convertLdapEntryToUserSearchResult(result.Entries)
+
+	var tableRows []utils.Row
+	for _, l := range searchResults {
+		row := &ldapUserSearchResult{
+			Name:     l.Name,
+			MemberOf: l.MemberOf,
+		}
+		tableRows = append(tableRows, row)
+	}
+	output := utils.Output{Format: c.String(FlOutputOptional.Name)}
+	output.WriteList(LdapUsers, tableRows)
+
+	return nil
+}
+
+func ListLdapGroups(c *cli.Context) error {
+	checkRequiredFlagsAndArguments(c)
+	defer utils.TimeTrack(time.Now(), "list ldap groups")
+
+	directoryType := c.String(FlLdapDirectoryType.Name)
+	validateDirectoryTypeToManageUsers(directoryType)
+
+	bindUser := c.String(FlLdapBindDN.Name)
+	bindPassword := c.String(FlLdapBindPassword.Name)
+	ldapServer := c.String(FlLdapServer.Name)
+	searchBase := c.String(FlLdapGroupSearchBase.Name)
+
+	ldap := connectLdap(ldapServer, bindUser, bindPassword)
+	defer ldap.Close()
+
+	searchReq := ldaputils.NewSearchRequest(searchBase,
+		ldaputils.ScopeWholeSubtree, ldaputils.NeverDerefAliases, 0, 0, false,
+		"(&(objectClass=group))", []string{"dn"}, nil,
+	)
+
+	result := ldapSearch(ldap, searchReq)
+	searchResults := convertLdapEntryToGroupSearchResult(result.Entries)
+
+	var tableRows []utils.Row
+	for _, l := range searchResults {
+		row := &ldapGroupSearchResult{
+			Name: l.Name,
+		}
+		tableRows = append(tableRows, row)
+	}
+	output := utils.Output{Format: c.String(FlOutputOptional.Name)}
+	output.WriteList(LdapGroups, tableRows)
+
+	return nil
+}
+
 func ldapAdd(ldap *ldaputils.Conn, objectAttributes []ldaputils.Attribute, objectDn string) {
 	log.Infof("[ldapAdd] create object: %s", objectDn)
 	addRequest := &ldaputils.AddRequest{
@@ -332,6 +426,41 @@ func ldapDel(ldap *ldaputils.Conn, dn string) {
 		utils.LogErrorAndExit(err)
 	}
 	log.Infof("[ldapDel] object successfully deleted: %s", dn)
+}
+
+func ldapSearch(ldap *ldaputils.Conn, searchRequest *ldaputils.SearchRequest) *ldaputils.SearchResult {
+	log.Infof("[ldapSearch] execute LDAP search: %s with filter %s", searchRequest.BaseDN, searchRequest.Filter)
+	result, err := ldap.Search(searchRequest)
+	if err != nil {
+		utils.LogErrorAndExit(err)
+	}
+	log.Infof("[ldapSearch] LDAP search successfully finished")
+	return result
+}
+
+func convertLdapEntryToUserSearchResult(entries []*ldaputils.Entry) []ldapUserSearchResult {
+	var result = make([]ldapUserSearchResult, 0)
+	for _, e := range entries {
+		memberOf := ""
+		for _, attr := range e.Attributes {
+			if len(attr.Values) > 0 && len(attr.Name) > 0 && attr.Name == "memberOf" {
+				memberOf = strings.Join(attr.Values, ";")
+				break
+			}
+		}
+		result = append(result, ldapUserSearchResult{e.DN, memberOf})
+	}
+	return result
+}
+
+func convertLdapEntryToGroupSearchResult(entries []*ldaputils.Entry) []ldapGroupSearchResult {
+	var result = make([]ldapGroupSearchResult, 0)
+	if entries != nil {
+		for _, e := range entries {
+			result = append(result, ldapGroupSearchResult{e.DN})
+		}
+	}
+	return result
 }
 
 func connectLdap(ldapServer, bindUser, bindPassword string) *ldaputils.Conn {

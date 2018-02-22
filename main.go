@@ -917,6 +917,19 @@ func main() {
 							},
 						},
 						{
+							Name:  "list",
+							Usage: "list the LDAP users in the given base",
+							Flags: cb.NewFlagBuilder().AddOutputFlag().AddFlags(cb.FlLdapServer,
+								cb.FlLdapBindDN, cb.FlLdapBindPassword, cb.FlLdapUserSearchBase, cb.FlLdapDirectoryType).Build(),
+							Action: cb.ListLdapUsers,
+							BashComplete: func(c *cli.Context) {
+								for _, f := range cb.NewFlagBuilder().AddOutputFlag().AddFlags(cb.FlLdapServer,
+									cb.FlLdapBindDN, cb.FlLdapBindPassword, cb.FlLdapUserSearchBase, cb.FlLdapDirectoryType).Build() {
+									printFlagCompletion(f)
+								}
+							},
+						},
+						{
 							Name:  "delete",
 							Usage: "delete a user from LDAP",
 							Flags: cb.NewFlagBuilder().AddFlags(cb.FlLdapServer,
@@ -946,6 +959,19 @@ func main() {
 							BashComplete: func(c *cli.Context) {
 								for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlLdapServer,
 									cb.FlLdapBindDN, cb.FlLdapBindPassword, cb.FlLdapGroupToCreate, cb.FlLdapGroupToCreateBase, cb.FlLdapDirectoryType).Build() {
+									printFlagCompletion(f)
+								}
+							},
+						},
+						{
+							Name:  "list",
+							Usage: "list the LDAP groups in the given base",
+							Flags: cb.NewFlagBuilder().AddOutputFlag().AddFlags(cb.FlLdapServer,
+								cb.FlLdapBindDN, cb.FlLdapBindPassword, cb.FlLdapGroupSearchBase, cb.FlLdapDirectoryType).Build(),
+							Action: cb.ListLdapGroups,
+							BashComplete: func(c *cli.Context) {
+								for _, f := range cb.NewFlagBuilder().AddOutputFlag().AddFlags(cb.FlLdapServer,
+									cb.FlLdapBindDN, cb.FlLdapBindPassword, cb.FlLdapGroupSearchBase, cb.FlLdapDirectoryType).Build() {
 									printFlagCompletion(f)
 								}
 							},
