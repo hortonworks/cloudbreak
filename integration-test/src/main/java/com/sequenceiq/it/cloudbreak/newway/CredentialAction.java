@@ -1,6 +1,7 @@
 package com.sequenceiq.it.cloudbreak.newway;
 
 import com.sequenceiq.it.IntegrationTestContext;
+import com.sequenceiq.it.cloudbreak.newway.log.Log;
 
 class CredentialAction {
 
@@ -12,6 +13,7 @@ class CredentialAction {
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT,
                 CloudbreakClient.class);
+        Log.log(" post private credential. ");
         credentialEntity.setResponse(
                 client.getCloudbreakClient()
                         .credentialEndpoint()
@@ -23,6 +25,7 @@ class CredentialAction {
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT,
                 CloudbreakClient.class);
+        Log.log(" get private credential. ");
         credentialEntity.setResponse(
                 client.getCloudbreakClient()
                         .credentialEndpoint()
@@ -34,9 +37,9 @@ class CredentialAction {
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT,
                 CloudbreakClient.class);
+        Log.log(" get all private credential. ");
         credentialEntity.setResponses(
                 client.getCloudbreakClient().credentialEndpoint().getPrivates());
-
     }
 
     public static void delete(IntegrationTestContext integrationTestContext, Entity entity) {
@@ -44,6 +47,7 @@ class CredentialAction {
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT,
                 CloudbreakClient.class);
+        Log.log(" delete private credential. ");
         client.getCloudbreakClient().credentialEndpoint()
                 .deletePrivate(credentialEntity.getName());
     }
