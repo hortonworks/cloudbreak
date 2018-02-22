@@ -1,6 +1,7 @@
 package com.sequenceiq.it.cloudbreak.newway;
 
 import com.sequenceiq.it.IntegrationTestContext;
+import com.sequenceiq.it.cloudbreak.newway.log.Log;
 
 class BlueprintAction {
 
@@ -12,6 +13,7 @@ class BlueprintAction {
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT,
                 CloudbreakClient.class);
+        Log.log(" post " + blueprintEntity.getName() + " private blueprint. ");
         blueprintEntity.setResponse(
                 client.getCloudbreakClient()
                         .blueprintEndpoint()
@@ -23,6 +25,7 @@ class BlueprintAction {
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT,
                 CloudbreakClient.class);
+        Log.log(" get " + blueprintEntity.getName() + " private blueprint by Name. ");
         blueprintEntity.setResponse(
                 client.getCloudbreakClient()
                         .blueprintEndpoint()
@@ -34,6 +37,7 @@ class BlueprintAction {
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT,
                 CloudbreakClient.class);
+        Log.log(" get all private blueprints. ");
         blueprintEntity.setResponses(
                 client.getCloudbreakClient()
                         .blueprintEndpoint()
@@ -45,6 +49,7 @@ class BlueprintAction {
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT,
                 CloudbreakClient.class);
+        Log.log(" delete " + blueprintEntity.getName() + " private blueprint with Name. ");
         client.getCloudbreakClient().blueprintEndpoint().deletePrivate(blueprintEntity.getName());
     }
 
