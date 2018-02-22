@@ -21,20 +21,20 @@ import com.sequenceiq.it.cloudbreak.newway.Recipe;
 
 
 public class RecipeTests extends CloudbreakTest {
-    public static final String VALID_RECIPE_NAME = "valid-recipe";
+    private static final String VALID_RECIPE_NAME = "valid-recipe";
 
-    public static final String VALID_RECIPE_DESCRIPTION = "recipe for API E2E tests";
+    private static final String VALID_RECIPE_DESCRIPTION = "recipe for API E2E tests";
 
-    public static final String VALID_RECIPE_URI = "https://gist.githubusercontent.com/aszegedi/4fc4a6a2fd319da436df6441c04c68e1/"
+    private static final String VALID_RECIPE_URI = "https://gist.githubusercontent.com/aszegedi/4fc4a6a2fd319da436df6441c04c68e1/"
             + "raw/5698a1106a2365eb543e9d3c830e14f955882437/post-install.sh";
 
-    public static final String VALID_RECIPE_SCRIPT = "echo test";
+    private static final String VALID_RECIPE_SCRIPT = "echo test";
 
-    public static final String VALID_RECIPE_SCRIPT_FILE = "classpath:/recipes/valid_recipe.sh";
+    private static final String VALID_RECIPE_SCRIPT_FILE = "classpath:/recipes/valid_recipe.sh";
 
-    public static final String INVALID_RECIPE_NAME_SHORT = "test";
+    private static final String INVALID_RECIPE_NAME_SHORT = "test";
 
-    public static final String SPECIAL_RECIPE_NAME = "@#$%|:&*;";
+    private static final String SPECIAL_RECIPE_NAME = "@#$%|:&*;";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RecipeTests.class);
 

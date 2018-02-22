@@ -1,9 +1,9 @@
 package com.sequenceiq.it.cloudbreak.newway;
 
-import com.sequenceiq.it.IntegrationTestContext;
-
 import java.util.function.BiConsumer;
 import java.util.function.Function;
+
+import com.sequenceiq.it.IntegrationTestContext;
 
 public class ImageCatalog extends ImageCatalogEntity {
 
@@ -22,6 +22,18 @@ public class ImageCatalog extends ImageCatalogEntity {
     public static ImageCatalog isCreated() {
         ImageCatalog imageCatalog = new ImageCatalog();
         imageCatalog.setCreationStrategy(ImageCatalogAction::createInGiven);
+        return imageCatalog;
+    }
+
+    public static ImageCatalog isCreatedDeleted() {
+        ImageCatalog  imageCatalog = new ImageCatalog();
+        imageCatalog.setCreationStrategy(ImageCatalogAction::createDeleteInGiven);
+        return imageCatalog;
+    }
+
+    public static ImageCatalog isCreatedAsDefault() {
+        ImageCatalog  imageCatalog = new ImageCatalog();
+        imageCatalog.setCreationStrategy(ImageCatalogAction::createAsDefaultInGiven);
         return imageCatalog;
     }
 
@@ -55,5 +67,13 @@ public class ImageCatalog extends ImageCatalogEntity {
 
     public static Assertion<ImageCatalog> assertThis(BiConsumer<ImageCatalog, IntegrationTestContext> check) {
         return new Assertion<>(getTestContext(GherkinTest.RESULT), check);
+    }
+
+    public static Action<ImageCatalog> setDefault(String key) {
+        return new Action<ImageCatalog>(getTestContext(key), ImageCatalogAction::putSetDefaultByName);
+    }
+
+    public static Action<ImageCatalog> setDefault() {
+        return setDefault(IMAGE_CATALOG);
     }
 }
