@@ -8,6 +8,8 @@ import (
 )
 
 func TestWriteConfigToFileDirExists(t *testing.T) {
+	t.Parallel()
+
 	tempDirName, _ := ioutil.TempDir("", "configwritetest")
 	defer os.RemoveAll(tempDirName)
 	os.MkdirAll(tempDirName+string(filepath.Separator)+Config_dir, 0700)
@@ -18,6 +20,8 @@ func TestWriteConfigToFileDirExists(t *testing.T) {
 }
 
 func TestWriteConfigToFileDirNotExists(t *testing.T) {
+	t.Parallel()
+
 	tempDirName, _ := ioutil.TempDir("", "configwritetest")
 	defer os.RemoveAll(tempDirName)
 
@@ -36,6 +40,8 @@ func validateConfigContent(tempDirName string, t *testing.T) {
 }
 
 func TestReadConfig(t *testing.T) {
+	t.Parallel()
+
 	tempDirName, _ := ioutil.TempDir("", "configreadtest")
 	defer os.RemoveAll(tempDirName)
 

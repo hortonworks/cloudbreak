@@ -43,6 +43,8 @@ func (*mockBlueprintsClient) DeletePrivateBlueprint(params *v1blueprints.DeleteP
 }
 
 func TestListBlueprintsImpl(t *testing.T) {
+	t.Parallel()
+
 	var rows []utils.Row
 
 	listBlueprintsImpl(new(mockBlueprintsClient), func(h []string, r []utils.Row) { rows = r })

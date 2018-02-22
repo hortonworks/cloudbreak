@@ -10,6 +10,8 @@ import (
 var provider cloud.CloudProvider = new(GcpProvider)
 
 func TestCreateCredentialParameters(t *testing.T) {
+	t.Parallel()
+
 	stringFinder := func(in string) string {
 		switch in {
 		case "service-account-private-key-file":

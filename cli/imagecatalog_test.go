@@ -27,6 +27,8 @@ func (*mockGetPublicsImagecatalogsClient) GetPublicsImageCatalogs(params *v1imag
 }
 
 func TestListImagecatalogsImpl(t *testing.T) {
+	t.Parallel()
+
 	var rows []utils.Row
 	listImagecatalogsImpl(new(mockGetPublicsImagecatalogsClient), func(h []string, r []utils.Row) { rows = r })
 	if len(rows) != 1 {

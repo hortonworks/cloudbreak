@@ -9,6 +9,8 @@ import (
 var provider cloud.CloudProvider = new(OpenstackProvider)
 
 func TestKeystoneV2(t *testing.T) {
+	t.Parallel()
+
 	stringFinder := func(in string) string {
 		switch in {
 		case "facing":
@@ -34,6 +36,8 @@ func TestKeystoneV2(t *testing.T) {
 }
 
 func TestKeystoneV3(t *testing.T) {
+	t.Parallel()
+
 	stringFinder := func(in string) string {
 		switch in {
 		case "facing":
@@ -59,6 +63,8 @@ func TestKeystoneV3(t *testing.T) {
 }
 
 func TestValidateAndGetDefaultValue(t *testing.T) {
+	t.Parallel()
+
 	actualValue, _ := validateAndGet("", []string{"default", "not-default"})
 	expectedValue := "default"
 
@@ -68,6 +74,8 @@ func TestValidateAndGetDefaultValue(t *testing.T) {
 }
 
 func TestValidateAndGetValidValue(t *testing.T) {
+	t.Parallel()
+
 	actualValue, _ := validateAndGet("valid", []string{"not-valid", "valid"})
 	expectedValue := "valid"
 
@@ -77,6 +85,8 @@ func TestValidateAndGetValidValue(t *testing.T) {
 }
 
 func TestValidateAndGetInvalidValue(t *testing.T) {
+	t.Parallel()
+
 	_, err := validateAndGet("not-valid", []string{"valid1", "valid2"})
 
 	if err == nil {

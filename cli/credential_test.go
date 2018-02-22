@@ -34,6 +34,8 @@ func (m *mockCredentialCreate) PostPrivateCredential(params *v1credentials.PostP
 }
 
 func TestCreateCredentialPublic(t *testing.T) {
+	t.Parallel()
+
 	boolFinder := func(in string) bool {
 		switch in {
 		case FlPublicOptional.Name:
@@ -66,6 +68,8 @@ func TestCreateCredentialPublic(t *testing.T) {
 }
 
 func TestCreateCredentialPrivate(t *testing.T) {
+	t.Parallel()
+
 	mock := mockCredentialCreate{request: make(chan *models_cloudbreak.CredentialRequest)}
 
 	go func() {
@@ -95,6 +99,8 @@ func (m *mockGetPublicsCredential) GetPublicsCredential(params *v1credentials.Ge
 }
 
 func TestListCredentialsImpl(t *testing.T) {
+	t.Parallel()
+
 	var rows []utils.Row
 
 	listCredentialsImpl(new(mockGetPublicsCredential), func(h []string, r []utils.Row) { rows = r })

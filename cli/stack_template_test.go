@@ -8,6 +8,8 @@ import (
 )
 
 func TestGetNodesByBlueprint(t *testing.T) {
+	t.Parallel()
+
 	bp, _ := ioutil.ReadFile("testdata/blueprint.json")
 
 	nodes := getNodesByBlueprint(bp)

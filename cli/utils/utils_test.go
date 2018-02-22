@@ -6,6 +6,8 @@ import (
 )
 
 func TestRandStr(t *testing.T) {
+	t.Parallel()
+
 	res1 := RandStr(10)
 	res2 := RandStr(10)
 	if len(res1) != 10 || len(res2) != 10 {
@@ -17,6 +19,8 @@ func TestRandStr(t *testing.T) {
 }
 
 func TestSafeInt32ConvertIsNil(t *testing.T) {
+	t.Parallel()
+
 	expected := int32(0)
 	resp := SafeInt32Convert(nil)
 	if resp != expected {
@@ -25,6 +29,8 @@ func TestSafeInt32ConvertIsNil(t *testing.T) {
 }
 
 func TestSafeInt32ConvertIsNotNil(t *testing.T) {
+	t.Parallel()
+
 	expected := int32(0)
 	resp := SafeInt32Convert(&expected)
 	if resp != expected {
@@ -33,6 +39,8 @@ func TestSafeInt32ConvertIsNotNil(t *testing.T) {
 }
 
 func TestSafeStringConvertIsNil(t *testing.T) {
+	t.Parallel()
+
 	resp := SafeStringConvert(nil)
 	if resp != "" {
 		t.Errorf("expected empty != %s", resp)
@@ -40,6 +48,8 @@ func TestSafeStringConvertIsNil(t *testing.T) {
 }
 
 func TestSafeStringConvertIsNotNil(t *testing.T) {
+	t.Parallel()
+
 	expected := "content"
 	resp := SafeStringConvert(&expected)
 	if resp != expected {
@@ -48,6 +58,8 @@ func TestSafeStringConvertIsNotNil(t *testing.T) {
 }
 
 func TestEscapeStringToJson(t *testing.T) {
+	t.Parallel()
+
 	password := EscapeStringToJson("§±!@#$%^&*()_+-=[]{};'\\:\"/.,?><`~")
 	expectedPassword := "§±!@#$%^&*()_+-=[]{};'\\\\:\\\"/.,?><`~"
 	if password != expectedPassword {
@@ -56,6 +68,8 @@ func TestEscapeStringToJson(t *testing.T) {
 }
 
 func TestReadFile(t *testing.T) {
+	t.Parallel()
+
 	content := ReadFile("testdata/file")
 
 	if "content\n" != string(content) {
@@ -64,6 +78,8 @@ func TestReadFile(t *testing.T) {
 }
 
 func TestSemicolonDelimiterConvert(t *testing.T) {
+	t.Parallel()
+
 	result := DelimitedStringToArray("simple;test", ";")
 
 	expected := []string{"simple", "test"}
@@ -73,6 +89,8 @@ func TestSemicolonDelimiterConvert(t *testing.T) {
 }
 
 func TestSemicolonDelimiterConvertToInvalidString(t *testing.T) {
+	t.Parallel()
+
 	result := DelimitedStringToArray("simple,test", ";")
 
 	expected := []string{"simple,test"}
@@ -82,6 +100,8 @@ func TestSemicolonDelimiterConvertToInvalidString(t *testing.T) {
 }
 
 func TestSemicolonDelimiterConvertToEmptyString(t *testing.T) {
+	t.Parallel()
+
 	result := DelimitedStringToArray("", ";")
 
 	expected := make([]string, 0)

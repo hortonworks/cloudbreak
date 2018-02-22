@@ -28,6 +28,8 @@ func (*mockConnectorsClient) GetRegionsByCredentialID(params *v2connectors.GetRe
 }
 
 func TestListRegionsImpl(t *testing.T) {
+	t.Parallel()
+
 	var rows []utils.Row
 	listRegionsImpl(new(mockConnectorsClient), func(h []string, r []utils.Row) { rows = r }, "credentialName")
 	if len(rows) != 1 {
@@ -42,6 +44,8 @@ func TestListRegionsImpl(t *testing.T) {
 }
 
 func TestListAvailabilityZonesImpl(t *testing.T) {
+	t.Parallel()
+
 	var rows []utils.Row
 	listAvailabilityZonesImpl(new(mockConnectorsClient), func(h []string, r []utils.Row) { rows = r }, "credentialName", "region")
 	if len(rows) != 2 {
@@ -110,6 +114,8 @@ func (*mockInstanceTypesClient) GetVMTypesByCredentialID(*v2connectors.GetVMType
 }
 
 func TestListInstanceTypesImpl(t *testing.T) {
+	t.Parallel()
+
 	inputs := []struct {
 		Region, Avzone string
 		Count          int

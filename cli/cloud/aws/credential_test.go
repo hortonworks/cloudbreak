@@ -9,6 +9,8 @@ import (
 var provider cloud.CloudProvider = new(AwsProvider)
 
 func TestCreateRoleBasedCredentialParameters(t *testing.T) {
+	t.Parallel()
+
 	stringFinder := func(in string) string {
 		switch in {
 		case "role-arn":
@@ -29,6 +31,8 @@ func TestCreateRoleBasedCredentialParameters(t *testing.T) {
 }
 
 func TestCreateKeyBasedCredentialParameters(t *testing.T) {
+	t.Parallel()
+
 	stringFinder := func(in string) string {
 		switch in {
 		case "access-key":

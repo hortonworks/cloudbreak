@@ -35,6 +35,8 @@ func (m *mockAccountTagsClient) PutAccountPreferencesEndpoint(params *v1accountp
 }
 
 func TestListAccountTagsImpl(t *testing.T) {
+	t.Parallel()
+
 	var rows []utils.Row
 	listAccountTagsImpl(new(mockAccountTagsClient), func(h []string, r []utils.Row) { rows = r })
 	if len(rows) != 3 {
@@ -52,6 +54,8 @@ func TestListAccountTagsImpl(t *testing.T) {
 }
 
 func TestAddAccountTagsImpl(t *testing.T) {
+	t.Parallel()
+
 	client := &mockAccountTagsClient{params: make(chan map[string]string)}
 	go addAccountTagsImpl(client, "key", "value")
 	m := <-client.params
@@ -65,6 +69,8 @@ func TestAddAccountTagsImpl(t *testing.T) {
 }
 
 func TestDeleteAccountTagsImpl(t *testing.T) {
+	t.Parallel()
+
 	client := &mockAccountTagsClient{params: make(chan map[string]string)}
 	go deleteAccountTagsImpl(client, "key1")
 	m := <-client.params

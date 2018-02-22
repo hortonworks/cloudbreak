@@ -22,10 +22,14 @@ func (c getStackAvailableClient) GetStack(*v1stacks.GetStackParams) (*v1stacks.G
 }
 
 func TestWaitForOperationToFinishImplAvailable(t *testing.T) {
+	t.Parallel()
+
 	waitForOperationToFinishImpl(int64(1), AVAILABLE, AVAILABLE, getStackAvailableClient{})
 }
 
 func TestWaitForOperationToFinishImplSkip(t *testing.T) {
+	t.Parallel()
+
 	client := getStackAvailableClient{}
 	waitForOperationToFinishImpl(int64(1), SKIP, AVAILABLE, client)
 	waitForOperationToFinishImpl(int64(1), AVAILABLE, SKIP, client)
@@ -47,6 +51,8 @@ func (c getStackFailedClient) GetStack(*v1stacks.GetStackParams) (*v1stacks.GetS
 }
 
 func TestWaitForOperationToFinishImplFailedStack(t *testing.T) {
+	t.Parallel()
+
 	defer func() {
 		if r := recover(); r != nil {
 			if r != "cluster operation failed" {
@@ -62,6 +68,8 @@ func TestWaitForOperationToFinishImplFailedStack(t *testing.T) {
 }
 
 func TestWaitForOperationToFinishImplFailedCluster(t *testing.T) {
+	t.Parallel()
+
 	defer func() {
 		if r := recover(); r != nil {
 			if r != "cluster operation failed" {
