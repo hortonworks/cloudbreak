@@ -259,7 +259,12 @@ aws-generate-inline-role-policy() {
                 "ec2:DeleteInternetGateway",
                 "ec2:DeleteRouteTable",
                 "ec2:DeleteRoute",
-                "ec2:DetachInternetGateway"
+                "ec2:DetachInternetGateway",
+                "ec2:RunInstances",
+                "ec2:StartInstances",
+                "ec2:StopInstances",
+                "ec2:TerminateInstances"
+
             ],
             "Resource": [
                 "*"
