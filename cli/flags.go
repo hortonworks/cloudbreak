@@ -344,6 +344,13 @@ var (
 			Usage: "address of the ldap server (e.g: ldap://10.0.0.1:384)",
 		},
 	}
+	FlLdapSecureOptional = BoolFlag{
+		RequiredFlag: OPTIONAL,
+		BoolFlag: cli.BoolFlag{
+			Name:  "ldaps",
+			Usage: "set ldaps if the ldap is secured with SSL",
+		},
+	}
 	FlLdapDomain = StringFlag{
 		RequiredFlag: REQUIRED,
 		StringFlag: cli.StringFlag{

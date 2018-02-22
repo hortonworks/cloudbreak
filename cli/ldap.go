@@ -3,6 +3,7 @@ package cli
 import (
 	"time"
 
+	"crypto/tls"
 	"errors"
 	"fmt"
 	log "github.com/Sirupsen/logrus"
@@ -218,8 +219,9 @@ func CreateLdapUser(c *cli.Context) error {
 	password := c.String(FlLdapUserToCreatePassword.Name)
 	baseDn := c.String(FlLdapUserToCreateBase.Name)
 	groups := c.String(FlLdapUserToCreateGroups.Name)
+	ldaps := c.Bool(FlLdapSecureOptional.Name)
 
-	ldap := connectLdap(ldapServer, bindUser, bindPassword)
+	ldap := connectLdap(ldapServer, bindUser, bindPassword, ldaps)
 	defer ldap.Close()
 
 	encoder := unicode.UTF16(unicode.LittleEndian, unicode.IgnoreBOM).NewEncoder()
@@ -275,8 +277,9 @@ func DeleteLdapUser(c *cli.Context) error {
 	ldapServer := c.String(FlLdapServer.Name)
 	userName := c.String(FlLdapUserToDelete.Name)
 	baseDn := c.String(FlLdapUserToDeleteBase.Name)
+	ldaps := c.Bool(FlLdapSecureOptional.Name)
 
-	ldap := connectLdap(ldapServer, bindUser, bindPassword)
+	ldap := connectLdap(ldapServer, bindUser, bindPassword, ldaps)
 	defer ldap.Close()
 
 	dn := fmt.Sprintf("CN=%s,%s", userName, baseDn)
@@ -297,8 +300,9 @@ func CreateLdapGroup(c *cli.Context) error {
 	ldapServer := c.String(FlLdapServer.Name)
 	group := c.String(FlLdapGroupToCreate.Name)
 	baseDn := c.String(FlLdapGroupToCreateBase.Name)
+	ldaps := c.Bool(FlLdapSecureOptional.Name)
 
-	ldap := connectLdap(ldapServer, bindUser, bindPassword)
+	ldap := connectLdap(ldapServer, bindUser, bindPassword, ldaps)
 	defer ldap.Close()
 
 	groupAttributes := []ldaputils.Attribute{
@@ -324,8 +328,9 @@ func DeleteLdapGroup(c *cli.Context) error {
 	ldapServer := c.String(FlLdapServer.Name)
 	group := c.String(FlLdapGroupToDelete.Name)
 	baseDn := c.String(FlLdapGroupToDeleteBase.Name)
+	ldaps := c.Bool(FlLdapSecureOptional.Name)
 
-	ldap := connectLdap(ldapServer, bindUser, bindPassword)
+	ldap := connectLdap(ldapServer, bindUser, bindPassword, ldaps)
 	defer ldap.Close()
 
 	dn := fmt.Sprintf("CN=%s,%s", group, baseDn)
@@ -345,8 +350,9 @@ func ListLdapUsers(c *cli.Context) error {
 	bindPassword := c.String(FlLdapBindPassword.Name)
 	ldapServer := c.String(FlLdapServer.Name)
 	searchBase := c.String(FlLdapUserSearchBase.Name)
+	ldaps := c.Bool(FlLdapSecureOptional.Name)
 
-	ldap := connectLdap(ldapServer, bindUser, bindPassword)
+	ldap := connectLdap(ldapServer, bindUser, bindPassword, ldaps)
 	defer ldap.Close()
 
 	searchReq := ldaputils.NewSearchRequest(searchBase,
@@ -382,8 +388,9 @@ func ListLdapGroups(c *cli.Context) error {
 	bindPassword := c.String(FlLdapBindPassword.Name)
 	ldapServer := c.String(FlLdapServer.Name)
 	searchBase := c.String(FlLdapGroupSearchBase.Name)
+	ldaps := c.Bool(FlLdapSecureOptional.Name)
 
-	ldap := connectLdap(ldapServer, bindUser, bindPassword)
+	ldap := connectLdap(ldapServer, bindUser, bindPassword, ldaps)
 	defer ldap.Close()
 
 	searchReq := ldaputils.NewSearchRequest(searchBase,
@@ -463,8 +470,14 @@ func convertLdapEntryToGroupSearchResult(entries []*ldaputils.Entry) []ldapGroup
 	return result
 }
 
-func connectLdap(ldapServer, bindUser, bindPassword string) *ldaputils.Conn {
-	ldap, err := ldaputils.Dial("tcp", ldapServer)
+func connectLdap(ldapServer, bindUser, bindPassword string, secure bool) *ldaputils.Conn {
+	var ldap *ldaputils.Conn = nil
+	var err error = nil
+	if secure {
+		ldap, err = ldaputils.DialTLS("tcp", ldapServer, &tls.Config{InsecureSkipVerify: true})
+	} else {
+		ldap, err = ldaputils.Dial("tcp", ldapServer)
+	}
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
