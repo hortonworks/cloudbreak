@@ -219,15 +219,7 @@ func CreateLdapUser(c *cli.Context) error {
 	}
 
 	userDn := fmt.Sprintf("CN=%s,%s", userName, baseDn)
-	log.Infof("[CreateLdapUser] create user: %s", userDn)
-	addRequest := &ldaputils.AddRequest{
-		Attributes: userAttributes,
-		DN:         userDn,
-	}
-	if err := ldap.Add(addRequest); err != nil {
-		utils.LogErrorAndExit(err)
-	}
-	log.Infof("[CreateLdapUser] user successfully created: %s", userDn)
+	ldapAdd(ldap, userAttributes, userDn)
 
 	if len(groups) > 0 {
 		groupArray := utils.DelimitedStringToArray(groups, ";")
@@ -267,13 +259,79 @@ func DeleteLdapUser(c *cli.Context) error {
 	defer ldap.Close()
 
 	dn := fmt.Sprintf("CN=%s,%s", userName, baseDn)
+	ldapDel(ldap, dn)
+
+	return nil
+}
+
+func CreateLdapGroup(c *cli.Context) error {
+	checkRequiredFlagsAndArguments(c)
+	defer utils.TimeTrack(time.Now(), "create ldap group")
+
+	directoryType := c.String(FlLdapDirectoryType.Name)
+	validateDirectoryTypeToManageUsers(directoryType)
+
+	bindUser := c.String(FlLdapBindDN.Name)
+	bindPassword := c.String(FlLdapBindPassword.Name)
+	ldapServer := c.String(FlLdapServer.Name)
+	group := c.String(FlLdapGroupToCreate.Name)
+	baseDn := c.String(FlLdapGroupToCreateBase.Name)
+
+	ldap := connectLdap(ldapServer, bindUser, bindPassword)
+	defer ldap.Close()
+
+	groupAttributes := []ldaputils.Attribute{
+		{Type: "objectclass", Vals: []string{"group"}},
+		{Type: "sAMAccountName", Vals: []string{group}},
+	}
+
+	groupDn := fmt.Sprintf("CN=%s,%s", group, baseDn)
+	ldapAdd(ldap, groupAttributes, groupDn)
+
+	return nil
+}
+
+func DeleteLdapGroup(c *cli.Context) error {
+	checkRequiredFlagsAndArguments(c)
+	defer utils.TimeTrack(time.Now(), "delete ldap group")
+
+	directoryType := c.String(FlLdapDirectoryType.Name)
+	validateDirectoryTypeToManageUsers(directoryType)
+
+	bindUser := c.String(FlLdapBindDN.Name)
+	bindPassword := c.String(FlLdapBindPassword.Name)
+	ldapServer := c.String(FlLdapServer.Name)
+	group := c.String(FlLdapGroupToDelete.Name)
+	baseDn := c.String(FlLdapGroupToDeleteBase.Name)
+
+	ldap := connectLdap(ldapServer, bindUser, bindPassword)
+	defer ldap.Close()
+
+	dn := fmt.Sprintf("CN=%s,%s", group, baseDn)
+	ldapDel(ldap, dn)
+
+	return nil
+}
+
+func ldapAdd(ldap *ldaputils.Conn, objectAttributes []ldaputils.Attribute, objectDn string) {
+	log.Infof("[ldapAdd] create object: %s", objectDn)
+	addRequest := &ldaputils.AddRequest{
+		Attributes: objectAttributes,
+		DN:         objectDn,
+	}
+	if err := ldap.Add(addRequest); err != nil {
+		utils.LogErrorAndExit(err)
+	}
+	log.Infof("[ldapAdd] object successfully created: %s", objectDn)
+}
+
+func ldapDel(ldap *ldaputils.Conn, dn string) {
+	log.Infof("[ldapDel] delete object: %s", dn)
 	delRequest := &ldaputils.DelRequest{DN: dn}
 	if err := ldap.Del(delRequest); err != nil {
 		utils.LogErrorAndExit(err)
 	}
-	log.Infof("[DeleteLdapUser] user successfully deleted: %s", dn)
-
-	return nil
+	log.Infof("[ldapDel] object successfully deleted: %s", dn)
 }
 
 func connectLdap(ldapServer, bindUser, bindPassword string) *ldaputils.Conn {

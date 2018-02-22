@@ -933,6 +933,38 @@ func main() {
 						},
 					},
 				},
+				{
+					Name:  "group",
+					Usage: "manage LDAP groups",
+					Subcommands: []cli.Command{
+						{
+							Name:  "create",
+							Usage: "create a new LDAP group in the given base",
+							Flags: cb.NewFlagBuilder().AddFlags(cb.FlLdapServer,
+								cb.FlLdapBindDN, cb.FlLdapBindPassword, cb.FlLdapGroupToCreate, cb.FlLdapGroupToCreateBase, cb.FlLdapDirectoryType).Build(),
+							Action: cb.CreateLdapGroup,
+							BashComplete: func(c *cli.Context) {
+								for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlLdapServer,
+									cb.FlLdapBindDN, cb.FlLdapBindPassword, cb.FlLdapGroupToCreate, cb.FlLdapGroupToCreateBase, cb.FlLdapDirectoryType).Build() {
+									printFlagCompletion(f)
+								}
+							},
+						},
+						{
+							Name:  "delete",
+							Usage: "delete a group from LDAP",
+							Flags: cb.NewFlagBuilder().AddFlags(cb.FlLdapServer,
+								cb.FlLdapBindDN, cb.FlLdapBindPassword, cb.FlLdapGroupToDelete, cb.FlLdapGroupToDeleteBase, cb.FlLdapDirectoryType).Build(),
+							Action: cb.DeleteLdapGroup,
+							BashComplete: func(c *cli.Context) {
+								for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlLdapServer,
+									cb.FlLdapBindDN, cb.FlLdapBindPassword, cb.FlLdapGroupToDelete, cb.FlLdapGroupToDeleteBase, cb.FlLdapDirectoryType).Build() {
+									printFlagCompletion(f)
+								}
+							},
+						},
+					},
+				},
 			},
 		},
 		{

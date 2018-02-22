@@ -456,6 +456,34 @@ var (
 			Usage: "semicolon separated list of group DNs that the user will be added to (e.g: OU=cloudbreak,CN=Users,DC=ad,DC=cb,DC=com;)",
 		},
 	}
+	FlLdapGroupToCreate = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "ldap-group-to-create",
+			Usage: "name of the ldap group (e.g cloudbreak will create CN=cloudbreak)",
+		},
+	}
+	FlLdapGroupToCreateBase = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "ldap-group-to-create-base",
+			Usage: "base DN where the group will be created (e.g: CN=Users,DC=ad,DC=cb,DC=com)",
+		},
+	}
+	FlLdapGroupToDelete = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "ldap-group-to-delete",
+			Usage: "name of the ldap group",
+		},
+	}
+	FlLdapGroupToDeleteBase = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "ldap-group-to-delete-base",
+			Usage: "base DN from where the group will be deleted (e.g: CN=Users,DC=ad,DC=cb,DC=com)",
+		},
+	}
 	FlLdapUserToDelete = StringFlag{
 		RequiredFlag: REQUIRED,
 		StringFlag: cli.StringFlag{
