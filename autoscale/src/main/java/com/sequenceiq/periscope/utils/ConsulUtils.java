@@ -55,12 +55,13 @@ public final class ConsulUtils {
                 .loadTrustMaterial(KeyStoreUtil.createTrustStore(serverCert), null)
                 .loadKeyMaterial(KeyStoreUtil.createKeyStore(clientCert, clientKey), "consul".toCharArray())
                 .build();
-        PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(setupSchemeRegistry(sslContext));
-        connectionManager.setMaxTotal(MAX_CONNECTION);
-        connectionManager.setDefaultMaxPerRoute(MAX_ROUTE);
-        Builder requestBuilder = RequestConfig.custom()
-                .setConnectTimeout(DEFAULT_TIMEOUT_MS).setConnectionRequestTimeout(DEFAULT_TIMEOUT_MS).setSocketTimeout(DEFAULT_TIMEOUT_MS);
-        return HttpClientBuilder.create().setConnectionManager(connectionManager).setDefaultRequestConfig(requestBuilder.build()).build();
+        try (PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(setupSchemeRegistry(sslContext))) {
+            connectionManager.setMaxTotal(MAX_CONNECTION);
+            connectionManager.setDefaultMaxPerRoute(MAX_ROUTE);
+            Builder requestBuilder = RequestConfig.custom()
+                    .setConnectTimeout(DEFAULT_TIMEOUT_MS).setConnectionRequestTimeout(DEFAULT_TIMEOUT_MS).setSocketTimeout(DEFAULT_TIMEOUT_MS);
+            return HttpClientBuilder.create().setConnectionManager(connectionManager).setDefaultRequestConfig(requestBuilder.build()).build();
+        }
     }
 
     private static Registry<ConnectionSocketFactory> setupSchemeRegistry(SSLContext sslContext) {

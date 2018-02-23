@@ -3,6 +3,8 @@ package com.sequenceiq.cloudbreak.cloud.aws;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNoneEmpty;
 
+import java.io.IOException;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -110,7 +112,11 @@ public class AwsClient {
                 throw new CloudConnectorException("If 'AWS_SECRET_ACCESS_KEY' available then 'AWS_ACCESS_KEY_ID' must be set!");
             } else if (!awsEnvironmentVariableChecker.isAwsAccessKeyAvailable() && !awsEnvironmentVariableChecker.isAwsSecretAccessKeyAvailable()) {
                 try {
-                    new InstanceProfileCredentialsProvider().getCredentials();
+                    try (InstanceProfileCredentialsProvider provider = new InstanceProfileCredentialsProvider()) {
+                        provider.getCredentials();
+                    } catch (IOException e) {
+                        LOGGER.error("Unable to create AWS provider", e);
+                    }
                 } catch (AmazonClientException ignored) {
                     StringBuilder sb = new StringBuilder();
                     sb.append("The 'AWS_ACCESS_KEY_ID' and 'AWS_SECRET_ACCESS_KEY' environment variables must be set ");
