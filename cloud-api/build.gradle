@@ -6,7 +6,7 @@ repositories {
 }
 
 jar {
-    baseName = 'cloud-api'
+    archiveName = 'cloud-api.jar'
 }
 
 dependencies {

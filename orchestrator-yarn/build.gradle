@@ -7,7 +7,7 @@ repositories {
 }
 
 jar {
-  baseName = 'orchestrator-yarn'
+  archiveName = 'orchestrator-yarn.jar'
 }
 
 dependencies {

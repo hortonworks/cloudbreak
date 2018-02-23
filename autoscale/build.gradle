@@ -1,4 +1,7 @@
-buildscript {
+import com.github.zafarkhaja.semver.Version
+import org.ajoberstar.grgit.Grgit
+
+bildscript {
   repositories {
     mavenCentral()
     jcenter()
@@ -9,7 +12,7 @@ buildscript {
 }
 
 jar {
-  baseName = 'periscope'
+  archiveName = 'periscope.jar'
 }
 
 apply plugin: 'org.springframework.boot'
@@ -61,7 +64,7 @@ dependencies {
 task buildInfo(type: BuildInfoTask) {
     destination = file("$buildDir")
     applicationPropertiesPath = "$buildDir"
-    basename = jar.baseName
+    basename = jar.archiveName
     buildVersion = version
 }
 
@@ -81,27 +84,63 @@ test {
 compileJava.dependsOn buildInfo
 
 class BuildInfoTask extends DefaultTask {
-    File destination = new File("build.info")
-    String applicationPropertiesPath
-    String basename
-    String buildVersion
+  File destination = new File("build.info")
+  String applicationPropertiesPath
+  String basename
+  String buildVersion
 
-    @TaskAction
-    def writeBuildInfo() {
-        destination.mkdirs()
-        File applicationDestination = new File(applicationPropertiesPath + "/resources/main")
-        applicationDestination.mkdirs()
-        new File(destination, "build.info").withWriter { out ->
-            [
-                    "ARTIFACT_BASENAME=" + basename,
-                    "ARTIFACT_VERSION=" + buildVersion,
-            ].each { out.println it }
-        }
-        new File(applicationDestination, "application.properties").withWriter { out ->
-            [
-                    "info.app.name=" + basename,
-                    "info.app.version=" + buildVersion
-            ].each { out.println it }
-        }
+  @TaskAction
+  def writeBuildInfo() {
+    File applicationDestination
+
+    // For Local-dev
+    if (buildVersion == "unspecified") {
+      def grgit = Grgit.open(currentDir: '.')
+      def tempBuildVersion = grgit.describe()
+      try {
+        Version v = Version.valueOf(tempBuildVersion)
+        Version.Builder builder = new Version.Builder()
+        builder.setNormalVersion(v.getNormalVersion())
+        builder.setPreReleaseVersion(v.getPreReleaseVersion().split('-')[0])
+        buildVersion = builder.build().toString()
+        project.logger.info("Determined version: " + buildVersion)
+
+      } catch (e) {
+        project.logger.error("Unable to parse git tag as version: " + buildVersion)
+        throw e
+      }
+      applicationDestination = new File("./out/production/resources")
+    } else {
+      applicationDestination = new File(applicationPropertiesPath + "/resources/main")
     }
+
+    destination.mkdirs()
+    String activeProfile = determineActiveProfile()
+    applicationDestination.mkdirs()
+    new File(destination, "build.info").withWriter { out ->
+      [
+          "ARTIFACT_BASENAME=" + basename,
+          "ARTIFACT_VERSION=" + buildVersion,
+      ].each { out.println it }
+    }
+    new File(applicationDestination, "application.properties").withWriter { out ->
+      [
+          "info.app.name=" + basename,
+          "info.app.version=" + buildVersion,
+          "spring.profiles.active=" + activeProfile
+      ].each { out.println it }
+    }
+  }
+
+  private String determineActiveProfile() {
+    String activeProfile = "dev"
+    if (buildVersion.contains("dev") || buildVersion.equals("unspecified")) {
+      activeProfile = "dev"
+    } else if (buildVersion.contains("rc")) {
+      activeProfile = "rc"
+    } else {
+      activeProfile = "prod"
+    }
+    return activeProfile
+  }
 }

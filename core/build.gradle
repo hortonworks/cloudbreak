@@ -1,3 +1,6 @@
+import org.ajoberstar.grgit.Grgit
+import com.github.zafarkhaja.semver.Version
+
 buildscript {
   repositories {
     maven { url 'http://repo.spring.io/libs-release' }
@@ -29,7 +32,7 @@ bootRun {
 }
 
 jar {
-  baseName = 'cloudbreak'
+  archiveName = 'cloudbreak.jar'
 }
 
 dependencies {
@@ -148,7 +151,7 @@ test {
 task buildInfo(type: BuildInfoTask) {
   destination = file("$buildDir")
   applicationPropertiesPath = "$buildDir"
-  basename = jar.baseName
+  basename = jar.archiveName
   buildVersion = version
 }
 
@@ -173,20 +176,59 @@ class BuildInfoTask extends DefaultTask {
 
   @TaskAction
   def writeBuildInfo() {
+    List<File> applicationDestinations = []
+
+    // For Local-dev
+    if (buildVersion == "unspecified") {
+      def grgit = Grgit.open(currentDir: '.')
+      def tempBuildVersion = grgit.describe()
+      try {
+        Version v = Version.valueOf(tempBuildVersion)
+        Version.Builder builder = new Version.Builder()
+        builder.setNormalVersion(v.getNormalVersion())
+        builder.setPreReleaseVersion(v.getPreReleaseVersion().split('-')[0])
+        buildVersion = builder.build().toString()
+        project.logger.info("Determined version: " + buildVersion)
+
+      } catch (e) {
+        project.logger.error("Unable to parse git tag as version: " + buildVersion)
+        throw e
+      }
+      applicationDestinations += project.file("out/production/resources")
+      applicationDestinations += project.file("build/resources/main")
+    } else {
+      applicationDestinations += new File(applicationPropertiesPath + "/resources/main")
+    }
+
     destination.mkdirs()
-    File applicationDestination = new File(applicationPropertiesPath + "/resources/main")
-    applicationDestination.mkdirs()
+    String activeProfile = determineActiveProfile()
     new File(destination, "build.info").withWriter { out ->
       [
-              "ARTIFACT_BASENAME=" + basename,
-              "ARTIFACT_VERSION=" + buildVersion,
+          "ARTIFACT_BASENAME=" + basename,
+          "ARTIFACT_VERSION=" + buildVersion,
       ].each { out.println it }
     }
-    new File(applicationDestination, "application.properties").withWriter { out ->
-      [
-              "info.app.name=" + basename,
-              "info.app.version=" + buildVersion
-      ].each { out.println it }
+    applicationDestinations.each {
+      it.mkdirs()
+      new File(it, "application.properties").withWriter { out ->
+        [
+            "info.app.name=" + basename,
+            "info.app.version=" + buildVersion,
+            "spring.profiles.active=" + activeProfile
+        ].each { out.println it }
+      }
     }
+  }
+
+  private String determineActiveProfile() {
+    String activeProfile = "dev"
+    if (buildVersion.contains("dev") || buildVersion.equals("unspecified")) {
+      activeProfile = "dev"
+    } else if (buildVersion.contains("rc")) {
+      activeProfile = "rc"
+    } else {
+      activeProfile = "prod"
+    }
+    return activeProfile
   }
 }

@@ -18,6 +18,11 @@ else
   SCOPE=patch
 fi
 
-./gradlew -Penv=jenkins -b build.gradle clean build release uploadArchives -Prelease.scope=$SCOPE -Prelease.stage=final --refresh-dependencies --info --stacktrace
+./gradlew -Penv=jenkins -b build.gradle clean build uploadArchives -Preckon.scope=$SCOPE -Preckon.stage=final --refresh-dependencies --info --stacktrace
+RECKONED_VERSION=$(./gradlew -Penv=jenkins -b build.gradle buildInfo -Preckon.scope=$SCOPE -Preckon.stage=final | grep Reckoned)
+VERSION=${RECKONED_VERSION#Reckoned version: }
 
-echo VERSION=$(git describe --abbrev=0 --tags) > $WORKSPACE/version
+git tag $VERSION
+git push origin $VERSION
+
+echo VERSION=$VERSION > $WORKSPACE/version
