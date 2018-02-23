@@ -1,5 +1,26 @@
 'use strict';
 
+exports.checkClientVersion = function(args, res, next) {
+  /**
+   * checks the client version
+   * 
+   *
+   * version String 
+   * returns VersionCheckResult
+   **/
+  var examples = {};
+  examples['application/json'] = {
+  "versionCheckOk" : true,
+  "message" : "aeiou"
+};
+  if (Object.keys(examples).length > 0) {
+    res.setHeader('Content-Type', 'application/json');
+    res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
+  } else {
+    res.end();
+  }
+}
+
 exports.createRDSDatabaseUtil = function(args, res, next) {
   /**
    * create a database connection parameters

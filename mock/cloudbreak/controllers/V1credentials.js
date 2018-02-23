@@ -17,11 +17,7 @@ module.exports.deletePublicCredential = function deletePublicCredential (req, re
 };
 
 module.exports.getCredential = function getCredential (req, res, next) {
-    V1credentials.getCredential(req.swagger.params, res, next);
-};
-
-module.exports.getCredentialRequestFromName = function getCredentialRequestFromName (req, res, next) {
-    V1credentials.getCredentialRequestFromName(req.swagger.params, res, next);
+  V1credentials.getCredential(req.swagger.params, res, next);
 };
 
 module.exports.getPrivateCredential = function getPrivateCredential (req, res, next) {
