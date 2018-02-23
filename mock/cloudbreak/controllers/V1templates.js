@@ -35,11 +35,3 @@ module.exports.getPublicsTemplate = function getPublicsTemplate (req, res, next)
 module.exports.getTemplate = function getTemplate (req, res, next) {
   V1templates.getTemplate(req.swagger.params, res, next);
 };
-
-module.exports.postPrivateTemplate = function postPrivateTemplate (req, res, next) {
-  V1templates.postPrivateTemplate(req.swagger.params, res, next);
-};
-
-module.exports.postPublicTemplate = function postPublicTemplate (req, res, next) {
-  V1templates.postPublicTemplate(req.swagger.params, res, next);
-};
