@@ -5,6 +5,7 @@ repositories {
 }
 
 jar {
+    baseName = 'orchestrator-salt'
     archiveName = 'orchestrator-salt.jar'
 }
 

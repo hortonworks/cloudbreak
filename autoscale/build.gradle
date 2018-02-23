@@ -12,6 +12,7 @@ bildscript {
 }
 
 jar {
+  baseName = 'periscope'
   archiveName = 'periscope.jar'
 }
 

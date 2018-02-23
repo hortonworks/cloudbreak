@@ -32,6 +32,7 @@ bootRun {
 }
 
 jar {
+  baseName = 'cloudbreak'
   archiveName = 'cloudbreak.jar'
 }
 
