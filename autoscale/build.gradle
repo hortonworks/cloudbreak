@@ -76,7 +76,7 @@ dependencies {
 task buildInfo(type: BuildInfoTask) {
     destination = file("$buildDir")
     applicationPropertiesPath = "$buildDir"
-    basename = jar.archiveName
+    basename = jar.baseName
     buildVersion = version
 }
 
