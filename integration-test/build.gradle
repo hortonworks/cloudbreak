@@ -9,7 +9,7 @@ buildscript {
 }
 
 jar {
-  baseName = 'cloudbreak-integration-test'
+  archiveName = 'cloudbreak-integration-test.jar'
 }
 
 apply plugin: 'org.springframework.boot'
@@ -84,7 +84,7 @@ dependencies {
 task buildInfo(type: BuildInfoTask) {
   destination = file("$buildDir")
   applicationPropertiesPath = "$buildDir"
-  basename = jar.baseName
+  basename = jar.archiveName
   buildVersion = version
 }
 

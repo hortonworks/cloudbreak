@@ -1,6 +1,12 @@
 #!/bin/bash -e
 : ${WORKSPACE=.}
 
-./gradlew -Penv=jenkins -b build.gradle clean build release uploadArchives -Prelease.scope=minor -Prelease.stage=dev --info --stacktrace --parallel
+./gradlew -Penv=jenkins -b build.gradle clean build uploadArchives -Preckon.scope=minor -Preckon.stage=dev --info --stacktrace --parallel
 
-echo VERSION=$(git describe --abbrev=0 --tags) > $WORKSPACE/version
+RECKONED_VERSION=$(./gradlew -Penv=jenkins -b build.gradle buildInfo -Preckon.scope=minor -Preckon.stage=dev | grep Reckoned)
+VERSION=${RECKONED_VERSION#Reckoned version: }
+
+git tag $VERSION
+git push origin $VERSION
+
+echo VERSION=$VERSION > $WORKSPACE/version

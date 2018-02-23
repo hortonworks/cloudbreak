@@ -7,7 +7,7 @@ repositories {
 }
 
 jar {
-  baseName = 'cloud-aws'
+  archiveName = 'cloud-aws.jar'
 }
 
 dependencies {

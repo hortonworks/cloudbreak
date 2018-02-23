@@ -7,7 +7,7 @@ repositories {
 }
 
 jar {
-    baseName = 'cloud-gcp'
+    archiveName = 'cloud-gcp.jar'
 }
 
 dependencies {

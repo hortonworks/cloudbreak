@@ -12,7 +12,7 @@ buildscript {
 }
 
 jar {
-  baseName = 'periscope'
+  archiveName = 'periscope.jar'
 }
 
 apply plugin: 'org.springframework.boot'
@@ -75,7 +75,7 @@ dependencies {
 task buildInfo(type: BuildInfoTask) {
     destination = file("$buildDir")
     applicationPropertiesPath = "$buildDir"
-    basename = jar.baseName
+    basename = jar.archiveName
     buildVersion = version
 }
 
@@ -105,7 +105,7 @@ class BuildInfoTask extends DefaultTask {
 
         // For Local-dev
         if (buildVersion == "unspecified") {
-            def grgit = Grgit.open(project.file('./..'))
+            def grgit = Grgit.open(currentDir: '.')
             def tempBuildVersion = grgit.describe()
             try {
                 Version v = Version.valueOf(tempBuildVersion)
