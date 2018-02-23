@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.template;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -32,7 +32,7 @@ import com.sequenceiq.cloudbreak.cloud.template.network.NetworkResourceService;
  * functionality to call the resource builders in order starting from the {@link NetworkResourceBuilder} and continueing with the
  * {@link ComputeResourceBuilder}. Before calling any resource builder it constructs a generic {@link ResourceBuilderContext}. This context object
  * will be extended with the created resources as the builder finish creating them. The resources are grouped by private id.
- * <p/>
+ * <br>
  * Compute resource can be rolled back based on the different failure policies configured. Network resource failure immediately results in a failing deployment.
  */
 public abstract class AbstractResourceConnector implements ResourceConnector<List<CloudResource>> {
@@ -166,8 +166,8 @@ public abstract class AbstractResourceConnector implements ResourceConnector<Lis
         throw new UnsupportedOperationException();
     }
 
-    private List<CloudResource> getCloudResources(List<CloudResourceStatus> resourceStatuses) {
-        List<CloudResource> resources = new ArrayList<>();
+    private Collection<CloudResource> getCloudResources(Iterable<CloudResourceStatus> resourceStatuses) {
+        Collection<CloudResource> resources = new ArrayList<>();
         for (CloudResourceStatus status : resourceStatuses) {
             resources.add(status.getCloudResource());
         }
@@ -176,19 +176,14 @@ public abstract class AbstractResourceConnector implements ResourceConnector<Lis
 
     private Group getScalingGroup(Group scalingGroup) {
         List<CloudInstance> instances = new ArrayList<>(scalingGroup.getInstances());
-        Iterator<CloudInstance> iterator = instances.iterator();
-        while (iterator.hasNext()) {
-            if (InstanceStatus.CREATE_REQUESTED != iterator.next().getTemplate().getStatus()) {
-                iterator.remove();
-            }
-        }
+        instances.removeIf(cloudInstance -> InstanceStatus.CREATE_REQUESTED != cloudInstance.getTemplate().getStatus());
         return new Group(scalingGroup.getName(), scalingGroup.getType(), instances, scalingGroup.getSecurity(), null,
                 scalingGroup.getInstanceAuthentication(),
                 scalingGroup.getInstanceAuthentication().getLoginUserName(),
                 scalingGroup.getInstanceAuthentication().getPublicKey());
     }
 
-    private Group getGroup(List<Group> groups, String groupName) {
+    private Group getGroup(Iterable<Group> groups, String groupName) {
         Group resultGroup = null;
         for (Group group : groups) {
             if (groupName.equalsIgnoreCase(group.getName())) {
@@ -211,8 +206,8 @@ public abstract class AbstractResourceConnector implements ResourceConnector<Lis
         return null;
     }
 
-    private List<CloudResource> getDeleteResources(List<CloudResource> resources, List<CloudInstance> instances) {
-        List<CloudResource> result = new ArrayList<>();
+    private Collection<CloudResource> getDeleteResources(Iterable<CloudResource> resources, Iterable<CloudInstance> instances) {
+        Collection<CloudResource> result = new ArrayList<>();
         for (CloudInstance instance : instances) {
             String instanceId = instance.getInstanceId();
             for (CloudResource resource : resources) {

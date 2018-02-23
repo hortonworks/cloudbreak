@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.structuredevent.db;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.inject.Inject;
 
@@ -58,17 +59,15 @@ public class StructuredEventDBService implements StructuredEventService {
     public List<StructuredEvent> getEventsForUser(String userId, List<String> eventTypes, Map<String, Long> resourceIds) {
         List<StructuredEventEntity> events = Lists.newArrayList();
         for (String eventType : eventTypes) {
-            for (Map.Entry<String, Long> resId : resourceIds.entrySet()) {
+            for (Entry<String, Long> resId : resourceIds.entrySet()) {
                 events.addAll(structuredEventRepository.findByUserIdAndEventTypeAndResourceTypeAndResourceId(
                         userId, eventType, resId.getKey(), resId.getValue()));
             }
         }
-        List<StructuredEvent> structEvents = events != null ? (List) conversionService.convert(events,
+        List<StructuredEvent> structEvents = events != null ? (List<StructuredEvent>) conversionService.convert(events,
                 TypeDescriptor.forObject(events),
                 TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(StructuredEvent.class))) : Collections.emptyList();
-        Collections.sort(structEvents, (StructuredEvent o1, StructuredEvent o2) -> {
-                return (int) (o1.getOperation().getTimestamp() - o2.getOperation().getTimestamp());
-            });
+        structEvents.sort((StructuredEvent o1, StructuredEvent o2) -> (int) (o1.getOperation().getTimestamp() - o2.getOperation().getTimestamp()));
         return structEvents;
     }
 }

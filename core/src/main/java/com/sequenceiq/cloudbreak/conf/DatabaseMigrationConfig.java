@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.conf;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Properties;
 
@@ -9,6 +10,7 @@ import javax.inject.Inject;
 import javax.sql.DataSource;
 
 import org.apache.commons.io.Charsets;
+import org.apache.ibatis.migration.ConnectionProvider;
 import org.apache.ibatis.migration.DataSourceConnectionProvider;
 import org.apache.ibatis.migration.FileMigrationLoader;
 import org.apache.ibatis.migration.operations.PendingOperation;
@@ -48,29 +50,31 @@ public class DatabaseMigrationConfig {
 
     @Bean
     @DependsOn("dataSource")
-    public UpOperation databaseUpMigration() {
+    public UpOperation databaseUpMigration() throws IOException {
         UpOperation upOperation = new UpOperation();
         PendingOperation pendingOperation = new PendingOperation();
         if (schemaMigrationEnabled) {
-            DataSourceConnectionProvider dataSourceConnectionProvider = new DataSourceConnectionProvider(dataSource);
+            ConnectionProvider dataSourceConnectionProvider = new DataSourceConnectionProvider(dataSource);
             DatabaseOperationOption operationOption = new DatabaseOperationOption();
             operationOption.setDelimiter(";");
             operationOption.setFullLineDelimiter(false);
             operationOption.setSendFullScript(true);
             operationOption.setAutoCommit(false);
-            ByteArrayOutputStream upOutStream = new ByteArrayOutputStream();
-            ByteArrayOutputStream pendingOutStream = new ByteArrayOutputStream();
-            FileMigrationLoader upMigrationLoader = upMigrationLoader();
-            upOperation = upOperation.operate(dataSourceConnectionProvider, upMigrationLoader, operationOption, new PrintStream(upOutStream));
-            FileMigrationLoader pendingMigrationLoader = pendingMigrationLoader();
-            pendingOperation.operate(dataSourceConnectionProvider, pendingMigrationLoader, operationOption, new PrintStream(pendingOutStream));
-            String upMigrationResult = upOutStream.toString().trim();
-            String pendingMigrationResult = pendingOutStream.toString().trim();
-            if (upMigrationResult.isEmpty() && pendingMigrationResult.equals(PENDING_OPERATION_WARNING_MSG)) {
-                LOGGER.info("Schema is up to date. No migration necessary.");
-            } else {
-                logMigrationResult(upMigrationResult, "up");
-                logMigrationResult(pendingMigrationResult, "pending");
+            try (ByteArrayOutputStream upOutStream = new ByteArrayOutputStream()) {
+                try (ByteArrayOutputStream pendingOutStream = new ByteArrayOutputStream()) {
+                    FileMigrationLoader upMigrationLoader = upMigrationLoader();
+                    upOperation = upOperation.operate(dataSourceConnectionProvider, upMigrationLoader, operationOption, new PrintStream(upOutStream));
+                    FileMigrationLoader pendingMigrationLoader = pendingMigrationLoader();
+                    pendingOperation.operate(dataSourceConnectionProvider, pendingMigrationLoader, operationOption, new PrintStream(pendingOutStream));
+                    String upMigrationResult = upOutStream.toString().trim();
+                    String pendingMigrationResult = pendingOutStream.toString().trim();
+                    if (upMigrationResult.isEmpty() && pendingMigrationResult.equals(PENDING_OPERATION_WARNING_MSG)) {
+                        LOGGER.info("Schema is up to date. No migration necessary.");
+                    } else {
+                        logMigrationResult(upMigrationResult, "up");
+                        logMigrationResult(pendingMigrationResult, "pending");
+                    }
+                }
             }
         }
         return upOperation;

@@ -21,9 +21,8 @@ public class SshCheckerTask extends StackBasedStatusCheckerTask<SshCheckerTaskCo
 
     @Override
     public boolean checkStatus(SshCheckerTaskContext sshCheckerTaskContext) {
-        SSHClient ssh = new SSHClient();
         boolean ret = false;
-        try {
+        try (SSHClient ssh = new SSHClient()) {
             ssh.addHostKeyVerifier(sshCheckerTaskContext.getHostKeyVerifier());
             String user = sshCheckerTaskContext.getUser();
             ssh.connect(sshCheckerTaskContext.getPublicIp(), sshCheckerTaskContext.getSshPort());
@@ -36,14 +35,10 @@ public class SshCheckerTask extends StackBasedStatusCheckerTask<SshCheckerTaskCo
                 ssh.authPublickey(user, new KeyPairWrapper(keyPair));
             }
             ret = true;
+        } catch (IOException e) {
+            LOGGER.info("Failed to disconnect from ssh: {}", e.getMessage());
         } catch (Exception e) {
             LOGGER.info("Failed to connect ssh: {}", e.getMessage());
-        } finally {
-            try {
-                ssh.disconnect();
-            } catch (IOException e) {
-                LOGGER.info("Failed to disconnect from ssh: {}", e.getMessage());
-            }
         }
         return ret;
     }

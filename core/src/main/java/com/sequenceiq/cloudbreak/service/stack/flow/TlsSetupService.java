@@ -225,17 +225,19 @@ public class TlsSetupService {
     }
 
     private void downloadAndSavePrivateKey(SSHClient ssh, InstanceMetaData gwInstance) throws IOException {
-        ByteArrayOutputStream cert = new ByteArrayOutputStream();
-        ssh.newSCPFileTransfer().download("/tmp/cluster.pem", new InMemoryDestFile() {
+        byte[] certBytes;
+        try (ByteArrayOutputStream cert = new ByteArrayOutputStream()) {
+            ssh.newSCPFileTransfer().download("/tmp/cluster.pem", new InMemoryDestFile() {
 
-            @Override
-            public OutputStream getOutputStream() {
-                return cert;
-            }
-        });
-        cert.close();
+                @Override
+                public OutputStream getOutputStream() {
+                    return cert;
+                }
+            });
+            certBytes = cert.toByteArray();
+        }
         InstanceMetaData metaData = instanceMetaDataRepository.findOne(gwInstance.getId());
-        metaData.setServerCert(BaseEncoding.base64().encode(cert.toByteArray()));
+        metaData.setServerCert(BaseEncoding.base64().encode(certBytes));
         instanceMetaDataRepository.save(metaData);
     }
 
@@ -259,8 +261,12 @@ public class TlsSetupService {
 
     private void logStdOutAndStdErr(Command command, String commandDesc) throws IOException {
         LOGGER.info("Standard output of {} command", commandDesc);
-        LOGGER.info(IOUtils.readFully(command.getInputStream()).toString());
+        try (ByteArrayOutputStream content = IOUtils.readFully(command.getInputStream())) {
+            LOGGER.info(content.toString());
+        }
         LOGGER.info("Standard error of {} command", commandDesc);
-        LOGGER.info(IOUtils.readFully(command.getErrorStream()).toString());
+        try (ByteArrayOutputStream content = IOUtils.readFully(command.getErrorStream())) {
+            LOGGER.info(content.toString());
+        }
     }
 }
