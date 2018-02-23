@@ -37,6 +37,7 @@ springBoot {
 }
 
 jar {
+  baseName = 'cloudbreak'
   archiveName = 'cloudbreak.jar'
 }
 

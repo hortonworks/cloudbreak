@@ -6,6 +6,7 @@ repositories {
 }
 
 jar {
+    baseName = 'cloud-reactor-api'
     archiveName = 'cloud-reactor-api.jar'
 }
 
