@@ -5,6 +5,7 @@ repositories {
 }
 
 jar {
+  baseName = 'autoscale-api'
   archiveName = 'autoscale-api.jar'
 }
 
