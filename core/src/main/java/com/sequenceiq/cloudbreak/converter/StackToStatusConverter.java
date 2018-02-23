@@ -9,10 +9,10 @@ import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Stack;
 
 @Component
-public class StackToStatusConverter extends AbstractConversionServiceAwareConverter<Stack, Map> {
+public class StackToStatusConverter extends AbstractConversionServiceAwareConverter<Stack, Map<String, Object>> {
 
     @Override
-    public Map convert(Stack source) {
+    public Map<String, Object> convert(Stack source) {
         Map<String, Object> stackStatus = new HashMap<>();
         stackStatus.put("id", source.getId());
         stackStatus.put("status", source.getStatus().name());

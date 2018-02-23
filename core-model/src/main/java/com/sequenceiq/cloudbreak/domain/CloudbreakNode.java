@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.domain;
 
+import java.util.Objects;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -53,7 +55,7 @@ public class CloudbreakNode implements Comparable<CloudbreakNode> {
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (o == null || !Objects.equals(getClass(), o.getClass())) {
             return false;
         }
 

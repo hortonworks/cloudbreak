@@ -7,6 +7,7 @@ import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.BlueprintModelDescription;
 
@@ -15,7 +16,7 @@ import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
-@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonInclude(Include.NON_NULL)
 public class BlueprintRequest extends BlueprintBase {
 
     @Size(max = 100, min = 1, message = "The length of the blueprint's name has to be in range of 1 to 100")

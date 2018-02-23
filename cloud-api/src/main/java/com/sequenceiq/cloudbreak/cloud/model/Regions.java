@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.model;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
 
 import com.sequenceiq.cloudbreak.cloud.model.generic.CloudTypes;
@@ -14,7 +13,7 @@ import com.sequenceiq.cloudbreak.cloud.model.generic.CloudTypes;
  */
 public class Regions extends CloudTypes<Region> {
 
-    private Map<Region, DisplayName> displayNames = new HashMap<>();
+    private final Map<Region, DisplayName> displayNames;
 
     public Regions(Collection<Region> types, Region defaultType, Map<Region, DisplayName> displayNames) {
         super(types, defaultType);

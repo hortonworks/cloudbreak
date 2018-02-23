@@ -15,7 +15,7 @@ public class ClientVersionUtil {
             if (serverParts[0].equals(clientParts[0]) && serverParts[1].equals(clientParts[1])) {
                 return true;
             }
-        } catch (ArrayIndexOutOfBoundsException | NullPointerException e) {
+        } catch (ArrayIndexOutOfBoundsException | NullPointerException ignore) {
         }
         return false;
     }

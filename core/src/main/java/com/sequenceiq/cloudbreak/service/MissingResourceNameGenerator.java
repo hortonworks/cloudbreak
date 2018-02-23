@@ -14,10 +14,7 @@ public class MissingResourceNameGenerator {
     private String namePatternForMissingReources;
 
     public String generateName(APIResourceType apiResourceType) {
-        if (apiResourceType != null) {
-            return String.format("%s%s", apiResourceType.namePrefix(), UUID.randomUUID().toString());
-        } else {
-            return String.format("%s%s", "un", UUID.randomUUID().toString());
-        }
+        return apiResourceType != null ? String.format("%s%s", apiResourceType.namePrefix(), UUID.randomUUID().toString())
+                : String.format("%s%s", "un", UUID.randomUUID().toString());
     }
 }

@@ -9,6 +9,8 @@ import com.sequenceiq.it.ssh.MockSshServer;
 
 public class MockSshServerRunner {
 
+    private static final long TIMEOUT = 600_000L;
+
     private static boolean condition = true;
 
     private MockSshServerRunner() {
@@ -32,19 +34,19 @@ public class MockSshServerRunner {
         try {
             synchronized (s) {
                 while (condition) {
-                    s.wait();
+                    s.wait(TIMEOUT);
                 }
             }
         } catch (InterruptedException e) {
-            throw new RuntimeException("interrupted");
+            throw new RuntimeException("interrupted", e);
         }
     }
 
-    public static boolean isCondition() {
+    public static synchronized boolean isCondition() {
         return condition;
     }
 
-    public static void setCondition(boolean condition) {
+    public static synchronized void setCondition(boolean condition) {
         MockSshServerRunner.condition = condition;
     }
 }

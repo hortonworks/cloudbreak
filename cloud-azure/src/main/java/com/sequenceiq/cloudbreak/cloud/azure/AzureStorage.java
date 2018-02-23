@@ -80,11 +80,9 @@ public class AzureStorage {
         String storageName;
         if (isLegacyImageStore(stack)) {
             String persistentStorageName = getPersistentStorageName(stack);
-            if (isPersistentStorage(persistentStorageName)) {
-                storageName = getPersistentStorageName(persistentStorageName, acv, cloudContext.getLocation().getRegion().value());
-            } else {
-                storageName = buildStorageName(getArmAttachedStorageOption(stack.getParameters()), acv, null, cloudContext, AzureDiskType.LOCALLY_REDUNDANT);
-            }
+            storageName = isPersistentStorage(persistentStorageName)
+                    ? getPersistentStorageName(persistentStorageName, acv, cloudContext.getLocation().getRegion().value())
+                    : buildStorageName(getArmAttachedStorageOption(stack.getParameters()), acv, null, cloudContext, AzureDiskType.LOCALLY_REDUNDANT);
         } else {
             storageName = getPersistentStorageName(imageStorePrefix, acv, cloudContext.getLocation().getRegion().value());
         }

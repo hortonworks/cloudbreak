@@ -6,7 +6,7 @@ import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
-import org.aspectj.lang.reflect.MethodSignature;
+import org.aspectj.lang.reflect.CodeSignature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -29,7 +29,7 @@ public class ControllerLogContextAspects {
     @Before("com.sequenceiq.periscope.log.ControllerLogContextAspects.interceptControllerMethodCalls()")
     public void buildLogContextForControllerCalls(JoinPoint joinPoint) {
         Object[] args = joinPoint.getArgs();
-        MethodSignature sig = (MethodSignature) joinPoint.getSignature();
+        CodeSignature sig = (CodeSignature) joinPoint.getSignature();
         String[] paramNames = sig.getParameterNames();
         Long clusterId = getClusterId(paramNames, args);
         PeriscopeUser user = authenticatedUserService.getPeriscopeUser();

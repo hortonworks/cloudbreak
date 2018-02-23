@@ -42,6 +42,6 @@ public class ClusterStartPollingHandler implements ReactorEventHandler<ClusterSt
         } catch (Exception e) {
             result = new ClusterStartPollingResult(e.getMessage(), e, request);
         }
-        eventBus.notify(result.selector(), new Event(event.getHeaders(), result));
+        eventBus.notify(result.selector(), new Event<>(event.getHeaders(), result));
     }
 }

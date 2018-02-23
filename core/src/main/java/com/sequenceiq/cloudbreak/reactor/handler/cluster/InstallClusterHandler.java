@@ -38,6 +38,6 @@ public class InstallClusterHandler implements ReactorEventHandler<InstallCluster
         } catch (RuntimeException e) {
             response = new InstallClusterFailed(stackId, e);
         }
-        eventBus.notify(response.selector(), new Event(event.getHeaders(), response));
+        eventBus.notify(response.selector(), new Event<>(event.getHeaders(), response));
     }
 }

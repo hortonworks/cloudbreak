@@ -23,11 +23,7 @@ public class HostDiscoveryService {
         String domainName = getCustomDomainName(domain);
         if (StringUtils.isNoneBlank(domainName)) {
             String sub = getSubDomain(subDomain, useSubDomain);
-            if (domainName.startsWith(".")) {
-                result = sub + domainName;
-            } else {
-                result = sub + '.' + domainName;
-            }
+            result = domainName.startsWith(".") ? sub + domainName : sub + '.' + domainName;
             LOGGER.info("Custom domain defined: {}", result);
 
         }

@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
+import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.DescribeInternetGatewaysRequest;
 import com.amazonaws.services.ec2.model.DescribeInternetGatewaysResult;
@@ -208,7 +209,7 @@ public class AwsSetup implements Setup {
         return false;
     }
 
-    private void validateExistingSubnet(AwsNetworkView awsNetworkView, AmazonEC2Client amazonEC2Client) {
+    private void validateExistingSubnet(AwsNetworkView awsNetworkView, AmazonEC2 amazonEC2Client) {
         if (awsNetworkView.isExistingSubnet()) {
             DescribeSubnetsRequest describeSubnetsRequest = new DescribeSubnetsRequest();
             describeSubnetsRequest.withSubnetIds(awsNetworkView.getSubnetList());
@@ -227,7 +228,7 @@ public class AwsSetup implements Setup {
         }
     }
 
-    private void validateExistingIGW(AwsNetworkView awsNetworkView, AmazonEC2Client amazonEC2Client) {
+    private void validateExistingIGW(AwsNetworkView awsNetworkView, AmazonEC2 amazonEC2Client) {
         if (awsNetworkView.isExistingIGW()) {
             DescribeInternetGatewaysRequest describeInternetGatewaysRequest = new DescribeInternetGatewaysRequest();
             describeInternetGatewaysRequest.withInternetGatewayIds(awsNetworkView.getExistingIGW());
@@ -246,7 +247,7 @@ public class AwsSetup implements Setup {
     }
 
     @Override
-    public void validateFileSystem(CloudCredential credential, FileSystem fileSystem) throws Exception {
+    public void validateFileSystem(CloudCredential credential, FileSystem fileSystem) {
     }
 
     private void validateExistingKeyPair(InstanceAuthentication instanceAuthentication, AwsCredentialView credentialView, String region) {

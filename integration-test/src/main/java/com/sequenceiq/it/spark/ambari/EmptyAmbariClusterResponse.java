@@ -11,7 +11,7 @@ import spark.Response;
 public class EmptyAmbariClusterResponse extends ITResponse {
 
     @Override
-    public Object handle(Request request, Response response) throws Exception {
+    public Object handle(Request request, Response response) {
         response.type("text/plain");
         ObjectNode rootNode = JsonNodeFactory.instance.objectNode();
         ArrayNode items = rootNode.putArray("items");

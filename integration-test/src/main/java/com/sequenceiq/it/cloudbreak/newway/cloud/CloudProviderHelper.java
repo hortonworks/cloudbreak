@@ -1,5 +1,11 @@
 package com.sequenceiq.it.cloudbreak.newway.cloud;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.model.SecurityRuleRequest;
 import com.sequenceiq.cloudbreak.api.model.StackAuthenticationRequest;
@@ -12,11 +18,6 @@ import com.sequenceiq.it.cloudbreak.newway.Entity;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
 import com.sequenceiq.it.cloudbreak.newway.StackEntity;
 import com.sequenceiq.it.cloudbreak.newway.TestParameter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public abstract class CloudProviderHelper extends CloudProvider {
 
@@ -32,9 +33,9 @@ public abstract class CloudProviderHelper extends CloudProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CloudProviderHelper.class);
 
-    private TestParameter testParameter;
+    private final TestParameter testParameter;
 
-    public CloudProviderHelper(TestParameter testParameter) {
+    protected CloudProviderHelper(TestParameter testParameter) {
         LOGGER.info("TestParemeters length: {}", testParameter.size());
         this.testParameter = testParameter;
     }
@@ -99,7 +100,7 @@ public abstract class CloudProviderHelper extends CloudProvider {
     abstract NetworkV2Request network();
 
     List<InstanceGroupV2Request> instanceGroups() {
-        List<InstanceGroupV2Request> requests = new ArrayList<InstanceGroupV2Request>();
+        List<InstanceGroupV2Request> requests = new ArrayList<>();
         requests.add(master());
         requests.add(compute());
         requests.add(worker());
@@ -109,8 +110,8 @@ public abstract class CloudProviderHelper extends CloudProvider {
     @Override
     public AmbariV2Request ambariRequestWithBlueprintId(Long id) {
         AmbariV2Request req = new AmbariV2Request();
-        req.setUserName(getTestParameter().get(DEFAULT_AMBARI_USER));
-        req.setPassword(getTestParameter().get(DEFAULT_AMBARI_PASSWORD));
+        req.setUserName(testParameter.get(DEFAULT_AMBARI_USER));
+        req.setPassword(testParameter.get(DEFAULT_AMBARI_PASSWORD));
         req.setBlueprintId(id);
         return req;
     }
@@ -118,8 +119,8 @@ public abstract class CloudProviderHelper extends CloudProvider {
     @Override
     public AmbariV2Request ambariRequestWithBlueprintName(String name) {
         AmbariV2Request req = new AmbariV2Request();
-        req.setUserName(getTestParameter().get(DEFAULT_AMBARI_USER));
-        req.setPassword(getTestParameter().get(DEFAULT_AMBARI_PASSWORD));
+        req.setUserName(testParameter.get(DEFAULT_AMBARI_USER));
+        req.setPassword(testParameter.get(DEFAULT_AMBARI_PASSWORD));
         req.setBlueprintName(name);
         return req;
     }
@@ -163,7 +164,7 @@ public abstract class CloudProviderHelper extends CloudProvider {
     abstract TemplateV2Request template();
 
     List<SecurityRuleRequest> rules() {
-        List<SecurityRuleRequest> rules = new ArrayList<SecurityRuleRequest>();
+        List<SecurityRuleRequest> rules = new ArrayList<>();
         SecurityRuleRequest a = new SecurityRuleRequest();
         a.setSubnet("0.0.0.0/0");
         a.setProtocol("tcp");

@@ -9,7 +9,7 @@ public class ImageCatalogAction {
     private ImageCatalogAction() {
     }
 
-    public static void post(IntegrationTestContext integrationTestContext, Entity entity) throws Exception {
+    public static void post(IntegrationTestContext integrationTestContext, Entity entity) {
         ImageCatalogEntity imageCatalogEntity = (ImageCatalogEntity) entity;
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT,
@@ -19,7 +19,7 @@ public class ImageCatalogAction {
                         .imageCatalogEndpoint().postPrivate(imageCatalogEntity.getRequest()));
     }
 
-    public static void get(IntegrationTestContext integrationTestContext, Entity entity) throws Exception {
+    public static void get(IntegrationTestContext integrationTestContext, Entity entity) {
         ImageCatalogEntity imageCatalogEntity = (ImageCatalogEntity) entity;
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT,
@@ -29,7 +29,7 @@ public class ImageCatalogAction {
                         .imageCatalogEndpoint().getPublicByName(imageCatalogEntity.getName(), false));
     }
 
-    public static void getAll(IntegrationTestContext integrationTestContext, Entity entity) throws Exception {
+    public static void getAll(IntegrationTestContext integrationTestContext, Entity entity) {
         ImageCatalogEntity recipeEntity = (ImageCatalogEntity) entity;
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT,
@@ -48,7 +48,7 @@ public class ImageCatalogAction {
                 .deletePublic(recipeEntity.getName());
     }
 
-    public static void createInGiven(IntegrationTestContext integrationTestContext, Entity entity) throws Exception {
+    public static void createInGiven(IntegrationTestContext integrationTestContext, Entity entity) {
         post(integrationTestContext, entity);
     }
 }

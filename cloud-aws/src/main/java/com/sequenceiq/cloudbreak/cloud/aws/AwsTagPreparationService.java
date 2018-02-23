@@ -44,7 +44,7 @@ public class AwsTagPreparationService {
     }
 
     public Collection<Tag> prepareTags(AuthenticatedContext ac, Map<String, String> userDefinedTags) {
-        List<com.amazonaws.services.cloudformation.model.Tag> tags = new ArrayList<>();
+        Collection<Tag> tags = new ArrayList<>();
         tags.add(prepareTag(CLOUDBREAK_CLUSTER_TAG, ac.getCloudContext().getName()));
         if (!Strings.isNullOrEmpty(defaultCloudformationTag)) {
             tags.add(prepareTag(CLOUDBREAK_ID, defaultCloudformationTag));

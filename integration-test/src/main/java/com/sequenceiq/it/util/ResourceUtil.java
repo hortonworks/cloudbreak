@@ -3,8 +3,8 @@ package com.sequenceiq.it.util;
 import java.io.IOException;
 
 import org.apache.commons.codec.binary.Base64;
-import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.util.StreamUtils;
 
 public class ResourceUtil {
@@ -13,23 +13,16 @@ public class ResourceUtil {
     private ResourceUtil() {
     }
 
-    public static String readStringFromResource(ApplicationContext applicationContext, String resourceLocation) throws IOException {
-        if (resourceLocation.startsWith("raw:")) {
-            return resourceLocation.substring(RAWDATA_START);
-        } else {
-            return new String(readResource(applicationContext, resourceLocation));
-        }
+    public static String readStringFromResource(ResourceLoader applicationContext, String resourceLocation) throws IOException {
+        return resourceLocation.startsWith("raw:") ? resourceLocation.substring(RAWDATA_START) : new String(readResource(applicationContext, resourceLocation));
     }
 
-    public static String readBase64EncodedContentFromResource(ApplicationContext applicationContext, String resourceLocation) throws IOException {
-        if (resourceLocation.startsWith("raw:")) {
-            return resourceLocation.substring(RAWDATA_START);
-        } else {
-            return Base64.encodeBase64String(readResource(applicationContext, resourceLocation));
-        }
+    public static String readBase64EncodedContentFromResource(ResourceLoader applicationContext, String resourceLocation) throws IOException {
+        return resourceLocation.startsWith("raw:") ? resourceLocation.substring(RAWDATA_START)
+                : Base64.encodeBase64String(readResource(applicationContext, resourceLocation));
     }
 
-    public static byte[] readResource(ApplicationContext applicationContext, String resourceLocation) throws IOException {
+    public static byte[] readResource(ResourceLoader applicationContext, String resourceLocation) throws IOException {
         Resource resource = applicationContext.getResource(resourceLocation);
         return StreamUtils.copyToByteArray(resource.getInputStream());
     }

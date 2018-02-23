@@ -33,7 +33,7 @@ public class MockResourceConnector implements ResourceConnector<Object> {
 
     @Override
     public List<CloudResourceStatus> launch(AuthenticatedContext authenticatedContext, CloudStack stack, PersistenceNotifier persistenceNotifier,
-            AdjustmentType adjustmentType, Long threshold) throws Exception {
+            AdjustmentType adjustmentType, Long threshold) {
         List<CloudResourceStatus> cloudResourceStatuses = new ArrayList<>();
         for (Group group : stack.getGroups()) {
             for (int i = 0; i < group.getInstancesSize(); i++) {
@@ -56,13 +56,12 @@ public class MockResourceConnector implements ResourceConnector<Object> {
     }
 
     @Override
-    public List<CloudResourceStatus> terminate(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> cloudResources)
-            throws Exception {
+    public List<CloudResourceStatus> terminate(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> cloudResources) {
         return new ArrayList<>();
     }
 
     @Override
-    public List<CloudResourceStatus> update(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources) throws Exception {
+    public List<CloudResourceStatus> update(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources) {
         return new ArrayList<>();
     }
 

@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.downscale;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
 
@@ -32,7 +33,7 @@ public class StackScalingFlowContext extends StackContext {
         this.hostNames = hostNames;
     }
 
-    public Set<String> getInstanceIds() {
+    public Collection<String> getInstanceIds() {
         return instanceIds;
     }
 

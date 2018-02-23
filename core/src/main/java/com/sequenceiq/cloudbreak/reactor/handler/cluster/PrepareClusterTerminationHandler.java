@@ -36,6 +36,6 @@ public class PrepareClusterTerminationHandler implements ReactorEventHandler<Pre
         } catch (Exception e) {
             result = new PrepareClusterTerminationResult(e.getMessage(), e, event.getData());
         }
-        eventBus.notify(result.selector(), new Event(event.getHeaders(), result));
+        eventBus.notify(result.selector(), new Event<>(event.getHeaders(), result));
     }
 }

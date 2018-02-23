@@ -36,6 +36,6 @@ public class DisableKerberosHandler implements ReactorEventHandler<DisableKerber
         } catch (Exception e) {
             result = new DisableKerberosResult(e.getMessage(), e, event.getData());
         }
-        eventBus.notify(result.selector(), new Event(event.getHeaders(), result));
+        eventBus.notify(result.selector(), new Event<>(event.getHeaders(), result));
     }
 }

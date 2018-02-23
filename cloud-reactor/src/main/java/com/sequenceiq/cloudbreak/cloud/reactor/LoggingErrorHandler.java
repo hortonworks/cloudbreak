@@ -9,7 +9,7 @@ import reactor.fn.Consumer;
 /**
  * Generic error handler for the Cloudbreak application.
  * Errors (Exceptions) need to be delegated to the error translator  / interpreter subsystem.
- * <p/>
+ * <br>
  * The main functionality of the subsystem is to provide meaningful error messages to the calling systems.
  */
 @Component

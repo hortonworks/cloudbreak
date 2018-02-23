@@ -21,13 +21,13 @@ public class StateJson implements Json {
 
     public static StateJson running() {
         StateJson stateJson = new StateJson();
-        stateJson.setState(ClusterState.RUNNING);
+        stateJson.state = ClusterState.RUNNING;
         return stateJson;
     }
 
     public static StateJson suspended() {
         StateJson stateJson = new StateJson();
-        stateJson.setState(ClusterState.SUSPENDED);
+        stateJson.state = ClusterState.SUSPENDED;
         return stateJson;
     }
 }

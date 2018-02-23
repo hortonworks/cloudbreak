@@ -24,7 +24,7 @@ public final class InMemoryStateStore {
         return STACK_STATE_STORE.keySet();
     }
 
-    public static Set<Long> getAllClusterId() {
+    public static Iterable<Long> getAllClusterId() {
         return CLUSTER_STATE_STORE.keySet();
     }
 

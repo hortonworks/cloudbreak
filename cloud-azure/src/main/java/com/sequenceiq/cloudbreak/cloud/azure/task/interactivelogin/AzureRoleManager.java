@@ -4,10 +4,10 @@ import static com.sequenceiq.cloudbreak.cloud.azure.task.interactivelogin.AzureI
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 import javax.ws.rs.client.Client;
@@ -185,7 +185,7 @@ public class AzureRoleManager {
 
         request.header("Authorization", "Bearer " + accessToken);
 
-        String customRole = "";
+        String customRole;
         try {
             customRole = new ObjectMapper().writeValueAsString(assembleCustomRole(subscriptionId, roleName));
         } catch (JsonProcessingException e) {
@@ -197,7 +197,7 @@ public class AzureRoleManager {
 
         if (response.getStatusInfo().getFamily() != Family.SUCCESSFUL) {
             String errorResponse = response.readEntity(String.class);
-            LOGGER.error("Create role request error - status code: {} - error message: ", response.getStatus(), errorResponse);
+            LOGGER.error("Create role request error - status code: {} - error message: {}", response.getStatus(), errorResponse);
             if (Status.FORBIDDEN.getStatusCode() == response.getStatus()) {
                 throw new InteractiveLoginException("You don't have enough permissions to create role, please contact with your administrator");
             } else {
@@ -241,31 +241,26 @@ public class AzureRoleManager {
 
     //CHECKSTYLE:OFF
     private boolean validateRoleActions(AzureRoleDefinition role) {
-        Set<String> actions = new HashSet<>();
-        Set<String> notActions = new HashSet<>();
+        Collection<String> actions = new HashSet<>();
+        Collection<String> notActions = new HashSet<>();
         for (AzurePermission permission : role.getProperties().getPermissions()) {
             actions.addAll(permission.getActions());
             notActions.addAll(permission.getNotActions());
         }
         if (actions.contains("*")) {
-            if (!notActions.contains("Microsoft.Compute/*")
+            return !notActions.contains("Microsoft.Compute/*")
                     && !notActions.contains("Microsoft.Authorization/*/read")
                     && !notActions.contains("Microsoft.DataLakeStore/accounts/read")
                     && !notActions.contains("Microsoft.Network/*")
                     && !notActions.contains("Microsoft.Storage/*")
-                    && !notActions.contains("Microsoft.Resources/*")) {
-                return true;
-            }
-        } else if (actions.contains("Microsoft.Compute/*")
+                    && !notActions.contains("Microsoft.Resources/*");
+        } else return actions.contains("Microsoft.Compute/*")
                 && actions.contains("Microsoft.Authorization/*/read")
                 && actions.contains("Microsoft.DataLakeStore/accounts/read")
                 && actions.contains("Microsoft.Network/*")
                 && actions.contains("Microsoft.Storage/*")
-                && actions.contains("Microsoft.Resources/*")) {
-            return true;
-        }
+                && actions.contains("Microsoft.Resources/*");
 
-        return false;
     }
     //CHECKSTYLE:ON
 

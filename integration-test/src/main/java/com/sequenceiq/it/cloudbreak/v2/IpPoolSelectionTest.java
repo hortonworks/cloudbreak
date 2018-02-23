@@ -34,7 +34,7 @@ public class IpPoolSelectionTest extends AbstractCloudbreakIntegrationTest {
         Set<IpPoolJson> ipPools = response.getIppools().get(availabilityZone);
         Assert.assertNotNull(ipPools, "ippools cannot be null for " + region);
         java.util.Optional<IpPoolJson> selected = ipPools.stream().filter(rk -> rk.getName().equals(poolName)).findFirst();
-        Assert.assertTrue(selected.isPresent(), "the ippool list doesn't contain [" + poolName + "]");
+        Assert.assertTrue(selected.isPresent(), "the ippool list doesn't contain [" + poolName + ']');
         getItContext().putContextParam(CloudbreakV2Constants.OPENSTACK_FLOATING_POOL, selected.get().getId());
     }
 }

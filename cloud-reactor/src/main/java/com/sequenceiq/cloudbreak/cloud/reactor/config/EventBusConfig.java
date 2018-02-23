@@ -13,6 +13,7 @@ import com.sequenceiq.cloudbreak.concurrent.MDCCleanerThreadPoolExecutor;
 import reactor.Environment;
 import reactor.bus.EventBus;
 import reactor.bus.spec.EventBusSpec;
+import reactor.core.Dispatcher;
 import reactor.core.dispatch.ThreadPoolExecutorDispatcher;
 import reactor.core.support.NamedDaemonThreadFactory;
 import reactor.fn.timer.Timer;
@@ -43,15 +44,15 @@ public class EventBusConfig {
                 .get();
     }
 
-    private ThreadPoolExecutorDispatcher getEventBusDispatcher() {
-        final ClassLoader context = new ClassLoader(Thread.currentThread()
+    private Dispatcher getEventBusDispatcher() {
+        ClassLoader context = new ClassLoader(Thread.currentThread()
                 .getContextClassLoader()) {
         };
         MDCCleanerThreadPoolExecutor executorService = new MDCCleanerThreadPoolExecutor(eventBusThreadPoolSize,
                 eventBusThreadPoolSize,
                 0L,
                 TimeUnit.MILLISECONDS,
-                new LinkedBlockingQueue<Runnable>(eventBusThreadPoolSize),
+                new LinkedBlockingQueue<>(eventBusThreadPoolSize),
                 new NamedDaemonThreadFactory("reactorDispatcher", context),
                 (r, executor) -> r.run());
         return new ThreadPoolExecutorDispatcher(eventBusThreadPoolSize, eventBusThreadPoolSize, executorService);

@@ -17,27 +17,27 @@ import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 public class AzureInstanceView {
 
-    private CloudInstance instance;
+    private final CloudInstance instance;
 
-    private InstanceTemplate instanceTemplate;
+    private final InstanceTemplate instanceTemplate;
 
-    private int stackNamePrefixLength;
+    private final int stackNamePrefixLength;
 
-    private InstanceGroupType type;
+    private final InstanceGroupType type;
 
-    private String attachedDiskStorage;
+    private final String attachedDiskStorage;
 
-    private String attachedDiskStorageType;
+    private final String attachedDiskStorageType;
 
-    private String groupName;
+    private final String groupName;
 
-    private String stackName;
+    private final String stackName;
 
-    private String availabilitySetName;
+    private final String availabilitySetName;
 
-    private boolean managedDisk;
+    private final boolean managedDisk;
 
-    private String subnetId;
+    private final String subnetId;
 
     public AzureInstanceView(String stackName, int stackNamePrefixLength, CloudInstance instance, InstanceGroupType type, String attachedDiskStorage,
             String attachedDiskStorageType, String groupName, String availabilitySetName, boolean managedDisk, String subnetId) {

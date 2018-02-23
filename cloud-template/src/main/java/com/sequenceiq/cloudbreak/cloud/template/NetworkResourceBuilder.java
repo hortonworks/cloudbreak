@@ -19,12 +19,12 @@ import com.sequenceiq.cloudbreak.common.type.ResourceType;
  * These resource builders are ordered {@link OrderedBuilder#order()} which means you can provide the
  * order of the resource creation. For instance creation it is most likely to need the resources created by an early builder so these resources should
  * be provided by the generic {@link ResourceBuilderContext} objects which will be passed along with the creation process.
- * <p/>
+ * <br>
  * To remove the corresponding network resources the builders will be called in <b>reverse</b> order. It the example above it will be called as:
  * GCP_RESERVED_IP
  * GCP_FIREWALL_INTERNAL
  * GCP_NETWORK
- * <p/>
+ * <br>
  * In order to make use of this interface and call the resource builders in ordered fashion the Cloud provider implementation should extend
  * {@link AbstractResourceConnector} which is a base implementation of {@link com.sequenceiq.cloudbreak.cloud.ResourceConnector}. Eventually all the
  * Cloud provider implementations use {@link com.sequenceiq.cloudbreak.cloud.ResourceConnector}. Providers which support some form of template deployments
@@ -37,7 +37,7 @@ public interface NetworkResourceBuilder<C extends ResourceBuilderContext> extend
      * will be provided to the {@link #build(ResourceBuilderContext, AuthenticatedContext, Network, Security, CloudResource)} method to actually create these
      * resources on the cloud provider. In case the resource creation fails the whole deployment fails, because the network type resources are not
      * replaceable. In that case the only option is to remove the stack.
-     * <p/>
+     * <br>
      * There are some cases where you don't want to create some of the resources from the network stack, like when you use custom network or vpc or subnet. In
      * that case return the cloud resource with the existing resource id.
      *
@@ -51,7 +51,7 @@ public interface NetworkResourceBuilder<C extends ResourceBuilderContext> extend
     /**
      * This method will be called after the {@link #create(ResourceBuilderContext, AuthenticatedContext, Network)} method with the constructed
      * cloud resources. It's purpose to actually create these resources on the cloud provider side.
-     * <p/>
+     * <br>
      * There are some cases where you don't want to create some of the resources from the network stack, like when you use custom network or vpc or subnet. In
      * that case return the cloud resource with the existing resource id.
      *
@@ -76,7 +76,7 @@ public interface NetworkResourceBuilder<C extends ResourceBuilderContext> extend
     /**
      * Responsible to delete the provided cloud resource by {@link #create(ResourceBuilderContext, AuthenticatedContext, Network)} from the
      * cloud provider.
-     * <p/>
+     * <br>
      * There are some cases where you didn't create some of the resources from the network stack, like when you use custom network or vpc or subnet. In
      * that case return <b>null</b>.
      *

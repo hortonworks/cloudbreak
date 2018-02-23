@@ -29,13 +29,9 @@ public class AmbariDatabaseDetailsJsonToAmbariDatabaseConverter extends Abstract
     @Override
     public AmbariDatabase convert(AmbariDatabaseDetailsJson source) {
         AmbariDatabase ambariDatabase;
-        if (source == null || source.getVendor() == null) {
-            ambariDatabase = getDefault();
-        } else {
-            ambariDatabase = new AmbariDatabase(source.getVendor().value(), source.getVendor().fancyName(), source.getName(), source.getHost(),
-                    source.getPort(), source.getUserName(), source.getPassword());
-
-        }
+        ambariDatabase = source == null || source.getVendor() == null ? getDefault()
+                : new AmbariDatabase(source.getVendor().value(), source.getVendor().fancyName(), source.getName(), source.getHost(),
+                source.getPort(), source.getUserName(), source.getPassword());
         return ambariDatabase;
     }
 

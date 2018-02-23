@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.reactor;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
@@ -71,7 +72,7 @@ public class DecommissionHandler implements ReactorEventHandler<DecommissionRequ
         eventBus.notify(result.selector(), new Event<>(event.getHeaders(), result));
     }
 
-    private void executePreTerminationRecipes(Stack stack, String hostGroupName, Set<String> hostNames) {
+    private void executePreTerminationRecipes(Stack stack, String hostGroupName, Collection<String> hostNames) {
         try {
             HostGroup hostGroup = hostGroupService.getByClusterIdAndName(stack.getCluster().getId(), hostGroupName);
             recipeEngine.executePreTerminationRecipes(stack, Collections.singleton(hostGroup), hostNames);

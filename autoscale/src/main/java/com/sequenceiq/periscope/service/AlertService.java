@@ -272,7 +272,7 @@ public class AlertService {
         return processTemplateIntoString(freemarkerConfiguration.getTemplate(ALERT_PATH + name, "UTF-8"), model);
     }
 
-    private void createAlert(AmbariClient client, String json, String alertName) {
+    private void createAlert(com.sequenceiq.ambari.client.services.AlertService client, String json, String alertName) {
         try {
             client.createAlert(json);
             LOGGER.info("Alert: {} added to the cluster", alertName);

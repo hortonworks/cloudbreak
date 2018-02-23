@@ -18,7 +18,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloudbreak.client.RestClientUtil;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
@@ -120,7 +120,7 @@ public class StackCreationMock extends MockServer {
             genericResponse.setStatusCode(HttpStatus.OK.value());
             return genericResponse;
         }, gson()::toJson);
-        objectMapper.setVisibility(objectMapper.getVisibilityChecker().withGetterVisibility(JsonAutoDetect.Visibility.NONE));
+        objectMapper.setVisibility(objectMapper.getVisibilityChecker().withGetterVisibility(Visibility.NONE));
         sparkService.post(SALT_API_ROOT + "/run", new SaltApiRunPostResponse(instanceMap));
         sparkService.post(SALT_BOOT_ROOT + "/file", (request, response) -> {
             response.status(HttpStatus.CREATED.value());

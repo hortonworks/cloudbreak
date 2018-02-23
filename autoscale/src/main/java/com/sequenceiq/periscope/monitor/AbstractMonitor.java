@@ -5,7 +5,6 @@ import java.util.concurrent.ExecutorService;
 
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
 import org.springframework.context.ApplicationContext;
 
 import com.sequenceiq.periscope.api.model.ClusterState;
@@ -23,7 +22,7 @@ public abstract class AbstractMonitor implements Monitor {
     private ExecutorService executorService;
 
     @Override
-    public void execute(JobExecutionContext context) throws JobExecutionException {
+    public void execute(JobExecutionContext context) {
         MDCBuilder.buildMdcContext();
         evalContext(context);
         for (Cluster cluster : getClusters()) {

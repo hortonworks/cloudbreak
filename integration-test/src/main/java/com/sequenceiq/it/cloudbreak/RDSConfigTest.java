@@ -25,7 +25,7 @@ public class RDSConfigTest extends AbstractCloudbreakIntegrationTest {
     @Test
     @Parameters({ "rdsName", "rdsUser", "rdsPassword", "rdsConnectionUrl", "rdsDbType", "hdpVersion" })
     public void testRDSConfig(String rdsName, @Optional("") String rdsUser, @Optional("") String rdsPassword,
-            @Optional("") String rdsConnectionUrl, @Optional("POSTGRES") String rdsDbType, @Optional("2.5") String hdpVersion) throws Exception {
+            @Optional("") String rdsConnectionUrl, @Optional("POSTGRES") String rdsDbType, @Optional("2.5") String hdpVersion) {
         // GIVEN
         IntegrationTestContext itContext = getItContext();
         rdsUser = StringUtils.hasLength(rdsUser) ? rdsUser : defaultRdsUser;

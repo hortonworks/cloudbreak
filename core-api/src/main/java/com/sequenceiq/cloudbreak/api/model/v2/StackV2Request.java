@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.api.model.v2;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -10,6 +11,7 @@ import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.cloudbreak.api.model.FailurePolicyRequest;
 import com.sequenceiq.cloudbreak.api.model.JsonEntity;
 import com.sequenceiq.cloudbreak.api.model.StackAuthenticationRequest;
@@ -20,7 +22,7 @@ import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
-@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonInclude(Include.NON_NULL)
 public class StackV2Request implements JsonEntity {
 
     @Valid
@@ -42,7 +44,7 @@ public class StackV2Request implements JsonEntity {
     private String hdpVersion;
 
     @ApiModelProperty(StackModelDescription.PARAMETERS)
-    private Map<String, ? extends Object> parameters = new HashMap<>();
+    private Map<String, ?> parameters = new HashMap<>();
 
     @ApiModelProperty(StackModelDescription.CUSTOM_DOMAIN_SETTINGS)
     private CustomDomainSettings customDomain;
@@ -92,7 +94,7 @@ public class StackV2Request implements JsonEntity {
         this.failurePolicy = failurePolicy;
     }
 
-    public List<InstanceGroupV2Request> getInstanceGroups() {
+    public Collection<InstanceGroupV2Request> getInstanceGroups() {
         return instanceGroups;
     }
 
@@ -140,11 +142,11 @@ public class StackV2Request implements JsonEntity {
         this.stackAuthentication = stackAuthentication;
     }
 
-    public Map<String, ? extends Object> getParameters() {
+    public Map<String, ?> getParameters() {
         return parameters;
     }
 
-    public void setParameters(Map<String, ? extends Object> parameters) {
+    public void setParameters(Map<String, ?> parameters) {
         this.parameters = parameters;
     }
 

@@ -10,7 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.ambari.client.AmbariClient;
+import com.sequenceiq.ambari.client.services.ClusterService;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariSecurityConfigProvider;
@@ -34,7 +34,7 @@ public class AmbariClusterTemplateService {
     @Inject
     private AmbariRepositoryVersionService ambariRepositoryVersionService;
 
-    public void addClusterTemplate(Cluster cluster, Map<String, List<Map<String, String>>> hostGroupMappings, AmbariClient ambariClient) {
+    public void addClusterTemplate(Cluster cluster, Map<String, List<Map<String, String>>> hostGroupMappings, ClusterService ambariClient) {
         String clusterName = cluster.getName();
         String blueprintName = cluster.getBlueprint().getAmbariName();
         String configStrategy = cluster.getConfigStrategy().name();

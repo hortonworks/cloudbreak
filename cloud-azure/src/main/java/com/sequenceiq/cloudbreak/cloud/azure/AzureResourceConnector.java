@@ -10,7 +10,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -44,7 +43,6 @@ import com.sequenceiq.cloudbreak.cloud.azure.view.AzureStorageView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
-import com.sequenceiq.cloudbreak.cloud.exception.TemplatingDoesNotSupportedException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource.Builder;
@@ -56,7 +54,7 @@ import com.sequenceiq.cloudbreak.cloud.model.TlsInfo;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 import com.sequenceiq.cloudbreak.service.Retry;
-import com.sequenceiq.cloudbreak.service.Retry.ActionWentFail;
+import com.sequenceiq.cloudbreak.service.Retry.ActionWentFailException;
 
 @Service
 public class AzureResourceConnector implements ResourceConnector<Map<String, Map<String, Object>>> {
@@ -191,12 +189,12 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
                 try {
                     retryService.testWith2SecDelayMax5Times(() -> {
                         if (!client.resourceGroupExists(resource.getName())) {
-                            throw new ActionWentFail("Resource group not exists");
+                            throw new ActionWentFailException("Resource group not exists");
                         }
                         return true;
                     });
                     client.deleteResourceGroup(resource.getName());
-                } catch (ActionWentFail ignored) {
+                } catch (ActionWentFailException ignored) {
                     LOGGER.info(String.format("Resource group not found with name: %s", resource.getName()));
                 }
                 if (azureStorage.isPersistentStorage(azureStorage.getPersistentStorageName(stack))) {
@@ -313,13 +311,13 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
         try {
             VirtualMachine virtualMachine = client.getVirtualMachine(stackName, instanceId);
             List<String> networkInterfaceIds = virtualMachine.networkInterfaceIds();
-            List<String> networkInterfacesNames = new ArrayList<>();
-            List<String> publicIpAddressNames = new ArrayList<>();
+            Collection<String> networkInterfacesNames = new ArrayList<>();
+            Collection<String> publicIpAddressNames = new ArrayList<>();
             for (String interfaceId : networkInterfaceIds) {
                 NetworkInterface networkInterface = client.getNetworkInterfaceById(interfaceId);
                 String interfaceName = networkInterface.name();
                 networkInterfacesNames.add(interfaceName);
-                Set<String> ipNames = new HashSet<>();
+                Collection<String> ipNames = new HashSet<>();
                 for (NicIPConfiguration ipConfiguration : networkInterface.ipConfigurations().values()) {
                     if (ipConfiguration.publicIPAddressId() != null && ipConfiguration.getPublicIPAddress().name() != null) {
                         ipNames.add(ipConfiguration.getPublicIPAddress().name());
@@ -345,8 +343,8 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
         StorageProfile storageProfile = virtualMachine.storageProfile();
         List<DataDisk> dataDisks = storageProfile.dataDisks();
 
-        List<String> storageProfileDiskNames = new ArrayList<>();
-        List<String> managedDiskIds = new ArrayList<>();
+        Collection<String> storageProfileDiskNames = new ArrayList<>();
+        Collection<String> managedDiskIds = new ArrayList<>();
         for (DataDisk datadisk : dataDisks) {
             VirtualHardDisk vhd = datadisk.vhd();
             if (datadisk.vhd() != null) {
@@ -380,11 +378,11 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
                 deallocateVirtualMachine(client, stackName, instanceId);
                 deleteVirtualMachine(client, stackName, instanceId);
                 if (instanceResources != null) {
-                    deleteNetworkInterfaces(client, stackName, (List<String>) instanceResources.get(NETWORK_INTERFACES_NAMES));
-                    deletePublicIps(client, stackName, (List<String>) instanceResources.get(PUBLIC_ADDRESS_NAME));
-                    deleteDisk((List<String>) instanceResources.get(STORAGE_PROFILE_DISK_NAMES), client, resourceGroupName,
+                    deleteNetworkInterfaces(client, stackName, (Iterable<String>) instanceResources.get(NETWORK_INTERFACES_NAMES));
+                    deletePublicIps(client, stackName, (Iterable<String>) instanceResources.get(PUBLIC_ADDRESS_NAME));
+                    deleteDisk((Iterable<String>) instanceResources.get(STORAGE_PROFILE_DISK_NAMES), client, resourceGroupName,
                             (String) instanceResources.get(ATTACHED_DISK_STORAGE_NAME), diskContainer);
-                    deleteManagedDisks((List<String>) instanceResources.get(MANAGED_DISK_IDS), client);
+                    deleteManagedDisks((Iterable<String>) instanceResources.get(MANAGED_DISK_IDS), client);
                     if (azureStorage.getArmAttachedStorageOption(stack.getParameters()) == ArmAttachedStorageOption.PER_VM) {
                         azureStorage.deleteStorage(client, (String) instanceResources.get(ATTACHED_DISK_STORAGE_NAME), resourceGroupName);
                     }
@@ -404,7 +402,7 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
     }
 
     @Override
-    public String getStackTemplate() throws TemplatingDoesNotSupportedException {
+    public String getStackTemplate() {
         return azureTemplateBuilder.getTemplateString();
     }
 
@@ -428,13 +426,13 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
         }
     }
 
-    private void deleteManagedDisks(List<String> managedDiskIds, AzureClient azureClient) {
+    private void deleteManagedDisks(Iterable<String> managedDiskIds, AzureClient azureClient) {
         for (String managedDiskId : managedDiskIds) {
             azureClient.deleteManagedDisk(managedDiskId);
         }
     }
 
-    private void deleteDisk(List<String> storageProfileDiskNames, AzureClient azureClient, String resourceGroup, String storageName, String container) {
+    private void deleteDisk(Iterable<String> storageProfileDiskNames, AzureClient azureClient, String resourceGroup, String storageName, String container) {
         for (String storageProfileDiskName : storageProfileDiskNames) {
             try {
                 azureClient.deleteBlobInStorageContainer(resourceGroup, storageName, container, storageProfileDiskName);
@@ -449,7 +447,7 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
         }
     }
 
-    private void deleteNetworkInterfaces(AzureClient client, String stackName, List<String> networkInterfacesNames)
+    private void deleteNetworkInterfaces(AzureClient client, String stackName, Iterable<String> networkInterfacesNames)
             throws CloudConnectorException {
         for (String networkInterfacesName : networkInterfacesNames) {
             try {
@@ -464,7 +462,7 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
         }
     }
 
-    private void deletePublicIps(AzureClient client, String stackName, List<String> publicIpNames) {
+    private void deletePublicIps(AzureClient client, String stackName, Iterable<String> publicIpNames) {
         for (String publicIpName : publicIpNames) {
             try {
                 if (client.getPublicIpAddress(stackName, publicIpName) != null) {

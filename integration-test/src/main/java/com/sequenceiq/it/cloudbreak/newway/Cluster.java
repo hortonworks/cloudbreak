@@ -20,7 +20,7 @@ public class Cluster extends Entity  {
 
     Cluster(String newId) {
         super(newId);
-        setRequest(new ClusterV2Request());
+        this.request = new ClusterV2Request();
     }
 
     Cluster() {
@@ -44,54 +44,54 @@ public class Cluster extends Entity  {
     }
 
     public Cluster withName(String name) {
-        getRequest().setName(name);
-        setName(name);
+        request.setName(name);
+        this.name = name;
         return this;
     }
 
     public Cluster withAmbariRequest(AmbariV2Request ambariRequest) {
-        getRequest().setAmbari(ambariRequest);
+        request.setAmbari(ambariRequest);
         return this;
     }
 
     public Cluster withEmailNeeded(Boolean aBoolean) {
-        getRequest().setEmailNeeded(aBoolean);
+        request.setEmailNeeded(aBoolean);
         return this;
     }
 
     public Cluster withEmailTo(String parameters) {
-        getRequest().setEmailTo(parameters);
+        request.setEmailTo(parameters);
         return this;
     }
 
     public Cluster withExecutorType(ExecutorType executorType) {
-        getRequest().setExecutorType(executorType);
+        request.setExecutorType(executorType);
         return this;
     }
 
     public Cluster withFileSystem(FileSystemRequest fileSystemRequest) {
-        getRequest().setFileSystem(fileSystemRequest);
+        request.setFileSystem(fileSystemRequest);
         return this;
     }
 
     public Cluster withLdapConfigName(String ldap) {
-        getRequest().setLdapConfigName(ldap);
+        request.setLdapConfigName(ldap);
         return this;
     }
 
     public Cluster withRdsConfigIds(Set<Long> ids) {
-        if (getRequest().getRdsConfigs() == null) {
-            getRequest().setRdsConfigs(new RdsConfigs());
+        if (request.getRdsConfigs() == null) {
+            request.setRdsConfigs(new RdsConfigs());
         }
-        getRequest().getRdsConfigs().setIds(ids);
+        request.getRdsConfigs().setIds(ids);
         return this;
     }
 
     public Cluster withRdsConfigJsons(Set<RDSConfigRequest> rdsConfigRequests) {
-        if (getRequest().getRdsConfigs() == null) {
-            getRequest().setRdsConfigs(new RdsConfigs());
+        if (request.getRdsConfigs() == null) {
+            request.setRdsConfigs(new RdsConfigs());
         }
-        getRequest().getRdsConfigs().setConfigs(rdsConfigRequests);
+        request.getRdsConfigs().setConfigs(rdsConfigRequests);
         return this;
     }
 

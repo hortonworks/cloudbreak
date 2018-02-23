@@ -48,11 +48,10 @@ public class OpenStackNativeMetaDataCollector implements MetadataCollector {
 
         List<InstanceTemplate> templates = Lists.transform(vms, CloudInstance::getTemplate);
 
-        Map<String, InstanceTemplate> templateMap = Maps.uniqueIndex(templates, from -> {
-            return utils.getPrivateInstanceId(from.getGroupName(), Long.toString(from.getPrivateId()));
-        });
+        Map<String, InstanceTemplate> templateMap = Maps.uniqueIndex(templates, from -> utils.getPrivateInstanceId(from.getGroupName(),
+                Long.toString(from.getPrivateId())));
 
-        OSClient client = openStackClient.createOSClient(authenticatedContext);
+        OSClient<?> client = openStackClient.createOSClient(authenticatedContext);
         List<CloudVmMetaDataStatus> results = new ArrayList<>();
 
         for (CloudResource resource : resources) {

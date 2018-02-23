@@ -15,6 +15,7 @@ import org.apache.sshd.common.session.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.InputStreamSource;
 
 public class MockFileSystemFactory implements FileSystemFactory {
 
@@ -30,7 +31,7 @@ public class MockFileSystemFactory implements FileSystemFactory {
                     throw new IllegalArgumentException("First is not valid");
                 }
                 try {
-                    ClassPathResource classPathResource = new ClassPathResource(path.toString());
+                    InputStreamSource classPathResource = new ClassPathResource(path.toString());
                     InputStream inputStream = classPathResource.getInputStream();
                     File tempFile = path.toFile();
                     try (OutputStream outputStream = new FileOutputStream(tempFile)) {

@@ -42,9 +42,6 @@ public class StructuredEventEntity {
     @Column(columnDefinition = "TEXT")
     private Json structuredEventJson;
 
-    public StructuredEventEntity() {
-    }
-
     public Long getId() {
         return id;
     }

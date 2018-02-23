@@ -59,7 +59,7 @@ public class MDCBuilder {
     public static void buildMdcContextFromMap(Map<String, String> map) {
         cleanupMdc();
         if (map != null) {
-            map.entrySet().forEach(e -> MDC.put(e.getKey(), e.getValue()));
+            map.forEach(MDC::put);
         }
     }
 

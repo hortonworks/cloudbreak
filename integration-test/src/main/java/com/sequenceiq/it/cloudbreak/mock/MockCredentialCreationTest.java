@@ -19,11 +19,11 @@ public class MockCredentialCreationTest extends AbstractCloudbreakIntegrationTes
     private String defaultName;
 
     @Test
-    @Parameters({ "credentialName" })
-    public void testMockCredentialCreation(@Optional("") String credentialName) throws Exception {
+    @Parameters("credentialName")
+    public void testMockCredentialCreation(@Optional("") String credentialName) {
         // GIVEN
         credentialName = StringUtils.hasLength(credentialName) ? credentialName : defaultName;
-        credentialName = credentialName + UUID.randomUUID();
+        credentialName += UUID.randomUUID();
         CredentialRequest credentialRequest = new CredentialRequest();
         credentialRequest.setName(credentialName);
         credentialRequest.setDescription("Mock Rm credential for integrationtest");

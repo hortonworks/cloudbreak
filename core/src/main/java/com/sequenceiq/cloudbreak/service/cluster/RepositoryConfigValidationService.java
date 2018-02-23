@@ -66,8 +66,8 @@ public class RepositoryConfigValidationService {
         boolean result = false;
 
         if (isNoneEmpty(urlExtension)) {
-            String ext = url.endsWith("/") ? urlExtension : "/" + urlExtension;
-            url = url + ext;
+            String ext = url.endsWith("/") ? urlExtension : '/' + urlExtension;
+            url += ext;
         }
 
         try {

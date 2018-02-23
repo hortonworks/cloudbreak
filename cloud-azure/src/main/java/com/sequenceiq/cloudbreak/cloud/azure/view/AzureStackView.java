@@ -25,13 +25,13 @@ public class AzureStackView {
 
     private final List<String> instanceGroupNames = new ArrayList<>();
 
-    public AzureStackView(String stackName, int stackNamePrefixLength, List<Group> groupList, AzureStorageView armStorageView,
+    public AzureStackView(String stackName, int stackNamePrefixLength, Iterable<Group> groupList, AzureStorageView armStorageView,
             AzureSubnetStrategy subnetStrategy) {
         for (Group group : groupList) {
             String groupName = group.getType().name();
             List<AzureInstanceView> existingInstances = groups.computeIfAbsent(groupName, k -> new ArrayList<>());
             AzureInstanceGroupView instanceGroupView;
-            Map asMap = group.getParameter("availabilitySet", HashMap.class);
+            Map<?, ?> asMap = group.getParameter("availabilitySet", HashMap.class);
             if (asMap != null) {
                 String asName = (String) asMap.get("name");
                 Integer faultDomainCount = asMap.get("faultDomainCount") != null

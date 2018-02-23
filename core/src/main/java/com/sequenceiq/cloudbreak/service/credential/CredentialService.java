@@ -62,11 +62,8 @@ public class CredentialService {
     }
 
     public Set<Credential> retrieveAccountCredentials(IdentityUser user) {
-        if (user.getRoles().contains(IdentityUserRole.ADMIN)) {
-            return credentialRepository.findAllInAccount(user.getAccount());
-        } else {
-            return credentialRepository.findPublicInAccountForUser(user.getUserId(), user.getAccount());
-        }
+        return user.getRoles().contains(IdentityUserRole.ADMIN) ? credentialRepository.findAllInAccount(user.getAccount())
+                : credentialRepository.findPublicInAccountForUser(user.getUserId(), user.getAccount());
     }
 
     public Credential get(Long id) {

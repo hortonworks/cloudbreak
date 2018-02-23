@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.TreeNode;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.model.BlueprintParameterJson;
@@ -149,13 +150,13 @@ public class BlueprintRequestToBlueprintConverter extends AbstractConversionServ
         }
     }
 
-    private void hasBlueprintNameInBlueprint(JsonNode root) {
+    private void hasBlueprintNameInBlueprint(TreeNode root) {
         if (root.path("Blueprints").path("blueprint_name").isMissingNode()) {
             throw new BadRequestException("Invalid blueprint: 'blueprint_name' under 'Blueprints' is missing from JSON.");
         }
     }
 
-    private void hasBlueprintInBlueprint(JsonNode root) {
+    private void hasBlueprintInBlueprint(TreeNode root) {
         if (root.path("Blueprints").isMissingNode()) {
             throw new BadRequestException("Invalid blueprint: 'Blueprints' node is missing from JSON.");
         }

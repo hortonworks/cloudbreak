@@ -29,7 +29,7 @@ public class TemplateAdditionHelper {
         return result;
     }
 
-    public void handleTemplateAdditions(IntegrationTestContext itContext, String templateId, List<TemplateAddition> additions) {
+    public void handleTemplateAdditions(IntegrationTestContext itContext, String templateId, Iterable<TemplateAddition> additions) {
         List<InstanceGroup> instanceGroups = itContext.getContextParam(CloudbreakITContextConstants.TEMPLATE_ID, List.class);
         if (instanceGroups == null) {
             instanceGroups = new ArrayList<>();

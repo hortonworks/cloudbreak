@@ -24,7 +24,7 @@ public class CloudPlatformInitializer {
     private static final Logger LOGGER = LoggerFactory.getLogger(CloudPlatformInitializer.class);
 
     @Resource
-    private List<CloudPlatformEventHandler> handlers;
+    private List<CloudPlatformEventHandler<?>> handlers;
 
     @Inject
     private EventBus eventBus;
@@ -33,7 +33,7 @@ public class CloudPlatformInitializer {
     public void init() {
         validateSelectors();
         LOGGER.info("Registering CloudPlatformEventHandlers");
-        for (CloudPlatformEventHandler handler : handlers) {
+        for (CloudPlatformEventHandler<?> handler : handlers) {
             String selector = CloudPlatformRequest.selector(handler.type());
             LOGGER.info("Registering handler [{}] for selector [{}]", handler.getClass(), selector);
             eventBus.on($(selector), handler);
@@ -42,9 +42,9 @@ public class CloudPlatformInitializer {
 
     private void validateSelectors() {
         LOGGER.debug("There are {} handlers suitable for registering", handlers.size());
-        Map<Class, CloudPlatformEventHandler> handlerMap = new HashMap<>();
-        for (CloudPlatformEventHandler handler : handlers) {
-            CloudPlatformEventHandler entry = handlerMap.put(handler.type(), handler);
+        Map<Class<?>, CloudPlatformEventHandler<?>> handlerMap = new HashMap<>();
+        for (CloudPlatformEventHandler<?> handler : handlers) {
+            CloudPlatformEventHandler<?> entry = handlerMap.put(handler.type(), handler);
             if (null != entry) {
                 LOGGER.error("Duplicate handlers! actual: {}, existing: {}", handler, entry);
                 throw new IllegalStateException("Duplicate handlers! first: " + handler + " second: " + entry);

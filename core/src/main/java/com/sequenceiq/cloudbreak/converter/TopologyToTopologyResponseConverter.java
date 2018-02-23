@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.converter;
 
-import java.util.List;
 import java.util.Map;
 
 import org.springframework.stereotype.Component;
@@ -24,7 +23,7 @@ public class TopologyToTopologyResponseConverter extends AbstractConversionServi
         return json;
     }
 
-    private Map<String, String> convertNodes(List<TopologyRecord> records) {
+    private Map<String, String> convertNodes(Iterable<TopologyRecord> records) {
         Map<String, String> result = Maps.newHashMap();
         for (TopologyRecord record : records) {
             result.put(record.getHypervisor(), record.getRack());

@@ -7,7 +7,7 @@ import com.sequenceiq.cloudbreak.cloud.notification.model.ResourcePersisted;
 
 /**
  * When the Cloud provider allocates a resource (e.g starts a VM, or creates a disk) then it notifies the Cloudbreak through this interface.
- * <p/>
+ * <br>
  * Note: if the Cloud provider fails not send a notificayion then the resource (e.g VM, disk, etc.) will not be managed by Cloudbreak.
  */
 public interface PersistenceNotifier {

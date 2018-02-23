@@ -1,6 +1,6 @@
 package com.sequenceiq.periscope.api.model;
 
-import com.sequenceiq.periscope.doc.ApiDescription;
+import com.sequenceiq.periscope.doc.ApiDescription.ClusterAutoscaleState;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -8,7 +8,7 @@ import io.swagger.annotations.ApiModelProperty;
 @ApiModel("AutoscaleClusterState")
 public class AutoscaleClusterState {
 
-    @ApiModelProperty(ApiDescription.ClusterAutoscaleState.ENABLE_AUTOSCALING)
+    @ApiModelProperty(ClusterAutoscaleState.ENABLE_AUTOSCALING)
     private boolean enableAutoscaling;
 
     public boolean isEnableAutoscaling() {
@@ -21,13 +21,13 @@ public class AutoscaleClusterState {
 
     public static AutoscaleClusterState enable() {
         AutoscaleClusterState stateJson = new AutoscaleClusterState();
-        stateJson.setEnableAutoscaling(true);
+        stateJson.enableAutoscaling = true;
         return stateJson;
     }
 
     public static AutoscaleClusterState disable() {
         AutoscaleClusterState stateJson = new AutoscaleClusterState();
-        stateJson.setEnableAutoscaling(false);
+        stateJson.enableAutoscaling = false;
         return stateJson;
     }
 }

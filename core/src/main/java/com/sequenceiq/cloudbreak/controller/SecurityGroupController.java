@@ -111,7 +111,7 @@ public class SecurityGroupController extends NotificationController implements S
         return conversionService.convert(securityGroup, SecurityGroupResponse.class);
     }
 
-    private Set<SecurityGroupResponse> convert(Set<SecurityGroup> securityGroups) {
+    private Set<SecurityGroupResponse> convert(Iterable<SecurityGroup> securityGroups) {
         Set<SecurityGroupResponse> jsons = new HashSet<>();
         for (SecurityGroup securityGroup : securityGroups) {
             jsons.add(convert(securityGroup));

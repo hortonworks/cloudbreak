@@ -14,16 +14,16 @@ import io.swagger.annotations.ApiModelProperty;
 public class PlatformVmJson implements JsonEntity {
 
     @ApiModelProperty(ConnectorModelDescription.VIRTUAL_MACHNES)
-    private Collection<VmTypeJson> virtualMachines = new ArrayList<>();
+    private final Collection<VmTypeJson> virtualMachines = new ArrayList<>();
 
     @ApiModelProperty(ConnectorModelDescription.DEFAULT_VIRTUAL_MACHINES)
-    private Collection<String> defaultVirtualMachines = new ArrayList<>();
+    private final Collection<String> defaultVirtualMachines = new ArrayList<>();
 
     @ApiModelProperty(ConnectorModelDescription.VIRTUAL_MACHINES_PER_ZONES)
-    private Map<String, Collection<VmTypeJson>> vmTypesPerZones = new HashMap<>();
+    private final Map<String, Collection<VmTypeJson>> vmTypesPerZones = new HashMap<>();
 
     @ApiModelProperty(ConnectorModelDescription.DEFAULT_VIRTUAL_MACHINES_PER_ZONES)
-    private Map<String, String> defaultVmTypePerZones = new HashMap<>();
+    private final Map<String, String> defaultVmTypePerZones = new HashMap<>();
 
     public Collection<VmTypeJson> getVirtualMachines() {
         return virtualMachines;

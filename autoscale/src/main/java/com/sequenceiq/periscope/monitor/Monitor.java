@@ -12,7 +12,7 @@ public interface Monitor extends Job {
 
     String getTriggerExpression();
 
-    Class getEvaluatorType();
+    Class<?> getEvaluatorType();
 
     Map<String, Object> getContext(Cluster cluster);
 

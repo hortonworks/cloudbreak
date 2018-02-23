@@ -38,7 +38,7 @@ public class OpenStackSetup implements Setup {
     @Override
     public void prepareImage(AuthenticatedContext authenticatedContext, CloudStack stack, com.sequenceiq.cloudbreak.cloud.model.Image image) {
         String imageName = image.getImageName();
-        OSClient osClient = openStackClient.createOSClient(authenticatedContext);
+        OSClient<?> osClient = openStackClient.createOSClient(authenticatedContext);
         openStackImageVerifier.exist(osClient, imageName);
     }
 
@@ -49,16 +49,16 @@ public class OpenStackSetup implements Setup {
 
     @Override
     public void prerequisites(AuthenticatedContext authenticatedContext, CloudStack stack, PersistenceNotifier persistenceNotifier) {
-        OSClient osClient = openStackClient.createOSClient(authenticatedContext);
+        OSClient<?> osClient = openStackClient.createOSClient(authenticatedContext);
         verifyFlavors(osClient, stack.getGroups());
         LOGGER.debug("setup has been executed");
     }
 
     @Override
-    public void validateFileSystem(CloudCredential credential, FileSystem fileSystem) throws Exception {
+    public void validateFileSystem(CloudCredential credential, FileSystem fileSystem) {
     }
 
-    private void verifyFlavors(OSClient osClient, Iterable<Group> instanceGroups) {
+    private void verifyFlavors(OSClient<?> osClient, Iterable<Group> instanceGroups) {
         List<? extends Flavor> flavors = osClient.compute().flavors().list();
         Set<String> notFoundFlavors = new HashSet<>();
         for (Group instanceGroup : instanceGroups) {

@@ -4,7 +4,8 @@ import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.InstanceGroupAdjustmentModelDescription;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.InstanceGroupModelDescription;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -14,11 +15,11 @@ import io.swagger.annotations.ApiModelProperty;
 public class StackScaleRequestV2 implements JsonEntity {
 
     @NotNull
-    @ApiModelProperty(value = ModelDescriptions.InstanceGroupModelDescription.INSTANCE_GROUP_NAME, required = true)
+    @ApiModelProperty(value = InstanceGroupModelDescription.INSTANCE_GROUP_NAME, required = true)
     private String group;
 
     @NotNull
-    @ApiModelProperty(value = ModelDescriptions.InstanceGroupAdjustmentModelDescription.SCALING_ADJUSTMENT, required = true)
+    @ApiModelProperty(value = InstanceGroupAdjustmentModelDescription.SCALING_ADJUSTMENT, required = true)
     private Integer desiredCount;
 
     private Long stackId;

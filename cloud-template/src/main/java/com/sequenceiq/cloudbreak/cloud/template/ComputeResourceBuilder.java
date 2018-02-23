@@ -26,17 +26,17 @@ import com.sequenceiq.cloudbreak.common.type.ResourceType;
  * order of the resource creation. In the example above on GCP first the root disk will be created after that the attached disks and then at the end the
  * actual instance will be created. For instance creation it is most likely to need the resources created by an early builder so these resources should
  * be provided by the generic {@link ResourceBuilderContext} objects which will be passed along with the creation process.
- * <p/>
+ * <br>
  * To remove the corresponding compute resources the builders will be called in <b>reverse</b> order. It the example above it will be called as:
  * - GCP_INSTANCE
  * - GCP_ATTACHED_DISK
  * - GCP_DISK
  * It is possible that the instance deletion will delete all the resources as well which is a normal scenario, see the documentation on the delete method.
- * <p/>
+ * <br>
  * These type of resources <b>can be rolled back</b>. It means if the creation of an instance fails does not automatically mean that the whole deployment
  * fails. The failure policy can determine when to rollback the whole deployment {@link com.sequenceiq.cloudbreak.cloud.template.compute.CloudFailureHandler}.
  * The rollback is handled automatically by Cloudbreak by calling the appropriate delete methods of the different resource builders.
- * <p/>
+ * <br>
  * In order to make use of this interface and call the resource builders in ordered fashion the cloud provider implementation should extend
  * {@link AbstractResourceConnector} which is a base implementation of {@link com.sequenceiq.cloudbreak.cloud.ResourceConnector}.
  * Eventually all the cloud provider implementations use {@link com.sequenceiq.cloudbreak.cloud.ResourceConnector}. Providers which support some form of

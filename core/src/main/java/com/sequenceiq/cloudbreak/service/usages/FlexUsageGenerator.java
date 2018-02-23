@@ -134,7 +134,7 @@ public class FlexUsageGenerator {
         return cbUser;
     }
 
-    private List<FlexUsageProductJson> getFlexUsageProductJsons(List<CloudbreakUsage> usages, Long fromDate) {
+    private List<FlexUsageProductJson> getFlexUsageProductJsons(Iterable<CloudbreakUsage> usages, Long fromDate) {
         List<FlexUsageProductJson> flexUsageProducts = new ArrayList<>();
         FlexUsageProductJson flexUsageProductJson = new FlexUsageProductJson();
         flexUsageProductJson.setProductId(productId);
@@ -174,7 +174,7 @@ public class FlexUsageGenerator {
         return cbdComponentInstance;
     }
 
-    private List<FlexUsageHdpInstanceJson> getFlexUsageHdpInstances(List<CloudbreakUsage> usages) {
+    private List<FlexUsageHdpInstanceJson> getFlexUsageHdpInstances(Iterable<CloudbreakUsage> usages) {
         Map<Long, FlexUsageHdpInstanceJson> flexUsageJsonsByStackId = new HashMap<>();
         for (CloudbreakUsage usage : usages) {
             Long stackId = usage.getStackId();

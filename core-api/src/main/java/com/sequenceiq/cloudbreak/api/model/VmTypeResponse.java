@@ -9,11 +9,11 @@ public class VmTypeResponse {
 
     private VmTypeMetaResponse metaData;
 
-    private Boolean extended = true;
+    private Boolean extended;
 
     private VmTypeResponse(String vmType, VmTypeMetaResponse meta, Boolean extended) {
         this.vmType = vmType;
-        this.metaData = meta;
+        metaData = meta;
         this.extended = extended;
     }
 

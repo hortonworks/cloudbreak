@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -89,7 +90,7 @@ public class SaltApiRunPostResponse extends ITResponse {
         NetworkInterfaceResponse networkInterfaceResponse = new NetworkInterfaceResponse();
         List<Map<String, String>> result = new ArrayList<>();
 
-        for (Map.Entry<String, CloudVmMetaDataStatus> stringCloudVmMetaDataStatusEntry : instanceMap.entrySet()) {
+        for (Entry<String, CloudVmMetaDataStatus> stringCloudVmMetaDataStatusEntry : instanceMap.entrySet()) {
             CloudVmMetaDataStatus cloudVmMetaDataStatus = stringCloudVmMetaDataStatusEntry.getValue();
             if (InstanceStatus.STARTED == cloudVmMetaDataStatus.getCloudVmInstanceStatus().getStatus()) {
                 String privateIp = cloudVmMetaDataStatus.getMetaData().getPrivateIp();
@@ -109,7 +110,7 @@ public class SaltApiRunPostResponse extends ITResponse {
 
         Map<String, Object> hostMap = new HashMap<>();
 
-        for (Map.Entry<String, CloudVmMetaDataStatus> stringCloudVmMetaDataStatusEntry : instanceMap.entrySet()) {
+        for (Entry<String, CloudVmMetaDataStatus> stringCloudVmMetaDataStatusEntry : instanceMap.entrySet()) {
             CloudVmMetaDataStatus cloudVmMetaDataStatus = stringCloudVmMetaDataStatusEntry.getValue();
             if (InstanceStatus.STARTED == cloudVmMetaDataStatus.getCloudVmInstanceStatus().getStatus()) {
                 String privateIp = cloudVmMetaDataStatus.getMetaData().getPrivateIp();
@@ -129,7 +130,7 @@ public class SaltApiRunPostResponse extends ITResponse {
 
         Map<String, Object> hostMap = new HashMap<>();
 
-        for (Map.Entry<String, CloudVmMetaDataStatus> stringCloudVmMetaDataStatusEntry : instanceMap.entrySet()) {
+        for (Entry<String, CloudVmMetaDataStatus> stringCloudVmMetaDataStatusEntry : instanceMap.entrySet()) {
             CloudVmMetaDataStatus cloudVmMetaDataStatus = stringCloudVmMetaDataStatusEntry.getValue();
             if (InstanceStatus.STARTED == cloudVmMetaDataStatus.getCloudVmInstanceStatus().getStatus()) {
                 String privateIp = cloudVmMetaDataStatus.getMetaData().getPrivateIp();

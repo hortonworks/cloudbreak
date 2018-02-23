@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.security.Security;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,6 +25,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.actuate.autoconfigure.ExportMetricWriter;
 import org.springframework.boot.actuate.metrics.jmx.JmxMetricWriter;
 import org.springframework.boot.actuate.metrics.writer.MetricWriter;
+import org.springframework.boot.env.PropertySourceLoader;
 import org.springframework.boot.env.YamlPropertySourceLoader;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.ResourceLoaderAware;
@@ -129,7 +132,7 @@ public class AppConfig implements ResourceLoaderAware {
         Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
 
         ResourcePatternResolver patternResolver = new PathMatchingResourcePatternResolver();
-        YamlPropertySourceLoader load = new YamlPropertySourceLoader();
+        PropertySourceLoader load = new YamlPropertySourceLoader();
         for (Resource resource : patternResolver.getResources("classpath*:*-images.yml")) {
             environment.getPropertySources().addLast(load.load(resource.getFilename(), resource, null));
         }
@@ -200,7 +203,7 @@ public class AppConfig implements ResourceLoaderAware {
 
     @Bean
     public Map<FileSystemType, FileSystemConfigurator> fileSystemConfigurators() {
-        Map<FileSystemType, FileSystemConfigurator> map = new HashMap<>();
+        Map<FileSystemType, FileSystemConfigurator> map = new EnumMap<>(FileSystemType.class);
         for (FileSystemConfigurator fileSystemConfigurator : fileSystemConfigurators) {
             map.put(fileSystemConfigurator.getFileSystemType(), fileSystemConfigurator);
         }
@@ -295,10 +298,10 @@ public class AppConfig implements ResourceLoaderAware {
         return cardinality == null ? defaultValue : cardinality;
     }
 
-    private List<Resource> loadEtcResources() {
+    private Iterable<Resource> loadEtcResources() {
         File folder = new File(etcConfigDir);
         File[] listOfFiles = folder.listFiles();
-        List<Resource> resources = new ArrayList<>();
+        Collection<Resource> resources = new ArrayList<>();
         if (listOfFiles != null) {
             for (File file : listOfFiles) {
                 try {

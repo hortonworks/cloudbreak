@@ -26,7 +26,7 @@ public class AmbariStartupPollerObject extends StackContext {
         this.ambariIp = ambariIp;
     }
 
-    public List<AmbariClient> getAmbariClients() {
+    public Iterable<AmbariClient> getAmbariClients() {
         return ambariClients;
     }
 

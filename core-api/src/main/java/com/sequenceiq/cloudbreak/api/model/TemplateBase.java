@@ -28,10 +28,10 @@ public abstract class TemplateBase implements JsonEntity {
     @ApiModelProperty(TemplateModelDescription.VOLUME_TYPE)
     private String volumeType;
 
-    @ApiModelProperty(value = TemplateModelDescription.INSTANCE_TYPE)
+    @ApiModelProperty(TemplateModelDescription.INSTANCE_TYPE)
     private String instanceType;
 
-    @ApiModelProperty(value = TemplateModelDescription.CUSTOM_INSTANCE_TYPE)
+    @ApiModelProperty(TemplateModelDescription.CUSTOM_INSTANCE_TYPE)
     private CustomInstanceType customInstanceType;
 
     @ApiModelProperty(ModelDescriptions.TOPOLOGY_ID)

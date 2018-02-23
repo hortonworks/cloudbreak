@@ -36,6 +36,7 @@ import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
+import com.sequenceiq.cloudbreak.cloud.model.CloudResource.Builder;
 import com.sequenceiq.cloudbreak.cloud.openstack.view.KeystoneCredentialView;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 
@@ -66,7 +67,7 @@ public class OpenStackClient {
     @Value("${cb.openstack.disable.ssl.verification:false}")
     private boolean disableSSLVerification;
 
-    private Config config = Config.newConfig();
+    private final Config config = Config.newConfig();
 
     @PostConstruct
     public void init() {
@@ -82,7 +83,7 @@ public class OpenStackClient {
         return authenticatedContext;
     }
 
-    public OSClient createOSClient(AuthenticatedContext authenticatedContext) {
+    public OSClient<?> createOSClient(AuthenticatedContext authenticatedContext) {
         String facing = authenticatedContext.getCloudCredential().getStringParameter(FACING);
 
         if (isV2Keystone(authenticatedContext)) {
@@ -94,7 +95,7 @@ public class OpenStackClient {
         }
     }
 
-    public OSClient createOSClient(CloudCredential cloudCredential) {
+    public OSClient<?> createOSClient(CloudCredential cloudCredential) {
         String facing = cloudCredential.getStringParameter(FACING);
 
         if (isV2Keystone(cloudCredential)) {
@@ -137,7 +138,7 @@ public class OpenStackClient {
                 .map(r -> {
                     Optional<ResourceType> type = getType(r);
                     if (type.isPresent()) {
-                        return new CloudResource.Builder()
+                        return new Builder()
                                 .name(r.getPhysicalResourceId())
                                 .type(type.get())
                                 .build();
@@ -200,29 +201,30 @@ public class OpenStackClient {
 
     private Token createToken(CloudCredential cloudCredential) {
         KeystoneCredentialView osCredential = createKeystoneCredential(cloudCredential);
-
-        if (KeystoneCredentialView.CB_KEYSTONE_V3_DEFAULT_SCOPE.equals(osCredential.getScope())) {
-            Token token = OSFactory.builderV3().withConfig(config).endpoint(osCredential.getEndpoint())
-                    .credentials(osCredential.getUserName(), osCredential.getPassword(), Identifier.byName(osCredential.getUserDomain()))
-                    .authenticate()
-                    .getToken();
-            return token;
-        } else if (KeystoneCredentialView.CB_KEYSTONE_V3_DOMAIN_SCOPE.equals(osCredential.getScope())) {
-            Token token = OSFactory.builderV3().withConfig(config).endpoint(osCredential.getEndpoint())
-                    .credentials(osCredential.getUserName(), osCredential.getPassword(), Identifier.byName(osCredential.getUserDomain()))
-                    .scopeToDomain(Identifier.byName(osCredential.getDomainName()))
-                    .authenticate()
-                    .getToken();
-            return token;
-        } else if (KeystoneCredentialView.CB_KEYSTONE_V3_PROJECT_SCOPE.equals(osCredential.getScope())) {
-            Token token = OSFactory.builderV3().withConfig(config).endpoint(osCredential.getEndpoint())
-                    .credentials(osCredential.getUserName(), osCredential.getPassword(), Identifier.byName(osCredential.getUserDomain()))
-                    .scopeToProject(Identifier.byName(osCredential.getProjectName()), Identifier.byName(osCredential.getProjectDomain()))
-                    .authenticate()
-                    .getToken();
-            return token;
+        if (osCredential == null || osCredential.getScope() == null) {
+            return null;
         }
-        return null;
+        switch (osCredential.getScope()) {
+            case KeystoneCredentialView.CB_KEYSTONE_V3_DEFAULT_SCOPE:
+                return OSFactory.builderV3().withConfig(config).endpoint(osCredential.getEndpoint())
+                        .credentials(osCredential.getUserName(), osCredential.getPassword(), Identifier.byName(osCredential.getUserDomain()))
+                        .authenticate()
+                        .getToken();
+            case KeystoneCredentialView.CB_KEYSTONE_V3_DOMAIN_SCOPE:
+                return OSFactory.builderV3().withConfig(config).endpoint(osCredential.getEndpoint())
+                        .credentials(osCredential.getUserName(), osCredential.getPassword(), Identifier.byName(osCredential.getUserDomain()))
+                        .scopeToDomain(Identifier.byName(osCredential.getDomainName()))
+                        .authenticate()
+                        .getToken();
+            case KeystoneCredentialView.CB_KEYSTONE_V3_PROJECT_SCOPE:
+                return OSFactory.builderV3().withConfig(config).endpoint(osCredential.getEndpoint())
+                        .credentials(osCredential.getUserName(), osCredential.getPassword(), Identifier.byName(osCredential.getUserDomain()))
+                        .scopeToProject(Identifier.byName(osCredential.getProjectName()), Identifier.byName(osCredential.getProjectDomain()))
+                        .authenticate()
+                        .getToken();
+            default:
+                return null;
+        }
     }
 
     private void createAccessOrToken(AuthenticatedContext authenticatedContext) {
@@ -263,14 +265,14 @@ public class OpenStackClient {
         return regions;
     }
 
-    public List<com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone> getZones(OSClient osClient, String regionFromOpenStack) {
+    public List<com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone> getZones(OSClient<?> osClient, String regionFromOpenStack) {
         List<? extends AvailabilityZone> zonesFromOS = osClient.compute().zones().list();
         LOGGER.info("zones from openstack for {}: {}", regionFromOpenStack, zonesFromOS);
         return zonesFromOS.stream().map(z -> availabilityZone(z.getZoneName())).collect(Collectors.toList());
     }
 
-    public List<Flavor> getFlavors(OSClient osClient) {
-        return (List<Flavor>) osClient.compute().flavors().list();
+    public List<? extends Flavor> getFlavors(OSClient<?> osClient) {
+        return osClient.compute().flavors().list();
     }
 
 }

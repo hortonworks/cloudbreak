@@ -14,7 +14,7 @@ public class CloudInstance extends DynamicModel {
 
     private final InstanceTemplate template;
 
-    private InstanceAuthentication authentication;
+    private final InstanceAuthentication authentication;
 
     public CloudInstance(String instanceId, InstanceTemplate template, InstanceAuthentication authentication) {
         this.instanceId = instanceId;

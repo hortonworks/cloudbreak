@@ -44,7 +44,7 @@ public class PlatformConverterUtil {
         return result;
     }
 
-    public static <T extends StringType> Collection<String> convertList(Collection<T> vmlist) {
+    public static <T extends StringType> Collection<String> convertList(Iterable<T> vmlist) {
         Collection<String> result = Lists.newArrayList();
         for (T item : vmlist) {
             result.add(item.value());

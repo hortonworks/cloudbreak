@@ -14,7 +14,7 @@ public interface CacheDefinition {
         return SimpleKeyGenerator.generateKey(params);
     }
 
-    default Class type() {
+    default Class<?> type() {
         return null;
     }
 }

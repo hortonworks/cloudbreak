@@ -9,10 +9,11 @@ import javax.inject.Inject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import com.amazonaws.services.autoscaling.AmazonAutoScalingClient;
+import com.amazonaws.services.autoscaling.AmazonAutoScaling;
 import com.amazonaws.services.autoscaling.model.DescribeAutoScalingGroupsRequest;
 import com.amazonaws.services.autoscaling.model.DescribeAutoScalingGroupsResult;
 import com.amazonaws.services.autoscaling.model.Instance;
+import com.amazonaws.services.cloudformation.AmazonCloudFormation;
 import com.amazonaws.services.cloudformation.AmazonCloudFormationClient;
 import com.amazonaws.services.cloudformation.model.DescribeStackResourceRequest;
 import com.amazonaws.services.cloudformation.model.DescribeStackResourceResult;
@@ -35,7 +36,7 @@ public class CloudFormationStackUtil {
         return getAutoscalingGroupName(ac, amazonCfClient, instanceGroup);
     }
 
-    public String getAutoscalingGroupName(AuthenticatedContext ac, AmazonCloudFormationClient amazonCFClient, String instanceGroup) {
+    public String getAutoscalingGroupName(AuthenticatedContext ac, AmazonCloudFormation amazonCFClient, String instanceGroup) {
         String cFStackName = getCfStackName(ac);
         DescribeStackResourceResult asGroupResource = amazonCFClient.describeStackResource(new DescribeStackResourceRequest()
                 .withStackName(cFStackName)
@@ -48,7 +49,7 @@ public class CloudFormationStackUtil {
                 .splitToList(ac.getCloudContext().getName()).get(0), ac.getCloudContext().getId());
     }
 
-    public List<String> getInstanceIds(AmazonAutoScalingClient amazonASClient, String asGroupName) {
+    public List<String> getInstanceIds(AmazonAutoScaling amazonASClient, String asGroupName) {
         DescribeAutoScalingGroupsResult describeAutoScalingGroupsResult = amazonASClient
                 .describeAutoScalingGroups(new DescribeAutoScalingGroupsRequest().withAutoScalingGroupNames(asGroupName));
         List<String> instanceIds = new ArrayList<>();

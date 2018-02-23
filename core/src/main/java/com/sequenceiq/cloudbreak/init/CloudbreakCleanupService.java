@@ -190,7 +190,7 @@ public class CloudbreakCleanupService implements ApplicationListener<ContextRefr
      * It restarts all the disrupted flows that are assigned to this node.
      */
     private Collection<Long> restartMyAssignedDisruptedFlows() {
-        List<Long> stackIds = new ArrayList<>();
+        Collection<Long> stackIds = new ArrayList<>();
         if (cloudbreakNodeConfig.isNodeIdSpecified()) {
             Set<FlowLog> myFlowLogs;
             try {

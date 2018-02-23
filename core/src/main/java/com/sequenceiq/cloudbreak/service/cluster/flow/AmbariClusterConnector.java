@@ -61,7 +61,6 @@ import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
-import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.core.ClusterException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
@@ -335,7 +334,7 @@ public class AmbariClusterConnector {
             AmbariClient ambariClient = getAmbariClient(stack);
             Map<String, Integer> operationRequests = new HashMap<>();
             Stream.of("ZOOKEEPER", "HDFS", "YARN", "MAPREDUCE2", "KERBEROS").forEach(s -> {
-                int opId = s.equals("ZOOKEEPER") ? ambariClient.startService(s) : ambariClient.stopService(s);
+                int opId = "ZOOKEEPER".equals(s) ? ambariClient.startService(s) : ambariClient.stopService(s);
                 if (opId != -1) {
                     operationRequests.put(s + "_SERVICE_STATE", opId);
                 }
@@ -370,7 +369,7 @@ public class AmbariClusterConnector {
         }
     }
 
-    private String updateBlueprintConfiguration(Stack stack, String blueprintText, Set<RDSConfig> rdsConfigs, FileSystem fs)
+    private String updateBlueprintConfiguration(Stack stack, String blueprintText, Collection<RDSConfig> rdsConfigs, FileSystem fs)
             throws IOException, CloudbreakException {
         if (fs != null) {
             blueprintText = extendBlueprintWithFsConfig(blueprintText, fs, stack);
@@ -397,7 +396,7 @@ public class AmbariClusterConnector {
         return blueprintText;
     }
 
-    private String updateBlueprintWithInputs(Cluster cluster, Blueprint blueprint, Set<RDSConfig> rdsConfigs) throws IOException {
+    private String updateBlueprintWithInputs(Cluster cluster, Blueprint blueprint, Iterable<RDSConfig> rdsConfigs) throws IOException {
         String blueprintText = blueprint.getBlueprintText();
         return blueprintTemplateProcessor.process(blueprintText, cluster, rdsConfigs);
     }
@@ -421,7 +420,7 @@ public class AmbariClusterConnector {
         }
     }
 
-    public void waitForAmbariHosts(Stack stack) throws CloudbreakSecuritySetupException {
+    public void waitForAmbariHosts(Stack stack) {
         AmbariClient ambariClient = getAmbariClient(stack);
         Set<HostMetadata> hostMetadata = hostMetadataRepository.findHostsInCluster(stack.getCluster().getId());
         waitForHosts(stack, ambariClient, hostMetadata);
@@ -442,19 +441,19 @@ public class AmbariClusterConnector {
         }
     }
 
-    private AmbariClient getDefaultAmbariClient(Stack stack) throws CloudbreakSecuritySetupException {
+    private AmbariClient getDefaultAmbariClient(Stack stack) {
         Cluster cluster = stack.getCluster();
         HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfigForPrimaryGateway(stack.getId(), cluster.getAmbariIp());
         return ambariClientProvider.getDefaultAmbariClient(clientConfig, stack.getGatewayPort());
     }
 
-    private AmbariClient getAmbariClient(Stack stack) throws CloudbreakSecuritySetupException {
+    private AmbariClient getAmbariClient(Stack stack) {
         Cluster cluster = stack.getCluster();
         HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfigForPrimaryGateway(stack.getId(), cluster.getAmbariIp());
         return ambariClientProvider.getAmbariClient(clientConfig, stack.getGatewayPort(), cluster);
     }
 
-    private AmbariClient getAmbariClient(Stack stack, String user, String password) throws CloudbreakSecuritySetupException {
+    private AmbariClient getAmbariClient(Stack stack, String user, String password) {
         Cluster cluster = stack.getCluster();
         HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfigForPrimaryGateway(stack.getId(), cluster.getAmbariIp());
         return ambariClientProvider.getAmbariClient(clientConfig, stack.getGatewayPort(), user, password);
@@ -545,7 +544,7 @@ public class AmbariClusterConnector {
         waitForAllServices(stack, ambariClient, requestId);
     }
 
-    public boolean isAmbariAvailable(Stack stack) throws CloudbreakSecuritySetupException {
+    public boolean isAmbariAvailable(Stack stack) {
         boolean result = false;
         if (stack.getCluster() != null) {
             AmbariClient ambariClient = getAmbariClient(stack);
@@ -701,7 +700,7 @@ public class AmbariClusterConnector {
         }
     }
 
-    private void startAmbariAgents(Stack stack) throws CloudbreakSecuritySetupException {
+    private void startAmbariAgents(Stack stack) {
         LOGGER.info("Starting Ambari agents on the hosts.");
         PollingResult hostsJoinedResult = waitForHostsToJoin(stack);
         if (PollingResult.EXIT.equals(hostsJoinedResult)) {
@@ -709,7 +708,7 @@ public class AmbariClusterConnector {
         }
     }
 
-    private PollingResult waitForHostsToJoin(Stack stack) throws CloudbreakSecuritySetupException {
+    private PollingResult waitForHostsToJoin(Stack stack) {
         Set<HostMetadata> hostsInCluster = hostMetadataRepository.findHostsInCluster(stack.getCluster().getId());
         AmbariHostsCheckerContext ambariHostsCheckerContext =
                 new AmbariHostsCheckerContext(stack, getAmbariClient(stack), hostsInCluster, stack.getFullNodeCount());
@@ -734,7 +733,7 @@ public class AmbariClusterConnector {
         return stopped;
     }
 
-    private void addBlueprint(Stack stack, AmbariClient ambariClient, String blueprintText, Set<HostGroup> hostGroups) {
+    private void addBlueprint(Stack stack, AmbariClient ambariClient, String blueprintText, Collection<HostGroup> hostGroups) {
         try {
             Cluster cluster = stack.getCluster();
             StackRepoDetails stackRepoDetails = clusterComponentConfigProvider.getHDPRepo(cluster.getId());
@@ -765,7 +764,7 @@ public class AmbariClusterConnector {
         }
     }
 
-    private String addHDFConfigToBlueprint(Stack stack, BlueprintService ambariClient, String blueprintText, Set<HostGroup> hostGroups) {
+    private String addHDFConfigToBlueprint(Stack stack, BlueprintService ambariClient, String blueprintText, Collection<HostGroup> hostGroups) {
         Set<String> nifiMasters = blueprintProcessor.getHostGroupsWithComponent(blueprintText, "NIFI_MASTER");
         Set<InstanceGroup> nifiIgs = hostGroups.stream().filter(hg -> nifiMasters.contains(hg.getName())).map(hg -> hg.getConstraint()
                 .getInstanceGroup()).collect(Collectors.toSet());

@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 
 import javax.inject.Inject;
@@ -152,7 +153,7 @@ public class ImageService {
     private <T> Optional<T> findStringKeyWithEqualsIgnoreCase(String key, Map<String, T> map) {
         return map.entrySet().stream()
                 .filter(entry -> entry.getKey().equalsIgnoreCase(key))
-                .map(Map.Entry::getValue)
+                .map(Entry::getValue)
                 .findFirst();
     }
 

@@ -23,7 +23,7 @@ public class ComputeApiExtractor implements CloudInstanceMetaDataExtractor {
     private HypervisorExtractor hypervisorExtractor;
 
     @Override
-    public CloudInstanceMetaData extractMetadata(OSClient client, Server server, String instanceId) {
+    public CloudInstanceMetaData extractMetadata(OSClient<?> client, Server server, String instanceId) {
         String hypervisor = hypervisorExtractor.getHypervisor(server);
         String privateIp = null;
         String floatingIp = null;

@@ -13,9 +13,6 @@ public class InstanceGroupParameterRequest {
 
     private Map<String, Object> parameters = new HashMap<>();
 
-    public InstanceGroupParameterRequest() {
-    }
-
     public String getStackName() {
         return stackName;
     }

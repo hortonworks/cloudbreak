@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Objects;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -50,7 +51,7 @@ public class Json implements Serializable {
             return true;
         }
 
-        if (o == null || getClass() != o.getClass()) {
+        if (o == null || !Objects.equals(getClass(), o.getClass())) {
             return false;
         }
 

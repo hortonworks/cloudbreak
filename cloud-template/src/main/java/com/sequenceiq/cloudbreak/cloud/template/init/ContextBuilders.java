@@ -16,18 +16,18 @@ import com.sequenceiq.cloudbreak.cloud.template.ResourceContextBuilder;
 public class ContextBuilders {
 
     @Inject
-    private List<ResourceContextBuilder> contextBuilders;
+    private List<ResourceContextBuilder<?>> contextBuilders;
 
-    private final Map<Platform, ResourceContextBuilder> map = new HashMap<>();
+    private final Map<Platform, ResourceContextBuilder<?>> map = new HashMap<>();
 
     @PostConstruct
     public void init() {
-        for (ResourceContextBuilder builder : contextBuilders) {
+        for (ResourceContextBuilder<?> builder : contextBuilders) {
             map.put(builder.platform(), builder);
         }
     }
 
-    public ResourceContextBuilder get(Platform platform) {
+    public ResourceContextBuilder<?> get(Platform platform) {
         return map.get(platform);
     }
 

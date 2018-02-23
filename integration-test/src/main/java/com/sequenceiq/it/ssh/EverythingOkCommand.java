@@ -1,6 +1,5 @@
 package com.sequenceiq.it.ssh;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
@@ -48,7 +47,7 @@ class EverythingOkCommand implements Command {
     }
 
     @Override
-    public void start(Environment env) throws IOException {
+    public void start(Environment env) {
         LOGGER.info("start");
         IOUtils.closeQuietly(in);
         IOUtils.closeQuietly(out);
@@ -57,7 +56,7 @@ class EverythingOkCommand implements Command {
     }
 
     @Override
-    public void destroy() throws Exception {
+    public void destroy() {
         LOGGER.info("destroy");
     }
 }

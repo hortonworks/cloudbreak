@@ -59,7 +59,7 @@ public class PlatformVirtualMachineTypesToPlatformVirtualMachinesJsonConverter e
         return result;
     }
 
-    public Collection<VmTypeJson> convertVmList(Collection<VmType> vmlist) {
+    public Collection<VmTypeJson> convertVmList(Iterable<VmType> vmlist) {
         Collection<VmTypeJson> result = Lists.newArrayList();
         for (VmType item : vmlist) {
             result.add(getConversionService().convert(item, VmTypeJson.class));

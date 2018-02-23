@@ -63,7 +63,7 @@ public class JsonIoConfig {
         }
 
         @Override
-        public void writePrimitiveForm(Object o, Writer output) throws IOException {
+        public void writePrimitiveForm(Object o, Writer output) {
             throw new UnsupportedOperationException("Primitive form write not allowed");
         }
     }

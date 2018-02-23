@@ -113,7 +113,7 @@ public class MockClusterCreationWithSaltSuccessTest extends AbstractCloudbreakIn
         stackCreationMock.stop();
     }
 
-    private Set<HostGroupRequest> convertHostGroups(List<HostGroup> hostGroups, String runRecipesOnHosts) {
+    private Set<HostGroupRequest> convertHostGroups(Iterable<HostGroup> hostGroups, String runRecipesOnHosts) {
         Set<Long> recipeIds = Collections.emptySet();
         List<String> hostGroupsWithRecipe = Collections.emptyList();
         if (!runRecipesOnHosts.isEmpty()) {

@@ -5,7 +5,7 @@ import java.util.Map;
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformRequest;
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
 
-public class InteractiveLoginResult extends CloudPlatformResult<CloudPlatformRequest> {
+public class InteractiveLoginResult extends CloudPlatformResult<CloudPlatformRequest<?>> {
 
     private Map<String, String> parameters;
 

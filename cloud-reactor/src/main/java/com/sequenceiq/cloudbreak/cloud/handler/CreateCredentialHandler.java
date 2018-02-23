@@ -52,12 +52,12 @@ public class CreateCredentialHandler implements CloudPlatformEventHandler<Create
             }
             CreateCredentialResult result = new CreateCredentialResult(request);
             request.getResult().onNext(result);
-            eventBus.notify(result.selector(), new Event(credentialRequestEvent.getHeaders(), result));
+            eventBus.notify(result.selector(), new Event<>(credentialRequestEvent.getHeaders(), result));
             LOGGER.info("Creating credential successfully finished for {}", cloudContext);
         } catch (RuntimeException e) {
             CreateCredentialResult failure = new CreateCredentialResult(e, request);
             request.getResult().onNext(failure);
-            eventBus.notify(failure.selector(), new Event(credentialRequestEvent.getHeaders(), failure));
+            eventBus.notify(failure.selector(), new Event<>(credentialRequestEvent.getHeaders(), failure));
         }
     }
 }

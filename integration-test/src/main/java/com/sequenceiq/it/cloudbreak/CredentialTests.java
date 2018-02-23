@@ -23,33 +23,29 @@ import javax.ws.rs.ForbiddenException;
 
 public class CredentialTests extends CloudbreakTest {
 
-    public static final String VALID_CRED_NAME = "valid-credential";
+    private static final String VALID_CRED_NAME = "valid-credential";
 
-    public static final String VALID_AWSKEY_CRED_NAME = "valid-keybased-credential";
+    private static final String VALID_AWSKEY_CRED_NAME = "valid-keybased-credential";
 
-    public static final String VALID_OSV3_CRED_NAME = "valid-v3-credential";
+    private static final String VALID_OSV3_CRED_NAME = "valid-v3-credential";
 
-    public static final String AGAIN_CRED_NAME = "again-credential";
+    private static final String AGAIN_CRED_NAME = "again-credential";
 
-    public static final String DELETE_CRED_NAME = "delete-credential";
+    private static final String DELETE_CRED_NAME = "delete-credential";
 
-    public static final String DELETE_AGAIN_CRED_NAME = "delete-again-credential";
+    private static final String DELETE_AGAIN_CRED_NAME = "delete-again-credential";
 
-    public static final String LONG_DC_CRED_NAME = "long-description-credential";
+    private static final String LONG_DC_CRED_NAME = "long-description-credential";
 
-    public static final String SPECIAL_CRED_NAME = "@#$%|:&*;";
+    private static final String SPECIAL_CRED_NAME = "@#$%|:&*;";
 
-    public static final String INVALID_SHORT_CRED_NAME = "";
+    private static final String INVALID_SHORT_CRED_NAME = "";
 
-    public static final String EMPTY_CRED_NAME = "temp-empty-credential";
+    private static final String EMPTY_CRED_NAME = "temp-empty-credential";
 
-    public static final String CRED_DESCRIPTION = "temporary credential for API E2E tests";
+    private static final String CRED_DESCRIPTION = "temporary credential for API E2E tests";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CredentialTests.class);
-
-    private String invalidLongDescripton = "";
-
-    private String invalidLongName = "";
 
     private String credentialName = "";
 
@@ -64,41 +60,41 @@ public class CredentialTests extends CloudbreakTest {
     }
 
     public CredentialTests(CloudProvider cp, TestParameter tp) {
-        this.cloudProvider = cp;
+        cloudProvider = cp;
         setTestParameter(tp);
     }
 
     @BeforeTest
-    @Parameters({ "provider" })
+    @Parameters("provider")
     public void beforeTest(@Optional(OpenstackCloudProvider.OPENSTACK) String provider) {
         LOGGER.info("before cluster test set provider: " + provider);
-        if (this.cloudProvider != null) {
+        if (cloudProvider != null) {
             LOGGER.info("cloud provider already set - running from factory test");
             return;
         }
-        this.cloudProvider = CloudProviderHelper.providerFactory(provider, getTestParameter())[0];
+        cloudProvider = CloudProviderHelper.providerFactory(provider, getTestParameter())[0];
     }
 
     @AfterTest
     public void cleanUp() throws Exception {
         String[] nameArray = {VALID_CRED_NAME, VALID_AWSKEY_CRED_NAME, AGAIN_CRED_NAME, VALID_OSV3_CRED_NAME, LONG_DC_CRED_NAME, DELETE_AGAIN_CRED_NAME};
 
-        for (int i = 0; i < nameArray.length; i++) {
-            LOGGER.info("Delete credential: \'{}\'", nameArray[i].toLowerCase().trim());
+        for (String aNameArray : nameArray) {
+            LOGGER.info("Delete credential: \'{}\'", aNameArray.toLowerCase().trim());
             try {
                 given(CloudbreakClient.isCreated());
                 given(Credential.request()
-                        .withName(nameArray[i] + cloudProvider.getPlatform().toLowerCase()));
+                        .withName(aNameArray + cloudProvider.getPlatform().toLowerCase()));
                 when(Credential.delete());
             } catch (ForbiddenException e) {
                 String exceptionMessage = e.getResponse().readEntity(String.class);
-                this.errorMessage = exceptionMessage.substring(exceptionMessage.lastIndexOf(":") + 1);
-                LOGGER.info("ForbiddenException message ::: " + this.errorMessage);
+                errorMessage = exceptionMessage.substring(exceptionMessage.lastIndexOf(':') + 1);
+                LOGGER.info("ForbiddenException message ::: " + errorMessage);
             }
         }
     }
 
-    @Test(priority = 0, groups = { "credentials" })
+    @Test(priority = 0, groups = "credentials")
     public void testCreateValidCredential() throws Exception {
         credentialName = VALID_CRED_NAME + cloudProvider.getPlatform().toLowerCase();
 
@@ -109,13 +105,12 @@ public class CredentialTests extends CloudbreakTest {
                 .withCloudPlatform(cloudProvider.getPlatform()), credentialName + " credential is created.");
         when(Credential.get(), credentialName + " credential has been got.");
         then(Credential.assertThis(
-                (credential, t) -> {
-                    Assert.assertEquals(credential.getResponse().getName(), credentialName);
-                }), credentialName + " should be the name of the new credential."
+                (credential, t) -> Assert.assertEquals(credential.getResponse().getName(), credentialName)),
+                credentialName + " should be the name of the new credential."
         );
     }
 
-    @Test(expectedExceptions = BadRequestException.class, priority = 1, groups = { "credentials" })
+    @Test(expectedExceptions = BadRequestException.class, priority = 1, groups = "credentials")
     public void testCreateAgainCredentialException() throws Exception {
         credentialName = AGAIN_CRED_NAME + cloudProvider.getPlatform().toLowerCase();
 
@@ -131,7 +126,7 @@ public class CredentialTests extends CloudbreakTest {
         when(Credential.post(), credentialName + " credential request has been posted.");
     }
 
-    @Test(expectedExceptions = BadRequestException.class, priority = 2, groups = { "credentials" })
+    @Test(expectedExceptions = BadRequestException.class, priority = 2, groups = "credentials")
     public void testCreateCredentialWithNameOnlyException() throws Exception {
         given(CloudbreakClient.isCreated());
         given(Credential.request()
@@ -141,7 +136,7 @@ public class CredentialTests extends CloudbreakTest {
         when(Credential.post(), EMPTY_CRED_NAME + " credential with no parameters request has been posted.");
     }
 
-    @Test(priority = 3, groups = { "credentials" })
+    @Test(priority = 3, groups = "credentials")
     public void testCreateCredentialWithNameOnlyMessage() throws Exception {
         given(CloudbreakClient.isCreated());
         given(Credential.request()
@@ -152,18 +147,17 @@ public class CredentialTests extends CloudbreakTest {
             when(Credential.post(), EMPTY_CRED_NAME + " credential with no parameters request has been posted.");
         } catch (BadRequestException e) {
             String exceptionMessage = e.getResponse().readEntity(String.class);
-            this.errorMessage = exceptionMessage.substring(exceptionMessage.lastIndexOf(":") + 1);
-            LOGGER.info("MissingParameterException message ::: " + this.errorMessage);
+            errorMessage = exceptionMessage.substring(exceptionMessage.lastIndexOf(':') + 1);
+            LOGGER.info("MissingParameterException message ::: " + errorMessage);
         }
         then(Credential.assertThis(
-                (credential, t) -> {
-                    Assert.assertTrue(this.errorMessage.contains("Missing "), "MissingParameterException is not match: " + this.errorMessage);
-                }), "Error message [Missing] should be present in response."
+                (credential, t) -> Assert.assertTrue(errorMessage.contains("Missing "), "MissingParameterException is not match: " + errorMessage)),
+                "Error message [Missing] should be present in response."
         );
     }
 
     //"The length of the credential's name has to be in range of 1 to 100"
-    @Test(expectedExceptions = BadRequestException.class, priority = 4, groups = { "credentials" })
+    @Test(expectedExceptions = BadRequestException.class, priority = 4, groups = "credentials")
     public void testCreateInvalidShortCredential() throws Exception {
         given(CloudbreakClient.isCreated());
         given(cloudProvider.aValidCredential()
@@ -174,9 +168,9 @@ public class CredentialTests extends CloudbreakTest {
     }
 
     //"The length of the credential's name has to be in range of 1 to 100"
-    @Test(expectedExceptions = BadRequestException.class, priority = 5, groups = { "credentials" })
+    @Test(expectedExceptions = BadRequestException.class, priority = 5, groups = "credentials")
     public void testCreateInvalidLongCredential() throws Exception {
-        invalidLongName = longStringGeneratorUtil.stringGenerator(101);
+        String invalidLongName = longStringGeneratorUtil.stringGenerator(101);
 
         given(CloudbreakClient.isCreated());
         given(cloudProvider.aValidCredential()
@@ -186,7 +180,7 @@ public class CredentialTests extends CloudbreakTest {
         when(Credential.post(), invalidLongName + " credential name request has been posted.");
     }
 
-    @Test(expectedExceptions = BadRequestException.class, priority = 6, groups = { "credentials" })
+    @Test(expectedExceptions = BadRequestException.class, priority = 6, groups = "credentials")
     public void testCreateSpecialCharacterCredential() throws Exception {
         credentialName = SPECIAL_CRED_NAME + cloudProvider.getPlatform().toLowerCase();
 
@@ -200,11 +194,11 @@ public class CredentialTests extends CloudbreakTest {
 
     //BUG-95609 - Won't fix issue
     //"The length of the credential's description has to be in range of 1 to 1000"
-    @Test(expectedExceptions = BadRequestException.class, priority = 7, groups = { "credentials" })
+    @Test(expectedExceptions = BadRequestException.class, priority = 7, groups = "credentials")
     public void testCreateLongDescriptionCredential() throws Exception {
         credentialName = LONG_DC_CRED_NAME + cloudProvider.getPlatform().toLowerCase();
 
-        invalidLongDescripton = longStringGeneratorUtil.stringGenerator(1001);
+        String invalidLongDescripton = longStringGeneratorUtil.stringGenerator(1001);
 
         given(CloudbreakClient.isCreated());
         given(cloudProvider.aValidCredential()
@@ -214,7 +208,7 @@ public class CredentialTests extends CloudbreakTest {
         when(Credential.post(), credentialName + " credential description request has been posted.");
     }
 
-    @Test(expectedExceptions = ForbiddenException.class, priority = 8, groups = { "credentials" })
+    @Test(expectedExceptions = ForbiddenException.class, priority = 8, groups = "credentials")
     public void testDeleteValidCredential() throws Exception {
         credentialName = DELETE_CRED_NAME + cloudProvider.getPlatform().toLowerCase();
 
@@ -227,7 +221,7 @@ public class CredentialTests extends CloudbreakTest {
         when(Credential.get(),  credentialName + " credential should not be present in response.");
     }
 
-    @Test(priority = 9, groups = { "credentials" })
+    @Test(priority = 9, groups = "credentials")
     public void testDeleteAgainCredentialException() throws Exception {
         credentialName = DELETE_AGAIN_CRED_NAME + cloudProvider.getPlatform().toLowerCase();
 
@@ -242,9 +236,8 @@ public class CredentialTests extends CloudbreakTest {
                 .withCloudPlatform(cloudProvider.getPlatform()), credentialName + " credential is created.");
         when(Credential.get(), credentialName + " credential has been got.");
         then(Credential.assertThis(
-                (credential, t) -> {
-                    Assert.assertEquals(credential.getResponse().getName(), credentialName);
-                }), credentialName + " credential name should be present in response."
+                (credential, t) -> Assert.assertEquals(credential.getResponse().getName(), credentialName)),
+                credentialName + " credential name should be present in response."
         );
     }
 }

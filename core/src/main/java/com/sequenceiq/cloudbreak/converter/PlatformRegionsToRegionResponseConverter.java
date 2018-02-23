@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.springframework.stereotype.Component;
@@ -28,8 +29,8 @@ public class PlatformRegionsToRegionResponseConverter extends AbstractConversion
         }
 
         Map<String, Collection<String>> availabilityZones = new HashMap<>();
-        for (Map.Entry<Region, List<AvailabilityZone>> regionListEntry : source.getCloudRegions().entrySet()) {
-            List<String> azs = new ArrayList<>();
+        for (Entry<Region, List<AvailabilityZone>> regionListEntry : source.getCloudRegions().entrySet()) {
+            Collection<String> azs = new ArrayList<>();
             for (AvailabilityZone availabilityZone : regionListEntry.getValue()) {
                 azs.add(availabilityZone.value());
             }
@@ -37,7 +38,7 @@ public class PlatformRegionsToRegionResponseConverter extends AbstractConversion
         }
 
         Map<String, String> displayNames = new HashMap<>();
-        for (Map.Entry<Region, String> regionStringEntry : source.getDisplayNames().entrySet()) {
+        for (Entry<Region, String> regionStringEntry : source.getDisplayNames().entrySet()) {
             displayNames.put(regionStringEntry.getKey().value(), regionStringEntry.getValue());
         }
 

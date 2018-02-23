@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.cloud.model;
 
-import java.util.HashMap;
 import java.util.Map;
 
 public class CloudNetwork {
@@ -9,9 +8,9 @@ public class CloudNetwork {
 
     private String id;
 
-    private Map<String, String> subnets = new HashMap<>();
+    private Map<String, String> subnets;
 
-    private Map<String, Object> properties = new HashMap<>();
+    private Map<String, Object> properties;
 
     public CloudNetwork(String name, String id, Map<String, String> subnets, Map<String, Object> properties) {
         this.name = name;

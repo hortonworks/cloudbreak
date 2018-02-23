@@ -7,6 +7,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -49,7 +50,7 @@ public class OpenStackPlatformResourcesTest {
         when(openStackClient.createOSClient(cloudCredential)).thenReturn(osClient);
         when(openStackClient.getRegion(cloudCredential)).thenReturn(regionsFromOpenStack);
         when(openStackClient.getZones(osClient, regionName)).thenReturn(availabilityZones);
-        when(openStackClient.getFlavors(osClient)).thenReturn(newArrayList(flavor8GB));
+        when(openStackClient.getFlavors(osClient)).thenReturn((List) Collections.singletonList(flavor8GB));
 
         CloudVmTypes actual = underTest.virtualMachines(cloudCredential, null, null);
 

@@ -4,6 +4,7 @@ import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.AmbariStackDetailsDescription;
 
 import io.swagger.annotations.ApiModel;
@@ -11,7 +12,7 @@ import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel("AmbariStackDetails")
 @JsonIgnoreProperties(ignoreUnknown = true)
-@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonInclude(Include.NON_NULL)
 public class AmbariStackDetailsJson implements JsonEntity {
 
     @NotNull
@@ -25,32 +26,32 @@ public class AmbariStackDetailsJson implements JsonEntity {
     @ApiModelProperty(AmbariStackDetailsDescription.OS)
     private String os;
 
-    @ApiModelProperty(value = AmbariStackDetailsDescription.STACK_REPO_ID)
+    @ApiModelProperty(AmbariStackDetailsDescription.STACK_REPO_ID)
     private String stackRepoId;
 
-    @ApiModelProperty(value = AmbariStackDetailsDescription.STACK_BASE_URL)
+    @ApiModelProperty(AmbariStackDetailsDescription.STACK_BASE_URL)
     private String stackBaseURL;
 
-    @ApiModelProperty(value = AmbariStackDetailsDescription.UTILS_REPO_ID)
+    @ApiModelProperty(AmbariStackDetailsDescription.UTILS_REPO_ID)
     private String utilsRepoId;
 
-    @ApiModelProperty(value = AmbariStackDetailsDescription.UTILS_BASE_URL)
+    @ApiModelProperty(AmbariStackDetailsDescription.UTILS_BASE_URL)
     private String utilsBaseURL;
 
-    @ApiModelProperty(value = AmbariStackDetailsDescription.ENABLE_GPL_REPO)
+    @ApiModelProperty(AmbariStackDetailsDescription.ENABLE_GPL_REPO)
     private boolean enableGplRepo;
 
     @NotNull
     @ApiModelProperty(value = AmbariStackDetailsDescription.VERIFY, required = true)
     private Boolean verify;
 
-    @ApiModelProperty(value = AmbariStackDetailsDescription.REPOSITORY_VERSION)
+    @ApiModelProperty(AmbariStackDetailsDescription.REPOSITORY_VERSION)
     private String repositoryVersion;
 
-    @ApiModelProperty(value = AmbariStackDetailsDescription.VDF_URL)
+    @ApiModelProperty(AmbariStackDetailsDescription.VDF_URL)
     private String versionDefinitionFileUrl;
 
-    @ApiModelProperty(value = AmbariStackDetailsDescription.MPACK_URL)
+    @ApiModelProperty(AmbariStackDetailsDescription.MPACK_URL)
     private String mpackUrl;
 
     public String getStack() {

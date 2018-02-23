@@ -6,10 +6,8 @@ import static com.sequenceiq.cloudbreak.api.model.Status.UPDATE_FAILED;
 import static com.sequenceiq.cloudbreak.api.model.Status.UPDATE_IN_PROGRESS;
 import static java.lang.String.format;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -123,17 +121,16 @@ public class StackUpscaleService {
         flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_ADDING_INSTANCES, UPDATE_IN_PROGRESS.name(), scalingAdjustment);
     }
 
-    public Set<Resource> finishAddInstances(StackScalingFlowContext context, UpscaleStackResult payload) {
+    public void finishAddInstances(StackScalingFlowContext context, UpscaleStackResult payload) {
         LOGGER.info("Upscale stack result: {}", payload);
         List<CloudResourceStatus> results = payload.getResults();
         validateResourceResults(context.getCloudContext(), payload.getErrorDetails(), results);
-        updateNodeCount(context.getStack().getId(), context.getCloudStack().getGroups(), results, false);
+        updateNodeCount(context.getStack().getId(), context.getCloudStack().getGroups(), results);
         Set<Resource> resourceSet = transformResults(results, context.getStack());
         if (resourceSet.isEmpty()) {
             throw new OperationException("Failed to upscale the cluster since all create request failed. Resource set is empty");
         }
         LOGGER.debug("Adding new instances to the stack is DONE");
-        return resourceSet;
     }
 
     public void extendingMetadata(Stack stack) {
@@ -209,7 +206,7 @@ public class StackUpscaleService {
         }
     }
 
-    private Set<Resource> transformResults(List<CloudResourceStatus> cloudResourceStatuses, Stack stack) {
+    private Set<Resource> transformResults(Iterable<CloudResourceStatus> cloudResourceStatuses, Stack stack) {
         Set<Resource> retSet = new HashSet<>();
         for (CloudResourceStatus cloudResourceStatus : cloudResourceStatuses) {
             if (!cloudResourceStatus.isFailed()) {
@@ -232,22 +229,14 @@ public class StackUpscaleService {
         }
     }
 
-    private void updateNodeCount(Long stackId, List<Group> originalGroups, List<CloudResourceStatus> statuses, boolean create) {
+    private void updateNodeCount(Long stackId, Iterable<Group> originalGroups, Iterable<CloudResourceStatus> statuses) {
         for (Group group : originalGroups) {
             int nodeCount = group.getInstancesSize();
-            List<CloudResourceStatus> failedResources = removeFailedMetadata(stackId, statuses, group);
-            if (!failedResources.isEmpty() && create) {
-                int failedCount = failedResources.size();
-                InstanceGroup instanceGroup = instanceGroupRepository.findOneByGroupNameInStack(stackId, group.getName());
-                instanceGroup.setNodeCount(nodeCount - failedCount);
-                instanceGroupRepository.save(instanceGroup);
-                flowMessageService.fireEventAndLog(stackId, Msg.STACK_INFRASTRUCTURE_ROLLBACK_MESSAGE, UPDATE_IN_PROGRESS.name(),
-                        failedCount, group.getName(), failedResources.get(0).getStatusReason());
-            }
+            removeFailedMetadata(stackId, statuses, group);
         }
     }
 
-    private List<CloudResourceStatus> removeFailedMetadata(Long stackId, List<CloudResourceStatus> statuses, Group group) {
+    private void removeFailedMetadata(Long stackId, Iterable<CloudResourceStatus> statuses, Group group) {
         Map<Long, CloudResourceStatus> failedResources = new HashMap<>();
         Set<Long> groupPrivateIds = getPrivateIds(group);
         for (CloudResourceStatus status : statuses) {
@@ -257,7 +246,6 @@ public class StackUpscaleService {
                 instanceMetadataService.deleteInstanceRequest(stackId, privateId);
             }
         }
-        return new ArrayList<>(failedResources.values());
     }
 
     private Set<Long> getPrivateIds(Group group) {
@@ -270,12 +258,7 @@ public class StackUpscaleService {
 
     public List<CloudInstance> getNewInstances(Stack stack) {
         List<CloudInstance> cloudInstances = cloudStackConverter.buildInstances(stack);
-        Iterator<CloudInstance> iterator = cloudInstances.iterator();
-        while (iterator.hasNext()) {
-            if (iterator.next().getTemplate().getStatus() != InstanceStatus.CREATE_REQUESTED) {
-                iterator.remove();
-            }
-        }
+        cloudInstances.removeIf(cloudInstance -> cloudInstance.getTemplate().getStatus() != InstanceStatus.CREATE_REQUESTED);
         return cloudInstances;
     }
 }

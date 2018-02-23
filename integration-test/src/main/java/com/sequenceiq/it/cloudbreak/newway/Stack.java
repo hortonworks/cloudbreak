@@ -1,14 +1,15 @@
 package com.sequenceiq.it.cloudbreak.newway;
 
-import com.sequenceiq.it.IntegrationTestContext;
-import com.sequenceiq.it.cloudbreak.CloudbreakUtil;
-import org.testng.Assert;
+import static com.sequenceiq.it.cloudbreak.CloudbreakUtil.waitAndCheckClusterStatus;
+import static com.sequenceiq.it.cloudbreak.CloudbreakUtil.waitAndCheckStackStatus;
 
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
-import static com.sequenceiq.it.cloudbreak.CloudbreakUtil.waitAndCheckClusterStatus;
-import static com.sequenceiq.it.cloudbreak.CloudbreakUtil.waitAndCheckStackStatus;
+import org.testng.Assert;
+
+import com.sequenceiq.it.IntegrationTestContext;
+import com.sequenceiq.it.cloudbreak.CloudbreakUtil;
 
 public class Stack extends StackEntity {
 
@@ -67,7 +68,7 @@ public class Stack extends StackEntity {
     }
 
     public static Assertion<Stack> waitAndCheckClusterAndStackAvailabilityStatus() {
-        return Stack.assertThis((stack, t) -> {
+        return assertThis((stack, t) -> {
             CloudbreakClient client = CloudbreakClient.getTestContextCloudbreakClient().apply(t);
             Assert.assertNotNull(stack.getResponse().getId());
             waitAndCheckStackStatus(client.getCloudbreakClient(), stack.getResponse().getId().toString(), "AVAILABLE");
@@ -77,7 +78,7 @@ public class Stack extends StackEntity {
     }
 
     public static Assertion<Stack> waitAndCheckClusterAndStackStoppedStatus() {
-        return Stack.assertThis((stack, t) -> {
+        return assertThis((stack, t) -> {
             CloudbreakClient client = CloudbreakClient.getTestContextCloudbreakClient().apply(t);
             Assert.assertNotNull(stack.getResponse().getId());
             waitAndCheckStackStatus(client.getCloudbreakClient(), stack.getResponse().getId().toString(), "STOPPED");
@@ -86,15 +87,15 @@ public class Stack extends StackEntity {
         });
     }
 
-    public static Assertion waitAndCheckClusterDeleted() {
-        return Stack.assertThis((stack, t) -> {
+    public static Assertion<?> waitAndCheckClusterDeleted() {
+        return assertThis((stack, t) -> {
             CloudbreakClient client = CloudbreakClient.getTestContextCloudbreakClient().apply(t);
             waitAndCheckStackStatus(client.getCloudbreakClient(), stack.getResponse().getId().toString(), "DELETE_COMPLETED");
         });
     }
 
-    public static Assertion checkClusterHasAmbariRunning(String ambariPort, String ambariUser, String ambariPassword) {
-        return Stack.assertThis((stack, t) -> {
+    public static Assertion<?> checkClusterHasAmbariRunning(String ambariPort, String ambariUser, String ambariPassword) {
+        return assertThis((stack, t) -> {
             CloudbreakClient client = CloudbreakClient.getTestContextCloudbreakClient().apply(t);
             CloudbreakUtil.checkClusterAvailability(client.getCloudbreakClient().stackV2Endpoint(),
                     ambariPort,

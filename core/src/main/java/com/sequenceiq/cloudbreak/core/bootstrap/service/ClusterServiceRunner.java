@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.core.bootstrap.service;
 
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,7 +18,6 @@ import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
-import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ClusterContainerRunner;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.ClusterHostServiceRunner;
 import com.sequenceiq.cloudbreak.domain.Cluster;
@@ -127,8 +127,8 @@ public class ClusterServiceRunner {
         throw new CloudbreakException(String.format("Change primary gateway is not supported on orchestrator %s", orchestrator.getType()));
     }
 
-    private HttpClientConfig buildAmbariClientConfig(Stack stack, String gatewayPublicIp) throws CloudbreakSecuritySetupException {
-        Map<InstanceGroupType, InstanceStatus> newStatusByGroupType = new HashMap<>();
+    private HttpClientConfig buildAmbariClientConfig(Stack stack, String gatewayPublicIp) {
+        Map<InstanceGroupType, InstanceStatus> newStatusByGroupType = new EnumMap<>(InstanceGroupType.class);
         newStatusByGroupType.put(InstanceGroupType.GATEWAY, InstanceStatus.REGISTERED);
         newStatusByGroupType.put(InstanceGroupType.CORE, InstanceStatus.UNREGISTERED);
         instanceMetadataService.updateInstanceStatus(stack.getInstanceGroups(), newStatusByGroupType);

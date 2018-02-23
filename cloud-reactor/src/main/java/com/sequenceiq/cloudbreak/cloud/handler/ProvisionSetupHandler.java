@@ -55,6 +55,6 @@ public class ProvisionSetupHandler implements CloudPlatformEventHandler<SetupReq
             result = new SetupResult(e, request);
         }
         request.getResult().onNext(result);
-        eventBus.notify(result.selector(), new Event(event.getHeaders(), result));
+        eventBus.notify(result.selector(), new Event<>(event.getHeaders(), result));
     }
 }

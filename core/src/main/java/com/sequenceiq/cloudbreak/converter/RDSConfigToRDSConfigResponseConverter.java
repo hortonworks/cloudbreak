@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.model.RDSConfigResponse;
 import com.sequenceiq.cloudbreak.api.model.RdsConfigPropertyJson;
 import com.sequenceiq.cloudbreak.api.model.RdsType;
+import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 
@@ -31,7 +32,7 @@ public class RDSConfigToRDSConfigResponseConverter extends AbstractConversionSer
         json.setPublicInAccount(source.isPublicInAccount());
         json.setCreationDate(source.getCreationDate());
         if (source.getClusters() != null) {
-            json.setClusterNames(source.getClusters().stream().map(cluster -> cluster.getName()).collect(Collectors.toSet()));
+            json.setClusterNames(source.getClusters().stream().map(Cluster::getName).collect(Collectors.toSet()));
         } else {
             json.setClusterNames(new HashSet<>());
         }

@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.SecurityRulesModelDescription;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -13,10 +13,10 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class SecurityRulesResponse {
 
-    @ApiModelProperty(ModelDescriptions.SecurityRulesModelDescription.CORE)
+    @ApiModelProperty(SecurityRulesModelDescription.CORE)
     private List<SecurityRuleResponse> core = new ArrayList<>();
 
-    @ApiModelProperty(ModelDescriptions.SecurityRulesModelDescription.GATEWAY)
+    @ApiModelProperty(SecurityRulesModelDescription.GATEWAY)
     private List<SecurityRuleResponse> gateway = new ArrayList<>();
 
     public List<SecurityRuleResponse> getCore() {

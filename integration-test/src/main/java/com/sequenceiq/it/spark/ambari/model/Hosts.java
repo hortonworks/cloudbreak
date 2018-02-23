@@ -1,7 +1,6 @@
 package com.sequenceiq.it.spark.ambari.model;
 
 import java.util.Collection;
-import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.gson.annotations.SerializedName;
@@ -25,7 +24,7 @@ public class Hosts {
         return hostName;
     }
 
-    public void setHostName(List<String> hostName) {
+    public void setHostName(Collection<String> hostName) {
         this.hostName = hostName;
     }
 

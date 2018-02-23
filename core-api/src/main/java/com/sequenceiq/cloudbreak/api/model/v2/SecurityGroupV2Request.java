@@ -7,6 +7,7 @@ import javax.validation.Valid;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.cloudbreak.api.model.JsonEntity;
 import com.sequenceiq.cloudbreak.api.model.SecurityRuleRequest;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.SecurityGroupModelDescription;
@@ -16,7 +17,7 @@ import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
-@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonInclude(Include.NON_NULL)
 public class SecurityGroupV2Request implements JsonEntity {
 
     @ApiModelProperty(SecurityGroupModelDescription.SECURITY_GROUP_ID)

@@ -420,7 +420,7 @@ public class HeartbeatServiceTest {
         class TestRetry implements Retry {
 
             @Override
-            public Boolean testWith2SecDelayMax5Times(Supplier<Boolean> action) throws ActionWentFail {
+            public Boolean testWith2SecDelayMax5Times(Supplier<Boolean> action) throws ActionWentFailException {
                 return Boolean.TRUE;
             }
         }
@@ -450,8 +450,8 @@ public class HeartbeatServiceTest {
         class TestRetryWithFail implements Retry {
 
             @Override
-            public Boolean testWith2SecDelayMax5Times(Supplier<Boolean> action) throws ActionWentFail {
-                throw new ActionWentFail("Test failed");
+            public Boolean testWith2SecDelayMax5Times(Supplier<Boolean> action) throws ActionWentFailException {
+                throw new ActionWentFailException("Test failed");
             }
         }
 

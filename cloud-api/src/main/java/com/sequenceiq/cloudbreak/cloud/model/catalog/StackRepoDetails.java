@@ -14,17 +14,17 @@ public class StackRepoDetails {
 
     public static final String MPACK_TAG = "mpack";
 
-    private Map<String, String> stack;
+    private final Map<String, String> stack;
 
-    private Map<String, String> util;
+    private final Map<String, String> util;
 
-    private Map<String, String> knox;
+    private final Map<String, String> knox;
 
     @JsonCreator
     public StackRepoDetails(
             @JsonProperty(value = "stack", required = true) Map<String, String> stack,
             @JsonProperty(value = "util", required = true) Map<String, String> util,
-            @JsonProperty(value = "knox") Map<String, String> knox) {
+            @JsonProperty("knox") Map<String, String> knox) {
         this.stack = stack;
         this.util = util;
         this.knox = (knox == null) ? Collections.emptyMap() : knox;

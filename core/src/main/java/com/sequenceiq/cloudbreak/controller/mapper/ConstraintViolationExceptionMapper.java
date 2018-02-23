@@ -26,7 +26,7 @@ public class ConstraintViolationExceptionMapper extends SendNotificationExceptio
     @Override
     protected Object getEntity(ConstraintViolationException exception) {
         ValidationResult result = new ValidationResult();
-        for (ConstraintViolation violation : exception.getConstraintViolations()) {
+        for (ConstraintViolation<?> violation : exception.getConstraintViolations()) {
             String key = "";
             if (violation.getPropertyPath() != null) {
                 key = violation.getPropertyPath().toString();

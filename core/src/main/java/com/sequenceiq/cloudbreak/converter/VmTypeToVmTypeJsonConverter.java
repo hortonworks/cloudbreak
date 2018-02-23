@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.converter;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.springframework.stereotype.Component;
@@ -36,7 +37,7 @@ public class VmTypeToVmTypeJsonConverter
         return vmTypeJson;
     }
 
-    private void convertVolumeConfig(List<VolumeParameterConfigJson> configs, VolumeParameterConfig source) {
+    private void convertVolumeConfig(Collection<VolumeParameterConfigJson> configs, VolumeParameterConfig source) {
         if (source != null) {
             VolumeParameterConfigJson config = new VolumeParameterConfigJson();
             config.setMaximumNumber(source.maximumNumber());

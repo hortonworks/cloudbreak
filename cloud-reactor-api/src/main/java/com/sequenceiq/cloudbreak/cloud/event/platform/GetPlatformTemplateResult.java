@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.event.platform;
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformRequest;
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
 
-public class GetPlatformTemplateResult extends CloudPlatformResult<CloudPlatformRequest> {
+public class GetPlatformTemplateResult extends CloudPlatformResult<CloudPlatformRequest<?>> {
     private String template;
 
     public GetPlatformTemplateResult(CloudPlatformRequest<?> request, String template) {

@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.stack.resource.definition.credential;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -32,7 +33,7 @@ public class Selector {
         this.parent = parent;
     }
 
-    public List<Value> getValues() {
+    public Collection<Value> getValues() {
         return values;
     }
 

@@ -26,7 +26,7 @@ public class ImageCatalog extends ImageCatalogEntity {
     }
 
     public static Action<ImageCatalog> post(String key) {
-        return new Action<ImageCatalog>(getTestContext(key), ImageCatalogAction::post);
+        return new Action<>(getTestContext(key), ImageCatalogAction::post);
     }
 
     public static Action<ImageCatalog> post() {

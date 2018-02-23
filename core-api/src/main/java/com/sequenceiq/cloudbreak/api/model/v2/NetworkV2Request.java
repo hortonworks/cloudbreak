@@ -5,8 +5,9 @@ import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.cloudbreak.api.model.JsonEntity;
-import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.NetworkModelDescription;
 import com.sequenceiq.cloudbreak.validation.ValidSubnet;
 
 import io.swagger.annotations.ApiModel;
@@ -14,14 +15,14 @@ import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
-@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonInclude(Include.NON_NULL)
 public class NetworkV2Request implements JsonEntity {
 
-    @ApiModelProperty(ModelDescriptions.NetworkModelDescription.SUBNET_CIDR)
+    @ApiModelProperty(NetworkModelDescription.SUBNET_CIDR)
     @ValidSubnet
     private String subnetCIDR;
 
-    @ApiModelProperty(ModelDescriptions.NetworkModelDescription.PARAMETERS)
+    @ApiModelProperty(NetworkModelDescription.PARAMETERS)
     private Map<String, Object> parameters = new HashMap<>();
 
     public String getSubnetCIDR() {

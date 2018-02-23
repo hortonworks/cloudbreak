@@ -4,9 +4,9 @@ import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 
 public class TerminationEvent extends StackEvent {
 
-    private Boolean deleteDependencies = Boolean.FALSE;
+    private final Boolean deleteDependencies;
 
-    private Boolean forced = Boolean.FALSE;
+    private final Boolean forced;
 
     public TerminationEvent(String selector, Long stackId, Boolean forced, Boolean deleteDependencies) {
         super(selector, stackId, null);

@@ -44,12 +44,12 @@ public class CollectMetadataHandler implements CloudPlatformEventHandler<Collect
             List<CloudVmMetaDataStatus> instanceStatuses = connector.metadata().collect(ac, request.getCloudResource(), request.getVms());
             CollectMetadataResult collectMetadataResult = new CollectMetadataResult(request, instanceStatuses);
             request.getResult().onNext(collectMetadataResult);
-            eventBus.notify(collectMetadataResult.selector(), new Event(collectMetadataRequestEvent.getHeaders(), collectMetadataResult));
+            eventBus.notify(collectMetadataResult.selector(), new Event<>(collectMetadataRequestEvent.getHeaders(), collectMetadataResult));
             LOGGER.info("Metadata collection successfully finished");
         } catch (RuntimeException e) {
             CollectMetadataResult failure = new CollectMetadataResult(e, request);
             request.getResult().onNext(failure);
-            eventBus.notify(failure.selector(), new Event(collectMetadataRequestEvent.getHeaders(), failure));
+            eventBus.notify(failure.selector(), new Event<>(collectMetadataRequestEvent.getHeaders(), failure));
         }
     }
 }

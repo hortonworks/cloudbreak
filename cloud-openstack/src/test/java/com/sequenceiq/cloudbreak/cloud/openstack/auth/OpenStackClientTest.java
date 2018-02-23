@@ -25,7 +25,7 @@ public class OpenStackClientTest {
 
     @Test
     public void testGetZones() {
-        OSClient osClient = mock(OSClient.class);
+        OSClient<?> osClient = mock(OSClient.class);
         ComputeService computeService = mock(ComputeService.class);
         ZoneService zoneService = mock(ZoneService.class);
 
@@ -43,7 +43,7 @@ public class OpenStackClientTest {
 
     @Test
     public void testGetZonesWhenAvailabiltyZonesEmpt() {
-        OSClient osClient = mock(OSClient.class);
+        OSClient<?> osClient = mock(OSClient.class);
         ComputeService computeService = mock(ComputeService.class);
         ZoneService zoneService = mock(ZoneService.class);
 

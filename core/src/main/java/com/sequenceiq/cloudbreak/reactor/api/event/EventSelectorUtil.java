@@ -4,11 +4,11 @@ public class EventSelectorUtil {
     private EventSelectorUtil() {
     }
 
-    public static String selector(Class clazz) {
+    public static String selector(Class<?> clazz) {
         return clazz.getSimpleName().toUpperCase();
     }
 
-    public static String failureSelector(Class clazz) {
+    public static String failureSelector(Class<?> clazz) {
         return clazz.getSimpleName().toUpperCase() + "_ERROR";
     }
 }

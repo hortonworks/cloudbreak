@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.service.image;
 import static com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils.processTemplateIntoString;
 
 import java.io.IOException;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -35,7 +36,7 @@ public class UserDataBuilder {
 
     Map<InstanceGroupType, String> buildUserData(Platform cloudPlatform, byte[] cbSshKeyDer, String cbSshKey, String sshUser,
             PlatformParameters parameters, String saltBootPassword) {
-        Map<InstanceGroupType, String> result = new HashMap<>();
+        Map<InstanceGroupType, String> result = new EnumMap<>(InstanceGroupType.class);
         for (InstanceGroupType type : InstanceGroupType.values()) {
             String userData = build(type, cloudPlatform, cbSshKey, cbSshKeyDer, sshUser, parameters, saltBootPassword);
             result.put(type, userData);
