@@ -13,7 +13,6 @@ buildscript {
     classpath "com.smokejumperit.gradle.license:Gradle-License-Report:0.0.2"
     classpath "gradle.plugin.com.palantir:jacoco-coverage:0.4.0"
     classpath "gradle.plugin.com.github.jk1:gradle-license-report:0.3.4"
-    classpath "org.ajoberstar:gradle-git:1.7.2"
   }
 }
 
@@ -24,7 +23,6 @@ plugins {
 
 apply plugin: 'org.springframework.boot'
 apply plugin: 'info.solidsoft.pitest'
-apply plugin: 'org.ajoberstar.grgit'
 
 bootRun {
   systemProperty 'spring.profiles.active', System.properties['spring.profiles.active']
@@ -39,7 +37,7 @@ springBoot {
 }
 
 jar {
-  baseName = 'cloudbreak'
+  archiveName = 'cloudbreak.jar'
 }
 
 dependencies {
@@ -136,7 +134,7 @@ test {
 task buildInfo(type: BuildInfoTask) {
   destination = file("$buildDir")
   applicationPropertiesPath = "$buildDir"
-  basename = jar.baseName
+  basename = jar.archiveName
   buildVersion = version
 }
 
@@ -161,7 +159,7 @@ class BuildInfoTask extends DefaultTask {
 
     // For Local-dev
     if (buildVersion == "unspecified") {
-      def grgit = Grgit.open(project.file('./..'))
+      def grgit = Grgit.open(currentDir: '.')
       def tempBuildVersion = grgit.describe()
       try {
         Version v = Version.valueOf(tempBuildVersion)
