@@ -7,7 +7,7 @@ repositories {
 }
 
 jar {
-    baseName = 'cloud-openstack'
+    archiveName = 'cloud-openstack.jar'
 }
 
 dependencies {

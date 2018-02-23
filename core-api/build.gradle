@@ -5,7 +5,7 @@ repositories {
 }
 
 jar {
-  baseName = 'core-api'
+  archiveName = 'core-api.jar'
 }
 
 dependencies {
