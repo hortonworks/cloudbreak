@@ -11,17 +11,17 @@ enum InstanceTerminationState implements FlowState {
     TERMINATION_FINISHED_STATE(InstanceTerminationFinishedAction.class),
     FINAL_STATE;
 
-    private Class<? extends AbstractAction> action;
+    private Class<? extends AbstractAction<?, ?, ?, ?>> action;
 
     InstanceTerminationState() {
     }
 
-    InstanceTerminationState(Class<? extends AbstractAction> action) {
+    InstanceTerminationState(Class<? extends AbstractAction<?, ?, ?, ?>> action) {
         this.action = action;
     }
 
     @Override
-    public Class<? extends AbstractAction> action() {
+    public Class<? extends AbstractAction<?, ?, ?, ?>> action() {
         return action;
     }
 }

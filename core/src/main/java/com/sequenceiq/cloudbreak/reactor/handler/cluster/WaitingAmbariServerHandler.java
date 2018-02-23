@@ -44,6 +44,6 @@ public class WaitingAmbariServerHandler implements ReactorEventHandler<WaitForAm
         } catch (Exception e) {
             response = new WaitForAmbariServerFailed(stackId, e);
         }
-        eventBus.notify(response.selector(), new Event(event.getHeaders(), response));
+        eventBus.notify(response.selector(), new Event<>(event.getHeaders(), response));
     }
 }

@@ -11,9 +11,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class CloudbreakVersion {
 
-    private List<String> versions;
+    private final List<String> versions;
 
-    private List<String> imageIds;
+    private final List<String> imageIds;
 
     @JsonCreator
     public CloudbreakVersion(

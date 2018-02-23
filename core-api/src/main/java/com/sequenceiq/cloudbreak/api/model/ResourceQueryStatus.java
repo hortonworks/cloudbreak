@@ -4,10 +4,6 @@ public enum ResourceQueryStatus {
     SUCCESS, FAILED;
 
     public static ResourceQueryStatus fromQueryStatus(String queryStatus) {
-        if (SUCCESS.name().equals(queryStatus)) {
-            return SUCCESS;
-        } else {
-            return FAILED;
-        }
+        return SUCCESS.name().equals(queryStatus) ? SUCCESS : FAILED;
     }
 }

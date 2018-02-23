@@ -70,11 +70,8 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
     @Override
     public List<StructuredNotificationEvent> cloudbreakEvents(String owner, Long since) {
         List<StructuredNotificationEvent> events;
-        if (null == since) {
-            events = structuredEventService.getEventsForUserWithType(owner, "NOTIFICATION");
-        } else {
-            events = structuredEventService.getEventsForUserWithTypeSince(owner, "NOTIFICATION", since);
-        }
+        events = null == since ? structuredEventService.getEventsForUserWithType(owner, "NOTIFICATION")
+                : structuredEventService.getEventsForUserWithTypeSince(owner, "NOTIFICATION", since);
         return events;
     }
 

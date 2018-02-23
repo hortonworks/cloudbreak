@@ -57,7 +57,7 @@ public class UsageTimeService {
         return Optional.ofNullable(duration).map(Duration::parse).orElse(Duration.ZERO);
     }
 
-    private Instant getEndInstant(Date start) {
+    private Temporal getEndInstant(Date start) {
         ZonedDateTime startDt = start.toInstant().atZone(ZoneId.systemDefault());
         ZonedDateTime nowDt = ZonedDateTime.now();
         if (sameDay(startDt, nowDt)) {

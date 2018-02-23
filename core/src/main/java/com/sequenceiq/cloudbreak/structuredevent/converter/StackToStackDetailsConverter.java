@@ -92,21 +92,22 @@ public class StackToStackDetailsConverter extends AbstractConversionServiceAware
             Map<String, Object> params = attributes == null ? Collections.emptyMap() : attributes.getMap();
             switch (cloudPlatform) {
                 case CloudConstants.GCP:
-                    existingNetwork = StringUtils.isNoneEmpty((String) params.get("networkId"));
-                    existingSubnet = StringUtils.isNoneEmpty((String) params.get("subnetId"));
+                    existingNetwork = StringUtils.isNoneEmpty((CharSequence) params.get("networkId"));
+                    existingSubnet = StringUtils.isNoneEmpty((CharSequence) params.get("subnetId"));
                     break;
                 case CloudConstants.AWS:
-                    existingNetwork = StringUtils.isNoneEmpty((String) params.get("vpcId"));
-                    existingSubnet = StringUtils.isNoneEmpty((String) params.get("subnetId"));
+                    existingNetwork = StringUtils.isNoneEmpty((CharSequence) params.get("vpcId"));
+                    existingSubnet = StringUtils.isNoneEmpty((CharSequence) params.get("subnetId"));
                     break;
                 case CloudConstants.AZURE:
-                    existingNetwork = StringUtils.isNoneEmpty((String) params.get("networkId"))
-                            && StringUtils.isNoneEmpty((String) params.get("resourceGroupName")) && StringUtils.isNoneEmpty((String) params.get("subnetId"));
+                    existingNetwork = StringUtils.isNoneEmpty((CharSequence) params.get("networkId"))
+                            && StringUtils.isNoneEmpty((CharSequence) params.get("resourceGroupName"))
+                            && StringUtils.isNoneEmpty((CharSequence) params.get("subnetId"));
                     existingSubnet = Boolean.TRUE;
                     break;
                 case CloudConstants.OPENSTACK:
-                    existingNetwork = StringUtils.isNoneEmpty((String) params.get("networkId"));
-                    existingSubnet = StringUtils.isNoneEmpty((String) params.get("subnetId"));
+                    existingNetwork = StringUtils.isNoneEmpty((CharSequence) params.get("networkId"));
+                    existingSubnet = StringUtils.isNoneEmpty((CharSequence) params.get("subnetId"));
                     break;
                 default:
                     existingNetwork = Boolean.FALSE;

@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.template.network;
 import static com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup.CANCELLED;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -75,7 +76,7 @@ public class NetworkResourceService {
     }
 
     public List<CloudResourceStatus> deleteResources(ResourceBuilderContext context,
-            AuthenticatedContext auth, List<CloudResource> resources, Network network, boolean cancellable) throws Exception {
+            AuthenticatedContext auth, Iterable<CloudResource> resources, Network network, boolean cancellable) throws Exception {
         CloudContext cloudContext = auth.getCloudContext();
         List<CloudResourceStatus> results = new ArrayList<>();
         List<NetworkResourceBuilder> builderChain = resourceBuilders.network(cloudContext.getPlatform());
@@ -99,7 +100,7 @@ public class NetworkResourceService {
     }
 
     public List<CloudResourceStatus> update(ResourceBuilderContext context, AuthenticatedContext auth,
-            Network network, Security security, List<CloudResource> networkResources) throws Exception {
+            Network network, Security security, Iterable<CloudResource> networkResources) throws Exception {
         List<CloudResourceStatus> results = new ArrayList<>();
         CloudContext cloudContext = auth.getCloudContext();
         for (NetworkResourceBuilder builder : resourceBuilders.network(cloudContext.getPlatform())) {
@@ -115,33 +116,31 @@ public class NetworkResourceService {
         return results;
     }
 
-    public List<CloudResource> getNetworkResources(Platform platform, List<CloudResource> resources) {
-        List<ResourceType> types = new ArrayList<>();
+    public List<CloudResource> getNetworkResources(Platform platform, Iterable<CloudResource> resources) {
+        Collection<ResourceType> types = new ArrayList<>();
         for (NetworkResourceBuilder builder : resourceBuilders.network(platform)) {
             types.add(builder.resourceType());
         }
         return getResources(resources, types);
     }
 
-    protected CloudResource createResource(AuthenticatedContext auth, CloudResource buildableResource) {
+    protected void createResource(AuthenticatedContext auth, CloudResource buildableResource) {
         if (buildableResource.isPersistent()) {
             resourceNotifier.notifyAllocation(buildableResource, auth.getCloudContext());
         }
-        return buildableResource;
     }
 
-    protected CloudResource updateResource(AuthenticatedContext auth, CloudResource buildableResource) {
+    protected void updateResource(AuthenticatedContext auth, CloudResource buildableResource) {
         if (buildableResource.isPersistent()) {
             resourceNotifier.notifyUpdate(buildableResource, auth.getCloudContext());
         }
-        return buildableResource;
     }
 
-    private List<CloudResource> getResources(List<CloudResource> resources, ResourceType type) {
+    private List<CloudResource> getResources(Iterable<CloudResource> resources, ResourceType type) {
         return getResources(resources, Collections.singletonList(type));
     }
 
-    private List<CloudResource> getResources(List<CloudResource> resources, List<ResourceType> types) {
+    private List<CloudResource> getResources(Iterable<CloudResource> resources, Collection<ResourceType> types) {
         List<CloudResource> filtered = new ArrayList<>();
         for (CloudResource resource : resources) {
             if (types.contains(resource.getType())) {

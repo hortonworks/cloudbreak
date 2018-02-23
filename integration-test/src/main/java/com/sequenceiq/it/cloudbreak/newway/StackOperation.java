@@ -44,7 +44,7 @@ public class StackOperation extends AbstractCloudbreakEntity<StackScaleRequestV2
         return getTestContextStackOperation(SCALE);
     }
 
-    public static void scale(IntegrationTestContext integrationTestContext, Entity entity) throws Exception {
+    public static void scale(IntegrationTestContext integrationTestContext, Entity entity) {
         StackOperation stackOperation = (StackOperation) entity;
         CloudbreakClient client;
         client = CloudbreakClient.getTestContextCloudbreakClient().apply(integrationTestContext);
@@ -56,7 +56,7 @@ public class StackOperation extends AbstractCloudbreakEntity<StackScaleRequestV2
                         .putScaling(stack.getRequest().getGeneral().getName(), stackOperation.getRequest()));
     }
 
-    public static void start(IntegrationTestContext integrationTestContext, Entity entity) throws Exception {
+    public static void start(IntegrationTestContext integrationTestContext, Entity entity) {
         StackOperation stackOperation = (StackOperation) entity;
         CloudbreakClient client;
         client = CloudbreakClient.getTestContextCloudbreakClient().apply(integrationTestContext);
@@ -68,7 +68,7 @@ public class StackOperation extends AbstractCloudbreakEntity<StackScaleRequestV2
                         .putStart(stack.getRequest().getGeneral().getName()));
     }
 
-    public static void stop(IntegrationTestContext integrationTestContext, Entity entity) throws Exception {
+    public static void stop(IntegrationTestContext integrationTestContext, Entity entity) {
         StackOperation stackOperation = (StackOperation) entity;
         CloudbreakClient client;
         client = CloudbreakClient.getTestContextCloudbreakClient().apply(integrationTestContext);
@@ -80,7 +80,7 @@ public class StackOperation extends AbstractCloudbreakEntity<StackScaleRequestV2
                         .putStop(stack.getRequest().getGeneral().getName()));
     }
 
-    public static void sync(IntegrationTestContext integrationTestContext, Entity entity) throws Exception {
+    public static void sync(IntegrationTestContext integrationTestContext, Entity entity) {
         StackOperation stackOperation = (StackOperation) entity;
         CloudbreakClient client;
         client = CloudbreakClient.getTestContextCloudbreakClient().apply(integrationTestContext);

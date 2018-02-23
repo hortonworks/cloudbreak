@@ -4,7 +4,7 @@ import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformRequest;
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSshKeys;
 
-public class GetPlatformSshKeysResult extends CloudPlatformResult<CloudPlatformRequest> {
+public class GetPlatformSshKeysResult extends CloudPlatformResult<CloudPlatformRequest<?>> {
     private CloudSshKeys cloudSshKeys;
 
     public GetPlatformSshKeysResult(CloudPlatformRequest<?> request, CloudSshKeys cloudSshKeys) {

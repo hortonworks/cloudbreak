@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.inject.Inject;
 
@@ -107,14 +108,14 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
         String groupname = group.getName().toLowerCase().replaceAll("[^A-Za-z0-9 ]", "");
         tagList.add(groupname);
         Map<String, String> instanceTag = defaultCostTaggingService.prepareInstanceTagging();
-        for (Map.Entry<String, String> entry : instanceTag.entrySet()) {
+        for (Entry<String, String> entry : instanceTag.entrySet()) {
             tagList.add(String.format("%s-%s", entry.getKey(), entry.getValue()));
             labels.put(entry.getKey(), entry.getValue());
         }
 
         tagList.add(GcpStackUtil.getClusterTag(auth.getCloudContext()));
         tagList.add(GcpStackUtil.getGroupClusterTag(auth.getCloudContext(), group));
-        customTags.entrySet().forEach(e -> tagList.add(e.getKey() + '-' + e.getValue()));
+        customTags.forEach((key, value) -> tagList.add(key + '-' + value));
 
         labels.putAll(customTags);
         tags.setItems(tagList);
@@ -127,7 +128,7 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
 
         Items sshMetaData = new Items();
         sshMetaData.setKey("ssh-keys");
-        sshMetaData.setValue(group.getInstanceAuthentication().getLoginUserName() + ":" + group.getInstanceAuthentication().getPublicKey());
+        sshMetaData.setValue(group.getInstanceAuthentication().getLoginUserName() + ':' + group.getInstanceAuthentication().getPublicKey());
 
         Items blockProjectWideSsh = new Items();
         blockProjectWideSsh.setKey("block-project-ssh-keys");
@@ -135,7 +136,7 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
 
         Items startupScript = new Items();
         startupScript.setKey("startup-script");
-        startupScript.setValue(image.getUserData(group.getType()));
+        startupScript.setValue(image.getUserDataByType(group.getType()));
 
         metadata.getItems().add(sshMetaData);
         metadata.getItems().add(startupScript);
@@ -204,16 +205,16 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
         return ORDER;
     }
 
-    private List<AttachedDisk> getBootDiskList(List<CloudResource> resources, String projectId, AvailabilityZone zone) {
-        List<AttachedDisk> listOfDisks = new ArrayList<>();
+    private Collection<AttachedDisk> getBootDiskList(Iterable<CloudResource> resources, String projectId, AvailabilityZone zone) {
+        Collection<AttachedDisk> listOfDisks = new ArrayList<>();
         for (CloudResource resource : filterResourcesByType(resources, ResourceType.GCP_DISK)) {
             listOfDisks.add(createDisk(resource, projectId, zone, true));
         }
         return listOfDisks;
     }
 
-    private List<AttachedDisk> getAttachedDisks(List<CloudResource> resources, String projectId, AvailabilityZone zone) {
-        List<AttachedDisk> listOfDisks = new ArrayList<>();
+    private Collection<AttachedDisk> getAttachedDisks(Iterable<CloudResource> resources, String projectId, AvailabilityZone zone) {
+        Collection<AttachedDisk> listOfDisks = new ArrayList<>();
         for (CloudResource resource : filterResourcesByType(resources, ResourceType.GCP_ATTACHED_DISK)) {
             listOfDisks.add(createDisk(resource, projectId, zone, false));
         }
@@ -232,7 +233,7 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
         return attachedDisk;
     }
 
-    private List<NetworkInterface> getNetworkInterface(List<CloudResource> networkResources, List<CloudResource> computeResources,
+    private List<NetworkInterface> getNetworkInterface(Iterable<CloudResource> networkResources, Iterable<CloudResource> computeResources,
             Region region, Group group, Compute compute, String projectId, boolean noPublicIp) throws IOException {
         NetworkInterface networkInterface = new NetworkInterface();
         List<CloudResource> subnet = filterResourcesByType(networkResources, ResourceType.GCP_SUBNET);
@@ -261,7 +262,7 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
         return Collections.singletonList(networkInterface);
     }
 
-    private List<CloudResource> filterResourcesByType(Collection<CloudResource> resources, ResourceType resourceType) {
+    private List<CloudResource> filterResourcesByType(Iterable<CloudResource> resources, ResourceType resourceType) {
         List<CloudResource> resourcesTemp = new ArrayList<>();
         for (CloudResource resource : resources) {
             if (resourceType.equals(resource.getType())) {

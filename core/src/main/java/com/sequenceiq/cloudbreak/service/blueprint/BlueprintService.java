@@ -2,8 +2,8 @@ package com.sequenceiq.cloudbreak.service.blueprint;
 
 import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
 
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -50,11 +50,8 @@ public class BlueprintService {
     }
 
     public Set<Blueprint> retrieveAccountBlueprints(IdentityUser user) {
-        if (user.getRoles().contains(IdentityUserRole.ADMIN)) {
-            return blueprintRepository.findAllInAccount(user.getAccount());
-        } else {
-            return blueprintRepository.findPublicInAccountForUser(user.getUserId(), user.getAccount());
-        }
+        return user.getRoles().contains(IdentityUserRole.ADMIN) ? blueprintRepository.findAllInAccount(user.getAccount())
+                : blueprintRepository.findPublicInAccountForUser(user.getUserId(), user.getAccount());
     }
 
     public Blueprint get(Long id) {
@@ -85,7 +82,7 @@ public class BlueprintService {
     }
 
     @Transactional(TxType.NEVER)
-    public Blueprint create(IdentityUser user, Blueprint blueprint, List<Map<String, Map<String, String>>> properties) {
+    public Blueprint create(IdentityUser user, Blueprint blueprint, Collection<Map<String, Map<String, String>>> properties) {
         LOGGER.debug("Creating blueprint: [User: '{}', Account: '{}']", user.getUsername(), user.getAccount());
         Blueprint savedBlueprint;
         blueprint.setOwner(user.getUserId());

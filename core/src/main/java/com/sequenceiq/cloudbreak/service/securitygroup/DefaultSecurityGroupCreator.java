@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.service.securitygroup;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 
 import javax.inject.Inject;
 
@@ -11,9 +10,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.model.Port;
+import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
-import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.domain.SecurityRule;
 import com.sequenceiq.cloudbreak.repository.SecurityGroupRepository;
@@ -34,14 +33,14 @@ public class DefaultSecurityGroupCreator {
     @Value("${cb.nginx.port:9443}")
     private int nginxPort;
 
-    private void addSecurityGroup(IdentityUser user, String platform, String name, List<Port> securityGroupPorts, String securityGroupDesc) {
+    private void addSecurityGroup(IdentityUser user, String platform, String name, Iterable<Port> securityGroupPorts, String securityGroupDesc) {
         SecurityGroup onlySshAndSsl = createSecurityGroup(user, platform, name, securityGroupDesc);
         SecurityRule sshAndSslRule = createSecurityRule(concatenatePorts(securityGroupPorts), onlySshAndSsl);
         onlySshAndSsl.setSecurityRules(new HashSet<>(Collections.singletonList(sshAndSslRule)));
         securityGroupService.create(user, onlySshAndSsl);
     }
 
-    private String getPortsOpenDesc(List<Port> portsWithoutAclRules) {
+    private String getPortsOpenDesc(Iterable<Port> portsWithoutAclRules) {
         StringBuilder allPortsOpenDescBuilder = new StringBuilder();
         allPortsOpenDescBuilder.append("Open ports:");
         for (Port port : portsWithoutAclRules) {
@@ -72,7 +71,7 @@ public class DefaultSecurityGroupCreator {
         return securityRule;
     }
 
-    private String concatenatePorts(List<Port> ports) {
+    private String concatenatePorts(Iterable<Port> ports) {
         StringBuilder builder = new StringBuilder("");
         Iterator<Port> portsIterator = ports.iterator();
         while (portsIterator.hasNext()) {

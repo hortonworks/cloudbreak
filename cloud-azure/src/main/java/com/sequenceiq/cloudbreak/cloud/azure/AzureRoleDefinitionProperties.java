@@ -52,7 +52,7 @@ public class AzureRoleDefinitionProperties {
         this.type = type;
     }
 
-    public List<AzurePermission> getPermissions() {
+    public Iterable<AzurePermission> getPermissions() {
         return permissions;
     }
 

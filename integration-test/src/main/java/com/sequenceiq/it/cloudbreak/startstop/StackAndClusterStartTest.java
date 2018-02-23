@@ -32,7 +32,7 @@ public class StackAndClusterStartTest extends AbstractCloudbreakIntegrationTest 
 
     @Test
     @Parameters("waitOn")
-    public void testStackAndClusterStart(@Optional(NOWAIT) Boolean waitOn) throws Exception {
+    public void testStackAndClusterStart(@Optional(NOWAIT) Boolean waitOn) {
         // GIVEN
         IntegrationTestContext itContext = getItContext();
         String stackId = itContext.getContextParam(CloudbreakITContextConstants.STACK_ID);

@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.template;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -13,8 +12,6 @@ import org.springframework.stereotype.Component;
 
 import com.github.jknack.handlebars.EscapingStrategy;
 import com.github.jknack.handlebars.Handlebars;
-import com.github.jknack.handlebars.Helper;
-import com.github.jknack.handlebars.Options;
 import com.github.jknack.handlebars.Template;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
@@ -29,7 +26,7 @@ public class BlueprintTemplateProcessor {
     @Inject
     private ClusterComponentConfigProvider clusterComponentConfigProvider;
 
-    public String process(String blueprintText, Cluster cluster, Set<RDSConfig> rdsConfigs) throws IOException {
+    public String process(String blueprintText, Cluster cluster, Iterable<RDSConfig> rdsConfigs) throws IOException {
         long started = System.currentTimeMillis();
         String generateBlueprint = generateBlueprintWithParameters(blueprintText, cluster, rdsConfigs);
         long generationTime = System.currentTimeMillis() - started;
@@ -37,21 +34,16 @@ public class BlueprintTemplateProcessor {
         return generateBlueprint;
     }
 
-    private String generateBlueprintWithParameters(String blueprintText, Cluster cluster, Set<RDSConfig> rdsConfigs) throws IOException {
+    private String generateBlueprintWithParameters(String blueprintText, Cluster cluster, Iterable<RDSConfig> rdsConfigs) throws IOException {
         Handlebars handlebars = new Handlebars();
         handlebars.with(EscapingStrategy.NOOP);
-        handlebars.registerHelperMissing(new Helper<Object>() {
-            @Override
-            public CharSequence apply(final Object context, final Options options) throws IOException {
-                return options.fn.text();
-            }
-        });
+        handlebars.registerHelperMissing((context, options) -> options.fn.text());
         Template template = handlebars.compileInline(blueprintText, "{{{", "}}}");
 
         return template.apply(prepareTemplateObject(cluster.getBlueprintInputs().get(Map.class), cluster, rdsConfigs));
     }
 
-    private Map<String, Object> prepareTemplateObject(Map<String, Object> blueprintInputs, Cluster cluster, Set<RDSConfig> rdsConfigs) {
+    private Map<String, Object> prepareTemplateObject(Map<String, Object> blueprintInputs, Cluster cluster, Iterable<RDSConfig> rdsConfigs) {
         if (blueprintInputs == null) {
             blueprintInputs = new HashMap<>();
         }

@@ -56,9 +56,6 @@ public class EndpointConfig extends ResourceConfig {
     @Value("${cb.structuredevent.rest.enabled:false}")
     private Boolean auditEnabled;
 
-    public EndpointConfig() {
-    }
-
     @PostConstruct
     private void init() {
         if (auditEnabled) {

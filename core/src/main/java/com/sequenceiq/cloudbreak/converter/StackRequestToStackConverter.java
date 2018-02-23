@@ -156,7 +156,7 @@ public class StackRequestToStackConverter extends AbstractConversionServiceAware
     }
 
     private String getRegion(StackRequest source) {
-        boolean containerOrchestrator = false;
+        boolean containerOrchestrator;
         try {
             containerOrchestrator = orchestratorTypeResolver.resolveType(source.getOrchestrator().getType()).containerOrchestrator();
         } catch (CloudbreakException ignored) {
@@ -211,7 +211,7 @@ public class StackRequestToStackConverter extends AbstractConversionServiceAware
                 }
             }
         }
-        boolean containerOrchestrator = false;
+        boolean containerOrchestrator;
         try {
             containerOrchestrator = orchestratorTypeResolver.resolveType(source.getOrchestrator().getType()).containerOrchestrator();
         } catch (CloudbreakException ignored) {

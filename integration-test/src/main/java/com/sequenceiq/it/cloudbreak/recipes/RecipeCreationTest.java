@@ -21,7 +21,7 @@ public class RecipeCreationTest extends AbstractCloudbreakIntegrationTest {
     @Test
     @Parameters({ "name", "description", "preScript", "postScript" })
     public void testRecipeCreation(String name, @Optional ("") String description, @Optional("") String preScript,
-            @Optional("") String postScript) throws Exception {
+            @Optional("") String postScript) {
         // GIVEN
         // WHEN
         if (!preScript.isEmpty()) {

@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.services.identitymanagement.AmazonIdentityManagement;
 import com.amazonaws.services.identitymanagement.AmazonIdentityManagementClient;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 
@@ -40,7 +41,7 @@ public class AwsSmartSenseIdGenerator {
                 smartSenseId = getSmartSenseIdFromArn(roleArn);
             } else if (StringUtils.isNoneEmpty(accessKey) && StringUtils.isNoneEmpty(secretKey)) {
                 try {
-                    AmazonIdentityManagementClient iamClient = new AmazonIdentityManagementClient(new BasicAWSCredentials(accessKey, secretKey));
+                    AmazonIdentityManagement iamClient = new AmazonIdentityManagementClient(new BasicAWSCredentials(accessKey, secretKey));
                     String arn = iamClient.getUser().getUser().getArn();
                     smartSenseId = getSmartSenseIdFromArn(arn);
                 } catch (RuntimeException e) {
@@ -53,7 +54,7 @@ public class AwsSmartSenseIdGenerator {
         return smartSenseId;
     }
 
-    private String getSmartSenseIdFromArn(String roleArn) {
+    private String getSmartSenseIdFromArn(CharSequence roleArn) {
         String smartSenseId = "";
         Matcher m = Pattern.compile("arn:aws:iam::(?<accountId>[0-9]{12}):.*").matcher(roleArn);
         if (m.matches()) {

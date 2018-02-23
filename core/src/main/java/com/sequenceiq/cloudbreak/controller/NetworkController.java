@@ -107,7 +107,7 @@ public class NetworkController extends NotificationController implements Network
         return conversionService.convert(network, NetworkResponse.class);
     }
 
-    private Set<NetworkResponse> convert(Set<Network> networks) {
+    private Set<NetworkResponse> convert(Iterable<Network> networks) {
         Set<NetworkResponse> jsons = new HashSet<>();
         for (Network network : networks) {
             jsons.add(convert(network));

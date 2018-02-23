@@ -111,7 +111,7 @@ public class HadoopConfigurationService {
         return config;
     }
 
-    private HostGroup findHostGroupForNode(Set<HostGroup> hostGroups, JsonNode hostGroupNode) {
+    private HostGroup findHostGroupForNode(Iterable<HostGroup> hostGroups, JsonNode hostGroupNode) {
         for (HostGroup hostGroup : hostGroups) {
             if (hostGroup.getName().equals(hostGroupNode.path("name").asText())) {
                 return hostGroup;
@@ -143,7 +143,7 @@ public class HadoopConfigurationService {
         return hostGroup.getConstraint().getInstanceGroup() != null;
     }
 
-    private List<ConfigProperty> toList(JsonNode nodes) {
+    private List<ConfigProperty> toList(Iterable<JsonNode> nodes) {
         List<ConfigProperty> list = new ArrayList<>();
         for (JsonNode node : nodes) {
             list.add(new ConfigProperty(node.get("name").asText(), node.get("directory").asText(), node.get("prefix").asText()));

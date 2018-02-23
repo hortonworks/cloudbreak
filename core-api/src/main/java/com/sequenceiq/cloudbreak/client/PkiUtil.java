@@ -18,6 +18,7 @@ import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.InvalidKeySpecException;
+import java.security.spec.KeySpec;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.RSAPrivateKeySpec;
 import java.security.spec.X509EncodedKeySpec;
@@ -35,6 +36,7 @@ import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.X509v3CertificateBuilder;
 import org.bouncycastle.crypto.CryptoException;
+import org.bouncycastle.crypto.Signer;
 import org.bouncycastle.crypto.digests.SHA256Digest;
 import org.bouncycastle.crypto.engines.RSAEngine;
 import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
@@ -97,9 +99,9 @@ public class PkiUtil {
                 PEMKeyPair pemKeyPair = (PEMKeyPair) pEMParser.readObject();
 
                 KeyFactory factory = KeyFactory.getInstance("RSA");
-                X509EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(pemKeyPair.getPublicKeyInfo().getEncoded());
+                KeySpec publicKeySpec = new X509EncodedKeySpec(pemKeyPair.getPublicKeyInfo().getEncoded());
                 PublicKey publicKey = factory.generatePublic(publicKeySpec);
-                PKCS8EncodedKeySpec privateKeySpec = new PKCS8EncodedKeySpec(pemKeyPair.getPrivateKeyInfo().getEncoded());
+                KeySpec privateKeySpec = new PKCS8EncodedKeySpec(pemKeyPair.getPrivateKeyInfo().getEncoded());
                 PrivateKey privateKey = factory.generatePrivate(privateKeySpec);
                 KeyPair kp = new KeyPair(publicKey, privateKey);
                 RSAPrivateKeySpec privKeySpec = factory.getKeySpec(kp.getPrivate(), RSAPrivateKeySpec.class);
@@ -111,7 +113,7 @@ public class PkiUtil {
             }
         }
 
-        PSSSigner signer = new PSSSigner(new RSAEngine(), new SHA256Digest(), SALT_LENGTH);
+        Signer signer = new PSSSigner(new RSAEngine(), new SHA256Digest(), SALT_LENGTH);
         signer.init(true, rsaKeyParameters);
         signer.update(data, 0, data.length);
         try {

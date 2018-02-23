@@ -1,9 +1,11 @@
 package com.sequenceiq.it.cloudbreak.recipes;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -55,14 +57,14 @@ public class CountRecipeResultsTest extends AbstractCloudbreakIntegrationTest {
         List<InstanceGroupResponse> instanceGroups = stackV1Endpoint.get(Long.valueOf(stackId), new HashSet<>()).getInstanceGroups();
         String[] files = lookingFor.split(",");
         List<String> publicIps = getPublicIps(instanceGroups, Arrays.asList(searchRecipesOnHosts.split(",")));
-        List<Future> futures = new ArrayList<>(publicIps.size() * files.length);
+        Collection<Future<Boolean>> futures = new ArrayList<>(publicIps.size() * files.length);
         ExecutorService executorService = Executors.newFixedThreadPool(publicIps.size());
         AtomicInteger count = new AtomicInteger(0);
         //WHEN
         try {
             for (String file : files) {
                 for (String ip : publicIps) {
-                    futures.add(executorService.submit(() -> {
+                    futures.add((Future<Boolean>) executorService.submit(() -> {
                         if (findFile(ip, file)) {
                             count.incrementAndGet();
                         }
@@ -80,7 +82,7 @@ public class CountRecipeResultsTest extends AbstractCloudbreakIntegrationTest {
         Assert.assertEquals(count.get(), require.intValue(), "The number of existing files is different than required.");
     }
 
-    private List<String> getPublicIps(List<InstanceGroupResponse> instanceGroups, List<String> hostGroupsWithRecipe) {
+    private List<String> getPublicIps(Iterable<InstanceGroupResponse> instanceGroups, Collection<String> hostGroupsWithRecipe) {
         List<String> ips = new ArrayList<>();
         for (InstanceGroupResponse instanceGroup : instanceGroups) {
             if (hostGroupsWithRecipe.contains(instanceGroup.getGroup())) {
@@ -128,20 +130,13 @@ public class CountRecipeResultsTest extends AbstractCloudbreakIntegrationTest {
     }
 
     private Pair<Integer, String> executeSshCommand(SSHClient ssh, String command) throws IOException {
-        Session session = null;
-        Command cmd = null;
-        try {
-            session = startSshSession(ssh);
-            cmd = session.exec(command);
-            String stdout = IOUtils.readFully(cmd.getInputStream()).toString();
-            cmd.join(10, TimeUnit.SECONDS);
-            return Pair.of(cmd.getExitStatus(), stdout);
-        } finally {
-            if (cmd != null) {
-                cmd.close();
-            }
-            if (session != null) {
-                session.close();
+        try (Session session = startSshSession(ssh)) {
+            try (Command cmd = session.exec(command)) {
+                try (ByteArrayOutputStream content = IOUtils.readFully(cmd.getInputStream())) {
+                    String stdout = content.toString();
+                    cmd.join(10, TimeUnit.SECONDS);
+                    return Pair.of(cmd.getExitStatus(), stdout);
+                }
             }
         }
     }

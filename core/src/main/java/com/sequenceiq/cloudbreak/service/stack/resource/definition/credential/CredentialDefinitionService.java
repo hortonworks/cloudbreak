@@ -68,7 +68,7 @@ public class CredentialDefinitionService {
         return processed;
     }
 
-    private List<Value> collectSelectorValues(Definition definition, String selectorName) {
+    private Iterable<Value> collectSelectorValues(Definition definition, String selectorName) {
         List<Value> values = new ArrayList<>();
         List<Selector> selectors = definition.getSelectors();
         String currentSelector = selectorName;
@@ -80,7 +80,7 @@ public class CredentialDefinitionService {
         return values;
     }
 
-    private Selector findSelector(List<Selector> selectors, String selector) {
+    private Selector findSelector(Iterable<Selector> selectors, String selector) {
         for (Selector s : selectors) {
             if (s.getName().equals(selector)) {
                 return s;
@@ -89,7 +89,7 @@ public class CredentialDefinitionService {
         return null;
     }
 
-    private Map<String, Object> processValues(Map<String, Object> properties, List<Value> values, boolean revert, boolean remove) {
+    private Map<String, Object> processValues(Map<String, Object> properties, Iterable<Value> values, boolean revert, boolean remove) {
         Map<String, Object> processed = new HashMap<>();
         for (Value value : values) {
             String key = value.getName();

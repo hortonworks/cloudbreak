@@ -93,7 +93,7 @@ public class OpenstackCloudProvider extends CloudProviderHelper {
     }
 
     public Map<String, Object> openstackCredentialDetails() {
-        Map<String, Object> map = new HashMap<String, Object>();
+        Map<String, Object> map = new HashMap<>();
         map.put("tenantName", getTestParameter().get("integrationtest.openstackcredential.tenantName"));
         map.put("userName", getTestParameter().get("integrationtest.openstackcredential.userName"));
         map.put("password", getTestParameter().get("integrationtest.openstackcredential.password"));
@@ -105,7 +105,7 @@ public class OpenstackCloudProvider extends CloudProviderHelper {
     }
 
     public Map<String, Object> openstackV3CredentialDetails() {
-        Map<String, Object> map = new HashMap<String, Object>();
+        Map<String, Object> map = new HashMap<>();
         map.put("tenantName", getTestParameter().get("integrationtest.openstackV3credential.tenantName"));
         map.put("userDomain", getTestParameter().get("integrationtest.openstackV3credential.userDomain"));
         map.put("userName", getTestParameter().get("integrationtest.openstackV3credential.userName"));
@@ -122,7 +122,7 @@ public class OpenstackCloudProvider extends CloudProviderHelper {
     }
 
     public Map<String, Object> openstackCredentialDetailsInvalidUser() {
-        Map<String, Object> map = new HashMap<String, Object>();
+        Map<String, Object> map = new HashMap<>();
         map.put("tenantName", getTestParameter().get("integrationtest.openstackcredential.tenantName"));
         map.put("userName", "kisnyul");
         map.put("password", getTestParameter().get("integrationtest.openstackcredential.password"));
@@ -134,7 +134,7 @@ public class OpenstackCloudProvider extends CloudProviderHelper {
     }
 
     public Map<String, Object> openstackCredentialDetailsInvalidEndpoint() {
-        Map<String, Object> map = new HashMap<String, Object>();
+        Map<String, Object> map = new HashMap<>();
         map.put("tenantName", getTestParameter().get("integrationtest.openstackcredential.tenantName"));
         map.put("userName", getTestParameter().get("integrationtest.openstackcredential.userName"));
         map.put("password", getTestParameter().get("integrationtest.openstackcredential.password"));

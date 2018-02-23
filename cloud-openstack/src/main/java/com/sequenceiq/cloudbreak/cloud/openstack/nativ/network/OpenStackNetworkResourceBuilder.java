@@ -35,9 +35,8 @@ public class OpenStackNetworkResourceBuilder extends AbstractOpenStackNetworkRes
     private OpenStackUtils utils;
 
     @Override
-    public CloudResource build(OpenStackContext context, AuthenticatedContext auth, Network network, Security security, CloudResource buildableResource)
-            throws Exception {
-        OSClient osClient = createOSClient(auth);
+    public CloudResource build(OpenStackContext context, AuthenticatedContext auth, Network network, Security security, CloudResource buildableResource) {
+        OSClient<?> osClient = createOSClient(auth);
         try {
             NeutronNetworkView neutronView = new NeutronNetworkView(network);
             String networkId = neutronView.isExistingNetwork() ? neutronView.getCustomNetworkId() : context.getParameter(NETWORK_ID, String.class);
@@ -57,9 +56,9 @@ public class OpenStackNetworkResourceBuilder extends AbstractOpenStackNetworkRes
     }
 
     @Override
-    public CloudResource delete(OpenStackContext context, AuthenticatedContext auth, CloudResource resource, Network network) throws Exception {
+    public CloudResource delete(OpenStackContext context, AuthenticatedContext auth, CloudResource resource, Network network) {
         try {
-            OSClient osClient = createOSClient(auth);
+            OSClient<?> osClient = createOSClient(auth);
             deAllocateFloatingIps(context, osClient);
             NeutronNetworkView neutronView = new NeutronNetworkView(network);
             if (!neutronView.isExistingNetwork()) {
@@ -80,7 +79,7 @@ public class OpenStackNetworkResourceBuilder extends AbstractOpenStackNetworkRes
     @Override
     protected boolean checkStatus(OpenStackContext context, AuthenticatedContext auth, CloudResource resource) {
         CloudContext cloudContext = auth.getCloudContext();
-        OSClient osClient = createOSClient(auth);
+        OSClient<?> osClient = createOSClient(auth);
         org.openstack4j.model.network.Network osNetwork = osClient.networking().network().get(resource.getReference());
         if (osNetwork != null && context.isBuild()) {
             State networkStatus = osNetwork.getStatus();
@@ -89,14 +88,13 @@ public class OpenStackNetworkResourceBuilder extends AbstractOpenStackNetworkRes
                         networkStatus.name());
             }
             return networkStatus == State.ACTIVE;
-        } else if (osNetwork == null && !context.isBuild()) {
-            return true;
+        } else {
+            return osNetwork == null && !context.isBuild();
         }
-        return false;
     }
 
     @SuppressWarnings("unchecked")
-    private void deAllocateFloatingIps(OpenStackContext context, OSClient osClient) {
+    private void deAllocateFloatingIps(OpenStackContext context, OSClient<?> osClient) {
         List<String> floatingIpIds = context.getParameter(OpenStackConstants.FLOATING_IP_IDS, List.class);
         for (String floatingIpId : floatingIpIds) {
             try {

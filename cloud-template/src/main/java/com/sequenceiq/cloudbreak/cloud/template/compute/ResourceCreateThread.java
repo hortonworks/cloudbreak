@@ -76,7 +76,7 @@ public class ResourceCreateThread implements Callable<ResourceRequestResult<List
     }
 
     @Override
-    public ResourceRequestResult<List<CloudResourceStatus>> call() throws Exception {
+    public ResourceRequestResult<List<CloudResourceStatus>> call() {
         List<CloudResourceStatus> results = new ArrayList<>();
         Collection<CloudResource> buildableResources = new ArrayList<>();
         try {

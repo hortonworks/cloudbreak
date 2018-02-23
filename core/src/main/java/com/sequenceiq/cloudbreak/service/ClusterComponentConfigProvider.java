@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -48,7 +49,7 @@ public class ClusterComponentConfigProvider {
         }
     }
 
-    public StackRepoDetails getStackRepo(Set<ClusterComponent> clusterComponents) {
+    public StackRepoDetails getStackRepo(Iterable<ClusterComponent> clusterComponents) {
         try {
             StackRepoDetails component = getComponent(Lists.newArrayList(clusterComponents), StackRepoDetails.class, ComponentType.HDP_REPO_DETAILS);
             if (component == null) {
@@ -72,7 +73,7 @@ public class ClusterComponentConfigProvider {
         }
     }
 
-    public AmbariRepo getAmbariRepo(Set<ClusterComponent> clusterComponents) {
+    public AmbariRepo getAmbariRepo(Iterable<ClusterComponent> clusterComponents) {
         try {
             return getComponent(Lists.newArrayList(clusterComponents), AmbariRepo.class, ComponentType.AMBARI_REPO_DETAILS);
         } catch (Exception e) {
@@ -80,7 +81,7 @@ public class ClusterComponentConfigProvider {
         }
     }
 
-    public <T> T getComponent(List<ClusterComponent> components, Class<T> clazz, ComponentType componentType) {
+    public <T> T getComponent(Collection<ClusterComponent> components, Class<T> clazz, ComponentType componentType) {
         try {
             Optional<ClusterComponent> comp = components.stream().filter(
                     c -> c.getComponentType() == componentType).findFirst();
@@ -102,7 +103,7 @@ public class ClusterComponentConfigProvider {
         }
     }
 
-    public AmbariDatabase getAmbariDatabase(Set<ClusterComponent> clusterComponents) {
+    public AmbariDatabase getAmbariDatabase(Iterable<ClusterComponent> clusterComponents) {
         try {
             return getComponent(Lists.newArrayList(clusterComponents), AmbariDatabase.class, ComponentType.AMBARI_DATABASE_DETAILS);
         } catch (Exception e) {

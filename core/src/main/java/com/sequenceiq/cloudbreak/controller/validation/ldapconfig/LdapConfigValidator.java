@@ -4,7 +4,6 @@ import java.util.Hashtable;
 
 import javax.naming.Context;
 import javax.naming.NamingException;
-import javax.naming.directory.DirContext;
 import javax.naming.directory.InitialDirContext;
 
 import org.springframework.stereotype.Component;
@@ -53,7 +52,7 @@ public class LdapConfigValidator {
             env.put(Context.SECURITY_AUTHENTICATION, "simple");
             env.put(Context.SECURITY_PRINCIPAL, bindDn);
             env.put(Context.SECURITY_CREDENTIALS, bindPassword);
-            DirContext ctx = new InitialDirContext(env);
+            Context ctx = new InitialDirContext(env);
             ctx.close();
 
         } catch (NamingException e) {

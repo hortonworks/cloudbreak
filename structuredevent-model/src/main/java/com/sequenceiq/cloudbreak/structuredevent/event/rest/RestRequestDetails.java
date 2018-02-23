@@ -23,9 +23,6 @@ public class RestRequestDetails implements Serializable {
     @JsonDeserialize(using = Base64Deserializer.class)
     private String body;
 
-    public RestRequestDetails() {
-    }
-
     public String getRequestUri() {
         return requestUri;
     }

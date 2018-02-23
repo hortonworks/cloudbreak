@@ -29,7 +29,7 @@ public class CloudbreakEventHandler implements Consumer<Event<StructuredNotifica
     private NotificationSender notificationSender;
 
     @Inject
-    private NotificationAssemblingService notificationAssemblingService;
+    private NotificationAssemblingService<Object> notificationAssemblingService;
 
     @Inject
     private ConversionService conversionService;

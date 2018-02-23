@@ -1,6 +1,7 @@
 package com.sequenceiq.it.cloudbreak;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -91,7 +92,7 @@ public class ClusterCreationTest extends AbstractCloudbreakIntegrationTest {
         }
     }
 
-    private Set<HostGroupRequest> convertHostGroups(List<HostGroup> hostGroups, String runRecipesOnHosts, Boolean autoRecoveryMode) {
+    private Set<HostGroupRequest> convertHostGroups(Collection<HostGroup> hostGroups, String runRecipesOnHosts, Boolean autoRecoveryMode) {
         Set<Long> recipeIds = Collections.emptySet();
         List<String> hostGroupsWithRecipe = Collections.emptyList();
         if (!runRecipesOnHosts.isEmpty()) {

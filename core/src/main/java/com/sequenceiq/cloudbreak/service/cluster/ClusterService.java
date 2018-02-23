@@ -17,7 +17,6 @@ import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
-import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.ClusterComponent;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
@@ -41,7 +40,7 @@ public interface ClusterService {
 
     String getClusterJson(String ambariIp, Long stackId);
 
-    void updateHosts(Long stackId, HostGroupAdjustmentJson hostGroupAdjustment) throws CloudbreakSecuritySetupException;
+    void updateHosts(Long stackId, HostGroupAdjustmentJson hostGroupAdjustment);
 
     void updateStatus(Long stackId, StatusRequest statusRequest);
 
@@ -64,13 +63,13 @@ public interface ClusterService {
 
     Cluster getById(Long clusterId);
 
-    ConfigsResponse retrieveOutputs(Long stackId, Set<BlueprintParameterJson> requests) throws CloudbreakSecuritySetupException, IOException;
+    ConfigsResponse retrieveOutputs(Long stackId, Set<BlueprintParameterJson> requests) throws IOException;
 
     void upgrade(Long stackId, AmbariRepo ambariRepo);
 
-    Map<String, String> getHostStatuses(Long stackId) throws CloudbreakSecuritySetupException;
+    Map<String, String> getHostStatuses(Long stackId);
 
-    void failureReport(Long stackId, List<String> failedNodes) throws CloudbreakSecuritySetupException;
+    void failureReport(Long stackId, List<String> failedNodes);
 
     void repairCluster(Long stackId, List<String> hostGroups, boolean removeOnly);
 

@@ -16,7 +16,6 @@ import com.sequenceiq.cloudbreak.api.model.imagecatalog.ImagesResponse;
 import com.sequenceiq.cloudbreak.api.model.imagecatalog.UpdateImageCatalogRequest;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
-import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 
@@ -56,12 +55,12 @@ public class ImageCatalogV1Controller implements ImageCatalogV1Endpoint {
     }
 
     @Override
-    public ImageCatalogResponse postPublic(ImageCatalogRequest imageCatalogRequest) throws Exception {
+    public ImageCatalogResponse postPublic(ImageCatalogRequest imageCatalogRequest) {
         return createImageCatalog(imageCatalogRequest, true);
     }
 
     @Override
-    public ImageCatalogResponse postPrivate(ImageCatalogRequest imageCatalogRequest) throws Exception {
+    public ImageCatalogResponse postPrivate(ImageCatalogRequest imageCatalogRequest) {
         return createImageCatalog(imageCatalogRequest, false);
     }
 
@@ -77,7 +76,7 @@ public class ImageCatalogV1Controller implements ImageCatalogV1Endpoint {
     }
 
     @Override
-    public ImageCatalogResponse putPublic(UpdateImageCatalogRequest request) throws CloudbreakImageCatalogException {
+    public ImageCatalogResponse putPublic(UpdateImageCatalogRequest request) {
         ImageCatalog imageCatalog = imageCatalogService.update(conversionService.convert(request, ImageCatalog.class));
         return convert(imageCatalog);
     }
@@ -93,7 +92,7 @@ public class ImageCatalogV1Controller implements ImageCatalogV1Endpoint {
         return conversionService.convert(imageCatalog, ImageCatalogRequest.class);
     }
 
-    private ImageCatalogResponse createImageCatalog(ImageCatalogRequest imageCatalogRequest, boolean publicInAccount) throws Exception {
+    private ImageCatalogResponse createImageCatalog(ImageCatalogRequest imageCatalogRequest, boolean publicInAccount) {
         IdentityUser identityUser = authenticatedUserService.getCbUser();
         ImageCatalog imageCatalog = conversionService.convert(imageCatalogRequest, ImageCatalog.class);
         imageCatalog.setAccount(identityUser.getAccount());

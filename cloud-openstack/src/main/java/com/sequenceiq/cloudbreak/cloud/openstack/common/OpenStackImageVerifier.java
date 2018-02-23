@@ -17,7 +17,7 @@ public class OpenStackImageVerifier {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OpenStackImageVerifier.class);
 
-    public void exist(OSClient osClient, String name) {
+    public void exist(OSClient<?> osClient, String name) {
         List<? extends Image> images = osClient.imagesV2().list(Collections.singletonMap("name", name));
         if (images == null || images.isEmpty()) {
             LOGGER.error("OpenStack image: {} not found", name);

@@ -58,11 +58,8 @@ public class RdsConfigService {
     }
 
     public Set<RDSConfig> retrieveAccountRdsConfigs(IdentityUser user) {
-        if (user.getRoles().contains(IdentityUserRole.ADMIN)) {
-            return rdsConfigRepository.findAllBasedOnAccount(user.getAccount());
-        } else {
-            return rdsConfigRepository.findPublicInAccountForUser(user.getUserId(), user.getAccount());
-        }
+        return user.getRoles().contains(IdentityUserRole.ADMIN) ? rdsConfigRepository.findAllBasedOnAccount(user.getAccount())
+                : rdsConfigRepository.findPublicInAccountForUser(user.getUserId(), user.getAccount());
     }
 
     public RDSConfig get(Long id) {

@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow.status;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
@@ -54,12 +55,12 @@ public class AmbariClusterStatusFactory {
             if (!ambariOperations.isEmpty()) {
                 clusterStatus = ClusterStatus.PENDING;
             } else {
-                Set<ClusterStatus> orderedPartialStatuses = new TreeSet<>();
-                Set<ClusterStatus> orderedFullStatuses = new TreeSet<>();
-                Set<String> unsupportedStatuses = new HashSet<>();
+                Collection<ClusterStatus> orderedPartialStatuses = new TreeSet<>();
+                Collection<ClusterStatus> orderedFullStatuses = new TreeSet<>();
+                Collection<String> unsupportedStatuses = new HashSet<>();
                 Map<String, Map<String, String>> hostComponentsStates = ambariClient.getHostComponentsStates();
                 Set<String> componentNames = new HashSet<>();
-                hostComponentsStates.entrySet().forEach(e -> componentNames.addAll(e.getValue().keySet()));
+                hostComponentsStates.forEach((key, value) -> componentNames.addAll(value.keySet()));
                 Map<String, String> componentsCategory = ambariClient.getComponentsCategory(new ArrayList<>(componentNames));
                 for (Entry<String, Map<String, String>> hostComponentsEntry : hostComponentsStates.entrySet()) {
                     Map<String, String> componentStateMap = hostComponentsEntry.getValue();
@@ -79,7 +80,7 @@ public class AmbariClusterStatusFactory {
         return clusterStatus;
     }
 
-    private ClusterStatus determineClusterStatus(Set<ClusterStatus> orderedPartialStatuses, Set<ClusterStatus> orderedFullStatuses) {
+    private ClusterStatus determineClusterStatus(Collection<ClusterStatus> orderedPartialStatuses, Collection<ClusterStatus> orderedFullStatuses) {
         ClusterStatus clusterStatus;
         if (!orderedPartialStatuses.isEmpty()) {
             clusterStatus = orderedPartialStatuses.iterator().next();
@@ -91,8 +92,8 @@ public class AmbariClusterStatusFactory {
         return clusterStatus;
     }
 
-    private void putComponentState(String componentStateStr, Set<ClusterStatus> orderedPartialStatuses, Set<ClusterStatus> orderedFullStatuses,
-            Set<String> unsupportedStatuses) {
+    private void putComponentState(String componentStateStr, Collection<ClusterStatus> orderedPartialStatuses, Collection<ClusterStatus> orderedFullStatuses,
+            Collection<String> unsupportedStatuses) {
         try {
             ClusterStatus componentStatus = ClusterStatus.valueOf(componentStateStr);
             if (partialStatuses.contains(componentStatus)) {

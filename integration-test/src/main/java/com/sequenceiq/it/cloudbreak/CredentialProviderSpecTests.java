@@ -1,5 +1,14 @@
 package com.sequenceiq.it.cloudbreak;
 
+import javax.ws.rs.BadRequestException;
+import javax.ws.rs.ForbiddenException;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.testng.Assert;
+import org.testng.annotations.AfterTest;
+import org.testng.annotations.Test;
+
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
 import com.sequenceiq.it.cloudbreak.newway.Credential;
@@ -7,46 +16,38 @@ import com.sequenceiq.it.cloudbreak.newway.cloud.AwsCloudProvider;
 import com.sequenceiq.it.cloudbreak.newway.cloud.AzureCloudProvider;
 import com.sequenceiq.it.cloudbreak.newway.cloud.GcpCloudProvider;
 import com.sequenceiq.it.cloudbreak.newway.cloud.OpenstackCloudProvider;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.testng.Assert;
-import org.testng.annotations.AfterTest;
-import org.testng.annotations.Test;
-
-import javax.ws.rs.BadRequestException;
-import javax.ws.rs.ForbiddenException;
 
 public class CredentialProviderSpecTests extends CloudbreakTest {
 
-    public static final String VALID_AWSKEY_CRED_NAME = "valid-keybased-credential";
+    private static final String VALID_AWSKEY_CRED_NAME = "valid-keybased-credential";
 
-    public static final String VALID_OSV3_CRED_NAME = "valid-v3-credential";
+    private static final String VALID_OSV3_CRED_NAME = "valid-v3-credential";
 
-    public static final String INVALID_AWSROLE_CRED_NAME = "temp-role-credential";
+    private static final String INVALID_AWSROLE_CRED_NAME = "temp-role-credential";
 
-    public static final String INVALID_AWSACCESS_CRED_NAME = "temp-access-credential";
+    private static final String INVALID_AWSACCESS_CRED_NAME = "temp-access-credential";
 
-    public static final String INVALID_AWSSECRET_CRED_NAME = "temp-secret-credential";
+    private static final String INVALID_AWSSECRET_CRED_NAME = "temp-secret-credential";
 
-    public static final String INVALID_OSUSER_CRED_NAME = "temp-user-credential";
+    private static final String INVALID_OSUSER_CRED_NAME = "temp-user-credential";
 
-    public static final String INVALID_OSENDPOINT_CRED_NAME = "temp-endpoint-credential";
+    private static final String INVALID_OSENDPOINT_CRED_NAME = "temp-endpoint-credential";
 
-    public static final String INVALID_ARMACCESS_CRED_NAME = "temp-access-credential";
+    private static final String INVALID_ARMACCESS_CRED_NAME = "temp-access-credential";
 
-    public static final String INVALID_ARMSECRET_CRED_NAME = "temp-secret-credential";
+    private static final String INVALID_ARMSECRET_CRED_NAME = "temp-secret-credential";
 
-    public static final String INVALID_ARMTENANT_CRED_NAME = "temp-tenant-credential";
+    private static final String INVALID_ARMTENANT_CRED_NAME = "temp-tenant-credential";
 
-    public static final String INVALID_ARMSUBSCRIPTION_CRED_NAME = "temp-subscription-credential";
+    private static final String INVALID_ARMSUBSCRIPTION_CRED_NAME = "temp-subscription-credential";
 
-    public static final String INVALID_GCP12_CRED_NAME = "temp-p12-credential";
+    private static final String INVALID_GCP12_CRED_NAME = "temp-p12-credential";
 
-    public static final String INVALID_GCPROJECT_CRED_NAME = "temp-project-credential";
+    private static final String INVALID_GCPROJECT_CRED_NAME = "temp-project-credential";
 
-    public static final String INVALID_GCPSERVICEACCOUNT_CRED_NAME = "temp-serviceacc-credential";
+    private static final String INVALID_GCPSERVICEACCOUNT_CRED_NAME = "temp-serviceacc-credential";
 
-    public static final String CRED_DESCRIPTION = "temporary credential for API E2E tests";
+    private static final String CRED_DESCRIPTION = "temporary credential for API E2E tests";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CredentialProviderSpecTests.class);
 
@@ -58,23 +59,21 @@ public class CredentialProviderSpecTests extends CloudbreakTest {
 
     private final GcpCloudProvider gcpCloudProvider = new GcpCloudProvider(getTestParameter());
 
-    private String errorMessage = "";
-
     @AfterTest
     public void cleanUp() throws Exception {
         String[] nameArray = {VALID_AWSKEY_CRED_NAME, VALID_OSV3_CRED_NAME};
 
-        for (int i = 0; i < nameArray.length; i++) {
-            LOGGER.info("Delete credential: \'{}\'", nameArray[i].toLowerCase().trim());
+        for (String aNameArray : nameArray) {
+            LOGGER.info("Delete credential: \'{}\'", aNameArray.toLowerCase().trim());
             try {
                 given(CloudbreakClient.isCreated());
                 given(Credential.request()
-                        .withName(nameArray[i]));
+                        .withName(aNameArray));
                 when(Credential.delete());
             } catch (ForbiddenException e) {
                 String exceptionMessage = e.getResponse().readEntity(String.class);
-                this.errorMessage = exceptionMessage.substring(exceptionMessage.lastIndexOf(":") + 1);
-                LOGGER.info("ForbiddenException message ::: " + this.errorMessage);
+                String errorMessage = exceptionMessage.substring(exceptionMessage.lastIndexOf(':') + 1);
+                LOGGER.info("ForbiddenException message ::: " + errorMessage);
             }
         }
     }
@@ -89,9 +88,8 @@ public class CredentialProviderSpecTests extends CloudbreakTest {
                 .withParameters(openstackCloudProvider.openstackV3CredentialDetails()), "OpenStack V3 credential request.");
         when(Credential.post(), "OpenStack V3 credential request has been posted.");
         then(Credential.assertThis(
-                (credential, t) -> {
-                    Assert.assertEquals(credential.getResponse().getName(), VALID_OSV3_CRED_NAME);
-                }), VALID_OSV3_CRED_NAME + " should be the name of the new credential."
+                (credential, t) -> Assert.assertEquals(credential.getResponse().getName(), VALID_OSV3_CRED_NAME)),
+                VALID_OSV3_CRED_NAME + " should be the name of the new credential."
         );
     }
 
@@ -127,9 +125,8 @@ public class CredentialProviderSpecTests extends CloudbreakTest {
                 .withParameters(awsCloudProvider.awsCredentialDetailsKey()), "AWS key based credential request.");
         when(Credential.post(), "AWS key based credential request has been posted.");
         then(Credential.assertThis(
-                (credential, t) -> {
-                    Assert.assertEquals(credential.getResponse().getName(), VALID_AWSKEY_CRED_NAME);
-                }), VALID_AWSKEY_CRED_NAME + " should be the name of the new credential."
+                (credential, t) -> Assert.assertEquals(credential.getResponse().getName(), VALID_AWSKEY_CRED_NAME)),
+                VALID_AWSKEY_CRED_NAME + " should be the name of the new credential."
         );
     }
 

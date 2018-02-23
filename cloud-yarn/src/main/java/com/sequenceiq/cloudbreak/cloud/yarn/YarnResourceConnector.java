@@ -4,7 +4,6 @@ import static com.sequenceiq.cloudbreak.common.type.ResourceType.YARN_APPLICATIO
 
 import java.net.MalformedURLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
@@ -28,6 +27,7 @@ import com.sequenceiq.cloudbreak.cloud.exception.CloudOperationNotSupportedExcep
 import com.sequenceiq.cloudbreak.cloud.exception.TemplatingDoesNotSupportedException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
+import com.sequenceiq.cloudbreak.cloud.model.CloudResource.Builder;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
@@ -87,7 +87,7 @@ public class YarnResourceConnector implements ResourceConnector<Object> {
             YarnComponent component = new YarnComponent();
             component.setName(group.getName());
             component.setNumberOfContainers(group.getInstancesSize());
-            String userData = stack.getImage().getUserData(group.getType());
+            String userData = stack.getImage().getUserDataByType(group.getType());
             component.setLaunchCommand(String.format("/bootstrap/start-systemd '%s' '%s' '%s'", Base64.getEncoder().encodeToString(userData.getBytes()),
                     stack.getLoginUserName(), stack.getPublicKey()));
             component.setArtifact(artifact);
@@ -102,22 +102,22 @@ public class YarnResourceConnector implements ResourceConnector<Object> {
             Configuration configuration = new Configuration();
             Map<String, String> propsMap = Maps.newHashMap();
             propsMap.put("conf.cb-conf.per.component", "true");
-            propsMap.put("site.cb-conf.userData", "'" + Base64.getEncoder().encodeToString(userData.getBytes()) + "'");
-            propsMap.put("site.cb-conf.sshUser", "'" + stack.getLoginUserName() + "'");
-            propsMap.put("site.cb-conf.groupname", "'" + group.getName() + "'");
-            propsMap.put("site.cb-conf.sshPubKey", "'" + stack.getPublicKey() + "'");
+            propsMap.put("site.cb-conf.userData", '\'' + Base64.getEncoder().encodeToString(userData.getBytes()) + '\'');
+            propsMap.put("site.cb-conf.sshUser", '\'' + stack.getLoginUserName() + '\'');
+            propsMap.put("site.cb-conf.groupname", '\'' + group.getName() + '\'');
+            propsMap.put("site.cb-conf.sshPubKey", '\'' + stack.getPublicKey() + '\'');
             configuration.setProperties(propsMap);
             ConfigFile configFileProps = new ConfigFile();
             configFileProps.setType(ConfigFileType.PROPERTIES.name());
             configFileProps.setSrcFile("cb-conf");
             configFileProps.setDestFile("/etc/cloudbreak-config.props");
-            configuration.setFiles(Arrays.asList(configFileProps));
+            configuration.setFiles(Collections.singletonList(configFileProps));
 
             component.setConfiguration(configuration);
             components.add(component);
         }
         createApplicationRequest.setComponents(components);
-        CloudResource yarnApplication = new CloudResource.Builder().type(YARN_APPLICATION).name(createApplicationRequest.getName()).build();
+        CloudResource yarnApplication = new Builder().type(YARN_APPLICATION).name(createApplicationRequest.getName()).build();
         persistenceNotifier.notifyAllocation(yarnApplication, authenticatedContext.getCloudContext());
 
         YarnClient yarnClient = yarnClientUtil.createYarnClient(authenticatedContext);
@@ -167,8 +167,7 @@ public class YarnResourceConnector implements ResourceConnector<Object> {
     }
 
     @Override
-    public List<CloudResourceStatus> terminate(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> cloudResources)
-            throws Exception {
+    public List<CloudResourceStatus> terminate(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> cloudResources) {
         for (CloudResource resource : cloudResources) {
             switch (resource.getType()) {
                 case YARN_APPLICATION:
@@ -193,7 +192,7 @@ public class YarnResourceConnector implements ResourceConnector<Object> {
     }
 
     @Override
-    public List<CloudResourceStatus> update(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources) throws Exception {
+    public List<CloudResourceStatus> update(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources) {
         return null;
     }
 

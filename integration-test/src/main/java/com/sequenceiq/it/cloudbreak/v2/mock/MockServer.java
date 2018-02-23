@@ -45,13 +45,13 @@ public class MockServer {
     @Value("${mock.server.address:localhost}")
     private String mockServerAddress;
 
-    private int mockPort;
+    private final int mockPort;
 
-    private int sshPort;
+    private final int sshPort;
 
-    private Service sparkService;
+    private final Service sparkService;
 
-    private Map<Call, Response> requestResponseMap = new HashMap<>();
+    private final Map<Call, Response> requestResponseMap = new HashMap<>();
 
     private Map<String, CloudVmMetaDataStatus> instanceMap;
 

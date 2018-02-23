@@ -4,7 +4,7 @@ import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformRequest;
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSecurityGroups;
 
-public class GetPlatformSecurityGroupsResult extends CloudPlatformResult<CloudPlatformRequest> {
+public class GetPlatformSecurityGroupsResult extends CloudPlatformResult<CloudPlatformRequest<?>> {
     private CloudSecurityGroups cloudSecurityGroups;
 
     public GetPlatformSecurityGroupsResult(CloudPlatformRequest<?> request, CloudSecurityGroups cloudSecurityGroups) {

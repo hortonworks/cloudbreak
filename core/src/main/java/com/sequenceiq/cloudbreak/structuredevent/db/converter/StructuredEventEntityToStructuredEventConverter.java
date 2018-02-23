@@ -23,7 +23,7 @@ import com.sequenceiq.cloudbreak.util.JsonUtil;
 public class StructuredEventEntityToStructuredEventConverter extends AbstractConversionServiceAwareConverter<StructuredEventEntity, StructuredEvent> {
     private static final Logger LOGGER = LoggerFactory.getLogger(StructuredEventEntityToStructuredEventConverter.class);
 
-    private Map<String, Class<? extends StructuredEvent>> classes = Maps.newHashMap();
+    private final Map<String, Class<? extends StructuredEvent>> classes = Maps.newHashMap();
 
     @PostConstruct
     public void init() {

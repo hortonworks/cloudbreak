@@ -143,7 +143,7 @@ public class StackCreationService {
         validateResourceResults(context.getCloudContext(), result);
         List<CloudResourceStatus> results = result.getResults();
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.METADATA_COLLECTION, "Metadata collection");
-        updateNodeCount(stack.getId(), context.getCloudStack().getGroups(), results, true);
+        updateNodeCount(stack.getId(), context.getCloudStack().getGroups(), results);
         flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_INFRASTRUCTURE_TIME, UPDATE_IN_PROGRESS.name(), calculateStackCreationTime(startDate));
         return stackService.getByIdWithLists(stack.getId());
     }
@@ -284,11 +284,11 @@ public class StackCreationService {
     }
 
     private void validateResourceResults(CloudContext cloudContext, LaunchStackResult res) {
-        validateResourceResults(cloudContext, res.getErrorDetails(), res.getResults(), true);
+        validateResourceResults(cloudContext, res.getErrorDetails(), res.getResults());
     }
 
-    private void validateResourceResults(CloudContext cloudContext, Exception exception, List<CloudResourceStatus> results, boolean create) {
-        String action = create ? "create" : "upscale";
+    private void validateResourceResults(CloudContext cloudContext, Exception exception, List<CloudResourceStatus> results) {
+        String action = "create";
         if (exception != null) {
             LOGGER.error(format("Failed to %s stack: %s", action, cloudContext), exception);
             throw new OperationException(exception);
@@ -302,11 +302,11 @@ public class StackCreationService {
         }
     }
 
-    private void updateNodeCount(Long stackId, List<Group> originalGroups, List<CloudResourceStatus> statuses, boolean create) {
+    private void updateNodeCount(Long stackId, Iterable<Group> originalGroups, Iterable<CloudResourceStatus> statuses) {
         for (Group group : originalGroups) {
             int nodeCount = group.getInstancesSize();
             List<CloudResourceStatus> failedResources = removeFailedMetadata(stackId, statuses, group);
-            if (!failedResources.isEmpty() && create) {
+            if (!failedResources.isEmpty()) {
                 int failedCount = failedResources.size();
                 InstanceGroup instanceGroup = instanceGroupRepository.findOneByGroupNameInStack(stackId, group.getName());
                 instanceGroup.setNodeCount(nodeCount - failedCount);
@@ -317,7 +317,7 @@ public class StackCreationService {
         }
     }
 
-    private List<CloudResourceStatus> removeFailedMetadata(Long stackId, List<CloudResourceStatus> statuses, Group group) {
+    private List<CloudResourceStatus> removeFailedMetadata(Long stackId, Iterable<CloudResourceStatus> statuses, Group group) {
         Map<Long, CloudResourceStatus> failedResources = new HashMap<>();
         Set<Long> groupPrivateIds = getPrivateIds(group);
         for (CloudResourceStatus status : statuses) {

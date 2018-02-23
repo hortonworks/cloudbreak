@@ -39,10 +39,10 @@ public class ClusterCreationActions {
     private ClusterCreationService clusterCreationService;
 
     @Bean(name = "BOOTSTRAPPING_MACHINES_STATE")
-    public Action bootstrappingMachinesAction() {
+    public Action<?, ?> bootstrappingMachinesAction() {
         return new AbstractStackCreationAction<StackEvent>(StackEvent.class) {
             @Override
-            protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) {
                 clusterCreationService.bootstrappingMachines(context.getStack());
                 sendEvent(context);
             }
@@ -55,10 +55,10 @@ public class ClusterCreationActions {
     }
 
     @Bean(name = "COLLECTING_HOST_METADATA_STATE")
-    public Action collectingHostMetadataAction() {
+    public Action<?, ?> collectingHostMetadataAction() {
         return new AbstractStackCreationAction<BootstrapMachinesSuccess>(BootstrapMachinesSuccess.class) {
             @Override
-            protected void doExecute(StackContext context, BootstrapMachinesSuccess payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(StackContext context, BootstrapMachinesSuccess payload, Map<Object, Object> variables) {
                 clusterCreationService.collectingHostMetadata(context.getStack());
                 sendEvent(context);
             }
@@ -71,10 +71,10 @@ public class ClusterCreationActions {
     }
 
     @Bean(name = "UPLOAD_RECIPES_STATE")
-    public Action uploadRecipesAction() {
+    public Action<?, ?> uploadRecipesAction() {
         return new AbstractClusterAction<HostMetadataSetupSuccess>(HostMetadataSetupSuccess.class) {
             @Override
-            protected void doExecute(ClusterViewContext context, HostMetadataSetupSuccess payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(ClusterViewContext context, HostMetadataSetupSuccess payload, Map<Object, Object> variables) {
                 sendEvent(context);
             }
 
@@ -86,7 +86,7 @@ public class ClusterCreationActions {
     }
 
     @Bean(name = "STARTING_AMBARI_SERVICES_STATE")
-    public Action startingAmbariServicesAction() {
+    public Action<?, ?> startingAmbariServicesAction() {
         return new AbstractClusterAction<UploadRecipesSuccess>(UploadRecipesSuccess.class) {
             @Override
             protected void doExecute(ClusterViewContext context, UploadRecipesSuccess payload, Map<Object, Object> variables) throws Exception {
@@ -102,10 +102,10 @@ public class ClusterCreationActions {
     }
 
     @Bean(name = "REGISTER_PROXY_STATE")
-    public Action registerProxyAction() {
+    public Action<?, ?> registerProxyAction() {
         return new AbstractClusterAction<StartAmbariServicesSuccess>(StartAmbariServicesSuccess.class) {
             @Override
-            protected void doExecute(ClusterViewContext context, StartAmbariServicesSuccess payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(ClusterViewContext context, StartAmbariServicesSuccess payload, Map<Object, Object> variables) {
                 sendEvent(context);
             }
 
@@ -117,10 +117,10 @@ public class ClusterCreationActions {
     }
 
     @Bean(name = "STARTING_AMBARI_STATE")
-    public Action startingAmbariAction() {
+    public Action<?, ?> startingAmbariAction() {
         return new AbstractClusterAction<RegisterProxySuccess>(RegisterProxySuccess.class) {
             @Override
-            protected void doExecute(ClusterViewContext context, RegisterProxySuccess payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(ClusterViewContext context, RegisterProxySuccess payload, Map<Object, Object> variables) {
                 clusterCreationService.startingAmbari(context.getStackId());
                 sendEvent(context);
             }
@@ -133,10 +133,10 @@ public class ClusterCreationActions {
     }
 
     @Bean(name = "INSTALLING_CLUSTER_STATE")
-    public Action installingClusterAction() {
+    public Action<?, ?> installingClusterAction() {
         return new AbstractClusterAction<StartAmbariSuccess>(StartAmbariSuccess.class) {
             @Override
-            protected void doExecute(ClusterViewContext context, StartAmbariSuccess payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(ClusterViewContext context, StartAmbariSuccess payload, Map<Object, Object> variables) {
                 clusterCreationService.installingCluster(context.getStack());
                 sendEvent(context);
             }
@@ -149,10 +149,10 @@ public class ClusterCreationActions {
     }
 
     @Bean(name = "CLUSTER_CREATION_FINISHED_STATE")
-    public Action clusterCreationFinishedAction() {
+    public Action<?, ?> clusterCreationFinishedAction() {
         return new AbstractClusterAction<InstallClusterSuccess>(InstallClusterSuccess.class) {
             @Override
-            protected void doExecute(ClusterViewContext context, InstallClusterSuccess payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(ClusterViewContext context, InstallClusterSuccess payload, Map<Object, Object> variables) {
                 clusterCreationService.clusterInstallationFinished(context.getStack());
                 metricService.incrementMetricCounter(MetricType.CLUSTER_CREATION_SUCCESSFUL, context.getStack());
                 sendEvent(context);
@@ -166,10 +166,10 @@ public class ClusterCreationActions {
     }
 
     @Bean(name = "CLUSTER_CREATION_FAILED_STATE")
-    public Action clusterCreationFailedAction() {
+    public Action<?, ?> clusterCreationFailedAction() {
         return new AbstractStackFailureAction<ClusterCreationState, ClusterCreationEvent>() {
             @Override
-            protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
                 clusterCreationService.handleClusterCreationFailure(context.getStackView(), payload.getException());
                 metricService.incrementMetricCounter(MetricType.CLUSTER_CREATION_FAILED, context.getStackView());
                 sendEvent(context);

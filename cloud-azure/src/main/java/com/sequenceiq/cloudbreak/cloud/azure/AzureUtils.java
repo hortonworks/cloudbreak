@@ -25,6 +25,7 @@ import com.microsoft.azure.management.network.Subnet;
 import com.microsoft.azure.management.resources.Deployment;
 import com.microsoft.azure.management.resources.DeploymentOperation;
 import com.microsoft.azure.management.resources.DeploymentOperations;
+import com.microsoft.azure.management.resources.fluentcore.arm.models.HasId;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.status.AzureStackStatus;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
@@ -74,7 +75,7 @@ public class AzureUtils {
     @Inject
     private AzurePremiumValidatorService azurePremiumValidatorService;
 
-    public CloudResource getTemplateResource(List<CloudResource> resourceList) {
+    public CloudResource getTemplateResource(Iterable<CloudResource> resourceList) {
         for (CloudResource resource : resourceList) {
             if (resource.getType() == ResourceType.ARM_TEMPLATE) {
                 return resource;
@@ -153,19 +154,11 @@ public class AzureUtils {
     }
 
     public boolean isPrivateIp(Network network) {
-        if (network.getParameters().containsKey(NO_PUBLIC_IP)) {
-            return network.getParameter(NO_PUBLIC_IP, Boolean.class);
-        } else {
-            return false;
-        }
+        return network.getParameters().containsKey(NO_PUBLIC_IP) ? network.getParameter(NO_PUBLIC_IP, Boolean.class) : false;
     }
 
     public boolean isNoSecurityGroups(Network network) {
-        if (network.getParameters().containsKey(NO_FIREWALL_RULES)) {
-            return network.getParameter(NO_FIREWALL_RULES, Boolean.class);
-        } else {
-            return false;
-        }
+        return network.getParameters().containsKey(NO_FIREWALL_RULES) ? network.getParameter(NO_FIREWALL_RULES, Boolean.class) : false;
     }
 
     public static List<CloudInstance> getInstanceList(CloudStack stack) {
@@ -240,7 +233,7 @@ public class AzureUtils {
         }
     }
 
-    private void validateSecurityGroup(AzureClient client, NetworkSecurityGroup networkSecurityGroup) {
+    private void validateSecurityGroup(AzureClient client, HasId networkSecurityGroup) {
         String securityGroupId = networkSecurityGroup.id();
         String[] parts = securityGroupId.split("/");
         if (parts.length != ID_SEGMENTS) {

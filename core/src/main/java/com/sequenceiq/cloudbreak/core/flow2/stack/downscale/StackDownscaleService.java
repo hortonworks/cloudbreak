@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.api.model.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.model.Status.UPDATE_IN_PROGRESS;
 import static java.util.stream.Collectors.toList;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -60,7 +61,7 @@ public class StackDownscaleService {
         flowMessageService.fireEventAndLog(context.getStack().getId(), Msg.STACK_DOWNSCALE_INSTANCES, UPDATE_IN_PROGRESS.name(), msgParam);
     }
 
-    public void finishStackDownscale(StackScalingFlowContext context, String instanceGroupName, Set<String> instanceIds) {
+    public void finishStackDownscale(StackScalingFlowContext context, String instanceGroupName, Collection<String> instanceIds) {
         Stack stack = context.getStack();
         InstanceGroup g = stack.getInstanceGroupByInstanceGroupName(instanceGroupName);
         int nodeCount = stackScalingService.updateRemovedResourcesState(stack, instanceIds, g);

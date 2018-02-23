@@ -32,11 +32,7 @@ public class AwsCloudProvider extends CloudProviderHelper {
     public CredentialEntity aValidCredential() {
         String credentialType = getTestParameter().get("awsCredentialType");
         Map<String, Object> credentialParameters;
-        if (KEY_BASED_CREDENTIAL.equals(credentialType)) {
-            credentialParameters = awsCredentialDetailsKey();
-        } else {
-            credentialParameters = awsCredentialDetailsArn();
-        }
+        credentialParameters = KEY_BASED_CREDENTIAL.equals(credentialType) ? awsCredentialDetailsKey() : awsCredentialDetailsArn();
         return Credential.isCreated()
                 .withName(CREDNAME)
                 .withDescription(CREDDESC)
@@ -45,7 +41,7 @@ public class AwsCloudProvider extends CloudProviderHelper {
     }
 
     public Map<String, Object> awsCredentialDetailsArn() {
-        Map<String, Object> map = new HashMap<String, Object>();
+        Map<String, Object> map = new HashMap<>();
         map.put("selector", "role-based");
         map.put("roleArn", getTestParameter().get("integrationtest.awscredential.roleArn"));
 
@@ -53,7 +49,7 @@ public class AwsCloudProvider extends CloudProviderHelper {
     }
 
     public Map<String, Object> awsCredentialDetailsInvalidArn() {
-        Map<String, Object> map = new HashMap<String, Object>();
+        Map<String, Object> map = new HashMap<>();
         map.put("selector", "role-based");
         map.put("roleArn", "arn:aws:iam::123456789012:role/fake");
 
@@ -117,7 +113,7 @@ public class AwsCloudProvider extends CloudProviderHelper {
     }
 
     public Map<String, Object> awsCredentialDetailsKey() {
-        Map<String, Object> map = new HashMap<String, Object>();
+        Map<String, Object> map = new HashMap<>();
         map.put("selector", "key-based");
         map.put("accessKey", getTestParameter().get("integrationtest.awscredential.accessKey"));
         map.put("secretKey", getTestParameter().get("integrationtest.awscredential.secretKey"));
@@ -126,7 +122,7 @@ public class AwsCloudProvider extends CloudProviderHelper {
     }
 
     public Map<String, Object> awsCredentialDetailsInvalidAccessKey() {
-        Map<String, Object> map = new HashMap<String, Object>();
+        Map<String, Object> map = new HashMap<>();
         map.put("selector", "key-based");
         map.put("accessKey", "ABCDEFGHIJKLMNOPQRST");
         map.put("secretKey", getTestParameter().get("integrationtest.awscredential.secretKey"));
@@ -135,7 +131,7 @@ public class AwsCloudProvider extends CloudProviderHelper {
     }
 
     public Map<String, Object> awsCredentialDetailsInvalidSecretKey() {
-        Map<String, Object> map = new HashMap<String, Object>();
+        Map<String, Object> map = new HashMap<>();
         map.put("selector", "key-based");
         map.put("accessKey", getTestParameter().get("integrationtest.awscredential.accessKey"));
         map.put("secretKey", "123456789ABCDEFGHIJKLMNOP0123456789=ABC+");

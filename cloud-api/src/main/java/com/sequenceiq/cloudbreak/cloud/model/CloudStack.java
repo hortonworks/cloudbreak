@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.model;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -19,9 +20,9 @@ public class CloudStack {
 
     private final String template;
 
-    private String loginUserName;
+    private final String loginUserName;
 
-    private String publicKey;
+    private final String publicKey;
 
     private final Map<String, String> parameters;
 
@@ -29,7 +30,7 @@ public class CloudStack {
 
     private final InstanceAuthentication instanceAuthentication;
 
-    public CloudStack(List<Group> groups, Network network, Image image, Map<String, String> parameters, Map<String, String> tags, String template,
+    public CloudStack(Collection<Group> groups, Network network, Image image, Map<String, String> parameters, Map<String, String> tags, String template,
             InstanceAuthentication instanceAuthentication, String loginUserName, String publicKey) {
         this.groups = ImmutableList.copyOf(groups);
         this.network = network;

@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.filter;
 
-import java.io.IOException;
-
 import javax.inject.Inject;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
@@ -27,7 +25,7 @@ public class MDCContextFilter implements ContainerRequestFilter, ContainerRespon
     private AuthenticatedUserService authenticatedUserService;
 
     @Override
-    public void filter(ContainerRequestContext requestContext) throws IOException {
+    public void filter(ContainerRequestContext requestContext) {
         MultivaluedMap<String, String> headers = requestContext.getHeaders();
         if (headers.containsKey(TRACKING_ID_HEADER)) {
             MDCBuilder.addTrackingIdToMdcContext(headers.getFirst(TRACKING_ID_HEADER));
@@ -39,7 +37,7 @@ public class MDCContextFilter implements ContainerRequestFilter, ContainerRespon
     }
 
     @Override
-    public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext) throws IOException {
+    public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext) {
         MDCBuilder.cleanupMdc();
     }
 }

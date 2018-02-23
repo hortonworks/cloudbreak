@@ -15,14 +15,14 @@ public class UpgradeTests extends CloudbreakTest {
 
     public static final int DESIRED_COUNT = 5;
 
-    private CloudProvider cloudProvider;
+    private final CloudProvider cloudProvider;
 
     public UpgradeTests() {
-        this.cloudProvider = new GcpCloudProvider(getTestParameter());
+        cloudProvider = new GcpCloudProvider(getTestParameter());
     }
 
     public UpgradeTests(CloudProvider cp, TestParameter tp) {
-        this.cloudProvider = cp;
+        cloudProvider = cp;
         setTestParameter(tp);
     }
 

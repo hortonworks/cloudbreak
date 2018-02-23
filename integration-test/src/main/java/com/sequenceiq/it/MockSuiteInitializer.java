@@ -56,7 +56,7 @@ public class MockSuiteInitializer extends AbstractTestNGSpringContextTests {
     }
 
     @BeforeSuite(dependsOnMethods = "initContext")
-    public void initSuiteMap(ITestContext testContext) throws Exception {
+    public void initSuiteMap(ITestContext testContext) {
         CloudbreakClient cloudbreakClient = itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class);
 
         if (cleanUpBeforeStart && isImageCatalogExists(cloudbreakClient.imageCatalogEndpoint(), MOCK_IMAGE_CATALOG_NAME)) {
@@ -66,7 +66,7 @@ public class MockSuiteInitializer extends AbstractTestNGSpringContextTests {
         createMockImageCatalog(cloudbreakClient.imageCatalogEndpoint());
     }
 
-    private boolean isImageCatalogExists(ImageCatalogV1Endpoint endpoint, String mockImageCatalogName) throws Exception {
+    private boolean isImageCatalogExists(ImageCatalogV1Endpoint endpoint, String mockImageCatalogName) {
         try {
             return endpoint.getPublicByName(mockImageCatalogName, false) != null;
         } catch (ForbiddenException e) {
@@ -74,7 +74,7 @@ public class MockSuiteInitializer extends AbstractTestNGSpringContextTests {
         }
     }
 
-    private void createMockImageCatalog(ImageCatalogV1Endpoint endpoint) throws Exception {
+    private void createMockImageCatalog(ImageCatalogV1Endpoint endpoint) {
         if (!isImageCatalogExists(endpoint, MOCK_IMAGE_CATALOG_NAME)) {
             ImageCatalogRequest imageCatalogRequest = new ImageCatalogRequest();
             imageCatalogRequest.setName(MOCK_IMAGE_CATALOG_NAME);

@@ -19,8 +19,7 @@ public class OpenStackNetworkCreationTest extends AbstractCloudbreakIntegrationT
     @Test
     @Parameters({ "networkName", "subnetCIDR", "publicNetId" })
     public void testOpenstackNetworkCreation(@Optional("it-openstack-network") String networkName, @Optional("10.0.36.0/24") String subnetCIDR,
-            @Optional("") String publicNetId)
-            throws Exception {
+            @Optional("") String publicNetId) {
         // GIVEN
         publicNetId = getPublicNetId(publicNetId, defaultPublicNetId);
         // WHEN

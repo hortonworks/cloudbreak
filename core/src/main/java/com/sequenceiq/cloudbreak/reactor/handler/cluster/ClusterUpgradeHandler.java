@@ -40,6 +40,6 @@ public class ClusterUpgradeHandler implements ReactorEventHandler<ClusterUpgrade
         } catch (Exception e) {
             result = new ClusterUpgradeResult(e.getMessage(), e, request);
         }
-        eventBus.notify(result.selector(), new Event(event.getHeaders(), result));
+        eventBus.notify(result.selector(), new Event<>(event.getHeaders(), result));
     }
 }

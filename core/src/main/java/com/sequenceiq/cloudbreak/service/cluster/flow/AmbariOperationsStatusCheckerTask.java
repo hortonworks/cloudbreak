@@ -23,7 +23,7 @@ import com.sequenceiq.cloudbreak.service.notification.NotificationSender;
 @Component
 public class AmbariOperationsStatusCheckerTask extends ClusterBasedStatusCheckerTask<AmbariOperations> {
 
-    public static final BigDecimal COMPLETED = new BigDecimal(100.0);
+    public static final Comparable<BigDecimal> COMPLETED = new BigDecimal(100.0);
 
     public static final BigDecimal FAILED = new BigDecimal(-1.0);
 

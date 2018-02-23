@@ -12,7 +12,7 @@ public class ApplyResponse {
     @JsonProperty("return")
     private List<Map<String, Object>> result;
 
-    public List<Map<String, Object>> getResult() {
+    public Iterable<Map<String, Object>> getResult() {
         return result;
     }
 

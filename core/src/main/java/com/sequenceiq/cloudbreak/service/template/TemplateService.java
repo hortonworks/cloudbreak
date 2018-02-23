@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.template;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -46,11 +47,8 @@ public class TemplateService {
     }
 
     public Set<Template> retrieveAccountTemplates(IdentityUser user) {
-        if (user.getRoles().contains(IdentityUserRole.ADMIN)) {
-            return templateRepository.findAllInAccount(user.getAccount());
-        } else {
-            return templateRepository.findPublicInAccountForUser(user.getUserId(), user.getAccount());
-        }
+        return user.getRoles().contains(IdentityUserRole.ADMIN) ? templateRepository.findAllInAccount(user.getAccount())
+                : templateRepository.findPublicInAccountForUser(user.getUserId(), user.getAccount());
     }
 
     public Template get(Long id) {
@@ -137,7 +135,7 @@ public class TemplateService {
         }
     }
 
-    private boolean isRunningStackReferToTemplate(List<Stack> allStackForTemplate) {
+    private boolean isRunningStackReferToTemplate(Collection<Stack> allStackForTemplate) {
         return allStackForTemplate.stream().anyMatch(s -> !s.isDeleteCompleted());
     }
 

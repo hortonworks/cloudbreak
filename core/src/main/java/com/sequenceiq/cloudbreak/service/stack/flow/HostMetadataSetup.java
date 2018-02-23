@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.stack.flow;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -53,7 +54,7 @@ public class HostMetadataSetup {
         }
     }
 
-    public void setupNewHostMetadata(Long stackId, Set<String> newAddresses) throws CloudbreakException {
+    public void setupNewHostMetadata(Long stackId, Collection<String> newAddresses) throws CloudbreakException {
         LOGGER.info("Extending host metadata.");
         Stack stack = stackService.getByIdWithLists(stackId);
         if (!orchestratorTypeResolver.resolveType(stack.getOrchestrator()).containerOrchestrator()) {
@@ -65,7 +66,7 @@ public class HostMetadataSetup {
         }
     }
 
-    private void updateWithHostData(Stack stack, Set<InstanceMetaData> metadataToUpdate) throws CloudbreakSecuritySetupException {
+    private void updateWithHostData(Stack stack, Collection<InstanceMetaData> metadataToUpdate) throws CloudbreakSecuritySetupException {
         try {
             List<String> privateIps = metadataToUpdate.stream().map(InstanceMetaData::getPrivateIp).collect(Collectors.toList());
             GatewayConfig gatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);

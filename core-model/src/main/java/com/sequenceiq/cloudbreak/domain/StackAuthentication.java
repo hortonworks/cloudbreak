@@ -24,9 +24,6 @@ public class StackAuthentication implements ProvisionEntity {
 
     private String loginUserName;
 
-    public StackAuthentication() {
-    }
-
     public Long getId() {
         return id;
     }

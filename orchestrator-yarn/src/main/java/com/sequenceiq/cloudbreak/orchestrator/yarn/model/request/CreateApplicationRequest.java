@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.orchestrator.yarn.model.request;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import com.sequenceiq.cloudbreak.api.model.JsonEntity;
@@ -40,7 +41,7 @@ public class CreateApplicationRequest implements JsonEntity {
         this.queue = queue;
     }
 
-    public List<YarnComponent> getComponents() {
+    public Collection<YarnComponent> getComponents() {
         return components;
     }
 

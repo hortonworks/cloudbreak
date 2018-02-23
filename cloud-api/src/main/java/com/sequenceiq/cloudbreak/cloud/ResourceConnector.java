@@ -14,7 +14,7 @@ import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 
 /**
  * Cloudbreak handles the entities on the Cloud provider side as generic resources and supports CRUD operations on them.
- * <p/>
+ * <br>
  * For example a resource from Cloudbreak point could one or more from the followings:
  * - HEAT_STACK,
  * - OPENSTACK_ATTACHED_DISK,
@@ -23,9 +23,9 @@ import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
  * - GCP_DISK
  * - GCP_ATTACHED_DISK
  * - GCP_INSTANCE
- * <p/>
+ * <br>
  * Take a look at {@link com.sequenceiq.cloudbreak.common.type.ResourceType} for more resource types.
- * <p/>
+ * <br>
  * Cloud providers which support template based deployments (like AWS Cloudformation, Azure ARM or OpenStack Heat) usually use only one {@link
  * CloudResource} which is  CLOUDFORMATION_STACK, HEAT_STACK or ARM_TEMPLATE and all the infrastructure related changes are done through that resource.
  * In other words when a new VM is removed from stack (cluster) then the CLoudbreak is not addressing that VM resource to be removed from stack, but uses the
@@ -42,7 +42,7 @@ public interface ResourceConnector<R> {
      * - network
      * - security
      * - extra dynamic parameters
-     * <p/>
+     * <br>
      * This method shall initiate the infrastructure creation on Cloud platform and shall return of a list of {@link CloudResourceStatus} values. It does not
      * need to wait/block until the infrastructure creation is finished, but it can return immediately and the {@link #check(AuthenticatedContext, List)}
      * method is invoked to check regularly whether the infrastructure and all resources have already been created or not.
@@ -84,7 +84,7 @@ public interface ResourceConnector<R> {
      * Update of infrastructure on Cloud platform. (e.g change Security groups). It does not need to wait/block until the infrastructure update is
      * finished, but it can return immediately and the {@link #check(AuthenticatedContext, List)} method is invoked to check regularly whether the
      * infrastructure and all resources have already been updated or not.
-     * <p/>
+     * <br>
      * Note: this method is a bit generic at the moment, but complex changes like replace the existing network with the a new one or add/remove instances
      * are not executed over this method.
      *
@@ -107,7 +107,6 @@ public interface ResourceConnector<R> {
      *                             {@link com.sequenceiq.cloudbreak.cloud.model.InstanceStatus} denotes that it is a new instance and needs to be created.
      * @param resources            resources that needs to be updated (e.g HEAT_TEMPLATE)
      * @return the status of updated resources
-     * @throws Exception in case of any error
      */
     List<CloudResourceStatus> upscale(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources);
 
@@ -124,7 +123,6 @@ public interface ResourceConnector<R> {
      * @param vms                  the {@link CloudInstance}s are listed that needs to be deleted
      * @param resourcesToRemove    previously collected resources to remove
      * @return the status of updated resources
-     * @throws Exception in case of any error
      */
     List<CloudResourceStatus> downscale(AuthenticatedContext authenticatedContext,
             CloudStack stack, List<CloudResource> resources, List<CloudInstance> vms, R resourcesToRemove);
@@ -139,10 +137,8 @@ public interface ResourceConnector<R> {
      * @param resources            resources that needs to be updated (e.g HEAT_TEMPLATE)
      * @param vms                  the {@link CloudInstance}s are listed that needs to be deleted
      * @return the status of updated resources
-     * @throws Exception in case of any error
      */
-    R collectResourcesToRemove(AuthenticatedContext authenticatedContext,
-            CloudStack stack, List<CloudResource> resources, List<CloudInstance> vms);
+    R collectResourcesToRemove(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources, List<CloudInstance> vms);
     /**
      * Gets the Cloud platform related tls info.
      *

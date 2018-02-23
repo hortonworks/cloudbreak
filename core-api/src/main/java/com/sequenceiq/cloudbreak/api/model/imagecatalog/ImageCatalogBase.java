@@ -5,6 +5,7 @@ import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ImageCatalogDescription;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -22,7 +23,7 @@ public class ImageCatalogBase {
     @NotNull
     @Pattern(regexp = "^http[s]?://.*",
             message = "The URL should start with the protocol (http, https)")
-    @ApiModelProperty(value = ModelDescriptions.ImageCatalogDescription.IMAGE_CATALOG_URL, required = true)
+    @ApiModelProperty(value = ImageCatalogDescription.IMAGE_CATALOG_URL, required = true)
     private String url;
 
     public String getName() {

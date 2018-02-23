@@ -18,36 +18,32 @@ import java.io.IOException;
 
 public class BlueprintTests extends CloudbreakTest {
 
-    public static final String VALID_BP_NAME = "valid-blueprint";
+    private static final String VALID_BP_NAME = "valid-blueprint";
 
-    public static final String AGAIN_BP_NAME = "again-blueprint";
+    private static final String AGAIN_BP_NAME = "again-blueprint";
 
-    public static final String LONG_DC_BP_NAME = "long-description-blueprint";
+    private static final String LONG_DC_BP_NAME = "long-description-blueprint";
 
-    public static final String DELETE_BP_NAME = "delete-blueprint";
+    private static final String DELETE_BP_NAME = "delete-blueprint";
 
-    public static final String SPECIAL_BP_NAME = "@#$%|:&*;";
+    private static final String SPECIAL_BP_NAME = "@#$%|:&*;";
 
-    public static final String INVALID_SHORT_BP_NAME = "";
+    private static final String INVALID_SHORT_BP_NAME = "";
 
-    public static final String EMPTY_BP_NAME = "temp-empty-blueprint";
+    private static final String EMPTY_BP_NAME = "temp-empty-blueprint";
 
-    public static final String INVALIDURL_BP_NAME = "temp-url-blueprint";
+    private static final String INVALIDURL_BP_NAME = "temp-url-blueprint";
 
-    public static final String BP_DESCRIPTION = "temporary blueprint for API E2E tests";
+    private static final String BP_DESCRIPTION = "temporary blueprint for API E2E tests";
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CloudbreakTest.class);
-
-    private String invalidLongDescripton = "";
-
-    private String invalidLongName = "";
+    private static final Logger LOGGER = LoggerFactory.getLogger(BlueprintTests.class);
 
     private String errorMessage = "";
 
     @Inject
     private LongStringGeneratorUtil longStringGeneratorUtil;
 
-    @Test(priority = 0, groups = { "blueprints" })
+    @Test(groups = "blueprints")
     public void testCreateValidBlueprint() throws Exception {
         given(CloudbreakClient.isCreated());
         given(Blueprint.request()
@@ -56,13 +52,12 @@ public class BlueprintTests extends CloudbreakTest {
                 .withAmbariBlueprint(getBlueprintFile()), VALID_BP_NAME + " blueprint request.");
         when(Blueprint.post(), VALID_BP_NAME + " blueprint request has been posted.");
         then(Blueprint.assertThis(
-                (blueprint, t) -> {
-                    Assert.assertEquals(blueprint.getResponse().getName(), VALID_BP_NAME);
-                }), VALID_BP_NAME + " should be the name of the new blueprint."
+                (blueprint, t) -> Assert.assertEquals(blueprint.getResponse().getName(), VALID_BP_NAME)),
+                VALID_BP_NAME + " should be the name of the new blueprint."
         );
     }
 
-    @Test(expectedExceptions = BadRequestException.class, priority = 1, groups = { "blueprints" })
+    @Test(expectedExceptions = BadRequestException.class, priority = 1, groups = "blueprints")
     public void testCreateAgainBlueprint() throws Exception {
         given(CloudbreakClient.isCreated());
         given(Blueprint.isCreated()
@@ -86,9 +81,9 @@ public class BlueprintTests extends CloudbreakTest {
     }
 
     //"The length of the blueprint's name has to be in range of 1 to 100"
-    @Test(expectedExceptions = BadRequestException.class, priority = 2, groups = { "blueprints" })
+    @Test(expectedExceptions = BadRequestException.class, priority = 2, groups = "blueprints")
     public void testCreateInvalidLongBlueprint() throws Exception {
-        invalidLongName = longStringGeneratorUtil.stringGenerator(101);
+        String invalidLongName = longStringGeneratorUtil.stringGenerator(101);
 
         given(CloudbreakClient.isCreated());
         given(Blueprint.request()
@@ -99,7 +94,7 @@ public class BlueprintTests extends CloudbreakTest {
     }
 
     //BUG-95607
-    @Test(expectedExceptions = BadRequestException.class, enabled = false, priority = 3, groups = { "blueprints" })
+    @Test(expectedExceptions = BadRequestException.class, enabled = false, priority = 3, groups = "blueprints")
     public void testCreateSpecialCharacterBlueprint() throws Exception {
         given(CloudbreakClient.isCreated());
         given(Blueprint.request()
@@ -111,9 +106,9 @@ public class BlueprintTests extends CloudbreakTest {
 
     //BUG-95609 - Won't fix issue
     //"The length of the blueprint's description has to be in range of 1 to 1000"
-    @Test(expectedExceptions = BadRequestException.class, priority = 4, groups = { "blueprints" })
+    @Test(expectedExceptions = BadRequestException.class, priority = 4, groups = "blueprints")
     public void testCreateLongDescriptionBlueprint() throws Exception {
-        invalidLongDescripton = longStringGeneratorUtil.stringGenerator(1001);
+        String invalidLongDescripton = longStringGeneratorUtil.stringGenerator(1001);
 
         given(CloudbreakClient.isCreated());
         given(Blueprint.request()
@@ -123,7 +118,7 @@ public class BlueprintTests extends CloudbreakTest {
         when(Blueprint.post(), LONG_DC_BP_NAME + " blueprint description request has been posted.");
     }
 
-    @Test(expectedExceptions = BadRequestException.class, priority = 5, groups = { "blueprints" })
+    @Test(expectedExceptions = BadRequestException.class, priority = 5, groups = "blueprints")
     public void testCreateEmptyJSONBlueprintException() throws Exception {
         given(CloudbreakClient.isCreated());
         given(Blueprint.request()
@@ -133,7 +128,7 @@ public class BlueprintTests extends CloudbreakTest {
         when(Blueprint.post(), EMPTY_BP_NAME + " blueprint  with no content request has been posted.");
     }
 
-    @Test(expectedExceptions = BadRequestException.class, priority = 6, groups = { "blueprints" })
+    @Test(expectedExceptions = BadRequestException.class, priority = 6, groups = "blueprints")
     public void testCreateEmptyFileBlueprintException() throws Exception {
         given(CloudbreakClient.isCreated());
         given(Blueprint.request()
@@ -143,7 +138,7 @@ public class BlueprintTests extends CloudbreakTest {
         when(Blueprint.post(), EMPTY_BP_NAME + " blueprint file with no content on URL request has been posted.");
     }
 
-    @Test(priority = 7, groups = { "blueprints" })
+    @Test(priority = 7, groups = "blueprints")
     public void testCreateEmptyFilelueprintMessage() throws Exception {
         given(CloudbreakClient.isCreated());
         given(Blueprint.request()
@@ -154,17 +149,16 @@ public class BlueprintTests extends CloudbreakTest {
             when(Blueprint.post(), EMPTY_BP_NAME + " blueprint file with no content on URL request has been posted.");
         } catch (BadRequestException e) {
             String exceptionMessage = e.getResponse().readEntity(String.class);
-            this.errorMessage = exceptionMessage.substring(exceptionMessage.lastIndexOf(":") + 1);
-            LOGGER.info("BadRequestException message ::: " + this.errorMessage);
+            errorMessage = exceptionMessage.substring(exceptionMessage.lastIndexOf(':') + 1);
+            LOGGER.info("BadRequestException message ::: " + errorMessage);
         }
         then(Blueprint.assertThis(
-                (blueprint, t) -> {
-                    Assert.assertEquals(this.errorMessage, " Failed to parse JSON.\"}");
-                }), "Error message [Failed to parse JSON.] should be present in response."
+                (blueprint, t) -> Assert.assertEquals(errorMessage, " Failed to parse JSON.\"}")),
+                "Error message [Failed to parse JSON.] should be present in response."
         );
     }
 
-    @Test(expectedExceptions = BadRequestException.class, priority = 8, groups = { "blueprints" })
+    @Test(expectedExceptions = BadRequestException.class, priority = 8, groups = "blueprints")
     public void testCreateInvalidURLBlueprintException() throws Exception {
         given(CloudbreakClient.isCreated());
         given(Blueprint.request()
@@ -174,7 +168,7 @@ public class BlueprintTests extends CloudbreakTest {
         when(Blueprint.post(), INVALIDURL_BP_NAME + " blueprint with invalid URL request has been posted.");
     }
 
-    @Test(priority = 9, groups = { "blueprints" })
+    @Test(priority = 9, groups = "blueprints")
     public void testCreateInvalidURLBlueprintMessage() throws Exception {
         given(CloudbreakClient.isCreated());
         given(Blueprint.request()
@@ -185,26 +179,24 @@ public class BlueprintTests extends CloudbreakTest {
             when(Blueprint.post(), INVALIDURL_BP_NAME + " blueprint with invalid URL request has been posted.");
         } catch (BadRequestException e) {
             String exceptionMessage = e.getResponse().readEntity(String.class);
-            this.errorMessage = exceptionMessage.substring(exceptionMessage.lastIndexOf(":") + 1);
-            LOGGER.info("BadRequestException message ::: " + this.errorMessage);
+            errorMessage = exceptionMessage.substring(exceptionMessage.lastIndexOf(':') + 1);
+            LOGGER.info("BadRequestException message ::: " + errorMessage);
         }
         then(Blueprint.assertThis(
-                (blueprint, t) -> {
-                    Assert.assertEquals(this.errorMessage, " Failed to parse JSON.\"}");
-                }), "Error message [Failed to parse JSON.] should be present in response."
+                (blueprint, t) -> Assert.assertEquals(errorMessage, " Failed to parse JSON.\"}")),
+                "Error message [Failed to parse JSON.] should be present in response."
         );
     }
 
-    @Test(priority = 10, groups = { "blueprints" })
+    @Test(priority = 10, groups = "blueprints")
     public void testDeleteValidBlueprint() throws Exception {
         given(CloudbreakClient.isCreated());
         given(Blueprint.request()
                 .withName(DELETE_BP_NAME), DELETE_BP_NAME + " blueprint delete request.");
         when(Blueprint.delete(), DELETE_BP_NAME + " blueprint delete request has been posted.");
         then(Blueprint.assertThis(
-                (blueprint, t) -> {
-                    Assert.assertNull(blueprint.getResponse());
-                }), DELETE_BP_NAME + " blueprint should not be present in response."
+                (blueprint, t) -> Assert.assertNull(blueprint.getResponse())),
+                DELETE_BP_NAME + " blueprint should not be present in response."
         );
     }
 

@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.controller.validation.blueprint;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -34,11 +35,11 @@ public class BlueprintValidator {
     @Inject
     private StackServiceComponentDescriptors stackServiceComponentDescs;
 
-    public void validateBlueprintForStack(Blueprint blueprint, Set<HostGroup> hostGroups, Set<InstanceGroup> instanceGroups) {
+    public void validateBlueprintForStack(Blueprint blueprint, Set<HostGroup> hostGroups, Collection<InstanceGroup> instanceGroups) {
         validateBlueprintForStack(null, blueprint, hostGroups, instanceGroups);
     }
 
-    public void validateBlueprintForStack(Cluster cluster, Blueprint blueprint, Set<HostGroup> hostGroups, Set<InstanceGroup> instanceGroups) {
+    public void validateBlueprintForStack(Cluster cluster, Blueprint blueprint, Collection<HostGroup> hostGroups, Collection<InstanceGroup> instanceGroups) {
         try {
             JsonNode hostGroupsNode = getHostGroupNode(blueprint);
             validateHostGroups(hostGroupsNode, hostGroups, instanceGroups);
@@ -63,7 +64,7 @@ public class BlueprintValidator {
         return objectMapper.readTree(blueprint.getBlueprintText());
     }
 
-    private void validateHostGroups(JsonNode hostGroupsNode, Set<HostGroup> hostGroups, Set<InstanceGroup> instanceGroups) {
+    private void validateHostGroups(JsonNode hostGroupsNode, Collection<HostGroup> hostGroups, Collection<InstanceGroup> instanceGroups) {
         Set<String> hostGroupsInRequest = getHostGroupsFromRequest(hostGroups);
         Set<String> hostGroupsInBlueprint = getHostGroupsFromBlueprint(hostGroupsNode);
 
@@ -73,7 +74,7 @@ public class BlueprintValidator {
         }
 
         if (!instanceGroups.isEmpty()) {
-            Set<String> instanceGroupNames = new HashSet<>();
+            Collection<String> instanceGroupNames = new HashSet<>();
             for (HostGroup hostGroup : hostGroups) {
                 String instanceGroupName = hostGroup.getConstraint().getInstanceGroup().getGroupName();
                 if (instanceGroupNames.contains(instanceGroupName)) {
@@ -108,7 +109,7 @@ public class BlueprintValidator {
         }
     }
 
-    private Set<String> getHostGroupsFromRequest(Set<HostGroup> hostGroup) {
+    private Set<String> getHostGroupsFromRequest(Collection<HostGroup> hostGroup) {
         return hostGroup.stream().map(HostGroup::getName).collect(Collectors.toSet());
     }
 
@@ -121,7 +122,7 @@ public class BlueprintValidator {
         return hostGroupsInBlueprint;
     }
 
-    public Map<String, HostGroup> createHostGroupMap(Set<HostGroup> hostGroups) {
+    public Map<String, HostGroup> createHostGroupMap(Iterable<HostGroup> hostGroups) {
         Map<String, HostGroup> groupMap = Maps.newHashMap();
         for (HostGroup hostGroup : hostGroups) {
             groupMap.put(hostGroup.getName(), hostGroup);
@@ -203,7 +204,7 @@ public class BlueprintValidator {
         }
     }
 
-    private void validateKnoxWithKerberos(Cluster cluster, Set<InstanceGroup> instanceGroups, Map<String, BlueprintServiceComponent> componentMap) {
+    private void validateKnoxWithKerberos(Cluster cluster, Collection<InstanceGroup> instanceGroups, Map<String, BlueprintServiceComponent> componentMap) {
         if (cluster != null && cluster.isSecure() && cluster.getGateway() != null && cluster.getGateway().getEnableGateway()) {
             List<String> missingNodes = instanceGroups.stream()
                 .filter(s -> {

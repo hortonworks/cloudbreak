@@ -47,7 +47,7 @@ public class InstanceStateHandler implements CloudPlatformEventHandler<GetInstan
             result = new GetInstancesStateResult("Instance state synchronizing failed", e, request);
         }
         request.getResult().onNext(result);
-        eventBus.notify(result.selector(), new Event(event.getHeaders(), result));
+        eventBus.notify(result.selector(), new Event<>(event.getHeaders(), result));
     }
 
 }

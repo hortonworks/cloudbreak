@@ -34,7 +34,7 @@ public class AzureFileSystemConfigProvider {
         // we have to lookup secret key from the credential because it is not stored in client side
         if (fsConfiguration instanceof AdlsFileSystemConfiguration) {
 
-            String adlsTrackingTag = (cbVersion != null) ? AdlsFileSystemConfiguration.ADLS_TRACKING_CLUSTERNAME_VALUE + "-" + cbVersion
+            String adlsTrackingTag = (cbVersion != null) ? AdlsFileSystemConfiguration.ADLS_TRACKING_CLUSTERNAME_VALUE + '-' + cbVersion
                     : AdlsFileSystemConfiguration.ADLS_TRACKING_CLUSTERNAME_VALUE;
             String credential = String.valueOf(stack.getCredential().getAttributes().getMap().get(AdlsFileSystemConfiguration.CREDENTIAL_SECRET_KEY));
             String clientId = String.valueOf(stack.getCredential().getAttributes().getMap().get(AdlsFileSystemConfiguration.ACCESS_KEY));

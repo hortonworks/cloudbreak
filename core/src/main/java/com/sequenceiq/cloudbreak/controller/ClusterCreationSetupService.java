@@ -7,7 +7,6 @@ import static com.sequenceiq.cloudbreak.service.cluster.flow.AmbariRepositoryVer
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
@@ -301,10 +300,10 @@ public class ClusterCreationSetupService {
             LOGGER.error(String.format("Could not get Image Component for stack: '%s'.", stackId), e);
         }
 
-        final String filter = vdfStackRepoKeyFilter;
+        String filter = vdfStackRepoKeyFilter;
         return stackRepoDetails.getStack().entrySet().stream()
                 .filter(entry -> entry.getKey().startsWith(filter))
-                .map(Map.Entry::getValue)
+                .map(Entry::getValue)
                 .findFirst();
     }
 

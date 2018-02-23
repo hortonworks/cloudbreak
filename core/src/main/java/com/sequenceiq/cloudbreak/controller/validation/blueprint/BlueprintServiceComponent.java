@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.controller.validation.blueprint;
 
+import java.util.Collection;
 import java.util.List;
 
 import com.google.common.collect.Lists;
@@ -32,7 +33,7 @@ public class BlueprintServiceComponent {
         return nodeCount;
     }
 
-    public List<String> getHostgroups() {
+    public Collection<String> getHostgroups() {
         return hostgroups;
     }
 }

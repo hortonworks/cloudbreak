@@ -1,20 +1,20 @@
 package com.sequenceiq.cloudbreak.service.cluster;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.ambari.client.AmbariClient;
+import com.sequenceiq.ambari.client.services.ServiceAndHostService;
 
 @Service
 public class AmbariConfigurationService {
 
-    private static final List<String> CONFIG_LIST = new ArrayList<>(ConfigParam.values().length);
+    private static final Collection<String> CONFIG_LIST = new ArrayList<>(ConfigParam.values().length);
 
     private static final String AZURE_ADDRESS_SUFFIX = "cloudapp.net";
 
@@ -24,7 +24,7 @@ public class AmbariConfigurationService {
         }
     }
 
-    public Map<String, String> getConfiguration(AmbariClient ambariClient, String hostGroup) {
+    public Map<String, String> getConfiguration(ServiceAndHostService ambariClient, String hostGroup) {
         Map<String, String> configuration = new HashMap<>();
         Set<Entry<String, Map<String, String>>> serviceConfigs = ambariClient.getServiceConfigMapByHostGroup(hostGroup).entrySet();
         for (Entry<String, Map<String, String>> serviceEntry : serviceConfigs) {
@@ -37,7 +37,7 @@ public class AmbariConfigurationService {
         return configuration;
     }
 
-    private String replaceHostName(AmbariClient ambariClient, Entry<String, String> entry) {
+    private String replaceHostName(ServiceAndHostService ambariClient, Entry<String, String> entry) {
         String result = entry.getValue();
         if (entry.getKey().startsWith("yarn.resourcemanager")) {
             int portStartIndex = result.indexOf(':');

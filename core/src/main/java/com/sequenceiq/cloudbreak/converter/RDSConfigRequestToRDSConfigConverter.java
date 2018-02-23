@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.converter;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -52,7 +51,7 @@ public class RDSConfigRequestToRDSConfigConverter extends AbstractConversionServ
         return rdsConfig;
     }
 
-    private Map<String, String> convertPropertiesToJson(Set<RdsConfigPropertyJson> inputs) {
+    private Map<String, String> convertPropertiesToJson(Iterable<RdsConfigPropertyJson> inputs) {
         Map<String, String> attributes = new HashMap<>();
         for (RdsConfigPropertyJson input : inputs) {
             attributes.put(input.getName(), input.getValue());

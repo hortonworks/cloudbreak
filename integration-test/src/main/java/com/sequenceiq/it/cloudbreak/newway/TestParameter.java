@@ -9,7 +9,7 @@ import java.util.Map;
 public class TestParameter {
     private static final Logger LOGGER = LoggerFactory.getLogger(TestParameter.class);
 
-    private Map<String, String> parameters;
+    private final Map<String, String> parameters;
 
     TestParameter() {
         parameters = new HashMap<>();

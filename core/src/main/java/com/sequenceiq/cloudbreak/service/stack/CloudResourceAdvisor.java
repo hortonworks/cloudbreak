@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 
@@ -106,7 +107,7 @@ public class CloudResourceAdvisor {
         return bp;
     }
 
-    private boolean isThereMasterComponents(Set<String> components) {
+    private boolean isThereMasterComponents(Collection<String> components) {
         return components.stream()
                 .anyMatch(component -> stackServiceComponentDescs.get(component) != null && stackServiceComponentDescs.get(component).isMaster());
     }
@@ -126,7 +127,7 @@ public class CloudResourceAdvisor {
         Map<String, VmType> result = new HashMap<>();
         Optional<VmType> masterVmType = getVmTypeByFlavor(recommendation.getFlavor(), availableVmTypes);
         if (masterVmType.isPresent()) {
-            for (Map.Entry<String, Boolean> entry : hostGroupContainsMasterComp.entrySet()) {
+            for (Entry<String, Boolean> entry : hostGroupContainsMasterComp.entrySet()) {
                 Boolean hasMasterComponentType = entry.getValue();
                 if (hasMasterComponentType == containsMasterComponent) {
                     VmType vmType = masterVmType.get();

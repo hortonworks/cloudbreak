@@ -31,7 +31,7 @@ public class OpenStackNativeInstanceConnector extends AbstractInstanceConnector 
     @Override
     public List<CloudVmInstanceStatus> check(AuthenticatedContext ac, List<CloudInstance> vms) {
         List<CloudVmInstanceStatus> statuses = new ArrayList<>();
-        OSClient osClient = openStackClient.createOSClient(ac);
+        OSClient<?> osClient = openStackClient.createOSClient(ac);
         for (CloudInstance vm : vms) {
             Server server = osClient.compute().servers().get(vm.getInstanceId());
             if (server == null) {
@@ -45,7 +45,7 @@ public class OpenStackNativeInstanceConnector extends AbstractInstanceConnector 
 
     @Override
     public String getConsoleOutput(AuthenticatedContext authenticatedContext, CloudInstance vm) {
-        OSClient osClient = openStackClient.createOSClient(authenticatedContext);
+        OSClient<?> osClient = openStackClient.createOSClient(authenticatedContext);
         return osClient.compute().servers().getConsoleOutput(vm.getInstanceId(), CONSOLE_OUTPUT_LINES);
     }
 }

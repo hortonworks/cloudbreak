@@ -7,7 +7,7 @@ public class RegionAction {
     private RegionAction() {
     }
 
-    public static void getPlatformRegions(IntegrationTestContext integrationTestContext, Entity entity) throws Exception {
+    public static void getPlatformRegions(IntegrationTestContext integrationTestContext, Entity entity) {
         Region region = (Region) entity;
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT,
@@ -15,7 +15,7 @@ public class RegionAction {
         region.setPlatformRegionsResponse(client.getCloudbreakClient().connectorV1Endpoint().getRegions());
     }
 
-    public static void getRegionAvByType(IntegrationTestContext integrationTestContext, Entity entity) throws Exception {
+    public static void getRegionAvByType(IntegrationTestContext integrationTestContext, Entity entity) {
         Region region = (Region) entity;
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT,
@@ -23,7 +23,7 @@ public class RegionAction {
         region.setRegionAvResponse(client.getCloudbreakClient().connectorV1Endpoint().getRegionAvByType(region.getType()));
     }
 
-    public static void getRegionRByType(IntegrationTestContext integrationTestContext, Entity entity) throws Exception {
+    public static void getRegionRByType(IntegrationTestContext integrationTestContext, Entity entity) {
         Region region = (Region) entity;
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT,

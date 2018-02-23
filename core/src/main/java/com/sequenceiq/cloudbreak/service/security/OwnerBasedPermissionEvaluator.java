@@ -62,11 +62,8 @@ public class OwnerBasedPermissionEvaluator implements PermissionEvaluator {
     }
 
     private boolean hasPermission(IdentityUser user, Permission p, Object targetDomainObject) throws IllegalAccessException {
-        if (getOwner(targetDomainObject).equals(user.getUserId()) || getAccount(targetDomainObject).equals(user.getAccount())
-                && (user.getRoles().contains(IdentityUserRole.ADMIN) || (p == Permission.READ && isPublicInAccount(targetDomainObject)))) {
-            return true;
-        }
-        return false;
+        return getOwner(targetDomainObject).equals(user.getUserId()) || getAccount(targetDomainObject).equals(user.getAccount())
+                && (user.getRoles().contains(IdentityUserRole.ADMIN) || (p == Permission.READ && isPublicInAccount(targetDomainObject)));
     }
 
     private String getAccount(Object targetDomainObject) throws IllegalAccessException {

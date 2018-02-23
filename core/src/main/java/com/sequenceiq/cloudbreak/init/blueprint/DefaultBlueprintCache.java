@@ -36,7 +36,7 @@ public class DefaultBlueprintCache {
     @Inject
     private BlueprintRequestToBlueprintConverter converter;
 
-    private Map<String, Blueprint> defaultBlueprints = new HashMap<>();
+    private final Map<String, Blueprint> defaultBlueprints = new HashMap<>();
 
     @PostConstruct
     public void loadBlueprintsFromFile() {
@@ -65,7 +65,7 @@ public class DefaultBlueprintCache {
 
     public Map<String, Blueprint> defaultBlueprints() {
         Map<String, Blueprint> result = new HashMap<>();
-        defaultBlueprints.entrySet().stream().forEach(e -> result.put(e.getKey(), SerializationUtils.clone(e.getValue())));
+        defaultBlueprints.forEach((key, value) -> result.put(key, SerializationUtils.clone(value)));
         return result;
     }
 

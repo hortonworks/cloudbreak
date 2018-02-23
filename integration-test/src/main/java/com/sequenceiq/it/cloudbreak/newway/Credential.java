@@ -36,7 +36,7 @@ public class Credential extends CredentialEntity {
     }
 
     public static Action<Credential> post(String key) {
-        return new Action<Credential>(getTestContextCredential(key), CredentialAction::post);
+        return new Action<>(getTestContextCredential(key), CredentialAction::post);
     }
 
     public static Action<Credential> post() {

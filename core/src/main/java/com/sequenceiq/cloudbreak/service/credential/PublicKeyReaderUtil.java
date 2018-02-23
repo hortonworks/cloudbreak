@@ -4,6 +4,7 @@ import java.math.BigInteger;
 import java.security.KeyFactory;
 import java.security.PublicKey;
 import java.security.spec.DSAPublicKeySpec;
+import java.security.spec.KeySpec;
 import java.security.spec.RSAPublicKeySpec;
 import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
@@ -136,7 +137,7 @@ public final class PublicKeyReaderUtil {
 
         try {
             KeyFactory dsaKeyFact = KeyFactory.getInstance("DSA");
-            DSAPublicKeySpec dsaPubSpec = new DSAPublicKeySpec(y, p, q, g);
+            KeySpec dsaPubSpec = new DSAPublicKeySpec(y, p, q, g);
 
             return dsaKeyFact.generatePublic(dsaPubSpec);
 
@@ -152,7 +153,7 @@ public final class PublicKeyReaderUtil {
 
         try {
             KeyFactory rsaKeyFact = KeyFactory.getInstance("RSA");
-            RSAPublicKeySpec rsaPubSpec = new RSAPublicKeySpec(n, e);
+            KeySpec rsaPubSpec = new RSAPublicKeySpec(n, e);
 
             return rsaKeyFact.generatePublic(rsaPubSpec);
 

@@ -6,6 +6,7 @@ import static com.sequenceiq.cloudbreak.orchestrator.container.DockerContainer.A
 import static com.sequenceiq.cloudbreak.orchestrator.container.DockerContainer.AMBARI_SERVER;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -163,7 +164,7 @@ public class ContainerConstraintFactory {
         return null;
     }
 
-    private List<String> getHosts(List<String> candidateAddresses, InstanceGroup instanceGroup) {
+    private List<String> getHosts(Collection<String> candidateAddresses, InstanceGroup instanceGroup) {
         List<String> hosts = new ArrayList<>();
         for (InstanceMetaData instanceMetaData : instanceMetaDataRepository.findAliveInstancesInInstanceGroup(instanceGroup.getId())) {
             String fqdn = instanceMetaData.getDiscoveryFQDN();

@@ -12,7 +12,7 @@ public class AmbariStatusResponse extends ITResponse {
     private AmbariClusterStatus status = AmbariClusterStatus.STOPPED;
 
     @Override
-    public Object handle(Request request, spark.Response response) throws Exception {
+    public Object handle(Request request, spark.Response response) {
         response.type("text/plain");
         return ambariStatus();
     }

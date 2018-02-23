@@ -7,7 +7,7 @@ import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformRequest;
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceGroupParameterResponse;
 
-public class GetPlatformInstanceGroupParameterResult extends CloudPlatformResult<CloudPlatformRequest> {
+public class GetPlatformInstanceGroupParameterResult extends CloudPlatformResult<CloudPlatformRequest<?>> {
 
     private Map<String, InstanceGroupParameterResponse> instanceGroupParameterResponses = new HashMap<>();
 

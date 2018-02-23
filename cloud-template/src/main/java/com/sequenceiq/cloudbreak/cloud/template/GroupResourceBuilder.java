@@ -21,10 +21,10 @@ import com.sequenceiq.cloudbreak.common.type.ResourceType;
  * order of the resource creation. In the example above on GCP first the root disk will be created after that the attached disks and then at the end the
  * actual instance will be created. For instance creation it is most likely to need the resources created by an early builder so these resources should
  * be provided by the generic {@link ResourceBuilderContext} objects which will be passed along with the creation process.
- * <p/>
+ * <br>
  * To remove the corresponding group resources the builders will be called in <b>reverse</b> order. It the example above it will be called as:
  * - GCP_FIREWALL_IN
- * <p/>
+ * <br>
  * In order to make use of this interface and call the resource builders in ordered fashion the cloud provider implementation should extend
  * {@link AbstractResourceConnector} which is a base implementation of {@link com.sequenceiq.cloudbreak.cloud.ResourceConnector}.
  * Eventually all the cloud provider implementations use {@link com.sequenceiq.cloudbreak.cloud.ResourceConnector}. Providers which support some form of
@@ -34,10 +34,10 @@ public interface GroupResourceBuilder<C extends ResourceBuilderContext> extends 
 
     /**
      * Create the reference {@link CloudResource} objects with proper resource naming to persist them into the DB. In the next phase these objects
-     * will be provided to the {@link #build(ResourceBuilderContext, AuthenticatedContext, Network, Security, CloudResource)} method to actually create these
+     * will be provided to the {@link #build(C, AuthenticatedContext, Group, Network, Security, CloudResource)} method to actually create these
      * resources on the cloud provider. In case the resource creation fails the whole deployment fails, because the network type resources are not
      * replaceable. In that case the only option is to remove the stack.
-     * <p/>
+     * <br>
      * There are some cases where you don't want to create some of the resources from the network stack, like when you use custom network or vpc or subnet. In
      * that case return the cloud resource with the existing resource id.
      *
@@ -52,9 +52,9 @@ public interface GroupResourceBuilder<C extends ResourceBuilderContext> extends 
     CloudResource create(C context, AuthenticatedContext auth, Group group, Network network);
 
     /**
-     * This method will be called after the {@link #create(ResourceBuilderContext, AuthenticatedContext, Network)} method with the constructed
+     * This method will be called after the {@link #create(C, AuthenticatedContext, Group, Network)} method with the constructed
      * cloud resources. It's purpose to actually create these resources on the cloud provider side.
-     * <p/>
+     * <br>
      * There are some cases where you don't want to create some of the resources from the network stack, like when you use custom network or vpc or subnet. In
      * that case return the cloud resource with the existing resource id.
      *
@@ -66,7 +66,7 @@ public interface GroupResourceBuilder<C extends ResourceBuilderContext> extends 
      * @param network  Network object provided which contains all the necessary information to create the proper network and subnet or the existing ones id.
      * @param security Security object represents the information to create the security rules and limit the accessibility of the cluster. Custom security
      *                 rules can be created and used. It's form is provided in protocol, port sequence and cidr range (0.0.0.0/0).
-     * @param resource Resource created earlier by the {@link #create(ResourceBuilderContext, AuthenticatedContext, Network)}.
+     * @param resource Resource created earlier by the {@link #create(C, AuthenticatedContext, Group, Network)}.
      * @return Returns the created cloud resource which can be extended with extra information since the object itself is a dynamic model. These objects
      * will be passed along with the extra information if it's provided so later it can be used to track the status of the deployment.
      * @throws Exception Exception can be thrown if the resource create request fails. It will result in stack failure since these resources are not
@@ -80,15 +80,15 @@ public interface GroupResourceBuilder<C extends ResourceBuilderContext> extends 
     CloudResourceStatus update(C context, AuthenticatedContext auth, Group group, Network network, Security security, CloudResource resource);
 
     /**
-     * Responsible to delete the provided cloud resource by {@link #create(ResourceBuilderContext, AuthenticatedContext, Network)} from the
+     * Responsible to delete the provided cloud resource by {@link #create(C, AuthenticatedContext, Group, Network)} from the
      * cloud provider.
-     * <p/>
+     * <br>
      * There are some cases where you didn't create some of the resources from the network stack, like when you use custom network or vpc or subnet. In
      * that case return <b>null</b>.
      *
      * @param context  Generic context object passed along with the flow to all methods. It is created by the {@link ResourceContextBuilder}.
      * @param auth     Authenticated context is provided to be able to send the requests to the cloud provider.
-     * @param resource Resource created earlier by the {@link #create(ResourceBuilderContext, AuthenticatedContext, Network)}.
+     * @param resource Resource created earlier by the {@link #create(C, AuthenticatedContext, Group, Network)}.
      * @param network  Network object which has to be deleted
      * @return Returns the deleted cloud resource which can be extended with extra information since the object itself is a dynamic model. These objects
      * will be passed along with the extra information if it's provided so later it can be used to track the status of the deployment.

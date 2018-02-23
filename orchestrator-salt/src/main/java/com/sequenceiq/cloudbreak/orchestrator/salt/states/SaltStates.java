@@ -72,14 +72,14 @@ public class SaltStates {
     }
 
     private static Multimap<String, String> applyStateJidInfo(SaltConnector sc, String jid) {
-        Map jidInfo = sc.run("jobs.lookup_jid", RUNNER, Map.class, "jid", jid);
+        Map<?, ?> jidInfo = sc.run("jobs.lookup_jid", RUNNER, Map.class, "jid", jid);
         LOGGER.info("Salt apply state jid info: {}", jidInfo);
         Map<String, List<RunnerInfo>> states = JidInfoResponseTransformer.getSimpleStates(jidInfo);
         return collectMissingTargets(states);
     }
 
     private static Multimap<String, String> highStateJidInfo(SaltConnector sc, String jid) {
-        Map jidInfo = sc.run("jobs.lookup_jid", RUNNER, Map.class, "jid", jid);
+        Map<String, List<Map<String, Object>>> jidInfo = sc.run("jobs.lookup_jid", RUNNER, Map.class, "jid", jid);
         LOGGER.info("Salt high state jid info: {}", jidInfo);
         Map<String, List<RunnerInfo>> states = JidInfoResponseTransformer.getHighStates(jidInfo);
         return collectMissingTargets(states);
@@ -92,7 +92,7 @@ public class SaltStates {
             logRunnerInfos(stringMapEntry);
             for (RunnerInfo targetObject : stringMapEntry.getValue()) {
                 if (!targetObject.getResult()) {
-                    LOGGER.info("SaltStates: State id: {} job state is has failed.", targetObject.getStateId(), targetObject.getComment());
+                    LOGGER.info("SaltStates: State id: {} job state is has failed. {}", targetObject.getStateId(), targetObject.getComment());
                     missingTargetsWithErrors.put(stringMapEntry.getKey(), targetObject.getComment());
                 }
             }
@@ -103,7 +103,7 @@ public class SaltStates {
     private static void logRunnerInfos(Entry<String, List<RunnerInfo>> stringMapEntry) {
         List<RunnerInfo> runnerInfos = stringMapEntry.getValue();
         runnerInfos.sort(Collections.reverseOrder(new DurationComparator()));
-        double sum = runnerInfos.stream().mapToDouble(runnerInfo -> runnerInfo.getDuration()).sum();
+        double sum = runnerInfos.stream().mapToDouble(RunnerInfo::getDuration).sum();
         try {
             LOGGER.info("SaltStates executed on: {} within: {} sec, details {}", stringMapEntry.getKey(),
                     TimeUnit.MILLISECONDS.toSeconds(Math.round(sum)), JsonUtil.writeValueAsString(runnerInfos));

@@ -30,7 +30,7 @@ public class OpenStackImageVerifierTest {
     private OpenStackImageVerifier underTest = new OpenStackImageVerifier();
 
     @Mock
-    private OSClient osClient;
+    private OSClient<?> osClient;
 
     @Mock
     private ImageService imageService;

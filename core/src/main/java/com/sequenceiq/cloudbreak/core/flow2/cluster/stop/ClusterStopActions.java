@@ -26,10 +26,10 @@ public class ClusterStopActions {
     private ClusterStopService clusterStopService;
 
     @Bean(name = "CLUSTER_STOPPING_STATE")
-    public Action stoppingCluster() {
+    public Action<?, ?> stoppingCluster() {
         return new AbstractClusterAction<StackEvent>(StackEvent.class) {
             @Override
-            protected void doExecute(ClusterViewContext context, StackEvent payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(ClusterViewContext context, StackEvent payload, Map<Object, Object> variables) {
                 clusterStopService.stoppingCluster(context.getStackId());
                 sendEvent(context);
             }
@@ -42,10 +42,10 @@ public class ClusterStopActions {
     }
 
     @Bean(name = "CLUSTER_STOP_FINISHED_STATE")
-    public Action clusterStopFinished() {
+    public Action<?, ?> clusterStopFinished() {
         return new AbstractClusterAction<ClusterStopResult>(ClusterStopResult.class) {
             @Override
-            protected void doExecute(ClusterViewContext context, ClusterStopResult payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(ClusterViewContext context, ClusterStopResult payload, Map<Object, Object> variables) {
                 clusterStopService.clusterStopFinished(context.getStackId());
                 metricService.incrementMetricCounter(MetricType.CLUSTER_STOP_SUCCESSFUL, context.getStack());
                 sendEvent(context);
@@ -59,10 +59,10 @@ public class ClusterStopActions {
     }
 
     @Bean(name = "CLUSTER_STOP_FAILED_STATE")
-    public Action clusterStopFailedAction() {
+    public Action<?, ?> clusterStopFailedAction() {
         return new AbstractStackFailureAction<ClusterStopState, ClusterStopEvent>() {
             @Override
-            protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
                 clusterStopService.handleClusterStopFailure(context.getStackView(), payload.getException().getMessage());
                 metricService.incrementMetricCounter(MetricType.CLUSTER_STOP_FAILED, context.getStackView());
                 sendEvent(context);

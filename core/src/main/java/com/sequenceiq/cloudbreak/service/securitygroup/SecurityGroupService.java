@@ -96,11 +96,8 @@ public class SecurityGroupService {
     }
 
     public Set<SecurityGroup> retrieveAccountSecurityGroups(IdentityUser user) {
-        if (user.getRoles().contains(IdentityUserRole.ADMIN)) {
-            return groupRepository.findAllInAccount(user.getAccount());
-        } else {
-            return groupRepository.findPublicInAccountForUser(user.getUserId(), user.getAccount());
-        }
+        return user.getRoles().contains(IdentityUserRole.ADMIN) ? groupRepository.findAllInAccount(user.getAccount())
+                : groupRepository.findPublicInAccountForUser(user.getUserId(), user.getAccount());
     }
 
     private void delete(SecurityGroup securityGroup) {

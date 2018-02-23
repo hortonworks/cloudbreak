@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.model;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -20,7 +21,7 @@ public class InstanceTemplate extends DynamicModel {
 
     private final Long templateId;
 
-    public InstanceTemplate(String flavor, String groupName, Long privateId, List<Volume> volumes, InstanceStatus status, Map<String, Object> parameters,
+    public InstanceTemplate(String flavor, String groupName, Long privateId, Collection<Volume> volumes, InstanceStatus status, Map<String, Object> parameters,
             Long templateId) {
         super(parameters);
         this.flavor = flavor;

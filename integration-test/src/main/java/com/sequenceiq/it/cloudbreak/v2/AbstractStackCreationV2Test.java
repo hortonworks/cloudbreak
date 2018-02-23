@@ -70,7 +70,7 @@ public class AbstractStackCreationV2Test extends AbstractCloudbreakIntegrationTe
     }
 
     @BeforeMethod(dependsOnGroups = "V2StackCreationInit")
-    @Parameters({"publicKeyId"})
+    @Parameters("publicKeyId")
     public void authenticationParams(@Optional("") String publicKeyId) {
         IntegrationTestContext itContext = getItContext();
         publicKeyId = StringUtils.hasText(publicKeyId) ? publicKeyId : itContext.getContextParam(CloudbreakV2Constants.SSH_PUBLICKEY_ID);

@@ -45,7 +45,7 @@ public class TopologyController extends NotificationController implements Topolo
         return conversionService.convert(topology, TopologyResponse.class);
     }
 
-    private Set<TopologyResponse> convert(Set<Topology> topologies) {
+    private Set<TopologyResponse> convert(Iterable<Topology> topologies) {
         Set<TopologyResponse> jsons = new HashSet<>();
         for (Topology topology : topologies) {
             jsons.add(convert(topology));

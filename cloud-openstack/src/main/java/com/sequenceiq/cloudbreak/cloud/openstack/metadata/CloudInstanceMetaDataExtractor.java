@@ -7,6 +7,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudInstanceMetaData;
 
 @FunctionalInterface
 public interface CloudInstanceMetaDataExtractor {
-    CloudInstanceMetaData extractMetadata(OSClient client, Server server, String instanceId);
+    CloudInstanceMetaData extractMetadata(OSClient<?> client, Server server, String instanceId);
 }
 

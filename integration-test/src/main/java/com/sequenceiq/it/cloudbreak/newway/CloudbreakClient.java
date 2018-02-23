@@ -1,10 +1,12 @@
 package com.sequenceiq.it.cloudbreak.newway;
 
-import com.sequenceiq.it.IntegrationTestContext;
+import java.util.function.Function;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.function.Function;
+import com.sequenceiq.cloudbreak.client.CloudbreakClient.CloudbreakClientBuilder;
+import com.sequenceiq.it.IntegrationTestContext;
 
 public class CloudbreakClient extends Entity {
     public static final String CLOUDBREAK_CLIENT = "CLOUDBREAK_CLIENT";
@@ -48,7 +50,7 @@ public class CloudbreakClient extends Entity {
     public static void newCloudbreakClientCreationStrategy(IntegrationTestContext integrationTestContext, Entity entity) {
         CloudbreakClient clientEntity = (CloudbreakClient) entity;
         com.sequenceiq.cloudbreak.client.CloudbreakClient client;
-        client = new com.sequenceiq.cloudbreak.client.CloudbreakClient.CloudbreakClientBuilder(
+        client = new CloudbreakClientBuilder(
                 integrationTestContext.getContextParam(CloudbreakTest.CLOUDBREAK_SERVER_ROOT),
                 integrationTestContext.getContextParam(CloudbreakTest.IDENTITY_URL),
                 "cloudbreak_shell")
@@ -58,13 +60,13 @@ public class CloudbreakClient extends Entity {
                         integrationTestContext.getContextParam(CloudbreakTest.PASSWORD))
                 .withIgnorePreValidation(true)
                 .build();
-        clientEntity.setCloudbreakClient(client);
+        clientEntity.cloudbreakClient = client;
     }
 
     public static synchronized void singletonCloudbreakClient(IntegrationTestContext integrationTestContext, Entity entity) {
         CloudbreakClient clientEntity = (CloudbreakClient) entity;
         if (singletonCloudbreakClient == null) {
-            singletonCloudbreakClient = new com.sequenceiq.cloudbreak.client.CloudbreakClient.CloudbreakClientBuilder(
+            singletonCloudbreakClient = new CloudbreakClientBuilder(
                     integrationTestContext.getContextParam(CloudbreakTest.CLOUDBREAK_SERVER_ROOT),
                     integrationTestContext.getContextParam(CloudbreakTest.IDENTITY_URL),
                     "cloudbreak_shell")
@@ -75,7 +77,7 @@ public class CloudbreakClient extends Entity {
                     .withIgnorePreValidation(true)
                     .build();
         }
-        clientEntity.setCloudbreakClient(singletonCloudbreakClient);
+        clientEntity.cloudbreakClient = singletonCloudbreakClient;
     }
 }
 

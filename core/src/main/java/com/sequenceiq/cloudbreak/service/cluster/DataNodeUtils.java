@@ -43,10 +43,6 @@ public final class DataNodeUtils {
     }
 
     private static Map<Long, List<String>> getSortedMap(boolean reverse) {
-        if (reverse) {
-            return new TreeMap<>(reverseOrder());
-        } else {
-            return new TreeMap<>();
-        }
+        return reverse ? new TreeMap<>(reverseOrder()) : new TreeMap<>();
     }
 }

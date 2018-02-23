@@ -112,7 +112,7 @@ public class ClusterHostServiceRunner {
         }
     }
 
-    private SaltConfig createSaltConfig(Stack stack, Cluster cluster, GatewayConfig primaryGatewayConfig, List<GatewayConfig> gatewayConfigs)
+    private SaltConfig createSaltConfig(Stack stack, Cluster cluster, GatewayConfig primaryGatewayConfig, Iterable<GatewayConfig> gatewayConfigs)
             throws IOException {
         Map<String, SaltPillarProperties> servicePillar = new HashMap<>();
         saveDatalakeNameservers(stack, servicePillar);
@@ -167,7 +167,7 @@ public class ClusterHostServiceRunner {
         return new SaltConfig(servicePillar, createGrainProperties(gatewayConfigs));
     }
 
-    private Map<String, Map<String, String>> createGrainProperties(List<GatewayConfig> gatewayConfigs) {
+    private Map<String, Map<String, String>> createGrainProperties(Iterable<GatewayConfig> gatewayConfigs) {
         Map<String, Map<String, String>> grainProperties = new HashMap<>();
         for (GatewayConfig gatewayConfig : gatewayConfigs) {
             Map<String, String> hostGrain = new HashMap<>();

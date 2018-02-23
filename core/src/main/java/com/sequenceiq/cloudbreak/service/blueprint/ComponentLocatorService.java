@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.blueprint;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,7 +26,7 @@ public class ComponentLocatorService {
     @Inject
     private HostGroupService hostGroupService;
 
-    public Map<String, List<String>> getComponentLocation(Cluster cluster, Set<String> componentNames) {
+    public Map<String, List<String>> getComponentLocation(Cluster cluster, Collection<String> componentNames) {
         Map<String, List<String>> result = new HashMap<>();
         for (HostGroup hg : hostGroupService.getByCluster(cluster.getId())) {
             Set<String> hgComponents = blueprintProcessor.getComponentsInHostGroup(cluster.getBlueprint().getBlueprintText(), hg.getName());

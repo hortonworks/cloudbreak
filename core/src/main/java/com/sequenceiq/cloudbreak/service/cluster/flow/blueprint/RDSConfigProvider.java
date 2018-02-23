@@ -33,7 +33,7 @@ public class RDSConfigProvider {
     @Inject
     private ClusterRepository clusterRepository;
 
-    public List<BlueprintConfigurationEntry> getConfigs(Set<RDSConfig> rdsConfigs) {
+    public List<BlueprintConfigurationEntry> getConfigs(Iterable<RDSConfig> rdsConfigs) {
         List<BlueprintConfigurationEntry> bpConfigs = new ArrayList<>();
         for (RDSConfig rds : rdsConfigs) {
             switch (rds.getType()) {
@@ -68,7 +68,7 @@ public class RDSConfigProvider {
         rdsConfig.setConnectionPassword(PasswordUtil.generatePassword());
         String primaryGatewayIp = stack.getPrimaryGatewayInstance().getPrivateIp();
         rdsConfig.setConnectionURL(
-                "jdbc:postgresql://" + primaryGatewayIp + ":" + dbPort + "/" + dbName
+                "jdbc:postgresql://" + primaryGatewayIp + ':' + dbPort + '/' + dbName
         );
         rdsConfig.setDatabaseType(RDSDatabase.POSTGRES);
         rdsConfig.setStatus(ResourceStatus.DEFAULT);

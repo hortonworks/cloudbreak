@@ -29,7 +29,6 @@ import com.microsoft.azure.storage.blob.ListBlobItem;
 import com.sequenceiq.cloudbreak.api.model.AdlsFileSystemConfiguration;
 import com.sequenceiq.cloudbreak.api.model.FileSystemConfiguration;
 import com.sequenceiq.cloudbreak.api.model.FileSystemType;
-import com.sequenceiq.cloudbreak.api.model.WasbFileSystemConfiguration;
 import com.sequenceiq.cloudbreak.cloud.Setup;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureCredentialView;
@@ -73,7 +72,7 @@ public class AzureSetup implements Setup {
         try {
             copyVhdImageIfNecessary(ac, stack, image, imageResourceGroupName, region, client);
         } catch (Exception ex) {
-            LOGGER.error("Could not create image with the specified parameters: {}", ex);
+            LOGGER.error("Could not create image with the specified parameters", ex);
             throw new CloudConnectorException("Image creation failed because " + image.getImageName() + " does not exist or Cloudbreak could not reach.", ex);
         }
         LOGGER.debug("prepare image has been executed");
@@ -155,8 +154,8 @@ public class AzureSetup implements Setup {
     }
 
     private void validateWasbFileSystem(FileSystem fileSystem, String fileSystemType) throws URISyntaxException, InvalidKeyException, StorageException {
-        String accountName = fileSystem.getParameter(WasbFileSystemConfiguration.ACCOUNT_NAME, String.class);
-        String accountKey = fileSystem.getParameter(WasbFileSystemConfiguration.ACCOUNT_KEY, String.class);
+        String accountName = fileSystem.getParameter(FileSystemConfiguration.ACCOUNT_NAME, String.class);
+        String accountKey = fileSystem.getParameter(FileSystemConfiguration.ACCOUNT_KEY, String.class);
         String connectionString = "DefaultEndpointsProtocol=https;AccountName=" + accountName + ";AccountKey=" + accountKey;
         CloudStorageAccount storageAccount = CloudStorageAccount.parse(connectionString);
         CloudBlobClient blobClient = storageAccount.createCloudBlobClient();

@@ -21,7 +21,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Region;
 @Service
 public class YarnPlatformResources implements PlatformResources {
     @Override
-    public CloudNetworks networks(CloudCredential cloudCredential, Region region, Map<String, String> filters) throws Exception {
+    public CloudNetworks networks(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
         return new CloudNetworks();
     }
 
@@ -31,32 +31,32 @@ public class YarnPlatformResources implements PlatformResources {
     }
 
     @Override
-    public CloudSecurityGroups securityGroups(CloudCredential cloudCredential, Region region, Map<String, String> filters) throws Exception {
+    public CloudSecurityGroups securityGroups(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
         return new CloudSecurityGroups();
     }
 
     @Override
-    public CloudRegions regions(CloudCredential cloudCredential, Region region, Map<String, String> filters) throws Exception {
+    public CloudRegions regions(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
         return new CloudRegions(Collections.emptyMap(), Collections.emptyMap(), "");
     }
 
     @Override
-    public CloudVmTypes virtualMachines(CloudCredential cloudCredential, Region region, Map<String, String> filters) throws Exception {
+    public CloudVmTypes virtualMachines(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
         return new CloudVmTypes();
     }
 
     @Override
-    public CloudGateWays gateways(CloudCredential cloudCredential, Region region, Map<String, String> filters) throws Exception {
+    public CloudGateWays gateways(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
         return new CloudGateWays();
     }
 
     @Override
-    public CloudIpPools publicIpPool(CloudCredential cloudCredential, Region region, Map<String, String> filters) throws Exception {
+    public CloudIpPools publicIpPool(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
         return new CloudIpPools();
     }
 
     @Override
-    public CloudAccessConfigs accessConfigs(CloudCredential cloudCredential, Region region, Map<String, String> filters) throws Exception {
+    public CloudAccessConfigs accessConfigs(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
         return new CloudAccessConfigs(new HashSet<>());
     }
 }

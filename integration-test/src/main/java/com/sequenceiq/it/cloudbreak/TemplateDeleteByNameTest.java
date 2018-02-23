@@ -6,7 +6,7 @@ import org.testng.annotations.Test;
 public class TemplateDeleteByNameTest extends AbstractCloudbreakIntegrationTest {
     @Test
     @Parameters("templateName")
-    public void testDeleteTemplateByName(String templateName) throws Exception {
+    public void testDeleteTemplateByName(String templateName) {
         // GIVEN
         // WHEN
         getCloudbreakClient().templateEndpoint().deletePublic(templateName);

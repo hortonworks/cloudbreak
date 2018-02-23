@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.core.flow2.cluster.downscale;
 import static com.sequenceiq.cloudbreak.api.model.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.model.Status.UPDATE_FAILED;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -70,7 +71,7 @@ public class ClusterDownscaleService {
         }
     }
 
-    public void updateMetadata(Long stackId, Set<String> hostNames, String hostGroupName) {
+    public void updateMetadata(Long stackId, Collection<String> hostNames, String hostGroupName) {
         StackView stackView = stackService.getByIdView(stackId);
         ClusterView clusterView = stackView.getClusterView();
         hostNames.forEach(hn -> {

@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.core.flow2;
 import com.sequenceiq.cloudbreak.core.flow2.restart.DefaultRestartAction;
 
 public interface FlowState {
-    default Class<? extends AbstractAction> action() {
+    default Class<? extends AbstractAction<?, ?, ?, ?>> action() {
         return null;
     }
 

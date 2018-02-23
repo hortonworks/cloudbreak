@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.converter;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -29,8 +30,8 @@ public class PlatformRecommendationToPlatformRecommendationResponseConverter
                 .stream().map(vmType -> getConversionService().convert(vmType, VmTypeJson.class)).collect(Collectors.toSet());
 
         Set<DiskResponse> diskResponses = new HashSet<>();
-        for (Map.Entry<DiskType, DisplayName> diskTypeDisplayName : source.getDiskTypes().displayNames().entrySet()) {
-            for (Map.Entry<String, VolumeParameterType> volumeParameterType : source.getDiskTypes().diskMapping().entrySet()) {
+        for (Entry<DiskType, DisplayName> diskTypeDisplayName : source.getDiskTypes().displayNames().entrySet()) {
+            for (Entry<String, VolumeParameterType> volumeParameterType : source.getDiskTypes().diskMapping().entrySet()) {
                 if (diskTypeDisplayName.getKey().value().equals(volumeParameterType.getKey())) {
                     DiskResponse diskResponse = new DiskResponse(
                             diskTypeDisplayName.getKey().value(),

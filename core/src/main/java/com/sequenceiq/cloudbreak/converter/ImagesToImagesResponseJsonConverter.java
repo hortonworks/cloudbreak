@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.converter;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -87,7 +86,7 @@ public class ImagesToImagesResponseJsonConverter extends AbstractConversionServi
         return baseImages;
     }
 
-    private List<StackDetailsJson> getDefaultStackInfos(Collection<? extends StackInfo> defaultStackInfos) {
+    private List<StackDetailsJson> getDefaultStackInfos(Iterable<? extends StackInfo> defaultStackInfos) {
         List<StackDetailsJson> result = new ArrayList<>();
         for (StackInfo info : defaultStackInfos) {
             StackDetailsJson json = new StackDetailsJson();

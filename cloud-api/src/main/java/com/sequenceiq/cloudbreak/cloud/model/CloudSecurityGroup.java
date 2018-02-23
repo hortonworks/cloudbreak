@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.cloud.model;
 
-import java.util.HashMap;
 import java.util.Map;
 
 public class CloudSecurityGroup {
@@ -9,7 +8,7 @@ public class CloudSecurityGroup {
 
     private String groupId;
 
-    private Map<String, Object> properties = new HashMap<>();
+    private Map<String, Object> properties;
 
     public CloudSecurityGroup(String groupName, String groupId, Map<String, Object> properties) {
         this.groupName = groupName;

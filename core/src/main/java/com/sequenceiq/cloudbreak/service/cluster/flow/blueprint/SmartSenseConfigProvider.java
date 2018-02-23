@@ -92,7 +92,7 @@ public class SmartSenseConfigProvider {
         return HostGroup::getName;
     }
 
-    private String addSmartSenseServerToBp(String blueprintText, Set<HostGroup> hostGroups, Set<String> hostGroupNames) {
+    private String addSmartSenseServerToBp(String blueprintText, Iterable<HostGroup> hostGroups, Collection<String> hostGroupNames) {
         if (!blueprintProcessor.componentExistsInBlueprint(HST_SERVER_COMPONENT, blueprintText)) {
             String aHostGroupName = hostGroupNames.stream().findFirst().get();
             String finalBlueprintText = blueprintText;
@@ -124,7 +124,7 @@ public class SmartSenseConfigProvider {
     }
 
     private Collection<? extends BlueprintConfigurationEntry> getSmartSenseServerConfigs(Stack stack, String smartSenseId) {
-        List<BlueprintConfigurationEntry> configs = new ArrayList<>();
+        Collection<BlueprintConfigurationEntry> configs = new ArrayList<>();
         configs.add(new BlueprintConfigurationEntry(SMART_SENSE_SERVER_CONFIG_FILE, "customer.account.name", "Hortonworks_Cloud_HDP"));
         configs.add(new BlueprintConfigurationEntry(SMART_SENSE_SERVER_CONFIG_FILE, "customer.notification.email", "aws-marketplace@hortonworks.com"));
         String clusterName = getClusterName(stack);
@@ -153,11 +153,9 @@ public class SmartSenseConfigProvider {
         String ssClusterName = String.format(ssClusterNamePattern, clusterName, stack.getUuid());
         if (ssClusterName.length() > SMART_SENSE_CLUSTER_NAME_MAX_LENGTH) {
             int charsOverTheLimit = ssClusterName.length() - SMART_SENSE_CLUSTER_NAME_MAX_LENGTH;
-            if (charsOverTheLimit < clusterName.length()) {
-                ssClusterName = String.format(ssClusterNamePattern, clusterName.substring(0, clusterName.length() - charsOverTheLimit), stack.getUuid());
-            } else {
-                ssClusterName = ssClusterName.substring(0, SMART_SENSE_CLUSTER_NAME_MAX_LENGTH);
-            }
+            ssClusterName = charsOverTheLimit < clusterName.length()
+                    ? String.format(ssClusterNamePattern, clusterName.substring(0, clusterName.length() - charsOverTheLimit), stack.getUuid())
+                    : ssClusterName.substring(0, SMART_SENSE_CLUSTER_NAME_MAX_LENGTH);
         }
         return ssClusterName;
     }

@@ -15,7 +15,7 @@ public class RecommendationAction {
 
         if (recommendationEntity.getRequest().getBlueprintId() == null
                 && recommendationEntity.getRequest().getBlueprintName() == null) {
-            Blueprint blueprint = integrationTestContext.getContextParam(Blueprint.BLUEPRINT, Blueprint.class);
+            Blueprint blueprint = integrationTestContext.getContextParam(BlueprintEntity.BLUEPRINT, Blueprint.class);
             if (blueprint != null && blueprint.getResponse() != null) {
                 recommendationEntity.getRequest().setBlueprintId(
                         blueprint.getResponse().getId()

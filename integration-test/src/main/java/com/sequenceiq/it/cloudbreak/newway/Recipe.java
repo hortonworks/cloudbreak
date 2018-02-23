@@ -32,7 +32,7 @@ public class Recipe extends RecipeEntity {
     }
 
     public static Action<Recipe> post(String key) {
-        return new Action<Recipe>(getTestContext(key), RecipeAction::post);
+        return new Action<>(getTestContext(key), RecipeAction::post);
     }
 
     public static Action<Recipe> post() {

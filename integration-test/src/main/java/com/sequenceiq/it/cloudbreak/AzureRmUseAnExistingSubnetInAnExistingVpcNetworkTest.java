@@ -49,7 +49,7 @@ public class AzureRmUseAnExistingSubnetInAnExistingVpcNetworkTest extends Abstra
     @Parameters({"networkName", "description", "publicInAccount", "regionName", "resourceGroupName", "vpcName", "vpcSubnet"})
     public void createNetwork(String networkName, @Optional("") String description, @Optional("false") boolean publicInAccount,
             String regionName, @Optional("it-vpc-resource-group") String resourceGroupName, @Optional("it-vpc") String vpcName,
-            @Optional("it-vpc-subnet") String vpcSubnet) throws Exception {
+            @Optional("it-vpc-subnet") String vpcSubnet) {
 
         ApplicationTokenCredentials serviceClientCredentials = new ApplicationTokenCredentials(defaultAccesKey, defaultTenantId, defaultSecretKey, null);
         Azure azure = Azure.authenticate(serviceClientCredentials).withSubscription(defaultSubscriptionId);

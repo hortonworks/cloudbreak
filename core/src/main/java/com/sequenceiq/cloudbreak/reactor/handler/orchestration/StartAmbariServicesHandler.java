@@ -38,6 +38,6 @@ public class StartAmbariServicesHandler implements ReactorEventHandler<StartAmba
         } catch (Exception e) {
             response = new StartAmbariServicesFailed(stackId, e);
         }
-        eventBus.notify(response.selector(), new Event(event.getHeaders(), response));
+        eventBus.notify(response.selector(), new Event<>(event.getHeaders(), response));
     }
 }

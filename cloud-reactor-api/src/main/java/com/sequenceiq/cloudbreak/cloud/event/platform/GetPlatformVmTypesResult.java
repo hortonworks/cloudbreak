@@ -4,7 +4,7 @@ import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformRequest;
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 
-public class GetPlatformVmTypesResult extends CloudPlatformResult<CloudPlatformRequest> {
+public class GetPlatformVmTypesResult extends CloudPlatformResult<CloudPlatformRequest<?>> {
     private CloudVmTypes vmTypes;
 
     public GetPlatformVmTypesResult(CloudPlatformRequest<?> request, CloudVmTypes vmTypes) {

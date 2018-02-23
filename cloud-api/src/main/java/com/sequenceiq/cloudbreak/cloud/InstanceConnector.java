@@ -22,7 +22,6 @@ public interface InstanceConnector {
      *                             (e.g. floating IP) and they can be started as well
      * @param vms                  VM instances to be started
      * @return status of instances
-     * @throws Exception in case of any error
      */
     List<CloudVmInstanceStatus> start(AuthenticatedContext authenticatedContext, List<CloudResource> resources, List<CloudInstance> vms);
 
@@ -36,7 +35,6 @@ public interface InstanceConnector {
      *                             (e.g. floating IP) and they can be stopped as well
      * @param vms                  VM instances to be stopped
      * @return status of instances
-     * @throws Exception in case of any error
      */
     List<CloudVmInstanceStatus> stop(AuthenticatedContext authenticatedContext, List<CloudResource> resources, List<CloudInstance> vms);
 

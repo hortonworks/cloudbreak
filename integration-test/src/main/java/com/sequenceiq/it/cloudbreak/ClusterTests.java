@@ -34,19 +34,19 @@ public class ClusterTests extends CloudbreakTest {
     }
 
     public ClusterTests(CloudProvider cp, TestParameter tp) {
-        this.cloudProvider = cp;
+        cloudProvider = cp;
         setTestParameter(tp);
     }
 
     @BeforeTest
-    @Parameters({ "provider" })
+    @Parameters("provider")
     public void beforeTest(@Optional(OpenstackCloudProvider.OPENSTACK) String provider) {
         LOGGER.info("before cluster test set provider: " + provider);
-        if (this.cloudProvider != null) {
+        if (cloudProvider != null) {
             LOGGER.info("cloud provider already set - running from factory test");
             return;
         }
-        this.cloudProvider = CloudProviderHelper.providerFactory(provider, getTestParameter())[0];
+        cloudProvider = CloudProviderHelper.providerFactory(provider, getTestParameter())[0];
     }
 
     @Priority(10)

@@ -4,7 +4,9 @@ package com.sequenceiq.cloudbreak.service.cluster.flow;
 import static com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails.CUSTOM_VDF_REPO_KEY;
 import static com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails.VDF_REPO_KEY_PREFIX;
 
+import java.util.Comparator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -16,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.sequenceiq.ambari.client.services.ClusterService;
 import com.sequenceiq.ambari.client.services.StackService;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.Versioned;
@@ -86,7 +89,7 @@ public class AmbariRepositoryVersionService {
     }
 
     public boolean isVersionNewerOrEqualThanLimited(Versioned currentVersion, Versioned limitedAPIVersion) {
-        VersionComparator versionComparator = new VersionComparator();
+        Comparator<Versioned> versionComparator = new VersionComparator();
         return versionComparator.compare(currentVersion, limitedAPIVersion) > -1;
     }
 
@@ -112,10 +115,10 @@ public class AmbariRepositoryVersionService {
         if (typeVersion.length > 1) {
             version = typeVersion[1];
         }
-        for (Map.Entry<String, String> entry : stackRepo.entrySet()) {
+        for (Entry<String, String> entry : stackRepo.entrySet()) {
             addRepository(ambariClient, stackType, version, entry.getKey(), stackRepoId, entry.getValue(), stackRepoDetails.isVerify());
         }
-        for (Map.Entry<String, String> entry : utilRepo.entrySet()) {
+        for (Entry<String, String> entry : utilRepo.entrySet()) {
             addRepository(ambariClient, stackType, version, entry.getKey(), utilRepoId, entry.getValue(), stackRepoDetails.isVerify());
         }
     }
@@ -124,7 +127,7 @@ public class AmbariRepositoryVersionService {
         stackRepoDetails.remove(StackRepoDetails.REPOSITORY_VERSION);
         return stackRepoDetails.entrySet().stream()
                 .filter(entry -> !entry.getKey().startsWith(VDF_REPO_KEY_PREFIX))
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+                .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
     }
 
     private void addRepository(StackService client, String stack, String version, String os,
@@ -132,7 +135,7 @@ public class AmbariRepositoryVersionService {
         client.addStackRepository(stack, version, os, repoId, repoUrl, verify);
     }
 
-    private void addVersionDefinitionFileToAmbari(String stackName, StackService ambariClient, StackRepoDetails stackRepoDetails) {
+    private void addVersionDefinitionFileToAmbari(String stackName, ClusterService ambariClient, StackRepoDetails stackRepoDetails) {
         Optional<String> vdfUrl = Optional.ofNullable(stackRepoDetails.getStack().get(CUSTOM_VDF_REPO_KEY));
         if (!vdfUrl.isPresent()) {
             String message = String.format("Couldn't determine any VDF file for the stack: %s", stackName);

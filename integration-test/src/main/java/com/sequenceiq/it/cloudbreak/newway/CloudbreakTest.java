@@ -1,6 +1,10 @@
 package com.sequenceiq.it.cloudbreak.newway;
 
-import com.sequenceiq.it.IntegrationTestContext;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -12,9 +16,7 @@ import org.springframework.util.StringUtils;
 import org.testng.ITestContext;
 import org.testng.annotations.BeforeTest;
 
-import javax.inject.Inject;
-import java.util.HashMap;
-import java.util.Map;
+import com.sequenceiq.it.IntegrationTestContext;
 
 public class CloudbreakTest extends GherkinTest {
     public static final String CLOUDBREAK_SERVER_ROOT = "CLOUDBREAK_SERVER_ROOT";
@@ -47,11 +49,20 @@ public class CloudbreakTest extends GherkinTest {
 
     private TestParameter testParameter;
 
-    public CloudbreakTest() {
+    public TestParameter getTestParameter() {
+        return testParameter;
+    }
+
+    public void setTestParameter(TestParameter tp) {
+        testParameter = tp;
+    }
+
+    @BeforeTest
+    public void setup() {
         try {
-            super.springTestContextBeforeTestClass();
-            super.springTestContextPrepareTestInstance();
-        } catch (Exception e) {
+            springTestContextBeforeTestClass();
+            springTestContextPrepareTestInstance();
+        } catch (Exception ignore) {
         }
 
         testParameter = new TestParameter();
@@ -64,23 +75,15 @@ public class CloudbreakTest extends GherkinTest {
         testContext.putContextParam(PASSWORD, defaultUaaPassword);
     }
 
-    public TestParameter getTestParameter() {
-        return testParameter;
-    }
-
-    public void setTestParameter(TestParameter tp) {
-        testParameter = tp;
-    }
-
-    @BeforeTest(alwaysRun = true)
+    @BeforeTest(alwaysRun = true, dependsOnMethods = "setup")
     public void digestParameters(ITestContext testngContext) {
         LOGGER.info("CloudbreakTest load test parameters ::: ");
         if (testngContext != null) {
-            getTestParameter().putAll(testngContext.getCurrentXmlTest().getAllParameters());
+            testParameter.putAll(testngContext.getCurrentXmlTest().getAllParameters());
         }
 
         LOGGER.info("Application.yml based parameters ::: ");
-        getTestParameter().putAll(getAllKnownProperties(environment));
+        testParameter.putAll(getAllKnownProperties(environment));
     }
 
     private Map<String, String> getAllKnownProperties(Environment env) {
@@ -89,7 +92,7 @@ public class CloudbreakTest extends GherkinTest {
             for (PropertySource<?> propertySource : ((ConfigurableEnvironment) env).getPropertySources()) {
                 if (propertySource instanceof EnumerablePropertySource) {
                     LOGGER.info("processing property source ::: " + propertySource.getName());
-                    for (String key : ((EnumerablePropertySource) propertySource).getPropertyNames()) {
+                    for (String key : ((EnumerablePropertySource<?>) propertySource).getPropertyNames()) {
                         String value = propertySource.getProperty(key).toString();
                         if (!StringUtils.isEmpty(value)) {
                             rtn.put(key, propertySource.getProperty(key).toString());

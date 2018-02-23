@@ -22,13 +22,13 @@ public abstract class AbstractCloudPersisterService<T> implements Persister<T> {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractCloudPersisterService.class);
 
     @Inject
-    private List<CrudRepository> repositoryList;
+    private List<CrudRepository<?, ?>> repositoryList;
 
     @Inject
     @Qualifier("conversionService")
     private ConversionService conversionService;
 
-    private final Map<Class, CrudRepository> repositoryMap = new HashMap<>();
+    private final Map<Class<?>, CrudRepository<?, ?>> repositoryMap = new HashMap<>();
 
     @PostConstruct
     public void checkRepoMap() {
@@ -44,12 +44,12 @@ public abstract class AbstractCloudPersisterService<T> implements Persister<T> {
     }
 
     private void fillRepositoryMap() {
-        for (CrudRepository repo : repositoryList) {
+        for (CrudRepository<?, ?> repo : repositoryList) {
             repositoryMap.put(getEntityClassForRepository(repo), repo);
         }
     }
 
-    private Class getEntityClassForRepository(CrudRepository repo) {
+    private Class<?> getEntityClassForRepository(CrudRepository<?, ?> repo) {
         Class<?> originalInterface = repo.getClass().getInterfaces()[0];
         EntityType annotation = originalInterface.getAnnotation(EntityType.class);
         if (annotation == null) {
@@ -58,7 +58,7 @@ public abstract class AbstractCloudPersisterService<T> implements Persister<T> {
         return annotation.entityClass();
     }
 
-    protected <R> R getRepositoryForEntity(Class clazz) {
+    protected <R> R getRepositoryForEntity(Class<?> clazz) {
         R repo = (R) repositoryMap.get(clazz);
         if (repo == null) {
             throw new IllegalStateException("No repository found for the entityClass:" + clazz);

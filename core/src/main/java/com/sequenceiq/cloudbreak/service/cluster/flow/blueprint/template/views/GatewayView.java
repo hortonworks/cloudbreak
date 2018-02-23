@@ -32,17 +32,17 @@ public class GatewayView {
     private final String tokenCert;
 
     public GatewayView(Gateway gateway) {
-        this.enableGateway = gateway.getEnableGateway();
-        this.gatewayType = gateway.getGatewayType();
-        this.path = gateway.getPath();
-        this.topologyName = gateway.getTopologyName();
-        this.exposedServices = gateway.getExposedServices();
-        this.ssoType = gateway.getSsoType();
-        this.ssoProvider = gateway.getSsoProvider();
-        this.signKey = gateway.getSignKey();
-        this.signPub = gateway.getSignPub();
-        this.signCert = gateway.getSignCert();
-        this.tokenCert = gateway.getTokenCert();
+        enableGateway = gateway.getEnableGateway();
+        gatewayType = gateway.getGatewayType();
+        path = gateway.getPath();
+        topologyName = gateway.getTopologyName();
+        exposedServices = gateway.getExposedServices();
+        ssoType = gateway.getSsoType();
+        ssoProvider = gateway.getSsoProvider();
+        signKey = gateway.getSignKey();
+        signPub = gateway.getSignPub();
+        signCert = gateway.getSignCert();
+        tokenCert = gateway.getTokenCert();
     }
 
     public Boolean getEnableGateway() {

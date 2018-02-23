@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.cloud.transform;
 
-import java.util.List;
-
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 
@@ -9,7 +7,7 @@ public class ResourceStatusLists {
     private ResourceStatusLists() {
     }
 
-    public static CloudResourceStatus aggregate(List<CloudResourceStatus> cloudResourceStatuses) {
+    public static CloudResourceStatus aggregate(Iterable<CloudResourceStatus> cloudResourceStatuses) {
 
         ResourceStatus status = null;
         StringBuilder statusReason = new StringBuilder();

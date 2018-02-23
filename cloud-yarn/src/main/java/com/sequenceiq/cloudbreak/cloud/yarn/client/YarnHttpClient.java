@@ -72,29 +72,30 @@ public class YarnHttpClient implements YarnClient {
         ClientResponse response = webResource.accept("application/json").type("application/json").delete(ClientResponse.class);
 
         // Validate HTTP 204 return
-        if (response.getStatus() == YarnResourceConstants.HTTP_NO_CONTENT) {
-            String msg = String.format("Successfully deleted application %s", deleteApplicationRequest.getName());
-            LOGGER.debug(msg);
-        } else if (response.getStatus() == YarnResourceConstants.HTTP_NOT_FOUND) {
-            String msg = String.format("Application %s not found, already deleted?", deleteApplicationRequest.getName());
-            LOGGER.debug(msg);
-        } else {
-            String msg = String.format("Received %d status code from url %s, reason: %s",
-                    response.getStatus(),
-                    dashEndpoint.getFullEndpointUrl().toString(),
-                    response.getEntity(String.class));
-            LOGGER.debug(msg);
-            throw new YarnClientException(msg);
+        String msg;
+        switch (response.getStatus()) {
+            case YarnResourceConstants.HTTP_NO_CONTENT:
+                msg = String.format("Successfully deleted application %s", deleteApplicationRequest.getName());
+                LOGGER.debug(msg);
+                break;
+            case YarnResourceConstants.HTTP_NOT_FOUND:
+                msg = String.format("Application %s not found, already deleted?", deleteApplicationRequest.getName());
+                LOGGER.debug(msg);
+                break;
+            default:
+                msg = String.format("Received %d status code from url %s, reason: %s",
+                        response.getStatus(),
+                        dashEndpoint.getFullEndpointUrl().toString(),
+                        response.getEntity(String.class));
+                LOGGER.debug(msg);
+                throw new YarnClientException(msg);
         }
 
     }
 
     @Override
     public void validateApiEndpoint() throws YarnClientException, MalformedURLException {
-        YarnEndpoint dashEndpoint = new YarnEndpoint(
-                apiEndpoint,
-                YarnResourceConstants.APPLICATIONS_PATH
-                );
+        YarnEndpoint dashEndpoint = new YarnEndpoint(apiEndpoint, YarnResourceConstants.APPLICATIONS_PATH);
 
         ClientConfig clientConfig = new DefaultClientConfig();
         Client client = Client.create(clientConfig);

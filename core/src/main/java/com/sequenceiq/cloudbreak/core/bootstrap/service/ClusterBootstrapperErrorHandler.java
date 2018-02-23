@@ -76,11 +76,8 @@ public class ClusterBootstrapperErrorHandler {
             Stack stack, GatewayConfig gatewayConfig, Set<Node> nodes)
             throws CloudbreakOrchestratorFailedException {
         List<String> allAvailableNode;
-        if (hostOrchestrator != null) {
-            allAvailableNode = hostOrchestrator.getAvailableNodes(gatewayConfig, nodes);
-        } else {
-            allAvailableNode = containerOrchestrator.getAvailableNodes(gatewayConfig, nodes);
-        }
+        allAvailableNode = hostOrchestrator != null ? hostOrchestrator.getAvailableNodes(gatewayConfig, nodes)
+                : containerOrchestrator.getAvailableNodes(gatewayConfig, nodes);
         List<Node> missingNodes = selectMissingNodes(nodes, allAvailableNode);
         if (!missingNodes.isEmpty()) {
             String message = cloudbreakMessagesService.getMessage(Msg.BOOTSTRAPPER_ERROR_BOOTSTRAP_FAILED_ON_NODES.code(),
@@ -114,7 +111,7 @@ public class ClusterBootstrapperErrorHandler {
         }
     }
 
-    private List<Node> selectMissingNodes(Set<Node> clusterNodes, List<String> availableNodes) {
+    private List<Node> selectMissingNodes(Iterable<Node> clusterNodes, Iterable<String> availableNodes) {
         List<Node> missingNodes = new ArrayList<>();
         for (Node node : clusterNodes) {
             boolean contains = false;
