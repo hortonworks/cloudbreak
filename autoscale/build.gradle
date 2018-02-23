@@ -12,6 +12,7 @@ buildscript {
 }
 
 jar {
+  baseName = 'periscope'
   archiveName = 'periscope.jar'
 }
 

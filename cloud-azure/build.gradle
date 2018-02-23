@@ -9,6 +9,7 @@ repositories {
 }
 
 jar {
+  baseName = 'cloud-azure'
   archiveName = 'cloud-azure.jar'
 }
 
