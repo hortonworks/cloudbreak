@@ -74,7 +74,7 @@ public class GcpCredentialConnector implements CredentialConnector {
 
     private void preCheckOfGooglePermission(GcpContext gcpContext) throws IOException {
         try {
-            gcpContext.getCompute().regions().list(gcpContext.getProjectId());
+            gcpContext.getCompute().regions().list(gcpContext.getProjectId()).execute();
         } catch (NullPointerException ignore) {
             LOGGER.error(String.format("Google authentication failed for project-id '%s' because of a null value:", gcpContext.getProjectId()), ignore);
         }
