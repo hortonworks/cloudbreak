@@ -546,7 +546,7 @@ public class StackService {
         } else if (stack.isStopped() || stack.isStartFailed()) {
             stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.START_REQUESTED);
             flowManager.triggerStackStart(stack.getId());
-            if (updateCluster) {
+            if (updateCluster && cluster != null) {
                 ambariClusterService.updateStatus(stack.getId(), StatusRequest.STARTED);
             }
         }

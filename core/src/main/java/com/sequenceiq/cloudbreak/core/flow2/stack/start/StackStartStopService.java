@@ -2,8 +2,10 @@ package com.sequenceiq.cloudbreak.core.flow2.stack.start;
 
 import static com.sequenceiq.cloudbreak.api.model.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.model.Status.STOPPED;
+import static java.lang.String.format;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -13,7 +15,13 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.model.Status;
+import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.event.instance.InstancesStatusResult;
+import com.sequenceiq.cloudbreak.cloud.event.instance.StartInstancesResult;
+import com.sequenceiq.cloudbreak.cloud.event.instance.StopInstancesResult;
+import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.common.type.BillingStatus;
 import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
@@ -23,6 +31,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.EmailSenderService;
+import com.sequenceiq.cloudbreak.service.stack.connector.OperationException;
 import com.sequenceiq.cloudbreak.service.stack.flow.MetadataSetupService;
 import com.sequenceiq.cloudbreak.service.stack.flow.WrongMetadataException;
 import com.sequenceiq.cloudbreak.service.usages.UsageService;
@@ -59,7 +68,12 @@ public class StackStartStopService {
         flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_INFRASTRUCTURE_STARTING, Status.START_IN_PROGRESS.name());
     }
 
-    public void finishStackStart(Stack stack, List<CloudVmMetaDataStatus> coreInstanceMetaData) {
+    public void validateStackStartResult(StackStartStopContext context, StartInstancesResult startInstancesResult) {
+        validateResourceResults(context.getCloudContext(), startInstancesResult.getErrorDetails(), startInstancesResult.getResults(), true);
+    }
+
+    public void finishStackStart(StackStartStopContext context, List<CloudVmMetaDataStatus> coreInstanceMetaData) {
+        Stack stack = context.getStack();
         if (coreInstanceMetaData.size() != stack.getFullNodeCount()) {
             throw new WrongMetadataException(String.format(
                     "Size of the collected metadata set does not equal the node count of the stack. [metadata size=%s] [nodecount=%s]",
@@ -85,8 +99,9 @@ public class StackStartStopService {
         }
     }
 
-    public void finishStackStop(StackStartStopContext context) {
+    public void finishStackStop(StackStartStopContext context, StopInstancesResult stopInstancesResult) {
         Stack stack = context.getStack();
+        validateResourceResults(context.getCloudContext(), stopInstancesResult.getErrorDetails(), stopInstancesResult.getResults(), false);
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.STOPPED, "Cluster infrastructure stopped successfully.");
 
         flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_INFRASTRUCTURE_STOPPED, STOPPED.name());
@@ -119,6 +134,22 @@ public class StackStartStopService {
         } else {
             LOGGER.info("Stack stop has not been requested because stack isn't in stop requested state, stop stack later.");
             return false;
+        }
+    }
+
+    private void validateResourceResults(CloudContext cloudContext, Exception exception, InstancesStatusResult results, boolean start) {
+        String action = start ? "start" : "stop";
+        if (exception != null) {
+            LOGGER.error(format("Failed to %s stack: %s", action, cloudContext), exception);
+            throw new OperationException(exception);
+        }
+        List<CloudVmInstanceStatus> failedInstances =
+                results.getResults().stream().filter(r -> r.getStatus() == InstanceStatus.FAILED).collect(Collectors.toList());
+        if (!failedInstances.isEmpty()) {
+            String statusReason = failedInstances.stream().map(
+                    fi -> "Instance " + fi.getCloudInstance().getInstanceId() + ": " + fi.getStatus() + "(" + fi.getStatusReason() + ")")
+                    .collect(Collectors.joining(","));
+            throw new OperationException(format("Failed to %s the stack for %s due to: %s", action, cloudContext.getName(), statusReason));
         }
     }
 
