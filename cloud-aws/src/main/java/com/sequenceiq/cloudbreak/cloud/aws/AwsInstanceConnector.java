@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.amazonaws.services.ec2.AmazonEC2Client;
+import com.amazonaws.services.ec2.model.AmazonEC2Exception;
 import com.amazonaws.services.ec2.model.DescribeInstancesRequest;
 import com.amazonaws.services.ec2.model.DescribeInstancesResult;
 import com.amazonaws.services.ec2.model.GetConsoleOutputRequest;
@@ -88,8 +89,10 @@ public class AwsInstanceConnector implements InstanceConnector {
                     statuses.add(new CloudVmInstanceStatus(cloudInstance, InstanceStatus.IN_PROGRESS));
                 }
             } catch (RuntimeException e) {
+                LOGGER.error("Start instances failed on AWS", e);
+                String message = e instanceof AmazonEC2Exception ? ((AmazonEC2Exception) e).getErrorCode() : e.getMessage();
                 for (CloudInstance cloudInstance : cloudInstances) {
-                    statuses.add(new CloudVmInstanceStatus(cloudInstance, InstanceStatus.FAILED, e.getMessage()));
+                    statuses.add(new CloudVmInstanceStatus(cloudInstance, InstanceStatus.FAILED, message));
                 }
             }
         }
@@ -121,8 +124,10 @@ public class AwsInstanceConnector implements InstanceConnector {
                     statuses.add(new CloudVmInstanceStatus(cloudInstance, InstanceStatus.IN_PROGRESS));
                 }
             } catch (RuntimeException e) {
+                LOGGER.error("Stop instances failed on AWS", e);
+                String message = e instanceof AmazonEC2Exception ? ((AmazonEC2Exception) e).getErrorCode() : e.getMessage();
                 for (CloudInstance cloudInstance : cloudInstances) {
-                    statuses.add(new CloudVmInstanceStatus(cloudInstance, InstanceStatus.FAILED, e.getMessage()));
+                    statuses.add(new CloudVmInstanceStatus(cloudInstance, InstanceStatus.FAILED, message));
                 }
             }
         }
