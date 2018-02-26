@@ -24,12 +24,10 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.model.ExecutorType;
 import com.sequenceiq.cloudbreak.api.model.ExposedService;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessor;
-import com.sequenceiq.cloudbreak.blueprint.kerberos.KerberosDetailService;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariDatabase;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
-import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.ExposedServices;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
@@ -50,12 +48,14 @@ import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.SmartSenseCredentialConfigService;
 import com.sequenceiq.cloudbreak.service.blueprint.ComponentLocatorService;
 import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariSecurityConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.HiveConfigProvider;
+import com.sequenceiq.cloudbreak.type.KerberosType;
 
 @Component
 public class ClusterHostServiceRunner {
@@ -91,9 +91,6 @@ public class ClusterHostServiceRunner {
     private SmartSenseCredentialConfigService smartSenseCredentialConfigService;
 
     @Inject
-    private KerberosDetailService kerberosDetailService;
-
-    @Inject
     private HiveConfigProvider hiveConfigProvider;
 
     @Transactional
@@ -117,22 +114,12 @@ public class ClusterHostServiceRunner {
         Map<String, SaltPillarProperties> servicePillar = new HashMap<>();
         saveDatalakeNameservers(stack, servicePillar);
         saveSharedRangerService(stack, servicePillar);
-        if (cluster.isSecure() && kerberosDetailService.isAmbariManagedKerberosPackages(cluster.getKerberosConfig())) {
+        if (cluster.isSecure() && stack.getCluster().getKerberosConfig().getType() == KerberosType.CB_MANAGED) {
             Map<String, String> kerberosPillarConf = new HashMap<>();
             KerberosConfig kerberosConfig = cluster.getKerberosConfig();
             putIfNotNull(kerberosPillarConf, kerberosConfig.getMasterKey(), "masterKey");
             putIfNotNull(kerberosPillarConf, kerberosConfig.getAdmin(), "user");
             putIfNotNull(kerberosPillarConf, kerberosConfig.getPassword(), "password");
-            if (StringUtils.isEmpty(kerberosConfig.getDescriptor())) {
-                putIfNotNull(kerberosPillarConf, kerberosConfig.getUrl(), "url");
-                putIfNotNull(kerberosPillarConf, kerberosConfig.getAdminUrl(), "adminUrl");
-                putIfNotNull(kerberosPillarConf, kerberosConfig.getRealm(), "realm");
-            } else {
-                Map<String, Object> properties = kerberosDetailService.getKerberosEnvProperties(kerberosConfig);
-                putIfNotNull(kerberosPillarConf, properties.get("kdc_hosts"), "url");
-                putIfNotNull(kerberosPillarConf, properties.get("admin_server_host"), "adminUrl");
-                putIfNotNull(kerberosPillarConf, properties.get("realm"), "realm");
-            }
             putIfNotNull(kerberosPillarConf, cluster.getUserName(), "clusterUser");
             putIfNotNull(kerberosPillarConf, cluster.getPassword(), "clusterPassword");
             servicePillar.put("kerberos", new SaltPillarProperties("/kerberos/init.sls", singletonMap("kerberos", kerberosPillarConf)));

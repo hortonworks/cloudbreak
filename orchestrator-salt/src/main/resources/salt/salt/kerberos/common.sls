@@ -12,8 +12,6 @@ install_kerberos:
       - krb5-libs
       - krb5-workstation
 
-{% if kerberos.url is none or kerberos.url == '' %}
-
 {% if salt['cmd.retcode']('test -f /var/krb5-conf-initialized') == 1 %}
 /etc/krb5.conf:
   file.managed:
@@ -66,16 +64,5 @@ kpropd_service:
   file.managed:
     - name: /etc/systemd/system/kpropd.service
     - source: salt://kerberos/systemd/kpropd.service
-
-{% endif %}
-
-{% else %}
-
-{% if salt['cmd.retcode']('test -f /var/krb5-conf-initialized') == 1 %}
-/etc/krb5.conf:
-  file.managed:
-    - source: salt://kerberos/config/krb5.conf-existing
-    - template: jinja
-{% endif %}
 
 {% endif %}
