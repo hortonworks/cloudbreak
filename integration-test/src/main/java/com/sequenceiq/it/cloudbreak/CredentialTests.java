@@ -25,10 +25,6 @@ public class CredentialTests extends CloudbreakTest {
 
     private static final String VALID_CRED_NAME = "valid-credential";
 
-    private static final String VALID_AWSKEY_CRED_NAME = "valid-keybased-credential";
-
-    private static final String VALID_OSV3_CRED_NAME = "valid-v3-credential";
-
     private static final String AGAIN_CRED_NAME = "again-credential";
 
     private static final String DELETE_CRED_NAME = "delete-credential";
@@ -77,7 +73,7 @@ public class CredentialTests extends CloudbreakTest {
 
     @AfterTest
     public void cleanUp() throws Exception {
-        String[] nameArray = {VALID_CRED_NAME, VALID_AWSKEY_CRED_NAME, AGAIN_CRED_NAME, VALID_OSV3_CRED_NAME, LONG_DC_CRED_NAME, DELETE_AGAIN_CRED_NAME};
+        String[] nameArray = {VALID_CRED_NAME, AGAIN_CRED_NAME, LONG_DC_CRED_NAME, DELETE_AGAIN_CRED_NAME};
 
         for (String aNameArray : nameArray) {
             LOGGER.info("Delete credential: \'{}\'", aNameArray.toLowerCase().trim());
