@@ -106,6 +106,10 @@ class BuildInfoTask extends DefaultTask {
 
       destination.mkdirs()
       String activeProfile = determineActiveProfile()
+
+      if (buildVersion.contains("+")) {
+        buildVersion = buildVersion.tokenize('+')[0]
+      }
       new File(destination, "build.info").withWriter { out ->
         [
             "ARTIFACT_BASENAME=" + basename,
