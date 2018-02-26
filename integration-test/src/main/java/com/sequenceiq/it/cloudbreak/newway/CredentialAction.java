@@ -15,7 +15,9 @@ class CredentialAction {
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT,
                 CloudbreakClient.class);
-        Log.log(" post " + credentialEntity.getName() + " private credential. ");
+        Log.log(" post "
+                .concat(credentialEntity.getName())
+                .concat(" private credential. "));
         credentialEntity.setResponse(
                 client.getCloudbreakClient()
                         .credentialEndpoint()
@@ -27,7 +29,9 @@ class CredentialAction {
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT,
                 CloudbreakClient.class);
-        Log.log(" get " + credentialEntity.getName() + " private credential. ");
+        Log.log(" get "
+                .concat(credentialEntity.getName())
+                .concat(" private credential. "));
         credentialEntity.setResponse(
                 client.getCloudbreakClient()
                         .credentialEndpoint()
@@ -50,7 +54,9 @@ class CredentialAction {
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT,
                 CloudbreakClient.class);
-        Log.log(" delete " + credentialEntity.getName() + " private credential. ");
+        Log.log(" delete "
+                .concat(credentialEntity.getName())
+                .concat(" private credential. "));
         client.getCloudbreakClient().credentialEndpoint()
                 .deletePrivate(credentialEntity.getName());
     }

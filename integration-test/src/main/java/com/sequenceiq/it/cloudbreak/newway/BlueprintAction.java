@@ -15,7 +15,9 @@ class BlueprintAction {
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT,
                 CloudbreakClient.class);
-        Log.log(" post " + blueprintEntity.getName() + " private blueprint. ");
+        Log.log(" post "
+                .concat(blueprintEntity.getName())
+                .concat(" private blueprint. "));
         blueprintEntity.setResponse(
                 client.getCloudbreakClient()
                         .blueprintEndpoint()
@@ -27,12 +29,17 @@ class BlueprintAction {
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT,
                 CloudbreakClient.class);
-        Log.log(" get " + blueprintEntity.getName() + " private blueprint by Name. ");
+        Log.log(" get "
+                .concat(blueprintEntity.getName())
+                .concat(" private blueprint by Name. "));
         blueprintEntity.setResponse(
                 client.getCloudbreakClient()
                         .blueprintEndpoint()
                         .getPrivate(blueprintEntity.getName()));
-        Log.logJSON(" get " + blueprintEntity.getName() + " blueprint response: ", blueprintEntity.getResponse());
+        Log.logJSON(" get "
+                .concat(blueprintEntity.getName())
+                .concat(" blueprint response: "),
+                blueprintEntity.getResponse());
     }
 
     public static void getAll(IntegrationTestContext integrationTestContext, Entity entity) {
@@ -52,7 +59,9 @@ class BlueprintAction {
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT,
                 CloudbreakClient.class);
-        Log.log(" delete " + blueprintEntity.getName() + " private blueprint with Name. ");
+        Log.log(" delete "
+                .concat(blueprintEntity.getName())
+                .concat(" private blueprint with Name. "));
         client.getCloudbreakClient().blueprintEndpoint().deletePrivate(blueprintEntity.getName());
     }
 
