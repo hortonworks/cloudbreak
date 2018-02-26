@@ -3,8 +3,6 @@
 include:
   - {{ slspath }}.common
 
-{% if kerberos.url is none or kerberos.url == '' %}
-
 add_principals_sh_script:
   file.managed:
     - name: /tmp/principals.sh
@@ -47,8 +45,6 @@ stop_kpropd:
   service.dead:
     - enable: False
     - name: kpropd
-
-{% endif %}
 
 create_krb5_conf_initialized:
   cmd.run:

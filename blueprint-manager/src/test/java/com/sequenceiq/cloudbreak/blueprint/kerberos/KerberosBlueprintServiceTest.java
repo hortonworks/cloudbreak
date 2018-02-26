@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.type.KerberosType;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -99,6 +100,7 @@ public class KerberosBlueprintServiceTest {
         String blueprintText = FileReaderUtils.readFileFromClasspath("blueprints/bp-not-kerberized.bp");
         Blueprint blueprint = TestUtil.blueprint("name", blueprintText);
         KerberosConfig kerberosConfig = new KerberosConfig();
+        kerberosConfig.setType(KerberosType.EXISTING_AD);
         kerberosConfig.setPrincipal("principal.conf");
         kerberosConfig.setPrincipal("passwd.conf");
         kerberosConfig.setUrl("url.conf");
