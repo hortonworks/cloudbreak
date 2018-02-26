@@ -147,7 +147,7 @@ public class YarnResourceConnector implements ResourceConnector<Object> {
                             ApplicationDetailResponse applicationDetailResponse = (ApplicationDetailResponse) responseContext.getResponseObject();
                             result.add(new CloudResourceStatus(resource, YarnApplicationStatus.mapResourceStatus(applicationDetailResponse.getState())));
                         } else if (responseContext.getStatusCode() == YarnResourceConstants.HTTP_NOT_FOUND) {
-                            result.add(new CloudResourceStatus(resource, ResourceStatus.DELETED));
+                            result.add(new CloudResourceStatus(resource, ResourceStatus.DELETED, "Yarn application has been killed."));
                         } else if (responseContext.getResponseError() != null) {
                             throw new CloudConnectorException(String.format("Yarn Application status check failed: HttpStatusCode: %d, Error: %s",
                                     responseContext.getStatusCode(), responseContext.getResponseError().getDiagnostics()));
