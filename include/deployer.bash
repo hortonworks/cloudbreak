@@ -59,7 +59,7 @@ cbd-version() {
     local releaseVer=$(latest-version)
     echo "$releaseVer" | green
 
-    if [ $(version-compare ${localVer#v} $releaseVer) -lt 0 ]; then
+    if [[ "$releaseVer" ]] && [ $(version-compare ${localVer#v} $releaseVer) -lt 0 ]; then
         warn "!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
         warn "Your version is outdated"
         warn "!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
@@ -99,6 +99,11 @@ cbd-update-release() {
     debug $desc
     debug binver=$binver lastver=$lastver osarch=$osarch | gray
 
+    if [[ ! "$lastver" ]]; then
+        error "Could not get latest version. Update terminated"
+        _exit 1
+    fi
+
     if [[ ${binver} != ${lastver} ]]; then
         debug upgrade needed |yellow
 
@@ -134,9 +139,25 @@ cbd-update-snap() {
 }
 
 latest-version() {
-  #curl -Ls https://raw.githubusercontent.com/hortonworks/cloudbreak-deployer/master/VERSION
-  curl -I https://github.com/hortonworks/cloudbreak-deployer/releases/latest 2>&1 \
-      |sed -n "s/^Location:.*tag.v\([0-9\.]*\).*/\1/p"
+    #curl -Ls https://raw.githubusercontent.com/hortonworks/cloudbreak-deployer/master/VERSION
+    LATEST_URL="https://github.com/hortonworks/cloudbreak-deployer/releases/latest"
+    if [[ "$CB_HTTP_PROXY" ]]; then
+        VERSION=$(curl --proxy $CB_HTTP_PROXY -I $LATEST_URL 2>&1)
+    elif [[ "$CB_HTTPS_PROXY" ]]; then
+        VERSION=$(curl --proxy $CB_HTTPS_PROXY -I $LATEST_URL 2>&1)
+    else
+        VERSION=$(curl -I $LATEST_URL 2>&1)
+    fi
+    RET=$?
+    if  [[ "$RET" != 0 ]]; then
+        error "curl returned with error $RET"
+
+        if [[ "$CB_HTTP_PROXY" ]] || [[ "$CB_HTTPS_PROXY" ]]; then
+            warn "Couldn't get latest version. Check your proxy settings in your Profile"
+        fi
+    else
+        echo "$VERSION" | sed -n "s/^Location:.*tag.v\([0-9\.]*\).*/\1/p"
+    fi
 }
 
 init-profile-deprecated() {
@@ -322,9 +343,8 @@ doctor() {
 }
 
 network-doctor() {
-
     if [[ "$SKIP_NETWORK_DOCTOR" ]] || [[ "$CB_HTTP_PROXY" ]] || [[ "$CB_HTTPS_PROXY" ]] || [[ "$http_proxy" ]] || [[ "$https_proxy" ]]; then
-        info "network checks are skippen in case you are using porxy"
+        info "network checks are skipped in case you are using proxy"
         return
     fi
 
@@ -527,7 +547,7 @@ _exit() {
 }
 
 is_command_needs_profile() {
-    [[ ' '"bash-complete help init machine version update delete"' ' != *" $1 "* ]]
+    [[ ' '"bash-complete help init machine delete"' ' != *" $1 "* ]]
 }
 
 copy_cbd_output_to_log() {
