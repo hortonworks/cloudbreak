@@ -25,8 +25,7 @@
       "Description" : "Id of the VPC where to deploy the cluster",
       "Type" : "String",
       "MinLength": "12",
-      "MaxLength": "12",
-      "AllowedPattern" : "vpc-[a-z0-9]{8}"
+      "AllowedPattern" : "vpc-[a-z0-9]*"
     },
 
     <#if !existingSubnet>
@@ -44,7 +43,7 @@
       "Type" : "String",
       "MinLength": "15",
       "MaxLength": "255",
-      "AllowedPattern" : "subnet-[a-z0-9]{8}(?:,subnet-[a-z0-9]{8})*"
+      "AllowedPattern" : "subnet-[a-z0-9]*(?:,subnet-[a-z0-9]*)*"
     },
     </#if>
 
@@ -53,8 +52,7 @@
        "Description" : "Id of the internet gateway used by the VPC",
        "Type" : "String",
        "MinLength": "12",
-       "MaxLength": "12",
-       "AllowedPattern" : "igw-[a-z0-9]{8}"
+       "AllowedPattern" : "igw-[a-z0-9]*"
     },
     </#if>
 
@@ -103,8 +101,7 @@
       "Description" : "AMI that's used to start instances",
       "Type" : "String",
       "MinLength": "12",
-      "MaxLength": "12",
-      "AllowedPattern" : "ami-[a-z0-9]{8}",
+      "AllowedPattern" : "ami-[a-z0-9]*",
       "ConstraintDescription" : "must follow pattern: ami-xxxxxxxx"
     },
 
