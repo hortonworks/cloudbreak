@@ -1,12 +1,17 @@
 package com.sequenceiq.cloudbreak.blueprint.kerberos;
 
-import org.springframework.stereotype.Service;
+import java.io.IOException;
+import java.util.Map;
 
+import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
+
+import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Strings;
 import com.google.gson.Gson;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
-import com.sequenceiq.cloudbreak.type.KerberosType;
+import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 @Service
 public class KerberosDetailService {
@@ -16,7 +21,10 @@ public class KerberosDetailService {
     private final Gson gson = new Gson();
 
     public String resolveTypeForKerberos(KerberosConfig kerberosConfig) {
-        return kerberosConfig.getType() == KerberosType.EXISTING_AD ? "active-directory" : "mit-kdc";
+        if (!Strings.isNullOrEmpty(kerberosConfig.getContainerDn()) && !Strings.isNullOrEmpty(kerberosConfig.getLdapUrl())) {
+            return "active-directory";
+        }
+        return "mit-kdc";
     }
 
     public String resolveHostForKerberos(Cluster cluster, String defaultHost) {
@@ -46,5 +54,22 @@ public class KerberosDetailService {
     public String resolvePrincipalForKerberos(KerberosConfig kerberosConfig) {
         return Strings.isNullOrEmpty(kerberosConfig.getPrincipal()) ? kerberosConfig.getAdmin() + PRINCIPAL
                 : kerberosConfig.getPrincipal();
+    }
+
+    public boolean isAmbariManagedKerberosPackages(KerberosConfig kerberosConfig) throws IOException {
+        if (!StringUtils.hasLength(kerberosConfig.getDescriptor())) {
+            return true;
+        }
+        try {
+            JsonNode node = JsonUtil.readTree(kerberosConfig.getDescriptor()).get("kerberos-env").get("properties").get("install_packages");
+            return node.asBoolean();
+        } catch (NullPointerException ignored) {
+            return true;
+        }
+    }
+
+    public Map<String, Object> getKerberosEnvProperties(KerberosConfig kerberosConfig) {
+        Map<String, Object> kerberosEnv = (Map<String, Object>) gson.fromJson(kerberosConfig.getDescriptor(), Map.class).get("kerberos-env");
+        return (Map<String, Object>) kerberosEnv.get("properties");
     }
 }

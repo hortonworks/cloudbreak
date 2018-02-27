@@ -1,0 +1,22 @@
+[logging]
+ default = FILE:/var/log/krb5libs.log
+ kdc = FILE:/var/log/krb5kdc.log
+ admin_server = FILE:/var/log/kadmind.log
+
+[libdefaults]
+ dns_lookup_realm = false
+ ticket_lifetime = 24h
+ renew_lifetime = 7d
+ forwardable = true
+ rdns = false
+ default_realm = {{ salt['pillar.get']('kerberos:realm')|upper }}
+
+[realms]
+ {{ salt['pillar.get']('kerberos:realm')|upper }} = {
+  kdc = {{ salt['pillar.get']('kerberos:url') }}
+  admin_server = {{ salt['pillar.get']('kerberos:adminUrl') }}
+ }
+
+[domain_realm]
+ .{{ salt['grains.get']('domain') }} = {{ salt['pillar.get']('kerberos:realm')|upper }}
+ {{ salt['grains.get']('domain') }} = {{ salt['pillar.get']('kerberos:realm')|upper }}
