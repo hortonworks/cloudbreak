@@ -6658,7 +6658,7 @@ paths:
         name: "body"
         required: false
         schema:
-          $ref: "#/definitions/StackblueprintRequest"
+          $ref: "#/definitions/StackValidationRequest"
       responses:
         default:
           description: "successful operation"
@@ -9275,7 +9275,7 @@ definitions:
       defaultRegion:
         type: "string"
         description: "default regions"
-  StackblueprintRequest:
+  StackValidationRequest:
     type: "object"
     required:
     - "hostGroups"
