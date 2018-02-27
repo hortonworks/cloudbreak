@@ -26,7 +26,7 @@ public class NifiConfigProvider implements BlueprintComponentConfigProvider {
     private HdfClusterLocator hdfClusterLocator;
 
     @Override
-    public String configure(BlueprintPreparationObject source, String blueprintText) {
+    public String customTextManipulation(BlueprintPreparationObject source, String blueprintText) {
         Set<String> nifiMasters = blueprintProcessor.getHostGroupsWithComponent(blueprintText, "NIFI_MASTER");
         Set<InstanceGroup> nifiIgs = source.getHostGroups().stream().filter(hg -> nifiMasters.contains(hg.getName())).map(hg -> hg.getConstraint()
                 .getInstanceGroup()).collect(Collectors.toSet());

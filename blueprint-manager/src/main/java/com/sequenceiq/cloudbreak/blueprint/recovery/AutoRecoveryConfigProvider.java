@@ -18,16 +18,18 @@ public class AutoRecoveryConfigProvider implements BlueprintComponentConfigProvi
     private BlueprintProcessor blueprintProcessor;
 
     @Override
-    public String configure(BlueprintPreparationObject source, String blueprintText) {
+    public List<BlueprintConfigurationEntry> getConfigurationEntries(BlueprintPreparationObject source, String blueprintText) {
         List<BlueprintConfigurationEntry> bpConfigs = new ArrayList<>();
         bpConfigs.add(new BlueprintConfigurationEntry("cluster-env", "recovery_enabled", "true"));
         bpConfigs.add(new BlueprintConfigurationEntry("cluster-env", "recovery_type", "AUTO_START"));
-        blueprintText = blueprintProcessor.addConfigEntries(blueprintText, bpConfigs, true);
+        return bpConfigs;
+    }
 
-        bpConfigs = new ArrayList<>();
+    @Override
+    public List<BlueprintConfigurationEntry> getSettingsEntries(BlueprintPreparationObject source, String blueprintText) {
+        List<BlueprintConfigurationEntry> bpConfigs = new ArrayList<>();
         bpConfigs.add(new BlueprintConfigurationEntry("recovery_settings", "recovery_enabled", "true"));
-        blueprintText = blueprintProcessor.addSettingsEntries(blueprintText, bpConfigs, true);
-        return blueprintText;
+        return bpConfigs;
     }
 
     @Override

@@ -153,13 +153,13 @@ public class RecipeEngine {
                 for (HostGroup hostGroup : hostGroups) {
                     String script = FileReaderUtils.readFileFromClasspath("scripts/configure-container-executor.sh");
                     RecipeScript recipeScript = new RecipeScript(script, RecipeType.POST_CLUSTER_INSTALL);
-                    Recipe recipe = recipeBuilder.buildRecipes("configure-container-executor",
+                    Recipe recipe = recipeBuilder.buildRecipes("getConfigurationEntries-container-executor",
                             Collections.singletonList(recipeScript)).get(0);
                     hostGroup.addRecipe(recipe);
                 }
             }
         } catch (IOException e) {
-            LOGGER.warn("Cannot configure container executor", e);
+            LOGGER.warn("Cannot getConfigurationEntries container executor", e);
         }
     }
 

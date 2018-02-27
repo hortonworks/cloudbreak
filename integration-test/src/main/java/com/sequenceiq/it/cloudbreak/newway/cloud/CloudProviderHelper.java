@@ -36,7 +36,7 @@ public abstract class CloudProviderHelper extends CloudProvider {
     private final TestParameter testParameter;
 
     protected CloudProviderHelper(TestParameter testParameter) {
-        LOGGER.info("TestParemeters length: {}", testParameter.size());
+        LOGGER.info("TestParemeters length: {}");
         this.testParameter = testParameter;
     }
 

@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import com.sequenceiq.ambari.client.AmbariClient;
+import com.sequenceiq.cloudbreak.blueprint.template.views.LdapView;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariDatabase;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.common.model.OrchestratorType;
@@ -43,6 +44,8 @@ public class BlueprintPreparationObject {
 
     private Map<String, List<String>> fqdns;
 
+    private Optional<LdapView> ldapView;
+
     private BlueprintPreparationObject(BlueprintPreparationObject.Builder builder) {
         this.ambariClient = builder.ambariClient;
         this.stack = builder.stack;
@@ -55,6 +58,7 @@ public class BlueprintPreparationObject {
         this.smartSenseSubscriptionId = builder.smartSenseSubscriptionId;
         this.orchestratorType = builder.orchestratorType;
         this.fqdns = builder.fqdns;
+        this.ldapView = builder.ldapView;
     }
 
     public Stack getStack() {
@@ -109,6 +113,10 @@ public class BlueprintPreparationObject {
         return fqdns;
     }
 
+    public Optional<LdapView> getLdapView() {
+        return ldapView;
+    }
+
     public static class Builder {
 
         private Stack stack;
@@ -132,6 +140,8 @@ public class BlueprintPreparationObject {
         private OrchestratorType orchestratorType = OrchestratorType.HOST;
 
         private Map<String, List<String>> fqdns = new HashMap<>();
+
+        private Optional<LdapView> ldapView;
 
         public static Builder builder() {
             return new Builder();
@@ -189,6 +199,11 @@ public class BlueprintPreparationObject {
 
         public Builder withIdentityUser(IdentityUser identityUser) {
             this.identityUser = identityUser;
+            return this;
+        }
+
+        public Builder withLdapView(Optional<LdapView> ldapView) {
+            this.ldapView = ldapView;
             return this;
         }
 

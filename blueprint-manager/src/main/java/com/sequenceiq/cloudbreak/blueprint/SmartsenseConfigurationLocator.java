@@ -14,7 +14,7 @@ public class SmartsenseConfigurationLocator {
 
     private static final String HST_SERVER_COMPONENT = "HST_SERVER";
 
-    @Value("${cb.smartsense.configure:false}")
+    @Value("${cb.smartsense.getConfigurationEntries:false}")
     private boolean configureSmartSense;
 
     @Inject

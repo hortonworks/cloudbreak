@@ -60,7 +60,26 @@ public class CentralBlueprintUpdater {
 
         for (BlueprintComponentConfigProvider provider : blueprintComponentConfigProviders) {
             if (blueprintProcessor.componentsExistsInBlueprint(provider.components(), blueprintText) || provider.additionalCriteria(source, blueprintText)) {
-                blueprintText = provider.configure(source, blueprintText);
+                List<BlueprintConfigurationEntry> configurationEntries = provider.getConfigurationEntries(source, blueprintText);
+                blueprintText = blueprintProcessor.addConfigEntries(blueprintText, configurationEntries, true);
+
+                List<BlueprintConfigurationEntry> settingsEntries = provider.getSettingsEntries(source, blueprintText);
+                blueprintText = blueprintProcessor.addSettingsEntries(blueprintText, settingsEntries, true);
+
+                Map<HostgroupEntry, List<BlueprintConfigurationEntry>> hostgroupConfigs = provider.getHostgroupConfigurationEntries(source, blueprintText);
+
+                blueprintText = provider.customTextManipulation(source, blueprintText);
+
+                if (provider.ldapConfigShouldApply(source, blueprintText)) {
+                    List<BlueprintConfigurationEntry> entries = provider.ldapConfigs(source, blueprintText);
+                    blueprintText = blueprintProcessor.addConfigEntries(blueprintText, entries, true);
+                }
+                if (provider.rdsConfigShouldApply(source, blueprintText)){
+                    List<BlueprintConfigurationEntry> entries = provider.rdsConfigs(source, blueprintText);
+                    blueprintText = blueprintProcessor.addConfigEntries(blueprintText, entries, true);
+                }
+
+
             }
         }
 

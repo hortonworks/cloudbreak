@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.blueprint.llap;
+package com.sequenceiq.cloudbreak.blueprint.hive;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,12 +24,12 @@ public class LlapConfigProvider implements BlueprintComponentConfigProvider {
     private BlueprintProcessor blueprintProcessor;
 
     @Override
-    public String configure(BlueprintPreparationObject source, String blueprintText) {
+    public List<BlueprintConfigurationEntry> getConfigurationEntries(BlueprintPreparationObject source, String blueprintText) {
         LOGGER.info("Hive server interactive exists in Blueprint");
         List<BlueprintConfigurationEntry> configs = new ArrayList<>();
-        configs.add(new BlueprintConfigurationEntry("hive-interactive-env", "num_llap_nodes",
-                String.valueOf(source.getStack().getFullNodeCount() - 1)));
-        return blueprintProcessor.addConfigEntries(blueprintText, configs, false);
+        String nodeCount = String.valueOf(source.getStack().getFullNodeCount() - 1);
+        configs.add(new BlueprintConfigurationEntry("hive-interactive-env", "num_llap_nodes", nodeCount));
+        return configs;
     }
 
     @Override

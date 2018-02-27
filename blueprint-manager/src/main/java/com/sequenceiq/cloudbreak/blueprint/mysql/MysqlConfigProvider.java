@@ -18,7 +18,7 @@ public class MysqlConfigProvider implements BlueprintComponentConfigProvider {
     private BlueprintProcessor blueprintProcessor;
 
     @Override
-    public String configure(BlueprintPreparationObject source, String blueprintText) {
+    public String customTextManipulation(BlueprintPreparationObject source, String blueprintText) {
         LOGGER.info("MYSQL_SERVER exists in Blueprint");
         return blueprintProcessor.removeComponentFromBlueprint("MYSQL_SERVER", blueprintText);
     }
