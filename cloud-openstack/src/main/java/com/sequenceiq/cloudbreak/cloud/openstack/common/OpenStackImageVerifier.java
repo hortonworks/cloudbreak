@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 
 import org.openstack4j.api.OSClient;
 import org.openstack4j.model.image.v2.Image;
+import org.openstack4j.model.image.v2.Image.ImageStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -17,9 +18,19 @@ public class OpenStackImageVerifier {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OpenStackImageVerifier.class);
 
-    public void exist(OSClient<?> osClient, String name) {
+    public boolean exist(OSClient<?> osClient, String name) {
+        boolean exist = false;
+        if (getStatus(osClient, name) != null) {
+            exist = true;
+        }
+        return exist;
+    }
+
+    public ImageStatus getStatus(OSClient<?> osClient, String name) {
+        ImageStatus imageStatus;
         List<? extends Image> images = osClient.imagesV2().list(Collections.singletonMap("name", name));
         if (images == null || images.isEmpty()) {
+            imageStatus = null;
             LOGGER.error("OpenStack image: {} not found", name);
             List<? extends Image> allImages = osClient.imagesV2().list();
             if (allImages != null) {
@@ -27,8 +38,7 @@ public class OpenStackImageVerifier {
                     LOGGER.info("Available images: {}, entry: {}", image.getName(), image);
                 }
             }
-            throw new CloudConnectorException(String.format("OpenStack image: %s not found", name));
-
+            LOGGER.warn("OpenStack image: {} not found", name);
         } else if (images.size() > 1) {
             for (Image image : images) {
                 LOGGER.info("Multiple images found: {}, entry: {}", image.getName(), image);
@@ -37,6 +47,8 @@ public class OpenStackImageVerifier {
             throw new CloudConnectorException(String.format("OpenStack image: %s not found with ids: %s", name, String.join(", ", imageIds)));
         } else {
             LOGGER.info("OpenStack Image found: {}, entry: {}", name, images);
+            imageStatus = images.get(0).getStatus();
         }
+        return imageStatus;
     }
 }
