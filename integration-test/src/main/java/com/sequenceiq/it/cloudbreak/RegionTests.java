@@ -17,6 +17,7 @@ import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
+import javax.ws.rs.BadRequestException;
 import javax.ws.rs.ForbiddenException;
 import java.util.Collection;
 
@@ -56,10 +57,10 @@ public class RegionTests extends CloudbreakTest {
             given(Credential.request()
                     .withName(cloudProvider.getCredentialName()));
             when(Credential.delete());
-        } catch (ForbiddenException e) {
+        } catch (ForbiddenException | BadRequestException e) {
             String exceptionMessage = e.getResponse().readEntity(String.class);
             this.errorMessage = exceptionMessage.substring(exceptionMessage.lastIndexOf(":") + 1);
-            LOGGER.info("ForbiddenException message ::: {}", this.errorMessage);
+            LOGGER.info("Clean Up Exception message ::: {}", this.errorMessage);
         }
     }
 
@@ -160,7 +161,7 @@ public class RegionTests extends CloudbreakTest {
                             .get(cloudProvider.region());
 
                     if (cloudProvider.getPlatform().equalsIgnoreCase("AZURE")) {
-                        LOGGER.info("{} Default Region's Availibility Zone is not available.",
+                        LOGGER.info("{} Default Region's Availibility Zone is not supported.",
                                 cloudProvider.getPlatform());
                         Assert.assertTrue(availibilityZones.isEmpty());
                     } else {

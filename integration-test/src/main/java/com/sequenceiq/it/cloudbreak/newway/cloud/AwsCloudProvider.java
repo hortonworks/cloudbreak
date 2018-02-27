@@ -71,6 +71,14 @@ public class AwsCloudProvider extends CloudProviderHelper {
     }
 
     @Override
+    public String availibilityZone() {
+        String availibilityZone = "eu-west-1a";
+        String availibilityZoneParam = getTestParameter().get("awsAvailibilityZone");
+
+        return availibilityZoneParam == null ? availibilityZone : availibilityZoneParam;
+    }
+
+    @Override
     StackAuthenticationRequest stackauth() {
         StackAuthenticationRequest stackauth = new StackAuthenticationRequest();
 

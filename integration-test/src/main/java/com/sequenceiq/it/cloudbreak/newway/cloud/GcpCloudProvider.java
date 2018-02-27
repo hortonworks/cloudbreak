@@ -49,6 +49,14 @@ public class GcpCloudProvider extends CloudProviderHelper {
     }
 
     @Override
+    public String availibilityZone() {
+        String availibilityZone = "europe-west1-b";
+        String availibilityZoneParam = getTestParameter().get("gcpAvailibilityZone");
+
+        return availibilityZoneParam == null ? availibilityZone : availibilityZoneParam;
+    }
+
+    @Override
     StackAuthenticationRequest stackauth() {
         StackAuthenticationRequest stackauth = new StackAuthenticationRequest();
 
