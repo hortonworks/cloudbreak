@@ -45,7 +45,7 @@ public class ZeppelinConfigProvider implements BlueprintComponentConfigProvider 
     private BlueprintProcessor blueprintProcessor;
 
     @Override
-    public String configure(BlueprintPreparationObject source, String blueprintText) {
+    public String customTextManipulation(BlueprintPreparationObject source, String blueprintText) {
         LOGGER.info("Zeppelin exists in Blueprint");
         List<BlueprintConfigurationEntry> configs = getConfigs(source.getStack().getCluster(), source.getStackRepoDetails());
         return blueprintProcessor.addConfigEntries(blueprintText, configs, false);

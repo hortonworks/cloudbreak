@@ -25,7 +25,7 @@ public class HbaseConfigProvider implements BlueprintComponentConfigProvider {
     private HdfClusterLocator hdfClusterLocator;
 
     @Override
-    public String configure(BlueprintPreparationObject source, String blueprintText) {
+    public String customTextManipulation(BlueprintPreparationObject source, String blueprintText) {
         String processingBlueprint = blueprintText;
         try {
             JsonNode root = JsonUtil.readTree(processingBlueprint);
