@@ -49,7 +49,7 @@ public class KerberosBlueprintServiceTest {
                 .withCluster(cluster)
                 .build();
 
-        String actualBlueprint = underTest.configure(object, blueprint.getBlueprintText());
+        String actualBlueprint = underTest.customTextManipulation(object, blueprint.getBlueprintText());
 
         Assert.assertEquals(expectedBlueprint, actualBlueprint);
     }
@@ -65,7 +65,7 @@ public class KerberosBlueprintServiceTest {
                 .withCluster(cluster)
                 .build();
 
-        String actualBlueprint = underTest.configure(object, blueprint.getBlueprintText());
+        String actualBlueprint = underTest.customTextManipulation(object, blueprint.getBlueprintText());
 
         String expectedBlueprint = FileReaderUtils.readFileFromClasspath("blueprints/bp-not-kerberized-cloudbreak-managed-expected.bp");
         Assert.assertEquals(expectedBlueprint, actualBlueprint);
@@ -88,7 +88,7 @@ public class KerberosBlueprintServiceTest {
                 .withCluster(cluster)
                 .build();
 
-        String actualBlueprint = underTest.configure(object, blueprint.getBlueprintText());
+        String actualBlueprint = underTest.customTextManipulation(object, blueprint.getBlueprintText());
 
         String expectedBlueprint = FileReaderUtils.readFileFromClasspath("blueprints/bp-not-kerberized-custom-config-expected.bp");
         Assert.assertEquals(expectedBlueprint, actualBlueprint);
@@ -113,7 +113,7 @@ public class KerberosBlueprintServiceTest {
                 .withAmbariClient(kerberosService)
                 .withCluster(cluster)
                 .build();
-        String actualBlueprint = underTest.configure(object, blueprint.getBlueprintText());
+        String actualBlueprint = underTest.customTextManipulation(object, blueprint.getBlueprintText());
 
         String expectedBlueprint = FileReaderUtils.readFileFromClasspath("blueprints/bp-not-kerberized-existing-expected.bp");
         Assert.assertEquals(expectedBlueprint, actualBlueprint);

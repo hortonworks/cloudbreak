@@ -30,7 +30,7 @@ public class KerberosBlueprintService implements BlueprintComponentConfigProvide
     private KerberosDetailService kerberosDetailService;
 
     @Override
-    public String configure(BlueprintPreparationObject source, String blueprintText) {
+    public String customTextManipulation(BlueprintPreparationObject source, String blueprintText) {
         Cluster cluster = source.getCluster();
         if (source.getStack().getInstanceGroups() != null && !source.getInstanceGroups().isEmpty()) {
             KerberosConfig kerberosConfig = source.getCluster().getKerberosConfig();

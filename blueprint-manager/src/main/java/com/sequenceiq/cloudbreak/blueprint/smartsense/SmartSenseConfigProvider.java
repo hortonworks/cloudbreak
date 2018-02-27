@@ -65,7 +65,7 @@ public class SmartSenseConfigProvider implements BlueprintComponentConfigProvide
     private SmartsenseConfigurationLocator smartsenseConfigurationLocator;
 
     @Override
-    public String configure(BlueprintPreparationObject source, String blueprintText) {
+    public String customTextManipulation(BlueprintPreparationObject source, String blueprintText) {
         String smartSenseId = source.getSmartSenseSubscriptionId().get();
         Set<String> hostGroupNames = source.getHostGroups().stream().map(getHostGroupNameMapper()).collect(Collectors.toSet());
         blueprintText = addSmartSenseServerToBp(blueprintText, source.getHostGroups(), hostGroupNames);

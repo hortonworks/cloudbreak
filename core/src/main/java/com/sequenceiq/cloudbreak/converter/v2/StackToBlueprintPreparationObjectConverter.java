@@ -9,9 +9,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.blueprint.BlueprintPreparationObject;
+import com.sequenceiq.cloudbreak.blueprint.template.views.LdapView;
 import com.sequenceiq.cloudbreak.common.service.user.UserFilterField;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
+import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.SmartSenseSubscription;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
@@ -57,6 +59,7 @@ public class StackToBlueprintPreparationObjectConverter extends AbstractConversi
     public BlueprintPreparationObject convert(Stack source) {
         try {
             Optional<SmartSenseSubscription> aDefault = smartSenseSubscriptionService.getDefault();
+            LdapConfig ldapConfig = source.getCluster().getLdapConfig();
 
             return BlueprintPreparationObject.Builder.builder()
                     .withStack(source)
@@ -70,6 +73,7 @@ public class StackToBlueprintPreparationObjectConverter extends AbstractConversi
                     .withOrchestratorType(orchestratorTypeResolver.resolveType(source.getOrchestrator()))
                     .withFqdns(ambariFqdnCollector.collectFqdns(source))
                     .withSmartSenseSubscriptionId(aDefault.isPresent() ? Optional.of(aDefault.get().getSubscriptionId()) : Optional.empty())
+                    .withLdapView(ldapConfig == null ? Optional.empty() : Optional.of(new LdapView(ldapConfig)))
                     .build();
         } catch (CloudbreakException e) {
             throw new CloudbreakServiceException(e.getMessage(), e);
