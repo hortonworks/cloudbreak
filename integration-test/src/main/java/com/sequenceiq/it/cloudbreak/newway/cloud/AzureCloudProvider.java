@@ -46,6 +46,14 @@ public class AzureCloudProvider extends CloudProviderHelper {
     }
 
     @Override
+    public String availibilityZone() {
+        String availibilityZone = "";
+        String availibilityZoneParam = getTestParameter().get("azureAvailibilityZone");
+
+        return availibilityZoneParam == null ? availibilityZone : availibilityZoneParam;
+    }
+
+    @Override
     StackAuthenticationRequest stackauth() {
         StackAuthenticationRequest stackauth = new StackAuthenticationRequest();
         stackauth.setPublicKey(getTestParameter().get(INTEGRATIONTEST_PUBLIC_KEY_FILE).substring(BEGIN_INDEX));

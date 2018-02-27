@@ -25,4 +25,6 @@ public abstract class CloudProvider {
     public abstract String getCredentialName();
 
     public abstract String region();
+
+    public abstract String availibilityZone();
 }

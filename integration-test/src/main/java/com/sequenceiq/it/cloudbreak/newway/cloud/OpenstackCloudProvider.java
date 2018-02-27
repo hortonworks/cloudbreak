@@ -50,6 +50,14 @@ public class OpenstackCloudProvider extends CloudProviderHelper {
     }
 
     @Override
+    public String availibilityZone() {
+        String availibilityZone = "nova";
+        String availibilityZoneParam = getTestParameter().get("openstackAvailibilityZone");
+
+        return availibilityZoneParam == null ? availibilityZone : availibilityZoneParam;
+    }
+
+    @Override
     StackAuthenticationRequest stackauth() {
         StackAuthenticationRequest stackauth = new StackAuthenticationRequest();
 

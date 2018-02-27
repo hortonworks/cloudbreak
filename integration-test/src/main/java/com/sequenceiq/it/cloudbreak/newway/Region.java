@@ -36,8 +36,12 @@ public class Region extends Entity {
         return this;
     }
 
-    static Function<IntegrationTestContext, Region> getTestContext(String key) {
+    static Function<IntegrationTestContext, Region> getTestContextRegion(String key) {
         return (testContext) -> testContext.getContextParam(key, Region.class);
+    }
+
+    public static Function<IntegrationTestContext, Region> getTestContextRegion() {
+        return getTestContextRegion(REGION);
     }
 
     static Function<IntegrationTestContext, Region> getNew() {
@@ -49,7 +53,7 @@ public class Region extends Entity {
     }
 
     public static Action<Region> getPlatformRegions(String key) {
-        return new Action<>(getTestContext(key), RegionAction::getRegionsByCredentialId);
+        return new Action<>(getTestContextRegion(key), RegionAction::getRegionsByCredentialId);
     }
 
     public static Action<Region> getPlatformRegions() {
@@ -57,7 +61,7 @@ public class Region extends Entity {
     }
 
     public static Assertion<Region> assertThis(BiConsumer<Region, IntegrationTestContext> check) {
-        return new Assertion<>(getTestContext(GherkinTest.RESULT), check);
+        return new Assertion<>(getTestContextRegion(GherkinTest.RESULT), check);
     }
 
     public PlatformResourceRequestJson getPlatformResourceRequest() {
