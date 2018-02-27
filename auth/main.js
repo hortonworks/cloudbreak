@@ -921,15 +921,16 @@ function continueInit() {
                                                 'Content-Type': 'application/json'
                                             }
                                         }, function(error, response, body) {
-                                            if (response.statusCode == 200) {
-                                                var resultResource = JSON.parse(body).resources[0]
-                                                var isAdmin = (adminGroupMemberIds.indexOf(resultResource.id) == -1) ? false : true
+                                            var resultResource = JSON.parse(body)
+                                            if (response.statusCode == 200 && resultResource.resources.length > 0) {
+                                                var resource = resultResource.resources[0]
+                                                var isAdmin = adminGroupMemberIds.indexOf(resource.id) > -1
                                                 users.push({
-                                                    id: resultResource.id,
-                                                    username: resultResource.userName,
-                                                    active: resultResource.active,
+                                                    id: resource.id,
+                                                    username: resource.userName,
+                                                    active: resource.active,
                                                     admin: isAdmin,
-                                                    groups: resultResource.groups
+                                                    groups: resource.groups
                                                 })
                                             }
                                             completed_requests++;
