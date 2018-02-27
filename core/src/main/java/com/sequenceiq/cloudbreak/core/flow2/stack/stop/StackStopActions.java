@@ -80,7 +80,7 @@ public class StackStopActions {
         return new AbstractStackStopAction<StopInstancesResult>(StopInstancesResult.class) {
             @Override
             protected void doExecute(StackStartStopContext context, StopInstancesResult payload, Map<Object, Object> variables) {
-                stackStartStopService.finishStackStop(context);
+                stackStartStopService.finishStackStop(context, payload);
                 metricService.incrementMetricCounter(MetricType.STACK_STOP_SUCCESSFUL, context.getStack());
                 sendEvent(context);
             }

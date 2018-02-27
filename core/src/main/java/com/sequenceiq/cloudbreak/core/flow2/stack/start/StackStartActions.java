@@ -87,6 +87,7 @@ public class StackStartActions {
         return new AbstractStackStartAction<StartInstancesResult>(StartInstancesResult.class) {
             @Override
             protected void doExecute(StackStartStopContext context, StartInstancesResult payload, Map<Object, Object> variables) {
+                stackStartStopService.validateStackStartResult(context, payload);
                 sendEvent(context);
             }
 
@@ -104,7 +105,7 @@ public class StackStartActions {
         return new AbstractStackStartAction<CollectMetadataResult>(CollectMetadataResult.class) {
             @Override
             protected void doExecute(StackStartStopContext context, CollectMetadataResult payload, Map<Object, Object> variables) {
-                stackStartStopService.finishStackStart(context.getStack(), payload.getResults());
+                stackStartStopService.finishStackStart(context, payload.getResults());
                 metricService.incrementMetricCounter(MetricType.STACK_START_SUCCESSFUL, context.getStack());
                 sendEvent(context);
             }
