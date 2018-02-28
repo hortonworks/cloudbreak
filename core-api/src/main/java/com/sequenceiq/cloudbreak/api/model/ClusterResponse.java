@@ -9,6 +9,7 @@ import javax.validation.Valid;
 
 import com.fasterxml.jackson.annotation.JsonRawValue;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.sequenceiq.cloudbreak.api.model.proxy.ProxyConfigResponse;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
@@ -65,6 +66,12 @@ public class ClusterResponse implements JsonEntity {
 
     @ApiModelProperty(ClusterModelDescription.RDSCONFIGS)
     private Set<RDSConfigResponse> rdsConfigs = new HashSet<>();
+
+    @ApiModelProperty(ClusterModelDescription.PROXY_CONFIG_ID)
+    private Long proxyConfigId;
+
+    @ApiModelProperty(ClusterModelDescription.PROXY_CONFIG)
+    private ProxyConfigResponse proxyConfig;
 
     @ApiModelProperty(ClusterModelDescription.SERVICE_ENDPOINT_MAP)
     private Map<String, String> serviceEndPoints = new HashMap<>();
@@ -388,5 +395,21 @@ public class ClusterResponse implements JsonEntity {
 
     public void setUptime(Long uptime) {
         this.uptime = uptime;
+    }
+
+    public Long getProxyConfigId() {
+        return proxyConfigId;
+    }
+
+    public void setProxyConfigId(Long proxyConfigId) {
+        this.proxyConfigId = proxyConfigId;
+    }
+
+    public ProxyConfigResponse getProxyConfig() {
+        return proxyConfig;
+    }
+
+    public void setProxyConfig(ProxyConfigResponse proxyConfig) {
+        this.proxyConfig = proxyConfig;
     }
 }

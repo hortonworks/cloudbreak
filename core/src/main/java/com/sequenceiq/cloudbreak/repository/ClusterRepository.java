@@ -12,6 +12,7 @@ import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
+import com.sequenceiq.cloudbreak.domain.ProxyConfig;
 
 @EntityType(entityClass = Cluster.class)
 public interface ClusterRepository extends CrudRepository<Cluster, Long> {
@@ -39,4 +40,6 @@ public interface ClusterRepository extends CrudRepository<Cluster, Long> {
     Long countByBlueprint(Blueprint blueprint);
 
     Long countByLdapConfig(LdapConfig ldapConfig);
+
+    Long countByProxyConfig(ProxyConfig proxyConfig);
 }

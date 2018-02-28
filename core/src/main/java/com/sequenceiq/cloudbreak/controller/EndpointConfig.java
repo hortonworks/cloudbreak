@@ -140,6 +140,7 @@ public class EndpointConfig extends ResourceConfig {
         register(SettingsController.class);
         register(UtilController.class);
         register(RdsConfigController.class);
+        register(ProxyConfigController.class);
         register(LdapController.class);
         register(SmartSenseSubscriptionController.class);
         register(FlexSubscriptionController.class);

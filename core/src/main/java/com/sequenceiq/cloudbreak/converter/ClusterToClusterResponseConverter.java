@@ -45,6 +45,7 @@ import com.sequenceiq.cloudbreak.json.JsonHelper;
 import com.sequenceiq.cloudbreak.blueprint.validation.BlueprintValidator;
 import com.sequenceiq.cloudbreak.blueprint.validation.StackServiceComponentDescriptor;
 import com.sequenceiq.cloudbreak.blueprint.validation.StackServiceComponentDescriptors;
+import com.sequenceiq.cloudbreak.converter.mapper.ProxyConfigMapper;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.ExposedServices;
@@ -85,6 +86,9 @@ public class ClusterToClusterResponseConverter extends AbstractConversionService
 
     @Inject
     private StackUtil stackUtil;
+
+    @Inject
+    private ProxyConfigMapper proxyConfigMapper;
 
     @Override
     public ClusterResponse convert(Cluster source) {
@@ -147,6 +151,7 @@ public class ClusterToClusterResponseConverter extends AbstractConversionService
             clusterResponse.setSecure(source.isSecure());
             clusterResponse.setKerberosResponse(getConversionService().convert(source.getKerberosConfig(), KerberosResponse.class));
         }
+        convertProxyConfig(source, clusterResponse);
         return clusterResponse;
     }
 
@@ -364,5 +369,12 @@ public class ClusterToClusterResponseConverter extends AbstractConversionService
             url = null;
         }
         return url;
+    }
+
+    private void convertProxyConfig(Cluster source, ClusterResponse clusterResponse) {
+        if (source.getProxyConfig() != null) {
+            clusterResponse.setProxyConfig(proxyConfigMapper.mapEntityToResponse(source.getProxyConfig()));
+            clusterResponse.setProxyConfigId(source.getProxyConfig().getId());
+        }
     }
 }

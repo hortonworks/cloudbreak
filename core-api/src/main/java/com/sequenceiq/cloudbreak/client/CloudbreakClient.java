@@ -36,6 +36,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v1.FlexSubscriptionEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.ImageCatalogV1Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.LdapConfigEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.NetworkEndpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v1.ProxyConfigEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.RdsConfigEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.RecipeEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.SecurityGroupEndpoint;
@@ -154,6 +155,10 @@ public class CloudbreakClient {
         return refreshIfNeededAndGet(RdsConfigEndpoint.class);
     }
 
+    public ProxyConfigEndpoint proxyConfigEndpoint() {
+        return refreshIfNeededAndGet(ProxyConfigEndpoint.class);
+    }
+
     public AccountPreferencesEndpoint accountPreferencesEndpoint() {
         return refreshIfNeededAndGet(AccountPreferencesEndpoint.class);
     }
@@ -240,6 +245,7 @@ public class CloudbreakClient {
         endpointWrapperHolder.setEndpoint(newEndpoint(NetworkEndpoint.class, headers));
         endpointWrapperHolder.setEndpoint(newEndpoint(RecipeEndpoint.class, headers));
         endpointWrapperHolder.setEndpoint(newEndpoint(RdsConfigEndpoint.class, headers));
+        endpointWrapperHolder.setEndpoint(newEndpoint(ProxyConfigEndpoint.class, headers));
         endpointWrapperHolder.setEndpoint(newEndpoint(AccountPreferencesEndpoint.class, headers));
         endpointWrapperHolder.setEndpoint(newEndpoint(BlueprintEndpoint.class, headers));
         endpointWrapperHolder.setEndpoint(newEndpoint(ClusterV1Endpoint.class, headers));

@@ -38,6 +38,8 @@ import com.sequenceiq.cloudbreak.blueprint.validation.StackServiceComponentDescr
 import com.sequenceiq.cloudbreak.blueprint.validation.StackServiceComponentDescriptors;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.common.model.OrchestratorType;
+import com.sequenceiq.cloudbreak.api.model.proxy.ProxyConfigResponse;
+import com.sequenceiq.cloudbreak.converter.mapper.ProxyConfigMapper;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Cluster;
@@ -45,6 +47,7 @@ import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
+import com.sequenceiq.cloudbreak.domain.ProxyConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.ClusterComponentConfigProvider;
@@ -104,6 +107,9 @@ public class ClusterToClusterResponseConverterTest extends AbstractEntityConvert
 
     @Mock
     private ClusterComponentConfigProvider componentConfigProvider;
+
+    @Mock
+    private ProxyConfigMapper proxyConfigMapper;
 
     private StackServiceComponentDescriptor stackServiceComponentDescriptor;
 
@@ -169,6 +175,9 @@ public class ClusterToClusterResponseConverterTest extends AbstractEntityConvert
         Stack stack = TestUtil.stack();
         Blueprint blueprint = TestUtil.blueprint();
         Cluster cluster = TestUtil.cluster(blueprint, stack, 1L);
+        ProxyConfig proxyConfig = new ProxyConfig();
+        proxyConfig.setId(1L);
+        cluster.setProxyConfig(proxyConfig);
         stack.setCluster(cluster);
         return cluster;
     }
@@ -195,6 +204,10 @@ public class ClusterToClusterResponseConverterTest extends AbstractEntityConvert
         given(nameJsonNode.asText()).willReturn("dummyName");
         given(componentConfigProvider.getAmbariRepo(any(Set.class))).willReturn(null);
         given(stackServiceComponentDescs.get(anyString())).willReturn(stackServiceComponentDescriptor);
+        ProxyConfigResponse proxyConfigResponse = new ProxyConfigResponse();
+        proxyConfigResponse.setId(1L);
+        given(proxyConfigMapper.mapEntityToResponse(any(ProxyConfig.class))).willReturn(proxyConfigResponse);
+
     }
 
     private StackServiceComponentDescriptor createStackServiceComponentDescriptor() {

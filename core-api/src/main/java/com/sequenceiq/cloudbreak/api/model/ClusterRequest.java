@@ -11,6 +11,7 @@ import javax.validation.constraints.Size;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonRawValue;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.sequenceiq.cloudbreak.api.model.proxy.ProxyConfigRequest;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
@@ -129,6 +130,12 @@ public class ClusterRequest implements JsonEntity {
     @ApiModelProperty(ClusterModelDescription.AMBARI_SECURITY_MASTER_KEY)
     @Size(max = 100, min = 5, message = "The length of the password has to be in range of 5 to 100")
     private String ambariSecurityMasterKey;
+
+    @ApiModelProperty(ClusterModelDescription.PROXY_CONFIG_ID)
+    private Long proxyConfigId;
+
+    @ApiModelProperty(ClusterModelDescription.PROXY_CONFIG)
+    private ProxyConfigRequest proxyConfigRequest;
 
     public String getDescription() {
         return description;
@@ -381,5 +388,21 @@ public class ClusterRequest implements JsonEntity {
 
     public void setAmbariSecurityMasterKey(String ambariSecurityMasterKey) {
         this.ambariSecurityMasterKey = ambariSecurityMasterKey;
+    }
+
+    public Long getProxyConfigId() {
+        return proxyConfigId;
+    }
+
+    public void setProxyConfigId(Long proxyConfigId) {
+        this.proxyConfigId = proxyConfigId;
+    }
+
+    public ProxyConfigRequest getProxyConfigRequest() {
+        return proxyConfigRequest;
+    }
+
+    public void setProxyConfigRequest(ProxyConfigRequest proxyConfigRequest) {
+        this.proxyConfigRequest = proxyConfigRequest;
     }
 }
