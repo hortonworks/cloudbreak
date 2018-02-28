@@ -30,15 +30,13 @@ public interface ProxyConfigEndpoint {
     @GET
     @Path("{id}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ProxyConfigOpDescription.GET_BY_ID, produces = ContentType.JSON, notes = Notes.PROXY_CONFIG_NOTES,
-            nickname = "getProxyConfig")
+    @ApiOperation(value = ProxyConfigOpDescription.GET_BY_ID, produces = ContentType.JSON, notes = Notes.PROXY_CONFIG_NOTES, nickname = "getProxyConfig")
     ProxyConfigResponse get(@PathParam("id") Long id);
 
     @DELETE
     @Path("{id}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ProxyConfigOpDescription.DELETE_BY_ID, produces = ContentType.JSON, notes = Notes.PROXY_CONFIG_NOTES,
-            nickname = "deleteProxyConfig")
+    @ApiOperation(value = ProxyConfigOpDescription.DELETE_BY_ID, produces = ContentType.JSON, notes = Notes.PROXY_CONFIG_NOTES, nickname = "deleteProxyConfig")
     void delete(@PathParam("id") Long id);
 
     @POST

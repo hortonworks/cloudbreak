@@ -9,7 +9,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.google.common.base.Preconditions;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
@@ -35,32 +34,38 @@ public class ProxyConfigService {
     private AuthorizationService authorizationService;
 
     public Set<ProxyConfig> retrievePrivateProxyConfigs(IdentityUser user) {
-        return proxyConfigRepository.findForUser(user.getUserId());
+        Set<ProxyConfig> proxyConfigs = proxyConfigRepository.findAllByOwner(user.getUserId());
+        authorizationService.hasReadPermission(proxyConfigs);
+        return proxyConfigs;
     }
 
     public ProxyConfig getPrivateProxyConfig(String name, IdentityUser user) {
-        ProxyConfig proxyConfig = proxyConfigRepository.findByNameInUser(name, user.getUserId());
+        ProxyConfig proxyConfig = proxyConfigRepository.findByNameAndOwner(name, user.getUserId());
         if (proxyConfig == null) {
             throw new NotFoundException(String.format("Proxy configuration '%s' not found.", name));
         }
+        authorizationService.hasReadPermission(proxyConfig);
         return proxyConfig;
     }
 
     public ProxyConfig getPublicProxyConfig(String name, IdentityUser user) {
-        ProxyConfig proxyConfig = proxyConfigRepository.findOneByName(name, user.getAccount());
+        ProxyConfig proxyConfig = proxyConfigRepository.findByNameAndAccount(name, user.getAccount());
         if (proxyConfig == null) {
             throw new NotFoundException(String.format("Proxy configuration '%s' not found.", name));
         }
+        authorizationService.hasReadPermission(proxyConfig);
         return proxyConfig;
     }
 
     public Set<ProxyConfig> retrieveAccountProxyConfigs(IdentityUser user) {
-        return user.getRoles().contains(IdentityUserRole.ADMIN) ? proxyConfigRepository.findAllBasedOnAccount(user.getAccount())
+        Set<ProxyConfig> proxyConfigs = user.getRoles().contains(IdentityUserRole.ADMIN) ? proxyConfigRepository.findAllByAccount(user.getAccount())
                 : proxyConfigRepository.findPublicInAccountForUser(user.getUserId(), user.getAccount());
+        authorizationService.hasReadPermission(proxyConfigs);
+        return proxyConfigs;
     }
 
     public ProxyConfig get(Long id) {
-        ProxyConfig proxyConfig = proxyConfigRepository.findById(id);
+        ProxyConfig proxyConfig = proxyConfigRepository.findOne(id);
         if (proxyConfig == null) {
             throw new NotFoundException(String.format("Proxy configuration '%s' not found.", id));
         }
@@ -69,10 +74,11 @@ public class ProxyConfigService {
     }
 
     public void delete(Long id, IdentityUser user) {
-        ProxyConfig proxyConfig = proxyConfigRepository.findByIdInAccount(id, user.getAccount());
+        ProxyConfig proxyConfig = proxyConfigRepository.findByIdAndAccount(id, user.getAccount());
         if (proxyConfig == null) {
             throw new NotFoundException(String.format("Proxy configuration '%s' not found.", id));
         }
+        authorizationService.hasWritePermission(proxyConfig);
         delete(proxyConfig);
     }
 
@@ -81,6 +87,7 @@ public class ProxyConfigService {
         if (proxyConfig == null) {
             throw new NotFoundException(String.format("Proxy configuration '%s' not found.", name));
         }
+        authorizationService.hasWritePermission(proxyConfig);
         delete(proxyConfig);
     }
 
@@ -88,13 +95,6 @@ public class ProxyConfigService {
         LOGGER.debug("Creating Proxy configuration: [User: '{}', Account: '{}']", user.getUsername(), user.getAccount());
         proxyConfig.setOwner(user.getUserId());
         proxyConfig.setAccount(user.getAccount());
-        return proxyConfigRepository.save(proxyConfig);
-    }
-
-    public ProxyConfig create(ProxyConfig proxyConfig) {
-        Preconditions.checkNotNull(proxyConfig.getOwner(), "Owner cannot be null");
-        Preconditions.checkNotNull(proxyConfig.getAccount(), "Account cannot be null");
-        LOGGER.debug("Creating Proxy configuration: [User: '{}', Account: '{}']", proxyConfig.getOwner(), proxyConfig.getAccount());
         return proxyConfigRepository.save(proxyConfig);
     }
 
@@ -108,7 +108,7 @@ public class ProxyConfigService {
 
     private void delete(ProxyConfig proxyConfig) {
         authorizationService.hasWritePermission(proxyConfig);
-        if (clusterRepository.countByProxyConfig(proxyConfig) != 0) {
+        if (clusterRepository.countByProxyConfig(proxyConfig) != 0L) {
             throw new BadRequestException(String.format(
                     "There are clusters associated with proxy config '%s'. Please remove these before deleting the proxy configuration.", proxyConfig.getId()));
         }

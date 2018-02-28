@@ -151,7 +151,7 @@ public class ClusterToClusterResponseConverter extends AbstractConversionService
             clusterResponse.setSecure(source.isSecure());
             clusterResponse.setKerberosResponse(getConversionService().convert(source.getKerberosConfig(), KerberosResponse.class));
         }
-        convertProxyConfig(source, clusterResponse);
+        decorateResponseWithProxyConfig(source, clusterResponse);
         return clusterResponse;
     }
 
@@ -371,7 +371,7 @@ public class ClusterToClusterResponseConverter extends AbstractConversionService
         return url;
     }
 
-    private void convertProxyConfig(Cluster source, ClusterResponse clusterResponse) {
+    private void decorateResponseWithProxyConfig(Cluster source, ClusterResponse clusterResponse) {
         if (source.getProxyConfig() != null) {
             clusterResponse.setProxyConfig(proxyConfigMapper.mapEntityToResponse(source.getProxyConfig()));
             clusterResponse.setProxyConfigId(source.getProxyConfig().getId());

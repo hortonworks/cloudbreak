@@ -44,8 +44,8 @@ public class ClusterProxyDecoratorTest {
 
     @Before
     public void setUp() {
-        when(mapper.mapRequestToEntity(any(ProxyConfigRequest.class), any(IdentityUser.class), anyBoolean())).thenReturn(new ProxyConfig());
-        when(service.create(any(ProxyConfig.class))).thenReturn(new ProxyConfig());
+        when(mapper.mapRequestToEntity(any(ProxyConfigRequest.class), anyBoolean())).thenReturn(new ProxyConfig());
+        when(service.create(any(IdentityUser.class), any(ProxyConfig.class))).thenReturn(new ProxyConfig());
         when(service.get(any(Long.class))).thenReturn(new ProxyConfig());
         cluster = new Cluster();
         stack.setPublicInAccount(true);
@@ -56,7 +56,7 @@ public class ClusterProxyDecoratorTest {
         Cluster result = clusterProxyDecorator.prepareProxyConfig(cluster, identityUser, 1L, null, stack);
         assertNotNull(result.getProxyConfig());
         Mockito.verify(service, Mockito.times(1)).get(any(Long.class));
-        Mockito.verify(service, Mockito.times(0)).create(any(ProxyConfig.class));
+        Mockito.verify(service, Mockito.times(0)).create(any(IdentityUser.class), any(ProxyConfig.class));
     }
 
     @Test
@@ -64,7 +64,7 @@ public class ClusterProxyDecoratorTest {
         ProxyConfigRequest request = new ProxyConfigRequest();
         Cluster result = clusterProxyDecorator.prepareProxyConfig(cluster, identityUser, null, request, stack);
         assertNotNull(result.getProxyConfig());
-        Mockito.verify(service, Mockito.times(1)).create(any(ProxyConfig.class));
+        Mockito.verify(service, Mockito.times(1)).create(any(IdentityUser.class), any(ProxyConfig.class));
         Mockito.verify(service, Mockito.times(0)).get(any(Long.class));
     }
 
@@ -72,7 +72,7 @@ public class ClusterProxyDecoratorTest {
     public void testNothingProvided() {
         Cluster result = clusterProxyDecorator.prepareProxyConfig(cluster, identityUser, null, null, stack);
         assertNull(result.getProxyConfig());
-        Mockito.verify(service, Mockito.times(0)).create(any(ProxyConfig.class));
+        Mockito.verify(service, Mockito.times(0)).create(any(IdentityUser.class), any(ProxyConfig.class));
         Mockito.verify(service, Mockito.times(0)).get(any(Long.class));
     }
 }

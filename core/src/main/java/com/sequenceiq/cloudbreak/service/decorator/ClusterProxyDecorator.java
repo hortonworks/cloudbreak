@@ -26,8 +26,8 @@ public class ClusterProxyDecorator {
             ProxyConfig proxyConfig = proxyConfigService.get(proxyConfigId);
             subject.setProxyConfig(proxyConfig);
         } else if (proxyConfigRequest != null) {
-            ProxyConfig proxyConfig = mapper.mapRequestToEntity(proxyConfigRequest, user, stack.isPublicInAccount());
-            proxyConfig = proxyConfigService.create(proxyConfig);
+            ProxyConfig proxyConfig = mapper.mapRequestToEntity(proxyConfigRequest, stack.isPublicInAccount());
+            proxyConfig = proxyConfigService.create(user, proxyConfig);
             subject.setProxyConfig(proxyConfig);
         }
         return subject;

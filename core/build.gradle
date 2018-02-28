@@ -16,7 +16,7 @@ buildscript {
 plugins {
   id "com.palantir.jacoco-full-report" version "0.4.0"
   id "com.github.jk1.dependency-license-report" version "0.3.4"
-  id 'net.ltgt.apt' version '0.8'
+  id 'net.ltgt.apt' version '0.14'
 }
 
 apply plugin: 'org.springframework.boot'
@@ -83,8 +83,9 @@ dependencies {
     compile group: 'com.cedarsoftware',             name: 'json-io',                        version: '4.9.12'
     compile group: 'com.google.code.findbugs',      name: 'annotations',                    version: '3.0.1'
     compile group: 'org.mapstruct',                 name: 'mapstruct-jdk8',                 version: mapstructVersion
+    compileOnly group: 'org.mapstruct',             name: 'mapstruct-processor',            version: mapstructVersion
 
-    apt     group: 'org.mapstruct',                 name: 'mapstruct-processor',            version: mapstructVersion
+    annotationProcessor     group: 'org.mapstruct',                 name: 'mapstruct-processor',            version: mapstructVersion
 
     compile project(':core-model')
     compile project(':orchestrator-api')
@@ -147,8 +148,7 @@ task execute(type: JavaExec) {
 compileJava.dependsOn buildInfo
 compileJava {
   options.compilerArgs = [
-          '-Amapstruct.unmappedTargetPolicy=ERROR',
-          '-Amapstruct.defaultComponentModel=spring'
+          '-Amapstruct.unmappedTargetPolicy=ERROR'
   ]
 }
 
