@@ -62,6 +62,9 @@ public class StackRequest extends StackBase {
     @ApiModelProperty(hidden = true)
     private String ownerEmail;
 
+    public StackRequest() {
+    }
+
     public FailurePolicyRequest getFailurePolicy() {
         return failurePolicy;
     }

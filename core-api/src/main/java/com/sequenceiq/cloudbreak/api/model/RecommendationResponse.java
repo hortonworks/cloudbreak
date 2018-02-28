@@ -17,6 +17,9 @@ public class RecommendationResponse implements JsonEntity {
 
     private Set<DiskResponse> diskResponses;
 
+    public RecommendationResponse() {
+    }
+
     public RecommendationResponse(Map<String, VmTypeJson> recommendations, Set<VmTypeJson> virtualMachines, Set<DiskResponse> diskResponses) {
         this.recommendations = recommendations;
         this.virtualMachines = virtualMachines;
