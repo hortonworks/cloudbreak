@@ -9,6 +9,9 @@ public class PlatformVmtypesResponse implements JsonEntity {
 
     private Map<String, VirtualMachinesResponse> vmTypes;
 
+    public PlatformVmtypesResponse() {
+    }
+
     public PlatformVmtypesResponse(Map<String, VirtualMachinesResponse> vmTypes) {
         this.vmTypes = vmTypes;
     }

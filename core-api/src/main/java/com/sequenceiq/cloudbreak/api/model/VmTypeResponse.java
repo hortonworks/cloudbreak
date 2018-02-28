@@ -11,7 +11,10 @@ public class VmTypeResponse {
 
     private Boolean extended;
 
-    private VmTypeResponse(String vmType, VmTypeMetaResponse meta, Boolean extended) {
+    public VmTypeResponse() {
+    }
+
+    public VmTypeResponse(String vmType, VmTypeMetaResponse meta, Boolean extended) {
         this.vmType = vmType;
         metaData = meta;
         this.extended = extended;

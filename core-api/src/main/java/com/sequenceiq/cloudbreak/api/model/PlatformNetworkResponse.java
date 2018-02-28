@@ -18,6 +18,9 @@ public class PlatformNetworkResponse implements JsonEntity {
 
     private Map<String, Object> properties;
 
+    public PlatformNetworkResponse() {
+    }
+
     public PlatformNetworkResponse(String name, String id, Map<String, String> subnets, Map<String, Object> properties) {
         this.name = name;
         this.id = id;
