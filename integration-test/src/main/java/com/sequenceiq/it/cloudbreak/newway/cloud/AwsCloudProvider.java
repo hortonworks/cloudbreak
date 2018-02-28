@@ -20,9 +20,7 @@ public class AwsCloudProvider extends CloudProviderHelper {
 
     public static final String KEY_BASED_CREDENTIAL = "key";
 
-    public static final String CREDNAME = "testawscred";
-
-    private static final String CREDDESC = "test credential";
+    private static final String CREDENTIAL_DEFAULT_NAME = "testawscred";
 
     public AwsCloudProvider(TestParameter testParameter) {
         super(testParameter);
@@ -34,8 +32,8 @@ public class AwsCloudProvider extends CloudProviderHelper {
         Map<String, Object> credentialParameters;
         credentialParameters = KEY_BASED_CREDENTIAL.equals(credentialType) ? awsCredentialDetailsKey() : awsCredentialDetailsArn();
         return Credential.isCreated()
-                .withName(CREDNAME)
-                .withDescription(CREDDESC)
+                .withName(getCredentialName())
+                .withDescription(CREDENTIAL_DEFAULT_DESCRIPTION)
                 .withCloudPlatform(AWS_CAPITAL)
                 .withParameters(credentialParameters);
     }
@@ -102,7 +100,7 @@ public class AwsCloudProvider extends CloudProviderHelper {
     }
 
     @Override
-    public String getClusterDefaultName() {
+    public String getClusterName() {
         String clustername = getTestParameter().get("awsClusterName");
         return clustername == null ? AWS_CLUSTER_DEFAULT_NAME : clustername;
     }
@@ -121,7 +119,8 @@ public class AwsCloudProvider extends CloudProviderHelper {
 
     @Override
     public String getCredentialName() {
-        return CREDNAME;
+        String credentialName = getTestParameter().get("awsCredentialName");
+        return credentialName == null ? CREDENTIAL_DEFAULT_NAME : credentialName;
     }
 
     public Map<String, Object> awsCredentialDetailsKey() {

@@ -31,7 +31,7 @@ public class UpgradeTests extends CloudbreakTest {
     public void testGetClusterExistingAfterUpgrade() throws Exception {
         given(CloudbreakClient.isCreated());
         given(cloudProvider.aValidCredential());
-        given(Stack.request().withName(cloudProvider.getClusterDefaultName()));
+        given(Stack.request().withName(cloudProvider.getClusterName()));
         when(Stack.get());
         then(Stack.waitAndCheckClusterAndStackAvailabilityStatus());
         then(Stack.checkClusterHasAmbariRunning(
@@ -46,7 +46,7 @@ public class UpgradeTests extends CloudbreakTest {
         given(CloudbreakClient.isCreated());
         given(cloudProvider.aValidCredential());
         given(Stack.request()
-                .withName(cloudProvider.getClusterDefaultName()));
+                .withName(cloudProvider.getClusterName()));
         given(StackOperation.request()
                 .withGroupName("host_group_slave_1")
                 .withDesiredCount(DESIRED_COUNT));
@@ -64,7 +64,7 @@ public class UpgradeTests extends CloudbreakTest {
         given(CloudbreakClient.isCreated());
         given(cloudProvider.aValidCredential());
         given(Stack.request()
-                .withName(cloudProvider.getClusterDefaultName()));
+                .withName(cloudProvider.getClusterName()));
         given(StackOperation.request());
         when(StackOperation.stop());
         when(Stack.get());
@@ -77,7 +77,7 @@ public class UpgradeTests extends CloudbreakTest {
         given(CloudbreakClient.isCreated());
         given(cloudProvider.aValidCredential());
         given(Stack.request()
-                .withName(cloudProvider.getClusterDefaultName()));
+                .withName(cloudProvider.getClusterName()));
         given(StackOperation.request());
         when(StackOperation.start());
         when(Stack.get());
@@ -96,7 +96,7 @@ public class UpgradeTests extends CloudbreakTest {
         given(CloudbreakClient.isCreated());
         given(cloudProvider.aValidCredential());
         given(Stack.request()
-                .withName(cloudProvider.getClusterDefaultName()));
+                .withName(cloudProvider.getClusterName()));
         given(cloudProvider.aValidStackIsCreated());
         when(Stack.delete());
         then(Stack.waitAndCheckClusterDeleted());

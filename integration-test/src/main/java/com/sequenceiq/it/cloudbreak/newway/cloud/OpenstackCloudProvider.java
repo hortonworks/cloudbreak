@@ -16,9 +16,7 @@ public class OpenstackCloudProvider extends CloudProviderHelper {
 
     public static final String OPENSTACK_CAPITAL = "OPENSTACK";
 
-    public static final String CREDNAME = "testopenstackcred";
-
-    static final String CREDDESC = "test credential";
+    private static final String CREDENTIAL_DEFAULT_NAME = "testopenstackcred";
 
     private static final String OPENSTACK_CLUSTER_DEFAULT_NAME = "openstack-cluster";
 
@@ -29,8 +27,8 @@ public class OpenstackCloudProvider extends CloudProviderHelper {
     @Override
     public CredentialEntity aValidCredential() {
         return Credential.isCreated()
-                .withName(CREDNAME)
-                .withDescription(CREDDESC)
+                .withName(getCredentialName())
+                .withDescription(CREDENTIAL_DEFAULT_DESCRIPTION)
                 .withCloudPlatform(OPENSTACK_CAPITAL)
                 .withParameters(openstackCredentialDetails());
     }
@@ -82,7 +80,7 @@ public class OpenstackCloudProvider extends CloudProviderHelper {
     }
 
     @Override
-    public String getClusterDefaultName() {
+    public String getClusterName() {
         String clustername = getTestParameter().get("openstackClusterName");
         return clustername == null ? OPENSTACK_CLUSTER_DEFAULT_NAME : clustername;
     }
@@ -109,7 +107,8 @@ public class OpenstackCloudProvider extends CloudProviderHelper {
 
     @Override
     public String getCredentialName() {
-        return CREDNAME;
+        String credentialName = getTestParameter().get("openstackCredentialName");
+        return credentialName == null ? CREDENTIAL_DEFAULT_NAME : credentialName;
     }
 
     public Map<String, Object> openstackCredentialDetails() {
