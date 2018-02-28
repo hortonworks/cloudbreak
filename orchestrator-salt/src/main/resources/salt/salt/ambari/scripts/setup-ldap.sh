@@ -2,7 +2,8 @@
 
 set -ex
 
-ambari-server setup-ldap \
+# provide "n" for custom truststore in case we use ldaps.
+yes n | ambari-server setup-ldap \
   --ldap-url="{{ ldap.serverHost }}:{{ ldap.serverPort }}" \
   --ldap-secondary-url="{{ ldap.serverHost }}:{{ ldap.serverPort }}" \
   --ldap-ssl="{{ ambari.secure_ldap }}" \
