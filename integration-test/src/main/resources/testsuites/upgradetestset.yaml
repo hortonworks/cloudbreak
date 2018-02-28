@@ -7,6 +7,9 @@ parameters:
   gcpClusterName: "it-gcp-cred-ss"
   azureClusterName: "it-azure-cred"
   awsClusterName: "it-aws-cred"
+  gcpCredentialName: "its-gcp-credandsmoke-cred-ss"
+  azureCredentialName: "itsazurermcredandsmokecred"
+  awsCredentialName: "its-aws-credandsmoke-cred"
   provider: "gcp,azure,aws"
 
 tests:

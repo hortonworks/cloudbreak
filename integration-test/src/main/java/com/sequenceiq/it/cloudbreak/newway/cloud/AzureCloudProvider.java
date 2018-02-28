@@ -15,9 +15,7 @@ public class AzureCloudProvider extends CloudProviderHelper {
 
     public static final String AZURE_CAPITAL = "AZURE";
 
-    public static final String CREDNAME = "itsazurermcredandsmokecred";
-
-    private static final String CREDDESC = "test credential";
+    private static final String CREDENTIAL_DEFAULT_NAME = "itsazurermcredandsmokecred";
 
     private static final String AZURE_CLUSTER_DEFAULT_NAME = "azure";
 
@@ -28,8 +26,8 @@ public class AzureCloudProvider extends CloudProviderHelper {
     @Override
     public CredentialEntity aValidCredential() {
         return Credential.isCreated()
-                .withName(CREDNAME)
-                .withDescription(CREDDESC)
+                .withName(getCredentialName())
+                .withDescription(CREDENTIAL_DEFAULT_DESCRIPTION)
                 .withCloudPlatform(AZURE_CAPITAL)
                 .withParameters(azureCredentialDetails());
     }
@@ -81,7 +79,7 @@ public class AzureCloudProvider extends CloudProviderHelper {
     }
 
     @Override
-    public String getClusterDefaultName() {
+    public String getClusterName() {
         String clustername = getTestParameter().get("azureClusterName");
         return clustername == null ? AZURE_CLUSTER_DEFAULT_NAME : clustername;
     }
@@ -100,7 +98,8 @@ public class AzureCloudProvider extends CloudProviderHelper {
 
     @Override
     public String getCredentialName() {
-        return CREDNAME;
+        String credentialName = getTestParameter().get("azureCredentialName");
+        return credentialName == null ? CREDENTIAL_DEFAULT_NAME : credentialName;
     }
 
     public Map<String, Object> azureCredentialDetails() {

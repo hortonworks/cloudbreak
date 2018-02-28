@@ -72,7 +72,7 @@ public abstract class CloudProviderHelper extends CloudProvider {
 
     public StackEntity aValidStackRequest() {
         return Stack.request()
-                .withName(getClusterDefaultName())
+                .withName(getClusterName())
                 .withRegion(region())
                 .withAvailabilityZone(availabilityZone())
                 .withInstanceGroups(instanceGroups())
@@ -85,7 +85,7 @@ public abstract class CloudProviderHelper extends CloudProvider {
     @Override
     public Entity aValidStackIsCreated() {
         return Stack.isCreated()
-                .withName(getClusterDefaultName())
+                .withName(getClusterName())
                 .withRegion(region())
                 .withAvailabilityZone(availabilityZone())
                 .withInstanceGroups(instanceGroups())
