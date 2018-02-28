@@ -5,6 +5,7 @@ import javax.validation.constraints.Pattern;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.api.model.JsonEntity;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ProxyConfigModelDescription;
 
 import io.swagger.annotations.ApiModelProperty;
@@ -15,6 +16,9 @@ public abstract class ProxyConfigBase implements JsonEntity {
     @NotNull
     @ApiModelProperty(value = ProxyConfigModelDescription.NAME, required = true)
     private String name;
+
+    @ApiModelProperty(ModelDescriptions.DESCRIPTION)
+    private String description;
 
     @NotNull
     @ApiModelProperty(value = ProxyConfigModelDescription.SERVER_HOST, required = true)
@@ -70,5 +74,13 @@ public abstract class ProxyConfigBase implements JsonEntity {
 
     public void setUserName(String userName) {
         this.userName = userName;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 }

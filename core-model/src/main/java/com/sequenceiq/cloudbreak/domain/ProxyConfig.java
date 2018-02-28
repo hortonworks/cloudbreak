@@ -23,6 +23,9 @@ public class ProxyConfig implements ProvisionEntity {
     @Column(nullable = false)
     private String name;
 
+    @Column(length = 1000000, columnDefinition = "TEXT")
+    private String description;
+
     @Column(nullable = false)
     private String owner;
 
@@ -126,5 +129,13 @@ public class ProxyConfig implements ProvisionEntity {
 
     public void setPublicInAccount(boolean publicInAccount) {
         this.publicInAccount = publicInAccount;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 }

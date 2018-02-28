@@ -88,8 +88,8 @@ public class ProxyConfigController extends NotificationController implements Pro
     }
 
     private ProxyConfigResponse createProxyConfig(IdentityUser user, ProxyConfigRequest request, boolean publicInAccount) {
-        ProxyConfig proxyConfig = proxyConfigMapper.mapRequestToEntity(request, user, publicInAccount);
-        proxyConfig = proxyConfigService.create(proxyConfig);
+        ProxyConfig proxyConfig = proxyConfigMapper.mapRequestToEntity(request, publicInAccount);
+        proxyConfig = proxyConfigService.create(user, proxyConfig);
         notify(user, ResourceEvent.PROXY_CONFIG_CREATED);
         return proxyConfigMapper.mapEntityToResponse(proxyConfig);
     }
