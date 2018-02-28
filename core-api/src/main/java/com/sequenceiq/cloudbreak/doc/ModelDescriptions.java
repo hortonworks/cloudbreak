@@ -195,6 +195,8 @@ public class ModelDescriptions {
         public static final String CREATION_FINISHED = "Epoch time of cluster creation finish";
         public static final String AMBARI_SECURITY_MASTER_KEY = "a master key for encrypting the passwords in Ambari";
         public static final String UPTIME = "duration - how long the cluster is running in milliseconds";
+        public static final String PROXY_CONFIG = "proxy configuration for the cluster";
+        public static final String PROXY_CONFIG_ID = "proxy configuration id for the cluster";
     }
 
     public static class GatewayModelDescription {
@@ -477,5 +479,14 @@ public class ModelDescriptions {
 
     public static class RepositoryConfigValidationDescription {
         public static final String FIELDS = "Indicates the request's value with the same key is valid and reachable by Cloudbreak or not";
+    }
+
+    public static class ProxyConfigModelDescription {
+        public static final String SERVER_HOST = "host or IP address of proxy server";
+        public static final String SERVER_PORT = "port of proxy server (typically: 3128 or 8080)";
+        public static final String PROTOCOL = "determines the protocol (http or https)";
+        public static final String NAME = "Name of the proxy configuration resource";
+        public static final String USERNAME = "Username to use for basic authentication";
+        public static final String PASSWORD = "Password to use for basic authentication";
     }
 }

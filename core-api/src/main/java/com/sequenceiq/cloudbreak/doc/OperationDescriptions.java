@@ -223,6 +223,19 @@ public class OperationDescriptions {
         public static final String DELETE_BY_ID = "delete RDS configuration by id";
     }
 
+    public static class ProxyConfigOpDescription {
+        public static final String POST_PRIVATE = "create proxy configuration as private resource";
+        public static final String POST_PUBLIC = "create proxy configuration as public resource";
+        public static final String GET_PRIVATE = "retrieve private proxy configurations";
+        public static final String GET_PUBLIC = "retrieve public and private (owned) proxy configurations";
+        public static final String GET_PRIVATE_BY_NAME = "retrieve a private proxy configuration by name";
+        public static final String GET_PUBLIC_BY_NAME = "retrieve a public or private (owned) proxy configuration by name";
+        public static final String GET_BY_ID = "retrieve proxy configuration by id";
+        public static final String DELETE_PRIVATE_BY_NAME = "delete private proxy configuration by name";
+        public static final String DELETE_PUBLIC_BY_NAME = "delete public (owned) or private proxy configuration by name";
+        public static final String DELETE_BY_ID = "delete proxy configuration by id";
+    }
+
     public static class ConnectorOpDescription {
         public static final String GET_PLATFORMS = "retrive available platforms";
         public static final String GET_PLATFORM_VARIANTS = "retrive available platform variants";

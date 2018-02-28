@@ -15,6 +15,8 @@ public enum ResourceEvent {
     RECIPE_DELETED("resource.recipe.deleted"),
     RDS_CONFIG_CREATED("resource.rdsconfig.created"),
     RDS_CONFIG_DELETED("resource.rdsconfig.deleted"),
+    PROXY_CONFIG_CREATED("resource.proxyconfig.created"),
+    PROXY_CONFIG_DELETED("resource.proxyconfig.deleted"),
     SECURITY_GROUP_CREATED("resource.securitygroup.created"),
     SECURITY_GROUP_DELETED("resource.securitygroup.deleted"),
     TEMPLATE_CREATED("resource.template.created"),

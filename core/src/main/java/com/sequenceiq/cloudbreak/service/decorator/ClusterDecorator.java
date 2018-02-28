@@ -80,6 +80,9 @@ public class ClusterDecorator {
     @Inject
     private RdsConnectionValidator rdsConnectionValidator;
 
+    @Inject
+    private ClusterProxyDecorator clusterProxyDecorator;
+
     public Cluster decorate(Cluster subject, ClusterRequest request, Blueprint blueprint, IdentityUser user, Stack stack) {
         if (blueprint != null) {
             subject.setBlueprint(blueprint);
@@ -103,6 +106,7 @@ public class ClusterDecorator {
         }
         subject.setTopologyValidation(request.getValidateBlueprint());
         prepareRds(subject, user, request.getRdsConfigIds(), request.getRdsConfigJsons(), stack);
+        subject = clusterProxyDecorator.prepareProxyConfig(subject, user, request.getProxyConfigId(), request.getProxyConfigRequest(), stack);
         prepareLdap(subject, user, request.getLdapConfigId(), request.getLdapConfig(), request.getLdapConfigName(), stack);
         prepareConnectedClusterParameters(subject, user, request.getConnectedCluster());
         return subject;

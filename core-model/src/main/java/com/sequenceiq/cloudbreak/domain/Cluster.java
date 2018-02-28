@@ -162,6 +162,9 @@ public class Cluster implements ProvisionEntity {
     @Type(type = "encrypted_string")
     private String ambariSecurityMasterKey;
 
+    @ManyToOne
+    private ProxyConfig proxyConfig;
+
     public Stack getStack() {
         return stack;
     }
@@ -516,5 +519,13 @@ public class Cluster implements ProvisionEntity {
 
     public void setAmbariSecurityMasterKey(String ambariSecurityMasterKey) {
         this.ambariSecurityMasterKey = ambariSecurityMasterKey;
+    }
+
+    public ProxyConfig getProxyConfig() {
+        return proxyConfig;
+    }
+
+    public void setProxyConfig(ProxyConfig proxyConfig) {
+        this.proxyConfig = proxyConfig;
     }
 }
