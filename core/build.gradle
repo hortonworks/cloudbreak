@@ -180,7 +180,6 @@ class BuildInfoTask extends DefaultTask {
     applicationDestinations += new File(applicationPropertiesPath + "/resources/main")
 
     destination.mkdirs()
-    String activeProfile = determineActiveProfile()
 
     if (buildVersion.contains("+")) {
       buildVersion = buildVersion.tokenize('+')[0]
@@ -196,22 +195,9 @@ class BuildInfoTask extends DefaultTask {
       new File(it, "application.properties").withWriter { out ->
         [
             "info.app.name=" + basename,
-            "info.app.version=" + buildVersion,
-            "spring.profiles.active=" + activeProfile
+            "info.app.version=" + buildVersion
         ].each { out.println it }
       }
     }
-  }
-
-  private String determineActiveProfile() {
-    String activeProfile = "dev"
-    if (buildVersion.contains("dev") || buildVersion.equals("unspecified")) {
-      activeProfile = "dev"
-    } else if (buildVersion.contains("rc")) {
-      activeProfile = "rc"
-    } else {
-      activeProfile = "prod"
-    }
-    return activeProfile
   }
 }

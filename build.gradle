@@ -5,7 +5,6 @@ buildscript {
   }
   dependencies {
     classpath 'org.ajoberstar:grgit:2.1.0'
-    classpath 'info.solidsoft.gradle.pitest:gradle-pitest-plugin:1.1.11'
     classpath 'com.smokejumperit.gradle.license:Gradle-License-Report:0.0.2'
   }
 }
