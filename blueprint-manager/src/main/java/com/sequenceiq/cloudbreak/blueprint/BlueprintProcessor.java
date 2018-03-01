@@ -13,6 +13,14 @@ public interface BlueprintProcessor {
 
     Set<String> getComponentsInHostGroup(String blueprintText, String hostGroup);
 
+    String extendBlueprintHostGroupConfiguration(String blueprintText, Map<String, Map<String, Map<String, String>>> hostGroupConfig);
+
+    String extendBlueprintHostGroupConfiguration(String blueprintText, Map<String, Map<String, Map<String, String>>> hostGroupConfig, boolean forced);
+
+    String extendBlueprintGlobalConfiguration(String blueprintText, Map<String, Map<String, String>> globalConfig);
+
+    String extendBlueprintGlobalConfiguration(String blueprintText, Map<String, Map<String, String>> globalConfig, boolean forced);
+
     Set<String> getHostGroupsWithComponent(String blueprintText, String component);
 
     boolean componentExistsInBlueprint(String component, String blueprintText);
