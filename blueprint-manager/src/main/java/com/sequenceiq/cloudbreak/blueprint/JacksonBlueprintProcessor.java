@@ -323,6 +323,12 @@ public class JacksonBlueprintProcessor implements BlueprintProcessor {
         }
     }
 
+    // TODO needs to be implemented
+    @Override
+    public String addConfigEntryStringToBlueprint(String config, String blueprintText) {
+        return blueprintText;
+    }
+
     @Override
     public boolean componentExistsInBlueprint(String component, String blueprintText) {
         boolean componentExists = false;

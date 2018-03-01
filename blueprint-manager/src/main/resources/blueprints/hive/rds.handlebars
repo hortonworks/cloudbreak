@@ -1,0 +1,14 @@
+{
+{{{#if rdsConfigs.hive}}}
+  "hive-site": {
+    "properties": {
+      "javax.jdo.option.ConnectionURL": "{{{ rdsConfigs.hive.connectionHost }}}",
+      "javax.jdo.option.ConnectionDriverName": "org.postgresql.Driver",
+      "javax.jdo.option.ConnectionUserName": "{{{ rdsConfigs.hive.connectionUserName }}}",
+      "javax.jdo.option.ConnectionPassword": "{{{ rdsConfigs.hive.connectionPassword }}}",
+      "hive_database": "Existing PostgreSQL Database",
+      "hive_database_type": "postgres"
+    }
+  }
+{{{/if}}}
+}

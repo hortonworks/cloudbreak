@@ -28,6 +28,51 @@ public class BlueprintTemplateModelContextBuilder {
 
     private String clusterName;
 
+    private String clusterAdminPassword;
+
+    private String clusterAdminFirstname;
+
+    private String clusterAdminLastname;
+
+    private String adminEmail;
+
+    private boolean enableKnoxGateway;
+
+    private boolean containerExecutorType;
+
+    private String stackType;
+
+    private String stackVersion;
+
+    private Integer llapNodeCount;
+
+    private String nifiTargets;
+
+    public BlueprintTemplateModelContextBuilder withEnableKnoxGateway(boolean enableKnoxGateway) {
+        this.enableKnoxGateway = enableKnoxGateway;
+        return this;
+    }
+
+    public BlueprintTemplateModelContextBuilder withClusterAdminPassword(String clusterAdminPassword) {
+        this.clusterAdminPassword = clusterAdminPassword;
+        return this;
+    }
+
+    public BlueprintTemplateModelContextBuilder withClusterAdminFirstname(String clusterAdminFirstname) {
+        this.clusterAdminFirstname = clusterAdminFirstname;
+        return this;
+    }
+
+    public BlueprintTemplateModelContextBuilder withClusterAdminLastname(String clusterAdminLastname) {
+        this.clusterAdminLastname = clusterAdminLastname;
+        return this;
+    }
+
+    public BlueprintTemplateModelContextBuilder withAdminEmail(String adminEmail) {
+        this.adminEmail = adminEmail;
+        return this;
+    }
+
     public BlueprintTemplateModelContextBuilder withRdsConfigs(Iterable<RDSConfig> rdsConfigs) {
         for (RDSConfig rdsConfig : rdsConfigs) {
             if (rdsConfig != null) {
@@ -64,10 +109,35 @@ public class BlueprintTemplateModelContextBuilder {
         return this;
     }
 
+    public BlueprintTemplateModelContextBuilder withLlapNodeCounts(Integer llapNodeCount) {
+        this.llapNodeCount = llapNodeCount;
+        return this;
+    }
+
     public BlueprintTemplateModelContextBuilder withCustomProperties(Map<String, Object> customProperties) {
         for (Entry<String, Object> customProperty : customProperties.entrySet()) {
             withCustomProperty(customProperty.getKey(), customProperty.getValue().toString());
         }
+        return this;
+    }
+
+    public BlueprintTemplateModelContextBuilder withContainerExecutor(boolean containerExecutorType) {
+        this.containerExecutorType = containerExecutorType;
+        return this;
+    }
+
+    public BlueprintTemplateModelContextBuilder withStackType(String stackType) {
+        this.stackType = stackType.toUpperCase();
+        return this;
+    }
+
+    public BlueprintTemplateModelContextBuilder withStackVersion(String stackVersion) {
+        this.stackVersion = stackVersion;
+        return this;
+    }
+
+    public BlueprintTemplateModelContextBuilder withNifiTargets(String nifiTargets) {
+        this.nifiTargets = nifiTargets;
         return this;
     }
 
@@ -81,6 +151,16 @@ public class BlueprintTemplateModelContextBuilder {
             blueprintTemplateModelContext.put(customEntry.getKey(), customEntry.getValue());
         }
         blueprintTemplateModelContext.put("cluster_name", clusterName);
+        blueprintTemplateModelContext.put("cluster_admin_password", clusterAdminPassword);
+        blueprintTemplateModelContext.put("cluster_admin_firstname", clusterAdminFirstname);
+        blueprintTemplateModelContext.put("cluster_admin_lastname", clusterAdminLastname);
+        blueprintTemplateModelContext.put("admin_email", adminEmail);
+        blueprintTemplateModelContext.put("enable_knox_gateway", enableKnoxGateway);
+        blueprintTemplateModelContext.put("llap_node_count", llapNodeCount);
+        blueprintTemplateModelContext.put("container_executor", containerExecutorType);
+        blueprintTemplateModelContext.put("stack_type", stackType);
+        blueprintTemplateModelContext.put("stack_type_version", stackVersion);
+        blueprintTemplateModelContext.put("nifi_targets", nifiTargets);
         blueprintTemplateModelContext.put("stack_version", "{{stack_version}}");
         return blueprintTemplateModelContext;
     }

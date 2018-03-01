@@ -1,0 +1,14 @@
+{
+
+  "hive-site": {
+    "properties": {
+      "javax.jdo.option.ConnectionURL": "10.1.1.1:5432",
+      "javax.jdo.option.ConnectionDriverName": "org.postgresql.Driver",
+      "javax.jdo.option.ConnectionUserName": "heyitsme",
+      "javax.jdo.option.ConnectionPassword": "iamsoosecure",
+      "hive_database": "Existing PostgreSQL Database",
+      "hive_database_type": "postgres"
+    }
+  }
+
+}

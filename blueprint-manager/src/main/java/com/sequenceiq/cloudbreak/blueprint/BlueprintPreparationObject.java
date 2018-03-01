@@ -8,7 +8,9 @@ import java.util.Optional;
 import java.util.Set;
 
 import com.sequenceiq.ambari.client.AmbariClient;
+import com.sequenceiq.cloudbreak.blueprint.nifi.HdfConfigs;
 import com.sequenceiq.cloudbreak.blueprint.template.views.LdapView;
+import com.sequenceiq.cloudbreak.blueprint.templates.BlueprintStackInfo;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariDatabase;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.common.model.OrchestratorType;
@@ -46,6 +48,10 @@ public class BlueprintPreparationObject {
 
     private Optional<LdapView> ldapView;
 
+    private BlueprintStackInfo blueprintStackInfo;
+
+    private HdfConfigs hdfConfigs;
+
     private BlueprintPreparationObject(BlueprintPreparationObject.Builder builder) {
         this.ambariClient = builder.ambariClient;
         this.stack = builder.stack;
@@ -59,6 +65,8 @@ public class BlueprintPreparationObject {
         this.orchestratorType = builder.orchestratorType;
         this.fqdns = builder.fqdns;
         this.ldapView = builder.ldapView;
+        this.blueprintStackInfo = builder.blueprintStackInfo;
+        this.hdfConfigs = builder.hdfConfigs;
     }
 
     public Stack getStack() {
@@ -117,6 +125,14 @@ public class BlueprintPreparationObject {
         return ldapView;
     }
 
+    public BlueprintStackInfo getBlueprintStackInfo() {
+        return blueprintStackInfo;
+    }
+
+    public HdfConfigs getHdfConfigs() {
+        return hdfConfigs;
+    }
+
     public static class Builder {
 
         private Stack stack;
@@ -142,6 +158,10 @@ public class BlueprintPreparationObject {
         private Map<String, List<String>> fqdns = new HashMap<>();
 
         private Optional<LdapView> ldapView;
+
+        private BlueprintStackInfo blueprintStackInfo;
+
+        private HdfConfigs hdfConfigs = new HdfConfigs();
 
         public static Builder builder() {
             return new Builder();
@@ -204,6 +224,16 @@ public class BlueprintPreparationObject {
 
         public Builder withLdapView(Optional<LdapView> ldapView) {
             this.ldapView = ldapView;
+            return this;
+        }
+
+        public Builder withHdfConfigs(HdfConfigs hdfConfigs) {
+            this.hdfConfigs = hdfConfigs;
+            return this;
+        }
+
+        public Builder withBlueprintStackInfo(BlueprintStackInfo blueprintStackInfo) {
+            this.blueprintStackInfo = blueprintStackInfo;
             return this;
         }
 

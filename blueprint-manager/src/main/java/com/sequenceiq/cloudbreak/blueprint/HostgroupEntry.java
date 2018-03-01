@@ -8,6 +8,10 @@ public class HostgroupEntry {
         this.hostGroup = hostGroup;
     }
 
+    public String getHostGroup() {
+        return hostGroup;
+    }
+
     public static HostgroupEntry hostgroupEntry(String hostGroup) {
         return new HostgroupEntry(hostGroup);
     }

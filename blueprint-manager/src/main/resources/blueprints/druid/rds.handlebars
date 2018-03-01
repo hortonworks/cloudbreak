@@ -1,0 +1,26 @@
+{
+  "superset-env": {
+    "properties": {
+      "superset_admin_password": "{{{ cluster_admin_password }}}",
+      "superset_admin_firstname": "{{{ cluster_admin_firstname }}}",
+      "superset_admin_lastname": "{{{ cluster_admin_lastname }}}",
+      "superset_admin_email": "{{{ admin_email }}}"
+    }
+  },
+  "druid-superset-env": {
+    "properties": {
+      "superset_admin_password": "{{{ cluster_admin_password }}}",
+      "superset_admin_firstname": "{{{ cluster_admin_firstname }}}",
+      "superset_admin_lastname": "{{{ cluster_admin_lastname }}}",
+      "superset_admin_email": "{{{ admin_email }}}"
+    }
+  }{{{#if rdsConfigs.druid}}},
+  "druid-common": {
+    "properties": {
+      "druid.metadata.storage.type": "postgres",
+      "druid.metadata.storage.connector.connectURI": "{{{ rdsConfigs.druid.connectionHost }}}",
+      "druid.metadata.storage.connector.user": "{{{ rdsConfigs.druid.connectionUserName }}}",
+      "druid.metadata.storage.connector.password": "{{{ rdsConfigs.druid.connectionPassword }}}"
+    }
+  }{{{/if}}}
+}
