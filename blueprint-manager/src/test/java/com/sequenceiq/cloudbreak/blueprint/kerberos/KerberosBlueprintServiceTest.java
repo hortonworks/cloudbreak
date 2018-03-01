@@ -27,6 +27,9 @@ import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 @RunWith(MockitoJUnitRunner.class)
 public class KerberosBlueprintServiceTest {
 
+    @Spy
+    private AmbariClient ambariClient;
+
     @Mock
     private BlueprintPreparationObject blueprintPreparationObject;
 
