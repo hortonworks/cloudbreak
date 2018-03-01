@@ -21,6 +21,15 @@ public class RdsView {
 
     private final String connectionHost;
 
+    private final String databaseType;
+
+    //TODO check a real hive RDS config to validate the existence of com.sequenceiq.cloudbreak.api.model.RDSDatabase
+    private String connectionDriverName;
+
+    private String ambariDbOption;
+
+    private String databaseTypeDbName;
+
     private Map<String, Object> properties = new HashMap<>();
 
     public RdsView(RDSConfig rdsConfig) {
@@ -45,6 +54,12 @@ public class RdsView {
         if (rdsConfig.getAttributes() != null) {
             properties = rdsConfig.getAttributes().getMap();
         }
+        if (rdsConfig.getDatabaseType() != null) {
+            connectionDriverName = rdsConfig.getDatabaseType().getDbDriver();
+            ambariDbOption = rdsConfig.getDatabaseType().getAmbariDbOption();
+            databaseTypeDbName = rdsConfig.getDatabaseType().getDbName();
+        }
+        databaseType = getDatabaseType(connectionURL);
     }
 
     public String getConnectionURL() {
@@ -75,6 +90,22 @@ public class RdsView {
         return host;
     }
 
+    public String getConnectionDriverName() {
+        return connectionDriverName;
+    }
+
+    public String getAmbariDbOption() {
+        return ambariDbOption;
+    }
+
+    public String getDatabaseTypeDbName() {
+        return databaseTypeDbName;
+    }
+
+    public String getDatabaseType() {
+        return databaseType;
+    }
+
     private String getDatabaseName(String connectionURL) {
         String databaseName = "";
         String[] split = connectionURL.split("/");
@@ -90,5 +121,14 @@ public class RdsView {
             result = host + ':' + port;
         }
         return result;
+    }
+
+    private String getDatabaseType(String connectionURL) {
+        String databaseType = "";
+        String[] split = connectionURL.split(":");
+        if (split.length > 1) {
+            databaseType = split[1];
+        }
+        return databaseType;
     }
 }
