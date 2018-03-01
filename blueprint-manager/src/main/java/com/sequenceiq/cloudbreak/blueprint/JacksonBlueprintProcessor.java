@@ -31,6 +31,8 @@ public class JacksonBlueprintProcessor implements BlueprintProcessor {
 
     private static final String SETTINGS_NODE = "settings";
 
+    private static final String PROPERTIES_NODE = "properties";
+
     private static final String HOST_GROUPS_NODE = "host_groups";
 
     private static final String BLUEPRINTS = "Blueprints";
@@ -119,6 +121,165 @@ public class JacksonBlueprintProcessor implements BlueprintProcessor {
         } catch (IOException e) {
             throw new BlueprintProcessingException("Failed to get components for hostgroup '" + hostGroup + "' from validation.", e);
         }
+    }
+
+    @Override
+    public String extendBlueprintHostGroupConfiguration(String blueprintText, Map<String, Map<String, Map<String, String>>> hostGroupConfig) {
+        return extendBlueprintHostGroupConfiguration(blueprintText, hostGroupConfig, false);
+    }
+
+    @Override
+    public String extendBlueprintHostGroupConfiguration(String blueprintText, Map<String, Map<String, Map<String, String>>> hostGroupConfig, boolean forced) {
+        try {
+            ObjectNode blueprintNode = (ObjectNode) JsonUtil.readTree(blueprintText);
+            ArrayNode configurations = (ArrayNode) blueprintNode.path(CONFIGURATIONS_NODE);
+            ArrayNode hostgroups = (ArrayNode) blueprintNode.path(HOST_GROUPS_NODE);
+            Map<String, Map<String, Map<String, String>>> filteredConfiguraitons = getFilteredConfigs(hostGroupConfig, configurations, forced);
+
+            for (Map.Entry<String, Map<String, Map<String, String>>> filteredConfig : filteredConfiguraitons.entrySet()) {
+                ObjectNode hostgroup = getHostgroup(hostgroups, filteredConfig.getKey());
+                JsonNode hostgroupConfig = hostgroup.path(CONFIGURATIONS_NODE);
+                if (hostgroupConfig.isMissingNode()) {
+                    ArrayNode hostgroupConfigs = hostgroup.putArray(CONFIGURATIONS_NODE);
+                    for (Map.Entry<String, Map<String, String>> e : filteredConfig.getValue().entrySet()) {
+                        addSiteToHostgroupConfiguration(hostgroupConfigs, e.getKey(), e.getValue());
+                    }
+                } else {
+                    for (Map.Entry<String, Map<String, String>> e : filteredConfig.getValue().entrySet()) {
+                        ArrayNode hostgroupConfigs = (ArrayNode) hostgroupConfig;
+                        String siteName = e.getKey();
+                        ObjectNode site = (ObjectNode) hostgroupConfigs.findValue(siteName);
+
+                        if (site == null) {
+                            addSiteToHostgroupConfiguration(hostgroupConfigs, siteName, e.getValue());
+                        } else {
+                            ObjectNode objectToModify = (ObjectNode) site.get(PROPERTIES_NODE);
+                            if (objectToModify == null) {
+                                objectToModify = site;
+                            }
+                            putAllObjects(objectToModify, e.getValue(), forced);
+                        }
+                    }
+                }
+            }
+            return JsonUtil.writeValueAsString(blueprintNode);
+        } catch (IOException e) {
+            throw new BlueprintProcessingException("Failed to extend blueprint with global configurations.", e);
+        }
+    }
+
+    private ObjectNode getHostgroup(ArrayNode hostgroups, String name) {
+        ObjectNode result = null;
+        for (Iterator<JsonNode> nodes = hostgroups.elements(); nodes.hasNext();) {
+            ObjectNode node = (ObjectNode) nodes.next();
+            String nodeName = node.get("name").textValue();
+            if (name.equals(nodeName)) {
+                result = node;
+                break;
+            }
+        }
+        return result;
+    }
+
+    private Map<String, Map<String, Map<String, String>>> getFilteredConfigs(Map<String, Map<String, Map<String, String>>> newConfigs, ArrayNode globalConfigs,
+            boolean forced) {
+        Map<String, Map<String, Map<String, String>>> result = new HashMap<>();
+        if (forced) {
+            result = newConfigs;
+        } else {
+            for (Map.Entry<String, Map<String, Map<String, String>>> newConfig : newConfigs.entrySet()) {
+                String hostgroup = newConfig.getKey();
+                Map<String, Map<String, String>> filteredHostgroupConfig = new HashMap<>();
+                result.put(hostgroup, filteredHostgroupConfig);
+                for (Map.Entry<String, Map<String, String>> siteConfig : newConfig.getValue().entrySet()) {
+                    Map<String, String> filteredSiteConfig = new HashMap<>();
+                    filteredHostgroupConfig.put(siteConfig.getKey(), filteredSiteConfig);
+                    for (Map.Entry<String, String> siteProp : siteConfig.getValue().entrySet()) {
+                        JsonNode globalConfigProp = globalConfigs.findValue(siteProp.getKey());
+                        if (globalConfigProp == null) {
+                            filteredSiteConfig.put(siteProp.getKey(), siteProp.getValue());
+                        }
+                    }
+                }
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public String extendBlueprintGlobalConfiguration(String blueprintText, Map<String, Map<String, String>> globalConfig) {
+        return extendBlueprintGlobalConfiguration(blueprintText, globalConfig, false);
+    }
+
+    @Override
+    public String extendBlueprintGlobalConfiguration(String blueprintText, Map<String, Map<String, String>> globalConfig, boolean forced) {
+        try {
+            ObjectNode blueprintNode = (ObjectNode) JsonUtil.readTree(blueprintText);
+            JsonNode configurations = blueprintNode.path(CONFIGURATIONS_NODE);
+            if (configurations.isMissingNode()) {
+                if (globalConfig != null && !globalConfig.isEmpty()) {
+                    configurations = blueprintNode.putArray(CONFIGURATIONS_NODE);
+                    for (Map.Entry<String, Map<String, String>> e : globalConfig.entrySet()) {
+                        addSiteToConfiguration((ArrayNode) configurations, e.getKey(), e.getValue());
+                    }
+                }
+            } else {
+                if (globalConfig != null) {
+                    for (Map.Entry<String, Map<String, String>> e : globalConfig.entrySet()) {
+                        String siteName = e.getKey();
+                        ObjectNode site = (ObjectNode) configurations.findValue(siteName);
+                        if (site == null) {
+                            addSiteToConfiguration((ArrayNode) configurations, siteName, e.getValue());
+                        } else {
+                            ObjectNode objectToModify = (ObjectNode) site.get(PROPERTIES_NODE);
+                            if (objectToModify == null) {
+                                objectToModify = site;
+                            }
+                            putAllObjects(objectToModify, e.getValue(), forced);
+                        }
+                    }
+                }
+            }
+            return JsonUtil.writeValueAsString(blueprintNode);
+        } catch (IOException e) {
+            throw new BlueprintProcessingException("Failed to extend blueprint with global configurations.", e);
+        }
+    }
+
+    private void putAllObjects(ObjectNode objectToModify, Map<String, String> properties, boolean forced) {
+        if (forced) {
+            putAll(objectToModify, properties);
+        } else {
+            putAllIfAbsent(objectToModify, properties);
+        }
+    }
+
+    private void putAll(ObjectNode objectToModify, Map<String, String> properties) {
+        for (Map.Entry<String, String> prop : properties.entrySet()) {
+            objectToModify.put(prop.getKey(), prop.getValue());
+        }
+    }
+
+    private void putAllIfAbsent(ObjectNode objectToModify, Map<String, String> properties) {
+        for (Map.Entry<String, String> prop : properties.entrySet()) {
+            JsonNode exists = objectToModify.get(prop.getKey());
+            if (exists == null) {
+                objectToModify.put(prop.getKey(), prop.getValue());
+            }
+        }
+    }
+
+    private void addSiteToConfiguration(ArrayNode configurations, String siteName, Map<String, String> properties) {
+        ObjectNode config = configurations.addObject();
+        ObjectNode site = config.putObject(siteName);
+        ObjectNode props = site.putObject(PROPERTIES_NODE);
+        putAll(props, properties);
+    }
+
+    private void addSiteToHostgroupConfiguration(ArrayNode configurations, String siteName, Map<String, String> properties) {
+        ObjectNode config = configurations.addObject();
+        ObjectNode site = config.putObject(siteName);
+        putAll(site, properties);
     }
 
     @Override
