@@ -25,7 +25,7 @@ public class BlueprintTemplateProcessor {
         long started = System.currentTimeMillis();
         String generateBlueprint = generateBlueprintWithParameters(blueprintText, cluster, rdsConfigs, ambariDatabase);
         long generationTime = System.currentTimeMillis() - started;
-        LOGGER.info("The validation was generated successfully under {} ms, the generated validation is: {}",
+        LOGGER.info("The blueprint text processed successfully by the EL based template processor under {} ms, the text after processing is: {}",
                 generationTime,
                 JsonUtil.minify(generateBlueprint));
         return generateBlueprint;
@@ -37,8 +37,8 @@ public class BlueprintTemplateProcessor {
         handlebars.with(EscapingStrategy.NOOP);
         handlebars.registerHelperMissing((context, options) -> options.fn.text());
         Template template = handlebars.compileInline(blueprintText, "{{{", "}}}");
-
-        return template.apply(prepareTemplateObject(cluster.getBlueprintInputs().get(Map.class), cluster, rdsConfigs, ambariDatabase));
+        Map modelContext = prepareTemplateObject(cluster.getBlueprintInputs().get(Map.class), cluster, rdsConfigs, ambariDatabase);
+        return template.apply(modelContext);
     }
 
     private Map<String, Object> prepareTemplateObject(Map<String, Object> blueprintInputs, Cluster cluster, Iterable<RDSConfig> rdsConfigs,

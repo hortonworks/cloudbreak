@@ -18,11 +18,7 @@ public class BlueprintTemplateModelContextBuilder {
 
     private final Map<String, String> customProperties = new HashMap<>();
 
-    private Optional<RdsView> rangerRds = Optional.empty();
-
-    private Optional<RdsView> hiveRds = Optional.empty();
-
-    private Optional<RdsView> druidRds = Optional.empty();
+    private Map<String, RdsView> rdsConfigs = new HashMap<>();
 
     private Optional<LdapView> ldap = Optional.empty();
 
@@ -32,29 +28,13 @@ public class BlueprintTemplateModelContextBuilder {
 
     private String clusterName;
 
-    public BlueprintTemplateModelContextBuilder withRdsConfig(RDSConfig rdsConfig) {
-        if (rdsConfig != null) {
-            Optional<RdsView> rdsView = Optional.of(new RdsView(rdsConfig));
-            switch (rdsConfig.getType()) {
-                case HIVE:
-                    hiveRds = rdsView;
-                    break;
-                case RANGER:
-                    rangerRds = rdsView;
-                    break;
-                case DRUID:
-                    druidRds = rdsView;
-                    break;
-                default:
-                    break;
-            }
-        }
-        return this;
-    }
-
     public BlueprintTemplateModelContextBuilder withRdsConfigs(Iterable<RDSConfig> rdsConfigs) {
         for (RDSConfig rdsConfig : rdsConfigs) {
-            withRdsConfig(rdsConfig);
+            if (rdsConfig != null) {
+                RdsView rdsView = new RdsView(rdsConfig);
+                String componentName = rdsConfig.getType().name().toLowerCase();
+                this.rdsConfigs.put(componentName, rdsView);
+            }
         }
         return this;
     }
@@ -95,9 +75,7 @@ public class BlueprintTemplateModelContextBuilder {
         Map<String, Object> blueprintTemplateModelContext = new HashMap<>();
         blueprintTemplateModelContext.put("ldapConfig", ldap.orElse(null));
         blueprintTemplateModelContext.put("gateway", gateway.orElse(null));
-        blueprintTemplateModelContext.put("hiveRds", hiveRds.orElse(null));
-        blueprintTemplateModelContext.put("rangerRds", rangerRds.orElse(null));
-        blueprintTemplateModelContext.put("druidRds", druidRds.orElse(null));
+        blueprintTemplateModelContext.put("rdsConfigs", rdsConfigs);
         blueprintTemplateModelContext.put("ambariDatabase", ambariDatabase.orElse(null));
         for (Entry<String, String> customEntry : customProperties.entrySet()) {
             blueprintTemplateModelContext.put(customEntry.getKey(), customEntry.getValue());
