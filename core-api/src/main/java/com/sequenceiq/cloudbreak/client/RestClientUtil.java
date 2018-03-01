@@ -41,7 +41,10 @@ public class RestClientUtil {
             .loadTrustMaterial(KeyStoreUtil.createTrustStore(serverCert), null)
             .loadKeyMaterial(KeyStoreUtil.createKeyStore(clientCert, clientKey), "consul".toCharArray())
             .build();
+        return createClient(sslContext, debug, debugClass);
+    }
 
+    public static Client createClient(SSLContext sslContext, boolean debug, Class<?> debugClass) {
         ClientConfig config = new ClientConfig();
         config.property(ClientProperties.FOLLOW_REDIRECTS, "false");
         config.property(ClientProperties.CONNECT_TIMEOUT, CONNECT_TIMEOUT_MS);

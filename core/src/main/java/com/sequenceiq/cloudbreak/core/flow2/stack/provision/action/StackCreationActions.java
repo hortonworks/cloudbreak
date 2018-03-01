@@ -229,7 +229,7 @@ public class StackCreationActions {
         return new AbstractStackCreationAction<GetSSHFingerprintsResult>(GetSSHFingerprintsResult.class) {
             @Override
             protected void doExecute(StackContext context, GetSSHFingerprintsResult payload, Map<Object, Object> variables) throws Exception {
-                stackCreationService.setupTls(context, payload);
+                stackCreationService.setupTls(context);
                 StackWithFingerprintsEvent fingerprintsEvent = new StackWithFingerprintsEvent(payload.getStackId(), payload.getSshFingerprints());
                 sendEvent(context.getFlowId(), StackCreationEvent.TLS_SETUP_FINISHED_EVENT.event(), fingerprintsEvent);
             }
@@ -241,7 +241,6 @@ public class StackCreationActions {
         return new AbstractStackCreationAction<StackWithFingerprintsEvent>(StackWithFingerprintsEvent.class) {
             @Override
             protected void doExecute(StackContext context, StackWithFingerprintsEvent payload, Map<Object, Object> variables) throws Exception {
-                stackCreationService.removeTemporarySShKey(context, payload.getSshFingerprints());
                 stackCreationService.stackCreationFinished(context.getStack());
                 metricService.incrementMetricCounter(MetricType.STACK_CREATION_SUCCESSFUL, context.getStack());
                 sendEvent(context);

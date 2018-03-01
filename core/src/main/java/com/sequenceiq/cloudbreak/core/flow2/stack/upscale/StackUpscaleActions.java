@@ -159,8 +159,7 @@ public class StackUpscaleActions {
         return new AbstractStackUpscaleAction<GetSSHFingerprintsResult>(GetSSHFingerprintsResult.class) {
             @Override
             protected void doExecute(StackScalingFlowContext context, GetSSHFingerprintsResult payload, Map<Object, Object> variables) throws Exception {
-                stackUpscaleService.setupTls(context, payload);
-                stackUpscaleService.removeTemporarySShKey(context, payload.getSshFingerprints());
+                stackUpscaleService.setupTls(context);
                 BootstrapNewNodesEvent bootstrapNewNodesEvent =
                         new BootstrapNewNodesEvent(payload.getStackId(), (Set<String>) variables.get(UPSCALE_CANDIDATE_ADDRESSES));
                 sendEvent(context.getFlowId(), StackCreationEvent.TLS_SETUP_FINISHED_EVENT.event(), bootstrapNewNodesEvent);
