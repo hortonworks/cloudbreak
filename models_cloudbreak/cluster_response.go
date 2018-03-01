@@ -101,6 +101,12 @@ type ClusterResponse struct {
 	// name of the resource
 	Name string `json:"name,omitempty"`
 
+	// proxy configuration for the cluster
+	ProxyConfig *ProxyConfigResponse `json:"proxyConfig,omitempty"`
+
+	// proxy configuration id for the cluster
+	ProxyConfigID int64 `json:"proxyConfigId,omitempty"`
+
 	// RDS configuration ids for the cluster
 	// Unique: true
 	RdsConfigIds []int64 `json:"rdsConfigIds"`
@@ -180,6 +186,10 @@ type ClusterResponse struct {
 
 /* polymorph ClusterResponse name false */
 
+/* polymorph ClusterResponse proxyConfig false */
+
+/* polymorph ClusterResponse proxyConfigId false */
+
 /* polymorph ClusterResponse rdsConfigIds false */
 
 /* polymorph ClusterResponse rdsConfigs false */
@@ -256,6 +266,11 @@ func (m *ClusterResponse) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateLdapConfig(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateProxyConfig(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -573,6 +588,25 @@ func (m *ClusterResponse) validateLdapConfig(formats strfmt.Registry) error {
 		if err := m.LdapConfig.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("ldapConfig")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (m *ClusterResponse) validateProxyConfig(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.ProxyConfig) { // not required
+		return nil
+	}
+
+	if m.ProxyConfig != nil {
+
+		if err := m.ProxyConfig.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("proxyConfig")
 			}
 			return err
 		}

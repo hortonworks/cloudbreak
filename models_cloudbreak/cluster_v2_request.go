@@ -38,6 +38,9 @@ type ClusterV2Request struct {
 	// LDAP config name for the cluster
 	LdapConfigName string `json:"ldapConfigName,omitempty"`
 
+	// proxy configuration for the cluster
+	ProxyConfig *ProxyConfigv2Request `json:"proxyConfig,omitempty"`
+
 	// details of the external database for Hadoop components
 	RdsConfigs *RdsConfigs `json:"rdsConfigs,omitempty"`
 }
@@ -53,6 +56,8 @@ type ClusterV2Request struct {
 /* polymorph ClusterV2Request fileSystem false */
 
 /* polymorph ClusterV2Request ldapConfigName false */
+
+/* polymorph ClusterV2Request proxyConfig false */
 
 /* polymorph ClusterV2Request rdsConfigs false */
 
@@ -71,6 +76,11 @@ func (m *ClusterV2Request) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateFileSystem(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateProxyConfig(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -157,6 +167,25 @@ func (m *ClusterV2Request) validateFileSystem(formats strfmt.Registry) error {
 		if err := m.FileSystem.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("fileSystem")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (m *ClusterV2Request) validateProxyConfig(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.ProxyConfig) { // not required
+		return nil
+	}
+
+	if m.ProxyConfig != nil {
+
+		if err := m.ProxyConfig.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("proxyConfig")
 			}
 			return err
 		}
