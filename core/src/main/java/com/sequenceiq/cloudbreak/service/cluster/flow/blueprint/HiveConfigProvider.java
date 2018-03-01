@@ -19,7 +19,6 @@ import com.sequenceiq.cloudbreak.api.model.RDSDatabase;
 import com.sequenceiq.cloudbreak.api.model.RdsType;
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessor;
-import com.sequenceiq.cloudbreak.blueprint.rds.RDSConfigProvider;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
@@ -55,9 +54,6 @@ public class HiveConfigProvider {
 
     @Inject
     private ClusterRepository clusterRepository;
-
-    @Inject
-    private RDSConfigProvider rdsConfigProvider;
 
     public String getHiveDbUser() {
         return hiveDbUser;

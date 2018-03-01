@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
@@ -18,7 +17,6 @@ import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariDecommissioner;
 
 @RunWith(MockitoJUnitRunner.class)
-@Ignore
 public class AmbariDecommissionerTest {
 
     private AmbariDecommissioner underTest = new AmbariDecommissioner();
