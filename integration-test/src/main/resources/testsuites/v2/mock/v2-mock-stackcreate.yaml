@@ -5,7 +5,6 @@ parameters:
   availabilityZone: europe-b
   blueprintName: "Data Science: Apache Spark 2, Apache Zeppelin"
   mockPort: 9443
-  sshPort: 2020
 
 tests:
   - name: init
@@ -13,10 +12,6 @@ tests:
       - com.sequenceiq.it.TestSuiteInitializer
       - com.sequenceiq.it.cloudbreak.CloudbreakTestSuiteInitializer
       - com.sequenceiq.it.MockSuiteInitializer
-
-  - name: start ssh server on port 2021
-    classes:
-      - com.sequenceiq.it.cloudbreak.StartSshServerTest
 
   - name: create mock credential
     parameters:
@@ -70,7 +65,3 @@ tests:
       publicKeyId: seq-master
     classes:
       - com.sequenceiq.it.cloudbreak.v2.mock.MockStackCreationV2Test
-
-  - name: stop ssh server
-    classes:
-      - com.sequenceiq.it.cloudbreak.StopSshServerTest
