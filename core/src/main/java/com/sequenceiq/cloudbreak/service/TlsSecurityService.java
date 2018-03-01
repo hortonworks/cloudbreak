@@ -33,13 +33,13 @@ public class TlsSecurityService {
 
     public SecurityConfig storeSSHKeys() {
         SecurityConfig securityConfig = new SecurityConfig();
-        copyClientKeys(securityConfig);
+        generateClientKeys(securityConfig);
         generateTempSshKeypair(securityConfig);
         generateSaltSignKeypair(securityConfig);
         return securityConfig;
     }
 
-    private void copyClientKeys(SecurityConfig securityConfig) {
+    private void generateClientKeys(SecurityConfig securityConfig) {
         KeyPair identity = PkiUtil.generateKeypair();
         KeyPair signKey = PkiUtil.generateKeypair();
         X509Certificate cert = PkiUtil.cert(identity, "cloudbreak", signKey);

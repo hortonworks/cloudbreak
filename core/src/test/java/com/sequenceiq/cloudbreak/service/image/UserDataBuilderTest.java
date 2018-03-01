@@ -54,8 +54,8 @@ public class UserDataBuilderTest {
     public void testBuildUserDataAzure() throws IOException {
         String expectedGwScript = FileReaderUtils.readFileFromClasspath("azure-gateway-init.sh");
         String expectedCoreScript = FileReaderUtils.readFileFromClasspath("azure-core-init.sh");
-        Map<InstanceGroupType, String> userdata = USER_DATA_BUILDER.buildUserData(Platform.platform("AZURE"), "priv-key".getBytes(), "ssh-rsa test",
-                "cloudbreak", getPlatformParameters(), "pass");
+        Map<InstanceGroupType, String> userdata = USER_DATA_BUILDER.buildUserData(Platform.platform("AZURE"), "priv-key".getBytes(),
+            "cloudbreak", getPlatformParameters(), "pass", "cert");
         Assert.assertEquals(expectedGwScript, userdata.get(InstanceGroupType.GATEWAY));
         Assert.assertEquals(expectedCoreScript, userdata.get(InstanceGroupType.CORE));
     }
@@ -85,7 +85,7 @@ public class UserDataBuilderTest {
             @Override
             public PlatformOrchestrator orchestratorParams() {
                 return new PlatformOrchestrator(Collections.singleton(orchestrator(OrchestratorConstants.SALT)),
-                        orchestrator(OrchestratorConstants.SALT));
+                    orchestrator(OrchestratorConstants.SALT));
             }
 
             @Override
@@ -95,7 +95,7 @@ public class UserDataBuilderTest {
 
             @Override
             public VmRecommendations recommendedVms() {
-                    return null;
+                return null;
             }
 
             @Override
