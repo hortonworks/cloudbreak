@@ -10,6 +10,7 @@ buildscript {
 
 jar {
   baseName = 'cloudbreak-integration-test'
+  archiveName = 'cloudbreak-integration-test.jar'
 }
 
 apply plugin: 'org.springframework.boot'

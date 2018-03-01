@@ -8,6 +8,7 @@ repositories {
 
 jar {
     baseName = 'cloud-reactor'
+    archiveName = 'cloud-reactor.jar'
 }
 
 dependencies {

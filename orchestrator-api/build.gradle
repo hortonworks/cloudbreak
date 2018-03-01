@@ -6,6 +6,7 @@ repositories {
 
 jar {
     baseName = 'orchestrator-api'
+    archiveName = 'orchestrator-api.jar'
 }
 
 dependencies {

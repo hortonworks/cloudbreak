@@ -6,6 +6,7 @@ repositories {
 
 jar {
     baseName = 'structuredevent-model'
+    archiveName = 'structuredevent-model.jar'
 }
 
 dependencies {

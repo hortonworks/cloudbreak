@@ -5,7 +5,8 @@ repositories {
 }
 
 jar {
-    baseName = 'core-model'
+  baseName = 'core-model'
+  archiveName = 'core-model.jar'
 }
 
 dependencies {
