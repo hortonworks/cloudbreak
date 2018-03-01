@@ -39,6 +39,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v1.NetworkEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.ProxyConfigEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.RdsConfigEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.RecipeEndpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v1.RepositoryConfigValidationEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.SecurityGroupEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.SmartSenseSubscriptionEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.StackV1Endpoint;
@@ -203,6 +204,10 @@ public class CloudbreakClient {
         return refreshIfNeededAndGet(UtilEndpoint.class);
     }
 
+    public RepositoryConfigValidationEndpoint repositoryConfigValidationEndpoint() {
+        return refreshIfNeededAndGet(RepositoryConfigValidationEndpoint.class);
+    }
+
     private ExpiringMap<String, String> configTokenCache() {
         return ExpiringMap.builder().variableExpiration().expirationPolicy(ExpirationPolicy.CREATED).build();
     }
@@ -258,6 +263,7 @@ public class CloudbreakClient {
         endpointWrapperHolder.setEndpoint(newEndpoint(SmartSenseSubscriptionEndpoint.class, headers));
         endpointWrapperHolder.setEndpoint(newEndpoint(FlexSubscriptionEndpoint.class, headers));
         endpointWrapperHolder.setEndpoint(newEndpoint(ImageCatalogV1Endpoint.class, headers));
+        endpointWrapperHolder.setEndpoint(newEndpoint(RepositoryConfigValidationEndpoint.class, headers));
         logger.info("Endpoints have been renewed for CloudbreakClient");
     }
 
