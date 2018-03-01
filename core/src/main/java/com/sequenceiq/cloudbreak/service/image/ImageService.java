@@ -22,7 +22,6 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
-import com.sequenceiq.cloudbreak.blueprint.utils.BlueprintUtils;
 import com.sequenceiq.cloudbreak.client.PkiUtil;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
@@ -35,11 +34,11 @@ import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Component;
-import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
+import com.sequenceiq.cloudbreak.blueprint.utils.BlueprintUtils;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 @Service
@@ -77,13 +76,12 @@ public class ImageService {
             Platform platform = platform(stack.cloudPlatform());
             String platformString = platform(stack.cloudPlatform()).value().toLowerCase();
             String region = stack.getRegion();
-            SecurityConfig securityConfig = stack.getSecurityConfig();
-            String cbPrivKey = securityConfig.getCloudbreakSshPrivateKeyDecoded();
+            String cbPrivKey = stack.getSecurityConfig().getCloudbreakSshPrivateKeyDecoded();
+            String cbSshKey = stack.getSecurityConfig().getCloudbreakSshPublicKeyDecoded();
             byte[] cbSshKeyDer = PkiUtil.getPublicKeyDer(cbPrivKey);
             String sshUser = stack.getStackAuthentication().getLoginUserName();
-            String cbCert = securityConfig.getClientCertRaw();
-            Map<InstanceGroupType, String> userData = userDataBuilder.buildUserData(platform, cbSshKeyDer, sshUser, params,
-                    securityConfig.getSaltBootPassword(), cbCert);
+            Map<InstanceGroupType, String> userData = userDataBuilder.buildUserData(platform, cbSshKeyDer, cbSshKey, sshUser, params,
+                    stack.getSecurityConfig().getSaltBootPassword());
 
             StatedImage imgFromCatalog = determineImageFromCatalog(imageId, platformString, imageCatalog, blueprint);
             LOGGER.info("Determined image from catalog: {}", imgFromCatalog);

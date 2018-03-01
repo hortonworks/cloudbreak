@@ -22,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.instance.CollectMetadataResult;
+import com.sequenceiq.cloudbreak.cloud.event.instance.GetSSHFingerprintsResult;
 import com.sequenceiq.cloudbreak.cloud.event.resource.UpscaleStackResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
@@ -33,6 +34,7 @@ import com.sequenceiq.cloudbreak.common.type.BillingStatus;
 import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
+import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackContext;
@@ -44,7 +46,6 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
-import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
@@ -153,18 +154,29 @@ public class StackUpscaleService {
         }
         clusterService.updateClusterStatusByStackIdOutOfTransaction(stack.getId(), AVAILABLE);
         eventService.fireCloudbreakEvent(stack.getId(), BillingStatus.BILLING_CHANGED.name(),
-            messagesService.getMessage("stack.metadata.setup.billing.changed"));
+                messagesService.getMessage("stack.metadata.setup.billing.changed"));
         flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_METADATA_EXTEND, AVAILABLE.name());
         usageService.scaleUsagesForStack(stack.getId(), instanceGroupName, nodeCount);
 
         return upscaleCandidateAddresses;
     }
 
-    public void setupTls(StackContext context) throws CloudbreakException {
+    public void setupTls(StackContext context, GetSSHFingerprintsResult sshFingerprints) throws CloudbreakException {
+        LOGGER.info("Fingerprint has been determined: {}", sshFingerprints.getSshFingerprints());
         Stack stack = context.getStack();
         for (InstanceMetaData gwInstance : stack.getGatewayInstanceMetadata()) {
             if (CREATED.equals(gwInstance.getInstanceStatus())) {
-                tlsSetupService.setupTls(stack, gwInstance);
+                tlsSetupService.setupTls(stack, gwInstance, stack.getStackAuthentication().getLoginUserName(), sshFingerprints.getSshFingerprints());
+            }
+        }
+    }
+
+    public void removeTemporarySShKey(StackContext context, Set<String> sshFingerprints) throws CloudbreakException {
+        Stack stack = context.getStack();
+        for (InstanceMetaData gateway : stack.getGatewayInstanceMetadata()) {
+            if (CREATED.equals(gateway.getInstanceStatus())) {
+                String ipToTls = gatewayConfigService.getGatewayIp(stack, gateway);
+                tlsSetupService.removeTemporarySShKey(stack, ipToTls, gateway.getSshPort(), stack.getStackAuthentication().getLoginUserName(), sshFingerprints);
             }
         }
     }
@@ -200,7 +212,7 @@ public class StackUpscaleService {
             if (!cloudResourceStatus.isFailed()) {
                 CloudResource cloudResource = cloudResourceStatus.getCloudResource();
                 Resource resource = new Resource(cloudResource.getType(), cloudResource.getName(), cloudResource.getReference(), cloudResource.getStatus(),
-                    stack, null);
+                        stack, null);
                 retSet.add(resource);
             }
         }

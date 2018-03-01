@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.client;
 
 import java.security.KeyManagementException;
 import java.security.SecureRandom;
-import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
 import javax.net.ssl.HostnameVerifier;
@@ -33,21 +32,7 @@ public class CertificateTrustManager {
 
     public static SSLContext sslContext() {
         // Create a trust manager that does not validate certificate chains
-        TrustManager[] trustAllCerts = {trustEverythingTrustManager()};
-        try {
-            // Install the all-trusting trust manager
-            SSLContext sc = SslConfigurator.newInstance().createSSLContext();
-            sc.init(null, trustAllCerts, new SecureRandom());
-            LOGGER.warn("Trust all SSL cerificates has been installed");
-            return sc;
-        } catch (KeyManagementException e) {
-            LOGGER.error(e.getMessage(), e);
-            throw new RuntimeException("F", e);
-        }
-    }
-
-    private static X509TrustManager trustEverythingTrustManager() {
-        return new X509TrustManager() {
+        TrustManager[] trustAllCerts = {new X509TrustManager() {
             @Override
             public X509Certificate[] getAcceptedIssuers() {
                 LOGGER.info("accept all issuer");
@@ -65,28 +50,17 @@ public class CertificateTrustManager {
                 LOGGER.info("checkServerTrusted");
                 // Trust everything
             }
+        }
         };
-    }
-
-    public static class SavingX509TrustManager implements X509TrustManager {
-        private X509Certificate[] chain;
-
-        @Override
-        public X509Certificate[] getAcceptedIssuers() {
-            return null;
-        }
-
-        @Override
-        public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
-        }
-
-        @Override
-        public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
-            this.chain = chain;
-        }
-
-        public X509Certificate[] getChain() {
-            return chain;
+        try {
+            // Install the all-trusting trust manager
+            SSLContext sc = SslConfigurator.newInstance().createSSLContext();
+            sc.init(null, trustAllCerts, new SecureRandom());
+            LOGGER.warn("Trust all SSL cerificates has been installed");
+            return sc;
+        } catch (KeyManagementException e) {
+            LOGGER.error(e.getMessage(), e);
+            throw new RuntimeException("F", e);
         }
     }
 

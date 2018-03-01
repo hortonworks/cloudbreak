@@ -31,6 +31,7 @@ import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.model.OnFailureAction;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.instance.CollectMetadataResult;
+import com.sequenceiq.cloudbreak.cloud.event.instance.GetSSHFingerprintsResult;
 import com.sequenceiq.cloudbreak.cloud.event.resource.LaunchStackResult;
 import com.sequenceiq.cloudbreak.cloud.event.setup.CheckImageRequest;
 import com.sequenceiq.cloudbreak.cloud.event.setup.CheckImageResult;
@@ -43,6 +44,7 @@ import com.sequenceiq.cloudbreak.cloud.reactor.ErrorHandlerAwareReactorEventFact
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.common.type.BillingStatus;
 import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
+import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
@@ -54,7 +56,6 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
-import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
@@ -161,7 +162,7 @@ public class StackCreationService {
             Stack stack = context.getStack();
             Image image = imageService.getImage(stack.getId());
             CheckImageRequest<CheckImageResult> checkImageRequest = new CheckImageRequest<>(context.getCloudContext(), context.getCloudCredential(),
-                cloudStackConverter.convert(stack), image);
+                    cloudStackConverter.convert(stack), image);
             LOGGER.info("Triggering event: {}", checkImageRequest);
             eventBus.notify(checkImageRequest.selector(), eventFactory.createEvent(checkImageRequest));
             CheckImageResult result = checkImageRequest.await();
@@ -198,10 +199,19 @@ public class StackCreationService {
         return stack;
     }
 
-    public void setupTls(StackContext context) throws CloudbreakException {
+    public void setupTls(StackContext context, GetSSHFingerprintsResult sshFingerprints) throws CloudbreakException {
+        LOGGER.info("Fingerprint has been determined: {}", sshFingerprints.getSshFingerprints());
         Stack stack = context.getStack();
         for (InstanceMetaData gwInstance : stack.getGatewayInstanceMetadata()) {
-            tlsSetupService.setupTls(stack, gwInstance);
+            tlsSetupService.setupTls(stack, gwInstance, stack.getStackAuthentication().getLoginUserName(), sshFingerprints.getSshFingerprints());
+        }
+    }
+
+    public void removeTemporarySShKey(StackContext context, Set<String> sshFingerprints) throws CloudbreakException {
+        Stack stack = context.getStack();
+        for (InstanceMetaData gateway : stack.getGatewayInstanceMetadata()) {
+            String ipToTls = gatewayConfigService.getGatewayIp(stack, gateway);
+            tlsSetupService.removeTemporarySShKey(stack, ipToTls, gateway.getSshPort(), stack.getStackAuthentication().getLoginUserName(), sshFingerprints);
         }
     }
 
@@ -302,7 +312,7 @@ public class StackCreationService {
                 instanceGroup.setNodeCount(nodeCount - failedCount);
                 instanceGroupRepository.save(instanceGroup);
                 flowMessageService.fireEventAndLog(stackId, Msg.STACK_INFRASTRUCTURE_ROLLBACK_MESSAGE, UPDATE_IN_PROGRESS.name(),
-                    failedCount, group.getName(), failedResources.get(0).getStatusReason());
+                        failedCount, group.getName(), failedResources.get(0).getStatusReason());
             }
         }
     }

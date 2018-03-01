@@ -34,30 +34,30 @@ public class UserDataBuilder {
     @Inject
     private Configuration freemarkerConfiguration;
 
-    Map<InstanceGroupType, String> buildUserData(Platform cloudPlatform, byte[] cbSshKeyDer, String sshUser,
-        PlatformParameters parameters, String saltBootPassword, String cbCert) {
+    Map<InstanceGroupType, String> buildUserData(Platform cloudPlatform, byte[] cbSshKeyDer, String cbSshKey, String sshUser,
+            PlatformParameters parameters, String saltBootPassword) {
         Map<InstanceGroupType, String> result = new EnumMap<>(InstanceGroupType.class);
         for (InstanceGroupType type : InstanceGroupType.values()) {
-            String userData = build(type, cloudPlatform, cbSshKeyDer, sshUser, parameters, saltBootPassword, cbCert);
+            String userData = build(type, cloudPlatform, cbSshKey, cbSshKeyDer, sshUser, parameters, saltBootPassword);
             result.put(type, userData);
             LOGGER.debug("User data for {}, content; {}", type, userData);
         }
+
         return result;
     }
 
-    private String build(InstanceGroupType type, Platform cloudPlatform, byte[] cbSshKeyDer, String sshUser,
-        PlatformParameters params, String saltBootPassword, String cbCert) {
+    private String build(InstanceGroupType type, Platform cloudPlatform, String cbSshKey, byte[] cbSshKeyDer, String sshUser,
+            PlatformParameters params, String saltBootPassword) {
         Map<String, Object> model = new HashMap<>();
         model.put("cloudPlatform", cloudPlatform.value());
         model.put("platformDiskPrefix", params.scriptParams().getDiskPrefix());
         model.put("platformDiskStartLabel", params.scriptParams().getStartLabel());
         model.put("gateway", type == InstanceGroupType.GATEWAY);
-        model.put("tmpSshKey", "#NOT_USER_ANYMORE_BUT_KEEP_FOR_BACKWARD_COMPATIBILITY");
+        model.put("tmpSshKey", cbSshKey);
         model.put("signaturePublicKey", BaseEncoding.base64().encode(cbSshKeyDer));
         model.put("sshUser", sshUser);
         model.put("customUserData", userDataBuilderParams.getCustomData());
         model.put("saltBootPassword", saltBootPassword);
-        model.put("cbCert", cbCert);
         return build(model);
     }
 

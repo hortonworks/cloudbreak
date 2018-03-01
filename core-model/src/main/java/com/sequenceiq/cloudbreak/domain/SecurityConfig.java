@@ -79,10 +79,6 @@ public class SecurityConfig implements ProvisionEntity {
         return clientCert == null ? null : new String(Base64.decodeBase64(clientCert));
     }
 
-    public String getClientCertRaw() {
-        return clientCert;
-    }
-
     public void setClientCert(String clientCert) {
         this.clientCert = clientCert;
     }
