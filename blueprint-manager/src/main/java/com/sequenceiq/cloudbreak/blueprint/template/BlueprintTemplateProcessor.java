@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.blueprint.template;
 
+import static com.sequenceiq.cloudbreak.api.model.ExecutorType.CONTAINER;
+
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -8,12 +10,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.github.jknack.handlebars.EscapingStrategy;
 import com.github.jknack.handlebars.Handlebars;
 import com.github.jknack.handlebars.Template;
-import com.sequenceiq.cloudbreak.cloud.model.AmbariDatabase;
+import com.sequenceiq.cloudbreak.blueprint.BlueprintPreparationObject;
 import com.sequenceiq.cloudbreak.domain.Cluster;
-import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 @Component
@@ -21,9 +21,11 @@ public class BlueprintTemplateProcessor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BlueprintTemplateProcessor.class);
 
-    public String process(String blueprintText, Cluster cluster, Iterable<RDSConfig> rdsConfigs, AmbariDatabase ambariDatabase) throws IOException {
+    private final Handlebars handlebars = HandlebarUtils.handlebars();
+
+    public String process(String sourceTemplate, BlueprintPreparationObject source, Map<String, Object> customProperties) throws IOException {
         long started = System.currentTimeMillis();
-        String generateBlueprint = generateBlueprintWithParameters(blueprintText, cluster, rdsConfigs, ambariDatabase);
+        String generateBlueprint = generateBlueprintWithParameters(sourceTemplate, source, customProperties);
         long generationTime = System.currentTimeMillis() - started;
         LOGGER.info("The blueprint text processed successfully by the EL based template processor under {} ms, the text after processing is: {}",
                 generationTime,
@@ -31,29 +33,38 @@ public class BlueprintTemplateProcessor {
         return generateBlueprint;
     }
 
-    private String generateBlueprintWithParameters(String blueprintText, Cluster cluster, Iterable<RDSConfig> rdsConfigs, AmbariDatabase ambariDatabase)
+    private String generateBlueprintWithParameters(String sourceTemplate, BlueprintPreparationObject source, Map<String, Object> customProperties)
             throws IOException {
-        Handlebars handlebars = new Handlebars();
-        handlebars.with(EscapingStrategy.NOOP);
-        handlebars.registerHelperMissing((context, options) -> options.fn.text());
-        Template template = handlebars.compileInline(blueprintText, "{{{", "}}}");
-        Map modelContext = prepareTemplateObject(cluster.getBlueprintInputs().get(Map.class), cluster, rdsConfigs, ambariDatabase);
-        return template.apply(modelContext);
+        Template template = handlebars.compileInline(sourceTemplate, "{{{", "}}}");
+        return template.apply(prepareTemplateObject(source, customProperties));
     }
 
-    private Map<String, Object> prepareTemplateObject(Map<String, Object> blueprintInputs, Cluster cluster, Iterable<RDSConfig> rdsConfigs,
-            AmbariDatabase ambariDatabase) {
+    private Map<String, Object> prepareTemplateObject(BlueprintPreparationObject source, Map<String, Object> customProperties) throws IOException {
+        Cluster cluster = source.getCluster();
+
+        Map blueprintInputs = cluster.getBlueprintInputs().get(Map.class);
         if (blueprintInputs == null) {
             blueprintInputs = new HashMap<>();
         }
+        blueprintInputs.putAll(customProperties);
 
         return new BlueprintTemplateModelContextBuilder()
-                .withAmbariDatabase(ambariDatabase)
+                .withAmbariDatabase(source.getAmbariDatabase())
+                .withClusterAdminFirstname(cluster.getUserName())
+                .withClusterAdminLastname(cluster.getUserName())
+                .withClusterAdminPassword(cluster.getPassword())
+                .withLlapNodeCounts(cluster.getClusterNodeCount() - 1)
+                .withContainerExecutor(CONTAINER.equals(cluster.getExecutorType()))
+                .withEnableKnoxGateway(cluster.getGateway().getEnableGateway())
+                .withAdminEmail(source.getIdentityUser().getUsername())
                 .withClusterName(cluster.getName())
                 .withLdap(cluster.getLdapConfig())
                 .withGateway(cluster.getGateway())
-                .withRdsConfigs(rdsConfigs)
+                .withStackType(source.getBlueprintStackInfo().getType())
+                .withStackVersion(source.getBlueprintStackInfo().getVersion())
+                .withRdsConfigs(source.getRdsConfigs())
                 .withCustomProperties(blueprintInputs)
+                .withNifiTargets(source.getHdfConfigs().getNodeEntities())
                 .build();
     }
 }

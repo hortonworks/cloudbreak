@@ -1,0 +1,29 @@
+{
+{{{#if rdsConfigs.ranger}}}
+  "admin-properties": {
+    "properties": {
+      "db_user": "{{{ rdsConfigs.ranger.connectionUserName }}}",
+      "db_password": "{{{ rdsConfigs.ranger.connectionPassword }}}",
+      "db_name": "{{{ rdsConfigs.ranger.databaseName }}}",
+      "db_host": "{{{ rdsConfigs.ranger.connectionHost }}}",
+      "DB_FLAVOR": "POSTGRES"
+    }
+  },
+  "ranger-env": {
+    "properties": {
+      "admin_password": "{{{ rdsConfigs.ranger.properties.rangerAdminPassword }}}",
+      "ranger_admin_password": "{{{ rdsConfigs.ranger.properties.rangerAdminPassword }}}",
+      "is_solrCloud_enabled": "true",
+      "ranger-hdfs-plugin-enabled": "No",
+      "ranger-hive-plugin-enabled": "No",
+      "ranger-yarn-plugin-enabled": "No",
+      "ranger_privelege_user_jdbc_url": "jdbc:postgresql://{{{ rdsConfigs.ranger.connectionHost }}}",
+      "ranger-atlas-plugin-enabled": "No",
+      "create_db_dbuser": "false",
+      "xasecure.audit.destination.hdfs": "true",
+      "xasecure.audit.destination.hdfs.dir": "s3a://{{{ S3_BUCKET }}}/{{cluster_name}}/apps/ranger/audit/{{cluster_name}}",
+      "xasecure.audit.destination.solr": "true"
+    }
+  }
+{{{/if}}}
+}

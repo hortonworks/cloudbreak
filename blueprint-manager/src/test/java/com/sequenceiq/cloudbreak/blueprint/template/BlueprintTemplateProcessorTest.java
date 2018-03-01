@@ -13,8 +13,11 @@ import org.mockito.InjectMocks;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
+import com.sequenceiq.cloudbreak.blueprint.BlueprintPreparationObject;
+import com.sequenceiq.cloudbreak.blueprint.templates.BlueprintStackInfo;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariDatabase;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
@@ -31,8 +34,16 @@ public class BlueprintTemplateProcessorTest {
     public void testMustacheGeneratorWithSimpleUseCase() throws Exception {
         String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints/bp-mustache-test.bp");
         Cluster cluster = cluster();
+        BlueprintStackInfo blueprintStackInfo =  new BlueprintStackInfo("hdp", "2.4");
+        BlueprintPreparationObject blueprintPreparationObject = BlueprintPreparationObject.Builder.builder()
+                .withBlueprintStackInfo(blueprintStackInfo)
+                .withRdsConfigs(cluster.getRdsConfigs())
+                .withAmbariDatabase(ambariDatabase())
+                .withCluster(cluster)
+                .withIdentityUser(TestUtil.cbUser())
+                .build();
 
-        String result = underTest.process(testBlueprint, cluster, cluster.getRdsConfigs(), ambariDatabase());
+        String result = underTest.process(testBlueprint, blueprintPreparationObject, Maps.newHashMap());
         assertTrue(result.contains("testbucket"));
         assertTrue(result.contains("{{ zookeeper_quorum }}"));
         assertTrue(result.contains("{{default('/configurations/hadoop-env/hdfs_log_dir_prefix', '/var/log/hadoop')}}"));
@@ -46,8 +57,17 @@ public class BlueprintTemplateProcessorTest {
     public void testMustacheGeneratorForRangerRDS() throws Exception {
         String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints/bp-mustache-test.bp");
         Cluster cluster = cluster();
+        BlueprintStackInfo blueprintStackInfo =  new BlueprintStackInfo("hdp", "2.4");
 
-        String result = underTest.process(testBlueprint, cluster, cluster.getRdsConfigs(), ambariDatabase());
+        BlueprintPreparationObject blueprintPreparationObject = BlueprintPreparationObject.Builder.builder()
+                .withBlueprintStackInfo(blueprintStackInfo)
+                .withRdsConfigs(cluster.getRdsConfigs())
+                .withAmbariDatabase(ambariDatabase())
+                .withCluster(cluster)
+                .withIdentityUser(TestUtil.cbUser())
+                .build();
+
+        String result = underTest.process(testBlueprint, blueprintPreparationObject, Maps.newHashMap());
 
         assertTrue(result.contains("\"db_host\": \"10.1.1.1:5432\""));
         assertTrue(result.contains("\"db_user\": \"heyitsme\""));
@@ -61,8 +81,17 @@ public class BlueprintTemplateProcessorTest {
     public void testMustacheGeneratorForHiveRDS() throws Exception {
         String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints/bp-mustache-test.bp");
         Cluster cluster = cluster();
+        BlueprintStackInfo blueprintStackInfo =  new BlueprintStackInfo("hdp", "2.4");
 
-        String result = underTest.process(testBlueprint, cluster, cluster.getRdsConfigs(), ambariDatabase());
+        BlueprintPreparationObject blueprintPreparationObject = BlueprintPreparationObject.Builder.builder()
+                .withBlueprintStackInfo(blueprintStackInfo)
+                .withRdsConfigs(cluster.getRdsConfigs())
+                .withAmbariDatabase(ambariDatabase())
+                .withCluster(cluster)
+                .withIdentityUser(TestUtil.cbUser())
+                .build();
+
+        String result = underTest.process(testBlueprint, blueprintPreparationObject, Maps.newHashMap());
 
         assertTrue(result.contains("\"javax.jdo.option.ConnectionURL\": \"jdbc:postgresql://10.1.1.1:5432/hive\""));
         assertTrue(result.contains("\"javax.jdo.option.ConnectionUserName\": \"heyitsme\""));
@@ -76,8 +105,17 @@ public class BlueprintTemplateProcessorTest {
     public void testMustacheGeneratorForDruidRDS() throws Exception {
         String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints/bp-mustache-test.bp");
         Cluster cluster = cluster();
+        BlueprintStackInfo blueprintStackInfo =  new BlueprintStackInfo("hdp", "2.4");
 
-        String result = underTest.process(testBlueprint, cluster, cluster.getRdsConfigs(), ambariDatabase());
+        BlueprintPreparationObject blueprintPreparationObject = BlueprintPreparationObject.Builder.builder()
+                .withBlueprintStackInfo(blueprintStackInfo)
+                .withRdsConfigs(cluster.getRdsConfigs())
+                .withAmbariDatabase(ambariDatabase())
+                .withCluster(cluster)
+                .withIdentityUser(TestUtil.cbUser())
+                .build();
+
+        String result = underTest.process(testBlueprint, blueprintPreparationObject, Maps.newHashMap());
 
         assertTrue(result.contains("\"druid.metadata.storage.type\": \"postgresql\""));
         assertTrue(result.contains("\"druid.metadata.storage.connector.connectURI\": \"jdbc:postgresql://10.1.1.1:5432/druid\""));
@@ -90,8 +128,17 @@ public class BlueprintTemplateProcessorTest {
         String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints/bp-mustache-test.bp");
         Cluster cluster = cluster();
         cluster.getRdsConfigs().add(rdsConfig("customRds"));
+        BlueprintStackInfo blueprintStackInfo =  new BlueprintStackInfo("hdp", "2.4");
 
-        String result = underTest.process(testBlueprint, cluster, cluster.getRdsConfigs(), ambariDatabase());
+        BlueprintPreparationObject blueprintPreparationObject = BlueprintPreparationObject.Builder.builder()
+                .withBlueprintStackInfo(blueprintStackInfo)
+                .withRdsConfigs(cluster.getRdsConfigs())
+                .withAmbariDatabase(ambariDatabase())
+                .withCluster(cluster)
+                .withIdentityUser(TestUtil.cbUser())
+                .build();
+
+        String result = underTest.process(testBlueprint, blueprintPreparationObject, Maps.newHashMap());
 
         assertTrue(result.contains("\"custom.metadata.storage.type\": \"postgresql\""));
         assertTrue(result.contains("\"custom.metadata.storage.engine\": \"postgres\""));

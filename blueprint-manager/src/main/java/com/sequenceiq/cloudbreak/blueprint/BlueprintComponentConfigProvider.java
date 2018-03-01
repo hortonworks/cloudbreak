@@ -35,20 +35,4 @@ public interface BlueprintComponentConfigProvider {
     default Set<String> components() {
         return Sets.newHashSet();
     }
-
-    default boolean ldapConfigShouldApply(BlueprintPreparationObject source, String blueprintText) {
-        return false;
-    }
-
-    default List<BlueprintConfigurationEntry> ldapConfigs(BlueprintPreparationObject source, String blueprintText) {
-        return Lists.newArrayList();
-    }
-
-    default boolean rdsConfigShouldApply(BlueprintPreparationObject source, String blueprintText) {
-        return false;
-    }
-
-    default List<BlueprintConfigurationEntry> rdsConfigs(BlueprintPreparationObject source, String blueprintText) {
-        return Lists.newArrayList();
-    }
 }

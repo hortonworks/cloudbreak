@@ -33,6 +33,7 @@ import com.sequenceiq.cloudbreak.api.model.RecipeType;
 import com.sequenceiq.cloudbreak.api.model.RecoveryMode;
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.model.Status;
+import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
@@ -411,10 +412,10 @@ public class TestUtil {
         return kerberosConfig;
     }
 
-    public static HostGroup hostGroup() {
+    public static HostGroup hostGroup(String name) {
         HostGroup hostGroup = new HostGroup();
         hostGroup.setId(1L);
-        hostGroup.setName(DUMMY_NAME);
+        hostGroup.setName(name);
         hostGroup.setRecipes(recipes(1));
         hostGroup.setHostMetadata(hostMetadata(hostGroup, 1));
         InstanceGroup instanceGroup = instanceGroup(1L, InstanceGroupType.CORE, gcpTemplate(1L));
@@ -425,6 +426,18 @@ public class TestUtil {
         hostGroup.setCluster(cluster(blueprint(), stack(), 1L));
         hostGroup.setRecoveryMode(RecoveryMode.MANUAL);
         return hostGroup;
+    }
+
+    public static Set<HostGroup> hostGroups(Set<String> names) {
+        Set<HostGroup> hostgroups = new HashSet<>();
+        for (String name : names) {
+            hostgroups.add(hostGroup(name));
+        }
+        return hostgroups;
+    }
+
+    public static HostGroup hostGroup() {
+        return hostGroup(DUMMY_NAME);
     }
 
     public static Set<HostGroup> hostGroups(Cluster cluster) {
@@ -593,6 +606,16 @@ public class TestUtil {
         smartSenseSubscription.setPublicInAccount(false);
         smartSenseSubscription.setId(1L);
         return smartSenseSubscription;
+    }
+
+    public static RDSConfig rdsConfig(RdsType rdsType) {
+        RDSConfig rdsConfig = new RDSConfig();
+        rdsConfig.setName(rdsType.name());
+        rdsConfig.setConnectionPassword("iamsoosecure");
+        rdsConfig.setConnectionUserName("heyitsme");
+        rdsConfig.setConnectionURL("jdbc:postgresql://10.1.1.1:5432/" + rdsType.name().toLowerCase());
+        rdsConfig.setType(rdsType.name());
+        return rdsConfig;
     }
 
     public static Stack setSpotInstances(Stack stack) {

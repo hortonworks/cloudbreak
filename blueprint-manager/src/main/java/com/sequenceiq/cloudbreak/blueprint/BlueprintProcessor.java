@@ -35,5 +35,7 @@ public interface BlueprintProcessor {
 
     Map<String, Set<String>> getComponentsByHostGroup(String blueprintText);
 
+    String addConfigEntryStringToBlueprint(String config, String blueprintText);
+
     boolean hivaDatabaseConfigurationExistsInBlueprint(String blueprintText);
 }

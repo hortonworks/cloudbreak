@@ -13,7 +13,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintComponentConfigProvider;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintPreparationObject;
-import com.sequenceiq.cloudbreak.blueprint.HdfClusterLocator;
+import com.sequenceiq.cloudbreak.blueprint.utils.StackInfoService;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 @Component
@@ -22,7 +22,7 @@ public class HbaseConfigProvider implements BlueprintComponentConfigProvider {
     private static final Logger LOGGER = LoggerFactory.getLogger(HbaseConfigProvider.class);
 
     @Inject
-    private HdfClusterLocator hdfClusterLocator;
+    private StackInfoService stackInfoService;
 
     @Override
     public String customTextManipulation(BlueprintPreparationObject source, String blueprintText) {
@@ -59,6 +59,6 @@ public class HbaseConfigProvider implements BlueprintComponentConfigProvider {
 
     @Override
     public boolean additionalCriteria(BlueprintPreparationObject source, String blueprintText) {
-        return !hdfClusterLocator.hdfCluster(source.getStackRepoDetails());
+        return !stackInfoService.hdfCluster(source.getStackRepoDetails());
     }
 }
