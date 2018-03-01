@@ -145,13 +145,26 @@ task execute(type: JavaExec) {
   }
 }
 
+sourceSets {
+  main {
+    java.srcDirs += "${projectDir}/src/main/generated"
+  }
+}
+
 compileJava.dependsOn buildInfo
 compileJava {
   options.compilerArgs = [
-          '-Amapstruct.unmappedTargetPolicy=ERROR'
+          '-Amapstruct.unmappedTargetPolicy=ERROR',
+          '-Amapstruct.suppressGeneratorTimestamp=true',
+          '-Amapstruct.suppressGeneratorVersionInfoComment=true'
   ]
+
+  generatedSourcesDestinationDir = "$projectDir/src/main/generated"
 }
 
+compileJava.doFirst {
+  delete "${projectDir}/src/main/generated/"
+}
 
 class BuildInfoTask extends DefaultTask {
   File destination = new File("build.info")

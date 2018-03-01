@@ -10,6 +10,9 @@ jobs:
       - run:
           name: build
           command: ./gradlew -Penv=jenkins -b build.gradle clean build --info --stacktrace --parallel -x test -x checkstyleMain -x checkstyleTest -x findbugsMain -x findbugsTest
+      - run:
+          name: check
+          command: git status | grep "working tree clean"
       - save_cache:
           key: gradle-cache
           paths:
