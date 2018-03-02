@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.stack.flow;
 
+import java.security.cert.X509Certificate;
+
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.WebTarget;
 
@@ -25,7 +27,12 @@ public class NginxCertListenerTask extends StackBasedStatusCheckerTask<NginxPoll
             Client client = nginxPollerObject.getClient();
             WebTarget nginxTarget = client.target(String.format("https://%s:%d", ip, port));
             nginxTarget.path("/").request().get();
-            nginxAvailable = true;
+            X509Certificate[] chain = nginxPollerObject.getTrustManager().getChain();
+            if (chain == null || chain.length == 0) {
+                LOGGER.info("Nginx is listening on {}:{}, but TLS is not configured yet", ip, port);
+            } else {
+                nginxAvailable = true;
+            }
         } catch (Exception e) {
             LOGGER.info("Nginx is not listening on {}:{}, error: {}", ip, port, e.getMessage());
         }
