@@ -6,21 +6,25 @@ tests:
   - name: region_os_test
     parameters:
       provider: openstack
+      openstackCredentialName: regiontestopenstackcred
     classes:
       - com.sequenceiq.it.cloudbreak.RegionTests
   - name: region_aws_test
     parameters:
       provider: aws
+      awsCredentialName: regiontestawscred
     classes:
       - com.sequenceiq.it.cloudbreak.RegionTests
   - name: region_azure_test
     parameters:
       provider: azure
+      azureCredentialName: regiontestazurecred
     classes:
       - com.sequenceiq.it.cloudbreak.RegionTests
   - name: region_gcp_test
     parameters:
       provider: gcp
+      gcpCredentialName: regiontestgcpkcred
     classes:
       - com.sequenceiq.it.cloudbreak.RegionTests
 
