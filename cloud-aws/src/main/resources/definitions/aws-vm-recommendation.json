@@ -1,7 +1,7 @@
 {
   "master": {
     "type": "master",
-    "flavor": "m4.4xlarge",
+    "flavor": "m4.2xlarge",
     "cardinality": 1,
     "volumeType": "SSD",
     "volumeCount": 1,
