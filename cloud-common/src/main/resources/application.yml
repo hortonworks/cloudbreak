@@ -56,7 +56,7 @@ cb:
     vpc:
 
   azure:
-    host.name.prefix.length: 3
+    host.name.prefix.length: 255
 
   os:
     enable.autoimport: true
