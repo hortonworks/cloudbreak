@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.stack.flow;
 
 import javax.ws.rs.client.Client;
 
+import com.sequenceiq.cloudbreak.client.CertificateTrustManager.SavingX509TrustManager;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.StackContext;
 
@@ -13,11 +14,14 @@ public class NginxPollerObject extends StackContext {
 
     private final int gatewayPort;
 
-    public NginxPollerObject(Stack stack, Client client, String ip, int gatewayPort) {
+    private final SavingX509TrustManager trustManager;
+
+    public NginxPollerObject(Stack stack, Client client, String ip, int gatewayPort, SavingX509TrustManager trustManager) {
         super(stack);
         this.client = client;
         this.ip = ip;
         this.gatewayPort = gatewayPort;
+        this.trustManager = trustManager;
     }
 
     public Client getClient() {
@@ -30,5 +34,9 @@ public class NginxPollerObject extends StackContext {
 
     public int getGatewayPort() {
         return gatewayPort;
+    }
+
+    public SavingX509TrustManager getTrustManager() {
+        return trustManager;
     }
 }
