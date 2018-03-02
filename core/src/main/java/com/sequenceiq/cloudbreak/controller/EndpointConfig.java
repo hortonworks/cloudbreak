@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.controller.mapper.DataIntegrityViolationExcepti
 import com.sequenceiq.cloudbreak.controller.mapper.DefaultExceptionMapper;
 import com.sequenceiq.cloudbreak.controller.mapper.DuplicatedKeyValueExceptionMapper;
 import com.sequenceiq.cloudbreak.controller.mapper.EntityNotFoundExceptionMapper;
+import com.sequenceiq.cloudbreak.controller.mapper.GetCloudParameterExceptionMapper;
 import com.sequenceiq.cloudbreak.controller.mapper.HibernateConstraintViolationExceptionMapper;
 import com.sequenceiq.cloudbreak.controller.mapper.HttpMediaTypeNotSupportedExceptionMapper;
 import com.sequenceiq.cloudbreak.controller.mapper.HttpMessageNotReadableExceptionMapper;
@@ -111,6 +112,7 @@ public class EndpointConfig extends ResourceConfig {
         register(DataIntegrityViolationExceptionMapper.class);
         register(TerminationFailedExceptionMapper.class);
         register(WebApplicaitonExceptionMapper.class);
+        register(GetCloudParameterExceptionMapper.class);
 
         register(RuntimeExceptionMapper.class);
         register(DefaultExceptionMapper.class);
