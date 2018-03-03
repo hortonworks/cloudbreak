@@ -2,6 +2,7 @@ server:
   contextPath: "/as"
 
 periscope:
+  useProxyForClusterConnection: false
   db.env:
     user: postgres
     pass:
