@@ -15,7 +15,6 @@ cert:
 
 cb:
   enabledplatforms: AZURE,AWS,GCP,OPENSTACK
-  useProxyForClusterConnection: false
   publicip:
   etc.config.dir: /etc/cloudbreak
   threadpool:
