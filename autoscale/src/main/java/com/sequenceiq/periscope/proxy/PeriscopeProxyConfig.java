@@ -1,10 +1,10 @@
-package com.sequenceiq.cloudbreak.proxy;
+package com.sequenceiq.periscope.proxy;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
-public class CloudbreakProxyConfig {
+public class PeriscopeProxyConfig {
 
     @Value("${https.proxyHost:}")
     private String httpsProxyHost;
@@ -12,7 +12,7 @@ public class CloudbreakProxyConfig {
     @Value("${https.proxyPort:}")
     private String httpsProxyPort;
 
-    @Value("${cb.useProxyForClusterConnection:false}")
+    @Value("${periscope.useProxyForClusterConnection:false}")
     private boolean useProxyForClusterConnection;
 
     public String getHttpsProxyHost() {
