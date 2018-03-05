@@ -77,6 +77,8 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 
+import okhttp3.JavaNetAuthenticator;
+
 public class AzureClient {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureClient.class);
@@ -104,6 +106,7 @@ public class AzureClient {
                 .withDefaultSubscriptionId(subscriptionId);
         azure = Azure
                 .configure()
+                .withProxyAuthenticator(new JavaNetAuthenticator())
                 .withLogLevel(LogLevel.BASIC)
                 .authenticate(creds)
                 .withSubscription(subscriptionId);

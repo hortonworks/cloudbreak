@@ -6,9 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.ambari.client.AmbariClient;
+import com.sequenceiq.cloudbreak.proxy.ApplicationProxyConfig;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.model.TlsConfiguration;
-import com.sequenceiq.periscope.proxy.PeriscopeProxyConfig;
 import com.sequenceiq.periscope.service.security.TlsSecurityService;
 
 @Service
@@ -20,7 +20,7 @@ public class AmbariClientProvider {
     private TlsSecurityService tlsSecurityService;
 
     @Autowired
-    private PeriscopeProxyConfig proxyConfig;
+    private ApplicationProxyConfig proxyConfig;
 
     public AmbariClient createAmbariClient(Cluster cluster) {
         if (cluster.getStackId() != null) {
