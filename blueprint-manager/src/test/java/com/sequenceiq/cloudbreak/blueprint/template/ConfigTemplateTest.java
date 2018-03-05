@@ -12,11 +12,14 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.github.jknack.handlebars.Handlebars;
 import com.github.jknack.handlebars.Template;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
+import com.sequenceiq.cloudbreak.domain.RDSConfig;
+import com.sequenceiq.cloudbreak.domain.json.Json;
 
 @RunWith(Parameterized.class)
 public class ConfigTemplateTest {
@@ -36,7 +39,7 @@ public class ConfigTemplateTest {
     }
 
     @Parameterized.Parameters(name = "{index}: templateTest {0} with handlebar where the expected file is  {1}")
-    public static Iterable<Object[]> data() {
+    public static Iterable<Object[]> data() throws JsonProcessingException {
         return Arrays.asList(new Object[][] {
                 { "blueprints/atlas/ldap.handlebars", "blueprints/atlas/atlas-with-ldap.json",
                         ldapConfigWhenLdapPresentedThenShouldReturnWithLdapConfig() },
@@ -62,19 +65,22 @@ public class ConfigTemplateTest {
                         nifiConfigWhenHdfPresentedThenShouldReturnWithNifiConfig() },
                 { "blueprints/nifi/global.handlebars", "blueprints/nifi/global-without-hdf.json",
                         nifiConfigWhenHdfNotPresentedThenShouldReturnWithNotNifiConfig() },
-
                 { "blueprints/ranger/global.handlebars", "blueprints/ranger/global.json",
+                        objectWithoutEverything() },
+                { "blueprints/ranger/settings.handlebars", "blueprints/ranger/settings.json",
                         objectWithoutEverything() },
                 { "blueprints/ranger/ldap.handlebars", "blueprints/ranger/ranger-with-ldap.json",
                         ldapConfigWhenLdapPresentedThenShouldReturnWithLdapConfig() },
                 { "blueprints/ranger/ldap.handlebars", "blueprints/ranger/ranger-without-ldap.json",
                         withoutLdapConfigWhenLdapNotPresentedThenShouldReturnWithoutLdapConfig() },
-
+                { "blueprints/ranger/rds.handlebars", "blueprints/ranger/ranger-with-rds.json",
+                        rangerRdsConfigWhenRdsPresentedThenShouldReturnWithRdsConfig() },
+                { "blueprints/ranger/rds.handlebars", "blueprints/ranger/ranger-without-rds.json",
+                        objectWithoutEverything() },
                 { "blueprints/yarn/global.handlebars", "blueprints/yarn/global-without-container.json",
                         objectContainerExecutorIsFalseThenShouldReturnWithoutContainerConfigs() },
                 { "blueprints/yarn/global.handlebars", "blueprints/yarn/global-with-container.json",
                         objectContainerExecutorIsTrueThenShouldReturnWithContainerConfigs() },
-
                 { "blueprints/zeppelin/global.handlebars", "blueprints/zeppelin/global-with-2_5.json",
                         zeppelinWhenStackVersionIs25ThenShouldReturnWithZeppelinEnvConfigs() },
                 { "blueprints/zeppelin/global.handlebars", "blueprints/zeppelin/global-without-2_5.json",
@@ -185,6 +191,18 @@ public class ConfigTemplateTest {
     public static Map<String, Object> hiveRdsConfigWhenRdsPresentedThenShouldReturnWithRdsConfig() {
         return new BlueprintTemplateModelContextBuilder()
                 .withRdsConfigs(Sets.newHashSet(TestUtil.rdsConfig(RdsType.HIVE)))
+                .build();
+    }
+
+    public static Map<String, Object> rangerRdsConfigWhenRdsPresentedThenShouldReturnWithRdsConfig() throws JsonProcessingException {
+        RDSConfig rdsConfig = TestUtil.rdsConfig(RdsType.RANGER);
+
+        //Map<String, String> attributes = new HashMap<>();
+        //attributes.put("rangerAdminPassword", "rangerAdminPassword");
+        //rdsConfig.setAttributes(new Json(attributes));
+
+        return new BlueprintTemplateModelContextBuilder()
+                .withRdsConfigs(Sets.newHashSet(rdsConfig))
                 .build();
     }
 

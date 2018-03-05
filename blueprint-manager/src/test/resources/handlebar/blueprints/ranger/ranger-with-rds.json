@@ -1,0 +1,28 @@
+{
+
+  "admin-properties": {
+    "properties": {
+      "db_user": "heyitsme",
+      "db_password": "iamsoosecure",
+      "db_name": "ranger",
+      "db_host": "10.1.1.1:5432",
+      "DB_FLAVOR": "POSTGRES"
+    }
+  },
+  "ranger-env": {
+    "properties": {
+      "admin_password": "rangerAdminPassword",
+      "ranger_admin_password": "rangerAdminPassword",
+      "is_solrCloud_enabled": "true",
+      "ranger-hdfs-plugin-enabled": "No",
+      "ranger-hive-plugin-enabled": "No",
+      "ranger-yarn-plugin-enabled": "No",
+      "ranger_privelege_user_jdbc_url": "jdbc:postgresql://10.1.1.1:5432",
+      "ranger-atlas-plugin-enabled": "No",
+      "create_db_dbuser": "false",
+      "xasecure.audit.destination.hdfs": "true",
+      "xasecure.audit.destination.solr": "true"
+    }
+  }
+
+}
