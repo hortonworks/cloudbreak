@@ -32,10 +32,6 @@
       "ambariSecurityMasterKey": ""
     }
   },
-  "imageSettings": {
-    "imageId": "6c626ab8-5089-40d1-5c98-327b8dfe6bfb",
-    "imageCatalog": "cloudbreak-default"
-  },
   "instanceGroups": [
     {
       "parameters": {},
