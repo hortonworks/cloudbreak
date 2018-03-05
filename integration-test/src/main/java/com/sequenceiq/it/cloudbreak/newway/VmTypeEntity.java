@@ -37,7 +37,7 @@ public class VmTypeEntity extends AbstractCloudbreakEntity<PlatformResourceReque
         return this;
     }
 
-    public VmTypeEntity withAvailibilityZone(String availabilityZone) {
+    public VmTypeEntity withAvailabilityZone(String availabilityZone) {
         getRequest().setAvailabilityZone(availabilityZone);
         return this;
     }

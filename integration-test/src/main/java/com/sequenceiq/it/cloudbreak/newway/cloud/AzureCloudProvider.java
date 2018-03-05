@@ -15,9 +15,9 @@ public class AzureCloudProvider extends CloudProviderHelper {
 
     public static final String AZURE_CAPITAL = "AZURE";
 
-    private static final String CREDENTIAL_DEFAULT_NAME = "itsazurermcredandsmokecred";
+    private static final String CREDENTIAL_DEFAULT_NAME = "autotesting-azure-cred";
 
-    private static final String AZURE_CLUSTER_DEFAULT_NAME = "azure";
+    private static final String AZURE_CLUSTER_DEFAULT_NAME = "autotesting-azure-cluster";
 
     public AzureCloudProvider(TestParameter testParameter) {
         super(testParameter);
@@ -33,7 +33,7 @@ public class AzureCloudProvider extends CloudProviderHelper {
     }
 
     @Override
-    String availabilityZone() {
+    public String availabilityZone() {
         return null;
     }
 
@@ -43,14 +43,6 @@ public class AzureCloudProvider extends CloudProviderHelper {
         String regionParam = getTestParameter().get("azureRegion");
 
         return regionParam == null ? region : regionParam;
-    }
-
-    @Override
-    public String availibilityZone() {
-        String availibilityZone = "";
-        String availibilityZoneParam = getTestParameter().get("azureAvailibilityZone");
-
-        return availibilityZoneParam == null ? availibilityZone : availibilityZoneParam;
     }
 
     @Override

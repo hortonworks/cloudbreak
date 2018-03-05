@@ -12,8 +12,7 @@ public class VmTypeAction {
 
     public static void getVmTypesByCredentialId(IntegrationTestContext integrationTestContext, Entity entity) throws IOException {
         VmTypeEntity vmtypeEntity = (VmTypeEntity) entity;
-        CloudbreakClient client;
-        client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT,
+        CloudbreakClient client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT,
                 CloudbreakClient.class);
 
         Credential credential = Credential.getTestContextCredential().apply(integrationTestContext);
@@ -26,11 +25,9 @@ public class VmTypeAction {
             vmtypeEntity.getRequest().setRegion(region.getRegionResponse().getDefaultRegion());
         }
 
-        Log.log(" get Virtual Machine Types to "
-                .concat(vmtypeEntity.getRequest().getCredentialName())
-                .concat(" credential and to ")
-                .concat(vmtypeEntity.getRequest().getRegion())
-                .concat(" region "));
+        Log.log(String.join(" ", " get Virtual Machine Types to",
+                vmtypeEntity.getRequest().getCredentialName(), "credential and to",
+                vmtypeEntity.getRequest().getRegion(), "region "));
         vmtypeEntity.setResponse(client.getCloudbreakClient()
                 .connectorV2Endpoint()
                 .getVmTypesByCredentialId(vmtypeEntity.getRequest()));

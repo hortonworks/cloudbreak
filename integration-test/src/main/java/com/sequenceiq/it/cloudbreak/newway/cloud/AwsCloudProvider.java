@@ -16,11 +16,11 @@ public class AwsCloudProvider extends CloudProviderHelper {
 
     public static final String AWS_CAPITAL = "AWS";
 
-    public static final String AWS_CLUSTER_DEFAULT_NAME = "aws-cluster-2";
+    public static final String AWS_CLUSTER_DEFAULT_NAME = "autotesting-aws-cluster";
 
     public static final String KEY_BASED_CREDENTIAL = "key";
 
-    private static final String CREDENTIAL_DEFAULT_NAME = "testawscred";
+    private static final String CREDENTIAL_DEFAULT_NAME = "autotesting-aws-cred";
 
     public AwsCloudProvider(TestParameter testParameter) {
         super(testParameter);
@@ -55,7 +55,7 @@ public class AwsCloudProvider extends CloudProviderHelper {
     }
 
     @Override
-    String availabilityZone() {
+    public String availabilityZone() {
         String availabilityZone = "eu-west-1a";
         String availabilityZoneParam = getTestParameter().get("awsAvailabilityZone");
 
@@ -68,14 +68,6 @@ public class AwsCloudProvider extends CloudProviderHelper {
         String regionParam = getTestParameter().get("awsRegion");
 
         return regionParam == null ? region : regionParam;
-    }
-
-    @Override
-    public String availibilityZone() {
-        String availibilityZone = "eu-west-1a";
-        String availibilityZoneParam = getTestParameter().get("awsAvailibilityZone");
-
-        return availibilityZoneParam == null ? availibilityZone : availibilityZoneParam;
     }
 
     @Override
