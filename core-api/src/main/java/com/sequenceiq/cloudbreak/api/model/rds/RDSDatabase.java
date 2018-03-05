@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.api.model;
+package com.sequenceiq.cloudbreak.api.model.rds;
 
 public enum RDSDatabase {
     POSTGRES("postgres", "org.postgresql.Driver", "Existing PostgreSQL Database");

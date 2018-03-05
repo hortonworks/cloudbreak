@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.google.common.base.Preconditions;
-import com.sequenceiq.cloudbreak.api.model.RdsType;
+import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
@@ -50,7 +50,7 @@ public class RdsConfigService {
     }
 
     public RDSConfig getPublicRdsConfig(String name, IdentityUser user) {
-        RDSConfig rdsConfig = rdsConfigRepository.findOneByName(name, user.getAccount());
+        RDSConfig rdsConfig = rdsConfigRepository.findByNameBasedOnAccount(name, user.getAccount(), user.getUserId());
         if (rdsConfig == null) {
             throw new NotFoundException(String.format("RDS configuration '%s' not found.", name));
         }

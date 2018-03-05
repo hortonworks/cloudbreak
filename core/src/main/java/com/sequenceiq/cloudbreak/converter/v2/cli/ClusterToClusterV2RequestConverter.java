@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.converter.v2.cli;
 
-import java.util.HashSet;
+import java.util.Collections;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,7 +11,6 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.model.FileSystemRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.AmbariV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.ClusterV2Request;
-import com.sequenceiq.cloudbreak.api.model.v2.RdsConfigs;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
@@ -30,12 +31,10 @@ public class ClusterToClusterV2RequestConverter extends AbstractConversionServic
         clusterV2Request.setLdapConfigName(source.getLdapConfig() == null ? null : source.getLdapConfig().getName());
         clusterV2Request.setName(source.getName());
         if (source.getRdsConfigs() != null && !source.getRdsConfigs().isEmpty()) {
-            RdsConfigs rdsConfigs = new RdsConfigs();
-            rdsConfigs.setIds(new HashSet<>());
-            for (RDSConfig conf : source.getRdsConfigs()) {
-                rdsConfigs.getIds().add(conf.getId());
-            }
-            clusterV2Request.setRdsConfigs(rdsConfigs);
+            Set<String> rdsConfigNames = source.getRdsConfigs().stream()
+                    .map(RDSConfig::getName)
+                    .collect(Collectors.toSet());
+            clusterV2Request.setRdsConfigNames(Collections.unmodifiableSet(rdsConfigNames));
         }
 
         if (source.getProxyConfig() != null) {

@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.api.model.v2;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import javax.validation.Valid;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -32,8 +35,8 @@ public class ClusterV2Request implements JsonEntity {
     @ApiModelProperty(ClusterModelDescription.LDAP_CONFIG_NAME)
     private String ldapConfigName;
 
-    @ApiModelProperty(ClusterModelDescription.RDS_CONFIGS)
-    private RdsConfigs rdsConfigs;
+    @ApiModelProperty(ClusterModelDescription.RDSCONFIG_NAMES)
+    private Set<String> rdsConfigNames = new HashSet<>();
 
     @ApiModelProperty(ClusterModelDescription.PROXY_NAME)
     private String proxyName;
@@ -107,12 +110,12 @@ public class ClusterV2Request implements JsonEntity {
         this.ambari = ambari;
     }
 
-    public RdsConfigs getRdsConfigs() {
-        return rdsConfigs;
+    public Set<String> getRdsConfigNames() {
+        return rdsConfigNames;
     }
 
-    public void setRdsConfigs(RdsConfigs rdsConfigs) {
-        this.rdsConfigs = rdsConfigs;
+    public void setRdsConfigNames(Set<String> rdsConfigNames) {
+        this.rdsConfigNames = rdsConfigNames;
     }
 
     public String getProxyName() {

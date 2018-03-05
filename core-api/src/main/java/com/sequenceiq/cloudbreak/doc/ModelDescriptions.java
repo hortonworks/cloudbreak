@@ -176,6 +176,7 @@ public class ModelDescriptions {
         public static final String CONNECTED_CLUSTER = "cluster can connect to a datalake you can define the parameters here";
         public static final String CLUSTER_ATTRIBUTES = "Additional information for ambari cluster";
         public static final String RDSCONFIG_IDS = "RDS configuration ids for the cluster";
+        public static final String RDSCONFIG_NAMES = "RDS configuration names for the cluster";
         public static final String RDSCONFIGS = "RDS configurations for the cluster";
         public static final String LDAP_CONFIG_ID = "LDAP config id for the cluster";
         public static final String LDAP_CONFIG_NAME = "LDAP config name for the cluster";
@@ -191,7 +192,6 @@ public class ModelDescriptions {
         public static final String AMBARI_DATABASE_DETAILS = "details of the external Ambari database";
         public static final String AMBARI_DATABASE_ERROR = "result of Ambari database test";
         public static final String RDS_CONFIGS = "details of the external database for Hadoop components";
-        public static final String RDS_CONNECTION_RESULT = "result of RDS connection test";
         public static final String LDAP_CONNECTION_RESULT = "result of Ldap connection test";
         public static final String CREATION_FINISHED = "Epoch time of cluster creation finish";
         public static final String AMBARI_SECURITY_MASTER_KEY = "a master key for encrypting the passwords in Ambari";
@@ -273,16 +273,19 @@ public class ModelDescriptions {
 
     public static class RDSConfig {
         public static final String CONNECTION_URL = "JDBC connection URL in the form of jdbc:<db-type>://<address>:<port>/<db>";
-        public static final String DB_TYPE = "Type of the external database (allowed values: MYSQL, POSTGRES)";
+        public static final String CONNECTION_DRIVER_NAME = "Name of the JDBC connection driver (for example: 'org.postgresql.Driver')";
+        public static final String DB_ENGINE = "Name of the external database engine (MYSQL, POSTGRES...)";
         public static final String USERNAME = "Username to use for the jdbc connection";
         public static final String PASSWORD = "Password to use for the jdbc connection";
         public static final String NAME = "Name of the RDS configuration resource";
-        public static final String HDPVERSION = "HDP version for the RDS configuration";
+        public static final String STACK_VERSION = "(HDP, HDF)Stack version for the RDS configuration";
         public static final String VALIDATED = "If true, then the RDS configuration will be validated";
-        public static final String RDSTYPE = "Type of rds (HIVE or RANGER)";
-        public static final String RDS_PROPERTIES = "custom properties for rds connection";
+        public static final String RDSTYPE = "Type of RDS, aka the service name that will use the RDS like HIVE, DRUID, SUPERSET, RANGER, etc.";
         public static final String RDS_REQUEST = "rds config request";
         public static final String RDS_REQUEST_CLUSTER_NAME = "requested cluster name";
+        public static final String RDS_CONNECTION_TEST_RESULT = "result of RDS connection test";
+        public static final String RDS_CONFIG_ID = "id of the RDS config to be tested by connectivity";
+        public static final String RDS_CONFIG_REQUEST = "unsaved RDS config to be tested by connectivity";
     }
 
     public static class FileSystem {

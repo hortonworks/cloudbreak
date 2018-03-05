@@ -7,8 +7,7 @@ import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.cloudbreak.api.model.RDSConfigRequest;
-import com.sequenceiq.cloudbreak.api.model.RDSDatabase;
+import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigRequest;
 import com.sequenceiq.it.IntegrationTestContext;
 
 public class RDSConfigTest extends AbstractCloudbreakIntegrationTest {
@@ -37,8 +36,7 @@ public class RDSConfigTest extends AbstractCloudbreakIntegrationTest {
         rdsCreateRequest.setConnectionUserName(rdsUser);
         rdsCreateRequest.setConnectionPassword(rdsPassword);
         rdsCreateRequest.setConnectionURL(rdsConnectionUrl);
-        rdsCreateRequest.setDatabaseType(RDSDatabase.valueOf(rdsDbType));
-        rdsCreateRequest.setHdpVersion(hdpVersion);
+        rdsCreateRequest.setDatabaseEngine("POSTGRES");
         // WHEN
         String rdsConnectionResult = getCloudbreakClient().utilEndpoint().testRdsConnection(rdsCreateRequest).getConnectionResult();
         Assert.assertEquals(rdsConnectionResult, "connected", "RDS connection test failed. Set the RDS configuration parameters properly.");

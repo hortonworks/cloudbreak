@@ -12,8 +12,10 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v1.RdsConfigEndpoint;
-import com.sequenceiq.cloudbreak.api.model.RDSConfigRequest;
-import com.sequenceiq.cloudbreak.api.model.RDSConfigResponse;
+import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigRequest;
+import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigResponse;
+import com.sequenceiq.cloudbreak.api.model.rds.RDSTestRequest;
+import com.sequenceiq.cloudbreak.api.model.rds.RdsTestResult;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
@@ -98,6 +100,28 @@ public class RdsConfigController extends NotificationController implements RdsCo
         executeAndNotify(user -> rdsConfigService.delete(name, user), ResourceEvent.RDS_CONFIG_DELETED);
     }
 
+    @Override
+    public RdsTestResult testRdsConnection(RDSTestRequest rdsTestRequest) {
+        Long existingRDSConfigId = rdsTestRequest.getId();
+        RDSConfigRequest configRequest = rdsTestRequest.getRdsConfig();
+        if (existingRDSConfigId == null && configRequest == null) {
+            throw new BadRequestException("Either an RDSConfig id or an RDSConfig request needs to be specified in the request. ");
+        }
+
+        RdsTestResult rdsTestResult = new RdsTestResult();
+        if (existingRDSConfigId != null) {
+            try {
+                RDSConfig config = rdsConfigService.get(existingRDSConfigId);
+                rdsTestResult = testRDSConnectivity(config.getConnectionURL(), config.getConnectionUserName(), config.getConnectionPassword());
+            } catch (NotFoundException e) {
+                rdsTestResult.setConnectionResult("not found");
+            }
+        } else {
+            rdsTestResult = testRDSConnectivity(configRequest.getConnectionURL(), configRequest.getConnectionUserName(), configRequest.getConnectionPassword());
+        }
+        return rdsTestResult;
+    }
+
     private RDSConfigResponse createRdsConfig(IdentityUser user, RDSConfigRequest rdsConfigJson, boolean publicInAccount) {
         if (rdsConfigJson.isValidated()) {
             rdsConnectionValidator.validateRdsConnection(rdsConfigJson.getConnectionURL(), rdsConfigJson.getConnectionUserName(),
@@ -119,5 +143,16 @@ public class RdsConfigController extends NotificationController implements RdsCo
         return (Set<RDSConfigResponse>) conversionService.convert(rdsConfigs,
                 TypeDescriptor.forObject(rdsConfigs),
                 TypeDescriptor.collection(Set.class, TypeDescriptor.valueOf(RDSConfigResponse.class)));
+    }
+
+    private RdsTestResult testRDSConnectivity(String connectionURL, String connectionUserName, String connectionPassword) {
+        RdsTestResult rdsTestResult = new RdsTestResult();
+        try {
+            rdsConnectionValidator.validateRdsConnection(connectionURL, connectionUserName, connectionPassword);
+            rdsTestResult.setConnectionResult("connected");
+        } catch (RuntimeException e) {
+            rdsTestResult.setConnectionResult(e.getMessage());
+        }
+        return rdsTestResult;
     }
 }

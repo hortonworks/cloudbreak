@@ -1,9 +1,8 @@
-package com.sequenceiq.cloudbreak.api.model;
+package com.sequenceiq.cloudbreak.api.model.rds;
 
 import java.util.Set;
 
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
-import com.sequenceiq.cloudbreak.doc.ModelDescriptions.RDSConfig;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.RDSConfigModelDescription;
 
 import io.swagger.annotations.ApiModel;
@@ -11,9 +10,6 @@ import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel
 public class RDSConfigResponse extends RDSConfigJson {
-
-    @ApiModelProperty(value = RDSConfig.NAME, required = true)
-    private String name;
 
     @ApiModelProperty(ModelDescriptions.ID)
     private Long id;
@@ -27,13 +23,8 @@ public class RDSConfigResponse extends RDSConfigJson {
     @ApiModelProperty(RDSConfigModelDescription.CLUSTER_NAMES)
     private Set<String> clusterNames;
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
+    @ApiModelProperty(value = ModelDescriptions.RDSConfig.STACK_VERSION)
+    private String stackVersion;
 
     public Long getId() {
         return id;
@@ -65,5 +56,13 @@ public class RDSConfigResponse extends RDSConfigJson {
 
     public void setClusterNames(Set<String> clusterNames) {
         this.clusterNames = clusterNames;
+    }
+
+    public String getStackVersion() {
+        return stackVersion;
+    }
+
+    public void setStackVersion(String stackVersion) {
+        this.stackVersion = stackVersion;
     }
 }

@@ -12,8 +12,10 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-import com.sequenceiq.cloudbreak.api.model.RDSConfigRequest;
-import com.sequenceiq.cloudbreak.api.model.RDSConfigResponse;
+import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigRequest;
+import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigResponse;
+import com.sequenceiq.cloudbreak.api.model.rds.RDSTestRequest;
+import com.sequenceiq.cloudbreak.api.model.rds.RdsTestResult;
 import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.doc.Notes;
@@ -97,4 +99,10 @@ public interface RdsConfigEndpoint {
             nickname = "deletePublicRds")
     void deletePublic(@PathParam("name") String name);
 
+    @POST
+    @Path("testconnect")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = RdsConfigOpDescription.POST_CONNECTION_TEST, produces = ContentType.JSON, notes = Notes.RDSCONFIG_NOTES,
+            nickname = "testRdsConnection")
+    RdsTestResult testRdsConnection(@Valid RDSTestRequest rdsTestRequest);
 }

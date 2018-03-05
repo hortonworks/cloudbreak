@@ -1,22 +1,15 @@
 package com.sequenceiq.cloudbreak.converter;
 
-import java.io.IOException;
 import java.util.HashSet;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.model.RDSConfigResponse;
-import com.sequenceiq.cloudbreak.api.model.RdsConfigPropertyJson;
-import com.sequenceiq.cloudbreak.api.model.RdsType;
+import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigResponse;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
-import com.sequenceiq.cloudbreak.domain.json.Json;
 
 @Component
 public class RDSConfigToRDSConfigResponseConverter extends AbstractConversionServiceAwareConverter<RDSConfig, RDSConfigResponse> {
@@ -25,10 +18,11 @@ public class RDSConfigToRDSConfigResponseConverter extends AbstractConversionSer
     @Override
     public RDSConfigResponse convert(RDSConfig source) {
         RDSConfigResponse json = new RDSConfigResponse();
+        json.setId(source.getId());
         json.setName(source.getName());
         json.setConnectionURL(source.getConnectionURL());
-        json.setDatabaseType(source.getDatabaseType());
-        json.setId(source.getId());
+        json.setDatabaseEngine(source.getDatabaseEngine());
+        json.setConnectionDriver(source.getConnectionDriver());
         json.setPublicInAccount(source.isPublicInAccount());
         json.setCreationDate(source.getCreationDate());
         if (source.getClusters() != null) {
@@ -36,30 +30,8 @@ public class RDSConfigToRDSConfigResponseConverter extends AbstractConversionSer
         } else {
             json.setClusterNames(new HashSet<>());
         }
-        json.setHdpVersion(source.getHdpVersion());
-        json.setType(source.getType() == null ? RdsType.HIVE : source.getType());
-        if (source.getAttributes() != null) {
-            json.setProperties(convertRdsConfigs(source.getAttributes()));
-        }
+        json.setStackVersion(source.getStackVersion());
+        json.setType(source.getType());
         return json;
-    }
-
-    private Set<RdsConfigPropertyJson> convertRdsConfigs(Json inputs) {
-        Set<RdsConfigPropertyJson> rdsConfigPropertyJsons = new HashSet<>();
-        try {
-            if (inputs.getValue() != null) {
-                Map<String, String> is = inputs.get(Map.class);
-                for (Entry<String, String> stringStringEntry : is.entrySet()) {
-                    RdsConfigPropertyJson rdsConfigPropertyJson = new RdsConfigPropertyJson();
-                    rdsConfigPropertyJson.setName(stringStringEntry.getKey());
-                    rdsConfigPropertyJson.setValue(stringStringEntry.getValue());
-                    rdsConfigPropertyJsons.add(rdsConfigPropertyJson);
-                }
-            }
-        } catch (IOException ignored) {
-            LOGGER.error("Could not convert rdsConfigPropertyJsons json to Set.");
-        }
-        return rdsConfigPropertyJsons;
-
     }
 }

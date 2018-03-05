@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -23,8 +24,8 @@ import com.sequenceiq.cloudbreak.api.model.ConfigsResponse;
 import com.sequenceiq.cloudbreak.api.model.ConnectedClusterRequest;
 import com.sequenceiq.cloudbreak.api.model.HostGroupRequest;
 import com.sequenceiq.cloudbreak.api.model.LdapConfigRequest;
-import com.sequenceiq.cloudbreak.api.model.RDSConfigRequest;
-import com.sequenceiq.cloudbreak.api.model.RdsType;
+import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigRequest;
+import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.blueprint.validation.BlueprintValidator;
@@ -105,7 +106,7 @@ public class ClusterDecorator {
             blueprintValidator.validateBlueprintForStack(subject, subject.getBlueprint(), subject.getHostGroups(), stack.getInstanceGroups());
         }
         subject.setTopologyValidation(request.getValidateBlueprint());
-        prepareRds(subject, user, request.getRdsConfigIds(), request.getRdsConfigJsons(), stack);
+        prepareRds(subject, user, request.getRdsConfigIds(), request.getRdsConfigNames(), request.getRdsConfigJsons(), stack);
         subject = clusterProxyDecorator.prepareProxyConfig(subject, user, request.getProxyName(), stack);
         prepareLdap(subject, user, request.getLdapConfigId(), request.getLdapConfig(), request.getLdapConfigName(), stack);
         prepareConnectedClusterParameters(subject, user, request.getConnectedCluster());
@@ -176,7 +177,8 @@ public class ClusterDecorator {
         }
     }
 
-    private void prepareRds(Cluster subject, IdentityUser user, Collection<Long> rdsConfigIds, Collection<RDSConfigRequest> requestRdsConfigs, Stack stack) {
+    private void prepareRds(Cluster subject, IdentityUser user, Collection<Long> rdsConfigIds, Set<String> rdsConfigNames,
+            Collection<RDSConfigRequest> requestRdsConfigs, Stack stack) {
         subject.setRdsConfigs(new HashSet<>());
         if (rdsConfigIds != null && !rdsConfigIds.isEmpty()) {
             for (Long rdsConfigId : rdsConfigIds) {
@@ -198,6 +200,8 @@ public class ClusterDecorator {
                 subject.getRdsConfigs().add(rdsConfig);
             }
         }
+        Optional.of(rdsConfigNames)
+                .ifPresent(confs -> confs.forEach(confName -> subject.getRdsConfigs().add(rdsConfigService.getPublicRdsConfig(confName, user))));
     }
 
     private Set<HostGroup> convertHostGroupsFromJson(Stack stack, IdentityUser user, Cluster cluster, Iterable<HostGroupRequest> hostGroupsJsons) {

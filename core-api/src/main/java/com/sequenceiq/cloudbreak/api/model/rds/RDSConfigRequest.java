@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.api.model;
+package com.sequenceiq.cloudbreak.api.model.rds;
 
 import javax.validation.constraints.NotNull;
 
@@ -12,9 +12,6 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class RDSConfigRequest extends RDSConfigJson {
 
-    @ApiModelProperty(value = RDSConfig.NAME, required = true)
-    private String name;
-
     @NotNull
     @ApiModelProperty(value = RDSConfig.USERNAME, required = true)
     private String connectionUserName;
@@ -22,14 +19,6 @@ public class RDSConfigRequest extends RDSConfigJson {
     @NotNull
     @ApiModelProperty(value = RDSConfig.PASSWORD, required = true)
     private String connectionPassword;
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
 
     public String getConnectionUserName() {
         return connectionUserName;

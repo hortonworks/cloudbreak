@@ -5,10 +5,8 @@ import java.util.function.Function;
 
 import com.sequenceiq.cloudbreak.api.model.ExecutorType;
 import com.sequenceiq.cloudbreak.api.model.FileSystemRequest;
-import com.sequenceiq.cloudbreak.api.model.RDSConfigRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.AmbariV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.ClusterV2Request;
-import com.sequenceiq.cloudbreak.api.model.v2.RdsConfigs;
 import com.sequenceiq.it.IntegrationTestContext;
 
 public class Cluster extends Entity  {
@@ -79,19 +77,8 @@ public class Cluster extends Entity  {
         return this;
     }
 
-    public Cluster withRdsConfigIds(Set<Long> ids) {
-        if (request.getRdsConfigs() == null) {
-            request.setRdsConfigs(new RdsConfigs());
-        }
-        request.getRdsConfigs().setIds(ids);
-        return this;
-    }
-
-    public Cluster withRdsConfigJsons(Set<RDSConfigRequest> rdsConfigRequests) {
-        if (request.getRdsConfigs() == null) {
-            request.setRdsConfigs(new RdsConfigs());
-        }
-        request.getRdsConfigs().setConfigs(rdsConfigRequests);
+    public Cluster withRdsConfigNames(Set<String> names) {
+        request.setRdsConfigNames(names);
         return this;
     }
 

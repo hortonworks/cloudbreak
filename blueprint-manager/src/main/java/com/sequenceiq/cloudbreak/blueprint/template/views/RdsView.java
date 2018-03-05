@@ -1,8 +1,5 @@
 package com.sequenceiq.cloudbreak.blueprint.template.views;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.springframework.util.StringUtils;
 
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
@@ -10,6 +7,8 @@ import com.sequenceiq.cloudbreak.domain.RDSConfig;
 public class RdsView {
 
     private final String connectionURL;
+
+    private final String connectionDriver;
 
     private final String connectionUserName;
 
@@ -19,18 +18,11 @@ public class RdsView {
 
     private final String host;
 
-    private final String connectionHost;
+    private final String hostWithPort;
 
-    private final String databaseType;
+    private final String subprotocol;
 
-    //TODO check a real hive RDS config to validate the existence of com.sequenceiq.cloudbreak.api.model.RDSDatabase
-    private String connectionDriverName;
-
-    private String ambariDbOption;
-
-    private String databaseTypeDbName;
-
-    private Map<String, Object> properties = new HashMap<>();
+    private String databaseEngine;
 
     public RdsView(RDSConfig rdsConfig) {
         connectionURL = rdsConfig.getConnectionURL();
@@ -50,16 +42,12 @@ public class RdsView {
         }
 
         databaseName = getDatabaseName(connectionURL);
-        connectionHost = createConnectionHost(port);
-        if (rdsConfig.getAttributes() != null) {
-            properties = rdsConfig.getAttributes().getMap();
+        this.hostWithPort = createConnectionHost(port);
+        connectionDriver = rdsConfig.getConnectionDriver();
+        subprotocol = getSubprotocol(connectionURL);
+        if (rdsConfig.getDatabaseEngine() != null) {
+            databaseEngine = rdsConfig.getDatabaseEngine().toLowerCase();
         }
-        if (rdsConfig.getDatabaseType() != null) {
-            connectionDriverName = rdsConfig.getDatabaseType().getDbDriver();
-            ambariDbOption = rdsConfig.getDatabaseType().getAmbariDbOption();
-            databaseTypeDbName = rdsConfig.getDatabaseType().getDbName();
-        }
-        databaseType = getDatabaseType(connectionURL);
     }
 
     public String getConnectionURL() {
@@ -78,32 +66,24 @@ public class RdsView {
         return databaseName;
     }
 
-    public Map<String, Object> getProperties() {
-        return properties;
-    }
-
-    public String getConnectionHost() {
-        return connectionHost;
+    public String getHostWithPort() {
+        return hostWithPort;
     }
 
     public String getHost() {
         return host;
     }
 
-    public String getConnectionDriverName() {
-        return connectionDriverName;
+    public String getConnectionDriver() {
+        return connectionDriver;
     }
 
-    public String getAmbariDbOption() {
-        return ambariDbOption;
+    public String getDatabaseEngine() {
+        return databaseEngine;
     }
 
-    public String getDatabaseTypeDbName() {
-        return databaseTypeDbName;
-    }
-
-    public String getDatabaseType() {
-        return databaseType;
+    public String getSubprotocol() {
+        return subprotocol;
     }
 
     private String getDatabaseName(String connectionURL) {
@@ -123,11 +103,18 @@ public class RdsView {
         return result;
     }
 
-    private String getDatabaseType(String connectionURL) {
+    private String getSubprotocol(String connectionURL) {
         String databaseType = "";
-        String[] split = connectionURL.split(":");
+        String[] split = connectionURL.split("//");
         if (split.length > 1) {
-            databaseType = split[1];
+            String firstPart = split[0];
+            int firstIndexOfColon = firstPart.indexOf(":");
+            int lastIndexOfColon = firstPart.lastIndexOf(":");
+            if (firstIndexOfColon < lastIndexOfColon) {
+                databaseType = firstPart.substring(firstIndexOfColon + 1, lastIndexOfColon);
+            } else {
+                databaseType = firstPart.substring(firstIndexOfColon + 1);
+            }
         }
         return databaseType;
     }
