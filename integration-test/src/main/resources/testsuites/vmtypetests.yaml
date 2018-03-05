@@ -1,30 +1,9 @@
-name: Connectors_test
+name: Connectors_VMTypes_Tests
 parameters:
   cleanUp: true
 
 tests:
-  - name: vmtype_os_test
-    parameters:
-      provider: openstack
-      openstackCredentialName: "autotesting-vmtypes-os"
-    classes:
-      - com.sequenceiq.it.cloudbreak.VmTypeTests
-  - name: vmtype_aws_test
-    parameters:
-      provider: aws
-      awsCredentialName: "autotesting-vmtypes-aws"
-    classes:
-      - com.sequenceiq.it.cloudbreak.VmTypeTests
-  - name: vmtype_azure_test
-    parameters:
-      provider: azure
-      azureCredentialName: "autotesting-vmtypes-azure"
-    classes:
-      - com.sequenceiq.it.cloudbreak.VmTypeTests
-  - name: vmtype_gcp_test
-    parameters:
-      provider: gcp
-      gcpCredentialName: "autotesting-vmtypes-gcp"
+  - name: vmtype_provider_spec_test
     classes:
       - com.sequenceiq.it.cloudbreak.VmTypeTests
 

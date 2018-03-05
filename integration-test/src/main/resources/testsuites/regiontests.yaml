@@ -1,4 +1,4 @@
-name: Connectors_test
+name: Connectors_Regions_Tests
 parameters:
   cleanUp: true
 
@@ -27,4 +27,6 @@ tests:
       gcpCredentialName: autotesting-regions-gcp
     classes:
       - com.sequenceiq.it.cloudbreak.RegionTests
-
+  - name: region_provider_spec_test
+    classes:
+      - com.sequenceiq.it.cloudbreak.RegionProviderSpecTests

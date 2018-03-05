@@ -19,13 +19,10 @@ import org.testng.annotations.Test;
 
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.ForbiddenException;
-import java.util.Collection;
 
 public class RegionTests extends CloudbreakTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RegionTests.class);
-
-    private String errorMessage = "";
 
     private CloudProvider cloudProvider;
 
@@ -33,19 +30,19 @@ public class RegionTests extends CloudbreakTest {
     }
 
     public RegionTests(CloudProvider cp, TestParameter tp) {
-        this.cloudProvider = cp;
+        cloudProvider = cp;
         setTestParameter(tp);
     }
 
     @BeforeTest
-    @Parameters({ "provider" })
+    @Parameters("provider")
     public void beforeTest(@Optional(OpenstackCloudProvider.OPENSTACK) String provider) {
         LOGGER.info("Provider: {} Region test setup has been started.", provider);
-        if (this.cloudProvider != null) {
-            LOGGER.info("{} provider already set - running from factory test", this.cloudProvider);
+        if (cloudProvider != null) {
+            LOGGER.info("{} provider already set - running from factory test", cloudProvider);
             return;
         }
-        this.cloudProvider = CloudProviderHelper.providerFactory(provider, getTestParameter())[0];
+        cloudProvider = CloudProviderHelper.providerFactory(provider, getTestParameter())[0];
     }
 
     @AfterTest
@@ -59,118 +56,85 @@ public class RegionTests extends CloudbreakTest {
             when(Credential.delete());
         } catch (ForbiddenException | BadRequestException e) {
             String exceptionMessage = e.getResponse().readEntity(String.class);
-            this.errorMessage = exceptionMessage.substring(exceptionMessage.lastIndexOf(":") + 1);
-            LOGGER.info("Clean Up Exception message ::: {}", this.errorMessage);
+            String errorMessage;
+
+            errorMessage = exceptionMessage.substring(exceptionMessage.lastIndexOf(':') + 1);
+            LOGGER.info("Clean Up Exception message ::: {}", errorMessage);
         }
     }
 
-    @Test(priority = 0, groups = { "regions" })
+    @Test(priority = 1, groups = "regions")
     public void testDefaultRegionForCredential() throws Exception {
         given(CloudbreakClient.isCreated());
-        given(cloudProvider.aValidCredential(), cloudProvider.getPlatform()
-                .concat(" credential is created"));
-        given(Region.request(), cloudProvider.getPlatform()
-                .concat(" region request"));
-        when(Region.getPlatformRegions(), "Default region is requested to "
-                .concat(cloudProvider.getPlatform())
-                .concat(" credential"));
+        given(cloudProvider.aValidCredential(), cloudProvider.getPlatform() + " credential is created");
+        given(Region.request(), cloudProvider.getPlatform() + " region request");
+        when(Region.getPlatformRegions(), "Default region is requested to " + cloudProvider.getPlatform()
+                + " credential");
         then(Region.assertThis(
                 (region, t) -> {
                     LOGGER.info("{} Default Region is ::: {}",
                             cloudProvider.getPlatform(),
                             region.getRegionResponse().getDefaultRegion());
                     Assert.assertTrue(region.getRegionResponse().getDefaultRegion().contains(cloudProvider.region()),
-                            "[" + cloudProvider.region() + "] region is not the default one!");
-                }), "[" + cloudProvider.region() + "] region should be the default one."
+                            '[' + cloudProvider.region() + "] region is not the default one!");
+                }), '[' + cloudProvider.region() + "] region should be the default one."
         );
     }
 
-    @Test(priority = 1, groups = { "regions" })
+    @Test(priority = 2, groups = "regions")
     public void testListRegionsForCredential() throws Exception {
         given(CloudbreakClient.isCreated());
-        given(cloudProvider.aValidCredential(), cloudProvider.getPlatform()
-                .concat(" credential is created"));
-        given(Region.request(), cloudProvider.getPlatform()
-                .concat(" region request"));
-        when(Region.getPlatformRegions(), "Regions are requested to "
-                .concat(cloudProvider.getPlatform())
-                .concat(" credential"));
+        given(cloudProvider.aValidCredential(), cloudProvider.getPlatform() + " credential is created");
+        given(Region.request(), cloudProvider.getPlatform() + " region request");
+        when(Region.getPlatformRegions(), "Regions are requested to " + cloudProvider.getPlatform()
+                + " credential");
         then(Region.assertThis(
                 (region, t) -> {
+                    int regionsCount = region.getRegionResponse().getRegions().size();
+
                     LOGGER.info("{} number of Regions ::: {}",
                             cloudProvider.getPlatform(),
-                            Integer.toString(region.getRegionResponse().getRegions().size()));
-                    Assert.assertNotNull(region.getRegionResponse().getRegions().size());
+                            regionsCount);
+                    Assert.assertTrue(regionsCount > 0);
                 }), "Regions should be part of the response."
         );
     }
 
-    @Test(priority = 2, groups = { "regions" })
+    @Test(priority = 3, groups = "regions")
     public void testListDisplayNamesForCredential() throws Exception {
         given(CloudbreakClient.isCreated());
-        given(cloudProvider.aValidCredential(), cloudProvider.getPlatform()
-                .concat(" credential is created"));
-        given(Region.request(), cloudProvider.getPlatform()
-                .concat(" region request"));
-        when(Region.getPlatformRegions(), "Regions are requested to "
-                .concat(cloudProvider.getPlatform())
-                .concat(" credential"));
+        given(cloudProvider.aValidCredential(), cloudProvider.getPlatform() + " credential is created");
+        given(Region.request(), cloudProvider.getPlatform() + " region request");
+        when(Region.getPlatformRegions(), "Regions are requested to " + cloudProvider.getPlatform()
+                + " credential");
         then(Region.assertThis(
                 (region, t) -> {
+                    int displayNamesCount = region.getRegionResponse().getDisplayNames().size();
+
                     LOGGER.info("{} number of Display Names ::: {}",
                             cloudProvider.getPlatform(),
-                            Integer.toString(region.getRegionResponse().getDisplayNames().size()));
-                    Assert.assertNotNull(region.getRegionResponse().getDisplayNames().size());
+                            displayNamesCount);
+                    Assert.assertTrue(displayNamesCount > 0);
                 }), "Display Names should be part of the response."
         );
     }
 
-    @Test(priority = 3, groups = { "regions" })
+    @Test(priority = 4, groups = "regions")
     public void testListAvailabilityZonesForCredential() throws Exception {
         given(CloudbreakClient.isCreated());
-        given(cloudProvider.aValidCredential(), cloudProvider.getPlatform()
-                .concat(" credential is created"));
-        given(Region.request(), cloudProvider.getPlatform()
-                .concat(" region request"));
-        when(Region.getPlatformRegions(), "Regions are requested to "
-                .concat(cloudProvider.getPlatform())
-                .concat(" credential"));
+        given(cloudProvider.aValidCredential(), cloudProvider.getPlatform() + " credential is created");
+        given(Region.request(), cloudProvider.getPlatform() + " region request");
+        when(Region.getPlatformRegions(), "Regions are requested to " + cloudProvider.getPlatform()
+                + " credential");
         then(Region.assertThis(
                 (region, t) -> {
+                    int availibilityZonesCount = region.getRegionResponse().getAvailabilityZones().size();
+
                     LOGGER.info("{} number of Availibility Zones ::: {}",
                             cloudProvider.getPlatform(),
-                            Integer.toString(region.getRegionResponse().getAvailabilityZones().size()));
-                    Assert.assertNotNull(region.getRegionResponse().getAvailabilityZones().size());
+                            availibilityZonesCount);
+                    Assert.assertTrue(availibilityZonesCount > 0);
                 }), "Availibility Zones should be part of the response."
-        );
-    }
-
-    @Test(priority = 4, groups = { "regions" })
-    public void testListAvailabilityZonesForDefaultRegion() throws Exception {
-        given(CloudbreakClient.isCreated());
-        given(cloudProvider.aValidCredential(), cloudProvider.getPlatform()
-                .concat(" credential is created"));
-        given(Region.request(), cloudProvider.getPlatform()
-                .concat(" region request"));
-        when(Region.getPlatformRegions(), "Regions are requested to "
-                .concat(cloudProvider.getPlatform())
-                .concat(" credential"));
-        then(Region.assertThis(
-                (region, t) -> {
-                    Collection<String> availibilityZones = region.getRegionResponse().getAvailabilityZones()
-                            .get(cloudProvider.region());
-
-                    if (cloudProvider.getPlatform().equalsIgnoreCase("AZURE")) {
-                        LOGGER.info("{} Default Region's Availibility Zone is not supported.",
-                                cloudProvider.getPlatform());
-                        Assert.assertTrue(availibilityZones.isEmpty());
-                    } else {
-                        availibilityZones.forEach(zone ->
-                            LOGGER.info("{} Default Region's Availibility Zone is ::: {}",
-                                    cloudProvider.getPlatform(), zone));
-                        Assert.assertFalse(availibilityZones.isEmpty());
-                    }
-                }), "Default Region Availibility Zones should be part of the response."
         );
     }
 }

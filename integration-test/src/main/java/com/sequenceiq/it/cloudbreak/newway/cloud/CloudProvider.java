@@ -26,5 +26,5 @@ public abstract class CloudProvider {
 
     public abstract String region();
 
-    public abstract String availibilityZone();
+    public abstract String availabilityZone();
 }

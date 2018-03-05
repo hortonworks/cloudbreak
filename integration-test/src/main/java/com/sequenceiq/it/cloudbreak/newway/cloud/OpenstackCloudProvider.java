@@ -16,9 +16,9 @@ public class OpenstackCloudProvider extends CloudProviderHelper {
 
     public static final String OPENSTACK_CAPITAL = "OPENSTACK";
 
-    private static final String CREDENTIAL_DEFAULT_NAME = "testopenstackcred";
+    private static final String CREDENTIAL_DEFAULT_NAME = "autotesting-os-cred";
 
-    private static final String OPENSTACK_CLUSTER_DEFAULT_NAME = "openstack-cluster";
+    private static final String OPENSTACK_CLUSTER_DEFAULT_NAME = "autotesting-os-cluster";
 
     public OpenstackCloudProvider(TestParameter testParameter) {
         super(testParameter);
@@ -34,11 +34,11 @@ public class OpenstackCloudProvider extends CloudProviderHelper {
     }
 
     @Override
-    String availabilityZone() {
-        String az = "nova";
-        String azParam = getTestParameter().get("openstackAvailabilityZone");
+    public String availabilityZone() {
+        String availabilityZone = "nova";
+        String availabilityZoneParam = getTestParameter().get("openstackAvailibilityZone");
 
-        return azParam == null ? az : azParam;
+        return availabilityZoneParam == null ? availabilityZone : availabilityZoneParam;
     }
 
     @Override
@@ -47,14 +47,6 @@ public class OpenstackCloudProvider extends CloudProviderHelper {
         String regionParam = getTestParameter().get("openstackRegion");
 
         return regionParam == null ? region : regionParam;
-    }
-
-    @Override
-    public String availibilityZone() {
-        String availibilityZone = "nova";
-        String availibilityZoneParam = getTestParameter().get("openstackAvailibilityZone");
-
-        return availibilityZoneParam == null ? availibilityZone : availibilityZoneParam;
     }
 
     @Override

@@ -15,9 +15,9 @@ public class GcpCloudProvider extends CloudProviderHelper {
 
     public static final String GCP_CAPITAL = "GCP";
 
-    private static final String CREDENTIAL_DEFAULT_NAME = "its-gcp-credandsmoke-cred-ss";
+    private static final String CREDENTIAL_DEFAULT_NAME = "autotesting-gcp-cred";
 
-    private static final String GCP_CLUSTER_DEFAULT_NAME = "gcp-cluster";
+    private static final String GCP_CLUSTER_DEFAULT_NAME = "autotesting-gcp-cluster";
 
     public GcpCloudProvider(TestParameter testParameter) {
         super(testParameter);
@@ -33,7 +33,7 @@ public class GcpCloudProvider extends CloudProviderHelper {
     }
 
     @Override
-    String availabilityZone() {
+    public String availabilityZone() {
         String availabilityZone = "europe-west1-b";
         String availabilityZoneParam = getTestParameter().get("gcpAvailabilityZone");
 
@@ -46,14 +46,6 @@ public class GcpCloudProvider extends CloudProviderHelper {
         String regionParam = getTestParameter().get("gcpRegion");
 
         return regionParam == null ? region : regionParam;
-    }
-
-    @Override
-    public String availibilityZone() {
-        String availibilityZone = "europe-west1-b";
-        String availibilityZoneParam = getTestParameter().get("gcpAvailibilityZone");
-
-        return availibilityZoneParam == null ? availibilityZone : availibilityZoneParam;
     }
 
     @Override

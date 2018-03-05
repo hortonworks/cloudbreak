@@ -6,212 +6,298 @@ import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
 import com.sequenceiq.it.cloudbreak.newway.Credential;
 import com.sequenceiq.it.cloudbreak.newway.TestParameter;
 import com.sequenceiq.it.cloudbreak.newway.VmType;
+import com.sequenceiq.it.cloudbreak.newway.cloud.AwsCloudProvider;
+import com.sequenceiq.it.cloudbreak.newway.cloud.AzureCloudProvider;
 import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProvider;
-import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProviderHelper;
+import com.sequenceiq.it.cloudbreak.newway.cloud.GcpCloudProvider;
 import com.sequenceiq.it.cloudbreak.newway.cloud.OpenstackCloudProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.AfterTest;
-import org.testng.annotations.BeforeTest;
-import org.testng.annotations.Optional;
-import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.ForbiddenException;
-import java.util.HashSet;
 import java.util.Set;
 
 public class VmTypeTests extends CloudbreakTest {
 
+    private static final String AZURE_CRED_NAME = "autotesting-vmtypes-azure";
+
+    private static final String AWS_CRED_NAME = "autotesting-vmtypes-aws";
+
+    private static final String GCP_CRED_NAME = "autotesting-vmtypes-gcp";
+
+    private static final String OS_CRED_NAME = "autotesting-vmtypes-os";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(VmTypeTests.class);
-
-    private String errorMessage = "";
-
-    private CloudProvider cloudProvider;
-
-    private String regionDefVirtualMachine = "";
-
-    private String azDefVirtualMachine = "";
-
-    private int regionVirtualMachinesNumber;
-
-    private int azVirtualMachinesNumber;
-
-    private Set<VmTypeJson> regionVirtualMachines = new HashSet<VmTypeJson>();
-
-    private Set<VmTypeJson> azVirtualMachines = new HashSet<VmTypeJson>();
 
     public VmTypeTests() {
     }
 
-    public VmTypeTests(CloudProvider cp, TestParameter tp) {
-        this.cloudProvider = cp;
+    public VmTypeTests(TestParameter tp) {
         setTestParameter(tp);
     }
 
-    @BeforeTest
-    @Parameters({"provider"})
-    public void beforeTest(@Optional(OpenstackCloudProvider.OPENSTACK) String provider) {
-        LOGGER.info("Provider: {} VM Type test setup has been started.", provider);
-        if (this.cloudProvider != null) {
-            LOGGER.info("{} provider already set - running from factory test", this.cloudProvider);
-            return;
-        }
-        this.cloudProvider = CloudProviderHelper.providerFactory(provider, getTestParameter())[0];
+    private void countVMTypesForCredentialInDefaultAvailabilityZone(CloudProvider provider, String credentialName) throws Exception {
+        given(CloudbreakClient.isCreated());
+        given(provider.aValidCredential()
+                .withName(credentialName), provider.getPlatform() + " credential is created");
+        given(VmType.request()
+                .withPlatform(provider.getPlatform())
+                .withRegion(provider.region())
+                .withAvailabilityZone(provider.availabilityZone()), provider.getPlatform()
+                + " vm type request");
+        when(VmType.getPlatformVmTypes(), String.join(" ", "vm types are requested to",
+                provider.getPlatform(), "credential and", provider.region(), "region."));
+        then(VmType.assertThis(
+                (vmtype, t) -> {
+                    int azVirtualMachinesNumber = vmtype.getResponse().getVmTypes().get(provider.availabilityZone())
+                            .getVirtualMachines()
+                            .size();
+
+                    LOGGER.info("Number of {} Virtual Machines in {} availibility zone ::: {}",
+                            provider.getPlatform(),
+                            provider.availabilityZone(),
+                            azVirtualMachinesNumber);
+                    Assert.assertTrue(azVirtualMachinesNumber > 0,
+                            "Number of Virtual Machines should be present in response"
+                                    + " for default availibility zone!");
+                }), "Virtual Machines should be part of the response."
+        );
+    }
+
+    private void listVMTypesForCredentialInDefaultAvailabilityZone(CloudProvider provider, String credentialName) throws Exception {
+        given(CloudbreakClient.isCreated());
+        given(provider.aValidCredential()
+                .withName(credentialName), provider.getPlatform() + " credential is created");
+        given(VmType.request()
+                .withPlatform(provider.getPlatform())
+                .withRegion(provider.region())
+                .withAvailabilityZone(provider.availabilityZone()), provider.getPlatform()
+                + " vm type request");
+        when(VmType.getPlatformVmTypes(), String.join(" ", "vm types are requested to",
+                provider.getPlatform(), "credential and", provider.region(), "region."));
+        then(VmType.assertThis(
+                (vmtype, t) -> {
+                    Set<VmTypeJson> azVirtualMachines = vmtype.getResponse().getVmTypes()
+                            .get(provider.availabilityZone())
+                            .getVirtualMachines();
+
+                    Assert.assertFalse(azVirtualMachines.isEmpty(),
+                                "Virtual Machines should be present in response"
+                                        + " for default availibility zone!");
+                }), "Virtual Machines should be part of the response."
+        );
+    }
+
+    private void getDefaultVMTypeForCredentialInDefaultAvailabilityZone(CloudProvider provider, String credentialName) throws Exception {
+        given(CloudbreakClient.isCreated());
+        given(provider.aValidCredential()
+                .withName(credentialName), provider.getPlatform() + " credential is created");
+        given(VmType.request()
+                .withPlatform(provider.getPlatform())
+                .withRegion(provider.region())
+                .withAvailabilityZone(provider.availabilityZone()), provider.getPlatform()
+                + " vm type request");
+        when(VmType.getPlatformVmTypes(), String.join(" ", "vm types are requested to",
+                provider.getPlatform(), "credential and", provider.region(), "region."));
+        then(VmType.assertThis(
+                (vmtype, t) -> {
+                    String azDefVirtualMachine = vmtype.getResponse().getVmTypes()
+                            .get(provider.availabilityZone())
+                            .getDefaultVirtualMachine()
+                            .getValue();
+
+                    LOGGER.info("{} Default Virtual Machine in {} availibility zone is ::: {}",
+                            provider.getPlatform(),
+                            provider.availabilityZone(),
+                            azDefVirtualMachine);
+                    Assert.assertNotNull(azDefVirtualMachine,
+                            "Default Virtual Machine should be present in response"
+                                    + " for default availibility zone!");
+                }), "Default Virtual Machine should be part of the response."
+        );
     }
 
     @AfterTest
     public void cleanUp() throws Exception {
-        LOGGER.info("Delete credential with name: {}", cloudProvider.getCredentialName());
+        String[] nameArray = {AZURE_CRED_NAME, AWS_CRED_NAME, GCP_CRED_NAME, OS_CRED_NAME};
 
-        try {
-            given(CloudbreakClient.isCreated());
-            given(Credential.request()
-                    .withName(cloudProvider.getCredentialName()));
-            when(Credential.delete());
-        } catch (ForbiddenException | BadRequestException e) {
-            String exceptionMessage = e.getResponse().readEntity(String.class);
-            this.errorMessage = exceptionMessage.substring(exceptionMessage.lastIndexOf(":") + 1);
-            LOGGER.info("Clean Up Exception message ::: {}", this.errorMessage);
+        for (String aNameArray : nameArray) {
+            LOGGER.info("Delete credential: {}", aNameArray.toLowerCase().trim());
+
+            try {
+                given(CloudbreakClient.isCreated());
+                given(Credential.request()
+                        .withName(aNameArray));
+                when(Credential.delete());
+            } catch (ForbiddenException | BadRequestException e) {
+                String exceptionMessage = e.getResponse().readEntity(String.class);
+                String errorMessage = exceptionMessage.substring(exceptionMessage.lastIndexOf(':') + 1);
+                LOGGER.info("Clean Up Exception message ::: {}", errorMessage);
+            }
         }
     }
 
-    @Test(priority = 0, groups = {"vmtypes"})
-    public void testCountVMTypesForCredentialInDefaultRegion() throws Exception {
+    @Test(priority = 1, groups = "vmtypes")
+    public void testCountAzureVMTypesForCredentialInDefaultRegion() throws Exception {
+        AzureCloudProvider provider = new AzureCloudProvider(getTestParameter());
+
         given(CloudbreakClient.isCreated());
-        given(cloudProvider.aValidCredential(), cloudProvider.getPlatform()
-                .concat(" credential is created"));
+        given(provider.aValidCredential()
+                .withName(AZURE_CRED_NAME), "Azure credential is created");
         given(VmType.request()
-                .withPlatform(cloudProvider.getPlatform())
-                .withRegion(cloudProvider.region())
-                .withAvailibilityZone(cloudProvider.availibilityZone()), cloudProvider.getPlatform()
-                .concat(" vm type request"));
-        when(VmType.getPlatformVmTypes(), " vm types are requested to "
-                .concat(cloudProvider.getPlatform())
-                .concat(" credential and ")
-                .concat(cloudProvider.region())
-                .concat(" region."));
+                .withPlatform(provider.getPlatform())
+                .withRegion(provider.region())
+                .withAvailabilityZone(provider.availabilityZone()), "Azure vm type request");
+        when(VmType.getPlatformVmTypes(), "vm types are requested to Azure credential and "
+                + provider.region() + " region.");
         then(VmType.assertThis(
                 (vmtype, t) -> {
-                    if (cloudProvider.getPlatform().matches("AZURE")) {
-                        regionVirtualMachinesNumber = vmtype.getResponse().getVmTypes().get(cloudProvider.region())
+                    int regionVirtualMachinesCount = vmtype.getResponse().getVmTypes().get(provider.region())
                                 .getVirtualMachines()
                                 .size();
 
-                        LOGGER.info("Number of {} Virtual Machines in {} region ::: {}",
-                                cloudProvider.getPlatform(),
-                                cloudProvider.region(),
-                                regionVirtualMachinesNumber);
-                        Assert.assertTrue(regionVirtualMachinesNumber > 1,
-                                "Number of Virtual Machines should be present in response for default region!");
-                    } else {
-                        azVirtualMachinesNumber = vmtype.getResponse().getVmTypes().get(cloudProvider.availibilityZone())
-                                .getVirtualMachines()
-                                .size();
-
-                        LOGGER.info("Number of {} Virtual Machines in {} availibility zone ::: {}",
-                                cloudProvider.getPlatform(),
-                                cloudProvider.availibilityZone(),
-                                azVirtualMachinesNumber);
-                        Assert.assertTrue(azVirtualMachinesNumber > 1,
-                                "Number of Virtual Machines should be present in response for default availibility zone!");
-                    }
-                }), "Virtual Machines should be present in response."
+                        LOGGER.info("Number of Azure Virtual Machines in {} region ::: {}",
+                                provider.region(),
+                                regionVirtualMachinesCount);
+                        Assert.assertTrue(regionVirtualMachinesCount > 0,
+                                "Number of Azure Virtual Machines should be present in response"
+                                        + " for default region!");
+                }), "Azure Virtual Machines should be part of the response."
         );
     }
 
-    @Test(priority = 1, groups = {"vmtypes"})
-    public void testListVMTypesForCredentialInDefaultRegion() throws Exception {
+    @Test(priority = 2, groups = "vmtypes")
+    public void testCountAWSVMTypesForCredentialInDefaultAvailabilityZone() throws Exception {
+        AwsCloudProvider provider = new AwsCloudProvider(getTestParameter());
+
+        countVMTypesForCredentialInDefaultAvailabilityZone(provider, AWS_CRED_NAME);
+    }
+
+    @Test(priority = 3, groups = "vmtypes")
+    public void testCountGCPVMTypesForCredentialInDefaultAvailabilityZone() throws Exception {
+        GcpCloudProvider provider = new GcpCloudProvider(getTestParameter());
+
+        countVMTypesForCredentialInDefaultAvailabilityZone(provider, GCP_CRED_NAME);
+    }
+
+    @Test(priority = 4, groups = "vmtypes")
+    public void testCountOSVMTypesForCredentialInDefaultAvailabilityZone() throws Exception {
+        OpenstackCloudProvider provider = new OpenstackCloudProvider(getTestParameter());
+
+        countVMTypesForCredentialInDefaultAvailabilityZone(provider, OS_CRED_NAME);
+    }
+
+    @Test(priority = 5, groups = "vmtypes")
+    public void testListAzureVMTypesForCredentialInDefaultRegion() throws Exception {
+        AzureCloudProvider provider = new AzureCloudProvider(getTestParameter());
+
         given(CloudbreakClient.isCreated());
-        given(cloudProvider.aValidCredential(), cloudProvider.getPlatform()
-                .concat(" credential is created"));
+        given(provider.aValidCredential()
+                .withName(AZURE_CRED_NAME), "Azure credential is created");
         given(VmType.request()
-                .withPlatform(cloudProvider.getPlatform())
-                .withRegion(cloudProvider.region())
-                .withAvailibilityZone(cloudProvider.availibilityZone()), cloudProvider.getPlatform()
-                .concat(" vm type request"));
-        when(VmType.getPlatformVmTypes(), " vm types are requested to "
-                .concat(cloudProvider.getPlatform())
-                .concat(" credential and ")
-                .concat(cloudProvider.region())
-                .concat(" region."));
+                .withPlatform(provider.getPlatform())
+                .withRegion(provider.region())
+                .withAvailabilityZone(provider.availabilityZone()), "Azure vm type request");
+        when(VmType.getPlatformVmTypes(), "vm types are requested to Azure credential and "
+                + provider.region() + " region.");
         then(VmType.assertThis(
                 (vmtype, t) -> {
-                    if (cloudProvider.getPlatform().matches("AZURE")) {
-                        regionVirtualMachines = vmtype.getResponse().getVmTypes()
-                                .get(cloudProvider.region())
-                                .getVirtualMachines();
+                    Set<VmTypeJson> regionVirtualMachines = vmtype.getResponse().getVmTypes()
+                            .get(provider.region())
+                            .getVirtualMachines();
 
-                        Assert.assertFalse(regionVirtualMachines.isEmpty(),
-                                "Virtual Machines should be present in response for default region!");
-                    } else {
-                        azVirtualMachines = vmtype.getResponse().getVmTypes()
-                                .get(cloudProvider.availibilityZone())
-                                .getVirtualMachines();
-
-                        Assert.assertFalse(azVirtualMachines.isEmpty(),
-                                "Virtual Machines should be present in response for default availibility zone!");
-                    }
-                }), "Virtual Machines should be present in response."
+                    Assert.assertFalse(regionVirtualMachines.isEmpty(),
+                            "Azure Virtual Machines should be present in response for default region!");
+                }), "Virtual Machines should be part of the response."
         );
     }
 
-    @Test(priority = 2, groups = {"vmtypes"})
-    public void testDefaultVMTypeForCredentialInDefaultRegion() throws Exception {
+    @Test(priority = 6, groups = "vmtypes")
+    public void testListAWSVMTypesForCredentialInDefaultAvailabilityZone() throws Exception {
+        AwsCloudProvider provider = new AwsCloudProvider(getTestParameter());
+
+        listVMTypesForCredentialInDefaultAvailabilityZone(provider, AWS_CRED_NAME);
+    }
+
+    @Test(priority = 7, groups = "vmtypes")
+    public void testListGCPVMTypesForCredentialInDefaultAvailabilityZone() throws Exception {
+        GcpCloudProvider provider = new GcpCloudProvider(getTestParameter());
+
+        listVMTypesForCredentialInDefaultAvailabilityZone(provider, GCP_CRED_NAME);
+    }
+
+    @Test(priority = 8, groups = "vmtypes")
+    public void testListOSVMTypesForCredentialInDefaultAvailabilityZone() throws Exception {
+        OpenstackCloudProvider provider = new OpenstackCloudProvider(getTestParameter());
+
+        listVMTypesForCredentialInDefaultAvailabilityZone(provider, OS_CRED_NAME);
+    }
+
+    @Test(priority = 9, groups = "vmtypes")
+    public void testAzureDefaultVMTypeForCredentialInDefaultRegion() throws Exception {
+        AzureCloudProvider provider = new AzureCloudProvider(getTestParameter());
+
         given(CloudbreakClient.isCreated());
-        given(cloudProvider.aValidCredential(), cloudProvider.getPlatform()
-                .concat(" credential is created"));
+        given(provider.aValidCredential()
+                .withName(AZURE_CRED_NAME), "Azure credential is created");
         given(VmType.request()
-                .withPlatform(cloudProvider.getPlatform())
-                .withRegion(cloudProvider.region())
-                .withAvailibilityZone(cloudProvider.availibilityZone()), cloudProvider.getPlatform()
-                .concat(" vm type request"));
-        when(VmType.getPlatformVmTypes(), " vm types are requested to "
-                .concat(cloudProvider.getPlatform())
-                .concat(" credential and ")
-                .concat(cloudProvider.region())
-                .concat(" region."));
+                .withPlatform(provider.getPlatform())
+                .withRegion(provider.region())
+                .withAvailabilityZone(provider.availabilityZone()), "Azure vm type request");
+        when(VmType.getPlatformVmTypes(), "vm types are requested to Azure credential and "
+                + provider.region() + " region.");
         then(VmType.assertThis(
                 (vmtype, t) -> {
-                    switch (cloudProvider.getPlatform()) {
-                        case "AZURE":
-                            regionDefVirtualMachine = vmtype.getResponse().getVmTypes()
-                                    .get(cloudProvider.region())
-                                    .getDefaultVirtualMachine()
-                                    .getValue();
+                    String regionDefVirtualMachine = vmtype.getResponse().getVmTypes().get(provider.region())
+                            .getDefaultVirtualMachine()
+                            .getValue();
 
-                            LOGGER.info("{} Default Virtual Machine in {} region is ::: {}",
-                                    cloudProvider.getPlatform(),
-                                    cloudProvider.region(),
-                                    regionDefVirtualMachine);
-                            Assert.assertNotNull(regionDefVirtualMachine,
-                                    "Default Virtual Machine should be present in response!");
-                            break;
-                        case "OPENSTACK":
-                            LOGGER.info("{} Default Virtual Machine is not supported for OpenStack.",
-                                    cloudProvider.getPlatform());
-                            Assert.assertNull(vmtype.getResponse().getVmTypes()
-                                    .get(cloudProvider.availibilityZone())
+                    LOGGER.info("Azure Default Virtual Machine in {} region is ::: {}", provider.region(),
+                            regionDefVirtualMachine);
+                    Assert.assertNotNull(regionDefVirtualMachine,
+                            "Azure Default Virtual Machine should be present in response for default region!");
+                }), "Default Virtual Machine should be part of the response."
+        );
+    }
+
+    @Test(priority = 10, groups = "vmtypes")
+    public void testOSDefaultVMTypeSupport() throws Exception {
+        OpenstackCloudProvider provider = new OpenstackCloudProvider(getTestParameter());
+
+        given(CloudbreakClient.isCreated());
+        given(provider.aValidCredential()
+                .withName(OS_CRED_NAME), "OpenStack credential is created");
+        given(VmType.request()
+                .withPlatform(provider.getPlatform())
+                .withRegion(provider.region())
+                .withAvailabilityZone(provider.availabilityZone()), "OpenStack vm type request");
+        when(VmType.getPlatformVmTypes(), "vm types are requested to OpenStack credential and "
+                + provider.region() + " region.");
+        then(VmType.assertThis(
+                (vmtype, t) -> {
+                    LOGGER.info("OpenStack Default Virtual Machine is not supported for OpenStack.");
+                    Assert.assertNull(vmtype.getResponse().getVmTypes().get(provider.availabilityZone())
                                     .getDefaultVirtualMachine(),
-                                    "Default Virtual Machine should not be present in response!");
-                            break;
-                        default:
-                            azDefVirtualMachine = vmtype.getResponse().getVmTypes()
-                                    .get(cloudProvider.availibilityZone())
-                                    .getDefaultVirtualMachine()
-                                    .getValue();
-
-                            LOGGER.info("{} Default Virtual Machine in {} availibility zone is ::: {}",
-                                    cloudProvider.getPlatform(),
-                                    cloudProvider.availibilityZone(),
-                                    azDefVirtualMachine);
-                            Assert.assertNotNull(azDefVirtualMachine,
-                                    "Default Virtual Machine should be present in response!");
-                            break;
-                    }
-                }), "Default Virtual Machine should be present in response."
+                            "OpenStack Default Virtual Machine should not be present in response!");
+                }), "OpenStack Default Virtual Machine should not be part of the response."
         );
+    }
+
+    @Test(priority = 11, groups = "vmtypes")
+    public void testAWSDefaultVMTypeForCredentialInDefaultAvailabilityZone() throws Exception {
+        AwsCloudProvider provider = new AwsCloudProvider(getTestParameter());
+
+        getDefaultVMTypeForCredentialInDefaultAvailabilityZone(provider, AWS_CRED_NAME);
+    }
+
+    @Test(priority = 12, groups = "vmtypes")
+    public void testGCPDefaultVMTypeForCredentialInDefaultAvailabilityZone() throws Exception {
+        GcpCloudProvider provider = new GcpCloudProvider(getTestParameter());
+
+        getDefaultVMTypeForCredentialInDefaultAvailabilityZone(provider, GCP_CRED_NAME);
     }
 }
