@@ -43,6 +43,7 @@ import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.common.model.OrchestratorType;
 import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
+import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ContainerOrchestratorResolver;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.HostOrchestratorResolver;
@@ -290,13 +291,29 @@ public class AmbariDecommissioner {
         AmbariClient ambariClient = ambariClientProvider.getAmbariClient(clientConfig, stack.getGatewayPort(), cluster);
         if (ambariClient.getBlueprintMap(blueprintName).get(hostGroupName).contains(DATANODE)) {
             int replication = getReplicationFactor(ambariClient, hostGroupName);
-            verifyNodeCount(replication, scalingAdjustment, filteredHostList, reservedInstances);
+            verifyNodeCount(replication, scalingAdjustment, filteredHostList.size(), reservedInstances);
             downScaleCandidates = checkAndSortByAvailableSpace(stack, ambariClient, replication, scalingAdjustment, filteredHostList);
         } else {
-            verifyNodeCount(NO_REPLICATION, scalingAdjustment, filteredHostList, reservedInstances);
+            verifyNodeCount(NO_REPLICATION, scalingAdjustment, filteredHostList.size(), reservedInstances);
             downScaleCandidates = filteredHostList;
         }
         return downScaleCandidates;
+    }
+
+    public void verifyNodeCount(Stack stack, Cluster cluster, String hostName) throws CloudbreakSecuritySetupException {
+        HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfigForPrimaryGateway(stack.getId(), cluster.getAmbariIp());
+        AmbariClient ambariClient = ambariClientProvider.getAmbariClient(clientConfig, stack.getGatewayPort(), cluster);
+        String ambariName = cluster.getBlueprint().getAmbariName();
+
+        HostGroup hostGroup = hostGroupService.getByClusterAndHostName(cluster, hostName);
+
+        int replication = ambariClient.getBlueprintMap(ambariName).get(hostGroup.getName()).contains(DATANODE)
+                ? getReplicationFactor(ambariClient, hostGroup.getName())
+                : NO_REPLICATION;
+
+        int hostSize = 1;
+        int reservedInstances = hostGroup.getHostMetadata().size() - hostSize;
+        verifyNodeCount(replication, hostSize, hostSize, reservedInstances);
     }
 
     private Map<String, HostMetadata> collectHostMetadata(Cluster cluster, String hostGroupName, Collection<String> hostNames) {
@@ -312,9 +329,8 @@ public class AmbariDecommissioner {
         return Integer.parseInt(configuration.get(ConfigParam.DFS_REPLICATION.key()));
     }
 
-    private void verifyNodeCount(int replication, int scalingAdjustment, Collection<HostMetadata> filteredHostList, int reservedInstances) {
+    private void verifyNodeCount(int replication, int scalingAdjustment, int hostSize, int reservedInstances) {
         int adjustment = Math.abs(scalingAdjustment);
-        int hostSize = filteredHostList.size();
         if (hostSize + reservedInstances - adjustment < replication || hostSize < adjustment) {
             LOGGER.info("Cannot downscale: replication: {}, adjustment: {}, filtered host size: {}", replication, scalingAdjustment, hostSize);
             throw new BadRequestException("There is not enough node to downscale. "
@@ -364,7 +380,7 @@ public class AmbariDecommissioner {
     public Map<String, Long> selectNodes(Map<String, Long> sortedAscending, Collection<HostMetadata> filteredHostList, int removeCount) {
         LOGGER.info("sortedAscending: {}, filteredHostList: {}", sortedAscending, filteredHostList);
 
-        Map<String, Long> select  = filteredHostList
+        Map<String, Long> select = filteredHostList
                 .stream()
                 .filter(hostMetadata -> hostMetadata.getHostMetadataState() == HostMetadataState.UNHEALTHY
                         && sortedAscending.containsKey(hostMetadata.getHostName()))

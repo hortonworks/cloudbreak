@@ -33,11 +33,9 @@ import com.sequenceiq.cloudbreak.core.flow2.cluster.termination.ClusterTerminati
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterAndStackDownscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterCredentialChangeTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterScaleTriggerEvent;
-import com.sequenceiq.cloudbreak.core.flow2.event.InstanceTerminationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackAndClusterUpscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackDownscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackSyncTriggerEvent;
-import com.sequenceiq.cloudbreak.core.flow2.stack.instance.termination.InstanceTerminationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationEvent;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
@@ -50,6 +48,7 @@ import com.sequenceiq.cloudbreak.service.stack.repair.UnhealthyInstances;
 
 import reactor.bus.Event;
 import reactor.bus.EventBus;
+import reactor.rx.Promise;
 
 /**
  * Flow manager implementation backed by Reactor.
@@ -105,9 +104,10 @@ public class ReactorFlowManager {
         notify(selector, new StackSyncTriggerEvent(selector, stackId, true));
     }
 
-    public void triggerStackRemoveInstance(Long stackId, String instanceId) {
-        String selector = InstanceTerminationEvent.TERMINATION_EVENT.event();
-        Acceptable event = new InstanceTerminationTriggerEvent(selector, stackId, Collections.singleton(instanceId));
+    public void triggerStackRemoveInstance(Long stackId, String hostGroup, String hostname) {
+        String selector = FlowChainTriggers.FULL_DOWNSCALE_TRIGGER_EVENT;
+        ClusterAndStackDownscaleTriggerEvent event = new ClusterAndStackDownscaleTriggerEvent(selector, stackId, hostGroup, Collections.singleton(hostname),
+                ScalingType.DOWNSCALE_TOGETHER, new Promise<>());
         notify(selector, event);
     }
 

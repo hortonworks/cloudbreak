@@ -418,7 +418,7 @@ public class StackService {
         if (!stack.isPublicInAccount() && !stack.getOwner().equals(user.getUserId())) {
             throw new BadRequestException(String.format("Private stack (%s) only modifiable by the owner.", stackId));
         }
-        flowManager.triggerStackRemoveInstance(stackId, instanceId);
+        flowManager.triggerStackRemoveInstance(stackId, instanceMetaData.getInstanceGroupName(), instanceMetaData.getDiscoveryFQDN());
     }
 
     @Transactional(TxType.NEVER)
