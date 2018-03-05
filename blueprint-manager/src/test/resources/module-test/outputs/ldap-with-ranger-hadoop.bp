@@ -1,0 +1,378 @@
+{
+  "Blueprints": {
+    "blueprint_name": "hdp26-edw-analytics",
+    "stack_name": "HDP",
+    "stack_version": "2.6"
+  },
+  "configurations": [
+    {
+      "hive-interactive-env": {
+        "enable_hive_interactive": "true",
+        "num_llap_nodes": "0"
+      }
+    },
+    {
+      "core-site": {
+        "fs.trash.interval": "4320",
+        "proxyuser_group": "hadoop",
+        "hadoop.proxyuser.falcon.groups": "*",
+        "hadoop.proxyuser.root.groups": "*",
+        "hadoop.proxyuser.falcon.hosts": "*",
+        "hadoop.proxyuser.oozie.hosts": "*",
+        "hadoop.proxyuser.hcat.hosts": "*",
+        "hadoop.proxyuser.oozie.groups": "*",
+        "hadoop.proxyuser.hive.groups": "*",
+        "hadoop.proxyuser.hcat.groups": "*",
+        "hadoop.proxyuser.hbase.groups": "*",
+        "hadoop.proxyuser.hbase.hosts": "*",
+        "hadoop.proxyuser.root.hosts": "*",
+        "hadoop.proxyuser.hive.hosts": "*",
+        "hadoop.security.group.mapping.ldap.search.filter.user": "(&(objectClass=person)(cn=admin,dc=example,dc=org={0}))",
+        "hadoop.security.group.mapping.ldap.search.attr.member": "member",
+        "hadoop.security.group.mapping.ldap.search.attr.group.name": "cn",
+        "hadoop.security.group.mapping.ldap.bind.user": "cn=admin,dc=example,dc=org",
+        "hadoop.security.group.mapping.ldap.bind.password": "admin",
+        "hadoop.user.group.static.mapping.overrides": "hive=hive,hadoop;hdfs=hdfs,hadoop;beacon=hadoop,hdfs,beacon;dpprofiler=hadoop",
+        "hadoop.proxyuser.livy.hosts": "*",
+        "hadoop.security.group.mapping.ldap.userbase": "cn=users,dc=example,dc=org",
+        "hadoop.security.group.mapping": "org.apache.hadoop.security.LdapGroupsMapping",
+        "hadoop.security.group.mapping.ldap.url": "ldap://localhost:389",
+        "hadoop.security.group.mapping.ldap.groupbase": "cn=groups,dc=example,dc=org",
+        "hadoop.security.group.mapping.ldap.search.filter.group": "(objectClass=groupOfNames)",
+        "hadoop.proxyuser.livy.groups": "*"
+      }
+    },
+    {
+      "hdfs-site": {
+        "dfs.namenode.safemode.threshold-pct": "0.99",
+        "dfs.journalnode.edits.dir": "/hadoopfs/fs1/hdfs/journalnode",
+        "dfs.namenode.name.dir": "/hadoopfs/fs1/hdfs/namenode",
+        "dfs.namenode.checkpoint.dir": "/hadoopfs/fs1/hdfs/namesecondary"
+      }
+    },
+    {
+      "hive-interactive-site": {
+        "hive.exec.orc.split.strategy": "BI",
+        "hive.stats.fetch.bitvector": "true",
+        "hive.metastore.rawstore.impl": "org.apache.hadoop.hive.metastore.cache.CachedStore"
+      }
+    },
+    {
+      "hive-site": {
+        "hive.exec.compress.output": "true",
+        "hive.merge.mapfiles": "true",
+        "hive.server2.tez.initialize.default.sessions": "true",
+        "hive.server2.transport.mode": "http"
+      }
+    },
+    {
+      "mapred-site": {
+        "mapreduce.job.reduce.slowstart.completedmaps": "0.7",
+        "mapreduce.map.output.compress": "true",
+        "mapreduce.output.fileoutputformat.compress": "true"
+      }
+    },
+    {
+      "tez-site": {
+        "tez.runtime.shuffle.parallel.copies": "4",
+        "tez.runtime.enable.final-merge.in.output": "false",
+        "tez.am.am-rm.heartbeat.interval-ms.max": "2000"
+      }
+    },
+    {
+      "yarn-site": {
+        "yarn.acl.enable": "true",
+        "yarn.timeline-service.leveldb-timeline-store.path": "/hadoopfs/fs1/yarn/timeline"
+      }
+    },
+    {
+      "capacity-scheduler": {
+        "properties": {
+          "yarn.scheduler.capacity.root.queues": "default,llap",
+          "yarn.scheduler.capacity.root.capacity": "100",
+          "yarn.scheduler.capacity.root.default.capacity": "25",
+          "yarn.scheduler.capacity.root.default.maximum-capacity": "100",
+          "yarn.scheduler.capacity.root.llap.maximum-capacity": "100",
+          "yarn.scheduler.capacity.root.llap.capacity": "75"
+        }
+      }
+    },
+    {
+      "ranger-ugsync-site": {
+        "properties": {
+          "ranger.usersync.ldap.deltasync": "false",
+          "ranger.usersync.enabled": "true",
+          "ranger.usersync.group.searchbase": "cn=groups,dc=example,dc=org",
+          "ranger.usersync.group.nameattribute": "cn",
+          "ranger.usersync.ldap.binddn": "cn=admin,dc=example,dc=org",
+          "ranger.usersync.source.impl.class": "org.apache.ranger.ldapusersync.process.LdapUserGroupBuilder",
+          "ranger.usersync.ldap.user.nameattribute": "cn=admin,dc=example,dc=org",
+          "ranger.usersync.group.searchfilter": " ",
+          "ranger.usersync.group.searchenabled": "true",
+          "ranger.usersync.ldap.user.searchbase": "cn=users,dc=example,dc=org",
+          "ranger.usersync.ldap.ldapbindpassword": "admin",
+          "ranger.usersync.ldap.user.objectclass": "person",
+          "ranger.usersync.group.objectclass": "groupOfNames",
+          "ranger.usersync.group.memberattributename": "member",
+          "ranger.usersync.ldap.url": "ldap://localhost:389"
+        }
+      }
+    },
+    {
+      "ranger-admin-site": {
+        "properties": {
+          "ranger.authentication.method": "ACTIVE_DIRECTORY",
+          "ranger.ldap.user.dnpattern": "cn=admin,dc=example,dc=org={0},cn=users,dc=example,dc=org",
+          "ranger.ldap.ad.domain": " ",
+          "ranger.ldap.ad.user.searchfilter": "(cn=admin,dc=example,dc=org={0})",
+          "ranger.ldap.ad.bind.dn": "cn=admin,dc=example,dc=org",
+          "ranger.ldap.ad.bind.password": "admin",
+          "ranger.ldap.bind.dn": "cn=admin,dc=example,dc=org",
+          "ranger.ldap.bind.password": "admin",
+          "ranger.ldap.user.searchfilter": "(cn=admin,dc=example,dc=org={0})",
+          "ranger.audit.source.type": "solr",
+          "ranger.sso.enabled": "true",
+          "ranger.ldap.url": "ldap://localhost:389",
+          "ranger.jpa.jdbc.driver": "org.postgresql.Driver",
+          "ranger.ldap.ad.url": "ldap://localhost:389",
+          "ranger.ldap.ad.base.dn": "cn=users,dc=example,dc=org",
+          "ranger.ldap.base.dn": "cn=users,dc=example,dc=org",
+          "ranger.sso.publicKey": "signcert",
+          "ranger.ldap.group.searchbase": "cn=groups,dc=example,dc=org",
+          "ranger.ldap.group.roleattribute": "cn"
+        }
+      }
+    },
+    {
+      "webhcat-site": {
+        "properties": {
+          "webhcat.proxyuser.root.groups": "*",
+          "webhcat.proxyuser.root.hosts": "*"
+        }
+      }
+    },
+    {
+      "hbase-site": {
+        "properties": {
+          "zookeeper.recovery.retry": "10"
+        }
+      }
+    },
+    {
+      "zoo.cfg": {
+        "properties": {
+          "dataDir": "/hadoopfs/fs1/zookeeper"
+        }
+      }
+    },
+    {
+      "ams-hbase-site": {
+        "properties": {
+          "hbase.wal.dir": "file:///hadoopfs/fs1/metrics/hbase/wal",
+          "hbase.tmp.dir": "/hadoopfs/fs1/metrics/hbase-tmp"
+        }
+      }
+    },
+    {
+      "ams-site": {
+        "properties": {
+          "timeline.metrics.aggregator.checkpoint.dir": "/hadoopfs/fs1/metrics/checkpoint"
+        }
+      }
+    }
+  ],
+  "host_groups": [
+    {
+      "name": "master",
+      "configurations": [
+        {
+          "hdfs-site": {
+            "dfs.datanode.data.dir": "/hadoopfs/fs1/hdfs/datanode"
+          }
+        },
+        {
+          "yarn-site": {
+            "yarn.nodemanager.local-dirs": "/hadoopfs/fs1/yarn/nodemanager",
+            "yarn.nodemanager.log-dirs": "/hadoopfs/fs1/yarn/nodemanager/log"
+          }
+        },
+        {
+          "core-site": {
+            "fs.s3a.buffer.dir": "/hadoopfs/fs1/s3/temp"
+          }
+        }
+      ],
+      "components": [
+        {
+          "name": "APP_TIMELINE_SERVER"
+        },
+        {
+          "name": "HCAT"
+        },
+        {
+          "name": "HDFS_CLIENT"
+        },
+        {
+          "name": "HISTORYSERVER"
+        },
+        {
+          "name": "HIVE_CLIENT"
+        },
+        {
+          "name": "RANGER_ADMIN"
+        },
+        {
+          "name": "HIVE_SERVER"
+        },
+        {
+          "name": "HIVE_SERVER_INTERACTIVE"
+        },
+        {
+          "name": "JOURNALNODE"
+        },
+        {
+          "name": "LIVY_SERVER"
+        },
+        {
+          "name": "MAPREDUCE2_CLIENT"
+        },
+        {
+          "name": "METRICS_COLLECTOR"
+        },
+        {
+          "name": "METRICS_MONITOR"
+        },
+        {
+          "name": "NAMENODE"
+        },
+        {
+          "name": "PIG"
+        },
+        {
+          "name": "RESOURCEMANAGER"
+        },
+        {
+          "name": "SECONDARY_NAMENODE"
+        },
+        {
+          "name": "SLIDER"
+        },
+        {
+          "name": "SPARK_CLIENT"
+        },
+        {
+          "name": "SPARK_JOBHISTORYSERVER"
+        },
+        {
+          "name": "TEZ_CLIENT"
+        },
+        {
+          "name": "WEBHCAT_SERVER"
+        },
+        {
+          "name": "YARN_CLIENT"
+        },
+        {
+          "name": "ZOOKEEPER_CLIENT"
+        },
+        {
+          "name": "ZOOKEEPER_SERVER"
+        }
+      ],
+      "cardinality": "1"
+    },
+    {
+      "name": "worker",
+      "configurations": [
+        {
+          "hdfs-site": {
+            "dfs.datanode.data.dir": "/hadoopfs/fs1/hdfs/datanode"
+          }
+        },
+        {
+          "yarn-site": {
+            "yarn.nodemanager.local-dirs": "/hadoopfs/fs1/yarn/nodemanager",
+            "yarn.nodemanager.log-dirs": "/hadoopfs/fs1/yarn/nodemanager/log"
+          }
+        },
+        {
+          "core-site": {
+            "fs.s3a.buffer.dir": "/hadoopfs/fs1/s3/temp"
+          }
+        }
+      ],
+      "components": [
+        {
+          "name": "HIVE_CLIENT"
+        },
+        {
+          "name": "TEZ_CLIENT"
+        },
+        {
+          "name": "SPARK_CLIENT"
+        },
+        {
+          "name": "DATANODE"
+        },
+        {
+          "name": "METRICS_MONITOR"
+        },
+        {
+          "name": "NODEMANAGER"
+        }
+      ],
+      "cardinality": "1+"
+    },
+    {
+      "name": "compute",
+      "configurations": [
+        {
+          "yarn-site": {
+            "yarn.nodemanager.local-dirs": "/hadoopfs/fs1/yarn/nodemanager",
+            "yarn.nodemanager.log-dirs": "/hadoopfs/fs1/yarn/nodemanager/log"
+          }
+        },
+        {
+          "core-site": {
+            "fs.s3a.buffer.dir": "/hadoopfs/fs1/s3/temp"
+          }
+        }
+      ],
+      "components": [
+        {
+          "name": "HIVE_CLIENT"
+        },
+        {
+          "name": "TEZ_CLIENT"
+        },
+        {
+          "name": "SPARK_CLIENT"
+        },
+        {
+          "name": "METRICS_MONITOR"
+        },
+        {
+          "name": "NODEMANAGER"
+        }
+      ],
+      "cardinality": "1+"
+    }
+  ],
+  "settings": [
+    {
+      "cluster-env": {
+        "properties": {
+          "recovery_enabled": "true",
+          "recovery_type": "AUTO_START"
+        }
+      }
+    },
+    {
+      "recovery_settings": {
+        "properties": {
+          "recovery_enabled": "true"
+        }
+      }
+    }
+  ]
+}

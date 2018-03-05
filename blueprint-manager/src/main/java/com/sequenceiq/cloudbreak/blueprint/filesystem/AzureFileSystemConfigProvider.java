@@ -10,8 +10,9 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.model.AdlsFileSystemConfiguration;
 import com.sequenceiq.cloudbreak.api.model.FileSystemConfiguration;
 import com.sequenceiq.cloudbreak.api.model.WasbFileSystemConfiguration;
-import com.sequenceiq.cloudbreak.common.type.ResourceType;
-import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.Credential;
+import com.sequenceiq.cloudbreak.domain.FileSystem;
+import com.sequenceiq.cloudbreak.domain.Resource;
 
 @Component
 public class AzureFileSystemConfigProvider {
@@ -21,13 +22,14 @@ public class AzureFileSystemConfigProvider {
     @Value("${info.app.version:}")
     private String cbVersion;
 
-    public FileSystemConfiguration decorateFileSystemConfiguration(Stack stack, FileSystemConfiguration fsConfiguration) {
+    public FileSystemConfiguration decorateFileSystemConfiguration(String uuid, Credential credential, FileSystem fileSystem, Resource resourceByType,
+            FileSystemConfiguration fsConfiguration) {
 
-        String resourceGroupName = stack.getResourceByType(ResourceType.ARM_TEMPLATE).getResourceName();
+        String resourceGroupName = resourceByType == null ? "" : resourceByType.getResourceName();
         fsConfiguration.addProperty(FileSystemConfiguration.RESOURCE_GROUP_NAME, resourceGroupName);
 
         if (fsConfiguration instanceof WasbFileSystemConfiguration) {
-            Map<String, String> fileSystemProperties = stack.getCluster().getFileSystem().getProperties();
+            Map<String, String> fileSystemProperties = fileSystem.getProperties();
             String secureWasb = fileSystemProperties.getOrDefault("secure", "false");
             fsConfiguration.addProperty("secure", secureWasb);
             }
@@ -36,11 +38,11 @@ public class AzureFileSystemConfigProvider {
 
             String adlsTrackingTag = (cbVersion != null) ? AdlsFileSystemConfiguration.ADLS_TRACKING_CLUSTERNAME_VALUE + '-' + cbVersion
                     : AdlsFileSystemConfiguration.ADLS_TRACKING_CLUSTERNAME_VALUE;
-            String credential = String.valueOf(stack.getCredential().getAttributes().getMap().get(AdlsFileSystemConfiguration.CREDENTIAL_SECRET_KEY));
-            String clientId = String.valueOf(stack.getCredential().getAttributes().getMap().get(AdlsFileSystemConfiguration.ACCESS_KEY));
-            ((AdlsFileSystemConfiguration) fsConfiguration).setCredential(credential);
+            String credentialString = String.valueOf(credential.getAttributes().getMap().get(AdlsFileSystemConfiguration.CREDENTIAL_SECRET_KEY));
+            String clientId = String.valueOf(credential.getAttributes().getMap().get(AdlsFileSystemConfiguration.ACCESS_KEY));
+            ((AdlsFileSystemConfiguration) fsConfiguration).setCredential(credentialString);
             ((AdlsFileSystemConfiguration) fsConfiguration).setClientId(clientId);
-            fsConfiguration.addProperty(AdlsFileSystemConfiguration.ADLS_TRACKING_CLUSTERNAME_KEY, stack.getUuid());
+            fsConfiguration.addProperty(AdlsFileSystemConfiguration.ADLS_TRACKING_CLUSTERNAME_KEY, uuid);
             fsConfiguration.addProperty(AdlsFileSystemConfiguration.ADLS_TRACKING_CLUSTERTYPE_KEY, adlsTrackingTag);
         }
             return fsConfiguration;

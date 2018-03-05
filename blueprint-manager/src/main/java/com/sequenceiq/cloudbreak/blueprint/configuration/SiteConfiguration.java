@@ -24,4 +24,8 @@ public class SiteConfiguration {
     public Map<String, String> getProperties() {
         return properties;
     }
+
+    public void add(String key, String value) {
+        properties.put(key, value);
+    }
 }

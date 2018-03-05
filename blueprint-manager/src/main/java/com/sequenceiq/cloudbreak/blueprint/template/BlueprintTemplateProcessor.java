@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.blueprint.template;
 import static com.sequenceiq.cloudbreak.api.model.ExecutorType.CONTAINER;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -13,7 +12,6 @@ import org.springframework.stereotype.Component;
 import com.github.jknack.handlebars.Handlebars;
 import com.github.jknack.handlebars.Template;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintPreparationObject;
-import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 @Component
@@ -40,29 +38,27 @@ public class BlueprintTemplateProcessor {
     }
 
     private Map<String, Object> prepareTemplateObject(BlueprintPreparationObject source, Map<String, Object> customProperties) throws IOException {
-        Cluster cluster = source.getCluster();
 
-        Map blueprintInputs = cluster.getBlueprintInputs().get(Map.class);
-        if (blueprintInputs == null) {
-            blueprintInputs = new HashMap<>();
-        }
+
+        Map<String, Object> blueprintInputs = source.getBlueprintView().getBlueprintInputs();
         blueprintInputs.putAll(customProperties);
 
         return new BlueprintTemplateModelContextBuilder()
                 .withAmbariDatabase(source.getAmbariDatabase())
-                .withClusterAdminFirstname(cluster.getUserName())
-                .withClusterAdminLastname(cluster.getUserName())
-                .withClusterAdminPassword(cluster.getPassword())
-                .withLlapNodeCounts(cluster.getClusterNodeCount() - 1)
-                .withContainerExecutor(CONTAINER.equals(cluster.getExecutorType()))
-                .withEnableKnoxGateway(source.getGateway() == null ? false : source.getGateway().getEnableGateway())
-                .withAdminEmail(source.getIdentityUserEmail())
-                .withClusterName(cluster.getName())
+                .withClusterAdminFirstname(source.getGeneralClusterConfigs().getUserName())
+                .withClusterAdminLastname(source.getGeneralClusterConfigs().getUserName())
+                .withClusterAdminPassword(source.getGeneralClusterConfigs().getPassword())
+                .withLlapNodeCounts(source.getGeneralClusterConfigs().getNodeCount() - 1)
+                .withContainerExecutor(CONTAINER.equals(source.getGeneralClusterConfigs().getExecutorType()))
+                .withEnableKnoxGateway(source.getGatewayView() == null ? false : source.getGatewayView().getEnableGateway())
+                .withAdminEmail(source.getGeneralClusterConfigs().getIdentityUserEmail())
+                .withClusterName(source.getGeneralClusterConfigs().getClusterName())
                 .withLdap(source.getLdapConfig().orElse(null))
-                .withGateway(source.getGateway())
-                .withStackType(source.getBlueprintStackInfo().getType())
-                .withStackVersion(source.getBlueprintStackInfo().getVersion())
+                .withGateway(source.getGatewayView())
+                .withStackType(source.getBlueprintView().getType())
+                .withStackVersion(source.getBlueprintView().getVersion())
                 .withRdsConfigs(source.getRdsConfigs())
+                .withFileSystemConfigs(source.getFileSystemConfigurationView().orElse(null))
                 .withCustomProperties(blueprintInputs)
                 .withNifiTargets(source.getHdfConfigs().isPresent() ? source.getHdfConfigs().orElse(null).getNodeEntities() : null)
                 .build();

@@ -29,11 +29,10 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.blueprint.ConfigProperty;
 import com.sequenceiq.cloudbreak.blueprint.ServiceConfig;
-import com.sequenceiq.cloudbreak.domain.Constraint;
-import com.sequenceiq.cloudbreak.domain.HostGroup;
-import com.sequenceiq.cloudbreak.domain.InstanceGroup;
+import com.sequenceiq.cloudbreak.blueprint.template.views.HostgroupView;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ConfigUtilsTest {
@@ -49,10 +48,7 @@ public class ConfigUtilsTest {
 
     @Test
     public void testIsConfigNeedTrue() {
-        HostGroup hostGroup = new HostGroup();
-        Constraint constraint = new Constraint();
-        hostGroup.setConstraint(constraint);
-        constraint.setInstanceGroup(new InstanceGroup());
+        HostgroupView hostGroup = new HostgroupView("hostGroupName1", 1, InstanceGroupType.CORE, 1);
 
         boolean actual = underTest.isConfigUpdateNeeded(hostGroup);
 
@@ -61,9 +57,7 @@ public class ConfigUtilsTest {
 
     @Test
     public void testIsConfigNeedFalse() {
-        HostGroup hostGroup = new HostGroup();
-        Constraint constraint = new Constraint();
-        hostGroup.setConstraint(constraint);
+        HostgroupView hostGroup = new HostgroupView("hostGroupName1");
 
         boolean actual = underTest.isConfigUpdateNeeded(hostGroup);
 
@@ -197,7 +191,7 @@ public class ConfigUtilsTest {
 
     @Test
     public void readConfigJson() throws IOException {
-        JsonNode jsonNode = underTest.readConfigJson("blueprints/test-read-blueprint.bp", "components");
+        JsonNode jsonNode = underTest.readConfigJson("blueprints-jackson/test-read-blueprint.bp", "components");
 
         Assert.assertNotNull(jsonNode);
         Assert.assertEquals("comp1", jsonNode.get("names").get(0).asText());

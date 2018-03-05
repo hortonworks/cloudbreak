@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.google.common.base.Strings;
-import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessor;
+import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessorFactory;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.DiskTypes;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
@@ -43,7 +43,7 @@ public class CloudResourceAdvisor {
     private BlueprintService blueprintService;
 
     @Inject
-    private BlueprintProcessor blueprintProcessor;
+    private BlueprintProcessorFactory blueprintProcessorFactory;
 
     @Inject
     private StackServiceComponentDescriptors stackServiceComponentDescs;
@@ -58,7 +58,7 @@ public class CloudResourceAdvisor {
                 blueprintId, blueprintName, cloudPlatform, region);
 
         String blueprintText = getBlueprint(blueprintName, blueprintId, cbUser).getBlueprintText();
-        Map<String, Set<String>> componentsByHostGroup = blueprintProcessor.getComponentsByHostGroup(blueprintText);
+        Map<String, Set<String>> componentsByHostGroup = blueprintProcessorFactory.get(blueprintText).getComponentsByHostGroup();
         componentsByHostGroup
                 .forEach((hGName, components) -> hostGroupContainsMasterComp.put(hGName, isThereMasterComponents(components)));
 

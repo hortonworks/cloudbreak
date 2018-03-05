@@ -6,15 +6,22 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 
+import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.TreeNode;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 public class JsonUtil {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
+
+    static {
+        MAPPER.enable(JsonParser.Feature.ALLOW_UNQUOTED_CONTROL_CHARS);
+        MAPPER.configure(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY, false);
+    }
 
     private JsonUtil() {
     }

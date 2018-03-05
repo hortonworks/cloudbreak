@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.common.StackEndpoint;
 import com.sequenceiq.cloudbreak.api.model.AmbariAddressJson;
 import com.sequenceiq.cloudbreak.api.model.AutoscaleStackResponse;
 import com.sequenceiq.cloudbreak.api.model.CertificateResponse;
+import com.sequenceiq.cloudbreak.api.model.GeneratedBlueprintResponse;
 import com.sequenceiq.cloudbreak.api.model.PlatformVariantsJson;
 import com.sequenceiq.cloudbreak.api.model.StackResponse;
 import com.sequenceiq.cloudbreak.api.model.StackValidationRequest;
@@ -55,6 +56,13 @@ public interface StackV2Endpoint extends StackEndpoint {
     @ApiOperation(value = StackOpDescription.POST_PUBLIC, produces = ContentType.JSON,
             notes = Notes.STACK_NOTES, nickname = "postPublicStackV2")
     StackResponse postPublic(@Valid StackV2Request stackRequest) throws Exception;
+
+    @POST
+    @Path("blueprint")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = StackOpDescription.POST_PUBLIC_BLUEPRINT, produces = ContentType.JSON,
+            notes = Notes.STACK_NOTES, nickname = "postPublicStackV2ForBlueprint")
+    GeneratedBlueprintResponse postStackForBlueprint(@Valid StackV2Request stackRequest) throws Exception;
 
     @GET
     @Path("user")

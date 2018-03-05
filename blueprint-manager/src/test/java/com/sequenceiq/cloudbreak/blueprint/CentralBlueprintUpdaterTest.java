@@ -19,8 +19,8 @@ import org.mockito.runners.MockitoJUnitRunner;
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.blueprint.template.BlueprintTemplateProcessor;
+import com.sequenceiq.cloudbreak.blueprint.template.views.BlueprintView;
 import com.sequenceiq.cloudbreak.domain.Cluster;
-import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CentralBlueprintUpdaterTest {
@@ -46,14 +46,13 @@ public class CentralBlueprintUpdaterTest {
 
     @Before
     public void before() throws IOException {
-        testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints/bp-kerberized-test.bp");
+        testBlueprint = TestUtil.blueprint().getBlueprintText();
 
         Cluster cluster = TestUtil.cluster();
         cluster.getBlueprint().setBlueprintText(testBlueprint);
 
         object = BlueprintPreparationObject.Builder.builder()
-                .withCluster(cluster)
-                .withStack(TestUtil.stack())
+                .withBlueprintView(new BlueprintView(TestUtil.blueprint().getBlueprintText(), Maps.newHashMap(), "HDP", "2.6"))
                 .build();
     }
 

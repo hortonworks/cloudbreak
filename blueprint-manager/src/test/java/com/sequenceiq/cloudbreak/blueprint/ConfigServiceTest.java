@@ -9,6 +9,7 @@ import static java.util.Collections.singletonMap;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyMapOf;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -32,12 +33,10 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.Sets;
+import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
+import com.sequenceiq.cloudbreak.blueprint.template.views.HostgroupView;
 import com.sequenceiq.cloudbreak.blueprint.utils.ConfigUtils;
 import com.sequenceiq.cloudbreak.blueprint.utils.HadoopConfigurationUtils;
-import com.sequenceiq.cloudbreak.domain.Constraint;
-import com.sequenceiq.cloudbreak.domain.HostGroup;
-import com.sequenceiq.cloudbreak.domain.InstanceGroup;
-import com.sequenceiq.cloudbreak.domain.Template;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ConfigServiceTest {
@@ -47,9 +46,6 @@ public class ConfigServiceTest {
 
     @Mock
     private ConfigUtils configUtils;
-
-    @Mock
-    private BlueprintProcessor blueprintProcessor;
 
     @Mock
     private HadoopConfigurationUtils hadoopConfigurationUtils;
@@ -203,30 +199,22 @@ public class ConfigServiceTest {
 
     @Test
     public void testGetHostGroupConfiguration() throws IOException {
-
         init();
 
-        Template template = new Template();
-        template.setVolumeCount(10);
-        InstanceGroup instanceGroup = new InstanceGroup();
-        instanceGroup.setTemplate(template);
-        Constraint constraint = new Constraint();
-        constraint.setInstanceGroup(instanceGroup);
-        HostGroup hostGroup = new HostGroup();
-        hostGroup.setName("hostGroup");
-        hostGroup.setConstraint(constraint);
-        String blueprintText = "blueprintText";
+        HostgroupView hostGroup = new HostgroupView("hostGroup", 10, InstanceGroupType.CORE, 1);
 
         Set<String> components = singleton("component");
+
+        BlueprintTextProcessor blueprintTextProcessor = mock(BlueprintTextProcessor.class);
 
         Map<String, Map<String, String>> properties = new HashMap<>();
         properties.put("key", singletonMap("propKey", "propValue"));
 
         when(configUtils.isConfigUpdateNeeded(hostGroup)).thenReturn(true);
-        when(blueprintProcessor.getComponentsInHostGroup(blueprintText, hostGroup.getName())).thenReturn(components);
+        when(blueprintTextProcessor.getComponentsInHostGroup(hostGroup.getName())).thenReturn(components);
         when(configUtils.getProperties(any(ServiceConfig.class), eq(false), eq(10), eq(components))).thenReturn(properties);
 
-        Map<String, Map<String, Map<String, String>>> actual = underTest.getHostGroupConfiguration(blueprintText, singletonList(hostGroup));
+        Map<String, Map<String, Map<String, String>>> actual = underTest.getHostGroupConfiguration(blueprintTextProcessor, singletonList(hostGroup));
 
         Map<String, Map<String, Map<String, String>>> expected = new HashMap<>();
         expected.put("hostGroup", properties);
@@ -239,23 +227,20 @@ public class ConfigServiceTest {
     public void testGetHostGroupConfigurationWhenTemplateIsNull() throws IOException {
         init();
 
-        Constraint constraint = new Constraint();
-        constraint.setInstanceGroup(new InstanceGroup());
-        HostGroup hostGroup = new HostGroup();
-        hostGroup.setName("hostGroup");
-        hostGroup.setConstraint(constraint);
-        String blueprintText = "blueprintText";
+        HostgroupView hostGroup = new HostgroupView("hostGroup");
 
         Set<String> components = singleton("component");
+
+        BlueprintTextProcessor blueprintTextProcessor = mock(BlueprintTextProcessor.class);
 
         Map<String, Map<String, String>> properties = new HashMap<>();
         properties.put("key", singletonMap("propKey", "propValue"));
 
         when(configUtils.isConfigUpdateNeeded(hostGroup)).thenReturn(true);
-        when(blueprintProcessor.getComponentsInHostGroup(blueprintText, hostGroup.getName())).thenReturn(components);
+        when(blueprintTextProcessor.getComponentsInHostGroup(hostGroup.getName())).thenReturn(components);
         when(configUtils.getProperties(any(ServiceConfig.class), eq(false), eq(-1), eq(components))).thenReturn(properties);
 
-        Map<String, Map<String, Map<String, String>>> actual = underTest.getHostGroupConfiguration(blueprintText, singletonList(hostGroup));
+        Map<String, Map<String, Map<String, String>>> actual = underTest.getHostGroupConfiguration(blueprintTextProcessor, singletonList(hostGroup));
 
         Map<String, Map<String, Map<String, String>>> expected = new HashMap<>();
         expected.put("hostGroup", properties);
@@ -272,18 +257,15 @@ public class ConfigServiceTest {
         when(configUtils.readConfigJson("hdp/service-config.json", "services")).thenReturn(rootJsonNode);
         underTest.init();
 
-        Constraint constraint = new Constraint();
-        constraint.setInstanceGroup(new InstanceGroup());
-        HostGroup hostGroup = new HostGroup();
-        hostGroup.setName("hostGroup");
-        hostGroup.setConstraint(constraint);
-        String blueprintText = "blueprintText";
+        HostgroupView hostGroup = new HostgroupView("hostGroup", 1, InstanceGroupType.CORE, 1);
+
+        BlueprintTextProcessor blueprintTextProcessor = mock(BlueprintTextProcessor.class);
 
         Map<String, Map<String, String>> properties = new HashMap<>();
 
         when(configUtils.isConfigUpdateNeeded(hostGroup)).thenReturn(true);
 
-        Map<String, Map<String, Map<String, String>>> actual = underTest.getHostGroupConfiguration(blueprintText, singletonList(hostGroup));
+        Map<String, Map<String, Map<String, String>>> actual = underTest.getHostGroupConfiguration(blueprintTextProcessor, singletonList(hostGroup));
 
         Map<String, Map<String, Map<String, String>>> expected = new HashMap<>();
         expected.put("hostGroup", properties);
@@ -293,21 +275,21 @@ public class ConfigServiceTest {
 
     @Test
     public void testGetHostGroupConfigurationWhenConfigUpdateIsNotNeed() throws IOException {
-        HostGroup hostGroup = new HostGroup();
-        String blueprintText = "blueprintText";
+        HostgroupView hostGroup = new HostgroupView("hostGroupName");
+        BlueprintTextProcessor blueprintTextProcessor = mock(BlueprintTextProcessor.class);
 
         when(configUtils.isConfigUpdateNeeded(hostGroup)).thenReturn(false);
 
-        Map<String, Map<String, Map<String, String>>> actual = underTest.getHostGroupConfiguration(blueprintText, singletonList(hostGroup));
+        Map<String, Map<String, Map<String, String>>> actual = underTest.getHostGroupConfiguration(blueprintTextProcessor, singletonList(hostGroup));
 
         Assert.assertEquals(actual, emptyMap());
     }
 
     @Test
     public void testGetHostGroupConfigurationWhenHostGroupsIsEmpty() throws IOException {
-        String blueprintText = "blueprintText";
+        BlueprintTextProcessor blueprintTextProcessor = mock(BlueprintTextProcessor.class);
 
-        Map<String, Map<String, Map<String, String>>> actual = underTest.getHostGroupConfiguration(blueprintText, emptyList());
+        Map<String, Map<String, Map<String, String>>> actual = underTest.getHostGroupConfiguration(blueprintTextProcessor, emptyList());
 
         Assert.assertEquals(actual, emptyMap());
     }
@@ -317,9 +299,10 @@ public class ConfigServiceTest {
         init();
 
         String hostGroupName = "hostGroup";
-        HostGroup hostGroup = new HostGroup();
-        hostGroup.setName(hostGroupName);
+        HostgroupView hostGroup = new HostgroupView(hostGroupName, 1, InstanceGroupType.CORE, 1);
         String blueprintText = "blueprintText";
+
+        BlueprintTextProcessor blueprintTextProcessor = mock(BlueprintTextProcessor.class);
 
         Map<String, Set<String>> componentsByHostgroup = new HashMap<>();
         componentsByHostgroup.put(hostGroupName, Sets.newHashSet("serviceName1", "serviceName2"));
@@ -327,7 +310,7 @@ public class ConfigServiceTest {
         ServiceConfig serviceConfig1 = new ServiceConfig("serviceName1", emptyList(), emptyMap(), emptyMap());
         ServiceConfig serviceConfig2 = new ServiceConfig("serviceName2", emptyList(), emptyMap(), emptyMap());
 
-        List<HostGroup> hostGroups = singletonList(hostGroup);
+        List<HostgroupView> hostGroups = singletonList(hostGroup);
 
         Set<String> components = singleton("component");
 
@@ -336,16 +319,16 @@ public class ConfigServiceTest {
         Map<String, Map<String, String>> properties2 = new HashMap<>();
         properties2.put("key2", singletonMap("propKey2", "propValue2"));
 
-        when(blueprintProcessor.getComponentsByHostGroup(blueprintText)).thenReturn(componentsByHostgroup);
+        when(blueprintTextProcessor.getComponentsByHostGroup()).thenReturn(componentsByHostgroup);
         when(hadoopConfigurationUtils.findHostGroupForNode(hostGroups, hostGroupName)).thenReturn(hostGroup);
         when(configUtils.isConfigUpdateNeeded(hostGroup)).thenReturn(true);
         when(configUtils.getServiceConfig(eq("serviceName1"), anyMapOf(String.class, ServiceConfig.class))).thenReturn(serviceConfig1);
         when(configUtils.getServiceConfig(eq("serviceName2"), anyMapOf(String.class, ServiceConfig.class))).thenReturn(serviceConfig2);
-        when(blueprintProcessor.getComponentsInHostGroup(blueprintText, hostGroup.getName())).thenReturn(components);
+        when(blueprintTextProcessor.getComponentsInHostGroup(hostGroup.getName())).thenReturn(components);
         when(configUtils.getProperties(eq(serviceConfig1), eq(true), eq(0), eq(components))).thenReturn(properties1);
         when(configUtils.getProperties(eq(serviceConfig2), eq(true), eq(0), eq(components))).thenReturn(properties2);
 
-        Map<String, Map<String, String>> actual = underTest.getComponentsByHostGroup(blueprintText, hostGroups);
+        Map<String, Map<String, String>> actual = underTest.getComponentsByHostGroup(blueprintTextProcessor, hostGroups);
 
         Map<String, Map<String, String>> expected = properties1;
         expected.putAll(properties2);
@@ -358,30 +341,30 @@ public class ConfigServiceTest {
         init();
 
         String hostGroupName = "hostGroup";
-        HostGroup hostGroup = new HostGroup();
-        hostGroup.setName(hostGroupName);
-        String blueprintText = "blueprintText";
+        HostgroupView hostGroup = new HostgroupView(hostGroupName, 1, InstanceGroupType.CORE, 1);
+
+        BlueprintTextProcessor blueprintTextProcessor = mock(BlueprintTextProcessor.class);
 
         Map<String, Set<String>> componentsByHostgroup = new HashMap<>();
         componentsByHostgroup.put(hostGroupName, Sets.newHashSet("serviceName"));
 
         ServiceConfig serviceConfig = new ServiceConfig("serviceName", emptyList(), emptyMap(), emptyMap());
 
-        List<HostGroup> hostGroups = singletonList(hostGroup);
+        List<HostgroupView> hostGroups = singletonList(hostGroup);
 
         Set<String> components = singleton("component");
 
         Map<String, Map<String, String>> properties = new HashMap<>();
         properties.put("key", singletonMap("propKey", "propValue"));
 
-        when(blueprintProcessor.getComponentsByHostGroup(blueprintText)).thenReturn(componentsByHostgroup);
+        when(blueprintTextProcessor.getComponentsByHostGroup()).thenReturn(componentsByHostgroup);
         when(hadoopConfigurationUtils.findHostGroupForNode(hostGroups, hostGroupName)).thenReturn(hostGroup);
         when(configUtils.isConfigUpdateNeeded(hostGroup)).thenReturn(false);
         when(configUtils.getServiceConfig(eq("serviceName"), anyMapOf(String.class, ServiceConfig.class))).thenReturn(serviceConfig);
-        when(blueprintProcessor.getComponentsInHostGroup(blueprintText, hostGroup.getName())).thenReturn(components);
+        when(blueprintTextProcessor.getComponentsInHostGroup(hostGroup.getName())).thenReturn(components);
         when(configUtils.getProperties(eq(serviceConfig), eq(true), eq(-1), eq(components))).thenReturn(properties);
 
-        Map<String, Map<String, String>> actual = underTest.getComponentsByHostGroup(blueprintText, hostGroups);
+        Map<String, Map<String, String>> actual = underTest.getComponentsByHostGroup(blueprintTextProcessor, hostGroups);
 
         Map<String, Map<String, String>> expected = properties;
 
@@ -393,25 +376,26 @@ public class ConfigServiceTest {
         init();
 
         String hostGroupName = "hostGroup";
-        HostGroup hostGroup = new HostGroup();
-        hostGroup.setName(hostGroupName);
+        HostgroupView hostGroup = new HostgroupView(hostGroupName, 1, InstanceGroupType.CORE, 1);
         String blueprintText = "blueprintText";
+
+        BlueprintTextProcessor blueprintTextProcessor = mock(BlueprintTextProcessor.class);
 
         Map<String, Set<String>> componentsByHostgroup = new HashMap<>();
         componentsByHostgroup.put(hostGroupName, Sets.newHashSet("serviceName"));
 
-        List<HostGroup> hostGroups = singletonList(hostGroup);
+        List<HostgroupView> hostGroups = singletonList(hostGroup);
 
-        when(blueprintProcessor.getComponentsByHostGroup(blueprintText)).thenReturn(componentsByHostgroup);
+        when(blueprintTextProcessor.getComponentsByHostGroup()).thenReturn(componentsByHostgroup);
         when(hadoopConfigurationUtils.findHostGroupForNode(hostGroups, hostGroupName)).thenReturn(hostGroup);
         when(configUtils.isConfigUpdateNeeded(hostGroup)).thenReturn(true);
         when(configUtils.getServiceConfig(eq("serviceName"), anyMapOf(String.class, ServiceConfig.class))).thenReturn(null);
 
-        Map<String, Map<String, String>> actual = underTest.getComponentsByHostGroup(blueprintText, hostGroups);
+        Map<String, Map<String, String>> actual = underTest.getComponentsByHostGroup(blueprintTextProcessor, hostGroups);
 
         Assert.assertEquals(emptyMap(), actual);
 
-        verify(blueprintProcessor, times(0)).getComponentsInHostGroup(blueprintText, hostGroupName);
+        verify(blueprintTextProcessor, times(0)).getComponentsInHostGroup(hostGroupName);
     }
 
     @Test
@@ -419,25 +403,25 @@ public class ConfigServiceTest {
         init();
 
         String hostGroupName = "hostGroup";
-        HostGroup hostGroup = new HostGroup();
-        hostGroup.setName(hostGroupName);
-        String blueprintText = "blueprintText";
+        HostgroupView hostGroup = new HostgroupView(hostGroupName, 1, InstanceGroupType.CORE, 1);
+
+        BlueprintTextProcessor blueprintTextProcessor = mock(BlueprintTextProcessor.class);
 
         Map<String, Set<String>> componentsByHostgroup = new HashMap<>();
         componentsByHostgroup.put(hostGroupName, emptySet());
 
-        List<HostGroup> hostGroups = singletonList(hostGroup);
+        List<HostgroupView> hostGroups = singletonList(hostGroup);
 
-        when(blueprintProcessor.getComponentsByHostGroup(blueprintText)).thenReturn(componentsByHostgroup);
+        when(blueprintTextProcessor.getComponentsByHostGroup()).thenReturn(componentsByHostgroup);
         when(hadoopConfigurationUtils.findHostGroupForNode(hostGroups, hostGroupName)).thenReturn(hostGroup);
         when(configUtils.isConfigUpdateNeeded(hostGroup)).thenReturn(true);
 
-        Map<String, Map<String, String>> actual = underTest.getComponentsByHostGroup(blueprintText, hostGroups);
+        Map<String, Map<String, String>> actual = underTest.getComponentsByHostGroup(blueprintTextProcessor, hostGroups);
 
         Assert.assertEquals(emptyMap(), actual);
 
         verify(configUtils, times(1)).isConfigUpdateNeeded(hostGroup);
-        verify(blueprintProcessor, times(0)).getComponentsInHostGroup(blueprintText, hostGroupName);
+        verify(blueprintTextProcessor, times(0)).getComponentsInHostGroup(hostGroupName);
     }
 
     @Test
@@ -445,15 +429,15 @@ public class ConfigServiceTest {
         init();
 
         String hostGroupName = "hostGroup";
-        HostGroup hostGroup = new HostGroup();
-        hostGroup.setName(hostGroupName);
-        String blueprintText = "blueprintText";
+        HostgroupView hostGroup = new HostgroupView(hostGroupName, 1, InstanceGroupType.CORE, 1);
 
-        List<HostGroup> hostGroups = singletonList(hostGroup);
+        BlueprintTextProcessor blueprintTextProcessor = mock(BlueprintTextProcessor.class);
 
-        when(blueprintProcessor.getComponentsByHostGroup(blueprintText)).thenReturn(emptyMap());
+        List<HostgroupView> hostGroups = singletonList(hostGroup);
 
-        Map<String, Map<String, String>> actual = underTest.getComponentsByHostGroup(blueprintText, hostGroups);
+        when(blueprintTextProcessor.getComponentsByHostGroup()).thenReturn(emptyMap());
+
+        Map<String, Map<String, String>> actual = underTest.getComponentsByHostGroup(blueprintTextProcessor, hostGroups);
 
         Assert.assertEquals(emptyMap(), actual);
 

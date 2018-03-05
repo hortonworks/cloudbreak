@@ -37,7 +37,7 @@ public class BlueprintSegmentProcessor {
     private BlueprintSegmentReader blueprintSegmentReader;
 
     @Inject
-    private BlueprintProcessor blueprintProcessor;
+    private BlueprintProcessorFactory blueprintProcessorFactory;
 
     public String process(String blueprintText, BlueprintPreparationObject source) {
         Map<String, Object> customProperties = new HashMap<>();
@@ -50,9 +50,17 @@ public class BlueprintSegmentProcessor {
 
         collectContents(blueprintSegmentReader.collectAllServiceFile(), resultBlueprint.get(), file -> {
             String serviceContent = prepareContent(file, source, customProperties);
-            resultBlueprint.set(blueprintProcessor.addConfigEntryStringToBlueprint(serviceContent, resultBlueprint.get(), false));
+            if (isSettingsConfiguration(file)) {
+                resultBlueprint.set(blueprintProcessorFactory.get(resultBlueprint.get()).addSettingsEntryStringToBlueprint(serviceContent, false).asText());
+            } else {
+                resultBlueprint.set(blueprintProcessorFactory.get(resultBlueprint.get()).addConfigEntryStringToBlueprint(serviceContent, false).asText());
+            }
         });
         return resultBlueprint.get();
+    }
+
+    private boolean isSettingsConfiguration(String file) {
+        return file.toLowerCase().endsWith("settings.handlebars");
     }
 
     private String getCustomPropertyName(String file) {
@@ -93,7 +101,11 @@ public class BlueprintSegmentProcessor {
         } else {
             try {
                 RelatedServices relatedServices = JsonUtil.readValue(readFileFromClasspathQuietly(requiredServices.get()), RelatedServices.class);
-                shouldGenerate = blueprintProcessor.componentsExistsInBlueprint(relatedServices.getServices(), blueprintText);
+                if (relatedServices.getServices().isEmpty()) {
+                    shouldGenerate = true;
+                } else {
+                    shouldGenerate = blueprintProcessorFactory.get(blueprintText).componentsExistsInBlueprint(relatedServices.getServices());
+                }
             } catch (IOException e) {
                 LOGGER.error("Could not open {} file to check related service list.", requiredServices.get());
                 shouldGenerate = false;

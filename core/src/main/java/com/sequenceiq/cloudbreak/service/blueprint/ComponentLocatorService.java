@@ -11,7 +11,7 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessor;
+import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessorFactory;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
@@ -21,7 +21,7 @@ import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 public class ComponentLocatorService {
 
     @Inject
-    private BlueprintProcessor blueprintProcessor;
+    private BlueprintProcessorFactory blueprintProcessorFactory;
 
     @Inject
     private HostGroupService hostGroupService;
@@ -29,7 +29,7 @@ public class ComponentLocatorService {
     public Map<String, List<String>> getComponentLocation(Cluster cluster, Collection<String> componentNames) {
         Map<String, List<String>> result = new HashMap<>();
         for (HostGroup hg : hostGroupService.getByCluster(cluster.getId())) {
-            Set<String> hgComponents = blueprintProcessor.getComponentsInHostGroup(cluster.getBlueprint().getBlueprintText(), hg.getName());
+            Set<String> hgComponents = blueprintProcessorFactory.get(cluster.getBlueprint().getBlueprintText()).getComponentsInHostGroup(hg.getName());
             hgComponents.retainAll(componentNames);
 
             List<String> fqdn = hg.getConstraint().getInstanceGroup().getInstanceMetaData().stream()

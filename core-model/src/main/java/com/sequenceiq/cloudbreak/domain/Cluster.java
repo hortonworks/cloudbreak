@@ -540,12 +540,4 @@ public class Cluster implements ProvisionEntity {
     public void setExtendedBlueprintText(String extendedBlueprintText) {
         this.extendedBlueprintText = extendedBlueprintText;
     }
-
-    public Integer getClusterNodeCount() {
-        int nodeCount = 0;
-        for (HostGroup hostGroup : hostGroups) {
-            nodeCount += hostGroup.getHostMetadata().size();
-        }
-        return nodeCount;
-    }
 }

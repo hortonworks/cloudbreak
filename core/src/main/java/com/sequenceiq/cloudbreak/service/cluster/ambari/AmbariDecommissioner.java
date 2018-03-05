@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.service.cluster.ambari;
 
 import static com.sequenceiq.cloudbreak.api.model.Status.AVAILABLE;
-import static com.sequenceiq.cloudbreak.blueprint.datanode.DataNodeUtils.sortByUsedSpace;
+import static com.sequenceiq.cloudbreak.service.cluster.ambari.DataNodeUtils.sortByUsedSpace;
 import static com.sequenceiq.cloudbreak.orchestrator.container.DockerContainer.AMBARI_AGENT;
 import static com.sequenceiq.cloudbreak.service.PollingResult.SUCCESS;
 import static com.sequenceiq.cloudbreak.service.PollingResult.isSuccess;

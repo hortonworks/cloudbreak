@@ -9,6 +9,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.springframework.boot.context.embedded.AnnotationConfigEmbeddedWebApplicationContext;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.blueprint.templates.ServiceName;
@@ -20,10 +21,13 @@ public class BlueprintSegmentReaderTest {
     @InjectMocks
     private final BlueprintSegmentReader underTest = new BlueprintSegmentReader();
 
+    private AnnotationConfigEmbeddedWebApplicationContext annotationConfigEmbeddedWebApplicationContext = new AnnotationConfigEmbeddedWebApplicationContext();
+
     @Before
     public void setup() throws IOException {
-        ReflectionTestUtils.setField(underTest, "blueprintTemplatePath", "blueprints");
-        ReflectionTestUtils.setField(underTest, "basicTemplatePath", "basics");
+        ReflectionTestUtils.setField(underTest, "resourceLoader", annotationConfigEmbeddedWebApplicationContext);
+        ReflectionTestUtils.setField(underTest, "blueprintTemplatePath", "templates/blueprint_templates");
+        ReflectionTestUtils.setField(underTest, "basicTemplatePath", "templates/basic_templates");
     }
 
     @Test

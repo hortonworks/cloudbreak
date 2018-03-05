@@ -1,0 +1,46 @@
+{
+{{{#if ldapConfig}}}
+  "ranger-ugsync-site": {
+    "properties": {
+      "ranger.usersync.enabled": "true",
+      "ranger.usersync.source.impl.class": "org.apache.ranger.ldapusersync.process.LdapUserGroupBuilder",
+      "ranger.usersync.ldap.url": "{{{ ldapConfig.connectionURL }}}",
+      "ranger.usersync.ldap.binddn": "{{{ ldapConfig.bindDn }}}",
+      "ranger.usersync.ldap.ldapbindpassword": "{{{ ldapConfig.bindPassword }}}",
+      "ranger.usersync.ldap.user.nameattribute": "{{{ ldapConfig.userNameAttribute }}}",
+      "ranger.usersync.ldap.user.searchbase": "{{{ ldapConfig.userSearchBase }}}",
+      "ranger.usersync.ldap.user.objectclass": "{{{ ldapConfig.userObjectClass }}}",
+      "ranger.usersync.ldap.deltasync": "false",
+      "ranger.usersync.group.searchenabled": "true",
+      "ranger.usersync.group.memberattributename": "{{{ ldapConfig.groupMemberAttribute }}}",
+      "ranger.usersync.group.nameattribute": "{{{ ldapConfig.groupNameAttribute }}}",
+      "ranger.usersync.group.objectclass": "{{{ ldapConfig.groupObjectClass }}}",
+      "ranger.usersync.group.searchbase": "{{{ ldapConfig.groupSearchBase }}}",
+      "ranger.usersync.group.searchfilter": " "
+    }
+  },
+  "ranger-admin-site": {
+    "properties": {
+      "ranger.sso.enabled": "true",
+      "ranger.sso.publicKey": "{{{ gateway.escSignCert }}}",
+      "ranger.jpa.jdbc.driver": "org.postgresql.Driver",
+      "ranger.audit.source.type": "solr",
+      "ranger.authentication.method": "{{{ ldapConfig.directoryType }}}",
+      "ranger.ldap.ad.domain": " ",
+      "ranger.ldap.ad.url": "{{{ ldapConfig.connectionURL }}}",
+      "ranger.ldap.ad.bind.dn": "{{{ ldapConfig.bindDn }}}",
+      "ranger.ldap.ad.bind.password": "{{{ ldapConfig.bindPassword }}}",
+      "ranger.ldap.ad.base.dn": "{{{ ldapConfig.userSearchBase }}}",
+      "ranger.ldap.ad.user.searchfilter": "({{{ ldapConfig.userNameAttribute }}}={0})",
+      "ranger.ldap.url": "{{{ ldapConfig.connectionURL }}}",
+      "ranger.ldap.bind.dn": "{{{ ldapConfig.bindDn }}}",
+      "ranger.ldap.bind.password": "{{{ ldapConfig.bindPassword }}}",
+      "ranger.ldap.base.dn": "{{{ ldapConfig.userSearchBase }}}",
+      "ranger.ldap.user.searchfilter": "({{{ ldapConfig.userNameAttribute }}}={0})",
+      "ranger.ldap.user.dnpattern": "{{{ ldapConfig.userNameAttribute }}}={0},{{{ ldapConfig.userSearchBase }}}",
+      "ranger.ldap.group.searchbase": "{{{ ldapConfig.groupSearchBase }}}",
+      "ranger.ldap.group.roleattribute": "{{{ ldapConfig.groupNameAttribute }}}"
+    }
+  }
+{{{/if}}}
+}

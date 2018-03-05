@@ -37,7 +37,10 @@ public class BlueprintSegmentProcessorTest {
     private BlueprintSegmentReader blueprintSegmentReader;
 
     @Mock
-    private BlueprintProcessor blueprintProcessor;
+    private BlueprintTextProcessor blueprintProcessor;
+
+    @Mock
+    private BlueprintProcessorFactory blueprintProcessorFactory;
 
     @InjectMocks
     private final BlueprintSegmentProcessor underTest = new BlueprintSegmentProcessor();
@@ -48,7 +51,7 @@ public class BlueprintSegmentProcessorTest {
 
     @Before
     public void before() throws IOException {
-        expectedBlueprint = FileReaderUtils.readFileFromClasspath("blueprints/bp-kerberized-test.bp");
+        expectedBlueprint = FileReaderUtils.readFileFromClasspath("blueprints-jackson/bp-kerberized-test.bp");
 
         Map<ServiceName, TemplateFiles> configFiles = new HashMap<>();
         configFiles.put(serviceName("zeppelin"), templateFiles(
@@ -60,9 +63,11 @@ public class BlueprintSegmentProcessorTest {
 
         when(blueprintSegmentReader.collectAllConfigFile()).thenReturn(configFiles);
         when(blueprintSegmentReader.collectAllServiceFile()).thenReturn(serviceFiles);
-        when(blueprintProcessor.componentsExistsInBlueprint(anySet(), anyString())).thenReturn(true);
+        when(blueprintProcessor.componentsExistsInBlueprint(anySet())).thenReturn(true);
         when(blueprintTemplateProcessor.process(anyString(), any(BlueprintPreparationObject.class), anyMap())).thenReturn(expectedBlueprint);
-        when(blueprintProcessor.addConfigEntryStringToBlueprint(anyString(), anyString(), anyBoolean())).thenReturn(expectedBlueprint);
+        when(blueprintProcessor.addConfigEntryStringToBlueprint(anyString(), anyBoolean())).thenReturn(blueprintProcessor);
+        when(blueprintProcessor.asText()).thenReturn(expectedBlueprint);
+        when(blueprintProcessorFactory.get(anyString())).thenReturn(blueprintProcessor);
     }
 
     @Test

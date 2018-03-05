@@ -15,4 +15,13 @@ public enum FileSystemType {
     public Class<? extends FileSystemConfiguration> getClazz() {
         return clazz;
     }
+
+    public static FileSystemType fromClass(Class clazz) {
+        for (FileSystemType fileSystemType : FileSystemType.values()) {
+            if (fileSystemType.clazz.equals(clazz)) {
+                return fileSystemType;
+            }
+        }
+        return null;
+    }
 }

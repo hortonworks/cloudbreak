@@ -15,19 +15,15 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.sequenceiq.cloudbreak.blueprint.template.views.HostgroupView;
 import com.sequenceiq.cloudbreak.blueprint.utils.ConfigUtils;
 import com.sequenceiq.cloudbreak.blueprint.utils.HadoopConfigurationUtils;
-import com.sequenceiq.cloudbreak.domain.HostGroup;
-import com.sequenceiq.cloudbreak.domain.Template;
 
 @Service
 public class ConfigService {
 
     @Inject
     private ConfigUtils configUtils;
-
-    @Inject
-    private BlueprintProcessor blueprintProcessor;
 
     @Inject
     private HadoopConfigurationUtils hadoopConfigurationUtils;
@@ -91,26 +87,27 @@ public class ConfigService {
         return serviceConfigs;
     }
 
-    public Map<String, Map<String, Map<String, String>>> getHostGroupConfiguration(String blueprintText, Collection<HostGroup> hostGroups) {
+    public Map<String, Map<String, Map<String, String>>> getHostGroupConfiguration(BlueprintTextProcessor blueprintProcessor,
+            Collection<HostgroupView> hostGroups) {
         Map<String, Map<String, Map<String, String>>> hadoopConfig = new HashMap<>();
         hostGroups.stream()
                 .filter(configUtils::isConfigUpdateNeeded)
-                .forEach(hostGroup -> hadoopConfig.put(hostGroup.getName(), getHadoopConfigs(hostGroup, blueprintText)));
+                .forEach(hostGroup -> hadoopConfig.put(hostGroup.getName(), getHadoopConfigs(blueprintProcessor, hostGroup)));
         return hadoopConfig;
     }
 
-    public Map<String, Map<String, String>> getComponentsByHostGroup(String blueprintText, Collection<HostGroup> hostGroups) {
+    public Map<String, Map<String, String>> getComponentsByHostGroup(BlueprintTextProcessor blueprintProcessor, Collection<HostgroupView> hostGroups) {
         Map<String, Map<String, String>> config = new HashMap<>();
 
-        Map<String, Set<String>> componentsByHostGroup = blueprintProcessor.getComponentsByHostGroup(blueprintText);
+        Map<String, Set<String>> componentsByHostGroup = blueprintProcessor.getComponentsByHostGroup();
         componentsByHostGroup.forEach((hostGoupName, value) -> {
-            HostGroup hostGroup = hadoopConfigurationUtils.findHostGroupForNode(hostGroups, hostGoupName);
+            HostgroupView hostGroup = hadoopConfigurationUtils.findHostGroupForNode(hostGroups, hostGoupName);
             int volumeCount = configUtils.isConfigUpdateNeeded(hostGroup) ? 0 : -1;
             value.stream()
                     .map(componentName -> configUtils.getServiceConfig(componentName, serviceConfigs))
                     .filter(Objects::nonNull)
                     .forEach(serviceConfig -> {
-                        Set<String> hostComponents = blueprintProcessor.getComponentsInHostGroup(blueprintText, hostGoupName);
+                        Set<String> hostComponents = blueprintProcessor.getComponentsInHostGroup(hostGoupName);
                         config.putAll(configUtils.getProperties(serviceConfig, true, volumeCount, hostComponents));
                     });
         });
@@ -128,13 +125,12 @@ public class ConfigService {
         });
     }
 
-    private Map<String, Map<String, String>> getHadoopConfigs(HostGroup hostGroup, String blueprintText) {
-        Template template = hostGroup.getConstraint().getInstanceGroup().getTemplate();
-        int volumeCount = Objects.isNull(template) ? -1 : template.getVolumeCount();
+    private Map<String, Map<String, String>> getHadoopConfigs(BlueprintTextProcessor blueprintProcessor, HostgroupView hostGroup) {
+        int volumeCount = Objects.isNull(hostGroup.getVolumeCount()) ? -1 : hostGroup.getVolumeCount();
 
         Map<String, Map<String, String>> hadoopConfig = new HashMap<>();
         for (ServiceConfig serviceConfig : serviceConfigs.values()) {
-            Set<String> hostComponents = blueprintProcessor.getComponentsInHostGroup(blueprintText, hostGroup.getName());
+            Set<String> hostComponents = blueprintProcessor.getComponentsInHostGroup(hostGroup.getName());
             hadoopConfig.putAll(configUtils.getProperties(serviceConfig, false, volumeCount, hostComponents));
         }
         return hadoopConfig;

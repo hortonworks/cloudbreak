@@ -11,7 +11,4 @@ public class BlueprintProcessingException extends RuntimeException {
         super(message, cause);
     }
 
-    public BlueprintProcessingException(Throwable cause) {
-        super(cause);
-    }
 }

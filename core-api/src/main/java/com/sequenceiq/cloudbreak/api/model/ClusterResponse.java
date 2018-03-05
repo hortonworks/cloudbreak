@@ -129,6 +129,19 @@ public class ClusterResponse implements JsonEntity {
     @ApiModelProperty(ClusterModelDescription.UPTIME)
     private Long uptime;
 
+    @ApiModelProperty(ModelDescriptions.BlueprintModelDescription.AMBARI_BLUEPRINT)
+    @JsonSerialize(using = Base64Serializer.class)
+    @JsonDeserialize(using = Base64Deserializer.class)
+    private String extendedBlueprintText;
+
+    public String getExtendedBlueprintText() {
+        return extendedBlueprintText;
+    }
+
+    public void setExtendedBlueprintText(String extendedBlueprintText) {
+        this.extendedBlueprintText = extendedBlueprintText;
+    }
+
     public String getDescription() {
         return description;
     }

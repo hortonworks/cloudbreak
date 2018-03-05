@@ -1,21 +1,21 @@
 {
-{{{#if ldapConfig}}}
+{{{#if ldap}}}
   "ranger-ugsync-site": {
     "properties": {
       "ranger.usersync.enabled": "true",
       "ranger.usersync.source.impl.class": "org.apache.ranger.ldapusersync.process.LdapUserGroupBuilder",
-      "ranger.usersync.ldap.url": "{{{ ldapConfig.connectionURL }}}",
-      "ranger.usersync.ldap.binddn": "{{{ ldapConfig.bindDn }}}",
-      "ranger.usersync.ldap.ldapbindpassword": "{{{ ldapConfig.bindPassword }}}",
-      "ranger.usersync.ldap.user.nameattribute": "{{{ ldapConfig.userNameAttribute }}}",
-      "ranger.usersync.ldap.user.searchbase": "{{{ ldapConfig.userSearchBase }}}",
-      "ranger.usersync.ldap.user.objectclass": "{{{ ldapConfig.userObjectClass }}}",
+      "ranger.usersync.ldap.url": "{{{ ldap.connectionURL }}}",
+      "ranger.usersync.ldap.binddn": "{{{ ldap.bindDn }}}",
+      "ranger.usersync.ldap.ldapbindpassword": "{{{ ldap.bindPassword }}}",
+      "ranger.usersync.ldap.user.nameattribute": "{{{ ldap.userNameAttribute }}}",
+      "ranger.usersync.ldap.user.searchbase": "{{{ ldap.userSearchBase }}}",
+      "ranger.usersync.ldap.user.objectclass": "{{{ ldap.userObjectClass }}}",
       "ranger.usersync.ldap.deltasync": "false",
       "ranger.usersync.group.searchenabled": "true",
-      "ranger.usersync.group.memberattributename": "{{{ ldapConfig.groupMemberAttribute }}}",
-      "ranger.usersync.group.nameattribute": "{{{ ldapConfig.groupNameAttribute }}}",
-      "ranger.usersync.group.objectclass": "{{{ ldapConfig.groupObjectClass }}}",
-      "ranger.usersync.group.searchbase": "{{{ ldapConfig.groupSearchBase }}}",
+      "ranger.usersync.group.memberattributename": "{{{ ldap.groupMemberAttribute }}}",
+      "ranger.usersync.group.nameattribute": "{{{ ldap.groupNameAttribute }}}",
+      "ranger.usersync.group.objectclass": "{{{ ldap.groupObjectClass }}}",
+      "ranger.usersync.group.searchbase": "{{{ ldap.groupSearchBase }}}",
       "ranger.usersync.group.searchfilter": " "
     }
   },
@@ -25,21 +25,21 @@
       "ranger.sso.publicKey": "{{{ gateway.escSignCert }}}",
       "ranger.jpa.jdbc.driver": "org.postgresql.Driver",
       "ranger.audit.source.type": "solr",
-      "ranger.authentication.method": "{{{ ldapConfig.directoryType }}}",
+      "ranger.authentication.method": "{{{ ldap.directoryType }}}",
       "ranger.ldap.ad.domain": " ",
-      "ranger.ldap.ad.url": "{{{ ldapConfig.connectionURL }}}",
-      "ranger.ldap.ad.bind.dn": "{{{ ldapConfig.bindDn }}}",
-      "ranger.ldap.ad.bind.password": "{{{ ldapConfig.bindPassword }}}",
-      "ranger.ldap.ad.base.dn": "{{{ ldapConfig.userSearchBase }}}",
-      "ranger.ldap.ad.user.searchfilter": "({{{ ldapConfig.userNameAttribute }}}={0})",
-      "ranger.ldap.url": "{{{ ldapConfig.connectionURL }}}",
-      "ranger.ldap.bind.dn": "{{{ ldapConfig.bindDn }}}",
-      "ranger.ldap.bind.password": "{{{ ldapConfig.bindPassword }}}",
-      "ranger.ldap.base.dn": "{{{ ldapConfig.userSearchBase }}}",
-      "ranger.ldap.user.searchfilter": "({{{ ldapConfig.userNameAttribute }}}={0})",
-      "ranger.ldap.user.dnpattern": "{{{ ldapConfig.userNameAttribute }}}={0},{{{ ldapConfig.userSearchBase }}}",
-      "ranger.ldap.group.searchbase": "{{{ ldapConfig.groupSearchBase }}}",
-      "ranger.ldap.group.roleattribute": "{{{ ldapConfig.groupNameAttribute }}}"
+      "ranger.ldap.ad.url": "{{{ ldap.connectionURL }}}",
+      "ranger.ldap.ad.bind.dn": "{{{ ldap.bindDn }}}",
+      "ranger.ldap.ad.bind.password": "{{{ ldap.bindPassword }}}",
+      "ranger.ldap.ad.base.dn": "{{{ ldap.userSearchBase }}}",
+      "ranger.ldap.ad.user.searchfilter": "({{{ ldap.userNameAttribute }}}={0})",
+      "ranger.ldap.url": "{{{ ldap.connectionURL }}}",
+      "ranger.ldap.bind.dn": "{{{ ldap.bindDn }}}",
+      "ranger.ldap.bind.password": "{{{ ldap.bindPassword }}}",
+      "ranger.ldap.base.dn": "{{{ ldap.userSearchBase }}}",
+      "ranger.ldap.user.searchfilter": "({{{ ldap.userNameAttribute }}}={0})",
+      "ranger.ldap.user.dnpattern": "{{{ ldap.userNameAttribute }}}={0},{{{ ldap.userSearchBase }}}",
+      "ranger.ldap.group.searchbase": "{{{ ldap.groupSearchBase }}}",
+      "ranger.ldap.group.roleattribute": "{{{ ldap.groupNameAttribute }}}"
     }
   }
 {{{/if}}}

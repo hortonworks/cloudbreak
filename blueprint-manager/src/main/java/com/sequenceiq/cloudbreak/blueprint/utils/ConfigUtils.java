@@ -21,7 +21,7 @@ import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.sequenceiq.cloudbreak.blueprint.ConfigProperty;
 import com.sequenceiq.cloudbreak.blueprint.ServiceConfig;
-import com.sequenceiq.cloudbreak.domain.HostGroup;
+import com.sequenceiq.cloudbreak.blueprint.template.views.HostgroupView;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
@@ -36,8 +36,8 @@ public class ConfigUtils {
         return JsonUtil.readTree(serviceConfigJson).get(configName);
     }
 
-    public boolean isConfigUpdateNeeded(HostGroup hostGroup) {
-        return hostGroup.getConstraint().getInstanceGroup() != null;
+    public boolean isConfigUpdateNeeded(HostgroupView hostGroup) {
+        return hostGroup.isInstanceGroupConfigured();
     }
 
     public Map<String, Map<String, String>> getProperties(ServiceConfig serviceConfig, boolean global, int volumeCount, Collection<String> hostComponents) {

@@ -22,7 +22,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import com.google.common.collect.Sets;
 import com.sequenceiq.ambari.client.AmbariClient;
-import com.sequenceiq.cloudbreak.blueprint.ConfigParam;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
@@ -37,6 +36,7 @@ import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariClientProvider;
 import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariConfigurationService;
 import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariDecommissioner;
+import com.sequenceiq.cloudbreak.service.cluster.filter.ConfigParam;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 
 @RunWith(MockitoJUnitRunner.class)

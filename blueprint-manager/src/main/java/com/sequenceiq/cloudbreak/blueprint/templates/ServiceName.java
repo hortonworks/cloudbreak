@@ -10,10 +10,6 @@ public class ServiceName {
         this.name = name;
     }
 
-    public String getName() {
-        return name;
-    }
-
     public static ServiceName serviceName(String name) {
         return new ServiceName(name);
     }

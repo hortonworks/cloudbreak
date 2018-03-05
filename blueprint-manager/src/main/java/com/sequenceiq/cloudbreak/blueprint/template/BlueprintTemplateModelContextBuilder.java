@@ -5,20 +5,25 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 
+import com.sequenceiq.cloudbreak.api.model.FileSystemType;
+import com.sequenceiq.cloudbreak.blueprint.template.views.DatabaseView;
+import com.sequenceiq.cloudbreak.blueprint.template.views.FileSystemConfigurationView;
+import com.sequenceiq.cloudbreak.blueprint.template.views.FileSystemView;
+import com.sequenceiq.cloudbreak.blueprint.template.views.GatewayView;
+import com.sequenceiq.cloudbreak.blueprint.template.views.LdapView;
+import com.sequenceiq.cloudbreak.blueprint.template.views.RdsView;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariDatabase;
 import com.sequenceiq.cloudbreak.domain.Gateway;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
-import com.sequenceiq.cloudbreak.blueprint.template.views.DatabaseView;
-import com.sequenceiq.cloudbreak.blueprint.template.views.GatewayView;
-import com.sequenceiq.cloudbreak.blueprint.template.views.LdapView;
-import com.sequenceiq.cloudbreak.blueprint.template.views.RdsView;
 
 public class BlueprintTemplateModelContextBuilder {
 
     private final Map<String, String> customProperties = new HashMap<>();
 
     private Map<String, RdsView> rds = new HashMap<>();
+
+    private Map<String, FileSystemView> fileSystemConfig = new HashMap<>();
 
     private Optional<LdapView> ldap = Optional.empty();
 
@@ -84,6 +89,15 @@ public class BlueprintTemplateModelContextBuilder {
         return this;
     }
 
+    public BlueprintTemplateModelContextBuilder withFileSystemConfigs(FileSystemConfigurationView fileSystemConfigurationView) {
+        if (fileSystemConfigurationView != null && fileSystemConfigurationView.getFileSystemConfiguration() != null) {
+            FileSystemView fileSystemView = new FileSystemView(fileSystemConfigurationView.getFileSystemConfiguration());
+            String componentName = FileSystemType.fromClass(fileSystemConfig.getClass()).name().toLowerCase();
+            this.fileSystemConfig.put(componentName, fileSystemView);
+        }
+        return this;
+    }
+
     public BlueprintTemplateModelContextBuilder withLdap(LdapConfig ldapConfig) {
         ldap = Optional.ofNullable(ldapConfig == null ? null : new LdapView(ldapConfig));
         return this;
@@ -91,6 +105,11 @@ public class BlueprintTemplateModelContextBuilder {
 
     public BlueprintTemplateModelContextBuilder withGateway(Gateway gatewayConfig) {
         gateway = Optional.ofNullable(gateway == null ? null : new GatewayView(gatewayConfig));
+        return this;
+    }
+
+    public BlueprintTemplateModelContextBuilder withGateway(GatewayView gatewayConfig) {
+        gateway = Optional.ofNullable(gatewayConfig);
         return this;
     }
 
@@ -143,9 +162,10 @@ public class BlueprintTemplateModelContextBuilder {
 
     public Map<String, Object> build() {
         Map<String, Object> blueprintTemplateModelContext = new HashMap<>();
-        blueprintTemplateModelContext.put("ldapConfig", ldap.orElse(null));
+        blueprintTemplateModelContext.put("ldap", ldap.orElse(null));
         blueprintTemplateModelContext.put("gateway", gateway.orElse(null));
         blueprintTemplateModelContext.put("rds", rds);
+        blueprintTemplateModelContext.put("fileSystemConfigs", fileSystemConfig);
         blueprintTemplateModelContext.put("ambariDatabase", ambariDatabase.orElse(null));
         for (Entry<String, String> customEntry : customProperties.entrySet()) {
             blueprintTemplateModelContext.put(customEntry.getKey(), customEntry.getValue());

@@ -16,7 +16,8 @@ import org.junit.rules.ExpectedException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintConfigurationEntry;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessingException;
-import com.sequenceiq.cloudbreak.blueprint.JacksonBlueprintProcessor;
+import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessorFactory;
+import com.sequenceiq.cloudbreak.blueprint.BlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
@@ -27,13 +28,13 @@ public class JacksonBlueprintProcessorTest {
     @Rule
     public final ExpectedException thrown = ExpectedException.none();
 
-    private final JacksonBlueprintProcessor underTest = new JacksonBlueprintProcessor();
+    private final BlueprintProcessorFactory underTest = new BlueprintProcessorFactory();
 
     @Test
     public void testAddConfigEntriesAddsRootConfigurationsNodeIfMissing() throws Exception {
-        String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints/test-bp-without-config-block.bp");
+        String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints-jackson/test-bp-without-config-block.bp");
         List<BlueprintConfigurationEntry> configurationEntries = new ArrayList<>();
-        String result = underTest.addConfigEntries(testBlueprint, configurationEntries, true);
+        String result = underTest.get(testBlueprint).addConfigEntries(configurationEntries, true).asText();
 
         JsonNode configNode = JsonUtil.readTree(result).path("configurations");
         Assert.assertFalse(configNode.isMissingNode());
@@ -41,8 +42,8 @@ public class JacksonBlueprintProcessorTest {
 
     @Test
     public void testModifyStackVersionWithThreeTag() throws Exception {
-        String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints/test-bp-without-config-block.bp");
-        String result = underTest.modifyHdpVersion(testBlueprint, "2.2.4.4");
+        String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints-jackson/test-bp-without-config-block.bp");
+        String result = underTest.get(testBlueprint).modifyHdpVersion("2.2.4.4").asText();
 
         JsonNode configNode = JsonUtil.readTree(result).path("Blueprints");
         String stackVersion = configNode.get("stack_version").asText();
@@ -51,8 +52,8 @@ public class JacksonBlueprintProcessorTest {
 
     @Test
     public void testModifyStackVersionWithTwoTag() throws Exception {
-        String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints/test-bp-without-config-block.bp");
-        String result = underTest.modifyHdpVersion(testBlueprint, "2.6");
+        String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints-jackson/test-bp-without-config-block.bp");
+        String result = underTest.get(testBlueprint).modifyHdpVersion("2.6").asText();
 
         JsonNode configNode = JsonUtil.readTree(result).path("Blueprints");
         String stackVersion = configNode.get("stack_version").asText();
@@ -61,10 +62,10 @@ public class JacksonBlueprintProcessorTest {
 
     @Test
     public void testAddConfigEntriesAddsConfigFileEntryIfMissing() throws Exception {
-        String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints/test-bp-with-empty-config-block.bp");
+        String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints-jackson/test-bp-with-empty-config-block.bp");
         List<BlueprintConfigurationEntry> configurationEntries = new ArrayList<>();
         configurationEntries.add(new BlueprintConfigurationEntry("core-site", "fs.AbstractFileSystem.wasb.impl", "org.apache.hadoop.fs.azure.Wasb"));
-        String result = underTest.addConfigEntries(testBlueprint, configurationEntries, true);
+        String result = underTest.get(testBlueprint).addConfigEntries(configurationEntries, true).asText();
 
         JsonNode coreSiteNode = JsonUtil.readTree(result).findPath("core-site");
         Assert.assertFalse(coreSiteNode.isMissingNode());
@@ -72,11 +73,11 @@ public class JacksonBlueprintProcessorTest {
 
     @Test
     public void testAddConfigEntriesAddsConfigEntriesToCorrectConfigBlockWithCorrectValues() throws Exception {
-        String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints/test-bp-with-empty-config-block.bp");
+        String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints-jackson/test-bp-with-empty-config-block.bp");
         List<BlueprintConfigurationEntry> configurationEntries = new ArrayList<>();
         configurationEntries.add(new BlueprintConfigurationEntry("core-site", "fs.AbstractFileSystem.wasb.impl", "org.apache.hadoop.fs.azure.Wasb"));
         configurationEntries.add(new BlueprintConfigurationEntry("hdfs-site", "dfs.blocksize", "134217728"));
-        String result = underTest.addConfigEntries(testBlueprint, configurationEntries, true);
+        String result = underTest.get(testBlueprint).addConfigEntries(configurationEntries, true).asText();
 
         String configValue1 = JsonUtil.readTree(result).findPath("core-site").findPath("fs.AbstractFileSystem.wasb.impl").textValue();
         Assert.assertEquals("org.apache.hadoop.fs.azure.Wasb", configValue1);
@@ -87,11 +88,11 @@ public class JacksonBlueprintProcessorTest {
 
     @Test
     public void testAddConfigEntriesAddsConfigEntriesToExistingConfigBlockAndKeepsExistingEntries() throws Exception {
-        String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints/test-bp-with-core-site.bp");
+        String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints-jackson/test-bp-with-core-site.bp");
         List<BlueprintConfigurationEntry> configurationEntries = new ArrayList<>();
         configurationEntries.add(new BlueprintConfigurationEntry("core-site", "fs.AbstractFileSystem.wasb.impl", "org.apache.hadoop.fs.azure.Wasb"));
         configurationEntries.add(new BlueprintConfigurationEntry("core-site", "io.serializations", "org.apache.hadoop.io.serializer.WritableSerialization"));
-        String result = underTest.addConfigEntries(testBlueprint, configurationEntries, true);
+        String result = underTest.get(testBlueprint).addConfigEntries(configurationEntries, true).asText();
 
         String configValue1 = JsonUtil.readTree(result).findPath("core-site").path("fs.AbstractFileSystem.wasb.impl").textValue();
         Assert.assertEquals("org.apache.hadoop.fs.azure.Wasb", configValue1);
@@ -108,11 +109,11 @@ public class JacksonBlueprintProcessorTest {
 
     @Test
     public void testAddConfigEntriesAddsConfigEntriesToExistingConfigPropertiesBlockAndKeepsExistingEntries() throws Exception {
-        String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints/test-bp-with-core-site-properties.bp");
+        String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints-jackson/test-bp-with-core-site-properties.bp");
         List<BlueprintConfigurationEntry> configurationEntries = new ArrayList<>();
         configurationEntries.add(new BlueprintConfigurationEntry("core-site", "fs.AbstractFileSystem.wasb.impl", "org.apache.hadoop.fs.azure.Wasb"));
         configurationEntries.add(new BlueprintConfigurationEntry("core-site", "io.serializations", "org.apache.hadoop.io.serializer.WritableSerialization"));
-        String result = underTest.addConfigEntries(testBlueprint, configurationEntries, true);
+        String result = underTest.get(testBlueprint).addConfigEntries(configurationEntries, true).asText();
 
         String configValue1 = JsonUtil.readTree(result).findPath("core-site").path("properties").path("fs.AbstractFileSystem.wasb.impl").textValue();
         Assert.assertEquals("org.apache.hadoop.fs.azure.Wasb", configValue1);
@@ -129,11 +130,11 @@ public class JacksonBlueprintProcessorTest {
 
     @Test
     public void testAddConfigEntriesAddsConfigEntriesToExistingConfigPropertiesBlockAndUpdatesExistingEntries() throws Exception {
-        String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints/test-bp-with-core-site-properties-defaultfs.bp");
+        String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints-jackson/test-bp-with-core-site-properties-defaultfs.bp");
         List<BlueprintConfigurationEntry> configurationEntries = new ArrayList<>();
         configurationEntries.add(new BlueprintConfigurationEntry("core-site", "fs.defaultFS", "wasb://cloudbreak@dduihoab6jt1jl.cloudapp.net"));
         configurationEntries.add(new BlueprintConfigurationEntry("core-site", "io.serializations", "org.apache.hadoop.io.serializer.WritableSerialization"));
-        String result = underTest.addConfigEntries(testBlueprint, configurationEntries, true);
+        String result = underTest.get(testBlueprint).addConfigEntries(configurationEntries, true).asText();
 
         String configValue1 = JsonUtil.readTree(result).findPath("core-site").path("properties").path("fs.defaultFS").textValue();
         Assert.assertEquals("wasb://cloudbreak@dduihoab6jt1jl.cloudapp.net", configValue1);
@@ -150,11 +151,11 @@ public class JacksonBlueprintProcessorTest {
 
     @Test
     public void testAddConfigEntriesAddsConfigEntriesToExistingConfigPropertiesBlockAndDoesNotUpdateExistingEntriesWhenOverrideIsFalse() throws Exception {
-        String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints/test-bp-with-core-site-properties-defaultfs.bp");
+        String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints-jackson/test-bp-with-core-site-properties-defaultfs.bp");
         List<BlueprintConfigurationEntry> configurationEntries = new ArrayList<>();
         configurationEntries.add(new BlueprintConfigurationEntry("core-site", "fs.defaultFS", "wasb://cloudbreak@dduihoab6jt1jl.cloudapp.net"));
         configurationEntries.add(new BlueprintConfigurationEntry("core-site", "io.serializations", "org.apache.hadoop.io.serializer.WritableSerialization"));
-        String result = underTest.addConfigEntries(testBlueprint, configurationEntries, false);
+        String result = underTest.get(testBlueprint).addConfigEntries(configurationEntries, false).asText();
 
         String configValue1 = JsonUtil.readTree(result).findPath("core-site").path("properties").path("fs.defaultFS").textValue();
         Assert.assertEquals("hdfs://%HOSTGROUP::host_group_master_1%:8020", configValue1);
@@ -171,11 +172,11 @@ public class JacksonBlueprintProcessorTest {
 
     @Test
     public void testAddConfigEntriesBehavesCorrectlyWhenThereIsNoConfigurationsNode() throws Exception {
-        String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints/test-bp-without-config-block.bp");
+        String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints-jackson/test-bp-without-config-block.bp");
         List<BlueprintConfigurationEntry> configurationEntries = new ArrayList<>();
         configurationEntries.add(new BlueprintConfigurationEntry("core-site", "fs.defaultFS", "wasb://cloudbreak@dduihoab6jt1jl.cloudapp.net"));
         configurationEntries.add(new BlueprintConfigurationEntry("core-site", "io.serializations", "org.apache.hadoop.io.serializer.WritableSerialization"));
-        String result = underTest.addConfigEntries(testBlueprint, configurationEntries, false);
+        String result = underTest.get(testBlueprint).addConfigEntries(configurationEntries, false).asText();
 
         String configValue1 = JsonUtil.readTree(result).findPath("core-site").path("fs.defaultFS").textValue();
         Assert.assertEquals("wasb://cloudbreak@dduihoab6jt1jl.cloudapp.net", configValue1);
@@ -186,25 +187,25 @@ public class JacksonBlueprintProcessorTest {
 
     @Test
     public void testRemoveComponentFromBlueprint() throws Exception {
-        String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints/test-bp-without-config-block.bp");
-        String result = underTest.removeComponentFromBlueprint("NAGIOS_SERVER", testBlueprint);
+        String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints-jackson/test-bp-without-config-block.bp");
+        String result = underTest.get(testBlueprint).removeComponentFromBlueprint("NAGIOS_SERVER").asText();
         Assert.assertFalse(result.contains("NAGIOS_SERVER"));
     }
 
     @Test
     public void testAddConfigEntriesThrowsExceptionIfBlueprintCannotBeParsed() throws Exception {
-        String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints/test-bp-invalid.bp");
+        String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints-jackson/test-bp-invalid.bp");
         List<BlueprintConfigurationEntry> configurationEntries = new ArrayList<>();
         thrown.expect(BlueprintProcessingException.class);
         //thrown.expect(JsonParseException.class);
-        thrown.expectMessage("Failed to add config entries to original validation.");
-        underTest.addConfigEntries(testBlueprint, configurationEntries, true);
+        thrown.expectMessage("Failed to parse blueprint text.");
+        underTest.get(testBlueprint).addConfigEntries(configurationEntries, true);
     }
 
     @Test
     public void testGetServicesInHostgroup() throws Exception {
-        String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints/test-bp-without-config-block.bp");
-        Set<String> result = underTest.getComponentsInHostGroup(testBlueprint, "slave_1");
+        String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints-jackson/test-bp-without-config-block.bp");
+        Set<String> result = underTest.get(testBlueprint).getComponentsInHostGroup("slave_1");
 
         Set<String> expected = new HashSet<>();
         expected.add("DATANODE");
@@ -219,27 +220,27 @@ public class JacksonBlueprintProcessorTest {
 
     @Test
     public void testGetServicesInHostgroupThrowsExceptionIfBlueprintCannotBeParsed() throws Exception {
-        String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints/test-bp-invalid.bp");
+        String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints-jackson/test-bp-invalid.bp");
         thrown.expect(BlueprintProcessingException.class);
-        thrown.expectMessage("Failed to get components for hostgroup 'slave_1' from validation.");
-        underTest.getComponentsInHostGroup(testBlueprint, "slave_1");
+        thrown.expectMessage("Failed to parse blueprint text.");
+        underTest.get(testBlueprint).getComponentsInHostGroup("slave_1");
     }
 
     @Test
     public void testAddComponentToHostgroupsIfComponentIsMissing() throws Exception {
-        String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints/test-bp-without-config-block.bp");
+        String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints-jackson/test-bp-without-config-block.bp");
 
-        String result = underTest.addComponentToHostgroups("HST_SERVER", Collections.singletonList("slave_1"), testBlueprint);
+        String result = underTest.get(testBlueprint).addComponentToHostgroups("HST_SERVER", Collections.singletonList("slave_1")).asText();
 
-        Assert.assertTrue(underTest.componentExistsInBlueprint("HST_SERVER", result));
+        Assert.assertTrue(underTest.get(result).componentExistsInBlueprint("HST_SERVER"));
     }
 
     @Test
     public void testAddComponentToHostgroupsShouldAddComponentToEverySpecifiedHostGroupIfComponentIsMissing() throws Exception {
-        String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints/test-bp-without-config-block.bp");
+        String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints-jackson/test-bp-without-config-block.bp");
         String componentToAdd = "HST_AGENT";
 
-        String result = underTest.addComponentToHostgroups(componentToAdd, Arrays.asList("master", "slave_1"), testBlueprint);
+        String result = underTest.get(testBlueprint).addComponentToHostgroups(componentToAdd, Arrays.asList("master", "slave_1")).asText();
 
         Iterator<JsonNode> hostGroups = JsonUtil.readTree(result).path(HOST_GROUPS_NODE).elements();
         while (hostGroups.hasNext()) {
@@ -250,87 +251,94 @@ public class JacksonBlueprintProcessorTest {
 
     @Test
     public void testAddComponentToHostgroupsShouldNotModifyBlueprintIfComponentExists() throws Exception {
-        String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints/test-bp-without-config-block.bp");
+        String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints-jackson/test-bp-without-config-block.bp");
+
         String componentToAdd = "NAMENODE";
 
-        String result = underTest.addComponentToHostgroups(componentToAdd, Collections.singletonList("master"), testBlueprint);
+        String result = underTest.get(testBlueprint).addComponentToHostgroups(componentToAdd, Collections.singletonList("master")).asText();
 
         Assert.assertEquals(testBlueprint.replaceAll("\\s", ""), result);
     }
 
     @Test
     public void addToBlueprint() throws Exception {
-        String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints/test-bp-zeppelin-shiro.bp");
+        String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints-jackson/test-bp-zeppelin-shiro.bp");
+
         List<BlueprintConfigurationEntry> configs = new ArrayList<>();
         configs.add(new BlueprintConfigurationEntry("zeppelin-env", "shiro_ini_content", "changed"));
-        String result = underTest.addConfigEntries(testBlueprint, configs, false);
+        String result = underTest.get(testBlueprint).addConfigEntries(configs, false).asText();
 
         Assert.assertEquals(testBlueprint.replaceAll("\\s", ""), result);
     }
 
     @Test
     public void addSettingsToBlueprintWhenNoSettingsBlock() throws Exception {
-        String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints/bp-without-settings-array.bp");
-        String res = FileReaderUtils.readFileFromClasspath("blueprints/settings-bp-result.bp");
+        String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints-jackson/bp-without-settings-array.bp");
+        String res = FileReaderUtils.readFileFromClasspath("blueprints-jackson/settings-bp-result.bp");
 
         List<BlueprintConfigurationEntry> configs = new ArrayList<>();
         configs.add(new BlueprintConfigurationEntry("recovery_settings", "recovery_enabled", "true"));
         configs.add(new BlueprintConfigurationEntry("cluster-env", "recovery_enabled", "true"));
         configs.add(new BlueprintConfigurationEntry("cluster-env", "recovery_type", "AUTO_START"));
-        String result = underTest.addSettingsEntries(testBlueprint, configs, false);
+        String result = underTest.get(testBlueprint).addSettingsEntries(configs, false).asText();
 
         Assert.assertEquals(res.replaceAll("\\s", ""), result.replaceAll("\\s", ""));
     }
 
     @Test
     public void addSettingsToBlueprintWhenSettingsBlockExists() throws Exception {
-        String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints/bp-with-settings-array.bp");
-        String res = FileReaderUtils.readFileFromClasspath("blueprints/with-settings-bp-result.bp");
+        String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints-jackson/bp-with-settings-array.bp");
+        String res = FileReaderUtils.readFileFromClasspath("blueprints-jackson/with-settings-bp-result.bp");
+
 
         List<BlueprintConfigurationEntry> configs = new ArrayList<>();
         configs.add(new BlueprintConfigurationEntry("recovery_settings", "recovery_enabled", "true"));
         configs.add(new BlueprintConfigurationEntry("cluster-env", "recovery_enabled", "true"));
         configs.add(new BlueprintConfigurationEntry("cluster-env", "recovery_type", "AUTO_START"));
-        String result = underTest.addSettingsEntries(testBlueprint, configs, false);
+        String result = underTest.get(testBlueprint).addSettingsEntries(configs, false).asText();
 
         Assert.assertEquals(res.replaceAll("\\s", ""), result.replaceAll("\\s", ""));
     }
 
     @Test
     public void testHiveDbConfigExists() throws Exception {
-        String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints/test-bp-existing-hive-db.bp");
-        boolean result = underTest.hivaDatabaseConfigurationExistsInBlueprint(testBlueprint);
+        String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints-jackson/test-bp-existing-hive-db.bp");
+
+        boolean result = underTest.get(testBlueprint).hiveDatabaseConfigurationExistsInBlueprint();
         Assert.assertTrue(result);
     }
 
     @Test
     public void testHiveDbConfigExistsWithoutConfigBlock() throws Exception {
-        String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints/test-bp-without-config-block.bp");
-        boolean result = underTest.hivaDatabaseConfigurationExistsInBlueprint(testBlueprint);
+        String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints-jackson/test-bp-without-config-block.bp");
+
+        boolean result = underTest.get(testBlueprint).hiveDatabaseConfigurationExistsInBlueprint();
         Assert.assertFalse(result);
     }
 
     @Test
     public void testHiveDbConfigExistsWithEmptyConfigBlock() throws Exception {
-        String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints/test-bp-with-empty-config-block.bp");
-        boolean result = underTest.hivaDatabaseConfigurationExistsInBlueprint(testBlueprint);
+        String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints-jackson/test-bp-with-empty-config-block.bp");
+
+        boolean result = underTest.get(testBlueprint).hiveDatabaseConfigurationExistsInBlueprint();
         Assert.assertFalse(result);
     }
 
     @Test
     public void testHiveDbConfigExistsMissingConfig() throws Exception {
-        String originalBlueprint = FileReaderUtils.readFileFromClasspath("blueprints/test-bp-existing-hive-db.bp");
-        String testBlueprint = skipLine(originalBlueprint, JacksonBlueprintProcessor.JAVAX_JDO_OPTION_CONNECTION_DRIVER_NAME);
-        boolean result = underTest.hivaDatabaseConfigurationExistsInBlueprint(testBlueprint);
+        String originalBlueprint = FileReaderUtils.readFileFromClasspath("blueprints-jackson/test-bp-existing-hive-db.bp");
+
+        String testBlueprint = skipLine(originalBlueprint, BlueprintTextProcessor.JAVAX_JDO_OPTION_CONNECTION_DRIVER_NAME);
+        boolean result = underTest.get(testBlueprint).hiveDatabaseConfigurationExistsInBlueprint();
         Assert.assertFalse(result);
-        testBlueprint = skipLine(originalBlueprint, JacksonBlueprintProcessor.JAVAX_JDO_OPTION_CONNECTION_PASSWORD);
-        result = underTest.hivaDatabaseConfigurationExistsInBlueprint(testBlueprint);
+        testBlueprint = skipLine(originalBlueprint, BlueprintTextProcessor.JAVAX_JDO_OPTION_CONNECTION_PASSWORD);
+        result = underTest.get(testBlueprint).hiveDatabaseConfigurationExistsInBlueprint();
         Assert.assertFalse(result);
-        testBlueprint = skipLine(originalBlueprint, JacksonBlueprintProcessor.JAVAX_JDO_OPTION_CONNECTION_URL);
-        result = underTest.hivaDatabaseConfigurationExistsInBlueprint(testBlueprint);
+        testBlueprint = skipLine(originalBlueprint, BlueprintTextProcessor.JAVAX_JDO_OPTION_CONNECTION_URL);
+        result = underTest.get(testBlueprint).hiveDatabaseConfigurationExistsInBlueprint();
         Assert.assertFalse(result);
-        testBlueprint = skipLine(originalBlueprint, JacksonBlueprintProcessor.JAVAX_JDO_OPTION_CONNECTION_USER_NAME);
-        result = underTest.hivaDatabaseConfigurationExistsInBlueprint(testBlueprint);
+        testBlueprint = skipLine(originalBlueprint, BlueprintTextProcessor.JAVAX_JDO_OPTION_CONNECTION_USER_NAME);
+        result = underTest.get(testBlueprint).hiveDatabaseConfigurationExistsInBlueprint();
         Assert.assertFalse(result);
     }
 

@@ -1,10 +1,6 @@
 package com.sequenceiq.cloudbreak.blueprint.hadoop;
 
-import static com.sequenceiq.cloudbreak.blueprint.HostgroupEntry.hostgroupEntry;
-
-import java.io.IOException;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -12,46 +8,40 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.blueprint.BlueprintComponentConfigProvider;
-import com.sequenceiq.cloudbreak.blueprint.BlueprintConfigurationEntry;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintPreparationObject;
+import com.sequenceiq.cloudbreak.blueprint.BlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.blueprint.ConfigService;
-import com.sequenceiq.cloudbreak.blueprint.HdfClusterLocator;
-import com.sequenceiq.cloudbreak.blueprint.HostgroupEntry;
-import com.sequenceiq.cloudbreak.blueprint.template.views.LdapView;
-import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessingException;
-import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessor;
-import com.sequenceiq.cloudbreak.blueprint.ConfigProperty;
-import com.sequenceiq.cloudbreak.blueprint.utils.StackInfoService;
-import com.sequenceiq.cloudbreak.blueprint.HostgroupEntry;
-import com.sequenceiq.cloudbreak.blueprint.ServiceConfig;
-import com.sequenceiq.cloudbreak.blueprint.VolumeUtils;
-import com.sequenceiq.cloudbreak.domain.HostGroup;
+import com.sequenceiq.cloudbreak.blueprint.configuration.HostgroupConfigurations;
+import com.sequenceiq.cloudbreak.blueprint.configuration.SiteConfigurations;
+import com.sequenceiq.cloudbreak.blueprint.template.views.HostgroupView;
 
 @Service
 public class HadoopConfigurationService implements BlueprintComponentConfigProvider {
 
     @Inject
-    private HdfClusterLocator hdfClusterLocator;
-
-    @Inject
     private ConfigService configService;
 
     @Override
-    public String configure(BlueprintPreparationObject source, String blueprintText) throws IOException {
-        Map<String, Map<String, Map<String, String>>> hostGroupConfig = configService.getHostGroupConfiguration(blueprintText, source.getHostGroups());
-        blueprintText = source.getAmbariClient().extendBlueprintHostGroupConfiguration(blueprintText, hostGroupConfig);
+    public BlueprintTextProcessor customTextManipulation(BlueprintPreparationObject source, BlueprintTextProcessor blueprintProcessor) {
+        Map<String, Map<String, Map<String, String>>> hostGroupConfig =
+                configService.getHostGroupConfiguration(blueprintProcessor, source.getHostgroupViews());
+        HostgroupConfigurations hostgroupConfigurations = HostgroupConfigurations.fromMap(hostGroupConfig);
+        blueprintProcessor.extendBlueprintHostGroupConfiguration(hostgroupConfigurations, false);
 
-        Map<String, Map<String, String>> globalConfig = getGlobalConfiguration(blueprintText, source.getHostGroups());
-        return source.getAmbariClient().extendBlueprintGlobalConfiguration(blueprintText, globalConfig);
+        Map<String, Map<String, String>> globalConfig = getGlobalConfiguration(blueprintProcessor, source.getHostgroupViews());
+        SiteConfigurations siteConfigurations = SiteConfigurations.fromMap(globalConfig);
+        blueprintProcessor.extendBlueprintGlobalConfiguration(siteConfigurations, false);
+
+        return blueprintProcessor;
     }
 
     @Override
-    public boolean additionalCriteria(BlueprintPreparationObject source, String blueprintText) {
-        return !hdfClusterLocator.hdfCluster(source.getStackRepoDetails());
+    public boolean additionalCriteria(BlueprintPreparationObject source, String blueprintProcessor) {
+        return !source.getBlueprintView().isHdf();
     }
 
-    private Map<String, Map<String, String>> getGlobalConfiguration(String blueprintText, Collection<HostGroup> hostGroups) {
-        Map<String, Map<String, String>> config = configService.getComponentsByHostGroup(blueprintText, hostGroups);
+    private Map<String, Map<String, String>> getGlobalConfiguration(BlueprintTextProcessor blueprintProcessor, Collection<HostgroupView> hostGroups) {
+        Map<String, Map<String, String>> config = configService.getComponentsByHostGroup(blueprintProcessor, hostGroups);
         configService.collectBlueprintConfigIfNeed(config);
         return config;
     }

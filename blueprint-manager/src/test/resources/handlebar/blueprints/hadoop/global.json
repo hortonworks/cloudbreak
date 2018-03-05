@@ -12,7 +12,7 @@
     "hadoop.proxyuser.hbase.hosts": "*",
     "hadoop.proxyuser.hcat.hosts": "*",
     "hadoop.proxyuser.hive.hosts": "*",
-    "hadoop.proxyuser.oozie.hosts": "*",
+    "hadoop.proxyuser.oozie.hosts": "*"
   },
   "webhcat-site": {
     "webhcat.proxyuser.root.groups": "*",
@@ -20,12 +20,5 @@
   },
   "hbase-site": {
     "zookeeper.recovery.retry": "10"
-  },
-  "cluster-env": {
-    "recovery_enabled": "true",
-    "recovery_type": "AUTO_START"
-  },
-  "recovery_settings": {
-    "recovery_enabled": "true"
   }
 }

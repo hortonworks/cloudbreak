@@ -16,6 +16,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v2.StackV2Endpoint;
 import com.sequenceiq.cloudbreak.api.model.AmbariAddressJson;
 import com.sequenceiq.cloudbreak.api.model.AutoscaleStackResponse;
 import com.sequenceiq.cloudbreak.api.model.CertificateResponse;
+import com.sequenceiq.cloudbreak.api.model.GeneratedBlueprintResponse;
 import com.sequenceiq.cloudbreak.api.model.PlatformVariantsJson;
 import com.sequenceiq.cloudbreak.api.model.ReinstallRequestV2;
 import com.sequenceiq.cloudbreak.api.model.StackRequest;
@@ -27,6 +28,8 @@ import com.sequenceiq.cloudbreak.api.model.UpdateClusterJson;
 import com.sequenceiq.cloudbreak.api.model.UpdateStackJson;
 import com.sequenceiq.cloudbreak.api.model.UserNamePasswordJson;
 import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
+import com.sequenceiq.cloudbreak.blueprint.BlueprintPreparationObject;
+import com.sequenceiq.cloudbreak.blueprint.CentralBlueprintUpdater;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterCache;
@@ -55,6 +58,9 @@ public class StackV2Controller extends NotificationController implements StackV2
 
     @Autowired
     private CloudParameterCache cloudParameterCache;
+
+    @Autowired
+    private CentralBlueprintUpdater centralBlueprintUpdater;
 
     @Override
     public Set<StackResponse> getPrivates() {
@@ -225,5 +231,12 @@ public class StackV2Controller extends NotificationController implements StackV2
     @Override
     public StackResponse postPublic(StackV2Request stackRequest) throws Exception {
         return stackCommonService.postPublic(conversionService.convert(stackRequest, StackRequest.class));
+    }
+
+    @Override
+    public GeneratedBlueprintResponse postStackForBlueprint(StackV2Request stackRequest) throws Exception {
+        BlueprintPreparationObject blueprintPreparationObject = conversionService.convert(stackRequest, BlueprintPreparationObject.class);
+        String blueprintText = centralBlueprintUpdater.getBlueprintText(blueprintPreparationObject);
+        return new GeneratedBlueprintResponse(blueprintText);
     }
 }
