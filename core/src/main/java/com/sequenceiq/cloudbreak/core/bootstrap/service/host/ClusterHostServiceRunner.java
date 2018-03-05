@@ -56,6 +56,7 @@ import com.sequenceiq.cloudbreak.service.SmartSenseCredentialConfigService;
 import com.sequenceiq.cloudbreak.service.blueprint.ComponentLocatorService;
 import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariSecurityConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.HiveConfigProvider;
+import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigProvider;
 
 @Component
 public class ClusterHostServiceRunner {
@@ -95,6 +96,9 @@ public class ClusterHostServiceRunner {
 
     @Inject
     private HiveConfigProvider hiveConfigProvider;
+
+    @Inject
+    private ProxyConfigProvider proxyConfigProvider;
 
     @Transactional
     public void runAmbariServices(Stack stack, Cluster cluster) throws CloudbreakException {
@@ -163,6 +167,8 @@ public class ClusterHostServiceRunner {
         }
 
         hiveConfigProvider.decorateServicePillarWithPostgresIfNeeded(servicePillar, stack, cluster);
+
+        proxyConfigProvider.decoratePillarWithProxyDataIfNeeded(servicePillar, cluster);
 
         return new SaltConfig(servicePillar, createGrainProperties(gatewayConfigs));
     }
