@@ -28,9 +28,18 @@ public class AmbariClientProvider {
             if (proxyConfig.isUseProxyForClusterConnection()) {
                 String proxyHost = proxyConfig.getHttpsProxyHost();
                 int proxyPort = proxyConfig.getHttpsProxyPort();
-                LOGGER.info("Create Ambari client to connect to {}:{}, through proxy: {}:{}", cluster.getHost(), cluster.getPort(), proxyHost, proxyPort);
-                return new AmbariClient(cluster.getHost(), cluster.getPort(), cluster.getAmbariUser(), cluster.getAmbariPass(), tlsConfig.getClientCert(),
-                    tlsConfig.getClientKey(), tlsConfig.getServerCert(), proxyHost, proxyPort);
+                if (proxyConfig.isProxyAuthRequired()) {
+                    String proxyUser = proxyConfig.getHttpsProxyUser();
+                    String proxyPassword = proxyConfig.getHttpsProxyPassword();
+                    LOGGER.info("Create Ambari client to connect to {}:{}, through proxy: {}:{} with proxy user: {}",
+                        cluster.getHost(), cluster.getPort(), proxyHost, proxyPort, proxyUser);
+                    return new AmbariClient(cluster.getHost(), cluster.getPort(), cluster.getAmbariUser(), cluster.getAmbariPass(), tlsConfig.getClientCert(),
+                        tlsConfig.getClientKey(), tlsConfig.getServerCert(), proxyHost, proxyPort, proxyUser, proxyPassword);
+                } else {
+                    LOGGER.info("Create Ambari client to connect to {}:{}, through proxy: {}:{}", cluster.getHost(), cluster.getPort(), proxyHost, proxyPort);
+                    return new AmbariClient(cluster.getHost(), cluster.getPort(), cluster.getAmbariUser(), cluster.getAmbariPass(), tlsConfig.getClientCert(),
+                        tlsConfig.getClientKey(), tlsConfig.getServerCert(), proxyHost, proxyPort);
+                }
             } else {
                 LOGGER.info("Create Ambari client to connect to {}:{}", cluster.getHost(), cluster.getPort());
                 return new AmbariClient(cluster.getHost(), cluster.getPort(), cluster.getAmbariUser(), cluster.getAmbariPass(),
@@ -45,10 +54,19 @@ public class AmbariClientProvider {
         if (proxyConfig.isUseProxyForClusterConnection()) {
             String proxyHost = proxyConfig.getHttpsProxyHost();
             int proxyPort = proxyConfig.getHttpsProxyPort();
-            LOGGER.info("Create Ambari client to connect to non Cloudbreak cluster {}:{}, through proxy: {}:{}",
-                cluster.getHost(), cluster.getPort(), proxyHost, proxyPort);
-            return new AmbariClient(cluster.getHost(), cluster.getPort(), cluster.getAmbariUser(),
-                cluster.getAmbariPass(), null, null, null, proxyHost, proxyPort);
+            if (proxyConfig.isProxyAuthRequired()) {
+                String proxyUser = proxyConfig.getHttpsProxyUser();
+                String proxyPassword = proxyConfig.getHttpsProxyPassword();
+                LOGGER.info("Create Ambari client to connect to non Cloudbreak cluster {}:{}, through proxy: {}:{} with proxy user: {}",
+                    cluster.getHost(), cluster.getPort(), proxyHost, proxyPort, proxyUser);
+                return new AmbariClient(cluster.getHost(), cluster.getPort(), cluster.getAmbariUser(),
+                    cluster.getAmbariPass(), null, null, null, proxyHost, proxyPort, proxyUser, proxyPassword);
+            } else {
+                LOGGER.info("Create Ambari client to connect to non Cloudbreak cluster {}:{}, through proxy: {}:{}",
+                    cluster.getHost(), cluster.getPort(), proxyHost, proxyPort);
+                return new AmbariClient(cluster.getHost(), cluster.getPort(), cluster.getAmbariUser(),
+                    cluster.getAmbariPass(), null, null, null, proxyHost, proxyPort);
+            }
         } else {
             LOGGER.info("Create Ambari client to connect to non Cloudbreak cluster {}:{}", cluster.getHost(), cluster.getPort());
             return new AmbariClient(cluster.getHost(), cluster.getPort(), cluster.getAmbariUser(), cluster.getAmbariPass());
