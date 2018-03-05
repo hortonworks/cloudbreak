@@ -1,7 +1,7 @@
 {
   "master": {
     "type": "master",
-    "flavor": "Standard_D3_v2",
+    "flavor": "Standard_D12_v2",
     "cardinality": 1,
     "volumeType": "MAGNETIC",
     "volumeCount": 1,

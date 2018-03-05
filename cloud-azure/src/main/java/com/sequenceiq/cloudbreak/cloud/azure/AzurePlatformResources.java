@@ -56,7 +56,7 @@ public class AzurePlatformResources implements PlatformResources {
 
     private static final float NO_MB_PER_GB = 1024f;
 
-    @Value("${cb.azure.default.vmtype:Standard_D3_v2}")
+    @Value("${cb.azure.default.vmtype:Standard_D12_v2}")
     private String armVmDefault;
 
     @Value("${cb.arm.zone.parameter.default:North Europe}")
