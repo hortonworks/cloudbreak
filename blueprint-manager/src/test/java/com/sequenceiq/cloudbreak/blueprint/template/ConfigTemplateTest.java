@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.util.FileReaderUtils.readFileFromCustomP
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.Assert;
@@ -61,6 +62,23 @@ public class ConfigTemplateTest {
                         nifiConfigWhenHdfPresentedThenShouldReturnWithNifiConfig() },
                 { "blueprints/nifi/global.handlebars", "blueprints/nifi/global-without-hdf.json",
                         nifiConfigWhenHdfNotPresentedThenShouldReturnWithNotNifiConfig() },
+
+                { "blueprints/ranger/global.handlebars", "blueprints/ranger/global.json",
+                        objectWithoutEverything() },
+                { "blueprints/ranger/ldap.handlebars", "blueprints/ranger/ranger-with-ldap.json",
+                        ldapConfigWhenLdapPresentedThenShouldReturnWithLdapConfig() },
+                { "blueprints/ranger/ldap.handlebars", "blueprints/ranger/ranger-without-ldap.json",
+                        withoutLdapConfigWhenLdapNotPresentedThenShouldReturnWithoutLdapConfig() },
+
+                { "blueprints/yarn/global.handlebars", "blueprints/yarn/global-without-container.json",
+                        objectContainerExecutorIsFalseThenShouldReturnWithoutContainerConfigs() },
+                { "blueprints/yarn/global.handlebars", "blueprints/yarn/global-with-container.json",
+                        objectContainerExecutorIsTrueThenShouldReturnWithContainerConfigs() },
+
+                { "blueprints/zeppelin/global.handlebars", "blueprints/zeppelin/global-with-2_5.json",
+                        zeppelinWhenStackVersionIs25ThenShouldReturnWithZeppelinEnvConfigs() },
+                { "blueprints/zeppelin/global.handlebars", "blueprints/zeppelin/global-without-2_5.json",
+                        zeppelinWhenStackVersionIsNot25ThenShouldReturnWithZeppelinShiroIniConfigs() },
         });
     }
 
@@ -75,6 +93,38 @@ public class ConfigTemplateTest {
 
     public static Map<String, Object> objectWithoutEverything() {
         return new BlueprintTemplateModelContextBuilder()
+                .build();
+    }
+
+    public static Map<String, Object> zeppelinWhenStackVersionIsNot25ThenShouldReturnWithZeppelinShiroIniConfigs() {
+        Map<String, Object> properties = new HashMap<>();
+        properties.put("basics_zeppelin_shiro_ini_content", "testshiroini");
+
+        return new BlueprintTemplateModelContextBuilder()
+                .withStackVersion("2.6")
+                .withCustomProperties(properties)
+                .build();
+    }
+
+    public static Map<String, Object> zeppelinWhenStackVersionIs25ThenShouldReturnWithZeppelinEnvConfigs() {
+        Map<String, Object> properties = new HashMap<>();
+        properties.put("basics_zeppelin_shiro_ini_content", "testshiroini");
+
+        return new BlueprintTemplateModelContextBuilder()
+                .withStackVersion("2.5")
+                .withCustomProperties(properties)
+                .build();
+    }
+
+    public static Map<String, Object> objectContainerExecutorIsTrueThenShouldReturnWithContainerConfigs() {
+        return new BlueprintTemplateModelContextBuilder()
+                .withContainerExecutor(true)
+                .build();
+    }
+
+    public static Map<String, Object> objectContainerExecutorIsFalseThenShouldReturnWithoutContainerConfigs() {
+        return new BlueprintTemplateModelContextBuilder()
+                .withContainerExecutor(false)
                 .build();
     }
 

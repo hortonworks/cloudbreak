@@ -1,4 +1,5 @@
 {
+
   "nifi-ambari-ssl-config": {
     "content": "nifigtargets",
     "nifi.initial.admin.identity": "firstname"
@@ -7,4 +8,5 @@
     "metrics_grafana_username": "firstname",
     "metrics_grafana_password": "adminPassword"
   }
+
 }
