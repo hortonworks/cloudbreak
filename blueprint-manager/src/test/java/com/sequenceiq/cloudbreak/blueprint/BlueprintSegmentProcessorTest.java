@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.blueprint;
 import static com.sequenceiq.cloudbreak.blueprint.templates.ServiceName.serviceName;
 import static com.sequenceiq.cloudbreak.blueprint.templates.TemplateFiles.templateFiles;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyMap;
 import static org.mockito.Matchers.anySet;
 import static org.mockito.Matchers.anyString;
@@ -55,18 +56,18 @@ public class BlueprintSegmentProcessorTest {
 
         Map<ServiceName, TemplateFiles> serviceFiles = new HashMap<>();
         serviceFiles.put(serviceName("atlas"), templateFiles(
-                Lists.newArrayList("blueprints/atlas/ldap.json", "blueprints/atlas/services.json")));
+                Lists.newArrayList("handlebar/blueprints/atlas/atlas-with-ldap.json", "handlebar/blueprints/atlas/atlas-without-ldap.json")));
 
         when(blueprintSegmentReader.collectAllConfigFile()).thenReturn(configFiles);
         when(blueprintSegmentReader.collectAllServiceFile()).thenReturn(serviceFiles);
         when(blueprintProcessor.componentsExistsInBlueprint(anySet(), anyString())).thenReturn(true);
         when(blueprintTemplateProcessor.process(anyString(), any(BlueprintPreparationObject.class), anyMap())).thenReturn(expectedBlueprint);
-        when(blueprintProcessor.addConfigEntryStringToBlueprint(anyString(), anyString())).thenReturn(expectedBlueprint);
+        when(blueprintProcessor.addConfigEntryStringToBlueprint(anyString(), anyString(), anyBoolean())).thenReturn(expectedBlueprint);
     }
 
     @Test
     public void test() {
-        String process = underTest.process(object, expectedBlueprint);
+        String process = underTest.process(expectedBlueprint, object);
 
         Assert.assertEquals(expectedBlueprint, process);
 

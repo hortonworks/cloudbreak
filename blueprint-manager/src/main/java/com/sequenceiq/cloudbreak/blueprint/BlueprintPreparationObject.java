@@ -9,48 +9,49 @@ import java.util.Set;
 
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.blueprint.nifi.HdfConfigs;
-import com.sequenceiq.cloudbreak.blueprint.template.views.LdapView;
 import com.sequenceiq.cloudbreak.blueprint.templates.BlueprintStackInfo;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariDatabase;
-import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.common.model.OrchestratorType;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.Cluster;
+import com.sequenceiq.cloudbreak.domain.Gateway;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.Stack;
 
 public class BlueprintPreparationObject {
 
-    private Stack stack;
+    private final Stack stack;
 
-    private Cluster cluster;
+    private final Cluster cluster;
 
-    private Set<RDSConfig> rdsConfigs;
+    private final Gateway gateway;
 
-    private AmbariClient ambariClient;
+    private final Set<RDSConfig> rdsConfigs;
 
-    private Set<HostGroup> hostGroups;
+    private final AmbariClient ambariClient;
 
-    private StackRepoDetails stackRepoDetails;
+    private final Set<HostGroup> hostGroups;
 
-    private IdentityUser identityUser;
+    private final Optional<String> stackRepoDetailsHdpVersion;
 
-    private AmbariDatabase ambariDatabase;
+    private final String identityUserEmail;
 
-    private Optional<String> smartSenseSubscriptionId;
+    private final AmbariDatabase ambariDatabase;
 
-    private OrchestratorType orchestratorType;
+    private final Optional<String> smartSenseSubscriptionId;
 
-    private Map<String, List<String>> fqdns;
+    private final OrchestratorType orchestratorType;
 
-    private Optional<LdapView> ldapView;
+    private final Map<String, List<String>> fqdns;
 
-    private BlueprintStackInfo blueprintStackInfo;
+    private final Optional<LdapConfig> ldapConfig;
 
-    private HdfConfigs hdfConfigs;
+    private final BlueprintStackInfo blueprintStackInfo;
+
+    private final Optional<HdfConfigs> hdfConfigs;
 
     private BlueprintPreparationObject(BlueprintPreparationObject.Builder builder) {
         this.ambariClient = builder.ambariClient;
@@ -58,15 +59,16 @@ public class BlueprintPreparationObject {
         this.cluster = builder.cluster;
         this.rdsConfigs = builder.rdsConfigs;
         this.hostGroups = builder.hostGroups;
-        this.stackRepoDetails = builder.stackRepoDetails;
-        this.identityUser = builder.identityUser;
+        this.stackRepoDetailsHdpVersion = builder.stackRepoDetailsHdpVersion;
+        this.identityUserEmail = builder.identityUserEmail;
         this.ambariDatabase = builder.ambariDatabase;
         this.smartSenseSubscriptionId = builder.smartSenseSubscriptionId;
         this.orchestratorType = builder.orchestratorType;
         this.fqdns = builder.fqdns;
-        this.ldapView = builder.ldapView;
+        this.ldapConfig = builder.ldapConfig;
         this.blueprintStackInfo = builder.blueprintStackInfo;
         this.hdfConfigs = builder.hdfConfigs;
+        this.gateway = builder.gateway;
     }
 
     public Stack getStack() {
@@ -89,12 +91,12 @@ public class BlueprintPreparationObject {
         return hostGroups;
     }
 
-    public StackRepoDetails getStackRepoDetails() {
-        return stackRepoDetails;
+    public Optional<String> getStackRepoDetailsHdpVersion() {
+        return stackRepoDetailsHdpVersion;
     }
 
-    public IdentityUser getIdentityUser() {
-        return identityUser;
+    public String getIdentityUserEmail() {
+        return identityUserEmail;
     }
 
     public AmbariDatabase getAmbariDatabase() {
@@ -121,16 +123,20 @@ public class BlueprintPreparationObject {
         return fqdns;
     }
 
-    public Optional<LdapView> getLdapView() {
-        return ldapView;
+    public Optional<LdapConfig> getLdapConfig() {
+        return ldapConfig;
     }
 
     public BlueprintStackInfo getBlueprintStackInfo() {
         return blueprintStackInfo;
     }
 
-    public HdfConfigs getHdfConfigs() {
+    public Optional<HdfConfigs> getHdfConfigs() {
         return hdfConfigs;
+    }
+
+    public Gateway getGateway() {
+        return gateway;
     }
 
     public static class Builder {
@@ -145,9 +151,9 @@ public class BlueprintPreparationObject {
 
         private Set<HostGroup> hostGroups = new HashSet<>();
 
-        private StackRepoDetails stackRepoDetails;
+        private Optional<String> stackRepoDetailsHdpVersion = Optional.empty();
 
-        private IdentityUser identityUser;
+        private String identityUserEmail;
 
         private AmbariDatabase ambariDatabase;
 
@@ -157,11 +163,13 @@ public class BlueprintPreparationObject {
 
         private Map<String, List<String>> fqdns = new HashMap<>();
 
-        private Optional<LdapView> ldapView;
+        private Optional<LdapConfig> ldapConfig = Optional.empty();
 
         private BlueprintStackInfo blueprintStackInfo;
 
-        private HdfConfigs hdfConfigs = new HdfConfigs();
+        private Optional<HdfConfigs> hdfConfigs = Optional.empty();
+
+        private Gateway gateway;
 
         public static Builder builder() {
             return new Builder();
@@ -212,23 +220,28 @@ public class BlueprintPreparationObject {
             return this;
         }
 
-        public Builder withStackRepoDetails(StackRepoDetails stackRepoDetails) {
-            this.stackRepoDetails = stackRepoDetails;
+        public Builder withStackRepoDetailsHdpVersion(Optional<String> stackRepoDetailsHdpVersion) {
+            this.stackRepoDetailsHdpVersion = stackRepoDetailsHdpVersion;
             return this;
         }
 
-        public Builder withIdentityUser(IdentityUser identityUser) {
-            this.identityUser = identityUser;
+        public Builder withIdentityUserEmail(String identityUserEmail) {
+            this.identityUserEmail = identityUserEmail;
             return this;
         }
 
-        public Builder withLdapView(Optional<LdapView> ldapView) {
-            this.ldapView = ldapView;
+        public Builder withLdapConfig(Optional<LdapConfig> ldapConfig) {
+            this.ldapConfig = ldapConfig;
             return this;
         }
 
-        public Builder withHdfConfigs(HdfConfigs hdfConfigs) {
+        public Builder withHdfConfigs(Optional<HdfConfigs> hdfConfigs) {
             this.hdfConfigs = hdfConfigs;
+            return this;
+        }
+
+        public Builder withGateway(Gateway gateway) {
+            this.gateway = gateway;
             return this;
         }
 

@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.converter.v2;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -12,8 +11,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.blueprint.BlueprintPreparationObject;
+import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessingException;
 import com.sequenceiq.cloudbreak.blueprint.nifi.HdfConfigProvider;
-import com.sequenceiq.cloudbreak.blueprint.template.views.LdapView;
+import com.sequenceiq.cloudbreak.blueprint.nifi.HdfConfigs;
 import com.sequenceiq.cloudbreak.blueprint.utils.StackInfoService;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.common.service.user.UserFilterField;
@@ -75,7 +75,9 @@ public class StackToBlueprintPreparationObjectConverter extends AbstractConversi
             Cluster cluster = source.getCluster();
             LdapConfig ldapConfig = cluster.getLdapConfig();
             StackRepoDetails hdpRepo = clusterComponentConfigProvider.getHDPRepo(cluster.getId());
+            Optional<String> stackRepoDetailsHdpVersion = hdpRepo != null ? Optional.ofNullable(hdpRepo.getHdpVersion()) : Optional.empty();
             Map<String, List<String>> fqdns = ambariFqdnCollector.collectFqdns(source);
+            HdfConfigs hdfConfigs = hdfConfigProvider.nodeIdentities(cluster.getHostGroups(), fqdns, cluster.getBlueprint().getBlueprintText());
 
             return BlueprintPreparationObject.Builder.builder()
                     .withStack(source)
@@ -83,19 +85,20 @@ public class StackToBlueprintPreparationObjectConverter extends AbstractConversi
                     .withAmbariClient(clientFactory.getAmbariClient(source, cluster))
                     .withRdsConfigs(hiveConfigProvider.createPostgresRdsConfigIfNeeded(source, cluster))
                     .withHostgroups(hostGroupService.getByCluster(cluster.getId()))
-                    .withStackRepoDetails(hdpRepo)
-                    .withIdentityUser(userDetailsService.getDetails(cluster.getOwner(), UserFilterField.USERID))
+                    .withGateway(cluster.getGateway())
+                    .withStackRepoDetailsHdpVersion(stackRepoDetailsHdpVersion)
+                    .withIdentityUserEmail(userDetailsService.getDetails(cluster.getOwner(), UserFilterField.USERID).getUsername())
                     .withAmbariDatabase(clusterComponentConfigProvider.getAmbariDatabase(cluster.getId()))
                     .withOrchestratorType(orchestratorTypeResolver.resolveType(source.getOrchestrator()))
                     .withFqdns(fqdns)
                     .withBlueprintStackInfo(stackInfoService.blueprintStackInfo(cluster.getBlueprint().getBlueprintText()))
-                    .withSmartSenseSubscriptionId(aDefault.isPresent() ? Optional.of(aDefault.get().getSubscriptionId()) : Optional.empty())
-                    .withLdapView(ldapConfig == null ? Optional.empty() : Optional.of(new LdapView(ldapConfig)))
-                    .withHdfConfigs(hdfConfigProvider.nodeIdentities(cluster.getHostGroups(), fqdns, cluster.getBlueprint().getBlueprintText()))
+                    .withSmartSenseSubscriptionId(aDefault.isPresent() ? Optional.ofNullable(aDefault.get().getSubscriptionId()) : Optional.empty())
+                    .withLdapConfig(Optional.ofNullable(ldapConfig))
+                    .withHdfConfigs(Optional.of(hdfConfigs))
                     .build();
         } catch (CloudbreakException e) {
             throw new CloudbreakServiceException(e.getMessage(), e);
-        } catch (IOException e) {
+        } catch (BlueprintProcessingException e) {
             throw new CloudbreakServiceException(e.getMessage(), e);
         }
     }

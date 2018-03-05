@@ -8,9 +8,6 @@ public class HdfConfigs {
         this.nodeEntities = nodeEntities;
     }
 
-    public HdfConfigs() {
-    }
-
     public String getNodeEntities() {
         return nodeEntities;
     }

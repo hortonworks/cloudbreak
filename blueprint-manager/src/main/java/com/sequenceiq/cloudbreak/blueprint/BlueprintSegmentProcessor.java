@@ -39,7 +39,7 @@ public class BlueprintSegmentProcessor {
     @Inject
     private BlueprintProcessor blueprintProcessor;
 
-    public String process(BlueprintPreparationObject source, String blueprintText) {
+    public String process(String blueprintText, BlueprintPreparationObject source) {
         Map<String, Object> customProperties = new HashMap<>();
         AtomicReference<String> resultBlueprint = new AtomicReference<>(blueprintText);
 
@@ -50,7 +50,7 @@ public class BlueprintSegmentProcessor {
 
         collectContents(blueprintSegmentReader.collectAllServiceFile(), resultBlueprint.get(), file -> {
             String serviceContent = prepareContent(file, source, customProperties);
-            resultBlueprint.set(blueprintProcessor.addConfigEntryStringToBlueprint(serviceContent, resultBlueprint.get()));
+            resultBlueprint.set(blueprintProcessor.addConfigEntryStringToBlueprint(serviceContent, resultBlueprint.get(), false));
         });
         return resultBlueprint.get();
     }

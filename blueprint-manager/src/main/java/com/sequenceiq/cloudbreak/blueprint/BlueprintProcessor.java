@@ -4,6 +4,10 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Predicate;
+
+import com.sequenceiq.cloudbreak.blueprint.configuration.HostgroupConfigurations;
+import com.sequenceiq.cloudbreak.blueprint.configuration.SiteConfigurations;
 
 public interface BlueprintProcessor {
 
@@ -13,13 +17,13 @@ public interface BlueprintProcessor {
 
     Set<String> getComponentsInHostGroup(String blueprintText, String hostGroup);
 
-    String extendBlueprintHostGroupConfiguration(String blueprintText, Map<String, Map<String, Map<String, String>>> hostGroupConfig);
+    String extendBlueprintHostGroupConfiguration(String blueprintText, HostgroupConfigurations hostGroupConfig);
 
-    String extendBlueprintHostGroupConfiguration(String blueprintText, Map<String, Map<String, Map<String, String>>> hostGroupConfig, boolean forced);
+    String extendBlueprintHostGroupConfiguration(String blueprintText, HostgroupConfigurations hostGroupConfig, boolean forced);
 
-    String extendBlueprintGlobalConfiguration(String blueprintText, Map<String, Map<String, String>> globalConfig);
+    String extendBlueprintGlobalConfiguration(String blueprintText, SiteConfigurations globalConfig);
 
-    String extendBlueprintGlobalConfiguration(String blueprintText, Map<String, Map<String, String>> globalConfig, boolean forced);
+    String extendBlueprintGlobalConfiguration(String blueprintText, SiteConfigurations globalConfig, boolean forced);
 
     Set<String> getHostGroupsWithComponent(String blueprintText, String component);
 
@@ -35,7 +39,13 @@ public interface BlueprintProcessor {
 
     Map<String, Set<String>> getComponentsByHostGroup(String blueprintText);
 
-    String addConfigEntryStringToBlueprint(String config, String blueprintText);
+    String addConfigEntryStringToBlueprint(String blueprintText, String config, boolean forced);
+
+    String addSettingsEntryStringToBlueprint(String blueprintText, String config, boolean forced);
+
+    String addComponentToHostgroups(String blueprintText, String component, Predicate<String> addToHostgroup);
 
     boolean hivaDatabaseConfigurationExistsInBlueprint(String blueprintText);
+
+    String setSecurityType(String blueprintText, String kerberos);
 }

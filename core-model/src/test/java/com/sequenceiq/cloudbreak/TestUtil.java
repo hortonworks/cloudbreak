@@ -26,6 +26,7 @@ import com.sequenceiq.cloudbreak.api.model.AdjustmentType;
 import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.model.DirectoryType;
 import com.sequenceiq.cloudbreak.api.model.ExecutorType;
+import com.sequenceiq.cloudbreak.api.model.GatewayType;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.model.InstanceMetadataType;
 import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
@@ -616,6 +617,19 @@ public class TestUtil {
         rdsConfig.setConnectionURL("jdbc:postgresql://10.1.1.1:5432/" + rdsType.name().toLowerCase());
         rdsConfig.setType(rdsType.name());
         return rdsConfig;
+    }
+
+    public static Gateway gateway() {
+        Gateway gateway  = new Gateway();
+        gateway.setEnableGateway(true);
+        gateway.setTopologyName("topology");
+        gateway.setPath("/path");
+        gateway.setSsoProvider("simple");
+        gateway.setGatewayType(GatewayType.CENTRAL);
+        gateway.setSignCert("signcert");
+        gateway.setSignKey("signkey");
+        gateway.setTokenCert("tokencert");
+        return gateway;
     }
 
     public static Stack setSpotInstances(Stack stack) {

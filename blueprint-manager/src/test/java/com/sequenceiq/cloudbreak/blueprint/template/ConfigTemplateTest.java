@@ -143,6 +143,7 @@ public class ConfigTemplateTest {
     public static Map<String, Object> ldapConfigWhenLdapPresentedThenShouldReturnWithLdapConfig() {
         return new BlueprintTemplateModelContextBuilder()
                 .withLdap(TestUtil.ldapConfig())
+                .withGateway(TestUtil.gateway())
                 .build();
     }
 

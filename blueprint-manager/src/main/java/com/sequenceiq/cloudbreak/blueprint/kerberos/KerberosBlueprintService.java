@@ -1,7 +1,9 @@
 package com.sequenceiq.cloudbreak.blueprint.kerberos;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -10,11 +12,16 @@ import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.google.common.collect.ImmutableMap;
 import com.sequenceiq.ambari.client.services.KerberosService;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintComponentConfigProvider;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintPreparationObject;
+import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessingException;
+import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessor;
+import com.sequenceiq.cloudbreak.blueprint.configuration.SiteConfigurations;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
+import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 @Service
@@ -25,6 +32,9 @@ public class KerberosBlueprintService implements BlueprintComponentConfigProvide
     private static final String DOMAIN = "node.dc1.consul";
 
     private static final Integer KERBEROS_DB_PROPAGATION_PORT = 6318;
+
+    @Inject
+    private BlueprintProcessor blueprintProcessor;
 
     @Inject
     private KerberosDetailService kerberosDetailService;
@@ -61,11 +71,52 @@ public class KerberosBlueprintService implements BlueprintComponentConfigProvide
 
     }
 
+    public String extendBlueprintWithKerberos(String blueprint, String kdcType, String kdcHosts, String kdcAdminHost, String realm, String domains,
+            String ldapUrl, String containerDn, Boolean useUdp, Integer kpropPort, boolean forced) {
+        try {
+            String krb5Config = FileReaderUtils.readFileFromClasspath("kerberos/krb5-conf-template.conf");
+            krb5Config = krb5Config.replaceAll("udp_preference_limit_content", useUdp ? "0" : "1");
+            if (kpropPort != null) {
+                krb5Config = krb5Config.replaceAll("iprop_enable_content", "true");
+                krb5Config = krb5Config.replaceAll("iprop_port_content", kpropPort.toString());
+            } else {
+                krb5Config = krb5Config.replaceAll("iprop_enable_content", "false");
+                krb5Config = krb5Config.replaceAll("iprop_port_content", "8888");
+            }
+            SiteConfigurations configs = SiteConfigurations.getEmptyConfiguration();
+            Map<String, String> kerberosEnv = ImmutableMap.<String, String>builder()
+                    .put("realm", realm)
+                    .put("kdc_type", kdcType)
+                    .put("kdc_hosts", kdcHosts)
+                    .put("admin_server_host", kdcAdminHost)
+                    .put("encryption_types", "aes des3-cbc-sha1 rc4 des-cbc-md5")
+                    .put("ldap_url", ldapUrl == null ? "" : ldapUrl)
+                    .put("container_dn", containerDn == null ? "" : containerDn)
+                    .build();
+            Map<String, String> krb5Conf = new HashMap<>();
+            krb5Conf.put("domains", domains);
+            krb5Conf.put("manage_krb5_conf", "true");
+            if (!useUdp || kpropPort != null) {
+                krb5Conf.put("content", krb5Config.toString());
+            }
+            configs.addSiteConfiguration("kerberos-env", kerberosEnv);
+            configs.addSiteConfiguration("krb5-conf", krb5Conf);
+
+            String blueprintText = blueprintProcessor.extendBlueprintGlobalConfiguration(blueprint, configs, forced);
+            blueprintText = blueprintProcessor.addComponentToHostgroups(blueprintText, "KERBEROS_CLIENT", hg -> true);
+            blueprintText = blueprintProcessor.setSecurityType(blueprintText, "KERBEROS");
+            return blueprintText;
+        } catch (IOException e) {
+            throw new BlueprintProcessingException("Failed to extend blueprint with kerberos configurations.", e);
+        }
+
+    }
+
     private String extendBlueprintWithKerberos(String blueprintText, Cluster cluster, String gatewayHost, String realm, String domain, Integer propagationPort,
             KerberosService kerberosService) {
         KerberosConfig kerberosConfig = cluster.getKerberosConfig();
         String kdcHosts = kerberosDetailService.resolveHostForKerberos(cluster, gatewayHost);
-        blueprintText = kerberosService.extendBlueprintWithKerberos(blueprintText,
+        blueprintText = extendBlueprintWithKerberos(blueprintText,
                 kerberosDetailService.resolveTypeForKerberos(kerberosConfig),
                 kdcHosts,
                 kerberosDetailService.resolveHostForKdcAdmin(cluster, kdcHosts),
@@ -73,7 +124,7 @@ public class KerberosBlueprintService implements BlueprintComponentConfigProvide
                 kerberosDetailService.getDomains(domain),
                 kerberosDetailService.resolveLdapUrlForKerberos(kerberosConfig),
                 kerberosDetailService.resolveContainerDnForKerberos(kerberosConfig),
-                !kerberosConfig.getTcpAllowed(), propagationPort);
+                !kerberosConfig.getTcpAllowed(), propagationPort, false);
         return blueprintText;
     }
 

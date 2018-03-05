@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.blueprint.smartsense;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -69,7 +68,7 @@ public class SmartSenseConfigProvider implements BlueprintComponentConfigProvide
         String smartSenseId = source.getSmartSenseSubscriptionId().get();
         Set<String> hostGroupNames = source.getHostGroups().stream().map(getHostGroupNameMapper()).collect(Collectors.toSet());
         blueprintText = addSmartSenseServerToBp(blueprintText, source.getHostGroups(), hostGroupNames);
-        blueprintText = blueprintProcessor.addComponentToHostgroups(HST_AGENT_COMPONENT, hostGroupNames, blueprintText);
+        blueprintText = blueprintProcessor.addComponentToHostgroups(blueprintText, HST_AGENT_COMPONENT, hg -> hostGroupNames.contains(hg));
         List<BlueprintConfigurationEntry> configs = new ArrayList<>();
         configs.addAll(getSmartSenseServerConfigs(source.getStack(), smartSenseId));
         return blueprintProcessor.addConfigEntries(blueprintText, configs, true);
@@ -109,8 +108,8 @@ public class SmartSenseConfigProvider implements BlueprintComponentConfigProvide
 
             }
             LOGGER.info("Adding '{}' component to '{}' hosgroup in the Blueprint.", HST_SERVER_COMPONENT, aHostGroupName);
-            blueprintText = blueprintProcessor.addComponentToHostgroups(HST_SERVER_COMPONENT, Collections.singletonList(aHostGroupName), blueprintText);
-
+            final String finalAHostGroupName = aHostGroupName;
+            blueprintText = blueprintProcessor.addComponentToHostgroups(blueprintText, HST_SERVER_COMPONENT, hg -> finalAHostGroupName.equals(hg));
         }
         return blueprintText;
     }

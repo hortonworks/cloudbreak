@@ -59,6 +59,6 @@ public class HbaseConfigProvider implements BlueprintComponentConfigProvider {
 
     @Override
     public boolean additionalCriteria(BlueprintPreparationObject source, String blueprintText) {
-        return !stackInfoService.hdfCluster(source.getStackRepoDetails());
+        return !stackInfoService.hdfCluster(blueprintText);
     }
 }

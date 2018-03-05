@@ -10,12 +10,14 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Sets;
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintPreparationObject;
+import com.sequenceiq.cloudbreak.blueprint.JacksonBlueprintProcessor;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
@@ -23,12 +25,16 @@ import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
+import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 @RunWith(MockitoJUnitRunner.class)
 public class KerberosBlueprintServiceTest {
 
     @Spy
     private AmbariClient ambariClient;
+
+    @Spy
+    private JacksonBlueprintProcessor blueprintProcessor;
 
     @Mock
     private BlueprintPreparationObject blueprintPreparationObject;
@@ -54,7 +60,9 @@ public class KerberosBlueprintServiceTest {
 
         String actualBlueprint = underTest.customTextManipulation(object, blueprint.getBlueprintText());
 
-        Assert.assertEquals(expectedBlueprint, actualBlueprint);
+        JsonNode expectedNode = JsonUtil.readTree(expectedBlueprint);
+        JsonNode resultNode = JsonUtil.readTree(actualBlueprint);
+        Assert.assertEquals(expectedNode, resultNode);
     }
 
     @Test
@@ -71,7 +79,10 @@ public class KerberosBlueprintServiceTest {
         String actualBlueprint = underTest.customTextManipulation(object, blueprint.getBlueprintText());
 
         String expectedBlueprint = FileReaderUtils.readFileFromClasspath("blueprints/bp-not-kerberized-cloudbreak-managed-expected.bp");
-        Assert.assertEquals(expectedBlueprint, actualBlueprint);
+
+        JsonNode expectedNode = JsonUtil.readTree(expectedBlueprint);
+        JsonNode resultNode = JsonUtil.readTree(actualBlueprint);
+        Assert.assertEquals(expectedNode, resultNode);
     }
 
     @Test
@@ -94,7 +105,10 @@ public class KerberosBlueprintServiceTest {
         String actualBlueprint = underTest.customTextManipulation(object, blueprint.getBlueprintText());
 
         String expectedBlueprint = FileReaderUtils.readFileFromClasspath("blueprints/bp-not-kerberized-custom-config-expected.bp");
-        Assert.assertEquals(expectedBlueprint, actualBlueprint);
+
+        JsonNode expectedNode = JsonUtil.readTree(expectedBlueprint);
+        JsonNode resultNode = JsonUtil.readTree(actualBlueprint);
+        Assert.assertEquals(expectedNode, resultNode);
     }
 
     @Test
@@ -119,7 +133,10 @@ public class KerberosBlueprintServiceTest {
         String actualBlueprint = underTest.customTextManipulation(object, blueprint.getBlueprintText());
 
         String expectedBlueprint = FileReaderUtils.readFileFromClasspath("blueprints/bp-not-kerberized-existing-expected.bp");
-        Assert.assertEquals(expectedBlueprint, actualBlueprint);
+
+        JsonNode expectedNode = JsonUtil.readTree(expectedBlueprint);
+        JsonNode resultNode = JsonUtil.readTree(actualBlueprint);
+        Assert.assertEquals(expectedNode, resultNode);
     }
 
     private Stack stack() {

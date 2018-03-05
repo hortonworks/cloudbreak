@@ -12,7 +12,6 @@ import static com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariOperationTy
 import static com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariOperationType.START_OPERATION_STATE;
 import static java.util.Collections.singletonMap;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -222,8 +221,6 @@ public class AmbariClusterSetupService implements ClusterSetupService {
             } else {
                 throw new CloudbreakServiceException("Ambari Blueprint could not be added: " + AmbariClientExceptionUtil.getErrorMessage(hre), hre);
             }
-        } catch (IOException e) {
-            throw new CloudbreakServiceException(e.getMessage(), e);
         }
     }
 

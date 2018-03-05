@@ -46,10 +46,8 @@ public class BlueprintComponentProviderProcessor {
         if (source.getCluster().getFileSystem() != null) {
             blueprint = extendBlueprintWithFsConfig(blueprint, source.getCluster().getFileSystem(), source.getStack());
         }
-        if (!source.getOrchestratorType().containerOrchestrator()) {
-            if (source.getStackRepoDetails() != null && source.getStackRepoDetails().getHdpVersion() != null) {
-                blueprint = blueprintProcessor.modifyHdpVersion(blueprint, source.getStackRepoDetails().getHdpVersion());
-            }
+        if (!source.getOrchestratorType().containerOrchestrator() && source.getStackRepoDetailsHdpVersion().isPresent()) {
+            blueprint = blueprintProcessor.modifyHdpVersion(blueprint, source.getStackRepoDetailsHdpVersion().get());
         }
         return blueprint;
     }

@@ -32,14 +32,14 @@
       "name": "master",
       "configurations": [
         {
-          "yarn-site": {
-            "yarn.nodemanager.local-dirs": "/mnt/fs1/,/mnt/fs2/",
-            "property-key": "property-value"
+          "hdfs-site": {
+            "dfs.datanode.data.dir": "/mnt/fs1/,/mnt/fs2/"
           }
         },
         {
-          "hdfs-site": {
-            "dfs.datanode.data.dir": "/mnt/fs1/,/mnt/fs2/"
+          "yarn-site": {
+            "yarn.nodemanager.local-dirs": "/mnt/fs1/,/mnt/fs2/",
+            "property-key": "property-value"
           }
         }
       ],
@@ -75,14 +75,14 @@
       "name": "slave_1",
       "configurations": [
         {
-          "yarn-site": {
-            "yarn.nodemanager.local-dirs": "/mnt/fs1/,/mnt/fs2/",
-            "property-key": "property-value"
+          "hdfs-site": {
+            "dfs.datanode.data.dir": "/mnt/fs1/,/mnt/fs2/"
           }
         },
         {
-          "hdfs-site": {
-            "dfs.datanode.data.dir": "/mnt/fs1/,/mnt/fs2/"
+          "yarn-site": {
+            "yarn.nodemanager.local-dirs": "/mnt/fs1/,/mnt/fs2/",
+            "property-key": "property-value"
           }
         }
       ],
