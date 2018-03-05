@@ -12,7 +12,7 @@ import com.sequenceiq.cloudbreak.domain.RDSConfig;
 @EntityType(entityClass = RDSConfig.class)
 public interface RdsConfigRepository extends CrudRepository<RDSConfig, Long> {
 
-    @Query("SELECT r FROM RDSConfig r LEFT JOIN FETCH r.clusters WHERE r.owner= :user")
+    @Query("SELECT r FROM RDSConfig r LEFT JOIN FETCH r.clusters WHERE r.owner= :user AND r.status <> 'DEFAULT_DELETED'")
     Set<RDSConfig> findForUser(@Param("user") String user);
 
     @Query("SELECT r FROM RDSConfig r LEFT JOIN FETCH r.clusters WHERE ((r.account= :account AND r.publicInAccount= true) OR r.owner= :user) "

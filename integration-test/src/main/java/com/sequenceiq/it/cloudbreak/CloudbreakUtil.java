@@ -82,6 +82,20 @@ public class CloudbreakUtil {
         return waitForStatuses(cloudbreakClient, stackId, Collections.singletonMap("clusterStatus", desiredStatus));
     }
 
+    public static String getFailedStatuses(CloudbreakClient cloudbreakClient, String stackId, Map<String, String> desiredStatuses) {
+        for (int i = 0; i < 3; i++) {
+            WaitResult waitResult = waitForStatuses(cloudbreakClient, stackId, desiredStatuses);
+            if (waitResult != WaitResult.FAILED) {
+                Assert.fail("Expected status is failed, actual: " + waitResult);
+            } else {
+                StackV1Endpoint stackV1Endpoint = cloudbreakClient.stackV1Endpoint();
+                stackV1Endpoint.status(Long.valueOf(stackId));
+                return stackV1Endpoint.status(Long.valueOf(stackId)).get("statusReason").toString();
+            }
+        }
+        return "";
+    }
+
     public static void waitAndCheckStatuses(CloudbreakClient cloudbreakClient, String stackId, Map<String, String> desiredStatuses) {
         for (int i = 0; i < 3; i++) {
             WaitResult waitResult = waitForStatuses(cloudbreakClient, stackId, desiredStatuses);
@@ -284,7 +298,7 @@ public class CloudbreakUtil {
 
     private static boolean checkStatuses(Map<String, String> currentStatuses, Map<String, String> desiredStatuses) {
         boolean result = true;
-        for (Entry<String, String> desiredStatus: desiredStatuses.entrySet()) {
+        for (Entry<String, String> desiredStatus : desiredStatuses.entrySet()) {
             if (!desiredStatus.getValue().equals(currentStatuses.get(desiredStatus.getKey()))) {
                 result = false;
                 break;
@@ -296,7 +310,7 @@ public class CloudbreakUtil {
     private static boolean checkFailedStatuses(Map<String, String> currentStatuses) {
         boolean result = false;
         List<String> failedStatuses = Arrays.asList("FAILED", "DELETE_COMPLETED");
-        for (Entry<String, String> desiredStatus: currentStatuses.entrySet()) {
+        for (Entry<String, String> desiredStatus : currentStatuses.entrySet()) {
             if (failedStatuses.stream().anyMatch(fs -> desiredStatus.getValue().contains(fs))) {
                 result = true;
                 break;
@@ -307,7 +321,7 @@ public class CloudbreakUtil {
 
     private static boolean checkNotExpectedDelete(Map<String, String> currentStatuses, Map<String, String> desiredStatuses) {
         boolean result = false;
-        for (Entry<String, String> desiredStatus: desiredStatuses.entrySet()) {
+        for (Entry<String, String> desiredStatus : desiredStatuses.entrySet()) {
             if (!"DELETE_COMPLETED".equals(desiredStatus.getValue()) && "DELETE_COMPLETED".equals(currentStatuses.get(desiredStatus.getKey()))) {
                 result = true;
                 break;

@@ -15,6 +15,7 @@ integrationtest:
     suiteFiles:
       - /it/src/main/resources/testsuites/v2/mock/v2-mock-stackcreate-scaling.yaml
       - /it/src/main/resources/testsuites/v2/mock/v2-mock-kerberized-stackcreate-scaling.yaml
+      - /it/src/main/resources/testsuites/v2/mock/v2-mock-instance-termination.yaml
       - /it/src/main/resources/testsuites/blueprinttests.yaml
       - /it/src/main/resources/testsuites/recipetests.yaml
     cleanup:

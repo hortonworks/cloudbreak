@@ -38,6 +38,12 @@ public class HostGroupService {
         return hostGroupRepository.findHostGroupInClusterByName(clusterId, hostGroupName);
     }
 
+    public HostGroup getByClusterAndHostName(Cluster cluster, String hostName) {
+        HostMetadata hostMetadata = hostMetadataRepository.findHostInClusterByName(cluster.getId(), hostName);
+        String hostGroupName = hostMetadata.getHostGroup().getName();
+        return getByClusterIdAndName(cluster.getId(), hostGroupName);
+    }
+
     public HostGroup save(HostGroup hostGroup) {
         return hostGroupRepository.save(hostGroup);
     }
