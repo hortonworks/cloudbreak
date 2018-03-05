@@ -10,6 +10,7 @@ base:
     - datalake.init
     - docker
     - metadata.init
+    - proxy.proxy
 
   'roles:gateway':
     - match: grain
