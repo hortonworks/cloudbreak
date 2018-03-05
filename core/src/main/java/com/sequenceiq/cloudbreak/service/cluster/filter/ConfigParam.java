@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.blueprint;
+package com.sequenceiq.cloudbreak.service.cluster.filter;
 
 public enum ConfigParam {
 

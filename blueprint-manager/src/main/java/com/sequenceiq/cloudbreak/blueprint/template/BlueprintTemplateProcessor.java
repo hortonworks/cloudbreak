@@ -55,16 +55,16 @@ public class BlueprintTemplateProcessor {
                 .withClusterAdminPassword(cluster.getPassword())
                 .withLlapNodeCounts(cluster.getClusterNodeCount() - 1)
                 .withContainerExecutor(CONTAINER.equals(cluster.getExecutorType()))
-                .withEnableKnoxGateway(cluster.getGateway().getEnableGateway())
-                .withAdminEmail(source.getIdentityUser().getUsername())
+                .withEnableKnoxGateway(source.getGateway() == null ? false : source.getGateway().getEnableGateway())
+                .withAdminEmail(source.getIdentityUserEmail())
                 .withClusterName(cluster.getName())
-                .withLdap(cluster.getLdapConfig())
-                .withGateway(cluster.getGateway())
+                .withLdap(source.getLdapConfig().orElse(null))
+                .withGateway(source.getGateway())
                 .withStackType(source.getBlueprintStackInfo().getType())
                 .withStackVersion(source.getBlueprintStackInfo().getVersion())
                 .withRdsConfigs(source.getRdsConfigs())
                 .withCustomProperties(blueprintInputs)
-                .withNifiTargets(source.getHdfConfigs().getNodeEntities())
+                .withNifiTargets(source.getHdfConfigs().isPresent() ? source.getHdfConfigs().orElse(null).getNodeEntities() : null)
                 .build();
     }
 }

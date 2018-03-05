@@ -10,7 +10,7 @@ import java.util.Set;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.ambari.client.services.ServiceAndHostService;
-import com.sequenceiq.cloudbreak.blueprint.ConfigParam;
+import com.sequenceiq.cloudbreak.service.cluster.filter.ConfigParam;
 
 @Service
 public class AmbariConfigurationService {

@@ -5,6 +5,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.junit.Test;
@@ -40,7 +41,9 @@ public class BlueprintTemplateProcessorTest {
                 .withRdsConfigs(cluster.getRdsConfigs())
                 .withAmbariDatabase(ambariDatabase())
                 .withCluster(cluster)
-                .withIdentityUser(TestUtil.cbUser())
+                .withGateway(cluster.getGateway())
+                .withLdapConfig(Optional.ofNullable(cluster.getLdapConfig()))
+                .withIdentityUserEmail(TestUtil.cbUser().getUsername())
                 .build();
 
         String result = underTest.process(testBlueprint, blueprintPreparationObject, Maps.newHashMap());
@@ -64,7 +67,9 @@ public class BlueprintTemplateProcessorTest {
                 .withRdsConfigs(cluster.getRdsConfigs())
                 .withAmbariDatabase(ambariDatabase())
                 .withCluster(cluster)
-                .withIdentityUser(TestUtil.cbUser())
+                .withGateway(cluster.getGateway())
+                .withLdapConfig(Optional.ofNullable(cluster.getLdapConfig()))
+                .withIdentityUserEmail(TestUtil.cbUser().getUsername())
                 .build();
 
         String result = underTest.process(testBlueprint, blueprintPreparationObject, Maps.newHashMap());
@@ -88,7 +93,9 @@ public class BlueprintTemplateProcessorTest {
                 .withRdsConfigs(cluster.getRdsConfigs())
                 .withAmbariDatabase(ambariDatabase())
                 .withCluster(cluster)
-                .withIdentityUser(TestUtil.cbUser())
+                .withGateway(cluster.getGateway())
+                .withLdapConfig(Optional.ofNullable(cluster.getLdapConfig()))
+                .withIdentityUserEmail(TestUtil.cbUser().getUsername())
                 .build();
 
         String result = underTest.process(testBlueprint, blueprintPreparationObject, Maps.newHashMap());
@@ -112,7 +119,9 @@ public class BlueprintTemplateProcessorTest {
                 .withRdsConfigs(cluster.getRdsConfigs())
                 .withAmbariDatabase(ambariDatabase())
                 .withCluster(cluster)
-                .withIdentityUser(TestUtil.cbUser())
+                .withGateway(cluster.getGateway())
+                .withLdapConfig(Optional.ofNullable(cluster.getLdapConfig()))
+                .withIdentityUserEmail(TestUtil.cbUser().getUsername())
                 .build();
 
         String result = underTest.process(testBlueprint, blueprintPreparationObject, Maps.newHashMap());

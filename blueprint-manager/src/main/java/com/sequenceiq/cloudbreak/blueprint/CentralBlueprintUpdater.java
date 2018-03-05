@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.blueprint.template.BlueprintTemplateProcessor;
-import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 
 import groovyx.net.http.HttpResponseException;
 
@@ -28,12 +27,14 @@ public class CentralBlueprintUpdater {
     @Inject
     private BlueprintComponentProviderProcessor blueprintComponentProviderProcessor;
 
-    public String getBlueprintText(BlueprintPreparationObject source) throws CloudbreakServiceException, HttpResponseException {
+    public String getBlueprintText(BlueprintPreparationObject source) throws BlueprintProcessingException, HttpResponseException {
         String blueprintText = source.getCluster().getBlueprint().getBlueprintText();
         try {
             blueprintText = updateBlueprintConfiguration(source, blueprintText);
         } catch (IOException e) {
-            throw new CloudbreakServiceException(e);
+            String message = String.format("Unable to update blueprint with default  properties which was: %s", blueprintText);
+            LOGGER.warn(message);
+            throw new BlueprintProcessingException(message, e);
         }
         return blueprintText;
     }
@@ -41,7 +42,7 @@ public class CentralBlueprintUpdater {
     private String updateBlueprintConfiguration(BlueprintPreparationObject source, String blueprint)
             throws IOException {
         blueprint = blueprintTemplateProcessor.process(blueprint, source, Maps.newHashMap());
-        blueprint = blueprintSegmentProcessor.process(source, blueprint);
+        blueprint = blueprintSegmentProcessor.process(blueprint, source);
         blueprint = blueprintComponentProviderProcessor.process(source, blueprint);
         return blueprint;
     }
