@@ -11,6 +11,7 @@ import com.fasterxml.jackson.annotation.JsonRawValue;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigResponse;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
@@ -69,7 +70,7 @@ public class ClusterResponse implements JsonEntity {
 
     private Set<HostGroupResponse> hostGroups = new HashSet<>();
 
-    @ApiModelProperty(ClusterModelDescription.RDSCONFIG_IDS)
+    @ApiModelProperty(ClusterModelDescription.RDSCONFIG_NAMES)
     private Set<Long> rdsConfigIds = new HashSet<>();
 
     @ApiModelProperty(ClusterModelDescription.RDSCONFIGS)

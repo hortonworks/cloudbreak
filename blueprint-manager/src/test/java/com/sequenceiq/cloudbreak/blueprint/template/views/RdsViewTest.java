@@ -10,13 +10,25 @@ public class RdsViewTest {
     private static final String ASSERT_ERROR_MSG = "The generated connection URL(connectionHost field) is not valid!";
 
     @Test
+    public void testCreateRdsViewWhenConnectionUrlContainsSubprotocolAndSubname() {
+        String connectionUrl = "jdbc:postgresql:subname://some-rds.1d3nt1f13r.eu-west-1.rds.amazonaws.com:5432/ranger";
+        RDSConfig rdsConfig = createRdsConfig(connectionUrl);
+
+        RdsView underTest = new RdsView(rdsConfig);
+
+        Assert.assertEquals(ASSERT_ERROR_MSG, "some-rds.1d3nt1f13r.eu-west-1.rds.amazonaws.com:5432", underTest.getHostWithPort());
+        Assert.assertEquals("postgresql:subname", underTest.getSubprotocol());
+    }
+
+    @Test
     public void testCreateRdsViewWhenRDSConfigContainsProperConnectionUrl() {
         String connectionUrl = "jdbc:postgresql://some-rds.1d3nt1f13r.eu-west-1.rds.amazonaws.com:5432/ranger";
         RDSConfig rdsConfig = createRdsConfig(connectionUrl);
 
         RdsView underTest = new RdsView(rdsConfig);
 
-        Assert.assertEquals(ASSERT_ERROR_MSG, "some-rds.1d3nt1f13r.eu-west-1.rds.amazonaws.com:5432", underTest.getConnectionHost());
+        Assert.assertEquals(ASSERT_ERROR_MSG, "some-rds.1d3nt1f13r.eu-west-1.rds.amazonaws.com:5432", underTest.getHostWithPort());
+        Assert.assertEquals("postgresql", underTest.getSubprotocol());
     }
 
     @Test
@@ -26,7 +38,7 @@ public class RdsViewTest {
 
         RdsView underTest = new RdsView(rdsConfig);
 
-        Assert.assertEquals(ASSERT_ERROR_MSG, "some-rds.1d3nt1f13r.eu-west-1.rds.amazonaws.com", underTest.getConnectionHost());
+        Assert.assertEquals(ASSERT_ERROR_MSG, "some-rds.1d3nt1f13r.eu-west-1.rds.amazonaws.com", underTest.getHostWithPort());
     }
 
     @Test
@@ -36,7 +48,7 @@ public class RdsViewTest {
 
         RdsView underTest = new RdsView(rdsConfig);
 
-        Assert.assertEquals(ASSERT_ERROR_MSG, "some-rds.1d3nt1f13r.eu-west-1.rds.amazonaws.com:5432", underTest.getConnectionHost());
+        Assert.assertEquals(ASSERT_ERROR_MSG, "some-rds.1d3nt1f13r.eu-west-1.rds.amazonaws.com:5432", underTest.getHostWithPort());
     }
 
     @Test
@@ -46,7 +58,7 @@ public class RdsViewTest {
 
         RdsView underTest = new RdsView(rdsConfig);
 
-        Assert.assertEquals(ASSERT_ERROR_MSG, "some-rds.1d3nt1f13r.eu-west-1.rds.amazonaws.com:5432", underTest.getConnectionHost());
+        Assert.assertEquals(ASSERT_ERROR_MSG, "some-rds.1d3nt1f13r.eu-west-1.rds.amazonaws.com:5432", underTest.getHostWithPort());
     }
 
     @Test
@@ -56,7 +68,7 @@ public class RdsViewTest {
 
         RdsView underTest = new RdsView(rdsConfig);
 
-        Assert.assertEquals(ASSERT_ERROR_MSG, "some-rds.1d3nt1f13r.eu-west-1.rds.amazonaws.com", underTest.getConnectionHost());
+        Assert.assertEquals(ASSERT_ERROR_MSG, "some-rds.1d3nt1f13r.eu-west-1.rds.amazonaws.com", underTest.getHostWithPort());
     }
 
     @Test
@@ -66,7 +78,7 @@ public class RdsViewTest {
 
         RdsView underTest = new RdsView(rdsConfig);
 
-        Assert.assertEquals(ASSERT_ERROR_MSG, "some-rds.1d3nt1f13r.eu-west-1.rds.amazonaws.com", underTest.getConnectionHost());
+        Assert.assertEquals(ASSERT_ERROR_MSG, "some-rds.1d3nt1f13r.eu-west-1.rds.amazonaws.com", underTest.getHostWithPort());
     }
 
     @Test
@@ -76,7 +88,7 @@ public class RdsViewTest {
 
         RdsView underTest = new RdsView(rdsConfig);
 
-        Assert.assertEquals(ASSERT_ERROR_MSG, "some-rds.1d3nt1f13r.eu-west-1.rds.amazonaws.com:5432:5432", underTest.getConnectionHost());
+        Assert.assertEquals(ASSERT_ERROR_MSG, "some-rds.1d3nt1f13r.eu-west-1.rds.amazonaws.com:5432:5432", underTest.getHostWithPort());
     }
 
     private RDSConfig createRdsConfig(String connectionUrl) {
@@ -84,7 +96,6 @@ public class RdsViewTest {
         rdsConfig.setConnectionURL(connectionUrl);
         rdsConfig.setConnectionPassword("admin");
         rdsConfig.setConnectionUserName("admin");
-        rdsConfig.setAttributes(null);
         return rdsConfig;
     }
 

@@ -18,7 +18,7 @@ public class BlueprintTemplateModelContextBuilder {
 
     private final Map<String, String> customProperties = new HashMap<>();
 
-    private Map<String, RdsView> rdsConfigs = new HashMap<>();
+    private Map<String, RdsView> rds = new HashMap<>();
 
     private Optional<LdapView> ldap = Optional.empty();
 
@@ -32,8 +32,8 @@ public class BlueprintTemplateModelContextBuilder {
         for (RDSConfig rdsConfig : rdsConfigs) {
             if (rdsConfig != null) {
                 RdsView rdsView = new RdsView(rdsConfig);
-                String componentName = rdsConfig.getType().name().toLowerCase();
-                this.rdsConfigs.put(componentName, rdsView);
+                String componentName = rdsConfig.getType().toLowerCase();
+                this.rds.put(componentName, rdsView);
             }
         }
         return this;
@@ -75,7 +75,7 @@ public class BlueprintTemplateModelContextBuilder {
         Map<String, Object> blueprintTemplateModelContext = new HashMap<>();
         blueprintTemplateModelContext.put("ldapConfig", ldap.orElse(null));
         blueprintTemplateModelContext.put("gateway", gateway.orElse(null));
-        blueprintTemplateModelContext.put("rdsConfigs", rdsConfigs);
+        blueprintTemplateModelContext.put("rds", rds);
         blueprintTemplateModelContext.put("ambariDatabase", ambariDatabase.orElse(null));
         for (Entry<String, String> customEntry : customProperties.entrySet()) {
             blueprintTemplateModelContext.put(customEntry.getKey(), customEntry.getValue());

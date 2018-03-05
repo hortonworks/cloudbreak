@@ -11,6 +11,7 @@ import javax.validation.constraints.Size;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonRawValue;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigRequest;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
@@ -92,6 +93,9 @@ public class ClusterRequest implements JsonEntity {
 
     @ApiModelProperty(ClusterModelDescription.RDSCONFIG_IDS)
     private Set<Long> rdsConfigIds = new HashSet<>();
+
+    @ApiModelProperty(ClusterModelDescription.RDSCONFIG_NAMES)
+    private Set<String> rdsConfigNames = new HashSet<>();
 
     @Valid
     @ApiModelProperty(ClusterModelDescription.AMBARI_DATABASE_DETAILS)
@@ -392,5 +396,13 @@ public class ClusterRequest implements JsonEntity {
 
     public void setProxyName(String proxyName) {
         this.proxyName = proxyName;
+    }
+
+    public Set<String> getRdsConfigNames() {
+        return rdsConfigNames;
+    }
+
+    public void setRdsConfigNames(Set<String> rdsConfigNames) {
+        this.rdsConfigNames = rdsConfigNames;
     }
 }

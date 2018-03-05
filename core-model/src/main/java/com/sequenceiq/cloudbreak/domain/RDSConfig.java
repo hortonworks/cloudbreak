@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.domain;
 import java.util.Set;
 
 import javax.persistence.Column;
-import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -17,11 +16,7 @@ import javax.persistence.UniqueConstraint;
 
 import org.hibernate.annotations.Type;
 
-import com.sequenceiq.cloudbreak.api.model.RDSDatabase;
-import com.sequenceiq.cloudbreak.api.model.RdsType;
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
-import com.sequenceiq.cloudbreak.domain.json.Json;
-import com.sequenceiq.cloudbreak.domain.json.JsonToString;
 
 @Entity
 @Table(name = "RDSConfig", uniqueConstraints = @UniqueConstraint(columnNames = {"account", "name"}))
@@ -39,8 +34,10 @@ public class RDSConfig implements ProvisionEntity {
     private String connectionURL;
 
     @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
-    private RDSDatabase databaseType;
+    private String databaseEngine;
+
+    @Column(nullable = false)
+    private String connectionDriver;
 
     @Type(type = "encrypted_string")
     @Column(nullable = false)
@@ -53,7 +50,7 @@ public class RDSConfig implements ProvisionEntity {
     private Long creationDate;
 
     @Column(nullable = false)
-    private String hdpVersion;
+    private String stackVersion;
 
     @Column(nullable = false)
     private String owner;
@@ -71,12 +68,8 @@ public class RDSConfig implements ProvisionEntity {
     @ManyToMany(mappedBy = "rdsConfigs")
     private Set<Cluster> clusters;
 
-    @Enumerated(EnumType.STRING)
-    private RdsType type = RdsType.HIVE;
-
-    @Convert(converter = JsonToString.class)
-    @Column(columnDefinition = "TEXT")
-    private Json attributes;
+    @Column(nullable = false)
+    private String type;
 
     public Long getId() {
         return id;
@@ -102,12 +95,12 @@ public class RDSConfig implements ProvisionEntity {
         this.connectionURL = connectionURL;
     }
 
-    public RDSDatabase getDatabaseType() {
-        return databaseType;
+    public String getDatabaseEngine() {
+        return databaseEngine;
     }
 
-    public void setDatabaseType(RDSDatabase databaseType) {
-        this.databaseType = databaseType;
+    public void setDatabaseEngine(String databaseEngine) {
+        this.databaseEngine = databaseEngine;
     }
 
     public String getConnectionUserName() {
@@ -134,12 +127,12 @@ public class RDSConfig implements ProvisionEntity {
         this.creationDate = creationDate;
     }
 
-    public String getHdpVersion() {
-        return hdpVersion;
+    public String getStackVersion() {
+        return stackVersion;
     }
 
-    public void setHdpVersion(String hdpVersion) {
-        this.hdpVersion = hdpVersion;
+    public void setStackVersion(String stackVersion) {
+        this.stackVersion = stackVersion;
     }
 
     public String getAccount() {
@@ -182,19 +175,19 @@ public class RDSConfig implements ProvisionEntity {
         this.clusters = clusters;
     }
 
-    public RdsType getType() {
+    public String getType() {
         return type;
     }
 
-    public void setType(RdsType type) {
+    public void setType(String type) {
         this.type = type;
     }
 
-    public Json getAttributes() {
-        return attributes;
+    public String getConnectionDriver() {
+        return connectionDriver;
     }
 
-    public void setAttributes(Json attributes) {
-        this.attributes = attributes;
+    public void setConnectionDriver(String connectionDriver) {
+        this.connectionDriver = connectionDriver;
     }
 }

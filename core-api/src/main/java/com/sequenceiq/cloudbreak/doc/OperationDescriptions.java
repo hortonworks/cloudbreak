@@ -208,7 +208,7 @@ public class OperationDescriptions {
         public static final String TEST_LDAP_CONNECTION = "tests an LDAP connection";
         public static final String TEST_LDAP_CONNECTION_BY_ID = "tests an already exists LDAP connection";
         public static final String TEST_DATABASE = "tests a database connection parameters";
-        public static final String CREATE_DATABASE = "create a database connection parameters";
+        public static final String CREATE_DATABASE = "create a database for the service in the RDS if the connection could be created";
         public static final String CHECK_CLIENT_VERSION = "checks the client version";
     }
 
@@ -223,6 +223,7 @@ public class OperationDescriptions {
         public static final String DELETE_PRIVATE_BY_NAME = "delete private RDS configuration by name";
         public static final String DELETE_PUBLIC_BY_NAME = "delete public (owned) or private RDS configuration by name";
         public static final String DELETE_BY_ID = "delete RDS configuration by id";
+        public static final String POST_CONNECTION_TEST = "test RDS connectivity";
     }
 
     public static class ProxyConfigOpDescription {

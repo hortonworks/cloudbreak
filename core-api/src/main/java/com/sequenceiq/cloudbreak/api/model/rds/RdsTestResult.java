@@ -1,6 +1,7 @@
-package com.sequenceiq.cloudbreak.api.model;
+package com.sequenceiq.cloudbreak.api.model.rds;
 
-import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
+import com.sequenceiq.cloudbreak.api.model.JsonEntity;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -8,7 +9,7 @@ import io.swagger.annotations.ApiModelProperty;
 @ApiModel("RdsTestResult")
 public class RdsTestResult implements JsonEntity {
 
-    @ApiModelProperty(value = ClusterModelDescription.RDS_CONNECTION_RESULT, required = true)
+    @ApiModelProperty(value = ModelDescriptions.RDSConfig.RDS_CONNECTION_TEST_RESULT, required = true)
     private String connectionResult;
 
     public RdsTestResult() {

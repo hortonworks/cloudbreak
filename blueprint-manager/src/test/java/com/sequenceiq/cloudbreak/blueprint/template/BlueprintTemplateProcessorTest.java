@@ -14,8 +14,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.TestUtil;
-import com.sequenceiq.cloudbreak.api.model.RDSDatabase;
-import com.sequenceiq.cloudbreak.api.model.RdsType;
+import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariDatabase;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
@@ -70,7 +69,7 @@ public class BlueprintTemplateProcessorTest {
         assertTrue(result.contains("\"javax.jdo.option.ConnectionPassword\": \"iamsoosecure\""));
         assertTrue(result.contains("\"javax.jdo.option.ConnectionDriverName\": \"org.postgresql.Driver\""));
         assertTrue(result.contains("\"hive_database_type\": \"postgres\""));
-        assertTrue(result.contains("\"hive_database\": \"Existing PostgreSQL Database\""));
+        assertTrue(result.contains("\"hive_database\": \"Existing postgresql Database\","));
     }
 
     @Test
@@ -86,14 +85,29 @@ public class BlueprintTemplateProcessorTest {
         assertTrue(result.contains("\"druid.metadata.storage.connector.password\": \"iamsoosecure\""));
     }
 
-    //TODO create test for custom RDS when the Enum based rdsType replaced with configurable String type
+    @Test
+    public void testMustacheGeneratorForCustomRDSType() throws Exception {
+        String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints/bp-mustache-test.bp");
+        Cluster cluster = cluster();
+        cluster.getRdsConfigs().add(rdsConfig("customRds"));
+
+        String result = underTest.process(testBlueprint, cluster, cluster.getRdsConfigs(), ambariDatabase());
+
+        assertTrue(result.contains("\"custom.metadata.storage.type\": \"postgresql\""));
+        assertTrue(result.contains("\"custom.metadata.storage.engine\": \"postgres\""));
+        assertTrue(result.contains("\"custom.metadata.storage.connector.connectURI\": \"jdbc:postgresql://10.1.1.1:5432/customRds\""));
+        assertTrue(result.contains("\"custom.metadata.storage.connector.host\": \"10.1.1.1\""));
+        assertTrue(result.contains("\"custom.metadata.storage.connector.connectionHost\": \"10.1.1.1:5432\""));
+        assertTrue(result.contains("\"custom.metadata.storage.connector.user\": \"heyitsme\""));
+        assertTrue(result.contains("\"custom.metadata.storage.connector.password\": \"iamsoosecure\""));
+        assertTrue(result.contains("\"custom.metadata.storage.connector.databasename\": \"customRds\""));
+    }
 
     private Cluster cluster() {
         Cluster cluster = TestUtil.cluster();
         Set<RDSConfig> rdsConfigSet = new HashSet<>();
         rdsConfigSet.add(rdsConfig(RdsType.DRUID.name().toLowerCase()));
         RDSConfig hiveRds = rdsConfig(RdsType.HIVE.name().toLowerCase());
-        hiveRds.setDatabaseType(RDSDatabase.POSTGRES);
         rdsConfigSet.add(hiveRds);
         rdsConfigSet.add(rdsConfig(RdsType.RANGER.name().toLowerCase()));
         cluster.setRdsConfigs(rdsConfigSet);
@@ -113,7 +127,9 @@ public class BlueprintTemplateProcessorTest {
         rdsConfig.setConnectionPassword("iamsoosecure");
         rdsConfig.setConnectionUserName("heyitsme");
         rdsConfig.setConnectionURL("jdbc:postgresql://10.1.1.1:5432/" + rdsType);
-        rdsConfig.setType(RdsType.valueOf(rdsType.toUpperCase()));
+        rdsConfig.setConnectionDriver("org.postgresql.Driver");
+        rdsConfig.setDatabaseEngine("POSTGRES");
+        rdsConfig.setType(rdsType);
 
         return rdsConfig;
     }
