@@ -17,8 +17,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
+import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessorFactory;
+import com.sequenceiq.cloudbreak.blueprint.configuration.SiteConfigurations;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
@@ -44,6 +45,9 @@ public class BlueprintService {
 
     @Inject
     private AuthorizationService authorizationService;
+
+    @Inject
+    private BlueprintProcessorFactory blueprintProcessorFactory;
 
     public Set<Blueprint> retrievePrivateBlueprints(IdentityUser user) {
         return blueprintRepository.findForUser(user.getUserId());
@@ -100,7 +104,8 @@ public class BlueprintService {
                     }
                 }
             }
-            String extendedBlueprint = new AmbariClient().extendBlueprintGlobalConfiguration(blueprint.getBlueprintText(), configs);
+            String extendedBlueprint = blueprintProcessorFactory.get(blueprint.getBlueprintText())
+                    .extendBlueprintGlobalConfiguration(SiteConfigurations.fromMap(configs), false).asText();
             LOGGER.info("Extended validation result: {}", extendedBlueprint);
             blueprint.setBlueprintText(extendedBlueprint);
         }

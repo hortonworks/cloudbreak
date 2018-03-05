@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.service.cluster.flow.blueprint;
 import static java.util.Collections.singletonMap;
 
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -18,7 +19,8 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.model.rds.RDSDatabase;
 import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
-import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessor;
+import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessorFactory;
+import com.sequenceiq.cloudbreak.blueprint.BlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
@@ -44,7 +46,7 @@ public class HiveConfigProvider {
     private String hiveDbPort;
 
     @Inject
-    private BlueprintProcessor blueprintProcessor;
+    private BlueprintProcessorFactory blueprintProcessorFactory;
 
     @Inject
     private RdsConfigRepository rdsConfigRepository;
@@ -68,9 +70,10 @@ public class HiveConfigProvider {
     }
 
     public boolean isRdsConfigNeedForHiveMetastore(Blueprint blueprint) {
-        return blueprintProcessor.componentExistsInBlueprint("HIVE_METASTORE", blueprint.getBlueprintText())
-                && !blueprintProcessor.componentExistsInBlueprint("MYSQL_SERVER", blueprint.getBlueprintText())
-                && !blueprintProcessor.hivaDatabaseConfigurationExistsInBlueprint(blueprint.getBlueprintText());
+        BlueprintTextProcessor blueprintProcessor = blueprintProcessorFactory.get(blueprint.getBlueprintText());
+        return blueprintProcessor.componentExistsInBlueprint("HIVE_METASTORE")
+                && !blueprintProcessor.componentExistsInBlueprint("MYSQL_SERVER")
+                && !blueprintProcessor.hiveDatabaseConfigurationExistsInBlueprint();
     }
 
     public void decorateServicePillarWithPostgresIfNeeded(Map<String, SaltPillarProperties> servicePillar, Stack stack, Cluster cluster) {
@@ -101,13 +104,12 @@ public class HiveConfigProvider {
         rdsConfig.setConnectionUserName(dbUserName);
         rdsConfig.setConnectionPassword(PasswordUtil.generatePassword());
         String primaryGatewayIp = stack.getPrimaryGatewayInstance().getPrivateIp();
-        rdsConfig.setConnectionURL(
-                "jdbc:postgresql://" + primaryGatewayIp + ":" + dbPort + "/" + dbName
-        );
+        rdsConfig.setConnectionURL("jdbc:postgresql://" + primaryGatewayIp + ":" + dbPort + "/" + dbName);
         rdsConfig.setDatabaseEngine(RDSDatabase.POSTGRES.name());
         rdsConfig.setType(RdsType.HIVE.name());
         rdsConfig.setConnectionDriver(RDSDatabase.POSTGRES.getDbDriver());
         rdsConfig.setStatus(ResourceStatus.DEFAULT);
+        rdsConfig.setCreationDate(new Date().getTime());
         rdsConfig.setOwner(stack.getOwner());
         rdsConfig.setAccount(stack.getAccount());
         rdsConfig.setClusters(Collections.singleton(cluster));

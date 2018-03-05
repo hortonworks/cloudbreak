@@ -1,11 +1,11 @@
 package com.sequenceiq.cloudbreak.blueprint.template;
 
+import static com.sequenceiq.cloudbreak.blueprint.filesystem.BlueprintTestUtil.generalClusterConfigs;
 import static org.junit.Assert.assertTrue;
 
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
 import org.junit.Test;
@@ -18,7 +18,9 @@ import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintPreparationObject;
+import com.sequenceiq.cloudbreak.blueprint.template.views.BlueprintView;
 import com.sequenceiq.cloudbreak.blueprint.templates.BlueprintStackInfo;
+import com.sequenceiq.cloudbreak.blueprint.templates.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariDatabase;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
@@ -33,17 +35,24 @@ public class BlueprintTemplateProcessorTest {
 
     @Test
     public void testMustacheGeneratorWithSimpleUseCase() throws Exception {
-        String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints/bp-mustache-test.bp");
+        String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints-jackson/bp-mustache-test.bp");
+
         Cluster cluster = cluster();
         BlueprintStackInfo blueprintStackInfo =  new BlueprintStackInfo("hdp", "2.4");
+        GeneralClusterConfigs generalClusterConfigs = generalClusterConfigs();
+        generalClusterConfigs.setClusterName("dummyCluster");
+        generalClusterConfigs.setStackName("dummyCluster");
+
+        Map<String, Object> properties = new HashMap<>();
+        properties.put("S3_BUCKET", "testbucket");
+
         BlueprintPreparationObject blueprintPreparationObject = BlueprintPreparationObject.Builder.builder()
-                .withBlueprintStackInfo(blueprintStackInfo)
                 .withRdsConfigs(cluster.getRdsConfigs())
                 .withAmbariDatabase(ambariDatabase())
-                .withCluster(cluster)
                 .withGateway(cluster.getGateway())
-                .withLdapConfig(Optional.ofNullable(cluster.getLdapConfig()))
-                .withIdentityUserEmail(TestUtil.cbUser().getUsername())
+                .withLdapConfig(cluster.getLdapConfig())
+                .withGeneralClusterConfigs(generalClusterConfigs)
+                .withBlueprintView(new BlueprintView(testBlueprint, new Json(properties), blueprintStackInfo.getVersion(), blueprintStackInfo.getType()))
                 .build();
 
         String result = underTest.process(testBlueprint, blueprintPreparationObject, Maps.newHashMap());
@@ -58,18 +67,18 @@ public class BlueprintTemplateProcessorTest {
 
     @Test
     public void testMustacheGeneratorForRangerRDS() throws Exception {
-        String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints/bp-mustache-test.bp");
+        String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints-jackson/bp-mustache-test.bp");
+
         Cluster cluster = cluster();
         BlueprintStackInfo blueprintStackInfo =  new BlueprintStackInfo("hdp", "2.4");
 
         BlueprintPreparationObject blueprintPreparationObject = BlueprintPreparationObject.Builder.builder()
-                .withBlueprintStackInfo(blueprintStackInfo)
                 .withRdsConfigs(cluster.getRdsConfigs())
                 .withAmbariDatabase(ambariDatabase())
-                .withCluster(cluster)
                 .withGateway(cluster.getGateway())
-                .withLdapConfig(Optional.ofNullable(cluster.getLdapConfig()))
-                .withIdentityUserEmail(TestUtil.cbUser().getUsername())
+                .withLdapConfig(cluster.getLdapConfig())
+                .withGeneralClusterConfigs(generalClusterConfigs())
+                .withBlueprintView(new BlueprintView(testBlueprint, blueprintStackInfo.getVersion(), blueprintStackInfo.getType()))
                 .build();
 
         String result = underTest.process(testBlueprint, blueprintPreparationObject, Maps.newHashMap());
@@ -84,18 +93,18 @@ public class BlueprintTemplateProcessorTest {
 
     @Test
     public void testMustacheGeneratorForHiveRDS() throws Exception {
-        String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints/bp-mustache-test.bp");
+        String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints-jackson/bp-mustache-test.bp");
+
         Cluster cluster = cluster();
         BlueprintStackInfo blueprintStackInfo =  new BlueprintStackInfo("hdp", "2.4");
 
         BlueprintPreparationObject blueprintPreparationObject = BlueprintPreparationObject.Builder.builder()
-                .withBlueprintStackInfo(blueprintStackInfo)
                 .withRdsConfigs(cluster.getRdsConfigs())
                 .withAmbariDatabase(ambariDatabase())
-                .withCluster(cluster)
                 .withGateway(cluster.getGateway())
-                .withLdapConfig(Optional.ofNullable(cluster.getLdapConfig()))
-                .withIdentityUserEmail(TestUtil.cbUser().getUsername())
+                .withLdapConfig(cluster.getLdapConfig())
+                .withGeneralClusterConfigs(generalClusterConfigs())
+                .withBlueprintView(new BlueprintView(testBlueprint, blueprintStackInfo.getVersion(), blueprintStackInfo.getType()))
                 .build();
 
         String result = underTest.process(testBlueprint, blueprintPreparationObject, Maps.newHashMap());
@@ -110,18 +119,18 @@ public class BlueprintTemplateProcessorTest {
 
     @Test
     public void testMustacheGeneratorForDruidRDS() throws Exception {
-        String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints/bp-mustache-test.bp");
+        String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints-jackson/bp-mustache-test.bp");
+
         Cluster cluster = cluster();
         BlueprintStackInfo blueprintStackInfo =  new BlueprintStackInfo("hdp", "2.4");
 
         BlueprintPreparationObject blueprintPreparationObject = BlueprintPreparationObject.Builder.builder()
-                .withBlueprintStackInfo(blueprintStackInfo)
                 .withRdsConfigs(cluster.getRdsConfigs())
                 .withAmbariDatabase(ambariDatabase())
-                .withCluster(cluster)
                 .withGateway(cluster.getGateway())
-                .withLdapConfig(Optional.ofNullable(cluster.getLdapConfig()))
-                .withIdentityUserEmail(TestUtil.cbUser().getUsername())
+                .withLdapConfig(cluster.getLdapConfig())
+                .withGeneralClusterConfigs(generalClusterConfigs())
+                .withBlueprintView(new BlueprintView(testBlueprint, blueprintStackInfo.getVersion(), blueprintStackInfo.getType()))
                 .build();
 
         String result = underTest.process(testBlueprint, blueprintPreparationObject, Maps.newHashMap());
@@ -134,17 +143,16 @@ public class BlueprintTemplateProcessorTest {
 
     @Test
     public void testMustacheGeneratorForCustomRDSType() throws Exception {
-        String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints/bp-mustache-test.bp");
+        String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints-jackson/bp-mustache-test.bp");
         Cluster cluster = cluster();
         cluster.getRdsConfigs().add(rdsConfig("customRds"));
         BlueprintStackInfo blueprintStackInfo =  new BlueprintStackInfo("hdp", "2.4");
 
         BlueprintPreparationObject blueprintPreparationObject = BlueprintPreparationObject.Builder.builder()
-                .withBlueprintStackInfo(blueprintStackInfo)
+                .withBlueprintView(new BlueprintView(testBlueprint, blueprintStackInfo.getVersion(), blueprintStackInfo.getType()))
                 .withRdsConfigs(cluster.getRdsConfigs())
                 .withAmbariDatabase(ambariDatabase())
-                .withCluster(cluster)
-                .withIdentityUser(TestUtil.cbUser())
+                .withGeneralClusterConfigs(generalClusterConfigs(cluster))
                 .build();
 
         String result = underTest.process(testBlueprint, blueprintPreparationObject, Maps.newHashMap());

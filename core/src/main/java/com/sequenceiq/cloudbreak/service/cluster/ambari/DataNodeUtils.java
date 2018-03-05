@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.blueprint.datanode;
+package com.sequenceiq.cloudbreak.service.cluster.ambari;
 
 import static java.util.Collections.reverseOrder;
 

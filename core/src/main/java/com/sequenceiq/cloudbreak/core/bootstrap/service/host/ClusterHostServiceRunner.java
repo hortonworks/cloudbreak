@@ -23,7 +23,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.ExecutorType;
 import com.sequenceiq.cloudbreak.api.model.ExposedService;
-import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessor;
+import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessorFactory;
 import com.sequenceiq.cloudbreak.blueprint.kerberos.KerberosDetailService;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariDatabase;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
@@ -80,7 +80,7 @@ public class ClusterHostServiceRunner {
     private ClusterComponentConfigProvider clusterComponentConfigProvider;
 
     @Inject
-    private BlueprintProcessor blueprintProcessor;
+    private BlueprintProcessorFactory blueprintProcessorFactory;
 
     @Inject
     private ComponentLocatorService componentLocator;
@@ -203,7 +203,7 @@ public class ClusterHostServiceRunner {
         if (datalakeId != null) {
             Stack dataLakeStack = stackRepository.findOne(datalakeId);
             Cluster dataLakeCluster = dataLakeStack.getCluster();
-            Set<String> groupNames = blueprintProcessor.getHostGroupsWithComponent(dataLakeCluster.getBlueprint().getBlueprintText(), "RANGER_ADMIN");
+            Set<String> groupNames = blueprintProcessorFactory.get(dataLakeCluster.getBlueprint().getBlueprintText()).getHostGroupsWithComponent("RANGER_ADMIN");
             List<HostGroup> groups = dataLakeCluster.getHostGroups().stream().filter(hg -> groupNames.contains(hg.getName())).collect(Collectors.toList());
             Set<String> hostNames = new HashSet<>();
             groups.forEach(hg -> hostNames.addAll(hg.getHostMetadata().stream().map(HostMetadata::getHostName).collect(Collectors.toList())));
@@ -234,7 +234,7 @@ public class ClusterHostServiceRunner {
         Json exposedJson = cluster.getGateway().getExposedServices();
         if (exposedJson != null && StringUtils.isNoneEmpty(exposedJson.getValue())) {
             List<String> exposedServices = exposedJson.get(ExposedServices.class).getServices();
-            if (blueprintProcessor.componentExistsInBlueprint("HIVE_SERVER_INTERACTIVE", cluster.getBlueprint().getBlueprintText())) {
+            if (blueprintProcessorFactory.get(cluster.getBlueprint().getBlueprintText()).componentExistsInBlueprint("HIVE_SERVER_INTERACTIVE")) {
                 exposedServices = exposedServices.stream().map(x -> "HIVE".equals(x) ? "HIVE_INTERACTIVE" : x).collect(Collectors.toList());
             }
             gateway.put("exposed", exposedServices);

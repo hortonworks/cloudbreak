@@ -1,0 +1,19 @@
+{
+{{{#if ldapConfig}}}
+  "core-site": {
+    "hadoop.security.group.mapping": "org.apache.hadoop.security.LdapGroupsMapping",
+    "hadoop.security.group.mapping.ldap.url": "{{{ ldapConfig.connectionURL }}}",
+    "hadoop.security.group.mapping.ldap.bind.user": "{{{ ldapConfig.bindDn }}}",
+    "hadoop.security.group.mapping.ldap.bind.password": "{{{ ldapConfig.bindPassword }}}",
+    "hadoop.security.group.mapping.ldap.userbase": "{{{ ldapConfig.userSearchBase }}}",
+    "hadoop.security.group.mapping.ldap.search.filter.user": "(&(objectClass={{{ ldapConfig.userObjectClass }}})({{{ ldapConfig.userNameAttribute }}}={0}))",
+    "hadoop.security.group.mapping.ldap.groupbase": "{{{ ldapConfig.groupSearchBase }}}",
+    "hadoop.security.group.mapping.ldap.search.filter.group": "(objectClass={{{ ldapConfig.groupObjectClass }}})",
+    "hadoop.security.group.mapping.ldap.search.attr.group.name": "{{{ ldapConfig.groupNameAttribute }}}",
+    "hadoop.security.group.mapping.ldap.search.attr.member": "{{{ ldapConfig.groupMemberAttribute }}}",
+    "hadoop.user.group.static.mapping.overrides": "hive=hive,hadoop;hdfs=hdfs,hadoop;beacon=hadoop,hdfs,beacon;dpprofiler=hadoop",
+    "hadoop.proxyuser.livy.groups": "*",
+    "hadoop.proxyuser.livy.hosts": "*"
+  }
+{{{/if}}}
+}

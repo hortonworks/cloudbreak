@@ -18,29 +18,28 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessingException;
-import com.sequenceiq.cloudbreak.blueprint.templates.BlueprintStackInfo;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
 @RunWith(MockitoJUnitRunner.class)
 public class StackInfoServiceTest {
 
-    @Mock
-    private BlueprintUtils blueprintUtils;
-
     @Rule
     public final ExpectedException thrown = ExpectedException.none();
+
+    @Mock
+    private BlueprintUtils blueprintUtils;
 
     @InjectMocks
     private StackInfoService stackInfoService;
 
     @Test
     public void blueprintStackInfoWhenWeCanDetectTheStackInfoAndStackVersion() throws IOException {
-        String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints/bp-kerberized-test.bp");
+        String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints-jackson/bp-kerberized-test.bp");
 
         when(blueprintUtils.getBlueprintHdpVersion(any(JsonNode.class))).thenReturn("2.6");
         when(blueprintUtils.getBlueprintStackName(any(JsonNode.class))).thenReturn("HDP");
 
-        BlueprintStackInfo blueprintStackInfo = stackInfoService.blueprintStackInfo(testBlueprint);
+        stackInfoService.blueprintStackInfo(testBlueprint);
 
         verify(blueprintUtils, times(1)).getBlueprintHdpVersion(any(JsonNode.class));
         verify(blueprintUtils, times(1)).getBlueprintStackName(any(JsonNode.class));
@@ -56,16 +55,15 @@ public class StackInfoServiceTest {
         thrown.expect(BlueprintProcessingException.class);
         thrown.expectMessage("Unable to detect BlueprintStackInfo from the source blueprint which was: not-a-valid-bluepint.");
 
-        BlueprintStackInfo blueprintStackInfo = stackInfoService.blueprintStackInfo(testBlueprint);
+        stackInfoService.blueprintStackInfo(testBlueprint);
 
         verify(blueprintUtils, times(0)).getBlueprintHdpVersion(any(JsonNode.class));
         verify(blueprintUtils, times(0)).getBlueprintStackName(any(JsonNode.class));
     }
 
-
     @Test
     public void hdfClusterWhenWeCanDetectTheStackInfoAndStackVersionAndTypeIsHDFThenShouldReturnTrue() throws IOException {
-        String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints/bp-kerberized-test.bp");
+        String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints-jackson/bp-kerberized-test.bp");
 
         when(blueprintUtils.getBlueprintHdpVersion(any(JsonNode.class))).thenReturn("2.6");
         when(blueprintUtils.getBlueprintStackName(any(JsonNode.class))).thenReturn("HDF");
@@ -78,7 +76,7 @@ public class StackInfoServiceTest {
 
     @Test
     public void hdfClusterWhenWeCanDetectTheStackInfoAndStackVersionAndTypeIsHDPThenShouldReturnFalse() throws IOException {
-        String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints/bp-kerberized-test.bp");
+        String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints-jackson/bp-kerberized-test.bp");
 
         when(blueprintUtils.getBlueprintHdpVersion(any(JsonNode.class))).thenReturn("2.6");
         when(blueprintUtils.getBlueprintStackName(any(JsonNode.class))).thenReturn("HDP");

@@ -1,0 +1,183 @@
+package com.sequenceiq.cloudbreak.converter.v2;
+
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
+
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
+import com.sequenceiq.cloudbreak.api.model.FileSystemConfiguration;
+import com.sequenceiq.cloudbreak.api.model.v2.InstanceGroupV2Request;
+import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
+import com.sequenceiq.cloudbreak.blueprint.BlueprintPreparationObject;
+import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessingException;
+import com.sequenceiq.cloudbreak.blueprint.GeneralClusterConfigsProvider;
+import com.sequenceiq.cloudbreak.blueprint.filesystem.FileSystemConfigurationProvider;
+import com.sequenceiq.cloudbreak.blueprint.template.views.BlueprintView;
+import com.sequenceiq.cloudbreak.blueprint.template.views.FileSystemConfigurationView;
+import com.sequenceiq.cloudbreak.blueprint.template.views.HostgroupView;
+import com.sequenceiq.cloudbreak.blueprint.templates.BlueprintStackInfo;
+import com.sequenceiq.cloudbreak.blueprint.templates.GeneralClusterConfigs;
+import com.sequenceiq.cloudbreak.blueprint.utils.StackInfoService;
+import com.sequenceiq.cloudbreak.cloud.model.AmbariDatabase;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.common.service.user.UserFilterField;
+import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.FileSystem;
+import com.sequenceiq.cloudbreak.domain.FlexSubscription;
+import com.sequenceiq.cloudbreak.domain.KerberosConfig;
+import com.sequenceiq.cloudbreak.domain.LdapConfig;
+import com.sequenceiq.cloudbreak.domain.RDSConfig;
+import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
+import com.sequenceiq.cloudbreak.service.flex.FlexSubscriptionService;
+import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
+import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
+import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
+
+@Component
+public class StackRequestToBlueprintPreparationObjectConverter extends AbstractConversionServiceAwareConverter<StackV2Request, BlueprintPreparationObject> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(StackRequestToBlueprintPreparationObjectConverter.class);
+
+    @Inject
+    private FlexSubscriptionService flexSubscriptionService;
+
+    @Inject
+    private LdapConfigService ldapConfigService;
+
+    @Inject
+    private RdsConfigService rdsConfigService;
+
+    @Inject
+    private GeneralClusterConfigsProvider generalClusterConfigsProvider;
+
+    @Inject
+    private UserDetailsService userDetailsService;
+
+    @Inject
+    private BlueprintService blueprintService;
+
+    @Inject
+    private FileSystemConfigurationProvider fileSystemConfigurationProvider;
+
+    @Inject
+    private StackInfoService stackInfoService;
+
+    @Override
+    public BlueprintPreparationObject convert(StackV2Request source) {
+        try {
+            IdentityUser identityUser = userDetailsService.getDetails(source.getOwner(), UserFilterField.USERID);
+            FlexSubscription flexSubscription = getFlexSubscription(source);
+            String smartsenseSubscriptionId = getSmartsenseSubscriptionId(source, flexSubscription);
+            KerberosConfig kerberosConfig = getKerberosConfig(source);
+            LdapConfig ldapConfig = getLdapConfig(source, identityUser);
+            AmbariDatabase ambariDatabase = getAmbariDatabase(source);
+            FileSystemConfigurationView fileSystemConfigurationView = getFileSystemConfigurationView(source);
+            Set<RDSConfig> rdsConfigs = getRdsConfigs(source, identityUser);
+            Blueprint blueprint = blueprintService.get(source.getCluster().getAmbari().getBlueprintId());
+            BlueprintStackInfo blueprintStackInfo = stackInfoService.blueprintStackInfo(blueprint.getBlueprintText());
+            Set<HostgroupView> hostgroupViews = getHostgroupViews(source);
+            BlueprintView blueprintView = new BlueprintView(blueprint.getBlueprintText(), blueprintStackInfo.getVersion(), blueprintStackInfo.getType());
+            GeneralClusterConfigs generalClusterConfigs = generalClusterConfigsProvider.generalClusterConfigs(source, identityUser);
+
+            return BlueprintPreparationObject.Builder.builder()
+                    .withFlexSubscription(flexSubscription)
+                    .withRdsConfigs(rdsConfigs)
+                    .withHostgroupViews(hostgroupViews)
+                    .withBlueprintView(blueprintView)
+                    .withStackRepoDetailsHdpVersion(blueprintStackInfo.getVersion())
+                    .withAmbariDatabase(ambariDatabase)
+                    .withFileSystemConfigurationView(fileSystemConfigurationView)
+                    .withGeneralClusterConfigs(generalClusterConfigs)
+                    .withSmartSenseSubscriptionId(smartsenseSubscriptionId)
+                    .withLdapConfig(ldapConfig)
+                    .withKerberosConfig(kerberosConfig)
+                    .build();
+        } catch (BlueprintProcessingException e) {
+            throw new CloudbreakServiceException(e.getMessage(), e);
+        } catch (IOException e) {
+            throw new CloudbreakServiceException(e.getMessage(), e);
+        }
+    }
+
+    private FlexSubscription getFlexSubscription(StackV2Request source) {
+        FlexSubscription flexSubscription = null;
+        if (source.getFlexId() != null) {
+            flexSubscription = flexSubscriptionService.findOneById(source.getFlexId());
+        }
+        return flexSubscription;
+    }
+
+    private String getSmartsenseSubscriptionId(StackV2Request source, FlexSubscription flexSubscription) {
+        String smartsenseSubscriptionId = null;
+        if (source.getFlexId() != null) {
+            smartsenseSubscriptionId = flexSubscription.getSubscriptionId();
+        }
+        return smartsenseSubscriptionId;
+    }
+
+    private Set<HostgroupView> getHostgroupViews(StackV2Request source) {
+        Set<HostgroupView> hostgroupViews = new HashSet<>();
+        for (InstanceGroupV2Request instanceGroupV2Request : source.getInstanceGroups()) {
+            hostgroupViews.add(
+                    new HostgroupView(
+                            instanceGroupV2Request.getGroup(),
+                            instanceGroupV2Request.getTemplate().getVolumeCount(),
+                            instanceGroupV2Request.getType(),
+                            instanceGroupV2Request.getNodeCount()));
+        }
+        return hostgroupViews;
+    }
+
+    private Set<RDSConfig> getRdsConfigs(StackV2Request source, IdentityUser identityUser) {
+        Set<RDSConfig> rdsConfigs = new HashSet<>();
+        for (String rdsConfigRequest : source.getCluster().getRdsConfigNames()) {
+            RDSConfig rdsConfig = rdsConfigService.getPrivateRdsConfig(rdsConfigRequest, identityUser);
+            rdsConfigs.add(rdsConfig);
+        }
+        return rdsConfigs;
+    }
+
+    private FileSystemConfigurationView getFileSystemConfigurationView(StackV2Request source) throws IOException {
+        FileSystemConfigurationView fileSystemConfigurationView = null;
+        if (source.getCluster().getFileSystem() != null) {
+            FileSystem fileSystem = getConversionService().convert(source.getCluster().getFileSystem(), FileSystem.class);
+
+            FileSystemConfiguration fileSystemConfiguration = fileSystemConfigurationProvider.fileSystemConfiguration(fileSystem, null);
+            fileSystemConfigurationView = new FileSystemConfigurationView(fileSystemConfiguration, source.getCluster().getFileSystem().isDefaultFs());
+        }
+        return fileSystemConfigurationView;
+    }
+
+    private AmbariDatabase getAmbariDatabase(StackV2Request source) {
+        AmbariDatabase ambariDatabase = null;
+        if (source.getCluster().getAmbari().getAmbariDatabaseDetails() != null) {
+            ambariDatabase = getConversionService().convert(source.getCluster().getAmbari().getAmbariDatabaseDetails(), AmbariDatabase.class);
+        }
+        return ambariDatabase;
+    }
+
+    private LdapConfig getLdapConfig(StackV2Request source, IdentityUser identityUser) {
+        LdapConfig ldapConfig = null;
+        if (source.getCluster().getLdapConfigName() != null) {
+            ldapConfig = ldapConfigService.getPublicConfig(source.getCluster().getLdapConfigName(), identityUser);
+        }
+        return ldapConfig;
+    }
+
+    private KerberosConfig getKerberosConfig(StackV2Request source) {
+        KerberosConfig kerberosConfig = null;
+        if (source.getCluster().getAmbari().getKerberos() != null) {
+            kerberosConfig = getConversionService().convert(source.getCluster().getAmbari().getKerberos(), KerberosConfig.class);
+        }
+        return kerberosConfig;
+    }
+
+
+}

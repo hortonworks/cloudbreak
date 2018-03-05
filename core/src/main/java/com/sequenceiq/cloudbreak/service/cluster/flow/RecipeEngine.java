@@ -23,7 +23,7 @@ import com.sequenceiq.cloudbreak.api.model.FileSystemConfiguration;
 import com.sequenceiq.cloudbreak.api.model.FileSystemType;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.model.RecipeType;
-import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessor;
+import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessorFactory;
 import com.sequenceiq.cloudbreak.blueprint.SmartsenseConfigurationLocator;
 import com.sequenceiq.cloudbreak.blueprint.smartsense.SmartSenseConfigProvider;
 import com.sequenceiq.cloudbreak.blueprint.filesystem.FileSystemConfigurator;
@@ -62,7 +62,7 @@ public class RecipeEngine {
     private OrchestratorRecipeExecutor orchestratorRecipeExecutor;
 
     @Inject
-    private BlueprintProcessor blueprintProcessor;
+    private BlueprintProcessorFactory blueprintProcessorFactory;
 
     @Inject
     private SmartSenseConfigProvider smartSenseConfigProvider;
@@ -228,7 +228,7 @@ public class RecipeEngine {
         try {
             Cluster cluster = stack.getCluster();
             String blueprintText = cluster.getBlueprint().getBlueprintText();
-            if (smartsenseConfigurationLocator.smartsenseConfigurable(blueprintText, smartSenseSubscriptionService.getDefault())) {
+            if (smartsenseConfigurationLocator.smartsenseConfigurable(smartSenseSubscriptionService.getDefault())) {
                 for (HostGroup hostGroup : hostGroups) {
                     if (isComponentPresent(blueprintText, "HST_AGENT", hostGroup)) {
                         String script = FileReaderUtils.readFileFromClasspath("scripts/smartsense-capture-schedule.sh");
@@ -251,7 +251,7 @@ public class RecipeEngine {
 
     private boolean isComponentPresent(String blueprint, String component, Iterable<HostGroup> hostGroups) {
         for (HostGroup hostGroup : hostGroups) {
-            Set<String> components = blueprintProcessor.getComponentsInHostGroup(blueprint, hostGroup.getName());
+            Set<String> components = blueprintProcessorFactory.get(blueprint).getComponentsInHostGroup(hostGroup.getName());
             if (components.contains(component)) {
                 return true;
             }

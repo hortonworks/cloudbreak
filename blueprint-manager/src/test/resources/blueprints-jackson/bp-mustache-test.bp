@@ -98,11 +98,11 @@
         "ranger-ugsync-site": {
           "ranger.usersync.enabled": "true",
           "ranger.usersync.source.impl.class": "org.apache.ranger.ldapusersync.process.LdapUserGroupBuilder",
-          "ranger.usersync.ldap.url": "{{{ ldapConfig.connectionURL }}}",
-          "ranger.usersync.ldap.binddn": "{{{ ldapConfig.bindDn }}}",
-          "ranger.usersync.ldap.ldapbindpassword": "{{{ ldapConfig.bindPassword }}}",
-          "ranger.usersync.ldap.user.nameattribute": "{{{ ldapConfig.userNameAttribute }}}",
-          "ranger.usersync.ldap.user.searchbase": "{{{ ldapConfig.userSearchBase }}}",
+          "ranger.usersync.ldap.url": "{{{ ldap.connectionURL }}}",
+          "ranger.usersync.ldap.binddn": "{{{ ldap.bindDn }}}",
+          "ranger.usersync.ldap.ldapbindpassword": "{{{ ldap.bindPassword }}}",
+          "ranger.usersync.ldap.user.nameattribute": "{{{ ldap.userNameAttribute }}}",
+          "ranger.usersync.ldap.user.searchbase": "{{{ ldap.userSearchBase }}}",
           "ranger.usersync.group.searchenabled": "false"
         }
       },
@@ -113,9 +113,9 @@
             "ranger.jpa.jdbc.url": "{{{ rds.ranger.connectionURL }}}",
             "ranger.audit.source.type": "solr",
             "ranger.authentication.method": "ACTIVE_DIRECTORY",
-            "ranger.ldap.ad.user.searchfilter": "({{{ ldapConfig.userNameAttribute }}}={0})",
-            "ranger.ldap.ad.domain": "{{{ ldapConfig.domain }}}",
-            "ranger.ldap.ad.base.dn": "{{{ ldapConfig.userSearchBase }}}"
+            "ranger.ldap.ad.user.searchfilter": "({{{ ldap.userNameAttribute }}}={0})",
+            "ranger.ldap.ad.domain": "{{{ ldap.domain }}}",
+            "ranger.ldap.ad.base.dn": "{{{ ldap.userSearchBase }}}"
           }
         }
       },

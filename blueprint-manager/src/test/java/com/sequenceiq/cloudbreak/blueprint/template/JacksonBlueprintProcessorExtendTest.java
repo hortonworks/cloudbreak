@@ -9,14 +9,14 @@ import org.junit.Test;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.ImmutableMap;
-import com.sequenceiq.cloudbreak.blueprint.JacksonBlueprintProcessor;
+import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessorFactory;
 import com.sequenceiq.cloudbreak.blueprint.configuration.HostgroupConfigurations;
 import com.sequenceiq.cloudbreak.blueprint.configuration.SiteConfigurations;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 public class JacksonBlueprintProcessorExtendTest {
-    private final JacksonBlueprintProcessor underTest = new JacksonBlueprintProcessor();
+    private final BlueprintProcessorFactory underTest = new BlueprintProcessorFactory();
 
     @Test
     public void testExtendBlueprintWithConfiguration() throws URISyntaxException, IOException {
@@ -26,7 +26,7 @@ public class JacksonBlueprintProcessorExtendTest {
         Map<String, Map<String, String>> globalConfig = ImmutableMap.of("yarn-site", ImmutableMap.of("property-key", "property-value",
                 "yarn.nodemanager.local-dirs", "/mnt/fs1/,/mnt/fs2/"),
                 "hdfs-site", ImmutableMap.of("dfs.datanode.data.dir", "/mnt/fs1/,/mnt/fs2/"));
-        String result = underTest.extendBlueprintGlobalConfiguration(json, SiteConfigurations.fromMap(globalConfig));
+        String result = underTest.get(json).extendBlueprintGlobalConfiguration(SiteConfigurations.fromMap(globalConfig), false).asText();
 
         JsonNode expectedNode = JsonUtil.readTree(expected);
         JsonNode resultNode = JsonUtil.readTree(result);
@@ -43,7 +43,7 @@ public class JacksonBlueprintProcessorExtendTest {
                         "yarn.nodemanager.local-dirs", "apple"),
                 "hdfs-site", ImmutableMap.of("dfs.datanode.data.dir", "/mnt/fs1/,/mnt/fs2/"),
                 "core-site", ImmutableMap.of("fs.defaultFS", "localhost:9000"));
-        String result = underTest.extendBlueprintGlobalConfiguration(json, SiteConfigurations.fromMap(globalConfig), true);
+        String result = underTest.get(json).extendBlueprintGlobalConfiguration(SiteConfigurations.fromMap(globalConfig), true).asText();
 
         JsonNode expectedNode = JsonUtil.readTree(expected);
         JsonNode resultNode = JsonUtil.readTree(result);
@@ -61,7 +61,7 @@ public class JacksonBlueprintProcessorExtendTest {
                         "yarn.nodemanager.local-dirs", "apple"),
                 "hdfs-site", ImmutableMap.of("dfs.datanode.data.dir", "/mnt/fs1/,/mnt/fs2/"),
                 "core-site", ImmutableMap.of("fs.defaultFS", "localhost:9000"));
-        String result = underTest.extendBlueprintGlobalConfiguration(json, SiteConfigurations.fromMap(globalConfig), false);
+        String result = underTest.get(json).extendBlueprintGlobalConfiguration(SiteConfigurations.fromMap(globalConfig), false).asText();
 
         JsonNode expectedNode = JsonUtil.readTree(expected);
         JsonNode resultNode = JsonUtil.readTree(result);
@@ -78,7 +78,7 @@ public class JacksonBlueprintProcessorExtendTest {
                 ImmutableMap.of("*.falcon.graph.serialize.path", "/hadoopfs/fs1/falcon",
                         "*.falcon.graph.storage.directory", "/hadoopfs/fs1/falcon"),
                 "zoo.cfg", ImmutableMap.of("dataDir", "/hadoopfs/fs1/zookeeper"));
-        String result = underTest.extendBlueprintGlobalConfiguration(json, SiteConfigurations.fromMap(globalConfig), false);
+        String result = underTest.get(json).extendBlueprintGlobalConfiguration(SiteConfigurations.fromMap(globalConfig), false).asText();
 
         JsonNode expectedNode = JsonUtil.readTree(expected);
         JsonNode resultNode = JsonUtil.readTree(result);
@@ -94,7 +94,7 @@ public class JacksonBlueprintProcessorExtendTest {
                 ImmutableMap.of("*.falcon.graph.serialize.path", "/hadoopfs/fs1/falcon",
                         "*.falcon.graph.storage.directory", "/hadoopfs/fs1/falcon"),
                 "zoo.cfg", ImmutableMap.of("dataDir", "/hadoopfs/fs1/zookeeper"));
-        String result = underTest.extendBlueprintGlobalConfiguration(json, SiteConfigurations.fromMap(globalConfig), true);
+        String result = underTest.get(json).extendBlueprintGlobalConfiguration(SiteConfigurations.fromMap(globalConfig), true).asText();
 
         JsonNode expectedNode = JsonUtil.readTree(expected);
         JsonNode resultNode = JsonUtil.readTree(result);
@@ -104,7 +104,7 @@ public class JacksonBlueprintProcessorExtendTest {
     @Test
     public void testExtendBlueprintWithEmptyConfiguration() throws IOException {
         String json = FileReaderUtils.readFileFromClasspath("extend-blueprint/blueprint.json");
-        String result = underTest.extendBlueprintGlobalConfiguration(json, SiteConfigurations.getEmptyConfiguration());
+        String result = underTest.get(json).extendBlueprintGlobalConfiguration(SiteConfigurations.getEmptyConfiguration(), false).asText();
 
         JsonNode expectedNode = JsonUtil.readTree(json);
         JsonNode resultNode = JsonUtil.readTree(result);
@@ -120,7 +120,7 @@ public class JacksonBlueprintProcessorExtendTest {
                 ImmutableMap.of("yarn-site", ImmutableMap.of("property-key", "property-value",
                         "yarn.nodemanager.local-dirs", "/mnt/fs1/,/mnt/fs2/"),
                         "hdfs-site", ImmutableMap.of("dfs.datanode.data.dir", "/mnt/fs1/,/mnt/fs2/")));
-        String result = underTest.extendBlueprintHostGroupConfiguration(json, HostgroupConfigurations.fromMap(hgConfig), false);
+        String result = underTest.get(json).extendBlueprintHostGroupConfiguration(HostgroupConfigurations.fromMap(hgConfig), false).asText();
 
         JsonNode expectedNode = JsonUtil.readTree(expected);
         JsonNode resultNode = JsonUtil.readTree(result);
@@ -136,7 +136,7 @@ public class JacksonBlueprintProcessorExtendTest {
                 ImmutableMap.of("yarn-site", ImmutableMap.of("property-key", "property-value",
                         "yarn.nodemanager.local-dirs", "/mnt/fs1/,/mnt/fs2/"),
                         "hdfs-site", ImmutableMap.of("dfs.datanode.data.dir", "/mnt/fs1/,/mnt/fs2/")));
-        String result = underTest.extendBlueprintHostGroupConfiguration(json, HostgroupConfigurations.fromMap(hgConfig), true);
+        String result = underTest.get(json).extendBlueprintHostGroupConfiguration(HostgroupConfigurations.fromMap(hgConfig), true).asText();
 
         JsonNode expectedNode = JsonUtil.readTree(expected);
         JsonNode resultNode = JsonUtil.readTree(result);
@@ -156,7 +156,7 @@ public class JacksonBlueprintProcessorExtendTest {
                 ImmutableMap.of("yarn-site", ImmutableMap.of("property-key", "property-value",
                         "yarn.nodemanager.local-dirs", "/mnt/fs1/,/mnt/fs2/"),
                         "hdfs-site", ImmutableMap.of("dfs.datanode.data.dir", "/mnt/fs1/,/mnt/fs2/")));
-        String result = underTest.extendBlueprintHostGroupConfiguration(json, HostgroupConfigurations.fromMap(hgConfig), false);
+        String result = underTest.get(json).extendBlueprintHostGroupConfiguration(HostgroupConfigurations.fromMap(hgConfig), false).asText();
 
         JsonNode expectedNode = JsonUtil.readTree(expected);
         JsonNode resultNode = JsonUtil.readTree(result);
@@ -176,7 +176,7 @@ public class JacksonBlueprintProcessorExtendTest {
                 ImmutableMap.of("yarn-site", ImmutableMap.of("property-key", "property-value",
                         "yarn.nodemanager.local-dirs", "/mnt/fs1/,/mnt/fs2/"),
                         "hdfs-site", ImmutableMap.of("dfs.datanode.data.dir", "/mnt/fs1/,/mnt/fs2/")));
-        String result = underTest.extendBlueprintHostGroupConfiguration(json, HostgroupConfigurations.fromMap(hgConfig), true);
+        String result = underTest.get(json).extendBlueprintHostGroupConfiguration(HostgroupConfigurations.fromMap(hgConfig), true).asText();
 
         JsonNode expectedNode = JsonUtil.readTree(expected);
         JsonNode resultNode = JsonUtil.readTree(result);
@@ -191,7 +191,7 @@ public class JacksonBlueprintProcessorExtendTest {
         Map<String, Map<String, Map<String, String>>> hgConfig = ImmutableMap.of("master",
                 ImmutableMap.of("yarn-site", ImmutableMap.of("property-key", "property-value",
                         "yarn.nodemanager.local-dirs", "/mnt/fs1/,/mnt/fs2/")));
-        String result = underTest.extendBlueprintHostGroupConfiguration(json, HostgroupConfigurations.fromMap(hgConfig), false);
+        String result = underTest.get(json).extendBlueprintHostGroupConfiguration(HostgroupConfigurations.fromMap(hgConfig), false).asText();
 
         JsonNode expectedNode = JsonUtil.readTree(expected);
         JsonNode resultNode = JsonUtil.readTree(result);
@@ -206,7 +206,7 @@ public class JacksonBlueprintProcessorExtendTest {
         Map<String, Map<String, Map<String, String>>> hgConfig = ImmutableMap.of("master",
                 ImmutableMap.of("yarn-site", ImmutableMap.of("property-key", "property-value",
                         "yarn.nodemanager.local-dirs", "/mnt/fs1/,/mnt/fs2/")));
-        String result = underTest.extendBlueprintHostGroupConfiguration(json, HostgroupConfigurations.fromMap(hgConfig), true);
+        String result = underTest.get(json).extendBlueprintHostGroupConfiguration(HostgroupConfigurations.fromMap(hgConfig), true).asText();
 
         JsonNode expectedNode = JsonUtil.readTree(expected);
         JsonNode resultNode = JsonUtil.readTree(result);
@@ -220,7 +220,7 @@ public class JacksonBlueprintProcessorExtendTest {
 
         Map<String, Map<String, String>> globalConfig = ImmutableMap.of("hdfs-site",
                 ImmutableMap.of("property-key", "property-value", "yarn.nodemanager.local-dirs", "/mnt/fs1/,/mnt/fs2/"));
-        String result = underTest.extendBlueprintGlobalConfiguration(json, SiteConfigurations.fromMap(globalConfig));
+        String result = underTest.get(json).extendBlueprintGlobalConfiguration(SiteConfigurations.fromMap(globalConfig), false).asText();
 
         JsonNode expectedNode = JsonUtil.readTree(expected);
         JsonNode resultNode = JsonUtil.readTree(result);
@@ -237,7 +237,7 @@ public class JacksonBlueprintProcessorExtendTest {
                         ImmutableMap.of("property-key", "property-value", "yarn.nodemanager.local-dirs", "/mnt/fs1/,/mnt/fs2/"),
                         "kafka-broker",
                         ImmutableMap.of("property-key", "property-value", "yarn.nodemanager.local-dirs", "/mnt/fs1/,/mnt/fs2/")));
-        String result = underTest.extendBlueprintHostGroupConfiguration(json, HostgroupConfigurations.fromMap(hgConfig), true);
+        String result = underTest.get(json).extendBlueprintHostGroupConfiguration(HostgroupConfigurations.fromMap(hgConfig), true).asText();
 
         JsonNode expectedNode = JsonUtil.readTree(expected);
         JsonNode resultNode = JsonUtil.readTree(result);
@@ -259,8 +259,10 @@ public class JacksonBlueprintProcessorExtendTest {
                 "hdfs-site", ImmutableMap.of("dfs.datanode.data.dir", "/mnt/fs1/,/mnt/fs2/"),
                 "core-site", ImmutableMap.of("fs.defaultFS", "localhost:9000"));
 
-        String result = underTest.extendBlueprintHostGroupConfiguration(json, HostgroupConfigurations.fromMap(hgConfig));
-        result = underTest.extendBlueprintGlobalConfiguration(result, SiteConfigurations.fromMap(globalConfig));
+        String result = underTest.get(json)
+                .extendBlueprintHostGroupConfiguration(HostgroupConfigurations.fromMap(hgConfig), false)
+                .extendBlueprintGlobalConfiguration(SiteConfigurations.fromMap(globalConfig), false)
+                .asText();
 
         JsonNode expectedNode = JsonUtil.readTree(expected);
         JsonNode resultNode = JsonUtil.readTree(result);
@@ -273,7 +275,7 @@ public class JacksonBlueprintProcessorExtendTest {
         String expected = FileReaderUtils.readFileFromClasspath("extend-blueprint/blueprint-config.json");
         String config = FileReaderUtils.readFileFromClasspath("extend-blueprint/config.json");
 
-        String result = underTest.addConfigEntryStringToBlueprint(json, config, false);
+        String result = underTest.get(json).addConfigEntryStringToBlueprint(config, false).asText();
 
         JsonNode expectedNode = JsonUtil.readTree(expected);
         JsonNode resultNode = JsonUtil.readTree(result);
@@ -286,7 +288,7 @@ public class JacksonBlueprintProcessorExtendTest {
         String expected = FileReaderUtils.readFileFromClasspath("extend-blueprint/blueprint-settings.json");
         String config = FileReaderUtils.readFileFromClasspath("extend-blueprint/config.json");
 
-        String result = underTest.addSettingsEntryStringToBlueprint(json, config, false);
+        String result = underTest.get(json).addSettingsEntryStringToBlueprint(config, false).asText();
 
         JsonNode expectedNode = JsonUtil.readTree(expected);
         JsonNode resultNode = JsonUtil.readTree(result);

@@ -11,19 +11,19 @@ import com.google.common.collect.Sets;
 
 public interface BlueprintComponentConfigProvider {
 
-    default String customTextManipulation(BlueprintPreparationObject source, String blueprintText) {
-        return blueprintText;
+    default BlueprintTextProcessor customTextManipulation(BlueprintPreparationObject source, BlueprintTextProcessor blueprintProcessor) {
+        return blueprintProcessor;
     }
 
-    default List<BlueprintConfigurationEntry> getSettingsEntries(BlueprintPreparationObject source, String blueprintText) {
+    default List<BlueprintConfigurationEntry> getSettingsEntries(BlueprintPreparationObject source, String blueprintProcessor) {
         return Lists.newArrayList();
     }
 
-    default List<BlueprintConfigurationEntry> getConfigurationEntries(BlueprintPreparationObject source, String blueprintText) throws IOException {
+    default List<BlueprintConfigurationEntry> getConfigurationEntries(BlueprintPreparationObject source, String blueprintProcessor) throws IOException {
         return Lists.newArrayList();
     }
 
-    default Map<HostgroupEntry, List<BlueprintConfigurationEntry>> getHostgroupConfigurationEntries(BlueprintPreparationObject source, String blueprintText)
+    default Map<HostgroupEntry, List<BlueprintConfigurationEntry>> getHostgroupConfigurationEntries(BlueprintPreparationObject source, String blueprintProcessor)
             throws IOException {
         return Maps.newHashMap();
     }

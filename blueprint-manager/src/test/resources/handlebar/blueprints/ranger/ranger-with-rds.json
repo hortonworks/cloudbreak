@@ -11,8 +11,8 @@
   },
   "ranger-env": {
     "properties": {
-      "admin_password": "rangerAdminPassword",
-      "ranger_admin_password": "rangerAdminPassword",
+      "admin_password": "{{{rds.ranger.properties.rangerAdminPassword}}}",
+      "ranger_admin_password": "{{{rds.ranger.properties.rangerAdminPassword}}}",
       "is_solrCloud_enabled": "true",
       "ranger-hdfs-plugin-enabled": "No",
       "ranger-hive-plugin-enabled": "No",

@@ -11,67 +11,56 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.FileSystemConfiguration;
 import com.sequenceiq.cloudbreak.api.model.FileSystemType;
-import com.sequenceiq.cloudbreak.blueprint.filesystem.AzureFileSystemConfigProvider;
+import com.sequenceiq.cloudbreak.blueprint.configuration.HostgroupConfigurations;
+import com.sequenceiq.cloudbreak.blueprint.filesystem.FileSystemConfigurationProvider;
 import com.sequenceiq.cloudbreak.blueprint.filesystem.FileSystemConfigurator;
-import com.sequenceiq.cloudbreak.common.type.CloudConstants;
-import com.sequenceiq.cloudbreak.domain.FileSystem;
-import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 @Component
 public class BlueprintComponentProviderProcessor {
-
-    @Inject
-    private AzureFileSystemConfigProvider azureFileSystemConfigProvider;
 
     @Resource
     private Map<FileSystemType, FileSystemConfigurator<FileSystemConfiguration>> fileSystemConfigurators;
 
     @Inject
+    private FileSystemConfigurationProvider fileSystemConfigurationProvider;
+
+    @Inject
     private List<BlueprintComponentConfigProvider> blueprintComponentConfigProviders;
 
     @Inject
-    private BlueprintProcessor blueprintProcessor;
+    private BlueprintProcessorFactory blueprintProcessorFactory;
 
-    public String process(BlueprintPreparationObject source, String blueprint) throws IOException {
+    public String process(BlueprintPreparationObject source, String blueprintText) throws IOException {
+        BlueprintTextProcessor blueprintProcessor = blueprintProcessorFactory.get(blueprintText);
         for (BlueprintComponentConfigProvider provider : blueprintComponentConfigProviders) {
-            if (blueprintProcessor.componentsExistsInBlueprint(provider.components(), blueprint) || provider.additionalCriteria(source, blueprint)) {
-                blueprint = blueprintProcessor.addConfigEntries(blueprint, provider.getConfigurationEntries(source, blueprint), false);
-                blueprint = blueprintProcessor.addSettingsEntries(blueprint, provider.getSettingsEntries(source, blueprint), false);
+            if (blueprintProcessor.componentsExistsInBlueprint(provider.components()) || provider.additionalCriteria(source, blueprintText)) {
+                blueprintProcessor.addConfigEntries(provider.getConfigurationEntries(source, blueprintProcessor.asText()), false);
+                blueprintProcessor.addSettingsEntries(provider.getSettingsEntries(source, blueprintProcessor.asText()), false);
 
-                Map<HostgroupEntry, List<BlueprintConfigurationEntry>> hostgroupConfigs = provider.getHostgroupConfigurationEntries(source, blueprint);
-                blueprint = provider.customTextManipulation(source, blueprint);
+                Map<HostgroupEntry, List<BlueprintConfigurationEntry>> hostgroupConfigs = provider.getHostgroupConfigurationEntries(source, blueprintText);
+                blueprintProcessor.extendBlueprintHostGroupConfiguration(HostgroupConfigurations.fromConfigEntryMap(hostgroupConfigs), false);
+                provider.customTextManipulation(source, blueprintProcessor);
             }
         }
-        if (source.getCluster().getFileSystem() != null) {
-            blueprint = extendBlueprintWithFsConfig(blueprint, source.getCluster().getFileSystem(), source.getStack());
+        if (source.getFileSystemConfigurationView().isPresent()) {
+            extendBlueprintWithFsConfig(blueprintProcessor,
+                    source.getFileSystemConfigurationView().get().getFileSystemConfiguration(),
+                    source.getFileSystemConfigurationView().get().isDefaultFs());
         }
-        if (!source.getOrchestratorType().containerOrchestrator() && source.getStackRepoDetailsHdpVersion().isPresent()) {
-            blueprint = blueprintProcessor.modifyHdpVersion(blueprint, source.getStackRepoDetailsHdpVersion().get());
+        if (!source.getGeneralClusterConfigs().getOrchestratorType().containerOrchestrator() && source.getStackRepoDetailsHdpVersion().isPresent()) {
+            blueprintProcessor.modifyHdpVersion(source.getStackRepoDetailsHdpVersion().get());
         }
-        return blueprint;
+        return blueprintProcessor.asText();
     }
 
-    private String extendBlueprintWithFsConfig(String blueprintText, FileSystem fs, Stack stack) throws IOException {
-        FileSystemType fileSystemType = FileSystemType.valueOf(fs.getType());
+    private String extendBlueprintWithFsConfig(BlueprintTextProcessor blueprintProcessor, FileSystemConfiguration fsConfiguration, boolean defaultFs) {
+        FileSystemType fileSystemType = FileSystemType.fromClass(fsConfiguration.getClass());
         FileSystemConfigurator<FileSystemConfiguration> fsConfigurator = fileSystemConfigurators.get(fileSystemType);
-        String json = JsonUtil.writeValueAsString(fs.getProperties());
-        FileSystemConfiguration fsConfiguration = JsonUtil.readValue(json, fileSystemType.getClazz());
-        fsConfiguration = decorateFsConfigurationProperties(fsConfiguration, stack);
         Map<String, String> resourceProperties = fsConfigurator.createResources(fsConfiguration);
         List<BlueprintConfigurationEntry> bpConfigEntries = fsConfigurator.getFsProperties(fsConfiguration, resourceProperties);
-        if (fs.isDefaultFs()) {
+        if (defaultFs) {
             bpConfigEntries.addAll(fsConfigurator.getDefaultFsProperties(fsConfiguration));
         }
-        return blueprintProcessor.addConfigEntries(blueprintText, bpConfigEntries, true);
-    }
-
-    private FileSystemConfiguration decorateFsConfigurationProperties(FileSystemConfiguration fsConfiguration, Stack stack) {
-        fsConfiguration.addProperty(FileSystemConfiguration.STORAGE_CONTAINER, "cloudbreak" + stack.getId());
-
-        if (CloudConstants.AZURE.equals(stack.getPlatformVariant())) {
-            fsConfiguration = azureFileSystemConfigProvider.decorateFileSystemConfiguration(stack, fsConfiguration);
-        }
-        return fsConfiguration;
+        return blueprintProcessor.addConfigEntries(bpConfigEntries, true).asText();
     }
 }

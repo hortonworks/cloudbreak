@@ -11,9 +11,10 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessingException;
 import com.sequenceiq.cloudbreak.blueprint.ConfigProperty;
-import com.sequenceiq.cloudbreak.domain.HostGroup;
+import com.sequenceiq.cloudbreak.blueprint.template.views.HostgroupView;
 
 @RunWith(MockitoJUnitRunner.class)
 public class HadoopConfigurationUtilsTests {
@@ -25,10 +26,9 @@ public class HadoopConfigurationUtilsTests {
 
     @Test
     public void testFindHostGroupForNode() {
-        HostGroup hostGroup = new HostGroup();
-        hostGroup.setName("hostGroupName");
-        Collection<HostGroup> hostGroups = singletonList(hostGroup);
-        HostGroup actual = underTest.findHostGroupForNode(hostGroups, "hostGroupName");
+        HostgroupView hostGroup = new HostgroupView("hostGroupName", 1, InstanceGroupType.CORE, 1);
+        Collection<HostgroupView> hostGroups = singletonList(hostGroup);
+        HostgroupView actual = underTest.findHostGroupForNode(hostGroups, "hostGroupName");
 
         Assert.assertEquals(actual, hostGroup);
     }
@@ -38,9 +38,8 @@ public class HadoopConfigurationUtilsTests {
         expectedException.expect(BlueprintProcessingException.class);
         expectedException.expectMessage("Couldn't find a saved hostgroup for [hostGroupName] hostgroup name in the validation.");
 
-        HostGroup hostGroup = new HostGroup();
-        hostGroup.setName("hostGroupName1");
-        Collection<HostGroup> hostGroups = singletonList(hostGroup);
+        HostgroupView hostGroup = new HostgroupView("hostGroupName1", 1, InstanceGroupType.CORE, 1);
+        Collection<HostgroupView> hostGroups = singletonList(hostGroup);
         underTest.findHostGroupForNode(hostGroups, "hostGroupName");
     }
 
@@ -100,5 +99,7 @@ public class HadoopConfigurationUtilsTests {
 
         Assert.assertEquals(null, actual);
     }
+
+
 
 }

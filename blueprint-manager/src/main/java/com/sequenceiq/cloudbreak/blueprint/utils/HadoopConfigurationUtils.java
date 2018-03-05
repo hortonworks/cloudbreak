@@ -7,12 +7,12 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessingException;
 import com.sequenceiq.cloudbreak.blueprint.ConfigProperty;
 import com.sequenceiq.cloudbreak.blueprint.VolumeUtils;
-import com.sequenceiq.cloudbreak.domain.HostGroup;
+import com.sequenceiq.cloudbreak.blueprint.template.views.HostgroupView;
 
 @Component
 public class HadoopConfigurationUtils {
 
-    public HostGroup findHostGroupForNode(Collection<HostGroup> hostGroups, String hostGroupName) {
+    public HostgroupView findHostGroupForNode(Collection<HostgroupView> hostGroups, String hostGroupName) {
         return hostGroups.stream()
                 .filter(hostGroup -> hostGroup.getName().equals(hostGroupName))
                 .findFirst()

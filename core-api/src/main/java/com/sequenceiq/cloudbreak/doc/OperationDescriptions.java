@@ -71,6 +71,7 @@ public class OperationDescriptions {
     public static class StackOpDescription {
         public static final String POST_PRIVATE = "create stack as private resource";
         public static final String POST_PUBLIC = "create stack as public resource";
+        public static final String POST_PUBLIC_BLUEPRINT = "create stack as public resource for blueprint";
         public static final String GET_PRIVATE = "retrieve private stack";
         public static final String GET_PUBLIC = "retrieve public and private (owned) stacks";
         public static final String GET_PRIVATE_BY_NAME = "retrieve a private stack by name";

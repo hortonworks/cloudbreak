@@ -10,7 +10,7 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessor;
+import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessorFactory;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 
@@ -18,7 +18,7 @@ import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 public class HdfConfigProvider {
 
     @Inject
-    private BlueprintProcessor blueprintProcessor;
+    private BlueprintProcessorFactory blueprintProcessorFactory;
 
     public HdfConfigs nodeIdentities(Set<HostGroup> hostgroups,  Map<String, List<String>> fqdns, String blueprintText) {
         Set<String> nifiMasters = collectNifiMasters(blueprintText);
@@ -42,6 +42,6 @@ public class HdfConfigProvider {
     }
 
     private Set<String> collectNifiMasters(String blueprintText) {
-        return blueprintProcessor.getHostGroupsWithComponent(blueprintText, "NIFI_MASTER");
+        return blueprintProcessorFactory.get(blueprintText).getHostGroupsWithComponent("NIFI_MASTER");
     }
 }

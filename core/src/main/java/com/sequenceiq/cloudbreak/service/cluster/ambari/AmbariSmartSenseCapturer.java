@@ -24,9 +24,9 @@ public class AmbariSmartSenseCapturer {
     @Inject
     private SmartSenseSubscriptionService smartSenseSubscriptionService;
 
-    public void capture(int caseId, String blueprintText, AmbariClient ambariClient) {
+    public void capture(int caseId, AmbariClient ambariClient) {
         Optional<SmartSenseSubscription> smartSenseSubscription = smartSenseSubscriptionService.getDefault();
-        if (smartsenseConfigurationLocator.smartsenseConfigurable(blueprintText, smartSenseSubscription)) {
+        if (smartsenseConfigurationLocator.smartsenseConfigurable(smartSenseSubscription)) {
             try {
                 LOGGER.info("Triggering SmartSense data capture.");
                 ambariClient.smartSenseCapture(caseId);

@@ -9,7 +9,6 @@ import org.springframework.util.StringUtils;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Strings;
 import com.google.gson.Gson;
-import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
@@ -27,12 +26,12 @@ public class KerberosDetailService {
         return "mit-kdc";
     }
 
-    public String resolveHostForKerberos(Cluster cluster, String defaultHost) {
-        return Strings.isNullOrEmpty(cluster.getKerberosConfig().getUrl()) ? defaultHost : cluster.getKerberosConfig().getUrl();
+    public String resolveHostForKerberos(KerberosConfig kerberosConfig, String defaultHost) {
+        return Strings.isNullOrEmpty(kerberosConfig.getUrl()) ? defaultHost : kerberosConfig.getUrl();
     }
 
-    public String resolveHostForKdcAdmin(Cluster cluster, String defaultHost) {
-        return Strings.isNullOrEmpty(cluster.getKerberosConfig().getAdminUrl()) ? defaultHost : cluster.getKerberosConfig().getAdminUrl();
+    public String resolveHostForKdcAdmin(KerberosConfig kerberosConfig, String defaultHost) {
+        return Strings.isNullOrEmpty(kerberosConfig.getAdminUrl()) ? defaultHost : kerberosConfig.getAdminUrl();
     }
 
     public String getRealm(String gwDomain, KerberosConfig kerberosConfig) {

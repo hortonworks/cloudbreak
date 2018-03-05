@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.blueprint.smartsense;
 
+import static com.sequenceiq.cloudbreak.api.model.InstanceGroupType.GATEWAY;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -17,20 +19,19 @@ import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintComponentConfigProvider;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintConfigurationEntry;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintPreparationObject;
-import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessor;
+import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessorFactory;
+import com.sequenceiq.cloudbreak.blueprint.BlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.blueprint.SmartsenseConfigurationLocator;
-import com.sequenceiq.cloudbreak.domain.HostGroup;
-import com.sequenceiq.cloudbreak.domain.InstanceGroup;
-import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.blueprint.template.views.HostgroupView;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.ha.CloudbreakNodeConfig;
 
 @Component
 public class SmartSenseConfigProvider implements BlueprintComponentConfigProvider {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(SmartSenseConfigProvider.class);
 
     private static final String SMART_SENSE_SERVER_CONFIG_FILE = "hst-server-conf";
@@ -58,49 +59,48 @@ public class SmartSenseConfigProvider implements BlueprintComponentConfigProvide
     private CloudbreakNodeConfig cloudbreakNodeConfig;
 
     @Inject
-    private BlueprintProcessor blueprintProcessor;
+    private BlueprintProcessorFactory blueprintProcessorFactory;
 
     @Inject
     private SmartsenseConfigurationLocator smartsenseConfigurationLocator;
 
     @Override
-    public String customTextManipulation(BlueprintPreparationObject source, String blueprintText) {
+    public BlueprintTextProcessor customTextManipulation(BlueprintPreparationObject source, BlueprintTextProcessor blueprintProcessor) {
         String smartSenseId = source.getSmartSenseSubscriptionId().get();
-        Set<String> hostGroupNames = source.getHostGroups().stream().map(getHostGroupNameMapper()).collect(Collectors.toSet());
-        blueprintText = addSmartSenseServerToBp(blueprintText, source.getHostGroups(), hostGroupNames);
-        blueprintText = blueprintProcessor.addComponentToHostgroups(blueprintText, HST_AGENT_COMPONENT, hg -> hostGroupNames.contains(hg));
+        Set<String> hostGroupNames = source.getHostgroupViews().stream().map(getHostGroupNameMapper()).collect(Collectors.toSet());
+        addSmartSenseServerToBp(blueprintProcessor, source.getHostgroupViews(), hostGroupNames);
+        blueprintProcessor.addComponentToHostgroups(HST_AGENT_COMPONENT, hg -> hostGroupNames.contains(hg));
         List<BlueprintConfigurationEntry> configs = new ArrayList<>();
-        configs.addAll(getSmartSenseServerConfigs(source.getStack(), smartSenseId));
-        return blueprintProcessor.addConfigEntries(blueprintText, configs, true);
+        configs.addAll(getSmartSenseServerConfigs(source, smartSenseId));
+        return blueprintProcessor.addConfigEntries(configs, true);
     }
 
     @Override
     public boolean additionalCriteria(BlueprintPreparationObject source, String blueprintText) {
-        return smartsenseConfigurationLocator.smartsenseConfigurableBySubscriptionId(blueprintText, source.getSmartSenseSubscriptionId());
+        return smartsenseConfigurationLocator.smartsenseConfigurableBySubscriptionId(source.getSmartSenseSubscriptionId());
     }
 
-    private Function<HostGroup, String> getHostGroupNameMapper() {
-        return HostGroup::getName;
+    private Function<HostgroupView, String> getHostGroupNameMapper() {
+        return HostgroupView::getName;
     }
 
-    private String addSmartSenseServerToBp(String blueprintText, Iterable<HostGroup> hostGroups, Collection<String> hostGroupNames) {
-        if (!blueprintProcessor.componentExistsInBlueprint(HST_SERVER_COMPONENT, blueprintText)) {
+    private String addSmartSenseServerToBp(BlueprintTextProcessor blueprintProcessor, Iterable<HostgroupView> hostgroupViews,
+            Collection<String> hostGroupNames) {
+        if (!blueprintProcessor.componentExistsInBlueprint(HST_SERVER_COMPONENT)) {
             String aHostGroupName = hostGroupNames.stream().findFirst().get();
-            String finalBlueprintText = blueprintText;
             boolean singleNodeGatewayFound = false;
-            for (HostGroup hostGroup : hostGroups) {
-                InstanceGroup instanceGroup = hostGroup.getConstraint().getInstanceGroup();
-                if (instanceGroup != null && InstanceGroupType.GATEWAY.equals(instanceGroup.getInstanceGroupType()) && instanceGroup.getNodeCount().equals(1)) {
+            for (HostgroupView hostGroup : hostgroupViews) {
+                if (hostGroup.isInstanceGroupConfigured() && GATEWAY.equals(hostGroup.getInstanceGroupType()) && hostGroup.getNodeCount().equals(1)) {
                     aHostGroupName = hostGroup.getName();
                     singleNodeGatewayFound = true;
                     break;
                 }
             }
 
-            if (!singleNodeGatewayFound && blueprintProcessor.componentExistsInBlueprint(RESOURCEMANAGER_COMPONENT, blueprintText)) {
+            if (!singleNodeGatewayFound && blueprintProcessor.componentExistsInBlueprint(RESOURCEMANAGER_COMPONENT)) {
                 Optional<String> hostGroupNameOfNameNode = hostGroupNames
                         .stream()
-                        .filter(hGName -> blueprintProcessor.getComponentsInHostGroup(finalBlueprintText, hGName).contains(RESOURCEMANAGER_COMPONENT))
+                        .filter(hGName -> blueprintProcessor.getComponentsInHostGroup(hGName).contains(RESOURCEMANAGER_COMPONENT))
                         .findFirst();
                 if (hostGroupNameOfNameNode.isPresent()) {
                     aHostGroupName = hostGroupNameOfNameNode.get();
@@ -109,24 +109,24 @@ public class SmartSenseConfigProvider implements BlueprintComponentConfigProvide
             }
             LOGGER.info("Adding '{}' component to '{}' hosgroup in the Blueprint.", HST_SERVER_COMPONENT, aHostGroupName);
             final String finalAHostGroupName = aHostGroupName;
-            blueprintText = blueprintProcessor.addComponentToHostgroups(blueprintText, HST_SERVER_COMPONENT, hg -> finalAHostGroupName.equals(hg));
+            blueprintProcessor.addComponentToHostgroups(HST_SERVER_COMPONENT, hg -> finalAHostGroupName.equals(hg));
         }
-        return blueprintText;
+        return blueprintProcessor.asText();
     }
 
-    private Collection<? extends BlueprintConfigurationEntry> getSmartSenseServerConfigs(Stack stack, String smartSenseId) {
+    private Collection<? extends BlueprintConfigurationEntry> getSmartSenseServerConfigs(BlueprintPreparationObject source, String smartSenseId) {
         Collection<BlueprintConfigurationEntry> configs = new ArrayList<>();
         configs.add(new BlueprintConfigurationEntry(SMART_SENSE_SERVER_CONFIG_FILE, "customer.account.name", "Hortonworks_Cloud_HDP"));
         configs.add(new BlueprintConfigurationEntry(SMART_SENSE_SERVER_CONFIG_FILE, "customer.notification.email", "aws-marketplace@hortonworks.com"));
-        String clusterName = getClusterName(stack);
+        String clusterName = getClusterName(source);
         configs.add(new BlueprintConfigurationEntry(SMART_SENSE_SERVER_CONFIG_FILE, "cluster.name", clusterName));
 
         configs.add(new BlueprintConfigurationEntry(SMART_SENSE_SERVER_CONFIG_FILE, "customer.smartsense.id", smartSenseId));
 
         HSTMetadataInstanceInfoJson instanceInfoJson = new HSTMetadataInstanceInfoJson(
-                stack.getFlexSubscription() != null ? stack.getFlexSubscription().getSubscriptionId() : "",
+                source.getFlexSubscription().isPresent() ? source.getFlexSubscription().get().getSubscriptionId() : "",
                 clusterName,
-                stack.getUuid(),
+                source.getGeneralClusterConfigs().getUuid(),
                 cloudbreakNodeConfig.getInstanceUUID());
         HSTMetadataJson productInfo = new HSTMetadataJson(clustersComponentId, instanceInfoJson, productId, cbVersion);
         try {
@@ -138,15 +138,15 @@ public class SmartSenseConfigProvider implements BlueprintComponentConfigProvide
         return configs;
     }
 
-    private String getClusterName(Stack stack) {
+    private String getClusterName(BlueprintPreparationObject source) {
         String ssClusterNamePattern = "cbc--%s--%s";
-        String clusterName = stack.getCluster().getName();
-        String ssClusterName = String.format(ssClusterNamePattern, clusterName, stack.getUuid());
+        String clusterName = source.getGeneralClusterConfigs().getClusterName();
+        String ssClusterName = String.format(ssClusterNamePattern, clusterName, source.getGeneralClusterConfigs().getUuid());
         if (ssClusterName.length() > SMART_SENSE_CLUSTER_NAME_MAX_LENGTH) {
             int charsOverTheLimit = ssClusterName.length() - SMART_SENSE_CLUSTER_NAME_MAX_LENGTH;
             ssClusterName = charsOverTheLimit < clusterName.length()
-                    ? String.format(ssClusterNamePattern, clusterName.substring(0, clusterName.length() - charsOverTheLimit), stack.getUuid())
-                    : ssClusterName.substring(0, SMART_SENSE_CLUSTER_NAME_MAX_LENGTH);
+                    ? String.format(ssClusterNamePattern, clusterName.substring(0, clusterName.length() - charsOverTheLimit),
+                    source.getGeneralClusterConfigs().getUuid()) : ssClusterName.substring(0, SMART_SENSE_CLUSTER_NAME_MAX_LENGTH);
         }
         return ssClusterName;
     }

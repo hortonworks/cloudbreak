@@ -23,10 +23,13 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.api.model.AdjustmentType;
+import com.sequenceiq.cloudbreak.api.model.AdlsFileSystemConfiguration;
 import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.model.DirectoryType;
 import com.sequenceiq.cloudbreak.api.model.ExecutorType;
+import com.sequenceiq.cloudbreak.api.model.FileSystemConfiguration;
 import com.sequenceiq.cloudbreak.api.model.GatewayType;
+import com.sequenceiq.cloudbreak.api.model.GcsFileSystemConfiguration;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.model.InstanceMetadataType;
 import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
@@ -35,6 +38,8 @@ import com.sequenceiq.cloudbreak.api.model.RecoveryMode;
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
+import com.sequenceiq.cloudbreak.api.model.WasbFileSystemConfiguration;
+import com.sequenceiq.cloudbreak.api.model.WasbIntegratedFileSystemConfiguration;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
@@ -616,10 +621,12 @@ public class TestUtil {
         rdsConfig.setConnectionUserName("heyitsme");
         rdsConfig.setConnectionURL("jdbc:postgresql://10.1.1.1:5432/" + rdsType.name().toLowerCase());
         rdsConfig.setType(rdsType.name());
+        rdsConfig.setConnectionDriver("org.postgresql.Driver");
+        rdsConfig.setDatabaseEngine("postgres");
         return rdsConfig;
     }
 
-    public static Gateway gateway() {
+    public static Gateway gateway() throws JsonProcessingException {
         Gateway gateway  = new Gateway();
         gateway.setEnableGateway(true);
         gateway.setTopologyName("topology");
@@ -629,6 +636,8 @@ public class TestUtil {
         gateway.setSignCert("signcert");
         gateway.setSignKey("signkey");
         gateway.setTokenCert("tokencert");
+        gateway.setSignPub("signpub");
+        gateway.setExposedServices(new Json("{}"));
         return gateway;
     }
 
@@ -642,4 +651,41 @@ public class TestUtil {
         return stack;
 
     }
+
+    public static FileSystemConfiguration gcsFileSystemConfiguration() {
+        GcsFileSystemConfiguration gcsFileSystemConfiguration = new GcsFileSystemConfiguration();
+        gcsFileSystemConfiguration.setDefaultBucketName("hortonworks");
+        gcsFileSystemConfiguration.setProjectId("test-id");
+        gcsFileSystemConfiguration.setServiceAccountEmail("serviceaccountemail");
+        return gcsFileSystemConfiguration;
+    }
+
+    public static FileSystemConfiguration wasbIntegratedFileSystemConfiguration() {
+        WasbIntegratedFileSystemConfiguration wasbIntegratedFileSystemConfiguration = new WasbIntegratedFileSystemConfiguration();
+        wasbIntegratedFileSystemConfiguration.setAppId("appid");
+        wasbIntegratedFileSystemConfiguration.setAppPassword("password");
+        wasbIntegratedFileSystemConfiguration.setRegion("region");
+        wasbIntegratedFileSystemConfiguration.setStorageName("storagename");
+        wasbIntegratedFileSystemConfiguration.setSubscriptionId("subscriptionid");
+        wasbIntegratedFileSystemConfiguration.setTenantId("tenant");
+        return wasbIntegratedFileSystemConfiguration;
+    }
+
+    public static FileSystemConfiguration wasbFileSystemConfiguration() {
+        WasbFileSystemConfiguration wasbFileSystemConfiguration = new WasbFileSystemConfiguration();
+        wasbFileSystemConfiguration.setAccountKey("accountkey");
+        wasbFileSystemConfiguration.setAccountName("accountname");
+        wasbFileSystemConfiguration.setSecure(true);
+        return wasbFileSystemConfiguration;
+    }
+
+    public static FileSystemConfiguration adlsFileSystemConfiguration() {
+        AdlsFileSystemConfiguration adlsFileSystemConfiguration = new AdlsFileSystemConfiguration();
+        adlsFileSystemConfiguration.setClientId("clientid");
+        adlsFileSystemConfiguration.setAccountName("accountname");
+        adlsFileSystemConfiguration.setCredential("1");
+        adlsFileSystemConfiguration.setTenantId("tenantid");
+        return adlsFileSystemConfiguration;
+    }
+
 }

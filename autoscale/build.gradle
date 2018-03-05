@@ -1,33 +1,33 @@
 import org.ajoberstar.grgit.Grgit
 
 buildscript {
-  repositories {
-    mavenCentral()
-    jcenter()
-  }
-  dependencies {
-    classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
-  }
+    repositories {
+        mavenCentral()
+        jcenter()
+    }
+    dependencies {
+        classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
+    }
 }
 
 jar {
-  baseName = 'periscope'
-  archiveName = 'periscope.jar'
+    baseName = 'periscope'
+    archiveName = 'periscope.jar'
 }
 
 apply plugin: 'org.springframework.boot'
 apply plugin: 'info.solidsoft.pitest'
 
 bootRun {
-  systemProperty 'spring.profiles.active', System.properties['spring.profiles.active']
-  systemProperty 'spring.config.location', System.properties['spring.config.location']
-  if (project.hasProperty('jvmArgs')) {
-    jvmArgs += project.jvmArgs.split("\\s+").toList()
-  }
+    systemProperty 'spring.profiles.active', System.properties['spring.profiles.active']
+    systemProperty 'spring.config.location', System.properties['spring.config.location']
+    if (project.hasProperty('jvmArgs')) {
+        jvmArgs += project.jvmArgs.split("\\s+").toList()
+    }
 }
 
 springBoot {
-  mainClass = 'com.sequenceiq.periscope.PeriscopeApplication'
+    mainClass = 'com.sequenceiq.periscope.PeriscopeApplication'
 }
 
 dependencies {
@@ -80,15 +80,15 @@ task buildInfo(type: BuildInfoTask) {
 }
 
 test {
-  include 'com/sequenceiq/**'
-  testLogging.showStandardStreams = true
-  ignoreFailures = false
-  beforeTest { descriptor ->
-    logger.lifecycle("Running test: " + descriptor)
-  }
-  onOutput { descriptor, event ->
-    logger.lifecycle("Test: " + descriptor + " produced standard out/err: " + event.message)
-  }
+    include 'com/sequenceiq/**'
+    testLogging.showStandardStreams = true
+    ignoreFailures = false
+    beforeTest { descriptor ->
+        logger.lifecycle("Running test: " + descriptor)
+    }
+    onOutput { descriptor, event ->
+        logger.lifecycle("Test: " + descriptor + " produced standard out/err: " + event.message)
+    }
 }
 
 compileJava.dependsOn buildInfo
@@ -101,6 +101,7 @@ class BuildInfoTask extends DefaultTask {
 
     @TaskAction
     def writeBuildInfo() {
+<<<<<<< HEAD
       List<File> applicationDestinations = []
 
       applicationDestinations += project.file("out/production/resources")
@@ -129,8 +130,35 @@ class BuildInfoTask extends DefaultTask {
               "info.app.version=" + buildVersion,
               "spring.profiles.active=" + activeProfile
           ].each { out.println it }
+=======
+        List<File> applicationDestinations = []
+
+        applicationDestinations += project.file("out/production/resources")
+        applicationDestinations += new File(applicationPropertiesPath + "/resources/main")
+
+        destination.mkdirs()
+        String activeProfile = determineActiveProfile()
+
+        if (buildVersion.contains("+")) {
+            buildVersion = buildVersion.tokenize('+')[0]
         }
-      }
+        new File(destination, "build.info").withWriter { out ->
+            [
+                    "ARTIFACT_BASENAME=" + basename,
+                    "ARTIFACT_VERSION=" + buildVersion,
+            ].each { out.println it }
+        }
+        applicationDestinations.each {
+            it.mkdirs()
+            new File(it, "application.properties").withWriter { out ->
+                [
+                        "info.app.name=" + basename,
+                        "info.app.version=" + buildVersion,
+                        "spring.profiles.active=" + activeProfile
+                ].each { out.println it }
+            }
+>>>>>>> BUG-97527 Implement Datanode and Namenode component configurations
+        }
     }
 
     private String determineActiveProfile() {

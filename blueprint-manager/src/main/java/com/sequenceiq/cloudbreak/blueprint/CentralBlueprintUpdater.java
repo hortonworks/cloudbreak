@@ -28,7 +28,7 @@ public class CentralBlueprintUpdater {
     private BlueprintComponentProviderProcessor blueprintComponentProviderProcessor;
 
     public String getBlueprintText(BlueprintPreparationObject source) throws BlueprintProcessingException, HttpResponseException {
-        String blueprintText = source.getCluster().getBlueprint().getBlueprintText();
+        String blueprintText = source.getBlueprintView().getBlueprintText();
         try {
             blueprintText = updateBlueprintConfiguration(source, blueprintText);
         } catch (IOException e) {

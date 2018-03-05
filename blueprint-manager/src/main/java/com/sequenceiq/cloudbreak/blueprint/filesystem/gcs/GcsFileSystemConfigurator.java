@@ -11,6 +11,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.FileSystemType;
@@ -23,10 +25,11 @@ import com.sequenceiq.cloudbreak.domain.Credential;
 @Component
 public class GcsFileSystemConfigurator extends AbstractFileSystemConfigurator<GcsFileSystemConfiguration> {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(GcsFileSystemConfigurator.class);
+
     @Override
     protected List<FileSystemScriptConfig> getScriptConfigs(Credential credential, GcsFileSystemConfiguration fsConfig) {
-        String privateKey = getPrivateKey(credential);
-        Map<String, String> properties = Collections.singletonMap("P12KEY", privateKey);
+        Map<String, String> properties = Collections.singletonMap("P12KEY", getPrivateKey(credential));
         List<FileSystemScriptConfig> fsScriptConfigs = new ArrayList<>();
         fsScriptConfigs.add(new FileSystemScriptConfig("scripts/gcs-p12.sh", POST_AMBARI_START, ALL_NODES, properties));
         fsScriptConfigs.add(new FileSystemScriptConfig("scripts/gcs-connector-local.sh", POST_AMBARI_START, ALL_NODES));
@@ -35,7 +38,12 @@ public class GcsFileSystemConfigurator extends AbstractFileSystemConfigurator<Gc
     }
 
     private String getPrivateKey(Credential credential) {
-        return credential.getAttributes().getMap().get("serviceAccountPrivateKey").toString();
+        Object serviceAccountPrivateKey = credential.getAttributes().getMap().get("serviceAccountPrivateKey");
+        if (serviceAccountPrivateKey == null) {
+            LOGGER.warn("ServiceAccountPrivateKey isn't set.");
+            return "";
+        }
+        return serviceAccountPrivateKey.toString();
     }
 
     @Override

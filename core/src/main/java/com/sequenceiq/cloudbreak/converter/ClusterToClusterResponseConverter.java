@@ -129,6 +129,8 @@ public class ClusterToClusterResponseConverter extends AbstractConversionService
         clusterResponse.setUserName(source.getUserName());
         clusterResponse.setExecutorType(source.getExecutorType());
         clusterResponse.setDescription(source.getDescription() == null ? "" : source.getDescription());
+        clusterResponse.setExtendedBlueprintText(source.getExtendedBlueprintText() == null
+                ? source.getBlueprint().getBlueprintText() : source.getExtendedBlueprintText());
         clusterResponse.setHostGroups(convertHostGroupsToJson(source.getHostGroups()));
         clusterResponse.setAmbariServerUrl(getAmbariServerUrl(source, ambariIp));
         clusterResponse.setServiceEndPoints(prepareServiceEndpointsMap(source, ambariIp));

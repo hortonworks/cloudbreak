@@ -23,7 +23,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.api.model.ExposedService;
-import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessor;
+import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessorFactory;
+import com.sequenceiq.cloudbreak.blueprint.BlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Constraint;
@@ -36,10 +37,13 @@ import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 public class ComponentLocatorServiceTest {
 
     @Mock
-    private BlueprintProcessor blueprintProcessor;
+    private BlueprintTextProcessor blueprintProcessor;
 
     @Mock
     private HostGroupService hostGroupService;
+
+    @Mock
+    private BlueprintProcessorFactory blueprintProcessorFactory;
 
     @InjectMocks
     private ComponentLocatorService underTest;
@@ -58,8 +62,9 @@ public class ComponentLocatorServiceTest {
         Set<String> hg2Components = set("NAMENODE", "Service2", "Service3");
 
         when(hostGroupService.getByCluster(anyLong())).thenReturn(ImmutableSet.of(hg1, hg2));
-        when(blueprintProcessor.getComponentsInHostGroup(anyString(), eq("hg1"))).thenReturn(hg1Components);
-        when(blueprintProcessor.getComponentsInHostGroup(anyString(), eq("hg2"))).thenReturn(hg2Components);
+        when(blueprintProcessor.getComponentsInHostGroup(eq("hg1"))).thenReturn(hg1Components);
+        when(blueprintProcessor.getComponentsInHostGroup(eq("hg2"))).thenReturn(hg2Components);
+        when(blueprintProcessorFactory.get(anyString())).thenReturn(blueprintProcessor);
     }
 
     private HostGroup createHostGroup(String name, String hostname) {

@@ -1,8 +1,4 @@
 {
 
-
-  "zeppelin-shiro-ini": {
-    "shiro_ini_content": "testshiroini"
-  }
-
+"zeppelin-shiro-ini": { "shiro_ini_content": "testshiroini" }
 }

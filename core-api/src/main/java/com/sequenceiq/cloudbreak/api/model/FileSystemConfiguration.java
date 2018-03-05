@@ -23,4 +23,7 @@ public class FileSystemConfiguration {
         dynamicProperties.put(key, value);
     }
 
+    public Map<String, String> getDynamicProperties() {
+        return dynamicProperties;
+    }
 }

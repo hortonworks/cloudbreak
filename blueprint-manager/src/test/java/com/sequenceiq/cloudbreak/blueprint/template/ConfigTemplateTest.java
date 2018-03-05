@@ -19,7 +19,6 @@ import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
-import com.sequenceiq.cloudbreak.domain.json.Json;
 
 @RunWith(Parameterized.class)
 public class ConfigTemplateTest {
@@ -92,7 +91,7 @@ public class ConfigTemplateTest {
     public void test() throws IOException {
         String actual = compileTemplate(input, model);
         String expected = readExpectedTemplate(output);
-        String message = String.format("expected: %s \nactual: %s \n", expected, actual);
+        String message = String.format("expected: [%s] %nactual: [%s] %n", expected, actual);
 
         Assert.assertEquals(message, expected, actual);
     }
@@ -140,7 +139,7 @@ public class ConfigTemplateTest {
                 .build();
     }
 
-    public static Map<String, Object> ldapConfigWhenLdapPresentedThenShouldReturnWithLdapConfig() {
+    public static Map<String, Object> ldapConfigWhenLdapPresentedThenShouldReturnWithLdapConfig() throws JsonProcessingException {
         return new BlueprintTemplateModelContextBuilder()
                 .withLdap(TestUtil.ldapConfig())
                 .withGateway(TestUtil.gateway())
@@ -198,6 +197,7 @@ public class ConfigTemplateTest {
     public static Map<String, Object> rangerRdsConfigWhenRdsPresentedThenShouldReturnWithRdsConfig() throws JsonProcessingException {
         RDSConfig rdsConfig = TestUtil.rdsConfig(RdsType.RANGER);
 
+        // TODO we should somehow handle this
         //Map<String, String> attributes = new HashMap<>();
         //attributes.put("rangerAdminPassword", "rangerAdminPassword");
         //rdsConfig.setAttributes(new Json(attributes));

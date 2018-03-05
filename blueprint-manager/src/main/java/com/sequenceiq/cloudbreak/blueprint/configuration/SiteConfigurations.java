@@ -31,6 +31,11 @@ public class SiteConfigurations implements Iterable<SiteConfiguration> {
         addSiteConfiguration(new SiteConfiguration(name, properties));
     }
 
+    public void addConfiguration(String site, String key, String value) {
+        SiteConfiguration c = config.putIfAbsent(site, SiteConfiguration.getEmptyConfiguration(site));
+        c.add(key, value);
+    }
+
     public boolean isEmpty() {
         return config.isEmpty();
     }
