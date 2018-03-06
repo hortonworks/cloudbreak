@@ -95,7 +95,7 @@ public class ReactorFlowManagerTest {
         underTest.triggerTermination(stackId, false, true);
         underTest.triggerStackUpscale(stackId, instanceGroupAdjustment, true);
         underTest.triggerStackDownscale(stackId, instanceGroupAdjustment);
-        underTest.triggerStackRemoveInstance(stackId, "instanceId");
+        underTest.triggerStackRemoveInstance(stackId, "hostgroup", "hostname");
         underTest.triggerClusterUpscale(stackId, hostGroupAdjustment);
         underTest.triggerClusterDownscale(stackId, hostGroupAdjustment);
         underTest.triggerClusterSync(stackId);
