@@ -561,6 +561,42 @@ var (
 			Usage: "value of the tag",
 		},
 	}
+	FlProxyHost = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "proxy-host",
+			Usage: "hostname or ip of the proxy",
+		},
+	}
+	FlProxyPort = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "proxy-port",
+			Usage: "port of the proxy",
+		},
+	}
+	FlProxyProtocol = StringFlag{
+		RequiredFlag: OPTIONAL,
+		StringFlag: cli.StringFlag{
+			Name:  "proxy-protocol",
+			Usage: "protocol of the proxy (http or https)",
+			Value: "http",
+		},
+	}
+	FlProxyUser = StringFlag{
+		RequiredFlag: OPTIONAL,
+		StringFlag: cli.StringFlag{
+			Name:  "proxy-user",
+			Usage: "user for the proxy if basic auth is required",
+		},
+	}
+	FlProxyPassword = StringFlag{
+		RequiredFlag: OPTIONAL,
+		StringFlag: cli.StringFlag{
+			Name:  "proxy-password",
+			Usage: "password for the proxy if basic auth is required",
+		},
+	}
 )
 
 type RequiredFlag struct {

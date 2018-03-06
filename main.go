@@ -1102,6 +1102,50 @@ func main() {
 			},
 		},
 		{
+			Name:  "proxy",
+			Usage: "proxy related operations",
+			Subcommands: []cli.Command{
+				{
+					Name:  "create",
+					Usage: "creates a new proxy",
+					Flags: cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlProxyHost, cb.FlProxyPort,
+						cb.FlProxyProtocol, cb.FlProxyUser, cb.FlProxyPassword).AddAuthenticationFlags().Build(),
+					Before: ConfigRead,
+					Action: cb.CreateProxy,
+					BashComplete: func(c *cli.Context) {
+						for _, f := range cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlProxyHost, cb.FlProxyPort,
+							cb.FlProxyProtocol, cb.FlProxyUser, cb.FlProxyPassword).AddAuthenticationFlags().Build() {
+							printFlagCompletion(f)
+						}
+					},
+				},
+				{
+					Name:   "delete",
+					Usage:  "deletes a proxy",
+					Flags:  cb.NewFlagBuilder().AddFlags(cb.FlName).AddOutputFlag().AddAuthenticationFlags().Build(),
+					Before: ConfigRead,
+					Action: cb.DeleteProxy,
+					BashComplete: func(c *cli.Context) {
+						for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlName).AddOutputFlag().AddAuthenticationFlags().Build() {
+							printFlagCompletion(f)
+						}
+					},
+				},
+				{
+					Name:   "list",
+					Usage:  "list the available proxies",
+					Flags:  cb.NewFlagBuilder().AddOutputFlag().AddAuthenticationFlags().Build(),
+					Before: ConfigRead,
+					Action: cb.ListProxies,
+					BashComplete: func(c *cli.Context) {
+						for _, f := range cb.NewFlagBuilder().AddOutputFlag().AddAuthenticationFlags().Build() {
+							printFlagCompletion(f)
+						}
+					},
+				},
+			},
+		},
+		{
 			Name:  "recipe",
 			Usage: "recipe related operations",
 			Subcommands: []cli.Command{
