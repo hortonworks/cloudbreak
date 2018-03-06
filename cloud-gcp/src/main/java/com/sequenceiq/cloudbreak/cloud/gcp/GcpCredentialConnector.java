@@ -2,8 +2,10 @@ package com.sequenceiq.cloudbreak.cloud.gcp;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
+import javax.annotation.Nonnull;
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -24,8 +26,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredentialStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CredentialStatus;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 
-import reactor.core.support.Assert;
-
 @Service
 public class GcpCredentialConnector implements CredentialConnector {
 
@@ -38,8 +38,8 @@ public class GcpCredentialConnector implements CredentialConnector {
     private GcpPlatformParameters gcpPlatformParameters;
 
     @Override
-    public CloudCredentialStatus verify(AuthenticatedContext authenticatedContext) {
-        Assert.notNull(authenticatedContext);
+    public CloudCredentialStatus verify(@Nonnull AuthenticatedContext authenticatedContext) {
+        Objects.requireNonNull(authenticatedContext);
         LOGGER.info("Verify credential: {}", authenticatedContext.getCloudCredential());
         GcpContext gcpContext = gcpContextBuilder.contextInit(authenticatedContext.getCloudContext(), authenticatedContext, null, null, false);
         try {
@@ -54,8 +54,8 @@ public class GcpCredentialConnector implements CredentialConnector {
     }
 
     @Override
-    public CloudCredentialStatus create(AuthenticatedContext authenticatedContext) {
-        Assert.notNull(authenticatedContext);
+    public CloudCredentialStatus create(@Nonnull AuthenticatedContext authenticatedContext) {
+        Objects.requireNonNull(authenticatedContext);
         return new CloudCredentialStatus(authenticatedContext.getCloudCredential(), CredentialStatus.CREATED);
     }
 
@@ -66,8 +66,8 @@ public class GcpCredentialConnector implements CredentialConnector {
     }
 
     @Override
-    public CloudCredentialStatus delete(AuthenticatedContext authenticatedContext) {
-        Assert.notNull(authenticatedContext);
+    public CloudCredentialStatus delete(@Nonnull AuthenticatedContext authenticatedContext) {
+        Objects.requireNonNull(authenticatedContext);
         return new CloudCredentialStatus(authenticatedContext.getCloudCredential(), CredentialStatus.DELETED);
     }
 
