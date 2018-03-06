@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.cloud;
 
 import java.util.Map;
 
+import javax.annotation.Nonnull;
+
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.credential.CredentialNotifier;
@@ -19,7 +21,7 @@ public interface CredentialConnector {
      * @param authenticatedContext the authenticated context which holds the client object
      * @return the status respone of method call
      */
-    CloudCredentialStatus verify(AuthenticatedContext authenticatedContext);
+    CloudCredentialStatus verify(@Nonnull AuthenticatedContext authenticatedContext);
 
 
     /**
@@ -28,7 +30,7 @@ public interface CredentialConnector {
      * @param authenticatedContext the authenticated context which holds the client object
      * @return the status respone of method call
      */
-    CloudCredentialStatus create(AuthenticatedContext authenticatedContext);
+    CloudCredentialStatus create(@Nonnull AuthenticatedContext authenticatedContext);
 
 
     /**
@@ -45,6 +47,6 @@ public interface CredentialConnector {
      * @param authenticatedContext the authenticated context which holds the client object
      * @return the status respone of method call
      */
-    CloudCredentialStatus delete(AuthenticatedContext authenticatedContext);
+    CloudCredentialStatus delete(@Nonnull AuthenticatedContext authenticatedContext);
 
 }
