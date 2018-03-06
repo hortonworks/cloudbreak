@@ -5,6 +5,10 @@ import java.util.Set;
 import com.sequenceiq.cloudbreak.cloud.event.InstancePayload;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 
+/**
+ * @deprecated Downscale flow is used instead of Instance termination flow
+ */
+@Deprecated
 public class InstanceTerminationTriggerEvent extends StackEvent implements InstancePayload {
     private final Set<String> instanceIds;
 
