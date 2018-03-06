@@ -1,7 +1,13 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -9,15 +15,48 @@ import java.util.Map;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import com.google.common.collect.Sets;
+import com.sequenceiq.ambari.client.AmbariClient;
+import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
+import com.sequenceiq.cloudbreak.controller.BadRequestException;
+import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.Cluster;
+import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
+import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
+import com.sequenceiq.cloudbreak.service.TlsSecurityService;
+import com.sequenceiq.cloudbreak.service.cluster.AmbariClientProvider;
+import com.sequenceiq.cloudbreak.service.cluster.AmbariConfigurationService;
+import com.sequenceiq.cloudbreak.service.cluster.ConfigParam;
+import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AmbariDecommissionerTest {
 
+    @InjectMocks
     private AmbariDecommissioner underTest = new AmbariDecommissioner();
+
+    @Mock
+    private TlsSecurityService tlsSecurityService;
+
+    @Mock
+    private AmbariClientProvider ambariClientProvider;
+
+    @Mock
+    private HostGroupService hostGroupService;
+
+    @Mock
+    private HostMetadataRepository hostMetadataRepository;
+
+    @Mock
+    private AmbariConfigurationService configurationService;
 
     @Test
     public void testSelectNodesWhenHasOneUnhealthyNodeAndShouldSelectOne() {
@@ -133,6 +172,135 @@ public class AmbariDecommissionerTest {
 
         Assert.assertEquals(1, selectedNodes.size());
         Assert.assertTrue(selectedNodes.keySet().contains(hostname1));
+    }
+
+    @Test
+    public void testVerifyNodeCountWithReplicationFactory() throws CloudbreakSecuritySetupException {
+
+        String hostGroupName = "hostGroupName";
+        String hostname = "hostname";
+        String ipAddress = "192.18.256.1";
+        int gatewayPort = 1234;
+        String ambariName = "ambari-name";
+
+        Map<String, List<String>> blueprintMap = new HashMap<>();
+        blueprintMap.put(hostGroupName, Collections.singletonList("DATANODE"));
+
+        Blueprint blueprint = new Blueprint();
+        blueprint.setName(ambariName);
+        blueprint.setAmbariName(ambariName);
+
+        Cluster cluster = new Cluster();
+        cluster.setAmbariIp(ipAddress);
+        cluster.setBlueprint(blueprint);
+
+        Stack stack = new Stack();
+        stack.setGatewayPort(gatewayPort);
+        stack.setId(100L);
+
+        HostGroup hostGroup = new HostGroup();
+        hostGroup.setName(hostGroupName);
+        hostGroup.setHostMetadata(Sets.newHashSet(getHostMetadata(0L), getHostMetadata(1L), getHostMetadata(2L), getHostMetadata(3L)));
+
+        AmbariClient ambariClient = mock(AmbariClient.class);
+
+        HttpClientConfig config = new HttpClientConfig(ipAddress);
+        when(tlsSecurityService.buildTLSClientConfigForPrimaryGateway(stack.getId(), cluster.getAmbariIp())).thenReturn(config);
+        when(ambariClientProvider.getAmbariClient(config, stack.getGatewayPort(), cluster)).thenReturn(ambariClient);
+        when(hostGroupService.getByClusterAndHostName(cluster, hostname)).thenReturn(hostGroup);
+        when(ambariClient.getBlueprintMap(ambariName)).thenReturn(blueprintMap);
+        when(configurationService.getConfiguration(ambariClient, hostGroupName)).thenReturn(Collections.singletonMap(ConfigParam.DFS_REPLICATION.key(), "3"));
+
+        underTest.verifyNodeCount(stack, cluster, hostname);
+
+        verify(configurationService, times(1)).getConfiguration(ambariClient, hostGroupName);
+    }
+
+    @Test
+    public void testVerifyNodeCountWithoutReplicationFactory() throws CloudbreakSecuritySetupException {
+
+        String hostGroupName = "hostGroupName";
+        String hostname = "hostname";
+        String ipAddress = "192.18.256.1";
+        int gatewayPort = 1234;
+        String ambariName = "ambari-name";
+
+        Map<String, List<String>> blueprintMap = new HashMap<>();
+        blueprintMap.put(hostGroupName, Collections.singletonList("NODEMANAGER"));
+
+        Blueprint blueprint = new Blueprint();
+        blueprint.setName(ambariName);
+        blueprint.setAmbariName(ambariName);
+
+        Cluster cluster = new Cluster();
+        cluster.setAmbariIp(ipAddress);
+        cluster.setBlueprint(blueprint);
+
+        Stack stack = new Stack();
+        stack.setGatewayPort(gatewayPort);
+        stack.setId(100L);
+
+        HostGroup hostGroup = new HostGroup();
+        hostGroup.setName(hostGroupName);
+        hostGroup.setHostMetadata(Collections.singleton(getHostMetadata(0L)));
+
+        AmbariClient ambariClient = mock(AmbariClient.class);
+
+        HttpClientConfig config = new HttpClientConfig(ipAddress);
+        when(tlsSecurityService.buildTLSClientConfigForPrimaryGateway(stack.getId(), cluster.getAmbariIp())).thenReturn(config);
+        when(ambariClientProvider.getAmbariClient(config, stack.getGatewayPort(), cluster)).thenReturn(ambariClient);
+        when(hostGroupService.getByClusterAndHostName(cluster, hostname)).thenReturn(hostGroup);
+        when(ambariClient.getBlueprintMap(ambariName)).thenReturn(blueprintMap);
+
+        underTest.verifyNodeCount(stack, cluster, hostname);
+
+        verify(configurationService, times(0)).getConfiguration(ambariClient, hostGroupName);
+    }
+
+    @Test(expected = BadRequestException.class)
+    public void testVerifyNodeCountWithValidationException() throws CloudbreakSecuritySetupException {
+
+        String hostGroupName = "hostGroupName";
+        String hostname = "hostname";
+        String ipAddress = "192.18.256.1";
+        int gatewayPort = 1234;
+        String ambariName = "ambari-name";
+
+        Map<String, List<String>> blueprintMap = new HashMap<>();
+        blueprintMap.put(hostGroupName, Collections.singletonList("DATANODE"));
+
+        Blueprint blueprint = new Blueprint();
+        blueprint.setName(ambariName);
+        blueprint.setAmbariName(ambariName);
+
+        Cluster cluster = new Cluster();
+        cluster.setAmbariIp(ipAddress);
+        cluster.setBlueprint(blueprint);
+
+        Stack stack = new Stack();
+        stack.setGatewayPort(gatewayPort);
+        stack.setId(100L);
+
+        HostGroup hostGroup = new HostGroup();
+        hostGroup.setName(hostGroupName);
+        hostGroup.setHostMetadata(Collections.singleton(getHostMetadata(0L)));
+
+        AmbariClient ambariClient = mock(AmbariClient.class);
+
+        HttpClientConfig config = new HttpClientConfig(ipAddress);
+        when(tlsSecurityService.buildTLSClientConfigForPrimaryGateway(stack.getId(), cluster.getAmbariIp())).thenReturn(config);
+        when(ambariClientProvider.getAmbariClient(config, stack.getGatewayPort(), cluster)).thenReturn(ambariClient);
+        when(hostGroupService.getByClusterAndHostName(cluster, hostname)).thenReturn(hostGroup);
+        when(ambariClient.getBlueprintMap(ambariName)).thenReturn(blueprintMap);
+        when(configurationService.getConfiguration(ambariClient, hostGroupName)).thenReturn(Collections.singletonMap(ConfigParam.DFS_REPLICATION.key(), "3"));
+
+        underTest.verifyNodeCount(stack, cluster, hostname);
+    }
+
+    protected HostMetadata getHostMetadata(Long id) {
+        HostMetadata hostMetadata = new HostMetadata();
+        hostMetadata.setId(id);
+        return hostMetadata;
     }
 
     private HostMetadata getHostMetadata(String hostname2, HostMetadataState state) {
