@@ -16,6 +16,7 @@ cloudbreak-config() {
   cloudbreak-conf-ui
   cloudbreak-conf-java
   cloudbreak-conf-consul
+  migrate-config
 }
 
 cloudbreak-conf-tags() {
@@ -594,12 +595,21 @@ util-local-dev() {
 
     cloudbreak-config
 
+    if [ "$CB_SCHEMA_SCRIPTS_LOCATION" = "container" ]; then
+      warn "CB_SCHEMA_SCRIPTS_LOCATION environment variable must be set and points to the cloudbreak project's schema location"
+      _exit 127
+    fi
+
     debug stopping original cloudbreak container
     dockerCompose stop --timeout ${DOCKER_STOP_TIMEOUT} cloudbreak
     dockerCompose stop --timeout ${DOCKER_STOP_TIMEOUT} periscope
 
     docker rm -f cloudbreak-proxy 2> /dev/null || :
     docker rm -f periscope-proxy 2> /dev/null || :
+
+    create-migrate-log
+    migrate-one-db cbdb up
+    migrate-one-db periscopedb up
 
     debug starting an ambassador to be registered as cloudbreak.service.consul.
     debug "all traffic to ambassador will be proxied to localhost"
