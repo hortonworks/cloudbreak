@@ -84,8 +84,6 @@ CBD_FORCE_START - Disables docker-compose.yml and uaa.yml validation
 CB_GCP_HOSTKEY_VERIFY - Enables host fingerprint verification on GCP
 CB_HBM2DDL_STRATEGY - Configures hibernate.hbm2ddl.auto in Cloudbreak
 CB_HOST_DISCOVERY_CUSTOM_DOMAIN - Custom domain of the provisioned cluster
-CB_HTTPS_PROXY - HTTPS proxy url
-CB_HTTP_PROXY - HTTP proxy url
 CB_HOST_ADDRESS - Address of the Cloudbreak backend service
 CB_IMAGE_CATALOG_URL - Image catalog url
 CB_INSTANCE_NODE_ID - Unique identifier of the Cloudbreak node     
@@ -117,6 +115,7 @@ CLOUDBREAK_SMTP_STARTTLS_ENABLE - Configures mail.smtp.starttls.enable in Cloudb
 CLOUDBREAK_SMTP_TYPE - Defines mail.transport.protocol in CLoudbreak
 COMMON_DB - Name of the database container
 COMMON_DB_VOL - Name of the database volume
+CURL_CONNECT_TIMEOUT - Timeout for curl command
 COMPOSE_HTTP_TIMEOUT - Docker Compose execution timeout
 DB_DUMP_VOLUME - Name of the database dump volume
 DB_MIGRATION_LOG - Database migration log file
@@ -143,6 +142,13 @@ DOCKER_TAG_TRAEFIK - Traefik container version
 DOCKER_TAG_UAA - Identity container version
 DOCKER_TAG_ULUWATU - Web UI container version
 DOCKER_STOP_TIMEOUT - Specify a shutdown timeout in seconds for containers
+HTTP_PROXY_HOST - HTTP proxy address
+HTTPS_PROXY_HOST - HTTPS proxy address
+PROXY_PORT - Proxy port
+PROXY_USER - Proxy user (basic auth)
+PROXY_PASSWORD - Proxy password (basic auth)
+NON_PROXY_HOSTS - Indicates the hosts that should be accessed without going through the proxy. Typically this defines internal hosts. The value of this property is a list of hosts, separated by the "|" character. In addition the wildcard character "*" can be used for pattern matching. For example ”*.foo.com|localhost” will indicate that every hosts in the foo.com domain and the localhost should be accessed directly even if a proxy server is specified.
+HTTPS_PROXYFORCLUSTERCONNECTION - if set to true, Cloudbreak will use the proxy to connect Ambari server. Default: false
 IDENTITY_DB_NAME - Name of the Identity database
 IDENTITY_DB_PASS - Password for the Identity database authentication
 IDENTITY_DB_URL - Url for the Identity database connection included the port number
