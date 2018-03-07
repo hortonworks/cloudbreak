@@ -33,6 +33,14 @@ public class DiskTypes extends DiskTypesEntity {
         return get(DISKTYPES);
     }
 
+    public static Action<DiskTypes> getByType(String key) {
+        return new Action<>(getTestContext(key), DiskTypesAction::getByType);
+    }
+
+    public static Action<DiskTypes> getByType() {
+        return getByType(DISKTYPES);
+    }
+
     public static Assertion<DiskTypes> assertThis(BiConsumer<DiskTypes, IntegrationTestContext> check) {
         return new Assertion<>(getTestContext(GherkinTest.RESULT), check);
     }
