@@ -167,6 +167,7 @@ compose-generate-yaml() {
     declare desc="Generating docker-compose.yml based on Profile settings"
 
     cloudbreak-config
+    setup_proxy_environments
 
     if ! compose-generate-check-diff; then
         if [[ "$CBD_FORCE_START" ]]; then
@@ -199,6 +200,41 @@ escape-string-compose-yaml() {
     fi
 
     echo $out
+}
+
+setup_proxy_environments() {
+    if [[ "$HTTP_PROXY_HOST" ]] || [[ "$HTTPS_PROXY_HOST" ]]; then
+         if [[ "$HTTP_PROXY_HOST" ]]; then
+            PROXY_HOST=$HTTP_PROXY_HOST
+         else
+            PROXY_HOST=$HTTPS_PROXY_HOST
+         fi
+
+         for PROXY_PROTOCOL in http https; do
+             HTTP_PROXY="http://"
+             HTTPS_PROXY="https://"
+             if [[ "$PROXY_USER" ]] &&  [[ "$PROXY_PASSWORD" ]]; then
+                CB_JAVA_OPTS+=" -D$PROXY_PROTOCOL.proxyUser=$PROXY_USER"
+                CB_JAVA_OPTS+=" -D$PROXY_PROTOCOL.proxyPassword=$PROXY_PASSWORD"
+                HTTP_PROXY+="$PROXY_USER:$PROXY_PASSWORD@"
+                HTTPS_PROXY+="$PROXY_USER:$PROXY_PASSWORD@"
+             fi
+
+             CB_JAVA_OPTS+=" -D$PROXY_PROTOCOL.proxyHost=$PROXY_HOST"
+             HTTP_PROXY+="$PROXY_HOST"
+             HTTPS_PROXY+="$PROXY_HOST"
+
+             if [[ "$PROXY_PORT" ]]; then
+                CB_JAVA_OPTS+=" -D$PROXY_PROTOCOL.proxyPort=$PROXY_PORT"
+                HTTP_PROXY+=":$PROXY_PORT"
+                HTTPS_PROXY+=":$PROXY_PORT"
+             fi
+         done
+
+         if [[ "$NON_PROXY_HOSTS" ]]; then
+            CB_JAVA_OPTS+=" -Dhttp.nonProxyHosts=$NON_PROXY_HOSTS"
+         fi
+    fi
 }
 
 compose-generate-yaml-force() {
@@ -251,8 +287,8 @@ consul:
       - traefik.enable=false
     privileged: true
     environment:
-        - http_proxy=$CB_HTTP_PROXY
-        - https_proxy=$CB_HTTPS_PROXY
+        - http_proxy=$HTTP_PROXY
+        - https_proxy=$HTTPS_PROXY
     volumes:
         - "/var/run/docker.sock:/var/run/docker.sock"
         - consul-data:/data
@@ -402,8 +438,8 @@ identity:
     ports:
         - $UAA_PORT:8080
     environment:
-        - http_proxy=$CB_HTTP_PROXY
-        - https_proxy=$CB_HTTPS_PROXY
+        - http_proxy=$HTTP_PROXY
+        - https_proxy=$HTTPS_PROXY
         - SERVICE_NAME=identity
         # - SERVICE_CHECK_HTTP=/login
         - IDENTITY_DB_URL
@@ -425,9 +461,10 @@ cloudbreak:
         - AWS_SECRET_ACCESS_KEY
         - "SERVICE_NAME=cloudbreak"
           #- SERVICE_CHECK_HTTP=/info
-        - "http_proxy=$CB_HTTP_PROXY"
-        - "https_proxy=$CB_HTTPS_PROXY"
+        - "http_proxy=$HTTP_PROXY"
+        - "https_proxy=$HTTPS_PROXY"
         - 'CB_JAVA_OPTS=$(escape-string-compose-yaml "$CB_JAVA_OPTS" \')'
+        - "HTTPS_PROXYFORCLUSTERCONNECTION=$HTTPS_PROXYFORCLUSTERCONNECTION"
         - "CB_CLIENT_ID=$UAA_CLOUDBREAK_ID"
         - 'CB_CLIENT_SECRET=$(escape-string-compose-yaml $UAA_CLOUDBREAK_SECRET \')'
         - CB_BLUEPRINT_DEFAULTS
@@ -516,8 +553,8 @@ cloudbreak:
 
 sultans:
     environment:
-        - http_proxy=$CB_HTTP_PROXY
-        - https_proxy=$CB_HTTPS_PROXY
+        - http_proxy=$HTTP_PROXY
+        - https_proxy=$HTTPS_PROXY
         - SL_CLIENT_ID=$UAA_SULTANS_ID
         - 'SL_CLIENT_SECRET=$(escape-string-compose-yaml $UAA_SULTANS_SECRET \')'
         - SERVICE_NAME=sultans
@@ -561,8 +598,8 @@ sultans:
 
 uluwatu:
     environment:
-        - http_proxy=$CB_HTTP_PROXY
-        - https_proxy=$CB_HTTPS_PROXY
+        - http_proxy=$HTTP_PROXY
+        - https_proxy=$HTTPS_PROXY
         - SERVICE_NAME=uluwatu
           #- SERVICE_CHECK_HTTP=/
         - ULU_OAUTH_REDIRECT_URI
@@ -614,8 +651,8 @@ uluwatu:
 
 periscope:
     environment:
-        - http_proxy=$CB_HTTP_PROXY
-        - https_proxy=$CB_HTTPS_PROXY
+        - http_proxy=$HTTP_PROXY
+        - https_proxy=$HTTPS_PROXY
         - PERISCOPE_HBM2DDL_STRATEGY
         - PERISCOPE_DB_PORT_5432_TCP_ADDR
         - PERISCOPE_DB_PORT_5432_TCP_PORT
@@ -623,6 +660,7 @@ periscope:
         - PERISCOPE_DB_ENV_PASS
         - PERISCOPE_DB_ENV_DB
         - PERISCOPE_DB_ENV_SCHEMA
+        - "HTTPS_PROXYFORCLUSTERCONNECTION=$HTTPS_PROXYFORCLUSTERCONNECTION"
         - SERVICE_NAME=periscope
           #- SERVICE_CHECK_HTTP=/info
         - 'CB_JAVA_OPTS=$(escape-string-compose-yaml "$CB_JAVA_OPTS" \')'

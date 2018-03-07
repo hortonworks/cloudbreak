@@ -49,6 +49,25 @@ command_exists() {
 	command -v "$@" > /dev/null 2>&1
 }
 
+curl-proxy-aware() {
+    env-import CURL_CONNECT_TIMEOUT 20
+    local CURL_ARGS="--connect-timeout $CURL_CONNECT_TIMEOUT"
+    setup_proxy_environments
+    if [[ "$HTTP_PROXY_HOST" ]] || [[ "$HTTPS_PROXY_HOST" ]]; then
+        if [[ "$HTTP_PROXY_HOST" ]]; then
+            CURL_ARGS+=" --proxy $HTTP_PROXY"
+        elif [[ "$HTTPS_PROXY_HOST" ]]; then
+            CURL_ARGS+=" --proxy $HTTPS_PROXY"
+        fi
+        if [[ "$NON_PROXY_HOSTS" ]]; then
+            CURL_ARGS+=" --noproxy "
+            CURL_ARGS+=$(echo "$NON_PROXY_HOSTS" | sed 's/|/,/g' )
+        fi
+    fi
+
+    curl ${CURL_ARGS} "$@"
+}
+
 cbd-version() {
     declare desc="Displays the version of Cloudbreak Deployer"
     echo -n "local version:"
@@ -119,7 +138,7 @@ cbd-update-release() {
 
         local url=https://github.com/hortonworks/cloudbreak-deployer/releases/download/v${lastver}/cloudbreak-deployer_${lastver}_${osarch}.tgz
         info "Updating $SELF_EXECUTABLE from url: $url"
-        curl -Ls $url | tar -zx -C $TEMP_DIR
+        curl-proxy-aware -Ls $url | tar -zx -C $TEMP_DIR
         mv $TEMP_DIR/cbd $SELF_EXECUTABLE
         debug $SELF_EXECUTABLE is updated
     else
@@ -133,7 +152,7 @@ cbd-update-snap() {
 
     url=$(cci-latest hortonworks/cloudbreak-deployer $branch)
     info "Update $SELF_EXECUTABLE from: $url"
-    curl -Ls $url | tar -zx -C $TEMP_DIR
+    curl-proxy-aware -Ls $url | tar -zx -C $TEMP_DIR
     mv $TEMP_DIR/cbd $SELF_EXECUTABLE
     debug $SELF_EXECUTABLE is updated
 }
@@ -141,18 +160,13 @@ cbd-update-snap() {
 latest-version() {
     #curl -Ls https://raw.githubusercontent.com/hortonworks/cloudbreak-deployer/master/VERSION
     LATEST_URL="https://github.com/hortonworks/cloudbreak-deployer/releases/latest"
-    if [[ "$CB_HTTP_PROXY" ]]; then
-        VERSION=$(curl --proxy $CB_HTTP_PROXY -I $LATEST_URL 2>&1)
-    elif [[ "$CB_HTTPS_PROXY" ]]; then
-        VERSION=$(curl --proxy $CB_HTTPS_PROXY -I $LATEST_URL 2>&1)
-    else
-        VERSION=$(curl -I $LATEST_URL 2>&1)
-    fi
+
+    VERSION=$(curl-proxy-aware -I $LATEST_URL 2>&1)
     RET=$?
     if  [[ "$RET" != 0 ]]; then
         error "curl returned with error $RET"
 
-        if [[ "$CB_HTTP_PROXY" ]] || [[ "$CB_HTTPS_PROXY" ]]; then
+        if [[ "$HTTP_PROXY_HOST" ]] || [[ "$HTTPS_PROXY_HOST" ]]; then
             warn "Couldn't get latest version. Check your proxy settings in your Profile"
         fi
     else
@@ -343,7 +357,7 @@ doctor() {
 }
 
 network-doctor() {
-    if [[ "$SKIP_NETWORK_DOCTOR" ]] || [[ "$CB_HTTP_PROXY" ]] || [[ "$CB_HTTPS_PROXY" ]] || [[ "$http_proxy" ]] || [[ "$https_proxy" ]]; then
+    if [[ "$SKIP_NETWORK_DOCTOR" ]] || [[ "$HTTP_PROXY_HOST" ]] || [[ "$HTTPS_PROXY_HOST" ]]; then
         info "network checks are skipped in case you are using proxy"
         return
     fi
