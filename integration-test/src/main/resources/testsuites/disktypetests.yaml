@@ -1,0 +1,8 @@
+name: Connectors_DiskTypes_Tests
+parameters:
+  cleanUp: true
+
+tests:
+  - name: disktype_test
+    classes:
+      - com.sequenceiq.it.cloudbreak.DiskTypeTests
