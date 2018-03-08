@@ -152,16 +152,6 @@ public class GcpCredentialConnectorTest {
         Assert.assertEquals("Invalid credential status has specified!", CredentialStatus.FAILED, status.getStatus());
     }
 
-    /**
-     * If a null would be passed to the GcpCredentialConnector's verify
-     * method than an IllegalArgumentException would be thrown.
-     */
-    @Test
-    public void testForPassingNullAsVerifyArgument() throws Exception {
-        expectedException.expect(IllegalArgumentException.class);
-        underTest.verify(null);
-    }
-
 
     /**
      * On GCP there is no interactive login option, so when someone calls this
@@ -173,15 +163,6 @@ public class GcpCredentialConnectorTest {
         underTest.interactiveLogin(null, null, null);
     }
 
-    /**
-     * Testing that if the calling the delete function whith a null, the expected
-     * behaviour is a thrown IllegalArgumentException.
-     */
-    @Test
-    public void testDeleteForNull() {
-        expectedException.expect(IllegalArgumentException.class);
-        underTest.delete(null);
-    }
 
     /**
      * Test that if the delete function has called with a proper
@@ -194,16 +175,6 @@ public class GcpCredentialConnectorTest {
 
         Assert.assertNotNull("The returned CloudCredentialStatus instance is null!", status);
         Assert.assertEquals("Invalid credential status has specified!", CredentialStatus.DELETED, status.getStatus());
-    }
-
-    /**
-     * Testing that if the calling the create function whith a null, the expected
-     * behaviour is a thrown IllegalArgumentException.
-     */
-    @Test
-    public void testCreateForNull() {
-        expectedException.expect(IllegalArgumentException.class);
-        underTest.create(null);
     }
 
     /**
@@ -238,7 +209,8 @@ public class GcpCredentialConnectorTest {
     }
 
     private Compute createDummyCompute() {
-        return new Compute(new MockHttpTransport(), new MockJsonFactory(), request -> { });
+        return new Compute(new MockHttpTransport(), new MockJsonFactory(), request -> {
+        });
     }
 
 }
