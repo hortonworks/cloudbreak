@@ -10,6 +10,9 @@ public class PlatformAccessConfigsResponse implements JsonEntity {
 
     private Set<AccessConfigJson> accessConfigs = new HashSet<>();
 
+    public PlatformAccessConfigsResponse() {
+    }
+
     public Set<AccessConfigJson> getAccessConfigs() {
         return accessConfigs;
     }

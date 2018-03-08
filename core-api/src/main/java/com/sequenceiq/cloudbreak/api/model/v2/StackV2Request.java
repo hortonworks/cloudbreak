@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.api.model.v2;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -94,7 +93,7 @@ public class StackV2Request implements JsonEntity {
         this.failurePolicy = failurePolicy;
     }
 
-    public Collection<InstanceGroupV2Request> getInstanceGroups() {
+    public List<InstanceGroupV2Request> getInstanceGroups() {
         return instanceGroups;
     }
 
