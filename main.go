@@ -851,9 +851,8 @@ func main() {
 			},
 		},
 		{
-			Name:   "ldap",
-			Usage:  "ldap related operations",
-			Hidden: true,
+			Name:  "ldap",
+			Usage: "ldap related operations",
 			Subcommands: []cli.Command{
 				{
 					Name:  "create",
@@ -898,8 +897,9 @@ func main() {
 					},
 				},
 				{
-					Name:  "user",
-					Usage: "manage LDAP users",
+					Name:   "user",
+					Usage:  "manage LDAP users",
+					Hidden: true,
 					Subcommands: []cli.Command{
 						{
 							Name:  "create",
@@ -947,8 +947,9 @@ func main() {
 					},
 				},
 				{
-					Name:  "group",
-					Usage: "manage LDAP groups",
+					Name:   "group",
+					Usage:  "manage LDAP groups",
+					Hidden: true,
 					Subcommands: []cli.Command{
 						{
 							Name:  "create",
