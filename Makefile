@@ -69,23 +69,26 @@ build-linux-version:
 build-windows-version:
 	GOOS=windows CGO_ENABLED=0 go build -a ${LDFLAGS} -o build/Windows/${BINARY}.exe main.go
 
-generate-swagger:
+generate-swagger: build-swagger-fix
 	rm -rf client_cloudbreak models_cloudbreak
 	swagger generate client -f http://$(CB_IP):$(CB_PORT)/cb/api/swagger.json -c client_cloudbreak -m models_cloudbreak
 	make fix-swagger
 
-generate-swagger-docker:
+generate-swagger-docker: build-swagger-fix
 	@docker run --rm -it -v "${GOPATH}":"${GOPATH}" -w "${PWD}" -e GOPATH --net=host quay.io/goswagger/swagger:0.12.0 \
 	generate client -f http://$(CB_IP):$(CB_PORT)/cb/api/swagger.json -c client_cloudbreak -m models_cloudbreak
 	make fix-swagger
 
+build-swagger-fix:
+	go build -o build/swagger_fix swagger_fix/main.go
+
 fix-swagger:
 	$(info fixed on master https://github.com/go-swagger/go-swagger/issues/1197#issuecomment-335610396)
-	go run swagger_fix/main.go --src models_cloudbreak/platform_gateways_response.go --operation remove-statement --exp validateGateways:range-0,for-0,if-1
-	go run swagger_fix/main.go --src models_cloudbreak/platform_ip_pools_response.go --operation remove-statement --exp validateIppools:range-0,for-0,if-1
-	go run swagger_fix/main.go --src models_cloudbreak/platform_networks_response.go --operation remove-statement --exp validateNetworks:range-0,for-0,if-1
-	go run swagger_fix/main.go --src models_cloudbreak/platform_ssh_keys_response.go --operation remove-statement --exp validateSSHKeys:range-0,for-0,if-1
-	go run swagger_fix/main.go --src models_cloudbreak/platform_security_groups_response.go --operation remove-statement --exp validateSecurityGroups:range-0,for-0,if-1
+	build/swagger_fix --src models_cloudbreak/platform_gateways_response.go --operation remove-statement --exp validateGateways:range-0,for-0,if-1
+	build/swagger_fix --src models_cloudbreak/platform_ip_pools_response.go --operation remove-statement --exp validateIppools:range-0,for-0,if-1
+	build/swagger_fix --src models_cloudbreak/platform_networks_response.go --operation remove-statement --exp validateNetworks:range-0,for-0,if-1
+	build/swagger_fix --src models_cloudbreak/platform_ssh_keys_response.go --operation remove-statement --exp validateSSHKeys:range-0,for-0,if-1
+	build/swagger_fix --src models_cloudbreak/platform_security_groups_response.go --operation remove-statement --exp validateSecurityGroups:range-0,for-0,if-1
 	goimports -l -w models_cloudbreak
 	goimports -l -w client_cloudbreak
 	@gofmt -w ${GOFILES_NOVENDOR}

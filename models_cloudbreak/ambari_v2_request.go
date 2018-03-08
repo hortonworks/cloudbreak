@@ -76,7 +76,7 @@ type AmbariV2Request struct {
 	// Pattern: (^[a-z][-a-z0-9]*[a-z0-9]$)
 	UserName *string `json:"userName"`
 
-	// validate blueprint
+	// blueprint validation
 	ValidateBlueprint *bool `json:"validateBlueprint,omitempty"`
 }
 

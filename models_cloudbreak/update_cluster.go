@@ -48,7 +48,7 @@ type UpdateCluster struct {
 	// user details
 	UserNamePasswordJSON *UserNamePassword `json:"userNamePasswordJson,omitempty"`
 
-	// validate blueprint
+	// blueprint validation
 	ValidateBlueprint *bool `json:"validateBlueprint,omitempty"`
 }
 
