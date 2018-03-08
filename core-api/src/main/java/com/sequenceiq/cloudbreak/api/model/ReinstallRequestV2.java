@@ -41,7 +41,7 @@ public class ReinstallRequestV2 implements JsonEntity {
 
     private Long stackId;
 
-    public Iterable<InstanceGroupV2Request> getInstanceGroups() {
+    public Set<InstanceGroupV2Request> getInstanceGroups() {
         return instanceGroups;
     }
 
