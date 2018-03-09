@@ -3,6 +3,9 @@ package com.sequenceiq.cloudbreak.blueprint;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
 public class ServiceConfig {
 
     private final String serviceName;
@@ -35,5 +38,35 @@ public class ServiceConfig {
 
     public List<String> getRelatedServices() {
         return relatedServices;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        ServiceConfig that = (ServiceConfig) o;
+
+        return new EqualsBuilder()
+                .append(serviceName, that.serviceName)
+                .append(relatedServices, that.relatedServices)
+                .append(globalConfig, that.globalConfig)
+                .append(hostGroupConfig, that.hostGroupConfig)
+                .isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37)
+                .append(serviceName)
+                .append(relatedServices)
+                .append(globalConfig)
+                .append(hostGroupConfig)
+                .toHashCode();
     }
 }

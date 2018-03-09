@@ -1,0 +1,13 @@
+{
+    "blueprintName": "name",
+    "components": {
+        "services": {
+           "name1": "service-name1",
+           "name2": "service-name2"
+        },
+        "names": [
+            "comp1",
+            "comp2"
+        ]
+    }
+}
