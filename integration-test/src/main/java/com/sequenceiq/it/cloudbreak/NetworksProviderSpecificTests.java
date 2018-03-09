@@ -4,8 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import javax.ws.rs.BadRequestException;
 import javax.ws.rs.ForbiddenException;
-import javax.ws.rs.InternalServerErrorException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,7 +48,7 @@ public class NetworksProviderSpecificTests extends CloudbreakTest {
         }
     }
 
-    @Test(expectedExceptions = InternalServerErrorException.class)
+    @Test(expectedExceptions = BadRequestException.class)
     public void testGetNetworksInvalidRegionAWS() throws Exception {
         given(Networks.request()
                 .withCredentialId(credentialIdMap.get("aws"))
@@ -68,7 +68,7 @@ public class NetworksProviderSpecificTests extends CloudbreakTest {
         then(Networks.assertNetworksEmpty());
     }
 
-    @Test(expectedExceptions = InternalServerErrorException.class)
+    @Test(expectedExceptions = BadRequestException.class)
     public void testGetNetworksInvalidRegionGCP() throws Exception {
         given(Networks.request()
                 .withCredentialId(credentialIdMap.get("gcp"))
@@ -149,10 +149,10 @@ public class NetworksProviderSpecificTests extends CloudbreakTest {
         );
     }
 
-    @AfterTest(enabled = false)
+    @AfterTest
     public void cleanUp() throws Exception {
-        String[] nameArray = {VALID_CRED_NAME + "-azure-spec", VALID_CRED_NAME + "-aws-spec", VALID_CRED_NAME + "-gcp-spec",
-                VALID_CRED_NAME + "-openstack-spec"};
+        String[] nameArray = {VALID_CRED_NAME + "azure-spec", VALID_CRED_NAME + "aws-spec", VALID_CRED_NAME + "gcp-spec",
+                VALID_CRED_NAME + "openstack-spec"};
         for (String name : nameArray) {
             try {
                 given(CloudbreakClient.isCreated());
