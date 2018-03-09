@@ -7,7 +7,7 @@ import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel("ProxyConfigResponse")
 public class ProxyConfigResponse extends ProxyConfigBase {
-    @ApiModelProperty(ModelDescriptions.ID)
+    @ApiModelProperty(ModelDescriptions.ClusterModelDescription.PROXY_CONFIG_ID)
     private Long id;
 
     public Long getId() {

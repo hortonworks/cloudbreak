@@ -106,7 +106,7 @@ public class ClusterDecorator {
         }
         subject.setTopologyValidation(request.getValidateBlueprint());
         prepareRds(subject, user, request.getRdsConfigIds(), request.getRdsConfigJsons(), stack);
-        subject = clusterProxyDecorator.prepareProxyConfig(subject, user, request.getProxyConfigId(), request.getProxyConfigRequest(), stack);
+        subject = clusterProxyDecorator.prepareProxyConfig(subject, user, request.getProxyName(), stack);
         prepareLdap(subject, user, request.getLdapConfigId(), request.getLdapConfig(), request.getLdapConfigName(), stack);
         prepareConnectedClusterParameters(subject, user, request.getConnectedCluster());
         return subject;
