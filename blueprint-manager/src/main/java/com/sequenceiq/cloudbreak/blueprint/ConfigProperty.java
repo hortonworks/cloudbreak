@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.blueprint;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
 public class ConfigProperty {
 
     private final String name;
@@ -24,5 +27,33 @@ public class ConfigProperty {
 
     public String getDirectory() {
         return directory;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        ConfigProperty that = (ConfigProperty) o;
+
+        return new EqualsBuilder()
+                .append(name, that.name)
+                .append(prefix, that.prefix)
+                .append(directory, that.directory)
+                .isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37)
+                .append(name)
+                .append(prefix)
+                .append(directory)
+                .toHashCode();
     }
 }
