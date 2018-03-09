@@ -42,15 +42,16 @@ func (l *ldap) DataAsStringArray() []string {
 		l.UserObjectClass, l.GroupMemberAttribute, l.GroupNameAttribute, l.GroupObjectClass, l.GroupSearchBase}
 }
 
-var LdapUsers = []string{"Distinguished Names", "Member of Group"}
+var LdapUsers = []string{"Distinguished Names", "Email", "Member of Group"}
 
 type ldapUserSearchResult struct {
 	Name     string `json:"Name" yaml:"Name"`
+	Email    string `json:"Email" yaml:"Email"`
 	MemberOf string `json:"MemberOf" yaml:"MemberOf"`
 }
 
 func (l *ldapUserSearchResult) DataAsStringArray() []string {
-	return []string{l.Name, l.MemberOf}
+	return []string{l.Name, l.Email, l.MemberOf}
 }
 
 var LdapGroups = []string{"Distinguished Names"}
@@ -217,6 +218,7 @@ func CreateLdapUser(c *cli.Context) error {
 	ldapServer := c.String(FlLdapServer.Name)
 	userName := c.String(FlLdapUserToCreate.Name)
 	password := c.String(FlLdapUserToCreatePassword.Name)
+	email := c.String(FlLdapUserToCreateEmail.Name)
 	baseDn := c.String(FlLdapUserToCreateBase.Name)
 	groups := c.String(FlLdapUserToCreateGroups.Name)
 	ldaps := c.Bool(FlLdapSecureOptional.Name)
@@ -239,6 +241,7 @@ func CreateLdapUser(c *cli.Context) error {
 		{Type: "sAMAccountName", Vals: []string{userName}},
 		{Type: "userAccountControl", Vals: []string{accountControl}},
 		{Type: "unicodePwd", Vals: []string{utfLePassword}},
+		{Type: "mail", Vals: []string{email}},
 	}
 
 	userDn := fmt.Sprintf("CN=%s,%s", userName, baseDn)
@@ -357,7 +360,7 @@ func ListLdapUsers(c *cli.Context) error {
 
 	searchReq := ldaputils.NewSearchRequest(searchBase,
 		ldaputils.ScopeWholeSubtree, ldaputils.NeverDerefAliases, 0, 0, false,
-		"(&(objectClass=user))", []string{"dn", "memberOf"}, nil,
+		"(&(objectClass=user))", []string{"dn", "memberOf", "mail"}, nil,
 	)
 
 	result := ldapSearch(ldap, searchReq)
@@ -367,6 +370,7 @@ func ListLdapUsers(c *cli.Context) error {
 	for _, l := range searchResults {
 		row := &ldapUserSearchResult{
 			Name:     l.Name,
+			Email:    l.Email,
 			MemberOf: l.MemberOf,
 		}
 		tableRows = append(tableRows, row)
@@ -449,13 +453,18 @@ func convertLdapEntryToUserSearchResult(entries []*ldaputils.Entry) []ldapUserSe
 	var result = make([]ldapUserSearchResult, 0)
 	for _, e := range entries {
 		memberOf := ""
+		email := ""
 		for _, attr := range e.Attributes {
-			if len(attr.Values) > 0 && len(attr.Name) > 0 && attr.Name == "memberOf" {
-				memberOf = strings.Join(attr.Values, ";")
-				break
+			if len(attr.Values) > 0 && len(attr.Name) > 0 {
+				switch attr.Name {
+				case "memberOf":
+					memberOf = strings.Join(attr.Values, ";")
+				case "mail":
+					email = strings.Join(attr.Values, ";")
+				}
 			}
 		}
-		result = append(result, ldapUserSearchResult{e.DN, memberOf})
+		result = append(result, ldapUserSearchResult{e.DN, email, memberOf})
 	}
 	return result
 }

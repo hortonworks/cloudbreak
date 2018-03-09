@@ -905,12 +905,12 @@ func main() {
 							Name:  "create",
 							Usage: "create a new LDAP user in the given base",
 							Flags: cb.NewFlagBuilder().AddFlags(cb.FlLdapServer, cb.FlLdapSecureOptional,
-								cb.FlLdapBindDN, cb.FlLdapBindPassword, cb.FlLdapUserToCreate, cb.FlLdapUserToCreatePassword,
+								cb.FlLdapBindDN, cb.FlLdapBindPassword, cb.FlLdapUserToCreate, cb.FlLdapUserToCreateEmail, cb.FlLdapUserToCreatePassword,
 								cb.FlLdapUserToCreateBase, cb.FlLdapUserToCreateGroups, cb.FlLdapDirectoryType).Build(),
 							Action: cb.CreateLdapUser,
 							BashComplete: func(c *cli.Context) {
 								for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlLdapServer, cb.FlLdapSecureOptional,
-									cb.FlLdapBindDN, cb.FlLdapBindPassword, cb.FlLdapUserToCreate, cb.FlLdapUserToCreatePassword,
+									cb.FlLdapBindDN, cb.FlLdapBindPassword, cb.FlLdapUserToCreate, cb.FlLdapUserToCreateEmail, cb.FlLdapUserToCreatePassword,
 									cb.FlLdapUserToCreateBase, cb.FlLdapUserToCreateGroups, cb.FlLdapDirectoryType).Build() {
 									printFlagCompletion(f)
 								}

@@ -449,6 +449,13 @@ var (
 			Usage: "password of the user",
 		},
 	}
+	FlLdapUserToCreateEmail = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "ldap-user-to-create-email",
+			Usage: "email of the ldap user (it will set the mail attribute)",
+		},
+	}
 	FlLdapUserToCreateBase = StringFlag{
 		RequiredFlag: REQUIRED,
 		StringFlag: cli.StringFlag{
