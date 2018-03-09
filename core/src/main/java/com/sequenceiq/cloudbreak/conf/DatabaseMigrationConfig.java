@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Properties;
 
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.sql.DataSource;
 
@@ -27,10 +28,6 @@ import org.springframework.context.annotation.DependsOn;
 public class DatabaseMigrationConfig {
     private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseMigrationConfig.class);
 
-    private static final String DEFAULT_SCHEMA_LOCATION = "/schema";
-
-    private static final String SCHEMA_IN_CONTAINER = "container";
-
     private static final String DEFAULT_SCHEMA_LOCATION_IN_SOURCE = "core/src/main/resources/schema";
 
     private static final String PENDING_OPERATION_WARNING_MSG = "WARNING: Running pending migrations out of order can create unexpected results.";
@@ -47,6 +44,13 @@ public class DatabaseMigrationConfig {
 
     @Inject
     private DataSource dataSource;
+
+    @PostConstruct
+    public void init() {
+        if ("container".equals(schemaLocation)) {
+            schemaLocation = DEFAULT_SCHEMA_LOCATION_IN_SOURCE;
+        }
+    }
 
     @Bean
     @DependsOn("dataSource")
@@ -82,30 +86,19 @@ public class DatabaseMigrationConfig {
 
     @Bean
     public FileMigrationLoader upMigrationLoader() {
-        String schemaLoc = schemaLocation;
-        if (SCHEMA_IN_CONTAINER.equals(schemaLocation)) {
-            schemaLoc = DEFAULT_SCHEMA_LOCATION;
-        }
-        schemaLoc += UP_OPERATION_SUBFOLDER;
-        LOGGER.info("Creating up operation migration loader for location: '{}'.....", schemaLoc);
-        File scriptsDir = new File(schemaLoc);
-        Properties emptyProperties = new Properties();
-        String charset = Charsets.UTF_8.displayName();
-        return new FileMigrationLoader(scriptsDir, charset, emptyProperties);
+        return migrationLoader("up", UP_OPERATION_SUBFOLDER);
     }
 
     @Bean
     public FileMigrationLoader pendingMigrationLoader() {
-        String schemaLoc = schemaLocation;
-        if (SCHEMA_IN_CONTAINER.equals(schemaLocation)) {
-            schemaLoc = DEFAULT_SCHEMA_LOCATION;
-        }
-        schemaLoc += PENDING_OPERATION_SUBFOLDER;
-        LOGGER.info("Creating pending operation migration loader for location: '{}'.....", schemaLoc);
-        File scriptsDir = new File(schemaLoc);
-        Properties emptyProperties = new Properties();
+        return migrationLoader("pending", PENDING_OPERATION_SUBFOLDER);
+    }
+
+    private FileMigrationLoader migrationLoader(String type, String subFolder) {
+        String schemaLoc = schemaLocation + subFolder;
+        LOGGER.info(String.format("Creating %s operation migration loader for location: '{}'.....", type), schemaLoc);
         String charset = Charsets.UTF_8.displayName();
-        return new FileMigrationLoader(scriptsDir, charset, emptyProperties);
+        return new FileMigrationLoader(new File(schemaLoc), charset, new Properties());
     }
 
     private void logMigrationResult(String migrationResult, String operation) {
