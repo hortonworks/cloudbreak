@@ -51,7 +51,7 @@ public class NetworksTest extends CloudbreakTest {
     }
 
     @BeforeTest
-    public void createCredentialsAllProviders() throws  Exception {
+    public void setup() throws  Exception {
         credentialName = VALID_CRED_NAME + cloudProvider.getPlatform().toLowerCase() + "-nets";
         given(CloudbreakClient.isCreated());
         given(cloudProvider.aValidCredential()
