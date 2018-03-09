@@ -115,11 +115,8 @@ type ClusterRequest struct {
 	// Min Length: 5
 	Password *string `json:"password"`
 
-	// proxy configuration id for the cluster
-	ProxyConfigID int64 `json:"proxyConfigId,omitempty"`
-
-	// proxy configuration for the cluster
-	ProxyConfigRequest *ProxyConfigRequest `json:"proxyConfigRequest,omitempty"`
+	// proxy configuration name for the cluster
+	ProxyName string `json:"proxyName,omitempty"`
 
 	// RDS configuration ids for the cluster
 	// Unique: true
@@ -194,9 +191,7 @@ type ClusterRequest struct {
 
 /* polymorph ClusterRequest password false */
 
-/* polymorph ClusterRequest proxyConfigId false */
-
-/* polymorph ClusterRequest proxyConfigRequest false */
+/* polymorph ClusterRequest proxyName false */
 
 /* polymorph ClusterRequest rdsConfigIds false */
 
@@ -296,11 +291,6 @@ func (m *ClusterRequest) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validatePassword(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
-	if err := m.validateProxyConfigRequest(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -731,25 +721,6 @@ func (m *ClusterRequest) validatePassword(formats strfmt.Registry) error {
 
 	if err := validate.MaxLength("password", "body", string(*m.Password), 100); err != nil {
 		return err
-	}
-
-	return nil
-}
-
-func (m *ClusterRequest) validateProxyConfigRequest(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.ProxyConfigRequest) { // not required
-		return nil
-	}
-
-	if m.ProxyConfigRequest != nil {
-
-		if err := m.ProxyConfigRequest.Validate(formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("proxyConfigRequest")
-			}
-			return err
-		}
 	}
 
 	return nil

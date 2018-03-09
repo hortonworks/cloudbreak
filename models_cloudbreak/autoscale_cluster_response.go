@@ -104,11 +104,8 @@ type AutoscaleClusterResponse struct {
 	// ambari password
 	Password string `json:"password,omitempty"`
 
-	// proxy configuration for the cluster
-	ProxyConfig *ProxyConfigResponse `json:"proxyConfig,omitempty"`
-
-	// proxy configuration id for the cluster
-	ProxyConfigID int64 `json:"proxyConfigId,omitempty"`
+	// proxy configuration name for the cluster
+	ProxyName string `json:"proxyName,omitempty"`
 
 	// RDS configuration ids for the cluster
 	// Unique: true
@@ -191,9 +188,7 @@ type AutoscaleClusterResponse struct {
 
 /* polymorph AutoscaleClusterResponse password false */
 
-/* polymorph AutoscaleClusterResponse proxyConfig false */
-
-/* polymorph AutoscaleClusterResponse proxyConfigId false */
+/* polymorph AutoscaleClusterResponse proxyName false */
 
 /* polymorph AutoscaleClusterResponse rdsConfigIds false */
 
@@ -271,11 +266,6 @@ func (m *AutoscaleClusterResponse) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateLdapConfig(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
-	if err := m.validateProxyConfig(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -593,25 +583,6 @@ func (m *AutoscaleClusterResponse) validateLdapConfig(formats strfmt.Registry) e
 		if err := m.LdapConfig.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("ldapConfig")
-			}
-			return err
-		}
-	}
-
-	return nil
-}
-
-func (m *AutoscaleClusterResponse) validateProxyConfig(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.ProxyConfig) { // not required
-		return nil
-	}
-
-	if m.ProxyConfig != nil {
-
-		if err := m.ProxyConfig.Validate(formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("proxyConfig")
 			}
 			return err
 		}

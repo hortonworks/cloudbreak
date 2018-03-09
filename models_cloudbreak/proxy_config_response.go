@@ -21,7 +21,7 @@ type ProxyConfigResponse struct {
 	// description of the resource
 	Description string `json:"description,omitempty"`
 
-	// id of the resource
+	// proxy configuration id for the cluster
 	ID int64 `json:"id,omitempty"`
 
 	// Name of the proxy configuration resource
