@@ -178,6 +178,7 @@ UAA_DEFAULT_USER_FIRSTNAME - First name of default admin user
 UAA_DEFAULT_USER_GROUPS - Default user groups of the users
 UAA_DEFAULT_USER_LASTNAME - Last name of default admin user
 UAA_DEFAULT_USER_PW - Password of default admin user
+UAA_SETTINGS_FILE - You can specify custom settings for UAA which will be merged with the default (e.g provide LDAP settings)
 UAA_FLEX_USAGE_CLIENT_ID - Identity of the Flex usage generator scope in Identity
 UAA_FLEX_USAGE_CLIENT_SECRET - Secret of the Flex usage generator scope in Identity
 UAA_PERISCOPE_ID - Identity of the Autoscale scope in Identity

@@ -594,6 +594,7 @@ main() {
     deps-init
     create-temp-dir
     deps-require sed
+    deps-require yq
     if is_command_needs_profile $1; then
         init-profile
         load-profile
