@@ -183,6 +183,8 @@ cloudbreak-delete-certs() {
 cloudbreak-conf-uaa() {
     env-import UAA_PORT 8089
 
+    env-import UAA_SETTINGS_FILE uaa-changes.yml
+
     env-import UAA_DEFAULT_SECRET
     env-validate UAA_DEFAULT_SECRET *" "* "space"
 
@@ -422,6 +424,9 @@ generate_uaa_config() {
         fi
     else
         info "generating uaa.yml"
+        if [ -f "$UAA_SETTINGS_FILE" ]; then
+            info "apply custom uaa settings from file: $UAA_SETTINGS_FILE"
+        fi
         generate_uaa_config_force uaa.yml
     fi
 }
@@ -506,6 +511,10 @@ EOF
   users:
     - ${UAA_DEFAULT_USER_EMAIL}|${UAA_DEFAULT_USER_PW}|${UAA_DEFAULT_USER_EMAIL}|${UAA_DEFAULT_USER_FIRSTNAME}|${UAA_DEFAULT_USER_LASTNAME}|${UAA_DEFAULT_USER_GROUPS}
 EOF
+    fi
+
+    if [ -f "$UAA_SETTINGS_FILE" ]; then
+        yq m -i -x ${uaaFile} ${UAA_SETTINGS_FILE}
     fi
 }
 
