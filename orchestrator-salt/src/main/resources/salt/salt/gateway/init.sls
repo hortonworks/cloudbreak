@@ -24,6 +24,7 @@ knox-master-secret:
     - name: /usr/hdp/current/knox-server/bin/knoxcli.sh create-master --master '{{ salt['pillar.get']('gateway:mastersecret') }}'
     - user: knox
     - creates: /usr/hdp/current/knox-server/data/security/master
+    - output_loglevel: quiet
 
 knox-create-cert:
   cmd.run:
@@ -51,12 +52,14 @@ knox-create-sign-pkcs12:
     - name: cd /usr/hdp/current/knox-server/data/security/keystores/ && openssl pkcs12 -export -in signcert.pem -inkey signkey.pem -out signing.p12 -name signing-identity -password pass:{{ salt['pillar.get']('gateway:mastersecret') }}
     - user: knox
     - creates: /usr/hdp/current/knox-server/data/security/keystores/signing.p12
+    - output_loglevel: quiet
 
 knox-create-sign-jks:
   cmd.run:
     - name: cd /usr/hdp/current/knox-server/data/security/keystores/ && keytool -importkeystore -deststorepass {{ salt['pillar.get']('gateway:mastersecret') }} -destkeypass {{ salt['pillar.get']('gateway:mastersecret') }} -destkeystore signing.jks -srckeystore signing.p12 -srcstoretype PKCS12 -srcstorepass {{ salt['pillar.get']('gateway:mastersecret') }} -alias signing-identity
     - user: knox
     - creates: /usr/hdp/current/knox-server/data/security/keystores/signing.jks
+    - output_loglevel: quiet
 
 #knox-export-cert:
 #  cmd.run:

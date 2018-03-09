@@ -20,10 +20,4 @@ public class RunningJobsResponse {
         this.result = result;
     }
 
-    @Override
-    public String toString() {
-        return "RunningJobsResponse{"
-                + "result=" + result
-                + '}';
-    }
 }

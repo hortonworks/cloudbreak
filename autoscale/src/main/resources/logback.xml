@@ -5,8 +5,11 @@
     <logger name="org.springframework.boot.autoconfigure.security.AuthenticationManagerConfiguration" level="ERROR"/>
 
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
-        <encoder>
-            <pattern>%date{ISO8601} [%thread] %method:%line %-5level %logger{5} - [owner:%X{owner:-spring}] [id:%X{resourceId:-}] [cb-stack-id:%X{cbStack:-}] %msg%n</pattern>
+        <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
+            <layout class="com.sequenceiq.cloudbreak.logger.MaskingPatternLayout">
+                <loggerNameFilter>com.sequenceiq</loggerNameFilter>
+                <pattern>%date{ISO8601} [%thread] %method:%line %-5level %logger{5} - [owner:%X{owner:-spring}] [id:%X{resourceId:-}] [cb-stack-id:%X{cbStack:-}] %msg%n</pattern>
+            </layout>
         </encoder>
     </appender>
 
@@ -16,8 +19,11 @@
         <sift>
             <appender name="FILE-${nodeid}" class="ch.qos.logback.core.rolling.RollingFileAppender">
                 <file>autoscale-log/autoscale-${nodeid}.log</file>
-                <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
-                    <pattern>%date{ISO8601} [%thread] %method:%line %-5level %logger{5} - [instance:${nodeid}] [owner:%X{owner:-spring}] [id:%X{resourceId:-}] [cb-stack-id:%X{cbStack:-}] %msg%n</pattern>
+                <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
+                    <layout class="com.sequenceiq.cloudbreak.logger.MaskingPatternLayout">
+                        <loggerNameFilter>com.sequenceiq</loggerNameFilter>
+                        <pattern>%date{ISO8601} [%thread] %method:%line %-5level %logger{5} - [instance:${nodeid}] [owner:%X{owner:-spring}] [id:%X{resourceId:-}] [cb-stack-id:%X{cbStack:-}] %msg%n</pattern>
+                    </layout>
                 </encoder>
                 <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
                     <FileNamePattern>cloudbreak-log/cloudbreak-${nodeid}-%d{yyyy-MM-dd}.log</FileNamePattern>

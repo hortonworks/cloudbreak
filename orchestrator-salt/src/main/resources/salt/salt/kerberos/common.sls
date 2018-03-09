@@ -29,6 +29,7 @@ create_db:
     - unless: ls -la /var/kerberos/krb5kdc/principal
     - watch:
       - pkg: install_kerberos
+    - output_loglevel: quiet
 
 add_kadm5_sh_script:
   file.managed:
@@ -59,6 +60,7 @@ create_cluster_user:
     - name: 'kadmin.local -q "addprinc -pw {{ kerberos.clusterPassword }} {{ kerberos.clusterUser }}"'
     - shell: /bin/bash
     - unless: kadmin.local -q "list_principals *" | grep "^{{ kerberos.clusterUser }}@{{ kerberos.clusterPassword }} *"
+    - output_loglevel: quiet
 
 {% if grains['init'] == 'systemd' %}
 
