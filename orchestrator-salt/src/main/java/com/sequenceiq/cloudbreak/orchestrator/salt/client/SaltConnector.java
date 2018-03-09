@@ -148,11 +148,11 @@ public class SaltConnector implements Closeable {
                 .header(SIGN_HEADER, PkiUtil.generateSignature(signatureKey, toJson(form.asMap()).getBytes()))
                 .post(Entity.form(form));
         T responseEntity = JaxRSUtil.response(response, clazz);
-        LOGGER.info("Salt run response: {}", responseEntity);
+        LOGGER.info("Salt run has been executed. fun: {}", fun);
         return responseEntity;
     }
 
-    public <T> void wheel(String fun, Collection<String> match, Class<T> clazz) {
+    public <T> T wheel(String fun, Collection<String> match, Class<T> clazz) {
         Form form = new Form();
         form = addAuth(form)
                 .param("fun", fun)
@@ -164,7 +164,8 @@ public class SaltConnector implements Closeable {
                 .header(SIGN_HEADER, PkiUtil.generateSignature(signatureKey, toJson(form.asMap()).getBytes()))
                 .post(Entity.form(form));
         T responseEntity = JaxRSUtil.response(response, clazz);
-        LOGGER.info("Salt wheel run response: {}", responseEntity);
+        LOGGER.info("Salt wheel has been executed. fun: {}", fun);
+        return responseEntity;
     }
 
     public GenericResponses upload(Iterable<String> targets, String path, String fileName, byte[] content) throws IOException {
