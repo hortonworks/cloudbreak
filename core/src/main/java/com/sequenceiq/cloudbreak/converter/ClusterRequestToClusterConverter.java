@@ -116,7 +116,7 @@ public class ClusterRequestToClusterConverter extends AbstractConversionServiceA
         }
 
         if (gateway.getSsoProvider() == null) {
-            gateway.setSsoProvider('/' + gateway.getPath() + "/knoxsso/api/v1/websso");
+            gateway.setSsoProvider('/' + gateway.getPath() + "/sso/api/v1/websso");
         }
 
         convertExposedServices(cloudGatewayJson, gateway);
