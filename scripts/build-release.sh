@@ -22,7 +22,7 @@ fi
 RECKONED_VERSION=$(./gradlew -Penv=jenkins -b build.gradle buildInfo -Preckon.scope=$SCOPE -Preckon.stage=final | grep Reckoned)
 VERSION=${RECKONED_VERSION#Reckoned version: }
 
-git tag $VERSION
+git tag -a $VERSION -m "$VERSION"
 git push origin $VERSION
 
 echo VERSION=$VERSION > $WORKSPACE/version
