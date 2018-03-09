@@ -1,0 +1,24 @@
+name: Connectors_Recommendations_Tests
+parameters:
+  cleanUp: true
+
+tests:
+  - name: recommendations_os_test
+    parameters:
+      provider: openstack
+      openstackCredentialName: autotesting-recomm-os
+    classes:
+      - com.sequenceiq.it.cloudbreak.RecommendationsTests
+  - name: recommendations_aws_test
+    parameters:
+      provider: aws
+      awsCredentialName: autotesting-recomm-aws
+    classes:
+      - com.sequenceiq.it.cloudbreak.RecommendationsTests
+  - name: recommendations_gcp_test
+    parameters:
+      provider: gcp
+      gcpCredentialName: autotesting-recomm-gcp
+    classes:
+      - com.sequenceiq.it.cloudbreak.RecommendationsTests
+
