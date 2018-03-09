@@ -92,7 +92,7 @@ knox-create-sign-jks:
 
 {% if 'SSO_PROVIDER' == salt['pillar.get']('gateway:ssotype') %}
 
-/usr/hdp/current/knox-server/conf/topologies/knoxsso.xml:
+/usr/hdp/current/knox-server/conf/topologies/sso.xml:
   file.managed:
     - source: salt://gateway/config/knoxsso.xml.j2
     - template: jinja
@@ -109,13 +109,10 @@ knox-create-sign-jks:
 
 {% endif %}
 
-{% else %}
+{% endif %}
 
 /usr/hdp/current/knox-server/conf/topologies/knoxsso.xml:
   file.absent
-
-{% endif %}
-
 
 {% if gateway.is_systemd %}
 
