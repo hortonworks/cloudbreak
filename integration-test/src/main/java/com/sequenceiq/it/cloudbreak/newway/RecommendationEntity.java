@@ -24,4 +24,24 @@ public class RecommendationEntity extends AbstractCloudbreakEntity<Recommendatio
         getRequest().setBlueprintName(name);
         return this;
     }
+
+    public RecommendationEntity withCredentialId(Long id) {
+        getRequest().setCredentialId(id);
+        return this;
+    }
+
+    public RecommendationEntity withCredentialName(String name) {
+        getRequest().setCredentialName(name);
+        return this;
+    }
+
+    public RecommendationEntity withRegion(String regionName) {
+        getRequest().setRegion(regionName);
+        return this;
+    }
+
+    public RecommendationEntity withAvailabilityZone(String availabilityZone) {
+        getRequest().setAvailabilityZone(availabilityZone);
+        return this;
+    }
 }
