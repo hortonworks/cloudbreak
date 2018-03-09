@@ -9,7 +9,6 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.model.FileSystemRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.AmbariV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.ClusterV2Request;
-import com.sequenceiq.cloudbreak.api.model.v2.ProxyConfigv2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.RdsConfigs;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.Cluster;
@@ -39,10 +38,10 @@ public class ClusterToClusterV2RequestConverter extends AbstractConversionServic
             clusterV2Request.setRdsConfigs(rdsConfigs);
         }
 
-        if (source.getProxyConfig() != null && source.getProxyConfig().getId() != null) {
-            clusterV2Request.setProxyConfig(new ProxyConfigv2Request());
-            clusterV2Request.getProxyConfig().setId(source.getProxyConfig().getId());
+        if (source.getProxyConfig() != null) {
+            clusterV2Request.setProxyName(source.getProxyConfig().getName());
         }
+
         return clusterV2Request;
     }
 

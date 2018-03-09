@@ -176,7 +176,7 @@ public class ClusterToClusterResponseConverterTest extends AbstractEntityConvert
         Blueprint blueprint = TestUtil.blueprint();
         Cluster cluster = TestUtil.cluster(blueprint, stack, 1L);
         ProxyConfig proxyConfig = new ProxyConfig();
-        proxyConfig.setId(1L);
+        proxyConfig.setName("test");
         cluster.setProxyConfig(proxyConfig);
         stack.setCluster(cluster);
         return cluster;

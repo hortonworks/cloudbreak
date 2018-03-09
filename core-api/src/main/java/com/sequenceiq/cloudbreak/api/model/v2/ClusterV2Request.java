@@ -35,8 +35,8 @@ public class ClusterV2Request implements JsonEntity {
     @ApiModelProperty(ClusterModelDescription.RDS_CONFIGS)
     private RdsConfigs rdsConfigs;
 
-    @ApiModelProperty(ClusterModelDescription.PROXY_CONFIG)
-    private ProxyConfigv2Request proxyConfig;
+    @ApiModelProperty(ClusterModelDescription.PROXY_NAME)
+    private String proxyName;
 
     @Valid
     @ApiModelProperty(StackModelDescription.FILE_SYSTEM)
@@ -115,11 +115,11 @@ public class ClusterV2Request implements JsonEntity {
         this.rdsConfigs = rdsConfigs;
     }
 
-    public ProxyConfigv2Request getProxyConfig() {
-        return proxyConfig;
+    public String getProxyName() {
+        return proxyName;
     }
 
-    public void setProxyConfig(ProxyConfigv2Request proxyConfig) {
-        this.proxyConfig = proxyConfig;
+    public void setProxyName(String proxyName) {
+        this.proxyName = proxyName;
     }
 }

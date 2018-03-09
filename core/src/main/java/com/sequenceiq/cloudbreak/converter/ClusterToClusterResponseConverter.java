@@ -373,8 +373,7 @@ public class ClusterToClusterResponseConverter extends AbstractConversionService
 
     private void decorateResponseWithProxyConfig(Cluster source, ClusterResponse clusterResponse) {
         if (source.getProxyConfig() != null) {
-            clusterResponse.setProxyConfig(proxyConfigMapper.mapEntityToResponse(source.getProxyConfig()));
-            clusterResponse.setProxyConfigId(source.getProxyConfig().getId());
+            clusterResponse.setProxyName(source.getProxyConfig().getName());
         }
     }
 }
