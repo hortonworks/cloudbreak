@@ -20,9 +20,9 @@ public class Recommendation extends RecommendationEntity {
     }
 
     public static Recommendation isCreated() {
-        Recommendation credential = new Recommendation();
-        credential.setCreationStrategy(RecommendationAction::createInGiven);
-        return credential;
+        Recommendation recommendation = new Recommendation();
+        recommendation.setCreationStrategy(RecommendationAction::createInGiven);
+        return recommendation;
     }
 
     public static Action<Recommendation> post(String key) {
