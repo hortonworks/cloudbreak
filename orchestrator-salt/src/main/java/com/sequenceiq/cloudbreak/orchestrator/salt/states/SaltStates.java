@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Glob;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Target;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.ApplyResponse;
+import com.sequenceiq.cloudbreak.orchestrator.salt.domain.DefaultRouteResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.Minion;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.NetworkInterfaceResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.PingResponse;
@@ -122,8 +123,12 @@ public class SaltStates {
         return sc.run(target, "test.ping", LOCAL, PingResponse.class);
     }
 
-    public static NetworkInterfaceResponse networkInterfaceIP(SaltConnector sc, Target<String> target) {
-        return sc.run(target, "network.interface_ip", LOCAL, NetworkInterfaceResponse.class, "eth0");
+    public static DefaultRouteResponse defaultRoute(SaltConnector sc, Target<String> target) {
+        return sc.run(target, "network.default_route", LOCAL, DefaultRouteResponse.class);
+    }
+
+    public static NetworkInterfaceResponse networkInterfaceIP(SaltConnector sc, Target<String> target, String iFace) {
+        return sc.run(target, "network.interface_ip", LOCAL, NetworkInterfaceResponse.class, iFace);
     }
 
     public static void stopMinions(SaltConnector sc, Map<String, String> privateIPsByFQDN) {

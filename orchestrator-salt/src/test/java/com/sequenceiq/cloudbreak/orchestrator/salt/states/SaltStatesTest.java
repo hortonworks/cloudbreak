@@ -162,7 +162,7 @@ public class SaltStatesTest {
 
     @Test
     public void networkInterfaceIPTest() {
-        SaltStates.networkInterfaceIP(saltConnector, target);
+        SaltStates.networkInterfaceIP(saltConnector, target, "eth0");
         verify(saltConnector, times(1)).run(any(), eq("network.interface_ip"), eq(LOCAL), eq(NetworkInterfaceResponse.class), eq("eth0"));
     }
 
