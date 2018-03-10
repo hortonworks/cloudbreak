@@ -104,7 +104,7 @@ type ClusterResponse struct {
 	// proxy configuration name for the cluster
 	ProxyName string `json:"proxyName,omitempty"`
 
-	// RDS configuration ids for the cluster
+	// RDS configuration names for the cluster
 	// Unique: true
 	RdsConfigIds []int64 `json:"rdsConfigIds"`
 

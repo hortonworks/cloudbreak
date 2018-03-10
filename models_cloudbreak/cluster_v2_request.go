@@ -41,8 +41,9 @@ type ClusterV2Request struct {
 	// proxy configuration name for the cluster
 	ProxyName string `json:"proxyName,omitempty"`
 
-	// details of the external database for Hadoop components
-	RdsConfigs *RdsConfigs `json:"rdsConfigs,omitempty"`
+	// RDS configuration names for the cluster
+	// Unique: true
+	RdsConfigNames []string `json:"rdsConfigNames"`
 }
 
 /* polymorph ClusterV2Request ambari false */
@@ -59,7 +60,7 @@ type ClusterV2Request struct {
 
 /* polymorph ClusterV2Request proxyName false */
 
-/* polymorph ClusterV2Request rdsConfigs false */
+/* polymorph ClusterV2Request rdsConfigNames false */
 
 // Validate validates this cluster v2 request
 func (m *ClusterV2Request) Validate(formats strfmt.Registry) error {
@@ -172,18 +173,12 @@ func (m *ClusterV2Request) validateFileSystem(formats strfmt.Registry) error {
 
 func (m *ClusterV2Request) validateRdsConfigs(formats strfmt.Registry) error {
 
-	if swag.IsZero(m.RdsConfigs) { // not required
+	if swag.IsZero(m.RdsConfigNames) { // not required
 		return nil
 	}
 
-	if m.RdsConfigs != nil {
-
-		if err := m.RdsConfigs.Validate(formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("rdsConfigs")
-			}
-			return err
-		}
+	if err := validate.UniqueItems("rdsConfigNames", "body", m.RdsConfigNames); err != nil {
+		return err
 	}
 
 	return nil

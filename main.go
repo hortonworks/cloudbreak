@@ -1147,6 +1147,48 @@ func main() {
 			},
 		},
 		{
+			Name:  "rds",
+			Usage: "rds related operations",
+			Subcommands: []cli.Command{
+				{
+					Name:   "create",
+					Usage:  "create a new rds configuration",
+					Flags:  cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlRdsUserName, cb.FlRdsPassword, cb.FlRdsURL, cb.FlRdsDriver, cb.FlRdsDatabaseEngine, cb.FlRdsType, cb.FlRdsValidatedOptional).AddAuthenticationFlags().Build(),
+					Before: ConfigRead,
+					Action: cb.CreateRds,
+					BashComplete: func(c *cli.Context) {
+						for _, f := range cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlRdsUserName, cb.FlRdsPassword, cb.FlRdsURL, cb.FlRdsDriver, cb.FlRdsDatabaseEngine, cb.FlRdsType, cb.FlRdsValidatedOptional).AddAuthenticationFlags().Build() {
+							printFlagCompletion(f)
+						}
+					},
+				},
+				{
+					Name:   "list",
+					Usage:  "list the available rds configurations",
+					Flags:  cb.NewFlagBuilder().AddOutputFlag().AddAuthenticationFlags().Build(),
+					Before: ConfigRead,
+					Action: cb.ListAllRds,
+					BashComplete: func(c *cli.Context) {
+						for _, f := range cb.NewFlagBuilder().AddOutputFlag().AddAuthenticationFlags().Build() {
+							printFlagCompletion(f)
+						}
+					},
+				},
+				{
+					Name:   "delete",
+					Usage:  "deletes an rds configuration",
+					Flags:  cb.NewFlagBuilder().AddFlags(cb.FlName).AddOutputFlag().AddAuthenticationFlags().Build(),
+					Before: ConfigRead,
+					Action: cb.DeleteRds,
+					BashComplete: func(c *cli.Context) {
+						for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlName).AddOutputFlag().AddAuthenticationFlags().Build() {
+							printFlagCompletion(f)
+						}
+					},
+				},
+			},
+		},
+		{
 			Name:  "recipe",
 			Usage: "recipe related operations",
 			Subcommands: []cli.Command{

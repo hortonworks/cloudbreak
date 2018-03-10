@@ -475,6 +475,36 @@ func (a *Client) PostPublicStackV2(params *PostPublicStackV2Params) (*PostPublic
 }
 
 /*
+PostPublicStackV2ForBlueprint creates stack as public resource for blueprint
+
+Stacks are template instances - a running cloud infrastructure created based on a template. Stacks are always launched on behalf of a cloud user account. Stacks support a wide range of resources, allowing you to build a highly available, reliable, and scalable infrastructure for your application needs.
+*/
+func (a *Client) PostPublicStackV2ForBlueprint(params *PostPublicStackV2ForBlueprintParams) (*PostPublicStackV2ForBlueprintOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewPostPublicStackV2ForBlueprintParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "postPublicStackV2ForBlueprint",
+		Method:             "POST",
+		PathPattern:        "/v2/stacks/blueprint",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &PostPublicStackV2ForBlueprintReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*PostPublicStackV2ForBlueprintOK), nil
+
+}
+
+/*
 PutpasswordStackV2 updates stack by name
 
 Stacks are template instances - a running cloud infrastructure created based on a template. Stacks are always launched on behalf of a cloud user account. Stacks support a wide range of resources, allowing you to build a highly available, reliable, and scalable infrastructure for your application needs.

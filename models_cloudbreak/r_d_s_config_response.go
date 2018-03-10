@@ -6,9 +6,6 @@ package models_cloudbreak
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
-	"encoding/json"
-	"strconv"
-
 	strfmt "github.com/go-openapi/strfmt"
 
 	"github.com/go-openapi/errors"
@@ -25,6 +22,10 @@ type RDSConfigResponse struct {
 	// Unique: true
 	ClusterNames []string `json:"clusterNames"`
 
+	// Name of the JDBC connection driver (for example: 'org.postgresql.Driver')
+	// Required: true
+	ConnectionDriver *string `json:"connectionDriver"`
+
 	// JDBC connection URL in the form of jdbc:<db-type>://<address>:<port>/<db>
 	// Required: true
 	// Pattern: ^jdbc:postgresql://[-\w\.]*:\d{1,5}/?\w*
@@ -33,30 +34,32 @@ type RDSConfigResponse struct {
 	// creation time of the resource in long
 	CreationDate int64 `json:"creationDate,omitempty"`
 
-	// Type of the external database (allowed values: MYSQL, POSTGRES)
+	// Name of the external database engine (MYSQL, POSTGRES...)
 	// Required: true
-	DatabaseType *string `json:"databaseType"`
-
-	// HDP version for the RDS configuration
-	// Required: true
-	HdpVersion *string `json:"hdpVersion"`
+	DatabaseEngine *string `json:"databaseEngine"`
 
 	// id of the resource
 	ID int64 `json:"id,omitempty"`
 
 	// Name of the RDS configuration resource
 	// Required: true
+	// Max Length: 50
+	// Min Length: 4
+	// Pattern: (^[a-z][-a-z0-9]*[a-z0-9]$)
 	Name *string `json:"name"`
-
-	// custom properties for rds connection
-	// Unique: true
-	Properties []*RdsConfigProperty `json:"properties"`
 
 	// resource is visible in account
 	PublicInAccount *bool `json:"publicInAccount,omitempty"`
 
-	// Type of rds (HIVE or RANGER)
-	Type string `json:"type,omitempty"`
+	// (HDP, HDF)Stack version for the RDS configuration
+	StackVersion string `json:"stackVersion,omitempty"`
+
+	// Type of RDS, aka the service name that will use the RDS like HIVE, DRUID, SUPERSET, RANGER, etc.
+	// Required: true
+	// Max Length: 12
+	// Min Length: 4
+	// Pattern: (^[a-zA-Z][-a-zA-Z0-9]*[a-zA-Z0-9]$)
+	Type *string `json:"type"`
 
 	// If true, then the RDS configuration will be validated
 	Validated *bool `json:"validated,omitempty"`
@@ -64,21 +67,21 @@ type RDSConfigResponse struct {
 
 /* polymorph RDSConfigResponse clusterNames false */
 
+/* polymorph RDSConfigResponse connectionDriver false */
+
 /* polymorph RDSConfigResponse connectionURL false */
 
 /* polymorph RDSConfigResponse creationDate false */
 
-/* polymorph RDSConfigResponse databaseType false */
-
-/* polymorph RDSConfigResponse hdpVersion false */
+/* polymorph RDSConfigResponse databaseEngine false */
 
 /* polymorph RDSConfigResponse id false */
 
 /* polymorph RDSConfigResponse name false */
 
-/* polymorph RDSConfigResponse properties false */
-
 /* polymorph RDSConfigResponse publicInAccount false */
+
+/* polymorph RDSConfigResponse stackVersion false */
 
 /* polymorph RDSConfigResponse type false */
 
@@ -93,27 +96,22 @@ func (m *RDSConfigResponse) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
+	if err := m.validateConnectionDriver(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
 	if err := m.validateConnectionURL(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
 
-	if err := m.validateDatabaseType(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
-	if err := m.validateHdpVersion(formats); err != nil {
+	if err := m.validateDatabaseEngine(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateName(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
-	if err := m.validateProperties(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -142,6 +140,15 @@ func (m *RDSConfigResponse) validateClusterNames(formats strfmt.Registry) error 
 	return nil
 }
 
+func (m *RDSConfigResponse) validateConnectionDriver(formats strfmt.Registry) error {
+
+	if err := validate.Required("connectionDriver", "body", m.ConnectionDriver); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (m *RDSConfigResponse) validateConnectionURL(formats strfmt.Registry) error {
 
 	if err := validate.Required("connectionURL", "body", m.ConnectionURL); err != nil {
@@ -155,48 +162,9 @@ func (m *RDSConfigResponse) validateConnectionURL(formats strfmt.Registry) error
 	return nil
 }
 
-var rDSConfigResponseTypeDatabaseTypePropEnum []interface{}
+func (m *RDSConfigResponse) validateDatabaseEngine(formats strfmt.Registry) error {
 
-func init() {
-	var res []string
-	if err := json.Unmarshal([]byte(`["POSTGRES"]`), &res); err != nil {
-		panic(err)
-	}
-	for _, v := range res {
-		rDSConfigResponseTypeDatabaseTypePropEnum = append(rDSConfigResponseTypeDatabaseTypePropEnum, v)
-	}
-}
-
-const (
-	// RDSConfigResponseDatabaseTypePOSTGRES captures enum value "POSTGRES"
-	RDSConfigResponseDatabaseTypePOSTGRES string = "POSTGRES"
-)
-
-// prop value enum
-func (m *RDSConfigResponse) validateDatabaseTypeEnum(path, location string, value string) error {
-	if err := validate.Enum(path, location, value, rDSConfigResponseTypeDatabaseTypePropEnum); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (m *RDSConfigResponse) validateDatabaseType(formats strfmt.Registry) error {
-
-	if err := validate.Required("databaseType", "body", m.DatabaseType); err != nil {
-		return err
-	}
-
-	// value enum
-	if err := m.validateDatabaseTypeEnum("databaseType", "body", *m.DatabaseType); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (m *RDSConfigResponse) validateHdpVersion(formats strfmt.Registry) error {
-
-	if err := validate.Required("hdpVersion", "body", m.HdpVersion); err != nil {
+	if err := validate.Required("databaseEngine", "body", m.DatabaseEngine); err != nil {
 		return err
 	}
 
@@ -209,77 +177,36 @@ func (m *RDSConfigResponse) validateName(formats strfmt.Registry) error {
 		return err
 	}
 
-	return nil
-}
-
-func (m *RDSConfigResponse) validateProperties(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Properties) { // not required
-		return nil
-	}
-
-	if err := validate.UniqueItems("properties", "body", m.Properties); err != nil {
+	if err := validate.MinLength("name", "body", string(*m.Name), 4); err != nil {
 		return err
 	}
 
-	for i := 0; i < len(m.Properties); i++ {
-
-		if swag.IsZero(m.Properties[i]) { // not required
-			continue
-		}
-
-		if m.Properties[i] != nil {
-
-			if err := m.Properties[i].Validate(formats); err != nil {
-				if ve, ok := err.(*errors.Validation); ok {
-					return ve.ValidateName("properties" + "." + strconv.Itoa(i))
-				}
-				return err
-			}
-		}
-
-	}
-
-	return nil
-}
-
-var rDSConfigResponseTypeTypePropEnum []interface{}
-
-func init() {
-	var res []string
-	if err := json.Unmarshal([]byte(`["HIVE","RANGER","DRUID"]`), &res); err != nil {
-		panic(err)
-	}
-	for _, v := range res {
-		rDSConfigResponseTypeTypePropEnum = append(rDSConfigResponseTypeTypePropEnum, v)
-	}
-}
-
-const (
-	// RDSConfigResponseTypeHIVE captures enum value "HIVE"
-	RDSConfigResponseTypeHIVE string = "HIVE"
-	// RDSConfigResponseTypeRANGER captures enum value "RANGER"
-	RDSConfigResponseTypeRANGER string = "RANGER"
-	// RDSConfigResponseTypeDRUID captures enum value "DRUID"
-	RDSConfigResponseTypeDRUID string = "DRUID"
-)
-
-// prop value enum
-func (m *RDSConfigResponse) validateTypeEnum(path, location string, value string) error {
-	if err := validate.Enum(path, location, value, rDSConfigResponseTypeTypePropEnum); err != nil {
+	if err := validate.MaxLength("name", "body", string(*m.Name), 50); err != nil {
 		return err
 	}
+
+	if err := validate.Pattern("name", "body", string(*m.Name), `(^[a-z][-a-z0-9]*[a-z0-9]$)`); err != nil {
+		return err
+	}
+
 	return nil
 }
 
 func (m *RDSConfigResponse) validateType(formats strfmt.Registry) error {
 
-	if swag.IsZero(m.Type) { // not required
-		return nil
+	if err := validate.Required("type", "body", m.Type); err != nil {
+		return err
 	}
 
-	// value enum
-	if err := m.validateTypeEnum("type", "body", m.Type); err != nil {
+	if err := validate.MinLength("type", "body", string(*m.Type), 4); err != nil {
+		return err
+	}
+
+	if err := validate.MaxLength("type", "body", string(*m.Type), 12); err != nil {
+		return err
+	}
+
+	if err := validate.Pattern("type", "body", string(*m.Type), `(^[a-zA-Z][-a-zA-Z0-9]*[a-zA-Z0-9]$)`); err != nil {
 		return err
 	}
 

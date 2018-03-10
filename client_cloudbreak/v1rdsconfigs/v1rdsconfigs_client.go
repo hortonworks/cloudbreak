@@ -324,6 +324,36 @@ func (a *Client) PostPublicRds(params *PostPublicRdsParams) (*PostPublicRdsOK, e
 
 }
 
+/*
+TestRdsConnection tests r d s connectivity
+
+An RDS Configuration describe a connection to an external Relational Database Service that can be used as the Hive Metastore.
+*/
+func (a *Client) TestRdsConnection(params *TestRdsConnectionParams) (*TestRdsConnectionOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewTestRdsConnectionParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "testRdsConnection",
+		Method:             "POST",
+		PathPattern:        "/v1/rdsconfigs/testconnect",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &TestRdsConnectionReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*TestRdsConnectionOK), nil
+
+}
+
 // SetTransport changes the transport on the client
 func (a *Client) SetTransport(transport runtime.ClientTransport) {
 	a.transport = transport

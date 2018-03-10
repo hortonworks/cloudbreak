@@ -126,6 +126,10 @@ type ClusterRequest struct {
 	// Unique: true
 	RdsConfigJsons []*RdsConfig `json:"rdsConfigJsons"`
 
+	// RDS configuration names for the cluster
+	// Unique: true
+	RdsConfigNames []string `json:"rdsConfigNames"`
+
 	// ambari username
 	// Required: true
 	// Max Length: 15
@@ -196,6 +200,8 @@ type ClusterRequest struct {
 /* polymorph ClusterRequest rdsConfigIds false */
 
 /* polymorph ClusterRequest rdsConfigJsons false */
+
+/* polymorph ClusterRequest rdsConfigNames false */
 
 /* polymorph ClusterRequest userName false */
 
@@ -301,6 +307,11 @@ func (m *ClusterRequest) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateRdsConfigJsons(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateRdsConfigNames(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -765,6 +776,19 @@ func (m *ClusterRequest) validateRdsConfigJsons(formats strfmt.Registry) error {
 			}
 		}
 
+	}
+
+	return nil
+}
+
+func (m *ClusterRequest) validateRdsConfigNames(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.RdsConfigNames) { // not required
+		return nil
+	}
+
+	if err := validate.UniqueItems("rdsConfigNames", "body", m.RdsConfigNames); err != nil {
+		return err
 	}
 
 	return nil

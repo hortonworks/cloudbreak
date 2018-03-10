@@ -604,6 +604,55 @@ var (
 			Usage: "password for the proxy if basic auth is required",
 		},
 	}
+	FlRdsUserName = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "rds-username",
+			Usage: "username to use for the jdbc connection",
+		},
+	}
+	FlRdsPassword = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "rds-password",
+			Usage: "password to use for the jdbc connection",
+		},
+	}
+	FlRdsDriver = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "driver",
+			Usage: "name of the JDBC connection driver (for example: 'org.postgresql.Driver')",
+		},
+	}
+	FlRdsURL = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "url",
+			Usage: "JDBC connection URL in the form of jdbc:<db-type>://<address>:<port>/<db>",
+		},
+	}
+	FlRdsDatabaseEngine = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "database-engine",
+			Usage: "Name of the external database engine (MYSQL, POSTGRES...)",
+		},
+	}
+	FlRdsType = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "type",
+			Usage: "Type of RDS, aka the service name that will use the RDS like HIVE, DRUID, SUPERSET, RANGER, etc.",
+		},
+	}
+	FlRdsValidatedOptional = BoolFlag{
+		RequiredFlag: OPTIONAL,
+		BoolFlag: cli.BoolFlag{
+			Name:  "not-validated",
+			Usage: "If set, then the RDS configuration will be not validated",
+		},
+	}
 )
 
 type RequiredFlag struct {

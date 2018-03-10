@@ -53,7 +53,7 @@ func (a *Client) CheckClientVersion(params *CheckClientVersionParams) (*CheckCli
 }
 
 /*
-CreateRDSDatabaseUtil creates a database connection parameters
+CreateRDSDatabaseUtil creates a database for the service in the r d s if the connection could be created
 */
 func (a *Client) CreateRDSDatabaseUtil(params *CreateRDSDatabaseUtilParams) (*CreateRDSDatabaseUtilOK, error) {
 	// TODO: Validate the params before sending
