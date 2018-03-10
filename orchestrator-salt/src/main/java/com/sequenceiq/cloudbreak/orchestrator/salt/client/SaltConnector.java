@@ -149,7 +149,7 @@ public class SaltConnector implements Closeable {
                 .header(SIGN_HEADER, PkiUtil.generateSignature(signatureKey, toJson(form.asMap()).getBytes()))
                 .post(Entity.form(form));
         T responseEntity = JaxRSUtil.response(response, clazz);
-        LOGGER.info("Salt run response: {}", responseEntity);
+        LOGGER.info("Salt run has been executed. fun: {}", fun);
         return responseEntity;
     }
 
@@ -165,7 +165,7 @@ public class SaltConnector implements Closeable {
                 .header(SIGN_HEADER, PkiUtil.generateSignature(signatureKey, toJson(form.asMap()).getBytes()))
                 .post(Entity.form(form));
         T responseEntity = JaxRSUtil.response(response, clazz);
-        LOGGER.info("Salt wheel run response: {}", responseEntity);
+        LOGGER.info("Salt wheel has been executed. fun: {}", fun);
         return responseEntity;
     }
 

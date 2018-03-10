@@ -13,7 +13,6 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltActionType;
@@ -29,7 +28,6 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.domain.RunnerInfo.DurationCom
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.RunningJobsResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.SaltAction;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.StateType;
-import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 public class SaltStates {
 
@@ -80,7 +78,6 @@ public class SaltStates {
 
     private static Multimap<String, String> highStateJidInfo(SaltConnector sc, String jid) {
         Map jidInfo = sc.run("jobs.lookup_jid", RUNNER, Map.class, "jid", jid);
-        LOGGER.info("Salt high state jid info: {}", jidInfo);
         Map<String, List<RunnerInfo>> states = JidInfoResponseTransformer.getHighStates(jidInfo);
         return collectMissingTargets(states);
     }
@@ -92,7 +89,7 @@ public class SaltStates {
             logRunnerInfos(stringMapEntry);
             for (RunnerInfo targetObject : stringMapEntry.getValue()) {
                 if (!targetObject.getResult()) {
-                    LOGGER.info("SaltStates: State id: {} job state is has failed.", targetObject.getStateId(), targetObject.getComment());
+                    LOGGER.error("SaltStates: State id: {} job state has failed. {}", targetObject.getStateId(), targetObject.getComment());
                     missingTargetsWithErrors.put(stringMapEntry.getKey(), targetObject.getComment());
                 }
             }
@@ -104,13 +101,8 @@ public class SaltStates {
         List<RunnerInfo> runnerInfos = stringMapEntry.getValue();
         runnerInfos.sort(Collections.reverseOrder(new DurationComparator()));
         double sum = runnerInfos.stream().mapToDouble(runnerInfo -> runnerInfo.getDuration()).sum();
-        try {
-            LOGGER.info("SaltStates executed on: {} within: {} sec, details {}", stringMapEntry.getKey(),
-                    TimeUnit.MILLISECONDS.toSeconds(Math.round(sum)), JsonUtil.writeValueAsString(runnerInfos));
-        } catch (JsonProcessingException ignored) {
-            LOGGER.warn("Failed to serialise runnerInfos. Salt states executed on: {} within: {} sec", stringMapEntry.getKey(),
-                    TimeUnit.MILLISECONDS.toSeconds(Math.round(sum)));
-        }
+        LOGGER.info("SaltStates executed on: {} within: {} sec", stringMapEntry.getKey(),
+                TimeUnit.MILLISECONDS.toSeconds(Math.round(sum)));
     }
 
     public static boolean jobIsRunning(SaltConnector sc, String jid) {
