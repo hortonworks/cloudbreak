@@ -21,7 +21,7 @@ public class StructuredFlowErrorEvent extends StructuredFlowEvent {
 
     public StructuredFlowErrorEvent(OperationDetails operation, FlowDetails flow, StackDetails stack,
             ClusterDetails cluster, BlueprintDetails blueprint, String exception) {
-        super(operation, flow, stack, cluster, blueprint);
+        super(StructuredFlowErrorEvent.class.getSimpleName(), operation, flow, stack, cluster, blueprint);
         this.exception = exception;
     }
 
