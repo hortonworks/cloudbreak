@@ -72,7 +72,8 @@ public class SaltBootstrap implements OrchestratorBootstrap {
             }
         }
 
-        Map<String, String> networkResult = SaltStates.networkInterfaceIP(sc, Glob.ALL).getResultGroupByIP();
+        String iFace = SaltStates.defaultRoute(sc, Glob.ALL).getGatewayInterfaceName();
+        Map<String, String> networkResult = SaltStates.networkInterfaceIP(sc, Glob.ALL, iFace).getResultGroupByIP();
         originalTargets.forEach(node -> {
             if (!networkResult.containsKey(node.getPrivateIp())) {
                 LOGGER.info("Salt-minion is not responding on host: {}, yet", node);
