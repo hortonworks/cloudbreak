@@ -75,6 +75,8 @@ dependencies {
     compile group: 'io.springfox',                  name: 'springfox-core',                 version: '2.5.0'
     compile group: 'io.springfox',                  name: 'springfox-swagger-ui',           version: '2.5.0'
 
+
+    compile group: 'org.springframework.kafka',     name: 'spring-kafka',                   version: '2.1.2.RELEASE'
     compile group: 'io.swagger',                    name: 'swagger-jersey2-jaxrs',          version: swaggerVersion
     compile group: 'com.google.http-client',        name: 'google-http-client-jackson2',    version: '1.22.0'
     compile (group: 'com.google.oauth-client',      name: 'google-oauth-client-jetty',      version: '1.22.0')   { exclude module: 'servlet-api' }
