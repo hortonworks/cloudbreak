@@ -1,6 +1,7 @@
 package com.sequenceiq.it.spark.salt;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,6 +15,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.ApplyResponse;
+import com.sequenceiq.cloudbreak.orchestrator.salt.domain.DefaultRouteResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.NetworkInterfaceResponse;
 import com.sequenceiq.it.spark.ITResponse;
 
@@ -40,6 +42,9 @@ public class SaltApiRunPostResponse extends ITResponse {
         }
         if (request.body().contains("grains.remove")) {
             return grainsResponse();
+        }
+        if (request.body().contains("network.default_route")) {
+            return defaultRoute();
         }
         if (request.body().contains("network.interface_ip")) {
             return networkInterfaceIp();
@@ -83,6 +88,15 @@ public class SaltApiRunPostResponse extends ITResponse {
 
     protected Object stateHighState() {
         return responseFromJsonFile("saltapi/high_state_response.json");
+    }
+
+    protected Object defaultRoute() throws JsonProcessingException {
+        Map<String, String> iFace = new HashMap<>();
+        iFace.put("flags", "UG");
+        iFace.put("interface", "eth0");
+        DefaultRouteResponse defaultRouteResponse = new DefaultRouteResponse(Collections.singletonList(
+                Collections.singletonMap("hostname", Collections.singletonList(iFace))));
+        return objectMapper.writeValueAsString(defaultRouteResponse);
     }
 
     protected Object networkInterfaceIp() throws JsonProcessingException {
