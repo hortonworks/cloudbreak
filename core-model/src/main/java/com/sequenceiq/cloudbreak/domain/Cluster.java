@@ -116,6 +116,10 @@ public class Cluster implements ProvisionEntity {
 
     private String emailTo;
 
+    @Type(type = "encrypted_string")
+    @Column(length = 1000000, columnDefinition = "TEXT", nullable = false)
+    private String extendedBlueprintText;
+
     @OneToOne(mappedBy = "cluster", cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, orphanRemoval = true)
     private Gateway gateway;
 
@@ -527,5 +531,13 @@ public class Cluster implements ProvisionEntity {
 
     public void setProxyConfig(ProxyConfig proxyConfig) {
         this.proxyConfig = proxyConfig;
+    }
+
+    public String getExtendedBlueprintText() {
+        return extendedBlueprintText;
+    }
+
+    public void setExtendedBlueprintText(String extendedBlueprintText) {
+        this.extendedBlueprintText = extendedBlueprintText;
     }
 }

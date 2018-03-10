@@ -151,6 +151,8 @@ public class AmbariClusterSetupService implements ClusterSetupService {
             ambariRepositoryVersionService.setBaseRepoURL(stack.getName(), cluster.getId(), stack.getOrchestrator(), ambariClient);
             String blueprintText = centralBlueprintUpdater.getBlueprintText(blueprintPreparationObject);
             addBlueprint(stack.getId(), ambariClient, blueprintText, cluster.getTopologyValidation());
+            cluster.setExtendedBlueprintText(blueprintText);
+            clusterService.updateCluster(cluster);
             PollingResult waitForHostsResult = ambariPollingServiceProvider.hostsPollingService(stack, ambariClient, hostsInCluster);
             ambariClusterConnectorPollingResultChecker
                     .checkPollingResult(waitForHostsResult, cloudbreakMessagesService.getMessage(AMBARI_CLUSTER_HOST_JOIN_FAILED.code()));
