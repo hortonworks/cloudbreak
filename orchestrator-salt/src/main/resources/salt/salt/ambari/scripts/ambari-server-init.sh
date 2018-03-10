@@ -75,11 +75,11 @@ silent_security_setup() {
 }
 
 read_tarballs() {
-  mkdir -p /tmp/preload
-  cp -fn $(find /usr/hdp/ -name "mapreduce.tar.gz") /tmp/preload &
-  cp -fn $(find /usr/hdp/ -name "tez.tar.gz") /tmp/preload &
-  cp -fn $(find /usr/hdp/ -name "slider.tar.gz") /tmp/preload &
-  cp -fn $(find /usr/hdp/ -name "pig.tar.gz") /tmp/preload &
+  mkdir -p /opt/salt/preload
+  cp -fn $(find /usr/hdp/ -name "mapreduce.tar.gz") /opt/salt/preload &
+  cp -fn $(find /usr/hdp/ -name "tez.tar.gz") /opt/salt/preload &
+  cp -fn $(find /usr/hdp/ -name "slider.tar.gz") /opt/salt/preload &
+  cp -fn $(find /usr/hdp/ -name "pig.tar.gz") /opt/salt/preload &
 }
 
 main() {

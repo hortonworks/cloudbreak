@@ -64,9 +64,15 @@ start-postgresql:
     - enable: True
     - name: postgresql
 
-init-hive-db:
-  cmd.script:
+/opt/salt/scripts/init_hive_db.sh:
+  file.managed:
+    - makedirs: True
+    - mode: 755
     - source: salt://postgresql/scripts/init_hive_db.sh
+
+init-hive-db:
+  cmd.run:
+    - name: /opt/salt/scripts/init_hive_db.sh
     - runas: postgres
     - env:
       - USER: {{ pillar['postgres']['user'] }}
