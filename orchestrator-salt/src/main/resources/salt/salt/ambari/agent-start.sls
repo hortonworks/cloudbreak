@@ -5,6 +5,7 @@
 /etc/systemd/system/ambari-agent.service:
   file.managed:
     - source: salt://ambari/systemd/ambari-agent.service
+    - template: jinja
 
 start-ambari-agent:
   module.wait:

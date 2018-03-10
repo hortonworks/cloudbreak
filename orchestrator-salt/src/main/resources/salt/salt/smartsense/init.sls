@@ -2,8 +2,9 @@ smartsense-hst:
   pkg.installed: []
 
 update-smartsense:
-  cmd.run:
-    - name: yum -q -y update http://s3.amazonaws.com/dev.hortonworks.com/hst/centos7/smartsense-hst-1.4.1.2.5.0.1-1817.x86_64.rpm
+  pkg.installed:
+    - sources:
+      - smartsense-hst: {{ pillar['smartsense_update_pkg'] }}
     - unless: test -f /usr/hdp/share/hst/ambari-service/SMARTSENSE/configuration/product-info.xml
 
 upgrade-smartsense-ambari-service:
@@ -26,9 +27,9 @@ upgrade-smartsense-ambari-service:
       - pkg: smartsense-hst
 
 disable-hst-gateway:
-  cmd.run:
-    - name: chkconfig hst-gateway off
+  service.disabled:
+    - name: hst-gateway
 
-enable-hst:
-  cmd.run:
-    - name: chkconfig hst off
+disable-hst:
+  service.disabled:
+    - name: hst

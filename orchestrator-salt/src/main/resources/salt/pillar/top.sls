@@ -53,4 +53,5 @@ base:
 
   'roles:smartsense':
     - match: grain
+    - smartsense
     - smartsense.credentials
