@@ -1,4 +1,4 @@
-{% set advertise_addr = salt['network.interface_ip']('eth0') %}
+{% set advertise_addr = salt['network.interface_ip'](pillar['network_interface']) %}
 
 {% set roles = salt['grains.get']('roles') %}
 {% if 'ambari_server' in roles or 'ambari_server_standby' in roles %}
