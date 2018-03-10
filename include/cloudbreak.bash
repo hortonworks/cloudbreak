@@ -266,7 +266,7 @@ cloudbreak-conf-cloud-provider() {
 
     env-import CB_AWS_HOSTKEY_VERIFY "false"
     env-import CB_GCP_HOSTKEY_VERIFY "false"
-    
+
     env-import CB_BYOS_DFS_DATA_DIR "/hadoop/hdfs/data"
 }
 
@@ -342,7 +342,7 @@ cloudbreak-generate-cert() {
       if is_linux; then
         run_as_user="-u $(id -u $(whoami)):$(id -g $(whoami))"
       fi
-    
+
       cbd_ca_cert_gen_out=$(mktemp)
       docker run \
           --label cbreak.sidekick=true \
@@ -542,7 +542,7 @@ util-add-default-user() {
 
     local container=$(docker ps | grep cbreak_identity_ | cut -d" " -f 1)
     if ! [[ "$container" ]];then
-        echo "[ERROR] Cloudbreak doesn't running, please start it before adding new user" | red 1>&2
+        echo "[ERROR] Cloudbreak isn't running, please start it before adding new user" | red 1>&2
         _exit 1
     fi
 
@@ -570,6 +570,35 @@ util-add-default-user() {
     fi
 }
 
+util-generate-ldap-mapping() {
+  declare desc="Generate SQL script to map LDAP/AD groups to Cloudbreak defined OAuth2 scopes"
+  debug $desc
+
+  if [[ -z "$1" ]]; then
+    error "LDAP/AD group DN parameter must be provided (e.g: CN=cloudbreak,CN=Users,DC=ad,DC=mycompany,DC=com)"
+    _exit 1
+  fi
+  local group="$1"
+
+  local container=$(docker ps | grep cbreak_commondb_ | cut -d" " -f 1)
+    if ! [[ "$container" ]]; then
+        error "Cloudbreak isn't running, please start it"
+        _exit 1
+    fi
+
+  local scopes=$(docker exec $container psql -U postgres -d uaadb -c "select displayname from groups where displayname like 'cloudbreak%' or displayname like 'sequenceiq.account%' or displayname='sequenceiq.cloudbreak.user';" | tail -n +3 | grep -v rows)
+  local mapping_file="mapping.sql"
+  rm -f ${mapping_file}
+  for scope in ${scopes}; do
+    local line="INSERT INTO external_group_mapping (group_id, external_group, added, origin) VALUES ((select id from groups where displayname='$scope'), '$group', '2016-09-30 19:28:24.255', 'ldap');"
+    echo $line >> ${mapping_file}
+  done
+
+  info "Group mapping file has been created: $mapping_file"
+  info "To apply the $mapping_file please run the following command: docker exec cbreak_commondb_1 psql -U postgres -d uaadb -c \"\$(cat $mapping_file)\""
+  info "To clean up the group mapping please run the following command: docker exec cbreak_commondb_1 psql -U postgres -d uaadb -c \"delete from external_group_mapping\""
+  info "Note: you must log out and log back in with your LDAP/AD users after the mapping change"
+}
 
 util-token() {
     declare desc="Generates an OAuth token with CloudbreakShell scopes"
