@@ -130,7 +130,7 @@ public class AbstractFlowConfigurationTest {
         INIT, DO, DO2, FINISH, FAILED, FAILED2, FINAL;
 
         @Override
-        public Class<? extends AbstractAction> action() {
+        public Class<? extends AbstractAction<?, ?, ?, ?>> action() {
             return FlowFinalizeAction.class;
         }
     }

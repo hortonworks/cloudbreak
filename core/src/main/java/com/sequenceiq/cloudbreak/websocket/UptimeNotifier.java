@@ -42,7 +42,7 @@ public class UptimeNotifier {
             Stack stack = stackRepository.findStackForCluster(cluster.getId());
             if (stack != null && !stack.isDeleteCompleted()) {
                 Long uptime = stackUtil.getUptimeForCluster(cluster, cluster.isAvailable());
-                Notification notification = createUptimeNotification(stack, uptime);
+                Notification<CloudbreakEventsJson> notification = createUptimeNotification(stack, uptime);
                 notificationSender.send(notification);
             }
         }

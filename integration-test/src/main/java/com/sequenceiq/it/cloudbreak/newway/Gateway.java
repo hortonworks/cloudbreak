@@ -66,7 +66,7 @@ public class Gateway extends Entity {
     }
 
     public static Action<Gateway> get(String key) {
-        return new Action<>(getTestContext(key), RegionAction::getPlatformRegions);
+        return new Action<>(getTestContext(key), RegionAction::getRegionsByCredentialId);
     }
 
     public static Action<Gateway> get() {

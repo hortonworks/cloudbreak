@@ -15,7 +15,7 @@ import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.service.account.AccountPreferencesValidationFailed;
+import com.sequenceiq.cloudbreak.service.account.AccountPreferencesValidationException;
 import com.sequenceiq.cloudbreak.service.account.AccountPreferencesValidator;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
@@ -40,7 +40,7 @@ public class ScheduledLifetimeChecker {
                         if (Status.DELETE_IN_PROGRESS != stack.getStatus() && stack.getCluster() != null && stack.getCluster().getCreationFinished() != null) {
                             preferencesValidator.validateClusterTimeToLive(stack.getCluster().getCreationFinished(), ttl.toMillis());
                         }
-                    } catch (AccountPreferencesValidationFailed ignored) {
+                    } catch (AccountPreferencesValidationException ignored) {
                         terminateStack(stack);
                     }
                 });

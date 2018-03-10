@@ -7,7 +7,6 @@ import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
 import static java.util.Collections.emptyList;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
@@ -135,7 +134,8 @@ public class ImageCatalogService {
         return getImage(defaultCatalogUrl, CLOUDBREAK_DEFAULT_CATALOG_NAME, imageId);
     }
 
-    public StatedImage getImage(String catalogUrl, String catalogName, String imageId) throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
+    public StatedImage getImage(String catalogUrl, String catalogName, String imageId)throws CloudbreakImageNotFoundException,
+            CloudbreakImageCatalogException {
         Images images = imageCatalogProvider.getImageCatalogV2(catalogUrl).getImages();
         Optional<? extends Image> image = getImage(imageId, images);
         if (!image.isPresent()) {
@@ -165,7 +165,7 @@ public class ImageCatalogService {
         return image;
     }
 
-    public ImageCatalog create(ImageCatalog imageCatalog) throws CloudbreakImageCatalogException {
+    public ImageCatalog create(ImageCatalog imageCatalog) {
         try {
             if (isEnvDefault(imageCatalog.getImageCatalogName())) {
                 throw new BadRequestException(String
@@ -192,7 +192,7 @@ public class ImageCatalogService {
     }
 
     public ImageCatalog get(String name) {
-        ImageCatalog imageCatalog = null;
+        ImageCatalog imageCatalog;
         if (isEnvDefault(name)) {
             imageCatalog = getCloudbreakDefaultImageCatalog();
         } else {
@@ -203,13 +203,10 @@ public class ImageCatalogService {
     }
 
     public ImageCatalog get(Long id) {
-        ImageCatalog imageCatalog = null;
+        ImageCatalog imageCatalog;
         IdentityUser user = authenticatedUserService.getCbUser();
-        if (imageCatalogRepository.findAllPublicInAccount(user.getAccount(), user.getUserId()).isEmpty()) {
-            imageCatalog = getCloudbreakDefaultImageCatalog();
-        } else {
-            imageCatalog = imageCatalogRepository.findOne(id);
-        }
+        imageCatalog = imageCatalogRepository.findAllPublicInAccount(user.getAccount(), user.getUserId()).isEmpty() ? getCloudbreakDefaultImageCatalog()
+                : imageCatalogRepository.findOne(id);
         return imageCatalog;
     }
 
@@ -240,7 +237,7 @@ public class ImageCatalogService {
         userProfileService.save(userProfile);
     }
 
-    public ImageCatalog update(ImageCatalog source) throws CloudbreakImageCatalogException {
+    public ImageCatalog update(ImageCatalog source) {
 
         ImageCatalog imageCatalog = imageCatalogRepository.findOne(source.getId());
         checkImageCatalog(imageCatalog, source.getId());
@@ -341,7 +338,7 @@ public class ImageCatalogService {
                 .findFirst();
     }
 
-    private List<Image> filterImagesByPlatforms(Set<String> platforms, List<Image> images, Set<String> vMImageUUIDs) {
+    private List<Image> filterImagesByPlatforms(Collection<String> platforms, Collection<Image> images, Collection<String> vMImageUUIDs) {
         return images.stream()
                 .filter(img -> vMImageUUIDs.contains(img.getUuid()))
                 .filter(img -> img.getImageSetsByProvider().keySet().stream().anyMatch(
@@ -349,7 +346,7 @@ public class ImageCatalogService {
                 .collect(Collectors.toList());
     }
 
-    private String latestCloudbreakVersion(List<CloudbreakVersion> cloudbreakVersions) {
+    private String latestCloudbreakVersion(Iterable<CloudbreakVersion> cloudbreakVersions) {
         SortedMap<Versioned, CloudbreakVersion> sortedCloudbreakVersions = new TreeMap<>(new VersionComparator());
         for (CloudbreakVersion cbv : cloudbreakVersions) {
             cbv.getVersions().forEach(cbvs -> sortedCloudbreakVersions.put(() -> cbvs, cbv));
@@ -357,7 +354,7 @@ public class ImageCatalogService {
         return sortedCloudbreakVersions.lastKey().getVersion();
     }
 
-    private Set<String> prefixMatchForCBVersion(String cbVersion, List<CloudbreakVersion> cloudbreakVersions) {
+    private Collection<String> prefixMatchForCBVersion(String cbVersion, Collection<CloudbreakVersion> cloudbreakVersions) {
         Set<String> vMImageUUIDs = new HashSet<>();
         String unReleasedVersion = extractCbVersion(UNRELEASED_VERSION_PATTERN, cbVersion);
         boolean versionIsReleased = unReleasedVersion.equals(cbVersion);
@@ -366,14 +363,14 @@ public class ImageCatalogService {
             Set<CloudbreakVersion> unReleasedCbVersions = cloudbreakVersions.stream()
                     .filter(cloudbreakVersion -> cloudbreakVersion.getVersions().stream().anyMatch(aVersion -> aVersion.startsWith(unReleasedVersion)))
                     .collect(Collectors.toSet());
-            unReleasedCbVersions.stream().forEach(cloudbreakVersion -> vMImageUUIDs.addAll(cloudbreakVersion.getImageIds()));
+            unReleasedCbVersions.forEach(cloudbreakVersion -> vMImageUUIDs.addAll(cloudbreakVersion.getImageIds()));
         }
 
         if (versionIsReleased || vMImageUUIDs.isEmpty()) {
             String releasedVersion = extractCbVersion(RELEASED_VERSION_PATTERN, cbVersion);
             Set<CloudbreakVersion> releasedCbVersions = cloudbreakVersions.stream()
                     .filter(cloudbreakVersion -> cloudbreakVersion.getVersions().contains(releasedVersion)).collect(Collectors.toSet());
-            releasedCbVersions.stream().forEach(cloudbreakVersion -> vMImageUUIDs.addAll(cloudbreakVersion.getImageIds()));
+            releasedCbVersions.forEach(cloudbreakVersion -> vMImageUUIDs.addAll(cloudbreakVersion.getImageIds()));
         }
         return vMImageUUIDs;
     }
@@ -421,7 +418,7 @@ public class ImageCatalogService {
             case "HDF":
                 return statedImages.getImages().getHdfImages();
             default:
-                return Collections.emptyList();
+                return emptyList();
         }
     }
 }

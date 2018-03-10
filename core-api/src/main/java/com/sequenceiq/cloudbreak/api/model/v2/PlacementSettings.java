@@ -4,21 +4,22 @@ import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.cloudbreak.api.model.JsonEntity;
-import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
-@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonInclude(Include.NON_NULL)
 public class PlacementSettings implements JsonEntity {
-    @ApiModelProperty(ModelDescriptions.StackModelDescription.AVAILABILITY_ZONE)
+    @ApiModelProperty(StackModelDescription.AVAILABILITY_ZONE)
     private String availabilityZone;
 
     @NotNull
-    @ApiModelProperty(ModelDescriptions.StackModelDescription.REGION)
+    @ApiModelProperty(StackModelDescription.REGION)
     private String region;
 
     public String getAvailabilityZone() {

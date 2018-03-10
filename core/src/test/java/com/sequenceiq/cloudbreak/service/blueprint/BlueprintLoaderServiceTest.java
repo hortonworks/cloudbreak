@@ -35,7 +35,7 @@ public class BlueprintLoaderServiceTest {
 
     private static final String LOTTERY_WINNERS = "lottery_winners";
 
-    private static final String JSON = "{\"blueprint\":{\"Blueprints\":{\"blueprint_name\":\"hdp-etl-edw-tp\","
+    private static final String JSON = "{\"validation\":{\"Blueprints\":{\"blueprint_name\":\"hdp-etl-edw-tp\","
             + "\"stack_name\":\"HDP\",\"stack_version\":\"2.5\"},\"configurations\":[{\"core-site\":{\"fs.trash.interval\":\"4320\"}},{\"hdfs-site\":"
             + "{\"dfs.namenode.safemode.threshold-pct\":\"0.99\"}},{\"hive-site\":{\"hive.exec.compress.output\":\"true\",\"hive.merge.mapfiles\""
             + ":\"true\",\"hive.server2.tez.initialize.default.sessions\":\"true\"}},{\"mapred-site\":{\"mapreduce.job.reduce.slowstart.completedmaps\""
@@ -159,11 +159,11 @@ public class BlueprintLoaderServiceTest {
     public static Blueprint createBlueprint(ResourceStatus resourceStatus, int index) {
         Blueprint blueprint = new Blueprint();
         blueprint.setId(Long.valueOf(index));
-        blueprint.setAmbariName("test-blueprint" + index);
+        blueprint.setAmbariName("test-validation" + index);
         blueprint.setBlueprintText(JSON + index);
         blueprint.setHostGroupCount(3);
         blueprint.setStatus(resourceStatus);
-        blueprint.setDescription("test blueprint" + index);
+        blueprint.setDescription("test validation" + index);
         blueprint.setName("multi-node-hdfs-yarn" + index);
         blueprint.setOwner(LUCKY_MAN);
         blueprint.setAccount(LOTTERY_WINNERS);

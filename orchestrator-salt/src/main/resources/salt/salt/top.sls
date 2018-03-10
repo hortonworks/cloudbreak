@@ -1,5 +1,6 @@
 base:
   '*':
+    - yum-proxy
     - consul
     - unbound
     - java

@@ -29,19 +29,19 @@ public class ChangePrimaryGatewayActions {
     private ChangePrimaryGatewayService changePrimaryGatewayService;
 
     @Bean(name = "CHANGE_PRIMARY_GATEWAY_STATE")
-    public Action repairGatewayAction() {
+    public Action<?, ?> repairGatewayAction() {
         return new AbstractClusterAction<ChangePrimaryGatewayTriggerEvent>(ChangePrimaryGatewayTriggerEvent.class) {
             @Override
-            protected void doExecute(ClusterViewContext context, ChangePrimaryGatewayTriggerEvent payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(ClusterViewContext context, ChangePrimaryGatewayTriggerEvent payload, Map<Object, Object> variables) {
                 changePrimaryGatewayService.changePrimaryGatewayStarted(context.getStackId());
-                ChangePrimaryGatewayRequest request = new ChangePrimaryGatewayRequest(context.getStackId());
+                Selectable request = new ChangePrimaryGatewayRequest(context.getStackId());
                 sendEvent(context.getFlowId(), request.selector(), request);
             }
         };
     }
 
     @Bean(name = "WAITING_FOR_AMBARI_SERVER_STATE")
-    public Action waitingForAmbariServer() {
+    public Action<?, ?> waitingForAmbariServer() {
         return new AbstractClusterAction<ChangePrimaryGatewaySuccess>(ChangePrimaryGatewaySuccess.class) {
             @Override
             protected void doExecute(ClusterViewContext context, ChangePrimaryGatewaySuccess payload, Map<Object, Object> variables) throws Exception {
@@ -57,10 +57,10 @@ public class ChangePrimaryGatewayActions {
     }
 
     @Bean(name = "UPDATE_PROXY_STATE")
-    public Action registerProxyAction() {
+    public Action<?, ?> registerProxyAction() {
         return new AbstractClusterAction<WaitForAmbariServerSuccess>(WaitForAmbariServerSuccess.class) {
             @Override
-            protected void doExecute(ClusterViewContext context, WaitForAmbariServerSuccess payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(ClusterViewContext context, WaitForAmbariServerSuccess payload, Map<Object, Object> variables) {
                 sendEvent(context);
             }
 
@@ -72,10 +72,10 @@ public class ChangePrimaryGatewayActions {
     }
 
     @Bean(name = "CHANGE_PRIMARY_GATEWAY_FINISHED_STATE")
-    public Action changeGatewayFinishedAction() {
+    public Action<?, ?> changeGatewayFinishedAction() {
         return new AbstractClusterAction<RegisterProxySuccess>(RegisterProxySuccess.class) {
             @Override
-            protected void doExecute(ClusterViewContext context, RegisterProxySuccess payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(ClusterViewContext context, RegisterProxySuccess payload, Map<Object, Object> variables) {
                 changePrimaryGatewayService.ambariServerStarted(context.getStack());
                 sendEvent(context);
             }
@@ -88,10 +88,10 @@ public class ChangePrimaryGatewayActions {
     }
 
     @Bean(name = "CHANGE_PRIMARY_GATEWAY_FAILED_STATE")
-    public Action repairGatewayFailedAction() {
+    public Action<?, ?> repairGatewayFailedAction() {
         return new AbstractStackFailureAction<ChangePrimaryGatewayState, ChangePrimaryGatewayEvent>() {
             @Override
-            protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
                 changePrimaryGatewayService.changePrimaryGatewayFailed(context.getStackView().getId(), payload.getException());
                 sendEvent(context);
             }

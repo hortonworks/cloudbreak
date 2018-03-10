@@ -14,6 +14,7 @@ export TMP_SSH_KEY="${tmpSshKey}"
 export SSH_USER=${sshUser}
 export SALT_BOOT_PASSWORD=${saltBootPassword}
 export SALT_BOOT_SIGN_KEY=${signaturePublicKey}
+export CB_CERT=${cbCert}
 
 ${customUserData}
 

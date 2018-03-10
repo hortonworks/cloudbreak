@@ -11,17 +11,17 @@ enum StackTerminationState implements FlowState {
     PRE_TERMINATION_STATE(StackPreTerminationAction.class),
     FINAL_STATE;
 
-    private Class<? extends AbstractAction> action;
+    private Class<? extends AbstractAction<?, ?, ?, ?>> action;
 
     StackTerminationState() {
     }
 
-    StackTerminationState(Class<? extends AbstractAction> action) {
+    StackTerminationState(Class<? extends AbstractAction<?, ?, ?, ?>> action) {
         this.action = action;
     }
 
     @Override
-    public Class<? extends AbstractAction> action() {
+    public Class<? extends AbstractAction<?, ?, ?, ?>> action() {
         return action;
     }
 }

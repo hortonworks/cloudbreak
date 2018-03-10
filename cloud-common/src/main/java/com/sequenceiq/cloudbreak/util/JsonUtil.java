@@ -37,7 +37,7 @@ public class JsonUtil {
 
     public static JsonNode createJsonTree(Map<String, Object> map) {
         ObjectNode rootNode = MAPPER.createObjectNode();
-        map.entrySet().stream().forEach(e -> rootNode.set(e.getKey(), MAPPER.valueToTree(e.getValue())));
+        map.forEach((key, value) -> rootNode.set(key, MAPPER.valueToTree(value)));
         return rootNode;
     }
 

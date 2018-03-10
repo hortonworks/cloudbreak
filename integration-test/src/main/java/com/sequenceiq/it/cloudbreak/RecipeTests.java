@@ -21,22 +21,22 @@ import com.sequenceiq.it.cloudbreak.newway.Recipe;
 
 
 public class RecipeTests extends CloudbreakTest {
-    public static final String VALID_RECIPE_NAME = "valid-recipe";
+    private static final String VALID_RECIPE_NAME = "valid-recipe";
 
-    public static final String VALID_RECIPE_DESCRIPTION = "recipe for API E2E tests";
+    private static final String VALID_RECIPE_DESCRIPTION = "recipe for API E2E tests";
 
-    public static final String VALID_RECIPE_URI = "https://gist.githubusercontent.com/aszegedi/4fc4a6a2fd319da436df6441c04c68e1/"
+    private static final String VALID_RECIPE_URI = "https://gist.githubusercontent.com/aszegedi/4fc4a6a2fd319da436df6441c04c68e1/"
             + "raw/5698a1106a2365eb543e9d3c830e14f955882437/post-install.sh";
 
-    public static final String VALID_RECIPE_SCRIPT = "echo test";
+    private static final String VALID_RECIPE_SCRIPT = "echo test";
 
-    public static final String VALID_RECIPE_SCRIPT_FILE = "classpath:/recipes/valid_recipe.sh";
+    private static final String VALID_RECIPE_SCRIPT_FILE = "classpath:/recipes/valid_recipe.sh";
 
-    public static final String INVALID_RECIPE_NAME_SHORT = "test";
+    private static final String INVALID_RECIPE_NAME_SHORT = "test";
 
-    public static final String SPECIAL_RECIPE_NAME = "@#$%|:&*;";
+    private static final String SPECIAL_RECIPE_NAME = "@#$%|:&*;";
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CloudbreakTest.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(RecipeTests.class);
 
     @Test
     public void testCreateValidRecipePostAmbari() throws Exception {
@@ -49,9 +49,7 @@ public class RecipeTests extends CloudbreakTest {
                 );
         when(Recipe.post());
         then(Recipe.assertThis(
-                (recipe, t) -> {
-                    Assert.assertEquals(recipe.getResponse().getName(), VALID_RECIPE_NAME + "-post-ambari");
-                })
+                (recipe, t) -> Assert.assertEquals(recipe.getResponse().getName(), VALID_RECIPE_NAME + "-post-ambari"))
         );
     }
 
@@ -66,9 +64,7 @@ public class RecipeTests extends CloudbreakTest {
         );
         when(Recipe.post());
         then(Recipe.assertThis(
-                (recipe, t) -> {
-                    Assert.assertEquals(recipe.getResponse().getName(), VALID_RECIPE_NAME + "-pre-ambari");
-                })
+                (recipe, t) -> Assert.assertEquals(recipe.getResponse().getName(), VALID_RECIPE_NAME + "-pre-ambari"))
         );
     }
 
@@ -83,9 +79,7 @@ public class RecipeTests extends CloudbreakTest {
         );
         when(Recipe.post());
         then(Recipe.assertThis(
-                (recipe, t) -> {
-                    Assert.assertEquals(recipe.getResponse().getName(), VALID_RECIPE_NAME + "-post-cluster");
-                })
+                (recipe, t) -> Assert.assertEquals(recipe.getResponse().getName(), VALID_RECIPE_NAME + "-post-cluster"))
 
         );
     }
@@ -101,9 +95,7 @@ public class RecipeTests extends CloudbreakTest {
         );
         when(Recipe.post());
         then(Recipe.assertThis(
-                (recipe, t) -> {
-                    Assert.assertEquals(recipe.getResponse().getName(), VALID_RECIPE_NAME + "-pre-term");
-                })
+                (recipe, t) -> Assert.assertEquals(recipe.getResponse().getName(), VALID_RECIPE_NAME + "-pre-term"))
         );
     }
 
@@ -118,9 +110,7 @@ public class RecipeTests extends CloudbreakTest {
         );
         when(Recipe.post());
         then(Recipe.assertThis(
-                (recipe, t) -> {
-                    Assert.assertEquals(recipe.getResponse().getName(), VALID_RECIPE_NAME + "-from-file");
-                })
+                (recipe, t) -> Assert.assertEquals(recipe.getResponse().getName(), VALID_RECIPE_NAME + "-from-file"))
         );
     }
 
@@ -149,9 +139,7 @@ public class RecipeTests extends CloudbreakTest {
         );
         when(Recipe.post());
         then(Recipe.assertThis(
-                (recipe, t) -> {
-                    Assert.assertNotNull(recipe.getResponse());
-                })
+                (recipe, t) -> Assert.assertNotNull(recipe.getResponse()))
         );
     }
 
@@ -166,9 +154,7 @@ public class RecipeTests extends CloudbreakTest {
         );
         when(Recipe.post());
         then(Recipe.assertThis(
-                (recipe, t) -> {
-                    Assert.assertNotEquals(recipe.getResponse().getName(), INVALID_RECIPE_NAME_SHORT);
-                })
+                (recipe, t) -> Assert.assertNotEquals(recipe.getResponse().getName(), INVALID_RECIPE_NAME_SHORT))
         );
     }
 
@@ -183,9 +169,7 @@ public class RecipeTests extends CloudbreakTest {
         );
         when(Recipe.post());
         then(Recipe.assertThis(
-                (recipe, t) -> {
-                    Assert.assertNotEquals(recipe.getResponse().getName(), createLongString("a", 101));
-                })
+                (recipe, t) -> Assert.assertNotEquals(recipe.getResponse().getName(), createLongString("a", 101)))
         );
     }
 
@@ -200,9 +184,7 @@ public class RecipeTests extends CloudbreakTest {
         );
         when(Recipe.post());
         then(Recipe.assertThis(
-                (recipe, t) -> {
-                    Assert.assertNotEquals(recipe.getResponse().getName(), VALID_RECIPE_NAME);
-                })
+                (recipe, t) -> Assert.assertNotEquals(recipe.getResponse().getName(), VALID_RECIPE_NAME))
         );
     }
 
@@ -225,9 +207,7 @@ public class RecipeTests extends CloudbreakTest {
         );
         when(Recipe.post());
         then(Recipe.assertThis(
-                (recipe, t) -> {
-                    Assert.assertEquals(recipe.getResponse().getName(), VALID_RECIPE_NAME + "-delete-create");
-                })
+                (recipe, t) -> Assert.assertEquals(recipe.getResponse().getName(), VALID_RECIPE_NAME + "-delete-create"))
         );
     }
 
@@ -261,11 +241,11 @@ public class RecipeTests extends CloudbreakTest {
                                 .getInputStream()));
     }
 
-    private String createLongString(String character, Integer length) {
-        String customLongString = "";
+    private String createLongString(String character, int length) {
+        StringBuilder customLongString = new StringBuilder();
         for (int i = 0; i <= length; i++) {
-            customLongString = customLongString.concat(character);
+            customLongString.append(character);
         }
-        return customLongString;
+        return customLongString.toString();
     }
 }

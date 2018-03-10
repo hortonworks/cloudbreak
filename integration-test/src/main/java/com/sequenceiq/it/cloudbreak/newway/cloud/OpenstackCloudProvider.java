@@ -1,8 +1,5 @@
 package com.sequenceiq.it.cloudbreak.newway.cloud;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import com.sequenceiq.cloudbreak.api.model.StackAuthenticationRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.NetworkV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.TemplateV2Request;
@@ -10,17 +7,18 @@ import com.sequenceiq.it.cloudbreak.newway.Credential;
 import com.sequenceiq.it.cloudbreak.newway.CredentialEntity;
 import com.sequenceiq.it.cloudbreak.newway.TestParameter;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class OpenstackCloudProvider extends CloudProviderHelper {
 
     public static final String OPENSTACK = "openstack";
 
     public static final String OPENSTACK_CAPITAL = "OPENSTACK";
 
-    static final String CREDNAME = "testopenstackcred";
+    private static final String CREDENTIAL_DEFAULT_NAME = "autotesting-os-cred";
 
-    static final String CREDDESC = "test credential";
-
-    private static final String OPENSTACK_CLUSTER_DEFAULT_NAME = "openstack-cluster";
+    private static final String OPENSTACK_CLUSTER_DEFAULT_NAME = "autotesting-os-cluster";
 
     public OpenstackCloudProvider(TestParameter testParameter) {
         super(testParameter);
@@ -29,22 +27,22 @@ public class OpenstackCloudProvider extends CloudProviderHelper {
     @Override
     public CredentialEntity aValidCredential() {
         return Credential.isCreated()
-                .withName(CREDNAME)
-                .withDescription(CREDDESC)
+                .withName(getCredentialName())
+                .withDescription(CREDENTIAL_DEFAULT_DESCRIPTION)
                 .withCloudPlatform(OPENSTACK_CAPITAL)
                 .withParameters(openstackCredentialDetails());
     }
 
     @Override
-    String availabilityZone() {
-        String az = "nova";
-        String azParam = getTestParameter().get("openstackAvailabilityZone");
+    public String availabilityZone() {
+        String availabilityZone = "nova";
+        String availabilityZoneParam = getTestParameter().get("openstackAvailibilityZone");
 
-        return azParam == null ? az : azParam;
+        return availabilityZoneParam == null ? availabilityZone : availabilityZoneParam;
     }
 
     @Override
-    String region() {
+    public String region() {
         String region = "RegionOne";
         String regionParam = getTestParameter().get("openstackRegion");
 
@@ -82,9 +80,24 @@ public class OpenstackCloudProvider extends CloudProviderHelper {
     }
 
     @Override
-    public String getClusterDefaultName() {
+    public String getClusterName() {
         String clustername = getTestParameter().get("openstackClusterName");
         return clustername == null ? OPENSTACK_CLUSTER_DEFAULT_NAME : clustername;
+    }
+
+    @Override
+    NetworkV2Request network() {
+        NetworkV2Request network = new NetworkV2Request();
+        network.setSubnetCIDR("10.0.0.0/16");
+
+        Map<String, Object> parameters = new HashMap<>();
+
+        String defaultNetId = "999e09bc-cf75-4a19-98fb-c0b4ddee6d93";
+        String netIdParameter = getTestParameter().get("integrationtest.openstack.publicNetId");
+        parameters.put("networkingOption", "self-service");
+        parameters.put("publicNetId", netIdParameter == null ? defaultNetId : netIdParameter);
+        network.setParameters(parameters);
+        return network;
     }
 
     @Override
@@ -92,8 +105,14 @@ public class OpenstackCloudProvider extends CloudProviderHelper {
         return OPENSTACK_CAPITAL;
     }
 
+    @Override
+    public String getCredentialName() {
+        String credentialName = getTestParameter().get("openstackCredentialName");
+        return credentialName == null ? CREDENTIAL_DEFAULT_NAME : credentialName;
+    }
+
     public Map<String, Object> openstackCredentialDetails() {
-        Map<String, Object> map = new HashMap<String, Object>();
+        Map<String, Object> map = new HashMap<>();
         map.put("tenantName", getTestParameter().get("integrationtest.openstackcredential.tenantName"));
         map.put("userName", getTestParameter().get("integrationtest.openstackcredential.userName"));
         map.put("password", getTestParameter().get("integrationtest.openstackcredential.password"));
@@ -105,7 +124,7 @@ public class OpenstackCloudProvider extends CloudProviderHelper {
     }
 
     public Map<String, Object> openstackV3CredentialDetails() {
-        Map<String, Object> map = new HashMap<String, Object>();
+        Map<String, Object> map = new HashMap<>();
         map.put("tenantName", getTestParameter().get("integrationtest.openstackV3credential.tenantName"));
         map.put("userDomain", getTestParameter().get("integrationtest.openstackV3credential.userDomain"));
         map.put("userName", getTestParameter().get("integrationtest.openstackV3credential.userName"));
@@ -122,7 +141,7 @@ public class OpenstackCloudProvider extends CloudProviderHelper {
     }
 
     public Map<String, Object> openstackCredentialDetailsInvalidUser() {
-        Map<String, Object> map = new HashMap<String, Object>();
+        Map<String, Object> map = new HashMap<>();
         map.put("tenantName", getTestParameter().get("integrationtest.openstackcredential.tenantName"));
         map.put("userName", "kisnyul");
         map.put("password", getTestParameter().get("integrationtest.openstackcredential.password"));
@@ -134,7 +153,7 @@ public class OpenstackCloudProvider extends CloudProviderHelper {
     }
 
     public Map<String, Object> openstackCredentialDetailsInvalidEndpoint() {
-        Map<String, Object> map = new HashMap<String, Object>();
+        Map<String, Object> map = new HashMap<>();
         map.put("tenantName", getTestParameter().get("integrationtest.openstackcredential.tenantName"));
         map.put("userName", getTestParameter().get("integrationtest.openstackcredential.userName"));
         map.put("password", getTestParameter().get("integrationtest.openstackcredential.password"));
@@ -143,20 +162,5 @@ public class OpenstackCloudProvider extends CloudProviderHelper {
         map.put("selector", "cb-keystone-v2");
 
         return map;
-    }
-
-    @Override
-    NetworkV2Request network() {
-        NetworkV2Request network = new NetworkV2Request();
-        network.setSubnetCIDR("10.0.0.0/16");
-
-        Map<String, Object> parameters = new HashMap<>();
-
-        String defaultNetId = "999e09bc-cf75-4a19-98fb-c0b4ddee6d93";
-        String netIdParameter = getTestParameter().get("integrationtest.openstack.publicNetId");
-        parameters.put("networkingOption", "self-service");
-        parameters.put("publicNetId", netIdParameter == null ? defaultNetId : netIdParameter);
-        network.setParameters(parameters);
-        return network;
     }
 }

@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.task;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
@@ -57,7 +58,7 @@ public class ResourcesStatePollerResult {
         this.statusReason = statusReason;
     }
 
-    public void addResults(List<CloudResourceStatus> results) {
+    public void addResults(Collection<CloudResourceStatus> results) {
         this.results.addAll(results);
     }
 

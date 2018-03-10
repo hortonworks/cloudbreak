@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.mock;
 
 public class MockCredentialView {
-    private String mockServerAddress;
+    private final String mockServerAddress;
 
     public MockCredentialView(String mockServerAddress) {
         this.mockServerAddress = mockServerAddress;

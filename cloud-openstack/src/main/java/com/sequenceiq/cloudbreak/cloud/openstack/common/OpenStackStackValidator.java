@@ -22,7 +22,7 @@ public class OpenStackStackValidator implements Validator {
 
     @Override
     public void validate(AuthenticatedContext ac, CloudStack cloudStack) {
-        OSClient client = openStackClient.createOSClient(ac);
+        OSClient<?> client = openStackClient.createOSClient(ac);
         String stackName = utils.getStackName(ac);
         if (client.heat().stacks().getStackByName(stackName) != null) {
             throw new CloudConnectorException(String.format("Stack is already exists with the given name: %s", stackName));

@@ -15,4 +15,7 @@
     <Match>
         <Bug pattern="RV_RETURN_VALUE_IGNORED_NO_SIDE_EFFECT" />
     </Match>
+    <Match>
+        <Class name="~.*MapperImpl$"/>
+    </Match>
 </FindBugsFilter>

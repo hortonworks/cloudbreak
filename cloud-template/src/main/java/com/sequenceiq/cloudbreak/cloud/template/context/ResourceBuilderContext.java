@@ -68,20 +68,12 @@ public class ResourceBuilderContext extends DynamicModel {
     }
 
     public synchronized void addGroupResources(String groupName, Collection<CloudResource> resources) {
-        List<CloudResource> list = groupResources.get(groupName);
-        if (list == null) {
-            list = new ArrayList<>();
-            groupResources.put(groupName, list);
-        }
+        List<CloudResource> list = groupResources.computeIfAbsent(groupName, k -> new ArrayList<>());
         list.addAll(resources);
     }
 
     public synchronized void addComputeResources(Long index, Collection<CloudResource> resources) {
-        List<CloudResource> list = computeResources.get(index);
-        if (list == null) {
-            list = new ArrayList<>();
-            computeResources.put(index, list);
-        }
+        List<CloudResource> list = computeResources.computeIfAbsent(index, k -> new ArrayList<>());
         list.addAll(resources);
     }
 

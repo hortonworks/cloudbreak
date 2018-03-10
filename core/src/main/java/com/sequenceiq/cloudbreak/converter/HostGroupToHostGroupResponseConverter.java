@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.converter;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -30,7 +31,7 @@ public class HostGroupToHostGroupResponseConverter extends AbstractConversionSer
         return hostGroupBase;
     }
 
-    private Set<HostMetadataResponse> getHostMetadata(Set<HostMetadata> hostMetadataCollection) {
+    private Set<HostMetadataResponse> getHostMetadata(Iterable<HostMetadata> hostMetadataCollection) {
         Set<HostMetadataResponse> hostMetadataResponses = new HashSet<>();
         for (HostMetadata hostMetadata : hostMetadataCollection) {
             hostMetadataResponses.add(getConversionService().convert(hostMetadata, HostMetadataResponse.class));
@@ -38,11 +39,11 @@ public class HostGroupToHostGroupResponseConverter extends AbstractConversionSer
         return hostMetadataResponses;
     }
 
-    private Set<Long> getRecipeIds(Set<Recipe> recipes) {
+    private Set<Long> getRecipeIds(Collection<Recipe> recipes) {
         return recipes.stream().map(Recipe::getId).collect(Collectors.toSet());
     }
 
-    private Set<RecipeResponse> getRecipes(Set<Recipe> recipes) {
+    private Set<RecipeResponse> getRecipes(Iterable<Recipe> recipes) {
         Set<RecipeResponse> recipeResponseSet = new HashSet<>();
         for (Recipe recipe : recipes) {
             recipeResponseSet.add(getConversionService().convert(recipe, RecipeResponse.class));

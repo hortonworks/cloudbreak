@@ -25,11 +25,11 @@ public class YarnConstants implements CloudConstant {
 
     @Override
     public Platform platform() {
-        return YarnConstants.YARN_PLATFORM;
+        return YARN_PLATFORM;
     }
 
     @Override
     public Variant variant() {
-        return YarnConstants.YARN_VARIANT;
+        return YARN_VARIANT;
     }
 }

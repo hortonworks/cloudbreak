@@ -10,7 +10,9 @@ import org.slf4j.LoggerFactory;
 import com.ecwid.consul.v1.ConsulClient;
 import com.ecwid.consul.v1.OperationException;
 import com.ecwid.consul.v1.QueryParams;
+import com.ecwid.consul.v1.catalog.CatalogClient;
 import com.ecwid.consul.v1.catalog.model.CatalogService;
+import com.ecwid.consul.v1.kv.KeyValueClient;
 import com.ecwid.consul.v1.kv.model.GetValue;
 
 public final class ConsulUtils {
@@ -23,7 +25,7 @@ public final class ConsulUtils {
         throw new IllegalStateException("ConsulUtils not instancable");
     }
 
-    public static List<CatalogService> getService(List<ConsulClient> clients, String serviceName) {
+    public static List<CatalogService> getService(Iterable<ConsulClient> clients, String serviceName) {
         for (ConsulClient consul : clients) {
             List<CatalogService> service = getService(consul, serviceName);
             if (!service.isEmpty()) {
@@ -33,7 +35,7 @@ public final class ConsulUtils {
         return Collections.emptyList();
     }
 
-    public static List<CatalogService> getService(ConsulClient client, String serviceName) {
+    public static List<CatalogService> getService(CatalogClient client, String serviceName) {
         try {
             return client.getCatalogService(serviceName, QueryParams.DEFAULT).getValue();
         } catch (RuntimeException ignored) {
@@ -41,7 +43,7 @@ public final class ConsulUtils {
         }
     }
 
-    public static String getKVValue(List<ConsulClient> clients, String key, QueryParams queryParams) {
+    public static String getKVValue(Iterable<ConsulClient> clients, String key, QueryParams queryParams) {
         for (ConsulClient client : clients) {
             String value = getKVValue(client, key, queryParams);
             if (value != null) {
@@ -51,7 +53,7 @@ public final class ConsulUtils {
         return null;
     }
 
-    public static String getKVValue(ConsulClient client, String key, QueryParams queryParams) {
+    public static String getKVValue(KeyValueClient client, String key, QueryParams queryParams) {
         try {
             GetValue getValue = client.getKVValue(key, queryParams).getValue();
             return getValue == null ? null : new String(Base64.decodeBase64(getValue.getValue()));

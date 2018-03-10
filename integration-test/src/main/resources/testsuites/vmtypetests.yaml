@@ -1,0 +1,9 @@
+name: Connectors_VMTypes_Tests
+parameters:
+  cleanUp: true
+
+tests:
+  - name: vmtype_provider_spec_test
+    classes:
+      - com.sequenceiq.it.cloudbreak.VmTypeTests
+

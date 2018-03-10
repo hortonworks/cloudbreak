@@ -23,7 +23,7 @@ public class PrometheusMonitor extends AbstractMonitor {
     }
 
     @Override
-    public Class getEvaluatorType() {
+    public Class<?> getEvaluatorType() {
         return PrometheusEvaluator.class;
     }
 

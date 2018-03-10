@@ -39,7 +39,7 @@ public class MockStackCreationV2Test extends AbstractStackCreationV2Test {
     }
 
     @BeforeMethod
-    @Parameters({"subnetCidr"})
+    @Parameters("subnetCidr")
     public void initNetwork(String subnetCidr) {
         createNetworkRequest(getItContext(), subnetCidr);
     }

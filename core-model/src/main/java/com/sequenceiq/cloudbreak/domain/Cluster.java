@@ -116,6 +116,10 @@ public class Cluster implements ProvisionEntity {
 
     private String emailTo;
 
+    @Type(type = "encrypted_string")
+    @Column(length = 1000000, columnDefinition = "TEXT", nullable = false)
+    private String extendedBlueprintText;
+
     @OneToOne(mappedBy = "cluster", cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, orphanRemoval = true)
     private Gateway gateway;
 
@@ -161,6 +165,9 @@ public class Cluster implements ProvisionEntity {
 
     @Type(type = "encrypted_string")
     private String ambariSecurityMasterKey;
+
+    @ManyToOne
+    private ProxyConfig proxyConfig;
 
     public Stack getStack() {
         return stack;
@@ -516,5 +523,21 @@ public class Cluster implements ProvisionEntity {
 
     public void setAmbariSecurityMasterKey(String ambariSecurityMasterKey) {
         this.ambariSecurityMasterKey = ambariSecurityMasterKey;
+    }
+
+    public ProxyConfig getProxyConfig() {
+        return proxyConfig;
+    }
+
+    public void setProxyConfig(ProxyConfig proxyConfig) {
+        this.proxyConfig = proxyConfig;
+    }
+
+    public String getExtendedBlueprintText() {
+        return extendedBlueprintText;
+    }
+
+    public void setExtendedBlueprintText(String extendedBlueprintText) {
+        this.extendedBlueprintText = extendedBlueprintText;
     }
 }

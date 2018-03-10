@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.image;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -11,6 +12,7 @@ import javax.ws.rs.ProcessingException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status.Family;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -71,7 +73,7 @@ public class CachedImageCatalogProvider {
 
     private CloudbreakImageCatalogV2 checkResponse(WebTarget target, Response response) throws CloudbreakImageCatalogException {
         CloudbreakImageCatalogV2 catalog;
-        if (!response.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL)) {
+        if (!response.getStatusInfo().getFamily().equals(Family.SUCCESSFUL)) {
             throw new CloudbreakImageCatalogException(String.format("Failed to get image catalog from '%s' due to: '%s'",
                     target.getUri().toString(), response.getStatusInfo().getReasonPhrase()));
         } else {
@@ -113,9 +115,9 @@ public class CachedImageCatalogProvider {
 
     private void cleanAndValidateMaps(CloudbreakImageCatalogV2 catalog) throws CloudbreakImageCatalogException {
 
-        boolean baseImagesValidate = cleanAndCheckMap(catalog.getImages().getBaseImages());
-        boolean hdfImagesValidate = cleanAndCheckMap(catalog.getImages().getHdfImages());
-        boolean hdpImagesValidate = cleanAndCheckMap(catalog.getImages().getHdpImages());
+        boolean baseImagesValidate = isCleanAndCheckMap(catalog.getImages().getBaseImages());
+        boolean hdfImagesValidate = isCleanAndCheckMap(catalog.getImages().getHdfImages());
+        boolean hdpImagesValidate = isCleanAndCheckMap(catalog.getImages().getHdpImages());
 
         if (baseImagesValidate && hdfImagesValidate && hdpImagesValidate) {
             throw new CloudbreakImageCatalogException("All images are empty or every items equals NULL");
@@ -124,18 +126,18 @@ public class CachedImageCatalogProvider {
 
     }
 
-    private boolean cleanAndCheckMap(List<Image> images) throws CloudbreakImageCatalogException {
-        boolean invalid = images.isEmpty();
-        if (!invalid) {
+    private boolean isCleanAndCheckMap(Collection<Image> images) {
+        boolean valid = !images.isEmpty();
+        if (valid) {
             for (Image image : images) {
                 image.getImageSetsByProvider().values().removeIf(Objects::isNull);
                 if (image.getImageSetsByProvider().isEmpty()) {
-                    invalid = true;
+                    valid = false;
                 }
             }
         }
 
-        return invalid;
+        return !valid;
     }
 
     private void validateCloudBreakVersions(CloudbreakImageCatalogV2 catalog) throws CloudbreakImageCatalogException {

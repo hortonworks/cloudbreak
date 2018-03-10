@@ -21,7 +21,6 @@ import com.sequenceiq.cloudbreak.api.model.FailureReport;
 import com.sequenceiq.cloudbreak.api.model.UpdateClusterJson;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
-import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -105,7 +104,7 @@ public class ClusterV1Controller implements ClusterV1Endpoint {
     }
 
     @Override
-    public Response put(Long stackId, UpdateClusterJson updateJson) throws CloudbreakSecuritySetupException {
+    public Response put(Long stackId, UpdateClusterJson updateJson) {
         return clusterCommonService.put(stackId, updateJson);
     }
 
@@ -124,7 +123,7 @@ public class ClusterV1Controller implements ClusterV1Endpoint {
     }
 
     @Override
-    public Response failureReport(Long stackId, FailureReport failureReport) throws CloudbreakSecuritySetupException {
+    public Response failureReport(Long stackId, FailureReport failureReport) {
         clusterService.failureReport(stackId, failureReport.getFailedNodes());
         return Response.accepted().build();
     }

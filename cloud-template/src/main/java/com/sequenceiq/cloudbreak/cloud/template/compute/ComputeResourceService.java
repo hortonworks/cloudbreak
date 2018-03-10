@@ -3,8 +3,9 @@ package com.sequenceiq.cloudbreak.cloud.template.compute;
 import static com.sequenceiq.cloudbreak.cloud.template.compute.CloudFailureHandler.ScaleContext;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -52,20 +53,20 @@ public class ComputeResourceService {
     @Inject
     private CloudFailureHandler cloudFailureHandler;
 
-    public List<CloudResourceStatus> buildResourcesForLaunch(ResourceBuilderContext ctx, AuthenticatedContext auth, List<Group> groups, Image image,
+    public List<CloudResourceStatus> buildResourcesForLaunch(ResourceBuilderContext ctx, AuthenticatedContext auth, Iterable<Group> groups, Image image,
             Map<String, String> tags, AdjustmentType adjustmentType, Long threshold) {
         return new ResourceBuilder(ctx, auth).buildResources(groups, image, false, tags, adjustmentType, threshold);
     }
 
-    public List<CloudResourceStatus> buildResourcesForUpscale(ResourceBuilderContext ctx, AuthenticatedContext auth, List<Group> groups, Image image,
+    public List<CloudResourceStatus> buildResourcesForUpscale(ResourceBuilderContext ctx, AuthenticatedContext auth, Iterable<Group> groups, Image image,
             Map<String, String> tags) {
         return new ResourceBuilder(ctx, auth).buildResources(groups, image, true, tags, AdjustmentType.BEST_EFFORT, null);
     }
 
     public List<CloudResourceStatus> deleteResources(ResourceBuilderContext context, AuthenticatedContext auth,
-            List<CloudResource> resources, boolean cancellable) {
+            Iterable<CloudResource> resources, boolean cancellable) {
         List<CloudResourceStatus> results = new ArrayList<>();
-        List<Future<ResourceRequestResult<List<CloudResourceStatus>>>> futures = new ArrayList<>();
+        Collection<Future<ResourceRequestResult<List<CloudResourceStatus>>>> futures = new ArrayList<>();
         Platform platform = auth.getCloudContext().getPlatform();
         List<ComputeResourceBuilder> builders = resourceBuilders.compute(platform);
         int numberOfBuilders = builders.size();
@@ -87,19 +88,19 @@ public class ComputeResourceService {
     }
 
     public List<CloudVmInstanceStatus> stopInstances(ResourceBuilderContext context, AuthenticatedContext auth,
-            List<CloudResource> resources, List<CloudInstance> cloudInstances) {
+            Iterable<CloudResource> resources, Iterable<CloudInstance> cloudInstances) {
         return stopStart(context, auth, resources, cloudInstances);
     }
 
     public List<CloudVmInstanceStatus> startInstances(ResourceBuilderContext context, AuthenticatedContext auth,
-            List<CloudResource> resources, List<CloudInstance> cloudInstances) {
+            Iterable<CloudResource> resources, Iterable<CloudInstance> cloudInstances) {
         return stopStart(context, auth, resources, cloudInstances);
     }
 
     private List<CloudVmInstanceStatus> stopStart(ResourceBuilderContext context,
-            AuthenticatedContext auth, List<CloudResource> resources, List<CloudInstance> instances) {
+            AuthenticatedContext auth, Iterable<CloudResource> resources, Iterable<CloudInstance> instances) {
         List<CloudVmInstanceStatus> results = new ArrayList<>();
-        List<Future<ResourceRequestResult<List<CloudVmInstanceStatus>>>> futures = new ArrayList<>();
+        Collection<Future<ResourceRequestResult<List<CloudVmInstanceStatus>>>> futures = new ArrayList<>();
         Platform platform = auth.getCloudContext().getPlatform();
         List<ComputeResourceBuilder> builders = resourceBuilders.compute(platform);
         if (!context.isBuild()) {
@@ -125,8 +126,8 @@ public class ComputeResourceService {
         return results;
     }
 
-    private <T> Map<FutureResult, List<T>> waitForRequests(List<Future<ResourceRequestResult<T>>> futures) {
-        Map<FutureResult, List<T>> result = new HashMap<>();
+    private <T> Map<FutureResult, List<T>> waitForRequests(Collection<Future<ResourceRequestResult<T>>> futures) {
+        Map<FutureResult, List<T>> result = new EnumMap<>(FutureResult.class);
         result.put(FutureResult.FAILED, new ArrayList<>());
         result.put(FutureResult.SUCCESS, new ArrayList<>());
         int requests = futures.size();
@@ -156,7 +157,7 @@ public class ComputeResourceService {
         return (runningRequests * numberOfBuilders) % context.getParallelResourceRequest() == 0;
     }
 
-    private List<CloudResource> getResources(ResourceType resourceType, List<CloudResource> resources) {
+    private List<CloudResource> getResources(ResourceType resourceType, Iterable<CloudResource> resources) {
         List<CloudResource> selected = new ArrayList<>();
         for (CloudResource resource : resources) {
             if (resourceType == resource.getType()) {
@@ -170,7 +171,7 @@ public class ComputeResourceService {
         return (T) applicationContext.getBean(name, args);
     }
 
-    private CloudInstance getCloudInstance(CloudResource cloudResource, List<CloudInstance> instances) {
+    private CloudInstance getCloudInstance(CloudResource cloudResource, Iterable<CloudInstance> instances) {
         for (CloudInstance instance : instances) {
             if (instance.getInstanceId().equalsIgnoreCase(cloudResource.getName()) || instance.getInstanceId().equalsIgnoreCase(cloudResource.getReference())) {
                 return instance;
@@ -179,15 +180,15 @@ public class ComputeResourceService {
         return null;
     }
 
-    private List<CloudVmInstanceStatus> flatVmList(List<List<CloudVmInstanceStatus>> lists) {
-        List<CloudVmInstanceStatus> result = new ArrayList<>();
+    private Collection<CloudVmInstanceStatus> flatVmList(Iterable<List<CloudVmInstanceStatus>> lists) {
+        Collection<CloudVmInstanceStatus> result = new ArrayList<>();
         for (List<CloudVmInstanceStatus> list : lists) {
             result.addAll(list);
         }
         return result;
     }
 
-    private List<CloudResourceStatus> flatList(List<List<CloudResourceStatus>> lists) {
+    private List<CloudResourceStatus> flatList(Iterable<List<CloudResourceStatus>> lists) {
         List<CloudResourceStatus> result = new ArrayList<>();
         for (List<CloudResourceStatus> list : lists) {
             result.addAll(list);
@@ -206,13 +207,13 @@ public class ComputeResourceService {
             this.auth = auth;
         }
 
-        public List<CloudResourceStatus> buildResources(List<Group> groups, Image image, Boolean upscale, Map<String, String> tags,
+        public List<CloudResourceStatus> buildResources(Iterable<Group> groups, Image image, Boolean upscale, Map<String, String> tags,
                 AdjustmentType adjustmentType, Long threshold) {
             List<CloudResourceStatus> results = new ArrayList<>();
             int fullNodeCount = getFullNodeCount(groups);
 
             CloudContext cloudContext = auth.getCloudContext();
-            List<Future<ResourceRequestResult<List<CloudResourceStatus>>>> futures = new ArrayList<>();
+            Collection<Future<ResourceRequestResult<List<CloudResourceStatus>>>> futures = new ArrayList<>();
             List<ComputeResourceBuilder> builders = resourceBuilders.compute(cloudContext.getPlatform());
             for (Group group : getOrderedCopy(groups)) {
                 List<CloudInstance> instances = group.getInstances();
@@ -237,7 +238,7 @@ public class ComputeResourceService {
             return results;
         }
 
-        private int getFullNodeCount(List<Group> groups) {
+        private int getFullNodeCount(Iterable<Group> groups) {
             int fullNodeCount = 0;
             for (Group group : groups) {
                 fullNodeCount += group.getInstancesSize();
@@ -245,7 +246,7 @@ public class ComputeResourceService {
             return fullNodeCount;
         }
 
-        private List<Group> getOrderedCopy(List<Group> groups) {
+        private Iterable<Group> getOrderedCopy(Iterable<Group> groups) {
             Ordering<Group> byLengthOrdering = new Ordering<Group>() {
                 @Override
                 public int compare(Group left, Group right) {

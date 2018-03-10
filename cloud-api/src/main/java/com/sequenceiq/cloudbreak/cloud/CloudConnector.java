@@ -42,7 +42,7 @@ public interface CloudConnector extends CloudPlatformAware {
      *
      * @return the {@link ResourceConnector} object
      */
-    ResourceConnector resources();
+    ResourceConnector<Object> resources();
 
     /**
      * Access to the {@link MetadataCollector} object.

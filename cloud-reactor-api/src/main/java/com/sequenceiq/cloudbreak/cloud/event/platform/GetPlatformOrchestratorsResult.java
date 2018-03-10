@@ -4,7 +4,7 @@ import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformRequest;
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformOrchestrators;
 
-public class GetPlatformOrchestratorsResult extends CloudPlatformResult<CloudPlatformRequest> {
+public class GetPlatformOrchestratorsResult extends CloudPlatformResult<CloudPlatformRequest<?>> {
     private PlatformOrchestrators platformOrchestrators;
 
     public GetPlatformOrchestratorsResult(CloudPlatformRequest<?> request, PlatformOrchestrators platformOrchestrators) {

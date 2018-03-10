@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.service.securityrule;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -43,8 +43,8 @@ public class SecurityRuleService {
         ret.getGateway().addAll(createSecurityRuleResponse(cidr, sshPort, gatewayPort));
     }
 
-    private List<SecurityRuleResponse> createSecurityRuleResponse(String cidr, String... ports) {
-        List<SecurityRuleResponse> rules = new ArrayList<>();
+    private Collection<SecurityRuleResponse> createSecurityRuleResponse(String cidr, String... ports) {
+        Collection<SecurityRuleResponse> rules = new ArrayList<>();
         for (String port : ports) {
             if (StringUtils.isNotBlank(port)) {
                 SecurityRuleResponse securityRuleResponse = new SecurityRuleResponse();

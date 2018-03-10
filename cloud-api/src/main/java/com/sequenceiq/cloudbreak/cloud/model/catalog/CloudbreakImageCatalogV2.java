@@ -7,9 +7,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class CloudbreakImageCatalogV2 {
 
-    private Images images;
+    private final Images images;
 
-    private Versions versions;
+    private final Versions versions;
 
     @JsonCreator
     public CloudbreakImageCatalogV2(

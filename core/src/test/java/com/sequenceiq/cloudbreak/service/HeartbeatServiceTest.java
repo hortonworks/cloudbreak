@@ -44,7 +44,7 @@ import com.sequenceiq.cloudbreak.domain.FlowLog;
 import com.sequenceiq.cloudbreak.repository.CloudbreakNodeRepository;
 import com.sequenceiq.cloudbreak.repository.FlowLogRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
-import com.sequenceiq.cloudbreak.service.ha.CloudbreakNodeConfig;
+import com.sequenceiq.cloudbreak.ha.CloudbreakNodeConfig;
 import com.sequenceiq.cloudbreak.service.ha.FlowDistributor;
 import com.sequenceiq.cloudbreak.service.ha.HeartbeatService;
 
@@ -420,7 +420,7 @@ public class HeartbeatServiceTest {
         class TestRetry implements Retry {
 
             @Override
-            public Boolean testWith2SecDelayMax5Times(Supplier<Boolean> action) throws ActionWentFail {
+            public Boolean testWith2SecDelayMax5Times(Supplier<Boolean> action) throws ActionWentFailException {
                 return Boolean.TRUE;
             }
         }
@@ -450,8 +450,8 @@ public class HeartbeatServiceTest {
         class TestRetryWithFail implements Retry {
 
             @Override
-            public Boolean testWith2SecDelayMax5Times(Supplier<Boolean> action) throws ActionWentFail {
-                throw new ActionWentFail("Test failed");
+            public Boolean testWith2SecDelayMax5Times(Supplier<Boolean> action) throws ActionWentFailException {
+                throw new ActionWentFailException("Test failed");
             }
         }
 

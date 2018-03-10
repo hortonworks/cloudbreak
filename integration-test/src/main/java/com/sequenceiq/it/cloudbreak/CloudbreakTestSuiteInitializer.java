@@ -1,6 +1,7 @@
 package com.sequenceiq.it.cloudbreak;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -21,11 +22,11 @@ import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 
+import com.sequenceiq.cloudbreak.api.endpoint.common.StackEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.BlueprintEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.CredentialEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.NetworkEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.SecurityGroupEndpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v1.StackV1Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.TemplateEndpoint;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient.CloudbreakClientBuilder;
@@ -200,7 +201,7 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
         }
     }
 
-    private void putStackToContextIfExist(StackV1Endpoint endpoint, String stackName) {
+    private void putStackToContextIfExist(StackEndpoint endpoint, String stackName) {
         if (StringUtils.hasLength(stackName)) {
             Long resourceId = endpoint.getPublic(stackName, new HashSet<>()).getId();
             itContext.putContextParam(CloudbreakITContextConstants.STACK_ID, resourceId.toString());
@@ -248,7 +249,7 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
             cleanUpService.deleteStackAndWait(cloudbreakClient, stackId);
             List<InstanceGroup> instanceGroups = itContext.getCleanUpParameter(CloudbreakITContextConstants.TEMPLATE_ID, List.class);
             if (instanceGroups != null && !instanceGroups.isEmpty()) {
-                Set<String> deletedTemplates = new HashSet<>();
+                Collection<String> deletedTemplates = new HashSet<>();
                 for (InstanceGroup ig : instanceGroups) {
                     if (!deletedTemplates.contains(ig.getTemplateId())) {
                         cleanUpService.deleteTemplate(cloudbreakClient, ig.getTemplateId());

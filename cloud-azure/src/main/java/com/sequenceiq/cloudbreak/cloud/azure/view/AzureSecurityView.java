@@ -17,7 +17,7 @@ public class AzureSecurityView {
 
     private final Map<String, String> securityGroupIds = new HashMap<>();
 
-    public AzureSecurityView(List<Group> groups) {
+    public AzureSecurityView(Iterable<Group> groups) {
         for (Group group : groups) {
             List<AzurePortView> groupPorts = new ArrayList<>(group.getSecurity().getRules().size());
             for (SecurityRule securityRule : group.getSecurity().getRules()) {

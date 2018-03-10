@@ -130,6 +130,9 @@ public class ClusterRequest implements JsonEntity {
     @Size(max = 100, min = 5, message = "The length of the password has to be in range of 5 to 100")
     private String ambariSecurityMasterKey;
 
+    @ApiModelProperty(ClusterModelDescription.PROXY_NAME)
+    private String proxyName;
+
     public String getDescription() {
         return description;
     }
@@ -381,5 +384,13 @@ public class ClusterRequest implements JsonEntity {
 
     public void setAmbariSecurityMasterKey(String ambariSecurityMasterKey) {
         this.ambariSecurityMasterKey = ambariSecurityMasterKey;
+    }
+
+    public String getProxyName() {
+        return proxyName;
+    }
+
+    public void setProxyName(String proxyName) {
+        this.proxyName = proxyName;
     }
 }

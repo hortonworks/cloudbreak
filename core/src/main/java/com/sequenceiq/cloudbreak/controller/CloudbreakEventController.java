@@ -53,11 +53,11 @@ public class CloudbreakEventController implements EventEndpoint {
     public Response getStructuredEventsZip(Long stackId) {
         List<StructuredEvent> events = getStructuredEventsForStack(stackId);
         StreamingOutput streamingOutput = output -> {
-            ZipOutputStream zipOutputStream = new ZipOutputStream(output);
-            zipOutputStream.putNextEntry(new ZipEntry("struct-events.json"));
-            zipOutputStream.write(JsonUtil.writeValueAsString(events).getBytes());
-            zipOutputStream.closeEntry();
-            zipOutputStream.close();
+            try (ZipOutputStream zipOutputStream = new ZipOutputStream(output)) {
+                zipOutputStream.putNextEntry(new ZipEntry("struct-events.json"));
+                zipOutputStream.write(JsonUtil.writeValueAsString(events).getBytes());
+                zipOutputStream.closeEntry();
+            }
         };
         return Response.ok(streamingOutput).header("content-disposition", "attachment; filename = struct-events.zip").build();
     }

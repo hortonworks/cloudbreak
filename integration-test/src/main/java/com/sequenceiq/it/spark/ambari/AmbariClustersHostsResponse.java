@@ -1,6 +1,7 @@
 package com.sequenceiq.it.spark.ambari;
 
 import java.util.Map;
+import java.util.Map.Entry;
 
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
@@ -25,12 +26,12 @@ public class AmbariClustersHostsResponse extends ITResponse {
     }
 
     @Override
-    public Object handle(Request request, Response response) throws Exception {
+    public Object handle(Request request, Response response) {
         response.type("text/plain");
         ObjectNode rootNode = JsonNodeFactory.instance.objectNode();
         ArrayNode items = rootNode.putArray("items");
 
-        for (Map.Entry<String, CloudVmMetaDataStatus> stringCloudVmMetaDataStatusEntry : instanceMap.entrySet()) {
+        for (Entry<String, CloudVmMetaDataStatus> stringCloudVmMetaDataStatusEntry : instanceMap.entrySet()) {
             CloudVmMetaDataStatus status = stringCloudVmMetaDataStatusEntry.getValue();
             if (InstanceStatus.STARTED == status.getCloudVmInstanceStatus().getStatus()) {
                 ObjectNode item = items.addObject();

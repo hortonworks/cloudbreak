@@ -120,12 +120,12 @@ public class ClusterService {
         clusterRepository.delete(cluster);
     }
 
-    public void updateScalingConfiguration(Long clusterId, ScalingConfigurationRequest scalingConfiguration) {
+    public Cluster updateScalingConfiguration(Long clusterId, ScalingConfigurationRequest scalingConfiguration) {
         Cluster cluster = findOneById(clusterId);
         cluster.setMinSize(scalingConfiguration.getMinSize());
         cluster.setMaxSize(scalingConfiguration.getMaxSize());
         cluster.setCoolDown(scalingConfiguration.getCoolDown());
-        save(cluster);
+        return save(cluster);
     }
 
     public ScalingConfigurationRequest getScalingConfiguration(Long clusterId) {

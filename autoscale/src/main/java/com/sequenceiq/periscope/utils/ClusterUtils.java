@@ -2,7 +2,7 @@ package com.sequenceiq.periscope.utils;
 
 import java.text.DecimalFormat;
 
-import com.sequenceiq.ambari.client.AmbariClient;
+import com.sequenceiq.ambari.client.services.ServiceAndHostService;
 
 public final class ClusterUtils {
 
@@ -15,7 +15,7 @@ public final class ClusterUtils {
     private ClusterUtils() {
     }
 
-    public static int getTotalNodes(AmbariClient ambariClient) {
+    public static int getTotalNodes(ServiceAndHostService ambariClient) {
         return ambariClient.getClusterHosts().size();
     }
 }

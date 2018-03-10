@@ -41,10 +41,10 @@ public class ClusterUpgradeActions {
     private ClusterUpgradeService clusterUpgradeService;
 
     @Bean(name = "CLUSTER_UPGRADE_STATE")
-    public Action upgradeCluster() {
+    public Action<?, ?> upgradeCluster() {
         return new AbstractClusterUpgradeAction<StackEvent>(StackEvent.class) {
             @Override
-            protected void doExecute(ClusterViewContext context, StackEvent payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(ClusterViewContext context, StackEvent payload, Map<Object, Object> variables) {
                 clusterUpgradeService.upgradeCluster(context.getStackId());
                 sendEvent(context);
             }
@@ -57,10 +57,10 @@ public class ClusterUpgradeActions {
     }
 
     @Bean(name = "CLUSTER_UPGRADE_FINISHED_STATE")
-    public Action clusterUpgradeFinished() {
+    public Action<?, ?> clusterUpgradeFinished() {
         return new AbstractClusterAction<ClusterUpgradeResult>(ClusterUpgradeResult.class) {
             @Override
-            protected void doExecute(ClusterViewContext context, ClusterUpgradeResult payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(ClusterViewContext context, ClusterUpgradeResult payload, Map<Object, Object> variables) {
                 clusterUpgradeService.clusterUpgradeFinished(context.getStack());
                 sendEvent(context);
             }
@@ -73,10 +73,10 @@ public class ClusterUpgradeActions {
     }
 
     @Bean(name = "CLUSTER_UPGRADE_FAILED_STATE")
-    public Action clusterStartFailedAction() {
+    public Action<?, ?> clusterStartFailedAction() {
         return new AbstractStackFailureAction<ClusterUpgradeState, ClusterUpgradeEvent>() {
             @Override
-            protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
                 clusterUpgradeService.handleUpgradeClusterFailure(context.getStackView().getId(), payload.getException().getMessage());
                 sendEvent(context);
             }

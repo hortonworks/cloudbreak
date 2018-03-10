@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.reactor;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
@@ -17,7 +18,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.EventSelectorUtil;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.DecommissionRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.DecommissionResult;
 import com.sequenceiq.cloudbreak.reactor.handler.ReactorEventHandler;
-import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariDecommissioner;
+import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariDecommissioner;
 import com.sequenceiq.cloudbreak.service.cluster.flow.RecipeEngine;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -71,7 +72,7 @@ public class DecommissionHandler implements ReactorEventHandler<DecommissionRequ
         eventBus.notify(result.selector(), new Event<>(event.getHeaders(), result));
     }
 
-    private void executePreTerminationRecipes(Stack stack, String hostGroupName, Set<String> hostNames) {
+    private void executePreTerminationRecipes(Stack stack, String hostGroupName, Collection<String> hostNames) {
         try {
             HostGroup hostGroup = hostGroupService.getByClusterIdAndName(stack.getCluster().getId(), hostGroupName);
             recipeEngine.executePreTerminationRecipes(stack, Collections.singleton(hostGroup), hostNames);

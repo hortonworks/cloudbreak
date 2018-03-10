@@ -6,6 +6,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -21,6 +22,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import com.google.common.collect.Sets;
 import com.sequenceiq.ambari.client.AmbariClient;
+import com.sequenceiq.cloudbreak.blueprint.ConfigParam;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
@@ -33,8 +35,8 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariClientProvider;
-import com.sequenceiq.cloudbreak.service.cluster.AmbariConfigurationService;
-import com.sequenceiq.cloudbreak.service.cluster.ConfigParam;
+import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariConfigurationService;
+import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariDecommissioner;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -67,7 +69,7 @@ public class AmbariDecommissionerTest {
         HostMetadata unhealhtyNode = getHostMetadata(hostname1, HostMetadataState.UNHEALTHY);
         HostMetadata healhtyNode = getHostMetadata(hostname2, HostMetadataState.HEALTHY);
 
-        List<HostMetadata> nodes = Arrays.asList(unhealhtyNode, healhtyNode);
+        Collection<HostMetadata> nodes = Arrays.asList(unhealhtyNode, healhtyNode);
 
         Map<String, Long> ascendingNodes = new LinkedHashMap<>();
         ascendingNodes.put(hostname1, 100L);

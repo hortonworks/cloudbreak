@@ -15,11 +15,9 @@ public class GcpCloudProvider extends CloudProviderHelper {
 
     public static final String GCP_CAPITAL = "GCP";
 
-    private static final String CREDNAME = "its-gcp-credandsmoke-cred-ss";
+    private static final String CREDENTIAL_DEFAULT_NAME = "autotesting-gcp-cred";
 
-    private static final String CREDDESC = "test credential";
-
-    private static final String GCP_CLUSTER_DEFAULT_NAME = "gcp-cluster";
+    private static final String GCP_CLUSTER_DEFAULT_NAME = "autotesting-gcp-cluster";
 
     public GcpCloudProvider(TestParameter testParameter) {
         super(testParameter);
@@ -28,14 +26,14 @@ public class GcpCloudProvider extends CloudProviderHelper {
     @Override
     public CredentialEntity aValidCredential() {
         return Credential.isCreated()
-                .withName(CREDNAME)
-                .withDescription(CREDDESC)
+                .withName(getCredentialName())
+                .withDescription(CREDENTIAL_DEFAULT_DESCRIPTION)
                 .withCloudPlatform(GCP_CAPITAL)
                 .withParameters(gcpCredentialDetails());
     }
 
     @Override
-    String availabilityZone() {
+    public String availabilityZone() {
         String availabilityZone = "europe-west1-b";
         String availabilityZoneParam = getTestParameter().get("gcpAvailabilityZone");
 
@@ -43,7 +41,7 @@ public class GcpCloudProvider extends CloudProviderHelper {
     }
 
     @Override
-    String region() {
+    public String region() {
         String region = "europe-west1";
         String regionParam = getTestParameter().get("gcpRegion");
 
@@ -81,9 +79,16 @@ public class GcpCloudProvider extends CloudProviderHelper {
     }
 
     @Override
-    public String getClusterDefaultName() {
+    public String getClusterName() {
         String clustername = getTestParameter().get("gcpClusterName");
         return clustername == null ? GCP_CLUSTER_DEFAULT_NAME : clustername;
+    }
+
+    @Override
+    NetworkV2Request network() {
+        NetworkV2Request network = new NetworkV2Request();
+        network.setSubnetCIDR("10.0.0.0/16");
+        return network;
     }
 
     @Override
@@ -91,8 +96,14 @@ public class GcpCloudProvider extends CloudProviderHelper {
         return GCP_CAPITAL;
     }
 
+    @Override
+    public String getCredentialName() {
+        String credentialName = getTestParameter().get("gcpCredentialName");
+        return credentialName == null ? CREDENTIAL_DEFAULT_NAME : credentialName;
+    }
+
     public Map<String, Object> gcpCredentialDetails() {
-        Map<String, Object> map = new HashMap<String, Object>();
+        Map<String, Object> map = new HashMap<>();
         map.put("projectId", getTestParameter().get("integrationtest.gcpcredential.projectId"));
         map.put("serviceAccountId", getTestParameter().get("integrationtest.gcpcredential.serviceAccountId"));
         map.put("serviceAccountPrivateKey", getTestParameter().get("integrationtest.gcpcredential.p12File")
@@ -102,7 +113,7 @@ public class GcpCloudProvider extends CloudProviderHelper {
     }
 
     public Map<String, Object> gcpCredentialDetailsEmptyP12File() {
-        Map<String, Object> map = new HashMap<String, Object>();
+        Map<String, Object> map = new HashMap<>();
         map.put("projectId", getTestParameter().get("integrationtest.gcpcredential.projectId"));
         map.put("serviceAccountId", getTestParameter().get("integrationtest.gcpcredential.serviceAccountId"));
         map.put("serviceAccountPrivateKey", "");
@@ -111,7 +122,7 @@ public class GcpCloudProvider extends CloudProviderHelper {
     }
 
     public Map<String, Object> gcpCredentialDetailsEmptyProjectId() {
-        Map<String, Object> map = new HashMap<String, Object>();
+        Map<String, Object> map = new HashMap<>();
         map.put("projectId", "");
         map.put("serviceAccountId", getTestParameter().get("integrationtest.gcpcredential.serviceAccountId"));
         map.put("serviceAccountPrivateKey", getTestParameter().get("integrationtest.gcpcredential.p12File")
@@ -121,19 +132,12 @@ public class GcpCloudProvider extends CloudProviderHelper {
     }
 
     public Map<String, Object> gcpCredentialDetailsEmptyServiceAccount() {
-        Map<String, Object> map = new HashMap<String, Object>();
+        Map<String, Object> map = new HashMap<>();
         map.put("projectId", getTestParameter().get("integrationtest.gcpcredential.projectId"));
         map.put("serviceAccountId", "");
         map.put("serviceAccountPrivateKey", getTestParameter().get("integrationtest.gcpcredential.p12File")
                 .substring(CloudProviderHelper.BEGIN_INDEX));
 
         return map;
-    }
-
-    @Override
-    NetworkV2Request network() {
-        NetworkV2Request network = new NetworkV2Request();
-        network.setSubnetCIDR("10.0.0.0/16");
-        return network;
     }
 }

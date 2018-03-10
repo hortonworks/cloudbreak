@@ -20,7 +20,7 @@ import com.sequenceiq.cloudbreak.converter.BlueprintRequestToBlueprintConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.BlueprintInputParameters;
 import com.sequenceiq.cloudbreak.domain.json.Json;
-import com.sequenceiq.cloudbreak.service.blueprint.BlueprintUtils;
+import com.sequenceiq.cloudbreak.blueprint.utils.BlueprintUtils;
 
 @Service
 public class DefaultBlueprintCache {
@@ -36,7 +36,7 @@ public class DefaultBlueprintCache {
     @Inject
     private BlueprintRequestToBlueprintConverter converter;
 
-    private Map<String, Blueprint> defaultBlueprints = new HashMap<>();
+    private final Map<String, Blueprint> defaultBlueprints = new HashMap<>();
 
     @PostConstruct
     public void loadBlueprintsFromFile() {
@@ -44,7 +44,7 @@ public class DefaultBlueprintCache {
             try {
                 String[] split = blueprintStrings.split("=");
                 if (blueprintUtils.isBlueprintNamePreConfigured(blueprintStrings, split)) {
-                    LOGGER.info("Load default blueprint '{}'.", blueprintStrings);
+                    LOGGER.info("Load default validation '{}'.", blueprintStrings);
                     BlueprintRequest blueprintJson = new BlueprintRequest();
                     blueprintJson.setName(split[0].trim());
                     JsonNode jsonNode = blueprintUtils.convertStringToJsonNode(blueprintUtils.readDefaultBlueprintFromFile(split));
@@ -58,14 +58,14 @@ public class DefaultBlueprintCache {
                     defaultBlueprints.put(bp.getName(), bp);
                 }
             } catch (IOException e) {
-                LOGGER.info("Can not read default blueprint from file: ", e);
+                LOGGER.info("Can not read default validation from file: ", e);
             }
         }
     }
 
     public Map<String, Blueprint> defaultBlueprints() {
         Map<String, Blueprint> result = new HashMap<>();
-        defaultBlueprints.entrySet().stream().forEach(e -> result.put(e.getKey(), SerializationUtils.clone(e.getValue())));
+        defaultBlueprints.forEach((key, value) -> result.put(key, SerializationUtils.clone(value)));
         return result;
     }
 

@@ -7,7 +7,7 @@ public class IpPoolAction {
     private IpPoolAction() {
     }
 
-    public static void get(IntegrationTestContext integrationTestContext, Entity entity) throws Exception {
+    public static void get(IntegrationTestContext integrationTestContext, Entity entity) {
         IpPool ipPool = (IpPool) entity;
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT,

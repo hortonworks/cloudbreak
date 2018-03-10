@@ -41,10 +41,11 @@ import com.sequenceiq.cloudbreak.cloud.model.AmbariDatabase;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.controller.CloudbreakApiException;
-import com.sequenceiq.cloudbreak.controller.json.JsonHelper;
-import com.sequenceiq.cloudbreak.controller.validation.blueprint.BlueprintValidator;
-import com.sequenceiq.cloudbreak.controller.validation.blueprint.StackServiceComponentDescriptor;
-import com.sequenceiq.cloudbreak.controller.validation.blueprint.StackServiceComponentDescriptors;
+import com.sequenceiq.cloudbreak.json.JsonHelper;
+import com.sequenceiq.cloudbreak.blueprint.validation.BlueprintValidator;
+import com.sequenceiq.cloudbreak.blueprint.validation.StackServiceComponentDescriptor;
+import com.sequenceiq.cloudbreak.blueprint.validation.StackServiceComponentDescriptors;
+import com.sequenceiq.cloudbreak.converter.mapper.ProxyConfigMapper;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.ExposedServices;
@@ -85,6 +86,9 @@ public class ClusterToClusterResponseConverter extends AbstractConversionService
 
     @Inject
     private StackUtil stackUtil;
+
+    @Inject
+    private ProxyConfigMapper proxyConfigMapper;
 
     @Override
     public ClusterResponse convert(Cluster source) {
@@ -147,6 +151,7 @@ public class ClusterToClusterResponseConverter extends AbstractConversionService
             clusterResponse.setSecure(source.isSecure());
             clusterResponse.setKerberosResponse(getConversionService().convert(source.getKerberosConfig(), KerberosResponse.class));
         }
+        decorateResponseWithProxyConfig(source, clusterResponse);
         return clusterResponse;
     }
 
@@ -329,13 +334,9 @@ public class ClusterToClusterResponseConverter extends AbstractConversionService
         if (port.getExposedService().getServiceName().equals(componentDescriptor.getName())) {
             if (gateway.getEnableGateway() && ambariIp != null) {
                 String url;
-                if (GatewayType.CENTRAL == gateway.getGatewayType()) {
-                    url = String.format("/%s/%s%s", gateway.getPath(), gateway.getTopologyName(),
-                        port.getExposedService().getKnoxUrl());
-                } else {
-                    url = String.format("https://%s:8443/%s/%s%s", ambariIp, gateway.getPath(), gateway.getTopologyName(),
-                        port.getExposedService().getKnoxUrl());
-                }
+                url = GatewayType.CENTRAL == gateway.getGatewayType() ? String.format("/%s/%s%s", gateway.getPath(), gateway.getTopologyName(),
+                        port.getExposedService().getKnoxUrl()) : String.format("https://%s:8443/%s/%s%s", ambariIp, gateway.getPath(),
+                        gateway.getTopologyName(), port.getExposedService().getKnoxUrl());
                 // filter out what is not exposed
                 // filter out what is not expected to be exposed e.g Zeppelin WS since it does not have Knox Url
                 if (!Strings.isNullOrEmpty(port.getExposedService().getKnoxUrl())
@@ -358,11 +359,8 @@ public class ClusterToClusterResponseConverter extends AbstractConversionService
                 url = String.format("http://%s:8080", ambariIp);
             } else {
                 if (gateway.getEnableGateway() != null && gateway.getEnableGateway()) {
-                    if (GatewayType.CENTRAL == gateway.getGatewayType()) {
-                        url = String.format("/%s/%s/ambari/", gateway.getPath(), gateway.getTopologyName());
-                    } else {
-                        url = String.format("https://%s:8443/%s/%s/ambari/", ambariIp, gateway.getPath(), gateway.getTopologyName());
-                    }
+                    url = GatewayType.CENTRAL == gateway.getGatewayType() ? String.format("/%s/%s/ambari/", gateway.getPath(), gateway.getTopologyName())
+                            : String.format("https://%s:8443/%s/%s/ambari/", ambariIp, gateway.getPath(), gateway.getTopologyName());
                 } else {
                     url = String.format("https://%s/ambari/", ambariIp);
                 }
@@ -371,5 +369,11 @@ public class ClusterToClusterResponseConverter extends AbstractConversionService
             url = null;
         }
         return url;
+    }
+
+    private void decorateResponseWithProxyConfig(Cluster source, ClusterResponse clusterResponse) {
+        if (source.getProxyConfig() != null) {
+            clusterResponse.setProxyName(source.getProxyConfig().getName());
+        }
     }
 }

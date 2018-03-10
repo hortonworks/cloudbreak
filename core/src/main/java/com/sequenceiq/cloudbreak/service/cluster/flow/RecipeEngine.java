@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.service.cluster.flow;
 import static com.sequenceiq.cloudbreak.common.type.OrchestratorConstants.SALT;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -22,7 +23,12 @@ import com.sequenceiq.cloudbreak.api.model.FileSystemConfiguration;
 import com.sequenceiq.cloudbreak.api.model.FileSystemType;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.model.RecipeType;
-import com.sequenceiq.cloudbreak.core.CloudbreakException;
+import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessor;
+import com.sequenceiq.cloudbreak.blueprint.SmartsenseConfigurationLocator;
+import com.sequenceiq.cloudbreak.blueprint.smartsense.SmartSenseConfigProvider;
+import com.sequenceiq.cloudbreak.blueprint.filesystem.FileSystemConfigurator;
+import com.sequenceiq.cloudbreak.common.model.recipe.RecipeScript;
+import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Credential;
@@ -32,9 +38,7 @@ import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.BlueprintProcessor;
-import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.SmartSenseConfigProvider;
-import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemConfigurator;
+import com.sequenceiq.cloudbreak.service.smartsense.SmartSenseSubscriptionService;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
@@ -63,6 +67,12 @@ public class RecipeEngine {
     @Inject
     private SmartSenseConfigProvider smartSenseConfigProvider;
 
+    @Inject
+    private SmartsenseConfigurationLocator smartsenseConfigurationLocator;
+
+    @Inject
+    private SmartSenseSubscriptionService smartSenseSubscriptionService;
+
     public void uploadRecipes(Stack stack, Set<HostGroup> hostGroups) throws CloudbreakException {
         Orchestrator orchestrator = stack.getOrchestrator();
         if (recipesSupportedOnOrchestrator(orchestrator)) {
@@ -76,7 +86,8 @@ public class RecipeEngine {
         }
     }
 
-    public void uploadUpscaleRecipes(Stack stack, HostGroup hostGroup, Set<HostMetadata> metaDatas, Set<HostGroup> hostGroups) throws CloudbreakException {
+    public void uploadUpscaleRecipes(Stack stack, HostGroup hostGroup, Set<HostMetadata> metaDatas, Collection<HostGroup> hostGroups)
+            throws CloudbreakException {
         Orchestrator orchestrator = stack.getOrchestrator();
         if (recipesSupportedOnOrchestrator(orchestrator)) {
             Set<HostGroup> hgs = Collections.singleton(hostGroup);
@@ -89,7 +100,7 @@ public class RecipeEngine {
         }
     }
 
-    public void executePostAmbariStartRecipes(Stack stack, Set<HostGroup> hostGroups) throws CloudbreakException {
+    public void executePostAmbariStartRecipes(Stack stack, Iterable<HostGroup> hostGroups) throws CloudbreakException {
         Orchestrator orchestrator = stack.getOrchestrator();
         if (recipesSupportedOnOrchestrator(orchestrator)
             && (recipesFound(hostGroups) || (stack.getCluster() != null && stack.getCluster().getLdapConfig() != null))) {
@@ -97,14 +108,14 @@ public class RecipeEngine {
         }
     }
 
-    public void executePreTerminationRecipes(Stack stack, Set<HostGroup> hostGroups) throws CloudbreakException {
+    public void executePreTerminationRecipes(Stack stack, Iterable<HostGroup> hostGroups) throws CloudbreakException {
         Orchestrator orchestrator = stack.getOrchestrator();
         if (recipesFound(hostGroups, RecipeType.PRE_TERMINATION) && recipesSupportedOnOrchestrator(orchestrator)) {
             orchestratorRecipeExecutor.preTerminationRecipes(stack);
         }
     }
 
-    public void executePreTerminationRecipes(Stack stack, Set<HostGroup> hostGroups, Set<String> hostNames) throws CloudbreakException {
+    public void executePreTerminationRecipes(Stack stack, Iterable<HostGroup> hostGroups, Collection<String> hostNames) throws CloudbreakException {
         Orchestrator orchestrator = stack.getOrchestrator();
         if (recipesFound(hostGroups, RecipeType.PRE_TERMINATION) && recipesSupportedOnOrchestrator(orchestrator)) {
             orchestratorRecipeExecutor.preTerminationRecipes(stack, hostNames);
@@ -118,7 +129,7 @@ public class RecipeEngine {
         }
     }
 
-    private void addFsRecipes(Stack stack, Set<HostGroup> hostGroups) throws CloudbreakException {
+    private void addFsRecipes(Stack stack, Iterable<HostGroup> hostGroups) throws CloudbreakException {
         String orchestrator = stack.getOrchestrator().getType();
         if (SALT.equals(orchestrator)) {
             Cluster cluster = stack.getCluster();
@@ -135,7 +146,7 @@ public class RecipeEngine {
         }
     }
 
-    private void addContainerExecutorScripts(Stack stack, Set<HostGroup> hostGroups) {
+    private void addContainerExecutorScripts(Stack stack, Iterable<HostGroup> hostGroups) {
         try {
             Cluster cluster = stack.getCluster();
             if (cluster != null && ExecutorType.CONTAINER.equals(cluster.getExecutorType())) {
@@ -152,7 +163,7 @@ public class RecipeEngine {
         }
     }
 
-    private void addFsRecipesToHostGroups(Credential credential, Set<HostGroup> hostGroups, String blueprintText, FileSystem fs) throws IOException {
+    private void addFsRecipesToHostGroups(Credential credential, Iterable<HostGroup> hostGroups, String blueprintText, FileSystem fs) throws IOException {
         String scriptName = fs.getType().toLowerCase();
         FileSystemConfigurator fsConfigurator = fileSystemConfigurators.get(FileSystemType.valueOf(fs.getType()));
         FileSystemConfiguration fsConfiguration = getFileSystemConfiguration(fs);
@@ -177,7 +188,7 @@ public class RecipeEngine {
         return JsonUtil.readValue(json, FileSystemType.valueOf(fs.getType()).getClazz());
     }
 
-    private boolean recipesFound(Set<HostGroup> hostGroups) {
+    private boolean recipesFound(Iterable<HostGroup> hostGroups) {
         for (HostGroup hostGroup : hostGroups) {
             if (!hostGroup.getRecipes().isEmpty()) {
                 return true;
@@ -186,7 +197,7 @@ public class RecipeEngine {
         return false;
     }
 
-    private boolean recipesFound(Set<HostGroup> hostGroups, RecipeType recipeType) {
+    private boolean recipesFound(Iterable<HostGroup> hostGroups, RecipeType recipeType) {
         for (HostGroup hostGroup : hostGroups) {
             for (Recipe recipe : hostGroup.getRecipes()) {
                 if (recipe.getRecipeType() == recipeType) {
@@ -197,7 +208,7 @@ public class RecipeEngine {
         return false;
     }
 
-    private void addHDFSRecipe(Cluster cluster, String blueprintText, Set<HostGroup> hostGroups) {
+    private void addHDFSRecipe(Cluster cluster, String blueprintText, Iterable<HostGroup> hostGroups) {
         try {
             for (HostGroup hostGroup : hostGroups) {
                 if (isComponentPresent(blueprintText, "NAMENODE", hostGroup)) {
@@ -213,11 +224,11 @@ public class RecipeEngine {
         }
     }
 
-    private void addSmartSenseRecipe(Stack stack, Set<HostGroup> hostGroups) {
+    private void addSmartSenseRecipe(Stack stack, Iterable<HostGroup> hostGroups) {
         try {
             Cluster cluster = stack.getCluster();
             String blueprintText = cluster.getBlueprint().getBlueprintText();
-            if (smartSenseConfigProvider.smartSenseIsConfigurable(blueprintText)) {
+            if (smartsenseConfigurationLocator.smartsenseConfigurable(blueprintText, smartSenseSubscriptionService.getDefault())) {
                 for (HostGroup hostGroup : hostGroups) {
                     if (isComponentPresent(blueprintText, "HST_AGENT", hostGroup)) {
                         String script = FileReaderUtils.readFileFromClasspath("scripts/smartsense-capture-schedule.sh");
@@ -238,7 +249,7 @@ public class RecipeEngine {
         return isComponentPresent(blueprint, component, Sets.newHashSet(hostGroup));
     }
 
-    private boolean isComponentPresent(String blueprint, String component, Set<HostGroup> hostGroups) {
+    private boolean isComponentPresent(String blueprint, String component, Iterable<HostGroup> hostGroups) {
         for (HostGroup hostGroup : hostGroups) {
             Set<String> components = blueprintProcessor.getComponentsInHostGroup(blueprint, hostGroup.getName());
             if (components.contains(component)) {

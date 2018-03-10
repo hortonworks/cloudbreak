@@ -44,6 +44,6 @@ abstract class AbstractCloudbreakEntity<R, S> extends Entity {
     }
 
     public S getResponse() {
-        return this.response;
+        return response;
     }
 }

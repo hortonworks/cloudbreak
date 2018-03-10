@@ -16,8 +16,8 @@ module.exports.getImagesByProvider = function getImagesByProvider (req, res, nex
     V1imagecatalogs.getImagesByProvider(req.swagger.params, res, next);
 };
 
-module.exports.getPublicImageCatalogsById = function getPublicImageCatalogsById (req, res, next) {
-    V1imagecatalogs.getPublicImageCatalogsById(req.swagger.params, res, next);
+module.exports.getPublicImageCatalogsByName = function getPublicImageCatalogsByName (req, res, next) {
+  V1imagecatalogs.getPublicImageCatalogsByName(req.swagger.params, res, next);
 };
 
 module.exports.getPublicImagesByProviderAndCustomImageCatalog = function getPublicImagesByProviderAndCustomImageCatalog (req, res, next) {

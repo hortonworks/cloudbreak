@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.client;
 
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 import javax.net.ssl.SSLContext;
 import javax.ws.rs.client.Client;
@@ -21,7 +21,7 @@ public class RestClientUtil {
 
     private static final int CONNECT_TIMEOUT_MS = 20_000;
 
-    private static final ConcurrentMap<ConfigKey, Client> CLIENTS = new ConcurrentHashMap<>();
+    private static final Map<ConfigKey, Client> CLIENTS = new ConcurrentHashMap<>();
 
     private RestClientUtil() {
     }
@@ -31,21 +31,20 @@ public class RestClientUtil {
     }
 
     public static synchronized Client get(ConfigKey configKey) {
-        Client client = CLIENTS.get(configKey);
-        if (client == null) {
-            client = createClient(configKey);
-            CLIENTS.put(configKey, client);
-        }
+        Client client = CLIENTS.computeIfAbsent(configKey, RestClientUtil::createClient);
         LOGGER.info("RestClient cache size: {}, key: {}, fetched client: {}", CLIENTS.size(), configKey, client);
         return client;
     }
 
-    public static Client createClient(String serverCert, String clientCert, String clientKey, boolean debug, Class debugClass) throws Exception {
+    public static Client createClient(String serverCert, String clientCert, String clientKey, boolean debug, Class<?> debugClass) throws Exception {
         SSLContext sslContext = SSLContexts.custom()
             .loadTrustMaterial(KeyStoreUtil.createTrustStore(serverCert), null)
             .loadKeyMaterial(KeyStoreUtil.createKeyStore(clientCert, clientKey), "consul".toCharArray())
             .build();
+        return createClient(sslContext, debug, debugClass);
+    }
 
+    public static Client createClient(SSLContext sslContext, boolean debug, Class<?> debugClass) {
         ClientConfig config = new ClientConfig();
         config.property(ClientProperties.FOLLOW_REDIRECTS, "false");
         config.property(ClientProperties.CONNECT_TIMEOUT, CONNECT_TIMEOUT_MS);

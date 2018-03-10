@@ -17,6 +17,7 @@ import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.openstack4j.api.OSClient;
 import org.openstack4j.api.image.v2.ImageService;
+import org.openstack4j.model.image.v2.Image;
 import org.openstack4j.openstack.image.v2.domain.GlanceImage;
 
 import com.google.common.collect.ImmutableList;
@@ -30,7 +31,7 @@ public class OpenStackImageVerifierTest {
     private OpenStackImageVerifier underTest = new OpenStackImageVerifier();
 
     @Mock
-    private OSClient osClient;
+    private OSClient<?> osClient;
 
     @Mock
     private ImageService imageService;
@@ -40,27 +41,32 @@ public class OpenStackImageVerifierTest {
         when(osClient.imagesV2()).thenReturn(imageService);
     }
 
-    @Test(expected = CloudConnectorException.class)
-    public void testNullResult() {
-        try {
-            when(imageService.list(anyMap())).thenReturn(null);
-            when(imageService.list()).thenReturn(null);
-            underTest.exist(osClient, "invalidentryTgatResultsNull");
-        } catch (CloudConnectorException cce) {
-            Assert.assertEquals("OpenStack image: invalidentryTgatResultsNull not found", cce.getMessage());
-            throw cce;
-        }
+    @Test
+    public void testNotFoundResult() {
+        GlanceImage newImage1 = new GlanceImage();
+        newImage1.setId("id1");
+        newImage1.setName("exist-id1");
+        when(imageService.list(anyMap())).thenReturn(null);
+        doReturn(ImmutableList.of(newImage1)).when(imageService).list();
+        Assert.assertEquals(false, underTest.exist(osClient, "invalidentryTgatResultsNull"));
     }
 
     @Test
-    public void testFoundOne() {
-        GlanceImage newImage = new GlanceImage();
-        newImage.setId("id1");
-        newImage.setName("exist-id1");
+    public void testFoundOneAnyState() {
+        for (Image.ImageStatus status : Image.ImageStatus.values()) {
+            foundOneAnyState(status);
+        }
+    }
+
+    private void foundOneAnyState(Image.ImageStatus status) {
+        GlanceImage newImage = Mockito.mock(GlanceImage.class);
+        when(newImage.getId()).thenReturn("id1");
+        when(newImage.getName()).thenReturn("exist-id1");
+        when(newImage.getStatus()).thenReturn(status);
         List<GlanceImage> returnedImages = ImmutableList.of(newImage);
         Map<String, String> map = ImmutableMap.of("name", "exist-id1");
         doReturn(returnedImages).when(imageService).list(Mockito.eq(map));
-        underTest.exist(osClient, "exist-id1");
+        Assert.assertEquals(true, underTest.exist(osClient, "exist-id1"));
     }
 
     @Test(expected = CloudConnectorException.class)
@@ -77,7 +83,7 @@ public class OpenStackImageVerifierTest {
             doReturn(returnedImages).when(imageService).list(Mockito.eq(map));
             underTest.exist(osClient, "exist-id1");
         } catch (CloudConnectorException cce) {
-            Assert.assertEquals("OpenStack image: exist-id1 not found with ids: id1, id2", cce.getMessage());
+            Assert.assertEquals("Multiple OpenStack images found with ids: id1, id2, image name: exist-id1", cce.getMessage());
             throw cce;
         }
     }

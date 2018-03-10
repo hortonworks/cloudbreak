@@ -11,6 +11,7 @@ import com.sequenceiq.cloudbreak.orchestrator.model.ContainerConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.ContainerConstraint;
 import com.sequenceiq.cloudbreak.orchestrator.model.ContainerInfo;
 import com.sequenceiq.cloudbreak.orchestrator.model.OrchestrationCredential;
+import com.sequenceiq.cloudbreak.orchestrator.yarn.client.YarnClient;
 import com.sequenceiq.cloudbreak.orchestrator.yarn.client.YarnHttpClient;
 import com.sequenceiq.cloudbreak.orchestrator.yarn.model.request.ApplicationDetailRequest;
 import com.sequenceiq.cloudbreak.orchestrator.yarn.model.response.ApplicationErrorResponse;
@@ -33,7 +34,7 @@ public class ApplicationDetailHandler {
 
         try {
             // Validate that the app exists
-            YarnHttpClient yarnHttpClient = new YarnHttpClient(cred.getApiEndpoint());
+            YarnClient yarnHttpClient = new YarnHttpClient(cred.getApiEndpoint());
             ResponseContext appDetailResponseContext = yarnHttpClient.getApplicationDetail(applicationDetailRequest);
             if (appDetailResponseContext.getResponseError() != null) {
                 ApplicationErrorResponse applicationErrorResponse = appDetailResponseContext.getResponseError();

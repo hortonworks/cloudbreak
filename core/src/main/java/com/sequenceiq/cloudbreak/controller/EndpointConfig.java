@@ -57,9 +57,6 @@ public class EndpointConfig extends ResourceConfig {
     @Value("${cb.structuredevent.rest.enabled:false}")
     private Boolean auditEnabled;
 
-    public EndpointConfig() {
-    }
-
     @PostConstruct
     private void init() {
         if (auditEnabled) {
@@ -145,6 +142,7 @@ public class EndpointConfig extends ResourceConfig {
         register(SettingsController.class);
         register(UtilController.class);
         register(RdsConfigController.class);
+        register(ProxyConfigController.class);
         register(LdapController.class);
         register(SmartSenseSubscriptionController.class);
         register(FlexSubscriptionController.class);

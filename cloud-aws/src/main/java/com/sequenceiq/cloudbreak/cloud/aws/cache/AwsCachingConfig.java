@@ -32,17 +32,13 @@ public class AwsCachingConfig implements CacheDefinition {
     public Object generateKey(Object target, Method method, Object... params) {
         if (params.length == 1) {
             AwsCredentialView param = (AwsCredentialView) params[0];
-            if (param.getId() != null) {
-                return param.getId();
-            } else {
-                return SimpleKey.EMPTY;
-            }
+            return param.getId() != null ? param.getId() : SimpleKey.EMPTY;
         }
         return SimpleKey.EMPTY;
     }
 
     @Override
-    public Class type() {
+    public Class<?> type() {
         return AwsCredentialView.class;
     }
 }

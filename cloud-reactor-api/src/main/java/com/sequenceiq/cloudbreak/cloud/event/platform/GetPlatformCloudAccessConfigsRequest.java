@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.cloud.event.platform;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformRequest;
@@ -15,7 +14,7 @@ public class GetPlatformCloudAccessConfigsRequest extends CloudPlatformRequest<G
 
     private final ExtendedCloudCredential extendedCloudCredential;
 
-    private Map<String, String> filters = new HashMap<>();
+    private final Map<String, String> filters;
 
     public GetPlatformCloudAccessConfigsRequest(CloudCredential cloudCredential, ExtendedCloudCredential extendedCloudCredential, String variant, String region,
             Map<String, String> filters) {

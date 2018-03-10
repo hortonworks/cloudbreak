@@ -11,7 +11,6 @@ import java.util.concurrent.ExecutorService;
 
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
@@ -46,7 +45,7 @@ public class ClusterMonitor implements Monitor {
     }
 
     @Override
-    public Class getEvaluatorType() {
+    public Class<?> getEvaluatorType() {
         return ClusterCreationEvaluator.class;
     }
 
@@ -56,7 +55,7 @@ public class ClusterMonitor implements Monitor {
     }
 
     @Override
-    public void execute(JobExecutionContext context) throws JobExecutionException {
+    public void execute(JobExecutionContext context) {
         evalContext(context);
         try {
             CloudbreakClient cloudbreakClient = applicationContext.getBean(CloudbreakClientConfiguration.class).cloudbreakClient();

@@ -210,7 +210,7 @@ public class ScalingMock extends MockServer {
             verify(SALT_BOOT_ROOT + "/salt/server/pillar/distribute", "POST").bodyContains("/nodes/hosts.sls").exactTimes(1).verify();
             verify(AMBARI_API_ROOT + "/hosts", "GET").atLeast(1).verify();
             verify(AMBARI_API_ROOT + "/clusters", "GET").exactTimes(1).verify();
-            verify(AMBARI_API_ROOT + "/clusters/" + clusterName, "GET").exactTimes(1).verify();
+            verify(AMBARI_API_ROOT + "/clusters/" + clusterName, "GET").atLeast(1).verify();
         }
     }
 }

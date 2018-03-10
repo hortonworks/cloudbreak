@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.util.JsonUtil.readValue;
 import static com.sequenceiq.cloudbreak.util.JsonUtil.writeValueAsString;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -24,8 +25,9 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.FileSystemConfiguration;
 import com.sequenceiq.cloudbreak.api.model.FileSystemType;
-import com.sequenceiq.cloudbreak.core.CloudbreakException;
-import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorType;
+import com.sequenceiq.cloudbreak.blueprint.filesystem.FileSystemConfigurator;
+import com.sequenceiq.cloudbreak.service.CloudbreakException;
+import com.sequenceiq.cloudbreak.common.model.OrchestratorType;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ContainerOrchestratorResolver;
 import com.sequenceiq.cloudbreak.domain.Cluster;
@@ -43,7 +45,6 @@ import com.sequenceiq.cloudbreak.repository.ConstraintRepository;
 import com.sequenceiq.cloudbreak.repository.ContainerRepository;
 import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
-import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemConfigurator;
 import com.sequenceiq.cloudbreak.service.stack.flow.TerminationFailedException;
 
 @Component
@@ -140,7 +141,7 @@ public class ClusterTerminationService {
 
     private void deleteClusterHostGroupsWithItsMetadata(Cluster cluster) {
         Set<HostGroup> hostGroups = hostGroupRepository.findHostGroupsInCluster(cluster.getId());
-        List<Constraint> constraintsToDelete = new LinkedList<>();
+        Collection<Constraint> constraintsToDelete = new LinkedList<>();
         for (HostGroup hg : hostGroups) {
             hg.getRecipes().clear();
             Constraint constraint = hg.getConstraint();
@@ -155,13 +156,13 @@ public class ClusterTerminationService {
         clusterRepository.save(cluster);
     }
 
-    private Map<String, String> deleteFileSystemResources(Long stackId, FileSystem fileSystem) {
+    private void deleteFileSystemResources(Long stackId, FileSystem fileSystem) {
         try {
             FileSystemConfigurator fsConfigurator = fileSystemConfigurators.get(FileSystemType.valueOf(fileSystem.getType()));
             String json = writeValueAsString(fileSystem.getProperties());
-            FileSystemConfiguration fsConfiguration = (FileSystemConfiguration) readValue(json, FileSystemType.valueOf(fileSystem.getType()).getClazz());
+            FileSystemConfiguration fsConfiguration = readValue(json, FileSystemType.valueOf(fileSystem.getType()).getClazz());
             fsConfiguration.addProperty(FileSystemConfiguration.STORAGE_CONTAINER, "cloudbreak" + stackId);
-            return fsConfigurator.deleteResources(fsConfiguration);
+            fsConfigurator.deleteResources(fsConfiguration);
         } catch (IOException e) {
             throw new TerminationFailedException("File system resources could not be deleted: ", e);
         }

@@ -60,11 +60,8 @@ public class LdapConfigService {
     }
 
     public Set<LdapConfig> retrieveAccountConfigs(IdentityUser user) {
-        if (user.getRoles().contains(IdentityUserRole.ADMIN)) {
-            return ldapConfigRepository.findAllInAccount(user.getAccount());
-        } else {
-            return ldapConfigRepository.findPublicInAccountForUser(user.getUserId(), user.getAccount());
-        }
+        return user.getRoles().contains(IdentityUserRole.ADMIN) ? ldapConfigRepository.findAllInAccount(user.getAccount())
+                : ldapConfigRepository.findPublicInAccountForUser(user.getUserId(), user.getAccount());
     }
 
     public LdapConfig getPrivateConfig(String name, IdentityUser user) {

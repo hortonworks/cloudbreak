@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.openstack.heat;
 import static com.google.common.collect.Lists.newArrayList;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -20,12 +21,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
-import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.api.model.AdjustmentType;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
-import com.sequenceiq.cloudbreak.cloud.exception.TemplatingDoesNotSupportedException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource.Builder;
@@ -47,7 +46,7 @@ import com.sequenceiq.cloudbreak.cloud.task.PollTaskFactory;
 import com.sequenceiq.cloudbreak.cloud.task.ResourcesStatePollerResult;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 import com.sequenceiq.cloudbreak.service.Retry;
-import com.sequenceiq.cloudbreak.service.Retry.ActionWentFail;
+import com.sequenceiq.cloudbreak.service.Retry.ActionWentFailException;
 
 @Service
 public class OpenStackResourceConnector implements ResourceConnector<Object> {
@@ -102,7 +101,7 @@ public class OpenStackResourceConnector implements ResourceConnector<Object> {
         Map<String, String> parameters = heatTemplateBuilder.buildParameters(
                 authenticatedContext, stack, existingNetwork, existingSubnetCidr);
 
-        OSClient client = openStackClient.createOSClient(authenticatedContext);
+        OSClient<?> client = openStackClient.createOSClient(authenticatedContext);
 
         List<CloudResourceStatus> resources;
         Stack existingStack = client.heat().stacks().getStackByName(stackName);
@@ -129,7 +128,7 @@ public class OpenStackResourceConnector implements ResourceConnector<Object> {
 
     private List<CloudResource> collectResources(AuthenticatedContext authenticatedContext, PersistenceNotifier notifier, Stack heatStack, CloudStack stack,
             NeutronNetworkView neutronNetworkView) {
-        List<CloudResource> cloudResources = Lists.newArrayList();
+        List<CloudResource> cloudResources = newArrayList();
 
         CloudResource heatResource = new Builder().type(ResourceType.HEAT_STACK).name(heatStack.getId()).build();
         try {
@@ -152,7 +151,7 @@ public class OpenStackResourceConnector implements ResourceConnector<Object> {
         return cloudResources;
     }
 
-    private void createKeyPair(AuthenticatedContext authenticatedContext, CloudStack stack, OSClient client) {
+    private void createKeyPair(AuthenticatedContext authenticatedContext, CloudStack stack, OSClient<?> client) {
         KeystoneCredentialView keystoneCredential = openStackClient.createKeystoneCredential(authenticatedContext);
 
         String keyPairName = keystoneCredential.getKeyPairName();
@@ -172,7 +171,7 @@ public class OpenStackResourceConnector implements ResourceConnector<Object> {
     @Override
     public List<CloudResourceStatus> check(AuthenticatedContext authenticatedContext, List<CloudResource> resources) {
         List<CloudResourceStatus> results = newArrayList();
-        OSClient client = openStackClient.createOSClient(authenticatedContext);
+        OSClient<?> client = openStackClient.createOSClient(authenticatedContext);
         String stackName = utils.getStackName(authenticatedContext);
         List<CloudResource> osResourceList = openStackClient.getResources(stackName, authenticatedContext.getCloudCredential());
         List<CloudResource> otherResources = newArrayList();
@@ -197,8 +196,8 @@ public class OpenStackResourceConnector implements ResourceConnector<Object> {
         return results;
     }
 
-    private CloudResourceStatus checkByResourceType(AuthenticatedContext authenticatedContext, OSClient client,
-            String stackName, List<CloudResource> list, CloudResource resource) {
+    private CloudResourceStatus checkByResourceType(AuthenticatedContext authenticatedContext, OSClient<?> client,
+            String stackName, Collection<CloudResource> list, CloudResource resource) {
         CloudResourceStatus result = null;
         switch (resource.getType()) {
             case HEAT_STACK:
@@ -226,7 +225,7 @@ public class OpenStackResourceConnector implements ResourceConnector<Object> {
         return result;
     }
 
-    private CloudResourceStatus checkResourceStatus(AuthenticatedContext authenticatedContext, String stackName, List<CloudResource> list,
+    private CloudResourceStatus checkResourceStatus(AuthenticatedContext authenticatedContext, String stackName, Collection<CloudResource> list,
             CloudResource resource, ResourceType openstackNetwork) {
         CloudResourceStatus result;
         result = getCloudResourceStatus(list, openstackNetwork, resource);
@@ -236,7 +235,7 @@ public class OpenStackResourceConnector implements ResourceConnector<Object> {
         return result;
     }
 
-    private CloudResourceStatus getCloudResourceStatus(List<CloudResource> resources, ResourceType resourceType, CloudResource resource) {
+    private CloudResourceStatus getCloudResourceStatus(Collection<CloudResource> resources, ResourceType resourceType, CloudResource resource) {
         return resources.stream()
                 .filter(r -> r.getType() == resourceType)
                 .findFirst()
@@ -258,12 +257,12 @@ public class OpenStackResourceConnector implements ResourceConnector<Object> {
         String heatStackId = resource.getName();
         String stackName = utils.getStackName(authenticatedContext);
         LOGGER.info("Terminate stack: {}", stackName);
-        OSClient client = openStackClient.createOSClient(authenticatedContext);
+        OSClient<?> client = openStackClient.createOSClient(authenticatedContext);
         try {
             retryService.testWith2SecDelayMax5Times(() -> {
                 boolean exists = client.heat().stacks().getStackByName(resource.getName()) != null;
                 if (!exists) {
-                    throw new ActionWentFail("Stack not exists");
+                    throw new ActionWentFailException("Stack not exists");
                 }
                 return exists;
             });
@@ -272,12 +271,12 @@ public class OpenStackResourceConnector implements ResourceConnector<Object> {
             if (cloudStack.getInstanceAuthentication().getPublicKeyId() == null) {
                 deleteKeyPair(authenticatedContext, client);
             }
-        } catch (ActionWentFail ignored) {
+        } catch (ActionWentFailException ignored) {
             LOGGER.info(String.format("Stack not found with name: %s", resource.getName()));
         }
     }
 
-    private void deleteKeyPair(AuthenticatedContext authenticatedContext, OSClient client) {
+    private void deleteKeyPair(AuthenticatedContext authenticatedContext, OSClient<?> client) {
         KeystoneCredentialView keystoneCredential = openStackClient.createKeystoneCredential(authenticatedContext);
         String keyPairName = keystoneCredential.getKeyPairName();
         client.compute().keypairs().delete(keyPairName);
@@ -346,7 +345,7 @@ public class OpenStackResourceConnector implements ResourceConnector<Object> {
     }
 
     @Override
-    public String getStackTemplate() throws TemplatingDoesNotSupportedException {
+    public String getStackTemplate() {
         return heatTemplateBuilder.getTemplate();
     }
 
@@ -380,7 +379,7 @@ public class OpenStackResourceConnector implements ResourceConnector<Object> {
         String stackName = utils.getStackName(authenticatedContext);
         String heatStackId = resource.getName();
 
-        OSClient client = openStackClient.createOSClient(authenticatedContext);
+        OSClient<?> client = openStackClient.createOSClient(authenticatedContext);
         StackUpdate updateRequest = Builders.stackUpdate().template(heatTemplate)
                 .parameters(parameters).timeoutMins(OPERATION_TIMEOUT).build();
         client.heat().stacks().update(stackName, heatStackId, updateRequest);

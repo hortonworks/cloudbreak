@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.api.model;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -15,7 +14,7 @@ public class PlatformSecurityGroupResponse implements JsonEntity {
 
     private String groupId;
 
-    private Map<String, Object> properties = new HashMap<>();
+    private Map<String, Object> properties;
 
     public PlatformSecurityGroupResponse(String groupName, String groupId, Map<String, Object> properties) {
         this.groupName = groupName;

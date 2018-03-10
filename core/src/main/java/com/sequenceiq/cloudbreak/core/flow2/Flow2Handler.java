@@ -66,7 +66,7 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
 
     private static final List<String> ALLOWED_PARALLEL_FLOWS = Collections.singletonList(TERMINATION_EVENT.event());
 
-    private static final List<Class<? extends FlowConfiguration>> RESTARTABLE_FLOWS = Arrays.asList(
+    private static final List<Class<? extends FlowConfiguration<?>>> RESTARTABLE_FLOWS = Arrays.asList(
             StackCreationFlowConfig.class,
             StackSyncFlowConfig.class, StackTerminationFlowConfig.class, StackStopFlowConfig.class, StackStartFlowConfig.class,
             StackUpscaleConfig.class, StackDownscaleConfig.class,
@@ -107,38 +107,42 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
         String flowId = getFlowId(event);
         String flowChainId = getFlowChainId(event);
 
-        if (FLOW_CANCEL.equals(key)) {
-            cancelRunningFlows(payload.getStackId());
-        } else if (FLOW_FINAL.equals(key)) {
-            finalizeFlow(flowId, flowChainId, payload.getStackId());
-        } else {
-            if (flowId == null) {
-                LOGGER.debug("flow trigger arrived: key: {}, payload: {}", key, payload);
-                FlowConfiguration<?> flowConfig = flowConfigurationMap.get(key);
-                if (flowConfig != null && flowConfig.getFlowTriggerCondition().isFlowTriggerable(payload.getStackId())) {
-                    if (!isFlowAcceptable(key, payload)) {
-                        LOGGER.info("Flow operation not allowed, other flow is running. Stack ID {}, event {}", payload.getStackId(), key);
-                        return;
+        switch (key) {
+            case FLOW_CANCEL:
+                cancelRunningFlows(payload.getStackId());
+                break;
+            case FLOW_FINAL:
+                finalizeFlow(flowId, flowChainId, payload.getStackId());
+                break;
+            default:
+                if (flowId == null) {
+                    LOGGER.debug("flow trigger arrived: key: {}, payload: {}", key, payload);
+                    FlowConfiguration<?> flowConfig = flowConfigurationMap.get(key);
+                    if (flowConfig != null && flowConfig.getFlowTriggerCondition().isFlowTriggerable(payload.getStackId())) {
+                        if (!isFlowAcceptable(key, payload)) {
+                            LOGGER.info("Flow operation not allowed, other flow is running. Stack ID {}, event {}", payload.getStackId(), key);
+                            return;
+                        }
+                        flowId = UUID.randomUUID().toString();
+                        Flow flow = flowConfig.createFlow(flowId, payload.getStackId());
+                        flow.initialize();
+                        flowLogService.save(flowId, flowChainId, key, payload, null, flowConfig.getClass(), flow.getCurrentState());
+                        acceptFlow(payload);
+                        pruneMDCContext(flowId);
+                        runningFlows.put(flow, flowChainId);
+                        flow.sendEvent(key, payload);
                     }
-                    flowId = UUID.randomUUID().toString();
-                    Flow flow = flowConfig.createFlow(flowId, payload.getStackId());
-                    flow.initialize();
-                    flowLogService.save(flowId, flowChainId, key, payload, null, flowConfig.getClass(), flow.getCurrentState());
-                    acceptFlow(payload);
-                    pruneMDCContext(flowId);
-                    runningFlows.put(flow, flowChainId);
-                    flow.sendEvent(key, payload);
-                }
-            } else {
-                LOGGER.debug("flow control event arrived: key: {}, flowid: {}, payload: {}", key, flowId, payload);
-                Flow flow = runningFlows.get(flowId);
-                if (flow != null) {
-                    flowLogService.save(flowId, flowChainId, key, payload, flow.getVariables(), flow.getFlowConfigClass(), flow.getCurrentState());
-                    flow.sendEvent(key, payload);
                 } else {
-                    LOGGER.info("Cancelled flow finished running. Stack ID {}, flow ID {}, event {}", payload.getStackId(), flowId, key);
+                    LOGGER.debug("flow control event arrived: key: {}, flowid: {}, payload: {}", key, flowId, payload);
+                    Flow flow = runningFlows.get(flowId);
+                    if (flow != null) {
+                        flowLogService.save(flowId, flowChainId, key, payload, flow.getVariables(), flow.getFlowConfigClass(), flow.getCurrentState());
+                        flow.sendEvent(key, payload);
+                    } else {
+                        LOGGER.info("Cancelled flow finished running. Stack ID {}, flow ID {}, event {}", payload.getStackId(), flowId, key);
+                    }
                 }
-            }
+                break;
         }
     }
 

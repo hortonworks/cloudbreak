@@ -26,22 +26,22 @@ public class EphemeralClusterActions {
     private EphemeralClusterService ephemeralClusterService;
 
     @Bean(name = "EPHEMERAL_CLUSTER_UPDATE_STATE")
-    public Action updateNameserverAction() {
+    public Action<?, ?> updateNameserverAction() {
         return new AbstractClusterAction<EphemeralClusterUpdateTriggerEvent>(EphemeralClusterUpdateTriggerEvent.class) {
             @Override
-            protected void doExecute(ClusterViewContext context, EphemeralClusterUpdateTriggerEvent payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(ClusterViewContext context, EphemeralClusterUpdateTriggerEvent payload, Map<Object, Object> variables) {
                 ephemeralClusterService.updateClusterStarted(context.getStackId());
-                EphemeralClusterUpdateRequest request = new EphemeralClusterUpdateRequest(context.getStackId());
+                Selectable request = new EphemeralClusterUpdateRequest(context.getStackId());
                 sendEvent(context.getFlowId(), request.selector(), request);
             }
         };
     }
 
     @Bean(name = "EPHEMERAL_CLUSTER_UPDATE_FINISHED_STATE")
-    public Action ephemeralUpdateFinishedAction() {
+    public Action<?, ?> ephemeralUpdateFinishedAction() {
         return new AbstractClusterAction<EphemeralClusterUpdateSuccess>(EphemeralClusterUpdateSuccess.class) {
             @Override
-            protected void doExecute(ClusterViewContext context, EphemeralClusterUpdateSuccess payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(ClusterViewContext context, EphemeralClusterUpdateSuccess payload, Map<Object, Object> variables) {
                 ephemeralClusterService.updateClusterFinished(context.getStackId());
                 sendEvent(context);
             }
@@ -54,10 +54,10 @@ public class EphemeralClusterActions {
     }
 
     @Bean(name = "EPHEMERAL_CLUSTER_UPDATE_FAILED_STATE")
-    public Action ephemeralUpdateFailedAction() {
+    public Action<?, ?> ephemeralUpdateFailedAction() {
         return new AbstractStackFailureAction<EphemeralClusterState, EphemeralClusterEvent>() {
             @Override
-            protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
                 ephemeralClusterService.updateClusterFailed(context.getStackView().getId(), payload.getException());
                 sendEvent(context);
             }

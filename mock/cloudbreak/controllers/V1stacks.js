@@ -81,15 +81,7 @@ module.exports.getStackForAmbari = function getStackForAmbari (req, res, next) {
 };
 
 module.exports.postCluster = function postCluster (req, res, next) {
-    V1stacks.postCluster(req.swagger.params, res, next);
-};
-
-module.exports.postPrivateStack = function postPrivateStack (req, res, next) {
-    V1stacks.postPrivateStack(req.swagger.params, res, next);
-};
-
-module.exports.postPublicStack = function postPublicStack (req, res, next) {
-    V1stacks.postPublicStack(req.swagger.params, res, next);
+  V1stacks.postCluster(req.swagger.params, res, next);
 };
 
 module.exports.putCluster = function putCluster (req, res, next) {

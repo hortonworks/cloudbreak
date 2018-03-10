@@ -20,7 +20,7 @@ public class InstanceTerminationFinishedAction extends AbstractInstanceTerminati
     }
 
     @Override
-    protected void doExecute(InstanceTerminationContext context, RemoveInstanceResult payload, Map<Object, Object> variables) throws Exception {
+    protected void doExecute(InstanceTerminationContext context, RemoveInstanceResult payload, Map<Object, Object> variables) {
         instanceTerminationService.finishInstanceTermination(context, payload);
         sendEvent(context);
     }

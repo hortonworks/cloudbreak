@@ -23,11 +23,13 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.ExecutorType;
 import com.sequenceiq.cloudbreak.api.model.ExposedService;
+import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessor;
+import com.sequenceiq.cloudbreak.blueprint.kerberos.KerberosDetailService;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariDatabase;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
-import com.sequenceiq.cloudbreak.core.CloudbreakException;
+import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.ExposedServices;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
@@ -52,10 +54,9 @@ import com.sequenceiq.cloudbreak.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.SmartSenseCredentialConfigService;
 import com.sequenceiq.cloudbreak.service.blueprint.ComponentLocatorService;
-import com.sequenceiq.cloudbreak.service.cluster.AmbariSecurityConfigProvider;
-import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.BlueprintProcessor;
+import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariSecurityConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.HiveConfigProvider;
-import com.sequenceiq.cloudbreak.service.cluster.flow.kerberos.KerberosDetailService;
+import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigProvider;
 
 @Component
 public class ClusterHostServiceRunner {
@@ -96,6 +97,9 @@ public class ClusterHostServiceRunner {
     @Inject
     private HiveConfigProvider hiveConfigProvider;
 
+    @Inject
+    private ProxyConfigProvider proxyConfigProvider;
+
     @Transactional
     public void runAmbariServices(Stack stack, Cluster cluster) throws CloudbreakException {
         try {
@@ -112,7 +116,7 @@ public class ClusterHostServiceRunner {
         }
     }
 
-    private SaltConfig createSaltConfig(Stack stack, Cluster cluster, GatewayConfig primaryGatewayConfig, List<GatewayConfig> gatewayConfigs)
+    private SaltConfig createSaltConfig(Stack stack, Cluster cluster, GatewayConfig primaryGatewayConfig, Iterable<GatewayConfig> gatewayConfigs)
             throws IOException {
         Map<String, SaltPillarProperties> servicePillar = new HashMap<>();
         saveDatalakeNameservers(stack, servicePillar);
@@ -164,10 +168,12 @@ public class ClusterHostServiceRunner {
 
         hiveConfigProvider.decorateServicePillarWithPostgresIfNeeded(servicePillar, stack, cluster);
 
+        proxyConfigProvider.decoratePillarWithProxyDataIfNeeded(servicePillar, cluster);
+
         return new SaltConfig(servicePillar, createGrainProperties(gatewayConfigs));
     }
 
-    private Map<String, Map<String, String>> createGrainProperties(List<GatewayConfig> gatewayConfigs) {
+    private Map<String, Map<String, String>> createGrainProperties(Iterable<GatewayConfig> gatewayConfigs) {
         Map<String, Map<String, String>> grainProperties = new HashMap<>();
         for (GatewayConfig gatewayConfig : gatewayConfigs) {
             Map<String, String> hostGrain = new HashMap<>();

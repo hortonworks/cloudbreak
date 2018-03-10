@@ -71,7 +71,7 @@ public class RemoveInstanceHandler implements CloudPlatformEventHandler<RemoveIn
             LOGGER.error("Failed to handle RemoveInstanceRequest.", e);
             result = new RemoveInstanceResult(e.getMessage(), e, request);
         }
-        eventBus.notify(result.selector(), new Event(removeInstanceRequestEvent.getHeaders(), result));
+        eventBus.notify(result.selector(), new Event<>(removeInstanceRequestEvent.getHeaders(), result));
     }
 
 }

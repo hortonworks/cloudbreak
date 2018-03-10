@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.model;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -24,9 +25,9 @@ public class Group extends DynamicModel {
 
     private final InstanceAuthentication instanceAuthentication;
 
-    private Optional<CloudInstance> skeleton = Optional.empty();
+    private final Optional<CloudInstance> skeleton;
 
-    public Group(String name, InstanceGroupType type, List<CloudInstance> instances, Security security, CloudInstance skeleton,
+    public Group(String name, InstanceGroupType type, Collection<CloudInstance> instances, Security security, CloudInstance skeleton,
             InstanceAuthentication instanceAuthentication, String loginUserName, String publicKey) {
         this.name = name;
         this.type = type;
@@ -38,7 +39,7 @@ public class Group extends DynamicModel {
         this.loginUserName = loginUserName;
     }
 
-    public Group(String name, InstanceGroupType type, List<CloudInstance> instances, Security security, CloudInstance skeleton,
+    public Group(String name, InstanceGroupType type, Collection<CloudInstance> instances, Security security, CloudInstance skeleton,
             Map<String, Object> parameters, InstanceAuthentication instanceAuthentication, String loginUserName, String publicKey) {
         super(parameters);
         this.name = name;

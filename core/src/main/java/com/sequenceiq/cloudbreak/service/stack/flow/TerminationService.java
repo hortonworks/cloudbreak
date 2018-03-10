@@ -2,8 +2,8 @@ package com.sequenceiq.cloudbreak.service.stack.flow;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Date;
-import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Resource;
@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.model.FileSystemType;
 import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
+import com.sequenceiq.cloudbreak.blueprint.filesystem.FileSystemConfigurator;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
@@ -27,7 +28,6 @@ import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterTerminationService;
-import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemConfigurator;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderConnectorAdapter;
 
 @Service
@@ -59,7 +59,7 @@ public class TerminationService {
     private OrchestratorTypeResolver orchestratorTypeResolver;
 
     @Resource
-    private Map<FileSystemType, FileSystemConfigurator> fileSystemConfigurators;
+    private Map<FileSystemType, FileSystemConfigurator<?>> fileSystemConfigurators;
 
     public void finalizeTermination(Long stackId, boolean force) {
         Stack stack = stackRepository.findOneWithLists(stackId);
@@ -101,7 +101,7 @@ public class TerminationService {
     }
 
     private void terminateMetaDataInstances(Stack stack) {
-        List<InstanceMetaData> instanceMetaDatas = new ArrayList<>();
+        Collection<InstanceMetaData> instanceMetaDatas = new ArrayList<>();
         for (InstanceMetaData metaData : stack.getRunningInstanceMetaData()) {
             long timeInMillis = Calendar.getInstance().getTimeInMillis();
             metaData.setTerminationDate(timeInMillis);

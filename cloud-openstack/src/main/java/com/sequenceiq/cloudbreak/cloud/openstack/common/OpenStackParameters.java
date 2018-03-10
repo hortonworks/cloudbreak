@@ -5,7 +5,6 @@ import static com.sequenceiq.cloudbreak.cloud.model.DiskType.diskType;
 import static com.sequenceiq.cloudbreak.cloud.model.DisplayName.displayName;
 import static com.sequenceiq.cloudbreak.cloud.model.Orchestrator.orchestrator;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -77,7 +76,7 @@ public class OpenStackParameters implements PlatformParameters {
     }
 
     private Collection<DiskType> getDiskTypes() {
-        return Arrays.asList(diskType("HDD"));
+        return Collections.singletonList(diskType("HDD"));
     }
 
     private Map<DiskType, DisplayName> getDisplayName() {

@@ -70,12 +70,12 @@ public class UpscaleStackHandler implements CloudPlatformEventHandler<UpscaleSta
             }
             UpscaleStackResult result = ResourcesStatePollerResults.transformToUpscaleStackResult(statePollerResult, request);
             request.getResult().onNext(result);
-            eventBus.notify(result.selector(), new Event(upscaleStackRequestEvent.getHeaders(), result));
+            eventBus.notify(result.selector(), new Event<>(upscaleStackRequestEvent.getHeaders(), result));
             LOGGER.info("Upscale successfully finished for {}", cloudContext);
         } catch (Exception e) {
             UpscaleStackResult result = new UpscaleStackResult(e.getMessage(), e, request);
             request.getResult().onNext(result);
-            eventBus.notify(CloudPlatformResult.failureSelector(UpscaleStackResult.class), new Event(upscaleStackRequestEvent.getHeaders(), result));
+            eventBus.notify(CloudPlatformResult.failureSelector(UpscaleStackResult.class), new Event<>(upscaleStackRequestEvent.getHeaders(), result));
         }
     }
 

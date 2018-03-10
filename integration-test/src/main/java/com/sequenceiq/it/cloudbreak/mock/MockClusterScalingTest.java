@@ -49,7 +49,7 @@ public class MockClusterScalingTest extends AbstractCloudbreakIntegrationTest {
     @SuppressWarnings("Duplicates")
     @Test
     @Parameters({"instanceGroup", "scalingAdjustment", "mockPort"})
-    public void testScaling(@Optional("slave_1") String instanceGroup, @Optional("1") int scalingAdjustment, @Optional("9443") int mockPort) throws Exception {
+    public void testScaling(@Optional("slave_1") String instanceGroup, @Optional("1") int scalingAdjustment, @Optional("9443") int mockPort) {
         // GIVEN
         IntegrationTestContext itContext = getItContext();
         String stackId = itContext.getContextParam(CloudbreakITContextConstants.STACK_ID);

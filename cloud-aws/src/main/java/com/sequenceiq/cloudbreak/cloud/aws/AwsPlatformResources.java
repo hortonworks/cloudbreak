@@ -7,10 +7,12 @@ import static java.util.Collections.singletonList;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 
@@ -73,6 +75,7 @@ import com.sequenceiq.cloudbreak.cloud.model.RegionDisplayNameSpecifications;
 import com.sequenceiq.cloudbreak.cloud.model.VmSpecification;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta;
+import com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta.VmTypeMetaBuilder;
 import com.sequenceiq.cloudbreak.cloud.model.VmsSpecification;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterConfig;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
@@ -108,9 +111,9 @@ public class AwsPlatformResources implements PlatformResources {
 
     private Map<Region, DisplayName> regionDisplayNames = new HashMap<>();
 
-    private Map<Region, Set<VmType>> vmTypes = new HashMap<>();
+    private final Map<Region, Set<VmType>> vmTypes = new HashMap<>();
 
-    private Map<Region, VmType> defaultVmTypes = new HashMap<>();
+    private final Map<Region, VmType> defaultVmTypes = new HashMap<>();
 
     @PostConstruct
     public void init() {
@@ -119,11 +122,7 @@ public class AwsPlatformResources implements PlatformResources {
     }
 
     private String getDefinition(String parameter, String type) {
-        if (Strings.isNullOrEmpty(parameter)) {
-            return resourceDefinition(type);
-        } else {
-            return FileReaderUtils.readFileFromClasspathQuietly(parameter);
-        }
+        return Strings.isNullOrEmpty(parameter) ? resourceDefinition(type) : FileReaderUtils.readFileFromClasspathQuietly(parameter);
     }
 
     public String resourceDefinition(String resource) {
@@ -137,7 +136,7 @@ public class AwsPlatformResources implements PlatformResources {
         try {
             VmsSpecification oVms = JsonUtil.readValue(vm, VmsSpecification.class);
             for (VmSpecification vmSpecification : oVms.getItems()) {
-                VmTypeMeta.VmTypeMetaBuilder builder = VmTypeMeta.VmTypeMetaBuilder.builder()
+                VmTypeMetaBuilder builder = VmTypeMetaBuilder.builder()
                         .withCpuAndMemory(vmSpecification.getMetaSpecification().getProperties().getCpu(),
                                 vmSpecification.getMetaSpecification().getProperties().getMemory())
                         .withPrice(vmSpecification.getMetaSpecification().getProperties().getPrice());
@@ -167,7 +166,7 @@ public class AwsPlatformResources implements PlatformResources {
         }
     }
 
-    private void addConfig(VmTypeMeta.VmTypeMetaBuilder builder, ConfigSpecification configSpecification) {
+    private void addConfig(VmTypeMetaBuilder builder, ConfigSpecification configSpecification) {
         if (configSpecification.getVolumeParameterType().equals(VolumeParameterType.AUTO_ATTACHED.name())) {
             builder.withAutoAttachedConfig(volumeParameterConfig(configSpecification));
         } else if (configSpecification.getVolumeParameterType().equals(VolumeParameterType.EPHEMERAL.name())) {
@@ -321,7 +320,7 @@ public class AwsPlatformResources implements PlatformResources {
                 ec2Client.setRegion(RegionUtils.getRegion(awsRegion.getRegionName()));
                 Filter filter = new Filter();
                 filter.setName("region-name");
-                List<String> list = new ArrayList<>();
+                Collection<String> list = new ArrayList<>();
                 list.add(awsRegion.getRegionName());
                 filter.setValues(list);
 
@@ -350,7 +349,7 @@ public class AwsPlatformResources implements PlatformResources {
 
     @Override
     @Cacheable(cacheNames = "cloudResourceVmTypeCache", key = "#cloudCredential?.id + #region.getRegionName()")
-    public CloudVmTypes virtualMachines(CloudCredential cloudCredential, Region region, Map<String, String> filters) throws Exception {
+    public CloudVmTypes virtualMachines(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
         CloudRegions regions = regions(cloudCredential, region, filters);
 
         Map<String, Set<VmType>> cloudVmResponses = new HashMap<>();
@@ -365,13 +364,13 @@ public class AwsPlatformResources implements PlatformResources {
     }
 
     @Override
-    public CloudGateWays gateways(CloudCredential cloudCredential, Region region, Map<String, String> filters) throws Exception {
+    public CloudGateWays gateways(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
         AmazonEC2Client ec2Client = awsClient.createAccess(cloudCredential);
 
         Map<String, Set<CloudGateWay>> resultCloudGateWayMap = new HashMap<>();
         CloudRegions regions = regions(cloudCredential, region, filters);
 
-        for (Map.Entry<Region, List<AvailabilityZone>> regionListEntry : regions.getCloudRegions().entrySet()) {
+        for (Entry<Region, List<AvailabilityZone>> regionListEntry : regions.getCloudRegions().entrySet()) {
             if (region == null || Strings.isNullOrEmpty(region.value()) || regionListEntry.getKey().value().equals(region.value())) {
                 ec2Client.setRegion(RegionUtils.getRegion(regionListEntry.getKey().value()));
 
@@ -383,7 +382,7 @@ public class AwsPlatformResources implements PlatformResources {
                     CloudGateWay cloudGateWay = new CloudGateWay();
                     cloudGateWay.setId(internetGateway.getInternetGatewayId());
                     cloudGateWay.setName(internetGateway.getInternetGatewayId());
-                    List<String> vpcs = new ArrayList<>();
+                    Collection<String> vpcs = new ArrayList<>();
                     for (InternetGatewayAttachment internetGatewayAttachment : internetGateway.getAttachments()) {
                         vpcs.add(internetGatewayAttachment.getVpcId());
                     }
@@ -401,12 +400,12 @@ public class AwsPlatformResources implements PlatformResources {
     }
 
     @Override
-    public CloudIpPools publicIpPool(CloudCredential cloudCredential, Region region, Map<String, String> filters) throws Exception {
+    public CloudIpPools publicIpPool(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
         return new CloudIpPools();
     }
 
     @Override
-    public CloudAccessConfigs accessConfigs(CloudCredential cloudCredential, Region region, Map<String, String> filters) throws Exception {
+    public CloudAccessConfigs accessConfigs(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
         String queryFailedMessage = "Could not get instance profile roles from Amazon: ";
 
         CloudAccessConfigs cloudAccessConfigs = new CloudAccessConfigs(new HashSet<>());

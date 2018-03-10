@@ -12,7 +12,7 @@ import java.util.Arrays;
 
 public class UpgradeTestFactory extends CloudbreakTest {
     @Factory
-    @Parameters({"providers"})
+    @Parameters("providers")
     public Object[] clusterTestFactory(@Optional(GcpCloudProvider.GCP) String providers) {
         CloudProvider[] cloudProviders = CloudProviderHelper.providerFactory(providers, getTestParameter());
         Object[] results = Arrays.stream(cloudProviders)

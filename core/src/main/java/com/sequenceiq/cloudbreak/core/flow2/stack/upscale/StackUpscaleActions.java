@@ -70,7 +70,7 @@ public class StackUpscaleActions {
     private InstanceMetaDataToCloudInstanceConverter metadataConverter;
 
     @Bean(name = "ADD_INSTANCES_STATE")
-    public Action addInstances() {
+    public Action<?, ?> addInstances() {
         return new AbstractStackUpscaleAction<StackScaleTriggerEvent>(StackScaleTriggerEvent.class) {
             @Override
             protected void prepareExecution(StackScaleTriggerEvent payload, Map<Object, Object> variables) {
@@ -80,7 +80,7 @@ public class StackUpscaleActions {
             }
 
             @Override
-            protected void doExecute(StackScalingFlowContext context, StackScaleTriggerEvent payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(StackScalingFlowContext context, StackScaleTriggerEvent payload, Map<Object, Object> variables) {
                 stackUpscaleService.startAddInstances(context.getStack(), payload.getAdjustment());
                 sendEvent(context);
             }
@@ -99,10 +99,10 @@ public class StackUpscaleActions {
     }
 
     @Bean(name = "ADD_INSTANCES_FINISHED_STATE")
-    public Action finishAddInstances() {
+    public Action<?, ?> finishAddInstances() {
         return new AbstractStackUpscaleAction<UpscaleStackResult>(UpscaleStackResult.class) {
             @Override
-            protected void doExecute(StackScalingFlowContext context, UpscaleStackResult payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(StackScalingFlowContext context, UpscaleStackResult payload, Map<Object, Object> variables) {
                 stackUpscaleService.finishAddInstances(context, payload);
                 sendEvent(context);
             }
@@ -115,10 +115,10 @@ public class StackUpscaleActions {
     }
 
     @Bean(name = "EXTEND_METADATA_STATE")
-    public Action extendMetadata() {
+    public Action<?, ?> extendMetadata() {
         return new AbstractStackUpscaleAction<StackEvent>(StackEvent.class) {
             @Override
-            protected void doExecute(StackScalingFlowContext context, StackEvent payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(StackScalingFlowContext context, StackEvent payload, Map<Object, Object> variables) {
                 stackUpscaleService.extendingMetadata(context.getStack());
                 sendEvent(context);
             }
@@ -133,17 +133,17 @@ public class StackUpscaleActions {
     }
 
     @Bean(name = "EXTEND_METADATA_FINISHED_STATE")
-    public Action finishExtendMetadata() {
+    public Action<?, ?> finishExtendMetadata() {
         return new AbstractStackUpscaleAction<CollectMetadataResult>(CollectMetadataResult.class) {
             @Override
-            protected void doExecute(StackScalingFlowContext context, CollectMetadataResult payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(StackScalingFlowContext context, CollectMetadataResult payload, Map<Object, Object> variables) {
                 Set<String> upscaleCandidateAddresses = stackUpscaleService.finishExtendMetadata(context.getStack(), context.getInstanceGroupName(), payload);
                 variables.put(UPSCALE_CANDIDATE_ADDRESSES, upscaleCandidateAddresses);
                 InstanceGroup ig = instanceGroupRepository.findOneByGroupNameInStack(payload.getStackId(), context.getInstanceGroupName());
                 if (InstanceGroupType.GATEWAY == ig.getInstanceGroupType()) {
                     InstanceMetaData gatewayMetaData = context.getStack().getPrimaryGatewayInstance();
                     CloudInstance gatewayInstance = metadataConverter.convert(gatewayMetaData);
-                    GetSSHFingerprintsRequest sshFingerPrintReq = new GetSSHFingerprintsRequest<GetSSHFingerprintsResult>(context.getCloudContext(),
+                    Selectable sshFingerPrintReq = new GetSSHFingerprintsRequest<GetSSHFingerprintsResult>(context.getCloudContext(),
                             context.getCloudCredential(), gatewayInstance);
                     sendEvent(context.getFlowId(), sshFingerPrintReq);
                 } else {
@@ -155,12 +155,11 @@ public class StackUpscaleActions {
     }
 
     @Bean(name = "GATEWAY_TLS_SETUP_STATE")
-    public Action tlsSetupAction() {
+    public Action<?, ?> tlsSetupAction() {
         return new AbstractStackUpscaleAction<GetSSHFingerprintsResult>(GetSSHFingerprintsResult.class) {
             @Override
             protected void doExecute(StackScalingFlowContext context, GetSSHFingerprintsResult payload, Map<Object, Object> variables) throws Exception {
-                stackUpscaleService.setupTls(context, payload);
-                stackUpscaleService.removeTemporarySShKey(context, payload.getSshFingerprints());
+                stackUpscaleService.setupTls(context);
                 BootstrapNewNodesEvent bootstrapNewNodesEvent =
                         new BootstrapNewNodesEvent(payload.getStackId(), (Set<String>) variables.get(UPSCALE_CANDIDATE_ADDRESSES));
                 sendEvent(context.getFlowId(), StackCreationEvent.TLS_SETUP_FINISHED_EVENT.event(), bootstrapNewNodesEvent);
@@ -169,12 +168,12 @@ public class StackUpscaleActions {
     }
 
     @Bean(name = "BOOTSTRAP_NEW_NODES_STATE")
-    public Action bootstrapNewNodes() {
+    public Action<?, ?> bootstrapNewNodes() {
         return new AbstractStackUpscaleAction<BootstrapNewNodesEvent>(BootstrapNewNodesEvent.class) {
             @Override
-            protected void doExecute(StackScalingFlowContext context, BootstrapNewNodesEvent payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(StackScalingFlowContext context, BootstrapNewNodesEvent payload, Map<Object, Object> variables) {
                 stackUpscaleService.bootstrappingNewNodes(context.getStack());
-                BootstrapNewNodesRequest request = new BootstrapNewNodesRequest(context.getStack().getId(),
+                Selectable request = new BootstrapNewNodesRequest(context.getStack().getId(),
                         payload.getUpscaleCandidateAddresses(), context.getHostNames());
                 sendEvent(context.getFlowId(), request);
             }
@@ -182,12 +181,12 @@ public class StackUpscaleActions {
     }
 
     @Bean(name = "EXTEND_HOST_METADATA_STATE")
-    public Action extendHostMetadata() {
+    public Action<?, ?> extendHostMetadata() {
         return new AbstractStackUpscaleAction<BootstrapNewNodesResult>(BootstrapNewNodesResult.class) {
             @Override
-            protected void doExecute(StackScalingFlowContext context, BootstrapNewNodesResult payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(StackScalingFlowContext context, BootstrapNewNodesResult payload, Map<Object, Object> variables) {
                 stackUpscaleService.extendingHostMetadata(context.getStack());
-                ExtendHostMetadataRequest request = new ExtendHostMetadataRequest(context.getStack().getId(),
+                Selectable request = new ExtendHostMetadataRequest(context.getStack().getId(),
                         payload.getRequest().getUpscaleCandidateAddresses());
                 sendEvent(context.getFlowId(), request);
             }
@@ -195,10 +194,10 @@ public class StackUpscaleActions {
     }
 
     @Bean(name = "EXTEND_HOST_METADATA_FINISHED_STATE")
-    public Action finishExtendHostMetadata() {
+    public Action<?, ?> finishExtendHostMetadata() {
         return new AbstractStackUpscaleAction<ExtendHostMetadataResult>(ExtendHostMetadataResult.class) {
             @Override
-            protected void doExecute(StackScalingFlowContext context, ExtendHostMetadataResult payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(StackScalingFlowContext context, ExtendHostMetadataResult payload, Map<Object, Object> variables) {
                 stackUpscaleService.finishExtendHostMetadata(context.getStack());
                 metricService.incrementMetricCounter(MetricType.STACK_UPSCALE_SUCCESSFUL, context.getStack());
                 sendEvent(context);
@@ -212,10 +211,10 @@ public class StackUpscaleActions {
     }
 
     @Bean(name = "UPSCALE_FAILED_STATE")
-    public Action stackStartFailedAction() {
+    public Action<?, ?> stackStartFailedAction() {
         return new AbstractStackFailureAction<StackUpscaleState, StackUpscaleEvent>() {
             @Override
-            protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
                 stackUpscaleService.handleStackUpscaleFailure(context.getStackView().getId(), payload);
                 metricService.incrementMetricCounter(MetricType.STACK_UPSCALE_FAILED, context.getStackView());
                 sendEvent(context);

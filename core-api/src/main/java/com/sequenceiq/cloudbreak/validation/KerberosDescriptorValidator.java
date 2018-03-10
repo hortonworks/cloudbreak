@@ -31,7 +31,7 @@ public class KerberosDescriptorValidator implements ConstraintValidator<ValidKer
         }
         try {
             JsonNode json = objectMapper.readTree(value);
-            return !requiredFileds.stream().anyMatch(k -> !StringUtils.hasText(json.get("kerberos-env").get("properties").get(k).asText()));
+            return requiredFileds.stream().allMatch(k -> StringUtils.hasText(json.get("kerberos-env").get("properties").get(k).asText()));
         } catch (NullPointerException | IOException ignored) {
         }
         return false;

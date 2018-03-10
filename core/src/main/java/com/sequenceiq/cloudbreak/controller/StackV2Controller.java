@@ -28,7 +28,6 @@ import com.sequenceiq.cloudbreak.api.model.UpdateStackJson;
 import com.sequenceiq.cloudbreak.api.model.UserNamePasswordJson;
 import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
-import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterCache;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -98,7 +97,7 @@ public class StackV2Controller extends NotificationController implements StackV2
     }
 
     @Override
-    public Response putScaling(String name, StackScaleRequestV2 updateRequest) throws CloudbreakSecuritySetupException {
+    public Response putScaling(String name, StackScaleRequestV2 updateRequest) {
         IdentityUser user = authenticatedUserService.getCbUser();
         Stack stack = stackService.getPublicStack(name, user);
         if (!cloudParameterCache.isScalingSupported(stack.cloudPlatform())) {
@@ -161,7 +160,7 @@ public class StackV2Controller extends NotificationController implements StackV2
     }
 
     @Override
-    public Response putReinstall(String name, ReinstallRequestV2 reinstallRequestV2) throws CloudbreakSecuritySetupException {
+    public Response putReinstall(String name, ReinstallRequestV2 reinstallRequestV2) {
         IdentityUser user = authenticatedUserService.getCbUser();
         reinstallRequestV2.setAccount(user.getAccount());
         Stack stack = stackService.getPublicStack(name, user);
@@ -170,7 +169,7 @@ public class StackV2Controller extends NotificationController implements StackV2
     }
 
     @Override
-    public Response putPassword(String name, UserNamePasswordJson userNamePasswordJson) throws Exception {
+    public Response putPassword(String name, UserNamePasswordJson userNamePasswordJson) {
         IdentityUser user = authenticatedUserService.getCbUser();
         Stack stack = stackService.getPublicStack(name, user);
         UpdateClusterJson updateClusterJson = conversionService.convert(userNamePasswordJson, UpdateClusterJson.class);

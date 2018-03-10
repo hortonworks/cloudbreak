@@ -66,7 +66,7 @@ public class IpPool extends Entity {
     }
 
     public static Action<IpPool> get(String key) {
-        return new Action<>(getTestContext(key), RegionAction::getPlatformRegions);
+        return new Action<>(getTestContext(key), RegionAction::getRegionsByCredentialId);
     }
 
     public static Action<IpPool> get() {

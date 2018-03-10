@@ -26,7 +26,7 @@ import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.StackValidation;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.service.account.AccountPreferencesValidationFailed;
+import com.sequenceiq.cloudbreak.service.account.AccountPreferencesValidationException;
 import com.sequenceiq.cloudbreak.service.account.AccountPreferencesValidator;
 import com.sequenceiq.cloudbreak.service.decorator.StackDecorator;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -166,7 +166,7 @@ public class StackCreatorService {
     private void validateAccountPreferences(Stack stack, IdentityUser user) {
         try {
             accountPreferencesValidator.validate(stack, user.getAccount(), user.getUserId());
-        } catch (AccountPreferencesValidationFailed e) {
+        } catch (AccountPreferencesValidationException e) {
             throw new BadRequestException(e.getMessage(), e);
         }
     }

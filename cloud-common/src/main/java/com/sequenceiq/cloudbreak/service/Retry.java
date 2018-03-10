@@ -4,13 +4,13 @@ import java.util.function.Supplier;
 
 public interface Retry {
 
-    Boolean testWith2SecDelayMax5Times(Supplier<Boolean> action) throws ActionWentFail;
+    Boolean testWith2SecDelayMax5Times(Supplier<Boolean> action) throws ActionWentFailException;
 
-    class ActionWentFail extends RuntimeException {
-        public ActionWentFail() {
+    class ActionWentFailException extends RuntimeException {
+        public ActionWentFailException() {
         }
 
-        public ActionWentFail(String message) {
+        public ActionWentFailException(String message) {
             super(message);
         }
     }

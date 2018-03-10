@@ -33,4 +33,7 @@ public interface FlowLogRepository extends CrudRepository<FlowLog, Long> {
     @Query("SELECT fl FROM FlowLog fl WHERE fl.cloudbreakNodeId IS NULL AND (fl.finalized IS NULL OR fl.finalized = false)")
     Set<FlowLog> findAllUnassigned();
 
+    @Modifying
+    @Query("DELETE FROM FlowLog fl WHERE fl.stackId IN ( SELECT st.id FROM Stack st WHERE st.stackStatus.status = 'DELETE_COMPLETED')")
+    int purgeTerminatedStackLogs();
 }

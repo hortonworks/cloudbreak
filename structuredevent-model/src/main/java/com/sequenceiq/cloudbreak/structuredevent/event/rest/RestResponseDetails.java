@@ -21,9 +21,6 @@ public class RestResponseDetails implements Serializable {
     @JsonDeserialize(using = Base64Deserializer.class)
     private String body;
 
-    public RestResponseDetails() {
-    }
-
     public Integer getStatusCode() {
         return statusCode;
     }

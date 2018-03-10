@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.converter.v2;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.inject.Inject;
 
@@ -95,12 +96,12 @@ public class StackV2RequestToStackRequestConverter extends AbstractConversionSer
         return stackRequest;
     }
 
-    private Map<String, String> convertParameters(Map<String, ? extends Object> map) {
+    private Map<String, String> convertParameters(Map<String, ?> map) {
         if (map == null) {
             return null;
         }
         Map<String, String> result = new HashMap<>();
-        for (Map.Entry<String, ? extends Object> e : map.entrySet()) {
+        for (Entry<String, ?> e : map.entrySet()) {
             result.put(e.getKey(), e.getValue().toString());
         }
         return result;

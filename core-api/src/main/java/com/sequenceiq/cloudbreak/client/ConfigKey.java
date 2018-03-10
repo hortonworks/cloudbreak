@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.client;
 
 
+import java.util.Objects;
+
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -33,7 +35,7 @@ public class ConfigKey {
 
     @Override
     public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) {
+        if (o == null || !Objects.equals(getClass(), o.getClass())) {
             return false;
         } else if (this == o) {
             return true;

@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.util;
 
+import java.sql.SQLException;
+
 import org.postgresql.util.PSQLException;
 import org.springframework.dao.DataIntegrityViolationException;
 
@@ -12,7 +14,7 @@ public class SqlUtil {
         Throwable cause = ex.getCause();
 
         while (cause.getCause() != null || cause instanceof PSQLException) {
-            if (cause instanceof PSQLException && !((PSQLException) cause).getSQLState().isEmpty()) {
+            if (cause instanceof PSQLException && !((SQLException) cause).getSQLState().isEmpty()) {
                 PSQLException e = (PSQLException) cause;
                 String[] split = e.getLocalizedMessage().split("\\n");
                 if (split.length > 0) {

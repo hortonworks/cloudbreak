@@ -33,11 +33,13 @@ import com.sequenceiq.cloudbreak.api.model.ClusterResponse;
 import com.sequenceiq.cloudbreak.api.model.ConfigStrategy;
 import com.sequenceiq.cloudbreak.api.model.RDSConfigJson;
 import com.sequenceiq.cloudbreak.api.model.RDSConfigRequest;
-import com.sequenceiq.cloudbreak.controller.validation.blueprint.BlueprintValidator;
-import com.sequenceiq.cloudbreak.controller.validation.blueprint.StackServiceComponentDescriptor;
-import com.sequenceiq.cloudbreak.controller.validation.blueprint.StackServiceComponentDescriptors;
-import com.sequenceiq.cloudbreak.core.CloudbreakException;
-import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorType;
+import com.sequenceiq.cloudbreak.blueprint.validation.BlueprintValidator;
+import com.sequenceiq.cloudbreak.blueprint.validation.StackServiceComponentDescriptor;
+import com.sequenceiq.cloudbreak.blueprint.validation.StackServiceComponentDescriptors;
+import com.sequenceiq.cloudbreak.service.CloudbreakException;
+import com.sequenceiq.cloudbreak.common.model.OrchestratorType;
+import com.sequenceiq.cloudbreak.api.model.proxy.ProxyConfigResponse;
+import com.sequenceiq.cloudbreak.converter.mapper.ProxyConfigMapper;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Cluster;
@@ -45,10 +47,11 @@ import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
+import com.sequenceiq.cloudbreak.domain.ProxyConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.ClusterComponentConfigProvider;
-import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariViewProvider;
+import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariViewProvider;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 
@@ -104,6 +107,9 @@ public class ClusterToClusterResponseConverterTest extends AbstractEntityConvert
 
     @Mock
     private ClusterComponentConfigProvider componentConfigProvider;
+
+    @Mock
+    private ProxyConfigMapper proxyConfigMapper;
 
     private StackServiceComponentDescriptor stackServiceComponentDescriptor;
 
@@ -169,6 +175,9 @@ public class ClusterToClusterResponseConverterTest extends AbstractEntityConvert
         Stack stack = TestUtil.stack();
         Blueprint blueprint = TestUtil.blueprint();
         Cluster cluster = TestUtil.cluster(blueprint, stack, 1L);
+        ProxyConfig proxyConfig = new ProxyConfig();
+        proxyConfig.setName("test");
+        cluster.setProxyConfig(proxyConfig);
         stack.setCluster(cluster);
         return cluster;
     }
@@ -195,6 +204,10 @@ public class ClusterToClusterResponseConverterTest extends AbstractEntityConvert
         given(nameJsonNode.asText()).willReturn("dummyName");
         given(componentConfigProvider.getAmbariRepo(any(Set.class))).willReturn(null);
         given(stackServiceComponentDescs.get(anyString())).willReturn(stackServiceComponentDescriptor);
+        ProxyConfigResponse proxyConfigResponse = new ProxyConfigResponse();
+        proxyConfigResponse.setId(1L);
+        given(proxyConfigMapper.mapEntityToResponse(any(ProxyConfig.class))).willReturn(proxyConfigResponse);
+
     }
 
     private StackServiceComponentDescriptor createStackServiceComponentDescriptor() {

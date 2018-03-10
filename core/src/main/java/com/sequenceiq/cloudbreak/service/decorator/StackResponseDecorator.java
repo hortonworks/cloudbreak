@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.service.decorator;
 
-import java.util.Set;
+import java.util.Collection;
 
 import javax.inject.Inject;
 
@@ -16,7 +16,7 @@ public class StackResponseDecorator {
     @Inject
     private ResponseProviders responseProviders;
 
-    public StackResponse decorate(StackResponse stackResponse, Stack stack, Set<String> entries) {
+    public StackResponse decorate(StackResponse stackResponse, Stack stack, Collection<String> entries) {
         if (entries != null && !entries.isEmpty()) {
             for (String entry : entries) {
                 ResponseProvider responseProvider = responseProviders.get(entry);

@@ -25,7 +25,7 @@ public class PortApiExtractor implements CloudInstanceMetaDataExtractor {
     private HypervisorExtractor hypervisorExtractor;
 
     @Override
-    public CloudInstanceMetaData extractMetadata(OSClient client, Server server, String instanceId) {
+    public CloudInstanceMetaData extractMetadata(OSClient<?> client, Server server, String instanceId) {
         String hypervisor = hypervisorExtractor.getHypervisor(server);
         LOGGER.debug("Address map was empty, trying to extract ips");
         List<? extends Port> ports = client.networking().port().list(getPortListOptions(instanceId));

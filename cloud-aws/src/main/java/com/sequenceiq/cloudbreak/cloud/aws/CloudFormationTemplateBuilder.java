@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils.processTemp
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,8 +37,8 @@ public class CloudFormationTemplateBuilder {
 
     public String build(ModelContext context) {
         Map<String, Object> model = new HashMap<>();
-        List<AwsGroupView> awsGroupViews = new ArrayList<>();
-        List<AwsGroupView> awsGatewayGroupViews = new ArrayList<>();
+        Collection<AwsGroupView> awsGroupViews = new ArrayList<>();
+        Collection<AwsGroupView> awsGatewayGroupViews = new ArrayList<>();
         int i = 0;
         boolean multigw = context.stack.getGroups().stream().filter(g -> g.getType() == InstanceGroupType.GATEWAY).count() > 1;
         for (Group group : context.stack.getGroups()) {
@@ -91,7 +92,7 @@ public class CloudFormationTemplateBuilder {
                 ? existingSubnetIds.get(i % existingSubnetIds.size()) : null;
     }
 
-    private boolean isNullOrEmptyList(List<?> list) {
+    private boolean isNullOrEmptyList(Collection<?> list) {
         return list == null || list.isEmpty();
     }
 

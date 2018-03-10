@@ -120,7 +120,7 @@ public class GcpProvisionSetup implements Setup {
     }
 
     @Override
-    public void validateFileSystem(CloudCredential credential, FileSystem fileSystem) throws Exception {
+    public void validateFileSystem(CloudCredential credential, FileSystem fileSystem) {
     }
 
     private boolean containsSpecificImage(ImageList imageList, String imageUrl) {

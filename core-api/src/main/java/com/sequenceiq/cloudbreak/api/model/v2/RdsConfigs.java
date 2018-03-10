@@ -7,22 +7,23 @@ import javax.validation.Valid;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.cloudbreak.api.model.JsonEntity;
 import com.sequenceiq.cloudbreak.api.model.RDSConfigRequest;
-import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel("RdsConfigs")
 @JsonIgnoreProperties(ignoreUnknown = true)
-@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonInclude(Include.NON_NULL)
 public class RdsConfigs implements JsonEntity {
-    @ApiModelProperty(ModelDescriptions.ClusterModelDescription.RDSCONFIG_IDS)
+    @ApiModelProperty(ClusterModelDescription.RDSCONFIG_IDS)
     private Set<Long> ids = new HashSet<>();
 
     @Valid
-    @ApiModelProperty(ModelDescriptions.ClusterModelDescription.RDS_CONFIGS)
+    @ApiModelProperty(ClusterModelDescription.RDS_CONFIGS)
     private Set<RDSConfigRequest> configs = new HashSet<>();
 
     public Set<Long> getIds() {

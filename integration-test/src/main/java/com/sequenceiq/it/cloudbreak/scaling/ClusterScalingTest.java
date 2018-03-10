@@ -24,7 +24,7 @@ public class ClusterScalingTest extends AbstractCloudbreakIntegrationTest {
 
     @Test
     @Parameters({ "instanceGroup", "scalingAdjustment" })
-    public void testClusterScaling(@Optional("slave_1") String instanceGroup, int scalingAdjustment) throws Exception {
+    public void testClusterScaling(@Optional("slave_1") String instanceGroup, int scalingAdjustment) {
         // GIVEN
         IntegrationTestContext itContext = getItContext();
         String stackId = itContext.getContextParam(CloudbreakITContextConstants.STACK_ID);

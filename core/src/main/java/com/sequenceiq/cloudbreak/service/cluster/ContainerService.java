@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.service.cluster;
 
-import java.util.List;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -20,7 +19,7 @@ public class ContainerService {
     private ContainerRepository containerRepository;
 
     @Transactional(TxType.NEVER)
-    public Iterable<Container> save(List<Container> containers) {
+    public Iterable<Container> save(Iterable<Container> containers) {
         return containerRepository.save(containers);
     }
 

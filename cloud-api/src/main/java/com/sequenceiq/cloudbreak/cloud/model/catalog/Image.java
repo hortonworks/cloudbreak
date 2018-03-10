@@ -10,23 +10,23 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Image {
 
-    private String date;
+    private final String date;
 
-    private String description;
+    private final String description;
 
-    private String os;
+    private final String os;
 
-    private String osType;
+    private final String osType;
 
-    private String uuid;
+    private final String uuid;
 
-    private String version;
+    private final String version;
 
-    private Map<String, String> repo;
+    private final Map<String, String> repo;
 
-    private Map<String, Map<String, String>> imageSetsByProvider;
+    private final Map<String, Map<String, String>> imageSetsByProvider;
 
-    private StackDetails stackDetails;
+    private final StackDetails stackDetails;
 
     @JsonCreator
     public Image(

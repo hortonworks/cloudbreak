@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.controller.validation.network;
 
-import java.util.Set;
-
 import org.apache.commons.net.util.SubnetUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,7 +13,7 @@ import com.sequenceiq.cloudbreak.domain.Network;
 public class NetworkConfigurationValidator {
     private static final Logger LOGGER = LoggerFactory.getLogger(NetworkConfigurationValidator.class);
 
-    public boolean validateNetworkForStack(Network network, Set<InstanceGroup> instanceGroups) {
+    public boolean validateNetworkForStack(Network network, Iterable<InstanceGroup> instanceGroups) {
         if (network.getSubnetCIDR() != null) {
             SubnetUtils utils = new SubnetUtils(network.getSubnetCIDR());
             int addressCount = utils.getInfo().getAddressCount();

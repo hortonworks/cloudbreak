@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.converter;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -60,7 +61,7 @@ public class StackValidationRequestToStackValidationConverter extends AbstractCo
             validateBlueprint(stackValidationRequest, stackValidation);
         } catch (AccessDeniedException e) {
             throw new AccessDeniedException(
-                    String.format("Access to blueprint '%s' is denied or blueprint doesn't exist.", stackValidationRequest.getBlueprintId()), e);
+                    String.format("Access to validation '%s' is denied or validation doesn't exist.", stackValidationRequest.getBlueprintId()), e);
         }
         try {
             validateCredential(stackValidationRequest, stackValidation);
@@ -121,7 +122,7 @@ public class StackValidationRequestToStackValidationConverter extends AbstractCo
         }
     }
 
-    private Set<HostGroup> convertHostGroupsFromJson(Set<InstanceGroup> instanceGroups, Set<HostGroupRequest> hostGroupsJsons) {
+    private Set<HostGroup> convertHostGroupsFromJson(Collection<InstanceGroup> instanceGroups, Iterable<HostGroupRequest> hostGroupsJsons) {
         Set<HostGroup> hostGroups = new HashSet<>();
         for (HostGroupRequest json : hostGroupsJsons) {
             HostGroup hostGroup = new HostGroup();

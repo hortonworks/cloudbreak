@@ -21,21 +21,21 @@ import com.sequenceiq.cloudbreak.core.flow2.CommonContext;
 public class HelloWorldActions {
 
     @Bean(name = "HELLO_WORLD_START_STATE")
-    public Action startAction() {
+    public Action<?, ?> startAction() {
         return new AbstractHelloWorldAction<Payload>(Payload.class) {
 
             @Override
-            protected void doExecute(CommonContext context, Payload payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(CommonContext context, Payload payload, Map<Object, Object> variables) {
                 sendEvent(context.getFlowId(), HELLO_WORLD_FINISHED_EVENT.event(), payload);
             }
         };
     }
 
     @Bean(name = "HELLO_WORLD_FINISHED_STATE")
-    public Action finishedAction() {
+    public Action<?, ?> finishedAction() {
         return new AbstractHelloWorldAction<Payload>(Payload.class) {
             @Override
-            protected void doExecute(CommonContext context, Payload payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(CommonContext context, Payload payload, Map<Object, Object> variables) {
                 sendEvent(context);
             }
 
@@ -58,11 +58,11 @@ public class HelloWorldActions {
     }
 
     @Bean(name = "HELLO_WORLD_FAILED_STATE")
-    public Action failedAction() {
+    public Action<?, ?> failedAction() {
         return new AbstractHelloWorldAction<Payload>(Payload.class) {
 
             @Override
-            protected void doExecute(CommonContext context, Payload payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(CommonContext context, Payload payload, Map<Object, Object> variables) {
                 sendEvent(context.getFlowId(), HELLO_WORLD_FAIL_HANDLED_EVENT.event(), payload);
             }
         };

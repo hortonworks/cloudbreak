@@ -5,6 +5,7 @@ import javax.validation.Valid;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.cloudbreak.api.model.ExecutorType;
 import com.sequenceiq.cloudbreak.api.model.FileSystemRequest;
 import com.sequenceiq.cloudbreak.api.model.JsonEntity;
@@ -16,7 +17,7 @@ import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
-@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonInclude(Include.NON_NULL)
 public class ClusterV2Request implements JsonEntity {
 
     @ApiModelProperty(hidden = true)
@@ -33,6 +34,9 @@ public class ClusterV2Request implements JsonEntity {
 
     @ApiModelProperty(ClusterModelDescription.RDS_CONFIGS)
     private RdsConfigs rdsConfigs;
+
+    @ApiModelProperty(ClusterModelDescription.PROXY_NAME)
+    private String proxyName;
 
     @Valid
     @ApiModelProperty(StackModelDescription.FILE_SYSTEM)
@@ -109,5 +113,13 @@ public class ClusterV2Request implements JsonEntity {
 
     public void setRdsConfigs(RdsConfigs rdsConfigs) {
         this.rdsConfigs = rdsConfigs;
+    }
+
+    public String getProxyName() {
+        return proxyName;
+    }
+
+    public void setProxyName(String proxyName) {
+        this.proxyName = proxyName;
     }
 }

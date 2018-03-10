@@ -8,8 +8,9 @@ import static com.sequenceiq.cloudbreak.api.model.Status.WAIT_FOR_SYNC;
 
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -38,8 +39,8 @@ import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.ResourceRepository;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
-import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariClusterConnector;
-import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariDecommissioner;
+import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariClusterConnector;
+import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariDecommissioner;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -84,7 +85,7 @@ public class StackSyncService {
     @Inject
     private CloudbreakMessagesService cloudbreakMessagesService;
 
-    public void updateInstances(Stack stack, List<InstanceMetaData> instanceMetaDataList, List<CloudVmInstanceStatus> instanceStatuses,
+    public void updateInstances(Stack stack, Iterable<InstanceMetaData> instanceMetaDataList, Collection<CloudVmInstanceStatus> instanceStatuses,
             boolean stackStatusUpdateEnabled) {
         Map<InstanceSyncState, Integer> counts = initInstanceStateCounts();
         for (InstanceMetaData metaData : instanceMetaDataList) {
@@ -236,7 +237,7 @@ public class StackSyncService {
     }
 
     private Map<InstanceSyncState, Integer> initInstanceStateCounts() {
-        Map<InstanceSyncState, Integer> instanceStates = new HashMap<>();
+        Map<InstanceSyncState, Integer> instanceStates = new EnumMap<>(InstanceSyncState.class);
         instanceStates.put(InstanceSyncState.DELETED, 0);
         instanceStates.put(InstanceSyncState.STOPPED, 0);
         instanceStates.put(InstanceSyncState.RUNNING, 0);
@@ -254,7 +255,7 @@ public class StackSyncService {
                         throw new NotFoundException(String.format("Host not found with id '%s'", instanceMetaData.getDiscoveryFQDN()));
                     }
                 } else {
-                    if (ambariClusterConnector.isAmbariAvailable(stack)) {
+                    if (ambariClusterConnector.available(stack)) {
                         if (ambariDecommissioner.deleteHostFromAmbari(stack, hostMetadata)) {
                             hostMetadataRepository.delete(hostMetadata.getId());
                             eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(),
@@ -292,11 +293,8 @@ public class StackSyncService {
         instanceMetaDataRepository.save(instanceMetaData);
         instanceGroupRepository.save(instanceGroup);
         String name;
-        if (instanceMetaData.getDiscoveryFQDN() == null) {
-            name = instanceMetaData.getInstanceId();
-        } else {
-            name = String.format("%s (%s)", instanceMetaData.getInstanceId(), instanceMetaData.getDiscoveryFQDN());
-        }
+        name = instanceMetaData.getDiscoveryFQDN() == null ? instanceMetaData.getInstanceId() : String.format("%s (%s)", instanceMetaData.getInstanceId(),
+                instanceMetaData.getDiscoveryFQDN());
 
         eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(),
                 cloudbreakMessagesService.getMessage(Msg.STACK_SYNC_INSTANCE_DELETED_CBMETADATA.code(),

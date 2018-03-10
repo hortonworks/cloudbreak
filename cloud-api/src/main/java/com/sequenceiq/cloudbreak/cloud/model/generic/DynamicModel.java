@@ -40,7 +40,7 @@ public class DynamicModel {
         parameters.put(key, value);
     }
 
-    public void putParameter(Class clazz, Object value) {
+    public void putParameter(Class<?> clazz, Object value) {
         putParameter(clazz.getName(), value);
     }
 

@@ -82,8 +82,8 @@ public class AzureTemplateBuilder {
             model.put("igs", armStack.getInstanceGroups());
             model.put("securities", armSecurityView.getPorts());
             model.put("securityGroups", armSecurityView.getSecurityGroupIds());
-            model.put("corecustomData", base64EncodedUserData(cloudStack.getImage().getUserData(InstanceGroupType.CORE)));
-            model.put("gatewaycustomData", base64EncodedUserData(cloudStack.getImage().getUserData(InstanceGroupType.GATEWAY)));
+            model.put("corecustomData", base64EncodedUserData(cloudStack.getImage().getUserDataByType(InstanceGroupType.CORE)));
+            model.put("gatewaycustomData", base64EncodedUserData(cloudStack.getImage().getUserDataByType(InstanceGroupType.GATEWAY)));
             model.put("disablePasswordAuthentication", !azureInstanceCredentialView.passwordAuthenticationRequired());
             model.put("existingVPC", azureUtils.isExistingNetwork(network));
             model.put("resourceGroupName", azureUtils.getCustomResourceGroupName(network));

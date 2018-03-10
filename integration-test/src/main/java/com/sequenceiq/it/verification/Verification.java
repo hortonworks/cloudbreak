@@ -3,9 +3,11 @@ package com.sequenceiq.it.verification;
 import static org.testng.Assert.fail;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -31,7 +33,7 @@ public class Verification {
 
     private Integer exactTimes;
 
-    private final List<Pattern> patternList = new ArrayList<>();
+    private final Collection<Pattern> patternList = new ArrayList<>();
 
     private final Map<String, Integer> bodyContainsList = new HashMap<>();
 
@@ -106,7 +108,7 @@ public class Verification {
             boolean pathMatched = isPathMatched(call);
             if (call.getMethod().equals(httpMethod) && pathMatched) {
                 int bodyContainsNumber = 0;
-                for (Map.Entry<String, Integer> stringIntegerEntry : bodyContainsList.entrySet()) {
+                for (Entry<String, Integer> stringIntegerEntry : bodyContainsList.entrySet()) {
                     int count = StringUtils.countMatches(call.getPostBody(), stringIntegerEntry.getKey());
                     int required = stringIntegerEntry.getValue();
                     if ((required < 0 && count > 0) || (count == required)) {
@@ -130,12 +132,7 @@ public class Verification {
 
     private boolean isPathMatched(Call call) {
         boolean pathMatched;
-        if (regex) {
-            pathMatched = Pattern.matches(path, call.getUri());
-        } else {
-            pathMatched = call.getUri().equals(path);
-        }
-        return pathMatched;
+        return regex ? Pattern.matches(path, call.getUri()) : call.getUri().equals(path);
     }
 
     private void logRequests() {

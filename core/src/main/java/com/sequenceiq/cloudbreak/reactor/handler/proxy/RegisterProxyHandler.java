@@ -51,6 +51,6 @@ public class RegisterProxyHandler implements ReactorEventHandler<RegisterProxyRe
         } catch (RuntimeException e) {
             response = new RegisterProxyFailed(stackId, e);
         }
-        eventBus.notify(response.selector(), new Event(event.getHeaders(), response));
+        eventBus.notify(response.selector(), new Event<>(event.getHeaders(), response));
     }
 }

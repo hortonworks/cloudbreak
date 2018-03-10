@@ -7,7 +7,7 @@ public class GatewayAction {
     private GatewayAction() {
     }
 
-    public static void get(IntegrationTestContext integrationTestContext, Entity entity) throws Exception {
+    public static void get(IntegrationTestContext integrationTestContext, Entity entity) {
         Gateway gateway = (Gateway) entity;
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT,

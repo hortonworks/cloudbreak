@@ -8,7 +8,7 @@ import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 
-public class UpscaleStackResult extends CloudPlatformResult<CloudPlatformRequest> {
+public class UpscaleStackResult extends CloudPlatformResult<CloudPlatformRequest<?>> {
 
     private final ResourceStatus resourceStatus;
 

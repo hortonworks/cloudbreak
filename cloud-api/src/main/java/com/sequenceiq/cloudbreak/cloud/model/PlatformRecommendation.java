@@ -1,15 +1,14 @@
 package com.sequenceiq.cloudbreak.cloud.model;
 
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
 public class PlatformRecommendation {
 
-    private Map<String, VmType> recommendations = new HashMap<>();
+    private Map<String, VmType> recommendations;
 
-    private Set<VmType> virtualMachines = new HashSet<>();
+    private Set<VmType> virtualMachines;
 
     private DiskTypes diskTypes;
 
@@ -27,7 +26,7 @@ public class PlatformRecommendation {
         this.recommendations = recommendations;
     }
 
-    public Set<VmType> getVirtualMachines() {
+    public Collection<VmType> getVirtualMachines() {
         return virtualMachines;
     }
 

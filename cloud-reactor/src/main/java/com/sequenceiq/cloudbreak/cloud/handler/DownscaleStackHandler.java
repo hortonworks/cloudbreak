@@ -71,6 +71,6 @@ public class DownscaleStackHandler implements CloudPlatformEventHandler<Downscal
             result = new DownscaleStackResult(e.getMessage(), e, request);
         }
         request.getResult().onNext(result);
-        eventBus.notify(result.selector(), new Event(downscaleStackRequestEvent.getHeaders(), result));
+        eventBus.notify(result.selector(), new Event<>(downscaleStackRequestEvent.getHeaders(), result));
     }
 }

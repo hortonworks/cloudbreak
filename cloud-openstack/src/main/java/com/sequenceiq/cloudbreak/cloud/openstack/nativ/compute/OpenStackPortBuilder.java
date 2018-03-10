@@ -24,10 +24,10 @@ import com.sequenceiq.cloudbreak.common.type.ResourceType;
 public class OpenStackPortBuilder extends AbstractOpenStackComputeResourceBuilder {
     @Override
     public List<CloudResource> build(OpenStackContext context, long privateId, AuthenticatedContext auth, Group group, Image image,
-            List<CloudResource> buildableResource, Map<String, String> tags) throws Exception {
+            List<CloudResource> buildableResource, Map<String, String> tags) {
         CloudResource resource = buildableResource.get(0);
         try {
-            OSClient osClient = createOSClient(auth);
+            OSClient<?> osClient = createOSClient(auth);
             Port port = Builders.port()
                     .tenantId(context.getStringParameter(OpenStackConstants.TENANT_ID))
                     .networkId(context.getStringParameter(OpenStackConstants.NETWORK_ID))
@@ -43,9 +43,9 @@ public class OpenStackPortBuilder extends AbstractOpenStackComputeResourceBuilde
     }
 
     @Override
-    public CloudResource delete(OpenStackContext context, AuthenticatedContext auth, CloudResource resource) throws Exception {
+    public CloudResource delete(OpenStackContext context, AuthenticatedContext auth, CloudResource resource) {
         try {
-            OSClient osClient = createOSClient(auth);
+            OSClient<?> osClient = createOSClient(auth);
             ActionResponse response = osClient.networking().port().delete(resource.getReference());
             return checkDeleteResponse(response, resourceType(), auth, resource, "Port deletion failed");
         } catch (OS4JException ex) {

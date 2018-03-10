@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.api.model.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.model.Status.UPDATE_FAILED;
 import static com.sequenceiq.cloudbreak.api.model.Status.UPDATE_IN_PROGRESS;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -110,13 +111,13 @@ public class ClusterUpscaleFlowService {
         return failedHosts;
     }
 
-    private void updateFailedHostMetaData(Set<HostMetadata> hostMetadata) {
+    private void updateFailedHostMetaData(Collection<HostMetadata> hostMetadata) {
         List<String> upscaleHostNames = getHostNames(hostMetadata);
-        Set<String> successHosts = new HashSet<>(upscaleHostNames);
+        Collection<String> successHosts = new HashSet<>(upscaleHostNames);
         updateFailedHostMetaData(successHosts, hostMetadata);
     }
 
-    private void updateFailedHostMetaData(Set<String> successHosts, Set<HostMetadata> hostMetadata) {
+    private void updateFailedHostMetaData(Collection<String> successHosts, Iterable<HostMetadata> hostMetadata) {
         for (HostMetadata metaData : hostMetadata) {
             if (!successHosts.contains(metaData.getHostName())) {
                 metaData.setHostMetadataState(HostMetadataState.UNHEALTHY);
@@ -125,7 +126,7 @@ public class ClusterUpscaleFlowService {
         }
     }
 
-    private List<String> getHostNames(Set<HostMetadata> hostMetadata) {
+    private List<String> getHostNames(Collection<HostMetadata> hostMetadata) {
         return hostMetadata.stream().map(HostMetadata::getHostName).collect(Collectors.toList());
     }
 }

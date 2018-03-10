@@ -34,12 +34,11 @@ public class ManualStackRepairTriggerActions {
     private FlowMessageService flowMessageService;
 
     @Bean(name = "UNHEALTHY_INSTANCES_DETECTION_STATE")
-    public Action detectUnhealthyInstancesAction() {
+    public Action<?, ?> detectUnhealthyInstancesAction() {
         return new AbstractStackRepairTriggerAction<StackEvent>(StackEvent.class) {
 
             @Override
-            protected void doExecute(StackRepairTriggerContext context, StackEvent payload, Map<Object, Object> variables)
-                    throws Exception {
+            protected void doExecute(StackRepairTriggerContext context, StackEvent payload, Map<Object, Object> variables) {
                 flowMessageService.fireEventAndLog(payload.getStackId(), Msg.STACK_REPAIR_DETECTION_STARTED, Status.UPDATE_IN_PROGRESS.name());
                 sendEvent(context);
             }
@@ -52,12 +51,11 @@ public class ManualStackRepairTriggerActions {
     }
 
     @Bean(name = "NOTIFY_STACK_REPAIR_SERVICE_STATE")
-    public Action notifyStackRepairServiceAction() {
+    public Action<?, ?> notifyStackRepairServiceAction() {
         return new AbstractStackRepairTriggerAction<UnhealthyInstancesDetectionResult>(UnhealthyInstancesDetectionResult.class) {
 
             @Override
-            protected void doExecute(StackRepairTriggerContext context, UnhealthyInstancesDetectionResult payload, Map<Object, Object> variables)
-                    throws Exception {
+            protected void doExecute(StackRepairTriggerContext context, UnhealthyInstancesDetectionResult payload, Map<Object, Object> variables) {
                 stackRepairService.add(context.getStack(), payload.getUnhealthyInstanceIds());
                 sendEvent(context);
             }
@@ -70,12 +68,11 @@ public class ManualStackRepairTriggerActions {
     }
 
     @Bean(name = "MANUAL_STACK_REPAIR_TRIGGER_FAILED_STATE")
-    public Action handleErrorAction() {
+    public Action<?, ?> handleErrorAction() {
         return new AbstractStackRepairTriggerAction<UnhealthyInstancesDetectionResult>(UnhealthyInstancesDetectionResult.class) {
 
             @Override
-            protected void doExecute(StackRepairTriggerContext context, UnhealthyInstancesDetectionResult payload, Map<Object, Object> variables)
-                    throws Exception {
+            protected void doExecute(StackRepairTriggerContext context, UnhealthyInstancesDetectionResult payload, Map<Object, Object> variables) {
                 flowMessageService.fireEventAndLog(payload.getStackId(), Msg.STACK_REPAIR_FAILED, Status.AVAILABLE.name(), payload.getStatusReason());
                 sendEvent(context);
             }
@@ -87,7 +84,7 @@ public class ManualStackRepairTriggerActions {
         };
     }
 
-    private abstract class AbstractStackRepairTriggerAction<P extends Payload>
+    private abstract static class AbstractStackRepairTriggerAction<P extends Payload>
             extends AbstractAction<ManualStackRepairTriggerState, ManualStackRepairTriggerEvent, StackRepairTriggerContext, P> {
 
         @Inject

@@ -6,7 +6,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -117,7 +116,7 @@ public class ClusterRequestToClusterConverter extends AbstractConversionServiceA
         }
 
         if (gateway.getSsoProvider() == null) {
-            gateway.setSsoProvider("/" + gateway.getPath() + "/sso/api/v1/websso");
+            gateway.setSsoProvider('/' + gateway.getPath() + "/sso/api/v1/websso");
         }
 
         convertExposedServices(cloudGatewayJson, gateway);
@@ -155,7 +154,7 @@ public class ClusterRequestToClusterConverter extends AbstractConversionServiceA
         }
     }
 
-    private Map<String, String> convertBlueprintInputJsons(Set<BlueprintInputJson> inputs) {
+    private Map<String, String> convertBlueprintInputJsons(Iterable<BlueprintInputJson> inputs) {
         Map<String, String> blueprintInputs = new HashMap<>();
         for (BlueprintInputJson input : inputs) {
             blueprintInputs.put(input.getName(), input.getPropertyValue());

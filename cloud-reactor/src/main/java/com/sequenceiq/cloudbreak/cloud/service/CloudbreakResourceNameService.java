@@ -112,11 +112,7 @@ public abstract class CloudbreakResourceNameService implements ResourceNameServi
             throw new IllegalArgumentException("base and part are both null! Can't append them!");
         }
         StringBuilder sb;
-        if (null != base) {
-            sb = new StringBuilder(base).append(DELIMITER).append(part);
-        } else {
-            sb = new StringBuilder(part);
-        }
+        sb = null != base ? new StringBuilder(base).append(DELIMITER).append(part) : new StringBuilder(part);
         return sb.toString();
     }
 

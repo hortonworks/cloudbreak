@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.converter.spi;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -40,7 +41,7 @@ import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.repository.SecurityRuleRepository;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
-import com.sequenceiq.cloudbreak.service.stack.connector.VolumeUtils;
+import com.sequenceiq.cloudbreak.blueprint.VolumeUtils;
 
 @Component
 public class StackToCloudStackConverter {
@@ -68,7 +69,7 @@ public class StackToCloudStackConverter {
         return convert(stack, Collections.singleton(instanceId));
     }
 
-    public CloudStack convert(Stack stack, Set<String> deleteRequestedInstances) {
+    public CloudStack convert(Stack stack, Collection<String> deleteRequestedInstances) {
         Image image = null;
         List<Group> instanceGroups = buildInstanceGroups(stack.getInstanceGroupsAsList(), stack.getStackAuthentication(), deleteRequestedInstances);
         try {
@@ -103,12 +104,11 @@ public class StackToCloudStackConverter {
             }
         } catch (IOException e) {
             LOGGER.warn("Exception during converting user defined tags.", e);
-        } finally {
-            return result;
         }
+        return result;
     }
 
-    public List<Group> buildInstanceGroups(List<InstanceGroup> instanceGroups, StackAuthentication stackAuthentication, Set<String> deleteRequests) {
+    public List<Group> buildInstanceGroups(List<InstanceGroup> instanceGroups, StackAuthentication stackAuthentication, Collection<String> deleteRequests) {
         // sort by name to avoid shuffling the different instance groups
         Collections.sort(instanceGroups);
         List<Group> groups = new ArrayList<>();
@@ -234,7 +234,7 @@ public class StackToCloudStackConverter {
         return result;
     }
 
-    private Long getFirstValidPrivateId(List<InstanceGroup> instanceGroups) {
+    private Long getFirstValidPrivateId(Iterable<InstanceGroup> instanceGroups) {
         LOGGER.info("Get first valid PrivateId of instanceGroups");
         long highest = 0;
         for (InstanceGroup instanceGroup : instanceGroups) {
@@ -255,7 +255,7 @@ public class StackToCloudStackConverter {
         return highest == 0 ? 0 : highest + 1;
     }
 
-    private InstanceStatus getInstanceStatus(InstanceMetaData metaData, Set<String> deleteRequests) {
+    private InstanceStatus getInstanceStatus(InstanceMetaData metaData, Collection<String> deleteRequests) {
         return deleteRequests.contains(metaData.getInstanceId()) ? InstanceStatus.DELETE_REQUESTED
                 : metaData.getInstanceStatus() == com.sequenceiq.cloudbreak.api.model.InstanceStatus.REQUESTED ? InstanceStatus.CREATE_REQUESTED
                 : InstanceStatus.CREATED;

@@ -24,7 +24,7 @@ public class FlowChainInitializer {
     private FlowChainHandler flowChainHandler;
 
     @Resource
-    private List<FlowEventChainFactory> flowChainFactories;
+    private List<FlowEventChainFactory<?>> flowChainFactories;
 
     @PostConstruct
     public void init() {

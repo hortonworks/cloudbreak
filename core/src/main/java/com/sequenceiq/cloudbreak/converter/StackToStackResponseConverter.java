@@ -161,7 +161,7 @@ public class StackToStackResponseConverter extends AbstractConversionServiceAwar
         findAndAddResource(source, stackResponse.getParameters(), ResourceType.AWS_VPC.name(), ResourceType.AWS_VPC);
     }
 
-    private void findAndAddResource(Stack source, Map parameters, String key, ResourceType resourceType) {
+    private void findAndAddResource(Stack source, Map<String, ? super String> parameters, String key, ResourceType resourceType) {
         List<Resource> resourcesByType = source.getResourcesByType(resourceType);
         Optional<Resource> resource = resourcesByType.stream().findFirst();
 
@@ -203,7 +203,7 @@ public class StackToStackResponseConverter extends AbstractConversionServiceAwar
         }
     }
 
-    private StackResponse convertComponentConfig(StackResponse stackJson, Stack source) {
+    private void convertComponentConfig(StackResponse stackJson, Stack source) {
         try {
             if (source.getCluster() != null) {
                 StackRepoDetails stackRepoDetails = clusterComponentConfigProvider.getHDPRepo(source.getCluster().getId());
@@ -230,7 +230,6 @@ public class StackToStackResponseConverter extends AbstractConversionServiceAwar
             LOGGER.error("Failed to convert dynamic component.", e);
         }
 
-        return stackJson;
     }
 
     private Set<InstanceGroupResponse> convertInstanceGroups(Set<InstanceGroup> instanceGroups) {

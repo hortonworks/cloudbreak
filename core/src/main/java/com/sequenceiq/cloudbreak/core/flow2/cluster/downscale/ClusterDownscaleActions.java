@@ -29,13 +29,13 @@ public class ClusterDownscaleActions {
     private ClusterDownscaleService clusterDownscaleService;
 
     @Bean(name = "COLLECT_CANDIDATES_STATE")
-    public Action collectCandidatesAction() {
+    public Action<?, ?> collectCandidatesAction() {
         return new AbstractClusterAction<ClusterDownscaleTriggerEvent>(ClusterDownscaleTriggerEvent.class) {
             @Override
-            protected void doExecute(ClusterViewContext context, ClusterDownscaleTriggerEvent payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(ClusterViewContext context, ClusterDownscaleTriggerEvent payload, Map<Object, Object> variables) {
                 clusterDownscaleService.clusterDownscaleStarted(context.getStackId(), payload.getHostGroupName(), payload.getAdjustment(),
                         payload.getHostNames());
-                CollectDownscaleCandidatesRequest request = new CollectDownscaleCandidatesRequest(context.getStackId(), payload.getHostGroupName(),
+                Selectable request = new CollectDownscaleCandidatesRequest(context.getStackId(), payload.getHostGroupName(),
                         payload.getAdjustment(), payload.getHostNames());
                 sendEvent(context.getFlowId(), request.selector(), request);
             }
@@ -43,21 +43,21 @@ public class ClusterDownscaleActions {
     }
 
     @Bean(name = "DECOMMISSION_STATE")
-    public Action decommissionAction() {
+    public Action<?, ?> decommissionAction() {
         return new AbstractClusterAction<CollectDownscaleCandidatesResult>(CollectDownscaleCandidatesResult.class) {
             @Override
-            protected void doExecute(ClusterViewContext context, CollectDownscaleCandidatesResult payload, Map<Object, Object> variables) throws Exception {
-                DecommissionRequest request = new DecommissionRequest(context.getStackId(), payload.getHostGroupName(), payload.getHostNames());
+            protected void doExecute(ClusterViewContext context, CollectDownscaleCandidatesResult payload, Map<Object, Object> variables) {
+                Selectable request = new DecommissionRequest(context.getStackId(), payload.getHostGroupName(), payload.getHostNames());
                 sendEvent(context.getFlowId(), request.selector(), request);
             }
         };
     }
 
     @Bean(name = "UPDATE_INSTANCE_METADATA_STATE")
-    public Action updateInstanceMetadataAction() {
+    public Action<?, ?> updateInstanceMetadataAction() {
         return new AbstractClusterAction<DecommissionResult>(DecommissionResult.class) {
             @Override
-            protected void doExecute(ClusterViewContext context, DecommissionResult payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(ClusterViewContext context, DecommissionResult payload, Map<Object, Object> variables) {
                 clusterDownscaleService.updateMetadata(context.getStackId(), payload.getHostNames(), payload.getRequest().getHostGroupName());
                 sendEvent(context);
             }
@@ -70,10 +70,10 @@ public class ClusterDownscaleActions {
     }
 
     @Bean(name = "CLUSTER_DOWNSCALE_FAILED_STATE")
-    public Action clusterDownscalescaleFailedAction() {
+    public Action<?, ?> clusterDownscalescaleFailedAction() {
         return new AbstractStackFailureAction<ClusterStartState, ClusterStartEvent>() {
             @Override
-            protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
                 clusterDownscaleService.handleClusterDownscaleFailure(context.getStackView().getId(), payload.getException());
                 sendEvent(context);
             }

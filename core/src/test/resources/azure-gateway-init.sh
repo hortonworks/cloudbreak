@@ -10,10 +10,11 @@ export START_LABEL=98
 export PLATFORM_DISK_PREFIX=sd
 export LAZY_FORMAT_DISK_LIMIT=12
 export IS_GATEWAY=true
-export TMP_SSH_KEY="ssh-rsa test"
+export TMP_SSH_KEY="#NOT_USER_ANYMORE_BUT_KEEP_FOR_BACKWARD_COMPATIBILITY"
 export SSH_USER=cloudbreak
 export SALT_BOOT_PASSWORD=pass
 export SALT_BOOT_SIGN_KEY=cHJpdi1rZXk=
+export CB_CERT=cert
 
 date >> /tmp/time.txt
 

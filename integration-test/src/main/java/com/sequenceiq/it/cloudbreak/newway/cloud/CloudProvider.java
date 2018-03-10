@@ -6,6 +6,8 @@ import com.sequenceiq.it.cloudbreak.newway.Entity;
 import com.sequenceiq.it.cloudbreak.newway.StackEntity;
 
 public abstract class CloudProvider {
+    public static final String CREDENTIAL_DEFAULT_DESCRIPTION = "test credential";
+
     public abstract StackEntity aValidStackRequest();
 
     public abstract CredentialEntity aValidCredential();
@@ -16,7 +18,13 @@ public abstract class CloudProvider {
 
     public abstract AmbariV2Request ambariRequestWithBlueprintName(String blueprintHdp26EdwanalyticsName);
 
-    public abstract String getClusterDefaultName();
+    public abstract String getClusterName();
 
     public abstract String getPlatform();
+
+    public abstract String getCredentialName();
+
+    public abstract String region();
+
+    public abstract String availabilityZone();
 }

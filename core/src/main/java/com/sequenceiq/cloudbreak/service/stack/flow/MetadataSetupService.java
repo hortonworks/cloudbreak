@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.service.stack.flow;
 
 import java.util.Calendar;
-import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -34,7 +33,7 @@ public class MetadataSetupService {
     @Inject
     private InstanceMetaDataRepository instanceMetaDataRepository;
 
-    public int saveInstanceMetaData(Stack stack, List<CloudVmMetaDataStatus> cloudVmMetaDataStatusList, InstanceStatus status) {
+    public int saveInstanceMetaData(Stack stack, Iterable<CloudVmMetaDataStatus> cloudVmMetaDataStatusList, InstanceStatus status) {
         int newInstances = 0;
         boolean ambariServerFound = false;
         Set<InstanceMetaData> allInstanceMetadata = instanceMetaDataRepository.findNotTerminatedForStack(stack.getId());
@@ -92,7 +91,7 @@ public class MetadataSetupService {
         return newInstances;
     }
 
-    private InstanceMetaData createInstanceMetadataIfAbsent(Set<InstanceMetaData> allInstanceMetadata, Long privateId, String instanceId) {
+    private InstanceMetaData createInstanceMetadataIfAbsent(Iterable<InstanceMetaData> allInstanceMetadata, Long privateId, String instanceId) {
         if (privateId != null) {
             for (InstanceMetaData instanceMetaData : allInstanceMetadata) {
                 if (Objects.equals(instanceMetaData.getPrivateId(), privateId)) {

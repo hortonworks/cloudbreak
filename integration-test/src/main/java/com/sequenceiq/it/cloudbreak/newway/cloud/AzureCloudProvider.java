@@ -1,8 +1,5 @@
 package com.sequenceiq.it.cloudbreak.newway.cloud;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import com.sequenceiq.cloudbreak.api.model.StackAuthenticationRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.NetworkV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.TemplateV2Request;
@@ -10,16 +7,17 @@ import com.sequenceiq.it.cloudbreak.newway.Credential;
 import com.sequenceiq.it.cloudbreak.newway.CredentialEntity;
 import com.sequenceiq.it.cloudbreak.newway.TestParameter;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class AzureCloudProvider extends CloudProviderHelper {
     public static final String AZURE = "azure";
 
     public static final String AZURE_CAPITAL = "AZURE";
 
-    private static final String CREDNAME = "itsazurermcredandsmokecred";
+    private static final String CREDENTIAL_DEFAULT_NAME = "autotesting-azure-cred";
 
-    private static final String CREDDESC = "test credential";
-
-    private static final String AZURE_CLUSTER_DEFAULT_NAME = "azure";
+    private static final String AZURE_CLUSTER_DEFAULT_NAME = "autotesting-azure-cluster";
 
     public AzureCloudProvider(TestParameter testParameter) {
         super(testParameter);
@@ -28,19 +26,19 @@ public class AzureCloudProvider extends CloudProviderHelper {
     @Override
     public CredentialEntity aValidCredential() {
         return Credential.isCreated()
-                .withName(CREDNAME)
-                .withDescription(CREDDESC)
+                .withName(getCredentialName())
+                .withDescription(CREDENTIAL_DEFAULT_DESCRIPTION)
                 .withCloudPlatform(AZURE_CAPITAL)
                 .withParameters(azureCredentialDetails());
     }
 
     @Override
-    String availabilityZone() {
+    public String availabilityZone() {
         return null;
     }
 
     @Override
-    String region() {
+    public String region() {
         String region = "North Europe";
         String regionParam = getTestParameter().get("azureRegion");
 
@@ -81,9 +79,16 @@ public class AzureCloudProvider extends CloudProviderHelper {
     }
 
     @Override
-    public String getClusterDefaultName() {
+    public String getClusterName() {
         String clustername = getTestParameter().get("azureClusterName");
         return clustername == null ? AZURE_CLUSTER_DEFAULT_NAME : clustername;
+    }
+
+    @Override
+    NetworkV2Request network() {
+        NetworkV2Request network = new NetworkV2Request();
+        network.setSubnetCIDR("10.0.0.0/16");
+        return network;
     }
 
     @Override
@@ -91,8 +96,14 @@ public class AzureCloudProvider extends CloudProviderHelper {
         return AZURE_CAPITAL;
     }
 
+    @Override
+    public String getCredentialName() {
+        String credentialName = getTestParameter().get("azureCredentialName");
+        return credentialName == null ? CREDENTIAL_DEFAULT_NAME : credentialName;
+    }
+
     public Map<String, Object> azureCredentialDetails() {
-        Map<String, Object> map = new HashMap<String, Object>();
+        Map<String, Object> map = new HashMap<>();
         map.put("accessKey", getTestParameter().get("integrationtest.azurermcredential.accessKey"));
         map.put("secretKey", getTestParameter().get("integrationtest.azurermcredential.secretKey"));
         map.put("subscriptionId", getTestParameter().get("integrationtest.azurermcredential.subscriptionId"));
@@ -102,7 +113,7 @@ public class AzureCloudProvider extends CloudProviderHelper {
     }
 
     public Map<String, Object> azureCredentialDetailsInvalidAccessKey() {
-        Map<String, Object> map = new HashMap<String, Object>();
+        Map<String, Object> map = new HashMap<>();
         map.put("accessKey", "12345abcdefg789");
         map.put("secretKey", getTestParameter().get("integrationtest.azurermcredential.secretKey"));
         map.put("subscriptionId", getTestParameter().get("integrationtest.azurermcredential.subscriptionId"));
@@ -112,7 +123,7 @@ public class AzureCloudProvider extends CloudProviderHelper {
     }
 
     public Map<String, Object> azureCredentialDetailsInvalidSecretKey() {
-        Map<String, Object> map = new HashMap<String, Object>();
+        Map<String, Object> map = new HashMap<>();
         map.put("accessKey", getTestParameter().get("integrationtest.azurermcredential.accessKey"));
         map.put("secretKey", "12345abcdefg789");
         map.put("subscriptionId", getTestParameter().get("integrationtest.azurermcredential.subscriptionId"));
@@ -122,7 +133,7 @@ public class AzureCloudProvider extends CloudProviderHelper {
     }
 
     public Map<String, Object> azureCredentialDetailsInvalidSubscriptionID() {
-        Map<String, Object> map = new HashMap<String, Object>();
+        Map<String, Object> map = new HashMap<>();
         map.put("accessKey", getTestParameter().get("integrationtest.azurermcredential.accessKey"));
         map.put("secretKey", getTestParameter().get("integrationtest.azurermcredential.secretKey"));
         map.put("subscriptionId", "12345abcdefg789");
@@ -132,19 +143,12 @@ public class AzureCloudProvider extends CloudProviderHelper {
     }
 
     public Map<String, Object> azureCredentialDetailsInvalidTenantID() {
-        Map<String, Object> map = new HashMap<String, Object>();
+        Map<String, Object> map = new HashMap<>();
         map.put("accessKey", getTestParameter().get("integrationtest.azurermcredential.accessKey"));
         map.put("secretKey", getTestParameter().get("integrationtest.azurermcredential.secretKey"));
         map.put("subscriptionId", getTestParameter().get("integrationtest.azurermcredential.subscriptionId"));
         map.put("tenantId", "12345abcdefg789");
 
         return map;
-    }
-
-    @Override
-    NetworkV2Request network() {
-        NetworkV2Request network = new NetworkV2Request();
-        network.setSubnetCIDR("10.0.0.0/16");
-        return network;
     }
 }

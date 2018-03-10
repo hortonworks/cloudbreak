@@ -2,8 +2,8 @@ package com.sequenceiq.cloudbreak.service.blueprint;
 
 import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
 
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -50,11 +50,8 @@ public class BlueprintService {
     }
 
     public Set<Blueprint> retrieveAccountBlueprints(IdentityUser user) {
-        if (user.getRoles().contains(IdentityUserRole.ADMIN)) {
-            return blueprintRepository.findAllInAccount(user.getAccount());
-        } else {
-            return blueprintRepository.findPublicInAccountForUser(user.getUserId(), user.getAccount());
-        }
+        return user.getRoles().contains(IdentityUserRole.ADMIN) ? blueprintRepository.findAllInAccount(user.getAccount())
+                : blueprintRepository.findPublicInAccountForUser(user.getUserId(), user.getAccount());
     }
 
     public Blueprint get(Long id) {
@@ -85,13 +82,13 @@ public class BlueprintService {
     }
 
     @Transactional(TxType.NEVER)
-    public Blueprint create(IdentityUser user, Blueprint blueprint, List<Map<String, Map<String, String>>> properties) {
+    public Blueprint create(IdentityUser user, Blueprint blueprint, Collection<Map<String, Map<String, String>>> properties) {
         LOGGER.debug("Creating blueprint: [User: '{}', Account: '{}']", user.getUsername(), user.getAccount());
         Blueprint savedBlueprint;
         blueprint.setOwner(user.getUserId());
         blueprint.setAccount(user.getAccount());
         if (properties != null && !properties.isEmpty()) {
-            LOGGER.info("Extend blueprint with the following properties: {}", properties);
+            LOGGER.info("Extend validation with the following properties: {}", properties);
             Map<String, Map<String, String>> configs = new HashMap<>(properties.size());
             for (Map<String, Map<String, String>> property : properties) {
                 for (Entry<String, Map<String, String>> entry : property.entrySet()) {
@@ -104,7 +101,7 @@ public class BlueprintService {
                 }
             }
             String extendedBlueprint = new AmbariClient().extendBlueprintGlobalConfiguration(blueprint.getBlueprintText(), configs);
-            LOGGER.info("Extended blueprint result: {}", extendedBlueprint);
+            LOGGER.info("Extended validation result: {}", extendedBlueprint);
             blueprint.setBlueprintText(extendedBlueprint);
         }
         try {
@@ -157,7 +154,7 @@ public class BlueprintService {
         authorizationService.hasWritePermission(blueprint);
         if (!clusterRepository.countByBlueprint(blueprint).equals(0L)) {
             throw new BadRequestException(String.format(
-                    "There are clusters associated with blueprint '%s'. Please remove these before deleting the blueprint.", blueprint.getId()));
+                    "There are clusters associated with validation '%s'. Please remove these before deleting the validation.", blueprint.getId()));
         }
         if (ResourceStatus.USER_MANAGED.equals(blueprint.getStatus())) {
             blueprintRepository.delete(blueprint);

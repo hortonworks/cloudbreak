@@ -34,12 +34,13 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationFl
 import com.sequenceiq.cloudbreak.domain.CloudbreakNode;
 import com.sequenceiq.cloudbreak.domain.FlowLog;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.ha.CloudbreakNodeConfig;
 import com.sequenceiq.cloudbreak.repository.CloudbreakNodeRepository;
 import com.sequenceiq.cloudbreak.repository.FlowLogRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.Clock;
 import com.sequenceiq.cloudbreak.service.Retry;
-import com.sequenceiq.cloudbreak.service.Retry.ActionWentFail;
+import com.sequenceiq.cloudbreak.service.Retry.ActionWentFailException;
 import com.sequenceiq.cloudbreak.service.metrics.MetricService;
 
 @Service
@@ -106,10 +107,10 @@ public class HeartbeatService {
                     } catch (RuntimeException e) {
                         LOGGER.error("Failed to update the heartbeat timestamp", e);
                         metricService.incrementMetricCounter(MetricType.HEARTBEAT_UPDATE_FAILED);
-                        throw new ActionWentFail(e.getMessage());
+                        throw new ActionWentFailException(e.getMessage());
                     }
                 });
-            } catch (ActionWentFail af) {
+            } catch (ActionWentFailException af) {
                 LOGGER.error(String.format("Failed to update the heartbeat timestamp 5 times for node %s: %s", nodeId, af.getMessage()));
                 cancelEveryFlowWithoutDbUpdate();
             }
@@ -164,7 +165,7 @@ public class HeartbeatService {
         if (!failedFlowLogs.isEmpty()) {
             LOGGER.info("The following flows will be distributed across the active nodes: {}", getFlowIds(failedFlowLogs));
             List<FlowLog> invalidFlows = getInvalidFlows(failedFlowLogs);
-            List<FlowLog> updatedFlowLogs = new ArrayList<>(invalidFlows.size());
+            Collection<FlowLog> updatedFlowLogs = new ArrayList<>(invalidFlows.size());
             invalidFlows.forEach(fl -> fl.setFinalized(true));
             updatedFlowLogs.addAll(invalidFlows);
             failedFlowLogs.removeAll(invalidFlows);

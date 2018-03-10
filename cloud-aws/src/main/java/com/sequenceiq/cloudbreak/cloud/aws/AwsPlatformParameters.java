@@ -32,8 +32,6 @@ import com.sequenceiq.cloudbreak.cloud.model.DiskTypes;
 import com.sequenceiq.cloudbreak.cloud.model.DisplayName;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformOrchestrator;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
-import com.sequenceiq.cloudbreak.cloud.model.RegionDisplayNameSpecification;
-import com.sequenceiq.cloudbreak.cloud.model.RegionDisplayNameSpecifications;
 import com.sequenceiq.cloudbreak.cloud.model.ScriptParams;
 import com.sequenceiq.cloudbreak.cloud.model.StackParamValidation;
 import com.sequenceiq.cloudbreak.cloud.model.TagSpecification;
@@ -77,10 +75,6 @@ public class AwsPlatformParameters implements PlatformParameters {
     @Qualifier("AwsTagSpecification")
     private TagSpecification tagSpecification;
 
-    private Map<Region, List<AvailabilityZone>> regions = new HashMap<>();
-
-    private Map<Region, DisplayName> regionDisplayNames = new HashMap<>();
-
     private final Map<AvailabilityZone, VmType> defaultVmTypes = new HashMap<>();
 
     private Region defaultRegion;
@@ -91,23 +85,7 @@ public class AwsPlatformParameters implements PlatformParameters {
 
     @PostConstruct
     public void init() {
-        regions = readRegions(resourceDefinition("zone"));
-        regionDisplayNames = readRegionDisplayNames(resourceDefinition("zone-displaynames"));
         vmRecommendations = initVmRecommendations();
-    }
-
-    private Map<Region, DisplayName> readRegionDisplayNames(String displayNames) {
-        Map<Region, DisplayName> regionDisplayNames = new HashMap<>();
-        try {
-            RegionDisplayNameSpecifications regionDisplayNameSpecifications = JsonUtil.readValue(displayNames, RegionDisplayNameSpecifications.class);
-            for (RegionDisplayNameSpecification regionDisplayNameSpecification : regionDisplayNameSpecifications.getItems()) {
-                regionDisplayNames.put(Region.region(regionDisplayNameSpecification.getName()),
-                        displayName(regionDisplayNameSpecification.getDisplayName()));
-            }
-        } catch (IOException ignored) {
-            return regionDisplayNames;
-        }
-        return sortMap(regionDisplayNames);
     }
 
     @Override

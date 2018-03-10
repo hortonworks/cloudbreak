@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.decorator;
 
 import static org.springframework.util.StringUtils.isEmpty;
 
+import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
 
@@ -86,12 +87,12 @@ public class HostGroupDecorator {
         return subject;
     }
 
-    private void prepareRecipesByName(HostGroup subject, IdentityUser user, Set<String> recipeNames) {
+    private void prepareRecipesByName(HostGroup subject, IdentityUser user, Collection<String> recipeNames) {
         Set<Recipe> recipes = recipeService.getPublicRecipes(user, recipeNames);
         subject.getRecipes().addAll(recipes);
     }
 
-    private void prepareRecipesByRequests(HostGroup subject, IdentityUser user, Set<RecipeRequest> recipes, Boolean publicInAccount) {
+    private void prepareRecipesByRequests(HostGroup subject, IdentityUser user, Iterable<RecipeRequest> recipes, Boolean publicInAccount) {
         for (RecipeRequest recipe : recipes) {
             Recipe convert = conversionService.convert(recipe, Recipe.class);
             convert.setPublicInAccount(publicInAccount);
@@ -100,7 +101,7 @@ public class HostGroupDecorator {
         }
     }
 
-    private void prepareRecipesByIds(HostGroup subject, Set<Long> recipeIds) {
+    private void prepareRecipesByIds(HostGroup subject, Iterable<Long> recipeIds) {
         for (Long recipeId : recipeIds) {
             Recipe recipe = recipeService.get(recipeId);
             subject.getRecipes().add(recipe);
@@ -163,7 +164,7 @@ public class HostGroupDecorator {
         return result;
     }
 
-    private HostGroup getDetailsFromExistingHostGroup(Constraint constraint, HostGroup subject, String instanceGroupName, Set<HostGroup> hostGroups) {
+    private HostGroup getDetailsFromExistingHostGroup(Constraint constraint, HostGroup subject, String instanceGroupName, Collection<HostGroup> hostGroups) {
         Optional<HostGroup> hostGroupOptional = hostGroups.stream().filter(input ->
                 input.getConstraint().getInstanceGroup().getGroupName().equals(instanceGroupName)
         ).findFirst();

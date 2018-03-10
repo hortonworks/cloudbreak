@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.client.SaltClientConfig;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
-import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -21,7 +20,7 @@ public class GatewayConfigService {
     @Inject
     private TlsSecurityService tlsSecurityService;
 
-    public List<GatewayConfig> getAllGatewayConfigs(Stack stack) throws CloudbreakSecuritySetupException {
+    public List<GatewayConfig> getAllGatewayConfigs(Stack stack) {
         List<GatewayConfig> result = new ArrayList<>();
         for (InstanceMetaData instanceMetaData : stack.getGatewayInstanceMetadata()) {
             result.add(getGatewayConfig(stack, instanceMetaData, stack.getCluster().getGateway().getEnableGateway()));
@@ -29,7 +28,7 @@ public class GatewayConfigService {
         return result;
     }
 
-    public GatewayConfig getPrimaryGatewayConfig(Stack stack) throws CloudbreakSecuritySetupException {
+    public GatewayConfig getPrimaryGatewayConfig(Stack stack) {
         InstanceMetaData gatewayInstance = stack.getPrimaryGatewayInstance();
         if (gatewayInstance == null) {
             throw new NotFoundException("Gateway instance does not found");
@@ -37,7 +36,7 @@ public class GatewayConfigService {
         return getGatewayConfig(stack, gatewayInstance, stack.getCluster().getGateway().getEnableGateway());
     }
 
-    public GatewayConfig getGatewayConfig(Stack stack, InstanceMetaData gatewayInstance, Boolean knoxGatewayEnabled) throws CloudbreakSecuritySetupException {
+    public GatewayConfig getGatewayConfig(Stack stack, InstanceMetaData gatewayInstance, Boolean knoxGatewayEnabled) {
         return tlsSecurityService.buildGatewayConfig(stack.getId(), gatewayInstance, stack.getGatewayPort(), getSaltClientConfig(stack), knoxGatewayEnabled);
     }
 

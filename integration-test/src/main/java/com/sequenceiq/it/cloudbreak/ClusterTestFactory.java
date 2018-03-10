@@ -12,7 +12,7 @@ import java.util.Arrays;
 
 public class ClusterTestFactory extends CloudbreakTest {
     @Factory
-    @Parameters({"providers"})
+    @Parameters("providers")
     public Object[] clusterTestFactory(@Optional(OpenstackCloudProvider.OPENSTACK) String providers) {
         CloudProvider[] cloudProviders = CloudProviderHelper.providerFactory(providers, getTestParameter());
         Object[] results = Arrays.stream(cloudProviders)

@@ -66,6 +66,9 @@ public class ClusterResponse implements JsonEntity {
     @ApiModelProperty(ClusterModelDescription.RDSCONFIGS)
     private Set<RDSConfigResponse> rdsConfigs = new HashSet<>();
 
+    @ApiModelProperty(ClusterModelDescription.PROXY_NAME)
+    private String proxyName;
+
     @ApiModelProperty(ClusterModelDescription.SERVICE_ENDPOINT_MAP)
     private Map<String, String> serviceEndPoints = new HashMap<>();
 
@@ -388,5 +391,13 @@ public class ClusterResponse implements JsonEntity {
 
     public void setUptime(Long uptime) {
         this.uptime = uptime;
+    }
+
+    public String getProxyName() {
+        return proxyName;
+    }
+
+    public void setProxyName(String proxyName) {
+        this.proxyName = proxyName;
     }
 }

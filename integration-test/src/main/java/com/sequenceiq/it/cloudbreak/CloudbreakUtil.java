@@ -22,9 +22,9 @@ import org.springframework.util.StringUtils;
 import org.testng.Assert;
 
 import com.sequenceiq.ambari.client.AmbariClient;
+import com.sequenceiq.cloudbreak.api.endpoint.common.StackEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.EventEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.StackV1Endpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v2.StackV2Endpoint;
 import com.sequenceiq.cloudbreak.api.model.CloudbreakEventsJson;
 import com.sequenceiq.cloudbreak.api.model.HostGroupResponse;
 import com.sequenceiq.cloudbreak.api.model.HostMetadataResponse;
@@ -46,7 +46,7 @@ public class CloudbreakUtil {
 
     private static final int MAX_RETRY = 360;
 
-    private static int pollingInterval = 10000;
+    private static long pollingInterval = 10000L;
 
     private CloudbreakUtil() {
     }
@@ -108,7 +108,7 @@ public class CloudbreakUtil {
         }
     }
 
-    public static WaitResult waitForHostStatusStack(StackV1Endpoint stackV1Endpoint, String stackId, String hostGroup, String desiredStatus) {
+    public static WaitResult waitForHostStatusStack(StackEndpoint stackV1Endpoint, String stackId, String hostGroup, String desiredStatus) {
         WaitResult waitResult = WaitResult.SUCCESSFUL;
         Boolean found = FALSE;
 
@@ -139,21 +139,15 @@ public class CloudbreakUtil {
         return waitResult;
     }
 
-    public static void checkClusterFailed(StackV1Endpoint stackV1Endpoint, String stackId, String failMessage) {
+    public static void checkClusterFailed(StackEndpoint stackV1Endpoint, String stackId, CharSequence failMessage) {
         StackResponse stackResponse = stackV1Endpoint.get(Long.valueOf(stackId), new HashSet<>());
         Assert.assertNotEquals(stackResponse.getCluster().getStatus(), Status.AVAILABLE);
         Assert.assertTrue(stackResponse.getCluster().getStatusReason().contains(failMessage));
     }
 
-    public static void checkClusterAvailability(StackV1Endpoint stackV1Endpoint, String port, String stackId, String ambariUser, String ambariPassowrd,
+    public static void checkClusterAvailability(StackEndpoint stackV1Endpoint, String port, String stackId, String ambariUser, String ambariPassowrd,
             boolean checkAmbari) {
         StackResponse stackResponse = stackV1Endpoint.get(Long.valueOf(stackId), new HashSet<>());
-        checkClusterAvailability(stackResponse, port, stackId, ambariUser, ambariPassowrd, checkAmbari);
-    }
-
-    public static void checkClusterAvailability(StackV2Endpoint stackV2Endpoint, String port, String stackId, String ambariUser, String ambariPassowrd,
-            boolean checkAmbari) {
-        StackResponse stackResponse = stackV2Endpoint.get(Long.valueOf(stackId), new HashSet<>());
         checkClusterAvailability(stackResponse, port, stackId, ambariUser, ambariPassowrd, checkAmbari);
     }
 
@@ -173,12 +167,7 @@ public class CloudbreakUtil {
         }
     }
 
-    public static void checkClusterStopped(StackV1Endpoint stackV1Endpoint, String port, String stackId, String ambariUser, String ambariPassword) {
-        StackResponse stackResponse = stackV1Endpoint.get(Long.valueOf(stackId), new HashSet<>());
-        checkClusterStopped(port, ambariUser, ambariPassword, stackResponse);
-    }
-
-    public static void checkClusterStopped(StackV2Endpoint stackV1Endpoint, String port, String stackId, String ambariUser, String ambariPassword) {
+    public static void checkClusterStopped(StackEndpoint stackV1Endpoint, String port, String stackId, String ambariUser, String ambariPassword) {
         StackResponse stackResponse = stackV1Endpoint.get(Long.valueOf(stackId), new HashSet<>());
         checkClusterStopped(port, ambariUser, ambariPassword, stackResponse);
     }
@@ -201,7 +190,7 @@ public class CloudbreakUtil {
         }
     }
 
-    public static String getAmbariIp(StackV1Endpoint stackV1Endpoint, String stackId, IntegrationTestContext itContext) {
+    public static String getAmbariIp(StackEndpoint stackV1Endpoint, String stackId, IntegrationTestContext itContext) {
         String ambariIp = itContext.getContextParam(CloudbreakITContextConstants.AMBARI_IP_ID);
         if (StringUtils.isEmpty(ambariIp)) {
             StackResponse stackResponse = stackV1Endpoint.get(Long.valueOf(stackId), new HashSet<>());

@@ -21,10 +21,10 @@ public class ClusterSyncActions {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterSyncActions.class);
 
     @Bean(name = "CLUSTER_SYNC_STATE")
-    public Action syncCluster() {
+    public Action<?, ?> syncCluster() {
         return new AbstractClusterSyncAction<StackEvent>(StackEvent.class) {
             @Override
-            protected void doExecute(ClusterSyncContext context, StackEvent payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(ClusterSyncContext context, StackEvent payload, Map<Object, Object> variables) {
                 sendEvent(context);
             }
 
@@ -36,10 +36,10 @@ public class ClusterSyncActions {
     }
 
     @Bean(name = "CLUSTER_SYNC_FINISHED_STATE")
-    public Action finishSyncCluster() {
+    public Action<?, ?> finishSyncCluster() {
         return new AbstractClusterSyncAction<ClusterSyncResult>(ClusterSyncResult.class) {
             @Override
-            protected void doExecute(ClusterSyncContext context, ClusterSyncResult payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(ClusterSyncContext context, ClusterSyncResult payload, Map<Object, Object> variables) {
                 sendEvent(context);
             }
 
@@ -51,10 +51,10 @@ public class ClusterSyncActions {
     }
 
     @Bean(name = "CLUSTER_SYNC_FAILED_STATE")
-    public Action clusterSyncFailedAction() {
+    public Action<?, ?> clusterSyncFailedAction() {
         return new AbstractStackFailureAction<ClusterSyncState, ClusterSyncEvent>() {
             @Override
-            protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
                 LOGGER.warn("Error during executing cluster sync.", payload.getException());
                 sendEvent(context);
             }

@@ -26,7 +26,7 @@ public class StackStartTest extends AbstractCloudbreakIntegrationTest {
     }
 
     @Test
-    public void testStackStart() throws Exception {
+    public void testStackStart() {
         // GIVEN
         IntegrationTestContext itContext = getItContext();
         String stackId = itContext.getContextParam(CloudbreakITContextConstants.STACK_ID);

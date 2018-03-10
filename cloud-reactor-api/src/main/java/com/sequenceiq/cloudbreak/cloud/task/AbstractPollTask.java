@@ -15,7 +15,7 @@ public abstract class AbstractPollTask<T> implements PollTask<T> {
 
     private final boolean cancellable;
 
-    private Map<String, String> mdcContextMap;
+    private final Map<String, String> mdcContextMap;
 
     protected AbstractPollTask(AuthenticatedContext authenticatedContext) {
         this(authenticatedContext, true);
@@ -28,12 +28,12 @@ public abstract class AbstractPollTask<T> implements PollTask<T> {
     }
 
     @Override
-    public final T call() throws Exception {
+    public final T call() {
         MDCBuilder.buildMdcContextFromMap(mdcContextMap);
         return doCall();
     }
 
-    protected abstract T doCall() throws Exception;
+    protected abstract T doCall();
 
     @Override
     public AuthenticatedContext getAuthenticatedContext() {

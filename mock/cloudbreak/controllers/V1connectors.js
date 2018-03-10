@@ -79,11 +79,3 @@ module.exports.getSpecialProperties = function getSpecialProperties (req, res, n
 module.exports.getTagSpecifications = function getTagSpecifications (req, res, next) {
   V1connectors.getTagSpecifications(req.swagger.params, res, next);
 };
-
-module.exports.getVmTypes = function getVmTypes (req, res, next) {
-  V1connectors.getVmTypes(req.swagger.params, res, next);
-};
-
-module.exports.getVmTypesByType = function getVmTypesByType (req, res, next) {
-  V1connectors.getVmTypesByType(req.swagger.params, res, next);
-};

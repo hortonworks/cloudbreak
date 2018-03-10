@@ -7,9 +7,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class StackDetails {
 
-    private String version;
+    private final String version;
 
-    private StackRepoDetails repo;
+    private final StackRepoDetails repo;
 
     @JsonCreator
     public StackDetails(

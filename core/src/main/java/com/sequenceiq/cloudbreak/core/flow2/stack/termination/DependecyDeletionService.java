@@ -125,7 +125,7 @@ public class DependecyDeletionService {
                 blueprintRepository.delete(blueprint);
             }
         } catch (Exception ex) {
-            LOGGER.warn("Could not delete blueprint {} which is associated with the stack: {}", blueprint, ex.getMessage());
+            LOGGER.warn("Could not delete validation {} which is associated with the stack: {}", blueprint, ex.getMessage());
         }
     }
 

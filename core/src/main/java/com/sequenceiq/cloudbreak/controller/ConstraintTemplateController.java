@@ -109,7 +109,7 @@ public class ConstraintTemplateController implements ConstraintTemplateEndpoint 
         return conversionService.convert(constraintTemplate, ConstraintTemplateResponse.class);
     }
 
-    private Set<ConstraintTemplateResponse> convert(Set<ConstraintTemplate> constraintTemplates) {
+    private Set<ConstraintTemplateResponse> convert(Iterable<ConstraintTemplate> constraintTemplates) {
         Set<ConstraintTemplateResponse> jsons = new HashSet<>();
         for (ConstraintTemplate constraintTemplate : constraintTemplates) {
             jsons.add(convert(constraintTemplate));

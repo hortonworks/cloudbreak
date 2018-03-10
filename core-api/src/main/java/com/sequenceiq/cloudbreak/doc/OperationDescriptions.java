@@ -12,7 +12,7 @@ public class OperationDescriptions {
         public static final String DELETE_PRIVATE_BY_NAME = "delete private blueprint by name";
         public static final String DELETE_PUBLIC_BY_NAME = "delete public (owned) or private blueprint by name";
         public static final String DELETE_BY_ID = "delete blueprint by id";
-        public static final String GET_BY_BLUEPRINT_ID = "retrieve blueprint request by blueprint name";
+        public static final String GET_BY_BLUEPRINT_ID = "retrieve validation request by blueprint name";
     }
 
     public static class TemplateOpDescription {
@@ -207,6 +207,7 @@ public class OperationDescriptions {
         public static final String TEST_LDAP_CONNECTION_BY_ID = "tests an already exists LDAP connection";
         public static final String TEST_DATABASE = "tests a database connection parameters";
         public static final String CREATE_DATABASE = "create a database connection parameters";
+        public static final String CHECK_CLIENT_VERSION = "checks the client version";
     }
 
     public static class RdsConfigOpDescription {
@@ -220,6 +221,19 @@ public class OperationDescriptions {
         public static final String DELETE_PRIVATE_BY_NAME = "delete private RDS configuration by name";
         public static final String DELETE_PUBLIC_BY_NAME = "delete public (owned) or private RDS configuration by name";
         public static final String DELETE_BY_ID = "delete RDS configuration by id";
+    }
+
+    public static class ProxyConfigOpDescription {
+        public static final String POST_PRIVATE = "create proxy configuration as private resource";
+        public static final String POST_PUBLIC = "create proxy configuration as public resource";
+        public static final String GET_PRIVATE = "retrieve private proxy configurations";
+        public static final String GET_PUBLIC = "retrieve public and private (owned) proxy configurations";
+        public static final String GET_PRIVATE_BY_NAME = "retrieve a private proxy configuration by name";
+        public static final String GET_PUBLIC_BY_NAME = "retrieve a public or private (owned) proxy configuration by name";
+        public static final String GET_BY_ID = "retrieve proxy configuration by id";
+        public static final String DELETE_PRIVATE_BY_NAME = "delete private proxy configuration by name";
+        public static final String DELETE_PUBLIC_BY_NAME = "delete public (owned) or private proxy configuration by name";
+        public static final String DELETE_BY_ID = "delete proxy configuration by id";
     }
 
     public static class ConnectorOpDescription {

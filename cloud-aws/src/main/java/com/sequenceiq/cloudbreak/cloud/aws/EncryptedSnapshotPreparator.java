@@ -1,11 +1,13 @@
 package com.sequenceiq.cloudbreak.cloud.aws;
 
+import java.util.Collection;
 import java.util.Optional;
 
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
+import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.AvailabilityZone;
 import com.amazonaws.services.ec2.model.CreateSnapshotRequest;
@@ -60,14 +62,14 @@ public class EncryptedSnapshotPreparator {
         AmazonEC2Client client = awsClient.createAccess(awsCredentialView, regionName);
 
         Optional<String> snapshotId = checkThatSnapshotIsAvailable(awsInstanceView, client);
-        return snapshotId.isPresent() ? snapshotId : prepareSnapshotForEncryptionBecauseThatDoesNotExist(ac, group, awsInstanceView, client);
+        return snapshotId.isPresent() ? snapshotId : prepareSnapshotForEncryptionBecauseThatDoesNotExist(ac, awsInstanceView, client);
     }
 
-    private Optional<String> prepareSnapshotForEncryptionBecauseThatDoesNotExist(AuthenticatedContext ac, Group group,
-            AwsInstanceView instanceView, AmazonEC2Client client) {
+    private Optional<String> prepareSnapshotForEncryptionBecauseThatDoesNotExist(AuthenticatedContext ac, AwsInstanceView instanceView,
+            AmazonEC2Client client) {
         CreateVolumeResult volumeResult = client.createVolume(prepareCreateVolumeRequest(ac, instanceView, client));
 
-        checkEbsVolumeStatus(ac, group, client, volumeResult);
+        checkEbsVolumeStatus(ac, client, volumeResult);
         CreateSnapshotResult snapshotResult = client.createSnapshot(prepareCreateSnapshotRequest(volumeResult));
 
         checkSnapshotReadiness(ac, client, snapshotResult);
@@ -75,7 +77,7 @@ public class EncryptedSnapshotPreparator {
         return Optional.of(snapshotResult.getSnapshot().getSnapshotId());
     }
 
-    private Optional<String> checkThatSnapshotIsAvailable(AwsInstanceView awsInstanceView, AmazonEC2Client client) {
+    private Optional<String> checkThatSnapshotIsAvailable(AwsInstanceView awsInstanceView, AmazonEC2 client) {
         Optional<Snapshot> describeSnapshotsResult =
                 client.describeSnapshots(prepareDescribeSnapshotsRequest(awsInstanceView)).getSnapshots().stream().findFirst();
         return describeSnapshotsResult.isPresent() ? Optional.ofNullable(describeSnapshotsResult.get().getSnapshotId()) : Optional.empty();
@@ -85,7 +87,7 @@ public class EncryptedSnapshotPreparator {
         return new CreateTagsRequest().withTags(prepareTagList(awsInstanceView)).withResources(snapshotResult.getSnapshot().getSnapshotId());
     }
 
-    private ImmutableList<Tag> prepareTagList(AwsInstanceView awsInstanceView) {
+    private Collection<Tag> prepareTagList(AwsInstanceView awsInstanceView) {
         return ImmutableList.of(new Tag()
                 .withKey(String.format(CLOUDBREAK_EBS_SNAPSHOT, awsInstanceView.getTemplateId()))
                 .withValue(String.format(CLOUDBREAK_EBS_SNAPSHOT, awsInstanceView.getTemplateId())));
@@ -104,8 +106,8 @@ public class EncryptedSnapshotPreparator {
         }
     }
 
-    private void checkEbsVolumeStatus(AuthenticatedContext ac, Group group, AmazonEC2Client client, CreateVolumeResult volumeResult) {
-        PollTask<Boolean> ebsVolumeStateChecker = awsPollTaskFactory.newEbsVolumeStatusCheckerTask(ac, group, client, volumeResult.getVolume().getVolumeId());
+    private void checkEbsVolumeStatus(AuthenticatedContext ac, AmazonEC2Client client, CreateVolumeResult volumeResult) {
+        PollTask<Boolean> ebsVolumeStateChecker = awsPollTaskFactory.newEbsVolumeStatusCheckerTask(ac, client, volumeResult.getVolume().getVolumeId());
         try {
             Boolean statePollerResult = ebsVolumeStateChecker.call();
             if (!ebsVolumeStateChecker.completed(statePollerResult)) {
@@ -120,7 +122,7 @@ public class EncryptedSnapshotPreparator {
         return new CreateSnapshotRequest().withVolumeId(volumeResult.getVolume().getVolumeId()).withDescription(ENCRYPTED_SNAPSHOT);
     }
 
-    private CreateVolumeRequest prepareCreateVolumeRequest(AuthenticatedContext ac, AwsInstanceView awsInstanceView, AmazonEC2Client client) {
+    private CreateVolumeRequest prepareCreateVolumeRequest(AuthenticatedContext ac, AwsInstanceView awsInstanceView, AmazonEC2 client) {
         String availabilityZone = prepareDescribeAvailabilityZonesResult(ac, client);
 
         CreateVolumeRequest createVolumeRequest = new CreateVolumeRequest().withSize(VOLUME_SIZE).withAvailabilityZone(availabilityZone).withEncrypted(true);
@@ -130,7 +132,7 @@ public class EncryptedSnapshotPreparator {
         return createVolumeRequest;
     }
 
-    private String prepareDescribeAvailabilityZonesResult(AuthenticatedContext ac, AmazonEC2Client client) {
+    private String prepareDescribeAvailabilityZonesResult(AuthenticatedContext ac, AmazonEC2 client) {
         String regionName = ac.getCloudContext().getLocation().getRegion().value();
         Optional<AvailabilityZone> first =
                 client.describeAvailabilityZones(prepareDescribeAvailabilityZoneRequest(regionName)).getAvailabilityZones().stream().findFirst();

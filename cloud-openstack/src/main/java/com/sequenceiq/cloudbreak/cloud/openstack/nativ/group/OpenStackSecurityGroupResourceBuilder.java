@@ -37,10 +37,9 @@ public class OpenStackSecurityGroupResourceBuilder extends AbstractOpenStackGrou
 
     @Override
     public CloudResource build(OpenStackContext context, AuthenticatedContext auth, Group group, Network network, Security security,
-            CloudResource resource)
-            throws Exception {
+            CloudResource resource) {
         try {
-            OSClient osClient = createOSClient(auth);
+            OSClient<?> osClient = createOSClient(auth);
             ComputeSecurityGroupService securityGroupService = osClient.compute().securityGroups();
             SecGroupExtension securityGroup = securityGroupService.create(resource.getName(), "");
             String securityGroupId = securityGroup.getId();
@@ -65,9 +64,9 @@ public class OpenStackSecurityGroupResourceBuilder extends AbstractOpenStackGrou
     }
 
     @Override
-    public CloudResource delete(OpenStackContext context, AuthenticatedContext auth, CloudResource resource, Network network) throws Exception {
+    public CloudResource delete(OpenStackContext context, AuthenticatedContext auth, CloudResource resource, Network network) {
         try {
-            OSClient osClient = createOSClient(auth);
+            OSClient<?> osClient = createOSClient(auth);
             ActionResponse response = osClient.compute().securityGroups().delete(resource.getReference());
             return checkDeleteResponse(response, resourceType(), auth, resource, "SecurityGroup deletion failed");
         } catch (OS4JException ex) {

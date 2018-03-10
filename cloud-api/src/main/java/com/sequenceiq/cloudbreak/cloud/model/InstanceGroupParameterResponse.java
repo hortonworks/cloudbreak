@@ -9,9 +9,6 @@ public class InstanceGroupParameterResponse {
 
     private Map<String, Object> parameters = new HashMap<>();
 
-    public InstanceGroupParameterResponse() {
-    }
-
     public String getGroupName() {
         return groupName;
     }

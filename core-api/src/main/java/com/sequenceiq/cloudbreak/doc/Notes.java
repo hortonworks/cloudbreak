@@ -50,6 +50,8 @@ public class Notes {
     public static final String TOPOLOGY_NOTES = "A topology gives system administrators an easy way to associate compute nodes with data centers and racks.";
     public static final String RDSCONFIG_NOTES = "An RDS Configuration describe a connection to an external Relational Database Service "
             + "that can be used as the Hive Metastore.";
+    public static final String PROXY_CONFIG_NOTES = "An proxy Configuration describe a connection to an external proxy server which provides internet access "
+            + "cluster members. It's applied for package manager and Ambari too";
 
     public static final String LDAP_CONFIG_NOTES = "LDAP server integration enables the user to provide"
             + " a central place to store usernames and passwords for the users of his/her clusters.";

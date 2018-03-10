@@ -1,22 +1,24 @@
 package com.sequenceiq.cloudbreak.api.model;
 
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonInclude(Include.NON_NULL)
 public class RecommendationResponse implements JsonEntity {
 
-    private Map<String, VmTypeJson> recommendations = new HashMap<>();
+    private Map<String, VmTypeJson> recommendations;
 
-    private Set<VmTypeJson> virtualMachines = new HashSet<>();
+    private Set<VmTypeJson> virtualMachines;
 
-    private Set<DiskResponse> diskResponses = new HashSet<>();
+    private Set<DiskResponse> diskResponses;
+
+    public RecommendationResponse() {
+    }
 
     public RecommendationResponse(Map<String, VmTypeJson> recommendations, Set<VmTypeJson> virtualMachines, Set<DiskResponse> diskResponses) {
         this.recommendations = recommendations;

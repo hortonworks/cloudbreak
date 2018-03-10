@@ -16,7 +16,6 @@ import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.client.PkiUtil;
 import com.sequenceiq.cloudbreak.client.SaltClientConfig;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
-import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
@@ -32,15 +31,15 @@ public class TlsSecurityService {
     @Inject
     private InstanceMetaDataRepository instanceMetaDataRepository;
 
-    public SecurityConfig storeSSHKeys() throws CloudbreakSecuritySetupException {
+    public SecurityConfig storeSSHKeys() {
         SecurityConfig securityConfig = new SecurityConfig();
-        copyClientKeys(securityConfig);
+        generateClientKeys(securityConfig);
         generateTempSshKeypair(securityConfig);
         generateSaltSignKeypair(securityConfig);
         return securityConfig;
     }
 
-    private void copyClientKeys(SecurityConfig securityConfig) {
+    private void generateClientKeys(SecurityConfig securityConfig) {
         KeyPair identity = PkiUtil.generateKeypair();
         KeyPair signKey = PkiUtil.generateKeypair();
         X509Certificate cert = PkiUtil.cert(identity, "cloudbreak", signKey);
@@ -69,7 +68,7 @@ public class TlsSecurityService {
     }
 
     public GatewayConfig buildGatewayConfig(Long stackId, InstanceMetaData gatewayInstance, Integer gatewayPort,
-        SaltClientConfig saltClientConfig, Boolean knoxGatewayEnabled) throws CloudbreakSecuritySetupException {
+        SaltClientConfig saltClientConfig, Boolean knoxGatewayEnabled) {
         SecurityConfig securityConfig = securityConfigRepository.findOneByStackId(stackId);
         String connectionIp = getGatewayIp(securityConfig, gatewayInstance);
         HttpClientConfig conf = buildTLSClientConfig(stackId, connectionIp, gatewayInstance);
@@ -88,19 +87,15 @@ public class TlsSecurityService {
         return gatewayIP;
     }
 
-    public HttpClientConfig buildTLSClientConfigForPrimaryGateway(Long stackId, String apiAddress) throws CloudbreakSecuritySetupException {
+    public HttpClientConfig buildTLSClientConfigForPrimaryGateway(Long stackId, String apiAddress) {
         InstanceMetaData primaryGateway = instanceMetaDataRepository.getPrimaryGatewayInstanceMetadata(stackId);
         return buildTLSClientConfig(stackId, apiAddress, primaryGateway);
     }
 
     public HttpClientConfig buildTLSClientConfig(Long stackId, String apiAddress, InstanceMetaData gateway) {
         SecurityConfig securityConfig = securityConfigRepository.findOneByStackId(stackId);
-        if (securityConfig != null) {
-            return new HttpClientConfig(apiAddress,
-                gateway.getServerCert(), securityConfig.getClientCertDecoded(), securityConfig.getClientKeyDecoded());
-        } else {
-            return new HttpClientConfig(apiAddress);
-        }
+        return securityConfig != null ? new HttpClientConfig(apiAddress,
+                gateway.getServerCert(), securityConfig.getClientCertDecoded(), securityConfig.getClientKeyDecoded()) : new HttpClientConfig(apiAddress);
     }
 
     public CertificateResponse getCertificates(Long stackId) {

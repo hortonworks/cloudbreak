@@ -18,11 +18,8 @@ public class PortOrComputeApiMetadataExtractor implements CloudInstanceMetaDataE
     private ComputeApiExtractor computeApiExtractor;
 
     @Override
-    public CloudInstanceMetaData extractMetadata(OSClient client, Server server, String instanceId) {
-        if (server.getAddresses().getAddresses().isEmpty()) {
-            return portApiExtractor.extractMetadata(client, server, instanceId);
-        } else {
-            return computeApiExtractor.extractMetadata(client, server, instanceId);
-        }
+    public CloudInstanceMetaData extractMetadata(OSClient<?> client, Server server, String instanceId) {
+        return server.getAddresses().getAddresses().isEmpty() ? portApiExtractor.extractMetadata(client, server, instanceId)
+                : computeApiExtractor.extractMetadata(client, server, instanceId);
     }
 }

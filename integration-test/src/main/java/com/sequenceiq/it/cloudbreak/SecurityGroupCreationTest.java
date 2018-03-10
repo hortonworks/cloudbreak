@@ -15,7 +15,7 @@ public class SecurityGroupCreationTest extends AbstractCloudbreakIntegrationTest
     @Test
     @Parameters({ "name", "ports", "provider" })
     public void testSecurityGroupCreation(@Optional("it-restricted-ambari") String name, @Optional("22,443,9443,8080") String ports,
-            @Optional("MOCK") String provider) throws Exception {
+            @Optional("MOCK") String provider) {
         // GIVEN
         // WHEN
         SecurityGroupRequest securityGroupRequest = new SecurityGroupRequest();

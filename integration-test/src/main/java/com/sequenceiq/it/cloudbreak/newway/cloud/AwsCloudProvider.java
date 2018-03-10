@@ -1,8 +1,5 @@
 package com.sequenceiq.it.cloudbreak.newway.cloud;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import com.sequenceiq.cloudbreak.api.model.StackAuthenticationRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.NetworkV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.TemplateV2Request;
@@ -10,19 +7,20 @@ import com.sequenceiq.it.cloudbreak.newway.Credential;
 import com.sequenceiq.it.cloudbreak.newway.CredentialEntity;
 import com.sequenceiq.it.cloudbreak.newway.TestParameter;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class AwsCloudProvider extends CloudProviderHelper {
 
     public static final String AWS = "aws";
 
     public static final String AWS_CAPITAL = "AWS";
 
-    public static final String AWS_CLUSTER_DEFAULT_NAME = "aws-cluster-2";
+    public static final String AWS_CLUSTER_DEFAULT_NAME = "autotesting-aws-cluster";
 
     public static final String KEY_BASED_CREDENTIAL = "key";
 
-    private static final String CREDNAME = "testawscred";
-
-    private static final String CREDDESC = "test credential";
+    private static final String CREDENTIAL_DEFAULT_NAME = "autotesting-aws-cred";
 
     public AwsCloudProvider(TestParameter testParameter) {
         super(testParameter);
@@ -32,20 +30,16 @@ public class AwsCloudProvider extends CloudProviderHelper {
     public CredentialEntity aValidCredential() {
         String credentialType = getTestParameter().get("awsCredentialType");
         Map<String, Object> credentialParameters;
-        if (KEY_BASED_CREDENTIAL.equals(credentialType)) {
-            credentialParameters = awsCredentialDetailsKey();
-        } else {
-            credentialParameters = awsCredentialDetailsArn();
-        }
+        credentialParameters = KEY_BASED_CREDENTIAL.equals(credentialType) ? awsCredentialDetailsKey() : awsCredentialDetailsArn();
         return Credential.isCreated()
-                .withName(CREDNAME)
-                .withDescription(CREDDESC)
+                .withName(getCredentialName())
+                .withDescription(CREDENTIAL_DEFAULT_DESCRIPTION)
                 .withCloudPlatform(AWS_CAPITAL)
                 .withParameters(credentialParameters);
     }
 
     public Map<String, Object> awsCredentialDetailsArn() {
-        Map<String, Object> map = new HashMap<String, Object>();
+        Map<String, Object> map = new HashMap<>();
         map.put("selector", "role-based");
         map.put("roleArn", getTestParameter().get("integrationtest.awscredential.roleArn"));
 
@@ -53,7 +47,7 @@ public class AwsCloudProvider extends CloudProviderHelper {
     }
 
     public Map<String, Object> awsCredentialDetailsInvalidArn() {
-        Map<String, Object> map = new HashMap<String, Object>();
+        Map<String, Object> map = new HashMap<>();
         map.put("selector", "role-based");
         map.put("roleArn", "arn:aws:iam::123456789012:role/fake");
 
@@ -61,7 +55,7 @@ public class AwsCloudProvider extends CloudProviderHelper {
     }
 
     @Override
-    String availabilityZone() {
+    public String availabilityZone() {
         String availabilityZone = "eu-west-1a";
         String availabilityZoneParam = getTestParameter().get("awsAvailabilityZone");
 
@@ -69,7 +63,7 @@ public class AwsCloudProvider extends CloudProviderHelper {
     }
 
     @Override
-    String region() {
+    public String region() {
         String region = "eu-west-1";
         String regionParam = getTestParameter().get("awsRegion");
 
@@ -106,9 +100,16 @@ public class AwsCloudProvider extends CloudProviderHelper {
     }
 
     @Override
-    public String getClusterDefaultName() {
+    public String getClusterName() {
         String clustername = getTestParameter().get("awsClusterName");
         return clustername == null ? AWS_CLUSTER_DEFAULT_NAME : clustername;
+    }
+
+    @Override
+    NetworkV2Request network() {
+        NetworkV2Request network = new NetworkV2Request();
+        network.setSubnetCIDR("10.0.0.0/16");
+        return network;
     }
 
     @Override
@@ -116,8 +117,14 @@ public class AwsCloudProvider extends CloudProviderHelper {
         return AWS_CAPITAL;
     }
 
+    @Override
+    public String getCredentialName() {
+        String credentialName = getTestParameter().get("awsCredentialName");
+        return credentialName == null ? CREDENTIAL_DEFAULT_NAME : credentialName;
+    }
+
     public Map<String, Object> awsCredentialDetailsKey() {
-        Map<String, Object> map = new HashMap<String, Object>();
+        Map<String, Object> map = new HashMap<>();
         map.put("selector", "key-based");
         map.put("accessKey", getTestParameter().get("integrationtest.awscredential.accessKey"));
         map.put("secretKey", getTestParameter().get("integrationtest.awscredential.secretKey"));
@@ -126,7 +133,7 @@ public class AwsCloudProvider extends CloudProviderHelper {
     }
 
     public Map<String, Object> awsCredentialDetailsInvalidAccessKey() {
-        Map<String, Object> map = new HashMap<String, Object>();
+        Map<String, Object> map = new HashMap<>();
         map.put("selector", "key-based");
         map.put("accessKey", "ABCDEFGHIJKLMNOPQRST");
         map.put("secretKey", getTestParameter().get("integrationtest.awscredential.secretKey"));
@@ -135,18 +142,11 @@ public class AwsCloudProvider extends CloudProviderHelper {
     }
 
     public Map<String, Object> awsCredentialDetailsInvalidSecretKey() {
-        Map<String, Object> map = new HashMap<String, Object>();
+        Map<String, Object> map = new HashMap<>();
         map.put("selector", "key-based");
         map.put("accessKey", getTestParameter().get("integrationtest.awscredential.accessKey"));
         map.put("secretKey", "123456789ABCDEFGHIJKLMNOP0123456789=ABC+");
 
         return map;
-    }
-
-    @Override
-    NetworkV2Request network() {
-        NetworkV2Request network = new NetworkV2Request();
-        network.setSubnetCIDR("10.0.0.0/16");
-        return network;
     }
 }

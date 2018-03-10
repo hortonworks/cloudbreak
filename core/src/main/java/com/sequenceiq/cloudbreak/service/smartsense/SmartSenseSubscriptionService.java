@@ -101,16 +101,12 @@ public class SmartSenseSubscriptionService {
     public Optional<SmartSenseSubscription> getDefault() {
         LOGGER.info("Get the SmartSense subscription");
         Iterator<SmartSenseSubscription> subscriptions = repository.findAll().iterator();
-        if (subscriptions.hasNext()) {
-            return Optional.of(subscriptions.next());
-        } else {
-            return Optional.empty();
-        }
+        return subscriptions.hasNext() ? Optional.of(subscriptions.next()) : Optional.empty();
     }
 
     @PostAuthorize("hasPermission(returnObject,'read')")
     public SmartSenseSubscription getDefaultForUser(IdentityUser cbUser) {
-        SmartSenseSubscription subscription = null;
+        SmartSenseSubscription subscription;
         subscription = repository.findByAccountAndOwner(cbUser.getAccount(), cbUser.getUserId());
         if (subscription != null && !StringUtils.isEmpty(defaultSmartsenseId) && !defaultSmartsenseId.equals(subscription.getSubscriptionId())) {
             LOGGER.info("Upgrading default SmartSense subscription");

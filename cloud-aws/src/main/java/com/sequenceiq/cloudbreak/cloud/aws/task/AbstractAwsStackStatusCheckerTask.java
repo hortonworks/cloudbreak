@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.aws.task;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -59,13 +60,13 @@ abstract class AbstractAwsStackStatusCheckerTask extends PollBooleanStateTask {
         }
     }
 
-    protected boolean isSuccess(Stack cfStack, List<StackEvent> stackEvents) {
+    protected boolean isSuccess(Stack cfStack, Collection<StackEvent> stackEvents) {
         if (!stackEvents.isEmpty() && cfStack != null) {
             StackStatus cfStackStatus = StackStatus.valueOf(cfStack.getStackStatus());
             if (stackErrorStatuses.contains(cfStackStatus)) {
                 throw new CloudConnectorException(getErrorMessage(errorStatus.toString(), getErrorCauseStatusReason(stackEvents, errorStatus)));
-            } else if (cfStackStatus.equals(successStatus)) {
-                return true;
+            } else {
+                return cfStackStatus.equals(successStatus);
             }
         }
         return false;
@@ -75,7 +76,7 @@ abstract class AbstractAwsStackStatusCheckerTask extends PollBooleanStateTask {
         return String.format("AWS CloudFormation stack reached an error state: %s reason: %s", state, reason);
     }
 
-    private String getErrorCauseStatusReason(List<StackEvent> stackEvents, StackStatus errorStatus) {
+    private String getErrorCauseStatusReason(Iterable<StackEvent> stackEvents, StackStatus errorStatus) {
         StackEvent cause = null;
         for (StackEvent event : stackEvents) {
             if (event.getResourceStatus().equals(errorStatus.toString())) {

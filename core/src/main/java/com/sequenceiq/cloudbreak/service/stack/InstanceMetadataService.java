@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.stack;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -24,7 +25,7 @@ public class InstanceMetadataService {
     @Inject
     private InstanceMetaDataRepository instanceMetaDataRepository;
 
-    public void updateInstanceStatus(Set<InstanceGroup> instanceGroup,
+    public void updateInstanceStatus(Iterable<InstanceGroup> instanceGroup,
             Map<InstanceGroupType, com.sequenceiq.cloudbreak.api.model.InstanceStatus> newStatusByGroupType) {
         for (InstanceGroup group : instanceGroup) {
             com.sequenceiq.cloudbreak.api.model.InstanceStatus newStatus = newStatusByGroupType.get(group.getInstanceGroupType());
@@ -37,8 +38,8 @@ public class InstanceMetadataService {
         }
     }
 
-    public void updateInstanceStatus(Set<InstanceGroup> instanceGroup, com.sequenceiq.cloudbreak.api.model.InstanceStatus newStatus,
-            Set<String> candidateAddresses) {
+    public void updateInstanceStatus(Iterable<InstanceGroup> instanceGroup, com.sequenceiq.cloudbreak.api.model.InstanceStatus newStatus,
+            Collection<String> candidateAddresses) {
         for (InstanceGroup group : instanceGroup) {
             for (InstanceMetaData instanceMetaData : group.getInstanceMetaData()) {
                 if (candidateAddresses.contains(instanceMetaData.getDiscoveryFQDN())) {
@@ -49,7 +50,7 @@ public class InstanceMetadataService {
         }
     }
 
-    public void saveInstanceRequests(Stack stack, List<Group> groups) {
+    public void saveInstanceRequests(Stack stack, Iterable<Group> groups) {
         Set<InstanceGroup> instanceGroups = stack.getInstanceGroups();
         for (Group group : groups) {
             InstanceGroup instanceGroup = getInstanceGroup(instanceGroups, group.getName());
@@ -79,7 +80,7 @@ public class InstanceMetadataService {
         }
     }
 
-    private InstanceGroup getInstanceGroup(Set<InstanceGroup> instanceGroups, String groupName) {
+    private InstanceGroup getInstanceGroup(Iterable<InstanceGroup> instanceGroups, String groupName) {
         for (InstanceGroup instanceGroup : instanceGroups) {
             if (groupName.equalsIgnoreCase(instanceGroup.getGroupName())) {
                 return instanceGroup;

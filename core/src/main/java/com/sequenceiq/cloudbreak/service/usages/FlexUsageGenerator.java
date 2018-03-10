@@ -33,7 +33,7 @@ import com.sequenceiq.cloudbreak.domain.SmartSenseSubscription;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.repository.FlexSubscriptionRepository;
 import com.sequenceiq.cloudbreak.service.flex.FlexSubscriptionService;
-import com.sequenceiq.cloudbreak.service.ha.CloudbreakNodeConfig;
+import com.sequenceiq.cloudbreak.ha.CloudbreakNodeConfig;
 import com.sequenceiq.cloudbreak.service.smartsense.SmartSenseSubscriptionService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
@@ -134,7 +134,7 @@ public class FlexUsageGenerator {
         return cbUser;
     }
 
-    private List<FlexUsageProductJson> getFlexUsageProductJsons(List<CloudbreakUsage> usages, Long fromDate) {
+    private List<FlexUsageProductJson> getFlexUsageProductJsons(Iterable<CloudbreakUsage> usages, Long fromDate) {
         List<FlexUsageProductJson> flexUsageProducts = new ArrayList<>();
         FlexUsageProductJson flexUsageProductJson = new FlexUsageProductJson();
         flexUsageProductJson.setProductId(productId);
@@ -174,7 +174,7 @@ public class FlexUsageGenerator {
         return cbdComponentInstance;
     }
 
-    private List<FlexUsageHdpInstanceJson> getFlexUsageHdpInstances(List<CloudbreakUsage> usages) {
+    private List<FlexUsageHdpInstanceJson> getFlexUsageHdpInstances(Iterable<CloudbreakUsage> usages) {
         Map<Long, FlexUsageHdpInstanceJson> flexUsageJsonsByStackId = new HashMap<>();
         for (CloudbreakUsage usage : usages) {
             Long stackId = usage.getStackId();

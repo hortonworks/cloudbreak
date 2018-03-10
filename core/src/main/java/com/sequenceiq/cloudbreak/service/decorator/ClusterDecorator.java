@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.decorator;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -23,13 +24,12 @@ import com.sequenceiq.cloudbreak.api.model.ConnectedClusterRequest;
 import com.sequenceiq.cloudbreak.api.model.HostGroupRequest;
 import com.sequenceiq.cloudbreak.api.model.LdapConfigRequest;
 import com.sequenceiq.cloudbreak.api.model.RDSConfigRequest;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.api.model.RdsType;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
-import com.sequenceiq.cloudbreak.controller.validation.blueprint.BlueprintValidator;
+import com.sequenceiq.cloudbreak.blueprint.validation.BlueprintValidator;
 import com.sequenceiq.cloudbreak.controller.validation.ldapconfig.LdapConfigValidator;
 import com.sequenceiq.cloudbreak.controller.validation.rds.RdsConnectionValidator;
-import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.BlueprintInputParameters;
 import com.sequenceiq.cloudbreak.domain.BlueprintParameter;
@@ -80,6 +80,9 @@ public class ClusterDecorator {
     @Inject
     private RdsConnectionValidator rdsConnectionValidator;
 
+    @Inject
+    private ClusterProxyDecorator clusterProxyDecorator;
+
     public Cluster decorate(Cluster subject, ClusterRequest request, Blueprint blueprint, IdentityUser user, Stack stack) {
         if (blueprint != null) {
             subject.setBlueprint(blueprint);
@@ -103,6 +106,7 @@ public class ClusterDecorator {
         }
         subject.setTopologyValidation(request.getValidateBlueprint());
         prepareRds(subject, user, request.getRdsConfigIds(), request.getRdsConfigJsons(), stack);
+        subject = clusterProxyDecorator.prepareProxyConfig(subject, user, request.getProxyName(), stack);
         prepareLdap(subject, user, request.getLdapConfigId(), request.getLdapConfig(), request.getLdapConfigName(), stack);
         prepareConnectedClusterParameters(subject, user, request.getConnectedCluster());
         return subject;
@@ -149,7 +153,7 @@ public class ClusterDecorator {
                     newInputs.put(blueprintInputJson.getName(), blueprintInputJson.getPropertyValue());
                 }
                 requestedCluster.setBlueprintInputs(new Json(newInputs));
-            } catch (IOException | CloudbreakSecuritySetupException e) {
+            } catch (IOException e) {
                 LOGGER.error("Could not propagate cluster input parameters", e);
                 throw new BadRequestException("Could not propagate cluster input parameters: " + e.getMessage());
             }
@@ -172,7 +176,7 @@ public class ClusterDecorator {
         }
     }
 
-    private void prepareRds(Cluster subject, IdentityUser user, Set<Long> rdsConfigIds, Set<RDSConfigRequest> requestRdsConfigs, Stack stack) {
+    private void prepareRds(Cluster subject, IdentityUser user, Collection<Long> rdsConfigIds, Collection<RDSConfigRequest> requestRdsConfigs, Stack stack) {
         subject.setRdsConfigs(new HashSet<>());
         if (rdsConfigIds != null && !rdsConfigIds.isEmpty()) {
             for (Long rdsConfigId : rdsConfigIds) {
@@ -196,7 +200,7 @@ public class ClusterDecorator {
         }
     }
 
-    private Set<HostGroup> convertHostGroupsFromJson(Stack stack, IdentityUser user, Cluster cluster, Set<HostGroupRequest> hostGroupsJsons) {
+    private Set<HostGroup> convertHostGroupsFromJson(Stack stack, IdentityUser user, Cluster cluster, Iterable<HostGroupRequest> hostGroupsJsons) {
         Set<HostGroup> hostGroups = new HashSet<>();
         for (HostGroupRequest json : hostGroupsJsons) {
             HostGroup hostGroup = conversionService.convert(json, HostGroup.class);

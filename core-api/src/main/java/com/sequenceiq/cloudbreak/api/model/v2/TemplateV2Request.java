@@ -5,6 +5,7 @@ import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.cloudbreak.api.model.CustomInstanceType;
 import com.sequenceiq.cloudbreak.api.model.JsonEntity;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.TemplateModelDescription;
@@ -14,7 +15,7 @@ import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
-@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonInclude(Include.NON_NULL)
 public class TemplateV2Request implements JsonEntity {
 
     @ApiModelProperty(TemplateModelDescription.VOLUME_COUNT)
@@ -29,10 +30,10 @@ public class TemplateV2Request implements JsonEntity {
     @ApiModelProperty(TemplateModelDescription.VOLUME_TYPE)
     private String volumeType;
 
-    @ApiModelProperty(value = TemplateModelDescription.INSTANCE_TYPE)
+    @ApiModelProperty(TemplateModelDescription.INSTANCE_TYPE)
     private String instanceType;
 
-    @ApiModelProperty(value = TemplateModelDescription.CUSTOM_INSTANCE_TYPE)
+    @ApiModelProperty(TemplateModelDescription.CUSTOM_INSTANCE_TYPE)
     private CustomInstanceType customInstanceType;
 
     public Integer getVolumeSize() {

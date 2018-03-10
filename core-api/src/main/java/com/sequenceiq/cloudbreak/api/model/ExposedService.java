@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.api.model;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -60,10 +61,8 @@ public enum ExposedService {
         this.knoxUrl = knoxUrl;
     }
 
-    public static List<ExposedService> filterSupportedKnoxServices() {
-        return Arrays.stream(values()).filter(x -> {
-            return !Strings.isNullOrEmpty(x.knoxService);
-        }).collect(Collectors.toList());
+    public static Collection<ExposedService> filterSupportedKnoxServices() {
+        return Arrays.stream(values()).filter(x -> !Strings.isNullOrEmpty(x.knoxService)).collect(Collectors.toList());
     }
 
     public static List<String> getAllKnoxExposed() {
@@ -72,9 +71,7 @@ public enum ExposedService {
     }
 
     public static List<String> getAllServiceName() {
-        List<String> allServiceName = Arrays.stream(values()).filter(x -> {
-            return !Strings.isNullOrEmpty(x.serviceName);
-        })
+        List<String> allServiceName = Arrays.stream(values()).filter(x -> !Strings.isNullOrEmpty(x.serviceName))
                 .map(ExposedService::getServiceName).collect(Collectors.toList());
         return ImmutableList.copyOf(allServiceName);
     }

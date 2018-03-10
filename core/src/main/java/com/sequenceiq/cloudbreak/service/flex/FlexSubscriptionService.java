@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.flex;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.function.BiConsumer;
 
@@ -90,36 +91,33 @@ public class FlexSubscriptionService {
 
     public List<FlexSubscription> findPublicInAccountForUser(IdentityUser user) {
         LOGGER.info("Looking for public Flex subscriptions for user: {}", user.getUsername());
-        if (user.getRoles().contains(IdentityUserRole.ADMIN)) {
-            return flexRepo.findAllByAccount(user.getAccount());
-        } else {
-            return flexRepo.findAllPublicInAccountForUser(user.getUserId(), user.getAccount());
-        }
+        return user.getRoles().contains(IdentityUserRole.ADMIN) ? flexRepo.findAllByAccount(user.getAccount())
+                : flexRepo.findAllPublicInAccountForUser(user.getUserId(), user.getAccount());
     }
 
     public void setDefaultFlexSubscription(String name, IdentityUser identityUser) {
-        setFlexSubscriptionFlag(name, identityUser, (flex, flag) -> flex.setDefault(flag));
+        setFlexSubscriptionFlag(name, identityUser, FlexSubscription::setDefault);
     }
 
     public void setUsedForControllerFlexSubscription(String name, IdentityUser identityUser) {
-        setFlexSubscriptionFlag(name, identityUser, (flex, flag) -> flex.setUsedForController(flag));
+        setFlexSubscriptionFlag(name, identityUser, FlexSubscription::setUsedForController);
     }
 
-    private void setSubscriptionAsDefaultIfNeeded(FlexSubscription subscription, List<FlexSubscription> allInAccount) {
+    private void setSubscriptionAsDefaultIfNeeded(FlexSubscription subscription, Collection<FlexSubscription> allInAccount) {
         if (allInAccount.stream().allMatch(subscription::equals)) {
             subscription.setDefault(true);
             subscription.setUsedForController(true);
         }
     }
 
-    private void updateSubscriptionsDefaultFlagsIfNeeded(FlexSubscription subscription, List<FlexSubscription> allInAccount) {
+    private void updateSubscriptionsDefaultFlagsIfNeeded(FlexSubscription subscription, Collection<FlexSubscription> allInAccount) {
         if (subscription.isDefault() || subscription.isUsedForController()) {
             if (subscription.isDefault()) {
-                setFlagOnFlexSubscriptionCollection(subscription.getName(), (flex, flag) -> flex.setDefault(flag), allInAccount);
+                setFlagOnFlexSubscriptionCollection(subscription.getName(), FlexSubscription::setDefault, allInAccount);
             }
 
             if (subscription.isUsedForController()) {
-                setFlagOnFlexSubscriptionCollection(subscription.getName(), (flex, flag) -> flex.setUsedForController(flag), allInAccount);
+                setFlagOnFlexSubscriptionCollection(subscription.getName(), FlexSubscription::setUsedForController, allInAccount);
             }
             flexRepo.save(allInAccount);
         }
@@ -131,7 +129,7 @@ public class FlexSubscriptionService {
         flexRepo.save(allInAccount);
     }
 
-    private void setFlagOnFlexSubscriptionCollection(String name, BiConsumer<FlexSubscription, Boolean> setter, List<FlexSubscription> allInAccount) {
+    private void setFlagOnFlexSubscriptionCollection(String name, BiConsumer<FlexSubscription, Boolean> setter, Collection<FlexSubscription> allInAccount) {
         if (allInAccount.stream().noneMatch(f -> name.equals(f.getName()))) {
             throw new BadRequestException("Given subscription not found with name: " + name);
         }

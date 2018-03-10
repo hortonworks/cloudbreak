@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.TreeNode;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.model.BlueprintParameterJson;
@@ -18,14 +19,14 @@ import com.sequenceiq.cloudbreak.api.model.BlueprintRequest;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
-import com.sequenceiq.cloudbreak.controller.json.JsonHelper;
+import com.sequenceiq.cloudbreak.json.JsonHelper;
 import com.sequenceiq.cloudbreak.converter.util.URLUtils;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.BlueprintInputParameters;
 import com.sequenceiq.cloudbreak.domain.BlueprintParameter;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.service.MissingResourceNameGenerator;
-import com.sequenceiq.cloudbreak.service.blueprint.BlueprintUtils;
+import com.sequenceiq.cloudbreak.blueprint.utils.BlueprintUtils;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 @Component
@@ -51,7 +52,7 @@ public class BlueprintRequestToBlueprintConverter extends AbstractConversionServ
                 jsonHelper.createJsonFromString(urlText);
                 blueprint.setBlueprintText(urlText);
             } catch (Exception e) {
-                throw new BadRequestException("Cannot download ambari blueprint from: " + sourceUrl, e);
+                throw new BadRequestException("Cannot download ambari validation from: " + sourceUrl, e);
             }
         } else {
             blueprint.setBlueprintText(json.getAmbariBlueprint());
@@ -124,12 +125,12 @@ public class BlueprintRequestToBlueprintConverter extends AbstractConversionServ
     private void validateHostGroups(JsonNode root) {
         JsonNode hostGroups = root.path("host_groups");
         if (hostGroups.isMissingNode() || !hostGroups.isArray() || hostGroups.size() == 0) {
-            throw new BadRequestException("Invalid blueprint: 'host_groups' node is missing from JSON or is not an array or empty.");
+            throw new BadRequestException("Invalid validation: 'host_groups' node is missing from JSON or is not an array or empty.");
         }
         for (JsonNode hostGroup : hostGroups) {
             JsonNode hostGroupName = hostGroup.path("name");
             if (hostGroupName.isMissingNode() || !hostGroupName.isTextual() || hostGroupName.asText().isEmpty()) {
-                throw new BadRequestException("Invalid blueprint: one of the 'host_groups' has no name.");
+                throw new BadRequestException("Invalid validation: one of the 'host_groups' has no name.");
             }
             validateComponentsInHostgroup(hostGroup, hostGroupName.asText());
         }
@@ -139,25 +140,25 @@ public class BlueprintRequestToBlueprintConverter extends AbstractConversionServ
         JsonNode components = hostGroup.path("components");
         if (components.isMissingNode() || !components.isArray() || components.size() == 0) {
             throw new BadRequestException(
-                    String.format("Invalid blueprint: '%s' hostgroup's 'components' node is missing from JSON or is not an array or empty.", hostGroupName));
+                    String.format("Invalid validation: '%s' hostgroup's 'components' node is missing from JSON or is not an array or empty.", hostGroupName));
         }
         for (JsonNode component : components) {
             JsonNode componentName = component.path("name");
             if (componentName.isMissingNode() || !componentName.isTextual() || componentName.asText().isEmpty()) {
-                throw new BadRequestException(String.format("Invalid blueprint: one fo the 'components' has no name in '%s' hostgroup.", hostGroupName));
+                throw new BadRequestException(String.format("Invalid validation: one fo the 'components' has no name in '%s' hostgroup.", hostGroupName));
             }
         }
     }
 
-    private void hasBlueprintNameInBlueprint(JsonNode root) {
+    private void hasBlueprintNameInBlueprint(TreeNode root) {
         if (root.path("Blueprints").path("blueprint_name").isMissingNode()) {
-            throw new BadRequestException("Invalid blueprint: 'blueprint_name' under 'Blueprints' is missing from JSON.");
+            throw new BadRequestException("Invalid validation: 'blueprint_name' under 'Blueprints' is missing from JSON.");
         }
     }
 
-    private void hasBlueprintInBlueprint(JsonNode root) {
+    private void hasBlueprintInBlueprint(TreeNode root) {
         if (root.path("Blueprints").isMissingNode()) {
-            throw new BadRequestException("Invalid blueprint: 'Blueprints' node is missing from JSON.");
+            throw new BadRequestException("Invalid validation: 'Blueprints' node is missing from JSON.");
         }
     }
 }

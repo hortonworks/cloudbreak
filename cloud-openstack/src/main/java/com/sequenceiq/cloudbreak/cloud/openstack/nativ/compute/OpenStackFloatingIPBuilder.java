@@ -24,12 +24,12 @@ import com.sequenceiq.cloudbreak.common.type.ResourceType;
 public class OpenStackFloatingIPBuilder extends AbstractOpenStackComputeResourceBuilder {
     @Override
     public List<CloudResource> build(OpenStackContext context, long privateId, AuthenticatedContext auth, Group group, Image image,
-            List<CloudResource> buildableResource, Map<String, String> tags) throws Exception {
+            List<CloudResource> buildableResource, Map<String, String> tags) {
         CloudResource resource = buildableResource.get(0);
         try {
             String publicNetId = context.getStringParameter(OpenStackConstants.PUBLIC_NET_ID);
             if (publicNetId != null) {
-                OSClient osClient = createOSClient(auth);
+                OSClient<?> osClient = createOSClient(auth);
                 List<CloudResource> computeResources = context.getComputeResources(privateId);
                 CloudResource instance = getInstance(computeResources);
                 FloatingIP unusedIp = osClient.compute().floatingIps().allocateIP(publicNetId);
@@ -49,7 +49,7 @@ public class OpenStackFloatingIPBuilder extends AbstractOpenStackComputeResource
 
     @Override
     @SuppressWarnings("unchecked")
-    public CloudResource delete(OpenStackContext context, AuthenticatedContext auth, CloudResource resource) throws Exception {
+    public CloudResource delete(OpenStackContext context, AuthenticatedContext auth, CloudResource resource) {
         context.getParameter(OpenStackConstants.FLOATING_IP_IDS, List.class).add(resource.getReference());
         return null;
     }
@@ -64,7 +64,7 @@ public class OpenStackFloatingIPBuilder extends AbstractOpenStackComputeResource
         return true;
     }
 
-    private CloudResource getInstance(List<CloudResource> computeResources) {
+    private CloudResource getInstance(Iterable<CloudResource> computeResources) {
         CloudResource instance = null;
         for (CloudResource computeResource : computeResources) {
             if (computeResource.getType() == ResourceType.OPENSTACK_INSTANCE) {

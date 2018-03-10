@@ -30,13 +30,12 @@ public class OpenStackSubnetResourceBuilder extends AbstractOpenStackNetworkReso
     private OpenStackUtils utils;
 
     @Override
-    public CloudResource build(OpenStackContext context, AuthenticatedContext auth, Network network, Security security, CloudResource resource)
-            throws Exception {
+    public CloudResource build(OpenStackContext context, AuthenticatedContext auth, Network network, Security security, CloudResource resource) {
         try {
             NeutronNetworkView neutronView = new NeutronNetworkView(network);
             String subnetId = neutronView.isExistingSubnet() ? neutronView.getCustomSubnetId() : context.getParameter(SUBNET_ID, String.class);
             if (!neutronView.isExistingSubnet()) {
-                OSClient osClient = createOSClient(auth);
+                OSClient<?> osClient = createOSClient(auth);
                 NeutronNetworkView networkView = new NeutronNetworkView(network);
                 Subnet subnet = Builders.subnet().name(resource.getName())
                         .networkId(context.getParameter(OpenStackConstants.NETWORK_ID, String.class))
@@ -55,11 +54,11 @@ public class OpenStackSubnetResourceBuilder extends AbstractOpenStackNetworkReso
     }
 
     @Override
-    public CloudResource delete(OpenStackContext context, AuthenticatedContext auth, CloudResource resource, Network network) throws Exception {
+    public CloudResource delete(OpenStackContext context, AuthenticatedContext auth, CloudResource resource, Network network) {
         try {
             NeutronNetworkView neutronView = new NeutronNetworkView(network);
             if (!neutronView.isExistingSubnet()) {
-                OSClient osClient = createOSClient(auth);
+                OSClient<?> osClient = createOSClient(auth);
                 ActionResponse response = osClient.networking().subnet().delete(resource.getReference());
                 return checkDeleteResponse(response, resourceType(), auth, resource, "Subnet deletion failed");
             }

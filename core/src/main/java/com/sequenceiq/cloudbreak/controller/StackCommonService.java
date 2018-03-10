@@ -33,7 +33,7 @@ import com.sequenceiq.cloudbreak.domain.StackValidation;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
-import com.sequenceiq.cloudbreak.service.account.AccountPreferencesValidationFailed;
+import com.sequenceiq.cloudbreak.service.account.AccountPreferencesValidationException;
 import com.sequenceiq.cloudbreak.service.account.AccountPreferencesValidator;
 import com.sequenceiq.cloudbreak.service.decorator.StackDecorator;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterService;
@@ -195,7 +195,7 @@ public class StackCommonService implements StackEndpoint {
     private void validateAccountPreferences(Long stackId, Integer scalingAdjustment) {
         try {
             accountPreferencesValidator.validate(stackId, scalingAdjustment);
-        } catch (AccountPreferencesValidationFailed e) {
+        } catch (AccountPreferencesValidationException e) {
             throw new BadRequestException(e.getMessage(), e);
         }
     }

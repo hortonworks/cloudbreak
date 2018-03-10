@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.service.stack.repair;
 
-import java.util.Set;
+import java.util.Collection;
 import java.util.concurrent.ExecutorService;
 
 import javax.inject.Inject;
@@ -39,19 +39,19 @@ public class StackRepairService {
     @Inject
     private ExecutorService executorService;
 
-    public void add(Stack stack, Set<String> unhealthyInstanceIds) {
+    public void add(Stack stack, Collection<String> unhealthyInstanceIds) {
         if (unhealthyInstanceIds.isEmpty()) {
             LOGGER.warn("No instances are unhealthy, returning...");
             flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_REPAIR_COMPLETE_CLEAN, Status.AVAILABLE.name());
             return;
         }
         UnhealthyInstances unhealthyInstances = groupInstancesByHostGroups(stack, unhealthyInstanceIds);
-        StackRepairFlowSubmitter stackRepairFlowSubmitter = new StackRepairFlowSubmitter(stack.getId(), unhealthyInstances);
+        Runnable stackRepairFlowSubmitter = new StackRepairFlowSubmitter(stack.getId(), unhealthyInstances);
         flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_REPAIR_ATTEMPTING, Status.UPDATE_IN_PROGRESS.name());
         executorService.submit(stackRepairFlowSubmitter);
     }
 
-    private UnhealthyInstances groupInstancesByHostGroups(Stack stack, Set<String> unhealthyInstanceIds) {
+    private UnhealthyInstances groupInstancesByHostGroups(Stack stack, Iterable<String> unhealthyInstanceIds) {
         UnhealthyInstances unhealthyInstances = new UnhealthyInstances();
         for (String instanceId : unhealthyInstanceIds) {
             InstanceMetaData instanceMetaData = instanceMetaDataRepository.findByInstanceId(stack.getId(), instanceId);

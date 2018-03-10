@@ -21,6 +21,7 @@ import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
 import com.amazonaws.regions.RegionUtils;
+import com.amazonaws.services.cloudformation.AmazonCloudFormation;
 import com.amazonaws.services.cloudformation.AmazonCloudFormationClient;
 import com.amazonaws.services.cloudformation.model.CreateStackRequest;
 import com.amazonaws.services.cloudformation.model.DescribeStacksRequest;
@@ -79,7 +80,7 @@ public class AwsCreateVpcNetworkTest extends AbstractCloudbreakIntegrationTest {
         getItContext().putContextParam(CloudbreakITContextConstants.NETWORK_ID, id, true);
     }
 
-    private List<Output> getOutputForRequest(String vpcStackName, AmazonCloudFormationClient client) {
+    private List<Output> getOutputForRequest(String vpcStackName, AmazonCloudFormation client) {
         int tried = 0;
         while (tried < MAX_TRY) {
             LOGGER.info("checking vpc stack creation result, tried: " + tried + '/' + MAX_TRY);
@@ -88,7 +89,7 @@ public class AwsCreateVpcNetworkTest extends AbstractCloudbreakIntegrationTest {
             Stack resultStack = client.describeStacks(describeStacksRequest).getStacks().get(0);
             StackStatus stackStatus = StackStatus.valueOf(resultStack.getStackStatus());
             if (FAILED_STATUSES.contains(stackStatus)) {
-                LOGGER.error("stack creation failed: ", stackStatus);
+                LOGGER.error("stack creation failed: {}", stackStatus);
                 throw new RuntimeException();
             } else if (CREATE_COMPLETE.equals(stackStatus)) {
                 return resultStack.getOutputs();

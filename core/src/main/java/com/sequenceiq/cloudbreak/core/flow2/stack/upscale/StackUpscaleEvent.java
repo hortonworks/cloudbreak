@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.upscale;
 
+import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
 import com.sequenceiq.cloudbreak.cloud.event.instance.CollectMetadataResult;
 import com.sequenceiq.cloudbreak.cloud.event.instance.GetSSHFingerprintsResult;
 import com.sequenceiq.cloudbreak.cloud.event.resource.UpscaleStackResult;
@@ -10,15 +11,15 @@ import com.sequenceiq.cloudbreak.reactor.api.event.resource.ExtendHostMetadataRe
 
 public enum StackUpscaleEvent implements FlowEvent {
     ADD_INSTANCES_EVENT("STACK_UPSCALE_TRIGGER_EVENT"),
-    ADD_INSTANCES_FINISHED_EVENT(UpscaleStackResult.selector(UpscaleStackResult.class)),
-    ADD_INSTANCES_FAILURE_EVENT(UpscaleStackResult.failureSelector(UpscaleStackResult.class)),
+    ADD_INSTANCES_FINISHED_EVENT(CloudPlatformResult.selector(UpscaleStackResult.class)),
+    ADD_INSTANCES_FAILURE_EVENT(CloudPlatformResult.failureSelector(UpscaleStackResult.class)),
     ADD_INSTANCES_FINISHED_FAILURE_EVENT("ADD_INSTANCES_FINISHED_FAILURE_EVENT"),
     EXTEND_METADATA_EVENT("EXTEND_METADATA"),
-    EXTEND_METADATA_FINISHED_EVENT(CollectMetadataResult.selector(CollectMetadataResult.class)),
-    EXTEND_METADATA_FAILURE_EVENT(CollectMetadataResult.failureSelector(CollectMetadataResult.class)),
+    EXTEND_METADATA_FINISHED_EVENT(CloudPlatformResult.selector(CollectMetadataResult.class)),
+    EXTEND_METADATA_FAILURE_EVENT(CloudPlatformResult.failureSelector(CollectMetadataResult.class)),
     EXTEND_METADATA_FINISHED_FAILURE_EVENT("EXTEND_METADATA_FINISHED_FAILURE_EVENT"),
-    SSHFINGERPRINTS_EVENT(GetSSHFingerprintsResult.selector(GetSSHFingerprintsResult.class)),
-    SSHFINGERPRINTS_FAILED_EVENT(GetSSHFingerprintsResult.failureSelector(GetSSHFingerprintsResult.class)),
+    SSHFINGERPRINTS_EVENT(CloudPlatformResult.selector(GetSSHFingerprintsResult.class)),
+    SSHFINGERPRINTS_FAILED_EVENT(CloudPlatformResult.failureSelector(GetSSHFingerprintsResult.class)),
     TLS_SETUP_FINISHED_EVENT("TLS_SETUP_FINISHED_EVENT"),
     TLS_SETUP_FINISHED_FAILED_EVENT("TLS_SETUP_FINISHED_EVENT"),
     BOOTSTRAP_NEW_NODES_EVENT("BOOTSTRAP_NEW_NODES"),

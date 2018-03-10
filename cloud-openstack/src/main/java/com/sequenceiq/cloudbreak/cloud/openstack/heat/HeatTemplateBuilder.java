@@ -58,8 +58,8 @@ public class HeatTemplateBuilder {
             Map<String, Object> model = new HashMap<>();
             model.put("cb_stack_name", openStackUtil.adjustStackNameLength(modelContext.stackName));
             model.put("agents", novaInstances);
-            model.put("core_user_data", formatUserData(modelContext.instanceUserData.getUserData(InstanceGroupType.CORE)));
-            model.put("gateway_user_data", formatUserData(modelContext.instanceUserData.getUserData(InstanceGroupType.GATEWAY)));
+            model.put("core_user_data", formatUserData(modelContext.instanceUserData.getUserDataByType(InstanceGroupType.CORE)));
+            model.put("gateway_user_data", formatUserData(modelContext.instanceUserData.getUserDataByType(InstanceGroupType.GATEWAY)));
             model.put("groups", modelContext.groups);
             model.put("existingNetwork", modelContext.existingNetwork);
             model.put("existingSubnet", modelContext.existingSubnet);

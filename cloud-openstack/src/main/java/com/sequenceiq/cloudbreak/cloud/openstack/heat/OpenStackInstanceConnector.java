@@ -43,7 +43,7 @@ public class OpenStackInstanceConnector implements InstanceConnector {
         if (!verifyHostKey) {
             throw new CloudOperationNotSupportedException("Host key verification is disabled on OPENSTACK");
         }
-        OSClient osClient = openStackClient.createOSClient(authenticatedContext);
+        OSClient<?> osClient = openStackClient.createOSClient(authenticatedContext);
         return osClient.compute().servers().getConsoleOutput(vm.getInstanceId(), CONSOLE_OUTPUT_LINES);
     }
 
@@ -60,7 +60,7 @@ public class OpenStackInstanceConnector implements InstanceConnector {
     @Override
     public List<CloudVmInstanceStatus> check(AuthenticatedContext ac, List<CloudInstance> vms) {
         List<CloudVmInstanceStatus> statuses = new ArrayList<>();
-        OSClient osClient = openStackClient.createOSClient(ac);
+        OSClient<?> osClient = openStackClient.createOSClient(ac);
         for (CloudInstance vm : vms) {
             Optional<Server> server = Optional.ofNullable(vm.getInstanceId())
                                                 .map(iid -> osClient.compute().servers().get(iid));
@@ -73,9 +73,9 @@ public class OpenStackInstanceConnector implements InstanceConnector {
         return statuses;
     }
 
-    private List<CloudVmInstanceStatus> executeAction(AuthenticatedContext ac, List<CloudInstance> cloudInstances, Action action) {
+    private List<CloudVmInstanceStatus> executeAction(AuthenticatedContext ac, Iterable<CloudInstance> cloudInstances, Action action) {
         List<CloudVmInstanceStatus> statuses = new ArrayList<>();
-        OSClient osClient = openStackClient.createOSClient(ac);
+        OSClient<?> osClient = openStackClient.createOSClient(ac);
         for (CloudInstance cloudInstance : cloudInstances) {
             ActionResponse actionResponse = osClient.compute().servers().action(cloudInstance.getInstanceId(), action);
             if (actionResponse.isSuccess()) {

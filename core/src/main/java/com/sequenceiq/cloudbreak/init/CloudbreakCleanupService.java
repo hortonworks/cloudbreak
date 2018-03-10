@@ -41,7 +41,7 @@ import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.flowlog.FlowLogService;
-import com.sequenceiq.cloudbreak.service.ha.CloudbreakNodeConfig;
+import com.sequenceiq.cloudbreak.ha.CloudbreakNodeConfig;
 import com.sequenceiq.cloudbreak.service.ha.HeartbeatService;
 import com.sequenceiq.cloudbreak.service.usages.UsageService;
 
@@ -96,6 +96,7 @@ public class CloudbreakCleanupService implements ApplicationListener<ContextRefr
         List<Stack> stacksToSync = resetStackStatus(stackIdsUnderOperation);
         List<Cluster> clustersToSync = resetClusterStatus(stacksToSync, stackIdsUnderOperation);
         triggerSyncs(stacksToSync, clustersToSync);
+        flowLogService.purgeTerminatedStacksFlowLogs();
     }
 
     private List<Stack> resetStackStatus(Collection<Long> excludeStackIds) {
@@ -189,7 +190,7 @@ public class CloudbreakCleanupService implements ApplicationListener<ContextRefr
      * It restarts all the disrupted flows that are assigned to this node.
      */
     private Collection<Long> restartMyAssignedDisruptedFlows() {
-        List<Long> stackIds = new ArrayList<>();
+        Collection<Long> stackIds = new ArrayList<>();
         if (cloudbreakNodeConfig.isNodeIdSpecified()) {
             Set<FlowLog> myFlowLogs;
             try {

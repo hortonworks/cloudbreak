@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.api.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.InstanceGroupAdjustmentModelDescription;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
 import com.sequenceiq.cloudbreak.validation.ValidUpdateStackRequest;
 
@@ -16,7 +16,7 @@ public class UpdateStackJson implements JsonEntity {
     @ApiModelProperty(StackModelDescription.STATUS_REQUEST)
     private StatusRequest status;
 
-    @ApiModelProperty(ModelDescriptions.InstanceGroupAdjustmentModelDescription.WITH_CLUSTER_EVENT)
+    @ApiModelProperty(InstanceGroupAdjustmentModelDescription.WITH_CLUSTER_EVENT)
     private Boolean withClusterEvent = Boolean.FALSE;
 
     @ApiModelProperty(StackModelDescription.INSTANCE_GROUP_ADJUSTMENT)

@@ -30,7 +30,7 @@ public class StackStartStopContext extends CommonContext {
         return stack;
     }
 
-    public List<InstanceMetaData> getInstanceMetaData() {
+    public Iterable<InstanceMetaData> getInstanceMetaData() {
         return instanceMetaData;
     }
 

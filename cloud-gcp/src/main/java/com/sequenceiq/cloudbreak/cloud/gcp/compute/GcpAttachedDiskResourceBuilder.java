@@ -1,11 +1,11 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.compute;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
 import javax.inject.Inject;
@@ -74,24 +74,21 @@ public class GcpAttachedDiskResourceBuilder extends AbstractGcpComputeBuilder {
         String projectId = context.getProjectId();
         Location location = context.getLocation();
         Compute compute = context.getCompute();
-        List<Future<Void>> futures = new ArrayList<>();
+        Collection<Future<Void>> futures = new ArrayList<>();
         for (CloudResource cloudResource : buildableResource) {
             Disk disk = createDisk(volume, projectId, location.getAvailabilityZone(), cloudResource.getName(), tags);
-            Future<Void> submit = intermediateBuilderExecutor.submit(new Callable<Void>() {
-                @Override
-                public Void call() throws Exception {
-                    Insert insDisk = compute.disks().insert(projectId, location.getAvailabilityZone().value(), disk);
-                    try {
-                        Operation operation = insDisk.execute();
-                        syncedResources.add(createOperationAwareCloudResource(cloudResource, operation));
-                        if (operation.getHttpErrorStatusCode() != null) {
-                            throw new GcpResourceException(operation.getHttpErrorMessage(), resourceType(), cloudResource.getName());
-                        }
-                    } catch (GoogleJsonResponseException e) {
-                        throw new GcpResourceException(checkException(e), resourceType(), cloudResource.getName());
+            Future<Void> submit = intermediateBuilderExecutor.submit(() -> {
+                Insert insDisk = compute.disks().insert(projectId, location.getAvailabilityZone().value(), disk);
+                try {
+                    Operation operation = insDisk.execute();
+                    syncedResources.add(createOperationAwareCloudResource(cloudResource, operation));
+                    if (operation.getHttpErrorStatusCode() != null) {
+                        throw new GcpResourceException(operation.getHttpErrorMessage(), resourceType(), cloudResource.getName());
                     }
-                    return null;
+                } catch (GoogleJsonResponseException e) {
+                    throw new GcpResourceException(checkException(e), resourceType(), cloudResource.getName());
                 }
+                return null;
             });
             futures.add(submit);
         }

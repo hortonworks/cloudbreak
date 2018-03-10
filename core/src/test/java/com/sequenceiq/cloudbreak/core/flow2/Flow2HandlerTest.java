@@ -199,7 +199,7 @@ public class Flow2HandlerTest {
 
     private static class OwnFlowState implements FlowState {
         @Override
-        public Class<? extends AbstractAction> action() {
+        public Class<? extends AbstractAction<?, ?, ?, ?>> action() {
             return null;
         }
 

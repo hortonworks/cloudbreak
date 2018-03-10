@@ -51,8 +51,7 @@ public class ScalingHandler implements ApplicationListener<ScalingEvent> {
             int totalNodes = ClusterUtils.getTotalNodes(ambariClientProvider.createAmbariClient(cluster));
             int desiredNodeCount = getDesiredNodeCount(cluster, policy, totalNodes);
             if (totalNodes != desiredNodeCount) {
-                ScalingRequest scalingRequest = (ScalingRequest)
-                        applicationContext.getBean("ScalingRequest", cluster, policy, totalNodes, desiredNodeCount);
+                Runnable scalingRequest = (Runnable) applicationContext.getBean("ScalingRequest", cluster, policy, totalNodes, desiredNodeCount);
                 executorService.execute(scalingRequest);
                 cluster.setLastScalingActivityCurrent();
                 clusterService.save(cluster);

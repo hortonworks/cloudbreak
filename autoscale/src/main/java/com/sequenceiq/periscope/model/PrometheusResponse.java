@@ -1,5 +1,6 @@
 package com.sequenceiq.periscope.model;
 
+import java.util.Collection;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -57,7 +58,7 @@ public class PrometheusResponse {
         }
 
         @JsonProperty("result")
-        public List<Result> getResult() {
+        public Collection<Result> getResult() {
             return result;
         }
     }

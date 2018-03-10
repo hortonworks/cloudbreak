@@ -5,7 +5,7 @@ import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudGateWays;
 
 
-public class GetPlatformCloudGatewaysResult extends CloudPlatformResult<CloudPlatformRequest> {
+public class GetPlatformCloudGatewaysResult extends CloudPlatformResult<CloudPlatformRequest<?>> {
     private CloudGateWays cloudGateWays;
 
     public GetPlatformCloudGatewaysResult(CloudPlatformRequest<?> request, CloudGateWays cloudGateWays) {

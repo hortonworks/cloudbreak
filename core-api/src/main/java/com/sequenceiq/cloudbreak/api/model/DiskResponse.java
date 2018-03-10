@@ -11,6 +11,9 @@ public class DiskResponse implements JsonEntity {
 
     private String displayName;
 
+    public DiskResponse() {
+    }
+
     public DiskResponse(String name, String type, String displayName) {
         this.type = type;
         this.name = name;

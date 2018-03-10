@@ -21,6 +21,7 @@ public class ControllerDescription {
     public static final String LDAP_CONFIG_DESCRIPTION = "Operations on LDAP server configurations";
     public static final String UTIL_DESCRIPTION = "Miscellaneous utility operations";
     public static final String RDSCONFIG_DESCRIPTION = "Operations on RDS configs";
+    public static final String PROXYCONFIG_DESCRIPTION = "Operations on proxy configs";
     public static final String CONNECTOR_DESCRIPTION = "Returns cloud provider specific resource types";
     public static final String SETTINGS_DESCRIPTION = "Returns Cloudbreak specific resource settings";
     public static final String SUBSCRIPTION_DESCRIPTION = "Client subscription for event notifications";

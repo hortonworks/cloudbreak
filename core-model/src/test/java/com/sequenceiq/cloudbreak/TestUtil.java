@@ -57,6 +57,7 @@ import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.domain.SecurityRule;
+import com.sequenceiq.cloudbreak.domain.SmartSenseSubscription;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.StackStatus;
 import com.sequenceiq.cloudbreak.domain.Template;
@@ -245,7 +246,7 @@ public class TestUtil {
     }
 
     public static InstanceMetaData instanceMetaData(Long serverNumber, Long instanceGroupId, InstanceStatus instanceStatus, boolean ambariServer,
-        InstanceGroup instanceGroup) {
+        InstanceGroup instanceGroup, InstanceMetadataType instanceMetadataType) {
         InstanceMetaData instanceMetaData = new InstanceMetaData();
         instanceMetaData.setInstanceStatus(instanceStatus);
         instanceMetaData.setAmbariServer(ambariServer);
@@ -258,8 +259,18 @@ public class TestUtil {
         instanceMetaData.setId(instanceGroupId + serverNumber);
         instanceMetaData.setInstanceGroup(instanceGroup);
         instanceMetaData.setStartDate(new Date().getTime());
-        instanceMetaData.setInstanceMetadataType(InstanceMetadataType.CORE);
+        instanceMetaData.setInstanceMetadataType(instanceMetadataType);
         return instanceMetaData;
+    }
+
+    public static InstanceMetaData instanceMetaData(Long serverNumber, Long instanceGroupId, InstanceStatus instanceStatus, boolean ambariServer,
+            InstanceGroup instanceGroup) {
+        return instanceMetaData(serverNumber, instanceGroupId, instanceStatus, ambariServer, instanceGroup, InstanceMetadataType.CORE);
+    }
+
+    public static InstanceMetaData primaryGateWayInstanceMetaData(Long serverNumber, Long instanceGroupId, InstanceStatus instanceStatus, boolean ambariServer,
+            InstanceGroup instanceGroup) {
+        return instanceMetaData(serverNumber, instanceGroupId, instanceStatus, ambariServer, instanceGroup, InstanceMetadataType.GATEWAY_PRIMARY);
     }
 
     public static Set<InstanceMetaData> generateInstanceMetaDatas(int count, Long instanceGroupId, InstanceGroup instanceGroup) {
@@ -316,6 +327,12 @@ public class TestUtil {
 
     public static Stack stack() {
         return stack(AVAILABLE, gcpCredential());
+    }
+
+    public static Stack stack(Cluster cluster) {
+        Stack stack = stack(AVAILABLE, gcpCredential());
+        stack.setCluster(cluster);
+        return stack;
     }
 
     public static StackView stackView() {
@@ -566,6 +583,16 @@ public class TestUtil {
         resource.setResourceName("testResource");
         resource.setResourceType(ResourceType.GCP_INSTANCE);
         return resource;
+    }
+
+    public static SmartSenseSubscription smartSenseSubscription() {
+        SmartSenseSubscription smartSenseSubscription = new SmartSenseSubscription();
+        smartSenseSubscription.setSubscriptionId("1234-1234-1234-1244");
+        smartSenseSubscription.setAccount("hortonworks");
+        smartSenseSubscription.setOwner("hwx-user");
+        smartSenseSubscription.setPublicInAccount(false);
+        smartSenseSubscription.setId(1L);
+        return smartSenseSubscription;
     }
 
     public static Stack setSpotInstances(Stack stack) {

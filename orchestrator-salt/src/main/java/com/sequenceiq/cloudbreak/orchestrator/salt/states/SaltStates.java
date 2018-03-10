@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Glob;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Target;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.ApplyResponse;
+import com.sequenceiq.cloudbreak.orchestrator.salt.domain.DefaultRouteResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.Minion;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.NetworkInterfaceResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.PingResponse;
@@ -70,14 +71,14 @@ public class SaltStates {
     }
 
     private static Multimap<String, String> applyStateJidInfo(SaltConnector sc, String jid) {
-        Map jidInfo = sc.run("jobs.lookup_jid", RUNNER, Map.class, "jid", jid);
+        Map<?, ?> jidInfo = sc.run("jobs.lookup_jid", RUNNER, Map.class, "jid", jid);
         LOGGER.info("Salt apply state jid info: {}", jidInfo);
         Map<String, List<RunnerInfo>> states = JidInfoResponseTransformer.getSimpleStates(jidInfo);
         return collectMissingTargets(states);
     }
 
     private static Multimap<String, String> highStateJidInfo(SaltConnector sc, String jid) {
-        Map jidInfo = sc.run("jobs.lookup_jid", RUNNER, Map.class, "jid", jid);
+        Map<String, List<Map<String, Object>>> jidInfo = sc.run("jobs.lookup_jid", RUNNER, Map.class, "jid", jid);
         Map<String, List<RunnerInfo>> states = JidInfoResponseTransformer.getHighStates(jidInfo);
         return collectMissingTargets(states);
     }
@@ -100,7 +101,7 @@ public class SaltStates {
     private static void logRunnerInfos(Entry<String, List<RunnerInfo>> stringMapEntry) {
         List<RunnerInfo> runnerInfos = stringMapEntry.getValue();
         runnerInfos.sort(Collections.reverseOrder(new DurationComparator()));
-        double sum = runnerInfos.stream().mapToDouble(runnerInfo -> runnerInfo.getDuration()).sum();
+        double sum = runnerInfos.stream().mapToDouble(RunnerInfo::getDuration).sum();
         LOGGER.info("SaltStates executed on: {} within: {} sec", stringMapEntry.getKey(),
                 TimeUnit.MILLISECONDS.toSeconds(Math.round(sum)));
     }
@@ -122,8 +123,12 @@ public class SaltStates {
         return sc.run(target, "test.ping", LOCAL, PingResponse.class);
     }
 
-    public static NetworkInterfaceResponse networkInterfaceIP(SaltConnector sc, Target<String> target) {
-        return sc.run(target, "network.interface_ip", LOCAL, NetworkInterfaceResponse.class, "eth0");
+    public static DefaultRouteResponse defaultRoute(SaltConnector sc, Target<String> target) {
+        return sc.run(target, "network.default_route", LOCAL, DefaultRouteResponse.class);
+    }
+
+    public static NetworkInterfaceResponse networkInterfaceIP(SaltConnector sc, Target<String> target, String iFace) {
+        return sc.run(target, "network.interface_ip", LOCAL, NetworkInterfaceResponse.class, iFace);
     }
 
     public static void stopMinions(SaltConnector sc, Map<String, String> privateIPsByFQDN) {

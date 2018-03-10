@@ -50,6 +50,6 @@ public class DownscaleStackCollectResourcesHandler implements CloudPlatformEvent
         }
         request.getResult().onNext(result);
         LOGGER.info("DownscaleStackCollectResourcesRequest finished");
-        eventBus.notify(result.selector(), new Event(collectResourcesRequestEvent.getHeaders(), result));
+        eventBus.notify(result.selector(), new Event<>(collectResourcesRequestEvent.getHeaders(), result));
     }
 }

@@ -17,10 +17,9 @@ import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.HostGroupRequest;
 import com.sequenceiq.cloudbreak.api.model.UpdateClusterJson;
 import com.sequenceiq.cloudbreak.api.model.UserNamePasswordJson;
+import com.sequenceiq.cloudbreak.blueprint.validation.BlueprintValidator;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
-import com.sequenceiq.cloudbreak.controller.validation.blueprint.BlueprintValidator;
-import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -59,7 +58,7 @@ public class ClusterCommonService {
     @Autowired
     private ClusterCreationSetupService clusterCreationSetupService;
 
-    public Response put(Long stackId, UpdateClusterJson updateJson) throws CloudbreakSecuritySetupException {
+    public Response put(Long stackId, UpdateClusterJson updateJson) {
         Stack stack = stackService.get(stackId);
         MDCBuilder.buildMdcContext(stack);
         UserNamePasswordJson userNamePasswordJson = updateJson.getUserNamePasswordJson();
@@ -88,8 +87,7 @@ public class ClusterCommonService {
         throw new BadRequestException("Invalid update cluster request!");
     }
 
-    private void clusterHostgroupAdjustmentChange(Long stackId, UpdateClusterJson updateJson, Stack stack)
-            throws CloudbreakSecuritySetupException {
+    private void clusterHostgroupAdjustmentChange(Long stackId, UpdateClusterJson updateJson, Stack stack) {
         if (!stack.isAvailable()) {
             throw new BadRequestException(String.format(
                     "Stack '%s' is currently in '%s' state. PUT requests to a cluster can only be made if the underlying stack is 'AVAILABLE'.", stackId,

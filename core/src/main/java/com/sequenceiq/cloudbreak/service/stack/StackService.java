@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.api.model.Status.STOPPED;
 import static com.sequenceiq.cloudbreak.api.model.Status.STOP_REQUESTED;
 import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -33,6 +34,7 @@ import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.model.StackResponse;
 import com.sequenceiq.cloudbreak.api.model.StatusRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
+import com.sequenceiq.cloudbreak.blueprint.validation.BlueprintValidator;
 import com.sequenceiq.cloudbreak.cloud.model.CloudbreakDetails;
 import com.sequenceiq.cloudbreak.cloud.model.StackTemplate;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
@@ -42,12 +44,10 @@ import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
-import com.sequenceiq.cloudbreak.controller.validation.blueprint.BlueprintValidator;
 import com.sequenceiq.cloudbreak.controller.validation.network.NetworkConfigurationValidator;
-import com.sequenceiq.cloudbreak.core.CloudbreakException;
+import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
-import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ContainerOrchestratorResolver;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
@@ -182,11 +182,8 @@ public class StackService {
 
     @Transactional(TxType.NEVER)
     public Set<StackResponse> retrieveAccountStacks(IdentityUser user) {
-        if (user.getRoles().contains(IdentityUserRole.ADMIN)) {
-            return convertStacks(stackRepository.findAllInAccountWithLists(user.getAccount()));
-        } else {
-            return convertStacks(stackRepository.findPublicInAccountForUser(user.getUserId(), user.getAccount()));
-        }
+        return user.getRoles().contains(IdentityUserRole.ADMIN) ? convertStacks(stackRepository.findAllInAccountWithLists(user.getAccount()))
+                : convertStacks(stackRepository.findPublicInAccountForUser(user.getUserId(), user.getAccount()));
     }
 
     public Set<Stack> retrieveAccountStacks(String account) {
@@ -198,7 +195,7 @@ public class StackService {
     }
 
     @Transactional(TxType.NEVER)
-    public StackResponse getJsonById(Long id, Set<String> entry) {
+    public StackResponse getJsonById(Long id, Collection<String> entry) {
         Stack stack = getByIdWithLists(id);
         authorizationService.hasReadPermission(stack);
         StackResponse stackResponse = conversionService.convert(stack, StackResponse.class);
@@ -278,7 +275,7 @@ public class StackService {
         return stack;
     }
 
-    public StackResponse getPrivateStackJsonByName(String name, IdentityUser identityUser, Set<String> entries) {
+    public StackResponse getPrivateStackJsonByName(String name, IdentityUser identityUser, Collection<String> entries) {
         Stack stack = stackRepository.findByNameInUserWithLists(name, identityUser.getUserId());
         if (stack == null) {
             throw new NotFoundException(String.format("Stack '%s' not found", name));
@@ -288,7 +285,7 @@ public class StackService {
         return stackResponse;
     }
 
-    public StackResponse getPublicStackJsonByName(String name, IdentityUser identityUser, Set<String> entries) {
+    public StackResponse getPublicStackJsonByName(String name, IdentityUser identityUser, Collection<String> entries) {
         Stack stack = stackRepository.findByNameInAccountWithLists(name, identityUser.getAccount());
         if (stack == null) {
             throw new NotFoundException(String.format("Stack '%s' not found", name));
@@ -390,9 +387,6 @@ public class StackService {
         } catch (DataIntegrityViolationException ex) {
             String msg = String.format("Error with resource [%s], error: [%s]", APIResourceType.STACK, getProperSqlErrorMessage(ex));
             throw new BadRequestException(msg);
-        } catch (CloudbreakSecuritySetupException e) {
-            LOGGER.error("Storing of security credentials failed", e);
-            throw new CloudbreakApiException("Storing security credentials failed", e);
         } catch (CloudbreakImageNotFoundException e) {
             LOGGER.error("Cloudbreak Image not found", e);
             throw new CloudbreakApiException(e.getMessage(), e);

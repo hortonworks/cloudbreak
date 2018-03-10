@@ -58,6 +58,16 @@ cb:
   azure:
     host.name.prefix.length: 255
 
+  os:
+    enable.autoimport: true
+    import:
+      root.url.pattern: https://public-repo-1.hortonworks.com/HDP/cloudbreak/%s.img
+      from.format: qcow2
+      disk.format: qcow2
+      container.format: bare
+
+
+
   yarn:
     domain: default.com
     defaultQueue: "default"
@@ -200,4 +210,6 @@ cb:
       enabled: true
       contentlogging: true
 
-  image.catalog.url: https://cloudbreak-imagecatalog.s3.amazonaws.com/v2-dev-cb-image-catalog.json
+  image.catalog:
+    url: https://cloudbreak-imagecatalog.s3.amazonaws.com/v2-dev-cb-image-catalog.json
+    cache.ttl: 15

@@ -24,15 +24,15 @@ public class FlowStructuredEventHandler<S, E> extends StateMachineListenerAdapte
     @Inject
     private StructuredFlowEventFactory structuredFlowEventFactory;
 
-    private S initState;
+    private final S initState;
 
-    private S finalState;
+    private final S finalState;
 
-    private String flowType;
+    private final String flowType;
 
-    private String flowId;
+    private final String flowId;
 
-    private Long stackId;
+    private final Long stackId;
 
     private Long lastStateChange = -1L;
 

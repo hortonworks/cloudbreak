@@ -4,7 +4,6 @@ import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 import static com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType.MAGNETIC;
 import static com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType.values;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -42,7 +41,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudSshKeys;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
-import com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta;
+import com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta.VmTypeMetaBuilder;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterConfig;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
 
@@ -67,7 +66,7 @@ public class AzurePlatformResources implements PlatformResources {
     private AzureClientService azureClientService;
 
     @Override
-    public CloudNetworks networks(CloudCredential cloudCredential, Region region, Map<String, String> filters) throws Exception {
+    public CloudNetworks networks(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
         AzureClient client = azureClientService.getClient(cloudCredential);
         Map<String, Set<CloudNetwork>> result = new HashMap<>();
 
@@ -99,7 +98,7 @@ public class AzurePlatformResources implements PlatformResources {
     }
 
     @Override
-    public CloudSecurityGroups securityGroups(CloudCredential cloudCredential, Region region, Map<String, String> filters) throws Exception {
+    public CloudSecurityGroups securityGroups(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
         AzureClient client = azureClientService.getClient(cloudCredential);
         Map<String, Set<CloudSecurityGroup>> result = new HashMap<>();
 
@@ -121,7 +120,7 @@ public class AzurePlatformResources implements PlatformResources {
 
     @Override
     @Cacheable(cacheNames = "cloudResourceRegionCache", key = "#cloudCredential?.id")
-    public CloudRegions regions(CloudCredential cloudCredential, Region region, Map<String, String> filters) throws Exception {
+    public CloudRegions regions(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
         AzureClient client = azureClientService.getClient(cloudCredential);
         Map<Region, List<AvailabilityZone>> cloudRegions = new HashMap<>();
         Map<Region, String> displayNames = new HashMap<>();
@@ -138,7 +137,7 @@ public class AzurePlatformResources implements PlatformResources {
 
     @Override
     @Cacheable(cacheNames = "cloudResourceVmTypeCache", key = "#cloudCredential?.id + #region.getRegionName()")
-    public CloudVmTypes virtualMachines(CloudCredential cloudCredential, Region region, Map<String, String> filters) throws IOException {
+    public CloudVmTypes virtualMachines(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
         AzureClient client = azureClientService.getClient(cloudCredential);
         Set<VirtualMachineSize> vmTypes = client.getVmTypes(region.value());
 
@@ -150,7 +149,7 @@ public class AzurePlatformResources implements PlatformResources {
 
         for (VirtualMachineSize virtualMachineSize : vmTypes) {
             float memoryInGB = virtualMachineSize.memoryInMB() / NO_MB_PER_GB;
-            VmTypeMeta.VmTypeMetaBuilder builder = VmTypeMeta.VmTypeMetaBuilder.builder()
+            VmTypeMetaBuilder builder = VmTypeMetaBuilder.builder()
                     .withCpuAndMemory(virtualMachineSize.numberOfCores(), memoryInGB);
 
             for (VolumeParameterType volumeParameterType : values()) {
@@ -174,26 +173,26 @@ public class AzurePlatformResources implements PlatformResources {
     }
 
     @Override
-    public CloudGateWays gateways(CloudCredential cloudCredential, Region region, Map<String, String> filters) throws Exception {
+    public CloudGateWays gateways(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
         return new CloudGateWays();
     }
 
     @Override
-    public CloudIpPools publicIpPool(CloudCredential cloudCredential, Region region, Map<String, String> filters) throws Exception {
+    public CloudIpPools publicIpPool(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
         return new CloudIpPools();
     }
 
     @Override
-    public CloudAccessConfigs accessConfigs(CloudCredential cloudCredential, Region region, Map<String, String> filters) throws Exception {
+    public CloudAccessConfigs accessConfigs(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
         return new CloudAccessConfigs(new HashSet<>());
     }
 
     private VolumeParameterConfig volumeParameterConfig(VolumeParameterType volumeParameterType, VirtualMachineSize virtualMachineSize) {
         return new VolumeParameterConfig(
                 volumeParameterType,
-                Integer.valueOf(DEFAULT_MINIMUM_VOLUME_SIZE),
-                Integer.valueOf(DEFAULT_MAXIMUM_VOLUME_SIZE),
-                Integer.valueOf(DEFAULT_MINIMUM_VOLUME_COUNT),
+                DEFAULT_MINIMUM_VOLUME_SIZE,
+                DEFAULT_MAXIMUM_VOLUME_SIZE,
+                DEFAULT_MINIMUM_VOLUME_COUNT,
                 virtualMachineSize.maxDataDiskCount());
     }
 

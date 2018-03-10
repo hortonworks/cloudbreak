@@ -32,9 +32,9 @@ public abstract class CloudProviderHelper extends CloudProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CloudProviderHelper.class);
 
-    private TestParameter testParameter;
+    private final TestParameter testParameter;
 
-    public CloudProviderHelper(TestParameter testParameter) {
+    protected CloudProviderHelper(TestParameter testParameter) {
         LOGGER.info("TestParemeters length: {}", testParameter.size());
         this.testParameter = testParameter;
     }
@@ -71,7 +71,7 @@ public abstract class CloudProviderHelper extends CloudProvider {
 
     public StackEntity aValidStackRequest() {
         return Stack.request()
-                .withName(getClusterDefaultName())
+                .withName(getClusterName())
                 .withRegion(region())
                 .withAvailabilityZone(availabilityZone())
                 .withInstanceGroups(instanceGroups())
@@ -79,14 +79,10 @@ public abstract class CloudProviderHelper extends CloudProvider {
                 .withStackAuthentication(stackauth());
     }
 
-    abstract String availabilityZone();
-
-    abstract String region();
-
     @Override
     public Entity aValidStackIsCreated() {
         return Stack.isCreated()
-                .withName(getClusterDefaultName())
+                .withName(getClusterName())
                 .withRegion(region())
                 .withAvailabilityZone(availabilityZone())
                 .withInstanceGroups(instanceGroups())
@@ -99,7 +95,7 @@ public abstract class CloudProviderHelper extends CloudProvider {
     abstract NetworkV2Request network();
 
     List<InstanceGroupV2Request> instanceGroups() {
-        List<InstanceGroupV2Request> requests = new ArrayList<InstanceGroupV2Request>();
+        List<InstanceGroupV2Request> requests = new ArrayList<>();
         requests.add(master());
         requests.add(compute());
         requests.add(worker());
@@ -109,8 +105,8 @@ public abstract class CloudProviderHelper extends CloudProvider {
     @Override
     public AmbariV2Request ambariRequestWithBlueprintId(Long id) {
         AmbariV2Request req = new AmbariV2Request();
-        req.setUserName(getTestParameter().get(DEFAULT_AMBARI_USER));
-        req.setPassword(getTestParameter().get(DEFAULT_AMBARI_PASSWORD));
+        req.setUserName(testParameter.get(DEFAULT_AMBARI_USER));
+        req.setPassword(testParameter.get(DEFAULT_AMBARI_PASSWORD));
         req.setBlueprintId(id);
         return req;
     }
@@ -118,8 +114,8 @@ public abstract class CloudProviderHelper extends CloudProvider {
     @Override
     public AmbariV2Request ambariRequestWithBlueprintName(String name) {
         AmbariV2Request req = new AmbariV2Request();
-        req.setUserName(getTestParameter().get(DEFAULT_AMBARI_USER));
-        req.setPassword(getTestParameter().get(DEFAULT_AMBARI_PASSWORD));
+        req.setUserName(testParameter.get(DEFAULT_AMBARI_USER));
+        req.setPassword(testParameter.get(DEFAULT_AMBARI_PASSWORD));
         req.setBlueprintName(name);
         return req;
     }
@@ -163,7 +159,7 @@ public abstract class CloudProviderHelper extends CloudProvider {
     abstract TemplateV2Request template();
 
     List<SecurityRuleRequest> rules() {
-        List<SecurityRuleRequest> rules = new ArrayList<SecurityRuleRequest>();
+        List<SecurityRuleRequest> rules = new ArrayList<>();
         SecurityRuleRequest a = new SecurityRuleRequest();
         a.setSubnet("0.0.0.0/0");
         a.setProtocol("tcp");

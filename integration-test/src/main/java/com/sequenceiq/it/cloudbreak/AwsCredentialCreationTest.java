@@ -28,7 +28,7 @@ public class AwsCredentialCreationTest extends AbstractCloudbreakIntegrationTest
     @Test
     @Parameters({ "credentialName", "roleArn", "accessKey", "secretKey" })
     public void testAwsCredentialCreation(@Optional("") String credentialName, @Optional("") String roleArn,
-            @Optional("") String accessKey, @Optional("") String secretKey) throws Exception {
+            @Optional("") String accessKey, @Optional("") String secretKey) {
         // GIVEN
         credentialName = StringUtils.hasLength(credentialName) ? credentialName : defaultName;
         roleArn = StringUtils.hasLength(roleArn) ? roleArn : defaultRoleArn;

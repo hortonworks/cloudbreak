@@ -19,7 +19,7 @@ public class AuthenticatedUserService {
 
     public IdentityUser getCbUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null && authentication instanceof OAuth2Authentication) {
+        if (authentication instanceof OAuth2Authentication) {
             OAuth2Authentication oauth = (OAuth2Authentication) authentication;
             if (oauth.getUserAuthentication() != null) {
                 String username = (String) authentication.getPrincipal();

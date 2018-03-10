@@ -59,7 +59,7 @@ public class StackSyncActions {
     private FlowMessageService flowMessageService;
 
     @Bean(name = "SYNC_STATE")
-    public Action stackSyncAction() {
+    public Action<?, ?> stackSyncAction() {
         return new AbstractStackSyncAction<StackSyncTriggerEvent>(StackSyncTriggerEvent.class) {
             @Override
             protected void prepareExecution(StackSyncTriggerEvent payload, Map<Object, Object> variables) {
@@ -67,7 +67,7 @@ public class StackSyncActions {
             }
 
             @Override
-            protected void doExecute(StackSyncContext context, StackSyncTriggerEvent payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(StackSyncContext context, StackSyncTriggerEvent payload, Map<Object, Object> variables) {
                 sendEvent(context);
             }
 
@@ -80,10 +80,10 @@ public class StackSyncActions {
     }
 
     @Bean(name = "SYNC_FINISHED_STATE")
-    public Action stackSyncFinishedAction() {
+    public Action<?, ?> stackSyncFinishedAction() {
         return new AbstractStackSyncAction<GetInstancesStateResult>(GetInstancesStateResult.class) {
             @Override
-            protected void doExecute(StackSyncContext context, GetInstancesStateResult payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(StackSyncContext context, GetInstancesStateResult payload, Map<Object, Object> variables) {
                 stackSyncService.updateInstances(context.getStack(), context.getInstanceMetaData(), payload.getStatuses(), context.isStatusUpdateEnabled());
                 sendEvent(context);
             }
@@ -96,10 +96,10 @@ public class StackSyncActions {
     }
 
     @Bean(name = "SYNC_FAILED_STATE")
-    public Action stackSyncFailedAction() {
+    public Action<?, ?> stackSyncFailedAction() {
         return new AbstractStackFailureAction<StackSyncState, StackSyncEvent>() {
             @Override
-            protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
                 LOGGER.error("Error during Stack synchronization flow:", payload.getException());
                 flowMessageService.fireEventAndLog(context.getStackView().getId(), Msg.STACK_SYNC_INSTANCE_STATUS_COULDNT_DETERMINE, UPDATE_FAILED.name());
                 sendEvent(context);
@@ -143,7 +143,7 @@ public class StackSyncActions {
             for (InstanceMetaData im : instanceMetaDataRepository.findAllInStack(stackId)) {
                 String hostName = im.getDiscoveryFQDN();
                 InstanceMetaData instanceMetaData = metaDataMap.get(hostName);
-                if (instanceMetaData == null || im.getPrivateId().compareTo(instanceMetaData.getPrivateId()) == 1) {
+                if (instanceMetaData == null || im.getPrivateId().compareTo(instanceMetaData.getPrivateId()) > 0) {
                     metaDataMap.put(hostName, im);
                 }
             }

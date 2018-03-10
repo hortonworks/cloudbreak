@@ -15,7 +15,7 @@ import io.swagger.annotations.ApiModelProperty;
 @ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
-public class KerberosBase implements JsonEntity {
+public abstract class KerberosBase implements JsonEntity {
 
     @ApiModelProperty(StackModelDescription.KERBEROS_ADMIN)
     @Size(max = 15, min = 5, message = "The length of the Kerberos admin has to be in range of 5 to 15")

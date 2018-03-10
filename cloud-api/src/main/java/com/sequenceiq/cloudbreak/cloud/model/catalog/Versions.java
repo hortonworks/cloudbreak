@@ -10,7 +10,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Versions {
 
-    private List<CloudbreakVersion> cloudbreakVersions;
+    private final List<CloudbreakVersion> cloudbreakVersions;
 
     @JsonCreator
     public Versions(@JsonProperty(value = "cloudbreak", required = true) List<CloudbreakVersion> cloudbreakVersions) {

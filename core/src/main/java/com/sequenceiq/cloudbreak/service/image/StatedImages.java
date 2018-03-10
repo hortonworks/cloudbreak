@@ -4,11 +4,11 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
 
 public class StatedImages {
 
-    private Images images;
+    private final Images images;
 
-    private String imageCatalogUrl;
+    private final String imageCatalogUrl;
 
-    private String imageCatalogName;
+    private final String imageCatalogName;
 
     private StatedImages(Images images, String imageCatalogUrl, String imageCatalogName) {
         this.images = images;

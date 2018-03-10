@@ -89,7 +89,7 @@ public class TemplateController extends NotificationController implements Templa
         return conversionService.convert(template, TemplateResponse.class);
     }
 
-    private Set<TemplateResponse> convert(Set<Template> templates) {
+    private Set<TemplateResponse> convert(Iterable<Template> templates) {
         Set<TemplateResponse> jsons = new HashSet<>();
         for (Template template : templates) {
             jsons.add(convert(template));

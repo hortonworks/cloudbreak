@@ -57,23 +57,23 @@ public interface PlatformResources {
      * @param filters the filter statement
      * @return the {@link CloudVmTypes} contains every vmtype per region
      */
-    CloudVmTypes virtualMachines(CloudCredential cloudCredential, Region region, Map<String, String> filters) throws Exception;
+    CloudVmTypes virtualMachines(CloudCredential cloudCredential, Region region, Map<String, String> filters);
 
     /**
      * Return the gateways
      * @param region specific region (if null then the method will query every gateway)
      * @param filters the filter statement
-     * @return the {@link CloudGateWay} contains every gateway per region
+     * @return the {@link CloudGateWays} contains every gateway per region
      */
-    CloudGateWays gateways(CloudCredential cloudCredential, Region region, Map<String, String> filters) throws Exception;
+    CloudGateWays gateways(CloudCredential cloudCredential, Region region, Map<String, String> filters);
 
     /**
      * Return the ip pool
      * @param region specific region (if null then the method will query ip pool)
      * @param filters the filter statement
-     * @return the {@link CloudIpPool} contains every ip pool per region
+     * @return the {@link CloudIpPools} contains every ip pool per region
      */
-    CloudIpPools publicIpPool(CloudCredential cloudCredential, Region region, Map<String, String> filters) throws Exception;
+    CloudIpPools publicIpPool(CloudCredential cloudCredential, Region region, Map<String, String> filters);
 
     /**
      * Return the accessConfigs
@@ -81,21 +81,13 @@ public interface PlatformResources {
      * @param filters the filter statement
      * @return the {@link CloudAccessConfigs} contains every accessrole
      */
-    CloudAccessConfigs accessConfigs(CloudCredential cloudCredential, Region region, Map<String, String> filters) throws Exception;
+    CloudAccessConfigs accessConfigs(CloudCredential cloudCredential, Region region, Map<String, String> filters);
 
     default boolean regionMatch(Region actualRegion, Region expectedRegion) {
-        if (expectedRegion != null && !Strings.isNullOrEmpty(expectedRegion.value())) {
-            return actualRegion.value().equals(expectedRegion.value());
-        } else {
-            return true;
-        }
+        return expectedRegion == null || Strings.isNullOrEmpty(expectedRegion.value()) || actualRegion.value().equals(expectedRegion.value());
     }
 
     default boolean regionMatch(String actualRegion, Region expectedRegion) {
-        if (expectedRegion != null && !Strings.isNullOrEmpty(expectedRegion.value())) {
-            return actualRegion.equals(expectedRegion.value());
-        } else {
-            return true;
-        }
+        return expectedRegion == null || Strings.isNullOrEmpty(expectedRegion.value()) || actualRegion.equals(expectedRegion.value());
     }
 }

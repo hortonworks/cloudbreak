@@ -209,7 +209,7 @@ public class ContainerConstraint {
             return this;
         }
 
-        public Builder constraints(List<List<String>> constraints) {
+        public Builder constraints(Collection<List<String>> constraints) {
             this.constraints.addAll(constraints);
             return this;
         }
@@ -234,7 +234,7 @@ public class ContainerConstraint {
             return this;
         }
 
-        public Builder addHosts(List<String> hosts) {
+        public Builder addHosts(Collection<String> hosts) {
             this.hosts.addAll(hosts);
             return this;
         }

@@ -82,62 +82,45 @@ public class CleanupService {
                 .forEach(rds -> deleteRdsConfigs(cloudbreakClient, rds.getId().toString()));
     }
 
-    public boolean deleteCredential(CloudbreakClient cloudbreakClient, String credentialId) {
-        boolean result = false;
+    public void deleteCredential(CloudbreakClient cloudbreakClient, String credentialId) {
         if (credentialId != null) {
             cloudbreakClient.credentialEndpoint().delete(Long.valueOf(credentialId));
-            result = true;
         }
-        return result;
     }
 
-    public boolean deleteTemplate(CloudbreakClient cloudbreakClient, String templateId) {
-        boolean result = false;
+    public void deleteTemplate(CloudbreakClient cloudbreakClient, String templateId) {
         if (templateId != null) {
             cloudbreakClient.templateEndpoint().delete(Long.valueOf(templateId));
-            result = true;
         }
-        return result;
     }
 
-    public boolean deleteNetwork(CloudbreakClient cloudbreakClient, String networkId) {
-        boolean result = false;
+    public void deleteNetwork(CloudbreakClient cloudbreakClient, String networkId) {
         if (networkId != null) {
             cloudbreakClient.networkEndpoint().delete(Long.valueOf(networkId));
-            result = true;
         }
-        return result;
     }
 
-    public boolean deleteSecurityGroup(CloudbreakClient cloudbreakClient, String securityGroupId) {
-        boolean result = false;
+    public void deleteSecurityGroup(CloudbreakClient cloudbreakClient, String securityGroupId) {
         if (securityGroupId != null) {
             SecurityGroupEndpoint securityGroupEndpoint = cloudbreakClient.securityGroupEndpoint();
             SecurityGroupResponse securityGroupResponse = securityGroupEndpoint.get(Long.valueOf(securityGroupId));
             if (!itProps.isDefaultSecurityGroup(securityGroupResponse.getName())) {
                 securityGroupEndpoint.delete(Long.valueOf(securityGroupId));
-                result = true;
             }
         }
-        return result;
     }
 
-    public boolean deleteBlueprint(CloudbreakClient cloudbreakClient, String blueprintId) {
-        boolean result = false;
+    public void deleteBlueprint(CloudbreakClient cloudbreakClient, String blueprintId) {
         if (blueprintId != null) {
             cloudbreakClient.blueprintEndpoint().delete(Long.valueOf(blueprintId));
-            result = true;
         }
-        return result;
     }
 
-    public boolean deleteStackAndWait(CloudbreakClient cloudbreakClient, String stackId) {
-        boolean deleted = false;
+    public void deleteStackAndWait(CloudbreakClient cloudbreakClient, String stackId) {
         for (int i = 0; i < cleanUpRetryCount; i++) {
             if (deleteStack(cloudbreakClient, stackId)) {
                 WaitResult waitResult = CloudbreakUtil.waitForStackStatus(cloudbreakClient, stackId, "DELETE_COMPLETED");
                 if (waitResult == WaitResult.SUCCESSFUL) {
-                    deleted = true;
                     break;
                 }
                 try {
@@ -147,7 +130,6 @@ public class CleanupService {
                 }
             }
         }
-        return deleted;
     }
 
     public boolean deleteStack(CloudbreakClient cloudbreakClient, String stackId) {
@@ -159,20 +141,17 @@ public class CleanupService {
         return result;
     }
 
-    public boolean deleteRecipe(CloudbreakClient cloudbreakClient, Long recipeId) {
+    public void deleteRecipe(CloudbreakClient cloudbreakClient, Long recipeId) {
         cloudbreakClient.recipeEndpoint().delete(recipeId);
-        return true;
     }
 
-    public boolean deleteImageCatalog(CloudbreakClient cloudbreakClient, String name) {
+    public void deleteImageCatalog(CloudbreakClient cloudbreakClient, String name) {
         cloudbreakClient.imageCatalogEndpoint().deletePublic(name);
-        return true;
     }
 
-    public boolean deleteRdsConfigs(CloudbreakClient cloudbreakClient, String rdsConfigId) {
+    public void deleteRdsConfigs(CloudbreakClient cloudbreakClient, String rdsConfigId) {
         if (rdsConfigId != null) {
             cloudbreakClient.rdsConfigEndpoint().delete(Long.valueOf(rdsConfigId));
         }
-        return true;
     }
 }

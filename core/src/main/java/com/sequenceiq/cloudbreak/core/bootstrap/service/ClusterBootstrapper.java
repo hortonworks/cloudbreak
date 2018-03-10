@@ -7,6 +7,7 @@ import static java.util.Collections.singletonMap;
 import static org.apache.commons.lang3.StringUtils.isNoneBlank;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -21,9 +22,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
+import com.sequenceiq.cloudbreak.common.model.OrchestratorType;
 import com.sequenceiq.cloudbreak.common.service.HostDiscoveryService;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
-import com.sequenceiq.cloudbreak.core.CloudbreakException;
+import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ContainerBootstrapApiCheckerTask;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ContainerClusterAvailabilityCheckerTask;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ContainerOrchestratorResolver;
@@ -187,7 +189,7 @@ public class ClusterBootstrapper {
         }
     }
 
-    public void bootstrapNewNodes(Long stackId, Set<String> upscaleCandidateAddresses, Set<String> recoveryHostNames) throws CloudbreakException {
+    public void bootstrapNewNodes(Long stackId, Set<String> upscaleCandidateAddresses, Collection<String> recoveryHostNames) throws CloudbreakException {
         Stack stack = stackRepository.findOneWithLists(stackId);
         Set<Node> nodes = new HashSet<>();
         Set<Node> allNodes = new HashSet<>();
@@ -261,7 +263,7 @@ public class ClusterBootstrapper {
         }
     }
 
-    private List<Set<Node>> prepareBootstrapSegments(Set<Node> nodes, int maxBootstrapNodes, String gatewayIp) {
+    private List<Set<Node>> prepareBootstrapSegments(Iterable<Node> nodes, int maxBootstrapNodes, String gatewayIp) {
         List<Set<Node>> result = new ArrayList<>();
         Set<Node> newNodes = new HashSet<>();
         Node gatewayNode = getGateWayNode(nodes, gatewayIp);
@@ -298,7 +300,7 @@ public class ClusterBootstrapper {
         }
     }
 
-    private Node getGateWayNode(Set<Node> nodes, String gatewayIp) {
+    private Node getGateWayNode(Iterable<Node> nodes, String gatewayIp) {
         for (Node node : nodes) {
             if (gatewayIp.equals(node.getPublicIp())) {
                 return node;

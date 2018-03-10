@@ -29,7 +29,7 @@ public class ClusterToClusterV2RequestConverter extends AbstractConversionServic
         clusterV2Request.setFileSystem(getConversionService().convert(source.getFileSystem(), FileSystemRequest.class));
         clusterV2Request.setLdapConfigName(source.getLdapConfig() == null ? null : source.getLdapConfig().getName());
         clusterV2Request.setName(source.getName());
-        if (source.getRdsConfigs() != null && source.getRdsConfigs().size() > 0) {
+        if (source.getRdsConfigs() != null && !source.getRdsConfigs().isEmpty()) {
             RdsConfigs rdsConfigs = new RdsConfigs();
             rdsConfigs.setIds(new HashSet<>());
             for (RDSConfig conf : source.getRdsConfigs()) {
@@ -37,6 +37,11 @@ public class ClusterToClusterV2RequestConverter extends AbstractConversionServic
             }
             clusterV2Request.setRdsConfigs(rdsConfigs);
         }
+
+        if (source.getProxyConfig() != null) {
+            clusterV2Request.setProxyName(source.getProxyConfig().getName());
+        }
+
         return clusterV2Request;
     }
 

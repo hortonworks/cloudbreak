@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBa
 import static com.sequenceiq.cloudbreak.service.cluster.flow.RecipeEngine.DEFAULT_RECIPES;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -20,7 +21,7 @@ import org.springframework.stereotype.Component;
 import com.google.api.client.util.Joiner;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
-import com.sequenceiq.cloudbreak.core.CloudbreakException;
+import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.HostOrchestratorResolver;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
@@ -51,7 +52,7 @@ public class OrchestratorRecipeExecutor {
     @Inject
     private CloudbreakMessagesService cloudbreakMessagesService;
 
-    public void uploadRecipes(Stack stack, Set<HostGroup> hostGroups) throws CloudbreakException {
+    public void uploadRecipes(Stack stack, Collection<HostGroup> hostGroups) throws CloudbreakException {
         HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
         Map<String, List<RecipeModel>> recipeMap = hostGroups.stream().filter(hg -> !hg.getRecipes().isEmpty())
                 .collect(Collectors.toMap(HostGroup::getName, h -> convert(h.getRecipes())));
@@ -79,7 +80,7 @@ public class OrchestratorRecipeExecutor {
         preTerminationRecipesOnNodes(stack, collectNodes(stack));
     }
 
-    public void preTerminationRecipes(Stack stack, Set<String> hostNames) throws CloudbreakException {
+    public void preTerminationRecipes(Stack stack, Collection<String> hostNames) throws CloudbreakException {
         preTerminationRecipesOnNodes(stack, collectNodes(stack, hostNames));
     }
 
@@ -108,7 +109,7 @@ public class OrchestratorRecipeExecutor {
         }
     }
 
-    private List<RecipeModel> convert(Set<Recipe> recipes) {
+    private List<RecipeModel> convert(Iterable<Recipe> recipes) {
         List<RecipeModel> result = new ArrayList<>();
         for (Recipe recipe : recipes) {
             String decodedContent = new String(Base64.decodeBase64(recipe.getContent()));
@@ -128,7 +129,7 @@ public class OrchestratorRecipeExecutor {
         return agents;
     }
 
-    private Set<Node> collectNodes(Stack stack, Set<String> hostNames) {
+    private Set<Node> collectNodes(Stack stack, Collection<String> hostNames) {
         Set<Node> agents = new HashSet<>();
         for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
             for (InstanceMetaData im : instanceGroup.getInstanceMetaData()) {
@@ -143,7 +144,7 @@ public class OrchestratorRecipeExecutor {
     private void recipesEvent(Long stackId, Status status, Map<String, List<RecipeModel>> recipeMap) {
         List<String> recipes = new ArrayList<>();
         for (Entry<String, List<RecipeModel>> entry : recipeMap.entrySet()) {
-            List<String> recipeNamesPerHostgroup = new ArrayList<>(entry.getValue().size());
+            Collection<String> recipeNamesPerHostgroup = new ArrayList<>(entry.getValue().size());
             for (RecipeModel rm : entry.getValue()) {
                 //filter out default recipes
                 if (!DEFAULT_RECIPES.contains(rm.getName())) {

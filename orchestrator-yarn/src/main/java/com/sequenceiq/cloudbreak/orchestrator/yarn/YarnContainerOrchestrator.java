@@ -31,6 +31,7 @@ import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.orchestrator.model.OrchestrationCredential;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
+import com.sequenceiq.cloudbreak.orchestrator.yarn.client.YarnClient;
 import com.sequenceiq.cloudbreak.orchestrator.yarn.client.YarnHttpClient;
 import com.sequenceiq.cloudbreak.orchestrator.yarn.handler.ApplicationDetailHandler;
 import com.sequenceiq.cloudbreak.orchestrator.yarn.handler.ApplicationSubmissionHandler;
@@ -69,7 +70,7 @@ public class YarnContainerOrchestrator extends SimpleContainerOrchestrator {
 
     @Override
     public void validateApiEndpoint(OrchestrationCredential cred) throws CloudbreakOrchestratorException {
-        YarnHttpClient yarnHttpClient = new YarnHttpClient(cred.getApiEndpoint());
+        YarnClient yarnHttpClient = new YarnHttpClient(cred.getApiEndpoint());
         try {
             yarnHttpClient.validateApiEndpoint();
         } catch (Exception e) {
@@ -89,7 +90,7 @@ public class YarnContainerOrchestrator extends SimpleContainerOrchestrator {
 
                 String applicationName = applicationUtils.getApplicationName(constraint, componentNumber);
 
-                YarnAppBootstrap bootstrap = new YarnAppBootstrap(applicationName, cred.getApiEndpoint());
+                OrchestratorBootstrap bootstrap = new YarnAppBootstrap(applicationName, cred.getApiEndpoint());
 
                 Callable<Boolean> runner = runner(bootstrap, getExitCriteria(), exitCriteriaModel);
                 Future<Boolean> appFuture = getParallelOrchestratorComponentRunner().submit(runner);
@@ -107,7 +108,7 @@ public class YarnContainerOrchestrator extends SimpleContainerOrchestrator {
         for (ContainerInfo container: containerInfo) {
             DeleteApplicationRequest deleteApplicationRequest = new DeleteApplicationRequest();
             deleteApplicationRequest.setName(container.getName());
-            YarnHttpClient yarnHttpClient = new YarnHttpClient(cred.getApiEndpoint());
+            YarnClient yarnHttpClient = new YarnHttpClient(cred.getApiEndpoint());
             try {
                 yarnHttpClient.deleteApplication(deleteApplicationRequest);
             } catch (Exception e) {

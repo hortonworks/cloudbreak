@@ -32,7 +32,7 @@ public class AutoRecoveryTest extends AbstractCloudbreakIntegrationTest {
 
     @Test
     @Parameters({ "hostGroup", "removedInstanceCount" })
-    public void testAutoRecovery(String hostGroup, @Optional("0") Integer removedInstanceCount) throws Exception {
+    public void testAutoRecovery(String hostGroup, @Optional("0") Integer removedInstanceCount) {
         //GIVEN
         IntegrationTestContext itContext = getItContext();
         String stackId = itContext.getContextParam(CloudbreakITContextConstants.STACK_ID);

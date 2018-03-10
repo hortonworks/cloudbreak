@@ -3,6 +3,10 @@
 include:
   - ambari.server-install
   - ambari.setup-sso
+{% if pillar['proxy'] is defined and pillar['proxy']['host'] is defined and pillar['proxy']['port'] is defined and pillar['proxy']['protocol'] is defined %}
+  - ambari.proxy
+{% endif %}
+
 
 {% if ambari.is_predefined_repo %}
 

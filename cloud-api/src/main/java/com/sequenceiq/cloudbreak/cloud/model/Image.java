@@ -45,7 +45,7 @@ public class Image {
         return imageName;
     }
 
-    public String getUserData(InstanceGroupType key) {
+    public String getUserDataByType(InstanceGroupType key) {
         return userdata.get(key);
     }
 

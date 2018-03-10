@@ -79,7 +79,7 @@ public class ApplicationDetailResponse implements ApplicationResponse {
         this.components = components;
     }
 
-    public List<Container> getContainers() {
+    public Iterable<Container> getContainers() {
         return containers;
     }
 

@@ -24,7 +24,7 @@ public class ConsulServerFilter implements HostFilter {
     private InstanceMetaDataRepository instanceMetadataRepository;
 
     @Override
-    public List<HostMetadata> filter(long clusterId, Map<String, String> config, List<HostMetadata> hosts) throws HostFilterException {
+    public List<HostMetadata> filter(long clusterId, Map<String, String> config, List<HostMetadata> hosts) {
         List<HostMetadata> copy = new ArrayList<>(hosts);
         Cluster cluster = clusterRepository.findById(clusterId);
         for (HostMetadata host : hosts) {

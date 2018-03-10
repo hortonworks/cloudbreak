@@ -7,7 +7,7 @@ import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformRequest;
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 
-public class PlatformParametersResult extends CloudPlatformResult<CloudPlatformRequest> {
+public class PlatformParametersResult extends CloudPlatformResult<CloudPlatformRequest<?>> {
 
     private Map<Platform, PlatformParameters> platformParameters;
 

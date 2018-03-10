@@ -35,8 +35,7 @@ public class ManualRecoveryTest extends AbstractCloudbreakIntegrationTest {
 
     @Test
     @Parameters({ "hostGroup", "removeOnly", "removedInstanceCount" })
-    public void testManualRecovery(String hostGroup, @Optional("False") Boolean removeOnly, @Optional("0") Integer removedInstanceCount)
-            throws Exception {
+    public void testManualRecovery(String hostGroup, @Optional("False") Boolean removeOnly, @Optional("0") Integer removedInstanceCount) {
         //GIVEN
         if (removeOnly) {
             Assert.assertNotEquals(removedInstanceCount, 0);

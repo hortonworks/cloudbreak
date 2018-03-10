@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.core.bootstrap.service.container.context;
 
-import java.util.HashSet;
 import java.util.Set;
 
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -15,7 +14,7 @@ public class ContainerOrchestratorClusterContext extends StackContext {
 
     private final GatewayConfig gatewayConfig;
 
-    private Set<Node> nodes = new HashSet<>();
+    private final Set<Node> nodes;
 
     public ContainerOrchestratorClusterContext(Stack stack, ContainerOrchestrator containerOrchestrator, GatewayConfig gatewayConfig, Set<Node> nodes) {
         super(stack);

@@ -28,6 +28,7 @@ public class ClusterV2RequestToClusterRequestConverter extends AbstractConversio
             cluster.setRdsConfigIds(source.getRdsConfigs().getIds());
             cluster.setRdsConfigJsons(source.getRdsConfigs().getConfigs());
         }
+        cluster.setProxyName(source.getProxyName());
         cluster.setLdapConfigName(source.getLdapConfigName());
         AmbariV2Request ambariRequest = source.getAmbari();
         if (ambariRequest != null) {

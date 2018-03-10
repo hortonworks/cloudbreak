@@ -2,12 +2,11 @@ package com.sequenceiq.cloudbreak.controller;
 
 import static com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails.CUSTOM_VDF_REPO_KEY;
 import static com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails.VDF_REPO_KEY_PREFIX;
-import static com.sequenceiq.cloudbreak.service.cluster.flow.AmbariRepositoryVersionService.AMBARI_VERSION_2_6_0_0;
+import static com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariRepositoryVersionService.AMBARI_VERSION_2_6_0_0;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
@@ -53,9 +52,9 @@ import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.DefaultAmbariRepoService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
-import com.sequenceiq.cloudbreak.service.blueprint.BlueprintUtils;
+import com.sequenceiq.cloudbreak.blueprint.utils.BlueprintUtils;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
-import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariRepositoryVersionService;
+import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariRepositoryVersionService;
 import com.sequenceiq.cloudbreak.service.decorator.ClusterDecorator;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
@@ -301,10 +300,10 @@ public class ClusterCreationSetupService {
             LOGGER.error(String.format("Could not get Image Component for stack: '%s'.", stackId), e);
         }
 
-        final String filter = vdfStackRepoKeyFilter;
+        String filter = vdfStackRepoKeyFilter;
         return stackRepoDetails.getStack().entrySet().stream()
                 .filter(entry -> entry.getKey().startsWith(filter))
-                .map(Map.Entry::getValue)
+                .map(Entry::getValue)
                 .findFirst();
     }
 

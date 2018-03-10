@@ -19,6 +19,7 @@ include 'core-api'
 include 'autoscale'
 include 'autoscale-api'
 include 'structuredevent-model'
+include 'blueprint-manager'
 
 rootProject.name = 'cloudbreak'
 

@@ -1,5 +1,6 @@
 package com.sequenceiq.it.cloudbreak.config;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -55,7 +56,7 @@ public class ITProps {
         return testSuites.get(suitesKey);
     }
 
-    public List<String> getTestTypes() {
+    public Collection<String> getTestTypes() {
         return testTypes;
     }
 

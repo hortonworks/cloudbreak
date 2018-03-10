@@ -103,7 +103,7 @@ public class AbstractActionTest {
         INIT, DOING;
 
         @Override
-        public Class<? extends AbstractAction> action() {
+        public Class<? extends AbstractAction<?, ?, ?, ?>> action() {
             return TestAction.class;
         }
     }
@@ -117,7 +117,7 @@ public class AbstractActionTest {
         }
     }
 
-    class TestAction extends AbstractAction<State, Event, CommonContext, Payload> {
+    static class TestAction extends AbstractAction<State, Event, CommonContext, Payload> {
 
         protected TestAction() {
             super(Payload.class);

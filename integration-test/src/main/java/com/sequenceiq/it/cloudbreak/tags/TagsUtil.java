@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.security.PrivateKey;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -90,7 +91,7 @@ public class TagsUtil {
     }
 
     protected static void checkTagsWithProvider(String stackName, Map<String, String> cloudProviderParams, ApplicationContext applicationcontext,
-            List<String> instanceIds, Map<String, String> tagsToCheckMap) throws
+            Collection<String> instanceIds, Map<String, String> tagsToCheckMap) throws
             Exception {
         switch (cloudProviderParams.get("cloudProvider")) {
             case "AWS":
@@ -115,7 +116,7 @@ public class TagsUtil {
         }
     }
 
-    protected static void checkTagsAws(Regions region, List<String> instanceIdList, Map<String, String> tagsToCheckMap) {
+    protected static void checkTagsAws(Regions region, Collection<String> instanceIdList, Map<String, String> tagsToCheckMap) {
         Map<String, String> extractedTagsToCheck = new HashMap<>();
         List<Tag> extractedTags;
         AmazonEC2 ec2 = AmazonEC2ClientBuilder.standard().withRegion(region).build();
@@ -137,7 +138,7 @@ public class TagsUtil {
     }
 
     protected static void checkTagsAzure(String accesKey, String tenantId, String secretKey, String subscriptionId,
-            String stackName, Map<String, String> tagsToCheckMap) {
+            CharSequence stackName, Map<String, String> tagsToCheckMap) {
         ApplicationTokenCredentials serviceClientCredentials = new ApplicationTokenCredentials(accesKey, tenantId, secretKey, null);
         Azure azure = Azure.authenticate(serviceClientCredentials).withSubscription(subscriptionId);
         PagedList<VirtualMachine> virtualMachinesList = azure.virtualMachines().list();
@@ -150,7 +151,7 @@ public class TagsUtil {
     }
 
     protected static void checkTagsGcp(ApplicationContext applicationContext, String applicationName, String projectId, String serviceAccountId, String p12File,
-            String availabilityZone, List<String> instanceIdList, Map<String, String> tagsToCheckMap) throws Exception {
+            String availabilityZone, Iterable<String> instanceIdList, Map<String, String> tagsToCheckMap) throws Exception {
         String serviceAccountPrivateKey = ResourceUtil.readBase64EncodedContentFromResource(applicationContext, p12File);
         HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
         PrivateKey privateKey = SecurityUtils.loadPrivateKeyFromKeyStore(SecurityUtils.getPkcs12KeyStore(),
@@ -190,9 +191,9 @@ public class TagsUtil {
 
     }
 
-    protected static void checkTagsOpenstack(String endpoint, String userName, String password, String tenantName, List<String> instanceIdList,
+    protected static void checkTagsOpenstack(String endpoint, String userName, String password, String tenantName, Iterable<String> instanceIdList,
             Map<String, String> tagsToCheckMap) {
-        OSClient os = OSFactory.builderV2()
+        OSClient<?> os = OSFactory.builderV2()
                 .endpoint(endpoint)
                 .credentials(userName, password)
                 .tenantName(tenantName)

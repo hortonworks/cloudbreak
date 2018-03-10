@@ -86,7 +86,7 @@ public interface ClusterV1Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ClusterOpDescription.PUT_BY_STACK_ID, produces = ContentType.JSON, notes = Notes.CLUSTER_NOTES,
             nickname = "putCluster")
-    Response put(@PathParam("id") Long stackId, @Valid UpdateClusterJson updateJson) throws Exception;
+    Response put(@PathParam("id") Long stackId, @Valid UpdateClusterJson updateJson);
 
     @POST
     @Path("{id}/cluster/config")
@@ -107,12 +107,12 @@ public interface ClusterV1Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ClusterOpDescription.FAILURE_REPORT, produces = ContentType.JSON, notes = Notes.FAILURE_REPORT_NOTES,
             nickname = "failureReportCluster")
-    Response failureReport(@PathParam("id") Long stackId, FailureReport failureReport) throws Exception;
+    Response failureReport(@PathParam("id") Long stackId, FailureReport failureReport);
 
     @POST
     @Path("{id}/cluster/manualrepair")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ClusterOpDescription.REPAIR_CLUSTER, produces = ContentType.JSON, notes = Notes.CLUSTER_REPAIR_NOTES,
             nickname = "repairCluster")
-    Response repairCluster(@PathParam("id") Long stackId, ClusterRepairRequest clusterRepairRequest) throws Exception;
+    Response repairCluster(@PathParam("id") Long stackId, ClusterRepairRequest clusterRepairRequest);
 }

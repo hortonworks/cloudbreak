@@ -16,6 +16,7 @@ buildscript {
 plugins {
   id "com.palantir.jacoco-full-report" version "0.4.0"
   id "com.github.jk1.dependency-license-report" version "0.3.4"
+  id 'net.ltgt.apt' version '0.14'
 }
 
 apply plugin: 'org.springframework.boot'
@@ -40,9 +41,6 @@ jar {
 
 dependencies {
 
-    compile("com.sequenceiq:${ambariClientName}:${ambariClientVersion}") {
-        exclude group: 'org.slf4j';
-    }
 
     compile group: 'org.springframework.retry',     name: 'spring-retry',                   version: '1.2.0.RELEASE'
     compile group: 'org.springframework.boot',      name: 'spring-boot-starter',            version: springBootVersion
@@ -78,19 +76,22 @@ dependencies {
     compile group: 'io.swagger',                    name: 'swagger-jersey2-jaxrs',          version: swaggerVersion
     compile group: 'com.google.http-client',        name: 'google-http-client-jackson2',    version: '1.22.0'
     compile (group: 'com.google.oauth-client',      name: 'google-oauth-client-jetty',      version: '1.22.0')   { exclude module: 'servlet-api' }
-    compile group: 'com.hierynomus',                name: 'sshj',                           version: '0.15.0'
     compile group: 'dnsjava',                       name: 'dnsjava',                        version: '2.1.7'
     compile group: 'com.icegreen',                  name: 'greenmail',                      version: '1.4.1'
     compile group: 'org.mybatis',                   name: 'mybatis-migrations',             version: '3.2.0'
     compile group: 'com.cedarsoftware',             name: 'json-io',                        version: '4.9.12'
-    compile group: 'com.github.jknack',             name: 'handlebars',                     version: '4.0.6'
     compile group: 'com.google.code.findbugs',      name: 'annotations',                    version: '3.0.1'
+    compile group: 'org.mapstruct',                 name: 'mapstruct-jdk8',                 version: mapstructVersion
+    compileOnly group: 'org.mapstruct',             name: 'mapstruct-processor',            version: mapstructVersion
+
+    annotationProcessor     group: 'org.mapstruct',                 name: 'mapstruct-processor',            version: mapstructVersion
 
     compile project(':core-model')
     compile project(':orchestrator-api')
     compile project(':cloud-reactor-api')
     compile project(':cloud-reactor')
     compile project(':structuredevent-model')
+    compile project(':blueprint-manager')
 
     runtime project(':orchestrator-salt')
     runtime project(':orchestrator-yarn')
@@ -143,7 +144,26 @@ task execute(type: JavaExec) {
   }
 }
 
+sourceSets {
+  main {
+    java.srcDirs += "${projectDir}/src/main/generated"
+  }
+}
+
 compileJava.dependsOn buildInfo
+compileJava {
+  options.compilerArgs = [
+          '-Amapstruct.unmappedTargetPolicy=ERROR',
+          '-Amapstruct.suppressGeneratorTimestamp=true',
+          '-Amapstruct.suppressGeneratorVersionInfoComment=true'
+  ]
+
+  generatedSourcesDestinationDir = "$projectDir/src/main/generated"
+}
+
+compileJava.doFirst {
+  delete "${projectDir}/src/main/generated/"
+}
 
 class BuildInfoTask extends DefaultTask {
   File destination = new File("build.info")

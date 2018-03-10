@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.orchestrator.model.GenericResponse;
 import com.sequenceiq.cloudbreak.orchestrator.model.GenericResponses;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
+import com.sequenceiq.cloudbreak.orchestrator.salt.domain.DefaultRouteResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.NetworkInterfaceResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.SaltAction;
 
@@ -52,6 +53,9 @@ public class SaltBootstrapTest {
 
         when(saltConnector.action(Mockito.any(SaltAction.class))).thenReturn(genericResponses);
 
+
+        when(saltConnector.run(Mockito.any(), Mockito.eq("network.default_route"), Mockito.any(), Mockito.any()))
+                .thenReturn(new DefaultRouteResponse(Collections.emptyList()));
         NetworkInterfaceResponse networkInterfaceResponse = new NetworkInterfaceResponse();
         List<Map<String, String>> networkResultList = new ArrayList<>();
         networkMap = new HashMap<>();

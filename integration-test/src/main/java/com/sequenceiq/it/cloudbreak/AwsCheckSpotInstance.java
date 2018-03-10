@@ -2,6 +2,7 @@ package com.sequenceiq.it.cloudbreak;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -46,7 +47,7 @@ public class AwsCheckSpotInstance extends AbstractCloudbreakIntegrationTest {
 
         List<InstanceGroupResponse> instanceGroups = stackResponse.getInstanceGroups();
 
-        List<String> instanceIdList = new ArrayList<>();
+        Collection<String> instanceIdList = new ArrayList<>();
         List<String> hostGroupList = Arrays.asList(hostGroupToCheck.split(","));
 
         for (InstanceGroupResponse instanceGroup : instanceGroups) {
@@ -64,7 +65,7 @@ public class AwsCheckSpotInstance extends AbstractCloudbreakIntegrationTest {
         //THEN
         Assert.assertFalse(spotInstanceRequests.isEmpty());
 
-        List<String> spotInstanceIdList = new ArrayList<>();
+        Collection<String> spotInstanceIdList = new ArrayList<>();
 
         for (SpotInstanceRequest request : spotInstanceRequests) {
             spotInstanceIdList.add(request.getInstanceId());

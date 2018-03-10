@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.orchestrator.salt.poller;
 
 import static java.util.Collections.singletonMap;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -39,7 +40,7 @@ public class PillarSave implements OrchestratorBootstrap {
 
     private final Set<String> originalTargets;
 
-    public PillarSave(SaltConnector sc, Set<String> targets, Set<Node> hosts) {
+    public PillarSave(SaltConnector sc, Set<String> targets, Collection<Node> hosts) {
         this.sc = sc;
         Map<String, Map<String, Object>> fqdn = hosts
                 .stream()

@@ -9,9 +9,6 @@ import spark.Response;
 
 public class AmbariVersionDefinitionResponse extends ITResponse {
 
-    public  AmbariVersionDefinitionResponse() {
-    }
-
     @Override
     public Object handle(Request request, Response response) {
         response.type("text/plain");

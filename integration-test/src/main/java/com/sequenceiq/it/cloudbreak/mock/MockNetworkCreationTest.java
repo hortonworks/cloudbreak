@@ -12,8 +12,7 @@ import com.sequenceiq.it.cloudbreak.CloudbreakITContextConstants;
 public class MockNetworkCreationTest extends AbstractCloudbreakIntegrationTest {
     @Test
     @Parameters({ "networkName", "subnetCIDR" })
-    public void testGcpTemplateCreation(@Optional("it-mock-network") String networkName, @Optional("10.0.36.0/24") String subnetCIDR)
-            throws Exception {
+    public void testGcpTemplateCreation(@Optional("it-mock-network") String networkName, @Optional("10.0.36.0/24") String subnetCIDR) {
         // GIVEN
         // WHEN
         NetworkRequest networkRequest = new NetworkRequest();

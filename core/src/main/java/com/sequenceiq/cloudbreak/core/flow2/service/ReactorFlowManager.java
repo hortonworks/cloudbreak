@@ -35,7 +35,6 @@ import com.sequenceiq.cloudbreak.core.flow2.event.ClusterCredentialChangeTrigger
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterScaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackAndClusterUpscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackDownscaleTriggerEvent;
-import com.sequenceiq.cloudbreak.core.flow2.event.StackScaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackSyncTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationEvent;
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -76,7 +75,7 @@ public class ReactorFlowManager {
 
     public void triggerStackStart(Long stackId) {
         String selector = FlowChainTriggers.FULL_START_TRIGGER_EVENT;
-        StackEvent startTriggerEvent = new StackEvent(selector, stackId);
+        Acceptable startTriggerEvent = new StackEvent(selector, stackId);
         notify(selector, startTriggerEvent);
     }
 
@@ -87,7 +86,7 @@ public class ReactorFlowManager {
 
     public void triggerStackUpscale(Long stackId, InstanceGroupAdjustmentJson instanceGroupAdjustment, boolean withClusterEvent) {
         String selector = FlowChainTriggers.FULL_UPSCALE_TRIGGER_EVENT;
-        StackAndClusterUpscaleTriggerEvent stackAndClusterUpscaleTriggerEvent = new StackAndClusterUpscaleTriggerEvent(selector,
+        Acceptable stackAndClusterUpscaleTriggerEvent = new StackAndClusterUpscaleTriggerEvent(selector,
                 stackId, instanceGroupAdjustment.getInstanceGroup(), instanceGroupAdjustment.getScalingAdjustment(),
                 withClusterEvent ? ScalingType.UPSCALE_TOGETHER : ScalingType.UPSCALE_ONLY_STACK);
         notify(selector, stackAndClusterUpscaleTriggerEvent);
@@ -95,7 +94,7 @@ public class ReactorFlowManager {
 
     public void triggerStackDownscale(Long stackId, InstanceGroupAdjustmentJson instanceGroupAdjustment) {
         String selector = STACK_DOWNSCALE_EVENT.event();
-        StackScaleTriggerEvent stackScaleTriggerEvent = new StackDownscaleTriggerEvent(selector, stackId, instanceGroupAdjustment.getInstanceGroup(),
+        Acceptable stackScaleTriggerEvent = new StackDownscaleTriggerEvent(selector, stackId, instanceGroupAdjustment.getInstanceGroup(),
                 instanceGroupAdjustment.getScalingAdjustment());
         notify(selector, stackScaleTriggerEvent);
     }
@@ -152,7 +151,7 @@ public class ReactorFlowManager {
 
     public void triggerClusterUpscale(Long stackId, HostGroupAdjustmentJson hostGroupAdjustment) {
         String selector = CLUSTER_UPSCALE_TRIGGER_EVENT.event();
-        ClusterScaleTriggerEvent event = new ClusterScaleTriggerEvent(selector, stackId,
+        Acceptable event = new ClusterScaleTriggerEvent(selector, stackId,
                 hostGroupAdjustment.getHostGroup(), hostGroupAdjustment.getScalingAdjustment());
         notify(selector, event);
     }
@@ -160,7 +159,7 @@ public class ReactorFlowManager {
     public void triggerClusterDownscale(Long stackId, HostGroupAdjustmentJson hostGroupAdjustment) {
         String selector = FlowChainTriggers.FULL_DOWNSCALE_TRIGGER_EVENT;
         ScalingType scalingType = hostGroupAdjustment.getWithStackUpdate() ? ScalingType.DOWNSCALE_TOGETHER : ScalingType.DOWNSCALE_ONLY_CLUSTER;
-        ClusterAndStackDownscaleTriggerEvent event = new ClusterAndStackDownscaleTriggerEvent(selector, stackId,
+        Acceptable event = new ClusterAndStackDownscaleTriggerEvent(selector, stackId,
                 hostGroupAdjustment.getHostGroup(), hostGroupAdjustment.getScalingAdjustment(), scalingType);
         notify(selector, event);
     }

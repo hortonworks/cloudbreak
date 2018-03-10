@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.recipe;
 
 import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
 
+import java.util.Collection;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -61,11 +62,8 @@ public class RecipeService {
     }
 
     public Set<Recipe> retrieveAccountRecipes(IdentityUser user) {
-        if (user.getRoles().contains(IdentityUserRole.ADMIN)) {
-            return recipeRepository.findAllInAccount(user.getAccount());
-        } else {
-            return recipeRepository.findPublicInAccountForUser(user.getUserId(), user.getAccount());
-        }
+        return user.getRoles().contains(IdentityUserRole.ADMIN) ? recipeRepository.findAllInAccount(user.getAccount())
+                : recipeRepository.findPublicInAccountForUser(user.getUserId(), user.getAccount());
     }
 
     public Recipe getPrivateRecipe(String name, IdentityUser user) {
@@ -76,7 +74,7 @@ public class RecipeService {
         return recipe;
     }
 
-    public Set<Recipe> getPublicRecipes(IdentityUser user, Set<String> recipeNames) {
+    public Set<Recipe> getPublicRecipes(IdentityUser user, Collection<String> recipeNames) {
         Set<Recipe> recipes = recipeRepository.findByNameInAccount(recipeNames, user.getAccount());
         if (recipeNames.size() != recipes.size()) {
             Set<String> foundRecipes = recipes.stream().map(Recipe::getName).collect(Collectors.toSet());

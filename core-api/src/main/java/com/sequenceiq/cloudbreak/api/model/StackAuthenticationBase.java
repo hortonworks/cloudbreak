@@ -6,7 +6,7 @@ import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import io.swagger.annotations.ApiModelProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class StackAuthenticationBase implements JsonEntity {
+public abstract class StackAuthenticationBase implements JsonEntity {
 
     @ApiModelProperty(ModelDescriptions.StackAuthenticationBase.PUBLIC_KEY)
     private String publicKey;

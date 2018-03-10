@@ -55,7 +55,7 @@ public abstract class AbstractGcpResourceBuilder implements CloudPlatformAware {
         return resourceNameService;
     }
 
-    protected List<CloudResourceStatus> checkResources(ResourceType type, GcpContext context, AuthenticatedContext auth, List<CloudResource> resources) {
+    protected List<CloudResourceStatus> checkResources(ResourceType type, GcpContext context, AuthenticatedContext auth, Iterable<CloudResource> resources) {
         List<CloudResourceStatus> result = new ArrayList<>();
         for (CloudResource resource : resources) {
             LOGGER.info("Check {} resource: {}", type, resource);

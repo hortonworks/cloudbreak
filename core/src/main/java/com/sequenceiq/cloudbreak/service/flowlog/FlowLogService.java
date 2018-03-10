@@ -6,6 +6,8 @@ import java.util.Queue;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
@@ -17,11 +19,13 @@ import com.sequenceiq.cloudbreak.domain.FlowChainLog;
 import com.sequenceiq.cloudbreak.domain.FlowLog;
 import com.sequenceiq.cloudbreak.repository.FlowChainLogRepository;
 import com.sequenceiq.cloudbreak.repository.FlowLogRepository;
-import com.sequenceiq.cloudbreak.service.ha.CloudbreakNodeConfig;
+import com.sequenceiq.cloudbreak.ha.CloudbreakNodeConfig;
 
 @Service
 @Transactional
 public class FlowLogService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(FlowLogService.class);
 
     @Inject
     private CloudbreakNodeConfig cloudbreakNodeConfig;
@@ -56,6 +60,15 @@ public class FlowLogService {
 
     public FlowLog terminate(Long stackId, String flowId) {
         return finalize(stackId, flowId, "TERMINATED");
+    }
+
+    public void purgeTerminatedStacksFlowLogs() {
+        LOGGER.info("Cleaning deleted stack's flowlog");
+        int purgedTerminatedStackLogs = flowLogRepository.purgeTerminatedStackLogs();
+        LOGGER.info("Deleted flowlog count: {}", purgedTerminatedStackLogs);
+        LOGGER.info("Cleaning orphan flowchainlogs");
+        int purgedOrphanFLowChainLogs = flowChainLogRepository.purgeOrphanFLowChainLogs();
+        LOGGER.info("Deleted flowchainlog count: {}", purgedOrphanFLowChainLogs);
     }
 
     private FlowLog finalize(Long stackId, String flowId, String state) {

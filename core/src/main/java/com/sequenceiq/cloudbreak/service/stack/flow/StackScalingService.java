@@ -2,12 +2,12 @@ package com.sequenceiq.cloudbreak.service.stack.flow;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -27,8 +27,8 @@ import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
-import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariClusterConnector;
-import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariDecommissioner;
+import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariClusterConnector;
+import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariDecommissioner;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -108,7 +108,7 @@ public class StackScalingService {
 
             }
         } else {
-            LOGGER.info("Host cannot be deleted because it is not exist: ", instanceMetaData.getInstanceId());
+            LOGGER.info("Host cannot be deleted because it is not exist: {}", instanceMetaData.getInstanceId());
             eventService.fireCloudbreakEvent(stack.getId(), Status.AVAILABLE.name(),
                     cloudbreakMessagesService.getMessage(Msg.STACK_SCALING_HOST_NOT_FOUND.code(),
                             Collections.singletonList(instanceMetaData.getInstanceId())));
@@ -117,7 +117,7 @@ public class StackScalingService {
     }
 
     @Transactional
-    public int updateRemovedResourcesState(Stack stack, Set<String> instanceIds, InstanceGroup instanceGroup) {
+    public int updateRemovedResourcesState(Stack stack, Collection<String> instanceIds, InstanceGroup instanceGroup) {
         int nodesRemoved = 0;
         for (InstanceMetaData instanceMetaData : instanceGroup.getInstanceMetaData()) {
             if (instanceIds.contains(instanceMetaData.getInstanceId())) {

@@ -102,11 +102,8 @@ public class NetworkService {
     }
 
     public Set<Network> retrieveAccountNetworks(IdentityUser user) {
-        if (user.getRoles().contains(IdentityUserRole.ADMIN)) {
-            return networkRepository.findAllInAccount(user.getAccount());
-        } else {
-            return networkRepository.findPublicInAccountForUser(user.getUserId(), user.getAccount());
-        }
+        return user.getRoles().contains(IdentityUserRole.ADMIN) ? networkRepository.findAllInAccount(user.getAccount())
+                : networkRepository.findPublicInAccountForUser(user.getUserId(), user.getAccount());
     }
 
     private void delete(Network network) {

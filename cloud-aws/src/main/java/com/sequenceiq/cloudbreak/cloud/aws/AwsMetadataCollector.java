@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.aws;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -12,8 +13,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.amazonaws.services.autoscaling.AmazonAutoScaling;
 import com.amazonaws.services.autoscaling.AmazonAutoScalingClient;
+import com.amazonaws.services.cloudformation.AmazonCloudFormation;
 import com.amazonaws.services.cloudformation.AmazonCloudFormationClient;
+import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.CreateTagsRequest;
 import com.amazonaws.services.ec2.model.DescribeInstancesRequest;
@@ -74,10 +78,10 @@ public class AwsMetadataCollector implements MetadataCollector {
         }
     }
 
-    private List<CloudVmMetaDataStatus> collectGroupMetaData(AuthenticatedContext ac, AmazonAutoScalingClient amazonASClient,
-            AmazonEC2Client amazonEC2Client, AmazonCloudFormationClient amazonCFClient, String groupName, List<CloudInstance> cloudInstances) {
+    private Collection<CloudVmMetaDataStatus> collectGroupMetaData(AuthenticatedContext ac, AmazonAutoScaling amazonASClient,
+            AmazonEC2 amazonEC2Client, AmazonCloudFormation amazonCFClient, String groupName, Iterable<CloudInstance> cloudInstances) {
 
-        List<CloudVmMetaDataStatus> cloudVmMetaDataStatuses = new ArrayList<>();
+        Collection<CloudVmMetaDataStatus> cloudVmMetaDataStatuses = new ArrayList<>();
 
         String asGroupName = cloudFormationStackUtil.getAutoscalingGroupName(ac, amazonCFClient, groupName);
         List<String> instanceIds = cloudFormationStackUtil.getInstanceIds(amazonASClient, asGroupName);
@@ -110,7 +114,7 @@ public class AwsMetadataCollector implements MetadataCollector {
     }
 
     private CloudInstance ensureInstanceTag(Map<String, CloudInstance> mapByInstanceId, Instance instance, String instanceId, Queue<CloudInstance>
-            untrackedInstances, AmazonEC2Client amazonEC2Client) {
+            untrackedInstances, AmazonEC2 amazonEC2Client) {
 
         // we need to figure out whether it is already tracked or not, if it is already tracked then it has a tag
         String tag = getTag(instance);
@@ -145,7 +149,7 @@ public class AwsMetadataCollector implements MetadataCollector {
         return null;
     }
 
-    private void addTag(AmazonEC2Client amazonEC2Client, CloudInstance cloudInstance, Instance instance) {
+    private void addTag(AmazonEC2 amazonEC2Client, CloudInstance cloudInstance, Instance instance) {
         String tagName = awsClient.getCbName(cloudInstance.getTemplate().getGroupName(), cloudInstance.getTemplate().getPrivateId());
         Tag t = new Tag();
         t.setKey(TAG_NAME);
@@ -156,7 +160,7 @@ public class AwsMetadataCollector implements MetadataCollector {
         amazonEC2Client.createTags(ctr);
     }
 
-    private ListMultimap<String, CloudInstance> groupByInstanceGroup(List<CloudInstance> vms) {
+    private ListMultimap<String, CloudInstance> groupByInstanceGroup(Iterable<CloudInstance> vms) {
         ListMultimap<String, CloudInstance> groupByInstanceGroup = ArrayListMultimap.create();
         for (CloudInstance vm : vms) {
             String groupName = vm.getTemplate().getGroupName();
@@ -165,7 +169,7 @@ public class AwsMetadataCollector implements MetadataCollector {
         return groupByInstanceGroup;
     }
 
-    private Map<String, CloudInstance> mapByInstanceId(List<CloudInstance> vms) {
+    private Map<String, CloudInstance> mapByInstanceId(Iterable<CloudInstance> vms) {
         Map<String, CloudInstance> groupByInstanceId = Maps.newHashMap();
         for (CloudInstance vm : vms) {
             String instanceId = vm.getInstanceId();
@@ -176,7 +180,7 @@ public class AwsMetadataCollector implements MetadataCollector {
         return groupByInstanceId;
     }
 
-    private Queue<CloudInstance> untrackedInstances(List<CloudInstance> vms) {
+    private Queue<CloudInstance> untrackedInstances(Iterable<CloudInstance> vms) {
         Queue<CloudInstance> cloudInstances = Lists.newLinkedList();
         for (CloudInstance vm : vms) {
             if (vm.getInstanceId() == null) {

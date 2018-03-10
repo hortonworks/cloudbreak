@@ -25,11 +25,6 @@ task runMockServer(type:JavaExec) {
   systemProperty "MOCK_SERVER_ADDRESS", System.getProperty("MOCK_SERVER_ADDRESS")
 }
 
-task runMockSshServer(type:JavaExec) {
-  main = 'com.sequenceiq.it.spark.MockSshServerRunner'
-  classpath = sourceSets.main.runtimeClasspath
-}
-
 dependencies {
   compile project(':cloud-common')
   compile project(':core-api')

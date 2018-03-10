@@ -4,7 +4,7 @@ import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformRequest;
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudIpPools;
 
-public class GetPlatformCloudIpPoolsResult extends CloudPlatformResult<CloudPlatformRequest> {
+public class GetPlatformCloudIpPoolsResult extends CloudPlatformResult<CloudPlatformRequest<?>> {
     private CloudIpPools cloudIpPools;
 
     public GetPlatformCloudIpPoolsResult(CloudPlatformRequest<?> request, CloudIpPools cloudIpPools) {

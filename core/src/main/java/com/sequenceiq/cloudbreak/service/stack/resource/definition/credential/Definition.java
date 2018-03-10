@@ -13,7 +13,7 @@ public class Definition {
     @JsonProperty("selectors")
     private List<Selector> selectors = new ArrayList<>();
 
-    public List<Value> getDefaultValues() {
+    public Iterable<Value> getDefaultValues() {
         return defaultValues;
     }
 

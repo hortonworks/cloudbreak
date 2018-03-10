@@ -73,7 +73,8 @@ public class CloudPlatformConnectors {
     private void setupDefaultVariants(Multimap<Platform, Variant> platformToVariants, Map<Platform, Variant> environmentDefaults) {
         for (Entry<Platform, Collection<Variant>> platformVariants : platformToVariants.asMap().entrySet()) {
             if (platformVariants.getValue().size() == 1) {
-                defaultVariants.put(platformVariants.getKey(), platformVariants.getValue().toArray(new Variant[]{})[0]);
+                Collection<Variant> value = platformVariants.getValue();
+                defaultVariants.put(platformVariants.getKey(), value.toArray(new Variant[value.size()])[0]);
             } else {
                 if (platformVariants.getValue().contains(environmentDefaults.get(platformVariants.getKey()))) {
                     defaultVariants.put(platformVariants.getKey(), environmentDefaults.get(platformVariants.getKey()));

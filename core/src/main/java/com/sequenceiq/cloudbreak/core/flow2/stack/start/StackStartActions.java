@@ -64,10 +64,10 @@ public class StackStartActions {
     private StackStartStopService stackStartStopService;
 
     @Bean(name = "START_STATE")
-    public Action stackStartAction() {
+    public Action<?, ?> stackStartAction() {
         return new AbstractStackStartAction<StackEvent>(StackEvent.class) {
             @Override
-            protected void doExecute(StackStartStopContext context, StackEvent payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(StackStartStopContext context, StackEvent payload, Map<Object, Object> variables) {
                 stackStartStopService.startStackStart(context);
                 sendEvent(context);
             }
@@ -83,10 +83,10 @@ public class StackStartActions {
     }
 
     @Bean(name = "COLLECTING_METADATA")
-    public Action collectingMetadataAction() {
+    public Action<?, ?> collectingMetadataAction() {
         return new AbstractStackStartAction<StartInstancesResult>(StartInstancesResult.class) {
             @Override
-            protected void doExecute(StackStartStopContext context, StartInstancesResult payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(StackStartStopContext context, StartInstancesResult payload, Map<Object, Object> variables) {
                 stackStartStopService.validateStackStartResult(context, payload);
                 sendEvent(context);
             }
@@ -101,10 +101,10 @@ public class StackStartActions {
     }
 
     @Bean(name = "START_FINISHED_STATE")
-    public Action startFinishedAction() {
+    public Action<?, ?> startFinishedAction() {
         return new AbstractStackStartAction<CollectMetadataResult>(CollectMetadataResult.class) {
             @Override
-            protected void doExecute(StackStartStopContext context, CollectMetadataResult payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(StackStartStopContext context, CollectMetadataResult payload, Map<Object, Object> variables) {
                 stackStartStopService.finishStackStart(context, payload.getResults());
                 metricService.incrementMetricCounter(MetricType.STACK_START_SUCCESSFUL, context.getStack());
                 sendEvent(context);
@@ -118,10 +118,10 @@ public class StackStartActions {
     }
 
     @Bean(name = "START_FAILED_STATE")
-    public Action stackStartFailedAction() {
+    public Action<?, ?> stackStartFailedAction() {
         return new AbstractStackFailureAction<StackStartState, StackStartEvent>() {
             @Override
-            protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
                 stackStartStopService.handleStackStartError(context.getStackView(), payload);
                 metricService.incrementMetricCounter(MetricType.STACK_START_FAILED, context.getStackView());
                 sendEvent(context);
