@@ -3,8 +3,9 @@ install-smartsense-agent:
    - name: smartsense-hst
 
 update-smartsense-agent:
-  cmd.run:
-    - name: yum -q -y update http://s3.amazonaws.com/dev.hortonworks.com/hst/centos7/smartsense-hst-1.4.1.2.5.0.1-1817.x86_64.rpm
+  pkg.installed:
+    - sources:
+      - smartsense-hst: {{ pillar['smartsense_update_pkg'] }}
     - unless: test -f /usr/hdp/share/hst/ambari-service/SMARTSENSE/configuration/product-info.xml
 
 upgrade-smartsense-agent-ambari-agent-cache:
@@ -16,12 +17,12 @@ upgrade-smartsense-agent-ambari-agent-cache:
     - unless: test -f /var/lib/ambari-agent/cache/stacks/HDP/2.1/services/SMARTSENSE/configuration/product-info.xml
 
 disable-hst-gateway-on-agent:
-  cmd.run:
-    - name: chkconfig hst-gateway off
+  service.disabled:
+    - name: hst-gateway
 
 disable-hst:
-  cmd.run:
-    - name: chkconfig hst off
+  service.disabled:
+    - name: hst
 
 reset-hst-agent:
     cmd.run:
