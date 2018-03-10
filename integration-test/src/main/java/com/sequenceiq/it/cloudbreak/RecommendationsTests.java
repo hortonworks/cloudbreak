@@ -99,9 +99,7 @@ public class RecommendationsTests extends CloudbreakTest {
             createBlueprint();
         } catch (ForbiddenException | BadRequestException e) {
             String exceptionMessage = e.getResponse().readEntity(String.class);
-            String errorMessage;
-
-            errorMessage = exceptionMessage.substring(exceptionMessage.lastIndexOf(':') + 1);
+            String errorMessage = exceptionMessage.substring(exceptionMessage.lastIndexOf(':') + 1);
             LOGGER.info("Clean Up Exception message ::: {}", errorMessage);
         }
     }
@@ -115,9 +113,7 @@ public class RecommendationsTests extends CloudbreakTest {
             deleteCredential();
         } catch (ForbiddenException | BadRequestException e) {
             String exceptionMessage = e.getResponse().readEntity(String.class);
-            String errorMessage;
-
-            errorMessage = exceptionMessage.substring(exceptionMessage.lastIndexOf(':') + 1);
+            String errorMessage = exceptionMessage.substring(exceptionMessage.lastIndexOf(':') + 1);
             LOGGER.info("Clean Up Exception message ::: {}", errorMessage);
         }
     }
