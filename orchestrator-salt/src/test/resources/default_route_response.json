@@ -1,0 +1,58 @@
+{
+  "return": [
+    {
+      "rkovacstest-s1-1-20180310100436.c.siq-haas.internal": [
+        {
+          "destination": "0.0.0.0",
+          "addr_family": "inet",
+          "netmask": "0.0.0.0",
+          "flags": "UG",
+          "interface": "eth0",
+          "gateway": "10.0.0.1"
+        },
+        {
+          "destination": "::/0",
+          "addr_family": "inet6",
+          "netmask": "",
+          "flags": "!n",
+          "interface": "lo",
+          "gateway": "::"
+        },
+        {
+          "destination": "::/0",
+          "addr_family": "inet6",
+          "netmask": "",
+          "flags": "!n",
+          "interface": "lo",
+          "gateway": "::"
+        }
+      ],
+      "rkovacstest-m-0-20180310100408.c.siq-haas.internal": [
+        {
+          "destination": "0.0.0.0",
+          "addr_family": "inet",
+          "netmask": "0.0.0.0",
+          "flags": "UG",
+          "interface": "eth0",
+          "gateway": "10.0.0.1"
+        },
+        {
+          "destination": "::/0",
+          "addr_family": "inet6",
+          "netmask": "",
+          "flags": "!n",
+          "interface": "lo",
+          "gateway": "::"
+        },
+        {
+          "destination": "::/0",
+          "addr_family": "inet6",
+          "netmask": "",
+          "flags": "!n",
+          "interface": "lo",
+          "gateway": "::"
+        }
+      ]
+    }
+  ]
+}

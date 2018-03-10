@@ -1,10 +1,15 @@
 smartsense-hst:
   pkg.installed: []
 
+{% if grains['os_family'] == 'RedHat' %}
+# TODO: updata SmartSense .deb package
+
 update-smartsense:
   cmd.run:
     - name: yum -q -y update http://s3.amazonaws.com/dev.hortonworks.com/hst/centos7/smartsense-hst-1.4.1.2.5.0.1-1817.x86_64.rpm
     - unless: test -f /usr/hdp/share/hst/ambari-service/SMARTSENSE/configuration/product-info.xml
+
+{% endif %}
 
 upgrade-smartsense-ambari-service:
     file.copy:
@@ -25,6 +30,9 @@ upgrade-smartsense-ambari-service:
     - watch:
       - pkg: smartsense-hst
 
+{% if grains['os_family'] == 'RedHat' %}
+# TODO: disable SmartSense services on Ubuntu/Debian
+
 disable-hst-gateway:
   cmd.run:
     - name: chkconfig hst-gateway off
@@ -32,3 +40,5 @@ disable-hst-gateway:
 enable-hst:
   cmd.run:
     - name: chkconfig hst off
+
+{% endif %}

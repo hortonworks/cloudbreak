@@ -10,7 +10,7 @@
 {% set is_container_executor = salt['pillar.get']('docker:enableContainerExecutor') %}
 {% set version = salt['pillar.get']('ambari:repo:version') %}
 {% set ambari_database = salt['pillar.get']('ambari:database') %}
-{%- set cluster_domain = salt['pillar.get']('hosts')[salt['network.interface_ip']('eth0')]['domain'] %}
+{%- set cluster_domain = salt['pillar.get']('hosts')[salt['network.interface_ip'](pillar['network_interface'])]['domain'] %}
 {% set is_local_ldap = salt['pillar.get']('ldap:local', False) %}
 {% set ldap = salt['pillar.get']('ldap') %}
 {% set gateway = salt['pillar.get']('gateway') %}
