@@ -14,9 +14,11 @@ import com.sequenceiq.cloudbreak.controller.BadRequestException;
 @Component
 public class AmbariStackDetailsJsonToStackRepoDetailsConverter extends AbstractConversionServiceAwareConverter<AmbariStackDetailsJson, StackRepoDetails> {
 
-    private static final String REDHAT_6 = "redhat6";
+    private static final String REDHAT_6  = "redhat6";
 
-    private static final String REDHAT_7 = "redhat7";
+    private static final String REDHAT_7  = "redhat7";
+
+    private static final String UBUNTU_16 = "ubuntu16";
 
     @Override
     public StackRepoDetails convert(AmbariStackDetailsJson source) {
@@ -42,8 +44,10 @@ public class AmbariStackDetailsJsonToStackRepoDetailsConverter extends AbstractC
             if (source.getOs() == null) {
                 stack.put(REDHAT_6, stackBaseURL);
                 stack.put(REDHAT_7, stackBaseURL);
+                stack.put(UBUNTU_16, stackBaseURL);
                 util.put(REDHAT_6, utilsBaseURL);
                 util.put(REDHAT_7, utilsBaseURL);
+                util.put(UBUNTU_16, utilsBaseURL);
             } else {
                 stack.put(source.getOs(), stackBaseURL);
                 util.put(source.getOs(), utilsBaseURL);
