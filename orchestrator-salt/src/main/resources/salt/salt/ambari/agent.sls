@@ -88,7 +88,7 @@ set_tlsv1_2:
 
 add_amazon2017_patch_script_agent:
   file.managed:
-    - name: /tmp/amazon2017.sh
+    - name: /opt/salt/amazon2017.sh
     - source: salt://ambari/scripts/amazon2017.sh
     - skip_verify: True
     - makedirs: True
@@ -96,7 +96,7 @@ add_amazon2017_patch_script_agent:
 
 run_amazon2017_sh_agent:
   cmd.run:
-    - name: sh -x /tmp/amazon2017.sh 2>&1 | tee -a /var/log/amazon2017_agent_sh.log && exit ${PIPESTATUS[0]}
+    - name: sh -x /opt/salt/amazon2017.sh 2>&1 | tee -a /var/log/amazon2017_agent_sh.log && exit ${PIPESTATUS[0]}
     - unless: ls /var/log/amazon2017_agent_sh.log
     - require:
       - file: add_amazon2017_patch_script_agent

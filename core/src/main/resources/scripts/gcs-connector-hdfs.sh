@@ -7,10 +7,11 @@
 : ${TMP_EXTRACT_DIR:=temp_extract_dir}
 
 enable_gcs_connector_hdfs() {
+  mkdir -p /opt/salt
   SOURCE_JAR="$SOURCE_DIR/$STORAGE_JAR"
   if [ ! -f "$SOURCE_JAR" ]; then
-    echo 'GC storage jar not found in the source directory, downloading it to /tmp'
-    SOURCE_JAR="/tmp/$STORAGE_JAR"
+    echo 'GC storage jar not found in the source directory, downloading it to /opt/salt'
+    SOURCE_JAR="/opt/salt/$STORAGE_JAR"
     curl -Lko "$SOURCE_JAR" "https://storage.googleapis.com/hadoop-lib/gcs/gcs-connector-latest-hadoop2.jar"
   fi
 
@@ -23,14 +24,14 @@ enable_gcs_connector_hdfs() {
   echo "HDFS path to $MR_TAR_NAME: $MR_TAR_PATH"
   echo "HDFS path to $TEZ_TAR_NAME: $TEZ_TAR_PATH"
 
-  cd /tmp
+  cd /opt/salt
   for tar_file_path in $MR_TAR_PATH $TEZ_TAR_PATH; do
     if hadoop fs -test -e $tar_file_path; then
       tar_file=$(basename $tar_file_path)
 
       echo "Copying $tar_file from HDFS to local fs."
-      [[ -f "/tmp/$tar_file" ]] && rm "/tmp/$tar_file"
-      hadoop fs -copyToLocal "$tar_file_path" /tmp
+      [[ -f "/opt/salt/$tar_file" ]] && rm "/opt/salt/$tar_file"
+      hadoop fs -copyToLocal "$tar_file_path" /opt/salt
 
       rm -rf $TMP_EXTRACT_DIR && mkdir $TMP_EXTRACT_DIR && cd $TMP_EXTRACT_DIR
       echo "Extracting $tar_file."

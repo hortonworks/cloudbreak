@@ -7,7 +7,7 @@ include:
 
 add_kpropd_sh_script:
   file.managed:
-    - name: /tmp/kpropd.sh
+    - name: /opt/salt/kpropd.sh
     - source: salt://kerberos/scripts/kpropd.sh
     - template: jinja
     - skip_verify: True
@@ -19,7 +19,7 @@ add_kpropd_sh_script:
 
 run_kpropd_sh_script:
   cmd.run:
-    - name: sh -x /tmp/kpropd.sh 2>&1 | tee -a /var/log/kpropd_sh.log && exit ${PIPESTATUS[0]}
+    - name: sh -x /opt/salt/kpropd.sh 2>&1 | tee -a /var/log/kpropd_sh.log && exit ${PIPESTATUS[0]}
     - require:
       - file: add_kpropd_sh_script
 
