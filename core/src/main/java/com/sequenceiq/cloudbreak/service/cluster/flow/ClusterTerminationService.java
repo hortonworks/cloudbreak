@@ -26,6 +26,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.model.FileSystemConfiguration;
 import com.sequenceiq.cloudbreak.api.model.FileSystemType;
 import com.sequenceiq.cloudbreak.blueprint.filesystem.FileSystemConfigurator;
+import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.common.model.OrchestratorType;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
@@ -45,6 +46,7 @@ import com.sequenceiq.cloudbreak.repository.ConstraintRepository;
 import com.sequenceiq.cloudbreak.repository.ContainerRepository;
 import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
+import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.stack.flow.TerminationFailedException;
 
 @Component
@@ -78,6 +80,9 @@ public class ClusterTerminationService {
 
     @Inject
     private ComponentConfigProvider componentConfigProvider;
+
+    @Inject
+    private RdsConfigService rdsConfigService;
 
     public Boolean deleteClusterComponents(Long clusterId) {
         Cluster cluster = clusterRepository.findById(clusterId);
@@ -123,6 +128,7 @@ public class ClusterTerminationService {
 
     public void finalizeClusterTermination(Long clusterId) {
         Cluster cluster = clusterRepository.findById(clusterId);
+        Set<RDSConfig> rdsConfigs = cluster.getRdsConfigs();
         Long stackId = cluster.getStack().getId();
         String terminatedName = cluster.getName() + DELIMITER + new Date().getTime();
         cluster.setName(terminatedName);
@@ -136,6 +142,7 @@ public class ClusterTerminationService {
         cluster.setRdsConfigs(new HashSet<>());
         cluster.setStatus(DELETE_COMPLETED);
         deleteClusterHostGroupsWithItsMetadata(cluster);
+        rdsConfigService.deleteDefaultRdsConfigs(rdsConfigs);
         componentConfigProvider.deleteComponentsForStack(stackId);
     }
 
