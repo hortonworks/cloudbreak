@@ -1,24 +1,33 @@
 package com.sequenceiq.it.cloudbreak.newway;
 
+import java.util.Map;
+import java.util.Set;
+import java.util.function.BiConsumer;
+import java.util.function.Function;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.testng.Assert;
+
+import com.sequenceiq.cloudbreak.api.model.CloudGatewayJson;
 import com.sequenceiq.cloudbreak.api.model.PlatformGatewaysResponse;
 import com.sequenceiq.cloudbreak.api.model.PlatformResourceRequestJson;
 import com.sequenceiq.it.IntegrationTestContext;
 
-import java.util.function.BiConsumer;
-import java.util.function.Function;
-
 public class Gateway extends Entity {
-    public static final String IPPOOL = "IPPOOL";
+    private static final String IPPOOL = "IPPOOL";
 
-    private PlatformResourceRequestJson request;
+    private static final Logger LOGGER = LoggerFactory.getLogger(Gateway.class);
+
+    private PlatformResourceRequestJson request = new PlatformResourceRequestJson();
 
     private PlatformGatewaysResponse response;
 
-    public Gateway(String id) {
+    private Gateway(String id) {
         super(id);
     }
 
-    public Gateway() {
+    private Gateway() {
         this(IPPOOL);
     }
 
@@ -26,8 +35,8 @@ public class Gateway extends Entity {
         this.request = request;
     }
 
-    public PlatformGatewaysResponse getResponse() {
-        return response;
+    public Map<String, Set<CloudGatewayJson>> getResponse() {
+        return response.getGateways();
     }
 
     public PlatformResourceRequestJson getRequest() {
@@ -38,6 +47,16 @@ public class Gateway extends Entity {
         this.response = response;
     }
 
+    public Gateway withAccount(String account) {
+        request.setAccount(account);
+        return this;
+    }
+
+    public Gateway withAvailabilityZone(String availabilityZone) {
+        request.setAvailabilityZone(availabilityZone);
+        return this;
+    }
+
     public Gateway withCredentialId(Long id) {
         request.setCredentialId(id);
         return this;
@@ -45,6 +64,16 @@ public class Gateway extends Entity {
 
     public Gateway withCredentialName(String name) {
         request.setCredentialName(name);
+        return this;
+    }
+
+    public Gateway withFilter(Map<String, String> filter) {
+        request.setFilters(filter);
+        return this;
+    }
+
+    public Gateway withPlatformVariant(String platformVariant) {
+        request.setPlatformVariant(platformVariant);
         return this;
     }
 
@@ -66,7 +95,7 @@ public class Gateway extends Entity {
     }
 
     public static Action<Gateway> get(String key) {
-        return new Action<>(getTestContext(key), RegionAction::getRegionsByCredentialId);
+        return new Action<>(getTestContext(key), GatewayAction::get);
     }
 
     public static Action<Gateway> get() {
@@ -75,5 +104,20 @@ public class Gateway extends Entity {
 
     public static Assertion<Gateway> assertThis(BiConsumer<Gateway, IntegrationTestContext> check) {
         return new Assertion<>(getTestContext(GherkinTest.RESULT), check);
+    }
+
+    public static Assertion<Gateway> assertValidGateways() {
+        return assertThis((gateway, t) -> {
+            if (gateway.getResponse().isEmpty()) {
+                LOGGER.info("No gateways for given provider");
+            } else {
+                for (Map.Entry<String, Set<CloudGatewayJson>> elem : gateway.getResponse().entrySet()) {
+                    for (Object response : elem.getValue()) {
+                        CloudGatewayJson gatewayJson = (CloudGatewayJson) response;
+                        Assert.assertFalse(gatewayJson.getName().isEmpty());
+                    }
+                }
+            }
+        });
     }
 }
