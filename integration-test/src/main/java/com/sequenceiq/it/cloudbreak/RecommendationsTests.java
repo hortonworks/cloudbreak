@@ -62,6 +62,21 @@ public class RecommendationsTests extends CloudbreakTest {
         return new HashSet<>(mapper.readValue(getJsonFile(), mapper.getTypeFactory().constructCollectionType(Set.class, DiskResponse.class)));
     }
 
+    private String setCustomDiskResponses(Recommendation recommendations) {
+        String expectedDisplayName = "";
+
+        try {
+            Set<DiskResponse> customDiskResponseSet = getCustomDiskResponses();
+            expectedDisplayName = getCustomDiskResponses().iterator().next().getDisplayName();
+
+            recommendations.getResponse().setDiskResponses(customDiskResponseSet);
+        } catch (IOException e) {
+            LOGGER.info("Set custom Disk Response Exception message ::: {}", e.getMessage());
+        }
+
+        return expectedDisplayName;
+    }
+
     private void createBlueprint() throws Exception {
         given(CloudbreakClient.isCreated());
         given(Blueprint.request().withName(VALID_BP_NAME).withDescription(BP_DESCRIPTION).withAmbariBlueprint(getBlueprintFile()));
@@ -189,17 +204,7 @@ public class RecommendationsTests extends CloudbreakTest {
         when(Recommendation.post(), "Recommendations are requested.");
         then(Recommendation.assertThis(
                 (recommendations, t) -> {
-                    Set<DiskResponse> customDiskResponseSet;
-                    String expectedDisplayName = "";
-
-                    try {
-                        customDiskResponseSet = getCustomDiskResponses();
-                        expectedDisplayName = getCustomDiskResponses().iterator().next().getDisplayName();
-
-                        recommendations.getResponse().setDiskResponses(customDiskResponseSet);
-                    } catch (IOException e) {
-                        LOGGER.info("Set Disk Response Exception message ::: {}", e.getMessage());
-                    }
+                    String expectedDisplayName = setCustomDiskResponses(recommendations);
                     Set<DiskResponse> diskResponseSet = recommendations.getResponse().getDiskResponses();
 
                     for (DiskResponse diskResponse : diskResponseSet) {
