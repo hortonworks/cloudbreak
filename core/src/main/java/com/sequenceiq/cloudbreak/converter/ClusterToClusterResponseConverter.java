@@ -134,6 +134,7 @@ public class ClusterToClusterResponseConverter extends AbstractConversionService
         clusterResponse.setServiceEndPoints(prepareServiceEndpointsMap(source, ambariIp));
         clusterResponse.setBlueprintInputs(convertBlueprintInputs(source.getBlueprintInputs()));
         clusterResponse.setConfigStrategy(source.getConfigStrategy());
+        setExtendedBlueprintText(source, clusterResponse);
         clusterResponse.setLdapConfig(getConversionService().convert(source.getLdapConfig(), LdapConfigResponse.class));
         convertRdsConfigs(source, clusterResponse);
         clusterResponse.setBlueprint(getConversionService().convert(source.getBlueprint(), BlueprintResponse.class));
@@ -153,6 +154,14 @@ public class ClusterToClusterResponseConverter extends AbstractConversionService
         }
         decorateResponseWithProxyConfig(source, clusterResponse);
         return clusterResponse;
+    }
+
+    private <R extends ClusterResponse> void setExtendedBlueprintText(Cluster source, R clusterResponse) {
+        if (StringUtils.isEmpty(source.getExtendedBlueprintText())) {
+            clusterResponse.setExtendedBlueprintText(source.getBlueprint().getBlueprintText());
+        } else {
+            clusterResponse.setExtendedBlueprintText(source.getExtendedBlueprintText());
+        }
     }
 
     private void convertComponentConfig(ClusterResponse response, Cluster source) {

@@ -9,9 +9,13 @@ import javax.validation.Valid;
 
 import com.fasterxml.jackson.annotation.JsonRawValue;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
+import com.sequenceiq.cloudbreak.json.Base64Deserializer;
+import com.sequenceiq.cloudbreak.json.Base64Serializer;
 
 import io.swagger.annotations.ApiModelProperty;
 
@@ -57,6 +61,11 @@ public class ClusterResponse implements JsonEntity {
     private String userName;
 
     private boolean secure;
+
+    @ApiModelProperty(StackModelDescription.EXTENDED_BLUEPRINT_TEXT)
+    @JsonSerialize(using = Base64Serializer.class)
+    @JsonDeserialize(using = Base64Deserializer.class)
+    private String extendedBlueprintText;
 
     private Set<HostGroupResponse> hostGroups = new HashSet<>();
 
@@ -399,5 +408,13 @@ public class ClusterResponse implements JsonEntity {
 
     public void setProxyName(String proxyName) {
         this.proxyName = proxyName;
+    }
+
+    public String getExtendedBlueprintText() {
+        return extendedBlueprintText;
+    }
+
+    public void setExtendedBlueprintText(String extendedBlueprintText) {
+        this.extendedBlueprintText = extendedBlueprintText;
     }
 }

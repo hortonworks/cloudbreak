@@ -33,12 +33,11 @@ import com.sequenceiq.cloudbreak.api.model.ClusterResponse;
 import com.sequenceiq.cloudbreak.api.model.ConfigStrategy;
 import com.sequenceiq.cloudbreak.api.model.RDSConfigJson;
 import com.sequenceiq.cloudbreak.api.model.RDSConfigRequest;
+import com.sequenceiq.cloudbreak.api.model.proxy.ProxyConfigResponse;
 import com.sequenceiq.cloudbreak.blueprint.validation.BlueprintValidator;
 import com.sequenceiq.cloudbreak.blueprint.validation.StackServiceComponentDescriptor;
 import com.sequenceiq.cloudbreak.blueprint.validation.StackServiceComponentDescriptors;
-import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.common.model.OrchestratorType;
-import com.sequenceiq.cloudbreak.api.model.proxy.ProxyConfigResponse;
 import com.sequenceiq.cloudbreak.converter.mapper.ProxyConfigMapper;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
@@ -50,6 +49,7 @@ import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.ProxyConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariViewProvider;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
@@ -145,7 +145,7 @@ public class ClusterToClusterResponseConverterTest extends AbstractEntityConvert
         // WHEN
         ClusterResponse result = underTest.convert(getSource());
         // THEN
-        assertEquals(0L, (long) result.getMinutesUp());
+        assertEquals(0L, result.getMinutesUp());
     }
 
     @Test
@@ -167,6 +167,29 @@ public class ClusterToClusterResponseConverterTest extends AbstractEntityConvert
         underTest.convert(getSource());
         // THEN
         verify(blueprintValidator, times(0)).createHostGroupMap(anySet());
+
+    }
+
+    @Test
+    public void testConvertWhenExtendedBlueprintTextIsNull() throws IOException {
+        // GIVEN
+        mockAll();
+        // WHEN
+        ClusterResponse clusterResponse = underTest.convert(getSource());
+        // THEN
+        assertEquals("{\"host_groups\":[{\"name\":\"slave_1\",\"components\":[{\"name\":\"DATANODE\"}]}]}", clusterResponse.getExtendedBlueprintText());
+
+    }
+
+    @Test
+    public void testConvertWhenExtendedBlueprintTextIsNotNull() throws IOException {
+        // GIVEN
+        mockAll();
+        getSource().setExtendedBlueprintText("extendedBlueprintText");
+        // WHEN
+        ClusterResponse clusterResponse = underTest.convert(getSource());
+        // THEN
+        assertEquals("extendedBlueprintText", clusterResponse.getExtendedBlueprintText());
 
     }
 
