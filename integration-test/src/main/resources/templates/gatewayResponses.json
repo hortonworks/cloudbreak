@@ -1,0 +1,9 @@
+[
+  {
+    "subnet": "0.0.0.0/0",
+    "ports": "22",
+    "protocol": "tcp",
+    "modifiable": null,
+    "id": null
+  }
+]
