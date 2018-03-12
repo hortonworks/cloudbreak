@@ -89,6 +89,7 @@ public class ModelDescriptions {
         public static final String CREDENTIAL_NAME = "credential resource name for the stack";
         public static final String USERNAME = "ambari username";
         public static final String PASSWORD = "ambari password";
+        public static final String EXTENDED_BLUEPRINT_TEXT = "extended bluerint text";
         public static final String ENABLE_SECURITY = "enable Kerberos security";
         public static final String KERBEROS_MASTER_KEY = "kerberos master key";
         public static final String KERBEROS_ADMIN = "kerberos admin user";
