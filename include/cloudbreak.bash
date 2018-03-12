@@ -642,38 +642,40 @@ util-local-dev() {
     dockerCompose stop --timeout ${DOCKER_STOP_TIMEOUT} cloudbreak
     dockerCompose stop --timeout ${DOCKER_STOP_TIMEOUT} periscope
 
-    docker rm -f cloudbreak-proxy 2> /dev/null || :
-    docker rm -f periscope-proxy 2> /dev/null || :
+    if is_macos; then
+        docker rm -f cloudbreak-proxy 2> /dev/null || :
+        docker rm -f periscope-proxy 2> /dev/null || :
+
+        debug starting an ambassador to be registered as cloudbreak.service.consul.
+        debug "all traffic to ambassador will be proxied to localhost"
+
+        docker run -d \
+            --name cloudbreak-proxy \
+            -p 8080:8080 \
+            -e PORT=8080 \
+            -e SERVICE_NAME=cloudbreak \
+            -l traefik.port=8080 \
+            -l traefik.frontend.rule=PathPrefix:/cb/ \
+            -l traefik.backend=cloudbreak-backend \
+            -l traefik.frontend.priority=10 \
+            hortonworks/ambassadord:$DOCKER_TAG_AMBASSADOR $CB_LOCAL_DEV_BIND_ADDR:$port
+
+        docker run -d \
+            --name periscope-proxy \
+            -p 8085:8085 \
+            -e PORT=8085 \
+            -e SERVICE_NAME=periscope \
+            -l traefik.port=8085 \
+            -l traefik.frontend.rule=PathPrefix:/as/ \
+            -l traefik.backend=periscope-backend \
+            -l traefik.frontend.priority=10 \
+            hortonworks/ambassadord:$DOCKER_TAG_AMBASSADOR $CB_LOCAL_DEV_BIND_ADDR:8085
+
+    fi
 
     create-migrate-log
     migrate-one-db cbdb up
     migrate-one-db periscopedb up
-
-    debug starting an ambassador to be registered as cloudbreak.service.consul.
-    debug "all traffic to ambassador will be proxied to localhost"
-
-    docker run -d \
-        --name cloudbreak-proxy \
-        -p 8080:8080 \
-        -e PORT=8080 \
-        -e SERVICE_NAME=cloudbreak \
-        -l traefik.port=8080 \
-        -l traefik.frontend.rule=PathPrefix:/cb/ \
-        -l traefik.backend=cloudbreak-backend \
-        -l traefik.frontend.priority=10 \
-        hortonworks/ambassadord:$DOCKER_TAG_AMBASSADOR $CB_LOCAL_DEV_BIND_ADDR:$port
-
-    docker run -d \
-        --name periscope-proxy \
-        -p 8085:8085 \
-        -e PORT=8085 \
-        -e SERVICE_NAME=periscope \
-        -l traefik.port=8085 \
-        -l traefik.frontend.rule=PathPrefix:/as/ \
-        -l traefik.backend=periscope-backend \
-        -l traefik.frontend.priority=10 \
-        hortonworks/ambassadord:$DOCKER_TAG_AMBASSADOR $CB_LOCAL_DEV_BIND_ADDR:8085
-
 }
 
 util-get-usage() {
