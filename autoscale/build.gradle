@@ -1,3 +1,5 @@
+import org.ajoberstar.grgit.Grgit
+
 buildscript {
   repositories {
     mavenCentral()
@@ -107,8 +109,11 @@ class BuildInfoTask extends DefaultTask {
       destination.mkdirs()
       String activeProfile = determineActiveProfile()
 
+      // if using dev environment this condition is true
       if (buildVersion.contains("+")) {
-        buildVersion = buildVersion.tokenize('+')[0]
+        def grgit = Grgit.open(currentDir: project.projectDir)
+        buildVersion = grgit.describe()
+        println "buildVersion from git: " + buildVersion
       }
       new File(destination, "build.info").withWriter { out ->
         [
