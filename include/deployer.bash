@@ -664,6 +664,8 @@ main() {
     cmd-export util-cleanup
     cmd-export util-add-default-user
     cmd-export util-generate-ldap-mapping
+    cmd-export util-execute-ldap-mapping
+    cmd-export util-delete-ldap-mapping
     cmd-export util-get-usage
 
     if [[ "$DEBUG" ]]; then
