@@ -21,6 +21,13 @@ init-pg-database:
   cmd.run:
     - name: find /var/lib/pgsql/ -name PG_VERSION | grep -q "data/PG_VERSION" || postgresql-setup initdb
     - runas: postgres
+{% elif grains['os_family'] == 'Debian' %}
+install-postgres:
+  pkg.installed:
+    - pkgs:
+      - postgresql
+      - postgresql-client
+      - libpostgresql-jdbc-java
 {% else %}
 remove-old-postgres:
   pkg.removed:

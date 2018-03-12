@@ -3,6 +3,7 @@ base:
     - ambari.repo
     - ambari.gpl
     - hdp.repo
+    - network
     - nodes.hosts
     - discovery.init
     - recipes.init
@@ -53,4 +54,5 @@ base:
 
   'roles:smartsense':
     - match: grain
+    - smartsense
     - smartsense.credentials
