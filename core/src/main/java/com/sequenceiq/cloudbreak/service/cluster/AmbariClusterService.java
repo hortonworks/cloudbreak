@@ -851,11 +851,11 @@ public class AmbariClusterService implements ClusterService {
         if (scalingAdjustment == 0) {
             throw new BadRequestException("No scaling adjustments specified. Nothing to do.");
         }
+        blueprintValidator.validateHostGroupScalingRequest(stack.getCluster().getBlueprint(), hostGroup, scalingAdjustment);
         if (!downScale && hostGroup.getConstraint().getInstanceGroup() != null) {
             validateUnusedHosts(hostGroup.getConstraint().getInstanceGroup(), scalingAdjustment);
         } else {
             validateRegisteredHosts(stack, hostGroupAdjustment);
-            validateComponentsCategory(stack, hostGroupAdjustment.getHostGroup());
             if (hostGroupAdjustment.getWithStackUpdate() && hostGroupAdjustment.getScalingAdjustment() > 0) {
                 throw new BadRequestException("ScalingAdjustment has to be decommission if you define withStackUpdate = 'true'.");
             }
