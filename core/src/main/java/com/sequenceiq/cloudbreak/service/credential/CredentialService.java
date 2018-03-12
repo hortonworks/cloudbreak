@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.api.model.CloudbreakEventsJson;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
+import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.repository.CredentialRepository;
@@ -106,7 +107,28 @@ public class CredentialService {
         LOGGER.debug("Creating credential: [User: '{}', Account: '{}']", user.getUsername(), user.getAccount());
         credential.setOwner(user.getUserId());
         credential.setAccount(user.getAccount());
-        return saveCredential(credential);
+        return saveCredentialAndNotify(credential, ResourceEvent.CREDENTIAL_CREATED);
+    }
+
+    @Transactional(TxType.NEVER)
+    public Credential modify(IdentityUser user, Credential credential) {
+        LOGGER.debug("Modifying credential: [User: '{}', Account: '{}']", user.getUsername(), user.getAccount());
+        Credential credentialToModify = credential.isPublicInAccount() ? getPublicCredential(credential.getName(), user)
+                : getPrivateCredential(credential.getName(), user);
+        authorizationService.hasWritePermission(credentialToModify);
+        if (!credentialToModify.cloudPlatform().equals(credential.cloudPlatform())) {
+            throw new BadRequestException("Modifying credential platform is forbidden");
+        }
+        if (credential.getAttributes() != null) {
+            credentialToModify.setAttributes(credential.getAttributes());
+        }
+        if (credential.getDescription() != null) {
+            credentialToModify.setDescription(credential.getDescription());
+        }
+        if (credential.getTopology() != null) {
+            credentialToModify.setTopology(credential.getTopology());
+        }
+        return saveCredentialAndNotify(credentialToModify, ResourceEvent.CREDENTIAL_MODIFIED);
     }
 
     @Transactional(TxType.NEVER)
@@ -114,7 +136,7 @@ public class CredentialService {
         LOGGER.debug("Creating credential: [UserId: '{}', Account: '{}']", userId, account);
         credential.setOwner(userId);
         credential.setAccount(account);
-        return saveCredential(credential);
+        return saveCredentialAndNotify(credential, ResourceEvent.CREDENTIAL_CREATED);
     }
 
     @Transactional(TxType.NEVER)
@@ -123,13 +145,13 @@ public class CredentialService {
         return create(userId, account, credential);
     }
 
-    private Credential saveCredential(Credential credential) {
+    private Credential saveCredentialAndNotify(Credential credential, ResourceEvent resourceEvent) {
         credential = credentialAdapter.init(credential);
         Credential savedCredential;
         try {
             savedCredential = credentialRepository.save(credential);
             userProfileCredentialHandler.createProfilePreparation(credential);
-            sendCredentialCreatedNotification(credential);
+            sendCredentialNotification(credential, resourceEvent);
         } catch (DataIntegrityViolationException ex) {
             String msg = String.format("Error with resource [%s], error: [%s]", APIResourceType.CREDENTIAL, getProperSqlErrorMessage(ex));
             throw new BadRequestException(msg);
@@ -137,11 +159,11 @@ public class CredentialService {
         return savedCredential;
     }
 
-    private void sendCredentialCreatedNotification(Credential credential) {
+    private void sendCredentialNotification(Credential credential, ResourceEvent resourceEvent) {
         CloudbreakEventsJson notification = new CloudbreakEventsJson();
-        notification.setEventType("CREDENTIAL_CREATED");
+        notification.setEventType(resourceEvent.name());
         notification.setEventTimestamp(new Date().getTime());
-        notification.setEventMessage("Credential created");
+        notification.setEventMessage(resourceEvent.getMessage());
         notification.setOwner(credential.getOwner());
         notification.setAccount(credential.getAccount());
         notification.setCloud(credential.cloudPlatform());

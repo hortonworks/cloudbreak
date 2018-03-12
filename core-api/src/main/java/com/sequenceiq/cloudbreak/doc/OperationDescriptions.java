@@ -50,7 +50,9 @@ public class OperationDescriptions {
 
     public static class CredentialOpDescription {
         public static final String POST_PRIVATE = "create credential as private resource";
+        public static final String PUT_PRIVATE = "modify private credential resource";
         public static final String POST_PUBLIC = "create credential as public resource";
+        public static final String PUT_PUBLIC = "modify public credential resource";
         public static final String GET_PRIVATE = "retrieve private credentials";
         public static final String GET_PUBLIC = "retrieve public and private (owned) credentials";
         public static final String GET_PRIVATE_BY_NAME = "retrieve a private credential by name";
