@@ -117,18 +117,33 @@ public class RdsConfigService {
         return rdsConfigRepository.findByClusterIdAndType(user, account, clusterId, rdsType);
     }
 
+    public void deleteDefaultRdsConfigs(Set<RDSConfig> rdsConfigs) {
+        rdsConfigs.stream().filter(rdsConfig -> ResourceStatus.DEFAULT == rdsConfig.getStatus()).forEach(rdsConfig -> {
+                checkRdsConfigNotAssociated(rdsConfig);
+                setStatusToDeleted(rdsConfig);
+        });
+    }
+
     private void delete(RDSConfig rdsConfig) {
         authorizationService.hasWritePermission(rdsConfig);
+        checkRdsConfigNotAssociated(rdsConfig);
+        if (ResourceStatus.USER_MANAGED.equals(rdsConfig.getStatus())) {
+            rdsConfigRepository.delete(rdsConfig);
+        } else {
+            setStatusToDeleted(rdsConfig);
+        }
+    }
+
+    private void checkRdsConfigNotAssociated(RDSConfig rdsConfig) {
         if (!clusterRepository.findAllClustersByRDSConfig(rdsConfig.getId()).isEmpty()) {
             throw new BadRequestException(String.format(
                     "There are clusters associated with RDS config '%s'. Please remove these before deleting the RDS configuration.", rdsConfig.getId()));
         }
-        if (ResourceStatus.USER_MANAGED.equals(rdsConfig.getStatus())) {
-            rdsConfigRepository.delete(rdsConfig);
-        } else {
-            rdsConfig.setName(NameUtil.postfixWithTimestamp(rdsConfig.getName()));
-            rdsConfig.setStatus(ResourceStatus.DEFAULT_DELETED);
-            rdsConfigRepository.save(rdsConfig);
-        }
+    }
+
+    private void setStatusToDeleted(RDSConfig rdsConfig) {
+        rdsConfig.setName(NameUtil.postfixWithTimestamp(rdsConfig.getName()));
+        rdsConfig.setStatus(ResourceStatus.DEFAULT_DELETED);
+        rdsConfigRepository.save(rdsConfig);
     }
 }
