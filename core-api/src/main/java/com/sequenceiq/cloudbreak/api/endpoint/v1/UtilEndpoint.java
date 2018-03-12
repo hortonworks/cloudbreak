@@ -14,8 +14,8 @@ import javax.ws.rs.core.MediaType;
 
 import com.sequenceiq.cloudbreak.api.model.AmbariDatabaseDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.AmbariDatabaseTestResult;
-import com.sequenceiq.cloudbreak.api.model.LdapTestResult;
-import com.sequenceiq.cloudbreak.api.model.LdapValidationRequest;
+import com.sequenceiq.cloudbreak.api.model.ldap.LdapTestResult;
+import com.sequenceiq.cloudbreak.api.model.ldap.LdapValidationRequest;
 import com.sequenceiq.cloudbreak.api.model.rds.RDSBuildRequest;
 import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigRequest;
 import com.sequenceiq.cloudbreak.api.model.rds.RdsBuildResult;
