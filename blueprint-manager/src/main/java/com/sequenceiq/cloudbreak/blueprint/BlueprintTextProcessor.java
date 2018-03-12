@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.blueprint.configuration.HostgroupConfiguration;
 import com.sequenceiq.cloudbreak.blueprint.configuration.HostgroupConfigurations;
 import com.sequenceiq.cloudbreak.blueprint.configuration.SiteConfiguration;
 import com.sequenceiq.cloudbreak.blueprint.configuration.SiteConfigurations;
+import com.sequenceiq.cloudbreak.blueprint.configuration.SiteSettingsConfigurations;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 public class BlueprintTextProcessor {
@@ -196,17 +197,9 @@ public class BlueprintTextProcessor {
     }
 
     public BlueprintTextProcessor extendBlueprintGlobalConfiguration(SiteConfigurations globalConfig, boolean forced) {
-        return extendBlueprintGlobal(CONFIGURATIONS_NODE, globalConfig, forced);
-    }
-
-    public BlueprintTextProcessor extendBlueprintGlobalSettings(SiteConfigurations globalConfig, boolean forced) {
-        return extendBlueprintGlobal(SETTINGS_NODE, globalConfig, forced);
-    }
-
-    private BlueprintTextProcessor extendBlueprintGlobal(String fieldName, SiteConfigurations globalConfig, boolean forced) {
-        JsonNode configurations = blueprint.path(fieldName);
+        JsonNode configurations = blueprint.path(CONFIGURATIONS_NODE);
         if (configurations.isMissingNode() && globalConfig != null && !globalConfig.isEmpty()) {
-            configurations = blueprint.putArray(fieldName);
+            configurations = blueprint.putArray(CONFIGURATIONS_NODE);
             for (SiteConfiguration site : globalConfig) {
                 addSiteToConfiguration((ArrayNode) configurations, site);
             }
@@ -229,6 +222,86 @@ public class BlueprintTextProcessor {
         return this;
     }
 
+    public BlueprintTextProcessor extendBlueprintGlobalSettings(SiteSettingsConfigurations globalConfig, boolean forced) {
+        JsonNode configurations = blueprint.path(SETTINGS_NODE);
+        if (configurations.isMissingNode() && globalConfig != null && !globalConfig.isEmpty()) {
+            configurations = blueprint.putArray(SETTINGS_NODE);
+            for (List<SiteConfiguration> site : globalConfig) {
+                if (site.size() > 0) {
+                    addSiteToSettings((ArrayNode) configurations, site.get(0).getName(), site);
+                }
+            }
+        } else {
+            if (globalConfig != null) {
+                for (List<SiteConfiguration> site : globalConfig) {
+                    if (site.size() > 0) {
+                        ArrayNode siteNode = (ArrayNode) configurations.findValue(site.get(0).getName());
+                        if (siteNode == null) {
+                            addSiteToSettings((ArrayNode) configurations, site.get(0).getName(), site);
+                        } else {
+                            putAllSettingsObjects(siteNode, site, forced);
+                        }
+                    }
+                }
+            }
+        }
+        return this;
+    }
+
+    private void putAllSettingsObjects(ArrayNode siteNode, List<SiteConfiguration> siteList, boolean forced) {
+        if (forced) {
+            putAllSettings(siteNode, siteList);
+        } else {
+            putAllSettingsIfAbsent(siteNode, siteList);
+        }
+    }
+
+    private void putAllSettingsIfAbsent(ArrayNode siteNode, List<SiteConfiguration> siteList) {
+        for (SiteConfiguration conf :siteList) {
+            ObjectNode replace = findBestMatch(siteNode, conf);
+            if (replace != null) {
+                continue;
+            }
+            replace = siteNode.addObject();
+            putAll(replace, conf.getProperties());
+        }
+    }
+
+    private void putAllSettings(ArrayNode siteNode, List<SiteConfiguration> siteList) {
+        for (SiteConfiguration conf :siteList) {
+            ObjectNode replace = findBestMatch(siteNode, conf);
+            if (replace == null) {
+                replace = siteNode.addObject();
+            }
+            replace.removeAll();
+            putAll(replace, conf.getProperties());
+        }
+    }
+
+    private ObjectNode findBestMatch(ArrayNode siteNode, SiteConfiguration conf) {
+        ObjectNode result = null;
+        int maxFound = 0;
+        for (Iterator i = siteNode.iterator(); i.hasNext();) {
+            int foundNum = 0;
+            ObjectNode prop = (ObjectNode) i.next();
+            for (String key : conf.getProperties().keySet()) {
+                JsonNode found = prop.get(key);
+                if (found != null) {
+                    foundNum += 1;
+                }
+                if ("name".equals(key) && !conf.getProperties().get(key).equals(found.asText())) {
+                    foundNum = 0;
+                    continue;
+                }
+            }
+            if (foundNum > maxFound) {
+                maxFound = foundNum;
+                result = prop;
+            }
+        }
+        return result;
+    }
+
     private void putAllObjects(ObjectNode objectToModify, Map<String, String> properties, boolean forced) {
         if (forced) {
             putAll(objectToModify, properties);
@@ -249,6 +322,15 @@ public class BlueprintTextProcessor {
             if (exists == null) {
                 objectToModify.put(prop.getKey(), prop.getValue());
             }
+        }
+    }
+
+    private void addSiteToSettings(ArrayNode settings, String siteName, List<SiteConfiguration> siteList) {
+        ObjectNode config = settings.addObject();
+        ArrayNode siteNodeArray = config.putArray(siteName);
+        for (SiteConfiguration site : siteList) {
+            ObjectNode siteNode = siteNodeArray.addObject();
+            putAll(siteNode, site.getProperties());
         }
     }
 
@@ -295,13 +377,39 @@ public class BlueprintTextProcessor {
     }
 
     public BlueprintTextProcessor addSettingsEntryStringToBlueprint(String config, boolean forced) {
-        SiteConfigurations configs = convertTextToConfiguration(config);
+        SiteSettingsConfigurations configs = convertTextToSettings(config);
         return extendBlueprintGlobalSettings(configs, forced);
     }
 
     public BlueprintTextProcessor addConfigEntryStringToBlueprint(String config, boolean forced) {
         SiteConfigurations configs = convertTextToConfiguration(config);
         return extendBlueprintGlobalConfiguration(configs, forced);
+    }
+
+    private SiteSettingsConfigurations convertTextToSettings(String config) {
+        try {
+            SiteSettingsConfigurations result = SiteSettingsConfigurations.getEmptyConfiguration();
+            ObjectNode root = (ObjectNode) JsonUtil.readTree(config);
+
+            for (Iterator<Map.Entry<String, JsonNode>> sites = root.fields(); sites.hasNext();) {
+                Map.Entry<String, JsonNode> site = sites.next();
+                ArrayNode siteNodeList = (ArrayNode) site.getValue();
+
+                for (JsonNode siteNodeElement : siteNodeList) {
+                    Map<String, String> siteprops = new HashMap<>();
+                    for (Iterator<Map.Entry<String, JsonNode>> props = siteNodeElement.fields(); props.hasNext();) {
+                        Map.Entry<String, JsonNode> prop = props.next();
+                        siteprops.put(prop.getKey(), prop.getValue().textValue());
+                    }
+                    if (!siteprops.isEmpty()) {
+                        result.addSiteSettings(site.getKey(), siteprops);
+                    }
+                }
+            }
+            return result;
+        } catch (IOException e) {
+            throw new BlueprintProcessingException("Failed to parse configuration ('" + config + "').", e);
+        }
     }
 
     private SiteConfigurations convertTextToConfiguration(String config) {

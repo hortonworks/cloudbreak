@@ -101,36 +101,6 @@ class BuildInfoTask extends DefaultTask {
 
     @TaskAction
     def writeBuildInfo() {
-<<<<<<< HEAD
-      List<File> applicationDestinations = []
-
-      applicationDestinations += project.file("out/production/resources")
-      applicationDestinations += new File(applicationPropertiesPath + "/resources/main")
-
-      destination.mkdirs()
-      String activeProfile = determineActiveProfile()
-
-      // if using dev environment this condition is true
-      if (buildVersion.contains("+")) {
-        def grgit = Grgit.open(currentDir: project.projectDir)
-        buildVersion = grgit.describe()
-        println "buildVersion from git: " + buildVersion
-      }
-      new File(destination, "build.info").withWriter { out ->
-        [
-            "ARTIFACT_BASENAME=" + basename,
-            "ARTIFACT_VERSION=" + buildVersion,
-        ].each { out.println it }
-      }
-      applicationDestinations.each {
-        it.mkdirs()
-        new File(it, "application.properties").withWriter { out ->
-          [
-              "info.app.name=" + basename,
-              "info.app.version=" + buildVersion,
-              "spring.profiles.active=" + activeProfile
-          ].each { out.println it }
-=======
         List<File> applicationDestinations = []
 
         applicationDestinations += project.file("out/production/resources")
@@ -139,8 +109,11 @@ class BuildInfoTask extends DefaultTask {
         destination.mkdirs()
         String activeProfile = determineActiveProfile()
 
+        // if using dev environment this condition is true
         if (buildVersion.contains("+")) {
-            buildVersion = buildVersion.tokenize('+')[0]
+            def grgit = Grgit.open(currentDir: project.projectDir)
+            buildVersion = grgit.describe()
+            println "buildVersion from git: " + buildVersion
         }
         new File(destination, "build.info").withWriter { out ->
             [
@@ -157,7 +130,6 @@ class BuildInfoTask extends DefaultTask {
                         "spring.profiles.active=" + activeProfile
                 ].each { out.println it }
             }
->>>>>>> BUG-97527 Implement Datanode and Namenode component configurations
         }
     }
 

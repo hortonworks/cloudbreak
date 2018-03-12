@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintComponentConfigProvider;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintConfigurationEntry;
@@ -152,6 +153,7 @@ public class SmartSenseConfigProvider implements BlueprintComponentConfigProvide
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder({ "flexSubscriptionId", "guid", "name", "parentGuid" })
     static class HSTMetadataInstanceInfoJson {
         private final String flexSubscriptionId;
 
@@ -186,6 +188,7 @@ public class SmartSenseConfigProvider implements BlueprintComponentConfigProvide
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder({ "componentId", "instanceInfo", "productId", "productVersion", "schemaVersion", "type" })
     static class HSTMetadataJson {
 
         private static final String SCHEMA_VERSION = "1.0.0";
@@ -200,11 +203,17 @@ public class SmartSenseConfigProvider implements BlueprintComponentConfigProvide
 
         private final String productVersion;
 
+        private final String schemaVersion;
+
+        private final String type;
+
         HSTMetadataJson(String componentId, HSTMetadataInstanceInfoJson instanceInfo, String productId, String productVersion) {
             this.componentId = componentId;
             this.instanceInfo = instanceInfo;
             this.productId = productId;
             this.productVersion = productVersion;
+            this.schemaVersion = SCHEMA_VERSION;
+            this.type = TYPE;
         }
 
         public String getComponentId() {
@@ -224,11 +233,11 @@ public class SmartSenseConfigProvider implements BlueprintComponentConfigProvide
         }
 
         public String getSchemaVersion() {
-            return SCHEMA_VERSION;
+            return schemaVersion;
         }
 
         public String getType() {
-            return TYPE;
+            return type;
         }
     }
 }

@@ -1,8 +1,17 @@
 {
+  "settings": [
+    {
+      "recovery_settings": [
+        {
+          "recovery_enabled": "true"
+        }
+      ]
+    }
+  ],
   "Blueprints": {
+    "stack_version": "2.6",
     "blueprint_name": "hdp26-edw-analytics",
-    "stack_name": "HDP",
-    "stack_version": "2.6"
+    "stack_name": "HDP"
   },
   "configurations": [
     {
@@ -13,12 +22,12 @@
     },
     {
       "core-site": {
-        "fs.trash.interval": "4320",
         "proxyuser_group": "hadoop",
         "hadoop.proxyuser.falcon.groups": "*",
         "hadoop.proxyuser.root.groups": "*",
         "hadoop.proxyuser.falcon.hosts": "*",
         "hadoop.proxyuser.oozie.hosts": "*",
+        "fs.trash.interval": "4320",
         "hadoop.proxyuser.hcat.hosts": "*",
         "hadoop.proxyuser.oozie.groups": "*",
         "hadoop.proxyuser.hive.groups": "*",
@@ -31,39 +40,39 @@
     },
     {
       "hdfs-site": {
-        "dfs.namenode.safemode.threshold-pct": "0.99",
         "dfs.journalnode.edits.dir": "/hadoopfs/fs1/hdfs/journalnode",
         "dfs.namenode.name.dir": "/hadoopfs/fs1/hdfs/namenode",
+        "dfs.namenode.safemode.threshold-pct": "0.99",
         "dfs.namenode.checkpoint.dir": "/hadoopfs/fs1/hdfs/namesecondary"
       }
     },
     {
       "hive-interactive-site": {
-        "hive.exec.orc.split.strategy": "BI",
         "hive.stats.fetch.bitvector": "true",
+        "hive.exec.orc.split.strategy": "BI",
         "hive.metastore.rawstore.impl": "org.apache.hadoop.hive.metastore.cache.CachedStore"
       }
     },
     {
       "hive-site": {
+        "hive.server2.transport.mode": "http",
         "hive.exec.compress.output": "true",
         "hive.merge.mapfiles": "true",
-        "hive.server2.tez.initialize.default.sessions": "true",
-        "hive.server2.transport.mode": "http"
+        "hive.server2.tez.initialize.default.sessions": "true"
       }
     },
     {
       "mapred-site": {
-        "mapreduce.job.reduce.slowstart.completedmaps": "0.7",
         "mapreduce.map.output.compress": "true",
-        "mapreduce.output.fileoutputformat.compress": "true"
+        "mapreduce.output.fileoutputformat.compress": "true",
+        "mapreduce.job.reduce.slowstart.completedmaps": "0.7"
       }
     },
     {
       "tez-site": {
-        "tez.runtime.shuffle.parallel.copies": "4",
         "tez.runtime.enable.final-merge.in.output": "false",
-        "tez.am.am-rm.heartbeat.interval-ms.max": "2000"
+        "tez.am.am-rm.heartbeat.interval-ms.max": "2000",
+        "tez.runtime.shuffle.parallel.copies": "4"
       }
     },
     {
@@ -77,10 +86,10 @@
         "properties": {
           "yarn.scheduler.capacity.root.queues": "default,llap",
           "yarn.scheduler.capacity.root.capacity": "100",
-          "yarn.scheduler.capacity.root.default.capacity": "25",
           "yarn.scheduler.capacity.root.default.maximum-capacity": "100",
-          "yarn.scheduler.capacity.root.llap.maximum-capacity": "100",
-          "yarn.scheduler.capacity.root.llap.capacity": "75"
+          "yarn.scheduler.capacity.root.llap.capacity": "75",
+          "yarn.scheduler.capacity.root.default.capacity": "25",
+          "yarn.scheduler.capacity.root.llap.maximum-capacity": "100"
         }
       }
     },
@@ -98,17 +107,8 @@
     {
       "ranger-env": {
         "properties": {
-          "ranger-yarn-plugin-enabled": "No",
-          "is_solrCloud_enabled": "true",
-          "ranger-hive-plugin-enabled": "No",
-          "xasecure.audit.destination.hdfs": "true",
-          "ranger-hdfs-plugin-enabled": "No",
-          "xasecure.audit.destination.solr": "true",
-          "ranger_admin_password": "{{{rds.ranger.properties.rangerAdminPassword}}}",
           "ranger_privelege_user_jdbc_url": "jdbc:postgresql://10.1.1.1:5432",
-          "ranger-atlas-plugin-enabled": "No",
-          "create_db_dbuser": "false",
-          "admin_password": "{{{rds.ranger.properties.rangerAdminPassword}}}"
+          "create_db_dbuser": "true"
         }
       }
     },
@@ -117,6 +117,14 @@
         "properties": {
           "webhcat.proxyuser.root.groups": "*",
           "webhcat.proxyuser.root.hosts": "*"
+        }
+      }
+    },
+    {
+      "cluster-env": {
+        "properties": {
+          "recovery_enabled": "true",
+          "recovery_type": "AUTO_START"
         }
       }
     },
@@ -152,25 +160,6 @@
   ],
   "host_groups": [
     {
-      "name": "master",
-      "configurations": [
-        {
-          "hdfs-site": {
-            "dfs.datanode.data.dir": "/hadoopfs/fs1/hdfs/datanode"
-          }
-        },
-        {
-          "yarn-site": {
-            "yarn.nodemanager.local-dirs": "/hadoopfs/fs1/yarn/nodemanager",
-            "yarn.nodemanager.log-dirs": "/hadoopfs/fs1/yarn/nodemanager/log"
-          }
-        },
-        {
-          "core-site": {
-            "fs.s3a.buffer.dir": "/hadoopfs/fs1/s3/temp"
-          }
-        }
-      ],
       "components": [
         {
           "name": "APP_TIMELINE_SERVER"
@@ -248,10 +237,6 @@
           "name": "ZOOKEEPER_SERVER"
         }
       ],
-      "cardinality": "1"
-    },
-    {
-      "name": "worker",
       "configurations": [
         {
           "hdfs-site": {
@@ -270,6 +255,10 @@
           }
         }
       ],
+      "name": "master",
+      "cardinality": "1"
+    },
+    {
       "components": [
         {
           "name": "HIVE_CLIENT"
@@ -290,11 +279,12 @@
           "name": "NODEMANAGER"
         }
       ],
-      "cardinality": "1+"
-    },
-    {
-      "name": "compute",
       "configurations": [
+        {
+          "hdfs-site": {
+            "dfs.datanode.data.dir": "/hadoopfs/fs1/hdfs/datanode"
+          }
+        },
         {
           "yarn-site": {
             "yarn.nodemanager.local-dirs": "/hadoopfs/fs1/yarn/nodemanager",
@@ -307,6 +297,10 @@
           }
         }
       ],
+      "name": "worker",
+      "cardinality": "1+"
+    },
+    {
       "components": [
         {
           "name": "HIVE_CLIENT"
@@ -324,24 +318,21 @@
           "name": "NODEMANAGER"
         }
       ],
+      "configurations": [
+        {
+          "yarn-site": {
+            "yarn.nodemanager.local-dirs": "/hadoopfs/fs1/yarn/nodemanager",
+            "yarn.nodemanager.log-dirs": "/hadoopfs/fs1/yarn/nodemanager/log"
+          }
+        },
+        {
+          "core-site": {
+            "fs.s3a.buffer.dir": "/hadoopfs/fs1/s3/temp"
+          }
+        }
+      ],
+      "name": "compute",
       "cardinality": "1+"
-    }
-  ],
-  "settings": [
-    {
-      "cluster-env": {
-        "properties": {
-          "recovery_enabled": "true",
-          "recovery_type": "AUTO_START"
-        }
-      }
-    },
-    {
-      "recovery_settings": {
-        "properties": {
-          "recovery_enabled": "true"
-        }
-      }
     }
   ]
 }

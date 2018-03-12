@@ -1,42 +1,51 @@
 {
+  "settings": [
+    {
+      "recovery_settings": [
+        {
+          "recovery_enabled": "true"
+        }
+      ]
+    }
+  ],
   "Blueprints": {
+    "stack_version": "3.1",
     "blueprint_name": "hdf31-flow-management",
-    "stack_name": "HDF",
-    "stack_version": "3.1"
+    "stack_name": "HDF"
   },
   "configurations": [
     {
       "nifi-ambari-config": {
-        "nifi.security.encrypt.configuration.password": "changemeplease",
+        "nifi.node.ssl.port": "9091",
+        "nifi.max_mem": "1g",
         "nifi.node.protocol.port": "9089",
         "nifi.node.port": "9090",
-        "nifi.node.ssl.port": "9091",
-        "nifi.max_mem": "1g"
+        "nifi.security.encrypt.configuration.password": "changemeplease"
       }
     },
     {
       "nifi-properties": {
-        "nifi.sensitive.props.key": "changemeplease",
         "nifi.security.user.login.identity.provider": "kerberos-provider",
-        "nifi.security.identity.mapping.pattern.kerb": "^(.*?)@(.*?)$",
-        "nifi.security.identity.mapping.value.kerb": "$1"
+        "nifi.security.identity.mapping.value.kerb": "$1",
+        "nifi.sensitive.props.key": "changemeplease",
+        "nifi.security.identity.mapping.pattern.kerb": "^(.*?)@(.*?)$"
       }
     },
     {
       "nifi-ambari-ssl-config": {
-        "nifi.toolkit.tls.token": "changemeplease",
-        "nifi.node.ssl.isenabled": "true",
-        "nifi.security.needClientAuth": "false",
         "nifi.toolkit.dn.prefix": "CN=",
         "nifi.toolkit.dn.suffix": ", OU=NIFI",
         "nifi.initial.admin.identity": "admin",
+        "nifi.security.needClientAuth": "false",
+        "nifi.toolkit.tls.token": "changemeplease",
+        "nifi.node.ssl.isenabled": "true",
         "content": "<property name=\"Node Identity 10.0.0.1\">CN=10.0.0.1, OU=NIFI</property>"
       }
     },
     {
       "nifi-env": {
-        "nifi_group": "nifi",
-        "nifi_user": "nifi"
+        "nifi_user": "nifi",
+        "nifi_group": "nifi"
       }
     },
     {
@@ -50,6 +59,14 @@
         "properties": {
           "webhcat.proxyuser.root.groups": "*",
           "webhcat.proxyuser.root.hosts": "*"
+        }
+      }
+    },
+    {
+      "cluster-env": {
+        "properties": {
+          "recovery_enabled": "true",
+          "recovery_type": "AUTO_START"
         }
       }
     },
@@ -82,7 +99,6 @@
   ],
   "host_groups": [
     {
-      "name": "Services",
       "components": [
         {
           "name": "NIFI_CA"
@@ -103,10 +119,10 @@
           "name": "ZOOKEEPER_CLIENT"
         }
       ],
+      "name": "Services",
       "cardinality": "1"
     },
     {
-      "name": "NiFi",
       "components": [
         {
           "name": "NIFI_MASTER"
@@ -118,24 +134,8 @@
           "name": "ZOOKEEPER_CLIENT"
         }
       ],
+      "name": "NiFi",
       "cardinality": "1+"
-    }
-  ],
-  "settings": [
-    {
-      "cluster-env": {
-        "properties": {
-          "recovery_enabled": "true",
-          "recovery_type": "AUTO_START"
-        }
-      }
-    },
-    {
-      "recovery_settings": {
-        "properties": {
-          "recovery_enabled": "true"
-        }
-      }
     }
   ]
 }
