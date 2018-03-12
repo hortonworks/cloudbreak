@@ -44,6 +44,18 @@ public class CredentialController extends NotificationController implements Cred
     }
 
     @Override
+    public CredentialResponse putPrivate(CredentialRequest credentialRequest) {
+        IdentityUser user = authenticatedUserService.getCbUser();
+        return modifyCredential(user, credentialRequest, false);
+    }
+
+    @Override
+    public CredentialResponse putPublic(CredentialRequest credentialRequest) {
+        IdentityUser user = authenticatedUserService.getCbUser();
+        return modifyCredential(user, credentialRequest, true);
+    }
+
+    @Override
     public Set<CredentialResponse> getPrivates() {
         IdentityUser user = authenticatedUserService.getCbUser();
         Set<Credential> credentials = credentialService.retrievePrivateCredentials(user);
@@ -112,7 +124,12 @@ public class CredentialController extends NotificationController implements Cred
     private CredentialResponse createCredential(IdentityUser user, CredentialRequest credentialRequest, boolean publicInAccount) {
         Credential credential = convert(credentialRequest, publicInAccount);
         credential = credentialService.create(user, credential);
-        notify(user, ResourceEvent.CREDENTIAL_CREATED);
+        return convert(credential);
+    }
+
+    private CredentialResponse modifyCredential(IdentityUser user, CredentialRequest credentialRequest, boolean publicInAccount) {
+        Credential credential = convert(credentialRequest, publicInAccount);
+        credential = credentialService.modify(user, credential);
         return convert(credential);
     }
 

@@ -8,6 +8,7 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -41,6 +42,20 @@ public interface CredentialEndpoint {
     @ApiOperation(value = CredentialOpDescription.POST_PUBLIC, produces = ContentType.JSON, notes = Notes.CREDENTIAL_NOTES,
             nickname = "postPublicCredential")
     CredentialResponse postPublic(@Valid CredentialRequest credentialRequest);
+
+    @PUT
+    @Path("user")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = CredentialOpDescription.PUT_PRIVATE, produces = ContentType.JSON, notes = Notes.CREDENTIAL_NOTES,
+            nickname = "putPrivateCredential")
+    CredentialResponse putPrivate(@Valid CredentialRequest credentialRequest);
+
+    @PUT
+    @Path("account")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = CredentialOpDescription.PUT_PUBLIC, produces = ContentType.JSON, notes = Notes.CREDENTIAL_NOTES,
+            nickname = "putPublicCredential")
+    CredentialResponse putPublic(@Valid CredentialRequest credentialRequest);
 
     @GET
     @Path("user")
