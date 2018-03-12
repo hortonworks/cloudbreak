@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.api.model;
+package com.sequenceiq.cloudbreak.api.model.ldap;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
