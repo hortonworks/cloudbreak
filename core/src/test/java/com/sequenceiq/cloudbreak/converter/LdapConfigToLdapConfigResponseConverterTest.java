@@ -6,7 +6,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sequenceiq.cloudbreak.TestUtil;
-import com.sequenceiq.cloudbreak.api.model.LdapConfigResponse;
+import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigResponse;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 
 public class LdapConfigToLdapConfigResponseConverterTest extends AbstractEntityConverterTest<LdapConfig> {
