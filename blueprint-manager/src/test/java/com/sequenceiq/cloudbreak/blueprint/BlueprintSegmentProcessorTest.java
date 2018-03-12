@@ -55,7 +55,7 @@ public class BlueprintSegmentProcessorTest {
 
         Map<ServiceName, TemplateFiles> configFiles = new HashMap<>();
         configFiles.put(serviceName("zeppelin"), templateFiles(
-                Lists.newArrayList("basics/zeppelin/shiro_ini_content.handlebars", "basics/zeppelin/services.json")));
+                Lists.newArrayList("blueprints/basics/zeppelin/shiro_ini_content.handlebars", "blueprints/basics/zeppelin/services.json")));
 
         Map<ServiceName, TemplateFiles> serviceFiles = new HashMap<>();
         serviceFiles.put(serviceName("atlas"), templateFiles(

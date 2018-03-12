@@ -1,19 +1,11 @@
 {
   "settings": [
     {
-      "cluster-env": {
-        "properties": {
-          "recovery_enabled": "true",
-          "recovery_type": "AUTO_START"
-        }
-      }
-    },
-    {
-      "recovery_settings": {
-        "properties": {
+      "recovery_settings": [
+        {
           "recovery_enabled": "true"
         }
-      }
+      ]
     }
   ],
   "Blueprints": {
@@ -115,6 +107,16 @@
       }
     },
     {
+      "superset-env": {
+        "properties": {
+          "superset_admin_password": "Passw0rd",
+          "superset_admin_lastname": "username",
+          "superset_admin_email": "identity.user@email.com",
+          "superset_admin_firstname": "username"
+        }
+      }
+    },
+    {
       "druid-superset-env": {
         "properties": {
           "superset_admin_password": "Passw0rd",
@@ -135,20 +137,18 @@
       }
     },
     {
-      "superset-env": {
-        "properties": {
-          "superset_admin_password": "Passw0rd",
-          "superset_admin_lastname": "username",
-          "superset_admin_email": "identity.user@email.com",
-          "superset_admin_firstname": "username"
-        }
-      }
-    },
-    {
       "webhcat-site": {
         "properties": {
           "webhcat.proxyuser.root.groups": "*",
           "webhcat.proxyuser.root.hosts": "*"
+        }
+      }
+    },
+    {
+      "cluster-env": {
+        "properties": {
+          "recovery_enabled": "true",
+          "recovery_type": "AUTO_START"
         }
       }
     },

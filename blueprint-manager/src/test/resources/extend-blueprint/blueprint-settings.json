@@ -4,23 +4,15 @@
         "stack_version": "2.0",
         "stack_name": "HDP"
     },
-    "settings": [
+  "settings" : [
+    {
+      "recovery_settings" : [
         {
-           "hdfs-site": {
-                "properties": {
-                    "dfs.datanode.data.dir": "/mnt/fs1/,/mnt/fs2/"
-                }
-            }
-        },
-        {
-            "yarn-site": {
-                "properties": {
-                    "property-key": "property-value",
-                    "yarn.nodemanager.local-dirs": "/mnt/fs1/,/mnt/fs2/"
-                }
-            }
+          "recovery_enabled" : "true"
         }
-    ],
+      ]
+    }
+  ],
     "host_groups": [
         {
             "name": "host_group_1",

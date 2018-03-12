@@ -63,11 +63,6 @@ public class ClusterResponse implements JsonEntity {
 
     private boolean secure;
 
-    @ApiModelProperty(StackModelDescription.EXTENDED_BLUEPRINT_TEXT)
-    @JsonSerialize(using = Base64Serializer.class)
-    @JsonDeserialize(using = Base64Deserializer.class)
-    private String extendedBlueprintText;
-
     private Set<HostGroupResponse> hostGroups = new HashSet<>();
 
     @ApiModelProperty(ClusterModelDescription.RDSCONFIG_NAMES)
@@ -133,14 +128,6 @@ public class ClusterResponse implements JsonEntity {
     @JsonSerialize(using = Base64Serializer.class)
     @JsonDeserialize(using = Base64Deserializer.class)
     private String extendedBlueprintText;
-
-    public String getExtendedBlueprintText() {
-        return extendedBlueprintText;
-    }
-
-    public void setExtendedBlueprintText(String extendedBlueprintText) {
-        this.extendedBlueprintText = extendedBlueprintText;
-    }
 
     public String getDescription() {
         return description;

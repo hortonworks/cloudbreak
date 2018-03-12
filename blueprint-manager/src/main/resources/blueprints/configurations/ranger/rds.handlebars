@@ -1,0 +1,19 @@
+{
+{{{#if rds.ranger}}}
+  "admin-properties": {
+    "properties": {
+      "db_user": "{{{ rds.ranger.connectionUserName }}}",
+      "db_password": "{{{ rds.ranger.connectionPassword }}}",
+      "db_name": "{{{ rds.ranger.databaseName }}}",
+      "db_host": "{{{ rds.ranger.hostWithPort }}}",
+      "DB_FLAVOR": "POSTGRES"
+    }
+  },
+  "ranger-env": {
+    "properties": {
+      "ranger_privelege_user_jdbc_url": "jdbc:postgresql://{{{ rds.ranger.hostWithPort }}}",
+      "create_db_dbuser": "true"
+    }
+  }
+{{{/if}}}
+}

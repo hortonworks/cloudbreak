@@ -1,16 +1,25 @@
 {
+  "settings": [
+    {
+      "recovery_settings": [
+        {
+          "recovery_enabled": "true"
+        }
+      ]
+    }
+  ],
   "Blueprints": {
+    "stack_version": "2.6",
     "blueprint_name": "multi-node-hdfs-yarn",
-    "stack_name": "HDP",
-    "stack_version": "2.6"
+    "stack_name": "HDP"
   },
   "configurations": [
     {
       "hdfs-site": {
         "properties": {
-          "dfs.replication": 2,
           "dfs.journalnode.edits.dir": "/hadoopfs/fs1/hdfs/journalnode",
           "dfs.namenode.name.dir": "/hadoopfs/fs1/hdfs/namenode",
+          "dfs.replication": 2,
           "dfs.namenode.checkpoint.dir": "/hadoopfs/fs1/hdfs/namesecondary"
         }
       }
@@ -23,11 +32,11 @@
           "atlas.authentication.method.ldap.ad.domain": "ad.hdc.com",
           "atlas.authentication.method.ldap.ad.bind.dn": "cn=admin,dc=example,dc=org",
           "atlas.authentication.method.ldap.ugi-groups": "false",
-          "atlas.authentication.method.ldap.type": "ad",
-          "atlas.authentication.method.ldap.ad.bind.password": "admin",
-          "atlas.authentication.method.ldap": "true",
           "atlas.graph.index.search.directory": "/hadoopfs/fs1/atlas/data/es",
-          "atlas.graph.storage.directory": "/hadoopfs/fs1/atlas/data/berkeley"
+          "atlas.authentication.method.ldap.type": "ad",
+          "atlas.graph.storage.directory": "/hadoopfs/fs1/atlas/data/berkeley",
+          "atlas.authentication.method.ldap.ad.bind.password": "admin",
+          "atlas.authentication.method.ldap": "true"
         }
       }
     },
@@ -36,6 +45,14 @@
         "properties": {
           "webhcat.proxyuser.root.groups": "*",
           "webhcat.proxyuser.root.hosts": "*"
+        }
+      }
+    },
+    {
+      "cluster-env": {
+        "properties": {
+          "recovery_enabled": "true",
+          "recovery_type": "AUTO_START"
         }
       }
     },
@@ -49,32 +66,32 @@
     {
       "core-site": {
         "properties": {
-          "proxyuser_group": "hadoop",
+          "hadoop.security.group.mapping.ldap.search.attr.member": "member",
+          "hadoop.security.group.mapping.ldap.search.attr.group.name": "cn",
           "hadoop.proxyuser.falcon.groups": "*",
           "hadoop.proxyuser.root.groups": "*",
-          "hadoop.proxyuser.falcon.hosts": "*",
-          "hadoop.proxyuser.oozie.hosts": "*",
-          "hadoop.proxyuser.hcat.hosts": "*",
-          "hadoop.proxyuser.oozie.groups": "*",
-          "hadoop.proxyuser.hive.groups": "*",
+          "hadoop.security.group.mapping.ldap.bind.password": "admin",
+          "hadoop.user.group.static.mapping.overrides": "hive=hive,hadoop;hdfs=hdfs,hadoop;beacon=hadoop,hdfs,beacon;dpprofiler=hadoop",
+          "hadoop.security.group.mapping.ldap.userbase": "cn=users,dc=example,dc=org",
+          "hadoop.security.group.mapping.ldap.url": "ldap://localhost:389",
+          "hadoop.security.group.mapping.ldap.groupbase": "cn=groups,dc=example,dc=org",
+          "hadoop.security.group.mapping.ldap.search.filter.group": "(objectClass=groupOfNames)",
           "hadoop.proxyuser.hcat.groups": "*",
+          "hadoop.proxyuser.livy.groups": "*",
           "hadoop.proxyuser.hbase.groups": "*",
           "hadoop.proxyuser.hbase.hosts": "*",
           "hadoop.proxyuser.root.hosts": "*",
           "hadoop.proxyuser.hive.hosts": "*",
+          "proxyuser_group": "hadoop",
           "hadoop.security.group.mapping.ldap.search.filter.user": "(&(objectClass=person)(cn=admin,dc=example,dc=org={0}))",
-          "hadoop.security.group.mapping.ldap.search.attr.member": "member",
-          "hadoop.security.group.mapping.ldap.search.attr.group.name": "cn",
           "hadoop.security.group.mapping.ldap.bind.user": "cn=admin,dc=example,dc=org",
-          "hadoop.security.group.mapping.ldap.bind.password": "admin",
-          "hadoop.user.group.static.mapping.overrides": "hive=hive,hadoop;hdfs=hdfs,hadoop;beacon=hadoop,hdfs,beacon;dpprofiler=hadoop",
           "hadoop.proxyuser.livy.hosts": "*",
-          "hadoop.security.group.mapping.ldap.userbase": "cn=users,dc=example,dc=org",
+          "hadoop.proxyuser.falcon.hosts": "*",
+          "hadoop.proxyuser.oozie.hosts": "*",
+          "hadoop.proxyuser.hcat.hosts": "*",
+          "hadoop.proxyuser.oozie.groups": "*",
           "hadoop.security.group.mapping": "org.apache.hadoop.security.LdapGroupsMapping",
-          "hadoop.security.group.mapping.ldap.url": "ldap://localhost:389",
-          "hadoop.security.group.mapping.ldap.groupbase": "cn=groups,dc=example,dc=org",
-          "hadoop.security.group.mapping.ldap.search.filter.group": "(objectClass=groupOfNames)",
-          "hadoop.proxyuser.livy.groups": "*"
+          "hadoop.proxyuser.hive.groups": "*"
         }
       }
     },
@@ -102,7 +119,6 @@
   ],
   "host_groups": [
     {
-      "cardinality": "1",
       "components": [
         {
           "name": "NAMENODE"
@@ -126,7 +142,6 @@
           "name": "KERBEROS_CLIENT"
         }
       ],
-      "name": "master",
       "configurations": [
         {
           "hdfs-site": {
@@ -144,10 +159,11 @@
             "fs.s3a.buffer.dir": "/hadoopfs/fs1/s3/temp"
           }
         }
-      ]
+      ],
+      "name": "master",
+      "cardinality": "1"
     },
     {
-      "cardinality": "2",
       "components": [
         {
           "name": "DATANODE"
@@ -171,7 +187,6 @@
           "name": "KERBEROS_CLIENT"
         }
       ],
-      "name": "slave_1",
       "configurations": [
         {
           "hdfs-site": {
@@ -189,24 +204,9 @@
             "fs.s3a.buffer.dir": "/hadoopfs/fs1/s3/temp"
           }
         }
-      ]
-    }
-  ],
-  "settings": [
-    {
-      "cluster-env": {
-        "properties": {
-          "recovery_enabled": "true",
-          "recovery_type": "AUTO_START"
-        }
-      }
-    },
-    {
-      "recovery_settings": {
-        "properties": {
-          "recovery_enabled": "true"
-        }
-      }
+      ],
+      "name": "slave_1",
+      "cardinality": "2"
     }
   ]
 }

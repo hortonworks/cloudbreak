@@ -50,17 +50,14 @@ public class BlueprintSegmentProcessor {
 
         collectContents(blueprintSegmentReader.collectAllServiceFile(), resultBlueprint.get(), file -> {
             String serviceContent = prepareContent(file, source, customProperties);
-            if (isSettingsConfiguration(file)) {
-                resultBlueprint.set(blueprintProcessorFactory.get(resultBlueprint.get()).addSettingsEntryStringToBlueprint(serviceContent, false).asText());
-            } else {
-                resultBlueprint.set(blueprintProcessorFactory.get(resultBlueprint.get()).addConfigEntryStringToBlueprint(serviceContent, false).asText());
-            }
+            resultBlueprint.set(blueprintProcessorFactory.get(resultBlueprint.get()).addConfigEntryStringToBlueprint(serviceContent, false).asText());
+        });
+        collectContents(blueprintSegmentReader.collectAllSettingsFile(), resultBlueprint.get(), file -> {
+            String serviceContent = prepareContent(file, source, customProperties);
+            resultBlueprint.set(blueprintProcessorFactory.get(resultBlueprint.get()).addSettingsEntryStringToBlueprint(serviceContent, false).asText());
+
         });
         return resultBlueprint.get();
-    }
-
-    private boolean isSettingsConfiguration(String file) {
-        return file.toLowerCase().endsWith("settings.handlebars");
     }
 
     private String getCustomPropertyName(String file) {

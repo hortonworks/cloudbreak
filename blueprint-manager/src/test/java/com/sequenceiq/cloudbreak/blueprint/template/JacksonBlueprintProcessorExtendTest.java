@@ -286,7 +286,98 @@ public class JacksonBlueprintProcessorExtendTest {
     public void testAddSettingsEntryStringToBlueprint() throws IOException {
         String json = FileReaderUtils.readFileFromClasspath("extend-blueprint/blueprint.json");
         String expected = FileReaderUtils.readFileFromClasspath("extend-blueprint/blueprint-settings.json");
-        String config = FileReaderUtils.readFileFromClasspath("extend-blueprint/config.json");
+        String config = FileReaderUtils.readFileFromClasspath("extend-blueprint/settings.json");
+
+        String result = underTest.get(json).addSettingsEntryStringToBlueprint(config, false).asText();
+
+        JsonNode expectedNode = JsonUtil.readTree(expected);
+        JsonNode resultNode = JsonUtil.readTree(result);
+        Assert.assertEquals(expectedNode, resultNode);
+    }
+
+    @Test
+    public void testAddMultipleSettingsEntryStringToBlueprint() throws IOException {
+        String json = FileReaderUtils.readFileFromClasspath("extend-blueprint/blueprint.json");
+        String expected = FileReaderUtils.readFileFromClasspath("extend-blueprint/blueprint-settings-multiple.json");
+        String config = FileReaderUtils.readFileFromClasspath("extend-blueprint/settings-multiple.json");
+
+        String result = underTest.get(json).addSettingsEntryStringToBlueprint(config, false).asText();
+
+        JsonNode expectedNode = JsonUtil.readTree(expected);
+        JsonNode resultNode = JsonUtil.readTree(result);
+        Assert.assertEquals(expectedNode, resultNode);
+    }
+
+    @Test
+    public void testAddMultipleSettingsEntryStringToNotEmptyBlueprint() throws IOException {
+        String json = FileReaderUtils.readFileFromClasspath("extend-blueprint/blueprint-settings-notempty.json");
+        String expected = FileReaderUtils.readFileFromClasspath("extend-blueprint/blueprint-settings-notempty-result.json");
+        String config = FileReaderUtils.readFileFromClasspath("extend-blueprint/settings-multiple.json");
+
+        String result = underTest.get(json).addSettingsEntryStringToBlueprint(config, false).asText();
+
+        JsonNode expectedNode = JsonUtil.readTree(expected);
+        JsonNode resultNode = JsonUtil.readTree(result);
+        Assert.assertEquals(expectedNode, resultNode);
+    }
+
+    @Test
+    public void testModifySettingsEntryStringToBlueprintForced() throws IOException {
+        String json = FileReaderUtils.readFileFromClasspath("extend-blueprint/blueprint-settings-multiple.json");
+        String expected = FileReaderUtils.readFileFromClasspath("extend-blueprint/blueprint-settings-modify-forced.json");
+        String config = FileReaderUtils.readFileFromClasspath("extend-blueprint/settings-modify.json");
+
+        String result = underTest.get(json).addSettingsEntryStringToBlueprint(config, true).asText();
+
+        JsonNode expectedNode = JsonUtil.readTree(expected);
+        JsonNode resultNode = JsonUtil.readTree(result);
+        Assert.assertEquals(expectedNode, resultNode);
+    }
+
+    @Test
+    public void testModifySettingsEntryStringToBlueprintNotForced() throws IOException {
+        String json = FileReaderUtils.readFileFromClasspath("extend-blueprint/blueprint-settings-multiple.json");
+        String expected = FileReaderUtils.readFileFromClasspath("extend-blueprint/blueprint-settings-modify-not-forced.json");
+        String config = FileReaderUtils.readFileFromClasspath("extend-blueprint/settings-modify.json");
+
+        String result = underTest.get(json).addSettingsEntryStringToBlueprint(config, false).asText();
+
+        JsonNode expectedNode = JsonUtil.readTree(expected);
+        JsonNode resultNode = JsonUtil.readTree(result);
+        Assert.assertEquals(expectedNode, resultNode);
+    }
+
+    @Test
+    public void testMultipleModifySettingsEntryStringToBlueprintForced() throws IOException {
+        String json = FileReaderUtils.readFileFromClasspath("extend-blueprint/blueprint-settings-multiple.json");
+        String expected = FileReaderUtils.readFileFromClasspath("extend-blueprint/blueprint-settings-multiple-modify-forced.json");
+        String config = FileReaderUtils.readFileFromClasspath("extend-blueprint/settings-modify-multiple.json");
+
+        String result = underTest.get(json).addSettingsEntryStringToBlueprint(config, true).asText();
+
+        JsonNode expectedNode = JsonUtil.readTree(expected);
+        JsonNode resultNode = JsonUtil.readTree(result);
+        Assert.assertEquals(expectedNode, resultNode);
+    }
+
+    @Test
+    public void testMultipleModifySettingsEntryStringToBlueprintNotForced() throws IOException {
+        String json = FileReaderUtils.readFileFromClasspath("extend-blueprint/blueprint-settings-multiple.json");
+        String expected = FileReaderUtils.readFileFromClasspath("extend-blueprint/blueprint-settings-multiple-modify-not-forced.json");
+        String config = FileReaderUtils.readFileFromClasspath("extend-blueprint/settings-modify-multiple.json");
+
+        String result = underTest.get(json).addSettingsEntryStringToBlueprint(config, false).asText();
+
+        JsonNode expectedNode = JsonUtil.readTree(expected);
+        JsonNode resultNode = JsonUtil.readTree(result);
+        Assert.assertEquals(expectedNode, resultNode);
+    }
+
+    @Test
+    public void testSettingsEntryStringToEmptyBlueprintNotForced() throws IOException {
+        String json = FileReaderUtils.readFileFromClasspath("extend-blueprint/blueprint-settings-empty.json");
+        String expected = FileReaderUtils.readFileFromClasspath("extend-blueprint/blueprint-settings.json");
+        String config = FileReaderUtils.readFileFromClasspath("extend-blueprint/settings.json");
 
         String result = underTest.get(json).addSettingsEntryStringToBlueprint(config, false).asText();
 

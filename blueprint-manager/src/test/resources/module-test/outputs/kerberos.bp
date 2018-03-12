@@ -1,19 +1,28 @@
 {
+  "settings": [
+    {
+      "recovery_settings": [
+        {
+          "recovery_enabled": "true"
+        }
+      ]
+    }
+  ],
   "Blueprints": {
-    "blueprint_name": "multi-node-hdfs-yarn",
     "security": {
       "type": "KERBEROS"
     },
-    "stack_name": "HDP",
-    "stack_version": "2.6"
+    "stack_version": "2.6",
+    "blueprint_name": "multi-node-hdfs-yarn",
+    "stack_name": "HDP"
   },
   "configurations": [
     {
       "hdfs-site": {
         "properties": {
-          "dfs.replication": 2,
           "dfs.journalnode.edits.dir": "/hadoopfs/fs1/hdfs/journalnode",
           "dfs.namenode.name.dir": "/hadoopfs/fs1/hdfs/namenode",
+          "dfs.replication": 2,
           "dfs.namenode.checkpoint.dir": "/hadoopfs/fs1/hdfs/namesecondary"
         }
       }
@@ -23,6 +32,14 @@
         "properties": {
           "webhcat.proxyuser.root.groups": "*",
           "webhcat.proxyuser.root.hosts": "*"
+        }
+      }
+    },
+    {
+      "cluster-env": {
+        "properties": {
+          "recovery_enabled": "true",
+          "recovery_type": "AUTO_START"
         }
       }
     },
@@ -69,11 +86,11 @@
     {
       "kerberos-env": {
         "properties": {
-          "realm": "LOAL.COM",
           "kdc_type": "mit-kdc",
           "kdc_hosts": "fqdn.loal.com",
-          "admin_server_host": "fqdn.loal.com",
+          "realm": "LOAL.COM",
           "encryption_types": "aes des3-cbc-sha1 rc4 des-cbc-md5",
+          "admin_server_host": "fqdn.loal.com",
           "ldap_url": "",
           "container_dn": ""
         }
@@ -91,7 +108,6 @@
   ],
   "host_groups": [
     {
-      "cardinality": "1",
       "components": [
         {
           "name": "NAMENODE"
@@ -115,7 +131,6 @@
           "name": "KERBEROS_CLIENT"
         }
       ],
-      "name": "master",
       "configurations": [
         {
           "hdfs-site": {
@@ -133,10 +148,11 @@
             "fs.s3a.buffer.dir": "/hadoopfs/fs1/s3/temp"
           }
         }
-      ]
+      ],
+      "name": "master",
+      "cardinality": "1"
     },
     {
-      "cardinality": "2",
       "components": [
         {
           "name": "DATANODE"
@@ -160,7 +176,6 @@
           "name": "KERBEROS_CLIENT"
         }
       ],
-      "name": "slave_1",
       "configurations": [
         {
           "hdfs-site": {
@@ -178,24 +193,9 @@
             "fs.s3a.buffer.dir": "/hadoopfs/fs1/s3/temp"
           }
         }
-      ]
-    }
-  ],
-  "settings": [
-    {
-      "cluster-env": {
-        "properties": {
-          "recovery_enabled": "true",
-          "recovery_type": "AUTO_START"
-        }
-      }
-    },
-    {
-      "recovery_settings": {
-        "properties": {
-          "recovery_enabled": "true"
-        }
-      }
+      ],
+      "name": "slave_1",
+      "cardinality": "2"
     }
   ]
 }

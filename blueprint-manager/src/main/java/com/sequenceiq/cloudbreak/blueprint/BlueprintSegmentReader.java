@@ -24,11 +24,14 @@ public class BlueprintSegmentReader implements ResourceLoaderAware {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BlueprintSegmentReader.class);
 
-    @Value("${cb.blueprint.template.path:blueprints}")
+    @Value("${cb.blueprint.template.path:blueprints/configurations}")
     private String blueprintTemplatePath;
 
-    @Value("${cb.blueprint.basic.path:basics}")
+    @Value("${cb.blueprint.basic.path:blueprints/basics}")
     private String basicTemplatePath;
+
+    @Value("${cb.blueprint.basic.path:blueprints/settings}")
+    private String settingsTemplatePath;
 
     private ResourceLoader resourceLoader;
 
@@ -38,6 +41,10 @@ public class BlueprintSegmentReader implements ResourceLoaderAware {
 
     public Map<ServiceName, TemplateFiles> collectAllConfigFile() {
         return readAllFilesFromParameterDir(basicTemplatePath);
+    }
+
+    public Map<ServiceName, TemplateFiles> collectAllSettingsFile() {
+        return readAllFilesFromParameterDir(settingsTemplatePath);
     }
 
     private Map<ServiceName, TemplateFiles> readAllFilesFromParameterDir(String dir) {

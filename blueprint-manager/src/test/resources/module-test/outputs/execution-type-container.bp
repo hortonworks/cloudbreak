@@ -1,19 +1,11 @@
 {
   "settings": [
     {
-      "cluster-env": {
-        "properties": {
-          "recovery_enabled": "true",
-          "recovery_type": "AUTO_START"
-        }
-      }
-    },
-    {
-      "recovery_settings": {
-        "properties": {
+      "recovery_settings": [
+        {
           "recovery_enabled": "true"
         }
-      }
+      ]
     }
   ],
   "Blueprints": {
@@ -37,6 +29,14 @@
         "properties": {
           "webhcat.proxyuser.root.groups": "*",
           "webhcat.proxyuser.root.hosts": "*"
+        }
+      }
+    },
+    {
+      "cluster-env": {
+        "properties": {
+          "recovery_enabled": "true",
+          "recovery_type": "AUTO_START"
         }
       }
     },
