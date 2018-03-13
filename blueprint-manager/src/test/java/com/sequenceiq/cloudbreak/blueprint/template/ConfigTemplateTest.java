@@ -86,6 +86,10 @@ public class ConfigTemplateTest {
                         zeppelinWhenStackVersionIs25ThenShouldReturnWithZeppelinEnvConfigs() },
                 { "blueprints/configurations/zeppelin/global.handlebars", "configurations/zeppelin/global-without-2_5.json",
                         zeppelinWhenStackVersionIsNot25ThenShouldReturnWithZeppelinShiroIniConfigs() },
+                { "blueprints/configurations/hive/ldap.handlebars", "configurations/hive/hive-with-ldap.json",
+                        hiveWhenLdapPresentedThenShouldReturnWithLdapConfigs() },
+                { "blueprints/configurations/hive/ldap.handlebars", "configurations/hive/hive-without-ldap.json",
+                        hiveWhenLdapNotPresentedThenShouldReturnWithoutLdapConfigs() },
         });
     }
 
@@ -105,7 +109,7 @@ public class ConfigTemplateTest {
 
     public static Map<String, Object> zeppelinWhenStackVersionIsNot25ThenShouldReturnWithZeppelinShiroIniConfigs() {
         Map<String, Object> properties = new HashMap<>();
-        properties.put("basics_zeppelin_shiro_ini_content", "testshiroini");
+        properties.put("blueprints_basics_zeppelin_shiro_ini_content", "testshiroini");
 
         return new BlueprintTemplateModelContextBuilder()
                 .withStackVersion("2.6")
@@ -115,7 +119,7 @@ public class ConfigTemplateTest {
 
     public static Map<String, Object> zeppelinWhenStackVersionIs25ThenShouldReturnWithZeppelinEnvConfigs() {
         Map<String, Object> properties = new HashMap<>();
-        properties.put("basics_zeppelin_shiro_ini_content", "testshiroini");
+        properties.put("blueprints_basics_zeppelin_shiro_ini_content", "testshiroini");
 
         return new BlueprintTemplateModelContextBuilder()
                 .withStackVersion("2.5")
@@ -212,6 +216,17 @@ public class ConfigTemplateTest {
     public static Map<String, Object> hiveRdsConfigWhenRdsPresentedThenShouldReturnWithRdsConfig() {
         return new BlueprintTemplateModelContextBuilder()
                 .withRdsConfigs(Sets.newHashSet(TestUtil.rdsConfig(RdsType.HIVE)))
+                .build();
+    }
+
+    private static Object hiveWhenLdapPresentedThenShouldReturnWithLdapConfigs() {
+        return new BlueprintTemplateModelContextBuilder()
+                .withLdap(TestUtil.ldapConfig())
+                .build();
+    }
+
+    private static Object hiveWhenLdapNotPresentedThenShouldReturnWithoutLdapConfigs() {
+        return new BlueprintTemplateModelContextBuilder()
                 .build();
     }
 
