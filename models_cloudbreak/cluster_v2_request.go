@@ -81,7 +81,7 @@ func (m *ClusterV2Request) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
-	if err := m.validateRdsConfigs(formats); err != nil {
+	if err := m.validateRdsConfigNames(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -171,7 +171,7 @@ func (m *ClusterV2Request) validateFileSystem(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *ClusterV2Request) validateRdsConfigs(formats strfmt.Registry) error {
+func (m *ClusterV2Request) validateRdsConfigNames(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.RdsConfigNames) { // not required
 		return nil

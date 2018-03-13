@@ -73,6 +73,9 @@ type ClusterResponse struct {
 	// executor type of cluster
 	ExecutorType string `json:"executorType,omitempty"`
 
+	// ambari blueprint JSON, set this or the url field
+	ExtendedBlueprintText string `json:"extendedBlueprintText,omitempty"`
+
 	// gateway
 	Gateway *GatewayJSON `json:"gateway,omitempty"`
 
@@ -164,6 +167,8 @@ type ClusterResponse struct {
 /* polymorph ClusterResponse description false */
 
 /* polymorph ClusterResponse executorType false */
+
+/* polymorph ClusterResponse extendedBlueprintText false */
 
 /* polymorph ClusterResponse gateway false */
 

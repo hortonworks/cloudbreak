@@ -384,6 +384,66 @@ func (a *Client) PublicInteractiveLoginCredential(params *PublicInteractiveLogin
 
 }
 
+/*
+PutPrivateCredential modifies private credential resource
+
+Cloudbreak is launching Hadoop clusters on the user's behalf - on different cloud providers. One key point is that Cloudbreak does not store your Cloud provider account details (such as username, password, keys, private SSL certificates, etc). We work around the concept that Identity and Access Management is fully controlled by you - the end user. The Cloudbreak deployer is purely acting on behalf of the end user - without having access to the user's account.
+*/
+func (a *Client) PutPrivateCredential(params *PutPrivateCredentialParams) (*PutPrivateCredentialOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewPutPrivateCredentialParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "putPrivateCredential",
+		Method:             "PUT",
+		PathPattern:        "/v1/credentials/user",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &PutPrivateCredentialReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*PutPrivateCredentialOK), nil
+
+}
+
+/*
+PutPublicCredential modifies public credential resource
+
+Cloudbreak is launching Hadoop clusters on the user's behalf - on different cloud providers. One key point is that Cloudbreak does not store your Cloud provider account details (such as username, password, keys, private SSL certificates, etc). We work around the concept that Identity and Access Management is fully controlled by you - the end user. The Cloudbreak deployer is purely acting on behalf of the end user - without having access to the user's account.
+*/
+func (a *Client) PutPublicCredential(params *PutPublicCredentialParams) (*PutPublicCredentialOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewPutPublicCredentialParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "putPublicCredential",
+		Method:             "PUT",
+		PathPattern:        "/v1/credentials/account",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &PutPublicCredentialReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*PutPublicCredentialOK), nil
+
+}
+
 // SetTransport changes the transport on the client
 func (a *Client) SetTransport(transport runtime.ClientTransport) {
 	a.transport = transport

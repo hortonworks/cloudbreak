@@ -73,6 +73,9 @@ type AutoscaleClusterResponse struct {
 	// executor type of cluster
 	ExecutorType string `json:"executorType,omitempty"`
 
+	// ambari blueprint JSON, set this or the url field
+	ExtendedBlueprintText string `json:"extendedBlueprintText,omitempty"`
+
 	// gateway
 	Gateway *GatewayJSON `json:"gateway,omitempty"`
 
@@ -167,6 +170,8 @@ type AutoscaleClusterResponse struct {
 /* polymorph AutoscaleClusterResponse description false */
 
 /* polymorph AutoscaleClusterResponse executorType false */
+
+/* polymorph AutoscaleClusterResponse extendedBlueprintText false */
 
 /* polymorph AutoscaleClusterResponse gateway false */
 

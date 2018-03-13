@@ -265,6 +265,34 @@ func (a *Client) GetPublicsLdap(params *GetPublicsLdapParams) (*GetPublicsLdapOK
 }
 
 /*
+PostLdapConnectionTest tests that the connection could be established of an existing or new l d a p config
+*/
+func (a *Client) PostLdapConnectionTest(params *PostLdapConnectionTestParams) (*PostLdapConnectionTestOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewPostLdapConnectionTestParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "postLdapConnectionTest",
+		Method:             "POST",
+		PathPattern:        "/v1/ldap/testconnect",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &PostLdapConnectionTestReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*PostLdapConnectionTestOK), nil
+
+}
+
+/*
 PostPrivateLdap creates l d a p config as private resource
 
 LDAP server integration enables the user to provide a central place to store usernames and passwords for the users of his/her clusters.
