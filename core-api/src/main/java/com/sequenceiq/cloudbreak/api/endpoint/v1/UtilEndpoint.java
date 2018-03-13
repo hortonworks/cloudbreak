@@ -14,13 +14,9 @@ import javax.ws.rs.core.MediaType;
 
 import com.sequenceiq.cloudbreak.api.model.AmbariDatabaseDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.AmbariDatabaseTestResult;
-import com.sequenceiq.cloudbreak.api.model.ldap.LdapTestResult;
-import com.sequenceiq.cloudbreak.api.model.ldap.LdapValidationRequest;
-import com.sequenceiq.cloudbreak.api.model.rds.RDSBuildRequest;
-import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigRequest;
-import com.sequenceiq.cloudbreak.api.model.rds.RdsBuildResult;
-import com.sequenceiq.cloudbreak.api.model.rds.RdsTestResult;
 import com.sequenceiq.cloudbreak.api.model.VersionCheckResult;
+import com.sequenceiq.cloudbreak.api.model.rds.RDSBuildRequest;
+import com.sequenceiq.cloudbreak.api.model.rds.RdsBuildResult;
 import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions.UtilityOpDescription;
@@ -32,32 +28,6 @@ import io.swagger.annotations.ApiOperation;
 @Consumes(MediaType.APPLICATION_JSON)
 @Api(value = "/v1/util", description = ControllerDescription.UTIL_DESCRIPTION, protocols = "http,https")
 public interface UtilEndpoint {
-
-    @POST
-    @Path("rds")
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = UtilityOpDescription.TEST_RDS_CONNECTION, produces = ContentType.JSON, nickname = "testRdsConnectionUtil")
-    RdsTestResult testRdsConnection(@Valid RDSConfigRequest rdsConfigRequest);
-
-    @GET
-    @Path("rds/{id}")
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = UtilityOpDescription.TEST_RDS_CONNECTION_BY_ID, produces = ContentType.JSON,
-            nickname = "testRdsConnectionByIdUtil")
-    RdsTestResult testRdsConnectionById(@PathParam("id") Long id);
-
-    @POST
-    @Path("ldap")
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = UtilityOpDescription.TEST_LDAP_CONNECTION, produces = ContentType.JSON, nickname = "testLdapConnectionUtil")
-    LdapTestResult testLdapConnection(@Valid LdapValidationRequest ldapValidationRequest);
-
-    @GET
-    @Path("ldap/{id}")
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = UtilityOpDescription.TEST_LDAP_CONNECTION_BY_ID, produces = ContentType.JSON,
-            nickname = "testLdapConnectionByIdUtil")
-    LdapTestResult testLdapConnectionById(@PathParam("id") Long id);
 
     @GET
     @Path("client/{version}")

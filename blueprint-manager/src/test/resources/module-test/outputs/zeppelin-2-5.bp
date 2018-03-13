@@ -69,7 +69,7 @@
     {
       "zeppelin-env": {
         "properties": {
-          "shiro_ini_content": "{{{basics_zeppelin_shiro_ini_content}}}"
+          "shiro_ini_content": "[users]\n# List of users with their password allowed to access Zeppelin.\n# To use a different strategy (LDAP / Database / ...) check the shiro doc at http://shiro.apache.org/configuration.html#Configuration-INISections\n\nadmin = Passw0rd\n\n# Sample LDAP configuration, for user Authentication, currently tested for single Realm\n[main]\n\nldapRealm = org.apache.shiro.realm.ldap.JndiLdapRealm\nldapRealm.userDnTemplate = uid={0},ou=Users,dc=hadoop,dc=apache,dc=org\nldapRealm.contextFactory.url = ldap://localhost:33389\nldapRealm.contextFactory.authenticationMechanism = SIMPLE\n\nsessionManager = org.apache.shiro.web.session.mgt.DefaultWebSessionManager\nsecurityManager.sessionManager = $sessionManager\n# 86,400,000 milliseconds = 24 hour\nsecurityManager.sessionManager.globalSessionTimeout = 86400000\nshiro.loginUrl = /api/login\n\n[urls]\n# anon means the access is anonymous.\n# authcBasic means Basic Auth Security\n# To enfore security, comment the line below and uncomment the next one\n/api/version = anon\n#/** = anon\n/** = authc"
         }
       }
     },
