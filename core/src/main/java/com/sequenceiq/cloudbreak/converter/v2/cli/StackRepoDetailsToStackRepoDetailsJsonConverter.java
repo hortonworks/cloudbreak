@@ -20,6 +20,8 @@ public class StackRepoDetailsToStackRepoDetailsJsonConverter
 
     private static final String REDHAT_7 = "redhat7";
 
+    private static final String DEBIAN_9 = "debian9";
+
     private static final String UBUNTU_16 = "ubuntu16";
 
     @Override
@@ -38,6 +40,9 @@ public class StackRepoDetailsToStackRepoDetailsJsonConverter
         } else if (stack.containsKey(REDHAT_7)) {
             ambariStackDetailsJson.setOs(REDHAT_7);
             ambariStackDetailsJson.setStackBaseURL(stack.get(REDHAT_7));
+        } else if (stack.containsKey(DEBIAN_9)) {
+            ambariStackDetailsJson.setOs(DEBIAN_9);
+            ambariStackDetailsJson.setStackBaseURL(stack.get(DEBIAN_9));
         } else if (stack.containsKey(UBUNTU_16)) {
             ambariStackDetailsJson.setOs(UBUNTU_16);
             ambariStackDetailsJson.setStackBaseURL(stack.get(UBUNTU_16));
@@ -49,6 +54,8 @@ public class StackRepoDetailsToStackRepoDetailsJsonConverter
             ambariStackDetailsJson.setUtilsBaseURL(util.get(REDHAT_6));
         } else if (util.containsKey(REDHAT_7)) {
             ambariStackDetailsJson.setUtilsBaseURL(util.get(REDHAT_7));
+        } else if (util.containsKey(DEBIAN_9)) {
+            ambariStackDetailsJson.setUtilsBaseURL(util.get(DEBIAN_9));
         } else if (util.containsKey(UBUNTU_16)) {
             ambariStackDetailsJson.setUtilsBaseURL(util.get(UBUNTU_16));
         }
