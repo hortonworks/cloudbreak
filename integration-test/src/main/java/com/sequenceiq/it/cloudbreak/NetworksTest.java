@@ -1,7 +1,5 @@
 package com.sequenceiq.it.cloudbreak;
 
-import java.util.Set;
-
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.ForbiddenException;
 
@@ -13,7 +11,7 @@ import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.cloudbreak.api.model.CredentialResponse;
+import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
 import com.sequenceiq.it.cloudbreak.newway.Credential;
@@ -23,8 +21,6 @@ import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProviderHelper;
 import com.sequenceiq.it.cloudbreak.newway.cloud.OpenstackCloudProvider;
 
 public class NetworksTest extends CloudbreakTest {
-    private static final String VALID_CRED_NAME = "valid-cred-";
-
     private static final String INVALID_CRED_NAME = "invalid-cred";
 
     private static final String INVALID_AV_ZONE = "invalid-avzone";
@@ -32,8 +28,6 @@ public class NetworksTest extends CloudbreakTest {
     private static final long INVALID_CRED_ID = 9999L;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NetworksTest.class);
-
-    private String credentialName = "";
 
     private Long credentialId;
 
@@ -52,18 +46,17 @@ public class NetworksTest extends CloudbreakTest {
 
     @BeforeTest
     public void setup() throws  Exception {
-        credentialName = VALID_CRED_NAME + cloudProvider.getPlatform().toLowerCase() + "-nets";
         given(CloudbreakClient.isCreated());
-        given(cloudProvider.aValidCredential()
-                .withName(credentialName)
-                .withCloudPlatform(cloudProvider.getPlatform()), credentialName + " credential is given");
-        getCredentialId();
+        given(cloudProvider.aValidCredential());
+
+        IntegrationTestContext it = getItContext();
+        credentialId  = Credential.getTestContextCredential().apply(it).getResponse().getId();
     }
 
     @Test
     public void testGetNetworksWithCredName() throws Exception {
         given(Networks.request()
-                .withCredentialName(credentialName)
+                .withCredentialName(cloudProvider.getCredentialName())
                 .withRegion(cloudProvider.region()), "with credential name"
         );
         when(Networks.post(), "post the request");
@@ -132,29 +125,11 @@ public class NetworksTest extends CloudbreakTest {
         then(Networks.assertNameNotEmpty(), "available networks should be listed");
     }
 
-    private void getCredentialId() throws Exception {
-        given(Credential.request()
-                .withName(credentialName)
-        );
-
-        when(Credential.getAll());
-        then(Credential.assertThis(
-                (credential, t) -> {
-                    Set<CredentialResponse>  credentialResponses = credential.getResponses();
-                    for (CredentialResponse response : credentialResponses) {
-                        if (response.getName().equals(credentialName)) {
-                            credentialId = response.getId();
-                        }
-                    }
-                })
-        );
-    }
-
     @AfterTest
     public void cleanUp() throws Exception {
         try {
             given(Credential.request()
-                    .withName(VALID_CRED_NAME + cloudProvider.getPlatform().toLowerCase() + "-nets"));
+                    .withName(cloudProvider.getCredentialName()));
             when(Credential.delete());
         } catch (ForbiddenException e) {
             String errorMessage;

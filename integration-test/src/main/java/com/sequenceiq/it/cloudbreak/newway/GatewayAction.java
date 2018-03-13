@@ -15,6 +15,6 @@ public class GatewayAction {
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT,
                 CloudbreakClient.class);
         gateway.setResponse(client.getCloudbreakClient().connectorV1Endpoint().getGatewaysCredentialId(gateway.getRequest()));
-        logJSON("Gateways get response: ", gateway.getResponse());
+        logJSON("V1 Connectors Gateways post request: ", gateway.getRequest());
     }
 }
