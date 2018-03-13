@@ -6,8 +6,27 @@ parameters:
   cleanUp: false
 
 tests:
-  - name: cluster_test
+  - name: cluster_os_test
     parameters:
-      providers: openstack,gcp,azure,aws
+      provider: openstack
+      openstackCredentialName: autotesting-clusters-os
+    classes:
+      - com.sequenceiq.it.cloudbreak.ClusterTestFactory
+  - name: cluster_aws_test
+    parameters:
+      provider: aws
+      awsCredentialName: autotesting-clusters-aws
+    classes:
+      - com.sequenceiq.it.cloudbreak.ClusterTestFactory
+  - name: cluster_azure_test
+    parameters:
+      provider: azure
+      azureCredentialName: autotesting-clusters-azure
+    classes:
+      - com.sequenceiq.it.cloudbreak.ClusterTestFactory
+  - name: cluster_gcp_test
+    parameters:
+      provider: gcp
+      gcpCredentialName: autotesting-clusters-gcp
     classes:
       - com.sequenceiq.it.cloudbreak.ClusterTestFactory
