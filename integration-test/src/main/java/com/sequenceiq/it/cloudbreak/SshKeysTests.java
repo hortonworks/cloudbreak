@@ -15,13 +15,14 @@ import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
 import com.sequenceiq.it.cloudbreak.newway.Credential;
-import com.sequenceiq.it.cloudbreak.newway.Gateway;
+import com.sequenceiq.it.cloudbreak.newway.SshKey;
 import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProvider;
 import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProviderHelper;
 import com.sequenceiq.it.cloudbreak.newway.cloud.OpenstackCloudProvider;
 
 
-public class GatewayTests extends CloudbreakTest {
+
+public class SshKeysTests extends CloudbreakTest {
     private static final String INVALID_CRED_NAME = "invalid-cred";
 
     private static final String INVALID_AV_ZONE = "invalid-avzone";
@@ -30,7 +31,7 @@ public class GatewayTests extends CloudbreakTest {
 
     private static final long INVALID_CRED_ID = 9999L;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(GatewayTests.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SshKeysTests.class);
 
     private Long credentialId;
 
@@ -57,92 +58,92 @@ public class GatewayTests extends CloudbreakTest {
     }
 
     @Test
-    public void testGetGatewaysWithCredendtialId() throws Exception {
+    public void testGetSshKeysWithCredendtialId() throws Exception {
         given(cloudProvider.aValidCredential());
-        given(Gateway.request()
+        given(SshKey.request()
                 .withCredentialId(credentialId)
                 .withCredentialName("")
                 .withRegion(cloudProvider.region()), "with credential id"
         );
-        when(Gateway.get(), "get the request");
-        then(Gateway.assertValidGateways(), "available gateways should be listed");
+        when(SshKey.get(), "get the request");
+        then(SshKey.assertValidSshKeys(), "available sshkeys should be listed");
     }
 
     @Test
-    public void testGetGatewaysWithCredendtialName() throws Exception {
+    public void testGetSshKeysWithCredendtialName() throws Exception {
         given(cloudProvider.aValidCredential());
-        given(Gateway.request()
+        given(SshKey.request()
                 .withCredentialName(cloudProvider.getCredentialName())
                 .withRegion(cloudProvider.region()), "with credential name"
         );
-        when(Gateway.get(), "get the request");
-        then(Gateway.assertValidGateways(), "available gateways should be listed");
+        when(SshKey.get(), "get the request");
+        then(SshKey.assertValidSshKeys(), "available sshkeys should be listed");
     }
 
     @Test
-    public void testGetGatewaysWithAvZone() throws Exception {
-        given(Gateway.request()
+    public void testGetSshKeysWithAvZone() throws Exception {
+        given(SshKey.request()
                 .withCredentialId(null)
                 .withCredentialName(cloudProvider.getCredentialName())
                 .withRegion(cloudProvider.region())
                 .withAvailabilityZone(cloudProvider.availabilityZone()), "with availability zone "
         );
-        when(Gateway.get(), "get the request");
-        then(Gateway.assertValidGateways(), "available gateways should be listed");
+        when(SshKey.get(), "get the request");
+        then(SshKey.assertValidSshKeys(), "available sshkeys should be listed");
     }
 
     @Test
-    public void testGetGatewaysWithInvalidAvZone() throws Exception {
-        given(Gateway.request()
+    public void testGetSshKeysWithInvalidAvZone() throws Exception {
+        given(SshKey.request()
                 .withCredentialId(null)
                 .withCredentialName(cloudProvider.getCredentialName())
                 .withRegion(cloudProvider.region())
                 .withAvailabilityZone(INVALID_AV_ZONE), "with invalid availability zone "
         );
-        when(Gateway.get(), "get the request");
-        then(Gateway.assertValidGateways(), "available gateways should be listed");
+        when(SshKey.get(), "get the request");
+        then(SshKey.assertValidSshKeys(), "available sshkeys should be listed");
     }
 
     @Test(expectedExceptions = BadRequestException.class)
-    public void testGetGatewaysInvalidCredName() throws Exception {
-        given(Gateway.request()
+    public void testGetSshKeysInvalidCredName() throws Exception {
+        given(SshKey.request()
                 .withCredentialId(null)
                 .withCredentialName(INVALID_CRED_NAME), "with invalid credential name"
         );
-        when(Gateway.get(), "get the request");
-        then(Gateway.assertValidGateways());
+        when(SshKey.get(), "get the request");
+        then(SshKey.assertValidSshKeys());
     }
 
     @Test(expectedExceptions = BadRequestException.class)
-    public void testGetGatewaysWithoutCred() throws Exception {
-        given(Gateway.request()
+    public void testGetSshKeysWithoutCred() throws Exception {
+        given(SshKey.request()
                 .withCredentialId(null)
                 .withCredentialName(null)
                 .withRegion(cloudProvider.region()), "without credential"
         );
-        when(Gateway.get(), "get the request");
-        then(Gateway.assertValidGateways());
+        when(SshKey.get(), "get the request");
+        then(SshKey.assertValidSshKeys());
     }
 
     @Test(expectedExceptions = BadRequestException.class)
-    public void testGetGatewaysInvalidCredId() throws Exception {
-        given(Gateway.request()
+    public void testGetSshKeysInvalidCredId() throws Exception {
+        given(SshKey.request()
                 .withCredentialId(INVALID_CRED_ID)
                 .withCredentialName(null)
                 .withRegion(cloudProvider.region()),  "with invalid credential id"
         );
-        when(Gateway.get(), "get the request");
-        then(Gateway.assertValidGateways());
+        when(SshKey.get(), "get the request");
+        then(SshKey.assertValidSshKeys());
     }
 
     @Test
-    public void testGetGatewaysInvalidRegion() throws Exception {
-        given(Gateway.request()
+    public void testSshKeysInvalidRegion() throws Exception {
+        given(SshKey.request()
                 .withCredentialId(credentialId)
                 .withRegion(INVALID_REGION), "with invalid credential id"
         );
-        when(Gateway.get(), "get the request");
-        then(Gateway.assertValidGateways(), "available gateways should be listed");
+        when(SshKey.get(), "get the request");
+        then(SshKey.assertValidSshKeys(), "available sshkeys should be listed");
     }
 
     @AfterTest

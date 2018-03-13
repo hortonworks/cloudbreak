@@ -1,4 +1,4 @@
-name: IpPool_tests
+name: Gateway_tests
 parallel: "instances"
 parameters:
   cleanUp: false
