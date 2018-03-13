@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import com.sequenceiq.cloudbreak.api.model.FileSystemConfiguration;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintConfigurationEntry;
@@ -20,8 +21,8 @@ public abstract class AbstractFileSystemConfigurator<T extends FileSystemConfigu
         try {
             for (FileSystemScriptConfig fsScriptConfig : getScriptConfigs(credential, fsConfig)) {
                 String script = FileReaderUtils.readFileFromClasspath(fsScriptConfig.getScriptLocation());
-                for (String key : fsScriptConfig.getProperties().keySet()) {
-                    script = script.replaceAll("\\$" + key, fsScriptConfig.getProperties().get(key));
+                for (Entry<String, String> entry : fsScriptConfig.getProperties().entrySet()) {
+                    script = script.replaceAll("\\$" + entry.getKey(), entry.getValue());
                 }
                 scripts.add(new RecipeScript(script, fsScriptConfig.getExecutionType(), fsScriptConfig.getRecipeType()));
             }
