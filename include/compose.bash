@@ -202,41 +202,6 @@ escape-string-compose-yaml() {
     echo $out
 }
 
-setup_proxy_environments() {
-    if [[ "$HTTP_PROXY_HOST" ]] || [[ "$HTTPS_PROXY_HOST" ]]; then
-         if [[ "$HTTP_PROXY_HOST" ]]; then
-            PROXY_HOST=$HTTP_PROXY_HOST
-         else
-            PROXY_HOST=$HTTPS_PROXY_HOST
-         fi
-
-         for PROXY_PROTOCOL in http https; do
-             HTTP_PROXY="http://"
-             HTTPS_PROXY="https://"
-             if [[ "$PROXY_USER" ]] &&  [[ "$PROXY_PASSWORD" ]]; then
-                CB_JAVA_OPTS+=" -D$PROXY_PROTOCOL.proxyUser=$PROXY_USER"
-                CB_JAVA_OPTS+=" -D$PROXY_PROTOCOL.proxyPassword=$PROXY_PASSWORD"
-                HTTP_PROXY+="$PROXY_USER:$PROXY_PASSWORD@"
-                HTTPS_PROXY+="$PROXY_USER:$PROXY_PASSWORD@"
-             fi
-
-             CB_JAVA_OPTS+=" -D$PROXY_PROTOCOL.proxyHost=$PROXY_HOST"
-             HTTP_PROXY+="$PROXY_HOST"
-             HTTPS_PROXY+="$PROXY_HOST"
-
-             if [[ "$PROXY_PORT" ]]; then
-                CB_JAVA_OPTS+=" -D$PROXY_PROTOCOL.proxyPort=$PROXY_PORT"
-                HTTP_PROXY+=":$PROXY_PORT"
-                HTTPS_PROXY+=":$PROXY_PORT"
-             fi
-         done
-
-         if [[ "$NON_PROXY_HOSTS" ]]; then
-            CB_JAVA_OPTS+=" -Dhttp.nonProxyHosts=$NON_PROXY_HOSTS"
-         fi
-    fi
-}
-
 compose-generate-yaml-force() {
     declare composeFile=${1:? required: compose file path}
     debug "Generating docker-compose yaml: ${composeFile} ..."
