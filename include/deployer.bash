@@ -49,6 +49,12 @@ command_exists() {
 	command -v "$@" > /dev/null 2>&1
 }
 
+echo_if_not_contains() {
+    if [[ "$1" != *"$2"* ]]; then
+        echo "$2"
+    fi
+}
+
 setup_proxy_environments() {
     env-import HTTP_PROXY_HOST ""
     env-import HTTPS_PROXY_HOST ""
@@ -67,25 +73,25 @@ setup_proxy_environments() {
              HTTP_PROXY="http://"
              HTTPS_PROXY="https://"
              if [[ "$PROXY_USER" ]] &&  [[ "$PROXY_PASSWORD" ]]; then
-                CB_JAVA_OPTS+=" -D$PROXY_PROTOCOL.proxyUser=$PROXY_USER"
-                CB_JAVA_OPTS+=" -D$PROXY_PROTOCOL.proxyPassword=$PROXY_PASSWORD"
+                CB_JAVA_OPTS+=$(echo_if_not_contains "$CB_JAVA_OPTS" " -D$PROXY_PROTOCOL.proxyUser=$PROXY_USER")
+                CB_JAVA_OPTS+=$(echo_if_not_contains "$CB_JAVA_OPTS" " -D$PROXY_PROTOCOL.proxyPassword=$PROXY_PASSWORD")
                 HTTP_PROXY+="$PROXY_USER:$PROXY_PASSWORD@"
                 HTTPS_PROXY+="$PROXY_USER:$PROXY_PASSWORD@"
              fi
 
-             CB_JAVA_OPTS+=" -D$PROXY_PROTOCOL.proxyHost=$PROXY_HOST"
+             CB_JAVA_OPTS+=$(echo_if_not_contains "$CB_JAVA_OPTS" " -D$PROXY_PROTOCOL.proxyHost=$PROXY_HOST")
              HTTP_PROXY+="$PROXY_HOST"
              HTTPS_PROXY+="$PROXY_HOST"
 
              if [[ "$PROXY_PORT" ]]; then
-                CB_JAVA_OPTS+=" -D$PROXY_PROTOCOL.proxyPort=$PROXY_PORT"
+                CB_JAVA_OPTS+=$(echo_if_not_contains "$CB_JAVA_OPTS" " -D$PROXY_PROTOCOL.proxyPort=$PROXY_PORT")
                 HTTP_PROXY+=":$PROXY_PORT"
                 HTTPS_PROXY+=":$PROXY_PORT"
              fi
          done
 
          if [[ "$NON_PROXY_HOSTS" ]]; then
-            CB_JAVA_OPTS+=" -Dhttp.nonProxyHosts=$NON_PROXY_HOSTS"
+            CB_JAVA_OPTS+=$(echo_if_not_contains "$CB_JAVA_OPTS" " -Dhttp.nonProxyHosts=$NON_PROXY_HOSTS")
          fi
          export http_proxy=$HTTP_PROXY
          export https_proxy=$HTTPS_PROXY
