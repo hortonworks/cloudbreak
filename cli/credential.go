@@ -6,6 +6,7 @@ import (
 	"os"
 	"time"
 
+	"errors"
 	log "github.com/Sirupsen/logrus"
 	"github.com/hortonworks/cb-cli/cli/cloud"
 	"github.com/hortonworks/cb-cli/cli/types"
@@ -20,9 +21,19 @@ func CreateAwsCredential(c *cli.Context) {
 	createCredential(c)
 }
 
+func ModifyAwsCredential(c *cli.Context) {
+	cloud.SetProviderType(cloud.AWS)
+	modifyCredential(c)
+}
+
 func CreateAzureCredential(c *cli.Context) {
 	cloud.SetProviderType(cloud.AZURE)
 	createCredential(c)
+}
+
+func ModifyAzureCredential(c *cli.Context) {
+	cloud.SetProviderType(cloud.AZURE)
+	modifyCredential(c)
 }
 
 func CreateGcpCredential(c *cli.Context) {
@@ -30,22 +41,42 @@ func CreateGcpCredential(c *cli.Context) {
 	createCredential(c)
 }
 
+func ModifyGcpCredential(c *cli.Context) {
+	cloud.SetProviderType(cloud.GCP)
+	modifyCredential(c)
+}
+
 func CreateOpenstackCredential(c *cli.Context) {
 	cloud.SetProviderType(cloud.OPENSTACK)
 	createCredential(c)
+}
+
+func ModifyOpenstackCredential(c *cli.Context) {
+	cloud.SetProviderType(cloud.OPENSTACK)
+	modifyCredential(c)
 }
 
 func CreateCredentialFromFile(c *cli.Context) {
 	checkRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "create credential")
 
-	req := assembleCredentialRequest(c)
+	req := assembleCredentialRequest(c.String(FlInputJson.Name), c.String(FlNameOptional.Name))
 	cbClient := NewCloudbreakHTTPClientFromContext(c)
 	postCredential(cbClient.Cloudbreak.V1credentials, c.Bool(FlPublicOptional.Name), req)
 }
 
-func assembleCredentialRequest(c *cli.Context) *models_cloudbreak.CredentialRequest {
-	path := c.String(FlInputJson.Name)
+func ModifyCredentialFromFile(c *cli.Context) {
+	checkRequiredFlagsAndArguments(c)
+	defer utils.TimeTrack(time.Now(), "modify credential from file")
+
+	credReq := assembleCredentialRequest(c.String(FlInputJson.Name), c.String(FlNameOptional.Name))
+	cbClient := NewCloudbreakHTTPClientFromContext(c)
+
+	credential := getCredential(*credReq.Name, cbClient.Cloudbreak.V1credentials)
+	putCredential(cbClient.Cloudbreak.V1credentials, *credential.Public, credReq)
+}
+
+func assembleCredentialRequest(path, credName string) *models_cloudbreak.CredentialRequest {
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		utils.LogErrorAndExit(err)
 	}
@@ -60,7 +91,6 @@ func assembleCredentialRequest(c *cli.Context) *models_cloudbreak.CredentialRequ
 		utils.LogErrorMessageAndExit(msg)
 	}
 
-	credName := c.String(FlNameOptional.Name)
 	if len(credName) != 0 {
 		req.Name = &credName
 	}
@@ -77,6 +107,84 @@ func createCredential(c *cli.Context) {
 
 	cbClient := NewCloudbreakHTTPClientFromContext(c)
 	createCredentialImpl(c.String, c.Bool, cbClient.Cloudbreak.V1credentials)
+}
+
+func modifyCredential(c *cli.Context) {
+	checkRequiredFlagsAndArguments(c)
+	defer utils.TimeTrack(time.Now(), "modify credential")
+
+	cbClient := NewCloudbreakHTTPClientFromContext(c)
+	modifyCredentialImpl(c.String, c.Bool, cbClient.Cloudbreak.V1credentials)
+}
+
+type modifyCredentialClient interface {
+	PutPrivateCredential(params *v1credentials.PutPrivateCredentialParams) (*v1credentials.PutPrivateCredentialOK, error)
+	PutPublicCredential(params *v1credentials.PutPublicCredentialParams) (*v1credentials.PutPublicCredentialOK, error)
+	GetPublicCredential(params *v1credentials.GetPublicCredentialParams) (*v1credentials.GetPublicCredentialOK, error)
+}
+
+func modifyCredentialImpl(stringFinder func(string) string, boolFinder func(string) bool, client modifyCredentialClient) *models_cloudbreak.CredentialResponse {
+	name := stringFinder(FlName.Name)
+	description := stringFinder(FlDescriptionOptional.Name)
+	provider := cloud.GetProvider()
+
+	credential := getCredential(name, client)
+	if *credential.CloudPlatform != *provider.GetName() {
+		utils.LogErrorAndExit(errors.New("cloud provider cannot be modified"))
+	}
+
+	log.Infof("[modifyCredentialImpl] original credential found name: %s id: %d", name, credential.ID)
+	credentialMap, err := provider.GetCredentialParameters(stringFinder, boolFinder)
+	if err != nil {
+		utils.LogErrorAndExit(err)
+	}
+
+	if len(description) == 0 {
+		origDesc := credential.Description
+		if origDesc != nil && len(*origDesc) > 0 {
+			description = *origDesc
+		}
+	}
+
+	credReq := &models_cloudbreak.CredentialRequest{
+		Name:          &name,
+		Description:   &description,
+		CloudPlatform: provider.GetName(),
+		Parameters:    credentialMap,
+	}
+
+	return putCredential(client, *credential.Public, credReq)
+}
+
+func getCredential(name string, client modifyCredentialClient) *models_cloudbreak.CredentialResponse {
+	defer utils.TimeTrack(time.Now(), "get credential")
+
+	log.Infof("[getCredential] get credential by name: %s", name)
+	response, err := client.GetPublicCredential(v1credentials.NewGetPublicCredentialParams().WithName(name))
+	if err != nil {
+		utils.LogErrorAndExit(err)
+	}
+	return response.Payload
+}
+
+func putCredential(client modifyCredentialClient, public bool, credReq *models_cloudbreak.CredentialRequest) *models_cloudbreak.CredentialResponse {
+	var credential *models_cloudbreak.CredentialResponse
+	if public {
+		log.Infof("[putCredential] modify public credential: %s", *credReq.Name)
+		resp, err := client.PutPublicCredential(v1credentials.NewPutPublicCredentialParams().WithBody(credReq))
+		if err != nil {
+			utils.LogErrorAndExit(err)
+		}
+		credential = resp.Payload
+	} else {
+		log.Infof("[putCredential] modify private credential: %s", *credReq.Name)
+		resp, err := client.PutPrivateCredential(v1credentials.NewPutPrivateCredentialParams().WithBody(credReq))
+		if err != nil {
+			utils.LogErrorAndExit(err)
+		}
+		credential = resp.Payload
+	}
+	return credential
 }
 
 type createCredentialClient interface {

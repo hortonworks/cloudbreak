@@ -1,0 +1,17 @@
+{
+  "cloudPlatform": "OPENSTACK",
+  "description": "Test OS keystone v3 credential",
+  "name": "test-openstack-credential",
+  "parameters": {
+    "endpoint": "http://127.0.0.1:5000/v3",
+    "facing": "internal",
+    "keystoneAuthScope": "cb-keystone-v3-project-scope",
+    "selector": "cb-keystone-v3-project-scope",
+    "keystoneVersion": "cb-keystone-v3",
+    "password": "testpassword",
+    "userDomain": "Default",
+    "userName": "testuser",
+    "projectDomainName": "Testdomain",
+    "projectName": "infra"
+  }
+}

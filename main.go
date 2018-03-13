@@ -813,6 +813,116 @@ func main() {
 					},
 				},
 				{
+					Name:  "modify",
+					Usage: "modify an existing credential",
+					Subcommands: []cli.Command{
+						{
+							Name:  "aws",
+							Usage: "modify an existing aws credential",
+							Subcommands: []cli.Command{
+								{
+									Name:   "role-based",
+									Usage:  "modify a role based aws credential",
+									Before: ConfigRead,
+									Flags:  cb.NewFlagBuilder().AddFlags(cb.FlName, cb.FlDescriptionOptional, cb.FlRoleARN).AddAuthenticationFlags().Build(),
+									Action: cb.ModifyAwsCredential,
+									BashComplete: func(c *cli.Context) {
+										for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlName, cb.FlDescriptionOptional, cb.FlRoleARN).AddAuthenticationFlags().Build() {
+											printFlagCompletion(f)
+										}
+									},
+								},
+								{
+									Name:   "key-based",
+									Usage:  "modify a key based aws credential",
+									Before: ConfigRead,
+									Flags:  cb.NewFlagBuilder().AddFlags(cb.FlName, cb.FlDescriptionOptional, cb.FlAccessKey, cb.FlSecretKey).AddAuthenticationFlags().Build(),
+									Action: cb.ModifyAwsCredential,
+									BashComplete: func(c *cli.Context) {
+										for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlName, cb.FlDescriptionOptional, cb.FlAccessKey, cb.FlSecretKey).AddAuthenticationFlags().Build() {
+											printFlagCompletion(f)
+										}
+									},
+								},
+							},
+						},
+						{
+							Name:  "azure",
+							Usage: "modify an existing azure credential",
+							Subcommands: []cli.Command{
+								{
+									Name:   "app-based",
+									Usage:  "modify an app based azure credential",
+									Before: ConfigRead,
+									Flags:  cb.NewFlagBuilder().AddFlags(cb.FlName, cb.FlDescriptionOptional, cb.FlSubscriptionId, cb.FlTenantId, cb.FlAppId, cb.FlAppPassword).AddAuthenticationFlags().Build(),
+									Action: cb.ModifyAzureCredential,
+									BashComplete: func(c *cli.Context) {
+										for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlName, cb.FlDescriptionOptional, cb.FlSubscriptionId, cb.FlTenantId, cb.FlAppId, cb.FlAppPassword).AddAuthenticationFlags().Build() {
+											printFlagCompletion(f)
+										}
+									},
+								},
+							},
+						},
+						{
+							Name:   "gcp",
+							Usage:  "modify an existing gcp credential",
+							Before: ConfigRead,
+							Flags:  cb.NewFlagBuilder().AddFlags(cb.FlName, cb.FlDescriptionOptional, cb.FlProjectId, cb.FlServiceAccountId, cb.FlServiceAccountPrivateKeyFile).AddAuthenticationFlags().Build(),
+							Action: cb.ModifyGcpCredential,
+							BashComplete: func(c *cli.Context) {
+								for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlName, cb.FlDescriptionOptional, cb.FlProjectId, cb.FlServiceAccountId, cb.FlServiceAccountPrivateKeyFile).AddAuthenticationFlags().Build() {
+									printFlagCompletion(f)
+								}
+							},
+						},
+						{
+							Name:  "openstack",
+							Usage: "modify an existing openstack credential",
+							Subcommands: []cli.Command{
+								{
+									Name:   "keystone-v2",
+									Usage:  "modify a keystone version 2 openstack credential",
+									Before: ConfigRead,
+									Flags:  cb.NewFlagBuilder().AddFlags(cb.FlName, cb.FlDescriptionOptional, cb.FlTenantUser, cb.FlTenantPassword, cb.FlTenantName, cb.FlEndpoint, cb.FlFacingOptional).AddAuthenticationFlags().Build(),
+									Action: cb.ModifyOpenstackCredential,
+									BashComplete: func(c *cli.Context) {
+										for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlName, cb.FlDescriptionOptional, cb.FlTenantUser, cb.FlTenantPassword, cb.FlTenantName, cb.FlEndpoint, cb.FlFacingOptional).AddAuthenticationFlags().Build() {
+											printFlagCompletion(f)
+										}
+									},
+								},
+								{
+									Name:   "keystone-v3",
+									Usage:  "modify a keystone version 3 openstack credential",
+									Before: ConfigRead,
+									Flags: cb.NewFlagBuilder().AddFlags(cb.FlName, cb.FlDescriptionOptional, cb.FlTenantUser, cb.FlTenantPassword,
+										cb.FlUserDomain, cb.FlProjectDomainNameOptional, cb.FlProjectNameOptional, cb.FlDomainNameOptional, cb.FlKeystoneScopeOptional, cb.FlEndpoint, cb.FlFacingOptional).AddAuthenticationFlags().Build(),
+									Action: cb.ModifyOpenstackCredential,
+									BashComplete: func(c *cli.Context) {
+										for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlName, cb.FlDescriptionOptional, cb.FlTenantUser, cb.FlTenantPassword,
+											cb.FlUserDomain, cb.FlProjectDomainNameOptional, cb.FlProjectNameOptional, cb.FlDomainNameOptional, cb.FlKeystoneScopeOptional, cb.FlEndpoint, cb.FlFacingOptional).AddAuthenticationFlags().Build() {
+											printFlagCompletion(f)
+										}
+									},
+								},
+							},
+						},
+						{
+							Name:   "from-file",
+							Usage:  "modify a credential from input json file",
+							Flags:  cb.NewFlagBuilder().AddFlags(cb.FlNameOptional, cb.FlInputJson).AddAuthenticationFlags().Build(),
+							Before: ConfigRead,
+							Action: cb.ModifyCredentialFromFile,
+							BashComplete: func(c *cli.Context) {
+								for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlNameOptional, cb.FlInputJson).AddAuthenticationFlags().Build() {
+									printFlagCompletion(f)
+								}
+							},
+						},
+					},
+				},
+				{
 					Name:   "delete",
 					Usage:  "deletes a credential",
 					Flags:  cb.NewFlagBuilder().AddFlags(cb.FlName).AddAuthenticationFlags().Build(),
