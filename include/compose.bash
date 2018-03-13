@@ -136,6 +136,7 @@ compose-logs-tail() {
 
 compose-generate-check-diff() {
     cloudbreak-config
+    setup_proxy_environments
     local verbose="$1"
 
     if [ -f docker-compose.yml ]; then
