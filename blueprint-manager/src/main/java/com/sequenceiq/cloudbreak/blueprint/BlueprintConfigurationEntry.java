@@ -39,7 +39,6 @@ public class BlueprintConfigurationEntry {
             return false;
         }
 
-
         BlueprintConfigurationEntry that = (BlueprintConfigurationEntry) o;
 
         return new EqualsBuilder()
