@@ -9,7 +9,7 @@ import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-@ApiModel("RdsTestRequest")
+@ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class LDAPTestRequest implements JsonEntity {
 

@@ -1,12 +1,14 @@
 package com.sequenceiq.cloudbreak.api.model.ldap;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.api.model.JsonEntity;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-@ApiModel("RdsTestResult")
+@ApiModel
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class LdapTestResult implements JsonEntity {
 
     @ApiModelProperty(value = ClusterModelDescription.LDAP_CONNECTION_RESULT, required = true)
