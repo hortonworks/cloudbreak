@@ -41,7 +41,7 @@ public class KafkaStructuredEventHandler<T extends StructuredEvent> implements R
     public void accept(Event<T> structuredEvent) {
         try {
             ListenableFuture<SendResult<String, String>> sendResultFuture =
-                    kafkaTemplate.send(structuredEventsTopic, objectMapper.writeValueAsString(structuredEvent));
+                    kafkaTemplate.send(structuredEventsTopic, objectMapper.writeValueAsString(structuredEvent.getData()));
             SendResult<String, String> sendResult = sendResultFuture.get();
             LOGGER.debug("Structured event sent to kafka: {}", sendResult.getProducerRecord());
         } catch (JsonProcessingException e) {
