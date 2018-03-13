@@ -26,7 +26,7 @@ deps-install() {
 	declare name="$1" version="${2:-latest}"
 	local tag index tmpfile dep filename extension install
 	mkdir -p "$(deps-dir)/bin"
-	index=$(curl -s "$DEPS_REPO/$name")
+	index=$(curl-proxy-aware -s "$DEPS_REPO/$name")
 	tag="$(uname -s)_$(uname -m | grep -s 64 > /dev/null && echo amd64 || echo 386)"
 	if ! dep="$(echo "$index" | grep -i -e "^$version $tag " -e "^$version \* ")"; then
 		echo "!! Dependency not in index: $name $version" | red
@@ -36,7 +36,7 @@ deps-install() {
     downdir="$(deps-dir)/tmp/download"
 	mkdir -p "$downdir"
 	tmpfile="${downdir:?}/$name"
-	curl -Ls $url > "$tmpfile"
+	curl-proxy-aware -Ls $url > "$tmpfile"
 	if [[ "$checksum" ]]; then
 		if ! [[ "$(cat "$tmpfile" | checksum md5)" = "$checksum" ]]; then
 			echo "!! Dependency checksum failed: $name $version $checksum" | red

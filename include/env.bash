@@ -147,7 +147,7 @@ HTTPS_PROXY_HOST - HTTPS proxy address
 PROXY_PORT - Proxy port
 PROXY_USER - Proxy user (basic auth)
 PROXY_PASSWORD - Proxy password (basic auth)
-NON_PROXY_HOSTS - Indicates the hosts that should be accessed without going through the proxy. Typically this defines internal hosts. The value of this property is a list of hosts, separated by the "|" character. In addition the wildcard character "*" can be used for pattern matching. For example ”*.foo.com|localhost” will indicate that every hosts in the foo.com domain and the localhost should be accessed directly even if a proxy server is specified.
+NON_PROXY_HOSTS - Indicates the hosts that should be accessed without going through the proxy. Typically this defines internal hosts. The value of this property is a list of hosts, separated by the "|" character. In addition the wildcard character "*" can be used for pattern matching. For example ”*.foo.com|localhost” will indicate that every hosts in the foo.com domain and the localhost should be accessed directly even if a proxy server is specified. Warning: *.consul should be included!
 HTTPS_PROXYFORCLUSTERCONNECTION - if set to true, Cloudbreak will use the proxy to connect Ambari server. Default: false
 IDENTITY_DB_NAME - Name of the Identity database
 IDENTITY_DB_PASS - Password for the Identity database authentication

@@ -49,6 +49,49 @@ command_exists() {
 	command -v "$@" > /dev/null 2>&1
 }
 
+setup_proxy_environments() {
+    env-import HTTP_PROXY_HOST ""
+    env-import HTTPS_PROXY_HOST ""
+    env-import PROXY_PORT ""
+    env-import PROXY_USER ""
+    env-import PROXY_PASSWORD ""
+    env-import NON_PROXY_HOSTS "*.consul"
+    if [[ "$HTTP_PROXY_HOST" ]] || [[ "$HTTPS_PROXY_HOST" ]]; then
+         if [[ "$HTTP_PROXY_HOST" ]]; then
+            PROXY_HOST=$HTTP_PROXY_HOST
+         else
+            PROXY_HOST=$HTTPS_PROXY_HOST
+         fi
+
+         for PROXY_PROTOCOL in http https; do
+             HTTP_PROXY="http://"
+             HTTPS_PROXY="https://"
+             if [[ "$PROXY_USER" ]] &&  [[ "$PROXY_PASSWORD" ]]; then
+                CB_JAVA_OPTS+=" -D$PROXY_PROTOCOL.proxyUser=$PROXY_USER"
+                CB_JAVA_OPTS+=" -D$PROXY_PROTOCOL.proxyPassword=$PROXY_PASSWORD"
+                HTTP_PROXY+="$PROXY_USER:$PROXY_PASSWORD@"
+                HTTPS_PROXY+="$PROXY_USER:$PROXY_PASSWORD@"
+             fi
+
+             CB_JAVA_OPTS+=" -D$PROXY_PROTOCOL.proxyHost=$PROXY_HOST"
+             HTTP_PROXY+="$PROXY_HOST"
+             HTTPS_PROXY+="$PROXY_HOST"
+
+             if [[ "$PROXY_PORT" ]]; then
+                CB_JAVA_OPTS+=" -D$PROXY_PROTOCOL.proxyPort=$PROXY_PORT"
+                HTTP_PROXY+=":$PROXY_PORT"
+                HTTPS_PROXY+=":$PROXY_PORT"
+             fi
+         done
+
+         if [[ "$NON_PROXY_HOSTS" ]]; then
+            CB_JAVA_OPTS+=" -Dhttp.nonProxyHosts=$NON_PROXY_HOSTS"
+         fi
+         export http_proxy=$HTTP_PROXY
+         export https_proxy=$HTTPS_PROXY
+    fi
+}
+
 curl-proxy-aware() {
     env-import CURL_CONNECT_TIMEOUT 20
     local CURL_ARGS="--connect-timeout $CURL_CONNECT_TIMEOUT"
@@ -561,7 +604,7 @@ _exit() {
 }
 
 is_command_needs_profile() {
-    [[ ' '"bash-complete help init machine delete"' ' != *" $1 "* ]]
+    [[ ' '"bash-complete help machine delete"' ' != *" $1 "* ]]
 }
 
 copy_cbd_output_to_log() {
@@ -591,15 +634,15 @@ main() {
     cbd-find-root
     start-time-init
 	color-init
-    deps-init
-    create-temp-dir
-    deps-require sed
-    deps-require yq
     if is_command_needs_profile $1; then
         init-profile
         load-profile
         public-ip-init
     fi
+    deps-init
+    create-temp-dir
+    deps-require sed
+    deps-require yq
 
     circle-init
     compose-init
