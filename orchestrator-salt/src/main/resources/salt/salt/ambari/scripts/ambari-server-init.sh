@@ -46,26 +46,22 @@ config_remote_jdbc() {
 }
 
 config_jdbc_drivers() {
-  if [ -d "/var/lib/ambari-server/jdbc-drivers" ]; then
-    if [ -z "$(find_and_distribute_latest_jdbc_driver postgres)" ]; then
+    if [ -z "$(find_and_distribute_latest_jdbc_driver postgresql-jdbc postgres)" ]; then
       echo "PostgreSQL JDBC driver not found."
     fi
-    if [ -z "$(find_and_distribute_latest_jdbc_driver mysql)" ]; then
+    if [ -z "$(find_and_distribute_latest_jdbc_driver mysql-connector mysql)" ]; then
       echo "MySQL JDBC driver not found."
     fi
-  else
-    echo "JDBC driver directory not found."
-  fi
 }
 
 find_and_distribute_latest_jdbc_driver() {
-    latest=$(find /var/lib/ambari-server/jdbc-drivers -name "$1*.jar" | tail -n1)
+    latest=$(find /usr/share/java -name "$1*.jar" | tail -n1)
     if [ -z "$latest" ]; then
         exit 1
     fi
-    ln -s $latest /usr/share/java # this is for ambari-server setup
+
     ln -s $latest $JAVA_HOME/jre/lib/ext # this is for ambari-server start -> database check
-    ambari-server setup --jdbc-db=$1 --jdbc-driver=${latest} $GPL_SWITCH
+    ambari-server setup --jdbc-db=$2 --jdbc-driver=${latest} $GPL_SWITCH
     echo ${latest}
 }
 
