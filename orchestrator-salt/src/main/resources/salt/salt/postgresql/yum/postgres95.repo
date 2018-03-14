@@ -1,0 +1,7 @@
+[pgdg95]
+name=PostgreSQL 9.5
+baseurl=https://download.postgresql.org/pub/repos/yum/9.5/redhat/rhel-6-x86_64
+enabled=1
+priority=1
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-PGDG-95
