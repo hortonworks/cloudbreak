@@ -1,0 +1,242 @@
+{
+    "settings": [
+        {
+            "recovery_settings": [
+                {
+                    "recovery_enabled": "true"
+                }
+            ]
+        }
+    ],
+    "Blueprints": {
+        "stack_version": "2.6",
+        "blueprint_name": "multi-node-hdfs-yarn",
+        "stack_name": "HDP"
+    },
+    "configurations": [
+        {
+            "hdfs-site": {
+                "properties": {
+                    "dfs.journalnode.edits.dir": "\/hadoopfs\/fs1\/hdfs\/journalnode",
+                    "dfs.namenode.name.dir": "\/hadoopfs\/fs1\/hdfs\/namenode",
+                    "dfs.replication": 2,
+                    "dfs.namenode.checkpoint.dir": "\/hadoopfs\/fs1\/hdfs\/namesecondary"
+                }
+            }
+        },
+        {
+            "oozie-site": {
+                "properties": {
+                    "oozie.service.JPAService.jdbc.password": "iamsoosecure",
+                    "oozie.service.JPAService.jdbc.url": "jdbc:postgresql:\/\/10.1.1.1:5432\/oozie",
+                    "oozie.service.JPAService.jdbc.driver": "org.postgresql.Driver",
+                    "oozie.service.JPAService.jdbc.username": "heyitsme"
+                }
+            }
+        },
+        {
+            "oozie-env": {
+                "properties": {
+                    "oozie_database_type": "postgres",
+                    "oozie_database": "Existing postgresql Database"
+                }
+            }
+        },
+        {
+            "webhcat-site": {
+                "properties": {
+                    "webhcat.proxyuser.root.groups": "*",
+                    "webhcat.proxyuser.root.hosts": "*"
+                }
+            }
+        },
+        {
+            "cluster-env": {
+                "properties": {
+                    "recovery_enabled": "true",
+                    "recovery_type": "AUTO_START"
+                }
+            }
+        },
+        {
+            "hbase-site": {
+                "properties": {
+                    "zookeeper.recovery.retry": "10"
+                }
+            }
+        },
+        {
+            "core-site": {
+                "properties": {
+                    "proxyuser_group": "hadoop",
+                    "hadoop.proxyuser.falcon.groups": "*",
+                    "hadoop.proxyuser.root.groups": "*",
+                    "hadoop.proxyuser.falcon.hosts": "*",
+                    "hadoop.proxyuser.oozie.hosts": "*",
+                    "hadoop.proxyuser.hcat.hosts": "*",
+                    "hadoop.proxyuser.oozie.groups": "*",
+                    "hadoop.proxyuser.hive.groups": "*",
+                    "hadoop.proxyuser.hcat.groups": "*",
+                    "hadoop.proxyuser.hbase.groups": "*",
+                    "hadoop.proxyuser.hbase.hosts": "*",
+                    "hadoop.proxyuser.root.hosts": "*",
+                    "hadoop.proxyuser.hive.hosts": "*"
+                }
+            }
+        },
+        {
+            "zoo.cfg": {
+                "properties": {
+                    "dataDir": "\/hadoopfs\/fs1\/zookeeper"
+                }
+            }
+        },
+        {
+            "yarn-site": {
+                "properties": {
+                    "yarn.timeline-service.leveldb-timeline-store.path": "\/hadoopfs\/fs1\/yarn\/timeline"
+                }
+            }
+        }
+    ],
+    "host_groups": [
+        {
+            "components": [
+                {
+                    "name": "NAMENODE"
+                },
+                {
+                    "name": "SECONDARY_NAMENODE"
+                },
+                {
+                    "name": "RESOURCEMANAGER"
+                },
+                {
+                    "name": "APP_TIMELINE_SERVER"
+                },
+                {
+                    "name": "HISTORYSERVER"
+                },
+                {
+                    "name": "ZOOKEEPER_SERVER"
+                },
+                {
+                    "name": "KERBEROS_CLIENT"
+                },
+                {
+                    "name": "OOZIE"
+                }
+            ],
+            "configurations": [
+                {
+                    "hdfs-site": {
+                        "dfs.datanode.data.dir": "\/hadoopfs\/fs1\/hdfs\/datanode"
+                    }
+                },
+                {
+                    "yarn-site": {
+                        "yarn.nodemanager.local-dirs": "\/hadoopfs\/fs1\/yarn\/nodemanager",
+                        "yarn.nodemanager.log-dirs": "\/hadoopfs\/fs1\/yarn\/nodemanager\/log"
+                    }
+                },
+                {
+                    "core-site": {
+                        "fs.s3a.buffer.dir": "\/hadoopfs\/fs1\/s3\/temp"
+                    }
+                }
+            ],
+            "name": "master",
+            "cardinality": "1"
+        },
+        {
+            "components": [
+                {
+                    "name": "DATANODE"
+                },
+                {
+                    "name": "HDFS_CLIENT"
+                },
+                {
+                    "name": "NODEMANAGER"
+                },
+                {
+                    "name": "YARN_CLIENT"
+                },
+                {
+                    "name": "MAPREDUCE2_CLIENT"
+                },
+                {
+                    "name": "ZOOKEEPER_CLIENT"
+                },
+                {
+                    "name": "KERBEROS_CLIENT"
+                }
+            ],
+            "configurations": [
+                {
+                    "hdfs-site": {
+                        "dfs.datanode.data.dir": "\/hadoopfs\/fs1\/hdfs\/datanode"
+                    }
+                },
+                {
+                    "yarn-site": {
+                        "yarn.nodemanager.local-dirs": "\/hadoopfs\/fs1\/yarn\/nodemanager",
+                        "yarn.nodemanager.log-dirs": "\/hadoopfs\/fs1\/yarn\/nodemanager\/log"
+                    }
+                },
+                {
+                    "core-site": {
+                        "fs.s3a.buffer.dir": "\/hadoopfs\/fs1\/s3\/temp"
+                    }
+                }
+            ],
+            "name": "worker",
+            "cardinality": "2"
+        },
+        {
+            "components": [
+                {
+                    "name": "DATANODE"
+                },
+                {
+                    "name": "HDFS_CLIENT"
+                },
+                {
+                    "name": "NODEMANAGER"
+                },
+                {
+                    "name": "YARN_CLIENT"
+                },
+                {
+                    "name": "MAPREDUCE2_CLIENT"
+                },
+                {
+                    "name": "ZOOKEEPER_CLIENT"
+                },
+                {
+                    "name": "KERBEROS_CLIENT"
+                }
+            ],
+            "configurations": [
+                {
+                    "hdfs-site": {
+                        "dfs.datanode.data.dir": "\/hadoopfs\/fs1\/hdfs\/datanode"
+                    }
+                },
+                {
+                    "yarn-site": {
+                        "yarn.nodemanager.local-dirs": "\/hadoopfs\/fs1\/yarn\/nodemanager",
+                        "yarn.nodemanager.log-dirs": "\/hadoopfs\/fs1\/yarn\/nodemanager\/log"
+                    }
+                },
+                {
+                    "core-site": {
+                        "fs.s3a.buffer.dir": "\/hadoopfs\/fs1\/s3\/temp"
+                    }
+                }
+            ],
+            "name": "compute",
+            "cardinality": "2"
+        }
+    ]
+}

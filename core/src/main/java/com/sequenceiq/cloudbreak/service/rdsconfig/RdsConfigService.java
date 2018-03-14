@@ -117,6 +117,10 @@ public class RdsConfigService {
         return rdsConfigRepository.findByClusterIdAndType(user, account, clusterId, rdsType);
     }
 
+    public Set<RDSConfig> findUserManagedByClusterId(String user, String account, Long clusterId) {
+        return rdsConfigRepository.findUserManagedByClusterId(user, account, clusterId);
+    }
+
     public void deleteDefaultRdsConfigs(Set<RDSConfig> rdsConfigs) {
         rdsConfigs.stream().filter(rdsConfig -> ResourceStatus.DEFAULT == rdsConfig.getStatus()).forEach(rdsConfig -> {
                 checkRdsConfigNotAssociated(rdsConfig);

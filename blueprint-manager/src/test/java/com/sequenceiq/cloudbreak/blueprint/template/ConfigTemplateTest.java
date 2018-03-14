@@ -90,6 +90,10 @@ public class ConfigTemplateTest {
                         hiveWhenLdapPresentedThenShouldReturnWithLdapConfigs() },
                 { "blueprints/configurations/hive/ldap.handlebars", "configurations/hive/hive-without-ldap.json",
                         hiveWhenLdapNotPresentedThenShouldReturnWithoutLdapConfigs() },
+                { "blueprints/configurations/oozie/rds.handlebars", "configurations/oozie/oozie-with-rds.json",
+                        oozieWhenRdsPresentedThenShouldReturnWithRdsConfigs() },
+                { "blueprints/configurations/oozie/rds.handlebars", "configurations/oozie/oozie-without-rds.json",
+                        objectWithoutEverything() },
         });
     }
 
@@ -104,6 +108,12 @@ public class ConfigTemplateTest {
 
     public static Map<String, Object> objectWithoutEverything() {
         return new BlueprintTemplateModelContextBuilder()
+                .build();
+    }
+
+    public static Map<String, Object> oozieWhenRdsPresentedThenShouldReturnWithRdsConfigs() {
+        return new BlueprintTemplateModelContextBuilder()
+                .withRdsConfigs(Sets.newHashSet(TestUtil.rdsConfig(RdsType.OOZIE)))
                 .build();
     }
 
