@@ -112,6 +112,13 @@ class BlueprintModelProvider {
                 .build();
     }
 
+    static BlueprintPreparationObject blueprintObjectWhenRdsConfiguredWithRdsOozie() throws JsonProcessingException {
+        return getPreparedBuilder()
+                .withBlueprintView(BlueprintTestUtil.generalBlueprintView("", "2.6", "HDP"))
+                .withRdsConfigs(new HashSet<>(Collections.singleton(TestUtil.rdsConfig(RdsType.OOZIE))))
+                .build();
+    }
+
     static BlueprintPreparationObject blueprintObjectWhenLdapAndDruidRdsConfigured() throws JsonProcessingException {
         return getPreparedBuilder()
                 .withBlueprintView(BlueprintTestUtil.generalBlueprintView("", "2.6", "HDP"))

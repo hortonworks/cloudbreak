@@ -13,6 +13,7 @@ import static com.sequenceiq.cloudbreak.blueprint.moduletest.BlueprintModelProvi
 import static com.sequenceiq.cloudbreak.blueprint.moduletest.BlueprintModelProvider.blueprintObjectWhenNifiAndHdfPresentedThenHdfShouldConfigured;
 import static com.sequenceiq.cloudbreak.blueprint.moduletest.BlueprintModelProvider.blueprintObjectWhenNothingSpecialThere;
 import static com.sequenceiq.cloudbreak.blueprint.moduletest.BlueprintModelProvider.blueprintObjectWhenRangerAndRdsPresentedThenRdsRangerShouldConfigured;
+import static com.sequenceiq.cloudbreak.blueprint.moduletest.BlueprintModelProvider.blueprintObjectWhenRdsConfiguredWithRdsOozie;
 import static com.sequenceiq.cloudbreak.blueprint.moduletest.BlueprintModelProvider.blueprintObjectWhereExecutioTypeHasConfiguredAsContainer;
 import static com.sequenceiq.cloudbreak.blueprint.moduletest.BlueprintModelProvider.blueprintObjectWhereSmartSenseHasConfigured;
 import static com.sequenceiq.cloudbreak.blueprint.moduletest.BlueprintModelProvider.blueprintObjectWithZepelinAndHdp25PresentedThenZeppelinShouldConfigured;
@@ -30,6 +31,8 @@ import org.junit.runner.RunWith;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.skyscreamer.jsonassert.JSONParser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.SpringBootTestContextBootstrapper;
 import org.springframework.test.context.BootstrapWith;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -42,6 +45,8 @@ import com.sequenceiq.cloudbreak.blueprint.testrepeater.ListGenerator;
 @RunWith(SpringJUnit4ClassRunner.class)
 @BootstrapWith(SpringBootTestContextBootstrapper.class)
 public class CentralBlueprintUpdaterRollingtest extends CentralBlueprintContext {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(CentralBlueprintUpdaterRollingtest.class);
 
     @Rule
     public Generator<BlueprintDataProvider> params;
@@ -72,6 +77,7 @@ public class CentralBlueprintUpdaterRollingtest extends CentralBlueprintContext 
                 put("execution-type-container", blueprintObjectWhereExecutioTypeHasConfiguredAsContainer());
                 put("smartsense", blueprintObjectWhereSmartSenseHasConfigured());
                 put("smartsense-when-no-hst-server", blueprintObjectWhereSmartSenseHasConfigured());
+                put("oozie", blueprintObjectWhenRdsConfiguredWithRdsOozie());
             }
         };
     }
@@ -82,10 +88,14 @@ public class CentralBlueprintUpdaterRollingtest extends CentralBlueprintContext 
 
         JSONObject expected = toJSON(params.value().getOutput().getFileContent());
         JSONObject resultBlueprintText = toJSON(getUnderTest().getBlueprintText(blueprintPreparationObject));
-        String message = String.format("The result has not matched with the expected output <%s>, expected: <%s>  but was: <%s>",
-                params.value().getOutput().getFileName(), expected.toString(), resultBlueprintText.toString());
+        StringBuffer stringBuffer = new StringBuffer();
+        stringBuffer.append("The result has not matched with the expected output " + params.value().getOutput().getFileName());
+        stringBuffer.append("\nexpected:\n");
+        stringBuffer.append(new JSONObject(expected.toString()).toString(4));
+        stringBuffer.append("\nactual:\n");
+        stringBuffer.append(new JSONObject(resultBlueprintText.toString()).toString(4));
 
-        assertWithExtendedExceptionHandling(message, expected, resultBlueprintText);
+        assertWithExtendedExceptionHandling(stringBuffer.toString(), expected, resultBlueprintText);
     }
 
     private BlueprintPreparationObject prepareBlueprintPreparationObjectWithBlueprintText() {

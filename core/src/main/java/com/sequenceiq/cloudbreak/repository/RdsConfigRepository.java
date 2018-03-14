@@ -42,6 +42,10 @@ public interface RdsConfigRepository extends CrudRepository<RDSConfig, Long> {
             + "AND ((r.account= :account AND r.publicInAccount= true) OR r.owner= :user)")
     Set<RDSConfig> findByClusterId(@Param("user") String user, @Param("account") String account, @Param("clusterId") Long clusterId);
 
+    @Query("SELECT r FROM RDSConfig r INNER JOIN r.clusters cluster LEFT JOIN FETCH r.clusters WHERE cluster.id= :clusterId "
+            + "AND ((r.account= :account AND r.publicInAccount= true) OR r.owner= :user) AND r.status = 'USER_MANAGED'")
+    Set<RDSConfig> findUserManagedByClusterId(@Param("user") String user, @Param("account") String account, @Param("clusterId") Long clusterId);
+
     @Query("SELECT r FROM RDSConfig r INNER JOIN r.clusters cluster WHERE cluster.id= :clusterId "
             + "AND ((r.publicInAccount=true and r.account= :account) or r.owner= :user) AND r.status <> 'DEFAULT_DELETED' AND r.type= :type")
     RDSConfig findByClusterIdAndType(@Param("user") String user, @Param("account") String account, @Param("clusterId") Long clusterId,
