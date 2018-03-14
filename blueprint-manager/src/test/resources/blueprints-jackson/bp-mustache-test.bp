@@ -29,6 +29,12 @@
     ],
     "configurations": [
       {
+        "nifi-ambari-ssl-config": {
+          "content": "{{{ nifi_targets }}}",
+          "nifi.initial.admin.identity": "{{{ cluster_admin_firstname }}}"
+        },
+      }
+      {
         "total-custom-rds-conf": {
           "custom.metadata.storage.type": "{{{ rds.customrds.subprotocol }}}",
           "custom.metadata.storage.engine": "{{{ rds.customrds.databaseEngine }}}",

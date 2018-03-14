@@ -213,7 +213,7 @@ public class AmbariClusterSetupService implements ClusterSetupService {
 
     private void addBlueprint(Long stackId, AmbariClient ambariClient, String blueprintText, Boolean topologyValidation) {
         try {
-            LOGGER.info("Adding generated validation to Ambari: {}", JsonUtil.minify(blueprintText));
+            LOGGER.info("Adding generated blueprint to Ambari: {}", JsonUtil.minify(blueprintText));
             ambariClient.addBlueprint(blueprintText, topologyValidation);
         } catch (HttpResponseException hre) {
             if (hre.getStatusCode() == HttpStatus.SC_CONFLICT) {
