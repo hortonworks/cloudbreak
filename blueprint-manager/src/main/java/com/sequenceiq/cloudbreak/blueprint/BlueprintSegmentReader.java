@@ -2,10 +2,12 @@ package com.sequenceiq.cloudbreak.blueprint;
 
 import static com.sequenceiq.cloudbreak.blueprint.templates.ServiceName.serviceName;
 import static com.sequenceiq.cloudbreak.blueprint.templates.TemplateFiles.templateFiles;
+import static com.sequenceiq.cloudbreak.util.FileReaderUtils.readFolderFromClasspath;
 
-import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -50,33 +52,32 @@ public class BlueprintSegmentReader implements ResourceLoaderAware {
     private Map<ServiceName, TemplateFiles> readAllFilesFromParameterDir(String dir) {
         Map<ServiceName, TemplateFiles> collectedFiles = new HashMap<>();
         try {
-            File[] allFileInDir = getFiles(dir);
-            if (allFileInDir != null) {
-                for (final File serviceEntry : allFileInDir) {
-                    String insideFolder = String.format("%s/%s", dir, serviceEntry.getName());
-                    for (final File configEntry : getFiles(insideFolder)) {
-                        if (configEntry.isFile()) {
-                            String serviceName = serviceEntry.getPath().replace(serviceEntry.getParent() + "/", "");
-                            if (!collectedFiles.keySet().contains(serviceName(serviceName))) {
-                                collectedFiles.put(serviceName(serviceName), templateFiles(Lists.newArrayList()));
-                            }
-                            String file = configEntry.getPath().replace(serviceEntry.getParent() + "/", "");
-                            collectedFiles.get(serviceName(serviceName)).getFiles().add(String.format("%s/%s", dir, file));
+            List<URL> files = getFiles(dir);
+            if (files != null) {
+                for (final URL serviceEntry : files) {
+                    String[] serviceAndPath = serviceEntry.getPath().split(dir);
+                    String insideFolder = String.format("%s/%s", dir, serviceAndPath[1].replaceAll("/", ""));
+                    for (final URL configEntry : getFiles(insideFolder)) {
+                        String serviceName = serviceAndPath[1].replace("/", "");
+                        if (!collectedFiles.keySet().contains(serviceName(serviceName))) {
+                            collectedFiles.put(serviceName(serviceName), templateFiles(Lists.newArrayList()));
                         }
+                        String file = configEntry.getPath().replace(serviceEntry.getPath() + "/", "");
+                        collectedFiles.get(serviceName(serviceName)).getFiles().add(String.format("%s/%s/%s", dir, serviceName, file));
                     }
                 }
             }
         } catch (IOException ex) {
-            LOGGER.warn("Could not read files from the definiated folder which was: {}", dir, ex);
+            String message = String.format("Could not read files from the definiated folder which was: %s", dir);
+            LOGGER.warn(message, ex);
+            throw new BlueprintProcessingException(message, ex);
         }
 
         return collectedFiles;
     }
 
-    private File[] getFiles(String configDir) throws IOException {
-        File folder = resourceLoader.getResource("classpath:" + configDir).getFile();
-        File[] listOfFiles = folder.listFiles();
-        return listOfFiles == null ? new File[0] : listOfFiles;
+    private List<URL> getFiles(String configDir) throws IOException {
+        return readFolderFromClasspath(configDir);
     }
 
     @Override

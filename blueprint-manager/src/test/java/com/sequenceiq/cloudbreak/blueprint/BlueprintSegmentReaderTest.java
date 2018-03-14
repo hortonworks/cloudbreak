@@ -39,6 +39,6 @@ public class BlueprintSegmentReaderTest {
 
         Assert.assertEquals(configFiles.size(), 1);
         Assert.assertEquals(serviceFiles.size(), 9);
-        Assert.assertEquals(settingsFiles.size(), 0);
+        Assert.assertEquals(settingsFiles.size(), 1);
     }
 }
