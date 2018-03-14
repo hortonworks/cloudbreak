@@ -1,4 +1,5 @@
 {
+{{{#neq stack_type 'HDF'}}}
   "core-site": {
     "proxyuser_group": "hadoop",
     "hadoop.proxyuser.root.groups": "*",
@@ -21,6 +22,7 @@
   "hbase-site": {
     "zookeeper.recovery.retry": "10"
   },
+{{{/neq}}}
   "cluster-env": {
     "recovery_enabled": "true",
     "recovery_type": "AUTO_START"

@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.blueprint.template;
 
-import com.github.jknack.handlebars.EscapingStrategy;
+import org.apache.commons.lang3.StringEscapeUtils;
+
 import com.github.jknack.handlebars.Handlebars;
 
 public final class HandlebarUtils {
@@ -10,7 +11,7 @@ public final class HandlebarUtils {
 
     public static Handlebars handlebars() {
         Handlebars handlebars = new Handlebars();
-        handlebars.with(EscapingStrategy.NOOP);
+        handlebars.with(value -> StringEscapeUtils.escapeJava(value.toString()));
 
         handlebars.registerHelper(EqHelper.NAME, EqHelper.INSTANCE);
         handlebars.registerHelper(NeqHelper.NAME, NeqHelper.INSTANCE);

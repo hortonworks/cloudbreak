@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.blueprint.template;
 
 import static com.sequenceiq.cloudbreak.blueprint.filesystem.BlueprintTestUtil.generalClusterConfigs;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.util.HashMap;
@@ -18,6 +19,7 @@ import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintPreparationObject;
+import com.sequenceiq.cloudbreak.blueprint.nifi.HdfConfigs;
 import com.sequenceiq.cloudbreak.blueprint.template.views.BlueprintView;
 import com.sequenceiq.cloudbreak.blueprint.templates.BlueprintStackInfo;
 import com.sequenceiq.cloudbreak.blueprint.templates.GeneralClusterConfigs;
@@ -63,6 +65,35 @@ public class BlueprintTemplateProcessorTest {
         assertTrue(result.contains("jdbc:postgresql://10.1.1.1:5432/ranger"));
         assertTrue(result.contains("cn=users,dc=example,dc=org"));
         assertTrue(result.contains("ldap://localhost:389"));
+    }
+
+    @Test
+    public void testMustacheGeneratorShouldEscapeNifiHtmlBasedContentsQuotes() throws Exception {
+        String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints-jackson/bp-mustache-test.bp");
+
+        Cluster cluster = cluster();
+        BlueprintStackInfo blueprintStackInfo =  new BlueprintStackInfo("hdp", "2.4");
+        GeneralClusterConfigs generalClusterConfigs = generalClusterConfigs();
+        generalClusterConfigs.setClusterName("dummyCluster");
+        generalClusterConfigs.setStackName("dummyCluster");
+
+        Map<String, Object> properties = new HashMap<>();
+        properties.put("S3_BUCKET", "testbucket");
+        HdfConfigs hdfConfigs = new HdfConfigs("<property name=\"Node Identity 1\">CN=hostname-2, OU=NIFI</property>");
+
+        BlueprintPreparationObject blueprintPreparationObject = BlueprintPreparationObject.Builder.builder()
+                .withRdsConfigs(cluster.getRdsConfigs())
+                .withAmbariDatabase(ambariDatabase())
+                .withGateway(cluster.getGateway())
+                .withLdapConfig(cluster.getLdapConfig())
+                .withGeneralClusterConfigs(generalClusterConfigs)
+                .withBlueprintView(new BlueprintView(testBlueprint, new Json(properties), blueprintStackInfo.getVersion(), blueprintStackInfo.getType()))
+                .withHdfConfigs(hdfConfigs)
+                .build();
+
+        String result = underTest.process(testBlueprint, blueprintPreparationObject, Maps.newHashMap());
+        assertTrue(result.contains("\"content\": \"<property name=\\\"Node Identity 1\\\">CN=hostname-2, OU=NIFI</property>\""));
+        assertFalse(result.contains("\"content\": \"<property name=\"Node Identity 1\">CN=hostname-2, OU=NIFI</property>\""));
     }
 
     @Test
