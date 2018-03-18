@@ -31,6 +31,7 @@ public class GeneralClusterConfigsProvider {
         generalClusterConfigs.setInstanceGroupsPresented(instanceMetadataPresented);
         generalClusterConfigs.setGatewayInstanceMetadataPresented(gatewayInstanceMetadataPresented);
         generalClusterConfigs.setClusterName(cluster.getName());
+        generalClusterConfigs.setPassword(cluster.getPassword());
         generalClusterConfigs.setExecutorType(cluster.getExecutorType());
         generalClusterConfigs.setStackName(stack.getName());
         generalClusterConfigs.setUuid(stack.getUuid());
@@ -53,6 +54,7 @@ public class GeneralClusterConfigsProvider {
         generalClusterConfigs.setIdentityUserEmail(identityUser.getUsername());
         generalClusterConfigs.setAmbariIp("pendign...");
         generalClusterConfigs.setInstanceGroupsPresented(instanceMetadataPresented);
+        generalClusterConfigs.setPassword(stack.getCluster().getAmbari().getPassword());
         generalClusterConfigs.setGatewayInstanceMetadataPresented(gatewayInstanceMetadataPresented);
         generalClusterConfigs.setClusterName(stack.getGeneral().getName());
         generalClusterConfigs.setExecutorType(stack.getCluster().getExecutorType());

@@ -235,6 +235,9 @@ public class StackV2Controller extends NotificationController implements StackV2
 
     @Override
     public GeneratedBlueprintResponse postStackForBlueprint(StackV2Request stackRequest) throws Exception {
+        IdentityUser user = authenticatedUserService.getCbUser();
+        stackRequest.setAccount(user.getAccount());
+        stackRequest.setOwner(user.getUserId());
         BlueprintPreparationObject blueprintPreparationObject = conversionService.convert(stackRequest, BlueprintPreparationObject.class);
         String blueprintText = centralBlueprintUpdater.getBlueprintText(blueprintPreparationObject);
         return new GeneratedBlueprintResponse(blueprintText);

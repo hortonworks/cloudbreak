@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.model.FileSystemConfiguration;
 import com.sequenceiq.cloudbreak.api.model.v2.InstanceGroupV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
@@ -80,7 +81,7 @@ public class StackRequestToBlueprintPreparationObjectConverter extends AbstractC
             AmbariDatabase ambariDatabase = getAmbariDatabase(source);
             FileSystemConfigurationView fileSystemConfigurationView = getFileSystemConfigurationView(source);
             Set<RDSConfig> rdsConfigs = getRdsConfigs(source, identityUser);
-            Blueprint blueprint = blueprintService.get(source.getCluster().getAmbari().getBlueprintId());
+            Blueprint blueprint = getBlueprint(source, identityUser);
             BlueprintStackInfo blueprintStackInfo = stackInfoService.blueprintStackInfo(blueprint.getBlueprintText());
             Set<HostgroupView> hostgroupViews = getHostgroupViews(source);
             BlueprintView blueprintView = new BlueprintView(blueprint.getBlueprintText(), blueprintStackInfo.getVersion(), blueprintStackInfo.getType());
@@ -104,6 +105,16 @@ public class StackRequestToBlueprintPreparationObjectConverter extends AbstractC
         } catch (IOException e) {
             throw new CloudbreakServiceException(e.getMessage(), e);
         }
+    }
+
+    private Blueprint getBlueprint(StackV2Request source, IdentityUser identityUser) {
+        Blueprint blueprint;
+        if (Strings.isNullOrEmpty(source.getCluster().getAmbari().getBlueprintName())) {
+            blueprint = blueprintService.get(source.getCluster().getAmbari().getBlueprintId());
+        } else {
+            blueprint = blueprintService.get(source.getCluster().getAmbari().getBlueprintName(), identityUser.getAccount());
+        }
+        return blueprint;
     }
 
     private FlexSubscription getFlexSubscription(StackV2Request source) {

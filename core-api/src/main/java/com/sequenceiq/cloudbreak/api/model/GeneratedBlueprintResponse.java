@@ -10,7 +10,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel("GeneratedBlueprintResponse")
-public class GeneratedBlueprintResponse extends BlueprintBase {
+public class GeneratedBlueprintResponse implements JsonEntity {
 
     @ApiModelProperty(BlueprintModelDescription.AMBARI_BLUEPRINT)
     @JsonSerialize(using = Base64Serializer.class)
@@ -21,12 +21,10 @@ public class GeneratedBlueprintResponse extends BlueprintBase {
         this.ambariBlueprint = ambariBlueprint;
     }
 
-    @Override
     public String getAmbariBlueprint() {
         return ambariBlueprint;
     }
 
-    @Override
     public void setAmbariBlueprint(String ambariBlueprint) {
         this.ambariBlueprint = ambariBlueprint;
     }
