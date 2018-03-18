@@ -94,17 +94,24 @@ public class BlueprintSegmentProcessor {
         boolean shouldGenerate;
         Optional<String> requiredServices = templateFiles.getFiles().stream().filter(item -> item.endsWith(SERVICES_JSON)).findFirst();
         if (!requiredServices.isPresent()) {
+            LOGGER.info("Service file is not presented in {} list.", templateFiles.getFiles());
             shouldGenerate = true;
         } else {
             try {
+                LOGGER.info("Service file is presented in {} list.", templateFiles.getFiles());
                 RelatedServices relatedServices = JsonUtil.readValue(readFileFromClasspathQuietly(requiredServices.get()), RelatedServices.class);
+                LOGGER.info("Related services are {}.", relatedServices.getServices());
                 if (relatedServices.getServices().isEmpty()) {
+                    LOGGER.info("Related services are empty in list {}.", templateFiles.getFiles());
                     shouldGenerate = true;
                 } else {
+                    LOGGER.info("Related services list is not empty checking the blueprint that components {} are exist.", relatedServices.getServices());
                     shouldGenerate = blueprintProcessorFactory.get(blueprintText).componentsExistsInBlueprint(relatedServices.getServices());
+                    LOGGER.info("The mechanism should generate configurations [{}] for {} services.", shouldGenerate, relatedServices.getServices());
                 }
             } catch (IOException e) {
-                LOGGER.error("Could not open {} file to check related service list.", requiredServices.get());
+                LOGGER.error("Could not open {} file to check related service list and the template files were {}.",
+                        requiredServices.get(), templateFiles.getFiles());
                 shouldGenerate = false;
             }
         }
