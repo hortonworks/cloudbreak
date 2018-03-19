@@ -6,6 +6,7 @@ import java.util.Map.Entry;
 import java.util.Optional;
 
 import com.sequenceiq.cloudbreak.api.model.FileSystemType;
+import com.sequenceiq.cloudbreak.blueprint.nifi.HdfConfigs;
 import com.sequenceiq.cloudbreak.blueprint.template.views.DatabaseView;
 import com.sequenceiq.cloudbreak.blueprint.template.views.FileSystemConfigurationView;
 import com.sequenceiq.cloudbreak.blueprint.template.views.FileSystemView;
@@ -31,6 +32,8 @@ public class BlueprintTemplateModelContextBuilder {
 
     private Optional<GatewayView> gateway = Optional.empty();
 
+    private Optional<HdfConfigs> hdfConfigs = Optional.empty();
+
     private String clusterName;
 
     private String clusterAdminPassword;
@@ -50,8 +53,6 @@ public class BlueprintTemplateModelContextBuilder {
     private String stackVersion;
 
     private Integer llapNodeCount;
-
-    private String nifiTargets;
 
     public BlueprintTemplateModelContextBuilder withEnableKnoxGateway(boolean enableKnoxGateway) {
         this.enableKnoxGateway = enableKnoxGateway;
@@ -155,8 +156,8 @@ public class BlueprintTemplateModelContextBuilder {
         return this;
     }
 
-    public BlueprintTemplateModelContextBuilder withNifiTargets(String nifiTargets) {
-        this.nifiTargets = nifiTargets;
+    public BlueprintTemplateModelContextBuilder withHdfConfigs(Optional<HdfConfigs> hdfConfigs) {
+        this.hdfConfigs = hdfConfigs;
         return this;
     }
 
@@ -180,9 +181,9 @@ public class BlueprintTemplateModelContextBuilder {
         blueprintTemplateModelContext.put("container_executor", containerExecutorType);
         blueprintTemplateModelContext.put("stack_type", stackType);
         blueprintTemplateModelContext.put("stack_type_version", stackVersion);
-        blueprintTemplateModelContext.put("nifi_targets", nifiTargets);
+        blueprintTemplateModelContext.put("nifi_targets", hdfConfigs.isPresent() ? hdfConfigs.get().getNodeEntities() : null);
+        blueprintTemplateModelContext.put("nifi_proxy_hosts", hdfConfigs.isPresent() ? hdfConfigs.get().getProxyHosts().orElse(null) : null);
         blueprintTemplateModelContext.put("stack_version", "{{stack_version}}");
         return blueprintTemplateModelContext;
     }
-
 }

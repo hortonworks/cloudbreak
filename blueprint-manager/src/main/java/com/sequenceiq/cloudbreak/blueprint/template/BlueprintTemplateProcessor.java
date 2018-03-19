@@ -60,7 +60,7 @@ public class BlueprintTemplateProcessor {
                 .withRdsConfigs(source.getRdsConfigs())
                 .withFileSystemConfigs(source.getFileSystemConfigurationView().orElse(null))
                 .withCustomProperties(blueprintInputs)
-                .withNifiTargets(source.getHdfConfigs().isPresent() ? source.getHdfConfigs().orElse(null).getNodeEntities() : null)
+                .withHdfConfigs(source.getHdfConfigs())
                 .build();
     }
 }
