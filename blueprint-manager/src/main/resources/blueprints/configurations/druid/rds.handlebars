@@ -9,7 +9,7 @@
   }{{{#if rds.druid}}},
   "druid-common": {
     "properties": {
-      "druid.metadata.storage.type": "postgres",
+      "druid.metadata.storage.type": "{{{ rds.druid.subprotocol }}}",
       "druid.metadata.storage.connector.connectURI": "{{{ rds.druid.connectionURL }}}",
       "druid.metadata.storage.connector.user": "{{{ rds.druid.connectionUserName }}}",
       "druid.metadata.storage.connector.password": "{{{ rds.druid.connectionPassword }}}"

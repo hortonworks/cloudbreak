@@ -9,7 +9,7 @@
   }{{{#if rds.superset}}},
   "druid-common": {
     "properties": {
-      "druid.metadata.storage.type": "postgres",
+      "druid.metadata.storage.type": "{{{ rds.superset.subprotocol }}}",
       "druid.metadata.storage.connector.connectURI": "{{{ rds.superset.connectionURL }}}",
       "druid.metadata.storage.connector.user": "{{{ rds.superset.connectionUserName }}}",
       "druid.metadata.storage.connector.password": "{{{ rds.superset.connectionPassword }}}"
