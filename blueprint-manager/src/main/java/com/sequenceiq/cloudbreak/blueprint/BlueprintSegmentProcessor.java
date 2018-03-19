@@ -43,17 +43,30 @@ public class BlueprintSegmentProcessor {
         Map<String, Object> customProperties = new HashMap<>();
         AtomicReference<String> resultBlueprint = new AtomicReference<>(blueprintText);
 
-        collectContents(blueprintSegmentReader.collectAllConfigFile(), resultBlueprint.get(), file -> {
+        Map<ServiceName, TemplateFiles> configurationValueMap = blueprintSegmentReader.collectAllConfigFile();
+        LOGGER.info("The collected entries are for configurationValueMap : {}", configurationValueMap);
+        collectContents(configurationValueMap, resultBlueprint.get(), file -> {
+            LOGGER.info("The actual file is: {}", file);
             String configContent = prepareContent(file, source, customProperties);
+            LOGGER.debug("The generated content is: {}", configContent);
             customProperties.put(getCustomPropertyName(file), configContent);
         });
 
-        collectContents(blueprintSegmentReader.collectAllServiceFile(), resultBlueprint.get(), file -> {
+        Map<ServiceName, TemplateFiles> configMap = blueprintSegmentReader.collectAllServiceFile();
+        LOGGER.info("The collected entries are for configMap: {}", configMap);
+        collectContents(configMap, resultBlueprint.get(), file -> {
+            LOGGER.info("The actual file is: {}", file);
             String serviceContent = prepareContent(file, source, customProperties);
+            LOGGER.debug("The generated content is: {}", serviceContent);
             resultBlueprint.set(blueprintProcessorFactory.get(resultBlueprint.get()).addConfigEntryStringToBlueprint(serviceContent, false).asText());
         });
-        collectContents(blueprintSegmentReader.collectAllSettingsFile(), resultBlueprint.get(), file -> {
+
+        Map<ServiceName, TemplateFiles> settingsMap = blueprintSegmentReader.collectAllSettingsFile();
+        LOGGER.info("The collected entries are for settingsMap: {}", settingsMap);
+        collectContents(settingsMap, resultBlueprint.get(), file -> {
+            LOGGER.info("The actual file is: {}", file);
             String serviceContent = prepareContent(file, source, customProperties);
+            LOGGER.debug("The generated content is: {}", serviceContent);
             resultBlueprint.set(blueprintProcessorFactory.get(resultBlueprint.get()).addSettingsEntryStringToBlueprint(serviceContent, false).asText());
 
         });
