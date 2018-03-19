@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.blueprint.moduletest;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -77,7 +78,7 @@ class BlueprintModelProvider {
     static BlueprintPreparationObject blueprintObjectWhenNifiAndHdfPresentedThenHdfShouldConfigured() throws JsonProcessingException {
         return getPreparedBuilder("master", "slave_1")
                 .withBlueprintView(BlueprintTestUtil.generalBlueprintView("", "2.6", "HDF"))
-                .withHdfConfigs(new HdfConfigs("<property name=\"Node Identity 10.0.0.1\">CN=10.0.0.1, OU=NIFI</property>"))
+                .withHdfConfigs(new HdfConfigs("<property name=\"Node Identity 10.0.0.1\">CN=10.0.0.1, OU=NIFI</property>", Optional.empty()))
                 .build();
     }
 
@@ -143,7 +144,7 @@ class BlueprintModelProvider {
     static BlueprintPreparationObject blueprintObjectForHbaseConfigurationForTwoHosts() throws JsonProcessingException {
         return getPreparedBuilder("master", "slave_1")
                 .withBlueprintView(BlueprintTestUtil.generalBlueprintView("", "2.6", "HDP"))
-                .withHdfConfigs(new HdfConfigs("<property name=\"Node Identity 10.0.0.1\">CN=10.0.0.1, OU=NIFI</property>"))
+                .withHdfConfigs(new HdfConfigs("<property name=\"Node Identity 10.0.0.1\">CN=10.0.0.1, OU=NIFI</property>", Optional.empty()))
                 .build();
     }
 

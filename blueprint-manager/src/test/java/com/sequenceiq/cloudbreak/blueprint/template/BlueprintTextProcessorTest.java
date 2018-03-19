@@ -1,11 +1,13 @@
 package com.sequenceiq.cloudbreak.blueprint.template;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import org.junit.Assert;
@@ -21,7 +23,7 @@ import com.sequenceiq.cloudbreak.blueprint.BlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
-public class JacksonBlueprintProcessorTest {
+public class BlueprintTextProcessorTest {
 
     private static final String HOST_GROUPS_NODE = "host_groups";
 
@@ -340,6 +342,47 @@ public class JacksonBlueprintProcessorTest {
         testBlueprint = skipLine(originalBlueprint, BlueprintTextProcessor.JAVAX_JDO_OPTION_CONNECTION_USER_NAME);
         result = underTest.get(testBlueprint).hiveDatabaseConfigurationExistsInBlueprint();
         Assert.assertFalse(result);
+    }
+
+    @Test
+    public void testPathValueShouldReturnPathValue() throws IOException {
+        // GIVEN
+        String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints-jackson/test-bp-with-core-site-properties.bp");
+        // WHEN
+        Optional<String> value = underTest.get(testBlueprint).pathValue("configurations", "core-site", "properties", "fs.trash.interval");
+        //THEN
+        Assert.assertTrue(value.isPresent());
+        Assert.assertEquals(value.get(), "360");
+    }
+
+    @Test
+    public void testPathValueShouldReturnNullWhenPathIsInvalid() throws IOException {
+        // GIVEN
+        String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints-jackson/test-bp-with-core-site-properties.bp");
+        // WHEN
+        Optional<String> value = underTest.get(testBlueprint).pathValue("configuration", "core-site", "properties", "fs.trash.interval");
+        //THEN
+        Assert.assertFalse(value.isPresent());
+    }
+
+    @Test
+    public void testPathValueShouldReturnNullWhenJsonNodeIsAnArray() throws IOException {
+        // GIVEN
+        String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints-jackson/test-bp-with-core-site-properties.bp");
+        // WHEN
+        Optional<String> value = underTest.get(testBlueprint).pathValue("configuration");
+        //THEN
+        Assert.assertFalse(value.isPresent());
+    }
+
+    @Test
+    public void testPathValueShouldReturnNullWhenJsonNodeIsAnObject() throws IOException {
+        // GIVEN
+        String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints-jackson/test-bp-with-core-site-properties.bp");
+        // WHEN
+        Optional<String> value = underTest.get(testBlueprint).pathValue("configuration", "core-site");
+        //THEN
+        Assert.assertFalse(value.isPresent());
     }
 
     private String skipLine(String originalBlueprint, String toSkipString) {

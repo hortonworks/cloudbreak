@@ -8,6 +8,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -18,6 +19,7 @@ import javax.annotation.Nonnull;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.MissingNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.sequenceiq.cloudbreak.blueprint.configuration.HostgroupConfiguration;
 import com.sequenceiq.cloudbreak.blueprint.configuration.HostgroupConfigurations;
@@ -118,6 +120,31 @@ public class BlueprintTextProcessor {
             }
         }
         return this;
+    }
+
+    public Optional<String> pathValue(String... path) {
+        JsonNode currentNode = blueprint;
+        for (int i = 0; i < path.length; i++) {
+            if (currentNode.isArray()) {
+                ArrayNode array = (ArrayNode) currentNode;
+                Iterator<JsonNode> it = array.elements();
+                boolean found = false;
+                while (it.hasNext()) {
+                    JsonNode candidate = it.next().path(path[i]);
+                    if (!candidate.isMissingNode()) {
+                        currentNode = candidate;
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
+                    currentNode = MissingNode.getInstance();
+                }
+            } else {
+                currentNode = currentNode.path(path[i]);
+            }
+        }
+        return currentNode.isValueNode() ? Optional.of(currentNode.textValue()) : Optional.empty();
     }
 
     public Set<String> getComponentsInHostGroup(String hostGroup) {

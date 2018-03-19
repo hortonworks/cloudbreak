@@ -6,9 +6,12 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -24,6 +27,7 @@ import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessorFactory;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
+import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -40,28 +44,32 @@ public class HdfConfigProviderTest {
 
     @Test
     public void testNifiNodeIdentitiesWhenMasterIsAvailable() throws IOException {
+        //GIVEN
         String blueprintText = FileReaderUtils.readFileFromClasspath("blueprints-jackson/bp-kerberized-test.bp");
-
-        HostGroup master = TestUtil.hostGroup("master");
-        HostGroup worker = TestUtil.hostGroup("worker");
-        HostGroup compute = TestUtil.hostGroup("compute");
-
-        Map<String, List<String>> fqdns = new HashMap<>();
-        fqdns.put("master", TestUtil.hostMetadata(master, 1).stream().map(i -> i.getHostName()).collect(Collectors.toList()));
-        fqdns.put("worker", TestUtil.hostMetadata(worker, 3).stream().map(i -> i.getHostName()).collect(Collectors.toList()));
-        fqdns.put("compute", TestUtil.hostMetadata(compute, 5).stream().map(i -> i.getHostName()).collect(Collectors.toList()));
-
+        Set<HostGroup> hostGroups = new HashSet<>();
+        hostGroups.add(TestUtil.hostGroup("master", 2));
+        hostGroups.add(TestUtil.hostGroup("worker", 2));
+        hostGroups.add(TestUtil.hostGroup("compute", 2));
+        Map<String, List<InstanceMetaData>> groupInstanes = new HashMap<>();
+        for (HostGroup hg: hostGroups) {
+            groupInstanes.put(hg.getName(), new ArrayList<>(hg.getConstraint().getInstanceGroup().getInstanceMetaData()));
+        }
         when(blueprintProcessor.getHostGroupsWithComponent("NIFI_MASTER")).thenReturn(Sets.newHashSet("master"));
+        when(blueprintProcessor.pathValue("configurations", "nifi-ambari-config", "nifi.node.ssl.port")).thenReturn(Optional.of("9091"));
         when(blueprintProcessorFactory.get(anyString())).thenReturn(blueprintProcessor);
 
-        Set<HostGroup> hostGroups = TestUtil.hostGroups(Sets.newHashSet("master", "worker", "compute"));
-        hostGroups.forEach(hostGroup -> hostGroup.getConstraint().getInstanceGroup().setGroupName(hostGroup.getName()));
+        // WHEN
+        HdfConfigs hdfConfigs = underTest.createHdfConfig(hostGroups, groupInstanes, blueprintText);
 
-        HdfConfigs hdfConfigs = underTest.nodeIdentities(hostGroups, fqdns, blueprintText);
-
-        Assert.assertEquals("<property name=\"Node Identity 1\">CN=hostname-2, OU=NIFI</property>", hdfConfigs.getNodeEntities());
-
+        // THEN
+        StringBuilder expectedNodeEntities = new StringBuilder();
+        int i = 0;
+        for (InstanceMetaData instance : groupInstanes.get("master")) {
+            expectedNodeEntities.append("<property name=\"Node Identity " + ++i + "\">CN=" + instance.getDiscoveryFQDN() + ", OU=NIFI</property>");
+        }
+        Assert.assertEquals(expectedNodeEntities.toString(), hdfConfigs.getNodeEntities());
+        Assert.assertEquals(Optional.of(groupInstanes.get("master").stream().map(im -> im.getPublicIp() + ":9091").collect(Collectors.joining(","))),
+                hdfConfigs.getProxyHosts());
         verify(blueprintProcessor, times(1)).getHostGroupsWithComponent("NIFI_MASTER");
     }
-
 }

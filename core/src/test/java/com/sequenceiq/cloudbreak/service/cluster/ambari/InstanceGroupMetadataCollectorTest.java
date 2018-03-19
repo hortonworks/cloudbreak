@@ -21,11 +21,12 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 
 @RunWith(MockitoJUnitRunner.class)
-public class AmbariFqdnCollectorTest {
+public class InstanceGroupMetadataCollectorTest {
 
     @Rule
     public final ExpectedException thrown = ExpectedException.none();
@@ -34,7 +35,7 @@ public class AmbariFqdnCollectorTest {
     private InstanceMetaDataRepository instanceMetadataRepository;
 
     @InjectMocks
-    private AmbariFqdnCollector underTest = new AmbariFqdnCollector();
+    private InstanceGroupMetadataCollector underTest = new InstanceGroupMetadataCollector();
 
     @Test
     public void testCollectFqdnsWhenMetadataAvailable() {
@@ -45,7 +46,7 @@ public class AmbariFqdnCollectorTest {
                     .thenReturn(Lists.newArrayList(instanceGroup.getInstanceMetaData().iterator()));
         }
 
-        Map<String, List<String>> stringListMap = underTest.collectFqdns(stack);
+        Map<String, List<InstanceMetaData>> stringListMap = underTest.collectMetadata(stack);
 
         Assert.assertEquals(3, stringListMap.size());
         Assert.assertTrue(stringListMap.keySet().containsAll(Sets.newHashSet("is1", "is2", "is3")));

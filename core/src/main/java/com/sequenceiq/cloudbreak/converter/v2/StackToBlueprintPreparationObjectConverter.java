@@ -27,13 +27,14 @@ import com.sequenceiq.cloudbreak.common.service.user.UserFilterField;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
+import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.SmartSenseSubscription;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
-import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariFqdnCollector;
+import com.sequenceiq.cloudbreak.service.cluster.ambari.InstanceGroupMetadataCollector;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.HiveConfigProvider;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.smartsense.SmartSenseSubscriptionService;
@@ -57,7 +58,7 @@ public class StackToBlueprintPreparationObjectConverter extends AbstractConversi
     private UserDetailsService userDetailsService;
 
     @Inject
-    private AmbariFqdnCollector ambariFqdnCollector;
+    private InstanceGroupMetadataCollector instanceGroupMetadataCollector;
 
     @Inject
     private SmartSenseSubscriptionService smartSenseSubscriptionService;
@@ -86,8 +87,8 @@ public class StackToBlueprintPreparationObjectConverter extends AbstractConversi
             LdapConfig ldapConfig = cluster.getLdapConfig();
             StackRepoDetails hdpRepo = clusterComponentConfigProvider.getHDPRepo(cluster.getId());
             String stackRepoDetailsHdpVersion = hdpRepo != null ? hdpRepo.getHdpVersion() : null;
-            Map<String, List<String>> fqdns = ambariFqdnCollector.collectFqdns(source);
-            HdfConfigs hdfConfigs = hdfConfigProvider.nodeIdentities(cluster.getHostGroups(), fqdns, cluster.getBlueprint().getBlueprintText());
+            Map<String, List<InstanceMetaData>> groupInstances = instanceGroupMetadataCollector.collectMetadata(source);
+            HdfConfigs hdfConfigs = hdfConfigProvider.createHdfConfig(cluster.getHostGroups(), groupInstances, cluster.getBlueprint().getBlueprintText());
             BlueprintStackInfo blueprintStackInfo = stackInfoService.blueprintStackInfo(cluster.getBlueprint().getBlueprintText());
             FileSystemConfigurationView fileSystemConfigurationView = null;
             if (source.getCluster().getFileSystem() != null) {

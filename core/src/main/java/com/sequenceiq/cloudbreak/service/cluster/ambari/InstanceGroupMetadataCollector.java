@@ -15,19 +15,18 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 
 @Service
-public class AmbariFqdnCollector {
+public class InstanceGroupMetadataCollector {
 
     @Inject
     private InstanceMetaDataRepository instanceMetadataRepository;
 
-    public Map<String, List<String>> collectFqdns(Stack stack) {
-        Map<String, List<String>> result = new HashMap<>();
+    public Map<String, List<InstanceMetaData>> collectMetadata(Stack stack) {
+        Map<String, List<InstanceMetaData>> result = new HashMap<>();
         for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
             result.put(
                     instanceGroup.getGroupName(),
                     instanceMetadataRepository.findAliveInstancesInInstanceGroup(instanceGroup.getId())
                             .stream()
-                            .map(InstanceMetaData::getDiscoveryFQDN)
                             .collect(Collectors.toList()));
         }
         return result;

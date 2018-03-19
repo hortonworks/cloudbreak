@@ -1,0 +1,17 @@
+{
+
+  "nifi-ambari-ssl-config": {
+    "content": "nifigtargets",
+    "nifi.initial.admin.identity": "firstname"
+  },
+
+  "nifi-properties": {
+    "nifi.web.proxy.host": "nifiproxyhost"
+  },
+
+  "ams-grafana-env": {
+    "metrics_grafana_username": "firstname",
+    "metrics_grafana_password": "adminPassword"
+  }
+
+}

@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -18,6 +19,7 @@ import com.github.jknack.handlebars.Template;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
+import com.sequenceiq.cloudbreak.blueprint.nifi.HdfConfigs;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 
 @RunWith(Parameterized.class)
@@ -64,8 +66,10 @@ public class ConfigTemplateTest {
                         objectWithoutEverything() },
                 { "blueprints/configurations/llap/global.handlebars", "configurations/llap/global.json",
                         llapObjectWhenNodeCountPresented() },
-                { "blueprints/configurations/nifi/global.handlebars", "configurations/nifi/global-with-hdf.json",
-                        nifiConfigWhenHdfPresentedThenShouldReturnWithNifiConfig() },
+                { "blueprints/configurations/nifi/global.handlebars", "configurations/nifi/global-with-hdf-nifitargets.json",
+                        nifiConfigWhenHdfPresentedThenShouldReturnWithNifiConfig(false) },
+                { "blueprints/configurations/nifi/global.handlebars", "configurations/nifi/global-with-hdf-full.json",
+                        nifiConfigWhenHdfPresentedThenShouldReturnWithNifiConfig(true) },
                 { "blueprints/configurations/nifi/global.handlebars", "configurations/nifi/global-without-hdf.json",
                         nifiConfigWhenHdfNotPresentedThenShouldReturnWithNotNifiConfig() },
                 { "blueprints/configurations/ranger/global.handlebars", "configurations/ranger/global.json",
@@ -205,11 +209,11 @@ public class ConfigTemplateTest {
                 .build();
     }
 
-    public static Map<String, Object> nifiConfigWhenHdfPresentedThenShouldReturnWithNifiConfig() {
+    public static Map<String, Object> nifiConfigWhenHdfPresentedThenShouldReturnWithNifiConfig(boolean withProxyHost) {
         return new BlueprintTemplateModelContextBuilder()
                 .withClusterAdminPassword("adminPassword")
                 .withClusterAdminFirstname("firstname")
-                .withNifiTargets("nifigtargets")
+                .withHdfConfigs(Optional.of(new HdfConfigs("nifigtargets", withProxyHost ? Optional.of("nifiproxyhost") : Optional.empty())))
                 .withStackType("HDF")
                 .build();
     }
@@ -218,7 +222,7 @@ public class ConfigTemplateTest {
         return new BlueprintTemplateModelContextBuilder()
                 .withClusterAdminPassword("adminPassword")
                 .withClusterAdminFirstname("firstname")
-                .withNifiTargets("nifigtargets")
+                .withHdfConfigs(Optional.of(new HdfConfigs("nifigtargets", Optional.empty())))
                 .withStackType("HDP")
                 .build();
     }

@@ -7,6 +7,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.junit.Test;
@@ -79,7 +80,7 @@ public class BlueprintTemplateProcessorTest {
 
         Map<String, Object> properties = new HashMap<>();
         properties.put("S3_BUCKET", "testbucket");
-        HdfConfigs hdfConfigs = new HdfConfigs("<property name=\"Node Identity 1\">CN=hostname-2, OU=NIFI</property>");
+        HdfConfigs hdfConfigs = new HdfConfigs("<property name=\"Node Identity 1\">CN=hostname-2, OU=NIFI</property>", Optional.empty());
 
         BlueprintPreparationObject blueprintPreparationObject = BlueprintPreparationObject.Builder.builder()
                 .withRdsConfigs(cluster.getRdsConfigs())

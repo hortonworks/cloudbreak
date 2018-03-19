@@ -223,19 +223,27 @@ public class TestUtil {
         return instanceGroups;
     }
 
+    public static InstanceGroup instanceGroup(Long id, String name, InstanceGroupType instanceGroupType, Template template) {
+        return instanceGroup(id, name, instanceGroupType, template, 1);
+    }
+
     public static InstanceGroup instanceGroup(Long id, InstanceGroupType instanceGroupType, Template template) {
         return instanceGroup(id, instanceGroupType, template, 1);
     }
 
     public static InstanceGroup instanceGroup(Long id, InstanceGroupType instanceGroupType, Template template, int nodeCount) {
+        return instanceGroup(id, "is" + id, instanceGroupType, template, nodeCount);
+    }
+
+    public static InstanceGroup instanceGroup(Long id, String name, InstanceGroupType instanceGroupType, Template template, int nodeCount) {
         InstanceGroup instanceGroup = new InstanceGroup();
         instanceGroup.setId(id);
         instanceGroup.setNodeCount(nodeCount);
-        instanceGroup.setGroupName("is" + id);
+        instanceGroup.setGroupName(name);
         instanceGroup.setInstanceGroupType(instanceGroupType);
         instanceGroup.setTemplate(template);
         instanceGroup.setSecurityGroup(securityGroup(1L));
-        instanceGroup.setInstanceMetaData(generateInstanceMetaDatas(1, id, instanceGroup));
+        instanceGroup.setInstanceMetaData(generateInstanceMetaDatas(nodeCount, id, instanceGroup));
         return instanceGroup;
     }
 
@@ -419,12 +427,16 @@ public class TestUtil {
     }
 
     public static HostGroup hostGroup(String name) {
+        return hostGroup(name, 1);
+    }
+
+    public static HostGroup hostGroup(String name, int count) {
         HostGroup hostGroup = new HostGroup();
         hostGroup.setId(1L);
         hostGroup.setName(name);
         hostGroup.setRecipes(recipes(1));
-        hostGroup.setHostMetadata(hostMetadata(hostGroup, 1));
-        InstanceGroup instanceGroup = instanceGroup(1L, InstanceGroupType.CORE, gcpTemplate(1L));
+        hostGroup.setHostMetadata(hostMetadata(hostGroup, count));
+        InstanceGroup instanceGroup = instanceGroup(1L, name, InstanceGroupType.CORE, gcpTemplate(1L), count);
         Constraint constraint = new Constraint();
         constraint.setInstanceGroup(instanceGroup);
         constraint.setHostCount(instanceGroup.getNodeCount());
