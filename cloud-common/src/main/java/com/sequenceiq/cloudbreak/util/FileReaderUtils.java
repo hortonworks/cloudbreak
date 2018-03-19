@@ -1,18 +1,12 @@
 package com.sequenceiq.cloudbreak.util;
 
-import static java.util.stream.Collectors.toList;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -46,23 +40,6 @@ public final class FileReaderUtils {
             }
         }
         return sb.toString();
-    }
-
-    public static List<URL> readFolderFromClasspath(String folderName) throws IOException {
-        final ClassLoader loader = Thread.currentThread().getContextClassLoader();
-
-        try (final InputStream is = loader.getResourceAsStream(folderName);
-            final InputStreamReader isr = new InputStreamReader(is, StandardCharsets.UTF_8);
-            final BufferedReader br = new BufferedReader(isr)) {
-            return br.lines()
-                    .map(fileName -> getFolderNameAndFileName(folderName, fileName))
-                    .map(resource -> loader.getResource(resource))
-                    .collect(toList());
-        }
-    }
-
-    private static String getFolderNameAndFileName(String folderName, String fileName) {
-        return folderName + "/" + fileName;
     }
 
     public static String readFileFromPathBase64(String fileName) throws IOException {

@@ -2,10 +2,11 @@ package com.sequenceiq.cloudbreak.blueprint;
 
 import static com.sequenceiq.cloudbreak.blueprint.templates.ServiceName.serviceName;
 import static com.sequenceiq.cloudbreak.blueprint.templates.TemplateFiles.templateFiles;
-import static com.sequenceiq.cloudbreak.util.FileReaderUtils.readFolderFromClasspath;
+import static java.util.stream.Collectors.toList;
 
 import java.io.IOException;
-import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,7 +15,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ResourceLoaderAware;
+import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Lists;
@@ -32,7 +36,7 @@ public class BlueprintSegmentReader implements ResourceLoaderAware {
     @Value("${cb.blueprint.basic.path:blueprints/basics}")
     private String basicTemplatePath;
 
-    @Value("${cb.blueprint.basic.path:blueprints/settings}")
+    @Value("${cb.blueprint.settings.path:blueprints/settings}")
     private String settingsTemplatePath;
 
     private ResourceLoader resourceLoader;
@@ -52,19 +56,17 @@ public class BlueprintSegmentReader implements ResourceLoaderAware {
     private Map<ServiceName, TemplateFiles> readAllFilesFromParameterDir(String dir) {
         Map<ServiceName, TemplateFiles> collectedFiles = new HashMap<>();
         try {
-            List<URL> files = getFiles(dir);
-            for (final URL serviceEntry : files) {
-                String[] serviceAndPath = serviceEntry.getPath().split(dir);
-                String simpleServiceName = serviceAndPath[1].replaceAll("/", "");
-                String insideFolder = String.format("%s/%s", dir, simpleServiceName);
-                for (final URL configEntry : getFiles(insideFolder)) {
-                    ServiceName serviceName = serviceName(simpleServiceName);
-                    if (!collectedFiles.keySet().contains(serviceName)) {
-                        collectedFiles.put(serviceName, templateFiles(Lists.newArrayList()));
-                    }
-                    String file = configEntry.getPath().replace(serviceEntry.getPath() + "/", "");
-                    collectedFiles.get(serviceName).getFiles().add(String.format("%s/%s/%s", dir, simpleServiceName, file));
+            List<Resource> files = getFiles(dir);
+            for (final Resource serviceEntry : files) {
+                String[] serviceAndPath = serviceEntry.getURL().getPath().split(dir);
+                String simpleServiceName = serviceAndPath[1].split("/")[1];
+                String insideFolder = String.format("%s%s", dir, serviceAndPath[1]);
+                LOGGER.info("The the entry url is: {} file url is : {} for service: {}", serviceEntry, insideFolder, simpleServiceName);
+                ServiceName serviceName = serviceName(simpleServiceName);
+                if (!collectedFiles.keySet().contains(serviceName)) {
+                    collectedFiles.put(serviceName, templateFiles(Lists.newArrayList()));
                 }
+                collectedFiles.get(serviceName).getFiles().add(insideFolder);
             }
         } catch (IOException ex) {
             String message = String.format("Could not read files from the definiated folder which was: %s", dir);
@@ -75,8 +77,19 @@ public class BlueprintSegmentReader implements ResourceLoaderAware {
         return collectedFiles;
     }
 
-    private List<URL> getFiles(String configDir) throws IOException {
-        return readFolderFromClasspath(configDir);
+    private List<Resource> getFiles(String configDir) throws IOException {
+        ResourcePatternResolver patternResolver = new PathMatchingResourcePatternResolver();
+
+        List<Resource> handleBarFiles = Arrays.stream(patternResolver.getResources("classpath:" + configDir + "/*/*.handlebars"))
+                .collect(toList());
+        List<Resource> jsonFiles = Arrays.stream(patternResolver.getResources("classpath:" + configDir + "/*/*.json"))
+                .collect(toList());
+
+        List<Resource> resources = new ArrayList<>();
+        resources.addAll(handleBarFiles);
+        resources.addAll(jsonFiles);
+
+        return resources;
     }
 
     @Override
