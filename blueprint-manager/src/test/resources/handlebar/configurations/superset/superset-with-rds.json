@@ -10,7 +10,7 @@
   "druid-common": {
     "properties": {
       "druid.metadata.storage.type": "postgres",
-      "druid.metadata.storage.connector.connectURI": "10.1.1.1:5432",
+      "druid.metadata.storage.connector.connectURI": "jdbc:postgresql://10.1.1.1:5432/superset",
       "druid.metadata.storage.connector.user": "heyitsme",
       "druid.metadata.storage.connector.password": "iamsoosecure"
     }

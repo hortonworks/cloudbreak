@@ -10,7 +10,7 @@
   "druid-common": {
     "properties": {
       "druid.metadata.storage.type": "postgres",
-      "druid.metadata.storage.connector.connectURI": "{{{ rds.druid.hostWithPort }}}",
+      "druid.metadata.storage.connector.connectURI": "{{{ rds.druid.connectionURL }}}",
       "druid.metadata.storage.connector.user": "{{{ rds.druid.connectionUserName }}}",
       "druid.metadata.storage.connector.password": "{{{ rds.druid.connectionPassword }}}"
     }
