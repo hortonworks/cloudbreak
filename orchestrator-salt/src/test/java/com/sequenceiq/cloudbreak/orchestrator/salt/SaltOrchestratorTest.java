@@ -169,16 +169,23 @@ public class SaltOrchestratorTest {
 
         // verify ambari server role
         verifyNew(GrainAddRunner.class, times(1)).withArguments(eq(Sets.newHashSet(gatewayConfig.getPrivateAddress())),
+                eq(targets), eq("ambari_server_install"));
+        // verify ambari server role
+        verifyNew(GrainAddRunner.class, times(1)).withArguments(eq(Sets.newHashSet(gatewayConfig.getPrivateAddress())),
                 eq(targets), eq("ambari_server"));
 
         // verify ambari agent role
         Set<String> allNodes = targets.stream().map(Node::getPrivateIp).collect(Collectors.toSet());
         verifyNew(GrainAddRunner.class, times(1)).withArguments(eq(allNodes),
+                eq(targets), eq("ambari_agent_install"));
+        // verify ambari agent role
+        allNodes = targets.stream().map(Node::getPrivateIp).collect(Collectors.toSet());
+        verifyNew(GrainAddRunner.class, times(1)).withArguments(eq(allNodes),
                 eq(targets), eq("ambari_agent"));
         // verify two role command (amabari server, ambari agent)
-        verifyNew(SaltCommandTracker.class, times(2)).withArguments(eq(saltConnector), eq(addRemoveGrainRunner));
+        verifyNew(SaltCommandTracker.class, times(4)).withArguments(eq(saltConnector), eq(addRemoveGrainRunner));
         // verify two OrchestratorBootstrapRunner call with rolechecker command tracker
-        verifyNew(OrchestratorBootstrapRunner.class, times(2))
+        verifyNew(OrchestratorBootstrapRunner.class, times(4))
                 .withArguments(eq(roleCheckerSaltCommandTracker), eq(exitCriteria), eq(exitCriteriaModel), any(), anyInt(), anyInt());
 
         // verify syncgrains command
