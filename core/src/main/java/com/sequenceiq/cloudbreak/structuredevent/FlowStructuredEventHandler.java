@@ -81,7 +81,7 @@ public class FlowStructuredEventHandler<S, E> extends StateMachineListenerAdapte
         if (exception == null) {
             structuredEvent = structuredFlowEventFactory.createStucturedFlowEvent(stackId, flowDetails, detailed);
         } else {
-            structuredEvent = structuredFlowEventFactory.createStucturedFlowEvent(stackId, flowDetails, detailed, exception);
+            structuredEvent = structuredFlowEventFactory.createStucturedFlowEvent(stackId, flowDetails, true, exception);
             exception = null;
         }
         structuredEventClient.sendStructuredEvent(structuredEvent);

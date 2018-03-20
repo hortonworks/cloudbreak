@@ -19,6 +19,8 @@ public class OperationDetails implements Serializable {
 
     private String userId;
 
+    private String userName;
+
     private String cloudbreakId;
 
     private String cloudbreakVersion;
@@ -26,19 +28,20 @@ public class OperationDetails implements Serializable {
     public OperationDetails() {
     }
 
-    public OperationDetails(String eventType, String resourceType, Long resourceId, String account, String userId, String cloudbreakId,
+    public OperationDetails(String eventType, String resourceType, Long resourceId, String account, String userId, String userName, String cloudbreakId,
             String cloudbreakVersion) {
-        this(Calendar.getInstance().getTimeInMillis(), eventType, resourceType, resourceId, account, userId, cloudbreakId, cloudbreakVersion);
+        this(Calendar.getInstance().getTimeInMillis(), eventType, resourceType, resourceId, account, userId, userName, cloudbreakId, cloudbreakVersion);
     }
 
-    public OperationDetails(Long timestamp, String eventType, String resourceType, Long resourceId, String account, String userId, String cloudbreakId,
-            String cloudbreakVersion) {
+    public OperationDetails(Long timestamp, String eventType, String resourceType, Long resourceId, String account, String userId, String userName,
+            String cloudbreakId, String cloudbreakVersion) {
         this.timestamp = timestamp;
         this.eventType = eventType;
         this.resourceId = resourceId;
         this.resourceType = resourceType;
         this.account = account;
         this.userId = userId;
+        this.userName = userName;
         this.cloudbreakId = cloudbreakId;
         this.cloudbreakVersion = cloudbreakVersion;
     }
@@ -75,6 +78,10 @@ public class OperationDetails implements Serializable {
         this.cloudbreakVersion = cloudbreakVersion;
     }
 
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
     public String getEventType() {
         return eventType;
     }
@@ -105,5 +112,9 @@ public class OperationDetails implements Serializable {
 
     public String getCloudbreakVersion() {
         return cloudbreakVersion;
+    }
+
+    public String getUserName() {
+        return userName;
     }
 }

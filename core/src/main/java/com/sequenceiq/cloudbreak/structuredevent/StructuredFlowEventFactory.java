@@ -11,8 +11,10 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.UserProfile;
 import com.sequenceiq.cloudbreak.ha.CloudbreakNodeConfig;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.user.UserProfileService;
 import com.sequenceiq.cloudbreak.structuredevent.event.BlueprintDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.ClusterDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.FlowDetails;
@@ -35,6 +37,9 @@ public class StructuredFlowEventFactory {
     @Inject
     private CloudbreakNodeConfig cloudbreakNodeConfig;
 
+    @Inject
+    private UserProfileService userProfileService;
+
     @Value("${info.app.version:}")
     private String cbVersion;
 
@@ -44,12 +49,12 @@ public class StructuredFlowEventFactory {
 
     public StructuredFlowEvent createStucturedFlowEvent(Long stackId, FlowDetails flowDetails, Boolean detailed, Exception exception) {
         Stack stack = stackService.getById(stackId);
+        UserProfile userProfile = userProfileService.get(stack.getAccount(), stack.getOwner());
         OperationDetails operationDetails = new OperationDetails("FLOW", "STACK", stackId, stack.getAccount(), stack.getOwner(),
-                cloudbreakNodeConfig.getId(), cbVersion);
+                userProfile.getUserName(), cloudbreakNodeConfig.getId(), cbVersion);
         StackDetails stackDetails = null;
         ClusterDetails clusterDetails = null;
         BlueprintDetails blueprintDetails = null;
-        String stackTrace = null;
         if (detailed) {
             stackDetails = conversionService.convert(stack, StackDetails.class);
             Cluster cluster = stack.getCluster();
@@ -65,8 +70,9 @@ public class StructuredFlowEventFactory {
 
     public StructuredNotificationEvent createStructuredNotificationEvent(Long stackId, String notificationType, String message, String instanceGroupName) {
         Stack stack = stackService.getById(stackId);
+        UserProfile userProfile = userProfileService.get(stack.getAccount(), stack.getOwner());
         OperationDetails operationDetails = new OperationDetails("NOTIFICATION", "STACK", stackId, stack.getAccount(), stack.getOwner(),
-                cloudbreakNodeConfig.getInstanceUUID(), cbVersion);
+                userProfile.getUserName(), cloudbreakNodeConfig.getInstanceUUID(), cbVersion);
         NotificationDetails notificationDetails = new NotificationDetails();
         notificationDetails.setNotificationType(notificationType);
         notificationDetails.setNotification(message);
