@@ -393,7 +393,7 @@ public class ImageCatalogService {
 
     private ImageCatalog getDefaultImageCatalog() {
         IdentityUser user = authenticatedUserService.getCbUser();
-        return userProfileService.get(user.getAccount(), user.getUserId()).getImageCatalog();
+        return userProfileService.get(user.getAccount(), user.getUserId(), user.getUsername()).getImageCatalog();
     }
 
     public String getDefaultImageCatalogName() {
@@ -408,7 +408,7 @@ public class ImageCatalogService {
 
     private UserProfile getUserProfile() {
         IdentityUser cbUser = authenticatedUserService.getCbUser();
-        return userProfileService.get(cbUser.getAccount(), cbUser.getUserId());
+        return userProfileService.get(cbUser.getAccount(), cbUser.getUserId(), cbUser.getUsername());
     }
 
     private List<Image> getImagesForClusterType(StatedImages statedImages, String clusterType) {

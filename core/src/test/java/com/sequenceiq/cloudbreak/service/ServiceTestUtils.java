@@ -195,7 +195,8 @@ public final class ServiceTestUtils {
     }
 
     public static StructuredNotificationEvent createEvent(Long stackId, int nodeCount, String eventStatus, Date eventTimestamp) {
-        OperationDetails operation = new OperationDetails(eventTimestamp.getTime(), "NOTIFICATION", "STACK", stackId, "account", "userid", "cbId", "cbVersion");
+        OperationDetails operation = new OperationDetails(eventTimestamp.getTime(), "NOTIFICATION", "STACK", stackId, "account",
+                "userid", "username", "cbId", "cbVersion");
         NotificationDetails notification = new NotificationDetails();
         notification.setNotificationType(eventStatus);
         notification.setNodeCount(nodeCount);

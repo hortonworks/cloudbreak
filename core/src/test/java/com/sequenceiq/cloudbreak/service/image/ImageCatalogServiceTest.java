@@ -200,7 +200,7 @@ public class ImageCatalogServiceTest {
         imageCatalog.setArchived(false);
         when(authenticatedUserService.getCbUser()).thenReturn(user);
         when(imageCatalogRepository.findByName(name, user.getUserId(), user.getAccount())).thenReturn(imageCatalog);
-        when(userProfileService.get(user.getAccount(), user.getUserId())).thenReturn(userProfile);
+        when(userProfileService.get(user.getAccount(), user.getUserId(), user.getUsername())).thenReturn(userProfile);
         underTest.delete(name);
 
         verify(imageCatalogRepository, times(1)).save(imageCatalog);

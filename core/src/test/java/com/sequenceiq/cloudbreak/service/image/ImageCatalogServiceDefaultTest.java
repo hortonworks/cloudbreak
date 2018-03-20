@@ -91,7 +91,7 @@ public class ImageCatalogServiceDefaultTest {
         IdentityUser user = getIdentityUser();
         when(authenticatedUserService.getCbUser()).thenReturn(user);
 
-        when(userProfileService.get(user.getAccount(), user.getUserId())).thenReturn(new UserProfile());
+        when(userProfileService.get(user.getAccount(), user.getUserId(), user.getUsername())).thenReturn(new UserProfile());
     }
 
     @Test

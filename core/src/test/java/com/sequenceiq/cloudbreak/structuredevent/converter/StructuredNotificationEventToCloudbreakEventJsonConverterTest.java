@@ -36,8 +36,8 @@ public class StructuredNotificationEventToCloudbreakEventJsonConverterTest exten
 
     @Override
     public StructuredNotificationEvent createSource() {
-        OperationDetails operation = new OperationDetails(Calendar.getInstance().getTimeInMillis(), "NOTIFICATION", "STACK", 1L, "account", "owner", "cbId",
-                "cbVersion");
+        OperationDetails operation = new OperationDetails(Calendar.getInstance().getTimeInMillis(), "NOTIFICATION", "STACK", 1L,
+                "account", "owner", "userName", "cbId", "cbVersion");
         NotificationDetails notification = new NotificationDetails();
         notification.setInstanceGroup("master");
         notification.setRegion("us");
