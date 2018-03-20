@@ -175,3 +175,15 @@ function delete-image-catalog() {
 function set-default-image-catalog() {
   cb-command imagecatalog set-default "$@"
 }
+
+function list-rds() {
+  cb-command rds list "$@"
+}
+
+function create-rds() {
+  cb-command rds create "$@"
+}
+
+function delete-rds() {
+  cb-command rds delete "$@"
+}
