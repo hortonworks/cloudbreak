@@ -6,6 +6,7 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.reactor.api.event.EventSelectorUtil;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.CollectDownscaleCandidatesRequest;
@@ -45,7 +46,8 @@ public class CollectDownscaleCandidatesHandler implements ReactorEventHandler<Co
                 hostNames = ambariDecommissioner.collectDownscaleCandidates(stack, request.getHostGroupName(), request.getScalingAdjustment());
             } else {
                 hostNames = request.getHostNames();
-                ambariDecommissioner.verifyNodeCount(stack, stack.getCluster(), hostNames.stream().findFirst().get());
+                String hostName = hostNames.stream().findFirst().orElseThrow(() -> new BadRequestException("Unable to find host name"));
+                ambariDecommissioner.verifyNodeCount(stack, stack.getCluster(), hostName);
             }
             result = new CollectDownscaleCandidatesResult(request, hostNames);
         } catch (Exception e) {

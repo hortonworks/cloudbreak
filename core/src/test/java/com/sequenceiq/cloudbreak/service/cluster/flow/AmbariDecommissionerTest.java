@@ -266,6 +266,7 @@ public class AmbariDecommissionerTest {
 
     @Test
     public void testVerifyNodeCountWithValidationException() throws CloudbreakSecuritySetupException {
+        thrown.expect(NotEnoughNodeException.class);
 
         String hostGroupName = "hostGroupName";
         String hostname = "hostname";
