@@ -14,7 +14,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.Assert;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -24,7 +26,6 @@ import com.google.common.collect.Sets;
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
-import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Cluster;
@@ -34,6 +35,7 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariClientProvider;
+import com.sequenceiq.cloudbreak.service.cluster.NotEnoughNodeException;
 import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariConfigurationService;
 import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariDecommissioner;
 import com.sequenceiq.cloudbreak.service.cluster.filter.ConfigParam;
@@ -41,6 +43,9 @@ import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AmbariDecommissionerTest {
+
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
 
     @InjectMocks
     private AmbariDecommissioner underTest = new AmbariDecommissioner();
@@ -259,8 +264,9 @@ public class AmbariDecommissionerTest {
         verify(configurationService, times(0)).getConfiguration(ambariClient, hostGroupName);
     }
 
-    @Test(expected = BadRequestException.class)
+    @Test
     public void testVerifyNodeCountWithValidationException() throws CloudbreakSecuritySetupException {
+        thrown.expect(NotEnoughNodeException.class);
 
         String hostGroupName = "hostGroupName";
         String hostname = "hostname";

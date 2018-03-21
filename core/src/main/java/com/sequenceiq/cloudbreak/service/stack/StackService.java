@@ -4,12 +4,14 @@ import static com.sequenceiq.cloudbreak.api.model.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.model.Status.STOPPED;
 import static com.sequenceiq.cloudbreak.api.model.Status.STOP_REQUESTED;
 import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
+import static java.util.Objects.requireNonNull;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
@@ -45,7 +47,6 @@ import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.controller.validation.network.NetworkConfigurationValidator;
-import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ContainerOrchestratorResolver;
@@ -78,6 +79,7 @@ import com.sequenceiq.cloudbreak.repository.StackStatusRepository;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackViewRepository;
 import com.sequenceiq.cloudbreak.service.AuthorizationService;
+import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariClusterService;
@@ -96,6 +98,8 @@ public class StackService {
     private static final String SSH_USER_CB = "cloudbreak";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StackService.class);
+
+    private static final String STACK_NOT_FOUND_EXCEPTION_FORMAT_TEXT = "Stack '%s' has not found";
 
     @Inject
     private StackRepository stackRepository;
@@ -176,6 +180,9 @@ public class StackService {
     @Inject
     private AuthorizationService authorizationService;
 
+    @Inject
+    private StackDownscaleValidatorService downscaleValidatorService;
+
     public Set<StackResponse> retrievePrivateStacks(IdentityUser user) {
         return convertStacks(stackRepository.findForUserWithLists(user.getUserId()));
     }
@@ -206,7 +213,7 @@ public class StackService {
     public Stack get(Long id) {
         Stack stack = stackRepository.findOne(id);
         if (stack == null) {
-            throw new NotFoundException(String.format("Stack '%s' not found", id));
+            throw new NotFoundException(String.format(STACK_NOT_FOUND_EXCEPTION_FORMAT_TEXT, id));
         }
         authorizationService.hasReadPermission(stack);
         return stack;
@@ -216,7 +223,7 @@ public class StackService {
     public Stack getForAutoscale(Long id) {
         Stack stack = stackRepository.findOne(id);
         if (stack == null) {
-            throw new NotFoundException(String.format("Stack '%s' not found", id));
+            throw new NotFoundException(String.format(STACK_NOT_FOUND_EXCEPTION_FORMAT_TEXT, id));
         }
         return stack;
     }
@@ -234,7 +241,7 @@ public class StackService {
     public Stack getByIdWithLists(Long id) {
         Stack retStack = stackRepository.findOneWithLists(id);
         if (retStack == null) {
-            throw new NotFoundException(String.format("Stack '%s' not found", id));
+            throw new NotFoundException(String.format(STACK_NOT_FOUND_EXCEPTION_FORMAT_TEXT, id));
         }
         return retStack;
     }
@@ -242,7 +249,7 @@ public class StackService {
     public Stack getById(Long id) {
         Stack retStack = stackRepository.findOne(id);
         if (retStack == null) {
-            throw new NotFoundException(String.format("Stack '%s' not found", id));
+            throw new NotFoundException(String.format(STACK_NOT_FOUND_EXCEPTION_FORMAT_TEXT, id));
         }
         return retStack;
     }
@@ -250,7 +257,7 @@ public class StackService {
     public StackView getByIdView(Long id) {
         StackView retStack = stackViewRepository.findOne(id);
         if (retStack == null) {
-            throw new NotFoundException(String.format("Stack '%s' not found", id));
+            throw new NotFoundException(String.format(STACK_NOT_FOUND_EXCEPTION_FORMAT_TEXT, id));
         }
         return retStack;
     }
@@ -270,7 +277,7 @@ public class StackService {
     public Stack getPrivateStack(String name, IdentityUser identityUser) {
         Stack stack = stackRepository.findByNameInUser(name, identityUser.getUserId());
         if (stack == null) {
-            throw new NotFoundException(String.format("Stack '%s' not found", name));
+            throw new NotFoundException(String.format(STACK_NOT_FOUND_EXCEPTION_FORMAT_TEXT, name));
         }
         return stack;
     }
@@ -278,7 +285,7 @@ public class StackService {
     public StackResponse getPrivateStackJsonByName(String name, IdentityUser identityUser, Collection<String> entries) {
         Stack stack = stackRepository.findByNameInUserWithLists(name, identityUser.getUserId());
         if (stack == null) {
-            throw new NotFoundException(String.format("Stack '%s' not found", name));
+            throw new NotFoundException(String.format(STACK_NOT_FOUND_EXCEPTION_FORMAT_TEXT, name));
         }
         StackResponse stackResponse = conversionService.convert(stack, StackResponse.class);
         stackResponse = stackResponseDecorator.decorate(stackResponse, stack, entries);
@@ -288,7 +295,7 @@ public class StackService {
     public StackResponse getPublicStackJsonByName(String name, IdentityUser identityUser, Collection<String> entries) {
         Stack stack = stackRepository.findByNameInAccountWithLists(name, identityUser.getAccount());
         if (stack == null) {
-            throw new NotFoundException(String.format("Stack '%s' not found", name));
+            throw new NotFoundException(String.format(STACK_NOT_FOUND_EXCEPTION_FORMAT_TEXT, name));
         }
         authorizationService.hasReadPermission(stack);
         StackResponse stackResponse = conversionService.convert(stack, StackResponse.class);
@@ -299,7 +306,7 @@ public class StackService {
     public StackV2Request getStackRequestByName(String name, IdentityUser identityUser) {
         Stack stack = stackRepository.findByNameInAccountWithLists(name, identityUser.getAccount());
         if (stack == null) {
-            throw new NotFoundException(String.format("Stack '%s' not found", name));
+            throw new NotFoundException(String.format(STACK_NOT_FOUND_EXCEPTION_FORMAT_TEXT, name));
         }
         authorizationService.hasReadPermission(stack);
         return conversionService.convert(stack, StackV2Request.class);
@@ -308,7 +315,7 @@ public class StackService {
     public Stack getPublicStack(String name, IdentityUser identityUser) {
         Stack stack = stackRepository.findByNameInAccount(name, identityUser.getAccount());
         if (stack == null) {
-            throw new NotFoundException(String.format("Stack '%s' not found", name));
+            throw new NotFoundException(String.format(STACK_NOT_FOUND_EXCEPTION_FORMAT_TEXT, name));
         }
         authorizationService.hasReadPermission(stack);
         return stack;
@@ -317,7 +324,7 @@ public class StackService {
     public void delete(String name, IdentityUser user, Boolean forced, Boolean deleteDependencies) {
         Stack stack = stackRepository.findByNameInAccountOrOwner(name, user.getAccount(), user.getUserId());
         if (stack == null) {
-            throw new NotFoundException(String.format("Stack '%s' not found", name));
+            throw new NotFoundException(String.format(STACK_NOT_FOUND_EXCEPTION_FORMAT_TEXT, name));
         }
         delete(stack, forced, deleteDependencies);
     }
@@ -404,21 +411,22 @@ public class StackService {
     public void delete(Long id, IdentityUser user, Boolean forced, Boolean deleteDependencies) {
         Stack stack = stackRepository.findByIdInAccount(id, user.getAccount());
         if (stack == null) {
-            throw new NotFoundException(String.format("Stack '%s' not found", id));
+            throw new NotFoundException(String.format(STACK_NOT_FOUND_EXCEPTION_FORMAT_TEXT, id));
         }
         delete(stack, forced, deleteDependencies);
     }
 
-    public void removeInstance(IdentityUser user, Long stackId, String instanceId) {
+    public void removeInstance(@Nonnull IdentityUser user, Long stackId, String instanceId) {
+        requireNonNull(user);
         Stack stack = get(stackId);
-        InstanceMetaData instanceMetaData = instanceMetaDataRepository.findByInstanceId(stackId, instanceId);
-        if (instanceMetaData == null) {
-            throw new NotFoundException(String.format("Metadata for instance %s not found.", instanceId));
+        InstanceMetaData metaData = instanceMetaDataRepository.findByInstanceId(stackId, instanceId);
+        if (metaData == null) {
+            throw new NotFoundException(String.format("Metadata for instance %s has not found.", instanceId));
+        } else {
+            downscaleValidatorService.checkInstanceIsTheAmbariServerOrNot(metaData.getPublicIp(), metaData.getInstanceMetadataType());
+            downscaleValidatorService.checkUserHasRightToTerminateInstance(stack.isPublicInAccount(), stack.getOwner(), user.getUserId(), stackId);
+            flowManager.triggerStackRemoveInstance(stackId, metaData.getInstanceGroupName(), metaData.getDiscoveryFQDN());
         }
-        if (!stack.isPublicInAccount() && !stack.getOwner().equals(user.getUserId())) {
-            throw new BadRequestException(String.format("Private stack (%s) only modifiable by the owner.", stackId));
-        }
-        flowManager.triggerStackRemoveInstance(stackId, instanceMetaData.getInstanceGroupName(), instanceMetaData.getDiscoveryFQDN());
     }
 
     @Transactional(TxType.NEVER)
