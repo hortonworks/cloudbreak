@@ -24,21 +24,23 @@
 
 {% elif grains['os_family'] == 'Debian' %}
 
+{% set os = grains['os'] | lower ~ grains['osmajorrelease'] %}
+
 create_hdp_repo:
   pkgrepo.managed:
-    - name: "deb {{ salt['pillar.get']('hdp:stack:ubuntu16') }} HDP main"
+    - name: "deb {{ salt['pillar.get']('hdp:stack:' + os) }} HDP main"
     - file: /etc/apt/sources.list.d/hdp.list
 
 create_hdp_utils_repo:
   pkgrepo.managed:
-    - name: "deb {{ salt['pillar.get']('hdp:util:ubuntu16') }} HDP-UTILS main"
+    - name: "deb {{ salt['pillar.get']('hdp:util:' + os) }} HDP-UTILS main"
     - file: /etc/apt/sources.list.d/hdp-utils.list
 
 {% if 'HDF' in salt['pillar.get']('hdp:stack:repoid') %}
 
 create_knox_repo:
   pkgrepo.managed:
-    - name: "deb {{ salt['pillar.get']('hdp:knox:ubuntu16') }} HDP main"
+    - name: "deb {{ salt['pillar.get']('hdp:knox:' + os) }} HDP main"
     - file: /etc/apt/sources.list.d/knox.list
 
 {% endif %}
