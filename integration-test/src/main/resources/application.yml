@@ -81,6 +81,10 @@ integrationtest:
         rdsPassword:
         rdsConnectionUrl:
 
+    ldapconfig:
+        ldapserverhost:
+        bindpassword:
+
     filesystemconfig:
         accountKeyWasb:
 
