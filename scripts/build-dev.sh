@@ -1,8 +1,6 @@
 #!/bin/bash -e
 : ${WORKSPACE=.}
 
-#./gradlew -Penv=jenkins -b build.gradle clean build uploadArchives -Preckon.scope=minor -Preckon.stage=dev --info --stacktrace --parallel
-
 LATEST_RC_BRANCH=$(git branch --sort=-committerdate -r | grep 'origin/rc' | head -n 1)
 LATEST_RC_MAJOR_MINOR_VERSION=$(echo "$LATEST_RC_BRANCH" | cut -d'-' -f 2)
 LATEST_RC_MAJOR=$(echo $LATEST_RC_MAJOR_MINOR_VERSION | cut -d'.' -f 1)
@@ -21,6 +19,8 @@ fi;
 
 git tag -a $VERSION -m "$VERSION"
 git push origin $VERSION
+
+./gradlew -Penv=jenkins -b build.gradle clean build uploadArchives -Preckon.scope=minor -Preckon.stage=dev --info --stacktrace --parallel
 
 echo "Computed next dev version: $VERSION"
 echo VERSION=$VERSION > $WORKSPACE/version
