@@ -123,10 +123,6 @@ public class RdsConfigController extends NotificationController implements RdsCo
     }
 
     private RDSConfigResponse createRdsConfig(IdentityUser user, RDSConfigRequest rdsConfigJson, boolean publicInAccount) {
-        if (rdsConfigJson.isValidated()) {
-            rdsConnectionValidator.validateRdsConnection(rdsConfigJson.getConnectionURL(), rdsConfigJson.getConnectionUserName(),
-                    rdsConfigJson.getConnectionPassword());
-        }
         RDSConfig rdsConfig = conversionService.convert(rdsConfigJson, RDSConfig.class);
         rdsConfig.setPublicInAccount(publicInAccount);
         try {

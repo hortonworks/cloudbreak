@@ -1,15 +1,18 @@
 package com.sequenceiq.cloudbreak.converter;
 
 import java.util.Date;
+import java.util.Optional;
 
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Strings;
+import com.sequenceiq.cloudbreak.api.model.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigRequest;
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
+import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.service.MissingResourceNameGenerator;
 
@@ -28,8 +31,14 @@ public class RDSConfigRequestToRDSConfigConverter extends AbstractConversionServ
             rdsConfig.setName(source.getName());
         }
         rdsConfig.setConnectionURL(source.getConnectionURL());
-        rdsConfig.setDatabaseEngine(source.getDatabaseEngine());
-        rdsConfig.setConnectionDriver(source.getConnectionDriver());
+
+        Optional<DatabaseVendor> databaseVendor = DatabaseVendor.getVendorByJdbcUrl(source.getConnectionURL());
+        if (databaseVendor.isPresent()) {
+            rdsConfig.setDatabaseEngine(databaseVendor.get().name());
+            rdsConfig.setConnectionDriver(databaseVendor.get().connectionDriver());
+        } else {
+            throw new BadRequestException("Not a valid DatabaseVendor which was provided in the jdbc url.");
+        }
         rdsConfig.setConnectionUserName(source.getConnectionUserName());
         rdsConfig.setConnectionPassword(source.getConnectionPassword());
         rdsConfig.setCreationDate(new Date().getTime());

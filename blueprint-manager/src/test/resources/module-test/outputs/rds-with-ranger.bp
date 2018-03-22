@@ -113,6 +113,13 @@
       }
     },
     {
+      "ranger-admin-site": {
+        "properties": {
+          "ranger.jpa.jdbc.driver": "org.postgresql.Driver"
+        }
+      }
+    },
+    {
       "webhcat-site": {
         "properties": {
           "webhcat.proxyuser.root.groups": "*",

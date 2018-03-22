@@ -37,7 +37,6 @@ public class RDSConfigTest extends AbstractCloudbreakIntegrationTest {
         rdsCreateRequest.setConnectionUserName(rdsUser);
         rdsCreateRequest.setConnectionPassword(rdsPassword);
         rdsCreateRequest.setConnectionURL(rdsConnectionUrl);
-        rdsCreateRequest.setDatabaseEngine("POSTGRES");
         RDSTestRequest testRequest = new RDSTestRequest();
         testRequest.setRdsConfig(rdsCreateRequest);
         // WHEN
