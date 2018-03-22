@@ -184,7 +184,7 @@ public class StackRequestToBlueprintPreparationObjectConverter extends AbstractC
 
     private KerberosConfig getKerberosConfig(StackV2Request source) {
         KerberosConfig kerberosConfig = null;
-        if (source.getCluster().getAmbari().getKerberos() != null) {
+        if (source.getCluster().getAmbari().getKerberos() != null && source.getCluster().getAmbari().getEnableSecurity()) {
             kerberosConfig = getConversionService().convert(source.getCluster().getAmbari().getKerberos(), KerberosConfig.class);
         }
         return kerberosConfig;
