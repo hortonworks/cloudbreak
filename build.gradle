@@ -15,7 +15,7 @@ plugins {
   id 'org.ajoberstar.grgit' version '2.1.0'
 }
 
-if (project.hasProperty("reckon")) {
+if (project.hasProperty("reckon.scope")) {
   apply plugin: "org.ajoberstar.reckon"
   reckon {
     normal = scopeFromProp()
