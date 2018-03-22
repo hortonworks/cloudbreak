@@ -194,12 +194,6 @@ public class ClusterDecorator {
         }
         if (request.getRdsConfigJsons() != null) {
             for (RDSConfigRequest requestRdsConfig : request.getRdsConfigJsons()) {
-                if (requestRdsConfig.isValidated()) {
-                    rdsConnectionValidator.validateRdsConnection(
-                            requestRdsConfig.getConnectionURL(),
-                            requestRdsConfig.getConnectionUserName(),
-                            requestRdsConfig.getConnectionPassword());
-                }
                 RDSConfig rdsConfig = conversionService.convert(requestRdsConfig, RDSConfig.class);
                 rdsConfig.setPublicInAccount(stack.isPublicInAccount());
                 rdsConfig = rdsConfigService.createIfNotExists(user, rdsConfig);
