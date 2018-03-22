@@ -21,6 +21,8 @@ public class RdsView {
 
     private final String hostWithPort;
 
+    private final String hostWithPortWithJdbc;
+
     private final String subprotocol;
 
     private String databaseEngine;
@@ -31,11 +33,12 @@ public class RdsView {
 
     private String ambariVendor;
 
+    private String upperCaseDatabaseEngine;
+
     public RdsView(RDSConfig rdsConfig) {
         connectionURL = rdsConfig.getConnectionURL();
         connectionUserName = rdsConfig.getConnectionUserName();
         connectionPassword = rdsConfig.getConnectionPassword();
-
 
         String[] split = connectionURL.split("//");
         String withoutJDBCPrefix = split[split.length - 1];
@@ -50,6 +53,7 @@ public class RdsView {
         }
 
         databaseName = getDatabaseName(connectionURL);
+        hostWithPortWithJdbc = connectionURL.replace("/" + databaseName, "");
         this.hostWithPort = createConnectionHost(port);
         connectionDriver = rdsConfig.getConnectionDriver();
         subprotocol = getSubprotocol(connectionURL);
@@ -57,6 +61,7 @@ public class RdsView {
             databaseEngine = rdsConfig.getDatabaseEngine().toLowerCase();
             fancyName = DatabaseVendor.fromValue(databaseEngine).fancyName();
             ambariVendor = DatabaseVendor.valueOf(rdsConfig.getDatabaseEngine()).value();
+            upperCaseDatabaseEngine = rdsConfig.getDatabaseEngine().toUpperCase();
         }
     }
 
@@ -106,6 +111,14 @@ public class RdsView {
 
     public String getAmbariVendor() {
         return ambariVendor;
+    }
+
+    public String getUpperCaseDatabaseEngine() {
+        return upperCaseDatabaseEngine;
+    }
+
+    public String getHostWithPortWithJdbc() {
+        return hostWithPortWithJdbc;
     }
 
     private String getDatabaseName(String connectionURL) {

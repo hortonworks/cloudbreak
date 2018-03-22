@@ -26,6 +26,12 @@ public class RDSConfigResponse extends RDSConfigJson {
     @ApiModelProperty(value = ModelDescriptions.RDSConfig.STACK_VERSION)
     private String stackVersion;
 
+    @ApiModelProperty(value = ModelDescriptions.RDSConfig.DB_ENGINE, required = true)
+    private String databaseEngine;
+
+    @ApiModelProperty(value = ModelDescriptions.RDSConfig.CONNECTION_DRIVER_NAME, required = true)
+    private String connectionDriver;
+
     public Long getId() {
         return id;
     }
@@ -64,5 +70,21 @@ public class RDSConfigResponse extends RDSConfigJson {
 
     public void setStackVersion(String stackVersion) {
         this.stackVersion = stackVersion;
+    }
+
+    public String getDatabaseEngine() {
+        return databaseEngine;
+    }
+
+    public void setDatabaseEngine(String databaseEngine) {
+        this.databaseEngine = databaseEngine;
+    }
+
+    public String getConnectionDriver() {
+        return connectionDriver;
+    }
+
+    public void setConnectionDriver(String connectionDriver) {
+        this.connectionDriver = connectionDriver;
     }
 }

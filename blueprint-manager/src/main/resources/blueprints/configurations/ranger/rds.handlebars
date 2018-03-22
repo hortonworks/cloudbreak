@@ -6,13 +6,18 @@
       "db_password": "{{{ rds.ranger.connectionPassword }}}",
       "db_name": "{{{ rds.ranger.databaseName }}}",
       "db_host": "{{{ rds.ranger.hostWithPort }}}",
-      "DB_FLAVOR": "POSTGRES"
+      "DB_FLAVOR": "{{{ rds.ranger.upperCaseDatabaseEngine }}}"
     }
   },
   "ranger-env": {
     "properties": {
-      "ranger_privelege_user_jdbc_url": "jdbc:postgresql://{{{ rds.ranger.hostWithPort }}}",
+      "ranger_privelege_user_jdbc_url": "{{{ rds.ranger.hostWithPortWithJdbc }}}",
       "create_db_dbuser": "true"
+    }
+  },
+  "ranger-admin-site": {
+    "properties": {
+      "ranger.jpa.jdbc.driver": "{{{ rds.ranger.connectionDriver }}}"
     }
   }
 {{{/if}}}
