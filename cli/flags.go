@@ -607,14 +607,14 @@ var (
 	FlRdsUserName = StringFlag{
 		RequiredFlag: REQUIRED,
 		StringFlag: cli.StringFlag{
-			Name:  "rds-username",
+			Name:  "db-username",
 			Usage: "username to use for the jdbc connection",
 		},
 	}
 	FlRdsPassword = StringFlag{
 		RequiredFlag: REQUIRED,
 		StringFlag: cli.StringFlag{
-			Name:  "rds-password",
+			Name:  "db-password",
 			Usage: "password to use for the jdbc connection",
 		},
 	}
@@ -643,14 +643,14 @@ var (
 		RequiredFlag: REQUIRED,
 		StringFlag: cli.StringFlag{
 			Name:  "type",
-			Usage: "Type of RDS, aka the service name that will use the RDS like HIVE, DRUID, SUPERSET, RANGER, etc.",
+			Usage: "Type of database, aka the service name that will use the db like HIVE, DRUID, SUPERSET, RANGER, etc.",
 		},
 	}
 	FlRdsValidatedOptional = BoolFlag{
 		RequiredFlag: OPTIONAL,
 		BoolFlag: cli.BoolFlag{
 			Name:  "not-validated",
-			Usage: "If set, then the RDS configuration will be not validated",
+			Usage: "If set, then the database configuration will be not validated",
 		},
 	}
 )
