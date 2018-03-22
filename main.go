@@ -1257,12 +1257,12 @@ func main() {
 			},
 		},
 		{
-			Name:  "rds",
-			Usage: "rds related operations",
+			Name:  "database",
+			Usage: "database management related operations",
 			Subcommands: []cli.Command{
 				{
 					Name:   "create",
-					Usage:  "create a new rds configuration",
+					Usage:  "create a new database configuration",
 					Flags:  cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlRdsUserName, cb.FlRdsPassword, cb.FlRdsURL, cb.FlRdsDriver, cb.FlRdsDatabaseEngine, cb.FlRdsType, cb.FlRdsValidatedOptional).AddAuthenticationFlags().Build(),
 					Before: ConfigRead,
 					Action: cb.CreateRds,
@@ -1274,7 +1274,7 @@ func main() {
 				},
 				{
 					Name:   "list",
-					Usage:  "list the available rds configurations",
+					Usage:  "list the available database configurations",
 					Flags:  cb.NewFlagBuilder().AddOutputFlag().AddAuthenticationFlags().Build(),
 					Before: ConfigRead,
 					Action: cb.ListAllRds,
@@ -1286,7 +1286,7 @@ func main() {
 				},
 				{
 					Name:   "delete",
-					Usage:  "deletes an rds configuration",
+					Usage:  "deletes a database configuration",
 					Flags:  cb.NewFlagBuilder().AddFlags(cb.FlName).AddOutputFlag().AddAuthenticationFlags().Build(),
 					Before: ConfigRead,
 					Action: cb.DeleteRds,
