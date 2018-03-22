@@ -114,22 +114,22 @@ stop-service-registration:
     - enable: False
     - name: service-registration
 
-{% if 'HDF' in salt['pillar.get']('hdp:stack:repoid') %}
+{% if salt['pillar.get']('hdp:stack:mpack') %}
 
-/opt/ambari-server/install-hdf-mpack.sh:
+/opt/ambari-server/install-mpack.sh:
   file.managed:
     - makedirs: True
-    - source: salt://ambari/scripts/install-hdf-mpack.sh
+    - source: salt://ambari/scripts/install-mpack.sh
     - template: jinja
     - mode: 744
     - context:
       mpack: {{ salt['pillar.get']('hdp:stack:mpack') }}
 
-install_hdf_mpack:
+install_mpack:
   cmd.run:
-    - name: /opt/ambari-server/install-hdf-mpack.sh
+    - name: /opt/ambari-server/install-mpack.sh
     - shell: /bin/bash
-    - unless: test -f /var/hdf_mpack_installed
+    - unless: test -f /var/mpack_installed
 
 {% endif %}
 
