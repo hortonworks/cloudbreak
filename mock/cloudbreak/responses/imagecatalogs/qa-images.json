@@ -74,8 +74,8 @@
       "uuid": "f6e778fc-7f17-4535-9021-515351df3691",
       "version": "2.6.0.0",
       "repo": {
-        "baseurl": "http://public-repo-1.hortonworks.com/ambari/centos6/2.x/updates/2.6.0.0",
-        "gpgkey": "http://public-repo-1.hortonworks.com/ambari/centos6/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins"
+        "baseurl": "http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.6.0.0",
+        "gpgkey": "http://public-repo-1.hortonworks.com/ambari/centos7/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins"
       },
       "images": {
         "openstack": {
@@ -188,8 +188,8 @@
       "uuid": "3f66bdad-5f59-4460-6182-0359c2cf7f1b",
       "version": "2.6.0.0",
       "repo": {
-        "baseurl": "http://public-repo-1.hortonworks.com/ambari/centos6/2.x/updates/2.6.0.0",
-        "gpgkey": "http://public-repo-1.hortonworks.com/ambari/centos6/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins"
+        "baseurl": "http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.6.0.0",
+        "gpgkey": "http://public-repo-1.hortonworks.com/ambari/centos7/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins"
       },
       "images": {
         "openstack": {

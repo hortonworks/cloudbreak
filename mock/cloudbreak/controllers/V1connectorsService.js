@@ -203,13 +203,15 @@ exports.getPlatformSecurityGroups = function(args, res, next) {
      **/
     var examples = {};
     examples['application/json'] = {
-        "key" : [ {
+        "securityGroups" : {
+          "key" : [ {
             "groupName" : "aeiou",
             "groupId" : "aeiou",
             "properties" : {
-                "key" : "{}"
+              "key" : "{}"
             }
-        } ]
+          } ]
+        }
     };
     if (Object.keys(examples).length > 0) {
         res.setHeader('Content-Type', 'application/json');

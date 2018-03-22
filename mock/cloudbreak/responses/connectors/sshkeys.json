@@ -1,4 +1,4 @@
-{
+{"sshKeys": {
   "RegionOne": [
     {
       "name": "consul-keypair",
@@ -46,4 +46,4 @@
       }
     }
   ]
-}
+}}

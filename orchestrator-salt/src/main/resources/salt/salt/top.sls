@@ -47,31 +47,33 @@ base:
     - match: grain
     - postgresql.postgres-install
 
-  'G@roles:ambari_server and not G@roles:smartsense':
-    - match: compound
+  'roles:ambari_server_install':
+    - match: grain
     - prometheus.server
     - ambari.server
-    - pre-recipes.pre-ambari-start
-    - ambari.server-start
 
-  'G@roles:ambari_server and G@roles:smartsense':
-    - match: compound
-    - prometheus.server
-    - ambari.server
-    - pre-recipes.pre-ambari-start
+  'roles:ambari_agent_install':
+    - match: grain
+    - ambari.agent
+
+  'roles:smartsense':
+    - match: grain
     - smartsense
+
+  'roles:ambari*':
+    - match: grain
+    - pre-recipes.pre-ambari-start
+
+  'roles:ambari_server':
+    - match: grain
     - ambari.server-start
 
   'roles:ambari_server_standby':
     - match: grain
-    - prometheus.server
-    - ambari.server
     - ambari.server-stop
 
   'roles:ambari_agent':
     - match: grain
-    - ambari.agent
-    - pre-recipes.pre-ambari-start
     - ambari.agent-start
 
   'recipes:post-ambari-start':

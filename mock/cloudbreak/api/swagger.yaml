@@ -47,6 +47,7 @@ tags:
 - name: "v1subscriptions"
 - name: "v1stacks"
 - name: "v1rdsconfigs"
+- name: "v1proxyconfigs"
 schemes:
 - "http"
 - "https"
@@ -93,6 +94,267 @@ paths:
           schema:
             $ref: "#/definitions/Info"
       x-swagger-router-controller: "Info"
+  /api/v1/proxyconfigs/account:
+    get:
+      tags:
+      - "v1proxyconfigs"
+      summary: "retrieve public and private (owned) proxy configurations"
+      description: "An proxy Configuration describe a connection to an external proxy\
+        \ server which provides internet access cluster members. It's applied for\
+        \ package manager and Ambari too"
+      operationId: "getPublicsProxyConfig"
+      schemes:
+      - "http"
+      - "https"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters: []
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            type: "array"
+            uniqueItems: true
+            items:
+              $ref: "#/definitions/ProxyConfigResponse"
+      x-swagger-router-controller: "V1proxyconfigs"
+    post:
+      tags:
+      - "v1proxyconfigs"
+      summary: "create proxy configuration as public resource"
+      description: "An proxy Configuration describe a connection to an external proxy\
+        \ server which provides internet access cluster members. It's applied for\
+        \ package manager and Ambari too"
+      operationId: "postPublicProxyConfig"
+      schemes:
+      - "http"
+      - "https"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        required: false
+        schema:
+          $ref: "#/definitions/ProxyConfigRequest"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/ProxyConfigResponse"
+      x-swagger-router-controller: "V1proxyconfigs"
+  /api/v1/proxyconfigs/account/{name}:
+    get:
+      tags:
+      - "v1proxyconfigs"
+      summary: "retrieve a public or private (owned) proxy configuration by name"
+      description: "An proxy Configuration describe a connection to an external proxy\
+        \ server which provides internet access cluster members. It's applied for\
+        \ package manager and Ambari too"
+      operationId: "getPublicProxyConfig"
+      schemes:
+      - "http"
+      - "https"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "name"
+        in: "path"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/ProxyConfigResponse"
+      x-swagger-router-controller: "V1proxyconfigs"
+    delete:
+      tags:
+      - "v1proxyconfigs"
+      summary: "delete public (owned) or private proxy configuration by name"
+      description: "An proxy Configuration describe a connection to an external proxy\
+        \ server which provides internet access cluster members. It's applied for\
+        \ package manager and Ambari too"
+      operationId: "deletePublicProxyConfig"
+      schemes:
+      - "http"
+      - "https"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "name"
+        in: "path"
+        required: true
+        type: "string"
+      responses:
+        default:
+          description: "successful operation"
+      x-swagger-router-controller: "V1proxyconfigs"
+  /api/v1/proxyconfigs/user:
+    get:
+      tags:
+      - "v1proxyconfigs"
+      summary: "retrieve private proxy configurations"
+      description: "An proxy Configuration describe a connection to an external proxy\
+        \ server which provides internet access cluster members. It's applied for\
+        \ package manager and Ambari too"
+      operationId: "getPrivatesProxyConfig"
+      schemes:
+      - "http"
+      - "https"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters: []
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            type: "array"
+            uniqueItems: true
+            items:
+              $ref: "#/definitions/ProxyConfigResponse"
+      x-swagger-router-controller: "V1proxyconfigs"
+    post:
+      tags:
+      - "v1proxyconfigs"
+      summary: "create proxy configuration as private resource"
+      description: "An proxy Configuration describe a connection to an external proxy\
+        \ server which provides internet access cluster members. It's applied for\
+        \ package manager and Ambari too"
+      operationId: "postPrivateProxyConfig"
+      schemes:
+      - "http"
+      - "https"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        required: false
+        schema:
+          $ref: "#/definitions/ProxyConfigRequest"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/ProxyConfigResponse"
+      x-swagger-router-controller: "V1proxyconfigs"
+  /api/v1/proxyconfigs/user/{name}:
+    get:
+      tags:
+      - "v1proxyconfigs"
+      summary: "retrieve a private proxy configuration by name"
+      description: "An proxy Configuration describe a connection to an external proxy\
+        \ server which provides internet access cluster members. It's applied for\
+        \ package manager and Ambari too"
+      operationId: "getPrivateProxyConfig"
+      schemes:
+      - "http"
+      - "https"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "name"
+        in: "path"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/ProxyConfigResponse"
+      x-swagger-router-controller: "V1proxyconfigs"
+    delete:
+      tags:
+      - "v1proxyconfigs"
+      summary: "delete private proxy configuration by name"
+      description: "An proxy Configuration describe a connection to an external proxy\
+        \ server which provides internet access cluster members. It's applied for\
+        \ package manager and Ambari too"
+      operationId: "deletePrivateProxyConfig"
+      schemes:
+      - "http"
+      - "https"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "name"
+        in: "path"
+        required: true
+        type: "string"
+      responses:
+        default:
+          description: "successful operation"
+      x-swagger-router-controller: "V1proxyconfigs"
+  /api/v1/proxyconfigs/{id}:
+    get:
+      tags:
+      - "v1proxyconfigs"
+      summary: "retrieve proxy configuration by id"
+      description: "An proxy Configuration describe a connection to an external proxy\
+        \ server which provides internet access cluster members. It's applied for\
+        \ package manager and Ambari too"
+      operationId: "getProxyConfig"
+      schemes:
+      - "http"
+      - "https"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "id"
+        in: "path"
+        required: true
+        type: "integer"
+        format: "int64"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/ProxyConfigResponse"
+      x-swagger-router-controller: "V1proxyconfigs"
+    delete:
+      tags:
+      - "v1proxyconfigs"
+      summary: "delete proxy configuration by id"
+      description: "An proxy Configuration describe a connection to an external proxy\
+        \ server which provides internet access cluster members. It's applied for\
+        \ package manager and Ambari too"
+      operationId: "deleteProxyConfig"
+      schemes:
+      - "http"
+      - "https"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "id"
+        in: "path"
+        required: true
+        type: "integer"
+        format: "int64"
+      responses:
+        default:
+          description: "successful operation"
+      x-swagger-router-controller: "V1proxyconfigs"
   /api/v1/accountpreferences:
     get:
       tags:
@@ -7120,6 +7382,9 @@ definitions:
         description: "a master key for encrypting the passwords in Ambari"
         minLength: 5
         maxLength: 100
+      proxyName:
+        type: "string"
+        description: "proxy configuration name for the cluster"
   SecurityGroupResponse:
     type: "object"
     required:
@@ -7159,6 +7424,46 @@ definitions:
         type: "boolean"
         description: "resource is visible in account"
         default: false
+  ProxyConfigRequest:
+    type: "object"
+    required:
+    - "name"
+    - "protocol"
+    - "serverHost"
+    - "serverPort"
+    properties:
+      name:
+        type: "string"
+        description: "Name of the proxy configuration resource"
+        minLength: 4
+        maxLength: 100
+        pattern: "(^[a-z][-a-z0-9]*[a-z0-9]$)"
+      description:
+        type: "string"
+        description: "description of the resource"
+      serverHost:
+        type: "string"
+        description: "host or IP address of proxy server"
+        minLength: 1
+        maxLength: 255
+        pattern: "(^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\\\
+          -]*[A-Za-z0-9])$)"
+      serverPort:
+        type: "integer"
+        format: "int32"
+        description: "port of proxy server (typically: 3128 or 8080)"
+        minimum: 1.0
+        maximum: 65535.0
+      protocol:
+        type: "string"
+        description: "determines the protocol (http or https)"
+        pattern: "^http(s)?$"
+      userName:
+        type: "string"
+        description: "Username to use for basic authentication"
+      password:
+        type: "string"
+        description: "Password to use for basic authentication"
   PlatformNetworkResponse:
     type: "object"
     properties:
@@ -8247,6 +8552,9 @@ definitions:
       rdsConfigs:
         description: "details of the external database for Hadoop components"
         $ref: "#/definitions/RdsConfigs"
+      proxyName:
+        type: "string"
+        description: "proxy configuration name for the cluster"
       fileSystem:
         description: "external file system configuration"
         $ref: "#/definitions/FileSystem"
@@ -8385,6 +8693,9 @@ definitions:
         uniqueItems: true
         items:
           $ref: "#/definitions/RDSConfigResponse"
+      proxyName:
+        type: "string"
+        description: "proxy configuration name for the cluster"
       serviceEndPoints:
         type: "object"
         description: "most important services in the cluster"
@@ -10435,6 +10746,47 @@ definitions:
       uri:
         type: "string"
         description: "recipe uri"
+  ProxyConfigResponse:
+    type: "object"
+    required:
+    - "name"
+    - "protocol"
+    - "serverHost"
+    - "serverPort"
+    properties:
+      name:
+        type: "string"
+        description: "Name of the proxy configuration resource"
+        minLength: 4
+        maxLength: 100
+        pattern: "(^[a-z][-a-z0-9]*[a-z0-9]$)"
+      description:
+        type: "string"
+        description: "description of the resource"
+      serverHost:
+        type: "string"
+        description: "host or IP address of proxy server"
+        minLength: 1
+        maxLength: 255
+        pattern: "(^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\\\
+          -]*[A-Za-z0-9])$)"
+      serverPort:
+        type: "integer"
+        format: "int32"
+        description: "port of proxy server (typically: 3128 or 8080)"
+        minimum: 1.0
+        maximum: 65535.0
+      protocol:
+        type: "string"
+        description: "determines the protocol (http or https)"
+        pattern: "^http(s)?$"
+      userName:
+        type: "string"
+        description: "Username to use for basic authentication"
+      id:
+        type: "integer"
+        format: "int64"
+        description: "proxy configuration id for the cluster"
   RepoConfigValidationResponse:
     type: "object"
     properties:
