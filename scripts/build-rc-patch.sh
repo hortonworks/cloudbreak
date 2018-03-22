@@ -4,7 +4,7 @@
 
 MINOR_VERSION=$(echo "$BRANCH" | cut -d'-' -f 2)
 
-if [ "$(git tag -l "$MINOR_VERSION.0-rc.1")" == '' ]; then
+if [ "$(git tag -l "$MINOR_VERSION.0")" == '' ]; then
     ./gradlew -Penv=jenkins -b build.gradle clean build uploadArchives -Preckon.scope=minor -Preckon.stage=rc --info --stacktrace --parallel
     RECKONED_VERSION=$(./gradlew -Penv=jenkins -b build.gradle buildInfo -Preckon.scope=minor -Preckon.stage=rc | grep Reckoned)
 else
