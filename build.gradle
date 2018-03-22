@@ -6,18 +6,21 @@ buildscript {
   dependencies {
     classpath 'org.ajoberstar:grgit:2.1.0'
     classpath 'info.solidsoft.gradle.pitest:gradle-pitest-plugin:1.1.11'
+    classpath 'org.ajoberstar.reckon:reckon-gradle:0.4.0'
     classpath 'com.smokejumperit.gradle.license:Gradle-License-Report:0.0.2'
   }
 }
 
 plugins {
   id 'org.ajoberstar.grgit' version '2.1.0'
-  id 'org.ajoberstar.reckon' version '0.3.0'
 }
 
-reckon {
-  normal = scopeFromProp()
-  preRelease = stageFromProp('dev', 'rc', 'final')
+if (project.hasProperty("reckon")) {
+  apply plugin: "org.ajoberstar.reckon"
+  reckon {
+    normal = scopeFromProp()
+    preRelease = stageFromProp('dev', 'rc', 'final')
+  }
 }
 
 def env = project.hasProperty('env') ? project.getProperty('env') : 'local'
