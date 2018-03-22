@@ -112,7 +112,7 @@ public class StackToBlueprintPreparationObjectConverter extends AbstractConversi
                     .withSmartSenseSubscriptionId(aDefault.isPresent() ? aDefault.get().getSubscriptionId() : null)
                     .withLdapConfig(ldapConfig)
                     .withHdfConfigs(hdfConfigs)
-                    .withKerberosConfig(cluster.getKerberosConfig())
+                    .withKerberosConfig(cluster.isSecure() ? cluster.getKerberosConfig() : null)
                     .build();
         } catch (BlueprintProcessingException e) {
             throw new CloudbreakServiceException(e.getMessage(), e);
