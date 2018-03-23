@@ -47,6 +47,7 @@ import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.domain.UserProfile;
 import com.sequenceiq.cloudbreak.repository.ImageCatalogRepository;
 import com.sequenceiq.cloudbreak.service.AuthorizationService;
+import com.sequenceiq.cloudbreak.service.account.AccountPreferencesService;
 import com.sequenceiq.cloudbreak.service.user.UserProfileService;
 
 @Component
@@ -84,6 +85,9 @@ public class ImageCatalogService {
 
     @Inject
     private UserProfileService userProfileService;
+
+    @Inject
+    private AccountPreferencesService accountPreferencesService;
 
     @Inject
     private List<CloudConstant> cloudConstants;
@@ -135,7 +139,8 @@ public class ImageCatalogService {
         return getImage(defaultCatalogUrl, CLOUDBREAK_DEFAULT_CATALOG_NAME, imageId);
     }
 
-    public StatedImage getImage(String catalogUrl, String catalogName, String imageId) throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
+    public StatedImage getImage(String catalogUrl, String catalogName, String imageId) throws CloudbreakImageNotFoundException,
+            CloudbreakImageCatalogException {
         Images images = imageCatalogProvider.getImageCatalogV2(catalogUrl).getImages();
         Optional<? extends Image> image = getImage(imageId, images);
         if (!image.isPresent()) {
@@ -326,14 +331,22 @@ public class ImageCatalogService {
 
     public Images propagateImagesIfRequested(String name, boolean withImages) {
         if (withImages) {
-            Set<String> platforms = cloudConstants.stream().map(c -> c.platform().value()).collect(Collectors.toSet());
+            Set<String> platforms = filterPlatforms();
             try {
                 return getImages(name, platforms).getImages();
             } catch (CloudbreakImageCatalogException e) {
-                LOGGER.error("No images was found: " + e);
+                LOGGER.error("No images was found: ", e);
             }
         }
         return null;
+    }
+
+    public Set<String> filterPlatforms() {
+        Set<String> platforms = accountPreferencesService.platforms();
+        return cloudConstants.stream()
+                .map(c -> c.platform().value())
+                .filter(platforms::contains)
+                .collect(Collectors.toSet());
     }
 
     private Optional<? extends Image> findFirstWithImageId(String imageId, Collection<? extends Image> images) {
