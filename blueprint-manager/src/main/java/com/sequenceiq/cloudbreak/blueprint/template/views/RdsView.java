@@ -1,7 +1,8 @@
 package com.sequenceiq.cloudbreak.blueprint.template.views;
 
-import org.springframework.util.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
+import com.sequenceiq.cloudbreak.api.model.DatabaseVendor;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 
 public class RdsView {
@@ -24,12 +25,18 @@ public class RdsView {
 
     private String databaseEngine;
 
+    private final String port;
+
+    private String fancyName;
+
+    private String ambariVendor;
+
     public RdsView(RDSConfig rdsConfig) {
         connectionURL = rdsConfig.getConnectionURL();
         connectionUserName = rdsConfig.getConnectionUserName();
         connectionPassword = rdsConfig.getConnectionPassword();
 
-        String port = "";
+
         String[] split = connectionURL.split("//");
         String withoutJDBCPrefix = split[split.length - 1];
         String hostWithPort = withoutJDBCPrefix.split("/")[0];
@@ -39,6 +46,7 @@ public class RdsView {
             port = hostWithPort.substring(portDelimiterIndex + 1);
         } else {
             host = hostWithPort;
+            port = "";
         }
 
         databaseName = getDatabaseName(connectionURL);
@@ -47,6 +55,8 @@ public class RdsView {
         subprotocol = getSubprotocol(connectionURL);
         if (rdsConfig.getDatabaseEngine() != null) {
             databaseEngine = rdsConfig.getDatabaseEngine().toLowerCase();
+            fancyName = DatabaseVendor.fromValue(databaseEngine).fancyName();
+            ambariVendor = DatabaseVendor.valueOf(rdsConfig.getDatabaseEngine()).value();
         }
     }
 
@@ -86,6 +96,18 @@ public class RdsView {
         return subprotocol;
     }
 
+    public String getPort() {
+        return port;
+    }
+
+    public String getFancyName() {
+        return fancyName;
+    }
+
+    public String getAmbariVendor() {
+        return ambariVendor;
+    }
+
     private String getDatabaseName(String connectionURL) {
         String databaseName = "";
         String[] split = connectionURL.split("/");
@@ -97,7 +119,7 @@ public class RdsView {
 
     private String createConnectionHost(String port) {
         String result = host;
-        if (!StringUtils.isEmpty(port)) {
+        if (StringUtils.isNotBlank(port)) {
             result = host + ':' + port;
         }
         return result;

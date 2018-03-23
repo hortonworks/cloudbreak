@@ -88,7 +88,6 @@ class BlueprintModelProvider {
         return BlueprintPreparationObject.Builder.builder()
                 .withGeneralClusterConfigs(conf)
                 .withBlueprintView(BlueprintTestUtil.generalBlueprintView("", "2.6", "HDP"))
-                .withAmbariDatabase(BlueprintTestUtil.generalAmbariDatabase())
                 .withHostgroups(getHostGroups("master", "slave_1"))
                 .withGateway(TestUtil.gateway())
                 .build();
@@ -153,7 +152,6 @@ class BlueprintModelProvider {
         configs.setExecutorType(ExecutorType.CONTAINER);
         return BlueprintPreparationObject.Builder.builder()
                 .withBlueprintView(BlueprintTestUtil.generalBlueprintView("", "2.6", "HDP"))
-                .withAmbariDatabase(BlueprintTestUtil.generalAmbariDatabase())
                 .withHostgroups(getHostGroups("master", "slave_1"))
                 .withGeneralClusterConfigs(configs)
                 .withGateway(TestUtil.gateway())
@@ -169,7 +167,6 @@ class BlueprintModelProvider {
 
     static BlueprintPreparationObject.Builder getPreparedBuilder(String... hostNames) throws JsonProcessingException {
         return BlueprintPreparationObject.Builder.builder()
-                .withAmbariDatabase(BlueprintTestUtil.generalAmbariDatabase())
                 .withGeneralClusterConfigs(BlueprintTestUtil.generalClusterConfigs())
                 .withHostgroups(hostNames.length == 0 ? getHostGroups() : getHostGroups(hostNames))
                 .withGateway(TestUtil.gateway());

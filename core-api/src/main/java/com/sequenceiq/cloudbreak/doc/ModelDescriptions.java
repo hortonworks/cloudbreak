@@ -189,7 +189,7 @@ public class ModelDescriptions {
         public static final String HOSTGROUPS = "collection of hostgroups";
         public static final String AMBARI_STACK_DETAILS = "details of the Ambari stack";
         public static final String AMBARI_REPO_DETAILS = "details of the Ambari package repository";
-        public static final String AMBARI_DATABASE_DETAILS = "details of the external Ambari database";
+        public static final String AMBARI_DATABASE_DETAILS = "[DEPRECATED] use RdsConfig instead! details of the external Ambari database";
         public static final String AMBARI_DATABASE_ERROR = "result of Ambari database test";
         public static final String RDS_CONFIGS = "details of the external database for Hadoop components";
         public static final String LDAP_CONNECTION_RESULT = "result of Ldap connection test";

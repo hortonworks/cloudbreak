@@ -23,11 +23,10 @@ import org.springframework.core.convert.ConversionService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Sets;
-import com.sequenceiq.cloudbreak.api.model.AmbariDatabaseDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.AmbariRepoDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.ClusterRequest;
-import com.sequenceiq.cloudbreak.cloud.model.AmbariDatabase;
+import com.sequenceiq.cloudbreak.blueprint.utils.BlueprintUtils;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
@@ -52,7 +51,6 @@ import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.DefaultAmbariRepoService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
-import com.sequenceiq.cloudbreak.blueprint.utils.BlueprintUtils;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariRepositoryVersionService;
 import com.sequenceiq.cloudbreak.service.decorator.ClusterDecorator;
@@ -149,7 +147,6 @@ public class ClusterCreationSetupService {
 
         checkVDFFile(ambariRepoConfig, hdpRepoConfig, stackName);
 
-        components.add(addAmbariDatabaseConfig(request.getAmbariDatabaseDetails(), cluster));
         LOGGER.info("Cluster components saved in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
         start = System.currentTimeMillis();
@@ -278,15 +275,6 @@ public class ClusterCreationSetupService {
             }
         }
         return root;
-    }
-
-    private ClusterComponent addAmbariDatabaseConfig(AmbariDatabaseDetailsJson ambariRepoDetailsJson, Cluster cluster)
-            throws JsonProcessingException {
-        if (ambariRepoDetailsJson == null) {
-            ambariRepoDetailsJson = new AmbariDatabaseDetailsJson();
-        }
-        AmbariDatabase ambariDatabase = conversionService.convert(ambariRepoDetailsJson, AmbariDatabase.class);
-        return new ClusterComponent(ComponentType.AMBARI_DATABASE_DETAILS, new Json(ambariDatabase), cluster);
     }
 
     private Optional<String> getVDFUrlByOsType(Long stackId, StackRepoDetails stackRepoDetails) {

@@ -98,8 +98,12 @@ public class ClusterRequest implements JsonEntity {
     @ApiModelProperty(ClusterModelDescription.RDSCONFIG_NAMES)
     private Set<String> rdsConfigNames = new HashSet<>();
 
+    /**
+     * @deprecated RdsConfig is replacing AmbariDatabaseDetailsJson
+     */
     @Valid
     @ApiModelProperty(ClusterModelDescription.AMBARI_DATABASE_DETAILS)
+    @Deprecated
     private AmbariDatabaseDetailsJson ambariDatabaseDetails;
 
     @Valid

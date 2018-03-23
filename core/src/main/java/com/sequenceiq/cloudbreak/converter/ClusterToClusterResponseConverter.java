@@ -23,7 +23,6 @@ import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.api.client.repackaged.com.google.common.base.Strings;
-import com.sequenceiq.cloudbreak.api.model.AmbariDatabaseDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.AmbariRepoDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsResponse;
 import com.sequenceiq.cloudbreak.api.model.BlueprintInputJson;
@@ -40,7 +39,6 @@ import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigResponse;
 import com.sequenceiq.cloudbreak.blueprint.validation.BlueprintValidator;
 import com.sequenceiq.cloudbreak.blueprint.validation.StackServiceComponentDescriptor;
 import com.sequenceiq.cloudbreak.blueprint.validation.StackServiceComponentDescriptors;
-import com.sequenceiq.cloudbreak.cloud.model.AmbariDatabase;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.controller.CloudbreakApiException;
@@ -147,7 +145,6 @@ public class ClusterToClusterResponseConverter extends AbstractConversionService
         }
         convertContainerConfig(source, clusterResponse);
         convertComponentConfig(clusterResponse, source);
-        convertAmbariDatabaseComponentConfig(clusterResponse, source);
         clusterResponse.setCreationFinished(source.getCreationFinished());
         KerberosConfig kerberosConfig = source.getKerberosConfig();
         if (source.isSecure() && kerberosConfig != null) {
@@ -177,19 +174,6 @@ public class ClusterToClusterResponseConverter extends AbstractConversionService
             if (stackRepoDetails != null) {
                 AmbariStackDetailsResponse ambariRepoDetailsJson = getConversionService().convert(stackRepoDetails, AmbariStackDetailsResponse.class);
                 response.setAmbariStackDetails(ambariRepoDetailsJson);
-            }
-        } catch (RuntimeException e) {
-            LOGGER.error("Failed to convert dynamic component.", e);
-        }
-
-    }
-
-    private void convertAmbariDatabaseComponentConfig(ClusterResponse response, Cluster source) {
-        try {
-            AmbariDatabase ambariDatabase = componentConfigProvider.getAmbariDatabase(source.getComponents());
-            if (ambariDatabase != null) {
-                AmbariDatabaseDetailsJson ambariRepoDetailsJson = getConversionService().convert(ambariDatabase, AmbariDatabaseDetailsJson.class);
-                response.setAmbariDatabaseDetails(ambariRepoDetailsJson);
             }
         } catch (RuntimeException e) {
             LOGGER.error("Failed to convert dynamic component.", e);

@@ -44,7 +44,6 @@ public class BlueprintTemplateProcessor {
         blueprintInputs.putAll(customProperties);
 
         return new BlueprintTemplateModelContextBuilder()
-                .withAmbariDatabase(source.getAmbariDatabase())
                 .withClusterAdminFirstname(source.getGeneralClusterConfigs().getUserName())
                 .withClusterAdminLastname(source.getGeneralClusterConfigs().getUserName())
                 .withClusterAdminPassword(source.getGeneralClusterConfigs().getPassword())

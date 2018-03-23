@@ -51,7 +51,6 @@ public class BlueprintTemplateProcessorTest {
 
         BlueprintPreparationObject blueprintPreparationObject = BlueprintPreparationObject.Builder.builder()
                 .withRdsConfigs(cluster.getRdsConfigs())
-                .withAmbariDatabase(ambariDatabase())
                 .withGateway(cluster.getGateway())
                 .withLdapConfig(cluster.getLdapConfig())
                 .withGeneralClusterConfigs(generalClusterConfigs)
@@ -84,7 +83,6 @@ public class BlueprintTemplateProcessorTest {
 
         BlueprintPreparationObject blueprintPreparationObject = BlueprintPreparationObject.Builder.builder()
                 .withRdsConfigs(cluster.getRdsConfigs())
-                .withAmbariDatabase(ambariDatabase())
                 .withGateway(cluster.getGateway())
                 .withLdapConfig(cluster.getLdapConfig())
                 .withGeneralClusterConfigs(generalClusterConfigs)
@@ -106,7 +104,6 @@ public class BlueprintTemplateProcessorTest {
 
         BlueprintPreparationObject blueprintPreparationObject = BlueprintPreparationObject.Builder.builder()
                 .withRdsConfigs(cluster.getRdsConfigs())
-                .withAmbariDatabase(ambariDatabase())
                 .withGateway(cluster.getGateway())
                 .withLdapConfig(cluster.getLdapConfig())
                 .withGeneralClusterConfigs(generalClusterConfigs())
@@ -132,7 +129,6 @@ public class BlueprintTemplateProcessorTest {
 
         BlueprintPreparationObject blueprintPreparationObject = BlueprintPreparationObject.Builder.builder()
                 .withRdsConfigs(cluster.getRdsConfigs())
-                .withAmbariDatabase(ambariDatabase())
                 .withGateway(cluster.getGateway())
                 .withLdapConfig(cluster.getLdapConfig())
                 .withGeneralClusterConfigs(generalClusterConfigs())
@@ -158,7 +154,6 @@ public class BlueprintTemplateProcessorTest {
 
         BlueprintPreparationObject blueprintPreparationObject = BlueprintPreparationObject.Builder.builder()
                 .withRdsConfigs(cluster.getRdsConfigs())
-                .withAmbariDatabase(ambariDatabase())
                 .withGateway(cluster.getGateway())
                 .withLdapConfig(cluster.getLdapConfig())
                 .withGeneralClusterConfigs(generalClusterConfigs())
@@ -183,7 +178,6 @@ public class BlueprintTemplateProcessorTest {
         BlueprintPreparationObject blueprintPreparationObject = BlueprintPreparationObject.Builder.builder()
                 .withBlueprintView(new BlueprintView(testBlueprint, blueprintStackInfo.getVersion(), blueprintStackInfo.getType()))
                 .withRdsConfigs(cluster.getRdsConfigs())
-                .withAmbariDatabase(ambariDatabase())
                 .withGeneralClusterConfigs(generalClusterConfigs(cluster))
                 .build();
 

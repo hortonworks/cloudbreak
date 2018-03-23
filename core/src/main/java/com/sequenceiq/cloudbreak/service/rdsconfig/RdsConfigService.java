@@ -114,7 +114,7 @@ public class RdsConfigService {
     }
 
     public RDSConfig findByClusterIdAndType(String user, String account, Long clusterId, RdsType rdsType) {
-        return rdsConfigRepository.findByClusterIdAndType(user, account, clusterId, rdsType);
+        return rdsConfigRepository.findByClusterIdAndType(user, account, clusterId, rdsType.name());
     }
 
     public Set<RDSConfig> findUserManagedByClusterId(String user, String account, Long clusterId) {

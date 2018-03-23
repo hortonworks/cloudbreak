@@ -7,13 +7,11 @@ import java.util.Optional;
 
 import com.sequenceiq.cloudbreak.api.model.FileSystemType;
 import com.sequenceiq.cloudbreak.blueprint.nifi.HdfConfigs;
-import com.sequenceiq.cloudbreak.blueprint.template.views.DatabaseView;
 import com.sequenceiq.cloudbreak.blueprint.template.views.FileSystemConfigurationView;
 import com.sequenceiq.cloudbreak.blueprint.template.views.FileSystemView;
 import com.sequenceiq.cloudbreak.blueprint.template.views.GatewayView;
 import com.sequenceiq.cloudbreak.blueprint.template.views.LdapView;
 import com.sequenceiq.cloudbreak.blueprint.template.views.RdsView;
-import com.sequenceiq.cloudbreak.cloud.model.AmbariDatabase;
 import com.sequenceiq.cloudbreak.domain.Gateway;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
@@ -27,8 +25,6 @@ public class BlueprintTemplateModelContextBuilder {
     private Map<String, FileSystemView> fileSystemConfig = new HashMap<>();
 
     private Optional<LdapView> ldap = Optional.empty();
-
-    private Optional<DatabaseView> ambariDatabase = Optional.empty();
 
     private Optional<GatewayView> gateway = Optional.empty();
 
@@ -114,11 +110,6 @@ public class BlueprintTemplateModelContextBuilder {
         return this;
     }
 
-    public BlueprintTemplateModelContextBuilder withAmbariDatabase(AmbariDatabase ambariDatabase) {
-        this.ambariDatabase = Optional.ofNullable(ambariDatabase == null ? null : new DatabaseView(ambariDatabase));
-        return this;
-    }
-
     public BlueprintTemplateModelContextBuilder withClusterName(String clusterName) {
         this.clusterName = clusterName;
         return this;
@@ -167,7 +158,6 @@ public class BlueprintTemplateModelContextBuilder {
         blueprintTemplateModelContext.put("gateway", gateway.orElse(null));
         blueprintTemplateModelContext.put("rds", rds);
         blueprintTemplateModelContext.put("fileSystemConfigs", fileSystemConfig);
-        blueprintTemplateModelContext.put("ambariDatabase", ambariDatabase.orElse(null));
         for (Entry<String, String> customEntry : customProperties.entrySet()) {
             blueprintTemplateModelContext.put(customEntry.getKey(), customEntry.getValue());
         }

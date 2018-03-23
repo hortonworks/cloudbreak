@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.service.decorator;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
@@ -26,11 +25,12 @@ import com.sequenceiq.cloudbreak.api.model.HostGroupRequest;
 import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigRequest;
 import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigRequest;
 import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
+import com.sequenceiq.cloudbreak.blueprint.validation.BlueprintValidator;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
-import com.sequenceiq.cloudbreak.blueprint.validation.BlueprintValidator;
 import com.sequenceiq.cloudbreak.controller.validation.ldapconfig.LdapConfigValidator;
 import com.sequenceiq.cloudbreak.controller.validation.rds.RdsConnectionValidator;
+import com.sequenceiq.cloudbreak.converter.mapper.AmbariDatabaseMapper;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.BlueprintInputParameters;
 import com.sequenceiq.cloudbreak.domain.BlueprintParameter;
@@ -42,6 +42,7 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
+import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariConfigurationService;
 import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -84,6 +85,12 @@ public class ClusterDecorator {
     @Inject
     private ClusterProxyDecorator clusterProxyDecorator;
 
+    @Inject
+    private AmbariConfigurationService ambariConfigurationService;
+
+    @Inject
+    private AmbariDatabaseMapper ambariDatabaseMapper;
+
     public Cluster decorate(Cluster subject, ClusterRequest request, Blueprint blueprint, IdentityUser user, Stack stack) {
         if (blueprint != null) {
             subject.setBlueprint(blueprint);
@@ -106,7 +113,7 @@ public class ClusterDecorator {
             blueprintValidator.validateBlueprintForStack(subject, subject.getBlueprint(), subject.getHostGroups(), stack.getInstanceGroups());
         }
         subject.setTopologyValidation(request.getValidateBlueprint());
-        prepareRds(subject, user, request.getRdsConfigIds(), request.getRdsConfigNames(), request.getRdsConfigJsons(), stack);
+        prepareRds(subject, user, request, stack);
         subject = clusterProxyDecorator.prepareProxyConfig(subject, user, request.getProxyName(), stack);
         prepareLdap(subject, user, request.getLdapConfigId(), request.getLdapConfig(), request.getLdapConfigName(), stack);
         prepareConnectedClusterParameters(subject, user, request.getConnectedCluster());
@@ -177,17 +184,16 @@ public class ClusterDecorator {
         }
     }
 
-    private void prepareRds(Cluster subject, IdentityUser user, Collection<Long> rdsConfigIds, Set<String> rdsConfigNames,
-            Collection<RDSConfigRequest> requestRdsConfigs, Stack stack) {
+    private void prepareRds(Cluster subject, IdentityUser user, ClusterRequest request, Stack stack) {
         subject.setRdsConfigs(new HashSet<>());
-        if (rdsConfigIds != null && !rdsConfigIds.isEmpty()) {
-            for (Long rdsConfigId : rdsConfigIds) {
+        if (request.getRdsConfigIds() != null) {
+            for (Long rdsConfigId : request.getRdsConfigIds()) {
                 RDSConfig rdsConfig = rdsConfigService.get(rdsConfigId);
                 subject.getRdsConfigs().add(rdsConfig);
             }
         }
-        if (requestRdsConfigs != null && !requestRdsConfigs.isEmpty()) {
-            for (RDSConfigRequest requestRdsConfig : requestRdsConfigs) {
+        if (request.getRdsConfigJsons() != null) {
+            for (RDSConfigRequest requestRdsConfig : request.getRdsConfigJsons()) {
                 if (requestRdsConfig.isValidated()) {
                     rdsConnectionValidator.validateRdsConnection(
                             requestRdsConfig.getConnectionURL(),
@@ -200,8 +206,15 @@ public class ClusterDecorator {
                 subject.getRdsConfigs().add(rdsConfig);
             }
         }
-        Optional.of(rdsConfigNames)
+        Optional.of(request.getRdsConfigNames())
                 .ifPresent(confs -> confs.forEach(confName -> subject.getRdsConfigs().add(rdsConfigService.getPublicRdsConfig(confName, user))));
+
+        if (request.getAmbariDatabaseDetails() != null) {
+            RDSConfig rdsConfig = ambariDatabaseMapper.mapAmbariDatabaseDetailsJsonToRdsConfig(request.getAmbariDatabaseDetails(), stack);
+            subject.getRdsConfigs().add(rdsConfigService.createIfNotExists(user, rdsConfig));
+        }
+
+        ambariConfigurationService.createDefaultRdsConfigIfNeeded(stack, subject).ifPresent(rdsConfig -> subject.getRdsConfigs().add(rdsConfig));
     }
 
     private Set<HostGroup> convertHostGroupsFromJson(Stack stack, IdentityUser user, Cluster cluster, Iterable<HostGroupRequest> hostGroupsJsons) {
