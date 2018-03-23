@@ -4,6 +4,8 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Lists;
@@ -17,6 +19,8 @@ import com.sequenceiq.cloudbreak.service.smartsense.SmartSenseSubscriptionServic
 
 @Component
 public class SmartSenseSubscriptionController implements SmartSenseSubscriptionEndpoint {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SmartSenseSubscriptionController.class);
 
     @Inject
     private SmartSenseSubscriptionService smartSenseSubService;
@@ -34,9 +38,6 @@ public class SmartSenseSubscriptionController implements SmartSenseSubscriptionE
     public SmartSenseSubscriptionJson get() {
         IdentityUser cbUser = authenticatedUserService.getCbUser();
         SmartSenseSubscription subscription = smartSenseSubService.getDefaultForUser(cbUser);
-        if (subscription == null) {
-            throw new SmartSenseNotFoundException("SmartSense subscription not found");
-        }
         return toJsonConverter.convert(subscription);
     }
 
@@ -94,4 +95,5 @@ public class SmartSenseSubscriptionController implements SmartSenseSubscriptionE
         subscription = smartSenseSubService.create(subscription);
         return toJsonConverter.convert(subscription);
     }
+
 }

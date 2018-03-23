@@ -1,11 +1,14 @@
 package com.sequenceiq.cloudbreak.service.smartsense;
 
 import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
+import static java.util.Objects.requireNonNull;
 
 import java.util.Iterator;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
@@ -13,7 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.security.access.prepost.PostAuthorize;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -21,6 +24,7 @@ import com.sequenceiq.cloudbreak.api.model.SmartSenseSubscriptionJson;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
+import com.sequenceiq.cloudbreak.controller.SmartSenseConfigurationNotFoundException;
 import com.sequenceiq.cloudbreak.domain.SmartSenseSubscription;
 import com.sequenceiq.cloudbreak.repository.FlexSubscriptionRepository;
 import com.sequenceiq.cloudbreak.repository.SmartSenseSubscriptionRepository;
@@ -104,27 +108,55 @@ public class SmartSenseSubscriptionService {
         return subscriptions.hasNext() ? Optional.of(subscriptions.next()) : Optional.empty();
     }
 
-    @PostAuthorize("hasPermission(returnObject,'read')")
-    public SmartSenseSubscription getDefaultForUser(IdentityUser cbUser) {
-        SmartSenseSubscription subscription;
-        subscription = repository.findByAccountAndOwner(cbUser.getAccount(), cbUser.getUserId());
-        if (subscription != null && !StringUtils.isEmpty(defaultSmartsenseId) && !defaultSmartsenseId.equals(subscription.getSubscriptionId())) {
+    public SmartSenseSubscription getDefaultForUser(@Nonnull IdentityUser cbUser) {
+        requireNonNull(cbUser);
+        Optional<SmartSenseSubscription> subscription = obtainSmartSenseSubscription(cbUser);
+        checkSmartSenseSubscriptionAuthorization(subscription);
+        return subscription.get();
+    }
+
+    private Optional<SmartSenseSubscription> obtainSmartSenseSubscription(IdentityUser cbUser) {
+        Optional<SmartSenseSubscription> subscription = Optional.ofNullable(repository.findByAccountAndOwner(cbUser.getAccount(), cbUser.getUserId()));
+        if (subscription.isPresent()) {
+            upgradeDefaultSmartSenseSubscription(subscription.get());
+        } else {
+            LOGGER.info("Unable to find subscription for user.");
+            subscription = Optional.ofNullable(createSubscriptionFromIdentityUser(cbUser));
+        }
+        return subscription;
+    }
+
+    private void upgradeDefaultSmartSenseSubscription(SmartSenseSubscription subscription) {
+        if (!StringUtils.isEmpty(defaultSmartsenseId) && !defaultSmartsenseId.equals(subscription.getSubscriptionId())) {
             LOGGER.info("Upgrading default SmartSense subscription");
             subscription.setSubscriptionId(defaultSmartsenseId);
             repository.save(subscription);
         }
-        return Optional.ofNullable(subscription).orElseGet(() -> {
-            SmartSenseSubscription newSubscription = null;
-            if (!StringUtils.isEmpty(defaultSmartsenseId)) {
-                LOGGER.info("Generating default SmartSense subscription");
-                newSubscription = new SmartSenseSubscription();
-                newSubscription.setSubscriptionId(defaultSmartsenseId);
-                newSubscription.setAccount(cbUser.getAccount());
-                newSubscription.setOwner(cbUser.getUserId());
-                newSubscription.setPublicInAccount(true);
-                repository.save(newSubscription);
-            }
-            return newSubscription;
-        });
     }
+
+    private void checkSmartSenseSubscriptionAuthorization(Optional<SmartSenseSubscription> subscription) {
+        try {
+            authorizationService.hasReadPermission(subscription.orElseThrow(() -> new SmartSenseConfigurationNotFoundException("Not Found")));
+        } catch (AccessDeniedException | SmartSenseConfigurationNotFoundException issue) {
+            String message = "Unable to identify SmartSense subscription for the user.";
+            LOGGER.warn(message);
+            throw new SmartSenseSubscriptionAccessDeniedException(message, issue);
+        }
+    }
+
+    @Nullable
+    private SmartSenseSubscription createSubscriptionFromIdentityUser(IdentityUser cbUser) {
+        SmartSenseSubscription newSubscription = null;
+        if (!StringUtils.isEmpty(defaultSmartsenseId)) {
+            LOGGER.info("Generating default SmartSense subscription");
+            newSubscription = new SmartSenseSubscription();
+            newSubscription.setSubscriptionId(defaultSmartsenseId);
+            newSubscription.setAccount(cbUser.getAccount());
+            newSubscription.setOwner(cbUser.getUserId());
+            newSubscription.setPublicInAccount(true);
+            repository.save(newSubscription);
+        }
+        return newSubscription;
+    }
+
 }
