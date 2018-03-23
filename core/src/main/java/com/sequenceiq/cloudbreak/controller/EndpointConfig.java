@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.CoreApi;
 import com.sequenceiq.cloudbreak.controller.mapper.AccessDeniedExceptionMapper;
+import com.sequenceiq.cloudbreak.controller.mapper.SmartSenseSubscriptionAccessDeniedMapper;
 import com.sequenceiq.cloudbreak.controller.mapper.AuthenticationCredentialsNotFoundExceptionMapper;
 import com.sequenceiq.cloudbreak.controller.mapper.BadRequestExceptionMapper;
 import com.sequenceiq.cloudbreak.controller.mapper.CloudbreakApiExceptionMapper;
@@ -103,6 +104,7 @@ public class EndpointConfig extends ResourceConfig {
         register(MethodArgumentNotValidExceptionMapper.class);
         register(NotFoundExceptionMapper.class);
         register(SmartSenseNotFoundExceptionMapper.class);
+        register(SmartSenseSubscriptionAccessDeniedMapper.class);
         register(SpringAccessDeniedExceptionMapper.class);
         register(SpringBadRequestExceptionMapper.class);
         register(SubscriptionAlreadyExistExceptionMapper.class);
