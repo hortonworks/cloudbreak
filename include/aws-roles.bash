@@ -248,6 +248,7 @@ aws-generate-inline-role-policy() {
                 "ec2:DescribeRouteTables",
                 "ec2:DescribeSecurityGroups",
                 "ec2:DescribeSubnets",
+                "ec2:DeleteKeyPair",
                 "ec2:DescribeVpcs",
                 "ec2:DescribeSpotInstanceRequests",
                 "ec2:DescribeVpcAttribute",
