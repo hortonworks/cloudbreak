@@ -244,6 +244,7 @@ public class ImageCatalogService {
     public ImageCatalog update(ImageCatalog source) {
 
         ImageCatalog imageCatalog = imageCatalogRepository.findOne(source.getId());
+        authorizationService.hasReadPermission(imageCatalog);
         checkImageCatalog(imageCatalog, source.getId());
         imageCatalog.setImageCatalogName(source.getImageCatalogName());
         imageCatalog.setImageCatalogUrl(source.getImageCatalogUrl());
