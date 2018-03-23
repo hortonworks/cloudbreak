@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.account;
 
 
 import java.util.Map;
+import java.util.Set;
 
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.AccountPreferences;
@@ -17,6 +18,8 @@ public interface AccountPreferencesService {
     Boolean isPlatformSelectionDisabled();
 
     Map<String, Boolean> platformEnablement();
+
+    Set<String> platforms();
 
     AccountPreferences getByAccount(String account);
 
