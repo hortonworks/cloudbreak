@@ -1,5 +1,7 @@
 package com.sequenceiq.it.cloudbreak.v2.mock.instanceterm;
 
+import static java.util.Collections.singleton;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -19,6 +21,7 @@ import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.AbstractCloudbreakIntegrationTest;
 import com.sequenceiq.it.cloudbreak.CloudbreakITContextConstants;
 import com.sequenceiq.it.cloudbreak.CloudbreakUtil;
+import com.sequenceiq.it.cloudbreak.WaitResult;
 import com.sequenceiq.it.cloudbreak.v2.CloudbreakV2Constants;
 import com.sequenceiq.it.cloudbreak.v2.mock.MockServer;
 
@@ -56,8 +59,8 @@ public class MockInstanceTerminationReplicationErrorTest extends AbstractCloudbr
         getCloudbreakClient().stackV2Endpoint().deleteInstance(stackResponse.getId(), instanceId);
         Map<String, String> desiredStatuses = new HashMap<>();
         desiredStatuses.put("status", "AVAILABLE");
-        desiredStatuses.put("clusterStatus", "UPDATE_FAILED");
-        String reason = CloudbreakUtil.getFailedStatuses(getCloudbreakClient(), stackId.toString(), desiredStatuses);
+        desiredStatuses.put("clusterStatus", "AVAILABLE");
+        String reason = CloudbreakUtil.getFailedStatusReason(getCloudbreakClient(), stackId.toString(), desiredStatuses, singleton(WaitResult.SUCCESSFUL));
         Assert.assertEquals(reason, "Node(s) could not be removed from the cluster: There is not enough node to downscale. "
                 + "Check the replication factor and the ApplicationMaster occupation.");
     }
