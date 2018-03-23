@@ -20,7 +20,7 @@ disable-hst-gateway-on-agent:
   service.disabled:
     - name: hst-gateway
 
-disable-hst:
+disable-hst-agent-update:
   service.disabled:
     - name: hst
 

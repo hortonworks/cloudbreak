@@ -52,6 +52,10 @@ base:
     - match: grain
     - ldap.init
 
+  'roles:smartsense_agent_update':
+    - match: grain
+    - smartsense
+
   'roles:smartsense':
     - match: grain
     - smartsense
