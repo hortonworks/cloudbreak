@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -11,6 +12,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.cloud.CloudConstant;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
@@ -59,6 +61,11 @@ public class SimpleAccountPreferencesService implements AccountPreferencesServic
     }
 
     @Override
+    public Set<String> platforms() {
+        return Sets.newHashSet(enabledPlatforms.split(","));
+    }
+
+    @Override
     public Map<String, Boolean> platformEnablement() {
         Map<String, Boolean> result = new HashMap<>();
         if (StringUtils.isEmpty(enabledPlatforms)) {
@@ -66,7 +73,7 @@ public class SimpleAccountPreferencesService implements AccountPreferencesServic
                 result.put(cloudConstant.platform().value(), true);
             }
         } else {
-            for (String platform : enabledPlatforms.split(",")) {
+            for (String platform : platforms()) {
                 result.put(platform, true);
             }
             for (CloudConstant cloudConstant : cloudConstants) {

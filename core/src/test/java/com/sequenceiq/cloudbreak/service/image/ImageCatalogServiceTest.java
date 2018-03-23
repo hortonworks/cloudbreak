@@ -4,18 +4,29 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.List;
+import java.util.Set;
 
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
+import com.sequenceiq.cloudbreak.cloud.CloudConstant;
+import com.sequenceiq.cloudbreak.cloud.model.Platform;
+import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV2;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
@@ -26,6 +37,7 @@ import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.domain.UserProfile;
 import com.sequenceiq.cloudbreak.repository.ImageCatalogRepository;
 import com.sequenceiq.cloudbreak.service.AuthorizationService;
+import com.sequenceiq.cloudbreak.service.account.AccountPreferencesService;
 import com.sequenceiq.cloudbreak.service.user.UserProfileService;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
@@ -38,6 +50,9 @@ public class ImageCatalogServiceTest {
     public static final String USERNAME = "username";
 
     public static final String ACCOUNT = "account";
+
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
 
     @Mock
     private ImageCatalogProvider imageCatalogProvider;
@@ -54,8 +69,14 @@ public class ImageCatalogServiceTest {
     @Mock
     private ImageCatalogRepository imageCatalogRepository;
 
+    @Mock
+    private AccountPreferencesService accountPreferencesService;
+
     @InjectMocks
     private ImageCatalogService underTest;
+
+    @Spy
+    private List<CloudConstant> constants = new ArrayList<>();
 
     @Before
     public void beforeTest() throws Exception {
@@ -65,6 +86,21 @@ public class ImageCatalogServiceTest {
 
         IdentityUser user = getIdentityUser();
         when(authenticatedUserService.getCbUser()).thenReturn(user);
+
+        constants.addAll(Collections.singletonList(new CloudConstant() {
+            @Override
+            public Platform platform() {
+                return Platform.platform("AWS");
+            }
+
+            @Override
+            public Variant variant() {
+                return Variant.variant("AWS");
+            }
+        }));
+
+        ReflectionTestUtils.setField(underTest, ImageCatalogService.class, "defaultCatalogUrl", "http://localhost/imagecatalog-url", null);
+        ReflectionTestUtils.setField(underTest, ImageCatalogService.class, "cbVersion", "unspecified", null);
     }
 
     private IdentityUser getIdentityUser() {
@@ -209,9 +245,13 @@ public class ImageCatalogServiceTest {
         Assert.assertTrue(imageCatalog.getImageCatalogName().startsWith(name) && imageCatalog.getImageCatalogName().indexOf("_") == name.length());
     }
 
-    @Test(expected = BadRequestException.class)
+    @Test
     public void testDeleteImageCatalogWhenEnvDefault() {
         String name = "cloudbreak-default";
+
+        thrown.expectMessage("cloudbreak-default cannot be deleted because it is an environment default image catalog.");
+        thrown.expect(BadRequestException.class);
+
         underTest.delete(name);
     }
 
@@ -236,5 +276,25 @@ public class ImageCatalogServiceTest {
 
         Assert.assertEquals(actual.getImageCatalogName(), name);
         Assert.assertNull(actual.getId());
+    }
+
+    @Test
+    public void testPropagateImagesIfRequested() {
+
+        when(accountPreferencesService.platforms()).thenReturn(Sets.newHashSet("AWS"));
+
+        Set<String> actual = underTest.filterPlatforms();
+
+        Assert.assertEquals(actual, Sets.newHashSet("AWS"));
+    }
+
+    @Test
+    public void testPropagateImagesIfRequestedWHenNotContains() {
+
+        when(accountPreferencesService.platforms()).thenReturn(Sets.newHashSet("AWS", "NOTCONTAINS"));
+
+        Set<String> actual = underTest.filterPlatforms();
+
+        Assert.assertEquals(actual, Sets.newHashSet("AWS"));
     }
 }
