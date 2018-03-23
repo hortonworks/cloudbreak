@@ -10,12 +10,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.model.AmbariDatabaseDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.AmbariRepoDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.KerberosRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.AmbariV2Request;
-import com.sequenceiq.cloudbreak.cloud.model.AmbariDatabase;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
@@ -34,7 +32,6 @@ public class ClusterToAmbariV2RequestRequestConverter extends AbstractConversion
     public AmbariV2Request convert(Cluster source) {
         AmbariV2Request ambariV2Request = new AmbariV2Request();
         ambariV2Request.setBlueprintName(source.getBlueprint().getName());
-        prepareAmbariDatabase(source, ambariV2Request);
         prepareAmbariRepo(source, ambariV2Request);
         prepareStackRepoDetails(source, ambariV2Request);
         prepareBlueprintInputs(source, ambariV2Request);
@@ -72,12 +69,4 @@ public class ClusterToAmbariV2RequestRequestConverter extends AbstractConversion
             ambariV2Request.setAmbariRepoDetailsJson(getConversionService().convert(ambariRepo, AmbariRepoDetailsJson.class));
         }
     }
-
-    private void prepareAmbariDatabase(Cluster source, AmbariV2Request ambariV2Request) {
-        AmbariDatabase ambariDatabase = componentConfigProvider.getAmbariDatabase(source.getId());
-        if (ambariDatabase != null) {
-            ambariV2Request.setAmbariDatabaseDetails(getConversionService().convert(ambariDatabase, AmbariDatabaseDetailsJson.class));
-        }
-    }
-
 }

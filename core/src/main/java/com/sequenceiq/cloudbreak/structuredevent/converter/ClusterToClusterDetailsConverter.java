@@ -7,7 +7,7 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.DatabaseVendor;
-import com.sequenceiq.cloudbreak.cloud.model.AmbariDatabase;
+import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
@@ -15,8 +15,10 @@ import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.Gateway;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
-import com.sequenceiq.cloudbreak.structuredevent.event.ClusterDetails;
+import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.service.ClusterComponentConfigProvider;
+import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
+import com.sequenceiq.cloudbreak.structuredevent.event.ClusterDetails;
 
 @Component
 public class ClusterToClusterDetailsConverter extends AbstractConversionServiceAwareConverter<Cluster, ClusterDetails> {
@@ -25,6 +27,9 @@ public class ClusterToClusterDetailsConverter extends AbstractConversionServiceA
 
     @Inject
     private ClusterComponentConfigProvider clusterComponentConfigProvider;
+
+    @Inject
+    private RdsConfigService rdsConfigService;
 
     @Override
     public ClusterDetails convert(Cluster source) {
@@ -38,7 +43,19 @@ public class ClusterToClusterDetailsConverter extends AbstractConversionServiceA
         convertGatewayProperties(clusterDetails, source.getGateway());
         convertFileSystemProperties(clusterDetails, source.getFileSystem());
         convertComponents(clusterDetails, source);
+        addDatabaseInfo(clusterDetails, source);
         return clusterDetails;
+    }
+
+    private void addDatabaseInfo(ClusterDetails clusterDetails, Cluster source) {
+        RDSConfig rdsConfig = rdsConfigService.findByClusterIdAndType(source.getOwner(), source.getAccount(), source.getId(), RdsType.AMBARI);
+        if (rdsConfig == null || DatabaseVendor.EMBEDDED.name().equalsIgnoreCase(rdsConfig.getDatabaseEngine())) {
+            clusterDetails.setDatabaseType(DatabaseVendor.EMBEDDED.name());
+            clusterDetails.setExternalDatabase(Boolean.FALSE);
+        } else {
+            clusterDetails.setDatabaseType(rdsConfig.getDatabaseEngine());
+            clusterDetails.setExternalDatabase(Boolean.TRUE);
+        }
     }
 
     private void convertKerberosConfig(ClusterDetails clusterDetails, Cluster source) {
@@ -83,14 +100,6 @@ public class ClusterToClusterDetailsConverter extends AbstractConversionServiceA
         if (stackRepoDetails != null) {
             clusterDetails.setClusterType(stackRepoDetails.getStack().get(StackRepoDetails.REPO_ID_TAG));
             clusterDetails.setClusterVersion(stackRepoDetails.getHdpVersion());
-        }
-        AmbariDatabase ambariDatabase = clusterComponentConfigProvider.getAmbariDatabase(cluster.getId());
-        if (ambariDatabase != null) {
-            clusterDetails.setExternalDatabase(!ambariDatabase.getVendor().equals(DatabaseVendor.EMBEDDED.value()));
-            clusterDetails.setDatabaseType(ambariDatabase.getVendor());
-        } else {
-            clusterDetails.setExternalDatabase(Boolean.FALSE);
-            clusterDetails.setDatabaseType(DatabaseVendor.EMBEDDED.value());
         }
     }
 }

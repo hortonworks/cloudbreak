@@ -18,4 +18,6 @@ public interface ClusterComponentRepository extends CrudRepository<ClusterCompon
 
     @Query("SELECT cv FROM ClusterComponent cv WHERE cv.cluster.id = :clusterId")
     Set<ClusterComponent> findComponentByClusterId(@Param("clusterId") Long clusterId);
+
+    Set<ClusterComponent> findByComponentType(ComponentType componentType);
 }

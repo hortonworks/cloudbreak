@@ -106,7 +106,6 @@ public class StackToBlueprintPreparationObjectConverter extends AbstractConversi
                     .withGateway(cluster.getGateway())
                     .withBlueprintView(new BlueprintView(cluster, blueprintStackInfo))
                     .withStackRepoDetailsHdpVersion(stackRepoDetailsHdpVersion)
-                    .withAmbariDatabase(clusterComponentConfigProvider.getAmbariDatabase(cluster.getId()))
                     .withFileSystemConfigurationView(fileSystemConfigurationView)
                     .withGeneralClusterConfigs(generalClusterConfigsProvider.generalClusterConfigs(source, cluster, identityUser))
                     .withSmartSenseSubscriptionId(aDefault.isPresent() ? aDefault.get().getSubscriptionId() : null)

@@ -103,14 +103,6 @@ public class ClusterComponentConfigProvider {
         }
     }
 
-    public AmbariDatabase getAmbariDatabase(Iterable<ClusterComponent> clusterComponents) {
-        try {
-            return getComponent(Lists.newArrayList(clusterComponents), AmbariDatabase.class, ComponentType.AMBARI_DATABASE_DETAILS);
-        } catch (Exception e) {
-            throw new CloudbreakServiceException("Failed to read Ambari database", e);
-        }
-    }
-
     public ClusterComponent store(ClusterComponent component) {
         LOGGER.debug("Component is going to be saved: {}", component);
         ClusterComponent ret = componentRepository.save(component);

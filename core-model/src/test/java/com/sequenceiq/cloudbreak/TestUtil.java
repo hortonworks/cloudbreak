@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.api.model.AdjustmentType;
 import com.sequenceiq.cloudbreak.api.model.AdlsFileSystemConfiguration;
+import com.sequenceiq.cloudbreak.api.model.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.model.DirectoryType;
 import com.sequenceiq.cloudbreak.api.model.ExecutorType;
@@ -634,7 +635,7 @@ public class TestUtil {
         rdsConfig.setConnectionURL("jdbc:postgresql://10.1.1.1:5432/" + rdsType.name().toLowerCase());
         rdsConfig.setType(rdsType.name());
         rdsConfig.setConnectionDriver("org.postgresql.Driver");
-        rdsConfig.setDatabaseEngine("postgres");
+        rdsConfig.setDatabaseEngine(DatabaseVendor.POSTGRES.name());
         return rdsConfig;
     }
 

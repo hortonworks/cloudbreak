@@ -6,7 +6,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
-import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 
 @EntityType(entityClass = RDSConfig.class)
@@ -49,5 +48,5 @@ public interface RdsConfigRepository extends CrudRepository<RDSConfig, Long> {
     @Query("SELECT r FROM RDSConfig r INNER JOIN r.clusters cluster WHERE cluster.id= :clusterId "
             + "AND ((r.publicInAccount=true and r.account= :account) or r.owner= :user) AND r.status <> 'DEFAULT_DELETED' AND r.type= :type")
     RDSConfig findByClusterIdAndType(@Param("user") String user, @Param("account") String account, @Param("clusterId") Long clusterId,
-            @Param("type") RdsType type);
+            @Param("type") String type);
 }

@@ -10,7 +10,6 @@ import com.sequenceiq.cloudbreak.blueprint.template.views.FileSystemConfiguratio
 import com.sequenceiq.cloudbreak.blueprint.template.views.GatewayView;
 import com.sequenceiq.cloudbreak.blueprint.template.views.HostgroupView;
 import com.sequenceiq.cloudbreak.blueprint.templates.GeneralClusterConfigs;
-import com.sequenceiq.cloudbreak.cloud.model.AmbariDatabase;
 import com.sequenceiq.cloudbreak.domain.FlexSubscription;
 import com.sequenceiq.cloudbreak.domain.Gateway;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
@@ -26,8 +25,6 @@ public class BlueprintPreparationObject {
     private final GeneralClusterConfigs generalClusterConfigs;
 
     private final BlueprintView blueprintView;
-
-    private final AmbariDatabase ambariDatabase;
 
     private final Set<RDSConfig> rdsConfigs;
 
@@ -51,7 +48,6 @@ public class BlueprintPreparationObject {
         this.rdsConfigs = builder.rdsConfigs;
         this.hostgroupViews = builder.hostgroupViews;
         this.stackRepoDetailsHdpVersion = builder.stackRepoDetailsHdpVersion;
-        this.ambariDatabase = builder.ambariDatabase;
         this.smartSenseSubscriptionId = builder.smartSenseSubscriptionId;
         this.ldapConfig = builder.ldapConfig;
         this.hdfConfigs = builder.hdfConfigs;
@@ -73,10 +69,6 @@ public class BlueprintPreparationObject {
 
     public Optional<String> getStackRepoDetailsHdpVersion() {
         return stackRepoDetailsHdpVersion;
-    }
-
-    public AmbariDatabase getAmbariDatabase() {
-        return ambariDatabase;
     }
 
     public Optional<String> getSmartSenseSubscriptionId() {
@@ -123,8 +115,6 @@ public class BlueprintPreparationObject {
 
         private Optional<String> stackRepoDetailsHdpVersion = Optional.empty();
 
-        private AmbariDatabase ambariDatabase;
-
         private Optional<String> smartSenseSubscriptionId = Optional.empty();
 
         private Optional<LdapConfig> ldapConfig = Optional.empty();
@@ -145,11 +135,6 @@ public class BlueprintPreparationObject {
 
         public static Builder builder() {
             return new Builder();
-        }
-
-        public Builder withAmbariDatabase(AmbariDatabase ambariDatabase) {
-            this.ambariDatabase = ambariDatabase;
-            return this;
         }
 
         public Builder withSmartSenseSubscriptionId(String smartSenseSubscriptionId) {

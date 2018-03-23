@@ -23,13 +23,14 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.ExecutorType;
 import com.sequenceiq.cloudbreak.api.model.ExposedService;
+import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessorFactory;
 import com.sequenceiq.cloudbreak.blueprint.kerberos.KerberosDetailService;
-import com.sequenceiq.cloudbreak.cloud.model.AmbariDatabase;
+import com.sequenceiq.cloudbreak.blueprint.template.views.RdsView;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
-import com.sequenceiq.cloudbreak.service.CloudbreakException;
+import com.sequenceiq.cloudbreak.converter.mapper.AmbariDatabaseMapper;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.ExposedServices;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
@@ -38,10 +39,12 @@ import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
+import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorCancelledException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
+import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
@@ -50,6 +53,7 @@ import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.SmartSenseCredentialConfigService;
@@ -57,6 +61,7 @@ import com.sequenceiq.cloudbreak.service.blueprint.ComponentLocatorService;
 import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariSecurityConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.HiveConfigProvider;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigProvider;
+import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 
 @Component
 public class ClusterHostServiceRunner {
@@ -100,6 +105,12 @@ public class ClusterHostServiceRunner {
     @Inject
     private ProxyConfigProvider proxyConfigProvider;
 
+    @Inject
+    private RdsConfigService rdsConfigService;
+
+    @Inject
+    private AmbariDatabaseMapper ambariDatabaseMapper;
+
     @Transactional
     public void runAmbariServices(Stack stack, Cluster cluster) throws CloudbreakException {
         try {
@@ -117,7 +128,7 @@ public class ClusterHostServiceRunner {
     }
 
     private SaltConfig createSaltConfig(Stack stack, Cluster cluster, GatewayConfig primaryGatewayConfig, Iterable<GatewayConfig> gatewayConfigs)
-            throws IOException {
+            throws IOException, CloudbreakOrchestratorException {
         Map<String, SaltPillarProperties> servicePillar = new HashMap<>();
         saveDatalakeNameservers(stack, servicePillar);
         saveSharedRangerService(stack, servicePillar);
@@ -151,8 +162,9 @@ public class ClusterHostServiceRunner {
         }
         servicePillar.put("ambari-gpl-repo", new SaltPillarProperties("/ambari/gpl.sls", singletonMap("ambari", singletonMap("gpl", singletonMap("enabled",
                 clusterComponentConfigProvider.getHDPRepo(cluster.getId()).isEnableGplRepo())))));
-        AmbariDatabase ambariDb = clusterComponentConfigProvider.getAmbariDatabase(cluster.getId());
-        servicePillar.put("ambari-database", new SaltPillarProperties("/ambari/database.sls", singletonMap("ambari", singletonMap("database", ambariDb))));
+
+        decoratePillarWithAmbariDatabase(cluster, servicePillar);
+
         saveLdapPillar(cluster.getLdapConfig(), servicePillar);
         saveDockerPillar(cluster.getExecutorType(), servicePillar);
         saveHDPPillar(cluster.getId(), servicePillar);
@@ -171,6 +183,16 @@ public class ClusterHostServiceRunner {
         proxyConfigProvider.decoratePillarWithProxyDataIfNeeded(servicePillar, cluster);
 
         return new SaltConfig(servicePillar, createGrainProperties(gatewayConfigs));
+    }
+
+    private void decoratePillarWithAmbariDatabase(Cluster cluster, Map<String, SaltPillarProperties> servicePillar)
+            throws CloudbreakOrchestratorFailedException {
+        RDSConfig ambariRdsConfig = rdsConfigService.findByClusterIdAndType(cluster.getOwner(), cluster.getAccount(), cluster.getId(), RdsType.AMBARI);
+        if (ambariRdsConfig == null) {
+            throw new CloudbreakOrchestratorFailedException("Ambari RDSConfig is missing for stack");
+        }
+        RdsView ambariRdsView = new RdsView(ambariRdsConfig);
+        servicePillar.put("ambari-database", new SaltPillarProperties("/ambari/database.sls", singletonMap("ambari", singletonMap("database", ambariRdsView))));
     }
 
     private Map<String, Map<String, String>> createGrainProperties(Iterable<GatewayConfig> gatewayConfigs) {

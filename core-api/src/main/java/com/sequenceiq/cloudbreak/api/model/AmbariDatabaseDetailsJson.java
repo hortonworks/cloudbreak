@@ -17,9 +17,13 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
+/**
+ * @deprecated RdsConfig is replacing AmbariDatabaseDetailsJson
+ */
 @ApiModel("AmbariDatabaseDetails")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
+@Deprecated
 public class AmbariDatabaseDetailsJson implements JsonEntity {
 
     @NotNull
