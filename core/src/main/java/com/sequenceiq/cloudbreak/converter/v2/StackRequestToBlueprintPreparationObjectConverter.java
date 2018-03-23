@@ -24,7 +24,6 @@ import com.sequenceiq.cloudbreak.blueprint.template.views.HostgroupView;
 import com.sequenceiq.cloudbreak.blueprint.templates.BlueprintStackInfo;
 import com.sequenceiq.cloudbreak.blueprint.templates.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.blueprint.utils.StackInfoService;
-import com.sequenceiq.cloudbreak.cloud.model.AmbariDatabase;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.service.user.UserFilterField;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
@@ -78,7 +77,6 @@ public class StackRequestToBlueprintPreparationObjectConverter extends AbstractC
             String smartsenseSubscriptionId = getSmartsenseSubscriptionId(source, flexSubscription);
             KerberosConfig kerberosConfig = getKerberosConfig(source);
             LdapConfig ldapConfig = getLdapConfig(source, identityUser);
-            AmbariDatabase ambariDatabase = getAmbariDatabase(source);
             FileSystemConfigurationView fileSystemConfigurationView = getFileSystemConfigurationView(source);
             Set<RDSConfig> rdsConfigs = getRdsConfigs(source, identityUser);
             Blueprint blueprint = getBlueprint(source, identityUser);
@@ -93,7 +91,6 @@ public class StackRequestToBlueprintPreparationObjectConverter extends AbstractC
                     .withHostgroupViews(hostgroupViews)
                     .withBlueprintView(blueprintView)
                     .withStackRepoDetailsHdpVersion(blueprintStackInfo.getVersion())
-                    .withAmbariDatabase(ambariDatabase)
                     .withFileSystemConfigurationView(fileSystemConfigurationView)
                     .withGeneralClusterConfigs(generalClusterConfigs)
                     .withSmartSenseSubscriptionId(smartsenseSubscriptionId)
@@ -164,14 +161,6 @@ public class StackRequestToBlueprintPreparationObjectConverter extends AbstractC
             fileSystemConfigurationView = new FileSystemConfigurationView(fileSystemConfiguration, source.getCluster().getFileSystem().isDefaultFs());
         }
         return fileSystemConfigurationView;
-    }
-
-    private AmbariDatabase getAmbariDatabase(StackV2Request source) {
-        AmbariDatabase ambariDatabase = null;
-        if (source.getCluster().getAmbari().getAmbariDatabaseDetails() != null) {
-            ambariDatabase = getConversionService().convert(source.getCluster().getAmbari().getAmbariDatabaseDetails(), AmbariDatabase.class);
-        }
-        return ambariDatabase;
     }
 
     private LdapConfig getLdapConfig(StackV2Request source, IdentityUser identityUser) {

@@ -69,8 +69,12 @@ public class AmbariV2Request implements JsonEntity {
     @ApiModelProperty(ClusterModelDescription.AMBARI_REPO_DETAILS)
     private AmbariRepoDetailsJson ambariRepoDetailsJson;
 
+    /**
+     * @deprecated RdsConfig is replacing AmbariDatabaseDetailsJson
+     */
     @Valid
     @ApiModelProperty(ClusterModelDescription.AMBARI_DATABASE_DETAILS)
+    @Deprecated
     private AmbariDatabaseDetailsJson ambariDatabaseDetails;
 
     @ApiModelProperty(ClusterModelDescription.CONFIG_STRATEGY)

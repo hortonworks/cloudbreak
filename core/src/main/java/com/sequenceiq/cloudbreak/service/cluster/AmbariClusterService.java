@@ -52,10 +52,10 @@ import com.sequenceiq.cloudbreak.api.model.RecoveryMode;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.api.model.StatusRequest;
 import com.sequenceiq.cloudbreak.api.model.UserNamePasswordJson;
+import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
 import com.sequenceiq.cloudbreak.blueprint.validation.BlueprintValidator;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.client.PkiUtil;
-import com.sequenceiq.cloudbreak.cloud.model.AmbariDatabase;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
@@ -79,6 +79,7 @@ import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
+import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.StackStatus;
 import com.sequenceiq.cloudbreak.domain.StopRestrictionReason;
@@ -101,6 +102,7 @@ import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterTerminationService;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
+import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.util.AmbariClientExceptionUtil;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
@@ -185,6 +187,9 @@ public class AmbariClusterService implements ClusterService {
     @Inject
     private AuthorizationService authorizationService;
 
+    @Inject
+    private RdsConfigService rdsConfigService;
+
     @Override
     @Transactional(TxType.NEVER)
     public Cluster create(IdentityUser user, Stack stack, Cluster cluster, List<ClusterComponent> components) {
@@ -255,11 +260,6 @@ public class AmbariClusterService implements ClusterService {
             }
         }
         return gatewayCount > 1;
-    }
-
-    private boolean isEmbeddedAmbariDB(Collection<ClusterComponent> components) {
-        AmbariDatabase ambariDatabase = clusterComponentConfigProvider.getComponent(components, AmbariDatabase.class, ComponentType.AMBARI_DATABASE_DETAILS);
-        return ambariDatabase == null || DatabaseVendor.EMBEDDED.value().equals(ambariDatabase.getVendor());
     }
 
     @Override
@@ -486,8 +486,8 @@ public class AmbariClusterService implements ClusterService {
     }
 
     private boolean withEmbeddedAmbariDB(Cluster cluster) {
-        AmbariDatabase ambariDB = clusterComponentConfigProvider.getAmbariDatabase(cluster.getId());
-        return ambariDB == null || DatabaseVendor.EMBEDDED.value().equals(ambariDB.getVendor());
+        RDSConfig rdsConfig = rdsConfigService.findByClusterIdAndType(cluster.getOwner(), cluster.getAccount(), cluster.getId(), RdsType.AMBARI);
+        return rdsConfig == null || DatabaseVendor.EMBEDDED.name().equalsIgnoreCase(rdsConfig.getDatabaseEngine());
     }
 
     private void updateChangedHosts(Cluster cluster, Map<String, HostMetadata> failedHostMetadata, HostMetadataState healthyState,
@@ -696,10 +696,9 @@ public class AmbariClusterService implements ClusterService {
             kerberosConfigRepository.save(kerberosConfig);
         }
         Blueprint blueprint = blueprintService.get(blueprintId);
-        AmbariDatabase ambariDatabase = clusterComponentConfigProvider.getAmbariDatabase(cluster.getId());
-        if (ambariDatabase != null && !DatabaseVendor.EMBEDDED.value().equals(ambariDatabase.getVendor())) {
+        if (!withEmbeddedAmbariDB(cluster)) {
             throw new BadRequestException("Ambari doesn't support resetting external DB automatically. To reset Ambari Server schema you must first drop "
-                + "and then create it using DDL scripts from /var/lib/ambari-server/resources");
+                    + "and then create it using DDL scripts from /var/lib/ambari-server/resources");
         }
         if (validateBlueprint) {
             blueprintValidator.validateBlueprintForStack(cluster, blueprint, hostGroups, stack.getInstanceGroups());
