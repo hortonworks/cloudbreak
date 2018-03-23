@@ -40,6 +40,9 @@ type OperationDetails struct {
 
 	// user Id
 	UserID string `json:"userId,omitempty"`
+
+	// user name
+	UserName string `json:"userName,omitempty"`
 }
 
 /* polymorph OperationDetails account false */
@@ -57,6 +60,8 @@ type OperationDetails struct {
 /* polymorph OperationDetails timestamp false */
 
 /* polymorph OperationDetails userId false */
+
+/* polymorph OperationDetails userName false */
 
 // Validate validates this operation details
 func (m *OperationDetails) Validate(formats strfmt.Registry) error {

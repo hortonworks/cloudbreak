@@ -6,13 +6,10 @@ package models_cloudbreak
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
-	"strconv"
-
 	strfmt "github.com/go-openapi/strfmt"
 
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
-	"github.com/go-openapi/validate"
 )
 
 // GeneratedBlueprintResponse generated blueprint response
@@ -22,88 +19,17 @@ type GeneratedBlueprintResponse struct {
 
 	// ambari blueprint JSON, set this or the url field
 	AmbariBlueprint string `json:"ambariBlueprint,omitempty"`
-
-	// description of the resource
-	// Max Length: 1000
-	// Min Length: 0
-	Description *string `json:"description,omitempty"`
-
-	// input parameters of the blueprint
-	// Unique: true
-	Inputs []*BlueprintParameter `json:"inputs"`
 }
 
 /* polymorph GeneratedBlueprintResponse ambariBlueprint false */
-
-/* polymorph GeneratedBlueprintResponse description false */
-
-/* polymorph GeneratedBlueprintResponse inputs false */
 
 // Validate validates this generated blueprint response
 func (m *GeneratedBlueprintResponse) Validate(formats strfmt.Registry) error {
 	var res []error
 
-	if err := m.validateDescription(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
-	if err := m.validateInputs(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
-	return nil
-}
-
-func (m *GeneratedBlueprintResponse) validateDescription(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Description) { // not required
-		return nil
-	}
-
-	if err := validate.MinLength("description", "body", string(*m.Description), 0); err != nil {
-		return err
-	}
-
-	if err := validate.MaxLength("description", "body", string(*m.Description), 1000); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (m *GeneratedBlueprintResponse) validateInputs(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Inputs) { // not required
-		return nil
-	}
-
-	if err := validate.UniqueItems("inputs", "body", m.Inputs); err != nil {
-		return err
-	}
-
-	for i := 0; i < len(m.Inputs); i++ {
-
-		if swag.IsZero(m.Inputs[i]) { // not required
-			continue
-		}
-
-		if m.Inputs[i] != nil {
-
-			if err := m.Inputs[i].Validate(formats); err != nil {
-				if ve, ok := err.(*errors.Validation); ok {
-					return ve.ValidateName("inputs" + "." + strconv.Itoa(i))
-				}
-				return err
-			}
-		}
-
-	}
-
 	return nil
 }
 
