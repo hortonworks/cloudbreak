@@ -24,8 +24,6 @@ import com.sequenceiq.cloudbreak.converter.mapper.AmbariDatabaseMapper;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.repository.ClusterRepository;
-import com.sequenceiq.cloudbreak.repository.RdsConfigRepository;
 import com.sequenceiq.cloudbreak.service.cluster.filter.ConfigParam;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.util.PasswordUtil;
@@ -55,13 +53,7 @@ public class AmbariConfigurationService {
     private String userName;
 
     @Inject
-    private RdsConfigRepository rdsConfigRepository;
-
-    @Inject
     private RdsConfigService rdsConfigService;
-
-    @Inject
-    private ClusterRepository clusterRepository;
 
     @Inject
     private AmbariDatabaseMapper ambariDatabaseMapper;
@@ -103,16 +95,16 @@ public class AmbariConfigurationService {
 
     public Optional<RDSConfig> createDefaultRdsConfigIfNeeded(Stack stack, Cluster cluster) {
         Set<RDSConfig> rdsConfigs = cluster.getRdsConfigs();
-        if (rdsConfigs.stream().noneMatch(rdsConfig -> rdsConfig.getType().equalsIgnoreCase(RdsType.AMBARI.name()))) {
+        if (rdsConfigs == null || rdsConfigs.stream().noneMatch(rdsConfig -> rdsConfig.getType().equalsIgnoreCase(RdsType.AMBARI.name()))) {
             LOGGER.info("Creating Ambari RDSConfig");
-            return Optional.of(createAmbariDefaultRdsConf(stack, cluster, rdsConfigs));
+            return Optional.of(createAmbariDefaultRdsConf(stack, cluster));
         }
         return Optional.empty();
     }
 
-    private RDSConfig createAmbariDefaultRdsConf(Stack stack, Cluster cluster, Set<RDSConfig> rdsConfigs) {
+    private RDSConfig createAmbariDefaultRdsConf(Stack stack, Cluster cluster) {
         RDSConfig rdsConfig = new RDSConfig();
-        rdsConfig.setName(ambariDatabaseMapper.mapName(stack));
+        rdsConfig.setName(ambariDatabaseMapper.mapName(cluster));
         rdsConfig.setConnectionUserName(userName);
         rdsConfig.setConnectionPassword(PasswordUtil.generatePassword());
         rdsConfig.setConnectionURL("jdbc:postgresql://" + host + ":" + port + "/" + name);

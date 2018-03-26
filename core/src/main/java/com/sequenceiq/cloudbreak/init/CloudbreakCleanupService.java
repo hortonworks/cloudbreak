@@ -43,6 +43,7 @@ import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.flowlog.FlowLogService;
 import com.sequenceiq.cloudbreak.ha.CloudbreakNodeConfig;
 import com.sequenceiq.cloudbreak.service.ha.HeartbeatService;
+import com.sequenceiq.cloudbreak.service.rdsconfig.AmbariDatabaseToRdsConfigMigrationService;
 import com.sequenceiq.cloudbreak.service.usages.UsageService;
 
 @Component
@@ -86,6 +87,9 @@ public class CloudbreakCleanupService implements ApplicationListener<ContextRefr
     @Inject
     private HeartbeatService heartbeatService;
 
+    @Inject
+    private AmbariDatabaseToRdsConfigMigrationService ambariDatabaseToRdsConfigMigrationService;
+
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
         heartbeatService.heartbeat();
@@ -97,6 +101,7 @@ public class CloudbreakCleanupService implements ApplicationListener<ContextRefr
         List<Cluster> clustersToSync = resetClusterStatus(stacksToSync, stackIdsUnderOperation);
         triggerSyncs(stacksToSync, clustersToSync);
         flowLogService.purgeTerminatedStacksFlowLogs();
+        ambariDatabaseToRdsConfigMigrationService.migrateAmbariDatabaseClusterComponentsToRdsConfig();
     }
 
     private List<Stack> resetStackStatus(Collection<Long> excludeStackIds) {
