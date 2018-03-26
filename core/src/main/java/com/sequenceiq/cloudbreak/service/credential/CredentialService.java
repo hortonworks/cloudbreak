@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.repository.CredentialRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.AuthorizationService;
+import com.sequenceiq.cloudbreak.service.account.AccountPreferencesService;
 import com.sequenceiq.cloudbreak.service.notification.Notification;
 import com.sequenceiq.cloudbreak.service.notification.NotificationSender;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderCredentialAdapter;
@@ -56,6 +57,9 @@ public class CredentialService {
     private UserProfileCredentialHandler userProfileCredentialHandler;
 
     @Inject
+    private AccountPreferencesService accountPreferencesService;
+
+    @Inject
     private NotificationSender notificationSender;
 
     public Set<Credential> retrievePrivateCredentials(IdentityUser user) {
@@ -63,8 +67,10 @@ public class CredentialService {
     }
 
     public Set<Credential> retrieveAccountCredentials(IdentityUser user) {
-        return user.getRoles().contains(IdentityUserRole.ADMIN) ? credentialRepository.findAllInAccount(user.getAccount())
-                : credentialRepository.findPublicInAccountForUser(user.getUserId(), user.getAccount());
+        Set<String> platforms = accountPreferencesService.enabledPlatforms();
+        return user.getRoles().contains(IdentityUserRole.ADMIN)
+                ? credentialRepository.findAllInAccountAndFilterByPlatforms(user.getAccount(), platforms)
+                : credentialRepository.findPublicInAccountForUserFilterByPlatforms(user.getUserId(), user.getAccount(), platforms);
     }
 
     public Credential get(Long id) {

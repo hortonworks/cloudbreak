@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.repository;
 
+import java.util.Collection;
 import java.util.Set;
 
 import org.springframework.data.jpa.repository.Query;
@@ -24,8 +25,16 @@ public interface CredentialRepository extends CrudRepository<Credential, Long> {
     @Query("SELECT c FROM Credential c WHERE ((c.account= :account AND c.publicInAccount= true) OR c.owner= :user) AND c.archived IS FALSE")
     Set<Credential> findPublicInAccountForUser(@Param("user") String user, @Param("account") String account);
 
+    @Query("SELECT c FROM Credential c WHERE ((c.account= :account AND c.publicInAccount= true) OR c.owner= :user) AND c.archived IS FALSE "
+            + "AND cloudPlatform in (:cloudPlatforms)")
+    Set<Credential> findPublicInAccountForUserFilterByPlatforms(@Param("user") String user, @Param("account") String account,
+            @Param("cloudPlatforms") Collection<String> cloudPlatforms);
+
     @Query("SELECT c FROM Credential c WHERE c.account= :account AND c.archived IS FALSE")
     Set<Credential> findAllInAccount(@Param("account") String account);
+
+    @Query("SELECT c FROM Credential c WHERE c.account= :account AND c.archived IS FALSE and cloudPlatform in (:cloudPlatforms)")
+    Set<Credential> findAllInAccountAndFilterByPlatforms(@Param("account") String account, @Param("cloudPlatforms") Collection<String> cloudPlatforms);
 
     @Query("SELECT c FROM Credential c WHERE c.name= :name AND ((c.publicInAccount=true and c.account= :account) OR c.owner= :owner) AND c.archived IS FALSE")
     Credential findByNameInAccount(@Param("name") String name, @Param("account") String account, @Param("owner") String owner);

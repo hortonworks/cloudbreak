@@ -19,7 +19,7 @@ public interface AccountPreferencesService {
 
     Map<String, Boolean> platformEnablement();
 
-    Set<String> platforms();
+    Set<String> enabledPlatforms();
 
     AccountPreferences getByAccount(String account);
 
