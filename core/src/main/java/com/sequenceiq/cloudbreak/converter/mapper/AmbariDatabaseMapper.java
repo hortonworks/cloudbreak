@@ -34,7 +34,7 @@ public interface AmbariDatabaseMapper {
 
     @Named("connectionUrl")
     default String mapConnectionUrl(AmbariDatabaseDetailsJson ambariDatabaseDetailsJson) {
-        return "jdbc:postgresql://" + ambariDatabaseDetailsJson.getHost() + ":"
+        return "jdbc:" + ambariDatabaseDetailsJson.getVendor().jdbcUrlDriverId() + "://" + ambariDatabaseDetailsJson.getHost() + ":"
                 + ambariDatabaseDetailsJson.getPort() + "/" + ambariDatabaseDetailsJson.getName();
     }
 
