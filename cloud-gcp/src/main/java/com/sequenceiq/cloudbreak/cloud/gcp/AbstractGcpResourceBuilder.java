@@ -90,14 +90,14 @@ public abstract class AbstractGcpResourceBuilder implements CloudPlatformAware {
             checkError(execute);
             return execute;
         } catch (GoogleJsonResponseException e) {
-            if (e.getDetails().get("code").equals(HttpStatus.SC_NOT_FOUND)) {
+            if (e.getDetails().get("code").equals(HttpStatus.SC_NOT_FOUND) || e.getDetails().get("code").equals(HttpStatus.SC_FORBIDDEN)) {
                 Location location = context.getLocation();
                 try {
                     Operation execute = GcpStackUtil.regionOperations(context.getCompute(), context.getProjectId(), operation, location.getRegion()).execute();
                     checkError(execute);
                     return execute;
                 } catch (GoogleJsonResponseException e1) {
-                    if (e1.getDetails().get("code").equals(HttpStatus.SC_NOT_FOUND)) {
+                    if (e1.getDetails().get("code").equals(HttpStatus.SC_NOT_FOUND) || e1.getDetails().get("code").equals(HttpStatus.SC_FORBIDDEN)) {
                         Operation execute = GcpStackUtil.zoneOperations(context.getCompute(), context.getProjectId(), operation,
                                 location.getAvailabilityZone()).execute();
                         checkError(execute);
