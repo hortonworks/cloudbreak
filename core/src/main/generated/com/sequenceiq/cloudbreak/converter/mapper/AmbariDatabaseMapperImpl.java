@@ -1,10 +1,9 @@
 package com.sequenceiq.cloudbreak.converter.mapper;
 
 import com.sequenceiq.cloudbreak.api.model.AmbariDatabaseDetailsJson;
-import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariDatabase;
+import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
-import com.sequenceiq.cloudbreak.domain.Stack;
 import javax.annotation.Generated;
 import org.springframework.stereotype.Component;
 
@@ -15,8 +14,8 @@ import org.springframework.stereotype.Component;
 public class AmbariDatabaseMapperImpl implements AmbariDatabaseMapper {
 
     @Override
-    public RDSConfig mapAmbariDatabaseDetailsJsonToRdsConfig(AmbariDatabaseDetailsJson ambariDatabaseDetailsJson, Stack stack) {
-        if ( ambariDatabaseDetailsJson == null && stack == null ) {
+    public RDSConfig mapAmbariDatabaseDetailsJsonToRdsConfig(AmbariDatabaseDetailsJson ambariDatabaseDetailsJson, Cluster cluster, boolean publicInAccount) {
+        if ( ambariDatabaseDetailsJson == null && cluster == null ) {
             return null;
         }
 
@@ -30,16 +29,16 @@ public class AmbariDatabaseMapperImpl implements AmbariDatabaseMapper {
             rDSConfig.setConnectionURL( mapConnectionUrl( ambariDatabaseDetailsJson ) );
             rDSConfig.setConnectionPassword( ambariDatabaseDetailsJson.getPassword() );
         }
-        if ( stack != null ) {
-            rDSConfig.setName( mapName( stack ) );
-            rDSConfig.setAccount( stack.getAccount() );
-            rDSConfig.setOwner( stack.getOwner() );
-            rDSConfig.setPublicInAccount( stack.isPublicInAccount() );
+        if ( cluster != null ) {
+            rDSConfig.setName( mapName( cluster ) );
+            rDSConfig.setAccount( cluster.getAccount() );
+            rDSConfig.setOwner( cluster.getOwner() );
         }
+        rDSConfig.setPublicInAccount( publicInAccount );
         rDSConfig.setCreationDate( new java.util.Date().getTime() );
         rDSConfig.setType( com.sequenceiq.cloudbreak.api.model.rds.RdsType.AMBARI.name() );
         rDSConfig.setConnectionDriver( "org.postgresql.Driver" );
-        rDSConfig.setStatus( ResourceStatus.USER_MANAGED );
+        rDSConfig.setStatus( com.sequenceiq.cloudbreak.api.model.ResourceStatus.USER_MANAGED );
 
         return rDSConfig;
     }

@@ -10,15 +10,15 @@ import com.sequenceiq.cloudbreak.api.model.AmbariDatabaseDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariDatabase;
+import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
-import com.sequenceiq.cloudbreak.domain.Stack;
 
 @Mapper(componentModel = "spring")
 public interface AmbariDatabaseMapper {
 
     @Mappings({
             @Mapping(source = "ambariDatabaseDetailsJson.vendor", target = "databaseEngine"),
-            @Mapping(source = "stack", target = "name", qualifiedByName = "name"),
+            @Mapping(source = "cluster", target = "name", qualifiedByName = "name"),
             @Mapping(source = "ambariDatabaseDetailsJson.userName", target = "connectionUserName"),
             @Mapping(source = "ambariDatabaseDetailsJson.password", target = "connectionPassword"),
             @Mapping(source = "ambariDatabaseDetailsJson", target = "connectionURL", qualifiedByName = "connectionUrl"),
@@ -27,10 +27,10 @@ public interface AmbariDatabaseMapper {
             @Mapping(target = "clusters", ignore = true),
             @Mapping(target = "id", ignore = true),
             @Mapping(target = "stackVersion", ignore = true),
-            @Mapping(target = "status", constant = "USER_MANAGED"),
+            @Mapping(target = "status", expression = "java(com.sequenceiq.cloudbreak.api.model.ResourceStatus.USER_MANAGED)"),
             @Mapping(target = "type", expression = "java(com.sequenceiq.cloudbreak.api.model.rds.RdsType.AMBARI.name())")
     })
-    RDSConfig mapAmbariDatabaseDetailsJsonToRdsConfig(AmbariDatabaseDetailsJson ambariDatabaseDetailsJson, Stack stack);
+    RDSConfig mapAmbariDatabaseDetailsJsonToRdsConfig(AmbariDatabaseDetailsJson ambariDatabaseDetailsJson, Cluster cluster, boolean publicInAccount);
 
     @Named("connectionUrl")
     default String mapConnectionUrl(AmbariDatabaseDetailsJson ambariDatabaseDetailsJson) {
@@ -39,13 +39,8 @@ public interface AmbariDatabaseMapper {
     }
 
     @Named("name")
-    default String mapName(Stack stack) {
-        return RdsType.AMBARI.name() + stack.getId();
-    }
-
-    @Named("databaseEngine")
-    default String mapDatabaseEngine(DatabaseVendor vendor) {
-        return vendor.value();
+    default String mapName(Cluster cluster) {
+        return RdsType.AMBARI.name() + cluster.getId();
     }
 
     @Mapping(source = "ambariDatabase.vendor", target = "vendor", qualifiedByName = "vendor")

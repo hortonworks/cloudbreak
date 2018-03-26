@@ -12,6 +12,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.model.AmbariDatabaseDetailsJson;
+import com.sequenceiq.cloudbreak.api.model.DatabaseVendor;
+import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariDatabase;
@@ -20,7 +22,6 @@ import com.sequenceiq.cloudbreak.converter.mapper.AmbariDatabaseMapper;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.ClusterComponent;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
-import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.ClusterComponentRepository;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 
@@ -49,8 +50,7 @@ public class AmbariDatabaseToRdsConfigMigrationService {
 
     private void migrateClusterComponent(ClusterComponent component) {
         Cluster cluster = component.getCluster();
-        LOGGER.debug("Mapping component with id: {} from cluster name: [{}] id: [{}] and stack name: [{}] id: [{}]",
-                component.getId(), cluster.getName(), cluster.getId(), cluster.getStack().getDisplayName(), cluster.getStack().getId());
+        LOGGER.debug("Mapping component with id: {} from cluster name: [{}] id: [{}]", component.getId(), cluster.getName(), cluster.getId());
         try {
             if (cluster.getStatus() != Status.DELETE_COMPLETED) {
                 RDSConfig rdsConfig = createRdsConfig(component, cluster);
@@ -86,8 +86,10 @@ public class AmbariDatabaseToRdsConfigMigrationService {
         LOGGER.debug("Creating RdsConfig for component id: [{}]", component.getId());
         AmbariDatabaseDetailsJson ambariDatabaseDetailsJson = ambariDatabaseMapper.mapAmbariDatabaseToAmbariDatabaseDetailJson(
                 component.getAttributes().get(AmbariDatabase.class));
-        Stack stack = cluster.getStack();
-        RDSConfig rdsConfig = ambariDatabaseMapper.mapAmbariDatabaseDetailsJsonToRdsConfig(ambariDatabaseDetailsJson, stack);
+        RDSConfig rdsConfig = ambariDatabaseMapper.mapAmbariDatabaseDetailsJsonToRdsConfig(ambariDatabaseDetailsJson, cluster, false);
+        if (DatabaseVendor.EMBEDDED.name().equalsIgnoreCase(rdsConfig.getDatabaseEngine())) {
+            rdsConfig.setStatus(ResourceStatus.DEFAULT);
+        }
         return rdsConfigService.create(rdsConfig);
     }
 
