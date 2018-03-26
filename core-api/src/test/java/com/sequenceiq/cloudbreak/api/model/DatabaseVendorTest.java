@@ -26,7 +26,7 @@ public class DatabaseVendorTest {
                 { "jdbc:postgresql://test.eu-west-1.rds.amazonaws.com:5432/druidricsi", DatabaseVendor.POSTGRES },
                 { "jdbc:mysql://test.eu-west-1.rds.amazonaws.com:5432/druidricsi",      DatabaseVendor.MYSQL },
                 { "jdbc:oracle://test.eu-west-1.rds.amazonaws.com:5432/druidricsi",     DatabaseVendor.ORACLE, },
-                { "jdbc:mssql://test.eu-west-1.rds.amazonaws.com:5432/druidricsi",      DatabaseVendor.MSSQL, },
+                { "jdbc:sqlserver://test.eu-west-1.rds.amazonaws.com:5432/druidricsi",      DatabaseVendor.MSSQL, },
                 { "jdbc:smalldog://test.eu-west-1.rds.amazonaws.com:5432/druidricsi",   null },
         });
     }

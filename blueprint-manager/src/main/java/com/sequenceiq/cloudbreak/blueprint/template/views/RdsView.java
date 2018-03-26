@@ -25,7 +25,7 @@ public class RdsView {
 
     private final String subprotocol;
 
-    private String databaseEngine;
+    private String lowerCaseDatabaseEngine;
 
     private final String port;
 
@@ -58,9 +58,10 @@ public class RdsView {
         connectionDriver = rdsConfig.getConnectionDriver();
         subprotocol = getSubprotocol(connectionURL);
         if (rdsConfig.getDatabaseEngine() != null) {
-            databaseEngine = rdsConfig.getDatabaseEngine().toLowerCase();
-            fancyName = DatabaseVendor.fromValue(databaseEngine).fancyName();
-            ambariVendor = DatabaseVendor.valueOf(rdsConfig.getDatabaseEngine()).value();
+            lowerCaseDatabaseEngine = rdsConfig.getDatabaseEngine().toLowerCase();
+            DatabaseVendor databaseVendor = DatabaseVendor.valueOf(rdsConfig.getDatabaseEngine());
+            fancyName = databaseVendor.fancyName();
+            ambariVendor = databaseVendor.ambariVendor();
             upperCaseDatabaseEngine = rdsConfig.getDatabaseEngine().toUpperCase();
         }
     }
@@ -93,8 +94,12 @@ public class RdsView {
         return connectionDriver;
     }
 
+    public String getLowerCaseDatabaseEngine() {
+        return lowerCaseDatabaseEngine;
+    }
+
     public String getDatabaseEngine() {
-        return databaseEngine;
+        return lowerCaseDatabaseEngine;
     }
 
     public String getSubprotocol() {

@@ -31,6 +31,7 @@ public class AmbariDatabaseMapperTest {
         json.setHost("testHost");
         json.setPort(1234);
         json.setName("testName");
+        json.setVendor(DatabaseVendor.POSTGRES);
         cluster = new Cluster();
         cluster.setId(1L);
     }
@@ -65,14 +66,14 @@ public class AmbariDatabaseMapperTest {
     @Test
     public void testMapAmbariDatabaseToAmbariDatabaseDetailJson() {
         AmbariDatabase ambariDatabase = new AmbariDatabase();
-        ambariDatabase.setVendor(DatabaseVendor.POSTGRES.value());
+        ambariDatabase.setVendor(DatabaseVendor.POSTGRES.ambariVendor());
         AmbariDatabaseDetailsJson ambariDatabaseDetailsJson = mapper.mapAmbariDatabaseToAmbariDatabaseDetailJson(ambariDatabase);
-        assertEquals(mapper.mapVendorByValue(DatabaseVendor.POSTGRES.value()), ambariDatabaseDetailsJson.getVendor());
+        assertEquals(mapper.mapVendorByValue(DatabaseVendor.POSTGRES.ambariVendor()), ambariDatabaseDetailsJson.getVendor());
     }
 
     @Test
     public void testMapVendorByValue() {
         assertNull(mapper.mapVendorByValue(null));
-        assertEquals(DatabaseVendor.POSTGRES, mapper.mapVendorByValue(DatabaseVendor.POSTGRES.value()));
+        assertEquals(DatabaseVendor.POSTGRES, mapper.mapVendorByValue(DatabaseVendor.POSTGRES.ambariVendor()));
     }
 }
