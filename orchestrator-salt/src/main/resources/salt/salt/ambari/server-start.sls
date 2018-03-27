@@ -5,7 +5,7 @@ copy-optional-jdbc-drivers:
     - name: cp -R /opt/jdbc-drivers /usr/share/java
     - onlyif: test -d /opt/jdbc-drivers
 
-{% if ambari.ambari_database.vendor == 'embedded' %}
+{% if ambari.ambari_database.ambariVendor == 'embedded' %}
 start-postgresql:
   service.running:
     - enable: True
