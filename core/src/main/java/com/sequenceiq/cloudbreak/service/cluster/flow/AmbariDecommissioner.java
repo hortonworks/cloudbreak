@@ -37,6 +37,7 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Sets;
 import com.sequenceiq.ambari.client.AmbariClient;
+import com.sequenceiq.cloudbreak.service.cluster.NotEnoughNodeException;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
@@ -329,7 +330,7 @@ public class AmbariDecommissioner {
         int adjustment = Math.abs(scalingAdjustment);
         if (hostSize + reservedInstances - adjustment < replication || hostSize < adjustment) {
             LOGGER.info("Cannot downscale: replication: {}, adjustment: {}, filtered host size: {}", replication, scalingAdjustment, hostSize);
-            throw new BadRequestException("There is not enough node to downscale. "
+            throw new NotEnoughNodeException("There is not enough node to downscale. "
                     + "Check the replication factor and the ApplicationMaster occupation.");
         }
     }

@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.domain.view.ClusterView;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
+import com.sequenceiq.cloudbreak.service.cluster.NotEnoughNodeException;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
@@ -91,7 +92,11 @@ public class ClusterDownscaleService {
     public void handleClusterDownscaleFailure(long stackId, Exception error) {
         String errorDetailes = error.getMessage();
         LOGGER.error("Error during Cluster downscale flow: ", error);
-        clusterService.updateClusterStatusByStackId(stackId, UPDATE_FAILED, errorDetailes);
+        Status status = UPDATE_FAILED;
+        if (error instanceof NotEnoughNodeException) {
+            status = AVAILABLE;
+        }
+        clusterService.updateClusterStatusByStackId(stackId, status, errorDetailes);
         stackUpdater.updateStackStatus(stackId, DetailedStackStatus.AVAILABLE, "Node(s) could not be removed from the cluster: " + errorDetailes);
         flowMessageService.fireEventAndLog(stackId, Msg.AMBARI_CLUSTER_SCALING_FAILED, UPDATE_FAILED.name(), "removed from", errorDetailes);
 
