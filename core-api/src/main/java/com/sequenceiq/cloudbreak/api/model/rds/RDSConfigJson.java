@@ -30,7 +30,7 @@ public abstract class RDSConfigJson implements JsonEntity {
     @ApiModelProperty(value = RDSConfig.RDSTYPE, required = true)
     @Size(max = 12, min = 3, message = "The length of the type has to be in range of 3 to 12")
     @Pattern(regexp = "(^[a-zA-Z][-a-zA-Z0-9]*[a-zA-Z0-9]$)",
-            message = "The name can only contain lowercase alphanumeric characters and hyphens and has start with an alphanumeric character. "
+            message = "The type can only contain alphanumeric characters and hyphens and has start with an alphanumeric character. "
                     + "The length of the name has to be in range of 3 to 12")
     private String type;
 
