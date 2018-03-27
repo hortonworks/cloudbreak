@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -23,7 +22,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.cloud.CloudConstant;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
@@ -276,25 +274,5 @@ public class ImageCatalogServiceTest {
 
         Assert.assertEquals(actual.getImageCatalogName(), name);
         Assert.assertNull(actual.getId());
-    }
-
-    @Test
-    public void testPropagateImagesIfRequested() {
-
-        when(accountPreferencesService.platforms()).thenReturn(Sets.newHashSet("AWS"));
-
-        Set<String> actual = underTest.filterPlatforms();
-
-        Assert.assertEquals(actual, Sets.newHashSet("AWS"));
-    }
-
-    @Test
-    public void testPropagateImagesIfRequestedWHenNotContains() {
-
-        when(accountPreferencesService.platforms()).thenReturn(Sets.newHashSet("AWS", "NOTCONTAINS"));
-
-        Set<String> actual = underTest.filterPlatforms();
-
-        Assert.assertEquals(actual, Sets.newHashSet("AWS"));
     }
 }
