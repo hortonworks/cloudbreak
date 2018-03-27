@@ -30,7 +30,6 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import com.google.common.collect.ImmutableSet;
-import com.sequenceiq.cloudbreak.cloud.CloudConstant;
 import com.sequenceiq.cloudbreak.cloud.model.Versioned;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV2;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakVersion;
@@ -88,9 +87,6 @@ public class ImageCatalogService {
 
     @Inject
     private AccountPreferencesService accountPreferencesService;
-
-    @Inject
-    private List<CloudConstant> cloudConstants;
 
     public StatedImages getImages(String provider) throws CloudbreakImageCatalogException {
         return getImages(getImageDefaultCatalogUrl(), getDefaultImageCatalogName(), provider, cbVersion);
@@ -331,7 +327,7 @@ public class ImageCatalogService {
 
     public Images propagateImagesIfRequested(String name, boolean withImages) {
         if (withImages) {
-            Set<String> platforms = filterPlatforms();
+            Set<String> platforms = accountPreferencesService.enabledPlatforms();
             try {
                 return getImages(name, platforms).getImages();
             } catch (CloudbreakImageCatalogException e) {
@@ -339,14 +335,6 @@ public class ImageCatalogService {
             }
         }
         return null;
-    }
-
-    public Set<String> filterPlatforms() {
-        Set<String> platforms = accountPreferencesService.platforms();
-        return cloudConstants.stream()
-                .map(c -> c.platform().value())
-                .filter(platforms::contains)
-                .collect(Collectors.toSet());
     }
 
     private Optional<? extends Image> findFirstWithImageId(String imageId, Collection<? extends Image> images) {

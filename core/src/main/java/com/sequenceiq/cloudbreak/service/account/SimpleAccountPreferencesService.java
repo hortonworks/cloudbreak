@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -61,8 +62,16 @@ public class SimpleAccountPreferencesService implements AccountPreferencesServic
     }
 
     @Override
-    public Set<String> platforms() {
-        return Sets.newHashSet(enabledPlatforms.split(","));
+    public Set<String> enabledPlatforms() {
+        Set<String> platforms;
+        if (enabledPlatforms.isEmpty()) {
+            platforms = cloudConstants.stream()
+                    .map(cloudConstant -> cloudConstant.platform().value())
+                    .collect(Collectors.toSet());
+        } else {
+            platforms = Sets.newHashSet(enabledPlatforms.split(","));
+        }
+        return platforms;
     }
 
     @Override
@@ -73,7 +82,7 @@ public class SimpleAccountPreferencesService implements AccountPreferencesServic
                 result.put(cloudConstant.platform().value(), true);
             }
         } else {
-            for (String platform : platforms()) {
+            for (String platform : enabledPlatforms()) {
                 result.put(platform, true);
             }
             for (CloudConstant cloudConstant : cloudConstants) {
