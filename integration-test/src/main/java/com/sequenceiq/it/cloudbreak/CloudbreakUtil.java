@@ -3,6 +3,7 @@ package com.sequenceiq.it.cloudbreak;
 import static java.lang.Boolean.FALSE;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -82,10 +83,11 @@ public class CloudbreakUtil {
         return waitForStatuses(cloudbreakClient, stackId, Collections.singletonMap("clusterStatus", desiredStatus));
     }
 
-    public static String getFailedStatuses(CloudbreakClient cloudbreakClient, String stackId, Map<String, String> desiredStatuses) {
+    public static String getFailedStatusReason(CloudbreakClient cloudbreakClient, String stackId, Map<String, String> desiredStatuses,
+            Collection<WaitResult> desiredWaitResult) {
         for (int i = 0; i < 3; i++) {
             WaitResult waitResult = waitForStatuses(cloudbreakClient, stackId, desiredStatuses);
-            if (waitResult != WaitResult.FAILED) {
+            if (!desiredWaitResult.contains(waitResult)) {
                 Assert.fail("Expected status is failed, actual: " + waitResult);
             } else {
                 StackV1Endpoint stackV1Endpoint = cloudbreakClient.stackV1Endpoint();
