@@ -176,14 +176,26 @@ function set-default-image-catalog() {
   cb-command imagecatalog set-default "$@"
 }
 
-function list-rds() {
-  cb-command rds list "$@"
+function list-database() {
+  cb-command database list "$@"
 }
 
-function create-rds() {
-  cb-command rds create "$@"
+function create-database() {
+  cb-command database create "$@"
 }
 
-function delete-rds() {
-  cb-command rds delete "$@"
+function delete-database() {
+  cb-command database delete "$@"
+}
+
+function list-proxy() {
+  cb-command proxy list "$@"
+}
+
+function create-proxy() {
+  cb-command proxy create "$@"
+}
+
+function delete-proxy() {
+  cb-command proxy delete "$@"
 }
