@@ -22,7 +22,7 @@ fi
 config_remote_jdbc() {
     if [[ '{{ ambari_database.ambariVendor }}' = 'embedded' ]]; then
         echo Configure local jdbc connection
-        ambari-server setup --silent $GPL_SWITCH --java-home $JelseAVA_HOME
+        ambari-server setup --silent $GPL_SWITCH --java-home $JAVA_HOME
     else
         echo Configure remote jdbc connection
         local specoptions=''
