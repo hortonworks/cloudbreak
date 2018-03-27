@@ -38,8 +38,8 @@ public class AmbariDatabaseMapperTest {
 
     @Test
     public void testMapAmbariDatabaseDetailsJsonToRdsConfig() {
-        RDSConfig rdsConfig = mapper.mapAmbariDatabaseDetailsJsonToRdsConfig(json, cluster, false);
-        assertEquals(mapper.mapName(cluster), rdsConfig.getName());
+        RDSConfig rdsConfig = mapper.mapAmbariDatabaseDetailsJsonToRdsConfig(json, cluster, null, false);
+        assertEquals(mapper.mapName(null, cluster), rdsConfig.getName());
         assertEquals(mapper.mapConnectionUrl(json), rdsConfig.getConnectionURL());
         assertEquals(ResourceStatus.USER_MANAGED, rdsConfig.getStatus());
         assertEquals(RdsType.AMBARI.name(), rdsConfig.getType());
@@ -59,8 +59,8 @@ public class AmbariDatabaseMapperTest {
 
     @Test
     public void testMapName() {
-        String name = mapper.mapName(cluster);
-        assertEquals(RdsType.AMBARI.name() + cluster.getId(), name);
+        String name = mapper.mapName(null, cluster);
+        assertEquals(RdsType.AMBARI.name() + "_CLUSTER_" + cluster.getId(), name);
     }
 
     @Test

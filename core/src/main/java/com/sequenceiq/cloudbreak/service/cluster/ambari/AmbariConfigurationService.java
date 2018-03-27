@@ -104,7 +104,7 @@ public class AmbariConfigurationService {
 
     private RDSConfig createAmbariDefaultRdsConf(Stack stack, Cluster cluster) {
         RDSConfig rdsConfig = new RDSConfig();
-        rdsConfig.setName(ambariDatabaseMapper.mapName(cluster));
+        rdsConfig.setName(ambariDatabaseMapper.mapName(stack, cluster));
         rdsConfig.setConnectionUserName(userName);
         rdsConfig.setConnectionPassword(PasswordUtil.generatePassword());
         rdsConfig.setConnectionURL("jdbc:postgresql://" + host + ":" + port + "/" + name);

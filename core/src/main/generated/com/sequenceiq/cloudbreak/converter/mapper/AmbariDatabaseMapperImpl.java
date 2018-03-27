@@ -4,17 +4,17 @@ import com.sequenceiq.cloudbreak.api.model.AmbariDatabaseDetailsJson;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariDatabase;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
+import com.sequenceiq.cloudbreak.domain.Stack;
 import javax.annotation.Generated;
-import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor"
 )
-@Component
+@org.springframework.stereotype.Component
 public class AmbariDatabaseMapperImpl implements AmbariDatabaseMapper {
 
     @Override
-    public RDSConfig mapAmbariDatabaseDetailsJsonToRdsConfig(AmbariDatabaseDetailsJson ambariDatabaseDetailsJson, Cluster cluster, boolean publicInAccount) {
+    public RDSConfig mapAmbariDatabaseDetailsJsonToRdsConfig(AmbariDatabaseDetailsJson ambariDatabaseDetailsJson, Cluster cluster, Stack stack, boolean publicInAccount) {
         if ( ambariDatabaseDetailsJson == null && cluster == null ) {
             return null;
         }
@@ -30,7 +30,7 @@ public class AmbariDatabaseMapperImpl implements AmbariDatabaseMapper {
             rDSConfig.setConnectionPassword( ambariDatabaseDetailsJson.getPassword() );
         }
         if ( cluster != null ) {
-            rDSConfig.setName( mapName( cluster ) );
+            rDSConfig.setName( mapName( stack, cluster ) );
             rDSConfig.setAccount( cluster.getAccount() );
             rDSConfig.setOwner( cluster.getOwner() );
         }

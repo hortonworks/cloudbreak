@@ -204,7 +204,7 @@ public class ClusterDecorator {
                 .ifPresent(confs -> confs.forEach(confName -> subject.getRdsConfigs().add(rdsConfigService.getPublicRdsConfig(confName, user))));
 
         if (request.getAmbariDatabaseDetails() != null) {
-            RDSConfig rdsConfig = ambariDatabaseMapper.mapAmbariDatabaseDetailsJsonToRdsConfig(request.getAmbariDatabaseDetails(), subject,
+            RDSConfig rdsConfig = ambariDatabaseMapper.mapAmbariDatabaseDetailsJsonToRdsConfig(request.getAmbariDatabaseDetails(), subject, stack,
                     stack.isPublicInAccount());
             subject.getRdsConfigs().add(rdsConfigService.createIfNotExists(user, rdsConfig));
         }
