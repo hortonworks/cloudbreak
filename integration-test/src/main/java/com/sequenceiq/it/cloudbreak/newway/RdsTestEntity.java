@@ -38,28 +38,13 @@ public class RdsTestEntity extends AbstractCloudbreakEntity<RDSConfigRequest, Rd
         return this;
     }
 
-    public RdsTestEntity withConnectionDriver(String connectionDriver) {
-        getRequest().setConnectionDriver(connectionDriver);
-        return this;
-    }
-
     public RdsTestEntity withConnectionURL(String connectionURL) {
         getRequest().setConnectionURL(connectionURL);
         return this;
     }
 
-    public RdsTestEntity withDataBaseEngine(String dataBaseEngine) {
-        getRequest().setDatabaseEngine(dataBaseEngine);
-        return this;
-    }
-
     public RdsTestEntity withType(String type) {
         getRequest().setType(type);
-        return this;
-    }
-
-    public RdsTestEntity withValidated(Boolean validated) {
-        getRequest().setValidated(validated);
         return this;
     }
 }

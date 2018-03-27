@@ -57,11 +57,9 @@ public class RdsConfigTests extends CloudbreakTest {
         for (String type : TYPES) {
             given(RdsConfig.request()
                     .withName(VALID_RDS_CONFIG + '-' + type)
-                    .withConnectionDriver(CONNECTION_DRIVER)
                     .withConnectionPassword(rdsPassword)
                     .withConnectionURL(rdsConnectionUrl)
                     .withConnectionUserName(rdsUser)
-                    .withDataBaseEngine(DATABASE_ENGINE)
                     .withType(type), "create valid rds config with " + type
             );
             when(RdsConfig.post(), "post the request");
@@ -76,13 +74,10 @@ public class RdsConfigTests extends CloudbreakTest {
     public void testCreateValidRdsNotValidated() throws Exception {
         given(RdsConfig.request()
                 .withName(VALID_RDS_CONFIG + "-not-validated")
-                .withConnectionDriver(CONNECTION_DRIVER)
                 .withConnectionPassword(rdsPassword)
                 .withConnectionURL(rdsConnectionUrl)
                 .withConnectionUserName(rdsUser)
-                .withDataBaseEngine(DATABASE_ENGINE)
-                .withType(HIVE)
-                .withValidated(Boolean.FALSE), "create rds config without validation"
+                .withType(HIVE), "create rds config without validation"
         );
         when(RdsConfig.post(), "post the request");
         then(RdsConfig.assertThis(
@@ -95,13 +90,10 @@ public class RdsConfigTests extends CloudbreakTest {
     public void testCreateInvalidRdsWithLongName() throws Exception {
         given(RdsConfig.request()
                 .withName(longStringGeneratorUtil.stringGenerator(51))
-                .withConnectionDriver(CONNECTION_DRIVER)
                 .withConnectionPassword(rdsPassword)
                 .withConnectionURL(rdsConnectionUrl)
                 .withConnectionUserName(rdsUser)
-                .withDataBaseEngine(DATABASE_ENGINE)
-                .withType(HIVE)
-                .withValidated(Boolean.TRUE), "create rds config with long name"
+                .withType(HIVE), "create rds config with long name"
             );
             when(RdsConfig.post(), "post the request");
             then(RdsConfig.assertThis(
@@ -113,13 +105,10 @@ public class RdsConfigTests extends CloudbreakTest {
     public void testCreateInvalidRdsWithShortName() throws Exception {
         given(RdsConfig.request()
                 .withName("abc")
-                .withConnectionDriver(CONNECTION_DRIVER)
                 .withConnectionPassword(rdsPassword)
                 .withConnectionURL(rdsConnectionUrl)
                 .withConnectionUserName(rdsUser)
-                .withDataBaseEngine(DATABASE_ENGINE)
-                .withType(HIVE)
-                .withValidated(Boolean.TRUE), "create rds config with short name"
+                .withType(HIVE), "create rds config with short name"
         );
         when(RdsConfig.post(), "post the request");
         then(RdsConfig.assertThis(
@@ -131,11 +120,9 @@ public class RdsConfigTests extends CloudbreakTest {
     public void testCreateInvalidRdsWithSpecialName() throws Exception {
         given(RdsConfig.request()
                 .withName(SPECIAL_RDS_NAME)
-                .withConnectionDriver(CONNECTION_DRIVER)
                 .withConnectionPassword(rdsPassword)
                 .withConnectionURL(rdsConnectionUrl)
                 .withConnectionUserName(rdsUser)
-                .withDataBaseEngine(DATABASE_ENGINE)
                 .withType(HIVE), "create rds config with special name"
         );
         when(RdsConfig.post(), "post the request");
@@ -148,11 +135,9 @@ public class RdsConfigTests extends CloudbreakTest {
     public void testCreateRdsWithInvalidUserName() throws Exception {
         given(RdsConfig.request()
                 .withName(VALID_RDS_CONFIG + "-name")
-                .withConnectionDriver(CONNECTION_DRIVER)
                 .withConnectionPassword(rdsPassword)
                 .withConnectionURL(rdsConnectionUrl)
                 .withConnectionUserName("abcde1234")
-                .withDataBaseEngine(DATABASE_ENGINE)
                 .withType(HIVE), "create rds config with invalid user name"
         );
         when(RdsConfig.post(), "post the request");
@@ -165,11 +150,9 @@ public class RdsConfigTests extends CloudbreakTest {
     public void testCreateRdsWithInvalidPwd() throws Exception {
         given(RdsConfig.request()
                 .withName(VALID_RDS_CONFIG + "-pwd")
-                .withConnectionDriver(CONNECTION_DRIVER)
                 .withConnectionPassword("abcd1234")
                 .withConnectionURL(rdsConnectionUrl)
                 .withConnectionUserName(rdsUser)
-                .withDataBaseEngine(DATABASE_ENGINE)
                 .withType(HIVE), "create rds config with invalid password"
         );
         when(RdsConfig.post(), "post the request");
@@ -182,11 +165,9 @@ public class RdsConfigTests extends CloudbreakTest {
     public void testCreateRdsWithInvalidUrlNoProt() throws Exception {
         given(RdsConfig.request()
                 .withName(VALID_RDS_CONFIG + "-urlnp")
-                .withConnectionDriver(CONNECTION_DRIVER)
                 .withConnectionPassword(rdsPassword)
                 .withConnectionURL(rdsConnectionUrl.split(RDS_PROTOCOL)[1])
                 .withConnectionUserName(rdsUser)
-                .withDataBaseEngine(DATABASE_ENGINE)
                 .withType(HIVE), "create rds config with invalid connection url no protocol"
         );
         when(RdsConfig.post(), "post the request");
@@ -199,11 +180,9 @@ public class RdsConfigTests extends CloudbreakTest {
     public void testCreateRdsWithUrlNotExists() throws Exception {
         given(RdsConfig.request()
                 .withName(VALID_RDS_CONFIG + "-url")
-                .withConnectionDriver(CONNECTION_DRIVER)
                 .withConnectionPassword(rdsPassword)
                 .withConnectionURL(RDS_PROTOCOL + "www.google.com:1/test")
                 .withConnectionUserName(rdsUser)
-                .withDataBaseEngine(DATABASE_ENGINE)
                 .withType(HIVE), "create rds config with connection url not exits"
         );
         when(RdsConfig.post(), "post the request");
@@ -216,11 +195,9 @@ public class RdsConfigTests extends CloudbreakTest {
     public void testCreateRdsWithInvalidDbEngine() throws Exception {
         given(RdsConfig.request()
                 .withName(VALID_RDS_CONFIG + "-dbeng")
-                .withConnectionDriver(CONNECTION_DRIVER)
                 .withConnectionPassword(rdsPassword)
                 .withConnectionURL(rdsConnectionUrl.split(RDS_PROTOCOL)[1])
                 .withConnectionUserName(rdsUser)
-                .withDataBaseEngine("test")
                 .withType(HIVE), "create rds config with invalid database engine"
         );
         when(RdsConfig.post(), "post the request");
@@ -233,24 +210,18 @@ public class RdsConfigTests extends CloudbreakTest {
     public void testCreateDeleteCreateAgain() throws Exception {
         given(RdsConfig.isCreatedDeleted()
                 .withName(VALID_RDS_CONFIG + "-again")
-                .withConnectionDriver(CONNECTION_DRIVER)
                 .withConnectionPassword(rdsPassword)
                 .withConnectionURL(rdsConnectionUrl)
                 .withConnectionUserName(rdsUser)
-                .withDataBaseEngine(DATABASE_ENGINE)
-                .withType(HIVE)
-                .withValidated(Boolean.TRUE), "create rds config, then delete"
+                .withType(HIVE), "create rds config, then delete"
         );
 
         given(RdsConfig.request()
                 .withName(VALID_RDS_CONFIG + "-again")
-                .withConnectionDriver(CONNECTION_DRIVER)
                 .withConnectionPassword(rdsPassword)
                 .withConnectionURL(rdsConnectionUrl)
                 .withConnectionUserName(rdsUser)
-                .withDataBaseEngine(DATABASE_ENGINE)
-                .withType(HIVE)
-                .withValidated(Boolean.TRUE), "create rds config with same name again"
+                .withType(HIVE), "create rds config with same name again"
         );
         when(RdsConfig.post(), "post the request");
         then(RdsConfig.assertThis(
@@ -263,22 +234,17 @@ public class RdsConfigTests extends CloudbreakTest {
     public void testCreateRdsWithSameName() throws Exception {
         given(RdsConfig.isCreated()
                 .withName(VALID_RDS_CONFIG + "-same")
-                .withConnectionDriver(CONNECTION_DRIVER)
                 .withConnectionPassword(rdsPassword)
                 .withConnectionURL(rdsConnectionUrl)
                 .withConnectionUserName(rdsUser)
-                .withDataBaseEngine(DATABASE_ENGINE)
-                .withType(HIVE)
-                .withValidated(Boolean.TRUE), "create rds config with long name"
+                .withType(HIVE), "create rds config with long name"
         );
 
         given(RdsConfig.request()
                 .withName(VALID_RDS_CONFIG + "-same")
-                .withConnectionDriver(CONNECTION_DRIVER)
                 .withConnectionPassword(rdsPassword)
                 .withConnectionURL(rdsConnectionUrl.split(RDS_PROTOCOL)[1])
                 .withConnectionUserName(rdsUser)
-                .withDataBaseEngine("test")
                 .withType(HIVE), "create rds with name already exists"
         );
         try {
@@ -295,11 +261,9 @@ public class RdsConfigTests extends CloudbreakTest {
     public void testRdsConnectOk() throws Exception {
         given(RdsTest.request()
                 .withName(VALID_RDS_CONFIG)
-                .withConnectionDriver(CONNECTION_DRIVER)
                 .withConnectionPassword(rdsPassword)
                 .withConnectionURL(rdsConnectionUrl)
                 .withConnectionUserName(rdsUser)
-                .withDataBaseEngine(DATABASE_ENGINE)
                 .withType(HIVE), "create valid rds connection test"
         );
         when(RdsTest.testConnect(), "post the request");
@@ -313,13 +277,10 @@ public class RdsConfigTests extends CloudbreakTest {
     public void testRdsConnectOkNoValidation() throws Exception {
         given(RdsTest.request()
                 .withName(VALID_RDS_CONFIG)
-                .withConnectionDriver(CONNECTION_DRIVER)
                 .withConnectionPassword(rdsPassword)
                 .withConnectionURL(rdsConnectionUrl)
                 .withConnectionUserName(rdsUser)
-                .withDataBaseEngine(DATABASE_ENGINE)
-                .withType("RANGER")
-                .withValidated(Boolean.FALSE), "create valid rds connection test no validation"
+                .withType("RANGER"), "create valid rds connection test no validation"
         );
         when(RdsTest.testConnect(), "post the request");
         then(RdsTest.assertThis(
@@ -332,11 +293,9 @@ public class RdsConfigTests extends CloudbreakTest {
     public void testRdsConnectNotOkInvalidPwd() throws Exception {
         given(RdsTest.request()
                 .withName(VALID_RDS_CONFIG)
-                .withConnectionDriver(CONNECTION_DRIVER)
                 .withConnectionPassword("")
                 .withConnectionURL(rdsConnectionUrl)
                 .withConnectionUserName(rdsUser)
-                .withDataBaseEngine(DATABASE_ENGINE)
                 .withType(HIVE), "create rds connection test with invalid password"
         );
         when(RdsTest.testConnect(), "post the request");
@@ -350,11 +309,9 @@ public class RdsConfigTests extends CloudbreakTest {
     public void testRdsConnectWithUrlNotExists() throws Exception {
         given(RdsTest.request()
                 .withName(VALID_RDS_CONFIG + "-url")
-                .withConnectionDriver(CONNECTION_DRIVER)
                 .withConnectionPassword(rdsPassword)
                 .withConnectionURL(RDS_PROTOCOL + "www.google.com:1/test")
                 .withConnectionUserName(rdsUser)
-                .withDataBaseEngine(DATABASE_ENGINE)
                 .withType(HIVE), "create rds connection test with url not exits"
         );
         when(RdsTest.testConnect(), "post the request");
@@ -368,11 +325,9 @@ public class RdsConfigTests extends CloudbreakTest {
     public void testRdsConnectWithInvalidUserName() throws Exception {
         given(RdsTest.request()
                 .withName(VALID_RDS_CONFIG + "-name")
-                .withConnectionDriver(CONNECTION_DRIVER)
                 .withConnectionPassword(rdsPassword)
                 .withConnectionURL(rdsConnectionUrl)
                 .withConnectionUserName("abcde1234")
-                .withDataBaseEngine(DATABASE_ENGINE)
                 .withType(HIVE), "create rds connnection test with invalid user name"
         );
         when(RdsTest.testConnect(), "post the request");
@@ -386,11 +341,9 @@ public class RdsConfigTests extends CloudbreakTest {
     public void testRdsConnectWithInvalidDbEngine() throws Exception {
         given(RdsTest.request()
                 .withName(VALID_RDS_CONFIG + "-dbeng")
-                .withConnectionDriver(CONNECTION_DRIVER)
                 .withConnectionPassword(rdsPassword)
                 .withConnectionURL(rdsConnectionUrl.split(RDS_PROTOCOL)[1])
                 .withConnectionUserName(rdsUser)
-                .withDataBaseEngine("test")
                 .withType(HIVE), "create rds config with invalid database engine"
         );
         when(RdsTest.testConnect(), "post the request");
