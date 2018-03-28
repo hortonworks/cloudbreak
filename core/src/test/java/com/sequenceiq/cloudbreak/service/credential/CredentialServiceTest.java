@@ -55,6 +55,7 @@ public class CredentialServiceTest {
     @Mock
     private NotificationSender notificationSender;
 
+    @Mock
     private AccountPreferencesService accountPreferencesService;
 
     @InjectMocks
