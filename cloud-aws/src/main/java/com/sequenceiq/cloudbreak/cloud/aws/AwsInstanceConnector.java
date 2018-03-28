@@ -138,24 +138,34 @@ public class AwsInstanceConnector implements InstanceConnector {
     public List<CloudVmInstanceStatus> check(AuthenticatedContext ac, List<CloudInstance> vms) {
         List<CloudVmInstanceStatus> cloudVmInstanceStatuses = new ArrayList<>();
         for (CloudInstance vm : vms) {
-            DescribeInstancesResult result = awsClient.createAccess(new AwsCredentialView(ac.getCloudCredential()),
-                    ac.getCloudContext().getLocation().getRegion().value())
-                    .describeInstances(new DescribeInstancesRequest().withInstanceIds(vm.getInstanceId()));
-            for (Reservation reservation : result.getReservations()) {
-                for (Instance instance : reservation.getInstances()) {
-                    if ("Stopped".equalsIgnoreCase(instance.getState().getName())) {
-                        LOGGER.info("AWS instance is in Stopped state, polling stack.");
-                        cloudVmInstanceStatuses.add(new CloudVmInstanceStatus(vm, InstanceStatus.STOPPED));
-                    } else if ("Running".equalsIgnoreCase(instance.getState().getName())) {
-                        LOGGER.info("AWS instance is in Started state, polling stack.");
-                        cloudVmInstanceStatuses.add(new CloudVmInstanceStatus(vm, InstanceStatus.STARTED));
-                    } else if ("Terminated".equalsIgnoreCase(instance.getState().getName())) {
-                        LOGGER.info("AWS instance is in Terminated state, polling stack.");
-                        cloudVmInstanceStatuses.add(new CloudVmInstanceStatus(vm, InstanceStatus.TERMINATED));
-                    } else {
-                        cloudVmInstanceStatuses.add(new CloudVmInstanceStatus(vm, InstanceStatus.IN_PROGRESS));
+            try {
+                String region = ac.getCloudContext().getLocation().getRegion().value();
+                DescribeInstancesResult result = awsClient.createAccess(new AwsCredentialView(ac.getCloudCredential()),
+                        ac.getCloudContext().getLocation().getRegion().value())
+                        .describeInstances(new DescribeInstancesRequest().withInstanceIds(vm.getInstanceId()));
+                for (Reservation reservation : result.getReservations()) {
+                    for (Instance instance : reservation.getInstances()) {
+                        if ("Stopped".equalsIgnoreCase(instance.getState().getName())) {
+                            LOGGER.info("AWS instance [{}] is in {} state, region: {}, stack: {}",
+                                    instance.getInstanceId(), instance.getState().getName(), region, ac.getCloudContext().getId());
+                            cloudVmInstanceStatuses.add(new CloudVmInstanceStatus(vm, InstanceStatus.STOPPED));
+                        } else if ("Running".equalsIgnoreCase(instance.getState().getName())) {
+                            LOGGER.info("AWS instance [{}] is in {} state, region: {}, stack: {}",
+                                    instance.getInstanceId(), instance.getState().getName(), region, ac.getCloudContext().getId());
+                            cloudVmInstanceStatuses.add(new CloudVmInstanceStatus(vm, InstanceStatus.STARTED));
+                        } else if ("Terminated".equalsIgnoreCase(instance.getState().getName())) {
+                            LOGGER.info("AWS instance [{}] is in {} state, region: {}, stack: {}",
+                                    instance.getInstanceId(), instance.getState().getName(), region, ac.getCloudContext().getId());
+                            cloudVmInstanceStatuses.add(new CloudVmInstanceStatus(vm, InstanceStatus.TERMINATED));
+                        } else {
+                            LOGGER.info("AWS instance [{}] is in {} state, region: {}, stack: {}",
+                                    instance.getInstanceId(), instance.getState().getName(), region, ac.getCloudContext().getId());
+                            cloudVmInstanceStatuses.add(new CloudVmInstanceStatus(vm, InstanceStatus.IN_PROGRESS));
+                        }
                     }
                 }
+            } catch (AmazonEC2Exception e) {
+                LOGGER.warn("Instance does not exist with this id: {}, original message: {}", vm.getInstanceId(), e.getMessage());
             }
         }
         return cloudVmInstanceStatuses;
