@@ -29,7 +29,6 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import com.google.common.collect.ImmutableSet;
-import com.sequenceiq.cloudbreak.cloud.CloudConstant;
 import com.sequenceiq.cloudbreak.cloud.model.Versioned;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV2;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakVersion;
@@ -46,6 +45,7 @@ import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.domain.UserProfile;
 import com.sequenceiq.cloudbreak.repository.ImageCatalogRepository;
 import com.sequenceiq.cloudbreak.service.AuthorizationService;
+import com.sequenceiq.cloudbreak.service.account.AccountPreferencesService;
 import com.sequenceiq.cloudbreak.service.user.UserProfileService;
 
 @Component
@@ -85,7 +85,7 @@ public class ImageCatalogService {
     private UserProfileService userProfileService;
 
     @Inject
-    private List<CloudConstant> cloudConstants;
+    private AccountPreferencesService accountPreferencesService;
 
     public StatedImages getImages(String provider) throws CloudbreakImageCatalogException {
         return getImages(getImageDefaultCatalogUrl(), getDefaultImageCatalogName(), provider, cbVersion);
@@ -134,7 +134,7 @@ public class ImageCatalogService {
         return getImage(defaultCatalogUrl, CLOUDBREAK_DEFAULT_CATALOG_NAME, imageId);
     }
 
-    public StatedImage getImage(String catalogUrl, String catalogName, String imageId)throws CloudbreakImageNotFoundException,
+    public StatedImage getImage(String catalogUrl, String catalogName, String imageId) throws CloudbreakImageNotFoundException,
             CloudbreakImageCatalogException {
         Images images = imageCatalogProvider.getImageCatalogV2(catalogUrl).getImages();
         Optional<? extends Image> image = getImage(imageId, images);
@@ -323,11 +323,11 @@ public class ImageCatalogService {
 
     public Images propagateImagesIfRequested(String name, boolean withImages) {
         if (withImages) {
-            Set<String> platforms = cloudConstants.stream().map(c -> c.platform().value()).collect(Collectors.toSet());
+            Set<String> platforms = accountPreferencesService.enabledPlatforms();
             try {
                 return getImages(name, platforms).getImages();
             } catch (CloudbreakImageCatalogException e) {
-                LOGGER.error("No images was found: " + e);
+                LOGGER.error("No images was found: ", e);
             }
         }
         return null;

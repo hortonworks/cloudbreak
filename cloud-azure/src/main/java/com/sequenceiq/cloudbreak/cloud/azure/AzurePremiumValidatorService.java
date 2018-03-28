@@ -16,8 +16,14 @@ public class AzurePremiumValidatorService {
     }
 
     private boolean isPremiumStorageSupportedByInstance(String flavor) {
-        String transformedFlavor = flavor.replaceAll("[0-9]", "").toLowerCase();
-        String[] items = { "_ds", "_ls", "_gs", "_fs" };
+        String segment = flavor.toString().split("_")[1];
+        String transformedSegment = segment
+                .replaceAll("[0-9]", "")
+                .replaceAll("-", "")
+                .toLowerCase();
+
+        String transformedFlavor = flavor.replaceAll(segment, transformedSegment).toLowerCase();
+        String[] items = { "_ds", "_ls", "_gs", "_fs", "_es_v3" };
         return Arrays.stream(items).parallel().anyMatch(transformedFlavor::contains);
     }
 }
