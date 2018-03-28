@@ -24,6 +24,10 @@ public class LdapConfigTests extends CloudbreakTest {
 
     private static final Integer VALID_SERVER_PORT = 389;
 
+    private static final String SPECIAL_LDAP_NAME = "a-@#$%|:&*;";
+
+    private static final String VALID_LDAP_DESC = "Valid ldap config description";
+
     private static final String LDAP = "LDAP";
 
     private static final String BIND_DN = "CN=Administrator,CN=Users,DC=ad,DC=hwx,DC=com";
@@ -40,7 +44,7 @@ public class LdapConfigTests extends CloudbreakTest {
 
     private static final String GROUP_OBJECT_CLASS  = "group";
 
-    private List<String> ldapConfigsToDelete = new ArrayList<>();
+    private final List<String> ldapConfigsToDelete = new ArrayList<>();
 
     private String ldapServerHost;
 
@@ -52,8 +56,8 @@ public class LdapConfigTests extends CloudbreakTest {
     @BeforeTest
     public void setup() throws Exception {
         given(CloudbreakClient.isCreated());
-        ldapServerHost = getTestParameter().get("integrationtest.ldapconfig.ldapserverhost");
-        bindPassword = getTestParameter().get("integrationtest.ldapconfig.bindpassword");
+        ldapServerHost = getTestParameter().get("integrationtest.ldapconfig.ldapServerHost");
+        bindPassword = getTestParameter().get("integrationtest.ldapconfig.bindPassword");
     }
 
     @Test
@@ -72,7 +76,8 @@ public class LdapConfigTests extends CloudbreakTest {
                 .withGroupMemberAttribute(GROUP_MEMBER_ATTRIBUTE)
                 .withGroupNameAttribute(GROUP_NAME_ATTRIBUTE)
                 .withGroupObjectClass(GROUP_OBJECT_CLASS)
-                .withGroupSearchBase(SEARCH_BASE), "create ldap config with LDAP directory type"
+                .withGroupSearchBase(SEARCH_BASE)
+                .withDescription(VALID_LDAP_DESC), "create ldap config with LDAP directory type"
 
         );
         when(LdapConfig.post(), "post the request");
@@ -133,6 +138,31 @@ public class LdapConfigTests extends CloudbreakTest {
         );
     }
 
+    @Test(expectedExceptions = BadRequestException.class, enabled = false)
+    //Existing bug: BUG-99596
+    public void testCreateLdapWithSpecialName() throws Exception {
+        given(LdapConfig.request()
+                .withName(SPECIAL_LDAP_NAME)
+                .withDirectoryType(DirectoryType.LDAP)
+                .withProtocol(LDAP)
+                .withServerHost(ldapServerHost)
+                .withServerPort(VALID_SERVER_PORT)
+                .withBindDn(BIND_DN)
+                .withBindPassword(bindPassword)
+                .withUserSearchBase(SEARCH_BASE)
+                .withUserNameAttribute(USER_NAME_ATTRIBUTE)
+                .withUserObjectClass(USER_OBJECT_CLASS)
+                .withGroupMemberAttribute(GROUP_MEMBER_ATTRIBUTE)
+                .withGroupNameAttribute(GROUP_NAME_ATTRIBUTE)
+                .withGroupObjectClass(GROUP_OBJECT_CLASS)
+                .withGroupSearchBase(SEARCH_BASE), "create invalid ldap config with special name"
+        );
+        when(LdapConfig.post(), "post the request");
+        then(LdapConfig.assertThis(
+                (ldapconfig, t) -> Assert.assertNull(ldapconfig.getResponse().getId(), "ldap config id must be null"))
+        );
+    }
+
     @Test(expectedExceptions = BadRequestException.class)
     public void testCreateLdapWithLongName() throws Exception {
         given(LdapConfig.request()
@@ -150,6 +180,32 @@ public class LdapConfigTests extends CloudbreakTest {
                 .withGroupNameAttribute(GROUP_NAME_ATTRIBUTE)
                 .withGroupObjectClass(GROUP_OBJECT_CLASS)
                 .withGroupSearchBase(SEARCH_BASE), "create invalid ldap config with long name"
+
+        );
+        when(LdapConfig.post(), "post the request");
+        then(LdapConfig.assertThis(
+                (ldapconfig, t) -> Assert.assertNull(ldapconfig.getResponse().getId(), "ldap config id must be null"))
+        );
+    }
+
+    @Test(expectedExceptions = BadRequestException.class)
+    public void testCreateLdapWithLongDesc() throws Exception {
+        given(LdapConfig.request()
+                .withName(VALID_LDAP_CONFIG + "longdesc")
+                .withDirectoryType(DirectoryType.LDAP)
+                .withProtocol(LDAP)
+                .withServerHost(ldapServerHost)
+                .withServerPort(VALID_SERVER_PORT)
+                .withBindDn(BIND_DN)
+                .withBindPassword(bindPassword)
+                .withUserSearchBase(SEARCH_BASE)
+                .withUserNameAttribute(USER_NAME_ATTRIBUTE)
+                .withUserObjectClass(USER_OBJECT_CLASS)
+                .withGroupMemberAttribute(GROUP_MEMBER_ATTRIBUTE)
+                .withGroupNameAttribute(GROUP_NAME_ATTRIBUTE)
+                .withGroupObjectClass(GROUP_OBJECT_CLASS)
+                .withGroupSearchBase(SEARCH_BASE)
+                .withDescription(longStringGeneratorUtil.stringGenerator(1001)), "create invalid ldap config with long description"
 
         );
         when(LdapConfig.post(), "post the request");
@@ -216,7 +272,7 @@ public class LdapConfigTests extends CloudbreakTest {
                 .withGroupMemberAttribute(GROUP_MEMBER_ATTRIBUTE)
                 .withGroupNameAttribute(GROUP_NAME_ATTRIBUTE)
                 .withGroupObjectClass(GROUP_OBJECT_CLASS)
-                .withGroupSearchBase(SEARCH_BASE), "create ldap config with long name"
+                .withGroupSearchBase(SEARCH_BASE), "create ldap config"
         );
 
         given(LdapConfig.request()

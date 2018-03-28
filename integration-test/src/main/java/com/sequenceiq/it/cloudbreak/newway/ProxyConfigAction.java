@@ -4,75 +4,57 @@ import static com.sequenceiq.it.cloudbreak.newway.log.Log.logJSON;
 
 import java.io.IOException;
 
-import com.sequenceiq.cloudbreak.api.model.rds.RDSTestRequest;
 import com.sequenceiq.it.IntegrationTestContext;
 
 
-public class RdsConfigAction {
-    private RdsConfigAction() {
+public class ProxyConfigAction {
+    private ProxyConfigAction() {
     }
 
     static void post(IntegrationTestContext integrationTestContext, Entity entity) throws Exception {
-        RdsConfigEntity rdsconfigEntity = (RdsConfigEntity) entity;
+        ProxyConfigEntity proxyconfigEntity = (ProxyConfigEntity) entity;
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT,
                 CloudbreakClient.class);
-        rdsconfigEntity.setResponse(
+        proxyconfigEntity.setResponse(
                 client.getCloudbreakClient()
-                        .rdsConfigEndpoint()
-                        .postPrivate(rdsconfigEntity.getRequest()));
-        logJSON("Rds config post request: ", rdsconfigEntity.getRequest());
+                        .proxyConfigEndpoint()
+                        .postPrivate(proxyconfigEntity.getRequest()));
+        logJSON("Proxy config post request: ", proxyconfigEntity.getRequest());
     }
 
     public static void get(IntegrationTestContext integrationTestContext, Entity entity) throws IOException {
-        RdsConfigEntity rdsconfigEntity = (RdsConfigEntity) entity;
+        ProxyConfigEntity proxyconfigEntity = (ProxyConfigEntity) entity;
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT,
                 CloudbreakClient.class);
-        rdsconfigEntity.setResponse(
+        proxyconfigEntity.setResponse(
                 client.getCloudbreakClient()
-                        .rdsConfigEndpoint()
-                        .getPrivate(rdsconfigEntity.getEntityId()));
-        logJSON(" get rds config response: ", rdsconfigEntity.getResponse());
+                        .proxyConfigEndpoint()
+                        .getPrivate(proxyconfigEntity.getEntityId()));
+        logJSON(" get proxy config response: ", proxyconfigEntity.getResponse());
     }
 
     public static void getAll(IntegrationTestContext integrationTestContext, Entity entity) throws IOException {
-        RdsConfigEntity rdsconfigEntity = (RdsConfigEntity) entity;
+        ProxyConfigEntity proxyconfigEntity = (ProxyConfigEntity) entity;
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT,
                 CloudbreakClient.class);
-        rdsconfigEntity.setResponses(
+        proxyconfigEntity.setResponses(
                 client.getCloudbreakClient()
-                        .rdsConfigEndpoint()
+                        .proxyConfigEndpoint()
                         .getPrivates());
-        logJSON(" get all rds config response: ", rdsconfigEntity.getResponse());
+        logJSON(" get all proxy config response: ", proxyconfigEntity.getResponse());
     }
 
     public static void delete(IntegrationTestContext integrationTestContext, Entity entity) {
-        RdsConfigEntity rdsconfigEntity = (RdsConfigEntity) entity;
+        ProxyConfigEntity proxyconfigEntity = (ProxyConfigEntity) entity;
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT,
                 CloudbreakClient.class);
         client.getCloudbreakClient()
-                .rdsConfigEndpoint()
-                .deletePrivate(rdsconfigEntity.getName());
-    }
-
-    static void testConnect(IntegrationTestContext integrationTestContext, Entity entity) throws Exception {
-
-        RdsTestEntity rdsTestEntity = (RdsTestEntity) entity;
-
-        RDSTestRequest rdsTestRequest = new RDSTestRequest();
-        rdsTestRequest.setRdsConfig(rdsTestEntity.getRequest());
-
-        CloudbreakClient client;
-        client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT,
-                CloudbreakClient.class);
-        rdsTestEntity.setResponse(
-                client.getCloudbreakClient()
-                        .rdsConfigEndpoint()
-                        .testRdsConnection(rdsTestRequest));
-        logJSON("Rds test post request: ", rdsTestEntity.getRequest());
+                .proxyConfigEndpoint()
+                .deletePrivate(proxyconfigEntity.getName());
     }
 
     public static void createInGiven(IntegrationTestContext integrationTestContext, Entity entity) throws Exception {
