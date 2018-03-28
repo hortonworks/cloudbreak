@@ -102,20 +102,21 @@ public class RdsConfigController extends NotificationController implements RdsCo
 
     @Override
     public RdsTestResult testRdsConnection(RDSTestRequest rdsTestRequest) {
-        Long existingRDSConfigId = rdsTestRequest.getId();
+        String existingRDSConfigName = rdsTestRequest.getName();
         RDSConfigRequest configRequest = rdsTestRequest.getRdsConfig();
-        if (existingRDSConfigId == null && configRequest == null) {
-            throw new BadRequestException("Either an RDSConfig id or an RDSConfig request needs to be specified in the request. ");
+        if (existingRDSConfigName == null && configRequest == null) {
+            throw new BadRequestException("Either an RDSConfig id, name or an RDSConfig request needs to be specified in the request. ");
         }
 
         RdsTestResult rdsTestResult = new RdsTestResult();
-        if (existingRDSConfigId != null) {
+        if (existingRDSConfigName != null) {
             try {
-                RDSConfig config = rdsConfigService.get(existingRDSConfigId);
+                RDSConfig config = rdsConfigService.getByName(existingRDSConfigName, authenticatedUserService.getCbUser());
                 rdsTestResult = testRDSConnectivity(config.getConnectionURL(), config.getConnectionUserName(), config.getConnectionPassword());
             } catch (NotFoundException e) {
                 rdsTestResult.setConnectionResult("not found");
             }
+
         } else {
             rdsTestResult = testRDSConnectivity(configRequest.getConnectionURL(), configRequest.getConnectionUserName(), configRequest.getConnectionPassword());
         }

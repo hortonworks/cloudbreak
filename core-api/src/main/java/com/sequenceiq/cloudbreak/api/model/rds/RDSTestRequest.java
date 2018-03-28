@@ -13,19 +13,19 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class RDSTestRequest implements JsonEntity {
 
-    @ApiModelProperty(ModelDescriptions.RDSConfig.RDS_CONFIG_ID)
-    private Long id;
+    @ApiModelProperty(ModelDescriptions.RDSConfig.NAME)
+    private String name;
 
     @Valid
     @ApiModelProperty(ModelDescriptions.RDSConfig.RDS_CONFIG_REQUEST)
     private RDSConfigRequest rdsConfig;
 
-    public Long getId() {
-        return id;
+    public String getName() {
+        return name;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public RDSConfigRequest getRdsConfig() {
