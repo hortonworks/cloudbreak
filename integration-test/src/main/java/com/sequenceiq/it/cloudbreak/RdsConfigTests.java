@@ -23,10 +23,6 @@ public class RdsConfigTests extends CloudbreakTest {
 
     private static final String HIVE = "HIVE";
 
-    private static final String DATABASE_ENGINE = "POSTGRES";
-
-    private static final String CONNECTION_DRIVER = "org.postgresql.Driver";
-
     private static final String SPECIAL_RDS_NAME = "a-@#$%|:&*;";
 
     private static final String RDS_PROTOCOL = "jdbc:postgresql://";
@@ -68,22 +64,6 @@ public class RdsConfigTests extends CloudbreakTest {
             );
             rdsConfigsToDelete.add(type);
         }
-    }
-
-    @Test
-    public void testCreateValidRdsNotValidated() throws Exception {
-        given(RdsConfig.request()
-                .withName(VALID_RDS_CONFIG + "-not-validated")
-                .withConnectionPassword(rdsPassword)
-                .withConnectionURL(rdsConnectionUrl)
-                .withConnectionUserName(rdsUser)
-                .withType(HIVE), "create rds config without validation"
-        );
-        when(RdsConfig.post(), "post the request");
-        then(RdsConfig.assertThis(
-                (rdsconfig, t) -> Assert.assertNotNull(rdsconfig.getResponse().getId(), "rds config id must not be null"))
-        );
-        rdsConfigsToDelete.add("not-validated");
     }
 
     @Test(expectedExceptions = BadRequestException.class)
@@ -131,7 +111,7 @@ public class RdsConfigTests extends CloudbreakTest {
         );
     }
 
-    @Test(expectedExceptions = BadRequestException.class)
+    @Test()
     public void testCreateRdsWithInvalidUserName() throws Exception {
         given(RdsConfig.request()
                 .withName(VALID_RDS_CONFIG + "-name")
@@ -142,11 +122,12 @@ public class RdsConfigTests extends CloudbreakTest {
         );
         when(RdsConfig.post(), "post the request");
         then(RdsConfig.assertThis(
-                (rdsconfig, t) -> Assert.assertNull(rdsconfig.getResponse().getId(), "rds config id must be null"))
+                (rdsconfig, t) -> Assert.assertNotNull(rdsconfig.getResponse().getId(), "rds config id must not be null"))
         );
+        rdsConfigsToDelete.add("name");
     }
 
-    @Test(expectedExceptions = BadRequestException.class)
+    @Test()
     public void testCreateRdsWithInvalidPwd() throws Exception {
         given(RdsConfig.request()
                 .withName(VALID_RDS_CONFIG + "-pwd")
@@ -157,8 +138,9 @@ public class RdsConfigTests extends CloudbreakTest {
         );
         when(RdsConfig.post(), "post the request");
         then(RdsConfig.assertThis(
-                (rdsconfig, t) -> Assert.assertNull(rdsconfig.getResponse().getId(), "rds config id must be null"))
+                (rdsconfig, t) -> Assert.assertNotNull(rdsconfig.getResponse().getId(), "rds config id must not be null"))
         );
+        rdsConfigsToDelete.add("pwd");
     }
 
     @Test(expectedExceptions = BadRequestException.class)
@@ -176,7 +158,7 @@ public class RdsConfigTests extends CloudbreakTest {
         );
     }
 
-    @Test(expectedExceptions = BadRequestException.class)
+    @Test()
     public void testCreateRdsWithUrlNotExists() throws Exception {
         given(RdsConfig.request()
                 .withName(VALID_RDS_CONFIG + "-url")
@@ -187,23 +169,9 @@ public class RdsConfigTests extends CloudbreakTest {
         );
         when(RdsConfig.post(), "post the request");
         then(RdsConfig.assertThis(
-                (rdsconfig, t) -> Assert.assertNull(rdsconfig.getResponse().getId(), "rds config id must be null"))
+                (rdsconfig, t) -> Assert.assertNotNull(rdsconfig.getResponse().getId(), "rds config id must not be null"))
         );
-    }
-
-    @Test(expectedExceptions = BadRequestException.class)
-    public void testCreateRdsWithInvalidDbEngine() throws Exception {
-        given(RdsConfig.request()
-                .withName(VALID_RDS_CONFIG + "-dbeng")
-                .withConnectionPassword(rdsPassword)
-                .withConnectionURL(rdsConnectionUrl.split(RDS_PROTOCOL)[1])
-                .withConnectionUserName(rdsUser)
-                .withType(HIVE), "create rds config with invalid database engine"
-        );
-        when(RdsConfig.post(), "post the request");
-        then(RdsConfig.assertThis(
-                (rdsconfig, t) -> Assert.assertNull(rdsconfig.getResponse().getId(), "rds config id must be null"))
-        );
+        rdsConfigsToDelete.add("url");
     }
 
     @Test
@@ -243,7 +211,7 @@ public class RdsConfigTests extends CloudbreakTest {
         given(RdsConfig.request()
                 .withName(VALID_RDS_CONFIG + "-same")
                 .withConnectionPassword(rdsPassword)
-                .withConnectionURL(rdsConnectionUrl.split(RDS_PROTOCOL)[1])
+                .withConnectionURL(rdsConnectionUrl)
                 .withConnectionUserName(rdsUser)
                 .withType(HIVE), "create rds with name already exists"
         );
@@ -308,7 +276,7 @@ public class RdsConfigTests extends CloudbreakTest {
     @Test
     public void testRdsConnectWithUrlNotExists() throws Exception {
         given(RdsTest.request()
-                .withName(VALID_RDS_CONFIG + "-url")
+                .withName(VALID_RDS_CONFIG)
                 .withConnectionPassword(rdsPassword)
                 .withConnectionURL(RDS_PROTOCOL + "www.google.com:1/test")
                 .withConnectionUserName(rdsUser)
@@ -324,7 +292,7 @@ public class RdsConfigTests extends CloudbreakTest {
     @Test
     public void testRdsConnectWithInvalidUserName() throws Exception {
         given(RdsTest.request()
-                .withName(VALID_RDS_CONFIG + "-name")
+                .withName(VALID_RDS_CONFIG)
                 .withConnectionPassword(rdsPassword)
                 .withConnectionURL(rdsConnectionUrl)
                 .withConnectionUserName("abcde1234")
@@ -338,13 +306,13 @@ public class RdsConfigTests extends CloudbreakTest {
     }
 
     @Test(expectedExceptions = BadRequestException.class)
-    public void testRdsConnectWithInvalidDbEngine() throws Exception {
+    public void testRdsConnectWithInvalidUrlNoProt() throws Exception {
         given(RdsTest.request()
-                .withName(VALID_RDS_CONFIG + "-dbeng")
+                .withName(VALID_RDS_CONFIG)
                 .withConnectionPassword(rdsPassword)
                 .withConnectionURL(rdsConnectionUrl.split(RDS_PROTOCOL)[1])
                 .withConnectionUserName(rdsUser)
-                .withType(HIVE), "create rds config with invalid database engine"
+                .withType(HIVE), "create rds connection test with invalid connection url no protocol"
         );
         when(RdsTest.testConnect(), "post the request");
         then(RdsTest.assertThis(
