@@ -11,14 +11,14 @@ load ../utils/commands
  }
 
 @test "Create rds" {
-  OUTPUT=$(create-database  --name testrds --db-username testuser --db-password password --url http://google.hu --driver org.postgresql.Driver --database-engine MYSQL --type HIVE 2>&1 | awk '{printf "%s",$0} END {print ""}' | awk 'match($0, /{[^{}]+}/) { print substr($0, RSTART, RLENGTH)}')
+  OUTPUT=$(create-database  --name testrds --db-username testuser --db-password password --url jdbc:postgresql://google.com/db --driver org.postgresql.Driver --database-engine MYSQL --type HIVE 2>&1 | awk '{printf "%s",$0} END {print ""}' | awk 'match($0, /{[^{}]+}/) { print substr($0, RSTART, RLENGTH)}')
 
-  [[ $(echo "${OUTPUT}" | jq ' . |  [to_entries[].key] == ["connectionDriver","connectionPassword","connectionURL","connectionUserName","databaseEngine","name","type"]') == true ]]
+  [[ $(echo "${OUTPUT}" | jq ' . |  [to_entries[].key] == ["connectionPassword","connectionURL","connectionUserName","name","type"]') == true ]]
 }
 
 @test "Check rds delete" {
   OUTPUT=$(delete-database  --name testrds 2>&1 | tail -n 2 | head -n 1)
 
-  [[ "${OUTPUT}" == *"rds config deleted"* ]]
+  [[ "${OUTPUT}" == *"database configuration deleted"* ]]
   [[ "${OUTPUT}" != *"error"* ]]
 }

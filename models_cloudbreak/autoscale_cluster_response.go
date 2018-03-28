@@ -21,7 +21,7 @@ import (
 
 type AutoscaleClusterResponse struct {
 
-	// details of the external Ambari database
+	// [DEPRECATED] use RdsConfig instead! details of the external Ambari database
 	AmbariDatabaseDetails *AmbariDatabaseDetails `json:"ambariDatabaseDetails,omitempty"`
 
 	// details of the Ambari package repository

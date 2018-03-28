@@ -35,6 +35,10 @@ func (*mockRdsClient) PostPublicRds(params *v1rdsconfigs.PostPublicRdsParams) (*
 	return nil, nil
 }
 
+func (*mockRdsClient) TestRdsConnection(params *v1rdsconfigs.TestRdsConnectionParams) (*v1rdsconfigs.TestRdsConnectionOK, error) {
+	return nil, nil
+}
+
 func TestListRdsImpl(t *testing.T) {
 	var rows []utils.Row
 	listAllRdsImpl(new(mockRdsClient), func(h []string, r []utils.Row) { rows = r })

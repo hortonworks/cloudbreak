@@ -618,11 +618,11 @@ var (
 			Usage: "password to use for the jdbc connection",
 		},
 	}
-	FlRdsDriver = StringFlag{
-		RequiredFlag: REQUIRED,
+	FlRdsDriverOptional = StringFlag{
+		RequiredFlag: OPTIONAL,
 		StringFlag: cli.StringFlag{
 			Name:  "driver",
-			Usage: "name of the JDBC connection driver (for example: 'org.postgresql.Driver')",
+			Usage: "[DEPRECATED] has no effect",
 		},
 	}
 	FlRdsURL = StringFlag{
@@ -632,25 +632,25 @@ var (
 			Usage: "JDBC connection URL in the form of jdbc:<db-type>://<address>:<port>/<db>",
 		},
 	}
-	FlRdsDatabaseEngine = StringFlag{
-		RequiredFlag: REQUIRED,
+	FlRdsDatabaseEngineOptional = StringFlag{
+		RequiredFlag: OPTIONAL,
 		StringFlag: cli.StringFlag{
 			Name:  "database-engine",
-			Usage: "Name of the external database engine (MYSQL, POSTGRES...)",
+			Usage: "[DEPRECATED] has no effect",
 		},
 	}
 	FlRdsType = StringFlag{
 		RequiredFlag: REQUIRED,
 		StringFlag: cli.StringFlag{
 			Name:  "type",
-			Usage: "Type of database, aka the service name that will use the db like HIVE, DRUID, SUPERSET, RANGER, etc.",
+			Usage: "type of database, aka the service name that will use the db like HIVE, DRUID, SUPERSET, RANGER, etc.",
 		},
 	}
 	FlRdsValidatedOptional = BoolFlag{
 		RequiredFlag: OPTIONAL,
 		BoolFlag: cli.BoolFlag{
 			Name:  "not-validated",
-			Usage: "If set, then the database configuration will be not validated",
+			Usage: "[DEPRECATED] has no effect, use 'cb database test ...' command instead",
 		},
 	}
 )

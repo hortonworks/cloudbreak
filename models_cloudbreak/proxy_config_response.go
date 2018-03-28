@@ -26,6 +26,9 @@ type ProxyConfigResponse struct {
 
 	// Name of the proxy configuration resource
 	// Required: true
+	// Max Length: 100
+	// Min Length: 4
+	// Pattern: (^[a-z][-a-z0-9]*[a-z0-9]$)
 	Name *string `json:"name"`
 
 	// determines the protocol (http or https)
@@ -35,10 +38,15 @@ type ProxyConfigResponse struct {
 
 	// host or IP address of proxy server
 	// Required: true
+	// Max Length: 255
+	// Min Length: 1
+	// Pattern: (^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$)
 	ServerHost *string `json:"serverHost"`
 
 	// port of proxy server (typically: 3128 or 8080)
 	// Required: true
+	// Maximum: 65535
+	// Minimum: 1
 	ServerPort *int32 `json:"serverPort"`
 
 	// Username to use for basic authentication
@@ -95,6 +103,18 @@ func (m *ProxyConfigResponse) validateName(formats strfmt.Registry) error {
 		return err
 	}
 
+	if err := validate.MinLength("name", "body", string(*m.Name), 4); err != nil {
+		return err
+	}
+
+	if err := validate.MaxLength("name", "body", string(*m.Name), 100); err != nil {
+		return err
+	}
+
+	if err := validate.Pattern("name", "body", string(*m.Name), `(^[a-z][-a-z0-9]*[a-z0-9]$)`); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -117,12 +137,32 @@ func (m *ProxyConfigResponse) validateServerHost(formats strfmt.Registry) error 
 		return err
 	}
 
+	if err := validate.MinLength("serverHost", "body", string(*m.ServerHost), 1); err != nil {
+		return err
+	}
+
+	if err := validate.MaxLength("serverHost", "body", string(*m.ServerHost), 255); err != nil {
+		return err
+	}
+
+	if err := validate.Pattern("serverHost", "body", string(*m.ServerHost), `(^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$)`); err != nil {
+		return err
+	}
+
 	return nil
 }
 
 func (m *ProxyConfigResponse) validateServerPort(formats strfmt.Registry) error {
 
 	if err := validate.Required("serverPort", "body", m.ServerPort); err != nil {
+		return err
+	}
+
+	if err := validate.MinimumInt("serverPort", "body", int64(*m.ServerPort), 1, false); err != nil {
+		return err
+	}
+
+	if err := validate.MaximumInt("serverPort", "body", int64(*m.ServerPort), 65535, false); err != nil {
 		return err
 	}
 

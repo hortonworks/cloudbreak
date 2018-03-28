@@ -17,14 +17,14 @@ import (
 
 type RdsTestRequest struct {
 
-	// id of the RDS config to be tested by connectivity
-	ID int64 `json:"id,omitempty"`
+	// Name of the RDS configuration resource
+	Name string `json:"name,omitempty"`
 
 	// unsaved RDS config to be tested by connectivity
 	RdsConfig *RdsConfig `json:"rdsConfig,omitempty"`
 }
 
-/* polymorph RdsTestRequest id false */
+/* polymorph RdsTestRequest name false */
 
 /* polymorph RdsTestRequest rdsConfig false */
 

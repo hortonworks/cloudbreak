@@ -28,7 +28,7 @@ type RDSConfigResponse struct {
 
 	// JDBC connection URL in the form of jdbc:<db-type>://<address>:<port>/<db>
 	// Required: true
-	// Pattern: ^jdbc:postgresql://[-\w\.]*:\d{1,5}/?\w*
+	// Pattern: ^jdbc:(postgresql|mysql|oracle)://[-\w\.]*:\d{1,5}/?\w*
 	ConnectionURL *string `json:"connectionURL"`
 
 	// creation time of the resource in long
@@ -57,12 +57,9 @@ type RDSConfigResponse struct {
 	// Type of RDS, aka the service name that will use the RDS like HIVE, DRUID, SUPERSET, RANGER, etc.
 	// Required: true
 	// Max Length: 12
-	// Min Length: 4
+	// Min Length: 3
 	// Pattern: (^[a-zA-Z][-a-zA-Z0-9]*[a-zA-Z0-9]$)
 	Type *string `json:"type"`
-
-	// If true, then the RDS configuration will be validated
-	Validated *bool `json:"validated,omitempty"`
 }
 
 /* polymorph RDSConfigResponse clusterNames false */
@@ -84,8 +81,6 @@ type RDSConfigResponse struct {
 /* polymorph RDSConfigResponse stackVersion false */
 
 /* polymorph RDSConfigResponse type false */
-
-/* polymorph RDSConfigResponse validated false */
 
 // Validate validates this r d s config response
 func (m *RDSConfigResponse) Validate(formats strfmt.Registry) error {
@@ -155,7 +150,7 @@ func (m *RDSConfigResponse) validateConnectionURL(formats strfmt.Registry) error
 		return err
 	}
 
-	if err := validate.Pattern("connectionURL", "body", string(*m.ConnectionURL), `^jdbc:postgresql://[-\w\.]*:\d{1,5}/?\w*`); err != nil {
+	if err := validate.Pattern("connectionURL", "body", string(*m.ConnectionURL), `^jdbc:(postgresql|mysql|oracle)://[-\w\.]*:\d{1,5}/?\w*`); err != nil {
 		return err
 	}
 
@@ -198,7 +193,7 @@ func (m *RDSConfigResponse) validateType(formats strfmt.Registry) error {
 		return err
 	}
 
-	if err := validate.MinLength("type", "body", string(*m.Type), 4); err != nil {
+	if err := validate.MinLength("type", "body", string(*m.Type), 3); err != nil {
 		return err
 	}
 

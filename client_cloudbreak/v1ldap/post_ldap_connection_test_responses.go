@@ -47,7 +47,7 @@ func NewPostLdapConnectionTestOK() *PostLdapConnectionTestOK {
 successful operation
 */
 type PostLdapConnectionTestOK struct {
-	Payload *models_cloudbreak.RdsTestResult
+	Payload *models_cloudbreak.LdapTestResult
 }
 
 func (o *PostLdapConnectionTestOK) Error() string {
@@ -56,7 +56,7 @@ func (o *PostLdapConnectionTestOK) Error() string {
 
 func (o *PostLdapConnectionTestOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models_cloudbreak.RdsTestResult)
+	o.Payload = new(models_cloudbreak.LdapTestResult)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {

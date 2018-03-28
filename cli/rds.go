@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"fmt"
 	"time"
 
 	log "github.com/Sirupsen/logrus"
@@ -29,11 +30,69 @@ type rdsClient interface {
 	GetPublicsRds(params *v1rdsconfigs.GetPublicsRdsParams) (*v1rdsconfigs.GetPublicsRdsOK, error)
 	PostPrivateRds(params *v1rdsconfigs.PostPrivateRdsParams) (*v1rdsconfigs.PostPrivateRdsOK, error)
 	PostPublicRds(params *v1rdsconfigs.PostPublicRdsParams) (*v1rdsconfigs.PostPublicRdsOK, error)
+	TestRdsConnection(params *v1rdsconfigs.TestRdsConnectionParams) (*v1rdsconfigs.TestRdsConnectionOK, error)
+}
+
+func TestRdsByName(c *cli.Context) {
+	checkRequiredFlagsAndArguments(c)
+	log.Infof("[TestRdsByParams] test a database configuration")
+	cbClient := NewCloudbreakHTTPClientFromContext(c)
+	testRdsByNameImpl(
+		cbClient.Cloudbreak.V1rdsconfigs,
+		c.String(FlName.Name))
+}
+
+func TestRdsByParams(c *cli.Context) {
+	checkRequiredFlagsAndArguments(c)
+	log.Infof("[TestRdsByParams] test a database configuration")
+	cbClient := NewCloudbreakHTTPClientFromContext(c)
+	testRdsByParamsImpl(
+		cbClient.Cloudbreak.V1rdsconfigs,
+		c.String(FlRdsUserName.Name),
+		c.String(FlRdsPassword.Name),
+		c.String(FlRdsURL.Name),
+		c.String(FlRdsType.Name))
+}
+
+func testRdsByNameImpl(client rdsClient, name string) {
+	defer utils.TimeTrack(time.Now(), "test database configuration by name")
+	rdsRequest := &models_cloudbreak.RdsTestRequest{
+		Name: name,
+	}
+	log.Infof("[testRdsByParamsImpl] sending test database configuration by parameters request")
+	resp, err := client.TestRdsConnection(v1rdsconfigs.NewTestRdsConnectionParams().WithBody(rdsRequest))
+	if err != nil {
+		utils.LogErrorAndExit(err)
+	}
+	if responseText := getEmptyIfNil(resp.Payload.ConnectionResult); responseText != "connected" {
+		utils.LogErrorMessageAndExit(fmt.Sprintf("database configuration test result: %s", responseText))
+	}
+}
+
+func testRdsByParamsImpl(client rdsClient, username string, password string, URL string, rdsType string) {
+	defer utils.TimeTrack(time.Now(), "test database configuration by parameters")
+	rdsRequest := &models_cloudbreak.RdsTestRequest{
+		RdsConfig: &models_cloudbreak.RdsConfig{
+			Name:               &(&types.S{S: "testconnection"}).S,
+			ConnectionUserName: &username,
+			ConnectionPassword: &password,
+			ConnectionURL:      &URL,
+			Type:               &rdsType,
+		},
+	}
+	log.Infof("[testRdsByParamsImpl] sending test database configuration by parameters request")
+	resp, err := client.TestRdsConnection(v1rdsconfigs.NewTestRdsConnectionParams().WithBody(rdsRequest))
+	if err != nil {
+		utils.LogErrorAndExit(err)
+	}
+	if responseText := getEmptyIfNil(resp.Payload.ConnectionResult); responseText != "connected" {
+		utils.LogErrorMessageAndExit(fmt.Sprintf("database configuration test result: %s", responseText))
+	}
 }
 
 func CreateRds(c *cli.Context) {
 	checkRequiredFlagsAndArguments(c)
-	log.Infof("[CreateRds] creating an rds configuration")
+	log.Infof("[CreateRds] creating a database configuration")
 	cbClient := NewCloudbreakHTTPClientFromContext(c)
 	createRdsImpl(
 		cbClient.Cloudbreak.V1rdsconfigs,
@@ -41,37 +100,29 @@ func CreateRds(c *cli.Context) {
 		c.String(FlRdsUserName.Name),
 		c.String(FlRdsPassword.Name),
 		c.String(FlRdsURL.Name),
-		c.String(FlRdsDatabaseEngine.Name),
-		c.String(FlRdsDriver.Name),
 		c.String(FlRdsType.Name),
-		c.Bool(FlRdsValidatedOptional.Name),
 		c.Bool(FlPublicOptional.Name))
 }
 
-func createRdsImpl(client rdsClient, name string, username string, password string, URL string, databaseEngine string, driver string, rdsType string, notValidated bool, public bool) {
-	defer utils.TimeTrack(time.Now(), "create rds")
+func createRdsImpl(client rdsClient, name string, username string, password string, URL string, rdsType string, public bool) {
+	defer utils.TimeTrack(time.Now(), "create database")
 	rdsRequest := &models_cloudbreak.RdsConfig{
 		Name:               &name,
 		ConnectionUserName: &username,
 		ConnectionPassword: &password,
 		ConnectionURL:      &URL,
-		ConnectionDriver:   &driver,
-		DatabaseEngine:     &databaseEngine,
 		Type:               &rdsType,
-	}
-	if notValidated {
-		rdsRequest.Validated = &(&types.B{B: false}).B
 	}
 	var rdsResponse *models_cloudbreak.RDSConfigResponse
 	if public {
-		log.Infof("[createRdsImpl] sending create public rds request")
+		log.Infof("[createRdsImpl] sending create public database request")
 		resp, err := client.PostPublicRds(v1rdsconfigs.NewPostPublicRdsParams().WithBody(rdsRequest))
 		if err != nil {
 			utils.LogErrorAndExit(err)
 		}
 		rdsResponse = resp.Payload
 	} else {
-		log.Infof("[createRdsImpl] sending create private rds request")
+		log.Infof("[createRdsImpl] sending create private database request")
 		resp, err := client.PostPrivateRds(v1rdsconfigs.NewPostPrivateRdsParams().WithBody(rdsRequest))
 		if err != nil {
 			utils.LogErrorAndExit(err)
@@ -83,22 +134,22 @@ func createRdsImpl(client rdsClient, name string, username string, password stri
 
 func DeleteRds(c *cli.Context) error {
 	checkRequiredFlagsAndArguments(c)
-	defer utils.TimeTrack(time.Now(), "delete an rds")
+	defer utils.TimeTrack(time.Now(), "delete a database configuration")
 
 	rdsName := c.String(FlName.Name)
-	log.Infof("[DeleteRds] delete rds config by name: %s", rdsName)
+	log.Infof("[DeleteRds] delete database configuration by name: %s", rdsName)
 	cbClient := NewCloudbreakHTTPClientFromContext(c)
 
 	if err := cbClient.Cloudbreak.V1rdsconfigs.DeletePublicRds(v1rdsconfigs.NewDeletePublicRdsParams().WithName(rdsName)); err != nil {
 		utils.LogErrorAndExit(err)
 	}
-	log.Infof("[DeleteRds] rds config deleted: %s", rdsName)
+	log.Infof("[DeleteRds] database configuration deleted: %s", rdsName)
 	return nil
 }
 
 func ListAllRds(c *cli.Context) error {
 	checkRequiredFlagsAndArguments(c)
-	defer utils.TimeTrack(time.Now(), "list rds configs")
+	defer utils.TimeTrack(time.Now(), "list database configurations")
 
 	cbClient := NewCloudbreakHTTPClientFromContext(c)
 

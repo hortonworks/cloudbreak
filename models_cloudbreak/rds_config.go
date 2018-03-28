@@ -18,26 +18,18 @@ import (
 
 type RdsConfig struct {
 
-	// Name of the JDBC connection driver (for example: 'org.postgresql.Driver')
-	// Required: true
-	ConnectionDriver *string `json:"connectionDriver"`
-
 	// Password to use for the jdbc connection
 	// Required: true
 	ConnectionPassword *string `json:"connectionPassword"`
 
 	// JDBC connection URL in the form of jdbc:<db-type>://<address>:<port>/<db>
 	// Required: true
-	// Pattern: ^jdbc:postgresql://[-\w\.]*:\d{1,5}/?\w*
+	// Pattern: ^jdbc:(postgresql|mysql|oracle)://[-\w\.]*:\d{1,5}/?\w*
 	ConnectionURL *string `json:"connectionURL"`
 
 	// Username to use for the jdbc connection
 	// Required: true
 	ConnectionUserName *string `json:"connectionUserName"`
-
-	// Name of the external database engine (MYSQL, POSTGRES...)
-	// Required: true
-	DatabaseEngine *string `json:"databaseEngine"`
 
 	// Name of the RDS configuration resource
 	// Required: true
@@ -49,15 +41,10 @@ type RdsConfig struct {
 	// Type of RDS, aka the service name that will use the RDS like HIVE, DRUID, SUPERSET, RANGER, etc.
 	// Required: true
 	// Max Length: 12
-	// Min Length: 4
+	// Min Length: 3
 	// Pattern: (^[a-zA-Z][-a-zA-Z0-9]*[a-zA-Z0-9]$)
 	Type *string `json:"type"`
-
-	// If true, then the RDS configuration will be validated
-	Validated *bool `json:"validated,omitempty"`
 }
-
-/* polymorph RdsConfig connectionDriver false */
 
 /* polymorph RdsConfig connectionPassword false */
 
@@ -65,22 +52,13 @@ type RdsConfig struct {
 
 /* polymorph RdsConfig connectionUserName false */
 
-/* polymorph RdsConfig databaseEngine false */
-
 /* polymorph RdsConfig name false */
 
 /* polymorph RdsConfig type false */
 
-/* polymorph RdsConfig validated false */
-
 // Validate validates this rds config
 func (m *RdsConfig) Validate(formats strfmt.Registry) error {
 	var res []error
-
-	if err := m.validateConnectionDriver(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
 
 	if err := m.validateConnectionPassword(formats); err != nil {
 		// prop
@@ -93,11 +71,6 @@ func (m *RdsConfig) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateConnectionUserName(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
-	if err := m.validateDatabaseEngine(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -118,15 +91,6 @@ func (m *RdsConfig) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *RdsConfig) validateConnectionDriver(formats strfmt.Registry) error {
-
-	if err := validate.Required("connectionDriver", "body", m.ConnectionDriver); err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func (m *RdsConfig) validateConnectionPassword(formats strfmt.Registry) error {
 
 	if err := validate.Required("connectionPassword", "body", m.ConnectionPassword); err != nil {
@@ -142,7 +106,7 @@ func (m *RdsConfig) validateConnectionURL(formats strfmt.Registry) error {
 		return err
 	}
 
-	if err := validate.Pattern("connectionURL", "body", string(*m.ConnectionURL), `^jdbc:postgresql://[-\w\.]*:\d{1,5}/?\w*`); err != nil {
+	if err := validate.Pattern("connectionURL", "body", string(*m.ConnectionURL), `^jdbc:(postgresql|mysql|oracle)://[-\w\.]*:\d{1,5}/?\w*`); err != nil {
 		return err
 	}
 
@@ -152,15 +116,6 @@ func (m *RdsConfig) validateConnectionURL(formats strfmt.Registry) error {
 func (m *RdsConfig) validateConnectionUserName(formats strfmt.Registry) error {
 
 	if err := validate.Required("connectionUserName", "body", m.ConnectionUserName); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (m *RdsConfig) validateDatabaseEngine(formats strfmt.Registry) error {
-
-	if err := validate.Required("databaseEngine", "body", m.DatabaseEngine); err != nil {
 		return err
 	}
 
@@ -194,7 +149,7 @@ func (m *RdsConfig) validateType(formats strfmt.Registry) error {
 		return err
 	}
 
-	if err := validate.MinLength("type", "body", string(*m.Type), 4); err != nil {
+	if err := validate.MinLength("type", "body", string(*m.Type), 3); err != nil {
 		return err
 	}
 

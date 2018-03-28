@@ -65,7 +65,7 @@ for the post ldap connection test operation typically these are written to a htt
 type PostLdapConnectionTestParams struct {
 
 	/*Body*/
-	Body *models_cloudbreak.RdsTestRequest
+	Body *models_cloudbreak.LDAPTestRequest
 
 	timeout    time.Duration
 	Context    context.Context
@@ -106,13 +106,13 @@ func (o *PostLdapConnectionTestParams) SetHTTPClient(client *http.Client) {
 }
 
 // WithBody adds the body to the post ldap connection test params
-func (o *PostLdapConnectionTestParams) WithBody(body *models_cloudbreak.RdsTestRequest) *PostLdapConnectionTestParams {
+func (o *PostLdapConnectionTestParams) WithBody(body *models_cloudbreak.LDAPTestRequest) *PostLdapConnectionTestParams {
 	o.SetBody(body)
 	return o
 }
 
 // SetBody adds the body to the post ldap connection test params
-func (o *PostLdapConnectionTestParams) SetBody(body *models_cloudbreak.RdsTestRequest) {
+func (o *PostLdapConnectionTestParams) SetBody(body *models_cloudbreak.LDAPTestRequest) {
 	o.Body = body
 }
 
@@ -125,7 +125,7 @@ func (o *PostLdapConnectionTestParams) WriteToRequest(r runtime.ClientRequest, r
 	var res []error
 
 	if o.Body == nil {
-		o.Body = new(models_cloudbreak.RdsTestRequest)
+		o.Body = new(models_cloudbreak.LDAPTestRequest)
 	}
 
 	if err := r.SetBodyParam(o.Body); err != nil {

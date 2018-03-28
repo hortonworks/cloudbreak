@@ -1263,11 +1263,23 @@ func main() {
 				{
 					Name:   "create",
 					Usage:  "create a new database configuration",
-					Flags:  cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlRdsUserName, cb.FlRdsPassword, cb.FlRdsURL, cb.FlRdsDriver, cb.FlRdsDatabaseEngine, cb.FlRdsType, cb.FlRdsValidatedOptional).AddAuthenticationFlags().Build(),
+					Flags:  cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlRdsUserName, cb.FlRdsPassword, cb.FlRdsURL, cb.FlRdsDriverOptional, cb.FlRdsDatabaseEngineOptional, cb.FlRdsType, cb.FlRdsValidatedOptional).AddAuthenticationFlags().Build(),
 					Before: ConfigRead,
 					Action: cb.CreateRds,
 					BashComplete: func(c *cli.Context) {
-						for _, f := range cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlRdsUserName, cb.FlRdsPassword, cb.FlRdsURL, cb.FlRdsDriver, cb.FlRdsDatabaseEngine, cb.FlRdsType, cb.FlRdsValidatedOptional).AddAuthenticationFlags().Build() {
+						for _, f := range cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlRdsUserName, cb.FlRdsPassword, cb.FlRdsURL, cb.FlRdsDriverOptional, cb.FlRdsDatabaseEngineOptional, cb.FlRdsType, cb.FlRdsValidatedOptional).AddAuthenticationFlags().Build() {
+							printFlagCompletion(f)
+						}
+					},
+				},
+				{
+					Name:   "delete",
+					Usage:  "deletes a database configuration",
+					Flags:  cb.NewFlagBuilder().AddFlags(cb.FlName).AddAuthenticationFlags().Build(),
+					Before: ConfigRead,
+					Action: cb.DeleteRds,
+					BashComplete: func(c *cli.Context) {
+						for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlName).AddAuthenticationFlags().Build() {
 							printFlagCompletion(f)
 						}
 					},
@@ -1285,15 +1297,33 @@ func main() {
 					},
 				},
 				{
-					Name:   "delete",
-					Usage:  "deletes a database configuration",
-					Flags:  cb.NewFlagBuilder().AddFlags(cb.FlName).AddOutputFlag().AddAuthenticationFlags().Build(),
-					Before: ConfigRead,
-					Action: cb.DeleteRds,
-					BashComplete: func(c *cli.Context) {
-						for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlName).AddOutputFlag().AddAuthenticationFlags().Build() {
-							printFlagCompletion(f)
-						}
+					Name:  "test",
+					Usage: "test database connection configurations",
+					Subcommands: []cli.Command{
+						{
+							Name:   "by-name",
+							Usage:  "test a stored database configuration by name",
+							Flags:  cb.NewFlagBuilder().AddFlags(cb.FlName).AddAuthenticationFlags().Build(),
+							Before: ConfigRead,
+							Action: cb.TestRdsByName,
+							BashComplete: func(c *cli.Context) {
+								for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlName).AddAuthenticationFlags().Build() {
+									printFlagCompletion(f)
+								}
+							},
+						},
+						{
+							Name:   "by-params",
+							Usage:  "test database connection parameters",
+							Flags:  cb.NewFlagBuilder().AddFlags(cb.FlRdsUserName, cb.FlRdsPassword, cb.FlRdsURL, cb.FlRdsType).AddAuthenticationFlags().Build(),
+							Before: ConfigRead,
+							Action: cb.TestRdsByParams,
+							BashComplete: func(c *cli.Context) {
+								for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlRdsUserName, cb.FlRdsPassword, cb.FlRdsURL, cb.FlRdsType).AddAuthenticationFlags().Build() {
+									printFlagCompletion(f)
+								}
+							},
+						},
 					},
 				},
 			},
