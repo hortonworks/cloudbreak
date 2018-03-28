@@ -6,7 +6,6 @@ import java.io.IOException;
 
 import com.sequenceiq.cloudbreak.api.model.ldap.LDAPTestRequest;
 import com.sequenceiq.it.IntegrationTestContext;
-import com.sequenceiq.it.cloudbreak.newway.log.Log;
 
 
 public class LdapConfigAction {
@@ -34,7 +33,7 @@ public class LdapConfigAction {
                 client.getCloudbreakClient()
                         .ldapConfigEndpoint()
                         .getPrivate(ldapconfigEntity.getEntityId()));
-        Log.logJSON(" get ldap config response: ", ldapconfigEntity.getResponse());
+        logJSON(" get ldap config response: ", ldapconfigEntity.getResponse());
     }
 
     public static void getAll(IntegrationTestContext integrationTestContext, Entity entity) throws IOException {
@@ -46,7 +45,7 @@ public class LdapConfigAction {
                 client.getCloudbreakClient()
                         .ldapConfigEndpoint()
                         .getPrivates());
-        Log.logJSON(" get all ldap config response: ", ldapconfigEntity.getResponse());
+        logJSON(" get all ldap config response: ", ldapconfigEntity.getResponse());
     }
 
     public static void delete(IntegrationTestContext integrationTestContext, Entity entity) {

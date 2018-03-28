@@ -82,8 +82,13 @@ integrationtest:
         rdsConnectionUrl:
 
     ldapconfig:
-        ldapserverhost:
-        bindpassword:
+        ldapServerHost:
+        bindPassword:
+
+    proxyconfig:
+        proxyHost:
+        proxyUser:
+        proxyPassword:
 
     filesystemconfig:
         accountKeyWasb:
