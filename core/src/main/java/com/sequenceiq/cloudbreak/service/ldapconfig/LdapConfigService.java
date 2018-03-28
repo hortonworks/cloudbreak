@@ -55,6 +55,15 @@ public class LdapConfigService {
         return ldapConfig;
     }
 
+    public LdapConfig getByName(String name, IdentityUser user) {
+        LdapConfig ldapConfig = ldapConfigRepository.findByNameInAccount(name, user.getAccount());
+        if (ldapConfig == null) {
+            throw new NotFoundException(String.format("LdapConfig '%s' not found", name));
+        }
+        authorizationService.hasReadPermission(ldapConfig);
+        return ldapConfig;
+    }
+
     public Set<LdapConfig> retrievePrivateConfigs(IdentityUser user) {
         return ldapConfigRepository.findForUser(user.getUserId());
     }

@@ -57,6 +57,15 @@ public class RdsConfigService {
         return rdsConfig;
     }
 
+    public RDSConfig getByName(String name, IdentityUser user) {
+        RDSConfig rdsConfig = rdsConfigRepository.findOneByName(name, user.getAccount());
+        if (rdsConfig == null) {
+            throw new NotFoundException(String.format("RDS configuration '%s' not found.", name));
+        }
+        authorizationService.hasReadPermission(rdsConfig);
+        return rdsConfig;
+    }
+
     public Set<RDSConfig> retrieveAccountRdsConfigs(IdentityUser user) {
         return user.getRoles().contains(IdentityUserRole.ADMIN) ? rdsConfigRepository.findAllBasedOnAccount(user.getAccount())
                 : rdsConfigRepository.findPublicInAccountForUser(user.getUserId(), user.getAccount());

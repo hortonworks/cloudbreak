@@ -98,16 +98,16 @@ public class LdapController extends NotificationController implements LdapConfig
 
     @Override
     public LdapTestResult testLdapConnection(LDAPTestRequest ldapTestRequest) {
-        Long existingLDAPConfigId = ldapTestRequest.getId();
+        String existingLDAPConfigName = ldapTestRequest.getName();
         LdapValidationRequest validationRequest = ldapTestRequest.getValidationRequest();
-        if (existingLDAPConfigId == null && validationRequest == null) {
+        if (existingLDAPConfigName == null && validationRequest == null) {
             throw new BadRequestException("Either an existing resource 'id' or an LDAP 'validationRequest' needs to be specified in the request. ");
         }
 
         LdapTestResult ldapTestResult = new LdapTestResult();
         try {
-            if (existingLDAPConfigId != null) {
-                LdapConfig ldapConfig = ldapConfigService.get(existingLDAPConfigId);
+            if (existingLDAPConfigName != null) {
+                LdapConfig ldapConfig = ldapConfigService.getByName(existingLDAPConfigName, authenticatedUserService.getCbUser());
                 ldapConfigValidator.validateLdapConnection(ldapConfig);
             } else {
                 ldapConfigValidator.validateLdapConnection(validationRequest);
