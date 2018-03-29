@@ -27,7 +27,8 @@ public final class ReadTestData {
                 TestFile outputFile = getTestFile(getFileName(BLUEPRINT_UPDATER_TEST_OUTPUTS, entry.getKey()));
                 testFiles.add(new BlueprintDataProvider(inputFile, outputFile, entry.getValue()));
             } catch (Exception ex) {
-                throw new IOException(String.format("Unable to locate the desired folder/file in the classpath <%s>", entry.getKey()));
+                throw new IOException(String.format("Unable to locate the desired folder/file in the classpath <%s>, message: %s", entry.getKey(),
+                        ex.getMessage()));
             }
         }
         return testFiles;

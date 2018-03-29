@@ -107,6 +107,14 @@
       }
     },
     {
+      "webhcat-site": {
+        "properties": {
+          "webhcat.proxyuser.root.groups": "*",
+          "webhcat.proxyuser.root.hosts": "*"
+          }
+      }
+    },
+    {
       "ranger-ugsync-site": {
         "properties": {
           "ranger.usersync.ldap.deltasync": "false",
@@ -148,14 +156,6 @@
           "ranger.sso.publicKey": "signcert",
           "ranger.ldap.group.searchbase": "cn=groups,dc=example,dc=org",
           "ranger.ldap.group.roleattribute": "cn"
-        }
-      }
-    },
-    {
-      "webhcat-site": {
-        "properties": {
-          "webhcat.proxyuser.root.groups": "*",
-          "webhcat.proxyuser.root.hosts": "*"
         }
       }
     },

@@ -58,19 +58,6 @@
       ]
     },
     {
-      "name": "webhcat-site",
-      "configurations": [
-        {
-          "key": "webhcat.proxyuser.root.groups",
-          "value": "*"
-        },
-        {
-          "key": "webhcat.proxyuser.root.hosts",
-          "value": "*"
-        }
-      ]
-    },
-    {
       "name": "hbase-site",
       "configurations": [
         {

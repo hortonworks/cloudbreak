@@ -41,14 +41,6 @@
       }
     },
     {
-      "webhcat-site": {
-        "properties": {
-          "webhcat.proxyuser.root.groups": "*",
-          "webhcat.proxyuser.root.hosts": "*"
-        }
-      }
-    },
-    {
       "cluster-env": {
         "properties": {
           "recovery_enabled": "true",

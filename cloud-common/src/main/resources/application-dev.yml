@@ -1,1 +1,21 @@
 cb.image.catalog.url: https://cloudbreak-imagecatalog.s3.amazonaws.com/v2-dev-cb-image-catalog.json
+cb:
+  ambari:
+    version: 2.7.0.0-224
+    repo:
+      redhat7:
+        baseurl: http://s3.amazonaws.com/dev.hortonworks.com/ambari/centos7/2.x/BUILDS/2.7.0.0-224
+        gpgkey: http://s3.amazonaws.com/dev.hortonworks.com/ambari/centos7/2.x/BUILDS/2.7.0.0-224/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins
+  hdp:
+    entries:
+      3.0:
+        version: 3.0.0.0
+        repo:
+          stack:
+            repoid: HDP-3.0
+            redhat7: http://s3.amazonaws.com/dev.hortonworks.com/HDP/centos7/3.x/BUILDS/3.0.0.0-1073
+            repository-version: 3.0.0.0-1073
+            vdf-redhat7: http://s3.amazonaws.com/dev.hortonworks.com/HDP/centos7/3.x/BUILDS/3.0.0.0-1073/HDP-3.0.0.0-1073.xml
+          util:
+            repoid: HDP-UTILS-1.1.0.22
+            redhat7: http://s3.amazonaws.com/dev.hortonworks.com/HDP-UTILS-1.1.0.22/repos/centos7
