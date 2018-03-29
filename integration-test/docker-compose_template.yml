@@ -16,3 +16,9 @@ test:
     - CLOUDBREAK_URL=cloudbreak.service.consul:8080
     - SPRING_CONFIG_LOCATION=/it/it-application.yml
   image: java:8
+swagger-diff:
+  dns:
+  volumes:
+    - ./apidefinitions:/json 
+  command: bash -c "curl -k http://cloudbreak.service.consul:8080/cb/api/swagger.json -o new.json && for f in /json/*.json ; do echo check to $${f} ; swagger-diff -i $${f} new.json ; done ;"
+  image: afarsang/docker-swagger-diff
