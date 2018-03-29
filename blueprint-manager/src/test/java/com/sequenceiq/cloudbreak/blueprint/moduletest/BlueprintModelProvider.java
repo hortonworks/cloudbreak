@@ -119,6 +119,12 @@ class BlueprintModelProvider {
                 .build();
     }
 
+    static BlueprintPreparationObject blueprintObjectWhenWebhcatConfigured() throws JsonProcessingException {
+        return getPreparedBuilder("master")
+                .withBlueprintView(BlueprintTestUtil.generalBlueprintView("", "2.6", "HDP"))
+                .build();
+    }
+
     static BlueprintPreparationObject blueprintObjectWhenLdapAndDruidRdsConfigured() throws JsonProcessingException {
         return getPreparedBuilder()
                 .withBlueprintView(BlueprintTestUtil.generalBlueprintView("", "2.6", "HDP"))
