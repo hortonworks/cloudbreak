@@ -46,6 +46,7 @@ tags:
 - name: "v1rdsconfigs"
 - name: "v1util"
 - name: "v1constraints"
+- name: "v1repositoryconfigs"
 schemes:
 - "http"
 - "https"
@@ -7029,6 +7030,32 @@ paths:
         default:
           description: "successful operation"
       x-swagger-router-controller: "V2stacks"
+  /api/v1/repositoryconfigs/validate:
+    post:
+      tags:
+      - "v1repositoryconfigs"
+      summary: "validate repository configs fields, check their availability"
+      description: "Repository configs validation related operations"
+      operationId: "postRepositoryConfigsValidation"
+      schemes:
+      - "http"
+      - "https"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        required: false
+        schema:
+          $ref: "#/definitions/RepoConfigValidationRequest"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/RepoConfigValidationResponse"
+      x-swagger-router-controller: "V1repositoryconfigs"
 definitions:
   ConstraintTemplateResponse:
     type: "object"
@@ -9292,6 +9319,27 @@ definitions:
         description: "list of security rules that relates to the security group"
         items:
           $ref: "#/definitions/SecurityRuleRequest"
+  RepoConfigValidationRequest:
+    type: "object"
+    properties:
+      ambariBaseUrl:
+        type: "string"
+        description: "url of the Ambari repository"
+      ambariGpgKeyUrl:
+        type: "string"
+        description: "gpg key of the Ambari repository"
+      stackBaseURL:
+        type: "string"
+        description: "url of the stack repository"
+      utilsBaseURL:
+        type: "string"
+        description: "url of the stack utils repository"
+      versionDefinitionFileUrl:
+        type: "string"
+        description: "local path on the Ambari server or URL that point to the desired VDF file"
+      mpackUrl:
+        type: "string"
+        description: "url the MPACK that needs to be installed before HDF installation"
   TemplateV2Request:
     type: "object"
     properties:
@@ -10686,6 +10734,33 @@ definitions:
       uri:
         type: "string"
         description: "recipe uri"
+  RepoConfigValidationResponse:
+    type: "object"
+    properties:
+      ambariBaseUrl:
+        type: "boolean"
+        description: "Indicates the request's value with the same key is valid and reachable by Cloudbreak or not"
+        default: false
+      ambariGpgKeyUrl:
+        type: "boolean"
+        description: "Indicates the request's value with the same key is valid and reachable by Cloudbreak or not"
+        default: false
+      stackBaseURL:
+        type: "boolean"
+        description: "Indicates the request's value with the same key is valid and reachable by Cloudbreak or not"
+        default: false
+      utilsBaseURL:
+        type: "boolean"
+        description: "Indicates the request's value with the same key is valid and reachable by Cloudbreak or not"
+        default: false
+      versionDefinitionFileUrl:
+        type: "boolean"
+        description: "Indicates the request's value with the same key is valid and reachable by Cloudbreak or not"
+        default: false
+      mpackUrl:
+        type: "boolean"
+        description: "Indicates the request's value with the same key is valid and reachable by Cloudbreak or not"
+        default: false
   FlexUsageProductJson:
     type: "object"
     properties:
