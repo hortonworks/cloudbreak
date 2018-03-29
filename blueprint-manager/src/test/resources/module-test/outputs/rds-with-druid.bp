@@ -104,6 +104,14 @@
       }
     },
     {
+      "webhcat-site": {
+        "properties": {
+          "webhcat.proxyuser.root.groups": "*",
+          "webhcat.proxyuser.root.hosts": "*"
+        }
+      }
+    },
+    {
       "druid-superset-env": {
         "properties": {
           "superset_admin_password": "Passw0rd",
@@ -120,14 +128,6 @@
           "druid.metadata.storage.connector.user": "heyitsme",
           "druid.metadata.storage.connector.password": "iamsoosecure",
           "druid.metadata.storage.connector.connectURI": "jdbc:postgresql://10.1.1.1:5432/druid"
-        }
-      }
-    },
-    {
-      "webhcat-site": {
-        "properties": {
-          "webhcat.proxyuser.root.groups": "*",
-          "webhcat.proxyuser.root.hosts": "*"
         }
       }
     },

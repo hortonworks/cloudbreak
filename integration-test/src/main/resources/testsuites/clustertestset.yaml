@@ -12,6 +12,12 @@ tests:
       openstackCredentialName: autotesting-clusters-os
     classes:
       - com.sequenceiq.it.cloudbreak.ClusterTestFactory
+  - name: cluster_os_test_hdp_30_ambari_27
+    parameters:
+      provider: openstack
+      openstackCredentialName: autotesting-clusters-os
+    classes:
+      - com.sequenceiq.it.cloudbreak.ClusterTestFactory
   - name: cluster_aws_test
     parameters:
       provider: aws
