@@ -15,10 +15,6 @@
     "hadoop.proxyuser.hive.hosts": "*",
     "hadoop.proxyuser.oozie.hosts": "*"
   },
-  "webhcat-site": {
-    "webhcat.proxyuser.root.groups": "*",
-    "webhcat.proxyuser.root.hosts": "*"
-  },
   "hbase-site": {
     "zookeeper.recovery.retry": "10"
   },
