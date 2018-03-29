@@ -98,6 +98,8 @@ public class ConfigTemplateTest {
                         oozieWhenRdsPresentedThenShouldReturnWithRdsConfigs() },
                 { "blueprints/configurations/oozie/rds.handlebars", "configurations/oozie/oozie-without-rds.json",
                         objectWithoutEverything() },
+                { "blueprints/configurations/webhcat/global.handlebars", "configurations/webhcat/webhcat.json",
+                        objectWithoutEverything() },
         });
     }
 
