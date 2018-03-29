@@ -147,7 +147,7 @@ public class CredentialServiceTest {
         Credential credential = new Credential();
         credential.setCloudPlatform("AWS");
 
-        when(user.getRoles()).thenReturn(Collections.singleton(IdentityUserRole.fromString("ADMIN")));
+        when(user.getRoles()).thenReturn(Collections.singletonList(IdentityUserRole.fromString("ADMIN")));
         when(user.getAccount()).thenReturn("account");
         when(accountPreferencesService.enabledPlatforms()).thenReturn(platforms);
         when(credentialRepository.findAllInAccountAndFilterByPlatforms(user.getAccount(), platforms)).thenReturn(Sets.newHashSet(credential));
@@ -167,7 +167,7 @@ public class CredentialServiceTest {
         Credential credential = new Credential();
         credential.setCloudPlatform("AWS");
 
-        when(user.getRoles()).thenReturn(Collections.singleton(IdentityUserRole.fromString("USER")));
+        when(user.getRoles()).thenReturn(Collections.singletonList(IdentityUserRole.fromString("USER")));
         when(user.getAccount()).thenReturn("account");
         when(user.getUserId()).thenReturn("userId");
         when(accountPreferencesService.enabledPlatforms()).thenReturn(platforms);
