@@ -105,6 +105,13 @@
       }
     },
     {
+      "ranger-admin-site": {
+        "properties": {
+          "ranger.jpa.jdbc.driver": "org.postgresql.Driver"
+        }
+      }
+    },
+    {
       "ranger-env": {
         "properties": {
           "ranger_privelege_user_jdbc_url": "jdbc:postgresql://10.1.1.1:5432",

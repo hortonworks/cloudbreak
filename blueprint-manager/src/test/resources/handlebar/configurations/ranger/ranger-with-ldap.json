@@ -23,7 +23,6 @@
     "properties": {
       "ranger.sso.enabled": "true",
       "ranger.sso.publicKey": "signcert",
-      "ranger.jpa.jdbc.driver": "org.postgresql.Driver",
       "ranger.audit.source.type": "solr",
       "ranger.authentication.method": "ACTIVE_DIRECTORY",
       "ranger.ldap.ad.domain": " ",

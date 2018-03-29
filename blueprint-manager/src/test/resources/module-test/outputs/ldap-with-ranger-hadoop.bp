@@ -142,7 +142,6 @@
           "ranger.audit.source.type": "solr",
           "ranger.sso.enabled": "true",
           "ranger.ldap.url": "ldap://localhost:389",
-          "ranger.jpa.jdbc.driver": "org.postgresql.Driver",
           "ranger.ldap.ad.url": "ldap://localhost:389",
           "ranger.ldap.ad.base.dn": "cn=users,dc=example,dc=org",
           "ranger.ldap.base.dn": "cn=users,dc=example,dc=org",
