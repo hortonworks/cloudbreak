@@ -22,3 +22,7 @@ cd ..
 rm -rf test-output
 $INTEGCB_LOCATION/.deps/bin/docker-compose up test > test.out
 echo -e "\n\033[1;96m--- Test finished\033[0m\n"
+
+echo -e "\n\033[1;96m--- Swagger check\033[0m\n"
+$INTEGCB_LOCATION/.deps/bin/docker-compose up swagger-diff
+
