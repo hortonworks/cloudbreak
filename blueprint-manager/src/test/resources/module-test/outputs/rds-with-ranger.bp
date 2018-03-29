@@ -105,17 +105,17 @@
       }
     },
     {
-      "ranger-env": {
+      "ranger-admin-site": {
         "properties": {
-          "ranger_privelege_user_jdbc_url": "jdbc:postgresql://10.1.1.1:5432",
-          "create_db_dbuser": "true"
+          "ranger.jpa.jdbc.driver": "org.postgresql.Driver"
         }
       }
     },
     {
-      "ranger-admin-site": {
+      "ranger-env": {
         "properties": {
-          "ranger.jpa.jdbc.driver": "org.postgresql.Driver"
+          "ranger_privelege_user_jdbc_url": "jdbc:postgresql://10.1.1.1:5432",
+          "create_db_dbuser": "true"
         }
       }
     },
