@@ -132,6 +132,11 @@ cb:
     db: hive
     port: 5432
 
+  ranger.database:
+    user: ranger
+    db: ranger
+    port: 5432
+
   ambari:
     version: 2.6.1.3
     repo:

@@ -3,20 +3,25 @@ start-postgresql:
     - enable: True
     - name: postgresql
 
-/opt/salt/scripts/init_hive_db.sh:
+/opt/salt/scripts/init_db.sh:
   file.managed:
     - makedirs: True
     - mode: 755
-    - source: salt://postgresql/scripts/init_hive_db.sh
+    - source: salt://postgresql/scripts/init_db.sh
 
-init-hive-db:
+{% for service, values in pillar.get('postgres', {}).items()  %}
+
+init-{{ service }}-db:
   cmd.run:
-    - name: /opt/salt/scripts/init_hive_db.sh
+    - name: /opt/salt/scripts/init_db.sh
     - runas: postgres
     - env:
-      - USER: {{ pillar['postgres']['user'] }}
-      - PASSWORD: {{ pillar['postgres']['password'] }}
-      - DATABASE:  {{ pillar['postgres']['database'] }}
+      - USER: {{ values['user'] }}
+      - PASSWORD: {{ values['password'] }}
+      - DATABASE:  {{ values['database'] }}
+      - SERVICE: {{ service }}
+
+{% endfor %}
 
 reload-postgresql:
   cmd.run:

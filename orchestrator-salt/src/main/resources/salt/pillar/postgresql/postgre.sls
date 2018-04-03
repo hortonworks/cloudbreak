@@ -1,4 +1,1 @@
 postgres:
-  database:
-  user:
-  password:
