@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.blueprint.template;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -16,6 +19,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintConfigurationEntry;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessingException;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessorFactory;
@@ -29,6 +33,18 @@ public class BlueprintTextProcessorTest {
 
     @Rule
     public final ExpectedException thrown = ExpectedException.none();
+
+    private final List<String[]> rangerConfigurations = Lists.newArrayList(
+            new String[]{BlueprintTextProcessor.CONFIGURATIONS_NODE, "admin-properties", "properties", "db_host"},
+            new String[]{BlueprintTextProcessor.CONFIGURATIONS_NODE, "admin-properties", "properties", "db_user"},
+            new String[]{BlueprintTextProcessor.CONFIGURATIONS_NODE, "admin-properties", "properties", "db_password"},
+            new String[]{BlueprintTextProcessor.CONFIGURATIONS_NODE, "admin-properties", "properties", "db_name"});
+
+    private final List<String[]> hivaConfigurations = Lists.newArrayList(
+            new String[]{BlueprintTextProcessor.CONFIGURATIONS_NODE, "hive-site", "javax.jdo.option.ConnectionURL"},
+            new String[]{BlueprintTextProcessor.CONFIGURATIONS_NODE, "hive-site", "javax.jdo.option.ConnectionDriverName"},
+            new String[]{BlueprintTextProcessor.CONFIGURATIONS_NODE, "hive-site", "javax.jdo.option.ConnectionUserName"},
+            new String[]{BlueprintTextProcessor.CONFIGURATIONS_NODE, "hive-site", "javax.jdo.option.ConnectionPassword"});
 
     private final BlueprintProcessorFactory underTest = new BlueprintProcessorFactory();
 
@@ -303,48 +319,6 @@ public class BlueprintTextProcessorTest {
     }
 
     @Test
-    public void testHiveDbConfigExists() throws Exception {
-        String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints-jackson/test-bp-existing-hive-db.bp");
-
-        boolean result = underTest.get(testBlueprint).hiveDatabaseConfigurationExistsInBlueprint();
-        Assert.assertTrue(result);
-    }
-
-    @Test
-    public void testHiveDbConfigExistsWithoutConfigBlock() throws Exception {
-        String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints-jackson/test-bp-without-config-block.bp");
-
-        boolean result = underTest.get(testBlueprint).hiveDatabaseConfigurationExistsInBlueprint();
-        Assert.assertFalse(result);
-    }
-
-    @Test
-    public void testHiveDbConfigExistsWithEmptyConfigBlock() throws Exception {
-        String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints-jackson/test-bp-with-empty-config-block.bp");
-
-        boolean result = underTest.get(testBlueprint).hiveDatabaseConfigurationExistsInBlueprint();
-        Assert.assertFalse(result);
-    }
-
-    @Test
-    public void testHiveDbConfigExistsMissingConfig() throws Exception {
-        String originalBlueprint = FileReaderUtils.readFileFromClasspath("blueprints-jackson/test-bp-existing-hive-db.bp");
-
-        String testBlueprint = skipLine(originalBlueprint, BlueprintTextProcessor.JAVAX_JDO_OPTION_CONNECTION_DRIVER_NAME);
-        boolean result = underTest.get(testBlueprint).hiveDatabaseConfigurationExistsInBlueprint();
-        Assert.assertFalse(result);
-        testBlueprint = skipLine(originalBlueprint, BlueprintTextProcessor.JAVAX_JDO_OPTION_CONNECTION_PASSWORD);
-        result = underTest.get(testBlueprint).hiveDatabaseConfigurationExistsInBlueprint();
-        Assert.assertFalse(result);
-        testBlueprint = skipLine(originalBlueprint, BlueprintTextProcessor.JAVAX_JDO_OPTION_CONNECTION_URL);
-        result = underTest.get(testBlueprint).hiveDatabaseConfigurationExistsInBlueprint();
-        Assert.assertFalse(result);
-        testBlueprint = skipLine(originalBlueprint, BlueprintTextProcessor.JAVAX_JDO_OPTION_CONNECTION_USER_NAME);
-        result = underTest.get(testBlueprint).hiveDatabaseConfigurationExistsInBlueprint();
-        Assert.assertFalse(result);
-    }
-
-    @Test
     public void testPathValueShouldReturnPathValue() throws IOException {
         // GIVEN
         String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints-jackson/test-bp-with-core-site-properties.bp");
@@ -385,7 +359,7 @@ public class BlueprintTextProcessorTest {
         Assert.assertFalse(value.isPresent());
     }
 
-    private String skipLine(String originalBlueprint, String toSkipString) {
+    public static String skipLine(String originalBlueprint, String toSkipString) {
         String[] split = originalBlueprint.split(System.lineSeparator());
         StringBuilder sb = new StringBuilder();
         for (String line : split) {
@@ -396,6 +370,64 @@ public class BlueprintTextProcessorTest {
             }
         }
         return sb.toString();
+    }
+
+    @Test
+    public void testRangerDbConfigExists() throws Exception {
+        String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints-jackson/test-bp-existing-ranger-db.bp");
+
+        boolean result = underTest.get(testBlueprint).isAllConfigurationExistsInPathUnderConfigurationNode(rangerConfigurations);
+        assertTrue(result);
+    }
+
+    @Test
+    public void testRangerDbConfigExistsWithoutConfigBlock() throws Exception {
+        String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints-jackson/test-bp-without-config-block.bp");
+
+        boolean result = underTest.get(testBlueprint).isAllConfigurationExistsInPathUnderConfigurationNode(rangerConfigurations);
+        assertFalse(result);
+    }
+
+    @Test
+    public void testRangerDbConfigExistsWithEmptyConfigBlock() throws Exception {
+        String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints-jackson/test-bp-with-empty-config-block.bp");
+
+        boolean result = underTest.get(testBlueprint).isAllConfigurationExistsInPathUnderConfigurationNode(rangerConfigurations);
+        assertFalse(result);
+    }
+
+    @Test
+    public void testHiveDbConfigExists() throws Exception {
+        String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints-jackson/test-bp-existing-hive-db.bp");
+
+        boolean result = underTest.get(testBlueprint).isAllConfigurationExistsInPathUnderConfigurationNode(hivaConfigurations);
+        assertTrue(result);
+    }
+
+    @Test
+    public void testHiveDbConfigExistsWithoutConfigBlock() throws Exception {
+        String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints-jackson/test-bp-without-config-block.bp");
+
+        boolean result = underTest.get(testBlueprint).isAllConfigurationExistsInPathUnderConfigurationNode(hivaConfigurations);
+        assertFalse(result);
+    }
+
+    @Test
+    public void testHiveDbConfigExistsWithEmptyConfigBlock() throws Exception {
+        String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints-jackson/test-bp-with-empty-config-block.bp");
+
+        boolean result = underTest.get(testBlueprint).isAllConfigurationExistsInPathUnderConfigurationNode(hivaConfigurations);
+        assertFalse(result);
+    }
+
+    @Test
+    public void testHiveDbConfigExistsMissingConfig() throws Exception {
+        String originalBlueprint = FileReaderUtils.readFileFromClasspath("blueprints-jackson/test-bp-existing-hive-db.bp");
+        for (String[] config : hivaConfigurations) {
+            String testBlueprint = skipLine(originalBlueprint, config[config.length - 1]);
+            boolean result = underTest.get(testBlueprint).isAllConfigurationExistsInPathUnderConfigurationNode(hivaConfigurations);
+            assertFalse(result);
+        }
     }
 
     private boolean componentExistsInHostgroup(String component, JsonNode hostGroupNode) {

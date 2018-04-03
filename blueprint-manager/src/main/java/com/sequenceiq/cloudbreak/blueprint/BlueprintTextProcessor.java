@@ -30,15 +30,7 @@ import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 public class BlueprintTextProcessor {
 
-    public static final String JAVAX_JDO_OPTION_CONNECTION_URL = "javax.jdo.option.ConnectionURL";
-
-    public static final String JAVAX_JDO_OPTION_CONNECTION_DRIVER_NAME = "javax.jdo.option.ConnectionDriverName";
-
-    public static final String JAVAX_JDO_OPTION_CONNECTION_USER_NAME = "javax.jdo.option.ConnectionUserName";
-
-    public static final String JAVAX_JDO_OPTION_CONNECTION_PASSWORD = "javax.jdo.option.ConnectionPassword";
-
-    private static final String CONFIGURATIONS_NODE = "configurations";
+    public static final String CONFIGURATIONS_NODE = "configurations";
 
     private static final String SETTINGS_NODE = "settings";
 
@@ -53,8 +45,6 @@ public class BlueprintTextProcessor {
     private static final String BLUEPRINTS = "Blueprints";
 
     private static final String STACK_VERSION = "stack_version";
-
-    private static final String HIVE_SITE = "hive-site";
 
     private final ObjectNode blueprint;
 
@@ -120,6 +110,10 @@ public class BlueprintTextProcessor {
             }
         }
         return this;
+    }
+
+    public boolean isAllConfigurationExistsInPathUnderConfigurationNode(List<String[]> pathList) {
+        return pathList.stream().allMatch(path -> pathValue(path).isPresent());
     }
 
     public Optional<String> pathValue(String... path) {
@@ -537,20 +531,6 @@ public class BlueprintTextProcessor {
         return this;
     }
 
-    public boolean hiveDatabaseConfigurationExistsInBlueprint() {
-        JsonNode configurationsNode = blueprint.path(CONFIGURATIONS_NODE);
-        if (configurationsNode.isArray()) {
-            ArrayNode arrayConfNode = (ArrayNode) configurationsNode;
-            JsonNode hiveSite = arrayConfNode.findValue(HIVE_SITE);
-            return hiveSite != null
-                    && hiveSite.findValue(JAVAX_JDO_OPTION_CONNECTION_URL) != null
-                    && hiveSite.findValue(JAVAX_JDO_OPTION_CONNECTION_DRIVER_NAME) != null
-                    && hiveSite.findValue(JAVAX_JDO_OPTION_CONNECTION_USER_NAME) != null
-                    && hiveSite.findValue(JAVAX_JDO_OPTION_CONNECTION_PASSWORD) != null;
-        }
-        return false;
-    }
-
     public BlueprintTextProcessor setSecurityType(String type) {
         ObjectNode blueprintsNode = (ObjectNode) blueprint.path(BLUEPRINTS);
         ObjectNode security = (ObjectNode) blueprintsNode.get(SECURITY_NODE);
@@ -612,7 +592,12 @@ public class BlueprintTextProcessor {
         }
     }
 
+    public ObjectNode getBlueprint() {
+        return blueprint;
+    }
+
     private static class ComponentElement {
+
         private String name;
 
         private ComponentElement(String component) {
@@ -627,5 +612,4 @@ public class BlueprintTextProcessor {
             this.name = name;
         }
     }
-
 }
