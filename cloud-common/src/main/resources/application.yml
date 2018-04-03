@@ -61,7 +61,7 @@ cb:
   os:
     enable.autoimport: true
     import:
-      root.url.pattern: https://public-repo-1.hortonworks.com/HDP/cloudbreak/%s.img
+      root.url.pattern: http://public-repo-1.hortonworks.com/HDP/cloudbreak/%s.img
       from.format: qcow2
       disk.format: qcow2
       container.format: bare
