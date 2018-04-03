@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.service.user.UserFilterField;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
+import com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.PostgresConfigService;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
@@ -35,7 +36,6 @@ import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.ambari.InstanceGroupMetadataCollector;
-import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.HiveConfigProvider;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.smartsense.SmartSenseSubscriptionService;
 import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
@@ -44,9 +44,6 @@ import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
 public class StackToBlueprintPreparationObjectConverter extends AbstractConversionServiceAwareConverter<Stack, BlueprintPreparationObject> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StackToBlueprintPreparationObjectConverter.class);
-
-    @Inject
-    private HiveConfigProvider hiveConfigProvider;
 
     @Inject
     private HostGroupService hostGroupService;
@@ -68,6 +65,9 @@ public class StackToBlueprintPreparationObjectConverter extends AbstractConversi
 
     @Inject
     private HdfConfigProvider hdfConfigProvider;
+
+    @Inject
+    private PostgresConfigService postgresConfigService;
 
     @Inject
     private FileSystemConfigurationProvider fileSystemConfigurationProvider;
@@ -101,7 +101,7 @@ public class StackToBlueprintPreparationObjectConverter extends AbstractConversi
 
             return BlueprintPreparationObject.Builder.builder()
                     .withFlexSubscription(source.getFlexSubscription())
-                    .withRdsConfigs(hiveConfigProvider.createPostgresRdsConfigIfNeeded(source, cluster))
+                    .withRdsConfigs(postgresConfigService.createRdsConfigIfNeeded(source, cluster))
                     .withHostgroups(hostGroupService.getByCluster(cluster.getId()))
                     .withGateway(cluster.getGateway())
                     .withBlueprintView(new BlueprintView(cluster, blueprintStackInfo))

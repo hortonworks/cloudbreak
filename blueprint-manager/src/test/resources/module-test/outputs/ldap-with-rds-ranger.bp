@@ -174,7 +174,7 @@
       "ranger-env": {
         "properties": {
           "ranger_privelege_user_jdbc_url": "jdbc:postgresql://10.1.1.1:5432",
-          "create_db_dbuser": "true"
+          "create_db_dbuser": "false"
         }
       }
     },
