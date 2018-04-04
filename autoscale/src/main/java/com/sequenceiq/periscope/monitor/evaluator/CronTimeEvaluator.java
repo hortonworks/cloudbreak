@@ -6,7 +6,6 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -26,7 +25,7 @@ public class CronTimeEvaluator extends AbstractEventPublisher implements Evaluat
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CronTimeEvaluator.class);
 
-    @Autowired
+    @Inject
     private TimeAlertRepository alertRepository;
 
     @Inject
@@ -43,7 +42,7 @@ public class CronTimeEvaluator extends AbstractEventPublisher implements Evaluat
     }
 
     private boolean isTrigger(TimeAlert alert) {
-        return dateUtils.isTrigger(alert.getCron(), alert.getTimeZone(), MonitorUpdateRate.CLUSTER_UPDATE_RATE);
+        return dateUtils.isTrigger(alert, MonitorUpdateRate.CLUSTER_UPDATE_RATE);
     }
 
     private boolean isPolicyAttached(BaseAlert alert) {
@@ -56,10 +55,8 @@ public class CronTimeEvaluator extends AbstractEventPublisher implements Evaluat
         MDCBuilder.buildMdcContext(cluster);
 
         for (TimeAlert alert : alertRepository.findAllByCluster(clusterId)) {
-            String alertName = alert.getName();
-            LOGGER.info("Checking time based alert: '{}'", alertName);
             if (isTrigger(alert) && isPolicyAttached(alert)) {
-                LOGGER.info("Time alert: '{}' triggers", alertName);
+                LOGGER.info("Time alert '{}' triggers the '{}' scaling policy", alert.getName(), alert.getScalingPolicy().getName());
                 publishEvent(new ScalingEvent(alert));
                 break;
             }
