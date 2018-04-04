@@ -73,7 +73,7 @@ public class ScalingRequest implements Runnable {
         ambariAddressJson.setAmbariAddress(ambari);
         History history = null;
         try {
-            LOGGER.info("Sending request to add {} instance(s) and install services", scalingAdjustment);
+            LOGGER.info("Sending request to add {} instance(s) into host group '{}', triggered policy '{}'", scalingAdjustment, hostGroup, policy.getName());
             Long stackId = cloudbreakClient.stackV1Endpoint().getStackForAmbari(ambariAddressJson).getId();
             UpdateStackJson updateStackJson = new UpdateStackJson();
             updateStackJson.setWithClusterEvent(true);
@@ -100,7 +100,7 @@ public class ScalingRequest implements Runnable {
         ambariAddressJson.setAmbariAddress(ambari);
         History history = null;
         try {
-            LOGGER.info("Sending request to remove {} node(s) from host group '{}'", scalingAdjustment, hostGroup);
+            LOGGER.info("Sending request to remove {} node(s) from host group '{}', triggered policy '{}'", scalingAdjustment, hostGroup, policy.getName());
             Long stackId = cloudbreakClient.stackV1Endpoint().getStackForAmbari(ambariAddressJson).getId();
             UpdateClusterJson updateClusterJson = new UpdateClusterJson();
             HostGroupAdjustmentJson hostGroupAdjustmentJson = new HostGroupAdjustmentJson();
