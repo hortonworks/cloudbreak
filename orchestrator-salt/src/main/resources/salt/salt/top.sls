@@ -9,6 +9,7 @@ base:
     - nginx
 {% endif %}
     - docker
+    - recipes.runner
 
   'roles:kerberos_server_master':
     - match: grain
@@ -63,7 +64,7 @@ base:
 
   'roles:ambari*':
     - match: grain
-    - pre-recipes.pre-ambari-start
+    - recipes.pre-ambari-start
 
   'roles:ambari_server':
     - match: grain
@@ -79,7 +80,7 @@ base:
 
   'recipes:post-ambari-start':
     - match: grain
-    - pre-recipes.post-ambari-start
+    - recipes.post-ambari-start
 
   'G@roles:ambari_server and G@recipes:post-ambari-start':
     - match: compound
@@ -87,11 +88,11 @@ base:
 
   'recipes:pre-termination':
     - match: grain
-    - pre-recipes.pre-termination
+    - recipes.pre-termination
 
   'recipes:post-cluster-install':
     - match: grain
-    - post-recipes
+    - recipes.post-cluster-install
 
   'G@recipes:post and G@roles:kerberos_server_slave':
     - match: compound
