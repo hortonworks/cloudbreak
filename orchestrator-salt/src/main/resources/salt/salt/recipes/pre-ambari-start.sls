@@ -1,6 +1,7 @@
 create_recipe_log_dir_pre_start:
   file.directory:
-    - name: /var/log/recipes
+    - name: /var/log/recipes/pre-ambari-start
+    - makedirs: True
 
 {% for hg, args in pillar.get('recipes', {}).items() %}
 {% if grains['hostgroup'] == hg %}
@@ -16,10 +17,10 @@ create_recipe_log_dir_pre_start:
 
 run_pre_ambari_start_script_{{ script_name }}:
   cmd.run:
-    - name: sh -x /opt/scripts/pre-ambari-start/{{ script_name }} 2>&1 | tee -a /var/log/recipes/pre-ambari-start-{{ script_name }}.log && exit ${PIPESTATUS[0]}
+    - name: /opt/scripts/recipe-runner.sh pre-ambari-start {{ script_name }}
     - onlyif:
-      - ls /opt/scripts/pre-ambari-start/{{ script_name }}
-    - unless: ls /var/log/recipes/pre-ambari-start-{{ script_name }}.log
+      - test -f /opt/scripts/pre-ambari-start/{{ script_name }}
+      - test ! -f /var/log/recipes/pre-ambari-start/{{ script_name }}.success
 {% endfor %}
 {% endif %}
 
