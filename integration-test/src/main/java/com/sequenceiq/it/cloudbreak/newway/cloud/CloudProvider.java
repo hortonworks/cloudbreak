@@ -1,6 +1,9 @@
 package com.sequenceiq.it.cloudbreak.newway.cloud;
 
+import java.util.List;
+
 import com.sequenceiq.cloudbreak.api.model.v2.AmbariV2Request;
+import com.sequenceiq.cloudbreak.api.model.v2.InstanceGroupV2Request;
 import com.sequenceiq.it.cloudbreak.newway.CredentialEntity;
 import com.sequenceiq.it.cloudbreak.newway.Entity;
 import com.sequenceiq.it.cloudbreak.newway.StackEntity;
@@ -27,4 +30,6 @@ public abstract class CloudProvider {
     public abstract String region();
 
     public abstract String availabilityZone();
+
+    public abstract List<InstanceGroupV2Request> instanceGroups(String securityGroupId);
 }
