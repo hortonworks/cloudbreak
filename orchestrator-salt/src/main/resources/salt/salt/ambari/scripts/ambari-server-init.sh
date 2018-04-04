@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -x
+set -ex
 
 JAVA_PROFILE=/etc/profile.d/java.sh
 if [ -f $JAVA_PROFILE ]
