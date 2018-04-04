@@ -1,5 +1,11 @@
 package com.sequenceiq.it.cloudbreak.newway.cloud;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.model.SecurityRuleRequest;
 import com.sequenceiq.cloudbreak.api.model.StackAuthenticationRequest;
@@ -12,11 +18,6 @@ import com.sequenceiq.it.cloudbreak.newway.Entity;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
 import com.sequenceiq.it.cloudbreak.newway.StackEntity;
 import com.sequenceiq.it.cloudbreak.newway.TestParameter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public abstract class CloudProviderHelper extends CloudProvider {
 
@@ -102,6 +103,14 @@ public abstract class CloudProviderHelper extends CloudProvider {
         return requests;
     }
 
+    public List<InstanceGroupV2Request> instanceGroups(String securityGroupId) {
+        List<InstanceGroupV2Request> requests = new ArrayList<>();
+        requests.add(master(securityGroupId));
+        requests.add(compute(securityGroupId));
+        requests.add(worker(securityGroupId));
+        return requests;
+    }
+
     @Override
     public AmbariV2Request ambariRequestWithBlueprintId(Long id) {
         AmbariV2Request req = new AmbariV2Request();
@@ -132,6 +141,18 @@ public abstract class CloudProviderHelper extends CloudProvider {
         return r;
     }
 
+    public InstanceGroupV2Request master(String securityGroupId) {
+        InstanceGroupV2Request r = new InstanceGroupV2Request();
+        r.setNodeCount(1);
+        r.setGroup("master");
+        r.setType(InstanceGroupType.GATEWAY);
+        SecurityGroupV2Request s = new SecurityGroupV2Request();
+        s.setSecurityGroupId(securityGroupId);
+        r.setSecurityGroup(s);
+        r.setTemplate(template());
+        return r;
+    }
+
     InstanceGroupV2Request compute() {
         InstanceGroupV2Request r = new InstanceGroupV2Request();
         r.setNodeCount(1);
@@ -144,6 +165,18 @@ public abstract class CloudProviderHelper extends CloudProvider {
         return r;
     }
 
+    InstanceGroupV2Request compute(String securityGroupId) {
+        InstanceGroupV2Request r = new InstanceGroupV2Request();
+        r.setNodeCount(1);
+        r.setGroup("compute");
+        r.setType(InstanceGroupType.CORE);
+        SecurityGroupV2Request s = new SecurityGroupV2Request();
+        s.setSecurityGroupId(securityGroupId);
+        r.setSecurityGroup(s);
+        r.setTemplate(template());
+        return r;
+    }
+
     InstanceGroupV2Request worker() {
         InstanceGroupV2Request r = new InstanceGroupV2Request();
         r.setNodeCount(1);
@@ -151,6 +184,18 @@ public abstract class CloudProviderHelper extends CloudProvider {
         r.setType(InstanceGroupType.CORE);
         SecurityGroupV2Request s = new SecurityGroupV2Request();
         s.setSecurityRules(rules());
+        r.setSecurityGroup(s);
+        r.setTemplate(template());
+        return r;
+    }
+
+    InstanceGroupV2Request worker(String securityGroupId) {
+        InstanceGroupV2Request r = new InstanceGroupV2Request();
+        r.setNodeCount(1);
+        r.setGroup("worker");
+        r.setType(InstanceGroupType.CORE);
+        SecurityGroupV2Request s = new SecurityGroupV2Request();
+        s.setSecurityGroupId(securityGroupId);
         r.setSecurityGroup(s);
         r.setTemplate(template());
         return r;

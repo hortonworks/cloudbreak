@@ -77,6 +77,11 @@ public class Cluster extends Entity  {
         return this;
     }
 
+    public Cluster withProxyConfigName(String proxy) {
+        request.setProxyName(proxy);
+        return this;
+    }
+
     public Cluster withRdsConfigNames(Set<String> names) {
         request.setRdsConfigNames(names);
         return this;
