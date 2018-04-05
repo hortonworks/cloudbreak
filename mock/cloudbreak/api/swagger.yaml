@@ -7123,32 +7123,6 @@ paths:
         default:
           description: "successful operation"
       x-swagger-router-controller: "V2stacks"
-  /api/v1/repositoryconfigs/validate:
-    post:
-      tags:
-      - "v1repositoryconfigs"
-      summary: "validate repository configs fields, check their availability"
-      description: "Repository configs validation related operations"
-      operationId: "postRepositoryConfigsValidation"
-      schemes:
-      - "http"
-      - "https"
-      consumes:
-      - "application/json"
-      produces:
-      - "application/json"
-      parameters:
-      - in: "body"
-        name: "body"
-        required: false
-        schema:
-          $ref: "#/definitions/RepoConfigValidationRequest"
-      responses:
-        200:
-          description: "successful operation"
-          schema:
-            $ref: "#/definitions/RepoConfigValidationResponse"
-      x-swagger-router-controller: "V1repositoryconfigs"
 definitions:
   ConstraintTemplateResponse:
     type: "object"
@@ -9413,30 +9387,6 @@ definitions:
         items:
           $ref: "#/definitions/SecurityRuleRequest"
   RepoConfigValidationRequest:
-<<<<<<< HEAD
-=======
-    type: "object"
-    properties:
-      ambariBaseUrl:
-        type: "string"
-        description: "url of the Ambari repository"
-      ambariGpgKeyUrl:
-        type: "string"
-        description: "gpg key of the Ambari repository"
-      stackBaseURL:
-        type: "string"
-        description: "url of the stack repository"
-      utilsBaseURL:
-        type: "string"
-        description: "url of the stack utils repository"
-      versionDefinitionFileUrl:
-        type: "string"
-        description: "local path on the Ambari server or URL that point to the desired VDF file"
-      mpackUrl:
-        type: "string"
-        description: "url the MPACK that needs to be installed before HDF installation"
-  TemplateV2Request:
->>>>>>> origin/rc-2.4
     type: "object"
     properties:
       ambariBaseUrl:
@@ -10796,7 +10746,6 @@ definitions:
       uri:
         type: "string"
         description: "recipe uri"
-<<<<<<< HEAD
   ProxyConfigResponse:
     type: "object"
     required:
@@ -10838,14 +10787,11 @@ definitions:
         type: "integer"
         format: "int64"
         description: "proxy configuration id for the cluster"
-=======
->>>>>>> origin/rc-2.4
   RepoConfigValidationResponse:
     type: "object"
     properties:
       ambariBaseUrl:
         type: "boolean"
-<<<<<<< HEAD
         description: "Indicates the request's value with the same key is valid and\
           \ reachable by Cloudbreak or not"
         default: false
@@ -10873,29 +10819,6 @@ definitions:
         type: "boolean"
         description: "Indicates the request's value with the same key is valid and\
           \ reachable by Cloudbreak or not"
-=======
-        description: "Indicates the request's value with the same key is valid and reachable by Cloudbreak or not"
-        default: false
-      ambariGpgKeyUrl:
-        type: "boolean"
-        description: "Indicates the request's value with the same key is valid and reachable by Cloudbreak or not"
-        default: false
-      stackBaseURL:
-        type: "boolean"
-        description: "Indicates the request's value with the same key is valid and reachable by Cloudbreak or not"
-        default: false
-      utilsBaseURL:
-        type: "boolean"
-        description: "Indicates the request's value with the same key is valid and reachable by Cloudbreak or not"
-        default: false
-      versionDefinitionFileUrl:
-        type: "boolean"
-        description: "Indicates the request's value with the same key is valid and reachable by Cloudbreak or not"
-        default: false
-      mpackUrl:
-        type: "boolean"
-        description: "Indicates the request's value with the same key is valid and reachable by Cloudbreak or not"
->>>>>>> origin/rc-2.4
         default: false
   FlexUsageProductJson:
     type: "object"
