@@ -183,7 +183,6 @@ class BuildInfoTask extends DefaultTask {
     applicationDestinations += new File(applicationPropertiesPath + "/resources/main")
 
     destination.mkdirs()
-    String activeProfile = determineActiveProfile()
 
     // if using dev environment this condition is true
     if (buildVersion.contains("+") || buildVersion == "unspecified") {
@@ -191,6 +190,7 @@ class BuildInfoTask extends DefaultTask {
       buildVersion = grgit.describe()
       println "buildVersion from git: " + buildVersion
     }
+    String activeProfile = determineActiveProfile()
     new File(destination, "build.info").withWriter { out ->
       [
               "ARTIFACT_BASENAME=" + basename,
