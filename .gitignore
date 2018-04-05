@@ -32,5 +32,3 @@ build/
 debug
 .vscode/
 .history/
-
-tests/utils/e2e_parameters*

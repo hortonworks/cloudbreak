@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+load ../utils/e2e_parameters
 load ../utils/commands
 
 @test "Check blueprint create from url" {

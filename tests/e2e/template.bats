@@ -1,5 +1,6 @@
 #!/usr/bin/env bats
 
+load ../utils/e2e_parameters
 load ../utils/commands
 
 @test "Check generate cluster template azure new network" {
