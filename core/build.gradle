@@ -186,7 +186,7 @@ class BuildInfoTask extends DefaultTask {
     String activeProfile = determineActiveProfile()
 
     // if using dev environment this condition is true
-    if (buildVersion.contains("+")) {
+    if (buildVersion.contains("+") || buildVersion == "unspecified") {
       def grgit = Grgit.open(currentDir: project.projectDir)
       buildVersion = grgit.describe()
       println "buildVersion from git: " + buildVersion
