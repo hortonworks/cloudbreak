@@ -1,8 +1,5 @@
 package com.sequenceiq.it.cloudbreak.newway;
 
-import java.util.List;
-import java.util.Map;
-
 import com.sequenceiq.cloudbreak.api.model.StackAuthenticationRequest;
 import com.sequenceiq.cloudbreak.api.model.StackResponse;
 import com.sequenceiq.cloudbreak.api.model.v2.ClusterV2Request;
@@ -14,6 +11,9 @@ import com.sequenceiq.cloudbreak.api.model.v2.NetworkV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.PlacementSettings;
 import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.Tags;
+
+import java.util.List;
+import java.util.Map;
 
 public class StackEntity extends AbstractCloudbreakEntity<StackV2Request, StackResponse> {
     public static final String STACK = "STACK";

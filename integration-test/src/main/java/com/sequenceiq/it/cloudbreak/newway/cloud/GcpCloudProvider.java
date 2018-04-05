@@ -17,7 +17,19 @@ public class GcpCloudProvider extends CloudProviderHelper {
 
     private static final String CREDENTIAL_DEFAULT_NAME = "autotesting-gcp-cred";
 
+    private static final String BLUEPRINT_DEFAULT_NAME = "Data Science: Apache Spark 2, Apache Zeppelin";
+
     private static final String GCP_CLUSTER_DEFAULT_NAME = "autotesting-gcp-cluster";
+
+    private static final String NETWORK_DEFAULT_NAME = "autotesting-gcp-net";
+
+    private static final String VPC_DEFAULT_ID = "";
+
+    private static final String SUBNET_DEFAULT_ID = "";
+
+    private static final String DEFAULT_SUBNET_CIDR = "10.0.0.0/16";
+
+    private static final String NETWORK_DEFAULT_DESCRIPTION = "autotesting gcp network";
 
     public GcpCloudProvider(TestParameter testParameter) {
         super(testParameter);
@@ -81,14 +93,8 @@ public class GcpCloudProvider extends CloudProviderHelper {
     @Override
     public String getClusterName() {
         String clustername = getTestParameter().get("gcpClusterName");
-        return String.join(clustername == null ? GCP_CLUSTER_DEFAULT_NAME : clustername, getClusterNamePostfix());
-    }
-
-    @Override
-    NetworkV2Request network() {
-        NetworkV2Request network = new NetworkV2Request();
-        network.setSubnetCIDR("10.0.0.0/16");
-        return network;
+        clustername = clustername == null ? GCP_CLUSTER_DEFAULT_NAME : clustername;
+        return clustername + getClusterNamePostfix();
     }
 
     @Override
@@ -100,6 +106,92 @@ public class GcpCloudProvider extends CloudProviderHelper {
     public String getCredentialName() {
         String credentialName = getTestParameter().get("gcpCredentialName");
         return credentialName == null ? CREDENTIAL_DEFAULT_NAME : credentialName;
+    }
+
+    @Override
+    public String getBlueprintName() {
+        String blueprintName = getTestParameter().get("gcpBlueprintName");
+        return blueprintName == null ? BLUEPRINT_DEFAULT_NAME : blueprintName;
+    }
+
+    @Override
+    public String getNetworkName() {
+        String networkName = getTestParameter().get("gcpNetworkName");
+        return networkName == null ? NETWORK_DEFAULT_NAME : networkName;
+    }
+
+    @Override
+    public String getSubnetCIDR() {
+        String subnetCIDR = getTestParameter().get("gcpSubnetCIDR");
+        return subnetCIDR == null ? DEFAULT_SUBNET_CIDR : subnetCIDR;
+    }
+
+    @Override
+    public String getVpcId() {
+        String vpcId = getTestParameter().get("gcpVcpId");
+        return vpcId == null ? VPC_DEFAULT_ID : vpcId;
+    }
+
+    @Override
+    public String getSubnetId() {
+        String subnetId = getTestParameter().get("gcpSubnetId");
+        return subnetId == null ? SUBNET_DEFAULT_ID : subnetId;
+    }
+
+    public boolean getNoFirewallRules() {
+        Boolean firewallRules = Boolean.valueOf(getTestParameter().get("azureNoFirewallRules"));
+        return firewallRules == null ? false : firewallRules;
+    }
+
+    public boolean getNoPublicIp() {
+        Boolean publicIp = Boolean.valueOf(getTestParameter().get("azureNoPublicIp"));
+        return publicIp == null ? false : publicIp;
+    }
+
+    @Override
+    public Map<String, Object> newNetworkProperties() {
+        return null;
+    }
+
+    @Override
+    public Map<String, Object> networkProperties() {
+        Map<String, Object> map = new HashMap<>();
+        map.put("networkId", getVpcId());
+
+        return map;
+    }
+
+    @Override
+    public Map<String, Object> subnetProperties() {
+        Map<String, Object> map = new HashMap<>();
+        map.put("subnetId", getSubnetId());
+        map.put("networkId", getVpcId());
+        map.put("noFirewallRules", getNoFirewallRules());
+        map.put("noPublicIp", getNoPublicIp());
+
+        return map;
+    }
+
+    @Override
+    public NetworkV2Request newNetwork() {
+        NetworkV2Request network = new NetworkV2Request();
+        network.setSubnetCIDR(getSubnetCIDR());
+        return network;
+    }
+
+    @Override
+    public NetworkV2Request existingNetwork() {
+        NetworkV2Request network = new NetworkV2Request();
+        network.setSubnetCIDR(getSubnetCIDR());
+        network.setParameters(networkProperties());
+        return network;
+    }
+
+    @Override
+    public NetworkV2Request existingSubnet() {
+        NetworkV2Request network = new NetworkV2Request();
+        network.setParameters(subnetProperties());
+        return network;
     }
 
     public Map<String, Object> gcpCredentialDetails() {

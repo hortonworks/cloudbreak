@@ -20,6 +20,26 @@ public class OpenstackCloudProvider extends CloudProviderHelper {
 
     private static final String OPENSTACK_CLUSTER_DEFAULT_NAME = "autotesting-os-cluster";
 
+    private static final String BLUEPRINT_DEFAULT_NAME = "Data Science: Apache Spark 2, Apache Zeppelin";
+
+    private static final String NETWORK_DEFAULT_NAME = "autotesting-os-net";
+
+    private static final String VPC_DEFAULT_ID = "f955d535-8a7a-456f-a90a-430d45f1c92b";
+
+    private static final String SUBNET_DEFAULT_ID = "7a2c4679-1312-4cf6-91a5-76a2c1e3faa8";
+
+    private static final String PUBLIC_NETWORK_ID = "999e09bc-cf75-4a19-98fb-c0b4ddee6d93";
+
+    private static final String ROUTER_ID = "aa402f0a-8652-4799-904d-e73c95c1a711";
+
+    private static final String INTERNET_GATEWAY_ID = null;
+
+    private static final String DEFAULT_SUBNET_CIDR = "10.0.0.0/16";
+
+    private static final String NETWORK_DEFAULT_DESCRIPTION = "autotesting os network";
+
+    private static final String NETWORKING_DEFAULT_OPTION = "self-service";
+
     public OpenstackCloudProvider(TestParameter testParameter) {
         super(testParameter);
     }
@@ -87,21 +107,6 @@ public class OpenstackCloudProvider extends CloudProviderHelper {
     }
 
     @Override
-    NetworkV2Request network() {
-        NetworkV2Request network = new NetworkV2Request();
-        network.setSubnetCIDR("10.0.0.0/16");
-
-        Map<String, Object> parameters = new HashMap<>();
-
-        String defaultNetId = "999e09bc-cf75-4a19-98fb-c0b4ddee6d93";
-        String netIdParameter = getTestParameter().get("integrationtest.openstack.publicNetId");
-        parameters.put("networkingOption", "self-service");
-        parameters.put("publicNetId", netIdParameter == null ? defaultNetId : netIdParameter);
-        network.setParameters(parameters);
-        return network;
-    }
-
-    @Override
     public String getPlatform() {
         return OPENSTACK_CAPITAL;
     }
@@ -110,6 +115,110 @@ public class OpenstackCloudProvider extends CloudProviderHelper {
     public String getCredentialName() {
         String credentialName = getTestParameter().get("openstackCredentialName");
         return credentialName == null ? CREDENTIAL_DEFAULT_NAME : credentialName;
+    }
+
+    @Override
+    public String getBlueprintName() {
+        String blueprintName = getTestParameter().get("openstackBlueprintName");
+        return blueprintName == null ? BLUEPRINT_DEFAULT_NAME : blueprintName;
+    }
+
+    @Override
+    public String getNetworkName() {
+        String networkName = getTestParameter().get("openstackNetworkName");
+        return networkName == null ? NETWORK_DEFAULT_NAME : networkName;
+    }
+
+    @Override
+    public String getSubnetCIDR() {
+        String subnetCIDR = getTestParameter().get("openstackSubnetCIDR");
+        return subnetCIDR == null ? DEFAULT_SUBNET_CIDR : subnetCIDR;
+    }
+
+    @Override
+    public String getVpcId() {
+        String vpcId = getTestParameter().get("openstackVcpId");
+        return vpcId == null ? VPC_DEFAULT_ID : vpcId;
+    }
+
+    @Override
+    public String getSubnetId() {
+        String subnetId = getTestParameter().get("openstackSubnetId");
+        return subnetId == null ? SUBNET_DEFAULT_ID : subnetId;
+    }
+
+    public String getNetworkingOption() {
+        String networkingOption = getTestParameter().get("networkingOption");
+        return networkingOption == null ? NETWORKING_DEFAULT_OPTION : networkingOption;
+    }
+
+    public String getPublicNetId() {
+        String publicNetId = getTestParameter().get("publicNetId");
+        return publicNetId == null ? PUBLIC_NETWORK_ID : publicNetId;
+    }
+
+    public String getRouterId() {
+        String routerId = getTestParameter().get("routerId");
+        return routerId == null ? ROUTER_ID : routerId;
+    }
+
+    public String getInternetGatewayId() {
+        String gatewayId = getTestParameter().get("openstackInternetGatewayId");
+        return gatewayId == null ? INTERNET_GATEWAY_ID : gatewayId;
+    }
+
+    @Override
+    public Map<String, Object> newNetworkProperties() {
+        Map<String, Object> map = new HashMap<>();
+        map.put("publicNetId", getPublicNetId());
+
+        return map;
+    }
+
+    @Override
+    public Map<String, Object> networkProperties() {
+        Map<String, Object> map = new HashMap<>();
+        map.put("publicNetId", getPublicNetId());
+        map.put("networkId", getVpcId());
+        map.put("routerId", getRouterId());
+
+        return map;
+    }
+
+    @Override
+    public Map<String, Object> subnetProperties() {
+        Map<String, Object> map = new HashMap<>();
+        map.put("networkingOption", getNetworkingOption());
+        map.put("publicNetId", getPublicNetId());
+        map.put("subnetId", getSubnetId());
+        map.put("networkId", getVpcId());
+        map.put("routerId", getRouterId());
+        map.put("internetGatewayId", getInternetGatewayId());
+
+        return map;
+    }
+
+    @Override
+    public NetworkV2Request newNetwork() {
+        NetworkV2Request network = new NetworkV2Request();
+        network.setSubnetCIDR(getSubnetCIDR());
+        network.setParameters(newNetworkProperties());
+        return network;
+    }
+
+    @Override
+    public NetworkV2Request existingNetwork() {
+        NetworkV2Request network = new NetworkV2Request();
+        network.setSubnetCIDR(getSubnetCIDR());
+        network.setParameters(networkProperties());
+        return network;
+    }
+
+    @Override
+    public NetworkV2Request existingSubnet() {
+        NetworkV2Request network = new NetworkV2Request();
+        network.setParameters(subnetProperties());
+        return network;
     }
 
     public Map<String, Object> openstackCredentialDetails() {

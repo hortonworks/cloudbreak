@@ -1,15 +1,14 @@
 package com.sequenceiq.it.cloudbreak.newway;
 
-import static com.sequenceiq.it.cloudbreak.CloudbreakUtil.waitAndCheckClusterStatus;
-import static com.sequenceiq.it.cloudbreak.CloudbreakUtil.waitAndCheckStackStatus;
+import com.sequenceiq.it.IntegrationTestContext;
+import com.sequenceiq.it.cloudbreak.CloudbreakUtil;
+import org.testng.Assert;
 
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
-import org.testng.Assert;
-
-import com.sequenceiq.it.IntegrationTestContext;
-import com.sequenceiq.it.cloudbreak.CloudbreakUtil;
+import static com.sequenceiq.it.cloudbreak.CloudbreakUtil.waitAndCheckClusterStatus;
+import static com.sequenceiq.it.cloudbreak.CloudbreakUtil.waitAndCheckStackStatus;
 
 public class Stack extends StackEntity {
 
@@ -87,9 +86,10 @@ public class Stack extends StackEntity {
         });
     }
 
-    public static Assertion<?> waitAndCheckClusterDeleted() {
+    public static Assertion<Stack> waitAndCheckClusterDeleted() {
         return assertThis((stack, t) -> {
             CloudbreakClient client = CloudbreakClient.getTestContextCloudbreakClient().apply(t);
+            Assert.assertNotNull(stack.getResponse().getId());
             waitAndCheckStackStatus(client.getCloudbreakClient(), stack.getResponse().getId().toString(), "DELETE_COMPLETED");
         });
     }

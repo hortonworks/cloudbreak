@@ -3,11 +3,13 @@ package com.sequenceiq.it.cloudbreak.newway.cloud;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.model.v2.AmbariV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.InstanceGroupV2Request;
+import com.sequenceiq.cloudbreak.api.model.v2.NetworkV2Request;
 import com.sequenceiq.it.cloudbreak.newway.CredentialEntity;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
 import com.sequenceiq.it.cloudbreak.newway.StackEntity;
 
 import java.util.List;
+import java.util.Map;
 
 public abstract class CloudProvider {
     public static final String CREDENTIAL_DEFAULT_DESCRIPTION = "test credential";
@@ -28,7 +30,29 @@ public abstract class CloudProvider {
 
     public abstract String getCredentialName();
 
+    public abstract String getBlueprintName();
+
+    public abstract String getNetworkName();
+
+    public abstract String getSubnetCIDR();
+
+    public abstract Map<String, Object> newNetworkProperties();
+
+    public abstract Map<String, Object> networkProperties();
+
+    public abstract Map<String, Object> subnetProperties();
+
+    public abstract String getVpcId();
+
+    public abstract String getSubnetId();
+
     public abstract String region();
+
+    public abstract NetworkV2Request newNetwork();
+
+    public abstract NetworkV2Request existingNetwork();
+
+    public abstract NetworkV2Request existingSubnet();
 
     public abstract String availabilityZone();
 
