@@ -8,6 +8,8 @@ import com.sequenceiq.cloudbreak.api.model.v2.InstanceGroupV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.NetworkV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.SecurityGroupV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.TemplateV2Request;
+import com.sequenceiq.it.cloudbreak.newway.Network;
+import com.sequenceiq.it.cloudbreak.newway.NetworkEntity;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
 import com.sequenceiq.it.cloudbreak.newway.StackEntity;
 import com.sequenceiq.it.cloudbreak.newway.TestParameter;
@@ -36,6 +38,7 @@ public abstract class CloudProviderHelper extends CloudProvider {
     private String clusterNamePostfix;
 
     protected CloudProviderHelper(TestParameter testParameter) {
+        LOGGER.info("TestParemeters length: {}", testParameter.size());
         this.testParameter = testParameter;
     }
 
@@ -80,7 +83,7 @@ public abstract class CloudProviderHelper extends CloudProvider {
                 .withRegion(region())
                 .withAvailabilityZone(availabilityZone())
                 .withInstanceGroups(instanceGroups())
-                .withNetwork(network())
+                .withNetwork(newNetwork())
                 .withStackAuthentication(stackauth());
     }
 
@@ -91,13 +94,25 @@ public abstract class CloudProviderHelper extends CloudProvider {
                 .withRegion(region())
                 .withAvailabilityZone(availabilityZone())
                 .withInstanceGroups(instanceGroups())
-                .withNetwork(network())
+                .withNetwork(newNetwork())
                 .withStackAuthentication(stackauth());
     }
 
     abstract StackAuthenticationRequest stackauth();
 
-    abstract NetworkV2Request network();
+    public abstract NetworkV2Request newNetwork();
+
+    public abstract NetworkV2Request existingNetwork();
+
+    public abstract NetworkV2Request existingSubnet();
+
+    public NetworkEntity aValidNetworkIsCreated() {
+        return Network.isCreated()
+                .withName(getNetworkName())
+                .withCloudPlatform(getPlatform())
+                .withSubnetCIDR(getSubnetCIDR())
+                .withParameters(subnetProperties());
+    }
 
     List<InstanceGroupV2Request> instanceGroups() {
         List<InstanceGroupV2Request> requests = new ArrayList<>();

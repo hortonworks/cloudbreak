@@ -22,6 +22,22 @@ public class AwsCloudProvider extends CloudProviderHelper {
 
     private static final String CREDENTIAL_DEFAULT_NAME = "autotesting-aws-cred";
 
+    private static final String CREDENTIAL_DEFAULT_DESCRIPTION = "autotesting aws credential";
+
+    private static final String BLUEPRINT_DEFAULT_NAME = "Data Science: Apache Spark 2, Apache Zeppelin";
+
+    private static final String NETWORK_DEFAULT_NAME = "autotesting-aws-net";
+
+    private static final String VPC_DEFAULT_ID = "vpc-e623b28d";
+
+    private static final String INTERNET_GATEWAY_ID = "igw-b55b26dd";
+
+    private static final String SUBNET_DEFAULT_ID = "subnet-83901cfe";
+
+    private static final String DEFAULT_SUBNET_CIDR = "10.0.0.0/16";
+
+    private static final String NETWORK_DEFAULT_DESCRIPTION = "autotesting aws network";
+
     public AwsCloudProvider(TestParameter testParameter) {
         super(testParameter);
     }
@@ -102,14 +118,14 @@ public class AwsCloudProvider extends CloudProviderHelper {
     @Override
     public String getClusterName() {
         String clustername = getTestParameter().get("awsClusterName");
-        return String.join(clustername == null ? AWS_CLUSTER_DEFAULT_NAME : clustername, getClusterNamePostfix());
+        clustername = clustername == null ? AWS_CLUSTER_DEFAULT_NAME : clustername;
+        return clustername + getClusterNamePostfix();
     }
 
-    @Override
-    NetworkV2Request network() {
-        NetworkV2Request network = new NetworkV2Request();
-        network.setSubnetCIDR("10.0.0.0/16");
-        return network;
+    public StackAuthenticationRequest stackAuthentication() {
+        StackAuthenticationRequest stackAuthentication = new StackAuthenticationRequest();
+        stackAuthentication.setPublicKeyId("aszegedi");
+        return stackAuthentication;
     }
 
     @Override
@@ -121,6 +137,86 @@ public class AwsCloudProvider extends CloudProviderHelper {
     public String getCredentialName() {
         String credentialName = getTestParameter().get("awsCredentialName");
         return credentialName == null ? CREDENTIAL_DEFAULT_NAME : credentialName;
+    }
+
+    @Override
+    public String getBlueprintName() {
+        String blueprintName = getTestParameter().get("awsBlueprintName");
+        return blueprintName == null ? BLUEPRINT_DEFAULT_NAME : blueprintName;
+    }
+
+    @Override
+    public String getNetworkName() {
+        String networkName = getTestParameter().get("awsNetworkName");
+        return networkName == null ? NETWORK_DEFAULT_NAME : networkName;
+    }
+
+    @Override
+    public String getSubnetCIDR() {
+        String subnetCIDR = getTestParameter().get("awsSubnetCIDR");
+        return subnetCIDR == null ? DEFAULT_SUBNET_CIDR : subnetCIDR;
+    }
+
+    @Override
+    public String getVpcId() {
+        String vpcId = getTestParameter().get("awsVcpId");
+        return vpcId == null ? VPC_DEFAULT_ID : vpcId;
+    }
+
+    @Override
+    public String getSubnetId() {
+        String subnetId = getTestParameter().get("awsSubnetId");
+        return subnetId == null ? SUBNET_DEFAULT_ID : subnetId;
+    }
+
+    public String getInternetGatewayId() {
+        String gatewayId = getTestParameter().get("awsInternetGatewayId");
+        return gatewayId == null ? INTERNET_GATEWAY_ID : gatewayId;
+    }
+
+    @Override
+    public Map<String, Object> newNetworkProperties() {
+        return null;
+    }
+
+    @Override
+    public Map<String, Object> networkProperties() {
+        Map<String, Object> map = new HashMap<>();
+        map.put("internetGatewayId", getInternetGatewayId());
+        map.put("vpcId", getVpcId());
+
+        return map;
+    }
+
+    @Override
+    public Map<String, Object> subnetProperties() {
+        Map<String, Object> map = new HashMap<>();
+        map.put("subnetId", getSubnetId());
+        map.put("vpcId", getVpcId());
+
+        return map;
+    }
+
+    @Override
+    public NetworkV2Request newNetwork() {
+        NetworkV2Request network = new NetworkV2Request();
+        network.setSubnetCIDR(getSubnetCIDR());
+        return network;
+    }
+
+    @Override
+    public NetworkV2Request existingNetwork() {
+        NetworkV2Request network = new NetworkV2Request();
+        network.setSubnetCIDR(getSubnetCIDR());
+        network.setParameters(networkProperties());
+        return network;
+    }
+
+    @Override
+    public NetworkV2Request existingSubnet() {
+        NetworkV2Request network = new NetworkV2Request();
+        network.setParameters(subnetProperties());
+        return network;
     }
 
     public Map<String, Object> awsCredentialDetailsKey() {

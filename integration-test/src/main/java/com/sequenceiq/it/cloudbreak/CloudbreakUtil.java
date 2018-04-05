@@ -1,31 +1,9 @@
 package com.sequenceiq.it.cloudbreak;
 
-import static java.lang.Boolean.FALSE;
-
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status.Family;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
-import org.testng.Assert;
-
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.api.endpoint.common.StackEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.EventEndpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v1.StackV1Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v2.StackV2Endpoint;
 import com.sequenceiq.cloudbreak.api.model.CloudbreakEventsJson;
 import com.sequenceiq.cloudbreak.api.model.HostGroupResponse;
 import com.sequenceiq.cloudbreak.api.model.HostMetadataResponse;
@@ -37,8 +15,27 @@ import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.periscope.api.endpoint.v1.HistoryEndpoint;
 import com.sequenceiq.periscope.api.model.AutoscaleClusterHistoryResponse;
 import com.sequenceiq.periscope.client.AutoscaleClient;
-
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
+import org.testng.Assert;
+
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status.Family;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+
+import static java.lang.Boolean.FALSE;
 
 @Component
 public class CloudbreakUtil {
@@ -90,9 +87,9 @@ public class CloudbreakUtil {
             if (!desiredWaitResult.contains(waitResult)) {
                 Assert.fail("Expected status is failed, actual: " + waitResult);
             } else {
-                StackV1Endpoint stackV1Endpoint = cloudbreakClient.stackV1Endpoint();
-                stackV1Endpoint.status(Long.valueOf(stackId));
-                return stackV1Endpoint.status(Long.valueOf(stackId)).get("statusReason").toString();
+                StackV2Endpoint stackV2Endpoint = cloudbreakClient.stackV2Endpoint();
+                stackV2Endpoint.status(Long.valueOf(stackId));
+                return stackV2Endpoint.status(Long.valueOf(stackId)).get("statusReason").toString();
             }
         }
         return "";
@@ -110,7 +107,7 @@ public class CloudbreakUtil {
         }
     }
 
-    public static WaitResult waitForHostStatusStack(StackEndpoint stackV1Endpoint, String stackId, String hostGroup, String desiredStatus) {
+    public static WaitResult waitForHostStatusStack(StackEndpoint stackV2Endpoint, String stackId, String hostGroup, String desiredStatus) {
         WaitResult waitResult = WaitResult.SUCCESSFUL;
         Boolean found = FALSE;
 
@@ -118,7 +115,7 @@ public class CloudbreakUtil {
         do {
             LOGGER.info("Waiting for host status {} in hostgroup {} ...", desiredStatus, hostGroup);
             sleep();
-            StackResponse stackResponse = stackV1Endpoint.get(Long.valueOf(stackId), new HashSet<>());
+            StackResponse stackResponse = stackV2Endpoint.get(Long.valueOf(stackId), new HashSet<>());
             Set<HostGroupResponse> hostGroupResponse = stackResponse.getCluster().getHostGroups();
             for (HostGroupResponse hr : hostGroupResponse) {
                 if (hr.getName().equals(hostGroup)) {
@@ -141,15 +138,15 @@ public class CloudbreakUtil {
         return waitResult;
     }
 
-    public static void checkClusterFailed(StackEndpoint stackV1Endpoint, String stackId, CharSequence failMessage) {
-        StackResponse stackResponse = stackV1Endpoint.get(Long.valueOf(stackId), new HashSet<>());
+    public static void checkClusterFailed(StackEndpoint stackV2Endpoint, String stackId, CharSequence failMessage) {
+        StackResponse stackResponse = stackV2Endpoint.get(Long.valueOf(stackId), new HashSet<>());
         Assert.assertNotEquals(stackResponse.getCluster().getStatus(), Status.AVAILABLE);
         Assert.assertTrue(stackResponse.getCluster().getStatusReason().contains(failMessage));
     }
 
-    public static void checkClusterAvailability(StackEndpoint stackV1Endpoint, String port, String stackId, String ambariUser, String ambariPassowrd,
+    public static void checkClusterAvailability(StackEndpoint stackV2Endpoint, String port, String stackId, String ambariUser, String ambariPassowrd,
             boolean checkAmbari) {
-        StackResponse stackResponse = stackV1Endpoint.get(Long.valueOf(stackId), new HashSet<>());
+        StackResponse stackResponse = stackV2Endpoint.get(Long.valueOf(stackId), new HashSet<>());
         checkClusterAvailability(stackResponse, port, stackId, ambariUser, ambariPassowrd, checkAmbari);
     }
 
@@ -169,8 +166,8 @@ public class CloudbreakUtil {
         }
     }
 
-    public static void checkClusterStopped(StackEndpoint stackV1Endpoint, String port, String stackId, String ambariUser, String ambariPassword) {
-        StackResponse stackResponse = stackV1Endpoint.get(Long.valueOf(stackId), new HashSet<>());
+    public static void checkClusterStopped(StackEndpoint stackV2Endpoint, String port, String stackId, String ambariUser, String ambariPassword) {
+        StackResponse stackResponse = stackV2Endpoint.get(Long.valueOf(stackId), new HashSet<>());
         checkClusterStopped(port, ambariUser, ambariPassword, stackResponse);
     }
 
@@ -192,10 +189,10 @@ public class CloudbreakUtil {
         }
     }
 
-    public static String getAmbariIp(StackEndpoint stackV1Endpoint, String stackId, IntegrationTestContext itContext) {
+    public static String getAmbariIp(StackEndpoint stackV2Endpoint, String stackId, IntegrationTestContext itContext) {
         String ambariIp = itContext.getContextParam(CloudbreakITContextConstants.AMBARI_IP_ID);
         if (StringUtils.isEmpty(ambariIp)) {
-            StackResponse stackResponse = stackV1Endpoint.get(Long.valueOf(stackId), new HashSet<>());
+            StackResponse stackResponse = stackV2Endpoint.get(Long.valueOf(stackId), new HashSet<>());
             ambariIp = stackResponse.getCluster().getAmbariServerIp();
             Assert.assertNotNull(ambariIp, "The Ambari IP is not available!");
             itContext.putContextParam(CloudbreakITContextConstants.AMBARI_IP_ID, ambariIp);
@@ -222,9 +219,9 @@ public class CloudbreakUtil {
             LOGGER.info("Waiting for status(es) {}, stack id: {}, current status(es) {} ...", desiredStatuses, stackId, currentStatuses);
 
             sleep();
-            StackV1Endpoint stackV1Endpoint = cloudbreakClient.stackV1Endpoint();
+            StackV2Endpoint stackV2Endpoint = cloudbreakClient.stackV2Endpoint();
             try {
-                Map<String, Object> statusResult = stackV1Endpoint.status(Long.valueOf(stackId));
+                Map<String, Object> statusResult = stackV2Endpoint.status(Long.valueOf(stackId));
                 for (String statusPath : desiredStatuses.keySet()) {
                     currentStatuses.put(statusPath, (String) statusResult.get(statusPath));
                 }

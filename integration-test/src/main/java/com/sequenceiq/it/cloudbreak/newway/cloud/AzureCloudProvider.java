@@ -17,7 +17,21 @@ public class AzureCloudProvider extends CloudProviderHelper {
 
     private static final String CREDENTIAL_DEFAULT_NAME = "autotesting-azure-cred";
 
+    private static final String BLUEPRINT_DEFAULT_NAME = "Data Science: Apache Spark 2, Apache Zeppelin";
+
     private static final String AZURE_CLUSTER_DEFAULT_NAME = "autotesting-azure-cluster";
+
+    private static final String NETWORK_DEFAULT_NAME = "autotesting-azure-net";
+
+    private static final String VPC_DEFAULT_ID = "aszegedi";
+
+    private static final String SUBNET_DEFAULT_ID = "default";
+
+    private static final String RESOURCE_GROUP_DEFAULT_NAME = "aszegedi";
+
+    private static final String DEFAULT_SUBNET_CIDR = "10.0.0.0/16";
+
+    private static final String NETWORK_DEFAULT_DESCRIPTION = "autotesting azure network";
 
     public AzureCloudProvider(TestParameter testParameter) {
         super(testParameter);
@@ -48,6 +62,7 @@ public class AzureCloudProvider extends CloudProviderHelper {
     @Override
     StackAuthenticationRequest stackauth() {
         StackAuthenticationRequest stackauth = new StackAuthenticationRequest();
+
         stackauth.setPublicKey(getTestParameter().get(INTEGRATIONTEST_PUBLIC_KEY_FILE).substring(BEGIN_INDEX));
         return stackauth;
     }
@@ -81,14 +96,8 @@ public class AzureCloudProvider extends CloudProviderHelper {
     @Override
     public String getClusterName() {
         String clustername = getTestParameter().get("azureClusterName");
-        return String.join(clustername == null ? AZURE_CLUSTER_DEFAULT_NAME : clustername, getClusterNamePostfix());
-    }
-
-    @Override
-    NetworkV2Request network() {
-        NetworkV2Request network = new NetworkV2Request();
-        network.setSubnetCIDR("10.0.0.0/16");
-        return network;
+        clustername = clustername == null ? AZURE_CLUSTER_DEFAULT_NAME : clustername;
+        return clustername + getClusterNamePostfix();
     }
 
     @Override
@@ -100,6 +109,92 @@ public class AzureCloudProvider extends CloudProviderHelper {
     public String getCredentialName() {
         String credentialName = getTestParameter().get("azureCredentialName");
         return credentialName == null ? CREDENTIAL_DEFAULT_NAME : credentialName;
+    }
+
+    @Override
+    public String getBlueprintName() {
+        String blueprintName = getTestParameter().get("azureBlueprintName");
+        return blueprintName == null ? BLUEPRINT_DEFAULT_NAME : blueprintName;
+    }
+
+    @Override
+    public String getNetworkName() {
+        String networkName = getTestParameter().get("azureNetworkName");
+        return networkName == null ? NETWORK_DEFAULT_NAME : networkName;
+    }
+
+    @Override
+    public String getSubnetCIDR() {
+        String subnetCIDR = getTestParameter().get("azureSubnetCIDR");
+        return subnetCIDR == null ? DEFAULT_SUBNET_CIDR : subnetCIDR;
+    }
+
+    @Override
+    public String getVpcId() {
+        String vpcId = getTestParameter().get("azureVcpId");
+        return vpcId == null ? VPC_DEFAULT_ID : vpcId;
+    }
+
+    @Override
+    public String getSubnetId() {
+        String subnetId = getTestParameter().get("azureSubnetId");
+        return subnetId == null ? SUBNET_DEFAULT_ID : subnetId;
+    }
+
+    public String getResourceGroupName() {
+        String resourceGroupName = getTestParameter().get("resourceGroupName");
+        return resourceGroupName == null ? RESOURCE_GROUP_DEFAULT_NAME : resourceGroupName;
+    }
+
+    public boolean getNoFirewallRules() {
+        Boolean firewallRules = Boolean.valueOf(getTestParameter().get("azureNoFirewallRules"));
+        return firewallRules == null ? false : firewallRules;
+    }
+
+    public boolean getNoPublicIp() {
+        Boolean publicIp = Boolean.valueOf(getTestParameter().get("azureNoPublicIp"));
+        return publicIp == null ? false : publicIp;
+    }
+
+    @Override
+    public Map<String, Object> newNetworkProperties() {
+        return null;
+    }
+
+    @Override
+    public Map<String, Object> networkProperties() {
+        return null;
+    }
+
+    @Override
+    public Map<String, Object> subnetProperties() {
+        Map<String, Object> map = new HashMap<>();
+        map.put("subnetId", getSubnetId());
+        map.put("networkId", getVpcId());
+        map.put("resourceGroupName", getResourceGroupName());
+        map.put("noFirewallRules", getNoFirewallRules());
+        map.put("noPublicIp", getNoPublicIp());
+
+        return map;
+    }
+
+    @Override
+    public NetworkV2Request newNetwork() {
+        NetworkV2Request network = new NetworkV2Request();
+        network.setSubnetCIDR(getSubnetCIDR());
+        return network;
+    }
+
+    @Override
+    public NetworkV2Request existingNetwork() {
+        return null;
+    }
+
+    @Override
+    public NetworkV2Request existingSubnet() {
+        NetworkV2Request network = new NetworkV2Request();
+        network.setParameters(subnetProperties());
+        return network;
     }
 
     public Map<String, Object> azureCredentialDetails() {
