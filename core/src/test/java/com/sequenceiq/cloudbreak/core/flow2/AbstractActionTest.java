@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow2;
 
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.any;
@@ -80,8 +81,8 @@ public class AbstractActionTest {
     @Test
     public void testExecute() throws Exception {
         stateMachine.sendEvent(new GenericMessage<>(Event.DOIT, Collections.singletonMap(Flow2Handler.FLOW_ID, FLOW_ID)));
-        verify(underTest, times(1)).createFlowContext(eq(FLOW_ID), any(StateContext.class), any(Payload.class));
-        verify(underTest, times(1)).doExecute(any(CommonContext.class), any(Payload.class), any(Map.class));
+        verify(underTest, times(1)).createFlowContext(eq(FLOW_ID), any(StateContext.class), nullable(Payload.class));
+        verify(underTest, times(1)).doExecute(any(CommonContext.class), nullable(Payload.class), any(Map.class));
         verify(underTest, times(0)).sendEvent(any(CommonContext.class));
         verify(underTest, times(0)).sendEvent(anyString(), anyString(), any());
         verify(underTest, times(0)).sendEvent(anyString(), any(Selectable.class));
@@ -91,11 +92,11 @@ public class AbstractActionTest {
     @Test
     public void testFailedExecute() throws Exception {
         RuntimeException exception = new UnsupportedOperationException("");
-        Mockito.doThrow(exception).when(underTest).doExecute(any(CommonContext.class), any(Payload.class), any(Map.class));
+        Mockito.doThrow(exception).when(underTest).doExecute(any(CommonContext.class), nullable(Payload.class), any());
         stateMachine.sendEvent(new GenericMessage<>(Event.DOIT, Collections.singletonMap(Flow2Handler.FLOW_ID, FLOW_ID)));
-        verify(underTest, times(1)).createFlowContext(eq(FLOW_ID), any(StateContext.class), any(Payload.class));
-        verify(underTest, times(1)).doExecute(any(CommonContext.class), any(Payload.class), any(Map.class));
-        verify(underTest, times(1)).getFailurePayload(any(Payload.class), any(Optional.class), eq(exception));
+        verify(underTest, times(1)).createFlowContext(eq(FLOW_ID), any(StateContext.class), nullable(Payload.class));
+        verify(underTest, times(1)).doExecute(any(CommonContext.class), nullable(Payload.class), any(Map.class));
+        verify(underTest, times(1)).getFailurePayload(nullable(Payload.class), any(Optional.class), eq(exception));
         verify(underTest, times(1)).sendEvent(eq(FLOW_ID), eq(Event.FAILURE.name()), eq(Collections.emptyMap()));
     }
 

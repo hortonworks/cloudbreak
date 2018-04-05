@@ -14,7 +14,7 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessingException;
@@ -48,9 +48,6 @@ public class StackInfoServiceTest {
     @Test
     public void blueprintStackInfoWhenReadTreeThrowsException() {
         String testBlueprint = "not-a-valid-bluepint";
-
-        when(blueprintUtils.getBlueprintHdpVersion(any(JsonNode.class))).thenReturn("2.6");
-        when(blueprintUtils.getBlueprintStackName(any(JsonNode.class))).thenReturn("HDP");
 
         thrown.expect(BlueprintProcessingException.class);
         thrown.expectMessage("Unable to detect BlueprintStackInfo from the source blueprint which was: not-a-valid-bluepint.");
@@ -90,9 +87,6 @@ public class StackInfoServiceTest {
     @Test
     public void hdfClusterWhenReadTreeThrowsException() {
         String testBlueprint = "not-a-valid-bluepint";
-
-        when(blueprintUtils.getBlueprintHdpVersion(any(JsonNode.class))).thenReturn("2.6");
-        when(blueprintUtils.getBlueprintStackName(any(JsonNode.class))).thenReturn("HDP");
 
         Assert.assertFalse(stackInfoService.hdfCluster(testBlueprint));
 

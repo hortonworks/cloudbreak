@@ -18,7 +18,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
@@ -57,12 +57,10 @@ public class AccountPreferencesValidatorTest {
 
     @Before
     public void setUp() {
-        when(stack.getAccount()).thenReturn("");
         when(accountPreferencesService.getByAccount("")).thenReturn(preferences);
         when(preferences.getMaxNumberOfNodesPerCluster()).thenReturn(0L);
         when(preferences.getMaxNumberOfClusters()).thenReturn(0L);
         when(preferences.getMaxNumberOfClustersPerUser()).thenReturn(0L);
-        when(preferences.getClusterTimeToLive()).thenReturn(0L);
         when(preferences.getUserTimeToLive()).thenReturn(0L);
         when(preferences.getAllowedInstanceTypes()).thenReturn(new ArrayList<>());
     }

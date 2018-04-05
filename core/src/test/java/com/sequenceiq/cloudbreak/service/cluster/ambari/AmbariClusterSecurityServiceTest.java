@@ -8,7 +8,6 @@ import static java.util.Collections.singletonMap;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -24,7 +23,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.ambari.client.AmbariConnectionException;
@@ -207,8 +206,6 @@ public class AmbariClusterSecurityServiceTest {
         when(ambariSecurityConfigProvider.getAmbariUserName(cluster)).thenReturn("cloudbreak");
         when(ambariSecurityConfigProvider.getAmbariPassword(cluster)).thenReturn("cloudbreak123");
         when(ambariUserHandler.createAmbariUser("cloudbreak", "cloudbreak123", stack, ambariClient)).thenReturn(ambariClient);
-        when(ambariUserHandler.createAmbariUser(cluster.getUserName(), cluster.getPassword(), stack, ambariClient)).thenReturn(ambariClient);
-        when(ambariClient.deleteUser("admin")).thenReturn(ambariClient);
 
         underTest.changeOriginalAmbariCredentialsAndCreateCloudbreakUser(stack);
 
@@ -235,9 +232,6 @@ public class AmbariClusterSecurityServiceTest {
         when(ambariSecurityConfigProvider.getAmbariUserName(cluster)).thenReturn("cloudbreak");
         when(ambariSecurityConfigProvider.getAmbariPassword(cluster)).thenReturn("cloudbreak123");
         when(ambariUserHandler.createAmbariUser("cloudbreak", "cloudbreak123", stack, ambariClient)).thenReturn(ambariClient);
-        when(ambariUserHandler.createAmbariUser(cluster.getUserName(), cluster.getPassword(), stack, ambariClient)).thenReturn(ambariClient);
-        when(ambariClient.deleteUser("admin")).thenReturn(ambariClient);
-        when(ambariClient.changePassword("admin", "admin", cluster.getPassword(), true)).thenReturn(ambariClient);
 
         underTest.changeOriginalAmbariCredentialsAndCreateCloudbreakUser(stack);
 
@@ -300,8 +294,6 @@ public class AmbariClusterSecurityServiceTest {
 
         when(ambariOperationService.waitForOperations(stack, ambariClient, operationRequests, PREPARE_DEKERBERIZING))
                 .thenThrow(new CancellationException("cancel"));
-        when(cloudbreakMessagesService.getMessage(AMBARI_CLUSTER_PREPARE_DEKERBERIZING_FAILED.code())).thenReturn("failed");
-        doThrow(new CancellationException("cancel")).when(ambariClusterConnectorPollingResultChecker).checkPollingResult(pair.getLeft(), failed);
 
         thrown.expect(CancellationException.class);
         thrown.expectMessage("cancel");
@@ -334,8 +326,6 @@ public class AmbariClusterSecurityServiceTest {
 
         when(ambariOperationService.waitForOperations(stack, ambariClient, operationRequests, PREPARE_DEKERBERIZING))
                 .thenThrow(new AmbariConnectionException("failed"));
-        when(cloudbreakMessagesService.getMessage(AMBARI_CLUSTER_PREPARE_DEKERBERIZING_FAILED.code())).thenReturn("failed");
-        doThrow(new AmbariOperationFailedException("cancel")).when(ambariClusterConnectorPollingResultChecker).checkPollingResult(pair.getLeft(), failed);
 
         thrown.expect(AmbariOperationFailedException.class);
         thrown.expectMessage("failed");
@@ -387,9 +377,6 @@ public class AmbariClusterSecurityServiceTest {
 
         when(ambariOperationService.waitForOperations(stack, ambariClient, operationRequests, DISABLE_KERBEROS_STATE))
                 .thenThrow(new CancellationException("cancel"));
-        when(cloudbreakMessagesService.getMessage(AMBARI_CLUSTER_DISABLE_KERBEROS_FAILED.code())).thenReturn("failed");
-        doThrow(new CancellationException("cancel")).when(ambariClusterConnectorPollingResultChecker).checkPollingResult(pair.getLeft(), failed);
-
         thrown.expect(CancellationException.class);
         thrown.expectMessage("cancel");
 
@@ -415,8 +402,6 @@ public class AmbariClusterSecurityServiceTest {
 
         when(ambariOperationService.waitForOperations(stack, ambariClient, operationRequests, DISABLE_KERBEROS_STATE))
                 .thenThrow(new AmbariConnectionException("failed"));
-        when(cloudbreakMessagesService.getMessage(AMBARI_CLUSTER_DISABLE_KERBEROS_FAILED.code())).thenReturn("failed");
-        doThrow(new AmbariOperationFailedException("cancel")).when(ambariClusterConnectorPollingResultChecker).checkPollingResult(pair.getLeft(), failed);
 
         thrown.expect(AmbariOperationFailedException.class);
         thrown.expectMessage("failed");

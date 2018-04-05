@@ -26,7 +26,7 @@ dependencies {
 
     testCompile project(path: ':core-model', configuration: 'tests')
     testCompile project(':cloud-reactor')
-    testCompile group: 'org.mockito',               name: 'mockito-all',                  version: mockitoAllVersion
+    testCompile group: 'org.mockito',               name: 'mockito-core',                 version: mockitoVersion
     testCompile group: 'org.springframework.boot',  name: 'spring-boot-starter-test',     version: springBootVersion
 
 }
