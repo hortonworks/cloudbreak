@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.cloud.handler.testcontext;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyList;
 import static org.mockito.Matchers.anyLong;
-import static org.mockito.Matchers.anyMap;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.when;
 
@@ -151,7 +150,7 @@ public class TestApplicationContext {
                 .thenReturn(Collections.singletonList(new CloudResourceStatus(resource, ResourceStatus.UPDATED)));
         when(resourceConnector.upscale(any(), any(), any()))
                 .thenReturn(Collections.singletonList(new CloudResourceStatus(resource, ResourceStatus.UPDATED)));
-        when(resourceConnector.downscale(any(), any(), any(), anyList(), anyMap()))
+        when(resourceConnector.downscale(any(), any(), any(), anyList(), any()))
                 .thenReturn(Collections.singletonList(new CloudResourceStatus(resource, ResourceStatus.UPDATED)));
         when(instanceConnector.check(any(), any()))
                 .thenReturn(Collections.singletonList(new CloudVmInstanceStatus(cloudInstance, InstanceStatus.STARTED)));

@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.service.cluster;
 
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.when;
 
@@ -12,7 +12,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.api.model.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
@@ -85,10 +85,10 @@ public class AmbariClusterServiceTest {
         stack.setCluster(cluster);
         when(clusterRepository.findById(any(Long.class))).thenReturn(cluster);
         when(stackService.getByIdWithLists(any(Long.class))).thenReturn(stack);
-        when(orchestratorTypeResolver.resolveType(any(Orchestrator.class))).thenReturn(OrchestratorType.HOST);
-        when(orchestratorTypeResolver.resolveType(anyString())).thenReturn(OrchestratorType.HOST);
+        when(orchestratorTypeResolver.resolveType(nullable(Orchestrator.class))).thenReturn(OrchestratorType.HOST);
+        when(orchestratorTypeResolver.resolveType(nullable(String.class))).thenReturn(OrchestratorType.HOST);
         when(clusterComponentConfigProvider.getHDPRepo(any(Long.class))).thenReturn(new StackRepoDetails());
-        when(clusterComponentConfigProvider.store(any(ClusterComponent.class))).thenAnswer(invocation -> invocation.getArgumentAt(0, ClusterComponent.class));
+        when(clusterComponentConfigProvider.store(any(ClusterComponent.class))).thenAnswer(invocation -> invocation.getArgument(0));
         when(clusterComponentConfigProvider.getComponent(any(Long.class), any(ComponentType.class))).thenReturn(new ClusterComponent());
         when(blueprintService.get(any(Long.class))).thenReturn(cluster.getBlueprint());
     }
@@ -97,15 +97,12 @@ public class AmbariClusterServiceTest {
     public void testRecreateFailNotEmbeddedDb() {
         RDSConfig rdsConfig = new RDSConfig();
         rdsConfig.setDatabaseEngine(DatabaseVendor.POSTGRES.name());
-        when(rdsConfigService.findByClusterIdAndType(anyString(), anyString(), any(Long.class), eq(RdsType.AMBARI))).thenReturn(rdsConfig);
+        when(rdsConfigService.findByClusterIdAndType(nullable(String.class), nullable(String.class), any(Long.class), eq(RdsType.AMBARI))).thenReturn(rdsConfig);
         ambariClusterService.recreate(1L, 1L, new HashSet<>(), false, new StackRepoDetails(), null, null);
     }
 
     @Test
     public void testRecreateSuccess() {
-        RDSConfig rdsConfig = new RDSConfig();
-        rdsConfig.setDatabaseEngine(DatabaseVendor.EMBEDDED.name());
-        when(rdsConfigService.findByClusterIdAndType(anyString(), anyString(), any(Long.class), eq(RdsType.AMBARI))).thenReturn(rdsConfig);
         ambariClusterService.recreate(1L, 1L, new HashSet<>(), false, new StackRepoDetails(), null, null);
     }
 }

@@ -19,7 +19,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.blueprint.template.BlueprintTemplateProcessor;
@@ -59,7 +59,7 @@ public class BlueprintSegmentProcessorTest {
 
         Map<ServiceName, TemplateFiles> serviceFiles = new HashMap<>();
         serviceFiles.put(serviceName("atlas"), templateFiles(
-                Lists.newArrayList("handlebar/blueprints/atlas/atlas-with-ldap.json", "handlebar/blueprints/atlas/atlas-without-ldap.json")));
+                Lists.newArrayList("handlebar/configurations/atlas/atlas-with-ldap.json", "handlebar/configurations/atlas/atlas-without-ldap.json")));
 
         when(blueprintSegmentReader.collectAllConfigFile()).thenReturn(configFiles);
         when(blueprintSegmentReader.collectAllServiceFile()).thenReturn(serviceFiles);

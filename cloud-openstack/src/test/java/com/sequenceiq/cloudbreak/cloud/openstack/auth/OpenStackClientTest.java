@@ -11,7 +11,7 @@ import java.util.Map;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.openstack4j.api.OSClient;
 import org.openstack4j.api.compute.ComputeService;
 import org.openstack4j.api.compute.ext.ZoneService;

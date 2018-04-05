@@ -75,7 +75,7 @@ public class SaltJobIdTrackerTest {
         } catch (CloudbreakOrchestratorFailedException e) {
             assertThat(e.getMessage(), both(containsString("jobId='" + jobId + '\'')).and(containsString("is running")));
         }
-        PowerMockito.verifyStatic();
+        PowerMockito.verifyStatic(SaltStates.class);
         SaltStates.jobIsRunning(any(), eq(jobId));
         checkTargets(targets, targetCaptor.getAllValues());
         verify(saltJobRunner, times(2)).getJobState();
@@ -103,7 +103,7 @@ public class SaltJobIdTrackerTest {
         } catch (CloudbreakOrchestratorFailedException e) {
             assertThat(e.getMessage(), both(containsString("jobId='" + jobId + '\'')).and(containsString("is running")));
         }
-        PowerMockito.verifyStatic();
+        PowerMockito.verifyStatic(SaltStates.class);
         SaltStates.jobIsRunning(any(), eq(jobId));
     }
 
@@ -144,7 +144,7 @@ public class SaltJobIdTrackerTest {
             assertThat(e.getMessage(), both(containsString("jobId='" + jobId + '\'')).and(containsString("is running")));
         }
 
-        PowerMockito.verifyStatic();
+        PowerMockito.verifyStatic(SaltStates.class);
         SaltStates.jobIsRunning(any(), eq(jobId));
         checkTargets(targets, targetCaptor.getAllValues());
     }
@@ -179,7 +179,7 @@ public class SaltJobIdTrackerTest {
 
         assertEquals(JobState.FINISHED, saltJobRunner.getJobState());
 
-        PowerMockito.verifyStatic();
+        PowerMockito.verifyStatic(SaltStates.class);
         SaltStates.jobIsRunning(any(), eq(jobId));
         checkTargets(targets, targetCaptor.getAllValues());
     }
@@ -220,7 +220,7 @@ public class SaltJobIdTrackerTest {
             assertThat(e.getMessage(), both(containsString(missingMachine)).and(containsString(errorMessage)));
         }
 
-        PowerMockito.verifyStatic();
+        PowerMockito.verifyStatic(SaltStates.class);
         SaltStates.jobIsRunning(any(), eq(jobId));
         checkTargets(targets, targetCaptor.getAllValues());
     }

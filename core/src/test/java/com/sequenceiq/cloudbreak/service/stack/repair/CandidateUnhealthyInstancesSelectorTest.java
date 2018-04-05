@@ -14,11 +14,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
-import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -43,9 +42,6 @@ public class CandidateUnhealthyInstancesSelectorTest {
     public void setUp() {
         stack = mock(Stack.class);
         when(stack.getId()).thenReturn(1L);
-        Cluster cluster = mock(Cluster.class);
-        when(stack.getCluster()).thenReturn(cluster);
-        when(cluster.getId()).thenReturn(2L);
     }
 
     @Test

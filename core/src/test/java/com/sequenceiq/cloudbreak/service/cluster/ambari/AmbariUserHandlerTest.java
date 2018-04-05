@@ -12,7 +12,7 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.TestUtil;
@@ -79,7 +79,6 @@ public class AmbariUserHandlerTest {
         AmbariClient ambariClient = mock(AmbariClient.class);
 
         when(ambariClient.createUser(newUserName, newPassword, true)).thenThrow(new AmbariServiceException("failed"));
-        when(ambariClient.ambariServerVersion()).thenReturn("2.4");
         when(ambariClientFactory.getAmbariClient(stack, newUserName, newPassword)).thenThrow(new AmbariServiceException("failed"));
 
         thrown.expect(CloudbreakException.class);

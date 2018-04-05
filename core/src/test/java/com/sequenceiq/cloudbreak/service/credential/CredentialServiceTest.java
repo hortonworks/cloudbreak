@@ -2,8 +2,8 @@ package com.sequenceiq.cloudbreak.service.credential;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -21,7 +21,7 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
@@ -80,7 +80,7 @@ public class CredentialServiceTest {
     public void init() throws Exception {
         doNothing().when(authorizationService).hasWritePermission(any());
         doNothing().when(notificationSender).send(any());
-        when(credentialAdapter.init(any(Credential.class))).then(invocation -> invocation.getArgumentAt(0, Credential.class));
+        when(credentialAdapter.init(any(Credential.class))).then(invocation -> invocation.getArgument(0));
 
         credentialToModify = new Credential();
         credentialToModify.setId(1L);
@@ -91,9 +91,8 @@ public class CredentialServiceTest {
         credentialToModify.setDescription(originalDescription);
         originalAttributes = new Json("test");
         credentialToModify.setAttributes(originalAttributes);
-        when(credentialRepository.findByNameInUser(anyString(), anyString())).thenReturn(credentialToModify);
-        when(credentialRepository.findOneByName(anyString(), anyString())).thenReturn(credentialToModify);
-        when(credentialRepository.save(any(Credential.class))).then(invocation -> invocation.getArgumentAt(0, Credential.class));
+        when(credentialRepository.findByNameInUser(nullable(String.class), nullable(String.class))).thenReturn(credentialToModify);
+        when(credentialRepository.save(any(Credential.class))).then(invocation -> invocation.getArgument(0));
         user = new IdentityUser("asef", "asdf", "asdf", null, "ASdf", "asdf", new Date());
     }
 

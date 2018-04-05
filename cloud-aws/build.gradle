@@ -29,7 +29,7 @@ dependencies {
   testCompile (group: 'junit', name: 'junit', version: '4+') {
     exclude group: 'org.hamcrest'
   }
-  testCompile ('org.mockito:mockito-core:1+') {
+  testCompile (group: 'org.mockito',             name: 'mockito-core',          version: mockitoVersion) {
     exclude group: 'org.hamcrest'
   }
   testCompile 'org.hamcrest:java-hamcrest:2.0.0.0'

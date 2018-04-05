@@ -17,7 +17,7 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.security.access.AccessDeniedException;
 
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
@@ -84,7 +84,6 @@ public class StackServiceTest {
         when(instanceMetaData.getInstanceMetadataType()).thenReturn(CORE);
         doNothing().when(downscaleValidatorService).checkInstanceIsTheAmbariServerOrNot(INSTANCE_PUBLIC_IP, CORE);
         doNothing().when(downscaleValidatorService).checkUserHasRightToTerminateInstance(true, OWNER, USER_ID, STACK_ID);
-        doNothing().when(flowManager).triggerStackRemoveInstance(anyLong(), anyString(), anyString());
 
         underTest.removeInstance(user, STACK_ID, INSTANCE_ID);
         verify(instanceMetaDataRepository, times(1)).findByInstanceId(STACK_ID, INSTANCE_ID);

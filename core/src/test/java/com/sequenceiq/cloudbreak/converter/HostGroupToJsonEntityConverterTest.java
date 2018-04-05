@@ -32,7 +32,7 @@ public class HostGroupToJsonEntityConverterTest extends AbstractEntityConverterT
     public void setUp() {
         underTest = new HostGroupToHostGroupResponseConverter();
         MockitoAnnotations.initMocks(this);
-        when(conversionService.convert(any(Class.class), any(Class.class))).thenReturn(new ConstraintJson());
+        when(conversionService.convert(any(), any())).thenReturn(new ConstraintJson());
     }
 
     @Test

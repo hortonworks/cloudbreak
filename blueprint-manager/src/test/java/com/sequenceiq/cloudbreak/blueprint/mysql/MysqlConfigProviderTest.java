@@ -14,7 +14,7 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.TestUtil;
@@ -49,7 +49,6 @@ public class MysqlConfigProviderTest {
 
         when(blueprintProcessor.removeComponentFromBlueprint("MYSQL_SERVER")).thenReturn(blueprintProcessor);
         when(blueprintProcessor.asText()).thenReturn(blueprintText);
-        when(blueprintProcessorFactory.get(anyString())).thenReturn(blueprintProcessor);
 
         Assert.assertEquals(blueprintText, underTest.customTextManipulation(object, blueprintProcessor).asText());
 
@@ -65,7 +64,6 @@ public class MysqlConfigProviderTest {
                 .build();
 
         when(blueprintProcessor.componentExistsInBlueprint("MYSQL_SERVER")).thenReturn(true);
-        when(blueprintProcessor.asText()).thenReturn(blueprintText);
         when(blueprintProcessorFactory.get(anyString())).thenReturn(blueprintProcessor);
 
         Assert.assertTrue(underTest.additionalCriteria(object, blueprintText));
@@ -77,10 +75,6 @@ public class MysqlConfigProviderTest {
 
         BlueprintPreparationObject object = BlueprintPreparationObject.Builder.builder()
                 .build();
-
-        when(blueprintProcessor.componentExistsInBlueprint("MYSQL_SERVER")).thenReturn(true);
-        when(blueprintProcessor.asText()).thenReturn(blueprintText);
-        when(blueprintProcessorFactory.get(anyString())).thenReturn(blueprintProcessor);
 
         Assert.assertFalse(underTest.additionalCriteria(object, blueprintText));
     }

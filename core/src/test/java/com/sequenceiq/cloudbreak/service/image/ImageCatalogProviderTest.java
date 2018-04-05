@@ -15,7 +15,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -159,11 +159,11 @@ public class ImageCatalogProviderTest {
 
     private List<String> getImageCatalogOses(CloudbreakImageCatalogV2 actualCatalog) {
         return Stream.concat(actualCatalog.getImages().getBaseImages().stream(),
-                    Stream.concat(actualCatalog.getImages().getHdfImages().stream(),
-                            actualCatalog.getImages().getHdpImages().stream()))
-                    .map(Image::getOs)
-                    .distinct()
-                    .collect(Collectors.toList());
+                Stream.concat(actualCatalog.getImages().getHdfImages().stream(),
+                        actualCatalog.getImages().getHdpImages().stream()))
+                .map(Image::getOs)
+                .distinct()
+                .collect(Collectors.toList());
     }
 
     @Test

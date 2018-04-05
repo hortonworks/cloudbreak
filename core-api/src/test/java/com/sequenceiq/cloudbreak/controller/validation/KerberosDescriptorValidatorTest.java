@@ -6,11 +6,9 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.BDDMockito;
 import org.mockito.InjectMocks;
-import org.mockito.Matchers;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.validation.KerberosDescriptorValidator;
 import com.sequenceiq.cloudbreak.validation.ValidKerberosDescriptor;
@@ -30,7 +28,6 @@ public class KerberosDescriptorValidatorTest extends AbstractValidatorTest {
     @Before
     public void setUp() {
         underTest.initialize(validJson);
-        BDDMockito.given(constraintValidatorContext.buildConstraintViolationWithTemplate(Matchers.anyString())).willReturn(getConstraintViolationBuilder());
     }
 
     @Test
