@@ -1,6 +1,6 @@
 base:
   '*':
-    - yum-proxy
+    - pkg-mgr-proxy
     - consul
     - unbound
     - java
