@@ -1,8 +1,6 @@
 {%- from 'ambari/settings.sls' import ambari with context %}
 {%- from 'nodes/settings.sls' import host with context %}
 
-{% if not ambari.is_predefined_repo %}
-
 include:
   - ambari.repo
 
@@ -12,27 +10,11 @@ ambari-agent:
       - sls: ambari.repo
     - version: {{ ambari.version }}
 
-{% else %}
-
 parallel_task_execution:
   file.replace:
     - name: /etc/ambari-agent/conf/ambari-agent.ini
     - pattern: parallel_execution=0
     - repl: parallel_execution=1
-
-reduce_reconnect_retry_delay:
-  file.replace:
-    - name: /etc/ambari-agent/conf/ambari-agent.ini
-    - pattern: "max_reconnect_retry_delay.*=.*30"
-    - repl: max_reconnect_retry_delay=10
-
-reduce_connect_retry_delay:
-  file.replace:
-    - name: /etc/ambari-agent/conf/ambari-agent.ini
-    - pattern: "connect_retry_delay.*=.*10"
-    - repl: connect_retry_delay=5
-
-{% endif %}
 
 {% if salt['pillar.get']('platform') == 'GCP' %}
 /etc/environment:

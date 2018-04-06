@@ -7,34 +7,17 @@ include:
   - ambari.proxy
 {% endif %}
 
-
-{% if ambari.is_predefined_repo %}
-
 lazy_view_load:
   file.append:
     - name: /etc/ambari-server/conf/ambari.properties
     - text: view.extract-after-cluster-config=true
     - unless: grep "view.extract-after-cluster-config" /etc/ambari-server/conf/ambari.properties
 
-parallel_topology_task_execution:
-  file.append:
-    - name: /etc/ambari-server/conf/ambari.properties
-    - text: topology.task.creation.parallel=true
-    - unless: grep "topology.task.creation.parallel" /etc/ambari-server/conf/ambari.properties
-
-disable_agent_cache_update:
-  file.append:
-    - name: /etc/ambari-server/conf/ambari.properties
-    - text: agent.auto.cache.update=false
-    - unless: grep "agent.auto.cache.update" /etc/ambari-server/conf/ambari.properties
-
 provision_action_based_on_real_dependencies:
   file.append:
     - name: /etc/ambari-server/conf/ambari.properties
     - text: server.stage.command.execution_type=DEPENDENCY_ORDERED
     - unless: grep "server.stage.command.execution_type" /etc/ambari-server/conf/ambari.properties
-
-{% endif %}
 
 {% if ambari.ambari_database.ambariVendor == 'mysql' %}
 install-mariadb:
