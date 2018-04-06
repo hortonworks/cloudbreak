@@ -8,6 +8,9 @@ ambari-agent:
   pkg.installed:
     - require:
       - sls: ambari.repo
+{% if grains['os_family'] == 'Suse' %}
+    - skip_verify: True
+{% endif %}
 
 parallel_task_execution:
   file.replace:

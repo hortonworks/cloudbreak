@@ -13,7 +13,7 @@ TimeoutSec=5min
 IgnoreSIGPIPE=no
 KillMode=process
 GuessMainPID=no
-{% if grains['os_family'] == 'RedHat' %}
+{% if grains['os_family'] == 'RedHat' or grains['os_family'] == 'Suse' %}
 ExecStart=/usr/sbin/ambari-agent start
 ExecStop=/usr/sbin/ambari-agent stop
 {% elif grains['os_family'] == 'Debian' %}
