@@ -26,6 +26,7 @@ public class ModelDescriptions {
         public static final String STATUS = "status of the blueprint";
         public static final String INPUTS = "input parameters of the blueprint";
         public static final String BLUEPRINT_PROPERTIES = "properties to extend the blueprint with";
+        public static final String TAGS = "user defined tags for blueprint";
     }
 
     public static class CredentialModelDescription {

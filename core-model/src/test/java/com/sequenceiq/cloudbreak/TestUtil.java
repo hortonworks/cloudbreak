@@ -531,6 +531,7 @@ public class TestUtil {
         blueprint.setName(name);
         blueprint.setAmbariName("multi-node-yarn");
         blueprint.setStatus(ResourceStatus.DEFAULT);
+        blueprint.setTags(getEmptyJson());
         return blueprint;
     }
 
@@ -699,6 +700,14 @@ public class TestUtil {
         adlsFileSystemConfiguration.setCredential("1");
         adlsFileSystemConfiguration.setTenantId("tenantid");
         return adlsFileSystemConfiguration;
+    }
+
+    private static Json getEmptyJson() {
+        try {
+            return new Json("");
+        } catch (JsonProcessingException ignore) {
+            return null;
+        }
     }
 
 }

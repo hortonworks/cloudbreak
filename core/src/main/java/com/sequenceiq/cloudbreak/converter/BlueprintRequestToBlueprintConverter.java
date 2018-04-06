@@ -3,11 +3,12 @@ package com.sequenceiq.cloudbreak.converter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -16,22 +17,24 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.model.BlueprintParameterJson;
 import com.sequenceiq.cloudbreak.api.model.BlueprintRequest;
-import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
+import com.sequenceiq.cloudbreak.blueprint.utils.BlueprintUtils;
+import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
-import com.sequenceiq.cloudbreak.json.JsonHelper;
 import com.sequenceiq.cloudbreak.converter.util.URLUtils;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.BlueprintInputParameters;
 import com.sequenceiq.cloudbreak.domain.BlueprintParameter;
 import com.sequenceiq.cloudbreak.domain.json.Json;
+import com.sequenceiq.cloudbreak.json.CloudbreakApiException;
+import com.sequenceiq.cloudbreak.json.JsonHelper;
 import com.sequenceiq.cloudbreak.service.MissingResourceNameGenerator;
-import com.sequenceiq.cloudbreak.blueprint.utils.BlueprintUtils;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 @Component
 public class BlueprintRequestToBlueprintConverter extends AbstractConversionServiceAwareConverter<BlueprintRequest, Blueprint> {
-    private static final Logger LOGGER = LoggerFactory.getLogger(BlueprintRequestToBlueprintConverter.class);
+
+    private static final String JSON_PARSE_EXCEPTION_MESSAGE = "Invalid Blueprint: Failed to parse JSON.";
 
     @Inject
     private JsonHelper jsonHelper;
@@ -45,53 +48,28 @@ public class BlueprintRequestToBlueprintConverter extends AbstractConversionServ
     @Override
     public Blueprint convert(BlueprintRequest json) {
         Blueprint blueprint = new Blueprint();
-        if (json.getUrl() != null && !json.getUrl().isEmpty()) {
+        if (StringUtils.isNoneEmpty(json.getUrl())) {
             String sourceUrl = json.getUrl().trim();
             try {
                 String urlText = URLUtils.readUrl(sourceUrl);
                 jsonHelper.createJsonFromString(urlText);
                 blueprint.setBlueprintText(urlText);
-            } catch (Exception e) {
-                throw new BadRequestException("Cannot download ambari validation from: " + sourceUrl, e);
+            } catch (IOException | CloudbreakApiException e) {
+                throw new BadRequestException(String.format("Cannot download ambari validation from: %s", sourceUrl), e);
             }
         } else {
             blueprint.setBlueprintText(json.getAmbariBlueprint());
         }
         validateBlueprint(blueprint.getBlueprintText());
-        if (Strings.isNullOrEmpty(json.getName())) {
-            blueprint.setName(missingResourceNameGenerator.generateName(APIResourceType.BLUEPRINT));
-        } else {
-            blueprint.setName(json.getName());
-        }
+        blueprint.setName(getNameByItsAvailability(json.getName()));
         blueprint.setDescription(json.getDescription());
         blueprint.setStatus(ResourceStatus.USER_MANAGED);
+
         prepareBlueprintInputs(json, blueprint);
+        setAmbariNameAndHostGrouCount(blueprint);
+        blueprint.setTags(createJsonFromTagsMap(json.getTags()));
 
-        try {
-            JsonNode root = JsonUtil.readTree(blueprint.getBlueprintText());
-            blueprint.setAmbariName(blueprintUtils.getBlueprintName(root));
-            blueprint.setHostGroupCount(blueprintUtils.countHostGroups(root));
-        } catch (IOException e) {
-            throw new BadRequestException("Invalid Blueprint: Failed to parse JSON.", e);
-        }
         return blueprint;
-    }
-
-    private void prepareBlueprintInputs(BlueprintRequest json, Blueprint blueprint) {
-        List<BlueprintParameter> blueprintParameterList = new ArrayList<>();
-        for (BlueprintParameterJson blueprintParameterJson : json.getInputs()) {
-            BlueprintParameter blueprintParameter = new BlueprintParameter();
-            blueprintParameter.setReferenceConfiguration(blueprintParameterJson.getReferenceConfiguration());
-            blueprintParameter.setDescription(blueprintParameterJson.getDescription());
-            blueprintParameter.setName(blueprintParameterJson.getName());
-            blueprintParameterList.add(blueprintParameter);
-        }
-        BlueprintInputParameters inputParameters = new BlueprintInputParameters(blueprintParameterList);
-        try {
-            blueprint.setInputParameters(new Json(inputParameters));
-        } catch (JsonProcessingException e) {
-            throw new BadRequestException("Invalid Blueprint: Failed to parse inputs.", e);
-        }
     }
 
     public Blueprint convert(String name, String blueprintText, boolean publicInAccount) {
@@ -105,10 +83,49 @@ public class BlueprintRequestToBlueprintConverter extends AbstractConversionServ
             blueprint.setAmbariName(blueprintUtils.getBlueprintName(root));
             blueprint.setHostGroupCount(blueprintUtils.countHostGroups(root));
         } catch (IOException e) {
-            throw new BadRequestException("Invalid Blueprint: Failed to parse JSON.", e);
+            throw new BadRequestException(JSON_PARSE_EXCEPTION_MESSAGE, e);
         }
 
         return blueprint;
+    }
+
+    private String getNameByItsAvailability(@Nullable String name) {
+        return Strings.isNullOrEmpty(name) ? missingResourceNameGenerator.generateName(APIResourceType.BLUEPRINT) : name;
+    }
+
+    private void setAmbariNameAndHostGrouCount(Blueprint blueprint) {
+        try {
+            JsonNode root = JsonUtil.readTree(blueprint.getBlueprintText());
+            blueprint.setAmbariName(blueprintUtils.getBlueprintName(root));
+            blueprint.setHostGroupCount(blueprintUtils.countHostGroups(root));
+        } catch (IOException e) {
+            throw new BadRequestException(JSON_PARSE_EXCEPTION_MESSAGE, e);
+        }
+    }
+
+    private Json createJsonFromTagsMap(Map<String, Object> tags) {
+        try {
+            return new Json(tags);
+        } catch (JsonProcessingException e) {
+            throw new BadRequestException("Invalid tag(s) in the Blueprint: Unable to parse JSON.", e);
+        }
+    }
+
+    private void prepareBlueprintInputs(BlueprintRequest json, Blueprint blueprint) {
+        List<BlueprintParameter> blueprintParameterList = new ArrayList<>(json.getInputs().size());
+        for (BlueprintParameterJson blueprintParameterJson : json.getInputs()) {
+            BlueprintParameter blueprintParameter = new BlueprintParameter();
+            blueprintParameter.setReferenceConfiguration(blueprintParameterJson.getReferenceConfiguration());
+            blueprintParameter.setDescription(blueprintParameterJson.getDescription());
+            blueprintParameter.setName(blueprintParameterJson.getName());
+            blueprintParameterList.add(blueprintParameter);
+        }
+        BlueprintInputParameters inputParameters = new BlueprintInputParameters(blueprintParameterList);
+        try {
+            blueprint.setInputParameters(new Json(inputParameters));
+        } catch (JsonProcessingException e) {
+            throw new BadRequestException(JSON_PARSE_EXCEPTION_MESSAGE, e);
+        }
     }
 
     private void validateBlueprint(String blueprintText) {
@@ -118,7 +135,7 @@ public class BlueprintRequestToBlueprintConverter extends AbstractConversionServ
             hasBlueprintNameInBlueprint(root);
             validateHostGroups(root);
         } catch (IOException e) {
-            throw new BadRequestException("Invalid Blueprint: Failed to parse JSON.", e);
+            throw new BadRequestException(JSON_PARSE_EXCEPTION_MESSAGE, e);
         }
     }
 

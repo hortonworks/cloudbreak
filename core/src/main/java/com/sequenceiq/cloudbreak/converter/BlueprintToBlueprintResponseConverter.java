@@ -5,8 +5,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.inject.Inject;
-
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,7 +12,6 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.BlueprintParameterJson;
 import com.sequenceiq.cloudbreak.api.model.BlueprintResponse;
-import com.sequenceiq.cloudbreak.json.JsonHelper;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.BlueprintInputParameters;
 import com.sequenceiq.cloudbreak.domain.BlueprintParameter;
@@ -22,10 +19,8 @@ import com.sequenceiq.cloudbreak.domain.json.Json;
 
 @Component
 public class BlueprintToBlueprintResponseConverter extends AbstractConversionServiceAwareConverter<Blueprint, BlueprintResponse> {
-    private static final Logger LOGGER = LoggerFactory.getLogger(BlueprintToBlueprintResponseConverter.class);
 
-    @Inject
-    private JsonHelper jsonHelper;
+    private static final Logger LOGGER = LoggerFactory.getLogger(BlueprintToBlueprintResponseConverter.class);
 
     @Override
     public BlueprintResponse convert(Blueprint entity) {
@@ -36,6 +31,7 @@ public class BlueprintToBlueprintResponseConverter extends AbstractConversionSer
         blueprintJson.setDescription(entity.getDescription() == null ? "" : entity.getDescription());
         blueprintJson.setHostGroupCount(entity.getHostGroupCount());
         blueprintJson.setStatus(entity.getStatus());
+        blueprintJson.setTags(entity.getTags().getMap());
         try {
             blueprintJson.setInputs(convertInputParameters(entity.getInputParameters()));
         } catch (IOException e) {
