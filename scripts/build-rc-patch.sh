@@ -16,17 +16,17 @@ else
     if [[ $LATEST_RELEASED_TAG_ON_BRANCH = $(echo $LATEST_RC_TAG_ON_BRANCH | cut -d'-' -f 1) ]]; then
         echo "need to increase version with reckon from $LATEST_RELEASED_TAG_ON_BRANCH"
         RECKONED_VERSION=$(./gradlew -Penv=jenkins -b build.gradle buildInfo -Preckon.scope=patch -Preckon.stage=rc | grep Reckoned)
-        VERSION=$RECKONED_VERSION
+        VERSION=${RECKONED_VERSION#Reckoned version: }
     else
         LATEST_RC_NUMBER=$(echo $LATEST_RC_TAG_ON_BRANCH | cut -d'.' -f 4)
         VERSION=$(echo $LATEST_RC_TAG_ON_BRANCH | cut -d'-' -f 1)-rc.$((LATEST_RC_NUMBER+1))
     fi;
 fi;
 
-#git tag -a $VERSION -m "$VERSION"
-#git push origin $VERSION
-#
-#./gradlew -Penv=jenkins -b build.gradle clean build uploadArchives -Pversion=$VERSION --info --stacktrace --parallel
+git tag -a $VERSION -m "$VERSION"
+git push origin $VERSION
+
+./gradlew -Penv=jenkins -b build.gradle clean build uploadArchives -Pversion=$VERSION --info --stacktrace --parallel
 
 echo "Computed next rc version: $VERSION"
 echo VERSION=$VERSION > $WORKSPACE/version
