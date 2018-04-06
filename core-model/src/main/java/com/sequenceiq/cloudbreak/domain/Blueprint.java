@@ -17,6 +17,7 @@ import org.hibernate.annotations.Type;
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.domain.json.EncryptedJsonToString;
 import com.sequenceiq.cloudbreak.domain.json.Json;
+import com.sequenceiq.cloudbreak.domain.json.JsonToString;
 
 @Entity
 @Table(name = "Blueprint", uniqueConstraints = @UniqueConstraint(columnNames = {"account", "name"}))
@@ -57,6 +58,18 @@ public class Blueprint implements ProvisionEntity {
     @Convert(converter = EncryptedJsonToString.class)
     @Column(columnDefinition = "TEXT")
     private Json inputParameters;
+
+    @Convert(converter = JsonToString.class)
+    @Column(columnDefinition = "TEXT")
+    private Json tags;
+
+    public Json getTags() {
+        return tags;
+    }
+
+    public void setTags(Json tags) {
+        this.tags = tags;
+    }
 
     public String getDescription() {
         return description;

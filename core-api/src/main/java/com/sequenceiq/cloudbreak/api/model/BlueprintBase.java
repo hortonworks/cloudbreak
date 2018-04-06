@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.api.model;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import javax.validation.constraints.Size;
@@ -29,6 +31,17 @@ public abstract class BlueprintBase implements JsonEntity {
 
     @ApiModelProperty(BlueprintModelDescription.INPUTS)
     private Set<BlueprintParameterJson> inputs = new HashSet<>();
+
+    @ApiModelProperty(BlueprintModelDescription.TAGS)
+    private Map<String, Object> tags = new HashMap<>();
+
+    public Map<String, Object> getTags() {
+        return tags;
+    }
+
+    public void setTags(Map<String, Object> tags) {
+        this.tags = tags;
+    }
 
     public String getAmbariBlueprint() {
         return ambariBlueprint;
