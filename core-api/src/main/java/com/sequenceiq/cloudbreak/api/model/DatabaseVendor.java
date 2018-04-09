@@ -6,8 +6,8 @@ import java.util.Optional;
 
 public enum DatabaseVendor {
     POSTGRES("postgres", "Postgres", "org.postgresql.Driver", "postgresql"),
-    MYSQL("mysql", "MySQL", "org.mysql.Driver", "mysql"),
-    MARIADB("mysql", "MySQL", "org.mysql.Driver", "mysql"),
+    MYSQL("mysql", "MySQL", "com.mysql.jdbc.Driver", "mysql"),
+    MARIADB("mysql", "MySQL", "com.mysql.jdbc.Driver", "mysql"),
     MSSQL("mssql", "SQLServer", "com.microsoft.sqlserver.jdbc.SQLServerDriver", "sqlserver"),
     ORACLE("oracle", "Oracle", "oracle.jdbc.driver.OracleDriver", "oracle"),
     SQLANYWHERE("sqlanywhere", "SQLAnywhere", "org.postgresql.Driver", "sqlanywhere"),

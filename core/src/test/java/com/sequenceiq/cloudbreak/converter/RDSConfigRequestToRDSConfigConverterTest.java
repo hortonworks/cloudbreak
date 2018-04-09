@@ -62,6 +62,7 @@ public class RDSConfigRequestToRDSConfigConverterTest {
     public void mysqlJdbcConverterTestWhenDatabaseCanBeDetectedThenShouldReturnMysqlVendorProperties() {
         RDSConfigRequest rdsConfigRequest = rdsConfigRequest();
         rdsConfigRequest.setConnectionURL("jdbc:mysql://test.eu-west-1.rds.amazonaws.com:5432/test");
+        rdsConfigRequest.setConnectorJarUrl("http://anexampleofmysqlconnectorjarurl/connector.jar");
 
         RDSConfig rdsConfig = underTest.convert(rdsConfigRequest);
 

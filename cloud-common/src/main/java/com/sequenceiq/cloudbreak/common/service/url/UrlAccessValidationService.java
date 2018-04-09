@@ -39,7 +39,7 @@ public class UrlAccessValidationService {
                 result = true;
             }
         } catch (ProcessingException ex) {
-            LOGGER.info("The following URL is not reachable by Cloudbreak: '{}', reson: {}", url, ex.getMessage());
+            LOGGER.info("The following URL is not reachable by Cloudbreak: '{}', reason: {}", url, ex.getMessage());
         }
         return result;
     }
