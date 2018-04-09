@@ -26,7 +26,6 @@ import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
 import com.sequenceiq.cloudbreak.controller.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.controller.validation.template.TemplateValidator;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
-import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.sharedservice.SharedServiceConfigProvider;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -125,10 +124,9 @@ public class StackV2RequestToStackRequestConverter extends AbstractConversionSer
                 stackRequest.getClusterRequest().getHostGroups().add(convert);
             }
             stackRequest.getClusterRequest().setName(source.getGeneral().getName());
-            if (sharedServiceConfigProvider.configured(source.getCluster())) {
+            if (sharedServiceConfigProvider.isConfigured(source.getCluster())) {
                 SharedServiceRequest sharedService = source.getCluster().getSharedService();
-                Stack sourceStack = stackService.getPublicStack(sharedService.getSharedCluster(), authenticatedUserService.getCbUser());
-                stackRequest.setClusterToAttach(sourceStack != null ? sourceStack.getId() : null);
+                stackRequest.setClusterToAttach(stackService.getPublicStack(sharedService.getSharedCluster(), authenticatedUserService.getCbUser()).getId());
             }
         }
     }

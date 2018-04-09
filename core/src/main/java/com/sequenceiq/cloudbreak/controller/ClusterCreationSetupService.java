@@ -132,6 +132,7 @@ public class ClusterCreationSetupService {
         LOGGER.info("Cluster conversion took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
         start = System.currentTimeMillis();
+
         cluster = clusterDecorator.decorate(cluster, request, blueprint, user, stack);
         LOGGER.info("Cluster object decorated in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 

@@ -35,7 +35,6 @@ import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.common.service.DefaultCostTaggingService;
 import com.sequenceiq.cloudbreak.common.type.OrchestratorConstants;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
-import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
 import com.sequenceiq.cloudbreak.domain.AccountPreferences;
 import com.sequenceiq.cloudbreak.domain.Credential;
@@ -47,6 +46,7 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.StackAuthentication;
 import com.sequenceiq.cloudbreak.domain.StackStatus;
 import com.sequenceiq.cloudbreak.domain.json.Json;
+import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.account.AccountPreferencesService;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -88,7 +88,7 @@ public class StackRequestToStackConverter extends AbstractConversionServiceAware
         stack.setCloudPlatform(source.getCloudPlatform());
         Map<String, String> sourceTags = source.getApplicationTags();
         stack.setTags(getTags(mergeTags(sourceTags, source.getUserDefinedTags(), getDefaultTags(source))));
-        preprateSharedServiceProperties(source, stack, sourceTags);
+        preparateSharedServiceProperties(source, stack, sourceTags);
         StackAuthentication stackAuthentication = conversionService.convert(source.getStackAuthentication(), StackAuthentication.class);
         stack.setStackAuthentication(stackAuthentication);
         validateStackAuthentication(source);
@@ -117,11 +117,10 @@ public class StackRequestToStackConverter extends AbstractConversionServiceAware
         return stack;
     }
 
-    private void preprateSharedServiceProperties(StackRequest source, Stack stack, Map<String, String> sourceTags) {
-        if (sourceTags != null && sourceTags.get("datalakeId") != null) {
+    private void preparateSharedServiceProperties(StackRequest source, Stack stack, Map<String, String> sourceTags) {
+        if (sourceTags != null && sourceTags.containsKey("datalakeId")) {
             stack.setDatalakeId(Long.valueOf(String.valueOf(sourceTags.get("datalakeId"))));
-        }
-        if (source.getClusterToAttach() != null) {
+        } else if (source.getClusterToAttach() != null) {
             stack.setDatalakeId(source.getClusterToAttach());
         }
     }
@@ -216,10 +215,8 @@ public class StackRequestToStackConverter extends AbstractConversionServiceAware
         boolean gatewaySpecified = false;
         for (InstanceGroup instanceGroup : convertedSet) {
             instanceGroup.setStack(stack);
-            if (!gatewaySpecified) {
-                if (InstanceGroupType.GATEWAY.equals(instanceGroup.getInstanceGroupType())) {
-                    gatewaySpecified = true;
-                }
+            if (!gatewaySpecified && InstanceGroupType.GATEWAY.equals(instanceGroup.getInstanceGroupType())) {
+                gatewaySpecified = true;
             }
         }
         boolean containerOrchestrator;

@@ -5,9 +5,11 @@ import static java.util.stream.Collectors.toSet;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
+import javax.annotation.Nonnull;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
@@ -42,7 +44,8 @@ public class SharedServiceConfigProvider {
     @Inject
     private ClusterService clusterService;
 
-    public Cluster configureCluster(Cluster requestedCluster, IdentityUser user, ConnectedClusterRequest connectedClusterRequest) {
+    public Cluster configureCluster(@Nonnull Cluster requestedCluster, IdentityUser user, ConnectedClusterRequest connectedClusterRequest) {
+        Objects.requireNonNull(requestedCluster);
         if (connectedClusterRequest != null) {
             Stack publicStack = queryStack(user, connectedClusterRequest.getSourceClusterId(),
                     Optional.ofNullable(connectedClusterRequest.getSourceClusterName()));
@@ -65,9 +68,12 @@ public class SharedServiceConfigProvider {
         return requestedStack;
     }
 
+    public boolean isConfigured(@Nonnull ClusterV2Request clusterV2Request) {
+        return clusterV2Request.getSharedService() != null && !Strings.isNullOrEmpty(clusterV2Request.getSharedService().getSharedCluster());
+    }
+
     private void setupAdditionalParameters(Cluster requestedCluster, Stack publicStack) {
         try {
-
             Set<BlueprintParameterJson> requests = new HashSet<>();
             Json blueprintAttributes = requestedCluster.getBlueprint().getInputParameters();
             if (blueprintAttributes != null && StringUtils.isNoneEmpty(blueprintAttributes.getValue())) {
@@ -106,21 +112,10 @@ public class SharedServiceConfigProvider {
     }
 
     private Stack queryStack(IdentityUser user, Long sourceClusterId, Optional<String> sourceClusterName) {
-        Stack publicStack;
-        if (sourceClusterName.isPresent()) {
-            publicStack = stackService.getPublicStack(sourceClusterName.get(), user);
-        } else {
-            publicStack = stackService.get(sourceClusterId);
-        }
-        return publicStack;
+        return sourceClusterName.isPresent() ? stackService.getPublicStack(sourceClusterName.get(), user) : stackService.get(sourceClusterId);
     }
 
     private void setupLdap(Cluster requestedCluster, Stack publicStack) {
         requestedCluster.setLdapConfig(publicStack.getCluster().getLdapConfig());
-    }
-
-
-    public boolean configured(ClusterV2Request clusterV2Request) {
-        return clusterV2Request.getSharedService() != null && !Strings.isNullOrEmpty(clusterV2Request.getSharedService().getSharedCluster());
     }
 }

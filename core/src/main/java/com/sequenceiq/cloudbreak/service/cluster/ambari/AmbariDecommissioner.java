@@ -14,7 +14,6 @@ import static com.sequenceiq.cloudbreak.service.cluster.flow.AmbariOperationServ
 import static com.sequenceiq.cloudbreak.service.cluster.flow.AmbariOperationService.MAX_ATTEMPTS_FOR_HOSTS;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
-import static java.util.Objects.requireNonNull;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -230,9 +229,6 @@ public class AmbariDecommissioner {
     }
 
     public void verifyNodeCount(@Nonnull Stack stack, @Nonnull Cluster cluster, @Nonnull String hostName) {
-        requireNonNull(stack);
-        requireNonNull(cluster);
-        requireNonNull(hostName);
         HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfigForPrimaryGateway(stack.getId(), cluster.getAmbariIp());
         AmbariClient ambariClient = ambariClientProvider.getAmbariClient(clientConfig, stack.getGatewayPort(), cluster);
         String ambariName = cluster.getBlueprint().getAmbariName();

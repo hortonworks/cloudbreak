@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
+import javax.annotation.Nonnull;
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -84,13 +85,14 @@ public class ClusterDecorator {
     @Inject
     private SharedServiceConfigProvider sharedServiceConfigProvider;
 
-    public Cluster decorate(Cluster subject, ClusterRequest request, Blueprint blueprint, IdentityUser user, Stack stack) {
-        subject = prepareBlueprint(subject, request, blueprint, user, stack);
-        subject = prepareHostGroups(stack, user, subject, request.getHostGroups());
+    public Cluster decorate(@Nonnull Cluster subject, @Nonnull ClusterRequest request, Blueprint blueprint, @Nonnull IdentityUser user, @Nonnull Stack stack) {
+        prepareBlueprint(subject, request, user, stack, Optional.ofNullable(blueprint));
+        prepareHostGroups(stack, user, subject, request.getHostGroups());
         validateBlueprintIfRequired(subject, request, stack);
-        subject = prepareRds(subject, user, request, stack);
+        prepareRds(subject, user, request, stack);
         subject = clusterProxyDecorator.prepareProxyConfig(subject, user, request.getProxyName(), stack);
-        subject = prepareLdap(subject, user, request.getLdapConfigId(), request.getLdapConfig(), request.getLdapConfigName(), stack);
+        prepareLdap(subject, user, stack, Optional.ofNullable(request.getLdapConfigId()), Optional.ofNullable(request.getLdapConfig()),
+                Optional.ofNullable(request.getLdapConfigName()));
         subject = sharedServiceConfigProvider.configureCluster(subject, user, request.getConnectedCluster());
         return subject;
     }
@@ -101,9 +103,9 @@ public class ClusterDecorator {
         }
     }
 
-    private Cluster prepareBlueprint(Cluster subject, ClusterRequest request, Blueprint blueprint, IdentityUser user, Stack stack) {
-        if (blueprint != null) {
-            subject.setBlueprint(blueprint);
+    private void prepareBlueprint(Cluster subject, ClusterRequest request, IdentityUser user, Stack stack, Optional<Blueprint> blueprint) {
+        if (blueprint.isPresent()) {
+            subject.setBlueprint(blueprint.get());
         } else {
             if (request.getBlueprintId() != null) {
                 subject.setBlueprint(blueprintService.get(request.getBlueprintId()));
@@ -119,27 +121,26 @@ public class ClusterDecorator {
             }
         }
         subject.setTopologyValidation(request.getValidateBlueprint());
-        return subject;
     }
 
-    private Cluster prepareLdap(Cluster subject, IdentityUser user, Long ldapConfigId, LdapConfigRequest ldapConfigRequest, String ldapName, Stack stack) {
-        if (ldapConfigId != null) {
-            LdapConfig ldapConfig = ldapConfigService.get(ldapConfigId);
+    private void prepareLdap(Cluster subject, IdentityUser user, Stack stack, Optional<Long> ldapConfigId, Optional<LdapConfigRequest> ldapConfigRequest,
+            Optional<String> ldapName) {
+        if (ldapConfigId.isPresent()) {
+            LdapConfig ldapConfig = ldapConfigService.get(ldapConfigId.get());
             subject.setLdapConfig(ldapConfig);
-        } else if (ldapName != null) {
-            LdapConfig ldapConfig = ldapConfigService.getPublicConfig(ldapName, user);
+        } else if (ldapName.isPresent()) {
+            LdapConfig ldapConfig = ldapConfigService.getPublicConfig(ldapName.get(), user);
             subject.setLdapConfig(ldapConfig);
-        } else if (ldapConfigRequest != null) {
-            LdapConfig ldapConfig = conversionService.convert(ldapConfigRequest, LdapConfig.class);
+        } else if (ldapConfigRequest.isPresent()) {
+            LdapConfig ldapConfig = conversionService.convert(ldapConfigRequest.get(), LdapConfig.class);
             ldapConfig.setPublicInAccount(stack.isPublicInAccount());
             ldapConfigValidator.validateLdapConnection(ldapConfig);
             ldapConfig = ldapConfigService.create(user, ldapConfig);
             subject.setLdapConfig(ldapConfig);
         }
-        return subject;
     }
 
-    private Cluster prepareRds(Cluster subject, IdentityUser user, ClusterRequest request, Stack stack) {
+    private void prepareRds(Cluster subject, IdentityUser user, ClusterRequest request, Stack stack) {
         subject.setRdsConfigs(new HashSet<>());
         if (request.getRdsConfigIds() != null) {
             for (Long rdsConfigId : request.getRdsConfigIds()) {
@@ -165,10 +166,9 @@ public class ClusterDecorator {
         }
 
         ambariConfigurationService.createDefaultRdsConfigIfNeeded(stack, subject).ifPresent(rdsConfig -> subject.getRdsConfigs().add(rdsConfig));
-        return subject;
     }
 
-    private Cluster prepareHostGroups(Stack stack, IdentityUser user, Cluster cluster, Iterable<HostGroupRequest> hostGroupsJsons) {
+    private void prepareHostGroups(Stack stack, IdentityUser user, Cluster cluster, Iterable<HostGroupRequest> hostGroupsJsons) {
         Set<HostGroup> hostGroups = new HashSet<>();
         for (HostGroupRequest json : hostGroupsJsons) {
             HostGroup hostGroup = conversionService.convert(json, HostGroup.class);
@@ -177,7 +177,6 @@ public class ClusterDecorator {
             hostGroups.add(hostGroup);
         }
         cluster.setHostGroups(hostGroups);
-        return cluster;
     }
 
 }

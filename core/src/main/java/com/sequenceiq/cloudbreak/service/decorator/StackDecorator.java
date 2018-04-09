@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.annotation.Nonnull;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.BooleanUtils;
@@ -103,7 +104,7 @@ public class StackDecorator {
     @Inject
     private SharedServiceConfigProvider sharedServiceConfigProvider;
 
-    public Stack decorate(Stack subject, StackRequest request, IdentityUser user) {
+    public Stack decorate(@Nonnull Stack subject, @Nonnull StackRequest request, IdentityUser user) {
         prepareCredential(subject, request, user);
         prepareDomainIfDefined(subject, request, user);
         Long credentialId = request.getCredentialId();
@@ -127,8 +128,25 @@ public class StackDecorator {
             prepareFlexSubscription(subject, request.getFlexId());
             validate(subject);
             subject = sharedServiceConfigProvider.configureStack(subject, user);
+            checkSharedServiceStackRequirements(request);
         }
         return subject;
+    }
+
+    private void checkSharedServiceStackRequirements(StackRequest request) {
+        if (request.getClusterToAttach() != null && !isSharedServiceRequirementsMeets(request)) {
+            throw new BadRequestException("Shared service stack should contains both Hive RDS and Ranger RDS and a properly configured LDAP also. "
+                    + "One of them may be missing");
+        }
+    }
+
+    private boolean isSharedServiceRequirementsMeets(StackRequest request) {
+        boolean hasConfiguredLdap = request.getClusterRequest().getLdapConfig() != null;
+        boolean hasConfiguredHiveRds = request.getClusterRequest().getRdsConfigJsons().stream()
+                .anyMatch(rdsConfigRequest -> "hive".equalsIgnoreCase(rdsConfigRequest.getType()));
+        boolean hasConfiguredRangerRds = request.getClusterRequest().getRdsConfigJsons().stream()
+                .anyMatch(rdsConfigRequest -> "ranger".equalsIgnoreCase(rdsConfigRequest.getType()));
+        return hasConfiguredHiveRds && hasConfiguredRangerRds && hasConfiguredLdap;
     }
 
     private void prepareCredential(Stack subject, StackRequest request, IdentityUser user) {
@@ -256,7 +274,7 @@ public class StackDecorator {
 
     private void validate(Stack stack) {
         long instanceGroups = stack.getInstanceGroups().stream().filter(ig -> InstanceGroupType.GATEWAY.equals(ig.getInstanceGroupType())).count();
-        if (instanceGroups == 0) {
+        if (instanceGroups == 0L) {
             throw new BadRequestException("Gateway instance group not configured");
         }
         int minNodeCount = ConsulServers.SINGLE_NODE_COUNT_LOW.getMin();
@@ -301,13 +319,12 @@ public class StackDecorator {
             return cloudPlatform;
         } else if (stack.getCredential() != null && stack.getCredential().getId() != null) {
             return stack.getCredential().cloudPlatform();
-        } else if (Strings.isNullOrEmpty(stack.cloudPlatform()))  {
+        } else if (Strings.isNullOrEmpty(stack.cloudPlatform())) {
             return stack.cloudPlatform();
         } else {
             return request.getCloudPlatform();
         }
     }
-
 
 
 }

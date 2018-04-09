@@ -4,7 +4,6 @@ import static com.sequenceiq.cloudbreak.api.model.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.model.Status.STOPPED;
 import static com.sequenceiq.cloudbreak.api.model.Status.STOP_REQUESTED;
 import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
-import static java.util.Objects.requireNonNull;
 
 import java.util.Collection;
 import java.util.List;
@@ -418,7 +417,6 @@ public class StackService {
     }
 
     public void removeInstance(@Nonnull IdentityUser user, Long stackId, String instanceId) {
-        requireNonNull(user);
         Stack stack = get(stackId);
         InstanceMetaData metaData = instanceMetaDataRepository.findByInstanceId(stackId, instanceId);
         if (metaData == null) {
