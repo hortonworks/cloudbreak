@@ -1,18 +1,28 @@
 package com.sequenceiq.cloudbreak.service.image;
 
+import static org.junit.Assert.assertEquals;
+
 import java.io.IOException;
+import java.nio.file.Paths;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import org.assertj.core.util.Lists;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.springframework.test.util.ReflectionTestUtils;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV2;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakVersion;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -36,6 +46,10 @@ public class ImageCatalogProviderTest {
 
     private static final String CB_VERSION = "1.16.4";
 
+    private static final List<String> CB_IMAGE_CATALOG_V2_OS_TYPES = Lists.newArrayList("amazonlinux", "centos7");
+
+    private static final List<String> CB_AMAZONLINUX_FILTER = Lists.newArrayList("amazonlinux");
+
     @InjectMocks
     private CachedImageCatalogProvider underTest;
 
@@ -43,7 +57,7 @@ public class ImageCatalogProviderTest {
     public void testReadImageCatalogFromFile() throws Exception {
 
         String path = getPath(CB_IMAGE_CATALOG_V2_JSON);
-        underTest.setEtcConfigDir(path);
+        ReflectionTestUtils.setField(underTest, "etcConfigDir", path);
 
         CloudbreakImageCatalogV2 catalog = underTest.getImageCatalogV2(CB_IMAGE_CATALOG_V2_JSON);
 
@@ -74,7 +88,7 @@ public class ImageCatalogProviderTest {
     @Test
     public void testImageCatalogErrorWhenNull() throws CloudbreakImageCatalogException {
         String path = getPath(CB_IMAGE_CATALOG_NULL_FIELD_JSON);
-        underTest.setEtcConfigDir(path);
+        ReflectionTestUtils.setField(underTest, "etcConfigDir", path);
         String errorMessage = getErrorMessage(CB_IMAGE_CATALOG_NULL_FIELD_JSON);
 
         String expected = "Missing required creator property 'images' (index 0)";
@@ -94,14 +108,68 @@ public class ImageCatalogProviderTest {
     @Test
     public void testImageCatalogValid() throws CloudbreakImageCatalogException, IOException {
         String path = getPath(CB_IMAGE_CATALOG_VALID_JSON);
-        underTest.setEtcConfigDir(path);
+        ReflectionTestUtils.setField(underTest, "etcConfigDir", path);
         underTest.getImageCatalogV2(CB_IMAGE_CATALOG_VALID_JSON);
+    }
+
+    @Test
+    public void testImageCatalogFilterNothing() throws CloudbreakImageCatalogException, IOException {
+        String path = getPath(CB_IMAGE_CATALOG_V2_JSON);
+        ReflectionTestUtils.setField(underTest, "etcConfigDir", path);
+        ReflectionTestUtils.setField(underTest, "enabledLinuxTypes", Collections.emptyList());
+
+        CloudbreakImageCatalogV2 actualCatalog = underTest.getImageCatalogV2(CB_IMAGE_CATALOG_V2_JSON);
+
+        List<String> actualOsTypes = getImageCatalogOses(actualCatalog);
+        assertEquals(CB_IMAGE_CATALOG_V2_OS_TYPES, actualOsTypes);
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        CloudbreakImageCatalogV2 expectedCatalog = objectMapper.readValue(Paths.get(path, CB_IMAGE_CATALOG_V2_JSON).toFile(), CloudbreakImageCatalogV2.class);
+
+        assertEquals(mapToUuid(expectedCatalog.getImages().getBaseImages()), mapToUuid(actualCatalog.getImages().getBaseImages()));
+        assertEquals(mapToUuid(expectedCatalog.getImages().getHdpImages()), mapToUuid(actualCatalog.getImages().getHdpImages()));
+        assertEquals(mapToUuid(expectedCatalog.getImages().getHdfImages()), mapToUuid(actualCatalog.getImages().getHdfImages()));
+    }
+
+    private List<String> mapToUuid(List<Image> imageList) {
+        return imageList.stream()
+                .map(Image::getUuid)
+                .collect(Collectors.toList());
+    }
+
+    @Test
+    public void testImageCatalogFilterToAmazonlinux() throws CloudbreakImageCatalogException, IOException {
+        String path = getPath(CB_IMAGE_CATALOG_V2_JSON);
+        ReflectionTestUtils.setField(underTest, "etcConfigDir", path);
+        ReflectionTestUtils.setField(underTest, "enabledLinuxTypes", CB_AMAZONLINUX_FILTER);
+
+        CloudbreakImageCatalogV2 actualCatalog = underTest.getImageCatalogV2(CB_IMAGE_CATALOG_V2_JSON);
+
+        List<String> actualOsTypes = getImageCatalogOses(actualCatalog);
+        assertEquals(CB_AMAZONLINUX_FILTER, actualOsTypes);
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        CloudbreakImageCatalogV2 expectedCatalog = objectMapper.readValue(Paths.get(path, CB_IMAGE_CATALOG_V2_JSON).toFile(), CloudbreakImageCatalogV2.class);
+
+        assertEquals(mapToUuid(expectedCatalog.getImages().getBaseImages()), mapToUuid(actualCatalog.getImages().getBaseImages()));
+        List<String> expectedHdpImagesList = Collections.singletonList("2.4.0.0-1157-6eff4b14-482f-4e31-8e15-cb3a153d1030-2.5.0.0-1200");
+        assertEquals(expectedHdpImagesList, mapToUuid(actualCatalog.getImages().getHdpImages()));
+        assertEquals(mapToUuid(expectedCatalog.getImages().getHdfImages()), mapToUuid(actualCatalog.getImages().getHdfImages()));
+    }
+
+    private List<String> getImageCatalogOses(CloudbreakImageCatalogV2 actualCatalog) {
+        return Stream.concat(actualCatalog.getImages().getBaseImages().stream(),
+                    Stream.concat(actualCatalog.getImages().getHdfImages().stream(),
+                            actualCatalog.getImages().getHdpImages().stream()))
+                    .map(Image::getOs)
+                    .distinct()
+                    .collect(Collectors.toList());
     }
 
     @Test
     public void testImageCatalogWithEmptyCloudBreakVersions() throws CloudbreakImageCatalogException, IOException {
         String path = getPath(CB_IMAGE_CATALOG_EMPTY_CLOUDBREAK_VERSIONS_JSON);
-        underTest.setEtcConfigDir(path);
+        ReflectionTestUtils.setField(underTest, "etcConfigDir", path);
 
         String errorMessage = getErrorMessage(CB_IMAGE_CATALOG_EMPTY_CLOUDBREAK_VERSIONS_JSON);
         String expected = "Cloudbreak versions cannot be NULL";
@@ -111,16 +179,16 @@ public class ImageCatalogProviderTest {
     @Test
     public void testImageCatalogFilterNullImages() throws CloudbreakImageCatalogException, IOException {
         String path = getPath(CB_IMAGE_CATALOG_FILTER_NULL_IMAGES_JSON);
-        underTest.setEtcConfigDir(path);
+        ReflectionTestUtils.setField(underTest, "etcConfigDir", path);
 
         CloudbreakImageCatalogV2 imageCatalogV2 = underTest.getImageCatalogV2(CB_IMAGE_CATALOG_FILTER_NULL_IMAGES_JSON);
-        Assert.assertEquals(1, imageCatalogV2.getImages().getBaseImages().get(0).getImageSetsByProvider().values().size());
+        assertEquals(1, imageCatalogV2.getImages().getBaseImages().get(0).getImageSetsByProvider().values().size());
     }
 
     @Test
     public void testImageCatalogWithoutHdfImages() throws CloudbreakImageCatalogException, IOException {
         String path = getPath(CB_IMAGE_CATALOG_WITHOUT_HDF_IMAGES);
-        underTest.setEtcConfigDir(path);
+        ReflectionTestUtils.setField(underTest, "etcConfigDir", path);
 
         CloudbreakImageCatalogV2 imageCatalogV2 = underTest.getImageCatalogV2(CB_IMAGE_CATALOG_WITHOUT_HDF_IMAGES);
         Assert.assertNotNull(imageCatalogV2.getImages().getHdfImages());
@@ -129,7 +197,7 @@ public class ImageCatalogProviderTest {
     @Test
     public void testImageCatalogWithoutHdpImages() throws CloudbreakImageCatalogException, IOException {
         String path = getPath(CB_IMAGE_CATALOG_WITHOUT_HDP_IMAGES);
-        underTest.setEtcConfigDir(path);
+        ReflectionTestUtils.setField(underTest, "etcConfigDir", path);
 
         CloudbreakImageCatalogV2 imageCatalogV2 = underTest.getImageCatalogV2(CB_IMAGE_CATALOG_WITHOUT_HDP_IMAGES);
         Assert.assertNotNull(imageCatalogV2.getImages().getHdpImages());
@@ -138,7 +206,7 @@ public class ImageCatalogProviderTest {
     @Test
     public void testImageCatalogWithoutBaseImages() throws CloudbreakImageCatalogException, IOException {
         String path = getPath(CB_IMAGE_CATALOG_WITHOUT_BASE_IMAGES);
-        underTest.setEtcConfigDir(path);
+        ReflectionTestUtils.setField(underTest, "etcConfigDir", path);
 
         CloudbreakImageCatalogV2 imageCatalogV2 = underTest.getImageCatalogV2(CB_IMAGE_CATALOG_WITHOUT_BASE_IMAGES);
         Assert.assertNotNull(imageCatalogV2.getImages().getBaseImages());
