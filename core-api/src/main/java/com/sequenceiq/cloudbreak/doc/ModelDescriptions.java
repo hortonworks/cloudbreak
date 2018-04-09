@@ -280,8 +280,8 @@ public class ModelDescriptions {
         public static final String PASSWORD = "Password to use for the jdbc connection";
         public static final String NAME = "Name of the RDS configuration resource";
         public static final String STACK_VERSION = "(HDP, HDF)Stack version for the RDS configuration";
-        public static final String VALIDATED = "If true, then the RDS configuration will be validated";
         public static final String RDSTYPE = "Type of RDS, aka the service name that will use the RDS like HIVE, DRUID, SUPERSET, RANGER, etc.";
+        public static final String CONNECTOR_JAR_URL = "URL that points to the jar of the connection driver(connector)";
         public static final String RDS_REQUEST = "rds config request";
         public static final String RDS_REQUEST_CLUSTER_NAME = "requested cluster name";
         public static final String RDS_CONNECTION_TEST_RESULT = "result of RDS connection test";

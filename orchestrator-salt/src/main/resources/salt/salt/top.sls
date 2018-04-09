@@ -51,6 +51,7 @@ base:
     - match: grain
     - prometheus.server
     - ambari.server
+    - jdbc.connectors
 
   'roles:ambari_agent_install':
     - match: grain
