@@ -19,13 +19,17 @@ import com.sequenceiq.cloudbreak.api.model.HostGroupRequest;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupRequest;
 import com.sequenceiq.cloudbreak.api.model.NetworkRequest;
 import com.sequenceiq.cloudbreak.api.model.OrchestratorRequest;
+import com.sequenceiq.cloudbreak.api.model.SharedServiceRequest;
 import com.sequenceiq.cloudbreak.api.model.StackRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.InstanceGroupV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
 import com.sequenceiq.cloudbreak.controller.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.controller.validation.template.TemplateValidator;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
+import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
+import com.sequenceiq.cloudbreak.service.sharedservice.SharedServiceConfigProvider;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @Component
 public class StackV2RequestToStackRequestConverter extends AbstractConversionServiceAwareConverter<StackV2Request, StackRequest> {
@@ -38,6 +42,12 @@ public class StackV2RequestToStackRequestConverter extends AbstractConversionSer
 
     @Inject
     private CredentialService credentialService;
+
+    @Inject
+    private StackService stackService;
+
+    @Inject
+    private SharedServiceConfigProvider sharedServiceConfigProvider;
 
     @Inject
     private AuthenticatedUserService authenticatedUserService;
@@ -115,6 +125,11 @@ public class StackV2RequestToStackRequestConverter extends AbstractConversionSer
                 stackRequest.getClusterRequest().getHostGroups().add(convert);
             }
             stackRequest.getClusterRequest().setName(source.getGeneral().getName());
+            if (sharedServiceConfigProvider.configured(source.getCluster())) {
+                SharedServiceRequest sharedService = source.getCluster().getSharedService();
+                Stack sourceStack = stackService.getPublicStack(sharedService.getSharedCluster(), authenticatedUserService.getCbUser());
+                stackRequest.setClusterToAttach(sourceStack != null ? sourceStack.getId() : null);
+            }
         }
     }
 }

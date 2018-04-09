@@ -46,6 +46,7 @@ import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.flex.FlexSubscriptionService;
 import com.sequenceiq.cloudbreak.service.network.NetworkService;
 import com.sequenceiq.cloudbreak.service.securitygroup.SecurityGroupService;
+import com.sequenceiq.cloudbreak.service.sharedservice.SharedServiceConfigProvider;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterCache;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterService;
 import com.sequenceiq.cloudbreak.service.stack.StackParameterService;
@@ -99,6 +100,9 @@ public class StackDecorator {
     @Inject
     private CloudParameterCache cloudParameterCache;
 
+    @Inject
+    private SharedServiceConfigProvider sharedServiceConfigProvider;
+
     public Stack decorate(Stack subject, StackRequest request, IdentityUser user) {
         prepareCredential(subject, request, user);
         prepareDomainIfDefined(subject, request, user);
@@ -122,6 +126,7 @@ public class StackDecorator {
             prepareInstanceGroups(subject, request, subject.getCredential(), user);
             prepareFlexSubscription(subject, request.getFlexId());
             validate(subject);
+            subject = sharedServiceConfigProvider.configureStack(subject, user);
         }
         return subject;
     }

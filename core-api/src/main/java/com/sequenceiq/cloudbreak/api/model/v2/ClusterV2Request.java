@@ -12,6 +12,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.cloudbreak.api.model.ExecutorType;
 import com.sequenceiq.cloudbreak.api.model.FileSystemRequest;
 import com.sequenceiq.cloudbreak.api.model.JsonEntity;
+import com.sequenceiq.cloudbreak.api.model.SharedServiceRequest;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
 
@@ -51,6 +52,9 @@ public class ClusterV2Request implements JsonEntity {
     @Valid
     @ApiModelProperty(ClusterModelDescription.AMBARI_REQUEST)
     private AmbariV2Request ambari;
+
+    @ApiModelProperty(ClusterModelDescription.SHARED_SERVICE_REQUEST)
+    private SharedServiceRequest sharedService;
 
     public Boolean getEmailNeeded() {
         return emailNeeded;
@@ -124,5 +128,13 @@ public class ClusterV2Request implements JsonEntity {
 
     public void setProxyName(String proxyName) {
         this.proxyName = proxyName;
+    }
+
+    public SharedServiceRequest getSharedService() {
+        return sharedService;
+    }
+
+    public void setSharedService(SharedServiceRequest sharedService) {
+        this.sharedService = sharedService;
     }
 }

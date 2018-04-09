@@ -150,6 +150,7 @@ public class ModelDescriptions {
         public static final String CUSTOM_DOMAIN_SETTINGS = "settings related to custom domain names";
         public static final String GENERAL_SETTINGS = "general configuration parameters for a cluster (e.g. 'name', 'credentialname')";
         public static final String PLACEMENT_SETTINGS = "placement configuration parameters for a cluster (e.g. 'region', 'availabilityZone')";
+        public static final String SHARED_SERVICE_REQUEST = "Shared service request";
     }
 
     public static class ClusterModelDescription {
@@ -161,6 +162,7 @@ public class ModelDescriptions {
         public static final String BLUEPRINT_ID = "blueprint id for the cluster";
         public static final String BLUEPRINT_NAME = "blueprint name for the cluster";
         public static final String BLUEPRINT = "blueprint for the cluster";
+        public static final String SHARED_SERVICE_REQUEST = "Shared service request";
         public static final String VALIDATE_BLUEPRINT = "blueprint validation";
         public static final String HOURS = "duration - how long the cluster is running in hours";
         public static final String MINUTES = "duration - how long the cluster is running in minutes (minus hours)";

@@ -2,19 +2,26 @@ package com.sequenceiq.cloudbreak.converter.v2;
 
 import java.util.HashSet;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.ClusterRequest;
+import com.sequenceiq.cloudbreak.api.model.ConnectedClusterRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.AmbariV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.ClusterV2Request;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
+import com.sequenceiq.cloudbreak.service.sharedservice.SharedServiceConfigProvider;
 
 @Component
 public class ClusterV2RequestToClusterRequestConverter extends AbstractConversionServiceAwareConverter<ClusterV2Request, ClusterRequest> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterV2RequestToClusterRequestConverter.class);
+
+    @Inject
+    private SharedServiceConfigProvider sharedServiceConfigProvider;
 
     @Override
     public ClusterRequest convert(ClusterV2Request source) {
@@ -47,6 +54,11 @@ public class ClusterV2RequestToClusterRequestConverter extends AbstractConversio
             cluster.setUserName(ambariRequest.getUserName());
             cluster.setValidateBlueprint(ambariRequest.getValidateBlueprint());
             cluster.setAmbariSecurityMasterKey(ambariRequest.getAmbariSecurityMasterKey());
+            if (sharedServiceConfigProvider.configured(source)) {
+                ConnectedClusterRequest connectedClusterRequest = new ConnectedClusterRequest();
+                connectedClusterRequest.setSourceClusterName(source.getSharedService().getSharedCluster());
+                cluster.setConnectedCluster(connectedClusterRequest);
+            }
         }
         cluster.setHostGroups(new HashSet<>());
         return cluster;
