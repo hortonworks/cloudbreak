@@ -49,6 +49,7 @@ import com.sequenceiq.cloudbreak.domain.StackStatus;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.service.account.AccountPreferencesService;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterService;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @Component
 public class StackRequestToStackConverter extends AbstractConversionServiceAwareConverter<StackRequest, Stack> {
@@ -69,6 +70,9 @@ public class StackRequestToStackConverter extends AbstractConversionServiceAware
     private AccountPreferencesService accountPreferencesService;
 
     @Inject
+    private StackService stackService;
+
+    @Inject
     private DefaultCostTaggingService defaultCostTaggingService;
 
     @Value("${cb.platform.default.regions:}")
@@ -84,9 +88,7 @@ public class StackRequestToStackConverter extends AbstractConversionServiceAware
         stack.setCloudPlatform(source.getCloudPlatform());
         Map<String, String> sourceTags = source.getApplicationTags();
         stack.setTags(getTags(mergeTags(sourceTags, source.getUserDefinedTags(), getDefaultTags(source))));
-        if (sourceTags != null && sourceTags.get("datalakeId") != null) {
-            stack.setDatalakeId(Long.valueOf(String.valueOf(sourceTags.get("datalakeId"))));
-        }
+        preprateSharedServiceProperties(source, stack, sourceTags);
         StackAuthentication stackAuthentication = conversionService.convert(source.getStackAuthentication(), StackAuthentication.class);
         stack.setStackAuthentication(stackAuthentication);
         validateStackAuthentication(source);
@@ -113,6 +115,15 @@ public class StackRequestToStackConverter extends AbstractConversionServiceAware
 
         stack.setUuid(UUID.randomUUID().toString());
         return stack;
+    }
+
+    private void preprateSharedServiceProperties(StackRequest source, Stack stack, Map<String, String> sourceTags) {
+        if (sourceTags != null && sourceTags.get("datalakeId") != null) {
+            stack.setDatalakeId(Long.valueOf(String.valueOf(sourceTags.get("datalakeId"))));
+        }
+        if (source.getClusterToAttach() != null) {
+            stack.setDatalakeId(source.getClusterToAttach());
+        }
     }
 
     private void validateStackAuthentication(StackRequest source) {
