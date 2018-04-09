@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.service.smartsense;
 
 import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
-import static java.util.Objects.requireNonNull;
 
 import java.util.Iterator;
 import java.util.Optional;
@@ -109,7 +108,6 @@ public class SmartSenseSubscriptionService {
     }
 
     public SmartSenseSubscription getDefaultForUser(@Nonnull IdentityUser cbUser) {
-        requireNonNull(cbUser);
         Optional<SmartSenseSubscription> subscription = obtainSmartSenseSubscription(cbUser);
         checkSmartSenseSubscriptionAuthorization(subscription);
         return subscription.get();

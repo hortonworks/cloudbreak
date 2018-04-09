@@ -9,7 +9,7 @@ import io.swagger.annotations.ApiModel;
 @ApiModel("SharedService")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
-public class SharedServiceRequest {
+public class SharedServiceRequest implements JsonEntity {
 
     private String sharedCluster;
 

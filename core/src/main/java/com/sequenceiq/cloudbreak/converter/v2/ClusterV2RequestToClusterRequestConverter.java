@@ -54,7 +54,7 @@ public class ClusterV2RequestToClusterRequestConverter extends AbstractConversio
             cluster.setUserName(ambariRequest.getUserName());
             cluster.setValidateBlueprint(ambariRequest.getValidateBlueprint());
             cluster.setAmbariSecurityMasterKey(ambariRequest.getAmbariSecurityMasterKey());
-            if (sharedServiceConfigProvider.configured(source)) {
+            if (sharedServiceConfigProvider.isConfigured(source)) {
                 ConnectedClusterRequest connectedClusterRequest = new ConnectedClusterRequest();
                 connectedClusterRequest.setSourceClusterName(source.getSharedService().getSharedCluster());
                 cluster.setConnectedCluster(connectedClusterRequest);
@@ -63,4 +63,5 @@ public class ClusterV2RequestToClusterRequestConverter extends AbstractConversio
         cluster.setHostGroups(new HashSet<>());
         return cluster;
     }
+
 }
