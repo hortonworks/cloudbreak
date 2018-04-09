@@ -21,7 +21,6 @@ download_custom_oracle_connector_jar:
      - makedirs: True
      - mode: 755
      - skip_verify: True
-{% endif %}
 
 {% elif salt['pillar.get']('jdbc_connectors:ORACLE12') != "" %}
 
@@ -32,4 +31,4 @@ download_custom_oracle_connector_jar:
      - makedirs: True
      - mode: 755
      - skip_verify: True
-{% endif %}§
+{% endif %}
