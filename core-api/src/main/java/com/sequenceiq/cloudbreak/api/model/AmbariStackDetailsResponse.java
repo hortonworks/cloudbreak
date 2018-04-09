@@ -1,8 +1,11 @@
 package com.sequenceiq.cloudbreak.api.model;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.sequenceiq.cloudbreak.api.model.mpack.ManagementPackDetails;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AmbariStackDetailsResponse implements JsonEntity {
@@ -13,9 +16,9 @@ public class AmbariStackDetailsResponse implements JsonEntity {
 
     private Map<String, String> util;
 
-    private Boolean enableGplRepo;
+    private List<ManagementPackDetails> mpacks = new ArrayList<>();
 
-    private Map<String, String> knox;
+    private Boolean enableGplRepo;
 
     private boolean verify = true;
 
@@ -37,12 +40,12 @@ public class AmbariStackDetailsResponse implements JsonEntity {
         this.util = util;
     }
 
-    public Map<String, String> getKnox() {
-        return knox;
+    public List<ManagementPackDetails> getMpacks() {
+        return mpacks;
     }
 
-    public void setKnox(Map<String, String> knox) {
-        this.knox = knox;
+    public void setMpacks(List<ManagementPackDetails> mpacks) {
+        this.mpacks = mpacks;
     }
 
     public boolean isVerify() {

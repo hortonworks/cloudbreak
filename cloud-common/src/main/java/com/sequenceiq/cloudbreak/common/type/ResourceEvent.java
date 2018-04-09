@@ -10,6 +10,8 @@ public enum ResourceEvent {
     CLUSTER_TEMPLATE_DELETED("resource.clustertemplate.deleted"),
     LDAP_CREATED("resource.ldap.created"),
     LDAP_DELETED("resource.ldap.deleted"),
+    MANAGEMENT_PACK_CREATED("resource.mpack.created"),
+    MANAGEMENT_PACK_DELETED("resource.mpack.deleted"),
     NETWORK_CREATED("resource.network.created"),
     NETWORK_DELETED("resource.network.deleted"),
     RECIPE_CREATED("resource.recipe.created"),

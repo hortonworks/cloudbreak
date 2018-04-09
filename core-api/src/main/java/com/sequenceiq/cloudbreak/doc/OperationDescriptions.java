@@ -241,6 +241,19 @@ public class OperationDescriptions {
         public static final String DELETE_BY_ID = "delete proxy configuration by id";
     }
 
+    public static class ManagementPackOpDescription {
+        public static final String POST_PRIVATE = "create management pack as private resource";
+        public static final String POST_PUBLIC = "create management pack as public resource";
+        public static final String GET_PRIVATE = "retrieve private management packs";
+        public static final String GET_PUBLIC = "retrieve public and private (owned) management packs";
+        public static final String GET_PRIVATE_BY_NAME = "retrieve a private management pack by name";
+        public static final String GET_PUBLIC_BY_NAME = "retrieve a public or private (owned) management pack by name";
+        public static final String GET_BY_ID = "retrieve management pack by id";
+        public static final String DELETE_PRIVATE_BY_NAME = "delete private management pack by name";
+        public static final String DELETE_PUBLIC_BY_NAME = "delete public (owned) or private management pack by name";
+        public static final String DELETE_BY_ID = "delete management pack by id";
+    }
+
     public static class ConnectorOpDescription {
         public static final String GET_PLATFORMS = "retrive available platforms";
         public static final String GET_PLATFORM_VARIANTS = "retrive available platform variants";
