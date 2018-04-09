@@ -55,13 +55,13 @@ public class SharedServiceConfigProvider {
     }
 
     public Stack configureStack(Stack requestedStack, IdentityUser user) {
-        if (requestedStack.getDatalakeId() != null) {
-            Stack sourceStack = queryStack(user, requestedStack.getDatalakeId(), null);
-            requestedStack.setRegion(sourceStack.getRegion());
-            requestedStack.setAvailabilityZone(sourceStack.getAvailabilityZone());
-            requestedStack.getNetwork().setAttributes(sourceStack.getNetwork().getAttributes());
-
-        }
+        // This is not needed in the first version
+        // if (requestedStack.getDatalakeId() != null) {
+        //    Stack sourceStack = queryStack(user, requestedStack.getDatalakeId(), null);
+        //    requestedStack.setRegion(sourceStack.getRegion());
+        //    requestedStack.setAvailabilityZone(sourceStack.getAvailabilityZone());
+        //    requestedStack.getNetwork().setAttributes(sourceStack.getNetwork().getAttributes());
+        // }
         return requestedStack;
     }
 
