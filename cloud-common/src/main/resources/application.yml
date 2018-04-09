@@ -74,7 +74,7 @@ cb:
     defaultQueue: "default"
     defaultLifeTime: -1
 
-  blueprint.defaults: "EDW-ETL: Apache Hive, Apache Spark 2=hdp26-etl-edw-spark2;EDW-Analytics: Apache Hive 2 LLAP, Apache Zeppelin=hdp26-edw-analytics;Data Science: Apache Spark 2, Apache Zeppelin=hdp26-data-science-spark2;Flow Management: Apache NiFi=hdf31-flow-management"
+  blueprint.defaults: "EDW-ETL: Apache Hive, Apache Spark 2=hdp26-etl-edw-spark2;EDW-Analytics: Apache Hive 2 LLAP, Apache Zeppelin=hdp26-edw-analytics;Data Science: Apache Spark 2, Apache Zeppelin=hdp26-data-science-spark2;Flow Management: Apache NiFi=hdf31-flow-management;Enterprise Services=hdp26-shared-services"
   template.defaults: minviable-gcp,minviable-azure-managed-disks,minviable-aws
   custom.user.data: |
     touch /tmp/custom-user-data
