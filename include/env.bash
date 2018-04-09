@@ -25,7 +25,7 @@ env-import() {
 
 env-show() {
 	declare desc="Shows relevant environment variables, in human readable format"
-    
+
     cloudbreak-config
     migrate-config
 	local longest=0
@@ -41,7 +41,7 @@ env-show() {
 
 env-export() {
 	declare desc="Shows relevant environment variables, in a machine friendly format."
-    
+
     # TODO cloudbreak config shouldnt be called here ...
     cloudbreak-config
     migrate-config
@@ -80,13 +80,14 @@ CB_DB_ENV_USER - User for the Cloudbreak database authentication
 CB_DB_ROOT_PATH - Deprecated - Location of the database volume on Cloudbreak host
 CB_DEFAULT_SUBSCRIPTION_ADDRESS - Address of the default subscription for Cloudbreak notifications
 CB_ENABLEDPLATFORMS - Disables Cloudbreak resource called Platform
+CB_ENABLED_LINUX_TYPES - List of enabled OS types from image catalog
 CBD_FORCE_START - Disables docker-compose.yml and uaa.yml validation
 CB_GCP_HOSTKEY_VERIFY - Enables host fingerprint verification on GCP
 CB_HBM2DDL_STRATEGY - Configures hibernate.hbm2ddl.auto in Cloudbreak
 CB_HOST_DISCOVERY_CUSTOM_DOMAIN - Custom domain of the provisioned cluster
 CB_HOST_ADDRESS - Address of the Cloudbreak backend service
 CB_IMAGE_CATALOG_URL - Image catalog url
-CB_INSTANCE_NODE_ID - Unique identifier of the Cloudbreak node     
+CB_INSTANCE_NODE_ID - Unique identifier of the Cloudbreak node
 CB_INSTANCE_PROVIDER - Cloud provider of the Cloudbreak instance
 CB_INSTANCE_REGION - Cloud region of the Cloudbreak instance
 CB_INSTANCE_UUID - Unique identifier of Cloudbreak deployment
