@@ -4,10 +4,12 @@ import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -29,7 +31,9 @@ import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.StackDetails;
+import com.sequenceiq.cloudbreak.cloud.model.component.ManagementPackComponent;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
+import com.sequenceiq.cloudbreak.cloud.model.component.StackType;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
@@ -166,19 +170,12 @@ public class ImageService {
         Image image = new Image(imageName, userData, imgFromCatalog.getOsType(), imageCatalogUrl, imageCatalogName, imageId);
         Component imageComponent = new Component(ComponentType.IMAGE, ComponentType.IMAGE.name(), new Json(image), stack);
         components.add(imageComponent);
-
         if (imgFromCatalog.getStackDetails() != null) {
             components.add(getAmbariComponent(stack, imgFromCatalog));
             StackDetails stackDetails = imgFromCatalog.getStackDetails();
-
-            Component stackRepoComponent;
-            if (!imgFromCatalog.getStackDetails().getRepo().getKnox().isEmpty()) {
-                StackRepoDetails hdfRepo = createHDFRepo(stackDetails);
-                stackRepoComponent = new Component(ComponentType.HDF_REPO_DETAILS, ComponentType.HDF_REPO_DETAILS.name(), new Json(hdfRepo), stack);
-            } else {
-                StackRepoDetails repo = createHDPRepo(stackDetails);
-                stackRepoComponent = new Component(ComponentType.HDP_REPO_DETAILS, ComponentType.HDP_REPO_DETAILS.name(), new Json(repo), stack);
-            }
+            ComponentType componentType = determineStackType(stackDetails).getComponentType();
+            StackRepoDetails repo = createRepo(stackDetails);
+            Component stackRepoComponent = new Component(componentType, componentType.name(), new Json(repo), stack);
             components.add(stackRepoComponent);
         }
         return components;
@@ -197,21 +194,29 @@ public class ImageService {
         }
     }
 
-    private StackRepoDetails createHDPRepo(StackDetails hdpStack) {
-        StackRepoDetails repo = new StackRepoDetails();
-        repo.setHdpVersion(hdpStack.getVersion());
-        repo.setStack(hdpStack.getRepo().getStack());
-        repo.setUtil(hdpStack.getRepo().getUtil());
-        return repo;
+    private StackType determineStackType(StackDetails stackDetails) throws CloudbreakImageCatalogException {
+        String repoId = stackDetails.getRepo().getStack().get(StackRepoDetails.REPO_ID_TAG);
+        Optional<StackType> stackType = EnumSet.allOf(StackType.class).stream().filter(st -> repoId.contains(st.name())).findFirst();
+        if (stackType.isPresent()) {
+            return stackType.get();
+        } else {
+            throw new CloudbreakImageCatalogException(String.format("Unsupported stack type: '%s'.", repoId));
+        }
+
     }
 
-    private StackRepoDetails createHDFRepo(StackDetails hdfStack) {
-        com.sequenceiq.cloudbreak.cloud.model.catalog.StackRepoDetails hdfRepo = hdfStack.getRepo();
+    private StackRepoDetails createRepo(StackDetails stack) {
         StackRepoDetails repo = new StackRepoDetails();
-        repo.setHdpVersion(hdfStack.getVersion());
-        repo.setStack(hdfRepo.getStack());
-        repo.setUtil(hdfRepo.getUtil());
-        repo.setKnox(hdfRepo.getKnox());
+        repo.setHdpVersion(stack.getVersion());
+        repo.setStack(stack.getRepo().getStack());
+        repo.setUtil(stack.getRepo().getUtil());
+        repo.setManagementPacks(stack.getMpackList().stream().map(icmpack -> {
+            ManagementPackComponent mpack = new ManagementPackComponent();
+            mpack.setMpackUrl(icmpack.getMpackUrl());
+            mpack.setStackDefault(true);
+            mpack.setPreInstalled(true);
+            return mpack;
+        }).collect(Collectors.toList()));
         return repo;
     }
 }

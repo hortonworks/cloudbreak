@@ -16,7 +16,8 @@ public enum APIResourceType {
     LDAP_CONFIG("ldap"),
     SMARTSENSE_SUBSCRIPTION("sss"),
     IMAGE_CATALOG("ic"),
-    FLEX_SUBSCRIPTION("fs");
+    FLEX_SUBSCRIPTION("fs"),
+    MANAGEMENT_PACK("mpack");
 
     private final String namePrefix;
 

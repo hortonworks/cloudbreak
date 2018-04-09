@@ -270,6 +270,7 @@ public class ModelDescriptions {
         public static final String REPOSITORY_VERSION = "version of the repository for VDF file creation in Ambari";
         public static final String VDF_URL = "local path on the Ambari server or URL that point to the desired VDF file";
         public static final String MPACK_URL = "url the MPACK that needs to be installed before HDF installation";
+        public static final String MPACKS = "Management packs which are needed for the HDP / HDF clusters";
     }
 
     public static class RDSConfig {
@@ -320,6 +321,16 @@ public class ModelDescriptions {
     public static class InstanceGroupAdjustmentModelDescription {
         public static final String SCALING_ADJUSTMENT = "scaling adjustment of the instance groups";
         public static final String WITH_CLUSTER_EVENT = "on stack update, update cluster too";
+    }
+
+    public static class MpackDetailsDescription {
+        public static final String MPACK_NAME = "name of the ambari management pack";
+        public static final String MPACK_URL = "url of the ambari management pack";
+        public static final String PURGE = "if true, management pack will be installed with '--purge' flag";
+        public static final String PURGE_LIST = "if provided, management pack will be installed with '--purgeList' option with this values";
+        public static final String FORCE = "if true, management pack will be installed with '--force' flag";
+        public static final String STACK_DEFAULT = "if true, the management pack is mandatory for the stack";
+        public static final String PREINSTALLED = "if true, the management pack is already installed on the instances";
     }
 
     public static class HostGroupModelDescription {

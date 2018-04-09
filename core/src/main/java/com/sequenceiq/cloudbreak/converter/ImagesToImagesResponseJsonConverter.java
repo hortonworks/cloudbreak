@@ -99,10 +99,6 @@ public class ImagesToImagesResponseJsonConverter extends AbstractConversionServi
             if (utilRepo != null) {
                 repoJson.setUtil(utilRepo);
             }
-            Map<String, String> knoxRepo = info.getRepo().getKnox();
-            if (knoxRepo != null) {
-                repoJson.setKnox(knoxRepo);
-            }
             json.setRepo(repoJson);
             json.setVersion(info.getVersion());
             result.add(json);
@@ -136,9 +132,6 @@ public class ImagesToImagesResponseJsonConverter extends AbstractConversionServi
         StackRepoDetailsJson json = new StackRepoDetailsJson();
         json.setStack(new HashMap<>(repo.getStack()));
         json.setUtil(new HashMap<>(repo.getUtil()));
-        if (repo.getKnox() != null && !repo.getKnox().isEmpty()) {
-            json.setKnox(repo.getKnox());
-        }
         return json;
     }
 }
