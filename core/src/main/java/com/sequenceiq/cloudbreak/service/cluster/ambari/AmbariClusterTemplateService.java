@@ -1,20 +1,18 @@
 package com.sequenceiq.cloudbreak.service.cluster.ambari;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-
-import javax.inject.Inject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-
 import com.sequenceiq.ambari.client.services.ClusterService;
 import com.sequenceiq.cloudbreak.blueprint.kerberos.KerberosDetailService;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
+import javax.inject.Inject;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 @Service
 public class AmbariClusterTemplateService {
@@ -44,6 +42,7 @@ public class AmbariClusterTemplateService {
                 if (cluster.isSecure()) {
                     KerberosConfig kerberosConfig = cluster.getKerberosConfig();
                     String principal = kerberosDetailService.resolvePrincipalForKerberos(kerberosConfig);
+                    // TODO: do this in Java
                     clusterTemplate = ambariClient.createSecureCluster(clusterName, blueprintName, hostGroupMappings, configStrategy,
                             ambariSecurityConfigProvider.getAmbariPassword(cluster), principal, kerberosConfig.getPassword(), KEY_TYPE, false,
                             repositoryVersion);
