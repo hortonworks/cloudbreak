@@ -1,2 +1,4 @@
 jdbc_connectors:
-    vendor: http://exampleurltoconnectorjar
+    vendor: ConnectorVendor
+    connectorJarName: connector-name.jar
+    connectorJarUrl: http://exampleurltoconnectorjar

@@ -1,33 +1,14 @@
-{% if salt['pillar.get']('jdbc_connectors:MYSQL') != "" %}
-
+{% if salt['pillar.get']('jdbc_connectors:vendor') != "" %}
+{% if salt['pillar.get']('jdbc_connectors:vendor') == "MYSQL" or salt['pillar.get']('jdbc_connectors:vendor') == "MARIADB" %}
 install-mysql-client:
   pkg.installed:
      - name: mariadb
+{% endif %}
 
-download_custom_mysql_connector_jar:
+download_custom_{{ salt['pillar.get']('jdbc_connectors:vendor') }}_connector_jar:
   file.managed:
-     - name: /opt/jdbc-drivers/mysql-connector-java.jar
-     - source: {{ salt['pillar.get']('jdbc_connectors:MYSQL') }}
-     - makedirs: True
-     - mode: 755
-     - skip_verify: True
-
-{% elif salt['pillar.get']('jdbc_connectors:ORACLE11') != "" %}
-
-download_custom_oracle_connector_jar:
-  file.managed:
-     - name: /opt/jdbc-drivers/ojdbc6.jar
-     - source: {{ salt['pillar.get']('jdbc_connectors:ORACLE11') }}
-     - makedirs: True
-     - mode: 755
-     - skip_verify: True
-
-{% elif salt['pillar.get']('jdbc_connectors:ORACLE12') != "" %}
-
-download_custom_oracle_connector_jar:
-  file.managed:
-     - name: /opt/jdbc-drivers/ojdbc7.jar
-     - source: {{ salt['pillar.get']('jdbc_connectors:ORACLE12') }}
+     - name: /opt/jdbc-drivers/{{ salt['pillar.get']('jdbc_connectors:connectorJarName') }}
+     - source: {{ salt['pillar.get']('jdbc_connectors:connectorJarUrl') }}
      - makedirs: True
      - mode: 755
      - skip_verify: True
