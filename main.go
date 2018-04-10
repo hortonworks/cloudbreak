@@ -1400,6 +1400,50 @@ func main() {
 				},
 			},
 		},
+		{
+			Name:  "mpack",
+			Usage: "management pack related operations",
+			Subcommands: []cli.Command{
+				{
+					Name:  "create",
+					Usage: "create a new management pack",
+					Flags: cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FLMpackURL,
+						cb.FLMpackPurge, cb.FLMpackPurgeList, cb.FLMpackForce).AddAuthenticationFlags().Build(),
+					Before: ConfigRead,
+					Action: cb.CreateMpack,
+					BashComplete: func(c *cli.Context) {
+						for _, f := range cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FLMpackURL,
+							cb.FLMpackPurge, cb.FLMpackPurgeList, cb.FLMpackForce).AddAuthenticationFlags().Build() {
+							printFlagCompletion(f)
+						}
+					},
+				},
+				{
+					Name:   "delete",
+					Usage:  "deletes a management pack",
+					Flags:  cb.NewFlagBuilder().AddFlags(cb.FlName).AddAuthenticationFlags().Build(),
+					Before: ConfigRead,
+					Action: cb.DeleteMpack,
+					BashComplete: func(c *cli.Context) {
+						for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlName).AddAuthenticationFlags().Build() {
+							printFlagCompletion(f)
+						}
+					},
+				},
+				{
+					Name:   "list",
+					Usage:  "list the available management packs",
+					Flags:  cb.NewFlagBuilder().AddOutputFlag().AddAuthenticationFlags().Build(),
+					Before: ConfigRead,
+					Action: cb.ListMpacks,
+					BashComplete: func(c *cli.Context) {
+						for _, f := range cb.NewFlagBuilder().AddOutputFlag().AddAuthenticationFlags().Build() {
+							printFlagCompletion(f)
+						}
+					},
+				},
+			},
+		},
 	}
 	sortByName(app.Commands)
 

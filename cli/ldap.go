@@ -34,7 +34,7 @@ type ldap struct {
 	GroupNameAttribute   string `json:"GroupNameAttribute,omitempty" yaml:"GroupNameAttribute,omitempty"`
 	GroupObjectClass     string `json:"GroupObjectClass,omitempty" yaml:"GroupObjectClass,omitempty"`
 	GroupSearchBase      string `json:"GroupSearchBase,omitempty" yaml:"GroupSearchBase,omitempty"`
-	AdminGroup           string `json:"adminGroup,omitempty" yaml:"adminGroup,omitempty"`
+	AdminGroup           string `json:"AdminGroup,omitempty" yaml:"AdminGroup,omitempty"`
 }
 
 func (l *ldap) DataAsStringArray() []string {
