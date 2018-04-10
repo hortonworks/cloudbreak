@@ -63,7 +63,6 @@
           "hadoop.proxyuser.falcon.groups": "*",
           "hadoop.proxyuser.root.groups": "*",
           "hadoop.security.group.mapping.ldap.bind.password": "admin",
-          "hadoop.user.group.static.mapping.overrides": "hive=hive,hadoop;hdfs=hdfs,hadoop;beacon=hadoop,hdfs,beacon;dpprofiler=hadoop",
           "hadoop.security.group.mapping.ldap.userbase": "cn=users,dc=example,dc=org",
           "hadoop.security.group.mapping.ldap.url": "ldap://localhost:389",
           "hadoop.security.group.mapping.ldap.groupbase": "cn=groups,dc=example,dc=org",
