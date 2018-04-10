@@ -48,6 +48,9 @@ type BlueprintResponse struct {
 
 	// status of the blueprint
 	Status string `json:"status,omitempty"`
+
+	// user defined tags for blueprint
+	Tags map[string]interface{} `json:"tags,omitempty"`
 }
 
 /* polymorph BlueprintResponse ambariBlueprint false */
@@ -65,6 +68,8 @@ type BlueprintResponse struct {
 /* polymorph BlueprintResponse public false */
 
 /* polymorph BlueprintResponse status false */
+
+/* polymorph BlueprintResponse tags false */
 
 // Validate validates this blueprint response
 func (m *BlueprintResponse) Validate(formats strfmt.Registry) error {

@@ -58,6 +58,7 @@ type LdapConfigRequest struct {
 	// Required: true
 	// Max Length: 100
 	// Min Length: 1
+	// Pattern: (^[a-z][-a-z0-9]*[a-z0-9]$)
 	Name *string `json:"name"`
 
 	// determines the protocol (LDAP or LDAP over SSL)
@@ -255,6 +256,10 @@ func (m *LdapConfigRequest) validateName(formats strfmt.Registry) error {
 	}
 
 	if err := validate.MaxLength("name", "body", string(*m.Name), 100); err != nil {
+		return err
+	}
+
+	if err := validate.Pattern("name", "body", string(*m.Name), `(^[a-z][-a-z0-9]*[a-z0-9]$)`); err != nil {
 		return err
 	}
 

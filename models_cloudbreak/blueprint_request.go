@@ -41,6 +41,9 @@ type BlueprintRequest struct {
 	// properties to extend the blueprint with
 	Properties []map[string]map[string]string `json:"properties"`
 
+	// user defined tags for blueprint
+	Tags map[string]interface{} `json:"tags,omitempty"`
+
 	// url source of an ambari blueprint, set this or the ambariBlueprint field
 	URL string `json:"url,omitempty"`
 }
@@ -54,6 +57,8 @@ type BlueprintRequest struct {
 /* polymorph BlueprintRequest name false */
 
 /* polymorph BlueprintRequest properties false */
+
+/* polymorph BlueprintRequest tags false */
 
 /* polymorph BlueprintRequest url false */
 
