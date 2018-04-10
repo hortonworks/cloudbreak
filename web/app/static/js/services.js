@@ -362,7 +362,8 @@ uluwatuServices.factory('UluwatuCluster', ['StackValidation', 'UserStack', 'Acco
 
             this.get = function(clusterId, successHandler) {
                 GlobalStack.get({
-                    id: clusterId
+                    id: clusterId,
+                    entry: [ "events" ]
                 }, function(success) {
                     decorateCluster(success);
                     successHandler(success);

@@ -759,6 +759,12 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                         hostGroup: $scope.getHostGroupName(),
                         numberOfInstances: 1
                     };
+                    if (success.cloudbreakEvents) {
+                        $rootScope.events = success.cloudbreakEvents;
+                        angular.forEach($rootScope.events, function(item) {
+                            item.customTimeStamp = new Date(item.eventTimestamp).toLocaleDateString() + " " + new Date(item.eventTimestamp).toLocaleTimeString();
+                        });
+                    }
                 });
             }
         };
@@ -1073,16 +1079,6 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
         }
 
         $rootScope.events = [];
-
-        $scope.loadEvents = function() {
-            $rootScope.events = UserEvents.query(function(success) {
-                angular.forEach(success, function(item) {
-                    item.customTimeStamp = new Date(item.eventTimestamp).toLocaleDateString() + " " + new Date(item.eventTimestamp).toLocaleTimeString();
-                });
-            });
-        }
-
-        $scope.loadEvents();
 
         $scope.stopCluster = function(activeCluster) {
             var newStatus = {
