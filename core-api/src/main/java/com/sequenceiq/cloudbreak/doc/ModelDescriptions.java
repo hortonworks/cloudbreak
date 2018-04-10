@@ -443,6 +443,15 @@ public class ModelDescriptions {
         public static final String ENDPOINT = "url of the endpoint";
     }
 
+    public static class SupportedDatabaseModelDescription {
+        public static final String DATABASENAME = "Name of the database";
+        public static final String DISPLAYNAME = "Display name of the database";
+        public static final String JDBCPREFIX = "Jdbc prefix of the database";
+        public static final String NAME = "Name of the service";
+        public static final String SERVICE_DISPLAYNAME = "Display name of the service";
+        public static final String DATABASES = "Supported database list";
+    }
+
     public static class FailureReport {
         public static final String FAILED_NODES = "List of failed nodes";
     }
