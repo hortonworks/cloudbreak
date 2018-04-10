@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.cluster.ambari;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -10,11 +11,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.google.common.io.CharStreams;
 import com.sequenceiq.ambari.client.services.ClusterService;
 import com.sequenceiq.cloudbreak.blueprint.kerberos.KerberosDetailService;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
+import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
+
+import groovyx.net.http.HttpResponseException;
 
 @Service
 public class AmbariClusterTemplateService {
@@ -32,7 +37,7 @@ public class AmbariClusterTemplateService {
     @Inject
     private AmbariRepositoryVersionService ambariRepositoryVersionService;
 
-    public void addClusterTemplate(Cluster cluster, Map<String, List<Map<String, String>>> hostGroupMappings, ClusterService ambariClient) {
+    void addClusterTemplate(Cluster cluster, Map<String, List<Map<String, String>>> hostGroupMappings, ClusterService ambariClient) throws CloudbreakException {
         String clusterName = cluster.getName();
         String blueprintName = cluster.getBlueprint().getAmbariName();
         String configStrategy = cluster.getConfigStrategy().name();
@@ -52,8 +57,9 @@ public class AmbariClusterTemplateService {
                             ambariSecurityConfigProvider.getAmbariPassword(cluster), false, repositoryVersion);
                 }
                 LOGGER.info("Submitted cluster creation template: {}", JsonUtil.minify(clusterTemplate, Collections.singleton("credentials")));
-            } catch (Exception exception) {
-                String msg = "Ambari client failed to apply cluster creation template.";
+            } catch (HttpResponseException exception) {
+                String reason = collectErrorReason(exception);
+                String msg = String.format("Ambari client failed to apply cluster creation template! Reason: %s", reason);
                 LOGGER.error(msg, exception);
                 throw new AmbariServiceException(msg, exception);
             }
@@ -61,4 +67,22 @@ public class AmbariClusterTemplateService {
             LOGGER.info("Ambari cluster already exists: {}", clusterName);
         }
     }
+
+    private String collectErrorReason(HttpResponseException exception) {
+        Object data = exception.getResponse().getData();
+        String reason;
+        try {
+            if (data instanceof Readable) {
+                reason = CharStreams.toString((Readable) data);
+            } else if (data != null) {
+                reason = data.toString();
+            } else {
+                reason = "No response from Ambari Server!";
+            }
+        } catch (IOException e) {
+            reason = "Ambari server response cannot be parsed!";
+        }
+        return reason;
+    }
+
 }
