@@ -21,9 +21,6 @@
   },
   "ranger-admin-site": {
     "properties": {
-      "ranger.sso.enabled": "true",
-      "ranger.sso.publicKey": "signcert",
-      "ranger.audit.source.type": "solr",
       "ranger.authentication.method": "ACTIVE_DIRECTORY",
       "ranger.ldap.ad.domain": " ",
       "ranger.ldap.ad.url": "ldap://localhost:389",

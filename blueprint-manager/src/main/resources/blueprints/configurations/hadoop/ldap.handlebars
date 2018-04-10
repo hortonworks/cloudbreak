@@ -10,10 +10,7 @@
     "hadoop.security.group.mapping.ldap.groupbase": "{{{ ldap.groupSearchBase }}}",
     "hadoop.security.group.mapping.ldap.search.filter.group": "(objectClass={{{ ldap.groupObjectClass }}})",
     "hadoop.security.group.mapping.ldap.search.attr.group.name": "{{{ ldap.groupNameAttribute }}}",
-    "hadoop.security.group.mapping.ldap.search.attr.member": "{{{ ldap.groupMemberAttribute }}}",
-    "hadoop.user.group.static.mapping.overrides": "hive=hive,hadoop;hdfs=hdfs,hadoop;beacon=hadoop,hdfs,beacon;dpprofiler=hadoop",
-    "hadoop.proxyuser.livy.groups": "*",
-    "hadoop.proxyuser.livy.hosts": "*"
+    "hadoop.security.group.mapping.ldap.search.attr.member": "{{{ ldap.groupMemberAttribute }}}"
   }
 {{{/if}}}
 }
