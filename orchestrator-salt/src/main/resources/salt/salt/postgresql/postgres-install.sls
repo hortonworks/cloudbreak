@@ -76,7 +76,7 @@ init-hive-db:
     - source: salt://postgresql/scripts/init_hive_db.sh
     - runas: postgres
     - env:
-      - USER: {{ pillar['postgres']['user'] }}
+      - DBUSER: {{ pillar['postgres']['user'] }}
       - PASSWORD: {{ pillar['postgres']['password'] }}
       - DATABASE:  {{ pillar['postgres']['database'] }}
 
