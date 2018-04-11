@@ -4,7 +4,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.SupportedDatabaseEntryResponse;
 import com.sequenceiq.cloudbreak.api.model.SupportedExternalDatabaseServiceEntryResponse;
-import com.sequenceiq.cloudbreak.cloud.model.SupportedExternalDatabaseServiceEntry;
+import com.sequenceiq.cloudbreak.validation.externaldatabase.SupportedExternalDatabaseServiceEntry;
 
 
 @Component

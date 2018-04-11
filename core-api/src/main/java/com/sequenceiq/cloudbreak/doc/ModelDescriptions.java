@@ -278,6 +278,7 @@ public class ModelDescriptions {
         public static final String DB_ENGINE = "Name of the external database engine (MYSQL, POSTGRES...)";
         public static final String USERNAME = "Username to use for the jdbc connection";
         public static final String PASSWORD = "Password to use for the jdbc connection";
+        public static final String ORACLE = "Oracle specific properties";
         public static final String NAME = "Name of the RDS configuration resource";
         public static final String STACK_VERSION = "(HDP, HDF)Stack version for the RDS configuration";
         public static final String RDSTYPE = "Type of RDS, aka the service name that will use the RDS like HIVE, DRUID, SUPERSET, RANGER, etc.";
@@ -450,6 +451,7 @@ public class ModelDescriptions {
         public static final String NAME = "Name of the service";
         public static final String SERVICE_DISPLAYNAME = "Display name of the service";
         public static final String DATABASES = "Supported database list";
+        public static final String VERSIONS = "Supported version types currently only for Oracle";
     }
 
     public static class FailureReport {
