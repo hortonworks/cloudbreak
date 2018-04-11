@@ -14,7 +14,6 @@ import org.testng.annotations.Test;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
 import com.sequenceiq.it.cloudbreak.newway.RdsConfig;
-import com.sequenceiq.it.cloudbreak.newway.RdsTest;
 import com.sequenceiq.it.util.LongStringGeneratorUtil;
 
 
@@ -227,96 +226,96 @@ public class RdsConfigTests extends CloudbreakTest {
 
     @Test
     public void testRdsConnectOk() throws Exception {
-        given(RdsTest.request()
+        given(RdsConfig.request()
                 .withName(VALID_RDS_CONFIG)
                 .withConnectionPassword(rdsPassword)
                 .withConnectionURL(rdsConnectionUrl)
                 .withConnectionUserName(rdsUser)
                 .withType(HIVE), "create valid rds connection test"
         );
-        when(RdsTest.testConnect(), "post the request");
-        then(RdsTest.assertThis(
-                (rdsconfig, t) -> Assert.assertTrue(rdsconfig.getResponse().getConnectionResult().contains("connected"),
+        when(RdsConfig.testConnect(), "post the request");
+        then(RdsConfig.assertThis(
+                (rdsconfig, t) -> Assert.assertTrue(rdsconfig.getResponseTestResult().getConnectionResult().contains("connected"),
                         "rds connection test should be OK"))
         );
     }
 
     @Test
     public void testRdsConnectOkNoValidation() throws Exception {
-        given(RdsTest.request()
+        given(RdsConfig.request()
                 .withName(VALID_RDS_CONFIG)
                 .withConnectionPassword(rdsPassword)
                 .withConnectionURL(rdsConnectionUrl)
                 .withConnectionUserName(rdsUser)
                 .withType("RANGER"), "create valid rds connection test no validation"
         );
-        when(RdsTest.testConnect(), "post the request");
-        then(RdsTest.assertThis(
-                (rdsconfig, t) -> Assert.assertTrue(rdsconfig.getResponse().getConnectionResult().contains("connected"),
+        when(RdsConfig.testConnect(), "post the request");
+        then(RdsConfig.assertThis(
+                (rdsconfig, t) -> Assert.assertTrue(rdsconfig.getResponseTestResult().getConnectionResult().contains("connected"),
                         "rds connection test should be OK"))
         );
     }
 
     @Test
     public void testRdsConnectNotOkInvalidPwd() throws Exception {
-        given(RdsTest.request()
+        given(RdsConfig.request()
                 .withName(VALID_RDS_CONFIG)
                 .withConnectionPassword("")
                 .withConnectionURL(rdsConnectionUrl)
                 .withConnectionUserName(rdsUser)
                 .withType(HIVE), "create rds connection test with invalid password"
         );
-        when(RdsTest.testConnect(), "post the request");
-        then(RdsTest.assertThis(
-                (rdsconfig, t) -> Assert.assertFalse(rdsconfig.getResponse().getConnectionResult().contains("connected"),
+        when(RdsConfig.testConnect(), "post the request");
+        then(RdsConfig.assertThis(
+                (rdsconfig, t) -> Assert.assertFalse(rdsconfig.getResponseTestResult().getConnectionResult().contains("connected"),
                         "rds connection test should not be OK"))
         );
     }
 
     @Test
     public void testRdsConnectWithUrlNotExists() throws Exception {
-        given(RdsTest.request()
+        given(RdsConfig.request()
                 .withName(VALID_RDS_CONFIG)
                 .withConnectionPassword(rdsPassword)
                 .withConnectionURL(RDS_PROTOCOL + "www.google.com:1/test")
                 .withConnectionUserName(rdsUser)
                 .withType(HIVE), "create rds connection test with url not exits"
         );
-        when(RdsTest.testConnect(), "post the request");
-        then(RdsTest.assertThis(
-                (rdsconfig, t) -> Assert.assertFalse(rdsconfig.getResponse().getConnectionResult().contains("connected"),
+        when(RdsConfig.testConnect(), "post the request");
+        then(RdsConfig.assertThis(
+                (rdsconfig, t) -> Assert.assertFalse(rdsconfig.getResponseTestResult().getConnectionResult().contains("connected"),
                         "rds connection test should not be OK"))
         );
     }
 
     @Test
     public void testRdsConnectWithInvalidUserName() throws Exception {
-        given(RdsTest.request()
+        given(RdsConfig.request()
                 .withName(VALID_RDS_CONFIG)
                 .withConnectionPassword(rdsPassword)
                 .withConnectionURL(rdsConnectionUrl)
                 .withConnectionUserName("abcde1234")
                 .withType(HIVE), "create rds connnection test with invalid user name"
         );
-        when(RdsTest.testConnect(), "post the request");
-        then(RdsTest.assertThis(
-                (rdsconfig, t) -> Assert.assertFalse(rdsconfig.getResponse().getConnectionResult().contains("connected"),
+        when(RdsConfig.testConnect(), "post the request");
+        then(RdsConfig.assertThis(
+                (rdsconfig, t) -> Assert.assertFalse(rdsconfig.getResponseTestResult().getConnectionResult().contains("connected"),
                         "rds connection test should not be OK"))
         );
     }
 
     @Test(expectedExceptions = BadRequestException.class)
     public void testRdsConnectWithInvalidUrlNoProt() throws Exception {
-        given(RdsTest.request()
+        given(RdsConfig.request()
                 .withName(VALID_RDS_CONFIG)
                 .withConnectionPassword(rdsPassword)
                 .withConnectionURL(rdsConnectionUrl.split(RDS_PROTOCOL)[1])
                 .withConnectionUserName(rdsUser)
                 .withType(HIVE), "create rds connection test with invalid connection url no protocol"
         );
-        when(RdsTest.testConnect(), "post the request");
-        then(RdsTest.assertThis(
-                (rdsconfig, t) -> Assert.assertFalse(rdsconfig.getResponse().getConnectionResult().contains("connected"),
+        when(RdsConfig.testConnect(), "post the request");
+        then(RdsConfig.assertThis(
+                (rdsconfig, t) -> Assert.assertFalse(rdsconfig.getResponseTestResult().getConnectionResult().contains("connected"),
                         "rds connection test should not be OK"))
         );
     }

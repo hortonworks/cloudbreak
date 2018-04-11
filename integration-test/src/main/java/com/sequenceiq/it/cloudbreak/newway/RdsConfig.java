@@ -72,6 +72,14 @@ public class RdsConfig extends RdsConfigEntity {
         return delete(RDSCONFIG);
     }
 
+    public static Action<RdsConfig> testConnect(String key) {
+        return new Action<>(getTestContext(key), RdsConfigAction::testConnect);
+    }
+
+    public static Action<RdsConfig> testConnect() {
+        return testConnect(RDSCONFIG);
+    }
+
     public static Assertion<RdsConfig> assertThis(BiConsumer<RdsConfig, IntegrationTestContext> check) {
         return new Assertion<>(getTestContext(GherkinTest.RESULT), check);
     }

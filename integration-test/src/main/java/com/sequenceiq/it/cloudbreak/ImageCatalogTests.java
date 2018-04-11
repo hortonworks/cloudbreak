@@ -1,9 +1,12 @@
 package com.sequenceiq.it.cloudbreak;
 
+import static com.sequenceiq.it.cloudbreak.CloudbreakITContextConstants.CLOUDPROVIDER;
+
 import java.util.Set;
 
 import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
+import javax.ws.rs.ForbiddenException;
 
 import org.testng.Assert;
 import org.testng.annotations.AfterSuite;
@@ -34,6 +37,10 @@ public class ImageCatalogTests extends CloudbreakTest {
     private static final String[] IMAGECATALOG_NAMES = {VALID_IMAGECATALOG_NAME, VALID_IMAGECATALOG_NAME + "-default", VALID_IMAGECATALOG_NAME + "-old",
             VALID_IMAGECATALOG_NAME + "-new"};
 
+    private static final String[] PROVIDERS = {"aws", "azure", "openstack", "gcp"};
+
+    private static final String INVALID_PROVIDER_NAME = "testasdfgx";
+
     @Inject
     private LongStringGeneratorUtil longStringGeneratorUtil;
 
@@ -46,9 +53,7 @@ public class ImageCatalogTests extends CloudbreakTest {
         );
         when(ImageCatalog.post(), "post the imagecatalog request");
         then(ImageCatalog.assertThis(
-                (imageCatalog, t) -> {
-                    Assert.assertEquals(imageCatalog.getResponse().getName(), VALID_IMAGECATALOG_NAME);
-                }), "check imagecatalog is created");
+                (imageCatalog, t) -> Assert.assertEquals(imageCatalog.getResponse().getName(), VALID_IMAGECATALOG_NAME)), "check imagecatalog is created");
     }
 
     @Test(expectedExceptions = BadRequestException.class)
@@ -126,9 +131,8 @@ public class ImageCatalogTests extends CloudbreakTest {
         );
         when(ImageCatalog.post(), "post the imagecatalog request");
         then(ImageCatalog.assertThis(
-                (imageCatalog, t) -> {
-                    Assert.assertEquals(imageCatalog.getResponse().getName(), VALID_IMAGECATALOG_NAME + "-delete-create");
-                }),  "check imagecatalog is created when name was used and deleted before");
+                (imageCatalog, t) -> Assert.assertEquals(imageCatalog.getResponse().getName(), VALID_IMAGECATALOG_NAME + "-delete-create")),
+                "check imagecatalog is created when name was used and deleted before");
     }
 
     @Test(expectedExceptions = BadRequestException.class)
@@ -188,6 +192,98 @@ public class ImageCatalogTests extends CloudbreakTest {
         );
     }
 
+    @Test
+    public void testGetImageCatalogByProvider() throws Exception {
+        given(CloudbreakClient.isCreated());
+        for (String provider : PROVIDERS) {
+            getItContext().putContextParam(CLOUDPROVIDER, provider);
+            when(ImageCatalog.getImagesByProvider(), "get the imagecatalog by provider " + provider);
+            then(ImageCatalog.assertThis(
+                    (imageCatalog, t) -> {
+                        Assert.assertFalse(imageCatalog.getResponseByProvider().getBaseImages().isEmpty());
+                        Assert.assertFalse(imageCatalog.getResponseByProvider().getHdfImages().isEmpty());
+                        Assert.assertFalse(imageCatalog.getResponseByProvider().getHdpImages().isEmpty());
+                    }), "check base/hdf/hdp images are listed");
+        }
+    }
+
+    @Test
+    public void testGetByProviderFromImageCatalog() throws Exception {
+        given(CloudbreakClient.isCreated());
+        for (String provider : PROVIDERS) {
+            getItContext().putContextParam(CLOUDPROVIDER, provider);
+            given(ImageCatalog.request()
+                    .withName(DEFAULT_IMAGECATALOG_NAME));
+            when(ImageCatalog.getImagesByProviderFromImageCatalog(), " get by provider " + provider + " from image catalog");
+            then(ImageCatalog.assertThis(
+                    (imageCatalog, t) -> {
+                        Assert.assertFalse(imageCatalog.getResponseByProvider().getBaseImages().isEmpty());
+                        Assert.assertFalse(imageCatalog.getResponseByProvider().getHdfImages().isEmpty());
+                        Assert.assertFalse(imageCatalog.getResponseByProvider().getHdpImages().isEmpty());
+                    }), "check base/hdf/hdp images are listed");
+        }
+    }
+
+    @Test
+    public void testRequestFromDefaultCatalog() throws Exception {
+        given(CloudbreakClient.isCreated());
+        given(ImageCatalog.request()
+                .withName(DEFAULT_IMAGECATALOG_NAME));
+        when(ImageCatalog.getRequestFromName(), " get request of default image catalog");
+        then(ImageCatalog.assertThis(
+                (imageCatalog, t) -> Assert.assertEquals(imageCatalog.getRequestByName().getName(), DEFAULT_IMAGECATALOG_NAME)),
+                "check image catalog name in request");
+    }
+
+    @Test
+    public void testGetImageCatalogByInvalidProvider() throws Exception {
+        given(CloudbreakClient.isCreated());
+        getItContext().putContextParam(CLOUDPROVIDER, INVALID_PROVIDER_NAME);
+        when(ImageCatalog.getImagesByProvider(), "get the imagecatalog by invalid provider");
+        then(ImageCatalog.assertThis(
+                (imageCatalog, t) -> {
+                    Assert.assertTrue(imageCatalog.getResponseByProvider().getBaseImages().isEmpty());
+                    Assert.assertTrue(imageCatalog.getResponseByProvider().getHdfImages().isEmpty());
+                    Assert.assertTrue(imageCatalog.getResponseByProvider().getHdpImages().isEmpty());
+                }), "check no base/hdf/hdp images are listed");
+    }
+
+    @Test
+    public void testGetByInvalidProviderFromImageCatalog() throws Exception {
+        given(CloudbreakClient.isCreated());
+        getItContext().putContextParam(CLOUDPROVIDER, INVALID_PROVIDER_NAME);
+        given(ImageCatalog.request()
+                .withName(DEFAULT_IMAGECATALOG_NAME));
+        when(ImageCatalog.getImagesByProviderFromImageCatalog(), " get by invalid provider from image catalog");
+        then(ImageCatalog.assertThis(
+                (imageCatalog, t) -> {
+                    Assert.assertTrue(imageCatalog.getResponseByProvider().getBaseImages().isEmpty());
+                    Assert.assertTrue(imageCatalog.getResponseByProvider().getHdfImages().isEmpty());
+                    Assert.assertTrue(imageCatalog.getResponseByProvider().getHdpImages().isEmpty());
+                    }), "check no base/hdf/hdp images are listed");
+    }
+
+    @Test(expectedExceptions = ForbiddenException.class)
+    public void testGetByProviderFromNotExistingImageCatalog() throws Exception {
+        given(CloudbreakClient.isCreated());
+        getItContext().putContextParam(CLOUDPROVIDER, "openstack");
+        given(ImageCatalog.request()
+                .withName("asdfghj987x"));
+        when(ImageCatalog.getImagesByProviderFromImageCatalog(), " get by invalid provider from image catalog");
+        then(ImageCatalog.assertThis(
+                (imageCatalog, t) -> Assert.assertNull(imageCatalog.getResponseByProvider())), "check no response");
+    }
+
+    @Test(expectedExceptions = ForbiddenException.class)
+    public void testRequestFromNotExistingImageCatalog() throws Exception {
+        given(CloudbreakClient.isCreated());
+        given(ImageCatalog.request()
+                .withName(DEFAULT_IMAGECATALOG_NAME + "sss"));
+        when(ImageCatalog.getRequestFromName(), " get request of not existing image catalog");
+        then(ImageCatalog.assertThis(
+                (imageCatalog, t) -> Assert.assertNotNull(imageCatalog.getRequestByName())), "check request is empty");
+    }
+
     @AfterSuite
     public void cleanAll() throws Exception {
         for (String name : IMAGECATALOG_NAMES) {
@@ -217,8 +313,6 @@ public class ImageCatalogTests extends CloudbreakTest {
     private void checkNameNotAssertEquals(String a, String b) throws Exception {
         when(ImageCatalog.post(), "post the imagecatalog request");
         then(ImageCatalog.assertThis(
-                (imageCatalog, t) -> {
-                    Assert.assertNotEquals(imageCatalog.getResponse().getName(), a);
-                }),  "check imagecatalog is not created with " + b);
+                (imageCatalog, t) -> Assert.assertNotEquals(imageCatalog.getResponse().getName(), a)),  "check imagecatalog is not created with " + b);
     }
 }
