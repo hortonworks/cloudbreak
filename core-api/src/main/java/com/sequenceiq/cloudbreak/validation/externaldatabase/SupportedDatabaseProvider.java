@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.service.cluster;
+package com.sequenceiq.cloudbreak.validation.externaldatabase;
 
 import static com.sequenceiq.cloudbreak.api.model.DatabaseVendor.MYSQL;
 import static com.sequenceiq.cloudbreak.api.model.DatabaseVendor.ORACLE11;
@@ -8,46 +8,36 @@ import static com.sequenceiq.cloudbreak.api.model.DatabaseVendor.POSTGRES;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.annotation.PostConstruct;
-
-import org.springframework.stereotype.Component;
-
 import com.sequenceiq.cloudbreak.api.model.DatabaseVendor;
-import com.sequenceiq.cloudbreak.cloud.model.SupportedDatabaseEntry;
-import com.sequenceiq.cloudbreak.cloud.model.SupportedExternalDatabaseServiceEntry;
 
-@Component
-public class SupportedDatabaseProvider {
+public final class SupportedDatabaseProvider {
 
-    private Set<SupportedExternalDatabaseServiceEntry> supportedExternalDatabases = new HashSet<>();
+    private static Set<SupportedExternalDatabaseServiceEntry> supportedExternalDatabases = new HashSet<>();
 
-    @PostConstruct
-    private void init() {
-        this.supportedExternalDatabases = initSupportedExternalDatabases();
+    private SupportedDatabaseProvider() {
     }
 
-    private Set<SupportedExternalDatabaseServiceEntry> initSupportedExternalDatabases() {
+    static {
         supportedExternalDatabases.add(getSupportedServiceEntry("Hive", POSTGRES, MYSQL, ORACLE11, ORACLE12));
         supportedExternalDatabases.add(getSupportedServiceEntry("Oozie", POSTGRES, MYSQL, ORACLE11, ORACLE12));
         supportedExternalDatabases.add(getSupportedServiceEntry("Ranger", POSTGRES, MYSQL, ORACLE11, ORACLE12));
-        supportedExternalDatabases.add(getSupportedServiceEntry("Others", POSTGRES, MYSQL, ORACLE11, ORACLE12));
+        supportedExternalDatabases.add(getSupportedServiceEntry("Other", POSTGRES, MYSQL, ORACLE11, ORACLE12));
         supportedExternalDatabases.add(getSupportedServiceEntry("Druid", POSTGRES, MYSQL));
         supportedExternalDatabases.add(getSupportedServiceEntry("Superset", POSTGRES, MYSQL));
         supportedExternalDatabases.add(getSupportedServiceEntry("Ambari", POSTGRES, MYSQL));
+    }
+
+    public static Set<SupportedExternalDatabaseServiceEntry> supportedExternalDatabases() {
         return supportedExternalDatabases;
     }
 
-    private SupportedExternalDatabaseServiceEntry getSupportedServiceEntry(String name, DatabaseVendor... vendors) {
+    private static SupportedExternalDatabaseServiceEntry getSupportedServiceEntry(String name, DatabaseVendor... vendors) {
         SupportedExternalDatabaseServiceEntry entry = new SupportedExternalDatabaseServiceEntry();
-        entry.setName(name);
-        entry.setDisplayName(name.toUpperCase());
+        entry.setName(name.toUpperCase());
+        entry.setDisplayName(name);
         for (DatabaseVendor vendor : vendors) {
-            entry.getDatabases().add(new SupportedDatabaseEntry(vendor.name(), vendor.fancyName(), vendor.jdbcUrlDriverId()));
+            entry.getDatabases().add(new SupportedDatabaseEntry(vendor.name(), vendor.fancyName(), vendor.jdbcUrlDriverId(), vendor.versions()));
         }
         return entry;
-    }
-
-    public Set<SupportedExternalDatabaseServiceEntry> get() {
-        return this.supportedExternalDatabases;
     }
 }

@@ -37,7 +37,7 @@ public class RDSConfigRequestToRDSConfigConverter extends AbstractConversionServ
         }
         rdsConfig.setConnectionURL(source.getConnectionURL());
 
-        Optional<DatabaseVendor> databaseVendor = DatabaseVendor.getVendorByJdbcUrl(source.getConnectionURL());
+        Optional<DatabaseVendor> databaseVendor = DatabaseVendor.getVendorByJdbcUrl(source);
         if (databaseVendor.isPresent()) {
             rdsConfig.setDatabaseEngine(databaseVendor.get().name());
             rdsConfig.setConnectionDriver(databaseVendor.get().connectionDriver());

@@ -4,6 +4,8 @@ import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
 
 import java.util.Set;
 
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.convert.ConversionService;
@@ -40,13 +42,13 @@ public class RdsConfigController extends NotificationController implements RdsCo
     private ConversionService conversionService;
 
     @Override
-    public RDSConfigResponse postPrivate(RDSConfigRequest rdsConfigRequest) {
+    public RDSConfigResponse postPrivate(@Valid RDSConfigRequest rdsConfigRequest) {
         IdentityUser user = authenticatedUserService.getCbUser();
         return createRdsConfig(user, rdsConfigRequest, false);
     }
 
     @Override
-    public RDSConfigResponse postPublic(RDSConfigRequest rdsConfigRequest) {
+    public RDSConfigResponse postPublic(@Valid RDSConfigRequest rdsConfigRequest) {
         IdentityUser user = authenticatedUserService.getCbUser();
         return createRdsConfig(user, rdsConfigRequest, true);
     }
@@ -116,7 +118,6 @@ public class RdsConfigController extends NotificationController implements RdsCo
             } catch (NotFoundException e) {
                 rdsTestResult.setConnectionResult("not found");
             }
-
         } else {
             rdsTestResult = testRDSConnectivity(configRequest.getConnectionURL(), configRequest.getConnectionUserName(), configRequest.getConnectionPassword());
         }

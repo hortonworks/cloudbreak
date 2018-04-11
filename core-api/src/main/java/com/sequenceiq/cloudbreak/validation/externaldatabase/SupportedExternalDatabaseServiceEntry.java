@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cloud.model;
+package com.sequenceiq.cloudbreak.validation.externaldatabase;
 
 
 import java.util.HashSet;

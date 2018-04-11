@@ -3,8 +3,6 @@ package com.sequenceiq.cloudbreak.converter;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.inject.Inject;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,8 +13,7 @@ import com.sequenceiq.cloudbreak.api.model.AccountPreferencesResponse;
 import com.sequenceiq.cloudbreak.api.model.SupportedExternalDatabaseServiceEntryResponse;
 import com.sequenceiq.cloudbreak.domain.AccountPreferences;
 import com.sequenceiq.cloudbreak.domain.json.Json;
-import com.sequenceiq.cloudbreak.service.cluster.SupportedDatabaseProvider;
-
+import com.sequenceiq.cloudbreak.validation.externaldatabase.SupportedDatabaseProvider;
 
 @Component
 public class AccountPreferencesToAccountPreferencesJsonConverter
@@ -31,9 +28,6 @@ public class AccountPreferencesToAccountPreferencesJsonConverter
     @Value("${cb.smartsense.enabled:true}")
     private boolean smartsenseEnabled;
 
-    @Inject
-    private SupportedDatabaseProvider supportedDatabaseProvider;
-
     @Override
     public AccountPreferencesResponse convert(AccountPreferences source) {
         AccountPreferencesResponse json = new AccountPreferencesResponse();
@@ -47,7 +41,7 @@ public class AccountPreferencesToAccountPreferencesJsonConverter
         json.setMaxNumberOfClustersPerUser(source.getMaxNumberOfClustersPerUser());
         json.setPlatforms(source.getPlatforms());
         json.setSmartsenseEnabled(smartsenseEnabled);
-        supportedDatabaseProvider.get().forEach(item ->
+        SupportedDatabaseProvider.supportedExternalDatabases().forEach(item ->
                 json.getSupportedExternalDatabases().add(getConversionService().convert(item, SupportedExternalDatabaseServiceEntryResponse.class)));
         convertTags(json, source.getDefaultTags());
         return json;
