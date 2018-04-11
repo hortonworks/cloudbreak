@@ -1,4 +1,4 @@
-{% if salt['pillar.get']('jdbc_connectors:vendor') != "" %}
+{% if salt['pillar.get']('jdbc_connectors:vendor') != None %}
 {% if salt['pillar.get']('jdbc_connectors:vendor') == "MYSQL" or salt['pillar.get']('jdbc_connectors:vendor') == "MARIADB" %}
 install-mysql-client:
   pkg.installed:
