@@ -396,6 +396,7 @@ public class StackService {
             throw new BadRequestException(msg);
         } catch (CloudbreakImageNotFoundException e) {
             LOGGER.error("Cloudbreak Image not found", e);
+            stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.PROVISION_FAILED, "Image not found by id: " + imageId.get());
             throw new CloudbreakApiException(e.getMessage(), e);
         } catch (CloudbreakImageCatalogException e) {
             LOGGER.error("Cloudbreak Image Catalog error", e);
