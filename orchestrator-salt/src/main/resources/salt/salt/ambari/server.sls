@@ -19,7 +19,7 @@ provision_action_based_on_real_dependencies:
     - text: server.stage.command.execution_type=DEPENDENCY_ORDERED
     - unless: grep "server.stage.command.execution_type" /etc/ambari-server/conf/ambari.properties
 
-{% if ambari.ambari_database.vendor == 'mysql' %}
+{% if ambari.ambari_database.ambariVendor == 'mysql' %}
 install-mariadb:
   pkg.installed:
     - pkgs:
