@@ -169,13 +169,16 @@ public class SaltOrchestrator implements HostOrchestrator {
             setPostgreRoleIfNeeded(allNodes, saltConfig, exitModel, sc, server);
 
             // ambari server
+            runSaltCommand(sc, new GrainAddRunner(server, allNodes, "ambari_server_install"), exitModel);
             runSaltCommand(sc, new GrainAddRunner(server, allNodes, "ambari_server"), exitModel);
             // ambari server standby
             Set<String> standbyServers = gatewayTargets.stream().filter(ip -> !server.contains(ip)).collect(Collectors.toSet());
             if (!standbyServers.isEmpty()) {
+                runSaltCommand(sc, new GrainAddRunner(standbyServers, allNodes, "ambari_server_install"), exitModel);
                 runSaltCommand(sc, new GrainAddRunner(standbyServers, allNodes, "ambari_server_standby"), exitModel);
             }
             // ambari agent
+            runSaltCommand(sc, new GrainAddRunner(all, allNodes, "ambari_agent_install"), exitModel);
             runSaltCommand(sc, new GrainAddRunner(all, allNodes, "ambari_agent"), exitModel);
             // kerberos
             if (saltConfig.getServicePillarConfig().containsKey("kerberos")) {
