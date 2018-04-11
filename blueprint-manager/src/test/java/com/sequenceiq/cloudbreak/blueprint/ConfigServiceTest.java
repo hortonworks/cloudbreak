@@ -1,26 +1,14 @@
 package com.sequenceiq.cloudbreak.blueprint;
 
-import static java.util.Collections.emptyList;
-import static java.util.Collections.emptyMap;
-import static java.util.Collections.emptySet;
-import static java.util.Collections.singleton;
-import static java.util.Collections.singletonList;
-import static java.util.Collections.singletonMap;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyMapOf;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.common.collect.Sets;
+import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
+import com.sequenceiq.cloudbreak.blueprint.utils.ConfigUtils;
+import com.sequenceiq.cloudbreak.blueprint.utils.HadoopConfigurationUtils;
+import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplateTextProcessor;
+import com.sequenceiq.cloudbreak.templateprocessor.template.views.HostgroupView;
 import org.apache.commons.lang3.ArrayUtils;
 import org.junit.Assert;
 import org.junit.Test;
@@ -29,14 +17,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.JsonNodeFactory;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.google.common.collect.Sets;
-import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
-import com.sequenceiq.cloudbreak.blueprint.template.views.HostgroupView;
-import com.sequenceiq.cloudbreak.blueprint.utils.ConfigUtils;
-import com.sequenceiq.cloudbreak.blueprint.utils.HadoopConfigurationUtils;
+import java.io.IOException;
+import java.util.*;
+
+import static java.util.Collections.*;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyMapOf;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ConfigServiceTest {
@@ -205,7 +193,7 @@ public class ConfigServiceTest {
 
         Set<String> components = singleton("component");
 
-        BlueprintTextProcessor blueprintTextProcessor = mock(BlueprintTextProcessor.class);
+        TemplateTextProcessor blueprintTextProcessor = mock(TemplateTextProcessor.class);
 
         Map<String, Map<String, String>> properties = new HashMap<>();
         properties.put("key", singletonMap("propKey", "propValue"));
@@ -231,7 +219,7 @@ public class ConfigServiceTest {
 
         Set<String> components = singleton("component");
 
-        BlueprintTextProcessor blueprintTextProcessor = mock(BlueprintTextProcessor.class);
+        TemplateTextProcessor blueprintTextProcessor = mock(TemplateTextProcessor.class);
 
         Map<String, Map<String, String>> properties = new HashMap<>();
         properties.put("key", singletonMap("propKey", "propValue"));
@@ -259,7 +247,7 @@ public class ConfigServiceTest {
 
         HostgroupView hostGroup = new HostgroupView("hostGroup", 1, InstanceGroupType.CORE, 1);
 
-        BlueprintTextProcessor blueprintTextProcessor = mock(BlueprintTextProcessor.class);
+        TemplateTextProcessor blueprintTextProcessor = mock(TemplateTextProcessor.class);
 
         Map<String, Map<String, String>> properties = new HashMap<>();
 
@@ -276,7 +264,7 @@ public class ConfigServiceTest {
     @Test
     public void testGetHostGroupConfigurationWhenConfigUpdateIsNotNeed() throws IOException {
         HostgroupView hostGroup = new HostgroupView("hostGroupName");
-        BlueprintTextProcessor blueprintTextProcessor = mock(BlueprintTextProcessor.class);
+        TemplateTextProcessor blueprintTextProcessor = mock(TemplateTextProcessor.class);
 
         when(configUtils.isConfigUpdateNeeded(hostGroup)).thenReturn(false);
 
@@ -287,7 +275,7 @@ public class ConfigServiceTest {
 
     @Test
     public void testGetHostGroupConfigurationWhenHostGroupsIsEmpty() throws IOException {
-        BlueprintTextProcessor blueprintTextProcessor = mock(BlueprintTextProcessor.class);
+        TemplateTextProcessor blueprintTextProcessor = mock(TemplateTextProcessor.class);
 
         Map<String, Map<String, Map<String, String>>> actual = underTest.getHostGroupConfiguration(blueprintTextProcessor, emptyList());
 
@@ -302,7 +290,7 @@ public class ConfigServiceTest {
         HostgroupView hostGroup = new HostgroupView(hostGroupName, 1, InstanceGroupType.CORE, 1);
         String blueprintText = "blueprintText";
 
-        BlueprintTextProcessor blueprintTextProcessor = mock(BlueprintTextProcessor.class);
+        TemplateTextProcessor blueprintTextProcessor = mock(TemplateTextProcessor.class);
 
         Map<String, Set<String>> componentsByHostgroup = new HashMap<>();
         componentsByHostgroup.put(hostGroupName, Sets.newHashSet("serviceName1", "serviceName2"));
@@ -343,7 +331,7 @@ public class ConfigServiceTest {
         String hostGroupName = "hostGroup";
         HostgroupView hostGroup = new HostgroupView(hostGroupName, 1, InstanceGroupType.CORE, 1);
 
-        BlueprintTextProcessor blueprintTextProcessor = mock(BlueprintTextProcessor.class);
+        TemplateTextProcessor blueprintTextProcessor = mock(TemplateTextProcessor.class);
 
         Map<String, Set<String>> componentsByHostgroup = new HashMap<>();
         componentsByHostgroup.put(hostGroupName, Sets.newHashSet("serviceName"));
@@ -379,7 +367,7 @@ public class ConfigServiceTest {
         HostgroupView hostGroup = new HostgroupView(hostGroupName, 1, InstanceGroupType.CORE, 1);
         String blueprintText = "blueprintText";
 
-        BlueprintTextProcessor blueprintTextProcessor = mock(BlueprintTextProcessor.class);
+        TemplateTextProcessor blueprintTextProcessor = mock(TemplateTextProcessor.class);
 
         Map<String, Set<String>> componentsByHostgroup = new HashMap<>();
         componentsByHostgroup.put(hostGroupName, Sets.newHashSet("serviceName"));
@@ -405,7 +393,7 @@ public class ConfigServiceTest {
         String hostGroupName = "hostGroup";
         HostgroupView hostGroup = new HostgroupView(hostGroupName, 1, InstanceGroupType.CORE, 1);
 
-        BlueprintTextProcessor blueprintTextProcessor = mock(BlueprintTextProcessor.class);
+        TemplateTextProcessor blueprintTextProcessor = mock(TemplateTextProcessor.class);
 
         Map<String, Set<String>> componentsByHostgroup = new HashMap<>();
         componentsByHostgroup.put(hostGroupName, emptySet());
@@ -431,7 +419,7 @@ public class ConfigServiceTest {
         String hostGroupName = "hostGroup";
         HostgroupView hostGroup = new HostgroupView(hostGroupName, 1, InstanceGroupType.CORE, 1);
 
-        BlueprintTextProcessor blueprintTextProcessor = mock(BlueprintTextProcessor.class);
+        TemplateTextProcessor blueprintTextProcessor = mock(TemplateTextProcessor.class);
 
         List<HostgroupView> hostGroups = singletonList(hostGroup);
 

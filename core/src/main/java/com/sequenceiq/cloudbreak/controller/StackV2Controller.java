@@ -1,10 +1,14 @@
 package com.sequenceiq.cloudbreak.controller;
 
-import java.util.Map;
-import java.util.Set;
-
-import javax.ws.rs.core.Response;
-
+import com.sequenceiq.cloudbreak.api.endpoint.v2.StackV2Endpoint;
+import com.sequenceiq.cloudbreak.api.model.*;
+import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
+import com.sequenceiq.cloudbreak.blueprint.CentralBlueprintUpdater;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.service.stack.CloudParameterCache;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.templateprocessor.processor.PreparationObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,28 +16,9 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v2.StackV2Endpoint;
-import com.sequenceiq.cloudbreak.api.model.AmbariAddressJson;
-import com.sequenceiq.cloudbreak.api.model.AutoscaleStackResponse;
-import com.sequenceiq.cloudbreak.api.model.CertificateResponse;
-import com.sequenceiq.cloudbreak.api.model.GeneratedBlueprintResponse;
-import com.sequenceiq.cloudbreak.api.model.PlatformVariantsJson;
-import com.sequenceiq.cloudbreak.api.model.ReinstallRequestV2;
-import com.sequenceiq.cloudbreak.api.model.StackRequest;
-import com.sequenceiq.cloudbreak.api.model.StackResponse;
-import com.sequenceiq.cloudbreak.api.model.StackScaleRequestV2;
-import com.sequenceiq.cloudbreak.api.model.StackValidationRequest;
-import com.sequenceiq.cloudbreak.api.model.StatusRequest;
-import com.sequenceiq.cloudbreak.api.model.UpdateClusterJson;
-import com.sequenceiq.cloudbreak.api.model.UpdateStackJson;
-import com.sequenceiq.cloudbreak.api.model.UserNamePasswordJson;
-import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
-import com.sequenceiq.cloudbreak.blueprint.BlueprintPreparationObject;
-import com.sequenceiq.cloudbreak.blueprint.CentralBlueprintUpdater;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
-import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.service.stack.CloudParameterCache;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
+import javax.ws.rs.core.Response;
+import java.util.Map;
+import java.util.Set;
 
 @Component
 public class StackV2Controller extends NotificationController implements StackV2Endpoint {
@@ -238,7 +223,7 @@ public class StackV2Controller extends NotificationController implements StackV2
         IdentityUser user = authenticatedUserService.getCbUser();
         stackRequest.setAccount(user.getAccount());
         stackRequest.setOwner(user.getUserId());
-        BlueprintPreparationObject blueprintPreparationObject = conversionService.convert(stackRequest, BlueprintPreparationObject.class);
+        PreparationObject blueprintPreparationObject = conversionService.convert(stackRequest, PreparationObject.class);
         String blueprintText = centralBlueprintUpdater.getBlueprintText(blueprintPreparationObject);
         return new GeneratedBlueprintResponse(blueprintText);
     }

@@ -1,0 +1,18 @@
+{
+  "superset-env": {
+    "properties": {
+      "superset_admin_password": "adminPassword",
+      "superset_admin_firstname": "firstname",
+      "superset_admin_lastname": "lastname",
+      "superset_admin_email": "admin@example.com"
+    }
+  },
+  "druid-common": {
+    "properties": {
+      "druid.metadata.storage.type": "postgresql",
+      "druid.metadata.storage.connector.connectURI": "jdbc:postgresql://10.1.1.1:5432/superset",
+      "druid.metadata.storage.connector.user": "heyitsme",
+      "druid.metadata.storage.connector.password": "iamsoosecure"
+    }
+  }
+}

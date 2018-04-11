@@ -1,13 +1,10 @@
 package com.sequenceiq.cloudbreak.blueprint.hbase;
 
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.io.IOException;
-import java.util.Set;
-
+import com.google.common.collect.Sets;
+import com.sequenceiq.cloudbreak.templateprocessor.processor.PreparationObject;
+import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplateProcessorFactory;
+import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplateTextProcessor;
+import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
@@ -17,11 +14,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.google.common.collect.Sets;
-import com.sequenceiq.cloudbreak.blueprint.BlueprintPreparationObject;
-import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessorFactory;
-import com.sequenceiq.cloudbreak.blueprint.BlueprintTextProcessor;
-import com.sequenceiq.cloudbreak.util.FileReaderUtils;
+import java.io.IOException;
+import java.util.Set;
+
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class HbaseConfigProviderTest {
@@ -30,10 +27,10 @@ public class HbaseConfigProviderTest {
     public final ExpectedException thrown = ExpectedException.none();
 
     @Mock
-    private BlueprintProcessorFactory blueprintProcessorFactory;
+    private TemplateProcessorFactory blueprintProcessorFactory;
 
     @Mock
-    private BlueprintTextProcessor blueprintProcessor;
+    private TemplateTextProcessor blueprintProcessor;
 
     @InjectMocks
     private HbaseConfigProvider underTest;
@@ -42,7 +39,7 @@ public class HbaseConfigProviderTest {
     public void testCustomTextManipulationWhenThereAreMissingHbaseClients() throws IOException {
         String blueprintText = FileReaderUtils.readFileFromClasspath("blueprints-jackson/bp-kerberized-test.bp");
 
-        BlueprintPreparationObject object = BlueprintPreparationObject.Builder.builder().build();
+        PreparationObject object = PreparationObject.Builder.builder().build();
         Set<String> masters = Sets.newHashSet("master", "slave_1", "slave_2", "compute");
         Set<String> clients = Sets.newHashSet("slave_1", "slave_2", "compute_1");
         Set<String> missing = Sets.newHashSet("master", "compute");
@@ -65,7 +62,7 @@ public class HbaseConfigProviderTest {
     public void testCustomTextManipulationWhenThereAreNoMissingHbaseClients() throws IOException {
         String blueprintText = FileReaderUtils.readFileFromClasspath("blueprints-jackson/bp-kerberized-test.bp");
 
-        BlueprintPreparationObject object = BlueprintPreparationObject.Builder.builder().build();
+        PreparationObject object = PreparationObject.Builder.builder().build();
         Set<String> masters = Sets.newHashSet("master", "slave_1", "slave_2", "compute");
         Set<String> clients = Sets.newHashSet("master", "slave_1", "slave_2", "compute");
         Set<String> missing = Sets.newHashSet();

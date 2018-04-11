@@ -1,12 +1,8 @@
 package com.sequenceiq.cloudbreak.blueprint.utils;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.io.IOException;
-
+import com.fasterxml.jackson.databind.JsonNode;
+import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplateProcessingException;
+import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
@@ -16,9 +12,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessingException;
-import com.sequenceiq.cloudbreak.util.FileReaderUtils;
+import java.io.IOException;
+
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class StackInfoServiceTest {
@@ -52,7 +49,7 @@ public class StackInfoServiceTest {
         when(blueprintUtils.getBlueprintHdpVersion(any(JsonNode.class))).thenReturn("2.6");
         when(blueprintUtils.getBlueprintStackName(any(JsonNode.class))).thenReturn("HDP");
 
-        thrown.expect(BlueprintProcessingException.class);
+        thrown.expect(TemplateProcessingException.class);
         thrown.expectMessage("Unable to detect BlueprintStackInfo from the source blueprint which was: not-a-valid-bluepint.");
 
         stackInfoService.blueprintStackInfo(testBlueprint);

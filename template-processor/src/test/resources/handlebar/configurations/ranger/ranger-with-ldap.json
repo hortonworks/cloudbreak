@@ -1,0 +1,45 @@
+{
+
+  "ranger-ugsync-site": {
+    "properties": {
+      "ranger.usersync.enabled": "true",
+      "ranger.usersync.source.impl.class": "org.apache.ranger.ldapusersync.process.LdapUserGroupBuilder",
+      "ranger.usersync.ldap.url": "ldap://localhost:389",
+      "ranger.usersync.ldap.binddn": "cn=admin,dc=example,dc=org",
+      "ranger.usersync.ldap.ldapbindpassword": "admin",
+      "ranger.usersync.ldap.user.nameattribute": "cn=admin,dc=example,dc=org",
+      "ranger.usersync.ldap.user.searchbase": "cn=users,dc=example,dc=org",
+      "ranger.usersync.ldap.user.objectclass": "person",
+      "ranger.usersync.ldap.deltasync": "false",
+      "ranger.usersync.group.searchenabled": "true",
+      "ranger.usersync.group.memberattributename": "member",
+      "ranger.usersync.group.nameattribute": "cn",
+      "ranger.usersync.group.objectclass": "groupOfNames",
+      "ranger.usersync.group.searchbase": "cn=groups,dc=example,dc=org",
+      "ranger.usersync.group.searchfilter": " "
+    }
+  },
+  "ranger-admin-site": {
+    "properties": {
+      "ranger.sso.enabled": "true",
+      "ranger.sso.publicKey": "signcert",
+      "ranger.audit.source.type": "solr",
+      "ranger.authentication.method": "ACTIVE_DIRECTORY",
+      "ranger.ldap.ad.domain": " ",
+      "ranger.ldap.ad.url": "ldap://localhost:389",
+      "ranger.ldap.ad.bind.dn": "cn=admin,dc=example,dc=org",
+      "ranger.ldap.ad.bind.password": "admin",
+      "ranger.ldap.ad.base.dn": "cn=users,dc=example,dc=org",
+      "ranger.ldap.ad.user.searchfilter": "(cn=admin,dc=example,dc=org={0})",
+      "ranger.ldap.url": "ldap://localhost:389",
+      "ranger.ldap.bind.dn": "cn=admin,dc=example,dc=org",
+      "ranger.ldap.bind.password": "admin",
+      "ranger.ldap.base.dn": "cn=users,dc=example,dc=org",
+      "ranger.ldap.user.searchfilter": "(cn=admin,dc=example,dc=org={0})",
+      "ranger.ldap.user.dnpattern": "cn=admin,dc=example,dc=org={0},cn=users,dc=example,dc=org",
+      "ranger.ldap.group.searchbase": "cn=groups,dc=example,dc=org",
+      "ranger.ldap.group.roleattribute": "cn"
+    }
+  }
+
+}

@@ -1,8 +1,18 @@
 package com.sequenceiq.cloudbreak.blueprint.kerberos;
 
-import java.io.IOException;
-import java.util.Optional;
-
+import com.fasterxml.jackson.databind.JsonNode;
+import com.sequenceiq.cloudbreak.TestUtil;
+import com.sequenceiq.cloudbreak.blueprint.filesystem.BlueprintTestUtil;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.Cluster;
+import com.sequenceiq.cloudbreak.domain.KerberosConfig;
+import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.templateprocessor.processor.PreparationObject;
+import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplateProcessorFactory;
+import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplateTextProcessor;
+import com.sequenceiq.cloudbreak.templateprocessor.templates.GeneralClusterConfigs;
+import com.sequenceiq.cloudbreak.util.FileReaderUtils;
+import com.sequenceiq.cloudbreak.util.JsonUtil;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -11,28 +21,17 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.sequenceiq.cloudbreak.TestUtil;
-import com.sequenceiq.cloudbreak.blueprint.BlueprintPreparationObject;
-import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessorFactory;
-import com.sequenceiq.cloudbreak.blueprint.BlueprintTextProcessor;
-import com.sequenceiq.cloudbreak.blueprint.filesystem.BlueprintTestUtil;
-import com.sequenceiq.cloudbreak.blueprint.templates.GeneralClusterConfigs;
-import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.Cluster;
-import com.sequenceiq.cloudbreak.domain.KerberosConfig;
-import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.util.FileReaderUtils;
-import com.sequenceiq.cloudbreak.util.JsonUtil;
+import java.io.IOException;
+import java.util.Optional;
 
 @RunWith(MockitoJUnitRunner.class)
 public class KerberosBlueprintServiceTest {
 
     @Spy
-    private BlueprintProcessorFactory blueprintProcessorFactory;
+    private TemplateProcessorFactory blueprintProcessorFactory;
 
     @Mock
-    private BlueprintPreparationObject blueprintPreparationObject;
+    private PreparationObject preparationObject;
 
     @Spy
     private KerberosDetailService kerberosDetailService;
@@ -47,12 +46,12 @@ public class KerberosBlueprintServiceTest {
         Blueprint blueprint = TestUtil.blueprint("name", expectedBlueprint);
         Stack stack = TestUtil.stack();
         Cluster cluster = TestUtil.cluster(blueprint, stack, 1L, TestUtil.kerberosConfig());
-        BlueprintPreparationObject object = BlueprintPreparationObject.Builder.builder()
+        PreparationObject object = PreparationObject.Builder.builder()
                 .withKerberosConfig(cluster.getKerberosConfig())
                 .withGeneralClusterConfigs(BlueprintTestUtil.generalClusterConfigs())
                 .build();
 
-        BlueprintTextProcessor b = new BlueprintTextProcessor(blueprint.getBlueprintText());
+        TemplateTextProcessor b = new TemplateTextProcessor(blueprint.getBlueprintText());
         String actualBlueprint = underTest.customTextManipulation(object, b).asText();
 
         JsonNode expectedNode = JsonUtil.readTree(expectedBlueprint);
@@ -71,12 +70,12 @@ public class KerberosBlueprintServiceTest {
         generalClusterConfigs.setPrimaryGatewayInstanceDiscoveryFQDN(Optional.of("test-1-1"));
         generalClusterConfigs.setGatewayInstanceMetadataPresented(false);
 
-        BlueprintPreparationObject object = BlueprintPreparationObject.Builder.builder()
+        PreparationObject object = PreparationObject.Builder.builder()
                 .withKerberosConfig(cluster.getKerberosConfig())
                 .withGeneralClusterConfigs(generalClusterConfigs)
                 .build();
 
-        BlueprintTextProcessor b = new BlueprintTextProcessor(blueprint.getBlueprintText());
+        TemplateTextProcessor b = new TemplateTextProcessor(blueprint.getBlueprintText());
         String actualBlueprint = underTest.customTextManipulation(object, b).asText();
 
         String expectedBlueprint = FileReaderUtils.readFileFromClasspath("blueprints-jackson/bp-not-kerberized-cloudbreak-managed-expected.bp");
@@ -99,12 +98,12 @@ public class KerberosBlueprintServiceTest {
         kerberosConfig.setKrb5Conf("{\"krb5-conf\":{\"properties\":{\"domains\":\".domains.bp\",\"manage_krb5_conf\":\"true\",\"content\":\"content.bp\"}}}");
         kerberosConfig.setTcpAllowed(true);
         Cluster cluster = TestUtil.cluster(blueprint, stack, 1L, kerberosConfig);
-        BlueprintPreparationObject object = BlueprintPreparationObject.Builder.builder()
+        PreparationObject object = PreparationObject.Builder.builder()
                 .withKerberosConfig(cluster.getKerberosConfig())
                 .withGeneralClusterConfigs(BlueprintTestUtil.generalClusterConfigs())
                 .build();
 
-        BlueprintTextProcessor b = new BlueprintTextProcessor(blueprint.getBlueprintText());
+        TemplateTextProcessor b = new TemplateTextProcessor(blueprint.getBlueprintText());
         String actualBlueprint = underTest.customTextManipulation(object, b).asText();
 
         String expectedBlueprint = FileReaderUtils.readFileFromClasspath("blueprints-jackson/bp-not-kerberized-custom-config-expected.bp");
@@ -135,11 +134,11 @@ public class KerberosBlueprintServiceTest {
         generalClusterConfigs.setGatewayInstanceMetadataPresented(false);
 
         Cluster cluster = TestUtil.cluster(blueprint, stack, 1L, kerberosConfig);
-        BlueprintPreparationObject object = BlueprintPreparationObject.Builder.builder()
+        PreparationObject object = PreparationObject.Builder.builder()
                 .withKerberosConfig(cluster.getKerberosConfig())
                 .withGeneralClusterConfigs(generalClusterConfigs)
                 .build();
-        BlueprintTextProcessor b = new BlueprintTextProcessor(blueprint.getBlueprintText());
+        TemplateTextProcessor b = new TemplateTextProcessor(blueprint.getBlueprintText());
         String actualBlueprint = underTest.customTextManipulation(object, b).asText();
 
         String expectedBlueprint = FileReaderUtils.readFileFromClasspath("blueprints-jackson/bp-not-kerberized-existing-expected.bp");

@@ -1,8 +1,7 @@
 package com.sequenceiq.cloudbreak.blueprint;
 
-import java.io.IOException;
-import java.util.Map;
-
+import com.sequenceiq.cloudbreak.templateprocessor.templates.ServiceName;
+import com.sequenceiq.cloudbreak.templateprocessor.templates.TemplateFiles;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -12,8 +11,9 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.boot.context.embedded.AnnotationConfigEmbeddedWebApplicationContext;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import com.sequenceiq.cloudbreak.blueprint.templates.ServiceName;
-import com.sequenceiq.cloudbreak.blueprint.templates.TemplateFiles;
+import java.io.IOException;
+import java.util.Map;
+
 
 @RunWith(MockitoJUnitRunner.class)
 public class BlueprintSegmentReaderTest {

@@ -1,25 +1,24 @@
 package com.sequenceiq.cloudbreak.blueprint.filesystem.gcs;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.sequenceiq.cloudbreak.api.model.FileSystemType;
+import com.sequenceiq.cloudbreak.api.model.GcsFileSystemConfiguration;
+import com.sequenceiq.cloudbreak.blueprint.filesystem.FileSystemScriptConfig;
+import com.sequenceiq.cloudbreak.domain.Credential;
+import com.sequenceiq.cloudbreak.domain.json.Json;
+import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplateConfigurationEntry;
+import org.junit.Assert;
+import org.junit.Test;
+
+import java.util.Arrays;
+import java.util.List;
+
 import static com.sequenceiq.cloudbreak.api.model.ExecutionType.ALL_NODES;
 import static com.sequenceiq.cloudbreak.api.model.ExecutionType.ONE_NODE;
 import static com.sequenceiq.cloudbreak.api.model.RecipeType.POST_AMBARI_START;
 import static com.sequenceiq.cloudbreak.api.model.RecipeType.POST_CLUSTER_INSTALL;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonMap;
-
-import java.util.Arrays;
-import java.util.List;
-
-import org.junit.Assert;
-import org.junit.Test;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.sequenceiq.cloudbreak.api.model.FileSystemType;
-import com.sequenceiq.cloudbreak.api.model.GcsFileSystemConfiguration;
-import com.sequenceiq.cloudbreak.blueprint.BlueprintConfigurationEntry;
-import com.sequenceiq.cloudbreak.blueprint.filesystem.FileSystemScriptConfig;
-import com.sequenceiq.cloudbreak.domain.Credential;
-import com.sequenceiq.cloudbreak.domain.json.Json;
 
 public class GcsFileSystemConfiguratorTest {
 
@@ -37,18 +36,18 @@ public class GcsFileSystemConfiguratorTest {
     @Test
     public void testGetFsProperties() {
         GcsFileSystemConfiguration fsConfig = new GcsFileSystemConfiguration();
-        List<BlueprintConfigurationEntry> actual = underTest.getFsProperties(fsConfig, emptyMap());
+        List<TemplateConfigurationEntry> actual = underTest.getFsProperties(fsConfig, emptyMap());
 
-        List<BlueprintConfigurationEntry> expected = Arrays.asList(
-                new BlueprintConfigurationEntry("core-site", "fs.gs.impl", "com.google.cloud.hadoop.fs.gcs.GoogleHadoopFileSystem"),
-                new BlueprintConfigurationEntry("core-site",
+        List<TemplateConfigurationEntry> expected = Arrays.asList(
+                new TemplateConfigurationEntry("core-site", "fs.gs.impl", "com.google.cloud.hadoop.fs.gcs.GoogleHadoopFileSystem"),
+                new TemplateConfigurationEntry("core-site",
                         "fs.AbstractFileSystem.gs.impl", "com.google.cloud.hadoop.fs.gcs.GoogleHadoopFS"),
-                new BlueprintConfigurationEntry("core-site", "fs.gs.working.dir", "/"),
-                new BlueprintConfigurationEntry("core-site", "fs.gs.system.bucket", fsConfig.getDefaultBucketName()),
-                new BlueprintConfigurationEntry("core-site", "fs.gs.auth.service.account.enable", "true"),
-                new BlueprintConfigurationEntry("core-site", "fs.gs.auth.service.account.keyfile", "/usr/lib/hadoop/lib/gcp.p12"),
-                new BlueprintConfigurationEntry("core-site", "fs.gs.auth.service.account.email", fsConfig.getServiceAccountEmail()),
-                new BlueprintConfigurationEntry("core-site", "fs.gs.project.id", fsConfig.getProjectId()));
+                new TemplateConfigurationEntry("core-site", "fs.gs.working.dir", "/"),
+                new TemplateConfigurationEntry("core-site", "fs.gs.system.bucket", fsConfig.getDefaultBucketName()),
+                new TemplateConfigurationEntry("core-site", "fs.gs.auth.service.account.enable", "true"),
+                new TemplateConfigurationEntry("core-site", "fs.gs.auth.service.account.keyfile", "/usr/lib/hadoop/lib/gcp.p12"),
+                new TemplateConfigurationEntry("core-site", "fs.gs.auth.service.account.email", fsConfig.getServiceAccountEmail()),
+                new TemplateConfigurationEntry("core-site", "fs.gs.project.id", fsConfig.getProjectId()));
 
         Assert.assertEquals(expected, actual);
     }

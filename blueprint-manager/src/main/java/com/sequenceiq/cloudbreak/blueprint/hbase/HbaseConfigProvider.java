@@ -1,19 +1,17 @@
 package com.sequenceiq.cloudbreak.blueprint.hbase;
 
-import java.util.HashSet;
-import java.util.Set;
-
-import javax.inject.Inject;
-
+import com.google.common.collect.Sets;
+import com.sequenceiq.cloudbreak.blueprint.BlueprintComponentConfigProvider;
+import com.sequenceiq.cloudbreak.templateprocessor.processor.PreparationObject;
+import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplateProcessorFactory;
+import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplateTextProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.google.common.collect.Sets;
-import com.sequenceiq.cloudbreak.blueprint.BlueprintComponentConfigProvider;
-import com.sequenceiq.cloudbreak.blueprint.BlueprintPreparationObject;
-import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessorFactory;
-import com.sequenceiq.cloudbreak.blueprint.BlueprintTextProcessor;
+import javax.inject.Inject;
+import java.util.HashSet;
+import java.util.Set;
 
 @Component
 public class HbaseConfigProvider implements BlueprintComponentConfigProvider {
@@ -21,10 +19,10 @@ public class HbaseConfigProvider implements BlueprintComponentConfigProvider {
     private static final Logger LOGGER = LoggerFactory.getLogger(HbaseConfigProvider.class);
 
     @Inject
-    private BlueprintProcessorFactory blueprintProcessorFactory;
+    private TemplateProcessorFactory blueprintProcessorFactory;
 
     @Override
-    public BlueprintTextProcessor customTextManipulation(BlueprintPreparationObject source, BlueprintTextProcessor blueprintProcessor) {
+    public TemplateTextProcessor customTextManipulation(PreparationObject source, TemplateTextProcessor blueprintProcessor) {
         Set<String> hbaseMasters = blueprintProcessor.getHostGroupsWithComponent("HBASE_MASTER");
         Set<String> hbaseClients = blueprintProcessor.getHostGroupsWithComponent("HBASE_CLIENT");
 

@@ -1,9 +1,9 @@
 package com.sequenceiq.cloudbreak.blueprint.utils;
 
-import static java.util.Collections.singletonList;
-
-import java.util.Collection;
-
+import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
+import com.sequenceiq.cloudbreak.blueprint.ConfigProperty;
+import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplateProcessingException;
+import com.sequenceiq.cloudbreak.templateprocessor.template.views.HostgroupView;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
@@ -11,10 +11,9 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
-import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessingException;
-import com.sequenceiq.cloudbreak.blueprint.ConfigProperty;
-import com.sequenceiq.cloudbreak.blueprint.template.views.HostgroupView;
+import java.util.Collection;
+
+import static java.util.Collections.singletonList;
 
 @RunWith(MockitoJUnitRunner.class)
 public class HadoopConfigurationUtilsTests {
@@ -35,7 +34,7 @@ public class HadoopConfigurationUtilsTests {
 
     @Test
     public void testFindHostGroupForNodeWhenNotFound() {
-        expectedException.expect(BlueprintProcessingException.class);
+        expectedException.expect(TemplateProcessingException.class);
         expectedException.expectMessage("Couldn't find a saved hostgroup for [hostGroupName] hostgroup name in the validation.");
 
         HostgroupView hostGroup = new HostgroupView("hostGroupName1", 1, InstanceGroupType.CORE, 1);

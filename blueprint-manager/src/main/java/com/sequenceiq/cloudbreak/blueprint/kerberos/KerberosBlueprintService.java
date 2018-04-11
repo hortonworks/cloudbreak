@@ -1,23 +1,21 @@
 package com.sequenceiq.cloudbreak.blueprint.kerberos;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.inject.Inject;
-
+import com.google.common.collect.ImmutableMap;
+import com.sequenceiq.cloudbreak.blueprint.BlueprintComponentConfigProvider;
+import com.sequenceiq.cloudbreak.domain.KerberosConfig;
+import com.sequenceiq.cloudbreak.templateprocessor.configuration.SiteConfigurations;
+import com.sequenceiq.cloudbreak.templateprocessor.processor.PreparationObject;
+import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplateProcessingException;
+import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplateProcessorFactory;
+import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplateTextProcessor;
+import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import com.google.common.collect.ImmutableMap;
-import com.sequenceiq.cloudbreak.blueprint.BlueprintComponentConfigProvider;
-import com.sequenceiq.cloudbreak.blueprint.BlueprintPreparationObject;
-import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessingException;
-import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessorFactory;
-import com.sequenceiq.cloudbreak.blueprint.BlueprintTextProcessor;
-import com.sequenceiq.cloudbreak.blueprint.configuration.SiteConfigurations;
-import com.sequenceiq.cloudbreak.domain.KerberosConfig;
-import com.sequenceiq.cloudbreak.util.FileReaderUtils;
+import javax.inject.Inject;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 public class KerberosBlueprintService implements BlueprintComponentConfigProvider {
@@ -29,13 +27,13 @@ public class KerberosBlueprintService implements BlueprintComponentConfigProvide
     private static final Integer KERBEROS_DB_PROPAGATION_PORT = 6318;
 
     @Inject
-    private BlueprintProcessorFactory blueprintProcessorFactory;
+    private TemplateProcessorFactory blueprintProcessorFactory;
 
     @Inject
     private KerberosDetailService kerberosDetailService;
 
     @Override
-    public BlueprintTextProcessor customTextManipulation(BlueprintPreparationObject source, BlueprintTextProcessor blueprintProcessor) {
+    public TemplateTextProcessor customTextManipulation(PreparationObject source, TemplateTextProcessor blueprintProcessor) {
         KerberosConfig kerberosConfig = source.getKerberosConfig().orElse(null);
         if (source.getGeneralClusterConfigs().getInstanceGroupsPresented()) {
             Integer propagationPort = source.getGeneralClusterConfigs().isGatewayInstanceMetadataPresented() ? KERBEROS_DB_PROPAGATION_PORT : null;
@@ -55,15 +53,15 @@ public class KerberosBlueprintService implements BlueprintComponentConfigProvide
         return blueprintProcessor;
     }
 
-    private BlueprintTextProcessor extendBlueprintWithKerberos(BlueprintTextProcessor blueprintText, KerberosConfig kerberosConfig, String gatewayHost,
-            String domain, Integer propagationPort) {
+    private TemplateTextProcessor extendBlueprintWithKerberos(TemplateTextProcessor blueprintText, KerberosConfig kerberosConfig, String gatewayHost,
+                                                              String domain, Integer propagationPort) {
         return extendBlueprintWithKerberos(blueprintText, kerberosConfig, gatewayHost, kerberosDetailService.getRealm(domain, kerberosConfig),
                 domain, propagationPort);
 
     }
 
-    private BlueprintTextProcessor extendBlueprintWithKerberos(BlueprintTextProcessor blueprintText, KerberosConfig kerberosConfig, String gatewayHost,
-            String realm, String domain, Integer propagationPort) {
+    private TemplateTextProcessor extendBlueprintWithKerberos(TemplateTextProcessor blueprintText, KerberosConfig kerberosConfig, String gatewayHost,
+                                                              String realm, String domain, Integer propagationPort) {
         String kdcHosts = kerberosDetailService.resolveHostForKerberos(kerberosConfig, gatewayHost);
         String kdcType = kerberosDetailService.resolveTypeForKerberos(kerberosConfig);
         String kdcAdminHost = kerberosDetailService.resolveHostForKdcAdmin(kerberosConfig, kdcHosts);
@@ -83,9 +81,9 @@ public class KerberosBlueprintService implements BlueprintComponentConfigProvide
                 !kerberosConfig.getTcpAllowed(), propagationPort, false);
     }
 
-    public BlueprintTextProcessor extendBlueprintWithKerberos(BlueprintTextProcessor blueprint, Map<String, String> kerberosEnv, String domains,
-            Boolean useUdp, Integer kpropPort,
-            boolean forced) {
+    public TemplateTextProcessor extendBlueprintWithKerberos(TemplateTextProcessor blueprint, Map<String, String> kerberosEnv, String domains,
+                                                             Boolean useUdp, Integer kpropPort,
+                                                             boolean forced) {
         try {
             String krb5Config = FileReaderUtils.readFileFromClasspath("kerberos/krb5-conf-template.conf");
             krb5Config = krb5Config.replaceAll("udp_preference_limit_content", useUdp ? "0" : "1");
@@ -110,12 +108,12 @@ public class KerberosBlueprintService implements BlueprintComponentConfigProvide
                     .setSecurityType("KERBEROS")
                     .extendBlueprintGlobalConfiguration(configs, forced);
         } catch (IOException e) {
-            throw new BlueprintProcessingException("Failed to extend blueprint with kerberos configurations.", e);
+            throw new TemplateProcessingException("Failed to extend blueprint with kerberos configurations.", e);
         }
     }
 
     @Override
-    public boolean additionalCriteria(BlueprintPreparationObject source, String blueprintText) {
+    public boolean additionalCriteria(PreparationObject source, String blueprintText) {
         return source.getKerberosConfig().isPresent();
     }
 }

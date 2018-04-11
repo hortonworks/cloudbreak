@@ -6,7 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import com.sequenceiq.cloudbreak.blueprint.BlueprintPreparationObject;
+import com.sequenceiq.cloudbreak.templateprocessor.processor.PreparationObject;
 import com.sequenceiq.cloudbreak.blueprint.testrepeater.TestFile;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
@@ -19,9 +19,9 @@ public final class ReadTestData {
     private ReadTestData() {
     }
 
-    public static List<BlueprintDataProvider> getInputOutputData(Map<String, BlueprintPreparationObject> models) throws IOException {
+    public static List<BlueprintDataProvider> getInputOutputData(Map<String, PreparationObject> models) throws IOException {
         final List<BlueprintDataProvider> testFiles = new LinkedList<>();
-        for (Map.Entry<String, BlueprintPreparationObject> entry : models.entrySet()) {
+        for (Map.Entry<String, PreparationObject> entry : models.entrySet()) {
             try {
                 TestFile inputFile = getTestFile(getFileName(BLUEPRINT_UPDATER_TEST_INPUTS, entry.getKey()));
                 TestFile outputFile = getTestFile(getFileName(BLUEPRINT_UPDATER_TEST_OUTPUTS, entry.getKey()));

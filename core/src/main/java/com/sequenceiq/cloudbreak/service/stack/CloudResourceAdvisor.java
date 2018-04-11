@@ -1,36 +1,22 @@
 package com.sequenceiq.cloudbreak.service.stack;
 
-import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
-
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Optional;
-import java.util.Set;
-
-import javax.inject.Inject;
-
+import com.google.common.base.Strings;
+import com.sequenceiq.cloudbreak.blueprint.validation.StackServiceComponentDescriptors;
+import com.sequenceiq.cloudbreak.cloud.model.*;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.PlatformResourceRequest;
+import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
+import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplateProcessorFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.google.common.base.Strings;
-import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessorFactory;
-import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
-import com.sequenceiq.cloudbreak.cloud.model.DiskTypes;
-import com.sequenceiq.cloudbreak.cloud.model.Platform;
-import com.sequenceiq.cloudbreak.cloud.model.PlatformDisks;
-import com.sequenceiq.cloudbreak.cloud.model.PlatformRecommendation;
-import com.sequenceiq.cloudbreak.cloud.model.VmRecommendation;
-import com.sequenceiq.cloudbreak.cloud.model.VmRecommendations;
-import com.sequenceiq.cloudbreak.cloud.model.VmType;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
-import com.sequenceiq.cloudbreak.blueprint.validation.StackServiceComponentDescriptors;
-import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.PlatformResourceRequest;
-import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
+import javax.inject.Inject;
+import java.util.*;
+import java.util.Map.Entry;
+
+import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
 
 @Service
 public class CloudResourceAdvisor {
@@ -43,7 +29,7 @@ public class CloudResourceAdvisor {
     private BlueprintService blueprintService;
 
     @Inject
-    private BlueprintProcessorFactory blueprintProcessorFactory;
+    private TemplateProcessorFactory blueprintProcessorFactory;
 
     @Inject
     private StackServiceComponentDescriptors stackServiceComponentDescs;

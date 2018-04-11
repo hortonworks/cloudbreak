@@ -1,29 +1,21 @@
 package com.sequenceiq.cloudbreak.blueprint.utils;
 
-import static org.apache.commons.lang3.tuple.ImmutablePair.of;
-
-import java.io.IOException;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
-import javax.inject.Inject;
-
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.springframework.stereotype.Component;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.sequenceiq.cloudbreak.blueprint.ConfigProperty;
 import com.sequenceiq.cloudbreak.blueprint.ServiceConfig;
-import com.sequenceiq.cloudbreak.blueprint.template.views.HostgroupView;
+import com.sequenceiq.cloudbreak.templateprocessor.template.views.HostgroupView;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.springframework.stereotype.Component;
+
+import javax.inject.Inject;
+import java.io.IOException;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
+
+import static org.apache.commons.lang3.tuple.ImmutablePair.of;
 
 @Component
 public class ConfigUtils {

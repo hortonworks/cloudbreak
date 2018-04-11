@@ -1,21 +1,20 @@
 package com.sequenceiq.cloudbreak.service.rdsconfig;
 
-import javax.inject.Inject;
-
+import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplateProcessorFactory;
+import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplateTextProcessor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
-import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessorFactory;
-import com.sequenceiq.cloudbreak.blueprint.BlueprintTextProcessor;
-import com.sequenceiq.cloudbreak.domain.Blueprint;
+import javax.inject.Inject;
 
 @Component
 public class HiveRdsConfigProvider extends AbstractRdsConfigProvider {
 
     private static final String PILLAR_KEY = "hive";
 
-    private static final String[] PATH = {BlueprintTextProcessor.CONFIGURATIONS_NODE, "hive-site"};
+    private static final String[] PATH = {TemplateTextProcessor.CONFIGURATIONS_NODE, "hive-site"};
 
     private static final String[] CONFIGURATIONS = {"javax.jdo.option.ConnectionURL", "javax.jdo.option.ConnectionDriverName",
             "javax.jdo.option.ConnectionUserName", "javax.jdo.option.ConnectionPassword"};
@@ -30,10 +29,10 @@ public class HiveRdsConfigProvider extends AbstractRdsConfigProvider {
     private String hiveDbPort;
 
     @Inject
-    private BlueprintProcessorFactory blueprintProcessorFactory;
+    private TemplateProcessorFactory blueprintProcessorFactory;
 
     private boolean isRdsConfigNeedForHiveMetastore(Blueprint blueprint) {
-        BlueprintTextProcessor blueprintProcessor = blueprintProcessorFactory.get(blueprint.getBlueprintText());
+        TemplateTextProcessor blueprintProcessor = blueprintProcessorFactory.get(blueprint.getBlueprintText());
         return blueprintProcessor.componentExistsInBlueprint("HIVE_METASTORE")
                 && !blueprintProcessor.componentExistsInBlueprint("MYSQL_SERVER")
                 && !blueprintProcessor.isAllConfigurationExistsInPathUnderConfigurationNode(createPathListFromConfingurations(PATH, CONFIGURATIONS));

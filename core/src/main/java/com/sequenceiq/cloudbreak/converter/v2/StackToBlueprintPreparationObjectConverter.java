@@ -1,37 +1,14 @@
 package com.sequenceiq.cloudbreak.converter.v2;
 
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
-import javax.inject.Inject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
-
-import com.sequenceiq.cloudbreak.blueprint.BlueprintPreparationObject;
-import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessingException;
 import com.sequenceiq.cloudbreak.blueprint.GeneralClusterConfigsProvider;
 import com.sequenceiq.cloudbreak.blueprint.filesystem.FileSystemConfigurationProvider;
-import com.sequenceiq.cloudbreak.blueprint.nifi.HdfConfigProvider;
-import com.sequenceiq.cloudbreak.blueprint.nifi.HdfConfigs;
-import com.sequenceiq.cloudbreak.blueprint.template.views.BlueprintView;
-import com.sequenceiq.cloudbreak.blueprint.template.views.FileSystemConfigurationView;
-import com.sequenceiq.cloudbreak.blueprint.templates.BlueprintStackInfo;
 import com.sequenceiq.cloudbreak.blueprint.utils.StackInfoService;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.service.user.UserFilterField;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.PostgresConfigService;
-import com.sequenceiq.cloudbreak.domain.Cluster;
-import com.sequenceiq.cloudbreak.domain.FileSystem;
-import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
-import com.sequenceiq.cloudbreak.domain.LdapConfig;
-import com.sequenceiq.cloudbreak.domain.SmartSenseSubscription;
-import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.*;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
@@ -39,9 +16,25 @@ import com.sequenceiq.cloudbreak.service.cluster.ambari.InstanceGroupMetadataCol
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.smartsense.SmartSenseSubscriptionService;
 import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
+import com.sequenceiq.cloudbreak.templateprocessor.nifi.HdfConfigProvider;
+import com.sequenceiq.cloudbreak.templateprocessor.nifi.HdfConfigs;
+import com.sequenceiq.cloudbreak.templateprocessor.processor.PreparationObject;
+import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplateProcessingException;
+import com.sequenceiq.cloudbreak.templateprocessor.template.views.BlueprintView;
+import com.sequenceiq.cloudbreak.templateprocessor.template.views.FileSystemConfigurationView;
+import com.sequenceiq.cloudbreak.templateprocessor.templates.StackInfo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
+import javax.inject.Inject;
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @Component
-public class StackToBlueprintPreparationObjectConverter extends AbstractConversionServiceAwareConverter<Stack, BlueprintPreparationObject> {
+public class StackToBlueprintPreparationObjectConverter extends AbstractConversionServiceAwareConverter<Stack, PreparationObject> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StackToBlueprintPreparationObjectConverter.class);
 
@@ -79,7 +72,7 @@ public class StackToBlueprintPreparationObjectConverter extends AbstractConversi
     private GeneralClusterConfigsProvider generalClusterConfigsProvider;
 
     @Override
-    public BlueprintPreparationObject convert(Stack source) {
+    public PreparationObject convert(Stack source) {
         try {
             Optional<SmartSenseSubscription> aDefault = smartSenseSubscriptionService.getDefault();
             Cluster cluster = clusterService.getById(source.getCluster().getId());
@@ -89,7 +82,7 @@ public class StackToBlueprintPreparationObjectConverter extends AbstractConversi
             String stackRepoDetailsHdpVersion = hdpRepo != null ? hdpRepo.getHdpVersion() : null;
             Map<String, List<InstanceMetaData>> groupInstances = instanceGroupMetadataCollector.collectMetadata(source);
             HdfConfigs hdfConfigs = hdfConfigProvider.createHdfConfig(cluster.getHostGroups(), groupInstances, cluster.getBlueprint().getBlueprintText());
-            BlueprintStackInfo blueprintStackInfo = stackInfoService.blueprintStackInfo(cluster.getBlueprint().getBlueprintText());
+            StackInfo blueprintStackInfo = stackInfoService.blueprintStackInfo(cluster.getBlueprint().getBlueprintText());
             FileSystemConfigurationView fileSystemConfigurationView = null;
             if (source.getCluster().getFileSystem() != null) {
                 fileSystemConfigurationView = new FileSystemConfigurationView(
@@ -99,7 +92,7 @@ public class StackToBlueprintPreparationObjectConverter extends AbstractConversi
             IdentityUser identityUser = userDetailsService.getDetails(cluster.getOwner(), UserFilterField.USERID);
 
 
-            return BlueprintPreparationObject.Builder.builder()
+            return PreparationObject.Builder.builder()
                     .withFlexSubscription(source.getFlexSubscription())
                     .withRdsConfigs(postgresConfigService.createRdsConfigIfNeeded(source, cluster))
                     .withHostgroups(hostGroupService.getByCluster(cluster.getId()))
@@ -113,7 +106,7 @@ public class StackToBlueprintPreparationObjectConverter extends AbstractConversi
                     .withHdfConfigs(hdfConfigs)
                     .withKerberosConfig(cluster.isSecure() ? cluster.getKerberosConfig() : null)
                     .build();
-        } catch (BlueprintProcessingException e) {
+        } catch (TemplateProcessingException e) {
             throw new CloudbreakServiceException(e.getMessage(), e);
         } catch (IOException e) {
             throw new CloudbreakServiceException(e.getMessage(), e);

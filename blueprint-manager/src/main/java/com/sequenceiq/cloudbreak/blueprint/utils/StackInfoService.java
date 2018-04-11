@@ -1,17 +1,15 @@
 package com.sequenceiq.cloudbreak.blueprint.utils;
 
-import java.io.IOException;
-
-import javax.inject.Inject;
-
+import com.fasterxml.jackson.databind.JsonNode;
+import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplateProcessingException;
+import com.sequenceiq.cloudbreak.templateprocessor.templates.StackInfo;
+import com.sequenceiq.cloudbreak.util.JsonUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessingException;
-import com.sequenceiq.cloudbreak.blueprint.templates.BlueprintStackInfo;
-import com.sequenceiq.cloudbreak.util.JsonUtil;
+import javax.inject.Inject;
+import java.io.IOException;
 
 @Component
 public class StackInfoService {
@@ -25,20 +23,20 @@ public class StackInfoService {
         boolean hdfCluster;
         try {
             hdfCluster = "HDF".equals(blueprintStackInfo(blueprintText).getType().toUpperCase());
-        } catch (BlueprintProcessingException e) {
+        } catch (TemplateProcessingException e) {
             hdfCluster = false;
         }
         return hdfCluster;
     }
 
-    public BlueprintStackInfo blueprintStackInfo(String blueprintText) throws BlueprintProcessingException {
+    public StackInfo blueprintStackInfo(String blueprintText) throws TemplateProcessingException {
         try {
             JsonNode root = JsonUtil.readTree(blueprintText);
-            return new BlueprintStackInfo(blueprintUtils.getBlueprintHdpVersion(root), blueprintUtils.getBlueprintStackName(root));
+            return new StackInfo(blueprintUtils.getBlueprintHdpVersion(root), blueprintUtils.getBlueprintStackName(root));
         } catch (IOException e) {
             String message = String.format("Unable to detect BlueprintStackInfo from the source blueprint which was: %s.", blueprintText);
             LOGGER.warn(message);
-            throw new BlueprintProcessingException(message, e);
+            throw new TemplateProcessingException(message, e);
         }
     }
 

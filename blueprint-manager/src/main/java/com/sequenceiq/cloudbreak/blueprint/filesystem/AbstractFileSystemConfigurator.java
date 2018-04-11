@@ -1,17 +1,17 @@
 package com.sequenceiq.cloudbreak.blueprint.filesystem;
 
+import com.sequenceiq.cloudbreak.api.model.FileSystemConfiguration;
+import com.sequenceiq.cloudbreak.common.model.recipe.RecipeScript;
+import com.sequenceiq.cloudbreak.domain.Credential;
+import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplateConfigurationEntry;
+import com.sequenceiq.cloudbreak.util.FileReaderUtils;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-
-import com.sequenceiq.cloudbreak.api.model.FileSystemConfiguration;
-import com.sequenceiq.cloudbreak.blueprint.BlueprintConfigurationEntry;
-import com.sequenceiq.cloudbreak.common.model.recipe.RecipeScript;
-import com.sequenceiq.cloudbreak.domain.Credential;
-import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
 public abstract class AbstractFileSystemConfigurator<T extends FileSystemConfiguration> implements FileSystemConfigurator<T> {
 
@@ -33,18 +33,18 @@ public abstract class AbstractFileSystemConfigurator<T extends FileSystemConfigu
     }
 
     @Override
-    public List<BlueprintConfigurationEntry> getDefaultFsProperties(T fsConfig) {
-        List<BlueprintConfigurationEntry> bpConfigs = new ArrayList<>();
+    public List<TemplateConfigurationEntry> getDefaultFsProperties(T fsConfig) {
+        List<TemplateConfigurationEntry> bpConfigs = new ArrayList<>();
         String defaultFs = getDefaultFsValue(fsConfig);
-        bpConfigs.add(new BlueprintConfigurationEntry("core-site", "fs.defaultFS", defaultFs));
-        bpConfigs.add(new BlueprintConfigurationEntry("hbase-site", "hbase.rootdir", defaultFs + "/apps/hbase/data"));
-        bpConfigs.add(new BlueprintConfigurationEntry("accumulo-site", "instance.volumes", defaultFs + "/apps/accumulo/data"));
-        bpConfigs.add(new BlueprintConfigurationEntry("webhcat-site", "templeton.hive.archive", defaultFs + "/hdp/apps/${hdp.version}/hive/hive.tar.gz"));
-        bpConfigs.add(new BlueprintConfigurationEntry("webhcat-site", "templeton.pig.archive", defaultFs + "/hdp/apps/${hdp.version}/pig/pig.tar.gz"));
-        bpConfigs.add(new BlueprintConfigurationEntry("webhcat-site", "templeton.sqoop.archive", defaultFs + "/hdp/apps/${hdp.version}/sqoop/sqoop.tar.gz"));
-        bpConfigs.add(new BlueprintConfigurationEntry(
+        bpConfigs.add(new TemplateConfigurationEntry("core-site", "fs.defaultFS", defaultFs));
+        bpConfigs.add(new TemplateConfigurationEntry("hbase-site", "hbase.rootdir", defaultFs + "/apps/hbase/data"));
+        bpConfigs.add(new TemplateConfigurationEntry("accumulo-site", "instance.volumes", defaultFs + "/apps/accumulo/data"));
+        bpConfigs.add(new TemplateConfigurationEntry("webhcat-site", "templeton.hive.archive", defaultFs + "/hdp/apps/${hdp.version}/hive/hive.tar.gz"));
+        bpConfigs.add(new TemplateConfigurationEntry("webhcat-site", "templeton.pig.archive", defaultFs + "/hdp/apps/${hdp.version}/pig/pig.tar.gz"));
+        bpConfigs.add(new TemplateConfigurationEntry("webhcat-site", "templeton.sqoop.archive", defaultFs + "/hdp/apps/${hdp.version}/sqoop/sqoop.tar.gz"));
+        bpConfigs.add(new TemplateConfigurationEntry(
                 "webhcat-site", "templeton.streaming.jar", defaultFs + "/hdp/apps/${hdp.version}/mapreduce/hadoop-streaming.jar"));
-        bpConfigs.add(new BlueprintConfigurationEntry("oozie-site", "oozie.service.HadoopAccessorService.supported.filesystems", "*"));
+        bpConfigs.add(new TemplateConfigurationEntry("oozie-site", "oozie.service.HadoopAccessorService.supported.filesystems", "*"));
         return bpConfigs;
     }
 

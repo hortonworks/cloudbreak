@@ -1,29 +1,9 @@
 package com.sequenceiq.cloudbreak.blueprint.moduletest;
 
-import static com.sequenceiq.cloudbreak.blueprint.moduletest.BlueprintModelProvider.blueprintObjectForHbaseConfigurationForTwoHosts;
-import static com.sequenceiq.cloudbreak.blueprint.moduletest.BlueprintModelProvider.blueprintObjectWhenAtlasAndLdapPresentedThenBothShouldConfigured;
-import static com.sequenceiq.cloudbreak.blueprint.moduletest.BlueprintModelProvider.blueprintObjectWhenAtlasPresentedShouldConfigured;
-import static com.sequenceiq.cloudbreak.blueprint.moduletest.BlueprintModelProvider.blueprintObjectWhenDruidAndRdsPresentedThenRdsDruidShouldConfigured;
-import static com.sequenceiq.cloudbreak.blueprint.moduletest.BlueprintModelProvider.blueprintObjectWhenHiveAndRdsPresentedThenRdsHiveMetastoreShouldConfigured;
-import static com.sequenceiq.cloudbreak.blueprint.moduletest.BlueprintModelProvider.blueprintObjectWhenHiveInteractivePresentedTheLlapShouldConfigured;
-import static com.sequenceiq.cloudbreak.blueprint.moduletest.BlueprintModelProvider.blueprintObjectWhenKerberosPresentedThenKerberosShouldConfigured;
-import static com.sequenceiq.cloudbreak.blueprint.moduletest.BlueprintModelProvider.blueprintObjectWhenLdapAndDruidRdsConfigured;
-import static com.sequenceiq.cloudbreak.blueprint.moduletest.BlueprintModelProvider.blueprintObjectWhenLdapConfiguredWithRdsRanger;
-import static com.sequenceiq.cloudbreak.blueprint.moduletest.BlueprintModelProvider.blueprintObjectWhenLdapPresentedThenRangerAndHadoopLdapShouldConfigured;
-import static com.sequenceiq.cloudbreak.blueprint.moduletest.BlueprintModelProvider.blueprintObjectWhenNifiAndHdfPresentedThenHdfShouldConfigured;
-import static com.sequenceiq.cloudbreak.blueprint.moduletest.BlueprintModelProvider.blueprintObjectWhenNothingSpecialThere;
-import static com.sequenceiq.cloudbreak.blueprint.moduletest.BlueprintModelProvider.blueprintObjectWhenRangerAndRdsPresentedThenRdsRangerShouldConfigured;
-import static com.sequenceiq.cloudbreak.blueprint.moduletest.BlueprintModelProvider.blueprintObjectWhenRdsConfiguredWithRdsOozie;
-import static com.sequenceiq.cloudbreak.blueprint.moduletest.BlueprintModelProvider.blueprintObjectWhenWebhcatConfigured;
-import static com.sequenceiq.cloudbreak.blueprint.moduletest.BlueprintModelProvider.blueprintObjectWhereExecutioTypeHasConfiguredAsContainer;
-import static com.sequenceiq.cloudbreak.blueprint.moduletest.BlueprintModelProvider.blueprintObjectWhereSmartSenseHasConfigured;
-import static com.sequenceiq.cloudbreak.blueprint.moduletest.BlueprintModelProvider.blueprintObjectWithZepelinAndHdp25PresentedThenZeppelinShouldConfigured;
-import static com.sequenceiq.cloudbreak.blueprint.moduletest.BlueprintModelProvider.blueprintObjectWithZepelinAndHdp26PresentedThenZeppelinShouldConfigured;
-
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.sequenceiq.cloudbreak.blueprint.testrepeater.Generator;
+import com.sequenceiq.cloudbreak.blueprint.testrepeater.ListGenerator;
+import com.sequenceiq.cloudbreak.templateprocessor.processor.PreparationObject;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Rule;
@@ -38,10 +18,11 @@ import org.springframework.boot.test.context.SpringBootTestContextBootstrapper;
 import org.springframework.test.context.BootstrapWith;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.sequenceiq.cloudbreak.blueprint.BlueprintPreparationObject;
-import com.sequenceiq.cloudbreak.blueprint.testrepeater.Generator;
-import com.sequenceiq.cloudbreak.blueprint.testrepeater.ListGenerator;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
+import static com.sequenceiq.cloudbreak.blueprint.moduletest.BlueprintModelProvider.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @BootstrapWith(SpringBootTestContextBootstrapper.class)
@@ -56,8 +37,8 @@ public class CentralBlueprintUpdaterRollingtest extends CentralBlueprintContext 
         params = new ListGenerator<>(ReadTestData.getInputOutputData(testConfig()));
     }
 
-    private Map<String, BlueprintPreparationObject> testConfig() throws JsonProcessingException {
-        return new HashMap<String, BlueprintPreparationObject>() {
+    private Map<String, PreparationObject> testConfig() throws JsonProcessingException {
+        return new HashMap<String, PreparationObject>() {
             {
                 put("rds-with-hive-metastore", blueprintObjectWhenHiveAndRdsPresentedThenRdsHiveMetastoreShouldConfigured());
                 put("rds-with-ranger", blueprintObjectWhenRangerAndRdsPresentedThenRdsRangerShouldConfigured());
@@ -86,7 +67,7 @@ public class CentralBlueprintUpdaterRollingtest extends CentralBlueprintContext 
 
     @Test
     public void testGetBlueprintText() throws IOException, JSONException {
-        BlueprintPreparationObject blueprintPreparationObject = prepareBlueprintPreparationObjectWithBlueprintText();
+        PreparationObject blueprintPreparationObject = preparePreparationObjectWithBlueprintText();
 
         JSONObject expected = toJSON(params.value().getOutput().getFileContent());
         JSONObject resultBlueprintText = toJSON(getUnderTest().getBlueprintText(blueprintPreparationObject));
@@ -100,8 +81,8 @@ public class CentralBlueprintUpdaterRollingtest extends CentralBlueprintContext 
         assertWithExtendedExceptionHandling(stringBuffer.toString(), expected, resultBlueprintText);
     }
 
-    private BlueprintPreparationObject prepareBlueprintPreparationObjectWithBlueprintText() {
-        BlueprintPreparationObject blueprintPreparationObject = params.value().getModel();
+    private PreparationObject preparePreparationObjectWithBlueprintText() {
+        PreparationObject blueprintPreparationObject = params.value().getModel();
         blueprintPreparationObject.getBlueprintView().setBlueprintText(params.value().getInput().getFileContent());
         return blueprintPreparationObject;
     }

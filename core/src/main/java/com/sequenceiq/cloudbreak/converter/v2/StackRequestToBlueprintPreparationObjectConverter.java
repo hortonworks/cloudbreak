@@ -1,47 +1,40 @@
 package com.sequenceiq.cloudbreak.converter.v2;
 
-import java.io.IOException;
-import java.util.HashSet;
-import java.util.Set;
-
-import javax.inject.Inject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
-
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.model.FileSystemConfiguration;
 import com.sequenceiq.cloudbreak.api.model.v2.InstanceGroupV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
-import com.sequenceiq.cloudbreak.blueprint.BlueprintPreparationObject;
-import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessingException;
 import com.sequenceiq.cloudbreak.blueprint.GeneralClusterConfigsProvider;
 import com.sequenceiq.cloudbreak.blueprint.filesystem.FileSystemConfigurationProvider;
-import com.sequenceiq.cloudbreak.blueprint.template.views.BlueprintView;
-import com.sequenceiq.cloudbreak.blueprint.template.views.FileSystemConfigurationView;
-import com.sequenceiq.cloudbreak.blueprint.template.views.HostgroupView;
-import com.sequenceiq.cloudbreak.blueprint.templates.BlueprintStackInfo;
-import com.sequenceiq.cloudbreak.blueprint.templates.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.blueprint.utils.StackInfoService;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.service.user.UserFilterField;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
-import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.FileSystem;
-import com.sequenceiq.cloudbreak.domain.FlexSubscription;
-import com.sequenceiq.cloudbreak.domain.KerberosConfig;
-import com.sequenceiq.cloudbreak.domain.LdapConfig;
-import com.sequenceiq.cloudbreak.domain.RDSConfig;
+import com.sequenceiq.cloudbreak.domain.*;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.flex.FlexSubscriptionService;
 import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
+import com.sequenceiq.cloudbreak.templateprocessor.processor.PreparationObject;
+import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplateProcessingException;
+import com.sequenceiq.cloudbreak.templateprocessor.template.views.BlueprintView;
+import com.sequenceiq.cloudbreak.templateprocessor.template.views.FileSystemConfigurationView;
+import com.sequenceiq.cloudbreak.templateprocessor.template.views.HostgroupView;
+import com.sequenceiq.cloudbreak.templateprocessor.templates.GeneralClusterConfigs;
+import com.sequenceiq.cloudbreak.templateprocessor.templates.StackInfo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
+import javax.inject.Inject;
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
 
 @Component
-public class StackRequestToBlueprintPreparationObjectConverter extends AbstractConversionServiceAwareConverter<StackV2Request, BlueprintPreparationObject> {
+public class StackRequestToBlueprintPreparationObjectConverter extends AbstractConversionServiceAwareConverter<StackV2Request, PreparationObject> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StackRequestToBlueprintPreparationObjectConverter.class);
 
@@ -70,7 +63,7 @@ public class StackRequestToBlueprintPreparationObjectConverter extends AbstractC
     private StackInfoService stackInfoService;
 
     @Override
-    public BlueprintPreparationObject convert(StackV2Request source) {
+    public PreparationObject convert(StackV2Request source) {
         try {
             IdentityUser identityUser = userDetailsService.getDetails(source.getOwner(), UserFilterField.USERID);
             FlexSubscription flexSubscription = getFlexSubscription(source);
@@ -80,12 +73,12 @@ public class StackRequestToBlueprintPreparationObjectConverter extends AbstractC
             FileSystemConfigurationView fileSystemConfigurationView = getFileSystemConfigurationView(source);
             Set<RDSConfig> rdsConfigs = getRdsConfigs(source, identityUser);
             Blueprint blueprint = getBlueprint(source, identityUser);
-            BlueprintStackInfo blueprintStackInfo = stackInfoService.blueprintStackInfo(blueprint.getBlueprintText());
+            StackInfo blueprintStackInfo = stackInfoService.blueprintStackInfo(blueprint.getBlueprintText());
             Set<HostgroupView> hostgroupViews = getHostgroupViews(source);
             BlueprintView blueprintView = new BlueprintView(blueprint.getBlueprintText(), blueprintStackInfo.getVersion(), blueprintStackInfo.getType());
             GeneralClusterConfigs generalClusterConfigs = generalClusterConfigsProvider.generalClusterConfigs(source, identityUser);
 
-            return BlueprintPreparationObject.Builder.builder()
+            return PreparationObject.Builder.builder()
                     .withFlexSubscription(flexSubscription)
                     .withRdsConfigs(rdsConfigs)
                     .withHostgroupViews(hostgroupViews)
@@ -97,7 +90,7 @@ public class StackRequestToBlueprintPreparationObjectConverter extends AbstractC
                     .withLdapConfig(ldapConfig)
                     .withKerberosConfig(kerberosConfig)
                     .build();
-        } catch (BlueprintProcessingException e) {
+        } catch (TemplateProcessingException e) {
             throw new CloudbreakServiceException(e.getMessage(), e);
         } catch (IOException e) {
             throw new CloudbreakServiceException(e.getMessage(), e);

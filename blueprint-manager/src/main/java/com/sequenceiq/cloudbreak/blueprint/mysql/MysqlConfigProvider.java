@@ -1,31 +1,30 @@
 package com.sequenceiq.cloudbreak.blueprint.mysql;
 
-import javax.inject.Inject;
-
+import com.sequenceiq.cloudbreak.blueprint.BlueprintComponentConfigProvider;
+import com.sequenceiq.cloudbreak.templateprocessor.processor.PreparationObject;
+import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplateProcessorFactory;
+import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplateTextProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.blueprint.BlueprintComponentConfigProvider;
-import com.sequenceiq.cloudbreak.blueprint.BlueprintPreparationObject;
-import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessorFactory;
-import com.sequenceiq.cloudbreak.blueprint.BlueprintTextProcessor;
+import javax.inject.Inject;
 
 @Component
 public class MysqlConfigProvider implements BlueprintComponentConfigProvider {
     private static final Logger LOGGER = LoggerFactory.getLogger(MysqlConfigProvider.class);
 
     @Inject
-    private BlueprintProcessorFactory blueprintProcessorFactory;
+    private TemplateProcessorFactory blueprintProcessorFactory;
 
     @Override
-    public BlueprintTextProcessor customTextManipulation(BlueprintPreparationObject source, BlueprintTextProcessor blueprintProcessor) {
+    public TemplateTextProcessor customTextManipulation(PreparationObject source, TemplateTextProcessor blueprintProcessor) {
         LOGGER.info("MYSQL_SERVER exists in Blueprint");
         return blueprintProcessor.removeComponentFromBlueprint("MYSQL_SERVER");
     }
 
     @Override
-    public boolean additionalCriteria(BlueprintPreparationObject source, String blueprintText) {
+    public boolean additionalCriteria(PreparationObject source, String blueprintText) {
         return source.getRdsConfigs() != null
                 && !source.getRdsConfigs().isEmpty()
                 && blueprintProcessorFactory.get(blueprintText).componentExistsInBlueprint("MYSQL_SERVER");
