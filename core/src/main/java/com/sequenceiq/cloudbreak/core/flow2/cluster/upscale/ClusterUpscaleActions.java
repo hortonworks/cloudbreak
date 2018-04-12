@@ -29,10 +29,10 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.UpscaleClusterRequest
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.UpscaleClusterResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.UpscaleAmbariRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.UpscaleAmbariResult;
-import com.sequenceiq.cloudbreak.reactor.api.event.recipe.UpscalePostRecipesRequest;
-import com.sequenceiq.cloudbreak.reactor.api.event.recipe.UpscalePostRecipesResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.recipe.UploadUpscaleRecipesRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.recipe.UploadUpscaleRecipesResult;
+import com.sequenceiq.cloudbreak.reactor.api.event.recipe.UpscalePostRecipesRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.recipe.UpscalePostRecipesResult;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @Configuration

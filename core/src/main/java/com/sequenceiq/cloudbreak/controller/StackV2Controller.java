@@ -28,12 +28,12 @@ import com.sequenceiq.cloudbreak.api.model.UpdateClusterJson;
 import com.sequenceiq.cloudbreak.api.model.UpdateStackJson;
 import com.sequenceiq.cloudbreak.api.model.UserNamePasswordJson;
 import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
-import com.sequenceiq.cloudbreak.blueprint.BlueprintPreparationObject;
 import com.sequenceiq.cloudbreak.blueprint.CentralBlueprintUpdater;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterCache;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.template.processor.processor.TemplatePreparationObject;
 
 @Component
 public class StackV2Controller extends NotificationController implements StackV2Endpoint {
@@ -238,7 +238,7 @@ public class StackV2Controller extends NotificationController implements StackV2
         IdentityUser user = authenticatedUserService.getCbUser();
         stackRequest.setAccount(user.getAccount());
         stackRequest.setOwner(user.getUserId());
-        BlueprintPreparationObject blueprintPreparationObject = conversionService.convert(stackRequest, BlueprintPreparationObject.class);
+        TemplatePreparationObject blueprintPreparationObject = conversionService.convert(stackRequest, TemplatePreparationObject.class);
         String blueprintText = centralBlueprintUpdater.getBlueprintText(blueprintPreparationObject);
         return new GeneratedBlueprintResponse(blueprintText);
     }

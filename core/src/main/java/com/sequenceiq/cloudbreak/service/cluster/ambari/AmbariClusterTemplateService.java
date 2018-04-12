@@ -49,6 +49,7 @@ public class AmbariClusterTemplateService {
                 if (cluster.isSecure()) {
                     KerberosConfig kerberosConfig = cluster.getKerberosConfig();
                     String principal = kerberosDetailService.resolvePrincipalForKerberos(kerberosConfig);
+                    // TODO: do this in Java
                     clusterTemplate = ambariClient.createSecureCluster(clusterName, blueprintName, hostGroupMappings, configStrategy,
                             ambariSecurityConfigProvider.getAmbariPassword(cluster), principal, kerberosConfig.getPassword(), KEY_TYPE, false,
                             repositoryVersion);

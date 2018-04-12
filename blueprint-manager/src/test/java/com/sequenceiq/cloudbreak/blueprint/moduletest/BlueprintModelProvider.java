@@ -1,55 +1,55 @@
 package com.sequenceiq.cloudbreak.blueprint.moduletest;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.model.ExecutorType;
 import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
-import com.sequenceiq.cloudbreak.blueprint.BlueprintPreparationObject;
 import com.sequenceiq.cloudbreak.blueprint.filesystem.BlueprintTestUtil;
-import com.sequenceiq.cloudbreak.blueprint.nifi.HdfConfigs;
-import com.sequenceiq.cloudbreak.blueprint.templates.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
+import com.sequenceiq.cloudbreak.template.processor.nifi.HdfConfigs;
+import com.sequenceiq.cloudbreak.template.processor.processor.TemplatePreparationObject;
+import com.sequenceiq.cloudbreak.template.processor.templates.GeneralClusterConfigs;
+
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
 
 class BlueprintModelProvider {
 
     private BlueprintModelProvider() {
     }
 
-    static BlueprintPreparationObject blueprintObjectWhenHiveAndRdsPresentedThenRdsHiveMetastoreShouldConfigured() throws JsonProcessingException {
+    static TemplatePreparationObject blueprintObjectWhenHiveAndRdsPresentedThenRdsHiveMetastoreShouldConfigured() throws JsonProcessingException {
         return getPreparedBuilder()
                 .withBlueprintView(BlueprintTestUtil.generalBlueprintView("", "2.6", "HDP"))
                 .withRdsConfigs(new HashSet<>(Collections.singleton(TestUtil.rdsConfig(RdsType.HIVE))))
                 .build();
     }
 
-    static BlueprintPreparationObject blueprintObjectWhenRangerAndRdsPresentedThenRdsRangerShouldConfigured() throws JsonProcessingException {
+    static TemplatePreparationObject blueprintObjectWhenRangerAndRdsPresentedThenRdsRangerShouldConfigured() throws JsonProcessingException {
         return getPreparedBuilder()
                 .withBlueprintView(BlueprintTestUtil.generalBlueprintView("", "2.6", "HDP"))
                 .withRdsConfigs(new HashSet<>(Collections.singleton(TestUtil.rdsConfig(RdsType.RANGER))))
                 .build();
     }
 
-    static BlueprintPreparationObject blueprintObjectWhenDruidAndRdsPresentedThenRdsDruidShouldConfigured() throws JsonProcessingException {
+    static TemplatePreparationObject blueprintObjectWhenDruidAndRdsPresentedThenRdsDruidShouldConfigured() throws JsonProcessingException {
         return getPreparedBuilder()
                 .withBlueprintView(BlueprintTestUtil.generalBlueprintView("", "2.6", "HDP"))
                 .withRdsConfigs(new HashSet<>(Collections.singleton(TestUtil.rdsConfig(RdsType.DRUID))))
                 .build();
     }
 
-    static BlueprintPreparationObject blueprintObjectWhenLdapPresentedThenRangerAndHadoopLdapShouldConfigured() throws JsonProcessingException {
+    static TemplatePreparationObject blueprintObjectWhenLdapPresentedThenRangerAndHadoopLdapShouldConfigured() throws JsonProcessingException {
         return getPreparedBuilder()
                 .withBlueprintView(BlueprintTestUtil.generalBlueprintView("", "2.6", "HDP"))
                 .withLdapConfig(TestUtil.ldapConfig())
                 .build();
     }
 
-    static BlueprintPreparationObject bpObjectWithThreeHostAndLdapRangerConfigured() throws JsonProcessingException {
+    static TemplatePreparationObject bpObjectWithThreeHostAndLdapRangerConfigured() throws JsonProcessingException {
         return getPreparedBuilder()
                 .withBlueprintView(BlueprintTestUtil.generalBlueprintView("", "2.6", "HDP"))
                 .withRdsConfigs(new HashSet<>(Collections.singleton(TestUtil.rdsConfig(RdsType.RANGER))))
@@ -57,36 +57,36 @@ class BlueprintModelProvider {
                 .build();
     }
 
-    static BlueprintPreparationObject blueprintObjectWhenKerberosPresentedThenKerberosShouldConfigured() throws JsonProcessingException {
+    static TemplatePreparationObject blueprintObjectWhenKerberosPresentedThenKerberosShouldConfigured() throws JsonProcessingException {
         return getPreparedBuilder("master", "slave_1")
                 .withBlueprintView(BlueprintTestUtil.generalBlueprintView("", "2.6", "HDP"))
                 .withKerberosConfig(TestUtil.kerberosConfig())
                 .build();
     }
 
-    static BlueprintPreparationObject blueprintObjectWithZepelinAndHdp26PresentedThenZeppelinShouldConfigured() throws JsonProcessingException {
+    static TemplatePreparationObject blueprintObjectWithZepelinAndHdp26PresentedThenZeppelinShouldConfigured() throws JsonProcessingException {
         return getPreparedBuilder("master", "slave_1")
                 .withBlueprintView(BlueprintTestUtil.generalBlueprintView("", "2.6", "HDP"))
                 .build();
     }
 
-    static BlueprintPreparationObject blueprintObjectWithZepelinAndHdp25PresentedThenZeppelinShouldConfigured() throws JsonProcessingException {
+    static TemplatePreparationObject blueprintObjectWithZepelinAndHdp25PresentedThenZeppelinShouldConfigured() throws JsonProcessingException {
         return getPreparedBuilder("master", "slave_1")
                 .withBlueprintView(BlueprintTestUtil.generalBlueprintView("", "2.5", "HDP"))
                 .build();
     }
 
-    static BlueprintPreparationObject blueprintObjectWhenNifiAndHdfPresentedThenHdfShouldConfigured() throws JsonProcessingException {
+    static TemplatePreparationObject blueprintObjectWhenNifiAndHdfPresentedThenHdfShouldConfigured() throws JsonProcessingException {
         return getPreparedBuilder("master", "slave_1")
                 .withBlueprintView(BlueprintTestUtil.generalBlueprintView("", "2.6", "HDF"))
                 .withHdfConfigs(new HdfConfigs("<property name=\"Node Identity 10.0.0.1\">CN=10.0.0.1, OU=NIFI</property>", Optional.empty()))
                 .build();
     }
 
-    static BlueprintPreparationObject blueprintObjectWhenHiveInteractivePresentedTheLlapShouldConfigured() throws JsonProcessingException {
+    static TemplatePreparationObject blueprintObjectWhenHiveInteractivePresentedTheLlapShouldConfigured() throws JsonProcessingException {
         GeneralClusterConfigs conf = BlueprintTestUtil.generalClusterConfigs();
         conf.setNodeCount(5);
-        return BlueprintPreparationObject.Builder.builder()
+        return TemplatePreparationObject.Builder.builder()
                 .withGeneralClusterConfigs(conf)
                 .withBlueprintView(BlueprintTestUtil.generalBlueprintView("", "2.6", "HDP"))
                 .withHostgroups(getHostGroups("master", "slave_1"))
@@ -94,10 +94,10 @@ class BlueprintModelProvider {
                 .build();
     }
 
-    static BlueprintPreparationObject blueprintObjectWhenNothingSpecialThere() throws JsonProcessingException {
+    static TemplatePreparationObject blueprintObjectWhenNothingSpecialThere() throws JsonProcessingException {
         GeneralClusterConfigs conf = BlueprintTestUtil.generalClusterConfigs();
         conf.setNodeCount(5);
-        return BlueprintPreparationObject.Builder.builder()
+        return TemplatePreparationObject.Builder.builder()
                 .withGeneralClusterConfigs(conf)
                 .withBlueprintView(BlueprintTestUtil.generalBlueprintView("", "2.6", "HDP"))
                 .withHostgroups(getHostGroups("master", "slave_1"))
@@ -105,7 +105,7 @@ class BlueprintModelProvider {
                 .build();
     }
 
-    static BlueprintPreparationObject blueprintObjectWhenLdapConfiguredWithRdsRanger() throws JsonProcessingException {
+    static TemplatePreparationObject blueprintObjectWhenLdapConfiguredWithRdsRanger() throws JsonProcessingException {
         return getPreparedBuilder()
                 .withBlueprintView(BlueprintTestUtil.generalBlueprintView("", "2.6", "HDP"))
                 .withRdsConfigs(new HashSet<>(Collections.singleton(TestUtil.rdsConfig(RdsType.RANGER))))
@@ -113,22 +113,22 @@ class BlueprintModelProvider {
                 .build();
     }
 
-    static BlueprintPreparationObject blueprintObjectWhenRdsConfiguredWithRdsOozie() throws JsonProcessingException {
+    static TemplatePreparationObject blueprintObjectWhenRdsConfiguredWithRdsOozie() throws JsonProcessingException {
         return getPreparedBuilder()
                 .withBlueprintView(BlueprintTestUtil.generalBlueprintView("", "2.6", "HDP"))
                 .withRdsConfigs(new HashSet<>(Collections.singleton(TestUtil.rdsConfig(RdsType.OOZIE))))
                 .build();
     }
 
-    static BlueprintPreparationObject blueprintObjectWhenWebhcatConfigured() throws JsonProcessingException {
+    static TemplatePreparationObject blueprintObjectWhenWebhcatConfigured() throws JsonProcessingException {
         return getPreparedBuilder("master")
                 .withBlueprintView(BlueprintTestUtil.generalBlueprintView("", "2.6", "HDP"))
                 .build();
     }
 
-    static BlueprintPreparationObject blueprintObjectWhenSharedServiceConfigured() throws JsonProcessingException {
+    static TemplatePreparationObject blueprintObjectWhenSharedServiceConfigured() throws JsonProcessingException {
         GeneralClusterConfigs configs = BlueprintTestUtil.generalClusterConfigs();
-        return BlueprintPreparationObject.Builder.builder()
+        return TemplatePreparationObject.Builder.builder()
                 .withHostgroups(getHostGroups("master", "worker", "compute"))
                 .withGateway(TestUtil.gateway())
                 .withBlueprintView(BlueprintTestUtil.generalBlueprintView("", "2.6", "HDP"))
@@ -138,7 +138,7 @@ class BlueprintModelProvider {
                 .build();
     }
 
-    static BlueprintPreparationObject blueprintObjectWhenLdapAndDruidRdsConfigured() throws JsonProcessingException {
+    static TemplatePreparationObject blueprintObjectWhenLdapAndDruidRdsConfigured() throws JsonProcessingException {
         return getPreparedBuilder()
                 .withBlueprintView(BlueprintTestUtil.generalBlueprintView("", "2.6", "HDP"))
                 .withRdsConfigs(new HashSet<>(Collections.singleton(TestUtil.rdsConfig(RdsType.DRUID))))
@@ -146,30 +146,30 @@ class BlueprintModelProvider {
                 .build();
     }
 
-    static BlueprintPreparationObject blueprintObjectWhenAtlasPresentedShouldConfigured() throws JsonProcessingException {
+    static TemplatePreparationObject blueprintObjectWhenAtlasPresentedShouldConfigured() throws JsonProcessingException {
         return getPreparedBuilder("master", "slave_1")
                 .withBlueprintView(BlueprintTestUtil.generalBlueprintView("", "2.6", "HDP"))
                 .build();
     }
 
-    static BlueprintPreparationObject blueprintObjectWhenAtlasAndLdapPresentedThenBothShouldConfigured() throws JsonProcessingException {
+    static TemplatePreparationObject blueprintObjectWhenAtlasAndLdapPresentedThenBothShouldConfigured() throws JsonProcessingException {
         return getPreparedBuilder("master", "slave_1")
                 .withBlueprintView(BlueprintTestUtil.generalBlueprintView("", "2.6", "HDP"))
                 .withLdapConfig(TestUtil.ldapConfig())
                 .build();
     }
 
-    static BlueprintPreparationObject blueprintObjectForHbaseConfigurationForTwoHosts() throws JsonProcessingException {
+    static TemplatePreparationObject blueprintObjectForHbaseConfigurationForTwoHosts() throws JsonProcessingException {
         return getPreparedBuilder("master", "slave_1")
                 .withBlueprintView(BlueprintTestUtil.generalBlueprintView("", "2.6", "HDP"))
                 .withHdfConfigs(new HdfConfigs("<property name=\"Node Identity 10.0.0.1\">CN=10.0.0.1, OU=NIFI</property>", Optional.empty()))
                 .build();
     }
 
-    static BlueprintPreparationObject blueprintObjectWhereExecutioTypeHasConfiguredAsContainer() throws JsonProcessingException {
+    static TemplatePreparationObject blueprintObjectWhereExecutioTypeHasConfiguredAsContainer() throws JsonProcessingException {
         GeneralClusterConfigs configs = BlueprintTestUtil.generalClusterConfigs();
         configs.setExecutorType(ExecutorType.CONTAINER);
-        return BlueprintPreparationObject.Builder.builder()
+        return TemplatePreparationObject.Builder.builder()
                 .withBlueprintView(BlueprintTestUtil.generalBlueprintView("", "2.6", "HDP"))
                 .withHostgroups(getHostGroups("master", "slave_1"))
                 .withGeneralClusterConfigs(configs)
@@ -177,15 +177,15 @@ class BlueprintModelProvider {
                 .build();
     }
 
-    static BlueprintPreparationObject   blueprintObjectWhereSmartSenseHasConfigured() throws JsonProcessingException {
+    static TemplatePreparationObject blueprintObjectWhereSmartSenseHasConfigured() throws JsonProcessingException {
         return getPreparedBuilder("master", "slave_1")
                 .withBlueprintView(BlueprintTestUtil.generalBlueprintView("", "2.6", "HDP"))
                 .withSmartSenseSubscriptionId("A-99900000-C-00000000")
                 .build();
     }
 
-    static BlueprintPreparationObject.Builder getPreparedBuilder(String... hostNames) throws JsonProcessingException {
-        return BlueprintPreparationObject.Builder.builder()
+    static TemplatePreparationObject.Builder getPreparedBuilder(String... hostNames) throws JsonProcessingException {
+        return TemplatePreparationObject.Builder.builder()
                 .withGeneralClusterConfigs(BlueprintTestUtil.generalClusterConfigs())
                 .withHostgroups(hostNames.length == 0 ? getHostGroups() : getHostGroups(hostNames))
                 .withGateway(TestUtil.gateway());

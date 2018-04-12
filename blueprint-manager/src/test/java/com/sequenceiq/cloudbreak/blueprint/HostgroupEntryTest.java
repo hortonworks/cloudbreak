@@ -1,9 +1,11 @@
 package com.sequenceiq.cloudbreak.blueprint;
 
-import static com.sequenceiq.cloudbreak.blueprint.HostgroupEntry.hostgroupEntry;
 
+import com.sequenceiq.cloudbreak.template.processor.HostgroupEntry;
 import org.junit.Assert;
 import org.junit.Test;
+
+import static com.sequenceiq.cloudbreak.template.processor.HostgroupEntry.hostgroupEntry;
 
 public class HostgroupEntryTest {
 

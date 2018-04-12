@@ -1,0 +1,203 @@
+{
+  "settings": [
+    {
+      "recovery_settings": [
+        {
+          "recovery_enabled": "true"
+        }
+      ]
+    }
+  ],
+  "Blueprints": {
+    "stack_version": "2.6",
+    "blueprint_name": "multi-node-hdfs-yarn",
+    "stack_name": "HDP"
+  },
+  "configurations": [
+    {
+      "hdfs-site": {
+        "properties": {
+          "dfs.journalnode.edits.dir": "/hadoopfs/fs1/hdfs/journalnode",
+          "dfs.namenode.name.dir": "/hadoopfs/fs1/hdfs/namenode",
+          "dfs.replication": 2,
+          "dfs.namenode.checkpoint.dir": "/hadoopfs/fs1/hdfs/namesecondary"
+        }
+      }
+    },
+    {
+      "application-properties": {
+        "properties": {
+          "atlas.authentication.method.ldap.ad.base.dn": "cn=users,dc=example,dc=org",
+          "atlas.authentication.method.ldap.ad.url": "ldap://localhost:389",
+          "atlas.authentication.method.ldap.ad.domain": "ad.hdc.com",
+          "atlas.authentication.method.ldap.ad.bind.dn": "cn=admin,dc=example,dc=org",
+          "atlas.authentication.method.ldap.ugi-groups": "false",
+          "atlas.graph.index.search.directory": "/hadoopfs/fs1/atlas/data/es",
+          "atlas.authentication.method.ldap.type": "ad",
+          "atlas.graph.storage.directory": "/hadoopfs/fs1/atlas/data/berkeley",
+          "atlas.authentication.method.ldap.ad.bind.password": "admin",
+          "atlas.authentication.method.ldap": "true"
+        }
+      }
+    },
+    {
+      "cluster-env": {
+        "properties": {
+          "recovery_enabled": "true",
+          "recovery_type": "AUTO_START"
+        }
+      }
+    },
+    {
+      "hbase-site": {
+        "properties": {
+          "zookeeper.recovery.retry": "10"
+        }
+      }
+    },
+    {
+      "core-site": {
+        "properties": {
+          "hadoop.security.group.mapping.ldap.search.attr.member": "member",
+          "hadoop.security.group.mapping.ldap.search.attr.group.name": "cn",
+          "hadoop.proxyuser.falcon.groups": "*",
+          "hadoop.proxyuser.root.groups": "*",
+          "hadoop.security.group.mapping.ldap.bind.password": "admin",
+          "hadoop.security.group.mapping.ldap.userbase": "cn=users,dc=example,dc=org",
+          "hadoop.security.group.mapping.ldap.url": "ldap://localhost:389",
+          "hadoop.security.group.mapping.ldap.groupbase": "cn=groups,dc=example,dc=org",
+          "hadoop.security.group.mapping.ldap.search.filter.group": "(objectClass=groupOfNames)",
+          "hadoop.proxyuser.hcat.groups": "*",
+          "hadoop.proxyuser.livy.groups": "*",
+          "hadoop.proxyuser.hbase.groups": "*",
+          "hadoop.proxyuser.hbase.hosts": "*",
+          "hadoop.proxyuser.root.hosts": "*",
+          "hadoop.proxyuser.hive.hosts": "*",
+          "proxyuser_group": "hadoop",
+          "hadoop.security.group.mapping.ldap.search.filter.user": "(&(objectClass=person)(cn=admin,dc=example,dc=org={0}))",
+          "hadoop.security.group.mapping.ldap.bind.user": "cn=admin,dc=example,dc=org",
+          "hadoop.proxyuser.livy.hosts": "*",
+          "hadoop.proxyuser.falcon.hosts": "*",
+          "hadoop.proxyuser.oozie.hosts": "*",
+          "hadoop.proxyuser.hcat.hosts": "*",
+          "hadoop.proxyuser.oozie.groups": "*",
+          "hadoop.security.group.mapping": "org.apache.hadoop.security.LdapGroupsMapping",
+          "hadoop.proxyuser.hive.groups": "*"
+        }
+      }
+    },
+    {
+      "atlas-env": {
+        "properties": {
+          "metadata_data_dir": "/hadoopfs/fs1/atlas/metadata"
+        }
+      }
+    },
+    {
+      "zoo.cfg": {
+        "properties": {
+          "dataDir": "/hadoopfs/fs1/zookeeper"
+        }
+      }
+    },
+    {
+      "yarn-site": {
+        "properties": {
+          "yarn.timeline-service.leveldb-timeline-store.path": "/hadoopfs/fs1/yarn/timeline"
+        }
+      }
+    }
+  ],
+  "host_groups": [
+    {
+      "components": [
+        {
+          "name": "NAMENODE"
+        },
+        {
+          "name": "SECONDARY_NAMENODE"
+        },
+        {
+          "name": "RESOURCEMANAGER"
+        },
+        {
+          "name": "APP_TIMELINE_SERVER"
+        },
+        {
+          "name": "ATLAS_SERVER"
+        },
+        {
+          "name": "ZOOKEEPER_SERVER"
+        },
+        {
+          "name": "KERBEROS_CLIENT"
+        }
+      ],
+      "configurations": [
+        {
+          "hdfs-site": {
+            "dfs.datanode.data.dir": "/hadoopfs/fs1/hdfs/datanode"
+          }
+        },
+        {
+          "yarn-site": {
+            "yarn.nodemanager.local-dirs": "/hadoopfs/fs1/yarn/nodemanager",
+            "yarn.nodemanager.log-dirs": "/hadoopfs/fs1/yarn/nodemanager/log"
+          }
+        },
+        {
+          "core-site": {
+            "fs.s3a.buffer.dir": "/hadoopfs/fs1/s3/temp"
+          }
+        }
+      ],
+      "name": "master",
+      "cardinality": "1"
+    },
+    {
+      "components": [
+        {
+          "name": "DATANODE"
+        },
+        {
+          "name": "HDFS_CLIENT"
+        },
+        {
+          "name": "NODEMANAGER"
+        },
+        {
+          "name": "YARN_CLIENT"
+        },
+        {
+          "name": "MAPREDUCE2_CLIENT"
+        },
+        {
+          "name": "ZOOKEEPER_CLIENT"
+        },
+        {
+          "name": "KERBEROS_CLIENT"
+        }
+      ],
+      "configurations": [
+        {
+          "hdfs-site": {
+            "dfs.datanode.data.dir": "/hadoopfs/fs1/hdfs/datanode"
+          }
+        },
+        {
+          "yarn-site": {
+            "yarn.nodemanager.local-dirs": "/hadoopfs/fs1/yarn/nodemanager",
+            "yarn.nodemanager.log-dirs": "/hadoopfs/fs1/yarn/nodemanager/log"
+          }
+        },
+        {
+          "core-site": {
+            "fs.s3a.buffer.dir": "/hadoopfs/fs1/s3/temp"
+          }
+        }
+      ],
+      "name": "slave_1",
+      "cardinality": "2"
+    }
+  ]
+}

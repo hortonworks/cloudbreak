@@ -1,16 +1,16 @@
 package com.sequenceiq.cloudbreak.blueprint.filesystem;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-
 import com.sequenceiq.cloudbreak.api.model.ExecutionType;
 import com.sequenceiq.cloudbreak.api.model.FileSystemConfiguration;
 import com.sequenceiq.cloudbreak.api.model.FileSystemType;
 import com.sequenceiq.cloudbreak.api.model.RecipeType;
-import com.sequenceiq.cloudbreak.blueprint.BlueprintConfigurationEntry;
 import com.sequenceiq.cloudbreak.domain.Credential;
+import com.sequenceiq.cloudbreak.template.processor.processor.TemplateConfigurationEntry;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 public class AbstractFileSystemConfiguratorImpl extends AbstractFileSystemConfigurator<FileSystemConfiguration> {
 
@@ -36,7 +36,7 @@ public class AbstractFileSystemConfiguratorImpl extends AbstractFileSystemConfig
     }
 
     @Override
-    public List<BlueprintConfigurationEntry> getFsProperties(FileSystemConfiguration fsConfig, Map<String, String> resourceProperties) {
+    public List<TemplateConfigurationEntry> getFsProperties(FileSystemConfiguration fsConfig, Map<String, String> resourceProperties) {
         return null;
     }
 

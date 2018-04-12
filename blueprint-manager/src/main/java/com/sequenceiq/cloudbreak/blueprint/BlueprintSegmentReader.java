@@ -1,16 +1,9 @@
 package com.sequenceiq.cloudbreak.blueprint;
 
-import static com.sequenceiq.cloudbreak.blueprint.templates.ServiceName.serviceName;
-import static com.sequenceiq.cloudbreak.blueprint.templates.TemplateFiles.templateFiles;
-import static java.util.stream.Collectors.toList;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import com.google.common.collect.Lists;
+import com.sequenceiq.cloudbreak.template.processor.processor.TemplateProcessingException;
+import com.sequenceiq.cloudbreak.template.processor.templates.ServiceName;
+import com.sequenceiq.cloudbreak.template.processor.templates.TemplateFiles;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,9 +14,16 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.stereotype.Component;
 
-import com.google.common.collect.Lists;
-import com.sequenceiq.cloudbreak.blueprint.templates.ServiceName;
-import com.sequenceiq.cloudbreak.blueprint.templates.TemplateFiles;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static com.sequenceiq.cloudbreak.template.processor.templates.ServiceName.serviceName;
+import static com.sequenceiq.cloudbreak.template.processor.templates.TemplateFiles.templateFiles;
+import static java.util.stream.Collectors.toList;
 
 @Component
 public class BlueprintSegmentReader implements ResourceLoaderAware {
@@ -71,7 +71,7 @@ public class BlueprintSegmentReader implements ResourceLoaderAware {
         } catch (IOException ex) {
             String message = String.format("Could not read files from the definiated folder which was: %s", dir);
             LOGGER.warn(message, ex);
-            throw new BlueprintProcessingException(message, ex);
+            throw new TemplateProcessingException(message, ex);
         }
 
         return collectedFiles;

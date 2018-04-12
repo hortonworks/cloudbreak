@@ -1,5 +1,27 @@
 package com.sequenceiq.cloudbreak.blueprint.moduletest;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.sequenceiq.cloudbreak.blueprint.testrepeater.Generator;
+import com.sequenceiq.cloudbreak.blueprint.testrepeater.ListGenerator;
+import com.sequenceiq.cloudbreak.template.processor.processor.TemplatePreparationObject;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.skyscreamer.jsonassert.JSONAssert;
+import org.skyscreamer.jsonassert.JSONCompareMode;
+import org.skyscreamer.jsonassert.JSONParser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.boot.test.context.SpringBootTestContextBootstrapper;
+import org.springframework.test.context.BootstrapWith;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
 import static com.sequenceiq.cloudbreak.blueprint.moduletest.BlueprintModelProvider.blueprintObjectForHbaseConfigurationForTwoHosts;
 import static com.sequenceiq.cloudbreak.blueprint.moduletest.BlueprintModelProvider.blueprintObjectWhenAtlasAndLdapPresentedThenBothShouldConfigured;
 import static com.sequenceiq.cloudbreak.blueprint.moduletest.BlueprintModelProvider.blueprintObjectWhenAtlasPresentedShouldConfigured;
@@ -21,29 +43,6 @@ import static com.sequenceiq.cloudbreak.blueprint.moduletest.BlueprintModelProvi
 import static com.sequenceiq.cloudbreak.blueprint.moduletest.BlueprintModelProvider.blueprintObjectWithZepelinAndHdp25PresentedThenZeppelinShouldConfigured;
 import static com.sequenceiq.cloudbreak.blueprint.moduletest.BlueprintModelProvider.blueprintObjectWithZepelinAndHdp26PresentedThenZeppelinShouldConfigured;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.skyscreamer.jsonassert.JSONAssert;
-import org.skyscreamer.jsonassert.JSONCompareMode;
-import org.skyscreamer.jsonassert.JSONParser;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.boot.test.context.SpringBootTestContextBootstrapper;
-import org.springframework.test.context.BootstrapWith;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.sequenceiq.cloudbreak.blueprint.BlueprintPreparationObject;
-import com.sequenceiq.cloudbreak.blueprint.testrepeater.Generator;
-import com.sequenceiq.cloudbreak.blueprint.testrepeater.ListGenerator;
-
 @RunWith(SpringJUnit4ClassRunner.class)
 @BootstrapWith(SpringBootTestContextBootstrapper.class)
 public class CentralBlueprintUpdaterRollingtest extends CentralBlueprintContext {
@@ -57,8 +56,8 @@ public class CentralBlueprintUpdaterRollingtest extends CentralBlueprintContext 
         params = new ListGenerator<>(ReadTestData.getInputOutputData(testConfig()));
     }
 
-    private Map<String, BlueprintPreparationObject> testConfig() throws JsonProcessingException {
-        return new HashMap<String, BlueprintPreparationObject>() {
+    private Map<String, TemplatePreparationObject> testConfig() throws JsonProcessingException {
+        return new HashMap<String, TemplatePreparationObject>() {
             {
                 put("rds-with-hive-metastore", blueprintObjectWhenHiveAndRdsPresentedThenRdsHiveMetastoreShouldConfigured());
                 put("rds-with-ranger", blueprintObjectWhenRangerAndRdsPresentedThenRdsRangerShouldConfigured());
@@ -89,7 +88,7 @@ public class CentralBlueprintUpdaterRollingtest extends CentralBlueprintContext 
 
     @Test
     public void testGetBlueprintText() throws IOException, JSONException {
-        BlueprintPreparationObject blueprintPreparationObject = prepareBlueprintPreparationObjectWithBlueprintText();
+        TemplatePreparationObject blueprintPreparationObject = preparePreparationObjectWithBlueprintText();
 
         JSONObject expected = toJSON(params.value().getOutput().getFileContent());
         JSONObject resultBlueprintText = toJSON(getUnderTest().getBlueprintText(blueprintPreparationObject));
@@ -103,8 +102,8 @@ public class CentralBlueprintUpdaterRollingtest extends CentralBlueprintContext 
         assertWithExtendedExceptionHandling(stringBuffer.toString(), expected, resultBlueprintText);
     }
 
-    private BlueprintPreparationObject prepareBlueprintPreparationObjectWithBlueprintText() {
-        BlueprintPreparationObject blueprintPreparationObject = params.value().getModel();
+    private TemplatePreparationObject preparePreparationObjectWithBlueprintText() {
+        TemplatePreparationObject blueprintPreparationObject = params.value().getModel();
         blueprintPreparationObject.getBlueprintView().setBlueprintText(params.value().getInput().getFileContent());
         return blueprintPreparationObject;
     }

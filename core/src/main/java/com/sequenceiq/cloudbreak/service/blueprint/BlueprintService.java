@@ -18,8 +18,6 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
-import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessorFactory;
-import com.sequenceiq.cloudbreak.blueprint.configuration.SiteConfigurations;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
@@ -29,6 +27,8 @@ import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.service.AuthorizationService;
+import com.sequenceiq.cloudbreak.template.processor.configuration.SiteConfigurations;
+import com.sequenceiq.cloudbreak.template.processor.processor.TemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.util.NameUtil;
 
 @Service
@@ -47,7 +47,7 @@ public class BlueprintService {
     private AuthorizationService authorizationService;
 
     @Inject
-    private BlueprintProcessorFactory blueprintProcessorFactory;
+    private TemplateProcessorFactory blueprintProcessorFactory;
 
     public Set<Blueprint> retrievePrivateBlueprints(IdentityUser user) {
         return blueprintRepository.findForUser(user.getUserId());

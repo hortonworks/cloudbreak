@@ -1,16 +1,5 @@
 package com.sequenceiq.cloudbreak.blueprint.moduletest;
 
-import java.util.EnumMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.inject.Inject;
-
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.test.context.ContextConfiguration;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.api.model.FileSystemType;
@@ -22,6 +11,15 @@ import com.sequenceiq.cloudbreak.ha.CloudbreakNodeConfig;
 import com.sequenceiq.cloudbreak.json.JsonHelper;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.test.context.ContextConfiguration;
+
+import javax.inject.Inject;
+import java.util.EnumMap;
+import java.util.List;
+import java.util.Map;
 
 @ContextConfiguration
 public class CentralBlueprintContext {
@@ -34,7 +32,7 @@ public class CentralBlueprintContext {
     }
 
     @Configuration
-    @ComponentScan({"com.sequenceiq.cloudbreak.blueprint"})
+    @ComponentScan({"com.sequenceiq.cloudbreak.blueprint", "com.sequenceiq.cloudbreak.template.processor"})
     public static class SpringConfig {
 
         @Inject

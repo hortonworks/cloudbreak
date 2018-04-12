@@ -1,5 +1,14 @@
 package com.sequenceiq.cloudbreak.blueprint;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.sequenceiq.cloudbreak.blueprint.utils.ConfigUtils;
+import com.sequenceiq.cloudbreak.blueprint.utils.HadoopConfigurationUtils;
+import com.sequenceiq.cloudbreak.template.processor.processor.TemplateTextProcessor;
+import com.sequenceiq.cloudbreak.template.processor.template.views.HostgroupView;
+import org.springframework.stereotype.Service;
+
+import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -8,16 +17,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-
-import javax.annotation.PostConstruct;
-import javax.inject.Inject;
-
-import org.springframework.stereotype.Service;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.sequenceiq.cloudbreak.blueprint.template.views.HostgroupView;
-import com.sequenceiq.cloudbreak.blueprint.utils.ConfigUtils;
-import com.sequenceiq.cloudbreak.blueprint.utils.HadoopConfigurationUtils;
 
 @Service
 public class ConfigService {
@@ -87,7 +86,7 @@ public class ConfigService {
         return serviceConfigs;
     }
 
-    public Map<String, Map<String, Map<String, String>>> getHostGroupConfiguration(BlueprintTextProcessor blueprintProcessor,
+    public Map<String, Map<String, Map<String, String>>> getHostGroupConfiguration(TemplateTextProcessor blueprintProcessor,
             Collection<HostgroupView> hostGroups) {
         Map<String, Map<String, Map<String, String>>> hadoopConfig = new HashMap<>();
         hostGroups.stream()
@@ -96,7 +95,7 @@ public class ConfigService {
         return hadoopConfig;
     }
 
-    public Map<String, Map<String, String>> getComponentsByHostGroup(BlueprintTextProcessor blueprintProcessor, Collection<HostgroupView> hostGroups) {
+    public Map<String, Map<String, String>> getComponentsByHostGroup(TemplateTextProcessor blueprintProcessor, Collection<HostgroupView> hostGroups) {
         Map<String, Map<String, String>> config = new HashMap<>();
 
         Map<String, Set<String>> componentsByHostGroup = blueprintProcessor.getComponentsByHostGroup();
@@ -125,7 +124,7 @@ public class ConfigService {
         });
     }
 
-    private Map<String, Map<String, String>> getHadoopConfigs(BlueprintTextProcessor blueprintProcessor, HostgroupView hostGroup) {
+    private Map<String, Map<String, String>> getHadoopConfigs(TemplateTextProcessor blueprintProcessor, HostgroupView hostGroup) {
         int volumeCount = Objects.isNull(hostGroup.getVolumeCount()) ? -1 : hostGroup.getVolumeCount();
 
         Map<String, Map<String, String>> hadoopConfig = new HashMap<>();

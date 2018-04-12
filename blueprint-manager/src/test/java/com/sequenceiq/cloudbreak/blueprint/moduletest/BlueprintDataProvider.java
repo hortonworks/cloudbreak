@@ -1,12 +1,12 @@
 package com.sequenceiq.cloudbreak.blueprint.moduletest;
 
-import com.sequenceiq.cloudbreak.blueprint.BlueprintPreparationObject;
+import com.sequenceiq.cloudbreak.template.processor.processor.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.blueprint.testrepeater.TestFile;
 import com.sequenceiq.cloudbreak.blueprint.testrepeater.TripleTestData;
 
-class BlueprintDataProvider extends TripleTestData<TestFile, TestFile, BlueprintPreparationObject> {
+class BlueprintDataProvider extends TripleTestData<TestFile, TestFile, TemplatePreparationObject> {
 
-    BlueprintDataProvider(TestFile input, TestFile output, BlueprintPreparationObject model) {
+    BlueprintDataProvider(TestFile input, TestFile output, TemplatePreparationObject model) {
         super(input, output, model);
     }
 
@@ -18,7 +18,7 @@ class BlueprintDataProvider extends TripleTestData<TestFile, TestFile, Blueprint
         return getData2();
     }
 
-    BlueprintPreparationObject getModel() {
+    TemplatePreparationObject getModel() {
         return getData3();
     }
 

@@ -1,13 +1,12 @@
 package com.sequenceiq.cloudbreak.blueprint.utils;
 
-import java.util.Collection;
-
-import org.springframework.stereotype.Component;
-
-import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessingException;
 import com.sequenceiq.cloudbreak.blueprint.ConfigProperty;
 import com.sequenceiq.cloudbreak.blueprint.VolumeUtils;
-import com.sequenceiq.cloudbreak.blueprint.template.views.HostgroupView;
+import com.sequenceiq.cloudbreak.template.processor.processor.TemplateProcessingException;
+import com.sequenceiq.cloudbreak.template.processor.template.views.HostgroupView;
+import org.springframework.stereotype.Component;
+
+import java.util.Collection;
 
 @Component
 public class HadoopConfigurationUtils {
@@ -16,7 +15,7 @@ public class HadoopConfigurationUtils {
         return hostGroups.stream()
                 .filter(hostGroup -> hostGroup.getName().equals(hostGroupName))
                 .findFirst()
-                .orElseThrow(() -> new BlueprintProcessingException(
+                .orElseThrow(() -> new TemplateProcessingException(
                         String.format("Couldn't find a saved hostgroup for [%s] hostgroup name in the validation.", hostGroupName)));
     }
 

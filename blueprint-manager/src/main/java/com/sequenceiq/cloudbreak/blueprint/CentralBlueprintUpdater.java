@@ -1,17 +1,16 @@
 package com.sequenceiq.cloudbreak.blueprint;
 
-import java.io.IOException;
-
-import javax.inject.Inject;
-
+import com.google.common.collect.Maps;
+import com.sequenceiq.cloudbreak.template.processor.processor.TemplatePreparationObject;
+import com.sequenceiq.cloudbreak.template.processor.processor.TemplateProcessingException;
+import com.sequenceiq.cloudbreak.template.processor.template.TemplateProcessor;
+import groovyx.net.http.HttpResponseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.google.common.collect.Maps;
-import com.sequenceiq.cloudbreak.blueprint.template.BlueprintTemplateProcessor;
-
-import groovyx.net.http.HttpResponseException;
+import javax.inject.Inject;
+import java.io.IOException;
 
 @Component
 public class CentralBlueprintUpdater {
@@ -19,7 +18,7 @@ public class CentralBlueprintUpdater {
     private static final Logger LOGGER = LoggerFactory.getLogger(CentralBlueprintUpdater.class);
 
     @Inject
-    private BlueprintTemplateProcessor blueprintTemplateProcessor;
+    private TemplateProcessor blueprintTemplateProcessor;
 
     @Inject
     private BlueprintSegmentProcessor blueprintSegmentProcessor;
@@ -27,19 +26,19 @@ public class CentralBlueprintUpdater {
     @Inject
     private BlueprintComponentProviderProcessor blueprintComponentProviderProcessor;
 
-    public String getBlueprintText(BlueprintPreparationObject source) throws BlueprintProcessingException, HttpResponseException {
+    public String getBlueprintText(TemplatePreparationObject source) throws TemplateProcessingException, HttpResponseException {
         String blueprintText = source.getBlueprintView().getBlueprintText();
         try {
             blueprintText = updateBlueprintConfiguration(source, blueprintText);
         } catch (IOException e) {
             String message = String.format("Unable to update blueprint with default  properties which was: %s", blueprintText);
             LOGGER.warn(message);
-            throw new BlueprintProcessingException(message, e);
+            throw new TemplateProcessingException(message, e);
         }
         return blueprintText;
     }
 
-    private String updateBlueprintConfiguration(BlueprintPreparationObject source, String blueprint)
+    private String updateBlueprintConfiguration(TemplatePreparationObject source, String blueprint)
             throws IOException {
         blueprint = blueprintTemplateProcessor.process(blueprint, source, Maps.newHashMap());
         blueprint = blueprintSegmentProcessor.process(blueprint, source);

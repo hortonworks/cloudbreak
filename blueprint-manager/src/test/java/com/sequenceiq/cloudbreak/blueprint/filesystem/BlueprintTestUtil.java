@@ -1,12 +1,12 @@
 package com.sequenceiq.cloudbreak.blueprint.filesystem;
 
-import java.util.Optional;
-
 import com.sequenceiq.cloudbreak.api.model.ExecutorType;
-import com.sequenceiq.cloudbreak.blueprint.template.views.BlueprintView;
-import com.sequenceiq.cloudbreak.blueprint.templates.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariDatabase;
 import com.sequenceiq.cloudbreak.domain.Cluster;
+import com.sequenceiq.cloudbreak.template.processor.template.views.BlueprintView;
+import com.sequenceiq.cloudbreak.template.processor.templates.GeneralClusterConfigs;
+
+import java.util.Optional;
 
 public class BlueprintTestUtil {
 

@@ -1,0 +1,172 @@
+{
+  "settings": [
+    {
+      "recovery_settings": [
+        {
+          "recovery_enabled": "true"
+        }
+      ]
+    }
+  ],
+  "Blueprints": {
+    "stack_version": "2.6",
+    "blueprint_name": "multi-node-hdfs-yarn",
+    "stack_name": "HDP"
+  },
+  "configurations": [
+    {
+      "hdfs-site": {
+        "properties": {
+          "dfs.journalnode.edits.dir": "/hadoopfs/fs1/hdfs/journalnode",
+          "dfs.namenode.name.dir": "/hadoopfs/fs1/hdfs/namenode",
+          "dfs.replication": 2,
+          "dfs.namenode.checkpoint.dir": "/hadoopfs/fs1/hdfs/namesecondary"
+        }
+      }
+    },
+    {
+      "cluster-env": {
+        "properties": {
+          "recovery_enabled": "true",
+          "recovery_type": "AUTO_START"
+        }
+      }
+    },
+    {
+      "hbase-site": {
+        "properties": {
+          "zookeeper.recovery.retry": "10"
+        }
+      }
+    },
+    {
+      "core-site": {
+        "properties": {
+          "proxyuser_group": "hadoop",
+          "hadoop.proxyuser.falcon.groups": "*",
+          "hadoop.proxyuser.root.groups": "*",
+          "hadoop.proxyuser.falcon.hosts": "*",
+          "hadoop.proxyuser.oozie.hosts": "*",
+          "hadoop.proxyuser.hcat.hosts": "*",
+          "hadoop.proxyuser.oozie.groups": "*",
+          "hadoop.proxyuser.hive.groups": "*",
+          "hadoop.proxyuser.hcat.groups": "*",
+          "hadoop.proxyuser.hbase.groups": "*",
+          "hadoop.proxyuser.hbase.hosts": "*",
+          "hadoop.proxyuser.root.hosts": "*",
+          "hadoop.proxyuser.hive.hosts": "*"
+        }
+      }
+    },
+    {
+      "zeppelin-shiro-ini": {
+        "properties": {
+          "shiro_ini_content": "[users]\n# List of users with their password allowed to access Zeppelin.\n# To use a different strategy (LDAP / Database / ...) check the shiro doc at http://shiro.apache.org/configuration.html#Configuration-INISections\n\nadmin = Passw0rd\n\n# Sample LDAP configuration, for user Authentication, currently tested for single Realm\n[main]\n\nldapRealm = org.apache.shiro.realm.ldap.JndiLdapRealm\nldapRealm.userDnTemplate = uid={0},ou=Users,dc=hadoop,dc=apache,dc=org\nldapRealm.contextFactory.url = ldap://localhost:33389\nldapRealm.contextFactory.authenticationMechanism = SIMPLE\n\nsessionManager = org.apache.shiro.web.session.mgt.DefaultWebSessionManager\nsecurityManager.sessionManager = $sessionManager\n# 86,400,000 milliseconds = 24 hour\nsecurityManager.sessionManager.globalSessionTimeout = 86400000\nshiro.loginUrl = /api/login\n\n[urls]\n# anon means the access is anonymous.\n# authcBasic means Basic Auth Security\n# To enfore security, comment the line below and uncomment the next one\n/api/version = anon\n#/** = anon\n/** = authc"
+        }
+      }
+    },
+    {
+      "zoo.cfg": {
+        "properties": {
+          "dataDir": "/hadoopfs/fs1/zookeeper"
+        }
+      }
+    },
+    {
+      "yarn-site": {
+        "properties": {
+          "yarn.timeline-service.leveldb-timeline-store.path": "/hadoopfs/fs1/yarn/timeline"
+        }
+      }
+    }
+  ],
+  "host_groups": [
+    {
+      "components": [
+        {
+          "name": "NAMENODE"
+        },
+        {
+          "name": "SECONDARY_NAMENODE"
+        },
+        {
+          "name": "RESOURCEMANAGER"
+        },
+        {
+          "name": "APP_TIMELINE_SERVER"
+        },
+        {
+          "name": "HISTORYSERVER"
+        },
+        {
+          "name": "ZOOKEEPER_SERVER"
+        },
+        {
+          "name": "ZEPPELIN_MASTER"
+        }
+      ],
+      "configurations": [
+        {
+          "hdfs-site": {
+            "dfs.datanode.data.dir": "/hadoopfs/fs1/hdfs/datanode"
+          }
+        },
+        {
+          "yarn-site": {
+            "yarn.nodemanager.local-dirs": "/hadoopfs/fs1/yarn/nodemanager",
+            "yarn.nodemanager.log-dirs": "/hadoopfs/fs1/yarn/nodemanager/log"
+          }
+        },
+        {
+          "core-site": {
+            "fs.s3a.buffer.dir": "/hadoopfs/fs1/s3/temp"
+          }
+        }
+      ],
+      "name": "master",
+      "cardinality": "1"
+    },
+    {
+      "components": [
+        {
+          "name": "DATANODE"
+        },
+        {
+          "name": "HDFS_CLIENT"
+        },
+        {
+          "name": "NODEMANAGER"
+        },
+        {
+          "name": "YARN_CLIENT"
+        },
+        {
+          "name": "MAPREDUCE2_CLIENT"
+        },
+        {
+          "name": "ZOOKEEPER_CLIENT"
+        }
+      ],
+      "configurations": [
+        {
+          "hdfs-site": {
+            "dfs.datanode.data.dir": "/hadoopfs/fs1/hdfs/datanode"
+          }
+        },
+        {
+          "yarn-site": {
+            "yarn.nodemanager.local-dirs": "/hadoopfs/fs1/yarn/nodemanager",
+            "yarn.nodemanager.log-dirs": "/hadoopfs/fs1/yarn/nodemanager/log"
+          }
+        },
+        {
+          "core-site": {
+            "fs.s3a.buffer.dir": "/hadoopfs/fs1/s3/temp"
+          }
+        }
+      ],
+      "name": "slave_1",
+      "cardinality": "2"
+    }
+  ]
+}

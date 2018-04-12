@@ -1,12 +1,14 @@
 package com.sequenceiq.cloudbreak.structuredevent.reactor;
 
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Component;
+
 import com.sequenceiq.cloudbreak.cloud.reactor.ErrorHandlerAwareReactorEventFactory;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEvent;
-import org.springframework.stereotype.Component;
+
 import reactor.bus.Event;
 import reactor.bus.EventBus;
-
-import javax.inject.Inject;
 
 @Component
 public class KafkaStructuredEventAsyncNotifier {

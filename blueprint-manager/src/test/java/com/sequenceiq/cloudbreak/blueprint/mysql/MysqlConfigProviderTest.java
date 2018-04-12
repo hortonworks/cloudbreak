@@ -1,12 +1,12 @@
 package com.sequenceiq.cloudbreak.blueprint.mysql;
 
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.io.IOException;
-
+import com.google.common.collect.Sets;
+import com.sequenceiq.cloudbreak.TestUtil;
+import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
+import com.sequenceiq.cloudbreak.template.processor.processor.TemplatePreparationObject;
+import com.sequenceiq.cloudbreak.template.processor.processor.TemplateProcessorFactory;
+import com.sequenceiq.cloudbreak.template.processor.processor.TemplateTextProcessor;
+import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
@@ -16,13 +16,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import com.google.common.collect.Sets;
-import com.sequenceiq.cloudbreak.TestUtil;
-import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
-import com.sequenceiq.cloudbreak.blueprint.BlueprintPreparationObject;
-import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessorFactory;
-import com.sequenceiq.cloudbreak.blueprint.BlueprintTextProcessor;
-import com.sequenceiq.cloudbreak.util.FileReaderUtils;
+import java.io.IOException;
+
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MysqlConfigProviderTest {
@@ -31,10 +30,10 @@ public class MysqlConfigProviderTest {
     public final ExpectedException thrown = ExpectedException.none();
 
     @Mock
-    private BlueprintProcessorFactory blueprintProcessorFactory;
+    private TemplateProcessorFactory blueprintProcessorFactory;
 
     @Mock
-    private BlueprintTextProcessor blueprintProcessor;
+    private TemplateTextProcessor blueprintProcessor;
 
     @InjectMocks
     private MysqlConfigProvider underTest;
@@ -43,7 +42,7 @@ public class MysqlConfigProviderTest {
     public void testRemoveComponentFromBlueprintWhenBlueprintContainsMysqlServerThenShouldReturnTrue() throws IOException {
         String blueprintText = FileReaderUtils.readFileFromClasspath("blueprints-jackson/bp-kerberized-test.bp");
 
-        BlueprintPreparationObject object = BlueprintPreparationObject.Builder.builder()
+        TemplatePreparationObject object = TemplatePreparationObject.Builder.builder()
                 .withRdsConfigs(Sets.newHashSet(TestUtil.rdsConfig(RdsType.HIVE)))
                 .build();
 
@@ -59,7 +58,7 @@ public class MysqlConfigProviderTest {
     public void testAdditionalCriteriaWhenBlueprintContainsMysqlServerThenShouldReturnTrue() throws IOException {
         String blueprintText = FileReaderUtils.readFileFromClasspath("blueprints-jackson/bp-kerberized-test.bp");
 
-        BlueprintPreparationObject object = BlueprintPreparationObject.Builder.builder()
+        TemplatePreparationObject object = TemplatePreparationObject.Builder.builder()
                 .withRdsConfigs(Sets.newHashSet(TestUtil.rdsConfig(RdsType.HIVE)))
                 .build();
 
@@ -73,7 +72,7 @@ public class MysqlConfigProviderTest {
     public void testAdditionalCriteriaWhenRdsConfigEmptyThenShouldReturnFalse() throws IOException {
         String blueprintText = FileReaderUtils.readFileFromClasspath("blueprints-jackson/bp-kerberized-test.bp");
 
-        BlueprintPreparationObject object = BlueprintPreparationObject.Builder.builder()
+        TemplatePreparationObject object = TemplatePreparationObject.Builder.builder()
                 .build();
 
         Assert.assertFalse(underTest.additionalCriteria(object, blueprintText));

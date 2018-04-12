@@ -1,12 +1,15 @@
 package com.sequenceiq.cloudbreak.converter.mapper;
 
+import java.util.HashSet;
+import java.util.Set;
+
+import javax.annotation.Generated;
+
+import org.springframework.stereotype.Component;
+
 import com.sequenceiq.cloudbreak.api.model.proxy.ProxyConfigRequest;
 import com.sequenceiq.cloudbreak.api.model.proxy.ProxyConfigResponse;
 import com.sequenceiq.cloudbreak.domain.ProxyConfig;
-import java.util.HashSet;
-import java.util.Set;
-import javax.annotation.Generated;
-import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor"

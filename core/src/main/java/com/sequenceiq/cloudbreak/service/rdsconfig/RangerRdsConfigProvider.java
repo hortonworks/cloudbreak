@@ -6,16 +6,16 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
-import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessorFactory;
-import com.sequenceiq.cloudbreak.blueprint.BlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.template.processor.processor.TemplateProcessorFactory;
+import com.sequenceiq.cloudbreak.template.processor.processor.TemplateTextProcessor;
 
 @Component
 public class RangerRdsConfigProvider extends AbstractRdsConfigProvider {
 
     private static final String PILLAR_KEY = "ranger";
 
-    private static final String[] PATH = {BlueprintTextProcessor.CONFIGURATIONS_NODE, "admin-properties", "properties"};
+    private static final String[] PATH = {TemplateTextProcessor.CONFIGURATIONS_NODE, "admin-properties", "properties"};
 
     private static final String[] CONFIGURATIONS = {"db_user", "db_password", "db_name", "db_host"};
 
@@ -29,10 +29,10 @@ public class RangerRdsConfigProvider extends AbstractRdsConfigProvider {
     private String rangerDbPort;
 
     @Inject
-    private BlueprintProcessorFactory blueprintProcessorFactory;
+    private TemplateProcessorFactory blueprintProcessorFactory;
 
     private boolean isRdsConfigNeedForRangerAdmin(Blueprint blueprint) {
-        BlueprintTextProcessor blueprintProcessor = blueprintProcessorFactory.get(blueprint.getBlueprintText());
+        TemplateTextProcessor blueprintProcessor = blueprintProcessorFactory.get(blueprint.getBlueprintText());
         return blueprintProcessor.componentExistsInBlueprint("RANGER_ADMIN")
                 && !blueprintProcessor.componentExistsInBlueprint("MYSQL_SERVER")
                 && !blueprintProcessor.isAllConfigurationExistsInPathUnderConfigurationNode(createPathListFromConfingurations(PATH, CONFIGURATIONS));

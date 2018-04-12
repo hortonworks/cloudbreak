@@ -13,9 +13,9 @@ import org.mockito.InjectMocks;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ContainerOrchestratorResolver;
 import com.sequenceiq.cloudbreak.orchestrator.container.ContainerOrchestrator;
+import com.sequenceiq.cloudbreak.service.CloudbreakException;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ContainerOrchestratorResolverTest {

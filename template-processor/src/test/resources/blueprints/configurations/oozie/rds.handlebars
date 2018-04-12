@@ -1,0 +1,18 @@
+{
+{{{#if rds.oozie}}}
+  "oozie-site": {
+    "properties": {
+      "oozie.service.JPAService.jdbc.driver": "{{{ rds.oozie.connectionDriver }}}",
+      "oozie.service.JPAService.jdbc.url": "{{{ rds.oozie.connectionURL }}}",
+      "oozie.service.JPAService.jdbc.username": "{{{ rds.oozie.connectionUserName }}}",
+      "oozie.service.JPAService.jdbc.password": "{{{ rds.oozie.connectionPassword }}}"
+    }
+  },
+  "oozie-env" : {
+    "properties" : {
+      "oozie_database" : "Existing {{{ rds.oozie.subprotocol }}} Database",
+      "oozie_database_type" : "{{{ rds.oozie.databaseEngine }}}"
+    }
+  }
+{{{/if}}}
+}

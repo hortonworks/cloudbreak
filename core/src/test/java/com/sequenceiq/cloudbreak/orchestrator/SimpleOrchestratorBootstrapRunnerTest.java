@@ -7,10 +7,10 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 import org.slf4j.MDC;
 
-import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
+import com.sequenceiq.cloudbreak.service.CloudbreakException;
 
 public class SimpleOrchestratorBootstrapRunnerTest {
 

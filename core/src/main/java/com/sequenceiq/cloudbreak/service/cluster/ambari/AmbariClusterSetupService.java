@@ -29,7 +29,6 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.ambari.client.AmbariClient;
-import com.sequenceiq.cloudbreak.blueprint.BlueprintPreparationObject;
 import com.sequenceiq.cloudbreak.blueprint.CentralBlueprintUpdater;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
@@ -49,6 +48,7 @@ import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.template.processor.processor.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.util.AmbariClientExceptionUtil;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
@@ -142,7 +142,7 @@ public class AmbariClusterSetupService implements ClusterSetupService {
             clusterService.updateCreationDateOnCluster(cluster);
             AmbariClient ambariClient = clientFactory.getAmbariClient(stack, stack.getCluster());
             Set<HostGroup> hostGroups = hostGroupService.getByCluster(cluster.getId());
-            BlueprintPreparationObject blueprintPreparationObject = conversionService.convert(stack, BlueprintPreparationObject.class);
+            TemplatePreparationObject blueprintPreparationObject = conversionService.convert(stack, TemplatePreparationObject.class);
             Map<String, List<Map<String, String>>> hostGroupMappings = hostGroupAssociationBuilder.buildHostGroupAssociations(hostGroups);
             Set<HostMetadata> hostsInCluster = hostMetadataRepository.findHostsInCluster(cluster.getId());
 

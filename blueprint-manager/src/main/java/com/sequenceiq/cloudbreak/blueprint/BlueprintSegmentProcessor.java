@@ -1,7 +1,17 @@
 package com.sequenceiq.cloudbreak.blueprint;
 
-import static com.sequenceiq.cloudbreak.util.FileReaderUtils.readFileFromClasspathQuietly;
+import com.sequenceiq.cloudbreak.template.processor.processor.TemplatePreparationObject;
+import com.sequenceiq.cloudbreak.template.processor.processor.TemplateProcessorFactory;
+import com.sequenceiq.cloudbreak.template.processor.template.TemplateProcessor;
+import com.sequenceiq.cloudbreak.template.processor.templates.RelatedServices;
+import com.sequenceiq.cloudbreak.template.processor.templates.ServiceName;
+import com.sequenceiq.cloudbreak.template.processor.templates.TemplateFiles;
+import com.sequenceiq.cloudbreak.util.JsonUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
+import javax.inject.Inject;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
@@ -11,17 +21,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import javax.inject.Inject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
-
-import com.sequenceiq.cloudbreak.blueprint.template.BlueprintTemplateProcessor;
-import com.sequenceiq.cloudbreak.blueprint.templates.RelatedServices;
-import com.sequenceiq.cloudbreak.blueprint.templates.ServiceName;
-import com.sequenceiq.cloudbreak.blueprint.templates.TemplateFiles;
-import com.sequenceiq.cloudbreak.util.JsonUtil;
+import static com.sequenceiq.cloudbreak.util.FileReaderUtils.readFileFromClasspathQuietly;
 
 @Component
 public class BlueprintSegmentProcessor {
@@ -31,15 +31,15 @@ public class BlueprintSegmentProcessor {
     private static final String SERVICES_JSON = "services.json";
 
     @Inject
-    private BlueprintTemplateProcessor blueprintTemplateProcessor;
+    private TemplateProcessor blueprintTemplateProcessor;
 
     @Inject
     private BlueprintSegmentReader blueprintSegmentReader;
 
     @Inject
-    private BlueprintProcessorFactory blueprintProcessorFactory;
+    private TemplateProcessorFactory blueprintProcessorFactory;
 
-    public String process(String blueprintText, BlueprintPreparationObject source) {
+    public String process(String blueprintText, TemplatePreparationObject source) {
         Map<String, Object> customProperties = new HashMap<>();
         AtomicReference<String> resultBlueprint = new AtomicReference<>(blueprintText);
 
@@ -91,7 +91,7 @@ public class BlueprintSegmentProcessor {
         return value.getFiles().stream().filter(item -> !item.endsWith(SERVICES_JSON)).collect(Collectors.toList());
     }
 
-    private String prepareContent(final String filePath, BlueprintPreparationObject source, Map<String, Object> configs) {
+    private String prepareContent(final String filePath, TemplatePreparationObject source, Map<String, Object> configs) {
         String result;
         String content = readFileFromClasspathQuietly(filePath);
         try {

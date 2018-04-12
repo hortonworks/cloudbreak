@@ -1,0 +1,17 @@
+{
+{{{#eq stack_type 'HDF'}}}
+  "nifi-ambari-ssl-config": {
+    "content": "{{{ nifi_targets }}}",
+    "nifi.initial.admin.identity": "{{{ cluster_admin_firstname }}}"
+  },
+{{{#if nifi_proxy_hosts}}}
+  "nifi-properties": {
+    "nifi.web.proxy.host": "{{{ nifi_proxy_hosts }}}"
+  },
+{{{/if}}}
+  "ams-grafana-env": {
+    "metrics_grafana_username": "{{{ cluster_admin_firstname }}}",
+    "metrics_grafana_password": "{{{ cluster_admin_password }}}"
+  }
+{{{/eq}}}
+}

@@ -1,11 +1,12 @@
 package com.sequenceiq.cloudbreak.blueprint;
 
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.io.IOException;
-
+import com.google.common.collect.Maps;
+import com.sequenceiq.cloudbreak.TestUtil;
+import com.sequenceiq.cloudbreak.domain.Cluster;
+import com.sequenceiq.cloudbreak.template.processor.processor.TemplatePreparationObject;
+import com.sequenceiq.cloudbreak.template.processor.processor.TemplateProcessingException;
+import com.sequenceiq.cloudbreak.template.processor.template.TemplateProcessor;
+import com.sequenceiq.cloudbreak.template.processor.template.views.BlueprintView;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -16,11 +17,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import com.google.common.collect.Maps;
-import com.sequenceiq.cloudbreak.TestUtil;
-import com.sequenceiq.cloudbreak.blueprint.template.BlueprintTemplateProcessor;
-import com.sequenceiq.cloudbreak.blueprint.template.views.BlueprintView;
-import com.sequenceiq.cloudbreak.domain.Cluster;
+import java.io.IOException;
+
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CentralBlueprintUpdaterTest {
@@ -29,7 +30,7 @@ public class CentralBlueprintUpdaterTest {
     public final ExpectedException thrown = ExpectedException.none();
 
     @Mock
-    private BlueprintTemplateProcessor blueprintTemplateProcessor;
+    private TemplateProcessor blueprintTemplateProcessor;
 
     @Mock
     private BlueprintSegmentProcessor blueprintSegmentProcessor;
@@ -40,7 +41,7 @@ public class CentralBlueprintUpdaterTest {
     @InjectMocks
     private CentralBlueprintUpdater underTest;
 
-    private BlueprintPreparationObject object;
+    private TemplatePreparationObject object;
 
     private String testBlueprint;
 
@@ -51,7 +52,7 @@ public class CentralBlueprintUpdaterTest {
         Cluster cluster = TestUtil.cluster();
         cluster.getBlueprint().setBlueprintText(testBlueprint);
 
-        object = BlueprintPreparationObject.Builder.builder()
+        object = TemplatePreparationObject.Builder.builder()
                 .withBlueprintView(new BlueprintView(TestUtil.blueprint().getBlueprintText(), Maps.newHashMap(), "HDP", "2.6"))
                 .build();
     }
@@ -77,7 +78,7 @@ public class CentralBlueprintUpdaterTest {
 
         String message = String.format("Unable to update blueprint with default  properties which was: %s", testBlueprint);
 
-        thrown.expect(BlueprintProcessingException.class);
+        thrown.expect(TemplateProcessingException.class);
         thrown.expectMessage(message);
 
         String result = underTest.getBlueprintText(object);

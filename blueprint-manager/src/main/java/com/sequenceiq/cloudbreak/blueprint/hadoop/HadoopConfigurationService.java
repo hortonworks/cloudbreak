@@ -1,19 +1,17 @@
 package com.sequenceiq.cloudbreak.blueprint.hadoop;
 
-import java.util.Collection;
-import java.util.Map;
-
-import javax.inject.Inject;
-
+import com.sequenceiq.cloudbreak.blueprint.BlueprintComponentConfigProvider;
+import com.sequenceiq.cloudbreak.blueprint.ConfigService;
+import com.sequenceiq.cloudbreak.template.processor.processor.TemplatePreparationObject;
+import com.sequenceiq.cloudbreak.template.processor.processor.TemplateTextProcessor;
+import com.sequenceiq.cloudbreak.template.processor.configuration.HostgroupConfigurations;
+import com.sequenceiq.cloudbreak.template.processor.configuration.SiteConfigurations;
+import com.sequenceiq.cloudbreak.template.processor.template.views.HostgroupView;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.blueprint.BlueprintComponentConfigProvider;
-import com.sequenceiq.cloudbreak.blueprint.BlueprintPreparationObject;
-import com.sequenceiq.cloudbreak.blueprint.BlueprintTextProcessor;
-import com.sequenceiq.cloudbreak.blueprint.ConfigService;
-import com.sequenceiq.cloudbreak.blueprint.configuration.HostgroupConfigurations;
-import com.sequenceiq.cloudbreak.blueprint.configuration.SiteConfigurations;
-import com.sequenceiq.cloudbreak.blueprint.template.views.HostgroupView;
+import javax.inject.Inject;
+import java.util.Collection;
+import java.util.Map;
 
 @Service
 public class HadoopConfigurationService implements BlueprintComponentConfigProvider {
@@ -22,7 +20,7 @@ public class HadoopConfigurationService implements BlueprintComponentConfigProvi
     private ConfigService configService;
 
     @Override
-    public BlueprintTextProcessor customTextManipulation(BlueprintPreparationObject source, BlueprintTextProcessor blueprintProcessor) {
+    public TemplateTextProcessor customTextManipulation(TemplatePreparationObject source, TemplateTextProcessor blueprintProcessor) {
         Map<String, Map<String, Map<String, String>>> hostGroupConfig =
                 configService.getHostGroupConfiguration(blueprintProcessor, source.getHostgroupViews());
         HostgroupConfigurations hostgroupConfigurations = HostgroupConfigurations.fromMap(hostGroupConfig);
@@ -36,11 +34,11 @@ public class HadoopConfigurationService implements BlueprintComponentConfigProvi
     }
 
     @Override
-    public boolean additionalCriteria(BlueprintPreparationObject source, String blueprintProcessor) {
+    public boolean additionalCriteria(TemplatePreparationObject source, String blueprintProcessor) {
         return !source.getBlueprintView().isHdf();
     }
 
-    private Map<String, Map<String, String>> getGlobalConfiguration(BlueprintTextProcessor blueprintProcessor, Collection<HostgroupView> hostGroups) {
+    private Map<String, Map<String, String>> getGlobalConfiguration(TemplateTextProcessor blueprintProcessor, Collection<HostgroupView> hostGroups) {
         Map<String, Map<String, String>> config = configService.getComponentsByHostGroup(blueprintProcessor, hostGroups);
         configService.collectBlueprintConfigIfNeed(config);
         return config;

@@ -1,7 +1,23 @@
 package com.sequenceiq.cloudbreak.blueprint.smartsense;
 
-import static com.sequenceiq.cloudbreak.api.model.InstanceGroupType.GATEWAY;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.sequenceiq.cloudbreak.blueprint.BlueprintComponentConfigProvider;
+import com.sequenceiq.cloudbreak.blueprint.SmartsenseConfigurationLocator;
+import com.sequenceiq.cloudbreak.domain.json.Json;
+import com.sequenceiq.cloudbreak.ha.CloudbreakNodeConfig;
+import com.sequenceiq.cloudbreak.template.processor.processor.TemplateConfigurationEntry;
+import com.sequenceiq.cloudbreak.template.processor.processor.TemplatePreparationObject;
+import com.sequenceiq.cloudbreak.template.processor.processor.TemplateProcessorFactory;
+import com.sequenceiq.cloudbreak.template.processor.processor.TemplateTextProcessor;
+import com.sequenceiq.cloudbreak.template.processor.template.views.HostgroupView;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
+import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -10,25 +26,7 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import javax.inject.Inject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.sequenceiq.cloudbreak.blueprint.BlueprintComponentConfigProvider;
-import com.sequenceiq.cloudbreak.blueprint.BlueprintConfigurationEntry;
-import com.sequenceiq.cloudbreak.blueprint.BlueprintPreparationObject;
-import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessorFactory;
-import com.sequenceiq.cloudbreak.blueprint.BlueprintTextProcessor;
-import com.sequenceiq.cloudbreak.blueprint.SmartsenseConfigurationLocator;
-import com.sequenceiq.cloudbreak.blueprint.template.views.HostgroupView;
-import com.sequenceiq.cloudbreak.domain.json.Json;
-import com.sequenceiq.cloudbreak.ha.CloudbreakNodeConfig;
+import static com.sequenceiq.cloudbreak.api.model.InstanceGroupType.GATEWAY;
 
 @Component
 public class SmartSenseConfigProvider implements BlueprintComponentConfigProvider {
@@ -60,24 +58,24 @@ public class SmartSenseConfigProvider implements BlueprintComponentConfigProvide
     private CloudbreakNodeConfig cloudbreakNodeConfig;
 
     @Inject
-    private BlueprintProcessorFactory blueprintProcessorFactory;
+    private TemplateProcessorFactory blueprintProcessorFactory;
 
     @Inject
     private SmartsenseConfigurationLocator smartsenseConfigurationLocator;
 
     @Override
-    public BlueprintTextProcessor customTextManipulation(BlueprintPreparationObject source, BlueprintTextProcessor blueprintProcessor) {
+    public TemplateTextProcessor customTextManipulation(TemplatePreparationObject source, TemplateTextProcessor blueprintProcessor) {
         String smartSenseId = source.getSmartSenseSubscriptionId().get();
         Set<String> hostGroupNames = source.getHostgroupViews().stream().map(getHostGroupNameMapper()).collect(Collectors.toSet());
         addSmartSenseServerToBp(blueprintProcessor, source.getHostgroupViews(), hostGroupNames);
         blueprintProcessor.addComponentToHostgroups(HST_AGENT_COMPONENT, hg -> hostGroupNames.contains(hg));
-        List<BlueprintConfigurationEntry> configs = new ArrayList<>();
+        List<TemplateConfigurationEntry> configs = new ArrayList<>();
         configs.addAll(getSmartSenseServerConfigs(source, smartSenseId));
         return blueprintProcessor.addConfigEntries(configs, true);
     }
 
     @Override
-    public boolean additionalCriteria(BlueprintPreparationObject source, String blueprintText) {
+    public boolean additionalCriteria(TemplatePreparationObject source, String blueprintText) {
         return smartsenseConfigurationLocator.smartsenseConfigurableBySubscriptionId(source.getSmartSenseSubscriptionId());
     }
 
@@ -85,7 +83,7 @@ public class SmartSenseConfigProvider implements BlueprintComponentConfigProvide
         return HostgroupView::getName;
     }
 
-    private String addSmartSenseServerToBp(BlueprintTextProcessor blueprintProcessor, Iterable<HostgroupView> hostgroupViews,
+    private String addSmartSenseServerToBp(TemplateTextProcessor blueprintProcessor, Iterable<HostgroupView> hostgroupViews,
             Collection<String> hostGroupNames) {
         if (!blueprintProcessor.componentExistsInBlueprint(HST_SERVER_COMPONENT)) {
             String aHostGroupName = hostGroupNames.stream().findFirst().get();
@@ -115,14 +113,14 @@ public class SmartSenseConfigProvider implements BlueprintComponentConfigProvide
         return blueprintProcessor.asText();
     }
 
-    private Collection<? extends BlueprintConfigurationEntry> getSmartSenseServerConfigs(BlueprintPreparationObject source, String smartSenseId) {
-        Collection<BlueprintConfigurationEntry> configs = new ArrayList<>();
-        configs.add(new BlueprintConfigurationEntry(SMART_SENSE_SERVER_CONFIG_FILE, "customer.account.name", "Hortonworks_Cloud_HDP"));
-        configs.add(new BlueprintConfigurationEntry(SMART_SENSE_SERVER_CONFIG_FILE, "customer.notification.email", "aws-marketplace@hortonworks.com"));
+    private Collection<? extends TemplateConfigurationEntry> getSmartSenseServerConfigs(TemplatePreparationObject source, String smartSenseId) {
+        Collection<TemplateConfigurationEntry> configs = new ArrayList<>();
+        configs.add(new TemplateConfigurationEntry(SMART_SENSE_SERVER_CONFIG_FILE, "customer.account.name", "Hortonworks_Cloud_HDP"));
+        configs.add(new TemplateConfigurationEntry(SMART_SENSE_SERVER_CONFIG_FILE, "customer.notification.email", "aws-marketplace@hortonworks.com"));
         String clusterName = getClusterName(source);
-        configs.add(new BlueprintConfigurationEntry(SMART_SENSE_SERVER_CONFIG_FILE, "cluster.name", clusterName));
+        configs.add(new TemplateConfigurationEntry(SMART_SENSE_SERVER_CONFIG_FILE, "cluster.name", clusterName));
 
-        configs.add(new BlueprintConfigurationEntry(SMART_SENSE_SERVER_CONFIG_FILE, "customer.smartsense.id", smartSenseId));
+        configs.add(new TemplateConfigurationEntry(SMART_SENSE_SERVER_CONFIG_FILE, "customer.smartsense.id", smartSenseId));
 
         HSTMetadataInstanceInfoJson instanceInfoJson = new HSTMetadataInstanceInfoJson(
                 source.getFlexSubscription().isPresent() ? source.getFlexSubscription().get().getSubscriptionId() : "",
@@ -132,14 +130,14 @@ public class SmartSenseConfigProvider implements BlueprintComponentConfigProvide
         HSTMetadataJson productInfo = new HSTMetadataJson(clustersComponentId, instanceInfoJson, productId, cbVersion);
         try {
             Json productInfoJson = new Json(productInfo);
-            configs.add(new BlueprintConfigurationEntry(SMART_SENSE_PRODUCT_INFO_FILE, "product-info-content", productInfoJson.getValue()));
+            configs.add(new TemplateConfigurationEntry(SMART_SENSE_PRODUCT_INFO_FILE, "product-info-content", productInfoJson.getValue()));
         } catch (JsonProcessingException ignored) {
             LOGGER.error("The 'product-info-content' SmartSense config could not be added to the Blueprint.");
         }
         return configs;
     }
 
-    private String getClusterName(BlueprintPreparationObject source) {
+    private String getClusterName(TemplatePreparationObject source) {
         String ssClusterNamePattern = "cbc--%s--%s";
         String clusterName = source.getGeneralClusterConfigs().getClusterName();
         String ssClusterName = String.format(ssClusterNamePattern, clusterName, source.getGeneralClusterConfigs().getUuid());
@@ -153,7 +151,7 @@ public class SmartSenseConfigProvider implements BlueprintComponentConfigProvide
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    @JsonPropertyOrder({ "flexSubscriptionId", "guid", "name", "parentGuid" })
+    @JsonPropertyOrder({"flexSubscriptionId", "guid", "name", "parentGuid"})
     static class HSTMetadataInstanceInfoJson {
         private final String flexSubscriptionId;
 
@@ -188,7 +186,7 @@ public class SmartSenseConfigProvider implements BlueprintComponentConfigProvide
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    @JsonPropertyOrder({ "componentId", "instanceInfo", "productId", "productVersion", "schemaVersion", "type" })
+    @JsonPropertyOrder({"componentId", "instanceInfo", "productId", "productVersion", "schemaVersion", "type"})
     static class HSTMetadataJson {
 
         private static final String SCHEMA_VERSION = "1.0.0";
