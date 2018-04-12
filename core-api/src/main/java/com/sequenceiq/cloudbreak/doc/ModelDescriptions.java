@@ -277,6 +277,7 @@ public class ModelDescriptions {
         public static final String CONNECTION_URL = "JDBC connection URL in the form of jdbc:<db-type>://<address>:<port>/<db>";
         public static final String CONNECTION_DRIVER_NAME = "Name of the JDBC connection driver (for example: 'org.postgresql.Driver')";
         public static final String DB_ENGINE = "Name of the external database engine (MYSQL, POSTGRES...)";
+        public static final String DB_ENGINE_DISPLAYNAME = "Display name of the external database engine (Mysql, Postges...)";
         public static final String VERSION = "Version of the Database";
         public static final String USERNAME = "Username to use for the jdbc connection";
         public static final String PASSWORD = "Password to use for the jdbc connection";

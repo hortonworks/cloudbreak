@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.api.model.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigResponse;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
@@ -23,6 +24,7 @@ public class RDSConfigToRDSConfigResponseConverter extends AbstractConversionSer
         json.setConnectionURL(source.getConnectionURL());
         json.setDatabaseEngine(source.getDatabaseEngine());
         json.setConnectionDriver(source.getConnectionDriver());
+        json.setDatabaseEngineDisplayName(DatabaseVendor.valueOf(source.getDatabaseEngine()).fancyName());
         json.setConnectorJarUrl(source.getConnectorJarUrl());
         json.setPublicInAccount(source.isPublicInAccount());
         json.setCreationDate(source.getCreationDate());
