@@ -2,8 +2,8 @@ package com.sequenceiq.cloudbreak.blueprint.kerberos;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.ImmutableMap;
-import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplateProcessorFactory;
-import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplateTextProcessor;
+import com.sequenceiq.cloudbreak.template.processor.processor.TemplateProcessorFactory;
+import com.sequenceiq.cloudbreak.template.processor.processor.TemplateTextProcessor;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 import org.junit.Assert;

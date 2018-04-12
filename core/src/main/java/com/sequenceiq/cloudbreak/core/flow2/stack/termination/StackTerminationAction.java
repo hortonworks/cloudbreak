@@ -1,13 +1,5 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.termination;
 
-import java.util.Map;
-
-import javax.inject.Inject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
-
 import com.sequenceiq.cloudbreak.cloud.event.resource.TerminateStackRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.recipe.StackPreTerminationSuccess;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
@@ -16,6 +8,12 @@ import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyRegistrator;
 import com.sequenceiq.cloudbreak.service.stack.flow.TerminationService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
+import javax.inject.Inject;
+import java.util.Map;
 
 @Component("StackTerminationAction")
 public class StackTerminationAction extends AbstractStackTerminationAction<StackPreTerminationSuccess> {

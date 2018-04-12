@@ -1,5 +1,11 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.upgrade;
 
+import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration;
+import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration.Transition.Builder;
+import org.springframework.stereotype.Component;
+
+import java.util.List;
+
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.upgrade.ClusterUpgradeEvent.CLUSTER_UPGRADE_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.upgrade.ClusterUpgradeEvent.CLUSTER_UPGRADE_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.upgrade.ClusterUpgradeEvent.CLUSTER_UPGRADE_FINISHED_FAILURE_EVENT;
@@ -11,13 +17,6 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.upgrade.ClusterUpgrad
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.upgrade.ClusterUpgradeState.CLUSTER_UPGRADE_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.upgrade.ClusterUpgradeState.FINAL_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.upgrade.ClusterUpgradeState.INIT_STATE;
-
-import java.util.List;
-
-import org.springframework.stereotype.Component;
-
-import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration;
-import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration.Transition.Builder;
 
 @Component
 public class ClusterUpgradeFlowConfig extends AbstractFlowConfiguration<ClusterUpgradeState, ClusterUpgradeEvent> {

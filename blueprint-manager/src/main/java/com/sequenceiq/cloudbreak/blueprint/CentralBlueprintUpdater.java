@@ -1,9 +1,9 @@
 package com.sequenceiq.cloudbreak.blueprint;
 
 import com.google.common.collect.Maps;
-import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplatePreparationObject;
-import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplateProcessingException;
-import com.sequenceiq.cloudbreak.templateprocessor.template.TemplateProcessor;
+import com.sequenceiq.cloudbreak.template.processor.processor.TemplatePreparationObject;
+import com.sequenceiq.cloudbreak.template.processor.processor.TemplateProcessingException;
+import com.sequenceiq.cloudbreak.template.processor.template.TemplateProcessor;
 import groovyx.net.http.HttpResponseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

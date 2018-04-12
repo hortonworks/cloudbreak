@@ -1,16 +1,5 @@
 package com.sequenceiq.cloudbreak.service.flex;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.function.BiConsumer;
-
-import javax.inject.Inject;
-import javax.transaction.Transactional;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
@@ -18,6 +7,15 @@ import com.sequenceiq.cloudbreak.domain.FlexSubscription;
 import com.sequenceiq.cloudbreak.repository.FlexSubscriptionRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.AuthorizationService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
+import javax.inject.Inject;
+import javax.transaction.Transactional;
+import java.util.Collection;
+import java.util.List;
+import java.util.function.BiConsumer;
 
 @Service
 @Transactional

@@ -1,5 +1,18 @@
 package com.sequenceiq.cloudbreak.repository;
 
+import com.sequenceiq.cloudbreak.TestUtil;
+import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
+import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
+import com.sequenceiq.cloudbreak.converter.scheduler.StatusToPollGroupConverter;
+import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.StackStatus;
+import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
+
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyLong;
@@ -8,20 +21,6 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
-
-import com.sequenceiq.cloudbreak.TestUtil;
-import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
-import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
-import com.sequenceiq.cloudbreak.converter.scheduler.StatusToPollGroupConverter;
-import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.StackStatus;
-import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class StackUpdaterTest {

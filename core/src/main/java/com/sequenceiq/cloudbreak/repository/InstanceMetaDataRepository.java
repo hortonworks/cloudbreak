@@ -1,15 +1,14 @@
 package com.sequenceiq.cloudbreak.repository;
 
-import java.util.List;
-import java.util.Set;
-
+import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
+import com.sequenceiq.cloudbreak.domain.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
-import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
-import com.sequenceiq.cloudbreak.domain.InstanceGroup;
-import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
+import java.util.List;
+import java.util.Set;
 
 @EntityType(entityClass = InstanceMetaData.class)
 public interface InstanceMetaDataRepository extends CrudRepository<InstanceMetaData, Long> {

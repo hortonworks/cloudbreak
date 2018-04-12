@@ -1,9 +1,8 @@
 package com.sequenceiq.cloudbreak.converter;
 
-import org.springframework.stereotype.Component;
-
 import com.sequenceiq.cloudbreak.api.model.imagecatalog.UpdateImageCatalogRequest;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
+import org.springframework.stereotype.Component;
 
 @Component
 public class UpdateImageCatalogRequestToImageCatalogConverter extends AbstractConversionServiceAwareConverter<UpdateImageCatalogRequest, ImageCatalog> {

@@ -1,16 +1,15 @@
 package com.sequenceiq.cloudbreak.core.flow2.chain;
 
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.sync.ClusterSyncEvent.CLUSTER_SYNC_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.stack.sync.StackSyncEvent.STACK_SYNC_EVENT;
+import com.sequenceiq.cloudbreak.cloud.event.Selectable;
+import com.sequenceiq.cloudbreak.core.flow2.event.StackSyncTriggerEvent;
+import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
+import org.springframework.stereotype.Component;
 
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import org.springframework.stereotype.Component;
-
-import com.sequenceiq.cloudbreak.cloud.event.Selectable;
-import com.sequenceiq.cloudbreak.core.flow2.event.StackSyncTriggerEvent;
-import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.sync.ClusterSyncEvent.CLUSTER_SYNC_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.sync.StackSyncEvent.STACK_SYNC_EVENT;
 
 @Component
 public class SyncFlowEventChainFactory implements FlowEventChainFactory<StackEvent> {

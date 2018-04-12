@@ -1,9 +1,11 @@
 package com.sequenceiq.cloudbreak.controller;
 
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
+import com.sequenceiq.cloudbreak.api.model.SmartSenseSubscriptionJson;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.converter.SmartSenseSubscriptionToSmartSenseSubscriptionJsonConverter;
+import com.sequenceiq.cloudbreak.domain.SmartSenseSubscription;
+import com.sequenceiq.cloudbreak.service.smartsense.SmartSenseSubscriptionAccessDeniedException;
+import com.sequenceiq.cloudbreak.service.smartsense.SmartSenseSubscriptionService;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
@@ -14,12 +16,9 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.security.access.AccessDeniedException;
 
-import com.sequenceiq.cloudbreak.api.model.SmartSenseSubscriptionJson;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
-import com.sequenceiq.cloudbreak.converter.SmartSenseSubscriptionToSmartSenseSubscriptionJsonConverter;
-import com.sequenceiq.cloudbreak.domain.SmartSenseSubscription;
-import com.sequenceiq.cloudbreak.service.smartsense.SmartSenseSubscriptionAccessDeniedException;
-import com.sequenceiq.cloudbreak.service.smartsense.SmartSenseSubscriptionService;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SmartSenseSubscriptionControllerTest {

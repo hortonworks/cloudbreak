@@ -55,7 +55,12 @@ import javax.ws.rs.client.Client;
 import java.io.File;
 import java.io.IOException;
 import java.security.Security;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Configuration
 @EnableRetry
@@ -267,7 +272,7 @@ public class AppConfig implements ResourceLoaderAware {
     }
 
     private StackServiceComponentDescriptors createServiceComponentDescriptors(String stackServiceComponentsJson, Map<String, Integer> minCardinalityReps,
-                                                                               Map<String, Integer> maxCardinalityReps) throws Exception {
+            Map<String, Integer> maxCardinalityReps) throws Exception {
         Map<String, StackServiceComponentDescriptor> stackServiceComponentDescriptorMap = Maps.newHashMap();
         JsonNode rootNode = JsonUtil.readTree(stackServiceComponentsJson);
         JsonNode itemsNode = rootNode.get("items");

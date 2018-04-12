@@ -4,11 +4,15 @@ import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
-import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplateProcessorFactory;
+import com.sequenceiq.cloudbreak.template.processor.processor.TemplateProcessorFactory;
 import org.springframework.stereotype.Service;
 
 import javax.inject.Inject;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service

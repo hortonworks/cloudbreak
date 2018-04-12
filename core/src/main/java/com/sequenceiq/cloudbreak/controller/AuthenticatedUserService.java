@@ -1,15 +1,14 @@
 package com.sequenceiq.cloudbreak.controller;
 
-import javax.inject.Inject;
-
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.common.service.user.UserFilterField;
+import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
-import com.sequenceiq.cloudbreak.common.service.user.UserFilterField;
-import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
+import javax.inject.Inject;
 
 @Service
 public class AuthenticatedUserService {

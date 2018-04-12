@@ -1,9 +1,8 @@
 package com.sequenceiq.cloudbreak.core.flow2;
 
+import com.sequenceiq.cloudbreak.core.flow2.stack.stop.StackStopState;
 import org.junit.Assert;
 import org.junit.Test;
-
-import com.sequenceiq.cloudbreak.core.flow2.stack.stop.StackStopState;
 
 public class StateConverterAdapterTest {
 

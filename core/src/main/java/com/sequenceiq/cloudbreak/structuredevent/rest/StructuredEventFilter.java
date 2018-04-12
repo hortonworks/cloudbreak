@@ -1,5 +1,34 @@
 package com.sequenceiq.cloudbreak.structuredevent.rest;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.controller.AuthenticatedUserService;
+import com.sequenceiq.cloudbreak.ha.CloudbreakNodeConfig;
+import com.sequenceiq.cloudbreak.structuredevent.StructuredEventClient;
+import com.sequenceiq.cloudbreak.structuredevent.event.OperationDetails;
+import com.sequenceiq.cloudbreak.structuredevent.event.StructuredRestCallEvent;
+import com.sequenceiq.cloudbreak.structuredevent.event.rest.RestCallDetails;
+import com.sequenceiq.cloudbreak.structuredevent.event.rest.RestRequestDetails;
+import com.sequenceiq.cloudbreak.structuredevent.event.rest.RestResponseDetails;
+import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.glassfish.jersey.message.MessageUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.container.ContainerRequestContext;
+import javax.ws.rs.container.ContainerRequestFilter;
+import javax.ws.rs.container.ContainerResponseContext;
+import javax.ws.rs.container.ContainerResponseFilter;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.ext.WriterInterceptor;
+import javax.ws.rs.ext.WriterInterceptorContext;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.FilterOutputStream;
@@ -13,37 +42,6 @@ import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.container.ContainerRequestContext;
-import javax.ws.rs.container.ContainerRequestFilter;
-import javax.ws.rs.container.ContainerResponseContext;
-import javax.ws.rs.container.ContainerResponseFilter;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.ext.WriterInterceptor;
-import javax.ws.rs.ext.WriterInterceptorContext;
-
-import org.apache.commons.lang3.BooleanUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.glassfish.jersey.message.MessageUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
-import com.sequenceiq.cloudbreak.controller.AuthenticatedUserService;
-import com.sequenceiq.cloudbreak.ha.CloudbreakNodeConfig;
-import com.sequenceiq.cloudbreak.structuredevent.StructuredEventClient;
-import com.sequenceiq.cloudbreak.structuredevent.event.OperationDetails;
-import com.sequenceiq.cloudbreak.structuredevent.event.StructuredRestCallEvent;
-import com.sequenceiq.cloudbreak.structuredevent.event.rest.RestCallDetails;
-import com.sequenceiq.cloudbreak.structuredevent.event.rest.RestRequestDetails;
-import com.sequenceiq.cloudbreak.structuredevent.event.rest.RestResponseDetails;
 
 @Component
 public class StructuredEventFilter implements WriterInterceptor, ContainerRequestFilter, ContainerResponseFilter {

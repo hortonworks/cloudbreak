@@ -1,12 +1,9 @@
 package com.sequenceiq.cloudbreak.service.cluster.ambari;
 
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.util.Optional;
-
+import com.sequenceiq.ambari.client.AmbariClient;
+import com.sequenceiq.cloudbreak.blueprint.SmartsenseConfigurationLocator;
+import com.sequenceiq.cloudbreak.domain.SmartSenseSubscription;
+import com.sequenceiq.cloudbreak.service.smartsense.SmartSenseSubscriptionService;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -16,10 +13,12 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.sequenceiq.ambari.client.AmbariClient;
-import com.sequenceiq.cloudbreak.blueprint.SmartsenseConfigurationLocator;
-import com.sequenceiq.cloudbreak.domain.SmartSenseSubscription;
-import com.sequenceiq.cloudbreak.service.smartsense.SmartSenseSubscriptionService;
+import java.util.Optional;
+
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AmbariSmartSenseCapturerTest {

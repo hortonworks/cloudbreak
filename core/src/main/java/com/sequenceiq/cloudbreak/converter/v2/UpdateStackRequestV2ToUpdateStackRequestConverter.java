@@ -1,16 +1,15 @@
 package com.sequenceiq.cloudbreak.converter.v2;
 
-import javax.inject.Inject;
-
-import org.springframework.stereotype.Component;
-
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupAdjustmentJson;
-import com.sequenceiq.cloudbreak.api.model.UpdateStackJson;
 import com.sequenceiq.cloudbreak.api.model.StackScaleRequestV2;
+import com.sequenceiq.cloudbreak.api.model.UpdateStackJson;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
+import org.springframework.stereotype.Component;
+
+import javax.inject.Inject;
 
 @Component
 public class UpdateStackRequestV2ToUpdateStackRequestConverter extends AbstractConversionServiceAwareConverter<StackScaleRequestV2, UpdateStackJson> {

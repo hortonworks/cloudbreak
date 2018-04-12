@@ -1,11 +1,11 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow;
 
-import java.util.Set;
-
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.StackContext;
+
+import java.util.Set;
 
 public class AmbariHostsCheckerContext extends StackContext {
 

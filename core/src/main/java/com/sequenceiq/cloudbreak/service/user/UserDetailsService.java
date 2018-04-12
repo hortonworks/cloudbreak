@@ -1,14 +1,13 @@
 package com.sequenceiq.cloudbreak.service.user;
 
-import javax.inject.Inject;
-
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.common.service.user.CachedUserDetailsService;
+import com.sequenceiq.cloudbreak.common.service.user.UserFilterField;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
-import com.sequenceiq.cloudbreak.common.service.user.CachedUserDetailsService;
-import com.sequenceiq.cloudbreak.common.service.user.UserFilterField;
+import javax.inject.Inject;
 
 @Service
 @Lazy

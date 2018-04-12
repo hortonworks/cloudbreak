@@ -4,7 +4,7 @@ import com.sequenceiq.cloudbreak.api.model.FileSystemConfiguration;
 import com.sequenceiq.cloudbreak.api.model.FileSystemType;
 import com.sequenceiq.cloudbreak.common.model.recipe.RecipeScript;
 import com.sequenceiq.cloudbreak.domain.Credential;
-import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplateConfigurationEntry;
+import com.sequenceiq.cloudbreak.template.processor.processor.TemplateConfigurationEntry;
 
 import java.util.List;
 import java.util.Map;

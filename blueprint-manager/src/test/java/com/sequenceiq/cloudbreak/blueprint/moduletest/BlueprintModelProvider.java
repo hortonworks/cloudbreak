@@ -6,9 +6,9 @@ import com.sequenceiq.cloudbreak.api.model.ExecutorType;
 import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
 import com.sequenceiq.cloudbreak.blueprint.filesystem.BlueprintTestUtil;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
-import com.sequenceiq.cloudbreak.templateprocessor.nifi.HdfConfigs;
-import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplatePreparationObject;
-import com.sequenceiq.cloudbreak.templateprocessor.templates.GeneralClusterConfigs;
+import com.sequenceiq.cloudbreak.template.processor.nifi.HdfConfigs;
+import com.sequenceiq.cloudbreak.template.processor.processor.TemplatePreparationObject;
+import com.sequenceiq.cloudbreak.template.processor.templates.GeneralClusterConfigs;
 
 import java.util.Collections;
 import java.util.HashSet;

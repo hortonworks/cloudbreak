@@ -1,11 +1,12 @@
 package com.sequenceiq.cloudbreak.conf;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.when;
-
-import java.util.Collections;
-
+import com.sequenceiq.cloudbreak.TestUtil;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
+import com.sequenceiq.cloudbreak.common.service.user.UserFilterField;
+import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.service.security.OwnerBasedPermissionEvaluator;
+import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -16,13 +17,11 @@ import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.OAuth2Request;
 
-import com.sequenceiq.cloudbreak.TestUtil;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
-import com.sequenceiq.cloudbreak.common.service.user.UserFilterField;
-import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.service.security.OwnerBasedPermissionEvaluator;
-import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
+import java.util.Collections;
+
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.when;
 
 public class OwnerBasedPermissionEvaluatorTest {
 

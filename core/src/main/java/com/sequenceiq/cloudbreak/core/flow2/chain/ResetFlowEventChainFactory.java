@@ -1,16 +1,15 @@
 package com.sequenceiq.cloudbreak.core.flow2.chain;
 
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.CLUSTER_INSTALL_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.reset.ClusterResetEvent.CLUSTER_RESET_EVENT;
+import com.sequenceiq.cloudbreak.cloud.event.Selectable;
+import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.StartAmbariSuccess;
+import org.springframework.stereotype.Component;
 
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import org.springframework.stereotype.Component;
-
-import com.sequenceiq.cloudbreak.cloud.event.Selectable;
-import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.StartAmbariSuccess;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.CLUSTER_INSTALL_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.reset.ClusterResetEvent.CLUSTER_RESET_EVENT;
 
 @Component
 public class ResetFlowEventChainFactory implements FlowEventChainFactory<StackEvent> {

@@ -1,24 +1,5 @@
 package com.sequenceiq.cloudbreak.reactor;
 
-import static org.mockito.Mockito.argThat;
-import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
-import static org.mockito.Mockito.when;
-
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-
-import org.hamcrest.Description;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.ArgumentMatcher;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
-
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -28,9 +9,26 @@ import com.sequenceiq.cloudbreak.reactor.api.event.resource.UnhealthyInstancesDe
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.repair.CandidateUnhealthyInstanceSelector;
 import com.sequenceiq.cloudbreak.service.stack.repair.UnhealthyInstancesFinalizer;
-
+import org.hamcrest.Description;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatcher;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 import reactor.bus.Event;
 import reactor.bus.EventBus;
+
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
+import static org.mockito.Mockito.argThat;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.when;
 
 
 @RunWith(MockitoJUnitRunner.class)

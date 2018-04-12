@@ -1,17 +1,5 @@
 package com.sequenceiq.cloudbreak.controller;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
-
-import javax.inject.Inject;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.StreamingOutput;
-
-import org.springframework.stereotype.Component;
-
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.EventEndpoint;
 import com.sequenceiq.cloudbreak.api.model.CloudbreakEventsJson;
@@ -20,6 +8,16 @@ import com.sequenceiq.cloudbreak.facade.CloudbreakEventsFacade;
 import com.sequenceiq.cloudbreak.structuredevent.StructuredEventService;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEvent;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
+import org.springframework.stereotype.Component;
+
+import javax.inject.Inject;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.StreamingOutput;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 @Component
 public class CloudbreakEventController implements EventEndpoint {

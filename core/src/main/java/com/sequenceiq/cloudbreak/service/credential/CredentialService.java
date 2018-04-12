@@ -1,24 +1,5 @@
 package com.sequenceiq.cloudbreak.service.credential;
 
-import static com.sequenceiq.cloudbreak.util.NameUtil.generateArchiveName;
-import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
-
-import java.util.Date;
-import java.util.Map;
-import java.util.Set;
-
-import javax.inject.Inject;
-import javax.transaction.Transactional;
-import javax.transaction.Transactional.TxType;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.retry.annotation.Backoff;
-import org.springframework.retry.annotation.Retryable;
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.stereotype.Service;
-
 import com.sequenceiq.cloudbreak.api.model.CloudbreakEventsJson;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
@@ -34,6 +15,23 @@ import com.sequenceiq.cloudbreak.service.notification.Notification;
 import com.sequenceiq.cloudbreak.service.notification.NotificationSender;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderCredentialAdapter;
 import com.sequenceiq.cloudbreak.service.user.UserProfileCredentialHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.stereotype.Service;
+
+import javax.inject.Inject;
+import javax.transaction.Transactional;
+import javax.transaction.Transactional.TxType;
+import java.util.Date;
+import java.util.Map;
+import java.util.Set;
+
+import static com.sequenceiq.cloudbreak.util.NameUtil.generateArchiveName;
+import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
 
 @Service
 @Transactional

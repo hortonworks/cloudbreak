@@ -1,15 +1,14 @@
 package com.sequenceiq.cloudbreak.converter;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-
-import org.springframework.stereotype.Component;
-
 import com.sequenceiq.cloudbreak.api.model.TagSpecificationsJson;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.TagSpecification;
+import org.springframework.stereotype.Component;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 @Component
 public class TagSpecificationsToTagSpecificationsJsonConverter

@@ -1,9 +1,9 @@
 package com.sequenceiq.cloudbreak.controller.mapper;
 
+import com.sequenceiq.cloudbreak.service.stack.flow.TerminationFailedException;
+
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.Provider;
-
-import com.sequenceiq.cloudbreak.service.stack.flow.TerminationFailedException;
 
 @Provider
 public class TerminationFailedExceptionMapper extends SendNotificationExceptionMapper<TerminationFailedException> {

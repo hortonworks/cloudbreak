@@ -1,19 +1,5 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.downscale;
 
-import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
-import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
-import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
-
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import javax.inject.Inject;
-
-import org.springframework.statemachine.StateContext;
-
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.Payload;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
@@ -31,6 +17,18 @@ import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackScalingService;
+import org.springframework.statemachine.StateContext;
+
+import javax.inject.Inject;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
+import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
+import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 
 public abstract class AbstractStackDownscaleAction<P extends Payload>
         extends AbstractAction<StackDownscaleState, StackDownscaleEvent, StackScalingFlowContext, P> {

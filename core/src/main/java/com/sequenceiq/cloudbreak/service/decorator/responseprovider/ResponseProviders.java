@@ -1,13 +1,12 @@
 package com.sequenceiq.cloudbreak.service.decorator.responseprovider;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
-
-import org.springframework.stereotype.Component;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Component
 public class ResponseProviders {

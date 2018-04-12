@@ -1,10 +1,10 @@
 package com.sequenceiq.cloudbreak.reactor.api.event.resource;
 
+import com.sequenceiq.cloudbreak.reactor.api.ClusterPlatformResult;
+
 import java.util.Collections;
 import java.util.Objects;
 import java.util.Set;
-
-import com.sequenceiq.cloudbreak.reactor.api.ClusterPlatformResult;
 
 public class UnhealthyInstancesDetectionResult extends ClusterPlatformResult<UnhealthyInstancesDetectionRequest> {
 

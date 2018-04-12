@@ -1,22 +1,5 @@
 package com.sequenceiq.cloudbreak.core.flow2;
 
-import static com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationEvent.TERMINATION_EVENT;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
-
-import javax.annotation.Resource;
-import javax.inject.Inject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
-
 import com.cedarsoftware.util.io.JsonReader;
 import com.sequenceiq.cloudbreak.cloud.Acceptable;
 import com.sequenceiq.cloudbreak.cloud.event.Payload;
@@ -48,9 +31,23 @@ import com.sequenceiq.cloudbreak.logger.LoggerContextKey;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.FlowLogRepository;
 import com.sequenceiq.cloudbreak.service.flowlog.FlowLogService;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 import reactor.bus.Event;
 import reactor.fn.Consumer;
+
+import javax.annotation.Resource;
+import javax.inject.Inject;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+
+import static com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationEvent.TERMINATION_EVENT;
 
 @Component
 public class Flow2Handler implements Consumer<Event<? extends Payload>> {

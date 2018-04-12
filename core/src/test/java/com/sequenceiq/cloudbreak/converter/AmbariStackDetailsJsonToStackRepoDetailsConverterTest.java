@@ -1,14 +1,13 @@
 package com.sequenceiq.cloudbreak.converter;
 
-import java.util.Collections;
-
+import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
+import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
+import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
-import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
-import com.sequenceiq.cloudbreak.controller.BadRequestException;
+import java.util.Collections;
 
 public class AmbariStackDetailsJsonToStackRepoDetailsConverterTest extends AbstractJsonConverterTest<AmbariStackDetailsJson> {
 

@@ -1,12 +1,11 @@
 package com.sequenceiq.cloudbreak.repository;
 
-import java.util.List;
-
+import com.sequenceiq.cloudbreak.domain.SecurityRule;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
-import com.sequenceiq.cloudbreak.domain.SecurityRule;
+import java.util.List;
 
 @EntityType(entityClass = SecurityRule.class)
 public interface SecurityRuleRepository extends CrudRepository<SecurityRule, Long> {

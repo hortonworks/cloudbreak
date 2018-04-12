@@ -1,19 +1,16 @@
 package com.sequenceiq.cloudbreak.conf;
 
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import javax.annotation.Resource;
-
+import com.sequenceiq.cloudbreak.api.CoreApi;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
-
-import com.sequenceiq.cloudbreak.api.CoreApi;
-
 import springfox.documentation.swagger.web.InMemorySwaggerResourcesProvider;
 import springfox.documentation.swagger.web.SwaggerResource;
 import springfox.documentation.swagger.web.SwaggerResourcesProvider;
+
+import javax.annotation.Resource;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Component
 @Primary

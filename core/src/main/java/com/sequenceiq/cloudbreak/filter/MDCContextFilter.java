@@ -1,18 +1,17 @@
 package com.sequenceiq.cloudbreak.filter;
 
+import com.sequenceiq.cloudbreak.controller.AuthenticatedUserService;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
 import javax.inject.Inject;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.container.ContainerResponseContext;
 import javax.ws.rs.container.ContainerResponseFilter;
 import javax.ws.rs.core.MultivaluedMap;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
-
-import com.sequenceiq.cloudbreak.controller.AuthenticatedUserService;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 
 @Component
 public class MDCContextFilter implements ContainerRequestFilter, ContainerResponseFilter {

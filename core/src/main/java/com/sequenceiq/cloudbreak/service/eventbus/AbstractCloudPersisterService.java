@@ -1,12 +1,7 @@
 package com.sequenceiq.cloudbreak.service.eventbus;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.annotation.PostConstruct;
-import javax.inject.Inject;
-
+import com.sequenceiq.cloudbreak.cloud.service.Persister;
+import com.sequenceiq.cloudbreak.repository.EntityType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -14,8 +9,11 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.util.CollectionUtils;
 
-import com.sequenceiq.cloudbreak.cloud.service.Persister;
-import com.sequenceiq.cloudbreak.repository.EntityType;
+import javax.annotation.PostConstruct;
+import javax.inject.Inject;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public abstract class AbstractCloudPersisterService<T> implements Persister<T> {
 

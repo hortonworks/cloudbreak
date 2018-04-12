@@ -1,12 +1,11 @@
 package com.sequenceiq.cloudbreak.service.image;
 
-import java.io.IOException;
-
+import com.sequenceiq.cloudbreak.cloud.model.Versioned;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sequenceiq.cloudbreak.cloud.model.Versioned;
+import java.io.IOException;
 
 public class VersionComparatorTest {
 

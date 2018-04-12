@@ -1,14 +1,5 @@
 package com.sequenceiq.cloudbreak.service.stack;
 
-import java.util.Collections;
-import java.util.List;
-
-import javax.inject.Inject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetStackParamValidationRequest;
@@ -17,8 +8,14 @@ import com.sequenceiq.cloudbreak.cloud.model.StackParamValidation;
 import com.sequenceiq.cloudbreak.cloud.reactor.ErrorHandlerAwareReactorEventFactory;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.service.stack.connector.OperationException;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 import reactor.bus.EventBus;
+
+import javax.inject.Inject;
+import java.util.Collections;
+import java.util.List;
 
 @Service
 public class StackParameterService {

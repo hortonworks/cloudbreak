@@ -1,14 +1,5 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.termination;
 
-import java.util.List;
-import java.util.Map;
-
-import javax.inject.Inject;
-
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.statemachine.action.Action;
-
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.PayloadConverter;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.AbstractClusterAction;
@@ -23,6 +14,13 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.PrepareClusterTermina
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.PrepareClusterTerminationResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterTerminationRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterTerminationResult;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.statemachine.action.Action;
+
+import javax.inject.Inject;
+import java.util.List;
+import java.util.Map;
 
 @Configuration
 public class ClusterTerminationActions {

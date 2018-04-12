@@ -2,9 +2,9 @@ package com.sequenceiq.cloudbreak.blueprint.hbase;
 
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintComponentConfigProvider;
-import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplatePreparationObject;
-import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplateProcessorFactory;
-import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplateTextProcessor;
+import com.sequenceiq.cloudbreak.template.processor.processor.TemplatePreparationObject;
+import com.sequenceiq.cloudbreak.template.processor.processor.TemplateProcessorFactory;
+import com.sequenceiq.cloudbreak.template.processor.processor.TemplateTextProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;

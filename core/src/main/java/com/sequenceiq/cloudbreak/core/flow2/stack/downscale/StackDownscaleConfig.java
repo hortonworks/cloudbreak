@@ -1,5 +1,11 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.downscale;
 
+import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration;
+import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration.Transition.Builder;
+import org.springframework.stereotype.Component;
+
+import java.util.List;
+
 import static com.sequenceiq.cloudbreak.core.flow2.stack.downscale.StackDownscaleEvent.DOWNSCALE_FAILURE_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.downscale.StackDownscaleEvent.DOWNSCALE_FAIL_HANDLED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.downscale.StackDownscaleEvent.DOWNSCALE_FINALIZED_EVENT;
@@ -13,13 +19,6 @@ import static com.sequenceiq.cloudbreak.core.flow2.stack.downscale.StackDownscal
 import static com.sequenceiq.cloudbreak.core.flow2.stack.downscale.StackDownscaleState.DOWNSCALE_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.downscale.StackDownscaleState.FINAL_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.downscale.StackDownscaleState.INIT_STATE;
-
-import java.util.List;
-
-import org.springframework.stereotype.Component;
-
-import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration;
-import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration.Transition.Builder;
 
 @Component
 public class StackDownscaleConfig extends AbstractFlowConfiguration<StackDownscaleState, StackDownscaleEvent> {

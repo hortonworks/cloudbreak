@@ -1,12 +1,11 @@
 package com.sequenceiq.cloudbreak.converter;
 
-import java.util.Collections;
-
+import com.sequenceiq.cloudbreak.api.model.RecipeRequest;
+import com.sequenceiq.cloudbreak.domain.Recipe;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sequenceiq.cloudbreak.api.model.RecipeRequest;
-import com.sequenceiq.cloudbreak.domain.Recipe;
+import java.util.Collections;
 
 public class RecipeRequestToRecipeConverterTest extends AbstractJsonConverterTest<RecipeRequest> {
 

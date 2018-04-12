@@ -20,7 +20,7 @@ import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplatePreparationObject;
+import com.sequenceiq.cloudbreak.template.processor.processor.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.util.AmbariClientExceptionUtil;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 import groovyx.net.http.HttpResponseException;
@@ -40,9 +40,15 @@ import java.util.Map;
 import java.util.Set;
 
 import static com.sequenceiq.cloudbreak.api.model.Status.UPDATE_IN_PROGRESS;
-import static com.sequenceiq.cloudbreak.service.PollingResult.*;
-import static com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariMessages.*;
-import static com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariOperationType.*;
+import static com.sequenceiq.cloudbreak.service.PollingResult.isExited;
+import static com.sequenceiq.cloudbreak.service.PollingResult.isSuccess;
+import static com.sequenceiq.cloudbreak.service.PollingResult.isTimeout;
+import static com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariMessages.AMBARI_CLUSTER_HOST_JOIN_FAILED;
+import static com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariMessages.AMBARI_CLUSTER_INSTALL_FAILED;
+import static com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariMessages.AMBARI_CLUSTER_SERVICES_STARTED;
+import static com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariOperationType.INSTALL_AMBARI_PROGRESS_STATE;
+import static com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariOperationType.START_AMBARI_PROGRESS_STATE;
+import static com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariOperationType.START_OPERATION_STATE;
 import static java.util.Collections.singletonMap;
 
 @Service

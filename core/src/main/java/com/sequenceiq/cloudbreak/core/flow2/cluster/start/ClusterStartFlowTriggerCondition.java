@@ -1,15 +1,14 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.start;
 
-import javax.inject.Inject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
-
 import com.sequenceiq.cloudbreak.core.flow2.FlowTriggerCondition;
 import com.sequenceiq.cloudbreak.domain.view.ClusterView;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
+import javax.inject.Inject;
 
 @Component
 public class ClusterStartFlowTriggerCondition implements FlowTriggerCondition {

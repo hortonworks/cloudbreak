@@ -1,17 +1,8 @@
 package com.sequenceiq.cloudbreak.service.cluster;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import javax.ws.rs.ProcessingException;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.core.Response;
-
+import com.sequenceiq.cloudbreak.api.model.repositoryconfig.RepoConfigValidationRequest;
+import com.sequenceiq.cloudbreak.api.model.repositoryconfig.RepoConfigValidationResponse;
+import com.sequenceiq.cloudbreak.common.service.url.UrlAccessValidationService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -22,9 +13,17 @@ import org.mockito.internal.util.reflection.Whitebox;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
 
-import com.sequenceiq.cloudbreak.api.model.repositoryconfig.RepoConfigValidationRequest;
-import com.sequenceiq.cloudbreak.api.model.repositoryconfig.RepoConfigValidationResponse;
-import com.sequenceiq.cloudbreak.common.service.url.UrlAccessValidationService;
+import javax.ws.rs.ProcessingException;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.core.Response;
+
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class RepositoryConfigValidationServiceTest {

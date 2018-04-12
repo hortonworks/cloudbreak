@@ -5,7 +5,7 @@ import com.sequenceiq.cloudbreak.api.model.FileSystemConfiguration;
 import com.sequenceiq.cloudbreak.api.model.RecipeType;
 import com.sequenceiq.cloudbreak.common.model.recipe.RecipeScript;
 import com.sequenceiq.cloudbreak.domain.Credential;
-import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplateConfigurationEntry;
+import com.sequenceiq.cloudbreak.template.processor.processor.TemplateConfigurationEntry;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;

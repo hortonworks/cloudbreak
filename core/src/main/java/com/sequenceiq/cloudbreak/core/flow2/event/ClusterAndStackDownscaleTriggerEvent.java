@@ -1,10 +1,9 @@
 package com.sequenceiq.cloudbreak.core.flow2.event;
 
-import java.util.Set;
-
 import com.sequenceiq.cloudbreak.common.type.ScalingType;
-
 import reactor.rx.Promise;
+
+import java.util.Set;
 
 public class ClusterAndStackDownscaleTriggerEvent extends ClusterDownscaleTriggerEvent {
     private final ScalingType scalingType;

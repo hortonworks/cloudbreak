@@ -1,5 +1,9 @@
 package com.sequenceiq.cloudbreak.controller.validation;
 
+import com.sequenceiq.cloudbreak.TestUtil;
+import com.sequenceiq.cloudbreak.controller.BadRequestException;
+import com.sequenceiq.cloudbreak.controller.validation.ldapconfig.LdapConfigValidator;
+import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -7,11 +11,6 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.runners.MockitoJUnitRunner;
-
-import com.sequenceiq.cloudbreak.TestUtil;
-import com.sequenceiq.cloudbreak.controller.BadRequestException;
-import com.sequenceiq.cloudbreak.controller.validation.ldapconfig.LdapConfigValidator;
-import com.sequenceiq.cloudbreak.domain.LdapConfig;
 
 @RunWith(MockitoJUnitRunner.class)
 public class LdapConfigValidatorTest {

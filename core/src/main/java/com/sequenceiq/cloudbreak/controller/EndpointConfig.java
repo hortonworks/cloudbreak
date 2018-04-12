@@ -1,18 +1,8 @@
 package com.sequenceiq.cloudbreak.controller;
 
-import java.io.IOException;
-
-import javax.annotation.PostConstruct;
-import javax.ws.rs.ApplicationPath;
-
-import org.glassfish.jersey.server.ResourceConfig;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-
 import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.CoreApi;
 import com.sequenceiq.cloudbreak.controller.mapper.AccessDeniedExceptionMapper;
-import com.sequenceiq.cloudbreak.controller.mapper.SmartSenseSubscriptionAccessDeniedMapper;
 import com.sequenceiq.cloudbreak.controller.mapper.AuthenticationCredentialsNotFoundExceptionMapper;
 import com.sequenceiq.cloudbreak.controller.mapper.BadRequestExceptionMapper;
 import com.sequenceiq.cloudbreak.controller.mapper.CloudbreakApiExceptionMapper;
@@ -32,6 +22,7 @@ import com.sequenceiq.cloudbreak.controller.mapper.NotFoundExceptionMapper;
 import com.sequenceiq.cloudbreak.controller.mapper.OperationExceptionMapper;
 import com.sequenceiq.cloudbreak.controller.mapper.RuntimeExceptionMapper;
 import com.sequenceiq.cloudbreak.controller.mapper.SmartSenseNotFoundExceptionMapper;
+import com.sequenceiq.cloudbreak.controller.mapper.SmartSenseSubscriptionAccessDeniedMapper;
 import com.sequenceiq.cloudbreak.controller.mapper.SpringAccessDeniedExceptionMapper;
 import com.sequenceiq.cloudbreak.controller.mapper.SpringBadRequestExceptionMapper;
 import com.sequenceiq.cloudbreak.controller.mapper.SubscriptionAlreadyExistExceptionMapper;
@@ -42,10 +33,16 @@ import com.sequenceiq.cloudbreak.controller.mapper.WebApplicaitonExceptionMapper
 import com.sequenceiq.cloudbreak.filter.MDCContextFilter;
 import com.sequenceiq.cloudbreak.structuredevent.rest.StructuredEventFilter;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
-
 import io.swagger.jaxrs.config.BeanConfig;
 import io.swagger.jaxrs.config.SwaggerConfigLocator;
 import io.swagger.jaxrs.config.SwaggerContextService;
+import org.glassfish.jersey.server.ResourceConfig;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+import javax.annotation.PostConstruct;
+import javax.ws.rs.ApplicationPath;
+import java.io.IOException;
 
 @ApplicationPath(CoreApi.API_ROOT_CONTEXT)
 @Component

@@ -1,16 +1,15 @@
 package com.sequenceiq.cloudbreak.converter;
 
-import java.util.HashMap;
-import java.util.Map;
-
+import com.sequenceiq.cloudbreak.api.model.AccountPreferencesJson;
+import com.sequenceiq.cloudbreak.domain.AccountPreferences;
+import com.sequenceiq.cloudbreak.domain.json.Json;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.model.AccountPreferencesJson;
-import com.sequenceiq.cloudbreak.domain.AccountPreferences;
-import com.sequenceiq.cloudbreak.domain.json.Json;
+import java.util.HashMap;
+import java.util.Map;
 
 
 @Component

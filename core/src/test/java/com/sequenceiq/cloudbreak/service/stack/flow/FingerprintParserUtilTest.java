@@ -1,16 +1,15 @@
 package com.sequenceiq.cloudbreak.service.stack.flow;
 
-import static org.junit.Assert.assertEquals;
+import com.sequenceiq.cloudbreak.util.FileReaderUtils;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.runners.MockitoJUnitRunner;
 
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.runners.MockitoJUnitRunner;
-
-import com.sequenceiq.cloudbreak.util.FileReaderUtils;
+import static org.junit.Assert.assertEquals;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FingerprintParserUtilTest {

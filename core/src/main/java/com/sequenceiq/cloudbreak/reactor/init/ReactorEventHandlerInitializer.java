@@ -1,22 +1,19 @@
 package com.sequenceiq.cloudbreak.reactor.init;
 
-import static reactor.bus.selector.Selectors.$;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import com.sequenceiq.cloudbreak.reactor.handler.ReactorEventHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+import reactor.bus.EventBus;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.inject.Inject;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
-
-import com.sequenceiq.cloudbreak.reactor.handler.ReactorEventHandler;
-
-import reactor.bus.EventBus;
+import static reactor.bus.selector.Selectors.$;
 
 @Component
 public class ReactorEventHandlerInitializer {

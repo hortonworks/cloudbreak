@@ -1,15 +1,14 @@
 package com.sequenceiq.cloudbreak.service;
 
-import java.util.HashMap;
-import java.util.Map;
-
+import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 @ConfigurationProperties("cb.ambari")

@@ -1,5 +1,11 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.repair;
 
+import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration;
+import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration.Transition.Builder;
+import org.springframework.stereotype.Component;
+
+import java.util.List;
+
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.repair.ChangePrimaryGatewayEvent.AMBARI_SERVER_STARTED;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.repair.ChangePrimaryGatewayEvent.AMBARI_SERVER_START_FAILED;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.repair.ChangePrimaryGatewayEvent.CHANGE_PRIMARY_GATEWAY_FAILED;
@@ -16,13 +22,6 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.repair.ChangePrimaryG
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.repair.ChangePrimaryGatewayState.INIT_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.repair.ChangePrimaryGatewayState.UPDATE_PROXY_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.repair.ChangePrimaryGatewayState.WAITING_FOR_AMBARI_SERVER_STATE;
-
-import java.util.List;
-
-import org.springframework.stereotype.Component;
-
-import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration;
-import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration.Transition.Builder;
 
 @Component
 public class ChangePrimaryGatewayFlowConfig extends AbstractFlowConfiguration<ChangePrimaryGatewayState, ChangePrimaryGatewayEvent> {

@@ -1,15 +1,5 @@
 package com.sequenceiq.cloudbreak.converter.v2.cli;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashSet;
-
-import javax.inject.Inject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
-
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.model.StackAuthenticationRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.ClusterV2Request;
@@ -30,6 +20,14 @@ import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
+import javax.inject.Inject;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashSet;
 
 @Component
 public class StackToStackV2RequestConverter extends AbstractConversionServiceAwareConverter<Stack, StackV2Request> {

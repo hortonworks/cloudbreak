@@ -1,16 +1,14 @@
 package com.sequenceiq.cloudbreak.service.usages;
 
-import java.util.List;
-
-import javax.inject.Inject;
-
-import org.springframework.data.jpa.domain.Specifications;
-import org.springframework.stereotype.Service;
-
 import com.sequenceiq.cloudbreak.domain.CbUsageFilterParameters;
 import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
 import com.sequenceiq.cloudbreak.repository.CloudbreakUsageRepository;
 import com.sequenceiq.cloudbreak.repository.CloudbreakUsageSpecifications;
+import org.springframework.data.jpa.domain.Specifications;
+import org.springframework.stereotype.Service;
+
+import javax.inject.Inject;
+import java.util.List;
 
 @Service
 public class CloudbreakUsagesRetrievalService {

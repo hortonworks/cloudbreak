@@ -1,17 +1,16 @@
 package com.sequenceiq.cloudbreak.converter;
 
+import com.sequenceiq.cloudbreak.api.model.IpPoolJson;
+import com.sequenceiq.cloudbreak.api.model.PlatformIpPoolsResponse;
+import com.sequenceiq.cloudbreak.cloud.model.CloudIpPool;
+import com.sequenceiq.cloudbreak.cloud.model.CloudIpPools;
+import org.springframework.stereotype.Component;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-
-import org.springframework.stereotype.Component;
-
-import com.sequenceiq.cloudbreak.api.model.IpPoolJson;
-import com.sequenceiq.cloudbreak.api.model.PlatformIpPoolsResponse;
-import com.sequenceiq.cloudbreak.cloud.model.CloudIpPool;
-import com.sequenceiq.cloudbreak.cloud.model.CloudIpPools;
 
 @Component
 public class CloudIpPoolsToPlatformIpPoolsResponseConverter extends AbstractConversionServiceAwareConverter<CloudIpPools, PlatformIpPoolsResponse> {

@@ -1,14 +1,13 @@
 package com.sequenceiq.cloudbreak.core.flow2.restart;
 
-import javax.inject.Inject;
-
-import org.springframework.stereotype.Component;
-
 import com.sequenceiq.cloudbreak.cloud.event.Payload;
 import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
 import com.sequenceiq.cloudbreak.converter.scheduler.StatusToPollGroupConverter;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import org.springframework.stereotype.Component;
+
+import javax.inject.Inject;
 
 @Component("FillInMemoryStateStoreRestartAction")
 public class FillInMemoryStateStoreRestartAction extends DefaultRestartAction {

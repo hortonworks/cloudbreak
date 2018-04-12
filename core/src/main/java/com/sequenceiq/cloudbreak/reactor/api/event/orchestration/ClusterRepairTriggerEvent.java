@@ -1,9 +1,9 @@
 package com.sequenceiq.cloudbreak.reactor.api.event.orchestration;
 
+import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
+
 import java.util.List;
 import java.util.Map;
-
-import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 
 public class ClusterRepairTriggerEvent extends StackEvent {
 

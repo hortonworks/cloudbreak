@@ -4,8 +4,8 @@ import com.sequenceiq.cloudbreak.core.flow2.FlowEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.EventSelectorUtil;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.UpscaleClusterResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.UpscaleAmbariResult;
-import com.sequenceiq.cloudbreak.reactor.api.event.recipe.UpscalePostRecipesResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.recipe.UploadUpscaleRecipesResult;
+import com.sequenceiq.cloudbreak.reactor.api.event.recipe.UpscalePostRecipesResult;
 
 public enum ClusterUpscaleEvent implements FlowEvent {
     CLUSTER_UPSCALE_TRIGGER_EVENT("CLUSTER_UPSCALE_TRIGGER_EVENT"),

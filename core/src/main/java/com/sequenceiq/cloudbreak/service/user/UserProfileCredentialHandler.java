@@ -1,13 +1,11 @@
 package com.sequenceiq.cloudbreak.service.user;
 
-import java.util.Set;
-
-import javax.inject.Inject;
-
-import org.springframework.stereotype.Service;
-
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.UserProfile;
+import org.springframework.stereotype.Service;
+
+import javax.inject.Inject;
+import java.util.Set;
 
 @Service
 public class UserProfileCredentialHandler {

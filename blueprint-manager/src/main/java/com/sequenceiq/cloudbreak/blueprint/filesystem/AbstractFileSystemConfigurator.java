@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.blueprint.filesystem;
 import com.sequenceiq.cloudbreak.api.model.FileSystemConfiguration;
 import com.sequenceiq.cloudbreak.common.model.recipe.RecipeScript;
 import com.sequenceiq.cloudbreak.domain.Credential;
-import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplateConfigurationEntry;
+import com.sequenceiq.cloudbreak.template.processor.processor.TemplateConfigurationEntry;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
 import java.io.IOException;

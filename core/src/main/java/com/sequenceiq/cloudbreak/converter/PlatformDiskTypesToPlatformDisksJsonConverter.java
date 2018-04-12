@@ -1,16 +1,15 @@
 package com.sequenceiq.cloudbreak.converter;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
-
-import org.springframework.stereotype.Component;
-
 import com.sequenceiq.cloudbreak.api.model.PlatformDisksJson;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformDisks;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
 import com.sequenceiq.cloudbreak.converter.util.PlatformConverterUtil;
+import org.springframework.stereotype.Component;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 
 @Component
 public class PlatformDiskTypesToPlatformDisksJsonConverter extends AbstractConversionServiceAwareConverter<PlatformDisks, PlatformDisksJson> {

@@ -1,14 +1,5 @@
 package com.sequenceiq.cloudbreak.service.stack.repair;
 
-import java.util.Collection;
-import java.util.concurrent.ExecutorService;
-
-import javax.inject.Inject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
-
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.controller.FlowsAlreadyRunningException;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
@@ -19,6 +10,13 @@ import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
+import javax.inject.Inject;
+import java.util.Collection;
+import java.util.concurrent.ExecutorService;
 
 @Component
 public class StackRepairService {

@@ -1,13 +1,5 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.downscale;
 
-import java.util.Map;
-
-import javax.inject.Inject;
-
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.statemachine.action.Action;
-
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.AbstractClusterAction;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.ClusterViewContext;
@@ -22,6 +14,12 @@ import com.sequenceiq.cloudbreak.reactor.api.event.resource.CollectDownscaleCand
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.CollectDownscaleCandidatesResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.DecommissionRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.DecommissionResult;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.statemachine.action.Action;
+
+import javax.inject.Inject;
+import java.util.Map;
 
 @Configuration
 public class ClusterDownscaleActions {

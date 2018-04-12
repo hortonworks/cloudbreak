@@ -1,11 +1,10 @@
 package com.sequenceiq.cloudbreak.core.bootstrap.service.container;
 
-import java.util.concurrent.Callable;
-import java.util.concurrent.Future;
-
+import com.sequenceiq.cloudbreak.orchestrator.executor.ParallelOrchestratorComponentRunner;
 import org.springframework.core.task.AsyncTaskExecutor;
 
-import com.sequenceiq.cloudbreak.orchestrator.executor.ParallelOrchestratorComponentRunner;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
 
 public class ExecutorBasedParallelOrchestratorComponentRunner implements ParallelOrchestratorComponentRunner {
 

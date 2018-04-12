@@ -1,20 +1,18 @@
 package com.sequenceiq.cloudbreak.converter;
 
-import java.util.Date;
-import java.util.Optional;
-
-import javax.inject.Inject;
-
-import org.springframework.stereotype.Component;
-
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.model.DatabaseVendor;
-import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigRequest;
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
+import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigRequest;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.service.MissingResourceNameGenerator;
+import org.springframework.stereotype.Component;
+
+import javax.inject.Inject;
+import java.util.Date;
+import java.util.Optional;
 
 @Component
 public class RDSConfigRequestToRDSConfigConverter extends AbstractConversionServiceAwareConverter<RDSConfigRequest, RDSConfig> {

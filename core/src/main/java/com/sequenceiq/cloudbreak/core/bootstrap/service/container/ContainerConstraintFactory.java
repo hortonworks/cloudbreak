@@ -1,24 +1,8 @@
 package com.sequenceiq.cloudbreak.core.bootstrap.service.container;
 
-import static com.sequenceiq.cloudbreak.common.type.OrchestratorConstants.YARN;
-import static com.sequenceiq.cloudbreak.orchestrator.container.DockerContainer.AMBARI_AGENT;
-import static com.sequenceiq.cloudbreak.orchestrator.container.DockerContainer.AMBARI_DB;
-import static com.sequenceiq.cloudbreak.orchestrator.container.DockerContainer.AMBARI_SERVER;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.inject.Inject;
-
-import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
-
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.sequenceiq.cloudbreak.blueprint.VolumeUtils;
 import com.sequenceiq.cloudbreak.domain.Constraint;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
@@ -28,7 +12,21 @@ import com.sequenceiq.cloudbreak.orchestrator.model.ContainerConstraint.Builder;
 import com.sequenceiq.cloudbreak.orchestrator.model.port.TcpPortBinding;
 import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
-import com.sequenceiq.cloudbreak.blueprint.VolumeUtils;
+import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
+
+import javax.inject.Inject;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import static com.sequenceiq.cloudbreak.common.type.OrchestratorConstants.YARN;
+import static com.sequenceiq.cloudbreak.orchestrator.container.DockerContainer.AMBARI_AGENT;
+import static com.sequenceiq.cloudbreak.orchestrator.container.DockerContainer.AMBARI_DB;
+import static com.sequenceiq.cloudbreak.orchestrator.container.DockerContainer.AMBARI_SERVER;
 
 @Component
 public class ContainerConstraintFactory {

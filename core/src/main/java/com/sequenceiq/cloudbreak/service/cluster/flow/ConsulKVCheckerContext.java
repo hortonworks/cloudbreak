@@ -1,10 +1,10 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow;
 
-import java.util.List;
-
 import com.ecwid.consul.v1.ConsulClient;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.StackContext;
+
+import java.util.List;
 
 public class ConsulKVCheckerContext extends StackContext {
 

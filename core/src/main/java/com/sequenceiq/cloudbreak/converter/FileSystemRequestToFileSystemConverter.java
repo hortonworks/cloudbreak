@@ -1,11 +1,10 @@
 package com.sequenceiq.cloudbreak.converter;
 
-import java.util.HashMap;
-
-import org.springframework.stereotype.Component;
-
 import com.sequenceiq.cloudbreak.api.model.FileSystemRequest;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
+import org.springframework.stereotype.Component;
+
+import java.util.HashMap;
 
 @Component
 public class FileSystemRequestToFileSystemConverter extends AbstractConversionServiceAwareConverter<FileSystemRequest, FileSystem> {

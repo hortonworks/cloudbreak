@@ -1,13 +1,12 @@
 package com.sequenceiq.cloudbreak.service.cluster.filter;
 
+import com.sequenceiq.cloudbreak.domain.HostMetadata;
+import org.springframework.stereotype.Component;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
-import org.springframework.stereotype.Component;
-
-import com.sequenceiq.cloudbreak.domain.HostMetadata;
 
 @Component
 public class NameNodeFilter implements HostFilter {

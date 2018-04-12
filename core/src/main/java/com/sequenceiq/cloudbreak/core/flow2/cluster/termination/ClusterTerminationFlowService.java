@@ -1,15 +1,5 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.termination;
 
-import static com.sequenceiq.cloudbreak.api.model.Status.AVAILABLE;
-import static com.sequenceiq.cloudbreak.api.model.Status.DELETE_COMPLETED;
-import static com.sequenceiq.cloudbreak.api.model.Status.DELETE_FAILED;
-
-import javax.inject.Inject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-
 import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
@@ -25,6 +15,15 @@ import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterTerminationService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.EmailSenderService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
+import javax.inject.Inject;
+
+import static com.sequenceiq.cloudbreak.api.model.Status.AVAILABLE;
+import static com.sequenceiq.cloudbreak.api.model.Status.DELETE_COMPLETED;
+import static com.sequenceiq.cloudbreak.api.model.Status.DELETE_FAILED;
 
 @Service
 public class ClusterTerminationFlowService {

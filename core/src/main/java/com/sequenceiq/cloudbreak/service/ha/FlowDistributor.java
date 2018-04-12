@@ -1,9 +1,9 @@
 package com.sequenceiq.cloudbreak.service.ha;
 
+import com.sequenceiq.cloudbreak.domain.CloudbreakNode;
+
 import java.util.List;
 import java.util.Map;
-
-import com.sequenceiq.cloudbreak.domain.CloudbreakNode;
 
 public interface FlowDistributor {
 

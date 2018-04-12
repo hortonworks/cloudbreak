@@ -1,10 +1,9 @@
 package com.sequenceiq.cloudbreak.repository;
 
-import java.util.List;
-
+import com.sequenceiq.cloudbreak.domain.Subscription;
 import org.springframework.data.repository.CrudRepository;
 
-import com.sequenceiq.cloudbreak.domain.Subscription;
+import java.util.List;
 
 @EntityType(entityClass = Subscription.class)
 public interface SubscriptionRepository extends CrudRepository<Subscription, Long> {

@@ -1,9 +1,37 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow;
 
-import static com.sequenceiq.cloudbreak.api.model.Status.DELETE_COMPLETED;
-import static com.sequenceiq.cloudbreak.util.JsonUtil.readValue;
-import static com.sequenceiq.cloudbreak.util.JsonUtil.writeValueAsString;
+import com.sequenceiq.cloudbreak.api.model.FileSystemConfiguration;
+import com.sequenceiq.cloudbreak.api.model.FileSystemType;
+import com.sequenceiq.cloudbreak.blueprint.filesystem.FileSystemConfigurator;
+import com.sequenceiq.cloudbreak.common.model.OrchestratorType;
+import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
+import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ContainerOrchestratorResolver;
+import com.sequenceiq.cloudbreak.domain.Cluster;
+import com.sequenceiq.cloudbreak.domain.Constraint;
+import com.sequenceiq.cloudbreak.domain.Container;
+import com.sequenceiq.cloudbreak.domain.FileSystem;
+import com.sequenceiq.cloudbreak.domain.HostGroup;
+import com.sequenceiq.cloudbreak.domain.Orchestrator;
+import com.sequenceiq.cloudbreak.domain.RDSConfig;
+import com.sequenceiq.cloudbreak.orchestrator.container.ContainerOrchestrator;
+import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
+import com.sequenceiq.cloudbreak.orchestrator.model.ContainerInfo;
+import com.sequenceiq.cloudbreak.orchestrator.model.OrchestrationCredential;
+import com.sequenceiq.cloudbreak.repository.ClusterRepository;
+import com.sequenceiq.cloudbreak.repository.ConstraintRepository;
+import com.sequenceiq.cloudbreak.repository.ContainerRepository;
+import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
+import com.sequenceiq.cloudbreak.service.CloudbreakException;
+import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
+import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
+import com.sequenceiq.cloudbreak.service.stack.flow.TerminationFailedException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
+import javax.annotation.Resource;
+import javax.inject.Inject;
+import javax.transaction.Transactional;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Date;
@@ -15,39 +43,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.annotation.Resource;
-import javax.inject.Inject;
-import javax.transaction.Transactional;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
-
-import com.sequenceiq.cloudbreak.api.model.FileSystemConfiguration;
-import com.sequenceiq.cloudbreak.api.model.FileSystemType;
-import com.sequenceiq.cloudbreak.blueprint.filesystem.FileSystemConfigurator;
-import com.sequenceiq.cloudbreak.domain.RDSConfig;
-import com.sequenceiq.cloudbreak.service.CloudbreakException;
-import com.sequenceiq.cloudbreak.common.model.OrchestratorType;
-import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
-import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ContainerOrchestratorResolver;
-import com.sequenceiq.cloudbreak.domain.Cluster;
-import com.sequenceiq.cloudbreak.domain.Constraint;
-import com.sequenceiq.cloudbreak.domain.Container;
-import com.sequenceiq.cloudbreak.domain.FileSystem;
-import com.sequenceiq.cloudbreak.domain.HostGroup;
-import com.sequenceiq.cloudbreak.domain.Orchestrator;
-import com.sequenceiq.cloudbreak.orchestrator.container.ContainerOrchestrator;
-import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
-import com.sequenceiq.cloudbreak.orchestrator.model.ContainerInfo;
-import com.sequenceiq.cloudbreak.orchestrator.model.OrchestrationCredential;
-import com.sequenceiq.cloudbreak.repository.ClusterRepository;
-import com.sequenceiq.cloudbreak.repository.ConstraintRepository;
-import com.sequenceiq.cloudbreak.repository.ContainerRepository;
-import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
-import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
-import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
-import com.sequenceiq.cloudbreak.service.stack.flow.TerminationFailedException;
+import static com.sequenceiq.cloudbreak.api.model.Status.DELETE_COMPLETED;
+import static com.sequenceiq.cloudbreak.util.JsonUtil.readValue;
+import static com.sequenceiq.cloudbreak.util.JsonUtil.writeValueAsString;
 
 @Component
 @Transactional

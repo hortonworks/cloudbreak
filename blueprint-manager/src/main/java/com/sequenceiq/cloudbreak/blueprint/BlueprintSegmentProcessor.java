@@ -1,11 +1,11 @@
 package com.sequenceiq.cloudbreak.blueprint;
 
-import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplatePreparationObject;
-import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplateProcessorFactory;
-import com.sequenceiq.cloudbreak.templateprocessor.template.TemplateProcessor;
-import com.sequenceiq.cloudbreak.templateprocessor.templates.RelatedServices;
-import com.sequenceiq.cloudbreak.templateprocessor.templates.ServiceName;
-import com.sequenceiq.cloudbreak.templateprocessor.templates.TemplateFiles;
+import com.sequenceiq.cloudbreak.template.processor.processor.TemplatePreparationObject;
+import com.sequenceiq.cloudbreak.template.processor.processor.TemplateProcessorFactory;
+import com.sequenceiq.cloudbreak.template.processor.template.TemplateProcessor;
+import com.sequenceiq.cloudbreak.template.processor.templates.RelatedServices;
+import com.sequenceiq.cloudbreak.template.processor.templates.ServiceName;
+import com.sequenceiq.cloudbreak.template.processor.templates.TemplateFiles;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

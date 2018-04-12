@@ -1,5 +1,28 @@
 package com.sequenceiq.cloudbreak.service.usages;
 
+import com.sequenceiq.cloudbreak.api.model.flex.CloudbreakFlexUsageJson;
+import com.sequenceiq.cloudbreak.api.model.flex.FlexUsageCbdInstanceJson;
+import com.sequenceiq.cloudbreak.api.model.flex.FlexUsageComponentJson;
+import com.sequenceiq.cloudbreak.api.model.flex.FlexUsageControllerJson;
+import com.sequenceiq.cloudbreak.api.model.flex.FlexUsageHdpInstanceJson;
+import com.sequenceiq.cloudbreak.api.model.flex.FlexUsageProductJson;
+import com.sequenceiq.cloudbreak.common.service.user.UserFilterField;
+import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
+import com.sequenceiq.cloudbreak.domain.FlexSubscription;
+import com.sequenceiq.cloudbreak.domain.SmartSenseSubscription;
+import com.sequenceiq.cloudbreak.domain.view.StackView;
+import com.sequenceiq.cloudbreak.ha.CloudbreakNodeConfig;
+import com.sequenceiq.cloudbreak.repository.FlexSubscriptionRepository;
+import com.sequenceiq.cloudbreak.service.flex.FlexSubscriptionService;
+import com.sequenceiq.cloudbreak.service.smartsense.SmartSenseSubscriptionService;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
+import javax.inject.Inject;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -12,31 +35,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-
-import javax.inject.Inject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-
-import com.sequenceiq.cloudbreak.api.model.flex.CloudbreakFlexUsageJson;
-import com.sequenceiq.cloudbreak.api.model.flex.FlexUsageCbdInstanceJson;
-import com.sequenceiq.cloudbreak.api.model.flex.FlexUsageComponentJson;
-import com.sequenceiq.cloudbreak.api.model.flex.FlexUsageControllerJson;
-import com.sequenceiq.cloudbreak.api.model.flex.FlexUsageHdpInstanceJson;
-import com.sequenceiq.cloudbreak.api.model.flex.FlexUsageProductJson;
-import com.sequenceiq.cloudbreak.common.service.user.UserFilterField;
-import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
-import com.sequenceiq.cloudbreak.domain.FlexSubscription;
-import com.sequenceiq.cloudbreak.domain.SmartSenseSubscription;
-import com.sequenceiq.cloudbreak.domain.view.StackView;
-import com.sequenceiq.cloudbreak.repository.FlexSubscriptionRepository;
-import com.sequenceiq.cloudbreak.service.flex.FlexSubscriptionService;
-import com.sequenceiq.cloudbreak.ha.CloudbreakNodeConfig;
-import com.sequenceiq.cloudbreak.service.smartsense.SmartSenseSubscriptionService;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
 
 @Service
 public class FlexUsageGenerator {

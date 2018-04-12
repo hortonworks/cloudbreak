@@ -1,15 +1,14 @@
 package com.sequenceiq.cloudbreak.controller.validation.rds;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.util.Properties;
-
+import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.controller.BadRequestException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.util.Properties;
 
 @Component
 public class RdsConnectionValidator {

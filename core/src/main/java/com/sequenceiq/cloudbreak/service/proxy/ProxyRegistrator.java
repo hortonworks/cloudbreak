@@ -1,15 +1,14 @@
 package com.sequenceiq.cloudbreak.service.proxy;
 
-import javax.inject.Inject;
-
+import com.ecwid.consul.v1.ConsulClient;
+import com.ecwid.consul.v1.OperationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
-import com.ecwid.consul.v1.ConsulClient;
-import com.ecwid.consul.v1.OperationException;
+import javax.inject.Inject;
 
 @Service
 public class ProxyRegistrator {

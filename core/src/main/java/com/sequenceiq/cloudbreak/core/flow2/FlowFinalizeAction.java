@@ -1,13 +1,12 @@
 package com.sequenceiq.cloudbreak.core.flow2;
 
-import java.util.Map;
-import java.util.Optional;
-
+import com.sequenceiq.cloudbreak.cloud.event.Payload;
+import com.sequenceiq.cloudbreak.cloud.event.Selectable;
 import org.springframework.statemachine.StateContext;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.cloud.event.Payload;
-import com.sequenceiq.cloudbreak.cloud.event.Selectable;
+import java.util.Map;
+import java.util.Optional;
 
 @Component("FlowFinalizeAction")
 public final class FlowFinalizeAction extends AbstractAction<FlowState, FlowEvent, CommonContext, Payload> {

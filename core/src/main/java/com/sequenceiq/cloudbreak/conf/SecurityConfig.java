@@ -1,9 +1,7 @@
 package com.sequenceiq.cloudbreak.conf;
 
-import static com.sequenceiq.cloudbreak.api.CoreApi.API_ROOT_CONTEXT;
-
-import javax.inject.Inject;
-
+import com.sequenceiq.cloudbreak.service.security.OwnerBasedPermissionEvaluator;
+import com.sequenceiq.cloudbreak.service.security.ScimAccountGroupReaderFilter;
 import org.jasypt.encryption.pbe.PBEStringCleanablePasswordEncryptor;
 import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,8 +21,9 @@ import org.springframework.security.oauth2.provider.expression.OAuth2MethodSecur
 import org.springframework.security.oauth2.provider.token.ResourceServerTokenServices;
 import org.springframework.security.web.authentication.preauth.AbstractPreAuthenticatedProcessingFilter;
 
-import com.sequenceiq.cloudbreak.service.security.OwnerBasedPermissionEvaluator;
-import com.sequenceiq.cloudbreak.service.security.ScimAccountGroupReaderFilter;
+import javax.inject.Inject;
+
+import static com.sequenceiq.cloudbreak.api.CoreApi.API_ROOT_CONTEXT;
 
 @Configuration
 public class SecurityConfig {

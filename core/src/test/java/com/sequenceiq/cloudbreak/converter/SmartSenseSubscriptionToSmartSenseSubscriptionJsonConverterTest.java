@@ -1,17 +1,16 @@
 package com.sequenceiq.cloudbreak.converter;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
+import com.sequenceiq.cloudbreak.api.model.SmartSenseSubscriptionJson;
+import com.sequenceiq.cloudbreak.domain.SmartSenseSubscription;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.sequenceiq.cloudbreak.api.model.SmartSenseSubscriptionJson;
-import com.sequenceiq.cloudbreak.domain.SmartSenseSubscription;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SmartSenseSubscriptionToSmartSenseSubscriptionJsonConverterTest {

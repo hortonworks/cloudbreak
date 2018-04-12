@@ -1,21 +1,20 @@
 package com.sequenceiq.cloudbreak.core.flow2.helloworld;
 
-import static com.sequenceiq.cloudbreak.core.flow2.helloworld.HelloWorldEvent.FINALIZE_HELLO_WORLD_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.helloworld.HelloWorldEvent.HELLO_WORLD_FAIL_HANDLED_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.helloworld.HelloWorldEvent.HELLO_WORLD_FINISHED_EVENT;
-
-import java.util.Map;
-import java.util.Optional;
-
+import com.sequenceiq.cloudbreak.cloud.event.Payload;
+import com.sequenceiq.cloudbreak.cloud.event.Selectable;
+import com.sequenceiq.cloudbreak.core.flow2.AbstractAction;
+import com.sequenceiq.cloudbreak.core.flow2.CommonContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
-import com.sequenceiq.cloudbreak.cloud.event.Payload;
-import com.sequenceiq.cloudbreak.cloud.event.Selectable;
-import com.sequenceiq.cloudbreak.core.flow2.AbstractAction;
-import com.sequenceiq.cloudbreak.core.flow2.CommonContext;
+import java.util.Map;
+import java.util.Optional;
+
+import static com.sequenceiq.cloudbreak.core.flow2.helloworld.HelloWorldEvent.FINALIZE_HELLO_WORLD_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.helloworld.HelloWorldEvent.HELLO_WORLD_FAIL_HANDLED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.helloworld.HelloWorldEvent.HELLO_WORLD_FINISHED_EVENT;
 
 @Configuration
 public class HelloWorldActions {

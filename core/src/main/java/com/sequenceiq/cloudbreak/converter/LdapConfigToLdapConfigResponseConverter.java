@@ -1,9 +1,8 @@
 package com.sequenceiq.cloudbreak.converter;
 
-import org.springframework.stereotype.Component;
-
 import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigResponse;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
+import org.springframework.stereotype.Component;
 
 @Component
 public class LdapConfigToLdapConfigResponseConverter extends AbstractConversionServiceAwareConverter<LdapConfig, LdapConfigResponse> {

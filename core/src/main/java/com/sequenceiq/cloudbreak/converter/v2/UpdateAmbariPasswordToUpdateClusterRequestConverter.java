@@ -1,13 +1,12 @@
 package com.sequenceiq.cloudbreak.converter.v2;
 
-import javax.inject.Inject;
-
-import org.springframework.stereotype.Component;
-
 import com.sequenceiq.cloudbreak.api.model.UpdateClusterJson;
 import com.sequenceiq.cloudbreak.api.model.UserNamePasswordJson;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
+import org.springframework.stereotype.Component;
+
+import javax.inject.Inject;
 
 @Component
 public class UpdateAmbariPasswordToUpdateClusterRequestConverter extends AbstractConversionServiceAwareConverter<UserNamePasswordJson, UpdateClusterJson> {

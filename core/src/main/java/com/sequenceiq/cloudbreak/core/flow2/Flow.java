@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.core.flow2;
 
-import java.util.Map;
-
 import com.sequenceiq.cloudbreak.core.flow2.config.FlowConfiguration;
+
+import java.util.Map;
 
 public interface Flow {
     void initialize();

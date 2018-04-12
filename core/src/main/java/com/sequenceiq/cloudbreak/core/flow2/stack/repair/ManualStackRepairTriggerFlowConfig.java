@@ -1,5 +1,11 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.repair;
 
+import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration;
+import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration.Transition.Builder;
+import org.springframework.stereotype.Component;
+
+import java.util.List;
+
 import static com.sequenceiq.cloudbreak.core.flow2.stack.repair.ManualStackRepairTriggerEvent.MANUAL_STACK_REPAIR_TRIGGER_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.repair.ManualStackRepairTriggerEvent.MANUAL_STACK_REPAIR_TRIGGER_FAILURE_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.repair.ManualStackRepairTriggerEvent.MANUAL_STACK_REPAIR_TRIGGER_FAILURE_HANDLED_EVENT;
@@ -10,13 +16,6 @@ import static com.sequenceiq.cloudbreak.core.flow2.stack.repair.ManualStackRepai
 import static com.sequenceiq.cloudbreak.core.flow2.stack.repair.ManualStackRepairTriggerState.MANUAL_STACK_REPAIR_TRIGGER_FAILED_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.repair.ManualStackRepairTriggerState.NOTIFY_STACK_REPAIR_SERVICE_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.repair.ManualStackRepairTriggerState.UNHEALTHY_INSTANCES_DETECTION_STATE;
-
-import java.util.List;
-
-import org.springframework.stereotype.Component;
-
-import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration;
-import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration.Transition.Builder;
 
 @Component
 public class ManualStackRepairTriggerFlowConfig extends AbstractFlowConfiguration<ManualStackRepairTriggerState, ManualStackRepairTriggerEvent> {

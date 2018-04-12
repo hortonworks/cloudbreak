@@ -1,14 +1,13 @@
 package com.sequenceiq.cloudbreak.converter;
 
-import static org.junit.Assert.assertEquals;
-
-import org.junit.Before;
-import org.junit.Test;
-
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.model.AdjustmentType;
 import com.sequenceiq.cloudbreak.api.model.FailurePolicyResponse;
 import com.sequenceiq.cloudbreak.domain.FailurePolicy;
+import org.junit.Before;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 public class FailurePolicyToFailurePolicyResponseConverterTest extends AbstractEntityConverterTest<FailurePolicy> {
 

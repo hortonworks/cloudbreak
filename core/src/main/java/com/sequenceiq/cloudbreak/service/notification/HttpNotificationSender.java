@@ -1,19 +1,18 @@
 package com.sequenceiq.cloudbreak.service.notification;
 
+import com.sequenceiq.cloudbreak.client.ConfigKey;
+import com.sequenceiq.cloudbreak.client.RestClientUtil;
+import com.sequenceiq.cloudbreak.domain.Subscription;
+import com.sequenceiq.cloudbreak.repository.SubscriptionRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
 import javax.inject.Inject;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-
-import com.sequenceiq.cloudbreak.client.ConfigKey;
-import com.sequenceiq.cloudbreak.client.RestClientUtil;
-import com.sequenceiq.cloudbreak.domain.Subscription;
-import com.sequenceiq.cloudbreak.repository.SubscriptionRepository;
 
 @Service
 public class HttpNotificationSender implements NotificationSender {

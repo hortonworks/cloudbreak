@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.upscale;
 
-import java.util.Set;
-
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
+
+import java.util.Set;
 
 public class BootstrapNewNodesEvent extends StackEvent {
 

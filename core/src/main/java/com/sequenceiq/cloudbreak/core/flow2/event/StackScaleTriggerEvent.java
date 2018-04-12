@@ -1,9 +1,9 @@
 package com.sequenceiq.cloudbreak.core.flow2.event;
 
+import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
+
 import java.util.Collections;
 import java.util.Set;
-
-import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 
 public class StackScaleTriggerEvent extends StackEvent {
 

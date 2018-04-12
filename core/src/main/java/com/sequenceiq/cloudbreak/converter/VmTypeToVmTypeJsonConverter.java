@@ -1,16 +1,15 @@
 package com.sequenceiq.cloudbreak.converter;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
-import org.springframework.stereotype.Component;
-
 import com.sequenceiq.cloudbreak.api.model.VmTypeJson;
 import com.sequenceiq.cloudbreak.api.model.VmTypeMetaJson;
 import com.sequenceiq.cloudbreak.api.model.VolumeParameterConfigJson;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterConfig;
+import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 @Component
 public class VmTypeToVmTypeJsonConverter

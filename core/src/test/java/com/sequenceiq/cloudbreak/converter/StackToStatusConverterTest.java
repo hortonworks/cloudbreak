@@ -1,16 +1,15 @@
 package com.sequenceiq.cloudbreak.converter;
 
-import static org.junit.Assert.assertEquals;
-
-import java.util.Map;
-
-import org.junit.Before;
-import org.junit.Test;
-
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.util.Map;
+
+import static org.junit.Assert.assertEquals;
 
 public class StackToStatusConverterTest extends AbstractEntityConverterTest<Stack> {
 

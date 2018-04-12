@@ -1,18 +1,25 @@
 package com.sequenceiq.cloudbreak.converter;
 
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyMap;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-
+import com.sequenceiq.cloudbreak.api.model.FailurePolicyRequest;
+import com.sequenceiq.cloudbreak.api.model.InstanceGroupRequest;
+import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
+import com.sequenceiq.cloudbreak.api.model.OrchestratorRequest;
+import com.sequenceiq.cloudbreak.api.model.StackAuthenticationRequest;
+import com.sequenceiq.cloudbreak.api.model.StackRequest;
+import com.sequenceiq.cloudbreak.common.model.OrchestratorType;
+import com.sequenceiq.cloudbreak.common.service.DefaultCostTaggingService;
+import com.sequenceiq.cloudbreak.controller.AuthenticatedUserService;
+import com.sequenceiq.cloudbreak.controller.BadRequestException;
+import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
+import com.sequenceiq.cloudbreak.domain.FailurePolicy;
+import com.sequenceiq.cloudbreak.domain.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.Orchestrator;
+import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.StackAuthentication;
+import com.sequenceiq.cloudbreak.service.CloudbreakException;
+import com.sequenceiq.cloudbreak.service.account.AccountPreferencesService;
+import com.sequenceiq.cloudbreak.service.stack.StackParameterService;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -25,27 +32,18 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import com.sequenceiq.cloudbreak.api.model.FailurePolicyRequest;
-import com.sequenceiq.cloudbreak.api.model.InstanceGroupRequest;
-import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
-import com.sequenceiq.cloudbreak.api.model.OrchestratorRequest;
-import com.sequenceiq.cloudbreak.api.model.StackAuthenticationRequest;
-import com.sequenceiq.cloudbreak.api.model.StackRequest;
-import com.sequenceiq.cloudbreak.common.service.DefaultCostTaggingService;
-import com.sequenceiq.cloudbreak.controller.AuthenticatedUserService;
-import com.sequenceiq.cloudbreak.controller.BadRequestException;
-import com.sequenceiq.cloudbreak.service.CloudbreakException;
-import com.sequenceiq.cloudbreak.common.model.OrchestratorType;
-import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
-import com.sequenceiq.cloudbreak.domain.FailurePolicy;
-import com.sequenceiq.cloudbreak.domain.InstanceGroup;
-import com.sequenceiq.cloudbreak.domain.Orchestrator;
-import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.StackAuthentication;
-import com.sequenceiq.cloudbreak.service.account.AccountPreferencesService;
-import com.sequenceiq.cloudbreak.service.stack.StackParameterService;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyMap;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class StackRequestToStackConverterTest extends AbstractJsonConverterTest<StackRequest> {
 

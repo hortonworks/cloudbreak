@@ -1,9 +1,5 @@
 package com.sequenceiq.cloudbreak.reactor.handler.orchestration;
 
-import javax.inject.Inject;
-
-import org.springframework.stereotype.Component;
-
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterServiceRunner;
 import com.sequenceiq.cloudbreak.reactor.api.event.EventSelectorUtil;
@@ -11,9 +7,11 @@ import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ChangePrimaryGa
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ChangePrimaryGatewayRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ChangePrimaryGatewaySuccess;
 import com.sequenceiq.cloudbreak.reactor.handler.ReactorEventHandler;
-
+import org.springframework.stereotype.Component;
 import reactor.bus.Event;
 import reactor.bus.EventBus;
+
+import javax.inject.Inject;
 
 @Component
 public class ChangePrimaryGatewayHandler implements ReactorEventHandler<ChangePrimaryGatewayRequest> {

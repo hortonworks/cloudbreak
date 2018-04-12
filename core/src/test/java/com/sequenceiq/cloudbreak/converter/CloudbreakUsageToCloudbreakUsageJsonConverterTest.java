@@ -1,21 +1,5 @@
 package com.sequenceiq.cloudbreak.converter;
 
-import static com.sequenceiq.cloudbreak.common.type.CloudConstants.AWS;
-import static com.sequenceiq.cloudbreak.common.type.CloudConstants.GCP;
-import static org.junit.Assert.assertEquals;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-
-import java.util.Arrays;
-import java.util.Date;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.model.CloudbreakUsageJson;
@@ -24,6 +8,21 @@ import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
 import com.sequenceiq.cloudbreak.common.service.user.UserFilterField;
 import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
 import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+
+import java.util.Arrays;
+import java.util.Date;
+
+import static com.sequenceiq.cloudbreak.common.type.CloudConstants.AWS;
+import static com.sequenceiq.cloudbreak.common.type.CloudConstants.GCP;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
 
 public class CloudbreakUsageToCloudbreakUsageJsonConverterTest extends AbstractEntityConverterTest<CloudbreakUsage> {
 

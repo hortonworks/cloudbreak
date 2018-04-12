@@ -1,12 +1,11 @@
 package com.sequenceiq.cloudbreak.converter;
 
-import java.util.Arrays;
-
+import com.sequenceiq.cloudbreak.api.model.HostGroupRequest;
+import com.sequenceiq.cloudbreak.domain.HostGroup;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sequenceiq.cloudbreak.api.model.HostGroupRequest;
-import com.sequenceiq.cloudbreak.domain.HostGroup;
+import java.util.Arrays;
 
 public class HostGroupRequestToHostGroupConverterTest extends AbstractJsonConverterTest<HostGroupRequest> {
 

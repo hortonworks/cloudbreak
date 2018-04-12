@@ -1,13 +1,12 @@
 package com.sequenceiq.cloudbreak.service;
 
-import java.util.HashMap;
-import java.util.Map;
-
+import com.google.common.collect.ImmutableMap;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.google.common.collect.ImmutableMap;
+import java.util.HashMap;
+import java.util.Map;
 
 @Component
 public class SmartSenseCredentialConfigService {

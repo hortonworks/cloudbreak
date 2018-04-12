@@ -1,14 +1,5 @@
 package com.sequenceiq.cloudbreak.service.securitygroup;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
-
-import javax.inject.Inject;
-
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-
 import com.sequenceiq.cloudbreak.api.model.Port;
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
@@ -16,6 +7,13 @@ import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.domain.SecurityRule;
 import com.sequenceiq.cloudbreak.repository.SecurityGroupRepository;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
+import javax.inject.Inject;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
 
 @Service
 public class DefaultSecurityGroupCreator {

@@ -1,17 +1,5 @@
 package com.sequenceiq.cloudbreak.converter;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
-
-import javax.inject.Inject;
-
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.core.convert.ConversionService;
-import org.springframework.core.convert.TypeDescriptor;
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.stereotype.Component;
-
 import com.sequenceiq.cloudbreak.api.model.HostGroupRequest;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupRequest;
 import com.sequenceiq.cloudbreak.api.model.NetworkRequest;
@@ -31,6 +19,16 @@ import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.network.NetworkService;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterCache;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.convert.ConversionService;
+import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.stereotype.Component;
+
+import javax.inject.Inject;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 @Component
 public class StackValidationRequestToStackValidationConverter extends AbstractConversionServiceAwareConverter<StackValidationRequest, StackValidation> {

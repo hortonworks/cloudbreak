@@ -1,12 +1,5 @@
 package com.sequenceiq.cloudbreak.controller;
 
-import javax.inject.Inject;
-import javax.inject.Named;
-
-import org.springframework.core.convert.ConversionService;
-import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
-
 import com.sequenceiq.cloudbreak.api.endpoint.v2.ConnectorV2Endpoint;
 import com.sequenceiq.cloudbreak.api.model.PlatformResourceRequestJson;
 import com.sequenceiq.cloudbreak.api.model.PlatformVmtypesResponse;
@@ -16,6 +9,12 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.PlatformResourceRequest;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterService;
+import org.springframework.core.convert.ConversionService;
+import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
+
+import javax.inject.Inject;
+import javax.inject.Named;
 
 @Component
 public class PlatformParameterV2Controller implements ConnectorV2Endpoint {

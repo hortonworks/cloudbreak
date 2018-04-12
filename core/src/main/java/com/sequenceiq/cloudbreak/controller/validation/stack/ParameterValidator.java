@@ -1,9 +1,9 @@
 package com.sequenceiq.cloudbreak.controller.validation.stack;
 
+import com.sequenceiq.cloudbreak.cloud.model.StackParamValidation;
+
 import java.util.List;
 import java.util.Map;
-
-import com.sequenceiq.cloudbreak.cloud.model.StackParamValidation;
 
 public interface ParameterValidator {
 

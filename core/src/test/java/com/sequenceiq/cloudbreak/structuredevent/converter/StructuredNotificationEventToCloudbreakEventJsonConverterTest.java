@@ -1,20 +1,19 @@
 package com.sequenceiq.cloudbreak.structuredevent.converter;
 
-import static com.sequenceiq.cloudbreak.api.model.Status.AVAILABLE;
-import static com.sequenceiq.cloudbreak.common.type.CloudConstants.GCP;
-import static org.junit.Assert.assertEquals;
-
-import java.util.Calendar;
-
-import org.junit.Before;
-import org.junit.Test;
-
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.api.model.CloudbreakEventsJson;
 import com.sequenceiq.cloudbreak.converter.AbstractEntityConverterTest;
 import com.sequenceiq.cloudbreak.structuredevent.event.NotificationDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.OperationDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredNotificationEvent;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.util.Calendar;
+
+import static com.sequenceiq.cloudbreak.api.model.Status.AVAILABLE;
+import static com.sequenceiq.cloudbreak.common.type.CloudConstants.GCP;
+import static org.junit.Assert.assertEquals;
 
 public class StructuredNotificationEventToCloudbreakEventJsonConverterTest extends AbstractEntityConverterTest<StructuredNotificationEvent> {
     private StructuredNotificationEventToCloudbreakEventJsonConverter underTest;

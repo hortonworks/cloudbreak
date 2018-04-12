@@ -1,13 +1,5 @@
 package com.sequenceiq.cloudbreak.controller;
 
-import static java.time.ZoneId.systemDefault;
-
-import java.time.LocalDate;
-import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import com.sequenceiq.cloudbreak.api.endpoint.v1.UsageEndpoint;
 import com.sequenceiq.cloudbreak.api.model.CloudbreakUsageJson;
 import com.sequenceiq.cloudbreak.api.model.flex.CloudbreakFlexUsageJson;
@@ -15,6 +7,13 @@ import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.CbUsageFilterParameters;
 import com.sequenceiq.cloudbreak.domain.CbUsageFilterParameters.Builder;
 import com.sequenceiq.cloudbreak.facade.CloudbreakUsagesFacade;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.time.LocalDate;
+import java.util.List;
+
+import static java.time.ZoneId.systemDefault;
 
 @Component
 public class CloudbreakUsageController implements UsageEndpoint {

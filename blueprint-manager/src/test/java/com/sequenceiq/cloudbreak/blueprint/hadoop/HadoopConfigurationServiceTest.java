@@ -1,11 +1,11 @@
 package com.sequenceiq.cloudbreak.blueprint.hadoop;
 
 import com.sequenceiq.cloudbreak.blueprint.ConfigService;
-import com.sequenceiq.cloudbreak.templateprocessor.configuration.HostgroupConfigurations;
-import com.sequenceiq.cloudbreak.templateprocessor.configuration.SiteConfigurations;
-import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplatePreparationObject;
-import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplateTextProcessor;
-import com.sequenceiq.cloudbreak.templateprocessor.template.views.BlueprintView;
+import com.sequenceiq.cloudbreak.template.processor.configuration.HostgroupConfigurations;
+import com.sequenceiq.cloudbreak.template.processor.configuration.SiteConfigurations;
+import com.sequenceiq.cloudbreak.template.processor.processor.TemplatePreparationObject;
+import com.sequenceiq.cloudbreak.template.processor.processor.TemplateTextProcessor;
+import com.sequenceiq.cloudbreak.template.processor.template.views.BlueprintView;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;

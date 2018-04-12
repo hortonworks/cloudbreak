@@ -5,7 +5,7 @@ import com.sequenceiq.cloudbreak.api.model.FileSystemType;
 import com.sequenceiq.cloudbreak.blueprint.filesystem.AbstractFileSystemConfigurator;
 import com.sequenceiq.cloudbreak.blueprint.filesystem.FileSystemScriptConfig;
 import com.sequenceiq.cloudbreak.domain.Credential;
-import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplateConfigurationEntry;
+import com.sequenceiq.cloudbreak.template.processor.processor.TemplateConfigurationEntry;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;

@@ -1,14 +1,5 @@
 package com.sequenceiq.cloudbreak.controller;
 
-import java.util.Map;
-import java.util.Set;
-
-import javax.inject.Inject;
-import javax.validation.Valid;
-
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-
 import com.sequenceiq.cloudbreak.api.endpoint.v1.UtilEndpoint;
 import com.sequenceiq.cloudbreak.api.model.AmbariDatabaseDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.AmbariDatabaseTestResult;
@@ -21,6 +12,13 @@ import com.sequenceiq.cloudbreak.controller.validation.rds.RdsConnectionValidato
 import com.sequenceiq.cloudbreak.repository.LdapConfigRepository;
 import com.sequenceiq.cloudbreak.repository.RdsConfigRepository;
 import com.sequenceiq.cloudbreak.util.ClientVersionUtil;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+import javax.inject.Inject;
+import javax.validation.Valid;
+import java.util.Map;
+import java.util.Set;
 
 @Component
 public class UtilController implements UtilEndpoint {

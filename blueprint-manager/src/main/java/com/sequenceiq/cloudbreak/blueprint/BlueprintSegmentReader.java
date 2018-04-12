@@ -1,9 +1,9 @@
 package com.sequenceiq.cloudbreak.blueprint;
 
 import com.google.common.collect.Lists;
-import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplateProcessingException;
-import com.sequenceiq.cloudbreak.templateprocessor.templates.ServiceName;
-import com.sequenceiq.cloudbreak.templateprocessor.templates.TemplateFiles;
+import com.sequenceiq.cloudbreak.template.processor.processor.TemplateProcessingException;
+import com.sequenceiq.cloudbreak.template.processor.templates.ServiceName;
+import com.sequenceiq.cloudbreak.template.processor.templates.TemplateFiles;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,8 +21,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.sequenceiq.cloudbreak.templateprocessor.templates.ServiceName.serviceName;
-import static com.sequenceiq.cloudbreak.templateprocessor.templates.TemplateFiles.templateFiles;
+import static com.sequenceiq.cloudbreak.template.processor.templates.ServiceName.serviceName;
+import static com.sequenceiq.cloudbreak.template.processor.templates.TemplateFiles.templateFiles;
 import static java.util.stream.Collectors.toList;
 
 @Component

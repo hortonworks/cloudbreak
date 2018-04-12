@@ -1,16 +1,5 @@
 package com.sequenceiq.cloudbreak.controller;
 
-import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
-
-import java.util.Set;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.core.convert.ConversionService;
-import org.springframework.core.convert.TypeDescriptor;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.stereotype.Component;
-
 import com.sequenceiq.cloudbreak.api.endpoint.v1.RdsConfigEndpoint;
 import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigRequest;
 import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigResponse;
@@ -22,6 +11,16 @@ import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.controller.validation.rds.RdsConnectionValidator;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.convert.ConversionService;
+import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.stereotype.Component;
+
+import java.util.Set;
+
+import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
 
 @Component
 public class RdsConfigController extends NotificationController implements RdsConfigEndpoint {

@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.blueprint.moduletest;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.blueprint.testrepeater.Generator;
 import com.sequenceiq.cloudbreak.blueprint.testrepeater.ListGenerator;
-import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplatePreparationObject;
+import com.sequenceiq.cloudbreak.template.processor.processor.TemplatePreparationObject;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Rule;

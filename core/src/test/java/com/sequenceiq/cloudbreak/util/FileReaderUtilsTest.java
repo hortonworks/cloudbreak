@@ -1,15 +1,14 @@
 package com.sequenceiq.cloudbreak.util;
 
-import static org.junit.Assert.assertEquals;
-
-import java.io.FileNotFoundException;
-import java.io.IOException;
-
+import com.sequenceiq.cloudbreak.TestUtil;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import com.sequenceiq.cloudbreak.TestUtil;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+
+import static org.junit.Assert.assertEquals;
 
 
 public class FileReaderUtilsTest {

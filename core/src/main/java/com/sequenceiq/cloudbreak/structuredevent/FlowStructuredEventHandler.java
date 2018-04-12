@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.structuredevent;
 
-import javax.inject.Inject;
-
+import com.sequenceiq.cloudbreak.structuredevent.event.FlowDetails;
+import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEvent;
 import org.springframework.context.annotation.Scope;
 import org.springframework.messaging.Message;
 import org.springframework.statemachine.StateMachine;
@@ -11,8 +11,7 @@ import org.springframework.statemachine.transition.Transition;
 import org.springframework.statemachine.trigger.Trigger;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.structuredevent.event.FlowDetails;
-import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEvent;
+import javax.inject.Inject;
 
 @Component
 @Scope("prototype")

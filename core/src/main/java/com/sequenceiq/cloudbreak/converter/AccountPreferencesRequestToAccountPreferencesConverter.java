@@ -1,15 +1,14 @@
 package com.sequenceiq.cloudbreak.converter;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.springframework.stereotype.Component;
-
 import com.sequenceiq.cloudbreak.api.model.AccountPreferencesJson;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.AccountPreferences;
 import com.sequenceiq.cloudbreak.domain.json.Json;
+import org.springframework.stereotype.Component;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Component
 public class AccountPreferencesRequestToAccountPreferencesConverter extends AbstractConversionServiceAwareConverter<AccountPreferencesJson, AccountPreferences> {

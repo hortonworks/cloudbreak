@@ -1,5 +1,25 @@
 package com.sequenceiq.cloudbreak.core.flow2;
 
+import com.sequenceiq.cloudbreak.cloud.event.Payload;
+import com.sequenceiq.cloudbreak.core.flow2.chain.FlowChains;
+import com.sequenceiq.cloudbreak.core.flow2.config.FlowConfiguration;
+import com.sequenceiq.cloudbreak.repository.FlowLogRepository;
+import com.sequenceiq.cloudbreak.service.flowlog.FlowLogService;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.BDDMockito;
+import org.mockito.InjectMocks;
+import org.mockito.Matchers;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import reactor.bus.Event;
+import reactor.bus.Event.Headers;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyLong;
@@ -9,28 +29,6 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isNull;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.BDDMockito;
-import org.mockito.InjectMocks;
-import org.mockito.Matchers;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-
-import com.sequenceiq.cloudbreak.cloud.event.Payload;
-import com.sequenceiq.cloudbreak.core.flow2.chain.FlowChains;
-import com.sequenceiq.cloudbreak.core.flow2.config.FlowConfiguration;
-import com.sequenceiq.cloudbreak.repository.FlowLogRepository;
-import com.sequenceiq.cloudbreak.service.flowlog.FlowLogService;
-
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import reactor.bus.Event;
-import reactor.bus.Event.Headers;
 
 @SuppressFBWarnings("RV_RETURN_VALUE_IGNORED_NO_SIDE_EFFECT")
 public class Flow2HandlerTest {

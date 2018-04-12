@@ -1,16 +1,15 @@
 package com.sequenceiq.cloudbreak.converter.v2.cli;
 
-import java.util.ArrayList;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
-
 import com.sequenceiq.cloudbreak.api.model.SecurityRuleRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.SecurityGroupV2Request;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.domain.SecurityRule;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
 
 @Component
 public class SecurityGroupToSecurityGroupV2RequestConverter extends AbstractConversionServiceAwareConverter<SecurityGroup, SecurityGroupV2Request> {
