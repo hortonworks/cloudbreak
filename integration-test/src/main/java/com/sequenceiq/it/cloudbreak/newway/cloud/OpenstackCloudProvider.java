@@ -82,7 +82,8 @@ public class OpenstackCloudProvider extends CloudProviderHelper {
     @Override
     public String getClusterName() {
         String clustername = getTestParameter().get("openstackClusterName");
-        return clustername == null ? OPENSTACK_CLUSTER_DEFAULT_NAME : clustername;
+        clustername = clustername == null ? OPENSTACK_CLUSTER_DEFAULT_NAME : clustername;
+        return clustername + getClusterNamePostfix();
     }
 
     @Override

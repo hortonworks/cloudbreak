@@ -102,7 +102,7 @@ public class AwsCloudProvider extends CloudProviderHelper {
     @Override
     public String getClusterName() {
         String clustername = getTestParameter().get("awsClusterName");
-        return clustername == null ? AWS_CLUSTER_DEFAULT_NAME : clustername;
+        return String.join(clustername == null ? AWS_CLUSTER_DEFAULT_NAME : clustername, getClusterNamePostfix());
     }
 
     @Override
