@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.blueprint.utils;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplateProcessingException;
+import com.sequenceiq.cloudbreak.template.processor.processor.TemplateProcessingException;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import org.junit.Assert;
 import org.junit.Rule;
@@ -15,7 +15,9 @@ import org.mockito.runners.MockitoJUnitRunner;
 import java.io.IOException;
 
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class StackInfoServiceTest {

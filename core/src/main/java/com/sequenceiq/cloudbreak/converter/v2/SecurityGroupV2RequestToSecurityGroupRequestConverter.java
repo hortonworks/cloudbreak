@@ -1,14 +1,13 @@
 package com.sequenceiq.cloudbreak.converter.v2;
 
-import javax.inject.Inject;
-
-import org.springframework.stereotype.Component;
-
 import com.sequenceiq.cloudbreak.api.model.SecurityGroupRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.SecurityGroupV2Request;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.service.MissingResourceNameGenerator;
+import org.springframework.stereotype.Component;
+
+import javax.inject.Inject;
 
 @Component
 public class SecurityGroupV2RequestToSecurityGroupRequestConverter

@@ -1,14 +1,5 @@
 package com.sequenceiq.cloudbreak.controller;
 
-import java.util.HashSet;
-import java.util.Set;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.core.convert.ConversionService;
-import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.PathVariable;
-
 import com.sequenceiq.cloudbreak.api.endpoint.v1.TemplateEndpoint;
 import com.sequenceiq.cloudbreak.api.model.TemplateResponse;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
@@ -17,6 +8,14 @@ import com.sequenceiq.cloudbreak.controller.validation.template.TemplateValidato
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.service.decorator.TemplateDecorator;
 import com.sequenceiq.cloudbreak.service.template.TemplateService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.convert.ConversionService;
+import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.PathVariable;
+
+import java.util.HashSet;
+import java.util.Set;
 
 @Component
 public class TemplateController extends NotificationController implements TemplateEndpoint {

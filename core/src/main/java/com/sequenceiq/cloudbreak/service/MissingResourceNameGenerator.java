@@ -1,11 +1,10 @@
 package com.sequenceiq.cloudbreak.service;
 
-import java.util.UUID;
-
+import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.common.type.APIResourceType;
+import java.util.UUID;
 
 @Service
 public class MissingResourceNameGenerator {

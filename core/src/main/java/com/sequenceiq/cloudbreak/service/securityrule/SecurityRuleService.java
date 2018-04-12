@@ -1,16 +1,15 @@
 package com.sequenceiq.cloudbreak.service.securityrule;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Set;
-import java.util.stream.Collectors;
-
+import com.sequenceiq.cloudbreak.api.model.SecurityRuleResponse;
+import com.sequenceiq.cloudbreak.api.model.SecurityRulesResponse;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.model.SecurityRuleResponse;
-import com.sequenceiq.cloudbreak.api.model.SecurityRulesResponse;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Component
 public class SecurityRuleService {

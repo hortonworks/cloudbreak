@@ -1,9 +1,5 @@
 package com.sequenceiq.cloudbreak.reactor.handler.cluster;
 
-import javax.inject.Inject;
-
-import org.springframework.stereotype.Component;
-
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.reactor.api.event.EventSelectorUtil;
@@ -13,9 +9,11 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.WaitForAmbariServerSu
 import com.sequenceiq.cloudbreak.reactor.handler.ReactorEventHandler;
 import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariClusterConnector;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-
+import org.springframework.stereotype.Component;
 import reactor.bus.Event;
 import reactor.bus.EventBus;
+
+import javax.inject.Inject;
 
 @Component
 public class WaitingAmbariServerHandler implements ReactorEventHandler<WaitForAmbariServerRequest> {

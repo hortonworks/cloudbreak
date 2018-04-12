@@ -1,14 +1,13 @@
 package com.sequenceiq.cloudbreak.converter;
 
-import java.util.HashSet;
-
-import org.springframework.stereotype.Component;
-
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.model.ClusterRequest;
 import com.sequenceiq.cloudbreak.api.model.CredentialSourceRequest;
 import com.sequenceiq.cloudbreak.api.model.StackRequest;
 import com.sequenceiq.cloudbreak.api.model.StackValidationRequest;
+import org.springframework.stereotype.Component;
+
+import java.util.HashSet;
 
 @Component
 public class StackRequestToStackValidationRequestConverter extends AbstractConversionServiceAwareConverter<StackRequest, StackValidationRequest> {

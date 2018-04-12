@@ -1,14 +1,13 @@
 package com.sequenceiq.cloudbreak.repository;
 
-import java.util.List;
-import java.util.Set;
-
+import com.sequenceiq.cloudbreak.domain.FlowLog;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
-import com.sequenceiq.cloudbreak.domain.FlowLog;
+import java.util.List;
+import java.util.Set;
 
 @EntityType(entityClass = FlowLog.class)
 public interface FlowLogRepository extends CrudRepository<FlowLog, Long> {

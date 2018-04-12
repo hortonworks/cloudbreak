@@ -1,12 +1,11 @@
 package com.sequenceiq.cloudbreak.controller.validation.stack;
 
-import java.util.List;
-import java.util.Map;
-
-import org.springframework.stereotype.Component;
-
 import com.sequenceiq.cloudbreak.cloud.model.StackParamValidation;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
+import org.springframework.stereotype.Component;
+
+import java.util.List;
+import java.util.Map;
 
 @Component
 public class ParametersRequiredValidator implements ParameterValidator {

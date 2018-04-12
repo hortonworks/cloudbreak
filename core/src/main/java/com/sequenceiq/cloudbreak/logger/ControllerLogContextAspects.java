@@ -1,9 +1,8 @@
 package com.sequenceiq.cloudbreak.logger;
 
-import java.util.Map;
-
-import javax.inject.Inject;
-
+import com.google.common.collect.Maps;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.controller.AuthenticatedUserService;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
@@ -13,9 +12,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.google.common.collect.Maps;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
-import com.sequenceiq.cloudbreak.controller.AuthenticatedUserService;
+import javax.inject.Inject;
+import java.util.Map;
 
 @Component
 @Aspect

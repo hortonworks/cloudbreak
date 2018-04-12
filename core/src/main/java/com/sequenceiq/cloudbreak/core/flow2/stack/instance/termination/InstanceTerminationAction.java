@@ -1,16 +1,14 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.instance.termination;
 
-import java.util.Map;
-
-import javax.inject.Inject;
-
+import com.sequenceiq.cloudbreak.cloud.event.Selectable;
+import com.sequenceiq.cloudbreak.cloud.event.resource.RemoveInstanceRequest;
+import com.sequenceiq.cloudbreak.core.flow2.event.InstanceTerminationTriggerEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.cloud.event.Selectable;
-import com.sequenceiq.cloudbreak.cloud.event.resource.RemoveInstanceRequest;
-import com.sequenceiq.cloudbreak.core.flow2.event.InstanceTerminationTriggerEvent;
+import javax.inject.Inject;
+import java.util.Map;
 
 @Component("InstanceTerminationAction")
 public class InstanceTerminationAction extends AbstractInstanceTerminationAction<InstanceTerminationTriggerEvent> {

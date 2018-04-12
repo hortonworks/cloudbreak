@@ -1,9 +1,8 @@
 package com.sequenceiq.cloudbreak.converter;
 
-import org.springframework.stereotype.Component;
-
 import com.sequenceiq.cloudbreak.api.model.KerberosResponse;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
+import org.springframework.stereotype.Component;
 
 @Component
 public class KerberosConfigToKerberosResponseConverter extends AbstractConversionServiceAwareConverter<KerberosConfig, KerberosResponse> {

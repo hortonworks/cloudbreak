@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.blueprint.moduletest;
 
-import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplatePreparationObject;
+import com.sequenceiq.cloudbreak.template.processor.processor.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.blueprint.testrepeater.TestFile;
 import com.sequenceiq.cloudbreak.blueprint.testrepeater.TripleTestData;
 

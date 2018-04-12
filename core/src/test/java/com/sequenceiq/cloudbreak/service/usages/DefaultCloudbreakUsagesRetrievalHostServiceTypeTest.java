@@ -1,16 +1,9 @@
 package com.sequenceiq.cloudbreak.service.usages;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.BDDMockito.any;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.times;
-import static org.mockito.BDDMockito.verify;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-
+import com.sequenceiq.cloudbreak.domain.CbUsageFilterParameters;
+import com.sequenceiq.cloudbreak.domain.CbUsageFilterParameters.Builder;
+import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
+import com.sequenceiq.cloudbreak.repository.CloudbreakUsageRepository;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
@@ -18,10 +11,16 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.data.jpa.domain.Specification;
 
-import com.sequenceiq.cloudbreak.domain.CbUsageFilterParameters;
-import com.sequenceiq.cloudbreak.domain.CbUsageFilterParameters.Builder;
-import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
-import com.sequenceiq.cloudbreak.repository.CloudbreakUsageRepository;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static org.mockito.BDDMockito.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.times;
+import static org.mockito.BDDMockito.verify;
 
 public class DefaultCloudbreakUsagesRetrievalHostServiceTypeTest {
     private static final String DUMMY_ACCOUNT = "account";

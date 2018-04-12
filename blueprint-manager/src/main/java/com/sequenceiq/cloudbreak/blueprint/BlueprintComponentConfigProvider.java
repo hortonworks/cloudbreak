@@ -3,10 +3,10 @@ package com.sequenceiq.cloudbreak.blueprint;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import com.sequenceiq.cloudbreak.templateprocessor.HostgroupEntry;
-import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplateConfigurationEntry;
-import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplatePreparationObject;
-import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplateTextProcessor;
+import com.sequenceiq.cloudbreak.template.processor.HostgroupEntry;
+import com.sequenceiq.cloudbreak.template.processor.processor.TemplateConfigurationEntry;
+import com.sequenceiq.cloudbreak.template.processor.processor.TemplatePreparationObject;
+import com.sequenceiq.cloudbreak.template.processor.processor.TemplateTextProcessor;
 
 import java.io.IOException;
 import java.util.List;

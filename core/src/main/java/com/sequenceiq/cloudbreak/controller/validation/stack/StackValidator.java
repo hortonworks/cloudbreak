@@ -1,16 +1,14 @@
 package com.sequenceiq.cloudbreak.controller.validation.stack;
 
-import java.util.List;
-import java.util.Map;
-
-import javax.inject.Inject;
-
+import com.sequenceiq.cloudbreak.cloud.model.StackParamValidation;
+import com.sequenceiq.cloudbreak.service.stack.StackParameterService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.cloud.model.StackParamValidation;
-import com.sequenceiq.cloudbreak.service.stack.StackParameterService;
+import javax.inject.Inject;
+import java.util.List;
+import java.util.Map;
 
 @Component
 public class StackValidator {

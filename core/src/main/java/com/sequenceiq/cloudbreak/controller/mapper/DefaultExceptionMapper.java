@@ -1,9 +1,9 @@
 package com.sequenceiq.cloudbreak.controller.mapper;
 
+import com.sequenceiq.cloudbreak.controller.json.ExceptionResult;
+
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.Provider;
-
-import com.sequenceiq.cloudbreak.controller.json.ExceptionResult;
 
 @Provider
 public class DefaultExceptionMapper extends BaseExceptionMapper<Exception> {

@@ -1,11 +1,5 @@
 package com.sequenceiq.cloudbreak.converter;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.Map.Entry;
-
-import org.springframework.stereotype.Component;
-
 import com.google.api.client.util.Lists;
 import com.google.api.client.util.Maps;
 import com.sequenceiq.cloudbreak.api.model.PlatformVirtualMachinesJson;
@@ -16,6 +10,11 @@ import com.sequenceiq.cloudbreak.cloud.model.PlatformVirtualMachines;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.model.generic.StringType;
 import com.sequenceiq.cloudbreak.converter.util.PlatformConverterUtil;
+import org.springframework.stereotype.Component;
+
+import java.util.Collection;
+import java.util.Map;
+import java.util.Map.Entry;
 
 @Component
 public class PlatformVirtualMachineTypesToPlatformVirtualMachinesJsonConverter extends AbstractConversionServiceAwareConverter<PlatformVirtualMachines,

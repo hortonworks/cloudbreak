@@ -1,14 +1,13 @@
 package com.sequenceiq.cloudbreak.core.flow2;
 
-import java.util.List;
-import java.util.Map;
-
+import com.sequenceiq.cloudbreak.core.flow2.config.FlowConfiguration;
+import com.sequenceiq.cloudbreak.structuredevent.FlowStructuredEventHandler;
 import org.springframework.statemachine.StateMachine;
 import org.springframework.statemachine.access.StateMachineAccess;
 import org.springframework.statemachine.support.DefaultStateMachineContext;
 
-import com.sequenceiq.cloudbreak.core.flow2.config.FlowConfiguration;
-import com.sequenceiq.cloudbreak.structuredevent.FlowStructuredEventHandler;
+import java.util.List;
+import java.util.Map;
 
 public class FlowAdapter<S extends FlowState, E extends FlowEvent> implements Flow {
     private final String flowId;

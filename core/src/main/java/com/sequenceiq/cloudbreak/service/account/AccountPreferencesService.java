@@ -1,11 +1,11 @@
 package com.sequenceiq.cloudbreak.service.account;
 
 
-import java.util.Map;
-import java.util.Set;
-
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.AccountPreferences;
+
+import java.util.Map;
+import java.util.Set;
 
 public interface AccountPreferencesService {
 

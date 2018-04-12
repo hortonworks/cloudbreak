@@ -1,13 +1,12 @@
 package com.sequenceiq.cloudbreak.converter.v2;
 
-import java.util.Collections;
-
-import org.springframework.stereotype.Component;
-
 import com.sequenceiq.cloudbreak.api.model.ConstraintJson;
 import com.sequenceiq.cloudbreak.api.model.HostGroupRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.InstanceGroupV2Request;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
+import org.springframework.stereotype.Component;
+
+import java.util.Collections;
 
 @Component
 public class InstanceGroupV2RequestToHostGroupRequestConverter extends AbstractConversionServiceAwareConverter<InstanceGroupV2Request, HostGroupRequest> {

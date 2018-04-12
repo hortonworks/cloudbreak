@@ -1,9 +1,9 @@
 package com.sequenceiq.cloudbreak.util;
 
-import java.sql.SQLException;
-
 import org.postgresql.util.PSQLException;
 import org.springframework.dao.DataIntegrityViolationException;
+
+import java.sql.SQLException;
 
 public class SqlUtil {
 

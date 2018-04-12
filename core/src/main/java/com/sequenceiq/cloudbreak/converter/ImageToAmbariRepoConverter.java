@@ -1,9 +1,8 @@
 package com.sequenceiq.cloudbreak.converter;
 
-import org.springframework.stereotype.Component;
-
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
+import org.springframework.stereotype.Component;
 
 @Component
 public class ImageToAmbariRepoConverter extends AbstractConversionServiceAwareConverter<Image, AmbariRepo> {

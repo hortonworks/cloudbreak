@@ -1,21 +1,18 @@
 package com.sequenceiq.cloudbreak.core.flow2.config;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import com.sequenceiq.cloudbreak.core.flow2.Flow2Handler;
+import com.sequenceiq.cloudbreak.core.flow2.FlowEvent;
+import org.springframework.stereotype.Component;
+import reactor.bus.EventBus;
+import reactor.bus.selector.Selectors;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.inject.Inject;
-
-import org.springframework.stereotype.Component;
-
-import com.sequenceiq.cloudbreak.core.flow2.Flow2Handler;
-import com.sequenceiq.cloudbreak.core.flow2.FlowEvent;
-
-import reactor.bus.EventBus;
-import reactor.bus.selector.Selectors;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Component
 public class Flow2Initializer {

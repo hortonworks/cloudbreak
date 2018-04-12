@@ -1,10 +1,9 @@
 package com.sequenceiq.cloudbreak.core.bootstrap.service.host;
 
-import org.springframework.stereotype.Component;
-
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.context.HostBootstrapApiContext;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.StackBasedStatusCheckerTask;
+import org.springframework.stereotype.Component;
 
 @Component
 public class HostBootstrapApiCheckerTask extends StackBasedStatusCheckerTask<HostBootstrapApiContext> {

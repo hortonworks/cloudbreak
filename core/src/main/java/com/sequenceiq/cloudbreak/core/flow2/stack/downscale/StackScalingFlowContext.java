@@ -1,14 +1,14 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.downscale;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Set;
-
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackContext;
 import com.sequenceiq.cloudbreak.domain.Stack;
+
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Set;
 
 public class StackScalingFlowContext extends StackContext {
     private final Set<String> instanceIds;

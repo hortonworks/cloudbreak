@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.reactor.api.event.cluster;
 
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
-
 import reactor.rx.Promise;
 
 public class WaitForAmbariServerRequest extends StackEvent {

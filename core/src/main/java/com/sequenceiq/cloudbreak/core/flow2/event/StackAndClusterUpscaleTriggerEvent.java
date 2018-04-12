@@ -1,9 +1,9 @@
 package com.sequenceiq.cloudbreak.core.flow2.event;
 
+import com.sequenceiq.cloudbreak.common.type.ScalingType;
+
 import java.util.Collections;
 import java.util.Set;
-
-import com.sequenceiq.cloudbreak.common.type.ScalingType;
 
 public class StackAndClusterUpscaleTriggerEvent extends StackScaleTriggerEvent {
     private final ScalingType scalingType;

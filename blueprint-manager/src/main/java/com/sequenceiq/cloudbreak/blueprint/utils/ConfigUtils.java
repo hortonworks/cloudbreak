@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.blueprint.utils;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.sequenceiq.cloudbreak.blueprint.ConfigProperty;
 import com.sequenceiq.cloudbreak.blueprint.ServiceConfig;
-import com.sequenceiq.cloudbreak.templateprocessor.template.views.HostgroupView;
+import com.sequenceiq.cloudbreak.template.processor.template.views.HostgroupView;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 import org.apache.commons.lang3.tuple.ImmutablePair;

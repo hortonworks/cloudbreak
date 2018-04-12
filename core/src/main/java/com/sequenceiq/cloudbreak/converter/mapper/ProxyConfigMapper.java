@@ -1,14 +1,13 @@
 package com.sequenceiq.cloudbreak.converter.mapper;
 
-import java.util.Set;
-
+import com.sequenceiq.cloudbreak.api.model.proxy.ProxyConfigRequest;
+import com.sequenceiq.cloudbreak.api.model.proxy.ProxyConfigResponse;
+import com.sequenceiq.cloudbreak.domain.ProxyConfig;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
 
-import com.sequenceiq.cloudbreak.api.model.proxy.ProxyConfigRequest;
-import com.sequenceiq.cloudbreak.api.model.proxy.ProxyConfigResponse;
-import com.sequenceiq.cloudbreak.domain.ProxyConfig;
+import java.util.Set;
 
 @Mapper(componentModel = "spring")
 public interface ProxyConfigMapper {

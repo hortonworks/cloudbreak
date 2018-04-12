@@ -1,12 +1,11 @@
 package com.sequenceiq.cloudbreak.repository;
 
-import java.util.Set;
-
+import com.sequenceiq.cloudbreak.domain.HostGroup;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
-import com.sequenceiq.cloudbreak.domain.HostGroup;
+import java.util.Set;
 
 @EntityType(entityClass = HostGroup.class)
 public interface HostGroupRepository extends CrudRepository<HostGroup, Long> {

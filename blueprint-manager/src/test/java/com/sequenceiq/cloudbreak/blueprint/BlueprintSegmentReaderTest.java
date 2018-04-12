@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.blueprint;
 
-import com.sequenceiq.cloudbreak.templateprocessor.templates.ServiceName;
-import com.sequenceiq.cloudbreak.templateprocessor.templates.TemplateFiles;
+import com.sequenceiq.cloudbreak.template.processor.templates.ServiceName;
+import com.sequenceiq.cloudbreak.template.processor.templates.TemplateFiles;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;

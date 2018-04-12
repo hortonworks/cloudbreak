@@ -1,14 +1,14 @@
 package com.sequenceiq.cloudbreak.converter.util;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
-
 import com.google.api.client.util.Lists;
 import com.google.api.client.util.Maps;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.generic.StringType;
+
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 
 public class PlatformConverterUtil {
 

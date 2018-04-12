@@ -4,12 +4,12 @@ import com.sequenceiq.cloudbreak.api.model.FileSystemConfiguration;
 import com.sequenceiq.cloudbreak.api.model.FileSystemType;
 import com.sequenceiq.cloudbreak.blueprint.filesystem.FileSystemConfigurationProvider;
 import com.sequenceiq.cloudbreak.blueprint.filesystem.FileSystemConfigurator;
-import com.sequenceiq.cloudbreak.templateprocessor.HostgroupEntry;
-import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplateConfigurationEntry;
-import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplatePreparationObject;
-import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplateProcessorFactory;
-import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplateTextProcessor;
-import com.sequenceiq.cloudbreak.templateprocessor.configuration.HostgroupConfigurations;
+import com.sequenceiq.cloudbreak.template.processor.HostgroupEntry;
+import com.sequenceiq.cloudbreak.template.processor.processor.TemplateConfigurationEntry;
+import com.sequenceiq.cloudbreak.template.processor.processor.TemplatePreparationObject;
+import com.sequenceiq.cloudbreak.template.processor.processor.TemplateProcessorFactory;
+import com.sequenceiq.cloudbreak.template.processor.processor.TemplateTextProcessor;
+import com.sequenceiq.cloudbreak.template.processor.configuration.HostgroupConfigurations;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;

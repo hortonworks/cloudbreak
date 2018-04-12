@@ -1,12 +1,11 @@
 package com.sequenceiq.cloudbreak.repository;
 
-import java.util.Set;
-
+import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
-import com.sequenceiq.cloudbreak.domain.LdapConfig;
+import java.util.Set;
 
 @EntityType(entityClass = LdapConfig.class)
 public interface LdapConfigRepository extends CrudRepository<LdapConfig, Long> {

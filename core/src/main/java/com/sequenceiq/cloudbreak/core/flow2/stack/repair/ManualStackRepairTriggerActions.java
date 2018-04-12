@@ -1,15 +1,5 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.repair;
 
-import java.util.Map;
-import java.util.Optional;
-
-import javax.inject.Inject;
-
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.statemachine.StateContext;
-import org.springframework.statemachine.action.Action;
-
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.cloud.event.Payload;
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
@@ -23,6 +13,14 @@ import com.sequenceiq.cloudbreak.reactor.api.event.resource.UnhealthyInstancesDe
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.UnhealthyInstancesDetectionResult;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.repair.StackRepairService;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.statemachine.StateContext;
+import org.springframework.statemachine.action.Action;
+
+import javax.inject.Inject;
+import java.util.Map;
+import java.util.Optional;
 
 @Configuration
 public class ManualStackRepairTriggerActions {

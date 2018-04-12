@@ -6,7 +6,7 @@ import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.templateprocessor.templates.GeneralClusterConfigs;
+import com.sequenceiq.cloudbreak.template.processor.templates.GeneralClusterConfigs;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

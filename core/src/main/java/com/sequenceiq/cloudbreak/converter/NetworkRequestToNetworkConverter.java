@@ -1,21 +1,19 @@
 package com.sequenceiq.cloudbreak.converter;
 
-import java.util.Map;
-
-import javax.inject.Inject;
-
-import org.springframework.stereotype.Component;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.model.NetworkRequest;
-import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
+import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.service.MissingResourceNameGenerator;
 import com.sequenceiq.cloudbreak.service.topology.TopologyService;
+import org.springframework.stereotype.Component;
+
+import javax.inject.Inject;
+import java.util.Map;
 
 @Component
 public class NetworkRequestToNetworkConverter extends AbstractConversionServiceAwareConverter<NetworkRequest, Network> {

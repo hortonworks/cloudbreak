@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.blueprint.moduletest;
 
 import com.sequenceiq.cloudbreak.blueprint.filesystem.BlueprintTestUtil;
-import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplatePreparationObject;
-import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplateProcessingException;
+import com.sequenceiq.cloudbreak.template.processor.processor.TemplatePreparationObject;
+import com.sequenceiq.cloudbreak.template.processor.processor.TemplateProcessingException;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import org.junit.Rule;
 import org.junit.Test;

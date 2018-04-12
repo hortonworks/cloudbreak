@@ -1,11 +1,5 @@
 package com.sequenceiq.cloudbreak.reactor;
 
-import java.util.Date;
-
-import javax.inject.Inject;
-
-import org.springframework.stereotype.Component;
-
 import com.sequenceiq.cloudbreak.api.model.CloudbreakEventsJson;
 import com.sequenceiq.cloudbreak.cloud.event.credential.InteractiveCredentialCreationStatus;
 import com.sequenceiq.cloudbreak.converter.spi.ExtendedCloudCredentialToCredentialConverter;
@@ -13,8 +7,11 @@ import com.sequenceiq.cloudbreak.reactor.api.event.EventSelectorUtil;
 import com.sequenceiq.cloudbreak.reactor.handler.ReactorEventHandler;
 import com.sequenceiq.cloudbreak.service.notification.Notification;
 import com.sequenceiq.cloudbreak.service.notification.NotificationSender;
-
+import org.springframework.stereotype.Component;
 import reactor.bus.Event;
+
+import javax.inject.Inject;
+import java.util.Date;
 
 /**
  * Created by perdos on 9/23/16.

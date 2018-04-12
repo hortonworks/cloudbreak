@@ -1,15 +1,13 @@
 package com.sequenceiq.cloudbreak.service.cluster;
 
-import java.util.Set;
+import com.sequenceiq.cloudbreak.domain.Container;
+import com.sequenceiq.cloudbreak.repository.ContainerRepository;
+import org.springframework.stereotype.Service;
 
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
-
-import org.springframework.stereotype.Service;
-
-import com.sequenceiq.cloudbreak.domain.Container;
-import com.sequenceiq.cloudbreak.repository.ContainerRepository;
+import java.util.Set;
 
 @Service
 @Transactional

@@ -1,14 +1,13 @@
 package com.sequenceiq.cloudbreak.converter.v2.cli;
 
-import java.util.Map;
-
+import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
+import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
+import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
-import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
-import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
+import java.util.Map;
 
 @Component
 public class StackRepoDetailsToStackRepoDetailsJsonConverter

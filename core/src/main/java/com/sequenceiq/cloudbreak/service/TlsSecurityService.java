@@ -1,14 +1,5 @@
 package com.sequenceiq.cloudbreak.service;
 
-import static org.apache.commons.codec.binary.Base64.decodeBase64;
-
-import java.security.KeyPair;
-import java.security.cert.X509Certificate;
-
-import javax.inject.Inject;
-
-import org.springframework.stereotype.Component;
-
 import com.google.common.io.BaseEncoding;
 import com.sequenceiq.cloudbreak.api.model.CertificateResponse;
 import com.sequenceiq.cloudbreak.api.model.InstanceMetadataType;
@@ -21,6 +12,13 @@ import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.SecurityConfigRepository;
+import org.springframework.stereotype.Component;
+
+import javax.inject.Inject;
+import java.security.KeyPair;
+import java.security.cert.X509Certificate;
+
+import static org.apache.commons.codec.binary.Base64.decodeBase64;
 
 @Component
 public class TlsSecurityService {

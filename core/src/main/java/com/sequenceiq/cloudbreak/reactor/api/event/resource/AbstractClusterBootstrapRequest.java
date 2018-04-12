@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.reactor.api.event.resource;
 
-import java.util.Set;
-
 import com.sequenceiq.cloudbreak.reactor.api.ClusterPlatformRequest;
+
+import java.util.Set;
 
 public abstract class AbstractClusterBootstrapRequest extends ClusterPlatformRequest {
     private final Set<String> upscaleCandidateAddresses;

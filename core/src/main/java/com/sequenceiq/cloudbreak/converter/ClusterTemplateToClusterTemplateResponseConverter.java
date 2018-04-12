@@ -1,11 +1,10 @@
 package com.sequenceiq.cloudbreak.converter;
 
+import com.sequenceiq.cloudbreak.api.model.ClusterTemplateResponse;
+import com.sequenceiq.cloudbreak.domain.ClusterTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-
-import com.sequenceiq.cloudbreak.api.model.ClusterTemplateResponse;
-import com.sequenceiq.cloudbreak.domain.ClusterTemplate;
 
 @Component
 public class ClusterTemplateToClusterTemplateResponseConverter extends AbstractConversionServiceAwareConverter<ClusterTemplate, ClusterTemplateResponse> {

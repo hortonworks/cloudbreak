@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.blueprint.filesystem.wasb;
 import com.sequenceiq.cloudbreak.api.model.WasbFileSystemConfiguration;
 import com.sequenceiq.cloudbreak.blueprint.filesystem.FileSystemScriptConfig;
 import com.sequenceiq.cloudbreak.domain.Credential;
-import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplateConfigurationEntry;
+import com.sequenceiq.cloudbreak.template.processor.processor.TemplateConfigurationEntry;
 import org.junit.Assert;
 import org.junit.Test;
 

@@ -3,11 +3,11 @@ package com.sequenceiq.cloudbreak.blueprint.kerberos;
 import com.google.common.collect.ImmutableMap;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintComponentConfigProvider;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
-import com.sequenceiq.cloudbreak.templateprocessor.configuration.SiteConfigurations;
-import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplatePreparationObject;
-import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplateProcessingException;
-import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplateProcessorFactory;
-import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplateTextProcessor;
+import com.sequenceiq.cloudbreak.template.processor.configuration.SiteConfigurations;
+import com.sequenceiq.cloudbreak.template.processor.processor.TemplatePreparationObject;
+import com.sequenceiq.cloudbreak.template.processor.processor.TemplateProcessingException;
+import com.sequenceiq.cloudbreak.template.processor.processor.TemplateProcessorFactory;
+import com.sequenceiq.cloudbreak.template.processor.processor.TemplateTextProcessor;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -54,14 +54,14 @@ public class KerberosBlueprintService implements BlueprintComponentConfigProvide
     }
 
     private TemplateTextProcessor extendBlueprintWithKerberos(TemplateTextProcessor blueprintText, KerberosConfig kerberosConfig, String gatewayHost,
-                                                              String domain, Integer propagationPort) {
+            String domain, Integer propagationPort) {
         return extendBlueprintWithKerberos(blueprintText, kerberosConfig, gatewayHost, kerberosDetailService.getRealm(domain, kerberosConfig),
                 domain, propagationPort);
 
     }
 
     private TemplateTextProcessor extendBlueprintWithKerberos(TemplateTextProcessor blueprintText, KerberosConfig kerberosConfig, String gatewayHost,
-                                                              String realm, String domain, Integer propagationPort) {
+            String realm, String domain, Integer propagationPort) {
         String kdcHosts = kerberosDetailService.resolveHostForKerberos(kerberosConfig, gatewayHost);
         String kdcType = kerberosDetailService.resolveTypeForKerberos(kerberosConfig);
         String kdcAdminHost = kerberosDetailService.resolveHostForKdcAdmin(kerberosConfig, kdcHosts);
@@ -82,8 +82,8 @@ public class KerberosBlueprintService implements BlueprintComponentConfigProvide
     }
 
     public TemplateTextProcessor extendBlueprintWithKerberos(TemplateTextProcessor blueprint, Map<String, String> kerberosEnv, String domains,
-                                                             Boolean useUdp, Integer kpropPort,
-                                                             boolean forced) {
+            Boolean useUdp, Integer kpropPort,
+            boolean forced) {
         try {
             String krb5Config = FileReaderUtils.readFileFromClasspath("kerberos/krb5-conf-template.conf");
             krb5Config = krb5Config.replaceAll("udp_preference_limit_content", useUdp ? "0" : "1");

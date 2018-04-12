@@ -3,8 +3,8 @@ package com.sequenceiq.cloudbreak.blueprint;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.sequenceiq.cloudbreak.blueprint.utils.ConfigUtils;
 import com.sequenceiq.cloudbreak.blueprint.utils.HadoopConfigurationUtils;
-import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplateTextProcessor;
-import com.sequenceiq.cloudbreak.templateprocessor.template.views.HostgroupView;
+import com.sequenceiq.cloudbreak.template.processor.processor.TemplateTextProcessor;
+import com.sequenceiq.cloudbreak.template.processor.template.views.HostgroupView;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;

@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.core.bootstrap.config;
 
-import java.util.Optional;
-
 import com.sequenceiq.cloudbreak.orchestrator.model.ContainerConfig;
+
+import java.util.Optional;
 
 public class ContainerConfigBuilder {
 

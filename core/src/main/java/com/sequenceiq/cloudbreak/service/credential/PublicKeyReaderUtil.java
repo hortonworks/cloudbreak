@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.service.credential;
 
+import com.sequenceiq.cloudbreak.service.credential.PublicKeyReaderUtil.PublicKeyParseException.ErrorCode;
+import org.apache.commons.codec.binary.Base64;
+
 import java.math.BigInteger;
 import java.security.KeyFactory;
 import java.security.PublicKey;
@@ -8,10 +11,6 @@ import java.security.spec.KeySpec;
 import java.security.spec.RSAPublicKeySpec;
 import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
-
-import org.apache.commons.codec.binary.Base64;
-
-import com.sequenceiq.cloudbreak.service.credential.PublicKeyReaderUtil.PublicKeyParseException.ErrorCode;
 
 public final class PublicKeyReaderUtil {
     private static final String BEGIN_PUB_KEY = "---- BEGIN SSH2 PUBLIC KEY ----";

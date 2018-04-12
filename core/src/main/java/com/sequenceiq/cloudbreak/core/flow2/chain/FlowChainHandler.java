@@ -1,24 +1,21 @@
 package com.sequenceiq.cloudbreak.core.flow2.chain;
 
-import static com.sequenceiq.cloudbreak.core.flow2.Flow2Handler.FLOW_CHAIN_ID;
-
-import java.util.Map;
-import java.util.Queue;
-import java.util.UUID;
-
-import javax.annotation.Resource;
-import javax.inject.Inject;
-
-import org.springframework.stereotype.Component;
-
 import com.cedarsoftware.util.io.JsonReader;
 import com.sequenceiq.cloudbreak.cloud.event.Payload;
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
 import com.sequenceiq.cloudbreak.domain.FlowChainLog;
 import com.sequenceiq.cloudbreak.repository.FlowChainLogRepository;
-
+import org.springframework.stereotype.Component;
 import reactor.bus.Event;
 import reactor.fn.Consumer;
+
+import javax.annotation.Resource;
+import javax.inject.Inject;
+import java.util.Map;
+import java.util.Queue;
+import java.util.UUID;
+
+import static com.sequenceiq.cloudbreak.core.flow2.Flow2Handler.FLOW_CHAIN_ID;
 
 @Component
 public class FlowChainHandler implements Consumer<Event<? extends Payload>> {

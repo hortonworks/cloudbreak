@@ -1,12 +1,11 @@
 package com.sequenceiq.cloudbreak.logger;
 
-import static org.junit.Assert.assertEquals;
-
+import com.sequenceiq.cloudbreak.TestUtil;
+import com.sequenceiq.cloudbreak.domain.Stack;
 import org.junit.Test;
 import org.slf4j.MDC;
 
-import com.sequenceiq.cloudbreak.TestUtil;
-import com.sequenceiq.cloudbreak.domain.Stack;
+import static org.junit.Assert.assertEquals;
 
 public class MDCBuilderTest {
 

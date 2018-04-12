@@ -1,9 +1,8 @@
 package com.sequenceiq.cloudbreak.converter;
 
-import org.springframework.stereotype.Component;
-
 import com.sequenceiq.cloudbreak.api.model.SmartSenseSubscriptionJson;
 import com.sequenceiq.cloudbreak.domain.SmartSenseSubscription;
+import org.springframework.stereotype.Component;
 
 @Component
 public class SmartSenseSubscriptionRequestToSmartSenseSubscriptionConverter

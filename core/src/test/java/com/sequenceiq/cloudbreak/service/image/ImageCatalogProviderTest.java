@@ -1,19 +1,18 @@
 package com.sequenceiq.cloudbreak.service.image;
 
-import java.io.IOException;
-import java.util.List;
-import java.util.Optional;
-
+import com.sequenceiq.cloudbreak.TestUtil;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV2;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakVersion;
+import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.sequenceiq.cloudbreak.TestUtil;
-import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV2;
-import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakVersion;
-import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
+import java.io.IOException;
+import java.util.List;
+import java.util.Optional;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ImageCatalogProviderTest {

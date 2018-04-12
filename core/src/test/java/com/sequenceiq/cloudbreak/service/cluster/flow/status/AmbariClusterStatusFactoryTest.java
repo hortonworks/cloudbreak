@@ -1,9 +1,7 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow.status;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-
+import com.sequenceiq.ambari.client.AmbariClient;
+import com.sequenceiq.cloudbreak.api.model.Status;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -12,8 +10,9 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
-import com.sequenceiq.ambari.client.AmbariClient;
-import com.sequenceiq.cloudbreak.api.model.Status;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 public class AmbariClusterStatusFactoryTest {
     private static final String TEST_BLUEPRINT = "blueprint";

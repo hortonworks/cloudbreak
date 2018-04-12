@@ -1,12 +1,5 @@
 package com.sequenceiq.cloudbreak.converter;
 
-import java.io.IOException;
-
-import javax.inject.Inject;
-
-import org.apache.commons.codec.binary.Base64;
-import org.springframework.stereotype.Component;
-
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.model.RecipeRequest;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
@@ -14,6 +7,11 @@ import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.converter.util.URLUtils;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.service.MissingResourceNameGenerator;
+import org.apache.commons.codec.binary.Base64;
+import org.springframework.stereotype.Component;
+
+import javax.inject.Inject;
+import java.io.IOException;
 
 @Component
 public class RecipeRequestToRecipeConverter extends AbstractConversionServiceAwareConverter<RecipeRequest, Recipe> {

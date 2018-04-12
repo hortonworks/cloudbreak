@@ -1,9 +1,8 @@
 package com.sequenceiq.cloudbreak.converter;
 
-import org.springframework.stereotype.Component;
-
 import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsResponse;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
+import org.springframework.stereotype.Component;
 
 @Component
 public class StackRepoDetailsToAmbariStackDetailsResponseConverter

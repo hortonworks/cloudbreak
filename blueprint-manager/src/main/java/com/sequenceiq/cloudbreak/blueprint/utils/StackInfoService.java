@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.blueprint.utils;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplateProcessingException;
-import com.sequenceiq.cloudbreak.templateprocessor.templates.StackInfo;
+import com.sequenceiq.cloudbreak.template.processor.processor.TemplateProcessingException;
+import com.sequenceiq.cloudbreak.template.processor.templates.StackInfo;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

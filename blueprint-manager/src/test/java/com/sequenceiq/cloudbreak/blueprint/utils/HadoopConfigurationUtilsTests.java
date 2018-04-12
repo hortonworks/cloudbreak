@@ -2,8 +2,8 @@ package com.sequenceiq.cloudbreak.blueprint.utils;
 
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.blueprint.ConfigProperty;
-import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplateProcessingException;
-import com.sequenceiq.cloudbreak.templateprocessor.template.views.HostgroupView;
+import com.sequenceiq.cloudbreak.template.processor.processor.TemplateProcessingException;
+import com.sequenceiq.cloudbreak.template.processor.template.views.HostgroupView;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;

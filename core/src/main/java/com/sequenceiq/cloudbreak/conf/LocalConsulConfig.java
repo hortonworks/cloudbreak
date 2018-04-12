@@ -1,10 +1,9 @@
 package com.sequenceiq.cloudbreak.conf;
 
+import com.ecwid.consul.v1.ConsulClient;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import com.ecwid.consul.v1.ConsulClient;
 
 @Configuration
 public class LocalConsulConfig {

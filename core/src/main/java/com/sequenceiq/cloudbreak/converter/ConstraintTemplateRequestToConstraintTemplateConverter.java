@@ -1,10 +1,9 @@
 package com.sequenceiq.cloudbreak.converter;
 
-import org.springframework.stereotype.Component;
-
 import com.sequenceiq.cloudbreak.api.model.ConstraintTemplateRequest;
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.domain.ConstraintTemplate;
+import org.springframework.stereotype.Component;
 
 @Component
 public class ConstraintTemplateRequestToConstraintTemplateConverter

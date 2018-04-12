@@ -1,10 +1,10 @@
 package com.sequenceiq.cloudbreak.controller.mapper;
 
-import javax.inject.Inject;
-import javax.ws.rs.core.Response;
-
 import com.sequenceiq.cloudbreak.service.StackUnderOperationService;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
+
+import javax.inject.Inject;
+import javax.ws.rs.core.Response;
 
 abstract class SendNotificationExceptionMapper<E extends Throwable> extends BaseExceptionMapper<E> {
 

@@ -1,15 +1,14 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow;
 
-import java.util.List;
-import java.util.Map;
-
+import com.sequenceiq.ambari.client.AmbariClient;
+import com.sequenceiq.cloudbreak.service.ClusterBasedStatusCheckerTask;
+import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariHostsWithNames;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.ambari.client.AmbariClient;
-import com.sequenceiq.cloudbreak.service.ClusterBasedStatusCheckerTask;
-import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariHostsWithNames;
+import java.util.List;
+import java.util.Map;
 
 @Component
 public class AmbariHostsLeaveStatusCheckerTask extends ClusterBasedStatusCheckerTask<AmbariHostsWithNames> {

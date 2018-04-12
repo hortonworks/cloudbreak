@@ -1,11 +1,10 @@
 package com.sequenceiq.cloudbreak.conf;
 
+import com.sequenceiq.cloudbreak.converter.CloudbreakConversionServiceFactoryBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.aspectj.EnableSpringConfigured;
 import org.springframework.context.support.ConversionServiceFactoryBean;
-
-import com.sequenceiq.cloudbreak.converter.CloudbreakConversionServiceFactoryBean;
 
 @Configuration
 @EnableSpringConfigured

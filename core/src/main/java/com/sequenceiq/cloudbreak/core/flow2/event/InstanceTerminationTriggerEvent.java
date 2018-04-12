@@ -1,9 +1,9 @@
 package com.sequenceiq.cloudbreak.core.flow2.event;
 
-import java.util.Set;
-
 import com.sequenceiq.cloudbreak.cloud.event.InstancePayload;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
+
+import java.util.Set;
 
 /**
  * @deprecated Downscale flow is used instead of Instance termination flow

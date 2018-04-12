@@ -1,9 +1,8 @@
 package com.sequenceiq.cloudbreak.converter;
 
-import org.springframework.stereotype.Component;
-
 import com.sequenceiq.cloudbreak.api.model.HostMetadataResponse;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
+import org.springframework.stereotype.Component;
 
 @Component
 public class HostMetadataToHostMetadataResponseConverter extends AbstractConversionServiceAwareConverter<HostMetadata, HostMetadataResponse> {

@@ -1,8 +1,7 @@
 package com.sequenceiq.cloudbreak.controller.validation;
 
-import org.springframework.stereotype.Service;
-
 import com.google.common.base.Strings;
+import org.springframework.stereotype.Service;
 
 @Service
 public class LocationService {

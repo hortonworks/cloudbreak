@@ -1,11 +1,10 @@
 package com.sequenceiq.cloudbreak.converter.spi;
 
-import org.springframework.stereotype.Component;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.json.Json;
+import org.springframework.stereotype.Component;
 
 @Component
 public class ExtendedCloudCredentialToCredentialConverter {

@@ -1,12 +1,9 @@
 package com.sequenceiq.cloudbreak.converter;
 
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.any;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-
+import com.sequenceiq.cloudbreak.TestUtil;
+import com.sequenceiq.cloudbreak.api.model.SecurityGroupResponse;
+import com.sequenceiq.cloudbreak.api.model.SecurityRuleRequest;
+import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
@@ -15,10 +12,12 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 
-import com.sequenceiq.cloudbreak.TestUtil;
-import com.sequenceiq.cloudbreak.api.model.SecurityGroupResponse;
-import com.sequenceiq.cloudbreak.api.model.SecurityRuleRequest;
-import com.sequenceiq.cloudbreak.domain.SecurityGroup;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Matchers.any;
 
 public class SecurityGroupToSecurityGroupResponseConverterTest extends AbstractEntityConverterTest<SecurityGroup> {
 

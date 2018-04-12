@@ -1,15 +1,14 @@
 package com.sequenceiq.cloudbreak.util;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import com.sequenceiq.cloudbreak.api.model.Status;
+import com.sequenceiq.cloudbreak.domain.Cluster;
+import org.junit.Test;
 
 import java.time.Duration;
 import java.util.Date;
 
-import org.junit.Test;
-
-import com.sequenceiq.cloudbreak.api.model.Status;
-import com.sequenceiq.cloudbreak.domain.Cluster;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class StackUtilTest {
     private StackUtil stackUtil = new StackUtil();

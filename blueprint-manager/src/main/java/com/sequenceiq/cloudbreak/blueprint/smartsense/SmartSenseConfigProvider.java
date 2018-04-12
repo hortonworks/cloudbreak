@@ -7,11 +7,11 @@ import com.sequenceiq.cloudbreak.blueprint.BlueprintComponentConfigProvider;
 import com.sequenceiq.cloudbreak.blueprint.SmartsenseConfigurationLocator;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.ha.CloudbreakNodeConfig;
-import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplateConfigurationEntry;
-import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplatePreparationObject;
-import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplateProcessorFactory;
-import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplateTextProcessor;
-import com.sequenceiq.cloudbreak.templateprocessor.template.views.HostgroupView;
+import com.sequenceiq.cloudbreak.template.processor.processor.TemplateConfigurationEntry;
+import com.sequenceiq.cloudbreak.template.processor.processor.TemplatePreparationObject;
+import com.sequenceiq.cloudbreak.template.processor.processor.TemplateProcessorFactory;
+import com.sequenceiq.cloudbreak.template.processor.processor.TemplateTextProcessor;
+import com.sequenceiq.cloudbreak.template.processor.template.views.HostgroupView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -84,7 +84,7 @@ public class SmartSenseConfigProvider implements BlueprintComponentConfigProvide
     }
 
     private String addSmartSenseServerToBp(TemplateTextProcessor blueprintProcessor, Iterable<HostgroupView> hostgroupViews,
-                                           Collection<String> hostGroupNames) {
+            Collection<String> hostGroupNames) {
         if (!blueprintProcessor.componentExistsInBlueprint(HST_SERVER_COMPONENT)) {
             String aHostGroupName = hostGroupNames.stream().findFirst().get();
             boolean singleNodeGatewayFound = false;

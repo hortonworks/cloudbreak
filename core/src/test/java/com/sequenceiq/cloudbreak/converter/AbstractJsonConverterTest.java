@@ -1,17 +1,16 @@
 package com.sequenceiq.cloudbreak.converter;
 
+import com.sequenceiq.cloudbreak.TestException;
+import com.sequenceiq.cloudbreak.util.JsonUtil;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
+
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.Resource;
-
-import com.sequenceiq.cloudbreak.TestException;
-import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 public abstract class AbstractJsonConverterTest<S> extends AbstractConverterTest {
 
