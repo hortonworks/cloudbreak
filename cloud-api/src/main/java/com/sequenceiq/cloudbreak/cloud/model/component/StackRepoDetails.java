@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.model.component;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -24,11 +26,11 @@ public class StackRepoDetails implements Serializable {
 
     private boolean enableGplRepo;
 
-    private Map<String, String> knox;
-
     private boolean verify = true;
 
     private String hdpVersion;
+
+    private List<ManagementPackComponent> mpacks = new ArrayList<>();
 
     public Map<String, String> getStack() {
         return stack;
@@ -44,14 +46,6 @@ public class StackRepoDetails implements Serializable {
 
     public void setUtil(Map<String, String> util) {
         this.util = util;
-    }
-
-    public Map<String, String> getKnox() {
-        return knox;
-    }
-
-    public void setKnox(Map<String, String> knox) {
-        this.knox = knox;
     }
 
     public boolean isVerify() {
@@ -76,6 +70,14 @@ public class StackRepoDetails implements Serializable {
 
     public void setEnableGplRepo(boolean enableGplRepo) {
         this.enableGplRepo = enableGplRepo;
+    }
+
+    public List<ManagementPackComponent> getManagementPacks() {
+        return mpacks;
+    }
+
+    public void setManagementPacks(List<ManagementPackComponent> mpacks) {
+        this.mpacks = mpacks;
     }
 
     @Override

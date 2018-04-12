@@ -1,18 +1,23 @@
 package com.sequenceiq.cloudbreak.converter;
 
-import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
-import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
-import com.sequenceiq.cloudbreak.controller.BadRequestException;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.stereotype.Component;
-
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import javax.inject.Inject;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.core.convert.ConversionService;
+import org.springframework.stereotype.Component;
+
+import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
+import com.sequenceiq.cloudbreak.cloud.model.component.ManagementPackComponent;
+import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
+import com.sequenceiq.cloudbreak.controller.BadRequestException;
 
 @Component
 public class AmbariStackDetailsJsonToStackRepoDetailsConverter extends AbstractConversionServiceAwareConverter<AmbariStackDetailsJson, StackRepoDetails> {
-
     private static final String REDHAT_6 = "redhat6";
 
     private static final String REDHAT_7 = "redhat7";
@@ -21,16 +26,18 @@ public class AmbariStackDetailsJsonToStackRepoDetailsConverter extends AbstractC
 
     private static final String UBUNTU_16 = "ubuntu16";
 
+    @Inject
+    private ConversionService conversionService;
+
     @Override
     public StackRepoDetails convert(AmbariStackDetailsJson source) {
         StackRepoDetails repo = new StackRepoDetails();
         Map<String, String> stack = new HashMap<>();
         Map<String, String> util = new HashMap<>();
 
-        boolean baseRepoRequiredFieldsExists = Stream.of(source.getStackRepoId(), source.getStackBaseURL(), source.getUtilsRepoId(), source.getUtilsBaseURL())
-                .noneMatch(StringUtils::isEmpty);
+        boolean baseRepoRequiredFieldsExists = isBaseRepoRequiredFieldsExists(source);
 
-        if (!isVdfRequiredFieldsExists(source) && !baseRepoRequiredFieldsExists) {
+        if (!isVdfRequiredFieldsExists(source) && !baseRepoRequiredFieldsExists && source.getMpacks().isEmpty()) {
             String msg = "The 'repositoryVersion', 'versionDefinitionFileUrl' or "
                     + "'stackBaseURL', 'stackRepoId', 'utilsBaseUrl', 'utilsRepoId' fields must be specified!";
             throw new BadRequestException(msg);
@@ -68,13 +75,26 @@ public class AmbariStackDetailsJsonToStackRepoDetailsConverter extends AbstractC
         if (!StringUtils.isEmpty(source.getMpackUrl())) {
             stack.put(StackRepoDetails.MPACK_TAG, source.getMpackUrl());
         }
-
         repo.setStack(stack);
         repo.setUtil(util);
         repo.setEnableGplRepo(source.isEnableGplRepo());
         repo.setVerify(source.getVerify());
         repo.setHdpVersion(source.getVersion());
+
+        if (!source.getMpacks().isEmpty()) {
+            repo.setManagementPacks(source.getMpacks().stream().map(rmpack -> conversionService.convert(rmpack, ManagementPackComponent.class))
+                    .collect(Collectors.toList()));
+        }
         return repo;
+    }
+
+    public boolean onlyMpackListIsDefined(AmbariStackDetailsJson source) {
+        return !isBaseRepoRequiredFieldsExists(source) && !isVdfRequiredFieldsExists(source) && !source.getMpacks().isEmpty();
+    }
+
+    private boolean isBaseRepoRequiredFieldsExists(AmbariStackDetailsJson source) {
+        return Stream.of(source.getStackRepoId(), source.getStackBaseURL(), source.getUtilsRepoId(), source.getUtilsBaseURL())
+                    .noneMatch(StringUtils::isEmpty);
     }
 
     private boolean isVdfRequiredFieldsExists(AmbariStackDetailsJson source) {

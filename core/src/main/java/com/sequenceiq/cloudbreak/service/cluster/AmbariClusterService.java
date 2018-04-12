@@ -820,7 +820,7 @@ public class AmbariClusterService implements ClusterService {
                 stackRepoDetails.setStack(stackRepoDetailsUpdate.getStack());
                 stackRepoDetails.setUtil(stackRepoDetailsUpdate.getUtil());
                 stackRepoDetails.setEnableGplRepo(stackRepoDetailsUpdate.isEnableGplRepo());
-                stackRepoDetails.setKnox(stackRepoDetailsUpdate.getKnox());
+                stackRepoDetails.setManagementPacks(stackRepoDetailsUpdate.getManagementPacks());
                 try {
                     component.setAttributes(new Json(stackRepoDetails));
                     clusterComponentConfigProvider.store(component);

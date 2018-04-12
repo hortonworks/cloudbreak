@@ -1,6 +1,26 @@
 package com.sequenceiq.cloudbreak.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
+import static com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails.CUSTOM_VDF_REPO_KEY;
+import static com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails.VDF_REPO_KEY_PREFIX;
+import static com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariRepositoryVersionService.AMBARI_VERSION_2_6_0_0;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import javax.inject.Inject;
+import javax.inject.Named;
+
+import org.apache.commons.lang3.SerializationUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.core.convert.ConversionService;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.model.AmbariRepoDetailsJson;
@@ -14,11 +34,13 @@ import com.sequenceiq.cloudbreak.cloud.model.component.DefaultHDFEntries;
 import com.sequenceiq.cloudbreak.cloud.model.component.DefaultHDFInfo;
 import com.sequenceiq.cloudbreak.cloud.model.component.DefaultHDPEntries;
 import com.sequenceiq.cloudbreak.cloud.model.component.DefaultHDPInfo;
+import com.sequenceiq.cloudbreak.cloud.model.component.ManagementPackComponent;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackInfo;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.controller.validation.filesystem.FileSystemValidator;
+import com.sequenceiq.cloudbreak.converter.AmbariStackDetailsJsonToStackRepoDetailsConverter;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
@@ -35,24 +57,6 @@ import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariRepositoryVersionService;
 import com.sequenceiq.cloudbreak.service.decorator.ClusterDecorator;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
-import org.apache.commons.lang3.SerializationUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.core.convert.ConversionService;
-
-import javax.inject.Inject;
-import javax.inject.Named;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map.Entry;
-import java.util.Optional;
-import java.util.Set;
-
-import static com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails.CUSTOM_VDF_REPO_KEY;
-import static com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails.VDF_REPO_KEY_PREFIX;
-import static com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariRepositoryVersionService.AMBARI_VERSION_2_6_0_0;
 
 @org.springframework.stereotype.Component
 public class ClusterCreationSetupService {
@@ -68,6 +72,9 @@ public class ClusterCreationSetupService {
     @Inject
     @Named("conversionService")
     private ConversionService conversionService;
+
+    @Inject
+    private AmbariStackDetailsJsonToStackRepoDetailsConverter stackRepoDetailsConverter;
 
     @Inject
     private ClusterDecorator clusterDecorator;
@@ -181,24 +188,32 @@ public class ClusterCreationSetupService {
     }
 
     private ClusterComponent determineHDPRepoConfig(Blueprint blueprint, long stackId, Optional<Component> stackHdpRepoConfig,
-            ClusterRequest request, Cluster cluster, IdentityUser user, Optional<Component> stackImageComponent) throws JsonProcessingException {
+            ClusterRequest request, Cluster cluster, IdentityUser user, Optional<Component> stackImageComponent) throws IOException {
         Json stackRepoDetailsJson;
+        AmbariStackDetailsJson ambariStackDetails = request.getAmbariStackDetails();
         if (!stackHdpRepoConfig.isPresent()) {
-            AmbariStackDetailsJson ambariStackDetails = request.getAmbariStackDetails();
-            if (ambariStackDetails != null) {
+            if (ambariStackDetails != null && !stackRepoDetailsConverter.onlyMpackListIsDefined(ambariStackDetails)) {
                 setOsTypeFromImageIfMissing(cluster, stackImageComponent, ambariStackDetails);
-                StackRepoDetails stackRepoDetails = conversionService.convert(ambariStackDetails, StackRepoDetails.class);
+                StackRepoDetails stackRepoDetails = stackRepoDetailsConverter.convert(ambariStackDetails);
                 stackRepoDetailsJson = new Json(stackRepoDetails);
             } else {
                 StackRepoDetails stackRepoDetails = SerializationUtils.clone(defaultHDPInfo(blueprint, request, user).getRepo());
                 Optional<String> vdfUrl = getVDFUrlByOsType(stackId, stackRepoDetails);
                 vdfUrl.ifPresent(s -> stackRepoDetails.getStack().put(CUSTOM_VDF_REPO_KEY, s));
+                if (ambariStackDetails != null) {
+                    stackRepoDetails.getManagementPacks().addAll(ambariStackDetails.getMpacks().stream().map(
+                            rmpack -> conversionService.convert(rmpack, ManagementPackComponent.class)).collect(Collectors.toList()));
+                }
                 stackRepoDetailsJson = new Json(stackRepoDetails);
             }
         } else {
             stackRepoDetailsJson = stackHdpRepoConfig.get().getAttributes();
+            if (ambariStackDetails != null && !ambariStackDetails.getMpacks().isEmpty()) {
+                StackRepoDetails stackRepoDetails = stackRepoDetailsJson.get(StackRepoDetails.class);
+                stackRepoDetails.getManagementPacks().addAll(ambariStackDetails.getMpacks().stream().map(
+                        rmpack -> conversionService.convert(rmpack, ManagementPackComponent.class)).collect(Collectors.toList()));
+            }
         }
-
         return new ClusterComponent(ComponentType.HDP_REPO_DETAILS, stackRepoDetailsJson, cluster);
     }
 

@@ -148,6 +148,7 @@ public class EndpointConfig extends ResourceConfig {
         register(ImageCatalogV1Controller.class);
         register(SecurityRuleController.class);
         register(RepositoryConfigValidationController.class);
+        register(ManagementPackController.class);
 
         register(io.swagger.jaxrs.listing.ApiListingResource.class);
         register(io.swagger.jaxrs.listing.SwaggerSerializers.class);
