@@ -17,17 +17,12 @@ import (
 
 type StackRepoDetailsJSON struct {
 
-	// knox
-	Knox map[string]string `json:"knox,omitempty"`
-
 	// stack
 	Stack map[string]string `json:"stack,omitempty"`
 
 	// util
 	Util map[string]string `json:"util,omitempty"`
 }
-
-/* polymorph StackRepoDetailsJson knox false */
 
 /* polymorph StackRepoDetailsJson stack false */
 

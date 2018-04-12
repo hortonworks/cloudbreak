@@ -6,6 +6,8 @@ package models_cloudbreak
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"strconv"
+
 	strfmt "github.com/go-openapi/strfmt"
 
 	"github.com/go-openapi/errors"
@@ -23,8 +25,8 @@ type AmbariStackDetailsResponse struct {
 	// hdp version
 	HdpVersion string `json:"hdpVersion,omitempty"`
 
-	// knox
-	Knox map[string]string `json:"knox,omitempty"`
+	// mpacks
+	Mpacks []*ManagementPackDetails `json:"mpacks"`
 
 	// stack
 	Stack map[string]string `json:"stack,omitempty"`
@@ -40,7 +42,7 @@ type AmbariStackDetailsResponse struct {
 
 /* polymorph AmbariStackDetailsResponse hdpVersion false */
 
-/* polymorph AmbariStackDetailsResponse knox false */
+/* polymorph AmbariStackDetailsResponse mpacks false */
 
 /* polymorph AmbariStackDetailsResponse stack false */
 
@@ -52,9 +54,41 @@ type AmbariStackDetailsResponse struct {
 func (m *AmbariStackDetailsResponse) Validate(formats strfmt.Registry) error {
 	var res []error
 
+	if err := m.validateMpacks(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (m *AmbariStackDetailsResponse) validateMpacks(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Mpacks) { // not required
+		return nil
+	}
+
+	for i := 0; i < len(m.Mpacks); i++ {
+
+		if swag.IsZero(m.Mpacks[i]) { // not required
+			continue
+		}
+
+		if m.Mpacks[i] != nil {
+
+			if err := m.Mpacks[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("mpacks" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
+	}
+
 	return nil
 }
 

@@ -44,7 +44,7 @@ type RdsConfig struct {
 	Name *string `json:"name"`
 
 	// Oracle specific properties
-	OracleProperties map[string]interface{} `json:"oracleProperties,omitempty"`
+	OracleParameters *Oracle `json:"oracleParameters,omitempty"`
 
 	// Type of RDS, aka the service name that will use the RDS like HIVE, DRUID, SUPERSET, RANGER, etc.
 	// Required: true
@@ -64,7 +64,7 @@ type RdsConfig struct {
 
 /* polymorph RdsConfig name false */
 
-/* polymorph RdsConfig oracleProperties false */
+/* polymorph RdsConfig oracleParameters false */
 
 /* polymorph RdsConfig type false */
 
@@ -93,6 +93,11 @@ func (m *RdsConfig) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateName(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateOracleParameters(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -172,6 +177,25 @@ func (m *RdsConfig) validateName(formats strfmt.Registry) error {
 
 	if err := validate.Pattern("name", "body", string(*m.Name), `(^[a-z][-a-z0-9]*[a-z0-9]$)`); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func (m *RdsConfig) validateOracleParameters(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.OracleParameters) { // not required
+		return nil
+	}
+
+	if m.OracleParameters != nil {
+
+		if err := m.OracleParameters.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("oracleParameters")
+			}
+			return err
+		}
 	}
 
 	return nil

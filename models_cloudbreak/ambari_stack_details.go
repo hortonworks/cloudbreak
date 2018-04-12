@@ -6,11 +6,12 @@ package models_cloudbreak
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"strconv"
+
 	strfmt "github.com/go-openapi/strfmt"
 
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
-	"github.com/go-openapi/validate"
 )
 
 // AmbariStackDetails ambari stack details
@@ -24,6 +25,9 @@ type AmbariStackDetails struct {
 	// url the MPACK that needs to be installed before HDF installation
 	MpackURL string `json:"mpackUrl,omitempty"`
 
+	// Management packs which are needed for the HDP / HDF clusters
+	Mpacks []*ManagementPackDetails `json:"mpacks"`
+
 	// operating system for the stack, like redhat6
 	Os string `json:"os,omitempty"`
 
@@ -31,8 +35,7 @@ type AmbariStackDetails struct {
 	RepositoryVersion string `json:"repositoryVersion,omitempty"`
 
 	// name of the stack, like HDP
-	// Required: true
-	Stack *string `json:"stack"`
+	Stack string `json:"stack,omitempty"`
 
 	// url of the stack repository
 	StackBaseURL string `json:"stackBaseURL,omitempty"`
@@ -47,12 +50,10 @@ type AmbariStackDetails struct {
 	UtilsRepoID string `json:"utilsRepoId,omitempty"`
 
 	// whether to verify or not the repo url
-	// Required: true
-	Verify bool `json:"verify"`
+	Verify *bool `json:"verify,omitempty"`
 
 	// version of the stack
-	// Required: true
-	Version *string `json:"version"`
+	Version string `json:"version,omitempty"`
 
 	// local path on the Ambari server or URL that point to the desired VDF file
 	VersionDefinitionFileURL string `json:"versionDefinitionFileUrl,omitempty"`
@@ -61,6 +62,8 @@ type AmbariStackDetails struct {
 /* polymorph AmbariStackDetails enableGplRepo false */
 
 /* polymorph AmbariStackDetails mpackUrl false */
+
+/* polymorph AmbariStackDetails mpacks false */
 
 /* polymorph AmbariStackDetails os false */
 
@@ -86,17 +89,7 @@ type AmbariStackDetails struct {
 func (m *AmbariStackDetails) Validate(formats strfmt.Registry) error {
 	var res []error
 
-	if err := m.validateStack(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
-	if err := m.validateVerify(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
-	if err := m.validateVersion(formats); err != nil {
+	if err := m.validateMpacks(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -107,28 +100,28 @@ func (m *AmbariStackDetails) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *AmbariStackDetails) validateStack(formats strfmt.Registry) error {
+func (m *AmbariStackDetails) validateMpacks(formats strfmt.Registry) error {
 
-	if err := validate.Required("stack", "body", m.Stack); err != nil {
-		return err
+	if swag.IsZero(m.Mpacks) { // not required
+		return nil
 	}
 
-	return nil
-}
+	for i := 0; i < len(m.Mpacks); i++ {
 
-func (m *AmbariStackDetails) validateVerify(formats strfmt.Registry) error {
+		if swag.IsZero(m.Mpacks[i]) { // not required
+			continue
+		}
 
-	if err := validate.Required("verify", "body", bool(m.Verify)); err != nil {
-		return err
-	}
+		if m.Mpacks[i] != nil {
 
-	return nil
-}
+			if err := m.Mpacks[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("mpacks" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
 
-func (m *AmbariStackDetails) validateVersion(formats strfmt.Registry) error {
-
-	if err := validate.Required("version", "body", m.Version); err != nil {
-		return err
 	}
 
 	return nil
