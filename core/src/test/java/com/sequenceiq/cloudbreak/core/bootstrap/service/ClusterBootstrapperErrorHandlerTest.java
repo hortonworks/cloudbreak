@@ -1,12 +1,12 @@
 package com.sequenceiq.cloudbreak.core.bootstrap.service;
 
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anySet;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -22,7 +22,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 
 import com.sequenceiq.cloudbreak.TestUtil;
@@ -84,10 +84,7 @@ public class ClusterBootstrapperErrorHandlerTest {
     public void clusterBootstrapErrorHandlerWhenNodeCountLessThanOneAfterTheRollbackThenClusterProvisionFailed() throws CloudbreakOrchestratorFailedException {
         Stack stack = TestUtil.stack();
 
-        doNothing().when(eventService).fireCloudbreakEvent(anyLong(), anyString(), anyString());
         when(orchestrator.getAvailableNodes(any(GatewayConfig.class), anySet())).thenReturn(new ArrayList<>());
-        when(instanceGroupRepository.save(any(InstanceGroup.class))).then(returnsFirstArg());
-        when(instanceMetaDataRepository.save(any(InstanceMetaData.class))).then(returnsFirstArg());
         when(instanceMetaDataRepository.findNotTerminatedByPrivateAddress(anyLong(), anyString())).thenAnswer((Answer<InstanceMetaData>) invocation -> {
             Object[] args = invocation.getArguments();
             String ip = (String) args[1];
@@ -113,7 +110,7 @@ public class ClusterBootstrapperErrorHandlerTest {
         thrown.expectMessage("invalide.nodecount");
 
         underTest.terminateFailedNodes(null, orchestrator, TestUtil.stack(),
-                new GatewayConfig("10.0.0.1",  "198.0.0.1",  "10.0.0.1", 8443, false), prepareNodes(stack));
+                new GatewayConfig("10.0.0.1", "198.0.0.1", "10.0.0.1", 8443, false), prepareNodes(stack));
     }
 
     @Test
@@ -121,12 +118,11 @@ public class ClusterBootstrapperErrorHandlerTest {
             throws CloudbreakOrchestratorFailedException {
         Stack stack = TestUtil.stack();
 
-        doNothing().when(eventService).fireCloudbreakEvent(anyLong(), anyString(), anyString());
         when(orchestrator.getAvailableNodes(any(GatewayConfig.class), anySet())).thenReturn(new ArrayList<>());
         when(instanceGroupRepository.save(any(InstanceGroup.class))).then(returnsFirstArg());
         when(instanceMetaDataRepository.save(any(InstanceMetaData.class))).then(returnsFirstArg());
-        doNothing().when(resourceRepository).delete(anyLong());
-        when(resourceRepository.findByStackIdAndNameAndType(anyLong(), anyString(), any(ResourceType.class))).thenReturn(new Resource());
+        when(resourceRepository.findByStackIdAndNameAndType(nullable(Long.class), nullable(String.class), nullable(ResourceType.class)))
+                .thenReturn(new Resource());
         when(connector.removeInstances(any(Stack.class), anySet(), anyString())).thenReturn(new HashSet<>());
         when(instanceMetaDataRepository.findNotTerminatedByPrivateAddress(anyLong(), anyString())).thenAnswer(new Answer<InstanceMetaData>() {
             @Override
@@ -157,14 +153,14 @@ public class ClusterBootstrapperErrorHandlerTest {
             }
         });
         underTest.terminateFailedNodes(null, orchestrator, TestUtil.stack(),
-                new GatewayConfig("10.0.0.1",  "198.0.0.1",  "10.0.0.1", 8443, false), prepareNodes(stack));
+                new GatewayConfig("10.0.0.1", "198.0.0.1", "10.0.0.1", 8443, false), prepareNodes(stack));
 
-        verify(eventService, times(4)).fireCloudbreakEvent(anyLong(), anyString(), anyString());
+        verify(eventService, times(4)).fireCloudbreakEvent(anyLong(), anyString(), nullable(String.class));
         verify(instanceGroupRepository, times(3)).save(any(InstanceGroup.class));
         verify(instanceMetaDataRepository, times(3)).save(any(InstanceMetaData.class));
         verify(connector, times(3)).removeInstances(any(Stack.class), anySet(), anyString());
-        verify(resourceRepository, times(3)).findByStackIdAndNameAndType(anyLong(), anyString(), any(ResourceType.class));
-        verify(resourceRepository, times(3)).delete(anyLong());
+        verify(resourceRepository, times(3)).findByStackIdAndNameAndType(anyLong(), anyString(), nullable(ResourceType.class));
+        verify(resourceRepository, times(3)).delete(nullable(Long.class));
         verify(instanceGroupRepository, times(3)).findOneByGroupNameInStack(anyLong(), anyString());
 
     }

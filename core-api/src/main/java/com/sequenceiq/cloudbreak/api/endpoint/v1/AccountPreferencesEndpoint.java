@@ -12,7 +12,8 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import com.sequenceiq.cloudbreak.api.model.AccountPreferencesJson;
+import com.sequenceiq.cloudbreak.api.model.AccountPreferencesRequest;
+import com.sequenceiq.cloudbreak.api.model.AccountPreferencesResponse;
 import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.doc.Notes;
@@ -30,19 +31,19 @@ public interface AccountPreferencesEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = AccountPreferencesDescription.GET_PRIVATE, produces = ContentType.JSON, notes = Notes.ACCOUNT_PREFERENCES_NOTES,
             nickname = "getAccountPreferencesEndpoint")
-    AccountPreferencesJson get();
+    AccountPreferencesResponse get();
 
     @PUT
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = AccountPreferencesDescription.PUT_PRIVATE, produces = ContentType.JSON, notes = Notes.ACCOUNT_PREFERENCES_NOTES,
             nickname = "putAccountPreferencesEndpoint")
-    AccountPreferencesJson put(@Valid AccountPreferencesJson updateRequest);
+    AccountPreferencesResponse put(@Valid AccountPreferencesRequest updateRequest);
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = AccountPreferencesDescription.POST_PRIVATE, produces = ContentType.JSON, notes = Notes.ACCOUNT_PREFERENCES_NOTES,
             nickname = "postAccountPreferencesEndpoint")
-    AccountPreferencesJson post(@Valid AccountPreferencesJson updateRequest);
+    AccountPreferencesResponse post(@Valid AccountPreferencesRequest updateRequest);
 
     @GET
     @Path("/isplatformselectiondisabled")

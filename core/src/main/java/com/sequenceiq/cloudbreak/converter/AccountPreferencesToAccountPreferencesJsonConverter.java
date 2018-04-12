@@ -8,13 +8,16 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.model.AccountPreferencesJson;
+import com.sequenceiq.cloudbreak.api.model.AccountPreferencesBase;
+import com.sequenceiq.cloudbreak.api.model.AccountPreferencesResponse;
+import com.sequenceiq.cloudbreak.api.model.SupportedExternalDatabaseServiceEntryResponse;
 import com.sequenceiq.cloudbreak.domain.AccountPreferences;
 import com.sequenceiq.cloudbreak.domain.json.Json;
-
+import com.sequenceiq.cloudbreak.validation.externaldatabase.SupportedDatabaseProvider;
 
 @Component
-public class AccountPreferencesToAccountPreferencesJsonConverter extends AbstractConversionServiceAwareConverter<AccountPreferences, AccountPreferencesJson> {
+public class AccountPreferencesToAccountPreferencesJsonConverter
+        extends AbstractConversionServiceAwareConverter<AccountPreferences, AccountPreferencesResponse> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AccountPreferencesToAccountPreferencesJsonConverter.class);
 
@@ -26,8 +29,8 @@ public class AccountPreferencesToAccountPreferencesJsonConverter extends Abstrac
     private boolean smartsenseEnabled;
 
     @Override
-    public AccountPreferencesJson convert(AccountPreferences source) {
-        AccountPreferencesJson json = new AccountPreferencesJson();
+    public AccountPreferencesResponse convert(AccountPreferences source) {
+        AccountPreferencesResponse json = new AccountPreferencesResponse();
         json.setMaxNumberOfClusters(source.getMaxNumberOfClusters());
         json.setMaxNumberOfNodesPerCluster(source.getMaxNumberOfNodesPerCluster());
         json.setAllowedInstanceTypes(source.getAllowedInstanceTypes());
@@ -38,11 +41,13 @@ public class AccountPreferencesToAccountPreferencesJsonConverter extends Abstrac
         json.setMaxNumberOfClustersPerUser(source.getMaxNumberOfClustersPerUser());
         json.setPlatforms(source.getPlatforms());
         json.setSmartsenseEnabled(smartsenseEnabled);
+        SupportedDatabaseProvider.supportedExternalDatabases().forEach(item ->
+                json.getSupportedExternalDatabases().add(getConversionService().convert(item, SupportedExternalDatabaseServiceEntryResponse.class)));
         convertTags(json, source.getDefaultTags());
         return json;
     }
 
-    private void convertTags(AccountPreferencesJson apJson, Json tag) {
+    private void convertTags(AccountPreferencesBase apJson, Json tag) {
         Map<String, String> tags = new HashMap<>();
         try {
             if (tag != null && tag.getValue() != null) {

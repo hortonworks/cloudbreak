@@ -7,5 +7,3 @@ ambari-server:
   pkg.installed:
     - require:
       - sls: ambari.repo
-    - version: {{ ambari.version }}
-

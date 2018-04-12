@@ -10,10 +10,7 @@
     "hadoop.security.group.mapping.ldap.groupbase": "cn=groups,dc=example,dc=org",
     "hadoop.security.group.mapping.ldap.search.filter.group": "(objectClass=groupOfNames)",
     "hadoop.security.group.mapping.ldap.search.attr.group.name": "cn",
-    "hadoop.security.group.mapping.ldap.search.attr.member": "member",
-    "hadoop.user.group.static.mapping.overrides": "hive=hive,hadoop;hdfs=hdfs,hadoop;beacon=hadoop,hdfs,beacon;dpprofiler=hadoop",
-    "hadoop.proxyuser.livy.groups": "*",
-    "hadoop.proxyuser.livy.hosts": "*"
+    "hadoop.security.group.mapping.ldap.search.attr.member": "member"
   }
 
 }

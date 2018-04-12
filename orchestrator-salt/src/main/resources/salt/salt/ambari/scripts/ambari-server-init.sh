@@ -35,6 +35,9 @@ config_remote_jdbc() {
           if [[ '{{ ambari_database.ambariVendor }}' = 'mysql' ]]; then
             mysql -h{{ ambari_database.host }} -P{{ ambari_database.port }} -u'{{ ambari_database.connectionUserName }}' -p'{{ ambari_database.connectionPassword }}' '{{ ambari_database.databaseName }}' < /var/lib/ambari-server/resources/Ambari-DDL-{{ ambari_database.fancyName }}-CREATE.sql
           fi
+          if [[ '{{ ambari_database.ambariVendor }}' = 'oracle' ]]; then
+            sqlplus '{{ ambari_database.connectionUserName }}/{{ ambari_database.connectionPassword }}@(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(Host={{ ambari_database.host }})(Port={{ ambari_database.port }}))(CONNECT_DATA=(SID=remote_SID)))' < /var/lib/ambari-server/resources/Ambari-DDL-{{ ambari_database.fancyName }}-CREATE.sql
+          fi
         else
             echo File not found /var/lib/ambari-server/resources/Ambari-DDL-{{ ambari_database.fancyName }}-CREATE.sql
             exit 1
@@ -51,6 +54,9 @@ config_jdbc_drivers() {
     fi
     if [ -z "$(find_and_distribute_latest_jdbc_driver mysql-connector mysql)" ]; then
       echo "MySQL JDBC driver not found."
+    fi
+    if [ -z "$(find_and_distribute_latest_jdbc_driver ojdbc oracle)" ]; then
+      echo "ORACLE_JDBC driver not found."
     fi
 }
 

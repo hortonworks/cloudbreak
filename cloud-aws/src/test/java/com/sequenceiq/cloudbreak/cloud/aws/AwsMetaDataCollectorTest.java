@@ -19,7 +19,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.amazonaws.services.autoscaling.AmazonAutoScalingClient;
 import com.amazonaws.services.cloudformation.AmazonCloudFormationClient;
@@ -315,8 +315,6 @@ public class AwsMetaDataCollectorTest {
 
         Instance instance1 = Mockito.mock(Instance.class);
         when(instance1.getInstanceId()).thenReturn("i-1");
-        when(instance1.getPrivateIpAddress()).thenReturn("privateIp1");
-        when(instance1.getPublicIpAddress()).thenReturn("publicIp1");
         Tag tag = new Tag();
         tag.setKey("cbname");
         tag.setValue("somevalue");

@@ -18,7 +18,7 @@ import org.mockito.Answers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.google.api.client.testing.http.MockHttpTransport;
 import com.google.api.client.testing.json.MockJsonFactory;
@@ -106,7 +106,6 @@ public class GcpCredentialConnectorTest {
         final AuthenticatedContext authContext = createAuthContext();
         when(contextBuilder.contextInit(authContext.getCloudContext(), authContext, null, null, false)).thenReturn(context);
         when(context.getProjectId()).thenReturn(null);
-        when(context.getServiceAccountId()).thenReturn("some service id");
 
         final CloudCredentialStatus status = underTest.verify(authContext);
 
@@ -125,7 +124,6 @@ public class GcpCredentialConnectorTest {
         when(contextBuilder.contextInit(authContext.getCloudContext(), authContext, null, null, false)).thenReturn(context);
         when(context.getProjectId()).thenReturn("some id");
         when(context.getServiceAccountId()).thenReturn(null);
-        when(context.getCompute()).thenReturn(createDummyCompute());
 
         final CloudCredentialStatus status = underTest.verify(authContext);
 

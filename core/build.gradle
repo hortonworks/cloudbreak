@@ -42,8 +42,6 @@ jar {
 }
 
 dependencies {
-
-
     compile group: 'org.springframework.retry',     name: 'spring-retry',                   version: '1.2.0.RELEASE'
     compile group: 'org.springframework.boot',      name: 'spring-boot-starter',            version: springBootVersion
     compile group: 'org.springframework.boot',      name: 'spring-boot-starter-web',        version: springBootVersion
@@ -110,12 +108,16 @@ dependencies {
 
     runtime     group: 'activation',                name: 'activation',                     version: '1.0.2'
 
+    testCompile (group: 'org.powermock',             name: 'powermock-module-junit4',        version: powermockVersion)
+    testCompile (group: 'org.powermock',             name: 'powermock-api-mockito2',          version: powermockVersion) {
+      exclude group: 'org.hamcrest'
+    }
+    testCompile group: 'org.mockito',              name: 'mockito-core',                   version: mockitoVersion
     testCompile project(path: ':core-model', configuration: 'tests')
     testCompile group: 'org.springframework.boot', name:'spring-boot-starter-test',        version:springBootVersion
     testCompile group: 'org.springframework.boot', name:'spring-boot-starter-freemarker',  version:springBootVersion
     testCompile group: 'com.jayway.restassured',   name: 'rest-assured',                   version: '2.3.4'
     testCompile group: 'com.jayway.restassured',   name: 'json-path',                      version: '2.3.4'
-
 }
 
 jacoco {

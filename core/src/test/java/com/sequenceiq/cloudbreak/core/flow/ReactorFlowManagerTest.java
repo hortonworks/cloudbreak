@@ -17,7 +17,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.model.HostGroupAdjustmentJson;
@@ -74,8 +74,6 @@ public class ReactorFlowManagerTest {
         Stack stack = TestUtil.stack();
         stack.setCluster(TestUtil.cluster());
         when(stackService.get(anyLong())).thenReturn(stack);
-        when(stackService.getById(anyLong())).thenReturn(TestUtil.stack());
-        when(stackService.getByIdView(anyLong())).thenReturn(TestUtil.stackView());
         when(eventFactory.createEventWithErrHandler(anyObject())).thenReturn(new Event<>(acceptable));
     }
 

@@ -17,7 +17,7 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentMatcher;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
@@ -121,7 +121,7 @@ public class StackRepairServiceTest {
         when(instanceMetaDataRepository.findByInstanceId(stackId, instanceId)).thenReturn(imd1);
     }
 
-    private static class StackRepairFlowSubmitterMatcher extends ArgumentMatcher<StackRepairFlowSubmitter> {
+    private static class StackRepairFlowSubmitterMatcher implements ArgumentMatcher<StackRepairFlowSubmitter> {
 
         private final Long expectedStackId;
 
@@ -133,7 +133,7 @@ public class StackRepairServiceTest {
         }
 
         @Override
-        public boolean matches(Object argument) {
+        public boolean matches(StackRepairFlowSubmitter argument) {
             StackRepairFlowSubmitter stackRepairFlowSubmitter = (StackRepairFlowSubmitter) argument;
             return stackRepairFlowSubmitter.getStackId().equals(expectedStackId) && expectedInstances.equals(stackRepairFlowSubmitter.getUnhealthyInstances());
         }

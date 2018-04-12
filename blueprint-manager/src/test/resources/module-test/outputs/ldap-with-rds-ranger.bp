@@ -27,7 +27,6 @@
         "hadoop.proxyuser.falcon.groups": "*",
         "hadoop.proxyuser.root.groups": "*",
         "hadoop.security.group.mapping.ldap.bind.password": "admin",
-        "hadoop.user.group.static.mapping.overrides": "hive=hive,hadoop;hdfs=hdfs,hadoop;beacon=hadoop,hdfs,beacon;dpprofiler=hadoop",
         "fs.trash.interval": "4320",
         "hadoop.security.group.mapping.ldap.userbase": "cn=users,dc=example,dc=org",
         "hadoop.security.group.mapping.ldap.url": "ldap://localhost:389",
@@ -147,13 +146,10 @@
           "ranger.ldap.bind.dn": "cn=admin,dc=example,dc=org",
           "ranger.ldap.bind.password": "admin",
           "ranger.ldap.user.searchfilter": "(cn=admin,dc=example,dc=org={0})",
-          "ranger.audit.source.type": "solr",
-          "ranger.sso.enabled": "true",
           "ranger.ldap.url": "ldap://localhost:389",
           "ranger.ldap.ad.url": "ldap://localhost:389",
           "ranger.ldap.ad.base.dn": "cn=users,dc=example,dc=org",
           "ranger.ldap.base.dn": "cn=users,dc=example,dc=org",
-          "ranger.sso.publicKey": "signcert",
           "ranger.ldap.group.searchbase": "cn=groups,dc=example,dc=org",
           "ranger.ldap.group.roleattribute": "cn"
         }

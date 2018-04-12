@@ -14,7 +14,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.openstack4j.api.OSClient;
 import org.openstack4j.api.image.v2.ImageService;
 import org.openstack4j.model.image.v2.Image;
@@ -60,8 +60,6 @@ public class OpenStackImageVerifierTest {
 
     private void foundOneAnyState(Image.ImageStatus status) {
         GlanceImage newImage = Mockito.mock(GlanceImage.class);
-        when(newImage.getId()).thenReturn("id1");
-        when(newImage.getName()).thenReturn("exist-id1");
         when(newImage.getStatus()).thenReturn(status);
         List<GlanceImage> returnedImages = ImmutableList.of(newImage);
         Map<String, String> map = ImmutableMap.of("name", "exist-id1");

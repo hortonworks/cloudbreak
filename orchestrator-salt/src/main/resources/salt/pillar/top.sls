@@ -38,6 +38,7 @@ base:
     - grafana.repo
     - gateway.init
     - gateway.ldap
+    - jdbc.connectors
 
   'roles:knox_gateway':
     - match: grain

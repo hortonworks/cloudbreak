@@ -4,6 +4,7 @@
   "ui": true, {% endif %}
   "data_dir": "/opt/consul",
   "client_addr": "0.0.0.0",
+  "advertise_addr": "{{ advertise_addr }}",
   "disable_update_check": true,
   "retry_join": {{ retry_join | json }},
   "ports": {

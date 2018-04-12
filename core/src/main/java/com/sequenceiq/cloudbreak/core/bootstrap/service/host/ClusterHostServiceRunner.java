@@ -21,6 +21,7 @@ import javax.transaction.Transactional;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.api.model.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.model.ExecutorType;
 import com.sequenceiq.cloudbreak.api.model.ExposedService;
 import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
@@ -30,7 +31,6 @@ import com.sequenceiq.cloudbreak.blueprint.template.views.RdsView;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
-import com.sequenceiq.cloudbreak.converter.mapper.AmbariDatabaseMapper;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.PostgresConfigService;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.ExposedServices;
@@ -108,9 +108,6 @@ public class ClusterHostServiceRunner {
     @Inject
     private RdsConfigService rdsConfigService;
 
-    @Inject
-    private AmbariDatabaseMapper ambariDatabaseMapper;
-
     @Transactional
     public void runAmbariServices(Stack stack, Cluster cluster) throws CloudbreakException {
         try {
@@ -181,6 +178,8 @@ public class ClusterHostServiceRunner {
         postgresConfigService.decorateServicePillarWithPostgresIfNeeded(servicePillar, stack, cluster);
 
         proxyConfigProvider.decoratePillarWithProxyDataIfNeeded(servicePillar, cluster);
+
+        decoratePillarWithJdbcConnectors(cluster, servicePillar);
 
         return new SaltConfig(servicePillar, createGrainProperties(gatewayConfigs));
     }
@@ -355,6 +354,23 @@ public class ClusterHostServiceRunner {
             }
         } else {
             throw new CloudbreakException("Primary gateway change is not possible because there is no available node for the action");
+        }
+    }
+
+    private void decoratePillarWithJdbcConnectors(Cluster cluster, Map<String, SaltPillarProperties> servicePillar) {
+        Set<RDSConfig> rdsConfigs = rdsConfigService.findByClusterId(cluster.getOwner(), cluster.getAccount(), cluster.getId());
+        Map<String, Object> connectorJarUrlsByVendor = new HashMap<>();
+        rdsConfigs.stream()
+                .filter(rds -> StringUtils.isNoneEmpty(rds.getConnectorJarUrl()))
+                .forEach(rdsConfig -> {
+                    DatabaseVendor databaseVendor = DatabaseVendor.valueOf(rdsConfig.getDatabaseEngine());
+                    connectorJarUrlsByVendor.put("vendor", databaseVendor.ambariVendor());
+                    connectorJarUrlsByVendor.put("connectorJarUrl", rdsConfig.getConnectorJarUrl());
+                    connectorJarUrlsByVendor.put("connectorJarName", databaseVendor.connectorJarName());
+                });
+        if (!connectorJarUrlsByVendor.isEmpty()) {
+            Map<String, Object> jdbcConnectors = singletonMap("jdbc_connectors", connectorJarUrlsByVendor);
+            servicePillar.put("jdbc-connectors", new SaltPillarProperties("/jdbc/connectors.sls", jdbcConnectors));
         }
     }
 }

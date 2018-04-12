@@ -6,17 +6,18 @@ import java.util.Map;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.model.AccountPreferencesJson;
+import com.sequenceiq.cloudbreak.api.model.AccountPreferencesRequest;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.AccountPreferences;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 
 @Component
-public class AccountPreferencesRequestToAccountPreferencesConverter extends AbstractConversionServiceAwareConverter<AccountPreferencesJson, AccountPreferences> {
+public class AccountPreferencesRequestToAccountPreferencesConverter
+        extends AbstractConversionServiceAwareConverter<AccountPreferencesRequest, AccountPreferences> {
     private static final long HOUR_IN_MS = 3600000L;
 
     @Override
-    public AccountPreferences convert(AccountPreferencesJson source) {
+    public AccountPreferences convert(AccountPreferencesRequest source) {
         AccountPreferences target = new AccountPreferences();
         target.setMaxNumberOfClusters(source.getMaxNumberOfClusters());
         target.setMaxNumberOfNodesPerCluster(source.getMaxNumberOfNodesPerCluster());
