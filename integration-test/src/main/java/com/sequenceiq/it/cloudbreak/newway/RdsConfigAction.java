@@ -60,19 +60,19 @@ public class RdsConfigAction {
 
     static void testConnect(IntegrationTestContext integrationTestContext, Entity entity) throws Exception {
 
-        RdsTestEntity rdsTestEntity = (RdsTestEntity) entity;
+        RdsConfigEntity rdsConfigEntity = (RdsConfigEntity) entity;
 
         RDSTestRequest rdsTestRequest = new RDSTestRequest();
-        rdsTestRequest.setRdsConfig(rdsTestEntity.getRequest());
+        rdsTestRequest.setRdsConfig(rdsConfigEntity.getRequest());
 
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT,
                 CloudbreakClient.class);
-        rdsTestEntity.setResponse(
+        rdsConfigEntity.setResponseTestResult(
                 client.getCloudbreakClient()
                         .rdsConfigEndpoint()
                         .testRdsConnection(rdsTestRequest));
-        logJSON("Rds test post request: ", rdsTestEntity.getRequest());
+        logJSON("Rds test post request: ", rdsConfigEntity.getRequest());
     }
 
     public static void createInGiven(IntegrationTestContext integrationTestContext, Entity entity) throws Exception {

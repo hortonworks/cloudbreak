@@ -2,9 +2,13 @@ package com.sequenceiq.it.cloudbreak.newway;
 
 import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigRequest;
 import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigResponse;
+import com.sequenceiq.cloudbreak.api.model.rds.RdsTestResult;
 
 public class RdsConfigEntity extends AbstractCloudbreakEntity<RDSConfigRequest, RDSConfigResponse> {
+
     public static final String RDS_CONFIG = "RDS_CONFIG";
+
+    private RdsTestResult response;
 
     RdsConfigEntity(String newId) {
         super(newId);
@@ -39,5 +43,13 @@ public class RdsConfigEntity extends AbstractCloudbreakEntity<RDSConfigRequest, 
     public RdsConfigEntity withType(String type) {
         getRequest().setType(type);
         return this;
+    }
+
+    public RdsTestResult getResponseTestResult() {
+        return response;
+    }
+
+    public void setResponseTestResult(RdsTestResult response) {
+        this.response = response;
     }
 }

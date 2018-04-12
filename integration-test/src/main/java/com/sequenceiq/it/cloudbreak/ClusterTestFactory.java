@@ -14,9 +14,9 @@ public class ClusterTestFactory extends CloudbreakTest {
     @Factory
     @Parameters("providers")
     public Object[] clusterTestFactory(@Optional(OpenstackCloudProvider.OPENSTACK) String providers) {
-        CloudProvider[] cloudProviders = CloudProviderHelper.providerFactory(providers, getTestParameter());
+        CloudProvider[] cloudProviders = CloudProviderHelper.providersFactory(providers, getTestParameter());
         Object[] results = Arrays.stream(cloudProviders)
-                .map(provider->new ClusterTests(provider, getTestParameter()))
+                .map(provider->new ClusterTestsSimple(provider, getTestParameter()))
                 .toArray();
         return results;
     }

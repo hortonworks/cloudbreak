@@ -1,5 +1,6 @@
 package com.sequenceiq.it.cloudbreak.newway;
 
+import static com.sequenceiq.it.cloudbreak.CloudbreakITContextConstants.CLOUDPROVIDER;
 import static com.sequenceiq.it.cloudbreak.newway.log.Log.logJSON;
 
 import java.util.HashSet;
@@ -33,6 +34,41 @@ public class ImageCatalogAction {
         logJSON("Imagecatalog get response: ", imageCatalogEntity.getResponse());
     }
 
+    public static void getImagesByProviderFromImageCatalog(IntegrationTestContext integrationTestContext, Entity entity) throws Exception {
+        ImageCatalogEntity imageCatalogEntity = (ImageCatalogEntity) entity;
+        CloudbreakClient client;
+        client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT,
+                CloudbreakClient.class);
+        imageCatalogEntity.setResponseByProvider(
+                client.getCloudbreakClient()
+                        .imageCatalogEndpoint().getImagesByProviderFromImageCatalog(imageCatalogEntity.getName(),
+                        integrationTestContext.getContextParam(CLOUDPROVIDER, String.class)));
+        logJSON("get response by provider from image catalog: ", imageCatalogEntity.getResponseByProvider());
+    }
+
+    public static void getImagesByProvider(IntegrationTestContext integrationTestContext, Entity entity) throws Exception {
+        ImageCatalogEntity imageCatalogEntity = (ImageCatalogEntity) entity;
+        CloudbreakClient client;
+        client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT,
+                CloudbreakClient.class);
+        imageCatalogEntity.setResponseByProvider(
+                client.getCloudbreakClient()
+                        .imageCatalogEndpoint().getImagesByProvider(integrationTestContext.getContextParam(CLOUDPROVIDER, String.class)));
+        logJSON("Imagecatalog get response by provider: ", imageCatalogEntity.getResponseByProvider());
+    }
+
+    public static void getRequestByName(IntegrationTestContext integrationTestContext, Entity entity) throws Exception {
+        ImageCatalogEntity imageCatalogEntity = (ImageCatalogEntity) entity;
+        CloudbreakClient client;
+        client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT,
+                CloudbreakClient.class);
+        imageCatalogEntity.setRequestByName(
+                client.getCloudbreakClient()
+                        .imageCatalogEndpoint().getRequestfromName(imageCatalogEntity.getRequest().getName()));
+
+        logJSON("Imagecatalog get response by provider: ", imageCatalogEntity.getRequestByName());
+    }
+
     public static void getAll(IntegrationTestContext integrationTestContext, Entity entity) throws Exception {
         ImageCatalogEntity imageCatalogEntity = (ImageCatalogEntity) entity;
         CloudbreakClient client;
@@ -60,7 +96,7 @@ public class ImageCatalogAction {
                 CloudbreakClient.class);
         imageCatalogEntity.setResponse(
                 client.getCloudbreakClient()
-                        .imageCatalogEndpoint().putSetDefaultByName(((ImageCatalogEntity) entity).getName()));
+                        .imageCatalogEndpoint().putSetDefaultByName(imageCatalogEntity.getName()));
         logJSON("Imagecatalog get response: ", imageCatalogEntity.getResponse());
     }
 

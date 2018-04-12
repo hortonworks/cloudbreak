@@ -44,7 +44,7 @@ public class GatewayTests extends CloudbreakTest {
             LOGGER.info("cloud provider: "  + cloudProvider + " already set - running from factory test");
             return;
         }
-        cloudProvider = CloudProviderHelper.providerFactory(provider, getTestParameter())[0];
+        cloudProvider = CloudProviderHelper.providerFactory(provider, getTestParameter());
     }
 
     @BeforeTest
