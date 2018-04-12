@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.blueprint.moduletest;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.model.ExecutorType;
 import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
@@ -122,6 +123,18 @@ class BlueprintModelProvider {
     static TemplatePreparationObject blueprintObjectWhenWebhcatConfigured() throws JsonProcessingException {
         return getPreparedBuilder("master")
                 .withBlueprintView(BlueprintTestUtil.generalBlueprintView("", "2.6", "HDP"))
+                .build();
+    }
+
+    static TemplatePreparationObject blueprintObjectWhenSharedServiceConfigured() throws JsonProcessingException {
+        GeneralClusterConfigs configs = BlueprintTestUtil.generalClusterConfigs();
+        return TemplatePreparationObject.Builder.builder()
+                .withHostgroups(getHostGroups("master", "worker", "compute"))
+                .withGateway(TestUtil.gateway())
+                .withBlueprintView(BlueprintTestUtil.generalBlueprintView("", "2.6", "HDP"))
+                .withRdsConfigs(Sets.newHashSet(TestUtil.rdsConfig(RdsType.RANGER), TestUtil.rdsConfig(RdsType.HIVE)))
+                .withLdapConfig(TestUtil.ldapConfig())
+                .withGeneralClusterConfigs(configs)
                 .build();
     }
 

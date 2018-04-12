@@ -1,5 +1,24 @@
 package com.sequenceiq.cloudbreak.service.stack.repair;
 
+import static org.mockito.Matchers.argThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.when;
+
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.concurrent.ExecutorService;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatcher;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
+
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
@@ -11,24 +30,6 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.service.stack.repair.StackRepairService.StackRepairFlowSubmitter;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.ArgumentMatcher;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
-
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.concurrent.ExecutorService;
-
-import static org.mockito.Matchers.argThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
-import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class StackRepairServiceTest {
@@ -120,7 +121,7 @@ public class StackRepairServiceTest {
         when(instanceMetaDataRepository.findByInstanceId(stackId, instanceId)).thenReturn(imd1);
     }
 
-    private static class StackRepairFlowSubmitterMatcher extends ArgumentMatcher<StackRepairFlowSubmitter> {
+    private static class StackRepairFlowSubmitterMatcher implements ArgumentMatcher<StackRepairFlowSubmitter> {
 
         private final Long expectedStackId;
 
@@ -132,7 +133,7 @@ public class StackRepairServiceTest {
         }
 
         @Override
-        public boolean matches(Object argument) {
+        public boolean matches(StackRepairFlowSubmitter argument) {
             StackRepairFlowSubmitter stackRepairFlowSubmitter = (StackRepairFlowSubmitter) argument;
             return stackRepairFlowSubmitter.getStackId().equals(expectedStackId) && expectedInstances.equals(stackRepairFlowSubmitter.getUnhealthyInstances());
         }

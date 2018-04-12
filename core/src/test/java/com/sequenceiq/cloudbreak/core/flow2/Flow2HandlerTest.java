@@ -1,25 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow2;
 
-import com.sequenceiq.cloudbreak.cloud.event.Payload;
-import com.sequenceiq.cloudbreak.core.flow2.chain.FlowChains;
-import com.sequenceiq.cloudbreak.core.flow2.config.FlowConfiguration;
-import com.sequenceiq.cloudbreak.repository.FlowLogRepository;
-import com.sequenceiq.cloudbreak.service.flowlog.FlowLogService;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.BDDMockito;
-import org.mockito.InjectMocks;
-import org.mockito.Matchers;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import reactor.bus.Event;
-import reactor.bus.Event.Headers;
-
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyLong;
@@ -29,6 +10,28 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isNull;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.BDDMockito;
+import org.mockito.InjectMocks;
+import org.mockito.Matchers;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+
+import com.sequenceiq.cloudbreak.cloud.event.Payload;
+import com.sequenceiq.cloudbreak.core.flow2.chain.FlowChains;
+import com.sequenceiq.cloudbreak.core.flow2.config.FlowConfiguration;
+import com.sequenceiq.cloudbreak.repository.FlowLogRepository;
+import com.sequenceiq.cloudbreak.service.flowlog.FlowLogService;
+
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import reactor.bus.Event;
+import reactor.bus.Event.Headers;
 
 @SuppressFBWarnings("RV_RETURN_VALUE_IGNORED_NO_SIDE_EFFECT")
 public class Flow2HandlerTest {
@@ -92,7 +95,8 @@ public class Flow2HandlerTest {
         underTest.accept(event);
         verify(flowConfigurationMap, times(1)).get(anyString());
         verify(runningFlows, times(1)).put(eq(flow), isNull(String.class));
-        verify(flowLogService, times(1)).save(anyString(), anyString(), eq("KEY"), any(Payload.class), anyMap(), eq(flowConfig.getClass()), eq(flowState));
+        verify(flowLogService, times(1))
+                .save(anyString(), nullable(String.class), eq("KEY"), any(Payload.class), any(), eq(flowConfig.getClass()), eq(flowState));
         verify(flow, times(1)).sendEvent(anyString(), any());
     }
 
@@ -113,7 +117,8 @@ public class Flow2HandlerTest {
         given(flow.getCurrentState()).willReturn(flowState);
         dummyEvent.setKey("KEY");
         underTest.accept(dummyEvent);
-        verify(flowLogService, times(1)).save(eq(FLOW_ID), anyString(), eq("KEY"), any(Payload.class), anyMap(), any(Class.class), eq(flowState));
+        verify(flowLogService, times(1))
+                .save(eq(FLOW_ID), nullable(String.class), eq("KEY"), any(Payload.class), anyMap(), nullable(Class.class), eq(flowState));
         verify(flow, times(1)).sendEvent(eq("KEY"), any());
     }
 

@@ -5,6 +5,13 @@ import com.sequenceiq.cloudbreak.template.processor.processor.TemplatePreparatio
 import com.sequenceiq.cloudbreak.template.processor.processor.TemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.template.processor.processor.TemplateTextProcessor;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.io.IOException;
+import java.util.Set;
+
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
@@ -12,7 +19,7 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.io.IOException;
 import java.util.Set;
@@ -50,7 +57,6 @@ public class HbaseConfigProviderTest {
         when(blueprintProcessor.getHostGroupsWithComponent("HBASE_CLIENT")).thenReturn(clients);
         when(blueprintProcessor.addComponentToHostgroups("HBASE_CLIENT", missing)).thenReturn(blueprintProcessor);
         when(blueprintProcessor.asText()).thenReturn(blueprintText);
-        when(blueprintProcessorFactory.get(anyString())).thenReturn(blueprintProcessor);
 
         String result = underTest.customTextManipulation(object, blueprintProcessor).asText();
 
@@ -71,9 +77,7 @@ public class HbaseConfigProviderTest {
 
         when(blueprintProcessor.getHostGroupsWithComponent("HBASE_MASTER")).thenReturn(masters);
         when(blueprintProcessor.getHostGroupsWithComponent("HBASE_CLIENT")).thenReturn(clients);
-        when(blueprintProcessor.addComponentToHostgroups("HBASE_CLIENT", missing)).thenReturn(blueprintProcessor);
         when(blueprintProcessor.asText()).thenReturn(blueprintText);
-        when(blueprintProcessorFactory.get(anyString())).thenReturn(blueprintProcessor);
 
         String result = underTest.customTextManipulation(object, blueprintProcessor).asText();
 

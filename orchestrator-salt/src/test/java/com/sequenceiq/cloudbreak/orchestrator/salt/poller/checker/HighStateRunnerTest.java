@@ -48,7 +48,7 @@ public class HighStateRunnerTest {
 
         String jid = highStateRunner.submit(saltConnector);
         assertEquals(jobId, jid);
-        PowerMockito.verifyStatic();
+        PowerMockito.verifyStatic(SaltStates.class);
         SaltStates.highstate(eq(saltConnector));
     }
 

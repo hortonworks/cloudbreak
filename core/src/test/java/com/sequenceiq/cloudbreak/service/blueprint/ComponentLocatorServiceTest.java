@@ -1,5 +1,23 @@
 package com.sequenceiq.cloudbreak.service.blueprint;
 
+import static org.mockito.ArgumentMatchers.nullable;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.when;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
+
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
@@ -60,10 +78,10 @@ public class ComponentLocatorServiceTest {
         Set<String> hg1Components = set("RESOURCEMANAGER", "Service1", "HIVE_SERVER");
         Set<String> hg2Components = set("NAMENODE", "Service2", "Service3");
 
-        when(hostGroupService.getByCluster(anyLong())).thenReturn(ImmutableSet.of(hg1, hg2));
+        when(hostGroupService.getByCluster(nullable(Long.class))).thenReturn(ImmutableSet.of(hg1, hg2));
         when(blueprintProcessor.getComponentsInHostGroup(eq("hg1"))).thenReturn(hg1Components);
         when(blueprintProcessor.getComponentsInHostGroup(eq("hg2"))).thenReturn(hg2Components);
-        when(blueprintProcessorFactory.get(anyString())).thenReturn(blueprintProcessor);
+        when(blueprintProcessorFactory.get(nullable(String.class))).thenReturn(blueprintProcessor);
     }
 
     private HostGroup createHostGroup(String name, String hostname) {

@@ -64,8 +64,8 @@ public class AmbariClusterStatusUpdaterTest {
     public void testUpdateClusterStatusShouldUpdateStackStatusWhenStackStatusChanged() throws CloudbreakSecuritySetupException {
         // GIVEN
         Stack stack = createStack(Status.AVAILABLE, Status.AVAILABLE);
-        BDDMockito.given(ambariClientProvider.getAmbariClient(BDDMockito.any(HttpClientConfig.class), BDDMockito.anyInt(), BDDMockito.any(Cluster.class)))
-                .willReturn(ambariClient);
+        BDDMockito.given(ambariClientProvider.getAmbariClient(BDDMockito.nullable(HttpClientConfig.class),
+                BDDMockito.nullable(Integer.class), BDDMockito.any(Cluster.class))).willReturn(ambariClient);
         BDDMockito.given(clusterStatusFactory.createClusterStatus(ambariClient, TEST_BLUEPRINT)).willReturn(ClusterStatus.INSTALLED);
         // WHEN
         underTest.updateClusterStatus(stack, stack.getCluster());
@@ -77,8 +77,8 @@ public class AmbariClusterStatusUpdaterTest {
     public void testUpdateClusterStatusShouldOnlyNotifyWhenStackStatusNotChanged() throws CloudbreakSecuritySetupException {
         // GIVEN
         Stack stack = createStack(Status.AVAILABLE, Status.AVAILABLE);
-        BDDMockito.given(ambariClientProvider.getAmbariClient(BDDMockito.any(HttpClientConfig.class), BDDMockito.anyInt(), BDDMockito.any(Cluster.class)))
-                .willReturn(ambariClient);
+        BDDMockito.given(ambariClientProvider.getAmbariClient(BDDMockito.nullable(HttpClientConfig.class),
+                BDDMockito.nullable(Integer.class), BDDMockito.any(Cluster.class))).willReturn(ambariClient);
         BDDMockito.given(clusterStatusFactory.createClusterStatus(ambariClient, TEST_BLUEPRINT)).willReturn(ClusterStatus.STARTED);
         // WHEN
         underTest.updateClusterStatus(stack, stack.getCluster());

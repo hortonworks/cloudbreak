@@ -1,29 +1,28 @@
 package com.sequenceiq.cloudbreak.service.decorator;
 
-import com.sequenceiq.cloudbreak.api.model.proxy.ProxyConfigRequest;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
-import com.sequenceiq.cloudbreak.converter.mapper.ProxyConfigMapper;
-import com.sequenceiq.cloudbreak.domain.Cluster;
-import com.sequenceiq.cloudbreak.domain.ProxyConfig;
-import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigService;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.when;
+
+import java.util.Date;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
-import java.util.Date;
-
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyBoolean;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.when;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.converter.mapper.ProxyConfigMapper;
+import com.sequenceiq.cloudbreak.domain.Cluster;
+import com.sequenceiq.cloudbreak.domain.ProxyConfig;
+import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ClusterProxyDecoratorTest {
@@ -45,8 +44,6 @@ public class ClusterProxyDecoratorTest {
 
     @Before
     public void setUp() {
-        when(mapper.mapRequestToEntity(any(ProxyConfigRequest.class), anyBoolean())).thenReturn(new ProxyConfig());
-        when(service.create(any(IdentityUser.class), any(ProxyConfig.class))).thenReturn(new ProxyConfig());
         when(service.getPublicProxyConfig(anyString(), eq(identityUser))).thenReturn(new ProxyConfig());
         cluster = new Cluster();
         stack.setPublicInAccount(true);

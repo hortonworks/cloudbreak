@@ -8,7 +8,6 @@ ambari-agent:
   pkg.installed:
     - require:
       - sls: ambari.repo
-    - version: {{ ambari.version }}
 
 parallel_task_execution:
   file.replace:

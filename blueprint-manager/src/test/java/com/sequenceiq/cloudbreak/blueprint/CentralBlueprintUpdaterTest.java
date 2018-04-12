@@ -15,7 +15,7 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.io.IOException;
 
@@ -75,8 +75,6 @@ public class CentralBlueprintUpdaterTest {
     @Test
     public void getBlueprintTextWhenBlueprintTemplateProcessorThrowExceptionThenShouldReturnThrowException() throws IOException {
         when(blueprintTemplateProcessor.process(testBlueprint, object, Maps.newHashMap())).thenThrow(new IOException("failed to read bp"));
-        when(blueprintSegmentProcessor.process(testBlueprint, object)).thenReturn(testBlueprint);
-        when(blueprintComponentProviderProcessor.process(object, testBlueprint)).thenReturn(testBlueprint);
 
         String message = String.format("Unable to update blueprint with default  properties which was: %s", testBlueprint);
 

@@ -34,6 +34,10 @@ public abstract class RDSConfigJson implements JsonEntity {
                     + "The length of the name has to be in range of 3 to 12")
     private String type;
 
+    @ApiModelProperty(RDSConfig.CONNECTOR_JAR_URL)
+    @Size(max = 150, min = 4, message = "The length of the connectorJarUrl has to be in range of 4 to 150")
+    private String connectorJarUrl;
+
     public String getConnectionURL() {
         return connectionURL;
     }
@@ -56,5 +60,13 @@ public abstract class RDSConfigJson implements JsonEntity {
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    public String getConnectorJarUrl() {
+        return connectorJarUrl;
+    }
+
+    public void setConnectorJarUrl(String connectorJarUrl) {
+        this.connectorJarUrl = connectorJarUrl;
     }
 }

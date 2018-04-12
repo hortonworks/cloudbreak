@@ -1,9 +1,17 @@
 package com.sequenceiq.cloudbreak.core.flow2;
 
-import com.sequenceiq.cloudbreak.cloud.event.Payload;
-import com.sequenceiq.cloudbreak.cloud.event.Selectable;
-import com.sequenceiq.cloudbreak.cloud.reactor.ErrorHandlerAwareReactorEventFactory;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import static org.mockito.ArgumentMatchers.nullable;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
+import java.util.Collections;
+import java.util.Map;
+import java.util.Optional;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.BDDMockito;
@@ -20,18 +28,13 @@ import org.springframework.statemachine.config.builders.StateMachineConfiguratio
 import org.springframework.statemachine.config.builders.StateMachineStateBuilder;
 import org.springframework.statemachine.config.builders.StateMachineTransitionBuilder;
 import org.springframework.statemachine.config.common.annotation.ObjectPostProcessor;
+
+import com.sequenceiq.cloudbreak.cloud.event.Payload;
+import com.sequenceiq.cloudbreak.cloud.event.Selectable;
+import com.sequenceiq.cloudbreak.cloud.reactor.ErrorHandlerAwareReactorEventFactory;
+
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import reactor.bus.EventBus;
-
-import java.util.Collections;
-import java.util.Map;
-import java.util.Optional;
-
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 @SuppressFBWarnings("RV_RETURN_VALUE_IGNORED_NO_SIDE_EFFECT")
 public class AbstractActionTest {
@@ -78,8 +81,8 @@ public class AbstractActionTest {
     @Test
     public void testExecute() throws Exception {
         stateMachine.sendEvent(new GenericMessage<>(Event.DOIT, Collections.singletonMap(Flow2Handler.FLOW_ID, FLOW_ID)));
-        verify(underTest, times(1)).createFlowContext(eq(FLOW_ID), any(StateContext.class), any(Payload.class));
-        verify(underTest, times(1)).doExecute(any(CommonContext.class), any(Payload.class), any(Map.class));
+        verify(underTest, times(1)).createFlowContext(eq(FLOW_ID), any(StateContext.class), nullable(Payload.class));
+        verify(underTest, times(1)).doExecute(any(CommonContext.class), nullable(Payload.class), any(Map.class));
         verify(underTest, times(0)).sendEvent(any(CommonContext.class));
         verify(underTest, times(0)).sendEvent(anyString(), anyString(), any());
         verify(underTest, times(0)).sendEvent(anyString(), any(Selectable.class));
@@ -89,11 +92,11 @@ public class AbstractActionTest {
     @Test
     public void testFailedExecute() throws Exception {
         RuntimeException exception = new UnsupportedOperationException("");
-        Mockito.doThrow(exception).when(underTest).doExecute(any(CommonContext.class), any(Payload.class), any(Map.class));
+        Mockito.doThrow(exception).when(underTest).doExecute(any(CommonContext.class), nullable(Payload.class), any());
         stateMachine.sendEvent(new GenericMessage<>(Event.DOIT, Collections.singletonMap(Flow2Handler.FLOW_ID, FLOW_ID)));
-        verify(underTest, times(1)).createFlowContext(eq(FLOW_ID), any(StateContext.class), any(Payload.class));
-        verify(underTest, times(1)).doExecute(any(CommonContext.class), any(Payload.class), any(Map.class));
-        verify(underTest, times(1)).getFailurePayload(any(Payload.class), any(Optional.class), eq(exception));
+        verify(underTest, times(1)).createFlowContext(eq(FLOW_ID), any(StateContext.class), nullable(Payload.class));
+        verify(underTest, times(1)).doExecute(any(CommonContext.class), nullable(Payload.class), any(Map.class));
+        verify(underTest, times(1)).getFailurePayload(nullable(Payload.class), any(Optional.class), eq(exception));
         verify(underTest, times(1)).sendEvent(eq(FLOW_ID), eq(Event.FAILURE.name()), eq(Collections.emptyMap()));
     }
 

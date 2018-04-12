@@ -28,6 +28,20 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import org.junit.Assert;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
+
+import com.google.common.collect.Sets;
+import com.sequenceiq.cloudbreak.TestUtil;
+import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessorFactory;
+import com.sequenceiq.cloudbreak.blueprint.BlueprintTextProcessor;
+import com.sequenceiq.cloudbreak.domain.HostGroup;
+import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
+import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
 @RunWith(MockitoJUnitRunner.class)
 public class HdfConfigProviderTest {

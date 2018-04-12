@@ -1,5 +1,23 @@
 package com.sequenceiq.cloudbreak.reactor;
 
+import static org.mockito.Mockito.argThat;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.when;
+
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatcher;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
+
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -9,26 +27,9 @@ import com.sequenceiq.cloudbreak.reactor.api.event.resource.UnhealthyInstancesDe
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.repair.CandidateUnhealthyInstanceSelector;
 import com.sequenceiq.cloudbreak.service.stack.repair.UnhealthyInstancesFinalizer;
-import org.hamcrest.Description;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.ArgumentMatcher;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+
 import reactor.bus.Event;
 import reactor.bus.EventBus;
-
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-
-import static org.mockito.Mockito.argThat;
-import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
-import static org.mockito.Mockito.when;
 
 
 @RunWith(MockitoJUnitRunner.class)
@@ -99,7 +100,7 @@ public class UnhealthyInstancesDetectionHandlerTest {
 
     }
 
-    private static class UnhealthyInstancesResultMatcher extends ArgumentMatcher<Event<UnhealthyInstancesDetectionResult>> {
+    private static class UnhealthyInstancesResultMatcher implements ArgumentMatcher<Event<UnhealthyInstancesDetectionResult>> {
 
         private final Set<String> expectedUnhealthyIds;
 
@@ -110,7 +111,16 @@ public class UnhealthyInstancesDetectionHandlerTest {
         }
 
         @Override
-        public boolean matches(Object argument) {
+        public String toString() {
+            if (errorMessage == null) {
+                return "";
+            } else {
+                return errorMessage;
+            }
+        }
+
+        @Override
+        public boolean matches(Event<UnhealthyInstancesDetectionResult> argument) {
             Event event = (Event) argument;
             UnhealthyInstancesDetectionResult payload = (UnhealthyInstancesDetectionResult) event.getData();
             Set<String> unhealthyInstanceIds = payload.getUnhealthyInstanceIds();
@@ -127,15 +137,6 @@ public class UnhealthyInstancesDetectionHandlerTest {
                 }
             }
             return true;
-        }
-
-        @Override
-        public void describeTo(Description description) {
-            if (errorMessage == null) {
-                super.describeTo(description);
-            } else {
-                description.appendText(errorMessage);
-            }
         }
     }
 }

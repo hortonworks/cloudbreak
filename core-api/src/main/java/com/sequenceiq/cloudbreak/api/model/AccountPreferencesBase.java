@@ -9,11 +9,9 @@ import javax.validation.constraints.NotNull;
 
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.AccountPreferencesModelDescription;
 
-import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-@ApiModel("AccountPreference")
-public class AccountPreferencesJson implements JsonEntity {
+public abstract class AccountPreferencesBase implements JsonEntity {
 
     @Min(value = 0, message = "The maximum number of clusters has to be greater than '-1'")
     @Digits(fraction = 0, integer = 10, message = "The maximum number of clusters has to be a number")

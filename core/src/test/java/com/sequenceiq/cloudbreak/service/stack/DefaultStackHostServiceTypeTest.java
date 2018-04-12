@@ -1,5 +1,31 @@
 package com.sequenceiq.cloudbreak.service.stack;
 
+import static com.sequenceiq.cloudbreak.api.model.Status.AVAILABLE;
+import static com.sequenceiq.cloudbreak.api.model.Status.START_FAILED;
+import static com.sequenceiq.cloudbreak.api.model.Status.STOPPED;
+import static com.sequenceiq.cloudbreak.api.model.Status.STOP_FAILED;
+import static com.sequenceiq.cloudbreak.api.model.Status.STOP_IN_PROGRESS;
+import static com.sequenceiq.cloudbreak.api.model.Status.STOP_REQUESTED;
+import static com.sequenceiq.cloudbreak.api.model.Status.UPDATE_IN_PROGRESS;
+import static org.mockito.ArgumentMatchers.nullable;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyLong;
+import static org.mockito.Matchers.anyObject;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
+
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.model.Status;
@@ -18,31 +44,6 @@ import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariClusterService;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
-
-import static com.sequenceiq.cloudbreak.api.model.Status.AVAILABLE;
-import static com.sequenceiq.cloudbreak.api.model.Status.START_FAILED;
-import static com.sequenceiq.cloudbreak.api.model.Status.STOPPED;
-import static com.sequenceiq.cloudbreak.api.model.Status.STOP_FAILED;
-import static com.sequenceiq.cloudbreak.api.model.Status.STOP_IN_PROGRESS;
-import static com.sequenceiq.cloudbreak.api.model.Status.STOP_REQUESTED;
-import static com.sequenceiq.cloudbreak.api.model.Status.UPDATE_IN_PROGRESS;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyLong;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DefaultStackHostServiceTypeTest {
@@ -101,9 +102,8 @@ public class DefaultStackHostServiceTypeTest {
         Stack stack = stack(AVAILABLE, STOP_IN_PROGRESS);
         given(stackRepository.findOneWithLists(anyLong())).willReturn(stack);
         given(clusterRepository.findOneWithLists(anyLong())).willReturn(stack.getCluster());
-        given(stackUpdater.updateStackStatus(anyLong(), any(DetailedStackStatus.class))).willReturn(stack);
         underTest.updateStatus(1L, StatusRequest.STOPPED, true);
-        verify(eventService, times(1)).fireCloudbreakEvent(eq(1L), eq(STOP_REQUESTED.name()), anyString());
+        verify(eventService, times(1)).fireCloudbreakEvent(eq(1L), eq(STOP_REQUESTED.name()), nullable(String.class));
     }
 
     @Test
@@ -131,7 +131,6 @@ public class DefaultStackHostServiceTypeTest {
         Stack stack = stack(UPDATE_IN_PROGRESS, STOPPED);
         given(stackRepository.findOneWithLists(anyLong())).willReturn(stack);
         given(clusterRepository.findOneWithLists(anyLong())).willReturn(stack.getCluster());
-        given(stackUpdater.updateStackStatus(anyLong(), any(DetailedStackStatus.class))).willReturn(stack);
         thrown.expect(BadRequestException.class);
         thrown.expectMessage("Cannot update the status of stack 'simplestack' to STOPPED, because it isn't in AVAILABLE state.");
         underTest.updateStatus(1L, StatusRequest.STOPPED, true);
@@ -143,7 +142,6 @@ public class DefaultStackHostServiceTypeTest {
         Stack stack = stack(AVAILABLE, AVAILABLE);
         given(stackRepository.findOneWithLists(anyLong())).willReturn(stack);
         given(clusterRepository.findOneWithLists(anyLong())).willReturn(stack.getCluster());
-        given(stackUpdater.updateStackStatus(anyLong(), any(DetailedStackStatus.class))).willReturn(stack);
         thrown.expect(BadRequestException.class);
         thrown.expectMessage("Cannot update the status of stack 'simplestack' to STOPPED, because the cluster is not in STOPPED state.");
         underTest.updateStatus(1L, StatusRequest.STOPPED, false);
@@ -164,7 +162,6 @@ public class DefaultStackHostServiceTypeTest {
         Stack stack = stack(UPDATE_IN_PROGRESS, STOPPED);
         given(stackRepository.findOneWithLists(anyLong())).willReturn(stack);
         given(clusterRepository.findOneWithLists(anyLong())).willReturn(stack.getCluster());
-        given(stackUpdater.updateStackStatus(anyLong(), any(DetailedStackStatus.class))).willReturn(stack);
         thrown.expect(BadRequestException.class);
         thrown.expectMessage("Cannot update the status of stack 'simplestack' to STARTED, because it isn't in STOPPED state.");
         underTest.updateStatus(1L, StatusRequest.STARTED, true);
@@ -185,7 +182,6 @@ public class DefaultStackHostServiceTypeTest {
         Stack stack = stack(UPDATE_IN_PROGRESS, UPDATE_IN_PROGRESS);
         given(stackRepository.findOneWithLists(anyLong())).willReturn(stack);
         given(clusterRepository.findOneWithLists(anyLong())).willReturn(stack.getCluster());
-        given(stackUpdater.updateStackStatus(anyLong(), any(DetailedStackStatus.class))).willReturn(stack);
         thrown.expect(BadRequestException.class);
         thrown.expectMessage("Cannot update the status of stack 'simplestack' to STARTED, because it isn't in STOPPED state.");
         underTest.updateStatus(1L, StatusRequest.STARTED, true);
@@ -195,8 +191,6 @@ public class DefaultStackHostServiceTypeTest {
     public void updateStatusTestStopWhenClusterAndStackAvailableAndEphemeralThenBadRequestExceptionDropping() {
         Stack stack = TestUtil.setEphemeral(TestUtil.stack(AVAILABLE, TestUtil.awsCredential()));
         given(stackRepository.findOneWithLists(anyLong())).willReturn(stack);
-        given(clusterRepository.findOneWithLists(anyLong())).willReturn(stack.getCluster());
-        given(stackUpdater.updateStackStatus(anyLong(), any(DetailedStackStatus.class))).willReturn(stack);
         thrown.expect(BadRequestException.class);
         thrown.expectMessage("Cannot stop a stack 'simplestack'. Reason: Instances with ephemeral volumes cannot be stopped.");
         underTest.updateStatus(1L, StatusRequest.STOPPED, true);
@@ -206,8 +200,6 @@ public class DefaultStackHostServiceTypeTest {
     public void updateStatusTestStopWhenClusterAndStackAvailableAndSpotInstancesThenBadRequestExceptionDropping() {
         Stack stack = TestUtil.setSpotInstances(TestUtil.stack(AVAILABLE, TestUtil.awsCredential()));
         given(stackRepository.findOneWithLists(anyLong())).willReturn(stack);
-        given(clusterRepository.findOneWithLists(anyLong())).willReturn(stack.getCluster());
-        given(stackUpdater.updateStackStatus(anyLong(), any(DetailedStackStatus.class))).willReturn(stack);
         thrown.expect(BadRequestException.class);
         thrown.expectMessage("Cannot stop a stack 'simplestack'. Reason: Spot instances cannot be stopped.");
         underTest.updateStatus(1L, StatusRequest.STOPPED, true);

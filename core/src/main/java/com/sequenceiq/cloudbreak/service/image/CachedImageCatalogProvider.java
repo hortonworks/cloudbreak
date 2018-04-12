@@ -1,9 +1,11 @@
 package com.sequenceiq.cloudbreak.service.image;
 
 import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloudbreak.client.RestClientUtil;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV2;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
@@ -35,6 +37,12 @@ public class CachedImageCatalogProvider {
     @Value("${cb.etc.config.dir}")
     private String etcConfigDir;
 
+    @Value("${cb.enabled.linux.types}")
+    private List<String> enabledLinuxTypes;
+
+    @Inject
+    private ObjectMapper objectMapper;
+
     @Cacheable(cacheNames = "imageCatalogCache", key = "#catalogUrl")
     public CloudbreakImageCatalogV2 getImageCatalogV2(String catalogUrl) throws CloudbreakImageCatalogException {
         CloudbreakImageCatalogV2 catalog = null;
@@ -57,6 +65,7 @@ public class CachedImageCatalogProvider {
             validateImageCatalogUuids(catalog);
             validateCloudBreakVersions(catalog);
             cleanAndValidateMaps(catalog);
+            catalog = filterImagesByOsType(catalog);
             long timeOfParse = System.currentTimeMillis() - started;
             LOGGER.info("ImageCatalog has been get and parsed from '{}' and took '{}' ms.", catalogUrl, timeOfParse);
         } catch (RuntimeException e) {
@@ -69,6 +78,31 @@ public class CachedImageCatalogProvider {
         return catalog;
     }
 
+    private CloudbreakImageCatalogV2 filterImagesByOsType(CloudbreakImageCatalogV2 catalog) {
+        if (CollectionUtils.isEmpty(enabledLinuxTypes) || Objects.isNull(catalog) || Objects.isNull(catalog.getImages())) {
+            return catalog;
+        }
+
+        List<Image> filteredBaseImages = filterImages(catalog.getImages().getBaseImages(), enabledOsPredicate());
+        List<Image> filteredHdpImages = filterImages(catalog.getImages().getHdpImages(), enabledOsPredicate());
+        List<Image> filteredHdfImages = filterImages(catalog.getImages().getHdfImages(), enabledOsPredicate());
+
+        Images images = new Images(filteredBaseImages, filteredHdpImages, filteredHdfImages);
+        return new CloudbreakImageCatalogV2(images, catalog.getVersions());
+    }
+
+    private List<Image> filterImages(List<Image> imageList, Predicate<Image> predicate) {
+        return Optional.ofNullable(imageList)
+                .orElse(Collections.emptyList())
+                .stream()
+                .filter(predicate)
+                .collect(Collectors.toList());
+    }
+
+    private Predicate<Image> enabledOsPredicate() {
+        return img -> enabledLinuxTypes.stream().anyMatch(img.getOs()::equalsIgnoreCase);
+    }
+
     private CloudbreakImageCatalogV2 checkResponse(WebTarget target, Response response) throws CloudbreakImageCatalogException {
         CloudbreakImageCatalogV2 catalog;
         if (!response.getStatusInfo().getFamily().equals(Family.SUCCESSFUL)) {
@@ -76,8 +110,9 @@ public class CachedImageCatalogProvider {
                     target.getUri().toString(), response.getStatusInfo().getReasonPhrase()));
         } else {
             try {
-                catalog = response.readEntity(CloudbreakImageCatalogV2.class);
-            } catch (ProcessingException e) {
+                String responseContent = response.readEntity(String.class);
+                catalog = objectMapper.readValue(responseContent, CloudbreakImageCatalogV2.class);
+            } catch (IOException | ProcessingException e) {
                 throw new CloudbreakImageCatalogException(String.format("Failed to process image catalog from '%s' due to: '%s'",
                         target.getUri().toString(), e.getMessage()));
             }
@@ -100,10 +135,6 @@ public class CachedImageCatalogProvider {
             throw new CloudbreakImageCatalogException(String.format("Images with ids: %s is not present in ambari-images block",
                     StringUtils.join(orphanUuids, ",")));
         }
-    }
-
-    void setEtcConfigDir(String etcConfigDir) {
-        this.etcConfigDir = etcConfigDir;
     }
 
     private String readCatalogFromFile(String catalogUrl) throws IOException {

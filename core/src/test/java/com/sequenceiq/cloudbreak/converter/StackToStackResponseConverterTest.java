@@ -79,7 +79,7 @@ public class StackToStackResponseConverterTest extends AbstractEntityConverterTe
     @Test
     public void testConvert() {
         // GIVEN
-        given(conversionService.convert(any(Object.class), any(Class.class)))
+        given(conversionService.convert(any(), any()))
                 .willReturn(new ImageJson())
                 .willReturn(new StackAuthenticationResponse())
                 .willReturn(new CredentialResponse())
@@ -99,7 +99,7 @@ public class StackToStackResponseConverterTest extends AbstractEntityConverterTe
     @Test
     public void testConvertWithoutCredential() {
         // GIVEN
-        given(conversionService.convert(any(Object.class), any(Class.class)))
+        given(conversionService.convert(any(), any()))
                 .willReturn(new ImageJson())
                 .willReturn(new StackAuthenticationResponse())
                 .willReturn(new CredentialResponse())
@@ -121,7 +121,7 @@ public class StackToStackResponseConverterTest extends AbstractEntityConverterTe
     public void testConvertWithoutCluster() {
         // GIVEN
         getSource().setCluster(null);
-        given(conversionService.convert(any(Object.class), any(Class.class)))
+        given(conversionService.convert(any(), any()))
                 .willReturn(new ImageJson())
                 .willReturn(new StackAuthenticationResponse())
                 .willReturn(new CredentialResponse())
@@ -142,7 +142,7 @@ public class StackToStackResponseConverterTest extends AbstractEntityConverterTe
     public void testConvertWithoutFailurePolicy() {
         // GIVEN
         getSource().setFailurePolicy(null);
-        given(conversionService.convert(any(Object.class), any(Class.class)))
+        given(conversionService.convert(any(), any()))
                 .willReturn(new ImageJson())
                 .willReturn(new StackAuthenticationResponse())
                 .willReturn(new CredentialResponse())
@@ -165,7 +165,7 @@ public class StackToStackResponseConverterTest extends AbstractEntityConverterTe
     public void testConvertWithoutNetwork() {
         // GIVEN
         getSource().setNetwork(null);
-        given(conversionService.convert(any(Object.class), any(Class.class)))
+        given(conversionService.convert(any(), any()))
                 .willReturn(new ImageJson())
                 .willReturn(new StackAuthenticationResponse())
                 .willReturn(new CredentialResponse())

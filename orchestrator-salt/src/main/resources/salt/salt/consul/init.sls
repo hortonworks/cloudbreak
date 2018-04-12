@@ -7,6 +7,7 @@
     - template: jinja
     - context:
         is_server: {{ consul.is_server }}
+        advertise_addr: {{ consul.advertise_addr }}
         node_name: {{ consul.node_name }}
         bootstrap_expect: {{ consul.bootstrap_expect }}
         retry_join: {{ consul.retry_join }}

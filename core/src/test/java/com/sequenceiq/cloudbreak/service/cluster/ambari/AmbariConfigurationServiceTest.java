@@ -11,7 +11,7 @@ import org.junit.runner.RunWith;
 import org.mapstruct.factory.Mappers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.HashSet;
 import java.util.Optional;
@@ -49,7 +49,7 @@ public class AmbariConfigurationServiceTest {
     public void testCreateRdsConfig() {
         Cluster cluster = new Cluster();
         Stack stack = new Stack();
-        when(rdsConfigService.create(any(RDSConfig.class))).thenAnswer(invocation -> invocation.getArgumentAt(0, RDSConfig.class));
+        when(rdsConfigService.create(any(RDSConfig.class))).thenAnswer(invocation -> invocation.getArgument(0));
         Optional<RDSConfig> rdsConfig = ambariConfigurationService.createDefaultRdsConfigIfNeeded(stack, cluster);
         assertTrue(rdsConfig.isPresent());
     }

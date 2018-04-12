@@ -18,5 +18,8 @@ integrationtest:
       - /it/src/main/resources/testsuites/v2/mock/v2-mock-instance-termination.yaml
       - /it/src/main/resources/testsuites/blueprinttests.yaml
       - /it/src/main/resources/testsuites/recipetests.yaml
+      - /it/src/main/resources/testsuites/repoconfigstests.yaml
+      - /it/src/main/resources/testsuites/disktypetests.yaml
+      - /it/src/main/resources/testsuites/securityruletests.yaml
     cleanup:
       cleanupBeforeStart: true

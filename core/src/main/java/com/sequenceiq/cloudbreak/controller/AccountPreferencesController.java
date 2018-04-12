@@ -2,7 +2,8 @@ package com.sequenceiq.cloudbreak.controller;
 
 import com.google.common.collect.ImmutableMap;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.AccountPreferencesEndpoint;
-import com.sequenceiq.cloudbreak.api.model.AccountPreferencesJson;
+import com.sequenceiq.cloudbreak.api.model.AccountPreferencesRequest;
+import com.sequenceiq.cloudbreak.api.model.AccountPreferencesResponse;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
 import com.sequenceiq.cloudbreak.domain.AccountPreferences;
@@ -34,20 +35,20 @@ public class AccountPreferencesController implements AccountPreferencesEndpoint 
     private ConversionService conversionService;
 
     @Override
-    public AccountPreferencesJson get() {
+    public AccountPreferencesResponse get() {
         IdentityUser user = authenticatedUserService.getCbUser();
         AccountPreferences preferences = service.getOneByAccount(user);
         return convert(preferences);
     }
 
     @Override
-    public AccountPreferencesJson put(AccountPreferencesJson updateRequest) {
+    public AccountPreferencesResponse put(AccountPreferencesRequest updateRequest) {
         IdentityUser user = authenticatedUserService.getCbUser();
         return convert(service.saveOne(user, convert(updateRequest)));
     }
 
     @Override
-    public AccountPreferencesJson post(AccountPreferencesJson updateRequest) {
+    public AccountPreferencesResponse post(AccountPreferencesRequest updateRequest) {
         IdentityUser user = authenticatedUserService.getCbUser();
         return convert(service.saveOne(user, convert(updateRequest)));
     }
@@ -71,11 +72,11 @@ public class AccountPreferencesController implements AccountPreferencesEndpoint 
         return Response.status(Status.NO_CONTENT).build();
     }
 
-    private AccountPreferencesJson convert(AccountPreferences preferences) {
-        return conversionService.convert(preferences, AccountPreferencesJson.class);
+    private AccountPreferencesResponse convert(AccountPreferences preferences) {
+        return conversionService.convert(preferences, AccountPreferencesResponse.class);
     }
 
-    private AccountPreferences convert(AccountPreferencesJson preferences) {
+    private AccountPreferences convert(AccountPreferencesRequest preferences) {
         return conversionService.convert(preferences, AccountPreferences.class);
     }
 }

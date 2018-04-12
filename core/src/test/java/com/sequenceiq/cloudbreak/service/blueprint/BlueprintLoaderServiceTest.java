@@ -1,18 +1,9 @@
 package com.sequenceiq.cloudbreak.service.blueprint;
 
-import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
-import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.init.blueprint.BlueprintLoaderService;
-import com.sequenceiq.cloudbreak.init.blueprint.DefaultBlueprintCache;
-import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import static com.sequenceiq.cloudbreak.api.model.ResourceStatus.DEFAULT;
+import static org.mockito.Matchers.anySet;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -22,10 +13,20 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import static com.sequenceiq.cloudbreak.api.model.ResourceStatus.DEFAULT;
-import static org.mockito.Matchers.anySet;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import org.junit.Assert;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
+
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.init.blueprint.BlueprintLoaderService;
+import com.sequenceiq.cloudbreak.init.blueprint.DefaultBlueprintCache;
+import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
 
 @RunWith(MockitoJUnitRunner.class)
 public class BlueprintLoaderServiceTest {

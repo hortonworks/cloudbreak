@@ -71,6 +71,9 @@ public class RDSConfig implements ProvisionEntity {
     @Column(nullable = false)
     private String type;
 
+    @Column
+    private String connectorJarUrl;
+
     public Long getId() {
         return id;
     }
@@ -189,5 +192,13 @@ public class RDSConfig implements ProvisionEntity {
 
     public void setConnectionDriver(String connectionDriver) {
         this.connectionDriver = connectionDriver;
+    }
+
+    public String getConnectorJarUrl() {
+        return connectorJarUrl;
+    }
+
+    public void setConnectorJarUrl(String connectorJarUrl) {
+        this.connectorJarUrl = connectorJarUrl;
     }
 }

@@ -1,5 +1,24 @@
 package com.sequenceiq.cloudbreak.core.flow;
 
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyLong;
+import static org.mockito.Matchers.anyObject;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.lang.reflect.Method;
+import java.util.HashMap;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
+
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.model.HostGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupAdjustmentJson;
@@ -11,28 +30,11 @@ import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.repair.UnhealthyInstances;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+
 import reactor.bus.Event;
 import reactor.bus.EventBus;
 import reactor.core.dispatch.ThreadPoolExecutorDispatcher;
 import reactor.rx.Promise;
-
-import java.lang.reflect.Method;
-import java.util.HashMap;
-
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyLong;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ReactorFlowManagerTest {
@@ -72,8 +74,6 @@ public class ReactorFlowManagerTest {
         Stack stack = TestUtil.stack();
         stack.setCluster(TestUtil.cluster());
         when(stackService.get(anyLong())).thenReturn(stack);
-        when(stackService.getById(anyLong())).thenReturn(TestUtil.stack());
-        when(stackService.getByIdView(anyLong())).thenReturn(TestUtil.stackView());
         when(eventFactory.createEventWithErrHandler(anyObject())).thenReturn(new Event<>(acceptable));
     }
 

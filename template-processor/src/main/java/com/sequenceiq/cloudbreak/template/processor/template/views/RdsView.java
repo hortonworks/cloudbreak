@@ -30,6 +30,8 @@ public class RdsView {
 
     private String fancyName;
 
+    private String databaseType;
+
     private String ambariVendor;
 
     private String upperCaseDatabaseEngine;
@@ -61,6 +63,7 @@ public class RdsView {
             DatabaseVendor databaseVendor = DatabaseVendor.valueOf(rdsConfig.getDatabaseEngine());
             fancyName = databaseVendor.fancyName();
             ambariVendor = databaseVendor.ambariVendor();
+            databaseType = databaseVendor.databaseType();
             upperCaseDatabaseEngine = rdsConfig.getDatabaseEngine().toUpperCase();
         }
     }
@@ -79,6 +82,10 @@ public class RdsView {
 
     public String getDatabaseName() {
         return databaseName;
+    }
+
+    public String getDatabaseType() {
+        return databaseType;
     }
 
     public String getHostWithPort() {

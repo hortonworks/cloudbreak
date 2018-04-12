@@ -19,6 +19,7 @@
 {% set consul = {} %}
 {% do consul.update({
     'is_server': is_server,
+    'advertise_addr': advertise_addr,
     'node_name': node_name,
     'bootstrap_expect': bootstrap_expect,
     'retry_join': servers

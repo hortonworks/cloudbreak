@@ -1,10 +1,6 @@
 package com.sequenceiq.cloudbreak.service.ha;
 
-import com.sequenceiq.cloudbreak.domain.CloudbreakNode;
-import com.sequenceiq.cloudbreak.domain.FlowLog;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.runners.MockitoJUnitRunner;
+import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -13,7 +9,12 @@ import java.util.Map;
 import java.util.Random;
 import java.util.stream.Collectors;
 
-import static org.junit.Assert.assertEquals;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.junit.MockitoJUnitRunner;
+
+import com.sequenceiq.cloudbreak.domain.CloudbreakNode;
+import com.sequenceiq.cloudbreak.domain.FlowLog;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EvenFlowDistributorTest {

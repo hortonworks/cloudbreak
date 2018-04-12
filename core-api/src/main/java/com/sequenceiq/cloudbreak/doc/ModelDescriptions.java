@@ -278,10 +278,11 @@ public class ModelDescriptions {
         public static final String DB_ENGINE = "Name of the external database engine (MYSQL, POSTGRES...)";
         public static final String USERNAME = "Username to use for the jdbc connection";
         public static final String PASSWORD = "Password to use for the jdbc connection";
+        public static final String ORACLE = "Oracle specific properties";
         public static final String NAME = "Name of the RDS configuration resource";
         public static final String STACK_VERSION = "(HDP, HDF)Stack version for the RDS configuration";
-        public static final String VALIDATED = "If true, then the RDS configuration will be validated";
         public static final String RDSTYPE = "Type of RDS, aka the service name that will use the RDS like HIVE, DRUID, SUPERSET, RANGER, etc.";
+        public static final String CONNECTOR_JAR_URL = "URL that points to the jar of the connection driver(connector)";
         public static final String RDS_REQUEST = "rds config request";
         public static final String RDS_REQUEST_CLUSTER_NAME = "requested cluster name";
         public static final String RDS_CONNECTION_TEST_RESULT = "result of RDS connection test";
@@ -441,6 +442,16 @@ public class ModelDescriptions {
 
     public static class SubscriptionModelDescription {
         public static final String ENDPOINT = "url of the endpoint";
+    }
+
+    public static class SupportedDatabaseModelDescription {
+        public static final String DATABASENAME = "Name of the database";
+        public static final String DISPLAYNAME = "Display name of the database";
+        public static final String JDBCPREFIX = "Jdbc prefix of the database";
+        public static final String NAME = "Name of the service";
+        public static final String SERVICE_DISPLAYNAME = "Display name of the service";
+        public static final String DATABASES = "Supported database list";
+        public static final String VERSIONS = "Supported version types currently only for Oracle";
     }
 
     public static class FailureReport {
