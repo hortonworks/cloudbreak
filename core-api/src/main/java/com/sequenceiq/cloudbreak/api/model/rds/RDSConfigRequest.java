@@ -1,8 +1,5 @@
 package com.sequenceiq.cloudbreak.api.model.rds;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -26,7 +23,7 @@ public class RDSConfigRequest extends RDSConfigJson {
     private String connectionPassword;
 
     @ApiModelProperty(value = RDSConfig.ORACLE)
-    private Map<String, Object> oracleProperties = new HashMap<>();
+    private OracleParameters oracleParameters;
 
     public String getConnectionUserName() {
         return connectionUserName;
@@ -44,11 +41,11 @@ public class RDSConfigRequest extends RDSConfigJson {
         this.connectionPassword = connectionPassword;
     }
 
-    public Map<String, Object> getOracleProperties() {
-        return oracleProperties;
+    public OracleParameters getOracleParameters() {
+        return oracleParameters;
     }
 
-    public void setOracleProperties(Map<String, Object> oracleProperties) {
-        this.oracleProperties = oracleProperties;
+    public void setOracleParameters(OracleParameters oracleParameters) {
+        this.oracleParameters = oracleParameters;
     }
 }
