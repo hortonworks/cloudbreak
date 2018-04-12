@@ -22,7 +22,11 @@ import java.util.Map;
 
 import static com.sequenceiq.cloudbreak.templateprocessor.templates.ServiceName.serviceName;
 import static com.sequenceiq.cloudbreak.templateprocessor.templates.TemplateFiles.templateFiles;
-import static org.mockito.Matchers.*;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyBoolean;
+import static org.mockito.Matchers.anyMap;
+import static org.mockito.Matchers.anySet;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
