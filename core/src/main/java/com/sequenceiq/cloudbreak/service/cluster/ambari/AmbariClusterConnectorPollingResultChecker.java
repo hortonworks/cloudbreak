@@ -1,13 +1,14 @@
 package com.sequenceiq.cloudbreak.service.cluster.ambari;
 
-import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
-import com.sequenceiq.cloudbreak.core.ClusterException;
-import com.sequenceiq.cloudbreak.service.PollingResult;
-import org.springframework.stereotype.Service;
-
 import static com.sequenceiq.cloudbreak.service.PollingResult.isExited;
 import static com.sequenceiq.cloudbreak.service.PollingResult.isFailure;
 import static com.sequenceiq.cloudbreak.service.PollingResult.isTimeout;
+
+import org.springframework.stereotype.Service;
+
+import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
+import com.sequenceiq.cloudbreak.core.ClusterException;
+import com.sequenceiq.cloudbreak.service.PollingResult;
 
 @Service
 public class AmbariClusterConnectorPollingResultChecker {

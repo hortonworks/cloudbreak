@@ -1,12 +1,13 @@
 package com.sequenceiq.cloudbreak.converter.v2.cli;
 
+import org.junit.Test;
+
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.model.KerberosRequest;
 import com.sequenceiq.cloudbreak.converter.AbstractConverterTest;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.type.KerberosType;
-import org.junit.Test;
 
 public class KerberosConfigToKerberosRequestConverterTest extends AbstractConverterTest {
 

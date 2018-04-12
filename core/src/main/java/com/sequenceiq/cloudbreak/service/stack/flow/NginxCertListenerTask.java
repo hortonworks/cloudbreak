@@ -1,14 +1,16 @@
 package com.sequenceiq.cloudbreak.service.stack.flow;
 
-import com.sequenceiq.cloudbreak.service.StackBasedStatusCheckerTask;
-import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariOperationFailedException;
+import java.security.cert.X509Certificate;
+
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.WebTarget;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.WebTarget;
-import java.security.cert.X509Certificate;
+import com.sequenceiq.cloudbreak.service.StackBasedStatusCheckerTask;
+import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariOperationFailedException;
 
 @Component
 public class NginxCertListenerTask extends StackBasedStatusCheckerTask<NginxPollerObject> {

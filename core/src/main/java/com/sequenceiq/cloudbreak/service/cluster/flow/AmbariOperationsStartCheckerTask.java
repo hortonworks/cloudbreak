@@ -1,19 +1,20 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow;
 
-import com.sequenceiq.ambari.client.AmbariClient;
-import com.sequenceiq.cloudbreak.service.ClusterBasedStatusCheckerTask;
-import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariOperationFailedException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
+import static com.sequenceiq.cloudbreak.service.cluster.flow.AmbariOperationsStatusCheckerTask.FAILED;
+import static com.sequenceiq.cloudbreak.service.cluster.flow.AmbariOperationsStatusCheckerTask.PENDING;
 
 import java.math.BigDecimal;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 
-import static com.sequenceiq.cloudbreak.service.cluster.flow.AmbariOperationsStatusCheckerTask.FAILED;
-import static com.sequenceiq.cloudbreak.service.cluster.flow.AmbariOperationsStatusCheckerTask.PENDING;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
+import com.sequenceiq.ambari.client.AmbariClient;
+import com.sequenceiq.cloudbreak.service.ClusterBasedStatusCheckerTask;
+import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariOperationFailedException;
 
 @Component
 public class AmbariOperationsStartCheckerTask extends ClusterBasedStatusCheckerTask<AmbariOperations> {

@@ -1,14 +1,15 @@
 package com.sequenceiq.cloudbreak.converter;
 
-import com.sequenceiq.cloudbreak.api.model.SecurityRuleRequest;
-import com.sequenceiq.cloudbreak.controller.BadRequestException;
-import com.sequenceiq.cloudbreak.domain.SecurityRule;
+import java.util.Collections;
+
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import java.util.Collections;
+import com.sequenceiq.cloudbreak.api.model.SecurityRuleRequest;
+import com.sequenceiq.cloudbreak.controller.BadRequestException;
+import com.sequenceiq.cloudbreak.domain.SecurityRule;
 
 public class SecurityRuleRequestToSecurityRuleConverterTest extends AbstractJsonConverterTest<SecurityRuleRequest> {
 

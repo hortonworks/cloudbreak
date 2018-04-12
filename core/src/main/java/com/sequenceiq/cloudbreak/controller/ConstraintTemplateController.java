@@ -1,19 +1,20 @@
 package com.sequenceiq.cloudbreak.controller;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v1.ConstraintTemplateEndpoint;
-import com.sequenceiq.cloudbreak.api.model.ConstraintTemplateRequest;
-import com.sequenceiq.cloudbreak.api.model.ConstraintTemplateResponse;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
-import com.sequenceiq.cloudbreak.domain.ConstraintTemplate;
-import com.sequenceiq.cloudbreak.service.constraint.ConstraintTemplateService;
+import java.util.HashSet;
+import java.util.Set;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.PathVariable;
 
-import java.util.HashSet;
-import java.util.Set;
+import com.sequenceiq.cloudbreak.api.endpoint.v1.ConstraintTemplateEndpoint;
+import com.sequenceiq.cloudbreak.api.model.ConstraintTemplateRequest;
+import com.sequenceiq.cloudbreak.api.model.ConstraintTemplateResponse;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.domain.ConstraintTemplate;
+import com.sequenceiq.cloudbreak.service.constraint.ConstraintTemplateService;
 
 @Component
 public class ConstraintTemplateController implements ConstraintTemplateEndpoint {

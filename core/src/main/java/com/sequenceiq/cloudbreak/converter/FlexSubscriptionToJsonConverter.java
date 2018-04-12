@@ -1,11 +1,12 @@
 package com.sequenceiq.cloudbreak.converter;
 
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Component;
+
 import com.sequenceiq.cloudbreak.api.model.FlexSubscriptionResponse;
 import com.sequenceiq.cloudbreak.api.model.SmartSenseSubscriptionJson;
 import com.sequenceiq.cloudbreak.domain.FlexSubscription;
-import org.springframework.stereotype.Component;
-
-import javax.inject.Inject;
 
 @Component
 public class FlexSubscriptionToJsonConverter extends AbstractConversionServiceAwareConverter<FlexSubscription, FlexSubscriptionResponse> {

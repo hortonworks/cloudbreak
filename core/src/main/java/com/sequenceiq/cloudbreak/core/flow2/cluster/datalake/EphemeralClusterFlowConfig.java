@@ -1,11 +1,5 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.datalake;
 
-import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration;
-import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration.Transition.Builder;
-import org.springframework.stereotype.Component;
-
-import java.util.List;
-
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.EphemeralClusterEvent.EPHEMERAL_CLUSTER_FAILURE_HANDLED;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.EphemeralClusterEvent.EPHEMERAL_CLUSTER_FLOW_FINISHED;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.EphemeralClusterEvent.EPHEMERAL_CLUSTER_UPDATE_FAILED;
@@ -16,6 +10,13 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.EphemeralClu
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.EphemeralClusterState.EPHEMERAL_CLUSTER_UPDATE_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.EphemeralClusterState.FINAL_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.EphemeralClusterState.INIT_STATE;
+
+import java.util.List;
+
+import org.springframework.stereotype.Component;
+
+import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration;
+import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration.Transition.Builder;
 
 @Component
 public class EphemeralClusterFlowConfig extends AbstractFlowConfiguration<EphemeralClusterState, EphemeralClusterEvent> {

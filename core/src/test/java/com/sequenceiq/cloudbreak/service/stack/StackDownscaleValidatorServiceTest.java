@@ -1,6 +1,9 @@
 package com.sequenceiq.cloudbreak.service.stack;
 
-import com.sequenceiq.cloudbreak.controller.BadRequestException;
+import static com.sequenceiq.cloudbreak.api.model.InstanceMetadataType.CORE;
+import static com.sequenceiq.cloudbreak.api.model.InstanceMetadataType.GATEWAY;
+import static com.sequenceiq.cloudbreak.api.model.InstanceMetadataType.GATEWAY_PRIMARY;
+
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -10,9 +13,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.security.access.AccessDeniedException;
 
-import static com.sequenceiq.cloudbreak.api.model.InstanceMetadataType.CORE;
-import static com.sequenceiq.cloudbreak.api.model.InstanceMetadataType.GATEWAY;
-import static com.sequenceiq.cloudbreak.api.model.InstanceMetadataType.GATEWAY_PRIMARY;
+import com.sequenceiq.cloudbreak.controller.BadRequestException;
 
 @RunWith(MockitoJUnitRunner.class)
 public class StackDownscaleValidatorServiceTest {

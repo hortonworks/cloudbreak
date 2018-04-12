@@ -1,5 +1,9 @@
 package com.sequenceiq.cloudbreak.reactor.handler.cluster;
 
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Component;
+
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
 import com.sequenceiq.cloudbreak.core.cluster.AmbariClusterCreationService;
 import com.sequenceiq.cloudbreak.reactor.api.event.EventSelectorUtil;
@@ -7,11 +11,9 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.InstallClusterFailed;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.InstallClusterRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.InstallClusterSuccess;
 import com.sequenceiq.cloudbreak.reactor.handler.ReactorEventHandler;
-import org.springframework.stereotype.Component;
+
 import reactor.bus.Event;
 import reactor.bus.EventBus;
-
-import javax.inject.Inject;
 
 @Component
 public class InstallClusterHandler implements ReactorEventHandler<InstallClusterRequest> {

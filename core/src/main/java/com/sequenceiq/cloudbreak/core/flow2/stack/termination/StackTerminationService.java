@@ -1,5 +1,13 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.termination;
 
+import static com.sequenceiq.cloudbreak.api.model.Status.DELETE_COMPLETED;
+
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
 import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.cloud.event.resource.TerminateStackResult;
 import com.sequenceiq.cloudbreak.common.type.BillingStatus;
@@ -17,13 +25,6 @@ import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.flow.TerminationService;
 import com.sequenceiq.cloudbreak.service.usages.UsageService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-
-import javax.inject.Inject;
-
-import static com.sequenceiq.cloudbreak.api.model.Status.DELETE_COMPLETED;
 
 @Service
 public class StackTerminationService {

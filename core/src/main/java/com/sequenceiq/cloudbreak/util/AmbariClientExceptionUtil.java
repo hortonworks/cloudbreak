@@ -1,10 +1,11 @@
 package com.sequenceiq.cloudbreak.util;
 
 
-import groovyx.net.http.HttpResponseException;
+import java.io.Reader;
+
 import org.apache.commons.io.IOUtils;
 
-import java.io.Reader;
+import groovyx.net.http.HttpResponseException;
 
 public class AmbariClientExceptionUtil {
 

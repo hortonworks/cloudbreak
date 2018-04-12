@@ -1,13 +1,14 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow;
 
-import com.sequenceiq.cloudbreak.common.model.recipe.RecipeScript;
-import com.sequenceiq.cloudbreak.domain.Recipe;
-import org.apache.commons.codec.binary.Base64;
-import org.springframework.stereotype.Component;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+
+import org.apache.commons.codec.binary.Base64;
+import org.springframework.stereotype.Component;
+
+import com.sequenceiq.cloudbreak.common.model.recipe.RecipeScript;
+import com.sequenceiq.cloudbreak.domain.Recipe;
 
 @Component
 public class RecipeBuilder {

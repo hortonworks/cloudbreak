@@ -1,5 +1,14 @@
 package com.sequenceiq.cloudbreak.reactor;
 
+import java.util.Collections;
+import java.util.Set;
+
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.reactor.api.event.EventSelectorUtil;
@@ -9,15 +18,9 @@ import com.sequenceiq.cloudbreak.reactor.handler.ReactorEventHandler;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.repair.CandidateUnhealthyInstanceSelector;
 import com.sequenceiq.cloudbreak.service.stack.repair.UnhealthyInstancesFinalizer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
+
 import reactor.bus.Event;
 import reactor.bus.EventBus;
-
-import javax.inject.Inject;
-import java.util.Collections;
-import java.util.Set;
 
 @Component
 public class UnhealthyInstancesDetectionHandler implements ReactorEventHandler<UnhealthyInstancesDetectionRequest> {

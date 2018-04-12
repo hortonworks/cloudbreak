@@ -1,5 +1,9 @@
 package com.sequenceiq.cloudbreak.reactor;
 
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Component;
+
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.reactor.api.event.EventSelectorUtil;
@@ -11,11 +15,9 @@ import com.sequenceiq.cloudbreak.service.cluster.flow.status.AmbariClusterStatus
 import com.sequenceiq.cloudbreak.service.proxy.ProxyRegistrator;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
-import org.springframework.stereotype.Component;
+
 import reactor.bus.Event;
 import reactor.bus.EventBus;
-
-import javax.inject.Inject;
 
 @Component
 public class ClusterSyncHandler implements ReactorEventHandler<ClusterSyncRequest> {

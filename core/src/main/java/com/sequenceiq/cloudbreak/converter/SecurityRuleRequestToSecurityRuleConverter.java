@@ -1,11 +1,12 @@
 package com.sequenceiq.cloudbreak.converter;
 
+import java.util.regex.Pattern;
+
+import org.springframework.stereotype.Component;
+
 import com.sequenceiq.cloudbreak.api.model.SecurityRuleRequest;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.SecurityRule;
-import org.springframework.stereotype.Component;
-
-import java.util.regex.Pattern;
 
 @Component
 public class SecurityRuleRequestToSecurityRuleConverter extends AbstractConversionServiceAwareConverter<SecurityRuleRequest, SecurityRule> {

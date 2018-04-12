@@ -1,11 +1,12 @@
 package com.sequenceiq.cloudbreak.converter;
 
+import java.util.Optional;
+
+import org.springframework.stereotype.Component;
+
 import com.sequenceiq.cloudbreak.api.model.KerberosRequest;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.type.KerberosType;
-import org.springframework.stereotype.Component;
-
-import java.util.Optional;
 
 @Component
 public class KerbersoRequestToKerberosConfigConverter extends AbstractConversionServiceAwareConverter<KerberosRequest, KerberosConfig> {

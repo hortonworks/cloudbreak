@@ -1,16 +1,18 @@
 package com.sequenceiq.cloudbreak.service.proxy;
 
-import com.sequenceiq.cloudbreak.domain.Cluster;
-import com.sequenceiq.cloudbreak.domain.ProxyConfig;
-import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.stereotype.Service;
+import static java.util.Collections.singletonMap;
 
-import javax.transaction.Transactional;
 import java.util.HashMap;
 import java.util.Map;
 
-import static java.util.Collections.singletonMap;
+import javax.transaction.Transactional;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Service;
+
+import com.sequenceiq.cloudbreak.domain.Cluster;
+import com.sequenceiq.cloudbreak.domain.ProxyConfig;
+import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 
 @Service
 public class ProxyConfigProvider {

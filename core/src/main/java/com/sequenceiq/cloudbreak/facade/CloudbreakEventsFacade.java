@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.facade;
 
-import com.sequenceiq.cloudbreak.api.model.CloudbreakEventsJson;
-
 import java.util.List;
+
+import com.sequenceiq.cloudbreak.api.model.CloudbreakEventsJson;
 
 public interface CloudbreakEventsFacade {
 

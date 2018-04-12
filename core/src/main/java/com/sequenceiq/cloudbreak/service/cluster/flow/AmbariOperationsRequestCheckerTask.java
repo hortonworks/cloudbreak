@@ -1,9 +1,10 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow;
 
-import com.sequenceiq.cloudbreak.service.ClusterBasedStatusCheckerTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+
+import com.sequenceiq.cloudbreak.service.ClusterBasedStatusCheckerTask;
 
 @Component
 public class AmbariOperationsRequestCheckerTask extends ClusterBasedStatusCheckerTask<AmbariOperations> {

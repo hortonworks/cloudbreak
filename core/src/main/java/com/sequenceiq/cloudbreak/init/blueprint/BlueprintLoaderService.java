@@ -1,14 +1,7 @@
 package com.sequenceiq.cloudbreak.init.blueprint;
 
-import com.google.common.collect.Sets;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
-import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
+import static com.sequenceiq.cloudbreak.api.model.ResourceStatus.DEFAULT;
 
-import javax.inject.Inject;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -17,7 +10,16 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.sequenceiq.cloudbreak.api.model.ResourceStatus.DEFAULT;
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
+import com.google.common.collect.Sets;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
 
 @Service
 public class BlueprintLoaderService {

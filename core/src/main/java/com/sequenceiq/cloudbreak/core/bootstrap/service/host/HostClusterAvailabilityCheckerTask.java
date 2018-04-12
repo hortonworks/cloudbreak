@@ -1,12 +1,13 @@
 package com.sequenceiq.cloudbreak.core.bootstrap.service.host;
 
-import com.sequenceiq.cloudbreak.core.bootstrap.service.host.context.HostOrchestratorClusterContext;
-import com.sequenceiq.cloudbreak.service.StackBasedStatusCheckerTask;
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
+import com.sequenceiq.cloudbreak.core.bootstrap.service.host.context.HostOrchestratorClusterContext;
+import com.sequenceiq.cloudbreak.service.StackBasedStatusCheckerTask;
 
 @Component
 public class HostClusterAvailabilityCheckerTask extends StackBasedStatusCheckerTask<HostOrchestratorClusterContext> {

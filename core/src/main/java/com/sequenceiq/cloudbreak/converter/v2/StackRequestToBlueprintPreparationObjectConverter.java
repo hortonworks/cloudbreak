@@ -1,5 +1,15 @@
 package com.sequenceiq.cloudbreak.converter.v2;
 
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
+
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.model.FileSystemConfiguration;
 import com.sequenceiq.cloudbreak.api.model.v2.InstanceGroupV2Request;
@@ -29,14 +39,6 @@ import com.sequenceiq.cloudbreak.template.processor.template.views.FileSystemCon
 import com.sequenceiq.cloudbreak.template.processor.template.views.HostgroupView;
 import com.sequenceiq.cloudbreak.template.processor.templates.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.template.processor.templates.StackInfo;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
-
-import javax.inject.Inject;
-import java.io.IOException;
-import java.util.HashSet;
-import java.util.Set;
 
 @Component
 public class StackRequestToBlueprintPreparationObjectConverter extends AbstractConversionServiceAwareConverter<StackV2Request, TemplatePreparationObject> {

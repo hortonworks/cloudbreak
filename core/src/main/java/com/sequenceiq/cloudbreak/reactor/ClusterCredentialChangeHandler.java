@@ -1,5 +1,9 @@
 package com.sequenceiq.cloudbreak.reactor;
 
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Component;
+
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.reactor.api.event.EventSelectorUtil;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.ClusterCredentialChangeRequest;
@@ -7,11 +11,9 @@ import com.sequenceiq.cloudbreak.reactor.api.event.resource.ClusterCredentialCha
 import com.sequenceiq.cloudbreak.reactor.handler.ReactorEventHandler;
 import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariClusterConnector;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import org.springframework.stereotype.Component;
+
 import reactor.bus.Event;
 import reactor.bus.EventBus;
-
-import javax.inject.Inject;
 
 @Component
 public class ClusterCredentialChangeHandler implements ReactorEventHandler<ClusterCredentialChangeRequest> {

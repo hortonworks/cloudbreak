@@ -1,12 +1,13 @@
 package com.sequenceiq.cloudbreak.conf;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
 import com.sequenceiq.cloudbreak.service.registry.DNSServiceAddressResolver;
 import com.sequenceiq.cloudbreak.service.registry.RetryingServiceAddressResolver;
 import com.sequenceiq.cloudbreak.service.registry.ServiceAddressResolver;
 import com.sequenceiq.cloudbreak.service.registry.ServiceAddressResolvingException;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class ServiceEndpointConfig {

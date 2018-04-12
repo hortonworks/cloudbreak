@@ -1,17 +1,19 @@
 package com.sequenceiq.cloudbreak.converter;
 
-import com.sequenceiq.cloudbreak.api.model.CredentialResponse;
-import com.sequenceiq.cloudbreak.domain.Credential;
-import com.sequenceiq.cloudbreak.service.stack.resource.definition.credential.CredentialDefinitionService;
-import com.sequenceiq.cloudbreak.service.topology.TopologyService;
-import org.springframework.stereotype.Component;
+import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
 
-import javax.inject.Inject;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Component;
+
+import com.sequenceiq.cloudbreak.api.model.CredentialResponse;
+import com.sequenceiq.cloudbreak.domain.Credential;
+import com.sequenceiq.cloudbreak.service.stack.resource.definition.credential.CredentialDefinitionService;
+import com.sequenceiq.cloudbreak.service.topology.TopologyService;
 
 @Component
 public class CredentialToCredentialResponseConverter extends AbstractConversionServiceAwareConverter<Credential, CredentialResponse> {

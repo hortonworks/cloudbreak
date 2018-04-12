@@ -1,5 +1,11 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.reset;
 
+import java.util.Optional;
+
+import javax.inject.Inject;
+
+import org.springframework.statemachine.StateContext;
+
 import com.sequenceiq.cloudbreak.cloud.event.Payload;
 import com.sequenceiq.cloudbreak.core.flow2.AbstractAction;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.ClusterViewContext;
@@ -7,10 +13,6 @@ import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import org.springframework.statemachine.StateContext;
-
-import javax.inject.Inject;
-import java.util.Optional;
 
 public abstract class AbstractClusterResetAction<P extends Payload> extends AbstractAction<ClusterResetState, ClusterResetEvent, ClusterViewContext, P> {
     @Inject

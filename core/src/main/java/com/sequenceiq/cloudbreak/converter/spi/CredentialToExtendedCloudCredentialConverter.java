@@ -1,11 +1,12 @@
 package com.sequenceiq.cloudbreak.converter.spi;
 
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Component;
+
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 import com.sequenceiq.cloudbreak.domain.Credential;
-import org.springframework.stereotype.Component;
-
-import javax.inject.Inject;
 
 @Component
 public class CredentialToExtendedCloudCredentialConverter {

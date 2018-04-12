@@ -1,8 +1,9 @@
 package com.sequenceiq.cloudbreak.cloud.connector;
 
-import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import org.junit.Assert;
 import org.junit.Test;
+
+import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 
 public class CloudConnectorExceptionTest {
 

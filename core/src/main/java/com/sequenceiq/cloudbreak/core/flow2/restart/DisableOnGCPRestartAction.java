@@ -1,14 +1,15 @@
 package com.sequenceiq.cloudbreak.core.flow2.restart;
 
+import static com.sequenceiq.cloudbreak.common.type.CloudConstants.GCP;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Component;
+
 import com.sequenceiq.cloudbreak.cloud.event.Payload;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.flowlog.FlowLogService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import org.springframework.stereotype.Component;
-
-import javax.inject.Inject;
-
-import static com.sequenceiq.cloudbreak.common.type.CloudConstants.GCP;
 
 @Component("DisableOnGCPRestartAction")
 public class DisableOnGCPRestartAction extends FillInMemoryStateStoreRestartAction {

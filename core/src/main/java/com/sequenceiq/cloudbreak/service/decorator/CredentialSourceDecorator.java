@@ -1,5 +1,12 @@
 package com.sequenceiq.cloudbreak.service.decorator;
 
+import java.util.Map;
+import java.util.Map.Entry;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Component;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.model.CredentialSourceRequest;
@@ -10,11 +17,6 @@ import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.service.MissingResourceNameGenerator;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
-import org.springframework.stereotype.Component;
-
-import javax.inject.Inject;
-import java.util.Map;
-import java.util.Map.Entry;
 
 @Component
 public class CredentialSourceDecorator {

@@ -1,15 +1,5 @@
 package com.sequenceiq.cloudbreak.service.usages;
 
-import com.google.api.client.util.Lists;
-import com.sequenceiq.cloudbreak.api.model.UsageStatus;
-import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
-import com.sequenceiq.cloudbreak.domain.FlexSubscription;
-import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.ha.CloudbreakNodeConfig;
-import org.springframework.stereotype.Service;
-
-import javax.inject.Inject;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -20,6 +10,18 @@ import java.time.temporal.TemporalAccessor;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Service;
+
+import com.google.api.client.util.Lists;
+import com.sequenceiq.cloudbreak.api.model.UsageStatus;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
+import com.sequenceiq.cloudbreak.domain.FlexSubscription;
+import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.ha.CloudbreakNodeConfig;
 
 @Service
 public class UsageGeneratorService {

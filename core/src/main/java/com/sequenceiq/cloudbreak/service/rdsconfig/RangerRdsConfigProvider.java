@@ -1,13 +1,14 @@
 package com.sequenceiq.cloudbreak.service.rdsconfig;
 
+import javax.inject.Inject;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
 import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.template.processor.processor.TemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.template.processor.processor.TemplateTextProcessor;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-
-import javax.inject.Inject;
 
 @Component
 public class RangerRdsConfigProvider extends AbstractRdsConfigProvider {

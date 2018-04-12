@@ -1,15 +1,17 @@
 package com.sequenceiq.cloudbreak.core.flow2;
 
-import com.sequenceiq.cloudbreak.common.type.MetricType;
-import com.sequenceiq.cloudbreak.service.metrics.MetricService;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Component;
 
-import javax.inject.Inject;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
+import com.sequenceiq.cloudbreak.common.type.MetricType;
+import com.sequenceiq.cloudbreak.service.metrics.MetricService;
 
 @Component
 public class FlowRegister {

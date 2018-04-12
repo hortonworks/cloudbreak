@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.core.flow2.event;
 
-import reactor.rx.Promise;
-
 import java.util.Set;
+
+import reactor.rx.Promise;
 
 public class ClusterDownscaleTriggerEvent extends ClusterScaleTriggerEvent {
     private final Set<String> hostNames;

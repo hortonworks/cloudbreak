@@ -1,5 +1,15 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.termination;
 
+import static com.sequenceiq.cloudbreak.api.model.Status.DELETE_IN_PROGRESS;
+
+import java.util.Map;
+
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
 import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
 import com.sequenceiq.cloudbreak.domain.Cluster;
@@ -11,14 +21,6 @@ import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
-
-import javax.inject.Inject;
-import java.util.Map;
-
-import static com.sequenceiq.cloudbreak.api.model.Status.DELETE_IN_PROGRESS;
 
 @Component("StackPreTerminationAction")
 public class StackPreTerminationAction extends AbstractStackTerminationAction<TerminationEvent> {

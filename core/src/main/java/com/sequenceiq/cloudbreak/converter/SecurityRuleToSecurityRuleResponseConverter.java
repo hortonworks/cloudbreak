@@ -1,9 +1,10 @@
 package com.sequenceiq.cloudbreak.converter;
 
-import com.sequenceiq.cloudbreak.api.model.SecurityRuleResponse;
-import com.sequenceiq.cloudbreak.domain.SecurityRule;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
+
+import com.sequenceiq.cloudbreak.api.model.SecurityRuleResponse;
+import com.sequenceiq.cloudbreak.domain.SecurityRule;
 
 @Component
 public class SecurityRuleToSecurityRuleResponseConverter extends AbstractConversionServiceAwareConverter<SecurityRule, SecurityRuleResponse> {

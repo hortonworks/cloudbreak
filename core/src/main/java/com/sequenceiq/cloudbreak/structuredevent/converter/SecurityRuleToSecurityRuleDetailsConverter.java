@@ -1,14 +1,16 @@
 package com.sequenceiq.cloudbreak.structuredevent.converter;
 
-import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
-import com.sequenceiq.cloudbreak.domain.SecurityRule;
-import com.sequenceiq.cloudbreak.structuredevent.event.SecurityRuleDetails;
+import java.util.Arrays;
+import java.util.stream.Collectors;
+
+import javax.inject.Inject;
+
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
 
-import javax.inject.Inject;
-import java.util.Arrays;
-import java.util.stream.Collectors;
+import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
+import com.sequenceiq.cloudbreak.domain.SecurityRule;
+import com.sequenceiq.cloudbreak.structuredevent.event.SecurityRuleDetails;
 
 @Component
 public class SecurityRuleToSecurityRuleDetailsConverter extends AbstractConversionServiceAwareConverter<SecurityRule, SecurityRuleDetails> {

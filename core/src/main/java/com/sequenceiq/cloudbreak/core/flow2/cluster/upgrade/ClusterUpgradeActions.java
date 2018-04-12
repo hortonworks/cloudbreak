@@ -1,5 +1,13 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.upgrade;
 
+import java.util.Map;
+
+import javax.inject.Inject;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.statemachine.action.Action;
+
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.AbstractClusterAction;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.ClusterViewContext;
@@ -13,12 +21,6 @@ import com.sequenceiq.cloudbreak.reactor.api.event.resource.ClusterUpgradeResult
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.EmailSenderService;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.statemachine.action.Action;
-
-import javax.inject.Inject;
-import java.util.Map;
 
 @Configuration
 public class ClusterUpgradeActions {

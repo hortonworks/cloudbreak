@@ -1,9 +1,9 @@
 package com.sequenceiq.cloudbreak.controller.mapper;
 
-import org.hibernate.exception.ConstraintViolationException;
-
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.Provider;
+
+import org.hibernate.exception.ConstraintViolationException;
 
 @Provider
 public class HibernateConstraintViolationExceptionMapper extends SendNotificationExceptionMapper<ConstraintViolationException> {

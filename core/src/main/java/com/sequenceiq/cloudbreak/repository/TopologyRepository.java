@@ -1,11 +1,12 @@
 package com.sequenceiq.cloudbreak.repository;
 
-import com.sequenceiq.cloudbreak.domain.Topology;
+import java.util.Set;
+
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
-import java.util.Set;
+import com.sequenceiq.cloudbreak.domain.Topology;
 
 @EntityType(entityClass = Topology.class)
 public interface TopologyRepository extends CrudRepository<Topology, Long> {

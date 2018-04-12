@@ -1,15 +1,17 @@
 package com.sequenceiq.cloudbreak.facade;
 
-import com.sequenceiq.cloudbreak.api.model.CloudbreakEventsJson;
-import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
-import com.sequenceiq.cloudbreak.structuredevent.event.StructuredNotificationEvent;
+import java.util.List;
+
+import javax.inject.Inject;
+
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.stereotype.Service;
 
-import javax.inject.Inject;
-import java.util.List;
+import com.sequenceiq.cloudbreak.api.model.CloudbreakEventsJson;
+import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
+import com.sequenceiq.cloudbreak.structuredevent.event.StructuredNotificationEvent;
 
 @Service
 public class DefaultCloudbreakEventsFacade implements CloudbreakEventsFacade {

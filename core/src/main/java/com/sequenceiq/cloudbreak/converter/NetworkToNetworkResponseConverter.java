@@ -1,10 +1,11 @@
 package com.sequenceiq.cloudbreak.converter;
 
+import org.springframework.stereotype.Component;
+
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.api.model.NetworkResponse;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.json.Json;
-import org.springframework.stereotype.Component;
 
 @Component
 public class NetworkToNetworkResponseConverter extends AbstractConversionServiceAwareConverter<Network, NetworkResponse> {

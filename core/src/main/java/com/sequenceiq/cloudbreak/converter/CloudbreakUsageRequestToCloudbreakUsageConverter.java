@@ -1,8 +1,9 @@
 package com.sequenceiq.cloudbreak.converter;
 
+import org.springframework.stereotype.Component;
+
 import com.sequenceiq.cloudbreak.api.model.CloudbreakUsageJson;
 import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
-import org.springframework.stereotype.Component;
 
 @Component
 public class CloudbreakUsageRequestToCloudbreakUsageConverter extends AbstractConversionServiceAwareConverter<CloudbreakUsageJson, CloudbreakUsage> {

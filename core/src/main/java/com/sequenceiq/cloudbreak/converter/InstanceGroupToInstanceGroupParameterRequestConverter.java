@@ -1,11 +1,12 @@
 package com.sequenceiq.cloudbreak.converter;
 
+import java.util.HashMap;
+
+import org.springframework.stereotype.Component;
+
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceGroupParameterRequest;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
-import org.springframework.stereotype.Component;
-
-import java.util.HashMap;
 
 @Component
 public class InstanceGroupToInstanceGroupParameterRequestConverter

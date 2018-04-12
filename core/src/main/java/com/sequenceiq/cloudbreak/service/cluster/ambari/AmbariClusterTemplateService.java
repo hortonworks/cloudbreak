@@ -1,5 +1,16 @@
 package com.sequenceiq.cloudbreak.service.cluster.ambari;
 
+import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
 import com.google.common.io.CharStreams;
 import com.sequenceiq.ambari.client.services.ClusterService;
 import com.sequenceiq.cloudbreak.blueprint.kerberos.KerberosDetailService;
@@ -7,16 +18,8 @@ import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
-import groovyx.net.http.HttpResponseException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
 
-import javax.inject.Inject;
-import java.io.IOException;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import groovyx.net.http.HttpResponseException;
 
 @Service
 public class AmbariClusterTemplateService {

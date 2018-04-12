@@ -1,13 +1,13 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.termination;
 
+import java.util.List;
+
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackContext;
 import com.sequenceiq.cloudbreak.domain.Stack;
-
-import java.util.List;
 
 public class StackTerminationContext extends StackContext {
 

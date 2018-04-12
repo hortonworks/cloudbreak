@@ -1,13 +1,15 @@
 package com.sequenceiq.cloudbreak.service.decorator;
 
+import java.util.Collection;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Service;
+
 import com.sequenceiq.cloudbreak.api.model.StackResponse;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.decorator.responseprovider.ResponseProvider;
 import com.sequenceiq.cloudbreak.service.decorator.responseprovider.ResponseProviders;
-import org.springframework.stereotype.Service;
-
-import javax.inject.Inject;
-import java.util.Collection;
 
 @Service
 public class StackResponseDecorator {

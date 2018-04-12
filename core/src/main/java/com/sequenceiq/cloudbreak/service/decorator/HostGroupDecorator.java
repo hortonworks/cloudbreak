@@ -1,5 +1,18 @@
 package com.sequenceiq.cloudbreak.service.decorator;
 
+import static org.springframework.util.StringUtils.isEmpty;
+
+import java.util.Collection;
+import java.util.Optional;
+import java.util.Set;
+
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.core.convert.ConversionService;
+import org.springframework.stereotype.Component;
+
 import com.sequenceiq.cloudbreak.api.model.ConstraintJson;
 import com.sequenceiq.cloudbreak.api.model.HostGroupRequest;
 import com.sequenceiq.cloudbreak.api.model.RecipeRequest;
@@ -18,17 +31,6 @@ import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.recipe.RecipeService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.core.convert.ConversionService;
-import org.springframework.stereotype.Component;
-
-import javax.inject.Inject;
-import java.util.Collection;
-import java.util.Optional;
-import java.util.Set;
-
-import static org.springframework.util.StringUtils.isEmpty;
 
 @Component
 public class HostGroupDecorator {

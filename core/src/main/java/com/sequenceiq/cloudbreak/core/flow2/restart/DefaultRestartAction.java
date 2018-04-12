@@ -1,16 +1,19 @@
 package com.sequenceiq.cloudbreak.core.flow2.restart;
 
-import com.sequenceiq.cloudbreak.cloud.reactor.ErrorHandlerAwareReactorEventFactory;
-import com.sequenceiq.cloudbreak.core.flow2.RestartAction;
-import org.springframework.stereotype.Component;
-import reactor.bus.EventBus;
+import static com.sequenceiq.cloudbreak.core.flow2.Flow2Handler.FLOW_CHAIN_ID;
+import static com.sequenceiq.cloudbreak.core.flow2.Flow2Handler.FLOW_ID;
 
-import javax.inject.Inject;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.sequenceiq.cloudbreak.core.flow2.Flow2Handler.FLOW_CHAIN_ID;
-import static com.sequenceiq.cloudbreak.core.flow2.Flow2Handler.FLOW_ID;
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Component;
+
+import com.sequenceiq.cloudbreak.cloud.reactor.ErrorHandlerAwareReactorEventFactory;
+import com.sequenceiq.cloudbreak.core.flow2.RestartAction;
+
+import reactor.bus.EventBus;
 
 @Component("DefaultRestartAction")
 public class DefaultRestartAction implements RestartAction {

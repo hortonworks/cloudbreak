@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.event;
 
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
+
 import reactor.rx.Promise;
 
 public class StackSyncTriggerEvent extends StackEvent {

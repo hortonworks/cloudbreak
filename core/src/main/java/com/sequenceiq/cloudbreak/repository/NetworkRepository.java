@@ -1,13 +1,14 @@
 package com.sequenceiq.cloudbreak.repository;
 
-import com.sequenceiq.cloudbreak.domain.Network;
-import com.sequenceiq.cloudbreak.domain.Topology;
+import java.util.Set;
+
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.security.access.prepost.PostAuthorize;
 
-import java.util.Set;
+import com.sequenceiq.cloudbreak.domain.Network;
+import com.sequenceiq.cloudbreak.domain.Topology;
 
 @EntityType(entityClass = Network.class)
 public interface NetworkRepository extends CrudRepository<Network, Long> {

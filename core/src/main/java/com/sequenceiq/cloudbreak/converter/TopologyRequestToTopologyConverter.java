@@ -1,14 +1,15 @@
 package com.sequenceiq.cloudbreak.converter;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+
+import org.springframework.stereotype.Component;
+
 import com.google.api.client.util.Lists;
 import com.sequenceiq.cloudbreak.api.model.TopologyRequest;
 import com.sequenceiq.cloudbreak.domain.Topology;
 import com.sequenceiq.cloudbreak.domain.TopologyRecord;
-import org.springframework.stereotype.Component;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 
 @Component
 public class TopologyRequestToTopologyConverter extends AbstractConversionServiceAwareConverter<TopologyRequest, Topology> {

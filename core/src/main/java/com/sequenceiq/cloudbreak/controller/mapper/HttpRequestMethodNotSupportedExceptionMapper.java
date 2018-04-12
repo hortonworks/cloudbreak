@@ -1,10 +1,11 @@
 package com.sequenceiq.cloudbreak.controller.mapper;
 
-import com.sequenceiq.cloudbreak.controller.json.ExceptionResult;
-import org.springframework.web.HttpRequestMethodNotSupportedException;
-
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.Provider;
+
+import org.springframework.web.HttpRequestMethodNotSupportedException;
+
+import com.sequenceiq.cloudbreak.controller.json.ExceptionResult;
 
 @Provider
 public class HttpRequestMethodNotSupportedExceptionMapper extends BaseExceptionMapper<HttpRequestMethodNotSupportedException> {

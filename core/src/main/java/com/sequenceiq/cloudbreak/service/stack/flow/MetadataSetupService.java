@@ -1,5 +1,13 @@
 package com.sequenceiq.cloudbreak.service.stack.flow;
 
+import java.util.Calendar;
+import java.util.Objects;
+import java.util.Set;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Service;
+
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.model.InstanceMetadataType;
 import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
@@ -12,12 +20,6 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderMetadataAdapter;
-import org.springframework.stereotype.Service;
-
-import javax.inject.Inject;
-import java.util.Calendar;
-import java.util.Objects;
-import java.util.Set;
 
 @Service
 public class MetadataSetupService {

@@ -1,11 +1,12 @@
 package com.sequenceiq.cloudbreak.service.cluster.ambari;
 
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Service;
+
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
-import org.springframework.stereotype.Service;
-
-import javax.inject.Inject;
 
 @Service
 public class AmbariUserHandler {

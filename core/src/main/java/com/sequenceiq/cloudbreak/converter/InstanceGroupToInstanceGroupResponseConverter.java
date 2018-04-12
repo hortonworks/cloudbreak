@@ -1,5 +1,10 @@
 package com.sequenceiq.cloudbreak.converter;
 
+import java.util.Set;
+
+import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.stereotype.Component;
+
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupResponse;
 import com.sequenceiq.cloudbreak.api.model.InstanceMetaDataJson;
 import com.sequenceiq.cloudbreak.api.model.SecurityGroupResponse;
@@ -7,10 +12,6 @@ import com.sequenceiq.cloudbreak.api.model.TemplateResponse;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.json.Json;
-import org.springframework.core.convert.TypeDescriptor;
-import org.springframework.stereotype.Component;
-
-import java.util.Set;
 
 @Component
 public class InstanceGroupToInstanceGroupResponseConverter extends AbstractConversionServiceAwareConverter<InstanceGroup, InstanceGroupResponse> {

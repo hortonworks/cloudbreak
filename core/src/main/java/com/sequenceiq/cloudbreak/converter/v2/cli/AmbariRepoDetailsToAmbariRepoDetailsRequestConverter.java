@@ -1,11 +1,12 @@
 package com.sequenceiq.cloudbreak.converter.v2.cli;
 
-import com.sequenceiq.cloudbreak.api.model.AmbariRepoDetailsJson;
-import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
-import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+
+import com.sequenceiq.cloudbreak.api.model.AmbariRepoDetailsJson;
+import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
+import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 
 @Component
 public class AmbariRepoDetailsToAmbariRepoDetailsRequestConverter

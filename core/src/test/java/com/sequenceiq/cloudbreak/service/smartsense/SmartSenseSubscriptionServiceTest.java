@@ -1,10 +1,13 @@
 package com.sequenceiq.cloudbreak.service.smartsense;
 
-import com.sequenceiq.cloudbreak.TestUtil;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
-import com.sequenceiq.cloudbreak.domain.SmartSenseSubscription;
-import com.sequenceiq.cloudbreak.repository.SmartSenseSubscriptionRepository;
-import com.sequenceiq.cloudbreak.service.AuthorizationService;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.mockito.MockitoAnnotations.initMocks;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -16,13 +19,11 @@ import org.mockito.Mock;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
+import com.sequenceiq.cloudbreak.TestUtil;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.domain.SmartSenseSubscription;
+import com.sequenceiq.cloudbreak.repository.SmartSenseSubscriptionRepository;
+import com.sequenceiq.cloudbreak.service.AuthorizationService;
 
 public class SmartSenseSubscriptionServiceTest {
 

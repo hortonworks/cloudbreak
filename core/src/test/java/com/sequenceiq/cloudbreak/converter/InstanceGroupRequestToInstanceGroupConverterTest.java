@@ -1,10 +1,10 @@
 package com.sequenceiq.cloudbreak.converter;
 
-import com.sequenceiq.cloudbreak.TestUtil;
-import com.sequenceiq.cloudbreak.api.model.InstanceGroupRequest;
-import com.sequenceiq.cloudbreak.domain.InstanceGroup;
-import com.sequenceiq.cloudbreak.service.securitygroup.SecurityGroupService;
-import com.sequenceiq.cloudbreak.service.template.TemplateService;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Matchers.anyLong;
+
+import java.util.Collections;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
@@ -12,10 +12,11 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.security.access.AccessDeniedException;
 
-import java.util.Collections;
-
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.anyLong;
+import com.sequenceiq.cloudbreak.TestUtil;
+import com.sequenceiq.cloudbreak.api.model.InstanceGroupRequest;
+import com.sequenceiq.cloudbreak.domain.InstanceGroup;
+import com.sequenceiq.cloudbreak.service.securitygroup.SecurityGroupService;
+import com.sequenceiq.cloudbreak.service.template.TemplateService;
 
 public class InstanceGroupRequestToInstanceGroupConverterTest extends AbstractJsonConverterTest<InstanceGroupRequest> {
 

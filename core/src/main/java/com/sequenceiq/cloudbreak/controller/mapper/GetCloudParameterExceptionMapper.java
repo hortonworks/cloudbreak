@@ -1,10 +1,10 @@
 package com.sequenceiq.cloudbreak.controller.mapper;
 
-import com.sequenceiq.cloudbreak.service.stack.GetCloudParameterException;
+import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
 
 import javax.ws.rs.core.Response;
 
-import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
+import com.sequenceiq.cloudbreak.service.stack.GetCloudParameterException;
 
 public class GetCloudParameterExceptionMapper extends BaseExceptionMapper<GetCloudParameterException> {
 

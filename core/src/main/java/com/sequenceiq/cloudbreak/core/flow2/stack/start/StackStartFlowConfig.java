@@ -1,11 +1,5 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.start;
 
-import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration;
-import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration.Transition.Builder;
-import org.springframework.stereotype.Component;
-
-import java.util.List;
-
 import static com.sequenceiq.cloudbreak.core.flow2.stack.start.StackStartEvent.COLLECT_METADATA_FAILED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.start.StackStartEvent.COLLECT_METADATA_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.start.StackStartEvent.STACK_START_EVENT;
@@ -19,6 +13,13 @@ import static com.sequenceiq.cloudbreak.core.flow2.stack.start.StackStartState.I
 import static com.sequenceiq.cloudbreak.core.flow2.stack.start.StackStartState.START_FAILED_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.start.StackStartState.START_FINISHED_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.start.StackStartState.START_STATE;
+
+import java.util.List;
+
+import org.springframework.stereotype.Component;
+
+import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration;
+import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration.Transition.Builder;
 
 @Component
 public class StackStartFlowConfig extends AbstractFlowConfiguration<StackStartState, StackStartEvent> {

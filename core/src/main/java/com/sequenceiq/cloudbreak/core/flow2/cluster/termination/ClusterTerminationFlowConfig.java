@@ -1,12 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.termination;
 
 
-import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration;
-import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration.Transition.Builder;
-import org.springframework.stereotype.Component;
-
-import java.util.List;
-
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.termination.ClusterTerminationEvent.DISABLE_KERBEROS_FAILED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.termination.ClusterTerminationEvent.DISABLE_KERBEROS_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.termination.ClusterTerminationEvent.FAILURE_EVENT;
@@ -25,6 +19,13 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.termination.ClusterTe
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.termination.ClusterTerminationState.FINAL_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.termination.ClusterTerminationState.INIT_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.termination.ClusterTerminationState.PREPARE_CLUSTER_STATE;
+
+import java.util.List;
+
+import org.springframework.stereotype.Component;
+
+import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration;
+import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration.Transition.Builder;
 
 @Component
 public class ClusterTerminationFlowConfig extends AbstractFlowConfiguration<ClusterTerminationState, ClusterTerminationEvent> {

@@ -1,5 +1,14 @@
 package com.sequenceiq.cloudbreak.service.decorator.responseprovider;
 
+import java.util.HashSet;
+import java.util.Set;
+
+import javax.inject.Inject;
+
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.convert.ConversionService;
+import org.springframework.stereotype.Component;
+
 import com.sequenceiq.cloudbreak.api.model.HardwareInfoResponse;
 import com.sequenceiq.cloudbreak.api.model.HostMetadataResponse;
 import com.sequenceiq.cloudbreak.api.model.InstanceMetaDataJson;
@@ -10,13 +19,6 @@ import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.core.convert.ConversionService;
-import org.springframework.stereotype.Component;
-
-import javax.inject.Inject;
-import java.util.HashSet;
-import java.util.Set;
 
 @Component
 public class StackResponseHardwareInfoProvider implements ResponseProvider {

@@ -1,8 +1,5 @@
 package com.sequenceiq.cloudbreak.service.usages;
 
-import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
-import org.springframework.stereotype.Service;
-
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -12,6 +9,10 @@ import java.time.ZonedDateTime;
 import java.time.temporal.Temporal;
 import java.util.Date;
 import java.util.Optional;
+
+import org.springframework.stereotype.Service;
+
+import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
 
 @Service
 public class UsageTimeService {

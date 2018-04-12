@@ -1,9 +1,9 @@
 package com.sequenceiq.cloudbreak.controller.mapper;
 
-import org.springframework.dao.DataIntegrityViolationException;
-
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.Provider;
+
+import org.springframework.dao.DataIntegrityViolationException;
 
 @Provider
 public class DataIntegrityViolationExceptionMapper extends SendNotificationExceptionMapper<DataIntegrityViolationException> {

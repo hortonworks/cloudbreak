@@ -1,9 +1,10 @@
 package com.sequenceiq.cloudbreak.repository;
 
-import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
+import java.util.Date;
+
 import org.springframework.data.jpa.domain.Specification;
 
-import java.util.Date;
+import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
 
 public class CloudbreakUsageSpecifications {
     private CloudbreakUsageSpecifications() {

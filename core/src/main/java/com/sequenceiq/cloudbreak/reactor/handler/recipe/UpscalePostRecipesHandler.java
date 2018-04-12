@@ -1,15 +1,17 @@
 package com.sequenceiq.cloudbreak.reactor.handler.recipe;
 
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Component;
+
 import com.sequenceiq.cloudbreak.core.cluster.AmbariClusterUpscaleService;
 import com.sequenceiq.cloudbreak.reactor.api.event.EventSelectorUtil;
 import com.sequenceiq.cloudbreak.reactor.api.event.recipe.UpscalePostRecipesRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.recipe.UpscalePostRecipesResult;
 import com.sequenceiq.cloudbreak.reactor.handler.ReactorEventHandler;
-import org.springframework.stereotype.Component;
+
 import reactor.bus.Event;
 import reactor.bus.EventBus;
-
-import javax.inject.Inject;
 
 @Component
 public class UpscalePostRecipesHandler implements ReactorEventHandler<UpscalePostRecipesRequest> {

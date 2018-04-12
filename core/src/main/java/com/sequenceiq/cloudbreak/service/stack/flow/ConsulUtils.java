@@ -1,5 +1,12 @@
 package com.sequenceiq.cloudbreak.service.stack.flow;
 
+import java.util.Collections;
+import java.util.List;
+
+import org.apache.commons.codec.binary.Base64;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.ecwid.consul.v1.ConsulClient;
 import com.ecwid.consul.v1.OperationException;
 import com.ecwid.consul.v1.QueryParams;
@@ -7,12 +14,6 @@ import com.ecwid.consul.v1.catalog.CatalogClient;
 import com.ecwid.consul.v1.catalog.model.CatalogService;
 import com.ecwid.consul.v1.kv.KeyValueClient;
 import com.ecwid.consul.v1.kv.model.GetValue;
-import org.apache.commons.codec.binary.Base64;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.Collections;
-import java.util.List;
 
 public final class ConsulUtils {
 

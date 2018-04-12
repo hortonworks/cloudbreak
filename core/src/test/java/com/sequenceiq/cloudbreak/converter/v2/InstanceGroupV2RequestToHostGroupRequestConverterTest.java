@@ -1,12 +1,9 @@
 package com.sequenceiq.cloudbreak.converter.v2;
 
-import com.sequenceiq.cloudbreak.api.model.HostGroupRequest;
-import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
-import com.sequenceiq.cloudbreak.api.model.RecoveryMode;
-import com.sequenceiq.cloudbreak.api.model.v2.InstanceGroupV2Request;
-import com.sequenceiq.cloudbreak.api.model.v2.SecurityGroupV2Request;
-import com.sequenceiq.cloudbreak.api.model.v2.TemplateV2Request;
-import com.sequenceiq.cloudbreak.converter.AbstractEntityConverterTest;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+
 import org.assertj.core.util.Sets;
 import org.junit.Assert;
 import org.junit.Before;
@@ -14,9 +11,13 @@ import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.MockitoAnnotations;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
+import com.sequenceiq.cloudbreak.api.model.HostGroupRequest;
+import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
+import com.sequenceiq.cloudbreak.api.model.RecoveryMode;
+import com.sequenceiq.cloudbreak.api.model.v2.InstanceGroupV2Request;
+import com.sequenceiq.cloudbreak.api.model.v2.SecurityGroupV2Request;
+import com.sequenceiq.cloudbreak.api.model.v2.TemplateV2Request;
+import com.sequenceiq.cloudbreak.converter.AbstractEntityConverterTest;
 
 public class InstanceGroupV2RequestToHostGroupRequestConverterTest extends AbstractEntityConverterTest<InstanceGroupV2Request> {
 

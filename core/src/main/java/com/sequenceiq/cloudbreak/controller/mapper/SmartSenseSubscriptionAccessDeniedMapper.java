@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.controller.mapper;
 
-import com.sequenceiq.cloudbreak.service.smartsense.SmartSenseSubscriptionAccessDeniedException;
-
 import javax.ws.rs.core.Response;
+
+import com.sequenceiq.cloudbreak.service.smartsense.SmartSenseSubscriptionAccessDeniedException;
 
 public class SmartSenseSubscriptionAccessDeniedMapper extends BaseExceptionMapper<SmartSenseSubscriptionAccessDeniedException> {
 

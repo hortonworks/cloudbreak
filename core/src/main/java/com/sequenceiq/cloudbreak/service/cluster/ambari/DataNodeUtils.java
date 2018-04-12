@@ -1,13 +1,13 @@
 package com.sequenceiq.cloudbreak.service.cluster.ambari;
 
+import static java.util.Collections.reverseOrder;
+
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
-
-import static java.util.Collections.reverseOrder;
 
 public final class DataNodeUtils {
 

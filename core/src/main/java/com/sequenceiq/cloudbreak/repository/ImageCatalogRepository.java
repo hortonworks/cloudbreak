@@ -1,12 +1,13 @@
 package com.sequenceiq.cloudbreak.repository;
 
-import com.sequenceiq.cloudbreak.domain.ImageCatalog;
+import java.util.List;
+
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.security.access.prepost.PostAuthorize;
 
-import java.util.List;
+import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 
 @EntityType(entityClass = ImageCatalog.class)
 public interface ImageCatalogRepository extends CrudRepository<ImageCatalog, Long> {

@@ -1,14 +1,15 @@
 package com.sequenceiq.cloudbreak.conf;
 
-import com.sequenceiq.cloudbreak.client.IdentityClient;
-import com.sequenceiq.cloudbreak.common.service.token.CachedRemoteTokenService;
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.oauth2.provider.token.ResourceServerTokenServices;
 
-import javax.inject.Inject;
-import javax.inject.Named;
+import com.sequenceiq.cloudbreak.client.IdentityClient;
+import com.sequenceiq.cloudbreak.common.service.token.CachedRemoteTokenService;
 
 @Configuration
 public class RemoteTokenConfig {

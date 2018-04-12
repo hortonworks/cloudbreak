@@ -1,10 +1,11 @@
 package com.sequenceiq.cloudbreak.controller.advice;
 
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ModelAttribute;
 
-import javax.servlet.http.HttpServletRequest;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 
 @ControllerAdvice
 public class UserContextControllerAdvice {

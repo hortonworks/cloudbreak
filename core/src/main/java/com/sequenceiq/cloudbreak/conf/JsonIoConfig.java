@@ -1,22 +1,24 @@
 package com.sequenceiq.cloudbreak.conf;
 
-import com.cedarsoftware.util.io.JsonReader;
-import com.cedarsoftware.util.io.JsonReader.CollectionFactory;
-import com.cedarsoftware.util.io.JsonReader.MapFactory;
-import com.cedarsoftware.util.io.JsonWriter;
-import com.cedarsoftware.util.io.JsonWriter.JsonClassWriter;
-import com.cedarsoftware.util.io.JsonWriter.JsonClassWriterBase;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import static com.cedarsoftware.util.io.JsonWriter.CUSTOM_WRITER_MAP;
 
-import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.cedarsoftware.util.io.JsonWriter.CUSTOM_WRITER_MAP;
+import javax.annotation.PostConstruct;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+import com.cedarsoftware.util.io.JsonReader;
+import com.cedarsoftware.util.io.JsonReader.CollectionFactory;
+import com.cedarsoftware.util.io.JsonReader.MapFactory;
+import com.cedarsoftware.util.io.JsonWriter;
+import com.cedarsoftware.util.io.JsonWriter.JsonClassWriter;
+import com.cedarsoftware.util.io.JsonWriter.JsonClassWriterBase;
 
 @Configuration
 public class JsonIoConfig {

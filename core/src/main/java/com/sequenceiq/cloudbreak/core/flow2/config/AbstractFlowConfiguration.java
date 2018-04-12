@@ -1,19 +1,15 @@
 package com.sequenceiq.cloudbreak.core.flow2.config;
 
-import com.sequenceiq.cloudbreak.core.flow2.AbstractAction;
-import com.sequenceiq.cloudbreak.core.flow2.DefaultFlowTriggerCondition;
-import com.sequenceiq.cloudbreak.core.flow2.EventConverterAdapter;
-import com.sequenceiq.cloudbreak.core.flow2.Flow;
-import com.sequenceiq.cloudbreak.core.flow2.FlowAdapter;
-import com.sequenceiq.cloudbreak.core.flow2.FlowEvent;
-import com.sequenceiq.cloudbreak.core.flow2.FlowFinalizeAction;
-import com.sequenceiq.cloudbreak.core.flow2.FlowState;
-import com.sequenceiq.cloudbreak.core.flow2.FlowTriggerCondition;
-import com.sequenceiq.cloudbreak.core.flow2.MessageFactory;
-import com.sequenceiq.cloudbreak.core.flow2.RestartAction;
-import com.sequenceiq.cloudbreak.core.flow2.StateConverterAdapter;
-import com.sequenceiq.cloudbreak.core.flow2.restart.DefaultRestartAction;
-import com.sequenceiq.cloudbreak.structuredevent.FlowStructuredEventHandler;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+
+import javax.annotation.PostConstruct;
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -37,14 +33,20 @@ import org.springframework.statemachine.listener.StateMachineListener;
 import org.springframework.statemachine.listener.StateMachineListenerAdapter;
 import org.springframework.statemachine.state.State;
 
-import javax.annotation.PostConstruct;
-import javax.inject.Inject;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import com.sequenceiq.cloudbreak.core.flow2.AbstractAction;
+import com.sequenceiq.cloudbreak.core.flow2.DefaultFlowTriggerCondition;
+import com.sequenceiq.cloudbreak.core.flow2.EventConverterAdapter;
+import com.sequenceiq.cloudbreak.core.flow2.Flow;
+import com.sequenceiq.cloudbreak.core.flow2.FlowAdapter;
+import com.sequenceiq.cloudbreak.core.flow2.FlowEvent;
+import com.sequenceiq.cloudbreak.core.flow2.FlowFinalizeAction;
+import com.sequenceiq.cloudbreak.core.flow2.FlowState;
+import com.sequenceiq.cloudbreak.core.flow2.FlowTriggerCondition;
+import com.sequenceiq.cloudbreak.core.flow2.MessageFactory;
+import com.sequenceiq.cloudbreak.core.flow2.RestartAction;
+import com.sequenceiq.cloudbreak.core.flow2.StateConverterAdapter;
+import com.sequenceiq.cloudbreak.core.flow2.restart.DefaultRestartAction;
+import com.sequenceiq.cloudbreak.structuredevent.FlowStructuredEventHandler;
 
 public abstract class AbstractFlowConfiguration<S extends FlowState, E extends FlowEvent> implements FlowConfiguration<E> {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractFlowConfiguration.class);

@@ -1,9 +1,10 @@
 package com.sequenceiq.cloudbreak.converter;
 
-import com.sequenceiq.cloudbreak.api.model.FailurePolicyResponse;
-import com.sequenceiq.cloudbreak.domain.FailurePolicy;
 import org.junit.Before;
 import org.junit.Test;
+
+import com.sequenceiq.cloudbreak.api.model.FailurePolicyResponse;
+import com.sequenceiq.cloudbreak.domain.FailurePolicy;
 
 public class FailurePolicyRequestToFailurePolicyConverterTest extends AbstractJsonConverterTest<FailurePolicy> {
 

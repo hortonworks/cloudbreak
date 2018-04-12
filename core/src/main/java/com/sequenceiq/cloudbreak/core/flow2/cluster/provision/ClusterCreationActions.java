@@ -1,5 +1,13 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.provision;
 
+import java.util.Map;
+
+import javax.inject.Inject;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.statemachine.action.Action;
+
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
 import com.sequenceiq.cloudbreak.common.type.MetricType;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.AbstractClusterAction;
@@ -24,12 +32,6 @@ import com.sequenceiq.cloudbreak.reactor.api.event.proxy.RegisterProxyRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.proxy.RegisterProxySuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.recipe.UploadRecipesRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.recipe.UploadRecipesSuccess;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.statemachine.action.Action;
-
-import javax.inject.Inject;
-import java.util.Map;
 
 @Configuration
 public class ClusterCreationActions {

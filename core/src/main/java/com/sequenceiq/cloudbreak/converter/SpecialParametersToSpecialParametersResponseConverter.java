@@ -1,9 +1,10 @@
 package com.sequenceiq.cloudbreak.converter;
 
-import com.sequenceiq.cloudbreak.api.model.SpecialParameters;
+import java.util.Map;
+
 import org.springframework.stereotype.Component;
 
-import java.util.Map;
+import com.sequenceiq.cloudbreak.api.model.SpecialParameters;
 
 @Component
 public class SpecialParametersToSpecialParametersResponseConverter extends AbstractConversionServiceAwareConverter<SpecialParameters, Map<String, Boolean>> {

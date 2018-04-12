@@ -1,18 +1,5 @@
 package com.sequenceiq.cloudbreak.service.network;
 
-import com.sequenceiq.cloudbreak.api.model.EndpointRule;
-import com.sequenceiq.cloudbreak.api.model.EndpointRule.Action;
-import com.sequenceiq.cloudbreak.api.model.ExposedService;
-import com.sequenceiq.cloudbreak.api.model.Port;
-import com.sequenceiq.cloudbreak.domain.InstanceGroup;
-import com.sequenceiq.cloudbreak.domain.SecurityRule;
-import com.sequenceiq.cloudbreak.domain.Stack;
-
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Optional;
-
 import static com.sequenceiq.cloudbreak.api.model.ExposedService.ACCUMULO_MASTER;
 import static com.sequenceiq.cloudbreak.api.model.ExposedService.ACCUMULO_TSERVER;
 import static com.sequenceiq.cloudbreak.api.model.ExposedService.AMBARI;
@@ -44,6 +31,19 @@ import static com.sequenceiq.cloudbreak.api.model.ExposedService.SSH;
 import static com.sequenceiq.cloudbreak.api.model.ExposedService.STORM;
 import static com.sequenceiq.cloudbreak.api.model.ExposedService.ZEPPELIN_UI;
 import static com.sequenceiq.cloudbreak.api.model.ExposedService.ZEPPELIN_WEB_SOCKET;
+
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Optional;
+
+import com.sequenceiq.cloudbreak.api.model.EndpointRule;
+import com.sequenceiq.cloudbreak.api.model.EndpointRule.Action;
+import com.sequenceiq.cloudbreak.api.model.ExposedService;
+import com.sequenceiq.cloudbreak.api.model.Port;
+import com.sequenceiq.cloudbreak.domain.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.SecurityRule;
+import com.sequenceiq.cloudbreak.domain.Stack;
 
 public final class NetworkUtils {
 

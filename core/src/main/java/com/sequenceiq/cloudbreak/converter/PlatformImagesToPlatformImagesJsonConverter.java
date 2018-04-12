@@ -1,15 +1,16 @@
 package com.sequenceiq.cloudbreak.converter;
 
-import com.sequenceiq.cloudbreak.api.model.PlatformImagesJson;
-import com.sequenceiq.cloudbreak.cloud.model.CustomImage;
-import com.sequenceiq.cloudbreak.cloud.model.Platform;
-import com.sequenceiq.cloudbreak.cloud.model.PlatformImages;
-import org.springframework.stereotype.Component;
-
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+
+import org.springframework.stereotype.Component;
+
+import com.sequenceiq.cloudbreak.api.model.PlatformImagesJson;
+import com.sequenceiq.cloudbreak.cloud.model.CustomImage;
+import com.sequenceiq.cloudbreak.cloud.model.Platform;
+import com.sequenceiq.cloudbreak.cloud.model.PlatformImages;
 
 @Component
 public class PlatformImagesToPlatformImagesJsonConverter extends AbstractConversionServiceAwareConverter<PlatformImages, PlatformImagesJson> {

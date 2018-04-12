@@ -1,9 +1,10 @@
 package com.sequenceiq.cloudbreak.converter;
 
+import org.springframework.stereotype.Component;
+
 import com.sequenceiq.cloudbreak.api.model.OrchestratorResponse;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.json.Json;
-import org.springframework.stereotype.Component;
 
 @Component
 public class OrchestratorToOrchestratorResponseConverter extends AbstractConversionServiceAwareConverter<Orchestrator, OrchestratorResponse> {

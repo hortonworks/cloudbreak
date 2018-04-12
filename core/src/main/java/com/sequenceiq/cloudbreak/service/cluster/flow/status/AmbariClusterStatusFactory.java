@@ -1,10 +1,5 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow.status;
 
-import com.sequenceiq.ambari.client.AmbariClient;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumSet;
@@ -14,6 +9,12 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
+import com.sequenceiq.ambari.client.AmbariClient;
 
 @Component
 public class AmbariClusterStatusFactory {

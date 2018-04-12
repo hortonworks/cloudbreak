@@ -1,12 +1,12 @@
 package com.sequenceiq.cloudbreak.converter;
 
-import com.google.common.collect.ObjectArrays;
-import com.sequenceiq.cloudbreak.TestException;
+import static org.junit.Assert.assertFalse;
 
 import java.lang.reflect.Field;
 import java.util.List;
 
-import static org.junit.Assert.assertFalse;
+import com.google.common.collect.ObjectArrays;
+import com.sequenceiq.cloudbreak.TestException;
 
 public class AbstractConverterTest {
     public void assertAllFieldsNotNull(Object obj) {

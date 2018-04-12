@@ -1,5 +1,15 @@
 package com.sequenceiq.cloudbreak.converter.v2.cli;
 
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
+
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
 import com.sequenceiq.cloudbreak.api.model.AmbariRepoDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.KerberosRequest;
@@ -9,14 +19,6 @@ import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.service.ClusterComponentConfigProvider;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
-
-import javax.inject.Inject;
-import java.io.IOException;
-import java.util.HashSet;
-import java.util.Set;
 
 @Component
 public class ClusterToAmbariV2RequestRequestConverter extends AbstractConversionServiceAwareConverter<Cluster, AmbariV2Request> {

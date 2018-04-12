@@ -1,11 +1,12 @@
 package com.sequenceiq.cloudbreak.service;
 
-import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
-import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
+import static com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup.CANCELLED;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup.CANCELLED;
+import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
+import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
 
 public abstract class ClusterBasedStatusCheckerTask<T extends StackContext> extends SimpleStatusCheckerTask<T> {
 

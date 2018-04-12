@@ -1,11 +1,12 @@
 package com.sequenceiq.cloudbreak.controller.mapper;
 
-import com.sequenceiq.cloudbreak.controller.json.ValidationResult;
+import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.ext.Provider;
+
 import org.springframework.messaging.handler.annotation.support.MethodArgumentNotValidException;
 import org.springframework.validation.FieldError;
 
-import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.ext.Provider;
+import com.sequenceiq.cloudbreak.controller.json.ValidationResult;
 
 @Provider
 public class MethodArgumentNotValidExceptionMapper extends BaseExceptionMapper<MethodArgumentNotValidException> {

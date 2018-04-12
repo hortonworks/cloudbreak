@@ -1,18 +1,20 @@
 package com.sequenceiq.cloudbreak.structuredevent.db;
 
-import com.google.common.collect.Lists;
-import com.sequenceiq.cloudbreak.domain.StructuredEventEntity;
-import com.sequenceiq.cloudbreak.structuredevent.StructuredEventService;
-import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEvent;
-import org.springframework.core.convert.ConversionService;
-import org.springframework.core.convert.TypeDescriptor;
-import org.springframework.stereotype.Component;
-
-import javax.inject.Inject;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+
+import javax.inject.Inject;
+
+import org.springframework.core.convert.ConversionService;
+import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.stereotype.Component;
+
+import com.google.common.collect.Lists;
+import com.sequenceiq.cloudbreak.domain.StructuredEventEntity;
+import com.sequenceiq.cloudbreak.structuredevent.StructuredEventService;
+import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEvent;
 
 @Component
 public class StructuredEventDBService implements StructuredEventService {

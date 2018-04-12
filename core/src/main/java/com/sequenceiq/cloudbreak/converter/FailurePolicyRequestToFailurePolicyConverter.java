@@ -1,8 +1,9 @@
 package com.sequenceiq.cloudbreak.converter;
 
+import org.springframework.stereotype.Component;
+
 import com.sequenceiq.cloudbreak.api.model.FailurePolicyRequest;
 import com.sequenceiq.cloudbreak.domain.FailurePolicy;
-import org.springframework.stereotype.Component;
 
 @Component
 public class FailurePolicyRequestToFailurePolicyConverter extends AbstractConversionServiceAwareConverter<FailurePolicyRequest, FailurePolicy> {

@@ -1,12 +1,13 @@
 package com.sequenceiq.cloudbreak.repository;
 
-import com.sequenceiq.cloudbreak.common.type.ComponentType;
-import com.sequenceiq.cloudbreak.domain.ClusterComponent;
+import java.util.Set;
+
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
-import java.util.Set;
+import com.sequenceiq.cloudbreak.common.type.ComponentType;
+import com.sequenceiq.cloudbreak.domain.ClusterComponent;
 
 @EntityType(entityClass = ClusterComponent.class)
 public interface ClusterComponentRepository extends CrudRepository<ClusterComponent, Long> {

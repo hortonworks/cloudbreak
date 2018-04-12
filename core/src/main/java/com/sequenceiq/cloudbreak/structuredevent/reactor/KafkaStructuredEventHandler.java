@@ -1,9 +1,9 @@
 package com.sequenceiq.cloudbreak.structuredevent.reactor;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sequenceiq.cloudbreak.reactor.handler.ReactorEventHandler;
-import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEvent;
+import java.util.concurrent.ExecutionException;
+
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -11,10 +11,13 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Component;
 import org.springframework.util.concurrent.ListenableFuture;
-import reactor.bus.Event;
 
-import javax.inject.Inject;
-import java.util.concurrent.ExecutionException;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sequenceiq.cloudbreak.reactor.handler.ReactorEventHandler;
+import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEvent;
+
+import reactor.bus.Event;
 
 @Component
 public class KafkaStructuredEventHandler<T extends StructuredEvent> implements ReactorEventHandler<T> {

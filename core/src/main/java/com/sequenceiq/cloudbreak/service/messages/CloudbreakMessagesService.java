@@ -1,11 +1,12 @@
 package com.sequenceiq.cloudbreak.service.messages;
 
-import org.springframework.context.MessageSource;
-import org.springframework.stereotype.Component;
-
-import javax.inject.Inject;
 import java.util.Collection;
 import java.util.Locale;
+
+import javax.inject.Inject;
+
+import org.springframework.context.MessageSource;
+import org.springframework.stereotype.Component;
 
 /**
  * Wraps a message source used by the cloudbreak core.

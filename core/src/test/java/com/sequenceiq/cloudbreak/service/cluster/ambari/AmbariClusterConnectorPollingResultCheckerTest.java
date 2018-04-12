@@ -1,14 +1,15 @@
 package com.sequenceiq.cloudbreak.service.cluster.ambari;
 
-import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
-import com.sequenceiq.cloudbreak.core.ClusterException;
-import com.sequenceiq.cloudbreak.service.PollingResult;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.MockitoJUnitRunner;
+
+import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
+import com.sequenceiq.cloudbreak.core.ClusterException;
+import com.sequenceiq.cloudbreak.service.PollingResult;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AmbariClusterConnectorPollingResultCheckerTest {

@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.service.cluster.ambari;
 
-import com.sequenceiq.cloudbreak.TestUtil;
-import com.sequenceiq.cloudbreak.domain.Cluster;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
@@ -9,6 +7,9 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.MockitoJUnitRunner;
+
+import com.sequenceiq.cloudbreak.TestUtil;
+import com.sequenceiq.cloudbreak.domain.Cluster;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AmbariSecurityConfigProviderTest {

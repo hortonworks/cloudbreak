@@ -1,5 +1,14 @@
 package com.sequenceiq.cloudbreak.conf;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.util.Properties;
+
+import javax.inject.Inject;
+import javax.sql.DataSource;
+
 import org.apache.commons.io.Charsets;
 import org.apache.ibatis.migration.ConnectionProvider;
 import org.apache.ibatis.migration.DataSourceConnectionProvider;
@@ -13,14 +22,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
-
-import javax.inject.Inject;
-import javax.sql.DataSource;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.util.Properties;
 
 @Configuration
 public class DatabaseMigrationConfig {

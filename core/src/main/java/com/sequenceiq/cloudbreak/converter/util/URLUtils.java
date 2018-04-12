@@ -1,9 +1,9 @@
 package com.sequenceiq.cloudbreak.converter.util;
 
-import org.apache.commons.io.IOUtils;
-
 import java.io.IOException;
 import java.net.URL;
+
+import org.apache.commons.io.IOUtils;
 
 public class URLUtils {
 

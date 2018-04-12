@@ -1,5 +1,13 @@
 package com.sequenceiq.cloudbreak.controller;
 
+import java.util.Set;
+
+import javax.inject.Inject;
+import javax.inject.Named;
+
+import org.springframework.core.convert.ConversionService;
+import org.springframework.core.convert.TypeDescriptor;
+
 import com.sequenceiq.cloudbreak.api.endpoint.v1.LdapConfigEndpoint;
 import com.sequenceiq.cloudbreak.api.model.ldap.LDAPTestRequest;
 import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigRequest;
@@ -11,12 +19,6 @@ import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.controller.validation.ldapconfig.LdapConfigValidator;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
-import org.springframework.core.convert.ConversionService;
-import org.springframework.core.convert.TypeDescriptor;
-
-import javax.inject.Inject;
-import javax.inject.Named;
-import java.util.Set;
 
 public class LdapController extends NotificationController implements LdapConfigEndpoint {
 

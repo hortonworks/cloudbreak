@@ -1,13 +1,15 @@
 package com.sequenceiq.cloudbreak.core.bootstrap.service.host;
 
-import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
-import com.sequenceiq.cloudbreak.service.CloudbreakException;
+import java.util.Map;
+
+import javax.annotation.Resource;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
-import java.util.Map;
+import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
+import com.sequenceiq.cloudbreak.service.CloudbreakException;
 
 @Component
 public class HostOrchestratorResolver {

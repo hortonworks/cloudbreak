@@ -1,20 +1,22 @@
 package com.sequenceiq.cloudbreak.service.stack.resource.definition.credential;
 
-import com.sequenceiq.cloudbreak.cloud.model.Platform;
-import com.sequenceiq.cloudbreak.service.stack.resource.definition.MissingParameterException;
-import com.sequenceiq.cloudbreak.service.stack.resource.definition.ResourceDefinitionService;
-import com.sequenceiq.cloudbreak.util.JsonUtil;
-import org.jasypt.encryption.pbe.PBEStringCleanablePasswordEncryptor;
-import org.jasypt.exceptions.EncryptionOperationNotPossibleException;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.stereotype.Service;
-
-import javax.inject.Inject;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.inject.Inject;
+
+import org.jasypt.encryption.pbe.PBEStringCleanablePasswordEncryptor;
+import org.jasypt.exceptions.EncryptionOperationNotPossibleException;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Service;
+
+import com.sequenceiq.cloudbreak.cloud.model.Platform;
+import com.sequenceiq.cloudbreak.service.stack.resource.definition.MissingParameterException;
+import com.sequenceiq.cloudbreak.service.stack.resource.definition.ResourceDefinitionService;
+import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 @Service
 public class CredentialDefinitionService {

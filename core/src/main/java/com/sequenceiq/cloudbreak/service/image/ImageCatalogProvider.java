@@ -1,10 +1,11 @@
 package com.sequenceiq.cloudbreak.service.image;
 
-import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV2;
-import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Service;
 
-import javax.inject.Inject;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV2;
+import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 
 @Service
 public class ImageCatalogProvider {

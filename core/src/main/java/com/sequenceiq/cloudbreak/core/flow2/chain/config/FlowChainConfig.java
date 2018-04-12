@@ -1,14 +1,16 @@
 package com.sequenceiq.cloudbreak.core.flow2.chain.config;
 
-import com.google.common.collect.ImmutableMap;
-import com.sequenceiq.cloudbreak.core.flow2.chain.FlowEventChainFactory;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-
-import javax.annotation.Resource;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.annotation.Resource;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+import com.google.common.collect.ImmutableMap;
+import com.sequenceiq.cloudbreak.core.flow2.chain.FlowEventChainFactory;
 
 @Configuration
 public class FlowChainConfig {

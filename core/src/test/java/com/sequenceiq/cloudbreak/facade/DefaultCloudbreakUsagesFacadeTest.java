@@ -1,11 +1,14 @@
 package com.sequenceiq.cloudbreak.facade;
 
-import com.sequenceiq.cloudbreak.TestUtil;
-import com.sequenceiq.cloudbreak.api.model.CloudbreakUsageJson;
-import com.sequenceiq.cloudbreak.domain.CbUsageFilterParameters;
-import com.sequenceiq.cloudbreak.domain.CbUsageFilterParameters.Builder;
-import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
-import com.sequenceiq.cloudbreak.service.usages.CloudbreakUsagesRetrievalService;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyObject;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -14,14 +17,12 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import com.sequenceiq.cloudbreak.TestUtil;
+import com.sequenceiq.cloudbreak.api.model.CloudbreakUsageJson;
+import com.sequenceiq.cloudbreak.domain.CbUsageFilterParameters;
+import com.sequenceiq.cloudbreak.domain.CbUsageFilterParameters.Builder;
+import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
+import com.sequenceiq.cloudbreak.service.usages.CloudbreakUsagesRetrievalService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DefaultCloudbreakUsagesFacadeTest {

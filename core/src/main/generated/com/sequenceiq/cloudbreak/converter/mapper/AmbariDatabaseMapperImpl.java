@@ -1,11 +1,12 @@
 package com.sequenceiq.cloudbreak.converter.mapper;
 
+import javax.annotation.Generated;
+
 import com.sequenceiq.cloudbreak.api.model.AmbariDatabaseDetailsJson;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariDatabase;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import javax.annotation.Generated;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor"

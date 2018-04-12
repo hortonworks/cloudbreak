@@ -1,12 +1,13 @@
 package com.sequenceiq.cloudbreak.service.cluster.ambari;
 
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Service;
+
 import com.sequenceiq.cloudbreak.service.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.service.cluster.api.ClusterModificationService;
 import com.sequenceiq.cloudbreak.service.cluster.api.ClusterSecurityService;
 import com.sequenceiq.cloudbreak.service.cluster.api.ClusterSetupService;
-import org.springframework.stereotype.Service;
-
-import javax.inject.Inject;
 
 @Service
 public class AmbariClusterConnector implements ClusterApi {

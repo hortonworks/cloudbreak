@@ -1,12 +1,12 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.sync;
 
+import java.util.List;
+
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.core.flow2.CommonContext;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
-
-import java.util.List;
 
 public class StackSyncContext extends CommonContext {
 

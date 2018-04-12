@@ -1,9 +1,10 @@
 package com.sequenceiq.cloudbreak.service.credential;
 
-import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+
+import com.sequenceiq.cloudbreak.controller.BadRequestException;
 
 @Component
 public class OpenSshPublicKeyValidator {

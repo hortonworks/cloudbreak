@@ -1,13 +1,14 @@
 package com.sequenceiq.cloudbreak.converter;
 
+import javax.inject.Inject;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.model.ImageJson;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-
-import javax.inject.Inject;
 
 @Component
 public class ImageToImageJsonConverter extends AbstractConversionServiceAwareConverter<Image, ImageJson> {

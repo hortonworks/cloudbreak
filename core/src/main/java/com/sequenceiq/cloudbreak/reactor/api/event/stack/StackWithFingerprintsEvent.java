@@ -1,10 +1,10 @@
 package com.sequenceiq.cloudbreak.reactor.api.event.stack;
 
-import com.google.common.collect.ImmutableSet;
-import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
-
 import java.util.Collection;
 import java.util.Set;
+
+import com.google.common.collect.ImmutableSet;
+import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 
 public class StackWithFingerprintsEvent extends StackEvent {
 

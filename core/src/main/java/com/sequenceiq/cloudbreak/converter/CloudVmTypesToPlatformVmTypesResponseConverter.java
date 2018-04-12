@@ -1,17 +1,18 @@
 package com.sequenceiq.cloudbreak.converter;
 
-import com.sequenceiq.cloudbreak.api.model.PlatformVmtypesResponse;
-import com.sequenceiq.cloudbreak.api.model.VirtualMachinesResponse;
-import com.sequenceiq.cloudbreak.api.model.VmTypeJson;
-import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
-import com.sequenceiq.cloudbreak.cloud.model.VmType;
-import org.springframework.stereotype.Component;
-
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+
+import org.springframework.stereotype.Component;
+
+import com.sequenceiq.cloudbreak.api.model.PlatformVmtypesResponse;
+import com.sequenceiq.cloudbreak.api.model.VirtualMachinesResponse;
+import com.sequenceiq.cloudbreak.api.model.VmTypeJson;
+import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
+import com.sequenceiq.cloudbreak.cloud.model.VmType;
 
 @Component
 public class CloudVmTypesToPlatformVmTypesResponseConverter

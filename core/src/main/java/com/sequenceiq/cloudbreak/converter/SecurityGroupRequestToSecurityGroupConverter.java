@@ -1,5 +1,13 @@
 package com.sequenceiq.cloudbreak.converter;
 
+import java.util.List;
+import java.util.Set;
+
+import javax.inject.Inject;
+
+import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.stereotype.Component;
+
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.model.SecurityGroupRequest;
@@ -8,12 +16,6 @@ import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.domain.SecurityRule;
 import com.sequenceiq.cloudbreak.service.MissingResourceNameGenerator;
-import org.springframework.core.convert.TypeDescriptor;
-import org.springframework.stereotype.Component;
-
-import javax.inject.Inject;
-import java.util.List;
-import java.util.Set;
 
 @Component
 public class SecurityGroupRequestToSecurityGroupConverter extends AbstractConversionServiceAwareConverter<SecurityGroupRequest, SecurityGroup> {

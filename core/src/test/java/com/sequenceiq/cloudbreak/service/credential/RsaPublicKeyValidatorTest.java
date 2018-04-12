@@ -1,10 +1,11 @@
 package com.sequenceiq.cloudbreak.service.credential;
 
-import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+
+import com.sequenceiq.cloudbreak.controller.BadRequestException;
 
 public class RsaPublicKeyValidatorTest {
 

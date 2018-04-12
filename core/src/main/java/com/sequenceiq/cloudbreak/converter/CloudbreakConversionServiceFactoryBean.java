@@ -1,10 +1,11 @@
 package com.sequenceiq.cloudbreak.converter;
 
-import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import org.springframework.context.support.ConversionServiceFactoryBean;
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.core.convert.support.GenericConversionService;
+
+import com.sequenceiq.cloudbreak.controller.BadRequestException;
 
 public class CloudbreakConversionServiceFactoryBean extends ConversionServiceFactoryBean {
 

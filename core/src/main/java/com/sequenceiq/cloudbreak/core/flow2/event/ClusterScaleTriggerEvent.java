@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.core.flow2.event;
 
 import com.sequenceiq.cloudbreak.reactor.api.event.HostGroupPayload;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
+
 import reactor.rx.Promise;
 
 public class ClusterScaleTriggerEvent extends StackEvent implements HostGroupPayload {

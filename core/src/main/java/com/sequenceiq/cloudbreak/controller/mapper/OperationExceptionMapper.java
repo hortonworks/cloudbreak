@@ -1,16 +1,17 @@
 package com.sequenceiq.cloudbreak.controller.mapper;
 
-import com.sequenceiq.cloudbreak.controller.json.ExceptionResult;
-import com.sequenceiq.cloudbreak.service.stack.connector.OperationException;
-import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.springframework.security.access.AccessDeniedException;
+import static javax.ws.rs.core.Response.Status.FORBIDDEN;
+import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.ExceptionMapper;
 
-import static javax.ws.rs.core.Response.Status.FORBIDDEN;
-import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
+import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.springframework.security.access.AccessDeniedException;
+
+import com.sequenceiq.cloudbreak.controller.json.ExceptionResult;
+import com.sequenceiq.cloudbreak.service.stack.connector.OperationException;
 
 public class OperationExceptionMapper implements ExceptionMapper<OperationException> {
 

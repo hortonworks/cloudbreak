@@ -1,13 +1,14 @@
 package com.sequenceiq.cloudbreak.service.cluster;
 
-import com.sequenceiq.cloudbreak.api.model.repositoryconfig.RepoConfigValidationRequest;
-import com.sequenceiq.cloudbreak.api.model.repositoryconfig.RepoConfigValidationResponse;
-import com.sequenceiq.cloudbreak.common.service.url.UrlAccessValidationService;
-import org.springframework.stereotype.Service;
+import static org.apache.commons.lang3.StringUtils.isNoneEmpty;
 
 import javax.inject.Inject;
 
-import static org.apache.commons.lang3.StringUtils.isNoneEmpty;
+import org.springframework.stereotype.Service;
+
+import com.sequenceiq.cloudbreak.api.model.repositoryconfig.RepoConfigValidationRequest;
+import com.sequenceiq.cloudbreak.api.model.repositoryconfig.RepoConfigValidationResponse;
+import com.sequenceiq.cloudbreak.common.service.url.UrlAccessValidationService;
 
 @Service
 public class RepositoryConfigValidationService {

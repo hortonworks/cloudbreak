@@ -1,9 +1,9 @@
 package com.sequenceiq.cloudbreak.controller.mapper;
 
-import org.springframework.beans.TypeMismatchException;
-
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.Provider;
+
+import org.springframework.beans.TypeMismatchException;
 
 @Provider
 public class TypeMismatchExceptionMapper extends BaseExceptionMapper<TypeMismatchException> {

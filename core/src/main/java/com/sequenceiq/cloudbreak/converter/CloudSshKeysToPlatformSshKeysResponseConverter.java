@@ -1,16 +1,17 @@
 package com.sequenceiq.cloudbreak.converter;
 
-import com.sequenceiq.cloudbreak.api.model.PlatformSshKeyResponse;
-import com.sequenceiq.cloudbreak.api.model.PlatformSshKeysResponse;
-import com.sequenceiq.cloudbreak.cloud.model.CloudSshKey;
-import com.sequenceiq.cloudbreak.cloud.model.CloudSshKeys;
-import org.springframework.stereotype.Component;
-
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+
+import org.springframework.stereotype.Component;
+
+import com.sequenceiq.cloudbreak.api.model.PlatformSshKeyResponse;
+import com.sequenceiq.cloudbreak.api.model.PlatformSshKeysResponse;
+import com.sequenceiq.cloudbreak.cloud.model.CloudSshKey;
+import com.sequenceiq.cloudbreak.cloud.model.CloudSshKeys;
 
 @Component
 public class CloudSshKeysToPlatformSshKeysResponseConverter extends AbstractConversionServiceAwareConverter<CloudSshKeys, PlatformSshKeysResponse> {

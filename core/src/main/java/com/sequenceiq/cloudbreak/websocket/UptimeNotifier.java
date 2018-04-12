@@ -1,5 +1,13 @@
 package com.sequenceiq.cloudbreak.websocket;
 
+import java.util.EnumSet;
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
+
 import com.sequenceiq.cloudbreak.api.model.CloudbreakEventsJson;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.domain.Cluster;
@@ -9,12 +17,6 @@ import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.notification.Notification;
 import com.sequenceiq.cloudbreak.service.notification.NotificationSender;
 import com.sequenceiq.cloudbreak.util.StackUtil;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
-
-import javax.inject.Inject;
-import java.util.EnumSet;
-import java.util.List;
 
 @Component
 public class UptimeNotifier {

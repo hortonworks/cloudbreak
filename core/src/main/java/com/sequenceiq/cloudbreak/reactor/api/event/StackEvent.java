@@ -1,8 +1,10 @@
 package com.sequenceiq.cloudbreak.reactor.api.event;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.sequenceiq.cloudbreak.cloud.Acceptable;
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
-import org.apache.commons.lang3.StringUtils;
+
 import reactor.rx.Promise;
 
 public class StackEvent implements Selectable, Acceptable {

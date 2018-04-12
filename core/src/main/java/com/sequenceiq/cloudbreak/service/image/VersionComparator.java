@@ -1,10 +1,11 @@
 package com.sequenceiq.cloudbreak.service.image;
 
-import com.sequenceiq.cloudbreak.cloud.model.Versioned;
-import org.apache.commons.lang3.StringUtils;
-
 import java.io.Serializable;
 import java.util.Comparator;
+
+import org.apache.commons.lang3.StringUtils;
+
+import com.sequenceiq.cloudbreak.cloud.model.Versioned;
 
 public class VersionComparator implements Comparator<Versioned>, Serializable {
 

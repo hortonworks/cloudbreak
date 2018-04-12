@@ -1,12 +1,13 @@
 package com.sequenceiq.cloudbreak.controller;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v1.SettingsEndpoint;
-import com.sequenceiq.cloudbreak.api.model.DatabaseVendor;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.util.HashMap;
-import java.util.Map;
+import com.sequenceiq.cloudbreak.api.endpoint.v1.SettingsEndpoint;
+import com.sequenceiq.cloudbreak.api.model.DatabaseVendor;
 
 @Component
 public class SettingsController implements SettingsEndpoint {

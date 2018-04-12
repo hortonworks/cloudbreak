@@ -1,11 +1,12 @@
 package com.sequenceiq.cloudbreak.converter.v2;
 
+import org.springframework.stereotype.Component;
+
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupRequest;
 import com.sequenceiq.cloudbreak.api.model.SecurityGroupRequest;
 import com.sequenceiq.cloudbreak.api.model.TemplateRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.InstanceGroupV2Request;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
-import org.springframework.stereotype.Component;
 
 @Component
 public class InstanceGroupV2RequestToInstanceGroupRequestConverter

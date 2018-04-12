@@ -1,10 +1,10 @@
 package com.sequenceiq.cloudbreak.service;
 
+import java.util.function.Supplier;
+
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
-
-import java.util.function.Supplier;
 
 @Service("DefaultRetryService")
 public class RetryService implements Retry {

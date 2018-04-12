@@ -1,9 +1,9 @@
 package com.sequenceiq.cloudbreak.structuredevent;
 
-import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEvent;
-
 import java.util.List;
 import java.util.Map;
+
+import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEvent;
 
 public interface StructuredEventService {
     void storeStructuredEvent(StructuredEvent structuredEvent);

@@ -1,17 +1,18 @@
 package com.sequenceiq.cloudbreak.service.cluster.ambari;
 
-import com.google.common.collect.Lists;
-import com.sequenceiq.ambari.client.AmbariClient;
-import com.sequenceiq.cloudbreak.TestUtil;
-import com.sequenceiq.cloudbreak.domain.Stack;
+import static org.mockito.Mockito.mock;
+
+import java.util.List;
+
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import java.util.List;
-
-import static org.mockito.Mockito.mock;
+import com.google.common.collect.Lists;
+import com.sequenceiq.ambari.client.AmbariClient;
+import com.sequenceiq.cloudbreak.TestUtil;
+import com.sequenceiq.cloudbreak.domain.Stack;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AmbariHostsWithNamesTest {

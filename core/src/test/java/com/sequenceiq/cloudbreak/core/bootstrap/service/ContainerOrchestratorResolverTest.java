@@ -1,8 +1,10 @@
 package com.sequenceiq.cloudbreak.core.bootstrap.service;
 
-import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ContainerOrchestratorResolver;
-import com.sequenceiq.cloudbreak.orchestrator.container.ContainerOrchestrator;
-import com.sequenceiq.cloudbreak.service.CloudbreakException;
+import static org.junit.Assert.assertNotNull;
+
+import java.util.HashMap;
+import java.util.Map;
+
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -11,10 +13,9 @@ import org.mockito.InjectMocks;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import static org.junit.Assert.assertNotNull;
+import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ContainerOrchestratorResolver;
+import com.sequenceiq.cloudbreak.orchestrator.container.ContainerOrchestrator;
+import com.sequenceiq.cloudbreak.service.CloudbreakException;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ContainerOrchestratorResolverTest {

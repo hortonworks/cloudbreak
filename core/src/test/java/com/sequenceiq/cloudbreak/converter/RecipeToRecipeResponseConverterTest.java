@@ -1,11 +1,12 @@
 package com.sequenceiq.cloudbreak.converter;
 
+import org.junit.Before;
+import org.junit.Test;
+
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.model.RecipeResponse;
 import com.sequenceiq.cloudbreak.domain.Recipe;
-import org.junit.Before;
-import org.junit.Test;
 
 public class RecipeToRecipeResponseConverterTest extends AbstractEntityConverterTest<Recipe> {
 

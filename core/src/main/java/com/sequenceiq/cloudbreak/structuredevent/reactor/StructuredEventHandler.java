@@ -1,12 +1,14 @@
 package com.sequenceiq.cloudbreak.structuredevent.reactor;
 
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Component;
+
 import com.sequenceiq.cloudbreak.reactor.handler.ReactorEventHandler;
 import com.sequenceiq.cloudbreak.structuredevent.StructuredEventService;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEvent;
-import org.springframework.stereotype.Component;
-import reactor.bus.Event;
 
-import javax.inject.Inject;
+import reactor.bus.Event;
 
 @Component
 public class StructuredEventHandler<T extends StructuredEvent> implements ReactorEventHandler<T> {

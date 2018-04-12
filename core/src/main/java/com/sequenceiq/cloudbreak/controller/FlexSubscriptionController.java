@@ -1,5 +1,11 @@
 package com.sequenceiq.cloudbreak.controller;
 
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Controller;
+
 import com.sequenceiq.cloudbreak.api.endpoint.v1.FlexSubscriptionEndpoint;
 import com.sequenceiq.cloudbreak.api.model.FlexSubscriptionRequest;
 import com.sequenceiq.cloudbreak.api.model.FlexSubscriptionResponse;
@@ -8,10 +14,6 @@ import com.sequenceiq.cloudbreak.converter.FlexSubscriptionRequestToFlexSubscrip
 import com.sequenceiq.cloudbreak.converter.FlexSubscriptionToJsonConverter;
 import com.sequenceiq.cloudbreak.domain.FlexSubscription;
 import com.sequenceiq.cloudbreak.service.flex.FlexSubscriptionService;
-import org.springframework.stereotype.Controller;
-
-import javax.inject.Inject;
-import java.util.List;
 
 @Controller
 public class FlexSubscriptionController implements FlexSubscriptionEndpoint {

@@ -1,9 +1,10 @@
 package com.sequenceiq.cloudbreak.converter.spi;
 
+import org.springframework.stereotype.Component;
+
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.Resource;
-import org.springframework.stereotype.Component;
 
 @Component
 public class CloudResourceToResourceConverter extends AbstractConversionServiceAwareConverter<CloudResource, Resource> {

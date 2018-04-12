@@ -1,10 +1,10 @@
 package com.sequenceiq.cloudbreak.core.flow2;
 
-import org.springframework.messaging.Message;
-import org.springframework.messaging.support.GenericMessage;
-
 import java.util.HashMap;
 import java.util.Map;
+
+import org.springframework.messaging.Message;
+import org.springframework.messaging.support.GenericMessage;
 
 public class MessageFactory<E> {
 

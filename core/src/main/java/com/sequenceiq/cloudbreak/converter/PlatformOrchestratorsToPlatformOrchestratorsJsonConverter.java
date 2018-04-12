@@ -1,9 +1,10 @@
 package com.sequenceiq.cloudbreak.converter;
 
+import org.springframework.stereotype.Component;
+
 import com.sequenceiq.cloudbreak.api.model.PlatformOrchestratorsJson;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformOrchestrators;
 import com.sequenceiq.cloudbreak.converter.util.PlatformConverterUtil;
-import org.springframework.stereotype.Component;
 
 @Component
 public class PlatformOrchestratorsToPlatformOrchestratorsJsonConverter

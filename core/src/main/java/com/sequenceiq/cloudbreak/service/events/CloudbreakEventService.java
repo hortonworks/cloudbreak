@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.service.events;
 
-import com.sequenceiq.cloudbreak.structuredevent.event.StructuredNotificationEvent;
-
 import java.util.List;
+
+import com.sequenceiq.cloudbreak.structuredevent.event.StructuredNotificationEvent;
 
 public interface CloudbreakEventService {
 

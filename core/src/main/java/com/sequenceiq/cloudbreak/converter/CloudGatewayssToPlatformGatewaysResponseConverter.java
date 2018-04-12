@@ -1,16 +1,17 @@
 package com.sequenceiq.cloudbreak.converter;
 
-import com.sequenceiq.cloudbreak.api.model.CloudGatewayJson;
-import com.sequenceiq.cloudbreak.api.model.PlatformGatewaysResponse;
-import com.sequenceiq.cloudbreak.cloud.model.CloudGateWay;
-import com.sequenceiq.cloudbreak.cloud.model.CloudGateWays;
-import org.springframework.stereotype.Component;
-
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+
+import org.springframework.stereotype.Component;
+
+import com.sequenceiq.cloudbreak.api.model.CloudGatewayJson;
+import com.sequenceiq.cloudbreak.api.model.PlatformGatewaysResponse;
+import com.sequenceiq.cloudbreak.cloud.model.CloudGateWay;
+import com.sequenceiq.cloudbreak.cloud.model.CloudGateWays;
 
 @Component
 public class CloudGatewayssToPlatformGatewaysResponseConverter extends AbstractConversionServiceAwareConverter<CloudGateWays, PlatformGatewaysResponse> {

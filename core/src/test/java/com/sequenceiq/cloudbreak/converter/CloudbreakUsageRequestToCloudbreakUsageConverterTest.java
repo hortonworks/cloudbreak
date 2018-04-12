@@ -1,11 +1,12 @@
 package com.sequenceiq.cloudbreak.converter;
 
-import com.sequenceiq.cloudbreak.api.model.CloudbreakUsageJson;
-import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
+import static java.util.Arrays.asList;
+
 import org.junit.Before;
 import org.junit.Test;
 
-import static java.util.Arrays.asList;
+import com.sequenceiq.cloudbreak.api.model.CloudbreakUsageJson;
+import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
 
 public class CloudbreakUsageRequestToCloudbreakUsageConverterTest extends AbstractJsonConverterTest<CloudbreakUsageJson> {
 

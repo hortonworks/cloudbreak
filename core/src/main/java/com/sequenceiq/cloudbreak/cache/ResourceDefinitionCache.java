@@ -1,7 +1,8 @@
 package com.sequenceiq.cloudbreak.cache;
 
-import net.sf.ehcache.config.CacheConfiguration;
 import org.springframework.stereotype.Service;
+
+import net.sf.ehcache.config.CacheConfiguration;
 
 @Service
 public class ResourceDefinitionCache implements CacheDefinition {

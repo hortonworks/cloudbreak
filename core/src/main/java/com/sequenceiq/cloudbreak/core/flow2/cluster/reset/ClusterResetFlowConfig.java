@@ -1,11 +1,5 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.reset;
 
-import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration;
-import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration.Transition.Builder;
-import org.springframework.stereotype.Component;
-
-import java.util.List;
-
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.reset.ClusterResetEvent.CLUSTER_RESET_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.reset.ClusterResetEvent.CLUSTER_RESET_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.reset.ClusterResetEvent.CLUSTER_RESET_FINISHED_FAILURE_EVENT;
@@ -20,6 +14,13 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.reset.ClusterResetSta
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.reset.ClusterResetState.CLUSTER_RESET_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.reset.ClusterResetState.FINAL_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.reset.ClusterResetState.INIT_STATE;
+
+import java.util.List;
+
+import org.springframework.stereotype.Component;
+
+import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration;
+import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration.Transition.Builder;
 
 @Component
 public class ClusterResetFlowConfig extends AbstractFlowConfiguration<ClusterResetState, ClusterResetEvent> {

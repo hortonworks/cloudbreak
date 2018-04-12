@@ -1,8 +1,9 @@
 package com.sequenceiq.cloudbreak.logger;
 
+import com.google.common.base.Strings;
+
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.sift.Discriminator;
-import com.google.common.base.Strings;
 
 public class UniqueIdDiscriminator implements Discriminator<ILoggingEvent> {
 

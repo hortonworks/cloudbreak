@@ -1,11 +1,12 @@
 package com.sequenceiq.cloudbreak.converter.v2.cli;
 
-import com.sequenceiq.cloudbreak.api.model.imagecatalog.ImageCatalogRequest;
-import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
-import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+
+import com.sequenceiq.cloudbreak.api.model.imagecatalog.ImageCatalogRequest;
+import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
+import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 
 @Component
 public class ImageCatalogToImageCatalogRequestConverter

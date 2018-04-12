@@ -1,13 +1,14 @@
 package com.sequenceiq.cloudbreak.repository;
 
-import com.sequenceiq.cloudbreak.api.model.RecipeType;
-import com.sequenceiq.cloudbreak.domain.Recipe;
+import java.util.Collection;
+import java.util.Set;
+
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
-import java.util.Collection;
-import java.util.Set;
+import com.sequenceiq.cloudbreak.api.model.RecipeType;
+import com.sequenceiq.cloudbreak.domain.Recipe;
 
 @EntityType(entityClass = Recipe.class)
 public interface RecipeRepository extends CrudRepository<Recipe, Long> {

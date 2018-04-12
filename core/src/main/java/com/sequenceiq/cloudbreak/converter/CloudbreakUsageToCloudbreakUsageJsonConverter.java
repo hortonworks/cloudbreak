@@ -1,18 +1,20 @@
 package com.sequenceiq.cloudbreak.converter;
 
+import java.text.SimpleDateFormat;
+import java.time.Duration;
+
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
 import com.sequenceiq.cloudbreak.api.model.CloudbreakUsageJson;
 import com.sequenceiq.cloudbreak.api.model.UsageStatus;
 import com.sequenceiq.cloudbreak.common.service.user.UserFilterField;
 import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
 import com.sequenceiq.cloudbreak.service.usages.UsageTimeService;
 import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
-
-import javax.inject.Inject;
-import java.text.SimpleDateFormat;
-import java.time.Duration;
 
 @Component
 public class CloudbreakUsageToCloudbreakUsageJsonConverter extends AbstractConversionServiceAwareConverter<CloudbreakUsage, CloudbreakUsageJson> {

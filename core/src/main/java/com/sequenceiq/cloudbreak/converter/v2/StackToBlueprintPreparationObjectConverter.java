@@ -1,5 +1,16 @@
 package com.sequenceiq.cloudbreak.converter.v2;
 
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
 import com.sequenceiq.cloudbreak.blueprint.GeneralClusterConfigsProvider;
 import com.sequenceiq.cloudbreak.blueprint.filesystem.FileSystemConfigurationProvider;
 import com.sequenceiq.cloudbreak.blueprint.utils.StackInfoService;
@@ -28,15 +39,6 @@ import com.sequenceiq.cloudbreak.template.processor.processor.TemplateProcessing
 import com.sequenceiq.cloudbreak.template.processor.template.views.BlueprintView;
 import com.sequenceiq.cloudbreak.template.processor.template.views.FileSystemConfigurationView;
 import com.sequenceiq.cloudbreak.template.processor.templates.StackInfo;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
-
-import javax.inject.Inject;
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 
 @Component
 public class StackToBlueprintPreparationObjectConverter extends AbstractConversionServiceAwareConverter<Stack, TemplatePreparationObject> {

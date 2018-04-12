@@ -1,16 +1,19 @@
 package com.sequenceiq.cloudbreak.core.flow2.chain.config;
 
-import com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainHandler;
-import com.sequenceiq.cloudbreak.core.flow2.chain.FlowEventChainFactory;
-import org.springframework.stereotype.Component;
-import reactor.bus.EventBus;
-import reactor.bus.selector.Selectors;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.inject.Inject;
-import java.util.List;
-import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Component;
+
+import com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainHandler;
+import com.sequenceiq.cloudbreak.core.flow2.chain.FlowEventChainFactory;
+
+import reactor.bus.EventBus;
+import reactor.bus.selector.Selectors;
 
 @Component
 public class FlowChainInitializer {

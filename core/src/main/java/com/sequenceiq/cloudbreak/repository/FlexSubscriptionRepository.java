@@ -1,13 +1,14 @@
 package com.sequenceiq.cloudbreak.repository;
 
-import com.sequenceiq.cloudbreak.domain.FlexSubscription;
-import com.sequenceiq.cloudbreak.domain.SmartSenseSubscription;
+import java.util.List;
+
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.security.access.prepost.PostAuthorize;
 
-import java.util.List;
+import com.sequenceiq.cloudbreak.domain.FlexSubscription;
+import com.sequenceiq.cloudbreak.domain.SmartSenseSubscription;
 
 @EntityType(entityClass = FlexSubscription.class)
 public interface FlexSubscriptionRepository extends CrudRepository<FlexSubscription, Long> {

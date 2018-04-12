@@ -1,16 +1,18 @@
 package com.sequenceiq.cloudbreak.controller.validation.ldapconfig;
 
-import com.sequenceiq.cloudbreak.api.model.ldap.LdapValidationRequest;
-import com.sequenceiq.cloudbreak.controller.BadRequestException;
-import com.sequenceiq.cloudbreak.domain.LdapConfig;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
+import java.util.Hashtable;
 
 import javax.naming.Context;
 import javax.naming.NamingException;
 import javax.naming.directory.InitialDirContext;
-import java.util.Hashtable;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
+import com.sequenceiq.cloudbreak.api.model.ldap.LdapValidationRequest;
+import com.sequenceiq.cloudbreak.controller.BadRequestException;
+import com.sequenceiq.cloudbreak.domain.LdapConfig;
 
 @Component
 public class LdapConfigValidator {

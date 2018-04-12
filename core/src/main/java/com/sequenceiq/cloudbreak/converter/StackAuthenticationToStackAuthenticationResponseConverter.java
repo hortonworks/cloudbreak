@@ -1,8 +1,9 @@
 package com.sequenceiq.cloudbreak.converter;
 
+import org.springframework.stereotype.Component;
+
 import com.sequenceiq.cloudbreak.api.model.StackAuthenticationResponse;
 import com.sequenceiq.cloudbreak.domain.StackAuthentication;
-import org.springframework.stereotype.Component;
 
 @Component
 public class StackAuthenticationToStackAuthenticationResponseConverter

@@ -1,11 +1,5 @@
 package com.sequenceiq.cloudbreak.core.flow2.helloworld;
 
-import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration;
-import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration.Transition.Builder;
-import org.springframework.stereotype.Component;
-
-import java.util.List;
-
 import static com.sequenceiq.cloudbreak.core.flow2.helloworld.HelloWorldEvent.FINALIZE_HELLO_WORLD_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.helloworld.HelloWorldEvent.HELLO_WORLD_FAIL_HANDLED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.helloworld.HelloWorldEvent.HELLO_WORLD_FINISHED_EVENT;
@@ -16,6 +10,13 @@ import static com.sequenceiq.cloudbreak.core.flow2.helloworld.HelloWorldState.HE
 import static com.sequenceiq.cloudbreak.core.flow2.helloworld.HelloWorldState.HELLO_WORLD_FINISHED_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.helloworld.HelloWorldState.HELLO_WORLD_START_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.helloworld.HelloWorldState.INIT_STATE;
+
+import java.util.List;
+
+import org.springframework.stereotype.Component;
+
+import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration;
+import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration.Transition.Builder;
 
 @Component
 public class HelloWorldFlowConfig extends AbstractFlowConfiguration<HelloWorldState, HelloWorldEvent> {
