@@ -9,7 +9,7 @@ import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.templateprocessor.BlueprintTestUtil;
-import com.sequenceiq.cloudbreak.templateprocessor.processor.PreparationObject;
+import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.templateprocessor.nifi.HdfConfigs;
 import com.sequenceiq.cloudbreak.templateprocessor.template.views.BlueprintView;
 import com.sequenceiq.cloudbreak.templateprocessor.templates.StackInfo;
@@ -44,7 +44,7 @@ public class BlueprintTemplateProcessorTest {
         Map<String, Object> properties = new HashMap<>();
         properties.put("S3_BUCKET", "testbucket");
 
-        PreparationObject blueprintPreparationObject = PreparationObject.Builder.builder()
+        TemplatePreparationObject blueprintPreparationObject = TemplatePreparationObject.Builder.builder()
                 .withRdsConfigs(cluster.getRdsConfigs())
                 .withGateway(cluster.getGateway())
                 .withLdapConfig(cluster.getLdapConfig())
@@ -76,7 +76,7 @@ public class BlueprintTemplateProcessorTest {
         properties.put("S3_BUCKET", "testbucket");
         HdfConfigs hdfConfigs = new HdfConfigs("<property name=\"Node Identity 1\">CN=hostname-2, OU=NIFI</property>", Optional.empty());
 
-        PreparationObject blueprintPreparationObject = PreparationObject.Builder.builder()
+        TemplatePreparationObject blueprintPreparationObject = TemplatePreparationObject.Builder.builder()
                 .withRdsConfigs(cluster.getRdsConfigs())
                 .withGateway(cluster.getGateway())
                 .withLdapConfig(cluster.getLdapConfig())
@@ -97,7 +97,7 @@ public class BlueprintTemplateProcessorTest {
         Cluster cluster = cluster();
         StackInfo blueprintStackInfo =  new StackInfo("hdp", "2.4");
 
-        PreparationObject blueprintPreparationObject = PreparationObject.Builder.builder()
+        TemplatePreparationObject blueprintPreparationObject = TemplatePreparationObject.Builder.builder()
                 .withRdsConfigs(cluster.getRdsConfigs())
                 .withGateway(cluster.getGateway())
                 .withLdapConfig(cluster.getLdapConfig())
@@ -122,7 +122,7 @@ public class BlueprintTemplateProcessorTest {
         Cluster cluster = cluster();
         StackInfo blueprintStackInfo =  new StackInfo("hdp", "2.4");
 
-        PreparationObject blueprintPreparationObject = PreparationObject.Builder.builder()
+        TemplatePreparationObject blueprintPreparationObject = TemplatePreparationObject.Builder.builder()
                 .withRdsConfigs(cluster.getRdsConfigs())
                 .withGateway(cluster.getGateway())
                 .withLdapConfig(cluster.getLdapConfig())
@@ -147,7 +147,7 @@ public class BlueprintTemplateProcessorTest {
         Cluster cluster = cluster();
         StackInfo blueprintStackInfo =  new StackInfo("hdp", "2.4");
 
-        PreparationObject blueprintPreparationObject = PreparationObject.Builder.builder()
+        TemplatePreparationObject blueprintPreparationObject = TemplatePreparationObject.Builder.builder()
                 .withRdsConfigs(cluster.getRdsConfigs())
                 .withGateway(cluster.getGateway())
                 .withLdapConfig(cluster.getLdapConfig())
@@ -170,7 +170,7 @@ public class BlueprintTemplateProcessorTest {
         cluster.getRdsConfigs().add(rdsConfig("customRds"));
         StackInfo blueprintStackInfo =  new StackInfo("hdp", "2.4");
 
-        PreparationObject blueprintPreparationObject = PreparationObject.Builder.builder()
+        TemplatePreparationObject blueprintPreparationObject = TemplatePreparationObject.Builder.builder()
                 .withBlueprintView(new BlueprintView(testBlueprint, blueprintStackInfo.getVersion(), blueprintStackInfo.getType()))
                 .withRdsConfigs(cluster.getRdsConfigs())
                 .withGeneralClusterConfigs(BlueprintTestUtil.generalClusterConfigs(cluster))

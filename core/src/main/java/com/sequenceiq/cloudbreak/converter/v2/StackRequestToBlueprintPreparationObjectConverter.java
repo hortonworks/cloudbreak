@@ -17,7 +17,7 @@ import com.sequenceiq.cloudbreak.service.flex.FlexSubscriptionService;
 import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
-import com.sequenceiq.cloudbreak.templateprocessor.processor.PreparationObject;
+import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplateProcessingException;
 import com.sequenceiq.cloudbreak.templateprocessor.template.views.BlueprintView;
 import com.sequenceiq.cloudbreak.templateprocessor.template.views.FileSystemConfigurationView;
@@ -34,7 +34,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Component
-public class StackRequestToBlueprintPreparationObjectConverter extends AbstractConversionServiceAwareConverter<StackV2Request, PreparationObject> {
+public class StackRequestToBlueprintPreparationObjectConverter extends AbstractConversionServiceAwareConverter<StackV2Request, TemplatePreparationObject> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StackRequestToBlueprintPreparationObjectConverter.class);
 
@@ -63,7 +63,7 @@ public class StackRequestToBlueprintPreparationObjectConverter extends AbstractC
     private StackInfoService stackInfoService;
 
     @Override
-    public PreparationObject convert(StackV2Request source) {
+    public TemplatePreparationObject convert(StackV2Request source) {
         try {
             IdentityUser identityUser = userDetailsService.getDetails(source.getOwner(), UserFilterField.USERID);
             FlexSubscription flexSubscription = getFlexSubscription(source);
@@ -78,7 +78,7 @@ public class StackRequestToBlueprintPreparationObjectConverter extends AbstractC
             BlueprintView blueprintView = new BlueprintView(blueprint.getBlueprintText(), blueprintStackInfo.getVersion(), blueprintStackInfo.getType());
             GeneralClusterConfigs generalClusterConfigs = generalClusterConfigsProvider.generalClusterConfigs(source, identityUser);
 
-            return PreparationObject.Builder.builder()
+            return TemplatePreparationObject.Builder.builder()
                     .withFlexSubscription(flexSubscription)
                     .withRdsConfigs(rdsConfigs)
                     .withHostgroupViews(hostgroupViews)

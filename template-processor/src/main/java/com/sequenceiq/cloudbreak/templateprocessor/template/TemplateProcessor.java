@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.templateprocessor.template;
 
 import com.github.jknack.handlebars.Handlebars;
 import com.github.jknack.handlebars.Template;
-import com.sequenceiq.cloudbreak.templateprocessor.processor.PreparationObject;
+import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,7 +20,7 @@ public class TemplateProcessor {
 
     private final Handlebars handlebars = HandlebarUtils.handlebars();
 
-    public String process(String sourceTemplate, PreparationObject source, Map<String, Object> customProperties) throws IOException {
+    public String process(String sourceTemplate, TemplatePreparationObject source, Map<String, Object> customProperties) throws IOException {
         long started = System.currentTimeMillis();
         String generateBlueprint = generateBlueprintWithParameters(sourceTemplate, source, customProperties);
         long generationTime = System.currentTimeMillis() - started;
@@ -30,13 +30,13 @@ public class TemplateProcessor {
         return generateBlueprint;
     }
 
-    private String generateBlueprintWithParameters(String sourceTemplate, PreparationObject source, Map<String, Object> customProperties)
+    private String generateBlueprintWithParameters(String sourceTemplate, TemplatePreparationObject source, Map<String, Object> customProperties)
             throws IOException {
         Template template = handlebars.compileInline(sourceTemplate, "{{{", "}}}");
         return template.apply(prepareTemplateObject(source, customProperties));
     }
 
-    private Map<String, Object> prepareTemplateObject(PreparationObject source, Map<String, Object> customProperties) throws IOException {
+    private Map<String, Object> prepareTemplateObject(TemplatePreparationObject source, Map<String, Object> customProperties) throws IOException {
 
 
         Map<String, Object> blueprintInputs = source.getBlueprintView().getBlueprintInputs();

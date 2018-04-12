@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.blueprint.moduletest;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.blueprint.testrepeater.Generator;
 import com.sequenceiq.cloudbreak.blueprint.testrepeater.ListGenerator;
-import com.sequenceiq.cloudbreak.templateprocessor.processor.PreparationObject;
+import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplatePreparationObject;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Rule;
@@ -37,8 +37,8 @@ public class CentralBlueprintUpdaterRollingtest extends CentralBlueprintContext 
         params = new ListGenerator<>(ReadTestData.getInputOutputData(testConfig()));
     }
 
-    private Map<String, PreparationObject> testConfig() throws JsonProcessingException {
-        return new HashMap<String, PreparationObject>() {
+    private Map<String, TemplatePreparationObject> testConfig() throws JsonProcessingException {
+        return new HashMap<String, TemplatePreparationObject>() {
             {
                 put("rds-with-hive-metastore", blueprintObjectWhenHiveAndRdsPresentedThenRdsHiveMetastoreShouldConfigured());
                 put("rds-with-ranger", blueprintObjectWhenRangerAndRdsPresentedThenRdsRangerShouldConfigured());
@@ -67,7 +67,7 @@ public class CentralBlueprintUpdaterRollingtest extends CentralBlueprintContext 
 
     @Test
     public void testGetBlueprintText() throws IOException, JSONException {
-        PreparationObject blueprintPreparationObject = preparePreparationObjectWithBlueprintText();
+        TemplatePreparationObject blueprintPreparationObject = preparePreparationObjectWithBlueprintText();
 
         JSONObject expected = toJSON(params.value().getOutput().getFileContent());
         JSONObject resultBlueprintText = toJSON(getUnderTest().getBlueprintText(blueprintPreparationObject));
@@ -81,8 +81,8 @@ public class CentralBlueprintUpdaterRollingtest extends CentralBlueprintContext 
         assertWithExtendedExceptionHandling(stringBuffer.toString(), expected, resultBlueprintText);
     }
 
-    private PreparationObject preparePreparationObjectWithBlueprintText() {
-        PreparationObject blueprintPreparationObject = params.value().getModel();
+    private TemplatePreparationObject preparePreparationObjectWithBlueprintText() {
+        TemplatePreparationObject blueprintPreparationObject = params.value().getModel();
         blueprintPreparationObject.getBlueprintView().setBlueprintText(params.value().getInput().getFileContent());
         return blueprintPreparationObject;
     }

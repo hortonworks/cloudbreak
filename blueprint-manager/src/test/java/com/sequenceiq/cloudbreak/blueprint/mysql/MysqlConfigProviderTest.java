@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.blueprint.mysql;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
-import com.sequenceiq.cloudbreak.templateprocessor.processor.PreparationObject;
+import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplateTextProcessor;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
@@ -40,7 +40,7 @@ public class MysqlConfigProviderTest {
     public void testRemoveComponentFromBlueprintWhenBlueprintContainsMysqlServerThenShouldReturnTrue() throws IOException {
         String blueprintText = FileReaderUtils.readFileFromClasspath("blueprints-jackson/bp-kerberized-test.bp");
 
-        PreparationObject object = PreparationObject.Builder.builder()
+        TemplatePreparationObject object = TemplatePreparationObject.Builder.builder()
                 .withRdsConfigs(Sets.newHashSet(TestUtil.rdsConfig(RdsType.HIVE)))
                 .build();
 
@@ -57,7 +57,7 @@ public class MysqlConfigProviderTest {
     public void testAdditionalCriteriaWhenBlueprintContainsMysqlServerThenShouldReturnTrue() throws IOException {
         String blueprintText = FileReaderUtils.readFileFromClasspath("blueprints-jackson/bp-kerberized-test.bp");
 
-        PreparationObject object = PreparationObject.Builder.builder()
+        TemplatePreparationObject object = TemplatePreparationObject.Builder.builder()
                 .withRdsConfigs(Sets.newHashSet(TestUtil.rdsConfig(RdsType.HIVE)))
                 .build();
 
@@ -72,7 +72,7 @@ public class MysqlConfigProviderTest {
     public void testAdditionalCriteriaWhenRdsConfigEmptyThenShouldReturnFalse() throws IOException {
         String blueprintText = FileReaderUtils.readFileFromClasspath("blueprints-jackson/bp-kerberized-test.bp");
 
-        PreparationObject object = PreparationObject.Builder.builder()
+        TemplatePreparationObject object = TemplatePreparationObject.Builder.builder()
                 .build();
 
         when(blueprintProcessor.componentExistsInBlueprint("MYSQL_SERVER")).thenReturn(true);

@@ -7,7 +7,7 @@ import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.templateprocessor.processor.PreparationObject;
+import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplateTextProcessor;
 import com.sequenceiq.cloudbreak.templateprocessor.templates.GeneralClusterConfigs;
@@ -31,7 +31,7 @@ public class KerberosBlueprintServiceTest {
     private TemplateProcessorFactory blueprintProcessorFactory;
 
     @Mock
-    private PreparationObject preparationObject;
+    private TemplatePreparationObject preparationObject;
 
     @Spy
     private KerberosDetailService kerberosDetailService;
@@ -46,7 +46,7 @@ public class KerberosBlueprintServiceTest {
         Blueprint blueprint = TestUtil.blueprint("name", expectedBlueprint);
         Stack stack = TestUtil.stack();
         Cluster cluster = TestUtil.cluster(blueprint, stack, 1L, TestUtil.kerberosConfig());
-        PreparationObject object = PreparationObject.Builder.builder()
+        TemplatePreparationObject object = TemplatePreparationObject.Builder.builder()
                 .withKerberosConfig(cluster.getKerberosConfig())
                 .withGeneralClusterConfigs(BlueprintTestUtil.generalClusterConfigs())
                 .build();
@@ -70,7 +70,7 @@ public class KerberosBlueprintServiceTest {
         generalClusterConfigs.setPrimaryGatewayInstanceDiscoveryFQDN(Optional.of("test-1-1"));
         generalClusterConfigs.setGatewayInstanceMetadataPresented(false);
 
-        PreparationObject object = PreparationObject.Builder.builder()
+        TemplatePreparationObject object = TemplatePreparationObject.Builder.builder()
                 .withKerberosConfig(cluster.getKerberosConfig())
                 .withGeneralClusterConfigs(generalClusterConfigs)
                 .build();
@@ -98,7 +98,7 @@ public class KerberosBlueprintServiceTest {
         kerberosConfig.setKrb5Conf("{\"krb5-conf\":{\"properties\":{\"domains\":\".domains.bp\",\"manage_krb5_conf\":\"true\",\"content\":\"content.bp\"}}}");
         kerberosConfig.setTcpAllowed(true);
         Cluster cluster = TestUtil.cluster(blueprint, stack, 1L, kerberosConfig);
-        PreparationObject object = PreparationObject.Builder.builder()
+        TemplatePreparationObject object = TemplatePreparationObject.Builder.builder()
                 .withKerberosConfig(cluster.getKerberosConfig())
                 .withGeneralClusterConfigs(BlueprintTestUtil.generalClusterConfigs())
                 .build();
@@ -134,7 +134,7 @@ public class KerberosBlueprintServiceTest {
         generalClusterConfigs.setGatewayInstanceMetadataPresented(false);
 
         Cluster cluster = TestUtil.cluster(blueprint, stack, 1L, kerberosConfig);
-        PreparationObject object = PreparationObject.Builder.builder()
+        TemplatePreparationObject object = TemplatePreparationObject.Builder.builder()
                 .withKerberosConfig(cluster.getKerberosConfig())
                 .withGeneralClusterConfigs(generalClusterConfigs)
                 .build();

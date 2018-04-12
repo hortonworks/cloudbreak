@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.blueprint.hadoop;
 import com.sequenceiq.cloudbreak.blueprint.ConfigService;
 import com.sequenceiq.cloudbreak.templateprocessor.configuration.HostgroupConfigurations;
 import com.sequenceiq.cloudbreak.templateprocessor.configuration.SiteConfigurations;
-import com.sequenceiq.cloudbreak.templateprocessor.processor.PreparationObject;
+import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplateTextProcessor;
 import com.sequenceiq.cloudbreak.templateprocessor.template.views.BlueprintView;
 import org.junit.Assert;
@@ -32,7 +32,7 @@ public class HadoopConfigurationServiceTest {
 
     @Test
     public void testConfigure() throws IOException {
-        PreparationObject source = PreparationObject.Builder.builder()
+        TemplatePreparationObject source = TemplatePreparationObject.Builder.builder()
                 .build();
         TemplateTextProcessor blueprintTextProcessor = mock(TemplateTextProcessor.class);
 
@@ -49,7 +49,7 @@ public class HadoopConfigurationServiceTest {
 
     @Test
     public void testAdditionalCriteriaWhenTrue() {
-        PreparationObject source = PreparationObject.Builder.builder()
+        TemplatePreparationObject source = TemplatePreparationObject.Builder.builder()
                 .withBlueprintView(new BlueprintView("blueprintText", "2.5", "HDP"))
                 .build();
 
@@ -59,7 +59,7 @@ public class HadoopConfigurationServiceTest {
 
     @Test
     public void testAdditionalCriteriaWhenFalse() {
-        PreparationObject source = PreparationObject.Builder.builder()
+        TemplatePreparationObject source = TemplatePreparationObject.Builder.builder()
                 .withBlueprintView(new BlueprintView("blueprintText", "2.5", "HDF"))
                 .build();
 

@@ -20,7 +20,7 @@ import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.cloudbreak.templateprocessor.processor.PreparationObject;
+import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.util.AmbariClientExceptionUtil;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 import groovyx.net.http.HttpResponseException;
@@ -133,7 +133,7 @@ public class AmbariClusterSetupService implements ClusterSetupService {
             clusterService.updateCreationDateOnCluster(cluster);
             AmbariClient ambariClient = clientFactory.getAmbariClient(stack, stack.getCluster());
             Set<HostGroup> hostGroups = hostGroupService.getByCluster(cluster.getId());
-            PreparationObject blueprintPreparationObject = conversionService.convert(stack, PreparationObject.class);
+            TemplatePreparationObject blueprintPreparationObject = conversionService.convert(stack, TemplatePreparationObject.class);
             Map<String, List<Map<String, String>>> hostGroupMappings = hostGroupAssociationBuilder.buildHostGroupAssociations(hostGroups);
             Set<HostMetadata> hostsInCluster = hostMetadataRepository.findHostsInCluster(cluster.getId());
 

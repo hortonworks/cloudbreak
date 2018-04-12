@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintComponentConfigProvider;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.templateprocessor.configuration.SiteConfigurations;
-import com.sequenceiq.cloudbreak.templateprocessor.processor.PreparationObject;
+import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplateProcessingException;
 import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplateTextProcessor;
@@ -33,7 +33,7 @@ public class KerberosBlueprintService implements BlueprintComponentConfigProvide
     private KerberosDetailService kerberosDetailService;
 
     @Override
-    public TemplateTextProcessor customTextManipulation(PreparationObject source, TemplateTextProcessor blueprintProcessor) {
+    public TemplateTextProcessor customTextManipulation(TemplatePreparationObject source, TemplateTextProcessor blueprintProcessor) {
         KerberosConfig kerberosConfig = source.getKerberosConfig().orElse(null);
         if (source.getGeneralClusterConfigs().getInstanceGroupsPresented()) {
             Integer propagationPort = source.getGeneralClusterConfigs().isGatewayInstanceMetadataPresented() ? KERBEROS_DB_PROPAGATION_PORT : null;
@@ -113,7 +113,7 @@ public class KerberosBlueprintService implements BlueprintComponentConfigProvide
     }
 
     @Override
-    public boolean additionalCriteria(PreparationObject source, String blueprintText) {
+    public boolean additionalCriteria(TemplatePreparationObject source, String blueprintText) {
         return source.getKerberosConfig().isPresent();
     }
 }

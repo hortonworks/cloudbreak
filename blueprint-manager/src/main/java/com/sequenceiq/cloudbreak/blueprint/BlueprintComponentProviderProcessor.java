@@ -6,7 +6,7 @@ import com.sequenceiq.cloudbreak.blueprint.filesystem.FileSystemConfigurationPro
 import com.sequenceiq.cloudbreak.blueprint.filesystem.FileSystemConfigurator;
 import com.sequenceiq.cloudbreak.templateprocessor.HostgroupEntry;
 import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplateConfigurationEntry;
-import com.sequenceiq.cloudbreak.templateprocessor.processor.PreparationObject;
+import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplateTextProcessor;
 import com.sequenceiq.cloudbreak.templateprocessor.configuration.HostgroupConfigurations;
@@ -33,7 +33,7 @@ public class BlueprintComponentProviderProcessor {
     @Inject
     private TemplateProcessorFactory blueprintProcessorFactory;
 
-    public String process(PreparationObject source, String blueprintText) throws IOException {
+    public String process(TemplatePreparationObject source, String blueprintText) throws IOException {
         TemplateTextProcessor blueprintProcessor = blueprintProcessorFactory.get(blueprintText);
         for (BlueprintComponentConfigProvider provider : blueprintComponentConfigProviders) {
             if (blueprintProcessor.componentsExistsInBlueprint(provider.components()) || provider.additionalCriteria(source, blueprintText)) {

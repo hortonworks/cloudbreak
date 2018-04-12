@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.blueprint.hbase;
 
 import com.google.common.collect.Sets;
-import com.sequenceiq.cloudbreak.templateprocessor.processor.PreparationObject;
+import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplateTextProcessor;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
@@ -39,7 +39,7 @@ public class HbaseConfigProviderTest {
     public void testCustomTextManipulationWhenThereAreMissingHbaseClients() throws IOException {
         String blueprintText = FileReaderUtils.readFileFromClasspath("blueprints-jackson/bp-kerberized-test.bp");
 
-        PreparationObject object = PreparationObject.Builder.builder().build();
+        TemplatePreparationObject object = TemplatePreparationObject.Builder.builder().build();
         Set<String> masters = Sets.newHashSet("master", "slave_1", "slave_2", "compute");
         Set<String> clients = Sets.newHashSet("slave_1", "slave_2", "compute_1");
         Set<String> missing = Sets.newHashSet("master", "compute");
@@ -62,7 +62,7 @@ public class HbaseConfigProviderTest {
     public void testCustomTextManipulationWhenThereAreNoMissingHbaseClients() throws IOException {
         String blueprintText = FileReaderUtils.readFileFromClasspath("blueprints-jackson/bp-kerberized-test.bp");
 
-        PreparationObject object = PreparationObject.Builder.builder().build();
+        TemplatePreparationObject object = TemplatePreparationObject.Builder.builder().build();
         Set<String> masters = Sets.newHashSet("master", "slave_1", "slave_2", "compute");
         Set<String> clients = Sets.newHashSet("master", "slave_1", "slave_2", "compute");
         Set<String> missing = Sets.newHashSet();

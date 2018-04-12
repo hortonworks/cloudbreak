@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.blueprint.moduletest;
 
 import com.sequenceiq.cloudbreak.blueprint.filesystem.BlueprintTestUtil;
-import com.sequenceiq.cloudbreak.templateprocessor.processor.PreparationObject;
+import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplateProcessingException;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import org.junit.Rule;
@@ -28,39 +28,39 @@ public class CentralBlueprintUpdaterNegativeInputTest extends CentralBlueprintCo
         String dummyHostGroupName = "dummy";
         expectedException.expect(TemplateProcessingException.class);
         expectedException.expectMessage(String.format("There is no such host group as \"%s\"", dummyHostGroupName));
-        PreparationObject model = getExtendedPreparedBlueprintBuilder("wrong-hostnames-in-model.bp", dummyHostGroupName).build();
+        TemplatePreparationObject model = getExtendedPreparedBlueprintBuilder("wrong-hostnames-in-model.bp", dummyHostGroupName).build();
         getUnderTest().getBlueprintText(model);
     }
 
     @Test
     public void testForMissingHostGroupNodeInBlueprint() throws IOException {
         expectedException.expect(TemplateProcessingException.class);
-        PreparationObject model = getExtendedPreparedBlueprintBuilder("missing-hostgroups.bp").build();
+        TemplatePreparationObject model = getExtendedPreparedBlueprintBuilder("missing-hostgroups.bp").build();
         getUnderTest().getBlueprintText(model);
     }
 
     @Test
     public void testForMissingBlueprintsBlockInBlueprint() throws IOException {
         expectedException.expect(TemplateProcessingException.class);
-        PreparationObject model = getExtendedPreparedBlueprintBuilder("missing-blueprints-block.bp").build();
+        TemplatePreparationObject model = getExtendedPreparedBlueprintBuilder("missing-blueprints-block.bp").build();
         getUnderTest().getBlueprintText(model);
     }
 
     @Test
     public void testForEmptyJsonInputAsBlueprintText() throws IOException {
         expectedException.expect(TemplateProcessingException.class);
-        PreparationObject model = getExtendedPreparedBlueprintBuilder("empty-blueprint.bp").build();
+        TemplatePreparationObject model = getExtendedPreparedBlueprintBuilder("empty-blueprint.bp").build();
         getUnderTest().getBlueprintText(model);
     }
 
     @Test
     public void testInvalidJsonInput() throws IOException {
         expectedException.expect(TemplateProcessingException.class);
-        PreparationObject model = getExtendedPreparedBlueprintBuilder("invalid-json.bp").build();
+        TemplatePreparationObject model = getExtendedPreparedBlueprintBuilder("invalid-json.bp").build();
         getUnderTest().getBlueprintText(model);
     }
 
-    private PreparationObject.Builder getExtendedPreparedBlueprintBuilder(String fileName, String... hosts) throws IOException {
+    private TemplatePreparationObject.Builder getExtendedPreparedBlueprintBuilder(String fileName, String... hosts) throws IOException {
         return getPreparedBuilder(hosts)
                 .withBlueprintView(BlueprintTestUtil.generalBlueprintView(getBlueprintTextFromFile(fileName), "2.6", "HDP"));
     }

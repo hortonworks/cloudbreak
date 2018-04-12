@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.blueprint.hadoop;
 
 import com.sequenceiq.cloudbreak.blueprint.BlueprintComponentConfigProvider;
 import com.sequenceiq.cloudbreak.blueprint.ConfigService;
-import com.sequenceiq.cloudbreak.templateprocessor.processor.PreparationObject;
+import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplateTextProcessor;
 import com.sequenceiq.cloudbreak.templateprocessor.configuration.HostgroupConfigurations;
 import com.sequenceiq.cloudbreak.templateprocessor.configuration.SiteConfigurations;
@@ -20,7 +20,7 @@ public class HadoopConfigurationService implements BlueprintComponentConfigProvi
     private ConfigService configService;
 
     @Override
-    public TemplateTextProcessor customTextManipulation(PreparationObject source, TemplateTextProcessor blueprintProcessor) {
+    public TemplateTextProcessor customTextManipulation(TemplatePreparationObject source, TemplateTextProcessor blueprintProcessor) {
         Map<String, Map<String, Map<String, String>>> hostGroupConfig =
                 configService.getHostGroupConfiguration(blueprintProcessor, source.getHostgroupViews());
         HostgroupConfigurations hostgroupConfigurations = HostgroupConfigurations.fromMap(hostGroupConfig);
@@ -34,7 +34,7 @@ public class HadoopConfigurationService implements BlueprintComponentConfigProvi
     }
 
     @Override
-    public boolean additionalCriteria(PreparationObject source, String blueprintProcessor) {
+    public boolean additionalCriteria(TemplatePreparationObject source, String blueprintProcessor) {
         return !source.getBlueprintView().isHdf();
     }
 

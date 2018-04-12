@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.blueprint;
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.domain.Cluster;
-import com.sequenceiq.cloudbreak.templateprocessor.processor.PreparationObject;
+import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplateProcessingException;
 import com.sequenceiq.cloudbreak.templateprocessor.template.TemplateProcessor;
 import com.sequenceiq.cloudbreak.templateprocessor.template.views.BlueprintView;
@@ -39,7 +39,7 @@ public class CentralBlueprintUpdaterTest {
     @InjectMocks
     private CentralBlueprintUpdater underTest;
 
-    private PreparationObject object;
+    private TemplatePreparationObject object;
 
     private String testBlueprint;
 
@@ -50,7 +50,7 @@ public class CentralBlueprintUpdaterTest {
         Cluster cluster = TestUtil.cluster();
         cluster.getBlueprint().setBlueprintText(testBlueprint);
 
-        object = PreparationObject.Builder.builder()
+        object = TemplatePreparationObject.Builder.builder()
                 .withBlueprintView(new BlueprintView(TestUtil.blueprint().getBlueprintText(), Maps.newHashMap(), "HDP", "2.6"))
                 .build();
     }

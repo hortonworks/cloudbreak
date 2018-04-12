@@ -8,7 +8,7 @@ import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterCache;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.cloudbreak.templateprocessor.processor.PreparationObject;
+import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplatePreparationObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -223,7 +223,7 @@ public class StackV2Controller extends NotificationController implements StackV2
         IdentityUser user = authenticatedUserService.getCbUser();
         stackRequest.setAccount(user.getAccount());
         stackRequest.setOwner(user.getUserId());
-        PreparationObject blueprintPreparationObject = conversionService.convert(stackRequest, PreparationObject.class);
+        TemplatePreparationObject blueprintPreparationObject = conversionService.convert(stackRequest, TemplatePreparationObject.class);
         String blueprintText = centralBlueprintUpdater.getBlueprintText(blueprintPreparationObject);
         return new GeneratedBlueprintResponse(blueprintText);
     }

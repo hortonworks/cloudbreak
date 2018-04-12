@@ -13,7 +13,7 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
-public class PreparationObject {
+public class TemplatePreparationObject {
 
     private final GatewayView gatewayView;
 
@@ -39,7 +39,7 @@ public class PreparationObject {
 
     private final Optional<FlexSubscription> flexSubscription;
 
-    private PreparationObject(PreparationObject.Builder builder) {
+    private TemplatePreparationObject(TemplatePreparationObject.Builder builder) {
         this.rdsConfigs = builder.rdsConfigs;
         this.hostgroupViews = builder.hostgroupViews;
         this.stackRepoDetailsHdpVersion = builder.stackRepoDetailsHdpVersion;
@@ -212,8 +212,8 @@ public class PreparationObject {
             return this;
         }
 
-        public PreparationObject build() {
-            return new PreparationObject(this);
+        public TemplatePreparationObject build() {
+            return new TemplatePreparationObject(this);
         }
     }
 }

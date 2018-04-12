@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.blueprint.mysql;
 
 import com.sequenceiq.cloudbreak.blueprint.BlueprintComponentConfigProvider;
-import com.sequenceiq.cloudbreak.templateprocessor.processor.PreparationObject;
+import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplateTextProcessor;
 import org.slf4j.Logger;
@@ -18,13 +18,13 @@ public class MysqlConfigProvider implements BlueprintComponentConfigProvider {
     private TemplateProcessorFactory blueprintProcessorFactory;
 
     @Override
-    public TemplateTextProcessor customTextManipulation(PreparationObject source, TemplateTextProcessor blueprintProcessor) {
+    public TemplateTextProcessor customTextManipulation(TemplatePreparationObject source, TemplateTextProcessor blueprintProcessor) {
         LOGGER.info("MYSQL_SERVER exists in Blueprint");
         return blueprintProcessor.removeComponentFromBlueprint("MYSQL_SERVER");
     }
 
     @Override
-    public boolean additionalCriteria(PreparationObject source, String blueprintText) {
+    public boolean additionalCriteria(TemplatePreparationObject source, String blueprintText) {
         return source.getRdsConfigs() != null
                 && !source.getRdsConfigs().isEmpty()
                 && blueprintProcessorFactory.get(blueprintText).componentExistsInBlueprint("MYSQL_SERVER");

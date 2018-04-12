@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.blueprint;
 
 import com.google.common.collect.Maps;
-import com.sequenceiq.cloudbreak.templateprocessor.processor.PreparationObject;
+import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplateProcessingException;
 import com.sequenceiq.cloudbreak.templateprocessor.template.TemplateProcessor;
 import groovyx.net.http.HttpResponseException;
@@ -26,7 +26,7 @@ public class CentralBlueprintUpdater {
     @Inject
     private BlueprintComponentProviderProcessor blueprintComponentProviderProcessor;
 
-    public String getBlueprintText(PreparationObject source) throws TemplateProcessingException, HttpResponseException {
+    public String getBlueprintText(TemplatePreparationObject source) throws TemplateProcessingException, HttpResponseException {
         String blueprintText = source.getBlueprintView().getBlueprintText();
         try {
             blueprintText = updateBlueprintConfiguration(source, blueprintText);
@@ -38,7 +38,7 @@ public class CentralBlueprintUpdater {
         return blueprintText;
     }
 
-    private String updateBlueprintConfiguration(PreparationObject source, String blueprint)
+    private String updateBlueprintConfiguration(TemplatePreparationObject source, String blueprint)
             throws IOException {
         blueprint = blueprintTemplateProcessor.process(blueprint, source, Maps.newHashMap());
         blueprint = blueprintSegmentProcessor.process(blueprint, source);

@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.blueprint;
 
-import com.sequenceiq.cloudbreak.templateprocessor.processor.PreparationObject;
+import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplateTextProcessor;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import org.junit.Assert;
@@ -14,7 +14,7 @@ public class BlueprintComponentConfigProviderTest {
     public void testBlueprintComponentConfigProviderTestWhenSimpleImplementationExist() throws IOException {
         String blueprintText = FileReaderUtils.readFileFromClasspath("blueprints-jackson/bp-kerberized-test.bp");
 
-        PreparationObject object = PreparationObject.Builder.builder().build();
+        TemplatePreparationObject object = TemplatePreparationObject.Builder.builder().build();
 
         BlueprintComponentConfigProviderTestImpl blueprintComponentConfigProviderTest = new BlueprintComponentConfigProviderTestImpl();
 

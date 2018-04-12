@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.blueprint.hbase;
 
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintComponentConfigProvider;
-import com.sequenceiq.cloudbreak.templateprocessor.processor.PreparationObject;
+import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplateTextProcessor;
 import org.slf4j.Logger;
@@ -22,7 +22,7 @@ public class HbaseConfigProvider implements BlueprintComponentConfigProvider {
     private TemplateProcessorFactory blueprintProcessorFactory;
 
     @Override
-    public TemplateTextProcessor customTextManipulation(PreparationObject source, TemplateTextProcessor blueprintProcessor) {
+    public TemplateTextProcessor customTextManipulation(TemplatePreparationObject source, TemplateTextProcessor blueprintProcessor) {
         Set<String> hbaseMasters = blueprintProcessor.getHostGroupsWithComponent("HBASE_MASTER");
         Set<String> hbaseClients = blueprintProcessor.getHostGroupsWithComponent("HBASE_CLIENT");
 

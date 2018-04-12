@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.blueprint;
 
 import com.google.common.collect.Lists;
-import com.sequenceiq.cloudbreak.templateprocessor.processor.PreparationObject;
+import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplateTextProcessor;
 import com.sequenceiq.cloudbreak.templateprocessor.template.TemplateProcessor;
@@ -45,7 +45,7 @@ public class BlueprintSegmentProcessorTest {
 
     private String expectedBlueprint;
 
-    private PreparationObject object = PreparationObject.Builder.builder().build();
+    private TemplatePreparationObject object = TemplatePreparationObject.Builder.builder().build();
 
     @Before
     public void before() throws IOException {
@@ -62,7 +62,7 @@ public class BlueprintSegmentProcessorTest {
         when(blueprintSegmentReader.collectAllConfigFile()).thenReturn(configFiles);
         when(blueprintSegmentReader.collectAllServiceFile()).thenReturn(serviceFiles);
         when(blueprintProcessor.componentsExistsInBlueprint(anySet())).thenReturn(true);
-        when(blueprintTemplateProcessor.process(anyString(), any(PreparationObject.class), anyMap())).thenReturn(expectedBlueprint);
+        when(blueprintTemplateProcessor.process(anyString(), any(TemplatePreparationObject.class), anyMap())).thenReturn(expectedBlueprint);
         when(blueprintProcessor.addConfigEntryStringToBlueprint(anyString(), anyBoolean())).thenReturn(blueprintProcessor);
         when(blueprintProcessor.asText()).thenReturn(expectedBlueprint);
         when(blueprintProcessorFactory.get(anyString())).thenReturn(blueprintProcessor);

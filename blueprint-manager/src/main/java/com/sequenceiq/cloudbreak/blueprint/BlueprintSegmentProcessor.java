@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.blueprint;
 
-import com.sequenceiq.cloudbreak.templateprocessor.processor.PreparationObject;
+import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.templateprocessor.processor.TemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.templateprocessor.template.TemplateProcessor;
 import com.sequenceiq.cloudbreak.templateprocessor.templates.RelatedServices;
@@ -39,7 +39,7 @@ public class BlueprintSegmentProcessor {
     @Inject
     private TemplateProcessorFactory blueprintProcessorFactory;
 
-    public String process(String blueprintText, PreparationObject source) {
+    public String process(String blueprintText, TemplatePreparationObject source) {
         Map<String, Object> customProperties = new HashMap<>();
         AtomicReference<String> resultBlueprint = new AtomicReference<>(blueprintText);
 
@@ -91,7 +91,7 @@ public class BlueprintSegmentProcessor {
         return value.getFiles().stream().filter(item -> !item.endsWith(SERVICES_JSON)).collect(Collectors.toList());
     }
 
-    private String prepareContent(final String filePath, PreparationObject source, Map<String, Object> configs) {
+    private String prepareContent(final String filePath, TemplatePreparationObject source, Map<String, Object> configs) {
         String result;
         String content = readFileFromClasspathQuietly(filePath);
         try {
