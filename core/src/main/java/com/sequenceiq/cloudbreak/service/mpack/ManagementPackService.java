@@ -28,7 +28,7 @@ public class ManagementPackService {
     @Inject
     private AuthorizationService authorizationService;
 
-    public Set<ManagementPack> retrievePrivateRdsConfigs(IdentityUser user) {
+    public Set<ManagementPack> retrievePrivateManagementPacks(IdentityUser user) {
         return mpackRepository.findByOwner(user.getUserId());
     }
 

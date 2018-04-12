@@ -53,7 +53,7 @@ public class ManagementPackController extends NotificationController implements 
     @Override
     public Set<ManagementPackResponse> getPrivates() {
         IdentityUser user = authenticatedUserService.getCbUser();
-        Set<ManagementPack> mpacks = mpackService.retrievePrivateRdsConfigs(user);
+        Set<ManagementPack> mpacks = mpackService.retrievePrivateManagementPacks(user);
         return toJsonList(mpacks);
     }
 
