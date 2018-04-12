@@ -81,7 +81,7 @@ public class AzureCloudProvider extends CloudProviderHelper {
     @Override
     public String getClusterName() {
         String clustername = getTestParameter().get("azureClusterName");
-        return clustername == null ? AZURE_CLUSTER_DEFAULT_NAME : clustername;
+        return String.join(clustername == null ? AZURE_CLUSTER_DEFAULT_NAME : clustername, getClusterNamePostfix());
     }
 
     @Override

@@ -42,7 +42,7 @@ public class RegionTests extends CloudbreakTest {
             LOGGER.info("{} provider already set - running from factory test", cloudProvider);
             return;
         }
-        cloudProvider = CloudProviderHelper.providerFactory(provider, getTestParameter())[0];
+        cloudProvider = CloudProviderHelper.providerFactory(provider, getTestParameter());
     }
 
     @AfterTest

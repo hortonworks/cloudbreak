@@ -57,6 +57,21 @@ public class ImageCatalog extends ImageCatalogEntity {
         return new Action<>(getNew(), ImageCatalogAction::getAll);
     }
 
+    public static Action<ImageCatalog> getImagesByProvider() {
+        return new Action<>(getNew(), ImageCatalogAction::getImagesByProvider); }
+
+    public static Action<ImageCatalog> getImagesByProviderFromImageCatalog(String key) {
+        return new Action<>(getTestContext(key),  ImageCatalogAction::getImagesByProviderFromImageCatalog); }
+
+    public static Action<ImageCatalog> getImagesByProviderFromImageCatalog() {
+        return getImagesByProviderFromImageCatalog(IMAGE_CATALOG); }
+
+    public static Action<ImageCatalog> getRequestFromName(String key) {
+        return new Action<>(getTestContext(key), ImageCatalogAction::getRequestByName); }
+
+    public static Action<ImageCatalog> getRequestFromName() {
+        return getRequestFromName(IMAGE_CATALOG); }
+
     public static Action<ImageCatalog> delete(String key) {
         return new Action<>(getTestContext(key), ImageCatalogAction::delete);
     }
@@ -70,7 +85,7 @@ public class ImageCatalog extends ImageCatalogEntity {
     }
 
     public static Action<ImageCatalog> setDefault(String key) {
-        return new Action<ImageCatalog>(getTestContext(key), ImageCatalogAction::putSetDefaultByName);
+        return new Action<>(getTestContext(key), ImageCatalogAction::putSetDefaultByName);
     }
 
     public static Action<ImageCatalog> setDefault() {
