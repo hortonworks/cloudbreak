@@ -2,13 +2,12 @@ package com.sequenceiq.cloudbreak.api.model;
 
 import java.util.Collection;
 import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigRequest;
+import com.sequenceiq.cloudbreak.api.model.rds.RdsConfigRequestParameters;
 
 public enum DatabaseVendor {
     POSTGRES("postgres", "postgres", "Postgres", "org.postgresql.Driver", "postgresql", ""),
@@ -89,8 +88,8 @@ public enum DatabaseVendor {
     }
 
     public static Optional<DatabaseVendor> getVendorByJdbcUrl(RDSConfigRequest configRequest) {
-        Map<String, Object> parameters = getParameters(configRequest);
-        Optional<String> version = databaseVersion(parameters);
+        Optional<RdsConfigRequestParameters> rdsConfigRequestParameters = getParameters(configRequest);
+        Optional<String> version = databaseVersion(rdsConfigRequestParameters);
         for (DatabaseVendor vendor : values()) {
             if (configRequest.getConnectionURL().startsWith(String.format("jdbc:%s:", vendor.jdbcUrlDriverId))) {
                 if (vendor.versions.isEmpty()) {
@@ -108,19 +107,18 @@ public enum DatabaseVendor {
         return Optional.empty();
     }
 
-    private static Map<String, Object> getParameters(RDSConfigRequest configRequest) {
-        Map<String, Object> result = new HashMap<>();
+    private static Optional<RdsConfigRequestParameters> getParameters(RDSConfigRequest configRequest) {
         if (configRequest.getConnectionURL().contains(String.format("jdbc:%s:", ORACLE11.jdbcUrlDriverId))) {
-            result = configRequest.getOracleProperties();
+            return Optional.ofNullable(configRequest.getOracleParameters());
         }
-        return result;
+        return Optional.empty();
     }
 
-    private static Optional<String> databaseVersion(Map<String, Object> parameters) {
-        if (parameters.entrySet().isEmpty() || !parameters.containsKey("version")) {
-            return Optional.empty();
+    private static Optional<String> databaseVersion(Optional<RdsConfigRequestParameters> rdsConfigRequestParameters) {
+        if (rdsConfigRequestParameters.isPresent()) {
+            return Optional.of(rdsConfigRequestParameters.get().getVersion());
         } else {
-            return Optional.of(parameters.get("version").toString());
+            return Optional.empty();
         }
     }
 
