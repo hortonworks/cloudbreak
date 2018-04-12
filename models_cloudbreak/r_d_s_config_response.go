@@ -31,6 +31,11 @@ type RDSConfigResponse struct {
 	// Pattern: ^jdbc:(postgresql|mysql|oracle)://[-\w\.]*:\d{1,5}/?\w*
 	ConnectionURL *string `json:"connectionURL"`
 
+	// URL that points to the jar of the connection driver(connector)
+	// Max Length: 150
+	// Min Length: 4
+	ConnectorJarURL string `json:"connectorJarUrl,omitempty"`
+
 	// creation time of the resource in long
 	CreationDate int64 `json:"creationDate,omitempty"`
 
@@ -68,6 +73,8 @@ type RDSConfigResponse struct {
 
 /* polymorph RDSConfigResponse connectionURL false */
 
+/* polymorph RDSConfigResponse connectorJarUrl false */
+
 /* polymorph RDSConfigResponse creationDate false */
 
 /* polymorph RDSConfigResponse databaseEngine false */
@@ -97,6 +104,11 @@ func (m *RDSConfigResponse) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateConnectionURL(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateConnectorJarURL(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -151,6 +163,23 @@ func (m *RDSConfigResponse) validateConnectionURL(formats strfmt.Registry) error
 	}
 
 	if err := validate.Pattern("connectionURL", "body", string(*m.ConnectionURL), `^jdbc:(postgresql|mysql|oracle)://[-\w\.]*:\d{1,5}/?\w*`); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *RDSConfigResponse) validateConnectorJarURL(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.ConnectorJarURL) { // not required
+		return nil
+	}
+
+	if err := validate.MinLength("connectorJarUrl", "body", string(m.ConnectorJarURL), 4); err != nil {
+		return err
+	}
+
+	if err := validate.MaxLength("connectorJarUrl", "body", string(m.ConnectorJarURL), 150); err != nil {
 		return err
 	}
 

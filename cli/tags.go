@@ -6,6 +6,7 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/hortonworks/cb-cli/cli/utils"
 	"github.com/hortonworks/cb-cli/client_cloudbreak/v1accountpreferences"
+	"github.com/hortonworks/cb-cli/models_cloudbreak"
 	"github.com/urfave/cli"
 )
 
@@ -73,8 +74,19 @@ func addAccountTagsImpl(client accountTagsClient, key string, value string) {
 	if accountPref.DefaultTags == nil {
 		accountPref.DefaultTags = make(map[string]string)
 	}
+	accountPrefReq := &models_cloudbreak.AccountPreferencesRequest{
+		AllowedInstanceTypes:       accountPref.AllowedInstanceTypes,
+		ClusterTimeToLive:          accountPref.ClusterTimeToLive,
+		DefaultTags:                accountPref.DefaultTags,
+		MaxNumberOfClusters:        accountPref.MaxNumberOfClusters,
+		MaxNumberOfClustersPerUser: accountPref.MaxNumberOfClustersPerUser,
+		MaxNumberOfNodesPerCluster: accountPref.MaxNumberOfNodesPerCluster,
+		Platforms:                  accountPref.Platforms,
+		SmartsenseEnabled:          accountPref.SmartsenseEnabled,
+		UserTimeToLive:             accountPref.UserTimeToLive,
+	}
 	accountPref.DefaultTags[key] = value
-	_, err = client.PutAccountPreferencesEndpoint(v1accountpreferences.NewPutAccountPreferencesEndpointParams().WithBody(accountPref))
+	_, err = client.PutAccountPreferencesEndpoint(v1accountpreferences.NewPutAccountPreferencesEndpointParams().WithBody(accountPrefReq))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
@@ -88,8 +100,19 @@ func deleteAccountTagsImpl(client accountTagsClient, key string) {
 		utils.LogErrorAndExit(err)
 	}
 	accountPref := accountprefResp.Payload
+	accountPrefReq := &models_cloudbreak.AccountPreferencesRequest{
+		AllowedInstanceTypes:       accountPref.AllowedInstanceTypes,
+		ClusterTimeToLive:          accountPref.ClusterTimeToLive,
+		DefaultTags:                accountPref.DefaultTags,
+		MaxNumberOfClusters:        accountPref.MaxNumberOfClusters,
+		MaxNumberOfClustersPerUser: accountPref.MaxNumberOfClustersPerUser,
+		MaxNumberOfNodesPerCluster: accountPref.MaxNumberOfNodesPerCluster,
+		Platforms:                  accountPref.Platforms,
+		SmartsenseEnabled:          accountPref.SmartsenseEnabled,
+		UserTimeToLive:             accountPref.UserTimeToLive,
+	}
 	delete(accountPref.DefaultTags, key)
-	_, err = client.PutAccountPreferencesEndpoint(v1accountpreferences.NewPutAccountPreferencesEndpointParams().WithBody(accountPref))
+	_, err = client.PutAccountPreferencesEndpoint(v1accountpreferences.NewPutAccountPreferencesEndpointParams().WithBody(accountPrefReq))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}

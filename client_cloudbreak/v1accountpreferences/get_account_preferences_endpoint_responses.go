@@ -47,7 +47,7 @@ func NewGetAccountPreferencesEndpointOK() *GetAccountPreferencesEndpointOK {
 successful operation
 */
 type GetAccountPreferencesEndpointOK struct {
-	Payload *models_cloudbreak.AccountPreference
+	Payload *models_cloudbreak.AccountPreferencesResponse
 }
 
 func (o *GetAccountPreferencesEndpointOK) Error() string {
@@ -56,7 +56,7 @@ func (o *GetAccountPreferencesEndpointOK) Error() string {
 
 func (o *GetAccountPreferencesEndpointOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models_cloudbreak.AccountPreference)
+	o.Payload = new(models_cloudbreak.AccountPreferencesResponse)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {

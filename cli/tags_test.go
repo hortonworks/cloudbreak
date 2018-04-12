@@ -17,7 +17,7 @@ type mockAccountTagsClient struct {
 }
 
 func (*mockAccountTagsClient) GetAccountPreferencesEndpoint(params *v1accountpreferences.GetAccountPreferencesEndpointParams) (*v1accountpreferences.GetAccountPreferencesEndpointOK, error) {
-	resp := &models_cloudbreak.AccountPreference{
+	resp := &models_cloudbreak.AccountPreferencesResponse{
 		DefaultTags: map[string]string{
 			"key0": "val0",
 			"key1": "val1",
@@ -28,7 +28,7 @@ func (*mockAccountTagsClient) GetAccountPreferencesEndpoint(params *v1accountpre
 }
 
 func (m *mockAccountTagsClient) PutAccountPreferencesEndpoint(params *v1accountpreferences.PutAccountPreferencesEndpointParams) (*v1accountpreferences.PutAccountPreferencesEndpointOK, error) {
-	resp := &models_cloudbreak.AccountPreference{}
+	resp := &models_cloudbreak.AccountPreferencesResponse{}
 	m.params <- params.Body.DefaultTags
 	defer close(m.params)
 	return &v1accountpreferences.PutAccountPreferencesEndpointOK{Payload: resp}, nil

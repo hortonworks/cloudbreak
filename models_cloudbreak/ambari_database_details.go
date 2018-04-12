@@ -166,7 +166,7 @@ var ambariDatabaseDetailsTypeVendorPropEnum []interface{}
 
 func init() {
 	var res []string
-	if err := json.Unmarshal([]byte(`["POSTGRES","MYSQL","MARIADB","MSSQL","ORACLE","SQLANYWHERE","EMBEDDED"]`), &res); err != nil {
+	if err := json.Unmarshal([]byte(`["POSTGRES","MYSQL","MARIADB","MSSQL","ORACLE11","ORACLE12","SQLANYWHERE","EMBEDDED"]`), &res); err != nil {
 		panic(err)
 	}
 	for _, v := range res {
@@ -183,8 +183,10 @@ const (
 	AmbariDatabaseDetailsVendorMARIADB string = "MARIADB"
 	// AmbariDatabaseDetailsVendorMSSQL captures enum value "MSSQL"
 	AmbariDatabaseDetailsVendorMSSQL string = "MSSQL"
-	// AmbariDatabaseDetailsVendorORACLE captures enum value "ORACLE"
-	AmbariDatabaseDetailsVendorORACLE string = "ORACLE"
+	// AmbariDatabaseDetailsVendorORACLE11 captures enum value "ORACLE11"
+	AmbariDatabaseDetailsVendorORACLE11 string = "ORACLE11"
+	// AmbariDatabaseDetailsVendorORACLE12 captures enum value "ORACLE12"
+	AmbariDatabaseDetailsVendorORACLE12 string = "ORACLE12"
 	// AmbariDatabaseDetailsVendorSQLANYWHERE captures enum value "SQLANYWHERE"
 	AmbariDatabaseDetailsVendorSQLANYWHERE string = "SQLANYWHERE"
 	// AmbariDatabaseDetailsVendorEMBEDDED captures enum value "EMBEDDED"

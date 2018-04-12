@@ -65,7 +65,7 @@ for the put account preferences endpoint operation typically these are written t
 type PutAccountPreferencesEndpointParams struct {
 
 	/*Body*/
-	Body *models_cloudbreak.AccountPreference
+	Body *models_cloudbreak.AccountPreferencesRequest
 
 	timeout    time.Duration
 	Context    context.Context
@@ -106,13 +106,13 @@ func (o *PutAccountPreferencesEndpointParams) SetHTTPClient(client *http.Client)
 }
 
 // WithBody adds the body to the put account preferences endpoint params
-func (o *PutAccountPreferencesEndpointParams) WithBody(body *models_cloudbreak.AccountPreference) *PutAccountPreferencesEndpointParams {
+func (o *PutAccountPreferencesEndpointParams) WithBody(body *models_cloudbreak.AccountPreferencesRequest) *PutAccountPreferencesEndpointParams {
 	o.SetBody(body)
 	return o
 }
 
 // SetBody adds the body to the put account preferences endpoint params
-func (o *PutAccountPreferencesEndpointParams) SetBody(body *models_cloudbreak.AccountPreference) {
+func (o *PutAccountPreferencesEndpointParams) SetBody(body *models_cloudbreak.AccountPreferencesRequest) {
 	o.Body = body
 }
 
@@ -125,7 +125,7 @@ func (o *PutAccountPreferencesEndpointParams) WriteToRequest(r runtime.ClientReq
 	var res []error
 
 	if o.Body == nil {
-		o.Body = new(models_cloudbreak.AccountPreference)
+		o.Body = new(models_cloudbreak.AccountPreferencesRequest)
 	}
 
 	if err := r.SetBodyParam(o.Body); err != nil {

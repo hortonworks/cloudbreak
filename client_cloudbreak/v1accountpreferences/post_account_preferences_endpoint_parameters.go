@@ -65,7 +65,7 @@ for the post account preferences endpoint operation typically these are written 
 type PostAccountPreferencesEndpointParams struct {
 
 	/*Body*/
-	Body *models_cloudbreak.AccountPreference
+	Body *models_cloudbreak.AccountPreferencesRequest
 
 	timeout    time.Duration
 	Context    context.Context
@@ -106,13 +106,13 @@ func (o *PostAccountPreferencesEndpointParams) SetHTTPClient(client *http.Client
 }
 
 // WithBody adds the body to the post account preferences endpoint params
-func (o *PostAccountPreferencesEndpointParams) WithBody(body *models_cloudbreak.AccountPreference) *PostAccountPreferencesEndpointParams {
+func (o *PostAccountPreferencesEndpointParams) WithBody(body *models_cloudbreak.AccountPreferencesRequest) *PostAccountPreferencesEndpointParams {
 	o.SetBody(body)
 	return o
 }
 
 // SetBody adds the body to the post account preferences endpoint params
-func (o *PostAccountPreferencesEndpointParams) SetBody(body *models_cloudbreak.AccountPreference) {
+func (o *PostAccountPreferencesEndpointParams) SetBody(body *models_cloudbreak.AccountPreferencesRequest) {
 	o.Body = body
 }
 
@@ -125,7 +125,7 @@ func (o *PostAccountPreferencesEndpointParams) WriteToRequest(r runtime.ClientRe
 	var res []error
 
 	if o.Body == nil {
-		o.Body = new(models_cloudbreak.AccountPreference)
+		o.Body = new(models_cloudbreak.AccountPreferencesRequest)
 	}
 
 	if err := r.SetBodyParam(o.Body); err != nil {

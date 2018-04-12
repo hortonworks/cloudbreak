@@ -31,12 +31,20 @@ type RdsConfig struct {
 	// Required: true
 	ConnectionUserName *string `json:"connectionUserName"`
 
+	// URL that points to the jar of the connection driver(connector)
+	// Max Length: 150
+	// Min Length: 4
+	ConnectorJarURL string `json:"connectorJarUrl,omitempty"`
+
 	// Name of the RDS configuration resource
 	// Required: true
 	// Max Length: 50
 	// Min Length: 4
 	// Pattern: (^[a-z][-a-z0-9]*[a-z0-9]$)
 	Name *string `json:"name"`
+
+	// Oracle specific properties
+	OracleProperties map[string]interface{} `json:"oracleProperties,omitempty"`
 
 	// Type of RDS, aka the service name that will use the RDS like HIVE, DRUID, SUPERSET, RANGER, etc.
 	// Required: true
@@ -52,7 +60,11 @@ type RdsConfig struct {
 
 /* polymorph RdsConfig connectionUserName false */
 
+/* polymorph RdsConfig connectorJarUrl false */
+
 /* polymorph RdsConfig name false */
+
+/* polymorph RdsConfig oracleProperties false */
 
 /* polymorph RdsConfig type false */
 
@@ -71,6 +83,11 @@ func (m *RdsConfig) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateConnectionUserName(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateConnectorJarURL(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -116,6 +133,23 @@ func (m *RdsConfig) validateConnectionURL(formats strfmt.Registry) error {
 func (m *RdsConfig) validateConnectionUserName(formats strfmt.Registry) error {
 
 	if err := validate.Required("connectionUserName", "body", m.ConnectionUserName); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *RdsConfig) validateConnectorJarURL(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.ConnectorJarURL) { // not required
+		return nil
+	}
+
+	if err := validate.MinLength("connectorJarUrl", "body", string(m.ConnectorJarURL), 4); err != nil {
+		return err
+	}
+
+	if err := validate.MaxLength("connectorJarUrl", "body", string(m.ConnectorJarURL), 150); err != nil {
 		return err
 	}
 
