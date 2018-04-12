@@ -14,7 +14,7 @@ public class UpgradeTestFactory extends CloudbreakTest {
     @Factory
     @Parameters("providers")
     public Object[] clusterTestFactory(@Optional(GcpCloudProvider.GCP) String providers) {
-        CloudProvider[] cloudProviders = CloudProviderHelper.providerFactory(providers, getTestParameter());
+        CloudProvider[] cloudProviders = CloudProviderHelper.providersFactory(providers, getTestParameter());
         Object[] results = Arrays.stream(cloudProviders)
                 .map(provider->new UpgradeTests(provider, getTestParameter()))
                 .toArray();

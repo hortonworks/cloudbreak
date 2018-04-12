@@ -51,7 +51,7 @@ public class RdsClusterTests extends CloudbreakTest {
             LOGGER.info("cloud provider already set - running from factory test");
             return;
         }
-        cloudProvider = CloudProviderHelper.providerFactory(provider, getTestParameter())[0];
+        cloudProvider = CloudProviderHelper.providerFactory(provider, getTestParameter());
     }
 
     @BeforeTest

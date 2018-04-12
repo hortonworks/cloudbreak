@@ -81,7 +81,7 @@ public class GcpCloudProvider extends CloudProviderHelper {
     @Override
     public String getClusterName() {
         String clustername = getTestParameter().get("gcpClusterName");
-        return clustername == null ? GCP_CLUSTER_DEFAULT_NAME : clustername;
+        return String.join(clustername == null ? GCP_CLUSTER_DEFAULT_NAME : clustername, getClusterNamePostfix());
     }
 
     @Override

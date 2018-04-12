@@ -8,27 +8,27 @@ tests:
     parameters:
       provider: aws
     classes:
-      - name: com.sequenceiq.it.cloudbreak.ClusterTests
+      - name: com.sequenceiq.it.cloudbreak.ClusterTestsSimple
         excludedMethods:
           - testScaleCluster
   - name: openstack_cluster_test
     parameters:
       provider: openstack
     classes:
-      - name: com.sequenceiq.it.cloudbreak.ClusterTests
+      - name: com.sequenceiq.it.cloudbreak.ClusterTestsSimple
         excludedMethods:
           - testScaleCluster
   - name: azure_cluster_test
     parameters:
       provider: azure
     classes:
-      - name: com.sequenceiq.it.cloudbreak.ClusterTests
+      - name: com.sequenceiq.it.cloudbreak.ClusterTestsSimple
         excludedMethods:
           - testScaleCluster
   - name: gcp_cluster_test
     parameters:
       provider: gcp
     classes:
-      - name: com.sequenceiq.it.cloudbreak.ClusterTests
+      - name: com.sequenceiq.it.cloudbreak.ClusterTestsSimple
         excludedMethods:
           - testScaleCluster
