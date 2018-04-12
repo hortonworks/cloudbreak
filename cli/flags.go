@@ -653,6 +653,34 @@ var (
 			Usage: "[DEPRECATED] has no effect, use 'cb database test ...' command instead",
 		},
 	}
+	FLMpackURL = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "url",
+			Usage: "URL of the mpack",
+		},
+	}
+	FLMpackPurge = BoolFlag{
+		RequiredFlag: OPTIONAL,
+		BoolFlag: cli.BoolFlag{
+			Name:  "purge",
+			Usage: "purge existing resources specified in purge-list",
+		},
+	}
+	FLMpackPurgeList = StringFlag{
+		RequiredFlag: OPTIONAL,
+		StringFlag: cli.StringFlag{
+			Name:  "purge-list",
+			Usage: "comma separated list of resources to purge (stack-definitions,service-definitions,mpacks). By default (stack-definitions,mpacks) will be purged",
+		},
+	}
+	FLMpackForce = BoolFlag{
+		RequiredFlag: OPTIONAL,
+		BoolFlag: cli.BoolFlag{
+			Name:  "force",
+			Usage: "force install management pack",
+		},
+	}
 )
 
 type RequiredFlag struct {
