@@ -52,6 +52,8 @@ public class Notes {
             + "that can be used as the Hive Metastore.";
     public static final String PROXY_CONFIG_NOTES = "An proxy Configuration describe a connection to an external proxy server which provides internet access "
             + "cluster members. It's applied for package manager and Ambari too";
+    public static final String MANAGEMENT_PACK_NOTES = "An Apache Ambari Management Pack (Mpack) can bundle multiple service definitions, stack definitions, "
+            + "stack add-on service definitions, view definitions services so that releasing these artifacts don’t enforce an Apache Ambari release.";
 
     public static final String LDAP_CONFIG_NOTES = "LDAP server integration enables the user to provide"
             + " a central place to store usernames and passwords for the users of his/her clusters.";

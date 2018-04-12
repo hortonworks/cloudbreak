@@ -97,23 +97,29 @@ stop-service-registration:
     - enable: False
     - name: service-registration
 
-{% if salt['pillar.get']('hdp:stack:mpack') %}
+{% if salt['pillar.get']('hdp:mpacks') %}
+{% for mpack in salt['pillar.get']('hdp:mpacks') %}
 
-/opt/ambari-server/install-mpack.sh:
+{% if mpack.preInstalled == false %}
+
+/opt/ambari-server/install-mpack-{{loop.index}}.sh:
   file.managed:
     - makedirs: True
     - source: salt://ambari/scripts/install-mpack.sh
     - template: jinja
     - mode: 744
     - context:
-      mpack: {{ salt['pillar.get']('hdp:stack:mpack') }}
+      mpack: {{ mpack }}
 
-install_mpack:
+install_mpack_{{ loop.index }}:
   cmd.run:
-    - name: /opt/ambari-server/install-mpack.sh
+    - name: /opt/ambari-server/install-mpack-{{loop.index}}.sh
     - shell: /bin/bash
-    - unless: test -f /var/mpack_installed
+    - unless: grep {{ mpack.mpackUrl }} /var/mpack_installed
 
+{% endif %}
+
+{% endfor %}
 {% endif %}
 
 {% if not ambari.is_local_ldap %}

@@ -1,10 +1,12 @@
 package com.sequenceiq.cloudbreak.api.model;
 
-import javax.validation.constraints.NotNull;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.sequenceiq.cloudbreak.api.model.mpack.ManagementPackDetails;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.AmbariStackDetailsDescription;
 
 import io.swagger.annotations.ApiModel;
@@ -14,13 +16,10 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 public class AmbariStackDetailsJson implements JsonEntity {
-
-    @NotNull
-    @ApiModelProperty(value = AmbariStackDetailsDescription.STACK, required = true)
+    @ApiModelProperty(value = AmbariStackDetailsDescription.STACK)
     private String stack;
 
-    @NotNull
-    @ApiModelProperty(value = AmbariStackDetailsDescription.VERSION, required = true)
+    @ApiModelProperty(value = AmbariStackDetailsDescription.VERSION)
     private String version;
 
     @ApiModelProperty(AmbariStackDetailsDescription.OS)
@@ -41,8 +40,7 @@ public class AmbariStackDetailsJson implements JsonEntity {
     @ApiModelProperty(AmbariStackDetailsDescription.ENABLE_GPL_REPO)
     private boolean enableGplRepo;
 
-    @NotNull
-    @ApiModelProperty(value = AmbariStackDetailsDescription.VERIFY, required = true)
+    @ApiModelProperty(value = AmbariStackDetailsDescription.VERIFY)
     private Boolean verify;
 
     @ApiModelProperty(AmbariStackDetailsDescription.REPOSITORY_VERSION)
@@ -53,6 +51,9 @@ public class AmbariStackDetailsJson implements JsonEntity {
 
     @ApiModelProperty(AmbariStackDetailsDescription.MPACK_URL)
     private String mpackUrl;
+
+    @ApiModelProperty(AmbariStackDetailsDescription.MPACKS)
+    private List<ManagementPackDetails> mpacks = new ArrayList<>();
 
     public String getStack() {
         return stack;
@@ -140,6 +141,14 @@ public class AmbariStackDetailsJson implements JsonEntity {
 
     public void setMpackUrl(String mpackUrl) {
         this.mpackUrl = mpackUrl;
+    }
+
+    public List<ManagementPackDetails> getMpacks() {
+        return mpacks;
+    }
+
+    public void setMpacks(List<ManagementPackDetails> mpacks) {
+        this.mpacks = mpacks;
     }
 
     public boolean isEnableGplRepo() {
