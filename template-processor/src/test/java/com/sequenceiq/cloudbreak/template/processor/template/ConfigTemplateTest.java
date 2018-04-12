@@ -57,20 +57,12 @@ public class ConfigTemplateTest {
                         supersetRdsConfigWhenRdsPresentedThenShouldReturnWithRdsConfig()},
                 {"blueprints/configurations/superset/rds.handlebars", "configurations/superset/superset-without-rds.json",
                         supersetWithoutRdsConfigWhenRdsNotPresentedThenShouldReturnWithoutRdsConfig()},
-
-                // todo
                 {"blueprints/configurations/hadoop/ldap.handlebars", "configurations/hadoop/hadoop-with-ldap.json",
                         ldapConfigWhenLdapPresentedThenShouldReturnWithLdapConfig()},
-
-
                 {"blueprints/configurations/hadoop/ldap.handlebars", "configurations/hadoop/hadoop-without-ldap.json",
                         withoutLdapConfigWhenLdapNotPresentedThenShouldReturnWithoutLdapConfig()},
-
-                // todo
                 {"blueprints/configurations/hadoop/global.handlebars", "configurations/hadoop/global.json",
                         objectWithoutEverything()},
-
-
                 {"blueprints/configurations/hive/rds.handlebars", "configurations/hive/hive-with-rds.json",
                         hiveRdsConfigWhenRdsPresentedThenShouldReturnWithRdsConfig()},
                 {"blueprints/configurations/hive/rds.handlebars", "configurations/hive/hive-without-rds.json",
@@ -85,12 +77,8 @@ public class ConfigTemplateTest {
                         nifiConfigWhenHdfNotPresentedThenShouldReturnWithNotNifiConfig()},
                 {"blueprints/configurations/ranger/global.handlebars", "configurations/ranger/global.json",
                         objectWithoutEverything()},
-
-                // todo
                 {"blueprints/configurations/ranger/ldap.handlebars", "configurations/ranger/ranger-with-ldap.json",
                         ldapConfigWhenLdapPresentedThenShouldReturnWithLdapConfig()},
-
-
                 {"blueprints/configurations/ranger/ldap.handlebars", "configurations/ranger/ranger-without-ldap.json",
                         withoutLdapConfigWhenLdapNotPresentedThenShouldReturnWithoutLdapConfig()},
                 {"blueprints/configurations/ranger/rds.handlebars", "configurations/ranger/ranger-with-rds.json",
