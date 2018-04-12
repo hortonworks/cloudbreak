@@ -47,7 +47,7 @@ func CreateMpack(c *cli.Context) {
 
 func createMpackImpl(client mpackClient, name, description, url string, purge bool, purgeList string, force, public bool) {
 	defer utils.TimeTrack(time.Now(), "create management pack")
-	req := &models_cloudbreak.MpackRequest{
+	req := &models_cloudbreak.ManagementPackRequest{
 		Name:        &name,
 		Description: &description,
 		MpackURL:    &url,
@@ -56,7 +56,7 @@ func createMpackImpl(client mpackClient, name, description, url string, purge bo
 		Force:       &force,
 	}
 
-	var mpackResponse *models_cloudbreak.MpackResponse
+	var mpackResponse *models_cloudbreak.ManagementPackResponse
 	if public {
 		log.Infof("[createMpackImpl] sending create public management pack request with name: %s", name)
 		resp, err := client.PostPublicManagementPack(v1mpacks.NewPostPublicManagementPackParams().WithBody(req))

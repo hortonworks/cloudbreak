@@ -9,14 +9,14 @@ import (
 )
 
 type mockMpackClient struct {
-	postPublicCapture  *models_cloudbreak.MpackRequest
-	postPrivateCapture *models_cloudbreak.MpackRequest
+	postPublicCapture  *models_cloudbreak.ManagementPackRequest
+	postPrivateCapture *models_cloudbreak.ManagementPackRequest
 }
 
 func (m *mockMpackClient) PostPublicManagementPack(params *v1mpacks.PostPublicManagementPackParams) (*v1mpacks.PostPublicManagementPackOK, error) {
 	m.postPublicCapture = params.Body
 	return &v1mpacks.PostPublicManagementPackOK{
-		Payload: &models_cloudbreak.MpackResponse{
+		Payload: &models_cloudbreak.ManagementPackResponse{
 			ID:   1,
 			Name: &(&types.S{S: "mpack"}).S,
 		},
@@ -26,7 +26,7 @@ func (m *mockMpackClient) PostPublicManagementPack(params *v1mpacks.PostPublicMa
 func (m *mockMpackClient) PostPrivateManagementPack(params *v1mpacks.PostPrivateManagementPackParams) (*v1mpacks.PostPrivateManagementPackOK, error) {
 	m.postPrivateCapture = params.Body
 	return &v1mpacks.PostPrivateManagementPackOK{
-		Payload: &models_cloudbreak.MpackResponse{
+		Payload: &models_cloudbreak.ManagementPackResponse{
 			ID:   1,
 			Name: &(&types.S{S: "mpack"}).S,
 		},
@@ -36,7 +36,7 @@ func (m *mockMpackClient) PostPrivateManagementPack(params *v1mpacks.PostPrivate
 func (m *mockMpackClient) GetPublicManagementPacks(params *v1mpacks.GetPublicManagementPacksParams) (*v1mpacks.GetPublicManagementPacksOK, error) {
 	yes := true
 	resp := v1mpacks.GetPublicManagementPacksOK{
-		Payload: []*models_cloudbreak.MpackResponse{
+		Payload: []*models_cloudbreak.ManagementPackResponse{
 			{
 				Name:     &(&types.S{S: "mpack"}).S,
 				MpackURL: &(&types.S{S: "http://localhost/mpack.tar.gz"}).S,
@@ -151,7 +151,7 @@ func TestCreateMpackImplForPrivate(t *testing.T) {
 	checkReqParams(req, t)
 }
 
-func checkReqParams(req *models_cloudbreak.MpackRequest, t *testing.T) {
+func checkReqParams(req *models_cloudbreak.ManagementPackRequest, t *testing.T) {
 	if *req.Name != "mpack" {
 		t.Errorf("mpack name does not match %s == %s", *req.Name, "mpack")
 	}
