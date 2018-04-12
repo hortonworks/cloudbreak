@@ -11,6 +11,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javax.inject.Inject;
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.WebTarget;
@@ -27,6 +28,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloudbreak.client.RestClientUtil;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV2;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
@@ -44,6 +46,9 @@ public class CachedImageCatalogProvider {
 
     @Value("${cb.enabled.linux.types}")
     private List<String> enabledLinuxTypes;
+
+    @Inject
+    private ObjectMapper objectMapper;
 
     @Cacheable(cacheNames = "imageCatalogCache", key = "#catalogUrl")
     public CloudbreakImageCatalogV2 getImageCatalogV2(String catalogUrl) throws CloudbreakImageCatalogException {
@@ -112,8 +117,9 @@ public class CachedImageCatalogProvider {
                     target.getUri().toString(), response.getStatusInfo().getReasonPhrase()));
         } else {
             try {
-                catalog = response.readEntity(CloudbreakImageCatalogV2.class);
-            } catch (ProcessingException e) {
+                String responseContent = response.readEntity(String.class);
+                catalog = objectMapper.readValue(responseContent, CloudbreakImageCatalogV2.class);
+            } catch (IOException | ProcessingException e) {
                 throw new CloudbreakImageCatalogException(String.format("Failed to process image catalog from '%s' due to: '%s'",
                         target.getUri().toString(), e.getMessage()));
             }

@@ -16,7 +16,7 @@ init-{{ service }}-db:
     - name: /opt/salt/scripts/init_db.sh
     - runas: postgres
     - env:
-      - USER: {{ values['user'] }}
+      - DBUSER: {{ values['user'] }}
       - PASSWORD: {{ values['password'] }}
       - DATABASE:  {{ values['database'] }}
       - SERVICE: {{ service }}
