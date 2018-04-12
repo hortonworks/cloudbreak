@@ -32,6 +32,9 @@ public class RDSConfigResponse extends RDSConfigJson {
     @ApiModelProperty(value = ModelDescriptions.RDSConfig.CONNECTION_DRIVER_NAME, required = true)
     private String connectionDriver;
 
+    @ApiModelProperty(value = ModelDescriptions.RDSConfig.DB_ENGINE_DISPLAYNAME, required = true)
+    private String databaseEngineDisplayName;
+
     public Long getId() {
         return id;
     }
@@ -86,5 +89,13 @@ public class RDSConfigResponse extends RDSConfigJson {
 
     public void setConnectionDriver(String connectionDriver) {
         this.connectionDriver = connectionDriver;
+    }
+
+    public String getDatabaseEngineDisplayName() {
+        return databaseEngineDisplayName;
+    }
+
+    public void setDatabaseEngineDisplayName(String databaseEngineDisplayName) {
+        this.databaseEngineDisplayName = databaseEngineDisplayName;
     }
 }
