@@ -84,7 +84,7 @@ exports.getCluster = function(args, res, next) {
     "id" : 9
   } ],
   "scalingConfiguration" : {
-    "cooldown" : 1,
+    "cooldown" : 6,
     "minSize" : 1,
     "maxSize" : 1
   }
@@ -151,7 +151,7 @@ exports.getClusters = function(args, res, next) {
     "id" : 9
   } ],
   "scalingConfiguration" : {
-    "cooldown" : 1,
+    "cooldown" : 6,
     "minSize" : 1,
     "maxSize" : 1
   }
@@ -220,7 +220,7 @@ exports.modifyCluster = function(args, res, next) {
     "id" : 9
   } ],
   "scalingConfiguration" : {
-    "cooldown" : 1,
+    "cooldown" : 6,
     "minSize" : 1,
     "maxSize" : 1
   }
@@ -289,7 +289,7 @@ exports.setAutoscaleState = function(args, res, next) {
     "id" : 9
   } ],
   "scalingConfiguration" : {
-    "cooldown" : 1,
+    "cooldown" : 6,
     "minSize" : 1,
     "maxSize" : 1
   }
@@ -358,7 +358,7 @@ exports.setState = function(args, res, next) {
     "id" : 9
   } ],
   "scalingConfiguration" : {
-    "cooldown" : 1,
+    "cooldown" : 6,
     "minSize" : 1,
     "maxSize" : 1
   }

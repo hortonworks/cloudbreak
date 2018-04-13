@@ -22,7 +22,7 @@ exports.disableAutoscaleStateByCloudbreakCluster = function(args, res, next) {
   var examples = {};
   examples['application/json'] = {
   "port" : "aeiou",
-  "stackId" : 0,
+  "stackId" : args.cbClusterId.value,
   "host" : "aeiou",
   "metricAlerts" : [ {
     "scalingPolicy" : {
@@ -66,7 +66,7 @@ exports.disableAutoscaleStateByCloudbreakCluster = function(args, res, next) {
     "id" : 9
   } ],
   "scalingConfiguration" : {
-    "cooldown" : 1,
+    "cooldown" : 6,
     "minSize" : 1,
     "maxSize" : 1
   }
@@ -90,7 +90,7 @@ exports.enableAutoscaleStateByCloudbreakCluster = function(args, res, next) {
   var examples = {};
   examples['application/json'] = {
   "port" : "aeiou",
-  "stackId" : 0,
+  "stackId" : args.cbClusterId.value,
   "host" : "aeiou",
   "metricAlerts" : [ {
     "scalingPolicy" : {
@@ -134,14 +134,19 @@ exports.enableAutoscaleStateByCloudbreakCluster = function(args, res, next) {
     "id" : 9
   } ],
   "scalingConfiguration" : {
-    "cooldown" : 1,
+    "cooldown" : 6,
     "minSize" : 1,
     "maxSize" : 1
   }
 };
   if (Object.keys(examples).length > 0) {
     res.setHeader('Content-Type', 'application/json');
-    res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
+    if (args.cbClusterId.value == 4) {
+        var responseJson = require('../responses/clusters/4.json');
+        res.end(JSON.stringify(responseJson));
+    } else {
+        res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
+    }
   } else {
     res.end();
   }
@@ -158,7 +163,7 @@ exports.getByCloudbreakCluster = function(args, res, next) {
   var examples = {};
   examples['application/json'] = {
   "port" : "aeiou",
-  "stackId" : 0,
+  "stackId" : args.cbClusterId.value,
   "host" : "aeiou",
   "metricAlerts" : [ {
     "scalingPolicy" : {
@@ -202,14 +207,33 @@ exports.getByCloudbreakCluster = function(args, res, next) {
     "id" : 9
   } ],
   "scalingConfiguration" : {
-    "cooldown" : 1,
+    "cooldown" : 6,
     "minSize" : 1,
     "maxSize" : 1
   }
 };
   if (Object.keys(examples).length > 0) {
     res.setHeader('Content-Type', 'application/json');
-    res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
+      switch(args.cbClusterId.value){
+          case 1:
+            var responseJson = require('../responses/clusters/1.json');
+            res.end(JSON.stringify(responseJson));
+            break;
+          case 2:
+            var responseJson = require('../responses/clusters/2.json');
+            res.end(JSON.stringify(responseJson));
+            break;
+          case 3:
+            var responseJson = require('../responses/clusters/3.json');
+            res.end(JSON.stringify(responseJson));
+            break;
+          case 4:
+            var responseJson = require('../responses/clusters/4.json');
+            res.end(JSON.stringify(responseJson));
+            break;
+          default:
+            res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
+      }
   } else {
     res.end();
   }
@@ -227,7 +251,7 @@ exports.modifyByCloudbreakCluster = function(args, res, next) {
   var examples = {};
   examples['application/json'] = {
   "port" : "aeiou",
-  "stackId" : 0,
+  "stackId" : args.cbClusterId.value,
   "host" : "aeiou",
   "metricAlerts" : [ {
     "scalingPolicy" : {
@@ -271,7 +295,7 @@ exports.modifyByCloudbreakCluster = function(args, res, next) {
     "id" : 9
   } ],
   "scalingConfiguration" : {
-    "cooldown" : 1,
+    "cooldown" : 6,
     "minSize" : 1,
     "maxSize" : 1
   }
@@ -295,7 +319,7 @@ exports.runByCloudbreakCluster = function(args, res, next) {
   var examples = {};
   examples['application/json'] = {
   "port" : "aeiou",
-  "stackId" : 0,
+  "stackId" : args.cbClusterId.value,
   "host" : "aeiou",
   "metricAlerts" : [ {
     "scalingPolicy" : {
@@ -339,7 +363,7 @@ exports.runByCloudbreakCluster = function(args, res, next) {
     "id" : 9
   } ],
   "scalingConfiguration" : {
-    "cooldown" : 1,
+    "cooldown" : 6,
     "minSize" : 1,
     "maxSize" : 1
   }
@@ -407,7 +431,7 @@ exports.suspendByCloudbreakCluster = function(args, res, next) {
     "id" : 9
   } ],
   "scalingConfiguration" : {
-    "cooldown" : 1,
+    "cooldown" : 6,
     "minSize" : 1,
     "maxSize" : 1
   }

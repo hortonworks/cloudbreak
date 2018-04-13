@@ -10,7 +10,7 @@ exports.checkClientVersion = function(args, res, next) {
    **/
   var examples = {};
   examples['application/json'] = {
-  "versionCheckOk" : false,
+  "versionCheckOk" : true,
   "message" : "aeiou"
 };
   if (Object.keys(examples).length > 0) {

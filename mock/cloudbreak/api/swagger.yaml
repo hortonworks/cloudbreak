@@ -20,6 +20,7 @@ basePath: "/cb"
 tags:
 - name: "info"
 - name: "health"
+- name: "periscopehealth"
 - name: "v1events"
 - name: "v1proxyconfigs"
 - name: "v2stacks"
@@ -95,6 +96,27 @@ paths:
           schema:
             $ref: "#/definitions/Info"
       x-swagger-router-controller: "Info"  
+  /periscopehealth:
+    get:
+      tags:
+      - "periscopehealth"
+      summary: "retrieve Periscope server status for user"
+      description: "Periscope server status."
+      operationId: "getPeriscopeHealth"
+      schemes:
+      - "http"
+      - "https"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters: []
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/Info"
+      x-swagger-router-controller: "Info"
   /api/v1/accountpreferences:
     get:
       tags:
