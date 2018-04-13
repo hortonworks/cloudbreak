@@ -44,6 +44,9 @@ type ClusterV2Request struct {
 	// RDS configuration names for the cluster
 	// Unique: true
 	RdsConfigNames []string `json:"rdsConfigNames"`
+
+	// Shared service request
+	SharedService *SharedService `json:"sharedService,omitempty"`
 }
 
 /* polymorph ClusterV2Request ambari false */
@@ -61,6 +64,8 @@ type ClusterV2Request struct {
 /* polymorph ClusterV2Request proxyName false */
 
 /* polymorph ClusterV2Request rdsConfigNames false */
+
+/* polymorph ClusterV2Request sharedService false */
 
 // Validate validates this cluster v2 request
 func (m *ClusterV2Request) Validate(formats strfmt.Registry) error {
@@ -82,6 +87,11 @@ func (m *ClusterV2Request) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateRdsConfigNames(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateSharedService(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -179,6 +189,25 @@ func (m *ClusterV2Request) validateRdsConfigNames(formats strfmt.Registry) error
 
 	if err := validate.UniqueItems("rdsConfigNames", "body", m.RdsConfigNames); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func (m *ClusterV2Request) validateSharedService(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.SharedService) { // not required
+		return nil
+	}
+
+	if m.SharedService != nil {
+
+		if err := m.SharedService.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("sharedService")
+			}
+			return err
+		}
 	}
 
 	return nil

@@ -681,6 +681,13 @@ var (
 			Usage: "force install management pack",
 		},
 	}
+	FlRdsConnectorJarURLOptional = StringFlag{
+		RequiredFlag: OPTIONAL,
+		StringFlag: cli.StringFlag{
+			Name:  "connector-jar-url",
+			Usage: "URL of the jdbc jar file",
+		},
+	}
 )
 
 type RequiredFlag struct {

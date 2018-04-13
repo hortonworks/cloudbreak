@@ -1261,15 +1261,57 @@ func main() {
 			Usage: "database management related operations",
 			Subcommands: []cli.Command{
 				{
-					Name:   "create",
-					Usage:  "create a new database configuration",
-					Flags:  cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlRdsUserName, cb.FlRdsPassword, cb.FlRdsURL, cb.FlRdsDriverOptional, cb.FlRdsDatabaseEngineOptional, cb.FlRdsType, cb.FlRdsValidatedOptional).AddAuthenticationFlags().Build(),
-					Before: ConfigRead,
-					Action: cb.CreateRds,
-					BashComplete: func(c *cli.Context) {
-						for _, f := range cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlRdsUserName, cb.FlRdsPassword, cb.FlRdsURL, cb.FlRdsDriverOptional, cb.FlRdsDatabaseEngineOptional, cb.FlRdsType, cb.FlRdsValidatedOptional).AddAuthenticationFlags().Build() {
-							printFlagCompletion(f)
-						}
+					Name:  "create",
+					Usage: "create a new database configuration",
+					Subcommands: []cli.Command{
+						{
+							Name:   "mysql",
+							Usage:  "create mysql database configuration",
+							Flags:  cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlRdsUserName, cb.FlRdsPassword, cb.FlRdsURL, cb.FlRdsDriverOptional, cb.FlRdsDatabaseEngineOptional, cb.FlRdsType, cb.FlRdsValidatedOptional, cb.FlRdsConnectorJarURLOptional).AddAuthenticationFlags().Build(),
+							Before: ConfigRead,
+							Action: cb.CreateRds,
+							BashComplete: func(c *cli.Context) {
+								for _, f := range cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlRdsUserName, cb.FlRdsPassword, cb.FlRdsURL, cb.FlRdsDriverOptional, cb.FlRdsDatabaseEngineOptional, cb.FlRdsType, cb.FlRdsValidatedOptional, cb.FlRdsConnectorJarURLOptional).AddAuthenticationFlags().Build() {
+									printFlagCompletion(f)
+								}
+							},
+						},
+						{
+							Name:   "oracle11",
+							Usage:  "create oracle 11 database configuration",
+							Flags:  cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlRdsUserName, cb.FlRdsPassword, cb.FlRdsURL, cb.FlRdsDriverOptional, cb.FlRdsDatabaseEngineOptional, cb.FlRdsType, cb.FlRdsValidatedOptional, cb.FlRdsConnectorJarURLOptional).AddAuthenticationFlags().Build(),
+							Before: ConfigRead,
+							Action: cb.CreateRdsOracle11,
+							BashComplete: func(c *cli.Context) {
+								for _, f := range cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlRdsUserName, cb.FlRdsPassword, cb.FlRdsURL, cb.FlRdsDriverOptional, cb.FlRdsDatabaseEngineOptional, cb.FlRdsType, cb.FlRdsValidatedOptional, cb.FlRdsConnectorJarURLOptional).AddAuthenticationFlags().Build() {
+									printFlagCompletion(f)
+								}
+							},
+						},
+						{
+							Name:   "oracle12",
+							Usage:  "create oracle 12 database configuration",
+							Flags:  cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlRdsUserName, cb.FlRdsPassword, cb.FlRdsURL, cb.FlRdsDriverOptional, cb.FlRdsDatabaseEngineOptional, cb.FlRdsType, cb.FlRdsValidatedOptional, cb.FlRdsConnectorJarURLOptional).AddAuthenticationFlags().Build(),
+							Before: ConfigRead,
+							Action: cb.CreateRdsOracle12,
+							BashComplete: func(c *cli.Context) {
+								for _, f := range cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlRdsUserName, cb.FlRdsPassword, cb.FlRdsURL, cb.FlRdsDriverOptional, cb.FlRdsDatabaseEngineOptional, cb.FlRdsType, cb.FlRdsValidatedOptional, cb.FlRdsConnectorJarURLOptional).AddAuthenticationFlags().Build() {
+									printFlagCompletion(f)
+								}
+							},
+						},
+						{
+							Name:   "postgres",
+							Usage:  "create postgres database configuration",
+							Flags:  cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlRdsUserName, cb.FlRdsPassword, cb.FlRdsURL, cb.FlRdsDriverOptional, cb.FlRdsDatabaseEngineOptional, cb.FlRdsType, cb.FlRdsValidatedOptional, cb.FlRdsConnectorJarURLOptional).AddAuthenticationFlags().Build(),
+							Before: ConfigRead,
+							Action: cb.CreateRds,
+							BashComplete: func(c *cli.Context) {
+								for _, f := range cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlRdsUserName, cb.FlRdsPassword, cb.FlRdsURL, cb.FlRdsDriverOptional, cb.FlRdsDatabaseEngineOptional, cb.FlRdsType, cb.FlRdsValidatedOptional, cb.FlRdsConnectorJarURLOptional).AddAuthenticationFlags().Build() {
+									printFlagCompletion(f)
+								}
+							},
+						},
 					},
 				},
 				{

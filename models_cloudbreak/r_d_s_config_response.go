@@ -33,8 +33,8 @@ type RDSConfigResponse struct {
 
 	// URL that points to the jar of the connection driver(connector)
 	// Max Length: 150
-	// Min Length: 4
-	ConnectorJarURL string `json:"connectorJarUrl,omitempty"`
+	// Min Length: 0
+	ConnectorJarURL *string `json:"connectorJarUrl,omitempty"`
 
 	// creation time of the resource in long
 	CreationDate int64 `json:"creationDate,omitempty"`
@@ -42,6 +42,10 @@ type RDSConfigResponse struct {
 	// Name of the external database engine (MYSQL, POSTGRES...)
 	// Required: true
 	DatabaseEngine *string `json:"databaseEngine"`
+
+	// Display name of the external database engine (Mysql, Postges...)
+	// Required: true
+	DatabaseEngineDisplayName *string `json:"databaseEngineDisplayName"`
 
 	// id of the resource
 	ID int64 `json:"id,omitempty"`
@@ -79,6 +83,8 @@ type RDSConfigResponse struct {
 
 /* polymorph RDSConfigResponse databaseEngine false */
 
+/* polymorph RDSConfigResponse databaseEngineDisplayName false */
+
 /* polymorph RDSConfigResponse id false */
 
 /* polymorph RDSConfigResponse name false */
@@ -114,6 +120,11 @@ func (m *RDSConfigResponse) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateDatabaseEngine(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateDatabaseEngineDisplayName(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -175,11 +186,11 @@ func (m *RDSConfigResponse) validateConnectorJarURL(formats strfmt.Registry) err
 		return nil
 	}
 
-	if err := validate.MinLength("connectorJarUrl", "body", string(m.ConnectorJarURL), 4); err != nil {
+	if err := validate.MinLength("connectorJarUrl", "body", string(*m.ConnectorJarURL), 0); err != nil {
 		return err
 	}
 
-	if err := validate.MaxLength("connectorJarUrl", "body", string(m.ConnectorJarURL), 150); err != nil {
+	if err := validate.MaxLength("connectorJarUrl", "body", string(*m.ConnectorJarURL), 150); err != nil {
 		return err
 	}
 
@@ -189,6 +200,15 @@ func (m *RDSConfigResponse) validateConnectorJarURL(formats strfmt.Registry) err
 func (m *RDSConfigResponse) validateDatabaseEngine(formats strfmt.Registry) error {
 
 	if err := validate.Required("databaseEngine", "body", m.DatabaseEngine); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *RDSConfigResponse) validateDatabaseEngineDisplayName(formats strfmt.Registry) error {
+
+	if err := validate.Required("databaseEngineDisplayName", "body", m.DatabaseEngineDisplayName); err != nil {
 		return err
 	}
 

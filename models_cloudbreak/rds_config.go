@@ -33,8 +33,8 @@ type RdsConfig struct {
 
 	// URL that points to the jar of the connection driver(connector)
 	// Max Length: 150
-	// Min Length: 4
-	ConnectorJarURL string `json:"connectorJarUrl,omitempty"`
+	// Min Length: 0
+	ConnectorJarURL *string `json:"connectorJarUrl,omitempty"`
 
 	// Name of the RDS configuration resource
 	// Required: true
@@ -150,11 +150,11 @@ func (m *RdsConfig) validateConnectorJarURL(formats strfmt.Registry) error {
 		return nil
 	}
 
-	if err := validate.MinLength("connectorJarUrl", "body", string(m.ConnectorJarURL), 4); err != nil {
+	if err := validate.MinLength("connectorJarUrl", "body", string(*m.ConnectorJarURL), 0); err != nil {
 		return err
 	}
 
-	if err := validate.MaxLength("connectorJarUrl", "body", string(m.ConnectorJarURL), 150); err != nil {
+	if err := validate.MaxLength("connectorJarUrl", "body", string(*m.ConnectorJarURL), 150); err != nil {
 		return err
 	}
 

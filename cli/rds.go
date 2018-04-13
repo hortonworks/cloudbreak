@@ -90,6 +90,42 @@ func testRdsByParamsImpl(client rdsClient, username string, password string, URL
 	}
 }
 
+func CreateRdsOracle11(c *cli.Context) {
+	checkRequiredFlagsAndArguments(c)
+	log.Infof("[CreateRdsOracle11] creating a database configuration")
+	cbClient := NewCloudbreakHTTPClientFromContext(c)
+	createRdsImpl(
+		cbClient.Cloudbreak.V1rdsconfigs,
+		c.String(FlName.Name),
+		c.String(FlRdsUserName.Name),
+		c.String(FlRdsPassword.Name),
+		c.String(FlRdsURL.Name),
+		c.String(FlRdsType.Name),
+		c.String(FlRdsConnectorJarURLOptional.Name),
+		c.Bool(FlPublicOptional.Name),
+		&models_cloudbreak.Oracle{
+			Version: &(&types.S{S: "11"}).S,
+		})
+}
+
+func CreateRdsOracle12(c *cli.Context) {
+	checkRequiredFlagsAndArguments(c)
+	log.Infof("[CreateRdsOracle12] creating a database configuration")
+	cbClient := NewCloudbreakHTTPClientFromContext(c)
+	createRdsImpl(
+		cbClient.Cloudbreak.V1rdsconfigs,
+		c.String(FlName.Name),
+		c.String(FlRdsUserName.Name),
+		c.String(FlRdsPassword.Name),
+		c.String(FlRdsURL.Name),
+		c.String(FlRdsType.Name),
+		c.String(FlRdsConnectorJarURLOptional.Name),
+		c.Bool(FlPublicOptional.Name),
+		&models_cloudbreak.Oracle{
+			Version: &(&types.S{S: "12"}).S,
+		})
+}
+
 func CreateRds(c *cli.Context) {
 	checkRequiredFlagsAndArguments(c)
 	log.Infof("[CreateRds] creating a database configuration")
@@ -101,10 +137,12 @@ func CreateRds(c *cli.Context) {
 		c.String(FlRdsPassword.Name),
 		c.String(FlRdsURL.Name),
 		c.String(FlRdsType.Name),
-		c.Bool(FlPublicOptional.Name))
+		c.String(FlRdsConnectorJarURLOptional.Name),
+		c.Bool(FlPublicOptional.Name),
+		nil)
 }
 
-func createRdsImpl(client rdsClient, name string, username string, password string, URL string, rdsType string, public bool) {
+func createRdsImpl(client rdsClient, name string, username string, password string, URL string, rdsType string, jarURL string, public bool, oracle *models_cloudbreak.Oracle) {
 	defer utils.TimeTrack(time.Now(), "create database")
 	rdsRequest := &models_cloudbreak.RdsConfig{
 		Name:               &name,
@@ -112,6 +150,10 @@ func createRdsImpl(client rdsClient, name string, username string, password stri
 		ConnectionPassword: &password,
 		ConnectionURL:      &URL,
 		Type:               &rdsType,
+		ConnectorJarURL:    &jarURL,
+	}
+	if oracle != nil {
+		rdsRequest.OracleParameters = oracle
 	}
 	var rdsResponse *models_cloudbreak.RDSConfigResponse
 	if public {
