@@ -68,14 +68,14 @@ public class ImagesToImagesResponseJsonConverter extends AbstractConversionServi
         List<StackDetailsJson> defaultHdpStacks = getDefaultStackInfos(defaultHDPEntries.getEntries().values());
         List<StackDetailsJson> defaultHdfStacks = getDefaultStackInfos(defaultHDFEntries.getEntries().values());
         List<BaseImageResponse> baseImages = source.getBaseImages().stream()
-            .filter(i -> defaultAmbariRepoService.getDefault(i.getOsType()) != null)
-            .map(i -> {
+            .filter(defaultAmbariVersion -> defaultAmbariRepoService.getDefault(defaultAmbariVersion.getOsType()) != null)
+            .map(defaultAmbariVersion -> {
                 BaseImageResponse imgJson = new BaseImageResponse();
-                copyImageFieldsToJson(i, imgJson);
+                copyImageFieldsToJson(defaultAmbariVersion, imgJson);
                 imgJson.setHdpStacks(defaultHdpStacks);
                 imgJson.setHdfStacks(defaultHdfStacks);
-                imgJson.setVersion(defaultAmbariRepoService.getVersion());
-                AmbariRepo ambariRepo = defaultAmbariRepoService.getDefault(i.getOsType());
+                AmbariRepo ambariRepo = defaultAmbariRepoService.getDefault(defaultAmbariVersion.getOsType());
+                imgJson.setVersion(ambariRepo.getVersion());
                 Map<String, String> repoJson = new HashMap<>();
                 repoJson.put("baseurl", ambariRepo.getBaseUrl());
                 repoJson.put("gpgkey", ambariRepo.getGpgKeyUrl());

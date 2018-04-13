@@ -74,7 +74,7 @@ cb:
     defaultQueue: "default"
     defaultLifeTime: -1
 
-  blueprint.defaults: "EDW-ETL: Apache Hive, Apache Spark 2=hdp26-etl-edw-spark2;EDW-Analytics: Apache Hive 2 LLAP, Apache Zeppelin=hdp26-edw-analytics;Data Science: Apache Spark 2, Apache Zeppelin=hdp26-data-science-spark2;Flow Management: Apache NiFi=hdf31-flow-management;Enterprise Services=hdp26-shared-services"
+  blueprint.defaults: "EDW-ETL: Apache Hive, Apache Spark 2=hdp26-etl-edw-spark2;EDW-Analytics: Apache Hive 2 LLAP, Apache Zeppelin=hdp26-edw-analytics;Data Science: Apache Spark 2, Apache Zeppelin=hdp26-data-science-spark2;Flow Management: Apache NiFi=hdf31-flow-management;Enterprise Services=hdp26-shared-services;HDP 3.0 - Data Science: Apache Spark 2, Apache Zeppelin=hdp30-data-science-spark2"
   template.defaults: minviable-gcp,minviable-azure-managed-disks,minviable-aws
   custom.user.data: |
     touch /tmp/custom-user-data
@@ -139,20 +139,34 @@ cb:
     port: 5432
 
   ambari:
-    version: 2.6.1.3
-    repo:
-      redhat6:
-        baseurl: http://public-repo-1.hortonworks.com/ambari/centos6/2.x/updates/2.6.1.3
-        gpgkey: http://public-repo-1.hortonworks.com/ambari/centos6/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins
-      redhat7:
-        baseurl: http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.6.1.3
-        gpgkey: http://public-repo-1.hortonworks.com/ambari/centos7/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins
-      debian9:
-        baseurl: http://public-repo-1.hortonworks.com/ambari/debian9/2.x/updates/2.6.1.3
-        gpgkey: http://public-repo-1.hortonworks.com/ambari/centos7/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins
-      ubuntu16:
-        baseurl: http://public-repo-1.hortonworks.com/ambari/ubuntu16/2.x/updates/2.6.1.3
-        gpgkey: http://public-repo-1.hortonworks.com/ambari/centos7/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins
+    entries:
+      2.6:
+        version: 2.6.1.3
+        repo:
+          redhat6:
+            baseurl: http://public-repo-1.hortonworks.com/ambari/centos6/2.x/updates/2.6.1.3
+            gpgkey: http://public-repo-1.hortonworks.com/ambari/centos6/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins
+          redhat7:
+            baseurl: http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.6.1.3
+            gpgkey: http://public-repo-1.hortonworks.com/ambari/centos7/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins
+          debian9:
+            baseurl: http://public-repo-1.hortonworks.com/ambari/debian9/2.x/updates/2.6.1.3
+            gpgkey: http://public-repo-1.hortonworks.com/ambari/centos7/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins
+          ubuntu16:
+            baseurl: http://public-repo-1.hortonworks.com/ambari/ubuntu16/2.x/updates/2.6.1.3
+            gpgkey: http://public-repo-1.hortonworks.com/ambari/centos7/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins
+      2.7:
+        version: 2.7.0.0-190
+        repo:
+          redhat7:
+            baseurl: http://s3.amazonaws.com/dev.hortonworks.com/ambari/centos7/2.x/BUILDS/2.7.0.0-190
+            gpgkey: http://s3.amazonaws.com/dev.hortonworks.com/ambari/centos7/2.x/BUILDS/2.7.0.0-190/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins
+          debian9:
+            baseurl: http://s3.amazonaws.com/dev.hortonworks.com/ambari/debian9/2.x/BUILDS/2.7.0.0-190
+            gpgkey: http://s3.amazonaws.com/dev.hortonworks.com/ambari/debian9/2.x/BUILDS/2.7.0.0-190/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins
+          ubuntu16:
+            baseurl: http://s3.amazonaws.com/dev.hortonworks.com/ambari/ubuntu16/2.x/BUILDS/2.7.0.0-190
+            gpgkey: http://s3.amazonaws.com/dev.hortonworks.com/ambari/ubuntu16/2.x/BUILDS/2.7.0.0-190/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins
     database:
       databaseEngine: EMBEDDED
       host: localhost
@@ -164,6 +178,7 @@ cb:
     entries:
       2.5:
         version: 2.5.5.0
+        minAmbari: 2.6
         repo:
           stack:
             repoid: HDP-2.5
@@ -184,6 +199,7 @@ cb:
             ubuntu16: http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.21/repos/ubuntu16
       2.6:
         version: 2.6.4.5-2
+        minAmbari: 2.6
         repo:
           stack:
             repoid: HDP-2.6
@@ -202,11 +218,30 @@ cb:
             redhat7: http://private-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/centos7
             debian9: http://private-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/debian9
             ubuntu16: http://private-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/ubuntu16
+      3.0:
+        version: 3.0.0.0-1073
+        minAmbari: 2.7
+        repo:
+          stack:
+            repoid: HDP-3.0
+            redhat7: http://s3.amazonaws.com/dev.hortonworks.com/HDP/centos7/3.x/BUILDS/3.0.0.0-1073
+            debian9: http://s3.amazonaws.com/dev.hortonworks.com/HDP/debian9/3.x/BUILDS/3.0.0.0-1073
+            ubuntu16: http://s3.amazonaws.com/dev.hortonworks.com/HDP/ubuntu16/3.x/BUILDS/3.0.0.0-1073
+            repository-version: 3.0.0.0-1073
+            vdf-redhat7: http://s3.amazonaws.com/dev.hortonworks.com/HDP/centos7/3.x/BUILDS/3.0.0.0-1073/HDP-3.0.0.0-1073.xml
+            vdf-debian9: http://s3.amazonaws.com/dev.hortonworks.com/HDP/debian9/3.x/BUILDS/3.0.0.0-1073/HDP-3.0.0.0-1073.xml
+            vdf-ubuntu16: http://s3.amazonaws.com/dev.hortonworks.com/HDP/ubuntu16/3.x/BUILDS/3.0.0.0-1073/HDP-3.0.0.0-1073.xml
+          util:
+            repoid: HDP-UTILS-1.1.0.22
+            redhat7: http://s3.amazonaws.com/dev.hortonworks.com/HDP-UTILS-1.1.0.22/repos/centos7
+            debian9: http://s3.amazonaws.com/dev.hortonworks.com/HDP-UTILS-1.1.0.22/repos/debian9
+            ubuntu16: http://s3.amazonaws.com/dev.hortonworks.com/HDP-UTILS-1.1.0.22/repos/ubuntu16
 
   hdf:
     entries:
       3.1:
         version: 3.1.1.0-35
+        min-ambari: 2.6
         repo:
           stack:
             repoid: HDF-3.1
