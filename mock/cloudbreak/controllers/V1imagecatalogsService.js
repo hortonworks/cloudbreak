@@ -1,32 +1,32 @@
 'use strict';
 
 exports.deletePublicImageCatalogByName = function(args, res, next) {
-    /**
-     * delete public (owned) or private Image Catalog by id
-     * Provides an interface to determine available Virtual Machine images for the given version of Cloudbreak.
-     *
-     * name String
-     * no response value expected for this operation
-     **/
-    res.end();
+  /**
+   * delete public (owned) or private Image Catalog by id
+   * Provides an interface to determine available Virtual Machine images for the given version of Cloudbreak.
+   *
+   * name String 
+   * no response value expected for this operation
+   **/
+  res.end();
 }
 
 exports.getImageCatalogRequestFromName = function(args, res, next) {
-    /**
-     * retrieve imagecatalog request by imagecatalog name
-     * Provides an interface to determine available Virtual Machine images for the given version of Cloudbreak.
-     *
-     * name String
-     * returns ImageCatalogRequest
-     **/
-    var examples = {};
-    examples['application/json'] = require('../responses/imagecatalogs/default-imagecatalog.json');
-    if (Object.keys(examples).length > 0) {
-        res.setHeader('Content-Type', 'application/json');
-        res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
-    } else {
-        res.end();
-    }
+  /**
+   * retrieve imagecatalog request by imagecatalog name
+   * Provides an interface to determine available Virtual Machine images for the given version of Cloudbreak.
+   *
+   * name String 
+   * returns ImageCatalogRequest
+   **/
+  var examples = {};
+  examples['application/json'] = require('../responses/imagecatalogs/default-imagecatalog.json');
+  if (Object.keys(examples).length > 0) {
+    res.setHeader('Content-Type', 'application/json');
+    res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
+  } else {
+    res.end();
+  }
 }
 
 exports.getImagesByProvider = function(args, res, next) {
@@ -63,9 +63,6 @@ exports.getImagesByProvider = function(args, res, next) {
           "key" : "aeiou"
         },
         "util" : {
-          "key" : "aeiou"
-        },
-        "knox" : {
           "key" : "aeiou"
         }
       },
@@ -109,7 +106,7 @@ exports.getPublicImageCatalogsByName = function(args, res, next) {
    **/
   var examples = {};
   examples['application/json'] = {
-  "publicInAccount" : true,
+  "publicInAccount" : false,
   "imagesResponse" : {
     "hdpImages" : [ {
       "date" : "aeiou",
@@ -136,9 +133,6 @@ exports.getPublicImageCatalogsByName = function(args, res, next) {
           },
           "util" : {
             "key" : "aeiou"
-          },
-          "knox" : {
-            "key" : "aeiou"
           }
         },
         "version" : "aeiou"
@@ -163,9 +157,9 @@ exports.getPublicImageCatalogsByName = function(args, res, next) {
     "hdfImages" : [ "" ]
   },
   "name" : "aeiou",
-  "id" : 123456789,
+  "id" : 0,
   "url" : "aeiou",
-  "usedAsDefault" : true
+  "usedAsDefault" : false
 };
   if (Object.keys(examples).length > 0) {
     res.setHeader('Content-Type', 'application/json');
@@ -180,8 +174,8 @@ exports.getPublicImagesByProviderAndCustomImageCatalog = function(args, res, nex
    * determines available images for the Cloudbreak version by the given provider and given image catalog url
    * Provides an interface to determine available Virtual Machine images for the given version of Cloudbreak.
    *
-   * name String
-   * platform String
+   * name String 
+   * platform String 
    * returns ImagesResponse
    **/
   var examples = {};
@@ -212,32 +206,8 @@ exports.getPublicsImageCatalogs = function(args, res, next) {
 }
 
 exports.postPrivateImageCatalog = function(args, res, next) {
-    /**
-     * create Image Catalog as private resources
-     * Provides an interface to determine available Virtual Machine images for the given version of Cloudbreak.
-     *
-     * body ImageCatalogRequest  (optional)
-     * returns ImageCatalogResponse
-     **/
-    var examples = {};
-    examples['application/json'] = {
-        "default" : false,
-        "publicInAccount" : false,
-        "name" : "aeiou",
-        "id" : 0,
-        "url" : "aeiou"
-    };
-    if (Object.keys(examples).length > 0) {
-        res.setHeader('Content-Type', 'application/json');
-        res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
-    } else {
-        res.end();
-    }
-}
-
-exports.postPublicImageCatalog = function(args, res, next) {
   /**
-   * create Image Catalog as public resources
+   * create Image Catalog as private resources
    * Provides an interface to determine available Virtual Machine images for the given version of Cloudbreak.
    *
    * body ImageCatalogRequest  (optional)
@@ -245,7 +215,7 @@ exports.postPublicImageCatalog = function(args, res, next) {
    **/
   var examples = {};
   examples['application/json'] = {
-  "publicInAccount" : true,
+  "publicInAccount" : false,
   "imagesResponse" : {
     "hdpImages" : [ {
       "date" : "aeiou",
@@ -272,8 +242,78 @@ exports.postPublicImageCatalog = function(args, res, next) {
           },
           "util" : {
             "key" : "aeiou"
+          }
+        },
+        "version" : "aeiou"
+      } ],
+      "date" : "aeiou",
+      "images" : {
+        "key" : {
+          "key" : "aeiou"
+        }
+      },
+      "stackDetails" : "",
+      "os" : "aeiou",
+      "hdfStacks" : [ "" ],
+      "repo" : {
+        "key" : "aeiou"
+      },
+      "osType" : "aeiou",
+      "description" : "aeiou",
+      "uuid" : "aeiou",
+      "version" : "aeiou"
+    } ],
+    "hdfImages" : [ "" ]
+  },
+  "name" : "aeiou",
+  "id" : 0,
+  "url" : "aeiou",
+  "usedAsDefault" : false
+};
+  if (Object.keys(examples).length > 0) {
+    res.setHeader('Content-Type', 'application/json');
+    res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
+  } else {
+    res.end();
+  }
+}
+
+exports.postPublicImageCatalog = function(args, res, next) {
+  /**
+   * create Image Catalog as public resources
+   * Provides an interface to determine available Virtual Machine images for the given version of Cloudbreak.
+   *
+   * body ImageCatalogRequest  (optional)
+   * returns ImageCatalogResponse
+   **/
+  var examples = {};
+  examples['application/json'] = {
+  "publicInAccount" : false,
+  "imagesResponse" : {
+    "hdpImages" : [ {
+      "date" : "aeiou",
+      "images" : {
+        "key" : {
+          "key" : "aeiou"
+        }
+      },
+      "stackDetails" : "",
+      "os" : "aeiou",
+      "repo" : {
+        "key" : "aeiou"
+      },
+      "osType" : "aeiou",
+      "description" : "aeiou",
+      "uuid" : "aeiou",
+      "version" : "aeiou"
+    } ],
+    "baseImages" : [ {
+      "hdpStacks" : [ {
+        "repo" : {
+          "stack" : {
+            "key" : "aeiou"
           },
-          "knox" : {
+          "util" : {
             "key" : "aeiou"
           }
         },
@@ -299,9 +339,9 @@ exports.postPublicImageCatalog = function(args, res, next) {
     "hdfImages" : [ "" ]
   },
   "name" : "aeiou",
-  "id" : 123456789,
+  "id" : 0,
   "url" : "aeiou",
-  "usedAsDefault" : true
+  "usedAsDefault" : false
 };
   if (Object.keys(examples).length > 0) {
     res.setHeader('Content-Type', 'application/json');
@@ -321,7 +361,7 @@ exports.putPublicImageCatalog = function(args, res, next) {
    **/
   var examples = {};
   examples['application/json'] = {
-  "publicInAccount" : true,
+  "publicInAccount" : false,
   "imagesResponse" : {
     "hdpImages" : [ {
       "date" : "aeiou",
@@ -348,8 +388,78 @@ exports.putPublicImageCatalog = function(args, res, next) {
           },
           "util" : {
             "key" : "aeiou"
+          }
+        },
+        "version" : "aeiou"
+      } ],
+      "date" : "aeiou",
+      "images" : {
+        "key" : {
+          "key" : "aeiou"
+        }
+      },
+      "stackDetails" : "",
+      "os" : "aeiou",
+      "hdfStacks" : [ "" ],
+      "repo" : {
+        "key" : "aeiou"
+      },
+      "osType" : "aeiou",
+      "description" : "aeiou",
+      "uuid" : "aeiou",
+      "version" : "aeiou"
+    } ],
+    "hdfImages" : [ "" ]
+  },
+  "name" : "aeiou",
+  "id" : 0,
+  "url" : "aeiou",
+  "usedAsDefault" : false
+};
+  if (Object.keys(examples).length > 0) {
+    res.setHeader('Content-Type', 'application/json');
+    res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
+  } else {
+    res.end();
+  }
+}
+
+exports.putSetDefaultImageCatalogByName = function(args, res, next) {
+  /**
+   * update public (owned) or private Image Catalog by id
+   * Provides an interface to determine available Virtual Machine images for the given version of Cloudbreak.
+   *
+   * name String 
+   * returns ImageCatalogResponse
+   **/
+  var examples = {};
+  examples['application/json'] = {
+  "publicInAccount" : false,
+  "imagesResponse" : {
+    "hdpImages" : [ {
+      "date" : "aeiou",
+      "images" : {
+        "key" : {
+          "key" : "aeiou"
+        }
+      },
+      "stackDetails" : "",
+      "os" : "aeiou",
+      "repo" : {
+        "key" : "aeiou"
+      },
+      "osType" : "aeiou",
+      "description" : "aeiou",
+      "uuid" : "aeiou",
+      "version" : "aeiou"
+    } ],
+    "baseImages" : [ {
+      "hdpStacks" : [ {
+        "repo" : {
+          "stack" : {
+            "key" : "aeiou"
           },
-          "knox" : {
+          "util" : {
             "key" : "aeiou"
           }
         },
@@ -375,9 +485,9 @@ exports.putPublicImageCatalog = function(args, res, next) {
     "hdfImages" : [ "" ]
   },
   "name" : "aeiou",
-  "id" : 123456789,
+  "id" : 0,
   "url" : "aeiou",
-  "usedAsDefault" : true
+  "usedAsDefault" : false
 };
   if (Object.keys(examples).length > 0) {
     res.setHeader('Content-Type', 'application/json');
@@ -385,29 +495,5 @@ exports.putPublicImageCatalog = function(args, res, next) {
   } else {
     res.end();
   }
-}
-
-exports.putSetDefaultImageCatalogByName = function(args, res, next) {
-    /**
-     * update public (owned) or private Image Catalog by id
-     * Provides an interface to determine available Virtual Machine images for the given version of Cloudbreak.
-     *
-     * name String
-     * returns ImageCatalogResponse
-     **/
-    var examples = {};
-    examples['application/json'] = {
-        "default" : false,
-        "publicInAccount" : false,
-        "name" : "aeiou",
-        "id" : 0,
-        "url" : "aeiou"
-    };
-    if (Object.keys(examples).length > 0) {
-        res.setHeader('Content-Type', 'application/json');
-        res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
-    } else {
-        res.end();
-    }
 }
 

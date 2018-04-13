@@ -36,6 +36,10 @@ module.exports.getPublicsLdap = function getPublicsLdap (req, res, next) {
   V1ldap.getPublicsLdap(req.swagger.params, res, next);
 };
 
+module.exports.postLdapConnectionTest = function postLdapConnectionTest (req, res, next) {
+  V1ldap.postLdapConnectionTest(req.swagger.params, res, next);
+};
+
 module.exports.postPrivateLdap = function postPrivateLdap (req, res, next) {
   V1ldap.postPrivateLdap(req.swagger.params, res, next);
 };

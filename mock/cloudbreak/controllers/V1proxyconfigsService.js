@@ -5,7 +5,7 @@ exports.deletePrivateProxyConfig = function(args, res, next) {
    * delete private proxy configuration by name
    * An proxy Configuration describe a connection to an external proxy server which provides internet access cluster members. It's applied for package manager and Ambari too
    *
-   * name String
+   * name String 
    * no response value expected for this operation
    **/
   res.end();
@@ -16,7 +16,7 @@ exports.deleteProxyConfig = function(args, res, next) {
    * delete proxy configuration by id
    * An proxy Configuration describe a connection to an external proxy server which provides internet access cluster members. It's applied for package manager and Ambari too
    *
-   * id Long
+   * id Long 
    * no response value expected for this operation
    **/
   res.end();
@@ -27,7 +27,7 @@ exports.deletePublicProxyConfig = function(args, res, next) {
    * delete public (owned) or private proxy configuration by name
    * An proxy Configuration describe a connection to an external proxy server which provides internet access cluster members. It's applied for package manager and Ambari too
    *
-   * name String
+   * name String 
    * no response value expected for this operation
    **/
   res.end();
@@ -38,7 +38,7 @@ exports.getPrivateProxyConfig = function(args, res, next) {
    * retrieve a private proxy configuration by name
    * An proxy Configuration describe a connection to an external proxy server which provides internet access cluster members. It's applied for package manager and Ambari too
    *
-   * name String
+   * name String 
    * returns ProxyConfigResponse
    **/
   var examples = {};
@@ -46,8 +46,8 @@ exports.getPrivateProxyConfig = function(args, res, next) {
   "protocol" : "aeiou",
   "name" : "aeiou",
   "description" : "aeiou",
-  "id" : 123456789,
-  "serverPort" : 123,
+  "id" : 6,
+  "serverPort" : 5249,
   "userName" : "aeiou",
   "serverHost" : "aeiou"
 };
@@ -71,8 +71,8 @@ exports.getPrivatesProxyConfig = function(args, res, next) {
   "protocol" : "aeiou",
   "name" : "aeiou",
   "description" : "aeiou",
-  "id" : 123456789,
-  "serverPort" : 123,
+  "id" : 6,
+  "serverPort" : 5249,
   "userName" : "aeiou",
   "serverHost" : "aeiou"
 } ];
@@ -89,7 +89,7 @@ exports.getProxyConfig = function(args, res, next) {
    * retrieve proxy configuration by id
    * An proxy Configuration describe a connection to an external proxy server which provides internet access cluster members. It's applied for package manager and Ambari too
    *
-   * id Long
+   * id Long 
    * returns ProxyConfigResponse
    **/
   var examples = {};
@@ -97,8 +97,8 @@ exports.getProxyConfig = function(args, res, next) {
   "protocol" : "aeiou",
   "name" : "aeiou",
   "description" : "aeiou",
-  "id" : 123456789,
-  "serverPort" : 123,
+  "id" : 6,
+  "serverPort" : 5249,
   "userName" : "aeiou",
   "serverHost" : "aeiou"
 };
@@ -115,7 +115,7 @@ exports.getPublicProxyConfig = function(args, res, next) {
    * retrieve a public or private (owned) proxy configuration by name
    * An proxy Configuration describe a connection to an external proxy server which provides internet access cluster members. It's applied for package manager and Ambari too
    *
-   * name String
+   * name String 
    * returns ProxyConfigResponse
    **/
   var examples = {};
@@ -123,8 +123,8 @@ exports.getPublicProxyConfig = function(args, res, next) {
   "protocol" : "aeiou",
   "name" : "aeiou",
   "description" : "aeiou",
-  "id" : 123456789,
-  "serverPort" : 123,
+  "id" : 6,
+  "serverPort" : 5249,
   "userName" : "aeiou",
   "serverHost" : "aeiou"
 };
@@ -148,8 +148,8 @@ exports.getPublicsProxyConfig = function(args, res, next) {
   "protocol" : "aeiou",
   "name" : "aeiou",
   "description" : "aeiou",
-  "id" : 123456789,
-  "serverPort" : 123,
+  "id" : 6,
+  "serverPort" : 5249,
   "userName" : "aeiou",
   "serverHost" : "aeiou"
 } ];
@@ -174,8 +174,8 @@ exports.postPrivateProxyConfig = function(args, res, next) {
   "protocol" : "aeiou",
   "name" : "aeiou",
   "description" : "aeiou",
-  "id" : 123456789,
-  "serverPort" : 123,
+  "id" : 6,
+  "serverPort" : 5249,
   "userName" : "aeiou",
   "serverHost" : "aeiou"
 };
@@ -200,8 +200,8 @@ exports.postPublicProxyConfig = function(args, res, next) {
   "protocol" : "aeiou",
   "name" : "aeiou",
   "description" : "aeiou",
-  "id" : 123456789,
-  "serverPort" : 123,
+  "id" : 6,
+  "serverPort" : 5249,
   "userName" : "aeiou",
   "serverHost" : "aeiou"
 };
@@ -212,3 +212,4 @@ exports.postPublicProxyConfig = function(args, res, next) {
     res.end();
   }
 }
+

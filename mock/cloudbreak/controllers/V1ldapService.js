@@ -216,6 +216,26 @@ exports.getPublicsLdap = function(args, res, next) {
   }
 }
 
+exports.postLdapConnectionTest = function(args, res, next) {
+  /**
+   * test that the connection could be established of an existing or new LDAP config
+   * 
+   *
+   * body LDAPTestRequest  (optional)
+   * returns LdapTestResult
+   **/
+  var examples = {};
+  examples['application/json'] = {
+  "connectionResult" : "aeiou"
+};
+  if (Object.keys(examples).length > 0) {
+    res.setHeader('Content-Type', 'application/json');
+    res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
+  } else {
+    res.end();
+  }
+}
+
 exports.postPrivateLdap = function(args, res, next) {
   /**
    * create LDAP config as private resource

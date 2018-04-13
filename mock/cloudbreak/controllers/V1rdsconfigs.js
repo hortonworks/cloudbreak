@@ -43,3 +43,7 @@ module.exports.postPrivateRds = function postPrivateRds (req, res, next) {
 module.exports.postPublicRds = function postPublicRds (req, res, next) {
   V1rdsconfigs.postPublicRds(req.swagger.params, res, next);
 };
+
+module.exports.testRdsConnection = function testRdsConnection (req, res, next) {
+  V1rdsconfigs.testRdsConnection(req.swagger.params, res, next);
+};

@@ -87,6 +87,7 @@ exports.getStructuredEvents = function(args, res, next) {
     "resourceId" : 0,
     "eventType" : "aeiou",
     "cloudbreakVersion" : "aeiou",
+    "userName" : "aeiou",
     "userId" : "aeiou",
     "account" : "aeiou",
     "resourceType" : "aeiou",
