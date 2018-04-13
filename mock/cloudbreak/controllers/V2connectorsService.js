@@ -19,41 +19,41 @@ exports.getRegionsByCredentialId = function(args, res, next) {
 }
 
 exports.getVmTypesByCredentialId = function(args, res, next) {
-    /**
-     * retrive vmtype properties by credential
-     * Each cloud provider has it's own specific resources like instance types and disk types. These endpoints are collecting them.
-     *
-     * body PlatformResourceRequestJson  (optional)
-     * returns PlatformVmtypesResponse
-     **/
-    var examples = {};
-    examples['application/json'] = {
-        "vmTypes" : {
-            "key" : {
-                "defaultVirtualMachine" : "",
-                "virtualMachines" : [ {
-                    "vmTypeMetaJson" : {
-                        "configs" : [ {
-                            "volumeParameterType" : "aeiou",
-                            "minimumSize" : 0,
-                            "maximumNumber" : 5,
-                            "maximumSize" : 6,
-                            "minimumNumber" : 1
-                        } ],
-                        "properties" : {
-                            "key" : "aeiou"
-                        }
-                    },
-                    "value" : "aeiou"
-                } ]
-            }
-        }
-    };
-    if (Object.keys(examples).length > 0) {
-        res.setHeader('Content-Type', 'application/json');
-        res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
-    } else {
-        res.end();
+  /**
+   * retrive vmtype properties by credential
+   * Each cloud provider has it's own specific resources like instance types and disk types. These endpoints are collecting them.
+   *
+   * body PlatformResourceRequestJson  (optional)
+   * returns PlatformVmtypesResponse
+   **/
+  var examples = {};
+  examples['application/json'] = {
+  "vmTypes" : {
+    "key" : {
+      "defaultVirtualMachine" : "",
+      "virtualMachines" : [ {
+        "vmTypeMetaJson" : {
+          "configs" : [ {
+            "volumeParameterType" : "aeiou",
+            "minimumSize" : 0,
+            "maximumNumber" : 5,
+            "maximumSize" : 6,
+            "minimumNumber" : 1
+          } ],
+          "properties" : {
+            "key" : "aeiou"
+          }
+        },
+        "value" : "aeiou"
+      } ]
     }
+  }
+};
+  if (Object.keys(examples).length > 0) {
+    res.setHeader('Content-Type', 'application/json');
+    res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
+  } else {
+    res.end();
+  }
 }
 

@@ -43,20 +43,17 @@ exports.getPrivateRds = function(args, res, next) {
    **/
   var examples = {};
   examples['application/json'] = {
-  "databaseType" : "POSTGRES",
+  "connectionDriver" : "aeiou",
   "clusterNames" : [ "aeiou" ],
-  "validated" : false,
+  "connectorJarUrl" : "aeiou",
   "publicInAccount" : false,
-  "hdpVersion" : "aeiou",
+  "stackVersion" : "aeiou",
   "name" : "aeiou",
   "connectionURL" : "aeiou",
   "id" : 0,
-  "type" : "HIVE",
+  "type" : "aeiou",
   "creationDate" : 6,
-  "properties" : [ {
-    "name" : "aeiou",
-    "value" : "aeiou"
-  } ]
+  "databaseEngine" : "aeiou"
 };
   if (Object.keys(examples).length > 0) {
     res.setHeader('Content-Type', 'application/json');
@@ -75,20 +72,17 @@ exports.getPrivatesRds = function(args, res, next) {
    **/
   var examples = {};
   examples['application/json'] = [ {
-  "databaseType" : "POSTGRES",
+  "connectionDriver" : "aeiou",
   "clusterNames" : [ "aeiou" ],
-  "validated" : false,
+  "connectorJarUrl" : "aeiou",
   "publicInAccount" : false,
-  "hdpVersion" : "aeiou",
+  "stackVersion" : "aeiou",
   "name" : "aeiou",
   "connectionURL" : "aeiou",
   "id" : 0,
-  "type" : "HIVE",
+  "type" : "aeiou",
   "creationDate" : 6,
-  "properties" : [ {
-    "name" : "aeiou",
-    "value" : "aeiou"
-  } ]
+  "databaseEngine" : "aeiou"
 } ];
   if (Object.keys(examples).length > 0) {
     res.setHeader('Content-Type', 'application/json');
@@ -108,20 +102,17 @@ exports.getPublicRds = function(args, res, next) {
    **/
   var examples = {};
   examples['application/json'] = {
-  "databaseType" : "POSTGRES",
+  "connectionDriver" : "aeiou",
   "clusterNames" : [ "aeiou" ],
-  "validated" : false,
+  "connectorJarUrl" : "aeiou",
   "publicInAccount" : false,
-  "hdpVersion" : "aeiou",
+  "stackVersion" : "aeiou",
   "name" : "aeiou",
   "connectionURL" : "aeiou",
   "id" : 0,
-  "type" : "HIVE",
+  "type" : "aeiou",
   "creationDate" : 6,
-  "properties" : [ {
-    "name" : "aeiou",
-    "value" : "aeiou"
-  } ]
+  "databaseEngine" : "aeiou"
 };
   if (Object.keys(examples).length > 0) {
     res.setHeader('Content-Type', 'application/json');
@@ -140,20 +131,17 @@ exports.getPublicsRds = function(args, res, next) {
    **/
   var examples = {};
   examples['application/json'] = [ {
-  "databaseType" : "POSTGRES",
+  "connectionDriver" : "aeiou",
   "clusterNames" : [ "aeiou" ],
-  "validated" : false,
+  "connectorJarUrl" : "aeiou",
   "publicInAccount" : false,
-  "hdpVersion" : "aeiou",
+  "stackVersion" : "aeiou",
   "name" : "aeiou",
   "connectionURL" : "aeiou",
   "id" : 0,
-  "type" : "HIVE",
+  "type" : "aeiou",
   "creationDate" : 6,
-  "properties" : [ {
-    "name" : "aeiou",
-    "value" : "aeiou"
-  } ]
+  "databaseEngine" : "aeiou"
 } ];
   if (Object.keys(examples).length > 0) {
     res.setHeader('Content-Type', 'application/json');
@@ -173,20 +161,17 @@ exports.getRds = function(args, res, next) {
    **/
   var examples = {};
   examples['application/json'] = {
-  "databaseType" : "POSTGRES",
+  "connectionDriver" : "aeiou",
   "clusterNames" : [ "aeiou" ],
-  "validated" : false,
+  "connectorJarUrl" : "aeiou",
   "publicInAccount" : false,
-  "hdpVersion" : "aeiou",
+  "stackVersion" : "aeiou",
   "name" : "aeiou",
   "connectionURL" : "aeiou",
   "id" : 0,
-  "type" : "HIVE",
+  "type" : "aeiou",
   "creationDate" : 6,
-  "properties" : [ {
-    "name" : "aeiou",
-    "value" : "aeiou"
-  } ]
+  "databaseEngine" : "aeiou"
 };
   if (Object.keys(examples).length > 0) {
     res.setHeader('Content-Type', 'application/json');
@@ -201,25 +186,22 @@ exports.postPrivateRds = function(args, res, next) {
    * create RDS configuration as private resource
    * An RDS Configuration describe a connection to an external Relational Database Service that can be used as the Hive Metastore.
    *
-   * body RDSConfig  (optional)
+   * body RdsConfig  (optional)
    * returns RDSConfigResponse
    **/
   var examples = {};
   examples['application/json'] = {
-  "databaseType" : "POSTGRES",
+  "connectionDriver" : "aeiou",
   "clusterNames" : [ "aeiou" ],
-  "validated" : false,
+  "connectorJarUrl" : "aeiou",
   "publicInAccount" : false,
-  "hdpVersion" : "aeiou",
+  "stackVersion" : "aeiou",
   "name" : "aeiou",
   "connectionURL" : "aeiou",
   "id" : 0,
-  "type" : "HIVE",
+  "type" : "aeiou",
   "creationDate" : 6,
-  "properties" : [ {
-    "name" : "aeiou",
-    "value" : "aeiou"
-  } ]
+  "databaseEngine" : "aeiou"
 };
   if (Object.keys(examples).length > 0) {
     res.setHeader('Content-Type', 'application/json');
@@ -234,25 +216,42 @@ exports.postPublicRds = function(args, res, next) {
    * create RDS configuration as public resource
    * An RDS Configuration describe a connection to an external Relational Database Service that can be used as the Hive Metastore.
    *
-   * body RDSConfig  (optional)
+   * body RdsConfig  (optional)
    * returns RDSConfigResponse
    **/
   var examples = {};
   examples['application/json'] = {
-  "databaseType" : "POSTGRES",
+  "connectionDriver" : "aeiou",
   "clusterNames" : [ "aeiou" ],
-  "validated" : false,
+  "connectorJarUrl" : "aeiou",
   "publicInAccount" : false,
-  "hdpVersion" : "aeiou",
+  "stackVersion" : "aeiou",
   "name" : "aeiou",
   "connectionURL" : "aeiou",
   "id" : 0,
-  "type" : "HIVE",
+  "type" : "aeiou",
   "creationDate" : 6,
-  "properties" : [ {
-    "name" : "aeiou",
-    "value" : "aeiou"
-  } ]
+  "databaseEngine" : "aeiou"
+};
+  if (Object.keys(examples).length > 0) {
+    res.setHeader('Content-Type', 'application/json');
+    res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
+  } else {
+    res.end();
+  }
+}
+
+exports.testRdsConnection = function(args, res, next) {
+  /**
+   * test RDS connectivity
+   * An RDS Configuration describe a connection to an external Relational Database Service that can be used as the Hive Metastore.
+   *
+   * body RdsTestRequest  (optional)
+   * returns RdsTestResult
+   **/
+  var examples = {};
+  examples['application/json'] = {
+  "connectionResult" : "aeiou"
 };
   if (Object.keys(examples).length > 0) {
     res.setHeader('Content-Type', 'application/json');

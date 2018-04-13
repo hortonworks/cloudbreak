@@ -14,40 +14,41 @@ info:
     \ Ambari, Docker lightweight containers, Swarm and Consul.\nFor further product\
     \ documentation follow the link: <a href=\"http://hortonworks.com/apache/cloudbreak/\"\
     >http://hortonworks.com/apache/cloudbreak/</a>"
-  version: "2.5.0-dev.12"
+  version: "2.6.0-dev.84"
   title: "Cloudbreak API"
 basePath: "/cb"
 tags:
 - name: "info"
 - name: "health"
-- name: "v1constraints"
-- name: "v1blueprints"
-- name: "v1recipes"
-- name: "v1credentials"
-- name: "v1templates"
-- name: "v1flexsubscriptions"
-- name: "v2connectors"
-- name: "v1topologies"
-- name: "v1imagecatalogs"
-- name: "v1networks"
-- name: "v1accountpreferences"
-- name: "v1repositoryconfigs"
-- name: "v1ldap"
-- name: "v1util"
-- name: "v1connectors"
-- name: "v1users"
 - name: "v1events"
-- name: "v2stacks"
-- name: "v1smartsensesubscriptions"
-- name: "v1settings"
-- name: "v1securitygroups"
-- name: "v1clustertemplates"
-- name: "v1securityrules"
-- name: "v1usages"
-- name: "v1subscriptions"
-- name: "v1stacks"
-- name: "v1rdsconfigs"
 - name: "v1proxyconfigs"
+- name: "v2stacks"
+- name: "v2connectors"
+- name: "v1settings"
+- name: "v1stacks"
+- name: "v1templates"
+- name: "v1subscriptions"
+- name: "v1mpacks"
+- name: "v1flexsubscriptions"
+- name: "v1securitygroups"
+- name: "v1constraints"
+- name: "v1accountpreferences"
+- name: "v1networks"
+- name: "v1clustertemplates"
+- name: "v1credentials"
+- name: "v1topologies"
+- name: "v1users"
+- name: "v1ldap"
+- name: "v1blueprints"
+- name: "v1securityrules"
+- name: "v1connectors"
+- name: "v1usages"
+- name: "v1imagecatalogs"
+- name: "v1util"
+- name: "v1rdsconfigs"
+- name: "v1recipes"
+- name: "v1repositoryconfigs"
+- name: "v1smartsensesubscriptions"
 schemes:
 - "http"
 - "https"
@@ -93,268 +94,7 @@ paths:
           description: "successful operation"
           schema:
             $ref: "#/definitions/Info"
-      x-swagger-router-controller: "Info"
-  /api/v1/proxyconfigs/account:
-    get:
-      tags:
-      - "v1proxyconfigs"
-      summary: "retrieve public and private (owned) proxy configurations"
-      description: "An proxy Configuration describe a connection to an external proxy\
-        \ server which provides internet access cluster members. It's applied for\
-        \ package manager and Ambari too"
-      operationId: "getPublicsProxyConfig"
-      schemes:
-      - "http"
-      - "https"
-      consumes:
-      - "application/json"
-      produces:
-      - "application/json"
-      parameters: []
-      responses:
-        200:
-          description: "successful operation"
-          schema:
-            type: "array"
-            uniqueItems: true
-            items:
-              $ref: "#/definitions/ProxyConfigResponse"
-      x-swagger-router-controller: "V1proxyconfigs"
-    post:
-      tags:
-      - "v1proxyconfigs"
-      summary: "create proxy configuration as public resource"
-      description: "An proxy Configuration describe a connection to an external proxy\
-        \ server which provides internet access cluster members. It's applied for\
-        \ package manager and Ambari too"
-      operationId: "postPublicProxyConfig"
-      schemes:
-      - "http"
-      - "https"
-      consumes:
-      - "application/json"
-      produces:
-      - "application/json"
-      parameters:
-      - in: "body"
-        name: "body"
-        required: false
-        schema:
-          $ref: "#/definitions/ProxyConfigRequest"
-      responses:
-        200:
-          description: "successful operation"
-          schema:
-            $ref: "#/definitions/ProxyConfigResponse"
-      x-swagger-router-controller: "V1proxyconfigs"
-  /api/v1/proxyconfigs/account/{name}:
-    get:
-      tags:
-      - "v1proxyconfigs"
-      summary: "retrieve a public or private (owned) proxy configuration by name"
-      description: "An proxy Configuration describe a connection to an external proxy\
-        \ server which provides internet access cluster members. It's applied for\
-        \ package manager and Ambari too"
-      operationId: "getPublicProxyConfig"
-      schemes:
-      - "http"
-      - "https"
-      consumes:
-      - "application/json"
-      produces:
-      - "application/json"
-      parameters:
-      - name: "name"
-        in: "path"
-        required: true
-        type: "string"
-      responses:
-        200:
-          description: "successful operation"
-          schema:
-            $ref: "#/definitions/ProxyConfigResponse"
-      x-swagger-router-controller: "V1proxyconfigs"
-    delete:
-      tags:
-      - "v1proxyconfigs"
-      summary: "delete public (owned) or private proxy configuration by name"
-      description: "An proxy Configuration describe a connection to an external proxy\
-        \ server which provides internet access cluster members. It's applied for\
-        \ package manager and Ambari too"
-      operationId: "deletePublicProxyConfig"
-      schemes:
-      - "http"
-      - "https"
-      consumes:
-      - "application/json"
-      produces:
-      - "application/json"
-      parameters:
-      - name: "name"
-        in: "path"
-        required: true
-        type: "string"
-      responses:
-        default:
-          description: "successful operation"
-      x-swagger-router-controller: "V1proxyconfigs"
-  /api/v1/proxyconfigs/user:
-    get:
-      tags:
-      - "v1proxyconfigs"
-      summary: "retrieve private proxy configurations"
-      description: "An proxy Configuration describe a connection to an external proxy\
-        \ server which provides internet access cluster members. It's applied for\
-        \ package manager and Ambari too"
-      operationId: "getPrivatesProxyConfig"
-      schemes:
-      - "http"
-      - "https"
-      consumes:
-      - "application/json"
-      produces:
-      - "application/json"
-      parameters: []
-      responses:
-        200:
-          description: "successful operation"
-          schema:
-            type: "array"
-            uniqueItems: true
-            items:
-              $ref: "#/definitions/ProxyConfigResponse"
-      x-swagger-router-controller: "V1proxyconfigs"
-    post:
-      tags:
-      - "v1proxyconfigs"
-      summary: "create proxy configuration as private resource"
-      description: "An proxy Configuration describe a connection to an external proxy\
-        \ server which provides internet access cluster members. It's applied for\
-        \ package manager and Ambari too"
-      operationId: "postPrivateProxyConfig"
-      schemes:
-      - "http"
-      - "https"
-      consumes:
-      - "application/json"
-      produces:
-      - "application/json"
-      parameters:
-      - in: "body"
-        name: "body"
-        required: false
-        schema:
-          $ref: "#/definitions/ProxyConfigRequest"
-      responses:
-        200:
-          description: "successful operation"
-          schema:
-            $ref: "#/definitions/ProxyConfigResponse"
-      x-swagger-router-controller: "V1proxyconfigs"
-  /api/v1/proxyconfigs/user/{name}:
-    get:
-      tags:
-      - "v1proxyconfigs"
-      summary: "retrieve a private proxy configuration by name"
-      description: "An proxy Configuration describe a connection to an external proxy\
-        \ server which provides internet access cluster members. It's applied for\
-        \ package manager and Ambari too"
-      operationId: "getPrivateProxyConfig"
-      schemes:
-      - "http"
-      - "https"
-      consumes:
-      - "application/json"
-      produces:
-      - "application/json"
-      parameters:
-      - name: "name"
-        in: "path"
-        required: true
-        type: "string"
-      responses:
-        200:
-          description: "successful operation"
-          schema:
-            $ref: "#/definitions/ProxyConfigResponse"
-      x-swagger-router-controller: "V1proxyconfigs"
-    delete:
-      tags:
-      - "v1proxyconfigs"
-      summary: "delete private proxy configuration by name"
-      description: "An proxy Configuration describe a connection to an external proxy\
-        \ server which provides internet access cluster members. It's applied for\
-        \ package manager and Ambari too"
-      operationId: "deletePrivateProxyConfig"
-      schemes:
-      - "http"
-      - "https"
-      consumes:
-      - "application/json"
-      produces:
-      - "application/json"
-      parameters:
-      - name: "name"
-        in: "path"
-        required: true
-        type: "string"
-      responses:
-        default:
-          description: "successful operation"
-      x-swagger-router-controller: "V1proxyconfigs"
-  /api/v1/proxyconfigs/{id}:
-    get:
-      tags:
-      - "v1proxyconfigs"
-      summary: "retrieve proxy configuration by id"
-      description: "An proxy Configuration describe a connection to an external proxy\
-        \ server which provides internet access cluster members. It's applied for\
-        \ package manager and Ambari too"
-      operationId: "getProxyConfig"
-      schemes:
-      - "http"
-      - "https"
-      consumes:
-      - "application/json"
-      produces:
-      - "application/json"
-      parameters:
-      - name: "id"
-        in: "path"
-        required: true
-        type: "integer"
-        format: "int64"
-      responses:
-        200:
-          description: "successful operation"
-          schema:
-            $ref: "#/definitions/ProxyConfigResponse"
-      x-swagger-router-controller: "V1proxyconfigs"
-    delete:
-      tags:
-      - "v1proxyconfigs"
-      summary: "delete proxy configuration by id"
-      description: "An proxy Configuration describe a connection to an external proxy\
-        \ server which provides internet access cluster members. It's applied for\
-        \ package manager and Ambari too"
-      operationId: "deleteProxyConfig"
-      schemes:
-      - "http"
-      - "https"
-      consumes:
-      - "application/json"
-      produces:
-      - "application/json"
-      parameters:
-      - name: "id"
-        in: "path"
-        required: true
-        type: "integer"
-        format: "int64"
-      responses:
-        default:
-          description: "successful operation"
-      x-swagger-router-controller: "V1proxyconfigs"
+      x-swagger-router-controller: "Info"  
   /api/v1/accountpreferences:
     get:
       tags:
@@ -375,7 +115,7 @@ paths:
         200:
           description: "successful operation"
           schema:
-            $ref: "#/definitions/AccountPreference"
+            $ref: "#/definitions/AccountPreferencesResponse"
       x-swagger-router-controller: "V1accountpreferences"
     post:
       tags:
@@ -396,12 +136,12 @@ paths:
         name: "body"
         required: false
         schema:
-          $ref: "#/definitions/AccountPreference"
+          $ref: "#/definitions/AccountPreferencesRequest"
       responses:
         200:
           description: "successful operation"
           schema:
-            $ref: "#/definitions/AccountPreference"
+            $ref: "#/definitions/AccountPreferencesResponse"
       x-swagger-router-controller: "V1accountpreferences"
     put:
       tags:
@@ -422,12 +162,12 @@ paths:
         name: "body"
         required: false
         schema:
-          $ref: "#/definitions/AccountPreference"
+          $ref: "#/definitions/AccountPreferencesRequest"
       responses:
         200:
           description: "successful operation"
           schema:
-            $ref: "#/definitions/AccountPreference"
+            $ref: "#/definitions/AccountPreferencesResponse"
       x-swagger-router-controller: "V1accountpreferences"
   /api/v1/accountpreferences/isplatformselectiondisabled:
     get:
@@ -812,7 +552,7 @@ paths:
     get:
       tags:
       - "v1blueprints"
-      summary: "retrieve blueprint request by blueprint name"
+      summary: "retrieve validation request by blueprint name"
       description: "Ambari Blueprints are a declarative definition of a Hadoop cluster.\
         \ With a Blueprint, you specify a stack, the component layout and the configurations\
         \ to materialize a Hadoop cluster instance. Hostgroups defined in blueprints\
@@ -1917,6 +1657,37 @@ paths:
           schema:
             $ref: "#/definitions/CredentialResponse"
       x-swagger-router-controller: "V1credentials"
+    put:
+      tags:
+      - "v1credentials"
+      summary: "modify public credential resource"
+      description: "Cloudbreak is launching Hadoop clusters on the user's behalf -\
+        \ on different cloud providers. One key point is that Cloudbreak does not\
+        \ store your Cloud provider account details (such as username, password, keys,\
+        \ private SSL certificates, etc). We work around the concept that Identity\
+        \ and Access Management is fully controlled by you - the end user. The Cloudbreak\
+        \ deployer is purely acting on behalf of the end user - without having access\
+        \ to the user's account."
+      operationId: "putPublicCredential"
+      schemes:
+      - "http"
+      - "https"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        required: false
+        schema:
+          $ref: "#/definitions/CredentialRequest"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/CredentialResponse"
+      x-swagger-router-controller: "V1credentials"
   /api/v1/credentials/account/{name}:
     get:
       tags:
@@ -2052,6 +1823,37 @@ paths:
         \ deployer is purely acting on behalf of the end user - without having access\
         \ to the user's account."
       operationId: "postPrivateCredential"
+      schemes:
+      - "http"
+      - "https"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        required: false
+        schema:
+          $ref: "#/definitions/CredentialRequest"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/CredentialResponse"
+      x-swagger-router-controller: "V1credentials"
+    put:
+      tags:
+      - "v1credentials"
+      summary: "modify private credential resource"
+      description: "Cloudbreak is launching Hadoop clusters on the user's behalf -\
+        \ on different cloud providers. One key point is that Cloudbreak does not\
+        \ store your Cloud provider account details (such as username, password, keys,\
+        \ private SSL certificates, etc). We work around the concept that Identity\
+        \ and Access Management is fully controlled by you - the end user. The Cloudbreak\
+        \ deployer is purely acting on behalf of the end user - without having access\
+        \ to the user's account."
+      operationId: "putPrivateCredential"
       schemes:
       - "http"
       - "https"
@@ -3033,6 +2835,33 @@ paths:
         default:
           description: "successful operation"
       x-swagger-router-controller: "V1ldap"
+  /api/v1/ldap/testconnect:
+    post:
+      tags:
+      - "v1ldap"
+      summary: "test that the connection could be established of an existing or new\
+        \ LDAP config"
+      description: ""
+      operationId: "postLdapConnectionTest"
+      schemes:
+      - "http"
+      - "https"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        required: false
+        schema:
+          $ref: "#/definitions/LDAPTestRequest"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/LdapTestResult"
+      x-swagger-router-controller: "V1ldap"
   /api/v1/ldap/user:
     get:
       tags:
@@ -3184,6 +3013,277 @@ paths:
         default:
           description: "successful operation"
       x-swagger-router-controller: "V1ldap"
+  /api/v1/mpacks/account:
+    get:
+      tags:
+      - "v1mpacks"
+      summary: "retrieve public and private (owned) management packs"
+      description: "An Apache Ambari Management Pack (Mpack) can bundle multiple service\
+        \ definitions, stack definitions, stack add-on service definitions, view definitions\
+        \ services so that releasing these artifacts don’t enforce an Apache Ambari\
+        \ release."
+      operationId: "getPublicManagementPacks"
+      schemes:
+      - "http"
+      - "https"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters: []
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            type: "array"
+            uniqueItems: true
+            items:
+              $ref: "#/definitions/ManagementPackResponse"
+      x-swagger-router-controller: "V1mpacks"
+    post:
+      tags:
+      - "v1mpacks"
+      summary: "create management pack as public resource"
+      description: "An Apache Ambari Management Pack (Mpack) can bundle multiple service\
+        \ definitions, stack definitions, stack add-on service definitions, view definitions\
+        \ services so that releasing these artifacts don’t enforce an Apache Ambari\
+        \ release."
+      operationId: "postPublicManagementPack"
+      schemes:
+      - "http"
+      - "https"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        required: false
+        schema:
+          $ref: "#/definitions/ManagementPackRequest"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/ManagementPackResponse"
+      x-swagger-router-controller: "V1mpacks"
+  /api/v1/mpacks/account/{name}:
+    get:
+      tags:
+      - "v1mpacks"
+      summary: "retrieve a public or private (owned) management pack by name"
+      description: "An Apache Ambari Management Pack (Mpack) can bundle multiple service\
+        \ definitions, stack definitions, stack add-on service definitions, view definitions\
+        \ services so that releasing these artifacts don’t enforce an Apache Ambari\
+        \ release."
+      operationId: "getPublicManagementPack"
+      schemes:
+      - "http"
+      - "https"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "name"
+        in: "path"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/ManagementPackResponse"
+      x-swagger-router-controller: "V1mpacks"
+    delete:
+      tags:
+      - "v1mpacks"
+      summary: "delete public (owned) or private management pack by name"
+      description: "An Apache Ambari Management Pack (Mpack) can bundle multiple service\
+        \ definitions, stack definitions, stack add-on service definitions, view definitions\
+        \ services so that releasing these artifacts don’t enforce an Apache Ambari\
+        \ release."
+      operationId: "deletePublicManagementPack"
+      schemes:
+      - "http"
+      - "https"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "name"
+        in: "path"
+        required: true
+        type: "string"
+      responses:
+        default:
+          description: "successful operation"
+      x-swagger-router-controller: "V1mpacks"
+  /api/v1/mpacks/user:
+    get:
+      tags:
+      - "v1mpacks"
+      summary: "retrieve private management packs"
+      description: "An Apache Ambari Management Pack (Mpack) can bundle multiple service\
+        \ definitions, stack definitions, stack add-on service definitions, view definitions\
+        \ services so that releasing these artifacts don’t enforce an Apache Ambari\
+        \ release."
+      operationId: "getPrivateManagementPacks"
+      schemes:
+      - "http"
+      - "https"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters: []
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            type: "array"
+            uniqueItems: true
+            items:
+              $ref: "#/definitions/ManagementPackResponse"
+      x-swagger-router-controller: "V1mpacks"
+    post:
+      tags:
+      - "v1mpacks"
+      summary: "create management pack as private resource"
+      description: "An Apache Ambari Management Pack (Mpack) can bundle multiple service\
+        \ definitions, stack definitions, stack add-on service definitions, view definitions\
+        \ services so that releasing these artifacts don’t enforce an Apache Ambari\
+        \ release."
+      operationId: "postPrivateManagementPack"
+      schemes:
+      - "http"
+      - "https"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        required: false
+        schema:
+          $ref: "#/definitions/ManagementPackRequest"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/ManagementPackResponse"
+      x-swagger-router-controller: "V1mpacks"
+  /api/v1/mpacks/user/{name}:
+    get:
+      tags:
+      - "v1mpacks"
+      summary: "retrieve a private management pack by name"
+      description: "An Apache Ambari Management Pack (Mpack) can bundle multiple service\
+        \ definitions, stack definitions, stack add-on service definitions, view definitions\
+        \ services so that releasing these artifacts don’t enforce an Apache Ambari\
+        \ release."
+      operationId: "getPrivateManagementPack"
+      schemes:
+      - "http"
+      - "https"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "name"
+        in: "path"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/ManagementPackResponse"
+      x-swagger-router-controller: "V1mpacks"
+    delete:
+      tags:
+      - "v1mpacks"
+      summary: "delete private management pack by name"
+      description: "An Apache Ambari Management Pack (Mpack) can bundle multiple service\
+        \ definitions, stack definitions, stack add-on service definitions, view definitions\
+        \ services so that releasing these artifacts don’t enforce an Apache Ambari\
+        \ release."
+      operationId: "deletePrivateManagementPack"
+      schemes:
+      - "http"
+      - "https"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "name"
+        in: "path"
+        required: true
+        type: "string"
+      responses:
+        default:
+          description: "successful operation"
+      x-swagger-router-controller: "V1mpacks"
+  /api/v1/mpacks/{id}:
+    get:
+      tags:
+      - "v1mpacks"
+      summary: "retrieve management pack by id"
+      description: "An Apache Ambari Management Pack (Mpack) can bundle multiple service\
+        \ definitions, stack definitions, stack add-on service definitions, view definitions\
+        \ services so that releasing these artifacts don’t enforce an Apache Ambari\
+        \ release."
+      operationId: "getManagementPack"
+      schemes:
+      - "http"
+      - "https"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "id"
+        in: "path"
+        required: true
+        type: "integer"
+        format: "int64"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/ManagementPackResponse"
+      x-swagger-router-controller: "V1mpacks"
+    delete:
+      tags:
+      - "v1mpacks"
+      summary: "delete management pack by id"
+      description: "An Apache Ambari Management Pack (Mpack) can bundle multiple service\
+        \ definitions, stack definitions, stack add-on service definitions, view definitions\
+        \ services so that releasing these artifacts don’t enforce an Apache Ambari\
+        \ release."
+      operationId: "deleteManagementPack"
+      schemes:
+      - "http"
+      - "https"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "id"
+        in: "path"
+        required: true
+        type: "integer"
+        format: "int64"
+      responses:
+        default:
+          description: "successful operation"
+      x-swagger-router-controller: "V1mpacks"
   /api/v1/networks/account:
     get:
       tags:
@@ -3435,6 +3535,267 @@ paths:
         default:
           description: "successful operation"
       x-swagger-router-controller: "V1networks"
+  /api/v1/proxyconfigs/account:
+    get:
+      tags:
+      - "v1proxyconfigs"
+      summary: "retrieve public and private (owned) proxy configurations"
+      description: "An proxy Configuration describe a connection to an external proxy\
+        \ server which provides internet access cluster members. It's applied for\
+        \ package manager and Ambari too"
+      operationId: "getPublicsProxyConfig"
+      schemes:
+      - "http"
+      - "https"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters: []
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            type: "array"
+            uniqueItems: true
+            items:
+              $ref: "#/definitions/ProxyConfigResponse"
+      x-swagger-router-controller: "V1proxyconfigs"
+    post:
+      tags:
+      - "v1proxyconfigs"
+      summary: "create proxy configuration as public resource"
+      description: "An proxy Configuration describe a connection to an external proxy\
+        \ server which provides internet access cluster members. It's applied for\
+        \ package manager and Ambari too"
+      operationId: "postPublicProxyConfig"
+      schemes:
+      - "http"
+      - "https"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        required: false
+        schema:
+          $ref: "#/definitions/ProxyConfigRequest"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/ProxyConfigResponse"
+      x-swagger-router-controller: "V1proxyconfigs"
+  /api/v1/proxyconfigs/account/{name}:
+    get:
+      tags:
+      - "v1proxyconfigs"
+      summary: "retrieve a public or private (owned) proxy configuration by name"
+      description: "An proxy Configuration describe a connection to an external proxy\
+        \ server which provides internet access cluster members. It's applied for\
+        \ package manager and Ambari too"
+      operationId: "getPublicProxyConfig"
+      schemes:
+      - "http"
+      - "https"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "name"
+        in: "path"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/ProxyConfigResponse"
+      x-swagger-router-controller: "V1proxyconfigs"
+    delete:
+      tags:
+      - "v1proxyconfigs"
+      summary: "delete public (owned) or private proxy configuration by name"
+      description: "An proxy Configuration describe a connection to an external proxy\
+        \ server which provides internet access cluster members. It's applied for\
+        \ package manager and Ambari too"
+      operationId: "deletePublicProxyConfig"
+      schemes:
+      - "http"
+      - "https"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "name"
+        in: "path"
+        required: true
+        type: "string"
+      responses:
+        default:
+          description: "successful operation"
+      x-swagger-router-controller: "V1proxyconfigs"
+  /api/v1/proxyconfigs/user:
+    get:
+      tags:
+      - "v1proxyconfigs"
+      summary: "retrieve private proxy configurations"
+      description: "An proxy Configuration describe a connection to an external proxy\
+        \ server which provides internet access cluster members. It's applied for\
+        \ package manager and Ambari too"
+      operationId: "getPrivatesProxyConfig"
+      schemes:
+      - "http"
+      - "https"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters: []
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            type: "array"
+            uniqueItems: true
+            items:
+              $ref: "#/definitions/ProxyConfigResponse"
+      x-swagger-router-controller: "V1proxyconfigs"
+    post:
+      tags:
+      - "v1proxyconfigs"
+      summary: "create proxy configuration as private resource"
+      description: "An proxy Configuration describe a connection to an external proxy\
+        \ server which provides internet access cluster members. It's applied for\
+        \ package manager and Ambari too"
+      operationId: "postPrivateProxyConfig"
+      schemes:
+      - "http"
+      - "https"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        required: false
+        schema:
+          $ref: "#/definitions/ProxyConfigRequest"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/ProxyConfigResponse"
+      x-swagger-router-controller: "V1proxyconfigs"
+  /api/v1/proxyconfigs/user/{name}:
+    get:
+      tags:
+      - "v1proxyconfigs"
+      summary: "retrieve a private proxy configuration by name"
+      description: "An proxy Configuration describe a connection to an external proxy\
+        \ server which provides internet access cluster members. It's applied for\
+        \ package manager and Ambari too"
+      operationId: "getPrivateProxyConfig"
+      schemes:
+      - "http"
+      - "https"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "name"
+        in: "path"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/ProxyConfigResponse"
+      x-swagger-router-controller: "V1proxyconfigs"
+    delete:
+      tags:
+      - "v1proxyconfigs"
+      summary: "delete private proxy configuration by name"
+      description: "An proxy Configuration describe a connection to an external proxy\
+        \ server which provides internet access cluster members. It's applied for\
+        \ package manager and Ambari too"
+      operationId: "deletePrivateProxyConfig"
+      schemes:
+      - "http"
+      - "https"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "name"
+        in: "path"
+        required: true
+        type: "string"
+      responses:
+        default:
+          description: "successful operation"
+      x-swagger-router-controller: "V1proxyconfigs"
+  /api/v1/proxyconfigs/{id}:
+    get:
+      tags:
+      - "v1proxyconfigs"
+      summary: "retrieve proxy configuration by id"
+      description: "An proxy Configuration describe a connection to an external proxy\
+        \ server which provides internet access cluster members. It's applied for\
+        \ package manager and Ambari too"
+      operationId: "getProxyConfig"
+      schemes:
+      - "http"
+      - "https"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "id"
+        in: "path"
+        required: true
+        type: "integer"
+        format: "int64"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/ProxyConfigResponse"
+      x-swagger-router-controller: "V1proxyconfigs"
+    delete:
+      tags:
+      - "v1proxyconfigs"
+      summary: "delete proxy configuration by id"
+      description: "An proxy Configuration describe a connection to an external proxy\
+        \ server which provides internet access cluster members. It's applied for\
+        \ package manager and Ambari too"
+      operationId: "deleteProxyConfig"
+      schemes:
+      - "http"
+      - "https"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "id"
+        in: "path"
+        required: true
+        type: "integer"
+        format: "int64"
+      responses:
+        default:
+          description: "successful operation"
+      x-swagger-router-controller: "V1proxyconfigs"
   /api/v1/rdsconfigs/account:
     get:
       tags:
@@ -3534,6 +3895,33 @@ paths:
       responses:
         default:
           description: "successful operation"
+      x-swagger-router-controller: "V1rdsconfigs"
+  /api/v1/rdsconfigs/testconnect:
+    post:
+      tags:
+      - "v1rdsconfigs"
+      summary: "test RDS connectivity"
+      description: "An RDS Configuration describe a connection to an external Relational\
+        \ Database Service that can be used as the Hive Metastore."
+      operationId: "testRdsConnection"
+      schemes:
+      - "http"
+      - "https"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        required: false
+        schema:
+          $ref: "#/definitions/RdsTestRequest"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/RdsTestResult"
       x-swagger-router-controller: "V1rdsconfigs"
   /api/v1/rdsconfigs/user:
     get:
@@ -6161,89 +6549,12 @@ paths:
           schema:
             $ref: "#/definitions/VersionCheckResult"
       x-swagger-router-controller: "V1util"
-  /api/v1/util/ldap:
-    post:
-      tags:
-      - "v1util"
-      summary: "tests an LDAP connection"
-      description: ""
-      operationId: "testLdapConnectionUtil"
-      schemes:
-      - "http"
-      - "https"
-      consumes:
-      - "application/json"
-      produces:
-      - "application/json"
-      parameters:
-      - in: "body"
-        name: "body"
-        required: false
-        schema:
-          $ref: "#/definitions/LdapblueprintRequest"
-      responses:
-        200:
-          description: "successful operation"
-          schema:
-            $ref: "#/definitions/RdsTestResult"
-      x-swagger-router-controller: "V1util"
-  /api/v1/util/ldap/{id}:
-    get:
-      tags:
-      - "v1util"
-      summary: "tests an already exists LDAP connection"
-      description: ""
-      operationId: "testLdapConnectionByIdUtil"
-      schemes:
-      - "http"
-      - "https"
-      consumes:
-      - "application/json"
-      produces:
-      - "application/json"
-      parameters:
-      - name: "id"
-        in: "path"
-        required: true
-        type: "integer"
-        format: "int64"
-      responses:
-        200:
-          description: "successful operation"
-          schema:
-            $ref: "#/definitions/RdsTestResult"
-      x-swagger-router-controller: "V1util"
-  /api/v1/util/rds:
-    post:
-      tags:
-      - "v1util"
-      summary: "tests an RDS connection"
-      description: ""
-      operationId: "testRdsConnectionUtil"
-      schemes:
-      - "http"
-      - "https"
-      consumes:
-      - "application/json"
-      produces:
-      - "application/json"
-      parameters:
-      - in: "body"
-        name: "body"
-        required: false
-        schema:
-          $ref: "#/definitions/RdsConfig"
-      responses:
-        200:
-          description: "successful operation"
-          schema:
-            $ref: "#/definitions/RdsTestResult"
-      x-swagger-router-controller: "V1util"
   /api/v1/util/rds-database:
     post:
       tags:
       - "v1util"
-      summary: "create a database connection parameters"
+      summary: "create a database for the service in the RDS if the connection could\
+        \ be created"
       description: ""
       operationId: "createRDSDatabaseUtil"
       schemes:
@@ -6271,32 +6582,6 @@ paths:
           description: "successful operation"
           schema:
             $ref: "#/definitions/RdsBuildResult"
-      x-swagger-router-controller: "V1util"
-  /api/v1/util/rds/{id}:
-    get:
-      tags:
-      - "v1util"
-      summary: "tests an already exists RDS connection"
-      description: ""
-      operationId: "testRdsConnectionByIdUtil"
-      schemes:
-      - "http"
-      - "https"
-      consumes:
-      - "application/json"
-      produces:
-      - "application/json"
-      parameters:
-      - name: "id"
-        in: "path"
-        required: true
-        type: "integer"
-        format: "int64"
-      responses:
-        200:
-          description: "successful operation"
-          schema:
-            $ref: "#/definitions/RdsTestResult"
       x-swagger-router-controller: "V1util"
   /api/v2/connectors/regions:
     post:
@@ -6570,6 +6855,36 @@ paths:
       responses:
         default:
           description: "successful operation"
+      x-swagger-router-controller: "V2stacks"
+  /api/v2/stacks/blueprint:
+    post:
+      tags:
+      - "v2stacks"
+      summary: "create stack as public resource for blueprint"
+      description: "Stacks are template instances - a running cloud infrastructure\
+        \ created based on a template. Stacks are always launched on behalf of a cloud\
+        \ user account. Stacks support a wide range of resources, allowing you to\
+        \ build a highly available, reliable, and scalable infrastructure for your\
+        \ application needs."
+      operationId: "postPublicStackV2ForBlueprint"
+      schemes:
+      - "http"
+      - "https"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        required: false
+        schema:
+          $ref: "#/definitions/StackV2Request"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/GeneratedBlueprintResponse"
       x-swagger-router-controller: "V2stacks"
   /api/v2/stacks/platformVariants:
     get:
@@ -7214,37 +7529,40 @@ definitions:
         enum:
         - "MANUAL"
         - "AUTO"
-  PlatformRegionsJson:
+  ManagementPackRequest:
     type: "object"
+    required:
+    - "mpackUrl"
+    - "name"
     properties:
-      regions:
-        type: "object"
-        description: "regions"
-        additionalProperties:
-          type: "array"
-          items:
-            type: "string"
-      displayNames:
-        type: "object"
-        description: "regions with displayNames"
-        additionalProperties:
-          type: "object"
-          additionalProperties:
-            type: "string"
-      availabilityZones:
-        type: "object"
-        description: "availability zones"
-        additionalProperties:
-          type: "object"
-          additionalProperties:
-            type: "array"
-            items:
-              type: "string"
-      defaultRegions:
-        type: "object"
-        description: "default regions"
-        additionalProperties:
+      name:
+        type: "string"
+        description: "name of the resource"
+        minLength: 5
+        maxLength: 100
+        pattern: "(^[a-z][-a-z0-9]*[a-z0-9]$)"
+      description:
+        type: "string"
+        description: "description of the resource"
+        minLength: 0
+        maxLength: 1000
+      mpackUrl:
+        type: "string"
+        description: "url of the ambari management pack"
+      purge:
+        type: "boolean"
+        description: "if true, management pack will be installed with '--purge' flag"
+        default: false
+      purgeList:
+        type: "array"
+        description: "if provided, management pack will be installed with '--purgeList'\
+          \ option with this values"
+        items:
           type: "string"
+      force:
+        type: "boolean"
+        description: "if true, management pack will be installed with '--force' flag"
+        default: false
   ClusterRequest:
     type: "object"
     required:
@@ -7317,7 +7635,7 @@ definitions:
         $ref: "#/definitions/LdapConfigRequest"
       validateBlueprint:
         type: "boolean"
-        description: "validate blueprint"
+        description: "blueprint validation"
         default: false
       ambariStackDetails:
         description: "details of the Ambari stack"
@@ -7332,8 +7650,15 @@ definitions:
         items:
           type: "integer"
           format: "int64"
+      rdsConfigNames:
+        type: "array"
+        description: "RDS configuration names for the cluster"
+        uniqueItems: true
+        items:
+          type: "string"
       ambariDatabaseDetails:
-        description: "details of the external Ambari database"
+        description: "[DEPRECATED] use RdsConfig instead! details of the external\
+          \ Ambari database"
         $ref: "#/definitions/AmbariDatabaseDetails"
       rdsConfigJsons:
         type: "array"
@@ -7385,6 +7710,37 @@ definitions:
       proxyName:
         type: "string"
         description: "proxy configuration name for the cluster"
+  PlatformRegionsJson:
+    type: "object"
+    properties:
+      regions:
+        type: "object"
+        description: "regions"
+        additionalProperties:
+          type: "array"
+          items:
+            type: "string"
+      displayNames:
+        type: "object"
+        description: "regions with displayNames"
+        additionalProperties:
+          type: "object"
+          additionalProperties:
+            type: "string"
+      availabilityZones:
+        type: "object"
+        description: "availability zones"
+        additionalProperties:
+          type: "object"
+          additionalProperties:
+            type: "array"
+            items:
+              type: "string"
+      defaultRegions:
+        type: "object"
+        description: "default regions"
+        additionalProperties:
+          type: "string"
   SecurityGroupResponse:
     type: "object"
     required:
@@ -7464,6 +7820,17 @@ definitions:
       password:
         type: "string"
         description: "Password to use for basic authentication"
+  PlacementSettings:
+    type: "object"
+    required:
+    - "region"
+    properties:
+      availabilityZone:
+        type: "string"
+        description: "availability zone of the stack"
+      region:
+        type: "string"
+        description: "region of the stack"
   PlatformNetworkResponse:
     type: "object"
     properties:
@@ -7480,32 +7847,6 @@ definitions:
         additionalProperties:
           type: "object"
           properties: {}
-  PlacementSettings:
-    type: "object"
-    required:
-    - "region"
-    properties:
-      availabilityZone:
-        type: "string"
-        description: "availability zone of the stack"
-      region:
-        type: "string"
-        description: "region of the stack"
-  StackRepoDetailsJson:
-    type: "object"
-    properties:
-      stack:
-        type: "object"
-        additionalProperties:
-          type: "string"
-      util:
-        type: "object"
-        additionalProperties:
-          type: "string"
-      knox:
-        type: "object"
-        additionalProperties:
-          type: "string"
   OrchestratorResponse:
     type: "object"
     required:
@@ -7523,6 +7864,26 @@ definitions:
       type:
         type: "string"
         description: "type of the orchestrator"
+  StackRepoDetailsJson:
+    type: "object"
+    properties:
+      stack:
+        type: "object"
+        additionalProperties:
+          type: "string"
+      util:
+        type: "object"
+        additionalProperties:
+          type: "string"
+  HardwareInfoResponse:
+    type: "object"
+    properties:
+      instanceMetaData:
+        description: "metadata of instances"
+        $ref: "#/definitions/InstanceMetaData"
+      hostMetadata:
+        description: "metadata of hosts"
+        $ref: "#/definitions/HostMetadata"
   PlatformSshKeysResponse:
     type: "object"
     properties:
@@ -7533,15 +7894,6 @@ definitions:
           uniqueItems: true
           items:
             $ref: "#/definitions/PlatformSshKeyResponse"
-  HardwareInfoResponse:
-    type: "object"
-    properties:
-      instanceMetaData:
-        description: "metadata of instances"
-        $ref: "#/definitions/InstanceMetaData"
-      hostMetadata:
-        description: "metadata of hosts"
-        $ref: "#/definitions/HostMetadata"
   ConnectedClusterRequest:
     type: "object"
     properties:
@@ -7702,18 +8054,6 @@ definitions:
       error:
         type: "string"
         description: "result of Ambari database test"
-  PlatformSecurityGroupResponse:
-    type: "object"
-    properties:
-      groupName:
-        type: "string"
-      groupId:
-        type: "string"
-      properties:
-        type: "object"
-        additionalProperties:
-          type: "object"
-          properties: {}
   Tags:
     type: "object"
     properties:
@@ -7732,6 +8072,18 @@ definitions:
         description: "stack related default tags"
         additionalProperties:
           type: "string"
+  PlatformSecurityGroupResponse:
+    type: "object"
+    properties:
+      groupName:
+        type: "string"
+      groupId:
+        type: "string"
+      properties:
+        type: "object"
+        additionalProperties:
+          type: "object"
+          properties: {}
   PlatformIpPoolsResponse:
     type: "object"
     properties:
@@ -7787,6 +8139,15 @@ definitions:
         type: "integer"
         format: "int32"
         description: "size of volumes"
+  RdsTestRequest:
+    type: "object"
+    properties:
+      name:
+        type: "string"
+        description: "Name of the RDS configuration resource"
+      rdsConfig:
+        description: "unsaved RDS config to be tested by connectivity"
+        $ref: "#/definitions/RdsConfig"
   CloudbreakEvent:
     type: "object"
     properties:
@@ -7918,10 +8279,6 @@ definitions:
           $ref: "#/definitions/FlexUsageProductJson"
   AmbariStackDetails:
     type: "object"
-    required:
-    - "stack"
-    - "verify"
-    - "version"
     properties:
       stack:
         type: "string"
@@ -7962,6 +8319,11 @@ definitions:
       mpackUrl:
         type: "string"
         description: "url the MPACK that needs to be installed before HDF installation"
+      mpacks:
+        type: "array"
+        description: "Management packs which are needed for the HDP / HDF clusters"
+        items:
+          $ref: "#/definitions/ManagementPackDetails"
   TagSpecificationsJson:
     type: "object"
     properties:
@@ -8001,16 +8363,6 @@ definitions:
         type: "integer"
         format: "int32"
         description: "scaling adjustment of the instance groups"
-  RdsBuildResult:
-    type: "object"
-    required:
-    - "results"
-    properties:
-      results:
-        type: "object"
-        description: "name of the created dbs"
-        additionalProperties:
-          type: "string"
   RecommendationRequestJson:
     type: "object"
     properties:
@@ -8042,6 +8394,16 @@ definitions:
         type: "integer"
         format: "int64"
         description: "id that could indentify an existing blueprint"
+  RdsBuildResult:
+    type: "object"
+    required:
+    - "results"
+    properties:
+      results:
+        type: "object"
+        description: "name of the created dbs"
+        additionalProperties:
+          type: "string"
   VersionCheckResult:
     type: "object"
     properties:
@@ -8050,6 +8412,13 @@ definitions:
         default: false
       message:
         type: "string"
+  CustomContainerResponse:
+    type: "object"
+    properties:
+      definitions:
+        type: "object"
+        additionalProperties:
+          type: "string"
   NetworkResponse:
     type: "object"
     required:
@@ -8090,6 +8459,15 @@ definitions:
         description: "resource is visible in account"
         readOnly: true
         default: false
+  DiskResponse:
+    type: "object"
+    properties:
+      type:
+        type: "string"
+      name:
+        type: "string"
+      displayName:
+        type: "string"
   RDSBuildRequest:
     type: "object"
     required:
@@ -8102,22 +8480,6 @@ definitions:
       clusterName:
         type: "string"
         description: "requested cluster name"
-  DiskResponse:
-    type: "object"
-    properties:
-      type:
-        type: "string"
-      name:
-        type: "string"
-      displayName:
-        type: "string"
-  CustomContainerResponse:
-    type: "object"
-    properties:
-      definitions:
-        type: "object"
-        additionalProperties:
-          type: "string"
   Id:
     type: "object"
     required:
@@ -8127,6 +8489,47 @@ definitions:
         type: "integer"
         format: "int64"
         description: "id of the resource"
+  HostGroupResponse:
+    type: "object"
+    required:
+    - "constraint"
+    - "name"
+    properties:
+      name:
+        type: "string"
+        description: "name of the resource"
+      constraint:
+        description: "instance group or resource constraint for a hostgroup"
+        $ref: "#/definitions/Constraint"
+      recipeIds:
+        type: "array"
+        description: "referenced recipe ids"
+        uniqueItems: true
+        items:
+          type: "integer"
+          format: "int64"
+      recoveryMode:
+        type: "string"
+        description: "recovery mode of the hostgroup's nodes"
+        enum:
+        - "MANUAL"
+        - "AUTO"
+      id:
+        type: "integer"
+        format: "int64"
+        description: "id of the resource"
+      recipes:
+        type: "array"
+        description: "referenced recipes"
+        uniqueItems: true
+        items:
+          $ref: "#/definitions/RecipeResponse"
+      metadata:
+        type: "array"
+        description: "metadata of hosts"
+        uniqueItems: true
+        items:
+          $ref: "#/definitions/HostMetadata"
   LdapConfigResponse:
     type: "object"
     required:
@@ -8202,47 +8605,6 @@ definitions:
         type: "boolean"
         description: "resource is visible in account"
         default: false
-  HostGroupResponse:
-    type: "object"
-    required:
-    - "constraint"
-    - "name"
-    properties:
-      name:
-        type: "string"
-        description: "name of the resource"
-      constraint:
-        description: "instance group or resource constraint for a hostgroup"
-        $ref: "#/definitions/Constraint"
-      recipeIds:
-        type: "array"
-        description: "referenced recipe ids"
-        uniqueItems: true
-        items:
-          type: "integer"
-          format: "int64"
-      recoveryMode:
-        type: "string"
-        description: "recovery mode of the hostgroup's nodes"
-        enum:
-        - "MANUAL"
-        - "AUTO"
-      id:
-        type: "integer"
-        format: "int64"
-        description: "id of the resource"
-      recipes:
-        type: "array"
-        description: "referenced recipes"
-        uniqueItems: true
-        items:
-          $ref: "#/definitions/RecipeResponse"
-      metadata:
-        type: "array"
-        description: "metadata of hosts"
-        uniqueItems: true
-        items:
-          $ref: "#/definitions/HostMetadata"
   HostMetadata:
     type: "object"
     required:
@@ -8262,6 +8624,21 @@ definitions:
       state:
         type: "string"
         description: "state of the host"
+  SupportedExternalDatabaseServiceEntryResponse:
+    type: "object"
+    properties:
+      name:
+        type: "string"
+        description: "Name of the service"
+      displayName:
+        type: "string"
+        description: "Display name of the service"
+      databases:
+        type: "array"
+        description: "Supported database list"
+        uniqueItems: true
+        items:
+          $ref: "#/definitions/SupportedDatabaseEntryResponse"
   StructuredEvent:
     type: "object"
     properties:
@@ -8269,6 +8646,55 @@ definitions:
         type: "string"
       operation:
         $ref: "#/definitions/OperationDetails"
+  AccountPreferencesRequest:
+    type: "object"
+    required:
+    - "clusterTimeToLive"
+    - "userTimeToLive"
+    properties:
+      maxNumberOfClusters:
+        type: "integer"
+        format: "int64"
+        description: "max number of clusters in the account (0 when unlimited)"
+        minimum: 0.0
+      maxNumberOfNodesPerCluster:
+        type: "integer"
+        format: "int64"
+        description: "max number of vms in a cluster of account (0 when unlimited)"
+        minimum: 0.0
+      maxNumberOfClustersPerUser:
+        type: "integer"
+        format: "int64"
+        description: "max number of clusters for user within the account (0 when unlimited)"
+        minimum: 0.0
+      allowedInstanceTypes:
+        type: "array"
+        description: "allowed instance types in the account (empty list for no restriction)"
+        items:
+          type: "string"
+      clusterTimeToLive:
+        type: "integer"
+        format: "int64"
+        description: "lifecycle of the cluster in hours (0 for immortal clusters)"
+        minimum: 0.0
+      userTimeToLive:
+        type: "integer"
+        format: "int64"
+        description: "lifecycle of the account and its clusters in hours (0 for immortal\
+          \ account)"
+        minimum: 0.0
+      platforms:
+        type: "string"
+        description: "list of the cloudplatforms visible on the UI"
+      smartsenseEnabled:
+        type: "boolean"
+        description: "smartsense enabled on the UI"
+        default: false
+      defaultTags:
+        type: "object"
+        description: "default tags for the resources created"
+        additionalProperties:
+          type: "string"
   VirtualMachinesResponse:
     type: "object"
     properties:
@@ -8323,6 +8749,31 @@ definitions:
           uniqueItems: true
           items:
             $ref: "#/definitions/PlatformNetworkResponse"
+  LDAPTestRequest:
+    type: "object"
+    properties:
+      name:
+        type: "string"
+        description: "name of the resource"
+      validationRequest:
+        description: "Request that contains the minimal set of fields to test LDAP\
+          \ connectivity"
+        $ref: "#/definitions/LdapValidationRequest"
+  AmbariRepoDetails:
+    type: "object"
+    required:
+    - "baseUrl"
+    - "version"
+    properties:
+      version:
+        type: "string"
+        description: "version of the Ambari"
+      baseUrl:
+        type: "string"
+        description: "url of the Ambari repository"
+      gpgKeyUrl:
+        type: "string"
+        description: "gpg key of the Ambari repository"
   TopologyRequest:
     type: "object"
     required:
@@ -8348,21 +8799,6 @@ definitions:
         description: "topology mapping"
         additionalProperties:
           type: "string"
-  AmbariRepoDetails:
-    type: "object"
-    required:
-    - "baseUrl"
-    - "version"
-    properties:
-      version:
-        type: "string"
-        description: "version of the Ambari"
-      baseUrl:
-        type: "string"
-        description: "url of the Ambari repository"
-      gpgKeyUrl:
-        type: "string"
-        description: "gpg key of the Ambari repository"
   CloudGatewayJson:
     type: "object"
     properties:
@@ -8485,7 +8921,8 @@ definitions:
         - "MYSQL"
         - "MARIADB"
         - "MSSQL"
-        - "ORACLE"
+        - "ORACLE11"
+        - "ORACLE12"
         - "SQLANYWHERE"
         - "EMBEDDED"
       name:
@@ -8521,21 +8958,6 @@ definitions:
         additionalProperties:
           type: "object"
           properties: {}
-  ImagesResponse:
-    type: "object"
-    properties:
-      baseImages:
-        type: "array"
-        items:
-          $ref: "#/definitions/BaseImageResponse"
-      hdpImages:
-        type: "array"
-        items:
-          $ref: "#/definitions/ImageResponse"
-      hdfImages:
-        type: "array"
-        items:
-          $ref: "#/definitions/ImageResponse"
   ClusterV2Request:
     type: "object"
     properties:
@@ -8549,9 +8971,12 @@ definitions:
       ldapConfigName:
         type: "string"
         description: "LDAP config name for the cluster"
-      rdsConfigs:
-        description: "details of the external database for Hadoop components"
-        $ref: "#/definitions/RdsConfigs"
+      rdsConfigNames:
+        type: "array"
+        description: "RDS configuration names for the cluster"
+        uniqueItems: true
+        items:
+          type: "string"
       proxyName:
         type: "string"
         description: "proxy configuration name for the cluster"
@@ -8567,6 +8992,27 @@ definitions:
       ambari:
         description: "ambari specific requests"
         $ref: "#/definitions/AmbariV2Request"
+  GeneratedBlueprintResponse:
+    type: "object"
+    properties:
+      ambariBlueprint:
+        type: "string"
+        description: "ambari blueprint JSON, set this or the url field"
+  ImagesResponse:
+    type: "object"
+    properties:
+      baseImages:
+        type: "array"
+        items:
+          $ref: "#/definitions/BaseImageResponse"
+      hdpImages:
+        type: "array"
+        items:
+          $ref: "#/definitions/ImageResponse"
+      hdfImages:
+        type: "array"
+        items:
+          $ref: "#/definitions/ImageResponse"
   GatewayJson:
     type: "object"
     properties:
@@ -8682,7 +9128,7 @@ definitions:
           $ref: "#/definitions/HostGroupResponse"
       rdsConfigIds:
         type: "array"
-        description: "RDS configuration ids for the cluster"
+        description: "RDS configuration names for the cluster"
         uniqueItems: true
         items:
           type: "integer"
@@ -8749,7 +9195,8 @@ definitions:
         description: "details of the Ambari package repository"
         $ref: "#/definitions/AmbariRepoDetails"
       ambariDatabaseDetails:
-        description: "details of the external Ambari database"
+        description: "[DEPRECATED] use RdsConfig instead! details of the external\
+          \ Ambari database"
         $ref: "#/definitions/AmbariDatabaseDetails"
       customQueue:
         type: "string"
@@ -8764,6 +9211,9 @@ definitions:
         type: "integer"
         format: "int64"
         description: "duration - how long the cluster is running in milliseconds"
+      extendedBlueprintText:
+        type: "string"
+        description: "ambari blueprint JSON, set this or the url field"
       password:
         type: "string"
         description: "ambari password"
@@ -8845,7 +9295,7 @@ definitions:
           $ref: "#/definitions/HostGroupResponse"
       rdsConfigIds:
         type: "array"
-        description: "RDS configuration ids for the cluster"
+        description: "RDS configuration names for the cluster"
         uniqueItems: true
         items:
           type: "integer"
@@ -8856,6 +9306,9 @@ definitions:
         uniqueItems: true
         items:
           $ref: "#/definitions/RDSConfigResponse"
+      proxyName:
+        type: "string"
+        description: "proxy configuration name for the cluster"
       serviceEndPoints:
         type: "object"
         description: "most important services in the cluster"
@@ -8909,7 +9362,8 @@ definitions:
         description: "details of the Ambari package repository"
         $ref: "#/definitions/AmbariRepoDetails"
       ambariDatabaseDetails:
-        description: "details of the external Ambari database"
+        description: "[DEPRECATED] use RdsConfig instead! details of the external\
+          \ Ambari database"
         $ref: "#/definitions/AmbariDatabaseDetails"
       customQueue:
         type: "string"
@@ -8924,6 +9378,9 @@ definitions:
         type: "integer"
         format: "int64"
         description: "duration - how long the cluster is running in milliseconds"
+      extendedBlueprintText:
+        type: "string"
+        description: "ambari blueprint JSON, set this or the url field"
   VmTypeJson:
     type: "object"
     properties:
@@ -8931,13 +9388,6 @@ definitions:
         type: "string"
       vmTypeMetaJson:
         $ref: "#/definitions/VmTypeMetaJson"
-  RdsConfigProperty:
-    type: "object"
-    properties:
-      name:
-        type: "string"
-      value:
-        type: "string"
   PlatformSecurityGroupsResponse:
     type: "object"
     properties:
@@ -8948,6 +9398,48 @@ definitions:
           uniqueItems: true
           items:
             $ref: "#/definitions/PlatformSecurityGroupResponse"
+  ManagementPackResponse:
+    type: "object"
+    required:
+    - "mpackUrl"
+    - "name"
+    properties:
+      name:
+        type: "string"
+        description: "name of the resource"
+        minLength: 5
+        maxLength: 100
+        pattern: "(^[a-z][-a-z0-9]*[a-z0-9]$)"
+      description:
+        type: "string"
+        description: "description of the resource"
+        minLength: 0
+        maxLength: 1000
+      mpackUrl:
+        type: "string"
+        description: "url of the ambari management pack"
+      purge:
+        type: "boolean"
+        description: "if true, management pack will be installed with '--purge' flag"
+        default: false
+      purgeList:
+        type: "array"
+        description: "if provided, management pack will be installed with '--purgeList'\
+          \ option with this values"
+        items:
+          type: "string"
+      force:
+        type: "boolean"
+        description: "if true, management pack will be installed with '--force' flag"
+        default: false
+      id:
+        type: "integer"
+        format: "int64"
+        description: "id of the resource"
+      public:
+        type: "boolean"
+        description: "resource is visible in account"
+        default: false
   PlatformOrchestratorsJson:
     type: "object"
     properties:
@@ -8962,6 +9454,24 @@ definitions:
         type: "object"
         description: "default orchestrators"
         additionalProperties:
+          type: "string"
+  SupportedDatabaseEntryResponse:
+    type: "object"
+    properties:
+      databaseName:
+        type: "string"
+        description: "Name of the database"
+      displayName:
+        type: "string"
+        description: "Display name of the database"
+      jdbcPrefix:
+        type: "string"
+        description: "Jdbc prefix of the database"
+      versions:
+        type: "array"
+        description: "Supported version types currently only for Oracle"
+        uniqueItems: true
+        items:
           type: "string"
   FailurePolicyResponse:
     type: "object"
@@ -9019,6 +9529,12 @@ definitions:
         uniqueItems: true
         items:
           $ref: "#/definitions/BlueprintParameter"
+      tags:
+        type: "object"
+        description: "user defined tags for blueprint"
+        additionalProperties:
+          type: "object"
+          properties: {}
       name:
         type: "string"
         description: "name of the resource"
@@ -9104,7 +9620,7 @@ definitions:
         $ref: "#/definitions/KerberosRequest"
       validateBlueprint:
         type: "boolean"
-        description: "validate blueprint"
+        description: "blueprint validation"
         default: false
       ambariStackDetails:
         description: "details of the Ambari stack"
@@ -9113,7 +9629,8 @@ definitions:
         description: "details of the Ambari package repository"
         $ref: "#/definitions/AmbariRepoDetails"
       ambariDatabaseDetails:
-        description: "details of the external Ambari database"
+        description: "[DEPRECATED] use RdsConfig instead! details of the external\
+          \ Ambari database"
         $ref: "#/definitions/AmbariDatabaseDetails"
       configStrategy:
         type: "string"
@@ -9141,22 +9658,6 @@ definitions:
         description: "a master key for encrypting the passwords in Ambari"
         minLength: 5
         maxLength: 100
-  RdsConfigs:
-    type: "object"
-    properties:
-      ids:
-        type: "array"
-        description: "RDS configuration ids for the cluster"
-        uniqueItems: true
-        items:
-          type: "integer"
-          format: "int64"
-      configs:
-        type: "array"
-        description: "details of the external database for Hadoop components"
-        uniqueItems: true
-        items:
-          $ref: "#/definitions/RdsConfig"
   Constraint:
     type: "object"
     required:
@@ -9184,13 +9685,13 @@ definitions:
         type: "object"
         additionalProperties:
           type: "string"
+      mpacks:
+        type: "array"
+        items:
+          $ref: "#/definitions/ManagementPackDetails"
       enableGplRepo:
         type: "boolean"
         default: false
-      knox:
-        type: "object"
-        additionalProperties:
-          type: "string"
       verify:
         type: "boolean"
         default: false
@@ -9258,21 +9759,6 @@ definitions:
       instanceGroupAdjustment:
         description: "instance group adjustment"
         $ref: "#/definitions/InstanceGroupAdjustment"
-  SpecialParametersJson:
-    type: "object"
-    properties:
-      specialParameters:
-        type: "object"
-        description: "custom parameters"
-        additionalProperties:
-          type: "boolean"
-      platformSpecificSpecialParameters:
-        type: "object"
-        description: "platform specific custom parameters"
-        additionalProperties:
-          type: "object"
-          additionalProperties:
-            type: "boolean"
   PlatformVariantsJson:
     type: "object"
     properties:
@@ -9309,6 +9795,21 @@ definitions:
         type: "boolean"
         description: "validate node count during downscale"
         default: false
+  SpecialParametersJson:
+    type: "object"
+    properties:
+      specialParameters:
+        type: "object"
+        description: "custom parameters"
+        additionalProperties:
+          type: "boolean"
+      platformSpecificSpecialParameters:
+        type: "object"
+        description: "platform specific custom parameters"
+        additionalProperties:
+          type: "object"
+          additionalProperties:
+            type: "boolean"
   OperationDetails:
     type: "object"
     properties:
@@ -9325,6 +9826,8 @@ definitions:
       account:
         type: "string"
       userId:
+        type: "string"
+      userName:
         type: "string"
       cloudbreakId:
         type: "string"
@@ -9386,28 +9889,6 @@ definitions:
         description: "list of security rules that relates to the security group"
         items:
           $ref: "#/definitions/SecurityRuleRequest"
-  RepoConfigValidationRequest:
-    type: "object"
-    properties:
-      ambariBaseUrl:
-        type: "string"
-        description: "url of the Ambari repository"
-      ambariGpgKeyUrl:
-        type: "string"
-        description: "gpg key of the Ambari repository"
-      stackBaseURL:
-        type: "string"
-        description: "url of the stack repository"
-      utilsBaseURL:
-        type: "string"
-        description: "url of the stack utils repository"
-      versionDefinitionFileUrl:
-        type: "string"
-        description: "local path on the Ambari server or URL that point to the desired\
-          \ VDF file"
-      mpackUrl:
-        type: "string"
-        description: "url the MPACK that needs to be installed before HDF installation"
   FileSystem:
     type: "object"
     required:
@@ -9460,6 +9941,40 @@ definitions:
       customInstanceType:
         description: "custom instancetype definition"
         $ref: "#/definitions/CustomInstanceType"
+  RepoConfigValidationRequest:
+    type: "object"
+    properties:
+      ambariBaseUrl:
+        type: "string"
+        description: "url of the Ambari repository"
+      ambariGpgKeyUrl:
+        type: "string"
+        description: "gpg key of the Ambari repository"
+      stackBaseURL:
+        type: "string"
+        description: "url of the stack repository"
+      utilsBaseURL:
+        type: "string"
+        description: "url of the stack utils repository"
+      versionDefinitionFileUrl:
+        type: "string"
+        description: "local path on the Ambari server or URL that point to the desired\
+          \ VDF file"
+      mpackUrl:
+        type: "string"
+        description: "url the MPACK that needs to be installed before HDF installation"
+  StackAuthenticationResponse:
+    type: "object"
+    properties:
+      publicKey:
+        type: "string"
+        description: "public key for accessing instances"
+      publicKeyId:
+        type: "string"
+        description: "public key id for accessing instances"
+      loginUserName:
+        type: "string"
+        description: "authentication name for machines"
   TopologyResponse:
     type: "object"
     required:
@@ -9489,18 +10004,6 @@ definitions:
         type: "integer"
         format: "int64"
         description: "id of the resource"
-  StackAuthenticationResponse:
-    type: "object"
-    properties:
-      publicKey:
-        type: "string"
-        description: "public key for accessing instances"
-      publicKeyId:
-        type: "string"
-        description: "public key id for accessing instances"
-      loginUserName:
-        type: "string"
-        description: "authentication name for machines"
   PlatformVmtypesResponse:
     type: "object"
     properties:
@@ -9546,6 +10049,60 @@ definitions:
         - "EXACT"
         - "PERCENTAGE"
         - "BEST_EFFORT"
+  AccountPreferencesResponse:
+    type: "object"
+    required:
+    - "clusterTimeToLive"
+    - "userTimeToLive"
+    properties:
+      maxNumberOfClusters:
+        type: "integer"
+        format: "int64"
+        description: "max number of clusters in the account (0 when unlimited)"
+        minimum: 0.0
+      maxNumberOfNodesPerCluster:
+        type: "integer"
+        format: "int64"
+        description: "max number of vms in a cluster of account (0 when unlimited)"
+        minimum: 0.0
+      maxNumberOfClustersPerUser:
+        type: "integer"
+        format: "int64"
+        description: "max number of clusters for user within the account (0 when unlimited)"
+        minimum: 0.0
+      allowedInstanceTypes:
+        type: "array"
+        description: "allowed instance types in the account (empty list for no restriction)"
+        items:
+          type: "string"
+      clusterTimeToLive:
+        type: "integer"
+        format: "int64"
+        description: "lifecycle of the cluster in hours (0 for immortal clusters)"
+        minimum: 0.0
+      userTimeToLive:
+        type: "integer"
+        format: "int64"
+        description: "lifecycle of the account and its clusters in hours (0 for immortal\
+          \ account)"
+        minimum: 0.0
+      platforms:
+        type: "string"
+        description: "list of the cloudplatforms visible on the UI"
+      smartsenseEnabled:
+        type: "boolean"
+        description: "smartsense enabled on the UI"
+        default: false
+      defaultTags:
+        type: "object"
+        description: "default tags for the resources created"
+        additionalProperties:
+          type: "string"
+      supportedExternalDatabases:
+        type: "array"
+        uniqueItems: true
+        items:
+          $ref: "#/definitions/SupportedExternalDatabaseServiceEntryResponse"
   ImageCatalogRequest:
     type: "object"
     required:
@@ -9638,6 +10195,14 @@ definitions:
       fileSystem:
         description: "cluster related filesystem"
         $ref: "#/definitions/FileSystem"
+  oracle:
+    type: "object"
+    required:
+    - "version"
+    properties:
+      version:
+        type: "string"
+        description: "Version of the Database"
   CustomContainerRequest:
     type: "object"
     properties:
@@ -9784,18 +10349,6 @@ definitions:
             type: "string"
       stackDetails:
         $ref: "#/definitions/StackDetailsJson"
-  AccessConfigJson:
-    type: "object"
-    properties:
-      name:
-        type: "string"
-      id:
-        type: "string"
-      properties:
-        type: "object"
-        additionalProperties:
-          type: "object"
-          properties: {}
   GeneralSettings:
     type: "object"
     required:
@@ -9811,6 +10364,18 @@ definitions:
       credentialName:
         type: "string"
         description: "credential resource name for the stack"
+  AccessConfigJson:
+    type: "object"
+    properties:
+      name:
+        type: "string"
+      id:
+        type: "string"
+      properties:
+        type: "object"
+        additionalProperties:
+          type: "object"
+          properties: {}
   BlueprintResponse:
     type: "object"
     required:
@@ -9830,6 +10395,12 @@ definitions:
         uniqueItems: true
         items:
           $ref: "#/definitions/BlueprintParameter"
+      tags:
+        type: "object"
+        description: "user defined tags for blueprint"
+        additionalProperties:
+          type: "object"
+          properties: {}
       name:
         type: "string"
         description: "name of the resource"
@@ -9892,43 +10463,34 @@ definitions:
   RDSConfigResponse:
     type: "object"
     required:
+    - "connectionDriver"
     - "connectionURL"
-    - "databaseType"
-    - "hdpVersion"
+    - "databaseEngine"
     - "name"
+    - "type"
     properties:
-      connectionURL:
-        type: "string"
-        description: "JDBC connection URL in the form of jdbc:<db-type>://<address>:<port>/<db>"
-        pattern: "^jdbc:postgresql://[-\\w\\.]*:\\d{1,5}/?\\w*"
-      databaseType:
-        type: "string"
-        description: "Type of the external database (allowed values: MYSQL, POSTGRES)"
-        enum:
-        - "POSTGRES"
-      hdpVersion:
-        type: "string"
-        description: "HDP version for the RDS configuration"
-      validated:
-        type: "boolean"
-        description: "If true, then the RDS configuration will be validated"
-        default: false
-      type:
-        type: "string"
-        description: "Type of rds (HIVE or RANGER)"
-        enum:
-        - "HIVE"
-        - "RANGER"
-        - "DRUID"
-      properties:
-        type: "array"
-        description: "custom properties for rds connection"
-        uniqueItems: true
-        items:
-          $ref: "#/definitions/RdsConfigProperty"
       name:
         type: "string"
         description: "Name of the RDS configuration resource"
+        minLength: 4
+        maxLength: 50
+        pattern: "(^[a-z][-a-z0-9]*[a-z0-9]$)"
+      connectionURL:
+        type: "string"
+        description: "JDBC connection URL in the form of jdbc:<db-type>://<address>:<port>/<db>"
+        pattern: "^jdbc:(postgresql|mysql|oracle)://[-\\w\\.]*:\\d{1,5}/?\\w*"
+      type:
+        type: "string"
+        description: "Type of RDS, aka the service name that will use the RDS like\
+          \ HIVE, DRUID, SUPERSET, RANGER, etc."
+        minLength: 3
+        maxLength: 12
+        pattern: "(^[a-zA-Z][-a-zA-Z0-9]*[a-zA-Z0-9]$)"
+      connectorJarUrl:
+        type: "string"
+        description: "URL that points to the jar of the connection driver(connector)"
+        minLength: 4
+        maxLength: 150
       id:
         type: "integer"
         format: "int64"
@@ -9947,6 +10509,15 @@ definitions:
         uniqueItems: true
         items:
           type: "string"
+      stackVersion:
+        type: "string"
+        description: "(HDP, HDF)Stack version for the RDS configuration"
+      databaseEngine:
+        type: "string"
+        description: "Name of the external database engine (MYSQL, POSTGRES...)"
+      connectionDriver:
+        type: "string"
+        description: "Name of the JDBC connection driver (for example: 'org.postgresql.Driver')"
   FlexUsageComponentJson:
     type: "object"
     properties:
@@ -9997,6 +10568,22 @@ definitions:
       securityGroup:
         description: "instancegroup related securitygroup"
         $ref: "#/definitions/SecurityGroupRequest"
+  ClusterTemplateRequest:
+    type: "object"
+    required:
+    - "name"
+    properties:
+      name:
+        type: "string"
+        description: "name of the cluster template"
+      template:
+        type: "string"
+        description: "stringified template JSON"
+      type:
+        type: "string"
+        description: "type of the cluster template"
+        enum:
+        - "QUICK_START"
   PlatformDisksJson:
     type: "object"
     properties:
@@ -10026,22 +10613,6 @@ definitions:
           type: "object"
           additionalProperties:
             type: "string"
-  ClusterTemplateRequest:
-    type: "object"
-    required:
-    - "name"
-    properties:
-      name:
-        type: "string"
-        description: "name of the cluster template"
-      template:
-        type: "string"
-        description: "stringified template JSON"
-      type:
-        type: "string"
-        description: "type of the cluster template"
-        enum:
-        - "QUICK_START"
   CustomDomainSettings:
     type: "object"
     properties:
@@ -10118,7 +10689,7 @@ definitions:
         description: "blueprint id for the cluster"
       validateBlueprint:
         type: "boolean"
-        description: "validate blueprint"
+        description: "blueprint validation"
         default: false
       hostgroups:
         type: "array"
@@ -10540,7 +11111,7 @@ definitions:
           uniqueItems: true
           items:
             $ref: "#/definitions/CloudGatewayJson"
-  LdapblueprintRequest:
+  LdapValidationRequest:
     type: "object"
     required:
     - "bindDn"
@@ -10567,16 +11138,6 @@ definitions:
       bindPassword:
         type: "string"
         description: "password for the provided bind DN"
-  PlatformSshKeyResponse:
-    type: "object"
-    properties:
-      name:
-        type: "string"
-      properties:
-        type: "object"
-        additionalProperties:
-          type: "object"
-          properties: {}
   ClusterTemplateResponse:
     type: "object"
     required:
@@ -10597,6 +11158,24 @@ definitions:
         type: "integer"
         format: "int64"
         description: "id of the resource"
+  LdapTestResult:
+    type: "object"
+    required:
+    - "connectionResult"
+    properties:
+      connectionResult:
+        type: "string"
+        description: "result of Ldap connection test"
+  PlatformSshKeyResponse:
+    type: "object"
+    properties:
+      name:
+        type: "string"
+      properties:
+        type: "object"
+        additionalProperties:
+          type: "object"
+          properties: {}
   RecipeResponse:
     type: "object"
     required:
@@ -10684,6 +11263,48 @@ definitions:
         description: "The associated SmartSense subscription Cloudbreak domain object\
           \ json representation."
         $ref: "#/definitions/SmartSenseSubscriptionJson"
+  ManagementPackDetails:
+    type: "object"
+    required:
+    - "mpackUrl"
+    - "name"
+    properties:
+      name:
+        type: "string"
+        description: "name of the resource"
+        minLength: 5
+        maxLength: 100
+        pattern: "(^[a-z][-a-z0-9]*[a-z0-9]$)"
+      description:
+        type: "string"
+        description: "description of the resource"
+        minLength: 0
+        maxLength: 1000
+      mpackUrl:
+        type: "string"
+        description: "url of the ambari management pack"
+      purge:
+        type: "boolean"
+        description: "if true, management pack will be installed with '--purge' flag"
+        default: false
+      purgeList:
+        type: "array"
+        description: "if provided, management pack will be installed with '--purgeList'\
+          \ option with this values"
+        items:
+          type: "string"
+      force:
+        type: "boolean"
+        description: "if true, management pack will be installed with '--force' flag"
+        default: false
+      stackDefault:
+        type: "boolean"
+        description: "if true, the management pack is mandatory for the stack"
+        default: false
+      preInstalled:
+        type: "boolean"
+        description: "if true, the management pack is already installed on the instances"
+        default: false
   ConfigsResponse:
     type: "object"
     required:
@@ -10704,48 +11325,21 @@ definitions:
         items:
           type: "string"
           format: "byte"
+          pattern: "^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$"
       clientKey:
         type: "array"
         description: "client key used by the gateway"
         items:
           type: "string"
           format: "byte"
+          pattern: "^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$"
       clientCert:
         type: "array"
         description: "client certificate used by the gateway"
         items:
           type: "string"
           format: "byte"
-  RecipeRequest:
-    type: "object"
-    required:
-    - "recipeType"
-    properties:
-      name:
-        type: "string"
-        description: "name of the resource"
-        minLength: 5
-        maxLength: 100
-        pattern: "(^[a-z][-a-z0-9]*[a-z0-9]$)"
-      description:
-        type: "string"
-        description: "description of the resource"
-        minLength: 0
-        maxLength: 1000
-      recipeType:
-        type: "string"
-        description: "type of recipe"
-        enum:
-        - "PRE_AMBARI_START"
-        - "PRE_TERMINATION"
-        - "POST_AMBARI_START"
-        - "POST_CLUSTER_INSTALL"
-      content:
-        type: "string"
-        description: "content of recipe"
-      uri:
-        type: "string"
-        description: "recipe uri"
+          pattern: "^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$"
   ProxyConfigResponse:
     type: "object"
     required:
@@ -10787,6 +11381,45 @@ definitions:
         type: "integer"
         format: "int64"
         description: "proxy configuration id for the cluster"
+  RecipeRequest:
+    type: "object"
+    required:
+    - "recipeType"
+    properties:
+      name:
+        type: "string"
+        description: "name of the resource"
+        minLength: 5
+        maxLength: 100
+        pattern: "(^[a-z][-a-z0-9]*[a-z0-9]$)"
+      description:
+        type: "string"
+        description: "description of the resource"
+        minLength: 0
+        maxLength: 1000
+      recipeType:
+        type: "string"
+        description: "type of recipe"
+        enum:
+        - "PRE_AMBARI_START"
+        - "PRE_TERMINATION"
+        - "POST_AMBARI_START"
+        - "POST_CLUSTER_INSTALL"
+      content:
+        type: "string"
+        description: "content of recipe"
+      uri:
+        type: "string"
+        description: "recipe uri"
+  FlexUsageProductJson:
+    type: "object"
+    properties:
+      productId:
+        type: "string"
+      components:
+        type: "array"
+        items:
+          $ref: "#/definitions/FlexUsageComponentJson"
   RepoConfigValidationResponse:
     type: "object"
     properties:
@@ -10820,15 +11453,6 @@ definitions:
         description: "Indicates the request's value with the same key is valid and\
           \ reachable by Cloudbreak or not"
         default: false
-  FlexUsageProductJson:
-    type: "object"
-    properties:
-      productId:
-        type: "string"
-      components:
-        type: "array"
-        items:
-          $ref: "#/definitions/FlexUsageComponentJson"
   FlexUsageComponentInstanceJson:
     type: "object"
     properties:
@@ -10908,48 +11532,40 @@ definitions:
     - "connectionPassword"
     - "connectionURL"
     - "connectionUserName"
-    - "databaseType"
-    - "hdpVersion"
     - "name"
+    - "type"
     properties:
-      connectionURL:
-        type: "string"
-        description: "JDBC connection URL in the form of jdbc:<db-type>://<address>:<port>/<db>"
-        pattern: "^jdbc:postgresql://[-\\w\\.]*:\\d{1,5}/?\\w*"
-      databaseType:
-        type: "string"
-        description: "Type of the external database (allowed values: MYSQL, POSTGRES)"
-        enum:
-        - "POSTGRES"
-      hdpVersion:
-        type: "string"
-        description: "HDP version for the RDS configuration"
-      validated:
-        type: "boolean"
-        description: "If true, then the RDS configuration will be validated"
-        default: false
-      type:
-        type: "string"
-        description: "Type of rds (HIVE or RANGER)"
-        enum:
-        - "HIVE"
-        - "RANGER"
-        - "DRUID"
-      properties:
-        type: "array"
-        description: "custom properties for rds connection"
-        uniqueItems: true
-        items:
-          $ref: "#/definitions/RdsConfigProperty"
       name:
         type: "string"
         description: "Name of the RDS configuration resource"
+        minLength: 4
+        maxLength: 50
+        pattern: "(^[a-z][-a-z0-9]*[a-z0-9]$)"
+      connectionURL:
+        type: "string"
+        description: "JDBC connection URL in the form of jdbc:<db-type>://<address>:<port>/<db>"
+        pattern: "^jdbc:(postgresql|mysql|oracle)://[-\\w\\.]*:\\d{1,5}/?\\w*"
+      type:
+        type: "string"
+        description: "Type of RDS, aka the service name that will use the RDS like\
+          \ HIVE, DRUID, SUPERSET, RANGER, etc."
+        minLength: 3
+        maxLength: 12
+        pattern: "(^[a-zA-Z][-a-zA-Z0-9]*[a-zA-Z0-9]$)"
+      connectorJarUrl:
+        type: "string"
+        description: "URL that points to the jar of the connection driver(connector)"
+        minLength: 4
+        maxLength: 150
       connectionUserName:
         type: "string"
         description: "Username to use for the jdbc connection"
       connectionPassword:
         type: "string"
         description: "Password to use for the jdbc connection"
+      oracleParameters:
+        description: "Oracle specific properties"
+        $ref: "#/definitions/oracle"
   SecurityGroupRequest:
     type: "object"
     required:
@@ -11016,6 +11632,13 @@ definitions:
       principal:
         type: "string"
         description: "kerberos principal"
+  BlueprintInput:
+    type: "object"
+    properties:
+      name:
+        type: "string"
+      propertyValue:
+        type: "string"
   LdapConfigRequest:
     type: "object"
     required:
@@ -11086,16 +11709,10 @@ definitions:
         description: "name of the resource"
         minLength: 1
         maxLength: 100
+        pattern: "(^[a-z][-a-z0-9]*[a-z0-9]$)"
       bindPassword:
         type: "string"
         description: "password for the provided bind DN"
-  BlueprintInput:
-    type: "object"
-    properties:
-      name:
-        type: "string"
-      propertyValue:
-        type: "string"
   ClusterRepairRequest:
     type: "object"
     required:
@@ -11111,55 +11728,6 @@ definitions:
         description: "If true, the failed nodes will only be removed, otherwise the\
           \ failed nodes will be removed and new nodes will be started."
         default: false
-  AccountPreference:
-    type: "object"
-    required:
-    - "clusterTimeToLive"
-    - "userTimeToLive"
-    properties:
-      maxNumberOfClusters:
-        type: "integer"
-        format: "int64"
-        description: "max number of clusters in the account (0 when unlimited)"
-        minimum: 0.0
-      maxNumberOfNodesPerCluster:
-        type: "integer"
-        format: "int64"
-        description: "max number of vms in a cluster of account (0 when unlimited)"
-        minimum: 0.0
-      maxNumberOfClustersPerUser:
-        type: "integer"
-        format: "int64"
-        description: "max number of clusters for user within the account (0 when unlimited)"
-        minimum: 0.0
-      allowedInstanceTypes:
-        type: "array"
-        description: "allowed instance types in the account (empty list for no restriction)"
-        items:
-          type: "string"
-      clusterTimeToLive:
-        type: "integer"
-        format: "int64"
-        description: "lifecycle of the cluster in hours (0 for immortal clusters)"
-        minimum: 0.0
-      userTimeToLive:
-        type: "integer"
-        format: "int64"
-        description: "lifecycle of the account and its clusters in hours (0 for immortal\
-          \ account)"
-        minimum: 0.0
-      platforms:
-        type: "string"
-        description: "list of the cloudplatforms visible on the UI"
-      smartsenseEnabled:
-        type: "boolean"
-        description: "smartsense enabled on the UI"
-        default: false
-      defaultTags:
-        type: "object"
-        description: "default tags for the resources created"
-        additionalProperties:
-          type: "string"
   StackResponse:
     type: "object"
     required:

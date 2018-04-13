@@ -44,7 +44,6 @@ exports.getFlexSubscriptionById = function(args, res, next) {
   var examples = {};
   examples['application/json'] = {
   "owner" : "aeiou",
-  "default" : false,
   "publicInAccount" : false,
   "smartSenseSubscriptionId" : 0,
   "usedForController" : false,
@@ -59,7 +58,8 @@ exports.getFlexSubscriptionById = function(args, res, next) {
   },
   "id" : 6,
   "subscriptionId" : "aeiou",
-  "account" : "aeiou"
+  "account" : "aeiou",
+  "usedAsDefault" : false
 };
   if (Object.keys(examples).length > 0) {
     res.setHeader('Content-Type', 'application/json');
@@ -80,7 +80,6 @@ exports.getPrivateFlexSubscriptionByName = function(args, res, next) {
   var examples = {};
   examples['application/json'] = {
   "owner" : "aeiou",
-  "default" : false,
   "publicInAccount" : false,
   "smartSenseSubscriptionId" : 0,
   "usedForController" : false,
@@ -95,7 +94,8 @@ exports.getPrivateFlexSubscriptionByName = function(args, res, next) {
   },
   "id" : 6,
   "subscriptionId" : "aeiou",
-  "account" : "aeiou"
+  "account" : "aeiou",
+  "usedAsDefault" : false
 };
   if (Object.keys(examples).length > 0) {
     res.setHeader('Content-Type', 'application/json');
@@ -115,7 +115,6 @@ exports.getPrivateFlexSubscriptions = function(args, res, next) {
   var examples = {};
   examples['application/json'] = [ {
   "owner" : "aeiou",
-  "default" : false,
   "publicInAccount" : false,
   "smartSenseSubscriptionId" : 0,
   "usedForController" : false,
@@ -130,7 +129,8 @@ exports.getPrivateFlexSubscriptions = function(args, res, next) {
   },
   "id" : 6,
   "subscriptionId" : "aeiou",
-  "account" : "aeiou"
+  "account" : "aeiou",
+  "usedAsDefault" : false
 } ];
   if (Object.keys(examples).length > 0) {
     res.setHeader('Content-Type', 'application/json');
@@ -151,7 +151,6 @@ exports.getPublicFlexSubscriptionByName = function(args, res, next) {
   var examples = {};
   examples['application/json'] = {
   "owner" : "aeiou",
-  "default" : false,
   "publicInAccount" : false,
   "smartSenseSubscriptionId" : 0,
   "usedForController" : false,
@@ -166,7 +165,8 @@ exports.getPublicFlexSubscriptionByName = function(args, res, next) {
   },
   "id" : 6,
   "subscriptionId" : "aeiou",
-  "account" : "aeiou"
+  "account" : "aeiou",
+  "usedAsDefault" : false
 };
   if (Object.keys(examples).length > 0) {
     res.setHeader('Content-Type', 'application/json');
@@ -186,7 +186,6 @@ exports.getPublicFlexSubscriptions = function(args, res, next) {
   var examples = {};
   examples['application/json'] = [ {
   "owner" : "aeiou",
-  "default" : false,
   "publicInAccount" : false,
   "smartSenseSubscriptionId" : 0,
   "usedForController" : false,
@@ -201,7 +200,8 @@ exports.getPublicFlexSubscriptions = function(args, res, next) {
   },
   "id" : 6,
   "subscriptionId" : "aeiou",
-  "account" : "aeiou"
+  "account" : "aeiou",
+  "usedAsDefault" : false
 } ];
   if (Object.keys(examples).length > 0) {
     res.setHeader('Content-Type', 'application/json');
@@ -222,7 +222,6 @@ exports.postPrivateFlexSubscription = function(args, res, next) {
   var examples = {};
   examples['application/json'] = {
   "owner" : "aeiou",
-  "default" : false,
   "publicInAccount" : false,
   "smartSenseSubscriptionId" : 0,
   "usedForController" : false,
@@ -237,7 +236,8 @@ exports.postPrivateFlexSubscription = function(args, res, next) {
   },
   "id" : 6,
   "subscriptionId" : "aeiou",
-  "account" : "aeiou"
+  "account" : "aeiou",
+  "usedAsDefault" : false
 };
   if (Object.keys(examples).length > 0) {
     res.setHeader('Content-Type', 'application/json');
@@ -258,7 +258,6 @@ exports.postPublicFlexSubscription = function(args, res, next) {
   var examples = {};
   examples['application/json'] = {
   "owner" : "aeiou",
-  "default" : false,
   "publicInAccount" : false,
   "smartSenseSubscriptionId" : 0,
   "usedForController" : false,
@@ -273,7 +272,8 @@ exports.postPublicFlexSubscription = function(args, res, next) {
   },
   "id" : 6,
   "subscriptionId" : "aeiou",
-  "account" : "aeiou"
+  "account" : "aeiou",
+  "usedAsDefault" : false
 };
   if (Object.keys(examples).length > 0) {
     res.setHeader('Content-Type', 'application/json');

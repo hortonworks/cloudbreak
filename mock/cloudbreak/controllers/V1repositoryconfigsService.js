@@ -10,12 +10,12 @@ exports.postRepositoryConfigsValidation = function(args, res, next) {
    **/
   var examples = {};
   examples['application/json'] = {
-  "utilsBaseURL" : true,
-  "ambariGpgKeyUrl" : true,
-  "mpackUrl" : true,
-  "stackBaseURL" : true,
-  "versionDefinitionFileUrl" : true,
-  "ambariBaseUrl" : true
+  "utilsBaseURL" : false,
+  "ambariGpgKeyUrl" : false,
+  "mpackUrl" : false,
+  "stackBaseURL" : false,
+  "versionDefinitionFileUrl" : false,
+  "ambariBaseUrl" : false
 };
   if (Object.keys(examples).length > 0) {
     res.setHeader('Content-Type', 'application/json');
