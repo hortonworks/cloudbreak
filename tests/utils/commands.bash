@@ -180,8 +180,8 @@ function list-database() {
   cb-command database list "$@"
 }
 
-function create-database() {
-  cb-command database create "$@"
+function create-postgres-database() {
+  cb-command database create postgres "$@"
 }
 
 function delete-database() {
