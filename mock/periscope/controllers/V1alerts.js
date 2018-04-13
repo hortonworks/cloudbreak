@@ -59,3 +59,7 @@ module.exports.updatePrometheusAlert = function updatePrometheusAlert (req, res,
 module.exports.updateTimeAlert = function updateTimeAlert (req, res, next) {
   V1alerts.updateTimeAlert(req.swagger.params, res, next);
 };
+
+module.exports.validateCronExpression = function validateCronExpression (req, res, next) {
+  V1alerts.validateCronExpression(req.swagger.params, res, next);
+};
