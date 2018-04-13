@@ -12,7 +12,7 @@ load ../utils/commands
 @test "Create image catalog" {
   OUTPUT=$(create-image-catalog --name test --url test 2>&1 | tail -n 2 | head -n 1)
 
-  [[ "${OUTPUT}" == *"imagecatalog created"* ]]
+  [[ "${OUTPUT}" == *"create imagecatalog took"* ]]
   [[ "${OUTPUT}" != *"error"* ]]
 }
 
@@ -31,6 +31,7 @@ load ../utils/commands
 }
 
 @test "Set default image catalog" {
-  OUTPUT=$(set-default-image-catalog --name test 2>&1 | awk '{printf "%s",$0} END {print ""}' | grep -o '{.*}' | jq ' . | [to_entries[].key] == ["default","publicInAccount","name","id","url"]')
+  OUTPUT=$(set-default-image-catalog --name test 2>&1 | awk '{printf "%s",$0} END {print ""}' | grep -o '{.*}' | jq ' . | [to_entries[].key] ==
+  ["publicInAccount","imagesResponse","name","id","url","usedAsDefault"]' | tail -n 2 | head -n 1)
   [[ "${OUTPUT}" ==  true ]]
 }
