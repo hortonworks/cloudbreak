@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.service.decorator;
 
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -104,10 +104,11 @@ public class ClusterDecoratorTest {
     @Test
     public void testDecorateIfMethodCalledThenSharedServiceConfigProviderShouldBeCalledOnceToConfigureTheCluster() {
         Cluster expectedClusterInstance = new Cluster();
+        when(request.getConnectedCluster()).thenReturn(mock(ConnectedClusterRequest.class));
         when(sharedServiceConfigProvider.configureCluster(any(Cluster.class), any(IdentityUser.class), any(ConnectedClusterRequest.class)))
                 .thenReturn(expectedClusterInstance);
         when(ambariConfigurationService.createDefaultRdsConfigIfNeeded(any(Stack.class), any(Cluster.class))).thenReturn(Optional.empty());
-        when(clusterProxyDecorator.prepareProxyConfig(any(Cluster.class), any(IdentityUser.class), anyString(), any(Stack.class))).thenReturn(subject);
+        when(clusterProxyDecorator.prepareProxyConfig(any(Cluster.class), any(IdentityUser.class), any(), any(Stack.class))).thenReturn(subject);
 
         Cluster result = underTest.decorate(subject, request, blueprint, user, stack);
 
