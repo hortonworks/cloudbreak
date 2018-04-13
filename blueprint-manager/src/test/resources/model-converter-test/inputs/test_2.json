@@ -1,0 +1,15 @@
+{
+  "ranger.ldap.ad.url": "url1",
+  "ranger.ldap.ad.bind.dn": "binddn",
+  "ranger.ldap.ad.bind.password": "bindPassword",
+  "ranger.ldap.ad.base.dn": "userSearchBase",
+  "ranger.ldap.ad.user.searchfilter": "userNameAttribute",
+  "ranger.ldap.url": "connectionURL",
+  "ranger.ldap.bind.dn": "bindDn",
+  "ranger.ldap.bind.password": "bindPassword",
+  "ranger.ldap.base.dn": "userSearchBase",
+  "ranger.ldap.user.searchfilter": "userNameAttribute",
+  "ranger.ldap.user.dnpattern": "userNameAttribute",
+  "ranger.ldap.group.searchbase": "groupSearchBase",
+  "ranger.ldap.group.roleattribute": "groupNameAttribute"
+}

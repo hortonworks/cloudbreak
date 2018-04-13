@@ -1,0 +1,70 @@
+{
+  "ranger": {
+    "ldap": {
+      "ad": {
+        "bind": {
+          "password": "bindPassword",
+          "dn": "binddn"
+        },
+        "user": {
+          "searchfilter": "userNameAttribute"
+        },
+        "url": "url1",
+        "base": {
+          "dn": "userSearchBase"
+        }
+      },
+      "bind": {
+        "password": "bindPassword",
+        "dn": "bindDn"
+      },
+      "user": {
+        "dnpattern": "userNameAttribute",
+        "searchfilter": "userNameAttribute"
+      },
+      "url": "connectionURL",
+      "base": {
+        "dn": "userSearchBase"
+      },
+      "group": {
+        "searchbase": "groupSearchBase",
+        "roleattribute": "groupNameAttribute"
+      }
+    }
+  },
+  "second_block": {
+    "ranger": {
+      "ldap": {
+        "ad": {
+          "bind": {
+            "password": "bindPassword",
+            "dn": "binddn"
+          },
+          "user": {
+            "searchfilter": "userNameAttribute"
+          },
+          "url": "url1",
+          "base": {
+            "dn": "userSearchBase"
+          }
+        },
+        "bind": {
+          "password": "bindPassword",
+          "dn": "bindDn"
+        },
+        "user": {
+          "dnpattern": "userNameAttribute",
+          "searchfilter": "userNameAttribute"
+        },
+        "url": "connectionURL",
+        "base": {
+          "dn": "userSearchBase"
+        },
+        "group": {
+          "searchbase": "groupSearchBase",
+          "roleattribute": "groupNameAttribute"
+        }
+      }
+    }
+  }
+}

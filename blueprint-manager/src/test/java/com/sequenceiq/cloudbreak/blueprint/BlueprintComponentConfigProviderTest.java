@@ -20,7 +20,7 @@ public class BlueprintComponentConfigProviderTest {
         Assert.assertNotNull(blueprintComponentConfigProviderTest.components());
         Assert.assertNotNull(blueprintComponentConfigProviderTest.getSettingsEntries(object, blueprintText));
         Assert.assertNotNull(blueprintComponentConfigProviderTest.getConfigurationEntries(object, blueprintText));
-        Assert.assertNotNull(blueprintComponentConfigProviderTest.additionalCriteria(object, blueprintText));
+        Assert.assertNotNull(blueprintComponentConfigProviderTest.specialCondition(object, blueprintText));
         Assert.assertNotNull(blueprintComponentConfigProviderTest.getHostgroupConfigurationEntries(object, blueprintText));
         Assert.assertNotNull(blueprintComponentConfigProviderTest.customTextManipulation(object, new BlueprintTextProcessor(blueprintText)));
     }

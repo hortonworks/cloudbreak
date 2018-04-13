@@ -5,6 +5,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import com.sequenceiq.cloudbreak.blueprint.nifi.HdfConfigs;
+import com.sequenceiq.cloudbreak.blueprint.template.views.SharedServiceConfigsView;
 import com.sequenceiq.cloudbreak.blueprint.template.views.BlueprintView;
 import com.sequenceiq.cloudbreak.blueprint.template.views.FileSystemConfigurationView;
 import com.sequenceiq.cloudbreak.blueprint.template.views.GatewayView;
@@ -34,6 +35,8 @@ public class BlueprintPreparationObject {
 
     private final Optional<LdapConfig> ldapConfig;
 
+    private final Optional<SharedServiceConfigsView> sharedServiceConfigs;
+
     private final Optional<String> stackRepoDetailsHdpVersion;
 
     private final Optional<HdfConfigs> hdfConfigs;
@@ -57,6 +60,7 @@ public class BlueprintPreparationObject {
         this.blueprintView = builder.blueprintView;
         this.generalClusterConfigs = builder.generalClusterConfigs;
         this.flexSubscription = builder.flexSubscription;
+        this.sharedServiceConfigs = builder.sharedServiceConfigs;
     }
 
     public Set<RDSConfig> getRdsConfigs() {
@@ -107,6 +111,10 @@ public class BlueprintPreparationObject {
         return blueprintView;
     }
 
+    public Optional<SharedServiceConfigsView> getSharedServiceConfigs() {
+        return sharedServiceConfigs;
+    }
+
     public static class Builder {
 
         private Set<RDSConfig> rdsConfigs = new HashSet<>();
@@ -128,6 +136,8 @@ public class BlueprintPreparationObject {
         private Optional<KerberosConfig> kerberosConfig = Optional.empty();
 
         private Optional<FlexSubscription> flexSubscription = Optional.empty();
+
+        private Optional<SharedServiceConfigsView> sharedServiceConfigs = Optional.empty();
 
         private GeneralClusterConfigs generalClusterConfigs;
 
@@ -214,6 +224,11 @@ public class BlueprintPreparationObject {
 
         public Builder withFlexSubscription(FlexSubscription flexSubscription) {
             this.flexSubscription = Optional.ofNullable(flexSubscription);
+            return this;
+        }
+
+        public Builder withSharedServiceConfigs(SharedServiceConfigsView sharedServiceConfigsView) {
+            this.sharedServiceConfigs = Optional.ofNullable(sharedServiceConfigsView);
             return this;
         }
 

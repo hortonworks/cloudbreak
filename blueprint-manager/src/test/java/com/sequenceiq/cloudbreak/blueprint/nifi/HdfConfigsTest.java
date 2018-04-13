@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.blueprint.nifi;
 
-import java.util.Optional;
-
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -9,7 +7,7 @@ public class HdfConfigsTest {
 
     @Test
     public void testHdfConfigsIfGetSomePropertyThenShouldBeVisible() {
-        HdfConfigs hdfConfigs = new HdfConfigs("entities", "entities", Optional.empty());
+        HdfConfigs hdfConfigs = new HdfConfigs("entities", "entities", null);
         Assert.assertEquals("entities", hdfConfigs.getNodeEntities());
     }
 

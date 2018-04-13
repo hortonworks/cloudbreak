@@ -673,6 +673,21 @@ public class TestUtil {
         return gateway;
     }
 
+    public static Gateway gatewayEnabled() throws JsonProcessingException {
+        Gateway gateway = new Gateway();
+        gateway.setEnableGateway(true);
+        gateway.setTopologyName("topology");
+        gateway.setPath("/path");
+        gateway.setSsoProvider("simple");
+        gateway.setGatewayType(GatewayType.CENTRAL);
+        gateway.setSignCert("signcert");
+        gateway.setSignKey("signkey");
+        gateway.setTokenCert("tokencert");
+        gateway.setSignPub("signpub");
+        gateway.setExposedServices(new Json("{}"));
+        return gateway;
+    }
+
     public static Stack setSpotInstances(Stack stack) {
         if (stack.cloudPlatform().equals(AWS)) {
             for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {

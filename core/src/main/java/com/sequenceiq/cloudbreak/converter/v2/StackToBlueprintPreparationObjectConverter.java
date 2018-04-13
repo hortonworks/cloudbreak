@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.blueprint.GeneralClusterConfigsProvider;
 import com.sequenceiq.cloudbreak.blueprint.filesystem.FileSystemConfigurationProvider;
 import com.sequenceiq.cloudbreak.blueprint.nifi.HdfConfigProvider;
 import com.sequenceiq.cloudbreak.blueprint.nifi.HdfConfigs;
+import com.sequenceiq.cloudbreak.blueprint.sharedservice.SharedServiceConfigsProvider;
 import com.sequenceiq.cloudbreak.blueprint.template.views.BlueprintView;
 import com.sequenceiq.cloudbreak.blueprint.template.views.FileSystemConfigurationView;
 import com.sequenceiq.cloudbreak.blueprint.templates.BlueprintStackInfo;
@@ -38,6 +39,7 @@ import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.ambari.InstanceGroupMetadataCollector;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.smartsense.SmartSenseSubscriptionService;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
 
 @Component
@@ -73,10 +75,16 @@ public class StackToBlueprintPreparationObjectConverter extends AbstractConversi
     private FileSystemConfigurationProvider fileSystemConfigurationProvider;
 
     @Inject
+    private StackService stackService;
+
+    @Inject
     private ClusterService clusterService;
 
     @Inject
     private GeneralClusterConfigsProvider generalClusterConfigsProvider;
+
+    @Inject
+    private SharedServiceConfigsProvider sharedServiceConfigProvider;
 
     @Override
     public BlueprintPreparationObject convert(Stack source) {
@@ -97,21 +105,26 @@ public class StackToBlueprintPreparationObjectConverter extends AbstractConversi
                     fileSystem == null ? false : fileSystem.isDefaultFs());
             }
             IdentityUser identityUser = userDetailsService.getDetails(cluster.getOwner(), UserFilterField.USERID);
+            Stack dataLakeStack = null;
+            if (source.getDatalakeId() != null) {
+                dataLakeStack = stackService.get(source.getDatalakeId());
+            }
 
             return BlueprintPreparationObject.Builder.builder()
-                .withFlexSubscription(source.getFlexSubscription())
-                .withRdsConfigs(postgresConfigService.createRdsConfigIfNeeded(source, cluster))
-                .withHostgroups(hostGroupService.getByCluster(cluster.getId()))
-                .withGateway(cluster.getGateway())
-                .withBlueprintView(new BlueprintView(cluster, blueprintStackInfo))
-                .withStackRepoDetailsHdpVersion(stackRepoDetailsHdpVersion)
-                .withFileSystemConfigurationView(fileSystemConfigurationView)
-                .withGeneralClusterConfigs(generalClusterConfigsProvider.generalClusterConfigs(source, cluster, identityUser))
-                .withSmartSenseSubscriptionId(aDefault.isPresent() ? aDefault.get().getSubscriptionId() : null)
-                .withLdapConfig(ldapConfig)
-                .withHdfConfigs(hdfConfigs)
-                .withKerberosConfig(cluster.isSecure() ? cluster.getKerberosConfig() : null)
-                .build();
+                    .withFlexSubscription(source.getFlexSubscription())
+                    .withRdsConfigs(postgresConfigService.createRdsConfigIfNeeded(source, cluster))
+                    .withHostgroups(hostGroupService.getByCluster(cluster.getId()))
+                    .withGateway(cluster.getGateway())
+                    .withBlueprintView(new BlueprintView(cluster, blueprintStackInfo))
+                    .withStackRepoDetailsHdpVersion(stackRepoDetailsHdpVersion)
+                    .withFileSystemConfigurationView(fileSystemConfigurationView)
+                    .withGeneralClusterConfigs(generalClusterConfigsProvider.generalClusterConfigs(source, cluster, identityUser))
+                    .withSmartSenseSubscriptionId(aDefault.isPresent() ? aDefault.get().getSubscriptionId() : null)
+                    .withLdapConfig(ldapConfig)
+                    .withHdfConfigs(hdfConfigs)
+                    .withKerberosConfig(cluster.isSecure() ? cluster.getKerberosConfig() : null)
+                    .withSharedServiceConfigs(sharedServiceConfigProvider.createSharedServiceConfigs(source, dataLakeStack))
+                    .build();
         } catch (BlueprintProcessingException e) {
             throw new CloudbreakServiceException(e.getMessage(), e);
         } catch (IOException e) {

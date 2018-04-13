@@ -15,6 +15,16 @@
   },
   "configurations": [
     {
+      "ranger-env": {
+        "properties": {
+          "ranger_admin_password": "Passw0rd",
+          "ranger_privelege_user_jdbc_url": "jdbc:postgresql://10.1.1.1:5432",
+          "create_db_dbuser": "false",
+          "admin_password": "Passw0rd"
+        }
+      }
+    },
+    {
       "ranger-admin-site": {
         "properties": {
           "ranger.authentication.method": "ACTIVE_DIRECTORY",
@@ -44,14 +54,6 @@
           "db_user": "heyitsme",
           "db_host": "10.1.1.1:5432",
           "db_password": "iamsoosecure"
-        }
-      }
-    },
-    {
-      "ranger-env": {
-        "properties": {
-          "ranger_privelege_user_jdbc_url": "jdbc:postgresql://10.1.1.1:5432",
-          "create_db_dbuser": "false"
         }
       }
     },

@@ -15,6 +15,14 @@
   },
   "configurations": [
     {
+      "ranger-env": {
+        "properties": {
+          "ranger_admin_password": "Passw0rd",
+          "admin_password": "Passw0rd"
+        }
+      }
+    },
+    {
       "ranger-admin-site": {
         "properties": {
           "ranger.authentication.method": "ACTIVE_DIRECTORY",

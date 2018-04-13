@@ -1,0 +1,10 @@
+{
+{{{#if-true gateway.enableGateway}}}
+  "beacon-security-site": {
+    "properties": {
+      "beacon.sso.knox.authentication.enabled": "true",
+      "beacon.sso.knox.publicKey": "{{{ gateway.escSignCert }}}"
+    }
+  }
+{{{/if-true}}}
+}
