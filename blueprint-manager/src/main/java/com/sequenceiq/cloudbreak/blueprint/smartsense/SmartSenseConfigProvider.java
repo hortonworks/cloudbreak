@@ -77,7 +77,7 @@ public class SmartSenseConfigProvider implements BlueprintComponentConfigProvide
     }
 
     @Override
-    public boolean additionalCriteria(BlueprintPreparationObject source, String blueprintText) {
+    public boolean specialCondition(BlueprintPreparationObject source, String blueprintText) {
         return smartsenseConfigurationLocator.smartsenseConfigurableBySubscriptionId(source.getSmartSenseSubscriptionId());
     }
 

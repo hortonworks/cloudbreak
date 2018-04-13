@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.blueprint.moduletest;
 
-import static com.sequenceiq.cloudbreak.blueprint.moduletest.BlueprintModelProvider.getPreparedBuilder;
+import static com.sequenceiq.cloudbreak.blueprint.moduletest.BlueprintModulTestModelProvider.getPreparedBuilder;
 
 import java.io.IOException;
 

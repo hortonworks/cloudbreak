@@ -25,35 +25,7 @@
         "component_settings": []
       }
     ],
-    "configurations": [
-      {
-        "hive-site": {
-          "hive.metastore.warehouse.dir":"/apps/hive/warehouse"
-        }
-      },
-      {
-        "ranger-env": {
-          "properties": {
-            "admin_password": "{{{ cluster_admin_password }}}",
-            "ranger_admin_password": "{{{ cluster_admin_password }}}",
-            "is_solrCloud_enabled": "true",
-            "ranger-hdfs-plugin-enabled": "No",
-            "ranger-hive-plugin-enabled": "No",
-            "ranger-yarn-plugin-enabled": "No",
-            "ranger-atlas-plugin-enabled": "No",
-            "create_db_dbuser": "false",
-            "xasecure.audit.destination.hdfs": "true",
-            "xasecure.audit.destination.solr": "true"
-          }
-        }
-      },
-      {
-        "ranger-hive-plugin-properties": {
-          "ranger.service.config.param.enable.hive.metastore.lookup": "true",
-          "ranger.service.config.param.hive.site.file.path": "/etc/hive/conf/hive-site.xml"
-        }
-      }
-    ],
+    "configurations": [],
     "host_groups": [
       {
         "name": "master",

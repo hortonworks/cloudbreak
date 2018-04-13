@@ -2,9 +2,13 @@ package com.sequenceiq.cloudbreak.blueprint.template.views;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import com.google.common.collect.Maps;
+import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessingException;
+import com.sequenceiq.cloudbreak.blueprint.BlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.blueprint.templates.BlueprintStackInfo;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.json.Json;
@@ -19,11 +23,14 @@ public class BlueprintView {
 
     private String type;
 
+    private Set<String> components;
+
     public BlueprintView(String blueprintText, Map<String, Object> blueprintInputs, String version, String type) {
         this.blueprintText = blueprintText;
         this.blueprintInputs = blueprintInputs;
         this.type = type;
         this.version = version;
+        this.components = prepareComponents(blueprintText);
     }
 
     public BlueprintView(String blueprintText, String version, String type) {
@@ -31,6 +38,7 @@ public class BlueprintView {
         this.blueprintInputs = Maps.newHashMap();
         this.type = type;
         this.version = version;
+        this.components = prepareComponents(blueprintText);
     }
 
     public BlueprintView(Cluster cluster, BlueprintStackInfo blueprintStackInfo) throws IOException {
@@ -43,14 +51,29 @@ public class BlueprintView {
         }
         this.type = blueprintStackInfo.getType();
         this.version = blueprintStackInfo.getVersion();
+        this.components = prepareComponents(cluster.getBlueprint().getBlueprintText());
     }
 
     public BlueprintView(String blueprintText, Json blueprintInputs, String version, String type) throws IOException {
         this.blueprintText = blueprintText;
+        prepareComponents(blueprintText);
         Map tmpblueprintInputs = blueprintInputs.get(Map.class);
         this.blueprintInputs = tmpblueprintInputs == null ? new HashMap<>() : tmpblueprintInputs;
         this.type = type;
         this.version = version;
+        this.components = prepareComponents(blueprintText);
+    }
+
+    private Set<String> prepareComponents(String blueprintText) {
+        Set<String> result = new HashSet<>();
+        try {
+            BlueprintTextProcessor blueprintTextProcessor = new BlueprintTextProcessor(blueprintText);
+            Map<String, Set<String>> componentsByHostGroup = blueprintTextProcessor.getComponentsByHostGroup();
+            componentsByHostGroup.values().forEach(result::addAll);
+        } catch (BlueprintProcessingException exception) {
+            result = new HashSet<>();
+        }
+        return result;
     }
 
     public String getVersion() {
@@ -87,5 +110,13 @@ public class BlueprintView {
 
     public Map<String, Object> getBlueprintInputs() {
         return blueprintInputs;
+    }
+
+    public Set<String> getComponents() {
+        return components;
+    }
+
+    public void setComponents(Set<String> components) {
+        this.components = components;
     }
 }

@@ -27,7 +27,7 @@ public class EqHelper implements Helper<Object> {
         notNull(first, "found 'null', expected 'first'");
 
         Options.Buffer buffer = options.buffer();
-        if (!first.equals(context)) {
+        if (!first.equals(context.toString())) {
             buffer.append(options.inverse());
         } else {
             buffer.append(options.fn());

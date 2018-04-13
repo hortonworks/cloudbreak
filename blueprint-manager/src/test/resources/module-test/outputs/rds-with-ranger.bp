@@ -15,6 +15,16 @@
   },
   "configurations": [
     {
+      "ranger-env": {
+        "properties": {
+          "ranger_admin_password": "Passw0rd",
+          "ranger_privelege_user_jdbc_url": "jdbc:postgresql://10.1.1.1:5432",
+          "create_db_dbuser": "false",
+          "admin_password": "Passw0rd"
+        }
+      }
+    },
+    {
       "admin-properties": {
         "properties": {
           "DB_FLAVOR": "POSTGRES",
@@ -29,14 +39,6 @@
       "ranger-admin-site": {
         "properties": {
           "ranger.jpa.jdbc.driver": "org.postgresql.Driver"
-        }
-      }
-    },
-    {
-      "ranger-env": {
-        "properties": {
-          "ranger_privelege_user_jdbc_url": "jdbc:postgresql://10.1.1.1:5432",
-          "create_db_dbuser": "false"
         }
       }
     },

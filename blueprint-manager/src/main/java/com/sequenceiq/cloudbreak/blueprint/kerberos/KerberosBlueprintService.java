@@ -115,7 +115,7 @@ public class KerberosBlueprintService implements BlueprintComponentConfigProvide
     }
 
     @Override
-    public boolean additionalCriteria(BlueprintPreparationObject source, String blueprintText) {
+    public boolean specialCondition(BlueprintPreparationObject source, String blueprintText) {
         return source.getKerberosConfig().isPresent();
     }
 }

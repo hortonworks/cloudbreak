@@ -1,10 +1,10 @@
 {
   "superset-env": {
     "properties": {
-      "superset_admin_password": "{{{ cluster_admin_password }}}",
-      "superset_admin_firstname": "{{{ cluster_admin_firstname }}}",
-      "superset_admin_lastname": "{{{ cluster_admin_lastname }}}",
-      "superset_admin_email": "{{{ admin_email }}}"
+      "superset_admin_password": "{{{ general.password }}}",
+      "superset_admin_firstname": "{{{ general.userName }}}",
+      "superset_admin_lastname": "{{{ general.userName }}}",
+      "superset_admin_email": "{{{ general.email }}}"
     }
   }{{{#if rds.superset}}},
   "superset": {

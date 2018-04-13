@@ -12,12 +12,15 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.model.FileSystemConfiguration;
+import com.sequenceiq.cloudbreak.api.model.SharedServiceRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.InstanceGroupV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintPreparationObject;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessingException;
 import com.sequenceiq.cloudbreak.blueprint.GeneralClusterConfigsProvider;
 import com.sequenceiq.cloudbreak.blueprint.filesystem.FileSystemConfigurationProvider;
+import com.sequenceiq.cloudbreak.blueprint.template.views.SharedServiceConfigsView;
+import com.sequenceiq.cloudbreak.blueprint.sharedservice.SharedServiceConfigsProvider;
 import com.sequenceiq.cloudbreak.blueprint.template.views.BlueprintView;
 import com.sequenceiq.cloudbreak.blueprint.template.views.FileSystemConfigurationView;
 import com.sequenceiq.cloudbreak.blueprint.template.views.HostgroupView;
@@ -33,11 +36,13 @@ import com.sequenceiq.cloudbreak.domain.FlexSubscription;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
+import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.flex.FlexSubscriptionService;
 import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
 
 @Component
@@ -50,6 +55,9 @@ public class StackRequestToBlueprintPreparationObjectConverter extends AbstractC
 
     @Inject
     private LdapConfigService ldapConfigService;
+
+    @Inject
+    private StackService stackService;
 
     @Inject
     private RdsConfigService rdsConfigService;
@@ -69,6 +77,9 @@ public class StackRequestToBlueprintPreparationObjectConverter extends AbstractC
     @Inject
     private StackInfoService stackInfoService;
 
+    @Inject
+    private SharedServiceConfigsProvider sharedServiceConfigsProvider;
+
     @Override
     public BlueprintPreparationObject convert(StackV2Request source) {
         try {
@@ -85,6 +96,14 @@ public class StackRequestToBlueprintPreparationObjectConverter extends AbstractC
             BlueprintView blueprintView = new BlueprintView(blueprint.getBlueprintText(), blueprintStackInfo.getVersion(), blueprintStackInfo.getType());
             GeneralClusterConfigs generalClusterConfigs = generalClusterConfigsProvider.generalClusterConfigs(source, identityUser);
 
+            SharedServiceRequest sharedService = source.getCluster().getSharedService();
+            Stack dataLakeStack = null;
+            if (sharedService != null && Strings.isNullOrEmpty(sharedService.getSharedCluster())) {
+                dataLakeStack = stackService.getPublicStack(sharedService.getSharedCluster(), identityUser);
+            }
+            SharedServiceConfigsView sharedServiceConfigsView = sharedServiceConfigsProvider
+                    .createSharedServiceConfigs(blueprint, source.getCluster().getAmbari().getPassword(), dataLakeStack);
+
             return BlueprintPreparationObject.Builder.builder()
                     .withFlexSubscription(flexSubscription)
                     .withRdsConfigs(rdsConfigs)
@@ -96,6 +115,7 @@ public class StackRequestToBlueprintPreparationObjectConverter extends AbstractC
                     .withSmartSenseSubscriptionId(smartsenseSubscriptionId)
                     .withLdapConfig(ldapConfig)
                     .withKerberosConfig(kerberosConfig)
+                    .withSharedServiceConfigs(sharedServiceConfigsView)
                     .build();
         } catch (BlueprintProcessingException e) {
             throw new CloudbreakServiceException(e.getMessage(), e);
