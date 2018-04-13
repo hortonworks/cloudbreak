@@ -249,6 +249,7 @@ cb:
             redhat7: http://public-repo-1.hortonworks.com/HDF/centos7/3.x/updates/3.1.1.0
             debian9: http://public-repo-1.hortonworks.com/HDF/debian9/3.x/updates/3.1.1.0
             ubuntu16: http://public-repo-1.hortonworks.com/HDF/ubuntu16/3.x/updates/3.1.1.0
+            mpack: http://public-repo-1.hortonworks.com/HDF/centos7/3.x/updates/3.1.1.0/tars/hdf_ambari_mp/hdf-ambari-mpack-3.1.1.0-35.tar.gz
             repository-version: 3.1.1.0-35
             vdf-redhat6: http://public-repo-1.hortonworks.com/HDF/centos6/3.x/updates/3.1.1.0/HDF-3.1.1.0-35.xml
             vdf-redhat7: http://public-repo-1.hortonworks.com/HDF/centos7/3.x/updates/3.1.1.0/HDF-3.1.1.0-35.xml

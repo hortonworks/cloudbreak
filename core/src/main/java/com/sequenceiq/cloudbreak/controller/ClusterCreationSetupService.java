@@ -202,7 +202,7 @@ public class ClusterCreationSetupService {
                 Optional<String> vdfUrl = getVDFUrlByOsType(stackId, stackRepoDetails);
                 vdfUrl.ifPresent(s -> stackRepoDetails.getStack().put(CUSTOM_VDF_REPO_KEY, s));
                 if (ambariStackDetails != null) {
-                    stackRepoDetails.getManagementPacks().addAll(ambariStackDetails.getMpacks().stream().map(
+                    stackRepoDetails.getMpacks().addAll(ambariStackDetails.getMpacks().stream().map(
                             rmpack -> conversionService.convert(rmpack, ManagementPackComponent.class)).collect(Collectors.toList()));
                 }
                 stackRepoDetailsJson = new Json(stackRepoDetails);
@@ -211,8 +211,9 @@ public class ClusterCreationSetupService {
             stackRepoDetailsJson = stackHdpRepoConfig.get().getAttributes();
             if (ambariStackDetails != null && !ambariStackDetails.getMpacks().isEmpty()) {
                 StackRepoDetails stackRepoDetails = stackRepoDetailsJson.get(StackRepoDetails.class);
-                stackRepoDetails.getManagementPacks().addAll(ambariStackDetails.getMpacks().stream().map(
+                stackRepoDetails.getMpacks().addAll(ambariStackDetails.getMpacks().stream().map(
                         rmpack -> conversionService.convert(rmpack, ManagementPackComponent.class)).collect(Collectors.toList()));
+                stackRepoDetailsJson = new Json(stackRepoDetails);
             }
         }
         return new ClusterComponent(ComponentType.HDP_REPO_DETAILS, stackRepoDetailsJson, cluster);

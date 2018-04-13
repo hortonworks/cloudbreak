@@ -72,19 +72,23 @@ public class AmbariStackDetailsJsonToStackRepoDetailsConverter extends AbstractC
             stack.put(StackRepoDetails.CUSTOM_VDF_REPO_KEY, source.getVersionDefinitionFileUrl());
         }
 
+        if (!source.getMpacks().isEmpty()) {
+            repo.setMpacks(source.getMpacks().stream().map(rmpack -> conversionService.convert(rmpack, ManagementPackComponent.class))
+                    .collect(Collectors.toList()));
+        }
         if (!StringUtils.isEmpty(source.getMpackUrl())) {
-            stack.put(StackRepoDetails.MPACK_TAG, source.getMpackUrl());
+            // Backward compatibility: previous version of cluster requests can be handled
+            ManagementPackComponent mpack = new ManagementPackComponent();
+            mpack.setMpackUrl(source.getMpackUrl());
+            mpack.setStackDefault(true);
+            mpack.setPreInstalled(false);
+            repo.getMpacks().add(mpack);
         }
         repo.setStack(stack);
         repo.setUtil(util);
         repo.setEnableGplRepo(source.isEnableGplRepo());
         repo.setVerify(source.getVerify());
         repo.setHdpVersion(source.getVersion());
-
-        if (!source.getMpacks().isEmpty()) {
-            repo.setManagementPacks(source.getMpacks().stream().map(rmpack -> conversionService.convert(rmpack, ManagementPackComponent.class))
-                    .collect(Collectors.toList()));
-        }
         return repo;
     }
 

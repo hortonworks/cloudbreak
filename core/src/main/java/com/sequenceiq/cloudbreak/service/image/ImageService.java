@@ -210,13 +210,17 @@ public class ImageService {
         repo.setHdpVersion(stack.getVersion());
         repo.setStack(stack.getRepo().getStack());
         repo.setUtil(stack.getRepo().getUtil());
-        repo.setManagementPacks(stack.getMpackList().stream().map(icmpack -> {
+        repo.setMpacks(stack.getMpackList().stream().map(icmpack -> {
             ManagementPackComponent mpack = new ManagementPackComponent();
             mpack.setMpackUrl(icmpack.getMpackUrl());
             mpack.setStackDefault(true);
             mpack.setPreInstalled(true);
             return mpack;
         }).collect(Collectors.toList()));
+        if (!stack.getMpackList().isEmpty()) {
+            // Backward compatibility for the previous UI versions
+            repo.getStack().put(StackRepoDetails.MPACK_TAG, stack.getMpackList().get(0).getMpackUrl());
+        }
         return repo;
     }
 }

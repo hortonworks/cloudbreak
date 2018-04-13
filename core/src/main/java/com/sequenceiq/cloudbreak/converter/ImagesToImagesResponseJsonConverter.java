@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.model.imagecatalog.BaseImageResponse;
 import com.sequenceiq.cloudbreak.api.model.imagecatalog.ImageResponse;
 import com.sequenceiq.cloudbreak.api.model.imagecatalog.ImagesResponse;
+import com.sequenceiq.cloudbreak.api.model.imagecatalog.ManagementPackEntry;
 import com.sequenceiq.cloudbreak.api.model.imagecatalog.StackDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.imagecatalog.StackRepoDetailsJson;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
@@ -101,6 +102,11 @@ public class ImagesToImagesResponseJsonConverter extends AbstractConversionServi
             }
             json.setRepo(repoJson);
             json.setVersion(info.getVersion());
+            json.setMpacks(info.getRepo().getMpacks().stream().map(mp -> {
+                ManagementPackEntry mpackEntry = new ManagementPackEntry();
+                mpackEntry.setMpackUrl(mp.getMpackUrl());
+                return mpackEntry;
+            }).collect(Collectors.toList()));
             result.add(json);
         }
         return result;
@@ -125,6 +131,16 @@ public class ImagesToImagesResponseJsonConverter extends AbstractConversionServi
         StackDetailsJson json = new StackDetailsJson();
         json.setVersion(stackDetails.getVersion());
         json.setRepo(convertStackRepoDetailsToJson(stackDetails.getRepo()));
+        json.setMpacks(stackDetails.getMpackList().stream().map(mp -> {
+            ManagementPackEntry mpackEntry = new ManagementPackEntry();
+            mpackEntry.setMpackUrl(mp.getMpackUrl());
+            return mpackEntry;
+        }).collect(Collectors.toList()));
+        if (!stackDetails.getMpackList().isEmpty()) {
+            // Backward compatibility for the previous version of UI
+            json.getRepo().getStack().put(com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails.MPACK_TAG,
+                    stackDetails.getMpackList().get(0).getMpackUrl());
+        }
         return json;
     }
 

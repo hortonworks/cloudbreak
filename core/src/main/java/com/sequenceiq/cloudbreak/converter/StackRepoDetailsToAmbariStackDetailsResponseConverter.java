@@ -25,8 +25,8 @@ public class StackRepoDetailsToAmbariStackDetailsResponseConverter
         ambariRepoDetailsJson.setStack(source.getStack());
         ambariRepoDetailsJson.setUtil(source.getUtil());
         ambariRepoDetailsJson.setEnableGplRepo(source.isEnableGplRepo());
-        if (!source.getManagementPacks().isEmpty()) {
-            ambariRepoDetailsJson.setMpacks(source.getManagementPacks().stream().map(mp -> conversionService.convert(
+        if (!source.getMpacks().isEmpty()) {
+            ambariRepoDetailsJson.setMpacks(source.getMpacks().stream().map(mp -> conversionService.convert(
                     mp, ManagementPackDetails.class)).collect(Collectors.toList()));
         }
         return ambariRepoDetailsJson;
