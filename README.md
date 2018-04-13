@@ -73,12 +73,15 @@ Please note that the full path needs to be configured and env variables like $US
 
 xhyve:
 ```
+export CB_LOCAL_DEV_BIND_ADDR=192.168.64.1
+export PUBLIC_IP=192.168.64.2
 export PRIVATE_IP=$PUBLIC_IP
 export ULU_SUBSCRIBE_TO_NOTIFICATIONS=true
 export CB_INSTANCE_UUID=$(uuidgen | tr '[:upper:]' '[:lower:]')
 # NOTE: Some files could disappear when xhyve volume mounts are used, so CB_SCHEMA_SCRIPTS_LOCATION
 # is commented out by default. Remove the comment before `cbd util local-dev` is used.
 # export CB_SCHEMA_SCRIPTS_LOCATION=/Users/YOUR_USERNAME/YOUR_PROJECT_DIR/cloudbreak/core/src/main/resources/schema
+export UAA_DEFAULT_USER_EMAIL=YOUR_EMAIL
 export UAA_DEFAULT_USER_PW=YOUR_PASSWORD
 ```
 VirtualBox:
@@ -89,6 +92,7 @@ export PRIVATE_IP=$PUBLIC_IP
 export ULU_SUBSCRIBE_TO_NOTIFICATIONS=true
 export CB_INSTANCE_UUID=$(uuidgen | tr '[:upper:]' '[:lower:]')
 export CB_SCHEMA_SCRIPTS_LOCATION=/Users/YOUR_USERNAME/YOUR_PROJECT_DIR/cloudbreak/core/src/main/resources/schema
+export UAA_DEFAULT_USER_EMAIL=YOUR_EMAIL
 export UAA_DEFAULT_USER_PW=YOUR_PASSWORD
 export CB_LOCAL_DEV_BIND_ADDR=192.168.99.1
 ```
