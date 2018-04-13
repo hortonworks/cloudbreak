@@ -148,7 +148,7 @@ public class AmbariStackDetailsJson implements JsonEntity {
     }
 
     public void setMpacks(List<ManagementPackDetails> mpacks) {
-        this.mpacks = mpacks;
+        this.mpacks = mpacks != null ? mpacks : new ArrayList<>();
     }
 
     public boolean isEnableGplRepo() {

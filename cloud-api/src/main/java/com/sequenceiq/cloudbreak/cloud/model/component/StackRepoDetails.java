@@ -72,11 +72,11 @@ public class StackRepoDetails implements Serializable {
         this.enableGplRepo = enableGplRepo;
     }
 
-    public List<ManagementPackComponent> getManagementPacks() {
+    public List<ManagementPackComponent> getMpacks() {
         return mpacks;
     }
 
-    public void setManagementPacks(List<ManagementPackComponent> mpacks) {
+    public void setMpacks(List<ManagementPackComponent> mpacks) {
         this.mpacks = mpacks;
     }
 
