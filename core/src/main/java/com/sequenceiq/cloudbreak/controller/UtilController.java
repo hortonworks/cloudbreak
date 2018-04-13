@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.UtilEndpoint;
 import com.sequenceiq.cloudbreak.api.model.AmbariDatabaseDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.AmbariDatabaseTestResult;
+import com.sequenceiq.cloudbreak.api.model.StackMatrix;
 import com.sequenceiq.cloudbreak.api.model.VersionCheckResult;
 import com.sequenceiq.cloudbreak.api.model.rds.RDSBuildRequest;
 import com.sequenceiq.cloudbreak.api.model.rds.RdsBuildResult;
@@ -20,6 +21,7 @@ import com.sequenceiq.cloudbreak.controller.validation.rds.RdsConnectionBuilder;
 import com.sequenceiq.cloudbreak.controller.validation.rds.RdsConnectionValidator;
 import com.sequenceiq.cloudbreak.repository.LdapConfigRepository;
 import com.sequenceiq.cloudbreak.repository.RdsConfigRepository;
+import com.sequenceiq.cloudbreak.service.StackMatrixService;
 import com.sequenceiq.cloudbreak.util.ClientVersionUtil;
 
 @Component
@@ -41,6 +43,9 @@ public class UtilController implements UtilEndpoint {
 
     @Inject
     private LdapConfigRepository ldapConfigRepository;
+
+    @Inject
+    private StackMatrixService stackMatrixService;
 
     @Value("${info.app.version:}")
     private String cbVersion;
@@ -77,5 +82,10 @@ public class UtilController implements UtilEndpoint {
             throw new BadRequestException("Could not create databases in metastore - " + e.getMessage(), e);
         }
         return rdsBuildResult;
+    }
+
+    @Override
+    public StackMatrix getStackMatrix() {
+        return stackMatrixService.getStackMatrix();
     }
 }

@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.cloud.model.component;
 
-import java.util.Map;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.cloud.model.Versioned;
 
@@ -12,7 +10,7 @@ public class StackInfo implements Versioned {
 
     private StackRepoDetails repo;
 
-    private Map<String, Map<String, String>> images;
+    private String minAmbari;
 
     @Override
     public String getVersion() {
@@ -21,6 +19,14 @@ public class StackInfo implements Versioned {
 
     public void setVersion(String version) {
         this.version = version;
+    }
+
+    public String getMinAmbari() {
+        return minAmbari;
+    }
+
+    public void setMinAmbari(String minAmbari) {
+        this.minAmbari = minAmbari;
     }
 
     public StackRepoDetails getRepo() {
@@ -34,20 +40,12 @@ public class StackInfo implements Versioned {
         this.repo = repo;
     }
 
-    public Map<String, Map<String, String>> getImages() {
-        return images;
-    }
-
-    public void setImages(Map<String, Map<String, String>> images) {
-        this.images = images;
-    }
-
     @Override
     public String toString() {
         return "StackInfo{"
                 + "version='" + version + '\''
                 + ", repo=" + repo
-                + ", images=" + images
+                + ", minAmbari=" + minAmbari
                 + '}';
     }
 }
