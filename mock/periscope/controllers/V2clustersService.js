@@ -40,7 +40,7 @@ exports.disableAutoscaleStateByCloudbreakCluster = function(args, res, next) {
     "id" : 1,
     "alertState" : "OK"
   } ],
-  "id" : 6,
+  "id" : args.cbClusterId.value,
   "state" : "aeiou",
   "prometheusAlerts" : [ {
     "scalingPolicy" : "",
@@ -108,7 +108,7 @@ exports.enableAutoscaleStateByCloudbreakCluster = function(args, res, next) {
     "id" : 1,
     "alertState" : "OK"
   } ],
-  "id" : 6,
+  "id" : args.cbClusterId.value,
   "state" : "aeiou",
   "prometheusAlerts" : [ {
     "scalingPolicy" : "",
@@ -181,7 +181,7 @@ exports.getByCloudbreakCluster = function(args, res, next) {
     "id" : 1,
     "alertState" : "OK"
   } ],
-  "id" : 6,
+  "id" : args.cbClusterId.value,
   "state" : "aeiou",
   "prometheusAlerts" : [ {
     "scalingPolicy" : "",
@@ -269,7 +269,7 @@ exports.modifyByCloudbreakCluster = function(args, res, next) {
     "id" : 1,
     "alertState" : "OK"
   } ],
-  "id" : 6,
+  "id" : args.cbClusterId.value,
   "state" : "aeiou",
   "prometheusAlerts" : [ {
     "scalingPolicy" : "",
@@ -337,7 +337,7 @@ exports.runByCloudbreakCluster = function(args, res, next) {
     "id" : 1,
     "alertState" : "OK"
   } ],
-  "id" : 6,
+  "id" : args.cbClusterId.value,
   "state" : "aeiou",
   "prometheusAlerts" : [ {
     "scalingPolicy" : "",
