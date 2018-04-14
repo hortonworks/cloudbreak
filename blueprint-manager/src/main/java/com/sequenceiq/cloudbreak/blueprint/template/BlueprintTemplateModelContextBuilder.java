@@ -40,8 +40,6 @@ public class BlueprintTemplateModelContextBuilder {
 
     private String adminEmail;
 
-    private boolean enableKnoxGateway;
-
     private boolean containerExecutorType;
 
     private String stackType;
@@ -49,11 +47,6 @@ public class BlueprintTemplateModelContextBuilder {
     private String stackVersion;
 
     private Integer llapNodeCount;
-
-    public BlueprintTemplateModelContextBuilder withEnableKnoxGateway(boolean enableKnoxGateway) {
-        this.enableKnoxGateway = enableKnoxGateway;
-        return this;
-    }
 
     public BlueprintTemplateModelContextBuilder withClusterAdminPassword(String clusterAdminPassword) {
         this.clusterAdminPassword = clusterAdminPassword;
@@ -166,7 +159,6 @@ public class BlueprintTemplateModelContextBuilder {
         blueprintTemplateModelContext.put("cluster_admin_firstname", clusterAdminFirstname);
         blueprintTemplateModelContext.put("cluster_admin_lastname", clusterAdminLastname);
         blueprintTemplateModelContext.put("admin_email", adminEmail);
-        blueprintTemplateModelContext.put("enable_knox_gateway", enableKnoxGateway);
         blueprintTemplateModelContext.put("llap_node_count", llapNodeCount);
         blueprintTemplateModelContext.put("container_executor", containerExecutorType);
         blueprintTemplateModelContext.put("stack_type", stackType);

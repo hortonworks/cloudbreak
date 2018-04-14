@@ -34,9 +34,6 @@
                 },
                 {
                     "name": "ZOOKEEPER_SERVER"
-                },
-                {
-                    "name": "ZEPPELIN_MASTER"
                 }
             ],
             "name": "master"

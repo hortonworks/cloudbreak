@@ -49,7 +49,6 @@ public class BlueprintTemplateProcessor {
                 .withClusterAdminPassword(source.getGeneralClusterConfigs().getPassword())
                 .withLlapNodeCounts(source.getGeneralClusterConfigs().getNodeCount() - 1)
                 .withContainerExecutor(CONTAINER.equals(source.getGeneralClusterConfigs().getExecutorType()))
-                .withEnableKnoxGateway(source.getGatewayView() == null ? false : source.getGatewayView().getEnableGateway())
                 .withAdminEmail(source.getGeneralClusterConfigs().getIdentityUserEmail())
                 .withClusterName(source.getGeneralClusterConfigs().getClusterName())
                 .withLdap(source.getLdapConfig().orElse(null))
