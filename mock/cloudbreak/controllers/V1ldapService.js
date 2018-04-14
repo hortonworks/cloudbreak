@@ -42,26 +42,7 @@ exports.getLdap = function(args, res, next) {
    * returns LdapConfigResponse
    **/
   var examples = {};
-  examples['application/json'] = {
-  "adminGroup" : "aeiou",
-  "groupNameAttribute" : "aeiou",
-  "groupMemberAttribute" : "aeiou",
-  "description" : "aeiou",
-  "userNameAttribute" : "aeiou",
-  "serverPort" : 5249,
-  "serverHost" : "aeiou",
-  "directoryType" : "LDAP",
-  "bindDn" : "aeiou",
-  "protocol" : "aeiou",
-  "groupSearchBase" : "aeiou",
-  "userSearchBase" : "aeiou",
-  "public" : false,
-  "domain" : "aeiou",
-  "name" : "aeiou",
-  "id" : 6,
-  "userObjectClass" : "aeiou",
-  "groupObjectClass" : "aeiou"
-};
+  examples['application/json'] = require('../responses/ldapconfig/default-ldap.json');
   if (Object.keys(examples).length > 0) {
     res.setHeader('Content-Type', 'application/json');
     res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
@@ -79,26 +60,7 @@ exports.getPrivateLdap = function(args, res, next) {
    * returns LdapConfigResponse
    **/
   var examples = {};
-  examples['application/json'] = {
-  "adminGroup" : "aeiou",
-  "groupNameAttribute" : "aeiou",
-  "groupMemberAttribute" : "aeiou",
-  "description" : "aeiou",
-  "userNameAttribute" : "aeiou",
-  "serverPort" : 5249,
-  "serverHost" : "aeiou",
-  "directoryType" : "LDAP",
-  "bindDn" : "aeiou",
-  "protocol" : "aeiou",
-  "groupSearchBase" : "aeiou",
-  "userSearchBase" : "aeiou",
-  "public" : false,
-  "domain" : "aeiou",
-  "name" : "aeiou",
-  "id" : 6,
-  "userObjectClass" : "aeiou",
-  "groupObjectClass" : "aeiou"
-};
+  examples['application/json'] = require('../responses/ldapconfig/default-ldap.json');
   if (Object.keys(examples).length > 0) {
     res.setHeader('Content-Type', 'application/json');
     res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
@@ -115,26 +77,7 @@ exports.getPrivatesLdap = function(args, res, next) {
    * returns List
    **/
   var examples = {};
-  examples['application/json'] = [ {
-  "adminGroup" : "aeiou",
-  "groupNameAttribute" : "aeiou",
-  "groupMemberAttribute" : "aeiou",
-  "description" : "aeiou",
-  "userNameAttribute" : "aeiou",
-  "serverPort" : 5249,
-  "serverHost" : "aeiou",
-  "directoryType" : "LDAP",
-  "bindDn" : "aeiou",
-  "protocol" : "aeiou",
-  "groupSearchBase" : "aeiou",
-  "userSearchBase" : "aeiou",
-  "public" : false,
-  "domain" : "aeiou",
-  "name" : "aeiou",
-  "id" : 6,
-  "userObjectClass" : "aeiou",
-  "groupObjectClass" : "aeiou"
-} ];
+  examples['application/json'] = require('../responses/ldapconfig/default-ldap.json');
   if (Object.keys(examples).length > 0) {
     res.setHeader('Content-Type', 'application/json');
     res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
@@ -152,26 +95,7 @@ exports.getPublicLdap = function(args, res, next) {
    * returns LdapConfigResponse
    **/
   var examples = {};
-  examples['application/json'] = {
-  "adminGroup" : "aeiou",
-  "groupNameAttribute" : "aeiou",
-  "groupMemberAttribute" : "aeiou",
-  "description" : "aeiou",
-  "userNameAttribute" : "aeiou",
-  "serverPort" : 5249,
-  "serverHost" : "aeiou",
-  "directoryType" : "LDAP",
-  "bindDn" : "aeiou",
-  "protocol" : "aeiou",
-  "groupSearchBase" : "aeiou",
-  "userSearchBase" : "aeiou",
-  "public" : false,
-  "domain" : "aeiou",
-  "name" : "aeiou",
-  "id" : 6,
-  "userObjectClass" : "aeiou",
-  "groupObjectClass" : "aeiou"
-};
+  examples['application/json'] = require('../responses/ldapconfig/default-ldap.json');
   if (Object.keys(examples).length > 0) {
     res.setHeader('Content-Type', 'application/json');
     res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
@@ -188,26 +112,7 @@ exports.getPublicsLdap = function(args, res, next) {
    * returns List
    **/
   var examples = {};
-  examples['application/json'] = [ {
-  "adminGroup" : "aeiou",
-  "groupNameAttribute" : "aeiou",
-  "groupMemberAttribute" : "aeiou",
-  "description" : "aeiou",
-  "userNameAttribute" : "aeiou",
-  "serverPort" : 5249,
-  "serverHost" : "aeiou",
-  "directoryType" : "LDAP",
-  "bindDn" : "aeiou",
-  "protocol" : "aeiou",
-  "groupSearchBase" : "aeiou",
-  "userSearchBase" : "aeiou",
-  "public" : false,
-  "domain" : "aeiou",
-  "name" : "aeiou",
-  "id" : 6,
-  "userObjectClass" : "aeiou",
-  "groupObjectClass" : "aeiou"
-} ];
+  examples['application/json'] = require('../responses/ldapconfig/default-ldap.json');
   if (Object.keys(examples).length > 0) {
     res.setHeader('Content-Type', 'application/json');
     res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
@@ -226,8 +131,8 @@ exports.postLdapConnectionTest = function(args, res, next) {
    **/
   var examples = {};
   examples['application/json'] = {
-  "connectionResult" : "aeiou"
-};
+    "connectionResult":"Failed to connect to LDAP server: hwxad-1a2bcd3e45678f90.elb.eu-west-1.amazonaws.com:123"
+  };
   if (Object.keys(examples).length > 0) {
     res.setHeader('Content-Type', 'application/json');
     res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
@@ -245,26 +150,7 @@ exports.postPrivateLdap = function(args, res, next) {
    * returns LdapConfigResponse
    **/
   var examples = {};
-  examples['application/json'] = {
-  "adminGroup" : "aeiou",
-  "groupNameAttribute" : "aeiou",
-  "groupMemberAttribute" : "aeiou",
-  "description" : "aeiou",
-  "userNameAttribute" : "aeiou",
-  "serverPort" : 5249,
-  "serverHost" : "aeiou",
-  "directoryType" : "LDAP",
-  "bindDn" : "aeiou",
-  "protocol" : "aeiou",
-  "groupSearchBase" : "aeiou",
-  "userSearchBase" : "aeiou",
-  "public" : false,
-  "domain" : "aeiou",
-  "name" : "aeiou",
-  "id" : 6,
-  "userObjectClass" : "aeiou",
-  "groupObjectClass" : "aeiou"
-};
+  examples['application/json'] = require('../responses/ldapconfig/default-ldap.json');
   if (Object.keys(examples).length > 0) {
     res.setHeader('Content-Type', 'application/json');
     res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
@@ -282,26 +168,7 @@ exports.postPublicLdap = function(args, res, next) {
    * returns LdapConfigResponse
    **/
   var examples = {};
-  examples['application/json'] = {
-  "adminGroup" : "aeiou",
-  "groupNameAttribute" : "aeiou",
-  "groupMemberAttribute" : "aeiou",
-  "description" : "aeiou",
-  "userNameAttribute" : "aeiou",
-  "serverPort" : 5249,
-  "serverHost" : "aeiou",
-  "directoryType" : "LDAP",
-  "bindDn" : "aeiou",
-  "protocol" : "aeiou",
-  "groupSearchBase" : "aeiou",
-  "userSearchBase" : "aeiou",
-  "public" : false,
-  "domain" : "aeiou",
-  "name" : "aeiou",
-  "id" : 6,
-  "userObjectClass" : "aeiou",
-  "groupObjectClass" : "aeiou"
-};
+  examples['application/json'] = require('../responses/ldapconfig/default-ldap.json');
   if (Object.keys(examples).length > 0) {
     res.setHeader('Content-Type', 'application/json');
     res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
