@@ -45,7 +45,8 @@ public enum ExposedService {
     RANGER("Ranger Admin UI", "RANGER_ADMIN", "", "RANGERUI", "/ranger/"),
     KIBANA("Kibana", "KIBANA", "", "", ""),
     ELASTIC_SEARCH("Elastic Search", "ELASTIC_SEARCH", "", "", ""),
-    DRUID_SUPERSET("Druid Superset", "DRUID_SUPERSET", "", "", "");
+    DRUID_SUPERSET("Druid Superset", "DRUID_SUPERSET", "", "", ""),
+    DP_PROFILER_AGENT("DP Profiler Agent", "DP_PROFILER_AGENT", "", "PROFILER-AGENT", "/profiler-agent/");
 
     private final String serviceName;
     private final String portName;
