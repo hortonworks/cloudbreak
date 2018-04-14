@@ -11,7 +11,7 @@ load ../utils/commands
 }
 
 @test "New RDS with message [create database took]" {
-  OUTPUT=$(create-postgres-database --name testrds --db-username testuser --db-password testpassword --url "jdbc:postgresql://google.com/db" --type HIVE 2>&1 | tail -n 1 | head -n 1)
+  OUTPUT=$(create-postgres-database --name testrds --db-username testuser --db-password testpassword --url "jdbc:postgresql://google.com/db" --type HIVE 2>&1 | tail -n 2 | head -n 1)
 
   echo $OUTPUT
   [[ "${OUTPUT}" == *"create database took"* ]]

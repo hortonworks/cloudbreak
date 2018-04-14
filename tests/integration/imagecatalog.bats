@@ -31,7 +31,9 @@ load ../utils/commands
 }
 
 @test "Set default image catalog" {
-  OUTPUT=$(set-default-image-catalog --name test 2>&1 | awk '{printf "%s",$0} END {print ""}' | grep -o '{.*}' | jq ' . | [to_entries[].key] ==
-  ["publicInAccount","imagesResponse","name","id","url","usedAsDefault"]' | tail -n 2 | head -n 1)
-  [[ "${OUTPUT}" ==  true ]]
+  OUTPUT=$(set-default-image-catalog --name test 2>&1 | tail -n 2 | head -n 1)
+
+  echo $OUTPUT
+  [[ "${OUTPUT}" == *"set default imagecatalog took"* ]]
+  [[ "${OUTPUT}" != *"error"* ]]
 }
