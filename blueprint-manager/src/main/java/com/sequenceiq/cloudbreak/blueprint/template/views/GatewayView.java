@@ -85,6 +85,14 @@ public class GatewayView {
         return signCert;
     }
 
+    public String getSignCertWithoutHeader() {
+        String cert = null;
+        if (signCert != null) {
+            cert = signCert.replaceAll("-----BEGIN CERTIFICATE-----|-----END CERTIFICATE-----", "".trim());
+        }
+        return cert;
+    }
+
     public String getEscSignKey() {
         return StringEscapeUtils.escapeJson(signKey);
     }
@@ -94,9 +102,9 @@ public class GatewayView {
     }
 
     public String getEscSignCert() {
-        String cert = null;
-        if (signCert != null) {
-            cert = StringEscapeUtils.escapeJson(signCert.replaceAll("-----BEGIN CERTIFICATE-----|-----END CERTIFICATE-----", "").trim());
+        String cert = getSignCertWithoutHeader();
+        if (cert != null) {
+            cert = StringEscapeUtils.escapeJson(cert);
         }
         return cert;
     }
