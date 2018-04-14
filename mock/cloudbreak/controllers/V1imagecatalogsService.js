@@ -105,62 +105,7 @@ exports.getPublicImageCatalogsByName = function(args, res, next) {
    * returns ImageCatalogResponse
    **/
   var examples = {};
-  examples['application/json'] = {
-  "publicInAccount" : false,
-  "imagesResponse" : {
-    "hdpImages" : [ {
-      "date" : "aeiou",
-      "images" : {
-        "key" : {
-          "key" : "aeiou"
-        }
-      },
-      "stackDetails" : "",
-      "os" : "aeiou",
-      "repo" : {
-        "key" : "aeiou"
-      },
-      "osType" : "aeiou",
-      "description" : "aeiou",
-      "uuid" : "aeiou",
-      "version" : "aeiou"
-    } ],
-    "baseImages" : [ {
-      "hdpStacks" : [ {
-        "repo" : {
-          "stack" : {
-            "key" : "aeiou"
-          },
-          "util" : {
-            "key" : "aeiou"
-          }
-        },
-        "version" : "aeiou"
-      } ],
-      "date" : "aeiou",
-      "images" : {
-        "key" : {
-          "key" : "aeiou"
-        }
-      },
-      "stackDetails" : "",
-      "os" : "aeiou",
-      "hdfStacks" : [ "" ],
-      "repo" : {
-        "key" : "aeiou"
-      },
-      "osType" : "aeiou",
-      "description" : "aeiou",
-      "uuid" : "aeiou",
-      "version" : "aeiou"
-    } ],
-    "hdfImages" : [ "" ]
-  },
-  "name" : "aeiou",
-  "id" : 0,
-  "url" : "aeiou",
-  "usedAsDefault" : false
-};
+  examples['application/json'] = require('../responses/imagecatalogs/cloudbreak-default.json');
   if (Object.keys(examples).length > 0) {
     res.setHeader('Content-Type', 'application/json');
     res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
@@ -214,62 +159,7 @@ exports.postPrivateImageCatalog = function(args, res, next) {
    * returns ImageCatalogResponse
    **/
   var examples = {};
-  examples['application/json'] = {
-  "publicInAccount" : false,
-  "imagesResponse" : {
-    "hdpImages" : [ {
-      "date" : "aeiou",
-      "images" : {
-        "key" : {
-          "key" : "aeiou"
-        }
-      },
-      "stackDetails" : "",
-      "os" : "aeiou",
-      "repo" : {
-        "key" : "aeiou"
-      },
-      "osType" : "aeiou",
-      "description" : "aeiou",
-      "uuid" : "aeiou",
-      "version" : "aeiou"
-    } ],
-    "baseImages" : [ {
-      "hdpStacks" : [ {
-        "repo" : {
-          "stack" : {
-            "key" : "aeiou"
-          },
-          "util" : {
-            "key" : "aeiou"
-          }
-        },
-        "version" : "aeiou"
-      } ],
-      "date" : "aeiou",
-      "images" : {
-        "key" : {
-          "key" : "aeiou"
-        }
-      },
-      "stackDetails" : "",
-      "os" : "aeiou",
-      "hdfStacks" : [ "" ],
-      "repo" : {
-        "key" : "aeiou"
-      },
-      "osType" : "aeiou",
-      "description" : "aeiou",
-      "uuid" : "aeiou",
-      "version" : "aeiou"
-    } ],
-    "hdfImages" : [ "" ]
-  },
-  "name" : "aeiou",
-  "id" : 0,
-  "url" : "aeiou",
-  "usedAsDefault" : false
-};
+  examples['application/json'] = require('../responses/imagecatalogs/default-imagecatalog.json');
   if (Object.keys(examples).length > 0) {
     res.setHeader('Content-Type', 'application/json');
     res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
@@ -287,62 +177,7 @@ exports.postPublicImageCatalog = function(args, res, next) {
    * returns ImageCatalogResponse
    **/
   var examples = {};
-  examples['application/json'] = {
-  "publicInAccount" : false,
-  "imagesResponse" : {
-    "hdpImages" : [ {
-      "date" : "aeiou",
-      "images" : {
-        "key" : {
-          "key" : "aeiou"
-        }
-      },
-      "stackDetails" : "",
-      "os" : "aeiou",
-      "repo" : {
-        "key" : "aeiou"
-      },
-      "osType" : "aeiou",
-      "description" : "aeiou",
-      "uuid" : "aeiou",
-      "version" : "aeiou"
-    } ],
-    "baseImages" : [ {
-      "hdpStacks" : [ {
-        "repo" : {
-          "stack" : {
-            "key" : "aeiou"
-          },
-          "util" : {
-            "key" : "aeiou"
-          }
-        },
-        "version" : "aeiou"
-      } ],
-      "date" : "aeiou",
-      "images" : {
-        "key" : {
-          "key" : "aeiou"
-        }
-      },
-      "stackDetails" : "",
-      "os" : "aeiou",
-      "hdfStacks" : [ "" ],
-      "repo" : {
-        "key" : "aeiou"
-      },
-      "osType" : "aeiou",
-      "description" : "aeiou",
-      "uuid" : "aeiou",
-      "version" : "aeiou"
-    } ],
-    "hdfImages" : [ "" ]
-  },
-  "name" : "aeiou",
-  "id" : 0,
-  "url" : "aeiou",
-  "usedAsDefault" : false
-};
+  examples['application/json'] = require('../responses/imagecatalogs/default-imagecatalog.json');
   if (Object.keys(examples).length > 0) {
     res.setHeader('Content-Type', 'application/json');
     res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
@@ -360,62 +195,7 @@ exports.putPublicImageCatalog = function(args, res, next) {
    * returns ImageCatalogResponse
    **/
   var examples = {};
-  examples['application/json'] = {
-  "publicInAccount" : false,
-  "imagesResponse" : {
-    "hdpImages" : [ {
-      "date" : "aeiou",
-      "images" : {
-        "key" : {
-          "key" : "aeiou"
-        }
-      },
-      "stackDetails" : "",
-      "os" : "aeiou",
-      "repo" : {
-        "key" : "aeiou"
-      },
-      "osType" : "aeiou",
-      "description" : "aeiou",
-      "uuid" : "aeiou",
-      "version" : "aeiou"
-    } ],
-    "baseImages" : [ {
-      "hdpStacks" : [ {
-        "repo" : {
-          "stack" : {
-            "key" : "aeiou"
-          },
-          "util" : {
-            "key" : "aeiou"
-          }
-        },
-        "version" : "aeiou"
-      } ],
-      "date" : "aeiou",
-      "images" : {
-        "key" : {
-          "key" : "aeiou"
-        }
-      },
-      "stackDetails" : "",
-      "os" : "aeiou",
-      "hdfStacks" : [ "" ],
-      "repo" : {
-        "key" : "aeiou"
-      },
-      "osType" : "aeiou",
-      "description" : "aeiou",
-      "uuid" : "aeiou",
-      "version" : "aeiou"
-    } ],
-    "hdfImages" : [ "" ]
-  },
-  "name" : "aeiou",
-  "id" : 0,
-  "url" : "aeiou",
-  "usedAsDefault" : false
-};
+  examples['application/json'] = require('../responses/imagecatalogs/default-imagecatalog.json');
   if (Object.keys(examples).length > 0) {
     res.setHeader('Content-Type', 'application/json');
     res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
@@ -433,62 +213,7 @@ exports.putSetDefaultImageCatalogByName = function(args, res, next) {
    * returns ImageCatalogResponse
    **/
   var examples = {};
-  examples['application/json'] = {
-  "publicInAccount" : false,
-  "imagesResponse" : {
-    "hdpImages" : [ {
-      "date" : "aeiou",
-      "images" : {
-        "key" : {
-          "key" : "aeiou"
-        }
-      },
-      "stackDetails" : "",
-      "os" : "aeiou",
-      "repo" : {
-        "key" : "aeiou"
-      },
-      "osType" : "aeiou",
-      "description" : "aeiou",
-      "uuid" : "aeiou",
-      "version" : "aeiou"
-    } ],
-    "baseImages" : [ {
-      "hdpStacks" : [ {
-        "repo" : {
-          "stack" : {
-            "key" : "aeiou"
-          },
-          "util" : {
-            "key" : "aeiou"
-          }
-        },
-        "version" : "aeiou"
-      } ],
-      "date" : "aeiou",
-      "images" : {
-        "key" : {
-          "key" : "aeiou"
-        }
-      },
-      "stackDetails" : "",
-      "os" : "aeiou",
-      "hdfStacks" : [ "" ],
-      "repo" : {
-        "key" : "aeiou"
-      },
-      "osType" : "aeiou",
-      "description" : "aeiou",
-      "uuid" : "aeiou",
-      "version" : "aeiou"
-    } ],
-    "hdfImages" : [ "" ]
-  },
-  "name" : "aeiou",
-  "id" : 0,
-  "url" : "aeiou",
-  "usedAsDefault" : false
-};
+  examples['application/json'] = require('../responses/imagecatalogs/default-imagecatalog.json');
   if (Object.keys(examples).length > 0) {
     res.setHeader('Content-Type', 'application/json');
     res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));

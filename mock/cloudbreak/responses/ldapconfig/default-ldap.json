@@ -1,0 +1,22 @@
+[
+  {
+    "description": null,
+    "serverHost": "hwxad-1a2bcd3e45678f90.elb.eu-west-1.amazonaws.com",
+    "serverPort": 123,
+    "protocol": "LDAP",
+    "bindDn": "CN=Administrator,CN=Users,DC=ad,DC=hwx,DC=com",
+    "userSearchBase": "CN=Users,DC=ad,DC=hwx,DC=com",
+    "groupSearchBase": "CN=Users,DC=ad,DC=hwx,DC=com",
+    "userNameAttribute": "sAMAccountName",
+    "domain": "ad.hwx.com",
+    "directoryType": "LDAP",
+    "userObjectClass": "person",
+    "groupObjectClass": "person",
+    "groupNameAttribute": "cn",
+    "groupMemberAttribute": "member",
+    "adminGroup": "cloudbreak",
+    "name": "default-ldap",
+    "id": 1,
+    "public": true
+  }
+]

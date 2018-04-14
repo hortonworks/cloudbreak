@@ -42,15 +42,7 @@ exports.getPrivateProxyConfig = function(args, res, next) {
    * returns ProxyConfigResponse
    **/
   var examples = {};
-  examples['application/json'] = {
-  "protocol" : "aeiou",
-  "name" : "aeiou",
-  "description" : "aeiou",
-  "id" : 6,
-  "serverPort" : 5249,
-  "userName" : "aeiou",
-  "serverHost" : "aeiou"
-};
+  examples['application/json'] = require('../responses/proxyconfig/default-proxy.json');
   if (Object.keys(examples).length > 0) {
     res.setHeader('Content-Type', 'application/json');
     res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
@@ -67,15 +59,7 @@ exports.getPrivatesProxyConfig = function(args, res, next) {
    * returns List
    **/
   var examples = {};
-  examples['application/json'] = [ {
-  "protocol" : "aeiou",
-  "name" : "aeiou",
-  "description" : "aeiou",
-  "id" : 6,
-  "serverPort" : 5249,
-  "userName" : "aeiou",
-  "serverHost" : "aeiou"
-} ];
+  examples['application/json'] = require('../responses/proxyconfig/default-proxy.json');
   if (Object.keys(examples).length > 0) {
     res.setHeader('Content-Type', 'application/json');
     res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
@@ -93,15 +77,7 @@ exports.getProxyConfig = function(args, res, next) {
    * returns ProxyConfigResponse
    **/
   var examples = {};
-  examples['application/json'] = {
-  "protocol" : "aeiou",
-  "name" : "aeiou",
-  "description" : "aeiou",
-  "id" : 6,
-  "serverPort" : 5249,
-  "userName" : "aeiou",
-  "serverHost" : "aeiou"
-};
+  examples['application/json'] = require('../responses/proxyconfig/default-proxy.json');
   if (Object.keys(examples).length > 0) {
     res.setHeader('Content-Type', 'application/json');
     res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
@@ -119,15 +95,7 @@ exports.getPublicProxyConfig = function(args, res, next) {
    * returns ProxyConfigResponse
    **/
   var examples = {};
-  examples['application/json'] = {
-  "protocol" : "aeiou",
-  "name" : "aeiou",
-  "description" : "aeiou",
-  "id" : 6,
-  "serverPort" : 5249,
-  "userName" : "aeiou",
-  "serverHost" : "aeiou"
-};
+  examples['application/json'] = require('../responses/proxyconfig/default-proxy.json');
   if (Object.keys(examples).length > 0) {
     res.setHeader('Content-Type', 'application/json');
     res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
@@ -144,15 +112,7 @@ exports.getPublicsProxyConfig = function(args, res, next) {
    * returns List
    **/
   var examples = {};
-  examples['application/json'] = [ {
-  "protocol" : "aeiou",
-  "name" : "aeiou",
-  "description" : "aeiou",
-  "id" : 6,
-  "serverPort" : 5249,
-  "userName" : "aeiou",
-  "serverHost" : "aeiou"
-} ];
+  examples['application/json'] = require('../responses/proxyconfig/default-proxy.json');
   if (Object.keys(examples).length > 0) {
     res.setHeader('Content-Type', 'application/json');
     res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
@@ -170,15 +130,7 @@ exports.postPrivateProxyConfig = function(args, res, next) {
    * returns ProxyConfigResponse
    **/
   var examples = {};
-  examples['application/json'] = {
-  "protocol" : "aeiou",
-  "name" : "aeiou",
-  "description" : "aeiou",
-  "id" : 6,
-  "serverPort" : 5249,
-  "userName" : "aeiou",
-  "serverHost" : "aeiou"
-};
+  examples['application/json'] = require('../responses/proxyconfig/default-proxy.json');
   if (Object.keys(examples).length > 0) {
     res.setHeader('Content-Type', 'application/json');
     res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
@@ -196,15 +148,7 @@ exports.postPublicProxyConfig = function(args, res, next) {
    * returns ProxyConfigResponse
    **/
   var examples = {};
-  examples['application/json'] = {
-  "protocol" : "aeiou",
-  "name" : "aeiou",
-  "description" : "aeiou",
-  "id" : 6,
-  "serverPort" : 5249,
-  "userName" : "aeiou",
-  "serverHost" : "aeiou"
-};
+  examples['application/json'] = require('../responses/proxyconfig/default-proxy.json');
   if (Object.keys(examples).length > 0) {
     res.setHeader('Content-Type', 'application/json');
     res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));

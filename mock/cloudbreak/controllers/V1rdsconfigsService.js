@@ -42,19 +42,7 @@ exports.getPrivateRds = function(args, res, next) {
    * returns RDSConfigResponse
    **/
   var examples = {};
-  examples['application/json'] = {
-  "connectionDriver" : "aeiou",
-  "clusterNames" : [ "aeiou" ],
-  "connectorJarUrl" : "aeiou",
-  "publicInAccount" : false,
-  "stackVersion" : "aeiou",
-  "name" : "aeiou",
-  "connectionURL" : "aeiou",
-  "id" : 0,
-  "type" : "aeiou",
-  "creationDate" : 6,
-  "databaseEngine" : "aeiou"
-};
+  examples['application/json'] = require('../responses/rdsconfig/default-rds.json');
   if (Object.keys(examples).length > 0) {
     res.setHeader('Content-Type', 'application/json');
     res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
@@ -71,19 +59,7 @@ exports.getPrivatesRds = function(args, res, next) {
    * returns List
    **/
   var examples = {};
-  examples['application/json'] = [ {
-  "connectionDriver" : "aeiou",
-  "clusterNames" : [ "aeiou" ],
-  "connectorJarUrl" : "aeiou",
-  "publicInAccount" : false,
-  "stackVersion" : "aeiou",
-  "name" : "aeiou",
-  "connectionURL" : "aeiou",
-  "id" : 0,
-  "type" : "aeiou",
-  "creationDate" : 6,
-  "databaseEngine" : "aeiou"
-} ];
+  examples['application/json'] = require('../responses/rdsconfig/default-rds.json');
   if (Object.keys(examples).length > 0) {
     res.setHeader('Content-Type', 'application/json');
     res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
@@ -101,19 +77,7 @@ exports.getPublicRds = function(args, res, next) {
    * returns RDSConfigResponse
    **/
   var examples = {};
-  examples['application/json'] = {
-  "connectionDriver" : "aeiou",
-  "clusterNames" : [ "aeiou" ],
-  "connectorJarUrl" : "aeiou",
-  "publicInAccount" : false,
-  "stackVersion" : "aeiou",
-  "name" : "aeiou",
-  "connectionURL" : "aeiou",
-  "id" : 0,
-  "type" : "aeiou",
-  "creationDate" : 6,
-  "databaseEngine" : "aeiou"
-};
+  examples['application/json'] = require('../responses/rdsconfig/default-rds.json');
   if (Object.keys(examples).length > 0) {
     res.setHeader('Content-Type', 'application/json');
     res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
@@ -130,19 +94,7 @@ exports.getPublicsRds = function(args, res, next) {
    * returns List
    **/
   var examples = {};
-  examples['application/json'] = [ {
-  "connectionDriver" : "aeiou",
-  "clusterNames" : [ "aeiou" ],
-  "connectorJarUrl" : "aeiou",
-  "publicInAccount" : false,
-  "stackVersion" : "aeiou",
-  "name" : "aeiou",
-  "connectionURL" : "aeiou",
-  "id" : 0,
-  "type" : "aeiou",
-  "creationDate" : 6,
-  "databaseEngine" : "aeiou"
-} ];
+  examples['application/json'] = require('../responses/rdsconfig/default-rds.json');
   if (Object.keys(examples).length > 0) {
     res.setHeader('Content-Type', 'application/json');
     res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
@@ -160,19 +112,7 @@ exports.getRds = function(args, res, next) {
    * returns RDSConfigResponse
    **/
   var examples = {};
-  examples['application/json'] = {
-  "connectionDriver" : "aeiou",
-  "clusterNames" : [ "aeiou" ],
-  "connectorJarUrl" : "aeiou",
-  "publicInAccount" : false,
-  "stackVersion" : "aeiou",
-  "name" : "aeiou",
-  "connectionURL" : "aeiou",
-  "id" : 0,
-  "type" : "aeiou",
-  "creationDate" : 6,
-  "databaseEngine" : "aeiou"
-};
+  examples['application/json'] = require('../responses/rdsconfig/default-rds.json');
   if (Object.keys(examples).length > 0) {
     res.setHeader('Content-Type', 'application/json');
     res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
@@ -190,19 +130,7 @@ exports.postPrivateRds = function(args, res, next) {
    * returns RDSConfigResponse
    **/
   var examples = {};
-  examples['application/json'] = {
-  "connectionDriver" : "aeiou",
-  "clusterNames" : [ "aeiou" ],
-  "connectorJarUrl" : "aeiou",
-  "publicInAccount" : false,
-  "stackVersion" : "aeiou",
-  "name" : "aeiou",
-  "connectionURL" : "aeiou",
-  "id" : 0,
-  "type" : "aeiou",
-  "creationDate" : 6,
-  "databaseEngine" : "aeiou"
-};
+  examples['application/json'] = require('../responses/rdsconfig/default-rds.json');
   if (Object.keys(examples).length > 0) {
     res.setHeader('Content-Type', 'application/json');
     res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
@@ -220,19 +148,7 @@ exports.postPublicRds = function(args, res, next) {
    * returns RDSConfigResponse
    **/
   var examples = {};
-  examples['application/json'] = {
-  "connectionDriver" : "aeiou",
-  "clusterNames" : [ "aeiou" ],
-  "connectorJarUrl" : "aeiou",
-  "publicInAccount" : false,
-  "stackVersion" : "aeiou",
-  "name" : "aeiou",
-  "connectionURL" : "aeiou",
-  "id" : 0,
-  "type" : "aeiou",
-  "creationDate" : 6,
-  "databaseEngine" : "aeiou"
-};
+  examples['application/json'] = require('../responses/rdsconfig/default-rds.json');
   if (Object.keys(examples).length > 0) {
     res.setHeader('Content-Type', 'application/json');
     res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
@@ -251,8 +167,8 @@ exports.testRdsConnection = function(args, res, next) {
    **/
   var examples = {};
   examples['application/json'] = {
-  "connectionResult" : "aeiou"
-};
+    "connectionResult":"Failed to connect to RDS: The connection attempt failed."
+  };
   if (Object.keys(examples).length > 0) {
     res.setHeader('Content-Type', 'application/json');
     res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
