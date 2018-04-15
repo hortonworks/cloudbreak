@@ -81,6 +81,34 @@ func (a *Client) CreateRDSDatabaseUtil(params *CreateRDSDatabaseUtilParams) (*Cr
 }
 
 /*
+GetStackMatrixUtil returns default ambari details for distinct h d p and h d f
+*/
+func (a *Client) GetStackMatrixUtil(params *GetStackMatrixUtilParams) (*GetStackMatrixUtilOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetStackMatrixUtilParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "getStackMatrixUtil",
+		Method:             "GET",
+		PathPattern:        "/v1/util/stackmatrix",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &GetStackMatrixUtilReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*GetStackMatrixUtilOK), nil
+
+}
+
+/*
 TestAmbariDatabaseUtil tests a database connection parameters
 */
 func (a *Client) TestAmbariDatabaseUtil(params *TestAmbariDatabaseUtilParams) (*TestAmbariDatabaseUtilOK, error) {

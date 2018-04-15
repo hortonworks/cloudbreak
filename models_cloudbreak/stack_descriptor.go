@@ -6,21 +6,22 @@ package models_cloudbreak
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
-	"strconv"
-
 	strfmt "github.com/go-openapi/strfmt"
 
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
 )
 
-// StackDetailsJSON stack details Json
-// swagger:model StackDetailsJson
+// StackDescriptor stack descriptor
+// swagger:model StackDescriptor
 
-type StackDetailsJSON struct {
+type StackDescriptor struct {
 
-	// mpacks
-	Mpacks []*ManagementPackEntry `json:"mpacks"`
+	// ambari
+	Ambari *AmbariInfoJSON `json:"ambari,omitempty"`
+
+	// min ambari
+	MinAmbari string `json:"minAmbari,omitempty"`
 
 	// repo
 	Repo *StackRepoDetailsJSON `json:"repo,omitempty"`
@@ -29,17 +30,19 @@ type StackDetailsJSON struct {
 	Version string `json:"version,omitempty"`
 }
 
-/* polymorph StackDetailsJson mpacks false */
+/* polymorph StackDescriptor ambari false */
 
-/* polymorph StackDetailsJson repo false */
+/* polymorph StackDescriptor minAmbari false */
 
-/* polymorph StackDetailsJson version false */
+/* polymorph StackDescriptor repo false */
 
-// Validate validates this stack details Json
-func (m *StackDetailsJSON) Validate(formats strfmt.Registry) error {
+/* polymorph StackDescriptor version false */
+
+// Validate validates this stack descriptor
+func (m *StackDescriptor) Validate(formats strfmt.Registry) error {
 	var res []error
 
-	if err := m.validateMpacks(formats); err != nil {
+	if err := m.validateAmbari(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -55,34 +58,26 @@ func (m *StackDetailsJSON) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *StackDetailsJSON) validateMpacks(formats strfmt.Registry) error {
+func (m *StackDescriptor) validateAmbari(formats strfmt.Registry) error {
 
-	if swag.IsZero(m.Mpacks) { // not required
+	if swag.IsZero(m.Ambari) { // not required
 		return nil
 	}
 
-	for i := 0; i < len(m.Mpacks); i++ {
+	if m.Ambari != nil {
 
-		if swag.IsZero(m.Mpacks[i]) { // not required
-			continue
-		}
-
-		if m.Mpacks[i] != nil {
-
-			if err := m.Mpacks[i].Validate(formats); err != nil {
-				if ve, ok := err.(*errors.Validation); ok {
-					return ve.ValidateName("mpacks" + "." + strconv.Itoa(i))
-				}
-				return err
+		if err := m.Ambari.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("ambari")
 			}
+			return err
 		}
-
 	}
 
 	return nil
 }
 
-func (m *StackDetailsJSON) validateRepo(formats strfmt.Registry) error {
+func (m *StackDescriptor) validateRepo(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Repo) { // not required
 		return nil
@@ -102,7 +97,7 @@ func (m *StackDetailsJSON) validateRepo(formats strfmt.Registry) error {
 }
 
 // MarshalBinary interface implementation
-func (m *StackDetailsJSON) MarshalBinary() ([]byte, error) {
+func (m *StackDescriptor) MarshalBinary() ([]byte, error) {
 	if m == nil {
 		return nil, nil
 	}
@@ -110,8 +105,8 @@ func (m *StackDetailsJSON) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (m *StackDetailsJSON) UnmarshalBinary(b []byte) error {
-	var res StackDetailsJSON
+func (m *StackDescriptor) UnmarshalBinary(b []byte) error {
+	var res StackDescriptor
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}
