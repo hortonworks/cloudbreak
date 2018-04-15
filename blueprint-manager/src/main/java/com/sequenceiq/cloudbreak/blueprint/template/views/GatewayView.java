@@ -88,7 +88,7 @@ public class GatewayView {
     public String getSignCertWithoutHeader() {
         String cert = null;
         if (signCert != null) {
-            cert = signCert.replaceAll("-----BEGIN CERTIFICATE-----|-----END CERTIFICATE-----", "".trim());
+            cert = signCert.replaceAll("-----BEGIN CERTIFICATE-----|-----END CERTIFICATE-----", "").trim();
         }
         return cert;
     }
