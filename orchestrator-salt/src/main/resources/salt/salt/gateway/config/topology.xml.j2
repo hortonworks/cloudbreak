@@ -252,4 +252,13 @@
     </service>
     {%- endif %}
 
+    {% if ('BEACON' in salt['pillar.get']('gateway:exposed')) and ('BEACON_SERVER' in salt['pillar.get']('gateway:location')) -%}
+    <service>
+        <role>BEACON</role>
+        {% for hostloc in salt['pillar.get']('gateway:location')['BEACON_SERVER'] -%}
+        <url>http://{{ hostloc }}:25968</url>
+        {%- endfor %}
+    </service>
+    {%- endif %}
+
 </topology>

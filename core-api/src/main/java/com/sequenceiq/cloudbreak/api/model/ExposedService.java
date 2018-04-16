@@ -46,7 +46,8 @@ public enum ExposedService {
     KIBANA("Kibana", "KIBANA", "", "", ""),
     ELASTIC_SEARCH("Elastic Search", "ELASTIC_SEARCH", "", "", ""),
     DRUID_SUPERSET("Druid Superset", "DRUID_SUPERSET", "", "", ""),
-    DP_PROFILER_AGENT("DP Profiler Agent", "DP_PROFILER_AGENT", "", "PROFILER-AGENT", "");
+    DP_PROFILER_AGENT("DP Profiler Agent", "DP_PROFILER_AGENT", "", "PROFILER-AGENT", ""),
+    BEACON_SERVER("Beacon", "BEACON_SERVER", "", "BEACON", "");
 
     private final String serviceName;
     private final String portName;
@@ -54,10 +55,10 @@ public enum ExposedService {
     private final String knoxService;
     private final String knoxUrl;
 
-    ExposedService(String portName, String serviceName, String postFix, String knoxService, String knoxUrl) {
+    ExposedService(String portName, String serviceName, String postfix, String knoxService, String knoxUrl) {
         this.portName = portName;
         this.serviceName = serviceName;
-        postfix = postFix;
+        this.postfix = postfix;
         this.knoxService = knoxService;
         this.knoxUrl = knoxUrl;
     }
