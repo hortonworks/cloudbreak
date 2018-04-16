@@ -642,7 +642,7 @@ public class TestUtil {
 
     public static Gateway gateway() throws JsonProcessingException {
         Gateway gateway  = new Gateway();
-        gateway.setEnableGateway(true);
+        gateway.setEnableGateway(false);
         gateway.setTopologyName("topology");
         gateway.setPath("/path");
         gateway.setSsoProvider("simple");

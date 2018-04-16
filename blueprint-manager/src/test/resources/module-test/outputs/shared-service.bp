@@ -64,6 +64,7 @@
           "ranger.usersync.enabled": "true",
           "ranger.usersync.group.searchbase": "cn=groups,dc=example,dc=org",
           "ranger.usersync.group.nameattribute": "cn",
+          "ranger.usersync.group.based.role.assignment.rules": "&ROLE_SYS_ADMIN:g:ambariadmins",
           "ranger.usersync.ldap.binddn": "cn=admin,dc=example,dc=org",
           "ranger.usersync.source.impl.class": "org.apache.ranger.ldapusersync.process.LdapUserGroupBuilder",
           "ranger.usersync.ldap.user.nameattribute": "cn=admin,dc=example,dc=org",
