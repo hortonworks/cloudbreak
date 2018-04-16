@@ -250,6 +250,9 @@ cloudbreak-conf-defaults() {
     env-import CB_SMARTSENSE_ID ""
 
     env-import DOCKER_STOP_TIMEOUT 60
+
+    env-import TRAEFIK_PORT_HTTP 80
+    env-import TRAEFIK_PORT_HTTPS 443
 }
 
 cloudbreak-conf-autscale() {
@@ -280,9 +283,9 @@ cloudbreak-conf-rest-client() {
 cloudbreak-conf-ui() {
     declare desc="Defines Uluwatu and Sultans related parameters"
 
-    env-import ULU_HOST_ADDRESS  "https://$PUBLIC_IP"
+    env-import ULU_HOST_ADDRESS  "https://$PUBLIC_IP:$TRAEFIK_PORT_HTTPS"
     env-import ULU_OAUTH_REDIRECT_URI  "$ULU_HOST_ADDRESS/authorize"
-    env-import ULU_SULTANS_ADDRESS  "https://$PUBLIC_IP/sl"
+    env-import ULU_SULTANS_ADDRESS  "https://$PUBLIC_IP:$TRAEFIK_PORT_HTTPS/sl"
     env-import CB_HOST_ADDRESS  "http://$PUBLIC_IP"
     env-import ULU_HWX_CLOUD_DEFAULT_CREDENTIAL ""
     env-import HWX_HCC_AVAILABLE "false"
