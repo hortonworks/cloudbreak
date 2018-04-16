@@ -16,7 +16,8 @@
       "ranger.usersync.group.nameattribute": "cn",
       "ranger.usersync.group.objectclass": "groupOfNames",
       "ranger.usersync.group.searchbase": "cn=groups,dc=example,dc=org",
-      "ranger.usersync.group.searchfilter": " "
+      "ranger.usersync.group.searchfilter": " ",
+      "ranger.usersync.group.based.role.assignment.rules": "&ROLE_SYS_ADMIN:g:ambariadmins"
     }
   },
   "ranger-admin-site": {
