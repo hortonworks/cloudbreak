@@ -234,6 +234,9 @@
           "name": "RANGER_ADMIN"
         },
         {
+          "name": "RANGER_USERSYNC"
+        },
+        {
           "name": "HIVE_SERVER"
         },
         {
