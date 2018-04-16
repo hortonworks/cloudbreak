@@ -58,6 +58,9 @@ exports.getImagesByProvider = function(args, res, next) {
   } ],
   "baseImages" : [ {
     "hdpStacks" : [ {
+      "mpacks" : [ {
+        "mpackUrl" : "aeiou"
+      } ],
       "repo" : {
         "stack" : {
           "key" : "aeiou"

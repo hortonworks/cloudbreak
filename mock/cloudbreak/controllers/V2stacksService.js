@@ -124,6 +124,9 @@ exports.getClusterRequestFromName = function(args, res, next) {
     "executorType" : "CONTAINER",
     "emailNeeded" : false,
     "proxyName" : "aeiou",
+    "sharedService" : {
+      "sharedCluster" : "aeiou"
+    },
     "ambari" : {
       "ambariRepoDetailsJson" : {
         "baseUrl" : "aeiou",
@@ -455,6 +458,7 @@ exports.getPrivateStackV2 = function(args, res, next) {
     },
     "rdsConfigs" : [ {
       "connectionDriver" : "aeiou",
+      "databaseEngineDisplayName" : "aeiou",
       "clusterNames" : [ "aeiou" ],
       "connectorJarUrl" : "aeiou",
       "publicInAccount" : false,
@@ -852,6 +856,7 @@ exports.getPrivatesStackV2 = function(args, res, next) {
     },
     "rdsConfigs" : [ {
       "connectionDriver" : "aeiou",
+      "databaseEngineDisplayName" : "aeiou",
       "clusterNames" : [ "aeiou" ],
       "connectorJarUrl" : "aeiou",
       "publicInAccount" : false,
@@ -1301,6 +1306,7 @@ exports.getStackForAmbariV2 = function(args, res, next) {
     },
     "rdsConfigs" : [ {
       "connectionDriver" : "aeiou",
+      "databaseEngineDisplayName" : "aeiou",
       "clusterNames" : [ "aeiou" ],
       "connectorJarUrl" : "aeiou",
       "publicInAccount" : false,
@@ -1736,6 +1742,7 @@ exports.postPublicStackV2 = function(args, res, next) {
     },
     "rdsConfigs" : [ {
       "connectionDriver" : "aeiou",
+      "databaseEngineDisplayName" : "aeiou",
       "clusterNames" : [ "aeiou" ],
       "connectorJarUrl" : "aeiou",
       "publicInAccount" : false,
