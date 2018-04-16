@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.converter;
 
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -7,8 +9,10 @@ import javax.inject.Inject;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
 
+import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsResponse;
-import com.sequenceiq.cloudbreak.api.model.mpack.ManagementPackDetails;
+import com.sequenceiq.cloudbreak.api.model.mpack.ClusterResponseMpackDetails;
+import com.sequenceiq.cloudbreak.cloud.model.component.ManagementPackComponent;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 
 @Component
@@ -22,12 +26,15 @@ public class StackRepoDetailsToAmbariStackDetailsResponseConverter
         AmbariStackDetailsResponse ambariRepoDetailsJson = new AmbariStackDetailsResponse();
         ambariRepoDetailsJson.setHdpVersion(source.getHdpVersion());
         ambariRepoDetailsJson.setVerify(source.isVerify());
-        ambariRepoDetailsJson.setStack(source.getStack());
+        ambariRepoDetailsJson.setStack(Maps.newHashMap(source.getStack()));
         ambariRepoDetailsJson.setUtil(source.getUtil());
         ambariRepoDetailsJson.setEnableGplRepo(source.isEnableGplRepo());
         if (!source.getMpacks().isEmpty()) {
-            ambariRepoDetailsJson.setMpacks(source.getMpacks().stream().map(mp -> conversionService.convert(
-                    mp, ManagementPackDetails.class)).collect(Collectors.toList()));
+            List<ClusterResponseMpackDetails> mpacks = source.getMpacks().stream().filter(mp -> !mp.isStackDefault()).map(mp -> conversionService.convert(
+                    mp, ClusterResponseMpackDetails.class)).collect(Collectors.toList());
+            ambariRepoDetailsJson.setMpacks(mpacks);
+            Optional<ManagementPackComponent> stackDefaultMpack = source.getMpacks().stream().filter(mp -> mp.isStackDefault()).findFirst();
+            stackDefaultMpack.ifPresent(mp -> ambariRepoDetailsJson.getStack().put(StackRepoDetails.MPACK_TAG, mp.getMpackUrl()));
         }
         return ambariRepoDetailsJson;
     }

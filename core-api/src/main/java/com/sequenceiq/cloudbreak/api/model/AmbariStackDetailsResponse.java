@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.sequenceiq.cloudbreak.api.model.mpack.ManagementPackDetails;
+import com.sequenceiq.cloudbreak.api.model.mpack.ClusterResponseMpackDetails;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AmbariStackDetailsResponse implements JsonEntity {
@@ -16,7 +16,7 @@ public class AmbariStackDetailsResponse implements JsonEntity {
 
     private Map<String, String> util;
 
-    private List<ManagementPackDetails> mpacks = new ArrayList<>();
+    private List<ClusterResponseMpackDetails> mpacks = new ArrayList<>();
 
     private Boolean enableGplRepo;
 
@@ -40,11 +40,11 @@ public class AmbariStackDetailsResponse implements JsonEntity {
         this.util = util;
     }
 
-    public List<ManagementPackDetails> getMpacks() {
+    public List<ClusterResponseMpackDetails> getMpacks() {
         return mpacks;
     }
 
-    public void setMpacks(List<ManagementPackDetails> mpacks) {
+    public void setMpacks(List<ClusterResponseMpackDetails> mpacks) {
         this.mpacks = mpacks;
     }
 

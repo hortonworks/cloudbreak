@@ -8,6 +8,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ManagementPackComponent implements Serializable {
+    private String name;
+
     private String mpackUrl;
 
     private boolean purge;
@@ -19,6 +21,14 @@ public class ManagementPackComponent implements Serializable {
     private boolean stackDefault;
 
     private boolean preInstalled;
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 
     public String getMpackUrl() {
         return mpackUrl;
