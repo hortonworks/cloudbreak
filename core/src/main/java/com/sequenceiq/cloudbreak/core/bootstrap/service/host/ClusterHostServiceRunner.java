@@ -234,9 +234,6 @@ public class ClusterHostServiceRunner {
         Json exposedJson = cluster.getGateway().getExposedServices();
         if (exposedJson != null && StringUtils.isNoneEmpty(exposedJson.getValue())) {
             List<String> exposedServices = exposedJson.get(ExposedServices.class).getServices();
-            if (blueprintProcessorFactory.get(cluster.getBlueprint().getBlueprintText()).componentExistsInBlueprint("HIVE_SERVER_INTERACTIVE")) {
-                exposedServices = exposedServices.stream().map(x -> "HIVE".equals(x) ? "HIVE_INTERACTIVE" : x).collect(Collectors.toList());
-            }
             gateway.put("exposed", exposedServices);
         } else {
             gateway.put("exposed", new ArrayList<>());
