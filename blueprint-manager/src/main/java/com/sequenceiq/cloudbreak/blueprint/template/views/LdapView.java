@@ -29,6 +29,8 @@ public class LdapView {
 
     private String connectionURL;
 
+    private String adminGroup;
+
     public LdapView(LdapConfig ldapConfig) {
         connectionURL = ldapConfig.getProtocol() + "://" + ldapConfig.getServerHost();
         if (ldapConfig.getServerPort() != null) {
@@ -45,6 +47,7 @@ public class LdapView {
         groupObjectClass = ldapConfig.getGroupObjectClass();
         groupMemberAttribute = ldapConfig.getGroupMemberAttribute();
         domain = ldapConfig.getDomain();
+        adminGroup = ldapConfig.getAdminGroup();
     }
 
     public String getConnectionURL() {
@@ -100,5 +103,9 @@ public class LdapView {
 
     public String getDomain() {
         return domain;
+    }
+
+    public String getAdminGroup() {
+        return adminGroup;
     }
 }

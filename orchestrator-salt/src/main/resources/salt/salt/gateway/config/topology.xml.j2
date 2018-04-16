@@ -124,7 +124,7 @@
     </service>
     {%- endif %}
 
-    {% if ('HIVE' in salt['pillar.get']('gateway:exposed')) and ('HIVE_SERVER' in salt['pillar.get']('gateway:location')) -%}
+    {% if ('HIVE' in salt['pillar.get']('gateway:exposed')) and ('HIVE_SERVER' in salt['pillar.get']('gateway:location')) and not ('HIVE_SERVER_INTERACTIVE' in salt['pillar.get']('gateway:location')) -%}
     <!-- beeline -u "jdbc:hive2://{{ salt['grains.get']('gateway-address')[0] }}:8443/;ssl=true;sslTrustStore=/usr/hdp/current/knox-server/data/security/keystores/gateway.jks;trustStorePassword={{ salt['pillar.get']('gateway:password') }};transportMode=http;httpPath=gateway/hdc/hive" -d org.apache.hive.jdbc.HiveDriver -n {{ salt['pillar.get']('gateway:username') }} -p {{ salt['pillar.get']('gateway:password') }} -e "show databases;" -->
     <!-- beeline -u "jdbc:hive2://localhost:10001/;transportMode=http;httpPath=cliservice" -d org.apache.hive.jdbc.HiveDriver -n hive -p {{ salt['pillar.get']('gateway:password') }} -e "show databases;" -->
     <!-- docker run -ti -v $(pwd):/cert akanto/beeline -u "jdbc:hive2://{{ salt['grains.get']('gateway-address')[0] }}:8443/;ssl=true;sslTrustStore=/cert/gateway.jks;trustStorePassword={{ salt['pillar.get']('gateway:password') }};transportMode=http;httpPath=gateway/hdc/hive" -d org.apache.hive.jdbc.HiveDriver -n {{ salt['pillar.get']('gateway:username') }} -p {{ salt['pillar.get']('gateway:password') }} -e "show databases;" -->
@@ -248,6 +248,15 @@
         <role>PROFILER-AGENT</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['DP_PROFILER_AGENT'] -%}
         <url>http://{{ hostloc }}:21900</url>
+        {%- endfor %}
+    </service>
+    {%- endif %}
+
+    {% if ('BEACON' in salt['pillar.get']('gateway:exposed')) and ('BEACON_SERVER' in salt['pillar.get']('gateway:location')) -%}
+    <service>
+        <role>BEACON</role>
+        {% for hostloc in salt['pillar.get']('gateway:location')['BEACON_SERVER'] -%}
+        <url>http://{{ hostloc }}:25968</url>
         {%- endfor %}
     </service>
     {%- endif %}

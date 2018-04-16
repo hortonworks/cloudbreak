@@ -28,8 +28,8 @@ public enum ExposedService {
     HBASE_REGION("HBase Region Server", "HBase Region Server", "", "", ""),
     HBASE_REGION_INFO("HBase Region Server Info", "HBase Region Server Info", "", "", ""),
     HIVE_METASTORE("Hive Metastore", "Hive Metastore", "", "", ""),
-    HIVE_SERVER("Hive Server", "HIVE_SERVER", "", "", ""),
-    HIVE_SERVER_INTERACTIVE("Hive Server Interactive", "HIVE_SERVER_INTERACTIVE", "", "", ""),
+    HIVE_SERVER("Hive Server", "HIVE_SERVER", "", "HIVE", ""),
+    HIVE_SERVER_INTERACTIVE("Hive Server Interactive", "HIVE_SERVER_INTERACTIVE", "", "HIVE_INTERACTIVE", ""),
     HIVE_SERVER_HTTP("Hive Server Http", "Hive Server Http", "", "", ""),
     FALCON("Falcon", "FALCON_SERVER", "", "", ""),
     STORM("Storm", "STORM", "", "", ""),
@@ -46,7 +46,8 @@ public enum ExposedService {
     KIBANA("Kibana", "KIBANA", "", "", ""),
     ELASTIC_SEARCH("Elastic Search", "ELASTIC_SEARCH", "", "", ""),
     DRUID_SUPERSET("Druid Superset", "DRUID_SUPERSET", "", "", ""),
-    DP_PROFILER_AGENT("DP Profiler Agent", "DP_PROFILER_AGENT", "", "PROFILER-AGENT", "/profiler-agent/");
+    DP_PROFILER_AGENT("DP Profiler Agent", "DP_PROFILER_AGENT", "", "PROFILER-AGENT", ""),
+    BEACON_SERVER("Beacon", "BEACON_SERVER", "", "BEACON", "");
 
     private final String serviceName;
     private final String portName;
@@ -54,10 +55,10 @@ public enum ExposedService {
     private final String knoxService;
     private final String knoxUrl;
 
-    ExposedService(String portName, String serviceName, String postFix, String knoxService, String knoxUrl) {
+    ExposedService(String portName, String serviceName, String postfix, String knoxService, String knoxUrl) {
         this.portName = portName;
         this.serviceName = serviceName;
-        postfix = postFix;
+        this.postfix = postfix;
         this.knoxService = knoxService;
         this.knoxUrl = knoxUrl;
     }
