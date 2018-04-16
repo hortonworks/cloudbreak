@@ -12,6 +12,10 @@ module.exports.createRDSDatabaseUtil = function createRDSDatabaseUtil (req, res,
   V1util.createRDSDatabaseUtil(req.swagger.params, res, next);
 };
 
+module.exports.getStackMatrixUtil = function getStackMatrixUtil (req, res, next) {
+  V1util.getStackMatrixUtil(req.swagger.params, res, next);
+};
+
 module.exports.testAmbariDatabaseUtil = function testAmbariDatabaseUtil (req, res, next) {
   V1util.testAmbariDatabaseUtil(req.swagger.params, res, next);
 };

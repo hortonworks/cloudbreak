@@ -261,6 +261,7 @@ exports.getCluster = function(args, res, next) {
   },
   "rdsConfigs" : [ {
     "connectionDriver" : "aeiou",
+    "databaseEngineDisplayName" : "aeiou",
     "clusterNames" : [ "aeiou" ],
     "connectorJarUrl" : "aeiou",
     "publicInAccount" : false,
@@ -475,6 +476,7 @@ exports.getFullCluster = function(args, res, next) {
   },
   "rdsConfigs" : [ {
     "connectionDriver" : "aeiou",
+    "databaseEngineDisplayName" : "aeiou",
     "clusterNames" : [ "aeiou" ],
     "connectorJarUrl" : "aeiou",
     "publicInAccount" : false,
@@ -664,6 +666,7 @@ exports.getPrivateCluster = function(args, res, next) {
   },
   "rdsConfigs" : [ {
     "connectionDriver" : "aeiou",
+    "databaseEngineDisplayName" : "aeiou",
     "clusterNames" : [ "aeiou" ],
     "connectorJarUrl" : "aeiou",
     "publicInAccount" : false,
@@ -855,6 +858,7 @@ exports.getPrivateStack = function(args, res, next) {
     },
     "rdsConfigs" : [ {
       "connectionDriver" : "aeiou",
+      "databaseEngineDisplayName" : "aeiou",
       "clusterNames" : [ "aeiou" ],
       "connectorJarUrl" : "aeiou",
       "publicInAccount" : false,
@@ -1252,6 +1256,7 @@ exports.getPrivatesStack = function(args, res, next) {
     },
     "rdsConfigs" : [ {
       "connectionDriver" : "aeiou",
+      "databaseEngineDisplayName" : "aeiou",
       "clusterNames" : [ "aeiou" ],
       "connectorJarUrl" : "aeiou",
       "publicInAccount" : false,
@@ -1649,6 +1654,7 @@ exports.getPublicCluster = function(args, res, next) {
   },
   "rdsConfigs" : [ {
     "connectionDriver" : "aeiou",
+    "databaseEngineDisplayName" : "aeiou",
     "clusterNames" : [ "aeiou" ],
     "connectorJarUrl" : "aeiou",
     "publicInAccount" : false,
@@ -1891,6 +1897,7 @@ exports.getStack = function(args, res, next) {
     },
     "rdsConfigs" : [ {
       "connectionDriver" : "aeiou",
+      "databaseEngineDisplayName" : "aeiou",
       "clusterNames" : [ "aeiou" ],
       "connectorJarUrl" : "aeiou",
       "publicInAccount" : false,
@@ -2289,6 +2296,7 @@ exports.getStackForAmbari = function(args, res, next) {
     },
     "rdsConfigs" : [ {
       "connectionDriver" : "aeiou",
+      "databaseEngineDisplayName" : "aeiou",
       "clusterNames" : [ "aeiou" ],
       "connectorJarUrl" : "aeiou",
       "publicInAccount" : false,
@@ -2687,6 +2695,7 @@ exports.postCluster = function(args, res, next) {
   },
   "rdsConfigs" : [ {
     "connectionDriver" : "aeiou",
+    "databaseEngineDisplayName" : "aeiou",
     "clusterNames" : [ "aeiou" ],
     "connectorJarUrl" : "aeiou",
     "publicInAccount" : false,

@@ -14,41 +14,41 @@ info:
     \ Ambari, Docker lightweight containers, Swarm and Consul.\nFor further product\
     \ documentation follow the link: <a href=\"http://hortonworks.com/apache/cloudbreak/\"\
     >http://hortonworks.com/apache/cloudbreak/</a>"
-  version: "2.6.0-dev.84"
+  version: "2.6.0-dev.106"
   title: "Cloudbreak API"
 basePath: "/cb"
 tags:
 - name: "info"
 - name: "health"
-- name: "v1events"
-- name: "v1proxyconfigs"
-- name: "v2stacks"
-- name: "v2connectors"
-- name: "v1settings"
-- name: "v1stacks"
-- name: "v1templates"
-- name: "v1subscriptions"
-- name: "v1mpacks"
+- name: "v1usages"
+- name: "v1repositoryconfigs"
 - name: "v1flexsubscriptions"
-- name: "v1securitygroups"
-- name: "v1constraints"
+- name: "v1templates"
+- name: "v1rdsconfigs"
+- name: "v1imagecatalogs"
+- name: "v1settings"
+- name: "v1mpacks"
+- name: "v1topologies"
+- name: "v1subscriptions"
+- name: "v1proxyconfigs"
+- name: "v1recipes"
 - name: "v1accountpreferences"
-- name: "v1networks"
+- name: "v2stacks"
+- name: "v1util"
+- name: "v1stacks"
+- name: "v1blueprints"
 - name: "v1clustertemplates"
 - name: "v1credentials"
-- name: "v1topologies"
-- name: "v1users"
-- name: "v1ldap"
-- name: "v1blueprints"
-- name: "v1securityrules"
+- name: "v1securitygroups"
+- name: "v2connectors"
 - name: "v1connectors"
-- name: "v1usages"
-- name: "v1imagecatalogs"
-- name: "v1util"
-- name: "v1rdsconfigs"
-- name: "v1recipes"
-- name: "v1repositoryconfigs"
+- name: "v1users"
+- name: "v1networks"
+- name: "v1securityrules"
+- name: "v1constraints"
+- name: "v1ldap"
 - name: "v1smartsensesubscriptions"
+- name: "v1events"
 schemes:
 - "http"
 - "https"
@@ -94,7 +94,7 @@ paths:
           description: "successful operation"
           schema:
             $ref: "#/definitions/Info"
-      x-swagger-router-controller: "Info"  
+      x-swagger-router-controller: "Info"
   /api/v1/accountpreferences:
     get:
       tags:
@@ -6583,6 +6583,27 @@ paths:
           schema:
             $ref: "#/definitions/RdsBuildResult"
       x-swagger-router-controller: "V1util"
+  /api/v1/util/stackmatrix:
+    get:
+      tags:
+      - "v1util"
+      summary: "returns default ambari details for distinct HDP and HDF"
+      description: ""
+      operationId: "getStackMatrixUtil"
+      schemes:
+      - "http"
+      - "https"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters: []
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/StackMatrix"
+      x-swagger-router-controller: "V1util"
   /api/v2/connectors/regions:
     post:
       tags:
@@ -7483,6 +7504,45 @@ definitions:
         type: "boolean"
         description: "resource is visible in account"
         default: false
+  SharedService:
+    type: "object"
+    properties:
+      sharedCluster:
+        type: "string"
+  ManagementPackRequest:
+    type: "object"
+    required:
+    - "mpackUrl"
+    - "name"
+    properties:
+      name:
+        type: "string"
+        description: "name of the resource"
+        minLength: 5
+        maxLength: 100
+        pattern: "(^[a-z][-a-z0-9]*[a-z0-9]$)"
+      description:
+        type: "string"
+        description: "description of the resource"
+        minLength: 0
+        maxLength: 1000
+      mpackUrl:
+        type: "string"
+        description: "url of the ambari management pack"
+      purge:
+        type: "boolean"
+        description: "if true, management pack will be installed with '--purge' flag"
+        default: false
+      purgeList:
+        type: "array"
+        description: "if provided, management pack will be installed with '--purgeList'\
+          \ option with this values"
+        items:
+          type: "string"
+      force:
+        type: "boolean"
+        description: "if true, management pack will be installed with '--force' flag"
+        default: false
   instanceGroupsV2:
     type: "object"
     required:
@@ -7529,40 +7589,37 @@ definitions:
         enum:
         - "MANUAL"
         - "AUTO"
-  ManagementPackRequest:
+  PlatformRegionsJson:
     type: "object"
-    required:
-    - "mpackUrl"
-    - "name"
     properties:
-      name:
-        type: "string"
-        description: "name of the resource"
-        minLength: 5
-        maxLength: 100
-        pattern: "(^[a-z][-a-z0-9]*[a-z0-9]$)"
-      description:
-        type: "string"
-        description: "description of the resource"
-        minLength: 0
-        maxLength: 1000
-      mpackUrl:
-        type: "string"
-        description: "url of the ambari management pack"
-      purge:
-        type: "boolean"
-        description: "if true, management pack will be installed with '--purge' flag"
-        default: false
-      purgeList:
-        type: "array"
-        description: "if provided, management pack will be installed with '--purgeList'\
-          \ option with this values"
-        items:
+      regions:
+        type: "object"
+        description: "regions"
+        additionalProperties:
+          type: "array"
+          items:
+            type: "string"
+      displayNames:
+        type: "object"
+        description: "regions with displayNames"
+        additionalProperties:
+          type: "object"
+          additionalProperties:
+            type: "string"
+      availabilityZones:
+        type: "object"
+        description: "availability zones"
+        additionalProperties:
+          type: "object"
+          additionalProperties:
+            type: "array"
+            items:
+              type: "string"
+      defaultRegions:
+        type: "object"
+        description: "default regions"
+        additionalProperties:
           type: "string"
-      force:
-        type: "boolean"
-        description: "if true, management pack will be installed with '--force' flag"
-        default: false
   ClusterRequest:
     type: "object"
     required:
@@ -7710,37 +7767,6 @@ definitions:
       proxyName:
         type: "string"
         description: "proxy configuration name for the cluster"
-  PlatformRegionsJson:
-    type: "object"
-    properties:
-      regions:
-        type: "object"
-        description: "regions"
-        additionalProperties:
-          type: "array"
-          items:
-            type: "string"
-      displayNames:
-        type: "object"
-        description: "regions with displayNames"
-        additionalProperties:
-          type: "object"
-          additionalProperties:
-            type: "string"
-      availabilityZones:
-        type: "object"
-        description: "availability zones"
-        additionalProperties:
-          type: "object"
-          additionalProperties:
-            type: "array"
-            items:
-              type: "string"
-      defaultRegions:
-        type: "object"
-        description: "default regions"
-        additionalProperties:
-          type: "string"
   SecurityGroupResponse:
     type: "object"
     required:
@@ -7847,6 +7873,17 @@ definitions:
         additionalProperties:
           type: "object"
           properties: {}
+  StackRepoDetailsJson:
+    type: "object"
+    properties:
+      stack:
+        type: "object"
+        additionalProperties:
+          type: "string"
+      util:
+        type: "object"
+        additionalProperties:
+          type: "string"
   OrchestratorResponse:
     type: "object"
     required:
@@ -7864,17 +7901,6 @@ definitions:
       type:
         type: "string"
         description: "type of the orchestrator"
-  StackRepoDetailsJson:
-    type: "object"
-    properties:
-      stack:
-        type: "object"
-        additionalProperties:
-          type: "string"
-      util:
-        type: "object"
-        additionalProperties:
-          type: "string"
   HardwareInfoResponse:
     type: "object"
     properties:
@@ -8094,6 +8120,24 @@ definitions:
           uniqueItems: true
           items:
             $ref: "#/definitions/IpPoolJson"
+  AmbariInfoJson:
+    type: "object"
+    properties:
+      version:
+        type: "string"
+      repo:
+        type: "object"
+        additionalProperties:
+          $ref: "#/definitions/AmbariRepoDetails"
+  RdsTestRequest:
+    type: "object"
+    properties:
+      name:
+        type: "string"
+        description: "Name of the RDS configuration resource"
+      rdsConfig:
+        description: "unsaved RDS config to be tested by connectivity"
+        $ref: "#/definitions/RdsConfig"
   TemplateRequest:
     type: "object"
     required:
@@ -8139,15 +8183,6 @@ definitions:
         type: "integer"
         format: "int32"
         description: "size of volumes"
-  RdsTestRequest:
-    type: "object"
-    properties:
-      name:
-        type: "string"
-        description: "Name of the RDS configuration resource"
-      rdsConfig:
-        description: "unsaved RDS config to be tested by connectivity"
-        $ref: "#/definitions/RdsConfig"
   CloudbreakEvent:
     type: "object"
     properties:
@@ -8255,6 +8290,10 @@ definitions:
   StackDetailsJson:
     type: "object"
     properties:
+      mpacks:
+        type: "array"
+        items:
+          $ref: "#/definitions/ManagementPackEntry"
       version:
         type: "string"
       repo:
@@ -8324,17 +8363,6 @@ definitions:
         description: "Management packs which are needed for the HDP / HDF clusters"
         items:
           $ref: "#/definitions/ManagementPackDetails"
-  TagSpecificationsJson:
-    type: "object"
-    properties:
-      specifications:
-        type: "object"
-        description: "tag specifications"
-        additionalProperties:
-          type: "object"
-          additionalProperties:
-            type: "object"
-            properties: {}
   FlexUsageControllerJson:
     type: "object"
     properties:
@@ -8350,6 +8378,17 @@ definitions:
         type: "string"
       userName:
         type: "string"
+  TagSpecificationsJson:
+    type: "object"
+    properties:
+      specifications:
+        type: "object"
+        description: "tag specifications"
+        additionalProperties:
+          type: "object"
+          additionalProperties:
+            type: "object"
+            properties: {}
   StackScaleRequestV2:
     type: "object"
     required:
@@ -8363,6 +8402,16 @@ definitions:
         type: "integer"
         format: "int32"
         description: "scaling adjustment of the instance groups"
+  RdsBuildResult:
+    type: "object"
+    required:
+    - "results"
+    properties:
+      results:
+        type: "object"
+        description: "name of the created dbs"
+        additionalProperties:
+          type: "string"
   RecommendationRequestJson:
     type: "object"
     properties:
@@ -8394,16 +8443,6 @@ definitions:
         type: "integer"
         format: "int64"
         description: "id that could indentify an existing blueprint"
-  RdsBuildResult:
-    type: "object"
-    required:
-    - "results"
-    properties:
-      results:
-        type: "object"
-        description: "name of the created dbs"
-        additionalProperties:
-          type: "string"
   VersionCheckResult:
     type: "object"
     properties:
@@ -8459,15 +8498,6 @@ definitions:
         description: "resource is visible in account"
         readOnly: true
         default: false
-  DiskResponse:
-    type: "object"
-    properties:
-      type:
-        type: "string"
-      name:
-        type: "string"
-      displayName:
-        type: "string"
   RDSBuildRequest:
     type: "object"
     required:
@@ -8480,6 +8510,15 @@ definitions:
       clusterName:
         type: "string"
         description: "requested cluster name"
+  DiskResponse:
+    type: "object"
+    properties:
+      type:
+        type: "string"
+      name:
+        type: "string"
+      displayName:
+        type: "string"
   Id:
     type: "object"
     required:
@@ -8624,6 +8663,17 @@ definitions:
       state:
         type: "string"
         description: "state of the host"
+  StackDescriptor:
+    type: "object"
+    properties:
+      version:
+        type: "string"
+      minAmbari:
+        type: "string"
+      repo:
+        $ref: "#/definitions/StackRepoDetailsJson"
+      ambari:
+        $ref: "#/definitions/AmbariInfoJson"
   SupportedExternalDatabaseServiceEntryResponse:
     type: "object"
     properties:
@@ -8759,21 +8809,6 @@ definitions:
         description: "Request that contains the minimal set of fields to test LDAP\
           \ connectivity"
         $ref: "#/definitions/LdapValidationRequest"
-  AmbariRepoDetails:
-    type: "object"
-    required:
-    - "baseUrl"
-    - "version"
-    properties:
-      version:
-        type: "string"
-        description: "version of the Ambari"
-      baseUrl:
-        type: "string"
-        description: "url of the Ambari repository"
-      gpgKeyUrl:
-        type: "string"
-        description: "gpg key of the Ambari repository"
   TopologyRequest:
     type: "object"
     required:
@@ -8799,6 +8834,21 @@ definitions:
         description: "topology mapping"
         additionalProperties:
           type: "string"
+  AmbariRepoDetails:
+    type: "object"
+    required:
+    - "baseUrl"
+    - "version"
+    properties:
+      version:
+        type: "string"
+        description: "version of the Ambari"
+      baseUrl:
+        type: "string"
+        description: "url of the Ambari repository"
+      gpgKeyUrl:
+        type: "string"
+        description: "gpg key of the Ambari repository"
   CloudGatewayJson:
     type: "object"
     properties:
@@ -8958,6 +9008,21 @@ definitions:
         additionalProperties:
           type: "object"
           properties: {}
+  ImagesResponse:
+    type: "object"
+    properties:
+      baseImages:
+        type: "array"
+        items:
+          $ref: "#/definitions/BaseImageResponse"
+      hdpImages:
+        type: "array"
+        items:
+          $ref: "#/definitions/ImageResponse"
+      hdfImages:
+        type: "array"
+        items:
+          $ref: "#/definitions/ImageResponse"
   ClusterV2Request:
     type: "object"
     properties:
@@ -8992,27 +9057,15 @@ definitions:
       ambari:
         description: "ambari specific requests"
         $ref: "#/definitions/AmbariV2Request"
+      sharedService:
+        description: "Shared service request"
+        $ref: "#/definitions/SharedService"
   GeneratedBlueprintResponse:
     type: "object"
     properties:
       ambariBlueprint:
         type: "string"
         description: "ambari blueprint JSON, set this or the url field"
-  ImagesResponse:
-    type: "object"
-    properties:
-      baseImages:
-        type: "array"
-        items:
-          $ref: "#/definitions/BaseImageResponse"
-      hdpImages:
-        type: "array"
-        items:
-          $ref: "#/definitions/ImageResponse"
-      hdfImages:
-        type: "array"
-        items:
-          $ref: "#/definitions/ImageResponse"
   GatewayJson:
     type: "object"
     properties:
@@ -9658,22 +9711,6 @@ definitions:
         description: "a master key for encrypting the passwords in Ambari"
         minLength: 5
         maxLength: 100
-  Constraint:
-    type: "object"
-    required:
-    - "hostCount"
-    properties:
-      instanceGroupName:
-        type: "string"
-        description: "name of an instance group where the hostgroup will be deployed"
-      constraintTemplateName:
-        type: "string"
-        description: "name of a constraint template that defines the resource constraints\
-          \ for the hostgroup"
-      hostCount:
-        type: "integer"
-        format: "int32"
-        description: "number of hosts in the hostgroup"
   AmbariStackDetailsResponse:
     type: "object"
     properties:
@@ -9697,6 +9734,22 @@ definitions:
         default: false
       hdpVersion:
         type: "string"
+  Constraint:
+    type: "object"
+    required:
+    - "hostCount"
+    properties:
+      instanceGroupName:
+        type: "string"
+        description: "name of an instance group where the hostgroup will be deployed"
+      constraintTemplateName:
+        type: "string"
+        description: "name of a constraint template that defines the resource constraints\
+          \ for the hostgroup"
+      hostCount:
+        type: "integer"
+        format: "int32"
+        description: "number of hosts in the hostgroup"
   CloudbreakDetailsJson:
     type: "object"
     properties:
@@ -9774,6 +9827,21 @@ definitions:
         description: "default variants"
         additionalProperties:
           type: "string"
+  SpecialParametersJson:
+    type: "object"
+    properties:
+      specialParameters:
+        type: "object"
+        description: "custom parameters"
+        additionalProperties:
+          type: "boolean"
+      platformSpecificSpecialParameters:
+        type: "object"
+        description: "platform specific custom parameters"
+        additionalProperties:
+          type: "object"
+          additionalProperties:
+            type: "boolean"
   HostGroupAdjustment:
     type: "object"
     required:
@@ -9795,21 +9863,6 @@ definitions:
         type: "boolean"
         description: "validate node count during downscale"
         default: false
-  SpecialParametersJson:
-    type: "object"
-    properties:
-      specialParameters:
-        type: "object"
-        description: "custom parameters"
-        additionalProperties:
-          type: "boolean"
-      platformSpecificSpecialParameters:
-        type: "object"
-        description: "platform specific custom parameters"
-        additionalProperties:
-          type: "object"
-          additionalProperties:
-            type: "boolean"
   OperationDetails:
     type: "object"
     properties:
@@ -9889,6 +9942,28 @@ definitions:
         description: "list of security rules that relates to the security group"
         items:
           $ref: "#/definitions/SecurityRuleRequest"
+  RepoConfigValidationRequest:
+    type: "object"
+    properties:
+      ambariBaseUrl:
+        type: "string"
+        description: "url of the Ambari repository"
+      ambariGpgKeyUrl:
+        type: "string"
+        description: "gpg key of the Ambari repository"
+      stackBaseURL:
+        type: "string"
+        description: "url of the stack repository"
+      utilsBaseURL:
+        type: "string"
+        description: "url of the stack utils repository"
+      versionDefinitionFileUrl:
+        type: "string"
+        description: "local path on the Ambari server or URL that point to the desired\
+          \ VDF file"
+      mpackUrl:
+        type: "string"
+        description: "url the MPACK that needs to be installed before HDF installation"
   FileSystem:
     type: "object"
     required:
@@ -9941,40 +10016,6 @@ definitions:
       customInstanceType:
         description: "custom instancetype definition"
         $ref: "#/definitions/CustomInstanceType"
-  RepoConfigValidationRequest:
-    type: "object"
-    properties:
-      ambariBaseUrl:
-        type: "string"
-        description: "url of the Ambari repository"
-      ambariGpgKeyUrl:
-        type: "string"
-        description: "gpg key of the Ambari repository"
-      stackBaseURL:
-        type: "string"
-        description: "url of the stack repository"
-      utilsBaseURL:
-        type: "string"
-        description: "url of the stack utils repository"
-      versionDefinitionFileUrl:
-        type: "string"
-        description: "local path on the Ambari server or URL that point to the desired\
-          \ VDF file"
-      mpackUrl:
-        type: "string"
-        description: "url the MPACK that needs to be installed before HDF installation"
-  StackAuthenticationResponse:
-    type: "object"
-    properties:
-      publicKey:
-        type: "string"
-        description: "public key for accessing instances"
-      publicKeyId:
-        type: "string"
-        description: "public key id for accessing instances"
-      loginUserName:
-        type: "string"
-        description: "authentication name for machines"
   TopologyResponse:
     type: "object"
     required:
@@ -10004,6 +10045,18 @@ definitions:
         type: "integer"
         format: "int64"
         description: "id of the resource"
+  StackAuthenticationResponse:
+    type: "object"
+    properties:
+      publicKey:
+        type: "string"
+        description: "public key for accessing instances"
+      publicKeyId:
+        type: "string"
+        description: "public key id for accessing instances"
+      loginUserName:
+        type: "string"
+        description: "authentication name for machines"
   PlatformVmtypesResponse:
     type: "object"
     properties:
@@ -10423,6 +10476,19 @@ definitions:
         type: "boolean"
         description: "resource is visible in account"
         default: false
+  InstanceGroupAdjustment:
+    type: "object"
+    required:
+    - "instanceGroup"
+    - "scalingAdjustment"
+    properties:
+      instanceGroup:
+        type: "string"
+        description: "name of the instance group"
+      scalingAdjustment:
+        type: "integer"
+        format: "int32"
+        description: "scaling adjustment of the instance groups"
   PlatformResourceRequestJson:
     type: "object"
     properties:
@@ -10447,25 +10513,22 @@ definitions:
       availabilityZone:
         type: "string"
         description: "related availability zone"
-  InstanceGroupAdjustment:
+  FlexUsageComponentJson:
     type: "object"
-    required:
-    - "instanceGroup"
-    - "scalingAdjustment"
     properties:
-      instanceGroup:
+      componentId:
         type: "string"
-        description: "name of the instance group"
-      scalingAdjustment:
-        type: "integer"
-        format: "int32"
-        description: "scaling adjustment of the instance groups"
+      instances:
+        type: "array"
+        items:
+          $ref: "#/definitions/FlexUsageComponentInstanceJson"
   RDSConfigResponse:
     type: "object"
     required:
     - "connectionDriver"
     - "connectionURL"
     - "databaseEngine"
+    - "databaseEngineDisplayName"
     - "name"
     - "type"
     properties:
@@ -10489,7 +10552,7 @@ definitions:
       connectorJarUrl:
         type: "string"
         description: "URL that points to the jar of the connection driver(connector)"
-        minLength: 4
+        minLength: 0
         maxLength: 150
       id:
         type: "integer"
@@ -10518,15 +10581,9 @@ definitions:
       connectionDriver:
         type: "string"
         description: "Name of the JDBC connection driver (for example: 'org.postgresql.Driver')"
-  FlexUsageComponentJson:
-    type: "object"
-    properties:
-      componentId:
+      databaseEngineDisplayName:
         type: "string"
-      instances:
-        type: "array"
-        items:
-          $ref: "#/definitions/FlexUsageComponentInstanceJson"
+        description: "Display name of the external database engine (Mysql, Postges...)"
   instanceGroups:
     type: "object"
     required:
@@ -11017,6 +11074,16 @@ definitions:
       imagesResponse:
         description: "image response in imagecatalog"
         $ref: "#/definitions/ImagesResponse"
+  SubscriptionRequest:
+    type: "object"
+    required:
+    - "endpointUrl"
+    properties:
+      endpointUrl:
+        type: "string"
+        description: "url of the endpoint"
+        pattern: "^(https?:\\/\\/)((([\\da-z\\.-]+)\\.([a-z]{2,6}))|localhost|[1-9][0-9]{0,2}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3})(:[1-9][0-9]{1,4})?\\\
+          /([\\/\\w\\.-]*)\\/?$"
   StackV2Request:
     type: "object"
     required:
@@ -11076,16 +11143,6 @@ definitions:
       cluster:
         description: "cluster request object on stack"
         $ref: "#/definitions/ClusterV2Request"
-  SubscriptionRequest:
-    type: "object"
-    required:
-    - "endpointUrl"
-    properties:
-      endpointUrl:
-        type: "string"
-        description: "url of the endpoint"
-        pattern: "^(https?:\\/\\/)((([\\da-z\\.-]+)\\.([a-z]{2,6}))|localhost|[1-9][0-9]{0,2}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3})(:[1-9][0-9]{1,4})?\\\
-          /([\\/\\w\\.-]*)\\/?$"
   ImageJson:
     type: "object"
     properties:
@@ -11101,6 +11158,17 @@ definitions:
       imageCatalogName:
         type: "string"
         description: "name of the image catalog"
+  StackMatrix:
+    type: "object"
+    properties:
+      hdp:
+        type: "object"
+        additionalProperties:
+          $ref: "#/definitions/StackDescriptor"
+      hdf:
+        type: "object"
+        additionalProperties:
+          $ref: "#/definitions/StackDescriptor"
   PlatformGatewaysResponse:
     type: "object"
     properties:
@@ -11158,14 +11226,6 @@ definitions:
         type: "integer"
         format: "int64"
         description: "id of the resource"
-  LdapTestResult:
-    type: "object"
-    required:
-    - "connectionResult"
-    properties:
-      connectionResult:
-        type: "string"
-        description: "result of Ldap connection test"
   PlatformSshKeyResponse:
     type: "object"
     properties:
@@ -11176,6 +11236,14 @@ definitions:
         additionalProperties:
           type: "object"
           properties: {}
+  LdapTestResult:
+    type: "object"
+    required:
+    - "connectionResult"
+    properties:
+      connectionResult:
+        type: "string"
+        description: "result of Ldap connection test"
   RecipeResponse:
     type: "object"
     required:
@@ -11305,6 +11373,11 @@ definitions:
         type: "boolean"
         description: "if true, the management pack is already installed on the instances"
         default: false
+  ManagementPackEntry:
+    type: "object"
+    properties:
+      mpackUrl:
+        type: "string"
   ConfigsResponse:
     type: "object"
     required:
@@ -11381,36 +11454,6 @@ definitions:
         type: "integer"
         format: "int64"
         description: "proxy configuration id for the cluster"
-  RecipeRequest:
-    type: "object"
-    required:
-    - "recipeType"
-    properties:
-      name:
-        type: "string"
-        description: "name of the resource"
-        minLength: 5
-        maxLength: 100
-        pattern: "(^[a-z][-a-z0-9]*[a-z0-9]$)"
-      description:
-        type: "string"
-        description: "description of the resource"
-        minLength: 0
-        maxLength: 1000
-      recipeType:
-        type: "string"
-        description: "type of recipe"
-        enum:
-        - "PRE_AMBARI_START"
-        - "PRE_TERMINATION"
-        - "POST_AMBARI_START"
-        - "POST_CLUSTER_INSTALL"
-      content:
-        type: "string"
-        description: "content of recipe"
-      uri:
-        type: "string"
-        description: "recipe uri"
   FlexUsageProductJson:
     type: "object"
     properties:
@@ -11453,6 +11496,36 @@ definitions:
         description: "Indicates the request's value with the same key is valid and\
           \ reachable by Cloudbreak or not"
         default: false
+  RecipeRequest:
+    type: "object"
+    required:
+    - "recipeType"
+    properties:
+      name:
+        type: "string"
+        description: "name of the resource"
+        minLength: 5
+        maxLength: 100
+        pattern: "(^[a-z][-a-z0-9]*[a-z0-9]$)"
+      description:
+        type: "string"
+        description: "description of the resource"
+        minLength: 0
+        maxLength: 1000
+      recipeType:
+        type: "string"
+        description: "type of recipe"
+        enum:
+        - "PRE_AMBARI_START"
+        - "PRE_TERMINATION"
+        - "POST_AMBARI_START"
+        - "POST_CLUSTER_INSTALL"
+      content:
+        type: "string"
+        description: "content of recipe"
+      uri:
+        type: "string"
+        description: "recipe uri"
   FlexUsageComponentInstanceJson:
     type: "object"
     properties:
@@ -11555,7 +11628,7 @@ definitions:
       connectorJarUrl:
         type: "string"
         description: "URL that points to the jar of the connection driver(connector)"
-        minLength: 4
+        minLength: 0
         maxLength: 150
       connectionUserName:
         type: "string"

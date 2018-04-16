@@ -44,6 +44,51 @@ exports.createRDSDatabaseUtil = function(args, res, next) {
   }
 }
 
+exports.getStackMatrixUtil = function(args, res, next) {
+  /**
+   * returns default ambari details for distinct HDP and HDF
+   * 
+   *
+   * returns StackMatrix
+   **/
+  var examples = {};
+  examples['application/json'] = {
+  "hdp" : {
+    "key" : {
+      "minAmbari" : "aeiou",
+      "ambari" : {
+        "repo" : {
+          "key" : {
+            "baseUrl" : "aeiou",
+            "version" : "aeiou",
+            "gpgKeyUrl" : "aeiou"
+          }
+        },
+        "version" : "aeiou"
+      },
+      "repo" : {
+        "stack" : {
+          "key" : "aeiou"
+        },
+        "util" : {
+          "key" : "aeiou"
+        }
+      },
+      "version" : "aeiou"
+    }
+  },
+  "hdf" : {
+    "key" : ""
+  }
+};
+  if (Object.keys(examples).length > 0) {
+    res.setHeader('Content-Type', 'application/json');
+    res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
+  } else {
+    res.end();
+  }
+}
+
 exports.testAmbariDatabaseUtil = function(args, res, next) {
   /**
    * tests a database connection parameters

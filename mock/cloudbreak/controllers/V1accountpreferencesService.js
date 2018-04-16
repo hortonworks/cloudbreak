@@ -8,29 +8,7 @@ exports.getAccountPreferencesEndpoint = function(args, res, next) {
    * returns AccountPreferencesResponse
    **/
   var examples = {};
-  examples['application/json'] = {
-  "maxNumberOfNodesPerCluster" : 0,
-  "userTimeToLive" : 0,
-  "supportedExternalDatabases" : [ {
-    "databases" : [ {
-      "databaseName" : "aeiou",
-      "jdbcPrefix" : "aeiou",
-      "versions" : [ "aeiou" ],
-      "displayName" : "aeiou"
-    } ],
-    "displayName" : "aeiou",
-    "name" : "aeiou"
-  } ],
-  "maxNumberOfClustersPerUser" : 0,
-  "clusterTimeToLive" : 0,
-  "allowedInstanceTypes" : [ "aeiou" ],
-  "maxNumberOfClusters" : 0,
-  "defaultTags" : {
-    "key" : "aeiou"
-  },
-  "platforms" : "aeiou",
-  "smartsenseEnabled" : false
-};
+  examples['application/json'] = require('../responses/accountpreferences/accountpreferences.json');
   if (Object.keys(examples).length > 0) {
     res.setHeader('Content-Type', 'application/json');
     res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
