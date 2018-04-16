@@ -25,7 +25,7 @@ env-import() {
 
 env-show() {
 	declare desc="Shows relevant environment variables, in human readable format"
-    
+
     cloudbreak-config
     migrate-config
 	local longest=0
@@ -41,7 +41,7 @@ env-show() {
 
 env-export() {
 	declare desc="Shows relevant environment variables, in a machine friendly format."
-    
+
     # TODO cloudbreak config shouldnt be called here ...
     cloudbreak-config
     migrate-config
@@ -86,7 +86,7 @@ CB_HBM2DDL_STRATEGY - Configures hibernate.hbm2ddl.auto in Cloudbreak
 CB_HOST_DISCOVERY_CUSTOM_DOMAIN - Custom domain of the provisioned cluster
 CB_HOST_ADDRESS - Address of the Cloudbreak backend service
 CB_IMAGE_CATALOG_URL - Image catalog url
-CB_INSTANCE_NODE_ID - Unique identifier of the Cloudbreak node     
+CB_INSTANCE_NODE_ID - Unique identifier of the Cloudbreak node
 CB_INSTANCE_PROVIDER - Cloud provider of the Cloudbreak instance
 CB_INSTANCE_REGION - Cloud region of the Cloudbreak instance
 CB_INSTANCE_UUID - Unique identifier of Cloudbreak deployment
@@ -169,6 +169,8 @@ SL_ADDRESS_RESOLVING_TIMEOUT - DNS lookup timeout of Authentication service for 
 SL_NODE_TLS_REJECT_UNAUTHORIZED - Enables self signed certifications in Authentication service
 SULTANS_CONTAINER_PATH - Default project location in Authentication service container
 TRAEFIK_MAX_IDLE_CONNECTION - Configures --maxidleconnsperhost for Traefik
+TRAEFIK_PORT_HTTP - Configures http port for Traefik
+TRAEFIK_PORT_HTTPS - Configures https port for Traefik
 UAA_CLOUDBREAK_ID - Identity of the Cloudbreak scope in Identity
 UAA_CLOUDBREAK_SECRET - Secret of the Cloudbreak scope in Identity
 UAA_CLOUDBREAK_SHELL_ID - Identity of the Cloudbreak Shell scope in Identity

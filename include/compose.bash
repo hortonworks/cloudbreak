@@ -214,8 +214,8 @@ compose-generate-yaml-force() {
 traefik:
     ports:
         - "$PRIVATE_IP:8081:8080"
-        - 80:80
-        - 443:443
+        - $TRAEFIK_PORT_HTTP:80
+        - $TRAEFIK_PORT_HTTPS:443
     links:
         - consul
         - identity
