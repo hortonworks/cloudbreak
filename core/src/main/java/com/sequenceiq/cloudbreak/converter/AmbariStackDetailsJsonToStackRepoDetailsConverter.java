@@ -77,7 +77,6 @@ public class AmbariStackDetailsJsonToStackRepoDetailsConverter extends AbstractC
                     .collect(Collectors.toList()));
         }
         if (!StringUtils.isEmpty(source.getMpackUrl())) {
-            // Backward compatibility: previous version of cluster requests can be handled
             ManagementPackComponent mpack = new ManagementPackComponent();
             mpack.setMpackUrl(source.getMpackUrl());
             mpack.setStackDefault(true);
