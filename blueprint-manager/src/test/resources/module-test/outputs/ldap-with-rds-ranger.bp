@@ -148,6 +148,7 @@
           "ranger.ldap.user.searchfilter": "(cn=admin,dc=example,dc=org={0})",
           "ranger.ldap.url": "ldap://localhost:389",
           "ranger.ldap.ad.url": "ldap://localhost:389",
+          "ranger.jpa.jdbc.driver": "org.postgresql.Driver",
           "ranger.ldap.ad.base.dn": "cn=users,dc=example,dc=org",
           "ranger.ldap.base.dn": "cn=users,dc=example,dc=org",
           "ranger.ldap.group.searchbase": "cn=groups,dc=example,dc=org",
@@ -178,6 +179,7 @@
       "cluster-env": {
         "properties": {
           "recovery_enabled": "true",
+          "commands_to_retry": "START",
           "recovery_type": "AUTO_START"
         }
       }

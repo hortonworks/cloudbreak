@@ -17,10 +17,10 @@
         {
             "hdfs-site": {
                 "properties": {
-                    "dfs.journalnode.edits.dir": "\/hadoopfs\/fs1\/hdfs\/journalnode",
-                    "dfs.namenode.name.dir": "\/hadoopfs\/fs1\/hdfs\/namenode",
+                    "dfs.journalnode.edits.dir": "/hadoopfs/fs1/hdfs/journalnode",
+                    "dfs.namenode.name.dir": "/hadoopfs/fs1/hdfs/namenode",
                     "dfs.replication": 2,
-                    "dfs.namenode.checkpoint.dir": "\/hadoopfs\/fs1\/hdfs\/namesecondary"
+                    "dfs.namenode.checkpoint.dir": "/hadoopfs/fs1/hdfs/namesecondary"
                 }
             }
         },
@@ -28,7 +28,7 @@
             "oozie-site": {
                 "properties": {
                     "oozie.service.JPAService.jdbc.password": "iamsoosecure",
-                    "oozie.service.JPAService.jdbc.url": "jdbc:postgresql:\/\/10.1.1.1:5432\/oozie",
+                    "oozie.service.JPAService.jdbc.url": "jdbc:postgresql://10.1.1.1:5432/oozie",
                     "oozie.service.JPAService.jdbc.driver": "org.postgresql.Driver",
                     "oozie.service.JPAService.jdbc.username": "heyitsme"
                 }
@@ -79,14 +79,14 @@
         {
             "zoo.cfg": {
                 "properties": {
-                    "dataDir": "\/hadoopfs\/fs1\/zookeeper"
+                    "dataDir": "/hadoopfs/fs1/zookeeper"
                 }
             }
         },
         {
             "yarn-site": {
                 "properties": {
-                    "yarn.timeline-service.leveldb-timeline-store.path": "\/hadoopfs\/fs1\/yarn\/timeline"
+                    "yarn.timeline-service.leveldb-timeline-store.path": "/hadoopfs/fs1/yarn/timeline"
                 }
             }
         }
@@ -122,18 +122,18 @@
             "configurations": [
                 {
                     "hdfs-site": {
-                        "dfs.datanode.data.dir": "\/hadoopfs\/fs1\/hdfs\/datanode"
+                        "dfs.datanode.data.dir": "/hadoopfs/fs1/hdfs/datanode"
                     }
                 },
                 {
                     "yarn-site": {
-                        "yarn.nodemanager.local-dirs": "\/hadoopfs\/fs1\/yarn\/nodemanager",
-                        "yarn.nodemanager.log-dirs": "\/hadoopfs\/fs1\/yarn\/nodemanager\/log"
+                        "yarn.nodemanager.local-dirs": "/hadoopfs/fs1/yarn/nodemanager",
+                        "yarn.nodemanager.log-dirs": "/hadoopfs/fs1/yarn/nodemanager/log"
                     }
                 },
                 {
                     "core-site": {
-                        "fs.s3a.buffer.dir": "\/hadoopfs\/fs1\/s3\/temp"
+                        "fs.s3a.buffer.dir": "/hadoopfs/fs1/s3/temp"
                     }
                 }
             ],
@@ -167,18 +167,18 @@
             "configurations": [
                 {
                     "hdfs-site": {
-                        "dfs.datanode.data.dir": "\/hadoopfs\/fs1\/hdfs\/datanode"
+                        "dfs.datanode.data.dir": "/hadoopfs/fs1/hdfs/datanode"
                     }
                 },
                 {
                     "yarn-site": {
-                        "yarn.nodemanager.local-dirs": "\/hadoopfs\/fs1\/yarn\/nodemanager",
-                        "yarn.nodemanager.log-dirs": "\/hadoopfs\/fs1\/yarn\/nodemanager\/log"
+                        "yarn.nodemanager.local-dirs": "/hadoopfs/fs1/yarn/nodemanager",
+                        "yarn.nodemanager.log-dirs": "/hadoopfs/fs1/yarn/nodemanager/log"
                     }
                 },
                 {
                     "core-site": {
-                        "fs.s3a.buffer.dir": "\/hadoopfs\/fs1\/s3\/temp"
+                        "fs.s3a.buffer.dir": "/hadoopfs/fs1/s3/temp"
                     }
                 }
             ],
@@ -212,18 +212,18 @@
             "configurations": [
                 {
                     "hdfs-site": {
-                        "dfs.datanode.data.dir": "\/hadoopfs\/fs1\/hdfs\/datanode"
+                        "dfs.datanode.data.dir": "/hadoopfs/fs1/hdfs/datanode"
                     }
                 },
                 {
                     "yarn-site": {
-                        "yarn.nodemanager.local-dirs": "\/hadoopfs\/fs1\/yarn\/nodemanager",
-                        "yarn.nodemanager.log-dirs": "\/hadoopfs\/fs1\/yarn\/nodemanager\/log"
+                        "yarn.nodemanager.local-dirs": "/hadoopfs/fs1/yarn/nodemanager",
+                        "yarn.nodemanager.log-dirs": "/hadoopfs/fs1/yarn/nodemanager/log"
                     }
                 },
                 {
                     "core-site": {
-                        "fs.s3a.buffer.dir": "\/hadoopfs\/fs1\/s3\/temp"
+                        "fs.s3a.buffer.dir": "/hadoopfs/fs1/s3/temp"
                     }
                 }
             ],
