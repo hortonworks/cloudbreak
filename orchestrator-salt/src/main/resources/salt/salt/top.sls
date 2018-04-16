@@ -52,10 +52,7 @@ base:
     - match: grain
     - prometheus.server
     - ambari.server
-<<<<<<< HEAD
     - jdbc.connectors
-=======
->>>>>>> BUG-98792 pre-ambari-start recipe does not wait for agent on server node
 
   'roles:ambari_agent_install':
     - match: grain
