@@ -49,14 +49,16 @@ public class AmbariClusterTemplateService {
                 if (cluster.isSecure()) {
                     KerberosConfig kerberosConfig = cluster.getKerberosConfig();
                     String principal = kerberosDetailService.resolvePrincipalForKerberos(kerberosConfig);
-                    clusterTemplate = ambariClient.createSecureCluster(clusterName, blueprintName, hostGroupMappings, configStrategy,
-                            ambariSecurityConfigProvider.getAmbariPassword(cluster), principal, kerberosConfig.getPassword(), KEY_TYPE, false,
-                            repositoryVersion);
+                    clusterTemplate = ambariClient.createClusterJson(blueprintName, hostGroupMappings,
+                            ambariSecurityConfigProvider.getAmbariPassword(cluster), configStrategy,
+                            principal, kerberosConfig.getPassword(), KEY_TYPE, false, repositoryVersion);
                 } else {
-                    clusterTemplate = ambariClient.createCluster(clusterName, blueprintName, hostGroupMappings, configStrategy,
-                            ambariSecurityConfigProvider.getAmbariPassword(cluster), false, repositoryVersion);
+                    clusterTemplate = ambariClient.createClusterJson(blueprintName, hostGroupMappings,
+                            ambariSecurityConfigProvider.getAmbariPassword(cluster), configStrategy,
+                            null, null, null, false, repositoryVersion);
                 }
                 LOGGER.info("Submitted cluster creation template: {}", JsonUtil.minify(clusterTemplate, Collections.singleton("credentials")));
+                ambariClient.createClusterFromTemplate(clusterName, clusterTemplate);
             } catch (HttpResponseException exception) {
                 String reason = collectErrorReason(exception);
                 String msg = String.format("Ambari client failed to apply cluster creation template! Reason: %s", reason);

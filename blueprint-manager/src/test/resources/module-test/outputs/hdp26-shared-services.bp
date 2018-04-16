@@ -94,6 +94,7 @@
           "ranger.ldap.bind.dn": "cn=admin,dc=example,dc=org",
           "ranger.ldap.bind.password": "admin",
           "ranger.ldap.user.searchfilter": "(cn=admin,dc=example,dc=org={0})",
+          "ranger.audit.source.type": "solr",
           "ranger.ldap.url": "ldap://localhost:389",
           "ranger.jpa.jdbc.driver": "org.postgresql.Driver",
           "ranger.ldap.ad.url": "ldap://localhost:389",

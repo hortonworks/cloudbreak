@@ -93,14 +93,14 @@ public class CentralBlueprintUpdaterRollingtest extends CentralBlueprintContext 
 
         JSONObject expected = toJSON(params.value().getOutput().getFileContent());
         JSONObject resultBlueprintText = toJSON(getUnderTest().getBlueprintText(blueprintPreparationObject));
-        StringBuffer stringBuffer = new StringBuffer();
-        stringBuffer.append("The result has not matched with the expected output " + params.value().getOutput().getFileName());
-        stringBuffer.append("\nexpected:\n");
-        stringBuffer.append(new JSONObject(expected.toString()).toString(4));
-        stringBuffer.append("\nactual:\n");
-        stringBuffer.append(new JSONObject(resultBlueprintText.toString()).toString(4));
+        StringBuilder messageBuilder = new StringBuilder();
+        messageBuilder.append("The result has not matched with the expected output " + params.value().getOutput().getFileName());
+        messageBuilder.append("\nexpected:\n");
+        messageBuilder.append(new JSONObject(expected.toString()).toString(2));
+        messageBuilder.append("\nactual:\n");
+        messageBuilder.append(new JSONObject(resultBlueprintText.toString()).toString(2));
 
-        assertWithExtendedExceptionHandling(stringBuffer.toString(), expected, resultBlueprintText);
+        assertWithExtendedExceptionHandling(messageBuilder.toString(), expected, resultBlueprintText);
     }
 
     private BlueprintPreparationObject prepareBlueprintPreparationObjectWithBlueprintText() {
