@@ -1,10 +1,10 @@
 {
-{{{#if ldap}}}
+{{{#if ldap}}}{{{#gateway-disabled gateway}}}
   "hive-interactive-site": {
     "hive.server2.authentication.ldap.url":"{{{ ldap.connectionURL }}}",
     "hive.server2.authentication.ldap.Domain":"{{{ ldap.domain }}}",
     "hive.server2.authentication.ldap.baseDN": "{{{ ldap.groupSearchBase }}}",
     "hive.server2.authentication":"LDAP"
   }
-{{{/if}}}
+{{{/gateway-disabled}}}{{{/if}}}
 }
