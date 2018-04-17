@@ -56,6 +56,7 @@ func NewCloudbreakHTTPClient(address, username, password, authType string) *Clou
 	for _, v := range PREFIX_TRIM {
 		address = strings.TrimPrefix(address, v)
 	}
+	address = strings.TrimRight(address, "/ ")
 	basePath := ""
 	slashIndex := strings.Index(address, "/")
 	if slashIndex != -1 {
