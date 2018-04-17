@@ -1,9 +1,14 @@
 'use strict';
 
-var url = require('url');
-
-var V1securityrules = require('./V1securityrulesService');
+var utils = require('../utils/writer.js');
+var V1securityrules = require('../service/V1securityrulesService');
 
 module.exports.getDefaultSecurityRules = function getDefaultSecurityRules (req, res, next) {
-  V1securityrules.getDefaultSecurityRules(req.swagger.params, res, next);
+  V1securityrules.getDefaultSecurityRules()
+    .then(function (response) {
+      utils.writeJson(res, response);
+    })
+    .catch(function (response) {
+      utils.writeJson(res, response);
+    });
 };

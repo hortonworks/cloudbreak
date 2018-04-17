@@ -1,45 +1,112 @@
 'use strict';
 
-var url = require('url');
-
-var V1proxyconfigs = require('./V1proxyconfigsService');
+var utils = require('../utils/writer.js');
+var V1proxyconfigs = require('../service/V1proxyconfigsService');
 
 module.exports.deletePrivateProxyConfig = function deletePrivateProxyConfig (req, res, next) {
-  V1proxyconfigs.deletePrivateProxyConfig(req.swagger.params, res, next);
+  var name = req.swagger.params['name'].value;
+  V1proxyconfigs.deletePrivateProxyConfig(name)
+    .then(function (response) {
+      utils.writeJson(res, response);
+    })
+    .catch(function (response) {
+      utils.writeJson(res, response);
+    });
 };
 
 module.exports.deleteProxyConfig = function deleteProxyConfig (req, res, next) {
-  V1proxyconfigs.deleteProxyConfig(req.swagger.params, res, next);
+  var id = req.swagger.params['id'].value;
+  V1proxyconfigs.deleteProxyConfig(id)
+    .then(function (response) {
+      utils.writeJson(res, response);
+    })
+    .catch(function (response) {
+      utils.writeJson(res, response);
+    });
 };
 
 module.exports.deletePublicProxyConfig = function deletePublicProxyConfig (req, res, next) {
-  V1proxyconfigs.deletePublicProxyConfig(req.swagger.params, res, next);
+  var name = req.swagger.params['name'].value;
+  V1proxyconfigs.deletePublicProxyConfig(name)
+    .then(function (response) {
+      utils.writeJson(res, response);
+    })
+    .catch(function (response) {
+      utils.writeJson(res, response);
+    });
 };
 
 module.exports.getPrivateProxyConfig = function getPrivateProxyConfig (req, res, next) {
-  V1proxyconfigs.getPrivateProxyConfig(req.swagger.params, res, next);
+  var name = req.swagger.params['name'].value;
+  V1proxyconfigs.getPrivateProxyConfig(name)
+    .then(function (response) {
+      utils.writeJson(res, response);
+    })
+    .catch(function (response) {
+      utils.writeJson(res, response);
+    });
 };
 
 module.exports.getPrivatesProxyConfig = function getPrivatesProxyConfig (req, res, next) {
-  V1proxyconfigs.getPrivatesProxyConfig(req.swagger.params, res, next);
+  V1proxyconfigs.getPrivatesProxyConfig()
+    .then(function (response) {
+      utils.writeJson(res, response);
+    })
+    .catch(function (response) {
+      utils.writeJson(res, response);
+    });
 };
 
 module.exports.getProxyConfig = function getProxyConfig (req, res, next) {
-  V1proxyconfigs.getProxyConfig(req.swagger.params, res, next);
+  var id = req.swagger.params['id'].value;
+  V1proxyconfigs.getProxyConfig(id)
+    .then(function (response) {
+      utils.writeJson(res, response);
+    })
+    .catch(function (response) {
+      utils.writeJson(res, response);
+    });
 };
 
 module.exports.getPublicProxyConfig = function getPublicProxyConfig (req, res, next) {
-  V1proxyconfigs.getPublicProxyConfig(req.swagger.params, res, next);
+  var name = req.swagger.params['name'].value;
+  V1proxyconfigs.getPublicProxyConfig(name)
+    .then(function (response) {
+      utils.writeJson(res, response);
+    })
+    .catch(function (response) {
+      utils.writeJson(res, response);
+    });
 };
 
 module.exports.getPublicsProxyConfig = function getPublicsProxyConfig (req, res, next) {
-  V1proxyconfigs.getPublicsProxyConfig(req.swagger.params, res, next);
+  V1proxyconfigs.getPublicsProxyConfig()
+    .then(function (response) {
+      utils.writeJson(res, response);
+    })
+    .catch(function (response) {
+      utils.writeJson(res, response);
+    });
 };
 
 module.exports.postPrivateProxyConfig = function postPrivateProxyConfig (req, res, next) {
-  V1proxyconfigs.postPrivateProxyConfig(req.swagger.params, res, next);
+  var body = req.swagger.params['body'].value;
+  V1proxyconfigs.postPrivateProxyConfig(body)
+    .then(function (response) {
+      utils.writeJson(res, response);
+    })
+    .catch(function (response) {
+      utils.writeJson(res, response);
+    });
 };
 
 module.exports.postPublicProxyConfig = function postPublicProxyConfig (req, res, next) {
-  V1proxyconfigs.postPublicProxyConfig(req.swagger.params, res, next);
+  var body = req.swagger.params['body'].value;
+  V1proxyconfigs.postPublicProxyConfig(body)
+    .then(function (response) {
+      utils.writeJson(res, response);
+    })
+    .catch(function (response) {
+      utils.writeJson(res, response);
+    });
 };

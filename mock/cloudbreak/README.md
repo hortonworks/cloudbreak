@@ -7,40 +7,18 @@ Install [Swagger Codegen CLI](https://github.com/swagger-api/swagger-codegen#pre
 CLI is also available as [Docker Image](https://hub.docker.com/r/swaggerapi/swagger-codegen-cli/). You can read further [here](https://github.com/swagger-api/swagger-codegen#swagger-codegen-cli-docker-image).
 
 ### Get Help
-To get a list of available general options, you can run `help generate`. Here is an example for OS X users:
-```java -jar /usr/local/Cellar/swagger-codegen/2.2.3/libexec/swagger-codegen-cli.jar help generate```
+To get a list of available general options, you can run `help generate`.
 
 ### NodeJS specific options
-Supported config options can be different per language. Running `config-help -l {lang}` will show available options. Here is an example for OS X users to NodeJS:
-```java -jar /usr/local/Cellar/swagger-codegen/2.2.3/libexec/swagger-codegen-cli.jar config-help -l nodejs-server```
-
-### Generate NodeJS Client from QA
-Here is an example for OS X users to generate only NodeJS APIs (without tests):
-```
-java -jar /usr/local/Cellar/swagger-codegen/2.2.3/libexec/swagger-codegen-cli.jar generate \
-   -i https://qa-cloudbreak.eng.hortonworks.com/cb/api/swagger.json \
-   -l nodejs-server \
-   -o cbd-mock/javascript_api_client \
-   -Dio.swagger.parser.util.RemoteUrl.trustAll=true \
-   -Dapis -DapiTests=false
-```
+Supported config options can be different per language. Running `config-help -l {lang}` will show available options.
 
 ## Server stub generator HOWTO
 [The documentation](https://github.com/swagger-api/swagger-codegen/wiki/Server-stub-generator-HOWTO) to generate a server stub for a couple different frameworks.
 
-## Download Cloudbreak SWAGGER JSON
-```curl --insecure https://qa-cloudbreak.eng.hortonworks.com/cb/api/swagger.json --output swagger.json```
-
 ## Generate Cloudbreak API NodeJS Client
 ```
-java -jar /usr/local/Cellar/swagger-codegen/2.2.3/libexec/swagger-codegen-cli.jar generate \
-   -i swagger.json \
-   -l nodejs-server \
-   -o javascript_api_client
+make generate-api
 ```
-
-* `/usr/local/Cellar/swagger-codegen/2.2.3/libexec/swagger-codegen-cli.jar`: the Swagger Codegen CLI path on OS X. This can be vary on different OSs and with different installs. You can read more about this at [Swagger Codegen CLI Installation](https://github.com/swagger-api/swagger-codegen#table-of-contents).
-* `javascript_api_client`: the destination folder for the generated client. This is also can be vary based on your decision. 
 
 ## Upgrade Swagger YML
 
@@ -116,7 +94,7 @@ definitions:
 Extend all the `paths:` with `/api`, for example change `/v1/accountpreferences/isplatformselectiondisabled` to `/api/v1/accountpreferences/isplatformselectiondisabled`
 
 ## Provide responses to all the needed Services
-Introduce brand new Services for Cloudbreak Info and Health here as well. The new files should be [Info.js](controllers/Info.js) and [InfoService.js](controllers/InfoService.js).
+Introduce brand new Services for Cloudbreak Info and Health here as well. The new files should be [Info.js](controllers/Info.js) and [InfoService.js](service/InfoService.js).
 
 For existing services here is an example for `V1credentialsService`:
 1. Create/Update a related `Json` file at [responses/credentials/openstack.json](responses/credentials/openstack.json)

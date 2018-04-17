@@ -14,41 +14,41 @@ info:
     \ Ambari, Docker lightweight containers, Swarm and Consul.\nFor further product\
     \ documentation follow the link: <a href=\"http://hortonworks.com/apache/cloudbreak/\"\
     >http://hortonworks.com/apache/cloudbreak/</a>"
-  version: "2.6.0-dev.106"
+  version: "2.6.0-dev.112"
   title: "Cloudbreak API"
 basePath: "/cb"
 tags:
 - name: "info"
 - name: "health"
-- name: "v1usages"
-- name: "v1repositoryconfigs"
-- name: "v1flexsubscriptions"
-- name: "v1templates"
-- name: "v1rdsconfigs"
-- name: "v1imagecatalogs"
-- name: "v1settings"
-- name: "v1mpacks"
-- name: "v1topologies"
-- name: "v1subscriptions"
-- name: "v1proxyconfigs"
-- name: "v1recipes"
-- name: "v1accountpreferences"
-- name: "v2stacks"
 - name: "v1util"
 - name: "v1stacks"
-- name: "v1blueprints"
-- name: "v1clustertemplates"
-- name: "v1credentials"
-- name: "v1securitygroups"
-- name: "v2connectors"
-- name: "v1connectors"
 - name: "v1users"
-- name: "v1networks"
-- name: "v1securityrules"
-- name: "v1constraints"
-- name: "v1ldap"
+- name: "v1templates"
+- name: "v2connectors"
+- name: "v1accountpreferences"
+- name: "v1rdsconfigs"
+- name: "v1topologies"
+- name: "v1repositoryconfigs"
+- name: "v1clustertemplates"
 - name: "v1smartsensesubscriptions"
+- name: "v1mpacks"
+- name: "v1securityrules"
+- name: "v1ldap"
+- name: "v1flexsubscriptions"
+- name: "v1networks"
+- name: "v1blueprints"
+- name: "v2stacks"
+- name: "v1imagecatalogs"
+- name: "v1subscriptions"
+- name: "v1usages"
+- name: "v1settings"
+- name: "v1securitygroups"
+- name: "v1constraints"
+- name: "v1proxyconfigs"
 - name: "v1events"
+- name: "v1connectors"
+- name: "v1credentials"
+- name: "v1recipes"
 schemes:
 - "http"
 - "https"
@@ -7504,11 +7504,22 @@ definitions:
         type: "boolean"
         description: "resource is visible in account"
         default: false
+    example:
+      orchestratorType: "orchestratorType"
+      disk: 1.46581298050294517310021547018550336360931396484375
+      memory: 6.02745618307040320615897144307382404804229736328125
+      publicInAccount: false
+      name: "name"
+      description: "description"
+      cpu: 0.80082819046101150206595775671303272247314453125
+      id: 5
   SharedService:
     type: "object"
     properties:
       sharedCluster:
         type: "string"
+    example:
+      sharedCluster: "sharedCluster"
   ManagementPackRequest:
     type: "object"
     required:
@@ -7543,6 +7554,15 @@ definitions:
         type: "boolean"
         description: "if true, management pack will be installed with '--force' flag"
         default: false
+    example:
+      name: "name"
+      description: "description"
+      purge: false
+      force: false
+      mpackUrl: "mpackUrl"
+      purgeList:
+      - "purgeList"
+      - "purgeList"
   instanceGroupsV2:
     type: "object"
     required:
@@ -7589,37 +7609,37 @@ definitions:
         enum:
         - "MANUAL"
         - "AUTO"
-  PlatformRegionsJson:
-    type: "object"
-    properties:
-      regions:
-        type: "object"
-        description: "regions"
-        additionalProperties:
-          type: "array"
-          items:
-            type: "string"
-      displayNames:
-        type: "object"
-        description: "regions with displayNames"
-        additionalProperties:
-          type: "object"
-          additionalProperties:
-            type: "string"
-      availabilityZones:
-        type: "object"
-        description: "availability zones"
-        additionalProperties:
-          type: "object"
-          additionalProperties:
-            type: "array"
-            items:
-              type: "string"
-      defaultRegions:
-        type: "object"
-        description: "default regions"
-        additionalProperties:
-          type: "string"
+    example:
+      template:
+        volumeType: "volumeType"
+        instanceType: "instanceType"
+        customInstanceType:
+          memory: 5
+          cpus: 9
+        volumeCount: 6
+        parameters:
+          key: "{}"
+        volumeSize: 1
+      recipeNames:
+      - "recipeNames"
+      - "recipeNames"
+      recoveryMode: "MANUAL"
+      nodeCount: 8008
+      securityGroup:
+        securityGroupId: "securityGroupId"
+        securityRules:
+        - subnet: "subnet"
+          protocol: "protocol"
+          ports: "ports"
+          modifiable: false
+        - subnet: "subnet"
+          protocol: "protocol"
+          ports: "ports"
+          modifiable: false
+      type: "GATEWAY"
+      parameters:
+        key: "{}"
+      group: "group"
   ClusterRequest:
     type: "object"
     required:
@@ -7767,6 +7787,246 @@ definitions:
       proxyName:
         type: "string"
         description: "proxy configuration name for the cluster"
+    example:
+      ambariRepoDetailsJson:
+        baseUrl: "baseUrl"
+        version: "version"
+        gpgKeyUrl: "gpgKeyUrl"
+      hostGroups:
+      - recipes:
+        - recipeType: "PRE_AMBARI_START"
+          name: "name"
+          description: "description"
+          uri: "uri"
+          content: "content"
+        - recipeType: "PRE_AMBARI_START"
+          name: "name"
+          description: "description"
+          uri: "uri"
+          content: "content"
+        recipeIds:
+        - 0
+        - 0
+        recipeNames:
+        - "recipeNames"
+        - "recipeNames"
+        recoveryMode: "MANUAL"
+        name: "name"
+        constraint:
+          hostCount: 9
+          constraintTemplateName: "constraintTemplateName"
+          instanceGroupName: "instanceGroupName"
+      - recipes:
+        - recipeType: "PRE_AMBARI_START"
+          name: "name"
+          description: "description"
+          uri: "uri"
+          content: "content"
+        - recipeType: "PRE_AMBARI_START"
+          name: "name"
+          description: "description"
+          uri: "uri"
+          content: "content"
+        recipeIds:
+        - 0
+        - 0
+        recipeNames:
+        - "recipeNames"
+        - "recipeNames"
+        recoveryMode: "MANUAL"
+        name: "name"
+        constraint:
+          hostCount: 9
+          constraintTemplateName: "constraintTemplateName"
+          instanceGroupName: "instanceGroupName"
+      ambariSecurityMasterKey: "ambariSecurityMasterKey"
+      proxyName: "proxyName"
+      blueprintName: "blueprintName"
+      ldapConfigName: "ldapConfigName"
+      description: "description"
+      kerberos:
+        principal: "principal"
+        password: "password"
+        krb5Conf: "krb5Conf"
+        masterKey: "masterKey"
+        ldapUrl: "ldapUrl"
+        admin: "admin"
+        realm: "realm"
+        containerDn: "containerDn"
+        descriptor: "descriptor"
+        adminUrl: "adminUrl"
+        url: "url"
+        tcpAllowed: false
+      configStrategy: "NEVER_APPLY"
+      password: "password"
+      validateBlueprint: false
+      ambariStackDetails:
+        enableGplRepo: false
+        stack: "stack"
+        os: "os"
+        stackRepoId: "stackRepoId"
+        utilsRepoId: "utilsRepoId"
+        mpackUrl: "mpackUrl"
+        version: "version"
+        stackBaseURL: "stackBaseURL"
+        versionDefinitionFileUrl: "versionDefinitionFileUrl"
+        repositoryVersion: "repositoryVersion"
+        utilsBaseURL: "utilsBaseURL"
+        mpacks:
+        - name: "name"
+        - name: "name"
+        verify: false
+      ldapConfigId: 6
+      blueprintInputs:
+      - name: "name"
+        propertyValue: "propertyValue"
+      - name: "name"
+        propertyValue: "propertyValue"
+      rdsConfigNames:
+      - "rdsConfigNames"
+      - "rdsConfigNames"
+      ambariDatabaseDetails:
+        password: "password"
+        port: 1
+        vendor: "POSTGRES"
+        name: "name"
+        host: "host"
+        userName: "userName"
+      fileSystem:
+        name: "name"
+        defaultFs: false
+        type: "WASB_INTEGRATED"
+        properties:
+          key: "properties"
+      blueprintCustomProperties: "blueprintCustomProperties"
+      executorType: "CONTAINER"
+      rdsConfigJsons:
+      - connectionUserName: "connectionUserName"
+        connectorJarUrl: "connectorJarUrl"
+        oracleParameters:
+          version: "version"
+        name: "name"
+        connectionURL: "connectionURL"
+        connectionPassword: "connectionPassword"
+        type: "type"
+      - connectionUserName: "connectionUserName"
+        connectorJarUrl: "connectorJarUrl"
+        oracleParameters:
+          version: "version"
+        name: "name"
+        connectionURL: "connectionURL"
+        connectionPassword: "connectionPassword"
+        type: "type"
+      customContainer:
+        definitions:
+          key: "definitions"
+      customQueue: "customQueue"
+      emailTo: "emailTo"
+      userName: "userName"
+      blueprintId: 0
+      connectedCluster:
+        sourceClusterName: "sourceClusterName"
+        sourceClusterId: 5
+      ldapConfig:
+        adminGroup: "adminGroup"
+        bindPassword: "bindPassword"
+        groupNameAttribute: "groupNameAttribute"
+        groupMemberAttribute: "groupMemberAttribute"
+        description: "description"
+        userNameAttribute: "userNameAttribute"
+        serverPort: 5249
+        serverHost: "serverHost"
+        directoryType: "LDAP"
+        bindDn: "bindDn"
+        protocol: "protocol"
+        groupSearchBase: "groupSearchBase"
+        userSearchBase: "userSearchBase"
+        domain: "domain"
+        name: "name"
+        userObjectClass: "userObjectClass"
+        groupObjectClass: "groupObjectClass"
+      blueprint:
+        ambariBlueprint: "ambariBlueprint"
+        inputs:
+        - referenceConfiguration: "referenceConfiguration"
+          name: "name"
+          description: "description"
+        - referenceConfiguration: "referenceConfiguration"
+          name: "name"
+          description: "description"
+        name: "name"
+        description: "description"
+        url: "url"
+        properties:
+        - key:
+            key: "properties"
+        - key:
+            key: "properties"
+        tags:
+          key: "{}"
+      enableSecurity: false
+      emailNeeded: false
+      name: "name"
+      rdsConfigIds:
+      - 1
+      - 1
+      gateway:
+        path: "path"
+        topologyName: "topologyName"
+        gatewayType: "CENTRAL"
+        ssoProvider: "ssoProvider"
+        enableGateway: false
+        ssoType: "SSO_PROVIDER"
+        tokenCert: "tokenCert"
+        exposedServices:
+        - "exposedServices"
+        - "exposedServices"
+  PlatformRegionsJson:
+    type: "object"
+    properties:
+      regions:
+        type: "object"
+        description: "regions"
+        additionalProperties:
+          type: "array"
+          items:
+            type: "string"
+      displayNames:
+        type: "object"
+        description: "regions with displayNames"
+        additionalProperties:
+          type: "object"
+          additionalProperties:
+            type: "string"
+      availabilityZones:
+        type: "object"
+        description: "availability zones"
+        additionalProperties:
+          type: "object"
+          additionalProperties:
+            type: "array"
+            items:
+              type: "string"
+      defaultRegions:
+        type: "object"
+        description: "default regions"
+        additionalProperties:
+          type: "string"
+    example:
+      regions:
+        key:
+        - "regions"
+        - "regions"
+      displayNames:
+        key:
+          key: "displayNames"
+      availabilityZones:
+        key:
+          key:
+          - "availabilityZones"
+          - "availabilityZones"
+      defaultRegions:
+        key: "defaultRegions"
   SecurityGroupResponse:
     type: "object"
     required:
@@ -7806,6 +8066,26 @@ definitions:
         type: "boolean"
         description: "resource is visible in account"
         default: false
+    example:
+      securityGroupId: "securityGroupId"
+      owner: "owner"
+      cloudPlatform: "cloudPlatform"
+      publicInAccount: false
+      securityRules:
+      - subnet: "subnet"
+        protocol: "protocol"
+        id: 6
+        ports: "ports"
+        modifiable: false
+      - subnet: "subnet"
+        protocol: "protocol"
+        id: 6
+        ports: "ports"
+        modifiable: false
+      name: "name"
+      description: "description"
+      id: 0
+      account: "account"
   ProxyConfigRequest:
     type: "object"
     required:
@@ -7846,6 +8126,14 @@ definitions:
       password:
         type: "string"
         description: "Password to use for basic authentication"
+    example:
+      protocol: "protocol"
+      password: "password"
+      name: "name"
+      description: "description"
+      serverPort: 5249
+      userName: "userName"
+      serverHost: "serverHost"
   PlacementSettings:
     type: "object"
     required:
@@ -7857,6 +8145,9 @@ definitions:
       region:
         type: "string"
         description: "region of the stack"
+    example:
+      region: "region"
+      availabilityZone: "availabilityZone"
   PlatformNetworkResponse:
     type: "object"
     properties:
@@ -7873,6 +8164,13 @@ definitions:
         additionalProperties:
           type: "object"
           properties: {}
+    example:
+      name: "name"
+      subnets:
+        key: "subnets"
+      id: "id"
+      properties:
+        key: "{}"
   StackRepoDetailsJson:
     type: "object"
     properties:
@@ -7884,6 +8182,11 @@ definitions:
         type: "object"
         additionalProperties:
           type: "string"
+    example:
+      stack:
+        key: "stack"
+      util:
+        key: "util"
   OrchestratorResponse:
     type: "object"
     required:
@@ -7901,6 +8204,11 @@ definitions:
       type:
         type: "string"
         description: "type of the orchestrator"
+    example:
+      apiEndpoint: "apiEndpoint"
+      type: "type"
+      parameters:
+        key: "{}"
   HardwareInfoResponse:
     type: "object"
     properties:
@@ -7910,6 +8218,22 @@ definitions:
       hostMetadata:
         description: "metadata of hosts"
         $ref: "#/definitions/HostMetadata"
+    example:
+      instanceMetaData:
+        sshPort: 3
+        instanceId: "instanceId"
+        ambariServer: false
+        privateIp: "privateIp"
+        instanceType: "GATEWAY"
+        discoveryFQDN: "discoveryFQDN"
+        publicIp: "publicIp"
+        instanceGroup: "instanceGroup"
+        instanceStatus: "REQUESTED"
+      hostMetadata:
+        groupName: "groupName"
+        name: "name"
+        id: 4
+        state: "state"
   PlatformSshKeysResponse:
     type: "object"
     properties:
@@ -7920,6 +8244,15 @@ definitions:
           uniqueItems: true
           items:
             $ref: "#/definitions/PlatformSshKeyResponse"
+    example:
+      sshKeys:
+        key:
+        - name: "name"
+          properties:
+            key: "{}"
+        - name: "name"
+          properties:
+            key: "{}"
   ConnectedClusterRequest:
     type: "object"
     properties:
@@ -7928,6 +8261,9 @@ definitions:
         format: "int64"
       sourceClusterName:
         type: "string"
+    example:
+      sourceClusterName: "sourceClusterName"
+      sourceClusterId: 5
   ReinstallRequestV2:
     type: "object"
     required:
@@ -7953,6 +8289,87 @@ definitions:
       kerberosPrincipal:
         type: "string"
         description: "kerberos principal"
+    example:
+      instanceGroups:
+      - template:
+          volumeType: "volumeType"
+          instanceType: "instanceType"
+          customInstanceType:
+            memory: 5
+            cpus: 9
+          volumeCount: 6
+          parameters:
+            key: "{}"
+          volumeSize: 1
+        recipeNames:
+        - "recipeNames"
+        - "recipeNames"
+        recoveryMode: "MANUAL"
+        nodeCount: 8008
+        securityGroup:
+          securityGroupId: "securityGroupId"
+          securityRules:
+          - subnet: "subnet"
+            protocol: "protocol"
+            ports: "ports"
+            modifiable: false
+          - subnet: "subnet"
+            protocol: "protocol"
+            ports: "ports"
+            modifiable: false
+        type: "GATEWAY"
+        parameters:
+          key: "{}"
+        group: "group"
+      - template:
+          volumeType: "volumeType"
+          instanceType: "instanceType"
+          customInstanceType:
+            memory: 5
+            cpus: 9
+          volumeCount: 6
+          parameters:
+            key: "{}"
+          volumeSize: 1
+        recipeNames:
+        - "recipeNames"
+        - "recipeNames"
+        recoveryMode: "MANUAL"
+        nodeCount: 8008
+        securityGroup:
+          securityGroupId: "securityGroupId"
+          securityRules:
+          - subnet: "subnet"
+            protocol: "protocol"
+            ports: "ports"
+            modifiable: false
+          - subnet: "subnet"
+            protocol: "protocol"
+            ports: "ports"
+            modifiable: false
+        type: "GATEWAY"
+        parameters:
+          key: "{}"
+        group: "group"
+      ambariStackDetails:
+        enableGplRepo: false
+        stack: "stack"
+        os: "os"
+        stackRepoId: "stackRepoId"
+        utilsRepoId: "utilsRepoId"
+        mpackUrl: "mpackUrl"
+        version: "version"
+        stackBaseURL: "stackBaseURL"
+        versionDefinitionFileUrl: "versionDefinitionFileUrl"
+        repositoryVersion: "repositoryVersion"
+        utilsBaseURL: "utilsBaseURL"
+        mpacks:
+        - name: "name"
+        - name: "name"
+        verify: false
+      blueprintName: "blueprintName"
+      kerberosPassword: "kerberosPassword"
+      kerberosPrincipal: "kerberosPrincipal"
   UpdateImageCatalogRequest:
     type: "object"
     required:
@@ -7974,6 +8391,10 @@ definitions:
         type: "integer"
         format: "int64"
         description: "id of the resource"
+    example:
+      name: "name"
+      id: 0
+      url: "url"
   AutoscaleStackResponse:
     type: "object"
     required:
@@ -8060,6 +8481,18 @@ definitions:
         type: "integer"
         format: "int64"
         description: "creation time of the stack in long"
+    example:
+      owner: "owner"
+      password: "password"
+      ambariServerIp: "ambariServerIp"
+      created: 1
+      stackId: 0
+      name: "name"
+      userName: "userName"
+      account: "account"
+      gatewayPort: 6
+      clusterStatus: "REQUESTED"
+      status: "REQUESTED"
   IpPoolJson:
     type: "object"
     properties:
@@ -8072,6 +8505,11 @@ definitions:
         additionalProperties:
           type: "object"
           properties: {}
+    example:
+      name: "name"
+      id: "id"
+      properties:
+        key: "{}"
   AmbariDatabaseTestResult:
     type: "object"
     required:
@@ -8080,6 +8518,8 @@ definitions:
       error:
         type: "string"
         description: "result of Ambari database test"
+    example:
+      error: "error"
   Tags:
     type: "object"
     properties:
@@ -8098,6 +8538,13 @@ definitions:
         description: "stack related default tags"
         additionalProperties:
           type: "string"
+    example:
+      applicationTags:
+        key: "applicationTags"
+      userDefinedTags:
+        key: "userDefinedTags"
+      defaultTags:
+        key: "defaultTags"
   PlatformSecurityGroupResponse:
     type: "object"
     properties:
@@ -8110,6 +8557,11 @@ definitions:
         additionalProperties:
           type: "object"
           properties: {}
+    example:
+      groupName: "groupName"
+      groupId: "groupId"
+      properties:
+        key: "{}"
   PlatformIpPoolsResponse:
     type: "object"
     properties:
@@ -8120,6 +8572,17 @@ definitions:
           uniqueItems: true
           items:
             $ref: "#/definitions/IpPoolJson"
+    example:
+      ippools:
+        key:
+        - name: "name"
+          id: "id"
+          properties:
+            key: "{}"
+        - name: "name"
+          id: "id"
+          properties:
+            key: "{}"
   AmbariInfoJson:
     type: "object"
     properties:
@@ -8129,15 +8592,13 @@ definitions:
         type: "object"
         additionalProperties:
           $ref: "#/definitions/AmbariRepoDetails"
-  RdsTestRequest:
-    type: "object"
-    properties:
-      name:
-        type: "string"
-        description: "Name of the RDS configuration resource"
-      rdsConfig:
-        description: "unsaved RDS config to be tested by connectivity"
-        $ref: "#/definitions/RdsConfig"
+    example:
+      repo:
+        key:
+          baseUrl: "baseUrl"
+          version: "version"
+          gpgKeyUrl: "gpgKeyUrl"
+      version: "version"
   TemplateRequest:
     type: "object"
     required:
@@ -8183,6 +8644,40 @@ definitions:
         type: "integer"
         format: "int32"
         description: "size of volumes"
+    example:
+      volumeType: "volumeType"
+      cloudPlatform: "cloudPlatform"
+      instanceType: "instanceType"
+      customInstanceType:
+        memory: 5
+        cpus: 9
+      topologyId: 5
+      name: "name"
+      description: "description"
+      volumeCount: 2
+      parameters:
+        key: "{}"
+      volumeSize: 7
+  RdsTestRequest:
+    type: "object"
+    properties:
+      name:
+        type: "string"
+        description: "Name of the RDS configuration resource"
+      rdsConfig:
+        description: "unsaved RDS config to be tested by connectivity"
+        $ref: "#/definitions/RdsConfig"
+    example:
+      rdsConfig:
+        connectionUserName: "connectionUserName"
+        connectorJarUrl: "connectorJarUrl"
+        oracleParameters:
+          version: "version"
+        name: "name"
+        connectionURL: "connectionURL"
+        connectionPassword: "connectionPassword"
+        type: "type"
+      name: "name"
   CloudbreakEvent:
     type: "object"
     properties:
@@ -8287,6 +8782,25 @@ definitions:
         - "START_FAILED"
         - "STOP_FAILED"
         - "WAIT_FOR_SYNC"
+    example:
+      eventMessage: "eventMessage"
+      owner: "owner"
+      blueprintName: "blueprintName"
+      stackId: 5
+      stackName: "stackName"
+      stackStatus: "REQUESTED"
+      eventType: "eventType"
+      clusterId: 1
+      instanceGroup: "instanceGroup"
+      availabilityZone: "availabilityZone"
+      blueprintId: 6
+      cloud: "cloud"
+      clusterName: "clusterName"
+      nodeCount: 5
+      region: "region"
+      account: "account"
+      clusterStatus: "REQUESTED"
+      eventTimestamp: 0
   StackDetailsJson:
     type: "object"
     properties:
@@ -8298,6 +8812,16 @@ definitions:
         type: "string"
       repo:
         $ref: "#/definitions/StackRepoDetailsJson"
+    example:
+      mpacks:
+      - mpackUrl: "mpackUrl"
+      - mpackUrl: "mpackUrl"
+      repo:
+        stack:
+          key: "stack"
+        util:
+          key: "util"
+      version: "version"
   CustomInstanceType:
     type: "object"
     properties:
@@ -8307,6 +8831,9 @@ definitions:
       cpus:
         type: "integer"
         format: "int32"
+    example:
+      memory: 5
+      cpus: 9
   CloudbreakFlexUsage:
     type: "object"
     properties:
@@ -8316,6 +8843,83 @@ definitions:
         type: "array"
         items:
           $ref: "#/definitions/FlexUsageProductJson"
+    example:
+      controller:
+        instanceId: "instanceId"
+        provider: "provider"
+        smartSenseId: "smartSenseId"
+        guid: "guid"
+        region: "region"
+        userName: "userName"
+      products:
+      - components:
+        - componentId: "componentId"
+          instances:
+          - usageDate: "usageDate"
+            creationTime: "creationTime"
+            provider: "provider"
+            guid: "guid"
+            flexSubscriptionId: "flexSubscriptionId"
+            region: "region"
+            peakUsage: 0
+          - usageDate: "usageDate"
+            creationTime: "creationTime"
+            provider: "provider"
+            guid: "guid"
+            flexSubscriptionId: "flexSubscriptionId"
+            region: "region"
+            peakUsage: 0
+        - componentId: "componentId"
+          instances:
+          - usageDate: "usageDate"
+            creationTime: "creationTime"
+            provider: "provider"
+            guid: "guid"
+            flexSubscriptionId: "flexSubscriptionId"
+            region: "region"
+            peakUsage: 0
+          - usageDate: "usageDate"
+            creationTime: "creationTime"
+            provider: "provider"
+            guid: "guid"
+            flexSubscriptionId: "flexSubscriptionId"
+            region: "region"
+            peakUsage: 0
+        productId: "productId"
+      - components:
+        - componentId: "componentId"
+          instances:
+          - usageDate: "usageDate"
+            creationTime: "creationTime"
+            provider: "provider"
+            guid: "guid"
+            flexSubscriptionId: "flexSubscriptionId"
+            region: "region"
+            peakUsage: 0
+          - usageDate: "usageDate"
+            creationTime: "creationTime"
+            provider: "provider"
+            guid: "guid"
+            flexSubscriptionId: "flexSubscriptionId"
+            region: "region"
+            peakUsage: 0
+        - componentId: "componentId"
+          instances:
+          - usageDate: "usageDate"
+            creationTime: "creationTime"
+            provider: "provider"
+            guid: "guid"
+            flexSubscriptionId: "flexSubscriptionId"
+            region: "region"
+            peakUsage: 0
+          - usageDate: "usageDate"
+            creationTime: "creationTime"
+            provider: "provider"
+            guid: "guid"
+            flexSubscriptionId: "flexSubscriptionId"
+            region: "region"
+            peakUsage: 0
+        productId: "productId"
   AmbariStackDetails:
     type: "object"
     properties:
@@ -8363,6 +8967,22 @@ definitions:
         description: "Management packs which are needed for the HDP / HDF clusters"
         items:
           $ref: "#/definitions/ManagementPackDetails"
+    example:
+      enableGplRepo: false
+      stack: "stack"
+      os: "os"
+      stackRepoId: "stackRepoId"
+      utilsRepoId: "utilsRepoId"
+      mpackUrl: "mpackUrl"
+      version: "version"
+      stackBaseURL: "stackBaseURL"
+      versionDefinitionFileUrl: "versionDefinitionFileUrl"
+      repositoryVersion: "repositoryVersion"
+      utilsBaseURL: "utilsBaseURL"
+      mpacks:
+      - name: "name"
+      - name: "name"
+      verify: false
   FlexUsageControllerJson:
     type: "object"
     properties:
@@ -8378,6 +8998,13 @@ definitions:
         type: "string"
       userName:
         type: "string"
+    example:
+      instanceId: "instanceId"
+      provider: "provider"
+      smartSenseId: "smartSenseId"
+      guid: "guid"
+      region: "region"
+      userName: "userName"
   TagSpecificationsJson:
     type: "object"
     properties:
@@ -8389,6 +9016,10 @@ definitions:
           additionalProperties:
             type: "object"
             properties: {}
+    example:
+      specifications:
+        key:
+          key: "{}"
   StackScaleRequestV2:
     type: "object"
     required:
@@ -8402,6 +9033,9 @@ definitions:
         type: "integer"
         format: "int32"
         description: "scaling adjustment of the instance groups"
+    example:
+      desiredCount: 0
+      group: "group"
   RdsBuildResult:
     type: "object"
     required:
@@ -8412,6 +9046,9 @@ definitions:
         description: "name of the created dbs"
         additionalProperties:
           type: "string"
+    example:
+      results:
+        key: "results"
   RecommendationRequestJson:
     type: "object"
     properties:
@@ -8443,6 +9080,16 @@ definitions:
         type: "integer"
         format: "int64"
         description: "id that could indentify an existing blueprint"
+    example:
+      blueprintName: "blueprintName"
+      platformVariant: "platformVariant"
+      credentialId: 0
+      filters:
+        key: "filters"
+      credentialName: "credentialName"
+      region: "region"
+      availabilityZone: "availabilityZone"
+      blueprintId: 6
   VersionCheckResult:
     type: "object"
     properties:
@@ -8451,6 +9098,32 @@ definitions:
         default: false
       message:
         type: "string"
+    example:
+      versionCheckOk: false
+      message: "message"
+  RDSBuildRequest:
+    type: "object"
+    required:
+    - "clusterName"
+    - "rdsConfigRequest"
+    properties:
+      rdsConfigRequest:
+        description: "rds config request"
+        $ref: "#/definitions/RdsConfig"
+      clusterName:
+        type: "string"
+        description: "requested cluster name"
+    example:
+      clusterName: "clusterName"
+      rdsConfigRequest:
+        connectionUserName: "connectionUserName"
+        connectorJarUrl: "connectorJarUrl"
+        oracleParameters:
+          version: "version"
+        name: "name"
+        connectionURL: "connectionURL"
+        connectionPassword: "connectionPassword"
+        type: "type"
   CustomContainerResponse:
     type: "object"
     properties:
@@ -8458,6 +9131,9 @@ definitions:
         type: "object"
         additionalProperties:
           type: "string"
+    example:
+      definitions:
+        key: "definitions"
   NetworkResponse:
     type: "object"
     required:
@@ -8498,18 +9174,16 @@ definitions:
         description: "resource is visible in account"
         readOnly: true
         default: false
-  RDSBuildRequest:
-    type: "object"
-    required:
-    - "clusterName"
-    - "rdsConfigRequest"
-    properties:
-      rdsConfigRequest:
-        description: "rds config request"
-        $ref: "#/definitions/RdsConfig"
-      clusterName:
-        type: "string"
-        description: "requested cluster name"
+    example:
+      subnetCIDR: "subnetCIDR"
+      cloudPlatform: "cloudPlatform"
+      publicInAccount: false
+      topologyId: 0
+      name: "name"
+      description: "description"
+      id: 6
+      parameters:
+        key: "{}"
   DiskResponse:
     type: "object"
     properties:
@@ -8519,6 +9193,10 @@ definitions:
         type: "string"
       displayName:
         type: "string"
+    example:
+      displayName: "displayName"
+      name: "name"
+      type: "type"
   Id:
     type: "object"
     required:
@@ -8528,6 +9206,8 @@ definitions:
         type: "integer"
         format: "int64"
         description: "id of the resource"
+    example:
+      id: 0
   HostGroupResponse:
     type: "object"
     required:
@@ -8569,6 +9249,41 @@ definitions:
         uniqueItems: true
         items:
           $ref: "#/definitions/HostMetadata"
+    example:
+      recipes:
+      - recipeType: "PRE_AMBARI_START"
+        public: false
+        name: "name"
+        description: "description"
+        id: 0
+        uri: "uri"
+        content: "content"
+      - recipeType: "PRE_AMBARI_START"
+        public: false
+        name: "name"
+        description: "description"
+        id: 0
+        uri: "uri"
+        content: "content"
+      metadata:
+      - groupName: "groupName"
+        name: "name"
+        id: 4
+        state: "state"
+      - groupName: "groupName"
+        name: "name"
+        id: 4
+        state: "state"
+      recipeIds:
+      - 3
+      - 3
+      recoveryMode: "MANUAL"
+      name: "name"
+      constraint:
+        hostCount: 9
+        constraintTemplateName: "constraintTemplateName"
+        instanceGroupName: "instanceGroupName"
+      id: 2
   LdapConfigResponse:
     type: "object"
     required:
@@ -8644,6 +9359,51 @@ definitions:
         type: "boolean"
         description: "resource is visible in account"
         default: false
+    example:
+      adminGroup: "adminGroup"
+      groupNameAttribute: "groupNameAttribute"
+      groupMemberAttribute: "groupMemberAttribute"
+      description: "description"
+      userNameAttribute: "userNameAttribute"
+      serverPort: 5249
+      serverHost: "serverHost"
+      directoryType: "LDAP"
+      bindDn: "bindDn"
+      protocol: "protocol"
+      groupSearchBase: "groupSearchBase"
+      userSearchBase: "userSearchBase"
+      public: false
+      domain: "domain"
+      name: "name"
+      id: 6
+      userObjectClass: "userObjectClass"
+      groupObjectClass: "groupObjectClass"
+  StackDescriptor:
+    type: "object"
+    properties:
+      version:
+        type: "string"
+      minAmbari:
+        type: "string"
+      repo:
+        $ref: "#/definitions/StackRepoDetailsJson"
+      ambari:
+        $ref: "#/definitions/AmbariInfoJson"
+    example:
+      minAmbari: "minAmbari"
+      ambari:
+        repo:
+          key:
+            baseUrl: "baseUrl"
+            version: "version"
+            gpgKeyUrl: "gpgKeyUrl"
+        version: "version"
+      repo:
+        stack:
+          key: "stack"
+        util:
+          key: "util"
+      version: "version"
   HostMetadata:
     type: "object"
     required:
@@ -8663,17 +9423,11 @@ definitions:
       state:
         type: "string"
         description: "state of the host"
-  StackDescriptor:
-    type: "object"
-    properties:
-      version:
-        type: "string"
-      minAmbari:
-        type: "string"
-      repo:
-        $ref: "#/definitions/StackRepoDetailsJson"
-      ambari:
-        $ref: "#/definitions/AmbariInfoJson"
+    example:
+      groupName: "groupName"
+      name: "name"
+      id: 4
+      state: "state"
   SupportedExternalDatabaseServiceEntryResponse:
     type: "object"
     properties:
@@ -8689,6 +9443,22 @@ definitions:
         uniqueItems: true
         items:
           $ref: "#/definitions/SupportedDatabaseEntryResponse"
+    example:
+      databases:
+      - databaseName: "databaseName"
+        jdbcPrefix: "jdbcPrefix"
+        versions:
+        - "versions"
+        - "versions"
+        displayName: "displayName"
+      - databaseName: "databaseName"
+        jdbcPrefix: "jdbcPrefix"
+        versions:
+        - "versions"
+        - "versions"
+        displayName: "displayName"
+      displayName: "displayName"
+      name: "name"
   StructuredEvent:
     type: "object"
     properties:
@@ -8696,6 +9466,18 @@ definitions:
         type: "string"
       operation:
         $ref: "#/definitions/OperationDetails"
+    example:
+      type: "type"
+      operation:
+        resourceId: 0
+        eventType: "eventType"
+        cloudbreakVersion: "cloudbreakVersion"
+        userName: "userName"
+        userId: "userId"
+        account: "account"
+        resourceType: "resourceType"
+        timestamp: 6
+        cloudbreakId: "cloudbreakId"
   AccountPreferencesRequest:
     type: "object"
     required:
@@ -8745,6 +9527,19 @@ definitions:
         description: "default tags for the resources created"
         additionalProperties:
           type: "string"
+    example:
+      maxNumberOfNodesPerCluster: 0
+      userTimeToLive: 0
+      maxNumberOfClustersPerUser: 0
+      clusterTimeToLive: 0
+      allowedInstanceTypes:
+      - "allowedInstanceTypes"
+      - "allowedInstanceTypes"
+      maxNumberOfClusters: 0
+      defaultTags:
+        key: "defaultTags"
+      platforms: "platforms"
+      smartsenseEnabled: false
   VirtualMachinesResponse:
     type: "object"
     properties:
@@ -8757,6 +9552,54 @@ definitions:
       defaultVirtualMachine:
         description: "default virtual machines"
         $ref: "#/definitions/VmTypeJson"
+    example:
+      defaultVirtualMachine:
+        vmTypeMetaJson:
+          configs:
+          - volumeParameterType: "volumeParameterType"
+            minimumSize: 0
+            maximumNumber: 5
+            maximumSize: 6
+            minimumNumber: 1
+          - volumeParameterType: "volumeParameterType"
+            minimumSize: 0
+            maximumNumber: 5
+            maximumSize: 6
+            minimumNumber: 1
+          properties:
+            key: "properties"
+        value: "value"
+      virtualMachines:
+      - vmTypeMetaJson:
+          configs:
+          - volumeParameterType: "volumeParameterType"
+            minimumSize: 0
+            maximumNumber: 5
+            maximumSize: 6
+            minimumNumber: 1
+          - volumeParameterType: "volumeParameterType"
+            minimumSize: 0
+            maximumNumber: 5
+            maximumSize: 6
+            minimumNumber: 1
+          properties:
+            key: "properties"
+        value: "value"
+      - vmTypeMetaJson:
+          configs:
+          - volumeParameterType: "volumeParameterType"
+            minimumSize: 0
+            maximumNumber: 5
+            maximumSize: 6
+            minimumNumber: 1
+          - volumeParameterType: "volumeParameterType"
+            minimumSize: 0
+            maximumNumber: 5
+            maximumSize: 6
+            minimumNumber: 1
+          properties:
+            key: "properties"
+        value: "value"
   BlueprintParameter:
     type: "object"
     properties:
@@ -8766,6 +9609,10 @@ definitions:
         type: "string"
       referenceConfiguration:
         type: "string"
+    example:
+      referenceConfiguration: "referenceConfiguration"
+      name: "name"
+      description: "description"
   SecurityRuleRequest:
     type: "object"
     required:
@@ -8789,6 +9636,11 @@ definitions:
         type: "boolean"
         description: "flag for making the rule modifiable"
         default: false
+    example:
+      subnet: "subnet"
+      protocol: "protocol"
+      ports: "ports"
+      modifiable: false
   PlatformNetworksResponse:
     type: "object"
     properties:
@@ -8799,6 +9651,21 @@ definitions:
           uniqueItems: true
           items:
             $ref: "#/definitions/PlatformNetworkResponse"
+    example:
+      networks:
+        key:
+        - name: "name"
+          subnets:
+            key: "subnets"
+          id: "id"
+          properties:
+            key: "{}"
+        - name: "name"
+          subnets:
+            key: "subnets"
+          id: "id"
+          properties:
+            key: "{}"
   LDAPTestRequest:
     type: "object"
     properties:
@@ -8809,6 +9676,33 @@ definitions:
         description: "Request that contains the minimal set of fields to test LDAP\
           \ connectivity"
         $ref: "#/definitions/LdapValidationRequest"
+    example:
+      name: "name"
+      validationRequest:
+        bindDn: "bindDn"
+        protocol: "protocol"
+        bindPassword: "bindPassword"
+        serverPort: 5249
+        serverHost: "serverHost"
+  AmbariRepoDetails:
+    type: "object"
+    required:
+    - "baseUrl"
+    - "version"
+    properties:
+      version:
+        type: "string"
+        description: "version of the Ambari"
+      baseUrl:
+        type: "string"
+        description: "url of the Ambari repository"
+      gpgKeyUrl:
+        type: "string"
+        description: "gpg key of the Ambari repository"
+    example:
+      baseUrl: "baseUrl"
+      version: "version"
+      gpgKeyUrl: "gpgKeyUrl"
   TopologyRequest:
     type: "object"
     required:
@@ -8834,21 +9728,12 @@ definitions:
         description: "topology mapping"
         additionalProperties:
           type: "string"
-  AmbariRepoDetails:
-    type: "object"
-    required:
-    - "baseUrl"
-    - "version"
-    properties:
-      version:
-        type: "string"
-        description: "version of the Ambari"
-      baseUrl:
-        type: "string"
-        description: "url of the Ambari repository"
-      gpgKeyUrl:
-        type: "string"
-        description: "gpg key of the Ambari repository"
+    example:
+      cloudPlatform: "cloudPlatform"
+      nodes:
+        key: "nodes"
+      name: "name"
+      description: "description"
   CloudGatewayJson:
     type: "object"
     properties:
@@ -8861,6 +9746,11 @@ definitions:
         additionalProperties:
           type: "object"
           properties: {}
+    example:
+      name: "name"
+      id: "id"
+      properties:
+        key: "{}"
   ConfigsRequest:
     type: "object"
     required:
@@ -8872,6 +9762,14 @@ definitions:
         uniqueItems: true
         items:
           $ref: "#/definitions/BlueprintParameter"
+    example:
+      requests:
+      - referenceConfiguration: "referenceConfiguration"
+        name: "name"
+        description: "description"
+      - referenceConfiguration: "referenceConfiguration"
+        name: "name"
+        description: "description"
   ImageResponse:
     type: "object"
     properties:
@@ -8899,6 +9797,28 @@ definitions:
             type: "string"
       stackDetails:
         $ref: "#/definitions/StackDetailsJson"
+    example:
+      date: "date"
+      images:
+        key:
+          key: "images"
+      stackDetails:
+        mpacks:
+        - mpackUrl: "mpackUrl"
+        - mpackUrl: "mpackUrl"
+        repo:
+          stack:
+            key: "stack"
+          util:
+            key: "util"
+        version: "version"
+      os: "os"
+      repo:
+        key: "repo"
+      osType: "osType"
+      description: "description"
+      uuid: "uuid"
+      version: "version"
   TemplateResponse:
     type: "object"
     required:
@@ -8953,6 +9873,22 @@ definitions:
         type: "boolean"
         description: "resource is visible in account"
         default: false
+    example:
+      volumeType: "volumeType"
+      cloudPlatform: "cloudPlatform"
+      public: false
+      instanceType: "instanceType"
+      customInstanceType:
+        memory: 5
+        cpus: 9
+      topologyId: 9
+      name: "name"
+      description: "description"
+      volumeCount: 8
+      id: 6
+      parameters:
+        key: "{}"
+      volumeSize: 9
   AmbariDatabaseDetails:
     type: "object"
     required:
@@ -8995,6 +9931,13 @@ definitions:
         type: "string"
         description: "password for the Ambari database"
         pattern: "^[^']+$"
+    example:
+      password: "password"
+      port: 1
+      vendor: "POSTGRES"
+      name: "name"
+      host: "host"
+      userName: "userName"
   UserProfileRequest:
     type: "object"
     properties:
@@ -9008,21 +9951,11 @@ definitions:
         additionalProperties:
           type: "object"
           properties: {}
-  ImagesResponse:
-    type: "object"
-    properties:
-      baseImages:
-        type: "array"
-        items:
-          $ref: "#/definitions/BaseImageResponse"
-      hdpImages:
-        type: "array"
-        items:
-          $ref: "#/definitions/ImageResponse"
-      hdfImages:
-        type: "array"
-        items:
-          $ref: "#/definitions/ImageResponse"
+    example:
+      credentialId: 0
+      uiProperties:
+        key: "{}"
+      credentialName: "credentialName"
   ClusterV2Request:
     type: "object"
     properties:
@@ -9060,12 +9993,321 @@ definitions:
       sharedService:
         description: "Shared service request"
         $ref: "#/definitions/SharedService"
+    example:
+      fileSystem:
+        name: "name"
+        defaultFs: false
+        type: "WASB_INTEGRATED"
+        properties:
+          key: "properties"
+      executorType: "CONTAINER"
+      emailNeeded: false
+      proxyName: "proxyName"
+      sharedService:
+        sharedCluster: "sharedCluster"
+      ambari:
+        ambariRepoDetailsJson:
+          baseUrl: "baseUrl"
+          version: "version"
+          gpgKeyUrl: "gpgKeyUrl"
+        blueprintCustomProperties: "blueprintCustomProperties"
+        ambariSecurityMasterKey: "ambariSecurityMasterKey"
+        blueprintName: "blueprintName"
+        kerberos:
+          principal: "principal"
+          password: "password"
+          krb5Conf: "krb5Conf"
+          masterKey: "masterKey"
+          ldapUrl: "ldapUrl"
+          admin: "admin"
+          realm: "realm"
+          containerDn: "containerDn"
+          descriptor: "descriptor"
+          adminUrl: "adminUrl"
+          url: "url"
+          tcpAllowed: false
+        userName: "userName"
+        blueprintId: 2
+        connectedCluster:
+          sourceClusterName: "sourceClusterName"
+          sourceClusterId: 5
+        configStrategy: "NEVER_APPLY"
+        enableSecurity: false
+        password: "password"
+        validateBlueprint: false
+        ambariStackDetails:
+          enableGplRepo: false
+          stack: "stack"
+          os: "os"
+          stackRepoId: "stackRepoId"
+          utilsRepoId: "utilsRepoId"
+          mpackUrl: "mpackUrl"
+          version: "version"
+          stackBaseURL: "stackBaseURL"
+          versionDefinitionFileUrl: "versionDefinitionFileUrl"
+          repositoryVersion: "repositoryVersion"
+          utilsBaseURL: "utilsBaseURL"
+          mpacks:
+          - name: "name"
+          - name: "name"
+          verify: false
+        blueprintInputs:
+        - name: "name"
+          propertyValue: "propertyValue"
+        - name: "name"
+          propertyValue: "propertyValue"
+        ambariDatabaseDetails:
+          password: "password"
+          port: 1
+          vendor: "POSTGRES"
+          name: "name"
+          host: "host"
+          userName: "userName"
+        gateway:
+          path: "path"
+          topologyName: "topologyName"
+          gatewayType: "CENTRAL"
+          ssoProvider: "ssoProvider"
+          enableGateway: false
+          ssoType: "SSO_PROVIDER"
+          tokenCert: "tokenCert"
+          exposedServices:
+          - "exposedServices"
+          - "exposedServices"
+      ldapConfigName: "ldapConfigName"
+      rdsConfigNames:
+      - "rdsConfigNames"
+      - "rdsConfigNames"
+      emailTo: "emailTo"
   GeneratedBlueprintResponse:
     type: "object"
     properties:
       ambariBlueprint:
         type: "string"
         description: "ambari blueprint JSON, set this or the url field"
+    example:
+      ambariBlueprint: "ambariBlueprint"
+  ImagesResponse:
+    type: "object"
+    properties:
+      baseImages:
+        type: "array"
+        items:
+          $ref: "#/definitions/BaseImageResponse"
+      hdpImages:
+        type: "array"
+        items:
+          $ref: "#/definitions/ImageResponse"
+      hdfImages:
+        type: "array"
+        items:
+          $ref: "#/definitions/ImageResponse"
+    example:
+      hdpImages:
+      - date: "date"
+        images:
+          key:
+            key: "images"
+        stackDetails:
+          mpacks:
+          - mpackUrl: "mpackUrl"
+          - mpackUrl: "mpackUrl"
+          repo:
+            stack:
+              key: "stack"
+            util:
+              key: "util"
+          version: "version"
+        os: "os"
+        repo:
+          key: "repo"
+        osType: "osType"
+        description: "description"
+        uuid: "uuid"
+        version: "version"
+      - date: "date"
+        images:
+          key:
+            key: "images"
+        stackDetails:
+          mpacks:
+          - mpackUrl: "mpackUrl"
+          - mpackUrl: "mpackUrl"
+          repo:
+            stack:
+              key: "stack"
+            util:
+              key: "util"
+          version: "version"
+        os: "os"
+        repo:
+          key: "repo"
+        osType: "osType"
+        description: "description"
+        uuid: "uuid"
+        version: "version"
+      baseImages:
+      - hdpStacks:
+        - mpacks:
+          - mpackUrl: "mpackUrl"
+          - mpackUrl: "mpackUrl"
+          repo:
+            stack:
+              key: "stack"
+            util:
+              key: "util"
+          version: "version"
+        - mpacks:
+          - mpackUrl: "mpackUrl"
+          - mpackUrl: "mpackUrl"
+          repo:
+            stack:
+              key: "stack"
+            util:
+              key: "util"
+          version: "version"
+        date: "date"
+        images:
+          key:
+            key: "images"
+        stackDetails:
+          mpacks:
+          - mpackUrl: "mpackUrl"
+          - mpackUrl: "mpackUrl"
+          repo:
+            stack:
+              key: "stack"
+            util:
+              key: "util"
+          version: "version"
+        os: "os"
+        hdfStacks:
+        - mpacks:
+          - mpackUrl: "mpackUrl"
+          - mpackUrl: "mpackUrl"
+          repo:
+            stack:
+              key: "stack"
+            util:
+              key: "util"
+          version: "version"
+        - mpacks:
+          - mpackUrl: "mpackUrl"
+          - mpackUrl: "mpackUrl"
+          repo:
+            stack:
+              key: "stack"
+            util:
+              key: "util"
+          version: "version"
+        repo:
+          key: "repo"
+        osType: "osType"
+        description: "description"
+        uuid: "uuid"
+        version: "version"
+      - hdpStacks:
+        - mpacks:
+          - mpackUrl: "mpackUrl"
+          - mpackUrl: "mpackUrl"
+          repo:
+            stack:
+              key: "stack"
+            util:
+              key: "util"
+          version: "version"
+        - mpacks:
+          - mpackUrl: "mpackUrl"
+          - mpackUrl: "mpackUrl"
+          repo:
+            stack:
+              key: "stack"
+            util:
+              key: "util"
+          version: "version"
+        date: "date"
+        images:
+          key:
+            key: "images"
+        stackDetails:
+          mpacks:
+          - mpackUrl: "mpackUrl"
+          - mpackUrl: "mpackUrl"
+          repo:
+            stack:
+              key: "stack"
+            util:
+              key: "util"
+          version: "version"
+        os: "os"
+        hdfStacks:
+        - mpacks:
+          - mpackUrl: "mpackUrl"
+          - mpackUrl: "mpackUrl"
+          repo:
+            stack:
+              key: "stack"
+            util:
+              key: "util"
+          version: "version"
+        - mpacks:
+          - mpackUrl: "mpackUrl"
+          - mpackUrl: "mpackUrl"
+          repo:
+            stack:
+              key: "stack"
+            util:
+              key: "util"
+          version: "version"
+        repo:
+          key: "repo"
+        osType: "osType"
+        description: "description"
+        uuid: "uuid"
+        version: "version"
+      hdfImages:
+      - date: "date"
+        images:
+          key:
+            key: "images"
+        stackDetails:
+          mpacks:
+          - mpackUrl: "mpackUrl"
+          - mpackUrl: "mpackUrl"
+          repo:
+            stack:
+              key: "stack"
+            util:
+              key: "util"
+          version: "version"
+        os: "os"
+        repo:
+          key: "repo"
+        osType: "osType"
+        description: "description"
+        uuid: "uuid"
+        version: "version"
+      - date: "date"
+        images:
+          key:
+            key: "images"
+        stackDetails:
+          mpacks:
+          - mpackUrl: "mpackUrl"
+          - mpackUrl: "mpackUrl"
+          repo:
+            stack:
+              key: "stack"
+            util:
+              key: "util"
+          version: "version"
+        os: "os"
+        repo:
+          key: "repo"
+        osType: "osType"
+        description: "description"
+        uuid: "uuid"
+        version: "version"
   GatewayJson:
     type: "object"
     properties:
@@ -9103,6 +10345,17 @@ definitions:
         - "SSO_PROVIDER"
         - "SSO_CONSUMER"
         - "NONE"
+    example:
+      path: "path"
+      topologyName: "topologyName"
+      gatewayType: "CENTRAL"
+      ssoProvider: "ssoProvider"
+      enableGateway: false
+      ssoType: "SSO_PROVIDER"
+      tokenCert: "tokenCert"
+      exposedServices:
+      - "exposedServices"
+      - "exposedServices"
   AutoscaleClusterResponse:
     type: "object"
     properties:
@@ -9270,6 +10523,223 @@ definitions:
       password:
         type: "string"
         description: "ambari password"
+    example:
+      cluster: "cluster"
+      ambariRepoDetailsJson:
+        baseUrl: "baseUrl"
+        version: "version"
+        gpgKeyUrl: "gpgKeyUrl"
+      hostGroups:
+      - recipes:
+        - recipeType: "PRE_AMBARI_START"
+          public: false
+          name: "name"
+          description: "description"
+          id: 0
+          uri: "uri"
+          content: "content"
+        - recipeType: "PRE_AMBARI_START"
+          public: false
+          name: "name"
+          description: "description"
+          id: 0
+          uri: "uri"
+          content: "content"
+        metadata:
+        - groupName: "groupName"
+          name: "name"
+          id: 4
+          state: "state"
+        - groupName: "groupName"
+          name: "name"
+          id: 4
+          state: "state"
+        recipeIds:
+        - 3
+        - 3
+        recoveryMode: "MANUAL"
+        name: "name"
+        constraint:
+          hostCount: 9
+          constraintTemplateName: "constraintTemplateName"
+          instanceGroupName: "instanceGroupName"
+        id: 2
+      - recipes:
+        - recipeType: "PRE_AMBARI_START"
+          public: false
+          name: "name"
+          description: "description"
+          id: 0
+          uri: "uri"
+          content: "content"
+        - recipeType: "PRE_AMBARI_START"
+          public: false
+          name: "name"
+          description: "description"
+          id: 0
+          uri: "uri"
+          content: "content"
+        metadata:
+        - groupName: "groupName"
+          name: "name"
+          id: 4
+          state: "state"
+        - groupName: "groupName"
+          name: "name"
+          id: 4
+          state: "state"
+        recipeIds:
+        - 3
+        - 3
+        recoveryMode: "MANUAL"
+        name: "name"
+        constraint:
+          hostCount: 9
+          constraintTemplateName: "constraintTemplateName"
+          instanceGroupName: "instanceGroupName"
+        id: 2
+      ambariServerIp: "ambariServerIp"
+      ambariServerUrl: "ambariServerUrl"
+      proxyName: "proxyName"
+      description: "description"
+      secure: false
+      configStrategy: "NEVER_APPLY"
+      hoursUp: 6
+      serviceEndPoints:
+        key: "serviceEndPoints"
+      password: "password"
+      statusReason: "statusReason"
+      ambariStackDetails:
+        enableGplRepo: false
+        stack:
+          key: "stack"
+        util:
+          key: "util"
+        mpacks:
+        - name: "name"
+        - name: "name"
+        hdpVersion: "hdpVersion"
+        verify: false
+      ldapConfigId: 2
+      blueprintInputs:
+      - name: "name"
+        propertyValue: "propertyValue"
+      - name: "name"
+        propertyValue: "propertyValue"
+      ambariDatabaseDetails:
+        password: "password"
+        port: 1
+        vendor: "POSTGRES"
+        name: "name"
+        host: "host"
+        userName: "userName"
+      id: 0
+      blueprintCustomProperties: "blueprintCustomProperties"
+      executorType: "CONTAINER"
+      extendedBlueprintText: "extendedBlueprintText"
+      customQueue: "customQueue"
+      userName: "userName"
+      blueprintId: 5
+      ldapConfig:
+        adminGroup: "adminGroup"
+        groupNameAttribute: "groupNameAttribute"
+        groupMemberAttribute: "groupMemberAttribute"
+        description: "description"
+        userNameAttribute: "userNameAttribute"
+        serverPort: 5249
+        serverHost: "serverHost"
+        directoryType: "LDAP"
+        bindDn: "bindDn"
+        protocol: "protocol"
+        groupSearchBase: "groupSearchBase"
+        userSearchBase: "userSearchBase"
+        public: false
+        domain: "domain"
+        name: "name"
+        id: 6
+        userObjectClass: "userObjectClass"
+        groupObjectClass: "groupObjectClass"
+      uptime: 9
+      blueprint:
+        public: false
+        ambariBlueprint: "ambariBlueprint"
+        inputs:
+        - referenceConfiguration: "referenceConfiguration"
+          name: "name"
+          description: "description"
+        - referenceConfiguration: "referenceConfiguration"
+          name: "name"
+          description: "description"
+        hostGroupCount: 6
+        name: "name"
+        description: "description"
+        id: 0
+        tags:
+          key: "{}"
+        status: "DEFAULT"
+      rdsConfigs:
+      - connectionDriver: "connectionDriver"
+        databaseEngineDisplayName: "databaseEngineDisplayName"
+        clusterNames:
+        - "clusterNames"
+        - "clusterNames"
+        connectorJarUrl: "connectorJarUrl"
+        publicInAccount: false
+        stackVersion: "stackVersion"
+        name: "name"
+        connectionURL: "connectionURL"
+        id: 0
+        type: "type"
+        creationDate: 6
+        databaseEngine: "databaseEngine"
+      - connectionDriver: "connectionDriver"
+        databaseEngineDisplayName: "databaseEngineDisplayName"
+        clusterNames:
+        - "clusterNames"
+        - "clusterNames"
+        connectorJarUrl: "connectorJarUrl"
+        publicInAccount: false
+        stackVersion: "stackVersion"
+        name: "name"
+        connectionURL: "connectionURL"
+        id: 0
+        type: "type"
+        creationDate: 6
+        databaseEngine: "databaseEngine"
+      customContainers:
+        definitions:
+          key: "definitions"
+      creationFinished: 7
+      kerberosResponse:
+        krb5Conf: "krb5Conf"
+        ldapUrl: "ldapUrl"
+        admin: "admin"
+        realm: "realm"
+        containerDn: "containerDn"
+        descriptor: "descriptor"
+        adminUrl: "adminUrl"
+        type: "CB_MANAGED"
+        url: "url"
+        tcpAllowed: false
+      name: "name"
+      attributes:
+        key: "{}"
+      rdsConfigIds:
+      - 5
+      - 5
+      gateway:
+        path: "path"
+        topologyName: "topologyName"
+        gatewayType: "CENTRAL"
+        ssoProvider: "ssoProvider"
+        enableGateway: false
+        ssoType: "SSO_PROVIDER"
+        tokenCert: "tokenCert"
+        exposedServices:
+        - "exposedServices"
+        - "exposedServices"
+      status: "REQUESTED"
+      minutesUp: 1
   ClusterResponse:
     type: "object"
     properties:
@@ -9434,6 +10904,222 @@ definitions:
       extendedBlueprintText:
         type: "string"
         description: "ambari blueprint JSON, set this or the url field"
+    example:
+      cluster: "cluster"
+      ambariRepoDetailsJson:
+        baseUrl: "baseUrl"
+        version: "version"
+        gpgKeyUrl: "gpgKeyUrl"
+      hostGroups:
+      - recipes:
+        - recipeType: "PRE_AMBARI_START"
+          public: false
+          name: "name"
+          description: "description"
+          id: 0
+          uri: "uri"
+          content: "content"
+        - recipeType: "PRE_AMBARI_START"
+          public: false
+          name: "name"
+          description: "description"
+          id: 0
+          uri: "uri"
+          content: "content"
+        metadata:
+        - groupName: "groupName"
+          name: "name"
+          id: 4
+          state: "state"
+        - groupName: "groupName"
+          name: "name"
+          id: 4
+          state: "state"
+        recipeIds:
+        - 3
+        - 3
+        recoveryMode: "MANUAL"
+        name: "name"
+        constraint:
+          hostCount: 9
+          constraintTemplateName: "constraintTemplateName"
+          instanceGroupName: "instanceGroupName"
+        id: 2
+      - recipes:
+        - recipeType: "PRE_AMBARI_START"
+          public: false
+          name: "name"
+          description: "description"
+          id: 0
+          uri: "uri"
+          content: "content"
+        - recipeType: "PRE_AMBARI_START"
+          public: false
+          name: "name"
+          description: "description"
+          id: 0
+          uri: "uri"
+          content: "content"
+        metadata:
+        - groupName: "groupName"
+          name: "name"
+          id: 4
+          state: "state"
+        - groupName: "groupName"
+          name: "name"
+          id: 4
+          state: "state"
+        recipeIds:
+        - 3
+        - 3
+        recoveryMode: "MANUAL"
+        name: "name"
+        constraint:
+          hostCount: 9
+          constraintTemplateName: "constraintTemplateName"
+          instanceGroupName: "instanceGroupName"
+        id: 2
+      ambariServerIp: "ambariServerIp"
+      ambariServerUrl: "ambariServerUrl"
+      proxyName: "proxyName"
+      description: "description"
+      secure: false
+      configStrategy: "NEVER_APPLY"
+      hoursUp: 5
+      serviceEndPoints:
+        key: "serviceEndPoints"
+      statusReason: "statusReason"
+      ambariStackDetails:
+        enableGplRepo: false
+        stack:
+          key: "stack"
+        util:
+          key: "util"
+        mpacks:
+        - name: "name"
+        - name: "name"
+        hdpVersion: "hdpVersion"
+        verify: false
+      ldapConfigId: 1
+      blueprintInputs:
+      - name: "name"
+        propertyValue: "propertyValue"
+      - name: "name"
+        propertyValue: "propertyValue"
+      ambariDatabaseDetails:
+        password: "password"
+        port: 1
+        vendor: "POSTGRES"
+        name: "name"
+        host: "host"
+        userName: "userName"
+      id: 5
+      blueprintCustomProperties: "blueprintCustomProperties"
+      executorType: "CONTAINER"
+      extendedBlueprintText: "extendedBlueprintText"
+      customQueue: "customQueue"
+      userName: "userName"
+      blueprintId: 7
+      ldapConfig:
+        adminGroup: "adminGroup"
+        groupNameAttribute: "groupNameAttribute"
+        groupMemberAttribute: "groupMemberAttribute"
+        description: "description"
+        userNameAttribute: "userNameAttribute"
+        serverPort: 5249
+        serverHost: "serverHost"
+        directoryType: "LDAP"
+        bindDn: "bindDn"
+        protocol: "protocol"
+        groupSearchBase: "groupSearchBase"
+        userSearchBase: "userSearchBase"
+        public: false
+        domain: "domain"
+        name: "name"
+        id: 6
+        userObjectClass: "userObjectClass"
+        groupObjectClass: "groupObjectClass"
+      uptime: 6
+      blueprint:
+        public: false
+        ambariBlueprint: "ambariBlueprint"
+        inputs:
+        - referenceConfiguration: "referenceConfiguration"
+          name: "name"
+          description: "description"
+        - referenceConfiguration: "referenceConfiguration"
+          name: "name"
+          description: "description"
+        hostGroupCount: 6
+        name: "name"
+        description: "description"
+        id: 0
+        tags:
+          key: "{}"
+        status: "DEFAULT"
+      rdsConfigs:
+      - connectionDriver: "connectionDriver"
+        databaseEngineDisplayName: "databaseEngineDisplayName"
+        clusterNames:
+        - "clusterNames"
+        - "clusterNames"
+        connectorJarUrl: "connectorJarUrl"
+        publicInAccount: false
+        stackVersion: "stackVersion"
+        name: "name"
+        connectionURL: "connectionURL"
+        id: 0
+        type: "type"
+        creationDate: 6
+        databaseEngine: "databaseEngine"
+      - connectionDriver: "connectionDriver"
+        databaseEngineDisplayName: "databaseEngineDisplayName"
+        clusterNames:
+        - "clusterNames"
+        - "clusterNames"
+        connectorJarUrl: "connectorJarUrl"
+        publicInAccount: false
+        stackVersion: "stackVersion"
+        name: "name"
+        connectionURL: "connectionURL"
+        id: 0
+        type: "type"
+        creationDate: 6
+        databaseEngine: "databaseEngine"
+      customContainers:
+        definitions:
+          key: "definitions"
+      creationFinished: 1
+      kerberosResponse:
+        krb5Conf: "krb5Conf"
+        ldapUrl: "ldapUrl"
+        admin: "admin"
+        realm: "realm"
+        containerDn: "containerDn"
+        descriptor: "descriptor"
+        adminUrl: "adminUrl"
+        type: "CB_MANAGED"
+        url: "url"
+        tcpAllowed: false
+      name: "name"
+      attributes:
+        key: "{}"
+      rdsConfigIds:
+      - 7
+      - 7
+      gateway:
+        path: "path"
+        topologyName: "topologyName"
+        gatewayType: "CENTRAL"
+        ssoProvider: "ssoProvider"
+        enableGateway: false
+        ssoType: "SSO_PROVIDER"
+        tokenCert: "tokenCert"
+        exposedServices:
+        - "exposedServices"
+        - "exposedServices"
+      status: "REQUESTED"
+      minutesUp: 2
   VmTypeJson:
     type: "object"
     properties:
@@ -9441,6 +11127,22 @@ definitions:
         type: "string"
       vmTypeMetaJson:
         $ref: "#/definitions/VmTypeMetaJson"
+    example:
+      vmTypeMetaJson:
+        configs:
+        - volumeParameterType: "volumeParameterType"
+          minimumSize: 0
+          maximumNumber: 5
+          maximumSize: 6
+          minimumNumber: 1
+        - volumeParameterType: "volumeParameterType"
+          minimumSize: 0
+          maximumNumber: 5
+          maximumSize: 6
+          minimumNumber: 1
+        properties:
+          key: "properties"
+      value: "value"
   PlatformSecurityGroupsResponse:
     type: "object"
     properties:
@@ -9451,6 +11153,17 @@ definitions:
           uniqueItems: true
           items:
             $ref: "#/definitions/PlatformSecurityGroupResponse"
+    example:
+      securityGroups:
+        key:
+        - groupName: "groupName"
+          groupId: "groupId"
+          properties:
+            key: "{}"
+        - groupName: "groupName"
+          groupId: "groupId"
+          properties:
+            key: "{}"
   ManagementPackResponse:
     type: "object"
     required:
@@ -9493,6 +11206,17 @@ definitions:
         type: "boolean"
         description: "resource is visible in account"
         default: false
+    example:
+      public: false
+      name: "name"
+      description: "description"
+      purge: false
+      force: false
+      id: 0
+      mpackUrl: "mpackUrl"
+      purgeList:
+      - "purgeList"
+      - "purgeList"
   PlatformOrchestratorsJson:
     type: "object"
     properties:
@@ -9508,6 +11232,13 @@ definitions:
         description: "default orchestrators"
         additionalProperties:
           type: "string"
+    example:
+      defaults:
+        key: "defaults"
+      orchestrators:
+        key:
+        - "orchestrators"
+        - "orchestrators"
   SupportedDatabaseEntryResponse:
     type: "object"
     properties:
@@ -9526,6 +11257,13 @@ definitions:
         uniqueItems: true
         items:
           type: "string"
+    example:
+      databaseName: "databaseName"
+      jdbcPrefix: "jdbcPrefix"
+      versions:
+      - "versions"
+      - "versions"
+      displayName: "displayName"
   FailurePolicyResponse:
     type: "object"
     required:
@@ -9546,6 +11284,10 @@ definitions:
         type: "integer"
         format: "int64"
         description: "id of the resource"
+    example:
+      adjustmentType: "EXACT"
+      threshold: 6
+      id: 1
   RecommendationResponse:
     type: "object"
     properties:
@@ -9563,6 +11305,62 @@ definitions:
         uniqueItems: true
         items:
           $ref: "#/definitions/DiskResponse"
+    example:
+      diskResponses:
+      - displayName: "displayName"
+        name: "name"
+        type: "type"
+      - displayName: "displayName"
+        name: "name"
+        type: "type"
+      virtualMachines:
+      - vmTypeMetaJson:
+          configs:
+          - volumeParameterType: "volumeParameterType"
+            minimumSize: 0
+            maximumNumber: 5
+            maximumSize: 6
+            minimumNumber: 1
+          - volumeParameterType: "volumeParameterType"
+            minimumSize: 0
+            maximumNumber: 5
+            maximumSize: 6
+            minimumNumber: 1
+          properties:
+            key: "properties"
+        value: "value"
+      - vmTypeMetaJson:
+          configs:
+          - volumeParameterType: "volumeParameterType"
+            minimumSize: 0
+            maximumNumber: 5
+            maximumSize: 6
+            minimumNumber: 1
+          - volumeParameterType: "volumeParameterType"
+            minimumSize: 0
+            maximumNumber: 5
+            maximumSize: 6
+            minimumNumber: 1
+          properties:
+            key: "properties"
+        value: "value"
+      recommendations:
+        key:
+          vmTypeMetaJson:
+            configs:
+            - volumeParameterType: "volumeParameterType"
+              minimumSize: 0
+              maximumNumber: 5
+              maximumSize: 6
+              minimumNumber: 1
+            - volumeParameterType: "volumeParameterType"
+              minimumSize: 0
+              maximumNumber: 5
+              maximumSize: 6
+              minimumNumber: 1
+            properties:
+              key: "properties"
+          value: "value"
   BlueprintRequest:
     type: "object"
     required:
@@ -9606,18 +11404,25 @@ definitions:
             type: "object"
             additionalProperties:
               type: "string"
-  NetworkV2Request:
-    type: "object"
-    properties:
-      subnetCIDR:
-        type: "string"
-        description: "the subnet definition of the network in CIDR format"
-      parameters:
-        type: "object"
-        description: "provider specific parameters of the specified network"
-        additionalProperties:
-          type: "object"
-          properties: {}
+    example:
+      ambariBlueprint: "ambariBlueprint"
+      inputs:
+      - referenceConfiguration: "referenceConfiguration"
+        name: "name"
+        description: "description"
+      - referenceConfiguration: "referenceConfiguration"
+        name: "name"
+        description: "description"
+      name: "name"
+      description: "description"
+      url: "url"
+      properties:
+      - key:
+          key: "properties"
+      - key:
+          key: "properties"
+      tags:
+        key: "{}"
   AmbariAddress:
     type: "object"
     required:
@@ -9626,6 +11431,8 @@ definitions:
       ambariAddress:
         type: "string"
         description: "ambari server address"
+    example:
+      ambariAddress: "ambariAddress"
   SecurityRulesResponse:
     type: "object"
     properties:
@@ -9639,6 +11446,45 @@ definitions:
         description: "security rules for gateway type"
         items:
           $ref: "#/definitions/SecurityRuleResponse"
+    example:
+      core:
+      - subnet: "subnet"
+        protocol: "protocol"
+        id: 6
+        ports: "ports"
+        modifiable: false
+      - subnet: "subnet"
+        protocol: "protocol"
+        id: 6
+        ports: "ports"
+        modifiable: false
+      gateway:
+      - subnet: "subnet"
+        protocol: "protocol"
+        id: 6
+        ports: "ports"
+        modifiable: false
+      - subnet: "subnet"
+        protocol: "protocol"
+        id: 6
+        ports: "ports"
+        modifiable: false
+  NetworkV2Request:
+    type: "object"
+    properties:
+      subnetCIDR:
+        type: "string"
+        description: "the subnet definition of the network in CIDR format"
+      parameters:
+        type: "object"
+        description: "provider specific parameters of the specified network"
+        additionalProperties:
+          type: "object"
+          properties: {}
+    example:
+      subnetCIDR: "subnetCIDR"
+      parameters:
+        key: "{}"
   AmbariV2Request:
     type: "object"
     required:
@@ -9711,6 +11557,75 @@ definitions:
         description: "a master key for encrypting the passwords in Ambari"
         minLength: 5
         maxLength: 100
+    example:
+      ambariRepoDetailsJson:
+        baseUrl: "baseUrl"
+        version: "version"
+        gpgKeyUrl: "gpgKeyUrl"
+      blueprintCustomProperties: "blueprintCustomProperties"
+      ambariSecurityMasterKey: "ambariSecurityMasterKey"
+      blueprintName: "blueprintName"
+      kerberos:
+        principal: "principal"
+        password: "password"
+        krb5Conf: "krb5Conf"
+        masterKey: "masterKey"
+        ldapUrl: "ldapUrl"
+        admin: "admin"
+        realm: "realm"
+        containerDn: "containerDn"
+        descriptor: "descriptor"
+        adminUrl: "adminUrl"
+        url: "url"
+        tcpAllowed: false
+      userName: "userName"
+      blueprintId: 2
+      connectedCluster:
+        sourceClusterName: "sourceClusterName"
+        sourceClusterId: 5
+      configStrategy: "NEVER_APPLY"
+      enableSecurity: false
+      password: "password"
+      validateBlueprint: false
+      ambariStackDetails:
+        enableGplRepo: false
+        stack: "stack"
+        os: "os"
+        stackRepoId: "stackRepoId"
+        utilsRepoId: "utilsRepoId"
+        mpackUrl: "mpackUrl"
+        version: "version"
+        stackBaseURL: "stackBaseURL"
+        versionDefinitionFileUrl: "versionDefinitionFileUrl"
+        repositoryVersion: "repositoryVersion"
+        utilsBaseURL: "utilsBaseURL"
+        mpacks:
+        - name: "name"
+        - name: "name"
+        verify: false
+      blueprintInputs:
+      - name: "name"
+        propertyValue: "propertyValue"
+      - name: "name"
+        propertyValue: "propertyValue"
+      ambariDatabaseDetails:
+        password: "password"
+        port: 1
+        vendor: "POSTGRES"
+        name: "name"
+        host: "host"
+        userName: "userName"
+      gateway:
+        path: "path"
+        topologyName: "topologyName"
+        gatewayType: "CENTRAL"
+        ssoProvider: "ssoProvider"
+        enableGateway: false
+        ssoType: "SSO_PROVIDER"
+        tokenCert: "tokenCert"
+        exposedServices:
+        - "exposedServices"
+        - "exposedServices"
   AmbariStackDetailsResponse:
     type: "object"
     properties:
@@ -9734,6 +11649,17 @@ definitions:
         default: false
       hdpVersion:
         type: "string"
+    example:
+      enableGplRepo: false
+      stack:
+        key: "stack"
+      util:
+        key: "util"
+      mpacks:
+      - name: "name"
+      - name: "name"
+      hdpVersion: "hdpVersion"
+      verify: false
   Constraint:
     type: "object"
     required:
@@ -9750,12 +11676,18 @@ definitions:
         type: "integer"
         format: "int32"
         description: "number of hosts in the hostgroup"
+    example:
+      hostCount: 9
+      constraintTemplateName: "constraintTemplateName"
+      instanceGroupName: "instanceGroupName"
   CloudbreakDetailsJson:
     type: "object"
     properties:
       version:
         type: "string"
         description: "version of the Cloudbreak that provisioned the stack"
+    example:
+      version: "version"
   HostGroupRequest:
     type: "object"
     required:
@@ -9793,6 +11725,30 @@ definitions:
         uniqueItems: true
         items:
           type: "string"
+    example:
+      recipes:
+      - recipeType: "PRE_AMBARI_START"
+        name: "name"
+        description: "description"
+        uri: "uri"
+        content: "content"
+      - recipeType: "PRE_AMBARI_START"
+        name: "name"
+        description: "description"
+        uri: "uri"
+        content: "content"
+      recipeIds:
+      - 0
+      - 0
+      recipeNames:
+      - "recipeNames"
+      - "recipeNames"
+      recoveryMode: "MANUAL"
+      name: "name"
+      constraint:
+        hostCount: 9
+        constraintTemplateName: "constraintTemplateName"
+        instanceGroupName: "instanceGroupName"
   UpdateStack:
     type: "object"
     properties:
@@ -9812,6 +11768,12 @@ definitions:
       instanceGroupAdjustment:
         description: "instance group adjustment"
         $ref: "#/definitions/InstanceGroupAdjustment"
+    example:
+      instanceGroupAdjustment:
+        scalingAdjustment: 0
+        instanceGroup: "instanceGroup"
+      withClusterEvent: false
+      status: "SYNC"
   PlatformVariantsJson:
     type: "object"
     properties:
@@ -9827,21 +11789,13 @@ definitions:
         description: "default variants"
         additionalProperties:
           type: "string"
-  SpecialParametersJson:
-    type: "object"
-    properties:
-      specialParameters:
-        type: "object"
-        description: "custom parameters"
-        additionalProperties:
-          type: "boolean"
-      platformSpecificSpecialParameters:
-        type: "object"
-        description: "platform specific custom parameters"
-        additionalProperties:
-          type: "object"
-          additionalProperties:
-            type: "boolean"
+    example:
+      platformToVariants:
+        key:
+        - "platformToVariants"
+        - "platformToVariants"
+      defaultVariants:
+        key: "defaultVariants"
   HostGroupAdjustment:
     type: "object"
     required:
@@ -9863,6 +11817,32 @@ definitions:
         type: "boolean"
         description: "validate node count during downscale"
         default: false
+    example:
+      withStackUpdate: false
+      scalingAdjustment: 0
+      hostGroup: "hostGroup"
+      validateNodeCount: false
+  SpecialParametersJson:
+    type: "object"
+    properties:
+      specialParameters:
+        type: "object"
+        description: "custom parameters"
+        additionalProperties:
+          type: "boolean"
+      platformSpecificSpecialParameters:
+        type: "object"
+        description: "platform specific custom parameters"
+        additionalProperties:
+          type: "object"
+          additionalProperties:
+            type: "boolean"
+    example:
+      platformSpecificSpecialParameters:
+        key:
+          key: true
+      specialParameters:
+        key: true
   OperationDetails:
     type: "object"
     properties:
@@ -9886,6 +11866,16 @@ definitions:
         type: "string"
       cloudbreakVersion:
         type: "string"
+    example:
+      resourceId: 0
+      eventType: "eventType"
+      cloudbreakVersion: "cloudbreakVersion"
+      userName: "userName"
+      userId: "userId"
+      account: "account"
+      resourceType: "resourceType"
+      timestamp: 6
+      cloudbreakId: "cloudbreakId"
   KerberosResponse:
     type: "object"
     properties:
@@ -9920,6 +11910,17 @@ definitions:
         - "EXISTING_AD"
         - "EXISTING_MIT"
         - "CUSTOM"
+    example:
+      krb5Conf: "krb5Conf"
+      ldapUrl: "ldapUrl"
+      admin: "admin"
+      realm: "realm"
+      containerDn: "containerDn"
+      descriptor: "descriptor"
+      adminUrl: "adminUrl"
+      type: "CB_MANAGED"
+      url: "url"
+      tcpAllowed: false
   VmTypeMetaJson:
     type: "object"
     properties:
@@ -9931,6 +11932,20 @@ definitions:
         type: "object"
         additionalProperties:
           type: "string"
+    example:
+      configs:
+      - volumeParameterType: "volumeParameterType"
+        minimumSize: 0
+        maximumNumber: 5
+        maximumSize: 6
+        minimumNumber: 1
+      - volumeParameterType: "volumeParameterType"
+        minimumSize: 0
+        maximumNumber: 5
+        maximumSize: 6
+        minimumNumber: 1
+      properties:
+        key: "properties"
   SecurityGroupV2Request:
     type: "object"
     properties:
@@ -9942,28 +11957,17 @@ definitions:
         description: "list of security rules that relates to the security group"
         items:
           $ref: "#/definitions/SecurityRuleRequest"
-  RepoConfigValidationRequest:
-    type: "object"
-    properties:
-      ambariBaseUrl:
-        type: "string"
-        description: "url of the Ambari repository"
-      ambariGpgKeyUrl:
-        type: "string"
-        description: "gpg key of the Ambari repository"
-      stackBaseURL:
-        type: "string"
-        description: "url of the stack repository"
-      utilsBaseURL:
-        type: "string"
-        description: "url of the stack utils repository"
-      versionDefinitionFileUrl:
-        type: "string"
-        description: "local path on the Ambari server or URL that point to the desired\
-          \ VDF file"
-      mpackUrl:
-        type: "string"
-        description: "url the MPACK that needs to be installed before HDF installation"
+    example:
+      securityGroupId: "securityGroupId"
+      securityRules:
+      - subnet: "subnet"
+        protocol: "protocol"
+        ports: "ports"
+        modifiable: false
+      - subnet: "subnet"
+        protocol: "protocol"
+        ports: "ports"
+        modifiable: false
   FileSystem:
     type: "object"
     required:
@@ -9990,6 +11994,41 @@ definitions:
         description: "configuration of the filesystem access as key-value pairs"
         additionalProperties:
           type: "string"
+    example:
+      name: "name"
+      defaultFs: false
+      type: "WASB_INTEGRATED"
+      properties:
+        key: "properties"
+  RepoConfigValidationRequest:
+    type: "object"
+    properties:
+      ambariBaseUrl:
+        type: "string"
+        description: "url of the Ambari repository"
+      ambariGpgKeyUrl:
+        type: "string"
+        description: "gpg key of the Ambari repository"
+      stackBaseURL:
+        type: "string"
+        description: "url of the stack repository"
+      utilsBaseURL:
+        type: "string"
+        description: "url of the stack utils repository"
+      versionDefinitionFileUrl:
+        type: "string"
+        description: "local path on the Ambari server or URL that point to the desired\
+          \ VDF file"
+      mpackUrl:
+        type: "string"
+        description: "url the MPACK that needs to be installed before HDF installation"
+    example:
+      utilsBaseURL: "utilsBaseURL"
+      ambariGpgKeyUrl: "ambariGpgKeyUrl"
+      mpackUrl: "mpackUrl"
+      stackBaseURL: "stackBaseURL"
+      versionDefinitionFileUrl: "versionDefinitionFileUrl"
+      ambariBaseUrl: "ambariBaseUrl"
   TemplateV2Request:
     type: "object"
     properties:
@@ -10016,6 +12055,32 @@ definitions:
       customInstanceType:
         description: "custom instancetype definition"
         $ref: "#/definitions/CustomInstanceType"
+    example:
+      volumeType: "volumeType"
+      instanceType: "instanceType"
+      customInstanceType:
+        memory: 5
+        cpus: 9
+      volumeCount: 6
+      parameters:
+        key: "{}"
+      volumeSize: 1
+  StackAuthenticationResponse:
+    type: "object"
+    properties:
+      publicKey:
+        type: "string"
+        description: "public key for accessing instances"
+      publicKeyId:
+        type: "string"
+        description: "public key id for accessing instances"
+      loginUserName:
+        type: "string"
+        description: "authentication name for machines"
+    example:
+      loginUserName: "loginUserName"
+      publicKey: "publicKey"
+      publicKeyId: "publicKeyId"
   TopologyResponse:
     type: "object"
     required:
@@ -10045,18 +12110,13 @@ definitions:
         type: "integer"
         format: "int64"
         description: "id of the resource"
-  StackAuthenticationResponse:
-    type: "object"
-    properties:
-      publicKey:
-        type: "string"
-        description: "public key for accessing instances"
-      publicKeyId:
-        type: "string"
-        description: "public key id for accessing instances"
-      loginUserName:
-        type: "string"
-        description: "authentication name for machines"
+    example:
+      cloudPlatform: "cloudPlatform"
+      nodes:
+        key: "nodes"
+      name: "name"
+      description: "description"
+      id: 0
   PlatformVmtypesResponse:
     type: "object"
     properties:
@@ -10064,6 +12124,56 @@ definitions:
         type: "object"
         additionalProperties:
           $ref: "#/definitions/VirtualMachinesResponse"
+    example:
+      vmTypes:
+        key:
+          defaultVirtualMachine:
+            vmTypeMetaJson:
+              configs:
+              - volumeParameterType: "volumeParameterType"
+                minimumSize: 0
+                maximumNumber: 5
+                maximumSize: 6
+                minimumNumber: 1
+              - volumeParameterType: "volumeParameterType"
+                minimumSize: 0
+                maximumNumber: 5
+                maximumSize: 6
+                minimumNumber: 1
+              properties:
+                key: "properties"
+            value: "value"
+          virtualMachines:
+          - vmTypeMetaJson:
+              configs:
+              - volumeParameterType: "volumeParameterType"
+                minimumSize: 0
+                maximumNumber: 5
+                maximumSize: 6
+                minimumNumber: 1
+              - volumeParameterType: "volumeParameterType"
+                minimumSize: 0
+                maximumNumber: 5
+                maximumSize: 6
+                minimumNumber: 1
+              properties:
+                key: "properties"
+            value: "value"
+          - vmTypeMetaJson:
+              configs:
+              - volumeParameterType: "volumeParameterType"
+                minimumSize: 0
+                maximumNumber: 5
+                maximumSize: 6
+                minimumNumber: 1
+              - volumeParameterType: "volumeParameterType"
+                minimumSize: 0
+                maximumNumber: 5
+                maximumSize: 6
+                minimumNumber: 1
+              properties:
+                key: "properties"
+            value: "value"
   UserNamePassword:
     type: "object"
     required:
@@ -10086,6 +12196,10 @@ definitions:
         description: "new password in ambari"
         minLength: 1
         maxLength: 2147483647
+    example:
+      password: "password"
+      oldPassword: "oldPassword"
+      userName: "userName"
   FailurePolicyRequest:
     type: "object"
     required:
@@ -10102,6 +12216,9 @@ definitions:
         - "EXACT"
         - "PERCENTAGE"
         - "BEST_EFFORT"
+    example:
+      adjustmentType: "EXACT"
+      threshold: 5
   AccountPreferencesResponse:
     type: "object"
     required:
@@ -10156,6 +12273,50 @@ definitions:
         uniqueItems: true
         items:
           $ref: "#/definitions/SupportedExternalDatabaseServiceEntryResponse"
+    example:
+      maxNumberOfNodesPerCluster: 0
+      userTimeToLive: 0
+      supportedExternalDatabases:
+      - databases:
+        - databaseName: "databaseName"
+          jdbcPrefix: "jdbcPrefix"
+          versions:
+          - "versions"
+          - "versions"
+          displayName: "displayName"
+        - databaseName: "databaseName"
+          jdbcPrefix: "jdbcPrefix"
+          versions:
+          - "versions"
+          - "versions"
+          displayName: "displayName"
+        displayName: "displayName"
+        name: "name"
+      - databases:
+        - databaseName: "databaseName"
+          jdbcPrefix: "jdbcPrefix"
+          versions:
+          - "versions"
+          - "versions"
+          displayName: "displayName"
+        - databaseName: "databaseName"
+          jdbcPrefix: "jdbcPrefix"
+          versions:
+          - "versions"
+          - "versions"
+          displayName: "displayName"
+        displayName: "displayName"
+        name: "name"
+      maxNumberOfClustersPerUser: 0
+      clusterTimeToLive: 0
+      allowedInstanceTypes:
+      - "allowedInstanceTypes"
+      - "allowedInstanceTypes"
+      maxNumberOfClusters: 0
+      defaultTags:
+        key: "defaultTags"
+      platforms: "platforms"
+      smartsenseEnabled: false
   ImageCatalogRequest:
     type: "object"
     required:
@@ -10172,6 +12333,9 @@ definitions:
         type: "string"
         description: "custom image catalog's URL"
         pattern: "^http[s]?://.*"
+    example:
+      name: "name"
+      url: "url"
   RegionResponse:
     type: "object"
     properties:
@@ -10196,6 +12360,17 @@ definitions:
       defaultRegion:
         type: "string"
         description: "default regions"
+    example:
+      regions:
+      - "regions"
+      - "regions"
+      displayNames:
+        key: "displayNames"
+      defaultRegion: "defaultRegion"
+      availabilityZones:
+        key:
+        - "availabilityZones"
+        - "availabilityZones"
   StackValidationRequest:
     type: "object"
     required:
@@ -10248,6 +12423,171 @@ definitions:
       fileSystem:
         description: "cluster related filesystem"
         $ref: "#/definitions/FileSystem"
+    example:
+      blueprint:
+        ambariBlueprint: "ambariBlueprint"
+        inputs:
+        - referenceConfiguration: "referenceConfiguration"
+          name: "name"
+          description: "description"
+        - referenceConfiguration: "referenceConfiguration"
+          name: "name"
+          description: "description"
+        name: "name"
+        description: "description"
+        url: "url"
+        properties:
+        - key:
+            key: "properties"
+        - key:
+            key: "properties"
+        tags:
+          key: "{}"
+      fileSystem:
+        name: "name"
+        defaultFs: false
+        type: "WASB_INTEGRATED"
+        properties:
+          key: "properties"
+      hostGroups:
+      - recipes:
+        - recipeType: "PRE_AMBARI_START"
+          name: "name"
+          description: "description"
+          uri: "uri"
+          content: "content"
+        - recipeType: "PRE_AMBARI_START"
+          name: "name"
+          description: "description"
+          uri: "uri"
+          content: "content"
+        recipeIds:
+        - 0
+        - 0
+        recipeNames:
+        - "recipeNames"
+        - "recipeNames"
+        recoveryMode: "MANUAL"
+        name: "name"
+        constraint:
+          hostCount: 9
+          constraintTemplateName: "constraintTemplateName"
+          instanceGroupName: "instanceGroupName"
+      - recipes:
+        - recipeType: "PRE_AMBARI_START"
+          name: "name"
+          description: "description"
+          uri: "uri"
+          content: "content"
+        - recipeType: "PRE_AMBARI_START"
+          name: "name"
+          description: "description"
+          uri: "uri"
+          content: "content"
+        recipeIds:
+        - 0
+        - 0
+        recipeNames:
+        - "recipeNames"
+        - "recipeNames"
+        recoveryMode: "MANUAL"
+        name: "name"
+        constraint:
+          hostCount: 9
+          constraintTemplateName: "constraintTemplateName"
+          instanceGroupName: "instanceGroupName"
+      instanceGroups:
+      - securityGroupId: 1
+        template:
+          volumeType: "volumeType"
+          cloudPlatform: "cloudPlatform"
+          instanceType: "instanceType"
+          customInstanceType:
+            memory: 5
+            cpus: 9
+          topologyId: 5
+          name: "name"
+          description: "description"
+          volumeCount: 2
+          parameters:
+            key: "{}"
+          volumeSize: 7
+        nodeCount: 59621
+        securityGroup:
+          securityGroupId: "securityGroupId"
+          cloudPlatform: "cloudPlatform"
+          securityRules:
+          - subnet: "subnet"
+            protocol: "protocol"
+            ports: "ports"
+            modifiable: false
+          - subnet: "subnet"
+            protocol: "protocol"
+            ports: "ports"
+            modifiable: false
+          name: "name"
+          description: "description"
+        templateId: 6
+        type: "GATEWAY"
+        parameters:
+          key: "{}"
+        group: "group"
+      - securityGroupId: 1
+        template:
+          volumeType: "volumeType"
+          cloudPlatform: "cloudPlatform"
+          instanceType: "instanceType"
+          customInstanceType:
+            memory: 5
+            cpus: 9
+          topologyId: 5
+          name: "name"
+          description: "description"
+          volumeCount: 2
+          parameters:
+            key: "{}"
+          volumeSize: 7
+        nodeCount: 59621
+        securityGroup:
+          securityGroupId: "securityGroupId"
+          cloudPlatform: "cloudPlatform"
+          securityRules:
+          - subnet: "subnet"
+            protocol: "protocol"
+            ports: "ports"
+            modifiable: false
+          - subnet: "subnet"
+            protocol: "protocol"
+            ports: "ports"
+            modifiable: false
+          name: "name"
+          description: "description"
+        templateId: 6
+        type: "GATEWAY"
+        parameters:
+          key: "{}"
+        group: "group"
+      credential:
+        cloudPlatform: "cloudPlatform"
+        name: "name"
+        topologyId: 0
+        description: "description"
+        parameters:
+          key: "{}"
+      blueprintName: "blueprintName"
+      credentialId: 2
+      networkId: 3
+      credentialName: "credentialName"
+      blueprintId: 9
+      platform: "platform"
+      network:
+        subnetCIDR: "subnetCIDR"
+        cloudPlatform: "cloudPlatform"
+        topologyId: 0
+        name: "name"
+        description: "description"
+        parameters:
+          key: "{}"
   oracle:
     type: "object"
     required:
@@ -10256,6 +12596,8 @@ definitions:
       version:
         type: "string"
         description: "Version of the Database"
+    example:
+      version: "version"
   CustomContainerRequest:
     type: "object"
     properties:
@@ -10263,6 +12605,9 @@ definitions:
         type: "object"
         additionalProperties:
           type: "string"
+    example:
+      definitions:
+        key: "definitions"
   NetworkRequest:
     type: "object"
     required:
@@ -10294,6 +12639,14 @@ definitions:
         type: "string"
         description: "name of the resource"
         pattern: "(^[a-z][-a-z0-9]*[a-z0-9]$)"
+    example:
+      subnetCIDR: "subnetCIDR"
+      cloudPlatform: "cloudPlatform"
+      topologyId: 0
+      name: "name"
+      description: "description"
+      parameters:
+        key: "{}"
   FlexSubscriptionRequest:
     type: "object"
     required:
@@ -10321,6 +12674,12 @@ definitions:
         type: "boolean"
         description: "true if the flex subscription was used for the controller"
         default: false
+    example:
+      smartSenseSubscriptionId: 0
+      usedForController: false
+      name: "name"
+      subscriptionId: "subscriptionId"
+      usedAsDefault: false
   PlatformAccessConfigsResponse:
     type: "object"
     properties:
@@ -10329,6 +12688,16 @@ definitions:
         uniqueItems: true
         items:
           $ref: "#/definitions/AccessConfigJson"
+    example:
+      accessConfigs:
+      - name: "name"
+        id: "id"
+        properties:
+          key: "{}"
+      - name: "name"
+        id: "id"
+        properties:
+          key: "{}"
   CredentialResponse:
     type: "object"
     required:
@@ -10367,6 +12736,15 @@ definitions:
         type: "boolean"
         description: "resource is visible in account"
         default: false
+    example:
+      cloudPlatform: "cloudPlatform"
+      public: false
+      name: "name"
+      topologyId: 0
+      description: "description"
+      id: 6
+      parameters:
+        key: "{}"
   BaseImageResponse:
     type: "object"
     properties:
@@ -10402,6 +12780,66 @@ definitions:
             type: "string"
       stackDetails:
         $ref: "#/definitions/StackDetailsJson"
+    example:
+      hdpStacks:
+      - mpacks:
+        - mpackUrl: "mpackUrl"
+        - mpackUrl: "mpackUrl"
+        repo:
+          stack:
+            key: "stack"
+          util:
+            key: "util"
+        version: "version"
+      - mpacks:
+        - mpackUrl: "mpackUrl"
+        - mpackUrl: "mpackUrl"
+        repo:
+          stack:
+            key: "stack"
+          util:
+            key: "util"
+        version: "version"
+      date: "date"
+      images:
+        key:
+          key: "images"
+      stackDetails:
+        mpacks:
+        - mpackUrl: "mpackUrl"
+        - mpackUrl: "mpackUrl"
+        repo:
+          stack:
+            key: "stack"
+          util:
+            key: "util"
+        version: "version"
+      os: "os"
+      hdfStacks:
+      - mpacks:
+        - mpackUrl: "mpackUrl"
+        - mpackUrl: "mpackUrl"
+        repo:
+          stack:
+            key: "stack"
+          util:
+            key: "util"
+        version: "version"
+      - mpacks:
+        - mpackUrl: "mpackUrl"
+        - mpackUrl: "mpackUrl"
+        repo:
+          stack:
+            key: "stack"
+          util:
+            key: "util"
+        version: "version"
+      repo:
+        key: "repo"
+      osType: "osType"
+      description: "description"
+      uuid: "uuid"
+      version: "version"
   GeneralSettings:
     type: "object"
     required:
@@ -10417,6 +12855,9 @@ definitions:
       credentialName:
         type: "string"
         description: "credential resource name for the stack"
+    example:
+      name: "name"
+      credentialName: "credentialName"
   AccessConfigJson:
     type: "object"
     properties:
@@ -10429,6 +12870,11 @@ definitions:
         additionalProperties:
           type: "object"
           properties: {}
+    example:
+      name: "name"
+      id: "id"
+      properties:
+        key: "{}"
   BlueprintResponse:
     type: "object"
     required:
@@ -10476,6 +12922,23 @@ definitions:
         type: "boolean"
         description: "resource is visible in account"
         default: false
+    example:
+      public: false
+      ambariBlueprint: "ambariBlueprint"
+      inputs:
+      - referenceConfiguration: "referenceConfiguration"
+        name: "name"
+        description: "description"
+      - referenceConfiguration: "referenceConfiguration"
+        name: "name"
+        description: "description"
+      hostGroupCount: 6
+      name: "name"
+      description: "description"
+      id: 0
+      tags:
+        key: "{}"
+      status: "DEFAULT"
   InstanceGroupAdjustment:
     type: "object"
     required:
@@ -10489,6 +12952,9 @@ definitions:
         type: "integer"
         format: "int32"
         description: "scaling adjustment of the instance groups"
+    example:
+      scalingAdjustment: 0
+      instanceGroup: "instanceGroup"
   PlatformResourceRequestJson:
     type: "object"
     properties:
@@ -10513,15 +12979,14 @@ definitions:
       availabilityZone:
         type: "string"
         description: "related availability zone"
-  FlexUsageComponentJson:
-    type: "object"
-    properties:
-      componentId:
-        type: "string"
-      instances:
-        type: "array"
-        items:
-          $ref: "#/definitions/FlexUsageComponentInstanceJson"
+    example:
+      platformVariant: "platformVariant"
+      credentialId: 0
+      filters:
+        key: "filters"
+      credentialName: "credentialName"
+      region: "region"
+      availabilityZone: "availabilityZone"
   RDSConfigResponse:
     type: "object"
     required:
@@ -10584,6 +13049,47 @@ definitions:
       databaseEngineDisplayName:
         type: "string"
         description: "Display name of the external database engine (Mysql, Postges...)"
+    example:
+      connectionDriver: "connectionDriver"
+      databaseEngineDisplayName: "databaseEngineDisplayName"
+      clusterNames:
+      - "clusterNames"
+      - "clusterNames"
+      connectorJarUrl: "connectorJarUrl"
+      publicInAccount: false
+      stackVersion: "stackVersion"
+      name: "name"
+      connectionURL: "connectionURL"
+      id: 0
+      type: "type"
+      creationDate: 6
+      databaseEngine: "databaseEngine"
+  FlexUsageComponentJson:
+    type: "object"
+    properties:
+      componentId:
+        type: "string"
+      instances:
+        type: "array"
+        items:
+          $ref: "#/definitions/FlexUsageComponentInstanceJson"
+    example:
+      componentId: "componentId"
+      instances:
+      - usageDate: "usageDate"
+        creationTime: "creationTime"
+        provider: "provider"
+        guid: "guid"
+        flexSubscriptionId: "flexSubscriptionId"
+        region: "region"
+        peakUsage: 0
+      - usageDate: "usageDate"
+        creationTime: "creationTime"
+        provider: "provider"
+        guid: "guid"
+        flexSubscriptionId: "flexSubscriptionId"
+        region: "region"
+        peakUsage: 0
   instanceGroups:
     type: "object"
     required:
@@ -10625,6 +13131,42 @@ definitions:
       securityGroup:
         description: "instancegroup related securitygroup"
         $ref: "#/definitions/SecurityGroupRequest"
+    example:
+      securityGroupId: 1
+      template:
+        volumeType: "volumeType"
+        cloudPlatform: "cloudPlatform"
+        instanceType: "instanceType"
+        customInstanceType:
+          memory: 5
+          cpus: 9
+        topologyId: 5
+        name: "name"
+        description: "description"
+        volumeCount: 2
+        parameters:
+          key: "{}"
+        volumeSize: 7
+      nodeCount: 59621
+      securityGroup:
+        securityGroupId: "securityGroupId"
+        cloudPlatform: "cloudPlatform"
+        securityRules:
+        - subnet: "subnet"
+          protocol: "protocol"
+          ports: "ports"
+          modifiable: false
+        - subnet: "subnet"
+          protocol: "protocol"
+          ports: "ports"
+          modifiable: false
+        name: "name"
+        description: "description"
+      templateId: 6
+      type: "GATEWAY"
+      parameters:
+        key: "{}"
+      group: "group"
   ClusterTemplateRequest:
     type: "object"
     required:
@@ -10641,6 +13183,10 @@ definitions:
         description: "type of the cluster template"
         enum:
         - "QUICK_START"
+    example:
+      template: "template"
+      name: "name"
+      type: "QUICK_START"
   PlatformDisksJson:
     type: "object"
     properties:
@@ -10670,6 +13216,19 @@ definitions:
           type: "object"
           additionalProperties:
             type: "string"
+    example:
+      displayNames:
+        key:
+          key: "displayNames"
+      defaultDisks:
+        key: "defaultDisks"
+      diskMappings:
+        key:
+          key: "diskMappings"
+      diskTypes:
+        key:
+        - "diskTypes"
+        - "diskTypes"
   CustomDomainSettings:
     type: "object"
     properties:
@@ -10687,6 +13246,11 @@ definitions:
         type: "boolean"
         description: "using the hostgroup names to create hostnames"
         default: false
+    example:
+      hostgroupNameAsHostname: false
+      customHostname: "customHostname"
+      clusterNameAsSubdomain: false
+      customDomain: "customDomain"
   ConstraintTemplateRequest:
     type: "object"
     required:
@@ -10722,6 +13286,13 @@ definitions:
       orchestratorType:
         type: "string"
         description: "type of orchestrator"
+    example:
+      orchestratorType: "orchestratorType"
+      disk: 1.46581298050294517310021547018550336360931396484375
+      memory: 6.02745618307040320615897144307382404804229736328125
+      name: "name"
+      description: "description"
+      cpu: 0.80082819046101150206595775671303272247314453125
   UpdateCluster:
     type: "object"
     properties:
@@ -10765,6 +13336,84 @@ definitions:
       kerberosPrincipal:
         type: "string"
         description: "kerberos principal"
+    example:
+      hostGroupAdjustment:
+        withStackUpdate: false
+        scalingAdjustment: 0
+        hostGroup: "hostGroup"
+        validateNodeCount: false
+      userNamePasswordJson:
+        password: "password"
+        oldPassword: "oldPassword"
+        userName: "userName"
+      validateBlueprint: false
+      hostgroups:
+      - recipes:
+        - recipeType: "PRE_AMBARI_START"
+          name: "name"
+          description: "description"
+          uri: "uri"
+          content: "content"
+        - recipeType: "PRE_AMBARI_START"
+          name: "name"
+          description: "description"
+          uri: "uri"
+          content: "content"
+        recipeIds:
+        - 0
+        - 0
+        recipeNames:
+        - "recipeNames"
+        - "recipeNames"
+        recoveryMode: "MANUAL"
+        name: "name"
+        constraint:
+          hostCount: 9
+          constraintTemplateName: "constraintTemplateName"
+          instanceGroupName: "instanceGroupName"
+      - recipes:
+        - recipeType: "PRE_AMBARI_START"
+          name: "name"
+          description: "description"
+          uri: "uri"
+          content: "content"
+        - recipeType: "PRE_AMBARI_START"
+          name: "name"
+          description: "description"
+          uri: "uri"
+          content: "content"
+        recipeIds:
+        - 0
+        - 0
+        recipeNames:
+        - "recipeNames"
+        - "recipeNames"
+        recoveryMode: "MANUAL"
+        name: "name"
+        constraint:
+          hostCount: 9
+          constraintTemplateName: "constraintTemplateName"
+          instanceGroupName: "instanceGroupName"
+      ambariStackDetails:
+        enableGplRepo: false
+        stack: "stack"
+        os: "os"
+        stackRepoId: "stackRepoId"
+        utilsRepoId: "utilsRepoId"
+        mpackUrl: "mpackUrl"
+        version: "version"
+        stackBaseURL: "stackBaseURL"
+        versionDefinitionFileUrl: "versionDefinitionFileUrl"
+        repositoryVersion: "repositoryVersion"
+        utilsBaseURL: "utilsBaseURL"
+        mpacks:
+        - name: "name"
+        - name: "name"
+        verify: false
+      kerberosPassword: "kerberosPassword"
+      blueprintId: 6
+      kerberosPrincipal: "kerberosPrincipal"
+      status: "SYNC"
   CredentialRequest:
     type: "object"
     required:
@@ -10795,6 +13444,13 @@ definitions:
         type: "integer"
         format: "int64"
         description: "id of the topology the resource belongs to"
+    example:
+      cloudPlatform: "cloudPlatform"
+      name: "name"
+      topologyId: 0
+      description: "description"
+      parameters:
+        key: "{}"
   FailureReport:
     type: "object"
     required:
@@ -10805,6 +13461,10 @@ definitions:
         description: "List of failed nodes"
         items:
           type: "string"
+    example:
+      failedNodes:
+      - "failedNodes"
+      - "failedNodes"
   StackAuthentication:
     type: "object"
     properties:
@@ -10817,11 +13477,17 @@ definitions:
       loginUserName:
         type: "string"
         description: "authentication name for machines"
+    example:
+      loginUserName: "loginUserName"
+      publicKey: "publicKey"
+      publicKeyId: "publicKeyId"
   User:
     type: "object"
     properties:
       username:
         type: "string"
+    example:
+      username: "username"
   UserProfileResponse:
     type: "object"
     properties:
@@ -10836,6 +13502,20 @@ definitions:
         additionalProperties:
           type: "object"
           properties: {}
+    example:
+      owner: "owner"
+      credential:
+        cloudPlatform: "cloudPlatform"
+        public: false
+        name: "name"
+        topologyId: 0
+        description: "description"
+        id: 6
+        parameters:
+          key: "{}"
+      uiProperties:
+        key: "{}"
+      account: "account"
   SecurityRuleResponse:
     type: "object"
     required:
@@ -10863,6 +13543,12 @@ definitions:
         type: "integer"
         format: "int64"
         description: "id of the resource"
+    example:
+      subnet: "subnet"
+      protocol: "protocol"
+      id: 6
+      ports: "ports"
+      modifiable: false
   VolumeParameterConfigJson:
     type: "object"
     properties:
@@ -10880,6 +13566,12 @@ definitions:
       maximumNumber:
         type: "integer"
         format: "int32"
+    example:
+      volumeParameterType: "volumeParameterType"
+      minimumSize: 0
+      maximumNumber: 5
+      maximumSize: 6
+      minimumNumber: 1
   SmartSenseSubscriptionJson:
     type: "object"
     required:
@@ -10911,6 +13603,13 @@ definitions:
         type: "boolean"
         description: "Flag of aut generated SmartSense subscription."
         default: false
+    example:
+      owner: "owner"
+      publicInAccount: false
+      id: 1
+      autoGenerated: false
+      subscriptionId: "subscriptionId"
+      account: "account"
   InstanceGroupResponse:
     type: "object"
     required:
@@ -10963,6 +13662,70 @@ definitions:
         uniqueItems: true
         items:
           $ref: "#/definitions/InstanceMetaData"
+    example:
+      securityGroupId: 1
+      template:
+        volumeType: "volumeType"
+        cloudPlatform: "cloudPlatform"
+        public: false
+        instanceType: "instanceType"
+        customInstanceType:
+          memory: 5
+          cpus: 9
+        topologyId: 9
+        name: "name"
+        description: "description"
+        volumeCount: 8
+        id: 6
+        parameters:
+          key: "{}"
+        volumeSize: 9
+      metadata:
+      - sshPort: 3
+        instanceId: "instanceId"
+        ambariServer: false
+        privateIp: "privateIp"
+        instanceType: "GATEWAY"
+        discoveryFQDN: "discoveryFQDN"
+        publicIp: "publicIp"
+        instanceGroup: "instanceGroup"
+        instanceStatus: "REQUESTED"
+      - sshPort: 3
+        instanceId: "instanceId"
+        ambariServer: false
+        privateIp: "privateIp"
+        instanceType: "GATEWAY"
+        discoveryFQDN: "discoveryFQDN"
+        publicIp: "publicIp"
+        instanceGroup: "instanceGroup"
+        instanceStatus: "REQUESTED"
+      nodeCount: 49652
+      securityGroup:
+        securityGroupId: "securityGroupId"
+        owner: "owner"
+        cloudPlatform: "cloudPlatform"
+        publicInAccount: false
+        securityRules:
+        - subnet: "subnet"
+          protocol: "protocol"
+          id: 6
+          ports: "ports"
+          modifiable: false
+        - subnet: "subnet"
+          protocol: "protocol"
+          id: 6
+          ports: "ports"
+          modifiable: false
+        name: "name"
+        description: "description"
+        id: 0
+        account: "account"
+      id: 6
+      templateId: 7
+      type: "GATEWAY"
+      parameters:
+        key: "{}"
+      group: "group"
   RdsTestResult:
     type: "object"
     required:
@@ -10971,6 +13734,8 @@ definitions:
       connectionResult:
         type: "string"
         description: "result of RDS connection test"
+    example:
+      connectionResult: "connectionResult"
   CloudbreakUsage:
     type: "object"
     properties:
@@ -11040,6 +13805,27 @@ definitions:
       stackUuid:
         type: "string"
         description: "unique id of the cluster"
+    example:
+      owner: "owner"
+      costs: 3.35319334701124294184637619764544069766998291015625
+      instanceNum: 7
+      blueprintName: "blueprintName"
+      stackId: 6
+      instanceType: "instanceType"
+      instanceHours: 5
+      stackName: "stackName"
+      peak: 0
+      instanceGroup: "instanceGroup"
+      availabilityZone: "availabilityZone"
+      blueprintId: 3
+      duration: "duration"
+      provider: "provider"
+      flexId: "flexId"
+      region: "region"
+      day: "day"
+      stackUuid: "stackUuid"
+      account: "account"
+      username: "username"
   ImageCatalogResponse:
     type: "object"
     required:
@@ -11074,16 +13860,218 @@ definitions:
       imagesResponse:
         description: "image response in imagecatalog"
         $ref: "#/definitions/ImagesResponse"
-  SubscriptionRequest:
-    type: "object"
-    required:
-    - "endpointUrl"
-    properties:
-      endpointUrl:
-        type: "string"
-        description: "url of the endpoint"
-        pattern: "^(https?:\\/\\/)((([\\da-z\\.-]+)\\.([a-z]{2,6}))|localhost|[1-9][0-9]{0,2}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3})(:[1-9][0-9]{1,4})?\\\
-          /([\\/\\w\\.-]*)\\/?$"
+    example:
+      publicInAccount: false
+      imagesResponse:
+        hdpImages:
+        - date: "date"
+          images:
+            key:
+              key: "images"
+          stackDetails:
+            mpacks:
+            - mpackUrl: "mpackUrl"
+            - mpackUrl: "mpackUrl"
+            repo:
+              stack:
+                key: "stack"
+              util:
+                key: "util"
+            version: "version"
+          os: "os"
+          repo:
+            key: "repo"
+          osType: "osType"
+          description: "description"
+          uuid: "uuid"
+          version: "version"
+        - date: "date"
+          images:
+            key:
+              key: "images"
+          stackDetails:
+            mpacks:
+            - mpackUrl: "mpackUrl"
+            - mpackUrl: "mpackUrl"
+            repo:
+              stack:
+                key: "stack"
+              util:
+                key: "util"
+            version: "version"
+          os: "os"
+          repo:
+            key: "repo"
+          osType: "osType"
+          description: "description"
+          uuid: "uuid"
+          version: "version"
+        baseImages:
+        - hdpStacks:
+          - mpacks:
+            - mpackUrl: "mpackUrl"
+            - mpackUrl: "mpackUrl"
+            repo:
+              stack:
+                key: "stack"
+              util:
+                key: "util"
+            version: "version"
+          - mpacks:
+            - mpackUrl: "mpackUrl"
+            - mpackUrl: "mpackUrl"
+            repo:
+              stack:
+                key: "stack"
+              util:
+                key: "util"
+            version: "version"
+          date: "date"
+          images:
+            key:
+              key: "images"
+          stackDetails:
+            mpacks:
+            - mpackUrl: "mpackUrl"
+            - mpackUrl: "mpackUrl"
+            repo:
+              stack:
+                key: "stack"
+              util:
+                key: "util"
+            version: "version"
+          os: "os"
+          hdfStacks:
+          - mpacks:
+            - mpackUrl: "mpackUrl"
+            - mpackUrl: "mpackUrl"
+            repo:
+              stack:
+                key: "stack"
+              util:
+                key: "util"
+            version: "version"
+          - mpacks:
+            - mpackUrl: "mpackUrl"
+            - mpackUrl: "mpackUrl"
+            repo:
+              stack:
+                key: "stack"
+              util:
+                key: "util"
+            version: "version"
+          repo:
+            key: "repo"
+          osType: "osType"
+          description: "description"
+          uuid: "uuid"
+          version: "version"
+        - hdpStacks:
+          - mpacks:
+            - mpackUrl: "mpackUrl"
+            - mpackUrl: "mpackUrl"
+            repo:
+              stack:
+                key: "stack"
+              util:
+                key: "util"
+            version: "version"
+          - mpacks:
+            - mpackUrl: "mpackUrl"
+            - mpackUrl: "mpackUrl"
+            repo:
+              stack:
+                key: "stack"
+              util:
+                key: "util"
+            version: "version"
+          date: "date"
+          images:
+            key:
+              key: "images"
+          stackDetails:
+            mpacks:
+            - mpackUrl: "mpackUrl"
+            - mpackUrl: "mpackUrl"
+            repo:
+              stack:
+                key: "stack"
+              util:
+                key: "util"
+            version: "version"
+          os: "os"
+          hdfStacks:
+          - mpacks:
+            - mpackUrl: "mpackUrl"
+            - mpackUrl: "mpackUrl"
+            repo:
+              stack:
+                key: "stack"
+              util:
+                key: "util"
+            version: "version"
+          - mpacks:
+            - mpackUrl: "mpackUrl"
+            - mpackUrl: "mpackUrl"
+            repo:
+              stack:
+                key: "stack"
+              util:
+                key: "util"
+            version: "version"
+          repo:
+            key: "repo"
+          osType: "osType"
+          description: "description"
+          uuid: "uuid"
+          version: "version"
+        hdfImages:
+        - date: "date"
+          images:
+            key:
+              key: "images"
+          stackDetails:
+            mpacks:
+            - mpackUrl: "mpackUrl"
+            - mpackUrl: "mpackUrl"
+            repo:
+              stack:
+                key: "stack"
+              util:
+                key: "util"
+            version: "version"
+          os: "os"
+          repo:
+            key: "repo"
+          osType: "osType"
+          description: "description"
+          uuid: "uuid"
+          version: "version"
+        - date: "date"
+          images:
+            key:
+              key: "images"
+          stackDetails:
+            mpacks:
+            - mpackUrl: "mpackUrl"
+            - mpackUrl: "mpackUrl"
+            repo:
+              stack:
+                key: "stack"
+              util:
+                key: "util"
+            version: "version"
+          os: "os"
+          repo:
+            key: "repo"
+          osType: "osType"
+          description: "description"
+          uuid: "uuid"
+          version: "version"
+      name: "name"
+      id: 0
+      url: "url"
+      usedAsDefault: false
   StackV2Request:
     type: "object"
     required:
@@ -11143,6 +14131,248 @@ definitions:
       cluster:
         description: "cluster request object on stack"
         $ref: "#/definitions/ClusterV2Request"
+    example:
+      cluster:
+        fileSystem:
+          name: "name"
+          defaultFs: false
+          type: "WASB_INTEGRATED"
+          properties:
+            key: "properties"
+        executorType: "CONTAINER"
+        emailNeeded: false
+        proxyName: "proxyName"
+        sharedService:
+          sharedCluster: "sharedCluster"
+        ambari:
+          ambariRepoDetailsJson:
+            baseUrl: "baseUrl"
+            version: "version"
+            gpgKeyUrl: "gpgKeyUrl"
+          blueprintCustomProperties: "blueprintCustomProperties"
+          ambariSecurityMasterKey: "ambariSecurityMasterKey"
+          blueprintName: "blueprintName"
+          kerberos:
+            principal: "principal"
+            password: "password"
+            krb5Conf: "krb5Conf"
+            masterKey: "masterKey"
+            ldapUrl: "ldapUrl"
+            admin: "admin"
+            realm: "realm"
+            containerDn: "containerDn"
+            descriptor: "descriptor"
+            adminUrl: "adminUrl"
+            url: "url"
+            tcpAllowed: false
+          userName: "userName"
+          blueprintId: 2
+          connectedCluster:
+            sourceClusterName: "sourceClusterName"
+            sourceClusterId: 5
+          configStrategy: "NEVER_APPLY"
+          enableSecurity: false
+          password: "password"
+          validateBlueprint: false
+          ambariStackDetails:
+            enableGplRepo: false
+            stack: "stack"
+            os: "os"
+            stackRepoId: "stackRepoId"
+            utilsRepoId: "utilsRepoId"
+            mpackUrl: "mpackUrl"
+            version: "version"
+            stackBaseURL: "stackBaseURL"
+            versionDefinitionFileUrl: "versionDefinitionFileUrl"
+            repositoryVersion: "repositoryVersion"
+            utilsBaseURL: "utilsBaseURL"
+            mpacks:
+            - name: "name"
+            - name: "name"
+            verify: false
+          blueprintInputs:
+          - name: "name"
+            propertyValue: "propertyValue"
+          - name: "name"
+            propertyValue: "propertyValue"
+          ambariDatabaseDetails:
+            password: "password"
+            port: 1
+            vendor: "POSTGRES"
+            name: "name"
+            host: "host"
+            userName: "userName"
+          gateway:
+            path: "path"
+            topologyName: "topologyName"
+            gatewayType: "CENTRAL"
+            ssoProvider: "ssoProvider"
+            enableGateway: false
+            ssoType: "SSO_PROVIDER"
+            tokenCert: "tokenCert"
+            exposedServices:
+            - "exposedServices"
+            - "exposedServices"
+        ldapConfigName: "ldapConfigName"
+        rdsConfigNames:
+        - "rdsConfigNames"
+        - "rdsConfigNames"
+        emailTo: "emailTo"
+      hdpVersion: "hdpVersion"
+      platformVariant: "platformVariant"
+      imageSettings:
+        imageId: "imageId"
+        imageCatalog: "imageCatalog"
+      customDomain:
+        hostgroupNameAsHostname: false
+        customHostname: "customHostname"
+        clusterNameAsSubdomain: false
+        customDomain: "customDomain"
+      stackAuthentication:
+        loginUserName: "loginUserName"
+        publicKey: "publicKey"
+        publicKeyId: "publicKeyId"
+      tags:
+        applicationTags:
+          key: "applicationTags"
+        userDefinedTags:
+          key: "userDefinedTags"
+        defaultTags:
+          key: "defaultTags"
+      network:
+        subnetCIDR: "subnetCIDR"
+        parameters:
+          key: "{}"
+      general:
+        name: "name"
+        credentialName: "credentialName"
+      instanceGroups:
+      - template:
+          volumeType: "volumeType"
+          instanceType: "instanceType"
+          customInstanceType:
+            memory: 5
+            cpus: 9
+          volumeCount: 6
+          parameters:
+            key: "{}"
+          volumeSize: 1
+        recipeNames:
+        - "recipeNames"
+        - "recipeNames"
+        recoveryMode: "MANUAL"
+        nodeCount: 8008
+        securityGroup:
+          securityGroupId: "securityGroupId"
+          securityRules:
+          - subnet: "subnet"
+            protocol: "protocol"
+            ports: "ports"
+            modifiable: false
+          - subnet: "subnet"
+            protocol: "protocol"
+            ports: "ports"
+            modifiable: false
+        type: "GATEWAY"
+        parameters:
+          key: "{}"
+        group: "group"
+      - template:
+          volumeType: "volumeType"
+          instanceType: "instanceType"
+          customInstanceType:
+            memory: 5
+            cpus: 9
+          volumeCount: 6
+          parameters:
+            key: "{}"
+          volumeSize: 1
+        recipeNames:
+        - "recipeNames"
+        - "recipeNames"
+        recoveryMode: "MANUAL"
+        nodeCount: 8008
+        securityGroup:
+          securityGroupId: "securityGroupId"
+          securityRules:
+          - subnet: "subnet"
+            protocol: "protocol"
+            ports: "ports"
+            modifiable: false
+          - subnet: "subnet"
+            protocol: "protocol"
+            ports: "ports"
+            modifiable: false
+        type: "GATEWAY"
+        parameters:
+          key: "{}"
+        group: "group"
+      placement:
+        region: "region"
+        availabilityZone: "availabilityZone"
+      flexId: 5
+      ambariVersion: "ambariVersion"
+      parameters:
+        key: "{}"
+      failurePolicy:
+        adjustmentType: "EXACT"
+        threshold: 5
+  SubscriptionRequest:
+    type: "object"
+    required:
+    - "endpointUrl"
+    properties:
+      endpointUrl:
+        type: "string"
+        description: "url of the endpoint"
+        pattern: "^(https?:\\/\\/)((([\\da-z\\.-]+)\\.([a-z]{2,6}))|localhost|[1-9][0-9]{0,2}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3})(:[1-9][0-9]{1,4})?\\\
+          /([\\/\\w\\.-]*)\\/?$"
+    example:
+      endpointUrl: "endpointUrl"
+  StackMatrix:
+    type: "object"
+    properties:
+      hdp:
+        type: "object"
+        additionalProperties:
+          $ref: "#/definitions/StackDescriptor"
+      hdf:
+        type: "object"
+        additionalProperties:
+          $ref: "#/definitions/StackDescriptor"
+    example:
+      hdp:
+        key:
+          minAmbari: "minAmbari"
+          ambari:
+            repo:
+              key:
+                baseUrl: "baseUrl"
+                version: "version"
+                gpgKeyUrl: "gpgKeyUrl"
+            version: "version"
+          repo:
+            stack:
+              key: "stack"
+            util:
+              key: "util"
+          version: "version"
+      hdf:
+        key:
+          minAmbari: "minAmbari"
+          ambari:
+            repo:
+              key:
+                baseUrl: "baseUrl"
+                version: "version"
+                gpgKeyUrl: "gpgKeyUrl"
+            version: "version"
+          repo:
+            stack:
+              key: "stack"
+            util:
+              key: "util"
+          version: "version"
   ImageJson:
     type: "object"
     properties:
@@ -11158,17 +14388,11 @@ definitions:
       imageCatalogName:
         type: "string"
         description: "name of the image catalog"
-  StackMatrix:
-    type: "object"
-    properties:
-      hdp:
-        type: "object"
-        additionalProperties:
-          $ref: "#/definitions/StackDescriptor"
-      hdf:
-        type: "object"
-        additionalProperties:
-          $ref: "#/definitions/StackDescriptor"
+    example:
+      imageName: "imageName"
+      imageId: "imageId"
+      imageCatalogUrl: "imageCatalogUrl"
+      imageCatalogName: "imageCatalogName"
   PlatformGatewaysResponse:
     type: "object"
     properties:
@@ -11179,6 +14403,17 @@ definitions:
           uniqueItems: true
           items:
             $ref: "#/definitions/CloudGatewayJson"
+    example:
+      gateways:
+        key:
+        - name: "name"
+          id: "id"
+          properties:
+            key: "{}"
+        - name: "name"
+          id: "id"
+          properties:
+            key: "{}"
   LdapValidationRequest:
     type: "object"
     required:
@@ -11206,6 +14441,12 @@ definitions:
       bindPassword:
         type: "string"
         description: "password for the provided bind DN"
+    example:
+      bindDn: "bindDn"
+      protocol: "protocol"
+      bindPassword: "bindPassword"
+      serverPort: 5249
+      serverHost: "serverHost"
   ClusterTemplateResponse:
     type: "object"
     required:
@@ -11226,6 +14467,21 @@ definitions:
         type: "integer"
         format: "int64"
         description: "id of the resource"
+    example:
+      template: "template"
+      name: "name"
+      id: 0
+      type: "QUICK_START"
+  LdapTestResult:
+    type: "object"
+    required:
+    - "connectionResult"
+    properties:
+      connectionResult:
+        type: "string"
+        description: "result of Ldap connection test"
+    example:
+      connectionResult: "connectionResult"
   PlatformSshKeyResponse:
     type: "object"
     properties:
@@ -11236,14 +14492,10 @@ definitions:
         additionalProperties:
           type: "object"
           properties: {}
-  LdapTestResult:
-    type: "object"
-    required:
-    - "connectionResult"
-    properties:
-      connectionResult:
-        type: "string"
-        description: "result of Ldap connection test"
+    example:
+      name: "name"
+      properties:
+        key: "{}"
   RecipeResponse:
     type: "object"
     required:
@@ -11282,6 +14534,14 @@ definitions:
         type: "boolean"
         description: "resource is visible in account"
         default: false
+    example:
+      recipeType: "PRE_AMBARI_START"
+      public: false
+      name: "name"
+      description: "description"
+      id: 0
+      uri: "uri"
+      content: "content"
   FlexSubscriptionResponse:
     type: "object"
     required:
@@ -11331,53 +14591,30 @@ definitions:
         description: "The associated SmartSense subscription Cloudbreak domain object\
           \ json representation."
         $ref: "#/definitions/SmartSenseSubscriptionJson"
+    example:
+      owner: "owner"
+      publicInAccount: false
+      smartSenseSubscriptionId: 0
+      usedForController: false
+      name: "name"
+      smartSenseSubscription:
+        owner: "owner"
+        publicInAccount: false
+        id: 1
+        autoGenerated: false
+        subscriptionId: "subscriptionId"
+        account: "account"
+      id: 6
+      subscriptionId: "subscriptionId"
+      account: "account"
+      usedAsDefault: false
   ManagementPackDetails:
     type: "object"
-    required:
-    - "mpackUrl"
-    - "name"
     properties:
       name:
         type: "string"
-        description: "name of the resource"
-        minLength: 5
-        maxLength: 100
-        pattern: "(^[a-z][-a-z0-9]*[a-z0-9]$)"
-      description:
-        type: "string"
-        description: "description of the resource"
-        minLength: 0
-        maxLength: 1000
-      mpackUrl:
-        type: "string"
-        description: "url of the ambari management pack"
-      purge:
-        type: "boolean"
-        description: "if true, management pack will be installed with '--purge' flag"
-        default: false
-      purgeList:
-        type: "array"
-        description: "if provided, management pack will be installed with '--purgeList'\
-          \ option with this values"
-        items:
-          type: "string"
-      force:
-        type: "boolean"
-        description: "if true, management pack will be installed with '--force' flag"
-        default: false
-      stackDefault:
-        type: "boolean"
-        description: "if true, the management pack is mandatory for the stack"
-        default: false
-      preInstalled:
-        type: "boolean"
-        description: "if true, the management pack is already installed on the instances"
-        default: false
-  ManagementPackEntry:
-    type: "object"
-    properties:
-      mpackUrl:
-        type: "string"
+    example:
+      name: "name"
   ConfigsResponse:
     type: "object"
     required:
@@ -11389,6 +14626,19 @@ definitions:
         uniqueItems: true
         items:
           $ref: "#/definitions/BlueprintInput"
+    example:
+      inputs:
+      - name: "name"
+        propertyValue: "propertyValue"
+      - name: "name"
+        propertyValue: "propertyValue"
+  ManagementPackEntry:
+    type: "object"
+    properties:
+      mpackUrl:
+        type: "string"
+    example:
+      mpackUrl: "mpackUrl"
   CertificateResponse:
     type: "object"
     properties:
@@ -11413,6 +14663,16 @@ definitions:
           type: "string"
           format: "byte"
           pattern: "^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$"
+    example:
+      clientCert:
+      - "clientCert"
+      - "clientCert"
+      serverCert:
+      - "serverCert"
+      - "serverCert"
+      clientKey:
+      - "clientKey"
+      - "clientKey"
   ProxyConfigResponse:
     type: "object"
     required:
@@ -11454,15 +14714,50 @@ definitions:
         type: "integer"
         format: "int64"
         description: "proxy configuration id for the cluster"
-  FlexUsageProductJson:
+    example:
+      protocol: "protocol"
+      name: "name"
+      description: "description"
+      id: 6
+      serverPort: 5249
+      userName: "userName"
+      serverHost: "serverHost"
+  RecipeRequest:
     type: "object"
+    required:
+    - "recipeType"
     properties:
-      productId:
+      name:
         type: "string"
-      components:
-        type: "array"
-        items:
-          $ref: "#/definitions/FlexUsageComponentJson"
+        description: "name of the resource"
+        minLength: 5
+        maxLength: 100
+        pattern: "(^[a-z][-a-z0-9]*[a-z0-9]$)"
+      description:
+        type: "string"
+        description: "description of the resource"
+        minLength: 0
+        maxLength: 1000
+      recipeType:
+        type: "string"
+        description: "type of recipe"
+        enum:
+        - "PRE_AMBARI_START"
+        - "PRE_TERMINATION"
+        - "POST_AMBARI_START"
+        - "POST_CLUSTER_INSTALL"
+      content:
+        type: "string"
+        description: "content of recipe"
+      uri:
+        type: "string"
+        description: "recipe uri"
+    example:
+      recipeType: "PRE_AMBARI_START"
+      name: "name"
+      description: "description"
+      uri: "uri"
+      content: "content"
   RepoConfigValidationResponse:
     type: "object"
     properties:
@@ -11496,36 +14791,57 @@ definitions:
         description: "Indicates the request's value with the same key is valid and\
           \ reachable by Cloudbreak or not"
         default: false
-  RecipeRequest:
+    example:
+      utilsBaseURL: false
+      ambariGpgKeyUrl: false
+      mpackUrl: false
+      stackBaseURL: false
+      versionDefinitionFileUrl: false
+      ambariBaseUrl: false
+  FlexUsageProductJson:
     type: "object"
-    required:
-    - "recipeType"
     properties:
-      name:
+      productId:
         type: "string"
-        description: "name of the resource"
-        minLength: 5
-        maxLength: 100
-        pattern: "(^[a-z][-a-z0-9]*[a-z0-9]$)"
-      description:
-        type: "string"
-        description: "description of the resource"
-        minLength: 0
-        maxLength: 1000
-      recipeType:
-        type: "string"
-        description: "type of recipe"
-        enum:
-        - "PRE_AMBARI_START"
-        - "PRE_TERMINATION"
-        - "POST_AMBARI_START"
-        - "POST_CLUSTER_INSTALL"
-      content:
-        type: "string"
-        description: "content of recipe"
-      uri:
-        type: "string"
-        description: "recipe uri"
+      components:
+        type: "array"
+        items:
+          $ref: "#/definitions/FlexUsageComponentJson"
+    example:
+      components:
+      - componentId: "componentId"
+        instances:
+        - usageDate: "usageDate"
+          creationTime: "creationTime"
+          provider: "provider"
+          guid: "guid"
+          flexSubscriptionId: "flexSubscriptionId"
+          region: "region"
+          peakUsage: 0
+        - usageDate: "usageDate"
+          creationTime: "creationTime"
+          provider: "provider"
+          guid: "guid"
+          flexSubscriptionId: "flexSubscriptionId"
+          region: "region"
+          peakUsage: 0
+      - componentId: "componentId"
+        instances:
+        - usageDate: "usageDate"
+          creationTime: "creationTime"
+          provider: "provider"
+          guid: "guid"
+          flexSubscriptionId: "flexSubscriptionId"
+          region: "region"
+          peakUsage: 0
+        - usageDate: "usageDate"
+          creationTime: "creationTime"
+          provider: "provider"
+          guid: "guid"
+          flexSubscriptionId: "flexSubscriptionId"
+          region: "region"
+          peakUsage: 0
+      productId: "productId"
   FlexUsageComponentInstanceJson:
     type: "object"
     properties:
@@ -11544,6 +14860,14 @@ definitions:
       peakUsage:
         type: "integer"
         format: "int32"
+    example:
+      usageDate: "usageDate"
+      creationTime: "creationTime"
+      provider: "provider"
+      guid: "guid"
+      flexSubscriptionId: "flexSubscriptionId"
+      region: "region"
+      peakUsage: 0
   ImageSettings:
     type: "object"
     properties:
@@ -11554,6 +14878,9 @@ definitions:
         type: "string"
         description: "virtual machine image id from ImageCatalog, machines of the\
           \ cluster will be started from this image"
+    example:
+      imageId: "imageId"
+      imageCatalog: "imageCatalog"
   InstanceMetaData:
     type: "object"
     properties:
@@ -11599,6 +14926,16 @@ definitions:
         - "GATEWAY"
         - "GATEWAY_PRIMARY"
         - "CORE"
+    example:
+      sshPort: 3
+      instanceId: "instanceId"
+      ambariServer: false
+      privateIp: "privateIp"
+      instanceType: "GATEWAY"
+      discoveryFQDN: "discoveryFQDN"
+      publicIp: "publicIp"
+      instanceGroup: "instanceGroup"
+      instanceStatus: "REQUESTED"
   RdsConfig:
     type: "object"
     required:
@@ -11639,6 +14976,15 @@ definitions:
       oracleParameters:
         description: "Oracle specific properties"
         $ref: "#/definitions/oracle"
+    example:
+      connectionUserName: "connectionUserName"
+      connectorJarUrl: "connectorJarUrl"
+      oracleParameters:
+        version: "version"
+      name: "name"
+      connectionURL: "connectionURL"
+      connectionPassword: "connectionPassword"
+      type: "type"
   SecurityGroupRequest:
     type: "object"
     required:
@@ -11665,6 +15011,20 @@ definitions:
         description: "list of security rules that relates to the security group"
         items:
           $ref: "#/definitions/SecurityRuleRequest"
+    example:
+      securityGroupId: "securityGroupId"
+      cloudPlatform: "cloudPlatform"
+      securityRules:
+      - subnet: "subnet"
+        protocol: "protocol"
+        ports: "ports"
+        modifiable: false
+      - subnet: "subnet"
+        protocol: "protocol"
+        ports: "ports"
+        modifiable: false
+      name: "name"
+      description: "description"
   KerberosRequest:
     type: "object"
     properties:
@@ -11705,6 +15065,19 @@ definitions:
       principal:
         type: "string"
         description: "kerberos principal"
+    example:
+      principal: "principal"
+      password: "password"
+      krb5Conf: "krb5Conf"
+      masterKey: "masterKey"
+      ldapUrl: "ldapUrl"
+      admin: "admin"
+      realm: "realm"
+      containerDn: "containerDn"
+      descriptor: "descriptor"
+      adminUrl: "adminUrl"
+      url: "url"
+      tcpAllowed: false
   BlueprintInput:
     type: "object"
     properties:
@@ -11712,6 +15085,9 @@ definitions:
         type: "string"
       propertyValue:
         type: "string"
+    example:
+      name: "name"
+      propertyValue: "propertyValue"
   LdapConfigRequest:
     type: "object"
     required:
@@ -11786,6 +15162,24 @@ definitions:
       bindPassword:
         type: "string"
         description: "password for the provided bind DN"
+    example:
+      adminGroup: "adminGroup"
+      bindPassword: "bindPassword"
+      groupNameAttribute: "groupNameAttribute"
+      groupMemberAttribute: "groupMemberAttribute"
+      description: "description"
+      userNameAttribute: "userNameAttribute"
+      serverPort: 5249
+      serverHost: "serverHost"
+      directoryType: "LDAP"
+      bindDn: "bindDn"
+      protocol: "protocol"
+      groupSearchBase: "groupSearchBase"
+      userSearchBase: "userSearchBase"
+      domain: "domain"
+      name: "name"
+      userObjectClass: "userObjectClass"
+      groupObjectClass: "groupObjectClass"
   ClusterRepairRequest:
     type: "object"
     required:
@@ -11801,6 +15195,11 @@ definitions:
         description: "If true, the failed nodes will only be removed, otherwise the\
           \ failed nodes will be removed and new nodes will be started."
         default: false
+    example:
+      hostGroups:
+      - "hostGroups"
+      - "hostGroups"
+      removeOnly: false
   StackResponse:
     type: "object"
     required:
@@ -11978,5 +15377,545 @@ definitions:
         type: "boolean"
         description: "resource is visible in account"
         default: false
+    example:
+      cluster:
+        cluster: "cluster"
+        ambariRepoDetailsJson:
+          baseUrl: "baseUrl"
+          version: "version"
+          gpgKeyUrl: "gpgKeyUrl"
+        hostGroups:
+        - recipes:
+          - recipeType: "PRE_AMBARI_START"
+            public: false
+            name: "name"
+            description: "description"
+            id: 0
+            uri: "uri"
+            content: "content"
+          - recipeType: "PRE_AMBARI_START"
+            public: false
+            name: "name"
+            description: "description"
+            id: 0
+            uri: "uri"
+            content: "content"
+          metadata:
+          - groupName: "groupName"
+            name: "name"
+            id: 4
+            state: "state"
+          - groupName: "groupName"
+            name: "name"
+            id: 4
+            state: "state"
+          recipeIds:
+          - 3
+          - 3
+          recoveryMode: "MANUAL"
+          name: "name"
+          constraint:
+            hostCount: 9
+            constraintTemplateName: "constraintTemplateName"
+            instanceGroupName: "instanceGroupName"
+          id: 2
+        - recipes:
+          - recipeType: "PRE_AMBARI_START"
+            public: false
+            name: "name"
+            description: "description"
+            id: 0
+            uri: "uri"
+            content: "content"
+          - recipeType: "PRE_AMBARI_START"
+            public: false
+            name: "name"
+            description: "description"
+            id: 0
+            uri: "uri"
+            content: "content"
+          metadata:
+          - groupName: "groupName"
+            name: "name"
+            id: 4
+            state: "state"
+          - groupName: "groupName"
+            name: "name"
+            id: 4
+            state: "state"
+          recipeIds:
+          - 3
+          - 3
+          recoveryMode: "MANUAL"
+          name: "name"
+          constraint:
+            hostCount: 9
+            constraintTemplateName: "constraintTemplateName"
+            instanceGroupName: "instanceGroupName"
+          id: 2
+        ambariServerIp: "ambariServerIp"
+        ambariServerUrl: "ambariServerUrl"
+        proxyName: "proxyName"
+        description: "description"
+        secure: false
+        configStrategy: "NEVER_APPLY"
+        hoursUp: 5
+        serviceEndPoints:
+          key: "serviceEndPoints"
+        statusReason: "statusReason"
+        ambariStackDetails:
+          enableGplRepo: false
+          stack:
+            key: "stack"
+          util:
+            key: "util"
+          mpacks:
+          - name: "name"
+          - name: "name"
+          hdpVersion: "hdpVersion"
+          verify: false
+        ldapConfigId: 1
+        blueprintInputs:
+        - name: "name"
+          propertyValue: "propertyValue"
+        - name: "name"
+          propertyValue: "propertyValue"
+        ambariDatabaseDetails:
+          password: "password"
+          port: 1
+          vendor: "POSTGRES"
+          name: "name"
+          host: "host"
+          userName: "userName"
+        id: 5
+        blueprintCustomProperties: "blueprintCustomProperties"
+        executorType: "CONTAINER"
+        extendedBlueprintText: "extendedBlueprintText"
+        customQueue: "customQueue"
+        userName: "userName"
+        blueprintId: 7
+        ldapConfig:
+          adminGroup: "adminGroup"
+          groupNameAttribute: "groupNameAttribute"
+          groupMemberAttribute: "groupMemberAttribute"
+          description: "description"
+          userNameAttribute: "userNameAttribute"
+          serverPort: 5249
+          serverHost: "serverHost"
+          directoryType: "LDAP"
+          bindDn: "bindDn"
+          protocol: "protocol"
+          groupSearchBase: "groupSearchBase"
+          userSearchBase: "userSearchBase"
+          public: false
+          domain: "domain"
+          name: "name"
+          id: 6
+          userObjectClass: "userObjectClass"
+          groupObjectClass: "groupObjectClass"
+        uptime: 6
+        blueprint:
+          public: false
+          ambariBlueprint: "ambariBlueprint"
+          inputs:
+          - referenceConfiguration: "referenceConfiguration"
+            name: "name"
+            description: "description"
+          - referenceConfiguration: "referenceConfiguration"
+            name: "name"
+            description: "description"
+          hostGroupCount: 6
+          name: "name"
+          description: "description"
+          id: 0
+          tags:
+            key: "{}"
+          status: "DEFAULT"
+        rdsConfigs:
+        - connectionDriver: "connectionDriver"
+          databaseEngineDisplayName: "databaseEngineDisplayName"
+          clusterNames:
+          - "clusterNames"
+          - "clusterNames"
+          connectorJarUrl: "connectorJarUrl"
+          publicInAccount: false
+          stackVersion: "stackVersion"
+          name: "name"
+          connectionURL: "connectionURL"
+          id: 0
+          type: "type"
+          creationDate: 6
+          databaseEngine: "databaseEngine"
+        - connectionDriver: "connectionDriver"
+          databaseEngineDisplayName: "databaseEngineDisplayName"
+          clusterNames:
+          - "clusterNames"
+          - "clusterNames"
+          connectorJarUrl: "connectorJarUrl"
+          publicInAccount: false
+          stackVersion: "stackVersion"
+          name: "name"
+          connectionURL: "connectionURL"
+          id: 0
+          type: "type"
+          creationDate: 6
+          databaseEngine: "databaseEngine"
+        customContainers:
+          definitions:
+            key: "definitions"
+        creationFinished: 1
+        kerberosResponse:
+          krb5Conf: "krb5Conf"
+          ldapUrl: "ldapUrl"
+          admin: "admin"
+          realm: "realm"
+          containerDn: "containerDn"
+          descriptor: "descriptor"
+          adminUrl: "adminUrl"
+          type: "CB_MANAGED"
+          url: "url"
+          tcpAllowed: false
+        name: "name"
+        attributes:
+          key: "{}"
+        rdsConfigIds:
+        - 7
+        - 7
+        gateway:
+          path: "path"
+          topologyName: "topologyName"
+          gatewayType: "CENTRAL"
+          ssoProvider: "ssoProvider"
+          enableGateway: false
+          ssoType: "SSO_PROVIDER"
+          tokenCert: "tokenCert"
+          exposedServices:
+          - "exposedServices"
+          - "exposedServices"
+        status: "REQUESTED"
+        minutesUp: 2
+      hdpVersion: "hdpVersion"
+      cloudbreakEvents:
+      - eventMessage: "eventMessage"
+        owner: "owner"
+        blueprintName: "blueprintName"
+        stackId: 5
+        stackName: "stackName"
+        stackStatus: "REQUESTED"
+        eventType: "eventType"
+        clusterId: 1
+        instanceGroup: "instanceGroup"
+        availabilityZone: "availabilityZone"
+        blueprintId: 6
+        cloud: "cloud"
+        clusterName: "clusterName"
+        nodeCount: 5
+        region: "region"
+        account: "account"
+        clusterStatus: "REQUESTED"
+        eventTimestamp: 0
+      - eventMessage: "eventMessage"
+        owner: "owner"
+        blueprintName: "blueprintName"
+        stackId: 5
+        stackName: "stackName"
+        stackStatus: "REQUESTED"
+        eventType: "eventType"
+        clusterId: 1
+        instanceGroup: "instanceGroup"
+        availabilityZone: "availabilityZone"
+        blueprintId: 6
+        cloud: "cloud"
+        clusterName: "clusterName"
+        nodeCount: 5
+        region: "region"
+        account: "account"
+        clusterStatus: "REQUESTED"
+        eventTimestamp: 0
+      platformVariant: "platformVariant"
+      customHostname: "customHostname"
+      userDefinedTags:
+        key: "userDefinedTags"
+      flexSubscription:
+        owner: "owner"
+        publicInAccount: false
+        smartSenseSubscriptionId: 0
+        usedForController: false
+        name: "name"
+        smartSenseSubscription:
+          owner: "owner"
+          publicInAccount: false
+          id: 1
+          autoGenerated: false
+          subscriptionId: "subscriptionId"
+          account: "account"
+        id: 6
+        subscriptionId: "subscriptionId"
+        account: "account"
+        usedAsDefault: false
+      availabilityZone: "availabilityZone"
+      defaultTags:
+        key: "defaultTags"
+      network:
+        subnetCIDR: "subnetCIDR"
+        cloudPlatform: "cloudPlatform"
+        publicInAccount: false
+        topologyId: 0
+        name: "name"
+        description: "description"
+        id: 6
+        parameters:
+          key: "{}"
+      hostgroupNameAsHostname: false
+      onFailureAction: "ROLLBACK"
+      statusReason: "statusReason"
+      credential:
+        cloudPlatform: "cloudPlatform"
+        public: false
+        name: "name"
+        topologyId: 0
+        description: "description"
+        id: 6
+        parameters:
+          key: "{}"
+      public: false
+      networkId: 6
+      nodeCount: 6
+      clusterNameAsSubdomain: false
+      id: 1
+      failurePolicy:
+        adjustmentType: "EXACT"
+        threshold: 6
+        id: 1
+      owner: "owner"
+      applicationTags:
+        key: "applicationTags"
+      image:
+        imageName: "imageName"
+        imageId: "imageId"
+        imageCatalogUrl: "imageCatalogUrl"
+        imageCatalogName: "imageCatalogName"
+      cloudbreakDetails:
+        version: "version"
+      cloudPlatform: "cloudPlatform"
+      created: 2
+      customDomain: "customDomain"
+      gatewayPort: 6
+      stackAuthentication:
+        loginUserName: "loginUserName"
+        publicKey: "publicKey"
+        publicKeyId: "publicKeyId"
+      orchestrator:
+        apiEndpoint: "apiEndpoint"
+        type: "type"
+        parameters:
+          key: "{}"
+      instanceGroups:
+      - securityGroupId: 1
+        template:
+          volumeType: "volumeType"
+          cloudPlatform: "cloudPlatform"
+          public: false
+          instanceType: "instanceType"
+          customInstanceType:
+            memory: 5
+            cpus: 9
+          topologyId: 9
+          name: "name"
+          description: "description"
+          volumeCount: 8
+          id: 6
+          parameters:
+            key: "{}"
+          volumeSize: 9
+        metadata:
+        - sshPort: 3
+          instanceId: "instanceId"
+          ambariServer: false
+          privateIp: "privateIp"
+          instanceType: "GATEWAY"
+          discoveryFQDN: "discoveryFQDN"
+          publicIp: "publicIp"
+          instanceGroup: "instanceGroup"
+          instanceStatus: "REQUESTED"
+        - sshPort: 3
+          instanceId: "instanceId"
+          ambariServer: false
+          privateIp: "privateIp"
+          instanceType: "GATEWAY"
+          discoveryFQDN: "discoveryFQDN"
+          publicIp: "publicIp"
+          instanceGroup: "instanceGroup"
+          instanceStatus: "REQUESTED"
+        nodeCount: 49652
+        securityGroup:
+          securityGroupId: "securityGroupId"
+          owner: "owner"
+          cloudPlatform: "cloudPlatform"
+          publicInAccount: false
+          securityRules:
+          - subnet: "subnet"
+            protocol: "protocol"
+            id: 6
+            ports: "ports"
+            modifiable: false
+          - subnet: "subnet"
+            protocol: "protocol"
+            id: 6
+            ports: "ports"
+            modifiable: false
+          name: "name"
+          description: "description"
+          id: 0
+          account: "account"
+        id: 6
+        templateId: 7
+        type: "GATEWAY"
+        parameters:
+          key: "{}"
+        group: "group"
+      - securityGroupId: 1
+        template:
+          volumeType: "volumeType"
+          cloudPlatform: "cloudPlatform"
+          public: false
+          instanceType: "instanceType"
+          customInstanceType:
+            memory: 5
+            cpus: 9
+          topologyId: 9
+          name: "name"
+          description: "description"
+          volumeCount: 8
+          id: 6
+          parameters:
+            key: "{}"
+          volumeSize: 9
+        metadata:
+        - sshPort: 3
+          instanceId: "instanceId"
+          ambariServer: false
+          privateIp: "privateIp"
+          instanceType: "GATEWAY"
+          discoveryFQDN: "discoveryFQDN"
+          publicIp: "publicIp"
+          instanceGroup: "instanceGroup"
+          instanceStatus: "REQUESTED"
+        - sshPort: 3
+          instanceId: "instanceId"
+          ambariServer: false
+          privateIp: "privateIp"
+          instanceType: "GATEWAY"
+          discoveryFQDN: "discoveryFQDN"
+          publicIp: "publicIp"
+          instanceGroup: "instanceGroup"
+          instanceStatus: "REQUESTED"
+        nodeCount: 49652
+        securityGroup:
+          securityGroupId: "securityGroupId"
+          owner: "owner"
+          cloudPlatform: "cloudPlatform"
+          publicInAccount: false
+          securityRules:
+          - subnet: "subnet"
+            protocol: "protocol"
+            id: 6
+            ports: "ports"
+            modifiable: false
+          - subnet: "subnet"
+            protocol: "protocol"
+            id: 6
+            ports: "ports"
+            modifiable: false
+          name: "name"
+          description: "description"
+          id: 0
+          account: "account"
+        id: 6
+        templateId: 7
+        type: "GATEWAY"
+        parameters:
+          key: "{}"
+        group: "group"
+      hardwareInfos:
+      - instanceMetaData:
+          sshPort: 3
+          instanceId: "instanceId"
+          ambariServer: false
+          privateIp: "privateIp"
+          instanceType: "GATEWAY"
+          discoveryFQDN: "discoveryFQDN"
+          publicIp: "publicIp"
+          instanceGroup: "instanceGroup"
+          instanceStatus: "REQUESTED"
+        hostMetadata:
+          groupName: "groupName"
+          name: "name"
+          id: 4
+          state: "state"
+      - instanceMetaData:
+          sshPort: 3
+          instanceId: "instanceId"
+          ambariServer: false
+          privateIp: "privateIp"
+          instanceType: "GATEWAY"
+          discoveryFQDN: "discoveryFQDN"
+          publicIp: "publicIp"
+          instanceGroup: "instanceGroup"
+          instanceStatus: "REQUESTED"
+        hostMetadata:
+          groupName: "groupName"
+          name: "name"
+          id: 4
+          state: "state"
+      name: "name"
+      credentialId: 0
+      cloudbreakUsages:
+      - owner: "owner"
+        costs: 3.35319334701124294184637619764544069766998291015625
+        instanceNum: 7
+        blueprintName: "blueprintName"
+        stackId: 6
+        instanceType: "instanceType"
+        instanceHours: 5
+        stackName: "stackName"
+        peak: 0
+        instanceGroup: "instanceGroup"
+        availabilityZone: "availabilityZone"
+        blueprintId: 3
+        duration: "duration"
+        provider: "provider"
+        flexId: "flexId"
+        region: "region"
+        day: "day"
+        stackUuid: "stackUuid"
+        account: "account"
+        username: "username"
+      - owner: "owner"
+        costs: 3.35319334701124294184637619764544069766998291015625
+        instanceNum: 7
+        blueprintName: "blueprintName"
+        stackId: 6
+        instanceType: "instanceType"
+        instanceHours: 5
+        stackName: "stackName"
+        peak: 0
+        instanceGroup: "instanceGroup"
+        availabilityZone: "availabilityZone"
+        blueprintId: 3
+        duration: "duration"
+        provider: "provider"
+        flexId: "flexId"
+        region: "region"
+        day: "day"
+        stackUuid: "stackUuid"
+        account: "account"
+        username: "username"
+      region: "region"
+      ambariVersion: "ambariVersion"
+      parameters:
+        key: "parameters"
+      account: "account"
+      status: "REQUESTED"
   Info:
     type: "object"

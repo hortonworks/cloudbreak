@@ -1,29 +1,66 @@
 'use strict';
 
-var url = require('url');
-
-var V1accountpreferences = require('./V1accountpreferencesService');
+var utils = require('../utils/writer.js');
+var V1accountpreferences = require('../service/V1accountpreferencesService');
 
 module.exports.getAccountPreferencesEndpoint = function getAccountPreferencesEndpoint (req, res, next) {
-  V1accountpreferences.getAccountPreferencesEndpoint(req.swagger.params, res, next);
+  V1accountpreferences.getAccountPreferencesEndpoint()
+    .then(function (response) {
+      utils.writeJson(res, response);
+    })
+    .catch(function (response) {
+      utils.writeJson(res, response);
+    });
 };
 
 module.exports.isPlatformSelectionDisabled = function isPlatformSelectionDisabled (req, res, next) {
-  V1accountpreferences.isPlatformSelectionDisabled(req.swagger.params, res, next);
+  V1accountpreferences.isPlatformSelectionDisabled()
+    .then(function (response) {
+      utils.writeJson(res, response);
+    })
+    .catch(function (response) {
+      utils.writeJson(res, response);
+    });
 };
 
 module.exports.platformEnablement = function platformEnablement (req, res, next) {
-  V1accountpreferences.platformEnablement(req.swagger.params, res, next);
+  V1accountpreferences.platformEnablement()
+    .then(function (response) {
+      utils.writeJson(res, response);
+    })
+    .catch(function (response) {
+      utils.writeJson(res, response);
+    });
 };
 
 module.exports.postAccountPreferencesEndpoint = function postAccountPreferencesEndpoint (req, res, next) {
-  V1accountpreferences.postAccountPreferencesEndpoint(req.swagger.params, res, next);
+  var body = req.swagger.params['body'].value;
+  V1accountpreferences.postAccountPreferencesEndpoint(body)
+    .then(function (response) {
+      utils.writeJson(res, response);
+    })
+    .catch(function (response) {
+      utils.writeJson(res, response);
+    });
 };
 
 module.exports.putAccountPreferencesEndpoint = function putAccountPreferencesEndpoint (req, res, next) {
-  V1accountpreferences.putAccountPreferencesEndpoint(req.swagger.params, res, next);
+  var body = req.swagger.params['body'].value;
+  V1accountpreferences.putAccountPreferencesEndpoint(body)
+    .then(function (response) {
+      utils.writeJson(res, response);
+    })
+    .catch(function (response) {
+      utils.writeJson(res, response);
+    });
 };
 
 module.exports.validateAccountPreferencesEndpoint = function validateAccountPreferencesEndpoint (req, res, next) {
-  V1accountpreferences.validateAccountPreferencesEndpoint(req.swagger.params, res, next);
+  V1accountpreferences.validateAccountPreferencesEndpoint()
+    .then(function (response) {
+      utils.writeJson(res, response);
+    })
+    .catch(function (response) {
+      utils.writeJson(res, response);
+    });
 };
