@@ -1,49 +1,123 @@
 'use strict';
 
-var url = require('url');
-
-var V1blueprints = require('./V1blueprintsService');
+var utils = require('../utils/writer.js');
+var V1blueprints = require('../service/V1blueprintsService');
 
 module.exports.deleteBlueprint = function deleteBlueprint (req, res, next) {
-  V1blueprints.deleteBlueprint(req.swagger.params, res, next);
+  var id = req.swagger.params['id'].value;
+  V1blueprints.deleteBlueprint(id)
+    .then(function (response) {
+      utils.writeJson(res, response);
+    })
+    .catch(function (response) {
+      utils.writeJson(res, response);
+    });
 };
 
 module.exports.deletePrivateBlueprint = function deletePrivateBlueprint (req, res, next) {
-  V1blueprints.deletePrivateBlueprint(req.swagger.params, res, next);
+  var name = req.swagger.params['name'].value;
+  V1blueprints.deletePrivateBlueprint(name)
+    .then(function (response) {
+      utils.writeJson(res, response);
+    })
+    .catch(function (response) {
+      utils.writeJson(res, response);
+    });
 };
 
 module.exports.deletePublicBlueprint = function deletePublicBlueprint (req, res, next) {
-  V1blueprints.deletePublicBlueprint(req.swagger.params, res, next);
+  var name = req.swagger.params['name'].value;
+  V1blueprints.deletePublicBlueprint(name)
+    .then(function (response) {
+      utils.writeJson(res, response);
+    })
+    .catch(function (response) {
+      utils.writeJson(res, response);
+    });
 };
 
 module.exports.getBlueprint = function getBlueprint (req, res, next) {
-  V1blueprints.getBlueprint(req.swagger.params, res, next);
+  var id = req.swagger.params['id'].value;
+  V1blueprints.getBlueprint(id)
+    .then(function (response) {
+      utils.writeJson(res, response);
+    })
+    .catch(function (response) {
+      utils.writeJson(res, response);
+    });
 };
 
 module.exports.getBlueprintRequestFromId = function getBlueprintRequestFromId (req, res, next) {
-  V1blueprints.getBlueprintRequestFromId(req.swagger.params, res, next);
+  var id = req.swagger.params['id'].value;
+  V1blueprints.getBlueprintRequestFromId(id)
+    .then(function (response) {
+      utils.writeJson(res, response);
+    })
+    .catch(function (response) {
+      utils.writeJson(res, response);
+    });
 };
 
 module.exports.getPrivateBlueprint = function getPrivateBlueprint (req, res, next) {
-  V1blueprints.getPrivateBlueprint(req.swagger.params, res, next);
+  var name = req.swagger.params['name'].value;
+  V1blueprints.getPrivateBlueprint(name)
+    .then(function (response) {
+      utils.writeJson(res, response);
+    })
+    .catch(function (response) {
+      utils.writeJson(res, response);
+    });
 };
 
 module.exports.getPrivatesBlueprint = function getPrivatesBlueprint (req, res, next) {
-  V1blueprints.getPrivatesBlueprint(req.swagger.params, res, next);
+  V1blueprints.getPrivatesBlueprint()
+    .then(function (response) {
+      utils.writeJson(res, response);
+    })
+    .catch(function (response) {
+      utils.writeJson(res, response);
+    });
 };
 
 module.exports.getPublicBlueprint = function getPublicBlueprint (req, res, next) {
-  V1blueprints.getPublicBlueprint(req.swagger.params, res, next);
+  var name = req.swagger.params['name'].value;
+  V1blueprints.getPublicBlueprint(name)
+    .then(function (response) {
+      utils.writeJson(res, response);
+    })
+    .catch(function (response) {
+      utils.writeJson(res, response);
+    });
 };
 
 module.exports.getPublicsBlueprint = function getPublicsBlueprint (req, res, next) {
-  V1blueprints.getPublicsBlueprint(req.swagger.params, res, next);
+  V1blueprints.getPublicsBlueprint()
+    .then(function (response) {
+      utils.writeJson(res, response);
+    })
+    .catch(function (response) {
+      utils.writeJson(res, response);
+    });
 };
 
 module.exports.postPrivateBlueprint = function postPrivateBlueprint (req, res, next) {
-  V1blueprints.postPrivateBlueprint(req.swagger.params, res, next);
+  var body = req.swagger.params['body'].value;
+  V1blueprints.postPrivateBlueprint(body)
+    .then(function (response) {
+      utils.writeJson(res, response);
+    })
+    .catch(function (response) {
+      utils.writeJson(res, response);
+    });
 };
 
 module.exports.postPublicBlueprint = function postPublicBlueprint (req, res, next) {
-  V1blueprints.postPublicBlueprint(req.swagger.params, res, next);
+  var body = req.swagger.params['body'].value;
+  V1blueprints.postPublicBlueprint(body)
+    .then(function (response) {
+      utils.writeJson(res, response);
+    })
+    .catch(function (response) {
+      utils.writeJson(res, response);
+    });
 };
