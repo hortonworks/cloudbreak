@@ -94,7 +94,7 @@ cloudbreak:
     log_opt:
         max-size: "10M"
         max-file: "5"
-    image: hortonworks/cloudbreak-mock:latest
+    image: hortonworks/cloudbreak-mock:${GIT_VERSION}
     command: bash
 
 sultans:
