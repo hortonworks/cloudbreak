@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.model.mpack.ManagementPackDetails;
 import com.sequenceiq.cloudbreak.cloud.model.component.ManagementPackComponent;
 import com.sequenceiq.cloudbreak.controller.AuthenticatedUserService;
+import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.ManagementPack;
 import com.sequenceiq.cloudbreak.service.mpack.ManagementPackService;
 
@@ -37,12 +38,7 @@ public class ManagementPackDetailsToManagementPackComponentConverter
                 mpack.setPurgeList(Arrays.asList(dmpack.getPurgeList().split(",")));
             }
         } else {
-            mpack.setMpackUrl(source.getMpackUrl());
-            mpack.setStackDefault(source.isStackDefault());
-            mpack.setPreInstalled(source.isPreInstalled());
-            mpack.setForce(source.isForce());
-            mpack.setPurge(source.isPurge());
-            mpack.setPurgeList(source.getPurgeList());
+            throw new BadRequestException("Mpack name cannot be empty!");
         }
         return mpack;
     }
