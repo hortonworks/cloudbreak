@@ -9,8 +9,22 @@ install_kerberos:
   pkg.installed:
     - pkgs:
       - krb5-server
+{% if grains['os_family'] != 'Suse' %}
       - krb5-libs
       - krb5-workstation
+{% endif %}
+
+{% if grains['os_family'] == 'Suse' %}
+/var/kerberos:
+  file.symlink:
+      - target: /var/lib/kerberos
+      - force: True
+
+/run/user/0:
+  file.directory:
+    - user: root
+    - group: root
+{% endif %}
 
 {% if kerberos.url is none or kerberos.url == '' %}
 
@@ -25,7 +39,11 @@ install_kerberos:
 
 create_db:
   cmd.run:
+{% if grains['os_family'] == 'Suse' %}
+    - name: /usr/lib/mit/sbin/kdb5_util -P {{ kerberos.master_key }} -r {{ kerberos.realm }} create -s
+{% else %}
     - name: /usr/sbin/kdb5_util -P {{ kerberos.master_key }} -r {{ kerberos.realm }} create -s
+{% endif %}
     - unless: ls -la /var/kerberos/krb5kdc/principal
     - watch:
       - pkg: install_kerberos
@@ -55,12 +73,21 @@ run_kadm5_sh_script:
     - source: salt://kerberos/init.d/kpropd
     - mode: 755
 
+{% if grains['os_family'] == 'Suse' %}
+create_cluster_user:
+  cmd.run:
+    - name: '/usr/lib/mit/sbin/kadmin.local -q "addprinc -pw {{ kerberos.clusterPassword }} {{ kerberos.clusterUser }}"'
+    - shell: /bin/bash
+    - unless: /usr/lib/mit/sbin/kadmin.local -q "list_principals *" | grep "^{{ kerberos.clusterUser }}@{{ kerberos.clusterPassword }} *"
+    - output_loglevel: quiet
+{% else %}
 create_cluster_user:
   cmd.run:
     - name: 'kadmin.local -q "addprinc -pw {{ kerberos.clusterPassword }} {{ kerberos.clusterUser }}"'
     - shell: /bin/bash
     - unless: kadmin.local -q "list_principals *" | grep "^{{ kerberos.clusterUser }}@{{ kerberos.clusterPassword }} *"
     - output_loglevel: quiet
+{% endif %}
 
 {% if grains['init'] == 'systemd' %}
 
