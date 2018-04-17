@@ -96,6 +96,7 @@ public class StackRequestToBlueprintPreparationObjectConverter extends AbstractC
                     .withSmartSenseSubscriptionId(smartsenseSubscriptionId)
                     .withLdapConfig(ldapConfig)
                     .withKerberosConfig(kerberosConfig)
+                    .withStackParameters(source.getParameters())
                     .build();
         } catch (BlueprintProcessingException e) {
             throw new CloudbreakServiceException(e.getMessage(), e);

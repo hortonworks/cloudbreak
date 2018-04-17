@@ -1,0 +1,114 @@
+{
+  "settings": [
+    {
+      "recovery_settings": [
+        {
+          "recovery_enabled": "true"
+        }
+      ]
+    },
+    {
+      "service_settings": [
+        {
+          "name": "HIVE",
+          "credential_store_enabled": "false"
+        }
+      ]
+    },
+    {
+      "component_settings": []
+    }
+  ],
+  "configurations": [
+    {
+      "hive-site1": {
+        "hive.metastore.warehouse.dir1": "nodot"
+      }
+    },
+    {
+      "hive-site2": {
+        "hive.metastore.warehouse.dir2": "{{{some.value.string}}}"
+      }
+    },
+    {
+      "hive-site3": {
+        "hive.metastore.warehouse.dir3": "-1"
+      }
+    },
+    {
+      "hive-site4": {
+        "hive.metastore.warehouse.dir4": "true"
+      }
+    },
+    {
+      "cluster-env": {
+        "properties": {
+          "recovery_enabled": "true",
+          "commands_to_retry": "START",
+          "recovery_type": "AUTO_START"
+        }
+      }
+    },
+    {
+      "hbase-site": {
+        "properties": {
+          "zookeeper.recovery.retry": "10"
+        }
+      }
+    },
+    {
+      "core-site": {
+        "properties": {
+          "proxyuser_group": "hadoop",
+          "hadoop.proxyuser.falcon.groups": "*",
+          "hadoop.proxyuser.root.groups": "*",
+          "hadoop.proxyuser.livy.hosts": "*",
+          "hadoop.proxyuser.falcon.hosts": "*",
+          "hadoop.proxyuser.oozie.hosts": "*",
+          "hadoop.proxyuser.hcat.hosts": "*",
+          "hadoop.proxyuser.oozie.groups": "*",
+          "hadoop.proxyuser.hive.groups": "*",
+          "hadoop.proxyuser.hcat.groups": "*",
+          "hadoop.proxyuser.livy.groups": "*",
+          "hadoop.proxyuser.hbase.groups": "*",
+          "hadoop.proxyuser.hbase.hosts": "*",
+          "hadoop.proxyuser.root.hosts": "*",
+          "hadoop.proxyuser.hive.hosts": "*"
+        }
+      }
+    },
+    {
+      "zoo.cfg": {
+        "properties": {
+          "dataDir": "/hadoopfs/fs1/zookeeper"
+        }
+      }
+    }
+  ],
+  "host_groups": [
+    {
+      "components": [
+        {
+          "name": "ZOOKEEPER_SERVER"
+        }
+      ],
+      "cardinality": "1"
+    },
+    {
+      "components": [
+        {
+          "name": "ZOOKEEPER_CLIENT"
+        }
+      ],
+      "cardinality": "1+"
+    },
+    {
+      "components": [
+        {
+          "name": "ZOOKEEPER_CLIENT"
+        }
+      ],
+      "cardinality": "1+"
+    }
+  ]
+}
