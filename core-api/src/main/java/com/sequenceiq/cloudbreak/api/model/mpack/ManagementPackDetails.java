@@ -2,34 +2,21 @@ package com.sequenceiq.cloudbreak.api.model.mpack;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
+import com.sequenceiq.cloudbreak.api.model.JsonEntity;
 
 import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class ManagementPackDetails extends ManagementPackBase {
-    @ApiModelProperty(value = ModelDescriptions.MpackDetailsDescription.STACK_DEFAULT)
-    private boolean stackDefault;
+public class ManagementPackDetails implements JsonEntity {
+    private String name;
 
-    @ApiModelProperty(value = ModelDescriptions.MpackDetailsDescription.PREINSTALLED)
-    private boolean preInstalled;
-
-    public boolean isStackDefault() {
-        return stackDefault;
+    public String getName() {
+        return name;
     }
 
-    public void setStackDefault(boolean stackDefault) {
-        this.stackDefault = stackDefault;
-    }
-
-    public boolean isPreInstalled() {
-        return preInstalled;
-    }
-
-    public void setPreInstalled(boolean preInstalled) {
-        this.preInstalled = preInstalled;
+    public void setName(String name) {
+        this.name = name;
     }
 }

@@ -1,12 +1,20 @@
 package com.sequenceiq.cloudbreak.converter.v2.cli;
 
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
+import com.sequenceiq.cloudbreak.api.model.mpack.ManagementPackDetails;
+import com.sequenceiq.cloudbreak.cloud.model.component.ManagementPackComponent;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 
@@ -24,6 +32,9 @@ public class StackRepoDetailsToStackRepoDetailsJsonConverter
 
     private static final String UBUNTU_16 = "ubuntu16";
 
+    @Inject
+    private ConversionService conversionService;
+
     @Override
     public AmbariStackDetailsJson convert(StackRepoDetails source) {
         AmbariStackDetailsJson ambariStackDetailsJson = new AmbariStackDetailsJson();
@@ -33,7 +44,6 @@ public class StackRepoDetailsToStackRepoDetailsJsonConverter
         ambariStackDetailsJson.setStack(stack.get(StackRepoDetails.REPO_ID_TAG));
         ambariStackDetailsJson.setRepositoryVersion(stack.get(StackRepoDetails.REPOSITORY_VERSION));
         ambariStackDetailsJson.setVersionDefinitionFileUrl(stack.get(StackRepoDetails.CUSTOM_VDF_REPO_KEY));
-        ambariStackDetailsJson.setMpackUrl(stack.get(StackRepoDetails.MPACK_TAG));
         if (stack.containsKey(REDHAT_6)) {
             ambariStackDetailsJson.setOs(REDHAT_6);
             ambariStackDetailsJson.setStackBaseURL(stack.get(REDHAT_6));
@@ -63,6 +73,13 @@ public class StackRepoDetailsToStackRepoDetailsJsonConverter
         ambariStackDetailsJson.setEnableGplRepo(source.isEnableGplRepo());
         ambariStackDetailsJson.setVerify(source.isVerify());
         ambariStackDetailsJson.setVersion(source.getHdpVersion());
+        if (!source.getMpacks().isEmpty()) {
+            List<ManagementPackDetails> mpacks = source.getMpacks().stream().filter(mp -> !mp.isStackDefault()).map(mp -> conversionService.convert(
+                    mp, ManagementPackDetails.class)).collect(Collectors.toList());
+            ambariStackDetailsJson.setMpacks(mpacks);
+            Optional<ManagementPackComponent> stackDefaultMpack = source.getMpacks().stream().filter(mp -> mp.isStackDefault()).findFirst();
+            stackDefaultMpack.ifPresent(mp -> ambariStackDetailsJson.setMpackUrl(mp.getMpackUrl()));
+        }
         return ambariStackDetailsJson;
     }
 }

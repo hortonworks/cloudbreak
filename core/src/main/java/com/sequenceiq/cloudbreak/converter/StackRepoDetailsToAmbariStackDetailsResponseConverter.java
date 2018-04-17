@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsResponse;
-import com.sequenceiq.cloudbreak.api.model.mpack.ClusterResponseMpackDetails;
+import com.sequenceiq.cloudbreak.api.model.mpack.ManagementPackDetails;
 import com.sequenceiq.cloudbreak.cloud.model.component.ManagementPackComponent;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 
@@ -30,8 +30,8 @@ public class StackRepoDetailsToAmbariStackDetailsResponseConverter
         ambariRepoDetailsJson.setUtil(source.getUtil());
         ambariRepoDetailsJson.setEnableGplRepo(source.isEnableGplRepo());
         if (!source.getMpacks().isEmpty()) {
-            List<ClusterResponseMpackDetails> mpacks = source.getMpacks().stream().filter(mp -> !mp.isStackDefault()).map(mp -> conversionService.convert(
-                    mp, ClusterResponseMpackDetails.class)).collect(Collectors.toList());
+            List<ManagementPackDetails> mpacks = source.getMpacks().stream().filter(mp -> !mp.isStackDefault()).map(mp -> conversionService.convert(
+                    mp, ManagementPackDetails.class)).collect(Collectors.toList());
             ambariRepoDetailsJson.setMpacks(mpacks);
             Optional<ManagementPackComponent> stackDefaultMpack = source.getMpacks().stream().filter(mp -> mp.isStackDefault()).findFirst();
             stackDefaultMpack.ifPresent(mp -> ambariRepoDetailsJson.getStack().put(StackRepoDetails.MPACK_TAG, mp.getMpackUrl()));
