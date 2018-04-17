@@ -21,6 +21,8 @@
 
 NAME=kpropd
 PROG=$(which kpropd)
+# on Suse Linux it is not on the PATH
+if [[ "$?" == 1 ]]; then PROG=/usr/lib/mit/sbin/kpropd; fi
 
 get_pid() {
     ps -o pid= -C $NAME

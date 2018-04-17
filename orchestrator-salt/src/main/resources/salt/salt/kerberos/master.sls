@@ -18,6 +18,11 @@ add_principals_sh_script:
       kdcs: {{ kerberos.kdcs }}
       pw: {{ kerberos.password }}
       usr: {{ kerberos.user }}
+{% if grains['os_family'] == 'Suse' %}
+      kadmin_local: /usr/lib/mit/sbin/kadmin.local
+{% else %}
+      kadmin_local: kadmin.local
+{% endif %}
 
 run_principals_sh_script:
   cmd.run:
@@ -33,7 +38,11 @@ remove_kprop_acl:
 start_kadmin:
   service.running:
     - enable: True
+{% if grains['os_family'] == 'Suse' %}
+    - name: kadmind
+{% else %}
     - name: kadmin
+{% endif %}
     - watch:
         - pkg: install_kerberos
 

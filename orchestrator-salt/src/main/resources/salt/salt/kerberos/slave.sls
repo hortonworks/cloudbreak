@@ -33,7 +33,11 @@ start_slave_kdc:
 stop_kadmin:
   service.dead:
     - enable: False
+{% if grains['os_family'] == 'Suse' %}
+    - name: kadmind
+{% else %}
     - name: kadmin
+{% endif %}
 
 {% endif %}
 

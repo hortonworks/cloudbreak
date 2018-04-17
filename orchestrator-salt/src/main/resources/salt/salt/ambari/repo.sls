@@ -37,7 +37,6 @@ set_sles_sdk_priority_in_service_aws:
     - mode: insert
     - content: "repo_31_priority=100"
     - after: "repo_31_enabled=1"
-    - ignore_if_missing: True
     - backup: False
 {% endif %}
 
@@ -56,7 +55,6 @@ set_sles_sdk_priority_in_service_gce:
     - mode: insert
     - content: "repo_31_priority=100"
     - after: "repo_31_enabled=1"
-    - ignore_if_missing: True
     - backup: False
 {% endif %}
 
@@ -75,7 +73,6 @@ set_sles_sdk_priority_in_service_azure:
     - mode: insert
     - content: "repo_31_priority=100"
     - after: "repo_31_enabled=1"
-    - ignore_if_missing: True
     - backup: False
 {% endif %}
 
