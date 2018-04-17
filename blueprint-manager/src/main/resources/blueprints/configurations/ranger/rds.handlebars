@@ -5,7 +5,7 @@
       "db_user": "{{{ rds.ranger.connectionUserName }}}",
       "db_password": "{{{ rds.ranger.connectionPassword }}}",
       "db_name": "{{{ rds.ranger.databaseName }}}",
-      "db_host": "{{{ rds.ranger.hostWithPort }}}",
+      "db_host": "{{{ rds.ranger.withoutJDBCPrefix }}}",
       "DB_FLAVOR": "{{{ rds.ranger.upperCaseDatabaseEngine }}}"
     }
   },
