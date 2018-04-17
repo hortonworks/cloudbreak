@@ -26,7 +26,7 @@ type AmbariStackDetailsResponse struct {
 	HdpVersion string `json:"hdpVersion,omitempty"`
 
 	// mpacks
-	Mpacks []*ManagementPackDetails `json:"mpacks"`
+	Mpacks []*ClusterResponseMpackDetails `json:"mpacks"`
 
 	// stack
 	Stack map[string]string `json:"stack,omitempty"`

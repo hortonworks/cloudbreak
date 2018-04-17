@@ -150,7 +150,7 @@ func createRdsImpl(client rdsClient, name string, username string, password stri
 		ConnectionPassword: &password,
 		ConnectionURL:      &URL,
 		Type:               &rdsType,
-		ConnectorJarURL:    jarURL,
+		ConnectorJarURL:    &jarURL,
 	}
 	if oracle != nil {
 		rdsRequest.OracleParameters = oracle
