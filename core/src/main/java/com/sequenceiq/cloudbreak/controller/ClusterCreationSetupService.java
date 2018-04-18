@@ -40,6 +40,7 @@ import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.controller.validation.filesystem.FileSystemValidator;
+import com.sequenceiq.cloudbreak.controller.validation.mpack.ManagementPackValidator;
 import com.sequenceiq.cloudbreak.converter.AmbariStackDetailsJsonToStackRepoDetailsConverter;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
@@ -103,6 +104,9 @@ public class ClusterCreationSetupService {
     @Inject
     private DefaultAmbariRepoService defaultAmbariRepoService;
 
+    @Inject
+    private ManagementPackValidator mpackValidator;
+
     public void validate(ClusterRequest request, Stack stack, IdentityUser user) {
         validate(request, null, stack, user);
     }
@@ -117,6 +121,7 @@ public class ClusterCreationSetupService {
             credential = credentialToCloudCredentialConverter.convert(stack.getCredential());
         }
         fileSystemValidator.validateFileSystem(stack.cloudPlatform(), credential, request.getFileSystem());
+        mpackValidator.validateMpacks(request, user);
     }
 
     public Cluster prepare(ClusterRequest request, Stack stack, IdentityUser user) throws Exception {
