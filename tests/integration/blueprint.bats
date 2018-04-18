@@ -6,7 +6,7 @@ load ../utils/mock_parameters
 @test "Check blueprint create from url" {
   OUTPUT=$(create-blueprint from-url --name test --url "${BLUEPRINT_URL}" 2>&1 | tail -n 2 | head -n 1)
 
-  [[ "${OUTPUT}" == *"blueprint created: aeiou"* ]]
+  [[ "${OUTPUT}" == *"blueprint created:"* ]]
   [[ "${OUTPUT}" != *"error"* ]]
 }
 
@@ -28,7 +28,7 @@ load ../utils/mock_parameters
   OUTPUT=$(create-blueprint from-file --name test --file blueprints/test.bp 2>&1 | tail -n 2 | head -n 1)
   echo $OUTPUT
 
-  [[ "${OUTPUT}" == *"blueprint created: aeiou"* ]]
+  [[ "${OUTPUT}" == *"blueprint created:"* ]]
   [[ "${OUTPUT}" != *"error"* ]]
 }
 
