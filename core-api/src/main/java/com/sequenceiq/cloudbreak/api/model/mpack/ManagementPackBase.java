@@ -9,12 +9,11 @@ import javax.validation.constraints.Size;
 
 import com.sequenceiq.cloudbreak.api.model.JsonEntity;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
-import com.sequenceiq.cloudbreak.validation.ResourceGroup;
 
 import io.swagger.annotations.ApiModelProperty;
 
 public abstract class ManagementPackBase implements JsonEntity {
-    @NotNull(groups = ResourceGroup.class)
+    @NotNull()
     @Size(max = 100, min = 5, message = "The length of the management pack's name has to be in range of 5 to 100")
     @Pattern(regexp = "(^[a-z][-a-z0-9]*[a-z0-9]$)",
             message = "The management pack's name can only contain lowercase alphanumeric characters and hyphens and has start with an alphanumeric character")
@@ -25,7 +24,9 @@ public abstract class ManagementPackBase implements JsonEntity {
     @ApiModelProperty(ModelDescriptions.DESCRIPTION)
     private String description;
 
-    @NotNull(groups = ResourceGroup.class)
+    @NotNull
+    @Pattern(regexp = "^http[s]?://.*",
+            message = "The URL should start with the protocol (http, https)")
     @ApiModelProperty(value = ModelDescriptions.MpackDetailsDescription.MPACK_URL)
     private String mpackUrl;
 

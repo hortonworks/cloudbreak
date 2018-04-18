@@ -3,8 +3,6 @@ package com.sequenceiq.cloudbreak.api.endpoint.v1;
 import java.util.Set;
 
 import javax.validation.Valid;
-import javax.validation.groups.ConvertGroup;
-import javax.validation.groups.Default;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -20,7 +18,6 @@ import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.doc.Notes;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions.ManagementPackOpDescription;
-import com.sequenceiq.cloudbreak.validation.ResourceGroup;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -48,7 +45,7 @@ public interface ManagementPackEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ManagementPackOpDescription.POST_PRIVATE, produces = ContentType.JSON, notes = Notes.MANAGEMENT_PACK_NOTES,
             nickname = "postPrivateManagementPack")
-    ManagementPackResponse postPrivate(@Valid @ConvertGroup(from = Default.class, to = ResourceGroup.class) ManagementPackRequest mpackRequest);
+    ManagementPackResponse postPrivate(@Valid ManagementPackRequest mpackRequest);
 
     @GET
     @Path("user")
@@ -76,7 +73,7 @@ public interface ManagementPackEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ManagementPackOpDescription.POST_PUBLIC, produces = ContentType.JSON, notes = Notes.MANAGEMENT_PACK_NOTES,
             nickname = "postPublicManagementPack")
-    ManagementPackResponse postPublic(@Valid @ConvertGroup(from = Default.class, to = ResourceGroup.class) ManagementPackRequest mpackRequest);
+    ManagementPackResponse postPublic(@Valid ManagementPackRequest mpackRequest);
 
     @GET
     @Path("account")
