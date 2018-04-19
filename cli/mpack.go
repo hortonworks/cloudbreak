@@ -47,12 +47,17 @@ func CreateMpack(c *cli.Context) {
 
 func createMpackImpl(client mpackClient, name, description, url string, purge bool, purgeList string, force, public bool) {
 	defer utils.TimeTrack(time.Now(), "create management pack")
+	pList := make([]string, 0)
+	if len(purgeList) > 0 {
+		pList = strings.Split(purgeList, ",")
+	}
+
 	req := &models_cloudbreak.ManagementPackRequest{
 		Name:        &name,
 		Description: &description,
 		MpackURL:    &url,
 		Purge:       &purge,
-		PurgeList:   strings.Split(purgeList, ","),
+		PurgeList:   pList,
 		Force:       &force,
 	}
 

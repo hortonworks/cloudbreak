@@ -5,6 +5,7 @@ import (
 	"github.com/hortonworks/cb-cli/cli/utils"
 	"github.com/hortonworks/cb-cli/client_cloudbreak/v1mpacks"
 	"github.com/hortonworks/cb-cli/models_cloudbreak"
+	"strings"
 	"testing"
 )
 
@@ -135,7 +136,7 @@ func TestCreateMpackImplForPublic(t *testing.T) {
 		t.Errorf("no public mpack request was sent")
 	}
 	req := client.postPublicCapture
-	checkReqParams(req, t)
+	checkReqParams(req, "stack-definitions,service-definitions,mpacks", t)
 }
 
 func TestCreateMpackImplForPrivate(t *testing.T) {
@@ -148,10 +149,23 @@ func TestCreateMpackImplForPrivate(t *testing.T) {
 		t.Errorf("no private mpack request was sent")
 	}
 	req := client.postPrivateCapture
-	checkReqParams(req, t)
+	checkReqParams(req, "stack-definitions,service-definitions,mpacks", t)
 }
 
-func checkReqParams(req *models_cloudbreak.ManagementPackRequest, t *testing.T) {
+func TestCreateMpackForEmptyPurgeList(t *testing.T) {
+	t.Parallel()
+
+	client := new(mockMpackClient)
+	createMpackImpl(client, "mpack", "mpack description", "http://localhost/mpack.tar.gz", true, "", true, false)
+
+	if client.postPrivateCapture == nil {
+		t.Errorf("no private mpack request was sent")
+	}
+	req := client.postPrivateCapture
+	checkReqParams(req, "", t)
+}
+
+func checkReqParams(req *models_cloudbreak.ManagementPackRequest, purgeList string, t *testing.T) {
 	if *req.Name != "mpack" {
 		t.Errorf("mpack name does not match %s == %s", *req.Name, "mpack")
 	}
@@ -164,7 +178,7 @@ func checkReqParams(req *models_cloudbreak.ManagementPackRequest, t *testing.T) 
 	if *req.Purge != true {
 		t.Errorf("mpack purge does not match %v == %v", *req.Purge, true)
 	}
-	if req.PurgeList[0] != "stack-definitions" || req.PurgeList[1] != "service-definitions" || req.PurgeList[2] != "mpacks" {
+	if strings.Join(req.PurgeList, ",") != purgeList {
 		t.Errorf("mpack purge list does not match %s == %s", req.PurgeList, []string{"stack-definitions", "service-definitions", "mpacks"})
 	}
 }
