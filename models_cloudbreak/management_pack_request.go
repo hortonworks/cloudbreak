@@ -28,6 +28,7 @@ type ManagementPackRequest struct {
 
 	// url of the ambari management pack
 	// Required: true
+	// Pattern: ^http[s]?://.*
 	MpackURL *string `json:"mpackUrl"`
 
 	// name of the resource
@@ -106,6 +107,10 @@ func (m *ManagementPackRequest) validateDescription(formats strfmt.Registry) err
 func (m *ManagementPackRequest) validateMpackURL(formats strfmt.Registry) error {
 
 	if err := validate.Required("mpackUrl", "body", m.MpackURL); err != nil {
+		return err
+	}
+
+	if err := validate.Pattern("mpackUrl", "body", string(*m.MpackURL), `^http[s]?://.*`); err != nil {
 		return err
 	}
 
