@@ -75,6 +75,7 @@ generate-swagger: build-swagger-fix
 	make fix-swagger
 
 generate-swagger-docker: build-swagger-fix
+	rm -rf client_cloudbreak models_cloudbreak
 	@docker run --rm -it -v "${GOPATH}":"${GOPATH}" -w "${PWD}" -e GOPATH --net=host quay.io/goswagger/swagger:0.12.0 \
 	generate client -f http://$(CB_IP):$(CB_PORT)/cb/api/swagger.json -c client_cloudbreak -m models_cloudbreak
 	make fix-swagger
