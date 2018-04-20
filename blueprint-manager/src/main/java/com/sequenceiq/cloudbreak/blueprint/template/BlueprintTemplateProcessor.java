@@ -57,6 +57,7 @@ public class BlueprintTemplateProcessor {
                 .withStackVersion(source.getBlueprintView().getVersion())
                 .withRdsConfigs(source.getRdsConfigs())
                 .withFileSystemConfigs(source.getFileSystemConfigurationView().orElse(null))
+                .withCustomProperties(source.getStackParameters())
                 .withCustomProperties(blueprintInputs)
                 .withHdfConfigs(source.getHdfConfigs())
                 .build();

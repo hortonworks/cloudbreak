@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.blueprint;
 
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -44,6 +45,8 @@ public class BlueprintPreparationObject {
 
     private final Optional<FlexSubscription> flexSubscription;
 
+    private final Map<String, ?> stackParameters;
+
     private BlueprintPreparationObject(BlueprintPreparationObject.Builder builder) {
         this.rdsConfigs = builder.rdsConfigs;
         this.hostgroupViews = builder.hostgroupViews;
@@ -57,6 +60,7 @@ public class BlueprintPreparationObject {
         this.blueprintView = builder.blueprintView;
         this.generalClusterConfigs = builder.generalClusterConfigs;
         this.flexSubscription = builder.flexSubscription;
+        this.stackParameters = builder.stackParameters;
     }
 
     public Set<RDSConfig> getRdsConfigs() {
@@ -107,6 +111,10 @@ public class BlueprintPreparationObject {
         return blueprintView;
     }
 
+    public Map<String, ?> getStackParameters() {
+        return stackParameters;
+    }
+
     public static class Builder {
 
         private Set<RDSConfig> rdsConfigs = new HashSet<>();
@@ -132,6 +140,8 @@ public class BlueprintPreparationObject {
         private GeneralClusterConfigs generalClusterConfigs;
 
         private BlueprintView blueprintView;
+
+        private Map<String, ?> stackParameters;
 
         public static Builder builder() {
             return new Builder();
@@ -214,6 +224,11 @@ public class BlueprintPreparationObject {
 
         public Builder withFlexSubscription(FlexSubscription flexSubscription) {
             this.flexSubscription = Optional.ofNullable(flexSubscription);
+            return this;
+        }
+
+        public Builder withStackParameters(Map<String, ?> stackParameters) {
+            this.stackParameters = stackParameters;
             return this;
         }
 

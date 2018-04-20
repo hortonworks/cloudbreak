@@ -118,9 +118,11 @@ public class BlueprintTemplateModelContextBuilder {
         return this;
     }
 
-    public BlueprintTemplateModelContextBuilder withCustomProperties(Map<String, Object> customProperties) {
-        for (Entry<String, Object> customProperty : customProperties.entrySet()) {
-            withCustomProperty(customProperty.getKey(), customProperty.getValue().toString());
+    public BlueprintTemplateModelContextBuilder withCustomProperties(Map<String, ?> customProperties) {
+        if (customProperties != null) {
+            for (Entry<String, ?> customProperty : customProperties.entrySet()) {
+                withCustomProperty(customProperty.getKey(), customProperty.getValue().toString());
+            }
         }
         return this;
     }

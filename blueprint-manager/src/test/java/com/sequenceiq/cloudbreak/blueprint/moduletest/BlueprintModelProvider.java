@@ -1,7 +1,9 @@
 package com.sequenceiq.cloudbreak.blueprint.moduletest;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -138,6 +140,21 @@ class BlueprintModelProvider {
                 .build();
     }
 
+    static BlueprintPreparationObject blueprintObjectWhenStackParametersConfigured() throws JsonProcessingException {
+        GeneralClusterConfigs configs = BlueprintTestUtil.generalClusterConfigs();
+        Map<String, Object> map = new HashMap<>();
+        map.put("no_dot_in_key", "nodot");
+        map.put("some.value.string.not.resolved", "valuestring.with.dot");
+        map.put("some_int", -1);
+        map.put("some_bool", true);
+        return BlueprintPreparationObject.Builder.builder()
+                .withHostgroups(getHostGroups("master", "worker", "compute"))
+                .withBlueprintView(BlueprintTestUtil.generalBlueprintView("", "2.6", "HDP"))
+                .withGeneralClusterConfigs(configs)
+                .withStackParameters(map)
+                .build();
+    }
+
     static BlueprintPreparationObject blueprintObjectWhenLdapAndDruidRdsConfigured() throws JsonProcessingException {
         return getPreparedBuilder()
                 .withBlueprintView(BlueprintTestUtil.generalBlueprintView("", "2.6", "HDP"))
@@ -177,7 +194,7 @@ class BlueprintModelProvider {
                 .build();
     }
 
-    static BlueprintPreparationObject   blueprintObjectWhereSmartSenseHasConfigured() throws JsonProcessingException {
+    static BlueprintPreparationObject blueprintObjectWhereSmartSenseHasConfigured() throws JsonProcessingException {
         return getPreparedBuilder("master", "slave_1")
                 .withBlueprintView(BlueprintTestUtil.generalBlueprintView("", "2.6", "HDP"))
                 .withSmartSenseSubscriptionId("A-99900000-C-00000000")

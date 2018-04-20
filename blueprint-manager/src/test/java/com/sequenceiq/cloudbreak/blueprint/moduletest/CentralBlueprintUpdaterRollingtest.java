@@ -15,6 +15,7 @@ import static com.sequenceiq.cloudbreak.blueprint.moduletest.BlueprintModelProvi
 import static com.sequenceiq.cloudbreak.blueprint.moduletest.BlueprintModelProvider.blueprintObjectWhenRangerAndRdsPresentedThenRdsRangerShouldConfigured;
 import static com.sequenceiq.cloudbreak.blueprint.moduletest.BlueprintModelProvider.blueprintObjectWhenRdsConfiguredWithRdsOozie;
 import static com.sequenceiq.cloudbreak.blueprint.moduletest.BlueprintModelProvider.blueprintObjectWhenSharedServiceConfigured;
+import static com.sequenceiq.cloudbreak.blueprint.moduletest.BlueprintModelProvider.blueprintObjectWhenStackParametersConfigured;
 import static com.sequenceiq.cloudbreak.blueprint.moduletest.BlueprintModelProvider.blueprintObjectWhenWebhcatConfigured;
 import static com.sequenceiq.cloudbreak.blueprint.moduletest.BlueprintModelProvider.blueprintObjectWhereExecutioTypeHasConfiguredAsContainer;
 import static com.sequenceiq.cloudbreak.blueprint.moduletest.BlueprintModelProvider.blueprintObjectWhereSmartSenseHasConfigured;
@@ -83,6 +84,7 @@ public class CentralBlueprintUpdaterRollingtest extends CentralBlueprintContext 
                 put("webhcat-2-6", blueprintObjectWhenWebhcatConfigured());
                 put("shared-service", blueprintObjectWhenSharedServiceConfigured());
                 put("hdp26-shared-services", blueprintObjectWhenSharedServiceConfigured());
+                put("stack-parameters", blueprintObjectWhenStackParametersConfigured());
             }
         };
     }

@@ -1,0 +1,77 @@
+{
+  "Blueprints": {
+    "blueprint_name": "stack-parameters",
+    "stack_name": "HDP",
+    "stack_version": "2.6"
+  },
+  "settings": [
+    {
+      "recovery_settings": []
+    },
+    {
+      "service_settings": [
+        {
+          "name": "HIVE",
+          "credential_store_enabled": "false"
+        }
+      ]
+    },
+    {
+      "component_settings": []
+    }
+  ],
+  "configurations": [
+    {
+      "hive-site1": {
+        "hive.metastore.warehouse.dir1": "{{{ no_dot_in_key }}}"
+      }
+    },
+    {
+      "hive-site2": {
+        "hive.metastore.warehouse.dir2": "{{{ some.value.string }}}"
+      }
+    },
+    {
+      "hive-site3": {
+        "hive.metastore.warehouse.dir3": "{{{ some_int }}}"
+      }
+    },
+    {
+      "hive-site4": {
+        "hive.metastore.warehouse.dir4": "{{{ some_bool }}}"
+      }
+    }
+  ],
+  "host_groups": [
+    {
+      "name": "master",
+      "configurations": [],
+      "components": [
+        {
+          "name": "ZOOKEEPER_SERVER"
+        }
+      ],
+      "cardinality": "1"
+    },
+    {
+      "name": "worker",
+      "configurations": [],
+      "components": [
+        {
+          "name": "ZOOKEEPER_CLIENT"
+        }
+      ],
+      "cardinality": "1+"
+    },
+    {
+      "name": "compute",
+      "configurations": [],
+      "components": [
+        {
+          "name": "ZOOKEEPER_CLIENT"
+        }
+      ],
+      "cardinality": "1+"
+    }
+  ]
+}

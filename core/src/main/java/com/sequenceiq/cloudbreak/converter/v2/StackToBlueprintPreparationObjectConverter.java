@@ -98,7 +98,6 @@ public class StackToBlueprintPreparationObjectConverter extends AbstractConversi
             }
             IdentityUser identityUser = userDetailsService.getDetails(cluster.getOwner(), UserFilterField.USERID);
 
-
             return BlueprintPreparationObject.Builder.builder()
                     .withFlexSubscription(source.getFlexSubscription())
                     .withRdsConfigs(postgresConfigService.createRdsConfigIfNeeded(source, cluster))
@@ -112,6 +111,7 @@ public class StackToBlueprintPreparationObjectConverter extends AbstractConversi
                     .withLdapConfig(ldapConfig)
                     .withHdfConfigs(hdfConfigs)
                     .withKerberosConfig(cluster.isSecure() ? cluster.getKerberosConfig() : null)
+                    .withStackParameters(source.getParameters())
                     .build();
         } catch (BlueprintProcessingException e) {
             throw new CloudbreakServiceException(e.getMessage(), e);
