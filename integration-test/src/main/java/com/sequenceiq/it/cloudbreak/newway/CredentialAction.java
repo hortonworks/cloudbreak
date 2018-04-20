@@ -1,9 +1,9 @@
 package com.sequenceiq.it.cloudbreak.newway;
 
+import java.io.IOException;
+
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.newway.log.Log;
-
-import java.io.IOException;
 
 class CredentialAction {
 
@@ -62,10 +62,16 @@ class CredentialAction {
     }
 
     public static void createInGiven(IntegrationTestContext integrationTestContext, Entity entity) {
+        if (getWithoutException(integrationTestContext, entity)) {
+            return;
+        }
+        if (postWithoutException(integrationTestContext, entity)) {
+            return;
+        }
         try {
             get(integrationTestContext, entity);
-        } catch (Exception e) {
-            post(integrationTestContext, entity);
+        } catch (IOException iox) {
+            throw new RuntimeException(iox);
         }
     }
 
@@ -78,4 +84,21 @@ class CredentialAction {
         }
     }
 
+    private static boolean getWithoutException(IntegrationTestContext integrationTestContext, Entity entity) {
+        try {
+            get(integrationTestContext, entity);
+            return true;
+        } catch (Exception ex) {
+            return false;
+        }
+    }
+
+    private static boolean postWithoutException(IntegrationTestContext integrationTestContext, Entity entity) {
+        try {
+            post(integrationTestContext, entity);
+            return true;
+        } catch (Exception ex) {
+            return false;
+        }
+    }
 }
