@@ -4,7 +4,9 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.api.model.GatewayType;
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
+import com.sequenceiq.cloudbreak.domain.Gateway;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.reactor.api.event.EventSelectorUtil;
 import com.sequenceiq.cloudbreak.reactor.api.event.proxy.RegisterProxyFailed;
@@ -44,9 +46,12 @@ public class RegisterProxyHandler implements ReactorEventHandler<RegisterProxyRe
         Selectable response;
         try {
             Stack stack = stackRepository.findOneWithLists(stackId);
-            String proxyIp = stackUtil.extractAmbariIp(stack);
-            String contextPath = stack.getCluster().getGateway().getPath();
-            proxyRegistrator.register(stack.getName(), contextPath, proxyIp);
+            Gateway gateway = stack.getCluster().getGateway();
+            if (gateway != null && gateway.getEnableGateway()
+                    && gateway.getGatewayType() == GatewayType.CENTRAL) {
+                String proxyIp = stackUtil.extractAmbariIp(stack);
+                proxyRegistrator.register(stack.getName(), gateway.getPath(), proxyIp);
+            }
             response = new RegisterProxySuccess(stackId);
         } catch (RuntimeException e) {
             response = new RegisterProxyFailed(stackId, e);
