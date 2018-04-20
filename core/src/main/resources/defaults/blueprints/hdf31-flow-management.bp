@@ -1,6 +1,6 @@
 {
   "inputs": [],
-  "description": "Useful for data-flow management with Apache NiFi",
+  "description": "Useful for data-flow management with Apache NiFi and Apache NiFi Registry",
   "blueprint": {
     "Blueprints": {
       "blueprint_name": "hdf31-flow-management",
@@ -11,9 +11,6 @@
       {
         "nifi-ambari-config": {
           "nifi.security.encrypt.configuration.password": "changemeplease",
-          "nifi.node.protocol.port": "9089",
-          "nifi.node.port": "9090",
-          "nifi.node.ssl.port": "9091",
           "nifi.max_mem": "1g"
         }
       },
@@ -29,21 +26,28 @@
         "nifi-ambari-ssl-config": {
           "nifi.toolkit.tls.token": "changemeplease",
           "nifi.node.ssl.isenabled": "true",
-          "nifi.security.needClientAuth": "false",
           "nifi.toolkit.dn.prefix": "CN=",
-          "nifi.toolkit.dn.suffix": ", OU=NIFI",
-          "nifi.initial.admin.identity": "admin"
+          "nifi.toolkit.dn.suffix": ", OU=NIFI"
         }
       },
       {
-        "nifi-env": {
-          "nifi_group": "nifi",
-          "nifi_user": "nifi"
+        "nifi-registry-ambari-config": {
+          "nifi.registry.security.encrypt.configuration.password": "changemeplease"
         }
       },
       {
-        "ams-grafana-env": {
-          "metrics_grafana_password": "admin"
+        "nifi-registry-properties": {
+          "nifi.registry.sensitive.props.key": "changemeplease",
+          "nifi.registry.security.user.login.identity.provider": "kerberos-provider",
+          "nifi.registry.security.identity.mapping.pattern.kerb": "^(.*?)@(.*?)$",
+          "nifi.registry.security.identity.mapping.value.kerb": "$1"
+        }
+      },
+      {
+        "nifi-registry-ambari-ssl-config": {
+          "nifi.registry.ssl.isenabled": "true",
+          "nifi.registry.toolkit.dn.prefix": "CN=",
+          "nifi.registry.toolkit.dn.suffix": ", OU=NIFI"
         }
       }
     ],
@@ -53,6 +57,9 @@
         "components": [
           {
             "name": "NIFI_CA"
+          },
+          {
+            "name": "NIFI_REGISTRY_MASTER"
           },
           {
             "name": "METRICS_COLLECTOR"

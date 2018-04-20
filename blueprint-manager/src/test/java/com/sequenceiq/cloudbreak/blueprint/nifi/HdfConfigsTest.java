@@ -9,7 +9,7 @@ public class HdfConfigsTest {
 
     @Test
     public void testHdfConfigsIfGetSomePropertyThenShouldBeVisible() {
-        HdfConfigs hdfConfigs = new HdfConfigs("entities", Optional.empty());
+        HdfConfigs hdfConfigs = new HdfConfigs("entities", "entities", Optional.empty());
         Assert.assertEquals("entities", hdfConfigs.getNodeEntities());
     }
 

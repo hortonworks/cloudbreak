@@ -4,6 +4,10 @@
     "content": "nifigtargets",
     "nifi.initial.admin.identity": "firstname"
   },
+  "nifi-registry-ambari-ssl-config": {
+    "content": "nifigtargets",
+    "nifi.registry.initial.admin.identity": "firstname"
+  },
 
   "ams-grafana-env": {
     "metrics_grafana_username": "firstname",

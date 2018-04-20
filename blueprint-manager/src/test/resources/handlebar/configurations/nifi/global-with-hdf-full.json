@@ -4,6 +4,10 @@
     "content": "nifigtargets",
     "nifi.initial.admin.identity": "firstname"
   },
+  "nifi-registry-ambari-ssl-config": {
+    "content": "nifigtargets",
+    "nifi.registry.initial.admin.identity": "firstname"
+  },
 
   "nifi-properties": {
     "nifi.web.proxy.host": "nifiproxyhost"

@@ -4,6 +4,10 @@
     "content": "{{{ nifi_targets }}}",
     "nifi.initial.admin.identity": "{{{ cluster_admin_firstname }}}"
   },
+  "nifi-registry-ambari-ssl-config": {
+    "content": "{{{ nifi_registry_targets }}}",
+    "nifi.registry.initial.admin.identity": "{{{ cluster_admin_firstname }}}"
+  },
 {{{#if nifi_proxy_hosts}}}
   "nifi-properties": {
     "nifi.web.proxy.host": "{{{ nifi_proxy_hosts }}}"

@@ -93,32 +93,30 @@ public class StackToBlueprintPreparationObjectConverter extends AbstractConversi
             FileSystemConfigurationView fileSystemConfigurationView = null;
             if (source.getCluster().getFileSystem() != null) {
                 fileSystemConfigurationView = new FileSystemConfigurationView(
-                        fileSystemConfigurationProvider.fileSystemConfiguration(fileSystem, source),
-                        fileSystem == null ? false : fileSystem.isDefaultFs());
+                    fileSystemConfigurationProvider.fileSystemConfiguration(fileSystem, source),
+                    fileSystem == null ? false : fileSystem.isDefaultFs());
             }
             IdentityUser identityUser = userDetailsService.getDetails(cluster.getOwner(), UserFilterField.USERID);
 
-
             return BlueprintPreparationObject.Builder.builder()
-                    .withFlexSubscription(source.getFlexSubscription())
-                    .withRdsConfigs(postgresConfigService.createRdsConfigIfNeeded(source, cluster))
-                    .withHostgroups(hostGroupService.getByCluster(cluster.getId()))
-                    .withGateway(cluster.getGateway())
-                    .withBlueprintView(new BlueprintView(cluster, blueprintStackInfo))
-                    .withStackRepoDetailsHdpVersion(stackRepoDetailsHdpVersion)
-                    .withFileSystemConfigurationView(fileSystemConfigurationView)
-                    .withGeneralClusterConfigs(generalClusterConfigsProvider.generalClusterConfigs(source, cluster, identityUser))
-                    .withSmartSenseSubscriptionId(aDefault.isPresent() ? aDefault.get().getSubscriptionId() : null)
-                    .withLdapConfig(ldapConfig)
-                    .withHdfConfigs(hdfConfigs)
-                    .withKerberosConfig(cluster.isSecure() ? cluster.getKerberosConfig() : null)
-                    .build();
+                .withFlexSubscription(source.getFlexSubscription())
+                .withRdsConfigs(postgresConfigService.createRdsConfigIfNeeded(source, cluster))
+                .withHostgroups(hostGroupService.getByCluster(cluster.getId()))
+                .withGateway(cluster.getGateway())
+                .withBlueprintView(new BlueprintView(cluster, blueprintStackInfo))
+                .withStackRepoDetailsHdpVersion(stackRepoDetailsHdpVersion)
+                .withFileSystemConfigurationView(fileSystemConfigurationView)
+                .withGeneralClusterConfigs(generalClusterConfigsProvider.generalClusterConfigs(source, cluster, identityUser))
+                .withSmartSenseSubscriptionId(aDefault.isPresent() ? aDefault.get().getSubscriptionId() : null)
+                .withLdapConfig(ldapConfig)
+                .withHdfConfigs(hdfConfigs)
+                .withKerberosConfig(cluster.isSecure() ? cluster.getKerberosConfig() : null)
+                .build();
         } catch (BlueprintProcessingException e) {
             throw new CloudbreakServiceException(e.getMessage(), e);
         } catch (IOException e) {
             throw new CloudbreakServiceException(e.getMessage(), e);
         }
     }
-
 
 }

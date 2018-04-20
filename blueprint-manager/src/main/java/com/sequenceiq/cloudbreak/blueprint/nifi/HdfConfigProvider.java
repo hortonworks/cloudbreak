@@ -25,16 +25,17 @@ public class HdfConfigProvider {
     @Inject
     private BlueprintProcessorFactory blueprintProcessorFactory;
 
-    public HdfConfigs createHdfConfig(Set<HostGroup> hostgroups,  Map<String, List<InstanceMetaData>> groupInstances, String blueprintText) {
+    public HdfConfigs createHdfConfig(Set<HostGroup> hostgroups, Map<String, List<InstanceMetaData>> groupInstances, String blueprintText) {
         BlueprintTextProcessor blueprintTextProcessor = createTextProcessor(blueprintText);
         Set<String> nifiMasters = collectNifiMasters(blueprintText);
         Set<InstanceGroup> nifiIgs = collectInstanceGroupsWhichContainsNifiMasters(hostgroups, nifiMasters);
         List<String> nifiFqdns = collectFqdnsByInstanceGroupName(groupInstances, nifiIgs);
         AtomicInteger index = new AtomicInteger(0);
-        String nodeIdentities = nifiFqdns.stream()
-                .map(fqdn -> String.format("<property name=\"Node Identity %s\">CN=%s, OU=NIFI</property>", index.addAndGet(1), fqdn))
-                .collect(Collectors.joining());
-        return new HdfConfigs(nodeIdentities, getProxyHostsParameter(nifiIgs, blueprintTextProcessor, groupInstances));
+        String nodeEntities = nifiFqdns.stream()
+            .map(fqdn -> String.format("<property name=\"Node Identity %s\">CN=%s, OU=NIFI</property>", index.addAndGet(1), fqdn))
+            .collect(Collectors.joining());
+        String registryNodeEntities = nodeEntities.replaceAll("Node Identity", "NiFi Identity");
+        return new HdfConfigs(nodeEntities, registryNodeEntities, getProxyHostsParameter(nifiIgs, blueprintTextProcessor, groupInstances));
     }
 
     private BlueprintTextProcessor createTextProcessor(String blueprintText) {
@@ -42,7 +43,7 @@ public class HdfConfigProvider {
     }
 
     private Optional<String> getProxyHostsParameter(Set<InstanceGroup> nifiIgs, BlueprintTextProcessor blueprintTextProcessor, Map<String,
-            List<InstanceMetaData>> groupInstances) {
+        List<InstanceMetaData>> groupInstances) {
         String port = blueprintTextProcessor.pathValue("configurations", "nifi-ambari-config", "nifi.node.ssl.port").orElse(DEFAULT_NIFI_PORT);
         List<String> publicIps = collectPublicIps(groupInstances, nifiIgs);
         return publicIps.isEmpty() ? Optional.empty() : Optional.of(publicIps.stream().map(ip -> ip + ":" + port).collect(Collectors.joining(",")));
@@ -54,12 +55,12 @@ public class HdfConfigProvider {
 
     private List<String> collectPublicIps(Map<String, List<InstanceMetaData>> groupInstances, Set<InstanceGroup> nifiIgs) {
         return nifiIgs.stream().flatMap(ig -> groupInstances.get(ig.getGroupName()).stream()).filter(im -> StringUtils.hasText(im.getPublicIp()))
-                .map(im -> im.getPublicIp()).collect(Collectors.toList());
+            .map(im -> im.getPublicIp()).collect(Collectors.toList());
     }
 
     private Set<InstanceGroup> collectInstanceGroupsWhichContainsNifiMasters(Set<HostGroup> hostgroups, Set<String> nifiMasters) {
         return hostgroups.stream().filter(hg -> nifiMasters.contains(hg.getName())).map(hg -> hg.getConstraint()
-                .getInstanceGroup()).collect(Collectors.toSet());
+            .getInstanceGroup()).collect(Collectors.toSet());
     }
 
     private Set<String> collectNifiMasters(String blueprintText) {
