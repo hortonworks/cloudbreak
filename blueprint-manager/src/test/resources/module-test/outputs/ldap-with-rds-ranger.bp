@@ -106,20 +106,13 @@
       }
     },
     {
-      "webhcat-site": {
-        "properties": {
-          "webhcat.proxyuser.root.groups": "*",
-          "webhcat.proxyuser.root.hosts": "*"
-          }
-      }
-    },
-    {
       "ranger-ugsync-site": {
         "properties": {
           "ranger.usersync.ldap.deltasync": "false",
           "ranger.usersync.enabled": "true",
           "ranger.usersync.group.searchbase": "cn=groups,dc=example,dc=org",
           "ranger.usersync.group.nameattribute": "cn",
+          "ranger.usersync.group.based.role.assignment.rules": "&ROLE_SYS_ADMIN:g:ambariadmins",
           "ranger.usersync.ldap.binddn": "cn=admin,dc=example,dc=org",
           "ranger.usersync.source.impl.class": "org.apache.ranger.ldapusersync.process.LdapUserGroupBuilder",
           "ranger.usersync.ldap.user.nameattribute": "cn=admin,dc=example,dc=org",
@@ -162,7 +155,7 @@
           "DB_FLAVOR": "POSTGRES",
           "db_name": "ranger",
           "db_user": "heyitsme",
-          "db_host": "10.1.1.1:5432",
+          "db_host": "10.1.1.1:5432/ranger",
           "db_password": "iamsoosecure"
         }
       }
@@ -172,6 +165,14 @@
         "properties": {
           "ranger_privelege_user_jdbc_url": "jdbc:postgresql://10.1.1.1:5432",
           "create_db_dbuser": "false"
+        }
+      }
+    },
+    {
+      "webhcat-site": {
+        "properties": {
+          "webhcat.proxyuser.root.groups": "*",
+          "webhcat.proxyuser.root.hosts": "*"
         }
       }
     },

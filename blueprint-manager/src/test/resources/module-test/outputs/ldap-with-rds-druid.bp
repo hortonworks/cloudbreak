@@ -106,7 +106,7 @@
       }
     },
     {
-      "superset-env": {
+      "druid-superset-env": {
         "properties": {
           "superset_admin_password": "Passw0rd",
           "superset_admin_lastname": "username",
@@ -124,29 +124,10 @@
       }
     },
     {
-      "druid-superset-env": {
-        "properties": {
-          "superset_admin_password": "Passw0rd",
-          "superset_admin_lastname": "username",
-          "superset_admin_email": "identity.user@email.com",
-          "superset_admin_firstname": "username"
-        }
-      }
-    },
-    {
-      "druid-common": {
-        "properties": {
-          "druid.metadata.storage.type": "postgresql",
-          "druid.metadata.storage.connector.user": "heyitsme",
-          "druid.metadata.storage.connector.password": "iamsoosecure",
-          "druid.metadata.storage.connector.connectURI": "jdbc:postgresql://10.1.1.1:5432/druid"
-        }
-      }
-    },
-    {
       "cluster-env": {
         "properties": {
           "recovery_enabled": "true",
+          "commands_to_retry": "START",
           "recovery_type": "AUTO_START"
         }
       }
@@ -201,9 +182,6 @@
         },
         {
           "name": "DRUID_SUPERSET"
-        },
-        {
-          "name": "SUPERSET"
         },
         {
           "name": "HIVE_SERVER"

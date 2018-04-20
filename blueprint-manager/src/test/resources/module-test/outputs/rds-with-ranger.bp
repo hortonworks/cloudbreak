@@ -25,6 +25,7 @@
         "proxyuser_group": "hadoop",
         "hadoop.proxyuser.falcon.groups": "*",
         "hadoop.proxyuser.root.groups": "*",
+        "hadoop.proxyuser.livy.hosts": "*",
         "hadoop.proxyuser.falcon.hosts": "*",
         "hadoop.proxyuser.oozie.hosts": "*",
         "fs.trash.interval": "4320",
@@ -32,6 +33,7 @@
         "hadoop.proxyuser.oozie.groups": "*",
         "hadoop.proxyuser.hive.groups": "*",
         "hadoop.proxyuser.hcat.groups": "*",
+        "hadoop.proxyuser.livy.groups": "*",
         "hadoop.proxyuser.hbase.groups": "*",
         "hadoop.proxyuser.hbase.hosts": "*",
         "hadoop.proxyuser.root.hosts": "*",
@@ -99,7 +101,7 @@
           "DB_FLAVOR": "POSTGRES",
           "db_name": "ranger",
           "db_user": "heyitsme",
-          "db_host": "10.1.1.1:5432",
+          "db_host": "10.1.1.1:5432/ranger",
           "db_password": "iamsoosecure"
         }
       }
@@ -115,7 +117,7 @@
       "ranger-env": {
         "properties": {
           "ranger_privelege_user_jdbc_url": "jdbc:postgresql://10.1.1.1:5432",
-          "create_db_dbuser":"false"
+          "create_db_dbuser": "false"
         }
       }
     },
@@ -131,6 +133,7 @@
       "cluster-env": {
         "properties": {
           "recovery_enabled": "true",
+          "commands_to_retry": "START",
           "recovery_type": "AUTO_START"
         }
       }

@@ -46,10 +46,10 @@ public class ConfigTemplateTest {
                         ldapConfigWhenLdapPresentedThenShouldReturnWithLdapConfig() },
                 { "blueprints/configurations/atlas/ldap.handlebars", "configurations/atlas/atlas-without-ldap.json",
                         withoutLdapConfigWhenLdapNotPresentedThenShouldReturnWithoutLdapConfig() },
-                { "blueprints/configurations/druid/rds.handlebars", "configurations/druid/druid-with-rds.json",
-                        druidRdsConfigWhenRdsPresentedThenShouldReturnWithRdsConfig() },
-                { "blueprints/configurations/druid/rds.handlebars", "configurations/druid/druid-without-rds.json",
-                        druidWithoutRdsConfigWhenRdsNotPresentedThenShouldReturnWithoutRdsConfig() },
+                {"blueprints/configurations/druid_superset/rds.handlebars", "configurations/druid_superset/druid-with-rds.json",
+                        druidSupersetRdsConfigWhenRdsPresentedThenShouldReturnWithRdsConfig() },
+                {"blueprints/configurations/druid_superset/rds.handlebars", "configurations/druid_superset/druid-without-rds.json",
+                        druidSupersetWithoutRdsConfigWhenRdsNotPresentedThenShouldReturnWithoutRdsConfig() },
                 { "blueprints/configurations/superset/rds.handlebars", "configurations/superset/superset-with-rds.json",
                         supersetRdsConfigWhenRdsPresentedThenShouldReturnWithRdsConfig() },
                 { "blueprints/configurations/superset/rds.handlebars", "configurations/superset/superset-without-rds.json",
@@ -100,6 +100,10 @@ public class ConfigTemplateTest {
                         objectWithoutEverything() },
                 { "blueprints/configurations/webhcat/global.handlebars", "configurations/webhcat/webhcat.json",
                         objectWithoutEverything() },
+                { "blueprints/configurations/druid/rds.handlebars", "configurations/druid/druid-without-rds.json",
+                        druidWithoutRdsConfigWhenRdsNotPresentedThenShouldReturnWithoutRdsConfig() },
+                { "blueprints/configurations/druid/rds.handlebars", "configurations/druid/druid-with-rds.json",
+                        druidRdsConfigWhenRdsPresentedThenShouldReturnWithRdsConfig() },
         });
     }
 
@@ -170,6 +174,25 @@ public class ConfigTemplateTest {
 
     public static Map<String, Object> withoutLdapConfigWhenLdapNotPresentedThenShouldReturnWithoutLdapConfig() {
         return new BlueprintTemplateModelContextBuilder()
+                .build();
+    }
+
+    public static Map<String, Object> druidSupersetRdsConfigWhenRdsPresentedThenShouldReturnWithRdsConfig() {
+        return new BlueprintTemplateModelContextBuilder()
+                .withRdsConfigs(Sets.newHashSet(TestUtil.rdsConfig(RdsType.SUPERSET)))
+                .withClusterAdminPassword("adminPassword")
+                .withClusterAdminLastname("lastname")
+                .withClusterAdminFirstname("firstname")
+                .withAdminEmail("admin@example.com")
+                .build();
+    }
+
+    public static Map<String, Object> druidSupersetWithoutRdsConfigWhenRdsNotPresentedThenShouldReturnWithoutRdsConfig() {
+        return new BlueprintTemplateModelContextBuilder()
+                .withClusterAdminPassword("adminPassword")
+                .withClusterAdminLastname("lastname")
+                .withClusterAdminFirstname("firstname")
+                .withAdminEmail("admin@example.com")
                 .build();
     }
 

@@ -42,6 +42,20 @@ class BlueprintModelProvider {
                 .build();
     }
 
+    static BlueprintPreparationObject blueprintObjectWhenSuperSetAndRdsPresentedThenRdsDruidShouldConfigured() throws JsonProcessingException {
+        return getPreparedBuilder()
+                .withBlueprintView(BlueprintTestUtil.generalBlueprintView("", "2.6", "HDP"))
+                .withRdsConfigs(new HashSet<>(Collections.singleton(TestUtil.rdsConfig(RdsType.SUPERSET))))
+                .build();
+    }
+
+    static BlueprintPreparationObject blueprintObjectWhenDruidSuperSetAndRdsPresentedThenRdsDruidShouldConfigured() throws JsonProcessingException {
+        return getPreparedBuilder()
+                .withBlueprintView(BlueprintTestUtil.generalBlueprintView("", "2.6", "HDP"))
+                .withRdsConfigs(new HashSet<>(Collections.singleton(TestUtil.rdsConfig(RdsType.SUPERSET))))
+                .build();
+    }
+
     static BlueprintPreparationObject blueprintObjectWhenLdapPresentedThenRangerAndHadoopLdapShouldConfigured() throws JsonProcessingException {
         return getPreparedBuilder()
                 .withBlueprintView(BlueprintTestUtil.generalBlueprintView("", "2.6", "HDP"))

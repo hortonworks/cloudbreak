@@ -1,10 +1,3 @@
 {
-  "druid-superset-env": {
-    "properties": {
-      "superset_admin_password": "adminPassword",
-      "superset_admin_firstname": "firstname",
-      "superset_admin_lastname": "lastname",
-      "superset_admin_email": "admin@example.com"
-    }
-  }
+
 }

@@ -107,7 +107,7 @@
           "DB_FLAVOR": "POSTGRES",
           "db_name": "ranger",
           "db_user": "heyitsme",
-          "db_host": "10.1.1.1:5432",
+          "db_host": "10.1.1.1:5432/ranger",
           "db_password": "iamsoosecure"
         }
       }
