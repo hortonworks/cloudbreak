@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.blueprint.template;
 
-import static com.sequenceiq.cloudbreak.util.FileReaderUtils.readFileFromCustomPath;
+import static com.sequenceiq.cloudbreak.util.FileReaderUtils.readFileFromClasspath;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -215,7 +215,7 @@ public class ConfigTemplateTest {
         return new BlueprintTemplateModelContextBuilder()
                 .withClusterAdminPassword("adminPassword")
                 .withClusterAdminFirstname("firstname")
-                .withHdfConfigs(Optional.of(new HdfConfigs("nifigtargets", withProxyHost ? Optional.of("nifiproxyhost") : Optional.empty())))
+                .withHdfConfigs(Optional.of(new HdfConfigs("nifigtargets", "nifigtargets", withProxyHost ? Optional.of("nifiproxyhost") : Optional.empty())))
                 .withStackType("HDF")
                 .build();
     }
@@ -224,7 +224,7 @@ public class ConfigTemplateTest {
         return new BlueprintTemplateModelContextBuilder()
                 .withClusterAdminPassword("adminPassword")
                 .withClusterAdminFirstname("firstname")
-                .withHdfConfigs(Optional.of(new HdfConfigs("nifigtargets", Optional.empty())))
+                .withHdfConfigs(Optional.of(new HdfConfigs("nifigtargets", "nifigtargets", Optional.empty())))
                 .withStackType("HDP")
                 .build();
     }
@@ -271,11 +271,11 @@ public class ConfigTemplateTest {
     }
 
     private String readExpectedTemplate(String file) throws IOException {
-        return readFileFromCustomPath(String.format("src/test/resources/handlebar/%s", file));
+        return readFileFromClasspath(String.format("handlebar/%s", file));
     }
 
     private String readSourceTemplate(String file) throws IOException {
-        return readFileFromCustomPath(String.format("src/main/resources/%s", file));
+        return readFileFromClasspath(String.format("%s", file));
     }
 
 }

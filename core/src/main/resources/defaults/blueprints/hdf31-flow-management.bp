@@ -27,8 +27,7 @@
           "nifi.toolkit.tls.token": "changemeplease",
           "nifi.node.ssl.isenabled": "true",
           "nifi.toolkit.dn.prefix": "CN=",
-          "nifi.toolkit.dn.suffix": ", OU=NIFI",
-          "nifi.initial.admin.identity": "admin"
+          "nifi.toolkit.dn.suffix": ", OU=NIFI"
         }
       },
       {
@@ -48,13 +47,7 @@
         "nifi-registry-ambari-ssl-config": {
           "nifi.registry.ssl.isenabled": "true",
           "nifi.registry.toolkit.dn.prefix": "CN=",
-          "nifi.registry.toolkit.dn.suffix": ", OU=NIFI",
-          "nifi.registry.initial.admin.identity": "admin"
-        }
-      },
-      {
-        "ams-grafana-env": {
-          "metrics_grafana_password": "admin"
+          "nifi.registry.toolkit.dn.suffix": ", OU=NIFI"
         }
       }
     ],

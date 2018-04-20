@@ -164,6 +164,7 @@ public class BlueprintTemplateModelContextBuilder {
         blueprintTemplateModelContext.put("stack_type", stackType);
         blueprintTemplateModelContext.put("stack_type_version", stackVersion);
         blueprintTemplateModelContext.put("nifi_targets", hdfConfigs.isPresent() ? hdfConfigs.get().getNodeEntities() : null);
+        blueprintTemplateModelContext.put("nifi_registry_targets", hdfConfigs.isPresent() ? hdfConfigs.get().getRegistryNodeEntities() : null);
         blueprintTemplateModelContext.put("nifi_proxy_hosts", hdfConfigs.isPresent() ? hdfConfigs.get().getProxyHosts().orElse(null) : null);
         blueprintTemplateModelContext.put("stack_version", "{{stack_version}}");
         return blueprintTemplateModelContext;
