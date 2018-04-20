@@ -4,7 +4,9 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.api.model.GatewayType;
 import com.sequenceiq.cloudbreak.domain.Cluster;
+import com.sequenceiq.cloudbreak.domain.Gateway;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.reactor.api.event.EventSelectorUtil;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.ClusterSyncRequest;
@@ -50,9 +52,12 @@ public class ClusterSyncHandler implements ReactorEventHandler<ClusterSyncReques
         ClusterSyncResult result;
         try {
             Stack stack = stackService.getByIdWithLists(request.getStackId());
-            String proxyIp = stackUtil.extractAmbariIp(stack);
-            String contextPath = stack.getCluster().getGateway().getPath();
-            proxyRegistrator.register(stack.getName(), contextPath, proxyIp);
+            Gateway gateway = stack.getCluster().getGateway();
+            if (gateway != null && gateway.getEnableGateway()
+                    && gateway.getGatewayType() == GatewayType.CENTRAL) {
+                String proxyIp = stackUtil.extractAmbariIp(stack);
+                proxyRegistrator.register(stack.getName(), gateway.getPath(), proxyIp);
+            }
             Cluster cluster = clusterService.retrieveClusterByStackId(request.getStackId());
             ambariClusterStatusUpdater.updateClusterStatus(stack, cluster);
             result = new ClusterSyncResult(request);

@@ -30,7 +30,7 @@ public class Gateway implements ProvisionEntity {
     private Cluster cluster;
 
     @Column(nullable = false)
-    private Boolean enableGateway;
+    private boolean enableGateway;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
@@ -77,11 +77,11 @@ public class Gateway implements ProvisionEntity {
         this.cluster = cluster;
     }
 
-    public Boolean getEnableGateway() {
+    public boolean getEnableGateway() {
         return enableGateway;
     }
 
-    public void setEnableGateway(Boolean enableGateway) {
+    public void setEnableGateway(boolean enableGateway) {
         this.enableGateway = enableGateway;
     }
 

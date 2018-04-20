@@ -97,7 +97,7 @@ public class ClusterRequestToClusterConverter extends AbstractConversionServiceA
     private void convertKnox(ClusterRequest source, Cluster cluster) {
         GatewayJson cloudGatewayJson = source.getGateway();
         Gateway gateway = new Gateway();
-        gateway.setEnableGateway(Boolean.FALSE);
+        gateway.setEnableGateway(false);
         gateway.setTopologyName("services");
         gateway.setPath(source.getName());
         gateway.setSsoType(SSOType.NONE);
@@ -131,17 +131,15 @@ public class ClusterRequestToClusterConverter extends AbstractConversionServiceA
                 gateway.setGatewayType(gatewayJson.getGatewayType());
             }
 
-            if (gatewayJson.getEnableGateway() != null) {
-                gateway.setEnableGateway(gatewayJson.getEnableGateway());
-                if (!Strings.isNullOrEmpty(gatewayJson.getTopologyName())) {
-                    gateway.setTopologyName(gatewayJson.getTopologyName());
-                }
-                if (gatewayJson.getExposedServices() != null) {
-                    if (gatewayJson.getExposedServices().contains(ExposedService.ALL.name())) {
-                        exposedServices.setServices(ExposedService.getAllKnoxExposed());
-                    } else {
-                        exposedServices.setServices(gatewayJson.getExposedServices());
-                    }
+            gateway.setEnableGateway(gatewayJson.getEnableGateway());
+            if (!Strings.isNullOrEmpty(gatewayJson.getTopologyName())) {
+                gateway.setTopologyName(gatewayJson.getTopologyName());
+            }
+            if (gatewayJson.getExposedServices() != null) {
+                if (gatewayJson.getExposedServices().contains(ExposedService.ALL.name())) {
+                    exposedServices.setServices(ExposedService.getAllKnoxExposed());
+                } else {
+                    exposedServices.setServices(gatewayJson.getExposedServices());
                 }
             }
         }

@@ -20,7 +20,7 @@ import io.swagger.annotations.ApiModelProperty;
 public class GatewayJson implements JsonEntity {
 
     @ApiModelProperty(GatewayModelDescription.ENABLE_KNOX_GATEWAY)
-    private Boolean enableGateway;
+    private boolean enableGateway;
 
     @ApiModelProperty(GatewayModelDescription.KNOX_PATH)
     private String path;
@@ -45,11 +45,11 @@ public class GatewayJson implements JsonEntity {
     @ApiModelProperty(GatewayModelDescription.KNOX_SSO_TYPE)
     private SSOType ssoType;
 
-    public Boolean getEnableGateway() {
+    public boolean getEnableGateway() {
         return enableGateway;
     }
 
-    public void setEnableGateway(Boolean enableGateway) {
+    public void setEnableGateway(boolean enableGateway) {
         this.enableGateway = enableGateway;
     }
 
