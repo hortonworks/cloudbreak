@@ -1,5 +1,11 @@
 package com.sequenceiq.it.cloudbreak.newway.cloud;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.model.SecurityRuleRequest;
 import com.sequenceiq.cloudbreak.api.model.StackAuthenticationRequest;
@@ -8,16 +14,12 @@ import com.sequenceiq.cloudbreak.api.model.v2.InstanceGroupV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.NetworkV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.SecurityGroupV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.TemplateV2Request;
+import com.sequenceiq.it.cloudbreak.newway.CredentialEntity;
 import com.sequenceiq.it.cloudbreak.newway.Network;
 import com.sequenceiq.it.cloudbreak.newway.NetworkEntity;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
 import com.sequenceiq.it.cloudbreak.newway.StackEntity;
 import com.sequenceiq.it.cloudbreak.newway.TestParameter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public abstract class CloudProviderHelper extends CloudProvider {
 
@@ -75,6 +77,11 @@ public abstract class CloudProviderHelper extends CloudProvider {
 
         }
         return cloudProvider;
+    }
+
+    @Override
+    public CredentialEntity aValidCredential() {
+        return aValidCredential(true);
     }
 
     public StackEntity aValidStackRequest() {
