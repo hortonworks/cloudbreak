@@ -1,5 +1,8 @@
 package com.sequenceiq.it.cloudbreak.newway.cloud;
 
+import java.util.List;
+import java.util.Map;
+
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.model.v2.AmbariV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.InstanceGroupV2Request;
@@ -8,15 +11,14 @@ import com.sequenceiq.it.cloudbreak.newway.CredentialEntity;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
 import com.sequenceiq.it.cloudbreak.newway.StackEntity;
 
-import java.util.List;
-import java.util.Map;
-
 public abstract class CloudProvider {
     public static final String CREDENTIAL_DEFAULT_DESCRIPTION = "test credential";
 
     public abstract StackEntity aValidStackRequest();
 
     public abstract CredentialEntity aValidCredential();
+
+    public abstract CredentialEntity aValidCredential(boolean create);
 
     public abstract AmbariV2Request ambariRequestWithBlueprintId(Long id);
 
