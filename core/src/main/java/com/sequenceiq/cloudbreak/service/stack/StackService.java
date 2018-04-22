@@ -5,9 +5,11 @@ import static com.sequenceiq.cloudbreak.api.model.Status.STOPPED;
 import static com.sequenceiq.cloudbreak.api.model.Status.STOP_REQUESTED;
 import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.transaction.Transactional;
@@ -424,7 +426,7 @@ public class StackService {
         if (!stack.isPublicInAccount() && !stack.getOwner().equals(user.getUserId())) {
             throw new BadRequestException(String.format("Private stack (%s) only modifiable by the owner.", stackId));
         }
-        flowManager.triggerStackRemoveInstance(stackId, instanceMetaData.getInstanceGroupName(), instanceMetaData.getDiscoveryFQDN());
+        flowManager.triggerStackRemoveInstance(stackId, instanceMetaData.getInstanceGroupName(), instanceMetaData.getPrivateId());
     }
 
     @Transactional(TxType.NEVER)
@@ -570,13 +572,50 @@ public class StackService {
         }
     }
 
-    public InstanceMetaData updateMetaDataStatus(Long id, String hostName, InstanceStatus status) {
+    public void updateMetaDataStatusIfFound(Long id, String hostName, InstanceStatus status) {
         InstanceMetaData metaData = instanceMetaDataRepository.findHostInStack(id, hostName);
         if (metaData == null) {
-            throw new NotFoundException(String.format("Metadata not found on stack:'%s' with hostname: '%s'.", id, hostName));
+            LOGGER.warn("Metadata not found on stack:'%s' with hostname: '%s'.", id, hostName);
+        } else {
+            metaData.setInstanceStatus(status);
+            instanceMetaDataRepository.save(metaData);
         }
-        metaData.setInstanceStatus(status);
-        return instanceMetaDataRepository.save(metaData);
+    }
+
+    public List<String> getHostNamesForPrivateIds(List<InstanceMetaData> instanceMetaDataList, Collection<Long> privateIds) {
+        return getInstanceMetaDataForPrivateIds(instanceMetaDataList, privateIds).stream()
+                .map(InstanceMetaData::getInstanceId)
+                .collect(Collectors.toList());
+    }
+
+    public List<String> getInstanceIdsForPrivateIds(List<InstanceMetaData> instanceMetaDataList, Collection<Long> privateIds) {
+        List<InstanceMetaData> instanceMetaDataForPrivateIds = getInstanceMetaDataForPrivateIds(instanceMetaDataList, privateIds);
+        return instanceMetaDataForPrivateIds.stream()
+                .map(InstanceMetaData::getInstanceId)
+                .collect(Collectors.toList());
+    }
+
+    public List<InstanceMetaData> getInstanceMetaDataForPrivateIds(List<InstanceMetaData> instanceMetaDataList, Collection<Long> privateIds) {
+        return instanceMetaDataList.stream()
+                .filter(instanceMetaData -> privateIds.contains(instanceMetaData.getPrivateId()))
+                .collect(Collectors.toList());
+    }
+
+    public Set<Long> getPrivateIdsForHostNames(List<InstanceMetaData> instanceMetaDataList, Collection<String> hostNames) {
+        return getInstanceMetadatasForHostNames(instanceMetaDataList, hostNames).stream()
+                .map(InstanceMetaData::getPrivateId).collect(Collectors.toSet());
+    }
+
+    public Set<InstanceMetaData> getInstanceMetadatasForHostNames(List<InstanceMetaData> instanceMetaDataList, Collection<String> hostNames) {
+        return instanceMetaDataList.stream()
+                .filter(instanceMetaData -> hostNames.contains(instanceMetaData.getDiscoveryFQDN()))
+                .collect(Collectors.toSet());
+    }
+
+    public Optional<InstanceMetaData> getInstanceMetadata(List<InstanceMetaData> instanceMetaDataList, Long privateId) {
+        return instanceMetaDataList.stream()
+                .filter(instanceMetaData -> privateId.equals(instanceMetaData.getPrivateId()))
+                .findFirst();
     }
 
     public void validateStack(StackValidation stackValidation, boolean validateBlueprint) {

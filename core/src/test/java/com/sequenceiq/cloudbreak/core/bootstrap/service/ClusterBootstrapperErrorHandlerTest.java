@@ -91,7 +91,7 @@ public class ClusterBootstrapperErrorHandlerTest {
         when(instanceMetaDataRepository.findNotTerminatedByPrivateAddress(anyLong(), anyString())).thenAnswer((Answer<InstanceMetaData>) invocation -> {
             Object[] args = invocation.getArguments();
             String ip = (String) args[1];
-            for (InstanceMetaData instanceMetaData : stack.getRunningInstanceMetaData()) {
+            for (InstanceMetaData instanceMetaData : stack.getNotTerminatedInstanceMetaDataSet()) {
                 if (instanceMetaData.getPrivateIp().equals(ip)) {
                     return instanceMetaData;
                 }
@@ -101,7 +101,7 @@ public class ClusterBootstrapperErrorHandlerTest {
         when(instanceGroupRepository.findOneByGroupNameInStack(anyLong(), anyString())).thenAnswer((Answer<InstanceGroup>) invocation -> {
             Object[] args = invocation.getArguments();
             String name = (String) args[1];
-            for (InstanceMetaData instanceMetaData : stack.getRunningInstanceMetaData()) {
+            for (InstanceMetaData instanceMetaData : stack.getNotTerminatedInstanceMetaDataSet()) {
                 if (instanceMetaData.getInstanceGroup().getGroupName().equals(name)) {
                     return instanceMetaData.getInstanceGroup();
                 }
@@ -133,7 +133,7 @@ public class ClusterBootstrapperErrorHandlerTest {
             public InstanceMetaData answer(InvocationOnMock invocation) {
                 Object[] args = invocation.getArguments();
                 String ip = (String) args[1];
-                for (InstanceMetaData instanceMetaData : stack.getRunningInstanceMetaData()) {
+                for (InstanceMetaData instanceMetaData : stack.getNotTerminatedInstanceMetaDataSet()) {
                     if (instanceMetaData.getPrivateIp().equals(ip)) {
                         return instanceMetaData;
                     }
@@ -146,7 +146,7 @@ public class ClusterBootstrapperErrorHandlerTest {
             public InstanceGroup answer(InvocationOnMock invocation) {
                 Object[] args = invocation.getArguments();
                 String name = (String) args[1];
-                for (InstanceMetaData instanceMetaData : stack.getRunningInstanceMetaData()) {
+                for (InstanceMetaData instanceMetaData : stack.getNotTerminatedInstanceMetaDataSet()) {
                     if (instanceMetaData.getInstanceGroup().getGroupName().equals(name)) {
                         InstanceGroup instanceGroup = instanceMetaData.getInstanceGroup();
                         instanceGroup.setNodeCount(2);
@@ -171,7 +171,7 @@ public class ClusterBootstrapperErrorHandlerTest {
 
     private Set<Node> prepareNodes(Stack stack) {
         Set<Node> nodes = new HashSet<>();
-        for (InstanceMetaData instanceMetaData : stack.getRunningInstanceMetaData()) {
+        for (InstanceMetaData instanceMetaData : stack.getNotTerminatedInstanceMetaDataSet()) {
             nodes.add(new Node(instanceMetaData.getPrivateIp(), instanceMetaData.getPublicIpWrapper()));
         }
         return nodes;

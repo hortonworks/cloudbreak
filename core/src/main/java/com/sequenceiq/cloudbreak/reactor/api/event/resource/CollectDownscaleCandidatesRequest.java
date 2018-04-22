@@ -5,19 +5,19 @@ import java.util.Set;
 public class CollectDownscaleCandidatesRequest extends AbstractClusterScaleRequest {
     private final Integer scalingAdjustment;
 
-    private final Set<String> hostNames;
+    private final Set<Long> privateIds;
 
-    public CollectDownscaleCandidatesRequest(Long stackId, String hostGroupName, Integer scalingAdjustment, Set<String> hostNames) {
+    public CollectDownscaleCandidatesRequest(Long stackId, String hostGroupName, Integer scalingAdjustment, Set<Long> privateIds) {
         super(stackId, hostGroupName);
         this.scalingAdjustment = scalingAdjustment;
-        this.hostNames = hostNames;
+        this.privateIds = privateIds;
     }
 
     public Integer getScalingAdjustment() {
         return scalingAdjustment;
     }
 
-    public Set<String> getHostNames() {
-        return hostNames;
+    public Set<Long> getPrivateIds() {
+        return privateIds;
     }
 }

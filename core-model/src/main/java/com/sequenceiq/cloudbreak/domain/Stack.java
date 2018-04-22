@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -393,16 +394,22 @@ public class Stack implements ProvisionEntity {
         return nodeCount;
     }
 
-    public Set<InstanceMetaData> getRunningInstanceMetaData() {
+    public Set<InstanceMetaData> getNotTerminatedInstanceMetaDataSet() {
         Set<InstanceMetaData> instanceMetadata = new HashSet<>();
         for (InstanceGroup instanceGroup : instanceGroups) {
-            instanceMetadata.addAll(instanceGroup.getInstanceMetaData());
+            instanceMetadata.addAll(instanceGroup.getNotTerminatedInstanceMetaDataSet());
         }
         return instanceMetadata;
     }
 
+    public List<InstanceMetaData> getNotTerminatedInstanceMetaDataList() {
+        return new ArrayList<>(getNotTerminatedInstanceMetaDataSet());
+    }
+
     public List<InstanceMetaData> getInstanceMetaDataAsList() {
-        return new ArrayList<>(getRunningInstanceMetaData());
+        return instanceGroups.stream()
+                .flatMap(instanceGroup -> instanceGroup.getInstanceMetaDataSet().stream())
+                .collect(Collectors.toList());
     }
 
     public List<InstanceGroup> getInstanceGroupsAsList() {
@@ -437,7 +444,7 @@ public class Stack implements ProvisionEntity {
         List<InstanceMetaData> metadataList = new ArrayList<>();
         for (InstanceGroup instanceGroup : instanceGroups) {
             if (InstanceGroupType.GATEWAY.equals(instanceGroup.getInstanceGroupType())) {
-                metadataList.addAll(instanceGroup.getInstanceMetaData());
+                metadataList.addAll(instanceGroup.getNotTerminatedInstanceMetaDataSet());
             }
         }
         return metadataList;
