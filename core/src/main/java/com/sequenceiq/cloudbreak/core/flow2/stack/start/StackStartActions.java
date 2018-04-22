@@ -75,7 +75,7 @@ public class StackStartActions {
             @Override
             protected Selectable createRequest(StackStartStopContext context) {
                 LOGGER.info("Assembling start request for stack: {}", context.getStack());
-                List<CloudInstance> instances = cloudInstanceConverter.convert(context.getStack().getInstanceMetaDataAsList());
+                List<CloudInstance> instances = cloudInstanceConverter.convert(context.getStack().getNotTerminatedInstanceMetaDataList());
                 List<CloudResource> resources = cloudResourceConverter.convert(context.getStack().getResources());
                 return new StartInstancesRequest(context.getCloudContext(), context.getCloudCredential(), resources, instances);
             }

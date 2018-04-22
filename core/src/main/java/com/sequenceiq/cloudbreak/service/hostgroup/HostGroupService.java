@@ -38,10 +38,18 @@ public class HostGroupService {
         return hostGroupRepository.findHostGroupInClusterByName(clusterId, hostGroupName);
     }
 
+    public HostMetadata getHostMetadataByClusterAndHostName(Cluster cluster, String hostName) {
+        return hostMetadataRepository.findHostInClusterByName(cluster.getId(), hostName);
+    }
+
     public HostGroup getByClusterAndHostName(Cluster cluster, String hostName) {
-        HostMetadata hostMetadata = hostMetadataRepository.findHostInClusterByName(cluster.getId(), hostName);
-        String hostGroupName = hostMetadata.getHostGroup().getName();
-        return getByClusterIdAndName(cluster.getId(), hostGroupName);
+        HostMetadata hostMetadata = getHostMetadataByClusterAndHostName(cluster, hostName);
+        if (hostMetadata != null) {
+            String hostGroupName = hostMetadata.getHostGroup().getName();
+            return getByClusterIdAndName(cluster.getId(), hostGroupName);
+        } else {
+            return null;
+        }
     }
 
     public HostGroup save(HostGroup hostGroup) {

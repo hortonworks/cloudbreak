@@ -4,14 +4,14 @@ import java.util.Set;
 
 public class DecommissionRequest extends AbstractClusterScaleRequest {
 
-    private final Set<String> hostNames;
+    private final Set<Long> privateIds;
 
-    public DecommissionRequest(Long stackId, String hostGroupName, Set<String> hostNames) {
+    public DecommissionRequest(Long stackId, String hostGroupName, Set<Long> privateIds) {
         super(stackId, hostGroupName);
-        this.hostNames = hostNames;
+        this.privateIds = privateIds;
     }
 
-    public Set<String> getHostNames() {
-        return hostNames;
+    public Set<Long> getPrivateIds() {
+        return privateIds;
     }
 }

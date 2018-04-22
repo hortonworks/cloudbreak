@@ -41,7 +41,6 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Glob;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Target;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.ApplyResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.Minion;
-import com.sequenceiq.cloudbreak.orchestrator.salt.domain.NetworkInterfaceResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.PingResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.RunningJobsResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.SaltAction;
@@ -158,12 +157,6 @@ public class SaltStatesTest {
         resultMap.clear();
         running = SaltStates.jobIsRunning(saltConnector, jid);
         assertEquals(false, running);
-    }
-
-    @Test
-    public void networkInterfaceIPTest() {
-        SaltStates.networkInterfaceIP(saltConnector, target, "eth0");
-        verify(saltConnector, times(1)).run(any(), eq("network.interface_ip"), eq(LOCAL), eq(NetworkInterfaceResponse.class), eq("eth0"));
     }
 
     @Test

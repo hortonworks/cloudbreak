@@ -7,7 +7,6 @@ import static com.sequenceiq.cloudbreak.api.model.Status.STOPPED;
 import static com.sequenceiq.cloudbreak.api.model.Status.WAIT_FOR_SYNC;
 
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -34,7 +33,6 @@ import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
-import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.ResourceRepository;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
@@ -64,9 +62,6 @@ public class StackSyncService {
     private InstanceMetaDataRepository instanceMetaDataRepository;
 
     @Inject
-    private InstanceGroupRepository instanceGroupRepository;
-
-    @Inject
     private HostMetadataRepository hostMetadataRepository;
 
     @Inject
@@ -93,7 +88,7 @@ public class StackSyncService {
                             && is.getCloudInstance().getInstanceId().equals(metaData.getInstanceId()))
                     .findFirst();
 
-            InstanceSyncState state = status.isPresent() ? transform(status.get().getStatus()) : InstanceSyncState.DELETED;
+            InstanceSyncState state = status.isPresent() ? InstanceSyncState.getInstanceSyncState(status.get().getStatus()) : InstanceSyncState.DELETED;
             syncInstanceStatusByState(stack, counts, metaData, state);
         }
 
@@ -130,7 +125,7 @@ public class StackSyncService {
     }
 
     private void syncInstanceStatusByState(Stack stack, Map<InstanceSyncState, Integer> counts, InstanceMetaData metaData, InstanceSyncState state) {
-        if (InstanceSyncState.DELETED.equals(state)) {
+        if (InstanceSyncState.DELETED.equals(state) || InstanceSyncState.DELETED_ON_PROVIDER_SIDE.equals(state)) {
             syncDeletedInstance(stack, counts, metaData);
         } else if (InstanceSyncState.RUNNING.equals(state)) {
             syncRunningInstance(stack, counts, metaData);
@@ -168,12 +163,10 @@ public class StackSyncService {
     }
 
     private void syncDeletedInstance(Stack stack, Map<InstanceSyncState, Integer> instanceStateCounts, InstanceMetaData instance) {
-        deleteHostFromCluster(stack, instance);
-        if (!instance.isTerminated()) {
-            instanceStateCounts.put(InstanceSyncState.DELETED, instanceStateCounts.get(InstanceSyncState.DELETED) + 1);
-            LOGGER.info("Instance '{}' is reported as deleted on the cloud provider, setting its state to TERMINATED.", instance.getInstanceId());
-            deleteResourceIfNeeded(stack, instance);
-            updateMetaDataToTerminated(stack, instance);
+        if (!instance.isTerminated() && !instance.isDeletedOnProvider()) {
+            instanceStateCounts.put(InstanceSyncState.DELETED_ON_PROVIDER_SIDE, instanceStateCounts.get(InstanceSyncState.DELETED_ON_PROVIDER_SIDE) + 1);
+            LOGGER.info("Instance '{}' is reported as deleted on the cloud provider, setting its state to DELETED_ON_PROVIDER_SIDE.", instance.getInstanceId());
+            updateMetaDataToDeletedOnProviderSide(stack, instance);
         }
     }
 
@@ -216,28 +209,10 @@ public class StackSyncService {
         }
     }
 
-    private InstanceSyncState transform(com.sequenceiq.cloudbreak.cloud.model.InstanceStatus instanceStatus) {
-        switch (instanceStatus) {
-            case IN_PROGRESS:
-                return InstanceSyncState.IN_PROGRESS;
-            case STARTED:
-                return InstanceSyncState.RUNNING;
-            case STOPPED:
-                return InstanceSyncState.STOPPED;
-            case CREATED:
-                return InstanceSyncState.RUNNING;
-            case FAILED:
-                return InstanceSyncState.DELETED;
-            case TERMINATED:
-                return InstanceSyncState.DELETED;
-            default:
-                return InstanceSyncState.UNKNOWN;
-        }
-    }
-
     private Map<InstanceSyncState, Integer> initInstanceStateCounts() {
         Map<InstanceSyncState, Integer> instanceStates = new HashMap<>();
         instanceStates.put(InstanceSyncState.DELETED, 0);
+        instanceStates.put(InstanceSyncState.DELETED_ON_PROVIDER_SIDE, 0);
         instanceStates.put(InstanceSyncState.STOPPED, 0);
         instanceStates.put(InstanceSyncState.RUNNING, 0);
         instanceStates.put(InstanceSyncState.IN_PROGRESS, 0);
@@ -282,15 +257,9 @@ public class StackSyncService {
         }
     }
 
-    private void updateMetaDataToTerminated(Stack stack, InstanceMetaData instanceMetaData) {
-        InstanceGroup instanceGroup = instanceMetaData.getInstanceGroup();
-        List<InstanceMetaData> aliveInstancesInInstanceGroup = instanceMetaDataRepository.findAliveInstancesInInstanceGroup(instanceGroup.getId());
-        instanceGroup.setNodeCount(aliveInstancesInInstanceGroup.size() - 1);
-        long timeInMillis = Calendar.getInstance().getTimeInMillis();
-        instanceMetaData.setTerminationDate(timeInMillis);
-        instanceMetaData.setInstanceStatus(InstanceStatus.TERMINATED);
+    private void updateMetaDataToDeletedOnProviderSide(Stack stack, InstanceMetaData instanceMetaData) {
+        instanceMetaData.setInstanceStatus(InstanceStatus.DELETED_ON_PROVIDER_SIDE);
         instanceMetaDataRepository.save(instanceMetaData);
-        instanceGroupRepository.save(instanceGroup);
         String name;
         if (instanceMetaData.getDiscoveryFQDN() == null) {
             name = instanceMetaData.getInstanceId();
@@ -304,10 +273,6 @@ public class StackSyncService {
     }
 
     private void updateMetaDataToRunning(Long stackId, Cluster cluster, InstanceMetaData instanceMetaData) {
-        InstanceGroup instanceGroup = instanceMetaData.getInstanceGroup();
-        if (InstanceStatus.TERMINATED.equals(instanceMetaData.getInstanceStatus())) {
-            instanceGroup.setNodeCount(instanceGroup.getNodeCount() + 1);
-        }
         HostMetadata hostMetadata = hostMetadataRepository.findHostInClusterByName(cluster.getId(), instanceMetaData.getDiscoveryFQDN());
         if (hostMetadata != null) {
             LOGGER.info("Instance '{}' was found in the cluster metadata, setting it's state to REGISTERED.", instanceMetaData.getInstanceId());
@@ -317,7 +282,6 @@ public class StackSyncService {
             instanceMetaData.setInstanceStatus(InstanceStatus.UNREGISTERED);
         }
         instanceMetaDataRepository.save(instanceMetaData);
-        instanceGroupRepository.save(instanceGroup);
         eventService.fireCloudbreakEvent(stackId, AVAILABLE.name(),
                 cloudbreakMessagesService.getMessage(Msg.STACK_SYNC_INSTANCE_UPDATED.code(), Arrays.asList(instanceMetaData.getDiscoveryFQDN(), "running")));
     }

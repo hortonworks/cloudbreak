@@ -110,7 +110,7 @@ public class OrchestratorBootstrapRunner implements Callable<Boolean> {
                 long totalElapsedTime = System.currentTimeMillis() - initialStartTime;
                 LOGGER.warn("Orchestrator component {} failed to start, retrying [{}/{}] Elapsed time: {} ms, "
                                 + "Total elapsed time: {} ms, Reason: {}, additional info: {}",
-                        type, retryCount, maxRetryCount, elapsedTime, totalElapsedTime, actualException.getMessage(), orchestratorBootstrap);
+                        type, retryCount, maxRetryCount, elapsedTime, totalElapsedTime, actualException, orchestratorBootstrap);
                 retryCount++;
                 if (retryCount <= maxRetryCount) {
                     Thread.sleep(sleepTime);

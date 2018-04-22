@@ -31,19 +31,11 @@ import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariClusterConnector;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariDecommissioner;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderConnectorAdapter;
 
 @Service
 public class StackScalingService {
     private static final Logger LOGGER = LoggerFactory.getLogger(StackScalingService.class);
-
-    private static final int POLLING_INTERVAL = 5000;
-
-    private static final int MAX_POLLING_ATTEMPTS = 100;
-
-    @Inject
-    private StackService stackService;
 
     @Inject
     private CloudbreakEventService eventService;
@@ -119,7 +111,7 @@ public class StackScalingService {
     @Transactional
     public int updateRemovedResourcesState(Stack stack, Set<String> instanceIds, InstanceGroup instanceGroup) {
         int nodesRemoved = 0;
-        for (InstanceMetaData instanceMetaData : instanceGroup.getInstanceMetaData()) {
+        for (InstanceMetaData instanceMetaData : instanceGroup.getNotTerminatedInstanceMetaDataSet()) {
             if (instanceIds.contains(instanceMetaData.getInstanceId())) {
                 long timeInMillis = Calendar.getInstance().getTimeInMillis();
                 instanceMetaData.setTerminationDate(timeInMillis);
@@ -142,7 +134,8 @@ public class StackScalingService {
     public Map<String, String> getUnusedInstanceIds(String instanceGroupName, Integer scalingAdjustment, Stack stack) {
         Map<String, String> instanceIds = new HashMap<>();
         int i = 0;
-        List<InstanceMetaData> instanceMetaDatas = new ArrayList<>(stack.getInstanceGroupByInstanceGroupName(instanceGroupName).getInstanceMetaData());
+        List<InstanceMetaData> instanceMetaDatas = new ArrayList<>(stack.getInstanceGroupByInstanceGroupName(instanceGroupName)
+                .getNotTerminatedInstanceMetaDataSet());
         instanceMetaDatas.sort(Comparator.comparing(InstanceMetaData::getStartDate));
         for (InstanceMetaData metaData : instanceMetaDatas) {
             if (!metaData.getAmbariServer()

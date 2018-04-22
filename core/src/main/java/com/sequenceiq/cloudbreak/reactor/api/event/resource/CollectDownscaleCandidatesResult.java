@@ -5,26 +5,26 @@ import java.util.Set;
 
 public class CollectDownscaleCandidatesResult extends AbstractClusterScaleResult<CollectDownscaleCandidatesRequest> {
 
-    private final Set<String> hostNames;
+    private final Set<Long> privateIds;
 
-    public CollectDownscaleCandidatesResult(CollectDownscaleCandidatesRequest request, Set<String> hostNames) {
+    public CollectDownscaleCandidatesResult(CollectDownscaleCandidatesRequest request, Set<Long> privateIds) {
         super(request);
-        this.hostNames = hostNames;
+        this.privateIds = privateIds;
     }
 
     public CollectDownscaleCandidatesResult(String statusReason, Exception errorDetails, CollectDownscaleCandidatesRequest request) {
         super(statusReason, errorDetails, request);
-        hostNames = Collections.emptySet();
+        privateIds = Collections.emptySet();
     }
 
-    public Set<String> getHostNames() {
-        return hostNames;
+    public Set<Long> getPrivateIds() {
+        return privateIds;
     }
 
     @Override
     public String toString() {
         return "CollectDownscaleCandidatesResult{"
-                + "hostNames=" + hostNames
+                + "privateIds=" + privateIds
                 + '}';
     }
 }

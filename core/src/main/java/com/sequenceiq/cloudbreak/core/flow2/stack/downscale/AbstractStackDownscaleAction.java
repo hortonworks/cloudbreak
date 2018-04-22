@@ -78,7 +78,7 @@ public abstract class AbstractStackDownscaleAction<P extends Payload>
     private Integer extractAdjustment(P payload, Map<Object, Object> variables) {
         if (payload instanceof StackDownscaleTriggerEvent) {
             StackDownscaleTriggerEvent ssc = (StackDownscaleTriggerEvent) payload;
-            Integer adjustment = ssc.getHostNames() == null ? ssc.getAdjustment() : -ssc.getHostNames().size();
+            Integer adjustment = ssc.getPrivateIds() == null ? ssc.getAdjustment() : -ssc.getPrivateIds().size();
             variables.put(ADJUSTMENT, adjustment);
             return adjustment;
         }
@@ -89,12 +89,12 @@ public abstract class AbstractStackDownscaleAction<P extends Payload>
         if (payload instanceof StackDownscaleTriggerEvent) {
             StackDownscaleTriggerEvent ssc = (StackDownscaleTriggerEvent) payload;
             Set<String> instanceIds;
-            if (ssc.getHostNames() == null || ssc.getHostNames().isEmpty()) {
+            if (ssc.getPrivateIds() == null || ssc.getPrivateIds().isEmpty()) {
                 Map<String, String> unusedInstanceIds = stackScalingService.getUnusedInstanceIds(ssc.getInstanceGroup(), ssc.getAdjustment(), stack);
                 instanceIds = new HashSet<>(unusedInstanceIds.keySet());
             } else {
-                Set<InstanceMetaData> imds = stack.getInstanceGroupByInstanceGroupName(ssc.getInstanceGroup()).getInstanceMetaData();
-                instanceIds = imds.stream().filter(imd -> ssc.getHostNames().contains(imd.getDiscoveryFQDN())).map(InstanceMetaData::getInstanceId)
+                Set<InstanceMetaData> imds = stack.getInstanceGroupByInstanceGroupName(ssc.getInstanceGroup()).getNotTerminatedInstanceMetaDataSet();
+                instanceIds = imds.stream().filter(imd -> ssc.getPrivateIds().contains(imd.getPrivateId())).map(InstanceMetaData::getInstanceId)
                         .collect(Collectors.toSet());
             }
             variables.put(INSTANCEIDS, instanceIds);

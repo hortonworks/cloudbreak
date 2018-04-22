@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.api.model.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.model.Status.UPDATE_IN_PROGRESS;
 import static java.util.stream.Collectors.toList;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -23,6 +24,7 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.flow.EmailSenderService;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackScalingService;
 import com.sequenceiq.cloudbreak.service.usages.UsageService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
@@ -47,6 +49,9 @@ public class StackDownscaleService {
     private UsageService usageService;
 
     @Inject
+    private StackService stackService;
+
+    @Inject
     private StackUtil stackUtil;
 
     @Inject
@@ -55,8 +60,13 @@ public class StackDownscaleService {
     public void startStackDownscale(StackScalingFlowContext context, StackDownscaleTriggerEvent stackDownscaleTriggerEvent) {
         LOGGER.debug("Downscaling of stack {}", context.getStack().getId());
         stackUpdater.updateStackStatus(context.getStack().getId(), DetailedStackStatus.DOWNSCALE_IN_PROGRESS);
-        Set<String> hostNames = stackDownscaleTriggerEvent.getHostNames();
-        Object msgParam = hostNames == null || hostNames.isEmpty() ? Math.abs(stackDownscaleTriggerEvent.getAdjustment()) : hostNames;
+        Set<Long> privateIds = stackDownscaleTriggerEvent.getPrivateIds();
+        List<String> instanceIdList = Collections.emptyList();
+        if (privateIds != null) {
+            Stack stack = stackService.getByIdWithLists(context.getStack().getId());
+            instanceIdList = stackService.getInstanceIdsForPrivateIds(stack.getInstanceMetaDataAsList(), privateIds);
+        }
+        Object msgParam = instanceIdList.isEmpty() ? Math.abs(stackDownscaleTriggerEvent.getAdjustment()) : instanceIdList;
         flowMessageService.fireEventAndLog(context.getStack().getId(), Msg.STACK_DOWNSCALE_INSTANCES, UPDATE_IN_PROGRESS.name(), msgParam);
     }
 
@@ -64,7 +74,7 @@ public class StackDownscaleService {
         Stack stack = context.getStack();
         InstanceGroup g = stack.getInstanceGroupByInstanceGroupName(instanceGroupName);
         int nodeCount = stackScalingService.updateRemovedResourcesState(stack, instanceIds, g);
-        List<String> fqdns = instanceMetaDataRepository.findAllByInstanceIdIn(instanceIds).stream().map(InstanceMetaData::getDiscoveryFQDN).collect(toList());
+        List<String> fqdns = instanceMetaDataRepository.findAllByInstanceIdIn(instanceIds).stream().map(InstanceMetaData::getInstanceId).collect(toList());
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.DOWNSCALE_COMPLETED,
                 String.format("Downscale of the cluster infrastructure finished successfully. Terminated node(s): %s", fqdns));
         flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_DOWNSCALE_SUCCESS, AVAILABLE.name(), fqdns);
