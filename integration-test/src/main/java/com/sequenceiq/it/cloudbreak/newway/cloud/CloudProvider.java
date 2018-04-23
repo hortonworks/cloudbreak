@@ -2,6 +2,7 @@ package com.sequenceiq.it.cloudbreak.newway.cloud;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.model.v2.AmbariV2Request;
@@ -65,4 +66,6 @@ public abstract class CloudProvider {
     public abstract InstanceGroupV2Request hostgroup(String groupName, InstanceGroupType groupType, int nodeCount);
 
     public abstract List<InstanceGroupV2Request> instanceGroups(String securityGroupId);
+
+    public abstract List<InstanceGroupV2Request> instanceGroups(Set<String> recipes);
 }

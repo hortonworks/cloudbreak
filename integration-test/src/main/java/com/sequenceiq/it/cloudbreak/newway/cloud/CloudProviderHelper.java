@@ -2,6 +2,7 @@ package com.sequenceiq.it.cloudbreak.newway.cloud;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -137,6 +138,14 @@ public abstract class CloudProviderHelper extends CloudProvider {
         return requests;
     }
 
+    public List<InstanceGroupV2Request> instanceGroups(Set<String> recipes) {
+        List<InstanceGroupV2Request> requests = new ArrayList<>();
+        requests.add(master(recipes));
+        requests.add(compute(recipes));
+        requests.add(worker(recipes));
+        return requests;
+    }
+
     @Override
     public AmbariV2Request ambariRequestWithBlueprintId(Long id) {
         AmbariV2Request req = new AmbariV2Request();
@@ -181,6 +190,18 @@ public abstract class CloudProviderHelper extends CloudProvider {
         return hostgroup("worker", InstanceGroupType.CORE, 1);
     }
 
+    InstanceGroupV2Request master(Set<String> recipes) {
+        return hostgroup("master", InstanceGroupType.GATEWAY, 1, recipes);
+    }
+
+    InstanceGroupV2Request compute(Set<String> recipes) {
+        return hostgroup("compute", InstanceGroupType.CORE, 1, recipes);
+    }
+
+    InstanceGroupV2Request worker(Set<String> recipes) {
+        return hostgroup("worker", InstanceGroupType.CORE, 1, recipes);
+    }
+
     public InstanceGroupV2Request hostgroup(String groupName, InstanceGroupType groupType, int nodeCount, String securityGroupId) {
         InstanceGroupV2Request r = new InstanceGroupV2Request();
         r.setNodeCount(nodeCount);
@@ -198,6 +219,19 @@ public abstract class CloudProviderHelper extends CloudProvider {
         r.setNodeCount(nodeCount);
         r.setGroup(groupName);
         r.setType(groupType);
+        SecurityGroupV2Request s = new SecurityGroupV2Request();
+        s.setSecurityRules(rules());
+        r.setSecurityGroup(s);
+        r.setTemplate(template());
+        return r;
+    }
+
+    public InstanceGroupV2Request hostgroup(String groupName, InstanceGroupType groupType, int nodeCount, Set<String> recipes) {
+        InstanceGroupV2Request r = new InstanceGroupV2Request();
+        r.setNodeCount(nodeCount);
+        r.setGroup(groupName);
+        r.setType(groupType);
+        r.setRecipeNames(recipes);
         SecurityGroupV2Request s = new SecurityGroupV2Request();
         s.setSecurityRules(rules());
         r.setSecurityGroup(s);
