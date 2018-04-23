@@ -37,6 +37,9 @@ func (o *Output) Write(header []string, row Row) {
 }
 
 func (o *Output) WriteList(header []string, tableRows []Row) {
+	if tableRows == nil {
+		tableRows = []Row{}
+	}
 	if o.Format == "table" {
 		writeTable(header, tableRows)
 	} else if o.Format == "yaml" {
