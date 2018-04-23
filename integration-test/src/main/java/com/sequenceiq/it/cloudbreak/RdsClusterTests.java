@@ -52,6 +52,7 @@ public class RdsClusterTests extends CloudbreakTest {
             return;
         }
         cloudProvider = CloudProviderHelper.providerFactory(provider, getTestParameter());
+        cloudProvider.setClusterNamePostfix("");
     }
 
     @BeforeTest
