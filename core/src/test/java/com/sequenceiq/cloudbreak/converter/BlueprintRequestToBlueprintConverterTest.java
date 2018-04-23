@@ -71,6 +71,11 @@ public class BlueprintRequestToBlueprintConverterTest extends AbstractJsonConver
         Assert.assertTrue(result.getTags().getMap().size() > 1);
     }
 
+    @Test(expected = BadRequestException.class)
+    public void testWithNonAlphaNumericHostGroupName() {
+        underTest.convert(getRequest("stack/blueprint-non-alpha-numeric-host-group-name.json"));
+    }
+
     @Test
     public void testConvertWhenUrlIsNotEmptyButInvalidThenExceptionWouldCome() throws IOException {
         String wrongUrl = "some wrong content for url";

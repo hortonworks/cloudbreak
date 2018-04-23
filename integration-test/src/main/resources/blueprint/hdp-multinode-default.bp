@@ -9,7 +9,7 @@
   ],
   "host_groups": [
     {
-      "name": "master_1",
+      "name": "master1",
       "components": [
         {
           "name": "NAMENODE"
@@ -39,7 +39,7 @@
       "cardinality": "1"
     },
     {
-      "name": "master_2",
+      "name": "master2",
       "components": [
         {
           "name": "ZOOKEEPER_CLIENT"
@@ -78,7 +78,7 @@
       "cardinality": "1"
     },
     {
-      "name": "master_3",
+      "name": "master3",
       "components": [
         {
           "name": "RESOURCEMANAGER"
@@ -99,7 +99,7 @@
       "cardinality": "1"
     },
     {
-      "name": "master_4",
+      "name": "master4",
       "components": [
         {
           "name": "OOZIE_SERVER"
@@ -114,7 +114,7 @@
       "cardinality": "1"
     },
     {
-      "name": "slave_1",
+      "name": "slave1",
       "components": [
         {
           "name": "HBASE_REGIONSERVER"

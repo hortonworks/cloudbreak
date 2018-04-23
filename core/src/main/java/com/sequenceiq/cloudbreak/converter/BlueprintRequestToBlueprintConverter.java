@@ -142,12 +142,15 @@ public class BlueprintRequestToBlueprintConverter extends AbstractConversionServ
     private void validateHostGroups(JsonNode root) {
         JsonNode hostGroups = root.path("host_groups");
         if (hostGroups.isMissingNode() || !hostGroups.isArray() || hostGroups.size() == 0) {
-            throw new BadRequestException("Invalid validation: 'host_groups' node is missing from JSON or is not an array or empty.");
+            throw new BadRequestException("Validation error: 'host_groups' node is missing from JSON or is not an array or empty.");
         }
         for (JsonNode hostGroup : hostGroups) {
             JsonNode hostGroupName = hostGroup.path("name");
-            if (hostGroupName.isMissingNode() || !hostGroupName.isTextual() || hostGroupName.asText().isEmpty()) {
-                throw new BadRequestException("Invalid validation: one of the 'host_groups' has no name.");
+            if (isTextPropertyMissing(hostGroupName)) {
+                throw new BadRequestException("Validation error: one of the 'host_groups' has no name.");
+            } else if (!StringUtils.isAlphanumeric(hostGroupName.asText())) {
+                throw new BadRequestException(String.format("Validation error: '%s' is not a valid host group name. Host group name must be alphanumeric.",
+                        hostGroupName.asText()));
             }
             validateComponentsInHostgroup(hostGroup, hostGroupName.asText());
         }
@@ -157,25 +160,29 @@ public class BlueprintRequestToBlueprintConverter extends AbstractConversionServ
         JsonNode components = hostGroup.path("components");
         if (components.isMissingNode() || !components.isArray() || components.size() == 0) {
             throw new BadRequestException(
-                    String.format("Invalid validation: '%s' hostgroup's 'components' node is missing from JSON or is not an array or empty.", hostGroupName));
+                    String.format("Validation error: '%s' hostgroup's 'components' node is missing from JSON or is not an array or empty.", hostGroupName));
         }
         for (JsonNode component : components) {
             JsonNode componentName = component.path("name");
-            if (componentName.isMissingNode() || !componentName.isTextual() || componentName.asText().isEmpty()) {
-                throw new BadRequestException(String.format("Invalid validation: one fo the 'components' has no name in '%s' hostgroup.", hostGroupName));
+            if (isTextPropertyMissing(componentName)) {
+                throw new BadRequestException(String.format("Validation error: one fo the 'components' has no name in '%s' hostgroup.", hostGroupName));
             }
         }
     }
 
+    private boolean isTextPropertyMissing(JsonNode hostGroupName) {
+        return hostGroupName.isMissingNode() || !hostGroupName.isTextual() || hostGroupName.asText().isEmpty();
+    }
+
     private void hasBlueprintNameInBlueprint(TreeNode root) {
         if (root.path("Blueprints").path("blueprint_name").isMissingNode()) {
-            throw new BadRequestException("Invalid validation: 'blueprint_name' under 'Blueprints' is missing from JSON.");
+            throw new BadRequestException("Validation error: 'blueprint_name' under 'Blueprints' is missing from JSON.");
         }
     }
 
     private void hasBlueprintInBlueprint(TreeNode root) {
         if (root.path("Blueprints").isMissingNode()) {
-            throw new BadRequestException("Invalid validation: 'Blueprints' node is missing from JSON.");
+            throw new BadRequestException("Validation error: 'Blueprints' node is missing from JSON.");
         }
     }
 }
