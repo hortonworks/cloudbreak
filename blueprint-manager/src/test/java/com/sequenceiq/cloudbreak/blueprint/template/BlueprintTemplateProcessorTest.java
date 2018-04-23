@@ -143,7 +143,7 @@ public class BlueprintTemplateProcessorTest {
         assertTrue(result.contains("\"javax.jdo.option.ConnectionPassword\": \"iamsoosecure\""));
         assertTrue(result.contains("\"javax.jdo.option.ConnectionDriverName\": \"org.postgresql.Driver\""));
         assertTrue(result.contains("\"hive_database_type\": \"postgres\""));
-        assertTrue(result.contains("\"hive_database\": \"Existing postgresql Database\","));
+        assertTrue(result.contains("\"hive_database\": \"Existing PostgreSQL Database\","));
     }
 
     @Test
