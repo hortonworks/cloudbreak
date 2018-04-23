@@ -172,7 +172,7 @@
     {
       "hive-env": {
         "properties": {
-          "hive_database": "Existing postgresql Database",
+          "hive_database": "Existing PostgreSQL Database",
           "hive_database_type": "postgres"
         }
       }

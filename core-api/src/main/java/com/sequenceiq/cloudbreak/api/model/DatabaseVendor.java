@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.api.model;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Optional;
 import java.util.Set;
@@ -10,7 +11,7 @@ import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigRequest;
 import com.sequenceiq.cloudbreak.api.model.rds.RdsConfigRequestParameters;
 
 public enum DatabaseVendor {
-    POSTGRES("postgres", "postgres", "Postgres", "org.postgresql.Driver", "postgresql", ""),
+    POSTGRES("postgres", "postgres", "PostgreSQL", "org.postgresql.Driver", "postgresql", ""),
     MYSQL("mysql", "mysql", "MySQL", "com.mysql.jdbc.Driver", "mysql", "mysql-connector-java.jar"),
     MARIADB("mysql", "mysql", "MySQL", "com.mysql.jdbc.Driver", "mysql", "mysql-connector-java.jar"),
     MSSQL("mssql", "mssql", "SQLServer", "com.microsoft.sqlserver.jdbc.SQLServerDriver", "sqlserver", ""),
@@ -41,13 +42,7 @@ public enum DatabaseVendor {
     }
 
     DatabaseVendor(String ambariVendor, String databaseType, String fancyName, String connectionDriver, String jdbcUrlDriverId, String connectorJarName) {
-        this.ambariVendor = ambariVendor;
-        this.databaseType = databaseType;
-        this.fancyName = fancyName;
-        this.connectionDriver = connectionDriver;
-        this.jdbcUrlDriverId = jdbcUrlDriverId;
-        this.connectorJarName = connectorJarName;
-        this.versions = Sets.newHashSet();
+        this(ambariVendor, databaseType, fancyName, connectionDriver, jdbcUrlDriverId, connectorJarName, Collections.emptySet());
     }
 
     public final String ambariVendor() {
