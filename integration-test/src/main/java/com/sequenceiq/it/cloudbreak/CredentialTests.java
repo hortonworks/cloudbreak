@@ -1,13 +1,9 @@
 package com.sequenceiq.it.cloudbreak;
 
-import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
-import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
-import com.sequenceiq.it.cloudbreak.newway.Credential;
-import com.sequenceiq.it.cloudbreak.newway.TestParameter;
-import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProvider;
-import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProviderHelper;
-import com.sequenceiq.it.cloudbreak.newway.cloud.OpenstackCloudProvider;
-import com.sequenceiq.it.util.LongStringGeneratorUtil;
+import javax.inject.Inject;
+import javax.ws.rs.BadRequestException;
+import javax.ws.rs.ForbiddenException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
@@ -17,9 +13,14 @@ import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import javax.inject.Inject;
-import javax.ws.rs.BadRequestException;
-import javax.ws.rs.ForbiddenException;
+import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
+import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
+import com.sequenceiq.it.cloudbreak.newway.Credential;
+import com.sequenceiq.it.cloudbreak.newway.TestParameter;
+import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProvider;
+import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProviderHelper;
+import com.sequenceiq.it.cloudbreak.newway.cloud.OpenstackCloudProvider;
+import com.sequenceiq.it.util.LongStringGeneratorUtil;
 
 public class CredentialTests extends CloudbreakTest {
 
@@ -115,10 +116,6 @@ public class CredentialTests extends CloudbreakTest {
                 .withName(credentialName)
                 .withDescription(CRED_DESCRIPTION)
                 .withCloudPlatform(cloudProvider.getPlatform()), credentialName + " credential is created.");
-        given(cloudProvider.aValidCredential()
-                .withName(credentialName)
-                .withDescription(CRED_DESCRIPTION)
-                .withCloudPlatform(cloudProvider.getPlatform()), credentialName + " credential is created.");
         when(Credential.post(), credentialName + " credential request has been posted.");
     }
 
@@ -156,7 +153,7 @@ public class CredentialTests extends CloudbreakTest {
     @Test(expectedExceptions = BadRequestException.class, priority = 4, groups = "credentials")
     public void testCreateInvalidShortCredential() throws Exception {
         given(CloudbreakClient.isCreated());
-        given(cloudProvider.aValidCredential()
+        given(cloudProvider.aValidCredential(false)
                 .withName(INVALID_SHORT_CRED_NAME)
                 .withDescription(CRED_DESCRIPTION)
                 .withCloudPlatform(cloudProvider.getPlatform()), "0 char credential name request.");
@@ -169,7 +166,7 @@ public class CredentialTests extends CloudbreakTest {
         String invalidLongName = longStringGeneratorUtil.stringGenerator(101);
 
         given(CloudbreakClient.isCreated());
-        given(cloudProvider.aValidCredential()
+        given(cloudProvider.aValidCredential(false)
                 .withName(invalidLongName + cloudProvider.getPlatform().toLowerCase())
                 .withDescription(CRED_DESCRIPTION)
                 .withCloudPlatform(cloudProvider.getPlatform()), invalidLongName + " credential name request.");
@@ -181,7 +178,7 @@ public class CredentialTests extends CloudbreakTest {
         credentialName = SPECIAL_CRED_NAME + cloudProvider.getPlatform().toLowerCase();
 
         given(CloudbreakClient.isCreated());
-        given(cloudProvider.aValidCredential()
+        given(cloudProvider.aValidCredential(false)
                 .withName(credentialName)
                 .withDescription(CRED_DESCRIPTION)
                 .withCloudPlatform(cloudProvider.getPlatform()), credentialName + " credential name request.");
@@ -197,7 +194,7 @@ public class CredentialTests extends CloudbreakTest {
         String invalidLongDescripton = longStringGeneratorUtil.stringGenerator(1001);
 
         given(CloudbreakClient.isCreated());
-        given(cloudProvider.aValidCredential()
+        given(cloudProvider.aValidCredential(false)
                 .withName(credentialName)
                 .withDescription(invalidLongDescripton)
                 .withCloudPlatform(cloudProvider.getPlatform()), credentialName + " credential description request.");

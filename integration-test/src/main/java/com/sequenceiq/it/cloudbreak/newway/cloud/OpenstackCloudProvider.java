@@ -1,14 +1,14 @@
 package com.sequenceiq.it.cloudbreak.newway.cloud;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.sequenceiq.cloudbreak.api.model.StackAuthenticationRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.NetworkV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.TemplateV2Request;
 import com.sequenceiq.it.cloudbreak.newway.Credential;
 import com.sequenceiq.it.cloudbreak.newway.CredentialEntity;
 import com.sequenceiq.it.cloudbreak.newway.TestParameter;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public class OpenstackCloudProvider extends CloudProviderHelper {
 
@@ -45,8 +45,9 @@ public class OpenstackCloudProvider extends CloudProviderHelper {
     }
 
     @Override
-    public CredentialEntity aValidCredential() {
-        return Credential.isCreated()
+    public CredentialEntity aValidCredential(boolean create) {
+        CredentialEntity credential = create ? Credential.isCreated() : Credential.request();
+        return credential
                 .withName(getCredentialName())
                 .withDescription(CREDENTIAL_DEFAULT_DESCRIPTION)
                 .withCloudPlatform(OPENSTACK_CAPITAL)

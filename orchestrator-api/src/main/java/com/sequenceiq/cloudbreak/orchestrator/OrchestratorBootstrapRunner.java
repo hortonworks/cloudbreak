@@ -113,7 +113,7 @@ public class OrchestratorBootstrapRunner implements Callable<Boolean> {
                         type, retryCount, maxRetryCount, elapsedTime, totalElapsedTime, actualException.getMessage(), orchestratorBootstrap);
                 retryCount++;
                 if (retryCount <= maxRetryCount) {
-                    Thread.sleep(sleepTime);
+                    trySleeping();
                 } else {
                     success = Boolean.FALSE;
                 }
@@ -121,6 +121,18 @@ public class OrchestratorBootstrapRunner implements Callable<Boolean> {
         }
 
         return new ImmutablePair<>(success, actualException);
+    }
+
+    private void trySleeping() {
+        if (!Thread.interrupted()) {
+            try {
+                Thread.sleep(sleepTime);
+            } catch (InterruptedException ie) {
+                LOGGER.warn("The thread was interrupted during sleeping. Sleeping halted, continuing execution.", ie);
+            }
+        } else {
+            LOGGER.warn("The thread was interrupted before sleeping. Skipping sleeping and continuing execution.");
+        }
     }
 
     private boolean isExitNeeded() {
