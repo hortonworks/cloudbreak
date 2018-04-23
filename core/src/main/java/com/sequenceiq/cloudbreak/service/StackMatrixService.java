@@ -63,7 +63,7 @@ public class StackMatrixService {
 
     private StackDescriptor getStackDescriptor(StackInfo stackInfo) {
         Map<String, AmbariInfo> ambariInfoEntries = defaultAmbariRepoService.getEntries();
-        StackDescriptor stackDescriptor = stackInfoMapper.mapStackInfoToStackDescriptor(stackInfo);
+        StackDescriptor stackDescriptor = stackInfoMapper.mapStackInfoToStackDescriptor(stackInfo, stackInfo.getRepo().getMpacks());
         AmbariInfo ambariInfo = ambariInfoEntries.getOrDefault(stackDescriptor.getMinAmbari(), new AmbariInfo());
         AmbariInfoJson ambariInfoJson = ambariInfoMapper.mapAmbariInfoToAmbariInfoJson(ambariInfo);
         stackDescriptor.setAmbari(ambariInfoJson);
