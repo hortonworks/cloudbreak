@@ -179,27 +179,6 @@ cb:
 
   hdp:
     entries:
-      2.5:
-        version: 2.5.5.0
-        minAmbari: 2.6
-        repo:
-          stack:
-            repoid: HDP-2.5
-            redhat6: http://public-repo-1.hortonworks.com/HDP/centos6/2.x/updates/2.5.5.0
-            redhat7: http://public-repo-1.hortonworks.com/HDP/centos7/2.x/updates/2.5.5.0
-            debian9: http://public-repo-1.hortonworks.com/HDP/debian9/2.x/updates/2.5.5.0
-            ubuntu16: http://public-repo-1.hortonworks.com/HDP/ubuntu16/2.x/updates/2.5.5.0
-            repository-version: 2.5.3.0-37
-            vdf-redhat6: http://public-repo-1.hortonworks.com/HDP/centos6/2.x/updates/2.5.3.0/HDP-2.5.3.0-37.xml
-            vdf-redhat7: http://public-repo-1.hortonworks.com/HDP/centos7/2.x/updates/2.5.3.0/HDP-2.5.3.0-37.xml
-            vdf-debian9: http://public-repo-1.hortonworks.com/HDP/debian9/2.x/updates/2.5.3.0/HDP-2.5.3.0-37.xml
-            vdf-ubuntu16: http://public-repo-1.hortonworks.com/HDP/ubuntu16/2.x/updates/2.5.3.0/HDP-2.5.3.0-37.xml
-          util:
-            repoid: HDP-UTILS-1.1.0.21
-            redhat6: http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.21/repos/centos6
-            redhat7: http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.21/repos/centos7
-            debian9: http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.21/repos/debian9
-            ubuntu16: http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.21/repos/ubuntu16
       2.6:
         version: 2.6.4.5-2
         minAmbari: 2.6
