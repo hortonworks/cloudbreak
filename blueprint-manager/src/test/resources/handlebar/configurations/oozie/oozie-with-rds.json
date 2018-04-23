@@ -10,7 +10,7 @@
   },
   "oozie-env" : {
     "properties" : {
-      "oozie_database" : "Existing postgresql Database",
+      "oozie_database" : "Existing PostgreSQL Database",
       "oozie_database_type" : "postgres"
     }
   }
