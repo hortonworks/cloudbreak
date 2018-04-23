@@ -1,16 +1,29 @@
 package com.sequenceiq.it.cloudbreak.newway;
 
-import com.sequenceiq.it.IntegrationTestContext;
-import com.sequenceiq.it.cloudbreak.CloudbreakUtil;
-import org.testng.Assert;
+import static com.sequenceiq.it.cloudbreak.CloudbreakUtil.waitAndCheckClusterStatus;
+import static com.sequenceiq.it.cloudbreak.CloudbreakUtil.waitAndCheckStackStatus;
+import static com.sequenceiq.it.cloudbreak.CloudbreakUtil.waitAndExpectClusterFailure;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
-import static com.sequenceiq.it.cloudbreak.CloudbreakUtil.waitAndCheckClusterStatus;
-import static com.sequenceiq.it.cloudbreak.CloudbreakUtil.waitAndCheckStackStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.testng.Assert;
+
+import com.sequenceiq.cloudbreak.api.model.InstanceGroupResponse;
+import com.sequenceiq.cloudbreak.api.model.InstanceMetaDataJson;
+import com.sequenceiq.it.IntegrationTestContext;
+import com.sequenceiq.it.cloudbreak.CloudbreakUtil;
+import com.sequenceiq.it.cloudbreak.SshService;
 
 public class Stack extends StackEntity {
+    private static final Logger LOGGER = LoggerFactory.getLogger(Stack.class);
 
     static Function<IntegrationTestContext, Stack> getTestContextStack(String key) {
         return (testContext) -> testContext.getContextParam(key, Stack.class);
@@ -76,6 +89,15 @@ public class Stack extends StackEntity {
         });
     }
 
+    public static Assertion<Stack> waitAndCheckClusterFailure(String keyword) {
+        return assertThis((stack, t) -> {
+            CloudbreakClient client = CloudbreakClient.getTestContextCloudbreakClient().apply(t);
+            Assert.assertNotNull(stack.getResponse().getId());
+            waitAndCheckStackStatus(client.getCloudbreakClient(), stack.getResponse().getId().toString(), "AVAILABLE");
+            waitAndExpectClusterFailure(client.getCloudbreakClient(), stack.getResponse().getId().toString(), "CREATE_FAILED", keyword);
+        });
+    }
+
     public static Assertion<Stack> waitAndCheckClusterAndStackStoppedStatus() {
         return assertThis((stack, t) -> {
             CloudbreakClient client = CloudbreakClient.getTestContextCloudbreakClient().apply(t);
@@ -103,6 +125,29 @@ public class Stack extends StackEntity {
                     ambariUser,
                     ambariPassword,
                     true);
+        });
+    }
+
+    public static Assertion<Stack> checkRecipes(String [] searchOnHost, String[] files, String privateKey, String sshCommand, Integer require) {
+        return assertThis((stack, t) -> {
+            List<String> ips = new ArrayList<>();
+            List<String> emptyList = new ArrayList<>();
+            Map<String, List<String>> sshCheckMap = new HashMap<>();
+            sshCheckMap.put("beginsWith", emptyList);
+            List<InstanceGroupResponse> instanceGroups = stack.getResponse().getInstanceGroups();
+            for (InstanceGroupResponse instanceGroup : instanceGroups) {
+                if (Arrays.asList(searchOnHost).contains(instanceGroup.getGroup())) {
+                    for (InstanceMetaDataJson metaData : instanceGroup.getMetadata()) {
+                        ips.add(metaData.getPublicIp());
+                    }
+                }
+            }
+            try {
+                SshService sshService = new SshService();
+                sshService.executeCommand(ips, files, privateKey, sshCommand, "cloudbreak", 120000, require, sshCheckMap);
+            } catch (Exception e) {
+                LOGGER.error("Error occurred during ssh execution: " + e);
+            }
         });
     }
 }

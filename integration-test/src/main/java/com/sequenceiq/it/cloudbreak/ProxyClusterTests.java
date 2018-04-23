@@ -47,6 +47,7 @@ public class ProxyClusterTests extends CloudbreakTest {
             return;
         }
         cloudProvider = CloudProviderHelper.providerFactory(provider, getTestParameter());
+        cloudProvider.setClusterNamePostfix("");
     }
 
     @BeforeTest
@@ -71,8 +72,8 @@ public class ProxyClusterTests extends CloudbreakTest {
     public void testCreateClusterWithProxy(String securityGroupId) throws Exception {
         given(cloudProvider.aValidCredential());
         given(Cluster.request()
-                        .withAmbariRequest(cloudProvider.ambariRequestWithBlueprintName(BLUEPRINT_HDP26_NAME))
-                        .withProxyConfigName(VALID_PROXY_CONFIG), "a cluster request with proxy");
+                .withAmbariRequest(cloudProvider.ambariRequestWithBlueprintName(BLUEPRINT_HDP26_NAME))
+                .withProxyConfigName(VALID_PROXY_CONFIG), "a cluster request with proxy");
         given(cloudProvider.aValidStackRequest()
                 .withInstanceGroups(cloudProvider.instanceGroups(securityGroupId)),  "a stack request with given security group");
         when(Stack.post(), "post the stack request");
