@@ -21,6 +21,7 @@ import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.model.AdjustmentType;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.model.StackRequest;
+import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceGroupParameterRequest;
@@ -46,6 +47,7 @@ import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.flex.FlexSubscriptionService;
 import com.sequenceiq.cloudbreak.service.network.NetworkService;
+import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.securitygroup.SecurityGroupService;
 import com.sequenceiq.cloudbreak.service.sharedservice.SharedServiceConfigProvider;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterCache;
@@ -104,6 +106,9 @@ public class StackDecorator {
     @Inject
     private SharedServiceConfigProvider sharedServiceConfigProvider;
 
+    @Inject
+    private RdsConfigService rdsConfigService;
+
     public Stack decorate(@Nonnull Stack subject, @Nonnull StackRequest request, IdentityUser user) {
         prepareCredential(subject, request, user);
         prepareDomainIfDefined(subject, request, user);
@@ -128,25 +133,58 @@ public class StackDecorator {
             prepareFlexSubscription(subject, request.getFlexId());
             validate(subject);
             subject = sharedServiceConfigProvider.configureStack(subject, user);
-            checkSharedServiceStackRequirements(request);
+            checkSharedServiceStackRequirements(request, user);
         }
         return subject;
     }
 
-    private void checkSharedServiceStackRequirements(StackRequest request) {
-        if (request.getClusterToAttach() != null && !isSharedServiceRequirementsMeets(request)) {
+    private void checkSharedServiceStackRequirements(StackRequest request, IdentityUser user) {
+        if (request.getClusterToAttach() != null && !isSharedServiceRequirementsMeets(request, user)) {
             throw new BadRequestException("Shared service stack should contains both Hive RDS and Ranger RDS and a properly configured LDAP also. "
                     + "One of them may be missing");
         }
     }
 
-    private boolean isSharedServiceRequirementsMeets(StackRequest request) {
-        boolean hasConfiguredLdap = request.getClusterRequest().getLdapConfig() != null;
-        boolean hasConfiguredHiveRds = request.getClusterRequest().getRdsConfigJsons().stream()
-                .anyMatch(rdsConfigRequest -> "hive".equalsIgnoreCase(rdsConfigRequest.getType()));
-        boolean hasConfiguredRangerRds = request.getClusterRequest().getRdsConfigJsons().stream()
-                .anyMatch(rdsConfigRequest -> "ranger".equalsIgnoreCase(rdsConfigRequest.getType()));
+    private boolean isSharedServiceRequirementsMeets(StackRequest request, IdentityUser user) {
+        boolean hasConfiguredLdap = hasConfiguredLdap(request);
+        boolean hasConfiguredHiveRds = hasConfiguredRdsByType(request, user, RdsType.HIVE);
+        boolean hasConfiguredRangerRds = hasConfiguredRdsByType(request, user, RdsType.RANGER);
         return hasConfiguredHiveRds && hasConfiguredRangerRds && hasConfiguredLdap;
+    }
+
+    private boolean hasConfiguredRdsByType(StackRequest request, IdentityUser user, RdsType rdsType) {
+        boolean hasConfiguredRds = false;
+        if (!request.getClusterRequest().getRdsConfigJsons().isEmpty()) {
+            hasConfiguredRds = request.getClusterRequest().getRdsConfigJsons().stream()
+                    .anyMatch(rdsConfigRequest -> rdsType.name().equalsIgnoreCase(rdsConfigRequest.getType()));
+        }
+        if (!hasConfiguredRds && !request.getClusterRequest().getRdsConfigNames().isEmpty()) {
+            for (String rds : request.getClusterRequest().getRdsConfigNames()) {
+                if (rdsType.name().equalsIgnoreCase(rdsConfigService.getPublicRdsConfig(rds, user).getType())) {
+                    hasConfiguredRds = true;
+                    break;
+                }
+            }
+        }
+        if (!hasConfiguredRds && !request.getClusterRequest().getRdsConfigNames().isEmpty()) {
+            for (Long rds : request.getClusterRequest().getRdsConfigIds()) {
+                if (rdsType.name().equalsIgnoreCase(rdsConfigService.get(rds).getType())) {
+                    hasConfiguredRds = true;
+                    break;
+                }
+            }
+        }
+        return hasConfiguredRds;
+    }
+
+    private boolean hasConfiguredLdap(StackRequest request) {
+        boolean hasConfiguredLdap = false;
+        if (request.getClusterRequest().getLdapConfig() != null
+                || request.getClusterRequest().getLdapConfigName() != null
+                || request.getClusterRequest().getLdapConfigId() != null) {
+            hasConfiguredLdap = true;
+        }
+        return hasConfiguredLdap;
     }
 
     private void prepareCredential(Stack subject, StackRequest request, IdentityUser user) {

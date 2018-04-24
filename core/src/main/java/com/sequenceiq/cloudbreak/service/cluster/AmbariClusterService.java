@@ -961,10 +961,21 @@ public class AmbariClusterService implements ClusterService {
             results = ambariClient.getConfigValuesByConfigIds(targets);
         }
         prepareResults(requests, cluster, bpI, results);
-        prepareAdditionalInputParameters(results, cluster);
+
+        Map<String, String> additionalResults = new HashMap<>();
+        prepareAdditionalInputParameters(additionalResults, cluster);
 
         Set<BlueprintInputJson> blueprintInputJsons = new HashSet<>();
 
+        prepareBlueprintInputs(requests, results, blueprintInputJsons);
+        prepareBlueprintInputs(requests, additionalResults, blueprintInputJsons);
+
+        ConfigsResponse configsResponse = new ConfigsResponse();
+        configsResponse.setInputs(blueprintInputJsons);
+        return configsResponse;
+    }
+
+    private void prepareBlueprintInputs(Set<BlueprintParameterJson> requests, Map<String, String> results, Set<BlueprintInputJson> blueprintInputJsons) {
         for (Entry<String, String> stringStringEntry : results.entrySet()) {
             for (BlueprintParameterJson blueprintParameter : requests) {
                 if (stringStringEntry.getKey().equals(blueprintParameter.getName())) {
@@ -976,10 +987,6 @@ public class AmbariClusterService implements ClusterService {
                 }
             }
         }
-
-        ConfigsResponse configsResponse = new ConfigsResponse();
-        configsResponse.setInputs(blueprintInputJsons);
-        return configsResponse;
     }
 
     @Override

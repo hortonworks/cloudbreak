@@ -215,9 +215,6 @@ public class StackDecoratorTest {
         when(clusterRequest.getLdapConfig()).thenReturn(null);
         when(clusterRequest.getRdsConfigJsons()).thenReturn(rdsConfigRequests);
 
-        thrown.expect(BadRequestException.class);
-        thrown.expectMessage(MISCONFIGURED_STACK_FOR_SHARED_SERVICE);
-
         underTest.decorate(subject, request, user);
     }
 
