@@ -13,9 +13,18 @@ public class RdsView {
 
     private final String connectionUserName;
 
+    // For ambari init backward compatibility
+    private final String userName;
+
     private final String connectionPassword;
 
+    // For ambari init backward compatibility
+    private final String password;
+
     private final String databaseName;
+
+    // For ambari init backward compatibility
+    private final String name;
 
     private final String host;
 
@@ -35,12 +44,17 @@ public class RdsView {
 
     private String ambariVendor;
 
+    // For ambari init backward compatibility
+    private String vendor;
+
     private String upperCaseDatabaseEngine;
 
     public RdsView(RDSConfig rdsConfig) {
         connectionURL = rdsConfig.getConnectionURL();
         connectionUserName = rdsConfig.getConnectionUserName();
+        userName = connectionUserName;
         connectionPassword = rdsConfig.getConnectionPassword();
+        password = connectionPassword;
 
         String[] split = connectionURL.split("//");
         String withoutJDBCPrefix = split[split.length - 1];
@@ -55,6 +69,7 @@ public class RdsView {
         }
 
         databaseName = getDatabaseName(connectionURL);
+        name = databaseName;
         hostWithPortWithJdbc = connectionURL.replace("/" + databaseName, "");
         this.hostWithPort = createConnectionHost(port);
         connectionDriver = rdsConfig.getConnectionDriver();
@@ -64,6 +79,7 @@ public class RdsView {
             DatabaseVendor databaseVendor = DatabaseVendor.valueOf(rdsConfig.getDatabaseEngine());
             fancyName = databaseVendor.fancyName();
             ambariVendor = databaseVendor.ambariVendor();
+            vendor = ambariVendor;
             databaseType = databaseVendor.databaseType();
             upperCaseDatabaseEngine = rdsConfig.getDatabaseEngine().toUpperCase();
         }
@@ -123,6 +139,22 @@ public class RdsView {
 
     public String getAmbariVendor() {
         return ambariVendor;
+    }
+
+    public String getVendor() {
+        return vendor;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public String getName() {
+        return name;
     }
 
     public String getUpperCaseDatabaseEngine() {
