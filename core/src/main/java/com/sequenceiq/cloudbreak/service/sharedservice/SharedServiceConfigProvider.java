@@ -100,15 +100,17 @@ public class SharedServiceConfigProvider {
     }
 
     private void setupRds(Cluster requestedCluster, Cluster sourceCluster) {
-        requestedCluster.getRdsConfigs().addAll(
-                sourceCluster.getRdsConfigs()
-                        .stream()
-                        .filter(rdsConfig -> !ResourceStatus.DEFAULT.equals(rdsConfig.getStatus()))
-                        .collect(toSet()));
+        if (requestedCluster.getRdsConfigs().isEmpty()) {
+            requestedCluster.getRdsConfigs().addAll(
+                    sourceCluster.getRdsConfigs()
+                            .stream()
+                            .filter(rdsConfig -> !ResourceStatus.DEFAULT.equals(rdsConfig.getStatus()))
+                            .collect(toSet()));
+        }
     }
 
     private Cluster queryCluster(Stack publicStack) {
-        return clusterService.getById(publicStack.getId());
+        return clusterService.getById(publicStack.getCluster().getId());
     }
 
     private Stack queryStack(IdentityUser user, Long sourceClusterId, Optional<String> sourceClusterName) {
