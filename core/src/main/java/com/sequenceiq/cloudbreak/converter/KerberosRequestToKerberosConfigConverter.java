@@ -9,7 +9,7 @@ import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.type.KerberosType;
 
 @Component
-public class KerbersoRequestToKerberosConfigConverter extends AbstractConversionServiceAwareConverter<KerberosRequest, KerberosConfig> {
+public class KerberosRequestToKerberosConfigConverter extends AbstractConversionServiceAwareConverter<KerberosRequest, KerberosConfig> {
     @Override
     public KerberosConfig convert(KerberosRequest source) {
         KerberosConfig kerberosConfig = new KerberosConfig();
