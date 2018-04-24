@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.blueprint.kerberos;
 
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
+
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -73,8 +75,8 @@ public class KerberosBlueprintService implements BlueprintComponentConfigProvide
         Map<String, String> kerberosEnv = ImmutableMap.<String, String>builder()
                 .put("realm", realm)
                 .put("kdc_type", kdcType)
-                .put("kdc_hosts", kerberosDetailService.resolveHostForKerberos(kerberosConfig, gatewayHost))
-                .put("admin_server_host", kdcAdminHost)
+                .put("kdc_hosts", kdcHosts)
+                .put("admin_server_host", isNotEmpty(kdcAdminHost) ? kdcAdminHost : kdcHosts)
                 .put("encryption_types", "aes des3-cbc-sha1 rc4 des-cbc-md5")
                 .put("ldap_url", ldapUrl == null ? "" : ldapUrl)
                 .put("container_dn", containerDn == null ? "" : containerDn)

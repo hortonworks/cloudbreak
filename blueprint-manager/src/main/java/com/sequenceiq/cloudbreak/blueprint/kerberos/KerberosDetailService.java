@@ -3,8 +3,9 @@ package com.sequenceiq.cloudbreak.blueprint.kerberos;
 import java.io.IOException;
 import java.util.Map;
 
+import javax.annotation.Nonnull;
+
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Strings;
@@ -19,22 +20,22 @@ public class KerberosDetailService {
 
     private final Gson gson = new Gson();
 
-    public String resolveTypeForKerberos(KerberosConfig kerberosConfig) {
+    public String resolveTypeForKerberos(@Nonnull KerberosConfig kerberosConfig) {
         if (!Strings.isNullOrEmpty(kerberosConfig.getContainerDn()) && !Strings.isNullOrEmpty(kerberosConfig.getLdapUrl())) {
             return "active-directory";
         }
         return "mit-kdc";
     }
 
-    public String resolveHostForKerberos(KerberosConfig kerberosConfig, String defaultHost) {
-        return Strings.isNullOrEmpty(kerberosConfig.getUrl()) ? defaultHost : kerberosConfig.getUrl();
+    public String resolveHostForKerberos(@Nonnull KerberosConfig kerberosConfig, String defaultHost) {
+        return kerberosConfig.getUrl() == null || kerberosConfig.getUrl().trim().isEmpty() ? defaultHost : kerberosConfig.getUrl().trim();
     }
 
-    public String resolveHostForKdcAdmin(KerberosConfig kerberosConfig, String defaultHost) {
-        return Strings.isNullOrEmpty(kerberosConfig.getAdminUrl()) ? defaultHost : kerberosConfig.getAdminUrl();
+    public String resolveHostForKdcAdmin(@Nonnull KerberosConfig kerberosConfig, String defaultHost) {
+        return kerberosConfig.getAdminUrl() == null || kerberosConfig.getAdminUrl().trim().isEmpty() ? defaultHost : kerberosConfig.getAdminUrl().trim();
     }
 
-    public String getRealm(String gwDomain, KerberosConfig kerberosConfig) {
+    public String getRealm(@Nonnull String gwDomain, @Nonnull KerberosConfig kerberosConfig) {
         return Strings.isNullOrEmpty(kerberosConfig.getRealm()) ? gwDomain.toUpperCase() : kerberosConfig.getRealm().toUpperCase();
     }
 
@@ -42,21 +43,21 @@ public class KerberosDetailService {
         return '.' + gwDomain;
     }
 
-    public String resolveLdapUrlForKerberos(KerberosConfig kerberosConfig) {
+    public String resolveLdapUrlForKerberos(@Nonnull KerberosConfig kerberosConfig) {
         return Strings.isNullOrEmpty(kerberosConfig.getLdapUrl()) ? null : kerberosConfig.getLdapUrl();
     }
 
-    public String resolveContainerDnForKerberos(KerberosConfig kerberosConfig) {
+    public String resolveContainerDnForKerberos(@Nonnull KerberosConfig kerberosConfig) {
         return Strings.isNullOrEmpty(kerberosConfig.getContainerDn()) ? null : kerberosConfig.getContainerDn();
     }
 
-    public String resolvePrincipalForKerberos(KerberosConfig kerberosConfig) {
+    public String resolvePrincipalForKerberos(@Nonnull KerberosConfig kerberosConfig) {
         return Strings.isNullOrEmpty(kerberosConfig.getPrincipal()) ? kerberosConfig.getAdmin() + PRINCIPAL
                 : kerberosConfig.getPrincipal();
     }
 
-    public boolean isAmbariManagedKerberosPackages(KerberosConfig kerberosConfig) throws IOException {
-        if (!StringUtils.hasLength(kerberosConfig.getDescriptor())) {
+    public boolean isAmbariManagedKerberosPackages(@Nonnull KerberosConfig kerberosConfig) throws IOException {
+        if (org.apache.commons.lang3.StringUtils.isEmpty(kerberosConfig.getDescriptor())) {
             return true;
         }
         try {
@@ -67,7 +68,7 @@ public class KerberosDetailService {
         }
     }
 
-    public Map<String, Object> getKerberosEnvProperties(KerberosConfig kerberosConfig) {
+    public Map<String, Object> getKerberosEnvProperties(@Nonnull KerberosConfig kerberosConfig) {
         Map<String, Object> kerberosEnv = (Map<String, Object>) gson.fromJson(kerberosConfig.getDescriptor(), Map.class).get("kerberos-env");
         return (Map<String, Object>) kerberosEnv.get("properties");
     }
