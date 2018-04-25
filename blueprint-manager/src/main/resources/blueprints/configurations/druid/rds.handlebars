@@ -1,18 +1,12 @@
 {
-  "druid-superset-env": {
-    "properties": {
-      "superset_admin_password": "{{{ cluster_admin_password }}}",
-      "superset_admin_firstname": "{{{ cluster_admin_firstname }}}",
-      "superset_admin_lastname": "{{{ cluster_admin_lastname }}}",
-      "superset_admin_email": "{{{ admin_email }}}"
-    }
-  }{{{#if rds.druid}}},
+{{{#if rds.druid}}}
   "druid-common": {
     "properties": {
       "druid.metadata.storage.type": "{{{ rds.druid.subprotocol }}}",
-      "druid.metadata.storage.connector.connectURI": "{{{ rds.druid.connectionURL }}}",
+      "druid.metadata.storage.connector.connectURI": "{{{ rds.druid.connectionString }}}",
       "druid.metadata.storage.connector.user": "{{{ rds.druid.connectionUserName }}}",
       "druid.metadata.storage.connector.password": "{{{ rds.druid.connectionPassword }}}"
     }
-  }{{{/if}}}
+  }
+{{{/if}}}
 }

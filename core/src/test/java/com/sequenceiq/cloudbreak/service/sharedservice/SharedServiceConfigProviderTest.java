@@ -156,6 +156,7 @@ public class SharedServiceConfigProviderTest {
         when(stackService.get(TEST_LONG_VALUE)).thenReturn(publicStack);
         when(publicStack.getId()).thenReturn(TEST_LONG_VALUE);
         when(clusterService.getById(TEST_LONG_VALUE)).thenReturn(sourceCluster);
+        when(publicStackCluster.getId()).thenReturn(TEST_LONG_VALUE);
         when(publicStack.getCluster()).thenReturn(publicStackCluster);
         when(publicStackCluster.getLdapConfig()).thenReturn(ldapConfig);
         when(blueprint.getInputParameters()).thenReturn(null);
@@ -180,8 +181,9 @@ public class SharedServiceConfigProviderTest {
         when(connectedClusterRequest.getSourceClusterId()).thenReturn(TEST_LONG_VALUE);
         when(stackService.getPublicStack(clusterName, user)).thenReturn(publicStack);
         when(publicStack.getId()).thenReturn(TEST_LONG_VALUE);
-        when(clusterService.getById(TEST_LONG_VALUE)).thenReturn(sourceCluster);
+        when(publicStackCluster.getId()).thenReturn(TEST_LONG_VALUE);
         when(publicStack.getCluster()).thenReturn(publicStackCluster);
+        when(clusterService.getById(TEST_LONG_VALUE)).thenReturn(sourceCluster);
         when(publicStackCluster.getLdapConfig()).thenReturn(ldapConfig);
         when(blueprint.getInputParameters()).thenReturn(null);
         when(clusterService.retrieveOutputs(anyLong(), any())).thenReturn(configsResponse);
@@ -206,6 +208,8 @@ public class SharedServiceConfigProviderTest {
         when(connectedClusterRequest.getSourceClusterId()).thenReturn(TEST_LONG_VALUE);
         when(stackService.get(TEST_LONG_VALUE)).thenReturn(publicStack);
         when(publicStack.getId()).thenReturn(TEST_LONG_VALUE);
+        when(publicStackCluster.getId()).thenReturn(TEST_LONG_VALUE);
+        when(publicStack.getCluster()).thenReturn(publicStackCluster);
         when(clusterService.getById(TEST_LONG_VALUE)).thenReturn(sourceCluster);
         when(publicStack.getCluster()).thenReturn(publicStackCluster);
         when(publicStackCluster.getLdapConfig()).thenReturn(ldapConfig);
@@ -228,8 +232,9 @@ public class SharedServiceConfigProviderTest {
         when(connectedClusterRequest.getSourceClusterId()).thenReturn(TEST_LONG_VALUE);
         when(stackService.get(TEST_LONG_VALUE)).thenReturn(publicStack);
         when(publicStack.getId()).thenReturn(TEST_LONG_VALUE);
-        when(clusterService.getById(TEST_LONG_VALUE)).thenReturn(sourceCluster);
+        when(publicStackCluster.getId()).thenReturn(TEST_LONG_VALUE);
         when(publicStack.getCluster()).thenReturn(publicStackCluster);
+        when(clusterService.getById(TEST_LONG_VALUE)).thenReturn(sourceCluster);
         when(publicStackCluster.getLdapConfig()).thenReturn(ldapConfig);
         when(blueprint.getInputParameters()).thenReturn(null);
         when(clusterService.retrieveOutputs(anyLong(), any())).thenReturn(configsResponse);
@@ -250,8 +255,9 @@ public class SharedServiceConfigProviderTest {
         when(connectedClusterRequest.getSourceClusterId()).thenReturn(TEST_LONG_VALUE);
         when(stackService.get(TEST_LONG_VALUE)).thenReturn(publicStack);
         when(publicStack.getId()).thenReturn(TEST_LONG_VALUE);
-        when(clusterService.getById(TEST_LONG_VALUE)).thenReturn(sourceCluster);
+        when(publicStackCluster.getId()).thenReturn(TEST_LONG_VALUE);
         when(publicStack.getCluster()).thenReturn(publicStackCluster);
+        when(clusterService.getById(TEST_LONG_VALUE)).thenReturn(sourceCluster);
         when(publicStackCluster.getLdapConfig()).thenReturn(ldapConfig);
         when(blueprint.getInputParameters()).thenReturn(mockBlueprintAttributes);
         when(mockBlueprintAttributes.getValue()).thenReturn(null);
@@ -273,8 +279,9 @@ public class SharedServiceConfigProviderTest {
         when(connectedClusterRequest.getSourceClusterId()).thenReturn(TEST_LONG_VALUE);
         when(stackService.get(TEST_LONG_VALUE)).thenReturn(publicStack);
         when(publicStack.getId()).thenReturn(TEST_LONG_VALUE);
-        when(clusterService.getById(TEST_LONG_VALUE)).thenReturn(sourceCluster);
+        when(publicStackCluster.getId()).thenReturn(TEST_LONG_VALUE);
         when(publicStack.getCluster()).thenReturn(publicStackCluster);
+        when(clusterService.getById(TEST_LONG_VALUE)).thenReturn(sourceCluster);
         when(publicStackCluster.getLdapConfig()).thenReturn(ldapConfig);
         when(blueprint.getInputParameters()).thenReturn(mockBlueprintAttributes);
         when(mockBlueprintAttributes.getValue()).thenReturn("");
@@ -298,8 +305,9 @@ public class SharedServiceConfigProviderTest {
         when(connectedClusterRequest.getSourceClusterId()).thenReturn(TEST_LONG_VALUE);
         when(stackService.get(TEST_LONG_VALUE)).thenReturn(publicStack);
         when(publicStack.getId()).thenReturn(TEST_LONG_VALUE);
-        when(clusterService.getById(TEST_LONG_VALUE)).thenReturn(sourceCluster);
+        when(publicStackCluster.getId()).thenReturn(TEST_LONG_VALUE);
         when(publicStack.getCluster()).thenReturn(publicStackCluster);
+        when(clusterService.getById(TEST_LONG_VALUE)).thenReturn(sourceCluster);
         when(publicStackCluster.getLdapConfig()).thenReturn(ldapConfig);
         when(blueprint.getInputParameters()).thenReturn(mockBlueprintAttributes);
         when(mockBlueprintAttributes.getValue()).thenReturn("some value which does not empty or null");
@@ -321,8 +329,9 @@ public class SharedServiceConfigProviderTest {
         when(connectedClusterRequest.getSourceClusterId()).thenReturn(TEST_LONG_VALUE);
         when(stackService.get(TEST_LONG_VALUE)).thenReturn(publicStack);
         when(publicStack.getId()).thenReturn(TEST_LONG_VALUE);
-        when(clusterService.getById(TEST_LONG_VALUE)).thenReturn(sourceCluster);
+        when(publicStackCluster.getId()).thenReturn(TEST_LONG_VALUE);
         when(publicStack.getCluster()).thenReturn(publicStackCluster);
+        when(clusterService.getById(TEST_LONG_VALUE)).thenReturn(sourceCluster);
         when(publicStackCluster.getLdapConfig()).thenReturn(ldapConfig);
         when(blueprint.getInputParameters()).thenReturn(null);
         when(clusterService.retrieveOutputs(anyLong(), any())).thenReturn(configsResponse);
@@ -345,8 +354,9 @@ public class SharedServiceConfigProviderTest {
         when(connectedClusterRequest.getSourceClusterId()).thenReturn(TEST_LONG_VALUE);
         when(stackService.get(TEST_LONG_VALUE)).thenReturn(publicStack);
         when(publicStack.getId()).thenReturn(TEST_LONG_VALUE);
-        when(clusterService.getById(TEST_LONG_VALUE)).thenReturn(sourceCluster);
+        when(publicStackCluster.getId()).thenReturn(TEST_LONG_VALUE);
         when(publicStack.getCluster()).thenReturn(publicStackCluster);
+        when(clusterService.getById(TEST_LONG_VALUE)).thenReturn(sourceCluster);
         when(publicStackCluster.getLdapConfig()).thenReturn(ldapConfig);
         when(blueprint.getInputParameters()).thenReturn(null);
         when(clusterService.retrieveOutputs(anyLong(), any())).thenReturn(configsResponse);
@@ -369,8 +379,9 @@ public class SharedServiceConfigProviderTest {
         when(connectedClusterRequest.getSourceClusterId()).thenReturn(TEST_LONG_VALUE);
         when(stackService.get(TEST_LONG_VALUE)).thenReturn(publicStack);
         when(publicStack.getId()).thenReturn(TEST_LONG_VALUE);
-        when(clusterService.getById(TEST_LONG_VALUE)).thenReturn(sourceCluster);
+        when(publicStackCluster.getId()).thenReturn(TEST_LONG_VALUE);
         when(publicStack.getCluster()).thenReturn(publicStackCluster);
+        when(clusterService.getById(TEST_LONG_VALUE)).thenReturn(sourceCluster);
         when(publicStackCluster.getLdapConfig()).thenReturn(ldapConfig);
         when(blueprint.getInputParameters()).thenReturn(null);
         when(clusterService.retrieveOutputs(anyLong(), any())).thenReturn(configsResponse);

@@ -38,9 +38,9 @@ import com.sequenceiq.cloudbreak.api.model.RecipeType;
 import com.sequenceiq.cloudbreak.api.model.RecoveryMode;
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.model.Status;
-import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
 import com.sequenceiq.cloudbreak.api.model.WasbFileSystemConfiguration;
 import com.sequenceiq.cloudbreak.api.model.WasbIntegratedFileSystemConfiguration;
+import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
@@ -102,12 +102,12 @@ public class TestUtil {
 
     public static IdentityUser cbAdminUser() {
         return new IdentityUser("userid", "testuser", "testaccount",
-            Arrays.asList(IdentityUserRole.ADMIN, IdentityUserRole.USER), "givenname", "familyname", new Date());
+                Arrays.asList(IdentityUserRole.ADMIN, IdentityUserRole.USER), "givenname", "familyname", new Date());
     }
 
     public static IdentityUser cbUser() {
         return new IdentityUser("userid", "testuser", "testaccount",
-            Collections.singletonList(IdentityUserRole.USER), "givenname", "familyname", new Date());
+                Collections.singletonList(IdentityUserRole.USER), "givenname", "familyname", new Date());
     }
 
     public static Credential awsCredential() {
@@ -262,7 +262,7 @@ public class TestUtil {
     }
 
     public static InstanceMetaData instanceMetaData(Long serverNumber, Long instanceGroupId, InstanceStatus instanceStatus, boolean ambariServer,
-        InstanceGroup instanceGroup, InstanceMetadataType instanceMetadataType) {
+            InstanceGroup instanceGroup, InstanceMetadataType instanceMetadataType) {
         InstanceMetaData instanceMetaData = new InstanceMetaData();
         instanceMetaData.setInstanceStatus(instanceStatus);
         instanceMetaData.setAmbariServer(ambariServer);
@@ -293,7 +293,7 @@ public class TestUtil {
         Set<InstanceMetaData> instanceMetaDatas = new HashSet<>();
         for (int i = 1; i <= count; i++) {
             instanceMetaDatas.add(instanceMetaData(Integer.toUnsignedLong(i), instanceGroupId, InstanceStatus.REGISTERED,
-                instanceGroup.getInstanceGroupType().equals(InstanceGroupType.GATEWAY), instanceGroup));
+                    instanceGroup.getInstanceGroupType().equals(InstanceGroupType.GATEWAY), instanceGroup));
         }
         return instanceMetaDatas;
     }
@@ -628,6 +628,22 @@ public class TestUtil {
         return smartSenseSubscription;
     }
 
+    public static RDSConfig rdsConfig(RdsType rdsType, DatabaseVendor databaseVendor) {
+        RDSConfig rdsConfig = new RDSConfig();
+        rdsConfig.setName(rdsType.name());
+        rdsConfig.setConnectionPassword("iamsoosecure");
+        rdsConfig.setConnectionUserName("heyitsme");
+        if (databaseVendor == DatabaseVendor.ORACLE12 || databaseVendor == DatabaseVendor.ORACLE11) {
+            rdsConfig.setConnectionURL("jdbc:" + databaseVendor.jdbcUrlDriverId() + ":@10.1.1.1:5432:" + rdsType.name().toLowerCase());
+        } else {
+            rdsConfig.setConnectionURL("jdbc:" + databaseVendor.jdbcUrlDriverId() + "://10.1.1.1:5432/" + rdsType.name().toLowerCase());
+        }
+        rdsConfig.setType(rdsType.name());
+        rdsConfig.setConnectionDriver(databaseVendor.connectionDriver());
+        rdsConfig.setDatabaseEngine(databaseVendor.name());
+        return rdsConfig;
+    }
+
     public static RDSConfig rdsConfig(RdsType rdsType) {
         RDSConfig rdsConfig = new RDSConfig();
         rdsConfig.setName(rdsType.name());
@@ -641,7 +657,7 @@ public class TestUtil {
     }
 
     public static Gateway gateway() throws JsonProcessingException {
-        Gateway gateway  = new Gateway();
+        Gateway gateway = new Gateway();
         gateway.setEnableGateway(false);
         gateway.setTopologyName("topology");
         gateway.setPath("/path");
@@ -659,7 +675,7 @@ public class TestUtil {
         if (stack.cloudPlatform().equals(AWS)) {
             for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
                 (instanceGroup.getTemplate()).setAttributes(new JsonToString().convertToEntityAttribute(
-                    "{\"sshLocation\":\"0.0.0.0/0\",\"encrypted\":false,\"spotPrice\":0.04}"));
+                        "{\"sshLocation\":\"0.0.0.0/0\",\"encrypted\":false,\"spotPrice\":0.04}"));
             }
         }
         return stack;

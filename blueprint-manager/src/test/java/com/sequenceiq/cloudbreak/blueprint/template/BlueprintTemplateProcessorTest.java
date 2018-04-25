@@ -188,7 +188,6 @@ public class BlueprintTemplateProcessorTest {
         assertTrue(result.contains("\"custom.metadata.storage.engine\": \"postgres\""));
         assertTrue(result.contains("\"custom.metadata.storage.connector.connectURI\": \"jdbc:postgresql://10.1.1.1:5432/customRds\""));
         assertTrue(result.contains("\"custom.metadata.storage.connector.host\": \"10.1.1.1\""));
-        assertTrue(result.contains("\"custom.metadata.storage.connector.connectionHost\": \"10.1.1.1:5432\""));
         assertTrue(result.contains("\"custom.metadata.storage.connector.user\": \"heyitsme\""));
         assertTrue(result.contains("\"custom.metadata.storage.connector.password\": \"iamsoosecure\""));
         assertTrue(result.contains("\"custom.metadata.storage.connector.databasename\": \"customRds\""));

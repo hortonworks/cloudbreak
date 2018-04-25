@@ -34,6 +34,8 @@ config_remote_jdbc() {
           fi
           if [[ '{{ ambari_database.ambariVendor }}' = 'mysql' ]]; then
             mysql -h{{ ambari_database.host }} -P{{ ambari_database.port }} -u'{{ ambari_database.connectionUserName }}' -p'{{ ambari_database.connectionPassword }}' '{{ ambari_database.databaseName }}' < /var/lib/ambari-server/resources/Ambari-DDL-{{ ambari_database.fancyName }}-CREATE.sql
+            cp -f $(find /usr/share/java -name "mysql-connector*.jar" | tail -n1) /usr/share/java/mysql-connector.jar ##copy the jdbc driver jar to /usr/share/java folder because Ambari server requires it in that directory
+            specoptions='--jdbc-db mysql --jdbc-driver /usr/share/java/mysql-connector.jar'
           fi
           if [[ '{{ ambari_database.ambariVendor }}' = 'oracle' ]]; then
             sqlplus '{{ ambari_database.connectionUserName }}/{{ ambari_database.connectionPassword }}@(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(Host={{ ambari_database.host }})(Port={{ ambari_database.port }}))(CONNECT_DATA=(SID=remote_SID)))' < /var/lib/ambari-server/resources/Ambari-DDL-{{ ambari_database.fancyName }}-CREATE.sql

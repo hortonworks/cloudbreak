@@ -7,12 +7,13 @@
       "superset_admin_email": "admin@example.com"
     }
   },
-  "druid-common": {
+  "superset": {
     "properties": {
-      "druid.metadata.storage.type": "postgresql",
-      "druid.metadata.storage.connector.connectURI": "jdbc:postgresql://10.1.1.1:5432/superset",
-      "druid.metadata.storage.connector.user": "heyitsme",
-      "druid.metadata.storage.connector.password": "iamsoosecure"
+      "SUPERSET_DATABASE_TYPE" : "postgresql",
+      "SUPERSET_DATABASE_PASSWORD": "iamsoosecure",
+      "SUPERSET_DATABASE_HOSTNAME" : "10.1.1.1",
+      "SUPERSET_DATABASE_NAME": "superset",
+      "SUPERSET_DATABASE_PORT" : "5432"
     }
   }
 }

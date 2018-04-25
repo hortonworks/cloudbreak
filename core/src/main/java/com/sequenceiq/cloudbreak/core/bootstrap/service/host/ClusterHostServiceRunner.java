@@ -127,6 +127,45 @@ public class ClusterHostServiceRunner {
         }
     }
 
+    @Transactional
+    public Map<String, String> addAmbariServices(Long stackId, String hostGroupName, Integer scalingAdjustment) throws CloudbreakException {
+        Map<String, String> candidates;
+        try {
+            Stack stack = stackRepository.findOneWithLists(stackId);
+            Cluster cluster = stack.getCluster();
+            candidates = collectUpscaleCandidates(cluster.getId(), hostGroupName, scalingAdjustment);
+            Set<Node> allNodes = stackUtil.collectNodes(stack);
+            HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
+            List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
+            SaltConfig saltConfig = createSaltConfig(stack, cluster, gatewayConfigService.getPrimaryGatewayConfig(stack), gatewayConfigs);
+            hostOrchestrator.runService(gatewayConfigs, allNodes, saltConfig, clusterDeletionBasedModel(stack.getId(), cluster.getId()));
+        } catch (CloudbreakOrchestratorCancelledException e) {
+            throw new CancellationException(e.getMessage());
+        } catch (CloudbreakOrchestratorException | IOException e) {
+            throw new CloudbreakException(e);
+        }
+        return candidates;
+    }
+
+    public String changePrimaryGateway(Stack stack) throws CloudbreakException {
+        GatewayConfig formerPrimaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
+        List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
+        Optional<GatewayConfig> newPrimaryCandidate = gatewayConfigs.stream().filter(gc -> !gc.isPrimary()).findFirst();
+        if (newPrimaryCandidate.isPresent()) {
+            GatewayConfig newPrimary = newPrimaryCandidate.get();
+            Set<Node> allNodes = stackUtil.collectNodes(stack);
+            try {
+                hostOrchestratorResolver.get(stack.getOrchestrator().getType()).changePrimaryGateway(formerPrimaryGatewayConfig, newPrimary, gatewayConfigs,
+                        allNodes, clusterDeletionBasedModel(stack.getId(), stack.getCluster().getId()));
+                return newPrimary.getHostname();
+            } catch (CloudbreakOrchestratorException ex) {
+                throw new CloudbreakException(ex);
+            }
+        } else {
+            throw new CloudbreakException("Primary gateway change is not possible because there is no available node for the action");
+        }
+    }
+
     private SaltConfig createSaltConfig(Stack stack, Cluster cluster, GatewayConfig primaryGatewayConfig, Iterable<GatewayConfig> gatewayConfigs)
             throws IOException, CloudbreakOrchestratorException {
         Map<String, SaltPillarProperties> servicePillar = new HashMap<>();
@@ -140,7 +179,7 @@ public class ClusterHostServiceRunner {
             putIfNotNull(kerberosPillarConf, kerberosConfig.getPassword(), "password");
             if (StringUtils.isEmpty(kerberosConfig.getDescriptor())) {
                 putIfNotNull(kerberosPillarConf, kerberosConfig.getUrl(), "url");
-                putIfNotNull(kerberosPillarConf, kerberosConfig.getAdminUrl(), "adminUrl");
+                putIfNotNull(kerberosPillarConf, kerberosDetailService.resolveHostForKdcAdmin(kerberosConfig, kerberosConfig.getUrl()), "adminUrl");
                 putIfNotNull(kerberosPillarConf, kerberosConfig.getRealm(), "realm");
             } else {
                 Map<String, Object> properties = kerberosDetailService.getKerberosEnvProperties(kerberosConfig);
@@ -286,26 +325,6 @@ public class ClusterHostServiceRunner {
         servicePillar.put("hdp", new SaltPillarProperties("/hdp/repo.sls", singletonMap("hdp", hdprepo)));
     }
 
-    @Transactional
-    public Map<String, String> addAmbariServices(Long stackId, String hostGroupName, Integer scalingAdjustment) throws CloudbreakException {
-        Map<String, String> candidates;
-        try {
-            Stack stack = stackRepository.findOneWithLists(stackId);
-            Cluster cluster = stack.getCluster();
-            candidates = collectUpscaleCandidates(cluster.getId(), hostGroupName, scalingAdjustment);
-            Set<Node> allNodes = stackUtil.collectNodes(stack);
-            HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
-            List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
-            SaltConfig saltConfig = createSaltConfig(stack, cluster, gatewayConfigService.getPrimaryGatewayConfig(stack), gatewayConfigs);
-            hostOrchestrator.runService(gatewayConfigs, allNodes, saltConfig, clusterDeletionBasedModel(stack.getId(), cluster.getId()));
-        } catch (CloudbreakOrchestratorCancelledException e) {
-            throw new CancellationException(e.getMessage());
-        } catch (CloudbreakOrchestratorException | IOException e) {
-            throw new CloudbreakException(e);
-        }
-        return candidates;
-    }
-
     private Map<String, String> collectUpscaleCandidates(Long clusterId, String hostGroupName, Integer adjustment) {
         HostGroup hostGroup = hostGroupRepository.findHostGroupInClusterByName(clusterId, hostGroupName);
         if (hostGroup.getConstraint().getInstanceGroup() != null) {
@@ -324,25 +343,6 @@ public class ClusterHostServiceRunner {
     private void putIfNotNull(Map<String, String> context, Object variable, String key) {
         if (variable != null) {
             context.put(key, variable.toString());
-        }
-    }
-
-    public String changePrimaryGateway(Stack stack) throws CloudbreakException {
-        GatewayConfig formerPrimaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
-        List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
-        Optional<GatewayConfig> newPrimaryCandidate = gatewayConfigs.stream().filter(gc -> !gc.isPrimary()).findFirst();
-        if (newPrimaryCandidate.isPresent()) {
-            GatewayConfig newPrimary = newPrimaryCandidate.get();
-            Set<Node> allNodes = stackUtil.collectNodes(stack);
-            try {
-                hostOrchestratorResolver.get(stack.getOrchestrator().getType()).changePrimaryGateway(formerPrimaryGatewayConfig, newPrimary, gatewayConfigs,
-                        allNodes, clusterDeletionBasedModel(stack.getId(), stack.getCluster().getId()));
-                return newPrimary.getHostname();
-            } catch (CloudbreakOrchestratorException ex) {
-                throw new CloudbreakException(ex);
-            }
-        } else {
-            throw new CloudbreakException("Primary gateway change is not possible because there is no available node for the action");
         }
     }
 
