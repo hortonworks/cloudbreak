@@ -18,6 +18,7 @@ import com.github.jknack.handlebars.Handlebars;
 import com.github.jknack.handlebars.Template;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.TestUtil;
+import com.sequenceiq.cloudbreak.api.model.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
 import com.sequenceiq.cloudbreak.blueprint.nifi.HdfConfigs;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
@@ -46,10 +47,10 @@ public class ConfigTemplateTest {
                         ldapConfigWhenLdapPresentedThenShouldReturnWithLdapConfig() },
                 { "blueprints/configurations/atlas/ldap.handlebars", "configurations/atlas/atlas-without-ldap.json",
                         withoutLdapConfigWhenLdapNotPresentedThenShouldReturnWithoutLdapConfig() },
-                { "blueprints/configurations/druid/rds.handlebars", "configurations/druid/druid-with-rds.json",
-                        druidRdsConfigWhenRdsPresentedThenShouldReturnWithRdsConfig() },
-                { "blueprints/configurations/druid/rds.handlebars", "configurations/druid/druid-without-rds.json",
-                        druidWithoutRdsConfigWhenRdsNotPresentedThenShouldReturnWithoutRdsConfig() },
+                {"blueprints/configurations/druid_superset/rds.handlebars", "configurations/druid_superset/druid-with-rds.json",
+                        druidSupersetRdsConfigWhenRdsPresentedThenShouldReturnWithRdsConfig() },
+                {"blueprints/configurations/druid_superset/rds.handlebars", "configurations/druid_superset/druid-without-rds.json",
+                        druidSupersetWithoutRdsConfigWhenRdsNotPresentedThenShouldReturnWithoutRdsConfig() },
                 { "blueprints/configurations/superset/rds.handlebars", "configurations/superset/superset-with-rds.json",
                         supersetRdsConfigWhenRdsPresentedThenShouldReturnWithRdsConfig() },
                 { "blueprints/configurations/superset/rds.handlebars", "configurations/superset/superset-without-rds.json",
@@ -80,6 +81,8 @@ public class ConfigTemplateTest {
                         withoutLdapConfigWhenLdapNotPresentedThenShouldReturnWithoutLdapConfig() },
                 { "blueprints/configurations/ranger/rds.handlebars", "configurations/ranger/ranger-with-rds.json",
                         rangerRdsConfigWhenRdsPresentedThenShouldReturnWithRdsConfig() },
+                { "blueprints/configurations/ranger/rds.handlebars", "configurations/ranger/ranger-with-oracle-rds.json",
+                        rangerRdsConfigWhenOracleRdsPresentedThenShouldReturnWithRdsConfig() },
                 { "blueprints/configurations/ranger/rds.handlebars", "configurations/ranger/ranger-without-rds.json",
                         objectWithoutEverything() },
                 { "blueprints/configurations/yarn/global.handlebars", "configurations/yarn/global-without-container.json",
@@ -100,6 +103,10 @@ public class ConfigTemplateTest {
                         objectWithoutEverything() },
                 { "blueprints/configurations/webhcat/global.handlebars", "configurations/webhcat/webhcat.json",
                         objectWithoutEverything() },
+                { "blueprints/configurations/druid/rds.handlebars", "configurations/druid/druid-without-rds.json",
+                        druidWithoutRdsConfigWhenRdsNotPresentedThenShouldReturnWithoutRdsConfig() },
+                { "blueprints/configurations/druid/rds.handlebars", "configurations/druid/druid-with-rds.json",
+                        druidRdsConfigWhenRdsPresentedThenShouldReturnWithRdsConfig() },
         });
     }
 
@@ -170,6 +177,25 @@ public class ConfigTemplateTest {
 
     public static Map<String, Object> withoutLdapConfigWhenLdapNotPresentedThenShouldReturnWithoutLdapConfig() {
         return new BlueprintTemplateModelContextBuilder()
+                .build();
+    }
+
+    public static Map<String, Object> druidSupersetRdsConfigWhenRdsPresentedThenShouldReturnWithRdsConfig() {
+        return new BlueprintTemplateModelContextBuilder()
+                .withRdsConfigs(Sets.newHashSet(TestUtil.rdsConfig(RdsType.SUPERSET)))
+                .withClusterAdminPassword("adminPassword")
+                .withClusterAdminLastname("lastname")
+                .withClusterAdminFirstname("firstname")
+                .withAdminEmail("admin@example.com")
+                .build();
+    }
+
+    public static Map<String, Object> druidSupersetWithoutRdsConfigWhenRdsNotPresentedThenShouldReturnWithoutRdsConfig() {
+        return new BlueprintTemplateModelContextBuilder()
+                .withClusterAdminPassword("adminPassword")
+                .withClusterAdminLastname("lastname")
+                .withClusterAdminFirstname("firstname")
+                .withAdminEmail("admin@example.com")
                 .build();
     }
 
@@ -248,6 +274,19 @@ public class ConfigTemplateTest {
 
     public static Map<String, Object> rangerRdsConfigWhenRdsPresentedThenShouldReturnWithRdsConfig() throws JsonProcessingException {
         RDSConfig rdsConfig = TestUtil.rdsConfig(RdsType.RANGER);
+
+        // TODO we should somehow handle this
+        //Map<String, String> attributes = new HashMap<>();
+        //attributes.put("rangerAdminPassword", "rangerAdminPassword");
+        //rdsConfig.setAttributes(new Json(attributes));
+
+        return new BlueprintTemplateModelContextBuilder()
+                .withRdsConfigs(Sets.newHashSet(rdsConfig))
+                .build();
+    }
+
+    public static Map<String, Object> rangerRdsConfigWhenOracleRdsPresentedThenShouldReturnWithRdsConfig() throws JsonProcessingException {
+        RDSConfig rdsConfig = TestUtil.rdsConfig(RdsType.RANGER, DatabaseVendor.ORACLE11);
 
         // TODO we should somehow handle this
         //Map<String, String> attributes = new HashMap<>();

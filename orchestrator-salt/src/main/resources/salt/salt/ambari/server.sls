@@ -22,6 +22,7 @@ provision_action_based_on_real_dependencies:
 {% if ambari.ambari_database.ambariVendor == 'mysql' %}
 install-mariadb:
   pkg.installed:
+    - unless: mysql --version
     - pkgs:
       - mariadb
 {% endif %}

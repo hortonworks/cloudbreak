@@ -42,10 +42,10 @@
     },
     {
       "hdfs-site": {
-         "dfs.journalnode.edits.dir": "/hadoopfs/fs1/hdfs/journalnode",
-         "dfs.namenode.name.dir": "/hadoopfs/fs1/hdfs/namenode",
-         "dfs.namenode.safemode.threshold-pct": "0.99",
-         "dfs.namenode.checkpoint.dir": "/hadoopfs/fs1/hdfs/namesecondary"
+        "dfs.journalnode.edits.dir": "\/hadoopfs\/fs1\/hdfs\/journalnode",
+        "dfs.namenode.name.dir": "\/hadoopfs\/fs1\/hdfs\/namenode",
+        "dfs.namenode.safemode.threshold-pct": "0.99",
+        "dfs.namenode.checkpoint.dir": "\/hadoopfs\/fs1\/hdfs\/namesecondary"
       }
     },
     {
@@ -80,7 +80,7 @@
     {
       "yarn-site": {
         "yarn.acl.enable": "true",
-        "yarn.timeline-service.leveldb-timeline-store.path": "/hadoopfs/fs1/yarn/timeline"
+        "yarn.timeline-service.leveldb-timeline-store.path": "\/hadoopfs\/fs1\/yarn\/timeline"
       }
     },
     {
@@ -96,17 +96,18 @@
       }
     },
     {
-      "superset-env": {
+      "superset": {
         "properties": {
-          "superset_admin_password": "Passw0rd",
-          "superset_admin_lastname": "username",
-          "superset_admin_email": "identity.user@email.com",
-          "superset_admin_firstname": "username"
+          "SUPERSET_DATABASE_PORT": "5432",
+          "SUPERSET_DATABASE_PASSWORD": "iamsoosecure",
+          "SUPERSET_DATABASE_HOSTNAME": "10.1.1.1",
+          "SUPERSET_DATABASE_TYPE": "postgresql",
+          "SUPERSET_DATABASE_NAME": "superset"
         }
       }
     },
     {
-      "druid-superset-env": {
+      "superset-env": {
         "properties": {
           "superset_admin_password": "Passw0rd",
           "superset_admin_lastname": "username",
@@ -142,22 +143,22 @@
     {
       "zoo.cfg": {
         "properties": {
-          "dataDir": "/hadoopfs/fs1/zookeeper"
+          "dataDir": "\/hadoopfs\/fs1\/zookeeper"
         }
       }
     },
     {
       "ams-hbase-site": {
         "properties": {
-          "hbase.wal.dir": "file:///hadoopfs/fs1/metrics/hbase/wal",
-          "hbase.tmp.dir": "/hadoopfs/fs1/metrics/hbase-tmp"
+          "hbase.wal.dir": "file:\/\/\/hadoopfs\/fs1\/metrics\/hbase\/wal",
+          "hbase.tmp.dir": "\/hadoopfs\/fs1\/metrics\/hbase-tmp"
         }
       }
     },
     {
       "ams-site": {
         "properties": {
-          "timeline.metrics.aggregator.checkpoint.dir": "/hadoopfs/fs1/metrics/checkpoint"
+          "timeline.metrics.aggregator.checkpoint.dir": "\/hadoopfs\/fs1\/metrics\/checkpoint"
         }
       }
     }
@@ -179,9 +180,6 @@
         },
         {
           "name": "HIVE_CLIENT"
-        },
-        {
-          "name": "DRUID_SUPERSET"
         },
         {
           "name": "SUPERSET"
@@ -247,18 +245,18 @@
       "configurations": [
         {
           "hdfs-site": {
-            "dfs.datanode.data.dir": "/hadoopfs/fs1/hdfs/datanode"
+            "dfs.datanode.data.dir": "\/hadoopfs\/fs1\/hdfs\/datanode"
           }
         },
         {
           "yarn-site": {
-            "yarn.nodemanager.local-dirs": "/hadoopfs/fs1/yarn/nodemanager",
-            "yarn.nodemanager.log-dirs": "/hadoopfs/fs1/yarn/nodemanager/log"
+            "yarn.nodemanager.local-dirs": "\/hadoopfs\/fs1\/yarn\/nodemanager",
+            "yarn.nodemanager.log-dirs": "\/hadoopfs\/fs1\/yarn\/nodemanager\/log"
           }
         },
         {
           "core-site": {
-            "fs.s3a.buffer.dir": "/hadoopfs/fs1/s3/temp"
+            "fs.s3a.buffer.dir": "\/hadoopfs\/fs1\/s3\/temp"
           }
         }
       ],
@@ -289,18 +287,18 @@
       "configurations": [
         {
           "hdfs-site": {
-            "dfs.datanode.data.dir": "/hadoopfs/fs1/hdfs/datanode"
+            "dfs.datanode.data.dir": "\/hadoopfs\/fs1\/hdfs\/datanode"
           }
         },
         {
           "yarn-site": {
-            "yarn.nodemanager.local-dirs": "/hadoopfs/fs1/yarn/nodemanager",
-            "yarn.nodemanager.log-dirs": "/hadoopfs/fs1/yarn/nodemanager/log"
+            "yarn.nodemanager.local-dirs": "\/hadoopfs\/fs1\/yarn\/nodemanager",
+            "yarn.nodemanager.log-dirs": "\/hadoopfs\/fs1\/yarn\/nodemanager\/log"
           }
         },
         {
           "core-site": {
-            "fs.s3a.buffer.dir": "/hadoopfs/fs1/s3/temp"
+            "fs.s3a.buffer.dir": "\/hadoopfs\/fs1\/s3\/temp"
           }
         }
       ],
@@ -328,13 +326,13 @@
       "configurations": [
         {
           "yarn-site": {
-            "yarn.nodemanager.local-dirs": "/hadoopfs/fs1/yarn/nodemanager",
-            "yarn.nodemanager.log-dirs": "/hadoopfs/fs1/yarn/nodemanager/log"
+            "yarn.nodemanager.local-dirs": "\/hadoopfs\/fs1\/yarn\/nodemanager",
+            "yarn.nodemanager.log-dirs": "\/hadoopfs\/fs1\/yarn\/nodemanager\/log"
           }
         },
         {
           "core-site": {
-            "fs.s3a.buffer.dir": "/hadoopfs/fs1/s3/temp"
+            "fs.s3a.buffer.dir": "\/hadoopfs\/fs1\/s3\/temp"
           }
         }
       ],

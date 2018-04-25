@@ -38,9 +38,8 @@
         "total-custom-rds-conf": {
           "custom.metadata.storage.type": "{{{ rds.customrds.subprotocol }}}",
           "custom.metadata.storage.engine": "{{{ rds.customrds.databaseEngine }}}",
-          "custom.metadata.storage.connector.connectURI": "{{{ rds.customrds.connectionURL }}}",
+          "custom.metadata.storage.connector.connectURI": "{{{ rds.customrds.connectionString }}}",
           "custom.metadata.storage.connector.host": "{{{ rds.customrds.host }}}",
-          "custom.metadata.storage.connector.connectionHost": "{{{ rds.customrds.hostWithPort }}}",
           "custom.metadata.storage.connector.user": "{{{ rds.customrds.connectionUserName }}}",
           "custom.metadata.storage.connector.password": "{{{ rds.customrds.connectionPassword }}}",
           "custom.metadata.storage.connector.databasename": "{{{ rds.customrds.databaseName }}}"
@@ -76,7 +75,7 @@
             "zookeeper_quorum": "{{ zookeeper_quorum }}",
             "db_password": "{{{ rds.ranger.connectionPassword }}}",
             "db_name": "{{{ rds.ranger.databaseName }}}",
-            "db_host": "{{{ rds.ranger.hostWithPort }}}",
+            "db_host": "{{{ rds.ranger.connectionString }}}",
             "DB_FLAVOR": "POSTGRES",
             "exported-value": "{{default('/configurations/hadoop-env/hdfs_log_dir_prefix', '/var/log/hadoop')}}"
           }
@@ -91,7 +90,7 @@
             "ranger-hdfs-plugin-enabled": "No",
             "ranger-hive-plugin-enabled": "No",
             "ranger-yarn-plugin-enabled": "No",
-            "ranger_privelege_user_jdbc_url": "jdbc:{{{ rds.ranger.subprotocol }}}://{{{ rds.ranger.hostWithPort }}}",
+            "ranger_privelege_user_jdbc_url": "{{{ rds.ranger.hostWithPortWithJdbc }}}",
             "ranger-atlas-plugin-enabled": "No",
             "create_db_dbuser": "false",
             "xasecure.audit.destination.hdfs": "true",
