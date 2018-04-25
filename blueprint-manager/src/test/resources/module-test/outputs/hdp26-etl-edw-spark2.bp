@@ -6,60 +6,72 @@
           "recovery_enabled": "true"
         }
       ]
+    },
+    {
+      "service_settings": [
+        {
+          "name": "HIVE",
+          "credential_store_enabled": "false"
+        }
+      ]
+    },
+    {
+      "component_settings": []
     }
   ],
   "Blueprints": {
     "stack_version": "2.6",
-    "blueprint_name": "hdp26-edw-analytics",
+    "blueprint_name": "hdp26-etl-edw-spark2",
     "stack_name": "HDP"
   },
   "configurations": [
     {
-      "hive-interactive-env": {
-        "enable_hive_interactive": "true",
-        "num_llap_nodes": "0"
-      }
-    },
-    {
       "core-site": {
-        "proxyuser_group": "hadoop",
+        "hadoop.security.group.mapping.ldap.search.attr.member": "member",
+        "hadoop.security.group.mapping.ldap.search.attr.group.name": "cn",
         "hadoop.proxyuser.falcon.groups": "*",
         "hadoop.proxyuser.root.groups": "*",
-        "hadoop.proxyuser.livy.hosts": "*",
-        "hadoop.proxyuser.falcon.hosts": "*",
-        "hadoop.proxyuser.oozie.hosts": "*",
+        "hadoop.security.group.mapping.ldap.bind.password": "admin",
         "fs.trash.interval": "4320",
-        "hadoop.proxyuser.hcat.hosts": "*",
-        "hadoop.proxyuser.oozie.groups": "*",
-        "hadoop.proxyuser.hive.groups": "*",
+        "hadoop.security.group.mapping.ldap.userbase": "cn=users,dc=example,dc=org",
+        "hadoop.security.group.mapping.ldap.url": "ldap://localhost:389",
+        "hadoop.security.group.mapping.ldap.groupbase": "cn=groups,dc=example,dc=org",
+        "hadoop.security.group.mapping.ldap.search.filter.group": "(objectClass=groupOfNames)",
         "hadoop.proxyuser.hcat.groups": "*",
         "hadoop.proxyuser.livy.groups": "*",
         "hadoop.proxyuser.hbase.groups": "*",
         "hadoop.proxyuser.hbase.hosts": "*",
         "hadoop.proxyuser.root.hosts": "*",
-        "hadoop.proxyuser.hive.hosts": "*"
+        "hadoop.proxyuser.hive.hosts": "*",
+        "proxyuser_group": "hadoop",
+        "hadoop.security.group.mapping.ldap.search.filter.user": "(&(objectClass=person)(cn=admin,dc=example,dc=org={0}))",
+        "hadoop.security.group.mapping.ldap.bind.user": "cn=admin,dc=example,dc=org",
+        "hadoop.proxyuser.livy.hosts": "*",
+        "hadoop.proxyuser.falcon.hosts": "*",
+        "hadoop.proxyuser.oozie.hosts": "*",
+        "hadoop.proxyuser.hcat.hosts": "*",
+        "hadoop.proxyuser.oozie.groups": "*",
+        "hadoop.security.group.mapping": "org.apache.hadoop.security.LdapGroupsMapping",
+        "hadoop.proxyuser.hive.groups": "*"
       }
     },
     {
       "hdfs-site": {
-        "dfs.journalnode.edits.dir": "\/hadoopfs\/fs1\/hdfs\/journalnode",
-        "dfs.namenode.name.dir": "\/hadoopfs\/fs1\/hdfs\/namenode",
+        "dfs.journalnode.edits.dir": "/hadoopfs/fs1/hdfs/journalnode",
+        "dfs.namenode.name.dir": "/hadoopfs/fs1/hdfs/namenode",
         "dfs.namenode.safemode.threshold-pct": "0.99",
-        "dfs.namenode.checkpoint.dir": "\/hadoopfs\/fs1\/hdfs\/namesecondary"
-      }
-    },
-    {
-      "hive-interactive-site": {
-        "hive.stats.fetch.bitvector": "true",
-        "hive.exec.orc.split.strategy": "BI",
-        "hive.metastore.rawstore.impl": "org.apache.hadoop.hive.metastore.cache.CachedStore"
+        "dfs.namenode.checkpoint.dir": "/hadoopfs/fs1/hdfs/namesecondary"
       }
     },
     {
       "hive-site": {
         "hive.server2.transport.mode": "http",
+        "javax.jdo.option.ConnectionUserName": "heyitsme",
+        "javax.jdo.option.ConnectionDriverName": "org.postgresql.Driver",
         "hive.exec.compress.output": "true",
+        "javax.jdo.option.ConnectionPassword": "iamsoosecure",
         "hive.merge.mapfiles": "true",
+        "javax.jdo.option.ConnectionURL": "jdbc:postgresql://10.1.1.1:5432/hive",
         "hive.server2.tez.initialize.default.sessions": "true"
       }
     },
@@ -71,49 +83,9 @@
       }
     },
     {
-      "tez-site": {
-        "tez.runtime.enable.final-merge.in.output": "false",
-        "tez.am.am-rm.heartbeat.interval-ms.max": "2000",
-        "tez.runtime.shuffle.parallel.copies": "4"
-      }
-    },
-    {
       "yarn-site": {
         "yarn.acl.enable": "true",
-        "yarn.timeline-service.leveldb-timeline-store.path": "\/hadoopfs\/fs1\/yarn\/timeline"
-      }
-    },
-    {
-      "capacity-scheduler": {
-        "properties": {
-          "yarn.scheduler.capacity.root.queues": "default,llap",
-          "yarn.scheduler.capacity.root.capacity": "100",
-          "yarn.scheduler.capacity.root.default.maximum-capacity": "100",
-          "yarn.scheduler.capacity.root.llap.capacity": "75",
-          "yarn.scheduler.capacity.root.default.capacity": "25",
-          "yarn.scheduler.capacity.root.llap.maximum-capacity": "100"
-        }
-      }
-    },
-    {
-      "superset": {
-        "properties": {
-          "SUPERSET_DATABASE_PORT": "5432",
-          "SUPERSET_DATABASE_PASSWORD": "iamsoosecure",
-          "SUPERSET_DATABASE_HOSTNAME": "10.1.1.1",
-          "SUPERSET_DATABASE_TYPE": "postgresql",
-          "SUPERSET_DATABASE_NAME": "superset"
-        }
-      }
-    },
-    {
-      "superset-env": {
-        "properties": {
-          "superset_admin_password": "Passw0rd",
-          "superset_admin_lastname": "username",
-          "superset_admin_email": "identity.user@email.com",
-          "superset_admin_firstname": "username"
-        }
+        "yarn.timeline-service.leveldb-timeline-store.path": "/hadoopfs/fs1/yarn/timeline"
       }
     },
     {
@@ -141,24 +113,42 @@
       }
     },
     {
+      "hive-interactive-site": {
+        "properties": {
+          "hive.server2.authentication.ldap.baseDN": "cn=groups,dc=example,dc=org",
+          "hive.server2.authentication": "LDAP",
+          "hive.server2.authentication.ldap.Domain": "ad.hdc.com",
+          "hive.server2.authentication.ldap.url": "ldap://localhost:389"
+        }
+      }
+    },
+    {
+      "hive-env": {
+        "properties": {
+          "hive_database": "Existing PostgreSQL Database",
+          "hive_database_type": "postgres"
+        }
+      }
+    },
+    {
       "zoo.cfg": {
         "properties": {
-          "dataDir": "\/hadoopfs\/fs1\/zookeeper"
+          "dataDir": "/hadoopfs/fs1/zookeeper"
         }
       }
     },
     {
       "ams-hbase-site": {
         "properties": {
-          "hbase.wal.dir": "file:\/\/\/hadoopfs\/fs1\/metrics\/hbase\/wal",
-          "hbase.tmp.dir": "\/hadoopfs\/fs1\/metrics\/hbase-tmp"
+          "hbase.wal.dir": "file:///hadoopfs/fs1/metrics/hbase/wal",
+          "hbase.tmp.dir": "/hadoopfs/fs1/metrics/hbase-tmp"
         }
       }
     },
     {
       "ams-site": {
         "properties": {
-          "timeline.metrics.aggregator.checkpoint.dir": "\/hadoopfs\/fs1\/metrics\/checkpoint"
+          "timeline.metrics.aggregator.checkpoint.dir": "/hadoopfs/fs1/metrics/checkpoint"
         }
       }
     }
@@ -182,19 +172,13 @@
           "name": "HIVE_CLIENT"
         },
         {
-          "name": "SUPERSET"
+          "name": "HIVE_METASTORE"
         },
         {
           "name": "HIVE_SERVER"
         },
         {
-          "name": "HIVE_SERVER_INTERACTIVE"
-        },
-        {
           "name": "JOURNALNODE"
-        },
-        {
-          "name": "LIVY_SERVER"
         },
         {
           "name": "MAPREDUCE2_CLIENT"
@@ -218,13 +202,10 @@
           "name": "SECONDARY_NAMENODE"
         },
         {
-          "name": "SLIDER"
+          "name": "SPARK2_CLIENT"
         },
         {
-          "name": "SPARK_CLIENT"
-        },
-        {
-          "name": "SPARK_JOBHISTORYSERVER"
+          "name": "SPARK2_JOBHISTORYSERVER"
         },
         {
           "name": "TEZ_CLIENT"
@@ -245,18 +226,18 @@
       "configurations": [
         {
           "hdfs-site": {
-            "dfs.datanode.data.dir": "\/hadoopfs\/fs1\/hdfs\/datanode"
+            "dfs.datanode.data.dir": "/hadoopfs/fs1/hdfs/datanode"
           }
         },
         {
           "yarn-site": {
-            "yarn.nodemanager.local-dirs": "\/hadoopfs\/fs1\/yarn\/nodemanager",
-            "yarn.nodemanager.log-dirs": "\/hadoopfs\/fs1\/yarn\/nodemanager\/log"
+            "yarn.nodemanager.local-dirs": "/hadoopfs/fs1/yarn/nodemanager",
+            "yarn.nodemanager.log-dirs": "/hadoopfs/fs1/yarn/nodemanager/log"
           }
         },
         {
           "core-site": {
-            "fs.s3a.buffer.dir": "\/hadoopfs\/fs1\/s3\/temp"
+            "fs.s3a.buffer.dir": "/hadoopfs/fs1/s3-${user.name}"
           }
         }
       ],
@@ -272,7 +253,7 @@
           "name": "TEZ_CLIENT"
         },
         {
-          "name": "SPARK_CLIENT"
+          "name": "SPARK2_CLIENT"
         },
         {
           "name": "DATANODE"
@@ -287,18 +268,18 @@
       "configurations": [
         {
           "hdfs-site": {
-            "dfs.datanode.data.dir": "\/hadoopfs\/fs1\/hdfs\/datanode"
+            "dfs.datanode.data.dir": "/hadoopfs/fs1/hdfs/datanode"
           }
         },
         {
           "yarn-site": {
-            "yarn.nodemanager.local-dirs": "\/hadoopfs\/fs1\/yarn\/nodemanager",
-            "yarn.nodemanager.log-dirs": "\/hadoopfs\/fs1\/yarn\/nodemanager\/log"
+            "yarn.nodemanager.local-dirs": "/hadoopfs/fs1/yarn/nodemanager",
+            "yarn.nodemanager.log-dirs": "/hadoopfs/fs1/yarn/nodemanager/log"
           }
         },
         {
           "core-site": {
-            "fs.s3a.buffer.dir": "\/hadoopfs\/fs1\/s3\/temp"
+            "fs.s3a.buffer.dir": "/hadoopfs/fs1/s3-${user.name}"
           }
         }
       ],
@@ -314,7 +295,7 @@
           "name": "TEZ_CLIENT"
         },
         {
-          "name": "SPARK_CLIENT"
+          "name": "SPARK2_CLIENT"
         },
         {
           "name": "METRICS_MONITOR"
@@ -326,13 +307,13 @@
       "configurations": [
         {
           "yarn-site": {
-            "yarn.nodemanager.local-dirs": "\/hadoopfs\/fs1\/yarn\/nodemanager",
-            "yarn.nodemanager.log-dirs": "\/hadoopfs\/fs1\/yarn\/nodemanager\/log"
+            "yarn.nodemanager.local-dirs": "/hadoopfs/fs1/yarn/nodemanager",
+            "yarn.nodemanager.log-dirs": "/hadoopfs/fs1/yarn/nodemanager/log"
           }
         },
         {
           "core-site": {
-            "fs.s3a.buffer.dir": "\/hadoopfs\/fs1\/s3\/temp"
+            "fs.s3a.buffer.dir": "/hadoopfs/fs1/s3-${user.name}"
           }
         }
       ],

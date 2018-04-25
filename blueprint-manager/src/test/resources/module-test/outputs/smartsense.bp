@@ -15,16 +15,6 @@
   },
   "configurations": [
     {
-      "hdfs-site": {
-        "properties": {
-          "dfs.journalnode.edits.dir": "/hadoopfs/fs1/hdfs/journalnode",
-          "dfs.namenode.name.dir": "/hadoopfs/fs1/hdfs/namenode",
-          "dfs.replication": 2,
-          "dfs.namenode.checkpoint.dir": "/hadoopfs/fs1/hdfs/namesecondary"
-        }
-      }
-    },
-    {
       "cluster-env": {
         "properties": {
           "recovery_enabled": "true",
@@ -62,20 +52,6 @@
       }
     },
     {
-      "zoo.cfg": {
-        "properties": {
-          "dataDir": "/hadoopfs/fs1/zookeeper"
-        }
-      }
-    },
-    {
-      "yarn-site": {
-        "properties": {
-          "yarn.timeline-service.leveldb-timeline-store.path": "/hadoopfs/fs1/yarn/timeline"
-        }
-      }
-    },
-    {
       "hst-server-conf": {
         "customer.account.name": "Hortonworks_Cloud_HDP",
         "cluster.name": "cbc--clustername--111-222-333-444",
@@ -93,95 +69,26 @@
     {
       "components": [
         {
-          "name": "NAMENODE"
-        },
-        {
-          "name": "SECONDARY_NAMENODE"
-        },
-        {
-          "name": "RESOURCEMANAGER"
-        },
-        {
-          "name": "APP_TIMELINE_SERVER"
-        },
-        {
-          "name": "HISTORYSERVER"
-        },
-        {
-          "name": "ZOOKEEPER_SERVER"
-        },
-        {
           "name": "HST_SERVER"
         },
         {
           "name": "HST_AGENT"
         }
       ],
-      "configurations": [
-        {
-          "hdfs-site": {
-            "dfs.datanode.data.dir": "/hadoopfs/fs1/hdfs/datanode"
-          }
-        },
-        {
-          "yarn-site": {
-            "yarn.nodemanager.local-dirs": "/hadoopfs/fs1/yarn/nodemanager",
-            "yarn.nodemanager.log-dirs": "/hadoopfs/fs1/yarn/nodemanager/log"
-          }
-        },
-        {
-          "core-site": {
-            "fs.s3a.buffer.dir": "/hadoopfs/fs1/s3-${user.name}"
-          }
-        }
-      ],
+      "configurations": [],
       "name": "master",
       "cardinality": "1"
     },
     {
       "components": [
-        {
-          "name": "DATANODE"
-        },
-        {
-          "name": "HDFS_CLIENT"
-        },
-        {
-          "name": "NODEMANAGER"
-        },
-        {
-          "name": "YARN_CLIENT"
-        },
-        {
-          "name": "MAPREDUCE2_CLIENT"
-        },
-        {
-          "name": "ZOOKEEPER_CLIENT"
-        },
+        {},
         {
           "name": "HST_AGENT"
         }
       ],
-      "configurations": [
-        {
-          "hdfs-site": {
-            "dfs.datanode.data.dir": "/hadoopfs/fs1/hdfs/datanode"
-          }
-        },
-        {
-          "yarn-site": {
-            "yarn.nodemanager.local-dirs": "/hadoopfs/fs1/yarn/nodemanager",
-            "yarn.nodemanager.log-dirs": "/hadoopfs/fs1/yarn/nodemanager/log"
-          }
-        },
-        {
-          "core-site": {
-            "fs.s3a.buffer.dir": "/hadoopfs/fs1/s3-${user.name}"
-          }
-        }
-      ],
+      "configurations": [],
       "name": "slave_1",
-      "cardinality": "2"
+      "cardinality": "1"
     }
   ]
 }

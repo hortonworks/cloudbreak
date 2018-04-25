@@ -18,24 +18,6 @@
             "cardinality": "1",
             "components": [
                 {
-                    "name": "NAMENODE"
-                },
-                {
-                    "name": "SECONDARY_NAMENODE"
-                },
-                {
-                    "name": "RESOURCEMANAGER"
-                },
-                {
-                    "name": "APP_TIMELINE_SERVER"
-                },
-                {
-                    "name": "HISTORYSERVER"
-                },
-                {
-                    "name": "ZOOKEEPER_SERVER"
-                },
-                {
                     "name": "KERBEROS_CLIENT"
                 }
             ],
@@ -44,24 +26,6 @@
         {
             "cardinality": "2",
             "components": [
-                {
-                    "name": "DATANODE"
-                },
-                {
-                    "name": "HDFS_CLIENT"
-                },
-                {
-                    "name": "NODEMANAGER"
-                },
-                {
-                    "name": "YARN_CLIENT"
-                },
-                {
-                    "name": "MAPREDUCE2_CLIENT"
-                },
-                {
-                    "name": "ZOOKEEPER_CLIENT"
-                },
                 {
                     "name": "KERBEROS_CLIENT"
                 }
