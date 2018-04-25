@@ -11,6 +11,7 @@ start-postgresql:
 
 {% for service, values in pillar.get('postgres', {}).items()  %}
 
+{% if values['user'] is defined %}
 init-{{ service }}-db:
   cmd.run:
     - name: /opt/salt/scripts/init_db.sh
@@ -20,6 +21,7 @@ init-{{ service }}-db:
       - PASSWORD: {{ values['password'] }}
       - DATABASE:  {{ values['database'] }}
       - SERVICE: {{ service }}
+{% endif %}
 
 {% endfor %}
 
