@@ -22,7 +22,7 @@
     <suppress checks="ModifierOrderCheck" files="EncryptedJsonToString.java"/>
     <suppress checks="TrailingComment" files="HeartbeatServiceTest.java"/>
     <suppress checks="VisibilityModifier" files="AbstractAction.java"/>
-
+    <suppress checks=".*" files="CentralBlueprintUpdaterRollingtest.java"/>
 
     <!-- suppressing checks in application runner classes -->
     <suppress id="sysout" files="VersionedApplication.java"/>

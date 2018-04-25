@@ -27,6 +27,7 @@ dependencies {
       exclude group: 'org.hamcrest'
     }
     testCompile 'org.hamcrest:java-hamcrest:2.0.0.0'
+    testCompile 'net.javacrumbs.json-unit:json-unit:1.28.2'
     testCompile project(path: ':core-model', configuration: 'tests')
 
 }

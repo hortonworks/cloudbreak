@@ -23,14 +23,14 @@ class BlueprintModelProvider {
     }
 
     static BlueprintPreparationObject blueprintObjectWhenHiveAndRdsPresentedThenRdsHiveMetastoreShouldConfigured() throws JsonProcessingException {
-        return getPreparedBuilder()
+        return getPreparedBuilder("master")
                 .withBlueprintView(BlueprintTestUtil.generalBlueprintView("", "2.6", "HDP"))
                 .withRdsConfigs(new HashSet<>(Collections.singleton(TestUtil.rdsConfig(RdsType.HIVE))))
                 .build();
     }
 
     static BlueprintPreparationObject blueprintObjectWhenRangerAndRdsPresentedThenRdsRangerShouldConfigured() throws JsonProcessingException {
-        return getPreparedBuilder()
+        return getPreparedBuilder("master")
                 .withBlueprintView(BlueprintTestUtil.generalBlueprintView("", "2.6", "HDP"))
                 .withRdsConfigs(new HashSet<>(Collections.singleton(TestUtil.rdsConfig(RdsType.RANGER))))
                 .build();
@@ -58,7 +58,7 @@ class BlueprintModelProvider {
     }
 
     static BlueprintPreparationObject blueprintObjectWhenLdapPresentedThenRangerAndHadoopLdapShouldConfigured() throws JsonProcessingException {
-        return getPreparedBuilder()
+        return getPreparedBuilder("master")
                 .withBlueprintView(BlueprintTestUtil.generalBlueprintView("", "2.6", "HDP"))
                 .withLdapConfig(TestUtil.ldapConfig())
                 .build();
@@ -80,13 +80,13 @@ class BlueprintModelProvider {
     }
 
     static BlueprintPreparationObject blueprintObjectWithZepelinAndHdp26PresentedThenZeppelinShouldConfigured() throws JsonProcessingException {
-        return getPreparedBuilder("master", "slave_1")
+        return getPreparedBuilder("master")
                 .withBlueprintView(BlueprintTestUtil.generalBlueprintView("", "2.6", "HDP"))
                 .build();
     }
 
     static BlueprintPreparationObject blueprintObjectWithZepelinAndHdp25PresentedThenZeppelinShouldConfigured() throws JsonProcessingException {
-        return getPreparedBuilder("master", "slave_1")
+        return getPreparedBuilder("master")
                 .withBlueprintView(BlueprintTestUtil.generalBlueprintView("", "2.5", "HDP"))
                 .build();
     }
@@ -105,7 +105,7 @@ class BlueprintModelProvider {
         return BlueprintPreparationObject.Builder.builder()
                 .withGeneralClusterConfigs(conf)
                 .withBlueprintView(BlueprintTestUtil.generalBlueprintView("", "2.6", "HDP"))
-                .withHostgroups(getHostGroups("master", "slave_1"))
+                .withHostgroups(getHostGroups("master"))
                 .withGateway(TestUtil.gateway())
                 .build();
     }
@@ -122,7 +122,7 @@ class BlueprintModelProvider {
     }
 
     static BlueprintPreparationObject blueprintObjectWhenLdapConfiguredWithRdsRanger() throws JsonProcessingException {
-        return getPreparedBuilder()
+        return getPreparedBuilder("master")
                 .withBlueprintView(BlueprintTestUtil.generalBlueprintView("", "2.6", "HDP"))
                 .withRdsConfigs(new HashSet<>(Collections.singleton(TestUtil.rdsConfig(RdsType.RANGER))))
                 .withLdapConfig(TestUtil.ldapConfig())
@@ -162,6 +162,18 @@ class BlueprintModelProvider {
                 .build();
     }
 
+    static BlueprintPreparationObject blueprintObjectWhenDefaultBlueprintConfigured() throws JsonProcessingException {
+        GeneralClusterConfigs configs = BlueprintTestUtil.generalClusterConfigs();
+        return BlueprintPreparationObject.Builder.builder()
+                .withHostgroups(getHostGroups("master", "worker", "compute"))
+                .withGateway(TestUtil.gateway())
+                .withBlueprintView(BlueprintTestUtil.generalBlueprintView("", "2.6", "HDP"))
+                .withRdsConfigs(Sets.newHashSet(TestUtil.rdsConfig(RdsType.RANGER), TestUtil.rdsConfig(RdsType.HIVE)))
+                .withLdapConfig(TestUtil.ldapConfig())
+                .withGeneralClusterConfigs(configs)
+                .build();
+    }
+
     static BlueprintPreparationObject blueprintObjectWhenLdapAndDruidRdsConfigured() throws JsonProcessingException {
         return getPreparedBuilder()
                 .withBlueprintView(BlueprintTestUtil.generalBlueprintView("", "2.6", "HDP"))
@@ -171,13 +183,13 @@ class BlueprintModelProvider {
     }
 
     static BlueprintPreparationObject blueprintObjectWhenAtlasPresentedShouldConfigured() throws JsonProcessingException {
-        return getPreparedBuilder("master", "slave_1")
+        return getPreparedBuilder("master")
                 .withBlueprintView(BlueprintTestUtil.generalBlueprintView("", "2.6", "HDP"))
                 .build();
     }
 
     static BlueprintPreparationObject blueprintObjectWhenAtlasAndLdapPresentedThenBothShouldConfigured() throws JsonProcessingException {
-        return getPreparedBuilder("master", "slave_1")
+        return getPreparedBuilder("master")
                 .withBlueprintView(BlueprintTestUtil.generalBlueprintView("", "2.6", "HDP"))
                 .withLdapConfig(TestUtil.ldapConfig())
                 .build();

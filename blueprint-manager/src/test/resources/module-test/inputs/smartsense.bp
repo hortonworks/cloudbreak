@@ -4,37 +4,11 @@
         "stack_name": "HDP",
         "stack_version": "2.5"
     },
-    "configurations": [
-        {
-            "hdfs-site": {
-                "properties": {
-                    "dfs.replication": 2
-                }
-            }
-        }
-    ],
+    "configurations": [],
     "host_groups": [
         {
             "cardinality": "1",
             "components": [
-                {
-                    "name": "NAMENODE"
-                },
-                {
-                    "name": "SECONDARY_NAMENODE"
-                },
-                {
-                    "name": "RESOURCEMANAGER"
-                },
-                {
-                    "name": "APP_TIMELINE_SERVER"
-                },
-                {
-                    "name": "HISTORYSERVER"
-                },
-                {
-                    "name": "ZOOKEEPER_SERVER"
-                },
                 {
                     "name": "HST_SERVER"
                 }
@@ -42,25 +16,9 @@
             "name": "master"
         },
         {
-            "cardinality": "2",
+            "cardinality": "1",
             "components": [
                 {
-                    "name": "DATANODE"
-                },
-                {
-                    "name": "HDFS_CLIENT"
-                },
-                {
-                    "name": "NODEMANAGER"
-                },
-                {
-                    "name": "YARN_CLIENT"
-                },
-                {
-                    "name": "MAPREDUCE2_CLIENT"
-                },
-                {
-                    "name": "ZOOKEEPER_CLIENT"
                 }
             ],
             "name": "slave_1"

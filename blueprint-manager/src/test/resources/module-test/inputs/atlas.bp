@@ -4,26 +4,16 @@
         "stack_name": "HDP",
         "stack_version": "2.6"
     },
-    "configurations": [
-    ],
+    "configurations": [],
     "host_groups": [
         {
             "cardinality": "1",
             "components": [
                 {
-                    "name": "HBASE_MASTER"
+                    "name": "ATLAS_SERVER"
                 }
             ],
             "name": "master"
-        },
-        {
-            "cardinality": "2",
-            "components": [
-                {
-                    "name": "HBASE_MASTER"
-                }
-            ],
-            "name": "slave_1"
         }
     ]
 }

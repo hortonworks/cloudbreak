@@ -27,17 +27,6 @@
       }
     },
     {
-      "admin-properties": {
-        "properties": {
-          "db_user": "{{{ rds.ranger.connectionUserName }}}",
-          "db_password": "{{{ rds.ranger.connectionPassword }}}",
-          "db_name": "{{{ rds.ranger.databaseName }}}",
-          "db_host": "{{{ rds.ranger.connectionString }}}",
-          "DB_FLAVOR": "POSTGRES"
-        }
-      }
-    },
-    {
       "ranger-env": {
         "properties": {
           "admin_password": "{{{ cluster_admin_password }}}",
@@ -46,54 +35,10 @@
           "ranger-hdfs-plugin-enabled": "No",
           "ranger-hive-plugin-enabled": "No",
           "ranger-yarn-plugin-enabled": "No",
-          "ranger_privelege_user_jdbc_url": "{{{ rds.ranger.hostWithPortWithJdbc }}}",
           "ranger-atlas-plugin-enabled": "No",
           "create_db_dbuser": "false",
           "xasecure.audit.destination.hdfs": "true",
           "xasecure.audit.destination.solr": "true"
-        }
-      }
-    },
-    {
-      "ranger-ugsync-site": {
-        "ranger.usersync.enabled": "true",
-        "ranger.usersync.source.impl.class": "org.apache.ranger.ldapusersync.process.LdapUserGroupBuilder",
-        "ranger.usersync.ldap.url": "{{{ ldap.connectionURL }}}",
-        "ranger.usersync.ldap.binddn": "{{{ ldap.bindDn }}}",
-        "ranger.usersync.ldap.ldapbindpassword": "{{{ ldap.bindPassword }}}",
-        "ranger.usersync.ldap.user.nameattribute": "{{{ ldap.userNameAttribute }}}",
-        "ranger.usersync.ldap.user.searchbase": "{{{ ldap.userSearchBase }}}",
-        "ranger.usersync.ldap.user.objectclass": "{{{ ldap.userObjectClass }}}",
-        "ranger.usersync.ldap.deltasync": "false",
-        "ranger.usersync.group.searchenabled": "true",
-        "ranger.usersync.group.memberattributename": "{{{ ldap.groupMemberAttribute }}}",
-        "ranger.usersync.group.nameattribute": "{{{ ldap.groupNameAttribute }}}",
-        "ranger.usersync.group.objectclass": "{{{ ldap.groupObjectClass }}}",
-        "ranger.usersync.group.searchbase": "{{{ ldap.groupSearchBase }}}",
-        "ranger.usersync.group.searchfilter": " "
-      }
-    },
-    {
-      "ranger-admin-site": {
-        "properties": {
-          "ranger.jpa.jdbc.driver": "org.postgresql.Driver",
-          "ranger.jpa.jdbc.url": "{{{ rds.ranger.hostWithPortWithJdbc }}}/{{{ rds.ranger.databaseName }}}",
-          "ranger.audit.source.type": "solr",
-          "ranger.authentication.method": "{{{ ldap.directoryType }}}",
-          "ranger.ldap.ad.domain": " ",
-          "ranger.ldap.ad.url": "{{{ ldap.connectionURL }}}",
-          "ranger.ldap.ad.bind.dn": "{{{ ldap.bindDn }}}",
-          "ranger.ldap.ad.bind.password": "{{{ ldap.bindPassword }}}",
-          "ranger.ldap.ad.base.dn": "{{{ ldap.userSearchBase }}}",
-          "ranger.ldap.ad.user.searchfilter": "({{{ ldap.userNameAttribute }}}={0})",
-          "ranger.ldap.url": "{{{ ldap.connectionURL }}}",
-          "ranger.ldap.bind.dn": "{{{ ldap.bindDn }}}",
-          "ranger.ldap.bind.password": "{{{ ldap.bindPassword }}}",
-          "ranger.ldap.base.dn": "{{{ ldap.userSearchBase }}}",
-          "ranger.ldap.user.searchfilter": "({{{ ldap.userNameAttribute }}}={0})",
-          "ranger.ldap.user.dnpattern": "{{{ ldap.userNameAttribute }}}={0},{{{ ldap.userSearchBase }}}",
-          "ranger.ldap.group.searchbase": "{{{ ldap.groupSearchBase }}}",
-          "ranger.ldap.group.roleattribute": "{{{ ldap.groupNameAttribute }}}"
         }
       }
     },
