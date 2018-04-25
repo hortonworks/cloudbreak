@@ -22,30 +22,40 @@
     },
     {
       "core-site": {
-        "proxyuser_group": "hadoop",
+        "hadoop.security.group.mapping.ldap.search.attr.member": "member",
+        "hadoop.security.group.mapping.ldap.search.attr.group.name": "cn",
         "hadoop.proxyuser.falcon.groups": "*",
         "hadoop.proxyuser.root.groups": "*",
-        "hadoop.proxyuser.livy.hosts": "*",
-        "hadoop.proxyuser.falcon.hosts": "*",
-        "hadoop.proxyuser.oozie.hosts": "*",
+        "hadoop.security.group.mapping.ldap.bind.password": "admin",
         "fs.trash.interval": "4320",
-        "hadoop.proxyuser.hcat.hosts": "*",
-        "hadoop.proxyuser.oozie.groups": "*",
-        "hadoop.proxyuser.hive.groups": "*",
+        "hadoop.security.group.mapping.ldap.userbase": "cn=users,dc=example,dc=org",
+        "hadoop.security.group.mapping.ldap.url": "ldap://localhost:389",
+        "hadoop.security.group.mapping.ldap.groupbase": "cn=groups,dc=example,dc=org",
+        "hadoop.security.group.mapping.ldap.search.filter.group": "(objectClass=groupOfNames)",
         "hadoop.proxyuser.hcat.groups": "*",
         "hadoop.proxyuser.livy.groups": "*",
         "hadoop.proxyuser.hbase.groups": "*",
         "hadoop.proxyuser.hbase.hosts": "*",
         "hadoop.proxyuser.root.hosts": "*",
-        "hadoop.proxyuser.hive.hosts": "*"
+        "hadoop.proxyuser.hive.hosts": "*",
+        "proxyuser_group": "hadoop",
+        "hadoop.security.group.mapping.ldap.search.filter.user": "(&(objectClass=person)(cn=admin,dc=example,dc=org={0}))",
+        "hadoop.security.group.mapping.ldap.bind.user": "cn=admin,dc=example,dc=org",
+        "hadoop.proxyuser.livy.hosts": "*",
+        "hadoop.proxyuser.falcon.hosts": "*",
+        "hadoop.proxyuser.oozie.hosts": "*",
+        "hadoop.proxyuser.hcat.hosts": "*",
+        "hadoop.proxyuser.oozie.groups": "*",
+        "hadoop.security.group.mapping": "org.apache.hadoop.security.LdapGroupsMapping",
+        "hadoop.proxyuser.hive.groups": "*"
       }
     },
     {
       "hdfs-site": {
-         "dfs.journalnode.edits.dir": "/hadoopfs/fs1/hdfs/journalnode",
-         "dfs.namenode.name.dir": "/hadoopfs/fs1/hdfs/namenode",
-         "dfs.namenode.safemode.threshold-pct": "0.99",
-         "dfs.namenode.checkpoint.dir": "/hadoopfs/fs1/hdfs/namesecondary"
+        "dfs.journalnode.edits.dir": "/hadoopfs/fs1/hdfs/journalnode",
+        "dfs.namenode.name.dir": "/hadoopfs/fs1/hdfs/namenode",
+        "dfs.namenode.safemode.threshold-pct": "0.99",
+        "dfs.namenode.checkpoint.dir": "/hadoopfs/fs1/hdfs/namesecondary"
       }
     },
     {
@@ -96,22 +106,65 @@
       }
     },
     {
-      "superset-env": {
+      "ranger-ugsync-site": {
         "properties": {
-          "superset_admin_password": "Passw0rd",
-          "superset_admin_lastname": "username",
-          "superset_admin_email": "identity.user@email.com",
-          "superset_admin_firstname": "username"
+          "ranger.usersync.ldap.deltasync": "false",
+          "ranger.usersync.enabled": "true",
+          "ranger.usersync.group.searchbase": "cn=groups,dc=example,dc=org",
+          "ranger.usersync.group.nameattribute": "cn",
+          "ranger.usersync.group.based.role.assignment.rules": "&ROLE_SYS_ADMIN:g:ambariadmins",
+          "ranger.usersync.ldap.binddn": "cn=admin,dc=example,dc=org",
+          "ranger.usersync.source.impl.class": "org.apache.ranger.ldapusersync.process.LdapUserGroupBuilder",
+          "ranger.usersync.ldap.user.nameattribute": "cn=admin,dc=example,dc=org",
+          "ranger.usersync.group.searchfilter": " ",
+          "ranger.usersync.group.searchenabled": "true",
+          "ranger.usersync.ldap.user.searchbase": "cn=users,dc=example,dc=org",
+          "ranger.usersync.ldap.ldapbindpassword": "admin",
+          "ranger.usersync.ldap.user.objectclass": "person",
+          "ranger.usersync.group.objectclass": "groupOfNames",
+          "ranger.usersync.group.memberattributename": "member",
+          "ranger.usersync.ldap.url": "ldap://localhost:389"
         }
       }
     },
     {
-      "druid-superset-env": {
+      "ranger-admin-site": {
         "properties": {
-          "superset_admin_password": "Passw0rd",
-          "superset_admin_lastname": "username",
-          "superset_admin_email": "identity.user@email.com",
-          "superset_admin_firstname": "username"
+          "ranger.authentication.method": "ACTIVE_DIRECTORY",
+          "ranger.ldap.user.dnpattern": "cn=admin,dc=example,dc=org={0},cn=users,dc=example,dc=org",
+          "ranger.ldap.ad.domain": " ",
+          "ranger.ldap.ad.user.searchfilter": "(cn=admin,dc=example,dc=org={0})",
+          "ranger.ldap.ad.bind.dn": "cn=admin,dc=example,dc=org",
+          "ranger.ldap.ad.bind.password": "admin",
+          "ranger.ldap.bind.dn": "cn=admin,dc=example,dc=org",
+          "ranger.ldap.bind.password": "admin",
+          "ranger.ldap.user.searchfilter": "(cn=admin,dc=example,dc=org={0})",
+          "ranger.ldap.url": "ldap://localhost:389",
+          "ranger.ldap.ad.url": "ldap://localhost:389",
+          "ranger.jpa.jdbc.driver": "oracle.jdbc.driver.OracleDriver",
+          "ranger.ldap.ad.base.dn": "cn=users,dc=example,dc=org",
+          "ranger.ldap.base.dn": "cn=users,dc=example,dc=org",
+          "ranger.ldap.group.searchbase": "cn=groups,dc=example,dc=org",
+          "ranger.ldap.group.roleattribute": "cn"
+        }
+      }
+    },
+    {
+      "admin-properties": {
+        "properties": {
+          "DB_FLAVOR": "ORACLE",
+          "db_name": "ranger",
+          "db_user": "heyitsme",
+          "db_host": "10.1.1.1:5432:ranger",
+          "db_password": "iamsoosecure"
+        }
+      }
+    },
+    {
+      "ranger-env": {
+        "properties": {
+          "ranger_privelege_user_jdbc_url": "jdbc:oracle:@10.1.1.1:5432",
+          "create_db_dbuser": "false"
         }
       }
     },
@@ -181,10 +234,7 @@
           "name": "HIVE_CLIENT"
         },
         {
-          "name": "DRUID_SUPERSET"
-        },
-        {
-          "name": "SUPERSET"
+          "name": "RANGER_ADMIN"
         },
         {
           "name": "HIVE_SERVER"

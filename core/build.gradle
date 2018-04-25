@@ -1,44 +1,44 @@
 import org.ajoberstar.grgit.Grgit
 
 buildscript {
-  repositories {
-    maven { url 'http://repo.spring.io/libs-release' }
-    mavenCentral()
-    jcenter()
-    maven { url "http://maven.sequenceiq.com/releases" }
-  }
-  dependencies {
-    classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
-    classpath "com.smokejumperit.gradle.license:Gradle-License-Report:0.0.2"
-    classpath "gradle.plugin.com.palantir:jacoco-coverage:0.4.0"
-    classpath "gradle.plugin.com.github.jk1:gradle-license-report:0.3.4"
-  }
+    repositories {
+        maven { url 'http://repo.spring.io/libs-release' }
+        mavenCentral()
+        jcenter()
+        maven { url "http://maven.sequenceiq.com/releases" }
+    }
+    dependencies {
+        classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
+        classpath "com.smokejumperit.gradle.license:Gradle-License-Report:0.0.2"
+        classpath "gradle.plugin.com.palantir:jacoco-coverage:0.4.0"
+        classpath "gradle.plugin.com.github.jk1:gradle-license-report:0.3.4"
+    }
 }
 
 plugins {
-  id "com.palantir.jacoco-full-report" version "0.4.0"
-  id "com.github.jk1.dependency-license-report" version "0.3.4"
-  id 'net.ltgt.apt' version '0.14'
+    id "com.palantir.jacoco-full-report" version "0.4.0"
+    id "com.github.jk1.dependency-license-report" version "0.3.4"
+    id 'net.ltgt.apt' version '0.14'
 }
 
 apply plugin: 'org.springframework.boot'
 apply plugin: 'info.solidsoft.pitest'
 
 bootRun {
-  systemProperty 'spring.profiles.active', System.properties['spring.profiles.active']
-  systemProperty 'spring.config.location', System.properties['spring.config.location']
-  if (project.hasProperty('jvmArgs')) {
-    jvmArgs += project.jvmArgs.split("\\s+").toList()
-  }
+    systemProperty 'spring.profiles.active', System.properties['spring.profiles.active']
+    systemProperty 'spring.config.location', System.properties['spring.config.location']
+    if (project.hasProperty('jvmArgs')) {
+        jvmArgs += project.jvmArgs.split("\\s+").toList()
+    }
 }
 
 springBoot {
-  mainClass = 'com.sequenceiq.cloudbreak.CloudbreakApplication'
+    mainClass = 'com.sequenceiq.cloudbreak.CloudbreakApplication'
 }
 
 jar {
-  baseName = 'cloudbreak'
-  archiveName = 'cloudbreak.jar'
+    baseName = 'cloudbreak'
+    archiveName = 'cloudbreak.jar'
 }
 
 dependencies {
@@ -110,7 +110,7 @@ dependencies {
 
     testCompile (group: 'org.powermock',             name: 'powermock-module-junit4',        version: powermockVersion)
     testCompile (group: 'org.powermock',             name: 'powermock-api-mockito2',          version: powermockVersion) {
-      exclude group: 'org.hamcrest'
+        exclude group: 'org.hamcrest'
     }
     testCompile group: 'org.mockito',              name: 'mockito-core',                   version: mockitoVersion
     testCompile project(path: ':core-model', configuration: 'tests')
@@ -121,105 +121,105 @@ dependencies {
 }
 
 jacoco {
-  toolVersion = "0.7.1.201405082137"
-  reportsDir = file("$buildDir/reports/jacoco")
+    toolVersion = "0.7.1.201405082137"
+    reportsDir = file("$buildDir/reports/jacoco")
 }
 
 jacocoTestReport {
-  reports {
-    xml.enabled false
-    csv.enabled false
-    html.destination "${buildDir}/jacocoHtml"
-  }
+    reports {
+        xml.enabled false
+        csv.enabled false
+        html.destination "${buildDir}/jacocoHtml"
+    }
 }
 
 test {
 }
 
 task buildInfo(type: BuildInfoTask) {
-  destination = file("$buildDir")
-  applicationPropertiesPath = "$buildDir"
-  basename = jar.baseName
-  buildVersion = version
+    destination = file("$buildDir")
+    applicationPropertiesPath = "$buildDir"
+    basename = jar.baseName
+    buildVersion = version
 }
 
 task execute(type: JavaExec) {
-  if (project.hasProperty('mainClass')) {
-    main = mainClass
-    classpath = sourceSets.main.runtimeClasspath
-  }
+    if (project.hasProperty('mainClass')) {
+        main = mainClass
+        classpath = sourceSets.main.runtimeClasspath
+    }
 }
 
 sourceSets {
-  main {
-    java.srcDirs += "${projectDir}/src/main/generated"
-  }
+    main {
+        java.srcDirs += "${projectDir}/src/main/generated"
+    }
 }
 
 compileJava.dependsOn buildInfo
 compileJava {
-  options.compilerArgs = [
-          '-Amapstruct.unmappedTargetPolicy=ERROR',
-          '-Amapstruct.suppressGeneratorTimestamp=true',
-          '-Amapstruct.suppressGeneratorVersionInfoComment=true'
-  ]
+    options.compilerArgs = [
+            '-Amapstruct.unmappedTargetPolicy=ERROR',
+            '-Amapstruct.suppressGeneratorTimestamp=true',
+            '-Amapstruct.suppressGeneratorVersionInfoComment=true'
+    ]
 
-  generatedSourcesDestinationDir = "$projectDir/src/main/generated"
+    generatedSourcesDestinationDir = "$projectDir/src/main/generated"
 }
 
 compileJava.doFirst {
-  delete "${projectDir}/src/main/generated/"
+    delete "${projectDir}/src/main/generated/"
 }
 
 class BuildInfoTask extends DefaultTask {
-  File destination = new File("build.info")
-  String applicationPropertiesPath
-  String basename
-  String buildVersion
+    File destination = new File("build.info")
+    String applicationPropertiesPath
+    String basename
+    String buildVersion
 
-  @TaskAction
-  def writeBuildInfo() {
-    List<File> applicationDestinations = []
+    @TaskAction
+    def writeBuildInfo() {
+        List<File> applicationDestinations = []
 
-    applicationDestinations += project.file("out/production/resources")
-    applicationDestinations += new File(applicationPropertiesPath + "/resources/main")
+        applicationDestinations += project.file("out/production/resources")
+        applicationDestinations += new File(applicationPropertiesPath + "/resources/main")
 
-    destination.mkdirs()
+        destination.mkdirs()
 
-    // if using dev environment this condition is true
-    if (buildVersion.contains("+") || buildVersion == "unspecified") {
-      def grgit = Grgit.open(currentDir: project.projectDir)
-      buildVersion = grgit.describe()
-      println "buildVersion from git: " + buildVersion
+        // if using dev environment this condition is true
+        if (buildVersion.contains("+") || buildVersion == "unspecified") {
+            def grgit = Grgit.open(currentDir: project.projectDir)
+            buildVersion = grgit.describe()
+            println "buildVersion from git: " + buildVersion
+        }
+        String activeProfile = determineActiveProfile()
+        new File(destination, "build.info").withWriter { out ->
+            [
+                    "ARTIFACT_BASENAME=" + basename,
+                    "ARTIFACT_VERSION=" + buildVersion,
+            ].each { out.println it }
+        }
+        applicationDestinations.each {
+            it.mkdirs()
+            new File(it, "application.properties").withWriter { out ->
+                [
+                        "info.app.name=" + basename,
+                        "info.app.version=" + buildVersion,
+                        "spring.profiles.active=" + activeProfile
+                ].each { out.println it }
+            }
+        }
     }
-    String activeProfile = determineActiveProfile()
-    new File(destination, "build.info").withWriter { out ->
-      [
-              "ARTIFACT_BASENAME=" + basename,
-              "ARTIFACT_VERSION=" + buildVersion,
-      ].each { out.println it }
-    }
-    applicationDestinations.each {
-      it.mkdirs()
-      new File(it, "application.properties").withWriter { out ->
-        [
-                "info.app.name=" + basename,
-                "info.app.version=" + buildVersion,
-                "spring.profiles.active=" + activeProfile
-        ].each { out.println it }
-      }
-    }
-  }
 
-  private String determineActiveProfile() {
-      String activeProfile = "dev"
-      if (buildVersion.contains("dev") || buildVersion.equals("unspecified")) {
-          activeProfile = "dev"
-      } else if (buildVersion.contains("rc")) {
-          activeProfile = "rc"
-      } else {
-          activeProfile = "prod"
-      }
-      return activeProfile
-  }
+    private String determineActiveProfile() {
+        String activeProfile = "dev"
+        if (buildVersion.contains("dev") || buildVersion.equals("unspecified")) {
+            activeProfile = "dev"
+        } else if (buildVersion.contains("rc")) {
+            activeProfile = "rc"
+        } else {
+            activeProfile = "prod"
+        }
+        return activeProfile
+    }
 }

@@ -22,7 +22,7 @@ public abstract class RDSConfigJson implements JsonEntity {
 
     @NotNull
     @ApiModelProperty(value = RDSConfig.CONNECTION_URL, required = true)
-    @Pattern(regexp = "^jdbc:(postgresql|mysql|oracle)://[-\\w\\.]*:\\d{1,5}/?\\w*",
+    @Pattern(regexp = "^jdbc:(postgresql|mysql|oracle):(thin:@|//)[-\\w\\.]*:\\d{1,5}/?:?\\w*",
             message = "Connection URL is not valid we only supports Oracle, Postgres or Mysql as database")
     private String connectionURL;
 
@@ -36,6 +36,7 @@ public abstract class RDSConfigJson implements JsonEntity {
 
     @ApiModelProperty(RDSConfig.CONNECTOR_JAR_URL)
     @Size(max = 150, message = "The length of the connectorJarUrl has to be in range of 0 to 150")
+    @Pattern(regexp = "^(?![\\s\\S])|http[s]://[\\w-/?=+&:,#.]*", message = "The URL must be proper and valid!")
     private String connectorJarUrl;
 
     public String getConnectionURL() {

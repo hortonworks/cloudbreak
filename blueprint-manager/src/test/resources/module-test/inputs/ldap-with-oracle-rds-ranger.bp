@@ -90,7 +90,7 @@
                "name":"HIVE_CLIENT"
             },
             {
-               "name":"DRUID_SUPERSET"
+               "name":"RANGER_ADMIN"
             },
             {
                "name":"HIVE_SERVER"

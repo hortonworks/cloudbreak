@@ -2,7 +2,7 @@
 {{{#if rds.hive}}}
   "hive-site": {
     "properties": {
-      "javax.jdo.option.ConnectionURL": "{{{ rds.hive.connectionURL }}}",
+      "javax.jdo.option.ConnectionURL": "{{{ rds.hive.connectionString }}}",
       "javax.jdo.option.ConnectionDriverName": "{{{ rds.hive.connectionDriver }}}",
       "javax.jdo.option.ConnectionUserName": "{{{ rds.hive.connectionUserName }}}",
       "javax.jdo.option.ConnectionPassword": "{{{ rds.hive.connectionPassword }}}"

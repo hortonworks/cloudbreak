@@ -6,20 +6,25 @@
           "recovery_enabled": "true"
         }
       ]
+    },
+    {
+      "service_settings": [
+        {
+          "name": "HIVE",
+          "credential_store_enabled": "false"
+        }
+      ]
+    },
+    {
+      "component_settings": []
     }
   ],
   "Blueprints": {
     "stack_version": "2.6",
-    "blueprint_name": "hdp26-edw-analytics",
+    "blueprint_name": "hdp26-druid-bi",
     "stack_name": "HDP"
   },
   "configurations": [
-    {
-      "hive-interactive-env": {
-        "enable_hive_interactive": "true",
-        "num_llap_nodes": "0"
-      }
-    },
     {
       "core-site": {
         "proxyuser_group": "hadoop",
@@ -42,25 +47,10 @@
     },
     {
       "hdfs-site": {
-         "dfs.journalnode.edits.dir": "/hadoopfs/fs1/hdfs/journalnode",
-         "dfs.namenode.name.dir": "/hadoopfs/fs1/hdfs/namenode",
-         "dfs.namenode.safemode.threshold-pct": "0.99",
-         "dfs.namenode.checkpoint.dir": "/hadoopfs/fs1/hdfs/namesecondary"
-      }
-    },
-    {
-      "hive-interactive-site": {
-        "hive.stats.fetch.bitvector": "true",
-        "hive.exec.orc.split.strategy": "BI",
-        "hive.metastore.rawstore.impl": "org.apache.hadoop.hive.metastore.cache.CachedStore"
-      }
-    },
-    {
-      "hive-site": {
-        "hive.server2.transport.mode": "http",
-        "hive.exec.compress.output": "true",
-        "hive.merge.mapfiles": "true",
-        "hive.server2.tez.initialize.default.sessions": "true"
+        "dfs.journalnode.edits.dir": "/hadoopfs/fs1/hdfs/journalnode",
+        "dfs.namenode.name.dir": "/hadoopfs/fs1/hdfs/namenode",
+        "dfs.namenode.safemode.threshold-pct": "0.99",
+        "dfs.namenode.checkpoint.dir": "/hadoopfs/fs1/hdfs/namesecondary"
       }
     },
     {
@@ -71,27 +61,94 @@
       }
     },
     {
-      "tez-site": {
-        "tez.runtime.enable.final-merge.in.output": "false",
-        "tez.am.am-rm.heartbeat.interval-ms.max": "2000",
-        "tez.runtime.shuffle.parallel.copies": "4"
-      }
-    },
-    {
       "yarn-site": {
         "yarn.acl.enable": "true",
         "yarn.timeline-service.leveldb-timeline-store.path": "/hadoopfs/fs1/yarn/timeline"
       }
     },
     {
-      "capacity-scheduler": {
+      "druid-common": {
         "properties": {
-          "yarn.scheduler.capacity.root.queues": "default,llap",
-          "yarn.scheduler.capacity.root.capacity": "100",
-          "yarn.scheduler.capacity.root.default.maximum-capacity": "100",
-          "yarn.scheduler.capacity.root.llap.capacity": "75",
-          "yarn.scheduler.capacity.root.default.capacity": "25",
-          "yarn.scheduler.capacity.root.llap.maximum-capacity": "100"
+          "druid.extensions.loadList": "[\"postgresql-metadata-storage\", \"druid-s3-extensions\"]",
+          "druid.selectors.indexing.serviceName": "druid/overlord",
+          "druid.metadata.storage.type": "derby",
+          "druid.metadata.storage.connector.user": "heyitsme",
+          "druid.storage.type": "s3",
+          "druid.metadata.storage.connector.password": "iamsoosecure",
+          "druid.metadata.storage.connector.connectURI": "jdbc:postgresql://10.1.1.1:5432/druid"
+        }
+      }
+    },
+    {
+      "druid-overlord": {
+        "properties_attributes": {},
+        "properties": {
+          "druid.indexer.runner.type": "remote",
+          "druid.indexer.storage.type": "metadata",
+          "druid.service": "druid/overlord",
+          "druid.port": "8090"
+        }
+      }
+    },
+    {
+      "druid-middlemanager": {
+        "properties_attributes": {},
+        "properties": {
+          "druid.server.http.numThreads": "50",
+          "druid.worker.capacity": "3",
+          "druid.processing.numThreads": "2",
+          "druid.indexer.runner.javaOpts": "-server -Xmx2g -Duser.timezone=UTC -Dfile.encoding=UTF-8 -Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager -Dhdp.version={{stack_version}} -Dhadoop.mapreduce.job.classloader=true",
+          "druid.service": "druid/middlemanager",
+          "druid.port": "8091"
+        }
+      }
+    },
+    {
+      "druid-coordinator": {
+        "properties_attributes": {},
+        "properties": {
+          "druid.coordinator.merge.on": "false",
+          "druid.port": "8081"
+        }
+      }
+    },
+    {
+      "druid-historical": {
+        "properties_attributes": {},
+        "properties": {
+          "druid.server.http.numThreads": "50",
+          "druid.processing.numThreads": "10",
+          "druid.service": "druid/historical",
+          "druid.port": "8083",
+          "druid.server.maxSize": "300000000000"
+        }
+      }
+    },
+    {
+      "druid-broker": {
+        "properties_attributes": {},
+        "properties": {
+          "druid.cache.type": "local",
+          "druid.server.http.numThreads": "50",
+          "druid.broker.http.numConnections": "5",
+          "druid.processing.numThreads": "2",
+          "druid.service": "druid/broker",
+          "druid.port": "8082"
+        }
+      }
+    },
+    {
+      "druid-router": {
+        "properties_attributes": {},
+        "properties": {}
+      }
+    },
+    {
+      "superset": {
+        "properties_attributes": {},
+        "properties": {
+          "SECRET_KEY": "123admin123",
+          "SUPERSET_DATABASE_TYPE": "sqlite"
         }
       }
     },
@@ -102,24 +159,6 @@
           "superset_admin_lastname": "username",
           "superset_admin_email": "identity.user@email.com",
           "superset_admin_firstname": "username"
-        }
-      }
-    },
-    {
-      "druid-superset-env": {
-        "properties": {
-          "superset_admin_password": "Passw0rd",
-          "superset_admin_lastname": "username",
-          "superset_admin_email": "identity.user@email.com",
-          "superset_admin_firstname": "username"
-        }
-      }
-    },
-    {
-      "webhcat-site": {
-        "properties": {
-          "webhcat.proxyuser.root.groups": "*",
-          "webhcat.proxyuser.root.hosts": "*"
         }
       }
     },
@@ -169,36 +208,6 @@
           "name": "APP_TIMELINE_SERVER"
         },
         {
-          "name": "HCAT"
-        },
-        {
-          "name": "HDFS_CLIENT"
-        },
-        {
-          "name": "HISTORYSERVER"
-        },
-        {
-          "name": "HIVE_CLIENT"
-        },
-        {
-          "name": "DRUID_SUPERSET"
-        },
-        {
-          "name": "SUPERSET"
-        },
-        {
-          "name": "HIVE_SERVER"
-        },
-        {
-          "name": "HIVE_SERVER_INTERACTIVE"
-        },
-        {
-          "name": "JOURNALNODE"
-        },
-        {
-          "name": "LIVY_SERVER"
-        },
-        {
           "name": "MAPREDUCE2_CLIENT"
         },
         {
@@ -208,10 +217,10 @@
           "name": "METRICS_MONITOR"
         },
         {
-          "name": "NAMENODE"
+          "name": "HISTORYSERVER"
         },
         {
-          "name": "PIG"
+          "name": "NAMENODE"
         },
         {
           "name": "RESOURCEMANAGER"
@@ -220,19 +229,7 @@
           "name": "SECONDARY_NAMENODE"
         },
         {
-          "name": "SLIDER"
-        },
-        {
-          "name": "SPARK_CLIENT"
-        },
-        {
-          "name": "SPARK_JOBHISTORYSERVER"
-        },
-        {
           "name": "TEZ_CLIENT"
-        },
-        {
-          "name": "WEBHCAT_SERVER"
         },
         {
           "name": "YARN_CLIENT"
@@ -242,6 +239,24 @@
         },
         {
           "name": "ZOOKEEPER_SERVER"
+        },
+        {
+          "name": "DRUID_OVERLORD"
+        },
+        {
+          "name": "DRUID_COORDINATOR"
+        },
+        {
+          "name": "DRUID_ROUTER"
+        },
+        {
+          "name": "DRUID_BROKER"
+        },
+        {
+          "name": "SUPERSET"
+        },
+        {
+          "name": "HDFS_CLIENT"
         }
       ],
       "configurations": [
@@ -268,15 +283,6 @@
     {
       "components": [
         {
-          "name": "HIVE_CLIENT"
-        },
-        {
-          "name": "TEZ_CLIENT"
-        },
-        {
-          "name": "SPARK_CLIENT"
-        },
-        {
           "name": "DATANODE"
         },
         {
@@ -284,6 +290,9 @@
         },
         {
           "name": "NODEMANAGER"
+        },
+        {
+          "name": "DRUID_HISTORICAL"
         }
       ],
       "configurations": [
@@ -310,19 +319,13 @@
     {
       "components": [
         {
-          "name": "HIVE_CLIENT"
-        },
-        {
-          "name": "TEZ_CLIENT"
-        },
-        {
-          "name": "SPARK_CLIENT"
-        },
-        {
           "name": "METRICS_MONITOR"
         },
         {
           "name": "NODEMANAGER"
+        },
+        {
+          "name": "DRUID_MIDDLEMANAGER"
         }
       ],
       "configurations": [
