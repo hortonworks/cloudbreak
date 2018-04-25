@@ -137,7 +137,7 @@
         },
         {
           "core-site": {
-            "fs.s3a.buffer.dir": "/hadoopfs/fs1/s3/temp"
+            "fs.s3a.buffer.dir": "/hadoopfs/fs1/s3-${user.name}"
           }
         }
       ],
@@ -182,7 +182,7 @@
         },
         {
           "core-site": {
-            "fs.s3a.buffer.dir": "/hadoopfs/fs1/s3/temp"
+            "fs.s3a.buffer.dir": "/hadoopfs/fs1/s3-${user.name}"
           }
         }
       ],
