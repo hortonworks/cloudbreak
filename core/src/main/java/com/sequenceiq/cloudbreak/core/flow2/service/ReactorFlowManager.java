@@ -104,9 +104,9 @@ public class ReactorFlowManager {
         notify(selector, new StackSyncTriggerEvent(selector, stackId, true));
     }
 
-    public void triggerStackRemoveInstance(Long stackId, String hostGroup, String hostname) {
+    public void triggerStackRemoveInstance(Long stackId, String hostGroup, Long privateId) {
         String selector = FlowChainTriggers.FULL_DOWNSCALE_TRIGGER_EVENT;
-        ClusterAndStackDownscaleTriggerEvent event = new ClusterAndStackDownscaleTriggerEvent(selector, stackId, hostGroup, Collections.singleton(hostname),
+        ClusterAndStackDownscaleTriggerEvent event = new ClusterAndStackDownscaleTriggerEvent(selector, stackId, hostGroup, Collections.singleton(privateId),
                 ScalingType.DOWNSCALE_TOGETHER, new Promise<>());
         notify(selector, event);
     }

@@ -22,14 +22,13 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
+import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.view.ClusterView;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.NotEnoughNodeException;
-import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
-import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @Service
@@ -50,25 +49,21 @@ public class ClusterDownscaleService {
     private FlowMessageService flowMessageService;
 
     @Inject
-    private CloudbreakMessagesService messagesService;
-
-    @Inject
-    private CloudbreakEventService cloudbreakEventService;
-
-    @Inject
     private HostGroupService hostGroupService;
 
-    public void clusterDownscaleStarted(long stackId, String hostGroupName, Integer scalingAdjustment, Set<String> hostNames) {
+    public void clusterDownscaleStarted(long stackId, String hostGroupName, Integer scalingAdjustment, Set<Long> privateIds) {
         flowMessageService.fireEventAndLog(stackId, Msg.AMBARI_CLUSTER_SCALING_DOWN, Status.UPDATE_IN_PROGRESS.name());
         clusterService.updateClusterStatusByStackId(stackId, Status.UPDATE_IN_PROGRESS);
         if (scalingAdjustment != null) {
             LOGGER.info("Decommissioning {} hosts from host group '{}'", scalingAdjustment, hostGroupName);
             flowMessageService.fireInstanceGroupEventAndLog(stackId, Msg.AMBARI_CLUSTER_REMOVING_NODE_FROM_HOSTGROUP, Status.UPDATE_IN_PROGRESS.name(),
                     hostGroupName, scalingAdjustment, hostGroupName);
-        } else if (!CollectionUtils.isEmpty(hostNames)) {
-            LOGGER.info("Decommissioning {} hosts from host group '{}'", hostNames, hostGroupName);
+        } else if (!CollectionUtils.isEmpty(privateIds)) {
+            LOGGER.info("Decommissioning {} hosts from host group '{}'", privateIds, hostGroupName);
+            Stack stack = stackService.getByIdWithLists(stackId);
+            List<String> decomissionedHostNames = stackService.getHostNamesForPrivateIds(stack.getInstanceMetaDataAsList(), privateIds);
             flowMessageService.fireInstanceGroupEventAndLog(stackId, Msg.AMBARI_CLUSTER_REMOVING_NODE_FROM_HOSTGROUP, Status.UPDATE_IN_PROGRESS.name(),
-                    hostGroupName, hostNames, hostGroupName);
+                    hostGroupName, decomissionedHostNames, hostGroupName);
         }
     }
 
@@ -84,7 +79,7 @@ public class ClusterDownscaleService {
         });
         LOGGER.info("Start updating metadata");
         for (String hostName : hostNames) {
-            stackService.updateMetaDataStatus(stackView.getId(), hostName, InstanceStatus.DECOMMISSIONED);
+            stackService.updateMetaDataStatusIfFound(stackView.getId(), hostName, InstanceStatus.DECOMMISSIONED);
         }
         clusterService.updateClusterStatusByStackId(stackView.getId(), AVAILABLE);
         flowMessageService.fireEventAndLog(stackId, Msg.AMBARI_CLUSTER_SCALED_DOWN, AVAILABLE.name());

@@ -44,6 +44,7 @@ public class PillarSave implements OrchestratorBootstrap {
         this.sc = sc;
         Map<String, Map<String, Object>> fqdn = hosts
                 .stream()
+                .filter(node -> node.getHostname() != null)
                 .collect(Collectors.toMap(Node::getPrivateIp, node -> discovery(node.getHostname(), node.getPublicIp())));
         pillar = new Pillar("/nodes/hosts.sls", singletonMap("hosts", fqdn), targets);
         this.targets = targets;

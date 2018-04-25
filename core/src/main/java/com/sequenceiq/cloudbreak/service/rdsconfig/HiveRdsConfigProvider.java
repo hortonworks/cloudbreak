@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.service.rdsconfig;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.inject.Inject;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -9,6 +12,8 @@ import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessorFactory;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.Cluster;
+import com.sequenceiq.cloudbreak.domain.Stack;
 
 @Component
 public class HiveRdsConfigProvider extends AbstractRdsConfigProvider {
@@ -31,6 +36,28 @@ public class HiveRdsConfigProvider extends AbstractRdsConfigProvider {
 
     @Inject
     private BlueprintProcessorFactory blueprintProcessorFactory;
+
+    /**
+     *  For 2.4 compatibility we also need some extra field to be in the pillar so it will look like this:
+     *
+     *  postgres:
+     *   hive:
+     *     database: hive
+     *     password: asdf
+     *     user: hive
+     *  database: hive
+     *  password: asdf
+     *  user: hive
+     */
+    @Override
+    public Map<String, Object> createServicePillarConfigMapIfNeeded(Stack stack, Cluster cluster) {
+        Map<String, Object> servicePillarConfigMap = new HashMap<>(super.createServicePillarConfigMapIfNeeded(stack, cluster));
+        if (servicePillarConfigMap.containsKey(PILLAR_KEY)) {
+            Map<String, Object> hiveConfigMap = (Map<String, Object>) servicePillarConfigMap.get(PILLAR_KEY);
+            servicePillarConfigMap.putAll(hiveConfigMap);
+        }
+        return servicePillarConfigMap;
+    }
 
     private boolean isRdsConfigNeedForHiveMetastore(Blueprint blueprint) {
         BlueprintTextProcessor blueprintProcessor = blueprintProcessorFactory.get(blueprint.getBlueprintText());

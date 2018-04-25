@@ -1,17 +1,20 @@
 package com.sequenceiq.cloudbreak.reactor;
 
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.controller.BadRequestException;
+import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.reactor.api.event.EventSelectorUtil;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.CollectDownscaleCandidatesRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.CollectDownscaleCandidatesResult;
 import com.sequenceiq.cloudbreak.reactor.handler.ReactorEventHandler;
+import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariDecommissioner;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
@@ -41,18 +44,30 @@ public class CollectDownscaleCandidatesHandler implements ReactorEventHandler<Co
         CollectDownscaleCandidatesResult result;
         try {
             Stack stack = stackService.getByIdWithLists(request.getStackId());
-            Set<String> hostNames;
-            if (request.getHostNames() == null || request.getHostNames().isEmpty()) {
-                hostNames = ambariDecommissioner.collectDownscaleCandidates(stack, request.getHostGroupName(), request.getScalingAdjustment());
+            Set<Long> privateIds = request.getPrivateIds();
+            if (noSelectedInstancesForDownscale(privateIds)) {
+                privateIds = collectCandidates(request, stack);
             } else {
-                hostNames = request.getHostNames();
-                String hostName = hostNames.stream().findFirst().orElseThrow(() -> new BadRequestException("Unable to find host name"));
-                ambariDecommissioner.verifyNodeCount(stack, stack.getCluster(), hostName);
+                List<InstanceMetaData> instanceMetaDataList = stackService.getInstanceMetaDataForPrivateIds(stack.getInstanceMetaDataAsList(), privateIds);
+                List<InstanceMetaData> notDeletedNodes = instanceMetaDataList.stream()
+                        .filter(instanceMetaData -> !instanceMetaData.isTerminated() && !instanceMetaData.isDeletedOnProvider())
+                        .collect(Collectors.toList());
+
+                ambariDecommissioner.verifyNodesAreRemovable(stack, notDeletedNodes);
             }
-            result = new CollectDownscaleCandidatesResult(request, hostNames);
+            result = new CollectDownscaleCandidatesResult(request, privateIds);
         } catch (Exception e) {
             result = new CollectDownscaleCandidatesResult(e.getMessage(), e, request);
         }
         eventBus.notify(result.selector(), new Event<>(event.getHeaders(), result));
+    }
+
+    private Set<Long> collectCandidates(CollectDownscaleCandidatesRequest request, Stack stack) throws CloudbreakException {
+        Set<String> hostNames = ambariDecommissioner.collectDownscaleCandidates(stack, request.getHostGroupName(), request.getScalingAdjustment());
+        return stackService.getPrivateIdsForHostNames(stack.getInstanceMetaDataAsList(), hostNames);
+    }
+
+    private boolean noSelectedInstancesForDownscale(Set<Long> privateIds) {
+        return privateIds == null || privateIds.isEmpty();
     }
 }

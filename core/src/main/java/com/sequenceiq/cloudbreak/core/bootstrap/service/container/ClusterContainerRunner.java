@@ -209,7 +209,7 @@ public class ClusterContainerRunner {
 
     private List<String> getHosts(Stack stack) {
         List<String> hosts = new ArrayList<>();
-        for (InstanceMetaData instanceMetaData : stack.getRunningInstanceMetaData()) {
+        for (InstanceMetaData instanceMetaData : stack.getNotTerminatedInstanceMetaDataSet()) {
             hosts.add(instanceMetaData.getDiscoveryFQDN());
         }
         return hosts;

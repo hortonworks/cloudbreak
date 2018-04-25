@@ -5,8 +5,6 @@ import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilit
 import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -36,12 +34,10 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
-import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
-import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackSyncService;
 
@@ -119,9 +115,6 @@ public class StackSyncActions {
         private StackService stackService;
 
         @Inject
-        private InstanceMetaDataRepository instanceMetaDataRepository;
-
-        @Inject
         private CredentialToCloudCredentialConverter credentialConverter;
 
         @Inject
@@ -137,21 +130,11 @@ public class StackSyncActions {
             Long stackId = payload.getStackId();
             Stack stack = stackService.getByIdWithLists(stackId);
             MDCBuilder.buildMdcContext(stack);
-            // we need a find all in stack where we have host metadata associated
-            // if there are multiple instances with the same hostname let's use the latest one only
-            Map<String, InstanceMetaData> metaDataMap = new HashMap<>();
-            for (InstanceMetaData im : instanceMetaDataRepository.findAllInStack(stackId)) {
-                String hostName = im.getDiscoveryFQDN();
-                InstanceMetaData instanceMetaData = metaDataMap.get(hostName);
-                if (instanceMetaData == null || im.getPrivateId().compareTo(instanceMetaData.getPrivateId()) > 0) {
-                    metaDataMap.put(hostName, im);
-                }
-            }
             Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
             CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform(), stack.getOwner(), stack.getPlatformVariant(),
                     location);
             CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
-            return new StackSyncContext(flowId, stack, new ArrayList<>(metaDataMap.values()), cloudContext, cloudCredential, isStatusUpdateEnabled(variables));
+            return new StackSyncContext(flowId, stack, stack.getInstanceMetaDataAsList(), cloudContext, cloudCredential, isStatusUpdateEnabled(variables));
         }
 
         @Override

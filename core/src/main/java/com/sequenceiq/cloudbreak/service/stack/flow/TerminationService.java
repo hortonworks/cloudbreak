@@ -2,8 +2,8 @@ package com.sequenceiq.cloudbreak.service.stack.flow;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Resource;
@@ -101,8 +101,8 @@ public class TerminationService {
     }
 
     private void terminateMetaDataInstances(Stack stack) {
-        Collection<InstanceMetaData> instanceMetaDatas = new ArrayList<>();
-        for (InstanceMetaData metaData : stack.getRunningInstanceMetaData()) {
+        List<InstanceMetaData> instanceMetaDatas = new ArrayList<>();
+        for (InstanceMetaData metaData : stack.getNotTerminatedInstanceMetaDataSet()) {
             long timeInMillis = Calendar.getInstance().getTimeInMillis();
             metaData.setTerminationDate(timeInMillis);
             metaData.setInstanceStatus(InstanceStatus.TERMINATED);

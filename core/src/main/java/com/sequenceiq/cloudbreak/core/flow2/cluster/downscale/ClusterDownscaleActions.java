@@ -34,9 +34,9 @@ public class ClusterDownscaleActions {
             @Override
             protected void doExecute(ClusterViewContext context, ClusterDownscaleTriggerEvent payload, Map<Object, Object> variables) {
                 clusterDownscaleService.clusterDownscaleStarted(context.getStackId(), payload.getHostGroupName(), payload.getAdjustment(),
-                        payload.getHostNames());
-                Selectable request = new CollectDownscaleCandidatesRequest(context.getStackId(), payload.getHostGroupName(),
-                        payload.getAdjustment(), payload.getHostNames());
+                        payload.getPrivateIds());
+                CollectDownscaleCandidatesRequest request = new CollectDownscaleCandidatesRequest(context.getStackId(), payload.getHostGroupName(),
+                        payload.getAdjustment(), payload.getPrivateIds());
                 sendEvent(context.getFlowId(), request.selector(), request);
             }
         };
@@ -46,8 +46,8 @@ public class ClusterDownscaleActions {
     public Action<?, ?> decommissionAction() {
         return new AbstractClusterAction<CollectDownscaleCandidatesResult>(CollectDownscaleCandidatesResult.class) {
             @Override
-            protected void doExecute(ClusterViewContext context, CollectDownscaleCandidatesResult payload, Map<Object, Object> variables) {
-                Selectable request = new DecommissionRequest(context.getStackId(), payload.getHostGroupName(), payload.getHostNames());
+            protected void doExecute(ClusterViewContext context, CollectDownscaleCandidatesResult payload, Map<Object, Object> variables) throws Exception {
+                DecommissionRequest request = new DecommissionRequest(context.getStackId(), payload.getHostGroupName(), payload.getPrivateIds());
                 sendEvent(context.getFlowId(), request.selector(), request);
             }
         };
