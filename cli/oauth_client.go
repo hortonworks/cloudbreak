@@ -117,6 +117,9 @@ func getOAuth2Token(identityUrl string, username string, password string, client
 	location := resp.Header.Get("Location")
 	reg := regexp.MustCompile("access_token=(.*)&expires_in")
 	tokenBytes := reg.Find([]byte(location))
+	if tokenBytes == nil {
+		return "", errors.New(fmt.Sprintf("Error while connnecting to %s as user: %s, please check the host, your username and password in %s or use flags for each command. (%s)", identityUrl, username, Config_dir+"/"+Config_file, resp.Status))
+	}
 	tokenString := string(tokenBytes)
 	token := tokenString[13 : len(tokenString)-11]
 	return token, nil
