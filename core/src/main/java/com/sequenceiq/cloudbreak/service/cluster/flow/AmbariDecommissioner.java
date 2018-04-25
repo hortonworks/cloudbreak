@@ -217,7 +217,7 @@ public class AmbariDecommissioner {
         AmbariClient ambariClient = getAmbariClient(stack);
         List<String> runningHosts = ambariClient.getClusterHosts();
         if (runningHosts == null) {
-            throw new OperationException("Running ");
+            throw new OperationException("Running hosts is null");
         }
         Sets.newHashSet(hostsToRemove.keySet()).forEach(hostName -> {
             if (!runningHosts.contains(hostName)) {
