@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.service.image;
+package com.sequenceiq.cloudbreak.cloud;
 
 import java.io.IOException;
 
