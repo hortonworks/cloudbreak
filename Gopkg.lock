@@ -132,6 +132,12 @@
   version = "v1.20.0"
 
 [[projects]]
+  branch = "master"
+  name = "golang.org/x/crypto"
+  packages = ["ssh/terminal"]
+  revision = "b0697eccbea9adec5b7ba8008f4c33d98d733388"
+
+[[projects]]
   name = "golang.org/x/net"
   packages = [
     "context",
@@ -139,6 +145,15 @@
     "idna"
   ]
   revision = "07b51741c1d6423d4a6abab1c49940ec09cb1aaf"
+
+[[projects]]
+  branch = "master"
+  name = "golang.org/x/sys"
+  packages = [
+    "unix",
+    "windows"
+  ]
+  revision = "79b0c6888797020a994db17c8510466c72fe75d9"
 
 [[projects]]
   branch = "master"
@@ -195,6 +210,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "4313ba8c67100349a779c3bea0a079c7e4d47278df0229df4c57ac7ae22981f4"
+  inputs-digest = "1a38c04ac038e40c707bcab2e2040bb67fcd6b1e942647e33e553f392c3d3700"
   solver-name = "gps-cdcl"
   solver-version = 1

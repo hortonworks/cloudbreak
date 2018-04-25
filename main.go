@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"sort"
+	"syscall"
 
 	"errors"
 
@@ -16,6 +17,7 @@ import (
 	_ "github.com/hortonworks/cb-cli/cli/cloud/yarn"
 	"github.com/hortonworks/cb-cli/cli/utils"
 	"github.com/urfave/cli"
+	"golang.org/x/crypto/ssh/terminal"
 )
 
 func ConfigRead(c *cli.Context) error {
@@ -82,7 +84,17 @@ func ConfigRead(c *cli.Context) error {
 			set(cb.FlUsername.Name, config.Username)
 		}
 		if len(password) == 0 {
-			set(cb.FlPassword.Name, config.Password)
+			if len(config.Password) == 0 {
+				fmt.Print("Enter Password: ")
+				bytePassword, err := terminal.ReadPassword(int(syscall.Stdin))
+				fmt.Println()
+				if err != nil {
+					utils.LogErrorAndExit(err)
+				}
+				set(cb.FlPassword.Name, string(bytePassword))
+			} else {
+				set(cb.FlPassword.Name, config.Password)
+			}
 		}
 	}
 	return nil
