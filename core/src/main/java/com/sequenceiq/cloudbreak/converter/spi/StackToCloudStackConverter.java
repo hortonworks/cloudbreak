@@ -120,7 +120,7 @@ public class StackToCloudStackConverter {
                 Template template = instanceGroup.getTemplate();
                 int desiredNodeCount = instanceGroup.getNodeCount();
                 // existing instances
-                for (InstanceMetaData metaData : instanceGroup.getInstanceMetaData()) {
+                for (InstanceMetaData metaData : instanceGroup.getNotTerminatedInstanceMetaDataSet()) {
                     InstanceStatus status = getInstanceStatus(metaData, deleteRequests);
                     instances.add(buildInstance(metaData, template, stackAuthentication, instanceGroup.getGroupName(), metaData.getPrivateId(), status));
                 }

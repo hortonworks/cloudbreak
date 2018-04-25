@@ -30,7 +30,7 @@ public class InstanceMetadataService {
         for (InstanceGroup group : instanceGroup) {
             com.sequenceiq.cloudbreak.api.model.InstanceStatus newStatus = newStatusByGroupType.get(group.getInstanceGroupType());
             if (newStatus != null) {
-                for (InstanceMetaData instanceMetaData : group.getInstanceMetaData()) {
+                for (InstanceMetaData instanceMetaData : group.getNotTerminatedInstanceMetaDataSet()) {
                     instanceMetaData.setInstanceStatus(newStatus);
                     instanceMetaDataRepository.save(instanceMetaData);
                 }
@@ -41,7 +41,7 @@ public class InstanceMetadataService {
     public void updateInstanceStatus(Iterable<InstanceGroup> instanceGroup, com.sequenceiq.cloudbreak.api.model.InstanceStatus newStatus,
             Collection<String> candidateAddresses) {
         for (InstanceGroup group : instanceGroup) {
-            for (InstanceMetaData instanceMetaData : group.getInstanceMetaData()) {
+            for (InstanceMetaData instanceMetaData : group.getNotTerminatedInstanceMetaDataSet()) {
                 if (candidateAddresses.contains(instanceMetaData.getDiscoveryFQDN())) {
                     instanceMetaData.setInstanceStatus(newStatus);
                     instanceMetaDataRepository.save(instanceMetaData);

@@ -43,7 +43,7 @@ public class InstanceGroupMetadataCollectorTest {
 
         for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
             when(instanceMetadataRepository.findAliveInstancesInInstanceGroup(instanceGroup.getId()))
-                    .thenReturn(Lists.newArrayList(instanceGroup.getInstanceMetaData().iterator()));
+                    .thenReturn(Lists.newArrayList(instanceGroup.getAllInstanceMetaData().iterator()));
         }
 
         Map<String, List<InstanceMetaData>> stringListMap = underTest.collectMetadata(stack);

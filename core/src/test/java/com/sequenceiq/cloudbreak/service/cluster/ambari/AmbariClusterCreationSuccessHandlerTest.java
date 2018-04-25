@@ -58,7 +58,7 @@ public class AmbariClusterCreationSuccessHandlerTest {
         Set<HostMetadata> hostMetadataList = new HashSet<>();
         cluster.getHostGroups().forEach(hostGroup -> hostGroup.getHostMetadata().forEach(hostMetadataList::add));
         List<InstanceMetaData> instanceMetaDataList = new ArrayList<>();
-        stack.getInstanceGroups().forEach(instanceGroup -> instanceGroup.getInstanceMetaData().forEach(instanceMetaDataList::add));
+        stack.getInstanceGroups().forEach(instanceGroup -> instanceGroup.getAllInstanceMetaData().forEach(instanceMetaDataList::add));
 
         when(clusterService.updateCluster(cluster)).thenReturn(cluster);
         when(instanceMetadataRepository.save(anyCollection())).thenReturn(instanceMetaDataList);

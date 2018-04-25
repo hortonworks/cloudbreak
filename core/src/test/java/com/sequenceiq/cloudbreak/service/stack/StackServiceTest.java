@@ -165,7 +165,7 @@ public class StackServiceTest {
         verify(downscaleValidatorService, times(1)).checkInstanceIsTheAmbariServerOrNot(INSTANCE_PUBLIC_IP, GATEWAY);
         verify(downscaleValidatorService, times(0)).checkUserHasRightToTerminateInstance(anyBoolean(), anyString(), anyString(),
                 anyLong());
-        verify(flowManager, times(0)).triggerStackRemoveInstance(anyLong(), anyString(), anyString());
+        verify(flowManager, times(0)).triggerStackRemoveInstance(anyLong(), anyString(), anyLong());
     }
 
     @Test
@@ -192,7 +192,7 @@ public class StackServiceTest {
         verify(downscaleValidatorService, times(1)).checkInstanceIsTheAmbariServerOrNot(INSTANCE_PUBLIC_IP, CORE);
         verify(downscaleValidatorService, times(1)).checkUserHasRightToTerminateInstance(false, owner, userId,
                 STACK_ID);
-        verify(flowManager, times(0)).triggerStackRemoveInstance(anyLong(), anyString(), anyString());
+        verify(flowManager, times(0)).triggerStackRemoveInstance(anyLong(), anyString(), anyLong());
     }
 
     @Test

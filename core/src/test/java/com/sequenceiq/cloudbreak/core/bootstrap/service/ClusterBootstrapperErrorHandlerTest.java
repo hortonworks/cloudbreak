@@ -42,7 +42,6 @@ import com.sequenceiq.cloudbreak.repository.ResourceRepository;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderConnectorAdapter;
-import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderMetadataAdapter;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ClusterBootstrapperErrorHandlerTest {
@@ -74,9 +73,6 @@ public class ClusterBootstrapperErrorHandlerTest {
     @Mock
     private ServiceProviderConnectorAdapter connector;
 
-    @Mock
-    private ServiceProviderMetadataAdapter metadata;
-
     @InjectMocks
     private ClusterBootstrapperErrorHandler underTest;
 
@@ -88,7 +84,7 @@ public class ClusterBootstrapperErrorHandlerTest {
         when(instanceMetaDataRepository.findNotTerminatedByPrivateAddress(anyLong(), anyString())).thenAnswer((Answer<InstanceMetaData>) invocation -> {
             Object[] args = invocation.getArguments();
             String ip = (String) args[1];
-            for (InstanceMetaData instanceMetaData : stack.getRunningInstanceMetaData()) {
+            for (InstanceMetaData instanceMetaData : stack.getNotTerminatedInstanceMetaDataSet()) {
                 if (instanceMetaData.getPrivateIp().equals(ip)) {
                     return instanceMetaData;
                 }
@@ -98,7 +94,7 @@ public class ClusterBootstrapperErrorHandlerTest {
         when(instanceGroupRepository.findOneByGroupNameInStack(anyLong(), anyString())).thenAnswer((Answer<InstanceGroup>) invocation -> {
             Object[] args = invocation.getArguments();
             String name = (String) args[1];
-            for (InstanceMetaData instanceMetaData : stack.getRunningInstanceMetaData()) {
+            for (InstanceMetaData instanceMetaData : stack.getNotTerminatedInstanceMetaDataSet()) {
                 if (instanceMetaData.getInstanceGroup().getGroupName().equals(name)) {
                     return instanceMetaData.getInstanceGroup();
                 }
@@ -129,7 +125,7 @@ public class ClusterBootstrapperErrorHandlerTest {
             public InstanceMetaData answer(InvocationOnMock invocation) {
                 Object[] args = invocation.getArguments();
                 String ip = (String) args[1];
-                for (InstanceMetaData instanceMetaData : stack.getRunningInstanceMetaData()) {
+                for (InstanceMetaData instanceMetaData : stack.getNotTerminatedInstanceMetaDataSet()) {
                     if (instanceMetaData.getPrivateIp().equals(ip)) {
                         return instanceMetaData;
                     }
@@ -142,7 +138,7 @@ public class ClusterBootstrapperErrorHandlerTest {
             public InstanceGroup answer(InvocationOnMock invocation) {
                 Object[] args = invocation.getArguments();
                 String name = (String) args[1];
-                for (InstanceMetaData instanceMetaData : stack.getRunningInstanceMetaData()) {
+                for (InstanceMetaData instanceMetaData : stack.getNotTerminatedInstanceMetaDataSet()) {
                     if (instanceMetaData.getInstanceGroup().getGroupName().equals(name)) {
                         InstanceGroup instanceGroup = instanceMetaData.getInstanceGroup();
                         instanceGroup.setNodeCount(2);
@@ -167,7 +163,7 @@ public class ClusterBootstrapperErrorHandlerTest {
 
     private Set<Node> prepareNodes(Stack stack) {
         Set<Node> nodes = new HashSet<>();
-        for (InstanceMetaData instanceMetaData : stack.getRunningInstanceMetaData()) {
+        for (InstanceMetaData instanceMetaData : stack.getNotTerminatedInstanceMetaDataSet()) {
             nodes.add(new Node(instanceMetaData.getPrivateIp(), instanceMetaData.getPublicIpWrapper()));
         }
         return nodes;

@@ -1,7 +1,7 @@
 package com.sequenceiq.it.spark.salt;
 
+import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,12 +12,15 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.ApplyResponse;
-import com.sequenceiq.cloudbreak.orchestrator.salt.domain.DefaultRouteResponse;
-import com.sequenceiq.cloudbreak.orchestrator.salt.domain.NetworkInterfaceResponse;
+import com.sequenceiq.cloudbreak.orchestrator.salt.domain.MinionIpAddressesResponse;
+import com.sequenceiq.cloudbreak.orchestrator.salt.domain.MinionStatus;
+import com.sequenceiq.cloudbreak.orchestrator.salt.domain.MinionStatusSaltResponse;
+import com.sequenceiq.cloudbreak.util.JsonUtil;
 import com.sequenceiq.it.spark.ITResponse;
 
 import spark.Request;
@@ -38,17 +41,17 @@ public class SaltApiRunPostResponse extends ITResponse {
 
     @Override
     public Object handle(Request request, Response response) throws Exception {
+        if (request.body().contains("manage.status")) {
+            return minionStatuses();
+        }
+        if (request.body().contains("network.ipaddrs")) {
+            return ipAddresses();
+        }
         if (request.body().contains("grains.append")) {
             return grainsResponse();
         }
         if (request.body().contains("grains.remove")) {
             return grainsResponse();
-        }
-        if (request.body().contains("network.default_route")) {
-            return defaultRoute();
-        }
-        if (request.body().contains("network.interface_ip")) {
-            return networkInterfaceIp();
         }
         if (request.body().contains("saltutil.sync_grains")) {
             return saltUtilSyncGrainsResponse();
@@ -91,31 +94,48 @@ public class SaltApiRunPostResponse extends ITResponse {
         return responseFromJsonFile("saltapi/high_state_response.json");
     }
 
-    protected Object defaultRoute() throws JsonProcessingException {
-        Map<String, String> iFace = new HashMap<>();
-        iFace.put("flags", "UG");
-        iFace.put("interface", "eth0");
-        DefaultRouteResponse defaultRouteResponse = new DefaultRouteResponse(Collections.singletonList(
-                Collections.singletonMap("hostname", Collections.singletonList(iFace))));
-        return objectMapper.writeValueAsString(defaultRouteResponse);
+    protected Object minionStatuses() throws JsonProcessingException {
+        MinionStatusSaltResponse minionStatusSaltResponse = new MinionStatusSaltResponse();
+        List<MinionStatus> minionStatusList = new ArrayList<>();
+        MinionStatus minionStatus = new MinionStatus();
+        ArrayList<String> upList = new ArrayList<>();
+        minionStatus.setUp(upList);
+        ArrayList<String> downList = new ArrayList<>();
+        minionStatus.setDown(downList);
+        minionStatusList.add(minionStatus);
+        minionStatusSaltResponse.setResult(minionStatusList);
+
+        for (Map.Entry<String, CloudVmMetaDataStatus> stringCloudVmMetaDataStatusEntry : instanceMap.entrySet()) {
+            CloudVmMetaDataStatus cloudVmMetaDataStatus = stringCloudVmMetaDataStatusEntry.getValue();
+            if (InstanceStatus.STARTED == cloudVmMetaDataStatus.getCloudVmInstanceStatus().getStatus()) {
+                String privateIp = cloudVmMetaDataStatus.getMetaData().getPrivateIp();
+                upList.add("host-" + privateIp.replace(".", "-"));
+            }
+        }
+        // intentional new ObjectMapper() -> .withGetterVisibility(Visibility.NONE) screws up serializing
+        return new ObjectMapper().writeValueAsString(minionStatusSaltResponse);
     }
 
-    protected Object networkInterfaceIp() throws JsonProcessingException {
-        NetworkInterfaceResponse networkInterfaceResponse = new NetworkInterfaceResponse();
-        List<Map<String, String>> result = new ArrayList<>();
+    protected Object ipAddresses() throws JsonProcessingException {
+        MinionIpAddressesResponse minionIpAddressesResponse = new MinionIpAddressesResponse();
+        List<Map<String, JsonNode>> result = new ArrayList<>();
 
         for (Entry<String, CloudVmMetaDataStatus> stringCloudVmMetaDataStatusEntry : instanceMap.entrySet()) {
             CloudVmMetaDataStatus cloudVmMetaDataStatus = stringCloudVmMetaDataStatusEntry.getValue();
             if (InstanceStatus.STARTED == cloudVmMetaDataStatus.getCloudVmInstanceStatus().getStatus()) {
                 String privateIp = cloudVmMetaDataStatus.getMetaData().getPrivateIp();
-                Map<String, String> networkHashMap = new HashMap<>();
-                networkHashMap.put("host-" + privateIp.replace(".", "-"), privateIp);
+                Map<String, JsonNode> networkHashMap = new HashMap<>();
+                try {
+                    networkHashMap.put("host-" + privateIp.replace(".", "-"), JsonUtil.readTree("[\"" + privateIp + "\"]"));
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
                 result.add(networkHashMap);
             }
         }
 
-        networkInterfaceResponse.setResult(result);
-        return objectMapper.writeValueAsString(networkInterfaceResponse);
+        minionIpAddressesResponse.setResult(result);
+        return objectMapper.writeValueAsString(minionIpAddressesResponse);
     }
 
     protected Object saltUtilSyncGrainsResponse() throws JsonProcessingException {

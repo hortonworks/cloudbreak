@@ -97,14 +97,18 @@ public class InstanceGroup implements ProvisionEntity, Comparable<InstanceGroup>
         this.stack = stack;
     }
 
-    public Set<InstanceMetaData> getInstanceMetaData() {
+    public Set<InstanceMetaData> getNotTerminatedInstanceMetaDataSet() {
         Set<InstanceMetaData> resultSet = new HashSet<>();
         for (InstanceMetaData metaData : instanceMetaData) {
-            if (!metaData.isTerminated()) {
+            if (!metaData.isTerminated() && !metaData.isDeletedOnProvider()) {
                 resultSet.add(metaData);
             }
         }
         return resultSet;
+    }
+
+    public Set<InstanceMetaData> getInstanceMetaDataSet() {
+        return instanceMetaData;
     }
 
     public SecurityGroup getSecurityGroup() {

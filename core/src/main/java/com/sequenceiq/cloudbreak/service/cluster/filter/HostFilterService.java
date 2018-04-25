@@ -1,9 +1,9 @@
 package com.sequenceiq.cloudbreak.service.cluster.filter;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -38,7 +38,7 @@ public class HostFilterService {
     @Inject
     private TlsSecurityService tlsSecurityService;
 
-    public List<HostMetadata> filterHostsForDecommission(Cluster cluster, Set<HostMetadata> hosts, String hostGroup) {
+    public List<HostMetadata> filterHostsForDecommission(Cluster cluster, Collection<HostMetadata> hosts, String hostGroup) {
         List<HostMetadata> filteredList = new ArrayList<>(hosts);
         LOGGER.info("Ambari service config, hostGroup: {}, originalList: {}", hostGroup, filteredList);
         HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfigForPrimaryGateway(cluster.getStack().getId(), cluster.getAmbariIp());

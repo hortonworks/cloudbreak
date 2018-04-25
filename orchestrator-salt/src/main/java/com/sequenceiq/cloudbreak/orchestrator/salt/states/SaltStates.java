@@ -20,9 +20,9 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Glob;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Target;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.ApplyResponse;
-import com.sequenceiq.cloudbreak.orchestrator.salt.domain.DefaultRouteResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.Minion;
-import com.sequenceiq.cloudbreak.orchestrator.salt.domain.NetworkInterfaceResponse;
+import com.sequenceiq.cloudbreak.orchestrator.salt.domain.MinionIpAddressesResponse;
+import com.sequenceiq.cloudbreak.orchestrator.salt.domain.MinionStatusSaltResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.PingResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.RunnerInfo;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.RunnerInfo.DurationComparator;
@@ -119,16 +119,20 @@ public class SaltStates {
         return false;
     }
 
+    public static MinionIpAddressesResponse collectMinionIpAddresses(SaltConnector sc) {
+        MinionIpAddressesResponse minionIpAddressesResponse = sc.run(Glob.ALL, "network.ipaddrs", LOCAL, MinionIpAddressesResponse.class);
+        LOGGER.info("Minion ip response: {}", minionIpAddressesResponse);
+        return minionIpAddressesResponse;
+    }
+
+    public static MinionStatusSaltResponse collectNodeStatus(SaltConnector sc) {
+        MinionStatusSaltResponse minionStatus = sc.run("manage.status", RUNNER, MinionStatusSaltResponse.class);
+        LOGGER.info("Minion status: {}", minionStatus);
+        return minionStatus;
+    }
+
     public static PingResponse ping(SaltConnector sc, Target<String> target) {
         return sc.run(target, "test.ping", LOCAL, PingResponse.class);
-    }
-
-    public static DefaultRouteResponse defaultRoute(SaltConnector sc, Target<String> target) {
-        return sc.run(target, "network.default_route", LOCAL, DefaultRouteResponse.class);
-    }
-
-    public static NetworkInterfaceResponse networkInterfaceIP(SaltConnector sc, Target<String> target, String iFace) {
-        return sc.run(target, "network.interface_ip", LOCAL, NetworkInterfaceResponse.class, iFace);
     }
 
     public static void stopMinions(SaltConnector sc, Map<String, String> privateIPsByFQDN) {

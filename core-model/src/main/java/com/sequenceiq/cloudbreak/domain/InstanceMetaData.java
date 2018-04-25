@@ -191,6 +191,10 @@ public class InstanceMetaData implements ProvisionEntity {
         return InstanceStatus.TERMINATED.equals(instanceStatus);
     }
 
+    public boolean isDeletedOnProvider() {
+        return InstanceStatus.DELETED_ON_PROVIDER_SIDE.equals(instanceStatus);
+    }
+
     public boolean isRegistered() {
         return InstanceStatus.REGISTERED.equals(instanceStatus);
     }

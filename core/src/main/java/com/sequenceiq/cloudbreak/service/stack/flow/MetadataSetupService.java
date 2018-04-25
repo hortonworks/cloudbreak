@@ -19,13 +19,9 @@ import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
-import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderMetadataAdapter;
 
 @Service
 public class MetadataSetupService {
-
-    @Inject
-    private ServiceProviderMetadataAdapter metadata;
 
     @Inject
     private InstanceGroupRepository instanceGroupRepository;

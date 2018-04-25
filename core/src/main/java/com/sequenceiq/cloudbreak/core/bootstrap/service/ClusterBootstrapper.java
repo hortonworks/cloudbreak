@@ -139,7 +139,7 @@ public class ClusterBootstrapper {
     public void bootstrapOnHost(Stack stack) throws CloudbreakException {
         Set<Node> nodes = new HashSet<>();
         String domain = hostDiscoveryService.determineDomain(stack.getCustomDomain(), stack.getName(), stack.isClusterNameAsSubdomain());
-        for (InstanceMetaData im : stack.getRunningInstanceMetaData()) {
+        for (InstanceMetaData im : stack.getNotTerminatedInstanceMetaDataSet()) {
             if (im.getPrivateIp() == null && im.getPublicIpWrapper() == null) {
                 LOGGER.warn("Skipping instance metadata because the public ip and private ips are null '{}'.", im);
             } else {
@@ -194,7 +194,7 @@ public class ClusterBootstrapper {
         Set<Node> nodes = new HashSet<>();
         Set<Node> allNodes = new HashSet<>();
         boolean recoveredNodes = Integer.valueOf(recoveryHostNames.size()).equals(upscaleCandidateAddresses.size());
-        Set<InstanceMetaData> metaDataSet = stack.getRunningInstanceMetaData().stream()
+        Set<InstanceMetaData> metaDataSet = stack.getNotTerminatedInstanceMetaDataSet().stream()
                 .filter(im -> im.getPrivateIp() != null && im.getPublicIpWrapper() != null).collect(Collectors.toSet());
         String clusterDomain = metaDataSet.stream().filter(im -> isNoneBlank(im.getDiscoveryFQDN())).findAny().get().getDomain();
         for (InstanceMetaData im : metaDataSet) {

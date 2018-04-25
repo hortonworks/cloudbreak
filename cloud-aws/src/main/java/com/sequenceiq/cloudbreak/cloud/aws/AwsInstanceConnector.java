@@ -37,6 +37,8 @@ public class AwsInstanceConnector implements InstanceConnector {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsInstanceConnector.class);
 
+    private static final String INSTANCE_NOT_FOUND_ERROR_CODE = "InvalidInstanceID.NotFound";
+
     @Inject
     private AwsClient awsClient;
 
@@ -134,11 +136,12 @@ public class AwsInstanceConnector implements InstanceConnector {
     public List<CloudVmInstanceStatus> check(AuthenticatedContext ac, List<CloudInstance> vms) {
         List<CloudVmInstanceStatus> cloudVmInstanceStatuses = new ArrayList<>();
         for (CloudInstance vm : vms) {
+            String instanceId = vm.getInstanceId();
             try {
                 String region = ac.getCloudContext().getLocation().getRegion().value();
                 DescribeInstancesResult result = awsClient.createAccess(new AwsCredentialView(ac.getCloudCredential()),
                         ac.getCloudContext().getLocation().getRegion().value())
-                        .describeInstances(new DescribeInstancesRequest().withInstanceIds(vm.getInstanceId()));
+                        .describeInstances(new DescribeInstancesRequest().withInstanceIds(instanceId));
                 for (Reservation reservation : result.getReservations()) {
                     for (Instance instance : reservation.getInstances()) {
                         if ("Stopped".equalsIgnoreCase(instance.getState().getName())) {
@@ -161,7 +164,12 @@ public class AwsInstanceConnector implements InstanceConnector {
                     }
                 }
             } catch (AmazonEC2Exception e) {
-                LOGGER.warn("Instance does not exist with this id: {}, original message: {}", vm.getInstanceId(), e.getMessage());
+                if (e.getErrorCode().equalsIgnoreCase(INSTANCE_NOT_FOUND_ERROR_CODE)) {
+                    LOGGER.info("Instance does not exist with this id: {}, mark as terminated.", instanceId);
+                    cloudVmInstanceStatuses.add(new CloudVmInstanceStatus(vm, InstanceStatus.TERMINATED));
+                } else {
+                    LOGGER.warn("Instance could not be described with this id: {}, original message: {}", instanceId, e.getMessage());
+                }
             }
         }
         return cloudVmInstanceStatuses;

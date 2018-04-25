@@ -1,23 +1,30 @@
 package com.sequenceiq.cloudbreak.reactor;
 
-import java.util.Collection;
+import static com.sequenceiq.cloudbreak.service.PollingResult.isSuccess;
+
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
+import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.reactor.api.event.EventSelectorUtil;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.DecommissionRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.DecommissionResult;
 import com.sequenceiq.cloudbreak.reactor.handler.ReactorEventHandler;
+import com.sequenceiq.cloudbreak.service.PollingResult;
 import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariDecommissioner;
 import com.sequenceiq.cloudbreak.service.cluster.flow.RecipeEngine;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
@@ -57,22 +64,38 @@ public class DecommissionHandler implements ReactorEventHandler<DecommissionRequ
         DecommissionResult result;
         try {
             Stack stack = stackService.getByIdWithLists(request.getStackId());
-            Map<String, HostMetadata> hostsToRemove = ambariDecommissioner.collectHostsToRemove(stack, request.getHostGroupName(), request.getHostNames());
-            Set<String> hostNames;
+            Set<String> hostNames = getHostNamesForPrivateIds(request, stack);
+            Map<String, HostMetadata> hostsToRemove = ambariDecommissioner.collectHostsToRemove(stack, request.getHostGroupName(), hostNames);
+            Set<String> decomissionedHostNames;
             if (!hostsToRemove.isEmpty()) {
                 executePreTerminationRecipes(stack, request.getHostGroupName(), hostsToRemove.keySet());
-                hostNames = ambariDecommissioner.decommissionAmbariNodes(stack, hostsToRemove);
+                decomissionedHostNames = ambariDecommissioner.decommissionAmbariNodes(stack, hostsToRemove);
             } else {
-                hostNames = request.getHostNames();
+                decomissionedHostNames = hostNames;
             }
-            result = new DecommissionResult(request, hostNames);
+            PollingResult orchestratorRemovalPollingResult = ambariDecommissioner.removeHostsFromOrchestrator(stack, new ArrayList<>(decomissionedHostNames));
+            if (!isSuccess(orchestratorRemovalPollingResult)) {
+                LOGGER.warn("Can not remove hosts from orchestrator: {}", decomissionedHostNames);
+            }
+            result = new DecommissionResult(request, decomissionedHostNames);
         } catch (Exception e) {
             result = new DecommissionResult(e.getMessage(), e, request);
         }
         eventBus.notify(result.selector(), new Event<>(event.getHeaders(), result));
     }
 
-    private void executePreTerminationRecipes(Stack stack, String hostGroupName, Collection<String> hostNames) {
+    private Set<String> getHostNamesForPrivateIds(DecommissionRequest request, Stack stack) {
+        return request.getPrivateIds().stream().map(privateId -> {
+                    Optional<InstanceMetaData> instanceMetadata = stackService.getInstanceMetadata(stack.getInstanceMetaDataAsList(), privateId);
+                    if (instanceMetadata.isPresent()) {
+                        return instanceMetadata.get().getDiscoveryFQDN();
+                    } else {
+                        return null;
+                    }
+                }).filter(StringUtils::isNotEmpty).collect(Collectors.toSet());
+    }
+
+    private void executePreTerminationRecipes(Stack stack, String hostGroupName, Set<String> hostNames) {
         try {
             HostGroup hostGroup = hostGroupService.getByClusterIdAndName(stack.getCluster().getId(), hostGroupName);
             recipeEngine.executePreTerminationRecipes(stack, Collections.singleton(hostGroup), hostNames);
