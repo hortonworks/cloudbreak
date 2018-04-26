@@ -26,22 +26,18 @@ config_remote_jdbc() {
     else
         echo Configure remote jdbc connection
         local specoptions=''
-        if [[ -f /var/lib/ambari-server/resources/Ambari-DDL-{{ ambari_database.fancyName }}-CREATE.sql ]]; then
-          echo 'Initialize {{ ambari_database.ambariVendor }} database for Ambari.'
-          if [[ '{{ ambari_database.ambariVendor }}' = 'postgres' ]]; then
-            PGPASSWORD='{{ ambari_database.connectionPassword }}' psql 'dbname={{ ambari_database.databaseName }} options=--search_path=public' -h {{ ambari_database.host }} -p {{ ambari_database.port }} -U '{{ ambari_database.connectionUserName }}' -a -f /var/lib/ambari-server/resources/Ambari-DDL-{{ ambari_database.fancyName }}-CREATE.sql
-            specoptions='--postgresschema public'
-          fi
-          if [[ '{{ ambari_database.ambariVendor }}' = 'mysql' ]]; then
-            mysql -h{{ ambari_database.host }} -P{{ ambari_database.port }} -u'{{ ambari_database.connectionUserName }}' -p'{{ ambari_database.connectionPassword }}' '{{ ambari_database.databaseName }}' < /var/lib/ambari-server/resources/Ambari-DDL-{{ ambari_database.fancyName }}-CREATE.sql
-            cp -f $(find /usr/share/java -name "mysql-connector*.jar" | tail -n1) /usr/share/java/mysql-connector.jar ##copy the jdbc driver jar to /usr/share/java folder because Ambari server requires it in that directory
-            specoptions='--jdbc-db mysql --jdbc-driver /usr/share/java/mysql-connector.jar'
-          fi
-          if [[ '{{ ambari_database.ambariVendor }}' = 'oracle' ]]; then
-            sqlplus '{{ ambari_database.connectionUserName }}/{{ ambari_database.connectionPassword }}@(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(Host={{ ambari_database.host }})(Port={{ ambari_database.port }}))(CONNECT_DATA=(SID=remote_SID)))' < /var/lib/ambari-server/resources/Ambari-DDL-{{ ambari_database.fancyName }}-CREATE.sql
-          fi
+        echo 'Initialize {{ ambari_database.ambariVendor }} database for Ambari.'
+        if [[ '{{ ambari_database.ambariVendor }}' = 'postgres' && -f /var/lib/ambari-server/resources/Ambari-DDL-Postgres-CREATE.sql ]]; then
+          PGPASSWORD='{{ ambari_database.connectionPassword }}' psql 'dbname={{ ambari_database.databaseName }} options=--search_path=public' -h {{ ambari_database.host }} -p {{ ambari_database.port }} -U '{{ ambari_database.connectionUserName }}' -a -f /var/lib/ambari-server/resources/Ambari-DDL-Postgres-CREATE.sql
+          specoptions='--postgresschema public'
+        elif [[ '{{ ambari_database.ambariVendor }}' = 'mysql' && -f /var/lib/ambari-server/resources/Ambari-DDL-MySQL-CREATE.sql ]]; then
+          mysql -h{{ ambari_database.host }} -P{{ ambari_database.port }} -u'{{ ambari_database.connectionUserName }}' -p'{{ ambari_database.connectionPassword }}' '{{ ambari_database.databaseName }}' < /var/lib/ambari-server/resources/Ambari-DDL-MySQL-CREATE.sql
+          cp -f $(find /usr/share/java -name "mysql-connector*.jar" | tail -n1) /usr/share/java/mysql-connector.jar ##copy the jdbc driver jar to /usr/share/java folder because Ambari server requires it in that directory
+          ambari-server setup --jdbc-db mysql --jdbc-driver /usr/share/java/mysql-connector.jar
+        elif [[ '{{ ambari_database.ambariVendor }}' = 'oracle' && -f /var/lib/ambari-server/resources/Ambari-DDL-Oracle-CREATE.sql ]]; then
+          sqlplus '{{ ambari_database.connectionUserName }}/{{ ambari_database.connectionPassword }}@(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(Host={{ ambari_database.host }})(Port={{ ambari_database.port }}))(CONNECT_DATA=(SID=remote_SID)))' < /var/lib/ambari-server/resources/Ambari-DDL-Oracle-CREATE.sql
         else
-            echo File not found /var/lib/ambari-server/resources/Ambari-DDL-{{ ambari_database.fancyName }}-CREATE.sql
+            echo "SQL migration file could not be found for vendor='{{ ambari_database.ambariVendor }}'"
             exit 1
         fi
         ambari-server setup --silent $GPL_SWITCH --verbose --java-home $JAVA_HOME \
