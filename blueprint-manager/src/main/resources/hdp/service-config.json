@@ -32,7 +32,7 @@
       ]
     },
     {
-      "name": "S3",
+      "name": "S3-${user.name}",
       "related_services": [
         "DATANODE",
         "HDFS_CLIENT",
@@ -47,7 +47,7 @@
             {
               "name": "fs.s3a.buffer.dir",
               "prefix": "",
-              "directory": "temp"
+              "directory": ""
             }
           ]
         }
