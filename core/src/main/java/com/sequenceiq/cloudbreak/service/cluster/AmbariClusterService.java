@@ -968,11 +968,20 @@ public class AmbariClusterService implements ClusterService {
         Set<BlueprintInputJson> blueprintInputJsons = new HashSet<>();
 
         prepareBlueprintInputs(requests, results, blueprintInputJsons);
-        prepareBlueprintInputs(requests, additionalResults, blueprintInputJsons);
+        prepareAdditionalParameters(additionalResults, blueprintInputJsons);
 
         ConfigsResponse configsResponse = new ConfigsResponse();
         configsResponse.setInputs(blueprintInputJsons);
         return configsResponse;
+    }
+
+    private void prepareAdditionalParameters(Map<String, String> additionalResults, Set<BlueprintInputJson> blueprintInputJsons) {
+        for (Entry<String, String> stringStringEntry : additionalResults.entrySet()) {
+            BlueprintInputJson blueprintInputJson = new BlueprintInputJson();
+            blueprintInputJson.setName(stringStringEntry.getKey());
+            blueprintInputJson.setPropertyValue(stringStringEntry.getValue());
+            blueprintInputJsons.add(blueprintInputJson);
+        }
     }
 
     private void prepareBlueprintInputs(Set<BlueprintParameterJson> requests, Map<String, String> results, Set<BlueprintInputJson> blueprintInputJsons) {
