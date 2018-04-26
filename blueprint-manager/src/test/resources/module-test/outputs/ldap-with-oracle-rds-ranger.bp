@@ -106,28 +106,6 @@
       }
     },
     {
-      "ranger-ugsync-site": {
-        "properties": {
-          "ranger.usersync.ldap.deltasync": "false",
-          "ranger.usersync.enabled": "true",
-          "ranger.usersync.group.searchbase": "cn=groups,dc=example,dc=org",
-          "ranger.usersync.group.nameattribute": "cn",
-          "ranger.usersync.group.based.role.assignment.rules": "&ROLE_SYS_ADMIN:g:ambariadmins",
-          "ranger.usersync.ldap.binddn": "cn=admin,dc=example,dc=org",
-          "ranger.usersync.source.impl.class": "org.apache.ranger.ldapusersync.process.LdapUserGroupBuilder",
-          "ranger.usersync.ldap.user.nameattribute": "cn=admin,dc=example,dc=org",
-          "ranger.usersync.group.searchfilter": " ",
-          "ranger.usersync.group.searchenabled": "true",
-          "ranger.usersync.ldap.user.searchbase": "cn=users,dc=example,dc=org",
-          "ranger.usersync.ldap.ldapbindpassword": "admin",
-          "ranger.usersync.ldap.user.objectclass": "person",
-          "ranger.usersync.group.objectclass": "groupOfNames",
-          "ranger.usersync.group.memberattributename": "member",
-          "ranger.usersync.ldap.url": "ldap://localhost:389"
-        }
-      }
-    },
-    {
       "ranger-admin-site": {
         "properties": {
           "ranger.authentication.method": "ACTIVE_DIRECTORY",
@@ -308,7 +286,7 @@
         },
         {
           "core-site": {
-            "fs.s3a.buffer.dir": "/hadoopfs/fs1/s3/temp"
+            "fs.s3a.buffer.dir": "/hadoopfs/fs1/s3-${user.name}"
           }
         }
       ],
@@ -350,7 +328,7 @@
         },
         {
           "core-site": {
-            "fs.s3a.buffer.dir": "/hadoopfs/fs1/s3/temp"
+            "fs.s3a.buffer.dir": "/hadoopfs/fs1/s3-${user.name}"
           }
         }
       ],
@@ -384,7 +362,7 @@
         },
         {
           "core-site": {
-            "fs.s3a.buffer.dir": "/hadoopfs/fs1/s3/temp"
+            "fs.s3a.buffer.dir": "/hadoopfs/fs1/s3-${user.name}"
           }
         }
       ],

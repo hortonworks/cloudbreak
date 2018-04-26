@@ -77,6 +77,8 @@ public class ConfigTemplateTest {
                         objectWithoutEverything() },
                 { "blueprints/configurations/ranger/ldap.handlebars", "configurations/ranger/ranger-with-ldap.json",
                         ldapConfigWhenLdapPresentedThenShouldReturnWithLdapConfig() },
+                { "blueprints/configurations/ranger_usersync/ldap.handlebars", "configurations/ranger/ranger-usersync-with-ldap.json",
+                        ldapConfigWhenLdapPresentedThenShouldReturnWithLdapConfig() },
                 { "blueprints/configurations/ranger/ldap.handlebars", "configurations/ranger/ranger-without-ldap.json",
                         withoutLdapConfigWhenLdapNotPresentedThenShouldReturnWithoutLdapConfig() },
                 { "blueprints/configurations/ranger/rds.handlebars", "configurations/ranger/ranger-with-rds.json",
