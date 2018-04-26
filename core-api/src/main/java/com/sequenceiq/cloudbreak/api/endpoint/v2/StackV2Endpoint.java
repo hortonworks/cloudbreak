@@ -242,4 +242,10 @@ public interface StackV2Endpoint extends StackEndpoint {
     @ApiOperation(value = StackOpDescription.GET_BY_STACK_NAME, produces = ContentType.JSON, notes = Notes.STACK_NOTES,
             nickname = "getClusterRequestFromName")
     StackV2Request getRequestfromName(@PathParam("name") String name);
+
+    @POST
+    @Path("{name}/retry")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = StackOpDescription.RETRY_BY_ID, produces = ContentType.JSON, notes = Notes.RETRY_STACK_NOTES, nickname = "retryStack")
+    void retry(@PathParam("name") String name);
 }

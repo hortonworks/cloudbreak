@@ -45,9 +45,11 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration;
 import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration.Transition.Builder;
+import com.sequenceiq.cloudbreak.core.flow2.config.RetryableFlowConfiguration;
 
 @Component
-public class StackCreationFlowConfig extends AbstractFlowConfiguration<StackCreationState, StackCreationEvent> {
+public class StackCreationFlowConfig extends AbstractFlowConfiguration<StackCreationState, StackCreationEvent>
+        implements RetryableFlowConfiguration<StackCreationEvent> {
     private static final List<Transition<StackCreationState, StackCreationEvent>> TRANSITIONS = new Builder<StackCreationState, StackCreationEvent>()
             .defaultFailureEvent(STACK_CREATION_FAILED_EVENT)
             .from(INIT_STATE).to(VALIDATION_STATE).event(START_CREATION_EVENT).noFailureEvent()
@@ -92,5 +94,10 @@ public class StackCreationFlowConfig extends AbstractFlowConfiguration<StackCrea
         return new StackCreationEvent[] {
                 START_CREATION_EVENT
         };
+    }
+
+    @Override
+    public StackCreationEvent getFailHandledEvent() {
+        return STACKCREATION_FAILURE_HANDLED_EVENT;
     }
 }

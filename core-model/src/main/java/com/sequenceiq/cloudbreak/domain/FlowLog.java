@@ -4,6 +4,8 @@ import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -47,6 +49,9 @@ public class FlowLog {
 
     private String cloudbreakNodeId;
 
+    @Enumerated(EnumType.STRING)
+    private StateStatus stateStatus = StateStatus.PENDING;
+
     @Version
     private Long version;
 
@@ -54,11 +59,12 @@ public class FlowLog {
 
     }
 
-    public FlowLog(Long stackId, String flowId, String currentState, Boolean finalized) {
+    public FlowLog(Long stackId, String flowId, String currentState, Boolean finalized, StateStatus stateStatus) {
         this.stackId = stackId;
         this.flowId = flowId;
         this.currentState = currentState;
         this.finalized = finalized;
+        this.stateStatus = stateStatus;
     }
 
     public FlowLog(Long stackId, String flowId, String flowChainId, String nextEvent, String payload, Class<?> payloadType, String variables, Class<?> flowType,
@@ -185,4 +191,13 @@ public class FlowLog {
     public void setVersion(Long version) {
         this.version = version;
     }
+
+    public StateStatus getStateStatus() {
+        return stateStatus;
+    }
+
+    public void setStateStatus(StateStatus stateStatus) {
+        this.stateStatus = stateStatus;
+    }
+
 }

@@ -34,6 +34,7 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationFl
 import com.sequenceiq.cloudbreak.domain.CloudbreakNode;
 import com.sequenceiq.cloudbreak.domain.FlowLog;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.StateStatus;
 import com.sequenceiq.cloudbreak.ha.CloudbreakNodeConfig;
 import com.sequenceiq.cloudbreak.repository.CloudbreakNodeRepository;
 import com.sequenceiq.cloudbreak.repository.FlowLogRepository;
@@ -171,7 +172,10 @@ public class HeartbeatService {
             LOGGER.info("The following flows will be distributed across the active nodes: {}", getFlowIds(failedFlowLogs));
             List<FlowLog> invalidFlows = getInvalidFlows(failedFlowLogs);
             Collection<FlowLog> updatedFlowLogs = new ArrayList<>(invalidFlows.size());
-            invalidFlows.forEach(fl -> fl.setFinalized(true));
+            invalidFlows.forEach(fl -> {
+                fl.setFinalized(true);
+                fl.setStateStatus(StateStatus.SUCCESSFUL);
+            });
             updatedFlowLogs.addAll(invalidFlows);
             failedFlowLogs.removeAll(invalidFlows);
             LOGGER.info("The following flows have been filtered out from distribution: {}", getFlowIds(invalidFlows));
