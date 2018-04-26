@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -17,7 +18,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -41,6 +41,8 @@ import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.Clock;
 import com.sequenceiq.cloudbreak.service.Retry;
 import com.sequenceiq.cloudbreak.service.Retry.ActionWentFailException;
+import com.sequenceiq.cloudbreak.service.TransactionService;
+import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.metrics.MetricService;
 
 @Service
@@ -90,6 +92,9 @@ public class HeartbeatService {
     @Qualifier("DefaultRetryService")
     private Retry retryService;
 
+    @Inject
+    private TransactionService transactionService;
+
     @Scheduled(cron = "${cb.ha.heartbeat.rate:0/30 * * * * *}")
     public void heartbeat() {
         if (cloudbreakNodeConfig.isNodeIdSpecified()) {
@@ -97,13 +102,10 @@ public class HeartbeatService {
             try {
                 retryService.testWith2SecDelayMax5Times(() -> {
                     try {
-                        CloudbreakNode self = cloudbreakNodeRepository.findOne(nodeId);
-                        if (self == null) {
-                            self = new CloudbreakNode(nodeId);
-                        }
+                        CloudbreakNode self = Optional.ofNullable(cloudbreakNodeRepository.findOne(nodeId)).orElse(new CloudbreakNode(nodeId));
                         self.setLastUpdated(clock.getCurrentTime());
                         cloudbreakNodeRepository.save(self);
-                        return true;
+                        return Boolean.TRUE;
                     } catch (RuntimeException e) {
                         LOGGER.error("Failed to update the heartbeat timestamp", e);
                         metricService.incrementMetricCounter(MetricType.HEARTBEAT_UPDATE_FAILED);
@@ -119,19 +121,22 @@ public class HeartbeatService {
         }
     }
 
-    @Scheduled(cron = "${cb.ha.flow.distribution.rate:0/35 * * * * *}")
+    @Scheduled(initialDelay = 35000L, fixedDelay = 30000L)
     public void scheduledFlowDistribution() {
         if (cloudbreakNodeConfig.isNodeIdSpecified()) {
-            List<CloudbreakNode> failedNodes = Collections.emptyList();
+            List<CloudbreakNode> failedNodes = new ArrayList<>();
             try {
-                failedNodes = distributeFlows();
-            } catch (OptimisticLockingFailureException e) {
+                failedNodes.addAll(transactionService.required(() -> distributeFlows()));
+            } catch (TransactionExecutionException e) {
                 LOGGER.info("Failed to distribute the flow logs across the active nodes, somebody might have already done it. Message: {}", e.getMessage());
             }
 
             try {
-                cleanupNodes(failedNodes);
-            } catch (RuntimeException e) {
+                transactionService.required(() -> {
+                    cleanupNodes(failedNodes);
+                    return null;
+                });
+            } catch (TransactionExecutionException e) {
                 LOGGER.info("Failed to cleanup the nodes, somebody might have already done it. Message: {}", e.getMessage());
             }
 
