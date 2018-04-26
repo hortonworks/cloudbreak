@@ -310,7 +310,7 @@ public class ClusterToClusterResponseConverter extends AbstractConversionService
     }
 
     private void collectServicePorts(Map<String, String> result, Iterable<Port> ports, String ambariIp, String serviceAddress,
-        StackServiceComponentDescriptor componentDescriptor, Cluster cluster) throws IOException {
+            StackServiceComponentDescriptor componentDescriptor, Cluster cluster) throws IOException {
         if (componentDescriptor != null && componentDescriptor.isMaster()) {
             List<String> exposedServices = new ArrayList<>();
             Gateway gateway = cluster.getGateway();
@@ -325,7 +325,7 @@ public class ClusterToClusterResponseConverter extends AbstractConversionService
     }
 
     private void collectServicePort(Map<String, String> result, Port port, String serviceAddress, String ambariIp,
-        StackServiceComponentDescriptor componentDescriptor, Collection<String> exposedServices, Gateway gateway) {
+            StackServiceComponentDescriptor componentDescriptor, Collection<String> exposedServices, Gateway gateway) {
         if (port.getExposedService().getServiceName().equals(componentDescriptor.getName())) {
             if (gateway.getEnableGateway() && ambariIp != null) {
                 String url;
@@ -335,7 +335,7 @@ public class ClusterToClusterResponseConverter extends AbstractConversionService
                 // filter out what is not exposed
                 // filter out what is not expected to be exposed e.g Zeppelin WS since it does not have Knox Url
                 if (!Strings.isNullOrEmpty(port.getExposedService().getKnoxUrl())
-                    && exposedServices.contains(port.getExposedService().getKnoxService())) {
+                        && exposedServices.contains(port.getExposedService().getKnoxService())) {
                     result.put(port.getExposedService().getPortName(), url);
                 }
             } else if (serviceAddress != null) {
@@ -353,8 +353,9 @@ public class ClusterToClusterResponseConverter extends AbstractConversionService
             if (YARN.equals(orchestrator)) {
                 url = String.format("http://%s:8080", ambariIp);
             } else {
-                if (gateway.getEnableGateway() != null && gateway.getEnableGateway()) {
-                    url = GatewayType.CENTRAL == gateway.getGatewayType() ? String.format("/%s/%s/ambari/", gateway.getPath(), gateway.getTopologyName())
+                if (gateway.getEnableGateway()) {
+                    url = GatewayType.CENTRAL == gateway.getGatewayType() ? String.format("/%s/%s/ambari/",
+                            gateway.getPath(), gateway.getTopologyName())
                             : String.format("https://%s:8443/%s/%s/ambari/", ambariIp, gateway.getPath(), gateway.getTopologyName());
                 } else {
                     url = String.format("https://%s/ambari/", ambariIp);

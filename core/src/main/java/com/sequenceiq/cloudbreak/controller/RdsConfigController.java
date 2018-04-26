@@ -114,12 +114,13 @@ public class RdsConfigController extends NotificationController implements RdsCo
         if (existingRDSConfigName != null) {
             try {
                 RDSConfig config = rdsConfigService.getByName(existingRDSConfigName, authenticatedUserService.getCbUser());
-                rdsTestResult = testRDSConnectivity(config.getConnectionURL(), config.getConnectionUserName(), config.getConnectionPassword());
+                rdsTestResult = testRDSConnectivity(config);
             } catch (NotFoundException e) {
                 rdsTestResult.setConnectionResult("not found");
             }
         } else {
-            rdsTestResult = testRDSConnectivity(configRequest.getConnectionURL(), configRequest.getConnectionUserName(), configRequest.getConnectionPassword());
+            RDSConfig rdsConfig = conversionService.convert(rdsTestRequest.getRdsConfig(), RDSConfig.class);
+            rdsTestResult = testRDSConnectivity(rdsConfig);
         }
         return rdsTestResult;
     }
@@ -143,10 +144,10 @@ public class RdsConfigController extends NotificationController implements RdsCo
                 TypeDescriptor.collection(Set.class, TypeDescriptor.valueOf(RDSConfigResponse.class)));
     }
 
-    private RdsTestResult testRDSConnectivity(String connectionURL, String connectionUserName, String connectionPassword) {
+    private RdsTestResult testRDSConnectivity(RDSConfig rdsConfig) {
         RdsTestResult rdsTestResult = new RdsTestResult();
         try {
-            rdsConnectionValidator.validateRdsConnection(connectionURL, connectionUserName, connectionPassword);
+            rdsConnectionValidator.validateRdsConnection(rdsConfig);
             rdsTestResult.setConnectionResult("connected");
         } catch (RuntimeException e) {
             rdsTestResult.setConnectionResult(e.getMessage());
