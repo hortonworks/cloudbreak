@@ -75,6 +75,8 @@ public class Cluster {
     @Column(name = "autoscaling_enabled")
     private boolean autoscalingEnabled;
 
+    private String periscopeNodeId;
+
     public Cluster() {
     }
 
@@ -238,6 +240,14 @@ public class Cluster {
 
     public void setAutoscalingEnabled(boolean autoscalingEnabled) {
         this.autoscalingEnabled = autoscalingEnabled;
+    }
+
+    public String getPeriscopeNodeId() {
+        return periscopeNodeId;
+    }
+
+    public void setPeriscopeNodeId(String periscopeNodeId) {
+        this.periscopeNodeId = periscopeNodeId;
     }
 }
 

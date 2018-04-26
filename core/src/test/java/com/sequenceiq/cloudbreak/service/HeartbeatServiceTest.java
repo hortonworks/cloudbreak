@@ -9,6 +9,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -95,6 +96,7 @@ public class HeartbeatServiceTest {
         when(cloudbreakNodeConfig.isNodeIdSpecified()).thenReturn(true);
         when(cloudbreakNodeConfig.getId()).thenReturn(MY_ID);
         ReflectionTestUtils.setField(heartbeatService, "heartbeatThresholdRate", 70000);
+        ReflectionTestUtils.setField(heartbeatService, "transactionService", new TransactionService());
     }
 
     @Test
@@ -484,7 +486,7 @@ public class HeartbeatServiceTest {
 
     private List<FlowLog> getFlowLogs(int flowCount, int from) {
         List<FlowLog> flows = new ArrayList<>();
-        Random random = new Random(System.currentTimeMillis());
+        Random random = new SecureRandom();
         int flowId = random.nextInt(5000) + from;
         long stackId = random.nextInt(5000) + from;
         for (int i = 0; i < flowCount; i++) {

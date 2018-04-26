@@ -36,6 +36,6 @@ public class AmbariAgentHealthMonitor extends AbstractMonitor {
 
     @Override
     List<Cluster> getClusters() {
-        return getClusterService().findAll(ClusterState.RUNNING);
+        return getClusterService().findAllByStateAndNode(ClusterState.RUNNING, getPeriscopeNodeConfig().getId());
     }
 }

@@ -151,16 +151,16 @@ public class ClusterService {
         return clusterRepository.save(cluster);
     }
 
-    public List<Cluster> findAll(ClusterState state) {
-        return clusterRepository.findByState(state);
+    public List<Cluster> findAllByStateAndNode(ClusterState state, String nodeId) {
+        return clusterRepository.findByStateAndPeriscopeNodeId(state, nodeId);
     }
 
     public List<Cluster> findAll() {
         return Lists.newArrayList(clusterRepository.findAll());
     }
 
-    public List<Cluster> findAll(ClusterState state, boolean autoscalingEnabled) {
-        return clusterRepository.findByStateAndAutoscalingEnabled(state, autoscalingEnabled);
+    public List<Cluster> findAllForNode(ClusterState state, boolean autoscalingEnabled, String nodeId) {
+        return clusterRepository.findByStateAndAutoscalingEnabledAndPeriscopeNodeId(state, autoscalingEnabled, nodeId);
     }
 
     private PeriscopeUser createUserIfAbsent(PeriscopeUser user) {

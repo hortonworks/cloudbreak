@@ -12,8 +12,11 @@ import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.log.MDCBuilder;
 import com.sequenceiq.periscope.monitor.evaluator.EvaluatorExecutor;
 import com.sequenceiq.periscope.service.ClusterService;
+import com.sequenceiq.periscope.service.ha.PeriscopeNodeConfig;
 
 public abstract class AbstractMonitor implements Monitor {
+
+    private PeriscopeNodeConfig periscopeNodeConfig;
 
     private ClusterService clusterService;
 
@@ -37,6 +40,11 @@ public abstract class AbstractMonitor implements Monitor {
         applicationContext = (ApplicationContext) monitorContext.get(MonitorContext.APPLICATION_CONTEXT.name());
         executorService = applicationContext.getBean(ExecutorService.class);
         clusterService = applicationContext.getBean(ClusterService.class);
+        periscopeNodeConfig = applicationContext.getBean(PeriscopeNodeConfig.class);
+    }
+
+    PeriscopeNodeConfig getPeriscopeNodeConfig() {
+        return periscopeNodeConfig;
     }
 
     ClusterService getClusterService() {
@@ -44,6 +52,6 @@ public abstract class AbstractMonitor implements Monitor {
     }
 
     List<Cluster> getClusters() {
-        return clusterService.findAll(ClusterState.RUNNING, true);
+        return clusterService.findAllForNode(ClusterState.RUNNING, true, periscopeNodeConfig.getId());
     }
 }
