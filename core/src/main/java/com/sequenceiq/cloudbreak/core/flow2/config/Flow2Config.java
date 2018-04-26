@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.core.flow2.config;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
@@ -30,5 +31,13 @@ public class Flow2Config {
             }
         }
         return ImmutableMap.copyOf(flowConfigMap);
+    }
+
+    @Bean
+    public List<String> failHandledEvents(List<RetryableFlowConfiguration<?>> retryableFlowConfigurations) {
+        return retryableFlowConfigurations.stream()
+                .map(RetryableFlowConfiguration::getFailHandledEvent)
+                .map(FlowEvent::event)
+                .collect(Collectors.toList());
     }
 }

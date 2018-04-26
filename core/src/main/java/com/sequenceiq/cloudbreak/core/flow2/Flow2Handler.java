@@ -47,6 +47,7 @@ import com.sequenceiq.cloudbreak.domain.FlowLog;
 import com.sequenceiq.cloudbreak.logger.LoggerContextKey;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.FlowLogRepository;
+import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.flowlog.FlowLogService;
 
 import reactor.bus.Event;
@@ -88,6 +89,9 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
     @Resource
     private Map<String, FlowConfiguration<?>> flowConfigurationMap;
 
+    @Resource
+    private List<String> failHandledEvents;
+
     @Inject
     private FlowChains flowChains;
 
@@ -99,6 +103,9 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
 
     @Inject
     private FlowLogRepository flowLogRepository;
+
+    @Inject
+    private TransactionService transactionService;
 
     @Override
     public void accept(Event<? extends Payload> event) {
@@ -136,7 +143,18 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
                     LOGGER.debug("flow control event arrived: key: {}, flowid: {}, payload: {}", key, flowId, payload);
                     Flow flow = runningFlows.get(flowId);
                     if (flow != null) {
-                        flowLogService.save(flowId, flowChainId, key, payload, flow.getVariables(), flow.getFlowConfigClass(), flow.getCurrentState());
+                        try {
+                            transactionService.required(() -> {
+                                flowLogService.updateLastFlowLogStatus(flow.getFlowId(), failHandledEvents.contains(key));
+                                flowLogService.save(flow.getFlowId(), flowChainId, key, payload, flow.getVariables(),
+                                        flow.getFlowConfigClass(), flow.getCurrentState());
+                                return null;
+                            });
+                        } catch (TransactionService.TransactionExecutionException e) {
+                            LOGGER.error("Failed update last flow log status and save new flow log entry.");
+                            runningFlows.remove(flowId);
+                            return;
+                        }
                         flow.sendEvent(key, payload);
                     } else {
                         LOGGER.info("Cancelled flow finished running. Stack ID {}, flow ID {}, event {}", payload.getStackId(), flowId, key);
@@ -202,11 +220,15 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
 
     public void restartFlow(String flowId) {
         FlowLog flowLog = flowLogRepository.findFirstByFlowIdOrderByCreatedDesc(flowId);
+        restartFlow(flowLog);
+    }
+
+    public void restartFlow(FlowLog flowLog) {
         if (RESTARTABLE_FLOWS.contains(flowLog.getFlowType())) {
             Optional<FlowConfiguration<?>> flowConfig = flowConfigs.stream()
                     .filter(fc -> fc.getClass().equals(flowLog.getFlowType())).findFirst();
             Payload payload = (Payload) JsonReader.jsonToJava(flowLog.getPayload());
-            Flow flow = flowConfig.get().createFlow(flowId, payload.getStackId());
+            Flow flow = flowConfig.get().createFlow(flowLog.getFlowId(), payload.getStackId());
             runningFlows.put(flow, flowLog.getFlowChainId());
             if (flowLog.getFlowChainId() != null) {
                 flowChainHandler.restoreFlowChain(flowLog.getFlowChainId());
@@ -215,11 +237,11 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
             flow.initialize(flowLog.getCurrentState(), variables);
             RestartAction restartAction = flowConfig.get().getRestartAction(flowLog.getNextEvent());
             if (restartAction != null) {
-                restartAction.restart(flowId, flowLog.getFlowChainId(), flowLog.getNextEvent(), payload);
+                restartAction.restart(flowLog.getFlowId(), flowLog.getFlowChainId(), flowLog.getNextEvent(), payload);
                 return;
             }
         }
-        flowLogService.terminate(flowLog.getStackId(), flowId);
+        flowLogService.terminate(flowLog.getStackId(), flowLog.getFlowId());
     }
 
     private String getFlowId(Event<?> event) {

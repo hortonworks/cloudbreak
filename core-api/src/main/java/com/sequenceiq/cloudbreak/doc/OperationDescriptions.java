@@ -91,6 +91,7 @@ public class OperationDescriptions {
         public static final String GET_PLATFORM_VARIANTS = "retrieve available platform variants";
         public static final String GET_ALL = "retrieve all stacks";
         public static final String GET_BY_STACK_NAME = "retrieve stack request by stack name";
+        public static final String RETRY_BY_ID = "retry stack and cluster provisioning of failed stack";
     }
 
     public static class ClusterOpDescription {

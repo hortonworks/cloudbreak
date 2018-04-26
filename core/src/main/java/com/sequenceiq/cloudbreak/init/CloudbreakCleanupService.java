@@ -145,8 +145,8 @@ public class CloudbreakCleanupService implements ApplicationListener<ContextRefr
      */
     private Collection<Long> excludeStacksByFlowAssignment() {
         List<Long> exclusion = new ArrayList<>();
-        List<Object[]> allNonFinalized = flowLogRepository.findAllNonFinalized();
-        allNonFinalized.stream().filter(o -> o[2] != null).forEach(o -> exclusion.add((Long) o[1]));
+        List<Object[]> allPending = flowLogRepository.findAllPending();
+        allPending.stream().filter(o -> o[2] != null).forEach(o -> exclusion.add((Long) o[1]));
         return exclusion;
     }
 

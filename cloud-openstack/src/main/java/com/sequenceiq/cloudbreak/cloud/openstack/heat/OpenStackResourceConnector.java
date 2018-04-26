@@ -119,8 +119,8 @@ public class OpenStackResourceConnector implements ResourceConnector<Object> {
             resources = check(authenticatedContext, cloudResources);
         } else {
             LOGGER.info("Heat stack already exists: {}", existingStack.getName());
-            CloudResource cloudResource = new Builder().type(ResourceType.HEAT_STACK).name(existingStack.getId()).build();
-            resources = Collections.singletonList(new CloudResourceStatus(cloudResource, ResourceStatus.CREATED));
+            List<CloudResource> cloudResources = collectResources(authenticatedContext, notifier, existingStack, stack, neutronNetworkView);
+            resources = check(authenticatedContext, cloudResources);
         }
         LOGGER.debug("Launched resources: {}", resources);
         return resources;

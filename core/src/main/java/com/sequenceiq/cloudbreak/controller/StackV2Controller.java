@@ -32,6 +32,7 @@ import com.sequenceiq.cloudbreak.blueprint.BlueprintPreparationObject;
 import com.sequenceiq.cloudbreak.blueprint.CentralBlueprintUpdater;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.service.OperationRetryService;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterCache;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
@@ -61,6 +62,9 @@ public class StackV2Controller extends NotificationController implements StackV2
 
     @Autowired
     private CentralBlueprintUpdater centralBlueprintUpdater;
+
+    @Autowired
+    private OperationRetryService operationRetryService;
 
     @Override
     public Set<StackResponse> getPrivates() {
@@ -241,5 +245,12 @@ public class StackV2Controller extends NotificationController implements StackV2
         BlueprintPreparationObject blueprintPreparationObject = conversionService.convert(stackRequest, BlueprintPreparationObject.class);
         String blueprintText = centralBlueprintUpdater.getBlueprintText(blueprintPreparationObject);
         return new GeneratedBlueprintResponse(blueprintText);
+    }
+
+    @Override
+    public void retry(String stackName) {
+        IdentityUser user = authenticatedUserService.getCbUser();
+        Stack stack = stackService.getPublicStack(stackName, user);
+        operationRetryService.retry(stack);
     }
 }
