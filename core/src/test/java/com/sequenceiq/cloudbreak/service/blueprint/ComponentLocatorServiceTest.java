@@ -4,6 +4,7 @@ import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -22,6 +23,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.api.model.ExposedService;
+import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessorFactory;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
@@ -30,6 +32,7 @@ import com.sequenceiq.cloudbreak.domain.Constraint;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
+import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -44,6 +47,9 @@ public class ComponentLocatorServiceTest {
     @Mock
     private BlueprintProcessorFactory blueprintProcessorFactory;
 
+    @Mock
+    private InstanceMetaDataRepository instanceMetaDataRepository;
+
     @InjectMocks
     private ComponentLocatorService underTest;
 
@@ -54,8 +60,8 @@ public class ComponentLocatorServiceTest {
         cluster = new Cluster();
         cluster.setBlueprint(new Blueprint());
 
-        HostGroup hg1 = createHostGroup("hg1", "myhost1");
-        HostGroup hg2 = createHostGroup("hg2", "myhost2");
+        HostGroup hg1 = createHostGroup("hg1", 0L, "myhost1");
+        HostGroup hg2 = createHostGroup("hg2", 1L, "myhost2");
 
         Set<String> hg1Components = set("RESOURCEMANAGER", "Service1", "HIVE_SERVER");
         Set<String> hg2Components = set("NAMENODE", "Service2", "Service3");
@@ -64,15 +70,22 @@ public class ComponentLocatorServiceTest {
         when(blueprintProcessor.getComponentsInHostGroup(eq("hg1"))).thenReturn(hg1Components);
         when(blueprintProcessor.getComponentsInHostGroup(eq("hg2"))).thenReturn(hg2Components);
         when(blueprintProcessorFactory.get(nullable(String.class))).thenReturn(blueprintProcessor);
+        when(instanceMetaDataRepository.findInstancesInInstanceGroupWithoutStatuses(hg1.getConstraint()
+                .getInstanceGroup().getId(), Arrays.asList(InstanceStatus.TERMINATED, InstanceStatus.DELETED_ON_PROVIDER_SIDE)))
+                .thenReturn(new ArrayList<>(hg1.getConstraint().getInstanceGroup().getAllInstanceMetaData()));
+        when(instanceMetaDataRepository.findInstancesInInstanceGroupWithoutStatuses(hg2.getConstraint()
+                .getInstanceGroup().getId(), Arrays.asList(InstanceStatus.TERMINATED, InstanceStatus.DELETED_ON_PROVIDER_SIDE)))
+                .thenReturn(new ArrayList<>(hg2.getConstraint().getInstanceGroup().getAllInstanceMetaData()));
     }
 
-    private HostGroup createHostGroup(String name, String hostname) {
+    private HostGroup createHostGroup(String name, Long id, String hostname) {
         HostGroup hg = new HostGroup();
         hg.setName(name);
         Constraint constraint = new Constraint();
         hg.setConstraint(constraint);
 
         InstanceGroup ig = new InstanceGroup();
+        ig.setId(id);
         constraint.setInstanceGroup(ig);
 
         InstanceMetaData im = new InstanceMetaData();

@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.repository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -33,6 +34,10 @@ public interface InstanceMetaDataRepository extends CrudRepository<InstanceMetaD
 
     @Query("SELECT i FROM InstanceMetaData i WHERE i.instanceGroup.id = :instanceGroupId AND i.instanceStatus <> 'TERMINATED'")
     List<InstanceMetaData> findAliveInstancesInInstanceGroup(@Param("instanceGroupId") Long instanceGroupId);
+
+    @Query("SELECT i FROM InstanceMetaData i WHERE i.instanceGroup.id = :instanceGroupId AND i.instanceStatus not in (:statuses)")
+    List<InstanceMetaData> findInstancesInInstanceGroupWithoutStatuses(@Param("instanceGroupId") Long instanceGroupId,
+            @Param("statuses") Collection<InstanceStatus> statuses);
 
     @Query("SELECT i FROM InstanceMetaData i WHERE i.instanceGroup.stack.id= :stackId AND i.instanceGroup.groupName= :groupName "
             + "AND i.instanceStatus in ('CREATED', 'UNREGISTERED', 'DECOMMISSIONED', 'FAILED', 'STOPPED')")
