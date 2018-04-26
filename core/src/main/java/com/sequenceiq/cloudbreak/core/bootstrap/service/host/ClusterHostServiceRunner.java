@@ -111,7 +111,6 @@ public class ClusterHostServiceRunner {
     @Inject
     private StackUtil stackUtil;
 
-    @Transactional
     public void runAmbariServices(Stack stack, Cluster cluster) throws CloudbreakException {
         try {
             Set<Node> nodes = stackUtil.collectNodes(stack);
