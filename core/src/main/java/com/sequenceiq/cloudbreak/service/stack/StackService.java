@@ -87,6 +87,7 @@ import com.sequenceiq.cloudbreak.service.credential.OpenSshPublicKeyValidator;
 import com.sequenceiq.cloudbreak.service.decorator.StackResponseDecorator;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
+import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderConnectorAdapter;
 import com.sequenceiq.cloudbreak.util.PasswordUtil;
@@ -328,7 +329,7 @@ public class StackService {
     }
 
     @Transactional(TxType.NEVER)
-    public Stack create(IdentityUser user, Stack stack, String imageCatalog, Optional<String> imageId, Optional<Blueprint> blueprint) {
+    public Stack create(IdentityUser user, Stack stack, String platformString, StatedImage imgFromCatalog) {
         Stack savedStack;
         stack.setOwner(user.getUserId());
         stack.setAccount(user.getAccount());
@@ -386,7 +387,7 @@ public class StackService {
             savedStack.setSecurityConfig(securityConfig);
 
             start = System.currentTimeMillis();
-            imageService.create(savedStack, connector.getPlatformParameters(stack), imageCatalog, imageId, blueprint);
+            imageService.create(savedStack, platformString, connector.getPlatformParameters(stack), imgFromCatalog);
             LOGGER.info("Image creation took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
         } catch (DataIntegrityViolationException ex) {
