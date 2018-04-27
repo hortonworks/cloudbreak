@@ -42,6 +42,7 @@ import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.json.Json;
+import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorCancelledException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
@@ -50,9 +51,11 @@ import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
+import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.repository.StackViewRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
@@ -65,9 +68,14 @@ import com.sequenceiq.cloudbreak.util.StackUtil;
 
 @Component
 public class ClusterHostServiceRunner {
-
     @Inject
     private StackRepository stackRepository;
+
+    @Inject
+    private StackViewRepository stackViewRepository;
+
+    @Inject
+    private ClusterRepository clusterRepository;
 
     @Inject
     private HostOrchestratorResolver hostOrchestratorResolver;
@@ -263,12 +271,13 @@ public class ClusterHostServiceRunner {
     private void saveSharedRangerService(Stack stack, Map<String, SaltPillarProperties> servicePillar) {
         Long datalakeId = stack.getDatalakeId();
         if (datalakeId != null) {
-            Stack dataLakeStack = stackRepository.findOne(datalakeId);
-            Cluster dataLakeCluster = dataLakeStack.getCluster();
+            StackView dataLakeStack = stackViewRepository.findOne(datalakeId);
+            Cluster dataLakeCluster = clusterRepository.findOneWithLists(dataLakeStack.getClusterView().getId());
             Set<String> groupNames = blueprintProcessorFactory.get(dataLakeCluster.getBlueprint().getBlueprintText()).getHostGroupsWithComponent("RANGER_ADMIN");
             List<HostGroup> groups = dataLakeCluster.getHostGroups().stream().filter(hg -> groupNames.contains(hg.getName())).collect(Collectors.toList());
             Set<String> hostNames = new HashSet<>();
-            groups.forEach(hg -> hostNames.addAll(hg.getHostMetadata().stream().map(HostMetadata::getHostName).collect(Collectors.toList())));
+            groups.forEach(hg -> hostNames.addAll(hostGroupRepository.findHostGroupInClusterByName(dataLakeCluster.getId(), hg.getName())
+                    .getHostMetadata().stream().map(HostMetadata::getHostName).collect(Collectors.toList())));
             Map<String, Object> rangerMap = new HashMap<>();
             rangerMap.put("servers", hostNames);
             rangerMap.put("port", "6080");
