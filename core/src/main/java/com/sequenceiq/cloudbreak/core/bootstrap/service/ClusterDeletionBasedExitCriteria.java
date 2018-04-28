@@ -19,16 +19,21 @@ public class ClusterDeletionBasedExitCriteria implements ExitCriteria {
         LOGGER.debug("Check isExitNeeded for model: {}", model);
 
         PollGroup stackPollGroup = InMemoryStateStore.getStack(model.getStackId());
-        if (stackPollGroup != null && CANCELLED.equals(stackPollGroup)) {
+        if (CANCELLED.equals(stackPollGroup)) {
             LOGGER.warn("Stack is getting terminated, polling is cancelled.");
             return true;
         }
+        PollGroup clusterPollGroup = null;
         if (model.getClusterId() != null) {
-            PollGroup clusterPollGroup = InMemoryStateStore.getCluster(model.getClusterId());
-            if (clusterPollGroup != null && CANCELLED.equals(clusterPollGroup)) {
+            clusterPollGroup = InMemoryStateStore.getCluster(model.getClusterId());
+            if (CANCELLED.equals(clusterPollGroup)) {
                 LOGGER.warn("Cluster is getting terminated, polling is cancelled.");
                 return true;
             }
+        }
+        if (stackPollGroup == null && clusterPollGroup == null) {
+            LOGGER.warn("Cluster is getting terminated, polling is cancelled. No InMemoryState found");
+            return true;
         }
 
         return false;
