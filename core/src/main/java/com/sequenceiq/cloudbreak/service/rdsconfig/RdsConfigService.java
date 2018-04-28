@@ -131,10 +131,7 @@ public class RdsConfigService {
     }
 
     public void deleteDefaultRdsConfigs(Set<RDSConfig> rdsConfigs) {
-        rdsConfigs.stream().filter(rdsConfig -> ResourceStatus.DEFAULT == rdsConfig.getStatus()).forEach(rdsConfig -> {
-                checkRdsConfigNotAssociated(rdsConfig);
-                setStatusToDeleted(rdsConfig);
-        });
+        rdsConfigs.stream().filter(rdsConfig -> ResourceStatus.DEFAULT == rdsConfig.getStatus()).forEach(this::setStatusToDeleted);
     }
 
     private void delete(RDSConfig rdsConfig) {
