@@ -66,8 +66,13 @@ public class AzureInstanceView {
      * Used in freemarker template.
      */
     public String getInstanceName() {
-        String shortenedStackName = stackName.length() > stackNamePrefixLength ? stackName.substring(0, stackNamePrefixLength) : stackName;
-        return shortenedStackName + '-' + getInstanceId();
+        String instanceName = instance.getStringParameter(CloudInstance.INSTANCE_NAME);
+        if (instanceName != null) {
+            return instanceName;
+        } else {
+            String shortenedStackName = stackName.length() > stackNamePrefixLength ? stackName.substring(0, stackNamePrefixLength) : stackName;
+            return shortenedStackName + '-' + getInstanceId();
+        }
     }
 
     /**
