@@ -688,6 +688,55 @@ var (
 			Usage: "URL of the jdbc jar file",
 		},
 	}
+	FlWithCustomDomainOptional = BoolFlag{
+		RequiredFlag: OPTIONAL,
+		BoolFlag: cli.BoolFlag{
+			Name:  "with-custom-domain",
+			Usage: "adds custom domain configuration to the template",
+		},
+	}
+	FlWithTagsOptional = BoolFlag{
+		RequiredFlag: OPTIONAL,
+		BoolFlag: cli.BoolFlag{
+			Name:  "with-tags",
+			Usage: "adds user defined tags configuration to the template",
+		},
+	}
+	FlWithImageOptional = BoolFlag{
+		RequiredFlag: OPTIONAL,
+		BoolFlag: cli.BoolFlag{
+			Name:  "with-image",
+			Usage: "adds image-catalog configuration to the template",
+		},
+	}
+	FlWithKerberosManagedOptional = BoolFlag{
+		RequiredFlag: OPTIONAL,
+		BoolFlag: cli.BoolFlag{
+			Name:  "with-kerberos-managed",
+			Usage: "adds Cloudbreak managed Kerberos configuration to the template",
+		},
+	}
+	FlWithKerberosExistingMITOptional = BoolFlag{
+		RequiredFlag: OPTIONAL,
+		BoolFlag: cli.BoolFlag{
+			Name:  "with-kerberos-mit",
+			Usage: "adds existing MIT Kerberos configuration to the template",
+		},
+	}
+	FlWithKerberosExistingADOptional = BoolFlag{
+		RequiredFlag: OPTIONAL,
+		BoolFlag: cli.BoolFlag{
+			Name:  "with-kerberos-ad",
+			Usage: "adds existing Active Directory Kerberos configuration to the template",
+		},
+	}
+	FlWithKerberosCustomOptional = BoolFlag{
+		RequiredFlag: OPTIONAL,
+		BoolFlag: cli.BoolFlag{
+			Name:  "with-kerberos-custom",
+			Usage: "adds custom Kerberos configuration to the template",
+		},
+	}
 )
 
 type RequiredFlag struct {
@@ -817,6 +866,13 @@ func (fb *FlagBuilder) AddResourceFlagsWithOptionalName() *FlagBuilder {
 
 func (fb *FlagBuilder) AddOutputFlag() *FlagBuilder {
 	fb.flags = append(fb.flags, FlOutputOptional)
+	return fb
+}
+
+func (fb *FlagBuilder) AddTemplateFlags() *FlagBuilder {
+	for _, f := range []cli.Flag{FlWithCustomDomainOptional, FlWithTagsOptional, FlWithImageOptional, FlWithKerberosManagedOptional, FlWithKerberosExistingMITOptional, FlWithKerberosExistingADOptional, FlWithKerberosCustomOptional} {
+		fb.flags = append(fb.flags, f)
+	}
 	return fb
 }
 

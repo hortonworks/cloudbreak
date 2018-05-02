@@ -385,10 +385,10 @@ func main() {
 							Name:   "yarn",
 							Usage:  "creates an yarn cluster JSON template",
 							Before: ConfigRead,
-							Flags:  cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional).AddAuthenticationFlags().Build(),
+							Flags:  cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional).AddAuthenticationFlags().AddTemplateFlags().AddTemplateFlags().Build(),
 							Action: cb.GenerateYarnStackTemplate,
 							BashComplete: func(c *cli.Context) {
-								for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional).AddAuthenticationFlags().Build() {
+								for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional).AddAuthenticationFlags().AddTemplateFlags().AddTemplateFlags().Build() {
 									printFlagCompletion(f)
 								}
 							},
@@ -401,10 +401,10 @@ func main() {
 									Name:   "new-network",
 									Usage:  "creates an aws cluster JSON template with new network",
 									Before: ConfigRead,
-									Flags:  cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional).AddAuthenticationFlags().Build(),
+									Flags:  cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional).AddAuthenticationFlags().AddTemplateFlags().Build(),
 									Action: cb.GenerateAwsStackTemplate,
 									BashComplete: func(c *cli.Context) {
-										for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional).AddAuthenticationFlags().Build() {
+										for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional).AddAuthenticationFlags().AddTemplateFlags().Build() {
 											printFlagCompletion(f)
 										}
 									},
@@ -413,10 +413,10 @@ func main() {
 									Name:   "existing-network",
 									Usage:  "creates an aws cluster JSON template with existing network",
 									Before: ConfigRead,
-									Flags:  cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional).AddAuthenticationFlags().Build(),
+									Flags:  cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional).AddAuthenticationFlags().AddTemplateFlags().Build(),
 									Action: cb.GenerateAwsStackTemplate,
 									BashComplete: func(c *cli.Context) {
-										for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional).AddAuthenticationFlags().Build() {
+										for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional).AddAuthenticationFlags().AddTemplateFlags().Build() {
 											printFlagCompletion(f)
 										}
 									},
@@ -425,10 +425,10 @@ func main() {
 									Name:   "existing-subnet",
 									Usage:  "creates an aws cluster JSON template with existing subnet",
 									Before: ConfigRead,
-									Flags:  cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional).AddAuthenticationFlags().Build(),
+									Flags:  cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional).AddAuthenticationFlags().AddTemplateFlags().Build(),
 									Action: cb.GenerateAwsStackTemplate,
 									BashComplete: func(c *cli.Context) {
-										for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional).AddAuthenticationFlags().Build() {
+										for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional).AddAuthenticationFlags().AddTemplateFlags().Build() {
 											printFlagCompletion(f)
 										}
 									},
@@ -443,10 +443,10 @@ func main() {
 									Name:   "new-network",
 									Usage:  "creates an azure cluster JSON template with new network",
 									Before: ConfigRead,
-									Flags:  cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional).AddAuthenticationFlags().Build(),
+									Flags:  cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional).AddAuthenticationFlags().AddTemplateFlags().Build(),
 									Action: cb.GenerateAzureStackTemplate,
 									BashComplete: func(c *cli.Context) {
-										for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional).AddAuthenticationFlags().Build() {
+										for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional).AddAuthenticationFlags().AddTemplateFlags().Build() {
 											printFlagCompletion(f)
 										}
 									},
@@ -455,10 +455,10 @@ func main() {
 									Name:   "existing-subnet",
 									Usage:  "creates an azure cluster JSON template with existing subnet",
 									Before: ConfigRead,
-									Flags:  cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional).AddAuthenticationFlags().Build(),
+									Flags:  cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional).AddAuthenticationFlags().AddTemplateFlags().Build(),
 									Action: cb.GenerateAzureStackTemplate,
 									BashComplete: func(c *cli.Context) {
-										for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional).AddAuthenticationFlags().Build() {
+										for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional).AddAuthenticationFlags().AddTemplateFlags().Build() {
 											printFlagCompletion(f)
 										}
 									},
@@ -473,10 +473,10 @@ func main() {
 									Name:   "new-network",
 									Usage:  "creates a gcp cluster JSON template with new network",
 									Before: ConfigRead,
-									Flags:  cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional).AddAuthenticationFlags().Build(),
+									Flags:  cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional).AddAuthenticationFlags().AddTemplateFlags().Build(),
 									Action: cb.GenerateGcpStackTemplate,
 									BashComplete: func(c *cli.Context) {
-										for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional).AddAuthenticationFlags().Build() {
+										for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional).AddAuthenticationFlags().AddTemplateFlags().Build() {
 											printFlagCompletion(f)
 										}
 									},
@@ -485,10 +485,10 @@ func main() {
 									Name:   "existing-network",
 									Usage:  "creates a gcp cluster JSON template with existing network",
 									Before: ConfigRead,
-									Flags:  cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional).AddAuthenticationFlags().Build(),
+									Flags:  cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional).AddAuthenticationFlags().AddTemplateFlags().Build(),
 									Action: cb.GenerateGcpStackTemplate,
 									BashComplete: func(c *cli.Context) {
-										for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional).AddAuthenticationFlags().Build() {
+										for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional).AddAuthenticationFlags().AddTemplateFlags().Build() {
 											printFlagCompletion(f)
 										}
 									},
@@ -497,10 +497,10 @@ func main() {
 									Name:   "existing-subnet",
 									Usage:  "creates a gcp cluster JSON template with existing subnet",
 									Before: ConfigRead,
-									Flags:  cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional).AddAuthenticationFlags().Build(),
+									Flags:  cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional).AddAuthenticationFlags().AddTemplateFlags().Build(),
 									Action: cb.GenerateGcpStackTemplate,
 									BashComplete: func(c *cli.Context) {
-										for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional).AddAuthenticationFlags().Build() {
+										for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional).AddAuthenticationFlags().AddTemplateFlags().Build() {
 											printFlagCompletion(f)
 										}
 									},
@@ -509,10 +509,10 @@ func main() {
 									Name:   "legacy-network",
 									Usage:  "creates a gcp cluster JSON template with legacy network",
 									Before: ConfigRead,
-									Flags:  cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional).AddAuthenticationFlags().Build(),
+									Flags:  cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional).AddAuthenticationFlags().AddTemplateFlags().Build(),
 									Action: cb.GenerateGcpStackTemplate,
 									BashComplete: func(c *cli.Context) {
-										for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional).AddAuthenticationFlags().Build() {
+										for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional).AddAuthenticationFlags().AddTemplateFlags().Build() {
 											printFlagCompletion(f)
 										}
 									},
@@ -527,10 +527,10 @@ func main() {
 									Name:   "new-network",
 									Usage:  "creates a openstack cluster JSON template with new network",
 									Before: ConfigRead,
-									Flags:  cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional).AddAuthenticationFlags().Build(),
+									Flags:  cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional).AddAuthenticationFlags().AddTemplateFlags().Build(),
 									Action: cb.GenerateOpenstackStackTemplate,
 									BashComplete: func(c *cli.Context) {
-										for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional).AddAuthenticationFlags().Build() {
+										for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional).AddAuthenticationFlags().AddTemplateFlags().Build() {
 											printFlagCompletion(f)
 										}
 									},
@@ -539,10 +539,10 @@ func main() {
 									Name:   "existing-network",
 									Usage:  "creates a openstack cluster JSON template with existing network",
 									Before: ConfigRead,
-									Flags:  cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional).AddAuthenticationFlags().Build(),
+									Flags:  cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional).AddAuthenticationFlags().AddTemplateFlags().Build(),
 									Action: cb.GenerateOpenstackStackTemplate,
 									BashComplete: func(c *cli.Context) {
-										for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional).AddAuthenticationFlags().Build() {
+										for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional).AddAuthenticationFlags().AddTemplateFlags().Build() {
 											printFlagCompletion(f)
 										}
 									},
@@ -551,10 +551,10 @@ func main() {
 									Name:   "existing-subnet",
 									Usage:  "creates a openstack cluster JSON template with existing subnet",
 									Before: ConfigRead,
-									Flags:  cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional).AddAuthenticationFlags().Build(),
+									Flags:  cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional).AddAuthenticationFlags().AddTemplateFlags().Build(),
 									Action: cb.GenerateOpenstackStackTemplate,
 									BashComplete: func(c *cli.Context) {
-										for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional).AddAuthenticationFlags().Build() {
+										for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlBlueprintNameOptional, cb.FlBlueprintFileOptional).AddAuthenticationFlags().AddTemplateFlags().Build() {
 											printFlagCompletion(f)
 										}
 									},

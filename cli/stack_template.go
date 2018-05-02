@@ -40,27 +40,27 @@ var stackClient = func(server, userName, password, authType string) getPublicSta
 
 func GenerateAwsStackTemplate(c *cli.Context) error {
 	cloud.SetProviderType(cloud.AWS)
-	return generateStackTemplateImpl(getNetworkMode(c), c.String, getBlueprintClient)
+	return generateStackTemplateImpl(getNetworkMode(c), c.String, c.Bool, getBlueprintClient)
 }
 
 func GenerateAzureStackTemplate(c *cli.Context) error {
 	cloud.SetProviderType(cloud.AZURE)
-	return generateStackTemplateImpl(getNetworkMode(c), c.String, getBlueprintClient)
+	return generateStackTemplateImpl(getNetworkMode(c), c.String, c.Bool, getBlueprintClient)
 }
 
 func GenerateGcpStackTemplate(c *cli.Context) error {
 	cloud.SetProviderType(cloud.GCP)
-	return generateStackTemplateImpl(getNetworkMode(c), c.String, getBlueprintClient)
+	return generateStackTemplateImpl(getNetworkMode(c), c.String, c.Bool, getBlueprintClient)
 }
 
 func GenerateOpenstackStackTemplate(c *cli.Context) error {
 	cloud.SetProviderType(cloud.OPENSTACK)
-	return generateStackTemplateImpl(getNetworkMode(c), c.String, getBlueprintClient)
+	return generateStackTemplateImpl(getNetworkMode(c), c.String, c.Bool, getBlueprintClient)
 }
 
 func GenerateYarnStackTemplate(c *cli.Context) error {
 	cloud.SetProviderType(cloud.YARN)
-	return generateStackTemplateImpl(getNetworkMode(c), c.String, getBlueprintClient)
+	return generateStackTemplateImpl(getNetworkMode(c), c.String, c.Bool, getBlueprintClient)
 }
 
 func getNetworkMode(c *cli.Context) cloud.NetworkMode {
@@ -92,7 +92,7 @@ func getStringPointer(skippedFields map[string]bool, fieldName string, defaultVa
 	return &defaultValue
 }
 
-func generateStackTemplateImpl(mode cloud.NetworkMode, stringFinder func(string) string, getBlueprintClient func(string, string, string, string) getPublicBlueprint) error {
+func generateStackTemplateImpl(mode cloud.NetworkMode, stringFinder func(string) string, boolFinder func(string) bool, getBlueprintClient func(string, string, string, string) getPublicBlueprint) error {
 	provider := cloud.GetProvider()
 	skippedFields := provider.SkippedFields()
 
@@ -117,6 +117,8 @@ func generateStackTemplateImpl(mode cloud.NetworkMode, stringFinder func(string)
 		Network:             provider.GenerateDefaultNetwork(provider.GetNetworkParamatersTemplate(mode), mode),
 		StackAuthentication: &models_cloudbreak.StackAuthentication{PublicKey: "____"},
 	}
+
+	extendTemplateWithOptionalBlocks(&template, boolFinder)
 
 	nodes := defaultNodes
 	if bpName := stringFinder(FlBlueprintNameOptional.Name); len(bpName) != 0 {
@@ -186,6 +188,69 @@ func getNodesByBlueprint(bp []byte) []cloud.Node {
 		resp = append(resp, *n)
 	}
 	return resp
+}
+
+func extendTemplateWithOptionalBlocks(template *models_cloudbreak.StackV2Request, boolFinder func(string) bool) {
+	if withCustomDomain := boolFinder(FlWithCustomDomainOptional.Name); withCustomDomain {
+		template.CustomDomain = &models_cloudbreak.CustomDomainSettings{
+			CustomDomain:            "____",
+			CustomHostname:          "____",
+			ClusterNameAsSubdomain:  &(&types.B{B: false}).B,
+			HostgroupNameAsHostname: &(&types.B{B: false}).B,
+		}
+	}
+	if withTags := boolFinder(FlWithTagsOptional.Name); withTags {
+		template.Tags = &models_cloudbreak.Tags{
+			UserDefinedTags: map[string]string{
+				"____": "____",
+			},
+		}
+	}
+	if withImage := boolFinder(FlWithImageOptional.Name); withImage {
+		template.ImageSettings = &models_cloudbreak.ImageSettings{
+			ImageCatalog: "____",
+			ImageID:      "____",
+		}
+	}
+	if withKerberosManaged := boolFinder(FlWithKerberosManagedOptional.Name); withKerberosManaged {
+		template.Cluster.Ambari.Kerberos = &models_cloudbreak.KerberosRequest{
+			TCPAllowed: &(&types.B{B: false}).B,
+			MasterKey:  "____",
+			Admin:      "____",
+			Password:   "____",
+		}
+	}
+	if withKerberosMIT := boolFinder(FlWithKerberosExistingMITOptional.Name); withKerberosMIT {
+		template.Cluster.Ambari.Kerberos = &models_cloudbreak.KerberosRequest{
+			TCPAllowed: &(&types.B{B: false}).B,
+			Principal:  "____",
+			Password:   "____",
+			URL:        "____",
+			AdminURL:   "____",
+			Realm:      "____",
+		}
+	}
+	if withKerberosAD := boolFinder(FlWithKerberosExistingADOptional.Name); withKerberosAD {
+		template.Cluster.Ambari.Kerberos = &models_cloudbreak.KerberosRequest{
+			TCPAllowed:  &(&types.B{B: false}).B,
+			Principal:   "____",
+			Password:    "____",
+			URL:         "____",
+			AdminURL:    "____",
+			Realm:       "____",
+			LdapURL:     "____",
+			ContainerDn: "____",
+		}
+	}
+	if withKerberosCustom := boolFinder(FlWithKerberosCustomOptional.Name); withKerberosCustom {
+		template.Cluster.Ambari.Kerberos = &models_cloudbreak.KerberosRequest{
+			TCPAllowed: &(&types.B{B: false}).B,
+			Principal:  "____",
+			Password:   "____",
+			Descriptor: "____",
+			Krb5Conf:   "____",
+		}
+	}
 }
 
 func convertNodeToHostGroup(node cloud.Node) *models_cloudbreak.HostGroupRequest {
