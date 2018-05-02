@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.converter;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyMap;
@@ -86,22 +87,9 @@ public class StackRequestToStackConverterTest extends AbstractJsonConverterTest<
 
     @Test
     public void testConvert() throws CloudbreakException {
-        InstanceGroup instanceGroup = mock(InstanceGroup.class);
-        when(instanceGroup.getInstanceGroupType()).thenReturn(InstanceGroupType.GATEWAY);
-
-        // GIVEN
+        initMocks();
         ReflectionTestUtils.setField(underTest, "defaultRegions", "AWS:eu-west-2");
-        given(conversionService.convert(any(Object.class), any(TypeDescriptor.class), any(TypeDescriptor.class)))
-                .willReturn(new HashSet<>(Collections.singletonList(instanceGroup)));
-        given(conversionService.convert(any(Object.class), any(TypeDescriptor.class), any(TypeDescriptor.class)))
-                .willReturn(new HashSet<>(Collections.singletonList(instanceGroup)));
-
-        given(conversionService.convert(any(StackAuthenticationRequest.class), eq(StackAuthentication.class))).willReturn(new StackAuthentication());
-        given(conversionService.convert(any(FailurePolicyRequest.class), eq(FailurePolicy.class))).willReturn(new FailurePolicy());
-        given(conversionService.convert(any(InstanceGroupRequest.class), eq(InstanceGroup.class))).willReturn(instanceGroup);
-        given(conversionService.convert(any(OrchestratorRequest.class), eq(Orchestrator.class))).willReturn(new Orchestrator());
         given(orchestratorTypeResolver.resolveType(any(Orchestrator.class))).willReturn(OrchestratorType.HOST);
-        given(orchestratorTypeResolver.resolveType(any(String.class))).willReturn(OrchestratorType.HOST);
         given(defaultCostTaggingService.prepareDefaultTags(any(String.class), any(String.class), anyMap(), anyString())).willReturn(new HashMap<>());
         // WHEN
         Stack stack = underTest.convert(getRequest("stack/stack.json"));
@@ -110,52 +98,28 @@ public class StackRequestToStackConverterTest extends AbstractJsonConverterTest<
                 stack,
                 Arrays.asList("description", "statusReason", "cluster", "credential", "gatewayPort", "template", "network", "securityConfig", "securityGroup",
                         "version", "created", "platformVariant", "cloudPlatform", "saltPassword", "stackTemplate", "flexSubscription", "datalakeId",
-                        "customHostname", "customDomain", "clusterNameAsSubdomain", "hostgroupNameAsHostname", "loginUserName", "parameters"));
-        Assert.assertEquals("YARN", stack.getRegion());
+                        "customHostname", "customDomain", "clusterNameAsSubdomain", "hostgroupNameAsHostname", "loginUserName", "parameters", "rootVolumeSize"));
+        assertEquals("YARN", stack.getRegion());
     }
 
     @SuppressFBWarnings(value = "DLS_DEAD_LOCAL_STORE")
     @Test
     public void testConvertWithNoGateway() throws CloudbreakException {
-        InstanceGroup instanceGroup = mock(InstanceGroup.class);
-        when(instanceGroup.getInstanceGroupType()).thenReturn(InstanceGroupType.CORE);
-
-        // GIVEN
+        initMocks();
         ReflectionTestUtils.setField(underTest, "defaultRegions", "AWS:eu-west-2");
-        given(conversionService.convert(any(Object.class), any(TypeDescriptor.class), any(TypeDescriptor.class)))
-                .willReturn(new HashSet<>(Collections.singletonList(instanceGroup)));
-        given(conversionService.convert(any(Object.class), any(TypeDescriptor.class), any(TypeDescriptor.class)))
-                .willReturn(new HashSet<>(Collections.singletonList(instanceGroup)));
-
-        given(conversionService.convert(any(StackAuthenticationRequest.class), eq(StackAuthentication.class))).willReturn(new StackAuthentication());
-        given(conversionService.convert(any(FailurePolicyRequest.class), eq(FailurePolicy.class))).willReturn(new FailurePolicy());
-        given(conversionService.convert(any(InstanceGroupRequest.class), eq(InstanceGroup.class))).willReturn(instanceGroup);
-        given(conversionService.convert(any(OrchestratorRequest.class), eq(Orchestrator.class))).willReturn(new Orchestrator());
-        given(orchestratorTypeResolver.resolveType(any(String.class))).willReturn(OrchestratorType.HOST);
         // WHEN
         try {
             Stack stack = underTest.convert(getRequest("stack/stack.json"));
         } catch (BadRequestException e) {
             //THEN
-            Assert.assertEquals("Ambari server must be specified", e.getMessage());
+            assertEquals("Ambari server must be specified", e.getMessage());
         }
     }
 
     @Test
     public void testConvertWithLoginUserName() throws CloudbreakException {
-        InstanceGroup instanceGroup = mock(InstanceGroup.class);
-        when(instanceGroup.getInstanceGroupType()).thenReturn(InstanceGroupType.GATEWAY);
-
-        // GIVEN
+        initMocks();
         ReflectionTestUtils.setField(underTest, "defaultRegions", "AWS:eu-west-2");
-        given(conversionService.convert(any(Object.class), any(TypeDescriptor.class), any(TypeDescriptor.class)))
-                .willReturn(new HashSet<>(Collections.singletonList(instanceGroup)));
-        given(conversionService.convert(any(StackAuthenticationRequest.class), eq(StackAuthentication.class))).willReturn(new StackAuthentication());
-        given(conversionService.convert(any(FailurePolicyRequest.class), eq(FailurePolicy.class))).willReturn(new FailurePolicy());
-        given(conversionService.convert(any(InstanceGroupRequest.class), eq(InstanceGroup.class))).willReturn(instanceGroup);
-        given(conversionService.convert(any(OrchestratorRequest.class), eq(Orchestrator.class))).willReturn(new Orchestrator());
-        given(orchestratorTypeResolver.resolveType(any(Orchestrator.class))).willReturn(OrchestratorType.HOST);
-        given(orchestratorTypeResolver.resolveType(any(String.class))).willReturn(OrchestratorType.HOST);
         given(defaultCostTaggingService.prepareDefaultTags(any(String.class), any(String.class), anyMap(), anyString())).willReturn(new HashMap<>());
         thrown.expect(BadRequestException.class);
         thrown.expectMessage("You can not modify the default user!");
@@ -166,23 +130,13 @@ public class StackRequestToStackConverterTest extends AbstractJsonConverterTest<
                 stack,
                 Arrays.asList("description", "statusReason", "cluster", "credential", "gatewayPort", "template", "network", "securityConfig", "securityGroup",
                         "version", "created", "platformVariant", "cloudPlatform", "saltPassword", "stackTemplate", "flexSubscription", "datalakeId",
-                        "customHostname", "customDomain", "clusterNameAsSubdomain", "hostgroupNameAsHostname", "loginUserName"));
-        Assert.assertEquals("eu-west-1", stack.getRegion());
+                        "customHostname", "customDomain", "clusterNameAsSubdomain", "hostgroupNameAsHostname", "loginUserName", "rootVolumeSize"));
+        assertEquals("eu-west-1", stack.getRegion());
     }
 
     @Test
     public void testForNoRegionAndNoDefaultRegion() throws CloudbreakException {
-        InstanceGroup instanceGroup = mock(InstanceGroup.class);
-        when(instanceGroup.getInstanceGroupType()).thenReturn(InstanceGroupType.GATEWAY);
-
-        // GIVEN
-        given(conversionService.convert(any(Object.class), any(TypeDescriptor.class), any(TypeDescriptor.class)))
-                .willReturn(new HashSet<>(Collections.singletonList(instanceGroup)));
-        given(conversionService.convert(any(StackAuthenticationRequest.class), eq(StackAuthentication.class))).willReturn(new StackAuthentication());
-        given(conversionService.convert(any(FailurePolicyRequest.class), eq(FailurePolicy.class))).willReturn(new FailurePolicy());
-        given(conversionService.convert(any(InstanceGroupRequest.class), eq(InstanceGroup.class))).willReturn(instanceGroup);
-        given(conversionService.convert(any(OrchestratorRequest.class), eq(Orchestrator.class))).willReturn(new Orchestrator());
-        given(orchestratorTypeResolver.resolveType(any(Orchestrator.class))).willReturn(OrchestratorType.HOST);
+        initMocks();
         given(orchestratorTypeResolver.resolveType(any(String.class))).willReturn(OrchestratorType.HOST);
         given(defaultCostTaggingService.prepareDefaultTags(any(String.class), any(String.class), anyMap(), anyString())).willReturn(new HashMap<>());
         thrown.expect(BadRequestException.class);
@@ -252,7 +206,7 @@ public class StackRequestToStackConverterTest extends AbstractJsonConverterTest<
         Stack result = underTest.convert(source);
 
         //THEN
-        Assert.assertEquals(expectedDataLakeId, result.getDatalakeId());
+        assertEquals(expectedDataLakeId, result.getDatalakeId());
     }
 
     @Test
@@ -275,12 +229,28 @@ public class StackRequestToStackConverterTest extends AbstractJsonConverterTest<
         Stack result = underTest.convert(source);
 
         //THEN
-        Assert.assertEquals(Long.valueOf(expectedDataLakeId), result.getDatalakeId());
+        assertEquals(Long.valueOf(expectedDataLakeId), result.getDatalakeId());
         Assert.assertNotEquals(source.getClusterToAttach(), result.getDatalakeId());
     }
 
     @Override
     public Class<StackRequest> getRequestClass() {
         return StackRequest.class;
+    }
+
+    private void initMocks() throws CloudbreakException {
+        // GIVEN
+        InstanceGroup instanceGroup = mock(InstanceGroup.class);
+        when(instanceGroup.getInstanceGroupType()).thenReturn(InstanceGroupType.GATEWAY);
+        given(conversionService.convert(any(Object.class), any(TypeDescriptor.class), any(TypeDescriptor.class)))
+                .willReturn(new HashSet<>(Collections.singletonList(instanceGroup)));
+        given(conversionService.convert(any(Object.class), any(TypeDescriptor.class), any(TypeDescriptor.class)))
+                .willReturn(new HashSet<>(Collections.singletonList(instanceGroup)));
+
+        given(conversionService.convert(any(StackAuthenticationRequest.class), eq(StackAuthentication.class))).willReturn(new StackAuthentication());
+        given(conversionService.convert(any(FailurePolicyRequest.class), eq(FailurePolicy.class))).willReturn(new FailurePolicy());
+        given(conversionService.convert(any(InstanceGroupRequest.class), eq(InstanceGroup.class))).willReturn(instanceGroup);
+        given(conversionService.convert(any(OrchestratorRequest.class), eq(Orchestrator.class))).willReturn(new Orchestrator());
+        given(orchestratorTypeResolver.resolveType(any(String.class))).willReturn(OrchestratorType.HOST);
     }
 }

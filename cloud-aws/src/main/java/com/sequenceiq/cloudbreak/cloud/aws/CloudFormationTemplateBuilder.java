@@ -52,6 +52,7 @@ public class CloudFormationTemplateBuilder {
                     awsInstanceView.getVolumes().size(),
                     awsInstanceView.isEncryptedVolumes(),
                     awsInstanceView.getVolumeSize(),
+                    group.getRootVolumeSize(),
                     awsInstanceView.getVolumeType(),
                     awsInstanceView.getSpotPrice(),
                     group.getSecurity().getRules(),

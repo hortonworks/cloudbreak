@@ -24,6 +24,9 @@ public class TemplateV2Request implements JsonEntity {
     @ApiModelProperty(TemplateModelDescription.VOLUME_SIZE)
     private Integer volumeSize;
 
+    @ApiModelProperty(TemplateModelDescription.ROOT_VOLUME_SIZE)
+    private Integer rootVolumeSize;
+
     @ApiModelProperty(TemplateModelDescription.PARAMETERS)
     private Map<String, Object> parameters = new HashMap<>();
 
@@ -82,5 +85,13 @@ public class TemplateV2Request implements JsonEntity {
 
     public void setCustomInstanceType(CustomInstanceType customInstanceType) {
         this.customInstanceType = customInstanceType;
+    }
+
+    public Integer getRootVolumeSize() {
+        return rootVolumeSize;
+    }
+
+    public void setRootVolumeSize(Integer rootVolumeSize) {
+        this.rootVolumeSize = rootVolumeSize;
     }
 }

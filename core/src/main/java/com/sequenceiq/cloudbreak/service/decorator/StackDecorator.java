@@ -33,7 +33,8 @@ import com.sequenceiq.cloudbreak.cloud.model.StackParamValidation;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.controller.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
-import com.sequenceiq.cloudbreak.controller.validation.stack.StackValidator;
+import com.sequenceiq.cloudbreak.controller.validation.stack.ParameterValidator;
+import com.sequenceiq.cloudbreak.controller.validation.stack.StackRequestValidator;
 import com.sequenceiq.cloudbreak.controller.validation.template.TemplateValidator;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.FailurePolicy;
@@ -67,7 +68,7 @@ public class StackDecorator {
     private AuthenticatedUserService authenticatedUserService;
 
     @Inject
-    private StackValidator stackValidator;
+    private StackRequestValidator stackValidator;
 
     @Inject
     private StackParameterService stackParameterService;
@@ -108,6 +109,9 @@ public class StackDecorator {
 
     @Inject
     private RdsConfigService rdsConfigService;
+
+    @Inject
+    private List<ParameterValidator> parameterValidators;
 
     public Stack decorate(@Nonnull Stack subject, @Nonnull StackRequest request, IdentityUser user) {
         prepareCredential(subject, request, user);
@@ -213,9 +217,17 @@ public class StackDecorator {
                     params.put(paramName, value);
                 }
             }
-            stackValidator.validate(params, stackParams);
+            validateStackParameters(params, stackParams);
         }
         return params;
+    }
+
+    private void validateStackParameters(Map<String, String> params, List<StackParamValidation> stackParamValidations) {
+        if (params != null && !params.isEmpty()) {
+            for (ParameterValidator parameterValidator : parameterValidators) {
+                parameterValidator.validate(params, stackParamValidations);
+            }
+        }
     }
 
     private void prepareNetwork(Stack subject, Object networkId) {
@@ -363,6 +375,4 @@ public class StackDecorator {
             return request.getCloudPlatform();
         }
     }
-
-
 }

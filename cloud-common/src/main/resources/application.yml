@@ -15,6 +15,9 @@ cert:
 
 cb:
   enabledplatforms: AZURE,AWS,GCP,OPENSTACK
+  platform.default.rootVolumeSize:
+    AWS: 50
+    AZURE: 30
   enabled.linux.types: redhat6,redhat7,centos6,centos7,amazonlinux
   publicip:
   etc.config.dir: /etc/cloudbreak
