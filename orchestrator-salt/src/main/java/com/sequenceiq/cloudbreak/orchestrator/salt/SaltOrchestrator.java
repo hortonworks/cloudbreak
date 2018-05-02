@@ -39,6 +39,7 @@ import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorEx
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.executor.ParallelOrchestratorComponentRunner;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
+import com.sequenceiq.cloudbreak.orchestrator.model.BootstrapParams;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.orchestrator.model.RecipeModel;
@@ -95,14 +96,15 @@ public class SaltOrchestrator implements HostOrchestrator {
     }
 
     @Override
-    public void bootstrap(List<GatewayConfig> allGatewayConfigs, Set<Node> targets, ExitCriteriaModel exitModel) throws CloudbreakOrchestratorException {
+    public void bootstrap(List<GatewayConfig> allGatewayConfigs, Set<Node> targets, BootstrapParams params,
+        ExitCriteriaModel exitModel) throws CloudbreakOrchestratorException {
         LOGGER.info("Start SaltBootstrap on nodes: {}", targets);
         GatewayConfig primaryGateway = getPrimaryGatewayConfig(allGatewayConfigs);
         Set<String> gatewayTargets = getGatewayPrivateIps(allGatewayConfigs);
         try (SaltConnector sc = new SaltConnector(primaryGateway, restDebug)) {
             uploadSaltConfig(sc, gatewayTargets, exitModel);
             uploadSignKey(sc, primaryGateway, gatewayTargets, targets.stream().map(Node::getPrivateIp).collect(Collectors.toSet()), exitModel);
-            SaltBootstrap saltBootstrap = new SaltBootstrap(sc, allGatewayConfigs, targets);
+            SaltBootstrap saltBootstrap = new SaltBootstrap(sc, allGatewayConfigs, targets, params);
             Callable<Boolean> saltBootstrapRunner = runner(saltBootstrap, exitCriteria, exitModel);
             Future<Boolean> saltBootstrapRunnerFuture = parallelOrchestratorComponentRunner.submit(saltBootstrapRunner);
             saltBootstrapRunnerFuture.get();
@@ -114,7 +116,7 @@ public class SaltOrchestrator implements HostOrchestrator {
     }
 
     @Override
-    public void bootstrapNewNodes(List<GatewayConfig> allGatewayConfigs, Set<Node> targets, Set<Node> allNodes, byte[] stateConfigZip,
+    public void bootstrapNewNodes(List<GatewayConfig> allGatewayConfigs, Set<Node> targets, Set<Node> allNodes, byte[] stateConfigZip, BootstrapParams params,
             ExitCriteriaModel exitModel) throws CloudbreakOrchestratorException {
         GatewayConfig primaryGateway = getPrimaryGatewayConfig(allGatewayConfigs);
         Set<String> gatewayTargets = allGatewayConfigs.stream().filter(gc -> targets.stream().anyMatch(n -> gc.getPrivateAddress().equals(n.getPrivateIp())))
@@ -126,7 +128,7 @@ public class SaltOrchestrator implements HostOrchestrator {
             uploadSignKey(sc, primaryGateway, gatewayTargets, targets.stream().map(Node::getPrivateIp).collect(Collectors.toSet()), exitModel);
             // if there is a new salt master then re-bootstrap all nodes
             Set<Node> nodes = gatewayTargets.isEmpty() ? targets : allNodes;
-            SaltBootstrap saltBootstrap = new SaltBootstrap(sc, allGatewayConfigs, nodes);
+            SaltBootstrap saltBootstrap = new SaltBootstrap(sc, allGatewayConfigs, nodes, params);
             Callable<Boolean> saltBootstrapRunner = runner(saltBootstrap, exitCriteria, exitModel);
             Future<Boolean> saltBootstrapRunnerFuture = parallelOrchestratorComponentRunner.submit(saltBootstrapRunner);
             saltBootstrapRunnerFuture.get();

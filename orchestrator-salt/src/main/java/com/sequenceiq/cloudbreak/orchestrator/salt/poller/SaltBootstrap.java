@@ -12,12 +12,14 @@ import org.springframework.http.HttpStatus;
 
 import com.sequenceiq.cloudbreak.orchestrator.OrchestratorBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
+import com.sequenceiq.cloudbreak.orchestrator.model.BootstrapParams;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.GenericResponse;
 import com.sequenceiq.cloudbreak.orchestrator.model.GenericResponses;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltActionType;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
+import com.sequenceiq.cloudbreak.orchestrator.salt.domain.Cloud;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.Minion;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.MinionIpAddressesResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.SaltAction;
@@ -37,11 +39,14 @@ public class SaltBootstrap implements OrchestratorBootstrap {
 
     private Set<Node> targets;
 
-    public SaltBootstrap(SaltConnector sc, List<GatewayConfig> allGatewayConfigs, Set<Node> targets) {
+    private BootstrapParams params;
+
+    public SaltBootstrap(SaltConnector sc, List<GatewayConfig> allGatewayConfigs, Set<Node> targets, BootstrapParams params) {
         this.sc = sc;
         this.allGatewayConfigs = allGatewayConfigs;
         originalTargets = Collections.unmodifiableSet(targets);
         this.targets = targets;
+        this.params = params;
     }
 
     @Override
@@ -91,6 +96,7 @@ public class SaltBootstrap implements OrchestratorBootstrap {
 
     private SaltAction createBootstrap() {
         SaltAction saltAction = new SaltAction(SaltActionType.RUN);
+        saltAction.setCloud(new Cloud(params.getCloud()));
         SaltAuth auth = new SaltAuth();
         auth.setPassword(sc.getSaltPassword());
         List<String> targetIps = targets.stream().map(Node::getPrivateIp).collect(Collectors.toList());
