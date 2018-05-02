@@ -6,6 +6,8 @@ import com.sequenceiq.cloudbreak.cloud.model.generic.DynamicModel;
 
 public class CloudInstance extends DynamicModel {
 
+    public static final String INSTANCE_NAME = "InstanceName";
+
     public static final String DISCOVERY_NAME = "DiscoveryName";
 
     public static final String SUBNET_ID = "subnetId";

@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
+import static com.sequenceiq.cloudbreak.cloud.model.CloudInstance.INSTANCE_NAME;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import com.microsoft.azure.CloudException;
 import com.microsoft.azure.management.compute.PowerState;
+import com.microsoft.azure.management.compute.VirtualMachine;
 import com.sequenceiq.cloudbreak.cloud.InstanceConnector;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.status.AzureInstanceStatus;
@@ -74,7 +77,10 @@ public class AzureInstanceConnector implements InstanceConnector {
                 AzureClient azureClient = ac.getParameter(AzureClient.class);
                 boolean virtualMachineExists = azureClient.isVirtualMachineExists(stackName, vm.getInstanceId());
                 if (virtualMachineExists) {
-                    PowerState virtualMachinePowerState = azureClient.getVirtualMachinePowerState(stackName, vm.getInstanceId());
+                    VirtualMachine virtualMachine = azureClient.getVirtualMachine(stackName, vm.getInstanceId());
+                    PowerState virtualMachinePowerState = virtualMachine.powerState();
+                    String computerName = virtualMachine.computerName();
+                    vm.putParameter(INSTANCE_NAME, computerName);
                     statuses.add(new CloudVmInstanceStatus(vm, AzureInstanceStatus.get(virtualMachinePowerState)));
                 } else {
                     statuses.add(new CloudVmInstanceStatus(vm, InstanceStatus.TERMINATED));

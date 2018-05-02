@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.api.model.Status.CREATE_FAILED;
 import static com.sequenceiq.cloudbreak.api.model.Status.DELETE_FAILED;
 import static com.sequenceiq.cloudbreak.api.model.Status.STOPPED;
 import static com.sequenceiq.cloudbreak.api.model.Status.WAIT_FOR_SYNC;
+import static com.sequenceiq.cloudbreak.cloud.model.CloudInstance.INSTANCE_NAME;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -23,6 +24,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
+import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
@@ -88,7 +90,15 @@ public class StackSyncService {
                             && is.getCloudInstance().getInstanceId().equals(metaData.getInstanceId()))
                     .findFirst();
 
-            InstanceSyncState state = status.isPresent() ? InstanceSyncState.getInstanceSyncState(status.get().getStatus()) : InstanceSyncState.DELETED;
+            InstanceSyncState state;
+            if (status.isPresent()) {
+                CloudVmInstanceStatus cloudVmInstanceStatus = status.get();
+                CloudInstance cloudInstance = cloudVmInstanceStatus.getCloudInstance();
+                state = InstanceSyncState.getInstanceSyncState(cloudVmInstanceStatus.getStatus());
+                syncInstanceName(metaData, cloudInstance);
+            } else {
+                state = InstanceSyncState.DELETED;
+            }
             syncInstanceStatusByState(stack, counts, metaData, state);
         }
 
@@ -122,6 +132,12 @@ public class StackSyncService {
             }
         }
         handleSyncResult(stack, instanceStateCounts, stackStatusUpdateEnabled);
+    }
+
+    private void syncInstanceName(InstanceMetaData instanceMetaData, CloudInstance cloudInstance) {
+        String instanceName = cloudInstance.getStringParameter(INSTANCE_NAME);
+        instanceMetaData.setInstanceName(instanceName);
+        instanceMetaDataRepository.save(instanceMetaData);
     }
 
     private void syncInstanceStatusByState(Stack stack, Map<InstanceSyncState, Integer> counts, InstanceMetaData metaData, InstanceSyncState state) {

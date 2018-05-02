@@ -57,6 +57,7 @@ public class MetadataSetupService {
             instanceMetaDataEntry.setPrivateId(privateId);
             instanceMetaDataEntry.setStartDate(timeInMillis);
             instanceMetaDataEntry.setSubnetId(cloudInstance.getStringParameter(CloudInstance.SUBNET_ID));
+            instanceMetaDataEntry.setInstanceName(cloudInstance.getStringParameter(CloudInstance.INSTANCE_NAME));
             if (instanceMetaDataEntry.getInstanceMetadataType() == null) {
                 if (ig != null) {
                     if (InstanceGroupType.GATEWAY.equals(ig.getInstanceGroupType())) {
