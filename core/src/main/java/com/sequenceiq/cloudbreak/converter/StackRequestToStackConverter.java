@@ -112,7 +112,6 @@ public class StackRequestToStackConverter extends AbstractConversionServiceAware
         stack.setCustomHostname(source.getCustomHostname());
         stack.setClusterNameAsSubdomain(source.isClusterNameAsSubdomain());
         stack.setHostgroupNameAsHostname(source.isHostgroupNameAsHostname());
-
         stack.setUuid(UUID.randomUUID().toString());
         return stack;
     }

@@ -36,7 +36,7 @@ import com.sequenceiq.cloudbreak.cloud.model.PlatformOrchestrators;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.controller.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
-import com.sequenceiq.cloudbreak.controller.validation.stack.StackValidator;
+import com.sequenceiq.cloudbreak.controller.validation.stack.StackRequestValidator;
 import com.sequenceiq.cloudbreak.controller.validation.template.TemplateValidator;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
@@ -66,7 +66,7 @@ public class StackDecoratorTest {
     private AuthenticatedUserService authenticatedUserService;
 
     @Mock
-    private StackValidator stackValidator;
+    private StackRequestValidator stackValidator;
 
     @Mock
     private StackParameterService stackParameterService;

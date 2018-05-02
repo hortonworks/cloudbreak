@@ -27,8 +27,10 @@ public class Group extends DynamicModel {
 
     private final Optional<CloudInstance> skeleton;
 
+    private final int rootVolumeSize;
+
     public Group(String name, InstanceGroupType type, Collection<CloudInstance> instances, Security security, CloudInstance skeleton,
-            InstanceAuthentication instanceAuthentication, String loginUserName, String publicKey) {
+            InstanceAuthentication instanceAuthentication, String loginUserName, String publicKey, int rootVolumeSize) {
         this.name = name;
         this.type = type;
         this.instances = ImmutableList.copyOf(instances);
@@ -37,10 +39,11 @@ public class Group extends DynamicModel {
         this.instanceAuthentication = instanceAuthentication;
         this.publicKey = publicKey;
         this.loginUserName = loginUserName;
+        this.rootVolumeSize = rootVolumeSize;
     }
 
     public Group(String name, InstanceGroupType type, Collection<CloudInstance> instances, Security security, CloudInstance skeleton,
-            Map<String, Object> parameters, InstanceAuthentication instanceAuthentication, String loginUserName, String publicKey) {
+            Map<String, Object> parameters, InstanceAuthentication instanceAuthentication, String loginUserName, String publicKey, int rootVolumeSize) {
         super(parameters);
         this.name = name;
         this.type = type;
@@ -50,6 +53,7 @@ public class Group extends DynamicModel {
         this.instanceAuthentication = instanceAuthentication;
         this.publicKey = publicKey;
         this.loginUserName = loginUserName;
+        this.rootVolumeSize = rootVolumeSize;
     }
 
     public CloudInstance getReferenceInstanceConfiguration() {
@@ -89,6 +93,10 @@ public class Group extends DynamicModel {
 
     public InstanceAuthentication getInstanceAuthentication() {
         return instanceAuthentication;
+    }
+
+    public int getRootVolumeSize() {
+        return rootVolumeSize;
     }
 
     @Override

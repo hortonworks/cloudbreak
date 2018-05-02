@@ -358,6 +358,7 @@
                                     "uri" : "[concat(variables('osDiskVhdName'), '${instance.instanceId}','.vhd')]"
                                },
                                <#else>
+                               "diskSizeGB": "${instance.rootVolumeSize}",
                                "managedDisk": {
                                     "storageAccountType": "${instance.attachedDiskStorageType}"
                                },

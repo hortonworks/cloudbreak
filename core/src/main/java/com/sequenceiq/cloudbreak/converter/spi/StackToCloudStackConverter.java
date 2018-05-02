@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -42,6 +43,7 @@ import com.sequenceiq.cloudbreak.repository.SecurityRuleRepository;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.blueprint.VolumeUtils;
+import com.sequenceiq.cloudbreak.service.stack.DefaultRootVolumeSizeProvider;
 
 @Component
 public class StackToCloudStackConverter {
@@ -56,6 +58,9 @@ public class StackToCloudStackConverter {
 
     @Inject
     private ComponentConfigProvider componentConfigProvider;
+
+    @Inject
+    private DefaultRootVolumeSizeProvider defaultRootVolumeSizeProvider;
 
     public CloudStack convert(Stack stack) {
         return convert(stack, Collections.emptySet());
@@ -139,7 +144,14 @@ public class StackToCloudStackConverter {
                 Json attributes = instanceGroup.getAttributes();
                 InstanceAuthentication instanceAuthentication = buildInstanceAuthentication(stackAuthentication);
                 Map<String, Object> fields = attributes == null ? Collections.emptyMap() : attributes.getMap();
-                groups.add(new Group(instanceGroup.getGroupName(),
+
+                Integer rootVolumeSize = instanceGroup.getTemplate().getRootVolumeSize();
+                if (Objects.isNull(rootVolumeSize)) {
+                    rootVolumeSize = defaultRootVolumeSizeProvider.getForPlatform(instanceGroup.getTemplate().cloudPlatform());
+                }
+
+                groups.add(
+                        new Group(instanceGroup.getGroupName(),
                         instanceGroup.getInstanceGroupType(),
                         instances,
                         buildSecurity(instanceGroup),
@@ -147,7 +159,9 @@ public class StackToCloudStackConverter {
                         fields,
                         instanceAuthentication,
                         instanceAuthentication.getLoginUserName(),
-                        instanceAuthentication.getPublicKey()));
+                        instanceAuthentication.getPublicKey(),
+                        rootVolumeSize)
+                );
             }
         }
         return groups;

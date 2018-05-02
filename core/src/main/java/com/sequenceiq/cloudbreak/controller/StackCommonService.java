@@ -27,7 +27,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformVariants;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.controller.validation.filesystem.FileSystemValidator;
-import com.sequenceiq.cloudbreak.controller.validation.stack.StackValidator;
+import com.sequenceiq.cloudbreak.controller.validation.stack.StackRequestValidator;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.domain.StackValidation;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
@@ -66,7 +66,7 @@ public class StackCommonService implements StackEndpoint {
     private AuthenticatedUserService authenticatedUserService;
 
     @Autowired
-    private StackValidator stackValidator;
+    private StackRequestValidator stackValidator;
 
     @Autowired
     private CredentialToCloudCredentialConverter credentialToCloudCredentialConverter;

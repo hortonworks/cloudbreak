@@ -172,7 +172,7 @@ public class YarnResourceConnectorTest {
         String loginUserName = null;
         String publicKey = null;
 
-        return new Group(name, type, instances, security, skeleton, instanceAuthentication, loginUserName, publicKey);
+        return new Group(name, type, instances, security, skeleton, instanceAuthentication, loginUserName, publicKey, 50);
     }
 
     private void setUpStackParameters(String yarnQueue, Integer yarnLifeTime) {

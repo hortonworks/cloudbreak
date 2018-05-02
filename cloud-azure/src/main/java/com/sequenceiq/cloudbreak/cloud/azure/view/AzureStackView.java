@@ -40,9 +40,9 @@ public class AzureStackView {
                         ? (Integer) asMap.get("updateDomainCount") : DEFAULT_UPDATE_DOMAIN_COUNTER;
 
                 instanceGroupView = new AzureInstanceGroupView(group.getName(), faultDomainCount, updateDomainCount,
-                        asName);
+                        asName, group.getRootVolumeSize());
             } else {
-                instanceGroupView = new AzureInstanceGroupView(group.getName());
+                instanceGroupView = new AzureInstanceGroupView(group.getName(), group.getRootVolumeSize());
             }
             for (CloudInstance instance : group.getInstances()) {
                 InstanceTemplate template = instance.getTemplate();
@@ -50,7 +50,7 @@ public class AzureStackView {
                 boolean managedDisk = !Boolean.FALSE.equals(instance.getTemplate().getParameter("managedDisk", Boolean.class));
                 AzureInstanceView azureInstance = new AzureInstanceView(stackName, stackNamePrefixLength, instance, group.getType(), attachedDiskStorageName,
                         template.getVolumeType(), group.getName(), instanceGroupView.getAvailabilitySetName(), managedDisk,
-                        getInstanceSubnetId(instance, subnetStrategy));
+                        getInstanceSubnetId(instance, subnetStrategy), group.getRootVolumeSize());
                 existingInstances.add(azureInstance);
             }
             boolean managedDisk = !Boolean.FALSE.equals(group.getReferenceInstanceConfiguration().getTemplate()

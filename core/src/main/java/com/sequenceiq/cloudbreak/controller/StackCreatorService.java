@@ -16,6 +16,9 @@ import com.sequenceiq.cloudbreak.api.model.StackValidationRequest;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.controller.validation.StackSensitiveDataPropagator;
+import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
+import com.sequenceiq.cloudbreak.controller.validation.ValidationResult.State;
+import com.sequenceiq.cloudbreak.controller.validation.Validator;
 import com.sequenceiq.cloudbreak.controller.validation.filesystem.FileSystemValidator;
 import com.sequenceiq.cloudbreak.controller.validation.template.TemplateValidator;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
@@ -70,7 +73,16 @@ public class StackCreatorService {
     @Inject
     private TemplateValidator templateValidator;
 
+    @Inject
+    private Validator<StackRequest> stackRequestValidator;
+
     public StackResponse createStack(IdentityUser user, StackRequest stackRequest, boolean publicInAccount) throws Exception {
+        ValidationResult validationResult = stackRequestValidator.validate(stackRequest);
+        if (validationResult.getState() == State.ERROR) {
+            LOGGER.info("Stack request has validation error(s): {}.", validationResult.getFormattedErrors());
+            throw new BadRequestException(validationResult.getFormattedErrors());
+        }
+
         stackRequest.setAccount(user.getAccount());
         stackRequest.setOwner(user.getUserId());
         stackRequest.setOwnerEmail(user.getUsername());
