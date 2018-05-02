@@ -63,6 +63,8 @@ public class InstanceMetaData implements ProvisionEntity {
 
     private String subnetId;
 
+    private String instanceName;
+
     public InstanceGroup getInstanceGroup() {
         return instanceGroup;
     }
@@ -254,5 +256,13 @@ public class InstanceMetaData implements ProvisionEntity {
 
     public void setSubnetId(String subnetId) {
         this.subnetId = subnetId;
+    }
+
+    public String getInstanceName() {
+        return instanceName;
+    }
+
+    public void setInstanceName(String instanceName) {
+        this.instanceName = instanceName;
     }
 }
