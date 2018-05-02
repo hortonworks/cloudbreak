@@ -9,7 +9,7 @@
 [docker-io]: https://img.shields.io/docker/pulls/hortonworks/cloudbreak.svg
 
 * Website: https://hortonworks.com/open-source/cloudbreak/
-* Documentation: http://hortonworks.github.io/cloudbreak-docs/latest/
+* Documentation: https://docs.hortonworks.com/HDPDocuments/Cloudbreak/Cloudbreak-2.4.1/index.html
 
 # Local Development Setup
 As of now this document is focusing on setting up your development environment on OSX. You'll need brew to install certain components in case you don't have them already. To get brew please follow the install instructions on the brew homepage: https://brew.sh
