@@ -162,7 +162,7 @@ public class ImageService {
             com.sequenceiq.cloudbreak.cloud.model.catalog.Image imgFromCatalog,
             String imageName, String imageCatalogUrl, String imageCatalogName, String imageId) throws JsonProcessingException, CloudbreakImageCatalogException {
         List<Component> components = new ArrayList<>();
-        Image image = new Image(imageName, userData, imgFromCatalog.getOsType(), imageCatalogUrl, imageCatalogName, imageId);
+        Image image = new Image(imageName, userData, imgFromCatalog.getOs(), imgFromCatalog.getOsType(), imageCatalogUrl, imageCatalogName, imageId);
         Component imageComponent = new Component(ComponentType.IMAGE, ComponentType.IMAGE.name(), new Json(image), stack);
         components.add(imageComponent);
 

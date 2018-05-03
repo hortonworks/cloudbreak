@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.Cloud;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.Minion;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.MinionIpAddressesResponse;
+import com.sequenceiq.cloudbreak.orchestrator.salt.domain.Os;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.SaltAction;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.SaltAuth;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.SaltMaster;
@@ -37,9 +38,9 @@ public class SaltBootstrap implements OrchestratorBootstrap {
 
     private final Set<Node> originalTargets;
 
-    private Set<Node> targets;
+    private final BootstrapParams params;
 
-    private BootstrapParams params;
+    private Set<Node> targets;
 
     public SaltBootstrap(SaltConnector sc, List<GatewayConfig> allGatewayConfigs, Set<Node> targets, BootstrapParams params) {
         this.sc = sc;
@@ -96,7 +97,12 @@ public class SaltBootstrap implements OrchestratorBootstrap {
 
     private SaltAction createBootstrap() {
         SaltAction saltAction = new SaltAction(SaltActionType.RUN);
-        saltAction.setCloud(new Cloud(params.getCloud()));
+        if (params.getCloud() != null) {
+            saltAction.setCloud(new Cloud(params.getCloud()));
+        }
+        if (params.getOs() != null) {
+            saltAction.setOs(new Os(params.getOs()));
+        }
         SaltAuth auth = new SaltAuth();
         auth.setPassword(sc.getSaltPassword());
         List<String> targetIps = targets.stream().map(Node::getPrivateIp).collect(Collectors.toList());

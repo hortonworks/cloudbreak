@@ -165,7 +165,7 @@ public class AzureTemplateBuilderTest {
         List<SecurityRule> rules = Collections.singletonList(new SecurityRule("0.0.0.0/0",
                 new PortDefinition[]{new PortDefinition("22", "22"), new PortDefinition("443", "443")}, "tcp"));
         security = new Security(rules, null);
-        image = new Image("cb-centos66-amb200-2015-05-25", userData, "redhat6", "", "default", "default-id");
+        image = new Image("cb-centos66-amb200-2015-05-25", userData, "redhat6", "redhat6", "", "default", "default-id");
         cloudContext = new CloudContext(7899L, "thisisaverylongazureresourcenamewhichneedstobeshortened", "dummy1", "dummy2", "test",
                 Location.location(Region.region("EU"), new AvailabilityZone("availabilityZone")));
         azureCredentialView = new AzureCredentialView(cloudCredential("siq-haas"));
