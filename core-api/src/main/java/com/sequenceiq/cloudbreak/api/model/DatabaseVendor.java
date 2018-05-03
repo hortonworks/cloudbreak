@@ -11,38 +11,41 @@ import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigRequest;
 import com.sequenceiq.cloudbreak.api.model.rds.RdsConfigRequestParameters;
 
 public enum DatabaseVendor {
-    POSTGRES("postgres", "postgres", "PostgreSQL", "org.postgresql.Driver", "postgresql", ""),
-    MYSQL("mysql", "mysql", "MySQL", "com.mysql.jdbc.Driver", "mysql", "mysql-connector-java.jar"),
-    MARIADB("mysql", "mysql", "MySQL", "com.mysql.jdbc.Driver", "mysql", "mysql-connector-java.jar"),
-    MSSQL("mssql", "mssql", "SQLServer", "com.microsoft.sqlserver.jdbc.SQLServerDriver", "sqlserver", ""),
-    ORACLE11("oracle", "oracle", "Oracle 11g", "oracle.jdbc.driver.OracleDriver", "oracle", "ojdbc6.jar",
+    POSTGRES("postgres", "postgres", "PostgreSQL", "PostgreSQL", "org.postgresql.Driver", "postgresql", ""),
+    MYSQL("mysql", "mysql", "MySQL", "MySQL / MariaDB", "com.mysql.jdbc.Driver", "mysql", "mysql-connector-java.jar"),
+    MARIADB("mysql", "mysql", "MariaDB", "MySQL / MariaDB", "com.mysql.jdbc.Driver", "mysql", "mysql-connector-java.jar"),
+    MSSQL("mssql", "mssql", "SQLServer", "SQLServer", "com.microsoft.sqlserver.jdbc.SQLServerDriver", "sqlserver", ""),
+    ORACLE11("oracle", "oracle", "Oracle 11g", "Oracle", "oracle.jdbc.driver.OracleDriver", "oracle", "ojdbc6.jar",
             Sets.newHashSet("oracle11g", "oracle11", "11", "11g")),
-    ORACLE12("oracle", "oracle", "Oracle 12c", "oracle.jdbc.driver.OracleDriver", "oracle", "ojdbc7.jar",
+    ORACLE12("oracle", "oracle", "Oracle 12c", "Oracle", "oracle.jdbc.driver.OracleDriver", "oracle", "ojdbc7.jar",
             Sets.newHashSet("oracle12c", "oracle12", "12", "12c")),
-    SQLANYWHERE("sqlanywhere", "sqlanywhere", "SQLAnywhere", "org.postgresql.Driver", "sqlanywhere", ""),
-    EMBEDDED("embedded", "embedded", "", "", "", "");
+    SQLANYWHERE("sqlanywhere", "sqlanywhere", "SQLAnywhere", "SQL Anywhere", "org.postgresql.Driver", "sqlanywhere", ""),
+    EMBEDDED("embedded", "embedded", "", "", "", "", "");
 
     private final String ambariVendor;
     private final String fancyName;
+    private final String displayName;
     private final String connectionDriver;
     private final String jdbcUrlDriverId;
     private final String connectorJarName;
     private final String databaseType;
     private final Set<String> versions;
 
-    DatabaseVendor(String ambariVendor, String databaseType, String fancyName, String connectionDriver, String jdbcUrlDriverId, String connectorJarName,
-            Set<String> versions) {
+    DatabaseVendor(String ambariVendor, String databaseType, String displayName, String fancyName, String connectionDriver, String jdbcUrlDriverId,
+            String connectorJarName, Set<String> versions) {
         this.ambariVendor = ambariVendor;
         this.databaseType = databaseType;
         this.fancyName = fancyName;
+        this.displayName = displayName;
         this.connectionDriver = connectionDriver;
         this.jdbcUrlDriverId = jdbcUrlDriverId;
         this.connectorJarName = connectorJarName;
         this.versions = versions;
     }
 
-    DatabaseVendor(String ambariVendor, String databaseType, String fancyName, String connectionDriver, String jdbcUrlDriverId, String connectorJarName) {
-        this(ambariVendor, databaseType, fancyName, connectionDriver, jdbcUrlDriverId, connectorJarName, Collections.emptySet());
+    DatabaseVendor(String ambariVendor, String databaseType, String displayName, String fancyName, String connectionDriver, String jdbcUrlDriverId,
+            String connectorJarName) {
+        this(ambariVendor, databaseType, displayName, fancyName, connectionDriver, jdbcUrlDriverId, connectorJarName, Collections.emptySet());
     }
 
     public final String ambariVendor() {
@@ -67,6 +70,10 @@ public enum DatabaseVendor {
 
     public String connectorJarName() {
         return connectorJarName;
+    }
+
+    public String displayName() {
+        return displayName;
     }
 
     public Set<String> versions() {

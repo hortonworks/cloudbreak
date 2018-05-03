@@ -47,8 +47,10 @@ public class ConfigTemplateTest {
                         ldapConfigWhenLdapPresentedThenShouldReturnWithLdapConfig() },
                 { "blueprints/configurations/atlas/ldap.handlebars", "configurations/atlas/atlas-without-ldap.json",
                         withoutLdapConfigWhenLdapNotPresentedThenShouldReturnWithoutLdapConfig() },
-                {"blueprints/configurations/druid_superset/rds.handlebars", "configurations/druid_superset/druid-with-rds.json",
-                        druidSupersetRdsConfigWhenRdsPresentedThenShouldReturnWithRdsConfig() },
+                {"blueprints/configurations/druid_superset/rds.handlebars", "configurations/druid_superset/druid-with-postgres-rds.json",
+                        druidSupersetRdsConfigWhenRdsPresentedThenShouldReturnWithPostgresRdsConfig() },
+                {"blueprints/configurations/druid_superset/rds.handlebars", "configurations/druid_superset/druid-with-mysql-rds.json",
+                        druidSupersetRdsConfigWhenRdsPresentedThenShouldReturnWithMySQLRdsConfig() },
                 {"blueprints/configurations/druid_superset/rds.handlebars", "configurations/druid_superset/druid-without-rds.json",
                         druidSupersetWithoutRdsConfigWhenRdsNotPresentedThenShouldReturnWithoutRdsConfig() },
                 { "blueprints/configurations/superset/rds.handlebars", "configurations/superset/superset-with-rds.json",
@@ -61,8 +63,14 @@ public class ConfigTemplateTest {
                         withoutLdapConfigWhenLdapNotPresentedThenShouldReturnWithoutLdapConfig() },
                 { "blueprints/configurations/hadoop/global.handlebars", "configurations/hadoop/global.json",
                         objectWithoutEverything() },
-                { "blueprints/configurations/hive/rds.handlebars", "configurations/hive/hive-with-rds.json",
-                        hiveRdsConfigWhenRdsPresentedThenShouldReturnWithRdsConfig() },
+                { "blueprints/configurations/hive/rds.handlebars", "configurations/hive/hive-with-postgres-rds.json",
+                        hiveRdsConfigWhenRdsPresentedThenShouldReturnWithPotgresRdsConfig() },
+                { "blueprints/configurations/hive/rds.handlebars", "configurations/hive/hive-with-oracle11-rds.json",
+                        hiveRdsConfigWhenRdsPresentedThenShouldReturnWithOracle11RdsConfig() },
+                { "blueprints/configurations/hive/rds.handlebars", "configurations/hive/hive-with-oracle12-rds.json",
+                        hiveRdsConfigWhenRdsPresentedThenShouldReturnWithOracle12RdsConfig() },
+                { "blueprints/configurations/hive/rds.handlebars", "configurations/hive/hive-with-mysql-rds.json",
+                        hiveRdsConfigWhenRdsPresentedThenShouldReturnWithMySQLRdsConfig() },
                 { "blueprints/configurations/hive/rds.handlebars", "configurations/hive/hive-without-rds.json",
                         objectWithoutEverything() },
                 { "blueprints/configurations/llap/global.handlebars", "configurations/llap/global.json",
@@ -81,10 +89,14 @@ public class ConfigTemplateTest {
                         ldapConfigWhenLdapPresentedThenShouldReturnWithLdapConfig() },
                 { "blueprints/configurations/ranger/ldap.handlebars", "configurations/ranger/ranger-without-ldap.json",
                         withoutLdapConfigWhenLdapNotPresentedThenShouldReturnWithoutLdapConfig() },
-                { "blueprints/configurations/ranger/rds.handlebars", "configurations/ranger/ranger-with-rds.json",
-                        rangerRdsConfigWhenRdsPresentedThenShouldReturnWithRdsConfig() },
-                { "blueprints/configurations/ranger/rds.handlebars", "configurations/ranger/ranger-with-oracle-rds.json",
-                        rangerRdsConfigWhenOracleRdsPresentedThenShouldReturnWithRdsConfig() },
+                { "blueprints/configurations/ranger/rds.handlebars", "configurations/ranger/ranger-with-postgres-rds.json",
+                        rangerRdsConfigWhenRdsPresentedThenShouldReturnWithPostgresRdsConfig() },
+                { "blueprints/configurations/ranger/rds.handlebars", "configurations/ranger/ranger-with-mysql-rds.json",
+                        rangerRdsConfigWhenRdsPresentedThenShouldReturnWithMySQLRdsConfig() },
+                { "blueprints/configurations/ranger/rds.handlebars", "configurations/ranger/ranger-with-oracle11-rds.json",
+                        rangerRdsConfigWhenRdsPresentedThenShouldReturnWitOracle11hRdsConfig() },
+                { "blueprints/configurations/ranger/rds.handlebars", "configurations/ranger/ranger-with-oracle12-rds.json",
+                        rangerRdsConfigWhenRdsPresentedThenShouldReturnWitOracle12hRdsConfig() },
                 { "blueprints/configurations/ranger/rds.handlebars", "configurations/ranger/ranger-without-rds.json",
                         objectWithoutEverything() },
                 { "blueprints/configurations/yarn/global.handlebars", "configurations/yarn/global-without-container.json",
@@ -99,16 +111,24 @@ public class ConfigTemplateTest {
                         hiveWhenLdapPresentedThenShouldReturnWithLdapConfigs() },
                 { "blueprints/configurations/hive/ldap.handlebars", "configurations/hive/hive-without-ldap.json",
                         hiveWhenLdapNotPresentedThenShouldReturnWithoutLdapConfigs() },
-                { "blueprints/configurations/oozie/rds.handlebars", "configurations/oozie/oozie-with-rds.json",
-                        oozieWhenRdsPresentedThenShouldReturnWithRdsConfigs() },
+                { "blueprints/configurations/oozie/rds.handlebars", "configurations/oozie/oozie-with-postgres-rds.json",
+                        oozieWhenRdsPresentedThenShouldReturnWithPostgresRdsConfigs() },
+                { "blueprints/configurations/oozie/rds.handlebars", "configurations/oozie/oozie-with-mysql-rds.json",
+                        oozieWhenRdsPresentedThenShouldReturnWithMySQLRdsConfigs() },
+                { "blueprints/configurations/oozie/rds.handlebars", "configurations/oozie/oozie-with-oracle11-rds.json",
+                        oozieWhenRdsPresentedThenShouldReturnWithOracle11RdsConfigs() },
+                { "blueprints/configurations/oozie/rds.handlebars", "configurations/oozie/oozie-with-oracle12-rds.json",
+                        oozieWhenRdsPresentedThenShouldReturnWithOracle12RdsConfigs() },
                 { "blueprints/configurations/oozie/rds.handlebars", "configurations/oozie/oozie-without-rds.json",
                         objectWithoutEverything() },
                 { "blueprints/configurations/webhcat/global.handlebars", "configurations/webhcat/webhcat.json",
                         objectWithoutEverything() },
                 { "blueprints/configurations/druid/rds.handlebars", "configurations/druid/druid-without-rds.json",
                         druidWithoutRdsConfigWhenRdsNotPresentedThenShouldReturnWithoutRdsConfig() },
-                { "blueprints/configurations/druid/rds.handlebars", "configurations/druid/druid-with-rds.json",
-                        druidRdsConfigWhenRdsPresentedThenShouldReturnWithRdsConfig() },
+                { "blueprints/configurations/druid/rds.handlebars", "configurations/druid/druid-with-postgres-rds.json",
+                        druidRdsConfigWhenRdsPresentedThenShouldReturnWithPostgresRdsConfig() },
+                { "blueprints/configurations/druid/rds.handlebars", "configurations/druid/druid-with-mysql-rds.json",
+                        druidRdsConfigWhenRdsPresentedThenShouldReturnWithMySQLRdsConfig() },
         });
     }
 
@@ -126,9 +146,27 @@ public class ConfigTemplateTest {
                 .build();
     }
 
-    public static Map<String, Object> oozieWhenRdsPresentedThenShouldReturnWithRdsConfigs() {
+    public static Map<String, Object> oozieWhenRdsPresentedThenShouldReturnWithPostgresRdsConfigs() {
         return new BlueprintTemplateModelContextBuilder()
-                .withRdsConfigs(Sets.newHashSet(TestUtil.rdsConfig(RdsType.OOZIE)))
+                .withRdsConfigs(Sets.newHashSet(TestUtil.rdsConfig(RdsType.OOZIE, DatabaseVendor.POSTGRES)))
+                .build();
+    }
+
+    public static Map<String, Object> oozieWhenRdsPresentedThenShouldReturnWithOracle11RdsConfigs() {
+        return new BlueprintTemplateModelContextBuilder()
+                .withRdsConfigs(Sets.newHashSet(TestUtil.rdsConfig(RdsType.OOZIE, DatabaseVendor.ORACLE11)))
+                .build();
+    }
+
+    public static Map<String, Object> oozieWhenRdsPresentedThenShouldReturnWithOracle12RdsConfigs() {
+        return new BlueprintTemplateModelContextBuilder()
+                .withRdsConfigs(Sets.newHashSet(TestUtil.rdsConfig(RdsType.OOZIE, DatabaseVendor.ORACLE12)))
+                .build();
+    }
+
+    public static Map<String, Object> oozieWhenRdsPresentedThenShouldReturnWithMySQLRdsConfigs() {
+        return new BlueprintTemplateModelContextBuilder()
+                .withRdsConfigs(Sets.newHashSet(TestUtil.rdsConfig(RdsType.OOZIE, DatabaseVendor.MYSQL)))
                 .build();
     }
 
@@ -182,9 +220,19 @@ public class ConfigTemplateTest {
                 .build();
     }
 
-    public static Map<String, Object> druidSupersetRdsConfigWhenRdsPresentedThenShouldReturnWithRdsConfig() {
+    public static Map<String, Object> druidSupersetRdsConfigWhenRdsPresentedThenShouldReturnWithPostgresRdsConfig() {
         return new BlueprintTemplateModelContextBuilder()
-                .withRdsConfigs(Sets.newHashSet(TestUtil.rdsConfig(RdsType.SUPERSET)))
+                .withRdsConfigs(Sets.newHashSet(TestUtil.rdsConfig(RdsType.SUPERSET, DatabaseVendor.POSTGRES)))
+                .withClusterAdminPassword("adminPassword")
+                .withClusterAdminLastname("lastname")
+                .withClusterAdminFirstname("firstname")
+                .withAdminEmail("admin@example.com")
+                .build();
+    }
+
+    public static Map<String, Object> druidSupersetRdsConfigWhenRdsPresentedThenShouldReturnWithMySQLRdsConfig() {
+        return new BlueprintTemplateModelContextBuilder()
+                .withRdsConfigs(Sets.newHashSet(TestUtil.rdsConfig(RdsType.SUPERSET, DatabaseVendor.MYSQL)))
                 .withClusterAdminPassword("adminPassword")
                 .withClusterAdminLastname("lastname")
                 .withClusterAdminFirstname("firstname")
@@ -201,9 +249,19 @@ public class ConfigTemplateTest {
                 .build();
     }
 
-    public static Map<String, Object> druidRdsConfigWhenRdsPresentedThenShouldReturnWithRdsConfig() {
+    public static Map<String, Object> druidRdsConfigWhenRdsPresentedThenShouldReturnWithPostgresRdsConfig() {
         return new BlueprintTemplateModelContextBuilder()
-                .withRdsConfigs(Sets.newHashSet(TestUtil.rdsConfig(RdsType.DRUID)))
+                .withRdsConfigs(Sets.newHashSet(TestUtil.rdsConfig(RdsType.DRUID, DatabaseVendor.POSTGRES)))
+                .withClusterAdminPassword("adminPassword")
+                .withClusterAdminLastname("lastname")
+                .withClusterAdminFirstname("firstname")
+                .withAdminEmail("admin@example.com")
+                .build();
+    }
+
+    public static Map<String, Object> druidRdsConfigWhenRdsPresentedThenShouldReturnWithMySQLRdsConfig() {
+        return new BlueprintTemplateModelContextBuilder()
+                .withRdsConfigs(Sets.newHashSet(TestUtil.rdsConfig(RdsType.DRUID, DatabaseVendor.MYSQL)))
                 .withClusterAdminPassword("adminPassword")
                 .withClusterAdminLastname("lastname")
                 .withClusterAdminFirstname("firstname")
@@ -257,9 +315,27 @@ public class ConfigTemplateTest {
                 .build();
     }
 
-    public static Map<String, Object> hiveRdsConfigWhenRdsPresentedThenShouldReturnWithRdsConfig() {
+    public static Map<String, Object> hiveRdsConfigWhenRdsPresentedThenShouldReturnWithPotgresRdsConfig() {
         return new BlueprintTemplateModelContextBuilder()
-                .withRdsConfigs(Sets.newHashSet(TestUtil.rdsConfig(RdsType.HIVE)))
+                .withRdsConfigs(Sets.newHashSet(TestUtil.rdsConfig(RdsType.HIVE, DatabaseVendor.POSTGRES)))
+                .build();
+    }
+
+    public static Map<String, Object> hiveRdsConfigWhenRdsPresentedThenShouldReturnWithOracle11RdsConfig() {
+        return new BlueprintTemplateModelContextBuilder()
+                .withRdsConfigs(Sets.newHashSet(TestUtil.rdsConfig(RdsType.HIVE, DatabaseVendor.ORACLE11)))
+                .build();
+    }
+
+    public static Map<String, Object> hiveRdsConfigWhenRdsPresentedThenShouldReturnWithOracle12RdsConfig() {
+        return new BlueprintTemplateModelContextBuilder()
+                .withRdsConfigs(Sets.newHashSet(TestUtil.rdsConfig(RdsType.HIVE, DatabaseVendor.ORACLE12)))
+                .build();
+    }
+
+    public static Map<String, Object> hiveRdsConfigWhenRdsPresentedThenShouldReturnWithMySQLRdsConfig() {
+        return new BlueprintTemplateModelContextBuilder()
+                .withRdsConfigs(Sets.newHashSet(TestUtil.rdsConfig(RdsType.HIVE, DatabaseVendor.MYSQL)))
                 .build();
     }
 
@@ -274,8 +350,8 @@ public class ConfigTemplateTest {
                 .build();
     }
 
-    public static Map<String, Object> rangerRdsConfigWhenRdsPresentedThenShouldReturnWithRdsConfig() throws JsonProcessingException {
-        RDSConfig rdsConfig = TestUtil.rdsConfig(RdsType.RANGER);
+    public static Map<String, Object> rangerRdsConfigWhenRdsPresentedThenShouldReturnWithPostgresRdsConfig() throws JsonProcessingException {
+        RDSConfig rdsConfig = TestUtil.rdsConfig(RdsType.RANGER, DatabaseVendor.POSTGRES);
 
         // TODO we should somehow handle this
         //Map<String, String> attributes = new HashMap<>();
@@ -287,8 +363,34 @@ public class ConfigTemplateTest {
                 .build();
     }
 
-    public static Map<String, Object> rangerRdsConfigWhenOracleRdsPresentedThenShouldReturnWithRdsConfig() throws JsonProcessingException {
+    public static Map<String, Object> rangerRdsConfigWhenRdsPresentedThenShouldReturnWithMySQLRdsConfig() throws JsonProcessingException {
+        RDSConfig rdsConfig = TestUtil.rdsConfig(RdsType.RANGER, DatabaseVendor.MYSQL);
+
+        // TODO we should somehow handle this
+        //Map<String, String> attributes = new HashMap<>();
+        //attributes.put("rangerAdminPassword", "rangerAdminPassword");
+        //rdsConfig.setAttributes(new Json(attributes));
+
+        return new BlueprintTemplateModelContextBuilder()
+                .withRdsConfigs(Sets.newHashSet(rdsConfig))
+                .build();
+    }
+
+    public static Map<String, Object> rangerRdsConfigWhenRdsPresentedThenShouldReturnWitOracle11hRdsConfig() throws JsonProcessingException {
         RDSConfig rdsConfig = TestUtil.rdsConfig(RdsType.RANGER, DatabaseVendor.ORACLE11);
+
+        // TODO we should somehow handle this
+        //Map<String, String> attributes = new HashMap<>();
+        //attributes.put("rangerAdminPassword", "rangerAdminPassword");
+        //rdsConfig.setAttributes(new Json(attributes));
+
+        return new BlueprintTemplateModelContextBuilder()
+                .withRdsConfigs(Sets.newHashSet(rdsConfig))
+                .build();
+    }
+
+    public static Map<String, Object> rangerRdsConfigWhenRdsPresentedThenShouldReturnWitOracle12hRdsConfig() throws JsonProcessingException {
+        RDSConfig rdsConfig = TestUtil.rdsConfig(RdsType.RANGER, DatabaseVendor.ORACLE12);
 
         // TODO we should somehow handle this
         //Map<String, String> attributes = new HashMap<>();

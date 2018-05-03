@@ -36,7 +36,7 @@ public final class SupportedDatabaseProvider {
         entry.setName(name.toUpperCase());
         entry.setDisplayName(name);
         for (DatabaseVendor vendor : vendors) {
-            entry.getDatabases().add(new SupportedDatabaseEntry(vendor.name(), vendor.fancyName(), vendor.jdbcUrlDriverId(), vendor.versions()));
+            entry.getDatabases().add(new SupportedDatabaseEntry(vendor.name(), vendor.displayName(), vendor.jdbcUrlDriverId(), vendor.versions()));
         }
         return entry;
     }

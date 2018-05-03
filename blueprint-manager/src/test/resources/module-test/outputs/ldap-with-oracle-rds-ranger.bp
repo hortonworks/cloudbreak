@@ -133,7 +133,7 @@
           "DB_FLAVOR": "ORACLE",
           "db_name": "ranger",
           "db_user": "heyitsme",
-          "db_host": "10.1.1.1:5432:ranger",
+          "db_host": "10.1.1.1:1521:ranger",
           "db_password": "iamsoosecure"
         }
       }
@@ -141,7 +141,7 @@
     {
       "ranger-env": {
         "properties": {
-          "ranger_privelege_user_jdbc_url": "jdbc:oracle:@10.1.1.1:5432",
+          "ranger_privelege_user_jdbc_url": "jdbc:oracle:@10.1.1.1:1521",
           "create_db_dbuser": "false"
         }
       }
