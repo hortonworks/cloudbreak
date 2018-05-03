@@ -24,6 +24,7 @@ import org.springframework.http.HttpStatus;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
+import com.sequenceiq.cloudbreak.orchestrator.model.BootstrapParams;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.GenericResponse;
 import com.sequenceiq.cloudbreak.orchestrator.model.GenericResponses;
@@ -75,7 +76,7 @@ public class SaltBootstrapTest {
         targets.add(new Node("10.0.0.2", null, null, "hg"));
         targets.add(new Node("10.0.0.3", null, null, "hg"));
 
-        SaltBootstrap saltBootstrap = new SaltBootstrap(saltConnector, Collections.singletonList(gatewayConfig), targets);
+        SaltBootstrap saltBootstrap = new SaltBootstrap(saltConnector, Collections.singletonList(gatewayConfig), targets, new BootstrapParams());
         try {
             saltBootstrap.call();
         } catch (Exception e) {
@@ -98,7 +99,7 @@ public class SaltBootstrapTest {
         String missingNodeIp = "10.0.0.3";
         targets.add(new Node(missingNodeIp, null, null, "hg"));
 
-        SaltBootstrap saltBootstrap = new SaltBootstrap(saltConnector, Collections.singletonList(gatewayConfig), targets);
+        SaltBootstrap saltBootstrap = new SaltBootstrap(saltConnector, Collections.singletonList(gatewayConfig), targets, new BootstrapParams());
         try {
             saltBootstrap.call();
             fail("should throw exception");
