@@ -634,7 +634,9 @@ public class TestUtil {
         rdsConfig.setConnectionPassword("iamsoosecure");
         rdsConfig.setConnectionUserName("heyitsme");
         if (databaseVendor == DatabaseVendor.ORACLE12 || databaseVendor == DatabaseVendor.ORACLE11) {
-            rdsConfig.setConnectionURL("jdbc:" + databaseVendor.jdbcUrlDriverId() + ":@10.1.1.1:5432:" + rdsType.name().toLowerCase());
+            rdsConfig.setConnectionURL("jdbc:" + databaseVendor.jdbcUrlDriverId() + ":@10.1.1.1:1521:" + rdsType.name().toLowerCase());
+        } else if (databaseVendor == DatabaseVendor.MYSQL) {
+            rdsConfig.setConnectionURL("jdbc:" + databaseVendor.jdbcUrlDriverId() + "://10.1.1.1:3306/" + rdsType.name().toLowerCase());
         } else {
             rdsConfig.setConnectionURL("jdbc:" + databaseVendor.jdbcUrlDriverId() + "://10.1.1.1:5432/" + rdsType.name().toLowerCase());
         }

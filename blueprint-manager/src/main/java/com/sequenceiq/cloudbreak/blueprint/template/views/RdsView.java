@@ -54,6 +54,8 @@ public class RdsView {
 
     private final String fancyName;
 
+    private final String displayName;
+
     private final String databaseType;
 
     private final String ambariVendor;
@@ -102,6 +104,7 @@ public class RdsView {
         DatabaseVendor databaseVendor = DatabaseVendor.valueOf(rdsConfig.getDatabaseEngine());
         lowerCaseDatabaseEngine = databaseVendor.ambariVendor().toLowerCase();
         fancyName = databaseVendor.fancyName();
+        displayName = databaseVendor.displayName();
         ambariVendor = databaseVendor.ambariVendor();
         vendor = ambariVendor;
         databaseType = databaseVendor.databaseType();
@@ -175,6 +178,10 @@ public class RdsView {
 
     public String getFancyName() {
         return fancyName;
+    }
+
+    public String getDisplayName() {
+        return displayName;
     }
 
     public String getAmbariVendor() {
