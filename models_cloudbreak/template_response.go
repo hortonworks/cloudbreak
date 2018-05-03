@@ -46,6 +46,9 @@ type TemplateResponse struct {
 	// resource is visible in account
 	Public *bool `json:"public,omitempty"`
 
+	// size of the root volume
+	RootVolumeSize int32 `json:"rootVolumeSize,omitempty"`
+
 	// id of the topology the resource belongs to
 	TopologyID int64 `json:"topologyId,omitempty"`
 
@@ -76,6 +79,8 @@ type TemplateResponse struct {
 /* polymorph TemplateResponse parameters false */
 
 /* polymorph TemplateResponse public false */
+
+/* polymorph TemplateResponse rootVolumeSize false */
 
 /* polymorph TemplateResponse topologyId false */
 

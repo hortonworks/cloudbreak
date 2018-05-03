@@ -26,6 +26,9 @@ type TemplateV2Request struct {
 	// cloud specific parameters for template
 	Parameters map[string]interface{} `json:"parameters,omitempty"`
 
+	// size of the root volume
+	RootVolumeSize int32 `json:"rootVolumeSize,omitempty"`
+
 	// number of volumes
 	VolumeCount int32 `json:"volumeCount,omitempty"`
 
@@ -41,6 +44,8 @@ type TemplateV2Request struct {
 /* polymorph TemplateV2Request instanceType false */
 
 /* polymorph TemplateV2Request parameters false */
+
+/* polymorph TemplateV2Request rootVolumeSize false */
 
 /* polymorph TemplateV2Request volumeCount false */
 

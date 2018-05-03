@@ -715,6 +715,36 @@ func (a *Client) PutsyncStackV2(params *PutsyncStackV2Params) error {
 }
 
 /*
+RetryStack retries stack and cluster provisioning of failed stack
+
+Failed or interrupted stack and cluster operations can be retried, after the cause of the failure was eliminated. The operations will continue at the state, where the previous process failed.
+*/
+func (a *Client) RetryStack(params *RetryStackParams) error {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewRetryStackParams()
+	}
+
+	_, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "retryStack",
+		Method:             "POST",
+		PathPattern:        "/v2/stacks/{name}/retry",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &RetryStackReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return err
+	}
+	return nil
+
+}
+
+/*
 StatusStackV2 retrieves stack status by stack id
 
 Stacks are template instances - a running cloud infrastructure created based on a template. Stacks are always launched on behalf of a cloud user account. Stacks support a wide range of resources, allowing you to build a highly available, reliable, and scalable infrastructure for your application needs.

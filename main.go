@@ -612,6 +612,18 @@ func main() {
 					},
 				},
 				{
+					Name:   "retry",
+					Usage:  "retries the creation of a cluster",
+					Before: ConfigRead,
+					Flags:  cb.NewFlagBuilder().AddFlags(cb.FlName, cb.FlWaitOptional).AddAuthenticationFlags().AddOutputFlag().Build(),
+					Action: cb.RetryCluster,
+					BashComplete: func(c *cli.Context) {
+						for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlName, cb.FlWaitOptional).AddAuthenticationFlags().AddOutputFlag().Build() {
+							printFlagCompletion(f)
+						}
+					},
+				},
+				{
 					Name:   "scale",
 					Usage:  "scales a cluster",
 					Before: ConfigRead,

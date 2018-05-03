@@ -24,7 +24,7 @@ type RdsConfig struct {
 
 	// JDBC connection URL in the form of jdbc:<db-type>://<address>:<port>/<db>
 	// Required: true
-	// Pattern: ^jdbc:(postgresql|mysql|oracle)://[-\w\.]*:\d{1,5}/?\w*
+	// Pattern: ^jdbc:(postgresql|mysql|oracle):(thin:@|//)[-\w\.]*:\d{1,5}/?:?\w*
 	ConnectionURL *string `json:"connectionURL"`
 
 	// Username to use for the jdbc connection
@@ -34,6 +34,7 @@ type RdsConfig struct {
 	// URL that points to the jar of the connection driver(connector)
 	// Max Length: 150
 	// Min Length: 0
+	// Pattern: ^http[s]?://[\w-/?=+&:,#.]*
 	ConnectorJarURL *string `json:"connectorJarUrl,omitempty"`
 
 	// Name of the RDS configuration resource
@@ -128,7 +129,7 @@ func (m *RdsConfig) validateConnectionURL(formats strfmt.Registry) error {
 		return err
 	}
 
-	if err := validate.Pattern("connectionURL", "body", string(*m.ConnectionURL), `^jdbc:(postgresql|mysql|oracle)://[-\w\.]*:\d{1,5}/?\w*`); err != nil {
+	if err := validate.Pattern("connectionURL", "body", string(*m.ConnectionURL), `^jdbc:(postgresql|mysql|oracle):(thin:@|//)[-\w\.]*:\d{1,5}/?:?\w*`); err != nil {
 		return err
 	}
 
@@ -155,6 +156,10 @@ func (m *RdsConfig) validateConnectorJarURL(formats strfmt.Registry) error {
 	}
 
 	if err := validate.MaxLength("connectorJarUrl", "body", string(*m.ConnectorJarURL), 150); err != nil {
+		return err
+	}
+
+	if err := validate.Pattern("connectorJarUrl", "body", string(*m.ConnectorJarURL), `^http[s]?://[\w-/?=+&:,#.]*`); err != nil {
 		return err
 	}
 

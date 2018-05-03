@@ -232,6 +232,24 @@ func RepairStack(c *cli.Context) {
 	}
 }
 
+func RetryCluster(c *cli.Context) {
+	checkRequiredFlagsAndArguments(c)
+	defer utils.TimeTrack(time.Now(), "retry cluster creation")
+
+	cbClient := NewCloudbreakHTTPClientFromContext(c)
+	name := c.String(FlName.Name)
+	log.Infof("[RetryCluster] retrying cluster creation, name: %s", name)
+	err := cbClient.Cloudbreak.V2stacks.RetryStack(v2stacks.NewRetryStackParams().WithName(name))
+	if err != nil {
+		utils.LogErrorAndExit(err)
+	}
+	log.Infof("[RetryCluster] cluster creation retried, name: %s", name)
+
+	if c.Bool(FlWaitOptional.Name) {
+		cbClient.waitForOperationToFinish(name, AVAILABLE, AVAILABLE)
+	}
+}
+
 func ReinstallStack(c *cli.Context) {
 	checkRequiredFlagsAndArguments(c)
 	defer utils.TimeTrack(time.Now(), "reinstall stack")
