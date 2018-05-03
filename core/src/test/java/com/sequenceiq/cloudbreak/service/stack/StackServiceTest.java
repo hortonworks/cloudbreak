@@ -267,7 +267,6 @@ public class StackServiceTest {
         when(connector.getPlatformParameters(stack)).thenReturn(parameters);
 
         try {
-            Optional<String> imageId = Optional.of("IMAGE_ID");
             stack = underTest.create(user, stack, "AWS", mock(StatedImage.class));
         } finally {
             verify(stack, times(1)).setPlatformVariant(eq(VARIANT_VALUE));
