@@ -87,6 +87,7 @@ import com.sequenceiq.cloudbreak.service.credential.OpenSshPublicKeyValidator;
 import com.sequenceiq.cloudbreak.service.decorator.StackResponseDecorator;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
+import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderConnectorAdapter;
 import com.sequenceiq.cloudbreak.util.PasswordUtil;
@@ -330,7 +331,7 @@ public class StackService {
     }
 
     @Transactional(TxType.NEVER)
-    public Stack create(IdentityUser user, Stack stack, String imageCatalog, Optional<String> imageId, Optional<Blueprint> blueprint) {
+    public Stack create(IdentityUser user, Stack stack, String platformString, StatedImage imgFromCatalog) {
         Stack savedStack;
         stack.setOwner(user.getUserId());
         stack.setAccount(user.getAccount());
@@ -388,7 +389,7 @@ public class StackService {
             savedStack.setSecurityConfig(securityConfig);
 
             start = System.currentTimeMillis();
-            imageService.create(savedStack, connector.getPlatformParameters(stack), imageCatalog, imageId, blueprint);
+            imageService.create(savedStack, platformString, connector.getPlatformParameters(stack), imgFromCatalog);
             LOGGER.info("Image creation took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
         } catch (DataIntegrityViolationException ex) {
@@ -396,7 +397,13 @@ public class StackService {
             throw new BadRequestException(msg);
         } catch (CloudbreakImageNotFoundException e) {
             LOGGER.error("Cloudbreak Image not found", e);
-            stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.PROVISION_FAILED, "Image not found by id: " + imageId.get());
+            if (imgFromCatalog.getImage() != null) {
+                stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.PROVISION_FAILED,
+                        "Image not found by id: " + imgFromCatalog.getImage().getUuid());
+            } else {
+                stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.PROVISION_FAILED,
+                        "Image not found: " + imgFromCatalog.getImage());
+            }
             throw new CloudbreakApiException(e.getMessage(), e);
         } catch (CloudbreakImageCatalogException e) {
             LOGGER.error("Cloudbreak Image Catalog error", e);

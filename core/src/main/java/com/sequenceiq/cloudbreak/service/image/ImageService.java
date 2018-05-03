@@ -75,11 +75,10 @@ public class ImageService {
     }
 
     @Transactional(TxType.NEVER)
-    public void create(Stack stack, PlatformParameters params, String imageCatalog, Optional<String> imageId, Optional<Blueprint> blueprint)
+    public void create(Stack stack, String platformString, PlatformParameters params, StatedImage imgFromCatalog)
             throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         try {
             Platform platform = platform(stack.cloudPlatform());
-            String platformString = platform(stack.cloudPlatform()).value().toLowerCase();
             String region = stack.getRegion();
             SecurityConfig securityConfig = stack.getSecurityConfig();
             String cbPrivKey = securityConfig.getCloudbreakSshPrivateKeyDecoded();
@@ -89,7 +88,6 @@ public class ImageService {
             Map<InstanceGroupType, String> userData = userDataBuilder.buildUserData(platform, cbSshKeyDer, sshUser, params,
                     securityConfig.getSaltBootPassword(), cbCert);
 
-            StatedImage imgFromCatalog = determineImageFromCatalog(imageId, platformString, imageCatalog, blueprint);
             LOGGER.info("Determined image from catalog: {}", imgFromCatalog);
 
             String imageName = determineImageName(platformString, region, imgFromCatalog.getImage());
@@ -106,17 +104,17 @@ public class ImageService {
         }
     }
 
-    private StatedImage determineImageFromCatalog(Optional<String> imageId, String platformString, String catalogName, Optional<Blueprint> blueprint)
+    public StatedImage determineImageFromCatalog(String imageId, String platformString, String catalogName, Blueprint blueprint, boolean forceBaseImage)
             throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         StatedImage statedImage;
-        if (imageId.isPresent()) {
-            statedImage = imageCatalogService.getImageByCatalogName(imageId.get(), catalogName);
+        if (imageId != null) {
+            statedImage = imageCatalogService.getImageByCatalogName(imageId, catalogName);
         } else {
             String clusterType = ImageCatalogService.UNDEFINED;
             String clusterVersion = ImageCatalogService.UNDEFINED;
-            if (blueprint.isPresent()) {
+            if (blueprint != null) {
                 try {
-                    JsonNode root = JsonUtil.readTree(blueprint.get().getBlueprintText());
+                    JsonNode root = JsonUtil.readTree(blueprint.getBlueprintText());
                     clusterType = blueprintUtils.getBlueprintStackName(root);
                     clusterVersion = blueprintUtils.getBlueprintHdpVersion(root);
                 } catch (IOException ex) {
@@ -126,7 +124,11 @@ public class ImageService {
             LOGGER.warn(
                     "Image id hasn't been specified for the stack, falling back to a prewarmed image of {}-{} or to a base image if prewarmed doesn't exist.",
                     clusterType, clusterVersion);
-            statedImage = imageCatalogService.getDefaultImage(platformString, clusterType, clusterVersion);
+            if (forceBaseImage) {
+                statedImage = imageCatalogService.getDefaultBaseImage(platformString);
+            } else {
+                statedImage = imageCatalogService.getDefaultImage(platformString, clusterType, clusterVersion);
+            }
         }
         return statedImage;
     }

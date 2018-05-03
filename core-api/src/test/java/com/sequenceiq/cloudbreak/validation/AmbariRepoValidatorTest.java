@@ -18,10 +18,17 @@ public class AmbariRepoValidatorTest {
     private AmbariRepoValidator ambariRepoValidator = new AmbariRepoValidator();
 
     @Test
+    public void testAmbari24() {
+        AmbariRepoDetailsJson ambariRepoDetailsJson = new AmbariRepoDetailsJson();
+        ambariRepoDetailsJson.setVersion("2.4");
+        assertFalse(ambariRepoValidator.isValid(ambariRepoDetailsJson, constraintValidatorContext));
+    }
+
+    @Test
     public void testAmbari25() {
         AmbariRepoDetailsJson ambariRepoDetailsJson = new AmbariRepoDetailsJson();
         ambariRepoDetailsJson.setVersion("2.5");
-        assertFalse(ambariRepoValidator.isValid(ambariRepoDetailsJson, constraintValidatorContext));
+        assertTrue(ambariRepoValidator.isValid(ambariRepoDetailsJson, constraintValidatorContext));
     }
 
     @Test
@@ -42,6 +49,13 @@ public class AmbariRepoValidatorTest {
     public void testAmbari25WithMinor() {
         AmbariRepoDetailsJson ambariRepoDetailsJson = new AmbariRepoDetailsJson();
         ambariRepoDetailsJson.setVersion("2.5.2");
+        assertTrue(ambariRepoValidator.isValid(ambariRepoDetailsJson, constraintValidatorContext));
+    }
+
+    @Test
+    public void testAmbari24WithMinor() {
+        AmbariRepoDetailsJson ambariRepoDetailsJson = new AmbariRepoDetailsJson();
+        ambariRepoDetailsJson.setVersion("2.4.2");
         assertFalse(ambariRepoValidator.isValid(ambariRepoDetailsJson, constraintValidatorContext));
     }
 

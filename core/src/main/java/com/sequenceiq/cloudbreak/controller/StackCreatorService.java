@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.controller;
 
-import java.util.Optional;
+import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
 
 import javax.inject.Inject;
 
@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.api.model.ClusterRequest;
 import com.sequenceiq.cloudbreak.api.model.StackRequest;
 import com.sequenceiq.cloudbreak.api.model.StackResponse;
 import com.sequenceiq.cloudbreak.api.model.StackValidationRequest;
@@ -32,6 +33,8 @@ import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.account.AccountPreferencesValidationException;
 import com.sequenceiq.cloudbreak.service.account.AccountPreferencesValidator;
 import com.sequenceiq.cloudbreak.service.decorator.StackDecorator;
+import com.sequenceiq.cloudbreak.service.image.ImageService;
+import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @Service
@@ -62,6 +65,9 @@ public class StackCreatorService {
 
     @Inject
     private ReactorFlowManager flowManager;
+
+    @Inject
+    private ImageService imageService;
 
     @Inject
     @Qualifier("conversionService")
@@ -144,8 +150,12 @@ public class StackCreatorService {
             LOGGER.info("Cluster has been validated in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
         }
 
+        String platformString = platform(stack.cloudPlatform()).value().toLowerCase();
+        StatedImage imgFromCatalog = imageService.determineImageFromCatalog(stackRequest.getImageId(), platformString,
+                stackRequest.getImageCatalog(), blueprint, forceBaseImage(stackRequest.getClusterRequest()));
+
         start = System.currentTimeMillis();
-        stack = stackService.create(user, stack, stackRequest.getImageCatalog(), Optional.ofNullable(stackRequest.getImageId()), Optional.ofNullable(blueprint));
+        stack = stackService.create(user, stack, platformString, imgFromCatalog);
         LOGGER.info("Stack object and its dependencies has been created in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
         createClusterIfNeed(user, stackRequest, stack, stackName, blueprint);
@@ -159,6 +169,10 @@ public class StackCreatorService {
         LOGGER.info("Stack provision triggered in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
         return response;
+    }
+
+    private boolean forceBaseImage(ClusterRequest clusterRequest) {
+        return clusterRequest.getAmbariRepoDetailsJson() != null;
     }
 
     private void createClusterIfNeed(IdentityUser user, StackRequest stackRequest, Stack stack, String stackName, Blueprint blueprint) throws Exception {

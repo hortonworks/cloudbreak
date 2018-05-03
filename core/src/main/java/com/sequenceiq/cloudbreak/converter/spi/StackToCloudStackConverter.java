@@ -205,6 +205,7 @@ public class StackToCloudStackConverter {
         String id = instanceMetaData == null ? null : instanceMetaData.getInstanceId();
         String hostName = instanceMetaData == null ? null : instanceMetaData.getShortHostname();
         String subnetId = instanceMetaData == null ? null : instanceMetaData.getSubnetId();
+        String instanceName = instanceMetaData == null ? null : instanceMetaData.getInstanceName();
 
         InstanceTemplate instanceTemplate = buildInstanceTemplate(template, name, privateId, status);
         InstanceAuthentication instanceAuthentication = buildInstanceAuthentication(stackAuthentication);
@@ -214,6 +215,9 @@ public class StackToCloudStackConverter {
         }
         if (subnetId != null) {
             params.put(CloudInstance.SUBNET_ID, subnetId);
+        }
+        if (instanceName != null) {
+            params.put(CloudInstance.INSTANCE_NAME, instanceName);
         }
         return new CloudInstance(id, instanceTemplate, instanceAuthentication, params);
     }

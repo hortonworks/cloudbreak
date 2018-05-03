@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.stack;
 
 import static com.sequenceiq.cloudbreak.api.model.InstanceMetadataType.CORE;
 import static com.sequenceiq.cloudbreak.api.model.InstanceMetadataType.GATEWAY;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyObject;
@@ -9,11 +10,10 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
-import java.util.Optional;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -47,6 +47,7 @@ import com.sequenceiq.cloudbreak.service.AuthorizationService;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
+import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderConnectorAdapter;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -230,12 +231,14 @@ public class StackServiceTest {
         when(tlsSecurityService.storeSSHKeys()).thenReturn(securityConfig);
         when(connector.getPlatformParameters(stack)).thenReturn(parameters);
 
-        Optional<String> imageId = Optional.of("IMAGE_ID");
-        doThrow(new CloudbreakImageNotFoundException("Image not found")).when(imageService).create(stack, parameters, IMAGE_CATALOG, imageId, Optional.empty());
+        String platformString = "AWS";
+        doThrow(new CloudbreakImageNotFoundException("Image not found"))
+                .when(imageService)
+                .create(eq(stack), eq(platformString), eq(parameters), nullable(StatedImage.class));
 
         when(stack.getId()).thenReturn(Long.MAX_VALUE);
         try {
-            stack = underTest.create(user, stack, IMAGE_CATALOG, imageId, Optional.empty());
+            stack = underTest.create(user, stack, platformString, mock(StatedImage.class));
         } finally {
             verify(stack, times(1)).setPlatformVariant(eq(VARIANT_VALUE));
             verify(securityConfig, times(1)).setSaltPassword(anyObject());
@@ -262,8 +265,7 @@ public class StackServiceTest {
         when(connector.getPlatformParameters(stack)).thenReturn(parameters);
 
         try {
-            Optional<String> imageId = Optional.of("IMAGE_ID");
-            stack = underTest.create(user, stack, IMAGE_CATALOG, imageId, Optional.empty());
+            stack = underTest.create(user, stack, "AWS", mock(StatedImage.class));
         } finally {
             verify(stack, times(1)).setPlatformVariant(eq(VARIANT_VALUE));
             verify(securityConfig, times(1)).setSaltPassword(anyObject());
