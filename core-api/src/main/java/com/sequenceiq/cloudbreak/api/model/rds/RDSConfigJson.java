@@ -36,7 +36,7 @@ public abstract class RDSConfigJson implements JsonEntity {
 
     @ApiModelProperty(RDSConfig.CONNECTOR_JAR_URL)
     @Size(max = 150, message = "The length of the connectorJarUrl has to be in range of 0 to 150")
-    @Pattern(regexp = "^(?![\\s\\S])|http[s]://[\\w-/?=+&:,#.]*", message = "The URL must be proper and valid!")
+    @Pattern(regexp = "^http[s]?://[\\w-/?=+&:,#.]*", message = "The URL must be proper and valid!")
     private String connectorJarUrl;
 
     public String getConnectionURL() {
