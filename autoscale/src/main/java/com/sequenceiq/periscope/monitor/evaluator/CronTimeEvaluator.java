@@ -1,6 +1,9 @@
 package com.sequenceiq.periscope.monitor.evaluator;
 
+import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.inject.Inject;
 
@@ -17,7 +20,7 @@ import com.sequenceiq.periscope.monitor.MonitorUpdateRate;
 import com.sequenceiq.periscope.monitor.event.ScalingEvent;
 import com.sequenceiq.periscope.repository.TimeAlertRepository;
 import com.sequenceiq.periscope.service.ClusterService;
-import com.sequenceiq.periscope.utils.DateUtils;
+import com.sequenceiq.periscope.service.DateService;
 
 @Component("CronTimeEvaluator")
 @Scope("prototype")
@@ -32,7 +35,7 @@ public class CronTimeEvaluator extends AbstractEventPublisher implements Evaluat
     private ClusterService clusterService;
 
     @Inject
-    private DateUtils dateUtils;
+    private DateService dateService;
 
     private long clusterId;
 
@@ -42,7 +45,11 @@ public class CronTimeEvaluator extends AbstractEventPublisher implements Evaluat
     }
 
     private boolean isTrigger(TimeAlert alert) {
-        return dateUtils.isTrigger(alert, MonitorUpdateRate.CLUSTER_UPDATE_RATE);
+        return dateService.isTrigger(alert, MonitorUpdateRate.CLUSTER_UPDATE_RATE);
+    }
+
+    private boolean isTrigger(TimeAlert alert, ZonedDateTime zdt) {
+        return dateService.isTrigger(alert, MonitorUpdateRate.CLUSTER_UPDATE_RATE, zdt);
     }
 
     private boolean isPolicyAttached(BaseAlert alert) {
@@ -53,13 +60,30 @@ public class CronTimeEvaluator extends AbstractEventPublisher implements Evaluat
     public void run() {
         Cluster cluster = clusterService.find(clusterId);
         MDCBuilder.buildMdcContext(cluster);
+        publishIfNeeded(alertRepository.findAllByCluster(clusterId));
+    }
 
-        for (TimeAlert alert : alertRepository.findAllByCluster(clusterId)) {
-            if (isTrigger(alert) && isPolicyAttached(alert)) {
-                LOGGER.info("Time alert '{}' triggers the '{}' scaling policy", alert.getName(), alert.getScalingPolicy().getName());
-                publishEvent(new ScalingEvent(alert));
+    public void publishIfNeeded(List<TimeAlert> alerts) {
+        for (TimeAlert alert : alerts) {
+            if (isPolicyAttached(alert) && isTrigger(alert)) {
+                publish(alert);
                 break;
             }
         }
+    }
+
+    public void publishIfNeeded(Map<TimeAlert, ZonedDateTime> alerts) {
+        for (Entry<TimeAlert, ZonedDateTime> alertEntry : alerts.entrySet()) {
+            TimeAlert alert = alertEntry.getKey();
+            if (isPolicyAttached(alert) && isTrigger(alert, alertEntry.getValue())) {
+                publish(alert);
+                break;
+            }
+        }
+    }
+
+    private void publish(TimeAlert alert) {
+        LOGGER.info("Time alert '{}' triggers the '{}' scaling policy", alert.getName(), alert.getScalingPolicy().getName());
+        publishEvent(new ScalingEvent(alert));
     }
 }

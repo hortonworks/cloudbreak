@@ -19,7 +19,7 @@ import com.sequenceiq.periscope.log.MDCBuilder;
 import com.sequenceiq.periscope.monitor.event.UpdateFailedEvent;
 import com.sequenceiq.periscope.service.ClusterService;
 import com.sequenceiq.periscope.service.configuration.CloudbreakClientConfiguration;
-import com.sequenceiq.periscope.utils.AmbariClientProvider;
+import com.sequenceiq.periscope.service.AmbariClientProvider;
 
 @Component("AmbariAgentHealthEvaluator")
 @Scope("prototype")

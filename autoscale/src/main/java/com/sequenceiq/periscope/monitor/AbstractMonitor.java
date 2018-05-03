@@ -32,6 +32,8 @@ public abstract class AbstractMonitor implements Monitor {
             EvaluatorExecutor evaluatorExecutor = applicationContext.getBean(getEvaluatorType().getSimpleName(), EvaluatorExecutor.class);
             evaluatorExecutor.setContext(getContext(cluster));
             executorService.submit(evaluatorExecutor);
+            cluster.setLastEvaulated(System.currentTimeMillis());
+            clusterService.save(cluster);
         }
     }
 
