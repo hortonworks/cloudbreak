@@ -77,6 +77,8 @@ public class Cluster {
 
     private String periscopeNodeId;
 
+    private long lastEvaulated;
+
     public Cluster() {
     }
 
@@ -207,7 +209,7 @@ public class Cluster {
     }
 
     public synchronized void setLastScalingActivityCurrent() {
-        lastScalingActivity = System.currentTimeMillis();
+        setLastScalingActivity(System.currentTimeMillis());
     }
 
     public boolean isRunning() {
@@ -248,6 +250,14 @@ public class Cluster {
 
     public void setPeriscopeNodeId(String periscopeNodeId) {
         this.periscopeNodeId = periscopeNodeId;
+    }
+
+    public long getLastEvaulated() {
+        return lastEvaulated;
+    }
+
+    public void setLastEvaulated(long lastEvaulated) {
+        this.lastEvaulated = lastEvaulated;
     }
 }
 

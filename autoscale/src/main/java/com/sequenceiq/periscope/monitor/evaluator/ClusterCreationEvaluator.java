@@ -29,7 +29,7 @@ import com.sequenceiq.periscope.service.ClusterService;
 import com.sequenceiq.periscope.service.HistoryService;
 import com.sequenceiq.periscope.service.security.TlsConfigurationException;
 import com.sequenceiq.periscope.service.security.TlsSecurityService;
-import com.sequenceiq.periscope.utils.AmbariClientProvider;
+import com.sequenceiq.periscope.service.AmbariClientProvider;
 
 @Component("ClusterCreationEvaluator")
 @Scope("prototype")

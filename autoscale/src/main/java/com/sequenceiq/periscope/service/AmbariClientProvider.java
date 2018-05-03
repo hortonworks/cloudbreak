@@ -1,4 +1,4 @@
-package com.sequenceiq.periscope.utils;
+package com.sequenceiq.periscope.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

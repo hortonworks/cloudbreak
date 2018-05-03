@@ -30,7 +30,6 @@ import com.sequenceiq.periscope.repository.ClusterRepository;
 import com.sequenceiq.periscope.repository.MetricAlertRepository;
 import com.sequenceiq.periscope.repository.PrometheusAlertRepository;
 import com.sequenceiq.periscope.repository.TimeAlertRepository;
-import com.sequenceiq.periscope.utils.AmbariClientProvider;
 
 import freemarker.template.Configuration;
 
