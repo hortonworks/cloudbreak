@@ -88,7 +88,7 @@ public class SmartSenseConfigProvider implements BlueprintComponentConfigProvide
     private String addSmartSenseServerToBp(BlueprintTextProcessor blueprintProcessor, Iterable<HostgroupView> hostgroupViews,
             Collection<String> hostGroupNames) {
         if (!blueprintProcessor.componentExistsInBlueprint(HST_SERVER_COMPONENT)) {
-            String aHostGroupName = hostGroupNames.stream().findFirst().get();
+            String aHostGroupName = hostGroupNames.stream().sorted(String::compareTo).findFirst().get();
             boolean singleNodeGatewayFound = false;
             for (HostgroupView hostGroup : hostgroupViews) {
                 if (hostGroup.isInstanceGroupConfigured() && GATEWAY.equals(hostGroup.getInstanceGroupType()) && hostGroup.getNodeCount().equals(1)) {
