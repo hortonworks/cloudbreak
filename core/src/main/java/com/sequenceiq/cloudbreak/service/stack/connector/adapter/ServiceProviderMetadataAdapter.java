@@ -67,7 +67,7 @@ public class ServiceProviderMetadataAdapter {
         CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
         List<CloudInstance> cloudInstances = cloudStackConverter.buildInstances(stack);
         List<CloudResource> cloudResources = cloudResourceConverter.convert(stack.getResources());
-        CollectMetadataRequest cmr = new CollectMetadataRequest(cloudContext, cloudCredential, cloudResources, cloudInstances);
+        CollectMetadataRequest cmr = new CollectMetadataRequest(cloudContext, cloudCredential, cloudResources, cloudInstances, cloudInstances);
         LOGGER.info("Triggering event: {}", cmr);
         eventBus.notify(CloudPlatformRequest.selector(CollectMetadataRequest.class), eventFactory.createEvent(cmr));
         try {

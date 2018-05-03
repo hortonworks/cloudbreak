@@ -219,7 +219,7 @@ public class AmbariClusterConnectorTest {
         when(ambariOperationService.waitForOperations(any(Stack.class), any(AmbariClient.class), any(StatusCheckerTask.class), anyMap(),
                 any(AmbariOperationType.class))).thenReturn(new ImmutablePair<>(PollingResult.SUCCESS, null));
         when(clusterRepository.save(any(Cluster.class))).thenReturn(cluster);
-        when(instanceMetadataRepository.save(anyCollection())).thenReturn(stack.getNotTerminatedInstanceMetaDataSet());
+        when(instanceMetadataRepository.save(anyCollection())).thenReturn(stack.getNotDeletedInstanceMetaDataSet());
         when(ambariClient.deleteUser(anyString())).thenReturn("");
         when(ambariClient.createUser(anyString(), anyString(), anyBoolean())).thenReturn("");
         when(ambariClient.changePassword(anyString(), anyString(), anyString(), anyBoolean())).thenReturn("");

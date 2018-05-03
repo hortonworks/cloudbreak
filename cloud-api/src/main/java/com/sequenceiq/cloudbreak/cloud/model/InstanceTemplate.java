@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.model;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import com.google.common.collect.ImmutableList;
 import com.sequenceiq.cloudbreak.cloud.model.generic.DynamicModel;
@@ -61,6 +62,28 @@ public class InstanceTemplate extends DynamicModel {
 
     public Long getTemplateId() {
         return templateId;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        InstanceTemplate that = (InstanceTemplate) o;
+        return Objects.equals(flavor, that.flavor)
+                && Objects.equals(groupName, that.groupName)
+                && Objects.equals(privateId, that.privateId)
+                && Objects.equals(volumes, that.volumes)
+                && status == that.status
+                && Objects.equals(templateId, that.templateId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(flavor, groupName, privateId, volumes, status, templateId);
     }
 
     @Override

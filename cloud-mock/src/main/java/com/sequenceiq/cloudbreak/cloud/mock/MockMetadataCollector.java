@@ -26,7 +26,8 @@ public class MockMetadataCollector implements MetadataCollector {
     private MockCredentialViewFactory mockCredentialViewFactory;
 
     @Override
-    public List<CloudVmMetaDataStatus> collect(AuthenticatedContext authenticatedContext, List<CloudResource> resources, List<CloudInstance> vms) {
+    public List<CloudVmMetaDataStatus> collect(AuthenticatedContext authenticatedContext, List<CloudResource> resources, List<CloudInstance> vms,
+            List<CloudInstance> knownInstances) {
         try {
             MockCredentialView mockCredentialView = mockCredentialViewFactory.createCredetialView(authenticatedContext.getCloudCredential());
             LOGGER.info("collect metadata from mock spi, server address: " + mockCredentialView.getMockEndpoint());

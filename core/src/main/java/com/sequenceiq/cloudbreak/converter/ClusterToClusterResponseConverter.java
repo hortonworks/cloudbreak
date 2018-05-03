@@ -292,7 +292,7 @@ public class ClusterToClusterResponseConverter extends AbstractConversionService
                 HostGroup actualHostgroup = hostGroupMap.get(hostGroupName);
                 String serviceAddress;
                 if (actualHostgroup.getConstraint().getInstanceGroup() != null) {
-                    InstanceMetaData next = actualHostgroup.getConstraint().getInstanceGroup().getNotTerminatedInstanceMetaDataSet().iterator().next();
+                    InstanceMetaData next = actualHostgroup.getConstraint().getInstanceGroup().getNotDeletedInstanceMetaDataSet().iterator().next();
                     serviceAddress = next.getPublicIpWrapper();
                 } else {
                     serviceAddress = actualHostgroup.getHostMetadata().iterator().next().getHostName();

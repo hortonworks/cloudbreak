@@ -7,11 +7,9 @@ import static com.sequenceiq.cloudbreak.api.model.Status.UPDATE_IN_PROGRESS;
 import static java.lang.String.format;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -30,11 +28,8 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
-import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.common.type.BillingStatus;
-import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
-import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
@@ -51,13 +46,9 @@ import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
-import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
-import com.sequenceiq.cloudbreak.service.stack.InstanceMetadataService;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.connector.OperationException;
 import com.sequenceiq.cloudbreak.service.stack.flow.MetadataSetupService;
-import com.sequenceiq.cloudbreak.service.stack.flow.StackScalingService;
 import com.sequenceiq.cloudbreak.service.stack.flow.TlsSetupService;
 import com.sequenceiq.cloudbreak.service.usages.UsageService;
 
@@ -73,21 +64,6 @@ public class StackUpscaleService {
     private FlowMessageService flowMessageService;
 
     @Inject
-    private StackScalingService stackScalingService;
-
-    @Inject
-    private StackService stackService;
-
-    @Inject
-    private InstanceMetaDataToCloudInstanceConverter metadataConverter;
-
-    @Inject
-    private ResourceToCloudResourceConverter cloudResourceConverter;
-
-    @Inject
-    private InstanceMetadataService instanceMetadataService;
-
-    @Inject
     private InstanceGroupRepository instanceGroupRepository;
 
     @Inject
@@ -101,9 +77,6 @@ public class StackUpscaleService {
 
     @Inject
     private CloudbreakEventService eventService;
-
-    @Inject
-    private HostGroupService hostGroupService;
 
     @Inject
     private StackToCloudStackConverter cloudStackConverter;
@@ -127,7 +100,6 @@ public class StackUpscaleService {
         LOGGER.info("Upscale stack result: {}", payload);
         List<CloudResourceStatus> results = payload.getResults();
         validateResourceResults(context.getCloudContext(), payload.getErrorDetails(), results);
-        updateNodeCount(context.getStack().getId(), context.getCloudStack().getGroups(), results, false);
         Set<Resource> resourceSet = transformResults(results, context.getStack());
         if (resourceSet.isEmpty()) {
             throw new OperationException("Failed to upscale the cluster since all create request failed. Resource set is empty");
@@ -151,10 +123,6 @@ public class StackUpscaleService {
         }
         InstanceGroup instanceGroup = instanceGroupRepository.findOneByGroupNameInStack(stack.getId(), instanceGroupName);
         int nodeCount = instanceGroup.getNodeCount() + newinstances;
-        if (newinstances != 0) {
-            instanceGroup.setNodeCount(nodeCount);
-            instanceGroupRepository.save(instanceGroup);
-        }
         clusterService.updateClusterStatusByStackIdOutOfTransaction(stack.getId(), AVAILABLE);
         eventService.fireCloudbreakEvent(stack.getId(), BillingStatus.BILLING_CHANGED.name(),
                 messagesService.getMessage("stack.metadata.setup.billing.changed"));
@@ -232,50 +200,39 @@ public class StackUpscaleService {
         }
     }
 
-    private void updateNodeCount(Long stackId, List<Group> originalGroups, List<CloudResourceStatus> statuses, boolean create) {
-        for (Group group : originalGroups) {
-            int nodeCount = group.getInstancesSize();
-            List<CloudResourceStatus> failedResources = removeFailedMetadata(stackId, statuses, group);
-            if (!failedResources.isEmpty() && create) {
-                int failedCount = failedResources.size();
-                InstanceGroup instanceGroup = instanceGroupRepository.findOneByGroupNameInStack(stackId, group.getName());
-                instanceGroup.setNodeCount(nodeCount - failedCount);
-                instanceGroupRepository.save(instanceGroup);
-                flowMessageService.fireEventAndLog(stackId, Msg.STACK_INFRASTRUCTURE_ROLLBACK_MESSAGE, UPDATE_IN_PROGRESS.name(),
-                        failedCount, group.getName(), failedResources.get(0).getStatusReason());
+    public List<CloudInstance> buildNewInstances(Stack stack, String extendedInstanceGroupName, int count) {
+        Optional<InstanceGroup> extendedInstanceGroup = stack.getInstanceGroups().stream()
+                .filter(instanceGroup -> extendedInstanceGroupName.equals(instanceGroup.getGroupName()))
+                .findAny();
+        long privateId = getFirstValidPrivateId(stack.getInstanceGroupsAsList());
+        List<CloudInstance> newInstances = new ArrayList<>();
+        if (extendedInstanceGroup.isPresent()) {
+            for (long i = 0; i < count; i++) {
+                newInstances.add(cloudStackConverter.buildInstance(null, extendedInstanceGroup.get().getTemplate(),
+                        stack.getStackAuthentication(), extendedInstanceGroupName, privateId++, InstanceStatus.CREATE_REQUESTED));
             }
         }
+        return newInstances;
     }
 
-    private List<CloudResourceStatus> removeFailedMetadata(Long stackId, List<CloudResourceStatus> statuses, Group group) {
-        Map<Long, CloudResourceStatus> failedResources = new HashMap<>();
-        Set<Long> groupPrivateIds = getPrivateIds(group);
-        for (CloudResourceStatus status : statuses) {
-            Long privateId = status.getPrivateId();
-            if (privateId != null && status.isFailed() && !failedResources.containsKey(privateId) && groupPrivateIds.contains(privateId)) {
-                failedResources.put(privateId, status);
-                instanceMetadataService.deleteInstanceRequest(stackId, privateId);
+    private Long getFirstValidPrivateId(List<InstanceGroup> instanceGroups) {
+        LOGGER.info("Get first valid PrivateId of instanceGroups");
+        long highest = 0;
+        for (InstanceGroup instanceGroup : instanceGroups) {
+            LOGGER.info("Checking of instanceGroup: {}", instanceGroup.getGroupName());
+            for (InstanceMetaData metaData : instanceGroup.getAllInstanceMetaData()) {
+                Long privateId = metaData.getPrivateId();
+                LOGGER.info("InstanceMetaData metaData: privateId: {}, instanceGroupName: {}, instanceId: {}, status: {}",
+                        privateId, metaData.getInstanceGroupName(), metaData.getInstanceId(), metaData.getInstanceStatus());
+                if (privateId == null) {
+                    continue;
+                }
+                if (privateId > highest) {
+                    highest = privateId;
+                }
             }
         }
-        return new ArrayList<>(failedResources.values());
-    }
-
-    private Set<Long> getPrivateIds(Group group) {
-        Set<Long> ids = new HashSet<>();
-        for (CloudInstance cloudInstance : group.getInstances()) {
-            ids.add(cloudInstance.getTemplate().getPrivateId());
-        }
-        return ids;
-    }
-
-    public List<CloudInstance> getNewInstances(Stack stack) {
-        List<CloudInstance> cloudInstances = cloudStackConverter.buildInstances(stack);
-        Iterator<CloudInstance> iterator = cloudInstances.iterator();
-        while (iterator.hasNext()) {
-            if (iterator.next().getTemplate().getStatus() != InstanceStatus.CREATE_REQUESTED) {
-                iterator.remove();
-            }
-        }
-        return cloudInstances;
+        LOGGER.info("highest privateId: {}", highest);
+        return highest == 0 ? 0 : highest + 1;
     }
 }

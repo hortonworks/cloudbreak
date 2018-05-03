@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow;
 
 import static com.sequenceiq.cloudbreak.api.model.Status.AVAILABLE;
+import static com.sequenceiq.cloudbreak.common.type.HostMetadataState.HEALTHY;
 import static com.sequenceiq.cloudbreak.orchestrator.container.DockerContainer.AMBARI_AGENT;
 import static com.sequenceiq.cloudbreak.service.PollingResult.SUCCESS;
 import static com.sequenceiq.cloudbreak.service.PollingResult.isSuccess;
@@ -26,6 +27,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -404,7 +406,6 @@ public class AmbariDecommissioner {
             return dfsSpaceTask.getDfsSpace();
         } else {
             throw new CloudbreakServiceException("Failed to get dfs space from ambari!");
-
         }
     }
 
@@ -532,18 +533,17 @@ public class AmbariDecommissioner {
     }
 
     private Set<String> selectHostsToRemove(List<HostMetadata> decommissionCandidates, int adjustment) {
-        Set<String> hostsToRemove = new HashSet<>();
-        int i = 0;
-        for (HostMetadata hostMetadata : decommissionCandidates) {
-            String hostName = hostMetadata.getHostName();
-            if (i < adjustment) {
-                LOGGER.info("Host '{}' will be removed from Ambari cluster", hostName);
-                hostsToRemove.add(hostName);
+        Stream<HostMetadata> orderedByHealth = decommissionCandidates.stream().sorted((a, b) -> {
+            if (a.getHostMetadataState().equals(b.getHostMetadataState())) {
+                return 0;
+            } else if (!HEALTHY.equals(a.getHostMetadataState())) {
+                return 1;
             } else {
-                break;
+                return -1;
             }
-            i++;
-        }
+        });
+        Set<String> hostsToRemove = orderedByHealth.map(HostMetadata::getHostName).limit(adjustment).collect(Collectors.toSet());
+        LOGGER.info("Hosts '{}' will be removed from Ambari cluster", hostsToRemove);
         return hostsToRemove;
     }
 

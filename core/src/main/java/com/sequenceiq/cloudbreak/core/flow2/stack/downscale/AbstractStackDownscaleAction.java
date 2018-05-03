@@ -93,7 +93,7 @@ public abstract class AbstractStackDownscaleAction<P extends Payload>
                 Map<String, String> unusedInstanceIds = stackScalingService.getUnusedInstanceIds(ssc.getInstanceGroup(), ssc.getAdjustment(), stack);
                 instanceIds = new HashSet<>(unusedInstanceIds.keySet());
             } else {
-                Set<InstanceMetaData> imds = stack.getInstanceGroupByInstanceGroupName(ssc.getInstanceGroup()).getNotTerminatedInstanceMetaDataSet();
+                Set<InstanceMetaData> imds = stack.getInstanceGroupByInstanceGroupName(ssc.getInstanceGroup()).getNotDeletedInstanceMetaDataSet();
                 instanceIds = imds.stream().filter(imd -> ssc.getPrivateIds().contains(imd.getPrivateId())).map(InstanceMetaData::getInstanceId)
                         .collect(Collectors.toSet());
             }

@@ -44,7 +44,8 @@ public class OpenStackNativeMetaDataCollector implements MetadataCollector {
     private CloudInstanceMetaDataExtractor cloudInstanceMetaDataExtractor;
 
     @Override
-    public List<CloudVmMetaDataStatus> collect(AuthenticatedContext authenticatedContext, List<CloudResource> resources, List<CloudInstance> vms) {
+    public List<CloudVmMetaDataStatus> collect(AuthenticatedContext authenticatedContext, List<CloudResource> resources, List<CloudInstance> vms,
+            List<CloudInstance> knownInstances) {
 
         List<InstanceTemplate> templates = Lists.transform(vms, CloudInstance::getTemplate);
 

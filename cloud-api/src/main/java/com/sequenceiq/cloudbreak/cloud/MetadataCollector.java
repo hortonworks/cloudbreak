@@ -18,7 +18,9 @@ public interface MetadataCollector {
      * @param authenticatedContext the authenticated context which holds the client object
      * @param resources            resources managed by Cloudbreak, used to figure out which resources are associated with the given VMs (e.g network port)
      * @param vms                  the VM instances for which the metadata needs to be collected
+     * @param allInstances         all VM instances
      * @return status of instances including the metadata
      */
-    List<CloudVmMetaDataStatus> collect(AuthenticatedContext authenticatedContext, List<CloudResource> resources, List<CloudInstance> vms);
+    List<CloudVmMetaDataStatus> collect(AuthenticatedContext authenticatedContext, List<CloudResource> resources,
+            List<CloudInstance> vms, List<CloudInstance> allInstances);
 }

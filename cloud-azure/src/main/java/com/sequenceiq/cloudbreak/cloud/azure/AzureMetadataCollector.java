@@ -38,7 +38,8 @@ public class AzureMetadataCollector implements MetadataCollector {
     private AzureUtils azureUtils;
 
     @Override
-    public List<CloudVmMetaDataStatus> collect(AuthenticatedContext authenticatedContext, List<CloudResource> resources, List<CloudInstance> vms) {
+    public List<CloudVmMetaDataStatus> collect(AuthenticatedContext authenticatedContext, List<CloudResource> resources, List<CloudInstance> vms,
+            List<CloudInstance> knownInstances) {
         CloudResource resource = azureUtils.getTemplateResource(resources);
         List<CloudVmMetaDataStatus> results = new ArrayList<>();
 

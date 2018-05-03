@@ -126,7 +126,7 @@ public class OrchestratorRecipeExecutor {
     private Set<Node> collectNodes(Stack stack, Set<String> hostNames) {
         Set<Node> agents = new HashSet<>();
         for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
-            for (InstanceMetaData im : instanceGroup.getNotTerminatedInstanceMetaDataSet()) {
+            for (InstanceMetaData im : instanceGroup.getNotDeletedInstanceMetaDataSet()) {
                 if (hostNames.contains(im.getDiscoveryFQDN())) {
                     agents.add(new Node(im.getPrivateIp(), im.getPublicIp(), im.getDiscoveryFQDN(), im.getInstanceGroupName()));
                 }

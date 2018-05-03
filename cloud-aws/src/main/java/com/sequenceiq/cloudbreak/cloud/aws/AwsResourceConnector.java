@@ -7,6 +7,7 @@ import static com.amazonaws.services.cloudformation.model.StackStatus.DELETE_FAI
 import static com.amazonaws.services.cloudformation.model.StackStatus.ROLLBACK_COMPLETE;
 import static com.amazonaws.services.cloudformation.model.StackStatus.ROLLBACK_FAILED;
 import static com.amazonaws.services.cloudformation.model.StackStatus.ROLLBACK_IN_PROGRESS;
+import static com.sequenceiq.cloudbreak.cloud.aws.AwsInstanceConnector.INSTANCE_NOT_FOUND_ERROR_CODE;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 
@@ -662,16 +663,38 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
     @Override
     public List<CloudResourceStatus> downscale(AuthenticatedContext auth, CloudStack stack, List<CloudResource> resources, List<CloudInstance> vms,
             Object resourcesToRemove) {
-        List<String> instanceIds = new ArrayList<>();
-        for (CloudInstance vm : vms) {
-            instanceIds.add(vm.getInstanceId());
+        if (!vms.isEmpty()) {
+            List<String> instanceIds = new ArrayList<>();
+            for (CloudInstance vm : vms) {
+                instanceIds.add(vm.getInstanceId());
+            }
+            String asGroupName = cfStackUtil.getAutoscalingGroupName(auth, vms.get(0).getTemplate().getGroupName(),
+                    auth.getCloudContext().getLocation().getRegion().value());
+            DetachInstancesRequest detachInstancesRequest = new DetachInstancesRequest().withAutoScalingGroupName(asGroupName).withInstanceIds(instanceIds)
+                    .withShouldDecrementDesiredCapacity(true);
+            AmazonAutoScalingClient amazonASClient = awsClient.createAutoScalingClient(new AwsCredentialView(auth.getCloudCredential()),
+                    auth.getCloudContext().getLocation().getRegion().value());
+            detachInstances(instanceIds, detachInstancesRequest, amazonASClient);
+            AmazonEC2Client amazonEC2Client = awsClient.createAccess(new AwsCredentialView(auth.getCloudCredential()),
+                    auth.getCloudContext().getLocation().getRegion().value());
+            terminateInstances(instanceIds, amazonEC2Client);
+            LOGGER.info("Terminated instances in stack '{}': '{}'", auth.getCloudContext().getId(), instanceIds);
         }
-        String asGroupName = cfStackUtil.getAutoscalingGroupName(auth, vms.get(0).getTemplate().getGroupName(),
-                auth.getCloudContext().getLocation().getRegion().value());
-        DetachInstancesRequest detachInstancesRequest = new DetachInstancesRequest().withAutoScalingGroupName(asGroupName).withInstanceIds(instanceIds)
-                .withShouldDecrementDesiredCapacity(true);
-        AmazonAutoScalingClient amazonASClient = awsClient.createAutoScalingClient(new AwsCredentialView(auth.getCloudCredential()),
-                auth.getCloudContext().getLocation().getRegion().value());
+        return check(auth, resources);
+    }
+
+    private void terminateInstances(List<String> instanceIds, AmazonEC2Client amazonEC2Client) {
+        try {
+            amazonEC2Client.terminateInstances(new TerminateInstancesRequest().withInstanceIds(instanceIds));
+        } catch (AmazonServiceException e) {
+            if (!INSTANCE_NOT_FOUND_ERROR_CODE.equals(e.getErrorCode())) {
+                throw e;
+            }
+            LOGGER.info(e.getErrorMessage());
+        }
+    }
+
+    private void detachInstances(List<String> instanceIds, DetachInstancesRequest detachInstancesRequest, AmazonAutoScalingClient amazonASClient) {
         try {
             amazonASClient.detachInstances(detachInstancesRequest);
         } catch (AmazonServiceException e) {
@@ -682,18 +705,6 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
             }
             LOGGER.info(e.getErrorMessage());
         }
-        AmazonEC2Client amazonEC2Client = awsClient.createAccess(new AwsCredentialView(auth.getCloudCredential()),
-                auth.getCloudContext().getLocation().getRegion().value());
-        try {
-            amazonEC2Client.terminateInstances(new TerminateInstancesRequest().withInstanceIds(instanceIds));
-        } catch (AmazonServiceException e) {
-            if (!"InvalidInstanceID.NotFound".equals(e.getErrorCode())) {
-                throw e;
-            }
-            LOGGER.info(e.getErrorMessage());
-        }
-        LOGGER.info("Terminated instances in stack '{}': '{}'", auth.getCloudContext().getId(), instanceIds);
-        return check(auth, resources);
     }
 
     @Override

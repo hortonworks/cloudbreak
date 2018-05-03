@@ -27,7 +27,7 @@ public class InstanceGroupToInstanceGroupResponseConverter extends AbstractConve
             instanceGroupResponse.setTemplate(getConversionService().convert(entity.getTemplate(), TemplateResponse.class));
         }
         instanceGroupResponse.setType(entity.getInstanceGroupType());
-        instanceGroupResponse.setMetadata(convertEntitiesToJson(entity.getNotTerminatedInstanceMetaDataSet()));
+        instanceGroupResponse.setMetadata(convertEntitiesToJson(entity.getNotDeletedInstanceMetaDataSet()));
         if (entity.getSecurityGroup() != null) {
             instanceGroupResponse.setSecurityGroup(getConversionService().convert(entity.getSecurityGroup(), SecurityGroupResponse.class));
             instanceGroupResponse.setSecurityGroupId(entity.getSecurityGroup().getId());
