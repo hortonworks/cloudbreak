@@ -20,10 +20,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.common.service.HostDiscoveryService;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
+import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ContainerBootstrapApiCheckerTask;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ContainerClusterAvailabilityCheckerTask;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ContainerOrchestratorResolver;
@@ -49,6 +51,7 @@ import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.repository.OrchestratorRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.ClusterComponentConfigProvider;
+import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.PollingResult;
 import com.sequenceiq.cloudbreak.service.PollingService;
@@ -118,6 +121,9 @@ public class ClusterBootstrapper {
     @Inject
     private ClusterComponentConfigProvider clusterComponentProvider;
 
+    @Inject
+    private ComponentConfigProvider componentConfigProvider;
+
     public void bootstrapMachines(Long stackId) throws CloudbreakException {
         Stack stack = stackRepository.findOneWithLists(stackId);
         String stackOrchestratorType = stack.getOrchestrator().getType();
@@ -166,8 +172,12 @@ public class ClusterBootstrapper {
                         new Json(singletonMap(ComponentType.SALT_STATE.name(), Base64.encodeBase64String(stateConfigZip))), stack.getCluster());
                 clusterComponentProvider.store(saltComponent);
             }
+
             BootstrapParams params = new BootstrapParams();
             params.setCloud(stack.cloudPlatform());
+            Image image = componentConfigProvider.getImage(stack.getId());
+            params.setOs(image.getOs());
+
             hostOrchestrator.bootstrap(allGatewayConfig, nodes, params, clusterDeletionBasedModel(stack.getId(), null));
 
             InstanceMetaData primaryGateway = stack.getPrimaryGatewayInstance();
@@ -254,6 +264,14 @@ public class ClusterBootstrapper {
         }
         BootstrapParams params = new BootstrapParams();
         params.setCloud(stack.cloudPlatform());
+        Image image = null;
+        try {
+            image = componentConfigProvider.getImage(stack.getId());
+            params.setOs(image.getOs());
+        } catch (CloudbreakImageNotFoundException e) {
+            LOGGER.info("Image not found for stack: {}, err: {}", stack.getId(), e.getMessage());
+        }
+
         hostOrchestrator.bootstrapNewNodes(allGatewayConfigs, nodes, allNodes, stateZip, params, clusterDeletionBasedModel(stack.getId(), null));
 
         InstanceMetaData primaryGateway = stack.getPrimaryGatewayInstance();

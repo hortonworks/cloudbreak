@@ -27,6 +27,8 @@ public class SaltAction {
 
     private Cloud cloud;
 
+    private Os os;
+
     public SaltAction(SaltActionType action) {
         this.action = action;
     }
@@ -104,5 +106,13 @@ public class SaltAction {
 
     public void setCloud(Cloud cloud) {
         this.cloud = cloud;
+    }
+
+    public Os getOs() {
+        return os;
+    }
+
+    public void setOs(Os os) {
+        this.os = os;
     }
 }
