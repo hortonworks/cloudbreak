@@ -32,6 +32,7 @@ public class CollectMetadataComponentTest extends AbstractComponentTest<CollectM
                 g().createCloudContext(),
                 g().createCloudCredential(),
                 g().createCloudResourceList(),
+                g().createCloudInstances(),
                 g().createCloudInstances());
     }
 }

@@ -76,7 +76,7 @@ public class StructuredFlowEventFactory {
         notificationDetails.setStackId(stackId);
         notificationDetails.setStackName(stack.getDisplayName());
         notificationDetails.setStackStatus(stack.getStatus().name());
-        notificationDetails.setNodeCount(stack.getNotTerminatedInstanceMetaDataSet().size());
+        notificationDetails.setNodeCount(stack.getNotDeletedInstanceMetaDataSet().size());
         notificationDetails.setInstanceGroup(instanceGroupName);
         Cluster cluster = stack.getCluster();
         if (cluster != null) {

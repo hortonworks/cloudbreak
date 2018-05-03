@@ -24,7 +24,7 @@ public class Group extends DynamicModel {
 
     private final InstanceAuthentication instanceAuthentication;
 
-    private Optional<CloudInstance> skeleton = Optional.empty();
+    private Optional<CloudInstance> skeleton;
 
     public Group(String name, InstanceGroupType type, List<CloudInstance> instances, Security security, CloudInstance skeleton,
             InstanceAuthentication instanceAuthentication, String loginUserName, String publicKey) {

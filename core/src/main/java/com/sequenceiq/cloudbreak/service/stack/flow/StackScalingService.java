@@ -111,7 +111,7 @@ public class StackScalingService {
     @Transactional
     public int updateRemovedResourcesState(Stack stack, Set<String> instanceIds, InstanceGroup instanceGroup) {
         int nodesRemoved = 0;
-        for (InstanceMetaData instanceMetaData : instanceGroup.getNotTerminatedInstanceMetaDataSet()) {
+        for (InstanceMetaData instanceMetaData : instanceGroup.getNotDeletedInstanceMetaDataSet()) {
             if (instanceIds.contains(instanceMetaData.getInstanceId())) {
                 long timeInMillis = Calendar.getInstance().getTimeInMillis();
                 instanceMetaData.setTerminationDate(timeInMillis);
@@ -121,10 +121,6 @@ public class StackScalingService {
             }
         }
         int nodeCount = instanceGroup.getNodeCount() - nodesRemoved;
-        if (nodesRemoved != 0) {
-            instanceGroup.setNodeCount(nodeCount);
-            instanceGroupRepository.save(instanceGroup);
-        }
         LOGGER.info("Successfully terminated metadata of instances '{}' in stack.", instanceIds);
         eventService.fireCloudbreakEvent(stack.getId(), BillingStatus.BILLING_CHANGED.name(),
                 cloudbreakMessagesService.getMessage(Msg.STACK_SCALING_BILLING_CHANGED.code()));
@@ -135,7 +131,7 @@ public class StackScalingService {
         Map<String, String> instanceIds = new HashMap<>();
         int i = 0;
         List<InstanceMetaData> instanceMetaDatas = new ArrayList<>(stack.getInstanceGroupByInstanceGroupName(instanceGroupName)
-                .getNotTerminatedInstanceMetaDataSet());
+                .getNotDeletedInstanceMetaDataSet());
         instanceMetaDatas.sort(Comparator.comparing(InstanceMetaData::getStartDate));
         for (InstanceMetaData metaData : instanceMetaDatas) {
             if (!metaData.getAmbariServer()

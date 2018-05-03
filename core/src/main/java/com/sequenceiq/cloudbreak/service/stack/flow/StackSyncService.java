@@ -179,10 +179,19 @@ public class StackSyncService {
     }
 
     private void syncDeletedInstance(Stack stack, Map<InstanceSyncState, Integer> instanceStateCounts, InstanceMetaData instance) {
-        if (!instance.isTerminated() && !instance.isDeletedOnProvider()) {
-            instanceStateCounts.put(InstanceSyncState.DELETED_ON_PROVIDER_SIDE, instanceStateCounts.get(InstanceSyncState.DELETED_ON_PROVIDER_SIDE) + 1);
-            LOGGER.info("Instance '{}' is reported as deleted on the cloud provider, setting its state to DELETED_ON_PROVIDER_SIDE.", instance.getInstanceId());
-            updateMetaDataToDeletedOnProviderSide(stack, instance);
+        if (!instance.isTerminated()) {
+            if (instance.getInstanceId() == null) {
+                instanceStateCounts.put(InstanceSyncState.DELETED, instanceStateCounts.get(InstanceSyncState.DELETED) + 1);
+                LOGGER.info("Instance with private id '{}' don't have instanceId, setting its state to DELETED.",
+                        instance.getPrivateId());
+                instance.setInstanceStatus(InstanceStatus.TERMINATED);
+                instanceMetaDataRepository.save(instance);
+            } else {
+                instanceStateCounts.put(InstanceSyncState.DELETED_ON_PROVIDER_SIDE, instanceStateCounts.get(InstanceSyncState.DELETED_ON_PROVIDER_SIDE) + 1);
+                LOGGER.info("Instance '{}' is reported as deleted on the cloud provider, setting its state to DELETED_ON_PROVIDER_SIDE.",
+                        instance.getInstanceId());
+                updateMetaDataToDeletedOnProviderSide(stack, instance);
+            }
         }
     }
 

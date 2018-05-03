@@ -49,7 +49,6 @@ import com.sequenceiq.cloudbreak.service.securitygroup.SecurityGroupService;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterCache;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterService;
 import com.sequenceiq.cloudbreak.service.stack.StackParameterService;
-import com.sequenceiq.cloudbreak.service.stack.flow.ConsulUtils.ConsulServers;
 import com.sequenceiq.cloudbreak.service.template.TemplateService;
 
 @Service
@@ -253,11 +252,6 @@ public class StackDecorator {
         long instanceGroups = stack.getInstanceGroups().stream().filter(ig -> InstanceGroupType.GATEWAY.equals(ig.getInstanceGroupType())).count();
         if (instanceGroups == 0) {
             throw new BadRequestException("Gateway instance group not configured");
-        }
-        int minNodeCount = ConsulServers.SINGLE_NODE_COUNT_LOW.getMin();
-        int fullNodeCount = stack.getFullNodeCount();
-        if (fullNodeCount < minNodeCount) {
-            throw new BadRequestException(String.format("At least %s nodes are required to launch the stack", minNodeCount));
         }
     }
 

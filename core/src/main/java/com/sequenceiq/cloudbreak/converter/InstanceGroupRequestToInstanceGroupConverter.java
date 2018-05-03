@@ -7,7 +7,6 @@ import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupRequest;
-import com.sequenceiq.cloudbreak.controller.validation.template.TemplateValidator;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.domain.Template;
@@ -24,14 +23,10 @@ public class InstanceGroupRequestToInstanceGroupConverter extends AbstractConver
     @Inject
     private SecurityGroupService securityGroupService;
 
-    @Inject
-    private TemplateValidator templateValidator;
-
     @Override
     public InstanceGroup convert(InstanceGroupRequest json) {
         InstanceGroup instanceGroup = new InstanceGroup();
         instanceGroup.setGroupName(json.getGroup());
-        instanceGroup.setNodeCount(json.getNodeCount());
         instanceGroup.setInstanceGroupType(json.getType());
         try {
             if (json.getSecurityGroupId() != null) {

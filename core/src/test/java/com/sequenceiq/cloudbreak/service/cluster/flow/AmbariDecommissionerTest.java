@@ -524,7 +524,6 @@ public class AmbariDecommissionerTest {
 
     private InstanceGroup getMasterInstanceGroup(int nodeCount) {
         InstanceGroup masterInstanceGroup = new InstanceGroup();
-        masterInstanceGroup.setNodeCount(nodeCount);
         masterInstanceGroup.setGroupName("master_1");
         masterInstanceGroup.setInstanceGroupType(InstanceGroupType.GATEWAY);
         masterInstanceGroup.setInstanceMetaData(new HashSet<>());
@@ -544,7 +543,6 @@ public class AmbariDecommissionerTest {
 
     private InstanceGroup getSlaveInstanceGroup(int nodeCount) {
         InstanceGroup slaveInstanceGroup = new InstanceGroup();
-        slaveInstanceGroup.setNodeCount(nodeCount);
         slaveInstanceGroup.setGroupName("slave_1");
         slaveInstanceGroup.setInstanceGroupType(InstanceGroupType.CORE);
         slaveInstanceGroup.setInstanceMetaData(new HashSet<>());
