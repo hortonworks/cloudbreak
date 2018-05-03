@@ -86,20 +86,20 @@ set_tlsv1_2:
     - repl: "[security]\nforce_https_protocol=PROTOCOL_TLSv1_2"
     - unless: cat /etc/ambari-agent/conf/ambari-agent.ini | grep force_https_protocol
 
-add_amazon2017_patch_script_agent:
+add_amazon-osfamily_patch_script_agent:
   file.managed:
-    - name: /tmp/amazon2017.sh
-    - source: salt://ambari/scripts/amazon2017.sh
+    - name: /tmp/amazon-osfamily.sh
+    - source: salt://ambari/scripts/amazon-osfamily.sh
     - skip_verify: True
     - makedirs: True
     - mode: 755
 
-run_amazon2017_sh_agent:
+run_amazon-osfamily_sh_agent:
   cmd.run:
-    - name: sh -x /tmp/amazon2017.sh 2>&1 | tee -a /var/log/amazon2017_agent_sh.log && exit ${PIPESTATUS[0]}
-    - unless: ls /var/log/amazon2017_agent_sh.log
+    - name: sh -x /tmp/amazon-osfamily.sh 2>&1 | tee -a /var/log/amazon-osfamily_agent_sh.log && exit ${PIPESTATUS[0]}
+    - unless: ls /var/log/amazon-osfamilyagent_sh.log
     - require:
-      - file: add_amazon2017_patch_script_agent
+      - file: add_amazon-osfamily_patch_script_agent
 
 {% if ambari.is_container_executor %}
 
