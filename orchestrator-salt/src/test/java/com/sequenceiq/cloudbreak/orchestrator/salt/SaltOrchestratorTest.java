@@ -47,6 +47,7 @@ import com.sequenceiq.cloudbreak.orchestrator.OrchestratorBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.OrchestratorBootstrapRunner;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.executor.ParallelOrchestratorComponentRunner;
+import com.sequenceiq.cloudbreak.orchestrator.model.BootstrapParams;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.GenericResponse;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
@@ -117,8 +118,9 @@ public class SaltOrchestratorTest {
                 .thenReturn(mock(OrchestratorBootstrapRunner.class));
 
         saltOrchestrator.init(parallelOrchestratorComponentRunner, exitCriteria);
+        BootstrapParams bootstrapParams = mock(BootstrapParams.class);
 
-        saltOrchestrator.bootstrap(Collections.singletonList(gatewayConfig), targets, exitCriteriaModel);
+        saltOrchestrator.bootstrap(Collections.singletonList(gatewayConfig), targets, bootstrapParams, exitCriteriaModel);
 
         verify(parallelOrchestratorComponentRunner, times(4)).submit(any(OrchestratorBootstrapRunner.class));
 
@@ -127,7 +129,8 @@ public class SaltOrchestratorTest {
         // salt.zip, master_sign.pem, master_sign.pub
         verifyNew(OrchestratorBootstrapRunner.class, times(3))
                 .withArguments(any(SaltUpload.class), eq(exitCriteria), eq(exitCriteriaModel), any(), anyInt(), anyInt());
-        verifyNew(SaltBootstrap.class, times(1)).withArguments(eq(saltConnector), eq(Collections.singletonList(gatewayConfig)), eq(targets));
+        verifyNew(SaltBootstrap.class, times(1)).withArguments(eq(saltConnector), eq(Collections.singletonList(gatewayConfig)), eq(targets),
+            eq(bootstrapParams));
     }
 
     @Test
@@ -136,14 +139,15 @@ public class SaltOrchestratorTest {
         whenNew(OrchestratorBootstrapRunner.class)
                 .withArguments(any(OrchestratorBootstrap.class), any(ExitCriteria.class), any(ExitCriteriaModel.class), isNull(), anyInt(), anyInt())
                 .thenReturn(mock(OrchestratorBootstrapRunner.class));
+        BootstrapParams bootstrapParams = mock(BootstrapParams.class);
 
         saltOrchestrator.init(parallelOrchestratorComponentRunner, exitCriteria);
-
-        saltOrchestrator.bootstrapNewNodes(Collections.singletonList(gatewayConfig), targets, targets, null, exitCriteriaModel);
+        saltOrchestrator.bootstrapNewNodes(Collections.singletonList(gatewayConfig), targets, targets, null, bootstrapParams, exitCriteriaModel);
 
         verifyNew(OrchestratorBootstrapRunner.class, times(1))
                 .withArguments(any(SaltBootstrap.class), eq(exitCriteria), eq(exitCriteriaModel), any(), anyInt(), anyInt());
-        verifyNew(SaltBootstrap.class, times(1)).withArguments(eq(saltConnector), eq(Collections.singletonList(gatewayConfig)), eq(targets));
+        verifyNew(SaltBootstrap.class, times(1)).withArguments(eq(saltConnector),
+            eq(Collections.singletonList(gatewayConfig)), eq(targets), eq(bootstrapParams));
     }
 
     @Test

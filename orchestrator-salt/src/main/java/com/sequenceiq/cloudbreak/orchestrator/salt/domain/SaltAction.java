@@ -25,6 +25,10 @@ public class SaltAction {
 
     private List<Minion> minions;
 
+    private Cloud cloud;
+
+    private Os os;
+
     public SaltAction(SaltActionType action) {
         this.action = action;
     }
@@ -94,5 +98,21 @@ public class SaltAction {
             masters = new ArrayList<>();
         }
         masters.add(master);
+    }
+
+    public Cloud getCloud() {
+        return cloud;
+    }
+
+    public void setCloud(Cloud cloud) {
+        this.cloud = cloud;
+    }
+
+    public Os getOs() {
+        return os;
+    }
+
+    public void setOs(Os os) {
+        this.os = os;
     }
 }

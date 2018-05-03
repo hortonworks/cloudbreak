@@ -131,7 +131,7 @@ public class HeatTemplateBuilderTest {
         tags.put(CloudbreakResourceType.STORAGE.templateVariable(), CloudbreakResourceType.STORAGE.key());
         tags.put(CloudbreakResourceType.TEMPLATE.templateVariable(), CloudbreakResourceType.TEMPLATE.key());
         when(defaultCostTaggingService.prepareInstanceTagging()).thenReturn(tags);
-        image = new Image("cb-centos66-amb200-2015-05-25", userData, "redhat6", "url", "default", null);
+        image = new Image("cb-centos66-amb200-2015-05-25", userData, "redhat6", "redhat6", "url", "default", null);
     }
 
     @Test
