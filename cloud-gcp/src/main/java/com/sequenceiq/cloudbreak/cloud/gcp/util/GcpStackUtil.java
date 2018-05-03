@@ -42,6 +42,10 @@ import com.sequenceiq.cloudbreak.cloud.model.Region;
 
 public final class GcpStackUtil {
 
+    public static final String NETWORK_ID = "networkId";
+
+    public static final String SUBNET_ID = "subnetId";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(GcpStackUtil.class);
 
     private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
@@ -61,10 +65,6 @@ public final class GcpStackUtil {
     private static final String PRIVATE_KEY = "serviceAccountPrivateKey";
 
     private static final String PROJECT_ID = "projectId";
-
-    private static final String NETWORK_ID = "networkId";
-
-    private static final String SUBNET_ID = "subnetId";
 
     private static final String NO_PUBLIC_IP = "noPublicIp";
 
@@ -214,7 +214,7 @@ public final class GcpStackUtil {
     }
 
     public static boolean isNewSubnetInExistingNetwork(Network network) {
-        return isExistingNetwork(network) && isNoneEmpty(network.getSubnet().getCidr());
+        return isExistingNetwork(network) && !isExistingSubnet(network);
     }
 
     public static boolean isNewNetworkAndSubnet(Network network) {
