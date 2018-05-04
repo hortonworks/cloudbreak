@@ -86,17 +86,17 @@ modify_hadoop_env_template:
   cmd.run:
     - name: /opt/javaagent.sh
 
-add_amazon2017_patch_script_server:
+add_amazon-osfamily_patch_script_server:
   file.managed:
-    - name: /tmp/amazon2017.sh
-    - source: salt://ambari/scripts/amazon2017.sh
+    - name: /tmp/amazon-osfamily.sh
+    - source: salt://ambari/scripts/amazon-osfamily.sh
     - skip_verify: True
     - makedirs: True
     - mode: 755
 
-run_amazon2017_sh_server:
+run_amazon-osfamily_sh_server:
   cmd.run:
-    - name: sh -x /tmp/amazon2017.sh 2>&1 | tee -a /var/log/amazon2017_server_sh.log && exit ${PIPESTATUS[0]}
-    - unless: ls /var/log/amazon2017_server_sh.log
+    - name: sh -x /tmp/amazon-osfamily.sh 2>&1 | tee -a /var/log/amazon-osfamily_server_sh.log && exit ${PIPESTATUS[0]}
+    - unless: ls /var/log/amazon-osfamily_server_sh.log
     - require:
-      - file: add_amazon2017_patch_script_server
+      - file: add_amazon-osfamily_patch_script_server
