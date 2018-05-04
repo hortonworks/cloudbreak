@@ -23,6 +23,50 @@ jobs:
             - core/build/libs/cloudbreak.jar
             - integration-test/build/libs/cloudbreak-integration-test.jar
 
+  code-quality-check-checkstyle-test:
+    docker:
+      - image: circleci/openjdk:8-jdk
+    environment:
+      _JAVA_OPTIONS: "-Xmx2048m"
+    steps:
+      - checkout
+      - run:
+          name: checkstyle-test
+          command: ./gradlew -Penv=jenkins -b build.gradle check -x spotbugsMain -x spotbugsTest -x checkstyleTest -x test --no-daemon --max-workers 2 --stacktrace
+
+  code-quality-check-checkstyle-main:
+    docker:
+      - image: circleci/openjdk:8-jdk
+    environment:
+      _JAVA_OPTIONS: "-Xmx2048m"
+    steps:
+      - checkout
+      - run:
+          name: checkstyle-main
+          command: ./gradlew -Penv=jenkins -b build.gradle check -x spotbugsMain -x spotbugsTest -x checkstyleMain -x test --no-daemon --max-workers 2 --stacktrace
+
+  code-quality-check-spotbugs-main:
+    docker:
+      - image: circleci/openjdk:8-jdk
+    environment:
+      _JAVA_OPTIONS: "-Xmx2048m"
+    steps:
+      - checkout
+      - run:
+          name: spotbugs-main
+          command: ./gradlew -Penv=jenkins -b build.gradle check -x checkstyleMain -x checkstyleTest -x spotbugsTest -x test --no-daemon --max-workers 2 --stacktrace
+
+  code-quality-check-spotbugs-test:
+    docker:
+      - image: circleci/openjdk:8-jdk
+    environment:
+      _JAVA_OPTIONS: "-Xmx2048m"
+    steps:
+      - checkout
+      - run:
+          name: spotbugs-test
+          command: ./gradlew -Penv=jenkins -b build.gradle check -x checkstyleMain -x checkstyleTest -x spotbugsMain -x test --no-daemon --max-workers 2 --stacktrace
+
   unit-test:
     docker:
       - image: circleci/openjdk:8-jdk
@@ -32,10 +76,7 @@ jobs:
       - checkout
       - run:
           name: test
-          command: ./gradlew -Penv=jenkins -b build.gradle test --info --stacktrace --parallel
-      - run:
-          name: stylecheck
-          command: ./gradlew checkstyleMain checkstyleTest spotbugsMain spotbugsTest --stacktrace --max-workers 1
+          command: ./gradlew -Penv=jenkins -b build.gradle test --info --stacktrace --parallel  -x checkstyleMain -x checkstyleTest -x spotbugsMain -x spotbugsTest
       - run:
           name: Save test results
           command: |
@@ -87,6 +128,18 @@ workflows:
   build_and_test:
     jobs:
       - build
+      - code-quality-check-spotbugs-main:
+          requires:
+            - build
+      - code-quality-check-spotbugs-test:
+          requires:
+            - build
+      - code-quality-check-checkstyle-main:
+          requires:
+            - build
+      - code-quality-check-checkstyle-test:
+          requires:
+            - build
       - unit-test:
           requires:
             - build
