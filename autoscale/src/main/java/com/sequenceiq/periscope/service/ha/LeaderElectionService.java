@@ -117,7 +117,10 @@ public class LeaderElectionService {
                     public void run() {
                         try {
                             stackCollectorService.collectStackDetails();
-                            reallocateOrphanClusters();
+                            long limit = clock.getCurrentTime() - heartbeatThresholdRate;
+                            List<PeriscopeNode> activeNodes = periscopeNodeRepository.findAllByLastUpdatedIsGreaterThan(limit);
+                            reallocateOrphanClusters(activeNodes);
+                            cleanupInactiveNodesByActiveNodes(activeNodes);
                         } catch (RuntimeException e) {
                             LOGGER.error("Error happend during fetching cluster allocating them to nodes", e);
                         }
@@ -127,21 +130,20 @@ public class LeaderElectionService {
         }
     }
 
-    private void reallocateOrphanClusters() {
-        List<PeriscopeNode> nodes = periscopeNodeRepository.findAllByLastUpdatedIsGreaterThan(clock.getCurrentTime() - heartbeatThresholdRate);
-        if (nodes.stream().noneMatch(n -> n.isLeader() && n.getUuid().equals(periscopeNodeConfig.getId()))) {
-            Optional<PeriscopeNode> leader = nodes.stream().filter(PeriscopeNode::isLeader).findFirst();
+    private void reallocateOrphanClusters(List<PeriscopeNode> activeNodes) {
+        if (activeNodes.stream().noneMatch(n -> n.isLeader() && n.getUuid().equals(periscopeNodeConfig.getId()))) {
+            Optional<PeriscopeNode> leader = activeNodes.stream().filter(PeriscopeNode::isLeader).findFirst();
             LOGGER.info(String.format("Leader is %s, let's drop leader scope", leader.isPresent() ? leader.get().getUuid() : "-"));
             resetTimer();
             return;
         }
-        List<String> nodeIds = nodes.stream().map(PeriscopeNode::getUuid).collect(Collectors.toList());
+        List<String> nodeIds = activeNodes.stream().map(PeriscopeNode::getUuid).collect(Collectors.toList());
         List<Cluster> orphanClusters = clusterRepository.findAllByPeriscopeNodeIdNotInOrPeriscopeNodeIdIsNull(nodeIds);
         if (!orphanClusters.isEmpty()) {
-            Iterator<PeriscopeNode> iterator = nodes.iterator();
+            Iterator<PeriscopeNode> iterator = activeNodes.iterator();
             for (Cluster cluster : orphanClusters) {
                 if (!iterator.hasNext()) {
-                    iterator = nodes.iterator();
+                    iterator = activeNodes.iterator();
                 }
                 if (isExecutionOfMissedTimeBasedAlertsNeeded(cluster)) {
                     LOGGER.info(String.format("Executing missed alerts on cluster %s", cluster.getId()));
@@ -181,6 +183,17 @@ public class LeaderElectionService {
         if (!alerts.isEmpty()) {
             CronTimeEvaluator evaluator = applicationContext.getBean("CronTimeEvaluator", CronTimeEvaluator.class);
             evaluator.publishIfNeeded(alerts);
+        }
+    }
+
+    private void cleanupInactiveNodesByActiveNodes(List<PeriscopeNode> activeNodes) {
+        try {
+            transactionService.required(() -> {
+                periscopeNodeRepository.deleteAllOtherNodes(activeNodes);
+                return null;
+            });
+        } catch (TransactionExecutionException e) {
+            LOGGER.error("Unable to delete inactive periscope nodes", e);
         }
     }
 
