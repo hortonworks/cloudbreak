@@ -36,6 +36,7 @@ import com.sequenceiq.cloudbreak.orchestrator.container.ContainerOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorCancelledException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
+import com.sequenceiq.cloudbreak.orchestrator.model.BootstrapParams;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.repository.OrchestratorRepository;
@@ -136,7 +137,9 @@ public class ClusterBootstrapper {
                 validatePollingResultForCancellation(bootstrapApiPolling, "Polling of bootstrap API was cancelled.");
             }
 
-            hostOrchestrator.bootstrap(allGatewayConfig, nodes, clusterDeletionBasedExitCriteriaModel(stack.getId(), null));
+            BootstrapParams params = new BootstrapParams();
+            params.setCloud(stack.cloudPlatform());
+            hostOrchestrator.bootstrap(allGatewayConfig, nodes, params, clusterDeletionBasedExitCriteriaModel(stack.getId(), null));
 
             InstanceMetaData primaryGateway = stack.getPrimaryGatewayInstance();
             GatewayConfig gatewayConfig = gatewayConfigService.getGatewayConfig(stack, primaryGateway, enableKnox);
@@ -260,7 +263,9 @@ public class ClusterBootstrapper {
         nodes.forEach(n -> n.setHostGroup(runningInstanceMetaData.stream()
                 .filter(i -> i.getPrivateIp().equals(n.getPrivateIp())).findFirst().get().getInstanceGroupName()));
 
-        hostOrchestrator.bootstrapNewNodes(allGatewayConfigs, nodes, allNodes, clusterDeletionBasedExitCriteriaModel(stack.getId(), null));
+        BootstrapParams params = new BootstrapParams();
+        params.setCloud(stack.cloudPlatform());
+        hostOrchestrator.bootstrapNewNodes(allGatewayConfigs, nodes, allNodes, params, clusterDeletionBasedExitCriteriaModel(stack.getId(), null));
 
         InstanceMetaData primaryGateway = stack.getPrimaryGatewayInstance();
         GatewayConfig gatewayConfig = gatewayConfigService.getGatewayConfig(stack, primaryGateway, enableKnox);
