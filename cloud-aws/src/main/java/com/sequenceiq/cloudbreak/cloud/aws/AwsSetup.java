@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.aws;
 
 import java.net.URLDecoder;
+import java.util.Collections;
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -42,12 +44,15 @@ import com.sequenceiq.cloudbreak.cloud.aws.view.AwsInstanceView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsNetworkView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
+import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.FileSystem;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceAuthentication;
+import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.common.type.ImageStatus;
 import com.sequenceiq.cloudbreak.common.type.ImageStatusResult;
@@ -86,6 +91,9 @@ public class AwsSetup implements Setup {
     @Inject
     private AwsClient awsClient;
 
+    @Inject
+    private AwsPlatformResources awsPlatformResources;
+
     @Override
     public ImageStatusResult checkImageStatus(AuthenticatedContext authenticatedContext, CloudStack stack, Image image) {
         return new ImageStatusResult(ImageStatus.CREATE_FINISHED, FINISHED_PROGRESS_VALUE);
@@ -119,8 +127,18 @@ public class AwsSetup implements Setup {
             }
 
         }
+        validateRegionAndZone(ac.getCloudCredential(), ac.getCloudContext().getLocation());
         validateExistingKeyPair(stack.getInstanceAuthentication(), credentialView, region);
         LOGGER.debug("setup has been executed");
+    }
+
+    private void validateRegionAndZone(CloudCredential cloudCredential, Location location) {
+        CloudRegions regions = awsPlatformResources.regions(cloudCredential, location.getRegion(), Collections.emptyMap());
+        List<AvailabilityZone> availabilityZones = regions.getCloudRegions().get(location.getRegion());
+        if (!availabilityZones.contains(location.getAvailabilityZone())) {
+            throw new CloudConnectorException(String.format("Region [%s] doesn't contain availability zone [%s]",
+                    location.getRegion().getRegionName(), location.getAvailabilityZone().value()));
+        }
     }
 
     private void verifySpotInstances(CloudStack stack) {
