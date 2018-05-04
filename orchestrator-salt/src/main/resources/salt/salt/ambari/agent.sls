@@ -81,7 +81,7 @@ add_amazon-osfamily_patch_script_agent:
 run_amazon-osfamily_sh_agent:
   cmd.run:
     - name: sh -x /opt/salt/amazon-osfamily.sh 2>&1 | tee -a /var/log/amazon-osfamily_agent_sh.log && exit ${PIPESTATUS[0]}
-    - unless: ls /var/log/amazon-osfamilyagent_sh.log
+    - unless: ls /var/log/amazon-osfamily_agent_sh.log
     - require:
       - file: add_amazon-osfamily_patch_script_agent
 
