@@ -137,7 +137,7 @@ public class LeaderElectionServiceTest {
 
         spyTimer.lastTask.run();
 
-        verify(transactionService, times(1)).required(any(Supplier.class));
+        verify(transactionService, times(2)).required(any(Supplier.class));
         verify(clusterRepository, times(0)).findAllByPeriscopeNodeIdNotInOrPeriscopeNodeIdIsNull(any(List.class));
     }
 
@@ -155,7 +155,7 @@ public class LeaderElectionServiceTest {
 
         spyTimer.lastTask.run();
 
-        verify(transactionService, times(1)).required(any(Supplier.class));
+        verify(transactionService, times(2)).required(any(Supplier.class));
         verify(clusterRepository, times(1)).findAllByPeriscopeNodeIdNotInOrPeriscopeNodeIdIsNull(any(List.class));
         verify(clusterRepository, times(1)).save(any(List.class));
     }
