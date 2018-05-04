@@ -54,6 +54,9 @@ public class OperationRetryServiceTest {
     @Mock
     private AuthorizationService authorizationService;
 
+    @Mock
+    private Cluster clusterMock;
+
     @Test(expected = BadRequestException.class)
     public void retryPending() {
         when(stackMock.getId()).thenReturn(STACK_ID);
@@ -110,6 +113,29 @@ public class OperationRetryServiceTest {
                 createFlowLog("INIT_STATE", StateStatus.SUCCESSFUL, getOffsettedCreated(1))
                 );
         when(flowLogRepository.findAllByStackIdOrderByCreatedDesc(STACK_ID)).thenReturn(pendingFlowLogs);
+        when(stackMock.getStatus()).thenReturn(Status.CREATE_FAILED);
+        underTest.retry(stackMock);
+
+        verify(flow2Handler, times(1)).restartFlow(ArgumentMatchers.eq(lastSuccessfulState));
+    }
+
+    @Test
+    public void retryCluster() {
+        when(stackMock.getId()).thenReturn(STACK_ID);
+
+        FlowLog lastSuccessfulState = createFlowLog("INTERMEDIATE_STATE", StateStatus.SUCCESSFUL, getOffsettedCreated(2));
+        List<FlowLog> pendingFlowLogs = Lists.newArrayList(
+                createFlowLog("FINISHED", StateStatus.SUCCESSFUL, getOffsettedCreated(6)),
+                createFlowLog("NEXT_STATE", StateStatus.FAILED, getOffsettedCreated(5)),
+                createFlowLog("FINISHED", StateStatus.SUCCESSFUL, getOffsettedCreated(4)),
+                createFlowLog("NEXT_STATE", StateStatus.FAILED, getOffsettedCreated(3)),
+                lastSuccessfulState,
+                createFlowLog("INIT_STATE", StateStatus.SUCCESSFUL, getOffsettedCreated(1))
+                );
+        when(flowLogRepository.findAllByStackIdOrderByCreatedDesc(STACK_ID)).thenReturn(pendingFlowLogs);
+        when(stackMock.getStatus()).thenReturn(Status.AVAILABLE);
+        when(stackMock.getCluster()).thenReturn(clusterMock);
+        when(clusterMock.getStatus()).thenReturn(Status.CREATE_FAILED);
         underTest.retry(stackMock);
 
         verify(flow2Handler, times(1)).restartFlow(ArgumentMatchers.eq(lastSuccessfulState));

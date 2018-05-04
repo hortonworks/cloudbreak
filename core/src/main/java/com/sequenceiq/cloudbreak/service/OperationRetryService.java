@@ -43,14 +43,15 @@ public class OperationRetryService {
         }
 
         Cluster cluster = stack.getCluster();
-        if (Status.AVAILABLE.equals(stack.getStatus()) && Status.AVAILABLE.equals(cluster.getStatus())) {
-            LOGGER.info("Retry cannot be performed, cluster created successfully. stackId: {}", stack.getId());
-            throw new BadRequestException("Retry cannot be performed, cluster created successfully.");
+        if (Status.CREATE_FAILED.equals(stack.getStatus())
+                || (Status.AVAILABLE.equals(stack.getStatus()) && Status.CREATE_FAILED.equals(cluster.getStatus()))) {
+            Optional<FlowLog> failedFlowLog = getMostRecentFailedLog(flowLogs);
+            failedFlowLog.map(log -> getLastSuccessfulStateLog(log.getCurrentState(), flowLogs))
+                    .ifPresent(flow2Handler::restartFlow);
+        } else {
+            LOGGER.info("Retry can only be performed, if stack or cluster creation failed. stackId: {}", stack.getId());
+            throw new BadRequestException("Retry can only be performed, if stack or cluster creation failed.");
         }
-
-        Optional<FlowLog> failedFlowLog = getMostRecentFailedLog(flowLogs);
-        failedFlowLog.map(log -> getLastSuccessfulStateLog(log.getCurrentState(), flowLogs))
-                .ifPresent(flow2Handler::restartFlow);
     }
 
     private FlowLog getLastSuccessfulStateLog(String failedState, List<FlowLog> flowLogs) {
