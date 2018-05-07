@@ -98,6 +98,7 @@ CB_MAX_SALT_NEW_SERVICE_RETRY - Salt orchestrator max retry count
 CB_MAX_SALT_RECIPE_EXECUTION_RETRY - Salt orchestrator max retry count for recipes
 CB_PLATFORM_DEFAULT_REGIONS - Comma separated list of default regions by platform (AWS:eu-west-1)
 CB_PRODUCT_ID - SmartSense product ID
+CB_PORT - Cloudbreak port
 CB_SCHEMA_MIGRATION_AUTO - Flag for Cloudbreak automatic database schema update
 CB_SMARTSENSE_CONFIGURE - Flag to install and configure SmartSense on cluster nodes
 CB_SMARTSENSE_CLUSTER_NAME_PREFIX - SmartSense Cloudbreak cluster name prefix
