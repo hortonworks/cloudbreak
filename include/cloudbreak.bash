@@ -26,7 +26,7 @@ cloudbreak-conf-tags() {
     env-import DOCKER_TAG_HAVEGED 1.1.0
     env-import DOCKER_TAG_TRAEFIK v1.3.8-alpine
     env-import DOCKER_TAG_CONSUL 0.5
-    env-import DOCKER_TAG_REGISTRATOR v5
+    env-import DOCKER_TAG_REGISTRATOR v7
     env-import DOCKER_TAG_POSTFIX latest
     env-import DOCKER_TAG_UAA 3.6.5-pgupdate
     env-import DOCKER_TAG_AMBASSADOR 0.5.0
@@ -242,6 +242,7 @@ cloudbreak-conf-defaults() {
     env-import CB_MAX_SALT_NEW_SERVICE_RETRY 90
     env-import CB_MAX_SALT_RECIPE_EXECUTION_RETRY 90
     env-import CB_LOG_LEVEL "INFO"
+    env-import CB_PORT 8080
 
     env-import CB_INSTANCE_UUID
     env-import CB_INSTANCE_NODE_ID

@@ -504,7 +504,7 @@ cloudbreak:
       - traefik.backend=cloudbreak-backend
       - traefik.frontend.priority=10
     ports:
-        - 8080:8080
+        - $CB_PORT:8080
     volumes:
         - "$CBD_CERT_ROOT_PATH:/certs"
         - /dev/urandom:/dev/random
@@ -526,6 +526,7 @@ sultans:
         - SL_CLIENT_ID=$UAA_SULTANS_ID
         - 'SL_CLIENT_SECRET=$(escape-string-compose-yaml $UAA_SULTANS_SECRET \')'
         - SERVICE_NAME=sultans
+        - SERVICE_3000_NAME=sultans
           #- SERVICE_CHECK_HTTP=/
         - SL_PORT=3000
         - SL_SMTP_SENDER_HOST=$CLOUDBREAK_SMTP_SENDER_HOST
