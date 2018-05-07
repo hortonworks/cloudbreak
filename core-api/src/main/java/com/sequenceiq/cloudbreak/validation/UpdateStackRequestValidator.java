@@ -22,23 +22,17 @@ public class UpdateStackRequestValidator implements ConstraintValidator<ValidUpd
         if (instanceGroupAdjustment != null) {
             updateResources++;
             if (value.getWithClusterEvent() && instanceGroupAdjustment.getScalingAdjustment() < 0) {
-                addConstraintViolation(context,
-                        "Invalid PUT request on this resource. Update event has to be upscale if you define withClusterEvent = 'true'.");
+                ValidatorUtil.addConstraintViolation(context,
+                        "Invalid PUT request on this resource. Update event has to be upscale if you define withClusterEvent = 'true'.", "status");
                 return false;
             }
         }
 
         if (updateResources != 1) {
-            addConstraintViolation(context, "Invalid PUT request on this resource. 1 update request is allowed at a time.");
+            ValidatorUtil.addConstraintViolation(context, "Invalid PUT request on this resource. 1 update request is allowed at a time.", "status");
             return false;
         }
         return true;
-    }
-
-    private void addConstraintViolation(ConstraintValidatorContext context, String message) {
-        context.buildConstraintViolationWithTemplate(message)
-                .addPropertyNode("status")
-                .addConstraintViolation();
     }
 
 }

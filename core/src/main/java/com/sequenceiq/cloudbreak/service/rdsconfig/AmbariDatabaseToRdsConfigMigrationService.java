@@ -85,7 +85,7 @@ public class AmbariDatabaseToRdsConfigMigrationService {
         AmbariDatabaseDetailsJson ambariDatabaseDetailsJson = ambariDatabaseMapper.mapAmbariDatabaseToAmbariDatabaseDetailJson(
                 component.getAttributes().get(AmbariDatabase.class));
         RDSConfig rdsConfig = ambariDatabaseMapper.mapAmbariDatabaseDetailsJsonToRdsConfig(ambariDatabaseDetailsJson, cluster, null, false);
-        if (DatabaseVendor.EMBEDDED.name().equalsIgnoreCase(rdsConfig.getDatabaseEngine())) {
+        if (DatabaseVendor.EMBEDDED == rdsConfig.getDatabaseEngine()) {
             rdsConfig.setStatus(ResourceStatus.DEFAULT);
         }
         return rdsConfigService.create(rdsConfig);

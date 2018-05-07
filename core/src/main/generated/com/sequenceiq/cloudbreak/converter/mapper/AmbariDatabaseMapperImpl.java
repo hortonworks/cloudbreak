@@ -23,9 +23,7 @@ public class AmbariDatabaseMapperImpl implements AmbariDatabaseMapper {
 
         if ( ambariDatabaseDetailsJson != null ) {
             rDSConfig.setConnectionUserName( ambariDatabaseDetailsJson.getUserName() );
-            if ( ambariDatabaseDetailsJson.getVendor() != null ) {
-                rDSConfig.setDatabaseEngine( ambariDatabaseDetailsJson.getVendor().name() );
-            }
+            rDSConfig.setDatabaseEngine( ambariDatabaseDetailsJson.getVendor() );
             rDSConfig.setConnectionURL( mapConnectionUrl( ambariDatabaseDetailsJson ) );
             rDSConfig.setConnectionPassword( ambariDatabaseDetailsJson.getPassword() );
         }

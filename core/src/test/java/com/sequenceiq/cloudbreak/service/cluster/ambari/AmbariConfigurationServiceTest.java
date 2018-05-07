@@ -14,6 +14,7 @@ import org.mapstruct.factory.Mappers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
 import com.sequenceiq.cloudbreak.converter.mapper.AmbariDatabaseMapper;
@@ -48,6 +49,7 @@ public class AmbariConfigurationServiceTest {
 
     @Test
     public void testCreateRdsConfig() {
+        ReflectionTestUtils.setField(ambariConfigurationService, "databaseEngine", "MYSQL");
         Cluster cluster = new Cluster();
         Stack stack = new Stack();
         when(rdsConfigService.create(any(RDSConfig.class))).thenAnswer(invocation -> invocation.getArgument(0));

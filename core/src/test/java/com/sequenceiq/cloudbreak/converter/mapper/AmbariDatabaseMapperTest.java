@@ -66,14 +66,14 @@ public class AmbariDatabaseMapperTest {
     @Test
     public void testMapAmbariDatabaseToAmbariDatabaseDetailJson() {
         AmbariDatabase ambariDatabase = new AmbariDatabase();
-        ambariDatabase.setVendor(DatabaseVendor.POSTGRES.ambariVendor());
+        ambariDatabase.setVendor(DatabaseVendor.POSTGRES.databaseType());
         AmbariDatabaseDetailsJson ambariDatabaseDetailsJson = mapper.mapAmbariDatabaseToAmbariDatabaseDetailJson(ambariDatabase);
-        assertEquals(mapper.mapVendorByValue(DatabaseVendor.POSTGRES.ambariVendor()), ambariDatabaseDetailsJson.getVendor());
+        assertEquals(mapper.mapVendorByValue(DatabaseVendor.POSTGRES.databaseType()), ambariDatabaseDetailsJson.getVendor());
     }
 
     @Test
     public void testMapVendorByValue() {
         assertNull(mapper.mapVendorByValue(null));
-        assertEquals(DatabaseVendor.POSTGRES, mapper.mapVendorByValue(DatabaseVendor.POSTGRES.ambariVendor()));
+        assertEquals(DatabaseVendor.POSTGRES, mapper.mapVendorByValue(DatabaseVendor.POSTGRES.databaseType()));
     }
 }

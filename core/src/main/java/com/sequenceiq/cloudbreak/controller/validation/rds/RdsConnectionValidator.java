@@ -24,7 +24,7 @@ public class RdsConnectionValidator {
 
     public void validateRdsConnection(RDSConfig rdsConfig) {
         if (StringUtils.isEmpty(rdsConfig.getConnectorJarUrl())) {
-            if (rdsConfig.getDatabaseEngine().equals(DatabaseVendor.POSTGRES.name())) {
+            if (rdsConfig.getDatabaseEngine() == DatabaseVendor.POSTGRES) {
                 validateRdsConnection(new org.postgresql.Driver(), rdsConfig);
                 return;
             } else {
@@ -34,17 +34,16 @@ public class RdsConnectionValidator {
 
         try {
             URL[] urls = {new URL("jar:" + rdsConfig.getConnectorJarUrl() + "!/")};
-            DatabaseVendor vendor = DatabaseVendor.valueOf(rdsConfig.getDatabaseEngine());
             try (URLClassLoader cl = URLClassLoader.newInstance(urls)) {
-                Driver d = (Driver) cl.loadClass(vendor.connectionDriver()).newInstance();
+                Driver d = (Driver) cl.loadClass(rdsConfig.getDatabaseEngine().connectionDriver()).newInstance();
                 validateRdsConnection(d, rdsConfig);
             } catch (ClassNotFoundException e) {
                 String msg = String.format("Invalid connector JAR. Could not find the specified class (%s) or the JAR does not exist.",
-                        vendor.connectionDriver());
+                        rdsConfig.getDatabaseEngine().connectionDriver());
                 LOGGER.error("{}, {}", msg, e.getMessage(), e);
                 throw new BadRequestException(msg, e);
             } catch (InstantiationException | IllegalAccessException e) {
-                String msg = String.format("Could not instantiate the specified class (%s).", vendor.connectionDriver());
+                String msg = String.format("Could not instantiate the specified class (%s).", rdsConfig.getDatabaseEngine().connectionDriver());
                 LOGGER.error("{}, {}", msg, e.getMessage(), e);
                 throw new BadRequestException(msg, e);
             } catch (Exception e) {

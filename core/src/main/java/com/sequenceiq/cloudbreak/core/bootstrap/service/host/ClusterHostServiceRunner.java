@@ -20,7 +20,6 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.model.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.model.ExecutorType;
 import com.sequenceiq.cloudbreak.api.model.ExposedService;
 import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
@@ -358,10 +357,9 @@ public class ClusterHostServiceRunner {
         rdsConfigs.stream()
                 .filter(rds -> StringUtils.isNoneEmpty(rds.getConnectorJarUrl()))
                 .forEach(rdsConfig -> {
-                    DatabaseVendor databaseVendor = DatabaseVendor.valueOf(rdsConfig.getDatabaseEngine());
-                    connectorJarUrlsByVendor.put("vendor", databaseVendor.ambariVendor());
+                    connectorJarUrlsByVendor.put("databaseType", rdsConfig.getDatabaseEngine().databaseType());
                     connectorJarUrlsByVendor.put("connectorJarUrl", rdsConfig.getConnectorJarUrl());
-                    connectorJarUrlsByVendor.put("connectorJarName", databaseVendor.connectorJarName());
+                    connectorJarUrlsByVendor.put("connectorJarName", rdsConfig.getDatabaseEngine().connectorJarName());
                 });
         if (!connectorJarUrlsByVendor.isEmpty()) {
             Map<String, Object> jdbcConnectors = singletonMap("jdbc_connectors", connectorJarUrlsByVendor);

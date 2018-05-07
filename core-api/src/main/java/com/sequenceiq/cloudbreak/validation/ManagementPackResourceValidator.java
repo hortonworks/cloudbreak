@@ -26,11 +26,11 @@ public class ManagementPackResourceValidator implements ConstraintValidator<Vali
     public boolean isValid(ManagementPackRequest value, ConstraintValidatorContext context) {
         boolean result = true;
         if (StringUtils.isEmpty(value.getMpackUrl())) {
-            addConstraintViolation(context, "mpackUrl", "mpackUrl cannot be empty");
+            ValidatorUtil.addConstraintViolation(context, "mpackUrl cannot be empty", "mpackUrl");
             result = false;
         }
         if (!value.isPurge() && !value.getPurgeList().isEmpty()) {
-            addConstraintViolation(context, "purgeList", "purgeList have to be empty if purge option is false");
+            ValidatorUtil.addConstraintViolation(context, "purgeList have to be empty if purge option is false", "purgeList");
             result = false;
         }
         if (!isValidPurgeList(value, context)) {
@@ -42,16 +42,11 @@ public class ManagementPackResourceValidator implements ConstraintValidator<Vali
     private boolean isValidPurgeList(ManagementPackRequest value, ConstraintValidatorContext context) {
         boolean result = true;
         if (value.getPurgeList().stream().anyMatch(p -> !validPurgeListElements.contains(p))) {
-            addConstraintViolation(context, "purgeList", String.format("purgelist contains only elements from %s", validPurgeListElements.stream().collect(
-                    Collectors.joining(","))));
+            ValidatorUtil.addConstraintViolation(context, String.format("purgelist contains only elements from %s", validPurgeListElements.stream().collect(
+                    Collectors.joining(","))), "purgeList");
             result = false;
         }
         return result;
     }
 
-    private void addConstraintViolation(ConstraintValidatorContext context, String property, String message) {
-        context.buildConstraintViolationWithTemplate(message)
-                .addPropertyNode(property)
-                .addConstraintViolation();
-    }
 }
