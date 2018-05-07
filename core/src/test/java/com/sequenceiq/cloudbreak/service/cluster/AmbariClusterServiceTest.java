@@ -110,7 +110,7 @@ public class AmbariClusterServiceTest {
         thrown.expectCause(equalTo(new BadRequestException("Ambari doesn't support resetting external DB automatically."
                 + " To reset Ambari Server schema you must first drop and then create it using DDL scripts from /var/lib/ambari-server/resources")));
         RDSConfig rdsConfig = new RDSConfig();
-        rdsConfig.setDatabaseEngine(DatabaseVendor.POSTGRES.name());
+        rdsConfig.setDatabaseEngine(DatabaseVendor.POSTGRES);
         when(rdsConfigService.findByClusterIdAndType(nullable(String.class), nullable(String.class), any(Long.class), eq(RdsType.AMBARI))).thenReturn(rdsConfig);
         ambariClusterService.recreate(1L, 1L, new HashSet<>(), false, new StackRepoDetails(), null, null);
     }

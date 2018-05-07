@@ -49,11 +49,11 @@ public class ClusterToClusterDetailsConverter extends AbstractConversionServiceA
 
     private void addDatabaseInfo(ClusterDetails clusterDetails, Cluster source) {
         RDSConfig rdsConfig = rdsConfigService.findByClusterIdAndType(source.getOwner(), source.getAccount(), source.getId(), RdsType.AMBARI);
-        if (rdsConfig == null || DatabaseVendor.EMBEDDED.name().equalsIgnoreCase(rdsConfig.getDatabaseEngine())) {
+        if (rdsConfig == null || DatabaseVendor.EMBEDDED == rdsConfig.getDatabaseEngine()) {
             clusterDetails.setDatabaseType(DatabaseVendor.EMBEDDED.name());
             clusterDetails.setExternalDatabase(Boolean.FALSE);
         } else {
-            clusterDetails.setDatabaseType(rdsConfig.getDatabaseEngine());
+            clusterDetails.setDatabaseType(rdsConfig.getDatabaseEngine().name());
             clusterDetails.setExternalDatabase(Boolean.TRUE);
         }
     }

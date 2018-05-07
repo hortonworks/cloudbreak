@@ -634,7 +634,7 @@ public class TestUtil {
         }
         rdsConfig.setType(rdsType.name());
         rdsConfig.setConnectionDriver(databaseVendor.connectionDriver());
-        rdsConfig.setDatabaseEngine(databaseVendor.name());
+        rdsConfig.setDatabaseEngine(databaseVendor);
         return rdsConfig;
     }
 
@@ -646,7 +646,7 @@ public class TestUtil {
         rdsConfig.setConnectionURL("jdbc:postgresql://10.1.1.1:5432/" + rdsType.name().toLowerCase());
         rdsConfig.setType(rdsType.name());
         rdsConfig.setConnectionDriver("org.postgresql.Driver");
-        rdsConfig.setDatabaseEngine(DatabaseVendor.POSTGRES.name());
+        rdsConfig.setDatabaseEngine(DatabaseVendor.POSTGRES);
         return rdsConfig;
     }
 

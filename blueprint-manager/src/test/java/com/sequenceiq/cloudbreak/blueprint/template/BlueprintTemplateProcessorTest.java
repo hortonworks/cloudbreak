@@ -17,6 +17,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.TestUtil;
+import com.sequenceiq.cloudbreak.api.model.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintPreparationObject;
 import com.sequenceiq.cloudbreak.blueprint.nifi.HdfConfigs;
@@ -254,7 +255,7 @@ public class BlueprintTemplateProcessorTest {
         rdsConfig.setConnectionUserName("heyitsme");
         rdsConfig.setConnectionURL("jdbc:postgresql://10.1.1.1:5432/" + rdsType);
         rdsConfig.setConnectionDriver("org.postgresql.Driver");
-        rdsConfig.setDatabaseEngine("POSTGRES");
+        rdsConfig.setDatabaseEngine(DatabaseVendor.POSTGRES);
         rdsConfig.setType(rdsType);
 
         return rdsConfig;

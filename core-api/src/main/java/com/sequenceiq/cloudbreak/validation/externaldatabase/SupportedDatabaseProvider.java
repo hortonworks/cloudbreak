@@ -36,8 +36,9 @@ public final class SupportedDatabaseProvider {
         SupportedExternalDatabaseServiceEntry entry = new SupportedExternalDatabaseServiceEntry();
         entry.setName(name.toUpperCase());
         entry.setDisplayName(name);
-        for (DatabaseVendor vendor : vendors) {
-            entry.getDatabases().add(new SupportedDatabaseEntry(vendor.name(), vendor.displayName(), vendor.jdbcUrlDriverId(), vendor.versions()));
+        for (DatabaseVendor databaseVendor : vendors) {
+            entry.getDatabases().add(new SupportedDatabaseEntry(databaseVendor.name(), databaseVendor.displayName(),
+                    databaseVendor.jdbcUrlDriverId(), databaseVendor.versions()));
         }
         return entry;
     }
