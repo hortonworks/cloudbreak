@@ -51,7 +51,7 @@ public class GeneralClusterConfigsProvider {
 
         GeneralClusterConfigs generalClusterConfigs = new GeneralClusterConfigs();
         generalClusterConfigs.setIdentityUserEmail(identityUser.getUsername());
-        generalClusterConfigs.setAmbariIp("pendign...");
+        generalClusterConfigs.setAmbariIp("pending...");
         generalClusterConfigs.setInstanceGroupsPresented(instanceMetadataPresented);
         generalClusterConfigs.setPassword(stack.getCluster().getAmbari().getPassword());
         generalClusterConfigs.setGatewayInstanceMetadataPresented(gatewayInstanceMetadataPresented);

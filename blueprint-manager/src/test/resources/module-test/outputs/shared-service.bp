@@ -200,6 +200,14 @@
           "infra_solr_datadir": "/hadoopfs/fs1/infra/solr"
         }
       }
+    },
+    {
+      "ranger-hive-plugin-properties": {
+        "properties": {
+          "ranger.service.config.param.enable.hive.metastore.lookup": "true",
+          "ranger.service.config.param.hive.site.file.path": "/etc/hive/conf/hive-site.xml"
+        }
+      }
     }
   ],
   "host_groups": [

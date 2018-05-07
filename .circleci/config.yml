@@ -30,9 +30,13 @@ jobs:
       _JAVA_OPTIONS: "-Xmx2048m"
     steps:
       - checkout
+      - attach_workspace:
+          at: .
+      - restore_cache:
+          key: gradle-cache
       - run:
           name: checkstyle-test
-          command: ./gradlew -Penv=jenkins -b build.gradle check -x spotbugsMain -x spotbugsTest -x checkstyleMain -x test --no-daemon --max-workers 2 --stacktrace
+          command: ./gradlew -Penv=jenkins -b build.gradle check -x spotbugsMain -x spotbugsTest -x checkstyleMain -x test --no-daemon --max-workers 1 --stacktrace
 
   code-quality-check-checkstyle-main:
     docker:
@@ -41,9 +45,13 @@ jobs:
       _JAVA_OPTIONS: "-Xmx2048m"
     steps:
       - checkout
+      - attach_workspace:
+          at: .
+      - restore_cache:
+          key: gradle-cache
       - run:
           name: checkstyle-main
-          command: ./gradlew -Penv=jenkins -b build.gradle check -x spotbugsMain -x spotbugsTest -x checkstyleTest -x test --no-daemon --max-workers 2 --stacktrace
+          command: ./gradlew -Penv=jenkins -b build.gradle check -x spotbugsMain -x spotbugsTest -x checkstyleTest -x test --no-daemon --max-workers 1 --stacktrace
 
   code-quality-check-spotbugs-main:
     docker:
@@ -52,9 +60,13 @@ jobs:
       _JAVA_OPTIONS: "-Xmx2048m"
     steps:
       - checkout
+      - attach_workspace:
+          at: .
+      - restore_cache:
+          key: gradle-cache
       - run:
           name: spotbugs-main
-          command: ./gradlew -Penv=jenkins -b build.gradle check -x checkstyleMain -x checkstyleTest -x spotbugsTest -x test --no-daemon --max-workers 2 --stacktrace
+          command: ./gradlew -Penv=jenkins -b build.gradle check -x checkstyleMain -x checkstyleTest -x spotbugsTest -x test --no-daemon --max-workers 1 --stacktrace
 
   code-quality-check-spotbugs-test:
     docker:
@@ -63,9 +75,13 @@ jobs:
       _JAVA_OPTIONS: "-Xmx2048m"
     steps:
       - checkout
+      - attach_workspace:
+          at: .
+      - restore_cache:
+          key: gradle-cache
       - run:
           name: spotbugs-test
-          command: ./gradlew -Penv=jenkins -b build.gradle check -x checkstyleMain -x checkstyleTest -x spotbugsMain -x test --no-daemon --max-workers 2 --stacktrace
+          command: ./gradlew -Penv=jenkins -b build.gradle check -x checkstyleMain -x checkstyleTest -x spotbugsMain -x test --no-daemon --max-workers 1 --stacktrace
 
   unit-test:
     docker:
@@ -74,6 +90,10 @@ jobs:
       _JAVA_OPTIONS: "-Xmx2048m"
     steps:
       - checkout
+      - attach_workspace:
+          at: .
+      - restore_cache:
+          key: gradle-cache
       - run:
           name: test
           command: ./gradlew -Penv=jenkins -b build.gradle test --info --stacktrace --parallel  -x checkstyleMain -x checkstyleTest -x spotbugsMain -x spotbugsTest

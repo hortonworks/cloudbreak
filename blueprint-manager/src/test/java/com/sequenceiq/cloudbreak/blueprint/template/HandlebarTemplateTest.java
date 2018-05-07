@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import org.assertj.core.util.Maps;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -118,10 +117,6 @@ public class HandlebarTemplateTest {
                 // HIVE_METASTORE
                 {"blueprints/configurations/hive_metastore/shared_service.handlebars", "configurations/hive_metastore/shared-service-attached.json",
                         sSConfigWhenNoSSAndDatalakePresentedThenShouldReturnWithoutSSDatalakeConfig()},
-                {"blueprints/configurations/hive_metastore/ldap.handlebars", "configurations/hive_metastore/hive-with-ldap.json",
-                        hiveWhenLdapPresentedThenShouldReturnWithLdapConfigs()},
-                {"blueprints/configurations/hive_metastore/ldap.handlebars", "configurations/hive_metastore/hive-without-ldap.json",
-                        hiveWhenLdapNotPresentedThenShouldReturnWithoutLdapConfigs()},
                 {"blueprints/configurations/hive_metastore/rds.handlebars", "configurations/hive_metastore/hive-with-rds.json",
                         hiveRdsConfigWhenRdsPresentedThenShouldReturnWithRdsConfig()},
                 {"blueprints/configurations/hive_metastore/rds.handlebars", "configurations/hive_metastore/hive-without-rds.json",
@@ -140,6 +135,16 @@ public class HandlebarTemplateTest {
                         objectWithoutEverything()},
                 {"blueprints/configurations/hive_server/global.handlebars", "configurations/hive_server/hive-server-with-ranger.json",
                         withRangerAdmin()},
+                {"blueprints/configurations/hive_server/ldap.handlebars", "configurations/hive_server/hive-with-ldap.json",
+                        hiveWhenLdapPresentedThenShouldReturnWithLdapConfigs()},
+                {"blueprints/configurations/hive_server/ldap.handlebars", "configurations/hive_server/hive-without-ldap.json",
+                        hiveWhenLdapNotPresentedThenShouldReturnWithoutLdapConfigs()},
+
+                // HIVE_SERVER_INTERACTIVE
+                {"blueprints/configurations/hive_server_interactive/ldap.handlebars", "configurations/hive_server_interactive/hive-with-ldap.json",
+                        hiveWhenLdapPresentedThenShouldReturnWithLdapConfigs()},
+                {"blueprints/configurations/hive_server_interactive/ldap.handlebars", "configurations/hive_server_interactive/hive-without-ldap.json",
+                        hiveWhenLdapNotPresentedThenShouldReturnWithoutLdapConfigs()},
 
                 // DP_ROFILER_AGENT
                 {"blueprints/configurations/dp_profiler/global.handlebars", "configurations/dp_profiler/profiler.json",
@@ -216,12 +221,6 @@ public class HandlebarTemplateTest {
                 .build();
     }
 
-    public static Map<String, Object> oozieWhenRdsPresentedThenShouldReturnWithRdsConfigs() {
-        return new BlueprintTemplateModelContextBuilder()
-                .withRdsConfigs(Sets.newHashSet(TestUtil.rdsConfig(RdsType.OOZIE)))
-                .build();
-    }
-
     public static Map<String, Object> beaconWhenRdsPresentedThenShouldReturnWithRdsConfigs() {
         return new BlueprintTemplateModelContextBuilder()
                 .withRdsConfigs(Sets.newHashSet(TestUtil.rdsConfig(RdsType.BEACON)))
@@ -236,7 +235,7 @@ public class HandlebarTemplateTest {
 
         return new BlueprintTemplateModelContextBuilder()
                 .withBlueprintView(blueprintView)
-                .withCustomProperties(properties)
+                .withFixInputs(properties)
                 .build();
     }
 
@@ -248,7 +247,7 @@ public class HandlebarTemplateTest {
 
         return new BlueprintTemplateModelContextBuilder()
                 .withBlueprintView(blueprintView)
-                .withCustomProperties(properties)
+                .withFixInputs(properties)
                 .build();
     }
 
@@ -299,7 +298,7 @@ public class HandlebarTemplateTest {
                 .build();
     }
 
-    public static Map<String, Object> withRangerAdmin() throws JsonProcessingException {
+    public static Map<String, Object> withRangerAdmin() {
         GeneralClusterConfigs generalClusterConfigs = new GeneralClusterConfigs();
         generalClusterConfigs.setPassword("cloudbreak123!");
 
@@ -314,18 +313,6 @@ public class HandlebarTemplateTest {
                 .build();
     }
 
-    public static Map<String, Object> druidSupersetRdsConfigWhenRdsPresentedThenShouldReturnWithRdsConfig() {
-        GeneralClusterConfigs generalClusterConfigs = new GeneralClusterConfigs();
-        generalClusterConfigs.setPassword("adminPassword");
-        generalClusterConfigs.setUserName("lastname");
-        generalClusterConfigs.setIdentityUserEmail("admin@example.com");
-
-        return new BlueprintTemplateModelContextBuilder()
-                .withRdsConfigs(Sets.newHashSet(TestUtil.rdsConfig(RdsType.SUPERSET)))
-                .withGeneralClusterConfigs(generalClusterConfigs)
-                .build();
-    }
-
     public static Map<String, Object> druidSupersetWithoutRdsConfigWhenRdsNotPresentedThenShouldReturnWithoutRdsConfig() {
         GeneralClusterConfigs generalClusterConfigs = new GeneralClusterConfigs();
         generalClusterConfigs.setPassword("adminPassword");
@@ -333,18 +320,6 @@ public class HandlebarTemplateTest {
         generalClusterConfigs.setIdentityUserEmail("admin@example.com");
 
         return new BlueprintTemplateModelContextBuilder()
-                .withGeneralClusterConfigs(generalClusterConfigs)
-                .build();
-    }
-
-    public static Map<String, Object> druidRdsConfigWhenRdsPresentedThenShouldReturnWithRdsConfig() {
-        GeneralClusterConfigs generalClusterConfigs = new GeneralClusterConfigs();
-        generalClusterConfigs.setPassword("adminPassword");
-        generalClusterConfigs.setUserName("lastname");
-        generalClusterConfigs.setIdentityUserEmail("admin@example.com");
-
-        return new BlueprintTemplateModelContextBuilder()
-                .withRdsConfigs(Sets.newHashSet(TestUtil.rdsConfig(RdsType.DRUID)))
                 .withGeneralClusterConfigs(generalClusterConfigs)
                 .build();
     }
@@ -431,13 +406,6 @@ public class HandlebarTemplateTest {
                 .build();
     }
 
-    public static Map<String, Object> rangerRdsConfigWhenRdsPresentedThenShouldReturnWithRdsConfig() throws JsonProcessingException {
-        RDSConfig rdsConfig = TestUtil.rdsConfig(RdsType.RANGER);
-        return new BlueprintTemplateModelContextBuilder()
-                .withRdsConfigs(Sets.newHashSet(rdsConfig))
-                .build();
-    }
-
     public static Map<String, Object> sSConfigWhenSSAndDatalakePresentedThenShouldReturnWithSSDatalakeConfig() throws JsonProcessingException {
         return new BlueprintTemplateModelContextBuilder()
                 .withSharedServiceConfigs(datalakeSharedServiceConfig().get())
@@ -445,33 +413,17 @@ public class HandlebarTemplateTest {
     }
 
     public static Map<String, Object> sSConfigWhenNoSSAndDatalakePresentedThenShouldReturnWithoutSSDatalakeConfig() throws JsonProcessingException {
+        Map<String, Object> fixInputs = new HashMap<>();
+        fixInputs.put("REMOTE_CLUSTER_NAME", "datalake-1");
+        fixInputs.put("policymgr_external_url", "10.1.1.1:6080");
         return new BlueprintTemplateModelContextBuilder()
                 .withSharedServiceConfigs(attachedClusterSharedServiceConfig().get())
-                .withCustomProperties(Maps.newHashMap("REMOTE_CLUSTER_NAME", "datalake-1"))
-                .build();
-    }
-
-    public static Map<String, Object> rangerRdsConfigWhenOracleRdsPresentedThenShouldReturnWithRdsConfig() throws JsonProcessingException {
-        RDSConfig rdsConfig = TestUtil.rdsConfig(RdsType.RANGER, DatabaseVendor.ORACLE11);
-
-        // TODO we should somehow handle this
-        //Map<String, String> attributes = new HashMap<>();
-        //attributes.put("rangerAdminPassword", "rangerAdminPassword");
-        //rdsConfig.setAttributes(new Json(attributes));
-
-        return new BlueprintTemplateModelContextBuilder()
-                .withRdsConfigs(Sets.newHashSet(rdsConfig))
+                .withFixInputs(fixInputs)
                 .build();
     }
 
     public static Map<String, Object> rangerRdsConfigWhenRdsPresentedThenShouldReturnWithPostgresRdsConfig() throws JsonProcessingException {
         RDSConfig rdsConfig = TestUtil.rdsConfig(RdsType.RANGER, DatabaseVendor.POSTGRES);
-
-        // TODO we should somehow handle this
-        //Map<String, String> attributes = new HashMap<>();
-        //attributes.put("rangerAdminPassword", "rangerAdminPassword");
-        //rdsConfig.setAttributes(new Json(attributes));
-
         return new BlueprintTemplateModelContextBuilder()
                 .withRdsConfigs(Sets.newHashSet(rdsConfig))
                 .build();
@@ -479,12 +431,6 @@ public class HandlebarTemplateTest {
 
     public static Map<String, Object> rangerRdsConfigWhenRdsPresentedThenShouldReturnWithMySQLRdsConfig() throws JsonProcessingException {
         RDSConfig rdsConfig = TestUtil.rdsConfig(RdsType.RANGER, DatabaseVendor.MYSQL);
-
-        // TODO we should somehow handle this
-        //Map<String, String> attributes = new HashMap<>();
-        //attributes.put("rangerAdminPassword", "rangerAdminPassword");
-        //rdsConfig.setAttributes(new Json(attributes));
-
         return new BlueprintTemplateModelContextBuilder()
                 .withRdsConfigs(Sets.newHashSet(rdsConfig))
                 .build();
@@ -492,12 +438,6 @@ public class HandlebarTemplateTest {
 
     public static Map<String, Object> rangerRdsConfigWhenRdsPresentedThenShouldReturnWitOracle11hRdsConfig() throws JsonProcessingException {
         RDSConfig rdsConfig = TestUtil.rdsConfig(RdsType.RANGER, DatabaseVendor.ORACLE11);
-
-        // TODO we should somehow handle this
-        //Map<String, String> attributes = new HashMap<>();
-        //attributes.put("rangerAdminPassword", "rangerAdminPassword");
-        //rdsConfig.setAttributes(new Json(attributes));
-
         return new BlueprintTemplateModelContextBuilder()
                 .withRdsConfigs(Sets.newHashSet(rdsConfig))
                 .build();
@@ -505,12 +445,6 @@ public class HandlebarTemplateTest {
 
     public static Map<String, Object> rangerRdsConfigWhenRdsPresentedThenShouldReturnWitOracle12hRdsConfig() throws JsonProcessingException {
         RDSConfig rdsConfig = TestUtil.rdsConfig(RdsType.RANGER, DatabaseVendor.ORACLE12);
-
-        // TODO we should somehow handle this
-        //Map<String, String> attributes = new HashMap<>();
-        //attributes.put("rangerAdminPassword", "rangerAdminPassword");
-        //rdsConfig.setAttributes(new Json(attributes));
-
         return new BlueprintTemplateModelContextBuilder()
                 .withRdsConfigs(Sets.newHashSet(rdsConfig))
                 .build();

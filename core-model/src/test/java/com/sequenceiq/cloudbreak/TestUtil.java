@@ -394,13 +394,6 @@ public class TestUtil {
         cluster.setRdsConfigs(rdsConfigs);
         cluster.setLdapConfig(ldapConfig());
         cluster.setHostGroups(hostGroups(cluster));
-        Map<String, String> inputs = new HashMap<>();
-        inputs.put("S3_BUCKET", "testbucket");
-        try {
-            cluster.setBlueprintInputs(new Json(inputs));
-        } catch (JsonProcessingException ignored) {
-            cluster.setBlueprintInputs(null);
-        }
 
         Map<String, String> map = new HashMap<>();
         try {

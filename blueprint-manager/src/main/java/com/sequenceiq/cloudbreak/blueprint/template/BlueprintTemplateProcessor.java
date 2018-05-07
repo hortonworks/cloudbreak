@@ -54,10 +54,7 @@ public class BlueprintTemplateProcessor {
     }
 
     private Map<String, Object> prepareTemplateObject(BlueprintPreparationObject source, Map<String, Object> customProperties) throws IOException {
-
-
-        Map<String, Object> blueprintInputs = source.getBlueprintView().getBlueprintInputs();
-        blueprintInputs.putAll(customProperties);
+        source.getFixInputs().putAll(customProperties);
 
         return new BlueprintTemplateModelContextBuilder()
                 .withLdap(source.getLdapConfig().orElse(null))
@@ -67,7 +64,8 @@ public class BlueprintTemplateProcessor {
                 .withBlueprintView(source.getBlueprintView())
                 .withRdsConfigs(source.getRdsConfigs())
                 .withFileSystemConfigs(source.getFileSystemConfigurationView().orElse(null))
-                .withCustomProperties(blueprintInputs)
+                .withCustomInputs(source.getCustomInputs())
+                .withFixInputs(source.getFixInputs())
                 .withGeneralClusterConfigs(source.getGeneralClusterConfigs())
                 .withHdfConfigs(source.getHdfConfigs().orElse(null))
                 .build();

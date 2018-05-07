@@ -15,8 +15,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.api.model.ParametersQueryResponse;
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessorFactory;
+import com.sequenceiq.cloudbreak.blueprint.CentralBlueprintParameterQueryService;
 import com.sequenceiq.cloudbreak.blueprint.configuration.SiteConfigurations;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
@@ -45,6 +47,9 @@ public class BlueprintService {
 
     @Inject
     private BlueprintProcessorFactory blueprintProcessorFactory;
+
+    @Inject
+    private CentralBlueprintParameterQueryService centralBlueprintParameterQueryService;
 
     public Set<Blueprint> retrievePrivateBlueprints(IdentityUser user) {
         return blueprintRepository.findForUser(user.getUserId());
@@ -163,5 +168,16 @@ public class BlueprintService {
             blueprint.setStatus(ResourceStatus.DEFAULT_DELETED);
             blueprintRepository.save(blueprint);
         }
+    }
+
+    public ParametersQueryResponse queryCustomParameters(String name, IdentityUser user) {
+        Blueprint blueprint = getPublicBlueprint(name, user);
+        Map<String, String> result = new HashMap<>();
+        for (String customParameter : centralBlueprintParameterQueryService.queryCustomParameters(blueprint.getBlueprintText())) {
+            result.put(customParameter, "");
+        }
+        ParametersQueryResponse parametersQueryResponse = new ParametersQueryResponse();
+        parametersQueryResponse.setCustom(result);
+        return parametersQueryResponse;
     }
 }

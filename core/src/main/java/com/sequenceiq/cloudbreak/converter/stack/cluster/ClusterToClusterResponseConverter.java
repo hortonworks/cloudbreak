@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.converter.stack.cluster;
 
 import static com.sequenceiq.cloudbreak.common.type.OrchestratorConstants.YARN;
 import static com.sequenceiq.cloudbreak.domain.ClusterAttributes.CUSTOM_QUEUE;
+import static com.sequenceiq.cloudbreak.logger.ReplaceUtil.anonymize;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -27,15 +28,17 @@ import com.sequenceiq.cloudbreak.api.model.AmbariRepoDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsResponse;
 import com.sequenceiq.cloudbreak.api.model.BlueprintInputJson;
 import com.sequenceiq.cloudbreak.api.model.BlueprintResponse;
-import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterResponse;
 import com.sequenceiq.cloudbreak.api.model.CustomContainerResponse;
-import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.GatewayJson;
 import com.sequenceiq.cloudbreak.api.model.GatewayType;
-import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupResponse;
 import com.sequenceiq.cloudbreak.api.model.KerberosResponse;
 import com.sequenceiq.cloudbreak.api.model.Port;
+import com.sequenceiq.cloudbreak.api.model.SharedServiceResponse;
 import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigResponse;
 import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigResponse;
+import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterResponse;
+import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.GatewayJson;
+import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupResponse;
+import com.sequenceiq.cloudbreak.api.model.v2.AttachedClusterInfoResponse;
 import com.sequenceiq.cloudbreak.blueprint.validation.BlueprintValidator;
 import com.sequenceiq.cloudbreak.blueprint.validation.StackServiceComponentDescriptor;
 import com.sequenceiq.cloudbreak.blueprint.validation.StackServiceComponentDescriptors;
@@ -45,18 +48,21 @@ import com.sequenceiq.cloudbreak.controller.exception.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.converter.mapper.ProxyConfigMapper;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.ExposedServices;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.json.Json;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.json.JsonHelper;
 import com.sequenceiq.cloudbreak.service.ClusterComponentConfigProvider;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.network.NetworkUtils;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 
 @Component
@@ -88,6 +94,12 @@ public class ClusterToClusterResponseConverter extends AbstractConversionService
 
     @Inject
     private ProxyConfigMapper proxyConfigMapper;
+
+    @Inject
+    private ClusterService clusterService;
+
+    @Inject
+    private StackService stackService;
 
     @Override
     public ClusterResponse convert(Cluster source) {
@@ -133,7 +145,6 @@ public class ClusterToClusterResponseConverter extends AbstractConversionService
         clusterResponse.setHostGroups(convertHostGroupsToJson(source.getHostGroups()));
         clusterResponse.setAmbariServerUrl(getAmbariServerUrl(source, ambariIp));
         clusterResponse.setServiceEndPoints(prepareServiceEndpointsMap(source, ambariIp));
-        clusterResponse.setBlueprintInputs(convertBlueprintInputs(source.getBlueprintInputs()));
         clusterResponse.setConfigStrategy(source.getConfigStrategy());
         setExtendedBlueprintText(source, clusterResponse);
         clusterResponse.setLdapConfig(getConversionService().convert(source.getLdapConfig(), LdapConfigResponse.class));
@@ -141,9 +152,6 @@ public class ClusterToClusterResponseConverter extends AbstractConversionService
         clusterResponse.setBlueprint(getConversionService().convert(source.getBlueprint(), BlueprintResponse.class));
         convertKnox(source, clusterResponse);
         convertCustomQueue(source, clusterResponse);
-        if (source.getBlueprintCustomProperties() != null) {
-            clusterResponse.setBlueprintCustomProperties(jsonHelper.createJsonFromString(source.getBlueprintCustomProperties()));
-        }
         convertContainerConfig(source, clusterResponse);
         convertComponentConfig(clusterResponse, source);
         clusterResponse.setCreationFinished(source.getCreationFinished());
@@ -153,14 +161,15 @@ public class ClusterToClusterResponseConverter extends AbstractConversionService
             clusterResponse.setKerberosResponse(getConversionService().convert(source.getKerberosConfig(), KerberosResponse.class));
         }
         decorateResponseWithProxyConfig(source, clusterResponse);
+        addSharedServiceResponse(source, clusterResponse);
         return clusterResponse;
     }
 
     private <R extends ClusterResponse> void setExtendedBlueprintText(Cluster source, R clusterResponse) {
         if (StringUtils.isEmpty(source.getExtendedBlueprintText())) {
-            clusterResponse.setExtendedBlueprintText(source.getBlueprint().getBlueprintText());
+            clusterResponse.setExtendedBlueprintText(anonymize(source.getBlueprint().getBlueprintText()));
         } else {
-            clusterResponse.setExtendedBlueprintText(source.getExtendedBlueprintText());
+            clusterResponse.setExtendedBlueprintText(anonymize(source.getExtendedBlueprintText()));
         }
     }
 
@@ -192,6 +201,22 @@ public class ClusterToClusterResponseConverter extends AbstractConversionService
                 clusterResponse.setCustomQueue("default");
             }
         }
+    }
+
+    private void addSharedServiceResponse(Cluster cluster, ClusterResponse clusterResponse) {
+        SharedServiceResponse sharedServiceResponse = new SharedServiceResponse();
+        if (cluster.getStack().getDatalakeId() != null) {
+            sharedServiceResponse.setSharedClusterId(cluster.getStack().getDatalakeId());
+            sharedServiceResponse.setSharedClusterName(stackService.get(cluster.getStack().getDatalakeId()).getName());
+        } else {
+            for (Stack stack : stackService.findClustersConnectedToDatalake(cluster.getStack().getId())) {
+                AttachedClusterInfoResponse attachedClusterInfoResponse = new AttachedClusterInfoResponse();
+                attachedClusterInfoResponse.setId(stack.getId());
+                attachedClusterInfoResponse.setName(stack.getName());
+                sharedServiceResponse.getAttachedClusters().add(attachedClusterInfoResponse);
+            }
+        }
+        clusterResponse.setSharedServiceResponse(sharedServiceResponse);
     }
 
     private void convertRdsIds(ClusterResponse clusterResponse, Collection<RDSConfig> rdsConfigs) {

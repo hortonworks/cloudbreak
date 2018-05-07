@@ -24,12 +24,24 @@ public class CentralBlueprintParameterQueryService {
     @Inject
     private TemplateParameterFilter templateParameterFilter;
 
-    private Set<String> queryDatalakeParameters(String sourceTemplate) throws BlueprintProcessingException {
+    public Set<String> queryDatalakeParameters(String sourceTemplate) throws BlueprintProcessingException {
         Set<String> blueprintParameters;
         try {
             blueprintParameters = templateParameterFilter.queryForDatalakeParameters(
                     HandleBarModelKey.DATALAKE,
                     blueprintTemplateProcessor.queryParameters(sourceTemplate));
+        } catch (IOException e) {
+            String message = String.format("Unable to query blueprint parameters from blueprint which was: %s", sourceTemplate);
+            LOGGER.warn(message);
+            throw new BlueprintProcessingException(message, e);
+        }
+        return blueprintParameters;
+    }
+
+    public Set<String> queryCustomParameters(String sourceTemplate) throws BlueprintProcessingException {
+        Set<String> blueprintParameters;
+        try {
+            blueprintParameters = templateParameterFilter.queryForCustomParameters(blueprintTemplateProcessor.queryParameters(sourceTemplate));
         } catch (IOException e) {
             String message = String.format("Unable to query blueprint parameters from blueprint which was: %s", sourceTemplate);
             LOGGER.warn(message);

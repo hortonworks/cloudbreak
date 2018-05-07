@@ -19,13 +19,14 @@ import com.sequenceiq.cloudbreak.api.model.BlueprintResponse;
 import com.sequenceiq.cloudbreak.api.model.ConfigStrategy;
 import com.sequenceiq.cloudbreak.api.model.CustomContainerResponse;
 import com.sequenceiq.cloudbreak.api.model.ExecutorType;
-import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupResponse;
 import com.sequenceiq.cloudbreak.api.model.JsonEntity;
 import com.sequenceiq.cloudbreak.api.model.KerberosResponse;
+import com.sequenceiq.cloudbreak.api.model.SharedServiceResponse;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigResponse;
 import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.GatewayJson;
+import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupResponse;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
@@ -142,6 +143,9 @@ public class ClusterResponse implements JsonEntity {
     @JsonSerialize(using = Base64Serializer.class)
     @JsonDeserialize(using = Base64Deserializer.class)
     private String extendedBlueprintText;
+
+    @ApiModelProperty(ClusterModelDescription.SHARED_SERVICE)
+    private SharedServiceResponse sharedServiceResponse;
 
     public String getDescription() {
         return description;
@@ -431,5 +435,13 @@ public class ClusterResponse implements JsonEntity {
 
     public void setExtendedBlueprintText(String extendedBlueprintText) {
         this.extendedBlueprintText = extendedBlueprintText;
+    }
+
+    public SharedServiceResponse getSharedServiceResponse() {
+        return sharedServiceResponse;
+    }
+
+    public void setSharedServiceResponse(SharedServiceResponse sharedServiceResponse) {
+        this.sharedServiceResponse = sharedServiceResponse;
     }
 }

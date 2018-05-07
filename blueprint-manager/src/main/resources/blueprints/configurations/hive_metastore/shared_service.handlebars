@@ -25,13 +25,21 @@
   },
   "ranger-hive-security":{
     "properties": {
-      "ranger.plugin.hive.policy.rest.url": "http://localhost:6080",
+      "ranger.plugin.hive.policy.rest.url": "{{{ policymgr_external_url }}}",
       "ranger.plugin.hive.service.name":"{{{ REMOTE_CLUSTER_NAME }}}_hive"
     }
   },
   "hive-env": {
     "properties": {
       "hive_security_authorization": "Ranger"
+    }
+  }
+{{{/if-true}}}
+{{{#if-true sharedService.datalakeCluster}}}
+  "ranger-hive-plugin-properties": {
+    "properties": {
+      "ranger.service.config.param.enable.hive.metastore.lookup": "true",
+      "ranger.service.config.param.hive.site.file.path": "/etc/hive/conf/hive-site.xml"
     }
   }
 {{{/if-true}}}

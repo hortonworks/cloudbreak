@@ -121,7 +121,6 @@ public class AzureUtils {
         if (ResourceStatus.FAILED.equals(resourceStatus)) {
             LOGGER.debug("Cloud resource status: {}", resourceStatus);
             try {
-                // TODO: discuss with Doktorics why this is needed
                 DeploymentOperations templateDeploymentOperations = access.getTemplateDeploymentOperations(stackName, stackName);
                 for (DeploymentOperation deploymentOperation : templateDeploymentOperations.list()) {
 

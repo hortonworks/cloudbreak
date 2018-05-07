@@ -12,6 +12,8 @@ public class ModelDescriptions {
     public static final String TOPOLOGY_ID = "id of the topology the resource belongs to";
     public static final String REQUESTS = "request object";
     public static final String RESPONSE = "response object";
+    public static final String FIXINPUTS = "fixinputs object";
+    public static final String DATALAKEINPUTS = "datalakeinputs object";
     public static final String CREATED = "creation time of the resource in long";
     public static final String AMBARI_SERVER = "ambari server address";
 
@@ -83,6 +85,7 @@ public class ModelDescriptions {
 
     public static class StackModelDescription {
         public static final String STACK_ID = "id of the stack";
+        public static final String CUSTOM = "Custom parameters as a json";
         public static final String IMAGE = "image of the stack";
         public static final String STACK_NAME = "name of the stack";
         public static final String REGION = "region of the stack";
@@ -100,6 +103,7 @@ public class ModelDescriptions {
         public static final String KERBEROS_ADMIN_URL = "kerberos admin server URL";
         public static final String KERBEROS_PRINCIPAL = "kerberos principal";
         public static final String PARAMETERS = "additional cloud specific parameters for stack";
+        public static final String INPUTS = "dynamic properties";
         public static final String FAILURE_ACTION = "action on failure";
         public static final String FAILURE_POLICY = "failure policy in case of failures";
         public static final String STACK_STATUS = "status of the stack";
@@ -166,6 +170,7 @@ public class ModelDescriptions {
         public static final String BLUEPRINT = "blueprint for the cluster";
         public static final String SHARED_SERVICE_REQUEST = "Shared service request";
         public static final String VALIDATE_BLUEPRINT = "blueprint validation";
+        public static final String SHARED_SERVICE = "shared service for a specific stack";
         public static final String HOURS = "duration - how long the cluster is running in hours";
         public static final String MINUTES = "duration - how long the cluster is running in minutes (minus hours)";
         public static final String EMAIL_TO = "send email to the requested address";

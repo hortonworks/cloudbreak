@@ -1,11 +1,5 @@
 {
 {{{#cp components 'RANGER_ADMIN'}}}
-  "ranger-hive-plugin-properties": {
-    "properties": {
-      "ranger.service.config.param.enable.hive.metastore.lookup": "true",
-      "ranger.service.config.param.hive.site.file.path": "/etc/hive/conf/hive-site.xml"
-    }
-  },
   "hive-site": {
     "properties": {
       "hive.metastore.warehouse.dir":"/apps/hive/warehouse",
@@ -21,7 +15,9 @@
       "external_admin_username": "admin",
       "external_admin_password": "{{{ general.password }}}",
       "external_ranger_admin_username": "admin",
-      "external_ranger_admin_password": "{{{ general.password }}}"
+      "external_ranger_admin_password": "{{{ general.password }}}",
+      "ranger.service.config.param.enable.hive.metastore.lookup": "true",
+      "ranger.service.config.param.hive.site.file.path": "/etc/hive/conf/hive-site.xml"
     }
   },
   "hive-env": {

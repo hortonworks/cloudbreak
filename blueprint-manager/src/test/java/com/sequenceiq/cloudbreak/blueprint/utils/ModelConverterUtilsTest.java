@@ -8,7 +8,6 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import org.mockito.InjectMocks;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
@@ -21,9 +20,6 @@ public class ModelConverterUtilsTest {
     public static final String MAP_CONVERTER_INPUTS = "model-converter-test/inputs/";
 
     public static final String MAP_CONVERTER_OUTPUTS = "model-converter-test/outputs/";
-
-    @InjectMocks
-    private final ModelConverterUtils underTest = new ModelConverterUtils();
 
     private String fileName;
 
@@ -44,7 +40,7 @@ public class ModelConverterUtilsTest {
         JSONObject input = getJson(MAP_CONVERTER_INPUTS, fileName);
         JSONObject output = getJson(MAP_CONVERTER_OUTPUTS, fileName);
 
-        Map<String, Object> result = underTest.convert(input);
+        Map<String, Object> result = ModelConverterUtils.convert(input);
 
         Assert.assertEquals(output, JSONObject.fromObject(result));
     }
