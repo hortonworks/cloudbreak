@@ -6,7 +6,7 @@ base:
     - java
     - metadata
 {% if not salt['file.directory_exists']('/yarn-private') %}  # FIXME (BUG-92637): must be disabled for YCloud
-    - nginx
+    - nginx.datalake
 {% endif %}
     - docker
     - recipes.runner
@@ -69,6 +69,9 @@ base:
   'roles:ambari_server':
     - match: grain
     - ambari.server-start
+{% if not salt['file.directory_exists']('/yarn-private') %}  # FIXME (BUG-92637): must be disabled for YCloud
+    - nginx.init
+{% endif %}
 
   'roles:ambari_server_standby':
     - match: grain
