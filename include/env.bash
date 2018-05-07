@@ -170,8 +170,8 @@ SL_ADDRESS_RESOLVING_TIMEOUT - DNS lookup timeout of Authentication service for 
 SL_NODE_TLS_REJECT_UNAUTHORIZED - Enables self signed certifications in Authentication service
 SULTANS_CONTAINER_PATH - Default project location in Authentication service container
 TRAEFIK_MAX_IDLE_CONNECTION - Configures --maxidleconnsperhost for Traefik
-TRAEFIK_PORT_HTTP - Configures http port for Traefik
-TRAEFIK_PORT_HTTPS - Configures https port for Traefik
+PUBLIC_HTTP_PORT - Configures the public http port for Cloudbreak
+PUBLIC_HTTPS_PORT - Configures the public https port for Cloudbreak
 UAA_CLOUDBREAK_ID - Identity of the Cloudbreak scope in Identity
 UAA_CLOUDBREAK_SECRET - Secret of the Cloudbreak scope in Identity
 UAA_CLOUDBREAK_SHELL_ID - Identity of the Cloudbreak Shell scope in Identity
