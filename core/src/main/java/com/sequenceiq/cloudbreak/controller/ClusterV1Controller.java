@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.controller;
 
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
+import java.util.Optional;
+
 import javax.ws.rs.core.Response;
 
 import org.slf4j.Logger;
@@ -22,6 +24,7 @@ import com.sequenceiq.cloudbreak.api.model.ConfigsResponse;
 import com.sequenceiq.cloudbreak.api.model.FailureReport;
 import com.sequenceiq.cloudbreak.api.model.UpdateClusterJson;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
+import com.sequenceiq.cloudbreak.cloud.model.StackInputs;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -32,6 +35,7 @@ import com.sequenceiq.cloudbreak.service.ClusterCreationSetupService;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
+import com.sequenceiq.cloudbreak.service.sharedservice.SharedServiceConfigProvider;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @Controller
@@ -58,6 +62,9 @@ public class ClusterV1Controller implements ClusterV1Endpoint {
     @Autowired
     private ClusterCreationSetupService clusterCreationSetupService;
 
+    @Autowired
+    private SharedServiceConfigProvider sharedServiceConfigProvider;
+
     @Override
     public ClusterResponse post(Long stackId, ClusterRequest request) throws Exception {
         IdentityUser user = authenticatedUserService.getCbUser();
@@ -66,7 +73,10 @@ public class ClusterV1Controller implements ClusterV1Endpoint {
 
         clusterCreationSetupService.validate(request, stack, user);
         Cluster cluster = clusterCreationSetupService.prepare(request, stack, user);
-
+        Optional<StackInputs> stackInputs = sharedServiceConfigProvider.prepareDatalakeConfigs(cluster.getBlueprint(), stack);
+        if (stackInputs.isPresent()) {
+            sharedServiceConfigProvider.updateStackinputs(stackInputs.get(), stack);
+        }
         return conversionService.convert(cluster, ClusterResponse.class);
     }
 

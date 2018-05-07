@@ -31,6 +31,7 @@ import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.model.stack.StackRequest;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
+import com.sequenceiq.cloudbreak.cloud.model.StackInputs;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.common.service.DefaultCostTaggingService;
 import com.sequenceiq.cloudbreak.common.type.OrchestratorConstants;
@@ -89,6 +90,7 @@ public class StackRequestToStackConverter extends AbstractConversionServiceAware
         stack.setCloudPlatform(source.getCloudPlatform());
         Map<String, String> sourceTags = source.getApplicationTags();
         stack.setTags(getTags(mergeTags(sourceTags, source.getUserDefinedTags(), getDefaultTags(source))));
+        stack.setInputs(getInputs(mergeInputs(source.getCustomInputs())));
         preparateSharedServiceProperties(source, stack, sourceTags);
         StackAuthentication stackAuthentication = conversionService.convert(source.getStackAuthentication(), StackAuthentication.class);
         stack.setStackAuthentication(stackAuthentication);
@@ -147,6 +149,17 @@ public class StackRequestToStackConverter extends AbstractConversionServiceAware
         }
     }
 
+    private Json getInputs(StackInputs stackInputs) {
+        try {
+            if (stackInputs == null) {
+                return new Json(new StackInputs(new HashMap<>(), new HashMap<>(), new HashMap<>()));
+            }
+            return new Json(stackInputs);
+        } catch (Exception ignored) {
+            throw new BadRequestException("Failed to convert dynamic inputs.");
+        }
+    }
+
     private Map<String, String> getDefaultTags(StackRequest source) {
         Map<String, String> result = new HashMap<>();
         try {
@@ -163,6 +176,10 @@ public class StackRequestToStackConverter extends AbstractConversionServiceAware
 
     private StackTags mergeTags(Map<String, String> applicationTags, Map<String, String> userDefinedTags, Map<String, String> defaultTags) {
         return new StackTags(userDefinedTags, applicationTags, defaultTags);
+    }
+
+    private StackInputs mergeInputs(Map<String, Object> customInputs) {
+        return new StackInputs(customInputs, new HashMap<>(), new HashMap<>());
     }
 
     private String getRegion(StackRequest source) {

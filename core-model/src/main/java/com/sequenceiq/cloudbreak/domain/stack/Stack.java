@@ -163,6 +163,10 @@ public class Stack implements ProvisionEntity {
     @Column(columnDefinition = "TEXT")
     private Json tags;
 
+    @Convert(converter = JsonToString.class)
+    @Column(columnDefinition = "TEXT")
+    private Json inputs;
+
     @ManyToOne
     private FlexSubscription flexSubscription;
 
@@ -639,5 +643,13 @@ public class Stack implements ProvisionEntity {
 
     public void setStackAuthentication(StackAuthentication stackAuthentication) {
         this.stackAuthentication = stackAuthentication;
+    }
+
+    public Json getInputs() {
+        return inputs;
+    }
+
+    public void setInputs(Json inputs) {
+        this.inputs = inputs;
     }
 }

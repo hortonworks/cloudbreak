@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.converter.v2;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -17,11 +18,12 @@ import com.sequenceiq.cloudbreak.blueprint.GeneralClusterConfigsProvider;
 import com.sequenceiq.cloudbreak.blueprint.filesystem.FileSystemConfigurationProvider;
 import com.sequenceiq.cloudbreak.blueprint.nifi.HdfConfigProvider;
 import com.sequenceiq.cloudbreak.blueprint.nifi.HdfConfigs;
-import com.sequenceiq.cloudbreak.blueprint.sharedservice.SharedServiceConfigsProvider;
+import com.sequenceiq.cloudbreak.blueprint.sharedservice.SharedServiceConfigsViewProvider;
 import com.sequenceiq.cloudbreak.blueprint.template.views.BlueprintView;
 import com.sequenceiq.cloudbreak.blueprint.template.views.FileSystemConfigurationView;
 import com.sequenceiq.cloudbreak.blueprint.templates.BlueprintStackInfo;
 import com.sequenceiq.cloudbreak.blueprint.utils.StackInfoService;
+import com.sequenceiq.cloudbreak.cloud.model.StackInputs;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.service.user.UserFilterField;
@@ -84,7 +86,7 @@ public class StackToBlueprintPreparationObjectConverter extends AbstractConversi
     private GeneralClusterConfigsProvider generalClusterConfigsProvider;
 
     @Inject
-    private SharedServiceConfigsProvider sharedServiceConfigProvider;
+    private SharedServiceConfigsViewProvider sharedServiceConfigProvider;
 
     @Override
     public BlueprintPreparationObject convert(Stack source) {
@@ -98,23 +100,21 @@ public class StackToBlueprintPreparationObjectConverter extends AbstractConversi
             Map<String, List<InstanceMetaData>> groupInstances = instanceGroupMetadataCollector.collectMetadata(source);
             HdfConfigs hdfConfigs = hdfConfigProvider.createHdfConfig(cluster.getHostGroups(), groupInstances, cluster.getBlueprint().getBlueprintText());
             BlueprintStackInfo blueprintStackInfo = stackInfoService.blueprintStackInfo(cluster.getBlueprint().getBlueprintText());
-            FileSystemConfigurationView fileSystemConfigurationView = null;
-            if (source.getCluster().getFileSystem() != null) {
-                fileSystemConfigurationView = new FileSystemConfigurationView(
-                    fileSystemConfigurationProvider.fileSystemConfiguration(fileSystem, source),
-                    fileSystem == null ? false : fileSystem.isDefaultFs());
-            }
+            FileSystemConfigurationView fileSystemConfigurationView = getFileSystemConfigurationView(source, fileSystem);
             IdentityUser identityUser = userDetailsService.getDetails(cluster.getOwner(), UserFilterField.USERID);
-            Stack dataLakeStack = null;
-            if (source.getDatalakeId() != null) {
-                dataLakeStack = stackService.get(source.getDatalakeId());
-            }
+            Stack dataLakeStack = getDataLakeStack(source);
+            StackInputs stackInputs = getStackInputs(source);
+
+            Map<String, Object> fixInputs = stackInputs.getFixInputs() == null ? new HashMap<>() : stackInputs.getFixInputs();
+            fixInputs.putAll(stackInputs.getDatalakeInputs() == null ? new HashMap<>() : stackInputs.getDatalakeInputs());
 
             return BlueprintPreparationObject.Builder.builder()
                     .withFlexSubscription(source.getFlexSubscription())
                     .withRdsConfigs(postgresConfigService.createRdsConfigIfNeeded(source, cluster))
                     .withHostgroups(hostGroupService.getByCluster(cluster.getId()))
                     .withGateway(cluster.getGateway())
+                    .withCustomInputs(stackInputs.getCustomInputs() == null ? new HashMap<>() : stackInputs.getCustomInputs())
+                    .withFixInputs(fixInputs)
                     .withBlueprintView(new BlueprintView(cluster, blueprintStackInfo))
                     .withStackRepoDetailsHdpVersion(stackRepoDetailsHdpVersion)
                     .withFileSystemConfigurationView(fileSystemConfigurationView)
@@ -130,6 +130,32 @@ public class StackToBlueprintPreparationObjectConverter extends AbstractConversi
         } catch (IOException e) {
             throw new CloudbreakServiceException(e.getMessage(), e);
         }
+    }
+
+    private Stack getDataLakeStack(Stack source) {
+        Stack dataLakeStack = null;
+        if (source.getDatalakeId() != null) {
+            dataLakeStack = stackService.getById(source.getDatalakeId());
+        }
+        return dataLakeStack;
+    }
+
+    private FileSystemConfigurationView getFileSystemConfigurationView(Stack source, FileSystem fileSystem) throws IOException {
+        FileSystemConfigurationView fileSystemConfigurationView = null;
+        if (source.getCluster().getFileSystem() != null) {
+            fileSystemConfigurationView = new FileSystemConfigurationView(
+                fileSystemConfigurationProvider.fileSystemConfiguration(fileSystem, source),
+                fileSystem == null ? false : fileSystem.isDefaultFs());
+        }
+        return fileSystemConfigurationView;
+    }
+
+    private StackInputs getStackInputs(Stack source) throws IOException {
+        StackInputs stackInputs = source.getInputs().get(StackInputs.class);
+        if (stackInputs == null) {
+            stackInputs = new StackInputs(new HashMap<>(), new HashMap<>(), new HashMap<>());
+        }
+        return stackInputs;
     }
 
 }

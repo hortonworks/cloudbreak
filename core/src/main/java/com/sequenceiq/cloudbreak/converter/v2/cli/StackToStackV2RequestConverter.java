@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.converter.v2.cli;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 
 import javax.inject.Inject;
@@ -22,13 +23,14 @@ import com.sequenceiq.cloudbreak.api.model.v2.PlacementSettings;
 import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.Tags;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
+import com.sequenceiq.cloudbreak.cloud.model.StackInputs;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
 
 @Component
@@ -59,6 +61,7 @@ public class StackToStackV2RequestConverter extends AbstractConversionServiceAwa
         }
         prepareImage(source, stackV2Request);
         prepareTags(source, stackV2Request);
+        prepareInputs(source, stackV2Request);
         return stackV2Request;
     }
 
@@ -128,6 +131,19 @@ public class StackToStackV2RequestConverter extends AbstractConversionServiceAwa
             }
         } catch (IOException e) {
             stackV2Request.setTags(null);
+        }
+    }
+
+    private void prepareInputs(Stack source, StackV2Request stackV2Request) {
+        try {
+
+            StackInputs stackInputs = Strings.isNullOrEmpty(source.getInputs().getValue())
+                    ? new StackInputs(new HashMap<>(), new HashMap<>(), new HashMap<>()) : source.getInputs().get(StackInputs.class);
+            if (stackInputs.getCustomInputs() != null) {
+                stackV2Request.setInputs(stackInputs.getCustomInputs());
+            }
+        } catch (IOException e) {
+            stackV2Request.setInputs(null);
         }
     }
 

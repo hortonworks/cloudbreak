@@ -54,6 +54,7 @@ import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariViewProvider;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 
 public class ClusterToClusterResponseConverterTest extends AbstractEntityConverterTest<Cluster> {
@@ -104,6 +105,9 @@ public class ClusterToClusterResponseConverterTest extends AbstractEntityConvert
     private StackUtil stackUtil;
 
     @Mock
+    private StackService stackService;
+
+    @Mock
     private RdsConfigService rdsConfigService;
 
     @Mock
@@ -120,6 +124,7 @@ public class ClusterToClusterResponseConverterTest extends AbstractEntityConvert
         MockitoAnnotations.initMocks(this);
         given(orchestratorTypeResolver.resolveType(any(Orchestrator.class))).willReturn(OrchestratorType.HOST);
         given(rdsConfigService.findByClusterId(anyString(), anyString(), anyLong())).willReturn(new HashSet<>());
+        given(stackService.findClustersConnectedToDatalake(anyLong())).willReturn(new HashSet<>());
         stackServiceComponentDescriptor = createStackServiceComponentDescriptor();
     }
 

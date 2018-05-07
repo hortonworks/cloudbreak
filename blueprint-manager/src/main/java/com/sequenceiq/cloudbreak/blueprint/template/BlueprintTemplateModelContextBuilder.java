@@ -19,9 +19,10 @@ import com.sequenceiq.cloudbreak.blueprint.template.views.LdapView;
 import com.sequenceiq.cloudbreak.blueprint.template.views.RdsView;
 import com.sequenceiq.cloudbreak.blueprint.template.views.SharedServiceConfigsView;
 import com.sequenceiq.cloudbreak.blueprint.templates.GeneralClusterConfigs;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
+import com.sequenceiq.cloudbreak.blueprint.utils.ModelConverterUtils;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 
 public class BlueprintTemplateModelContextBuilder {
 
@@ -44,6 +45,10 @@ public class BlueprintTemplateModelContextBuilder {
     private BlueprintView blueprintView;
 
     private Set<String> components = new HashSet<>();
+
+    private Map<String, Object> customInputs = new HashMap<>();
+
+    private Map<String, Object> fixInputs = new HashMap<>();
 
     public BlueprintTemplateModelContextBuilder withGeneralClusterConfigs(GeneralClusterConfigs generalClusterConfigs) {
         this.generalClusterConfigsView = new GeneralClusterConfigsView(generalClusterConfigs);
@@ -121,6 +126,20 @@ public class BlueprintTemplateModelContextBuilder {
         return this;
     }
 
+    public BlueprintTemplateModelContextBuilder withCustomInputs(Map<String, Object> customInputs) {
+        if (customInputs != null) {
+            this.customInputs = customInputs;
+        }
+        return this;
+    }
+
+    public BlueprintTemplateModelContextBuilder withFixInputs(Map<String, Object> fixInputs) {
+        if (fixInputs != null) {
+            this.fixInputs = fixInputs;
+        }
+        return this;
+    }
+
     public Map<String, Object> build() {
         Map<String, Object> blueprintTemplateModelContext = new HashMap<>();
         blueprintTemplateModelContext.put(HandleBarModelKey.COMPONENTS.modelKey(), components);
@@ -129,18 +148,11 @@ public class BlueprintTemplateModelContextBuilder {
         blueprintTemplateModelContext.put(HandleBarModelKey.RDS.modelKey(), rds);
         blueprintTemplateModelContext.put(HandleBarModelKey.FILESYSTEMCONFIGS.modelKey(), fileSystemConfig);
         blueprintTemplateModelContext.put(HandleBarModelKey.SHAREDSERVICE.modelKey(), sharedServiceConfigs.orElse(null));
-        for (Entry<String, String> customEntry : customProperties.entrySet()) {
-            blueprintTemplateModelContext.put(customEntry.getKey(), customEntry.getValue());
-        }
-        if (blueprintView != null) {
-            for (Entry<String, Object> stringObjectEntry : blueprintView.getBlueprintInputs().entrySet()) {
-                blueprintTemplateModelContext.put(stringObjectEntry.getKey(), stringObjectEntry.getValue());
-            }
-        }
-
         blueprintTemplateModelContext.put(HandleBarModelKey.BLUEPRINT.modelKey(), blueprintView);
         blueprintTemplateModelContext.put(HandleBarModelKey.HDF.modelKey(), hdfConfigs.orElse(null));
         blueprintTemplateModelContext.put(HandleBarModelKey.GENERAL.modelKey(), generalClusterConfigsView);
+        ModelConverterUtils.deepMerge(blueprintTemplateModelContext, ModelConverterUtils.convert(customInputs));
+        ModelConverterUtils.deepMerge(blueprintTemplateModelContext, ModelConverterUtils.convert(fixInputs));
         blueprintTemplateModelContext.put(HandleBarModelKey.STACK_VERSION.modelKey(), "{{stack_version}}");
         return blueprintTemplateModelContext;
     }

@@ -41,10 +41,8 @@ public class ClusterV2RequestToClusterRequestConverter extends AbstractConversio
             cluster.setAmbariDatabaseDetails(ambariRequest.getAmbariDatabaseDetails());
             cluster.setAmbariRepoDetailsJson(ambariRequest.getAmbariRepoDetailsJson());
             cluster.setAmbariStackDetails(ambariRequest.getAmbariStackDetails());
-            cluster.setBlueprintCustomPropertiesAsString(ambariRequest.getBlueprintCustomProperties());
             cluster.setBlueprintId(ambariRequest.getBlueprintId());
             cluster.setBlueprintName(ambariRequest.getBlueprintName());
-            cluster.setBlueprintInputs(ambariRequest.getBlueprintInputs());
             cluster.setConfigStrategy(ambariRequest.getConfigStrategy());
             cluster.setConnectedCluster(ambariRequest.getConnectedCluster());
             cluster.setEnableSecurity(ambariRequest.getEnableSecurity());

@@ -38,7 +38,6 @@ import org.springframework.util.StringUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.sequenceiq.ambari.client.AmbariClient;
-import com.sequenceiq.cloudbreak.api.model.BlueprintInputJson;
 import com.sequenceiq.cloudbreak.api.model.BlueprintParameterJson;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterResponse;
 import com.sequenceiq.cloudbreak.api.model.ConfigsResponse;
@@ -104,6 +103,7 @@ import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
+import com.sequenceiq.cloudbreak.service.sharedservice.SharedServiceConfigProvider;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.util.AmbariClientExceptionUtil;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
@@ -192,6 +192,9 @@ public class AmbariClusterService implements ClusterService {
 
     @Inject
     private TransactionService transactionService;
+
+    @Inject
+    private SharedServiceConfigProvider sharedServiceConfigProvider;
 
     @Override
     public Cluster create(IdentityUser user, Stack stack, Cluster cluster, List<ClusterComponent> components) {
@@ -972,102 +975,14 @@ public class AmbariClusterService implements ClusterService {
     @Override
     public ConfigsResponse retrieveOutputs(Long stackId, Set<BlueprintParameterJson> requests) throws IOException {
         Stack stack = stackService.get(stackId);
-        AmbariClient ambariClient = getAmbariClient(stack);
-        Cluster cluster = stack.getCluster();
-
-        List<String> targets = new ArrayList<>();
-        Map<String, String> bpI = new HashMap<>();
-        if (cluster.getBlueprintInputs().getValue() != null) {
-            bpI = cluster.getBlueprintInputs().get(Map.class);
-        }
-        prepareTargets(requests, targets, bpI);
-        Map<String, String> results = new HashMap<>();
-        if (cluster.getAmbariIp() != null) {
-            results = ambariClient.getConfigValuesByConfigIds(targets);
-        }
-        prepareResults(requests, cluster, bpI, results);
-
-        Map<String, String> additionalResults = new HashMap<>();
-        prepareAdditionalInputParameters(additionalResults, cluster);
-
-        Set<BlueprintInputJson> blueprintInputJsons = new HashSet<>();
-
-        prepareBlueprintInputs(requests, results, blueprintInputJsons);
-        prepareAdditionalParameters(additionalResults, blueprintInputJsons);
-
-        ConfigsResponse configsResponse = new ConfigsResponse();
-        configsResponse.setInputs(blueprintInputJsons);
-        return configsResponse;
-    }
-
-    private void prepareAdditionalParameters(Map<String, String> additionalResults, Set<BlueprintInputJson> blueprintInputJsons) {
-        for (Entry<String, String> stringStringEntry : additionalResults.entrySet()) {
-            BlueprintInputJson blueprintInputJson = new BlueprintInputJson();
-            blueprintInputJson.setName(stringStringEntry.getKey());
-            blueprintInputJson.setPropertyValue(stringStringEntry.getValue());
-            blueprintInputJsons.add(blueprintInputJson);
-        }
-    }
-
-    private void prepareBlueprintInputs(Set<BlueprintParameterJson> requests, Map<String, String> results, Set<BlueprintInputJson> blueprintInputJsons) {
-        for (Entry<String, String> stringStringEntry : results.entrySet()) {
-            for (BlueprintParameterJson blueprintParameter : requests) {
-                if (stringStringEntry.getKey().equals(blueprintParameter.getName())) {
-                    BlueprintInputJson blueprintInputJson = new BlueprintInputJson();
-                    blueprintInputJson.setName(blueprintParameter.getName());
-                    blueprintInputJson.setPropertyValue(stringStringEntry.getValue());
-                    blueprintInputJsons.add(blueprintInputJson);
-                    break;
-                }
-            }
-        }
+        Stack datalake = stackService.get(stack.getDatalakeId());
+        return sharedServiceConfigProvider.retrieveOutputs(datalake, stack.getCluster().getBlueprint(), stack.getName());
     }
 
     @Override
     public Map<String, String> getHostStatuses(Long stackId) {
         AmbariClient ambariClient = getAmbariClient(stackId);
         return ambariClient.getHostStatuses();
-    }
-
-    private void prepareResults(Iterable<BlueprintParameterJson> requests, Cluster cluster, Map<String, String> bpI, Map<String, String> results) {
-        if (cluster.getBlueprintInputs().getValue() != null) {
-            if (bpI != null) {
-                for (Entry<String, String> stringStringEntry : bpI.entrySet()) {
-                    if (!results.keySet().contains(stringStringEntry.getKey())) {
-                        results.put(stringStringEntry.getKey(), stringStringEntry.getValue());
-                    }
-                }
-            }
-        }
-
-        for (BlueprintParameterJson request : requests) {
-            if (results.keySet().contains(request.getReferenceConfiguration())) {
-                results.put(request.getName(), results.get(request.getReferenceConfiguration()));
-                results.remove(request.getReferenceConfiguration());
-            }
-        }
-    }
-
-    private void prepareTargets(Iterable<BlueprintParameterJson> requests, Collection<String> targets, Map<String, String> bpI) {
-        for (BlueprintParameterJson request : requests) {
-            if (bpI != null) {
-                boolean contains = false;
-                for (Entry<String, String> stringStringEntry : bpI.entrySet()) {
-                    if (stringStringEntry.getKey().equals(request.getName())) {
-                        contains = true;
-                    }
-                }
-                if (!contains) {
-                    targets.add(request.getReferenceConfiguration());
-                }
-            } else {
-                targets.add(request.getReferenceConfiguration());
-            }
-        }
-    }
-
-    private void prepareAdditionalInputParameters(Map<String, String> results, Cluster cluster) {
-        results.put("REMOTE_CLUSTER_NAME", cluster.getName());
     }
 
     private AmbariClient getAmbariClient(Long stackId) {

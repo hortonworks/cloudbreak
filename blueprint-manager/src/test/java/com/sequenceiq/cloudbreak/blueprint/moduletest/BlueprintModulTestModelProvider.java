@@ -13,7 +13,9 @@ import static com.sequenceiq.cloudbreak.blueprint.moduletest.BlueprintModulTest.
 import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -198,6 +200,32 @@ class BlueprintModulTestModelProvider {
                 .withLdapConfig(ldapConfig())
                 .withGateway(gatewayEnabled())
                 .withGeneralClusterConfigs(configs)
+                .build();
+    }
+
+    static BlueprintPreparationObject blueprintObjectWhenCustomPropertiesBlueprintConfigured() throws IOException {
+        Map<String, Object> customProperties = new HashMap<>();
+
+        customProperties.put("hadoop.security.group.mapping.ldap.url", "10.1.1.2");
+        customProperties.put("hadoop.security.group.mapping.ldap.bind.user", "AppleBob");
+        customProperties.put("hadoop.security.group.mapping.ldap.bind.password", "Password123!@");
+        customProperties.put("hadoop.security.group.mapping.ldap.userbase", "dn");
+
+        Map<String, Object> customPropertiesInner = new HashMap<>();
+
+        customPropertiesInner.put("hadoop.security.group.mapping.ldap.url1", "10.1.1.2");
+        customPropertiesInner.put("hadoop.security.group.mapping.ldap.bind.user1", "AppleBob");
+        customPropertiesInner.put("hadoop.security.group.mapping.ldap.bind.password1", "Password123!@");
+        customPropertiesInner.put("hadoop.security.group.mapping.ldap.userbase1", "dn");
+
+        customProperties.put("custom-core-site", customPropertiesInner);
+
+        GeneralClusterConfigs configs = generalClusterConfigs();
+        return BlueprintPreparationObject.Builder.builder()
+                .withHostgroups(getHostGroups("master", "slave_1"))
+                .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
+                .withGeneralClusterConfigs(configs)
+                .withCustomInputs(customProperties)
                 .build();
     }
 

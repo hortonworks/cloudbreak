@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.blueprint.moduletest;
 import static com.sequenceiq.cloudbreak.blueprint.moduletest.BlueprintModulTestModelProvider.blueprintObjectForHbaseConfigurationForTwoHosts;
 import static com.sequenceiq.cloudbreak.blueprint.moduletest.BlueprintModulTestModelProvider.blueprintObjectWhenAtlasAndLdapPresentedThenBothShouldConfigured;
 import static com.sequenceiq.cloudbreak.blueprint.moduletest.BlueprintModulTestModelProvider.blueprintObjectWhenAtlasPresentedShouldConfigured;
+import static com.sequenceiq.cloudbreak.blueprint.moduletest.BlueprintModulTestModelProvider.blueprintObjectWhenCustomPropertiesBlueprintConfigured;
 import static com.sequenceiq.cloudbreak.blueprint.moduletest.BlueprintModulTestModelProvider.blueprintObjectWhenDefaultBlueprintConfigured;
 import static com.sequenceiq.cloudbreak.blueprint.moduletest.BlueprintModulTestModelProvider.blueprintObjectWhenDlmBlueprintConfigured;
 import static com.sequenceiq.cloudbreak.blueprint.moduletest.BlueprintModulTestModelProvider.blueprintObjectWhenDruidAndRdsPresentedThenRdsDruidShouldConfigured;
@@ -131,6 +132,8 @@ public class BlueprintModulTest extends CentralBlueprintContext {
                 blueprintObjectWhenDefaultBlueprintConfigured() });
         params.add(new Object[] { "dlm", "dlm",
                 blueprintObjectWhenDlmBlueprintConfigured("dlm") });
+        params.add(new Object[] { "custom-properties", "custom-properties",
+                blueprintObjectWhenCustomPropertiesBlueprintConfigured() });
         return params;
     }
 

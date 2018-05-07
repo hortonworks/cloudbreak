@@ -52,7 +52,7 @@ public class CentralBlueprintUpdaterTest {
         cluster.getBlueprint().setBlueprintText(testBlueprint);
 
         object = BlueprintPreparationObject.Builder.builder()
-                .withBlueprintView(new BlueprintView(TestUtil.blueprint().getBlueprintText(), Maps.newHashMap(), "HDP", "2.6"))
+                .withBlueprintView(new BlueprintView(TestUtil.blueprint().getBlueprintText(), "HDP", "2.6"))
                 .build();
     }
 

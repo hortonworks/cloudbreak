@@ -1,8 +1,5 @@
 package com.sequenceiq.cloudbreak.api.model.v2;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
@@ -11,11 +8,9 @@ import javax.validation.constraints.Size;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.annotation.JsonRawValue;
 import com.sequenceiq.cloudbreak.api.model.AmbariDatabaseDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.AmbariRepoDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
-import com.sequenceiq.cloudbreak.api.model.BlueprintInputJson;
 import com.sequenceiq.cloudbreak.api.model.ConfigStrategy;
 import com.sequenceiq.cloudbreak.api.model.ConnectedClusterRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.GatewayJson;
@@ -79,12 +74,6 @@ public class AmbariV2Request implements JsonEntity {
 
     @ApiModelProperty(ClusterModelDescription.CONFIG_STRATEGY)
     private ConfigStrategy configStrategy = ConfigStrategy.ALWAYS_APPLY_DONT_OVERRIDE_CUSTOM_VALUES;
-
-    @ApiModelProperty(ClusterModelDescription.BLUEPRINT_INPUTS)
-    private Set<BlueprintInputJson> blueprintInputs = new HashSet<>();
-
-    @ApiModelProperty(ClusterModelDescription.BLUEPRINT_CUSTOM_PROPERTIES)
-    private String blueprintCustomProperties;
 
     @ApiModelProperty(ClusterModelDescription.CONNECTED_CLUSTER)
     private ConnectedClusterRequest connectedCluster;
@@ -187,23 +176,6 @@ public class AmbariV2Request implements JsonEntity {
 
     public void setConfigStrategy(ConfigStrategy configStrategy) {
         this.configStrategy = configStrategy;
-    }
-
-    public Set<BlueprintInputJson> getBlueprintInputs() {
-        return blueprintInputs;
-    }
-
-    public void setBlueprintInputs(Set<BlueprintInputJson> blueprintInputs) {
-        this.blueprintInputs = blueprintInputs;
-    }
-
-    @JsonRawValue
-    public String getBlueprintCustomProperties() {
-        return blueprintCustomProperties;
-    }
-
-    public void setBlueprintCustomProperties(String blueprintCustomProperties) {
-        this.blueprintCustomProperties = blueprintCustomProperties;
     }
 
     public ConnectedClusterRequest getConnectedCluster() {

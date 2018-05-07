@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.converter.stack.cluster;
 
 import static com.sequenceiq.cloudbreak.api.model.Status.REQUESTED;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -13,22 +12,21 @@ import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.base.Strings;
-import com.sequenceiq.cloudbreak.api.model.BlueprintInputJson;
-import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRequest;
 import com.sequenceiq.cloudbreak.api.model.CustomContainerRequest;
 import com.sequenceiq.cloudbreak.api.model.ExposedService;
 import com.sequenceiq.cloudbreak.api.model.FileSystemBase;
-import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.GatewayJson;
 import com.sequenceiq.cloudbreak.api.model.SSOType;
+import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRequest;
+import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.GatewayJson;
 import com.sequenceiq.cloudbreak.controller.exception.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.ClusterAttributes;
 import com.sequenceiq.cloudbreak.domain.ExposedServices;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.json.Json;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.util.PasswordUtil;
 
 @Component
@@ -61,17 +59,6 @@ public class ClusterRequestToClusterConverter extends AbstractConversionServiceA
         convertAttributes(source, cluster);
         if (fileSystem != null) {
             cluster.setFileSystem(getConversionService().convert(fileSystem, FileSystem.class));
-        }
-        Map<String, String> inputs = source.getBlueprintInputs() == null ? Collections.emptyMap() : convertBlueprintInputJsons(source.getBlueprintInputs());
-        try {
-            cluster.setBlueprintInputs(new Json(inputs));
-            if (source.getBlueprintCustomProperties() != null) {
-                cluster.setBlueprintCustomProperties(source.getBlueprintCustomProperties());
-            } else {
-                cluster.setBlueprintCustomProperties(null);
-            }
-        } catch (JsonProcessingException ignored) {
-            cluster.setBlueprintInputs(null);
         }
         try {
             Json json = new Json(convertContainerConfigs(source.getCustomContainer()));
@@ -151,14 +138,6 @@ public class ClusterRequestToClusterConverter extends AbstractConversionServiceA
             LOGGER.error("Failed to store exposedServices", e);
             throw new CloudbreakApiException("Failed to store exposedServices", e);
         }
-    }
-
-    private Map<String, String> convertBlueprintInputJsons(Iterable<BlueprintInputJson> inputs) {
-        Map<String, String> blueprintInputs = new HashMap<>();
-        for (BlueprintInputJson input : inputs) {
-            blueprintInputs.put(input.getName(), input.getPropertyValue());
-        }
-        return blueprintInputs;
     }
 
     private Map<String, String> convertContainerConfigs(CustomContainerRequest customContainerRequest) {

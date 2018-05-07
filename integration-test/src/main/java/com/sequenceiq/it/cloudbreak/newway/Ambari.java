@@ -3,14 +3,11 @@ package com.sequenceiq.it.cloudbreak.newway;
 import com.sequenceiq.cloudbreak.api.model.AmbariDatabaseDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.AmbariRepoDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
-import com.sequenceiq.cloudbreak.api.model.BlueprintInputJson;
 import com.sequenceiq.cloudbreak.api.model.ConfigStrategy;
 import com.sequenceiq.cloudbreak.api.model.ConnectedClusterRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.GatewayJson;
 import com.sequenceiq.cloudbreak.api.model.KerberosRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.AmbariV2Request;
-
-import java.util.Set;
 
 public class Ambari extends Entity  {
     public static final String AMBARI_REQUEST = "AMBARI_REQUEST";
@@ -41,16 +38,6 @@ public class Ambari extends Entity  {
 
     public Ambari withBlueprintName(String name) {
         request.setBlueprintName(name);
-        return this;
-    }
-
-    public Ambari withBlueprintInputs(Set<BlueprintInputJson> inputs) {
-        request.setBlueprintInputs(inputs);
-        return this;
-    }
-
-    public Ambari withBlueprintCustomProperties(String properties) {
-        request.setBlueprintCustomProperties(properties);
         return this;
     }
 

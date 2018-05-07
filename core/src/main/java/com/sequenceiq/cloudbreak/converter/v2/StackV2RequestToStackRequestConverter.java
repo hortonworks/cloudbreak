@@ -102,7 +102,16 @@ public class StackV2RequestToStackRequestConverter extends AbstractConversionSer
         stackRequest.setOwnerEmail(Strings.isNullOrEmpty(source.getOwnerEmail()) ? authenticatedUserService.getCbUser().getUsername() : source.getOwnerEmail());
         convertClusterRequest(source, stackRequest);
         stackRequest.setCloudPlatform(credentialService.get(stackRequest.getCredentialName(), stackRequest.getAccount()).cloudPlatform());
+        convertCustomInputs(source, stackRequest);
         return stackRequest;
+    }
+
+    private void convertCustomInputs(StackV2Request source, StackRequest stackRequest) {
+        if (source.getInputs() != null) {
+            stackRequest.setCustomInputs(source.getInputs());
+        } else {
+            stackRequest.setCustomInputs(new HashMap<>());
+        }
     }
 
     private Map<String, String> convertParameters(Map<String, ?> map) {

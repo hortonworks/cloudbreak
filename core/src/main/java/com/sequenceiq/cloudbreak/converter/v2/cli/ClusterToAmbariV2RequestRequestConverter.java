@@ -1,9 +1,5 @@
 package com.sequenceiq.cloudbreak.converter.v2.cli;
 
-import java.io.IOException;
-import java.util.HashSet;
-import java.util.Set;
-
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -34,7 +30,6 @@ public class ClusterToAmbariV2RequestRequestConverter extends AbstractConversion
         ambariV2Request.setBlueprintName(source.getBlueprint().getName());
         prepareAmbariRepo(source, ambariV2Request);
         prepareStackRepoDetails(source, ambariV2Request);
-        prepareBlueprintInputs(source, ambariV2Request);
         ambariV2Request.setConfigStrategy(null);
         ambariV2Request.setConnectedCluster(null);
         ambariV2Request.setEnableSecurity(source.isSecure());
@@ -46,14 +41,6 @@ public class ClusterToAmbariV2RequestRequestConverter extends AbstractConversion
             ambariV2Request.setKerberos(getConversionService().convert(source.getKerberosConfig(), KerberosRequest.class));
         }
         return ambariV2Request;
-    }
-
-    private void prepareBlueprintInputs(Cluster source, AmbariV2Request ambariV2Request) {
-        try {
-            ambariV2Request.setBlueprintInputs(source.getBlueprintInputs().get(Set.class));
-        } catch (IOException e) {
-            ambariV2Request.setBlueprintInputs(new HashSet<>());
-        }
     }
 
     private void prepareStackRepoDetails(Cluster source, AmbariV2Request ambariV2Request) {

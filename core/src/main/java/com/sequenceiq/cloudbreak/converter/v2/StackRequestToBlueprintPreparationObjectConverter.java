@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Strings;
+import com.sequenceiq.cloudbreak.api.model.ConfigsResponse;
 import com.sequenceiq.cloudbreak.api.model.FileSystemConfiguration;
 import com.sequenceiq.cloudbreak.api.model.SharedServiceRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.InstanceGroupV2Request;
@@ -19,11 +20,11 @@ import com.sequenceiq.cloudbreak.blueprint.BlueprintPreparationObject;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessingException;
 import com.sequenceiq.cloudbreak.blueprint.GeneralClusterConfigsProvider;
 import com.sequenceiq.cloudbreak.blueprint.filesystem.FileSystemConfigurationProvider;
-import com.sequenceiq.cloudbreak.blueprint.template.views.SharedServiceConfigsView;
-import com.sequenceiq.cloudbreak.blueprint.sharedservice.SharedServiceConfigsProvider;
+import com.sequenceiq.cloudbreak.blueprint.sharedservice.SharedServiceConfigsViewProvider;
 import com.sequenceiq.cloudbreak.blueprint.template.views.BlueprintView;
 import com.sequenceiq.cloudbreak.blueprint.template.views.FileSystemConfigurationView;
 import com.sequenceiq.cloudbreak.blueprint.template.views.HostgroupView;
+import com.sequenceiq.cloudbreak.blueprint.template.views.SharedServiceConfigsView;
 import com.sequenceiq.cloudbreak.blueprint.templates.BlueprintStackInfo;
 import com.sequenceiq.cloudbreak.blueprint.templates.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.blueprint.utils.StackInfoService;
@@ -42,6 +43,7 @@ import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.flex.FlexSubscriptionService;
 import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
+import com.sequenceiq.cloudbreak.service.sharedservice.SharedServiceConfigProvider;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
 
@@ -78,7 +80,10 @@ public class StackRequestToBlueprintPreparationObjectConverter extends AbstractC
     private StackInfoService stackInfoService;
 
     @Inject
-    private SharedServiceConfigsProvider sharedServiceConfigsProvider;
+    private SharedServiceConfigsViewProvider sharedServiceConfigsViewProvider;
+
+    @Inject
+    private SharedServiceConfigProvider sharedServiceConfigProvider;
 
     @Override
     public BlueprintPreparationObject convert(StackV2Request source) {
@@ -95,16 +100,7 @@ public class StackRequestToBlueprintPreparationObjectConverter extends AbstractC
             Set<HostgroupView> hostgroupViews = getHostgroupViews(source);
             BlueprintView blueprintView = new BlueprintView(blueprint.getBlueprintText(), blueprintStackInfo.getVersion(), blueprintStackInfo.getType());
             GeneralClusterConfigs generalClusterConfigs = generalClusterConfigsProvider.generalClusterConfigs(source, identityUser);
-
-            SharedServiceRequest sharedService = source.getCluster().getSharedService();
-            Stack dataLakeStack = null;
-            if (sharedService != null && Strings.isNullOrEmpty(sharedService.getSharedCluster())) {
-                dataLakeStack = stackService.getPublicStack(sharedService.getSharedCluster(), identityUser);
-            }
-            SharedServiceConfigsView sharedServiceConfigsView = sharedServiceConfigsProvider
-                    .createSharedServiceConfigs(blueprint, source.getCluster().getAmbari().getPassword(), dataLakeStack);
-
-            return BlueprintPreparationObject.Builder.builder()
+            BlueprintPreparationObject.Builder builder = BlueprintPreparationObject.Builder.builder()
                     .withFlexSubscription(flexSubscription)
                     .withRdsConfigs(rdsConfigs)
                     .withHostgroupViews(hostgroupViews)
@@ -114,9 +110,20 @@ public class StackRequestToBlueprintPreparationObjectConverter extends AbstractC
                     .withGeneralClusterConfigs(generalClusterConfigs)
                     .withSmartSenseSubscriptionId(smartsenseSubscriptionId)
                     .withLdapConfig(ldapConfig)
-                    .withKerberosConfig(kerberosConfig)
-                    .withSharedServiceConfigs(sharedServiceConfigsView)
-                    .build();
+                    .withKerberosConfig(kerberosConfig);
+
+            SharedServiceRequest sharedService = source.getCluster().getSharedService();
+            if (sharedService != null && !Strings.isNullOrEmpty(sharedService.getSharedCluster())) {
+                Stack dataLakeStack = stackService.getPublicStack(sharedService.getSharedCluster(), identityUser);
+                SharedServiceConfigsView sharedServiceConfigsView = sharedServiceConfigsViewProvider
+                        .createSharedServiceConfigs(blueprint, source.getCluster().getAmbari().getPassword(), dataLakeStack);
+                ConfigsResponse configsResponse = sharedServiceConfigProvider.retrieveOutputs(dataLakeStack, blueprint, source.getGeneral().getName());
+                builder.withSharedServiceConfigs(sharedServiceConfigsView)
+                        .withFixInputs(configsResponse.getFixInputs())
+                        .withCustomInputs(configsResponse.getDatalakeInputs());
+
+            }
+            return builder.build();
         } catch (BlueprintProcessingException e) {
             throw new CloudbreakServiceException(e.getMessage(), e);
         } catch (IOException e) {

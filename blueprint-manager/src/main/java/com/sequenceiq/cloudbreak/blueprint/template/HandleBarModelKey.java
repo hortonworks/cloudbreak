@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.blueprint.template;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public enum HandleBarModelKey {
 
     COMPONENTS("components"),
@@ -23,4 +26,13 @@ public enum HandleBarModelKey {
     public String modelKey() {
         return modelKey;
     }
+
+    public static Set<String> modelKeys() {
+        Set<String> result = new HashSet<>();
+        for (HandleBarModelKey handleBarModelKey : HandleBarModelKey.values()) {
+            result.add(handleBarModelKey.modelKey());
+        }
+        return result;
+    }
+
 }

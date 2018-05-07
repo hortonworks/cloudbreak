@@ -6,23 +6,29 @@ import java.util.Set;
 import javax.inject.Inject;
 import javax.validation.Valid;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v1.UtilEndpoint;
 import com.sequenceiq.cloudbreak.api.model.AmbariDatabaseDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.AmbariDatabaseTestResult;
-import com.sequenceiq.cloudbreak.api.model.stack.StackMatrix;
+import com.sequenceiq.cloudbreak.api.model.ParametersQueryRequest;
+import com.sequenceiq.cloudbreak.api.model.ParametersQueryResponse;
 import com.sequenceiq.cloudbreak.api.model.VersionCheckResult;
 import com.sequenceiq.cloudbreak.api.model.rds.RDSBuildRequest;
 import com.sequenceiq.cloudbreak.api.model.rds.RdsBuildResult;
+import com.sequenceiq.cloudbreak.api.model.stack.StackMatrix;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.validation.ldapconfig.LdapConfigValidator;
 import com.sequenceiq.cloudbreak.controller.validation.rds.RdsConnectionBuilder;
 import com.sequenceiq.cloudbreak.controller.validation.rds.RdsConnectionValidator;
 import com.sequenceiq.cloudbreak.repository.LdapConfigRepository;
 import com.sequenceiq.cloudbreak.repository.RdsConfigRepository;
+import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.StackMatrixService;
+import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.util.ClientVersionUtil;
 
 @Component
@@ -47,6 +53,12 @@ public class UtilController implements UtilEndpoint {
 
     @Inject
     private StackMatrixService stackMatrixService;
+
+    @Inject
+    private BlueprintService blueprintService;
+
+    @Autowired
+    private AuthenticatedUserService authenticatedUserService;
 
     @Value("${info.app.version:}")
     private String cbVersion;
@@ -88,5 +100,11 @@ public class UtilController implements UtilEndpoint {
     @Override
     public StackMatrix getStackMatrix() {
         return stackMatrixService.getStackMatrix();
+    }
+
+    @Override
+    public ParametersQueryResponse getCustomParameters(ParametersQueryRequest parametersQueryRequest) {
+        IdentityUser user = authenticatedUserService.getCbUser();
+        return blueprintService.queryCustomParameters(parametersQueryRequest.getBlueprintName(), user);
     }
 }

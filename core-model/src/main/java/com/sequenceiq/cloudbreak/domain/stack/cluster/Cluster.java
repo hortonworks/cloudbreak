@@ -160,14 +160,6 @@ public class Cluster implements ProvisionEntity {
     @Column(columnDefinition = "TEXT")
     private Json attributes;
 
-    @Convert(converter = EncryptedJsonToString.class)
-    @Column(columnDefinition = "TEXT")
-    private Json blueprintInputs;
-
-    @Type(type = "encrypted_string")
-    @Column(columnDefinition = "TEXT")
-    private String blueprintCustomProperties;
-
     @Convert(converter = JsonToString.class)
     @Column(columnDefinition = "TEXT")
     private Json customContainerDefinition;
@@ -448,14 +440,6 @@ public class Cluster implements ProvisionEntity {
         this.ldapConfig = ldapConfig;
     }
 
-    public Json getBlueprintInputs() {
-        return blueprintInputs;
-    }
-
-    public void setBlueprintInputs(Json blueprintInputs) {
-        this.blueprintInputs = blueprintInputs;
-    }
-
     public String getCloudbreakAmbariUser() {
         return cloudbreakAmbariUser;
     }
@@ -470,14 +454,6 @@ public class Cluster implements ProvisionEntity {
 
     public void setCloudbreakAmbariPassword(String cloudbreakAmbariPassword) {
         this.cloudbreakAmbariPassword = cloudbreakAmbariPassword;
-    }
-
-    public String getBlueprintCustomProperties() {
-        return blueprintCustomProperties;
-    }
-
-    public void setBlueprintCustomProperties(String blueprintCustomProperties) {
-        this.blueprintCustomProperties = blueprintCustomProperties;
     }
 
     public KerberosConfig getKerberosConfig() {

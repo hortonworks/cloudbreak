@@ -77,6 +77,9 @@ public abstract class StackBase implements JsonEntity {
     @ApiModelProperty(StackModelDescription.DEFAULT_TAGS)
     private Map<String, String> defaultTags = new HashMap<>();
 
+    @ApiModelProperty(StackModelDescription.CUSTOM)
+    private Map<String, Object> customInputs = new HashMap<>();
+
     public OnFailureAction getOnFailureAction() {
         return onFailureAction;
     }
@@ -221,5 +224,13 @@ public abstract class StackBase implements JsonEntity {
 
     public void setDefaultTags(Map<String, String> defaultTags) {
         this.defaultTags = defaultTags;
+    }
+
+    public Map<String, Object> getCustomInputs() {
+        return customInputs;
+    }
+
+    public void setCustomInputs(Map<String, Object> customInputs) {
+        this.customInputs = customInputs;
     }
 }

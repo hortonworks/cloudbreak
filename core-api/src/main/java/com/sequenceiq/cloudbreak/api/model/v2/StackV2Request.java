@@ -45,6 +45,9 @@ public class StackV2Request implements JsonEntity {
     @ApiModelProperty(StackModelDescription.PARAMETERS)
     private Map<String, ?> parameters = new HashMap<>();
 
+    @ApiModelProperty(StackModelDescription.INPUTS)
+    private Map<String, Object> inputs = new HashMap<>();
+
     @ApiModelProperty(StackModelDescription.CUSTOM_DOMAIN_SETTINGS)
     private CustomDomainSettings customDomain;
 
@@ -227,5 +230,13 @@ public class StackV2Request implements JsonEntity {
 
     public void setOwnerEmail(String ownerEmail) {
         this.ownerEmail = ownerEmail;
+    }
+
+    public Map<String, Object> getInputs() {
+        return inputs;
+    }
+
+    public void setInputs(Map<String, Object> inputs) {
+        this.inputs = inputs;
     }
 }

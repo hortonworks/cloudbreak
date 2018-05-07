@@ -12,7 +12,6 @@ import net.sf.json.JSONArray;
 import net.sf.json.JSONException;
 import net.sf.json.JSONObject;
 
-// TODO This class will be used in the next commit
 @Component
 public class ModelConverterUtils {
 
@@ -20,11 +19,14 @@ public class ModelConverterUtils {
 
     public static final String ESCAPED_SEGMENT_CHARACTER = "\\.";
 
-    public Map<String, Object> convert(Object object) {
+    private ModelConverterUtils() {
+    }
+
+    public static Map<String, Object> convert(Object object) {
         return jsonToMap(object);
     }
 
-    public static Map<String, Object> jsonToMap(Object json) throws JSONException {
+    private static Map<String, Object> jsonToMap(Object json) throws JSONException {
         Map<String, Object> retMap = new HashMap<>();
         if (json != null) {
             retMap = toMap(JSONObject.fromObject(json));
@@ -32,7 +34,7 @@ public class ModelConverterUtils {
         return retMap;
     }
 
-    public static Map<String, Object> toMap(JSONObject object) throws JSONException {
+    private static Map<String, Object> toMap(JSONObject object) throws JSONException {
         Map<String, Object> map = new HashMap<>();
 
         Iterator<String> keysItr = object.keys();
@@ -62,7 +64,7 @@ public class ModelConverterUtils {
         return key.replace(split[0] + SEGMENT_CHARACTER, "");
     }
 
-    public static Map<String, Object> toMap(String key, Object value) throws JSONException {
+    private static Map<String, Object> toMap(String key, Object value) throws JSONException {
         Map<String, Object> map = new HashMap<>();
         String[] split = key.split(ESCAPED_SEGMENT_CHARACTER);
         if (split.length == 1) {
@@ -79,7 +81,7 @@ public class ModelConverterUtils {
         return map;
     }
 
-    public static List<Object> toList(JSONArray array) throws JSONException {
+    private static List<Object> toList(JSONArray array) throws JSONException {
         List<Object> list = new ArrayList<>();
         for (int i = 0; i < array.size(); i++) {
             Object value = array.get(i);

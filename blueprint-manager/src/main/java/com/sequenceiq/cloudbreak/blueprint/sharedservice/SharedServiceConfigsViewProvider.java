@@ -7,7 +7,7 @@ import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 
 @Component
-public class SharedServiceConfigsProvider {
+public class SharedServiceConfigsViewProvider {
 
     public SharedServiceConfigsView createSharedServiceConfigs(Blueprint blueprint, String ambariPassword, Stack dataLakeStack) {
         SharedServiceConfigsView sharedServiceConfigsView = new SharedServiceConfigsView();
