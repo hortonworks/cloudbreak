@@ -20,6 +20,20 @@ provision_action_based_on_real_dependencies:
     - unless: grep "server.stage.command.execution_type" /etc/ambari-server/conf/ambari.properties
 
 {% if ambari.ambari_database.ambariVendor == 'mysql' %}
+
+{% if grains['os'] == 'Amazon' or ( grains['os_family'] == 'RedHat' and grains['osmajorrelease'] | int == 6 )  %}
+/etc/yum.repos.d/MariaDB.repo:
+  file.managed:
+    - source: salt://ambari/yum/MariaDB.repo
+    - unless: mysql --version
+
+install-mariadb-client:
+  pkg.installed:
+    - unless: mysql --version
+    - pkgs:
+      - MariaDB-client
+{% endif %}
+
 install-mariadb:
   pkg.installed:
     - unless: mysql --version
