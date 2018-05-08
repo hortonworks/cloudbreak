@@ -36,10 +36,6 @@ base:
     - smartsense.server-upgrade
     - ambari.server-upgrade
 
-  'roles:gateway':
-    - match: grain
-    - gateway
-
   'roles:smartsense_agent_update':
     - match: grain
     - smartsense.agent-update
@@ -57,6 +53,10 @@ base:
   'roles:ambari_agent_install':
     - match: grain
     - ambari.agent
+
+  'roles:gateway':
+    - match: grain
+    - gateway
 
   'roles:smartsense':
     - match: grain
