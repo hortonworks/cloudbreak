@@ -105,6 +105,17 @@ cbd migrate cbdb up
 cbd migrate cbdb pending
 ```
 
+
+For some reason if you encounter a similar problem with Periscope, then run the following commands and you can restart the Cloudbreak Deployer:
+```
+cbd migrate periscopedb up
+cbd migrate periscopedb pending
+```
+You can track the Periscope's logs to check the results by executing the following command:
+```
+cbd logs periscope
+```
+
 If everything went well then Cloudbreak will be available on http://YOUR_IP. For more details and config parameters please check the documentation of [Cloudbreak Deployer](https://github.com/hortonworks/cloudbreak-deployer).
 
 The deployer has generated a `certs` directory under `cbd-local` directory which will be needed later on to set up IDEA properly.
