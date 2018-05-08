@@ -685,6 +685,7 @@ util-local-dev() {
             -p 8080:8080 \
             -e PORT=8080 \
             -e SERVICE_NAME=cloudbreak \
+            -e SERVICE_8080_NAME=cloudbreak \
             -l traefik.port=8080 \
             -l traefik.frontend.rule=PathPrefix:/cb/ \
             -l traefik.backend=cloudbreak-backend \
@@ -696,6 +697,7 @@ util-local-dev() {
             -p 8085:8085 \
             -e PORT=8085 \
             -e SERVICE_NAME=periscope \
+            -e SERVICE_8085_NAME=periscope \
             -l traefik.port=8085 \
             -l traefik.frontend.rule=PathPrefix:/as/ \
             -l traefik.backend=periscope-backend \
