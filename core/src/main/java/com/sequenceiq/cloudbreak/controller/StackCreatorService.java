@@ -159,7 +159,7 @@ public class StackCreatorService {
 
         String platformString = platform(stack.cloudPlatform()).value().toLowerCase();
         StatedImage imgFromCatalog = imageService.determineImageFromCatalog(stackRequest.getImageId(), platformString,
-                stackRequest.getImageCatalog(), blueprint, forceBaseImage(stackRequest.getClusterRequest()));
+                stackRequest.getImageCatalog(), blueprint, shouldUseBaseImage(stackRequest.getClusterRequest()));
 
         fillInstanceMetadata(stackRequest, stack);
         start = System.currentTimeMillis();
@@ -198,8 +198,8 @@ public class StackCreatorService {
         }
     }
 
-    private boolean forceBaseImage(ClusterRequest clusterRequest) {
-        return clusterRequest.getAmbariRepoDetailsJson() != null;
+    private boolean shouldUseBaseImage(ClusterRequest clusterRequest) {
+        return clusterRequest.getAmbariRepoDetailsJson() != null || clusterRequest.getAmbariStackDetails() != null;
     }
 
     private void createClusterIfNeed(IdentityUser user, StackRequest stackRequest, Stack stack, String stackName, Blueprint blueprint) throws Exception {
