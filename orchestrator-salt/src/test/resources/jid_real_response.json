@@ -22,8 +22,17 @@
             "start_time": "12:39:09.541430",
             "result": true,
             "duration": "2.963 ms",
-            "__run_num__": 1,
-            "changes": {}
+            "__run_num__": 1
+          },
+          "cmd_|-install_mpack_1_|-/opt/ambari-server/install-mpack-1.sh_|-run": {
+            "comment": "Command \"/opt/ambari-server/install-mpack-1.sh\" run",
+            "result": false,
+            "start_time": "12:39:09.588953",
+            "duration": "1.577 ms",
+            "__run_num__": 48,
+            "changes": {
+              "stderr": "+ ARGS= + echo yes + ambari-server install-mpack --"
+            }
           },
           "file_|-replace_etc_hosts_1_|-/etc/hosts_|-replace": {
             "comment": "No changes needed to be made",

@@ -101,21 +101,22 @@ public class SaltStatesTest {
 
         InputStream responseStream = SaltStatesTest.class.getResourceAsStream("/jid_response.json");
         String response = IOUtils.toString(responseStream);
+        responseStream.close();
         Map responseMap = new ObjectMapper().readValue(response, Map.class);
-
         when(saltConnector.run(eq("jobs.lookup_jid"), any(), any(), eq("jid"), any())).thenReturn(responseMap);
 
         Multimap<String, String> jidInfo = SaltStates.jidInfo(saltConnector, jobId, target, StateType.HIGH);
         verify(saltConnector, times(1)).run("jobs.lookup_jid", RUNNER, Map.class, "jid", jobId);
 
         assertThat(jidInfo.keySet(), hasSize(1));
-        assertThat(jidInfo.entries(), hasSize(3));
+        assertThat(jidInfo.entries(), hasSize(4));
         String hostName = jidInfo.keySet().iterator().next();
         Collection<String> hostErrors = jidInfo.get(hostName);
 
-        assertThat(hostErrors, containsInAnyOrder("Source file salt://ambari/scripts/ambari-server-initttt.sh not found",
-                "Service ambari-server is already enabled, and is dead",
-                "Package haveged is already installed."));
+        assertThat(hostErrors, containsInAnyOrder("\nComment: Source file salt://ambari/scripts/ambari-server-initttt.sh not found",
+                "\nComment: Service ambari-server is already enabled, and is dead",
+                "\nComment: Command \"/opt/ambari-server/install-mpack-1.sh\" run\nStderr: + ARGS= + echo yes + ambari-server install-mpack --",
+                "\nComment: Package haveged is already installed."));
     }
 
     @Test
@@ -136,9 +137,9 @@ public class SaltStatesTest {
         String hostName = jidInfo.keySet().iterator().next();
         Collection<String> hostErrors = jidInfo.get(hostName);
 
-        assertThat(hostErrors, containsInAnyOrder("Source file salt://ambari/scripts/ambari-server-initttt.sh not found",
-                "Service ambari-server is already enabled, and is dead",
-                "Package haveged is already installed."));
+        assertThat(hostErrors, containsInAnyOrder("\nComment: Source file salt://ambari/scripts/ambari-server-initttt.sh not found",
+                "\nComment: Service ambari-server is already enabled, and is dead",
+                "\nComment: Package haveged is already installed."));
     }
 
     @Test
