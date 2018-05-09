@@ -18,4 +18,12 @@ public class CloudVmMetaDataStatus {
     public CloudInstanceMetaData getMetaData() {
         return metaData;
     }
+
+    @Override
+    public String toString() {
+        return "CloudVmMetaDataStatus{"
+                + "cloudVmInstanceStatus=" + cloudVmInstanceStatus
+                + ", metaData=" + metaData
+                + '}';
+    }
 }
