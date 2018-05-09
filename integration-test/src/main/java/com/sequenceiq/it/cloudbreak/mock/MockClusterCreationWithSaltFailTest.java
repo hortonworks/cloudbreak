@@ -48,7 +48,6 @@ import com.sequenceiq.it.spark.ambari.AmbariStatusResponse;
 import com.sequenceiq.it.spark.ambari.EmptyAmbariResponse;
 import com.sequenceiq.it.spark.salt.SaltApiRunPostResponse;
 
-
 public class MockClusterCreationWithSaltFailTest extends AbstractMockIntegrationTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MockClusterCreationWithSaltFailTest.class);

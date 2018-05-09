@@ -5,8 +5,6 @@ import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
 import java.util.Set;
 
 import javax.inject.Inject;
-import javax.transaction.Transactional;
-import javax.transaction.Transactional.TxType;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,8 +15,8 @@ import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
-import com.sequenceiq.cloudbreak.controller.BadRequestException;
-import com.sequenceiq.cloudbreak.controller.NotFoundException;
+import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
 import com.sequenceiq.cloudbreak.repository.SecurityGroupRepository;
@@ -26,7 +24,6 @@ import com.sequenceiq.cloudbreak.service.AuthorizationService;
 import com.sequenceiq.cloudbreak.util.NameUtil;
 
 @Service
-@Transactional
 public class SecurityGroupService {
     private static final Logger LOGGER = LoggerFactory.getLogger(SecurityGroupService.class);
 
@@ -39,7 +36,6 @@ public class SecurityGroupService {
     @Inject
     private AuthorizationService authorizationService;
 
-    @Transactional(TxType.NEVER)
     public SecurityGroup create(IdentityUser user, SecurityGroup securityGroup) {
         LOGGER.info("Creating SecurityGroup: [User: '{}', Account: '{}']", user.getUsername(), user.getAccount());
         securityGroup.setOwner(user.getUserId());

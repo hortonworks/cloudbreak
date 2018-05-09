@@ -16,7 +16,6 @@ import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
 import com.sequenceiq.it.cloudbreak.newway.ProxyConfig;
 import com.sequenceiq.it.util.LongStringGeneratorUtil;
 
-
 public class ProxyConfigTests extends CloudbreakTest {
     private static final String VALID_PROXY_CONFIG = "e2e-proxy";
 

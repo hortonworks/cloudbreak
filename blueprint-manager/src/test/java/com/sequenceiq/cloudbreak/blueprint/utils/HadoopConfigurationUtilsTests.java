@@ -99,7 +99,4 @@ public class HadoopConfigurationUtilsTests {
 
         Assert.assertEquals(null, actual);
     }
-
-
-
 }

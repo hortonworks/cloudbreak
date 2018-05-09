@@ -6,7 +6,6 @@ import java.util.function.Function;
 import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigRequest;
 import com.sequenceiq.it.IntegrationTestContext;
 
-
 public class LdapConfig extends LdapConfigEntity {
     private static final String LDAPCONFIG = "LdapCONFIG";
 
@@ -21,7 +20,7 @@ public class LdapConfig extends LdapConfigEntity {
     }
 
     static Function<IntegrationTestContext, LdapConfig> getNew() {
-        return (testContext)->new LdapConfig();
+        return (testContext) -> new LdapConfig();
     }
 
     public static LdapConfig request() {

@@ -9,7 +9,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.InstanceMetadataType;
-import com.sequenceiq.cloudbreak.controller.BadRequestException;
+import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 
 @Component
 public class StackDownscaleValidatorService {

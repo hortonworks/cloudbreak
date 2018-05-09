@@ -17,7 +17,7 @@ import com.sequenceiq.cloudbreak.api.model.ConstraintJson;
 import com.sequenceiq.cloudbreak.api.model.HostGroupRequest;
 import com.sequenceiq.cloudbreak.api.model.RecipeRequest;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
-import com.sequenceiq.cloudbreak.controller.BadRequestException;
+import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Constraint;
 import com.sequenceiq.cloudbreak.domain.ConstraintTemplate;

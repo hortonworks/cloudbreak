@@ -20,7 +20,6 @@ import com.sequenceiq.cloudbreak.api.model.InstanceGroupResponse;
 import com.sequenceiq.cloudbreak.api.model.InstanceMetaDataJson;
 import com.sequenceiq.cloudbreak.api.model.StackResponse;
 
-
 public class RecoveryUtil {
     private static final Logger LOGGER = LoggerFactory.getLogger(RecoveryUtil.class);
 

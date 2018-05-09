@@ -105,7 +105,7 @@ subprojects {
   test.testLogging.showStandardStreams = project.hasProperty('showStandardStreams')
 
   dependencies {
-    checkstyle('com.puppycrawl.tools:checkstyle:6.11.1') {
+    checkstyle('com.puppycrawl.tools:checkstyle:7.8.2') {
       exclude group: 'com.google.guava'
     }
     checkstyle("com.google.guava:guava:21.0") { force = true }

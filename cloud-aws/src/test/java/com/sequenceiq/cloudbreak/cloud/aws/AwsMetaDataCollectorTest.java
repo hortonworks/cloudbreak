@@ -41,7 +41,6 @@ import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
 
-
 @RunWith(MockitoJUnitRunner.class)
 public class AwsMetaDataCollectorTest {
 

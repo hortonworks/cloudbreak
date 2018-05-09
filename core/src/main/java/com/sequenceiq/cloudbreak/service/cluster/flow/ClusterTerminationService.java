@@ -17,7 +17,6 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 import javax.inject.Inject;
-import javax.transaction.Transactional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,8 +25,6 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.model.FileSystemConfiguration;
 import com.sequenceiq.cloudbreak.api.model.FileSystemType;
 import com.sequenceiq.cloudbreak.blueprint.filesystem.FileSystemConfigurator;
-import com.sequenceiq.cloudbreak.domain.RDSConfig;
-import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.common.model.OrchestratorType;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ContainerOrchestratorResolver;
@@ -37,6 +34,7 @@ import com.sequenceiq.cloudbreak.domain.Container;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
+import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.orchestrator.container.ContainerOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.model.ContainerInfo;
@@ -45,12 +43,14 @@ import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.ConstraintRepository;
 import com.sequenceiq.cloudbreak.repository.ContainerRepository;
 import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
+import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
+import com.sequenceiq.cloudbreak.service.TransactionService;
+import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.stack.flow.TerminationFailedException;
 
 @Component
-@Transactional
 public class ClusterTerminationService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterTerminationService.class);
@@ -84,6 +84,9 @@ public class ClusterTerminationService {
     @Inject
     private RdsConfigService rdsConfigService;
 
+    @Inject
+    private TransactionService transactionService;
+
     public Boolean deleteClusterComponents(Long clusterId) {
         Cluster cluster = clusterRepository.findById(clusterId);
         if (cluster == null) {
@@ -114,9 +117,12 @@ public class ClusterTerminationService {
                 List<ContainerInfo> containerInfo = containers.stream()
                         .map(c -> new ContainerInfo(c.getContainerId(), c.getName(), c.getHost(), c.getImage())).collect(Collectors.toList());
                 containerOrchestrator.deleteContainer(containerInfo, credential);
-                containerRepository.delete(containers);
-                deleteClusterHostGroupsWithItsMetadata(cluster);
-            } catch (CloudbreakOrchestratorException e) {
+                transactionService.required(() -> {
+                    containerRepository.delete(containers);
+                    deleteClusterHostGroupsWithItsMetadata(cluster);
+                    return null;
+                });
+            } catch (TransactionExecutionException | CloudbreakOrchestratorException e) {
                 throw new TerminationFailedException(String.format("Failed to delete containers of cluster (id:'%s',name:'%s').",
                         cluster.getId(), cluster.getName()), e);
             }
@@ -126,7 +132,7 @@ public class ClusterTerminationService {
         }
     }
 
-    public void finalizeClusterTermination(Long clusterId) {
+    public void finalizeClusterTermination(Long clusterId) throws TransactionExecutionException {
         Cluster cluster = clusterRepository.findById(clusterId);
         Set<RDSConfig> rdsConfigs = cluster.getRdsConfigs();
         Long stackId = cluster.getStack().getId();
@@ -142,9 +148,12 @@ public class ClusterTerminationService {
         cluster.setRdsConfigs(new HashSet<>());
         cluster.setProxyConfig(null);
         cluster.setStatus(DELETE_COMPLETED);
-        deleteClusterHostGroupsWithItsMetadata(cluster);
-        rdsConfigService.deleteDefaultRdsConfigs(rdsConfigs);
-        componentConfigProvider.deleteComponentsForStack(stackId);
+        transactionService.required(() -> {
+            deleteClusterHostGroupsWithItsMetadata(cluster);
+            rdsConfigService.deleteDefaultRdsConfigs(rdsConfigs);
+            componentConfigProvider.deleteComponentsForStack(stackId);
+            return null;
+        });
     }
 
     private void deleteClusterHostGroupsWithItsMetadata(Cluster cluster) {

@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.controller;
+package com.sequenceiq.cloudbreak.service;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -20,10 +20,13 @@ import com.sequenceiq.cloudbreak.api.model.UserNamePasswordJson;
 import com.sequenceiq.cloudbreak.blueprint.validation.BlueprintValidator;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
+import com.sequenceiq.cloudbreak.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.decorator.HostGroupDecorator;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
@@ -75,7 +78,11 @@ public class ClusterCommonService {
 
         if (updateJson.getBlueprintId() != null && updateJson.getHostgroups() != null && stack.getCluster().isCreateFailed()) {
             LOGGER.info("Cluster rebuild request received. Stack id:  {}", stackId);
-            recreateCluster(stackId, updateJson);
+            try {
+                recreateCluster(stackId, updateJson);
+            } catch (TransactionExecutionException e) {
+                throw new TransactionRuntimeExecutionException(e);
+            }
             return Response.status(Status.NO_CONTENT).build();
         }
 
@@ -104,7 +111,7 @@ public class ClusterCommonService {
         clusterService.updateHosts(stackId, updateJson.getHostGroupAdjustment());
     }
 
-    private void recreateCluster(Long stackId, UpdateClusterJson updateJson) {
+    private void recreateCluster(Long stackId, UpdateClusterJson updateJson) throws TransactionExecutionException {
         IdentityUser user = authenticatedUserService.getCbUser();
         Set<HostGroup> hostGroups = new HashSet<>();
         for (HostGroupRequest json : updateJson.getHostgroups()) {

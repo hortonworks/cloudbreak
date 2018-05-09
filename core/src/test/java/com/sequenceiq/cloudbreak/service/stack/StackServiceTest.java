@@ -21,6 +21,7 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.security.access.AccessDeniedException;
 
@@ -28,9 +29,8 @@ import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
-import com.sequenceiq.cloudbreak.controller.BadRequestException;
-import com.sequenceiq.cloudbreak.controller.CloudbreakApiException;
-import com.sequenceiq.cloudbreak.controller.NotFoundException;
+import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
@@ -46,6 +46,7 @@ import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.service.AuthorizationService;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
+import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderConnectorAdapter;
@@ -129,6 +130,9 @@ public class StackServiceTest {
 
     @Mock
     private StackUpdater stackUpdater;
+
+    @Spy
+    private TransactionService transactionService;
 
     @Test
     public void testRemoveInstanceWhenTheInstanceIsCoreTypeAndUserHasRightToTerminateThenThenProcessWouldBeSuccessful() {
@@ -218,7 +222,7 @@ public class StackServiceTest {
         underTest.get(STACK_ID);
     }
 
-    @Test(expected = CloudbreakApiException.class)
+    @Test
     public void testCreateFailsWithInvalidImageId() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         when(connector.checkAndGetPlatformVariant(stack)).thenReturn(variant);
         when(variant.value()).thenReturn(VARIANT_VALUE);
@@ -231,12 +235,13 @@ public class StackServiceTest {
         when(tlsSecurityService.storeSSHKeys()).thenReturn(securityConfig);
         when(connector.getPlatformParameters(stack)).thenReturn(parameters);
 
+        expectedException.expectCause(org.hamcrest.Matchers.any(CloudbreakImageNotFoundException.class));
+
         String platformString = "AWS";
         doThrow(new CloudbreakImageNotFoundException("Image not found"))
                 .when(imageService)
                 .create(eq(stack), eq(platformString), eq(parameters), nullable(StatedImage.class));
 
-        when(stack.getId()).thenReturn(Long.MAX_VALUE);
         try {
             stack = underTest.create(user, stack, platformString, mock(StatedImage.class));
         } finally {
@@ -246,8 +251,6 @@ public class StackServiceTest {
             verify(securityConfig, times(1)).setKnoxMasterSecret(anyObject());
             verify(securityConfig, times(1)).setStack(stack);
             verify(securityConfigRepository, times(1)).save(securityConfig);
-
-            verify(stackUpdater, times(1)).updateStackStatus(eq(Long.MAX_VALUE), eq(DetailedStackStatus.PROVISION_FAILED), anyString());
         }
     }
 

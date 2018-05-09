@@ -13,8 +13,6 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.transaction.Transactional;
-import javax.transaction.Transactional.TxType;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,7 +45,6 @@ import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 @Service
-@Transactional
 public class ImageService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ImageService.class);
@@ -74,7 +71,6 @@ public class ImageService {
         return componentConfigProvider.getImage(stackId);
     }
 
-    @Transactional(TxType.NEVER)
     public void create(Stack stack, String platformString, PlatformParameters params, StatedImage imgFromCatalog)
             throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         try {

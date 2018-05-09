@@ -16,6 +16,7 @@ import com.sequenceiq.cloudbreak.api.model.StackMatrix;
 import com.sequenceiq.cloudbreak.api.model.VersionCheckResult;
 import com.sequenceiq.cloudbreak.api.model.rds.RDSBuildRequest;
 import com.sequenceiq.cloudbreak.api.model.rds.RdsBuildResult;
+import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.validation.ldapconfig.LdapConfigValidator;
 import com.sequenceiq.cloudbreak.controller.validation.rds.RdsConnectionBuilder;
 import com.sequenceiq.cloudbreak.controller.validation.rds.RdsConnectionValidator;

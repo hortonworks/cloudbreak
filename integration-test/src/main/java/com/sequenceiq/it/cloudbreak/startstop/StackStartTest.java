@@ -11,8 +11,6 @@ import com.sequenceiq.it.cloudbreak.AbstractCloudbreakIntegrationTest;
 import com.sequenceiq.it.cloudbreak.CloudbreakITContextConstants;
 import com.sequenceiq.it.cloudbreak.CloudbreakUtil;
 
-
-
 public class StackStartTest extends AbstractCloudbreakIntegrationTest {
     private static final String STARTED = "STARTED";
 

@@ -60,6 +60,4 @@ public class OpenStackImageImporter {
             throw new CloudConnectorException(String.format("Import of %s did not return any task or status object", name));
         }
     }
-
-
 }

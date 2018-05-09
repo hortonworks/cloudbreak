@@ -39,12 +39,11 @@ public class CollectMetadataRequest extends CloudPlatformRequest<CollectMetadata
     //BEGIN GENERATED CODE
     @Override
     public String toString() {
-        return "CollectMetadataRequest{" +
-                ", cloudResource=" + cloudResource +
-                ", vms=" + vms +
-                ", knownVms=" + knownVms +
-                '}';
+        return "CollectMetadataRequest{"
+                + ", cloudResource=" + cloudResource
+                + ", vms=" + vms
+                + ", knownVms=" + knownVms
+                + '}';
     }
     //END GENERATED CODE
-
 }

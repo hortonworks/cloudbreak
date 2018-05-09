@@ -5,8 +5,6 @@ import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
 import java.util.Date;
 
 import javax.inject.Inject;
-import javax.transaction.Transactional;
-import javax.transaction.Transactional.TxType;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,8 +13,8 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
-import com.sequenceiq.cloudbreak.controller.BadRequestException;
-import com.sequenceiq.cloudbreak.controller.NotFoundException;
+import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.Topology;
 import com.sequenceiq.cloudbreak.repository.CredentialRepository;
 import com.sequenceiq.cloudbreak.repository.NetworkRepository;
@@ -25,7 +23,6 @@ import com.sequenceiq.cloudbreak.repository.TopologyRepository;
 import com.sequenceiq.cloudbreak.service.AuthorizationService;
 
 @Service
-@Transactional
 public class TopologyService {
     private static final Logger LOGGER = LoggerFactory.getLogger(TopologyService.class);
 
@@ -63,7 +60,6 @@ public class TopologyService {
         }
     }
 
-    @Transactional(TxType.NEVER)
     public Topology create(IdentityUser user, Topology topology) {
         LOGGER.debug("Creating topology: [User: '{}', Account: '{}']", user.getUsername(), user.getAccount());
         Topology savedTopology;

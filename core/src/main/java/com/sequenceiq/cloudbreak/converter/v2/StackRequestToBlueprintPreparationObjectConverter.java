@@ -198,6 +198,4 @@ public class StackRequestToBlueprintPreparationObjectConverter extends AbstractC
         }
         return kerberosConfig;
     }
-
-
 }

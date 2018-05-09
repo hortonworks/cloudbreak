@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
-import com.sequenceiq.cloudbreak.controller.AuthenticatedUserService;
+import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 
 @Component
 @Aspect

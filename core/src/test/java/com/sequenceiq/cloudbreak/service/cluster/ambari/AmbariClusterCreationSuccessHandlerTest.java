@@ -86,6 +86,4 @@ public class AmbariClusterCreationSuccessHandlerTest {
 
         verify(hostMetadataRepository, times(1)).findHostsInCluster(cluster.getId());
     }
-
-
 }

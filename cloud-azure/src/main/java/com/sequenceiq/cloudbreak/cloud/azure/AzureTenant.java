@@ -33,10 +33,10 @@ public class AzureTenant {
     //BEGIN GENERATED CODE
     @Override
     public String toString() {
-        return "AzureTenant{" +
-                "id='" + id + '\'' +
-                ", tenantId='" + tenantId + '\'' +
-                '}';
+        return "AzureTenant{"
+                + "id='" + id + '\''
+                + ", tenantId='" + tenantId + '\''
+                + '}';
     }
     //END GENERATED CODE
 }

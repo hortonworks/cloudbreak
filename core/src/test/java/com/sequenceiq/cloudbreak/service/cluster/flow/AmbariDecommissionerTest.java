@@ -69,7 +69,6 @@ import com.sequenceiq.cloudbreak.service.cluster.filter.ConfigParam;
 import com.sequenceiq.cloudbreak.service.cluster.filter.HostFilterService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 
-
 @RunWith(org.mockito.junit.MockitoJUnitRunner.class)
 public class AmbariDecommissionerTest {
 

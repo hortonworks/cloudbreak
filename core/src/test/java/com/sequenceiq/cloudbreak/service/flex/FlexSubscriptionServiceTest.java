@@ -15,16 +15,22 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 
-import com.sequenceiq.cloudbreak.controller.BadRequestException;
+import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.FlexSubscription;
 import com.sequenceiq.cloudbreak.domain.SmartSenseSubscription;
 import com.sequenceiq.cloudbreak.repository.FlexSubscriptionRepository;
+import com.sequenceiq.cloudbreak.service.TransactionService;
+import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 
 public class FlexSubscriptionServiceTest {
 
     @Mock
     private FlexSubscriptionRepository flexRepo;
+
+    @Spy
+    private TransactionService transactionService;
 
     @InjectMocks
     private FlexSubscriptionService underTest;
@@ -35,7 +41,7 @@ public class FlexSubscriptionServiceTest {
     }
 
     @Test(expected = BadRequestException.class)
-    public void testCreateShouldThrowBadRequestWhenSubscriptionExistsWithTheSameName() {
+    public void testCreateShouldThrowBadRequestWhenSubscriptionExistsWithTheSameName() throws TransactionExecutionException {
         when(flexRepo.countByNameAndAccount(anyString(), anyString())).thenReturn(1L);
         FlexSubscription subscription = getFlexSubscription("testFlexSubscription", "FLEX-000000000");
 
@@ -43,7 +49,7 @@ public class FlexSubscriptionServiceTest {
     }
 
     @Test(expected = BadRequestException.class)
-    public void testCreateShouldThrowBadRequestWhenSubscriptionExistsWithTheSameSubscriptionIdentifier() {
+    public void testCreateShouldThrowBadRequestWhenSubscriptionExistsWithTheSameSubscriptionIdentifier() throws TransactionExecutionException {
         when(flexRepo.countByNameAndAccount(anyString(), anyString())).thenReturn(0L);
         when(flexRepo.countBySubscriptionId(anyString())).thenReturn(1L);
         FlexSubscription subscription = getFlexSubscription("testFlexSubscription1", "FLEX-000000001");
@@ -52,7 +58,7 @@ public class FlexSubscriptionServiceTest {
     }
 
     @Test
-    public void testCreateShouldSetDefaultFlagsForTheFirstSavedSubscription() {
+    public void testCreateShouldSetDefaultFlagsForTheFirstSavedSubscription() throws TransactionExecutionException {
         when(flexRepo.countByNameAndAccount(anyString(), anyString())).thenReturn(0L);
         when(flexRepo.countBySubscriptionId(anyString())).thenReturn(0L);
         FlexSubscription subscription = getFlexSubscription("testFlexSubscription", "FLEX-000000000", false, false);
@@ -68,7 +74,7 @@ public class FlexSubscriptionServiceTest {
     }
 
     @Test
-    public void testCreateShouldUpdateDefaultFlagsOfOldSubscriptionsWhenNewSubscriptionRequiresDefaultFlags() {
+    public void testCreateShouldUpdateDefaultFlagsOfOldSubscriptionsWhenNewSubscriptionRequiresDefaultFlags() throws TransactionExecutionException {
         when(flexRepo.countByNameAndAccount(anyString(), anyString())).thenReturn(0L);
         when(flexRepo.countBySubscriptionId(anyString())).thenReturn(0L);
         FlexSubscription subscription = getFlexSubscription("testFlexSubscription", "FLEX-000000000", true, true);
@@ -88,7 +94,8 @@ public class FlexSubscriptionServiceTest {
     }
 
     @Test
-    public void testCreateShouldUpdateUsedForControllerFlagOfOldSubscriptionsWhenNewSubscriptionCreatedAsUsedForController() {
+    public void testCreateShouldUpdateUsedForControllerFlagOfOldSubscriptionsWhenNewSubscriptionCreatedAsUsedForController()
+            throws TransactionExecutionException {
         when(flexRepo.countByNameAndAccount(anyString(), anyString())).thenReturn(0L);
         when(flexRepo.countBySubscriptionId(anyString())).thenReturn(0L);
         FlexSubscription subscription = getFlexSubscription("testFlexSubscription", "FLEX-000000000", true, false);
@@ -107,7 +114,7 @@ public class FlexSubscriptionServiceTest {
     }
 
     @Test
-    public void testCreateShouldUpdateDefaultFlagOfOldSubscriptionsWhenNewSubscriptionCreatedAsDefault() {
+    public void testCreateShouldUpdateDefaultFlagOfOldSubscriptionsWhenNewSubscriptionCreatedAsDefault() throws TransactionExecutionException {
         when(flexRepo.countByNameAndAccount(anyString(), anyString())).thenReturn(0L);
         when(flexRepo.countBySubscriptionId(anyString())).thenReturn(0L);
         FlexSubscription subscription = getFlexSubscription("testFlexSubscription", "FLEX-000000000", false, true);

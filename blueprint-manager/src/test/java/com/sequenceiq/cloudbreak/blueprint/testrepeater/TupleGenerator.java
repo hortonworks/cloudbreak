@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.blueprint.testrepeater;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 
-
 public class TupleGenerator<A, B> implements Generator<Tuple<A, B>> {
 
     private final Iterable<A> as;

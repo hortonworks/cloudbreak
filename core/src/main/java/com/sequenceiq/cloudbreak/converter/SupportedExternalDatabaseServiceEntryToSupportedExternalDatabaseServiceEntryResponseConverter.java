@@ -6,7 +6,6 @@ import com.sequenceiq.cloudbreak.api.model.SupportedDatabaseEntryResponse;
 import com.sequenceiq.cloudbreak.api.model.SupportedExternalDatabaseServiceEntryResponse;
 import com.sequenceiq.cloudbreak.validation.externaldatabase.SupportedExternalDatabaseServiceEntry;
 
-
 @Component
 public class SupportedExternalDatabaseServiceEntryToSupportedExternalDatabaseServiceEntryResponseConverter
         extends AbstractConversionServiceAwareConverter<SupportedExternalDatabaseServiceEntry, SupportedExternalDatabaseServiceEntryResponse> {

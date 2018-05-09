@@ -5,7 +5,7 @@ import java.util.regex.Pattern;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.SecurityRuleRequest;
-import com.sequenceiq.cloudbreak.controller.BadRequestException;
+import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.SecurityRule;
 
 @Component

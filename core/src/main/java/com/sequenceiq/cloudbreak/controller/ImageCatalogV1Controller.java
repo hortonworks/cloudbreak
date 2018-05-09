@@ -4,6 +4,8 @@ import java.util.List;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.transaction.Transactional;
+import javax.transaction.Transactional.TxType;
 
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
@@ -17,9 +19,11 @@ import com.sequenceiq.cloudbreak.api.model.imagecatalog.UpdateImageCatalogReques
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
+import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 
 @Component
+@Transactional(TxType.NEVER)
 public class ImageCatalogV1Controller implements ImageCatalogV1Endpoint {
 
     @Inject

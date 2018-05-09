@@ -18,7 +18,6 @@ import com.sequenceiq.it.cloudbreak.newway.LdapConfig;
 import com.sequenceiq.it.cloudbreak.newway.LdapTest;
 import com.sequenceiq.it.util.LongStringGeneratorUtil;
 
-
 public class LdapConfigTests extends CloudbreakTest {
     private static final String VALID_LDAP_CONFIG = "e2e-ldap";
 

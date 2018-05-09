@@ -48,6 +48,7 @@ import com.sequenceiq.cloudbreak.domain.StateStatus;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.repository.FlowLogRepository;
 import com.sequenceiq.cloudbreak.service.TransactionService;
+import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.flowlog.FlowLogService;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -189,7 +190,7 @@ public class Flow2HandlerTest {
     }
 
     @Test
-    public void testFlowFinalFlowNotChained() {
+    public void testFlowFinalFlowNotChained() throws TransactionExecutionException {
         given(runningFlows.remove(FLOW_ID)).willReturn(flow);
         dummyEvent.setKey(Flow2Handler.FLOW_FINAL);
         underTest.accept(dummyEvent);
@@ -202,7 +203,7 @@ public class Flow2HandlerTest {
     }
 
     @Test
-    public void testFlowFinalFlowChained() {
+    public void testFlowFinalFlowChained() throws TransactionExecutionException {
         given(runningFlows.remove(FLOW_ID)).willReturn(flow);
         dummyEvent.setKey(Flow2Handler.FLOW_FINAL);
         dummyEvent.getHeaders().set(Flow2Handler.FLOW_CHAIN_ID, FLOW_CHAIN_ID);
@@ -216,7 +217,7 @@ public class Flow2HandlerTest {
     }
 
     @Test
-    public void testFlowFinalFlowFailedNoChain() {
+    public void testFlowFinalFlowFailedNoChain() throws TransactionExecutionException {
         given(flow.isFlowFailed()).willReturn(Boolean.TRUE);
         given(runningFlows.remove(FLOW_ID)).willReturn(flow);
         dummyEvent.setKey(Flow2Handler.FLOW_FINAL);
@@ -231,7 +232,7 @@ public class Flow2HandlerTest {
     }
 
     @Test
-    public void testFlowFinalFlowFailedWithChain() {
+    public void testFlowFinalFlowFailedWithChain() throws TransactionExecutionException {
         given(flow.isFlowFailed()).willReturn(Boolean.TRUE);
         given(runningFlows.remove(FLOW_ID)).willReturn(flow);
         dummyEvent.setKey(Flow2Handler.FLOW_FINAL);
@@ -247,7 +248,7 @@ public class Flow2HandlerTest {
     }
 
     @Test
-    public void testCancelRunningFlows() {
+    public void testCancelRunningFlows() throws TransactionExecutionException {
         given(flowLogRepository.findAllRunningNonTerminationFlowIdsByStackId(anyLong())).willReturn(Collections.singleton(FLOW_ID));
         given(runningFlows.remove(FLOW_ID)).willReturn(flow);
         given(runningFlows.getFlowChainId(eq(FLOW_ID))).willReturn(FLOW_CHAIN_ID);
@@ -258,7 +259,7 @@ public class Flow2HandlerTest {
     }
 
     @Test
-    public void testRestartFlowNotRestartable() {
+    public void testRestartFlowNotRestartable() throws TransactionExecutionException {
         FlowLog flowLog = new FlowLog(STACK_ID, FLOW_ID, "START_STATE", true, StateStatus.SUCCESSFUL);
         flowLog.setFlowType(String.class);
         when(flowLogRepository.findFirstByFlowIdOrderByCreatedDesc(FLOW_ID)).thenReturn(flowLog);
@@ -268,7 +269,7 @@ public class Flow2HandlerTest {
     }
 
     @Test
-    public void testRestartFlow() {
+    public void testRestartFlow() throws TransactionExecutionException {
         ReflectionTestUtils.setField(underTest, "flowChainHandler", flowChainHandler);
 
         FlowLog flowLog = createFlowLog(FLOW_CHAIN_ID);
@@ -297,7 +298,7 @@ public class Flow2HandlerTest {
     }
 
     @Test
-    public void testRestartFlowNoRestartAction() {
+    public void testRestartFlowNoRestartAction() throws TransactionExecutionException {
         ReflectionTestUtils.setField(underTest, "flowChainHandler", flowChainHandler);
 
         FlowLog flowLog = createFlowLog(FLOW_CHAIN_ID);
@@ -320,7 +321,7 @@ public class Flow2HandlerTest {
     }
 
     @Test
-    public void testRestartFlowNoRestartActionNoFlowChainId() {
+    public void testRestartFlowNoRestartActionNoFlowChainId() throws TransactionExecutionException {
         ReflectionTestUtils.setField(underTest, "flowChainHandler", flowChainHandler);
 
         FlowLog flowLog = createFlowLog(null);

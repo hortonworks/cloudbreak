@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.controller;
 
 import java.util.Map;
 
+import javax.transaction.Transactional;
+import javax.transaction.Transactional.TxType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
@@ -17,10 +19,12 @@ import com.sequenceiq.cloudbreak.api.model.AccountPreferencesResponse;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
 import com.sequenceiq.cloudbreak.domain.AccountPreferences;
+import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.account.AccountPreferencesService;
 import com.sequenceiq.cloudbreak.service.account.ScheduledAccountPreferencesValidator;
 
 @Component
+@Transactional(TxType.NEVER)
 public class AccountPreferencesController implements AccountPreferencesEndpoint {
 
     @Autowired

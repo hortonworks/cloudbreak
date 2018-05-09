@@ -9,7 +9,6 @@ import com.sequenceiq.cloudbreak.api.model.repositoryconfig.RepoConfigValidation
 import com.sequenceiq.cloudbreak.api.model.repositoryconfig.RepoConfigValidationResponse;
 import com.sequenceiq.it.IntegrationTestContext;
 
-
 public class RepositoryConfigs extends Entity {
     private static final String REPOSITORYCONFIGS = "REPOSITORYCONFIGS";
 
@@ -33,7 +32,7 @@ public class RepositoryConfigs extends Entity {
     }
 
     static Function<IntegrationTestContext, RepositoryConfigs> getTestContext(String key) {
-        return (testContext)->testContext.getContextParam(key, RepositoryConfigs.class);
+        return (testContext) -> testContext.getContextParam(key, RepositoryConfigs.class);
     }
 
     public static RepositoryConfigs request() {

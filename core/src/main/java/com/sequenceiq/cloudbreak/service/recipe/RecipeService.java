@@ -7,8 +7,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
-import javax.transaction.Transactional;
-import javax.transaction.Transactional.TxType;
 
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
@@ -16,15 +14,14 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
-import com.sequenceiq.cloudbreak.controller.BadRequestException;
-import com.sequenceiq.cloudbreak.controller.NotFoundException;
+import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
 import com.sequenceiq.cloudbreak.repository.RecipeRepository;
 import com.sequenceiq.cloudbreak.service.AuthorizationService;
 
 @Service
-@Transactional
 public class RecipeService {
 
     @Inject
@@ -36,7 +33,6 @@ public class RecipeService {
     @Inject
     private AuthorizationService authorizationService;
 
-    @Transactional(TxType.NEVER)
     public Recipe create(IdentityUser user, Recipe recipe) {
         recipe.setOwner(user.getUserId());
         recipe.setAccount(user.getAccount());

@@ -1,15 +1,15 @@
 package com.sequenceiq.it.cloudbreak.newway.priority;
 
+import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.IMethodInstance;
 import org.testng.IMethodInterceptor;
 import org.testng.ITestContext;
-
-import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
 
 public class PriorityMethodInterceptor implements IMethodInterceptor {
     private static final Logger LOGGER = LoggerFactory.getLogger(PriorityMethodInterceptor.class);
@@ -39,7 +39,7 @@ public class PriorityMethodInterceptor implements IMethodInterceptor {
 
         IMethodInstance[] array = methods.toArray(new IMethodInstance[methods.size()]);
         Arrays.sort(array, comparator);
-        Arrays.stream(array).forEach(method-> LOGGER.info("###test priority: "
+        Arrays.stream(array).forEach(method -> LOGGER.info("###test priority: "
                 + method.getMethod().getMethodName()));
         return Arrays.asList(array);
     }

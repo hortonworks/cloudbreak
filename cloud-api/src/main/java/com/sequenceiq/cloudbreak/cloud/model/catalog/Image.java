@@ -97,6 +97,4 @@ public class Image {
                 + ", version='" + version + '\''
                 + '}';
     }
-
-
 }

@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.service.mpack;
 import java.util.Set;
 
 import javax.inject.Inject;
-import javax.transaction.Transactional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,13 +11,12 @@ import org.springframework.stereotype.Service;
 import com.google.common.base.Preconditions;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
-import com.sequenceiq.cloudbreak.controller.NotFoundException;
+import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.ManagementPack;
 import com.sequenceiq.cloudbreak.repository.ManagementPackRepository;
 import com.sequenceiq.cloudbreak.service.AuthorizationService;
 
 @Service
-@Transactional
 public class ManagementPackService {
     private static final Logger LOGGER = LoggerFactory.getLogger(ManagementPackService.class);
 

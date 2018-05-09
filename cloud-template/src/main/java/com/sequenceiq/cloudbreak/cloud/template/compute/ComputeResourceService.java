@@ -255,8 +255,5 @@ public class ComputeResourceService {
             };
             return byLengthOrdering.sortedCopy(groups);
         }
-
-
     }
-
 }

@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.controller;
 
+import javax.transaction.Transactional;
+import javax.transaction.Transactional.TxType;
 import javax.ws.rs.core.Response;
 
 import org.slf4j.Logger;
@@ -24,10 +26,16 @@ import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
+import com.sequenceiq.cloudbreak.service.ClusterCommonService;
+import com.sequenceiq.cloudbreak.service.ClusterCreationSetupService;
+import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
+import com.sequenceiq.cloudbreak.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @Controller
+@Transactional(TxType.NEVER)
 public class ClusterV1Controller implements ClusterV1Endpoint {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterV1Controller.class);
 
@@ -118,7 +126,11 @@ public class ClusterV1Controller implements ClusterV1Endpoint {
         Stack stack = stackService.get(stackId);
         MDCBuilder.buildMdcContext(stack);
         AmbariRepo ambariRepo = conversionService.convert(ambariRepoDetails, AmbariRepo.class);
-        clusterService.upgrade(stackId, ambariRepo);
+        try {
+            clusterService.upgrade(stackId, ambariRepo);
+        } catch (TransactionExecutionException e) {
+            throw new TransactionRuntimeExecutionException(e);
+        }
         return Response.accepted().build();
     }
 

@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.service.account;
 
-
 public class AccountPreferencesValidationException extends Exception {
 
     public AccountPreferencesValidationException(String message) {
@@ -14,5 +13,4 @@ public class AccountPreferencesValidationException extends Exception {
     public AccountPreferencesValidationException(Throwable cause) {
         super(cause);
     }
-
 }

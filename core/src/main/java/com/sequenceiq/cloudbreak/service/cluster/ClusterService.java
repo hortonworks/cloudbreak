@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.ClusterComponent;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.service.TransactionService;
 
 public interface ClusterService {
 
@@ -48,7 +49,7 @@ public interface ClusterService {
 
     Cluster updateClusterStatusByStackId(Long stackId, Status status);
 
-    Cluster updateClusterStatusByStackIdOutOfTransaction(Long stackId, Status status);
+    Cluster updateClusterStatusByStackIdOutOfTransaction(Long stackId, Status status) throws TransactionService.TransactionExecutionException;
 
     Cluster updateCluster(Cluster cluster);
 
@@ -57,7 +58,7 @@ public interface ClusterService {
     Cluster updateClusterMetadata(Long stackId);
 
     Cluster recreate(Long stackId, Long blueprintId, Set<HostGroup> hostGroups, boolean validateBlueprint, StackRepoDetails stackRepoDetails,
-            String kerberosPassword, String kerberosPrincipal);
+            String kerberosPassword, String kerberosPrincipal) throws TransactionService.TransactionExecutionException;
 
     void updateUserNamePassword(Long stackId, UserNamePasswordJson userNamePasswordJson);
 
@@ -67,7 +68,7 @@ public interface ClusterService {
 
     ConfigsResponse retrieveOutputs(Long stackId, Set<BlueprintParameterJson> requests) throws IOException;
 
-    void upgrade(Long stackId, AmbariRepo ambariRepo);
+    void upgrade(Long stackId, AmbariRepo ambariRepo) throws TransactionService.TransactionExecutionException;
 
     Map<String, String> getHostStatuses(Long stackId);
 

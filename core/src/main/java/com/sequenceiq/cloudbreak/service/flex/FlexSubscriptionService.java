@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.function.BiConsumer;
 
 import javax.inject.Inject;
-import javax.transaction.Transactional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,14 +12,15 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
-import com.sequenceiq.cloudbreak.controller.BadRequestException;
+import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.FlexSubscription;
 import com.sequenceiq.cloudbreak.repository.FlexSubscriptionRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.AuthorizationService;
+import com.sequenceiq.cloudbreak.service.TransactionService;
+import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 
 @Service
-@Transactional
 public class FlexSubscriptionService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FlexSubscriptionService.class);
@@ -34,20 +34,25 @@ public class FlexSubscriptionService {
     @Inject
     private AuthorizationService authorizationService;
 
-    public FlexSubscription create(FlexSubscription subscription) {
+    @Inject
+    private TransactionService transactionService;
+
+    public FlexSubscription create(FlexSubscription subscription) throws TransactionExecutionException {
         if (!flexRepo.countByNameAndAccount(subscription.getName(), subscription.getAccount()).equals(0L)) {
             throw new BadRequestException(String.format("The name: '%s' has already taken by an other FlexSubscription.", subscription.getName()));
         } else if (!flexRepo.countBySubscriptionId(subscription.getSubscriptionId()).equals(0L)) {
             throw new BadRequestException(String.format("The subscriptionId: '%s' has already taken by an other FlexSubscription.",
                     subscription.getSubscriptionId()));
         }
-        subscription = flexRepo.save(subscription);
+        return transactionService.required(() -> {
+            FlexSubscription updated = flexRepo.save(subscription);
 
-        List<FlexSubscription> allInAccount = flexRepo.findAllByAccount(subscription.getAccount());
-        setSubscriptionAsDefaultIfNeeded(subscription, allInAccount);
-        updateSubscriptionsDefaultFlagsIfNeeded(subscription, allInAccount);
-        LOGGER.info("Flex subscription has been created: {}", subscription);
-        return subscription;
+            List<FlexSubscription> allInAccount = flexRepo.findAllByAccount(updated.getAccount());
+            setSubscriptionAsDefaultIfNeeded(updated, allInAccount);
+            updateSubscriptionsDefaultFlagsIfNeeded(updated, allInAccount);
+            LOGGER.info("Flex subscription has been created: {}", updated);
+            return updated;
+        });
     }
 
     public void delete(FlexSubscription subscription) {

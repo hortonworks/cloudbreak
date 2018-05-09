@@ -38,18 +38,13 @@ public class CloudCredentialStatus {
     }
 
     //BEGIN GENERATED CODE
-
     @Override
     public String toString() {
-        return "CloudCredentialStatus{" +
-                "cloudCredential=" + cloudCredential +
-                ", status=" + status +
-                ", statusReason='" + statusReason + '\'' +
-                '}';
+        return "CloudCredentialStatus{"
+                + "cloudCredential=" + cloudCredential
+                + ", status=" + status
+                + ", statusReason='" + statusReason + '\''
+                + '}';
     }
-
-
     //END GENERATED CODE
-
-
 }

@@ -23,6 +23,4 @@ public class CredentialToCredentialRequestConverter
         credentialRequest.setParameters(cleanMap(source.getAttributes().getMap()));
         return credentialRequest;
     }
-
-
 }

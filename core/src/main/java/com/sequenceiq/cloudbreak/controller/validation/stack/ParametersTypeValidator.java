@@ -8,7 +8,7 @@ import java.util.Map;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.model.StackParamValidation;
-import com.sequenceiq.cloudbreak.controller.BadRequestException;
+import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
@@ -63,6 +63,4 @@ public class ParametersTypeValidator implements ParameterValidator {
     public ValidatorType getValidatorType() {
         return ValidatorType.CLASS;
     }
-
-
 }

@@ -5,8 +5,6 @@ import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
 import java.util.Set;
 
 import javax.inject.Inject;
-import javax.transaction.Transactional;
-import javax.transaction.Transactional.TxType;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,8 +15,8 @@ import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
-import com.sequenceiq.cloudbreak.controller.BadRequestException;
-import com.sequenceiq.cloudbreak.controller.NotFoundException;
+import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.repository.NetworkRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
@@ -26,7 +24,6 @@ import com.sequenceiq.cloudbreak.service.AuthorizationService;
 import com.sequenceiq.cloudbreak.util.NameUtil;
 
 @Service
-@Transactional
 public class NetworkService {
     private static final Logger LOGGER = LoggerFactory.getLogger(NetworkService.class);
 
@@ -39,7 +36,6 @@ public class NetworkService {
     @Inject
     private AuthorizationService authorizationService;
 
-    @Transactional(TxType.NEVER)
     public Network create(IdentityUser user, Network network) {
         LOGGER.info("Creating network: [User: '{}', Account: '{}']", user.getUsername(), user.getAccount());
         network.setOwner(user.getUserId());
@@ -82,7 +78,6 @@ public class NetworkService {
         return network;
     }
 
-    @Transactional(TxType.NEVER)
     public void delete(Long id, IdentityUser user) {
         LOGGER.info("Deleting network with id: {}", id);
         delete(get(id));

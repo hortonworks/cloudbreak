@@ -12,7 +12,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
-import javax.transaction.Transactional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -127,16 +126,12 @@ public class HeartbeatService {
         if (cloudbreakNodeConfig.isNodeIdSpecified()) {
             List<CloudbreakNode> failedNodes = new ArrayList<>();
             try {
-                failedNodes.addAll(transactionService.required(() -> distributeFlows()));
+                failedNodes.addAll(distributeFlows());
             } catch (TransactionExecutionException e) {
                 LOGGER.info("Failed to distribute the flow logs across the active nodes, somebody might have already done it. Message: {}", e.getMessage());
             }
-
             try {
-                transactionService.required(() -> {
-                    cleanupNodes(failedNodes);
-                    return null;
-                });
+                cleanupNodes(failedNodes);
             } catch (TransactionExecutionException e) {
                 LOGGER.info("Failed to cleanup the nodes, somebody might have already done it. Message: {}", e.getMessage());
             }
@@ -154,8 +149,7 @@ public class HeartbeatService {
         }
     }
 
-    @Transactional
-    public List<CloudbreakNode> distributeFlows() {
+    public List<CloudbreakNode> distributeFlows() throws TransactionExecutionException {
         List<CloudbreakNode> cloudbreakNodes = Lists.newArrayList(cloudbreakNodeRepository.findAll());
         long currentTimeMillis = clock.getCurrentTime();
         List<CloudbreakNode> failedNodes = cloudbreakNodes.stream()
@@ -187,7 +181,7 @@ public class HeartbeatService {
                             updatedFlowLogs.add(flowLog);
                         }));
             }
-            flowLogRepository.save(updatedFlowLogs);
+            transactionService.required(() -> flowLogRepository.save(updatedFlowLogs));
         }
         return failedNodes;
     }
@@ -195,15 +189,17 @@ public class HeartbeatService {
     /**
      * Remove the node reference from the DB for those nodes that are failing and does not have any assigned flows.
      */
-    @Transactional
-    public void cleanupNodes(Collection<CloudbreakNode> failedNodes) {
+    public void cleanupNodes(Collection<CloudbreakNode> failedNodes) throws TransactionExecutionException {
         if (failedNodes != null && !failedNodes.isEmpty()) {
             LOGGER.info("Cleanup node candidates: {}", failedNodes);
             List<CloudbreakNode> cleanupNodes = failedNodes.stream()
                     .filter(node -> flowLogRepository.findAllByCloudbreakNodeId(node.getUuid()).isEmpty())
                     .collect(Collectors.toList());
             LOGGER.info("Cleanup nodes from the DB: {}", cleanupNodes);
-            cloudbreakNodeRepository.delete(cleanupNodes);
+            transactionService.required(() -> {
+                cloudbreakNodeRepository.delete(cleanupNodes);
+                return null;
+            });
         }
     }
 

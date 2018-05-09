@@ -13,7 +13,6 @@ import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
 
-
 @Service
 public class GeneralClusterConfigsProvider {
 

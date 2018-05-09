@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
+import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.stack.flow.ScalingFailedException;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackScalingService;
 
@@ -67,7 +68,7 @@ public class InstanceTerminationService {
         }
     }
 
-    public void finishInstanceTermination(InstanceTerminationContext context, RemoveInstanceResult payload) {
+    public void finishInstanceTermination(InstanceTerminationContext context, RemoveInstanceResult payload) throws TransactionExecutionException {
         Stack stack = context.getStack();
         List<InstanceMetaData> instanceMetaDataList = context.getInstanceMetaDataList();
         for (InstanceMetaData instanceMetaData : instanceMetaDataList) {

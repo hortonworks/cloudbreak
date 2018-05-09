@@ -1,12 +1,12 @@
 package com.sequenceiq.cloudbreak.structuredevent;
 
 import javax.inject.Inject;
-import javax.transaction.Transactional;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Cluster;
@@ -26,8 +26,9 @@ import com.sequenceiq.cloudbreak.structuredevent.event.StructuredFlowEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredNotificationEvent;
 
 @Component
-@Transactional
+@Transactional(readOnly = true)
 public class StructuredFlowEventFactory {
+
     @Inject
     private StackService stackService;
 
