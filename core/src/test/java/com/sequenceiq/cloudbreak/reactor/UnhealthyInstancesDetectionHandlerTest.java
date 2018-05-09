@@ -31,7 +31,6 @@ import com.sequenceiq.cloudbreak.service.stack.repair.UnhealthyInstancesFinalize
 import reactor.bus.Event;
 import reactor.bus.EventBus;
 
-
 @RunWith(MockitoJUnitRunner.class)
 public class UnhealthyInstancesDetectionHandlerTest {
 

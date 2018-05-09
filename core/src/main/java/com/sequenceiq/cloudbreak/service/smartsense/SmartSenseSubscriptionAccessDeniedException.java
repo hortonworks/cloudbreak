@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.service.smartsense;
 
-import com.sequenceiq.cloudbreak.controller.BadRequestException;
+import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 
 public class SmartSenseSubscriptionAccessDeniedException extends BadRequestException {
 

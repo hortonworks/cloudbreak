@@ -9,7 +9,6 @@ import org.springframework.context.annotation.Configuration;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient.CloudbreakClientBuilder;
 
-
 @Configuration
 public class CloudbreakClientConfiguration {
 
@@ -34,6 +33,4 @@ public class CloudbreakClientConfiguration {
     public CloudbreakClient cloudbreakClient() {
         return new CloudbreakClientBuilder(cloudbreakUrl + cbRootContextPath, identityServerUrl, clientId).withSecret(secret).build();
     }
-
-
 }

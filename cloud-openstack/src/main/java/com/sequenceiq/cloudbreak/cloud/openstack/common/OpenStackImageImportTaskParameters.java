@@ -36,6 +36,4 @@ public class OpenStackImageImportTaskParameters {
         input.put("image_properties", imageProperties);
         return input;
     }
-
-
 }

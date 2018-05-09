@@ -41,13 +41,6 @@ public interface UserEndpoint {
     User evictCurrentUserDetails();
 
     @GET
-    @Path("{id}/resources")
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = UserOpDescription.USER_GET_RESOURCE, produces = ContentType.JSON, notes = Notes.USER_NOTES,
-            nickname = "hasResourcesUser")
-    Boolean hasResources(@PathParam("id") String id);
-
-    @GET
     @Path("profile")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = UserOpDescription.USER_GET_PROFILE, produces = ContentType.JSON, notes = Notes.USER_NOTES,

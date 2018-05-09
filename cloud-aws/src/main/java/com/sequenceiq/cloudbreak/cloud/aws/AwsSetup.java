@@ -58,7 +58,6 @@ import com.sequenceiq.cloudbreak.common.type.ImageStatus;
 import com.sequenceiq.cloudbreak.common.type.ImageStatusResult;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
-
 @Component
 public class AwsSetup implements Setup {
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsSetup.class);

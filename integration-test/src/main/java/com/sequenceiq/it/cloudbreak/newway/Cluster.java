@@ -88,7 +88,7 @@ public class Cluster extends Entity  {
     }
 
     public static Function<IntegrationTestContext, Cluster> getTestContextCluster(String key) {
-        return (testContext)->testContext.getContextParam(key, Cluster.class);
+        return (testContext) -> testContext.getContextParam(key, Cluster.class);
     }
 
     public static Function<IntegrationTestContext, Cluster> getTestContextCluster() {
@@ -96,7 +96,7 @@ public class Cluster extends Entity  {
     }
 
     public static Function<IntegrationTestContext, Cluster> getNewCluster() {
-        return (testContext)->new Cluster();
+        return (testContext) -> new Cluster();
     }
 
     public static Cluster request(String key) {

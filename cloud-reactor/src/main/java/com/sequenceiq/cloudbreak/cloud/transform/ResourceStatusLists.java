@@ -39,6 +39,4 @@ public class ResourceStatusLists {
 
         return new CloudResourceStatus(null, status, statusReason.toString());
     }
-
-
 }

@@ -20,7 +20,6 @@ import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProvider;
 import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProviderHelper;
 import com.sequenceiq.it.cloudbreak.newway.cloud.OpenstackCloudProvider;
 
-
 public class IpPoolTests extends CloudbreakTest {
     private static final String INVALID_CRED_NAME = "invalid-cred";
 

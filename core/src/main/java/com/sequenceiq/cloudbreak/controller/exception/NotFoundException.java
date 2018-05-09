@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.controller;
+package com.sequenceiq.cloudbreak.controller.exception;
 
 public class NotFoundException extends RuntimeException {
 

@@ -35,8 +35,6 @@ import com.microsoft.azure.storage.blob.CloudBlobClient;
 import com.microsoft.azure.storage.blob.CloudBlobContainer;
 import com.sequenceiq.it.util.ResourceUtil;
 
-
-
 public class FilesystemUtil {
 
     private static final String AZURE_TOKEN_URL = "https://login.microsoftonline.com/";

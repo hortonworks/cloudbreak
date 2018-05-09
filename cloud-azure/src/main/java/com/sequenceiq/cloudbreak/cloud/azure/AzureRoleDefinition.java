@@ -58,12 +58,12 @@ public class AzureRoleDefinition {
     //BEGIN GENERATED CODE
     @Override
     public String toString() {
-        return "AzureRoleDefinition{" +
-                "id='" + id + '\'' +
-                ", name='" + name + '\'' +
-                ", type='" + type + '\'' +
-                ", properties=" + properties +
-                '}';
+        return "AzureRoleDefinition{"
+                + "id='" + id + '\''
+                + ", name='" + name + '\''
+                + ", type='" + type + '\''
+                + ", properties=" + properties
+                + '}';
     }
     //END GENERATED CODE
 }

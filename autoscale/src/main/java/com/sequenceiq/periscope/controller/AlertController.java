@@ -8,7 +8,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
-import javax.transaction.Transactional;
 
 import org.springframework.stereotype.Component;
 
@@ -73,7 +72,6 @@ public class AlertController implements AlertEndpoint {
     }
 
     @Override
-    @Transactional
     public List<MetricAlertResponse> getMetricAlerts(Long clusterId) {
         return createAlarmsResponse(alertService.getMetricAlerts(clusterId));
     }

@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
+import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 
 @Configuration
 public class StackDownscaleActions {
@@ -89,7 +90,8 @@ public class StackDownscaleActions {
     public Action<?, ?> stackDownscaleFinishedAction() {
         return new AbstractStackDownscaleAction<DownscaleStackResult>(DownscaleStackResult.class) {
             @Override
-            protected void doExecute(StackScalingFlowContext context, DownscaleStackResult payload, Map<Object, Object> variables) {
+            protected void doExecute(StackScalingFlowContext context, DownscaleStackResult payload, Map<Object, Object> variables)
+                    throws TransactionExecutionException {
                 stackDownscaleService.finishStackDownscale(context, getInstanceGroupName(variables), getInstanceIds(variables));
                 sendEvent(context);
             }

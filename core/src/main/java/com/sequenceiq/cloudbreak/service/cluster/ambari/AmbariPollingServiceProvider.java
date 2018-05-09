@@ -110,7 +110,4 @@ public class AmbariPollingServiceProvider {
         }
         return result;
     }
-
-
-
 }

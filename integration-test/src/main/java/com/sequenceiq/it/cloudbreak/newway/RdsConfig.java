@@ -6,7 +6,6 @@ import java.util.function.Function;
 import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigRequest;
 import com.sequenceiq.it.IntegrationTestContext;
 
-
 public class RdsConfig extends RdsConfigEntity {
     private static final String RDSCONFIG = "RDSCONFIG";
 
@@ -21,7 +20,7 @@ public class RdsConfig extends RdsConfigEntity {
     }
 
     static Function<IntegrationTestContext, RdsConfig> getNew() {
-        return (testContext)->new RdsConfig();
+        return (testContext) -> new RdsConfig();
     }
 
     public static RdsConfig request() {

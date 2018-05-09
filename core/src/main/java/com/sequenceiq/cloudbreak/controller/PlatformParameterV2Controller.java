@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.controller;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.transaction.Transactional;
+import javax.transaction.Transactional.TxType;
 
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
@@ -14,10 +16,13 @@ import com.sequenceiq.cloudbreak.api.model.RegionResponse;
 import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.PlatformResourceRequest;
+import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterService;
 
 @Component
+@Transactional(TxType.NEVER)
 public class PlatformParameterV2Controller implements ConnectorV2Endpoint {
 
     @Inject

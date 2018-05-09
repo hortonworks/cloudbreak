@@ -168,7 +168,12 @@ compileJava {
 }
 
 compileJava.doFirst {
-    delete "${projectDir}/src/main/generated/"
+    def path = "${projectDir}/src/main/generated"
+    if (new File(path).exists()) {
+        delete fileTree(path) {
+            include '**/*.java'
+        }
+    }
 }
 
 class BuildInfoTask extends DefaultTask {

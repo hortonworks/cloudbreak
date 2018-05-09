@@ -5,7 +5,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import javax.inject.Inject;
-import javax.transaction.Transactional;
 
 import org.springframework.stereotype.Service;
 
@@ -16,9 +15,10 @@ import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.repository.ConstraintRepository;
 import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
 import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
+import com.sequenceiq.cloudbreak.service.TransactionService;
+import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 
 @Service
-@Transactional
 public class HostGroupService {
 
     @Inject
@@ -29,6 +29,9 @@ public class HostGroupService {
 
     @Inject
     private ConstraintRepository constraintRepository;
+
+    @Inject
+    private TransactionService transactionService;
 
     public Set<HostGroup> getByCluster(Long clusterId) {
         return hostGroupRepository.findHostGroupsInCluster(clusterId);
@@ -70,14 +73,16 @@ public class HostGroupService {
         return hostMetadataRepository.save(metaData);
     }
 
-    public Set<HostGroup> saveOrUpdateWithMetadata(Collection<HostGroup> hostGroups, Cluster cluster) {
+    public Set<HostGroup> saveOrUpdateWithMetadata(Collection<HostGroup> hostGroups, Cluster cluster) throws TransactionExecutionException {
         Set<HostGroup> result = new HashSet<>(hostGroups.size());
-        for (HostGroup hg : hostGroups) {
-            hg.setCluster(cluster);
-            hg.setConstraint(constraintRepository.save(hg.getConstraint()));
-            result.add(hostGroupRepository.save(hg));
-        }
-        return result;
+        return transactionService.required(() -> {
+            for (HostGroup hg : hostGroups) {
+                hg.setCluster(cluster);
+                hg.setConstraint(constraintRepository.save(hg.getConstraint()));
+                result.add(hostGroupRepository.save(hg));
+            }
+            return result;
+        });
     }
 
 }

@@ -5,7 +5,6 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.model.SupportedDatabaseEntryResponse;
 import com.sequenceiq.cloudbreak.validation.externaldatabase.SupportedDatabaseEntry;
 
-
 @Component
 public class SupportedDatabasEntryToSupportedDatabasEntryResponseConverter
         extends AbstractConversionServiceAwareConverter<SupportedDatabaseEntry, SupportedDatabaseEntryResponse> {

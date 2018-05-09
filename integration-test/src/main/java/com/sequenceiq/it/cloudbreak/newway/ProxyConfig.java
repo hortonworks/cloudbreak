@@ -6,7 +6,6 @@ import java.util.function.Function;
 import com.sequenceiq.cloudbreak.api.model.proxy.ProxyConfigRequest;
 import com.sequenceiq.it.IntegrationTestContext;
 
-
 public class ProxyConfig extends ProxyConfigEntity {
     private static final String PROXYCONFIG = "PROXYCONFIG";
 
@@ -21,7 +20,7 @@ public class ProxyConfig extends ProxyConfigEntity {
     }
 
     static Function<IntegrationTestContext, ProxyConfig> getNew() {
-        return (testContext)->new ProxyConfig();
+        return (testContext) -> new ProxyConfig();
     }
 
     public static ProxyConfig request() {

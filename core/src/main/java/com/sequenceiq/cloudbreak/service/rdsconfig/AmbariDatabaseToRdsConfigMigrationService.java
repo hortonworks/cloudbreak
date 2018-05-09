@@ -5,7 +5,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import javax.inject.Inject;
-import javax.transaction.Transactional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,7 +25,6 @@ import com.sequenceiq.cloudbreak.repository.ClusterComponentRepository;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 
 @Service
-@Transactional
 public class AmbariDatabaseToRdsConfigMigrationService {
     private static final Logger LOGGER = LoggerFactory.getLogger(AmbariDatabaseToRdsConfigMigrationService.class);
 

@@ -22,6 +22,4 @@ public class AzureClientService {
         return new AzureClient(azureCredentialView.getTenantId(), azureCredentialView.getAccessKey(),
                 azureCredentialView.getSecretKey(), azureCredentialView.getSubscriptionId());
     }
-
-
 }

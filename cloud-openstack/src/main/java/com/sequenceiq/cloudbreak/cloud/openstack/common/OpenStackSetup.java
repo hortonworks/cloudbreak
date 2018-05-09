@@ -89,6 +89,4 @@ public class OpenStackSetup implements Setup {
     @Override
     public void validateFileSystem(CloudCredential credential, FileSystem fileSystem) {
     }
-
-
 }

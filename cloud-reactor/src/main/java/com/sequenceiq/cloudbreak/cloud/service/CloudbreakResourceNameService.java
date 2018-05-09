@@ -13,7 +13,6 @@ import org.springframework.util.StringUtils;
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 
-
 public abstract class CloudbreakResourceNameService implements ResourceNameService {
     public static final String DELIMITER = "-";
 

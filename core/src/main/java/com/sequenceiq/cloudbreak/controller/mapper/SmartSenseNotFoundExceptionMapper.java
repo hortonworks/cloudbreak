@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.controller.mapper;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.Provider;
 
-import com.sequenceiq.cloudbreak.controller.SmartSenseConfigurationNotFoundException;
+import com.sequenceiq.cloudbreak.controller.exception.SmartSenseConfigurationNotFoundException;
 
 @Provider
 public class SmartSenseNotFoundExceptionMapper extends BaseExceptionMapper<SmartSenseConfigurationNotFoundException> {

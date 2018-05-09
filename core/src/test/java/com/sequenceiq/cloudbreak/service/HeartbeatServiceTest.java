@@ -55,6 +55,7 @@ import com.sequenceiq.cloudbreak.ha.CloudbreakNodeConfig;
 import com.sequenceiq.cloudbreak.repository.CloudbreakNodeRepository;
 import com.sequenceiq.cloudbreak.repository.FlowLogRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.ha.FlowDistributor;
 import com.sequenceiq.cloudbreak.service.ha.HeartbeatService;
 
@@ -513,7 +514,7 @@ public class HeartbeatServiceTest {
     }
 
     @Test
-    public void testDistributeFlows() {
+    public void testDistributeFlows() throws TransactionExecutionException {
         ReflectionTestUtils.setField(heartbeatService, "heartbeatThresholdRate", 70);
 
         List<CloudbreakNode> clusterNodes = getClusterNodes();

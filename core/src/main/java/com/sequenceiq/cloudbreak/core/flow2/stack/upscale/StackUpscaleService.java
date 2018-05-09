@@ -17,7 +17,6 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
@@ -43,6 +42,8 @@ import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
+import com.sequenceiq.cloudbreak.service.TransactionService;
+import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
@@ -89,6 +90,9 @@ public class StackUpscaleService {
     @Inject
     private GatewayConfigService gatewayConfigService;
 
+    @Inject
+    private TransactionService transactionService;
+
     public void startAddInstances(Stack stack, Integer scalingAdjustment) {
         String statusReason = format("Adding %s new instance(s) to the infrastructure.", scalingAdjustment);
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.ADDING_NEW_INSTANCES, statusReason);
@@ -111,23 +115,24 @@ public class StackUpscaleService {
         clusterService.updateClusterStatusByStackId(stack.getId(), UPDATE_IN_PROGRESS);
     }
 
-    @Transactional
-    public Set<String> finishExtendMetadata(Stack stack, String instanceGroupName, CollectMetadataResult payload) {
-        List<CloudVmMetaDataStatus> coreInstanceMetaData = payload.getResults();
-        int newinstances = metadataSetupService.saveInstanceMetaData(stack, coreInstanceMetaData, CREATED);
-        Set<String> upscaleCandidateAddresses = new HashSet<>();
-        for (CloudVmMetaDataStatus cloudVmMetaDataStatus : coreInstanceMetaData) {
-            upscaleCandidateAddresses.add(cloudVmMetaDataStatus.getMetaData().getPrivateIp());
-        }
-        InstanceGroup instanceGroup = instanceGroupRepository.findOneByGroupNameInStack(stack.getId(), instanceGroupName);
-        int nodeCount = instanceGroup.getNodeCount() + newinstances;
-        clusterService.updateClusterStatusByStackIdOutOfTransaction(stack.getId(), AVAILABLE);
-        eventService.fireCloudbreakEvent(stack.getId(), BillingStatus.BILLING_CHANGED.name(),
-            messagesService.getMessage("stack.metadata.setup.billing.changed"));
-        flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_METADATA_EXTEND, AVAILABLE.name());
-        usageService.scaleUsagesForStack(stack.getId(), instanceGroupName, nodeCount);
+    public Set<String> finishExtendMetadata(Stack stack, String instanceGroupName, CollectMetadataResult payload) throws TransactionExecutionException {
+        return transactionService.required(() -> {
+            List<CloudVmMetaDataStatus> coreInstanceMetaData = payload.getResults();
+            int newinstances = metadataSetupService.saveInstanceMetaData(stack, coreInstanceMetaData, CREATED);
+            Set<String> upscaleCandidateAddresses = new HashSet<>();
+            for (CloudVmMetaDataStatus cloudVmMetaDataStatus : coreInstanceMetaData) {
+                upscaleCandidateAddresses.add(cloudVmMetaDataStatus.getMetaData().getPrivateIp());
+            }
+            InstanceGroup instanceGroup = instanceGroupRepository.findOneByGroupNameInStack(stack.getId(), instanceGroupName);
+            int nodeCount = instanceGroup.getNodeCount() + newinstances;
+            clusterService.updateClusterStatusByStackIdOutOfTransaction(stack.getId(), AVAILABLE);
+            eventService.fireCloudbreakEvent(stack.getId(), BillingStatus.BILLING_CHANGED.name(),
+                messagesService.getMessage("stack.metadata.setup.billing.changed"));
+            flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_METADATA_EXTEND, AVAILABLE.name());
+            usageService.scaleUsagesForStack(stack.getId(), instanceGroupName, nodeCount);
 
-        return upscaleCandidateAddresses;
+            return upscaleCandidateAddresses;
+        });
     }
 
     public void setupTls(StackContext context) throws CloudbreakException {

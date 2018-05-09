@@ -25,8 +25,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.inject.Inject;
-import javax.transaction.Transactional;
-import javax.transaction.Transactional.TxType;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -64,8 +62,8 @@ import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
-import com.sequenceiq.cloudbreak.controller.BadRequestException;
-import com.sequenceiq.cloudbreak.controller.NotFoundException;
+import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.converter.scheduler.StatusToPollGroupConverter;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
@@ -97,6 +95,9 @@ import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
+import com.sequenceiq.cloudbreak.service.TransactionService;
+import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
+import com.sequenceiq.cloudbreak.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterTerminationService;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
@@ -110,7 +111,6 @@ import com.sequenceiq.cloudbreak.util.JsonUtil;
 import groovyx.net.http.HttpResponseException;
 
 @Service
-@Transactional
 public class AmbariClusterService implements ClusterService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AmbariClusterService.class);
@@ -190,66 +190,75 @@ public class AmbariClusterService implements ClusterService {
     @Inject
     private RdsConfigService rdsConfigService;
 
+    @Inject
+    private TransactionService transactionService;
+
     @Override
-    @Transactional(TxType.NEVER)
     public Cluster create(IdentityUser user, Stack stack, Cluster cluster, List<ClusterComponent> components) {
         LOGGER.info("Cluster requested [BlueprintId: {}]", cluster.getBlueprint().getId());
         String stackName = stack.getName();
         if (stack.getCluster() != null) {
             throw new BadRequestException(String.format("A cluster is already created on this stack! [cluster: '%s']", stack.getCluster().getName()));
         }
-        long start = System.currentTimeMillis();
-        if (clusterRepository.findByNameInAccount(cluster.getName(), user.getAccount()) != null) {
-            throw new DuplicateKeyValueException(APIResourceType.CLUSTER, cluster.getName());
-        }
-        LOGGER.info("Cluster name collision check took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
-
-        if (Status.CREATE_FAILED.equals(stack.getStatus())) {
-            throw new BadRequestException("Stack creation failed, cannot create cluster.");
-        }
-
-        start = System.currentTimeMillis();
-        for (HostGroup hostGroup : cluster.getHostGroups()) {
-            constraintRepository.save(hostGroup.getConstraint());
-        }
-        LOGGER.info("Host group constrainst saved in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
-
-        start = System.currentTimeMillis();
-        if (cluster.getFileSystem() != null) {
-            fileSystemRepository.save(cluster.getFileSystem());
-        }
-        LOGGER.info("Filesystem config saved in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
-
-        if (cluster.getKerberosConfig() != null) {
-            kerberosConfigRepository.save(cluster.getKerberosConfig());
-        }
-        cluster.setStack(stack);
-        cluster.setOwner(user.getUserId());
-        cluster.setAccount(user.getAccount());
-        stack.setCluster(cluster);
-
-        start = System.currentTimeMillis();
-        generateSignKeys(cluster.getGateway());
-        LOGGER.info("Sign key generated in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
-
         try {
-            start = System.currentTimeMillis();
-            cluster = clusterRepository.save(cluster);
-            LOGGER.info("Cluster object saved in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+            return transactionService.required(() -> {
+                long start = System.currentTimeMillis();
+                if (clusterRepository.findByNameInAccount(cluster.getName(), user.getAccount()) != null) {
+                    throw new DuplicateKeyValueException(APIResourceType.CLUSTER, cluster.getName());
+                }
+                LOGGER.info("Cluster name collision check took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
-            clusterComponentConfigProvider.store(components, cluster);
-        } catch (DataIntegrityViolationException ex) {
-            String msg = String.format("Error with resource [%s], error: [%s]", APIResourceType.CLUSTER, getProperSqlErrorMessage(ex));
-            throw new BadRequestException(msg);
+                if (Status.CREATE_FAILED.equals(stack.getStatus())) {
+                    throw new BadRequestException("Stack creation failed, cannot create cluster.");
+                }
+
+                start = System.currentTimeMillis();
+                for (HostGroup hostGroup : cluster.getHostGroups()) {
+                    constraintRepository.save(hostGroup.getConstraint());
+                }
+                LOGGER.info("Host group constrainst saved in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+
+                start = System.currentTimeMillis();
+                if (cluster.getFileSystem() != null) {
+                    fileSystemRepository.save(cluster.getFileSystem());
+                }
+                LOGGER.info("Filesystem config saved in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+
+                if (cluster.getKerberosConfig() != null) {
+                    kerberosConfigRepository.save(cluster.getKerberosConfig());
+                }
+                cluster.setStack(stack);
+                cluster.setOwner(user.getUserId());
+                cluster.setAccount(user.getAccount());
+                stack.setCluster(cluster);
+
+                start = System.currentTimeMillis();
+                generateSignKeys(cluster.getGateway());
+                LOGGER.info("Sign key generated in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+
+                Cluster savedCluster;
+                try {
+                    start = System.currentTimeMillis();
+                    savedCluster = clusterRepository.save(cluster);
+                    LOGGER.info("Cluster object saved in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+
+                    clusterComponentConfigProvider.store(components, savedCluster);
+                } catch (DataIntegrityViolationException ex) {
+                    String msg = String.format("Error with resource [%s], error: [%s]", APIResourceType.CLUSTER, getProperSqlErrorMessage(ex));
+                    throw new BadRequestException(msg);
+                }
+                if (stack.isAvailable()) {
+                    flowManager.triggerClusterInstall(stack.getId());
+                    InMemoryStateStore.putCluster(savedCluster.getId(), statusToPollGroupConverter.convert(savedCluster.getStatus()));
+                    if (InMemoryStateStore.getStack(stack.getId()) == null) {
+                        InMemoryStateStore.putStack(stack.getId(), statusToPollGroupConverter.convert(stack.getStatus()));
+                    }
+                }
+                return savedCluster;
+            });
+        } catch (TransactionExecutionException e) {
+            throw (RuntimeException) e.getCause();
         }
-        if (stack.isAvailable()) {
-            flowManager.triggerClusterInstall(stack.getId());
-            InMemoryStateStore.putCluster(cluster.getId(), statusToPollGroupConverter.convert(cluster.getStatus()));
-            if (InMemoryStateStore.getStack(stack.getId()) == null) {
-                InMemoryStateStore.putStack(stack.getId(), statusToPollGroupConverter.convert(stack.getStatus()));
-            }
-        }
-        return cluster;
     }
 
     private boolean isMultipleGateway(Stack stack) {
@@ -285,7 +294,6 @@ public class AmbariClusterService implements ClusterService {
     }
 
     @Override
-    @Transactional(TxType.NEVER)
     public Cluster updateAmbariClientConfig(Long clusterId, HttpClientConfig ambariClientConfig) {
         Cluster cluster = clusterRepository.findById(clusterId);
         cluster.setAmbariIp(ambariClientConfig.getApiAddress());
@@ -304,23 +312,30 @@ public class AmbariClusterService implements ClusterService {
 
     @Override
     public void updateHostMetadata(Long clusterId, Map<String, List<String>> hostsPerHostGroup, HostMetadataState hostMetadataState) {
-        for (Entry<String, List<String>> hostGroupEntry : hostsPerHostGroup.entrySet()) {
-            HostGroup hostGroup = hostGroupService.getByClusterIdAndName(clusterId, hostGroupEntry.getKey());
-            if (hostGroup != null) {
-                Set<String> existingHosts = hostMetadataRepository.findEmptyHostsInHostGroup(hostGroup.getId()).stream()
-                    .map(HostMetadata::getHostName)
-                    .collect(Collectors.toSet());
-                hostGroupEntry.getValue().stream()
-                    .filter(hostName -> !existingHosts.contains(hostName))
-                    .forEach(hostName -> {
-                        HostMetadata hostMetadataEntry = new HostMetadata();
-                        hostMetadataEntry.setHostName(hostName);
-                        hostMetadataEntry.setHostGroup(hostGroup);
-                        hostMetadataEntry.setHostMetadataState(hostMetadataState);
-                        hostGroup.getHostMetadata().add(hostMetadataEntry);
-                    });
-                hostGroupService.save(hostGroup);
-            }
+        try {
+            transactionService.required(() -> {
+                for (Entry<String, List<String>> hostGroupEntry : hostsPerHostGroup.entrySet()) {
+                    HostGroup hostGroup = hostGroupService.getByClusterIdAndName(clusterId, hostGroupEntry.getKey());
+                    if (hostGroup != null) {
+                        Set<String> existingHosts = hostMetadataRepository.findEmptyHostsInHostGroup(hostGroup.getId()).stream()
+                                .map(HostMetadata::getHostName)
+                                .collect(Collectors.toSet());
+                        hostGroupEntry.getValue().stream()
+                                .filter(hostName -> !existingHosts.contains(hostName))
+                                .forEach(hostName -> {
+                                    HostMetadata hostMetadataEntry = new HostMetadata();
+                                    hostMetadataEntry.setHostName(hostName);
+                                    hostMetadataEntry.setHostGroup(hostGroup);
+                                    hostMetadataEntry.setHostMetadataState(hostMetadataState);
+                                    hostGroup.getHostMetadata().add(hostMetadataEntry);
+                                });
+                        hostGroupService.save(hostGroup);
+                    }
+                }
+                return null;
+            });
+        } catch (TransactionExecutionException e) {
+            throw new TransactionRuntimeExecutionException(e);
         }
     }
 
@@ -360,7 +375,6 @@ public class AmbariClusterService implements ClusterService {
     }
 
     @Override
-    @Transactional(TxType.NEVER)
     public void updateStatus(Long stackId, StatusRequest statusRequest) {
         Stack stack = stackService.getByIdWithLists(stackId);
         Cluster cluster = stack.getCluster();
@@ -429,16 +443,20 @@ public class AmbariClusterService implements ClusterService {
                 failedHostMetadata.put(failedNode, hostMetadata);
             }
         }
-        if (!autoRecoveryNodesMap.isEmpty()) {
-            flowManager.triggerClusterRepairFlow(stackId, autoRecoveryNodesMap, false);
-            String recoveryMessage = cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_AUTORECOVERY_REQUESTED.code(),
-                Collections.singletonList(autoRecoveryNodesMap));
-            updateChangedHosts(cluster, autoRecoveryHostMetadata, HostMetadataState.HEALTHY, HostMetadataState.WAITING_FOR_REPAIR, recoveryMessage);
-        }
-        if (!failedHostMetadata.isEmpty()) {
-            String recoveryMessage = cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_FAILED_NODES_REPORTED.code(),
-                Collections.singletonList(failedHostMetadata.keySet()));
-            updateChangedHosts(cluster, failedHostMetadata, HostMetadataState.HEALTHY, HostMetadataState.UNHEALTHY, recoveryMessage);
+        try {
+            if (!autoRecoveryNodesMap.isEmpty()) {
+                flowManager.triggerClusterRepairFlow(stackId, autoRecoveryNodesMap, false);
+                String recoveryMessage = cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_AUTORECOVERY_REQUESTED.code(),
+                        Collections.singletonList(autoRecoveryNodesMap));
+                updateChangedHosts(cluster, autoRecoveryHostMetadata, HostMetadataState.HEALTHY, HostMetadataState.WAITING_FOR_REPAIR, recoveryMessage);
+            }
+            if (!failedHostMetadata.isEmpty()) {
+                String recoveryMessage = cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_FAILED_NODES_REPORTED.code(),
+                        Collections.singletonList(failedHostMetadata.keySet()));
+                updateChangedHosts(cluster, failedHostMetadata, HostMetadataState.HEALTHY, HostMetadataState.UNHEALTHY, recoveryMessage);
+            }
+        } catch (TransactionExecutionException e) {
+            throw new TransactionRuntimeExecutionException(e);
         }
     }
 
@@ -491,23 +509,26 @@ public class AmbariClusterService implements ClusterService {
     }
 
     private void updateChangedHosts(Cluster cluster, Map<String, HostMetadata> failedHostMetadata, HostMetadataState healthyState,
-        HostMetadataState unhealthyState, String recoveryMessage) {
+        HostMetadataState unhealthyState, String recoveryMessage) throws TransactionExecutionException {
         Set<HostMetadata> hosts = hostMetadataRepository.findHostsInCluster(cluster.getId());
         Collection<HostMetadata> changedHosts = new HashSet<>();
-        for (HostMetadata host : hosts) {
-            if (host.getHostMetadataState() == unhealthyState && !failedHostMetadata.containsKey(host.getHostName())) {
-                host.setHostMetadataState(healthyState);
-                changedHosts.add(host);
-            } else if (host.getHostMetadataState() == healthyState && failedHostMetadata.containsKey(host.getHostName())) {
-                host.setHostMetadataState(unhealthyState);
-                changedHosts.add(host);
+        transactionService.required(() -> {
+            for (HostMetadata host : hosts) {
+                if (host.getHostMetadataState() == unhealthyState && !failedHostMetadata.containsKey(host.getHostName())) {
+                    host.setHostMetadataState(healthyState);
+                    changedHosts.add(host);
+                } else if (host.getHostMetadataState() == healthyState && failedHostMetadata.containsKey(host.getHostName())) {
+                    host.setHostMetadataState(unhealthyState);
+                    changedHosts.add(host);
+                }
             }
-        }
-        if (!changedHosts.isEmpty()) {
-            LOGGER.info(recoveryMessage);
-            eventService.fireCloudbreakEvent(cluster.getStack().getId(), "RECOVERY", recoveryMessage);
-            hostMetadataRepository.save(changedHosts);
-        }
+            if (!changedHosts.isEmpty()) {
+                LOGGER.info(recoveryMessage);
+                eventService.fireCloudbreakEvent(cluster.getStack().getId(), "RECOVERY", recoveryMessage);
+                hostMetadataRepository.save(changedHosts);
+            }
+            return null;
+        });
     }
 
     private void sync(Stack stack) {
@@ -559,7 +580,6 @@ public class AmbariClusterService implements ClusterService {
     }
 
     @Override
-    @Transactional(TxType.NEVER)
     public Cluster updateClusterStatusByStackId(Long stackId, Status status, String statusReason) {
         LOGGER.debug("Updating cluster status. stackId: {}, status: {}, statusReason: {}", stackId, status, statusReason);
         StackStatus stackStatus = stackService.getCurrentStatusByStackId(stackId);
@@ -584,19 +604,16 @@ public class AmbariClusterService implements ClusterService {
     }
 
     @Override
-    @Transactional(TxType.NEVER)
     public Cluster updateClusterStatusByStackId(Long stackId, Status status) {
         return updateClusterStatusByStackId(stackId, status, "");
     }
 
     @Override
-    @Transactional(TxType.NOT_SUPPORTED)
-    public Cluster updateClusterStatusByStackIdOutOfTransaction(Long stackId, Status status) {
-        return updateClusterStatusByStackId(stackId, status, "");
+    public Cluster updateClusterStatusByStackIdOutOfTransaction(Long stackId, Status status) throws TransactionExecutionException {
+        return transactionService.notSupported(() -> updateClusterStatusByStackId(stackId, status, ""));
     }
 
     @Override
-    @Transactional(TxType.NEVER)
     public Cluster updateCluster(Cluster cluster) {
         LOGGER.debug("Updating cluster. clusterId: {}", cluster.getId());
         cluster = clusterRepository.save(cluster);
@@ -613,28 +630,33 @@ public class AmbariClusterService implements ClusterService {
     }
 
     @Override
-    @Transactional(TxType.NEVER)
     public Cluster updateClusterMetadata(Long stackId) {
         Stack stack = stackService.getById(stackId);
         AmbariClient ambariClient = getAmbariClient(stack);
         Map<String, Integer> hostGroupCounter = new HashMap<>();
         Set<HostMetadata> hosts = hostMetadataRepository.findHostsInCluster(stack.getCluster().getId());
         Map<String, String> hostStatuses = ambariClient.getHostStatuses();
-        for (HostMetadata host : hosts) {
-            if (hostStatuses.containsKey(host.getHostName())) {
-                String hgName = host.getHostGroup().getName();
-                Integer hgCounter = hostGroupCounter.getOrDefault(hgName, 0) + 1;
-                hostGroupCounter.put(hgName, hgCounter);
-                HostMetadataState newState = HostMetadataState.HEALTHY.name().equals(hostStatuses.get(host.getHostName()))
-                    ? HostMetadataState.HEALTHY : HostMetadataState.UNHEALTHY;
-                boolean stateChanged = updateHostMetadataByHostState(stack, host.getHostName(), newState);
-                if (stateChanged && HostMetadataState.HEALTHY == newState) {
-                    updateInstanceMetadataStateToRegistered(stackId, host);
+        try {
+            return transactionService.required(() -> {
+                for (HostMetadata host : hosts) {
+                    if (hostStatuses.containsKey(host.getHostName())) {
+                        String hgName = host.getHostGroup().getName();
+                        Integer hgCounter = hostGroupCounter.getOrDefault(hgName, 0) + 1;
+                        hostGroupCounter.put(hgName, hgCounter);
+                        HostMetadataState newState = HostMetadataState.HEALTHY.name().equals(hostStatuses.get(host.getHostName()))
+                                ? HostMetadataState.HEALTHY : HostMetadataState.UNHEALTHY;
+                        boolean stateChanged = updateHostMetadataByHostState(stack, host.getHostName(), newState);
+                        if (stateChanged && HostMetadataState.HEALTHY == newState) {
+                            updateInstanceMetadataStateToRegistered(stackId, host);
+                        }
+                    }
                 }
-            }
+                hostGroupCounter(stack.getCluster().getId(), hostGroupCounter);
+                return stack.getCluster();
+            });
+        } catch (TransactionExecutionException e) {
+            throw new TransactionRuntimeExecutionException(e);
         }
-        hostGroupCounter(stack.getCluster().getId(), hostGroupCounter);
-        return stack.getCluster();
     }
 
     private void hostGroupCounter(Long clusterId, Map<String, Integer> hostGroupCounter) {
@@ -676,54 +698,54 @@ public class AmbariClusterService implements ClusterService {
 
     @Override
     public Cluster recreate(Long stackId, Long blueprintId, Set<HostGroup> hostGroups, boolean validateBlueprint, StackRepoDetails stackRepoDetails,
-            String kerberosPassword, String kerberosPrincipal) {
-        if (blueprintId == null || hostGroups == null) {
-            throw new BadRequestException("Blueprint id and hostGroup assignments can not be null.");
-        }
-        Stack stack = stackService.getByIdWithLists(stackId);
-        Cluster cluster = getCluster(stack);
-        if (cluster != null && stack.getCluster().isSecure()) {
-            List<String> missing = Stream.of(Pair.of("password", kerberosPassword), Pair.of("principal", kerberosPrincipal))
-                    .filter(p -> !StringUtils.hasLength(p.getRight()))
-                    .map(Pair::getLeft).collect(Collectors.toList());
-            if (!missing.isEmpty()) {
-                throw new BadRequestException(String.format("Missing Kerberos credential detail(s): %s", String.join(", ", missing)));
+            String kerberosPassword, String kerberosPrincipal) throws TransactionExecutionException {
+        return transactionService.required(() -> {
+            if (blueprintId == null || hostGroups == null) {
+                throw new BadRequestException("Blueprint id and hostGroup assignments can not be null.");
             }
-            KerberosConfig kerberosConfig = cluster.getKerberosConfig();
-            kerberosConfig.setPassword(kerberosPassword);
-            kerberosConfig.setPrincipal(kerberosPrincipal);
+            Stack stack = stackService.getByIdWithLists(stackId);
+            Cluster cluster = getCluster(stack);
+            if (cluster != null && stack.getCluster().isSecure()) {
+                List<String> missing = Stream.of(Pair.of("password", kerberosPassword), Pair.of("principal", kerberosPrincipal))
+                        .filter(p -> !StringUtils.hasLength(p.getRight()))
+                        .map(Pair::getLeft).collect(Collectors.toList());
+                if (!missing.isEmpty()) {
+                    throw new BadRequestException(String.format("Missing Kerberos credential detail(s): %s", String.join(", ", missing)));
+                }
+                KerberosConfig kerberosConfig = cluster.getKerberosConfig();
+                kerberosConfig.setPassword(kerberosPassword);
+                kerberosConfig.setPrincipal(kerberosPrincipal);
 
-            kerberosConfigRepository.save(kerberosConfig);
-        }
-        Blueprint blueprint = blueprintService.get(blueprintId);
-        if (!withEmbeddedAmbariDB(cluster)) {
-            throw new BadRequestException("Ambari doesn't support resetting external DB automatically. To reset Ambari Server schema you must first drop "
-                    + "and then create it using DDL scripts from /var/lib/ambari-server/resources");
-        }
-        if (validateBlueprint) {
-            blueprintValidator.validateBlueprintForStack(cluster, blueprint, hostGroups, stack.getInstanceGroups());
-        }
-        Boolean containerOrchestrator;
-        try {
-            containerOrchestrator = orchestratorTypeResolver.resolveType(stack.getOrchestrator()).containerOrchestrator();
-        } catch (CloudbreakException ignored) {
-            containerOrchestrator = false;
-        }
-        if (containerOrchestrator) {
-            clusterTerminationService.deleteClusterComponents(cluster.getId());
-            cluster = clusterRepository.findById(stack.getCluster().getId());
-        }
+                kerberosConfigRepository.save(kerberosConfig);
+            }
+            Blueprint blueprint = blueprintService.get(blueprintId);
+            if (!withEmbeddedAmbariDB(cluster)) {
+                throw new BadRequestException("Ambari doesn't support resetting external DB automatically. To reset Ambari Server schema you must first drop "
+                        + "and then create it using DDL scripts from /var/lib/ambari-server/resources");
+            }
+            if (validateBlueprint) {
+                blueprintValidator.validateBlueprintForStack(cluster, blueprint, hostGroups, stack.getInstanceGroups());
+            }
+            Boolean containerOrchestrator;
+            try {
+                containerOrchestrator = orchestratorTypeResolver.resolveType(stack.getOrchestrator()).containerOrchestrator();
+            } catch (CloudbreakException ignored) {
+                containerOrchestrator = false;
+            }
+            if (containerOrchestrator) {
+                clusterTerminationService.deleteClusterComponents(cluster.getId());
+                cluster = clusterRepository.findById(stack.getCluster().getId());
+            }
 
-        hostGroups = hostGroupService.saveOrUpdateWithMetadata(hostGroups, cluster);
-        cluster = prepareCluster(hostGroups, stackRepoDetails, blueprint, stack, cluster);
-
-        try {
-            triggerClusterInstall(stack, cluster);
-        } catch (CloudbreakException e) {
-            throw new CloudbreakServiceException(e);
-        }
-        return stack.getCluster();
-
+            try {
+                Set<HostGroup> newHostGroups = hostGroupService.saveOrUpdateWithMetadata(hostGroups, cluster);
+                cluster = prepareCluster(hostGroups, stackRepoDetails, blueprint, stack, cluster);
+                triggerClusterInstall(stack, cluster);
+            } catch (TransactionExecutionException | CloudbreakException e) {
+                throw new CloudbreakServiceException(e);
+            }
+            return stack.getCluster();
+        });
     }
 
     private Cluster prepareCluster(Collection<HostGroup> hostGroups, StackRepoDetails stackRepoDetails, Blueprint blueprint, Stack stack, Cluster cluster) {
@@ -747,7 +769,7 @@ public class AmbariClusterService implements ClusterService {
     }
 
     @Override
-    public void upgrade(Long stackId, AmbariRepo ambariRepoUpgrade) {
+    public void upgrade(Long stackId, AmbariRepo ambariRepoUpgrade) throws TransactionExecutionException {
         if (ambariRepoUpgrade != null) {
             Stack stack = stackService.getByIdWithLists(stackId);
             Cluster cluster = clusterRepository.findById(stack.getCluster().getId());
@@ -756,40 +778,43 @@ public class AmbariClusterService implements ClusterService {
             }
             if (!stack.isAvailable()) {
                 throw new BadRequestException(String.format(
-                    "Stack '%s' is currently in '%s' state. Upgrade requests to a cluster can only be made if the underlying stack is 'AVAILABLE'.",
-                    stackId, stack.getStatus()));
+                        "Stack '%s' is currently in '%s' state. Upgrade requests to a cluster can only be made if the underlying stack is 'AVAILABLE'.",
+                        stackId, stack.getStatus()));
             }
             if (!cluster.isAvailable()) {
                 throw new BadRequestException(String.format(
-                    "Cluster '%s' is currently in '%s' state. Upgrade requests to a cluster can only be made if the underlying stack is 'AVAILABLE'.",
-                    stackId, stack.getStatus()));
+                        "Cluster '%s' is currently in '%s' state. Upgrade requests to a cluster can only be made if the underlying stack is 'AVAILABLE'.",
+                        stackId, stack.getStatus()));
             }
             AmbariRepo ambariRepo = clusterComponentConfigProvider.getAmbariRepo(cluster.getId());
-            if (ambariRepo == null) {
-                try {
-                    clusterComponentConfigProvider.store(new ClusterComponent(ComponentType.AMBARI_REPO_DETAILS,
-                        new Json(ambariRepoUpgrade), stack.getCluster()));
-                } catch (JsonProcessingException ignored) {
-                    throw new BadRequestException(String.format("Ambari repo details cannot be saved. %s", ambariRepoUpgrade));
+            transactionService.required(() -> {
+                if (ambariRepo == null) {
+                    try {
+                        clusterComponentConfigProvider.store(new ClusterComponent(ComponentType.AMBARI_REPO_DETAILS,
+                                new Json(ambariRepoUpgrade), stack.getCluster()));
+                    } catch (JsonProcessingException ignored) {
+                        throw new BadRequestException(String.format("Ambari repo details cannot be saved. %s", ambariRepoUpgrade));
+                    }
+                } else {
+                    ClusterComponent component = clusterComponentConfigProvider.getComponent(cluster.getId(), ComponentType.AMBARI_REPO_DETAILS);
+                    ambariRepo.setBaseUrl(ambariRepoUpgrade.getBaseUrl());
+                    ambariRepo.setGpgKeyUrl(ambariRepoUpgrade.getGpgKeyUrl());
+                    ambariRepo.setPredefined(false);
+                    ambariRepo.setVersion(ambariRepoUpgrade.getVersion());
+                    try {
+                        component.setAttributes(new Json(ambariRepo));
+                        clusterComponentConfigProvider.store(component);
+                    } catch (JsonProcessingException ignored) {
+                        throw new BadRequestException(String.format("Ambari repo details cannot be saved. %s", ambariRepoUpgrade));
+                    }
                 }
-            } else {
-                ClusterComponent component = clusterComponentConfigProvider.getComponent(cluster.getId(), ComponentType.AMBARI_REPO_DETAILS);
-                ambariRepo.setBaseUrl(ambariRepoUpgrade.getBaseUrl());
-                ambariRepo.setGpgKeyUrl(ambariRepoUpgrade.getGpgKeyUrl());
-                ambariRepo.setPredefined(false);
-                ambariRepo.setVersion(ambariRepoUpgrade.getVersion());
                 try {
-                    component.setAttributes(new Json(ambariRepo));
-                    clusterComponentConfigProvider.store(component);
-                } catch (JsonProcessingException ignored) {
-                    throw new BadRequestException(String.format("Ambari repo details cannot be saved. %s", ambariRepoUpgrade));
+                    flowManager.triggerClusterUpgrade(stack.getId());
+                } catch (RuntimeException e) {
+                    throw new CloudbreakServiceException(e);
                 }
-            }
-            try {
-                flowManager.triggerClusterUpgrade(stack.getId());
-            } catch (RuntimeException e) {
-                throw new CloudbreakServiceException(e);
-            }
+                return null;
+            });
         }
     }
 

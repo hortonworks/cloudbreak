@@ -16,7 +16,6 @@ import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
 import com.sequenceiq.it.cloudbreak.newway.RdsConfig;
 import com.sequenceiq.it.util.LongStringGeneratorUtil;
 
-
 public class RdsConfigTests extends CloudbreakTest {
     private static final String VALID_RDS_CONFIG = "e2e-rds";
 

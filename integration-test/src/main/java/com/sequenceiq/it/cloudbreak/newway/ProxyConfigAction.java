@@ -6,7 +6,6 @@ import java.io.IOException;
 
 import com.sequenceiq.it.IntegrationTestContext;
 
-
 public class ProxyConfigAction {
     private ProxyConfigAction() {
     }

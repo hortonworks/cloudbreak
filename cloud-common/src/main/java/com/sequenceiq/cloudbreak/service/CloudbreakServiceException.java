@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.service;
 
-
 public class CloudbreakServiceException extends RuntimeException {
     public CloudbreakServiceException(String message) {
         super(message);

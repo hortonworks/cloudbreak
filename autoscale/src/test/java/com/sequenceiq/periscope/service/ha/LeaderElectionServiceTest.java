@@ -30,6 +30,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.service.Clock;
 import com.sequenceiq.cloudbreak.service.TransactionService;
+import com.sequenceiq.cloudbreak.service.TransactionService.TransactionCallback;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.PeriscopeNode;
@@ -95,7 +96,7 @@ public class LeaderElectionServiceTest {
 
         underTest.leaderElection();
 
-        verify(transactionService, times(0)).required(any(Supplier.class));
+        verify(transactionService, times(0)).required(any(TransactionCallback.class));
         verify(timer, times(0)).schedule(any(TimerTask.class), anyLong(), anyLong());
     }
 
@@ -105,7 +106,7 @@ public class LeaderElectionServiceTest {
 
         underTest.leaderElection();
 
-        verify(transactionService, times(1)).required(any(Supplier.class));
+        verify(transactionService, times(1)).required(any(TransactionCallback.class));
         verify(timer, times(1)).cancel();
         verify(timer, times(1)).purge();
         verify(timerFactory, times(1)).get();
@@ -119,7 +120,7 @@ public class LeaderElectionServiceTest {
 
         underTest.leaderElection();
 
-        verify(transactionService, times(1)).required(any(Supplier.class));
+        verify(transactionService, times(1)).required(any(TransactionCallback.class));
         verify(timer, times(1)).cancel();
         verify(timer, times(1)).purge();
         verify(timerFactory, times(1)).get();
@@ -137,7 +138,7 @@ public class LeaderElectionServiceTest {
 
         spyTimer.lastTask.run();
 
-        verify(transactionService, times(2)).required(any(Supplier.class));
+        verify(transactionService, times(2)).required(any(TransactionCallback.class));
         verify(clusterRepository, times(0)).findAllByPeriscopeNodeIdNotInOrPeriscopeNodeIdIsNull(any(List.class));
     }
 
@@ -155,7 +156,7 @@ public class LeaderElectionServiceTest {
 
         spyTimer.lastTask.run();
 
-        verify(transactionService, times(2)).required(any(Supplier.class));
+        verify(transactionService, times(2)).required(any(TransactionCallback.class));
         verify(clusterRepository, times(1)).findAllByPeriscopeNodeIdNotInOrPeriscopeNodeIdIsNull(any(List.class));
         verify(clusterRepository, times(1)).save(any(List.class));
     }

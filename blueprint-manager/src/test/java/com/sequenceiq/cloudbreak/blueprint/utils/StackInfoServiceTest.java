@@ -93,6 +93,4 @@ public class StackInfoServiceTest {
         verify(blueprintUtils, times(0)).getBlueprintHdpVersion(any(JsonNode.class));
         verify(blueprintUtils, times(0)).getBlueprintStackName(any(JsonNode.class));
     }
-
-
 }

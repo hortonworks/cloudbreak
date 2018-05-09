@@ -3,6 +3,8 @@ package com.sequenceiq.cloudbreak.controller;
 import java.util.List;
 
 import javax.inject.Inject;
+import javax.transaction.Transactional;
+import javax.transaction.Transactional.TxType;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,9 +17,11 @@ import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.converter.SmartSenseSubscriptionRequestToSmartSenseSubscriptionConverter;
 import com.sequenceiq.cloudbreak.converter.SmartSenseSubscriptionToSmartSenseSubscriptionJsonConverter;
 import com.sequenceiq.cloudbreak.domain.SmartSenseSubscription;
+import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.smartsense.SmartSenseSubscriptionService;
 
 @Component
+@Transactional(TxType.NEVER)
 public class SmartSenseSubscriptionController implements SmartSenseSubscriptionEndpoint {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SmartSenseSubscriptionController.class);

@@ -1,6 +1,5 @@
 package com.sequenceiq.periscope.api.model;
 
-
 public class ExceptionResult {
 
     private String message;

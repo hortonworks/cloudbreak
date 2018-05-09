@@ -39,10 +39,10 @@ public class AzurePermission {
     //BEGIN GENERATED CODE
     @Override
     public String toString() {
-        return "AzurePermission{" +
-                "actions=" + actions +
-                ", notActions=" + notActions +
-                '}';
+        return "AzurePermission{"
+                + "actions=" + actions
+                + ", notActions=" + notActions
+                + '}';
     }
     //END GENERATED CODE
 }

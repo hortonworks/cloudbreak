@@ -7,7 +7,6 @@ import java.io.IOException;
 import com.sequenceiq.cloudbreak.api.model.rds.RDSTestRequest;
 import com.sequenceiq.it.IntegrationTestContext;
 
-
 public class RdsConfigAction {
     private RdsConfigAction() {
     }

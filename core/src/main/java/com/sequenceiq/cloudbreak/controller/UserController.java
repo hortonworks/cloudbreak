@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.controller;
 
 import javax.inject.Inject;
+import javax.transaction.Transactional;
+import javax.transaction.Transactional.TxType;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -13,18 +15,16 @@ import com.sequenceiq.cloudbreak.api.model.UserProfileRequest;
 import com.sequenceiq.cloudbreak.api.model.UserProfileResponse;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.UserProfile;
+import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
 import com.sequenceiq.cloudbreak.service.user.UserProfileService;
-import com.sequenceiq.cloudbreak.service.user.UserResourceCheck;
 
 @Component
+@Transactional(TxType.NEVER)
 public class UserController implements UserEndpoint {
 
     @Inject
     private UserDetailsService userDetailsService;
-
-    @Inject
-    private UserResourceCheck userResourceCheck;
 
     @Inject
     private AuthenticatedUserService authenticatedUserService;
@@ -47,12 +47,6 @@ public class UserController implements UserEndpoint {
         IdentityUser user = authenticatedUserService.getCbUser();
         userDetailsService.evictUserDetails(user.getUserId(), user.getUsername());
         return new User(user.getUsername());
-    }
-
-    @Override
-    public Boolean hasResources(String id) {
-        IdentityUser user = authenticatedUserService.getCbUser();
-        return userResourceCheck.hasResources(user, id);
     }
 
     @Override

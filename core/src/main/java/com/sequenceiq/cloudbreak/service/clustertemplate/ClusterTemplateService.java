@@ -5,8 +5,6 @@ import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
 import java.util.Set;
 
 import javax.inject.Inject;
-import javax.transaction.Transactional;
-import javax.transaction.Transactional.TxType;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,15 +14,14 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
-import com.sequenceiq.cloudbreak.controller.BadRequestException;
-import com.sequenceiq.cloudbreak.controller.NotFoundException;
+import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.ClusterTemplate;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.ClusterTemplateRepository;
 import com.sequenceiq.cloudbreak.service.AuthorizationService;
 
 @Service
-@Transactional
 public class ClusterTemplateService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterTemplateService.class);
@@ -65,7 +62,6 @@ public class ClusterTemplateService {
         return clusterTemplate;
     }
 
-    @Transactional(TxType.NEVER)
     public ClusterTemplate create(IdentityUser user, ClusterTemplate clusterTemplate) {
         LOGGER.debug("Creating clusterTemplate: [User: '{}', Account: '{}']", user.getUsername(), user.getAccount());
         ClusterTemplate savedClusterTemplate;
@@ -112,7 +108,6 @@ public class ClusterTemplateService {
         delete(clusterTemplate);
     }
 
-    @Transactional(TxType.NEVER)
     public Iterable<ClusterTemplate> save(Iterable<ClusterTemplate> entities) {
         return clusterTemplateRepository.save(entities);
     }
