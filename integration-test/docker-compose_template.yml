@@ -9,6 +9,9 @@ test:
   command: java -jar /it/build/libs/cloudbreak-integration-test.jar com.sequenceiq.it.IntegrationTestApp
   environment:
     - SERVICE_NAME=test
+    - SERVICE_2020_NAME=test
+    - SERVICE_9443_NAME=test
+    - SERVICE_7654_NAME=test
     - INTEGRATIONTEST_UAA_SERVER=http://identity.service.consul:8089
     - INTEGRATIONTEST_CLOUDBREAK_SERVER=http://cloudbreak.service.consul:8080
     - INTEGRATIONTEST_UAA_USER=admin@example.com
