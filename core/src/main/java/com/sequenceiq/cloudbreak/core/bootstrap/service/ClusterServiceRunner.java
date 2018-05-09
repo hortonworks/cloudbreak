@@ -93,7 +93,7 @@ public class ClusterServiceRunner {
             HttpClientConfig ambariClientConfig = buildAmbariClientConfig(stack, gatewayIp);
             clusterService.updateAmbariClientConfig(cluster.getId(), ambariClientConfig);
             Map<String, List<String>> hostsPerHostGroup = new HashMap<>();
-            for (InstanceMetaData instanceMetaData : stack.getNotTerminatedInstanceMetaDataSet()) {
+            for (InstanceMetaData instanceMetaData : stack.getNotDeletedInstanceMetaDataSet()) {
                 String groupName = instanceMetaData.getInstanceGroup().getGroupName();
                 if (!hostsPerHostGroup.keySet().contains(groupName)) {
                     hostsPerHostGroup.put(groupName, new ArrayList<>());

@@ -134,7 +134,8 @@ public class StackSyncActions {
             CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform(), stack.getOwner(), stack.getPlatformVariant(),
                     location);
             CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
-            return new StackSyncContext(flowId, stack, stack.getInstanceMetaDataAsList(), cloudContext, cloudCredential, isStatusUpdateEnabled(variables));
+            return new StackSyncContext(flowId, stack, stack.getNotTerminatedInstanceMetaDataList(), cloudContext, cloudCredential,
+                    isStatusUpdateEnabled(variables));
         }
 
         @Override

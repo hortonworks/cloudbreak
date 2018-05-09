@@ -48,8 +48,8 @@ public class HostMetadataSetup {
         LOGGER.info("Setting up host metadata for the cluster.");
         Stack stack = stackService.getByIdWithLists(stackId);
         if (!orchestratorTypeResolver.resolveType(stack.getOrchestrator()).containerOrchestrator()) {
-            Set<InstanceMetaData> allInstanceMetaData = stack.getNotTerminatedInstanceMetaDataSet();
-            updateWithHostData(stack, stack.getNotTerminatedInstanceMetaDataSet());
+            Set<InstanceMetaData> allInstanceMetaData = stack.getNotDeletedInstanceMetaDataSet();
+            updateWithHostData(stack, stack.getNotDeletedInstanceMetaDataSet());
             instanceMetaDataRepository.save(allInstanceMetaData);
         }
     }
@@ -58,7 +58,7 @@ public class HostMetadataSetup {
         LOGGER.info("Extending host metadata.");
         Stack stack = stackService.getByIdWithLists(stackId);
         if (!orchestratorTypeResolver.resolveType(stack.getOrchestrator()).containerOrchestrator()) {
-            Set<InstanceMetaData> newInstanceMetadata = stack.getNotTerminatedInstanceMetaDataSet().stream()
+            Set<InstanceMetaData> newInstanceMetadata = stack.getNotDeletedInstanceMetaDataSet().stream()
                     .filter(instanceMetaData -> newAddresses.contains(instanceMetaData.getPrivateIp()))
                     .collect(Collectors.toSet());
             updateWithHostData(stack, newInstanceMetadata);

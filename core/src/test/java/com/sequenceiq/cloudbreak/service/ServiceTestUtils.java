@@ -92,12 +92,10 @@ public final class ServiceTestUtils {
         Template template2 = createTemplate(AWS);
         Set<InstanceGroup> instanceGroups = new HashSet<>();
         InstanceGroup instanceGroup1 = new InstanceGroup();
-        instanceGroup1.setNodeCount(2);
         instanceGroup1.setGroupName("master");
         instanceGroup1.setTemplate(template1);
         instanceGroups.add(instanceGroup1);
         InstanceGroup instanceGroup2 = new InstanceGroup();
-        instanceGroup2.setNodeCount(2);
         instanceGroup2.setGroupName("slave_1");
         instanceGroup2.setTemplate(template2);
         instanceGroups.add(instanceGroup2);

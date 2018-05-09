@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.domain;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -13,6 +14,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedAttributeNode;
+import javax.persistence.NamedEntityGraph;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
@@ -23,6 +26,8 @@ import com.sequenceiq.cloudbreak.domain.json.JsonToString;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
+@NamedEntityGraph(name = "InstanceGroup.instanceMetaData",
+        attributeNodes = @NamedAttributeNode("instanceMetaData"))
 @Entity
 public class InstanceGroup implements ProvisionEntity, Comparable<InstanceGroup> {
 
@@ -36,9 +41,6 @@ public class InstanceGroup implements ProvisionEntity, Comparable<InstanceGroup>
 
     @OneToOne
     private SecurityGroup securityGroup;
-
-    @Column(nullable = false)
-    private Integer nodeCount;
 
     @Column(nullable = false)
     private String groupName;
@@ -82,11 +84,7 @@ public class InstanceGroup implements ProvisionEntity, Comparable<InstanceGroup>
     }
 
     public Integer getNodeCount() {
-        return nodeCount;
-    }
-
-    public void setNodeCount(Integer nodeCount) {
-        this.nodeCount = nodeCount;
+        return getNotTerminatedInstanceMetaDataSet().size();
     }
 
     public Stack getStack() {
@@ -98,13 +96,15 @@ public class InstanceGroup implements ProvisionEntity, Comparable<InstanceGroup>
     }
 
     public Set<InstanceMetaData> getNotTerminatedInstanceMetaDataSet() {
-        Set<InstanceMetaData> resultSet = new HashSet<>();
-        for (InstanceMetaData metaData : instanceMetaData) {
-            if (!metaData.isTerminated() && !metaData.isDeletedOnProvider()) {
-                resultSet.add(metaData);
-            }
-        }
-        return resultSet;
+        return instanceMetaData.stream()
+                .filter(metaData -> !metaData.isTerminated())
+                .collect(Collectors.toSet());
+    }
+
+    public Set<InstanceMetaData> getNotDeletedInstanceMetaDataSet() {
+        return instanceMetaData.stream()
+                .filter(metaData -> !metaData.isTerminated() && !metaData.isDeletedOnProvider())
+                .collect(Collectors.toSet());
     }
 
     public Set<InstanceMetaData> getInstanceMetaDataSet() {

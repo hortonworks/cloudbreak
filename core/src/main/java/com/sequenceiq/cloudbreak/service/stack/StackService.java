@@ -373,6 +373,10 @@ public class StackService {
             LOGGER.info("Instance groups saved in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
             start = System.currentTimeMillis();
+            instanceMetaDataRepository.save(savedStack.getInstanceMetaDataAsList());
+            LOGGER.info("Instance metadatas saved in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+
+            start = System.currentTimeMillis();
             SecurityConfig securityConfig = tlsSecurityService.storeSSHKeys();
             LOGGER.info("Generating SSH keys took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 

@@ -102,7 +102,7 @@ public class TerminationService {
 
     private void terminateMetaDataInstances(Stack stack) {
         List<InstanceMetaData> instanceMetaDatas = new ArrayList<>();
-        for (InstanceMetaData metaData : stack.getNotTerminatedInstanceMetaDataSet()) {
+        for (InstanceMetaData metaData : stack.getNotDeletedInstanceMetaDataSet()) {
             long timeInMillis = Calendar.getInstance().getTimeInMillis();
             metaData.setTerminationDate(timeInMillis);
             metaData.setInstanceStatus(InstanceStatus.TERMINATED);
