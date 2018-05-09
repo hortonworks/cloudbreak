@@ -43,7 +43,6 @@ public class ImageCatalogV1Controller implements ImageCatalogV1Endpoint {
 
     @Override
     public ImageCatalogResponse getPublicByName(String name, boolean withImages) {
-
         ImageCatalogResponse imageCatalogResponse = convert(imageCatalogService.get(name));
         Images images = imageCatalogService.propagateImagesIfRequested(name, withImages);
         if (images != null) {
