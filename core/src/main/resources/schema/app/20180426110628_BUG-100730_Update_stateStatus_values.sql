@@ -4,10 +4,8 @@ UPDATE flowlog SET statestatus = 'SUCCESSFUL';
 UPDATE flowlog SET statestatus = 'PENDING' WHERE (flowid, id) IN (
     SELECT DISTINCT ON (flowid) flowid, id FROM flowlog WHERE finalized = false ORDER BY flowid, created DESC
 );
-ALTER TABLE flowlog ALTER statestatus SET NOT NULL;
 
 -- //@UNDO
 -- SQL to undo the change goes here.
-ALTER TABLE flowlog ALTER statestatus DROP NOT NULL;
 UPDATE flowlog SET statestatus = NULL;
 
