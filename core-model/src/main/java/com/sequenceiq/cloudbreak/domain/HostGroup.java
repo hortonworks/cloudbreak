@@ -13,12 +13,27 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedAttributeNode;
+import javax.persistence.NamedEntityGraph;
+import javax.persistence.NamedSubgraph;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 
 import com.sequenceiq.cloudbreak.api.model.RecoveryMode;
 
+@NamedEntityGraph(name = "HostGroup.constraint.instanceGroup.instanceMetaData",
+        attributeNodes = @NamedAttributeNode(value = "constraint", subgraph = "instanceGroup"),
+        subgraphs = {
+                @NamedSubgraph(name = "instanceGroup",
+                        attributeNodes = @NamedAttributeNode(value = "instanceGroup", subgraph = "instanceMetaData")),
+                @NamedSubgraph(name = "instanceMetaData",
+                        attributeNodes = {
+                                @NamedAttributeNode("instanceMetaData")
+                        }
+                )
+        }
+)
 @Entity
 public class HostGroup implements ProvisionEntity {
 
