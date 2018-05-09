@@ -4,7 +4,6 @@ import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.when;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -23,7 +22,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.api.model.ExposedService;
-import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessorFactory;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
@@ -70,12 +68,6 @@ public class ComponentLocatorServiceTest {
         when(blueprintProcessor.getComponentsInHostGroup(eq("hg1"))).thenReturn(hg1Components);
         when(blueprintProcessor.getComponentsInHostGroup(eq("hg2"))).thenReturn(hg2Components);
         when(blueprintProcessorFactory.get(nullable(String.class))).thenReturn(blueprintProcessor);
-        when(instanceMetaDataRepository.findInstancesInInstanceGroupWithoutStatuses(hg1.getConstraint()
-                .getInstanceGroup().getId(), Arrays.asList(InstanceStatus.TERMINATED, InstanceStatus.DELETED_ON_PROVIDER_SIDE)))
-                .thenReturn(new ArrayList<>(hg1.getConstraint().getInstanceGroup().getAllInstanceMetaData()));
-        when(instanceMetaDataRepository.findInstancesInInstanceGroupWithoutStatuses(hg2.getConstraint()
-                .getInstanceGroup().getId(), Arrays.asList(InstanceStatus.TERMINATED, InstanceStatus.DELETED_ON_PROVIDER_SIDE)))
-                .thenReturn(new ArrayList<>(hg2.getConstraint().getInstanceGroup().getAllInstanceMetaData()));
     }
 
     private HostGroup createHostGroup(String name, Long id, String hostname) {

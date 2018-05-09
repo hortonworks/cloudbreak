@@ -395,15 +395,23 @@ public class Stack implements ProvisionEntity {
     }
 
     public Set<InstanceMetaData> getNotTerminatedInstanceMetaDataSet() {
-        Set<InstanceMetaData> instanceMetadata = new HashSet<>();
-        for (InstanceGroup instanceGroup : instanceGroups) {
-            instanceMetadata.addAll(instanceGroup.getNotTerminatedInstanceMetaDataSet());
-        }
-        return instanceMetadata;
+        return instanceGroups.stream()
+                .flatMap(instanceGroup -> instanceGroup.getNotTerminatedInstanceMetaDataSet().stream())
+                .collect(Collectors.toSet());
     }
 
     public List<InstanceMetaData> getNotTerminatedInstanceMetaDataList() {
         return new ArrayList<>(getNotTerminatedInstanceMetaDataSet());
+    }
+
+    public Set<InstanceMetaData> getNotDeletedInstanceMetaDataSet() {
+        return instanceGroups.stream()
+                .flatMap(instanceGroup -> instanceGroup.getNotDeletedInstanceMetaDataSet().stream())
+                .collect(Collectors.toSet());
+    }
+
+    public List<InstanceMetaData> getNotDeletedInstanceMetaDataList() {
+        return new ArrayList<>(getNotDeletedInstanceMetaDataSet());
     }
 
     public List<InstanceMetaData> getInstanceMetaDataAsList() {
@@ -444,7 +452,7 @@ public class Stack implements ProvisionEntity {
         List<InstanceMetaData> metadataList = new ArrayList<>();
         for (InstanceGroup instanceGroup : instanceGroups) {
             if (InstanceGroupType.GATEWAY.equals(instanceGroup.getInstanceGroupType())) {
-                metadataList.addAll(instanceGroup.getNotTerminatedInstanceMetaDataSet());
+                metadataList.addAll(instanceGroup.getNotDeletedInstanceMetaDataSet());
             }
         }
         return metadataList;

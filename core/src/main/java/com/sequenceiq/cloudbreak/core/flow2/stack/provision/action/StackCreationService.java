@@ -47,7 +47,6 @@ import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackContext;
-import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -140,9 +139,7 @@ public class StackCreationService {
         Date startDate = getStartDateIfExist(variables);
         Stack stack = context.getStack();
         validateResourceResults(context.getCloudContext(), result);
-        List<CloudResourceStatus> results = result.getResults();
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.METADATA_COLLECTION, "Metadata collection");
-        updateNodeCount(stack.getId(), context.getCloudStack().getGroups(), results);
         flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_INFRASTRUCTURE_TIME, UPDATE_IN_PROGRESS.name(), calculateStackCreationTime(startDate));
         return stackService.getByIdWithLists(stack.getId());
     }
@@ -292,22 +289,7 @@ public class StackCreationService {
         }
     }
 
-    private void updateNodeCount(Long stackId, Iterable<Group> originalGroups, Iterable<CloudResourceStatus> statuses) {
-        for (Group group : originalGroups) {
-            int nodeCount = group.getInstancesSize();
-            List<CloudResourceStatus> failedResources = removeFailedMetadata(stackId, statuses, group);
-            if (!failedResources.isEmpty()) {
-                int failedCount = failedResources.size();
-                InstanceGroup instanceGroup = instanceGroupRepository.findOneByGroupNameInStack(stackId, group.getName());
-                instanceGroup.setNodeCount(nodeCount - failedCount);
-                instanceGroupRepository.save(instanceGroup);
-                flowMessageService.fireEventAndLog(stackId, Msg.STACK_INFRASTRUCTURE_ROLLBACK_MESSAGE, UPDATE_IN_PROGRESS.name(),
-                    failedCount, group.getName(), failedResources.get(0).getStatusReason());
-            }
-        }
-    }
-
-    private List<CloudResourceStatus> removeFailedMetadata(Long stackId, Iterable<CloudResourceStatus> statuses, Group group) {
+    private List<CloudResourceStatus> removeFailedMetadata(Long stackId, List<CloudResourceStatus> statuses, Group group) {
         Map<Long, CloudResourceStatus> failedResources = new HashMap<>();
         Set<Long> groupPrivateIds = getPrivateIds(group);
         for (CloudResourceStatus status : statuses) {

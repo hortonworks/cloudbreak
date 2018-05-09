@@ -32,7 +32,8 @@ public class GcpMetadataCollector implements MetadataCollector {
     private static final Logger LOGGER = LoggerFactory.getLogger(GcpMetadataCollector.class);
 
     @Override
-    public List<CloudVmMetaDataStatus> collect(AuthenticatedContext authenticatedContext, List<CloudResource> resources, List<CloudInstance> vms) {
+    public List<CloudVmMetaDataStatus> collect(AuthenticatedContext authenticatedContext, List<CloudResource> resources, List<CloudInstance> vms,
+            List<CloudInstance> knownInstances) {
 
         List<CloudVmMetaDataStatus> instanceMetaData = new ArrayList<>();
 
