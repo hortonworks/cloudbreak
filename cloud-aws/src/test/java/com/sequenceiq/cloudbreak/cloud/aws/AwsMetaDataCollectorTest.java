@@ -140,10 +140,15 @@ public class AwsMetaDataCollectorTest {
         List<CloudInstance> vms = new ArrayList<>();
         List<Volume> volumes = new ArrayList<>();
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
-        vms.add(new CloudInstance("i-1",
+        vms.add(new CloudInstance(null,
                 new InstanceTemplate("fla", "cbgateway", 5L, volumes, InstanceStatus.CREATED, null, 0L),
                 instanceAuthentication));
-
+        vms.add(new CloudInstance(null,
+                new InstanceTemplate("fla", "cbgateway", 6L, volumes, InstanceStatus.CREATED, null, 0L),
+                instanceAuthentication));
+        vms.add(new CloudInstance(null,
+                new InstanceTemplate("fla", "cbgateway", 7L, volumes, InstanceStatus.CREATED, null, 0L),
+                instanceAuthentication));
 
         when(awsClient.createCloudFormationClient(any(AwsCredentialView.class), eq("region"))).thenReturn(amazonCFClient);
         when(awsClient.createAutoScalingClient(any(AwsCredentialView.class), eq("region"))).thenReturn(amazonASClient);
@@ -160,22 +165,32 @@ public class AwsMetaDataCollectorTest {
 
         when(amazonEC2Client.describeInstances(describeInstancesRequestGw)).thenReturn(describeInstancesResultGw);
 
-        Instance instance = Mockito.mock(Instance.class);
-        when(instance.getInstanceId()).thenReturn("i-1");
-        when(instance.getPrivateIpAddress()).thenReturn("privateIp");
-        when(instance.getPublicIpAddress()).thenReturn("publicIp");
-
-        List<Reservation> gatewayReservations = Collections.singletonList(getReservation(instance));
+        List<Instance> instances = new ArrayList<>();
+        for (int i = 0; i < 3; i++) {
+            Instance instance = Mockito.mock(Instance.class);
+            when(instance.getInstanceId()).thenReturn("i-" + i);
+            when(instance.getPrivateIpAddress()).thenReturn("privateIp" + i);
+            when(instance.getPublicIpAddress()).thenReturn("publicIp" + i);
+            instances.add(instance);
+        }
+        Instance[] instancesArray = new Instance[instances.size()];
+        List<Reservation> gatewayReservations = Collections.singletonList(getReservation(instances.toArray(instancesArray)));
 
         when(describeInstancesResultGw.getReservations()).thenReturn(gatewayReservations);
 
         AuthenticatedContext ac = authenticatedContext();
         List<CloudVmMetaDataStatus> statuses = awsMetadataCollector.collect(ac, null, vms, Collections.emptyList());
 
-        Assert.assertEquals(1, statuses.size());
-        Assert.assertEquals("i-1", statuses.get(0).getCloudVmInstanceStatus().getCloudInstance().getInstanceId());
-        Assert.assertEquals("privateIp", statuses.get(0).getMetaData().getPrivateIp());
-        Assert.assertEquals("publicIp", statuses.get(0).getMetaData().getPublicIp());
+        Assert.assertEquals(3, statuses.size());
+        Assert.assertEquals("i-0", statuses.get(0).getCloudVmInstanceStatus().getCloudInstance().getInstanceId());
+        Assert.assertEquals("privateIp0", statuses.get(0).getMetaData().getPrivateIp());
+        Assert.assertEquals("publicIp0", statuses.get(0).getMetaData().getPublicIp());
+        Assert.assertEquals("i-1", statuses.get(1).getCloudVmInstanceStatus().getCloudInstance().getInstanceId());
+        Assert.assertEquals("privateIp1", statuses.get(1).getMetaData().getPrivateIp());
+        Assert.assertEquals("publicIp1", statuses.get(1).getMetaData().getPublicIp());
+        Assert.assertEquals("i-2", statuses.get(2).getCloudVmInstanceStatus().getCloudInstance().getInstanceId());
+        Assert.assertEquals("privateIp2", statuses.get(2).getMetaData().getPrivateIp());
+        Assert.assertEquals("publicIp2", statuses.get(2).getMetaData().getPublicIp());
     }
 
     @Test
