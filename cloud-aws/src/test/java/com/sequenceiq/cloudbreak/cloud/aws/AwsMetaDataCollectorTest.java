@@ -282,8 +282,6 @@ public class AwsMetaDataCollectorTest {
 
         Instance instance1 = Mockito.mock(Instance.class);
         when(instance1.getInstanceId()).thenReturn("i-1");
-        when(instance1.getPrivateIpAddress()).thenReturn("privateIp1");
-        when(instance1.getPublicIpAddress()).thenReturn("publicIp1");
 
         Instance instance2 = Mockito.mock(Instance.class);
         when(instance2.getInstanceId()).thenReturn("i-2");
