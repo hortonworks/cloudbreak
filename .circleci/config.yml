@@ -32,7 +32,7 @@ jobs:
       - checkout
       - run:
           name: checkstyle-test
-          command: ./gradlew -Penv=jenkins -b build.gradle check -x spotbugsMain -x spotbugsTest -x checkstyleTest -x test --no-daemon --max-workers 2 --stacktrace
+          command: ./gradlew -Penv=jenkins -b build.gradle check -x spotbugsMain -x spotbugsTest -x checkstyleMain -x test --no-daemon --max-workers 2 --stacktrace
 
   code-quality-check-checkstyle-main:
     docker:
@@ -43,7 +43,7 @@ jobs:
       - checkout
       - run:
           name: checkstyle-main
-          command: ./gradlew -Penv=jenkins -b build.gradle check -x spotbugsMain -x spotbugsTest -x checkstyleMain -x test --no-daemon --max-workers 2 --stacktrace
+          command: ./gradlew -Penv=jenkins -b build.gradle check -x spotbugsMain -x spotbugsTest -x checkstyleTest -x test --no-daemon --max-workers 2 --stacktrace
 
   code-quality-check-spotbugs-main:
     docker:
