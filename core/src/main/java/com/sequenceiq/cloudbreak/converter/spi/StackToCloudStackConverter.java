@@ -108,31 +108,22 @@ public class StackToCloudStackConverter {
         }
     }
 
-    public List<Group> buildInstanceGroups(List<InstanceGroup> instanceGroups, StackAuthentication stackAuthentication, Set<String> deleteRequests) {
+    public List<Group> buildInstanceGroups(List<InstanceGroup> instanceGroups, StackAuthentication stackAuthentication,
+            Set<String> deleteRequests) {
         // sort by name to avoid shuffling the different instance groups
         Collections.sort(instanceGroups);
         List<Group> groups = new ArrayList<>();
-        long privateId = getFirstValidPrivateId(instanceGroups);
         for (InstanceGroup instanceGroup : instanceGroups) {
             if (instanceGroup.getTemplate() != null) {
                 CloudInstance skeleton = null;
                 List<CloudInstance> instances = new ArrayList<>();
                 Template template = instanceGroup.getTemplate();
-                int desiredNodeCount = instanceGroup.getNodeCount();
                 // existing instances
-                for (InstanceMetaData metaData : instanceGroup.getInstanceMetaData()) {
+                for (InstanceMetaData metaData : instanceGroup.getNotDeletedInstanceMetaDataSet()) {
                     InstanceStatus status = getInstanceStatus(metaData, deleteRequests);
                     instances.add(buildInstance(metaData, template, stackAuthentication, instanceGroup.getGroupName(), metaData.getPrivateId(), status));
                 }
-                // new instances
-                int existingNodesSize = instances.size();
-                if (existingNodesSize < desiredNodeCount) {
-                    for (long i = 0; i < desiredNodeCount - existingNodesSize; i++) {
-                        instances.add(buildInstance(null, template, stackAuthentication, instanceGroup.getGroupName(), privateId++,
-                                InstanceStatus.CREATE_REQUESTED));
-                    }
-                }
-                if (existingNodesSize == desiredNodeCount && desiredNodeCount == 0) {
+                if (instanceGroup.getNodeCount() == 0) {
                     skeleton = buildInstance(null, template, stackAuthentication, instanceGroup.getGroupName(), 0L,
                             InstanceStatus.CREATE_REQUESTED);
                 }
@@ -191,6 +182,7 @@ public class StackToCloudStackConverter {
         String id = instanceMetaData == null ? null : instanceMetaData.getInstanceId();
         String hostName = instanceMetaData == null ? null : instanceMetaData.getShortHostname();
         String subnetId = instanceMetaData == null ? null : instanceMetaData.getSubnetId();
+        String instanceName = instanceMetaData == null ? null : instanceMetaData.getInstanceName();
 
         InstanceTemplate instanceTemplate = buildInstanceTemplate(template, name, privateId, status);
         InstanceAuthentication instanceAuthentication = buildInstanceAuthentication(stackAuthentication);
@@ -200,6 +192,9 @@ public class StackToCloudStackConverter {
         }
         if (subnetId != null) {
             params.put(CloudInstance.SUBNET_ID, subnetId);
+        }
+        if (instanceName != null) {
+            params.put(CloudInstance.INSTANCE_NAME, instanceName);
         }
         return new CloudInstance(id, instanceTemplate, instanceAuthentication, params);
     }
@@ -232,27 +227,6 @@ public class StackToCloudStackConverter {
             result = new Network(subnet, params);
         }
         return result;
-    }
-
-    private Long getFirstValidPrivateId(List<InstanceGroup> instanceGroups) {
-        LOGGER.info("Get first valid PrivateId of instanceGroups");
-        long highest = 0;
-        for (InstanceGroup instanceGroup : instanceGroups) {
-            LOGGER.info("Checking of instanceGroup: {}", instanceGroup.getGroupName());
-            for (InstanceMetaData metaData : instanceGroup.getAllInstanceMetaData()) {
-                Long privateId = metaData.getPrivateId();
-                LOGGER.info("InstanceMetaData metaData: privateId: {}, instanceGroupName: {}, instanceId: {}, status: {}",
-                        privateId, metaData.getInstanceGroupName(), metaData.getInstanceId(), metaData.getInstanceStatus());
-                if (privateId == null) {
-                    continue;
-                }
-                if (privateId > highest) {
-                    highest = privateId;
-                }
-            }
-        }
-        LOGGER.info("highest privateId: {}", highest);
-        return highest == 0 ? 0 : highest + 1;
     }
 
     private InstanceStatus getInstanceStatus(InstanceMetaData metaData, Set<String> deleteRequests) {

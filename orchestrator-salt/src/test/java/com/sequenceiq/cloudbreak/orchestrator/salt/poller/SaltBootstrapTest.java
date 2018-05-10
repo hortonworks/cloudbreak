@@ -8,6 +8,7 @@ import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -21,15 +22,17 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import org.springframework.http.HttpStatus;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
+import com.sequenceiq.cloudbreak.orchestrator.model.BootstrapParams;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.GenericResponse;
 import com.sequenceiq.cloudbreak.orchestrator.model.GenericResponses;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
-import com.sequenceiq.cloudbreak.orchestrator.salt.domain.DefaultRouteResponse;
-import com.sequenceiq.cloudbreak.orchestrator.salt.domain.NetworkInterfaceResponse;
+import com.sequenceiq.cloudbreak.orchestrator.salt.domain.MinionIpAddressesResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.SaltAction;
+import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 public class SaltBootstrapTest {
 
@@ -37,7 +40,7 @@ public class SaltBootstrapTest {
 
     private GatewayConfig gatewayConfig;
 
-    private Map<String, String> networkMap;
+    private MinionIpAddressesResponse minionIpAddressesResponse;
 
     @Before
     public void setUp() {
@@ -53,29 +56,27 @@ public class SaltBootstrapTest {
 
         when(saltConnector.action(Mockito.any(SaltAction.class))).thenReturn(genericResponses);
 
-
-        when(saltConnector.run(Mockito.any(), Mockito.eq("network.default_route"), Mockito.any(), Mockito.any()))
-                .thenReturn(new DefaultRouteResponse(Collections.emptyList()));
-        NetworkInterfaceResponse networkInterfaceResponse = new NetworkInterfaceResponse();
-        List<Map<String, String>> networkResultList = new ArrayList<>();
-        networkMap = new HashMap<>();
-        networkMap.put("host-10-0-0-1.example.com", "10.0.0.1");
-        networkMap.put("host-10-0-0-2.example.com", "10.0.0.2");
-        networkMap.put("host-10-0-0-3.example.com", "10.0.0.3");
-        networkResultList.add(networkMap);
-        networkInterfaceResponse.setResult(networkResultList);
-        when(saltConnector.run(Mockito.any(), Mockito.eq("network.interface_ip"), Mockito.any(), Mockito.any(), Mockito.any()))
-                .thenReturn(networkInterfaceResponse);
+        minionIpAddressesResponse = new MinionIpAddressesResponse();
+        when(saltConnector.run(Mockito.any(), Mockito.eq("network.ipaddrs"), Mockito.any(), Mockito.any()))
+                .thenReturn(minionIpAddressesResponse);
     }
 
     @Test
-    public void callTest() {
+    public void callTest() throws IOException {
+        List<Map<String, JsonNode>> result = new ArrayList<>();
+        Map<String, JsonNode> ipAddressesForMinions = new HashMap<>();
+        ipAddressesForMinions.put("10-0-0-1.example.com", JsonUtil.readTree("[\"10.0.0.1\"]"));
+        ipAddressesForMinions.put("10-0-0-2.example.com", JsonUtil.readTree("[\"10.0.0.2\"]"));
+        ipAddressesForMinions.put("10-0-0-3.example.com", JsonUtil.readTree("[\"10.0.0.3\"]"));
+        result.add(ipAddressesForMinions);
+        minionIpAddressesResponse.setResult(result);
+
         Set<Node> targets = new HashSet<>();
         targets.add(new Node("10.0.0.1", null, null, "hg"));
         targets.add(new Node("10.0.0.2", null, null, "hg"));
         targets.add(new Node("10.0.0.3", null, null, "hg"));
 
-        SaltBootstrap saltBootstrap = new SaltBootstrap(saltConnector, Collections.singletonList(gatewayConfig), targets);
+        SaltBootstrap saltBootstrap = new SaltBootstrap(saltConnector, Collections.singletonList(gatewayConfig), targets, new BootstrapParams());
         try {
             saltBootstrap.call();
         } catch (Exception e) {
@@ -84,10 +85,13 @@ public class SaltBootstrapTest {
     }
 
     @Test
-    public void callFailTest() {
-        networkMap.clear();
-        networkMap.put("host-10-0-0-1.example.com", "10.0.0.1");
-        networkMap.put("host-10-0-0-2.example.com", "10.0.0.2");
+    public void callFailTest() throws IOException {
+        List<Map<String, JsonNode>> result = new ArrayList<>();
+        Map<String, JsonNode> ipAddressesForMinions = new HashMap<>();
+        ipAddressesForMinions.put("10-0-0-1.example.com", JsonUtil.readTree("[\"10.0.0.1\"]"));
+        ipAddressesForMinions.put("10-0-0-2.example.com", JsonUtil.readTree("[\"10.0.0.2\"]"));
+        result.add(ipAddressesForMinions);
+        minionIpAddressesResponse.setResult(result);
 
         Set<Node> targets = new HashSet<>();
         targets.add(new Node("10.0.0.1", null, null, "hg"));
@@ -95,7 +99,7 @@ public class SaltBootstrapTest {
         String missingNodeIp = "10.0.0.3";
         targets.add(new Node(missingNodeIp, null, null, "hg"));
 
-        SaltBootstrap saltBootstrap = new SaltBootstrap(saltConnector, Collections.singletonList(gatewayConfig), targets);
+        SaltBootstrap saltBootstrap = new SaltBootstrap(saltConnector, Collections.singletonList(gatewayConfig), targets, new BootstrapParams());
         try {
             saltBootstrap.call();
             fail("should throw exception");

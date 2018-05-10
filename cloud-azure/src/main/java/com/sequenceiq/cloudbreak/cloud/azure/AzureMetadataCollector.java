@@ -38,7 +38,8 @@ public class AzureMetadataCollector implements MetadataCollector {
     private AzureUtils azureUtils;
 
     @Override
-    public List<CloudVmMetaDataStatus> collect(AuthenticatedContext authenticatedContext, List<CloudResource> resources, List<CloudInstance> vms) {
+    public List<CloudVmMetaDataStatus> collect(AuthenticatedContext authenticatedContext, List<CloudResource> resources, List<CloudInstance> vms,
+            List<CloudInstance> knownInstances) {
         CloudResource resource = azureUtils.getTemplateResource(resources);
         List<CloudVmMetaDataStatus> results = new ArrayList<>();
 
@@ -53,6 +54,7 @@ public class AzureMetadataCollector implements MetadataCollector {
                 AzureClient azureClient = authenticatedContext.getParameter(AzureClient.class);
                 VirtualMachine vm = azureClient.getVirtualMachine(resourceName, instance.getKey());
                 String subnetId = vm.getPrimaryNetworkInterface().primaryIPConfiguration().subnetName();
+                String instanceName = vm.computerName();
 
                 String privateIp = null;
                 String publicIp = null;
@@ -98,6 +100,7 @@ public class AzureMetadataCollector implements MetadataCollector {
                 if (template != null) {
                     Map<String, Object> params = new HashMap<>(1);
                     params.put(CloudInstance.SUBNET_ID, subnetId);
+                    params.put(CloudInstance.INSTANCE_NAME, instanceName);
                     //TODO use shhkey here
                     CloudInstance cloudInstance = new CloudInstance(instanceId, template, null, params);
                     CloudVmInstanceStatus status = new CloudVmInstanceStatus(cloudInstance, InstanceStatus.CREATED);

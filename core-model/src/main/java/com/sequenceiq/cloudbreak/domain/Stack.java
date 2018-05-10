@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -393,16 +394,30 @@ public class Stack implements ProvisionEntity {
         return nodeCount;
     }
 
-    public Set<InstanceMetaData> getRunningInstanceMetaData() {
-        Set<InstanceMetaData> instanceMetadata = new HashSet<>();
-        for (InstanceGroup instanceGroup : instanceGroups) {
-            instanceMetadata.addAll(instanceGroup.getInstanceMetaData());
-        }
-        return instanceMetadata;
+    public Set<InstanceMetaData> getNotTerminatedInstanceMetaDataSet() {
+        return instanceGroups.stream()
+                .flatMap(instanceGroup -> instanceGroup.getNotTerminatedInstanceMetaDataSet().stream())
+                .collect(Collectors.toSet());
+    }
+
+    public List<InstanceMetaData> getNotTerminatedInstanceMetaDataList() {
+        return new ArrayList<>(getNotTerminatedInstanceMetaDataSet());
+    }
+
+    public Set<InstanceMetaData> getNotDeletedInstanceMetaDataSet() {
+        return instanceGroups.stream()
+                .flatMap(instanceGroup -> instanceGroup.getNotDeletedInstanceMetaDataSet().stream())
+                .collect(Collectors.toSet());
+    }
+
+    public List<InstanceMetaData> getNotDeletedInstanceMetaDataList() {
+        return new ArrayList<>(getNotDeletedInstanceMetaDataSet());
     }
 
     public List<InstanceMetaData> getInstanceMetaDataAsList() {
-        return new ArrayList<>(getRunningInstanceMetaData());
+        return instanceGroups.stream()
+                .flatMap(instanceGroup -> instanceGroup.getInstanceMetaDataSet().stream())
+                .collect(Collectors.toList());
     }
 
     public List<InstanceGroup> getInstanceGroupsAsList() {
@@ -437,7 +452,7 @@ public class Stack implements ProvisionEntity {
         List<InstanceMetaData> metadataList = new ArrayList<>();
         for (InstanceGroup instanceGroup : instanceGroups) {
             if (InstanceGroupType.GATEWAY.equals(instanceGroup.getInstanceGroupType())) {
-                metadataList.addAll(instanceGroup.getInstanceMetaData());
+                metadataList.addAll(instanceGroup.getNotDeletedInstanceMetaDataSet());
             }
         }
         return metadataList;

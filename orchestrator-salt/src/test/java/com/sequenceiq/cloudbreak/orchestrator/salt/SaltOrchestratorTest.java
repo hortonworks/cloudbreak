@@ -18,9 +18,11 @@ import static org.powermock.api.mockito.PowerMockito.verifyNew;
 import static org.powermock.api.mockito.PowerMockito.verifyStatic;
 import static org.powermock.api.mockito.PowerMockito.whenNew;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -37,16 +39,20 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.common.service.HostDiscoveryService;
 import com.sequenceiq.cloudbreak.orchestrator.OrchestratorBootstrapRunner;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.executor.ParallelOrchestratorComponentRunner;
+import com.sequenceiq.cloudbreak.orchestrator.model.BootstrapParams;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.GenericResponse;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltConfig;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
+import com.sequenceiq.cloudbreak.orchestrator.salt.domain.MinionStatus;
+import com.sequenceiq.cloudbreak.orchestrator.salt.domain.MinionStatusSaltResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.PillarSave;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.SaltBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.SaltCommandTracker;
@@ -107,8 +113,9 @@ public class SaltOrchestratorTest {
 
         whenNew(OrchestratorBootstrapRunner.class).withAnyArguments().thenReturn(mock(OrchestratorBootstrapRunner.class));
         whenNew(SaltBootstrap.class).withAnyArguments().thenReturn(mock(SaltBootstrap.class));
+        BootstrapParams bootstrapParams = mock(BootstrapParams.class);
 
-        saltOrchestrator.bootstrap(Collections.singletonList(gatewayConfig), targets, exitCriteriaModel);
+        saltOrchestrator.bootstrap(Collections.singletonList(gatewayConfig), targets, bootstrapParams, exitCriteriaModel);
 
         verify(parallelOrchestratorComponentRunner, times(2)).submit(any(OrchestratorBootstrapRunner.class));
 
@@ -116,21 +123,23 @@ public class SaltOrchestratorTest {
                 .withArguments(any(PillarSave.class), eq(exitCriteria), eq(exitCriteriaModel), any(), anyInt(), anyInt());
         verifyNew(OrchestratorBootstrapRunner.class, times(2))
                 .withArguments(any(SaltBootstrap.class), eq(exitCriteria), eq(exitCriteriaModel), any(), anyInt(), anyInt());
-        verifyNew(SaltBootstrap.class, times(1)).withArguments(eq(saltConnector), eq(Collections.singletonList(gatewayConfig)), eq(targets));
+        verifyNew(SaltBootstrap.class, times(1)).withArguments(eq(saltConnector),
+            eq(Collections.singletonList(gatewayConfig)), eq(targets), eq(bootstrapParams));
     }
 
     @Test
     public void bootstrapNewNodesTest() throws Exception {
         whenNew(SaltBootstrap.class).withAnyArguments().thenReturn(mock(SaltBootstrap.class));
         whenNew(OrchestratorBootstrapRunner.class).withAnyArguments().thenReturn(mock(OrchestratorBootstrapRunner.class));
+        BootstrapParams bootstrapParams = mock(BootstrapParams.class);
 
         saltOrchestrator.init(parallelOrchestratorComponentRunner, exitCriteria);
-
-        saltOrchestrator.bootstrapNewNodes(Collections.singletonList(gatewayConfig), targets, targets, null, exitCriteriaModel);
+        saltOrchestrator.bootstrapNewNodes(Collections.singletonList(gatewayConfig), targets, targets, null, bootstrapParams, exitCriteriaModel);
 
         verifyNew(OrchestratorBootstrapRunner.class, times(1))
                 .withArguments(any(SaltBootstrap.class), eq(exitCriteria), eq(exitCriteriaModel), any(), anyInt(), anyInt());
-        verifyNew(SaltBootstrap.class, times(1)).withArguments(eq(saltConnector), eq(Collections.singletonList(gatewayConfig)), eq(targets));
+        verifyNew(SaltBootstrap.class, times(1)).withArguments(eq(saltConnector),
+            eq(Collections.singletonList(gatewayConfig)), eq(targets), eq(bootstrapParams));
     }
 
     @Test
@@ -169,16 +178,23 @@ public class SaltOrchestratorTest {
 
         // verify ambari server role
         verifyNew(GrainAddRunner.class, times(1)).withArguments(eq(Sets.newHashSet(gatewayConfig.getPrivateAddress())),
+                eq(targets), eq("ambari_server_install"));
+        // verify ambari server role
+        verifyNew(GrainAddRunner.class, times(1)).withArguments(eq(Sets.newHashSet(gatewayConfig.getPrivateAddress())),
                 eq(targets), eq("ambari_server"));
 
         // verify ambari agent role
         Set<String> allNodes = targets.stream().map(Node::getPrivateIp).collect(Collectors.toSet());
         verifyNew(GrainAddRunner.class, times(1)).withArguments(eq(allNodes),
+                eq(targets), eq("ambari_agent_install"));
+        // verify ambari agent role
+        allNodes = targets.stream().map(Node::getPrivateIp).collect(Collectors.toSet());
+        verifyNew(GrainAddRunner.class, times(1)).withArguments(eq(allNodes),
                 eq(targets), eq("ambari_agent"));
         // verify two role command (amabari server, ambari agent)
-        verifyNew(SaltCommandTracker.class, times(2)).withArguments(eq(saltConnector), eq(addRemoveGrainRunner));
+        verifyNew(SaltCommandTracker.class, times(4)).withArguments(eq(saltConnector), eq(addRemoveGrainRunner));
         // verify two OrchestratorBootstrapRunner call with rolechecker command tracker
-        verifyNew(OrchestratorBootstrapRunner.class, times(2))
+        verifyNew(OrchestratorBootstrapRunner.class, times(4))
                 .withArguments(eq(roleCheckerSaltCommandTracker), eq(exitCriteria), eq(exitCriteriaModel), any(), anyInt(), anyInt());
 
         // verify syncgrains command
@@ -205,9 +221,21 @@ public class SaltOrchestratorTest {
 
         mockStatic(SaltStates.class);
         SaltStates.stopMinions(eq(saltConnector), eq(privateIpsByFQDN));
+        MinionStatusSaltResponse minionStatusSaltResponse = new MinionStatusSaltResponse();
+        List<MinionStatus> minionStatusList = new ArrayList<>();
+        MinionStatus minionStatus = new MinionStatus();
+        ArrayList<String> upNodes = Lists.newArrayList("10-0-0-1.example.com", "10-0-0-2.example.com", "10-0-0-3.example.com");
+        minionStatus.setUp(upNodes);
+        ArrayList<String> downNodes = Lists.newArrayList("10-0-0-4.example.com", "10-0-0-5.example.com");
+        minionStatus.setDown(downNodes);
+        minionStatusList.add(minionStatus);
+        minionStatusSaltResponse.setResult(minionStatusList);
+
+        when(SaltStates.collectNodeStatus(eq(saltConnector))).thenReturn(minionStatusSaltResponse);
 
         saltOrchestrator.tearDown(Collections.singletonList(gatewayConfig), privateIpsByFQDN);
 
+        verify(saltConnector, times(1)).wheel(eq("key.delete"), eq(downNodes), eq(Object.class));
         verifyStatic();
         SaltStates.stopMinions(eq(saltConnector), eq(privateIpsByFQDN));
     }

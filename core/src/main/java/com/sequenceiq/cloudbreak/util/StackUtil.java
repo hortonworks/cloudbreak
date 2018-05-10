@@ -37,8 +37,12 @@ public class StackUtil {
     public Set<Node> collectNodes(Stack stack) {
         Set<Node> agents = new HashSet<>();
         for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
-            for (InstanceMetaData im : instanceGroup.getInstanceMetaData()) {
-                agents.add(new Node(im.getPrivateIp(), im.getPublicIp(), im.getDiscoveryFQDN(), im.getInstanceGroupName()));
+            if (instanceGroup.getNodeCount() != 0) {
+                for (InstanceMetaData im : instanceGroup.getNotDeletedInstanceMetaDataSet()) {
+                    if (im.getDiscoveryFQDN() != null) {
+                        agents.add(new Node(im.getPrivateIp(), im.getPublicIp(), im.getDiscoveryFQDN(), im.getInstanceGroupName()));
+                    }
+                }
             }
         }
         return agents;

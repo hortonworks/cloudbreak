@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.orchestrator.salt.poller;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -13,14 +12,17 @@ import org.springframework.http.HttpStatus;
 
 import com.sequenceiq.cloudbreak.orchestrator.OrchestratorBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
+import com.sequenceiq.cloudbreak.orchestrator.model.BootstrapParams;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.GenericResponse;
 import com.sequenceiq.cloudbreak.orchestrator.model.GenericResponses;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltActionType;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
-import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Glob;
+import com.sequenceiq.cloudbreak.orchestrator.salt.domain.Cloud;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.Minion;
+import com.sequenceiq.cloudbreak.orchestrator.salt.domain.MinionIpAddressesResponse;
+import com.sequenceiq.cloudbreak.orchestrator.salt.domain.Os;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.SaltAction;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.SaltAuth;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.SaltMaster;
@@ -36,13 +38,16 @@ public class SaltBootstrap implements OrchestratorBootstrap {
 
     private final Set<Node> originalTargets;
 
+    private final BootstrapParams params;
+
     private Set<Node> targets;
 
-    public SaltBootstrap(SaltConnector sc, List<GatewayConfig> allGatewayConfigs, Set<Node> targets) {
+    public SaltBootstrap(SaltConnector sc, List<GatewayConfig> allGatewayConfigs, Set<Node> targets, BootstrapParams params) {
         this.sc = sc;
         this.allGatewayConfigs = allGatewayConfigs;
         originalTargets = Collections.unmodifiableSet(targets);
         this.targets = targets;
+        this.params = params;
     }
 
     @Override
@@ -72,14 +77,17 @@ public class SaltBootstrap implements OrchestratorBootstrap {
             }
         }
 
-        String iFace = SaltStates.defaultRoute(sc, Glob.ALL).getGatewayInterfaceName();
-        Map<String, String> networkResult = SaltStates.networkInterfaceIP(sc, Glob.ALL, iFace).getResultGroupByIP();
-        originalTargets.forEach(node -> {
-            if (!networkResult.containsKey(node.getPrivateIp())) {
-                LOGGER.info("Salt-minion is not responding on host: {}, yet", node);
-                targets.add(node);
-            }
-        });
+        MinionIpAddressesResponse minionIpAddressesResponse = SaltStates.collectMinionIpAddresses(sc);
+        if (minionIpAddressesResponse != null) {
+            originalTargets.forEach(node -> {
+                if (!minionIpAddressesResponse.getAllIpAddresses().contains(node.getPrivateIp())) {
+                    LOGGER.info("Salt-minion is not responding on host: {}, yet", node);
+                    targets.add(node);
+                }
+            });
+        } else {
+            throw new CloudbreakOrchestratorFailedException("Minions ip address collection returned null value");
+        }
         if (!targets.isEmpty()) {
             throw new CloudbreakOrchestratorFailedException("There are missing nodes from salt network response: " + targets);
         }
@@ -89,6 +97,12 @@ public class SaltBootstrap implements OrchestratorBootstrap {
 
     private SaltAction createBootstrap() {
         SaltAction saltAction = new SaltAction(SaltActionType.RUN);
+        if (params.getCloud() != null) {
+            saltAction.setCloud(new Cloud(params.getCloud()));
+        }
+        if (params.getOs() != null) {
+            saltAction.setOs(new Os(params.getOs()));
+        }
         SaltAuth auth = new SaltAuth();
         auth.setPassword(sc.getSaltPassword());
         List<String> targetIps = targets.stream().map(Node::getPrivateIp).collect(Collectors.toList());

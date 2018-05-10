@@ -186,7 +186,7 @@ public class ClusterToClusterResponseConverterTest extends AbstractEntityConvert
         given(blueprintValidator.getHostGroupName(jsonNode)).willReturn("slave_1");
         given(blueprintValidator.createHostGroupMap(any(Set.class))).willReturn(hostGroupMap);
         given(hostGroupMap.get("slave_1")).willReturn(hostGroup);
-        given(instanceGroup.getInstanceMetaData()).willReturn(Sets.newHashSet(instanceMetaData));
+        given(instanceGroup.getNotDeletedInstanceMetaDataSet()).willReturn(Sets.newHashSet(instanceMetaData));
         given(blueprintValidator.getComponentsNode(jsonNode)).willReturn(nameJsonNode);
         given(nameJsonNode.iterator()).willReturn(mockComponentIterator);
         given(mockComponentIterator.hasNext()).willReturn(true).willReturn(false);

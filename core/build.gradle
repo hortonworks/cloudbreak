@@ -110,11 +110,14 @@ dependencies {
   runtime     group: 'activation',                name: 'activation',                     version: '1.0.2'
 
   testCompile project(path: ':core-model', configuration: 'tests')
-  testCompile group: 'org.springframework.boot', name:'spring-boot-starter-test',        version:springBootVersion
-  testCompile group: 'org.springframework.boot', name:'spring-boot-starter-freemarker',  version:springBootVersion
-  testCompile group: 'com.jayway.restassured',   name: 'rest-assured',                   version: '2.3.4'
-  testCompile group: 'com.jayway.restassured',   name: 'json-path',                      version: '2.3.4'
-
+  testCompile group: 'org.springframework.boot', name:'spring-boot-starter-test',       version:springBootVersion
+  testCompile group: 'org.springframework.boot', name:'spring-boot-starter-freemarker', version:springBootVersion
+  testCompile group: 'com.jayway.restassured',   name: 'rest-assured',                  version: '2.3.4'
+  testCompile group: 'com.jayway.restassured',   name: 'json-path',                     version: '2.3.4'
+  testCompile (group: 'org.powermock',           name: 'powermock-module-junit4',       version: powermockVersion)
+  testCompile (group: 'org.powermock',           name: 'powermock-api-mockito',         version: powermockVersion) {
+    exclude group: 'org.hamcrest'
+  }
 }
 
 jacoco {
@@ -163,7 +166,6 @@ class BuildInfoTask extends DefaultTask {
     applicationDestinations += new File(applicationPropertiesPath + "/resources/main")
 
     destination.mkdirs()
-    String activeProfile = determineActiveProfile()
 
     // if using dev environment this condition is true
     if (buildVersion.contains("+") || buildVersion == "unspecified") {
@@ -171,6 +173,7 @@ class BuildInfoTask extends DefaultTask {
       buildVersion = grgit.describe()
       println "buildVersion from git: " + buildVersion
     }
+    String activeProfile = determineActiveProfile()
     new File(destination, "build.info").withWriter { out ->
       [
               "ARTIFACT_BASENAME=" + basename,

@@ -31,7 +31,7 @@ public class ComponentLocatorService {
             Set<String> hgComponents = blueprintProcessor.getComponentsInHostGroup(cluster.getBlueprint().getBlueprintText(), hg.getName());
             hgComponents.retainAll(componentNames);
 
-            List<String> fqdn = hg.getConstraint().getInstanceGroup().getInstanceMetaData().stream()
+            List<String> fqdn = hg.getConstraint().getInstanceGroup().getNotDeletedInstanceMetaDataSet().stream()
                     .map(InstanceMetaData::getDiscoveryFQDN).collect(Collectors.toList());
             for (String service : hgComponents) {
                 List<String> storedAddresses = result.get(service);

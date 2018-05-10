@@ -33,7 +33,6 @@ import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.EmailSenderService;
 import com.sequenceiq.cloudbreak.service.stack.connector.OperationException;
 import com.sequenceiq.cloudbreak.service.stack.flow.MetadataSetupService;
-import com.sequenceiq.cloudbreak.service.stack.flow.WrongMetadataException;
 import com.sequenceiq.cloudbreak.service.usages.UsageService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 
@@ -75,7 +74,7 @@ public class StackStartStopService {
     public void finishStackStart(StackStartStopContext context, List<CloudVmMetaDataStatus> coreInstanceMetaData) {
         Stack stack = context.getStack();
         if (coreInstanceMetaData.size() != stack.getFullNodeCount()) {
-            throw new WrongMetadataException(String.format(
+            LOGGER.warn(String.format(
                     "Size of the collected metadata set does not equal the node count of the stack. [metadata size=%s] [nodecount=%s]",
                     coreInstanceMetaData.size(), stack.getFullNodeCount()));
         }

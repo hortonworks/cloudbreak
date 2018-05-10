@@ -31,19 +31,11 @@ import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariClusterConnector;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariDecommissioner;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderConnectorAdapter;
 
 @Service
 public class StackScalingService {
     private static final Logger LOGGER = LoggerFactory.getLogger(StackScalingService.class);
-
-    private static final int POLLING_INTERVAL = 5000;
-
-    private static final int MAX_POLLING_ATTEMPTS = 100;
-
-    @Inject
-    private StackService stackService;
 
     @Inject
     private CloudbreakEventService eventService;
@@ -119,7 +111,7 @@ public class StackScalingService {
     @Transactional
     public int updateRemovedResourcesState(Stack stack, Set<String> instanceIds, InstanceGroup instanceGroup) {
         int nodesRemoved = 0;
-        for (InstanceMetaData instanceMetaData : instanceGroup.getInstanceMetaData()) {
+        for (InstanceMetaData instanceMetaData : instanceGroup.getNotDeletedInstanceMetaDataSet()) {
             if (instanceIds.contains(instanceMetaData.getInstanceId())) {
                 long timeInMillis = Calendar.getInstance().getTimeInMillis();
                 instanceMetaData.setTerminationDate(timeInMillis);
@@ -129,10 +121,6 @@ public class StackScalingService {
             }
         }
         int nodeCount = instanceGroup.getNodeCount() - nodesRemoved;
-        if (nodesRemoved != 0) {
-            instanceGroup.setNodeCount(nodeCount);
-            instanceGroupRepository.save(instanceGroup);
-        }
         LOGGER.info("Successfully terminated metadata of instances '{}' in stack.", instanceIds);
         eventService.fireCloudbreakEvent(stack.getId(), BillingStatus.BILLING_CHANGED.name(),
                 cloudbreakMessagesService.getMessage(Msg.STACK_SCALING_BILLING_CHANGED.code()));
@@ -142,7 +130,8 @@ public class StackScalingService {
     public Map<String, String> getUnusedInstanceIds(String instanceGroupName, Integer scalingAdjustment, Stack stack) {
         Map<String, String> instanceIds = new HashMap<>();
         int i = 0;
-        List<InstanceMetaData> instanceMetaDatas = new ArrayList<>(stack.getInstanceGroupByInstanceGroupName(instanceGroupName).getInstanceMetaData());
+        List<InstanceMetaData> instanceMetaDatas = new ArrayList<>(stack.getInstanceGroupByInstanceGroupName(instanceGroupName)
+                .getNotDeletedInstanceMetaDataSet());
         instanceMetaDatas.sort(Comparator.comparing(InstanceMetaData::getStartDate));
         for (InstanceMetaData metaData : instanceMetaDatas) {
             if (!metaData.getAmbariServer()

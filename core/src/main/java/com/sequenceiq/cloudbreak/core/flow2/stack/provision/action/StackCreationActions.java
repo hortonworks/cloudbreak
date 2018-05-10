@@ -180,7 +180,7 @@ public class StackCreationActions {
             protected Selectable createRequest(StackContext context) {
                 List<CloudInstance> cloudInstances = cloudStackConverter.buildInstances(context.getStack());
                 List<CloudResource> cloudResources = cloudResourceConverter.convert(context.getStack().getResources());
-                return new CollectMetadataRequest(context.getCloudContext(), context.getCloudCredential(), cloudResources, cloudInstances);
+                return new CollectMetadataRequest(context.getCloudContext(), context.getCloudCredential(), cloudResources, cloudInstances, cloudInstances);
             }
         };
     }

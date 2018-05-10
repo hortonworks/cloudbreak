@@ -24,7 +24,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
-import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.reactor.ErrorHandlerAwareReactorEventFactory;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
@@ -68,7 +67,7 @@ public class ServiceProviderMetadataAdapter {
         CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
         List<CloudInstance> cloudInstances = cloudStackConverter.buildInstances(stack);
         List<CloudResource> cloudResources = cloudResourceConverter.convert(stack.getResources());
-        CollectMetadataRequest cmr = new CollectMetadataRequest(cloudContext, cloudCredential, cloudResources, cloudInstances);
+        CollectMetadataRequest cmr = new CollectMetadataRequest(cloudContext, cloudCredential, cloudResources, cloudInstances, cloudInstances);
         LOGGER.info("Triggering event: {}", cmr);
         eventBus.notify(CloudPlatformRequest.selector(CollectMetadataRequest.class), eventFactory.createEvent(cmr));
         try {
@@ -110,32 +109,13 @@ public class ServiceProviderMetadataAdapter {
                     LOGGER.error("Failed to retrieve instance state", res.getErrorDetails());
                     throw new OperationException(res.getErrorDetails());
                 }
-                return transform(res.getStatuses().get(0).getStatus());
+                return InstanceSyncState.getInstanceSyncState(res.getStatuses().get(0).getStatus());
             } catch (InterruptedException e) {
                 LOGGER.error(format("Error while retrieving instance state of: %s", cloudContext), e);
                 throw new OperationException(e);
             }
         } else {
             return InstanceSyncState.DELETED;
-        }
-    }
-
-    private InstanceSyncState transform(InstanceStatus instanceStatus) {
-        switch (instanceStatus) {
-            case IN_PROGRESS:
-                return InstanceSyncState.IN_PROGRESS;
-            case STARTED:
-                return InstanceSyncState.RUNNING;
-            case STOPPED:
-                return InstanceSyncState.STOPPED;
-            case CREATED:
-                return InstanceSyncState.RUNNING;
-            case FAILED:
-                return InstanceSyncState.DELETED;
-            case TERMINATED:
-                return InstanceSyncState.DELETED;
-            default:
-                return InstanceSyncState.UNKNOWN;
         }
     }
 

@@ -178,7 +178,7 @@ public class StackCreationMock extends MockServer {
         verify(AMBARI_API_ROOT + "/services/AMBARI/components/AMBARI_SERVER", "GET").exactTimes(1).verify();
         verify(AMBARI_API_ROOT + "/clusters", "GET").exactTimes(2).verify();
         verify(AMBARI_API_ROOT + "/check", "GET").atLeast(1).verify();
-        verify(AMBARI_API_ROOT + "/users/admin", "PUT").exactTimes(1).bodyContains("Users/password").bodyContains("Users/old_password").verify();
+        verify(AMBARI_API_ROOT + "/users", "POST").exactTimes(1).verify();
         verify(AMBARI_API_ROOT + "/blueprints/bp", "POST").exactTimes(1)
                 .bodyContains("blueprint_name").bodyContains("stack_name").bodyContains("stack_version").bodyContains("host_groups")
                 .exactTimes(1).verify();
@@ -190,8 +190,10 @@ public class StackCreationMock extends MockServer {
         verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=mine.update").atLeast(1).verify();
         verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=state.highstate").atLeast(2).verify();
         verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=jobs.lookup_jid").bodyContains("jid=1").atLeast(2).verify();
-        verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=grains.append").bodyContains("ambari_agent").exactTimes(1).verify();
-        verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=grains.append").bodyContains("ambari_server").exactTimes(1).verify();
+        verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=grains.append").bodyContains("ambari_agent_install").exactTimes(1).verify();
+        verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=grains.append").bodyContains("ambari_agent").exactTimes(2).verify();
+        verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=grains.append").bodyContains("ambari_server_install").exactTimes(1).verify();
+        verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=grains.append").bodyContains("ambari_server").exactTimes(2).verify();
         verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=grains.append").bodyContains("recipes").exactTimes(2).verify();
         verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=grains.remove").bodyContains("recipes").exactTimes(2).verify();
         verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=jobs.active").atLeast(2).verify();

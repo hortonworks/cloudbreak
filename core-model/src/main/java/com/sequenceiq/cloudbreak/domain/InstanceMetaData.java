@@ -63,6 +63,8 @@ public class InstanceMetaData implements ProvisionEntity {
 
     private String subnetId;
 
+    private String instanceName;
+
     public InstanceGroup getInstanceGroup() {
         return instanceGroup;
     }
@@ -191,6 +193,10 @@ public class InstanceMetaData implements ProvisionEntity {
         return InstanceStatus.TERMINATED.equals(instanceStatus);
     }
 
+    public boolean isDeletedOnProvider() {
+        return InstanceStatus.DELETED_ON_PROVIDER_SIDE.equals(instanceStatus);
+    }
+
     public boolean isRegistered() {
         return InstanceStatus.REGISTERED.equals(instanceStatus);
     }
@@ -250,5 +256,13 @@ public class InstanceMetaData implements ProvisionEntity {
 
     public void setSubnetId(String subnetId) {
         this.subnetId = subnetId;
+    }
+
+    public String getInstanceName() {
+        return instanceName;
+    }
+
+    public void setInstanceName(String instanceName) {
+        this.instanceName = instanceName;
     }
 }

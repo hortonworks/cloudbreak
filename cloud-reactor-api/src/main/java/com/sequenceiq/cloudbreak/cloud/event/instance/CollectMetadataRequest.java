@@ -12,12 +12,16 @@ public class CollectMetadataRequest extends CloudPlatformRequest<CollectMetadata
 
     private final List<CloudResource> cloudResource;
 
+    private final List<CloudInstance> knownVms;
+
     private final List<CloudInstance> vms;
 
-    public CollectMetadataRequest(CloudContext cloudContext, CloudCredential cloudCredential, List<CloudResource> cloudResource, List<CloudInstance> vms) {
+    public CollectMetadataRequest(CloudContext cloudContext, CloudCredential cloudCredential, List<CloudResource> cloudResource,
+            List<CloudInstance> vms, List<CloudInstance> knownVms) {
         super(cloudContext, cloudCredential);
         this.cloudResource = cloudResource;
         this.vms = vms;
+        this.knownVms = knownVms;
     }
 
     public List<CloudResource> getCloudResource() {
@@ -28,12 +32,17 @@ public class CollectMetadataRequest extends CloudPlatformRequest<CollectMetadata
         return vms;
     }
 
+    public List<CloudInstance> getKnownVms() {
+        return knownVms;
+    }
+
     //BEGIN GENERATED CODE
     @Override
     public String toString() {
         return "CollectMetadataRequest{" +
                 ", cloudResource=" + cloudResource +
                 ", vms=" + vms +
+                ", knownVms=" + knownVms +
                 '}';
     }
     //END GENERATED CODE

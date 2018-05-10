@@ -222,7 +222,6 @@ public class TestUtil {
     public static InstanceGroup instanceGroup(Long id, InstanceGroupType instanceGroupType, Template template, int nodeCount) {
         InstanceGroup instanceGroup = new InstanceGroup();
         instanceGroup.setId(id);
-        instanceGroup.setNodeCount(nodeCount);
         instanceGroup.setGroupName("is" + id);
         instanceGroup.setInstanceGroupType(instanceGroupType);
         instanceGroup.setTemplate(template);

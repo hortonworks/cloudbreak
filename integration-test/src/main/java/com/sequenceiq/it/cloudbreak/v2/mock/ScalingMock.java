@@ -192,18 +192,19 @@ public class ScalingMock extends MockServer {
                     .exactTimes(1).verify();
             verify(SALT_BOOT_ROOT + "/salt/action/distribute", "POST").bodyContains("\"action\":\"stop\"").exactTimes(1).verify();
             verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=key.delete").exactTimes(1).verify();
+            verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=manage.status").exactTimes(1).verify();
             verify(MOCK_ROOT + "/terminate_instances", "POST").exactTimes(1).verify();
         } else {
             verify(MOCK_ROOT + "/cloud_instance_statuses", "POST").exactTimes(1).verify();
             verify(MOCK_ROOT + "/cloud_metadata_statuses", "POST").bodyContains("CREATE_REQUESTED", scalingAdjustment).exactTimes(1).verify();
             verify(SALT_BOOT_ROOT + "/health", "GET").atLeast(1).verify();
             verify(SALT_BOOT_ROOT + "/salt/action/distribute", "POST").atLeast(1).verify();
-            verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=network.interface").exactTimes(1).verify();
-            verify(SALT_API_ROOT + "/run", "POST").bodyContains("arg=roles&arg=ambari_server").exactTimes(1).verify();
+            verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=network.ipaddrs").exactTimes(1).verify();
+            verify(SALT_API_ROOT + "/run", "POST").bodyContains("arg=roles&arg=ambari_server").exactTimes(2).verify();
             verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=saltutil.sync_grains").atLeast(2).verify();
             verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=mine.update").atLeast(1).verify();
             verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=state.highstate").exactTimes(2).verify();
-            verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=grains.append").exactTimes(securityEnabled ? 7 : 6).verify();
+            verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=grains.append").exactTimes(securityEnabled ? 9 : 8).verify();
             verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=grains.remove").exactTimes(2).verify();
             verify(SALT_BOOT_ROOT + "/hostname/distribute", "POST").bodyRegexp("^.*\\[([\"0-9\\.]+([,]{0,1})){" + scalingAdjustment + "}\\].*")
                     .exactTimes(1).verify();

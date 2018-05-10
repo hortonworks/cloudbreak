@@ -29,16 +29,7 @@ base:
     - match: grain
     - postgresql.postgre
 
-  'roles:ambari_server':
-    - match: grain
-    - ambari.database
-    - ambari.credentials
-    - prometheus.server
-    - grafana.repo
-    - gateway.init
-    - gateway.ldap
-
-  'roles:ambari_server_standby':
+  'roles:ambari_server*':
     - match: grain
     - ambari.database
     - ambari.credentials

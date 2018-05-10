@@ -7,10 +7,12 @@ import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
 
 import java.util.HashMap;
 import java.util.LinkedHashSet;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.transaction.Transactional;
@@ -88,6 +90,7 @@ import com.sequenceiq.cloudbreak.service.credential.OpenSshPublicKeyValidator;
 import com.sequenceiq.cloudbreak.service.decorator.StackResponseDecorator;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
+import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderConnectorAdapter;
 import com.sequenceiq.cloudbreak.util.PasswordUtil;
@@ -329,7 +332,7 @@ public class StackService {
     }
 
     @Transactional(TxType.NEVER)
-    public Stack create(IdentityUser user, Stack stack, String imageCatalog, Optional<String> imageId, Optional<Blueprint> blueprint) {
+    public Stack create(IdentityUser user, Stack stack, String platformString, StatedImage imgFromCatalog) {
         Stack savedStack;
         stack.setOwner(user.getUserId());
         stack.setAccount(user.getAccount());
@@ -371,6 +374,10 @@ public class StackService {
             LOGGER.info("Instance groups saved in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
             start = System.currentTimeMillis();
+            instanceMetaDataRepository.save(savedStack.getInstanceMetaDataAsList());
+            LOGGER.info("Instance metadatas saved in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+
+            start = System.currentTimeMillis();
             SecurityConfig securityConfig = tlsSecurityService.storeSSHKeys();
             LOGGER.info("Generating SSH keys took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
@@ -387,7 +394,7 @@ public class StackService {
             savedStack.setSecurityConfig(securityConfig);
 
             start = System.currentTimeMillis();
-            imageService.create(savedStack, connector.getPlatformParameters(stack), imageCatalog, imageId, blueprint);
+            imageService.create(savedStack, platformString, connector.getPlatformParameters(stack), imgFromCatalog);
             LOGGER.info("Image creation took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
         } catch (DataIntegrityViolationException ex) {
@@ -427,7 +434,7 @@ public class StackService {
         if (!stack.isPublicInAccount() && !stack.getOwner().equals(user.getUserId())) {
             throw new BadRequestException(String.format("Private stack (%s) only modifiable by the owner.", stackId));
         }
-        flowManager.triggerStackRemoveInstance(stackId, instanceMetaData.getInstanceGroupName(), instanceMetaData.getDiscoveryFQDN());
+        flowManager.triggerStackRemoveInstance(stackId, instanceMetaData.getInstanceGroupName(), instanceMetaData.getPrivateId());
     }
 
     public void removeInstances(IdentityUser user, Long stackId, Set<String> instanceIds) {
@@ -597,13 +604,50 @@ public class StackService {
         }
     }
 
-    public InstanceMetaData updateMetaDataStatus(Long id, String hostName, InstanceStatus status) {
+    public void updateMetaDataStatusIfFound(Long id, String hostName, InstanceStatus status) {
         InstanceMetaData metaData = instanceMetaDataRepository.findHostInStack(id, hostName);
         if (metaData == null) {
-            throw new NotFoundException(String.format("Metadata not found on stack:'%s' with hostname: '%s'.", id, hostName));
+            LOGGER.warn("Metadata not found on stack:'%s' with hostname: '%s'.", id, hostName);
+        } else {
+            metaData.setInstanceStatus(status);
+            instanceMetaDataRepository.save(metaData);
         }
-        metaData.setInstanceStatus(status);
-        return instanceMetaDataRepository.save(metaData);
+    }
+
+    public List<String> getHostNamesForPrivateIds(List<InstanceMetaData> instanceMetaDataList, Collection<Long> privateIds) {
+        return getInstanceMetaDataForPrivateIds(instanceMetaDataList, privateIds).stream()
+                .map(InstanceMetaData::getInstanceId)
+                .collect(Collectors.toList());
+    }
+
+    public List<String> getInstanceIdsForPrivateIds(List<InstanceMetaData> instanceMetaDataList, Collection<Long> privateIds) {
+        List<InstanceMetaData> instanceMetaDataForPrivateIds = getInstanceMetaDataForPrivateIds(instanceMetaDataList, privateIds);
+        return instanceMetaDataForPrivateIds.stream()
+                .map(InstanceMetaData::getInstanceId)
+                .collect(Collectors.toList());
+    }
+
+    public List<InstanceMetaData> getInstanceMetaDataForPrivateIds(List<InstanceMetaData> instanceMetaDataList, Collection<Long> privateIds) {
+        return instanceMetaDataList.stream()
+                .filter(instanceMetaData -> privateIds.contains(instanceMetaData.getPrivateId()))
+                .collect(Collectors.toList());
+    }
+
+    public Set<Long> getPrivateIdsForHostNames(List<InstanceMetaData> instanceMetaDataList, Collection<String> hostNames) {
+        return getInstanceMetadatasForHostNames(instanceMetaDataList, hostNames).stream()
+                .map(InstanceMetaData::getPrivateId).collect(Collectors.toSet());
+    }
+
+    public Set<InstanceMetaData> getInstanceMetadatasForHostNames(List<InstanceMetaData> instanceMetaDataList, Collection<String> hostNames) {
+        return instanceMetaDataList.stream()
+                .filter(instanceMetaData -> hostNames.contains(instanceMetaData.getDiscoveryFQDN()))
+                .collect(Collectors.toSet());
+    }
+
+    public Optional<InstanceMetaData> getInstanceMetadata(List<InstanceMetaData> instanceMetaDataList, Long privateId) {
+        return instanceMetaDataList.stream()
+                .filter(instanceMetaData -> privateId.equals(instanceMetaData.getPrivateId()))
+                .findFirst();
     }
 
     public void validateStack(StackValidation stackValidation, boolean validateBlueprint) {

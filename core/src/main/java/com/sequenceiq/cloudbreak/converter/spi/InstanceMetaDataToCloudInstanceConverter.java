@@ -37,6 +37,7 @@ public class InstanceMetaDataToCloudInstanceConverter extends AbstractConversion
                 stackAuthentication.getLoginUserName());
         Map<String, Object> params = new HashMap<>();
         params.put(CloudInstance.SUBNET_ID, metaDataEnity.getSubnetId());
+        params.put(CloudInstance.INSTANCE_NAME, metaDataEnity.getInstanceName());
         return new CloudInstance(metaDataEnity.getInstanceId(), instanceTemplate, instanceAuthentication, params);
     }
 

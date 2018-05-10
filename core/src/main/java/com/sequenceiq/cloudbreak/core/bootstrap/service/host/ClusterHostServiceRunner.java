@@ -32,7 +32,6 @@ import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.ExposedServices;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
-import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
@@ -56,6 +55,7 @@ import com.sequenceiq.cloudbreak.service.cluster.AmbariSecurityConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.BlueprintProcessor;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.HiveConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.flow.kerberos.KerberosDetailService;
+import com.sequenceiq.cloudbreak.util.StackUtil;
 
 @Component
 public class ClusterHostServiceRunner {
@@ -96,10 +96,13 @@ public class ClusterHostServiceRunner {
     @Inject
     private HiveConfigProvider hiveConfigProvider;
 
+    @Inject
+    private StackUtil stackUtil;
+
     @Transactional
     public void runAmbariServices(Stack stack, Cluster cluster) throws CloudbreakException {
         try {
-            Set<Node> nodes = collectNodes(stack);
+            Set<Node> nodes = stackUtil.collectNodes(stack);
             HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
             GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
             List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
@@ -266,7 +269,7 @@ public class ClusterHostServiceRunner {
             Stack stack = stackRepository.findOneWithLists(stackId);
             Cluster cluster = stack.getCluster();
             candidates = collectUpscaleCandidates(cluster.getId(), hostGroupName, scalingAdjustment);
-            Set<Node> allNodes = collectNodes(stack);
+            Set<Node> allNodes = stackUtil.collectNodes(stack);
             HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
             List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
             SaltConfig saltConfig = createSaltConfig(stack, cluster, gatewayConfigService.getPrimaryGatewayConfig(stack), gatewayConfigs);
@@ -285,24 +288,13 @@ public class ClusterHostServiceRunner {
             Long instanceGroupId = hostGroup.getConstraint().getInstanceGroup().getId();
             Map<String, String> hostNames = new HashMap<>();
             instanceMetaDataRepository.findUnusedHostsInInstanceGroup(instanceGroupId).stream()
+                    .filter(instanceMetaData -> instanceMetaData.getDiscoveryFQDN() != null)
                     .sorted(Comparator.comparing(InstanceMetaData::getStartDate))
                     .limit(adjustment.longValue())
                     .forEach(im -> hostNames.put(im.getDiscoveryFQDN(), im.getPrivateIp()));
             return hostNames;
         }
         return Collections.emptyMap();
-    }
-
-    private Set<Node> collectNodes(Stack stack) {
-        Set<Node> agents = new HashSet<>();
-        for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
-            if (instanceGroup.getNodeCount() != 0) {
-                for (InstanceMetaData im : instanceGroup.getInstanceMetaData()) {
-                    agents.add(new Node(im.getPrivateIp(), im.getPublicIp(), im.getDiscoveryFQDN(), im.getInstanceGroupName()));
-                }
-            }
-        }
-        return agents;
     }
 
     private void putIfNotNull(Map<String, String> context, Object variable, String key) {
@@ -317,7 +309,7 @@ public class ClusterHostServiceRunner {
         Optional<GatewayConfig> newPrimaryCandidate = gatewayConfigs.stream().filter(gc -> !gc.isPrimary()).findFirst();
         if (newPrimaryCandidate.isPresent()) {
             GatewayConfig newPrimary = newPrimaryCandidate.get();
-            Set<Node> allNodes = collectNodes(stack);
+            Set<Node> allNodes = stackUtil.collectNodes(stack);
             try {
                 hostOrchestratorResolver.get(stack.getOrchestrator().getType()).changePrimaryGateway(formerPrimaryGatewayConfig, newPrimary, gatewayConfigs,
                         allNodes, clusterDeletionBasedModel(stack.getId(), stack.getCluster().getId()));
