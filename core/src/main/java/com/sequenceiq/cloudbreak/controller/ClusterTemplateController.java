@@ -12,8 +12,8 @@ import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v1.ClusterTemplateEndpoint;
-import com.sequenceiq.cloudbreak.api.model.ClusterTemplateRequest;
-import com.sequenceiq.cloudbreak.api.model.ClusterTemplateResponse;
+import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterTemplateRequest;
+import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterTemplateResponse;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.domain.ClusterTemplate;

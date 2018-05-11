@@ -18,7 +18,7 @@ import com.ecwid.consul.transport.TransportException;
 import com.ecwid.consul.v1.ConsulClient;
 import com.ecwid.consul.v1.ConsulRawClient;
 import com.ecwid.consul.v1.QueryParams;
-import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ConsulHostServiceTypeCheckerTaskTest {

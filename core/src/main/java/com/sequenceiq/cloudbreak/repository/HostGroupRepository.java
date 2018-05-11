@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
-import com.sequenceiq.cloudbreak.domain.HostGroup;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 
 @EntityType(entityClass = HostGroup.class)
 public interface HostGroupRepository extends CrudRepository<HostGroup, Long> {

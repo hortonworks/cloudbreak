@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.service.cluster.api;
 
-import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 
 public interface ClusterSecurityService {

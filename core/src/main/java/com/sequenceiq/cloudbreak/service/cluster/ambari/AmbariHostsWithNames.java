@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.service.cluster.ambari;
 import java.util.List;
 
 import com.sequenceiq.ambari.client.AmbariClient;
-import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariClientPollerObject;
 
 public class AmbariHostsWithNames extends AmbariClientPollerObject {

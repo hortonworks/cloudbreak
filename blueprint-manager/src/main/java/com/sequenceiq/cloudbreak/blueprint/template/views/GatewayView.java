@@ -4,7 +4,7 @@ import org.apache.commons.lang3.StringEscapeUtils;
 
 import com.sequenceiq.cloudbreak.api.model.GatewayType;
 import com.sequenceiq.cloudbreak.api.model.SSOType;
-import com.sequenceiq.cloudbreak.domain.Gateway;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 
 public class GatewayView {

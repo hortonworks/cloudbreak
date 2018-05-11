@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.service;
 
-import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 
 public abstract class StackContext {
 
