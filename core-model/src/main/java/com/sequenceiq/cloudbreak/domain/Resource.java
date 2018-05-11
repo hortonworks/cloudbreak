@@ -13,6 +13,7 @@ import javax.persistence.SequenceGenerator;
 
 import com.sequenceiq.cloudbreak.common.type.CommonStatus;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 
 @Entity
 public class Resource implements ProvisionEntity {

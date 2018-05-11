@@ -11,13 +11,13 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.io.BaseEncoding;
 import com.sequenceiq.cloudbreak.api.model.CertificateResponse;
-import com.sequenceiq.cloudbreak.api.model.InstanceMetadataType;
+import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceMetadataType;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.client.PkiUtil;
 import com.sequenceiq.cloudbreak.client.SaltClientConfig;
 import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
-import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.SecurityConfigRepository;

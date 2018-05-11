@@ -12,7 +12,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import com.google.common.collect.Lists;
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.TestUtil;
-import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AmbariHostsWithNamesTest {

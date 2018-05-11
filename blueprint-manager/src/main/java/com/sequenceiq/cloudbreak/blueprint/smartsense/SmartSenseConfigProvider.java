@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.blueprint.smartsense;
 
-import static com.sequenceiq.cloudbreak.api.model.InstanceGroupType.GATEWAY;
+import static com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType.GATEWAY;
 
 import java.util.ArrayList;
 import java.util.Collection;

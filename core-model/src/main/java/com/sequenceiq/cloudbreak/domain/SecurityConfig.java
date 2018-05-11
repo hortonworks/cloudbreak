@@ -13,6 +13,8 @@ import javax.persistence.Table;
 import org.apache.commons.codec.binary.Base64;
 import org.hibernate.annotations.Type;
 
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
+
 @Entity
 @Table(name = "SecurityConfig")
 public class SecurityConfig implements ProvisionEntity {

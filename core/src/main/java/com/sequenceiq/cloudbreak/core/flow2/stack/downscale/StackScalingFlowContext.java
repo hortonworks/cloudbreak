@@ -8,7 +8,7 @@ import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackContext;
-import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 
 public class StackScalingFlowContext extends StackContext {
     private final Set<String> instanceIds;

@@ -7,7 +7,7 @@ import java.util.Map;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.domain.HostMetadata;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 
 @Component
 public class NameNodeFilter implements HostFilter {

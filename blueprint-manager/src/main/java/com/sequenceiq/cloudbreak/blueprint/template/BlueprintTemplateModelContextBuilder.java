@@ -19,7 +19,7 @@ import com.sequenceiq.cloudbreak.blueprint.template.views.LdapView;
 import com.sequenceiq.cloudbreak.blueprint.template.views.RdsView;
 import com.sequenceiq.cloudbreak.blueprint.template.views.SharedServiceConfigsView;
 import com.sequenceiq.cloudbreak.blueprint.templates.GeneralClusterConfigs;
-import com.sequenceiq.cloudbreak.domain.Gateway;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 

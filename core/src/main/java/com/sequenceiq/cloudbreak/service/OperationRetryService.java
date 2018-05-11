@@ -13,9 +13,9 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.core.flow2.Flow2Handler;
-import com.sequenceiq.cloudbreak.domain.Cluster;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.FlowLog;
-import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.StateStatus;
 import com.sequenceiq.cloudbreak.repository.FlowLogRepository;
 

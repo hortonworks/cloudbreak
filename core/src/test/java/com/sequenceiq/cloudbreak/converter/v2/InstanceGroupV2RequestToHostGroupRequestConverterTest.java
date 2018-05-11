@@ -11,8 +11,8 @@ import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.MockitoAnnotations;
 
-import com.sequenceiq.cloudbreak.api.model.HostGroupRequest;
-import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
+import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupRequest;
+import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.model.RecoveryMode;
 import com.sequenceiq.cloudbreak.api.model.v2.InstanceGroupV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.SecurityGroupV2Request;

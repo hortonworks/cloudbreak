@@ -41,9 +41,9 @@ import com.sequenceiq.cloudbreak.api.model.EndpointRule;
 import com.sequenceiq.cloudbreak.api.model.EndpointRule.Action;
 import com.sequenceiq.cloudbreak.api.model.ExposedService;
 import com.sequenceiq.cloudbreak.api.model.Port;
-import com.sequenceiq.cloudbreak.domain.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.SecurityRule;
-import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 
 public final class NetworkUtils {
 

@@ -10,7 +10,7 @@ import com.sequenceiq.cloudbreak.api.model.v2.InstanceGroupV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.SecurityGroupV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.TemplateV2Request;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
-import com.sequenceiq.cloudbreak.domain.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 
 @Component
 public class InstanceGroupToInstanceGroupV2RequestConverter extends AbstractConversionServiceAwareConverter<InstanceGroup, InstanceGroupV2Request> {

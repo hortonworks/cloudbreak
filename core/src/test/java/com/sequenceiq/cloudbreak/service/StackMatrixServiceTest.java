@@ -16,7 +16,7 @@ import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.powermock.reflect.Whitebox;
 
-import com.sequenceiq.cloudbreak.api.model.StackMatrix;
+import com.sequenceiq.cloudbreak.api.model.stack.StackMatrix;
 import com.sequenceiq.cloudbreak.cloud.model.component.AmbariInfo;
 import com.sequenceiq.cloudbreak.cloud.model.component.AmbariRepoDetails;
 import com.sequenceiq.cloudbreak.cloud.model.component.DefaultHDFEntries;

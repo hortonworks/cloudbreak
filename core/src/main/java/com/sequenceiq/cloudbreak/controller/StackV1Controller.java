@@ -17,9 +17,9 @@ import com.sequenceiq.cloudbreak.api.model.AmbariAddressJson;
 import com.sequenceiq.cloudbreak.api.model.AutoscaleStackResponse;
 import com.sequenceiq.cloudbreak.api.model.CertificateResponse;
 import com.sequenceiq.cloudbreak.api.model.PlatformVariantsJson;
-import com.sequenceiq.cloudbreak.api.model.StackRequest;
-import com.sequenceiq.cloudbreak.api.model.StackResponse;
-import com.sequenceiq.cloudbreak.api.model.StackValidationRequest;
+import com.sequenceiq.cloudbreak.api.model.stack.StackRequest;
+import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;
+import com.sequenceiq.cloudbreak.api.model.stack.StackValidationRequest;
 import com.sequenceiq.cloudbreak.api.model.UpdateStackJson;
 import com.sequenceiq.cloudbreak.service.StackCommonService;
 

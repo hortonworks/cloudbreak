@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.service.cluster.flow;
 import java.util.Map;
 
 import com.sequenceiq.ambari.client.AmbariClient;
-import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.StackContext;
 import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariOperationType;
 

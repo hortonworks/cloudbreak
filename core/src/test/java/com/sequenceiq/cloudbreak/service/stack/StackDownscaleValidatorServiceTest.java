@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.service.stack;
 
-import static com.sequenceiq.cloudbreak.api.model.InstanceMetadataType.CORE;
-import static com.sequenceiq.cloudbreak.api.model.InstanceMetadataType.GATEWAY;
-import static com.sequenceiq.cloudbreak.api.model.InstanceMetadataType.GATEWAY_PRIMARY;
+import static com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceMetadataType.CORE;
+import static com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceMetadataType.GATEWAY;
+import static com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceMetadataType.GATEWAY_PRIMARY;
 
 import org.junit.Rule;
 import org.junit.Test;

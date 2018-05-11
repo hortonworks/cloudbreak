@@ -1,6 +1,6 @@
 package com.sequenceiq.it.cloudbreak;
 
-import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
+import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.model.imagecatalog.ImageResponse;
 import com.sequenceiq.cloudbreak.api.model.imagecatalog.ImagesResponse;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;

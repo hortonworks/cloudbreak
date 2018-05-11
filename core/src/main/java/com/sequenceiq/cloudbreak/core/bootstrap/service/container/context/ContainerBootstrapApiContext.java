@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.core.bootstrap.service.container.context;
 
-import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.orchestrator.container.ContainerOrchestrationBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.container.ContainerOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;

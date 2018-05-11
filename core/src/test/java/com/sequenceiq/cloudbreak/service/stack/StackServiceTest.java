@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.service.stack;
 
-import static com.sequenceiq.cloudbreak.api.model.InstanceMetadataType.CORE;
-import static com.sequenceiq.cloudbreak.api.model.InstanceMetadataType.GATEWAY;
+import static com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceMetadataType.CORE;
+import static com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceMetadataType.GATEWAY;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyLong;
@@ -34,9 +34,9 @@ import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
-import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
-import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.StackAuthentication;
 import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;

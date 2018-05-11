@@ -8,9 +8,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.model.GatewayJson;
+import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.GatewayJson;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
-import com.sequenceiq.cloudbreak.domain.Gateway;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 
 @Component
 public class GatewayToGatewayRequestConverter extends AbstractConversionServiceAwareConverter<Gateway, GatewayJson> {

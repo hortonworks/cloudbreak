@@ -20,14 +20,14 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.TestUtil;
-import com.sequenceiq.cloudbreak.api.model.HostGroupAdjustmentJson;
-import com.sequenceiq.cloudbreak.api.model.InstanceGroupAdjustmentJson;
+import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupAdjustmentJson;
+import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.cloud.Acceptable;
 import com.sequenceiq.cloudbreak.cloud.reactor.ErrorHandlerAwareReactorEventFactory;
 import com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainTriggers;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.termination.ClusterTerminationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
-import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.repair.UnhealthyInstances;
 

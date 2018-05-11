@@ -20,9 +20,9 @@ import org.mockito.junit.MockitoJUnitRunner;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.TestUtil;
-import com.sequenceiq.cloudbreak.domain.InstanceGroup;
-import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
-import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 
 @RunWith(MockitoJUnitRunner.class)

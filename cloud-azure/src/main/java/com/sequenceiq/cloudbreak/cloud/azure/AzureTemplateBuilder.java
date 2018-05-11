@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
+import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureCredentialView;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureInstanceCredentialView;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureSecurityView;

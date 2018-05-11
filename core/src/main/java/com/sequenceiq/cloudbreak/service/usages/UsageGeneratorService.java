@@ -20,7 +20,7 @@ import com.sequenceiq.cloudbreak.api.model.UsageStatus;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
 import com.sequenceiq.cloudbreak.domain.FlexSubscription;
-import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.ha.CloudbreakNodeConfig;
 
 @Service

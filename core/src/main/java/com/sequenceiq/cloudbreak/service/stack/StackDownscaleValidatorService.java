@@ -1,14 +1,14 @@
 package com.sequenceiq.cloudbreak.service.stack;
 
-import static com.sequenceiq.cloudbreak.api.model.InstanceMetadataType.GATEWAY;
-import static com.sequenceiq.cloudbreak.api.model.InstanceMetadataType.GATEWAY_PRIMARY;
+import static com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceMetadataType.GATEWAY;
+import static com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceMetadataType.GATEWAY_PRIMARY;
 
 import java.util.Objects;
 
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.model.InstanceMetadataType;
+import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceMetadataType;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 
 @Component

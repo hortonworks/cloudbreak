@@ -3,7 +3,7 @@ package com.sequenceiq.it.cloudbreak.newway.cloud;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.sequenceiq.cloudbreak.api.model.StackAuthenticationRequest;
+import com.sequenceiq.cloudbreak.api.model.stack.StackAuthenticationRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.NetworkV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.TemplateV2Request;
 import com.sequenceiq.it.cloudbreak.newway.Credential;

@@ -11,8 +11,8 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-import com.sequenceiq.cloudbreak.api.model.ClusterTemplateRequest;
-import com.sequenceiq.cloudbreak.api.model.ClusterTemplateResponse;
+import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterTemplateRequest;
+import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterTemplateResponse;
 import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.doc.Notes;

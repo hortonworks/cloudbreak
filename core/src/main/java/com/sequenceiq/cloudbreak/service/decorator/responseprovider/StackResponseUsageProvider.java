@@ -10,10 +10,10 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.CloudbreakUsageJson;
-import com.sequenceiq.cloudbreak.api.model.StackResponse;
-import com.sequenceiq.cloudbreak.api.model.StackResponseEntries;
+import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;
+import com.sequenceiq.cloudbreak.api.model.stack.StackResponseEntries;
 import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
-import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.repository.CloudbreakUsageRepository;
 
 @Component

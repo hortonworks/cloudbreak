@@ -7,7 +7,7 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
-import com.sequenceiq.cloudbreak.domain.Component;
+import com.sequenceiq.cloudbreak.domain.stack.Component;
 
 @EntityType(entityClass = Component.class)
 public interface ComponentRepository extends CrudRepository<Component, Long> {

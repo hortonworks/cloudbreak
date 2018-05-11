@@ -27,7 +27,7 @@ import com.sequenceiq.cloudbreak.blueprint.nifi.HdfConfigs;
 import com.sequenceiq.cloudbreak.blueprint.template.views.SharedServiceConfigsView;
 import com.sequenceiq.cloudbreak.blueprint.templates.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.blueprint.testrepeater.TestFile;
-import com.sequenceiq.cloudbreak.domain.HostGroup;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
 class BlueprintModulTestModelProvider {

@@ -8,8 +8,8 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.model.AmbariInfoJson;
-import com.sequenceiq.cloudbreak.api.model.StackDescriptor;
-import com.sequenceiq.cloudbreak.api.model.StackMatrix;
+import com.sequenceiq.cloudbreak.api.model.stack.StackDescriptor;
+import com.sequenceiq.cloudbreak.api.model.stack.StackMatrix;
 import com.sequenceiq.cloudbreak.cloud.model.component.AmbariInfo;
 import com.sequenceiq.cloudbreak.cloud.model.component.DefaultHDFEntries;
 import com.sequenceiq.cloudbreak.cloud.model.component.DefaultHDFInfo;

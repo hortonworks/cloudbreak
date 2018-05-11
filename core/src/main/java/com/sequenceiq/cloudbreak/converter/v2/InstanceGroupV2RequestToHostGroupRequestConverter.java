@@ -5,7 +5,7 @@ import java.util.Collections;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.ConstraintJson;
-import com.sequenceiq.cloudbreak.api.model.HostGroupRequest;
+import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.InstanceGroupV2Request;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 

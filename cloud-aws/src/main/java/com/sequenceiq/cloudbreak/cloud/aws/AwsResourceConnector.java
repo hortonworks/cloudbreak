@@ -77,7 +77,7 @@ import com.amazonaws.services.ec2.model.Vpc;
 import com.google.common.collect.Lists;
 import com.google.common.net.InetAddresses;
 import com.sequenceiq.cloudbreak.api.model.AdjustmentType;
-import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
+import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationTemplateBuilder.ModelContext;
 import com.sequenceiq.cloudbreak.cloud.aws.task.AwsPollTaskFactory;

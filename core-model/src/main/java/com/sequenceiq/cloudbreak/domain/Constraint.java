@@ -8,6 +8,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
+
 @Entity
 @Table(name = "hostgroup_constraint")
 public class Constraint implements ProvisionEntity {

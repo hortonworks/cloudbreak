@@ -205,14 +205,18 @@ public class ModelDescriptions {
     }
 
     public static class GatewayModelDescription {
-        public static final String ENABLE_KNOX_GATEWAY = "enable Knox gateway security";
+        public static final String ENABLE_KNOX_GATEWAY = "[DEPRECATED] enableGateway is no longer needed to determine if gateway needs to be launched or not. "
+                + "Presence of gateway definition in request is suffucicient.";
         public static final String KNOX_PATH = "Knox gateway path";
         public static final String KNOX_GATEWAY_TYPE = "Knox gateway type";
         public static final String KNOX_SSO_TYPE = "Knox SSO type";
+        public static final String DEPRECATED_KNOX_TOPOLOGY_NAME = "[DEPRECATED] Use the 'Knox topology name' inside the 'gateway' part of the request.";
         public static final String KNOX_TOPOLOGY_NAME = "Knox topology name";
-        public static final String EXPOSED_KNOX_SERVICES = "exposed Knox services";
+        public static final String DEPRECATED_EXPOSED_KNOX_SERVICES = "[DEPRECATED] Use the 'exposed Knox services' inside the 'gateway' part of the request.";
+        public static final String EXPOSED_KNOX_SERVICES = "exposed Knox services - those services that should be accessible through Knox gateway.";
         public static final String KNOX_SSO_PROVIDER = "SSO provider cluster name";
         public static final String KNOX_SSO_CERT = "SSO Provider certificate";
+        public static final String GATEWAY_TOPOLOGIES = "Topology definitions of the gateway.";
     }
 
     public static class ClusterTemplateModelDescription {

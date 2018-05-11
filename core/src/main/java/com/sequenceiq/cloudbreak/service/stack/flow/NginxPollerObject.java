@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.service.stack.flow;
 import javax.ws.rs.client.Client;
 
 import com.sequenceiq.cloudbreak.client.CertificateTrustManager.SavingX509TrustManager;
-import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.StackContext;
 
 public class NginxPollerObject extends StackContext {

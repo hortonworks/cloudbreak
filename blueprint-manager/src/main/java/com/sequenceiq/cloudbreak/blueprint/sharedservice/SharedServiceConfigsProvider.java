@@ -4,7 +4,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.blueprint.template.views.SharedServiceConfigsView;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 
 @Component
 public class SharedServiceConfigsProvider {
