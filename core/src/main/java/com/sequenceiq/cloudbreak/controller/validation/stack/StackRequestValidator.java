@@ -3,8 +3,6 @@ package com.sequenceiq.cloudbreak.controller.validation.stack;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
@@ -19,8 +17,6 @@ import com.sequenceiq.cloudbreak.controller.validation.Validator;
 
 @Component
 public class StackRequestValidator implements Validator<StackRequest> {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(StackRequestValidator.class);
 
     private final Validator<TemplateRequest> templateRequestValidator;
 
