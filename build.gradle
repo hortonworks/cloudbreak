@@ -87,6 +87,7 @@ subprojects {
       html.enabled true
     }
   }
+  
   checkstyle {
     toolVersion = "7.6"
   }
