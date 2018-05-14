@@ -12,21 +12,22 @@ import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.core.convert.ConversionService;
 
 import com.sequenceiq.cloudbreak.api.model.AmbariDatabaseDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.AmbariRepoDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.BlueprintInputJson;
-import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRequest;
 import com.sequenceiq.cloudbreak.api.model.ConfigStrategy;
 import com.sequenceiq.cloudbreak.api.model.ConnectedClusterRequest;
 import com.sequenceiq.cloudbreak.api.model.ExecutorType;
-import com.sequenceiq.cloudbreak.api.model.FileSystemRequest;
-import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.GatewayJson;
 import com.sequenceiq.cloudbreak.api.model.KerberosRequest;
 import com.sequenceiq.cloudbreak.api.model.SharedServiceRequest;
+import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRequest;
+import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.GatewayJson;
 import com.sequenceiq.cloudbreak.api.model.v2.AmbariV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.ClusterV2Request;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.service.sharedservice.SharedServiceConfigProvider;
 
 public class ClusterV2RequestToClusterRequestConverterTest {
@@ -37,8 +38,14 @@ public class ClusterV2RequestToClusterRequestConverterTest {
     @Mock
     private SharedServiceConfigProvider sharedServiceConfigProvider;
 
+    @Mock
+    private IdentityUser user;
+
+    @Mock
+    private ConversionService conversionService;
+
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         MockitoAnnotations.initMocks(this);
     }
 
@@ -118,7 +125,6 @@ public class ClusterV2RequestToClusterRequestConverterTest {
         Assert.assertEquals(source.getExecutorType(), result.getExecutorType());
         Assert.assertEquals(source.getEmailNeeded(), result.getEmailNeeded());
         Assert.assertEquals(source.getEmailTo(), result.getEmailTo());
-        Assert.assertEquals(source.getFileSystem(), result.getFileSystem());
         Assert.assertEquals(source.getName(), result.getName());
         Assert.assertEquals(source.getProxyName(), result.getProxyName());
         Assert.assertEquals(source.getLdapConfigName(), result.getLdapConfigName());
@@ -131,7 +137,6 @@ public class ClusterV2RequestToClusterRequestConverterTest {
         request.setEmailNeeded(true);
         request.setEmailTo("customemailaddress@someemailprovider.com");
         request.setExecutorType(ExecutorType.CONTAINER);
-        request.setFileSystem(new FileSystemRequest());
         request.setLdapConfigName("nameOfTheLdapConfig");
         request.setName("some name");
         request.setProxyName("proxy name");

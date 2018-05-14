@@ -10,6 +10,7 @@ public enum APIResourceType {
     RECIPE("hrec"),
     NETWORK("n"),
     TOPOLOGY("tp"),
+    FILESYSTEM("fs"),
     SECURITY_GROUP("sg"),
     CLUSTER_TEMPLATE("ct"),
     RDS_CONFIG("rds"),

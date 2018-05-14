@@ -148,6 +148,7 @@ public class ClusterTerminationService {
         cluster.setRdsConfigs(new HashSet<>());
         cluster.setProxyConfig(null);
         cluster.setStatus(DELETE_COMPLETED);
+        cluster.setFileSystem(null);
         transactionService.required(() -> {
             deleteClusterHostGroupsWithItsMetadata(cluster);
             rdsConfigService.deleteDefaultRdsConfigs(rdsConfigs);

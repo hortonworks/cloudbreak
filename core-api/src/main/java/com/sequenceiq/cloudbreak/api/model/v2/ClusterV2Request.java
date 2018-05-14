@@ -10,7 +10,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.cloudbreak.api.model.ExecutorType;
-import com.sequenceiq.cloudbreak.api.model.FileSystemRequest;
 import com.sequenceiq.cloudbreak.api.model.JsonEntity;
 import com.sequenceiq.cloudbreak.api.model.SharedServiceRequest;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
@@ -42,9 +41,8 @@ public class ClusterV2Request implements JsonEntity {
     @ApiModelProperty(ClusterModelDescription.PROXY_NAME)
     private String proxyName;
 
-    @Valid
     @ApiModelProperty(StackModelDescription.FILE_SYSTEM)
-    private FileSystemRequest fileSystem;
+    private FileSystemV2Request fileSystem;
 
     @ApiModelProperty(ClusterModelDescription.EXECUTOR_TYPE)
     private ExecutorType executorType = ExecutorType.DEFAULT;
@@ -62,14 +60,6 @@ public class ClusterV2Request implements JsonEntity {
 
     public void setEmailNeeded(Boolean emailNeeded) {
         this.emailNeeded = emailNeeded;
-    }
-
-    public FileSystemRequest getFileSystem() {
-        return fileSystem;
-    }
-
-    public void setFileSystem(FileSystemRequest fileSystem) {
-        this.fileSystem = fileSystem;
     }
 
     public String getEmailTo() {
@@ -100,6 +90,14 @@ public class ClusterV2Request implements JsonEntity {
     @JsonIgnore
     public void setName(String name) {
         this.name = name;
+    }
+
+    public FileSystemV2Request getFileSystem() {
+        return fileSystem;
+    }
+
+    public void setFileSystem(FileSystemV2Request fileSystem) {
+        this.fileSystem = fileSystem;
     }
 
     public ExecutorType getExecutorType() {

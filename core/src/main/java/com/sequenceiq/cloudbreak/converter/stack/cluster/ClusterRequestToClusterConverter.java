@@ -7,6 +7,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -19,17 +21,24 @@ import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.GatewayJson;
 import com.sequenceiq.cloudbreak.controller.exception.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.ClusterAttributes;
-import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
+import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
+import com.sequenceiq.cloudbreak.service.filesystem.FileSystemConfigService;
 import com.sequenceiq.cloudbreak.util.PasswordUtil;
 
 @Component
 public class ClusterRequestToClusterConverter extends AbstractConversionServiceAwareConverter<ClusterRequest, Cluster> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterRequestToClusterConverter.class);
+
+    @Inject
+    private FileSystemConfigService fileSystemConfigService;
+
+    @Inject
+    private AuthenticatedUserService authenticatedUserService;
 
     @Override
     public Cluster convert(ClusterRequest source) {
@@ -51,12 +60,12 @@ public class ClusterRequestToClusterConverter extends AbstractConversionServiceA
         }
         cluster.setConfigStrategy(source.getConfigStrategy());
         cluster.setEmailTo(source.getEmailTo());
-        FileSystemBase fileSystem = source.getFileSystem();
         cluster.setCloudbreakAmbariPassword(PasswordUtil.generatePassword());
         cluster.setCloudbreakAmbariUser("cloudbreak");
+        FileSystemBase fileSystem = source.getFileSystem();
         convertAttributes(source, cluster);
         if (fileSystem != null) {
-            cluster.setFileSystem(getConversionService().convert(fileSystem, FileSystem.class));
+            cluster.setFileSystem(fileSystemConfigService.getPrivateFileSystem(fileSystem.getName(), authenticatedUserService.getCbUser()));
         }
         try {
             Json json = new Json(convertContainerConfigs(source.getCustomContainer()));

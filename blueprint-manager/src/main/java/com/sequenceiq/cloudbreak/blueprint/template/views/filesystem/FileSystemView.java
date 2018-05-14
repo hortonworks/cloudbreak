@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.blueprint.template.views.filesystem;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import com.sequenceiq.cloudbreak.api.model.FileSystemConfiguration;
@@ -8,16 +7,16 @@ import com.sequenceiq.cloudbreak.blueprint.template.views.FileSystemConfiguratio
 
 public abstract class FileSystemView<T extends FileSystemConfiguration> {
 
-    private boolean useAsDefault;
+    private final boolean useAsDefault;
 
-    private String defaultFs;
+    private final String defaultFs;
 
-    private Map<String, String> properties = new HashMap<>();
+    private Map<String, String> properties;
 
     public FileSystemView(FileSystemConfigurationView fileSystemConfigurationView) {
-        this.useAsDefault = fileSystemConfigurationView.isDefaultFs();
-        this.properties = fileSystemConfigurationView.getFileSystemConfiguration().getDynamicProperties();
-        this.defaultFs = defaultFsValue((T) fileSystemConfigurationView.getFileSystemConfiguration());
+        useAsDefault = fileSystemConfigurationView.isDefaultFs();
+        properties = fileSystemConfigurationView.getFileSystemConfiguration().getDynamicProperties();
+        defaultFs = defaultFsValue((T) fileSystemConfigurationView.getFileSystemConfiguration());
     }
 
     public Map<String, String> getProperties() {

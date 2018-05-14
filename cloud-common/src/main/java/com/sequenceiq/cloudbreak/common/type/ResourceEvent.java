@@ -25,6 +25,8 @@ public enum ResourceEvent {
     TEMPLATE_CREATED("resource.template.created"),
     TEMPLATE_DELETED("resource.template.deleted"),
     TOPOLOGY_CREATED("resource.topology.created"),
+    FILESYSTEM_CREATED("resource.esystem.created"),
+    FILESYSTEM_DELETED("resource.filesystem.deleted"),
     TOPOLOGY_DELETED("resource.topology.deleted");
 
     private final String message;

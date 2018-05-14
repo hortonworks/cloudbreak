@@ -47,16 +47,18 @@ import com.sequenceiq.cloudbreak.converter.AmbariStackDetailsJsonToStackRepoDeta
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
+import com.sequenceiq.cloudbreak.domain.FileSystem;
+import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.Component;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.json.Json;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariRepositoryVersionService;
 import com.sequenceiq.cloudbreak.service.decorator.ClusterDecorator;
+import com.sequenceiq.cloudbreak.service.filesystem.FileSystemConfigService;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 @Service
@@ -66,6 +68,9 @@ public class ClusterCreationSetupService {
 
     @Inject
     private FileSystemValidator fileSystemValidator;
+
+    @Inject
+    private FileSystemConfigService fileSystemConfigService;
 
     @Inject
     private CredentialToCloudCredentialConverter credentialToCloudCredentialConverter;
@@ -132,6 +137,13 @@ public class ClusterCreationSetupService {
         String stackName = stack.getName();
 
         long start = System.currentTimeMillis();
+
+        if (request.getFileSystem() != null) {
+            FileSystem fs = fileSystemConfigService.create(user, conversionService.convert(request.getFileSystem(), FileSystem.class));
+            request.getFileSystem().setName(fs.getName());
+            LOGGER.info("File system saving took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+        }
+
         Cluster cluster = conversionService.convert(request, Cluster.class);
         cluster.setStack(stack);
         LOGGER.info("Cluster conversion took {} ms for stack {}", System.currentTimeMillis() - start, stackName);

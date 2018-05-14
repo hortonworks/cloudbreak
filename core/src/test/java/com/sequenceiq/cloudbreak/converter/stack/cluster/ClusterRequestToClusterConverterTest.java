@@ -5,6 +5,8 @@ import static org.junit.Assert.assertNull;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
 
@@ -19,11 +21,14 @@ import com.sequenceiq.cloudbreak.api.model.FileSystemRequest;
 import com.sequenceiq.cloudbreak.api.model.KerberosRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.GatewayJson;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.converter.AbstractJsonConverterTest;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
+import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
+import com.sequenceiq.cloudbreak.service.filesystem.FileSystemConfigService;
 
 public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterTest<ClusterRequest> {
 
@@ -33,10 +38,18 @@ public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterT
     @Mock
     private ConversionService conversionService;
 
+    @Mock
+    private FileSystemConfigService fileSystemConfigService;
+
+    @Mock
+    private AuthenticatedUserService authenticatedUserService;
+
     @Before
     public void setUp() {
         underTest = new ClusterRequestToClusterConverter();
         MockitoAnnotations.initMocks(this);
+        when(authenticatedUserService.getCbUser()).thenReturn(mock(IdentityUser.class));
+        when(fileSystemConfigService.getPrivateFileSystem(any(String.class), any(IdentityUser.class))).thenReturn(mock(FileSystem.class));
     }
 
     @Test
