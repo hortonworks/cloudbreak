@@ -4,13 +4,13 @@ import com.sequenceiq.cloudbreak.api.model.FileSystemConfiguration;
 
 public class FileSystemConfigurationView {
 
-    private FileSystemConfiguration fileSystemConfiguration;
+    private final FileSystemConfiguration fileSystemConfiguration;
 
-    private boolean defaultFs;
+    private final boolean defaultFs;
 
     public FileSystemConfigurationView(FileSystemConfiguration fileSystemConfiguration) {
         this.fileSystemConfiguration = fileSystemConfiguration;
-        this.defaultFs = false;
+        defaultFs = false;
     }
 
     public FileSystemConfigurationView(FileSystemConfiguration fileSystemConfiguration, boolean defaultFs) {

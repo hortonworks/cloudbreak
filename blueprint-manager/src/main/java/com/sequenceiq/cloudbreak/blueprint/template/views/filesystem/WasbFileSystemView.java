@@ -7,18 +7,18 @@ import com.sequenceiq.cloudbreak.blueprint.template.views.FileSystemConfiguratio
 
 public class WasbFileSystemView extends FileSystemView<WasbFileSystemConfiguration> {
 
-    private String accountKey;
+    private final String accountKey;
 
-    private String accountName;
+    private final String accountName;
 
-    private boolean secure;
+    private final boolean secure;
 
     public WasbFileSystemView(FileSystemConfigurationView fileSystemConfigurationView) {
         super(fileSystemConfigurationView);
         WasbFileSystemConfiguration wasbConfig = (WasbFileSystemConfiguration) fileSystemConfigurationView.getFileSystemConfiguration();
-        this.secure = wasbConfig.isSecure();
-        this.accountKey = wasbConfig.getAccountKey();
-        this.accountName = wasbConfig.getAccountName();
+        secure = wasbConfig.isSecure();
+        accountKey = wasbConfig.getAccountKey();
+        accountName = wasbConfig.getAccountName();
     }
 
     @Override
@@ -35,7 +35,7 @@ public class WasbFileSystemView extends FileSystemView<WasbFileSystemConfigurati
         return accountName;
     }
 
-    public boolean getSecure() {
+    public boolean isSecure() {
         return secure;
     }
 }

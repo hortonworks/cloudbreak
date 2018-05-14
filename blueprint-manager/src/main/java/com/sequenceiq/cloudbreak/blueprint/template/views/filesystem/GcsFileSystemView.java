@@ -5,18 +5,18 @@ import com.sequenceiq.cloudbreak.blueprint.template.views.FileSystemConfiguratio
 
 public class GcsFileSystemView extends FileSystemView<GcsFileSystemConfiguration> {
 
-    private String defaultBucketName;
+    private final String defaultBucketName;
 
-    private String projectId;
+    private final String projectId;
 
-    private String serviceAccountEmail;
+    private final String serviceAccountEmail;
 
     public GcsFileSystemView(FileSystemConfigurationView fileSystemConfigurationView) {
         super(fileSystemConfigurationView);
         GcsFileSystemConfiguration gcsConfig = (GcsFileSystemConfiguration) fileSystemConfigurationView.getFileSystemConfiguration();
-        this.defaultBucketName = gcsConfig.getDefaultBucketName();
-        this.projectId = gcsConfig.getProjectId();
-        this.serviceAccountEmail = gcsConfig.getServiceAccountEmail();
+        defaultBucketName = gcsConfig.getDefaultBucketName();
+        projectId = gcsConfig.getProjectId();
+        serviceAccountEmail = gcsConfig.getServiceAccountEmail();
     }
 
     @Override

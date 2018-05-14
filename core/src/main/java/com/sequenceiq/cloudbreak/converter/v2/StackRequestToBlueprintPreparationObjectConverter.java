@@ -38,8 +38,10 @@ import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
+import com.sequenceiq.cloudbreak.service.filesystem.FileSystemConfigService;
 import com.sequenceiq.cloudbreak.service.flex.FlexSubscriptionService;
 import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
@@ -84,6 +86,12 @@ public class StackRequestToBlueprintPreparationObjectConverter extends AbstractC
 
     @Inject
     private SharedServiceConfigProvider sharedServiceConfigProvider;
+
+    @Inject
+    private FileSystemConfigService fileSystemConfigService;
+
+    @Inject
+    private AuthenticatedUserService authenticatedUserService;
 
     @Override
     public BlueprintPreparationObject convert(StackV2Request source) {
@@ -183,9 +191,8 @@ public class StackRequestToBlueprintPreparationObjectConverter extends AbstractC
         FileSystemConfigurationView fileSystemConfigurationView = null;
         if (source.getCluster().getFileSystem() != null) {
             FileSystem fileSystem = getConversionService().convert(source.getCluster().getFileSystem(), FileSystem.class);
-
             FileSystemConfiguration fileSystemConfiguration = fileSystemConfigurationProvider.fileSystemConfiguration(fileSystem, null);
-            fileSystemConfigurationView = new FileSystemConfigurationView(fileSystemConfiguration, source.getCluster().getFileSystem().isDefaultFs());
+            fileSystemConfigurationView = new FileSystemConfigurationView(fileSystemConfiguration, fileSystem.isDefaultFs());
         }
         return fileSystemConfigurationView;
     }

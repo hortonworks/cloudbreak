@@ -8,8 +8,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRequest;
 import com.sequenceiq.cloudbreak.api.model.ConnectedClusterRequest;
+import com.sequenceiq.cloudbreak.api.model.FileSystemRequest;
+import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.AmbariV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.ClusterV2Request;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
@@ -29,8 +30,10 @@ public class ClusterV2RequestToClusterRequestConverter extends AbstractConversio
         cluster.setExecutorType(source.getExecutorType());
         cluster.setEmailNeeded(source.getEmailNeeded());
         cluster.setEmailTo(source.getEmailTo());
-        cluster.setFileSystem(source.getFileSystem());
-        cluster.setName(source.getName());
+        if (source.getFileSystem() != null) {
+            cluster.setFileSystem(getConversionService().convert(source.getFileSystem(), FileSystemRequest.class));
+        }
+            cluster.setName(source.getName());
         if (source.getRdsConfigNames() != null && !source.getRdsConfigNames().isEmpty()) {
             cluster.setRdsConfigNames(source.getRdsConfigNames());
         }

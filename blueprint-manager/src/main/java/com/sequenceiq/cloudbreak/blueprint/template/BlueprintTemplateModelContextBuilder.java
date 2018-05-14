@@ -29,9 +29,9 @@ public class BlueprintTemplateModelContextBuilder {
 
     private final Map<String, String> customProperties = new HashMap<>();
 
-    private Map<String, RdsView> rds = new HashMap<>();
+    private final Map<String, RdsView> rds = new HashMap<>();
 
-    private Map<String, FileSystemView> fileSystemConfig = new HashMap<>();
+    private final Map<String, FileSystemView> fileSystemConfig = new HashMap<>();
 
     private Optional<LdapView> ldap = Optional.empty();
 
@@ -52,7 +52,7 @@ public class BlueprintTemplateModelContextBuilder {
     private Map<String, Object> fixInputs = new HashMap<>();
 
     public BlueprintTemplateModelContextBuilder withGeneralClusterConfigs(GeneralClusterConfigs generalClusterConfigs) {
-        this.generalClusterConfigsView = new GeneralClusterConfigsView(generalClusterConfigs);
+        generalClusterConfigsView = new GeneralClusterConfigsView(generalClusterConfigs);
         return this;
     }
 
@@ -61,7 +61,7 @@ public class BlueprintTemplateModelContextBuilder {
             if (rdsConfig != null) {
                 RdsView rdsView = new RdsView(rdsConfig);
                 String componentName = rdsConfig.getType().toLowerCase();
-                this.rds.put(componentName, rdsView);
+                rds.put(componentName, rdsView);
             }
         }
         return this;
@@ -82,12 +82,12 @@ public class BlueprintTemplateModelContextBuilder {
     }
 
     public BlueprintTemplateModelContextBuilder withLdap(LdapConfig ldapConfig) {
-        this.ldap = Optional.ofNullable(ldapConfig == null ? null : new LdapView(ldapConfig));
+        ldap = Optional.ofNullable(ldapConfig == null ? null : new LdapView(ldapConfig));
         return this;
     }
 
     public BlueprintTemplateModelContextBuilder withGateway(Gateway gatewayConfig) {
-        this.gateway = Optional.ofNullable(gatewayConfig == null ? null : new GatewayView(gatewayConfig));
+        gateway = Optional.ofNullable(gatewayConfig == null ? null : new GatewayView(gatewayConfig));
         return this;
     }
 
@@ -97,12 +97,12 @@ public class BlueprintTemplateModelContextBuilder {
     }
 
     public BlueprintTemplateModelContextBuilder withGateway(GatewayView gatewayConfig) {
-        this.gateway = Optional.ofNullable(gatewayConfig);
+        gateway = Optional.ofNullable(gatewayConfig);
         return this;
     }
 
     public BlueprintTemplateModelContextBuilder withCustomProperty(String key, String value) {
-        this.customProperties.put(key, value);
+        customProperties.put(key, value);
         return this;
     }
 
@@ -123,7 +123,7 @@ public class BlueprintTemplateModelContextBuilder {
     }
 
     public BlueprintTemplateModelContextBuilder withSharedServiceConfigs(SharedServiceConfigsView sharedServiceConfigsView) {
-        this.sharedServiceConfigs = Optional.ofNullable(sharedServiceConfigsView);
+        sharedServiceConfigs = Optional.ofNullable(sharedServiceConfigsView);
         return this;
     }
 

@@ -5,21 +5,21 @@ import com.sequenceiq.cloudbreak.blueprint.template.views.FileSystemConfiguratio
 
 public class AdlsFileSystemView extends FileSystemView<AdlsFileSystemConfiguration> {
 
-    private String accountName;
+    private final String accountName;
 
-    private String clientId;
+    private final String clientId;
 
-    private String credential;
+    private final String credential;
 
-    private String tenantId;
+    private final String tenantId;
 
     public AdlsFileSystemView(FileSystemConfigurationView fileSystemConfigurationView) {
         super(fileSystemConfigurationView);
         AdlsFileSystemConfiguration adlsConfig = (AdlsFileSystemConfiguration) fileSystemConfigurationView.getFileSystemConfiguration();
-        this.accountName = adlsConfig.getAccountName();
-        this.clientId = adlsConfig.getClientId();
-        this.credential = adlsConfig.getCredential();
-        this.tenantId = adlsConfig.getTenantId();
+        accountName = adlsConfig.getAccountName();
+        clientId = adlsConfig.getClientId();
+        credential = adlsConfig.getCredential();
+        tenantId = adlsConfig.getTenantId();
     }
 
     @Override
@@ -42,4 +42,5 @@ public class AdlsFileSystemView extends FileSystemView<AdlsFileSystemConfigurati
     public String getTenantId() {
         return tenantId;
     }
+
 }

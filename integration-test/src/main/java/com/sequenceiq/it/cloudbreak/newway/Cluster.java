@@ -3,14 +3,25 @@ package com.sequenceiq.it.cloudbreak.newway;
 import java.util.Set;
 import java.util.function.Function;
 
+import javax.inject.Inject;
+
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.convert.ConversionService;
+
 import com.sequenceiq.cloudbreak.api.model.ExecutorType;
 import com.sequenceiq.cloudbreak.api.model.FileSystemRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.AmbariV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.ClusterV2Request;
+import com.sequenceiq.cloudbreak.api.model.v2.FileSystemV2Request;
 import com.sequenceiq.it.IntegrationTestContext;
 
-public class Cluster extends Entity  {
-    public static final String CLUSTER_REQUEST = "CLUSTER_REQUEST";
+public class Cluster extends Entity {
+
+    private static final String CLUSTER_REQUEST = "CLUSTER_REQUEST";
+
+    @Inject
+    @Qualifier("conversionService")
+    private ConversionService conversionService;
 
     private ClusterV2Request request;
 
@@ -18,7 +29,7 @@ public class Cluster extends Entity  {
 
     Cluster(String newId) {
         super(newId);
-        this.request = new ClusterV2Request();
+        request = new ClusterV2Request();
     }
 
     Cluster() {
@@ -68,7 +79,7 @@ public class Cluster extends Entity  {
     }
 
     public Cluster withFileSystem(FileSystemRequest fileSystemRequest) {
-        request.setFileSystem(fileSystemRequest);
+        request.setFileSystem(conversionService.convert(fileSystemRequest, FileSystemV2Request.class));
         return this;
     }
 
@@ -88,7 +99,7 @@ public class Cluster extends Entity  {
     }
 
     public static Function<IntegrationTestContext, Cluster> getTestContextCluster(String key) {
-        return (testContext) -> testContext.getContextParam(key, Cluster.class);
+        return testContext -> testContext.getContextParam(key, Cluster.class);
     }
 
     public static Function<IntegrationTestContext, Cluster> getTestContextCluster() {
