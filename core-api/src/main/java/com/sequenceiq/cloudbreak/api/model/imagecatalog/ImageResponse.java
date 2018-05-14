@@ -40,7 +40,7 @@ public class ImageResponse implements JsonEntity {
     @JsonInclude(NON_EMPTY)
     private StackDetailsJson stackDetails;
 
-    @JsonProperty("default")
+    @JsonProperty("defaultImage")
     private boolean defaultImage;
 
     public String getDate() {
