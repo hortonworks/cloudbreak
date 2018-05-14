@@ -91,16 +91,12 @@ public class AmbariStackDetailsJsonToStackRepoDetailsConverter extends AbstractC
         return repo;
     }
 
-    public boolean onlyMpackListIsDefined(AmbariStackDetailsJson source) {
-        return !isBaseRepoRequiredFieldsExists(source) && !isVdfRequiredFieldsExists(source) && !source.getMpacks().isEmpty();
-    }
-
-    private boolean isBaseRepoRequiredFieldsExists(AmbariStackDetailsJson source) {
+    public boolean isBaseRepoRequiredFieldsExists(AmbariStackDetailsJson source) {
         return Stream.of(source.getStackRepoId(), source.getStackBaseURL(), source.getUtilsRepoId(), source.getUtilsBaseURL())
                     .noneMatch(StringUtils::isEmpty);
     }
 
-    private boolean isVdfRequiredFieldsExists(AmbariStackDetailsJson source) {
+    public boolean isVdfRequiredFieldsExists(AmbariStackDetailsJson source) {
         return Stream.of(source.getRepositoryVersion(), source.getVersionDefinitionFileUrl()).noneMatch(StringUtils::isEmpty);
     }
 }

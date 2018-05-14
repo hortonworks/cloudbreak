@@ -198,7 +198,8 @@ public class ClusterCreationSetupService {
         Json stackRepoDetailsJson;
         AmbariStackDetailsJson ambariStackDetails = request.getAmbariStackDetails();
         if (!stackHdpRepoConfig.isPresent()) {
-            if (ambariStackDetails != null && !stackRepoDetailsConverter.onlyMpackListIsDefined(ambariStackDetails)) {
+            if (ambariStackDetails != null && (stackRepoDetailsConverter.isBaseRepoRequiredFieldsExists(ambariStackDetails)
+                    || stackRepoDetailsConverter.isVdfRequiredFieldsExists(ambariStackDetails))) {
                 setOsTypeFromImageIfMissing(cluster, stackImageComponent, ambariStackDetails);
                 StackRepoDetails stackRepoDetails = stackRepoDetailsConverter.convert(ambariStackDetails);
                 stackRepoDetailsJson = new Json(stackRepoDetails);
