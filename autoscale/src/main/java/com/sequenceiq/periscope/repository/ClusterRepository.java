@@ -17,7 +17,6 @@ public interface ClusterRepository extends CrudRepository<Cluster, Long> {
     @PostAuthorize("hasPermission(returnObject,'read')")
     Cluster findOne(@Param("id") Long id);
 
-    @PostAuthorize("hasPermission(returnObject,'read')")
     Cluster findByStackId(@Param("stackId") Long stackId);
 
     Cluster findById(Long id);

@@ -46,7 +46,7 @@ public class Cluster {
     private PeriscopeUser user;
 
     @Enumerated(EnumType.STRING)
-    private ClusterState state = ClusterState.RUNNING;
+    private ClusterState state = ClusterState.PENDING;
 
     @OneToMany(mappedBy = "cluster", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private Set<MetricAlert> metricAlerts = new HashSet<>();
