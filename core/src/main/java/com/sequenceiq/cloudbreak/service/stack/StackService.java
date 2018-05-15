@@ -555,10 +555,10 @@ public class StackService {
             throw new BadRequestException(
                     String.format("Cannot update the status of stack '%s' to STARTED, because it isn't in STOPPED state.", stack.getName()));
         } else if (stack.isStopped() || stack.isStartFailed()) {
-            stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.START_REQUESTED);
+            Stack startStack = stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.START_REQUESTED);
             flowManager.triggerStackStart(stack.getId());
             if (updateCluster && cluster != null) {
-                ambariClusterService.updateStatus(stack.getId(), StatusRequest.STARTED);
+                ambariClusterService.updateStatus(startStack, StatusRequest.STARTED);
             }
         }
     }

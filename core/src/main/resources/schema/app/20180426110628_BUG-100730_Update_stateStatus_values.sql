@@ -7,5 +7,6 @@ UPDATE flowlog SET statestatus = 'PENDING' WHERE (flowid, id) IN (
 
 -- //@UNDO
 -- SQL to undo the change goes here.
+ALTER TABLE flowlog ALTER statestatus DROP NOT NULL;
 UPDATE flowlog SET statestatus = NULL;
 

@@ -45,6 +45,8 @@ public interface ClusterService {
 
     void updateStatus(Long stackId, StatusRequest statusRequest);
 
+    void updateStatus(Stack stack, StatusRequest statusRequest);
+
     Cluster updateClusterStatusByStackId(Long stackId, Status status, String statusReason);
 
     Cluster updateClusterStatusByStackId(Long stackId, Status status);
