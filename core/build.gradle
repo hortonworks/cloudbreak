@@ -1,13 +1,16 @@
+import org.ajoberstar.grgit.Grgit
+
 buildscript {
   repositories {
     maven { url 'http://repo.spring.io/libs-release' }
     mavenCentral()
     jcenter()
+    maven { url "http://maven.sequenceiq.com/releases" }
   }
   dependencies {
     classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
+    classpath 'io.spring.gradle:dependency-management-plugin:0.6.1.RELEASE'
     classpath "com.smokejumperit.gradle.license:Gradle-License-Report:0.0.2"
-    classpath "org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:2.0.1"
     classpath "gradle.plugin.com.palantir:jacoco-coverage:0.4.0"
     classpath "gradle.plugin.com.github.jk1:gradle-license-report:0.3.4"
   }
@@ -15,20 +18,28 @@ buildscript {
 
 plugins {
   id "com.palantir.jacoco-full-report" version "0.4.0"
-  id "org.sonarqube" version "2.0.1"
   id "com.github.jk1.dependency-license-report" version "0.3.4"
+  id 'net.ltgt.apt' version '0.14'
 }
 
 apply plugin: 'spring-boot'
+apply plugin: 'info.solidsoft.pitest'
 
 bootRun {
   systemProperty 'spring.profiles.active', System.properties['spring.profiles.active']
   systemProperty 'spring.config.location', System.properties['spring.config.location']
-  jvmArgs = ['-XX:MaxPermSize=1024m']
+  if (project.hasProperty('jvmArgs')) {
+    jvmArgs += project.jvmArgs.split("\\s+").toList()
+  }
+}
+
+springBoot {
+  mainClass = 'com.sequenceiq.cloudbreak.CloudbreakApplication'
 }
 
 jar {
   baseName = 'cloudbreak'
+  archiveName = 'cloudbreak.jar'
 }
 
 dependencies {
@@ -96,22 +107,6 @@ dependencies {
 
 }
 
-sonarqube {
-  properties {
-    property "sonar.host.url", "$config.sonar_host_url"
-    property "sonar.jdbc.driverClassName", "org.postgresql.Driver"
-    property "sonar.login", "$config.sonar_host_user"
-    property "sonar.password", "$config.sonar_host_password"
-    property "sonar.sources", "src/main"
-    property "sonar.tests", "src/test"
-    property "sonar.java.binaries", "build/classes"
-    property "sonar.java.libraries", "build/libs/*.jar"
-    property "project.reporting.outputEncoding", "UTF-8"
-    property "sonar.projectKey", "cloudbreak"
-    property "sonar.projectName", "cloudbreak"
-  }
-}
-
 jacoco {
   toolVersion = "0.7.1.201405082137"
   reportsDir = file("$buildDir/reports/jacoco")
@@ -121,16 +116,11 @@ jacocoTestReport {
   reports {
     xml.enabled false
     csv.enabled false
-    html.destination "${buildDir}/jacocoHtml"
+    html.destination new File("${buildDir}/jacocoHtml")
   }
 }
 
 test {
-  jacoco {
-    append = false
-    destinationFile = file("$buildDir/jacoco/jacocoTest.exec")
-    classDumpFile = file("$buildDir/jacoco/classpathdumps")
-  }
 }
 
 task buildInfo(type: BuildInfoTask) {
@@ -140,10 +130,6 @@ task buildInfo(type: BuildInfoTask) {
   buildVersion = version
 }
 
-springBoot {
-  mainClass = 'com.sequenceiq.cloudbreak.CloudbreakApplication'
-}
-
 task execute(type: JavaExec) {
   if (project.hasProperty('mainClass')) {
     main = mainClass
@@ -151,7 +137,31 @@ task execute(type: JavaExec) {
   }
 }
 
+sourceSets {
+  main {
+    java.srcDirs += "${projectDir}/src/main/generated"
+  }
+}
+
 compileJava.dependsOn buildInfo
+compileJava {
+  options.compilerArgs = [
+          '-Amapstruct.unmappedTargetPolicy=ERROR',
+          '-Amapstruct.suppressGeneratorTimestamp=true',
+          '-Amapstruct.suppressGeneratorVersionInfoComment=true'
+  ]
+
+  generatedSourcesDestinationDir = "$projectDir/src/main/generated"
+}
+
+compileJava.doFirst {
+  def path = "${projectDir}/src/main/generated"
+  if (new File(path).exists()) {
+    delete fileTree(path) {
+      include '**/*.java'
+    }
+  }
+}
 
 class BuildInfoTask extends DefaultTask {
   File destination = new File("build.info")
@@ -161,20 +171,47 @@ class BuildInfoTask extends DefaultTask {
 
   @TaskAction
   def writeBuildInfo() {
+    List<File> applicationDestinations = []
+
+    applicationDestinations += project.file("out/production/resources")
+    applicationDestinations += new File(applicationPropertiesPath + "/resources/main")
+
     destination.mkdirs()
-    File applicationDestination = new File(applicationPropertiesPath + "/resources/main")
-    applicationDestination.mkdirs()
+
+    // if using dev environment this condition is true
+    if (buildVersion.contains("+") || buildVersion == "unspecified") {
+      def grgit = Grgit.open(currentDir: project.projectDir)
+      buildVersion = grgit.describe()
+      println "buildVersion from git: " + buildVersion
+    }
+    String activeProfile = determineActiveProfile()
     new File(destination, "build.info").withWriter { out ->
       [
               "ARTIFACT_BASENAME=" + basename,
               "ARTIFACT_VERSION=" + buildVersion,
       ].each { out.println it }
     }
-    new File(applicationDestination, "application.properties").withWriter { out ->
-      [
-              "info.app.name=" + basename,
-              "info.app.version=" + buildVersion
-      ].each { out.println it }
+    applicationDestinations.each {
+      it.mkdirs()
+      new File(it, "application.properties").withWriter { out ->
+        [
+                "info.app.name=" + basename,
+                "info.app.version=" + buildVersion,
+                "spring.profiles.active=" + activeProfile
+        ].each { out.println it }
+      }
     }
+  }
+
+  private String determineActiveProfile() {
+    String activeProfile = "dev"
+    if (buildVersion.contains("dev") || buildVersion.equals("unspecified")) {
+      activeProfile = "dev"
+    } else if (buildVersion.contains("rc")) {
+      activeProfile = "rc"
+    } else {
+      activeProfile = "prod"
+    }
+    return activeProfile
   }
 }

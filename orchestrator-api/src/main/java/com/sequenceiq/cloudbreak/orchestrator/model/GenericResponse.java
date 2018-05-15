@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.orchestrator.model;
 
-import org.springframework.http.HttpStatus;
+import org.apache.http.HttpStatus;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
@@ -55,7 +55,7 @@ public class GenericResponse {
     }
 
     public void assertError() throws CloudbreakOrchestratorFailedException {
-        if (getStatusCode() != HttpStatus.OK.value()) {
+        if (getStatusCode() != HttpStatus.SC_OK) {
             throw new CloudbreakOrchestratorFailedException(toString());
         }
     }

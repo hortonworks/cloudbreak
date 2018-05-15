@@ -1,3 +1,5 @@
+import org.ajoberstar.grgit.Grgit
+
 buildscript {
   repositories {
     mavenCentral()
@@ -5,15 +7,29 @@ buildscript {
   }
   dependencies {
     classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
+    classpath 'io.spring.gradle:dependency-management-plugin:0.6.1.RELEASE'
   }
 }
 
 jar {
   baseName = 'periscope'
+  archiveName = 'periscope.jar'
 }
 
 apply plugin: 'spring-boot'
-apply plugin: 'application'
+apply plugin: 'info.solidsoft.pitest'
+
+bootRun {
+  systemProperty 'spring.profiles.active', System.properties['spring.profiles.active']
+  systemProperty 'spring.config.location', System.properties['spring.config.location']
+  if (project.hasProperty('jvmArgs')) {
+    jvmArgs += project.jvmArgs.split("\\s+").toList()
+  }
+}
+
+springBoot {
+  mainClass = 'com.sequenceiq.periscope.PeriscopeApplication'
+}
 
 dependencies {
 
@@ -54,10 +70,10 @@ dependencies {
 }
 
 task buildInfo(type: BuildInfoTask) {
-    destination = file("$buildDir")
-    applicationPropertiesPath = "$buildDir"
-    basename = jar.baseName
-    buildVersion = version
+  destination = file("$buildDir")
+  applicationPropertiesPath = "$buildDir"
+  basename = jar.baseName
+  buildVersion = version
 }
 
 test {
@@ -72,31 +88,57 @@ test {
   }
 }
 
-
 compileJava.dependsOn buildInfo
 
 class BuildInfoTask extends DefaultTask {
-    File destination = new File("build.info")
-    String applicationPropertiesPath
-    String basename
-    String buildVersion
+  File destination = new File("build.info")
+  String applicationPropertiesPath
+  String basename
+  String buildVersion
 
-    @TaskAction
-    def writeBuildInfo() {
-        destination.mkdirs()
-        File applicationDestination = new File(applicationPropertiesPath + "/resources/main")
-        applicationDestination.mkdirs()
-        new File(destination, "build.info").withWriter { out ->
-            [
-                    "ARTIFACT_BASENAME=" + basename,
-                    "ARTIFACT_VERSION=" + buildVersion,
-            ].each { out.println it }
-        }
-        new File(applicationDestination, "application.properties").withWriter { out ->
-            [
-                    "info.app.name=" + basename,
-                    "info.app.version=" + buildVersion
-            ].each { out.println it }
-        }
+  @TaskAction
+  def writeBuildInfo() {
+    List<File> applicationDestinations = []
+
+    applicationDestinations += project.file("out/production/resources")
+    applicationDestinations += new File(applicationPropertiesPath + "/resources/main")
+
+    destination.mkdirs()
+    String activeProfile = determineActiveProfile()
+
+    // if using dev environment this condition is true
+    if (buildVersion.contains("+")) {
+      def grgit = Grgit.open(currentDir: project.projectDir)
+      buildVersion = grgit.describe()
+      println "buildVersion from git: " + buildVersion
     }
+    new File(destination, "build.info").withWriter { out ->
+      [
+              "ARTIFACT_BASENAME=" + basename,
+              "ARTIFACT_VERSION=" + buildVersion,
+      ].each { out.println it }
+    }
+    applicationDestinations.each {
+      it.mkdirs()
+      new File(it, "application.properties").withWriter { out ->
+        [
+                "info.app.name=" + basename,
+                "info.app.version=" + buildVersion,
+                "spring.profiles.active=" + activeProfile
+        ].each { out.println it }
+      }
+    }
+  }
+
+  private String determineActiveProfile() {
+    String activeProfile = "dev"
+    if (buildVersion.contains("dev") || buildVersion.equals("unspecified")) {
+      activeProfile = "dev"
+    } else if (buildVersion.contains("rc")) {
+      activeProfile = "rc"
+    } else {
+      activeProfile = "prod"
+    }
+    return activeProfile
+  }
 }
