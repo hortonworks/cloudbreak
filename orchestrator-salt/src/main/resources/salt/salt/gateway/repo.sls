@@ -1,4 +1,21 @@
-{% if grains['os_family'] == 'RedHat' %}
+{% if salt['pillar.get']('hdp:stack:vdf-url') != None %}
+HDP:
+  pkgrepo.managed:
+    - humanname: {{ salt['pillar.get']('hdp:stack:repoid') }}
+    - baseurl: "{{ salt['cmd.run']("cat /tmp/hdp-repo-url.text") }}"
+    - gpgcheck: 0
+    - enabled: 1
+    - path: /
+
+HDP-UTILS:
+  pkgrepo.managed:
+    - humanname: {{ salt['pillar.get']('hdp:util:repoid') }}
+    - baseurl: "{{ salt['cmd.run']("cat /tmp/hdp-util-repo-url.text") }}"
+    - gpgcheck: 0
+    - enabled: 1
+    - path: /
+
+{% else %}
 
 /etc/yum.repos.d/HDP.repo:
   file.managed:
@@ -11,38 +28,5 @@
     - replace: False
     - source: salt://gateway/yum/hdp-utils.repo
     - template: jinja
-
-{% if 'HDF' in salt['pillar.get']('hdp:stack:repoid') %}
-
-/etc/yum.repos.d/KNOX.repo:
-  file.managed:
-    - replace: False
-    - source: salt://gateway/yum/knox.repo
-    - template: jinja
-
-{% endif %}
-
-{% elif grains['os_family'] == 'Debian' %}
-
-{% set os = grains['os'] | lower ~ grains['osmajorrelease'] %}
-
-create_hdp_repo:
-  pkgrepo.managed:
-    - name: "deb {{ salt['pillar.get']('hdp:stack:' + os) }} HDP main"
-    - file: /etc/apt/sources.list.d/hdp.list
-
-create_hdp_utils_repo:
-  pkgrepo.managed:
-    - name: "deb {{ salt['pillar.get']('hdp:util:' + os) }} HDP-UTILS main"
-    - file: /etc/apt/sources.list.d/hdp-utils.list
-
-{% if 'HDF' in salt['pillar.get']('hdp:stack:repoid') %}
-
-create_knox_repo:
-  pkgrepo.managed:
-    - name: "deb {{ salt['pillar.get']('hdp:knox:' + os) }} HDP main"
-    - file: /etc/apt/sources.list.d/knox.list
-
-{% endif %}
 
 {% endif %}
