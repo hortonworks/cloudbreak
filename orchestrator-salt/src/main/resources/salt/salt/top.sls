@@ -42,7 +42,7 @@ base:
 
   'roles:postgresql_server':
     - match: grain
-    - postgresql.postgres-install
+    - postgresql
 
   'roles:ambari_server_install':
     - match: grain

@@ -99,7 +99,7 @@ public class SaltOrchestrator implements HostOrchestrator {
 
     @Override
     public void bootstrap(List<GatewayConfig> allGatewayConfigs, Set<Node> targets, BootstrapParams params,
-        ExitCriteriaModel exitModel) throws CloudbreakOrchestratorException {
+            ExitCriteriaModel exitModel) throws CloudbreakOrchestratorException {
         LOGGER.info("Start SaltBootstrap on nodes: {}", targets);
         GatewayConfig primaryGateway = getPrimaryGatewayConfig(allGatewayConfigs);
         Set<String> gatewayTargets = getGatewayPrivateIps(allGatewayConfigs);
