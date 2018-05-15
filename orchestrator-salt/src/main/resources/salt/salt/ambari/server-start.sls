@@ -12,6 +12,11 @@ ambari-start-postgresql:
     - name: postgresql
 {% endif %}
 
+execute-ambari-server-init:
+  cmd.run:
+    - name: /opt/ambari-server/ambari-server-init.sh 2>&1 | tee -a /var/log/ambari-server-init.log && exit ${PIPESTATUS[0]}
+    - unless: test -f /var/ambari-init-executed
+
 {% if ambari.is_systemd %}
 
 /etc/systemd/system/ambari-server.service:

@@ -31,6 +31,8 @@ init-services-db:
     - require:
       - file: /opt/salt/scripts/init_db.sh
 
+{% if not salt['file.directory_exists']('/yarn-private') %}  # FIXME (BUG-92637): must be disabled for YCloud
+
 restart-pgsql-if-reconfigured:
   service.running:
     - enable: True
@@ -38,3 +40,12 @@ restart-pgsql-if-reconfigured:
     - watch:
       - cmd: configure-listen-address
       - cmd: init-services-db
+
+{% else %}
+
+reload-postgresql:
+  cmd.run:
+    - name: service postgresql reload
+
+
+{% endif %}
