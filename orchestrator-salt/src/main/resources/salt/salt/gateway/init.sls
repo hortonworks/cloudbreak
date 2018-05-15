@@ -1,7 +1,13 @@
 {%- from 'gateway/settings.sls' import gateway with context %}
 
 include:
+{% if grains['os_family'] == 'RedHat' %}
   - gateway.repo
+{% endif %}
+
+{% if grains['os_family'] == 'Debian' %}
+  - gateway.repo.debian
+{% endif %}
 
 knox:
   pkg.installed
@@ -203,5 +209,34 @@ start-knox-gateway:
   file.copy:
     - source: /etc/knox/conf
     - preserve: True
+
+{% endif %}
+
+{% if salt['pillar.get']('hdp:stack:vdf-url') != None %}
+
+add_vdf_parse_script_agent:
+  file.managed:
+    - name: /opt/salt/extract-repo-url-from-vdf.sh
+    - source: salt://gateway/yum/scripts/extract-repo-url-from-vdf.sh
+    - skip_verify: True
+    - makedirs: True
+    - mode: 755
+
+run_vdf_parse_script_agent:
+  cmd.run:
+    - name: sh -x /opt/salt/extract-repo-url-from-vdf.sh {{ salt['pillar.get']('hdp:stack:vdf-url') }} | tee -a /var/log/add_vdf_parse_script_agent.log && exit ${PIPESTATUS[0]}
+    - unless: ls /var/log/add_vdf_parse_script_agent.log
+    - require:
+      - file: add_vdf_parse_script_agent
+
+{% endif %}
+
+{% if 'HDF' in salt['pillar.get']('hdp:stack:repoid') %}
+
+/etc/yum.repos.d/KNOX.repo:
+  file.managed:
+    - replace: False
+    - source: salt://gateway/yum/knox.repo
+    - template: jinja
 
 {% endif %}
