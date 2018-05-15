@@ -380,6 +380,11 @@ public class AmbariClusterService implements ClusterService {
     @Override
     public void updateStatus(Long stackId, StatusRequest statusRequest) {
         Stack stack = stackService.getByIdWithLists(stackId);
+        updateStatus(stack, statusRequest);
+    }
+
+    @Override
+    public void updateStatus(Stack stack, StatusRequest statusRequest) {
         Cluster cluster = stack.getCluster();
         if (cluster == null) {
             throw new BadRequestException(String.format("There is no cluster installed on stack '%s'.", stack.getName()));
