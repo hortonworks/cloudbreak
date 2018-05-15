@@ -1,0 +1,7 @@
+name: Cluster_tests
+tests:
+  - name: "cb info"
+    classes:
+      - name: com.sequenceiq.it.cloudbreak.CloudbreakInfoTest
+        includedMethods:
+          - testInfo
