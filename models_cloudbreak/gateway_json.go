@@ -7,6 +7,7 @@ package models_cloudbreak
 
 import (
 	"encoding/json"
+	"strconv"
 
 	strfmt "github.com/go-openapi/strfmt"
 
@@ -20,10 +21,10 @@ import (
 
 type GatewayJSON struct {
 
-	// enable Knox gateway security
+	// [DEPRECATED] enableGateway is no longer needed to determine if gateway needs to be launched or not. Presence of gateway definition in request is suffucicient.
 	EnableGateway *bool `json:"enableGateway,omitempty"`
 
-	// exposed Knox services
+	// [DEPRECATED] Use the 'exposed Knox services' inside the 'gateway' part of the request.
 	ExposedServices []string `json:"exposedServices"`
 
 	// Knox gateway type
@@ -41,7 +42,10 @@ type GatewayJSON struct {
 	// SSO Provider certificate
 	TokenCert string `json:"tokenCert,omitempty"`
 
-	// Knox topology name
+	// Topology definitions of the gateway.
+	Topologies []*GatewayTopologyJSON `json:"topologies"`
+
+	// [DEPRECATED] Use the 'Knox topology name' inside the 'gateway' part of the request.
 	TopologyName string `json:"topologyName,omitempty"`
 }
 
@@ -58,6 +62,8 @@ type GatewayJSON struct {
 /* polymorph GatewayJson ssoType false */
 
 /* polymorph GatewayJson tokenCert false */
+
+/* polymorph GatewayJson topologies false */
 
 /* polymorph GatewayJson topologyName false */
 
@@ -76,6 +82,11 @@ func (m *GatewayJSON) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateSsoType(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateTopologies(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -174,6 +185,33 @@ func (m *GatewayJSON) validateSsoType(formats strfmt.Registry) error {
 	// value enum
 	if err := m.validateSsoTypeEnum("ssoType", "body", m.SsoType); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func (m *GatewayJSON) validateTopologies(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Topologies) { // not required
+		return nil
+	}
+
+	for i := 0; i < len(m.Topologies); i++ {
+
+		if swag.IsZero(m.Topologies[i]) { // not required
+			continue
+		}
+
+		if m.Topologies[i] != nil {
+
+			if err := m.Topologies[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("topologies" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
 	}
 
 	return nil

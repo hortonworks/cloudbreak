@@ -1,6 +1,8 @@
 package aws
 
-import "github.com/hortonworks/cb-cli/cli/cloud"
+import (
+	"github.com/hortonworks/cb-cli/cli/cloud"
+)
 
 var name string
 

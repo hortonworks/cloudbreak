@@ -47,6 +47,7 @@ type CloudProvider interface {
 	SkippedFields() map[string]bool
 	GenerateDefaultTemplate() *models_cloudbreak.TemplateV2Request
 	GenerateDefaultNetwork(networkParameters map[string]interface{}, mode NetworkMode) *models_cloudbreak.NetworkV2Request
+	GenerateNetworkRequestFromNetworkResponse(response *models_cloudbreak.NetworkResponse) *models_cloudbreak.NetworkV2Request
 	GenerateDefaultSecurityGroup(node Node) *models_cloudbreak.SecurityGroupV2Request
 }
 
@@ -93,6 +94,12 @@ func (p *DefaultCloudProvider) GenerateDefaultNetwork(networkParameters map[stri
 func (p *DefaultCloudProvider) GenerateDefaultSecurityGroup(node Node) *models_cloudbreak.SecurityGroupV2Request {
 	return &models_cloudbreak.SecurityGroupV2Request{
 		SecurityRules: getDefaultSecurityRules(node),
+	}
+}
+
+func (p *DefaultCloudProvider) GenerateNetworkRequestFromNetworkResponse(response *models_cloudbreak.NetworkResponse) *models_cloudbreak.NetworkV2Request {
+	return &models_cloudbreak.NetworkV2Request{
+		Parameters: response.Parameters,
 	}
 }
 

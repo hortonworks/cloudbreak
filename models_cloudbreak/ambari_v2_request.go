@@ -7,7 +7,6 @@ package models_cloudbreak
 
 import (
 	"encoding/json"
-	"strconv"
 
 	strfmt "github.com/go-openapi/strfmt"
 
@@ -35,15 +34,8 @@ type AmbariV2Request struct {
 	// details of the Ambari stack
 	AmbariStackDetails *AmbariStackDetails `json:"ambariStackDetails,omitempty"`
 
-	// blueprint custom properties
-	BlueprintCustomProperties string `json:"blueprintCustomProperties,omitempty"`
-
 	// blueprint id for the cluster
 	BlueprintID int64 `json:"blueprintId,omitempty"`
-
-	// blueprint inputs in the cluster
-	// Unique: true
-	BlueprintInputs []*BlueprintInput `json:"blueprintInputs"`
 
 	// blueprint name for the cluster
 	BlueprintName string `json:"blueprintName,omitempty"`
@@ -88,11 +80,7 @@ type AmbariV2Request struct {
 
 /* polymorph AmbariV2Request ambariStackDetails false */
 
-/* polymorph AmbariV2Request blueprintCustomProperties false */
-
 /* polymorph AmbariV2Request blueprintId false */
-
-/* polymorph AmbariV2Request blueprintInputs false */
 
 /* polymorph AmbariV2Request blueprintName false */
 
@@ -132,11 +120,6 @@ func (m *AmbariV2Request) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateAmbariStackDetails(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
-	if err := m.validateBlueprintInputs(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -246,37 +229,6 @@ func (m *AmbariV2Request) validateAmbariStackDetails(formats strfmt.Registry) er
 			}
 			return err
 		}
-	}
-
-	return nil
-}
-
-func (m *AmbariV2Request) validateBlueprintInputs(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.BlueprintInputs) { // not required
-		return nil
-	}
-
-	if err := validate.UniqueItems("blueprintInputs", "body", m.BlueprintInputs); err != nil {
-		return err
-	}
-
-	for i := 0; i < len(m.BlueprintInputs); i++ {
-
-		if swag.IsZero(m.BlueprintInputs[i]) { // not required
-			continue
-		}
-
-		if m.BlueprintInputs[i] != nil {
-
-			if err := m.BlueprintInputs[i].Validate(formats); err != nil {
-				if ve, ok := err.(*errors.Validation); ok {
-					return ve.ValidateName("blueprintInputs" + "." + strconv.Itoa(i))
-				}
-				return err
-			}
-		}
-
 	}
 
 	return nil

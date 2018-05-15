@@ -20,17 +20,39 @@ import (
 
 type ConfigsResponse struct {
 
+	// datalakeinputs object
+	// Required: true
+	DatalakeInputs map[string]interface{} `json:"datalakeInputs"`
+
+	// fixinputs object
+	// Required: true
+	FixInputs map[string]interface{} `json:"fixInputs"`
+
 	// response object
 	// Required: true
 	// Unique: true
 	Inputs []*BlueprintInput `json:"inputs"`
 }
 
+/* polymorph ConfigsResponse datalakeInputs false */
+
+/* polymorph ConfigsResponse fixInputs false */
+
 /* polymorph ConfigsResponse inputs false */
 
 // Validate validates this configs response
 func (m *ConfigsResponse) Validate(formats strfmt.Registry) error {
 	var res []error
+
+	if err := m.validateDatalakeInputs(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateFixInputs(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
 
 	if err := m.validateInputs(formats); err != nil {
 		// prop
@@ -40,6 +62,24 @@ func (m *ConfigsResponse) Validate(formats strfmt.Registry) error {
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (m *ConfigsResponse) validateDatalakeInputs(formats strfmt.Registry) error {
+
+	if err := validate.Required("datalakeInputs", "body", m.DatalakeInputs); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *ConfigsResponse) validateFixInputs(formats strfmt.Registry) error {
+
+	if err := validate.Required("fixInputs", "body", m.FixInputs); err != nil {
+		return err
+	}
+
 	return nil
 }
 

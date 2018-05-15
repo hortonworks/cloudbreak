@@ -115,36 +115,6 @@ func (a *Client) GetUserProfile(params *GetUserProfileParams) (*GetUserProfileOK
 }
 
 /*
-HasResourcesUser checks that account user has any resources
-
-Users can be invited under an account by the administrator, and all resources (e.g. resources, networks, blueprints, credentials, clusters) can be shared across account users
-*/
-func (a *Client) HasResourcesUser(params *HasResourcesUserParams) (*HasResourcesUserOK, error) {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewHasResourcesUserParams()
-	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "hasResourcesUser",
-		Method:             "GET",
-		PathPattern:        "/v1/users/{id}/resources",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
-		Params:             params,
-		Reader:             &HasResourcesUserReader{formats: a.formats},
-		Context:            params.Context,
-		Client:             params.HTTPClient,
-	})
-	if err != nil {
-		return nil, err
-	}
-	return result.(*HasResourcesUserOK), nil
-
-}
-
-/*
 ModifyProfile modifies user related profile
 
 Users can be invited under an account by the administrator, and all resources (e.g. resources, networks, blueprints, credentials, clusters) can be shared across account users

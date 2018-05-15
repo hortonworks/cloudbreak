@@ -67,6 +67,9 @@ type StackResponse struct {
 	// custom hostname for nodes in the stack
 	CustomHostname string `json:"customHostname,omitempty"`
 
+	// Custom parameters as a json
+	CustomInputs map[string]interface{} `json:"customInputs,omitempty"`
+
 	// stack related default tags
 	DefaultTags map[string]string `json:"defaultTags,omitempty"`
 
@@ -177,6 +180,8 @@ type StackResponse struct {
 /* polymorph StackResponse customDomain false */
 
 /* polymorph StackResponse customHostname false */
+
+/* polymorph StackResponse customInputs false */
 
 /* polymorph StackResponse defaultTags false */
 

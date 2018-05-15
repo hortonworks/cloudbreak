@@ -81,6 +81,34 @@ func (a *Client) CreateRDSDatabaseUtil(params *CreateRDSDatabaseUtilParams) (*Cr
 }
 
 /*
+GetCustomParameters returns custom parameters
+*/
+func (a *Client) GetCustomParameters(params *GetCustomParametersParams) (*GetCustomParametersOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetCustomParametersParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "getCustomParameters",
+		Method:             "POST",
+		PathPattern:        "/v1/util/custom-parameters",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &GetCustomParametersReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*GetCustomParametersOK), nil
+
+}
+
+/*
 GetStackMatrixUtil returns default ambari details for distinct h d p and h d f
 */
 func (a *Client) GetStackMatrixUtil(params *GetStackMatrixUtilParams) (*GetStackMatrixUtilOK, error) {

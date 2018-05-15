@@ -121,6 +121,9 @@ type ClusterResponse struct {
 	// most important services in the cluster
 	ServiceEndPoints map[string]string `json:"serviceEndPoints,omitempty"`
 
+	// shared service for a specific stack
+	SharedServiceResponse *SharedServiceResponse `json:"sharedServiceResponse,omitempty"`
+
 	// status of the cluster
 	Status string `json:"status,omitempty"`
 
@@ -197,6 +200,8 @@ type ClusterResponse struct {
 /* polymorph ClusterResponse secure false */
 
 /* polymorph ClusterResponse serviceEndPoints false */
+
+/* polymorph ClusterResponse sharedServiceResponse false */
 
 /* polymorph ClusterResponse status false */
 
@@ -276,6 +281,11 @@ func (m *ClusterResponse) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateRdsConfigs(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateSharedServiceResponse(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -630,6 +640,25 @@ func (m *ClusterResponse) validateRdsConfigs(formats strfmt.Registry) error {
 			}
 		}
 
+	}
+
+	return nil
+}
+
+func (m *ClusterResponse) validateSharedServiceResponse(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.SharedServiceResponse) { // not required
+		return nil
+	}
+
+	if m.SharedServiceResponse != nil {
+
+		if err := m.SharedServiceResponse.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("sharedServiceResponse")
+			}
+			return err
+		}
 	}
 
 	return nil

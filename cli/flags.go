@@ -737,6 +737,13 @@ var (
 			Usage: "adds custom Kerberos configuration to the template",
 		},
 	}
+	FlWithSourceCluster = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "source-cluster",
+			Usage: "source cluster to use as datalake",
+		},
+	}
 )
 
 type RequiredFlag struct {

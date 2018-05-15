@@ -45,6 +45,9 @@ type StackV2Request struct {
 	// settings for custom images
 	ImageSettings *ImageSettings `json:"imageSettings,omitempty"`
 
+	// dynamic properties
+	Inputs map[string]interface{} `json:"inputs,omitempty"`
+
 	// collection of instance groupst
 	// Required: true
 	InstanceGroups []*InstanceGroupsV2 `json:"instanceGroups"`
@@ -83,6 +86,8 @@ type StackV2Request struct {
 /* polymorph StackV2Request hdpVersion false */
 
 /* polymorph StackV2Request imageSettings false */
+
+/* polymorph StackV2Request inputs false */
 
 /* polymorph StackV2Request instanceGroups false */
 

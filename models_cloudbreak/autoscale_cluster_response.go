@@ -124,6 +124,9 @@ type AutoscaleClusterResponse struct {
 	// most important services in the cluster
 	ServiceEndPoints map[string]string `json:"serviceEndPoints,omitempty"`
 
+	// shared service for a specific stack
+	SharedServiceResponse *SharedServiceResponse `json:"sharedServiceResponse,omitempty"`
+
 	// status of the cluster
 	Status string `json:"status,omitempty"`
 
@@ -203,6 +206,8 @@ type AutoscaleClusterResponse struct {
 
 /* polymorph AutoscaleClusterResponse serviceEndPoints false */
 
+/* polymorph AutoscaleClusterResponse sharedServiceResponse false */
+
 /* polymorph AutoscaleClusterResponse status false */
 
 /* polymorph AutoscaleClusterResponse statusReason false */
@@ -281,6 +286,11 @@ func (m *AutoscaleClusterResponse) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateRdsConfigs(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateSharedServiceResponse(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -635,6 +645,25 @@ func (m *AutoscaleClusterResponse) validateRdsConfigs(formats strfmt.Registry) e
 			}
 		}
 
+	}
+
+	return nil
+}
+
+func (m *AutoscaleClusterResponse) validateSharedServiceResponse(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.SharedServiceResponse) { // not required
+		return nil
+	}
+
+	if m.SharedServiceResponse != nil {
+
+		if err := m.SharedServiceResponse.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("sharedServiceResponse")
+			}
+			return err
+		}
 	}
 
 	return nil

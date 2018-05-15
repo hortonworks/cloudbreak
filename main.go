@@ -576,6 +576,18 @@ func main() {
 					},
 				},
 				{
+					Name:   "generate-attached-cluster-template",
+					Usage:  "generates attached cluster template",
+					Before: ConfigRead,
+					Flags:  cb.NewFlagBuilder().AddFlags(cb.FlWithSourceCluster, cb.FlBlueprintName, cb.FlBlueprintFileOptional).AddAuthenticationFlags().AddOutputFlag().Build(),
+					Action: cb.GenerateAtachedStackTemplate,
+					BashComplete: func(c *cli.Context) {
+						for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlWithSourceCluster, cb.FlBlueprintName, cb.FlBlueprintFileOptional).AddAuthenticationFlags().AddOutputFlag().Build() {
+							printFlagCompletion(f)
+						}
+					},
+				},
+				{
 					Name:   "list",
 					Usage:  "lists the running clusters",
 					Flags:  cb.NewFlagBuilder().AddAuthenticationFlags().AddOutputFlag().Build(),

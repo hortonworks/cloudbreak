@@ -40,27 +40,32 @@ var stackClient = func(server, userName, password, authType string) getPublicSta
 
 func GenerateAwsStackTemplate(c *cli.Context) error {
 	cloud.SetProviderType(cloud.AWS)
-	return generateStackTemplateImpl(getNetworkMode(c), c.String, c.Bool, getBlueprintClient)
+	return printTemplate(*generateStackTemplateImpl(getNetworkMode(c), c.String, c.Bool, getBlueprintClient))
 }
 
 func GenerateAzureStackTemplate(c *cli.Context) error {
 	cloud.SetProviderType(cloud.AZURE)
-	return generateStackTemplateImpl(getNetworkMode(c), c.String, c.Bool, getBlueprintClient)
+	return printTemplate(*generateStackTemplateImpl(getNetworkMode(c), c.String, c.Bool, getBlueprintClient))
 }
 
 func GenerateGcpStackTemplate(c *cli.Context) error {
 	cloud.SetProviderType(cloud.GCP)
-	return generateStackTemplateImpl(getNetworkMode(c), c.String, c.Bool, getBlueprintClient)
+	return printTemplate(*generateStackTemplateImpl(getNetworkMode(c), c.String, c.Bool, getBlueprintClient))
 }
 
 func GenerateOpenstackStackTemplate(c *cli.Context) error {
 	cloud.SetProviderType(cloud.OPENSTACK)
-	return generateStackTemplateImpl(getNetworkMode(c), c.String, c.Bool, getBlueprintClient)
+	return printTemplate(*generateStackTemplateImpl(getNetworkMode(c), c.String, c.Bool, getBlueprintClient))
 }
 
 func GenerateYarnStackTemplate(c *cli.Context) error {
 	cloud.SetProviderType(cloud.YARN)
-	return generateStackTemplateImpl(getNetworkMode(c), c.String, c.Bool, getBlueprintClient)
+	return printTemplate(*generateStackTemplateImpl(getNetworkMode(c), c.String, c.Bool, getBlueprintClient))
+}
+
+func GenerateAtachedStackTemplate(c *cli.Context) error {
+	checkRequiredFlagsAndArguments(c)
+	return generateAttachedtackTemplateImpl(c.String, c.Bool, stackClient)
 }
 
 func getNetworkMode(c *cli.Context) cloud.NetworkMode {
@@ -92,17 +97,16 @@ func getStringPointer(skippedFields map[string]bool, fieldName string, defaultVa
 	return &defaultValue
 }
 
-func generateStackTemplateImpl(mode cloud.NetworkMode, stringFinder func(string) string, boolFinder func(string) bool, getBlueprintClient func(string, string, string, string) getPublicBlueprint) error {
+func generateStackTemplateImpl(mode cloud.NetworkMode, stringFinder func(string) string, boolFinder func(string) bool, getBlueprintClient func(string, string, string, string) getPublicBlueprint) *models_cloudbreak.StackV2Request {
 	provider := cloud.GetProvider()
 	skippedFields := provider.SkippedFields()
 
 	template := models_cloudbreak.StackV2Request{
 		Cluster: &models_cloudbreak.ClusterV2Request{
 			Ambari: &models_cloudbreak.AmbariV2Request{
-				BlueprintName:   "____",
-				BlueprintInputs: []*models_cloudbreak.BlueprintInput{},
-				UserName:        &(&types.S{S: "____"}).S,
-				Password:        &(&types.S{S: ""}).S,
+				BlueprintName: "____",
+				UserName:      &(&types.S{S: "____"}).S,
+				Password:      &(&types.S{S: ""}).S,
 			},
 		},
 		General: &models_cloudbreak.GeneralSettings{
@@ -140,7 +144,40 @@ func generateStackTemplateImpl(mode cloud.NetworkMode, stringFinder func(string)
 	if params := provider.GetParamatersTemplate(); params != nil {
 		template.Parameters = params
 	}
+	return &template
+}
 
+func generateAttachedtackTemplateImpl(stringFinder func(string) string, boolFinder func(string) bool, getStackClient func(string, string, string, string) getPublicStack) error {
+
+	datalake := fetchStack(stringFinder(FlWithSourceCluster.Name), stackClient(stringFinder(FlServerOptional.Name), stringFinder(FlUsername.Name), stringFinder(FlPassword.Name), stringFinder(FlAuthTypeOptional.Name)))
+	isSharedServiceReady, _ := datalake.Cluster.Blueprint.Tags["shared_services_ready"].(bool)
+	if !isSharedServiceReady {
+		utils.LogErrorMessageAndExit("The source cluster must be a datalake")
+	} else if datalake.Status != "AVAILABLE" {
+		utils.LogErrorMessageAndExit("Datalake must be available state")
+	} else {
+		cloud.SetProviderType(cloud.CloudType(datalake.CloudPlatform))
+		attachedClusterTemplate := generateStackTemplateImpl(cloud.EXISTING_NETWORK_EXISTING_SUBNET, stringFinder, boolFinder, getBlueprintClient)
+		attachedClusterTemplate.Placement.Region = &datalake.Region
+		attachedClusterTemplate.Placement.AvailabilityZone = datalake.AvailabilityZone
+		attachedClusterTemplate.General.CredentialName = datalake.Credential.Name
+		attachedClusterTemplate.Network = cloud.GetProvider().GenerateNetworkRequestFromNetworkResponse(datalake.Network)
+		attachedClusterTemplate.Cluster.LdapConfigName = *datalake.Cluster.LdapConfig.Name
+		for _, rds := range datalake.Cluster.RdsConfigs {
+			if *rds.Type == "RANGER" || *rds.Type == "HIVE" {
+				attachedClusterTemplate.Cluster.RdsConfigNames = append(attachedClusterTemplate.Cluster.RdsConfigNames, *rds.Name)
+			}
+		}
+		attachedClusterTemplate.Cluster.SharedService = &models_cloudbreak.SharedService{
+			SharedCluster: stringFinder(FlWithSourceCluster.Name),
+		}
+
+		return printTemplate(*attachedClusterTemplate)
+	}
+	return nil
+}
+
+func printTemplate(template models_cloudbreak.StackV2Request) error {
 	resp, err := json.MarshalIndent(template, "", "\t")
 	if err != nil {
 		utils.LogErrorAndExit(err)

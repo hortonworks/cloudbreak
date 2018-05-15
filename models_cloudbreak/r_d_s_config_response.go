@@ -44,7 +44,7 @@ type RDSConfigResponse struct {
 	// Required: true
 	DatabaseEngine *string `json:"databaseEngine"`
 
-	// Display name of the external database engine (Mysql, Postges...)
+	// Display name of the external database engine (Mysql, PostgreSQL...)
 	// Required: true
 	DatabaseEngineDisplayName *string `json:"databaseEngineDisplayName"`
 

@@ -1,6 +1,10 @@
 package openstack
 
-import "github.com/hortonworks/cb-cli/cli/cloud"
+import (
+	"github.com/hortonworks/cb-cli/cli/cloud"
+	"github.com/hortonworks/cb-cli/cli/utils"
+	"github.com/hortonworks/cb-cli/models_cloudbreak"
+)
 
 func (p *OpenstackProvider) GetNetworkParamatersTemplate(mode cloud.NetworkMode) map[string]interface{} {
 	switch mode {
@@ -21,4 +25,11 @@ func (p *OpenstackProvider) GetParamatersTemplate() map[string]interface{} {
 
 func (p *OpenstackProvider) GetInstanceGroupParamatersTemplate(node cloud.Node) map[string]interface{} {
 	return nil
+}
+
+func (p *OpenstackProvider) GenerateNetworkRequestFromNetworkResponse(response *models_cloudbreak.NetworkResponse) *models_cloudbreak.NetworkV2Request {
+	request := &models_cloudbreak.NetworkV2Request{
+		Parameters: utils.CopyToByTargets(response.Parameters, "publicNetId", "networkId", "subnetId", "networkingOption"),
+	}
+	return request
 }

@@ -1,6 +1,10 @@
 package aws
 
-import "github.com/hortonworks/cb-cli/cli/cloud"
+import (
+	"github.com/hortonworks/cb-cli/cli/cloud"
+	"github.com/hortonworks/cb-cli/cli/utils"
+	"github.com/hortonworks/cb-cli/models_cloudbreak"
+)
 
 func (p *AwsProvider) GetNetworkParamatersTemplate(mode cloud.NetworkMode) map[string]interface{} {
 	switch mode {
@@ -19,4 +23,14 @@ func (p *AwsProvider) GetParamatersTemplate() map[string]interface{} {
 
 func (p *AwsProvider) GetInstanceGroupParamatersTemplate(node cloud.Node) map[string]interface{} {
 	return nil
+}
+
+func (p *AwsProvider) GenerateNetworkRequestFromNetworkResponse(response *models_cloudbreak.NetworkResponse) *models_cloudbreak.NetworkV2Request {
+	parameters := utils.CopyToByTargets(response.Parameters, "subnetId")
+	parameters["vpcId"] = response.Parameters["networkId"]
+
+	request := &models_cloudbreak.NetworkV2Request{
+		Parameters: parameters,
+	}
+	return request
 }

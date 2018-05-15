@@ -1,6 +1,10 @@
 package gcp
 
-import "github.com/hortonworks/cb-cli/cli/cloud"
+import (
+	"github.com/hortonworks/cb-cli/cli/cloud"
+	"github.com/hortonworks/cb-cli/cli/utils"
+	"github.com/hortonworks/cb-cli/models_cloudbreak"
+)
 
 func (p *GcpProvider) GetNetworkParamatersTemplate(mode cloud.NetworkMode) map[string]interface{} {
 	switch mode {
@@ -21,4 +25,17 @@ func (p *GcpProvider) GetParamatersTemplate() map[string]interface{} {
 
 func (p *GcpProvider) GetInstanceGroupParamatersTemplate(node cloud.Node) map[string]interface{} {
 	return nil
+}
+
+func (p *GcpProvider) GenerateNetworkRequestFromNetworkResponse(response *models_cloudbreak.NetworkResponse) *models_cloudbreak.NetworkV2Request {
+	var parameters = make(map[string]interface{})
+	parameters["networkId"] = response.Parameters["networkId"]
+	parameters["subnetId"] = response.Parameters["subnetId"]
+	parameters["noPublicIp"] = false
+	parameters["noFirewallRules"] = false
+
+	request := &models_cloudbreak.NetworkV2Request{
+		Parameters: utils.CopyToByTargets(response.Parameters, "networkId", "subnetId", "noPublicIp", "noFirewallRules"),
+	}
+	return request
 }

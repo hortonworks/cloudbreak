@@ -3,6 +3,7 @@ package azure
 import (
 	"github.com/hortonworks/cb-cli/cli/cloud"
 	"github.com/hortonworks/cb-cli/cli/utils"
+	"github.com/hortonworks/cb-cli/models_cloudbreak"
 )
 
 func (p *AzureProvider) GetNetworkParamatersTemplate(mode cloud.NetworkMode) map[string]interface{} {
@@ -29,4 +30,11 @@ func (p *AzureProvider) GetInstanceGroupParamatersTemplate(node cloud.Node) map[
 		}
 	}
 	return nil
+}
+
+func (p *AzureProvider) GenerateNetworkRequestFromNetworkResponse(response *models_cloudbreak.NetworkResponse) *models_cloudbreak.NetworkV2Request {
+	request := &models_cloudbreak.NetworkV2Request{
+		Parameters: utils.CopyToByTargets(response.Parameters, "resourceGroupName", "networkId", "subnetId", "noPublicIp", "noFirewallRules"),
+	}
+	return request
 }

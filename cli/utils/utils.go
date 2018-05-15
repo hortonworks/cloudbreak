@@ -100,3 +100,11 @@ func DelimitedStringToArray(text, delimiter string) []string {
 	}
 	return strings.Split(text, delimiter)
 }
+
+func CopyToByTargets(sourceParameters map[string]interface{}, parameters ...string) map[string]interface{} {
+	destinationParameters := map[string]interface{}{}
+	for _, actual := range parameters {
+		destinationParameters[actual] = sourceParameters[actual]
+	}
+	return destinationParameters
+}
