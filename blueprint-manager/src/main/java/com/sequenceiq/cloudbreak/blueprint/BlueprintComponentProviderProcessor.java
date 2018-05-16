@@ -4,22 +4,15 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.Resource;
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.model.FileSystemConfiguration;
-import com.sequenceiq.cloudbreak.api.model.FileSystemType;
 import com.sequenceiq.cloudbreak.blueprint.configuration.HostgroupConfigurations;
 import com.sequenceiq.cloudbreak.blueprint.filesystem.FileSystemConfigurationProvider;
-import com.sequenceiq.cloudbreak.blueprint.filesystem.FileSystemConfigurator;
 
 @Component
 public class BlueprintComponentProviderProcessor {
-
-    @Resource
-    private Map<FileSystemType, FileSystemConfigurator<FileSystemConfiguration>> fileSystemConfigurators;
 
     @Inject
     private FileSystemConfigurationProvider fileSystemConfigurationProvider;
@@ -42,25 +35,9 @@ public class BlueprintComponentProviderProcessor {
                 provider.customTextManipulation(source, blueprintProcessor);
             }
         }
-        if (source.getFileSystemConfigurationView().isPresent()) {
-            extendBlueprintWithFsConfig(blueprintProcessor,
-                    source.getFileSystemConfigurationView().get().getFileSystemConfiguration(),
-                    source.getFileSystemConfigurationView().get().isDefaultFs());
-        }
         if (!source.getGeneralClusterConfigs().getOrchestratorType().containerOrchestrator() && source.getStackRepoDetailsHdpVersion().isPresent()) {
             blueprintProcessor.modifyHdpVersion(source.getStackRepoDetailsHdpVersion().get());
         }
         return blueprintProcessor.asText();
-    }
-
-    private String extendBlueprintWithFsConfig(BlueprintTextProcessor blueprintProcessor, FileSystemConfiguration fsConfiguration, boolean defaultFs) {
-        FileSystemType fileSystemType = FileSystemType.fromClass(fsConfiguration.getClass());
-        FileSystemConfigurator<FileSystemConfiguration> fsConfigurator = fileSystemConfigurators.get(fileSystemType);
-        Map<String, String> resourceProperties = fsConfigurator.createResources(fsConfiguration);
-        List<BlueprintConfigurationEntry> bpConfigEntries = fsConfigurator.getFsProperties(fsConfiguration, resourceProperties);
-        if (defaultFs) {
-            bpConfigEntries.addAll(fsConfigurator.getDefaultFsProperties(fsConfiguration));
-        }
-        return blueprintProcessor.addConfigEntries(bpConfigEntries, true).asText();
     }
 }
