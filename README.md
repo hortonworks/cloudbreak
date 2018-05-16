@@ -147,6 +147,7 @@ To launch the Cloudbreak application execute the `com.sequenceiq.cloudbreak.Clou
 -Dcb.db.port.5432.tcp.addr=YOUR_IP
 -Dcb.db.port.5432.tcp.port=5432
 -Dcb.identity.server.url=http://YOUR_IP:8089
+-Dspring.cloud.consul.host=YOUR_IP
 -Dserver.port=9091
 -Dcb.schema.migration.auto=true
 ```
