@@ -11,12 +11,10 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 
-import org.postgresql.Driver;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
-import org.springframework.jdbc.datasource.SimpleDriverDataSource;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.JpaVendorAdapter;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
@@ -26,6 +24,8 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import com.sequenceiq.cloudbreak.util.DatabaseUtil;
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 
 @Configuration
 @EnableTransactionManagement
@@ -61,19 +61,16 @@ public class DatabaseConfig {
     @Bean
     public DataSource dataSource() throws SQLException {
         DatabaseUtil.createSchemaIfNeeded("postgresql", databaseAddress, dbName, dbUser, dbPassword, dbSchemaName);
-        SimpleDriverDataSource dataSource = new SimpleDriverDataSource();
-        dataSource.setDriverClass(Driver.class);
+        HikariConfig config = new HikariConfig();
         if (ssl && Files.exists(Paths.get(certFile))) {
-            Properties properties = new Properties();
-            properties.setProperty("ssl", "true");
-            properties.setProperty("sslfactory", "org.postgresql.ssl.SingleCertValidatingFactory");
-            properties.setProperty("sslfactoryarg", "file://" + certFile);
-            dataSource.setConnectionProperties(properties);
+            config.addDataSourceProperty("ssl", "true");
+            config.addDataSourceProperty("sslfactory", "org.postgresql.ssl.SingleCertValidatingFactory");
+            config.addDataSourceProperty("sslfactoryarg", "file://" + certFile);
         }
-        dataSource.setUrl(String.format("jdbc:postgresql://%s/%s?currentSchema=%s", databaseAddress, dbName, dbSchemaName));
-        dataSource.setUsername(dbUser);
-        dataSource.setPassword(dbPassword);
-        return dataSource;
+        config.setJdbcUrl(String.format("jdbc:postgresql://%s/%s?currentSchema=%s", databaseAddress, dbName, dbSchemaName));
+        config.setUsername(dbUser);
+        config.setPassword(dbPassword);
+        return new HikariDataSource(config);
     }
 
     @Bean
