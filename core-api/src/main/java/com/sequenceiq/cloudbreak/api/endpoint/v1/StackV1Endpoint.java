@@ -138,6 +138,13 @@ public interface StackV1Endpoint extends StackEndpoint {
     @ApiOperation(value = StackOpDescription.DELETE_INSTANCE_BY_ID, produces = ContentType.JSON, notes = Notes.STACK_NOTES, nickname = "deleteInstanceStack")
     Response deleteInstance(@PathParam("stackId") Long stackId, @PathParam("instanceId") String instanceId);
 
+    @DELETE
+    @Path("{stackId}/deleteInstances")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Override
+    @ApiOperation(value = StackOpDescription.DELETE_INSTANCE_BY_ID, produces = ContentType.JSON, notes = Notes.STACK_NOTES, nickname = "deleteInstancesStack")
+    Response deleteInstances(@PathParam("stackId") Long stackId, @QueryParam("instanceIds") Set<String> instanceIds);
+
     @GET
     @Path("{id}/certificate")
     @Produces(MediaType.APPLICATION_JSON)
