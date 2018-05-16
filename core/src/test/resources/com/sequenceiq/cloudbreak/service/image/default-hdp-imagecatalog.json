@@ -86,6 +86,92 @@
           }
         },
         "description": "Cloudbreak official base image"
+      },
+      {
+        "uuid": "third-latest-base-amazonlinux",
+        "date": "2016-09-18",
+        "os": "amazonlinux2",
+        "images": {
+          "aws": {
+            "ap-northeast-1": "ami-0fc3016e",
+            "ap-northeast-2": "ami-4d6aa023",
+            "ap-southeast-1": "ami-ced60fad",
+            "ap-southeast-2": "ami-9f9eaafc",
+            "eu-central-1": "ami-cd4cbaa2",
+            "eu-west-1": "ami-0b067378",
+            "sa-east-1": "ami-70a5331c",
+            "us-east-1": "ami-70a73c67",
+            "us-west-1": "ami-3fe8ab5f",
+            "us-west-2": "ami-6bf9330b"
+          },
+          "azure_rm": {
+            "Brazil South": "https://sequenceiqbrazilsouth2.blob.core.windows.net/images/hdc-hdp-25-1611041452.vhd",
+            "Canada Central": "https://sequenceiqcanadacentral.blob.core.windows.net/images/hdc-hdp-25-1611041452.vhd",
+            "Canada East": "https://sequenceiqcanadaeast.blob.core.windows.net/images/hdc-hdp-25-1611041452.vhd",
+            "Central US": "https://sequenceiqcentralus2.blob.core.windows.net/images/hdc-hdp-25-1611041452.vhd",
+            "East Asia": "https://sequenceiqeastasia2.blob.core.windows.net/images/hdc-hdp-25-1611041452.vhd",
+            "East US": "https://sequenceiqeastus12.blob.core.windows.net/images/hdc-hdp-25-1611041452.vhd",
+            "East US 2": "https://sequenceiqeastus22.blob.core.windows.net/images/hdc-hdp-25-1611041452.vhd",
+            "Japan East": "https://sequenceiqjapaneast2.blob.core.windows.net/images/hdc-hdp-25-1611041452.vhd",
+            "Japan West": "https://sequenceiqjapanwest2.blob.core.windows.net/images/hdc-hdp-25-1611041452.vhd",
+            "North Central US": "https://sequenceiqorthcentralus2.blob.core.windows.net/images/hdc-hdp-25-1611041452.vhd",
+            "North Europe": "https://sequenceiqnortheurope2.blob.core.windows.net/images/hdc-hdp-25-1611041452.vhd",
+            "South Central US": "https://sequenceiqouthcentralus2.blob.core.windows.net/images/hdc-hdp-25-1611041452.vhd",
+            "Southeast Asia": "https://sequenceiqsoutheastasia2.blob.core.windows.net/images/hdc-hdp-25-1611041452.vhd",
+            "West Europe": "https://sequenceiqwesteurope2.blob.core.windows.net/images/hdc-hdp-25-1611041452.vhd",
+            "West US": "https://sequenceiqwestus2.blob.core.windows.net/images/hdc-hdp-25-1611041452.vhd"
+          },
+          "gcp": {
+            "default": "sequenceiqimage/hdc-hdp--1710161226.tar.gz"
+          },
+          "openstack": {
+            "default": "hdc-hdp--1710161226"
+          }
+        },
+        "description": "Cloudbreak official base image"
+      },
+      {
+        "uuid": "forth-latest-base-amazonlinux",
+        "date": "2016-09-17",
+        "os": "amazonlinux2",
+        "images": {
+          "aws": {
+            "ap-northeast-1": "ami-0fc3016e",
+            "ap-northeast-2": "ami-4d6aa023",
+            "ap-southeast-1": "ami-ced60fad",
+            "ap-southeast-2": "ami-9f9eaafc",
+            "eu-central-1": "ami-cd4cbaa2",
+            "eu-west-1": "ami-0b067378",
+            "sa-east-1": "ami-70a5331c",
+            "us-east-1": "ami-70a73c67",
+            "us-west-1": "ami-3fe8ab5f",
+            "us-west-2": "ami-6bf9330b"
+          },
+          "azure_rm": {
+            "Brazil South": "https://sequenceiqbrazilsouth2.blob.core.windows.net/images/hdc-hdp-25-1611041452.vhd",
+            "Canada Central": "https://sequenceiqcanadacentral.blob.core.windows.net/images/hdc-hdp-25-1611041452.vhd",
+            "Canada East": "https://sequenceiqcanadaeast.blob.core.windows.net/images/hdc-hdp-25-1611041452.vhd",
+            "Central US": "https://sequenceiqcentralus2.blob.core.windows.net/images/hdc-hdp-25-1611041452.vhd",
+            "East Asia": "https://sequenceiqeastasia2.blob.core.windows.net/images/hdc-hdp-25-1611041452.vhd",
+            "East US": "https://sequenceiqeastus12.blob.core.windows.net/images/hdc-hdp-25-1611041452.vhd",
+            "East US 2": "https://sequenceiqeastus22.blob.core.windows.net/images/hdc-hdp-25-1611041452.vhd",
+            "Japan East": "https://sequenceiqjapaneast2.blob.core.windows.net/images/hdc-hdp-25-1611041452.vhd",
+            "Japan West": "https://sequenceiqjapanwest2.blob.core.windows.net/images/hdc-hdp-25-1611041452.vhd",
+            "North Central US": "https://sequenceiqorthcentralus2.blob.core.windows.net/images/hdc-hdp-25-1611041452.vhd",
+            "North Europe": "https://sequenceiqnortheurope2.blob.core.windows.net/images/hdc-hdp-25-1611041452.vhd",
+            "South Central US": "https://sequenceiqouthcentralus2.blob.core.windows.net/images/hdc-hdp-25-1611041452.vhd",
+            "Southeast Asia": "https://sequenceiqsoutheastasia2.blob.core.windows.net/images/hdc-hdp-25-1611041452.vhd",
+            "West Europe": "https://sequenceiqwesteurope2.blob.core.windows.net/images/hdc-hdp-25-1611041452.vhd",
+            "West US": "https://sequenceiqwestus2.blob.core.windows.net/images/hdc-hdp-25-1611041452.vhd"
+          },
+          "gcp": {
+            "default": "sequenceiqimage/hdc-hdp--1710161226.tar.gz"
+          },
+          "openstack": {
+            "default": "hdc-hdp--1710161226"
+          }
+        },
+        "description": "Cloudbreak official base image"
       }
     ],
     "hdp-images": [
@@ -1175,6 +1261,43 @@
         "version": "2.5.2.5-3"
       },
       {
+        "date": "2017-10-23",
+        "description": "Cloudbreak official image",
+        "stack-details": {
+          "repo": {
+            "stack": {
+              "redhat6": "http://s3.amazonaws.com/dev.hortonworks.com/HDP/centos6/2.x/BUILDS/2.6.2.4-5",
+              "repoid": "HDP-2.6"
+            },
+            "util": {
+              "redhat6": "http://s3.amazonaws.com/dev.hortonworks.com/HDP-UTILS-1.1.0.21/repos/centos6",
+              "repoid": "HDP-UTILS-1.1.0.21"
+            }
+          },
+          "version": "2.6.2.4-5"
+        },
+        "images": {
+          "aws": {
+            "ap-northeast-1": "ami-efd67089",
+            "ap-northeast-2": "ami-24288d4a",
+            "ap-southeast-1": "ami-47135224",
+            "ap-southeast-2": "ami-4d79952f",
+            "eu-central-1": "ami-b5ec57da",
+            "eu-west-1": "ami-d28359ab",
+            "sa-east-1": "ami-9ed7aef2",
+            "us-east-1": "ami-de5389a4",
+            "us-west-1": "ami-aa91acca",
+            "us-west-2": "ami-815995f9"
+          }
+        },
+        "os": "amazonlinux2",
+        "repo": {
+          "redhat6": "http://s3.amazonaws.com/dev.hortonworks.com/ambari/centos6/2.x/BUILDS/2.5.2.5-3"
+        },
+        "uuid": "latest-amazonlinux-hdp",
+        "version": "2.5.2.5-3"
+      },
+      {
         "date": "2017-10-24",
         "description": "Cloudbreak official image",
         "stack-details": {
@@ -1510,6 +1633,7 @@
           "2.5.1.9-4-ccbb32dc-6c9f-43f1-8a09-64b598fda733-2.6.1.4-2",
           "2.5.2.0-a7b0e31f-0469-405c-834d-24a3f045dacb-2.6.2.0",
           "latest-hdp",
+          "latest-amazonlinux-hdp",
           "second-latest-hdp",
           "9958938a-1261-48e2-aff9-dbcb2cebf6cd"
         ],
@@ -1545,6 +1669,8 @@
           "2.5.2.0-a7b0e31f-0469-405c-834d-24a3f045dacb-2.6.2.0",
           "second-latest-hdp",
           "latest-hdp",
+          "latest-amazonlinux-hdp",
+          "third-latest-base-amazonlinux",
           "9958938a-1261-48e2-aff9-dbcb2cebf6cd"
         ]
       },
@@ -1567,6 +1693,7 @@
           "2.5.1.9-4-ccbb32dc-6c9f-43f1-8a09-64b598fda733-2.6.1.4-2",
           "2.5.2.0-a7b0e31f-0469-405c-834d-24a3f045dacb-2.6.2.0",
           "second-latest-hdp",
+          "forth-latest-base-amazonlinux",
           "9958938a-1261-48e2-aff9-dbcb2cebf6cd"
         ],
         "images": [
@@ -1601,6 +1728,8 @@
           "2.5.2.0-a7b0e31f-0469-405c-834d-24a3f045dacb-2.6.2.0",
           "second-latest-hdp",
           "latest-hdp",
+          "third-latest-base-amazonlinux",
+          "forth-latest-base-amazonlinux",
           "9958938a-1261-48e2-aff9-dbcb2cebf6cd"
         ]
       },

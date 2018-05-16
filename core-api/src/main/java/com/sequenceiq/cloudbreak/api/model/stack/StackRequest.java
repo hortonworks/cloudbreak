@@ -47,6 +47,9 @@ public class StackRequest extends StackBase {
     @ApiModelProperty(StackModelDescription.IMAGE_ID)
     private String imageId;
 
+    @ApiModelProperty(StackModelDescription.OS_TYPE)
+    private String os;
+
     @ApiModelProperty(StackModelDescription.FLEX_ID)
     private Long flexId;
 
@@ -201,5 +204,13 @@ public class StackRequest extends StackBase {
 
     public void setClusterToAttach(Long clusterToAttach) {
         this.clusterToAttach = clusterToAttach;
+    }
+
+    public void setOs(String os) {
+        this.os = os;
+    }
+
+    public String getOs() {
+        return os;
     }
 }

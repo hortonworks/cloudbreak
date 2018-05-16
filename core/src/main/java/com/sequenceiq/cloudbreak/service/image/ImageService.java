@@ -100,8 +100,8 @@ public class ImageService {
         }
     }
 
-    public StatedImage determineImageFromCatalog(String imageId, String platformString, String catalogName, Blueprint blueprint, boolean useBaseImage)
-            throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
+    public StatedImage determineImageFromCatalog(String imageId, String platformString, String catalogName,
+        Blueprint blueprint, boolean useBaseImage, String os) throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         StatedImage statedImage;
         if (imageId != null) {
             statedImage = imageCatalogService.getImageByCatalogName(imageId, catalogName);
@@ -119,11 +119,11 @@ public class ImageService {
             }
             if (useBaseImage) {
                 LOGGER.info("Image id isn't specified for the stack, falling back to a base image, because repo information is provided");
-                statedImage = imageCatalogService.getLatestBaseImageDefaultPreferred(platformString);
+                statedImage = imageCatalogService.getLatestBaseImageDefaultPreferred(platformString, os);
             } else {
                 LOGGER.info("Image id isn't specified for the stack, falling back to a prewarmed "
                     + "image of {}-{} or to a base image if prewarmed doesn't exist", clusterType, clusterVersion);
-                statedImage = imageCatalogService.getPrewarmImageDefaultPreferred(platformString, clusterType, clusterVersion);
+                statedImage = imageCatalogService.getPrewarmImageDefaultPreferred(platformString, clusterType, clusterVersion, os);
             }
         }
         return statedImage;

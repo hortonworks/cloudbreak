@@ -53,7 +53,7 @@ public class ImageCatalogV1Controller implements ImageCatalogV1Endpoint {
 
     @Override
     public ImagesResponse getImagesByProvider(String platform) throws Exception {
-        Images images = imageCatalogService.getImages(platform).getImages();
+        Images images = imageCatalogService.getImagesOsFiltered(platform, null).getImages();
         return conversionService.convert(images, ImagesResponse.class);
     }
 

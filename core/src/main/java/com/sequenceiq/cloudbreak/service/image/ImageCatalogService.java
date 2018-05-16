@@ -90,13 +90,21 @@ public class ImageCatalogService {
     @Inject
     private AccountPreferencesService accountPreferencesService;
 
-    public StatedImages getImages(String provider) throws CloudbreakImageCatalogException {
-        return getImages(getDefaultImageCatalog(), provider, cbVersion);
+    public StatedImages getImagesOsFiltered(String provider, String os) throws CloudbreakImageCatalogException {
+        StatedImages images = getImages(getDefaultImageCatalog(), provider, cbVersion);
+        if (!StringUtils.isEmpty(os)) {
+            Images rawImages = images.getImages();
+            List<Image> baseImages = filterImagesByOs(rawImages.getBaseImages(), os);
+            List<Image> hdpImages = filterImagesByOs(rawImages.getHdpImages(), os);
+            List<Image> hdfImages = filterImagesByOs(rawImages.getHdfImages(), os);
+            images = statedImages(new Images(baseImages, hdpImages, hdfImages), images.getImageCatalogUrl(), images.getImageCatalogName());
+        }
+        return images;
     }
 
-    public StatedImage getLatestBaseImageDefaultPreferred(String platform) throws CloudbreakImageCatalogException, CloudbreakImageNotFoundException {
-        StatedImages statedImages = getImages(platform);
-        Optional<Image> defaultBaseImage = getLatestBaseImageDefaultPreferred(statedImages);
+    public StatedImage getLatestBaseImageDefaultPreferred(String platform, String os) throws CloudbreakImageCatalogException, CloudbreakImageNotFoundException {
+        StatedImages statedImages = getImagesOsFiltered(platform, os);
+        Optional<Image> defaultBaseImage = getLatestBaseImageDefaultPreferred(statedImages, os);
         if (defaultBaseImage.isPresent()) {
             return statedImage(defaultBaseImage.get(), statedImages.getImageCatalogUrl(), statedImages.getImageCatalogName());
         } else {
@@ -104,14 +112,17 @@ public class ImageCatalogService {
         }
     }
 
-    public Optional<Image> getLatestBaseImageDefaultPreferred(StatedImages statedImages) {
+    public Optional<Image> getLatestBaseImageDefaultPreferred(StatedImages statedImages, String os) {
         List<Image> baseImages = statedImages.getImages().getBaseImages();
+        if (!StringUtils.isEmpty(os)) {
+            baseImages = filterImagesByOs(baseImages, os);
+        }
         return getLatestImageDefaultPreferred(baseImages);
     }
 
-    public StatedImage getPrewarmImageDefaultPreferred(String platform, String clusterType, String clusterVersion)
+    public StatedImage getPrewarmImageDefaultPreferred(String platform, String clusterType, String clusterVersion, String os)
             throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
-        StatedImages statedImages = getImages(platform);
+        StatedImages statedImages = getImagesOsFiltered(platform, os);
         List<Image> images = getImagesForClusterType(statedImages, clusterType);
         Optional<Image> selectedImage = Optional.empty();
         if (!CollectionUtils.isEmpty(images)) {
@@ -122,7 +133,7 @@ public class ImageCatalogService {
             selectedImage = getLatestImageDefaultPreferred(matchingVersionImages);
         }
         if (!selectedImage.isPresent()) {
-            selectedImage = getLatestBaseImageDefaultPreferred(statedImages);
+            selectedImage = getLatestBaseImageDefaultPreferred(statedImages, os);
         }
         if (!selectedImage.isPresent()) {
             throw new CloudbreakImageNotFoundException(imageNotFoundErrorMessage(platform));
@@ -305,8 +316,7 @@ public class ImageCatalogService {
         return image;
     }
 
-    public StatedImages getImages(ImageCatalog imageCatalog, String platform, String cbVersion)
-            throws CloudbreakImageCatalogException {
+    public StatedImages getImages(ImageCatalog imageCatalog, String platform, String cbVersion) throws CloudbreakImageCatalogException {
         return getImages(imageCatalog, ImmutableSet.of(platform), cbVersion);
     }
 
@@ -375,6 +385,10 @@ public class ImageCatalogService {
                 .filter(img -> img.getImageSetsByProvider().keySet().stream().anyMatch(
                         p -> platforms.stream().anyMatch(platform -> platform.equalsIgnoreCase(p))))
                 .collect(Collectors.toList());
+    }
+
+    private List<Image> filterImagesByOs(List<Image> images, String os) {
+        return images.stream().filter(img -> img.getOs().equalsIgnoreCase(os)).collect(Collectors.toList());
     }
 
     private String latestCloudbreakVersion(Iterable<CloudbreakVersion> cloudbreakVersions) {

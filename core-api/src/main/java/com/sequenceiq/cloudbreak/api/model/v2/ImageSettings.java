@@ -19,6 +19,9 @@ public class ImageSettings implements JsonEntity {
     @ApiModelProperty(StackModelDescription.IMAGE_ID)
     private String imageId;
 
+    @ApiModelProperty(StackModelDescription.OS_TYPE)
+    private String os;
+
     public String getImageCatalog() {
         return imageCatalog;
     }
@@ -33,5 +36,9 @@ public class ImageSettings implements JsonEntity {
 
     public void setImageId(String imageId) {
         this.imageId = imageId;
+    }
+
+    public String getOs() {
+        return os;
     }
 }
