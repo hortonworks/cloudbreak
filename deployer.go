@@ -149,6 +149,7 @@ func main() {
 		"include/db.bash",
 		"include/docker.bash",
 		"include/env.bash",
+		"include/export.bash",
 		"include/fn.bash",
 		"include/migrate.bash",
 		"include/machine.bash",

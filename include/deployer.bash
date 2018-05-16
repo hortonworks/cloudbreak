@@ -667,6 +667,7 @@ main() {
     cmd-export-ns env "Environment namespace"
     cmd-export env-show
     cmd-export env-export
+    cmd-export export-logs export-logs
 
     cmd-export-ns aws "Amazon Webservice namespace"
     cmd-export aws-show-role
