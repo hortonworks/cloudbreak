@@ -8,7 +8,7 @@ endef
 
 all: cbm docker-integration-test stop-cbm generate-xunit-result
 
-cbm: 
+cbm:
 	GIT_VERSION=$(GIT_VERSION) GIT_TAG=$(GIT_TAG) ./scripts/cbm.sh
 
 integration-test:

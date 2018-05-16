@@ -1,0 +1,119 @@
+{
+  "cluster": {
+    "ambari": {
+      "blueprintInputs": [],
+      "blueprintName": "EDW-ETL: Apache Hive, Apache Spark 2",
+      "userName": "admin"
+    }
+  },
+  "general": {
+      "credentialName": "newopens",
+      "name": ""
+  },
+  "placement": {
+      "region": "local",
+      "availabilityZone": "null"
+  },
+  "instanceGroups": [
+    {
+      "group": "master",
+      "nodeCount": 1,
+      "recipeNames": ["test1","test3"],
+      "securityGroup": {
+        "securityRules": [
+          {
+            "ports": "22",
+            "protocol": "tcp",
+            "subnet": "0.0.0.0/0"
+          },
+          {
+            "ports": "443",
+            "protocol": "tcp",
+            "subnet": "0.0.0.0/0"
+          },
+          {
+            "ports": "9443",
+            "protocol": "tcp",
+            "subnet": "0.0.0.0/0"
+          }
+        ]
+      },
+      "template": {
+        "instanceType": "m1.large",
+        "volumeCount": 1,
+        "volumeSize": 10
+      },
+      "type": "GATEWAY"
+    },
+    {
+      "group": "worker",
+      "nodeCount": 1,
+      "recipeNames": ["test1","test3"],
+      "securityGroup": {
+        "securityRules": [
+          {
+            "ports": "22",
+            "protocol": "tcp",
+            "subnet": "0.0.0.0/0"
+          },
+          {
+            "ports": "443",
+            "protocol": "tcp",
+            "subnet": "0.0.0.0/0"
+          },
+          {
+            "ports": "9443",
+            "protocol": "tcp",
+            "subnet": "0.0.0.0/0"
+          }
+        ]
+      },
+      "template": {
+        "instanceType": "m1.large",
+        "volumeCount": 1,
+        "volumeSize": 10
+      },
+      "type": "CORE"
+    },
+    {
+      "group": "compute",
+      "nodeCount": 1,
+      "recipeNames": ["test1","test3"],
+      "securityGroup": {
+        "securityRules": [
+          {
+            "ports": "22",
+            "protocol": "tcp",
+            "subnet": "0.0.0.0/0"
+          },
+          {
+            "ports": "443",
+            "protocol": "tcp",
+            "subnet": "0.0.0.0/0"
+          },
+          {
+            "ports": "9443",
+            "protocol": "tcp",
+            "subnet": "0.0.0.0/0"
+          }
+        ]
+      },
+      "template": {
+        "instanceType": "m1.large",
+        "volumeCount": 1,
+        "volumeSize": 10
+      },
+      "type": "CORE"
+    }
+  ],
+  "network": {
+    "parameters": {
+      "publicNetId": "999e09bc-cf75-4a19-98fb-c0b4ddee6d93"
+    },
+    "subnetCIDR": "10.0.0.0/16"
+  },
+  "stackAuthentication": {
+    "publicKey": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC0Rfl2G2vDs6yc19RxCqReunFgpYj+ucyLobpTCBtfDwzIbJot2Fmife6M42mBtiTmAK6x8kcUEeab6CB4MUzsqF7vGTFUjwWirG/XU5pYXFUBhi8xzey+KS9KVrQ+UuKJh/AN9iSQeMV+rgT1yF5+etVH+bK1/37QCKp3+mCqjFzPyQOrvkGZv4sYyRwX7BKBLleQmIVWpofpjT7BfcCxH877RzC5YMIi65aBc82Dl6tH6OEiP7mzByU52yvH6JFuwZ/9fWj1vXCWJzxx2w0F1OU8Zwg8gNNzL+SVb9+xfBE7xBHMpYFg72hBWPh862Ce36F4NZd3MpWMSjMmpDPh",
+    "publicKeyId": null
+  }
+}
