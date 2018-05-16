@@ -5,38 +5,34 @@ import org.junit.Test;
 
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.model.FileSystemConfiguration;
+import com.sequenceiq.cloudbreak.blueprint.template.views.filesystem.AdlsFileSystemView;
+import com.sequenceiq.cloudbreak.blueprint.template.views.filesystem.FileSystemView;
+import com.sequenceiq.cloudbreak.blueprint.template.views.filesystem.GcsFileSystemView;
+import com.sequenceiq.cloudbreak.blueprint.template.views.filesystem.WasbFileSystemView;
 
 public class FileSystemViewTest {
 
     @Test
     public void testGcsFileSystemConfiguration() {
         FileSystemConfiguration fileSystemConfiguration = TestUtil.gcsFileSystemConfiguration();
-        FileSystemView fileSystemView = new FileSystemView(fileSystemConfiguration);
+        FileSystemView fileSystemView = new GcsFileSystemView(new FileSystemConfigurationView(fileSystemConfiguration));
         Assert.assertNotNull(fileSystemView);
-        Assert.assertEquals(3, fileSystemView.getProperties().size());
+        Assert.assertEquals(0, fileSystemView.getProperties().size());
     }
 
     @Test
     public void testAdlsFileSystemConfiguration() {
         FileSystemConfiguration fileSystemConfiguration = TestUtil.adlsFileSystemConfiguration();
-        FileSystemView fileSystemView = new FileSystemView(fileSystemConfiguration);
-        Assert.assertNotNull(fileSystemView);
-        Assert.assertEquals(4, fileSystemView.getProperties().size());
-    }
-
-    @Test
-    public void testWasbFileSystemConfiguration() {
-        FileSystemConfiguration fileSystemConfiguration = TestUtil.wasbFileSystemConfiguration();
-        FileSystemView fileSystemView = new FileSystemView(fileSystemConfiguration);
+        FileSystemView fileSystemView = new AdlsFileSystemView(new FileSystemConfigurationView(fileSystemConfiguration));
         Assert.assertNotNull(fileSystemView);
         Assert.assertEquals(2, fileSystemView.getProperties().size());
     }
 
     @Test
-    public void testWasbIntegratedFileSystemConfiguration() {
-        FileSystemConfiguration fileSystemConfiguration = TestUtil.wasbIntegratedFileSystemConfiguration();
-        FileSystemView fileSystemView = new FileSystemView(fileSystemConfiguration);
+    public void testWasbFileSystemConfiguration() {
+        FileSystemConfiguration fileSystemConfiguration = TestUtil.wasbSecureFileSystemConfiguration();
+        FileSystemView fileSystemView = new WasbFileSystemView(new FileSystemConfigurationView(fileSystemConfiguration));
         Assert.assertNotNull(fileSystemView);
-        Assert.assertEquals(6, fileSystemView.getProperties().size());
+        Assert.assertEquals(1, fileSystemView.getProperties().size());
     }
 }

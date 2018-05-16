@@ -17,7 +17,6 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.FileSystemType;
 import com.sequenceiq.cloudbreak.api.model.GcsFileSystemConfiguration;
-import com.sequenceiq.cloudbreak.blueprint.BlueprintConfigurationEntry;
 import com.sequenceiq.cloudbreak.blueprint.filesystem.AbstractFileSystemConfigurator;
 import com.sequenceiq.cloudbreak.blueprint.filesystem.FileSystemScriptConfig;
 import com.sequenceiq.cloudbreak.domain.Credential;
@@ -44,25 +43,6 @@ public class GcsFileSystemConfigurator extends AbstractFileSystemConfigurator<Gc
             return "";
         }
         return serviceAccountPrivateKey.toString();
-    }
-
-    @Override
-    public List<BlueprintConfigurationEntry> getFsProperties(GcsFileSystemConfiguration fsConfig, Map<String, String> resourceProperties) {
-        List<BlueprintConfigurationEntry> bpConfigs = new ArrayList<>();
-        bpConfigs.add(new BlueprintConfigurationEntry("core-site", "fs.gs.impl", "com.google.cloud.hadoop.fs.gcs.GoogleHadoopFileSystem"));
-        bpConfigs.add(new BlueprintConfigurationEntry("core-site", "fs.AbstractFileSystem.gs.impl", "com.google.cloud.hadoop.fs.gcs.GoogleHadoopFS"));
-        bpConfigs.add(new BlueprintConfigurationEntry("core-site", "fs.gs.working.dir", "/"));
-        bpConfigs.add(new BlueprintConfigurationEntry("core-site", "fs.gs.system.bucket", fsConfig.getDefaultBucketName()));
-        bpConfigs.add(new BlueprintConfigurationEntry("core-site", "fs.gs.auth.service.account.enable", "true"));
-        bpConfigs.add(new BlueprintConfigurationEntry("core-site", "fs.gs.auth.service.account.keyfile", "/usr/lib/hadoop/lib/gcp.p12"));
-        bpConfigs.add(new BlueprintConfigurationEntry("core-site", "fs.gs.auth.service.account.email", fsConfig.getServiceAccountEmail()));
-        bpConfigs.add(new BlueprintConfigurationEntry("core-site", "fs.gs.project.id", fsConfig.getProjectId()));
-        return bpConfigs;
-    }
-
-    @Override
-    public String getDefaultFsValue(GcsFileSystemConfiguration fsConfig) {
-        return String.format("gs://%s/", fsConfig.getDefaultBucketName());
     }
 
     @Override

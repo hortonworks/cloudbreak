@@ -31,30 +31,23 @@ import com.sequenceiq.cloudbreak.api.model.ExecutorType;
 import com.sequenceiq.cloudbreak.api.model.FileSystemConfiguration;
 import com.sequenceiq.cloudbreak.api.model.GatewayType;
 import com.sequenceiq.cloudbreak.api.model.GcsFileSystemConfiguration;
-import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType;
-import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceMetadataType;
-import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.model.RecipeType;
 import com.sequenceiq.cloudbreak.api.model.RecoveryMode;
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.api.model.WasbFileSystemConfiguration;
-import com.sequenceiq.cloudbreak.api.model.WasbIntegratedFileSystemConfiguration;
 import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
+import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType;
+import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceMetadataType;
+import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceStatus;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.Constraint;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.FailurePolicy;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.Network;
@@ -66,11 +59,17 @@ import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.domain.SecurityRule;
 import com.sequenceiq.cloudbreak.domain.SmartSenseSubscription;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.json.JsonToString;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.view.StackStatusView;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.type.KerberosType;
@@ -699,22 +698,21 @@ public class TestUtil {
         return gcsFileSystemConfiguration;
     }
 
-    public static FileSystemConfiguration wasbIntegratedFileSystemConfiguration() {
-        WasbIntegratedFileSystemConfiguration wasbIntegratedFileSystemConfiguration = new WasbIntegratedFileSystemConfiguration();
-        wasbIntegratedFileSystemConfiguration.setAppId("appid");
-        wasbIntegratedFileSystemConfiguration.setAppPassword("password");
-        wasbIntegratedFileSystemConfiguration.setRegion("region");
-        wasbIntegratedFileSystemConfiguration.setStorageName("storagename");
-        wasbIntegratedFileSystemConfiguration.setSubscriptionId("subscriptionid");
-        wasbIntegratedFileSystemConfiguration.setTenantId("tenant");
-        return wasbIntegratedFileSystemConfiguration;
-    }
-
-    public static FileSystemConfiguration wasbFileSystemConfiguration() {
+    public static FileSystemConfiguration wasbSecureFileSystemConfiguration() {
         WasbFileSystemConfiguration wasbFileSystemConfiguration = new WasbFileSystemConfiguration();
         wasbFileSystemConfiguration.setAccountKey("accountkey");
         wasbFileSystemConfiguration.setAccountName("accountname");
+        wasbFileSystemConfiguration.addProperty("container", "wasb-container");
         wasbFileSystemConfiguration.setSecure(true);
+        return wasbFileSystemConfiguration;
+    }
+
+    public static FileSystemConfiguration wasbUnSecureFileSystemConfiguration() {
+        WasbFileSystemConfiguration wasbFileSystemConfiguration = new WasbFileSystemConfiguration();
+        wasbFileSystemConfiguration.setAccountKey("accountkey");
+        wasbFileSystemConfiguration.setAccountName("accountname");
+        wasbFileSystemConfiguration.addProperty("container", "wasb-container");
+        wasbFileSystemConfiguration.setSecure(false);
         return wasbFileSystemConfiguration;
     }
 
@@ -724,6 +722,8 @@ public class TestUtil {
         adlsFileSystemConfiguration.setAccountName("accountname");
         adlsFileSystemConfiguration.setCredential("1");
         adlsFileSystemConfiguration.setTenantId("tenantid");
+        adlsFileSystemConfiguration.addProperty("adl.events.tracking.clustertype", "normal-cluster-type");
+        adlsFileSystemConfiguration.addProperty("adl.events.tracking.clustername", "normal-cluster");
         return adlsFileSystemConfiguration;
     }
 

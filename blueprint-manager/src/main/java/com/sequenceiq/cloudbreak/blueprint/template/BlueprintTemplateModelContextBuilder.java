@@ -11,13 +11,14 @@ import com.sequenceiq.cloudbreak.api.model.FileSystemType;
 import com.sequenceiq.cloudbreak.blueprint.nifi.HdfConfigs;
 import com.sequenceiq.cloudbreak.blueprint.template.views.BlueprintView;
 import com.sequenceiq.cloudbreak.blueprint.template.views.FileSystemConfigurationView;
-import com.sequenceiq.cloudbreak.blueprint.template.views.FileSystemView;
 import com.sequenceiq.cloudbreak.blueprint.template.views.GatewayView;
 import com.sequenceiq.cloudbreak.blueprint.template.views.GeneralClusterConfigsView;
 import com.sequenceiq.cloudbreak.blueprint.template.views.HdfConfigView;
 import com.sequenceiq.cloudbreak.blueprint.template.views.LdapView;
 import com.sequenceiq.cloudbreak.blueprint.template.views.RdsView;
 import com.sequenceiq.cloudbreak.blueprint.template.views.SharedServiceConfigsView;
+import com.sequenceiq.cloudbreak.blueprint.template.views.filesystem.FileSystemView;
+import com.sequenceiq.cloudbreak.blueprint.template.views.filesystem.FileSystemViewFactory;
 import com.sequenceiq.cloudbreak.blueprint.templates.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.blueprint.utils.ModelConverterUtils;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
@@ -68,10 +69,15 @@ public class BlueprintTemplateModelContextBuilder {
 
     public BlueprintTemplateModelContextBuilder withFileSystemConfigs(FileSystemConfigurationView fileSystemConfigurationView) {
         if (fileSystemConfigurationView != null && fileSystemConfigurationView.getFileSystemConfiguration() != null) {
-            FileSystemView fileSystemView = new FileSystemView(fileSystemConfigurationView.getFileSystemConfiguration());
-            String componentName = FileSystemType.fromClass(fileSystemConfig.getClass()).name().toLowerCase();
-            this.fileSystemConfig.put(componentName, fileSystemView);
+            withFileSystemConfigurationView(fileSystemConfigurationView);
         }
+        return this;
+    }
+
+    private BlueprintTemplateModelContextBuilder withFileSystemConfigurationView(FileSystemConfigurationView fileSystemConfigurationView) {
+        FileSystemView fileSystemView = FileSystemViewFactory.convertToFileSystem(fileSystemConfigurationView);
+        String componentName = FileSystemType.fromClass(fileSystemConfigurationView.getFileSystemConfiguration().getClass()).name().toLowerCase();
+        fileSystemConfig.put(componentName, fileSystemView);
         return this;
     }
 
@@ -144,9 +150,10 @@ public class BlueprintTemplateModelContextBuilder {
         Map<String, Object> blueprintTemplateModelContext = new HashMap<>();
         blueprintTemplateModelContext.put(HandleBarModelKey.COMPONENTS.modelKey(), components);
         blueprintTemplateModelContext.put(HandleBarModelKey.LDAP.modelKey(), ldap.orElse(null));
+        blueprintTemplateModelContext.put(HandleBarModelKey.LDAP.modelKey(), ldap.orElse(null));
         blueprintTemplateModelContext.put(HandleBarModelKey.GATEWAY.modelKey(), gateway.orElse(null));
         blueprintTemplateModelContext.put(HandleBarModelKey.RDS.modelKey(), rds);
-        blueprintTemplateModelContext.put(HandleBarModelKey.FILESYSTEMCONFIGS.modelKey(), fileSystemConfig);
+        blueprintTemplateModelContext.put(HandleBarModelKey.FILESYSTEMCONFIGS.modelKey(), ModelConverterUtils.convert(fileSystemConfig));
         blueprintTemplateModelContext.put(HandleBarModelKey.SHAREDSERVICE.modelKey(), sharedServiceConfigs.orElse(null));
         blueprintTemplateModelContext.put(HandleBarModelKey.BLUEPRINT.modelKey(), blueprintView);
         blueprintTemplateModelContext.put(HandleBarModelKey.HDF.modelKey(), hdfConfigs.orElse(null));

@@ -8,6 +8,11 @@ public class FileSystemConfigurationView {
 
     private boolean defaultFs;
 
+    public FileSystemConfigurationView(FileSystemConfiguration fileSystemConfiguration) {
+        this.fileSystemConfiguration = fileSystemConfiguration;
+        this.defaultFs = false;
+    }
+
     public FileSystemConfigurationView(FileSystemConfiguration fileSystemConfiguration, boolean defaultFs) {
         this.fileSystemConfiguration = fileSystemConfiguration;
         this.defaultFs = defaultFs;
