@@ -44,6 +44,8 @@ public interface StackEndpoint {
 
     Response deleteInstance(@PathParam("stackId") Long stackId, @PathParam("instanceId") String instanceId);
 
+    Response deleteInstances(@PathParam("stackId") Long stackId, @PathParam("instanceIds") Set<String> instanceIds);
+
     CertificateResponse getCertificate(@PathParam("id") Long stackId);
 
     Response validate(@Valid StackValidationRequest stackValidationRequest);
