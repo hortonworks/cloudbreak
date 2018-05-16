@@ -69,13 +69,13 @@ public class ImagesToImagesResponseJsonConverter extends AbstractConversionServi
         List<StackDetailsJson> defaultHdpStacks = getDefaultStackInfos(defaultHDPEntries.getEntries().values());
         List<StackDetailsJson> defaultHdfStacks = getDefaultStackInfos(defaultHDFEntries.getEntries().values());
         List<BaseImageResponse> baseImages = source.getBaseImages().stream()
-            .filter(defaultAmbariVersion -> defaultAmbariRepoService.getDefault(defaultAmbariVersion.getOsType()) != null)
-            .map(defaultAmbariVersion -> {
+            .filter(image -> defaultAmbariRepoService.getDefault(image.getOsType()) != null)
+            .map(image -> {
                 BaseImageResponse imgJson = new BaseImageResponse();
-                copyImageFieldsToJson(defaultAmbariVersion, imgJson);
+                copyImageFieldsToJson(image, imgJson);
                 imgJson.setHdpStacks(defaultHdpStacks);
                 imgJson.setHdfStacks(defaultHdfStacks);
-                AmbariRepo ambariRepo = defaultAmbariRepoService.getDefault(defaultAmbariVersion.getOsType());
+                AmbariRepo ambariRepo = defaultAmbariRepoService.getDefault(image.getOsType());
                 imgJson.setVersion(ambariRepo.getVersion());
                 Map<String, String> repoJson = new HashMap<>();
                 repoJson.put("baseurl", ambariRepo.getBaseUrl());
@@ -119,6 +119,7 @@ public class ImagesToImagesResponseJsonConverter extends AbstractConversionServi
         json.setOsType(source.getOsType());
         json.setUuid(source.getUuid());
         json.setVersion(source.getVersion());
+        json.setDefaultImage(source.isDefaultImage());
         if (source.getRepo() != null) {
             json.setRepo(new HashMap<>(source.getRepo()));
         } else {

@@ -31,9 +31,9 @@ import com.sequenceiq.cloudbreak.api.model.ExecutorType;
 import com.sequenceiq.cloudbreak.api.model.FileSystemConfiguration;
 import com.sequenceiq.cloudbreak.api.model.GatewayType;
 import com.sequenceiq.cloudbreak.api.model.GcsFileSystemConfiguration;
-import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
-import com.sequenceiq.cloudbreak.api.model.InstanceMetadataType;
-import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
+import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType;
+import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceMetadataType;
+import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.model.RecipeType;
 import com.sequenceiq.cloudbreak.api.model.RecoveryMode;
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
@@ -46,15 +46,15 @@ import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
-import com.sequenceiq.cloudbreak.domain.Cluster;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.Constraint;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.FailurePolicy;
-import com.sequenceiq.cloudbreak.domain.Gateway;
-import com.sequenceiq.cloudbreak.domain.HostGroup;
-import com.sequenceiq.cloudbreak.domain.HostMetadata;
-import com.sequenceiq.cloudbreak.domain.InstanceGroup;
-import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.Network;
@@ -66,8 +66,8 @@ import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.domain.SecurityRule;
 import com.sequenceiq.cloudbreak.domain.SmartSenseSubscription;
-import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.StackStatus;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.json.JsonToString;
@@ -239,7 +239,6 @@ public class TestUtil {
     public static InstanceGroup instanceGroup(Long id, String name, InstanceGroupType instanceGroupType, Template template, int nodeCount) {
         InstanceGroup instanceGroup = new InstanceGroup();
         instanceGroup.setId(id);
-        instanceGroup.setNodeCount(nodeCount);
         instanceGroup.setGroupName(name);
         instanceGroup.setInstanceGroupType(instanceGroupType);
         instanceGroup.setTemplate(template);
@@ -395,13 +394,6 @@ public class TestUtil {
         cluster.setRdsConfigs(rdsConfigs);
         cluster.setLdapConfig(ldapConfig());
         cluster.setHostGroups(hostGroups(cluster));
-        Map<String, String> inputs = new HashMap<>();
-        inputs.put("S3_BUCKET", "testbucket");
-        try {
-            cluster.setBlueprintInputs(new Json(inputs));
-        } catch (JsonProcessingException ignored) {
-            cluster.setBlueprintInputs(null);
-        }
 
         Map<String, String> map = new HashMap<>();
         try {
@@ -634,13 +626,15 @@ public class TestUtil {
         rdsConfig.setConnectionPassword("iamsoosecure");
         rdsConfig.setConnectionUserName("heyitsme");
         if (databaseVendor == DatabaseVendor.ORACLE12 || databaseVendor == DatabaseVendor.ORACLE11) {
-            rdsConfig.setConnectionURL("jdbc:" + databaseVendor.jdbcUrlDriverId() + ":@10.1.1.1:5432:" + rdsType.name().toLowerCase());
+            rdsConfig.setConnectionURL("jdbc:" + databaseVendor.jdbcUrlDriverId() + ":@10.1.1.1:1521:" + rdsType.name().toLowerCase());
+        } else if (databaseVendor == DatabaseVendor.MYSQL) {
+            rdsConfig.setConnectionURL("jdbc:" + databaseVendor.jdbcUrlDriverId() + "://10.1.1.1:3306/" + rdsType.name().toLowerCase());
         } else {
             rdsConfig.setConnectionURL("jdbc:" + databaseVendor.jdbcUrlDriverId() + "://10.1.1.1:5432/" + rdsType.name().toLowerCase());
         }
         rdsConfig.setType(rdsType.name());
         rdsConfig.setConnectionDriver(databaseVendor.connectionDriver());
-        rdsConfig.setDatabaseEngine(databaseVendor.name());
+        rdsConfig.setDatabaseEngine(databaseVendor);
         return rdsConfig;
     }
 
@@ -652,13 +646,28 @@ public class TestUtil {
         rdsConfig.setConnectionURL("jdbc:postgresql://10.1.1.1:5432/" + rdsType.name().toLowerCase());
         rdsConfig.setType(rdsType.name());
         rdsConfig.setConnectionDriver("org.postgresql.Driver");
-        rdsConfig.setDatabaseEngine(DatabaseVendor.POSTGRES.name());
+        rdsConfig.setDatabaseEngine(DatabaseVendor.POSTGRES);
         return rdsConfig;
     }
 
     public static Gateway gateway() throws JsonProcessingException {
         Gateway gateway = new Gateway();
         gateway.setEnableGateway(false);
+        gateway.setTopologyName("topology");
+        gateway.setPath("/path");
+        gateway.setSsoProvider("simple");
+        gateway.setGatewayType(GatewayType.CENTRAL);
+        gateway.setSignCert("signcert");
+        gateway.setSignKey("signkey");
+        gateway.setTokenCert("tokencert");
+        gateway.setSignPub("signpub");
+        gateway.setExposedServices(new Json("{}"));
+        return gateway;
+    }
+
+    public static Gateway gatewayEnabled() throws JsonProcessingException {
+        Gateway gateway = new Gateway();
+        gateway.setEnableGateway(true);
         gateway.setTopologyName("topology");
         gateway.setPath("/path");
         gateway.setSsoProvider("simple");

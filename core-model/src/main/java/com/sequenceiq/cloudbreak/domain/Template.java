@@ -49,6 +49,8 @@ public class Template implements ProvisionEntity {
 
     private Integer volumeSize;
 
+    private Integer rootVolumeSize;
+
     private String volumeType;
 
     @Column(nullable = false)
@@ -142,6 +144,14 @@ public class Template implements ProvisionEntity {
 
     public void setVolumeSize(Integer volumeSize) {
         this.volumeSize = volumeSize;
+    }
+
+    public Integer getRootVolumeSize() {
+        return rootVolumeSize;
+    }
+
+    public void setRootVolumeSize(Integer rootVolumeSize) {
+        this.rootVolumeSize = rootVolumeSize;
     }
 
     public boolean isDeleted() {

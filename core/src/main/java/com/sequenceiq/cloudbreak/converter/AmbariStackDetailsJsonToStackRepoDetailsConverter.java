@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
 import com.sequenceiq.cloudbreak.cloud.model.component.ManagementPackComponent;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
-import com.sequenceiq.cloudbreak.controller.BadRequestException;
+import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 
 @Component
 public class AmbariStackDetailsJsonToStackRepoDetailsConverter extends AbstractConversionServiceAwareConverter<AmbariStackDetailsJson, StackRepoDetails> {
@@ -91,16 +91,12 @@ public class AmbariStackDetailsJsonToStackRepoDetailsConverter extends AbstractC
         return repo;
     }
 
-    public boolean onlyMpackListIsDefined(AmbariStackDetailsJson source) {
-        return !isBaseRepoRequiredFieldsExists(source) && !isVdfRequiredFieldsExists(source) && !source.getMpacks().isEmpty();
-    }
-
-    private boolean isBaseRepoRequiredFieldsExists(AmbariStackDetailsJson source) {
+    public boolean isBaseRepoRequiredFieldsExists(AmbariStackDetailsJson source) {
         return Stream.of(source.getStackRepoId(), source.getStackBaseURL(), source.getUtilsRepoId(), source.getUtilsBaseURL())
                     .noneMatch(StringUtils::isEmpty);
     }
 
-    private boolean isVdfRequiredFieldsExists(AmbariStackDetailsJson source) {
+    public boolean isVdfRequiredFieldsExists(AmbariStackDetailsJson source) {
         return Stream.of(source.getRepositoryVersion(), source.getVersionDefinitionFileUrl()).noneMatch(StringUtils::isEmpty);
     }
 }

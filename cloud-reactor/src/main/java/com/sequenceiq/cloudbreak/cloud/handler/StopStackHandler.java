@@ -73,6 +73,4 @@ public class StopStackHandler implements CloudPlatformEventHandler<StopInstances
             eventBus.notify(failure.selector(), new Event<>(event.getHeaders(), failure));
         }
     }
-
-
 }

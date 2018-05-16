@@ -8,8 +8,6 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.inject.Inject;
-import javax.transaction.Transactional;
-import javax.transaction.Transactional.TxType;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,7 +22,7 @@ import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
-import com.sequenceiq.cloudbreak.controller.BadRequestException;
+import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.repository.CredentialRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
@@ -36,7 +34,6 @@ import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProvider
 import com.sequenceiq.cloudbreak.service.user.UserProfileCredentialHandler;
 
 @Service
-@Transactional
 public class CredentialService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CredentialService.class);
@@ -100,7 +97,6 @@ public class CredentialService {
         return credential;
     }
 
-    @Transactional(TxType.NEVER)
     public Map<String, String> interactiveLogin(IdentityUser user, Credential credential) {
         LOGGER.debug("Interactive login: [User: '{}', Account: '{}']", user.getUsername(), user.getAccount());
         credential.setOwner(user.getUserId());
@@ -108,7 +104,6 @@ public class CredentialService {
         return credentialAdapter.interactiveLogin(credential);
     }
 
-    @Transactional(TxType.NEVER)
     public Credential create(IdentityUser user, Credential credential) {
         LOGGER.debug("Creating credential: [User: '{}', Account: '{}']", user.getUsername(), user.getAccount());
         credential.setOwner(user.getUserId());
@@ -116,7 +111,6 @@ public class CredentialService {
         return saveCredentialAndNotify(credential, ResourceEvent.CREDENTIAL_CREATED);
     }
 
-    @Transactional(TxType.NEVER)
     public Credential modify(IdentityUser user, Credential credential) {
         LOGGER.debug("Modifying credential: [User: '{}', Account: '{}']", user.getUsername(), user.getAccount());
         Credential credentialToModify = credential.isPublicInAccount() ? getPublicCredential(credential.getName(), user)
@@ -137,7 +131,6 @@ public class CredentialService {
         return saveCredentialAndNotify(credentialToModify, ResourceEvent.CREDENTIAL_MODIFIED);
     }
 
-    @Transactional(TxType.NEVER)
     public Credential create(String userId, String account, Credential credential) {
         LOGGER.debug("Creating credential: [UserId: '{}', Account: '{}']", userId, account);
         credential.setOwner(userId);
@@ -145,7 +138,6 @@ public class CredentialService {
         return saveCredentialAndNotify(credential, ResourceEvent.CREDENTIAL_CREATED);
     }
 
-    @Transactional(TxType.NEVER)
     @Retryable(value = BadRequestException.class, maxAttempts = 30, backoff = @Backoff(delay = 2000))
     public Credential createWithRetry(String userId, String account, Credential credential) {
         return create(userId, account, credential);
@@ -194,7 +186,6 @@ public class CredentialService {
         return credential;
     }
 
-    @Transactional(TxType.NEVER)
     public void delete(Long id, IdentityUser user) {
         Credential credential = credentialRepository.findByIdInAccount(id, user.getAccount());
         if (credential == null) {
@@ -203,7 +194,6 @@ public class CredentialService {
         delete(credential);
     }
 
-    @Transactional(TxType.NEVER)
     public void delete(String name, IdentityUser user) {
         Credential credential = credentialRepository.findByNameInAccount(name, user.getAccount(), user.getUserId());
         if (credential == null) {
@@ -212,7 +202,6 @@ public class CredentialService {
         delete(credential);
     }
 
-    @Transactional(TxType.NEVER)
     public Credential update(Long id) {
         return credentialAdapter.update(get(id));
     }

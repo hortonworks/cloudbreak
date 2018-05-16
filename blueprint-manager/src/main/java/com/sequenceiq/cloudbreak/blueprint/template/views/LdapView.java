@@ -34,7 +34,7 @@ public class LdapView {
     public LdapView(LdapConfig ldapConfig) {
         connectionURL = ldapConfig.getProtocol() + "://" + ldapConfig.getServerHost();
         if (ldapConfig.getServerPort() != null) {
-            connectionURL = connectionURL + ':' + ldapConfig.getServerPort();
+            connectionURL = connectionURL.toLowerCase() + ':' + ldapConfig.getServerPort();
         }
         bindDn = ldapConfig.getBindDn();
         bindPassword = ldapConfig.getBindPassword();

@@ -14,7 +14,7 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Lists;
-import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
+import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsGroupView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsInstanceView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -52,6 +52,7 @@ public class CloudFormationTemplateBuilder {
                     awsInstanceView.getVolumes().size(),
                     awsInstanceView.isEncryptedVolumes(),
                     awsInstanceView.getVolumeSize(),
+                    group.getRootVolumeSize(),
                     awsInstanceView.getVolumeType(),
                     awsInstanceView.getSpotPrice(),
                     group.getSecurity().getRules(),

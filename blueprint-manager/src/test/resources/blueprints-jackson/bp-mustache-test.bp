@@ -30,8 +30,8 @@
     "configurations": [
       {
         "nifi-ambari-ssl-config": {
-          "content": "{{{ nifi_targets }}}",
-          "nifi.initial.admin.identity": "{{{ cluster_admin_firstname }}}"
+          "content": "{{{ hdf.nodeEntities }}}",
+          "nifi.initial.admin.identity": "{{{ general.userName }}}"
         },
       }
       {
@@ -55,7 +55,7 @@
       },
       {
         "hive-site": {
-          "hive.metastore.warehouse.dir":"s3a://{{{ S3_BUCKET }}}/{{{cluster_name}}}/apps/hive/warehouse",
+          "hive.metastore.warehouse.dir":"s3a://{{{ S3_BUCKET }}}/{{{general.clusterName}}}/apps/hive/warehouse",
           "javax.jdo.option.ConnectionURL": "{{{ rds.hive.connectionURL }}}",
           "javax.jdo.option.ConnectionUserName": "{{{ rds.hive.connectionUserName }}}",
           "javax.jdo.option.ConnectionPassword": "{{{ rds.hive.connectionPassword }}}",
@@ -94,7 +94,7 @@
             "ranger-atlas-plugin-enabled": "No",
             "create_db_dbuser": "false",
             "xasecure.audit.destination.hdfs": "true",
-            "xasecure.audit.destination.hdfs.dir": "s3a://{{{ S3_BUCKET }}}/{{{cluster_name}}}/apps/ranger/audit/{{{cluster_name}}}",
+            "xasecure.audit.destination.hdfs.dir": "s3a://{{{ S3_BUCKET }}}/{{{general.clusterName}}}/apps/ranger/audit/{{{general.clusterName}}}",
             "xasecure.audit.destination.solr": "true"
           }
         }

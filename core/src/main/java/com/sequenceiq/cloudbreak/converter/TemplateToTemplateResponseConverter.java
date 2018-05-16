@@ -18,6 +18,7 @@ public class TemplateToTemplateResponseConverter extends AbstractConversionServi
         templateJson.setPublicInAccount(source.isPublicInAccount());
         templateJson.setInstanceType(source.getInstanceType());
         templateJson.setVolumeType(source.getVolumeType());
+        templateJson.setRootVolumeSize(source.getRootVolumeSize());
         Json attributes = source.getAttributes();
         if (attributes != null) {
             templateJson.setParameters(attributes.getMap());

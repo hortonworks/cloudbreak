@@ -6,7 +6,7 @@ import org.junit.Test;
 import org.slf4j.MDC;
 
 import com.sequenceiq.cloudbreak.TestUtil;
-import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 
 public class MDCBuilderTest {
 

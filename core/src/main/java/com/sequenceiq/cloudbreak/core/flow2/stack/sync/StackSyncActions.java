@@ -34,7 +34,7 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
-import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
@@ -134,7 +134,8 @@ public class StackSyncActions {
             CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform(), stack.getOwner(), stack.getPlatformVariant(),
                     location);
             CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
-            return new StackSyncContext(flowId, stack, stack.getInstanceMetaDataAsList(), cloudContext, cloudCredential, isStatusUpdateEnabled(variables));
+            return new StackSyncContext(flowId, stack, stack.getNotTerminatedInstanceMetaDataList(), cloudContext, cloudCredential,
+                    isStatusUpdateEnabled(variables));
         }
 
         @Override

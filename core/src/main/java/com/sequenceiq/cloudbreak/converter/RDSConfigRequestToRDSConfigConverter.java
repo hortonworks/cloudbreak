@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.converter;
 
 import java.util.Date;
-import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -12,10 +11,9 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.model.DatabaseVendor;
-import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigRequest;
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
+import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigRequest;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
-import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.service.MissingResourceNameGenerator;
 
@@ -37,24 +35,21 @@ public class RDSConfigRequestToRDSConfigConverter extends AbstractConversionServ
         }
         rdsConfig.setConnectionURL(source.getConnectionURL());
 
-        Optional<DatabaseVendor> databaseVendor = DatabaseVendor.getVendorByJdbcUrl(source);
-        if (databaseVendor.isPresent()) {
-            rdsConfig.setDatabaseEngine(databaseVendor.get().name());
-            rdsConfig.setConnectionDriver(databaseVendor.get().connectionDriver());
-        } else {
-            throw new BadRequestException("Not a valid DatabaseVendor which was provided in the jdbc url.");
-        }
+        DatabaseVendor databaseVendor = DatabaseVendor.getVendorByJdbcUrl(source).get();
+        rdsConfig.setDatabaseEngine(databaseVendor);
+        rdsConfig.setConnectionDriver(databaseVendor.connectionDriver());
         rdsConfig.setConnectionUserName(source.getConnectionUserName());
         rdsConfig.setConnectionPassword(source.getConnectionPassword());
         rdsConfig.setCreationDate(new Date().getTime());
         rdsConfig.setStatus(ResourceStatus.USER_MANAGED);
         rdsConfig.setType(source.getType());
 
-        if (!rdsConfig.getDatabaseEngine().equalsIgnoreCase(DatabaseVendor.POSTGRES.name()) && StringUtils.isEmpty(source.getConnectorJarUrl())) {
+        if (rdsConfig.getDatabaseEngine() != DatabaseVendor.POSTGRES && StringUtils.isEmpty(source.getConnectorJarUrl())) {
             String msg = String.format("The 'connectorJarUrl' field needs to be specified for database engine: '%s'.", rdsConfig.getDatabaseEngine());
             LOGGER.warn(msg);
         }
         rdsConfig.setConnectorJarUrl(source.getConnectorJarUrl());
         return rdsConfig;
     }
+
 }

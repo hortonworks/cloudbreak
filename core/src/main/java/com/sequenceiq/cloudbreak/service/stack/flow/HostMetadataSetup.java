@@ -16,8 +16,8 @@ import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.HostOrchestratorResolver;
-import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
-import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
@@ -48,8 +48,8 @@ public class HostMetadataSetup {
         LOGGER.info("Setting up host metadata for the cluster.");
         Stack stack = stackService.getByIdWithLists(stackId);
         if (!orchestratorTypeResolver.resolveType(stack.getOrchestrator()).containerOrchestrator()) {
-            Set<InstanceMetaData> allInstanceMetaData = stack.getNotTerminatedInstanceMetaDataSet();
-            updateWithHostData(stack, stack.getNotTerminatedInstanceMetaDataSet());
+            Set<InstanceMetaData> allInstanceMetaData = stack.getNotDeletedInstanceMetaDataSet();
+            updateWithHostData(stack, stack.getNotDeletedInstanceMetaDataSet());
             instanceMetaDataRepository.save(allInstanceMetaData);
         }
     }
@@ -58,7 +58,7 @@ public class HostMetadataSetup {
         LOGGER.info("Extending host metadata.");
         Stack stack = stackService.getByIdWithLists(stackId);
         if (!orchestratorTypeResolver.resolveType(stack.getOrchestrator()).containerOrchestrator()) {
-            Set<InstanceMetaData> newInstanceMetadata = stack.getNotTerminatedInstanceMetaDataSet().stream()
+            Set<InstanceMetaData> newInstanceMetadata = stack.getNotDeletedInstanceMetaDataSet().stream()
                     .filter(instanceMetaData -> newAddresses.contains(instanceMetaData.getPrivateIp()))
                     .collect(Collectors.toSet());
             updateWithHostData(stack, newInstanceMetadata);

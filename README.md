@@ -9,7 +9,7 @@
 [docker-io]: https://img.shields.io/docker/pulls/hortonworks/cloudbreak.svg
 
 * Website: https://hortonworks.com/open-source/cloudbreak/
-* Documentation: http://hortonworks.github.io/cloudbreak-docs/latest/
+* Documentation: https://docs.hortonworks.com/HDPDocuments/Cloudbreak/Cloudbreak-2.4.1/index.html
 
 # Local Development Setup
 As of now this document is focusing on setting up your development environment on OSX. You'll need brew to install certain components in case you don't have them already. To get brew please follow the install instructions on the brew homepage: https://brew.sh
@@ -105,6 +105,17 @@ cbd migrate cbdb up
 cbd migrate cbdb pending
 ```
 
+
+For some reason if you encounter a similar problem with Periscope, then run the following commands and you can restart the Cloudbreak Deployer:
+```
+cbd migrate periscopedb up
+cbd migrate periscopedb pending
+```
+You can track the Periscope's logs to check the results by executing the following command:
+```
+cbd logs periscope
+```
+
 If everything went well then Cloudbreak will be available on http://YOUR_IP. For more details and config parameters please check the documentation of [Cloudbreak Deployer](https://github.com/hortonworks/cloudbreak-deployer).
 
 The deployer has generated a `certs` directory under `cbd-local` directory which will be needed later on to set up IDEA properly.
@@ -136,6 +147,7 @@ To launch the Cloudbreak application execute the `com.sequenceiq.cloudbreak.Clou
 -Dcb.db.port.5432.tcp.addr=YOUR_IP
 -Dcb.db.port.5432.tcp.port=5432
 -Dcb.identity.server.url=http://YOUR_IP:8089
+-Dspring.cloud.consul.host=YOUR_IP
 -Dserver.port=9091
 -Dcb.schema.migration.auto=true
 ```

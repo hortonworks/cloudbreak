@@ -18,12 +18,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.ambari.client.services.ServiceAndHostService;
+import com.sequenceiq.cloudbreak.api.model.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
 import com.sequenceiq.cloudbreak.converter.mapper.AmbariDatabaseMapper;
-import com.sequenceiq.cloudbreak.domain.Cluster;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
-import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.cluster.filter.ConfigParam;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.util.PasswordUtil;
@@ -83,10 +84,8 @@ public class AmbariConfigurationService {
             int portStartIndex = result.indexOf(':');
             String internalAddress = result.substring(0, portStartIndex);
             String publicAddress = ambariClient.resolveInternalHostName(internalAddress);
-            if (internalAddress.equals(publicAddress)) {
-                if (internalAddress.contains(AZURE_ADDRESS_SUFFIX)) {
-                    publicAddress = internalAddress.substring(0, internalAddress.indexOf('.') + 1) + AZURE_ADDRESS_SUFFIX;
-                }
+            if (internalAddress.equals(publicAddress) && internalAddress.contains(AZURE_ADDRESS_SUFFIX)) {
+                publicAddress = internalAddress.substring(0, internalAddress.indexOf('.') + 1) + AZURE_ADDRESS_SUFFIX;
             }
             result = publicAddress + result.substring(portStartIndex);
         }
@@ -107,7 +106,8 @@ public class AmbariConfigurationService {
         rdsConfig.setName(ambariDatabaseMapper.mapName(stack, cluster));
         rdsConfig.setConnectionUserName(userName);
         rdsConfig.setConnectionPassword(PasswordUtil.generatePassword());
-        rdsConfig.setConnectionURL("jdbc:postgresql://" + host + ":" + port + "/" + name);
+        DatabaseVendor databaseEngine = DatabaseVendor.valueOf(this.databaseEngine.toUpperCase());
+        rdsConfig.setConnectionURL(String.format(getJdbcUrlFormatPattern(databaseEngine), databaseEngine.jdbcUrlDriverId(), host, port, name));
         rdsConfig.setDatabaseEngine(databaseEngine);
         rdsConfig.setType(RdsType.AMBARI.name());
         rdsConfig.setStatus(ResourceStatus.DEFAULT);
@@ -115,8 +115,16 @@ public class AmbariConfigurationService {
         rdsConfig.setOwner(stack.getOwner());
         rdsConfig.setAccount(stack.getAccount());
         rdsConfig.setClusters(Collections.singleton(cluster));
-        rdsConfig.setConnectionDriver("org.postgresql.Driver");
+        rdsConfig.setConnectionDriver(getConnectionDriver(databaseEngine));
         return rdsConfigService.create(rdsConfig);
+    }
+
+    private String getJdbcUrlFormatPattern(DatabaseVendor databaseVendor) {
+        return databaseVendor == DatabaseVendor.ORACLE11 || databaseVendor == DatabaseVendor.ORACLE12 ? "jdbc:%s:thin:@%s:%s/%s" : "jdbc:%s://%s:%s/%s";
+    }
+
+    private String getConnectionDriver(DatabaseVendor databaseEngine) {
+        return databaseEngine == DatabaseVendor.EMBEDDED ? "org.postgresql.Driver" : databaseEngine.connectionDriver();
     }
 
 }

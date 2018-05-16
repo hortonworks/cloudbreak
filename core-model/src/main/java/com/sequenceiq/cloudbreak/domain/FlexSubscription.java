@@ -38,9 +38,7 @@ public class FlexSubscription implements ProvisionEntity {
     private boolean publicInAccount;
 
     @Column
-    //CHECKSTYLE:OFF
     private boolean isDefault;
-    //CHECKSTYLE:ON
 
     @Column
     private boolean usedForController;

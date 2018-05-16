@@ -29,8 +29,6 @@ import com.sequenceiq.cloudbreak.common.type.ResourceType;
 @Component
 public class GcpDiskResourceBuilder extends AbstractGcpComputeBuilder {
 
-    private static final long DEFAULT_ROOT_DISK_SIZE = 50L;
-
     @Inject
     private DefaultCostTaggingService defaultCostTaggingService;
 
@@ -48,7 +46,7 @@ public class GcpDiskResourceBuilder extends AbstractGcpComputeBuilder {
         Location location = context.getLocation();
 
         Disk disk = new Disk();
-        disk.setSizeGb(DEFAULT_ROOT_DISK_SIZE);
+        disk.setSizeGb((long) group.getRootVolumeSize());
         disk.setName(buildableResources.get(0).getName());
         disk.setKind(GcpDiskType.HDD.getUrl(projectId, location.getAvailabilityZone()));
 

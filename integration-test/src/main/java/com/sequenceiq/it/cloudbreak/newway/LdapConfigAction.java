@@ -7,7 +7,6 @@ import java.io.IOException;
 import com.sequenceiq.cloudbreak.api.model.ldap.LDAPTestRequest;
 import com.sequenceiq.it.IntegrationTestContext;
 
-
 public class LdapConfigAction {
     private LdapConfigAction() {
     }

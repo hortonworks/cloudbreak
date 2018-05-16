@@ -15,6 +15,4 @@ public enum DockerContainer {
     public String getName() {
         return name;
     }
-
-
 }

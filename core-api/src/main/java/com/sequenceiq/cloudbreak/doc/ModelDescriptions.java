@@ -12,6 +12,8 @@ public class ModelDescriptions {
     public static final String TOPOLOGY_ID = "id of the topology the resource belongs to";
     public static final String REQUESTS = "request object";
     public static final String RESPONSE = "response object";
+    public static final String FIXINPUTS = "fixinputs object";
+    public static final String DATALAKEINPUTS = "datalakeinputs object";
     public static final String CREATED = "creation time of the resource in long";
     public static final String AMBARI_SERVER = "ambari server address";
 
@@ -42,6 +44,7 @@ public class ModelDescriptions {
     public static class TemplateModelDescription {
         public static final String VOLUME_COUNT = "number of volumes";
         public static final String VOLUME_SIZE = "size of volumes";
+        public static final String ROOT_VOLUME_SIZE = "size of the root volume";
         public static final String VOLUME_TYPE = "type of the volumes";
         public static final String INSTANCE_TYPE = "type of the instance";
         public static final String CUSTOM_INSTANCE_TYPE = "custom instancetype definition";
@@ -82,6 +85,7 @@ public class ModelDescriptions {
 
     public static class StackModelDescription {
         public static final String STACK_ID = "id of the stack";
+        public static final String CUSTOM = "Custom parameters as a json";
         public static final String IMAGE = "image of the stack";
         public static final String STACK_NAME = "name of the stack";
         public static final String REGION = "region of the stack";
@@ -99,6 +103,7 @@ public class ModelDescriptions {
         public static final String KERBEROS_ADMIN_URL = "kerberos admin server URL";
         public static final String KERBEROS_PRINCIPAL = "kerberos principal";
         public static final String PARAMETERS = "additional cloud specific parameters for stack";
+        public static final String INPUTS = "dynamic properties";
         public static final String FAILURE_ACTION = "action on failure";
         public static final String FAILURE_POLICY = "failure policy in case of failures";
         public static final String STACK_STATUS = "status of the stack";
@@ -165,6 +170,7 @@ public class ModelDescriptions {
         public static final String BLUEPRINT = "blueprint for the cluster";
         public static final String SHARED_SERVICE_REQUEST = "Shared service request";
         public static final String VALIDATE_BLUEPRINT = "blueprint validation";
+        public static final String SHARED_SERVICE = "shared service for a specific stack";
         public static final String HOURS = "duration - how long the cluster is running in hours";
         public static final String MINUTES = "duration - how long the cluster is running in minutes (minus hours)";
         public static final String EMAIL_TO = "send email to the requested address";
@@ -204,14 +210,18 @@ public class ModelDescriptions {
     }
 
     public static class GatewayModelDescription {
-        public static final String ENABLE_KNOX_GATEWAY = "enable Knox gateway security";
+        public static final String ENABLE_KNOX_GATEWAY = "[DEPRECATED] enableGateway is no longer needed to determine if gateway needs to be launched or not. "
+                + "Presence of gateway definition in request is suffucicient.";
         public static final String KNOX_PATH = "Knox gateway path";
         public static final String KNOX_GATEWAY_TYPE = "Knox gateway type";
         public static final String KNOX_SSO_TYPE = "Knox SSO type";
+        public static final String DEPRECATED_KNOX_TOPOLOGY_NAME = "[DEPRECATED] Use the 'Knox topology name' inside the 'gateway' part of the request.";
         public static final String KNOX_TOPOLOGY_NAME = "Knox topology name";
-        public static final String EXPOSED_KNOX_SERVICES = "exposed Knox services";
+        public static final String DEPRECATED_EXPOSED_KNOX_SERVICES = "[DEPRECATED] Use the 'exposed Knox services' inside the 'gateway' part of the request.";
+        public static final String EXPOSED_KNOX_SERVICES = "exposed Knox services - those services that should be accessible through Knox gateway.";
         public static final String KNOX_SSO_PROVIDER = "SSO provider cluster name";
         public static final String KNOX_SSO_CERT = "SSO Provider certificate";
+        public static final String GATEWAY_TOPOLOGIES = "Topology definitions of the gateway.";
     }
 
     public static class ClusterTemplateModelDescription {
@@ -279,7 +289,7 @@ public class ModelDescriptions {
         public static final String CONNECTION_URL = "JDBC connection URL in the form of jdbc:<db-type>://<address>:<port>/<db>";
         public static final String CONNECTION_DRIVER_NAME = "Name of the JDBC connection driver (for example: 'org.postgresql.Driver')";
         public static final String DB_ENGINE = "Name of the external database engine (MYSQL, POSTGRES...)";
-        public static final String DB_ENGINE_DISPLAYNAME = "Display name of the external database engine (Mysql, Postges...)";
+        public static final String DB_ENGINE_DISPLAYNAME = "Display name of the external database engine (Mysql, PostgreSQL...)";
         public static final String VERSION = "Version of the Database";
         public static final String USERNAME = "Username to use for the jdbc connection";
         public static final String PASSWORD = "Password to use for the jdbc connection";

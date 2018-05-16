@@ -6,6 +6,8 @@ import java.util.Set;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.transaction.Transactional;
+import javax.transaction.Transactional.TxType;
 
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
@@ -18,11 +20,15 @@ import com.sequenceiq.cloudbreak.api.model.mpack.ManagementPackResponse;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
+import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.ManagementPack;
+import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.mpack.ManagementPackService;
 
 @Component
+@Transactional(TxType.NEVER)
 public class ManagementPackController extends NotificationController implements ManagementPackEndpoint {
+
     @Inject
     private AuthenticatedUserService authenticatedUserService;
 

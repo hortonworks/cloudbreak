@@ -18,11 +18,35 @@ public class AmbariStackValidatorTest {
     private AmbariStackValidator ambariStackValidator = new AmbariStackValidator();
 
     @Test
+    public void testHdp22() {
+        AmbariStackDetailsJson ambariStackDetailsJson = new AmbariStackDetailsJson();
+        ambariStackDetailsJson.setStack("HDP");
+        ambariStackDetailsJson.setVersion("2.2");
+        assertFalse(ambariStackValidator.isValid(ambariStackDetailsJson, constraintValidatorContext));
+    }
+
+    @Test
+    public void testHdp23() {
+        AmbariStackDetailsJson ambariStackDetailsJson = new AmbariStackDetailsJson();
+        ambariStackDetailsJson.setStack("HDP");
+        ambariStackDetailsJson.setVersion("2.3");
+        assertTrue(ambariStackValidator.isValid(ambariStackDetailsJson, constraintValidatorContext));
+    }
+
+    @Test
+    public void testHdp24() {
+        AmbariStackDetailsJson ambariStackDetailsJson = new AmbariStackDetailsJson();
+        ambariStackDetailsJson.setStack("HDP");
+        ambariStackDetailsJson.setVersion("2.4");
+        assertTrue(ambariStackValidator.isValid(ambariStackDetailsJson, constraintValidatorContext));
+    }
+
+    @Test
     public void testHdp25() {
         AmbariStackDetailsJson ambariStackDetailsJson = new AmbariStackDetailsJson();
         ambariStackDetailsJson.setStack("HDP");
         ambariStackDetailsJson.setVersion("2.5");
-        assertFalse(ambariStackValidator.isValid(ambariStackDetailsJson, constraintValidatorContext));
+        assertTrue(ambariStackValidator.isValid(ambariStackDetailsJson, constraintValidatorContext));
     }
 
     @Test
@@ -42,11 +66,35 @@ public class AmbariStackValidatorTest {
     }
 
     @Test
+    public void testHdp22WithMinor() {
+        AmbariStackDetailsJson ambariStackDetailsJson = new AmbariStackDetailsJson();
+        ambariStackDetailsJson.setStack("HDP");
+        ambariStackDetailsJson.setVersion("2.2.2");
+        assertFalse(ambariStackValidator.isValid(ambariStackDetailsJson, constraintValidatorContext));
+    }
+
+    @Test
+    public void testHdp23WithMinor() {
+        AmbariStackDetailsJson ambariStackDetailsJson = new AmbariStackDetailsJson();
+        ambariStackDetailsJson.setStack("HDP");
+        ambariStackDetailsJson.setVersion("2.3.2");
+        assertTrue(ambariStackValidator.isValid(ambariStackDetailsJson, constraintValidatorContext));
+    }
+
+    @Test
+    public void testHdp24WithMinor() {
+        AmbariStackDetailsJson ambariStackDetailsJson = new AmbariStackDetailsJson();
+        ambariStackDetailsJson.setStack("HDP");
+        ambariStackDetailsJson.setVersion("2.4.2");
+        assertTrue(ambariStackValidator.isValid(ambariStackDetailsJson, constraintValidatorContext));
+    }
+
+    @Test
     public void testHdp25WithMinor() {
         AmbariStackDetailsJson ambariStackDetailsJson = new AmbariStackDetailsJson();
         ambariStackDetailsJson.setStack("HDP");
         ambariStackDetailsJson.setVersion("2.5.2");
-        assertFalse(ambariStackValidator.isValid(ambariStackDetailsJson, constraintValidatorContext));
+        assertTrue(ambariStackValidator.isValid(ambariStackDetailsJson, constraintValidatorContext));
     }
 
     @Test

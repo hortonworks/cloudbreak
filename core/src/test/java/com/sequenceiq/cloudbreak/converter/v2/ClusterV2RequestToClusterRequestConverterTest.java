@@ -17,12 +17,12 @@ import com.sequenceiq.cloudbreak.api.model.AmbariDatabaseDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.AmbariRepoDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.BlueprintInputJson;
-import com.sequenceiq.cloudbreak.api.model.ClusterRequest;
+import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRequest;
 import com.sequenceiq.cloudbreak.api.model.ConfigStrategy;
 import com.sequenceiq.cloudbreak.api.model.ConnectedClusterRequest;
 import com.sequenceiq.cloudbreak.api.model.ExecutorType;
 import com.sequenceiq.cloudbreak.api.model.FileSystemRequest;
-import com.sequenceiq.cloudbreak.api.model.GatewayJson;
+import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.GatewayJson;
 import com.sequenceiq.cloudbreak.api.model.KerberosRequest;
 import com.sequenceiq.cloudbreak.api.model.SharedServiceRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.AmbariV2Request;
@@ -87,12 +87,8 @@ public class ClusterV2RequestToClusterRequestConverterTest {
         Assert.assertEquals(source.getAmbari().getAmbariDatabaseDetails(), result.getAmbariDatabaseDetails());
         Assert.assertEquals(source.getAmbari().getAmbariRepoDetailsJson(), result.getAmbariRepoDetailsJson());
         Assert.assertEquals(source.getAmbari().getAmbariStackDetails(), result.getAmbariStackDetails());
-        Assert.assertEquals(source.getAmbari().getBlueprintCustomProperties(), result.getBlueprintCustomProperties());
         Assert.assertEquals(source.getAmbari().getBlueprintId(), result.getBlueprintId());
         Assert.assertEquals(source.getAmbari().getBlueprintName(), result.getBlueprintName());
-        Assert.assertFalse(result.getBlueprintInputs().isEmpty());
-        Assert.assertEquals(ambariV2Request.getBlueprintInputs().size(), result.getBlueprintInputs().size());
-        ambariV2Request.getBlueprintInputs().forEach(blueprintInputJson -> Assert.assertTrue(result.getBlueprintInputs().contains(blueprintInputJson)));
     }
 
     @Test
@@ -107,14 +103,8 @@ public class ClusterV2RequestToClusterRequestConverterTest {
         Assert.assertEquals(source.getAmbari().getAmbariDatabaseDetails(), result.getAmbariDatabaseDetails());
         Assert.assertEquals(source.getAmbari().getAmbariRepoDetailsJson(), result.getAmbariRepoDetailsJson());
         Assert.assertEquals(source.getAmbari().getAmbariStackDetails(), result.getAmbariStackDetails());
-        Assert.assertEquals(source.getAmbari().getBlueprintCustomProperties(), result.getBlueprintCustomProperties());
         Assert.assertEquals(source.getAmbari().getBlueprintId(), result.getBlueprintId());
         Assert.assertEquals(source.getAmbari().getBlueprintName(), result.getBlueprintName());
-
-        Assert.assertFalse(result.getBlueprintInputs().isEmpty());
-        Assert.assertEquals(ambariV2Request.getBlueprintInputs().size(), result.getBlueprintInputs().size());
-        ambariV2Request.getBlueprintInputs().forEach(blueprintInputJson -> Assert.assertTrue(result.getBlueprintInputs().contains(blueprintInputJson)));
-
         Assert.assertNotEquals(source.getAmbari().getConnectedCluster(), result.getConnectedCluster());
         Assert.assertEquals(source.getSharedService().getSharedCluster(), result.getConnectedCluster().getSourceClusterName());
     }
@@ -168,10 +158,8 @@ public class ClusterV2RequestToClusterRequestConverterTest {
         request.setAmbariDatabaseDetails(new AmbariDatabaseDetailsJson());
         request.setAmbariRepoDetailsJson(new AmbariRepoDetailsJson());
         request.setAmbariStackDetails(new AmbariStackDetailsJson());
-        request.setBlueprintCustomProperties("custom properties");
         request.setBlueprintId(1L);
         request.setBlueprintName("blueprintName");
-        request.setBlueprintInputs(blueprintInputJsons(blueprintInputsQuantity));
         request.setConfigStrategy(ConfigStrategy.ALWAYS_APPLY);
         request.setConnectedCluster(new ConnectedClusterRequest());
         request.setEnableSecurity(true);

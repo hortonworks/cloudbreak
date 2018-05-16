@@ -37,8 +37,8 @@ import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
 import com.sequenceiq.cloudbreak.core.flow2.AbstractAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
-import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
-import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
@@ -75,7 +75,7 @@ public class StackStartActions {
             @Override
             protected Selectable createRequest(StackStartStopContext context) {
                 LOGGER.info("Assembling start request for stack: {}", context.getStack());
-                List<CloudInstance> instances = cloudInstanceConverter.convert(context.getStack().getNotTerminatedInstanceMetaDataList());
+                List<CloudInstance> instances = cloudInstanceConverter.convert(context.getStack().getNotDeletedInstanceMetaDataList());
                 List<CloudResource> resources = cloudResourceConverter.convert(context.getStack().getResources());
                 return new StartInstancesRequest(context.getCloudContext(), context.getCloudCredential(), resources, instances);
             }
@@ -95,7 +95,7 @@ public class StackStartActions {
             protected Selectable createRequest(StackStartStopContext context) {
                 List<CloudInstance> cloudInstances = cloudStackConverter.buildInstances(context.getStack());
                 List<CloudResource> cloudResources = cloudResourceConverter.convert(context.getStack().getResources());
-                return new CollectMetadataRequest(context.getCloudContext(), context.getCloudCredential(), cloudResources, cloudInstances);
+                return new CollectMetadataRequest(context.getCloudContext(), context.getCloudCredential(), cloudResources, cloudInstances, cloudInstances);
             }
         };
     }

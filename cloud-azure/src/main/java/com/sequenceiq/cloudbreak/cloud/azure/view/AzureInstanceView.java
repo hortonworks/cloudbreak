@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
+import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureDiskType;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureStorage;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureUtils;
@@ -39,8 +39,10 @@ public class AzureInstanceView {
 
     private final String subnetId;
 
+    private final int rootVolumeSize;
+
     public AzureInstanceView(String stackName, int stackNamePrefixLength, CloudInstance instance, InstanceGroupType type, String attachedDiskStorage,
-            String attachedDiskStorageType, String groupName, String availabilitySetName, boolean managedDisk, String subnetId) {
+            String attachedDiskStorageType, String groupName, String availabilitySetName, boolean managedDisk, String subnetId, int rootVolumeSize) {
         this.instance = instance;
         instanceTemplate = instance.getTemplate();
         this.stackNamePrefixLength = stackNamePrefixLength;
@@ -52,6 +54,7 @@ public class AzureInstanceView {
         this.availabilitySetName = availabilitySetName;
         this.managedDisk = managedDisk;
         this.subnetId = subnetId;
+        this.rootVolumeSize = rootVolumeSize;
     }
 
     /**
@@ -66,8 +69,13 @@ public class AzureInstanceView {
      * Used in freemarker template.
      */
     public String getInstanceName() {
-        String shortenedStackName = stackName.length() > stackNamePrefixLength ? stackName.substring(0, stackNamePrefixLength) : stackName;
-        return shortenedStackName + '-' + getInstanceId();
+        String instanceName = instance.getStringParameter(CloudInstance.INSTANCE_NAME);
+        if (instanceName != null) {
+            return instanceName;
+        } else {
+            String shortenedStackName = stackName.length() > stackNamePrefixLength ? stackName.substring(0, stackNamePrefixLength) : stackName;
+            return shortenedStackName + '-' + getInstanceId();
+        }
     }
 
     /**
@@ -148,5 +156,9 @@ public class AzureInstanceView {
 
     public String getSubnetId() {
         return subnetId;
+    }
+
+    public int getRootVolumeSize() {
+        return rootVolumeSize;
     }
 }

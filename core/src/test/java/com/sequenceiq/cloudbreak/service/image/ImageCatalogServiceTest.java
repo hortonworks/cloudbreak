@@ -29,8 +29,8 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV2;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
-import com.sequenceiq.cloudbreak.controller.AuthenticatedUserService;
-import com.sequenceiq.cloudbreak.controller.BadRequestException;
+import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
+import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.domain.UserProfile;
 import com.sequenceiq.cloudbreak.repository.ImageCatalogRepository;
@@ -107,9 +107,76 @@ public class ImageCatalogServiceTest {
     }
 
     @Test
+    public void testGetLatestBaseImageDefaultPreferredWithNoDefaultsLatest() throws Exception {
+        String name = "img-name";
+        IdentityUser user = getIdentityUser();
+        UserProfile userProfile = new UserProfile();
+        String catalogJson = FileReaderUtils.readFileFromClasspath("com/sequenceiq/cloudbreak/service/image/cb-image-catalog-v2.json");
+        CloudbreakImageCatalogV2 catalog = JsonUtil.readValue(catalogJson, CloudbreakImageCatalogV2.class);
+        when(imageCatalogProvider.getImageCatalogV2("http://localhost/imagecatalog-url")).thenReturn(catalog);
+        when(userProfileService.get(user.getAccount(), user.getUserId())).thenReturn(userProfile);
+        ReflectionTestUtils.setField(underTest, ImageCatalogService.class, "cbVersion", "2.1.0-dev.100", null);
+
+        StatedImage image = underTest.getLatestBaseImageDefaultPreferred("AWS");
+        Assert.assertEquals("7aca1fa6-980c-44e2-a75e-3144b18a5993", image.getImage().getUuid());
+        Assert.assertFalse(image.getImage().isDefaultImage());
+    }
+
+    @Test
+    public void testGetLatestBaseImageDefaultPreferredWithNoDefaultsLatestNoVersionMatch() throws Exception {
+        String name = "img-name";
+        IdentityUser user = getIdentityUser();
+        UserProfile userProfile = new UserProfile();
+        String catalogJson = FileReaderUtils.readFileFromClasspath("com/sequenceiq/cloudbreak/service/image/cb-image-catalog-v2.json");
+        CloudbreakImageCatalogV2 catalog = JsonUtil.readValue(catalogJson, CloudbreakImageCatalogV2.class);
+        when(imageCatalogProvider.getImageCatalogV2("http://localhost/imagecatalog-url")).thenReturn(catalog);
+        when(userProfileService.get(user.getAccount(), user.getUserId())).thenReturn(userProfile);
+        ReflectionTestUtils.setField(underTest, ImageCatalogService.class, "cbVersion", "2.1.0-dev.200", null);
+
+        StatedImage image = underTest.getLatestBaseImageDefaultPreferred("AWS");
+        Assert.assertEquals("7aca1fa6-980c-44e2-a75e-3144b18a5993", image.getImage().getUuid());
+        Assert.assertTrue(image.getImage().isDefaultImage());
+    }
+
+    @Test
+    public void testGetLatestBaseImageDefaultPreferredWithMultipleDefaults() throws Exception {
+        String name = "img-name";
+        IdentityUser user = getIdentityUser();
+        UserProfile userProfile = new UserProfile();
+        String catalogJson = FileReaderUtils.readFileFromClasspath("com/sequenceiq/cloudbreak/service/image/cb-image-catalog-v2.json");
+        CloudbreakImageCatalogV2 catalog = JsonUtil.readValue(catalogJson, CloudbreakImageCatalogV2.class);
+        when(imageCatalogProvider.getImageCatalogV2("http://localhost/imagecatalog-url")).thenReturn(catalog);
+        when(userProfileService.get(user.getAccount(), user.getUserId())).thenReturn(userProfile);
+        ReflectionTestUtils.setField(underTest, ImageCatalogService.class, "cbVersion", "2.1.0-dev.1", null);
+
+        StatedImage image = underTest.getLatestBaseImageDefaultPreferred("AWS");
+        Assert.assertEquals("7aca1fa6-980c-44e2-a75e-3144b18a5993", image.getImage().getUuid());
+        Assert.assertTrue(image.getImage().isDefaultImage());
+    }
+
+    @Test
+    public void testGetLatestBaseImageDefaultPreferredWenNotLatestSelected() throws Exception {
+        String name = "img-name";
+        IdentityUser user = getIdentityUser();
+        UserProfile userProfile = new UserProfile();
+        String catalogJson = FileReaderUtils.readFileFromClasspath("com/sequenceiq/cloudbreak/service/image/cb-image-catalog-v2.json");
+        CloudbreakImageCatalogV2 catalog = JsonUtil.readValue(catalogJson, CloudbreakImageCatalogV2.class);
+        when(imageCatalogProvider.getImageCatalogV2("http://localhost/imagecatalog-url")).thenReturn(catalog);
+        when(userProfileService.get(user.getAccount(), user.getUserId())).thenReturn(userProfile);
+        ReflectionTestUtils.setField(underTest, ImageCatalogService.class, "cbVersion", "2.1.0-dev.2", null);
+
+        StatedImage image = underTest.getLatestBaseImageDefaultPreferred("AWS");
+        Assert.assertEquals("f6e778fc-7f17-4535-9021-515351df3691", image.getImage().getUuid());
+        Assert.assertTrue(image.getImage().isDefaultImage());
+    }
+
+    @Test
     public void testGetImagesWhenExactVersionExistsInCatalog() throws Exception {
         String cbVersion = "1.16.4";
-        StatedImages images = underTest.getImages("", "default", "aws", cbVersion);
+        ImageCatalog imageCatalog = new ImageCatalog();
+        imageCatalog.setImageCatalogUrl("");
+        imageCatalog.setImageCatalogName("default");
+        StatedImages images = underTest.getImages(imageCatalog, "aws", cbVersion);
 
         boolean exactImageIdMatch = images.getImages().getHdpImages().stream()
                 .anyMatch(img -> img.getUuid().equals("2.5.1.9-4-ccbb32dc-6c9f-43f1-8a09-64b598fda733-2.6.1.4-2"));
@@ -119,7 +186,10 @@ public class ImageCatalogServiceTest {
     @Test
     public void testGetImagesWhenExactVersionExistsInCatalogAndMorePlatformRequested() throws Exception {
         String cbVersion = "1.12.0";
-        StatedImages images = underTest.getImages("", "default", ImmutableSet.of("aws", "azure"), cbVersion);
+        ImageCatalog imageCatalog = new ImageCatalog();
+        imageCatalog.setImageCatalogUrl("");
+        imageCatalog.setImageCatalogName("default");
+        StatedImages images = underTest.getImages(imageCatalog, ImmutableSet.of("aws", "azure"), cbVersion);
         boolean awsAndAzureWerePresentedInTheTest = false;
         Assert.assertEquals(2, images.getImages().getHdpImages().size());
         for (Image image : images.getImages().getHdpImages()) {
@@ -142,7 +212,10 @@ public class ImageCatalogServiceTest {
 
     @Test
     public void testGetImagesWhenSimilarDevVersionDoesntExistInCatalogShouldReturnWithReleasedVersionIfExists() throws Exception {
-        StatedImages images = underTest.getImages("", "default", "aws", "1.16.4-dev.132");
+        ImageCatalog imageCatalog = new ImageCatalog();
+        imageCatalog.setImageCatalogUrl("");
+        imageCatalog.setImageCatalogName("default");
+        StatedImages images = underTest.getImages(imageCatalog, "aws", "1.16.4-dev.132");
 
         boolean match = images.getImages().getHdpImages().stream()
                 .anyMatch(img -> img.getUuid().equals("2.5.1.9-4-ccbb32dc-6c9f-43f1-8a09-64b598fda733-2.6.1.4-2"));
@@ -151,7 +224,10 @@ public class ImageCatalogServiceTest {
 
     @Test
     public void testGetImagesWhenSimilarRcVersionDoesntExistInCatalogShouldReturnWithReleasedVersionIfExists() throws Exception {
-        StatedImages images = underTest.getImages("", "default", "aws", "1.16.4-rc.13");
+        ImageCatalog imageCatalog = new ImageCatalog();
+        imageCatalog.setImageCatalogUrl("");
+        imageCatalog.setImageCatalogName("default");
+        StatedImages images = underTest.getImages(imageCatalog, "aws", "1.16.4-rc.13");
 
         boolean match = images.getImages().getHdpImages().stream()
                 .anyMatch(img -> img.getUuid().equals("2.5.1.9-4-ccbb32dc-6c9f-43f1-8a09-64b598fda733-2.6.1.4-2"));
@@ -160,7 +236,10 @@ public class ImageCatalogServiceTest {
 
     @Test
     public void testGetImagesWhenSimilarDevVersionExistsInCatalog() throws Exception {
-        StatedImages images = underTest.getImages("", "default", "aws", "2.1.0-dev.4000");
+        ImageCatalog imageCatalog = new ImageCatalog();
+        imageCatalog.setImageCatalogUrl("");
+        imageCatalog.setImageCatalogName("default");
+        StatedImages images = underTest.getImages(imageCatalog, "aws", "2.1.0-dev.4000");
 
         boolean hdfImgMatch = images.getImages().getHdfImages().stream()
                 .anyMatch(ambariImage -> ambariImage.getUuid().equals("9958938a-1261-48e2-aff9-dbcb2cebf6cd"));
@@ -173,7 +252,10 @@ public class ImageCatalogServiceTest {
 
     @Test
     public void testGetImagesWhenSimilarRcVersionExistsInCatalog() throws Exception {
-        StatedImages images = underTest.getImages("", "default", "aws", "2.0.0-rc.4");
+        ImageCatalog imageCatalog = new ImageCatalog();
+        imageCatalog.setImageCatalogUrl("");
+        imageCatalog.setImageCatalogName("default");
+        StatedImages images = underTest.getImages(imageCatalog, "aws", "2.0.0-rc.4");
 
         boolean allMatch = images.getImages().getHdpImages().stream()
                 .allMatch(img -> img.getUuid().equals("2.4.2.2-1-9e3ccdca-fa64-42eb-ab29-b1450767bbd8-2.5.0.1-265")
@@ -183,7 +265,10 @@ public class ImageCatalogServiceTest {
 
     @Test
     public void testGetImagesWhenExactVersionExistsInCatalogForPlatform() throws Exception {
-        StatedImages images = underTest.getImages("", "default", "AWS", "1.16.4");
+        ImageCatalog imageCatalog = new ImageCatalog();
+        imageCatalog.setImageCatalogUrl("");
+        imageCatalog.setImageCatalogName("default");
+        StatedImages images = underTest.getImages(imageCatalog, "AWS", "1.16.4");
         boolean exactImageIdMatch = images.getImages().getHdpImages().stream()
                 .anyMatch(img -> img.getUuid().equals("2.5.1.9-4-ccbb32dc-6c9f-43f1-8a09-64b598fda733-2.6.1.4-2"));
         Assert.assertTrue("Result doesn't contain the required Ambari image with id for the platform.", exactImageIdMatch);
@@ -191,7 +276,10 @@ public class ImageCatalogServiceTest {
 
     @Test
     public void testGetImagesWhenExactVersionDoesnotExistInCatalogForPlatform() throws Exception {
-        StatedImages images = underTest.getImages("", "default", "owncloud", "1.16.4");
+        ImageCatalog imageCatalog = new ImageCatalog();
+        imageCatalog.setImageCatalogUrl("");
+        imageCatalog.setImageCatalogName("default");
+        StatedImages images = underTest.getImages(imageCatalog, "owncloud", "1.16.4");
 
         boolean noMatch = images.getImages().getBaseImages().isEmpty()
                 && images.getImages().getHdpImages().isEmpty()

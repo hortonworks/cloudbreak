@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.controller.validation.LocationService;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterService;
+import com.sequenceiq.cloudbreak.service.stack.DefaultRootVolumeSizeProvider;
 
 @Component
 public class TemplateDecorator {
@@ -33,35 +34,50 @@ public class TemplateDecorator {
     @Inject
     private LocationService locationService;
 
-    public Template decorate(Credential credential, Template subject, String region, String availabilityZone, String variant) {
+    @Inject
+    private DefaultRootVolumeSizeProvider defaultRootVolumeSizeProvider;
+
+    public Template decorate(Credential credential, Template template, String region, String availabilityZone, String variant) {
+        setRootVolumeSize(template);
         PlatformDisks platformDisks = cloudParameterService.getDiskTypes();
         CloudVmTypes vmTypesV2 = cloudParameterService.getVmTypesV2(credential, region, variant, new HashMap<>());
         String locationString = locationService.location(region, availabilityZone);
         VolumeParameterConfig config;
         try {
-            Platform platform = Platform.platform(subject.cloudPlatform());
-            VmType vmType = vmTypesV2.getCloudVmResponses()
-                    .getOrDefault(locationString, Collections.emptySet())
-                    .stream()
-                    .filter(curr -> curr.value().equals(subject.getInstanceType())).findFirst().get();
-            Map<String, VolumeParameterType> map = platformDisks.getDiskMappings().get(platform);
-            VolumeParameterType volumeParameterType = map.get(subject.getVolumeType());
-
-            config = vmType.getVolumeParameterbyVolumeParameterType(volumeParameterType);
+            config = resolveVolumeParameterConfig(template, platformDisks, vmTypesV2, locationString);
         } catch (NoSuchElementException ignored) {
             LOGGER.info("No VolumeParameterConfig found, which might be normal for platforms like OpenStack");
             config = VolumeParameterConfig.EMPTY;
         }
 
         if (config.volumeParameterType() != null) {
-            if (subject.getVolumeCount() == null) {
-                subject.setVolumeCount(config.maximumNumber());
+            if (template.getVolumeCount() == null) {
+                template.setVolumeCount(config.maximumNumber());
             }
-            if (subject.getVolumeSize() == null) {
-                subject.setVolumeSize(config.maximumSize());
+            if (template.getVolumeSize() == null) {
+                template.setVolumeSize(config.maximumSize());
             }
         }
 
-        return subject;
+        return template;
+    }
+
+    private VolumeParameterConfig resolveVolumeParameterConfig(Template template, PlatformDisks platformDisks, CloudVmTypes vmTypesV2, String locationString) {
+        Platform platform = Platform.platform(template.cloudPlatform());
+        VmType vmType = vmTypesV2.getCloudVmResponses()
+                .getOrDefault(locationString, Collections.emptySet())
+                .stream()
+                .filter(curr -> curr.value().equals(template.getInstanceType())).findFirst().get();
+        Map<String, VolumeParameterType> map = platformDisks.getDiskMappings().get(platform);
+        VolumeParameterType volumeParameterType = map.get(template.getVolumeType());
+
+        return vmType.getVolumeParameterbyVolumeParameterType(volumeParameterType);
+    }
+
+    private void setRootVolumeSize(Template template) {
+        if (template.getRootVolumeSize() == null) {
+            LOGGER.info("No root volume size was set in the request. Getting default value for platform '{}'", template.cloudPlatform());
+            template.setRootVolumeSize(defaultRootVolumeSizeProvider.getForPlatform(template.cloudPlatform()));
+        }
     }
 }

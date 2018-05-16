@@ -8,23 +8,24 @@ import java.util.Optional;
 import java.util.Set;
 
 import javax.inject.Inject;
-import javax.transaction.Transactional;
 
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
-import com.sequenceiq.cloudbreak.api.model.InstanceMetadataType;
-import com.sequenceiq.cloudbreak.service.CloudbreakException;
+import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceMetadataType;
 import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
-import com.sequenceiq.cloudbreak.domain.Cluster;
-import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
-import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
+import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
+import com.sequenceiq.cloudbreak.service.TransactionService;
+import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariClusterConnector;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -59,14 +60,16 @@ public class ChangePrimaryGatewayService {
     @Inject
     private FlowMessageService flowMessageService;
 
+    @Inject
+    private TransactionService transactionService;
+
     public void changePrimaryGatewayStarted(long stackId) {
         clusterService.updateClusterStatusByStackId(stackId, UPDATE_IN_PROGRESS);
         stackUpdater.updateStackStatus(stackId, DetailedStackStatus.CLUSTER_OPERATION, "Changing gateway.");
         flowMessageService.fireEventAndLog(stackId, Msg.AMBARI_CLUSTER_GATEWAY_CHANGE, UPDATE_IN_PROGRESS.name());
     }
 
-    @Transactional
-    public void primaryGatewayChanged(long stackId, String newPrimaryGatewayFQDN) throws CloudbreakException {
+    public void primaryGatewayChanged(long stackId, String newPrimaryGatewayFQDN) throws CloudbreakException, TransactionExecutionException {
         Set<InstanceMetaData> imds = instanceMetaDataRepository.findNotTerminatedForStack(stackId);
         Optional<InstanceMetaData> formerPrimaryGateway =
                 imds.stream().filter(imd -> imd.getInstanceMetadataType() == InstanceMetadataType.GATEWAY_PRIMARY).findFirst();
@@ -75,16 +78,19 @@ public class ChangePrimaryGatewayService {
         if (newPrimaryGateway.isPresent() && formerPrimaryGateway.isPresent()) {
             InstanceMetaData fpg = formerPrimaryGateway.get();
             fpg.setInstanceMetadataType(InstanceMetadataType.GATEWAY);
-            instanceMetaDataRepository.save(fpg);
-            InstanceMetaData npg = newPrimaryGateway.get();
-            npg.setInstanceMetadataType(InstanceMetadataType.GATEWAY_PRIMARY);
-            instanceMetaDataRepository.save(npg);
-            Stack updatedStack = stackService.getByIdWithLists(stackId);
-            String gatewayIp = gatewayConfigService.getPrimaryGatewayIp(updatedStack);
+            transactionService.required(() -> {
+                instanceMetaDataRepository.save(fpg);
+                InstanceMetaData npg = newPrimaryGateway.get();
+                npg.setInstanceMetadataType(InstanceMetadataType.GATEWAY_PRIMARY);
+                instanceMetaDataRepository.save(npg);
+                Stack updatedStack = stackService.getByIdWithLists(stackId);
+                String gatewayIp = gatewayConfigService.getPrimaryGatewayIp(updatedStack);
 
-            Cluster cluster = updatedStack.getCluster();
-            cluster.setAmbariIp(gatewayIp);
-            clusterRepository.save(cluster);
+                Cluster cluster = updatedStack.getCluster();
+                cluster.setAmbariIp(gatewayIp);
+                clusterRepository.save(cluster);
+                return null;
+            });
         } else {
             throw new CloudbreakException("Primary gateway change was not successful.");
         }

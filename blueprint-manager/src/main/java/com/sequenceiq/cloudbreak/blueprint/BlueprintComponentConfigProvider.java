@@ -28,7 +28,7 @@ public interface BlueprintComponentConfigProvider {
         return Maps.newHashMap();
     }
 
-    default boolean additionalCriteria(BlueprintPreparationObject source, String blueprintText) {
+    default boolean specialCondition(BlueprintPreparationObject source, String blueprintText) {
         return false;
     }
 

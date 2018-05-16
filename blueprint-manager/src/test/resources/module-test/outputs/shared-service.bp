@@ -26,15 +26,6 @@
   },
   "configurations": [
     {
-      "hive-site": {
-        "javax.jdo.option.ConnectionUserName": "heyitsme",
-        "javax.jdo.option.ConnectionDriverName": "org.postgresql.Driver",
-        "javax.jdo.option.ConnectionPassword": "iamsoosecure",
-        "javax.jdo.option.ConnectionURL": "jdbc:postgresql://10.1.1.1:5432/hive",
-        "hive.metastore.warehouse.dir": "/apps/hive/warehouse"
-      }
-    },
-    {
       "ranger-env": {
         "properties": {
           "ranger-yarn-plugin-enabled": "No",
@@ -45,37 +36,9 @@
           "xasecure.audit.destination.solr": "true",
           "ranger_admin_password": "Passw0rd",
           "ranger_privelege_user_jdbc_url": "jdbc:postgresql://10.1.1.1:5432",
-          "ranger-atlas-plugin-enabled": "No",
           "create_db_dbuser": "false",
+          "ranger-atlas-plugin-enabled": "No",
           "admin_password": "Passw0rd"
-        }
-      }
-    },
-    {
-      "ranger-hive-plugin-properties": {
-        "ranger.service.config.param.enable.hive.metastore.lookup": "true",
-        "ranger.service.config.param.hive.site.file.path": "/etc/hive/conf/hive-site.xml"
-      }
-    },
-    {
-      "ranger-ugsync-site": {
-        "properties": {
-          "ranger.usersync.ldap.deltasync": "false",
-          "ranger.usersync.enabled": "true",
-          "ranger.usersync.group.searchbase": "cn=groups,dc=example,dc=org",
-          "ranger.usersync.group.nameattribute": "cn",
-          "ranger.usersync.group.based.role.assignment.rules": "&ROLE_SYS_ADMIN:g:ambariadmins",
-          "ranger.usersync.ldap.binddn": "cn=admin,dc=example,dc=org",
-          "ranger.usersync.source.impl.class": "org.apache.ranger.ldapusersync.process.LdapUserGroupBuilder",
-          "ranger.usersync.ldap.user.nameattribute": "cn=admin,dc=example,dc=org",
-          "ranger.usersync.group.searchfilter": " ",
-          "ranger.usersync.group.searchenabled": "true",
-          "ranger.usersync.ldap.user.searchbase": "cn=users,dc=example,dc=org",
-          "ranger.usersync.ldap.ldapbindpassword": "admin",
-          "ranger.usersync.ldap.user.objectclass": "person",
-          "ranger.usersync.group.objectclass": "groupOfNames",
-          "ranger.usersync.group.memberattributename": "member",
-          "ranger.usersync.ldap.url": "ldap://localhost:389"
         }
       }
     },
@@ -109,6 +72,28 @@
           "db_user": "heyitsme",
           "db_host": "10.1.1.1:5432",
           "db_password": "iamsoosecure"
+        }
+      }
+    },
+    {
+      "ranger-ugsync-site": {
+        "properties": {
+          "ranger.usersync.ldap.deltasync": "false",
+          "ranger.usersync.enabled": "true",
+          "ranger.usersync.group.searchbase": "cn=groups,dc=example,dc=org",
+          "ranger.usersync.group.nameattribute": "cn",
+          "ranger.usersync.group.based.role.assignment.rules": "&ROLE_SYS_ADMIN:g:ambariadmins",
+          "ranger.usersync.ldap.binddn": "cn=admin,dc=example,dc=org",
+          "ranger.usersync.source.impl.class": "org.apache.ranger.ldapusersync.process.LdapUserGroupBuilder",
+          "ranger.usersync.ldap.user.nameattribute": "cn=admin,dc=example,dc=org",
+          "ranger.usersync.group.searchfilter": " ",
+          "ranger.usersync.group.searchenabled": "true",
+          "ranger.usersync.ldap.user.searchbase": "cn=users,dc=example,dc=org",
+          "ranger.usersync.ldap.ldapbindpassword": "admin",
+          "ranger.usersync.ldap.user.objectclass": "person",
+          "ranger.usersync.group.objectclass": "groupOfNames",
+          "ranger.usersync.group.memberattributename": "member",
+          "ranger.usersync.ldap.url": "ldap://localhost:389"
         }
       }
     },
@@ -170,6 +155,16 @@
       }
     },
     {
+      "hive-site": {
+        "properties": {
+          "javax.jdo.option.ConnectionUserName": "heyitsme",
+          "javax.jdo.option.ConnectionDriverName": "org.postgresql.Driver",
+          "javax.jdo.option.ConnectionPassword": "iamsoosecure",
+          "javax.jdo.option.ConnectionURL": "jdbc:postgresql://10.1.1.1:5432/hive"
+        }
+      }
+    },
+    {
       "hive-env": {
         "properties": {
           "hive_database": "Existing PostgreSQL Database",
@@ -203,6 +198,14 @@
       "infra-solr-env": {
         "properties": {
           "infra_solr_datadir": "/hadoopfs/fs1/infra/solr"
+        }
+      }
+    },
+    {
+      "ranger-hive-plugin-properties": {
+        "properties": {
+          "ranger.service.config.param.enable.hive.metastore.lookup": "true",
+          "ranger.service.config.param.hive.site.file.path": "/etc/hive/conf/hive-site.xml"
         }
       }
     }

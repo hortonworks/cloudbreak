@@ -43,9 +43,9 @@ import com.microsoft.azure.PagedList;
 import com.microsoft.azure.credentials.ApplicationTokenCredentials;
 import com.microsoft.azure.management.Azure;
 import com.microsoft.azure.management.compute.VirtualMachine;
-import com.sequenceiq.cloudbreak.api.model.InstanceGroupResponse;
-import com.sequenceiq.cloudbreak.api.model.InstanceMetaDataJson;
-import com.sequenceiq.cloudbreak.api.model.StackResponse;
+import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupResponse;
+import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceMetaDataJson;
+import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;
 import com.sequenceiq.it.util.ResourceUtil;
 
 public class TagsUtil {

@@ -46,7 +46,7 @@ public class Cluster {
     private PeriscopeUser user;
 
     @Enumerated(EnumType.STRING)
-    private ClusterState state = ClusterState.RUNNING;
+    private ClusterState state = ClusterState.PENDING;
 
     @OneToMany(mappedBy = "cluster", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private Set<MetricAlert> metricAlerts = new HashSet<>();
@@ -76,6 +76,8 @@ public class Cluster {
     private boolean autoscalingEnabled;
 
     private String periscopeNodeId;
+
+    private long lastEvaulated;
 
     public Cluster() {
     }
@@ -207,7 +209,7 @@ public class Cluster {
     }
 
     public synchronized void setLastScalingActivityCurrent() {
-        lastScalingActivity = System.currentTimeMillis();
+        setLastScalingActivity(System.currentTimeMillis());
     }
 
     public boolean isRunning() {
@@ -248,6 +250,14 @@ public class Cluster {
 
     public void setPeriscopeNodeId(String periscopeNodeId) {
         this.periscopeNodeId = periscopeNodeId;
+    }
+
+    public long getLastEvaulated() {
+        return lastEvaulated;
+    }
+
+    public void setLastEvaulated(long lastEvaulated) {
+        this.lastEvaulated = lastEvaulated;
     }
 }
 

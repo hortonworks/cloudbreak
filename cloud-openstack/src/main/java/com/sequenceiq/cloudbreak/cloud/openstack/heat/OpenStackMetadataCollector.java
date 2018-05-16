@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.openstack.heat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -41,7 +42,8 @@ public class OpenStackMetadataCollector implements MetadataCollector {
     private CloudInstanceMetaDataExtractor cloudInstanceMetaDataExtractor;
 
     @Override
-    public List<CloudVmMetaDataStatus> collect(AuthenticatedContext authenticatedContext, List<CloudResource> resources, List<CloudInstance> vms) {
+    public List<CloudVmMetaDataStatus> collect(AuthenticatedContext authenticatedContext, List<CloudResource> resources, List<CloudInstance> vms,
+            List<CloudInstance> knownInstances) {
         CloudResource resource = utils.getHeatResource(resources);
 
         String stackName = utils.getStackName(authenticatedContext);
@@ -49,8 +51,8 @@ public class OpenStackMetadataCollector implements MetadataCollector {
 
         List<InstanceTemplate> templates = Lists.transform(vms, CloudInstance::getTemplate);
 
-        Map<String, InstanceTemplate> templateMap = Maps.uniqueIndex(templates, from -> utils.getPrivateInstanceId(from.getGroupName(),
-                Long.toString(from.getPrivateId())));
+        Map<String, InstanceTemplate> templateMap = Maps.uniqueIndex(templates,
+                from -> utils.getPrivateInstanceId(Objects.requireNonNull(from).getGroupName(), Long.toString(from.getPrivateId())));
 
         OSClient<?> client = openStackClient.createOSClient(authenticatedContext);
 
@@ -69,7 +71,6 @@ public class OpenStackMetadataCollector implements MetadataCollector {
                 InstanceTemplate template = templateMap.get(privateInstanceId);
                 if (template != null) {
                     CloudInstanceMetaData md = cloudInstanceMetaDataExtractor.extractMetadata(client, server, instanceUUID);
-                    //TODO use here sshkey
                     CloudInstance cloudInstance = new CloudInstance(instanceUUID, template, null);
                     CloudVmInstanceStatus status = new CloudVmInstanceStatus(cloudInstance, InstanceStatus.CREATED);
                     results.add(new CloudVmMetaDataStatus(status, md));

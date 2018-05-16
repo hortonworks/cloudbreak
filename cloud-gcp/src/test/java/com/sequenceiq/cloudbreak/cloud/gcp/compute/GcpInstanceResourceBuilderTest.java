@@ -29,7 +29,7 @@ import com.google.api.services.compute.Compute.Instances.Insert;
 import com.google.api.services.compute.model.Instance;
 import com.google.api.services.compute.model.Operation;
 import com.google.common.collect.ImmutableMap;
-import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
+import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
@@ -107,7 +107,7 @@ public class GcpInstanceResourceBuilderTest {
         security = new Security(rules, null);
         Location location = Location.location(Region.region("region"), AvailabilityZone.availabilityZone("az"));
         Map<InstanceGroupType, String> userData = ImmutableMap.of(InstanceGroupType.CORE, "CORE", InstanceGroupType.GATEWAY, "GATEWAY");
-        image = new Image("cb-centos66-amb200-2015-05-25", userData, "redhat6", "", "default", "default-id");
+        image = new Image("cb-centos66-amb200-2015-05-25", userData, "redhat6", "redhat6", "", "default", "default-id");
         CloudContext cloudContext = new CloudContext(privateId, "testname", "GCP", "owner");
         CloudCredential cloudCredential = new CloudCredential(privateId, "credentialname");
         cloudCredential.putParameter("projectId", "projectId");
@@ -196,7 +196,7 @@ public class GcpInstanceResourceBuilderTest {
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
         CloudInstance cloudInstance = new CloudInstance(instanceId, instanceTemplate, instanceAuthentication);
         return new Group(name, InstanceGroupType.CORE, Collections.singletonList(cloudInstance), security, null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey());
+                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), 50);
     }
 
 }

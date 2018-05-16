@@ -8,11 +8,11 @@ import com.sequenceiq.it.IntegrationTestContext;
 public class Recipe extends RecipeEntity {
 
     static Function<IntegrationTestContext, Recipe> getTestContext(String key) {
-        return (testContext)->testContext.getContextParam(key, Recipe.class);
+        return (testContext) -> testContext.getContextParam(key, Recipe.class);
     }
 
     static Function<IntegrationTestContext, Recipe> getNew() {
-        return (testContext)->new Recipe();
+        return (testContext) -> new Recipe();
     }
 
     public static Recipe request() {

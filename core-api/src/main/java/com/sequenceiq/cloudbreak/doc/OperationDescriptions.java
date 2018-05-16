@@ -91,6 +91,7 @@ public class OperationDescriptions {
         public static final String GET_PLATFORM_VARIANTS = "retrieve available platform variants";
         public static final String GET_ALL = "retrieve all stacks";
         public static final String GET_BY_STACK_NAME = "retrieve stack request by stack name";
+        public static final String RETRY_BY_ID = "retry stack and cluster provisioning of failed stack";
     }
 
     public static class ClusterOpDescription {
@@ -163,7 +164,6 @@ public class OperationDescriptions {
     public static class UserOpDescription {
         public static final String USER_DETAILS_EVICT = "remove user from cache (by username)";
         public static final String CURRENT_USER_DETAILS_EVICT = "remove current user from cache";
-        public static final String USER_GET_RESOURCE = "check that account user has any resources";
         public static final String USER_GET_PROFILE = "user related profile";
         public static final String USER_PUT_PROFILE = "modify user related profile";
     }
@@ -212,6 +212,7 @@ public class OperationDescriptions {
         public static final String TEST_DATABASE = "tests a database connection parameters";
         public static final String CREATE_DATABASE = "create a database for the service in the RDS if the connection could be created";
         public static final String STACK_MATRIX = "returns default ambari details for distinct HDP and HDF";
+        public static final String CUSTOM_PARAMETERS = "returns custom parameters";
         public static final String CHECK_CLIENT_VERSION = "checks the client version";
     }
 

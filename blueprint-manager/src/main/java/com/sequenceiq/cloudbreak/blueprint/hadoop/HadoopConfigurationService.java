@@ -36,7 +36,7 @@ public class HadoopConfigurationService implements BlueprintComponentConfigProvi
     }
 
     @Override
-    public boolean additionalCriteria(BlueprintPreparationObject source, String blueprintProcessor) {
+    public boolean specialCondition(BlueprintPreparationObject source, String blueprintProcessor) {
         return !source.getBlueprintView().isHdf();
     }
 

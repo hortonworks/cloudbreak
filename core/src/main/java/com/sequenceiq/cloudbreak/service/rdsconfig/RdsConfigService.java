@@ -3,19 +3,18 @@ package com.sequenceiq.cloudbreak.service.rdsconfig;
 import java.util.Set;
 
 import javax.inject.Inject;
-import javax.transaction.Transactional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.google.common.base.Preconditions;
-import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
+import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
-import com.sequenceiq.cloudbreak.controller.BadRequestException;
-import com.sequenceiq.cloudbreak.controller.NotFoundException;
+import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.RdsConfigRepository;
@@ -23,7 +22,6 @@ import com.sequenceiq.cloudbreak.service.AuthorizationService;
 import com.sequenceiq.cloudbreak.util.NameUtil;
 
 @Service
-@Transactional
 public class RdsConfigService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RdsConfigService.class);
@@ -131,10 +129,7 @@ public class RdsConfigService {
     }
 
     public void deleteDefaultRdsConfigs(Set<RDSConfig> rdsConfigs) {
-        rdsConfigs.stream().filter(rdsConfig -> ResourceStatus.DEFAULT == rdsConfig.getStatus()).forEach(rdsConfig -> {
-                checkRdsConfigNotAssociated(rdsConfig);
-                setStatusToDeleted(rdsConfig);
-        });
+        rdsConfigs.stream().filter(rdsConfig -> ResourceStatus.DEFAULT == rdsConfig.getStatus()).forEach(this::setStatusToDeleted);
     }
 
     private void delete(RDSConfig rdsConfig) {

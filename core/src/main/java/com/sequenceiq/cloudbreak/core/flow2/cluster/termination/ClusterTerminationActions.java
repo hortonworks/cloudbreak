@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.PrepareClusterTermina
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.PrepareClusterTerminationResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterTerminationRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterTerminationResult;
+import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 
 @Configuration
 public class ClusterTerminationActions {
@@ -85,7 +86,8 @@ public class ClusterTerminationActions {
     public Action<?, ?> clusterTerminationFinished() {
         return new AbstractClusterAction<ClusterTerminationResult>(ClusterTerminationResult.class) {
             @Override
-            protected void doExecute(ClusterViewContext context, ClusterTerminationResult payload, Map<Object, Object> variables) {
+            protected void doExecute(ClusterViewContext context, ClusterTerminationResult payload, Map<Object, Object> variables)
+                    throws TransactionExecutionException {
                 if (payload.isOperationAllowed()) {
                     clusterTerminationFlowService.finishClusterTerminationAllowed(context, payload);
                 } else {
@@ -116,6 +118,4 @@ public class ClusterTerminationActions {
             }
         };
     }
-
-
 }

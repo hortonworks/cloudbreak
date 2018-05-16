@@ -24,11 +24,12 @@ import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackDownscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
-import com.sequenceiq.cloudbreak.domain.InstanceGroup;
-import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
-import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
+import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 
 @Configuration
 public class StackDownscaleActions {
@@ -89,7 +90,8 @@ public class StackDownscaleActions {
     public Action<?, ?> stackDownscaleFinishedAction() {
         return new AbstractStackDownscaleAction<DownscaleStackResult>(DownscaleStackResult.class) {
             @Override
-            protected void doExecute(StackScalingFlowContext context, DownscaleStackResult payload, Map<Object, Object> variables) {
+            protected void doExecute(StackScalingFlowContext context, DownscaleStackResult payload, Map<Object, Object> variables)
+                    throws TransactionExecutionException {
                 stackDownscaleService.finishStackDownscale(context, getInstanceGroupName(variables), getInstanceIds(variables));
                 sendEvent(context);
             }

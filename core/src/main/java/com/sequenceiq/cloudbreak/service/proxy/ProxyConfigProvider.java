@@ -5,14 +5,15 @@ import static java.util.Collections.singletonMap;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.transaction.Transactional;
+import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.domain.Cluster;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.ProxyConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
+import com.sequenceiq.cloudbreak.service.TransactionService;
 
 @Service
 public class ProxyConfigProvider {
@@ -21,7 +22,9 @@ public class ProxyConfigProvider {
 
     public static final String PROXY_SLS_PATH = "/proxy/proxy.sls";
 
-    @Transactional
+    @Inject
+    private TransactionService transactionService;
+
     public void decoratePillarWithProxyDataIfNeeded(Map<String, SaltPillarProperties> servicePillar, Cluster cluster) {
         ProxyConfig proxyConfig = cluster.getProxyConfig();
         if (proxyConfig != null) {

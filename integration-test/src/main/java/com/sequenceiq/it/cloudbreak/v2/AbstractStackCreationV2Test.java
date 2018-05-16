@@ -12,9 +12,9 @@ import org.testng.annotations.Test;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-import com.sequenceiq.cloudbreak.api.model.GatewayJson;
+import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.GatewayJson;
 import com.sequenceiq.cloudbreak.api.model.KerberosRequest;
-import com.sequenceiq.cloudbreak.api.model.StackAuthenticationRequest;
+import com.sequenceiq.cloudbreak.api.model.stack.StackAuthenticationRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.AmbariV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.ClusterV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.GeneralSettings;
@@ -88,7 +88,7 @@ public class AbstractStackCreationV2Test extends AbstractCloudbreakIntegrationTe
     public void ambariParameters(@Optional("") String blueprintName, @Optional("false") boolean enableSecurity,
             @Optional String kerberosMasterKey, @Optional String kerberosAdmin, @Optional String kerberosPassword) {
         IntegrationTestContext itContext = getItContext();
-        blueprintName = StringUtils.hasText(blueprintName) ? blueprintName : itContext.getContextParam(CloudbreakV2Constants.SSH_PUBLICKEY_ID);
+        blueprintName = StringUtils.hasText(blueprintName) ? blueprintName : itContext.getContextParam(CloudbreakV2Constants.BLUEPRINT_NAME);
 
         Assert.assertNotNull(itContext.getContextParam(CloudbreakITContextConstants.AMBARI_USER_ID), "Ambari user is mandatory.");
         Assert.assertNotNull(itContext.getContextParam(CloudbreakITContextConstants.AMBARI_PASSWORD_ID), "Ambari password is mandatory.");

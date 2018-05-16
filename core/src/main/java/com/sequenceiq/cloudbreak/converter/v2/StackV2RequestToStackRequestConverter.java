@@ -14,16 +14,16 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Strings;
-import com.sequenceiq.cloudbreak.api.model.ClusterRequest;
-import com.sequenceiq.cloudbreak.api.model.HostGroupRequest;
-import com.sequenceiq.cloudbreak.api.model.InstanceGroupRequest;
+import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRequest;
+import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupRequest;
+import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupRequest;
 import com.sequenceiq.cloudbreak.api.model.NetworkRequest;
 import com.sequenceiq.cloudbreak.api.model.OrchestratorRequest;
 import com.sequenceiq.cloudbreak.api.model.SharedServiceRequest;
-import com.sequenceiq.cloudbreak.api.model.StackRequest;
+import com.sequenceiq.cloudbreak.api.model.stack.StackRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.InstanceGroupV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
-import com.sequenceiq.cloudbreak.controller.AuthenticatedUserService;
+import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.controller.validation.template.TemplateValidator;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
@@ -102,7 +102,16 @@ public class StackV2RequestToStackRequestConverter extends AbstractConversionSer
         stackRequest.setOwnerEmail(Strings.isNullOrEmpty(source.getOwnerEmail()) ? authenticatedUserService.getCbUser().getUsername() : source.getOwnerEmail());
         convertClusterRequest(source, stackRequest);
         stackRequest.setCloudPlatform(credentialService.get(stackRequest.getCredentialName(), stackRequest.getAccount()).cloudPlatform());
+        convertCustomInputs(source, stackRequest);
         return stackRequest;
+    }
+
+    private void convertCustomInputs(StackV2Request source, StackRequest stackRequest) {
+        if (source.getInputs() != null) {
+            stackRequest.setCustomInputs(source.getInputs());
+        } else {
+            stackRequest.setCustomInputs(new HashMap<>());
+        }
     }
 
     private Map<String, String> convertParameters(Map<String, ?> map) {

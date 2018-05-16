@@ -20,7 +20,7 @@ import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.blueprint.template.BlueprintTemplateProcessor;
 import com.sequenceiq.cloudbreak.blueprint.template.views.BlueprintView;
-import com.sequenceiq.cloudbreak.domain.Cluster;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CentralBlueprintUpdaterTest {
@@ -52,7 +52,7 @@ public class CentralBlueprintUpdaterTest {
         cluster.getBlueprint().setBlueprintText(testBlueprint);
 
         object = BlueprintPreparationObject.Builder.builder()
-                .withBlueprintView(new BlueprintView(TestUtil.blueprint().getBlueprintText(), Maps.newHashMap(), "HDP", "2.6"))
+                .withBlueprintView(new BlueprintView(TestUtil.blueprint().getBlueprintText(), "HDP", "2.6"))
                 .build();
     }
 
@@ -75,7 +75,7 @@ public class CentralBlueprintUpdaterTest {
     public void getBlueprintTextWhenBlueprintTemplateProcessorThrowExceptionThenShouldReturnThrowException() throws IOException {
         when(blueprintTemplateProcessor.process(testBlueprint, object, Maps.newHashMap())).thenThrow(new IOException("failed to read bp"));
 
-        String message = String.format("Unable to update blueprint with default  properties which was: %s", testBlueprint);
+        String message = String.format("Unable to update blueprint with default properties which was: %s", testBlueprint);
 
         thrown.expect(BlueprintProcessingException.class);
         thrown.expectMessage(message);

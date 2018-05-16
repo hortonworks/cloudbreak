@@ -2,6 +2,9 @@ package com.sequenceiq.cloudbreak.controller;
 
 import java.util.Set;
 
+import javax.transaction.Transactional;
+import javax.transaction.Transactional.TxType;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -12,9 +15,11 @@ import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.converter.mapper.ProxyConfigMapper;
 import com.sequenceiq.cloudbreak.domain.ProxyConfig;
+import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigService;
 
 @Component
+@Transactional(TxType.NEVER)
 public class ProxyConfigController extends NotificationController implements ProxyConfigEndpoint {
 
     @Autowired

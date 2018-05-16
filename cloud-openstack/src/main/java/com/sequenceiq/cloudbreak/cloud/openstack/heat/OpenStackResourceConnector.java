@@ -119,8 +119,8 @@ public class OpenStackResourceConnector implements ResourceConnector<Object> {
             resources = check(authenticatedContext, cloudResources);
         } else {
             LOGGER.info("Heat stack already exists: {}", existingStack.getName());
-            CloudResource cloudResource = new Builder().type(ResourceType.HEAT_STACK).name(existingStack.getId()).build();
-            resources = Collections.singletonList(new CloudResourceStatus(cloudResource, ResourceStatus.CREATED));
+            List<CloudResource> cloudResources = collectResources(authenticatedContext, notifier, existingStack, stack, neutronNetworkView);
+            resources = check(authenticatedContext, cloudResources);
         }
         LOGGER.debug("Launched resources: {}", resources);
         return resources;
@@ -397,10 +397,11 @@ public class OpenStackResourceConnector implements ResourceConnector<Object> {
                 }
             }
             groups.add(new Group(group.getName(), group.getType(), instances, group.getSecurity(), null, stack.getInstanceAuthentication(),
-                    stack.getInstanceAuthentication().getLoginUserName(), stack.getInstanceAuthentication().getPublicKey()));
+                    stack.getInstanceAuthentication().getLoginUserName(), stack.getInstanceAuthentication().getPublicKey(), group.getRootVolumeSize()));
         }
-        return new CloudStack(groups, stack.getNetwork(), stack.getImage(), stack.getParameters(), stack.getTags(), stack.getTemplate(),
-                stack.getInstanceAuthentication(), stack.getInstanceAuthentication().getLoginUserName(), stack.getInstanceAuthentication().getPublicKey());
+        return new CloudStack(groups, stack.getNetwork(), stack.getImage(), stack.getParameters(), stack.getTags(),
+                stack.getTemplate(), stack.getInstanceAuthentication(), stack.getInstanceAuthentication().getLoginUserName(),
+                stack.getInstanceAuthentication().getPublicKey());
     }
 
     private String getExistingSubnetCidr(AuthenticatedContext authenticatedContext, CloudStack stack) {

@@ -9,22 +9,22 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.inject.Inject;
-import javax.transaction.Transactional;
-import javax.transaction.Transactional.TxType;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.api.model.ParametersQueryResponse;
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessorFactory;
+import com.sequenceiq.cloudbreak.blueprint.CentralBlueprintParameterQueryService;
 import com.sequenceiq.cloudbreak.blueprint.configuration.SiteConfigurations;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
-import com.sequenceiq.cloudbreak.controller.BadRequestException;
-import com.sequenceiq.cloudbreak.controller.NotFoundException;
+import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
@@ -32,7 +32,6 @@ import com.sequenceiq.cloudbreak.service.AuthorizationService;
 import com.sequenceiq.cloudbreak.util.NameUtil;
 
 @Service
-@Transactional
 public class BlueprintService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BlueprintService.class);
@@ -48,6 +47,9 @@ public class BlueprintService {
 
     @Inject
     private BlueprintProcessorFactory blueprintProcessorFactory;
+
+    @Inject
+    private CentralBlueprintParameterQueryService centralBlueprintParameterQueryService;
 
     public Set<Blueprint> retrievePrivateBlueprints(IdentityUser user) {
         return blueprintRepository.findForUser(user.getUserId());
@@ -85,7 +87,6 @@ public class BlueprintService {
         return blueprint;
     }
 
-    @Transactional(TxType.NEVER)
     public Blueprint create(IdentityUser user, Blueprint blueprint, Collection<Map<String, Map<String, String>>> properties) {
         LOGGER.debug("Creating blueprint: [User: '{}', Account: '{}']", user.getUsername(), user.getAccount());
         Blueprint savedBlueprint;
@@ -150,7 +151,6 @@ public class BlueprintService {
         delete(blueprint);
     }
 
-    @Transactional(TxType.NEVER)
     public Iterable<Blueprint> save(Iterable<Blueprint> entities) {
         return blueprintRepository.save(entities);
     }
@@ -168,5 +168,16 @@ public class BlueprintService {
             blueprint.setStatus(ResourceStatus.DEFAULT_DELETED);
             blueprintRepository.save(blueprint);
         }
+    }
+
+    public ParametersQueryResponse queryCustomParameters(String name, IdentityUser user) {
+        Blueprint blueprint = getPublicBlueprint(name, user);
+        Map<String, String> result = new HashMap<>();
+        for (String customParameter : centralBlueprintParameterQueryService.queryCustomParameters(blueprint.getBlueprintText())) {
+            result.put(customParameter, "");
+        }
+        ParametersQueryResponse parametersQueryResponse = new ParametersQueryResponse();
+        parametersQueryResponse.setCustom(result);
+        return parametersQueryResponse;
     }
 }

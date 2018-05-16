@@ -4,7 +4,7 @@ import java.util.Collection;
 import java.util.List;
 
 import com.google.common.collect.Lists;
-import com.sequenceiq.cloudbreak.domain.HostGroup;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 
 public class BlueprintServiceComponent {
 

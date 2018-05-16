@@ -28,6 +28,8 @@ public class Image {
 
     private final StackDetails stackDetails;
 
+    private boolean defaultImage;
+
     @JsonCreator
     public Image(
             @JsonProperty(value = "date", required = true) String date,
@@ -86,6 +88,14 @@ public class Image {
         return osType;
     }
 
+    public void setDefaultImage(boolean defaultImage) {
+        this.defaultImage = defaultImage;
+    }
+
+    public boolean isDefaultImage() {
+        return defaultImage;
+    }
+
     @Override
     public String toString() {
         return "Image{"
@@ -95,8 +105,7 @@ public class Image {
                 + ", os='" + os + '\''
                 + ", osType='" + osType + '\''
                 + ", version='" + version + '\''
+                + ", default='" + defaultImage + '\''
                 + '}';
     }
-
-
 }

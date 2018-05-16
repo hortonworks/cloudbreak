@@ -1,4 +1,4 @@
 jdbc_connectors:
-    vendor:
+    databaseType:
     connectorJarName:
     connectorJarUrl:

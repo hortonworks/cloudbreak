@@ -37,9 +37,9 @@ import org.mockito.Spy;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.sequenceiq.ambari.client.AmbariClient;
-import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
-import com.sequenceiq.cloudbreak.api.model.InstanceMetadataType;
-import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
+import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType;
+import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceMetadataType;
+import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceStatus;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.common.model.OrchestratorType;
 import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
@@ -47,13 +47,13 @@ import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.HostOrchestratorResolver;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.Cluster;
-import com.sequenceiq.cloudbreak.domain.HostGroup;
-import com.sequenceiq.cloudbreak.domain.HostMetadata;
-import com.sequenceiq.cloudbreak.domain.InstanceGroup;
-import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
-import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
@@ -68,7 +68,6 @@ import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariDecommissioner;
 import com.sequenceiq.cloudbreak.service.cluster.filter.ConfigParam;
 import com.sequenceiq.cloudbreak.service.cluster.filter.HostFilterService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
-
 
 @RunWith(org.mockito.junit.MockitoJUnitRunner.class)
 public class AmbariDecommissionerTest {
@@ -524,7 +523,6 @@ public class AmbariDecommissionerTest {
 
     private InstanceGroup getMasterInstanceGroup(int nodeCount) {
         InstanceGroup masterInstanceGroup = new InstanceGroup();
-        masterInstanceGroup.setNodeCount(nodeCount);
         masterInstanceGroup.setGroupName("master_1");
         masterInstanceGroup.setInstanceGroupType(InstanceGroupType.GATEWAY);
         masterInstanceGroup.setInstanceMetaData(new HashSet<>());
@@ -544,7 +542,6 @@ public class AmbariDecommissionerTest {
 
     private InstanceGroup getSlaveInstanceGroup(int nodeCount) {
         InstanceGroup slaveInstanceGroup = new InstanceGroup();
-        slaveInstanceGroup.setNodeCount(nodeCount);
         slaveInstanceGroup.setGroupName("slave_1");
         slaveInstanceGroup.setInstanceGroupType(InstanceGroupType.CORE);
         slaveInstanceGroup.setInstanceMetaData(new HashSet<>());

@@ -16,7 +16,9 @@ import javax.persistence.UniqueConstraint;
 
 import org.hibernate.annotations.Type;
 
+import com.sequenceiq.cloudbreak.api.model.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 
 @Entity
 @Table(name = "RDSConfig", uniqueConstraints = @UniqueConstraint(columnNames = {"account", "name"}))
@@ -34,7 +36,8 @@ public class RDSConfig implements ProvisionEntity {
     private String connectionURL;
 
     @Column(nullable = false)
-    private String databaseEngine;
+    @Enumerated(EnumType.STRING)
+    private DatabaseVendor databaseEngine;
 
     @Column(nullable = false)
     private String connectionDriver;
@@ -98,11 +101,11 @@ public class RDSConfig implements ProvisionEntity {
         this.connectionURL = connectionURL;
     }
 
-    public String getDatabaseEngine() {
+    public DatabaseVendor getDatabaseEngine() {
         return databaseEngine;
     }
 
-    public void setDatabaseEngine(String databaseEngine) {
+    public void setDatabaseEngine(DatabaseVendor databaseEngine) {
         this.databaseEngine = databaseEngine;
     }
 

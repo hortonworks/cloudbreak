@@ -41,7 +41,8 @@ public class CollectMetadataHandler implements CloudPlatformEventHandler<Collect
         try {
             CloudConnector connector = cloudPlatformConnectors.get(request.getCloudContext().getPlatformVariant());
             AuthenticatedContext ac = connector.authentication().authenticate(request.getCloudContext(), request.getCloudCredential());
-            List<CloudVmMetaDataStatus> instanceStatuses = connector.metadata().collect(ac, request.getCloudResource(), request.getVms());
+
+            List<CloudVmMetaDataStatus> instanceStatuses = connector.metadata().collect(ac, request.getCloudResource(), request.getVms(), request.getKnownVms());
             CollectMetadataResult collectMetadataResult = new CollectMetadataResult(request, instanceStatuses);
             request.getResult().onNext(collectMetadataResult);
             eventBus.notify(collectMetadataResult.selector(), new Event<>(collectMetadataRequestEvent.getHeaders(), collectMetadataResult));

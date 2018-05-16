@@ -32,7 +32,7 @@ import org.springframework.ui.freemarker.FreeMarkerConfigurationFactoryBean;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
+import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
@@ -117,7 +117,7 @@ public class HeatTemplateBuilderTest {
                 new PortDefinition[]{new PortDefinition("22", "22"), new PortDefinition("443", "443")}, "tcp"));
         Security security = new Security(rules, null);
         groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security, null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey()));
+                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), 50));
         Map<InstanceGroupType, String> userData = ImmutableMap.of(
                 InstanceGroupType.CORE, "CORE",
                 InstanceGroupType.GATEWAY, "GATEWAY"
@@ -131,7 +131,7 @@ public class HeatTemplateBuilderTest {
         tags.put(CloudbreakResourceType.STORAGE.templateVariable(), CloudbreakResourceType.STORAGE.key());
         tags.put(CloudbreakResourceType.TEMPLATE.templateVariable(), CloudbreakResourceType.TEMPLATE.key());
         when(defaultCostTaggingService.prepareInstanceTagging()).thenReturn(tags);
-        image = new Image("cb-centos66-amb200-2015-05-25", userData, "redhat6", "url", "default", null);
+        image = new Image("cb-centos66-amb200-2015-05-25", userData, "redhat6", "redhat6", "url", "default", null);
     }
 
     @Test
@@ -176,7 +176,7 @@ public class HeatTemplateBuilderTest {
         String cloudSecurityId = "sec-group-id";
         Security security = new Security(Collections.emptyList(), cloudSecurityId);
         Group groupWithSecGroup = new Group(group.getName(), InstanceGroupType.CORE, group.getInstances(), security, null,
-                group.getInstanceAuthentication(), group.getInstanceAuthentication().getLoginUserName(), group.getInstanceAuthentication().getPublicKey());
+                group.getInstanceAuthentication(), group.getInstanceAuthentication().getLoginUserName(), group.getInstanceAuthentication().getPublicKey(), 50);
         groups.add(groupWithSecGroup);
 
         //WHEN

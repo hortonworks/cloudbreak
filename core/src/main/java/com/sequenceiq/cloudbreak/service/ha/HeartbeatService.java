@@ -12,7 +12,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
-import javax.transaction.Transactional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,7 +32,8 @@ import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationFlowConfig;
 import com.sequenceiq.cloudbreak.domain.CloudbreakNode;
 import com.sequenceiq.cloudbreak.domain.FlowLog;
-import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.StateStatus;
 import com.sequenceiq.cloudbreak.ha.CloudbreakNodeConfig;
 import com.sequenceiq.cloudbreak.repository.CloudbreakNodeRepository;
 import com.sequenceiq.cloudbreak.repository.FlowLogRepository;
@@ -126,16 +126,12 @@ public class HeartbeatService {
         if (cloudbreakNodeConfig.isNodeIdSpecified()) {
             List<CloudbreakNode> failedNodes = new ArrayList<>();
             try {
-                failedNodes.addAll(transactionService.required(() -> distributeFlows()));
+                failedNodes.addAll(distributeFlows());
             } catch (TransactionExecutionException e) {
                 LOGGER.info("Failed to distribute the flow logs across the active nodes, somebody might have already done it. Message: {}", e.getMessage());
             }
-
             try {
-                transactionService.required(() -> {
-                    cleanupNodes(failedNodes);
-                    return null;
-                });
+                cleanupNodes(failedNodes);
             } catch (TransactionExecutionException e) {
                 LOGGER.info("Failed to cleanup the nodes, somebody might have already done it. Message: {}", e.getMessage());
             }
@@ -153,8 +149,7 @@ public class HeartbeatService {
         }
     }
 
-    @Transactional
-    public List<CloudbreakNode> distributeFlows() {
+    public List<CloudbreakNode> distributeFlows() throws TransactionExecutionException {
         List<CloudbreakNode> cloudbreakNodes = Lists.newArrayList(cloudbreakNodeRepository.findAll());
         long currentTimeMillis = clock.getCurrentTime();
         List<CloudbreakNode> failedNodes = cloudbreakNodes.stream()
@@ -171,7 +166,10 @@ public class HeartbeatService {
             LOGGER.info("The following flows will be distributed across the active nodes: {}", getFlowIds(failedFlowLogs));
             List<FlowLog> invalidFlows = getInvalidFlows(failedFlowLogs);
             Collection<FlowLog> updatedFlowLogs = new ArrayList<>(invalidFlows.size());
-            invalidFlows.forEach(fl -> fl.setFinalized(true));
+            invalidFlows.forEach(fl -> {
+                fl.setFinalized(true);
+                fl.setStateStatus(StateStatus.SUCCESSFUL);
+            });
             updatedFlowLogs.addAll(invalidFlows);
             failedFlowLogs.removeAll(invalidFlows);
             LOGGER.info("The following flows have been filtered out from distribution: {}", getFlowIds(invalidFlows));
@@ -183,7 +181,7 @@ public class HeartbeatService {
                             updatedFlowLogs.add(flowLog);
                         }));
             }
-            flowLogRepository.save(updatedFlowLogs);
+            transactionService.required(() -> flowLogRepository.save(updatedFlowLogs));
         }
         return failedNodes;
     }
@@ -191,15 +189,17 @@ public class HeartbeatService {
     /**
      * Remove the node reference from the DB for those nodes that are failing and does not have any assigned flows.
      */
-    @Transactional
-    public void cleanupNodes(Collection<CloudbreakNode> failedNodes) {
+    public void cleanupNodes(Collection<CloudbreakNode> failedNodes) throws TransactionExecutionException {
         if (failedNodes != null && !failedNodes.isEmpty()) {
             LOGGER.info("Cleanup node candidates: {}", failedNodes);
             List<CloudbreakNode> cleanupNodes = failedNodes.stream()
                     .filter(node -> flowLogRepository.findAllByCloudbreakNodeId(node.getUuid()).isEmpty())
                     .collect(Collectors.toList());
             LOGGER.info("Cleanup nodes from the DB: {}", cleanupNodes);
-            cloudbreakNodeRepository.delete(cleanupNodes);
+            transactionService.required(() -> {
+                cloudbreakNodeRepository.delete(cleanupNodes);
+                return null;
+            });
         }
     }
 

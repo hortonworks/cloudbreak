@@ -11,9 +11,9 @@ import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
-import com.sequenceiq.cloudbreak.domain.Cluster;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
-import com.sequenceiq.cloudbreak.domain.Gateway;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.service.ClusterComponentConfigProvider;
@@ -49,11 +49,11 @@ public class ClusterToClusterDetailsConverter extends AbstractConversionServiceA
 
     private void addDatabaseInfo(ClusterDetails clusterDetails, Cluster source) {
         RDSConfig rdsConfig = rdsConfigService.findByClusterIdAndType(source.getOwner(), source.getAccount(), source.getId(), RdsType.AMBARI);
-        if (rdsConfig == null || DatabaseVendor.EMBEDDED.name().equalsIgnoreCase(rdsConfig.getDatabaseEngine())) {
+        if (rdsConfig == null || DatabaseVendor.EMBEDDED == rdsConfig.getDatabaseEngine()) {
             clusterDetails.setDatabaseType(DatabaseVendor.EMBEDDED.name());
             clusterDetails.setExternalDatabase(Boolean.FALSE);
         } else {
-            clusterDetails.setDatabaseType(rdsConfig.getDatabaseEngine());
+            clusterDetails.setDatabaseType(rdsConfig.getDatabaseEngine().name());
             clusterDetails.setExternalDatabase(Boolean.TRUE);
         }
     }

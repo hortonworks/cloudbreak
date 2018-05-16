@@ -8,7 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.model.ClusterRequest;
+import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRequest;
 import com.sequenceiq.cloudbreak.api.model.ConnectedClusterRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.AmbariV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.ClusterV2Request;
@@ -41,10 +41,8 @@ public class ClusterV2RequestToClusterRequestConverter extends AbstractConversio
             cluster.setAmbariDatabaseDetails(ambariRequest.getAmbariDatabaseDetails());
             cluster.setAmbariRepoDetailsJson(ambariRequest.getAmbariRepoDetailsJson());
             cluster.setAmbariStackDetails(ambariRequest.getAmbariStackDetails());
-            cluster.setBlueprintCustomPropertiesAsString(ambariRequest.getBlueprintCustomProperties());
             cluster.setBlueprintId(ambariRequest.getBlueprintId());
             cluster.setBlueprintName(ambariRequest.getBlueprintName());
-            cluster.setBlueprintInputs(ambariRequest.getBlueprintInputs());
             cluster.setConfigStrategy(ambariRequest.getConfigStrategy());
             cluster.setConnectedCluster(ambariRequest.getConnectedCluster());
             cluster.setEnableSecurity(ambariRequest.getEnableSecurity());

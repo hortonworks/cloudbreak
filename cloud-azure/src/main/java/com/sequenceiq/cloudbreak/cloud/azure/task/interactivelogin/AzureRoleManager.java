@@ -254,12 +254,14 @@ public class AzureRoleManager {
                     && !notActions.contains("Microsoft.Network/*")
                     && !notActions.contains("Microsoft.Storage/*")
                     && !notActions.contains("Microsoft.Resources/*");
-        } else return actions.contains("Microsoft.Compute/*")
-                && actions.contains("Microsoft.Authorization/*/read")
-                && actions.contains("Microsoft.DataLakeStore/accounts/read")
-                && actions.contains("Microsoft.Network/*")
-                && actions.contains("Microsoft.Storage/*")
-                && actions.contains("Microsoft.Resources/*");
+        } else {
+            return actions.contains("Microsoft.Compute/*")
+                    && actions.contains("Microsoft.Authorization/*/read")
+                    && actions.contains("Microsoft.DataLakeStore/accounts/read")
+                    && actions.contains("Microsoft.Network/*")
+                    && actions.contains("Microsoft.Storage/*")
+                    && actions.contains("Microsoft.Resources/*");
+        }
 
     }
     //CHECKSTYLE:ON

@@ -17,6 +17,4 @@ public enum CredentialStatus {
     public StatusGroup getStatusGroup() {
         return statusGroup;
     }
-
-
 }

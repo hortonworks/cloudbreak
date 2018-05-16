@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
-import com.sequenceiq.cloudbreak.domain.HostMetadata;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 
 @EntityType(entityClass = HostMetadata.class)
 public interface HostMetadataRepository extends CrudRepository<HostMetadata, Long> {

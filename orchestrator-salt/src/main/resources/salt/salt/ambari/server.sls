@@ -20,6 +20,20 @@ provision_action_based_on_real_dependencies:
     - unless: grep "server.stage.command.execution_type" /etc/ambari-server/conf/ambari.properties
 
 {% if ambari.ambari_database.ambariVendor == 'mysql' %}
+
+{% if grains['os'] == 'Amazon' or ( grains['os_family'] == 'RedHat' and grains['osmajorrelease'] | int == 6 )  %}
+/etc/yum.repos.d/MariaDB.repo:
+  file.managed:
+    - source: salt://ambari/yum/MariaDB.repo
+    - unless: mysql --version
+
+install-mariadb-client:
+  pkg.installed:
+    - unless: mysql --version
+    - pkgs:
+      - MariaDB-client
+{% endif %}
+
 install-mariadb:
   pkg.installed:
     - unless: mysql --version
@@ -78,20 +92,20 @@ modify_container_executor_template_server:
 
 {% endif %}
 
-add_amazon2017_patch_script_server:
+add_amazon-osfamily_patch_script_server:
   file.managed:
-    - name: /opt/salt/amazon2017.sh
-    - source: salt://ambari/scripts/amazon2017.sh
+    - name: /opt/salt/amazon-osfamily.sh
+    - source: salt://ambari/scripts/amazon-osfamily.sh
     - skip_verify: True
     - makedirs: True
     - mode: 755
 
-run_amazon2017_sh_server:
+run_amazon-osfamily_sh_server:
   cmd.run:
-    - name: sh -x /opt/salt/amazon2017.sh 2>&1 | tee -a /var/log/amazon2017_server_sh.log && exit ${PIPESTATUS[0]}
-    - unless: ls /var/log/amazon2017_server_sh.log
+    - name: sh -x /opt/salt/amazon-osfamily.sh 2>&1 | tee -a /var/log/amazon-osfamily_server_sh.log && exit ${PIPESTATUS[0]}
+    - unless: ls /var/log/amazon-osfamily_server_sh.log
     - require:
-      - file: add_amazon2017_patch_script_server
+      - file: add_amazon-osfamily_patch_script_server
 
 stop-service-registration:
   service.dead:

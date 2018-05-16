@@ -14,19 +14,20 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
+import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.common.type.BillingStatus;
-import com.sequenceiq.cloudbreak.domain.HostMetadata;
-import com.sequenceiq.cloudbreak.domain.InstanceGroup;
-import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
-import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
+import com.sequenceiq.cloudbreak.service.TransactionService;
+import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariClusterConnector;
 import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariDecommissioner;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
@@ -63,6 +64,9 @@ public class StackScalingService {
 
     @Inject
     private CloudbreakMessagesService cloudbreakMessagesService;
+
+    @Inject
+    private TransactionService transactionService;
 
     private enum Msg {
         STACK_SCALING_HOST_DELETED("stack.scaling.host.deleted"),
@@ -108,34 +112,31 @@ public class StackScalingService {
         }
     }
 
-    @Transactional
-    public int updateRemovedResourcesState(Stack stack, Collection<String> instanceIds, InstanceGroup instanceGroup) {
-        int nodesRemoved = 0;
-        for (InstanceMetaData instanceMetaData : instanceGroup.getNotTerminatedInstanceMetaDataSet()) {
-            if (instanceIds.contains(instanceMetaData.getInstanceId())) {
-                long timeInMillis = Calendar.getInstance().getTimeInMillis();
-                instanceMetaData.setTerminationDate(timeInMillis);
-                instanceMetaData.setInstanceStatus(InstanceStatus.TERMINATED);
-                instanceMetaDataRepository.save(instanceMetaData);
-                nodesRemoved++;
+    public int updateRemovedResourcesState(Stack stack, Collection<String> instanceIds, InstanceGroup instanceGroup) throws TransactionExecutionException {
+        return transactionService.required(() -> {
+            int nodesRemoved = 0;
+            for (InstanceMetaData instanceMetaData : instanceGroup.getNotDeletedInstanceMetaDataSet()) {
+                if (instanceIds.contains(instanceMetaData.getInstanceId())) {
+                    long timeInMillis = Calendar.getInstance().getTimeInMillis();
+                    instanceMetaData.setTerminationDate(timeInMillis);
+                    instanceMetaData.setInstanceStatus(InstanceStatus.TERMINATED);
+                    instanceMetaDataRepository.save(instanceMetaData);
+                    nodesRemoved++;
+                }
             }
-        }
-        int nodeCount = instanceGroup.getNodeCount() - nodesRemoved;
-        if (nodesRemoved != 0) {
-            instanceGroup.setNodeCount(nodeCount);
-            instanceGroupRepository.save(instanceGroup);
-        }
-        LOGGER.info("Successfully terminated metadata of instances '{}' in stack.", instanceIds);
-        eventService.fireCloudbreakEvent(stack.getId(), BillingStatus.BILLING_CHANGED.name(),
-                cloudbreakMessagesService.getMessage(Msg.STACK_SCALING_BILLING_CHANGED.code()));
-        return nodeCount;
+            int nodeCount = instanceGroup.getNodeCount() - nodesRemoved;
+            LOGGER.info("Successfully terminated metadata of instances '{}' in stack.", instanceIds);
+            eventService.fireCloudbreakEvent(stack.getId(), BillingStatus.BILLING_CHANGED.name(),
+                    cloudbreakMessagesService.getMessage(Msg.STACK_SCALING_BILLING_CHANGED.code()));
+            return nodeCount;
+        });
     }
 
     public Map<String, String> getUnusedInstanceIds(String instanceGroupName, Integer scalingAdjustment, Stack stack) {
         Map<String, String> instanceIds = new HashMap<>();
         int i = 0;
         List<InstanceMetaData> instanceMetaDatas = new ArrayList<>(stack.getInstanceGroupByInstanceGroupName(instanceGroupName)
-                .getNotTerminatedInstanceMetaDataSet());
+                .getNotDeletedInstanceMetaDataSet());
         instanceMetaDatas.sort(Comparator.comparing(InstanceMetaData::getStartDate));
         for (InstanceMetaData metaData : instanceMetaDatas) {
             if (!metaData.getAmbariServer()

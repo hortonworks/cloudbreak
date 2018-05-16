@@ -38,7 +38,8 @@ public class YarnMetadataCollector implements MetadataCollector {
     private YarnClientUtil yarnClientUtil;
 
     @Override
-    public List<CloudVmMetaDataStatus> collect(AuthenticatedContext authenticatedContext, List<CloudResource> resources, List<CloudInstance> vms) {
+    public List<CloudVmMetaDataStatus> collect(AuthenticatedContext authenticatedContext, List<CloudResource> resources, List<CloudInstance> vms,
+            List<CloudInstance> knownInstances) {
         try {
             YarnClient yarnClient = yarnClientUtil.createYarnClient(authenticatedContext);
             CloudResource yarnApplication = getYarnApplcationResource(resources);

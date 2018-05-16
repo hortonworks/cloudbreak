@@ -2,6 +2,9 @@ package com.sequenceiq.cloudbreak.controller;
 
 import java.util.Set;
 
+import javax.transaction.Transactional;
+import javax.transaction.Transactional.TxType;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.convert.ConversionService;
@@ -9,15 +12,17 @@ import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v1.ClusterTemplateEndpoint;
-import com.sequenceiq.cloudbreak.api.model.ClusterTemplateRequest;
-import com.sequenceiq.cloudbreak.api.model.ClusterTemplateResponse;
+import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterTemplateRequest;
+import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterTemplateResponse;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.domain.ClusterTemplate;
+import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.clustertemplate.ClusterTemplateService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @Component
+@Transactional(TxType.NEVER)
 public class ClusterTemplateController extends NotificationController implements ClusterTemplateEndpoint {
 
     @Autowired

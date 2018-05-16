@@ -58,8 +58,8 @@ public class AmbariDatabaseDetailsJson implements JsonEntity {
         return vendor;
     }
 
-    public void setVendor(DatabaseVendor vendor) {
-        this.vendor = vendor;
+    public void setVendor(DatabaseVendor databaseVendor) {
+        vendor = databaseVendor;
     }
 
     public String getName() {

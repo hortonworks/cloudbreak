@@ -40,6 +40,9 @@ public class ImageResponse implements JsonEntity {
     @JsonInclude(NON_EMPTY)
     private StackDetailsJson stackDetails;
 
+    @JsonProperty("defaultImage")
+    private boolean defaultImage;
+
     public String getDate() {
         return date;
     }
@@ -110,5 +113,13 @@ public class ImageResponse implements JsonEntity {
 
     public void setOsType(String osType) {
         this.osType = osType;
+    }
+
+    public boolean isDefaultImage() {
+        return defaultImage;
+    }
+
+    public void setDefaultImage(boolean defaultImage) {
+        this.defaultImage = defaultImage;
     }
 }

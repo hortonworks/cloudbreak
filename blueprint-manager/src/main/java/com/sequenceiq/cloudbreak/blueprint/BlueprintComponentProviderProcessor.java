@@ -33,7 +33,7 @@ public class BlueprintComponentProviderProcessor {
     public String process(BlueprintPreparationObject source, String blueprintText) throws IOException {
         BlueprintTextProcessor blueprintProcessor = blueprintProcessorFactory.get(blueprintText);
         for (BlueprintComponentConfigProvider provider : blueprintComponentConfigProviders) {
-            if (blueprintProcessor.componentsExistsInBlueprint(provider.components()) || provider.additionalCriteria(source, blueprintText)) {
+            if (blueprintProcessor.componentsExistsInBlueprint(provider.components()) || provider.specialCondition(source, blueprintText)) {
                 blueprintProcessor.addConfigEntries(provider.getConfigurationEntries(source, blueprintProcessor.asText()), false);
                 blueprintProcessor.addSettingsEntries(provider.getSettingsEntries(source, blueprintProcessor.asText()), false);
 

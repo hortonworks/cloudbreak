@@ -11,16 +11,20 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Strings;
+import com.sequenceiq.cloudbreak.api.model.ConfigsResponse;
 import com.sequenceiq.cloudbreak.api.model.FileSystemConfiguration;
+import com.sequenceiq.cloudbreak.api.model.SharedServiceRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.InstanceGroupV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintPreparationObject;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessingException;
 import com.sequenceiq.cloudbreak.blueprint.GeneralClusterConfigsProvider;
 import com.sequenceiq.cloudbreak.blueprint.filesystem.FileSystemConfigurationProvider;
+import com.sequenceiq.cloudbreak.blueprint.sharedservice.SharedServiceConfigsViewProvider;
 import com.sequenceiq.cloudbreak.blueprint.template.views.BlueprintView;
 import com.sequenceiq.cloudbreak.blueprint.template.views.FileSystemConfigurationView;
 import com.sequenceiq.cloudbreak.blueprint.template.views.HostgroupView;
+import com.sequenceiq.cloudbreak.blueprint.template.views.SharedServiceConfigsView;
 import com.sequenceiq.cloudbreak.blueprint.templates.BlueprintStackInfo;
 import com.sequenceiq.cloudbreak.blueprint.templates.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.blueprint.utils.StackInfoService;
@@ -33,11 +37,14 @@ import com.sequenceiq.cloudbreak.domain.FlexSubscription;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.flex.FlexSubscriptionService;
 import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
+import com.sequenceiq.cloudbreak.service.sharedservice.SharedServiceConfigProvider;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
 
 @Component
@@ -50,6 +57,9 @@ public class StackRequestToBlueprintPreparationObjectConverter extends AbstractC
 
     @Inject
     private LdapConfigService ldapConfigService;
+
+    @Inject
+    private StackService stackService;
 
     @Inject
     private RdsConfigService rdsConfigService;
@@ -69,6 +79,12 @@ public class StackRequestToBlueprintPreparationObjectConverter extends AbstractC
     @Inject
     private StackInfoService stackInfoService;
 
+    @Inject
+    private SharedServiceConfigsViewProvider sharedServiceConfigsViewProvider;
+
+    @Inject
+    private SharedServiceConfigProvider sharedServiceConfigProvider;
+
     @Override
     public BlueprintPreparationObject convert(StackV2Request source) {
         try {
@@ -84,8 +100,7 @@ public class StackRequestToBlueprintPreparationObjectConverter extends AbstractC
             Set<HostgroupView> hostgroupViews = getHostgroupViews(source);
             BlueprintView blueprintView = new BlueprintView(blueprint.getBlueprintText(), blueprintStackInfo.getVersion(), blueprintStackInfo.getType());
             GeneralClusterConfigs generalClusterConfigs = generalClusterConfigsProvider.generalClusterConfigs(source, identityUser);
-
-            return BlueprintPreparationObject.Builder.builder()
+            BlueprintPreparationObject.Builder builder = BlueprintPreparationObject.Builder.builder()
                     .withFlexSubscription(flexSubscription)
                     .withRdsConfigs(rdsConfigs)
                     .withHostgroupViews(hostgroupViews)
@@ -95,8 +110,20 @@ public class StackRequestToBlueprintPreparationObjectConverter extends AbstractC
                     .withGeneralClusterConfigs(generalClusterConfigs)
                     .withSmartSenseSubscriptionId(smartsenseSubscriptionId)
                     .withLdapConfig(ldapConfig)
-                    .withKerberosConfig(kerberosConfig)
-                    .build();
+                    .withKerberosConfig(kerberosConfig);
+
+            SharedServiceRequest sharedService = source.getCluster().getSharedService();
+            if (sharedService != null && !Strings.isNullOrEmpty(sharedService.getSharedCluster())) {
+                Stack dataLakeStack = stackService.getPublicStack(sharedService.getSharedCluster(), identityUser);
+                SharedServiceConfigsView sharedServiceConfigsView = sharedServiceConfigsViewProvider
+                        .createSharedServiceConfigs(blueprint, source.getCluster().getAmbari().getPassword(), dataLakeStack);
+                ConfigsResponse configsResponse = sharedServiceConfigProvider.retrieveOutputs(dataLakeStack, blueprint, source.getGeneral().getName());
+                builder.withSharedServiceConfigs(sharedServiceConfigsView)
+                        .withFixInputs(configsResponse.getFixInputs())
+                        .withCustomInputs(configsResponse.getDatalakeInputs());
+
+            }
+            return builder.build();
         } catch (BlueprintProcessingException e) {
             throw new CloudbreakServiceException(e.getMessage(), e);
         } catch (IOException e) {
@@ -178,6 +205,4 @@ public class StackRequestToBlueprintPreparationObjectConverter extends AbstractC
         }
         return kerberosConfig;
     }
-
-
 }

@@ -9,7 +9,6 @@ import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import reactor.Environment;
 import reactor.bus.EventBus;
 
-
 @Configuration
 @ComponentScan
 public class TestConfig {

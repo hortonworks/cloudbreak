@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.cluster.ambari;
 
 import static com.sequenceiq.cloudbreak.api.model.Status.AVAILABLE;
+import static com.sequenceiq.cloudbreak.common.type.HostMetadataState.HEALTHY;
 import static com.sequenceiq.cloudbreak.orchestrator.container.DockerContainer.AMBARI_AGENT;
 import static com.sequenceiq.cloudbreak.service.PollingResult.SUCCESS;
 import static com.sequenceiq.cloudbreak.service.PollingResult.isSuccess;
@@ -26,6 +27,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -42,19 +44,19 @@ import com.sequenceiq.ambari.client.services.ServiceAndHostService;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.common.model.OrchestratorType;
 import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
-import com.sequenceiq.cloudbreak.controller.BadRequestException;
+import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ContainerOrchestratorResolver;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.HostOrchestratorResolver;
 import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
-import com.sequenceiq.cloudbreak.domain.Cluster;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.Container;
-import com.sequenceiq.cloudbreak.domain.HostGroup;
-import com.sequenceiq.cloudbreak.domain.HostMetadata;
-import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
-import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.orchestrator.container.ContainerOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
@@ -307,7 +309,7 @@ public class AmbariDecommissioner {
         }
     }
 
-    private Iterable<HostMetadata> collectDownscaleCandidates(Stack stack, Cluster cluster, String hostGroupName, Integer scalingAdjustment) {
+    private List<HostMetadata> collectDownscaleCandidates(Stack stack, Cluster cluster, String hostGroupName, Integer scalingAdjustment) {
         List<HostMetadata> downScaleCandidates;
         HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfigForPrimaryGateway(stack.getId(), cluster.getAmbariIp());
         HostGroup hostGroup = hostGroupService.getByClusterIdAndName(cluster.getId(), hostGroupName);
@@ -427,7 +429,6 @@ public class AmbariDecommissioner {
             return dfsSpaceTask.getDfsSpace();
         } else {
             throw new CloudbreakServiceException("Failed to get dfs space from ambari!");
-
         }
     }
 
@@ -534,19 +535,18 @@ public class AmbariDecommissioner {
                 AMBARI_POLLING_INTERVAL, MAX_ATTEMPTS_FOR_REGION_DECOM);
     }
 
-    private Set<String> selectHostsToRemove(Iterable<HostMetadata> decommissionCandidates, int adjustment) {
-        Set<String> hostsToRemove = new HashSet<>();
-        int i = 0;
-        for (HostMetadata hostMetadata : decommissionCandidates) {
-            String hostName = hostMetadata.getHostName();
-            if (i < adjustment) {
-                LOGGER.info("Host '{}' will be removed from Ambari cluster", hostName);
-                hostsToRemove.add(hostName);
+    private Set<String> selectHostsToRemove(List<HostMetadata> decommissionCandidates, int adjustment) {
+        Stream<HostMetadata> orderedByHealth = decommissionCandidates.stream().sorted((a, b) -> {
+            if (a.getHostMetadataState().equals(b.getHostMetadataState())) {
+                return 0;
+            } else if (!HEALTHY.equals(a.getHostMetadataState())) {
+                return 1;
             } else {
-                break;
+                return -1;
             }
-            i++;
-        }
+        });
+        Set<String> hostsToRemove = orderedByHealth.map(HostMetadata::getHostName).limit(adjustment).collect(Collectors.toSet());
+        LOGGER.info("Hosts '{}' will be removed from Ambari cluster", hostsToRemove);
         return hostsToRemove;
     }
 

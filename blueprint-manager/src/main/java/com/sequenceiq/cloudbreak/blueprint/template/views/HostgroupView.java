@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.blueprint.template.views;
 
-import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
+import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType;
 
 public class HostgroupView {
 

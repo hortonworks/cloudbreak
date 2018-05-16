@@ -2,5 +2,5 @@ package com.sequenceiq.cloudbreak.api.model.rds;
 
 public enum RdsType {
 
-    HIVE, RANGER, DRUID, SUPERSET, OOZIE, AMBARI
+    HIVE, RANGER, DRUID, SUPERSET, OOZIE, AMBARI, BEACON
 }

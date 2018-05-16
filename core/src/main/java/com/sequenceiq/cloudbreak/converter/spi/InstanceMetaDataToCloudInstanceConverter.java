@@ -12,8 +12,8 @@ import com.sequenceiq.cloudbreak.cloud.model.InstanceAuthentication;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
-import com.sequenceiq.cloudbreak.domain.InstanceGroup;
-import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.StackAuthentication;
 import com.sequenceiq.cloudbreak.domain.Template;
 
@@ -37,6 +37,7 @@ public class InstanceMetaDataToCloudInstanceConverter extends AbstractConversion
                 stackAuthentication.getLoginUserName());
         Map<String, Object> params = new HashMap<>();
         params.put(CloudInstance.SUBNET_ID, metaDataEnity.getSubnetId());
+        params.put(CloudInstance.INSTANCE_NAME, metaDataEnity.getInstanceName());
         return new CloudInstance(metaDataEnity.getInstanceId(), instanceTemplate, instanceAuthentication, params);
     }
 

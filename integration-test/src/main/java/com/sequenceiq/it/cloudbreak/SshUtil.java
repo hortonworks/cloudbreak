@@ -20,7 +20,6 @@ import net.schmizz.sshj.connection.channel.direct.Session;
 import net.schmizz.sshj.connection.channel.direct.Session.Command;
 import net.schmizz.sshj.transport.verification.PromiscuousVerifier;
 
-
 public class SshUtil {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(com.sequenceiq.it.cloudbreak.SshUtil.class);

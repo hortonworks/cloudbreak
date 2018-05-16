@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.blueprint.smartsense;
 
-import static com.sequenceiq.cloudbreak.api.model.InstanceGroupType.GATEWAY;
+import static com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType.GATEWAY;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -77,7 +77,7 @@ public class SmartSenseConfigProvider implements BlueprintComponentConfigProvide
     }
 
     @Override
-    public boolean additionalCriteria(BlueprintPreparationObject source, String blueprintText) {
+    public boolean specialCondition(BlueprintPreparationObject source, String blueprintText) {
         return smartsenseConfigurationLocator.smartsenseConfigurableBySubscriptionId(source.getSmartSenseSubscriptionId());
     }
 
@@ -88,7 +88,7 @@ public class SmartSenseConfigProvider implements BlueprintComponentConfigProvide
     private String addSmartSenseServerToBp(BlueprintTextProcessor blueprintProcessor, Iterable<HostgroupView> hostgroupViews,
             Collection<String> hostGroupNames) {
         if (!blueprintProcessor.componentExistsInBlueprint(HST_SERVER_COMPONENT)) {
-            String aHostGroupName = hostGroupNames.stream().findFirst().get();
+            String aHostGroupName = hostGroupNames.stream().sorted(String::compareTo).findFirst().get();
             boolean singleNodeGatewayFound = false;
             for (HostgroupView hostGroup : hostgroupViews) {
                 if (hostGroup.isInstanceGroupConfigured() && GATEWAY.equals(hostGroup.getInstanceGroupType()) && hostGroup.getNodeCount().equals(1)) {

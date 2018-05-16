@@ -1,8 +1,7 @@
 package com.sequenceiq.cloudbreak.blueprint.template;
 
-import static com.sequenceiq.cloudbreak.api.model.ExecutorType.CONTAINER;
-
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -10,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.github.jknack.handlebars.Handlebars;
+import com.github.jknack.handlebars.TagType;
 import com.github.jknack.handlebars.Template;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintPreparationObject;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
@@ -31,34 +31,43 @@ public class BlueprintTemplateProcessor {
         return generateBlueprint;
     }
 
+    public List<String> queryParameters(String sourceTemplate) throws IOException {
+        long started = System.currentTimeMillis();
+        List<String> blueprintParameters = queryBlueprintParameters(sourceTemplate);
+        long generationTime = System.currentTimeMillis() - started;
+        LOGGER.info("The blueprint text processed successfully by the EL based template processor under {} ms, the parameters are: {}",
+                generationTime,
+                blueprintParameters.toString());
+        return blueprintParameters;
+    }
+
     private String generateBlueprintWithParameters(String sourceTemplate, BlueprintPreparationObject source, Map<String, Object> customProperties)
             throws IOException {
         Template template = handlebars.compileInline(sourceTemplate, "{{{", "}}}");
         return template.apply(prepareTemplateObject(source, customProperties));
     }
 
+    private List<String> queryBlueprintParameters(String sourceTemplate)
+            throws IOException {
+        Template template = handlebars.compileInline(sourceTemplate, "{{{", "}}}");
+        return template.collect(TagType.VAR);
+    }
+
     private Map<String, Object> prepareTemplateObject(BlueprintPreparationObject source, Map<String, Object> customProperties) throws IOException {
-
-
-        Map<String, Object> blueprintInputs = source.getBlueprintView().getBlueprintInputs();
-        blueprintInputs.putAll(customProperties);
+        source.getFixInputs().putAll(customProperties);
 
         return new BlueprintTemplateModelContextBuilder()
-                .withClusterAdminFirstname(source.getGeneralClusterConfigs().getUserName())
-                .withClusterAdminLastname(source.getGeneralClusterConfigs().getUserName())
-                .withClusterAdminPassword(source.getGeneralClusterConfigs().getPassword())
-                .withLlapNodeCounts(source.getGeneralClusterConfigs().getNodeCount() - 1)
-                .withContainerExecutor(CONTAINER.equals(source.getGeneralClusterConfigs().getExecutorType()))
-                .withAdminEmail(source.getGeneralClusterConfigs().getIdentityUserEmail())
-                .withClusterName(source.getGeneralClusterConfigs().getClusterName())
                 .withLdap(source.getLdapConfig().orElse(null))
+                .withSharedServiceConfigs(source.getSharedServiceConfigs().orElse(null))
+                .withComponents(source.getBlueprintView().getComponents())
                 .withGateway(source.getGatewayView())
-                .withStackType(source.getBlueprintView().getType())
-                .withStackVersion(source.getBlueprintView().getVersion())
+                .withBlueprintView(source.getBlueprintView())
                 .withRdsConfigs(source.getRdsConfigs())
                 .withFileSystemConfigs(source.getFileSystemConfigurationView().orElse(null))
-                .withCustomProperties(blueprintInputs)
-                .withHdfConfigs(source.getHdfConfigs())
+                .withCustomInputs(source.getCustomInputs())
+                .withFixInputs(source.getFixInputs())
+                .withGeneralClusterConfigs(source.getGeneralClusterConfigs())
+                .withHdfConfigs(source.getHdfConfigs().orElse(null))
                 .build();
     }
 }

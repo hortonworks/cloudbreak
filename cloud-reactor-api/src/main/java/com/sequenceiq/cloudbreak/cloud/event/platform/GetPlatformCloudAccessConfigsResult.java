@@ -4,7 +4,6 @@ import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformRequest;
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfigs;
 
-
 public class GetPlatformCloudAccessConfigsResult extends CloudPlatformResult<CloudPlatformRequest<?>> {
     private CloudAccessConfigs cloudAccessConfigs;
 

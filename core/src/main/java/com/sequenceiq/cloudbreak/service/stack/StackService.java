@@ -13,8 +13,6 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
-import javax.transaction.Transactional;
-import javax.transaction.Transactional.TxType;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,9 +29,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.model.AutoscaleStackResponse;
 import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
-import com.sequenceiq.cloudbreak.api.model.InstanceGroupAdjustmentJson;
-import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
-import com.sequenceiq.cloudbreak.api.model.StackResponse;
+import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupAdjustmentJson;
+import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceStatus;
+import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;
 import com.sequenceiq.cloudbreak.api.model.StatusRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
 import com.sequenceiq.cloudbreak.blueprint.validation.BlueprintValidator;
@@ -43,25 +41,25 @@ import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
-import com.sequenceiq.cloudbreak.controller.BadRequestException;
-import com.sequenceiq.cloudbreak.controller.CloudbreakApiException;
-import com.sequenceiq.cloudbreak.controller.NotFoundException;
+import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.controller.exception.CloudbreakApiException;
+import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.controller.validation.network.NetworkConfigurationValidator;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ContainerOrchestratorResolver;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.Cluster;
-import com.sequenceiq.cloudbreak.domain.Component;
-import com.sequenceiq.cloudbreak.domain.HostGroup;
-import com.sequenceiq.cloudbreak.domain.InstanceGroup;
-import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.domain.stack.Component;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
-import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.StackStatus;
-import com.sequenceiq.cloudbreak.domain.StackValidation;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
+import com.sequenceiq.cloudbreak.domain.stack.StackValidation;
 import com.sequenceiq.cloudbreak.domain.StopRestrictionReason;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
@@ -82,17 +80,19 @@ import com.sequenceiq.cloudbreak.service.AuthorizationService;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
+import com.sequenceiq.cloudbreak.service.TransactionService;
+import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariClusterService;
 import com.sequenceiq.cloudbreak.service.credential.OpenSshPublicKeyValidator;
 import com.sequenceiq.cloudbreak.service.decorator.StackResponseDecorator;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
+import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderConnectorAdapter;
 import com.sequenceiq.cloudbreak.util.PasswordUtil;
 
 @Service
-@Transactional
 public class StackService {
 
     private static final String SSH_USER_CB = "cloudbreak";
@@ -183,11 +183,13 @@ public class StackService {
     @Inject
     private StackDownscaleValidatorService downscaleValidatorService;
 
+    @Inject
+    private TransactionService transactionService;
+
     public Set<StackResponse> retrievePrivateStacks(IdentityUser user) {
         return convertStacks(stackRepository.findForUserWithLists(user.getUserId()));
     }
 
-    @Transactional(TxType.NEVER)
     public Set<StackResponse> retrieveAccountStacks(IdentityUser user) {
         return user.getRoles().contains(IdentityUserRole.ADMIN) ? convertStacks(stackRepository.findAllInAccountWithLists(user.getAccount()))
                 : convertStacks(stackRepository.findPublicInAccountForUser(user.getUserId(), user.getAccount()));
@@ -201,7 +203,6 @@ public class StackService {
         return stackRepository.findForUser(owner);
     }
 
-    @Transactional(TxType.NEVER)
     public StackResponse getJsonById(Long id, Collection<String> entry) {
         Stack stack = getByIdWithLists(id);
         authorizationService.hasReadPermission(stack);
@@ -329,9 +330,7 @@ public class StackService {
         delete(stack, forced, deleteDependencies);
     }
 
-    @Transactional(TxType.NEVER)
-    public Stack create(IdentityUser user, Stack stack, String imageCatalog, Optional<String> imageId, Optional<Blueprint> blueprint) {
-        Stack savedStack;
+    public Stack create(IdentityUser user, Stack stack, String platformString, StatedImage imgFromCatalog) {
         stack.setOwner(user.getUserId());
         stack.setAccount(user.getAccount());
         stack.setGatewayPort(nginxPort);
@@ -339,70 +338,81 @@ public class StackService {
         String stackName = stack.getName();
         MDCBuilder.buildMdcContext(stack);
         try {
-            if (!stack.getStackAuthentication().passwordAuthenticationRequired() && !Strings.isNullOrEmpty(stack.getStackAuthentication().getPublicKey())) {
-                long start = System.currentTimeMillis();
-                rsaPublicKeyValidator.validate(stack.getStackAuthentication().getPublicKey());
-                LOGGER.info("RSA key has been validated in {} ms fot stack {}", System.currentTimeMillis() - start, stackName);
-            }
-            if (stack.getOrchestrator() != null) {
-                orchestratorRepository.save(stack.getOrchestrator());
-            }
-            stack.getStackAuthentication().setLoginUserName(SSH_USER_CB);
+            return transactionService.required(() -> {
+                Stack savedStack;
+                try {
+                    if (!stack.getStackAuthentication().passwordAuthenticationRequired()
+                            && !Strings.isNullOrEmpty(stack.getStackAuthentication().getPublicKey())) {
+                        long start = System.currentTimeMillis();
+                        rsaPublicKeyValidator.validate(stack.getStackAuthentication().getPublicKey());
+                        LOGGER.info("RSA key has been validated in {} ms fot stack {}", System.currentTimeMillis() - start, stackName);
+                    }
+                    if (stack.getOrchestrator() != null) {
+                        orchestratorRepository.save(stack.getOrchestrator());
+                    }
+                    stack.getStackAuthentication().setLoginUserName(SSH_USER_CB);
 
-            long start = System.currentTimeMillis();
-            String template = connector.getTemplate(stack);
-            LOGGER.info("Get cluster template took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+                    long start = System.currentTimeMillis();
+                    String template = connector.getTemplate(stack);
+                    LOGGER.info("Get cluster template took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
-            start = System.currentTimeMillis();
-            savedStack = stackRepository.save(stack);
-            LOGGER.info("Stackrepository save took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+                    start = System.currentTimeMillis();
+                    savedStack = stackRepository.save(stack);
+                    LOGGER.info("Stackrepository save took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
-            start = System.currentTimeMillis();
-            addTemplateForStack(stack, template);
-            LOGGER.info("Save cluster template took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+                    start = System.currentTimeMillis();
+                    addTemplateForStack(savedStack, template);
+                    LOGGER.info("Save cluster template took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
-            start = System.currentTimeMillis();
-            addCloudbreakDetailsForStack(stack);
-            LOGGER.info("Add Cloudbreak template took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+                    start = System.currentTimeMillis();
+                    addCloudbreakDetailsForStack(savedStack);
+                    LOGGER.info("Add Cloudbreak template took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
-            MDCBuilder.buildMdcContext(savedStack);
+                    MDCBuilder.buildMdcContext(savedStack);
 
-            start = System.currentTimeMillis();
-            instanceGroupRepository.save(savedStack.getInstanceGroups());
-            LOGGER.info("Instance groups saved in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+                    start = System.currentTimeMillis();
+                    instanceGroupRepository.save(savedStack.getInstanceGroups());
+                    LOGGER.info("Instance groups saved in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
-            start = System.currentTimeMillis();
-            SecurityConfig securityConfig = tlsSecurityService.storeSSHKeys();
-            LOGGER.info("Generating SSH keys took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+                    start = System.currentTimeMillis();
+                    instanceMetaDataRepository.save(savedStack.getInstanceMetaDataAsList());
+                    LOGGER.info("Instance metadatas saved in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
-            start = System.currentTimeMillis();
-            securityConfig.setSaltPassword(PasswordUtil.generatePassword());
-            securityConfig.setSaltBootPassword(PasswordUtil.generatePassword());
-            securityConfig.setKnoxMasterSecret(PasswordUtil.generatePassword());
-            LOGGER.info("Generating salt passwords took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+                    start = System.currentTimeMillis();
+                    SecurityConfig securityConfig = tlsSecurityService.storeSSHKeys();
+                    LOGGER.info("Generating SSH keys took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
-            securityConfig.setStack(stack);
-            start = System.currentTimeMillis();
-            securityConfigRepository.save(securityConfig);
-            LOGGER.info("Security config save took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
-            savedStack.setSecurityConfig(securityConfig);
+                    start = System.currentTimeMillis();
+                    securityConfig.setSaltPassword(PasswordUtil.generatePassword());
+                    securityConfig.setSaltBootPassword(PasswordUtil.generatePassword());
+                    securityConfig.setKnoxMasterSecret(PasswordUtil.generatePassword());
+                    LOGGER.info("Generating salt passwords took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
-            start = System.currentTimeMillis();
-            imageService.create(savedStack, connector.getPlatformParameters(stack), imageCatalog, imageId, blueprint);
-            LOGGER.info("Image creation took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+                    securityConfig.setStack(savedStack);
+                    start = System.currentTimeMillis();
+                    securityConfigRepository.save(securityConfig);
+                    LOGGER.info("Security config save took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+                    savedStack.setSecurityConfig(securityConfig);
 
-        } catch (DataIntegrityViolationException ex) {
-            String msg = String.format("Error with resource [%s], error: [%s]", APIResourceType.STACK, getProperSqlErrorMessage(ex));
-            throw new BadRequestException(msg);
-        } catch (CloudbreakImageNotFoundException e) {
-            LOGGER.error("Cloudbreak Image not found", e);
-            stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.PROVISION_FAILED, "Image not found by id: " + imageId.get());
-            throw new CloudbreakApiException(e.getMessage(), e);
-        } catch (CloudbreakImageCatalogException e) {
-            LOGGER.error("Cloudbreak Image Catalog error", e);
-            throw new CloudbreakApiException(e.getMessage(), e);
+                    start = System.currentTimeMillis();
+                    imageService.create(savedStack, platformString, connector.getPlatformParameters(savedStack), imgFromCatalog);
+                    LOGGER.info("Image creation took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+
+                } catch (DataIntegrityViolationException ex) {
+                    String msg = String.format("Error with resource [%s], error: [%s]", APIResourceType.STACK, getProperSqlErrorMessage(ex));
+                    throw new BadRequestException(msg);
+                } catch (CloudbreakImageNotFoundException e) {
+                    LOGGER.error("Cloudbreak Image not found", e);
+                    throw new CloudbreakApiException(e.getMessage(), e);
+                } catch (CloudbreakImageCatalogException e) {
+                    LOGGER.error("Cloudbreak Image Catalog error", e);
+                    throw new CloudbreakApiException(e.getMessage(), e);
+                }
+                return savedStack;
+            });
+        } catch (TransactionExecutionException e) {
+            throw (RuntimeException) e.getCause();
         }
-        return savedStack;
     }
 
     private void setPlatformVariant(Stack stack) {
@@ -429,7 +439,6 @@ public class StackService {
         }
     }
 
-    @Transactional(TxType.NEVER)
     public void updateStatus(Long stackId, StatusRequest status, boolean updateCluster) {
         Stack stack = getByIdWithLists(stackId);
         Cluster cluster = null;
@@ -546,16 +555,16 @@ public class StackService {
             throw new BadRequestException(
                     String.format("Cannot update the status of stack '%s' to STARTED, because it isn't in STOPPED state.", stack.getName()));
         } else if (stack.isStopped() || stack.isStartFailed()) {
-            stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.START_REQUESTED);
+            Stack startStack = stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.START_REQUESTED);
             flowManager.triggerStackStart(stack.getId());
             if (updateCluster && cluster != null) {
-                ambariClusterService.updateStatus(stack.getId(), StatusRequest.STARTED);
+                ambariClusterService.updateStatus(startStack, StatusRequest.STARTED);
             }
         }
     }
 
     public void updateNodeCount(Long stackId, InstanceGroupAdjustmentJson instanceGroupAdjustmentJson, boolean withClusterEvent) {
-        Stack stack = get(stackId);
+        Stack stack = getByIdWithLists(stackId);
         validateStackStatus(stack);
         validateInstanceGroup(stack, instanceGroupAdjustmentJson.getInstanceGroup());
         validateScalingAdjustment(instanceGroupAdjustmentJson, stack);
@@ -575,7 +584,7 @@ public class StackService {
     public void updateMetaDataStatusIfFound(Long id, String hostName, InstanceStatus status) {
         InstanceMetaData metaData = instanceMetaDataRepository.findHostInStack(id, hostName);
         if (metaData == null) {
-            LOGGER.warn("Metadata not found on stack:'%s' with hostname: '%s'.", id, hostName);
+            LOGGER.warn("Metadata not found on stack:'{}' with hostname: '{}'.", id, hostName);
         } else {
             metaData.setInstanceStatus(status);
             instanceMetaDataRepository.save(metaData);
@@ -638,7 +647,6 @@ public class StackService {
         }
     }
 
-    @Transactional(TxType.NEVER)
     public Stack save(Stack stack) {
         return stackRepository.save(stack);
     }
@@ -700,8 +708,11 @@ public class StackService {
         }
     }
 
-    public void delete(Stack stack) {
-        stackRepository.delete(stack.getId());
+    public void delete(Stack stack) throws TransactionExecutionException {
+        transactionService.required(() -> {
+            stackRepository.delete(stack.getId());
+            return null;
+        });
     }
 
     private void delete(Stack stack, Boolean forced, Boolean deleteDependencies) {

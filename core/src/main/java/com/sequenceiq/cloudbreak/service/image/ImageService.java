@@ -13,8 +13,6 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.transaction.Transactional;
-import javax.transaction.Transactional.TxType;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +21,7 @@ import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
+import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType;
 import com.sequenceiq.cloudbreak.blueprint.utils.BlueprintUtils;
 import com.sequenceiq.cloudbreak.client.PkiUtil;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
@@ -38,16 +36,15 @@ import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.Component;
+import com.sequenceiq.cloudbreak.domain.stack.Component;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
-import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 @Service
-@Transactional
 public class ImageService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ImageService.class);
@@ -74,12 +71,10 @@ public class ImageService {
         return componentConfigProvider.getImage(stackId);
     }
 
-    @Transactional(TxType.NEVER)
-    public void create(Stack stack, PlatformParameters params, String imageCatalog, Optional<String> imageId, Optional<Blueprint> blueprint)
+    public void create(Stack stack, String platformString, PlatformParameters params, StatedImage imgFromCatalog)
             throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         try {
             Platform platform = platform(stack.cloudPlatform());
-            String platformString = platform(stack.cloudPlatform()).value().toLowerCase();
             String region = stack.getRegion();
             SecurityConfig securityConfig = stack.getSecurityConfig();
             String cbPrivKey = securityConfig.getCloudbreakSshPrivateKeyDecoded();
@@ -89,7 +84,6 @@ public class ImageService {
             Map<InstanceGroupType, String> userData = userDataBuilder.buildUserData(platform, cbSshKeyDer, sshUser, params,
                     securityConfig.getSaltBootPassword(), cbCert);
 
-            StatedImage imgFromCatalog = determineImageFromCatalog(imageId, platformString, imageCatalog, blueprint);
             LOGGER.info("Determined image from catalog: {}", imgFromCatalog);
 
             String imageName = determineImageName(platformString, region, imgFromCatalog.getImage());
@@ -106,27 +100,31 @@ public class ImageService {
         }
     }
 
-    private StatedImage determineImageFromCatalog(Optional<String> imageId, String platformString, String catalogName, Optional<Blueprint> blueprint)
+    public StatedImage determineImageFromCatalog(String imageId, String platformString, String catalogName, Blueprint blueprint, boolean useBaseImage)
             throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         StatedImage statedImage;
-        if (imageId.isPresent()) {
-            statedImage = imageCatalogService.getImageByCatalogName(imageId.get(), catalogName);
+        if (imageId != null) {
+            statedImage = imageCatalogService.getImageByCatalogName(imageId, catalogName);
         } else {
             String clusterType = ImageCatalogService.UNDEFINED;
             String clusterVersion = ImageCatalogService.UNDEFINED;
-            if (blueprint.isPresent()) {
+            if (blueprint != null) {
                 try {
-                    JsonNode root = JsonUtil.readTree(blueprint.get().getBlueprintText());
+                    JsonNode root = JsonUtil.readTree(blueprint.getBlueprintText());
                     clusterType = blueprintUtils.getBlueprintStackName(root);
                     clusterVersion = blueprintUtils.getBlueprintHdpVersion(root);
                 } catch (IOException ex) {
                     LOGGER.warn("Can not initiate default hdp info: ", ex);
                 }
             }
-            LOGGER.warn(
-                    "Image id hasn't been specified for the stack, falling back to a prewarmed image of {}-{} or to a base image if prewarmed doesn't exist.",
-                    clusterType, clusterVersion);
-            statedImage = imageCatalogService.getDefaultImage(platformString, clusterType, clusterVersion);
+            if (useBaseImage) {
+                LOGGER.info("Image id isn't specified for the stack, falling back to a base image, because repo information is provided");
+                statedImage = imageCatalogService.getLatestBaseImageDefaultPreferred(platformString);
+            } else {
+                LOGGER.info("Image id isn't specified for the stack, falling back to a prewarmed "
+                    + "image of {}-{} or to a base image if prewarmed doesn't exist", clusterType, clusterVersion);
+                statedImage = imageCatalogService.getPrewarmImageDefaultPreferred(platformString, clusterType, clusterVersion);
+            }
         }
         return statedImage;
     }
@@ -167,7 +165,7 @@ public class ImageService {
             com.sequenceiq.cloudbreak.cloud.model.catalog.Image imgFromCatalog,
             String imageName, String imageCatalogUrl, String imageCatalogName, String imageId) throws JsonProcessingException, CloudbreakImageCatalogException {
         List<Component> components = new ArrayList<>();
-        Image image = new Image(imageName, userData, imgFromCatalog.getOsType(), imageCatalogUrl, imageCatalogName, imageId);
+        Image image = new Image(imageName, userData, imgFromCatalog.getOs(), imgFromCatalog.getOsType(), imageCatalogUrl, imageCatalogName, imageId);
         Component imageComponent = new Component(ComponentType.IMAGE, ComponentType.IMAGE.name(), new Json(image), stack);
         components.add(imageComponent);
         if (imgFromCatalog.getStackDetails() != null) {

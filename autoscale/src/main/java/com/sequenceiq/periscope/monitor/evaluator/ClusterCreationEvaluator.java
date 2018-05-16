@@ -4,8 +4,6 @@ import static com.sequenceiq.periscope.api.model.ClusterState.PENDING;
 import static com.sequenceiq.periscope.api.model.ClusterState.RUNNING;
 import static com.sequenceiq.periscope.api.model.ClusterState.SUSPENDED;
 
-import java.util.Optional;
-
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -25,11 +23,11 @@ import com.sequenceiq.periscope.log.MDCBuilder;
 import com.sequenceiq.periscope.model.AmbariStack;
 import com.sequenceiq.periscope.model.ClusterCreationEvaluatorContext;
 import com.sequenceiq.periscope.notification.HttpNotificationSender;
+import com.sequenceiq.periscope.service.AmbariClientProvider;
 import com.sequenceiq.periscope.service.ClusterService;
 import com.sequenceiq.periscope.service.HistoryService;
 import com.sequenceiq.periscope.service.security.TlsConfigurationException;
 import com.sequenceiq.periscope.service.security.TlsSecurityService;
-import com.sequenceiq.periscope.utils.AmbariClientProvider;
 
 @Component("ClusterCreationEvaluator")
 @Scope("prototype")
@@ -56,15 +54,22 @@ public class ClusterCreationEvaluator implements Runnable {
     @Override
     public void run() {
         AutoscaleStackResponse stack = context.getStack();
-        Optional<Cluster> clusterOptional = context.getClusterOptional();
         try {
-            createOrUpdateCluster(stack, clusterOptional);
+            Cluster cluster = clusterService.findOneByStackId(stack.getStackId());
+            AmbariStack resolvedAmbari = createAmbariStack(stack);
+            if (cluster != null) {
+                ambariHealthCheck(cluster.getUser(), resolvedAmbari);
+                updateCluster(stack, cluster, resolvedAmbari);
+            } else {
+                clusterService.validateClusterUniqueness(resolvedAmbari);
+                createCluster(stack, resolvedAmbari);
+            }
         } catch (AmbariHealtCheckException ahf) {
-            LOGGER.warn(String.format("Ambari health check failed for Cloudbreak stack: %s(ID:%s)", stack.getStackId(), stack.getName()), ahf);
+            LOGGER.warn(String.format("Ambari health check failed for Cloudbreak stack: %s (ID:%s)", stack.getStackId(), stack.getName()), ahf);
         } catch (TlsConfigurationException ex) {
-            LOGGER.warn(String.format("Could not prepare TLS configuration for Cloudbreak stack: %s(ID:%s)", stack.getStackId(), stack.getName()), ex);
+            LOGGER.warn(String.format("Could not prepare TLS configuration for Cloudbreak stack: %s (ID:%s)", stack.getStackId(), stack.getName()), ex);
         } catch (Exception ex) {
-            LOGGER.warn(String.format("Could not create cluster for Cloudbreak stack: %s(ID:%s)", stack.getStackId(), stack.getName()), ex);
+            LOGGER.error(String.format("Could not create cluster for Cloudbreak stack: %s (ID:%s)", stack.getStackId(), stack.getName()), ex);
         }
     }
 
@@ -72,28 +77,20 @@ public class ClusterCreationEvaluator implements Runnable {
         this.context = context;
     }
 
-    private void createOrUpdateCluster(AutoscaleStackResponse stack, Optional<Cluster> clusterOptional) {
-        AmbariStack resolvedAmbari = createAmbariStack(stack);
-        Cluster cluster;
-        boolean sendNotification = false;
-        if (clusterOptional.isPresent()) {
-            cluster = clusterOptional.get();
+    private void createCluster(AutoscaleStackResponse stack, AmbariStack resolvedAmbari) {
+        PeriscopeUser user = new PeriscopeUser(stack.getOwner(), null, stack.getAccount());
+        MDCBuilder.buildMdcContext(user, stack.getStackId(), null);
+        LOGGER.info("Creating cluster for Ambari host: {}", resolvedAmbari.getAmbari().getHost());
+        Cluster cluster = clusterService.create(user, resolvedAmbari, null);
+        History history = historyService.createEntry(ScalingStatus.ENABLED, "Autoscaling has been enabled for the cluster.", 0, cluster);
+        notificationSender.send(history);
+    }
+
+    private void updateCluster(AutoscaleStackResponse stack, Cluster cluster, AmbariStack resolvedAmbari) {
+        if (PENDING.equals(cluster.getState()) || SUSPENDED.equals(cluster.getState())) {
             MDCBuilder.buildMdcContext(cluster);
-            if (PENDING.equals(cluster.getState()) || SUSPENDED.equals(cluster.getState())) {
-                ambariHealthCheck(cluster.getUser(), resolvedAmbari);
-                LOGGER.info("Update cluster and set it's state to 'RUNNING' for Ambari host: {}", resolvedAmbari.getAmbari().getHost());
-                cluster = clusterService.update(cluster.getId(), resolvedAmbari, false, RUNNING, cluster.isAutoscalingEnabled());
-                sendNotification = true;
-            }
-        } else {
-            PeriscopeUser user = new PeriscopeUser(stack.getOwner(), null, stack.getAccount());
-            MDCBuilder.buildMdcContext(user, stack.getStackId(), null);
-            LOGGER.info("Creating cluster for Ambari host: {}", resolvedAmbari.getAmbari().getHost());
-            ambariHealthCheck(user, resolvedAmbari);
-            cluster = clusterService.create(user, resolvedAmbari, null);
-            sendNotification = true;
-        }
-        if (sendNotification) {
+            LOGGER.info("Update cluster and set it's state to 'RUNNING' for Ambari host: {}", resolvedAmbari.getAmbari().getHost());
+            cluster = clusterService.update(cluster.getId(), resolvedAmbari, false, RUNNING, cluster.isAutoscalingEnabled());
             History history = historyService.createEntry(ScalingStatus.ENABLED, "Autoscaling has been enabled for the cluster.", 0, cluster);
             notificationSender.send(history);
         }

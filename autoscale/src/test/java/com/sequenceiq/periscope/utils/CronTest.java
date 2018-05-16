@@ -15,6 +15,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.scheduling.support.CronSequenceGenerator;
 
+import com.sequenceiq.periscope.service.DateTimeService;
+import com.sequenceiq.periscope.service.DateService;
+
 @RunWith(Parameterized.class)
 public class CronTest {
 
@@ -22,10 +25,10 @@ public class CronTest {
     public ExpectedException thrown = ExpectedException.none();
 
     @Mock
-    private DateTimeUtils dateTimeUtils;
+    private DateTimeService dateTimeService;
 
     @InjectMocks
-    private final DateUtils underTest = new DateUtils();
+    private final DateService underTest = new DateService();
 
     private String input;
 

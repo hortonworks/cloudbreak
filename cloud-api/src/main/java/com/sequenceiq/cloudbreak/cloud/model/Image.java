@@ -9,7 +9,7 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.ImmutableMap;
-import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
+import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType;
 
 @JsonAutoDetect(fieldVisibility = ANY, getterVisibility = NONE, setterVisibility = NONE)
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -18,6 +18,8 @@ public class Image {
     private final String imageName;
 
     private final Map<InstanceGroupType, String> userdata;
+
+    private final String os;
 
     private final String osType;
 
@@ -29,6 +31,7 @@ public class Image {
 
     public Image(@JsonProperty("imageName") String imageName,
             @JsonProperty("userdata") Map<InstanceGroupType, String> userdata,
+            @JsonProperty("os") String os,
             @JsonProperty("osType") String osType,
             @JsonProperty("imageCatalogUrl") String imageCatalogUrl,
             @JsonProperty("imageCatalogName") String imageCatalogName,
@@ -36,6 +39,7 @@ public class Image {
         this.imageName = imageName;
         this.userdata = userdata != null ? ImmutableMap.copyOf(userdata) : null;
         this.imageCatalogUrl = imageCatalogUrl;
+        this.os = os;
         this.osType = osType;
         this.imageCatalogName = imageCatalogName;
         this.imageId = imageId;
@@ -69,10 +73,15 @@ public class Image {
         return imageCatalogName;
     }
 
+    public String getOs() {
+        return os;
+    }
+
     @Override
     public String toString() {
         return "Image{"
                 + "imageName='" + imageName + '\''
+                + ", os='" + os + '\''
                 + ", osType='" + osType + '\''
                 + ", imageCatalogUrl='" + imageCatalogUrl + '\''
                 + ", imageId='" + imageId + '\''

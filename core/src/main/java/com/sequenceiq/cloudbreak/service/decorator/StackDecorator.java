@@ -19,8 +19,8 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.model.AdjustmentType;
-import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
-import com.sequenceiq.cloudbreak.api.model.StackRequest;
+import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType;
+import com.sequenceiq.cloudbreak.api.model.stack.StackRequest;
 import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
@@ -31,17 +31,18 @@ import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformOrchestrators;
 import com.sequenceiq.cloudbreak.cloud.model.StackParamValidation;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
-import com.sequenceiq.cloudbreak.controller.AuthenticatedUserService;
-import com.sequenceiq.cloudbreak.controller.BadRequestException;
-import com.sequenceiq.cloudbreak.controller.validation.stack.StackValidator;
+import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
+import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.controller.validation.stack.ParameterValidator;
+import com.sequenceiq.cloudbreak.controller.validation.stack.StackRequestValidator;
 import com.sequenceiq.cloudbreak.controller.validation.template.TemplateValidator;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.FailurePolicy;
 import com.sequenceiq.cloudbreak.domain.FlexSubscription;
-import com.sequenceiq.cloudbreak.domain.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
-import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
@@ -49,11 +50,9 @@ import com.sequenceiq.cloudbreak.service.flex.FlexSubscriptionService;
 import com.sequenceiq.cloudbreak.service.network.NetworkService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.securitygroup.SecurityGroupService;
-import com.sequenceiq.cloudbreak.service.sharedservice.SharedServiceConfigProvider;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterCache;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterService;
 import com.sequenceiq.cloudbreak.service.stack.StackParameterService;
-import com.sequenceiq.cloudbreak.service.stack.flow.ConsulUtils.ConsulServers;
 import com.sequenceiq.cloudbreak.service.template.TemplateService;
 
 @Service
@@ -67,7 +66,7 @@ public class StackDecorator {
     private AuthenticatedUserService authenticatedUserService;
 
     @Inject
-    private StackValidator stackValidator;
+    private StackRequestValidator stackValidator;
 
     @Inject
     private StackParameterService stackParameterService;
@@ -104,10 +103,10 @@ public class StackDecorator {
     private CloudParameterCache cloudParameterCache;
 
     @Inject
-    private SharedServiceConfigProvider sharedServiceConfigProvider;
+    private RdsConfigService rdsConfigService;
 
     @Inject
-    private RdsConfigService rdsConfigService;
+    private List<ParameterValidator> parameterValidators;
 
     public Stack decorate(@Nonnull Stack subject, @Nonnull StackRequest request, IdentityUser user) {
         prepareCredential(subject, request, user);
@@ -132,7 +131,6 @@ public class StackDecorator {
             prepareInstanceGroups(subject, request, subject.getCredential(), user);
             prepareFlexSubscription(subject, request.getFlexId());
             validate(subject);
-            subject = sharedServiceConfigProvider.configureStack(subject, user);
             checkSharedServiceStackRequirements(request, user);
         }
         return subject;
@@ -213,9 +211,17 @@ public class StackDecorator {
                     params.put(paramName, value);
                 }
             }
-            stackValidator.validate(params, stackParams);
+            validateStackParameters(params, stackParams);
         }
         return params;
+    }
+
+    private void validateStackParameters(Map<String, String> params, List<StackParamValidation> stackParamValidations) {
+        if (params != null && !params.isEmpty()) {
+            for (ParameterValidator parameterValidator : parameterValidators) {
+                parameterValidator.validate(params, stackParamValidations);
+            }
+        }
     }
 
     private void prepareNetwork(Stack subject, Object networkId) {
@@ -315,11 +321,6 @@ public class StackDecorator {
         if (instanceGroups == 0L) {
             throw new BadRequestException("Gateway instance group not configured");
         }
-        int minNodeCount = ConsulServers.SINGLE_NODE_COUNT_LOW.getMin();
-        int fullNodeCount = stack.getFullNodeCount();
-        if (fullNodeCount < minNodeCount) {
-            throw new BadRequestException(String.format("At least %s nodes are required to launch the stack", minNodeCount));
-        }
     }
 
     private void validatFailurePolicy(Stack stack, FailurePolicy failurePolicy) {
@@ -363,6 +364,4 @@ public class StackDecorator {
             return request.getCloudPlatform();
         }
     }
-
-
 }

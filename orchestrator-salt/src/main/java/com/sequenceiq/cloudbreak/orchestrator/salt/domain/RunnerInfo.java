@@ -38,6 +38,30 @@ public class RunnerInfo {
         this.comment = comment;
     }
 
+    public String getStderr() {
+        return String.valueOf(changes.get("stderr"));
+    }
+
+    public String getStdout() {
+        return String.valueOf(changes.get("stdout"));
+    }
+
+    public String getErrorResultSummary() {
+        StringBuilder summary = new StringBuilder();
+        appendIfPresent(summary, "Comment: ", comment);
+        appendIfPresent(summary, "Stdout: ", getStdout());
+        appendIfPresent(summary, "Stderr: ", getStderr());
+        return summary.toString();
+    }
+
+    private void appendIfPresent(StringBuilder sb, String key, String value) {
+        if (value != null && !"null".equals(value) && !value.isEmpty()) {
+            sb.append('\n');
+            sb.append(key);
+            sb.append(value);
+        }
+    }
+
     public String getName() {
         return name;
     }

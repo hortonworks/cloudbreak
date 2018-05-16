@@ -5,7 +5,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import javax.inject.Inject;
-import javax.transaction.Transactional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,14 +18,13 @@ import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariDatabase;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.converter.mapper.AmbariDatabaseMapper;
-import com.sequenceiq.cloudbreak.domain.Cluster;
-import com.sequenceiq.cloudbreak.domain.ClusterComponent;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.repository.ClusterComponentRepository;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 
 @Service
-@Transactional
 public class AmbariDatabaseToRdsConfigMigrationService {
     private static final Logger LOGGER = LoggerFactory.getLogger(AmbariDatabaseToRdsConfigMigrationService.class);
 
@@ -87,7 +85,7 @@ public class AmbariDatabaseToRdsConfigMigrationService {
         AmbariDatabaseDetailsJson ambariDatabaseDetailsJson = ambariDatabaseMapper.mapAmbariDatabaseToAmbariDatabaseDetailJson(
                 component.getAttributes().get(AmbariDatabase.class));
         RDSConfig rdsConfig = ambariDatabaseMapper.mapAmbariDatabaseDetailsJsonToRdsConfig(ambariDatabaseDetailsJson, cluster, null, false);
-        if (DatabaseVendor.EMBEDDED.name().equalsIgnoreCase(rdsConfig.getDatabaseEngine())) {
+        if (DatabaseVendor.EMBEDDED == rdsConfig.getDatabaseEngine()) {
             rdsConfig.setStatus(ResourceStatus.DEFAULT);
         }
         return rdsConfigService.create(rdsConfig);

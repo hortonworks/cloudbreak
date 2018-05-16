@@ -38,6 +38,16 @@
 
             }
           },
+          "cmd_|-install_mpack_1_|-/opt/ambari-server/install-mpack-1.sh_|-run": {
+            "comment": "Command \"/opt/ambari-server/install-mpack-1.sh\" run",
+            "result": false,
+            "start_time": "12:39:09.588953",
+            "duration": "1.577 ms",
+            "__run_num__": 48,
+            "changes": {
+              "stderr": "+ ARGS= + echo yes + ambari-server install-mpack --"
+            }
+          },
           "pkg_|-ambari-server_|-ambari-server_|-latest":{
             "comment":"Package ambari-server is already up-to-date.",
             "name":"ambari-server",

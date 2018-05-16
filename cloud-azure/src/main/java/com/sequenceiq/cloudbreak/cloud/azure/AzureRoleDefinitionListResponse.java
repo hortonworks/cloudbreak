@@ -24,9 +24,9 @@ public class AzureRoleDefinitionListResponse {
     //BEGIN GENERATED CODE
     @Override
     public String toString() {
-        return "AzureRoleDefinitionListResponse{" +
-                "value=" + value +
-                '}';
+        return "AzureRoleDefinitionListResponse{"
+                + "value=" + value
+                + '}';
     }
     //END GENERATED CODE
 }

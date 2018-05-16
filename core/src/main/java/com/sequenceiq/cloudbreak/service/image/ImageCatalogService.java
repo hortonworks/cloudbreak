@@ -17,7 +17,9 @@ import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import javax.annotation.Nonnull;
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -37,9 +39,9 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
-import com.sequenceiq.cloudbreak.controller.AuthenticatedUserService;
-import com.sequenceiq.cloudbreak.controller.BadRequestException;
-import com.sequenceiq.cloudbreak.controller.NotFoundException;
+import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
+import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
@@ -89,28 +91,47 @@ public class ImageCatalogService {
     private AccountPreferencesService accountPreferencesService;
 
     public StatedImages getImages(String provider) throws CloudbreakImageCatalogException {
-        return getImages(getImageDefaultCatalogUrl(), getDefaultImageCatalogName(), provider, cbVersion);
+        return getImages(getDefaultImageCatalog(), provider, cbVersion);
     }
 
-    public StatedImage getDefaultImage(String platform, String clusterType, String clusterVersion)
+    public StatedImage getLatestBaseImageDefaultPreferred(String platform) throws CloudbreakImageCatalogException, CloudbreakImageNotFoundException {
+        StatedImages statedImages = getImages(platform);
+        Optional<Image> defaultBaseImage = getLatestBaseImageDefaultPreferred(statedImages);
+        if (defaultBaseImage.isPresent()) {
+            return statedImage(defaultBaseImage.get(), statedImages.getImageCatalogUrl(), statedImages.getImageCatalogName());
+        } else {
+            throw new CloudbreakImageNotFoundException(imageNotFoundErrorMessage(platform));
+        }
+    }
+
+    public Optional<Image> getLatestBaseImageDefaultPreferred(StatedImages statedImages) {
+        List<Image> baseImages = statedImages.getImages().getBaseImages();
+        return getLatestImageDefaultPreferred(baseImages);
+    }
+
+    public StatedImage getPrewarmImageDefaultPreferred(String platform, String clusterType, String clusterVersion)
             throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         StatedImages statedImages = getImages(platform);
         List<Image> images = getImagesForClusterType(statedImages, clusterType);
         Optional<Image> selectedImage = Optional.empty();
         if (!CollectionUtils.isEmpty(images)) {
-            selectedImage = images.stream().filter(i -> {
+            List<Image> matchingVersionImages = images.stream().filter(i -> {
                 String[] repoIdParts = i.getStackDetails().getRepo().getStack().get("repoid").split("-");
                 return repoIdParts.length > 1 && repoIdParts[1].equals(clusterVersion);
-            }).max(Comparator.comparing(Image::getDate));
+            }).collect(Collectors.toList());
+            selectedImage = getLatestImageDefaultPreferred(matchingVersionImages);
         }
         if (!selectedImage.isPresent()) {
-            selectedImage = statedImages.getImages().getBaseImages().stream().max(Comparator.comparing(Image::getDate));
+            selectedImage = getLatestBaseImageDefaultPreferred(statedImages);
         }
         if (!selectedImage.isPresent()) {
-            String msg = String.format("Could not find any image for platform '%s' and Cloudbreak version '%s'.", platform, cbVersion);
-            throw new CloudbreakImageNotFoundException(msg);
+            throw new CloudbreakImageNotFoundException(imageNotFoundErrorMessage(platform));
         }
         return statedImage(selectedImage.get(), statedImages.getImageCatalogUrl(), statedImages.getImageCatalogName());
+    }
+
+    private String imageNotFoundErrorMessage(String platform) {
+        return String.format("Could not find any image for platform '%s' and Cloudbreak version '%s'.", platform, cbVersion);
     }
 
     public StatedImages getImages(String name, String provider) throws CloudbreakImageCatalogException {
@@ -128,7 +149,7 @@ public class ImageCatalogService {
         if (imageCatalog == null) {
             return statedImages(emptyImages(), null, null);
         }
-        return getImages(imageCatalog.getImageCatalogUrl(), imageCatalog.getImageCatalogName(), providers, cbVersion);
+        return getImages(imageCatalog, providers, cbVersion);
     }
 
     public StatedImage getImage(String imageId) throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
@@ -284,40 +305,48 @@ public class ImageCatalogService {
         return image;
     }
 
-    public StatedImages getImages(String imageCatalogUrl, String imageCatalogName, String platform, String cbVersion)
+    public StatedImages getImages(ImageCatalog imageCatalog, String platform, String cbVersion)
             throws CloudbreakImageCatalogException {
-        return getImages(imageCatalogUrl, imageCatalogName, ImmutableSet.of(platform), cbVersion);
+        return getImages(imageCatalog, ImmutableSet.of(platform), cbVersion);
     }
 
-    public StatedImages getImages(String imageCatalogUrl, String imageCatalogName, Set<String> platforms, String cbVersion)
-            throws CloudbreakImageCatalogException {
-        LOGGER.info("Determine images for imageCatalogUrl: '{}', platforms: '{}' and Cloudbreak version: '{}'.", imageCatalogUrl, platforms, cbVersion);
+    public StatedImages getImages(ImageCatalog imageCatalog, Set<String> platforms, String cbVersion) throws CloudbreakImageCatalogException {
+        LOGGER.info("Determine images for imageCatalogUrl: '{}', platforms: '{}' and Cloudbreak version: '{}'.",
+                imageCatalog.getImageCatalogUrl(), platforms, cbVersion);
         StatedImages images;
-        CloudbreakImageCatalogV2 imageCatalog = imageCatalogProvider.getImageCatalogV2(imageCatalogUrl);
-        if (imageCatalog != null) {
+        CloudbreakImageCatalogV2 imageCatalogV2 = imageCatalogProvider.getImageCatalogV2(imageCatalog.getImageCatalogUrl());
+        if (imageCatalogV2 != null) {
             Set<String> vMImageUUIDs = new HashSet<>();
-            List<CloudbreakVersion> cloudbreakVersions = imageCatalog.getVersions().getCloudbreakVersions();
+            Set<String> defaultVMImageUUIDs = new HashSet<>();
+            List<CloudbreakVersion> cloudbreakVersions = imageCatalogV2.getVersions().getCloudbreakVersions();
             String cbv = UNSPECIFIED_VERSION.equals(cbVersion) ? latestCloudbreakVersion(cloudbreakVersions) : cbVersion;
             List<CloudbreakVersion> exactMatchedImgs = cloudbreakVersions.stream()
                     .filter(cloudbreakVersion -> cloudbreakVersion.getVersions().contains(cbv)).collect(Collectors.toList());
 
             if (!exactMatchedImgs.isEmpty()) {
-                exactMatchedImgs.forEach(cloudbreakVersion -> vMImageUUIDs.addAll(cloudbreakVersion.getImageIds()));
+                for (CloudbreakVersion exactMatchedImg : exactMatchedImgs) {
+                    vMImageUUIDs.addAll(exactMatchedImg.getImageIds());
+                    defaultVMImageUUIDs.addAll(exactMatchedImg.getDefaults());
+                }
             } else {
-                vMImageUUIDs.addAll(prefixMatchForCBVersion(cbVersion, cloudbreakVersions));
+                PrefixMatchImages prefixMatchImages = prefixMatchForCBVersion(cbVersion, cloudbreakVersions);
+                vMImageUUIDs.addAll(prefixMatchImages.vMImageUUIDs);
+                defaultVMImageUUIDs.addAll(prefixMatchImages.defaultVMImageUUIDs);
             }
 
-            List<Image> baseImages = filterImagesByPlatforms(platforms, imageCatalog.getImages().getBaseImages(), vMImageUUIDs);
-            List<Image> hdpImages = filterImagesByPlatforms(platforms, imageCatalog.getImages().getHdpImages(), vMImageUUIDs);
-            List<Image> hdfImages = filterImagesByPlatforms(platforms, imageCatalog.getImages().getHdfImages(), vMImageUUIDs);
+            List<Image> baseImages = filterImagesByPlatforms(platforms, imageCatalogV2.getImages().getBaseImages(), vMImageUUIDs);
+            List<Image> hdpImages = filterImagesByPlatforms(platforms, imageCatalogV2.getImages().getHdpImages(), vMImageUUIDs);
+            List<Image> hdfImages = filterImagesByPlatforms(platforms, imageCatalogV2.getImages().getHdfImages(), vMImageUUIDs);
+            Stream.concat(Stream.concat(baseImages.stream(), hdpImages.stream()), hdfImages.stream()).collect(Collectors.toList())
+                .forEach(img -> img.setDefaultImage(defaultVMImageUUIDs.contains(img.getUuid())));
 
             images = statedImages(new Images(baseImages, hdpImages, hdfImages),
-                    imageCatalogUrl,
-                    imageCatalogName);
+                    imageCatalog.getImageCatalogUrl(),
+                    imageCatalog.getImageCatalogName());
         } else {
             images = statedImages(emptyImages(),
-                    imageCatalogUrl,
-                    imageCatalogName);
+                    imageCatalog.getImageCatalogUrl(),
+                    imageCatalog.getImageCatalogName());
         }
         return images;
     }
@@ -356,8 +385,9 @@ public class ImageCatalogService {
         return sortedCloudbreakVersions.lastKey().getVersion();
     }
 
-    private Collection<String> prefixMatchForCBVersion(String cbVersion, Collection<CloudbreakVersion> cloudbreakVersions) {
+    private PrefixMatchImages prefixMatchForCBVersion(String cbVersion, Collection<CloudbreakVersion> cloudbreakVersions) {
         Set<String> vMImageUUIDs = new HashSet<>();
+        Set<String> defaultVMImageUUIDs = new HashSet<>();
         String unReleasedVersion = extractCbVersion(UNRELEASED_VERSION_PATTERN, cbVersion);
         boolean versionIsReleased = unReleasedVersion.equals(cbVersion);
 
@@ -365,16 +395,22 @@ public class ImageCatalogService {
             Set<CloudbreakVersion> unReleasedCbVersions = cloudbreakVersions.stream()
                     .filter(cloudbreakVersion -> cloudbreakVersion.getVersions().stream().anyMatch(aVersion -> aVersion.startsWith(unReleasedVersion)))
                     .collect(Collectors.toSet());
-            unReleasedCbVersions.forEach(cloudbreakVersion -> vMImageUUIDs.addAll(cloudbreakVersion.getImageIds()));
+            for (CloudbreakVersion unReleasedCbVersion : unReleasedCbVersions) {
+                vMImageUUIDs.addAll(unReleasedCbVersion.getImageIds());
+                defaultVMImageUUIDs.addAll(unReleasedCbVersion.getDefaults());
+            }
         }
 
         if (versionIsReleased || vMImageUUIDs.isEmpty()) {
             String releasedVersion = extractCbVersion(RELEASED_VERSION_PATTERN, cbVersion);
             Set<CloudbreakVersion> releasedCbVersions = cloudbreakVersions.stream()
                     .filter(cloudbreakVersion -> cloudbreakVersion.getVersions().contains(releasedVersion)).collect(Collectors.toSet());
-            releasedCbVersions.forEach(cloudbreakVersion -> vMImageUUIDs.addAll(cloudbreakVersion.getImageIds()));
+            for (CloudbreakVersion releasedCbVersion : releasedCbVersions) {
+                vMImageUUIDs.addAll(releasedCbVersion.getImageIds());
+                defaultVMImageUUIDs.addAll(releasedCbVersion.getDefaults());
+            }
         }
-        return vMImageUUIDs;
+        return new PrefixMatchImages(vMImageUUIDs, defaultVMImageUUIDs);
     }
 
     private String extractCbVersion(String pattern, String cbVersion) {
@@ -387,30 +423,40 @@ public class ImageCatalogService {
 
     private void removeDefaultFlag() {
         ImageCatalog imageCatalog = getDefaultImageCatalog();
-        if (imageCatalog != null) {
+        if (imageCatalog.getImageCatalogName() != null) {
             setImageCatalogAsDefault(null);
             imageCatalogRepository.save(imageCatalog);
         }
     }
 
-    private ImageCatalog getDefaultImageCatalog() {
+    @Nonnull private ImageCatalog getDefaultImageCatalog() {
         IdentityUser user = authenticatedUserService.getCbUser();
-        return userProfileService.get(user.getAccount(), user.getUserId(), user.getUsername()).getImageCatalog();
+        ImageCatalog imageCatalog = userProfileService.get(user.getAccount(), user.getUserId()).getImageCatalog();
+        if (imageCatalog == null) {
+            imageCatalog = new ImageCatalog();
+            imageCatalog.setImageCatalogUrl(defaultCatalogUrl);
+            imageCatalog.setImageCatalogName(null);
+        }
+        return imageCatalog;
     }
 
     public String getDefaultImageCatalogName() {
-        ImageCatalog imageCatalog = getDefaultImageCatalog();
-        return imageCatalog == null ? null : imageCatalog.getImageCatalogName();
+        return getDefaultImageCatalog().getImageCatalogName();
     }
 
     public String getImageDefaultCatalogUrl() {
-        ImageCatalog defaultImageCatalog = getDefaultImageCatalog();
-        return (defaultImageCatalog == null) ? defaultCatalogUrl : defaultImageCatalog.getImageCatalogUrl();
+        return getDefaultImageCatalog().getImageCatalogUrl();
     }
 
     private UserProfile getUserProfile() {
         IdentityUser cbUser = authenticatedUserService.getCbUser();
         return userProfileService.get(cbUser.getAccount(), cbUser.getUserId(), cbUser.getUsername());
+    }
+
+    private Optional<Image> getLatestImageDefaultPreferred(List<Image> images) {
+        List<Image> defaultImages = images.stream().filter(Image::isDefaultImage).collect(Collectors.toList());
+        return defaultImages.isEmpty() ? images.stream().max(Comparator.comparing(Image::getDate))
+            : defaultImages.stream().max(Comparator.comparing(Image::getDate));
     }
 
     private List<Image> getImagesForClusterType(StatedImages statedImages, String clusterType) {
@@ -421,6 +467,17 @@ public class ImageCatalogService {
                 return statedImages.getImages().getHdfImages();
             default:
                 return emptyList();
+        }
+    }
+
+    private static class PrefixMatchImages {
+        private final Set<String> vMImageUUIDs;
+
+        private final Set<String> defaultVMImageUUIDs;
+
+        private PrefixMatchImages(Set<String> vMImageUUIDs, Set<String> defaultVMImageUUIDs) {
+            this.vMImageUUIDs = vMImageUUIDs;
+            this.defaultVMImageUUIDs = defaultVMImageUUIDs;
         }
     }
 }

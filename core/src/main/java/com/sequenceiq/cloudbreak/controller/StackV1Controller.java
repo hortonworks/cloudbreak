@@ -3,6 +3,8 @@ package com.sequenceiq.cloudbreak.controller;
 import java.util.Map;
 import java.util.Set;
 
+import javax.transaction.Transactional;
+import javax.transaction.Transactional.TxType;
 import javax.ws.rs.core.Response;
 
 import org.slf4j.Logger;
@@ -15,12 +17,14 @@ import com.sequenceiq.cloudbreak.api.model.AmbariAddressJson;
 import com.sequenceiq.cloudbreak.api.model.AutoscaleStackResponse;
 import com.sequenceiq.cloudbreak.api.model.CertificateResponse;
 import com.sequenceiq.cloudbreak.api.model.PlatformVariantsJson;
-import com.sequenceiq.cloudbreak.api.model.StackRequest;
-import com.sequenceiq.cloudbreak.api.model.StackResponse;
-import com.sequenceiq.cloudbreak.api.model.StackValidationRequest;
+import com.sequenceiq.cloudbreak.api.model.stack.StackRequest;
+import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;
+import com.sequenceiq.cloudbreak.api.model.stack.StackValidationRequest;
 import com.sequenceiq.cloudbreak.api.model.UpdateStackJson;
+import com.sequenceiq.cloudbreak.service.StackCommonService;
 
 @Component
+@Transactional(TxType.NEVER)
 public class StackV1Controller extends NotificationController implements StackV1Endpoint {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StackV1Controller.class);

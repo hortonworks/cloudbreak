@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.ldap.LdapValidationRequest;
-import com.sequenceiq.cloudbreak.controller.BadRequestException;
+import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 
 @Component
@@ -64,6 +64,4 @@ public class LdapConfigValidator {
             throw new BadRequestException("Failed to connect to LDAP server: " + e.getMessage(), e);
         }
     }
-
-
 }

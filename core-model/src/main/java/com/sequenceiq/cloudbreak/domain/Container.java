@@ -7,6 +7,8 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+
 @Entity
 public class Container implements ProvisionEntity {
 

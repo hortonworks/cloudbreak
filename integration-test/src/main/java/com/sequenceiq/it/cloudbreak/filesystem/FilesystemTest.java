@@ -22,7 +22,6 @@ import com.sequenceiq.it.cloudbreak.CloudbreakUtil;
 import com.sequenceiq.it.cloudbreak.SshUtil;
 import com.sequenceiq.it.util.ResourceUtil;
 
-
 public class FilesystemTest extends AbstractCloudbreakIntegrationTest {
 
     @Value("${integrationtest.defaultPrivateKeyFile}")

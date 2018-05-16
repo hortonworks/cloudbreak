@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.api.model.Status.CREATE_FAILED;
 import static com.sequenceiq.cloudbreak.api.model.Status.DELETE_FAILED;
 import static com.sequenceiq.cloudbreak.api.model.Status.STOPPED;
 import static com.sequenceiq.cloudbreak.api.model.Status.WAIT_FOR_SYNC;
+import static com.sequenceiq.cloudbreak.cloud.model.CloudInstance.INSTANCE_NAME;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -21,17 +22,18 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
-import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
+import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
+import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
-import com.sequenceiq.cloudbreak.controller.NotFoundException;
-import com.sequenceiq.cloudbreak.domain.Cluster;
-import com.sequenceiq.cloudbreak.domain.HostMetadata;
-import com.sequenceiq.cloudbreak.domain.InstanceGroup;
-import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
+import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Resource;
-import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.ResourceRepository;
@@ -88,7 +90,15 @@ public class StackSyncService {
                             && is.getCloudInstance().getInstanceId().equals(metaData.getInstanceId()))
                     .findFirst();
 
-            InstanceSyncState state = status.isPresent() ? InstanceSyncState.getInstanceSyncState(status.get().getStatus()) : InstanceSyncState.DELETED;
+            InstanceSyncState state;
+            if (status.isPresent()) {
+                CloudVmInstanceStatus cloudVmInstanceStatus = status.get();
+                CloudInstance cloudInstance = cloudVmInstanceStatus.getCloudInstance();
+                state = InstanceSyncState.getInstanceSyncState(cloudVmInstanceStatus.getStatus());
+                syncInstanceName(metaData, cloudInstance);
+            } else {
+                state = InstanceSyncState.DELETED;
+            }
             syncInstanceStatusByState(stack, counts, metaData, state);
         }
 
@@ -122,6 +132,12 @@ public class StackSyncService {
             }
         }
         handleSyncResult(stack, instanceStateCounts, stackStatusUpdateEnabled);
+    }
+
+    private void syncInstanceName(InstanceMetaData instanceMetaData, CloudInstance cloudInstance) {
+        String instanceName = cloudInstance.getStringParameter(INSTANCE_NAME);
+        instanceMetaData.setInstanceName(instanceName);
+        instanceMetaDataRepository.save(instanceMetaData);
     }
 
     private void syncInstanceStatusByState(Stack stack, Map<InstanceSyncState, Integer> counts, InstanceMetaData metaData, InstanceSyncState state) {
@@ -163,10 +179,19 @@ public class StackSyncService {
     }
 
     private void syncDeletedInstance(Stack stack, Map<InstanceSyncState, Integer> instanceStateCounts, InstanceMetaData instance) {
-        if (!instance.isTerminated() && !instance.isDeletedOnProvider()) {
-            instanceStateCounts.put(InstanceSyncState.DELETED_ON_PROVIDER_SIDE, instanceStateCounts.get(InstanceSyncState.DELETED_ON_PROVIDER_SIDE) + 1);
-            LOGGER.info("Instance '{}' is reported as deleted on the cloud provider, setting its state to DELETED_ON_PROVIDER_SIDE.", instance.getInstanceId());
-            updateMetaDataToDeletedOnProviderSide(stack, instance);
+        if (!instance.isTerminated()) {
+            if (instance.getInstanceId() == null) {
+                instanceStateCounts.put(InstanceSyncState.DELETED, instanceStateCounts.get(InstanceSyncState.DELETED) + 1);
+                LOGGER.info("Instance with private id '{}' don't have instanceId, setting its state to DELETED.",
+                        instance.getPrivateId());
+                instance.setInstanceStatus(InstanceStatus.TERMINATED);
+                instanceMetaDataRepository.save(instance);
+            } else {
+                instanceStateCounts.put(InstanceSyncState.DELETED_ON_PROVIDER_SIDE, instanceStateCounts.get(InstanceSyncState.DELETED_ON_PROVIDER_SIDE) + 1);
+                LOGGER.info("Instance '{}' is reported as deleted on the cloud provider, setting its state to DELETED_ON_PROVIDER_SIDE.",
+                        instance.getInstanceId());
+                updateMetaDataToDeletedOnProviderSide(stack, instance);
+            }
         }
     }
 
@@ -284,6 +309,7 @@ public class StackSyncService {
     }
 
     private enum Msg {
+
         STACK_SYNC_INSTANCE_STATUS_RETRIEVAL_FAILED("stack.sync.instance.status.retrieval.failed"),
         STACK_SYNC_INSTANCE_STATUS_COULDNT_DETERMINE("stack.sync.instance.status.couldnt.determine"),
         STACK_SYNC_INSTANCE_OPERATION_IN_PROGRESS("stack.sync.instance.operation.in.progress"),
@@ -307,6 +333,4 @@ public class StackSyncService {
             return code;
         }
     }
-
-
 }

@@ -16,8 +16,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 
-import com.sequenceiq.cloudbreak.api.model.InstanceGroupResponse;
-import com.sequenceiq.cloudbreak.api.model.InstanceMetaDataJson;
+import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupResponse;
+import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceMetaDataJson;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.CloudbreakUtil;
 import com.sequenceiq.it.cloudbreak.SshService;

@@ -32,7 +32,6 @@ import com.sequenceiq.periscope.api.model.ScalingPolicyRequest;
 import com.sequenceiq.periscope.api.model.ScalingPolicyResponse;
 import com.sequenceiq.periscope.client.AutoscaleClient;
 
-
 public class AutoscalingUtil extends AbstractCloudbreakIntegrationTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(com.sequenceiq.it.cloudbreak.autoscaling.AutoscalingUtil.class);

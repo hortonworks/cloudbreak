@@ -82,14 +82,18 @@
     },
     {
       "hive-site": {
+        "hive.server2.authentication.ldap.baseDN": "cn=groups,dc=example,dc=org",
+        "hive.server2.authentication": "LDAP",
         "hive.server2.transport.mode": "http",
         "javax.jdo.option.ConnectionUserName": "heyitsme",
         "javax.jdo.option.ConnectionDriverName": "org.postgresql.Driver",
         "hive.exec.compress.output": "true",
         "javax.jdo.option.ConnectionPassword": "iamsoosecure",
+        "hive.server2.authentication.ldap.Domain": "ad.hdc.com",
         "hive.merge.mapfiles": "true",
         "javax.jdo.option.ConnectionURL": "jdbc:postgresql://10.1.1.1:5432/hive",
-        "hive.server2.tez.initialize.default.sessions": "true"
+        "hive.server2.tez.initialize.default.sessions": "true",
+        "hive.server2.authentication.ldap.url": "ldap://localhost:389"
       }
     },
     {

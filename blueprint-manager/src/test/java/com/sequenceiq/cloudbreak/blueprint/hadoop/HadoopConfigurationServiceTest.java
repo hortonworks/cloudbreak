@@ -55,7 +55,7 @@ public class HadoopConfigurationServiceTest {
                 .withBlueprintView(new BlueprintView("blueprintText", "2.5", "HDP"))
                 .build();
 
-        boolean actual = underTest.additionalCriteria(source, "blueprintText");
+        boolean actual = underTest.specialCondition(source, "blueprintText");
         Assert.assertTrue(actual);
     }
 
@@ -65,7 +65,7 @@ public class HadoopConfigurationServiceTest {
                 .withBlueprintView(new BlueprintView("blueprintText", "2.5", "HDF"))
                 .build();
 
-        boolean actual = underTest.additionalCriteria(source, "blueprintText");
+        boolean actual = underTest.specialCondition(source, "blueprintText");
         Assert.assertFalse(actual);
     }
 }

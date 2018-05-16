@@ -1,11 +1,7 @@
 package com.sequenceiq.cloudbreak.blueprint.template.views;
 
-import javax.ws.rs.BadRequestException;
-
 import org.junit.Assert;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import com.sequenceiq.cloudbreak.api.model.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
@@ -14,9 +10,6 @@ import com.sequenceiq.cloudbreak.domain.RDSConfig;
 public class RdsViewTest {
 
     private static final String ASSERT_ERROR_MSG = "The generated connection URL(connectionHost field) is not valid!";
-
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
 
     @Test
     public void testCreateRdsViewWhenConnectionUrlContainsSubprotocolAndSubname() {
@@ -45,28 +38,6 @@ public class RdsViewTest {
     }
 
     @Test
-    public void testCreateRdsViewWhenRDSConfigContainsConnectionUrlWithoutPort() {
-        String connectionUrl = "jdbc:postgresql://some-rds.1d3nt1f13r.eu-west-1.rds.amazonaws.com/ranger";
-        RDSConfig rdsConfig = createRdsConfig(connectionUrl);
-
-        thrown.expect(BadRequestException.class);
-        thrown.expectMessage("Invalid JDBC URL");
-
-        new RdsView(rdsConfig);
-    }
-
-    @Test
-    public void testCreateRdsViewWhenRDSConfigContainsConnectionUrlWithoutDatabaseName() {
-        String connectionUrl = "jdbc:postgresql://some-rds.1d3nt1f13r.eu-west-1.rds.amazonaws.com:5432";
-        RDSConfig rdsConfig = createRdsConfig(connectionUrl);
-
-        thrown.expect(BadRequestException.class);
-        thrown.expectMessage("Invalid JDBC URL");
-
-        new RdsView(rdsConfig);
-    }
-
-    @Test
     public void testCreateRdsViewWhenRDSConfigContainsConnectionUrlWithoutJDBCUrlPrefix() {
         String connectionUrl = "some-rds.1d3nt1f13r.eu-west-1.rds.amazonaws.com:5432/ranger";
         RDSConfig rdsConfig = createRdsConfig(connectionUrl);
@@ -76,28 +47,6 @@ public class RdsViewTest {
         Assert.assertEquals(ASSERT_ERROR_MSG, "some-rds.1d3nt1f13r.eu-west-1.rds.amazonaws.com", underTest.getHost());
         Assert.assertEquals(ASSERT_ERROR_MSG, "5432", underTest.getPort());
         Assert.assertEquals(ASSERT_ERROR_MSG, "ranger", underTest.getDatabaseName());
-    }
-
-    @Test
-    public void testCreateRdsViewWhenRDSConfigContainsConnectionUrlWithoutDatabaseNameAndPort() {
-        String connectionUrl = "jdbc:postgresql://some-rds.1d3nt1f13r.eu-west-1.rds.amazonaws.com";
-        RDSConfig rdsConfig = createRdsConfig(connectionUrl);
-
-        thrown.expect(BadRequestException.class);
-        thrown.expectMessage("Invalid JDBC URL");
-
-        new RdsView(rdsConfig);
-    }
-
-    @Test
-    public void testCreateRdsViewWhenRDSConfigContainsConnectionUrlWithoutDatabaseNameAndPortAndJDBCPrefix() {
-        String connectionUrl = "some-rds.1d3nt1f13r.eu-west-1.rds.amazonaws.com";
-        RDSConfig rdsConfig = createRdsConfig(connectionUrl);
-
-        thrown.expect(BadRequestException.class);
-        thrown.expectMessage("Invalid JDBC URL");
-
-        new RdsView(rdsConfig);
     }
 
     @Test
@@ -112,12 +61,22 @@ public class RdsViewTest {
 
     @Test
     public void testCreateRdsViewConnectionStringWhenRangerAndPostgreSQL() {
-        String connectionUrl = "jdbc:oracle:thin:@ranger.cmseikcocinw.us-east-1.rds.amazonaws.com:1521/ranger";
-        RDSConfig rdsConfig = createRdsConfig(connectionUrl, DatabaseVendor.ORACLE12, RdsType.RANGER);
+        String connectionUrl = "jdbc:postgresql://ranger.cmseikcocinw.us-east-1.rds.amazonaws.com:5432/ranger";
+        RDSConfig rdsConfig = createRdsConfig(connectionUrl, DatabaseVendor.POSTGRES, RdsType.RANGER);
 
         RdsView underTest = new RdsView(rdsConfig);
 
-        Assert.assertEquals(ASSERT_ERROR_MSG, "ranger.cmseikcocinw.us-east-1.rds.amazonaws.com:1521/ranger", underTest.getConnectionString());
+        Assert.assertEquals(ASSERT_ERROR_MSG, "ranger.cmseikcocinw.us-east-1.rds.amazonaws.com:5432", underTest.getConnectionString());
+    }
+
+    @Test
+    public void testCreateRdsViewConnectionStringWhenHiveAndPostgreSQL() {
+        String connectionUrl = "jdbc:postgresql://ranger.cmseikcocinw.us-east-1.rds.amazonaws.com:5432/ranger";
+        RDSConfig rdsConfig = createRdsConfig(connectionUrl, DatabaseVendor.POSTGRES, RdsType.HIVE);
+
+        RdsView underTest = new RdsView(rdsConfig);
+
+        Assert.assertEquals(ASSERT_ERROR_MSG, "jdbc:postgresql://ranger.cmseikcocinw.us-east-1.rds.amazonaws.com:5432/ranger", underTest.getConnectionString());
     }
 
     @Test
@@ -192,16 +151,16 @@ public class RdsViewTest {
         return createRdsConfig(connectionUrl, DatabaseVendor.POSTGRES, RdsType.HIVE);
     }
 
-    private RDSConfig createRdsConfig(String connectionUrl, DatabaseVendor vendor) {
-        return createRdsConfig(connectionUrl, vendor, RdsType.HIVE);
+    private RDSConfig createRdsConfig(String connectionUrl, DatabaseVendor databaseVendor) {
+        return createRdsConfig(connectionUrl, databaseVendor, RdsType.HIVE);
     }
 
-    private RDSConfig createRdsConfig(String connectionUrl, DatabaseVendor vendor, RdsType rdsType) {
+    private RDSConfig createRdsConfig(String connectionUrl, DatabaseVendor databaseVendor, RdsType rdsType) {
         RDSConfig rdsConfig = new RDSConfig();
         rdsConfig.setConnectionURL(connectionUrl);
         rdsConfig.setConnectionPassword("admin");
         rdsConfig.setConnectionUserName("admin");
-        rdsConfig.setDatabaseEngine(vendor.name());
+        rdsConfig.setDatabaseEngine(databaseVendor);
         rdsConfig.setType(rdsType.name());
         return rdsConfig;
     }

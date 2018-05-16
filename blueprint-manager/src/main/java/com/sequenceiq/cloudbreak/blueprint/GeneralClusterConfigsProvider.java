@@ -9,10 +9,9 @@ import com.sequenceiq.cloudbreak.api.model.v2.InstanceGroupV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
 import com.sequenceiq.cloudbreak.blueprint.templates.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
-import com.sequenceiq.cloudbreak.domain.Cluster;
-import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
-import com.sequenceiq.cloudbreak.domain.Stack;
-
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 
 @Service
 public class GeneralClusterConfigsProvider {
@@ -52,7 +51,7 @@ public class GeneralClusterConfigsProvider {
 
         GeneralClusterConfigs generalClusterConfigs = new GeneralClusterConfigs();
         generalClusterConfigs.setIdentityUserEmail(identityUser.getUsername());
-        generalClusterConfigs.setAmbariIp("pendign...");
+        generalClusterConfigs.setAmbariIp("pending...");
         generalClusterConfigs.setInstanceGroupsPresented(instanceMetadataPresented);
         generalClusterConfigs.setPassword(stack.getCluster().getAmbari().getPassword());
         generalClusterConfigs.setGatewayInstanceMetadataPresented(gatewayInstanceMetadataPresented);

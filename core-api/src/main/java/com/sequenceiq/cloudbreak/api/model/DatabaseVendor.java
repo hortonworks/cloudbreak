@@ -1,52 +1,48 @@
 package com.sequenceiq.cloudbreak.api.model;
 
+import static com.google.common.collect.Sets.newHashSet;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Optional;
 import java.util.Set;
 
-import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigRequest;
 import com.sequenceiq.cloudbreak.api.model.rds.RdsConfigRequestParameters;
 
 public enum DatabaseVendor {
-    POSTGRES("postgres", "postgres", "PostgreSQL", "org.postgresql.Driver", "postgresql", ""),
-    MYSQL("mysql", "mysql", "MySQL", "com.mysql.jdbc.Driver", "mysql", "mysql-connector-java.jar"),
-    MARIADB("mysql", "mysql", "MySQL", "com.mysql.jdbc.Driver", "mysql", "mysql-connector-java.jar"),
-    MSSQL("mssql", "mssql", "SQLServer", "com.microsoft.sqlserver.jdbc.SQLServerDriver", "sqlserver", ""),
-    ORACLE11("oracle", "oracle", "Oracle 11g", "oracle.jdbc.driver.OracleDriver", "oracle", "ojdbc6.jar",
-            Sets.newHashSet("oracle11g", "oracle11", "11", "11g")),
-    ORACLE12("oracle", "oracle", "Oracle 12c", "oracle.jdbc.driver.OracleDriver", "oracle", "ojdbc7.jar",
-            Sets.newHashSet("oracle12c", "oracle12", "12", "12c")),
-    SQLANYWHERE("sqlanywhere", "sqlanywhere", "SQLAnywhere", "org.postgresql.Driver", "sqlanywhere", ""),
-    EMBEDDED("embedded", "embedded", "", "", "", "");
+    POSTGRES("postgres", "PostgreSQL", "PostgreSQL", "org.postgresql.Driver", "postgresql", ""),
+    MYSQL("mysql", "MySQL", "MySQL / MariaDB", "com.mysql.jdbc.Driver", "mysql", "mysql-connector-java.jar"),
+    MARIADB("mysql", "MariaDB", "MySQL / MariaDB", "com.mysql.jdbc.Driver", "mysql", "mysql-connector-java.jar"),
+    MSSQL("mssql", "SQLServer", "SQLServer", "com.microsoft.sqlserver.jdbc.SQLServerDriver", "sqlserver", ""),
+    ORACLE11("oracle", "Oracle 11g", "Oracle", "oracle.jdbc.driver.OracleDriver", "oracle", "ojdbc6.jar", newHashSet("oracle11g", "oracle11", "11", "11g")),
+    ORACLE12("oracle", "Oracle 12c", "Oracle", "oracle.jdbc.driver.OracleDriver", "oracle", "ojdbc7.jar", newHashSet("oracle12c", "oracle12", "12", "12c")),
+    SQLANYWHERE("sqlanywhere", "SQLAnywhere", "SQL Anywhere", "org.postgresql.Driver", "sqlanywhere", ""),
+    EMBEDDED("embedded", "", "", "", "", "");
 
-    private final String ambariVendor;
     private final String fancyName;
+    private final String displayName;
     private final String connectionDriver;
     private final String jdbcUrlDriverId;
     private final String connectorJarName;
     private final String databaseType;
     private final Set<String> versions;
 
-    DatabaseVendor(String ambariVendor, String databaseType, String fancyName, String connectionDriver, String jdbcUrlDriverId, String connectorJarName,
-            Set<String> versions) {
-        this.ambariVendor = ambariVendor;
+    DatabaseVendor(String databaseType, String displayName, String fancyName, String connectionDriver, String jdbcUrlDriverId,
+            String connectorJarName, Set<String> versions) {
         this.databaseType = databaseType;
         this.fancyName = fancyName;
+        this.displayName = displayName;
         this.connectionDriver = connectionDriver;
         this.jdbcUrlDriverId = jdbcUrlDriverId;
         this.connectorJarName = connectorJarName;
         this.versions = versions;
     }
 
-    DatabaseVendor(String ambariVendor, String databaseType, String fancyName, String connectionDriver, String jdbcUrlDriverId, String connectorJarName) {
-        this(ambariVendor, databaseType, fancyName, connectionDriver, jdbcUrlDriverId, connectorJarName, Collections.emptySet());
-    }
-
-    public final String ambariVendor() {
-        return ambariVendor;
+    DatabaseVendor(String databaseType, String displayName, String fancyName, String connectionDriver, String jdbcUrlDriverId,
+            String connectorJarName) {
+        this(databaseType, displayName, fancyName, connectionDriver, jdbcUrlDriverId, connectorJarName, Collections.emptySet());
     }
 
     public final String databaseType() {
@@ -69,33 +65,37 @@ public enum DatabaseVendor {
         return connectorJarName;
     }
 
+    public String displayName() {
+        return displayName;
+    }
+
     public Set<String> versions() {
         return versions;
     }
 
-    public static DatabaseVendor fromValue(String ambariVendor) {
-        for (DatabaseVendor vendor : values()) {
-            if (vendor.ambariVendor.equals(ambariVendor)) {
-                return vendor;
+    public static DatabaseVendor fromValue(String databaseType) {
+        for (DatabaseVendor databaseVendor : values()) {
+            if (databaseVendor.databaseType.equals(databaseType)) {
+                return databaseVendor;
             }
         }
-        throw new UnsupportedOperationException(String.format("%s is not a DatabaseVendor", ambariVendor));
+        throw new UnsupportedOperationException(String.format("%s is not a DatabaseVendor", databaseType));
     }
 
     public static Optional<DatabaseVendor> getVendorByJdbcUrl(RDSConfigRequest configRequest) {
         Optional<RdsConfigRequestParameters> rdsConfigRequestParameters = getParameters(configRequest);
         Optional<String> version = databaseVersion(rdsConfigRequestParameters);
-        for (DatabaseVendor vendor : values()) {
-            if (configRequest.getConnectionURL().startsWith(String.format("jdbc:%s:", vendor.jdbcUrlDriverId))) {
-                if (vendor.versions.isEmpty()) {
-                    return Optional.of(vendor);
+        for (DatabaseVendor databaseVendor : values()) {
+            if (configRequest.getConnectionURL().startsWith(String.format("jdbc:%s:", databaseVendor.jdbcUrlDriverId))) {
+                if (databaseVendor.versions.isEmpty()) {
+                    return Optional.of(databaseVendor);
                 } else if (version.isPresent()) {
-                    Optional<String> versionMatchFound = vendor.versions.stream().filter(item -> item.equals(version.get().toLowerCase())).findFirst();
+                    Optional<String> versionMatchFound = databaseVendor.versions.stream().filter(item -> item.equalsIgnoreCase(version.get())).findFirst();
                     if (versionMatchFound.isPresent()) {
-                        return Optional.of(vendor);
+                        return Optional.of(databaseVendor);
                     }
                 } else {
-                    return Optional.of(vendor);
+                    return Optional.of(databaseVendor);
                 }
             }
         }

@@ -67,6 +67,10 @@ dependencies {
     testCompile group: 'org.springframework',       name: 'spring-test',                            version: springFrameworkVersion
     testCompile group: 'org.springframework.boot',  name: 'spring-boot-starter-test',               version: springBootVersion
     testCompile group: 'com.openpojo',              name: 'openpojo',                               version: '0.8.10'
+    testCompile (group: 'org.powermock',            name: 'powermock-module-junit4',                version: powermockVersion)
+    testCompile (group: 'org.powermock',            name: 'powermock-api-mockito2',                 version: powermockVersion) {
+      exclude group: 'org.hamcrest'
+    }
 
     compile project(':core-api')
     compile project(':autoscale-api')

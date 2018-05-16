@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 import com.google.common.io.CharStreams;
 import com.sequenceiq.ambari.client.services.ClusterService;
 import com.sequenceiq.cloudbreak.blueprint.kerberos.KerberosDetailService;
-import com.sequenceiq.cloudbreak.domain.Cluster;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.util.JsonUtil;

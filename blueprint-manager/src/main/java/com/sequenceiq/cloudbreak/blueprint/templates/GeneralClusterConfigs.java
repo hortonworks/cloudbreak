@@ -29,7 +29,7 @@ public class GeneralClusterConfigs {
 
     private OrchestratorType orchestratorType = OrchestratorType.HOST;
 
-    private Integer nodeCount;
+    private int nodeCount;
 
     private Optional<String> primaryGatewayInstanceDiscoveryFQDN = Optional.empty();
 
@@ -124,11 +124,11 @@ public class GeneralClusterConfigs {
         return primaryGatewayInstanceDiscoveryFQDN;
     }
 
-    public Integer getNodeCount() {
+    public int getNodeCount() {
         return nodeCount;
     }
 
-    public void setNodeCount(Integer nodeCount) {
+    public void setNodeCount(int nodeCount) {
         this.nodeCount = nodeCount;
     }
 

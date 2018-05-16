@@ -17,10 +17,10 @@ import org.testng.annotations.Test;
 
 import com.google.common.collect.ImmutableList;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.ClusterV1Endpoint;
-import com.sequenceiq.cloudbreak.api.model.ClusterRequest;
+import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRequest;
 import com.sequenceiq.cloudbreak.api.model.ConstraintJson;
-import com.sequenceiq.cloudbreak.api.model.GatewayJson;
-import com.sequenceiq.cloudbreak.api.model.HostGroupRequest;
+import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.GatewayJson;
+import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupRequest;
 import com.sequenceiq.cloudbreak.api.model.KerberosRequest;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 import com.sequenceiq.it.IntegrationTestContext;

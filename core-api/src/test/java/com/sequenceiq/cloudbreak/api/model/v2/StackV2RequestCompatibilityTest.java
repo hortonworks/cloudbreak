@@ -43,6 +43,4 @@ public class StackV2RequestCompatibilityTest {
         }
         assertEquals(0, violations.size());
     }
-
-
 }

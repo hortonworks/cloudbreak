@@ -11,7 +11,6 @@ import org.junit.rules.ExpectedException;
 
 import com.sequenceiq.cloudbreak.TestUtil;
 
-
 public class FileReaderUtilsTest {
 
     @Rule

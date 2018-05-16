@@ -26,7 +26,7 @@ import org.springframework.ui.freemarker.FreeMarkerConfigurationFactoryBean;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
+import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType;
 import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationTemplateBuilder.ModelContext;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
@@ -56,6 +56,8 @@ import freemarker.template.Configuration;
 public class CloudFormationTemplateBuilderTest {
 
     public static final String LATEST_AWS_CLOUD_FORMATION_TEMPLATE_PATH = "templates/aws-cf-stack.ftl";
+
+    private static final int ROOT_VOLUME_SIZE = 17;
 
     @Mock
     private DefaultCostTaggingService defaultCostTaggingService;
@@ -122,12 +124,12 @@ public class CloudFormationTemplateBuilderTest {
                 InstanceGroupType.CORE, "CORE",
                 InstanceGroupType.GATEWAY, "GATEWAY"
         );
-        Image image = new Image("cb-centos66-amb200-2015-05-25", userData, "redhat6", "", "default", "default-id");
+        Image image = new Image("cb-centos66-amb200-2015-05-25", userData, "redhat6", "redhat6", "", "default", "default-id");
         List<Group> groups = new ArrayList<>();
         groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security, null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey()));
+                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE));
         groups.add(new Group(name, InstanceGroupType.GATEWAY, Collections.singletonList(instance), security, null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey()));
+                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE));
         Network network = new Network(new Subnet("testSubnet"));
         Map<String, String> parameters = new HashMap<>();
         parameters.put("persistentStorage", "persistentStorageTest");
@@ -147,7 +149,7 @@ public class CloudFormationTemplateBuilderTest {
     }
 
     @Test
-    public void buildTestInstanceGroups() throws Exception {
+    public void buildTestInstanceGroupsAndRootVolumeSize() throws Exception {
         //GIVEN
         boolean existingVPC = true;
         boolean existingIGW = true;
@@ -174,6 +176,7 @@ public class CloudFormationTemplateBuilderTest {
         assertThat(templateString, containsString("ClusterNodeSecurityGroup" + name));
         assertThat(templateString, not(containsString("testtagkey")));
         assertThat(templateString, not(containsString("testtagvalue")));
+        assertThat(templateString, containsString(Integer.toString(ROOT_VOLUME_SIZE)));
     }
 
     @Test

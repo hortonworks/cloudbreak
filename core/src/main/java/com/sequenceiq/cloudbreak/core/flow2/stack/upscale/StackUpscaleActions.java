@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.core.flow2.stack.upscale;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -12,7 +13,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.action.Action;
 
-import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
+import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType;
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
 import com.sequenceiq.cloudbreak.cloud.event.instance.CollectMetadataRequest;
 import com.sequenceiq.cloudbreak.cloud.event.instance.CollectMetadataResult;
@@ -23,8 +24,8 @@ import com.sequenceiq.cloudbreak.cloud.event.resource.UpscaleStackResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.common.type.MetricType;
-import com.sequenceiq.cloudbreak.converter.spi.CloudResourceToResourceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
@@ -33,8 +34,9 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.downscale.StackScalingFlowContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent;
-import com.sequenceiq.cloudbreak.domain.InstanceGroup;
-import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.BootstrapNewNodesRequest;
@@ -42,7 +44,9 @@ import com.sequenceiq.cloudbreak.reactor.api.event.resource.BootstrapNewNodesRes
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.ExtendHostMetadataRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.ExtendHostMetadataResult;
 import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
+import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetadataService;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @Configuration
 public class StackUpscaleActions {
@@ -50,9 +54,6 @@ public class StackUpscaleActions {
 
     @Inject
     private ResourceToCloudResourceConverter cloudResourceConverter;
-
-    @Inject
-    private CloudResourceToResourceConverter resourceConverter;
 
     @Inject
     private InstanceMetadataService instanceMetadataService;
@@ -68,6 +69,9 @@ public class StackUpscaleActions {
 
     @Inject
     private InstanceMetaDataToCloudInstanceConverter metadataConverter;
+
+    @Inject
+    private StackService stackService;
 
     @Bean(name = "ADD_INSTANCES_STATE")
     public Action<?, ?> addInstances() {
@@ -88,12 +92,12 @@ public class StackUpscaleActions {
             @Override
             protected Selectable createRequest(StackScalingFlowContext context) {
                 LOGGER.debug("Assembling upscale stack event for stack: {}", context.getStack());
-                InstanceGroup group = context.getStack().getInstanceGroupByInstanceGroupName(context.getInstanceGroupName());
-                group.setNodeCount(group.getNodeCount() + context.getAdjustment());
-                CloudStack cloudStack = cloudStackConverter.convert(context.getStack());
-                instanceMetadataService.saveInstanceRequests(context.getStack(), cloudStack.getGroups());
+                List<CloudInstance> newInstances = stackUpscaleService.buildNewInstances(context.getStack(), context.getInstanceGroupName(),
+                        context.getAdjustment());
+                Stack updatedStack = instanceMetadataService.saveInstanceAndGetUpdatedStack(context.getStack(), newInstances);
                 List<CloudResource> resources = cloudResourceConverter.convert(context.getStack().getResources());
-                return new UpscaleStackRequest<UpscaleStackResult>(context.getCloudContext(), context.getCloudCredential(), cloudStack, resources);
+                CloudStack updatedCloudStack = cloudStackConverter.convert(updatedStack);
+                return new UpscaleStackRequest<UpscaleStackResult>(context.getCloudContext(), context.getCloudCredential(), updatedCloudStack, resources);
             }
         };
     }
@@ -126,8 +130,11 @@ public class StackUpscaleActions {
             @Override
             protected Selectable createRequest(StackScalingFlowContext context) {
                 List<CloudResource> cloudResources = cloudResourceConverter.convert(context.getStack().getResources());
-                List<CloudInstance> cloudInstances = stackUpscaleService.getNewInstances(context.getStack());
-                return new CollectMetadataRequest(context.getCloudContext(), context.getCloudCredential(), cloudResources, cloudInstances);
+                List<CloudInstance> allKnownInstances = cloudStackConverter.buildInstances(context.getStack());
+                List<CloudInstance> newCloudInstances = allKnownInstances.stream()
+                        .filter(cloudInstance -> InstanceStatus.CREATE_REQUESTED.equals(cloudInstance.getTemplate().getStatus()))
+                        .collect(Collectors.toList());
+                return new CollectMetadataRequest(context.getCloudContext(), context.getCloudCredential(), cloudResources, newCloudInstances, allKnownInstances);
             }
         };
     }
@@ -136,7 +143,8 @@ public class StackUpscaleActions {
     public Action<?, ?> finishExtendMetadata() {
         return new AbstractStackUpscaleAction<CollectMetadataResult>(CollectMetadataResult.class) {
             @Override
-            protected void doExecute(StackScalingFlowContext context, CollectMetadataResult payload, Map<Object, Object> variables) {
+            protected void doExecute(StackScalingFlowContext context, CollectMetadataResult payload, Map<Object, Object> variables)
+                    throws TransactionExecutionException {
                 Set<String> upscaleCandidateAddresses = stackUpscaleService.finishExtendMetadata(context.getStack(), context.getInstanceGroupName(), payload);
                 variables.put(UPSCALE_CANDIDATE_ADDRESSES, upscaleCandidateAddresses);
                 InstanceGroup ig = instanceGroupRepository.findOneByGroupNameInStack(payload.getStackId(), context.getInstanceGroupName());

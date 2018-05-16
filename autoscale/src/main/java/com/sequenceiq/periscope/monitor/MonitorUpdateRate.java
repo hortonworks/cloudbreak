@@ -18,7 +18,7 @@ public final class MonitorUpdateRate {
     public static final String METRIC_UPDATE_RATE_CRON = "0/30 * * * * ?";
 
     /**
-     * Every 30 seconds.
+     * Every 10 seconds.
      */
     public static final String PROMETHEUS_UPDATE_RATE_CRON = "0/10 * * * * ?";
 
@@ -35,7 +35,7 @@ public final class MonitorUpdateRate {
     /**
      * Time update rate in ms, aligned to the cron expression.
      */
-    public static final int CLUSTER_UPDATE_RATE = 10_000;
+    public static final long CLUSTER_UPDATE_RATE = 10_000L;
 
     private MonitorUpdateRate() {
         throw new IllegalStateException();

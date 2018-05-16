@@ -26,9 +26,9 @@ import org.testng.annotations.Test;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.ClusterV1Endpoint;
-import com.sequenceiq.cloudbreak.api.model.ClusterRequest;
+import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRequest;
 import com.sequenceiq.cloudbreak.api.model.ConstraintJson;
-import com.sequenceiq.cloudbreak.api.model.HostGroupRequest;
+import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupRequest;
 import com.sequenceiq.cloudbreak.api.model.KerberosRequest;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 import com.sequenceiq.cloudbreak.orchestrator.model.GenericResponse;
@@ -47,7 +47,6 @@ import com.sequenceiq.it.spark.ambari.AmbariServicesComponentsResponse;
 import com.sequenceiq.it.spark.ambari.AmbariStatusResponse;
 import com.sequenceiq.it.spark.ambari.EmptyAmbariResponse;
 import com.sequenceiq.it.spark.salt.SaltApiRunPostResponse;
-
 
 public class MockClusterCreationWithSaltFailTest extends AbstractMockIntegrationTest {
 

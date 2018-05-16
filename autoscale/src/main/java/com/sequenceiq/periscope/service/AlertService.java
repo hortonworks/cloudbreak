@@ -30,7 +30,6 @@ import com.sequenceiq.periscope.repository.ClusterRepository;
 import com.sequenceiq.periscope.repository.MetricAlertRepository;
 import com.sequenceiq.periscope.repository.PrometheusAlertRepository;
 import com.sequenceiq.periscope.repository.TimeAlertRepository;
-import com.sequenceiq.periscope.utils.AmbariClientProvider;
 
 import freemarker.template.Configuration;
 
@@ -107,7 +106,7 @@ public class AlertService {
     }
 
     public Set<MetricAlert> removeMetricAlert(Cluster cluster, Long alertId) {
-        return cluster.getMetricAlerts().stream().filter(a -> a.getId() != alertId).collect(Collectors.toSet());
+        return cluster.getMetricAlerts().stream().filter(a -> !a.getId().equals(alertId)).collect(Collectors.toSet());
     }
 
     public Set<MetricAlert> getMetricAlerts(Long clusterId) {
@@ -151,7 +150,7 @@ public class AlertService {
     }
 
     public Set<TimeAlert> removeTimeAlert(Cluster cluster, Long alertId) {
-        return cluster.getTimeAlerts().stream().filter(a -> a.getId() != alertId).collect(Collectors.toSet());
+        return cluster.getTimeAlerts().stream().filter(a -> !a.getId().equals(alertId)).collect(Collectors.toSet());
     }
 
     public BaseAlert getBaseAlert(Long clusterId, Long alertId) {
@@ -247,7 +246,7 @@ public class AlertService {
         PrometheusAlert alert = prometheusAlertRepository.findByCluster(alertId, clusterId);
         Cluster cluster = clusterRepository.findById(clusterId);
         consulKeyValueService.deleteAlert(cluster, alert);
-        Set<PrometheusAlert> alerts = cluster.getPrometheusAlerts().stream().filter(a -> a.getId() != alertId).collect(Collectors.toSet());
+        Set<PrometheusAlert> alerts = cluster.getPrometheusAlerts().stream().filter(a -> !a.getId().equals(alertId)).collect(Collectors.toSet());
         cluster.setPrometheusAlerts(alerts);
         prometheusAlertRepository.delete(alertId);
         clusterRepository.save(cluster);

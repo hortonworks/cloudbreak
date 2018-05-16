@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.cluster;
 
+import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
@@ -8,10 +9,13 @@ import static org.mockito.Mockito.when;
 import java.util.HashSet;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.api.model.DatabaseVendor;
@@ -20,18 +24,20 @@ import com.sequenceiq.cloudbreak.blueprint.validation.BlueprintValidator;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.common.model.OrchestratorType;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
-import com.sequenceiq.cloudbreak.controller.BadRequestException;
+import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.Cluster;
-import com.sequenceiq.cloudbreak.domain.ClusterComponent;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
-import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.ClusterComponentConfigProvider;
+import com.sequenceiq.cloudbreak.service.TransactionService;
+import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterTerminationService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
@@ -40,6 +46,9 @@ import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AmbariClusterServiceTest {
+
+    @Rule
+    public final ExpectedException thrown = ExpectedException.none();
 
     @Mock
     private StackService stackService;
@@ -71,6 +80,9 @@ public class AmbariClusterServiceTest {
     @Mock
     private ReactorFlowManager flowManager;
 
+    @Spy
+    private TransactionService transactionService;
+
     @InjectMocks
     private AmbariClusterService ambariClusterService;
 
@@ -93,16 +105,18 @@ public class AmbariClusterServiceTest {
         when(blueprintService.get(any(Long.class))).thenReturn(cluster.getBlueprint());
     }
 
-    @Test(expected = BadRequestException.class)
-    public void testRecreateFailNotEmbeddedDb() {
+    @Test
+    public void testRecreateFailNotEmbeddedDb() throws TransactionExecutionException {
+        thrown.expectCause(equalTo(new BadRequestException("Ambari doesn't support resetting external DB automatically."
+                + " To reset Ambari Server schema you must first drop and then create it using DDL scripts from /var/lib/ambari-server/resources")));
         RDSConfig rdsConfig = new RDSConfig();
-        rdsConfig.setDatabaseEngine(DatabaseVendor.POSTGRES.name());
+        rdsConfig.setDatabaseEngine(DatabaseVendor.POSTGRES);
         when(rdsConfigService.findByClusterIdAndType(nullable(String.class), nullable(String.class), any(Long.class), eq(RdsType.AMBARI))).thenReturn(rdsConfig);
         ambariClusterService.recreate(1L, 1L, new HashSet<>(), false, new StackRepoDetails(), null, null);
     }
 
     @Test
-    public void testRecreateSuccess() {
+    public void testRecreateSuccess() throws TransactionExecutionException {
         ambariClusterService.recreate(1L, 1L, new HashSet<>(), false, new StackRepoDetails(), null, null);
     }
 }

@@ -24,10 +24,10 @@ import com.sequenceiq.cloudbreak.api.model.AutoscaleStackResponse;
 import com.sequenceiq.cloudbreak.api.model.CertificateResponse;
 import com.sequenceiq.cloudbreak.api.model.GeneratedBlueprintResponse;
 import com.sequenceiq.cloudbreak.api.model.PlatformVariantsJson;
-import com.sequenceiq.cloudbreak.api.model.StackResponse;
-import com.sequenceiq.cloudbreak.api.model.StackValidationRequest;
+import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;
+import com.sequenceiq.cloudbreak.api.model.stack.StackValidationRequest;
 import com.sequenceiq.cloudbreak.api.model.ReinstallRequestV2;
-import com.sequenceiq.cloudbreak.api.model.StackScaleRequestV2;
+import com.sequenceiq.cloudbreak.api.model.stack.StackScaleRequestV2;
 import com.sequenceiq.cloudbreak.api.model.UserNamePasswordJson;
 import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
 import com.sequenceiq.cloudbreak.doc.ContentType;
@@ -242,4 +242,10 @@ public interface StackV2Endpoint extends StackEndpoint {
     @ApiOperation(value = StackOpDescription.GET_BY_STACK_NAME, produces = ContentType.JSON, notes = Notes.STACK_NOTES,
             nickname = "getClusterRequestFromName")
     StackV2Request getRequestfromName(@PathParam("name") String name);
+
+    @POST
+    @Path("{name}/retry")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = StackOpDescription.RETRY_BY_ID, produces = ContentType.JSON, notes = Notes.RETRY_STACK_NOTES, nickname = "retryStack")
+    void retry(@PathParam("name") String name);
 }

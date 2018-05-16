@@ -11,7 +11,6 @@ import javax.ws.rs.BadRequestException;
 
 import org.springframework.stereotype.Service;
 
-import com.google.common.collect.Lists;
 import com.sequenceiq.periscope.api.model.ClusterState;
 import com.sequenceiq.periscope.api.model.ScalingConfigurationRequest;
 import com.sequenceiq.periscope.domain.Ambari;
@@ -44,7 +43,6 @@ public class ClusterService {
 
     public Cluster create(Cluster cluster, PeriscopeUser user, AmbariStack stack, ClusterState clusterState) {
         PeriscopeUser periscopeUser = createUserIfAbsent(user);
-        validateClusterUniqueness(stack);
         cluster.setUser(periscopeUser);
         cluster.setAmbari(stack.getAmbari());
         cluster.setStackId(stack.getStackId());
@@ -155,12 +153,25 @@ public class ClusterService {
         return clusterRepository.findByStateAndPeriscopeNodeId(state, nodeId);
     }
 
-    public List<Cluster> findAll() {
-        return Lists.newArrayList(clusterRepository.findAll());
-    }
-
     public List<Cluster> findAllForNode(ClusterState state, boolean autoscalingEnabled, String nodeId) {
         return clusterRepository.findByStateAndAutoscalingEnabledAndPeriscopeNodeId(state, autoscalingEnabled, nodeId);
+    }
+
+    public void validateClusterUniqueness(AmbariStack stack) {
+        Iterable<Cluster> clusters = clusterRepository.findAll();
+        boolean clusterForTheSameStackAndAmbari = StreamSupport.stream(clusters.spliterator(), false)
+                .anyMatch(cluster -> {
+                    boolean equalityOfStackId = cluster.getStackId() != null && cluster.getStackId().equals(stack.getStackId());
+                    Ambari ambari = cluster.getAmbari();
+                    Ambari newAmbari = stack.getAmbari();
+                    boolean ambariObjectsNotNull = ambari != null && newAmbari != null;
+                    boolean ambariHostsNotEmpty = ambariObjectsNotNull && !isEmpty(ambari.getHost()) && !isEmpty(newAmbari.getHost());
+                    boolean equalityOfAmbariHost = ambariObjectsNotNull && ambariHostsNotEmpty && ambari.getHost().equals(newAmbari.getHost());
+                    return equalityOfStackId && equalityOfAmbariHost;
+                });
+        if (clusterForTheSameStackAndAmbari) {
+            throw new BadRequestException("Cluster exists for the same Cloudbreak stack id and Ambari host.");
+        }
     }
 
     private PeriscopeUser createUserIfAbsent(PeriscopeUser user) {
@@ -177,20 +188,4 @@ public class ClusterService {
         }
     }
 
-    private void validateClusterUniqueness(AmbariStack stack) {
-        Iterable<Cluster> clusters = clusterRepository.findAll();
-        boolean clusterForTheSameStackAndAmbari = StreamSupport.stream(clusters.spliterator(), false)
-                .anyMatch(cluster -> {
-                    boolean equalityOfStackId = cluster.getStackId() != null && cluster.getStackId().equals(stack.getStackId());
-                    Ambari ambari = cluster.getAmbari();
-                    Ambari newAmbari = stack.getAmbari();
-                    boolean ambariObjectsNotNull = ambari != null && newAmbari != null;
-                    boolean ambariHostsNotEmpty = ambariObjectsNotNull && !isEmpty(ambari.getHost()) && !isEmpty(newAmbari.getHost());
-                    boolean equalityOfAmbariHost = ambariObjectsNotNull && ambariHostsNotEmpty && ambari.getHost().equals(newAmbari.getHost());
-                    return equalityOfStackId && equalityOfAmbariHost;
-                });
-        if (clusterForTheSameStackAndAmbari) {
-            throw new BadRequestException("Cluster exists for the same Cloudbreak stack id and Ambari host.");
-        }
-    }
 }

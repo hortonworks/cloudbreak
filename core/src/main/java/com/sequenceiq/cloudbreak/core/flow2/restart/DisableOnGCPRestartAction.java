@@ -7,7 +7,9 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.event.Payload;
-import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
+import com.sequenceiq.cloudbreak.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.service.flowlog.FlowLogService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
@@ -25,7 +27,11 @@ public class DisableOnGCPRestartAction extends FillInMemoryStateStoreRestartActi
         Payload stackPayload = (Payload) payload;
         Stack stack = stackService.getById(stackPayload.getStackId());
         if (stack.getPlatformVariant().equals(GCP)) {
-            flowLogService.terminate(stackPayload.getStackId(), flowId);
+            try {
+                flowLogService.terminate(stackPayload.getStackId(), flowId);
+            } catch (TransactionExecutionException e) {
+                throw new TransactionRuntimeExecutionException(e);
+            }
         } else {
             restart(flowId, flowChainId, event, payload, stack);
         }

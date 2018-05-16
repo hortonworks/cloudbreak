@@ -24,6 +24,7 @@ public final class SupportedDatabaseProvider {
         supportedExternalDatabases.add(getSupportedServiceEntry("Other", POSTGRES, MYSQL, ORACLE11, ORACLE12));
         supportedExternalDatabases.add(getSupportedServiceEntry("Druid", POSTGRES, MYSQL));
         supportedExternalDatabases.add(getSupportedServiceEntry("Superset", POSTGRES, MYSQL));
+        supportedExternalDatabases.add(getSupportedServiceEntry("Beacon", POSTGRES, MYSQL));
         supportedExternalDatabases.add(getSupportedServiceEntry("Ambari", POSTGRES, MYSQL));
     }
 
@@ -35,8 +36,9 @@ public final class SupportedDatabaseProvider {
         SupportedExternalDatabaseServiceEntry entry = new SupportedExternalDatabaseServiceEntry();
         entry.setName(name.toUpperCase());
         entry.setDisplayName(name);
-        for (DatabaseVendor vendor : vendors) {
-            entry.getDatabases().add(new SupportedDatabaseEntry(vendor.name(), vendor.fancyName(), vendor.jdbcUrlDriverId(), vendor.versions()));
+        for (DatabaseVendor databaseVendor : vendors) {
+            entry.getDatabases().add(new SupportedDatabaseEntry(databaseVendor.name(), databaseVendor.displayName(),
+                    databaseVendor.jdbcUrlDriverId(), databaseVendor.versions()));
         }
         return entry;
     }

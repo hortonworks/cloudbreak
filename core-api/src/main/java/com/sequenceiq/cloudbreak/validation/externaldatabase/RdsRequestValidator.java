@@ -8,6 +8,7 @@ import javax.validation.ConstraintValidatorContext;
 
 import com.sequenceiq.cloudbreak.api.model.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigRequest;
+import com.sequenceiq.cloudbreak.validation.ValidatorUtil;
 
 public class RdsRequestValidator implements ConstraintValidator<ValidRds, RDSConfigRequest> {
 
@@ -25,7 +26,6 @@ public class RdsRequestValidator implements ConstraintValidator<ValidRds, RDSCon
                 .filter(item -> item.getName().equals(request.getType()) || item.getDisplayName().equals(request.getType()))
                 .findFirst();
 
-
         if (serviceEntry.isPresent() && vendorByJdbcUrl.isPresent()) {
             Optional<SupportedDatabaseEntry> databaseEntry = serviceEntry.get().getDatabases()
                     .stream()
@@ -35,23 +35,18 @@ public class RdsRequestValidator implements ConstraintValidator<ValidRds, RDSCon
                 supportedScenario = true;
             } else {
                 String message = String.format("The specified Database and Service combination not supported."
-                        + " The supported databases are %s for the %s service.",
+                                + " The supported databases are %s for the %s service.",
                         serviceEntry.get().getDatabases()
                                 .stream()
                                 .map(SupportedDatabaseEntry::getDatabaseName)
                                 .collect(Collectors.toList())
                                 .stream()
-                                .collect(Collectors.joining(",")).toString(), request.getType());
-                addConstraintViolation(context, message);
+                                .collect(Collectors.joining(",")), request.getType());
+                ValidatorUtil.addConstraintViolation(context, message, "status");
             }
         }
 
         return supportedScenario;
     }
 
-    private void addConstraintViolation(ConstraintValidatorContext context, String message) {
-        context.buildConstraintViolationWithTemplate(message)
-                .addPropertyNode("status")
-                .addConstraintViolation();
-    }
 }

@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.blueprint;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -9,11 +11,12 @@ import com.sequenceiq.cloudbreak.blueprint.template.views.BlueprintView;
 import com.sequenceiq.cloudbreak.blueprint.template.views.FileSystemConfigurationView;
 import com.sequenceiq.cloudbreak.blueprint.template.views.GatewayView;
 import com.sequenceiq.cloudbreak.blueprint.template.views.HostgroupView;
+import com.sequenceiq.cloudbreak.blueprint.template.views.SharedServiceConfigsView;
 import com.sequenceiq.cloudbreak.blueprint.templates.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.domain.FlexSubscription;
-import com.sequenceiq.cloudbreak.domain.Gateway;
-import com.sequenceiq.cloudbreak.domain.HostGroup;
-import com.sequenceiq.cloudbreak.domain.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
@@ -34,6 +37,8 @@ public class BlueprintPreparationObject {
 
     private final Optional<LdapConfig> ldapConfig;
 
+    private final Optional<SharedServiceConfigsView> sharedServiceConfigs;
+
     private final Optional<String> stackRepoDetailsHdpVersion;
 
     private final Optional<HdfConfigs> hdfConfigs;
@@ -43,6 +48,10 @@ public class BlueprintPreparationObject {
     private final Optional<KerberosConfig> kerberosConfig;
 
     private final Optional<FlexSubscription> flexSubscription;
+
+    private final Map<String, Object> customInputs;
+
+    private final Map<String, Object> fixInputs;
 
     private BlueprintPreparationObject(BlueprintPreparationObject.Builder builder) {
         this.rdsConfigs = builder.rdsConfigs;
@@ -57,6 +66,9 @@ public class BlueprintPreparationObject {
         this.blueprintView = builder.blueprintView;
         this.generalClusterConfigs = builder.generalClusterConfigs;
         this.flexSubscription = builder.flexSubscription;
+        this.sharedServiceConfigs = builder.sharedServiceConfigs;
+        this.customInputs = builder.customInputs;
+        this.fixInputs = builder.fixInputs;
     }
 
     public Set<RDSConfig> getRdsConfigs() {
@@ -107,6 +119,18 @@ public class BlueprintPreparationObject {
         return blueprintView;
     }
 
+    public Optional<SharedServiceConfigsView> getSharedServiceConfigs() {
+        return sharedServiceConfigs;
+    }
+
+    public Map<String, Object> getCustomInputs() {
+        return customInputs;
+    }
+
+    public Map<String, Object> getFixInputs() {
+        return fixInputs;
+    }
+
     public static class Builder {
 
         private Set<RDSConfig> rdsConfigs = new HashSet<>();
@@ -129,9 +153,15 @@ public class BlueprintPreparationObject {
 
         private Optional<FlexSubscription> flexSubscription = Optional.empty();
 
+        private Optional<SharedServiceConfigsView> sharedServiceConfigs = Optional.empty();
+
         private GeneralClusterConfigs generalClusterConfigs;
 
         private BlueprintView blueprintView;
+
+        private Map<String, Object> customInputs = new HashMap<>();
+
+        private Map<String, Object> fixInputs = new HashMap<>();
 
         public static Builder builder() {
             return new Builder();
@@ -214,6 +244,21 @@ public class BlueprintPreparationObject {
 
         public Builder withFlexSubscription(FlexSubscription flexSubscription) {
             this.flexSubscription = Optional.ofNullable(flexSubscription);
+            return this;
+        }
+
+        public Builder withSharedServiceConfigs(SharedServiceConfigsView sharedServiceConfigsView) {
+            this.sharedServiceConfigs = Optional.ofNullable(sharedServiceConfigsView);
+            return this;
+        }
+
+        public Builder withCustomInputs(Map<String, Object> customInputs) {
+            this.customInputs = customInputs == null ? new HashMap<>() : customInputs;
+            return this;
+        }
+
+        public Builder withFixInputs(Map<String, Object> fixInputs) {
+            this.fixInputs = fixInputs == null ? new HashMap<>() : fixInputs;
             return this;
         }
 

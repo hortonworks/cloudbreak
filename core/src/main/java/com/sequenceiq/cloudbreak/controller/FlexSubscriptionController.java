@@ -3,6 +3,8 @@ package com.sequenceiq.cloudbreak.controller;
 import java.util.List;
 
 import javax.inject.Inject;
+import javax.transaction.Transactional;
+import javax.transaction.Transactional.TxType;
 
 import org.springframework.stereotype.Controller;
 
@@ -10,12 +12,16 @@ import com.sequenceiq.cloudbreak.api.endpoint.v1.FlexSubscriptionEndpoint;
 import com.sequenceiq.cloudbreak.api.model.FlexSubscriptionRequest;
 import com.sequenceiq.cloudbreak.api.model.FlexSubscriptionResponse;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
-import com.sequenceiq.cloudbreak.converter.FlexSubscriptionToJsonConverter;
 import com.sequenceiq.cloudbreak.converter.FlexSubscriptionRequestToFlexSubscriptionConverter;
+import com.sequenceiq.cloudbreak.converter.FlexSubscriptionToJsonConverter;
 import com.sequenceiq.cloudbreak.domain.FlexSubscription;
+import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
+import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
+import com.sequenceiq.cloudbreak.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.service.flex.FlexSubscriptionService;
 
 @Controller
+@Transactional(TxType.NEVER)
 public class FlexSubscriptionController implements FlexSubscriptionEndpoint {
 
     @Inject
@@ -56,7 +62,11 @@ public class FlexSubscriptionController implements FlexSubscriptionEndpoint {
 
     @Override
     public FlexSubscriptionResponse postPublic(FlexSubscriptionRequest flexSubscription) {
-        return createFlexSubscription(flexSubscription, true);
+        try {
+            return createFlexSubscription(flexSubscription, true);
+        } catch (TransactionExecutionException e) {
+            throw new TransactionRuntimeExecutionException(e);
+        }
     }
 
     @Override
@@ -87,7 +97,11 @@ public class FlexSubscriptionController implements FlexSubscriptionEndpoint {
 
     @Override
     public FlexSubscriptionResponse postPrivate(FlexSubscriptionRequest flexSubscription) {
-        return createFlexSubscription(flexSubscription, false);
+        try {
+            return createFlexSubscription(flexSubscription, false);
+        } catch (TransactionExecutionException e) {
+            throw new TransactionRuntimeExecutionException(e);
+        }
     }
 
     @Override
@@ -117,7 +131,7 @@ public class FlexSubscriptionController implements FlexSubscriptionEndpoint {
         flexService.setUsedForControllerFlexSubscription(flexSubscription.getName(), identityUser);
     }
 
-    private FlexSubscriptionResponse createFlexSubscription(FlexSubscriptionRequest json, boolean publicInAccount) {
+    private FlexSubscriptionResponse createFlexSubscription(FlexSubscriptionRequest json, boolean publicInAccount) throws TransactionExecutionException {
         IdentityUser identityUser = authenticatedUserService.getCbUser();
         FlexSubscription subscription = toFlexSubscriptionConverter.convert(json);
         subscription.setAccount(identityUser.getAccount());

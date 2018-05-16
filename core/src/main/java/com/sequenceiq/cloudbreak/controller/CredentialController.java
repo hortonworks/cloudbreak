@@ -5,6 +5,8 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.Resource;
+import javax.transaction.Transactional;
+import javax.transaction.Transactional.TxType;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -17,10 +19,13 @@ import com.sequenceiq.cloudbreak.api.model.CredentialResponse;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.domain.Credential;
+import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 
 @Component
+@Transactional(TxType.NEVER)
 public class CredentialController extends NotificationController implements CredentialEndpoint {
+
     @Resource
     @Qualifier("conversionService")
     private ConversionService conversionService;

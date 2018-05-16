@@ -330,7 +330,7 @@
       	  {
             "DeviceName" : { "Ref" : "RootDeviceName" },
             "Ebs" : {
-              "VolumeSize" : "50",
+              "VolumeSize" : "${group.rootVolumeSize}",
               "VolumeType" : "gp2"
             }
           }

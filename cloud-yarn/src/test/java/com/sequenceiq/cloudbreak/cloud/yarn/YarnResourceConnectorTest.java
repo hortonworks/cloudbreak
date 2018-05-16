@@ -30,7 +30,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.api.model.AdjustmentType;
-import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
+import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
@@ -172,7 +172,7 @@ public class YarnResourceConnectorTest {
         String loginUserName = null;
         String publicKey = null;
 
-        return new Group(name, type, instances, security, skeleton, instanceAuthentication, loginUserName, publicKey);
+        return new Group(name, type, instances, security, skeleton, instanceAuthentication, loginUserName, publicKey, 50);
     }
 
     private void setUpStackParameters(String yarnQueue, Integer yarnLifeTime) {

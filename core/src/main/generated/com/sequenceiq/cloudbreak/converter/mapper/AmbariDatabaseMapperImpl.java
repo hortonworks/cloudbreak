@@ -2,9 +2,9 @@ package com.sequenceiq.cloudbreak.converter.mapper;
 
 import com.sequenceiq.cloudbreak.api.model.AmbariDatabaseDetailsJson;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariDatabase;
-import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
-import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import javax.annotation.Generated;
 
 @Generated(
@@ -23,9 +23,7 @@ public class AmbariDatabaseMapperImpl implements AmbariDatabaseMapper {
 
         if ( ambariDatabaseDetailsJson != null ) {
             rDSConfig.setConnectionUserName( ambariDatabaseDetailsJson.getUserName() );
-            if ( ambariDatabaseDetailsJson.getVendor() != null ) {
-                rDSConfig.setDatabaseEngine( ambariDatabaseDetailsJson.getVendor().name() );
-            }
+            rDSConfig.setDatabaseEngine( ambariDatabaseDetailsJson.getVendor() );
             rDSConfig.setConnectionURL( mapConnectionUrl( ambariDatabaseDetailsJson ) );
             rDSConfig.setConnectionPassword( ambariDatabaseDetailsJson.getPassword() );
         }

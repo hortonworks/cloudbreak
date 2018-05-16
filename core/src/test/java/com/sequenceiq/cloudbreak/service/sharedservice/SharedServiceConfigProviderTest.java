@@ -15,7 +15,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -23,9 +22,7 @@ import java.util.Set;
 
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -36,24 +33,20 @@ import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.model.SharedServiceRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.ClusterV2Request;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
-import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.BlueprintInputParameters;
 import com.sequenceiq.cloudbreak.domain.BlueprintParameter;
-import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
-import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.json.Json;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 public class SharedServiceConfigProviderTest {
 
     private static final Long TEST_LONG_VALUE = 1L;
-
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
 
     @InjectMocks
     private SharedServiceConfigProvider underTest;
@@ -243,8 +236,8 @@ public class SharedServiceConfigProviderTest {
 
         underTest.configureCluster(requestedCluster, user, connectedClusterRequest);
 
-        verify(clusterService, times(1)).retrieveOutputs(TEST_LONG_VALUE, new LinkedHashSet<>());
-    }
+        verify(clusterService, times(1)).getById(TEST_LONG_VALUE);
+        verify(stackService, times(1)).get(TEST_LONG_VALUE);    }
 
     @Test
     public void testConfigureClusterWhenBlueprintAttributesisNotNullButItsValueIsNullThenBlueprintParameterJsonsShouldBeEmpty() throws IOException {
@@ -267,7 +260,8 @@ public class SharedServiceConfigProviderTest {
 
         underTest.configureCluster(requestedCluster, user, connectedClusterRequest);
 
-        verify(clusterService, times(1)).retrieveOutputs(TEST_LONG_VALUE, new LinkedHashSet<>());
+        verify(clusterService, times(1)).getById(TEST_LONG_VALUE);
+        verify(stackService, times(1)).get(TEST_LONG_VALUE);
     }
 
     @Test
@@ -291,8 +285,8 @@ public class SharedServiceConfigProviderTest {
 
         underTest.configureCluster(requestedCluster, user, connectedClusterRequest);
 
-        verify(clusterService, times(1)).retrieveOutputs(TEST_LONG_VALUE, new LinkedHashSet<>());
-    }
+        verify(clusterService, times(1)).getById(TEST_LONG_VALUE);
+        verify(stackService, times(1)).get(TEST_LONG_VALUE);    }
 
     @Test
     public void testConfigureClusterWhenBlueprintAttributesisNotNullAndItsValueIsNotEmptyThenBlueprintParameterJsonsShouldNotBeEmpty() throws IOException {
@@ -321,81 +315,10 @@ public class SharedServiceConfigProviderTest {
         verify(clusterService, times(0)).retrieveOutputs(TEST_LONG_VALUE, new HashSet<>());
     }
 
-    @Test
-    public void testConfigureClusterWhenRequestedClusterHasNoBlueprintInputsThenAnEmptyJsonShouldBePlacedInTheResultBlueprintInputField() throws IOException {
-        Cluster requestedCluster = createBarelyConfiguredRequestedCluster();
-
-        when(connectedClusterRequest.getSourceClusterName()).thenReturn(null);
-        when(connectedClusterRequest.getSourceClusterId()).thenReturn(TEST_LONG_VALUE);
-        when(stackService.get(TEST_LONG_VALUE)).thenReturn(publicStack);
-        when(publicStack.getId()).thenReturn(TEST_LONG_VALUE);
-        when(publicStackCluster.getId()).thenReturn(TEST_LONG_VALUE);
-        when(publicStack.getCluster()).thenReturn(publicStackCluster);
-        when(clusterService.getById(TEST_LONG_VALUE)).thenReturn(sourceCluster);
-        when(publicStackCluster.getLdapConfig()).thenReturn(ldapConfig);
-        when(blueprint.getInputParameters()).thenReturn(null);
-        when(clusterService.retrieveOutputs(anyLong(), any())).thenReturn(configsResponse);
-        when(newInputs.get(Map.class)).thenReturn(Collections.emptyMap());
-
-        Cluster result = underTest.configureCluster(requestedCluster, user, connectedClusterRequest);
-
-        Assert.assertNotNull(result.getBlueprintInputs());
-        Assert.assertEquals("{}", result.getBlueprintInputs().getValue());
-    }
-
-    @Test
-    public void testConfigureClusterWhenRequestedClusterHasBlueprintInputsThenTheseShouldBePlacedIntoTheResultClusterAsKeyValuePairs() throws IOException {
-        Cluster requestedCluster = createBarelyConfiguredRequestedCluster();
-        Map<String, String> keyValuePairs = new LinkedHashMap<>(2);
-        keyValuePairs.put("some_1", "value_1");
-        keyValuePairs.put("some_2", "value_2");
-
-        when(connectedClusterRequest.getSourceClusterName()).thenReturn(null);
-        when(connectedClusterRequest.getSourceClusterId()).thenReturn(TEST_LONG_VALUE);
-        when(stackService.get(TEST_LONG_VALUE)).thenReturn(publicStack);
-        when(publicStack.getId()).thenReturn(TEST_LONG_VALUE);
-        when(publicStackCluster.getId()).thenReturn(TEST_LONG_VALUE);
-        when(publicStack.getCluster()).thenReturn(publicStackCluster);
-        when(clusterService.getById(TEST_LONG_VALUE)).thenReturn(sourceCluster);
-        when(publicStackCluster.getLdapConfig()).thenReturn(ldapConfig);
-        when(blueprint.getInputParameters()).thenReturn(null);
-        when(clusterService.retrieveOutputs(anyLong(), any())).thenReturn(configsResponse);
-        when(newInputs.get(Map.class)).thenReturn(keyValuePairs);
-
-        Cluster result = underTest.configureCluster(requestedCluster, user, connectedClusterRequest);
-
-        Assert.assertEquals(keyValuePairs, result.getBlueprintInputs().getMap());
-    }
-
-    @Test
-    public void testConfigureClusterWhenIOExceptionComesOnBlueprintInputsProcessingThenBadRequestExceptionWoldComeInsteadThrownByUs() throws IOException {
-        Cluster requestedCluster = createBarelyConfiguredRequestedCluster();
-        String ioExceptionMessage = "IOException message";
-
-        thrown.expect(BadRequestException.class);
-        thrown.expectMessage(String.format("Could not propagate cluster input parameters: %s", ioExceptionMessage));
-
-        when(connectedClusterRequest.getSourceClusterName()).thenReturn(null);
-        when(connectedClusterRequest.getSourceClusterId()).thenReturn(TEST_LONG_VALUE);
-        when(stackService.get(TEST_LONG_VALUE)).thenReturn(publicStack);
-        when(publicStack.getId()).thenReturn(TEST_LONG_VALUE);
-        when(publicStackCluster.getId()).thenReturn(TEST_LONG_VALUE);
-        when(publicStack.getCluster()).thenReturn(publicStackCluster);
-        when(clusterService.getById(TEST_LONG_VALUE)).thenReturn(sourceCluster);
-        when(publicStackCluster.getLdapConfig()).thenReturn(ldapConfig);
-        when(blueprint.getInputParameters()).thenReturn(null);
-        when(clusterService.retrieveOutputs(anyLong(), any())).thenReturn(configsResponse);
-        when(configsResponse.getInputs()).thenReturn(Collections.emptySet());
-        when(newInputs.get(Map.class)).thenThrow(new IOException(ioExceptionMessage));
-
-        underTest.configureCluster(requestedCluster, user, connectedClusterRequest);
-    }
-
     private Cluster createBarelyConfiguredRequestedCluster() {
         Cluster requestedCluster = new Cluster();
         requestedCluster.setRdsConfigs(new LinkedHashSet<>());
         requestedCluster.setBlueprint(blueprint);
-        requestedCluster.setBlueprintInputs(newInputs);
         return requestedCluster;
     }
 

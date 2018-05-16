@@ -11,7 +11,6 @@ import com.sequenceiq.it.cloudbreak.AbstractCloudbreakIntegrationTest;
 import com.sequenceiq.it.cloudbreak.CloudbreakITContextConstants;
 import com.sequenceiq.it.cloudbreak.CloudbreakUtil;
 
-
 public class ClusterStopTest extends AbstractCloudbreakIntegrationTest {
     private static final String STOPPED = "STOPPED";
 

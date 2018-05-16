@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.openstack.common;
 
+import java.util.Optional;
+
 import javax.inject.Inject;
 
 import org.openstack4j.api.OSClient;
@@ -57,21 +59,23 @@ public class OpenStackSetup implements Setup {
     public ImageStatusResult checkImageStatus(AuthenticatedContext authenticatedContext, CloudStack stack, com.sequenceiq.cloudbreak.cloud.model.Image image) {
         String imageName = image.getImageName();
         OSClient osClient = openStackClient.createOSClient(authenticatedContext);
-        Image.ImageStatus imageStatus = openStackImageVerifier.getStatus(osClient, imageName);
-        ImageStatusResult imageStatusResult;
-        switch (imageStatus) {
-            case ACTIVE:
-                imageStatusResult = new ImageStatusResult(ImageStatus.CREATE_FINISHED, ImageStatusResult.COMPLETED);
-                break;
-            case QUEUED:
-            case SAVING:
-                imageStatusResult = new ImageStatusResult(ImageStatus.IN_PROGRESS, ImageStatusResult.HALF);
-                break;
-            default:
-                imageStatusResult = new ImageStatusResult(ImageStatus.CREATE_FAILED, ImageStatusResult.COMPLETED);
-                break;
-        }
-        LOGGER.info("OpenStack image result. name: {}, imageStatus: {}, imageStatusResult: {}", imageName, imageStatus, imageStatusResult);
+        Optional<Image.ImageStatus> optionalImageStatus = openStackImageVerifier.getStatus(osClient, imageName);
+
+        ImageStatusResult imageStatusResult = optionalImageStatus.map(imageStatus -> {
+            switch (imageStatus) {
+                case ACTIVE:
+                    return new ImageStatusResult(ImageStatus.CREATE_FINISHED, ImageStatusResult.COMPLETED);
+                case QUEUED:
+                case SAVING:
+                    return new ImageStatusResult(ImageStatus.IN_PROGRESS, ImageStatusResult.HALF);
+                default:
+                    return new ImageStatusResult(ImageStatus.CREATE_FAILED, ImageStatusResult.COMPLETED);
+            }
+        }).orElse(
+                new ImageStatusResult(ImageStatus.CREATE_FAILED, ImageStatusResult.COMPLETED)
+        );
+
+        LOGGER.info("OpenStack image result. name: {}, imageStatus: {}, imageStatusResult: {}", imageName, optionalImageStatus.orElse(null), imageStatusResult);
         return imageStatusResult;
     }
 
@@ -85,6 +89,4 @@ public class OpenStackSetup implements Setup {
     @Override
     public void validateFileSystem(CloudCredential credential, FileSystem fileSystem) {
     }
-
-
 }

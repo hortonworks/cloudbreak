@@ -6,7 +6,6 @@ import java.util.function.Function;
 import com.sequenceiq.cloudbreak.api.model.ldap.LdapValidationRequest;
 import com.sequenceiq.it.IntegrationTestContext;
 
-
 public class LdapTest extends LdapTestEntity {
     private static final String LDAPTEST = "LDAPTEST";
 
@@ -21,7 +20,7 @@ public class LdapTest extends LdapTestEntity {
     }
 
     static Function<IntegrationTestContext, LdapTest> getNew() {
-        return (testContext)->new LdapTest();
+        return (testContext) -> new LdapTest();
     }
 
     public static LdapTest request() {

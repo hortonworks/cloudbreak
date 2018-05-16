@@ -8,7 +8,6 @@ import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
 import com.sequenceiq.it.cloudbreak.newway.RepositoryConfigs;
 
-
 public class RepositoryConfigsTests extends CloudbreakTest {
     private static final String VALID_AMBARI_BASE_URL = "http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.6.1.3";
 

@@ -83,6 +83,11 @@ knox-create-sign-jks:
     - source: salt://gateway/config/gateway-site.xml.j2
     - template: jinja
 
+/var/lib/ambari-server/resources/common-services/KNOX/0.5.0.2.2/configuration/gateway-site.xml:
+  file.managed:
+    - source: salt://gateway/config/gateway-site.xml.j2
+    - template: jinja
+
 /usr/hdp/current/knox-server/conf/topologies/{{ salt['pillar.get']('gateway:topology') }}.xml:
   file.managed:
     - source: salt://gateway/config/topology.xml.j2

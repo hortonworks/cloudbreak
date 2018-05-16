@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.service.cluster.ambari;
 import org.springframework.stereotype.Service;
 
 import com.google.api.client.repackaged.com.google.common.base.Strings;
-import com.sequenceiq.cloudbreak.domain.Cluster;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 
 @Service
 public class AmbariSecurityConfigProvider {
