@@ -11,6 +11,8 @@ import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -81,6 +83,8 @@ public class ReactorFlowManagerTest {
     public void shouldReturnTheNextFailureTransition() {
         InstanceGroupAdjustmentJson instanceGroupAdjustment = new InstanceGroupAdjustmentJson();
         HostGroupAdjustmentJson hostGroupAdjustment = new HostGroupAdjustmentJson();
+        Set<Long> privateIds = new LinkedHashSet<>();
+        privateIds.add(1L);
 
         underTest.triggerProvisioning(stackId);
         underTest.triggerClusterInstall(stackId);
@@ -94,6 +98,7 @@ public class ReactorFlowManagerTest {
         underTest.triggerStackUpscale(stackId, instanceGroupAdjustment, true);
         underTest.triggerStackDownscale(stackId, instanceGroupAdjustment);
         underTest.triggerStackRemoveInstance(stackId, "hostgroup", 5L);
+        underTest.triggerStackRemoveInstances(stackId, "hostgroup", privateIds);
         underTest.triggerClusterUpscale(stackId, hostGroupAdjustment);
         underTest.triggerClusterDownscale(stackId, hostGroupAdjustment);
         underTest.triggerClusterSync(stackId);
