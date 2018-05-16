@@ -166,7 +166,7 @@ public class StackCreatorService {
 
         String platformString = platform(stack.cloudPlatform()).value().toLowerCase();
         StatedImage imgFromCatalog = imageService.determineImageFromCatalog(stackRequest.getImageId(), platformString,
-                stackRequest.getImageCatalog(), blueprint, shouldUseBaseImage(stackRequest.getClusterRequest()));
+                stackRequest.getImageCatalog(), blueprint, shouldUseBaseImage(stackRequest.getClusterRequest()), stackRequest.getOs());
 
         fillInstanceMetadata(stackRequest, stack);
         start = System.currentTimeMillis();

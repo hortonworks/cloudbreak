@@ -117,7 +117,7 @@ public class ImageCatalogServiceTest {
         when(userProfileService.get(user.getAccount(), user.getUserId())).thenReturn(userProfile);
         ReflectionTestUtils.setField(underTest, ImageCatalogService.class, "cbVersion", "2.1.0-dev.100", null);
 
-        StatedImage image = underTest.getLatestBaseImageDefaultPreferred("AWS");
+        StatedImage image = underTest.getLatestBaseImageDefaultPreferred("AWS", null);
         Assert.assertEquals("7aca1fa6-980c-44e2-a75e-3144b18a5993", image.getImage().getUuid());
         Assert.assertFalse(image.getImage().isDefaultImage());
     }
@@ -133,7 +133,7 @@ public class ImageCatalogServiceTest {
         when(userProfileService.get(user.getAccount(), user.getUserId())).thenReturn(userProfile);
         ReflectionTestUtils.setField(underTest, ImageCatalogService.class, "cbVersion", "2.1.0-dev.200", null);
 
-        StatedImage image = underTest.getLatestBaseImageDefaultPreferred("AWS");
+        StatedImage image = underTest.getLatestBaseImageDefaultPreferred("AWS", null);
         Assert.assertEquals("7aca1fa6-980c-44e2-a75e-3144b18a5993", image.getImage().getUuid());
         Assert.assertTrue(image.getImage().isDefaultImage());
     }
@@ -149,7 +149,7 @@ public class ImageCatalogServiceTest {
         when(userProfileService.get(user.getAccount(), user.getUserId())).thenReturn(userProfile);
         ReflectionTestUtils.setField(underTest, ImageCatalogService.class, "cbVersion", "2.1.0-dev.1", null);
 
-        StatedImage image = underTest.getLatestBaseImageDefaultPreferred("AWS");
+        StatedImage image = underTest.getLatestBaseImageDefaultPreferred("AWS", null);
         Assert.assertEquals("7aca1fa6-980c-44e2-a75e-3144b18a5993", image.getImage().getUuid());
         Assert.assertTrue(image.getImage().isDefaultImage());
     }
@@ -165,7 +165,7 @@ public class ImageCatalogServiceTest {
         when(userProfileService.get(user.getAccount(), user.getUserId())).thenReturn(userProfile);
         ReflectionTestUtils.setField(underTest, ImageCatalogService.class, "cbVersion", "2.1.0-dev.2", null);
 
-        StatedImage image = underTest.getLatestBaseImageDefaultPreferred("AWS");
+        StatedImage image = underTest.getLatestBaseImageDefaultPreferred("AWS", null);
         Assert.assertEquals("f6e778fc-7f17-4535-9021-515351df3691", image.getImage().getUuid());
         Assert.assertTrue(image.getImage().isDefaultImage());
     }

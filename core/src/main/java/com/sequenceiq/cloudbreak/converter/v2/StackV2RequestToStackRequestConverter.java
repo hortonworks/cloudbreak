@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.api.model.NetworkRequest;
 import com.sequenceiq.cloudbreak.api.model.OrchestratorRequest;
 import com.sequenceiq.cloudbreak.api.model.SharedServiceRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.StackRequest;
+import com.sequenceiq.cloudbreak.api.model.v2.ImageSettings;
 import com.sequenceiq.cloudbreak.api.model.v2.InstanceGroupV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
 import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
@@ -91,9 +92,11 @@ public class StackV2RequestToStackRequestConverter extends AbstractConversionSer
         OrchestratorRequest orchestrator = new OrchestratorRequest();
         orchestrator.setType("SALT");
         stackRequest.setOrchestrator(orchestrator);
-        if (source.getImageSettings() != null) {
-            stackRequest.setImageCatalog(source.getImageSettings().getImageCatalog());
-            stackRequest.setImageId(source.getImageSettings().getImageId());
+        ImageSettings imageSettings = source.getImageSettings();
+        if (imageSettings != null) {
+            stackRequest.setImageCatalog(imageSettings.getImageCatalog());
+            stackRequest.setImageId(imageSettings.getImageId());
+            stackRequest.setOs(imageSettings.getOs());
         }
         stackRequest.setFlexId(source.getFlexId());
         stackRequest.setCredentialName(source.getGeneral().getCredentialName());
