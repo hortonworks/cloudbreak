@@ -12,9 +12,9 @@
       "recipeIds": []
     },
     {
-      "name": "slave_1",
+      "name": "slave1",
       "constraint": {
-        "instanceGroupName": "slave_1",
+        "instanceGroupName": "slave1",
         "hostCount": 1
       },
       "recipeIds": []

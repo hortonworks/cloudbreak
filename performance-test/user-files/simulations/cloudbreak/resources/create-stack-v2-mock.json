@@ -52,7 +52,7 @@
 			"type": "GATEWAY"
 		},
 		{
-			"group": "slave_1",
+			"group": "slave1",
 			"nodeCount": 1,
 			"recipeNames": [],
 			"securityGroup": {

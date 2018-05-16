@@ -24,7 +24,7 @@
     {
       "templateId": ${mockTemplateId},
       "securityGroupId": ${mockSecurityGroupId},
-      "group": "slave_1",
+      "group": "slave1",
       "nodeCount": 1,
       "type": "CORE",
       "parameters": {

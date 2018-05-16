@@ -28,7 +28,7 @@
         "cardinality": "1"
       },
       {
-        "name": "slave_1",
+        "name": "slave1",
         "components": [
           {
             "name": "DATANODE"
