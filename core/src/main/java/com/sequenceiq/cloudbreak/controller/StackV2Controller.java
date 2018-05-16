@@ -209,6 +209,11 @@ public class StackV2Controller extends NotificationController implements StackV2
     }
 
     @Override
+    public Response deleteInstances(Long stackId, Set<String> instanceIds) {
+        return stackCommonService.deleteInstances(stackId, instanceIds);
+    }
+
+    @Override
     public CertificateResponse getCertificate(Long stackId) {
         return stackCommonService.getCertificate(stackId);
     }
