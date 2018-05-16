@@ -6,7 +6,10 @@ import static com.sequenceiq.cloudbreak.api.model.Status.STOP_REQUESTED;
 import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
 
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -437,6 +440,30 @@ public class StackService {
             downscaleValidatorService.checkUserHasRightToTerminateInstance(stack.isPublicInAccount(), stack.getOwner(), user.getUserId(), stackId);
             flowManager.triggerStackRemoveInstance(stackId, metaData.getInstanceGroupName(), metaData.getPrivateId());
         }
+    }
+
+    public void removeInstances(IdentityUser user, Long stackId, Set<String> instanceIds) {
+        Stack stack = get(stackId);
+        Map<String, Set<Long>> groupToDiscoveryPrivateIdMap = new HashMap<>();
+        for (String instanceId: instanceIds) {
+            InstanceMetaData metadata = instanceMetaDataRepository.findByInstanceId(stackId, instanceId);
+            if (metadata == null) {
+                throw new NotFoundException(String.format("Metadata for instance %s not found.", instanceId));
+            }
+            if (!stack.isPublicInAccount() && !stack.getOwner().equals(user.getUserId())) {
+                throw new BadRequestException(String.format("Private stack (%s) only modifiable by the owner.", stackId));
+            }
+            if (groupToDiscoveryPrivateIdMap.containsKey(metadata.getInstanceGroupName())) {
+                Set<Long> privateIds = groupToDiscoveryPrivateIdMap.get(metadata.getInstanceGroupName());
+                privateIds.add(metadata.getPrivateId());
+                groupToDiscoveryPrivateIdMap.put(metadata.getInstanceGroupName(), privateIds);
+            } else {
+                Set<Long> privateIds = new LinkedHashSet<>();
+                privateIds.add(metadata.getPrivateId());
+                groupToDiscoveryPrivateIdMap.put(metadata.getInstanceGroupName(), privateIds);
+            }
+        }
+        groupToDiscoveryPrivateIdMap.forEach((k, v) -> flowManager.triggerStackRemoveInstances(stackId, k, v));
     }
 
     public void updateStatus(Long stackId, StatusRequest status, boolean updateCluster) {
