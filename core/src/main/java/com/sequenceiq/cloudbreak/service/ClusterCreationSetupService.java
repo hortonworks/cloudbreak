@@ -35,6 +35,7 @@ import com.sequenceiq.cloudbreak.cloud.model.component.DefaultHDFEntries;
 import com.sequenceiq.cloudbreak.cloud.model.component.DefaultHDFInfo;
 import com.sequenceiq.cloudbreak.cloud.model.component.DefaultHDPEntries;
 import com.sequenceiq.cloudbreak.cloud.model.component.DefaultHDPInfo;
+import com.sequenceiq.cloudbreak.cloud.model.component.DefaultStackRepoDetails;
 import com.sequenceiq.cloudbreak.cloud.model.component.ManagementPackComponent;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackInfo;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
@@ -194,7 +195,8 @@ public class ClusterCreationSetupService {
     }
 
     private ClusterComponent determineHDPRepoConfig(Blueprint blueprint, long stackId, Optional<Component> stackHdpRepoConfig,
-            ClusterRequest request, Cluster cluster, IdentityUser user, Optional<Component> stackImageComponent) throws IOException {
+            ClusterRequest request, Cluster cluster, IdentityUser user, Optional<Component> stackImageComponent)
+            throws IOException, CloudbreakImageNotFoundException {
         Json stackRepoDetailsJson;
         AmbariStackDetailsJson ambariStackDetails = request.getAmbariStackDetails();
         if (!stackHdpRepoConfig.isPresent()) {
@@ -204,14 +206,16 @@ public class ClusterCreationSetupService {
                 StackRepoDetails stackRepoDetails = stackRepoDetailsConverter.convert(ambariStackDetails);
                 stackRepoDetailsJson = new Json(stackRepoDetails);
             } else {
-                StackRepoDetails stackRepoDetails = SerializationUtils.clone(defaultHDPInfo(blueprint, request, user).getRepo());
-                Optional<String> vdfUrl = getVDFUrlByOsType(stackId, stackRepoDetails);
+                DefaultStackRepoDetails stackRepoDetails = SerializationUtils.clone(defaultHDPInfo(blueprint, request, user).getRepo());
+                String osType = getOsType(stackId);
+                StackRepoDetails repo = createStackRepoDetails(stackRepoDetails, osType);
+                Optional<String> vdfUrl = getVDFUrlByOsType(osType, stackRepoDetails);
                 vdfUrl.ifPresent(s -> stackRepoDetails.getStack().put(CUSTOM_VDF_REPO_KEY, s));
                 if (ambariStackDetails != null) {
-                    stackRepoDetails.getMpacks().addAll(ambariStackDetails.getMpacks().stream().map(
+                    repo.getMpacks().addAll(ambariStackDetails.getMpacks().stream().map(
                             rmpack -> conversionService.convert(rmpack, ManagementPackComponent.class)).collect(Collectors.toList()));
                 }
-                stackRepoDetailsJson = new Json(stackRepoDetails);
+                stackRepoDetailsJson = new Json(repo);
             }
         } else {
             stackRepoDetailsJson = stackHdpRepoConfig.get().getAttributes();
@@ -223,6 +227,20 @@ public class ClusterCreationSetupService {
             }
         }
         return new ClusterComponent(ComponentType.HDP_REPO_DETAILS, stackRepoDetailsJson, cluster);
+    }
+
+    private StackRepoDetails createStackRepoDetails(DefaultStackRepoDetails stackRepoDetails, String osType) {
+        StackRepoDetails repo = new StackRepoDetails();
+        repo.setHdpVersion(stackRepoDetails.getHdpVersion());
+        repo.setStack(stackRepoDetails.getStack());
+        repo.setUtil(stackRepoDetails.getUtil());
+        repo.setEnableGplRepo(stackRepoDetails.isEnableGplRepo());
+        repo.setVerify(stackRepoDetails.isVerify());
+        List<ManagementPackComponent> mpacks = stackRepoDetails.getMpacks().get(osType);
+        if (mpacks != null) {
+            repo.setMpacks(mpacks);
+        }
+        return repo;
     }
 
     private void setOsTypeFromImageIfMissing(Cluster cluster, Optional<Component> stackImageComponent,
@@ -298,22 +316,20 @@ public class ClusterCreationSetupService {
         return root;
     }
 
-    private Optional<String> getVDFUrlByOsType(Long stackId, StackRepoDetails stackRepoDetails) {
-        String vdfStackRepoKeyFilter = VDF_REPO_KEY_PREFIX;
-        try {
-            Image image = componentConfigProvider.getImage(stackId);
-            if (!StringUtils.isEmpty(image.getOsType())) {
-                vdfStackRepoKeyFilter += image.getOsType();
-            }
-        } catch (CloudbreakImageNotFoundException e) {
-            LOGGER.error(String.format("Could not get Image Component for stack: '%s'.", stackId), e);
-        }
+    private String getOsType(Long stackId) throws CloudbreakImageNotFoundException {
+        Image image = componentConfigProvider.getImage(stackId);
+        return image.getOsType();
+    }
 
+    private Optional<String> getVDFUrlByOsType(String osType, DefaultStackRepoDetails stackRepoDetails) {
+        String vdfStackRepoKeyFilter = VDF_REPO_KEY_PREFIX;
+        if (!StringUtils.isEmpty(osType)) {
+            vdfStackRepoKeyFilter += osType;
+        }
         String filter = vdfStackRepoKeyFilter;
         return stackRepoDetails.getStack().entrySet().stream()
                 .filter(entry -> entry.getKey().startsWith(filter))
                 .map(Entry::getValue)
                 .findFirst();
     }
-
 }

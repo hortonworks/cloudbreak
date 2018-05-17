@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.StackDetails;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cloud.model.component.DefaultHDFEntries;
 import com.sequenceiq.cloudbreak.cloud.model.component.DefaultHDPEntries;
+import com.sequenceiq.cloudbreak.cloud.model.component.ManagementPackComponent;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackInfo;
 import com.sequenceiq.cloudbreak.service.DefaultAmbariRepoService;
 
@@ -48,7 +49,7 @@ public class ImagesToImagesResponseJsonConverter extends AbstractConversionServi
         for (Image hdpImg : source.getHdpImages()) {
             ImageResponse hdpImgJson = new ImageResponse();
             copyImageFieldsToJson(hdpImg, hdpImgJson);
-            hdpImgJson.setStackDetails(convertStackDetailsToJson(hdpImg.getStackDetails()));
+            hdpImgJson.setStackDetails(convertStackDetailsToJson(hdpImg.getStackDetails(), hdpImg.getOsType()));
             hdpImages.add(hdpImgJson);
         }
         res.setHdpImages(hdpImages);
@@ -57,7 +58,7 @@ public class ImagesToImagesResponseJsonConverter extends AbstractConversionServi
         for (Image hdfImg : source.getHdfImages()) {
             ImageResponse hdfImgJson = new ImageResponse();
             copyImageFieldsToJson(hdfImg, hdfImgJson);
-            hdfImgJson.setStackDetails(convertStackDetailsToJson(hdfImg.getStackDetails()));
+            hdfImgJson.setStackDetails(convertStackDetailsToJson(hdfImg.getStackDetails(), hdfImg.getOsType()));
             hdfImages.add(hdfImgJson);
         }
         res.setHdfImages(hdfImages);
@@ -102,11 +103,15 @@ public class ImagesToImagesResponseJsonConverter extends AbstractConversionServi
             }
             json.setRepo(repoJson);
             json.setVersion(info.getVersion());
-            json.setMpacks(info.getRepo().getMpacks().stream().map(mp -> {
-                ManagementPackEntry mpackEntry = new ManagementPackEntry();
-                mpackEntry.setMpackUrl(mp.getMpackUrl());
-                return mpackEntry;
-            }).collect(Collectors.toList()));
+            Map<String, List<ManagementPackEntry>> mpacks = new HashMap<>();
+            for (Map.Entry<String, List<ManagementPackComponent>> mp : info.getRepo().getMpacks().entrySet()) {
+                mpacks.put(mp.getKey(), mp.getValue().stream().map(mpack -> {
+                    ManagementPackEntry mpackEntry = new ManagementPackEntry();
+                    mpackEntry.setMpackUrl(mpack.getMpackUrl());
+                    return mpackEntry;
+                }).collect(Collectors.toList()));
+            }
+            json.setMpacks(mpacks);
             result.add(json);
         }
         return result;
@@ -128,15 +133,17 @@ public class ImagesToImagesResponseJsonConverter extends AbstractConversionServi
         json.setImageSetsByProvider(new HashMap<>(source.getImageSetsByProvider()));
     }
 
-    private StackDetailsJson convertStackDetailsToJson(StackDetails stackDetails) {
+    private StackDetailsJson convertStackDetailsToJson(StackDetails stackDetails, String osType) {
         StackDetailsJson json = new StackDetailsJson();
         json.setVersion(stackDetails.getVersion());
         json.setRepo(convertStackRepoDetailsToJson(stackDetails.getRepo()));
-        json.setMpacks(stackDetails.getMpackList().stream().map(mp -> {
+        Map<String, List<ManagementPackEntry>> mpacks = new HashMap<>();
+        mpacks.put(osType, stackDetails.getMpackList().stream().map(mp -> {
             ManagementPackEntry mpackEntry = new ManagementPackEntry();
             mpackEntry.setMpackUrl(mp.getMpackUrl());
             return mpackEntry;
         }).collect(Collectors.toList()));
+        json.setMpacks(mpacks);
         if (!stackDetails.getMpackList().isEmpty()) {
             // Backward compatibility for the previous version of UI
             json.getRepo().getStack().put(com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails.MPACK_TAG,

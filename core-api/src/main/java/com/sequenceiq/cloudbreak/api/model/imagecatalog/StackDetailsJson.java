@@ -1,7 +1,8 @@
 package com.sequenceiq.cloudbreak.api.model.imagecatalog;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -9,14 +10,13 @@ import com.sequenceiq.cloudbreak.api.model.JsonEntity;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class StackDetailsJson implements JsonEntity {
-
     @JsonProperty("version")
     private String version;
 
     @JsonProperty("repo")
     private StackRepoDetailsJson repo;
 
-    private List<ManagementPackEntry> mpacks = new ArrayList<>();
+    private Map<String, List<ManagementPackEntry>> mpacks = new HashMap<>();
 
     public String getVersion() {
         return version;
@@ -34,11 +34,11 @@ public class StackDetailsJson implements JsonEntity {
         this.repo = repo;
     }
 
-    public List<ManagementPackEntry> getMpacks() {
+    public Map<String, List<ManagementPackEntry>> getMpacks() {
         return mpacks;
     }
 
-    public void setMpacks(List<ManagementPackEntry> mpacks) {
+    public void setMpacks(Map<String, List<ManagementPackEntry>> mpacks) {
         this.mpacks = mpacks;
     }
 }

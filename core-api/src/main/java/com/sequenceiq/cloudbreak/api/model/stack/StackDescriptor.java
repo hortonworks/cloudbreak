@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.api.model.stack;
 
 import java.util.List;
+import java.util.Map;
 
 import com.sequenceiq.cloudbreak.api.model.AmbariInfoJson;
 import com.sequenceiq.cloudbreak.api.model.imagecatalog.ManagementPackEntry;
@@ -14,7 +15,7 @@ public class StackDescriptor {
 
     private StackRepoDetailsJson repo;
 
-    private List<ManagementPackEntry> mpacks;
+    private Map<String, List<ManagementPackEntry>> mpacks;
 
     private AmbariInfoJson ambari;
 
@@ -50,11 +51,11 @@ public class StackDescriptor {
         this.ambari = ambari;
     }
 
-    public List<ManagementPackEntry> getMpacks() {
+    public Map<String, List<ManagementPackEntry>> getMpacks() {
         return mpacks;
     }
 
-    public void setMpacks(List<ManagementPackEntry> mpacks) {
+    public void setMpacks(Map<String, List<ManagementPackEntry>> mpacks) {
         this.mpacks = mpacks;
     }
 }
