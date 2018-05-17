@@ -8,7 +8,7 @@ public class StackInfo implements Versioned {
 
     private String version;
 
-    private StackRepoDetails repo;
+    private DefaultStackRepoDetails repo;
 
     private String minAmbari;
 
@@ -29,14 +29,14 @@ public class StackInfo implements Versioned {
         this.minAmbari = minAmbari;
     }
 
-    public StackRepoDetails getRepo() {
+    public DefaultStackRepoDetails getRepo() {
         if (repo != null) {
             repo.setHdpVersion(version);
         }
         return repo;
     }
 
-    public void setRepo(StackRepoDetails repo) {
+    public void setRepo(DefaultStackRepoDetails repo) {
         this.repo = repo;
     }
 

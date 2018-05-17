@@ -23,9 +23,10 @@ import com.sequenceiq.cloudbreak.cloud.model.component.DefaultHDFEntries;
 import com.sequenceiq.cloudbreak.cloud.model.component.DefaultHDFInfo;
 import com.sequenceiq.cloudbreak.cloud.model.component.DefaultHDPEntries;
 import com.sequenceiq.cloudbreak.cloud.model.component.DefaultHDPInfo;
-import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
+import com.sequenceiq.cloudbreak.cloud.model.component.DefaultStackRepoDetails;
 import com.sequenceiq.cloudbreak.converter.mapper.AmbariInfoMapperImpl;
 import com.sequenceiq.cloudbreak.converter.mapper.AmbariRepoDetailsMapperImpl;
+import com.sequenceiq.cloudbreak.converter.mapper.ManagementPackComponentListMapMapperImpl;
 import com.sequenceiq.cloudbreak.converter.mapper.StackInfoMapperImpl;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -44,6 +45,9 @@ public class StackMatrixServiceTest {
     private StackInfoMapperImpl stackInfoMapper;
 
     @Spy
+    private ManagementPackComponentListMapMapperImpl managementPackComponentListMapMapper;
+
+    @Spy
     private AmbariInfoMapperImpl ambariInfoMapper;
 
     @Spy
@@ -55,6 +59,7 @@ public class StackMatrixServiceTest {
     @Before
     public void setUp() {
         Whitebox.setInternalState(ambariInfoMapper, ambariRepoDetailsMapper);
+        Whitebox.setInternalState(stackInfoMapper, managementPackComponentListMapMapper);
     }
 
     @Test
@@ -195,8 +200,8 @@ public class StackMatrixServiceTest {
         return ambariRepo;
     }
 
-    private StackRepoDetails getStackRepoDetails(String version) {
-        StackRepoDetails stackRepoDetails = new StackRepoDetails();
+    private DefaultStackRepoDetails getStackRepoDetails(String version) {
+        DefaultStackRepoDetails stackRepoDetails = new DefaultStackRepoDetails();
         stackRepoDetails.setHdpVersion(version);
         Map<String, String> stackRepo = new HashMap<>();
         stackRepo.put("centos7", "http://centos7-repo/" + version);
