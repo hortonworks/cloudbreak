@@ -141,22 +141,22 @@ cb:
   ambari:
     entries:
       2.6:
-        version: 2.6.1.3
+        version: 2.6.2.0
         repo:
           redhat6:
-            baseurl: http://public-repo-1.hortonworks.com/ambari/centos6/2.x/updates/2.6.1.3
+            baseurl: http://public-repo-1.hortonworks.com/ambari/centos6/2.x/updates/2.6.2.0
             gpgkey: http://public-repo-1.hortonworks.com/ambari/centos6/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins
           redhat7:
-            baseurl: http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.6.1.3
+            baseurl: http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.6.2.0
             gpgkey: http://public-repo-1.hortonworks.com/ambari/centos7/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins
           debian9:
-            baseurl: http://public-repo-1.hortonworks.com/ambari/debian9/2.x/updates/2.6.1.3
-            gpgkey: http://public-repo-1.hortonworks.com/ambari/centos7/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins
+            baseurl: http://public-repo-1.hortonworks.com/ambari/debian9/2.x/updates/2.6.2.0
+            gpgkey: http://public-repo-1.hortonworks.com/ambari/debian9/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins
           ubuntu16:
-            baseurl: http://public-repo-1.hortonworks.com/ambari/ubuntu16/2.x/updates/2.6.1.3
-            gpgkey: http://public-repo-1.hortonworks.com/ambari/centos7/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins
+            baseurl: http://public-repo-1.hortonworks.com/ambari/ubuntu16/2.x/updates/2.6.2.0
+            gpgkey: http://public-repo-1.hortonworks.com/ambari/ubuntu16/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins
           sles12:
-            baseurl: http://public-repo-1.hortonworks.com/ambari/sles12/2.x/updates/2.6.1.3
+            baseurl: http://public-repo-1.hortonworks.com/ambari/sles12/2.x/updates/2.6.2.0
             gpgkey: http://public-repo-1.hortonworks.com/ambari/sles12/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins
       2.7:
         version: 2.7.0.0-508
@@ -207,29 +207,29 @@ cb:
             debian9: http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.21/repos/debian9
             ubuntu16: http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.21/repos/ubuntu16
       2.6:
-        version: 2.6.4.5-2
+        version: 2.6.5.0
         minAmbari: 2.6
         repo:
           stack:
             repoid: HDP-2.6
-            redhat6: http://private-repo-1.hortonworks.com/HDP/centos6/2.x/updates/2.6.4.5-2
-            redhat7: http://private-repo-1.hortonworks.com/HDP/centos7/2.x/updates/2.6.4.5-2
-            debian9: http://private-repo-1.hortonworks.com/HDP/debian9/2.x/updates/2.6.4.5-2
-            ubuntu16: http://private-repo-1.hortonworks.com/HDP/ubuntu16/2.x/updates/2.6.4.5-2
-            sles12: http://private-repo-1.hortonworks.com/HDP/sles12/2.x/updates/2.6.4.5-2
-            repository-version: 2.6.4.5-2
-            vdf-redhat6: http://private-repo-1.hortonworks.com/HDP/centos6/2.x/updates/2.6.4.5-2/HDP-2.6.4.5-2.xml
-            vdf-redhat7: http://private-repo-1.hortonworks.com/HDP/centos7/2.x/updates/2.6.4.5-2/HDP-2.6.4.5-2.xml
-            vdf-debian9: http://private-repo-1.hortonworks.com/HDP/debian9/2.x/updates/2.6.4.5-2/HDP-2.6.4.5-2.xml
-            vdf-ubuntu16: http://private-repo-1.hortonworks.com/HDP/ubuntu16/2.x/updates/2.6.4.5-2/HDP-2.6.4.5-2.xml
-            vdf-sles12: http://private-repo-1.hortonworks.com/HDP/sles12/2.x/updates/2.6.4.5-2/HDP-2.6.4.5-2.xml
+            redhat6: http://public-repo-1.hortonworks.com/HDP/centos6/2.x/updates/2.6.5.0
+            redhat7: http://public-repo-1.hortonworks.com/HDP/centos7/2.x/updates/2.6.5.0
+            debian9: http://public-repo-1.hortonworks.com/HDP/debian9/2.x/updates/2.6.5.0
+            ubuntu16: http://public-repo-1.hortonworks.com/HDP/ubuntu16/2.x/updates/2.6.5.0
+            sles12: http://public-repo-1.hortonworks.com/HDP/sles12/2.x/updates/2.6.5.0
+            repository-version: 2.6.5.0
+            vdf-redhat6: http://public-repo-1.hortonworks.com/HDP/centos6/2.x/updates/2.6.5.0/HDP-2.6.5.0-292.xml
+            vdf-redhat7: http://public-repo-1.hortonworks.com/HDP/centos7/2.x/updates/2.6.5.0/HDP-2.6.5.0-292.xml
+            vdf-debian9: http://public-repo-1.hortonworks.com/HDP/debian9/2.x/updates/2.6.5.0/HDP-2.6.5.0-292.xml
+            vdf-ubuntu16: http://public-repo-1.hortonworks.com/HDP/ubuntu16/2.x/updates/2.6.5.0/HDP-2.6.5.0-292.xml
+            vdf-sles12: http://public-repo-1.hortonworks.com/HDP/sles12/2.x/updates/2.6.5.0/HDP-2.6.5.0-292.xml
           util:
             repoid: HDP-UTILS-1.1.0.22
-            redhat6: http://private-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/centos6
-            redhat7: http://private-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/centos7
-            debian9: http://private-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/debian9
-            ubuntu16: http://private-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/ubuntu16
-            sles12: http://private-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/sles12
+            redhat6: http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/centos6
+            redhat7: http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/centos7
+            debian9: http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/debian9
+            ubuntu16: http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/ubuntu16
+            sles12: http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/sles12
       3.0:
         version: 3.0.0.0-1334
         minAmbari: 2.7
