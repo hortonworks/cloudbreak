@@ -112,7 +112,8 @@ type ClusterRequest struct {
 	// ambari password
 	// Required: true
 	// Max Length: 100
-	// Min Length: 5
+	// Min Length: 8
+	// Pattern: ^(.{0,}(([a-zA-Z][^a-zA-Z])|([^a-zA-Z][a-zA-Z])).{1,})|(.{1,}(([a-zA-Z][^a-zA-Z])|([^a-zA-Z][a-zA-Z])).{1,})|(.{1,}(([a-zA-Z][^a-zA-Z])|([^a-zA-Z][a-zA-Z])).{0,})$
 	Password *string `json:"password"`
 
 	// proxy configuration name for the cluster
@@ -726,11 +727,15 @@ func (m *ClusterRequest) validatePassword(formats strfmt.Registry) error {
 		return err
 	}
 
-	if err := validate.MinLength("password", "body", string(*m.Password), 5); err != nil {
+	if err := validate.MinLength("password", "body", string(*m.Password), 8); err != nil {
 		return err
 	}
 
 	if err := validate.MaxLength("password", "body", string(*m.Password), 100); err != nil {
+		return err
+	}
+
+	if err := validate.Pattern("password", "body", string(*m.Password), `^(.{0,}(([a-zA-Z][^a-zA-Z])|([^a-zA-Z][a-zA-Z])).{1,})|(.{1,}(([a-zA-Z][^a-zA-Z])|([^a-zA-Z][a-zA-Z])).{1,})|(.{1,}(([a-zA-Z][^a-zA-Z])|([^a-zA-Z][a-zA-Z])).{0,})$`); err != nil {
 		return err
 	}
 

@@ -20,8 +20,8 @@ type ImageResponse struct {
 	// date
 	Date string `json:"date,omitempty"`
 
-	// default
-	Default *bool `json:"default,omitempty"`
+	// default image
+	DefaultImage *bool `json:"defaultImage,omitempty"`
 
 	// description
 	Description string `json:"description,omitempty"`
@@ -50,7 +50,7 @@ type ImageResponse struct {
 
 /* polymorph ImageResponse date false */
 
-/* polymorph ImageResponse default false */
+/* polymorph ImageResponse defaultImage false */
 
 /* polymorph ImageResponse description false */
 

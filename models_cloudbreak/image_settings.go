@@ -22,11 +22,16 @@ type ImageSettings struct {
 
 	// virtual machine image id from ImageCatalog, machines of the cluster will be started from this image
 	ImageID string `json:"imageId,omitempty"`
+
+	// os type of the image, this property is only considered when no specific image id is provided
+	Os string `json:"os,omitempty"`
 }
 
 /* polymorph ImageSettings imageCatalog false */
 
 /* polymorph ImageSettings imageId false */
+
+/* polymorph ImageSettings os false */
 
 // Validate validates this image settings
 func (m *ImageSettings) Validate(formats strfmt.Registry) error {
