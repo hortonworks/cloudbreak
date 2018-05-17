@@ -21,12 +21,12 @@ import com.sequenceiq.cloudbreak.api.model.ConnectedClusterRequest;
 import com.sequenceiq.cloudbreak.api.model.CustomContainerRequest;
 import com.sequenceiq.cloudbreak.api.model.ExecutorType;
 import com.sequenceiq.cloudbreak.api.model.FileSystemRequest;
-import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupRequest;
 import com.sequenceiq.cloudbreak.api.model.JsonEntity;
 import com.sequenceiq.cloudbreak.api.model.KerberosRequest;
 import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigRequest;
 import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.GatewayJson;
+import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupRequest;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
@@ -38,7 +38,7 @@ public class ClusterRequest implements JsonEntity {
 
     @Size(max = 40, min = 5, message = "The length of the cluster's name has to be in range of 5 to 40")
     @Pattern(regexp = "(^[a-z][-a-z0-9]*[a-z0-9]$)",
-        message = "The name of the cluster can only contain lowercase alphanumeric characters and hyphens and has to start with an alphanumeric character")
+            message = "The name of the cluster can only contain lowercase alphanumeric characters and hyphens and has to start with an alphanumeric character")
     @NotNull
     @ApiModelProperty(value = ModelDescriptions.NAME, required = true)
     private String name;
@@ -73,15 +73,15 @@ public class ClusterRequest implements JsonEntity {
 
     @Size(max = 15, min = 5, message = "The length of the username has to be in range of 5 to 15")
     @Pattern(regexp = "(^[a-z][-a-z0-9]*[a-z0-9]$)",
-        message = "The username can only contain lowercase alphanumeric characters and hyphens and has start with an alphanumeric character")
+            message = "The username can only contain lowercase alphanumeric characters and hyphens and has start with an alphanumeric character")
     @NotNull
     @ApiModelProperty(value = StackModelDescription.USERNAME, required = true)
     private String userName;
 
     @NotNull
     @Size(max = 100, min = 8, message = "The length of the password has to be in range of 8 to 100")
-    @Pattern(regexp = "^(?=.*[A-Za-z])(?=.*\\d).*$",
-        message = "Password should be minimum 8 characters with at least one alphabet and numeric")
+    @Pattern(regexp = "^(.{0,}(([a-zA-Z][^a-zA-Z])|([^a-zA-Z][a-zA-Z])).{1,})|(.{1,}(([a-zA-Z][^a-zA-Z])|([^a-zA-Z][a-zA-Z])).{1,})|(.{1,}(([a-zA-Z]"
+            + "[^a-zA-Z])|([^a-zA-Z][a-zA-Z])).{0,})$", message = "Password should be minimum 8 characters with at least one alphabet and numeric")
     @ApiModelProperty(value = StackModelDescription.PASSWORD, required = true)
     private String password;
 
