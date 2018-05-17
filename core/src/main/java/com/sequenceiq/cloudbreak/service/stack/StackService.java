@@ -444,14 +444,12 @@ public class StackService {
 
     public void removeInstances(IdentityUser user, Long stackId, Set<String> instanceIds) {
         Stack stack = get(stackId);
+        authorizationService.hasWritePermission(stack);
         Map<String, Set<Long>> groupToDiscoveryPrivateIdMap = new HashMap<>();
         for (String instanceId: instanceIds) {
             InstanceMetaData metadata = instanceMetaDataRepository.findByInstanceId(stackId, instanceId);
             if (metadata == null) {
                 throw new NotFoundException(String.format("Metadata for instance %s not found.", instanceId));
-            }
-            if (!stack.isPublicInAccount() && !stack.getOwner().equals(user.getUserId())) {
-                throw new BadRequestException(String.format("Private stack (%s) only modifiable by the owner.", stackId));
             }
             if (groupToDiscoveryPrivateIdMap.containsKey(metadata.getInstanceGroupName())) {
                 Set<Long> privateIds = groupToDiscoveryPrivateIdMap.get(metadata.getInstanceGroupName());
