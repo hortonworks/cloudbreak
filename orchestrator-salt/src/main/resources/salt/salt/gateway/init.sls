@@ -203,15 +203,6 @@ start-knox-gateway:
 
 {% endif %}
 
-{% if 'HDF' in salt['pillar.get']('hdp:stack:repoid') %}
-
-/etc/knox/conf.hdf:
-  file.copy:
-    - source: /etc/knox/conf
-    - preserve: True
-
-{% endif %}
-
 {% if salt['pillar.get']('hdp:stack:vdf-url') != None %}
 
 add_vdf_parse_script_agent:
@@ -228,15 +219,5 @@ run_vdf_parse_script_agent:
     - unless: ls /var/log/add_vdf_parse_script_agent.log
     - require:
       - file: add_vdf_parse_script_agent
-
-{% endif %}
-
-{% if 'HDF' in salt['pillar.get']('hdp:stack:repoid') %}
-
-/etc/yum.repos.d/KNOX.repo:
-  file.managed:
-    - replace: False
-    - source: salt://gateway/yum/knox.repo
-    - template: jinja
 
 {% endif %}
