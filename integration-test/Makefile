@@ -50,3 +50,6 @@ revert-db:
 
 cbd-delete:
 	./scripts/cbd-delete.sh
+
+upload-s3:
+	aws s3 cp ./apidefinitions/new.json s3://cloudbreak-swagger/swagger-$(VERSION).json --acl public-read
