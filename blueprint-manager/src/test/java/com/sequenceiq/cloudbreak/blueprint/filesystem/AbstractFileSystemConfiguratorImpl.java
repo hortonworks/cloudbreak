@@ -13,7 +13,7 @@ import com.sequenceiq.cloudbreak.domain.Credential;
 public class AbstractFileSystemConfiguratorImpl extends AbstractFileSystemConfigurator<FileSystemConfiguration> {
 
     @Override
-    protected List<FileSystemScriptConfig> getScriptConfigs(Credential credential, FileSystemConfiguration fsConfig) {
+    protected List<FileSystemScriptConfig> getScriptConfigs(Credential credential) {
 
         if (credential.getId() == 1) {
             return Arrays.asList(new FileSystemScriptConfig("file-system-config.script",

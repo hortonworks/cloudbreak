@@ -9,13 +9,9 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.blueprint.configuration.HostgroupConfigurations;
-import com.sequenceiq.cloudbreak.blueprint.filesystem.FileSystemConfigurationProvider;
 
 @Component
 public class BlueprintComponentProviderProcessor {
-
-    @Inject
-    private FileSystemConfigurationProvider fileSystemConfigurationProvider;
 
     @Inject
     private List<BlueprintComponentConfigProvider> blueprintComponentConfigProviders;

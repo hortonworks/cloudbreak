@@ -18,7 +18,7 @@ public abstract class AbstractFileSystemConfigurator<T extends FileSystemConfigu
     public List<RecipeScript> getScripts(Credential credential, T fsConfig) {
         List<RecipeScript> scripts = new ArrayList<>();
         try {
-            for (FileSystemScriptConfig fsScriptConfig : getScriptConfigs(credential, fsConfig)) {
+            for (FileSystemScriptConfig fsScriptConfig : getScriptConfigs(credential)) {
                 String script = FileReaderUtils.readFileFromClasspath(fsScriptConfig.getScriptLocation());
                 for (Entry<String, String> entry : fsScriptConfig.getProperties().entrySet()) {
                     script = script.replaceAll("\\$" + entry.getKey(), entry.getValue());
@@ -31,6 +31,10 @@ public abstract class AbstractFileSystemConfigurator<T extends FileSystemConfigu
         return scripts;
     }
 
+    protected List<FileSystemScriptConfig> getScriptConfigs(Credential credential) {
+        return Collections.emptyList();
+    }
+
     @Override
     public Map<String, String> createResources(T fsConfig) {
         return Collections.emptyMap();
@@ -40,7 +44,5 @@ public abstract class AbstractFileSystemConfigurator<T extends FileSystemConfigu
     public Map<String, String> deleteResources(T fsConfig) {
         return Collections.emptyMap();
     }
-
-    protected abstract List<FileSystemScriptConfig> getScriptConfigs(Credential credential, T fsConfig);
 
 }

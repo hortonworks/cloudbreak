@@ -61,7 +61,7 @@ public class DatabaseVendorTest {
     public static RDSConfigRequest rdsConfigRequest(String jdbcUrl, Optional<OracleParameters> oracleParameters) {
         RDSConfigRequest rdsConfigRequest = new RDSConfigRequest();
         rdsConfigRequest.setConnectionURL(jdbcUrl);
-        rdsConfigRequest.setOracleParameters(oracleParameters.orElse(null));
+        rdsConfigRequest.setOracle(oracleParameters.orElse(null));
         return rdsConfigRequest;
     }
 

@@ -104,7 +104,7 @@ public enum DatabaseVendor {
 
     private static Optional<RdsConfigRequestParameters> getParameters(RDSConfigRequest configRequest) {
         if (configRequest.getConnectionURL().contains(String.format("jdbc:%s:", ORACLE11.jdbcUrlDriverId))) {
-            return Optional.ofNullable(configRequest.getOracleParameters());
+            return Optional.ofNullable(configRequest.getOracle());
         }
         return Optional.empty();
     }
