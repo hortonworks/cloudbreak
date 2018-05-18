@@ -11,8 +11,6 @@ import org.springframework.stereotype.Component;
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.blueprint.template.BlueprintTemplateProcessor;
 
-import groovyx.net.http.HttpResponseException;
-
 @Component
 public class CentralBlueprintUpdater {
 
@@ -27,7 +25,7 @@ public class CentralBlueprintUpdater {
     @Inject
     private BlueprintComponentProviderProcessor blueprintComponentProviderProcessor;
 
-    public String getBlueprintText(BlueprintPreparationObject source) throws BlueprintProcessingException, HttpResponseException {
+    public String getBlueprintText(BlueprintPreparationObject source) throws BlueprintProcessingException {
         String blueprintText = source.getBlueprintView().getBlueprintText();
         try {
             blueprintText = updateBlueprintConfiguration(source, blueprintText);

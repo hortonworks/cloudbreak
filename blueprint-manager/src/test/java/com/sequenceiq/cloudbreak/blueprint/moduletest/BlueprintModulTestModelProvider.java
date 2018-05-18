@@ -87,7 +87,10 @@ class BlueprintModulTestModelProvider {
     }
 
     static BlueprintPreparationObject blueprintObjectWhenKerberosPresentedThenKerberosShouldConfigured() throws JsonProcessingException {
+        GeneralClusterConfigs configWithGateWay = generalClusterConfigs();
+        configWithGateWay.setGatewayInstanceMetadataPresented(true);
         return getPreparedBuilder("master", "slave_1")
+                .withGeneralClusterConfigs(configWithGateWay)
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
                 .withKerberosConfig(kerberosConfig())
                 .build();

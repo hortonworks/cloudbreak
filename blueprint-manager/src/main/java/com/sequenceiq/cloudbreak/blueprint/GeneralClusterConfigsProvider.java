@@ -54,6 +54,9 @@ public class GeneralClusterConfigsProvider {
         generalClusterConfigs.setAmbariIp("pending...");
         generalClusterConfigs.setInstanceGroupsPresented(instanceMetadataPresented);
         generalClusterConfigs.setPassword(stack.getCluster().getAmbari().getPassword());
+        if (stack.getCluster().getAmbari().getGateway() != null) {
+            gatewayInstanceMetadataPresented = true;
+        }
         generalClusterConfigs.setGatewayInstanceMetadataPresented(gatewayInstanceMetadataPresented);
         generalClusterConfigs.setClusterName(stack.getGeneral().getName());
         generalClusterConfigs.setExecutorType(stack.getCluster().getExecutorType());

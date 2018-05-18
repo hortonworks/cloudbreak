@@ -173,8 +173,6 @@ public class AmbariClusterSetupService implements ClusterSetupService {
             ambariClusterCreationSuccessHandler.handleClusterCreationSuccess(stack, cluster);
         } catch (CancellationException cancellationException) {
             throw cancellationException;
-        } catch (HttpResponseException hre) {
-            throw new AmbariOperationFailedException("Ambari could not create the cluster: " + AmbariClientExceptionUtil.getErrorMessage(hre), hre);
         } catch (Exception e) {
             LOGGER.error("Error while building the Ambari cluster. Message {}, throwable: {}", e.getMessage(), e);
             throw new AmbariOperationFailedException(e.getMessage(), e);

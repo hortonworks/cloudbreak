@@ -156,9 +156,9 @@ public class BlueprintModulTest extends CentralBlueprintContext {
         StringBuilder messageBuilder = new StringBuilder();
         messageBuilder.append("The result has not matched with the expected output " + outputFile.getFileName());
         messageBuilder.append("\nexpected:\n");
-        messageBuilder.append(expected.toString());
+        messageBuilder.append(expected);
         messageBuilder.append("\nactual:\n");
-        messageBuilder.append(resultBlueprintText.toString());
+        messageBuilder.append(resultBlueprintText);
         LOGGER.info(messageBuilder.toString());
 
         assertJsonEquals(expected.toString(), resultBlueprintText.toString(), when(IGNORING_ARRAY_ORDER));
