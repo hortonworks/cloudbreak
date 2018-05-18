@@ -90,11 +90,13 @@ public class CachedImageCatalogProvider {
             return catalog;
         }
 
-        List<Image> filteredBaseImages = filterImages(catalog.getImages().getBaseImages(), enabledOsPredicate());
-        List<Image> filteredHdpImages = filterImages(catalog.getImages().getHdpImages(), enabledOsPredicate());
-        List<Image> filteredHdfImages = filterImages(catalog.getImages().getHdfImages(), enabledOsPredicate());
+        Images catalogImages = catalog.getImages();
 
-        Images images = new Images(filteredBaseImages, filteredHdpImages, filteredHdfImages);
+        List<Image> filteredBaseImages = filterImages(catalogImages.getBaseImages(), enabledOsPredicate());
+        List<Image> filteredHdpImages = filterImages(catalogImages.getHdpImages(), enabledOsPredicate());
+        List<Image> filteredHdfImages = filterImages(catalogImages.getHdfImages(), enabledOsPredicate());
+
+        Images images = new Images(filteredBaseImages, filteredHdpImages, filteredHdfImages, catalogImages.getSuppertedVersions());
         return new CloudbreakImageCatalogV2(images, catalog.getVersions());
     }
 
