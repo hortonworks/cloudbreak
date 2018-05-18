@@ -153,7 +153,7 @@ func createRdsImpl(client rdsClient, name string, username string, password stri
 		ConnectorJarURL:    jarURL,
 	}
 	if oracle != nil {
-		rdsRequest.OracleParameters = oracle
+		rdsRequest.Oracle = oracle
 	}
 	var rdsResponse *models_cloudbreak.RDSConfigResponse
 	if public {
