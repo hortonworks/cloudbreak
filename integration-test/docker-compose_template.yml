@@ -23,5 +23,5 @@ swagger-diff:
   dns:
   volumes:
     - ./apidefinitions:/json 
-  command: bash -c "curl -k http://cloudbreak.service.consul:8080/cb/api/swagger.json -o new.json && for f in /json/*.json ; do echo check to $${f} ; swagger-diff -i $${f} new.json ; done ;"
+  command: bash -c "curl -k http://cloudbreak.service.consul:8080/cb/api/swagger.json -o new.json && for f in /json/*.json ; do echo check to $${f} ; swagger-diff -i $${f} new.json ; done ; cp new.json /json"
   image: afarsang/docker-swagger-diff
