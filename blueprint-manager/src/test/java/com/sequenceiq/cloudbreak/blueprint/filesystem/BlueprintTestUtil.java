@@ -19,7 +19,7 @@ public class BlueprintTestUtil {
         GeneralClusterConfigs generalClusterConfigs = new GeneralClusterConfigs();
         generalClusterConfigs.setAmbariIp("10.1.1.1");
         generalClusterConfigs.setInstanceGroupsPresented(true);
-        generalClusterConfigs.setGatewayInstanceMetadataPresented(true);
+        generalClusterConfigs.setGatewayInstanceMetadataPresented(false);
         generalClusterConfigs.setClusterName("clustername");
         generalClusterConfigs.setExecutorType(ExecutorType.DEFAULT);
         generalClusterConfigs.setStackName("clustername");

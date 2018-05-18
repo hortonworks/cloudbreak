@@ -89,6 +89,9 @@
       "components": [
         {
           "name": "KERBEROS_CLIENT"
+        },
+        {
+          "name": "KNOX_GATEWAY"
         }
       ],
       "configurations": [],
