@@ -211,6 +211,42 @@ public class ImageCatalogServiceTest {
     }
 
     @Test
+    public void testGetImagesWhenLatestVersionDoesntExistInCatalogShouldReturnWithReleasedVersionIfExists() throws Exception {
+        ImageCatalog imageCatalog = new ImageCatalog();
+        imageCatalog.setImageCatalogUrl("");
+        imageCatalog.setImageCatalogName("default");
+        StatedImages images = underTest.getImages(imageCatalog, "aws", "2.6.0");
+
+        boolean match = images.getImages().getHdpImages().stream()
+                .anyMatch(img -> img.getUuid().equals("2.5.0.2-65-5288855d-d7b9-4b90-b326-ab4b168cf581-2.6.0.1-145"));
+        Assert.assertTrue("Result doesn't contain the required Ambari image with id.", match);
+    }
+
+    @Test
+    public void testGetImagesWhenLatestDevVersionDoesntExistInCatalogShouldReturnWithReleasedVersionIfExists() throws Exception {
+        ImageCatalog imageCatalog = new ImageCatalog();
+        imageCatalog.setImageCatalogUrl("");
+        imageCatalog.setImageCatalogName("default");
+        StatedImages images = underTest.getImages(imageCatalog, "aws", "2.6.0-dev.132");
+
+        boolean match = images.getImages().getHdpImages().stream()
+                .anyMatch(img -> img.getUuid().equals("2.5.0.2-65-5288855d-d7b9-4b90-b326-ab4b168cf581-2.6.0.1-145"));
+        Assert.assertTrue("Result doesn't contain the required Ambari image with id.", match);
+    }
+
+    @Test
+    public void testGetImagesWhenLatestRcVersionDoesntExistInCatalogShouldReturnWithReleasedVersionIfExists() throws Exception {
+        ImageCatalog imageCatalog = new ImageCatalog();
+        imageCatalog.setImageCatalogUrl("");
+        imageCatalog.setImageCatalogName("default");
+        StatedImages images = underTest.getImages(imageCatalog, "aws", "2.6.0-rc.13");
+
+        boolean match = images.getImages().getHdpImages().stream()
+                .anyMatch(img -> img.getUuid().equals("2.5.0.2-65-5288855d-d7b9-4b90-b326-ab4b168cf581-2.6.0.1-145"));
+        Assert.assertTrue("Result doesn't contain the required Ambari image with id.", match);
+    }
+
+    @Test
     public void testGetImagesWhenSimilarDevVersionDoesntExistInCatalogShouldReturnWithReleasedVersionIfExists() throws Exception {
         ImageCatalog imageCatalog = new ImageCatalog();
         imageCatalog.setImageCatalogUrl("");

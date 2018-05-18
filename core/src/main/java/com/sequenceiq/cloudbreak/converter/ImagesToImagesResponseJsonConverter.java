@@ -61,7 +61,7 @@ public class ImagesToImagesResponseJsonConverter extends AbstractConversionServi
             hdfImages.add(hdfImgJson);
         }
         res.setHdfImages(hdfImages);
-
+        res.setSupportedVersions(source.getSuppertedVersions());
         return res;
     }
 
