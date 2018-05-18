@@ -22,8 +22,8 @@ public class RDSConfigRequest extends RDSConfigJson {
     @ApiModelProperty(value = RDSConfig.PASSWORD, required = true)
     private String connectionPassword;
 
-    @ApiModelProperty(value = RDSConfig.ORACLE)
-    private OracleParameters oracleParameters;
+    @ApiModelProperty(RDSConfig.ORACLE)
+    private OracleParameters oracle;
 
     public String getConnectionUserName() {
         return connectionUserName;
@@ -41,11 +41,11 @@ public class RDSConfigRequest extends RDSConfigJson {
         this.connectionPassword = connectionPassword;
     }
 
-    public OracleParameters getOracleParameters() {
-        return oracleParameters;
+    public OracleParameters getOracle() {
+        return oracle;
     }
 
-    public void setOracleParameters(OracleParameters oracleParameters) {
-        this.oracleParameters = oracleParameters;
+    public void setOracle(OracleParameters oracle) {
+        this.oracle = oracle;
     }
 }

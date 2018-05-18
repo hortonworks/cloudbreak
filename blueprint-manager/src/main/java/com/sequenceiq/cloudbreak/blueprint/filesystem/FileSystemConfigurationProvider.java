@@ -1,9 +1,7 @@
 package com.sequenceiq.cloudbreak.blueprint.filesystem;
 
 import java.io.IOException;
-import java.util.Map;
 
-import javax.annotation.Resource;
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
@@ -18,9 +16,6 @@ import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 @Service
 public class FileSystemConfigurationProvider {
-
-    @Resource
-    private Map<FileSystemType, FileSystemConfigurator<FileSystemConfiguration>> fileSystemConfigurators;
 
     @Inject
     private AzureFileSystemConfigProvider azureFileSystemConfigProvider;

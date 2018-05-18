@@ -27,7 +27,7 @@ public class GcsFileSystemConfigurator extends AbstractFileSystemConfigurator<Gc
     private static final Logger LOGGER = LoggerFactory.getLogger(GcsFileSystemConfigurator.class);
 
     @Override
-    protected List<FileSystemScriptConfig> getScriptConfigs(Credential credential, GcsFileSystemConfiguration fsConfig) {
+    protected List<FileSystemScriptConfig> getScriptConfigs(Credential credential) {
         Map<String, String> properties = Collections.singletonMap("P12KEY", getPrivateKey(credential));
         List<FileSystemScriptConfig> fsScriptConfigs = new ArrayList<>();
         fsScriptConfigs.add(new FileSystemScriptConfig("scripts/gcs-p12.sh", POST_AMBARI_START, ALL_NODES, properties));

@@ -9,5 +9,3 @@ ALTER TABLE cluster DROP COLUMN IF EXISTS blueprintcustomproperties;
 -- SQL to undo the change goes here.
 
 ALTER TABLE stack DROP COLUMN IF EXISTS inputs;
-ALTER TABLE cluster ADD COLUMN blueprintcustomproperties TEXT;
-ALTER TABLE cluster ADD COLUMN blueprintinputs TEXT;

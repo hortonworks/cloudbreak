@@ -4,9 +4,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
-import javax.annotation.Resource;
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -14,21 +12,18 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
-import com.sequenceiq.cloudbreak.api.model.FileSystemType;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceStatus;
-import com.sequenceiq.cloudbreak.blueprint.filesystem.FileSystemConfigurator;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
-import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterTerminationService;
-import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderConnectorAdapter;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @Service
 public class TerminationService {
@@ -37,10 +32,7 @@ public class TerminationService {
     private static final String DELIMITER = "_";
 
     @Inject
-    private ServiceProviderConnectorAdapter connector;
-
-    @Inject
-    private StackRepository stackRepository;
+    private StackService stackService;
 
     @Inject
     private InstanceGroupRepository instanceGroupRepository;
@@ -60,11 +52,8 @@ public class TerminationService {
     @Inject
     private TransactionService transactionService;
 
-    @Resource
-    private Map<FileSystemType, FileSystemConfigurator<?>> fileSystemConfigurators;
-
     public void finalizeTermination(Long stackId, boolean force) {
-        Stack stack = stackRepository.findOneWithLists(stackId);
+        Stack stack = stackService.getByIdWithLists(stackId);
         try {
             Date now = new Date();
             String terminatedName = stack.getName() + DELIMITER + now.getTime();
@@ -87,7 +76,7 @@ public class TerminationService {
                 stack.setName(terminatedName);
                 terminateInstanceGroups(stack);
                 terminateMetaDataInstances(stack);
-                stackRepository.save(stack);
+                stackService.save(stack);
                 stackUpdater.updateStackStatus(stackId, DetailedStackStatus.DELETE_COMPLETED, "Stack was terminated successfully.");
                 return null;
             });
