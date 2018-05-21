@@ -48,6 +48,9 @@ public class CloudResourceAdvisor {
     @Inject
     private StackServiceComponentDescriptors stackServiceComponentDescs;
 
+    @Inject
+    private DefaultRootVolumeSizeProvider defaultRootVolumeSizeProvider;
+
     public PlatformRecommendation createForBlueprint(String blueprintName, Long blueprintId, PlatformResourceRequest resourceRequest, IdentityUser cbUser) {
         String cloudPlatform = resourceRequest.getCloudPlatform();
         String region = resourceRequest.getRegion();
@@ -78,9 +81,11 @@ public class CloudResourceAdvisor {
             availableVmTypes = Collections.emptySet();
         }
         if (recommendations != null) {
-            Map<String, VmType> masterVmTypes = getVmTypesForComponentType(true, recommendations.getMaster(), hostGroupContainsMasterComp, availableVmTypes);
+            Map<String, VmType> masterVmTypes = getVmTypesForComponentType(true, recommendations.getMaster(),
+                    hostGroupContainsMasterComp, availableVmTypes, cloudPlatform);
             vmTypesByHostGroup.putAll(masterVmTypes);
-            Map<String, VmType> workerVmTypes = getVmTypesForComponentType(false, recommendations.getWorker(), hostGroupContainsMasterComp, availableVmTypes);
+            Map<String, VmType> workerVmTypes = getVmTypesForComponentType(false, recommendations.getWorker(),
+                    hostGroupContainsMasterComp, availableVmTypes, cloudPlatform);
             vmTypesByHostGroup.putAll(workerVmTypes);
         }
 
@@ -123,7 +128,8 @@ public class CloudResourceAdvisor {
     private Map<String, VmType> getVmTypesForComponentType(boolean containsMasterComponent,
             VmRecommendation recommendation,
             Map<String, Boolean> hostGroupContainsMasterComp,
-            Collection<VmType> availableVmTypes) {
+            Collection<VmType> availableVmTypes,
+            String cloudPlatform) {
         Map<String, VmType> result = new HashMap<>();
         Optional<VmType> masterVmType = getVmTypeByFlavor(recommendation.getFlavor(), availableVmTypes);
         if (masterVmType.isPresent()) {
@@ -131,7 +137,7 @@ public class CloudResourceAdvisor {
                 Boolean hasMasterComponentType = entry.getValue();
                 if (hasMasterComponentType == containsMasterComponent) {
                     VmType vmType = masterVmType.get();
-                    decorateWithRecommendation(vmType, recommendation);
+                    decorateWithRecommendation(vmType, recommendation, cloudPlatform);
                     result.put(entry.getKey(), vmType);
                 }
             }
@@ -143,10 +149,11 @@ public class CloudResourceAdvisor {
         return availableVmTypes.stream().filter(vm -> vm.value().equals(flavor)).findFirst();
     }
 
-    private void decorateWithRecommendation(VmType vmType, VmRecommendation recommendation) {
+    private void decorateWithRecommendation(VmType vmType, VmRecommendation recommendation, String cloudPlatform) {
         Map<String, String> vmMetaDataProps = vmType.getMetaData().getProperties();
         vmMetaDataProps.put("recommendedVolumeType", recommendation.getVolumeType());
         vmMetaDataProps.put("recommendedvolumeCount", String.valueOf(recommendation.getVolumeCount()));
         vmMetaDataProps.put("recommendedvolumeSizeGB", String.valueOf(recommendation.getVolumeSizeGB()));
+        vmMetaDataProps.put("recommendedRootVolumeSize", String.valueOf(defaultRootVolumeSizeProvider.getForPlatform(cloudPlatform)));
     }
 }
