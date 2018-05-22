@@ -47,8 +47,7 @@ public class RegisterProxyHandler implements ReactorEventHandler<RegisterProxyRe
         try {
             Stack stack = stackRepository.findOneWithLists(stackId);
             Gateway gateway = stack.getCluster().getGateway();
-            if (gateway != null && gateway.getEnableGateway()
-                    && gateway.getGatewayType() == GatewayType.CENTRAL) {
+            if (gateway != null && gateway.getGatewayType() == GatewayType.CENTRAL) {
                 String proxyIp = stackUtil.extractAmbariIp(stack);
                 proxyRegistrator.register(stack.getName(), gateway.getPath(), proxyIp);
             }

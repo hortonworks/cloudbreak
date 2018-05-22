@@ -206,7 +206,7 @@ public class BlueprintValidator {
     }
 
     private void validateKnoxWithKerberos(Cluster cluster, Collection<InstanceGroup> instanceGroups, Map<String, BlueprintServiceComponent> componentMap) {
-        if (cluster != null && cluster.isSecure() && cluster.getGateway() != null && cluster.getGateway().getEnableGateway()) {
+        if (cluster != null && cluster.isSecure() && cluster.getGateway() != null) {
             List<String> missingNodes = instanceGroups.stream()
                 .filter(s -> {
                     if (!s.getInstanceGroupType().equals(InstanceGroupType.GATEWAY)) {

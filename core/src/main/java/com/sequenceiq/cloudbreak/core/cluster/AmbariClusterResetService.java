@@ -46,7 +46,7 @@ public class AmbariClusterResetService {
         Stack stack = stackRepository.findOneWithLists(stackId);
         try {
             InstanceMetaData gatewayInstance = stack.getPrimaryGatewayInstance();
-            GatewayConfig gatewayConfig = gatewayConfigService.getGatewayConfig(stack, gatewayInstance, stack.getCluster().getGateway().getEnableGateway());
+            GatewayConfig gatewayConfig = gatewayConfigService.getGatewayConfig(stack, gatewayInstance, stack.getCluster().hasGateway());
             OrchestratorType orchestratorType = orchestratorTypeResolver.resolveType(stack.getOrchestrator().getType());
             if (orchestratorType.hostOrchestrator()) {
                 HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());

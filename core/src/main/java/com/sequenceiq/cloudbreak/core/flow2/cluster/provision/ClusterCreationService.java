@@ -100,7 +100,7 @@ public class ClusterCreationService {
 
         if (cluster.getEmailNeeded()) {
             emailSenderService.sendProvisioningSuccessEmail(cluster.getOwner(), stackView.getClusterView().getEmailTo(), ambariIp,
-                    cluster.getName(), cluster.getGateway().getEnableGateway());
+                    cluster.getName(), cluster.getGateway() != null);
             flowMessageService.fireEventAndLog(stackView.getId(), Msg.AMBARI_CLUSTER_NOTIFICATION_EMAIL, AVAILABLE.name());
         }
     }

@@ -158,7 +158,7 @@ public class ClusterBootstrapper {
         try {
             HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
             List<GatewayConfig> allGatewayConfig = new ArrayList<>();
-            Boolean enableKnox = stack.getCluster().getGateway().getEnableGateway();
+            Boolean enableKnox = stack.getCluster().getGateway() != null;
             for (InstanceMetaData gateway : stack.getGatewayInstanceMetadata()) {
                 GatewayConfig gatewayConfig = gatewayConfigService.getGatewayConfig(stack, gateway, enableKnox);
                 allGatewayConfig.add(gatewayConfig);
@@ -248,7 +248,7 @@ public class ClusterBootstrapper {
             throws CloudbreakException, CloudbreakOrchestratorException {
         HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
         Cluster cluster = stack.getCluster();
-        Boolean enableKnox = cluster.getGateway().getEnableGateway();
+        Boolean enableKnox = cluster.getGateway() != null;
         for (InstanceMetaData gateway : stack.getGatewayInstanceMetadata()) {
             GatewayConfig gatewayConfig = gatewayConfigService.getGatewayConfig(stack, gateway, enableKnox);
             PollingResult bootstrapApiPolling = hostBootstrapApiPollingService.pollWithTimeoutSingleFailure(

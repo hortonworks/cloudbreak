@@ -91,7 +91,6 @@ public class MockClusterCreationWithSaltSuccessTest extends AbstractCloudbreakIn
         }
 
         GatewayJson gatewayJson = new GatewayJson();
-        gatewayJson.setEnableGateway(Boolean.TRUE);
         gatewayJson.setExposedServices(ImmutableList.of("ALL"));
         clusterRequest.setGateway(gatewayJson);
 

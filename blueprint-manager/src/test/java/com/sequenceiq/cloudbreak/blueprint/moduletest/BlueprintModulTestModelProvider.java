@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.blueprint.moduletest;
 
-import static com.sequenceiq.cloudbreak.TestUtil.gateway;
 import static com.sequenceiq.cloudbreak.TestUtil.gatewayEnabled;
 import static com.sequenceiq.cloudbreak.TestUtil.hostGroup;
 import static com.sequenceiq.cloudbreak.TestUtil.kerberosConfig;
@@ -121,7 +120,6 @@ class BlueprintModulTestModelProvider {
                 .withGeneralClusterConfigs(conf)
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
                 .withHostgroups(getHostGroups("master"))
-                .withGateway(gateway())
                 .build();
     }
 
@@ -132,7 +130,6 @@ class BlueprintModulTestModelProvider {
                 .withGeneralClusterConfigs(conf)
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
                 .withHostgroups(getHostGroups("master", "slave_1"))
-                .withGateway(gateway())
                 .build();
     }
 
@@ -169,7 +166,6 @@ class BlueprintModulTestModelProvider {
         GeneralClusterConfigs configs = generalClusterConfigs();
         return BlueprintPreparationObject.Builder.builder()
                 .withHostgroups(getHostGroups("master", "worker", "compute"))
-                .withGateway(gateway())
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
                 .withRdsConfigs(Sets.newHashSet(rdsConfig(RdsType.RANGER), rdsConfig(RdsType.HIVE)))
                 .withLdapConfig(ldapConfig())
@@ -182,7 +178,6 @@ class BlueprintModulTestModelProvider {
         GeneralClusterConfigs configs = generalClusterConfigs();
         return BlueprintPreparationObject.Builder.builder()
                 .withHostgroups(getHostGroups("master", "worker", "compute"))
-                .withGateway(gateway())
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
                 .withRdsConfigs(Sets.newHashSet(rdsConfig(RdsType.RANGER), rdsConfig(RdsType.HIVE)))
                 .withLdapConfig(ldapConfig())
@@ -265,7 +260,6 @@ class BlueprintModulTestModelProvider {
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
                 .withHostgroups(getHostGroups("master", "slave_1"))
                 .withGeneralClusterConfigs(configs)
-                .withGateway(gateway())
                 .build();
     }
 
@@ -279,8 +273,7 @@ class BlueprintModulTestModelProvider {
     static BlueprintPreparationObject.Builder getPreparedBuilder(String... hostNames) throws JsonProcessingException {
         return BlueprintPreparationObject.Builder.builder()
                 .withGeneralClusterConfigs(generalClusterConfigs())
-                .withHostgroups(hostNames.length == 0 ? getHostGroups() : getHostGroups(hostNames))
-                .withGateway(gateway());
+                .withHostgroups(hostNames.length == 0 ? getHostGroups() : getHostGroups(hostNames));
     }
 
     private static Set<HostGroup> getHostGroups() {

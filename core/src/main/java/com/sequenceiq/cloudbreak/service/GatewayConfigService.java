@@ -23,7 +23,7 @@ public class GatewayConfigService {
     public List<GatewayConfig> getAllGatewayConfigs(Stack stack) {
         List<GatewayConfig> result = new ArrayList<>();
         for (InstanceMetaData instanceMetaData : stack.getGatewayInstanceMetadata()) {
-            result.add(getGatewayConfig(stack, instanceMetaData, stack.getCluster().getGateway().getEnableGateway()));
+            result.add(getGatewayConfig(stack, instanceMetaData, stack.getCluster().getGateway() != null));
         }
         return result;
     }
@@ -33,7 +33,7 @@ public class GatewayConfigService {
         if (gatewayInstance == null) {
             throw new NotFoundException("Gateway instance does not found");
         }
-        return getGatewayConfig(stack, gatewayInstance, stack.getCluster().getGateway().getEnableGateway());
+        return getGatewayConfig(stack, gatewayInstance, stack.getCluster().getGateway() != null);
     }
 
     public GatewayConfig getGatewayConfig(Stack stack, InstanceMetaData gatewayInstance, Boolean knoxGatewayEnabled) {

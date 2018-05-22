@@ -827,16 +827,17 @@ public class AmbariClusterService implements ClusterService {
     }
 
     private void generateSignKeys(Gateway gateway) {
-        if (gateway.getSignCert() == null) {
-            KeyPair identityKey = PkiUtil.generateKeypair();
-            KeyPair signKey = PkiUtil.generateKeypair();
-            X509Certificate cert = PkiUtil.cert(identityKey, "signing", signKey);
+        if (gateway != null) {
+            if (gateway.getSignCert() == null) {
+                KeyPair identityKey = PkiUtil.generateKeypair();
+                KeyPair signKey = PkiUtil.generateKeypair();
+                X509Certificate cert = PkiUtil.cert(identityKey, "signing", signKey);
 
-            gateway.setSignKey(PkiUtil.convert(identityKey.getPrivate()));
-            gateway.setSignPub(PkiUtil.convert(identityKey.getPublic()));
-            gateway.setSignCert(PkiUtil.convert(cert));
+                gateway.setSignKey(PkiUtil.convert(identityKey.getPrivate()));
+                gateway.setSignPub(PkiUtil.convert(identityKey.getPublic()));
+                gateway.setSignCert(PkiUtil.convert(cert));
+            }
         }
-
     }
 
     private void createHDPRepoComponent(StackRepoDetails stackRepoDetailsUpdate, Stack stack) {

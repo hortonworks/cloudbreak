@@ -66,6 +66,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.GatewayTopology;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
@@ -383,8 +384,7 @@ public class TestUtil {
         cluster.setUserName("admin");
         cluster.setPassword("admin");
         Gateway gateway = new Gateway();
-        gateway.setEnableGateway(true);
-        gateway.setTopologyName("cb");
+        setGatewayTopology(gateway, "cb");
         cluster.setGateway(gateway);
         cluster.setExecutorType(ExecutorType.DEFAULT);
         RDSConfig rdsConfig = new RDSConfig();
@@ -649,25 +649,24 @@ public class TestUtil {
         return rdsConfig;
     }
 
-    public static Gateway gateway() throws JsonProcessingException {
-        Gateway gateway = new Gateway();
-        gateway.setEnableGateway(false);
-        gateway.setTopologyName("topology");
-        gateway.setPath("/path");
-        gateway.setSsoProvider("simple");
-        gateway.setGatewayType(GatewayType.CENTRAL);
-        gateway.setSignCert("signcert");
-        gateway.setSignKey("signkey");
-        gateway.setTokenCert("tokencert");
-        gateway.setSignPub("signpub");
-        gateway.setExposedServices(new Json("{}"));
-        return gateway;
+    private static void setGatewayTopology(Gateway gateway) {
+        setGatewayTopology(gateway, "topology");
     }
 
-    public static Gateway gatewayEnabled() throws JsonProcessingException {
+    private static void setGatewayTopology(Gateway gateway, String topologyName) {
+        try {
+            GatewayTopology gatewayTopology = new GatewayTopology();
+            gatewayTopology.setTopologyName(topologyName);
+            gatewayTopology.setExposedServices(new Json("{}"));
+            gateway.getTopologies().add(gatewayTopology);
+        } catch (JsonProcessingException e) {
+            LOGGER.error("unexpected error during creating GatewayTopology", e);
+        }
+    }
+
+    public static Gateway gatewayEnabled() {
         Gateway gateway = new Gateway();
-        gateway.setEnableGateway(true);
-        gateway.setTopologyName("topology");
+        setGatewayTopology(gateway);
         gateway.setPath("/path");
         gateway.setSsoProvider("simple");
         gateway.setGatewayType(GatewayType.CENTRAL);
@@ -675,7 +674,6 @@ public class TestUtil {
         gateway.setSignKey("signkey");
         gateway.setTokenCert("tokencert");
         gateway.setSignPub("signpub");
-        gateway.setExposedServices(new Json("{}"));
         return gateway;
     }
 

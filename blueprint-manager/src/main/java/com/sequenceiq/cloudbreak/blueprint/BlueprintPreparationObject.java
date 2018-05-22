@@ -223,7 +223,9 @@ public class BlueprintPreparationObject {
         }
 
         public Builder withGateway(Gateway gateway) {
-            this.gatewayView = new GatewayView(gateway);
+            if (gateway != null) {
+                this.gatewayView = new GatewayView(gateway);
+            }
             return this;
         }
 

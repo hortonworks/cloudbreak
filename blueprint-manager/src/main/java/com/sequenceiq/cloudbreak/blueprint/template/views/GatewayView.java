@@ -1,23 +1,24 @@
 package com.sequenceiq.cloudbreak.blueprint.template.views;
 
+import java.util.Collections;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
+
 import org.apache.commons.lang3.StringEscapeUtils;
+import org.springframework.util.CollectionUtils;
 
 import com.sequenceiq.cloudbreak.api.model.GatewayType;
-import com.sequenceiq.cloudbreak.api.model.SSOType;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
+import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.SSOType;
 import com.sequenceiq.cloudbreak.domain.json.Json;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.GatewayTopology;
 
 public class GatewayView {
-
-    private final Boolean enableGateway;
 
     private final GatewayType gatewayType;
 
     private final String path;
-
-    private final String topologyName;
-
-    private final Json exposedServices;
 
     private final SSOType ssoType;
 
@@ -31,22 +32,23 @@ public class GatewayView {
 
     private final String tokenCert;
 
+    private final Map<String, Json> gatewayTopologies;
+
     public GatewayView(Gateway gateway) {
-        enableGateway = gateway.getEnableGateway();
         gatewayType = gateway.getGatewayType();
         path = gateway.getPath();
-        topologyName = gateway.getTopologyName();
-        exposedServices = gateway.getExposedServices();
+        if (CollectionUtils.isEmpty(gateway.getTopologies())) {
+            gatewayTopologies = Collections.emptyMap();
+        } else {
+            gatewayTopologies = gateway.getTopologies().stream()
+                    .collect(Collectors.toMap(GatewayTopology::getTopologyName, GatewayTopology::getExposedServices));
+        }
         ssoType = gateway.getSsoType();
         ssoProvider = gateway.getSsoProvider();
         signKey = gateway.getSignKey();
         signPub = gateway.getSignPub();
         signCert = gateway.getSignCert();
         tokenCert = gateway.getTokenCert();
-    }
-
-    public Boolean getEnableGateway() {
-        return enableGateway;
     }
 
     public GatewayType getGatewayType() {
@@ -58,11 +60,15 @@ public class GatewayView {
     }
 
     public String getTopologyName() {
-        return topologyName;
+        return gatewayTopologies.isEmpty() ? null : getFirstTopology().getKey();
     }
 
     public Json getExposedServices() {
-        return exposedServices;
+        return gatewayTopologies.isEmpty() ? null : getFirstTopology().getValue();
+    }
+
+    private Entry<String, Json> getFirstTopology() {
+        return gatewayTopologies.entrySet().iterator().next();
     }
 
     public SSOType getSsoType() {
@@ -111,5 +117,9 @@ public class GatewayView {
 
     public String getTokenCert() {
         return tokenCert;
+    }
+
+    public Map<String, Json> getGatewayTopologies() {
+        return gatewayTopologies;
     }
 }

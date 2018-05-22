@@ -103,7 +103,6 @@ public class AbstractStackCreationV2Test extends AbstractCloudbreakIntegrationTe
         ambariV2Request.setUserName(itContext.getContextParam(CloudbreakITContextConstants.AMBARI_USER_ID));
         ambariV2Request.setPassword(itContext.getContextParam(CloudbreakITContextConstants.AMBARI_PASSWORD_ID));
         GatewayJson gatewayJson = new GatewayJson();
-        gatewayJson.setEnableGateway(Boolean.FALSE);
         gatewayJson.setExposedServices(ImmutableList.of("ALL"));
         ambariV2Request.setGateway(gatewayJson);
         if (enableSecurity) {

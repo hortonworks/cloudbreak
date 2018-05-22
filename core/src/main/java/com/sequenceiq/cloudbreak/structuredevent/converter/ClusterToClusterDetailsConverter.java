@@ -76,7 +76,7 @@ public class ClusterToClusterDetailsConverter extends AbstractConversionServiceA
 
     private void convertGatewayProperties(ClusterDetails clusterDetails, Gateway gateway) {
         if (gateway != null) {
-            clusterDetails.setGatewayEnabled(gateway.getEnableGateway());
+            clusterDetails.setGatewayEnabled(true);
             clusterDetails.setGatewayType(gateway.getGatewayType().toString());
             clusterDetails.setSsoType(gateway.getSsoType().toString());
         } else {

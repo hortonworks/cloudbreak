@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.domain;
+package com.sequenceiq.cloudbreak.domain.stack.cluster.gateway;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -351,7 +351,6 @@ public class BlueprintValidatorTest {
         Cluster cluster = new Cluster();
         cluster.setSecure(true);
         Gateway gateway = new Gateway();
-        gateway.setEnableGateway(true);
         cluster.setGateway(gateway);
         thrown.expect(BlueprintValidationException.class);
         thrown.expectMessage("In case of Knox and Kerberos each 'Ambari Server' node must include the 'KNOX_GATEWAY' service. "
@@ -384,7 +383,6 @@ public class BlueprintValidatorTest {
         Cluster cluster = new Cluster();
         cluster.setSecure(true);
         Gateway gateway = new Gateway();
-        gateway.setEnableGateway(true);
         cluster.setGateway(gateway);
         thrown.expect(BlueprintValidationException.class);
         thrown.expectMessage("In case of Knox and Kerberos each 'Ambari Server' node must include the 'KNOX_GATEWAY' service. "
@@ -417,7 +415,6 @@ public class BlueprintValidatorTest {
         Cluster cluster = new Cluster();
         cluster.setSecure(true);
         Gateway gateway = new Gateway();
-        gateway.setEnableGateway(true);
         cluster.setGateway(gateway);
         thrown.expect(BlueprintValidationException.class);
         thrown.expectMessage("In case of Knox and Kerberos each 'Ambari Server' node must include the 'KNOX_GATEWAY' service. "
@@ -450,7 +447,6 @@ public class BlueprintValidatorTest {
         Cluster cluster = new Cluster();
         cluster.setSecure(true);
         Gateway gateway = new Gateway();
-        gateway.setEnableGateway(true);
         cluster.setGateway(gateway);
 
         // WHEN
