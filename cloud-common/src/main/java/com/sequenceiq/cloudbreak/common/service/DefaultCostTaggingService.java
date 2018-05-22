@@ -8,12 +8,15 @@ import static com.sequenceiq.cloudbreak.common.type.CloudbreakResourceType.SECUR
 import static com.sequenceiq.cloudbreak.common.type.CloudbreakResourceType.STORAGE;
 import static com.sequenceiq.cloudbreak.common.type.CloudbreakResourceType.TEMPLATE;
 import static com.sequenceiq.cloudbreak.common.type.DefaultApplicationTag.CB_ACOUNT_NAME;
+import static com.sequenceiq.cloudbreak.common.type.DefaultApplicationTag.CB_CREATION_TIMESTAMP;
 import static com.sequenceiq.cloudbreak.common.type.DefaultApplicationTag.CB_USER_NAME;
 import static com.sequenceiq.cloudbreak.common.type.DefaultApplicationTag.CB_VERSION;
 import static com.sequenceiq.cloudbreak.common.type.DefaultApplicationTag.OWNER;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import javax.inject.Inject;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -22,12 +25,16 @@ import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.common.type.CloudbreakResourceType;
 import com.sequenceiq.cloudbreak.common.type.DefaultApplicationTag;
+import com.sequenceiq.cloudbreak.service.Clock;
 
 @Service
 public class DefaultCostTaggingService {
 
     @Value("${info.app.version:}")
     private String cbVersion;
+
+    @Inject
+    private Clock clock;
 
     public Map<String, String> prepareInstanceTagging() {
         return prepareResourceTag(INSTANCE);
@@ -73,11 +80,12 @@ public class DefaultCostTaggingService {
         if (sourceMap == null || Strings.isNullOrEmpty(sourceMap.get(transform(OWNER.key(), platform)))) {
             result.put(transform(OWNER.key(), platform), transform(owner, platform));
         }
+        result.put(transform(CB_CREATION_TIMESTAMP.key(), platform), transform(String.valueOf(clock.getCurrentInstant().getEpochSecond()), platform));
         return result;
     }
 
     private String transform(String value, String platform) {
-        String valueAfterCheck =  Strings.isNullOrEmpty(value) ? "unknown" : value;
+        String valueAfterCheck = Strings.isNullOrEmpty(value) ? "unknown" : value;
         return CloudConstants.GCP.equals(platform)
                 ? valueAfterCheck.split("@")[0].toLowerCase().replaceAll("[^\\w]", "-") : valueAfterCheck;
     }
@@ -87,5 +95,4 @@ public class DefaultCostTaggingService {
         result.put(DefaultApplicationTag.CB_RESOURCE_TYPE.key(), cloudbreakResourceType.key());
         return result;
     }
-
 }
