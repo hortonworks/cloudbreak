@@ -158,7 +158,7 @@ cloudbreak-conf-cert() {
 cloudbreak-delete-dbs() {
     declare desc="deletes all cloudbreak db (volume)"
 
-    if [[ $(docker-compose -p cbreak ps -q $COMMON_DB | wc -l) -eq 1 ]]; then
+    if [[ "$(docker-compose -p cbreak ps $COMMON_DB | tail -1)" == *"Up"* ]]; then
         error "Database container is running, delete not allowed"
         _exit 1
     fi
