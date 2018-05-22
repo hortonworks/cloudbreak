@@ -17,6 +17,11 @@ HDP_REPO_DATA=$(xmllint --xpath "//repository-version/repository-info/os/repo[re
 HDP_BASE_URL=$(xmllint --xpath "//baseurl/text()" - <<<"$HDP_REPO_DATA")
 echo $HDP_BASE_URL >> "/tmp/hdp-repo-url.text"
 
+#handle hdf repository
+HDP_REPO_DATA=$(xmllint --xpath "//repository-version/repository-info/os/repo[reponame='HDF']" vdf.xml)
+HDP_BASE_URL=$(xmllint --xpath "//baseurl/text()" - <<<"$HDP_REPO_DATA")
+echo $HDP_BASE_URL >> "/tmp/hdf-repo-url.text"
+
 #handle hdp-util repository
 HDP_UTIL_REPO_DATA=$(xmllint --xpath "//repository-version/repository-info/os/repo[reponame='HDP-UTILS']" vdf.xml)
 HDP_UTIL_BASE_URL=$(xmllint --xpath "//baseurl/text()" - <<<"$HDP_UTIL_REPO_DATA")
