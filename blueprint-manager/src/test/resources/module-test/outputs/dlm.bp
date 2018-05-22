@@ -130,15 +130,15 @@
       "ranger-admin-site": {
         "properties": {
           "ranger.authentication.method": "ACTIVE_DIRECTORY",
-          "ranger.ldap.user.dnpattern": "cn=admin,dc=example,dc=org={0},cn=users,dc=example,dc=org",
+          "ranger.ldap.user.dnpattern": "cn={0},cn=users,dc=example,dc=org",
           "ranger.ldap.ad.domain": " ",
-          "ranger.ldap.ad.user.searchfilter": "(cn=admin,dc=example,dc=org={0})",
+          "ranger.ldap.ad.user.searchfilter": "(cn={0})",
           "ranger.ldap.ad.bind.dn": "cn=admin,dc=example,dc=org",
           "ranger.sso.providerurl": "simple",
           "ranger.ldap.ad.bind.password": "admin",
           "ranger.ldap.bind.dn": "cn=admin,dc=example,dc=org",
           "ranger.ldap.bind.password": "admin",
-          "ranger.ldap.user.searchfilter": "(cn=admin,dc=example,dc=org={0})",
+          "ranger.ldap.user.searchfilter": "(cn={0})",
           "ranger.audit.source.type": "solr",
           "ranger.sso.enabled": "true",
           "ranger.ldap.url": "ldap://localhost:389",

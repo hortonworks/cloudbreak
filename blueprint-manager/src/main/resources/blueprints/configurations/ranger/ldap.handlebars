@@ -8,13 +8,13 @@
       "ranger.ldap.ad.bind.dn": "{{{ ldap.bindDn }}}",
       "ranger.ldap.ad.bind.password": "{{{ ldap.bindPassword }}}",
       "ranger.ldap.ad.base.dn": "{{{ ldap.userSearchBase }}}",
-      "ranger.ldap.ad.user.searchfilter": "({{{ ldap.userNameAttribute }}}={0})",
+      "ranger.ldap.ad.user.searchfilter": "(cn={0})",
       "ranger.ldap.url": "{{{ ldap.connectionURL }}}",
       "ranger.ldap.bind.dn": "{{{ ldap.bindDn }}}",
       "ranger.ldap.bind.password": "{{{ ldap.bindPassword }}}",
       "ranger.ldap.base.dn": "{{{ ldap.userSearchBase }}}",
-      "ranger.ldap.user.searchfilter": "({{{ ldap.userNameAttribute }}}={0})",
-      "ranger.ldap.user.dnpattern": "{{{ ldap.userNameAttribute }}}={0},{{{ ldap.userSearchBase }}}",
+      "ranger.ldap.user.searchfilter": "(cn={0})",
+      "ranger.ldap.user.dnpattern": "cn={0},{{{ ldap.userSearchBase }}}",
       "ranger.ldap.group.searchbase": "{{{ ldap.groupSearchBase }}}",
       "ranger.ldap.group.roleattribute": "{{{ ldap.groupNameAttribute }}}"
     }
