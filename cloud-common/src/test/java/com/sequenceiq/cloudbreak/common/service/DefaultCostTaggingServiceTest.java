@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.common.service;
 
+import static org.mockito.Mockito.when;
+
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -8,22 +11,30 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.common.type.CloudbreakResourceType;
 import com.sequenceiq.cloudbreak.common.type.DefaultApplicationTag;
+import com.sequenceiq.cloudbreak.service.Clock;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DefaultCostTaggingServiceTest {
+
+    @Mock
+    private Clock clock;
 
     @InjectMocks
     private DefaultCostTaggingService underTest;
 
     @Before
     public void before() {
+
         ReflectionTestUtils.setField(underTest, "cbVersion", "2.2.0");
+        MockitoAnnotations.initMocks(this);
     }
 
     @Test
@@ -34,34 +45,49 @@ public class DefaultCostTaggingServiceTest {
 
     @Test
     public void testPrepareDefaultTagsForAWSShouldReturnAllDefaultMap() {
+        final long epochSeconds = 1526991986;
+        when(clock.getCurrentInstant()).thenReturn(Instant.ofEpochSecond(epochSeconds));
+
         Map<String, String> result = underTest.prepareDefaultTags("Apache", "apache1@apache.com", new HashMap<>(), CloudConstants.AWS);
-        Assert.assertEquals(4, result.size());
+
+        Assert.assertEquals(5, result.size());
         Assert.assertEquals("Apache", result.get(DefaultApplicationTag.CB_ACOUNT_NAME.key()));
         Assert.assertEquals("apache1@apache.com", result.get(DefaultApplicationTag.CB_USER_NAME.key()));
         Assert.assertEquals("2.2.0", result.get(DefaultApplicationTag.CB_VERSION.key()));
         Assert.assertEquals("apache1@apache.com", result.get(DefaultApplicationTag.OWNER.key()));
+        Assert.assertEquals(String.valueOf(epochSeconds), result.get("cb-creation-timestamp"));
     }
 
     @Test
     public void testPrepareDefaultTagsForGCPShouldReturnAllDefaultMap() {
+        final long epochSeconds = 1526991986;
+        when(clock.getCurrentInstant()).thenReturn(Instant.ofEpochSecond(epochSeconds));
+
         Map<String, String> result = underTest.prepareDefaultTags("Apache", "apache1@apache.com", new HashMap<>(), CloudConstants.GCP);
-        Assert.assertEquals(4, result.size());
+
+        Assert.assertEquals(5, result.size());
         Assert.assertEquals("apache", result.get(DefaultApplicationTag.CB_ACOUNT_NAME.key()));
         Assert.assertEquals("apache1", result.get(DefaultApplicationTag.CB_USER_NAME.key()));
         Assert.assertEquals("2-2-0", result.get(DefaultApplicationTag.CB_VERSION.key()));
         Assert.assertEquals("apache1", result.get(DefaultApplicationTag.OWNER.key().toLowerCase()));
+        Assert.assertEquals(String.valueOf(epochSeconds), result.get("cb-creation-timestamp"));
     }
 
     @Test
     public void testPrepareDefaultTagsForAZUREWhenOwnerPresentedShouldReturnAllDefaultMap() {
+        final long epochSeconds = 1526991986;
+        when(clock.getCurrentInstant()).thenReturn(Instant.ofEpochSecond(epochSeconds));
         Map<String, String> sourceMap = new HashMap<>();
         sourceMap.put(DefaultApplicationTag.OWNER.key(), "appletree");
+
         Map<String, String> result = underTest.prepareDefaultTags("Apache", "apache1@apache.com", sourceMap, CloudConstants.AZURE);
-        Assert.assertEquals(3, result.size());
+
+        Assert.assertEquals(4, result.size());
         Assert.assertEquals("Apache", result.get(DefaultApplicationTag.CB_ACOUNT_NAME.key()));
         Assert.assertEquals("apache1@apache.com", result.get(DefaultApplicationTag.CB_USER_NAME.key()));
         Assert.assertEquals("2.2.0", result.get(DefaultApplicationTag.CB_VERSION.key()));
         Assert.assertNull(result.get(DefaultApplicationTag.OWNER.key()));
+        Assert.assertEquals(String.valueOf(epochSeconds), result.get("cb-creation-timestamp"));
     }
 
     @Test
@@ -112,5 +138,4 @@ public class DefaultCostTaggingServiceTest {
         Assert.assertEquals(1, result.size());
         Assert.assertEquals(result.get(DefaultApplicationTag.CB_RESOURCE_TYPE.key()), CloudbreakResourceType.SECURITY.key());
     }
-
 }
