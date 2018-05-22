@@ -11,41 +11,20 @@ import com.google.common.collect.ImmutableList;
 public enum ExposedService {
 
     ALL("ALL", "ALL", "", "", ""),
-    SSH("SSH", "SSH", "", "", ""),
-    HTTPS("HTTPS", "HTTPS", "", "", ""),
-    GATEWAY("Gateway", "Gateway", "", "", ""),
+
     AMBARI("Ambari", "AMBARI_SERVER", "", "AMBARI", "/ambari/"),
     AMBARIUI("Ambari", "AMBARI_SERVER", "", "AMBARIUI", "/ambari/"),
-    CONSUL("Consul", "Consul", "", "", ""),
     WEBHDFS("WebHDFS", "NAMENODE", "", "WEBHDFS", "/webhdfs/"),
     NAMENODE("Name Node", "NAMENODE", "", "HDFSUI", "/hdfs/"),
     RESOURCEMANAGER_WEB("Resource Manager", "RESOURCEMANAGER", "", "YARNUI", "/yarn/"),
-    RESOURCEMANAGER_SCHEDULER("RM Scheduler", "RM Scheduler", "", "", ""),
-    RESOURCEMANAGER_IPC("RM IPC", "RM IPC", "", "", ""),
     JOB_HISTORY_SERVER("Job History Server", "HISTORYSERVER", "", "JOBHISTORYUI", "/jobhistory/"),
-    HBASE_MASTER("HBase Master", "HBase Master", "", "", ""),
-    HBASE_MASTER_WEB("HBase Master Web", "HBASE_MASTER", "", "", ""),
-    HBASE_REGION("HBase Region Server", "HBase Region Server", "", "", ""),
-    HBASE_REGION_INFO("HBase Region Server Info", "HBase Region Server Info", "", "", ""),
-    HIVE_METASTORE("Hive Metastore", "Hive Metastore", "", "", ""),
     HIVE_SERVER("Hive Server", "HIVE_SERVER", "", "HIVE", ""),
     HIVE_SERVER_INTERACTIVE("Hive Server Interactive", "HIVE_SERVER_INTERACTIVE", "", "HIVE_INTERACTIVE", ""),
-    HIVE_SERVER_HTTP("Hive Server Http", "Hive Server Http", "", "", ""),
-    FALCON("Falcon", "FALCON_SERVER", "", "", ""),
-    STORM("Storm", "STORM", "", "", ""),
-    OOZIE("Oozie", "OOZIE_SERVER", "/oozie", "", ""),
-    ACCUMULO_MASTER("Accumulo Master", "Accumulo Master", "", "", ""),
-    ACCUMULO_TSERVER("Accumulo Tserver", "Accumulo Tserver", "", "", ""),
     ATLAS("Atlas", "ATLAS_SERVER", "", "ATLAS", "/atlas/"),
-    KNOX_GW("Knox GW", "Knox GW", "", "", ""),
     SPARK_HISTORY_SERVER("Spark History Server", "SPARK_JOBHISTORYSERVER", "", "SPARKHISTORYUI", "/sparkhistory/"),
-    CONTAINER_LOGS("Container logs", "Container logs", "", "", ""),
     ZEPPELIN_WEB_SOCKET("Zeppelin Web Socket", "ZEPPELIN_MASTER", "", "ZEPPELINWS", ""),
     ZEPPELIN_UI("Zeppelin UI", "ZEPPELIN_MASTER", "", "ZEPPELINUI", "/zeppelin/"),
     RANGER("Ranger Admin UI", "RANGER_ADMIN", "", "RANGERUI", "/ranger/"),
-    KIBANA("Kibana", "KIBANA", "", "", ""),
-    ELASTIC_SEARCH("Elastic Search", "ELASTIC_SEARCH", "", "", ""),
-    DRUID_SUPERSET("Druid Superset", "DRUID_SUPERSET", "", "", ""),
     DP_PROFILER_AGENT("DP Profiler Agent", "DP_PROFILER_AGENT", "", "PROFILER-AGENT", ""),
     BEACON_SERVER("Beacon", "BEACON_SERVER", "", "BEACON", "");
 
@@ -61,6 +40,10 @@ public enum ExposedService {
         this.postfix = postfix;
         this.knoxService = knoxService;
         this.knoxUrl = knoxUrl;
+    }
+
+    public static boolean isKnoxExposed(String knoxService) {
+        return getAllKnoxExposed().contains(knoxService);
     }
 
     public static Collection<ExposedService> filterSupportedKnoxServices() {

@@ -211,14 +211,21 @@ public class ModelDescriptions {
     }
 
     public static class GatewayModelDescription {
-        public static final String ENABLE_KNOX_GATEWAY = "[DEPRECATED] enableGateway is no longer needed to determine if gateway needs to be launched or not. "
-                + "Presence of gateway definition in request is suffucicient.";
+        public static final String ENABLE_KNOX_GATEWAY = "[DEPRECATED] 'enableGateway' is no longer needed to determine if "
+                + "gateway needs to be launched or not.\n"
+                + "Presence of gateway definition in request is suffucicient. This value is only used in legacy requests, \n"
+                + "when 'topologyName' or 'exposedServices' is defined in the root of Gateway, instead of using topologies.\n"
+                + "When it is a legacy request and 'enableGateway' is set to 'false', gateway will not be saved and created.";
         public static final String KNOX_PATH = "Knox gateway path";
         public static final String KNOX_GATEWAY_TYPE = "Knox gateway type";
         public static final String KNOX_SSO_TYPE = "Knox SSO type";
-        public static final String DEPRECATED_KNOX_TOPOLOGY_NAME = "[DEPRECATED] Use the 'Knox topology name' inside the 'gateway' part of the request.";
+        public static final String DEPRECATED_KNOX_TOPOLOGY_NAME = "[DEPRECATED] Use the 'topologyName' inside the 'topologies' part of the request.\n"
+                + "If 'topologyName' is specified, other deprecated properties ('exposedServices' and 'enableGateway') will be used as well, "
+                + "and 'topologies' will be ignored.";
         public static final String KNOX_TOPOLOGY_NAME = "Knox topology name";
-        public static final String DEPRECATED_EXPOSED_KNOX_SERVICES = "[DEPRECATED] Use the 'exposed Knox services' inside the 'gateway' part of the request.";
+        public static final String DEPRECATED_EXPOSED_KNOX_SERVICES = "[DEPRECATED] Use the 'exposedServices' inside the 'topologies' part of the request.\n"
+                + "If 'exposedServices' is specified, other deprecated properties ('topologyName' and 'enableGateway') will be used as well, "
+                + "and 'topologies' will be ignored.";
         public static final String EXPOSED_KNOX_SERVICES = "exposed Knox services - those services that should be accessible through Knox gateway.";
         public static final String KNOX_SSO_PROVIDER = "SSO provider cluster name";
         public static final String KNOX_SSO_CERT = "SSO Provider certificate";

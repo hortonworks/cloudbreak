@@ -19,6 +19,7 @@ import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import com.sequenceiq.cloudbreak.api.model.ExecutorType;
 import com.sequenceiq.cloudbreak.api.model.ExposedService;
@@ -30,16 +31,18 @@ import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.PostgresConfigService;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.domain.ExposedServices;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.json.Json;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.ExposedServices;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.GatewayTopology;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorCancelledException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
@@ -66,6 +69,7 @@ import com.sequenceiq.cloudbreak.util.StackUtil;
 
 @Component
 public class ClusterHostServiceRunner {
+
     @Inject
     private StackRepository stackRepository;
 
@@ -288,27 +292,50 @@ public class ClusterHostServiceRunner {
         gateway.put("address", gatewayConfig.getPublicAddress());
         gateway.put("username", cluster.getUserName());
         gateway.put("password", cluster.getPassword());
-        gateway.put("path", cluster.getGateway().getPath());
-        gateway.put("topology", cluster.getGateway().getTopologyName());
-        gateway.put("ssotype", cluster.getGateway().getSsoType());
-        gateway.put("ssoprovider", cluster.getGateway().getSsoProvider());
-        gateway.put("signpub", cluster.getGateway().getSignPub());
-        gateway.put("signcert", cluster.getGateway().getSignCert());
-        gateway.put("signkey", cluster.getGateway().getSignKey());
-        gateway.put("tokencert", cluster.getGateway().getTokenCert());
-        gateway.put("mastersecret", cluster.getStack().getSecurityConfig().getKnoxMasterSecret());
-        gateway.put("kerberos", cluster.isSecure());
 
-        Json exposedJson = cluster.getGateway().getExposedServices();
-        if (exposedJson != null && StringUtils.isNoneEmpty(exposedJson.getValue())) {
-            List<String> exposedServices = exposedJson.get(ExposedServices.class).getServices();
-            gateway.put("exposed", exposedServices);
-        } else {
-            gateway.put("exposed", new ArrayList<>());
+        Gateway clusterGateway = cluster.getGateway();
+        if (clusterGateway != null) {
+            gateway.put("path", clusterGateway.getPath());
+            gateway.put("ssotype", clusterGateway.getSsoType());
+            gateway.put("ssoprovider", clusterGateway.getSsoProvider());
+            gateway.put("signpub", clusterGateway.getSignPub());
+            gateway.put("signcert", clusterGateway.getSignCert());
+            gateway.put("signkey", clusterGateway.getSignKey());
+            gateway.put("tokencert", clusterGateway.getTokenCert());
+            List<Map<String, Object>> topologies = getTopologies(clusterGateway);
+            gateway.put("topologies", topologies);
         }
+
+        gateway.put("kerberos", cluster.isSecure());
+        gateway.put("mastersecret", cluster.getStack().getSecurityConfig().getKnoxMasterSecret());
         Map<String, List<String>> serviceLocation = componentLocator.getComponentLocation(cluster, new HashSet<>(ExposedService.getAllServiceName()));
         gateway.put("location", serviceLocation);
         servicePillar.put("gateway", new SaltPillarProperties("/gateway/init.sls", singletonMap("gateway", gateway)));
+    }
+
+    private List<Map<String, Object>> getTopologies(Gateway clusterGateway) throws IOException {
+        if (!CollectionUtils.isEmpty(clusterGateway.getTopologies())) {
+            List<Map<String, Object>> topologyMaps = new ArrayList<>();
+            for (GatewayTopology topology : clusterGateway.getTopologies()) {
+                Map<String, Object> topologyAndExposed = mapTopologyToMap(topology);
+                topologyMaps.add(topologyAndExposed);
+            }
+            return topologyMaps;
+        }
+        return Collections.emptyList();
+    }
+
+    private Map<String, Object> mapTopologyToMap(GatewayTopology gt) throws IOException {
+        Map<String, Object> topology = new HashMap<>();
+        topology.put("name", gt.getTopologyName());
+        Json exposedJson = gt.getExposedServices();
+        if (exposedJson != null && StringUtils.isNoneEmpty(exposedJson.getValue())) {
+            List<String> exposedServices = exposedJson.get(ExposedServices.class).getServices();
+            topology.put("exposed", exposedServices);
+        } else {
+            topology.put("exposed", new ArrayList<>());
+        }
+        return topology;
     }
 
     private void saveLdapPillar(LdapConfig ldapConfig, Map<String, SaltPillarProperties> servicePillar) {

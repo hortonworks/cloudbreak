@@ -372,7 +372,6 @@ public class HandlebarTemplateTest {
     public static Map<String, Object> ldapConfigWhenLdapPresentedThenShouldReturnWithLdapConfig() throws JsonProcessingException {
         return new BlueprintTemplateModelContextBuilder()
                 .withLdap(TestUtil.ldapConfig())
-                .withGateway(TestUtil.gateway())
                 .build();
     }
 

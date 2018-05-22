@@ -21,7 +21,7 @@ public class ValidationResult {
         this.state = state;
         this.errors = errors;
         formattedErrors = IntStream.range(0, errors.size())
-                .mapToObj(i -> i + ". " + errors.get(i))
+                .mapToObj(i -> i + 1 + ". " + errors.get(i))
                 .collect(Collectors.joining("\n"));
     }
 

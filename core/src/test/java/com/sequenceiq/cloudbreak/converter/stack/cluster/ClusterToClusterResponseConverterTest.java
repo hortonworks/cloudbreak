@@ -12,6 +12,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
@@ -34,6 +35,7 @@ import com.sequenceiq.cloudbreak.api.model.proxy.ProxyConfigResponse;
 import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigJson;
 import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterResponse;
+import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.GatewayJson;
 import com.sequenceiq.cloudbreak.blueprint.validation.BlueprintValidator;
 import com.sequenceiq.cloudbreak.blueprint.validation.StackServiceComponentDescriptor;
 import com.sequenceiq.cloudbreak.blueprint.validation.StackServiceComponentDescriptors;
@@ -47,6 +49,7 @@ import com.sequenceiq.cloudbreak.domain.ProxyConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
@@ -115,6 +118,9 @@ public class ClusterToClusterResponseConverterTest extends AbstractEntityConvert
 
     @Mock
     private ProxyConfigMapper proxyConfigMapper;
+
+    @Mock
+    private ServiceEndpointCollector serviceEndpointCollector;
 
     private StackServiceComponentDescriptor stackServiceComponentDescriptor;
 
@@ -208,6 +214,8 @@ public class ClusterToClusterResponseConverterTest extends AbstractEntityConvert
         proxyConfig.setName("test");
         cluster.setProxyConfig(proxyConfig);
         stack.setCluster(cluster);
+        Gateway gateway = new Gateway();
+        cluster.setGateway(gateway);
         return cluster;
     }
 
@@ -221,6 +229,7 @@ public class ClusterToClusterResponseConverterTest extends AbstractEntityConvert
         given(mockIterator.hasNext()).willReturn(true).willReturn(false);
         given(mockIterator.next()).willReturn(jsonNode);
         given(conversionService.convert(any(RDSConfig.class), eq(RDSConfigJson.class))).willReturn(new RDSConfigRequest());
+        given(conversionService.convert(any(Gateway.class), eq(GatewayJson.class))).willReturn(new GatewayJson());
         given(blueprintValidator.getHostGroupName(jsonNode)).willReturn("slave_1");
         given(blueprintValidator.createHostGroupMap(any(Set.class))).willReturn(hostGroupMap);
         given(hostGroupMap.get("slave_1")).willReturn(hostGroup);
@@ -236,7 +245,8 @@ public class ClusterToClusterResponseConverterTest extends AbstractEntityConvert
         ProxyConfigResponse proxyConfigResponse = new ProxyConfigResponse();
         proxyConfigResponse.setId(1L);
         given(proxyConfigMapper.mapEntityToResponse(any(ProxyConfig.class))).willReturn(proxyConfigResponse);
-
+        given(serviceEndpointCollector.getAmbariServerUrl(any(), anyString())).willReturn("http://ambari.com");
+        given(serviceEndpointCollector.collectServiceUrlsForPorts(any(), anyString())).willReturn(Collections.emptyMap());
     }
 
     private StackServiceComponentDescriptor createStackServiceComponentDescriptor() {

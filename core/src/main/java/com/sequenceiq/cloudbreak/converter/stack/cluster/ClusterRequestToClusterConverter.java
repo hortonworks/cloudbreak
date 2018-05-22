@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.converter.stack.cluster;
 
 import static com.sequenceiq.cloudbreak.api.model.Status.REQUESTED;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -11,17 +12,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.model.CustomContainerRequest;
-import com.sequenceiq.cloudbreak.api.model.ExposedService;
 import com.sequenceiq.cloudbreak.api.model.FileSystemBase;
-import com.sequenceiq.cloudbreak.api.model.SSOType;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.GatewayJson;
 import com.sequenceiq.cloudbreak.controller.exception.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.ClusterAttributes;
-import com.sequenceiq.cloudbreak.domain.ExposedServices;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.json.Json;
@@ -46,7 +43,8 @@ public class ClusterRequestToClusterConverter extends AbstractConversionServiceA
         cluster.setExecutorType(source.getExecutorType());
         Boolean enableSecurity = source.getEnableSecurity();
         cluster.setSecure(enableSecurity == null ? Boolean.FALSE : enableSecurity);
-        convertKnox(source, cluster);
+        convertGateway(source, cluster);
+
         if (source.getKerberos() != null) {
             KerberosConfig kerberosConfig = getConversionService().convert(source.getKerberos(), KerberosConfig.class);
             cluster.setKerberosConfig(kerberosConfig);
@@ -70,72 +68,36 @@ public class ClusterRequestToClusterConverter extends AbstractConversionServiceA
         return cluster;
     }
 
-    private void convertAttributes(ClusterRequest source, Cluster cluster) {
-        Map<String, Object> attributesMap = new HashMap<>();
-        if (source.getCustomQueue() != null) {
-            attributesMap.put(ClusterAttributes.CUSTOM_QUEUE.name(), source.getCustomQueue());
+    private void convertGateway(ClusterRequest source, Cluster cluster) {
+        GatewayJson gatewayJson = source.getGateway();
+        if (gatewayJson != null) {
+            Gateway gateway = getConversionService().convert(gatewayJson, Gateway.class);
+            if (gateway != null) {
+                setGatewayPathAndSsoProvider(source, gatewayJson, gateway);
+                cluster.setGateway(gateway);
+                gateway.setCluster(cluster);
+            }
         }
+    }
+
+    private void setGatewayPathAndSsoProvider(ClusterRequest source, GatewayJson gatewayJson, Gateway gateway) {
+        gateway.setPath(source.getName());
+        if (gatewayJson.getPath() != null) {
+            gateway.setPath(gatewayJson.getPath());
+        }
+        if (gateway.getSsoProvider() == null) {
+            gateway.setSsoProvider('/' + gateway.getPath() + "/sso/api/v1/websso");
+        }
+    }
+
+    private void convertAttributes(ClusterRequest source, Cluster cluster) {
+        Map<String, Object> attributesMap = source.getCustomQueue() != null
+                ? Collections.singletonMap(ClusterAttributes.CUSTOM_QUEUE.name(), source.getCustomQueue())
+                : Collections.emptyMap();
         try {
             cluster.setAttributes(new Json(attributesMap));
         } catch (JsonProcessingException e) {
             LOGGER.warn("Could not initiate the attribute map on cluster object: ", e);
-        }
-    }
-
-    private void convertKnox(ClusterRequest source, Cluster cluster) {
-        GatewayJson cloudGatewayJson = source.getGateway();
-        Gateway gateway = new Gateway();
-        gateway.setEnableGateway(false);
-        gateway.setTopologyName("services");
-        gateway.setPath(source.getName());
-        gateway.setSsoType(SSOType.NONE);
-
-        if (cloudGatewayJson != null) {
-            if (cloudGatewayJson.getPath() != null) {
-                gateway.setPath(cloudGatewayJson.getPath());
-            }
-            if (cloudGatewayJson.getSsoProvider() != null) {
-                gateway.setSsoProvider(cloudGatewayJson.getSsoProvider());
-            }
-            if (cloudGatewayJson.getSsoType() != null) {
-                gateway.setSsoType(cloudGatewayJson.getSsoType());
-            }
-            gateway.setTokenCert(cloudGatewayJson.getTokenCert());
-        }
-
-        if (gateway.getSsoProvider() == null) {
-            gateway.setSsoProvider('/' + gateway.getPath() + "/sso/api/v1/websso");
-        }
-
-        convertExposedServices(cloudGatewayJson, gateway);
-        cluster.setGateway(gateway);
-        gateway.setCluster(cluster);
-    }
-
-    private void convertExposedServices(GatewayJson gatewayJson, Gateway gateway) {
-        ExposedServices exposedServices = new ExposedServices();
-        if (gatewayJson != null) {
-            if (gatewayJson.getGatewayType() != null) {
-                gateway.setGatewayType(gatewayJson.getGatewayType());
-            }
-
-            gateway.setEnableGateway(gatewayJson.getEnableGateway());
-            if (!Strings.isNullOrEmpty(gatewayJson.getTopologyName())) {
-                gateway.setTopologyName(gatewayJson.getTopologyName());
-            }
-            if (gatewayJson.getExposedServices() != null) {
-                if (gatewayJson.getExposedServices().contains(ExposedService.ALL.name())) {
-                    exposedServices.setServices(ExposedService.getAllKnoxExposed());
-                } else {
-                    exposedServices.setServices(gatewayJson.getExposedServices());
-                }
-            }
-        }
-
-        try {
-            gateway.setExposedServices(new Json(exposedServices));
-        } catch (JsonProcessingException e) {
-            LOGGER.error("Failed to store exposedServices", e);
             throw new CloudbreakApiException("Failed to store exposedServices", e);
         }
     }

@@ -9,7 +9,6 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.sequenceiq.cloudbreak.api.model.GatewayType;
 import com.sequenceiq.cloudbreak.api.model.JsonEntity;
-import com.sequenceiq.cloudbreak.api.model.SSOType;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.GatewayModelDescription;
 import com.sequenceiq.cloudbreak.json.Base64Deserializer;
 import com.sequenceiq.cloudbreak.json.Base64Serializer;
@@ -23,8 +22,11 @@ import io.swagger.annotations.ApiModelProperty;
 public class GatewayJson implements JsonEntity {
 
     /**
-     * @deprecated enableGateway is no longer needed to determine if gateway needs to be launched or not.
+     * @deprecated 'enableGateway' is no longer needed to determine if gateway needs to be launched or not.
      * Presence of gateway definition in request is suffucicient.
+     * This value is only used in legacy requests, when 'topologyName' or 'exposedServices' is defined in the root of Gateway,
+     * instead of using topologies.
+     * When it is a legacy request and 'enableGateway' is set to 'false', gateway will not be saved and created.
      */
     @Deprecated
     @ApiModelProperty(GatewayModelDescription.ENABLE_KNOX_GATEWAY)
@@ -34,7 +36,9 @@ public class GatewayJson implements JsonEntity {
     private String path;
 
     /**
-     * @deprecated Use the Knox topology name inside the 'gateway' part of the request.
+     * @deprecated Use the 'topologyName' inside the 'topologies' part of the request.
+     * If 'topologyName' is specified, other deprecated properties ('exposedServices' and 'enableGateway') will be used as well,
+     * and 'topologies' will be ignored.
      */
     @Deprecated
     @ApiModelProperty(GatewayModelDescription.DEPRECATED_KNOX_TOPOLOGY_NAME)
@@ -44,7 +48,9 @@ public class GatewayJson implements JsonEntity {
     private List<GatewayTopologyJson> topologies;
 
     /**
-     * @deprecated Use the 'exposed Knox services' inside the 'gateway' part of the request.
+     * @deprecated Use the 'exposedServices' inside the 'topologies' part of the request.
+     * If 'exposedServices' is specified, other deprecated properties ('topologyName' and 'enableGateway') will be used as well,
+     * and 'topologies' will be ignored.
      */
     @Deprecated
     @ApiModelProperty(GatewayModelDescription.DEPRECATED_EXPOSED_KNOX_SERVICES)
@@ -63,14 +69,6 @@ public class GatewayJson implements JsonEntity {
 
     @ApiModelProperty(GatewayModelDescription.KNOX_SSO_TYPE)
     private SSOType ssoType;
-
-    public boolean getEnableGateway() {
-        return enableGateway;
-    }
-
-    public void setEnableGateway(boolean enableGateway) {
-        this.enableGateway = enableGateway;
-    }
 
     public String getPath() {
         return path;
@@ -134,5 +132,13 @@ public class GatewayJson implements JsonEntity {
 
     public void setTopologies(List<GatewayTopologyJson> topologies) {
         this.topologies = topologies;
+    }
+
+    public boolean isEnableGateway() {
+        return enableGateway;
+    }
+
+    public void setEnableGateway(boolean enableGateway) {
+        this.enableGateway = enableGateway;
     }
 }

@@ -1,24 +1,31 @@
 package com.sequenceiq.cloudbreak.domain.stack.cluster.gateway;
 
+import java.util.HashSet;
+import java.util.Set;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.Type;
 
 import com.sequenceiq.cloudbreak.api.model.GatewayType;
-import com.sequenceiq.cloudbreak.api.model.SSOType;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.SSOType;
 import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.json.JsonToString;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 
 @Entity
 public class Gateway implements ProvisionEntity {
@@ -32,17 +39,17 @@ public class Gateway implements ProvisionEntity {
     private Cluster cluster;
 
     @Column(nullable = false)
-    private boolean enableGateway;
-
-    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private GatewayType gatewayType = GatewayType.INDIVIDUAL;
 
     @Column(nullable = false)
     private String path;
 
+    @OneToMany(mappedBy = "gateway", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    private Set<GatewayTopology> topologies = new HashSet<>();
+
     @Column(nullable = false)
-    private String topologyName;
+    private String topologyName = "";
 
     @Convert(converter = JsonToString.class)
     @Column(columnDefinition = "TEXT")
@@ -79,14 +86,6 @@ public class Gateway implements ProvisionEntity {
         this.cluster = cluster;
     }
 
-    public boolean getEnableGateway() {
-        return enableGateway;
-    }
-
-    public void setEnableGateway(boolean enableGateway) {
-        this.enableGateway = enableGateway;
-    }
-
     public GatewayType getGatewayType() {
         return gatewayType;
     }
@@ -101,22 +100,6 @@ public class Gateway implements ProvisionEntity {
 
     public void setPath(String path) {
         this.path = path;
-    }
-
-    public String getTopologyName() {
-        return topologyName;
-    }
-
-    public void setTopologyName(String topologyName) {
-        this.topologyName = topologyName;
-    }
-
-    public Json getExposedServices() {
-        return exposedServices;
-    }
-
-    public void setExposedServices(Json exposedServices) {
-        this.exposedServices = exposedServices;
     }
 
     public SSOType getSsoType() {
@@ -165,5 +148,23 @@ public class Gateway implements ProvisionEntity {
 
     public void setTokenCert(String tokenCert) {
         this.tokenCert = tokenCert;
+    }
+
+    public Set<GatewayTopology> getTopologies() {
+        if (StringUtils.isNotEmpty(topologyName)) {
+            if (topologies.stream().noneMatch(t -> t.getTopologyName().equals(topologyName))) {
+                GatewayTopology gatewayTopology = new GatewayTopology();
+                gatewayTopology.setTopologyName(topologyName);
+                if (exposedServices != null && StringUtils.isNoneEmpty(exposedServices.getValue())) {
+                    gatewayTopology.setExposedServices(exposedServices);
+                }
+                topologies.add(gatewayTopology);
+            }
+        }
+        return topologies;
+    }
+
+    public void setTopologies(Set<GatewayTopology> topologies) {
+        this.topologies = topologies;
     }
 }

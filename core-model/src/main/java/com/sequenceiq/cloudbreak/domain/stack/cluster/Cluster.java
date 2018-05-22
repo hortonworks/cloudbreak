@@ -172,6 +172,10 @@ public class Cluster implements ProvisionEntity {
     @ManyToOne
     private ProxyConfig proxyConfig;
 
+    public boolean hasGateway() {
+        return gateway != null;
+    }
+
     public Stack getStack() {
         return stack;
     }
