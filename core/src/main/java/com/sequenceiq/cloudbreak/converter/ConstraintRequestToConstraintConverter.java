@@ -10,8 +10,6 @@ public class ConstraintRequestToConstraintConverter extends AbstractConversionSe
 
     @Override
     public Constraint convert(ConstraintJson source) {
-        Constraint constraint = new Constraint();
-        constraint.setHostCount(source.getHostCount());
-        return constraint;
+        return new Constraint();
     }
 }
