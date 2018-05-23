@@ -8,8 +8,6 @@ import static com.sequenceiq.cloudbreak.api.model.Status.UPDATE_REQUESTED;
 import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
 
 import java.io.IOException;
-import java.security.KeyPair;
-import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -52,7 +50,6 @@ import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceStatus;
 import com.sequenceiq.cloudbreak.blueprint.validation.BlueprintValidator;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
-import com.sequenceiq.cloudbreak.client.PkiUtil;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
@@ -64,6 +61,7 @@ import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.converter.scheduler.StatusToPollGroupConverter;
+import com.sequenceiq.cloudbreak.converter.util.GatewayConvertUtil;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
@@ -76,7 +74,6 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
@@ -160,6 +157,9 @@ public class AmbariClusterService implements ClusterService {
     private JsonHelper jsonHelper;
 
     @Inject
+    private GatewayConvertUtil gateWayUtil;
+
+    @Inject
     @Qualifier("conversionService")
     private ConversionService conversionService;
 
@@ -236,7 +236,7 @@ public class AmbariClusterService implements ClusterService {
                 stack.setCluster(cluster);
 
                 start = System.currentTimeMillis();
-                generateSignKeys(cluster.getGateway());
+                gateWayUtil.generateSignKeys(cluster.getGateway());
                 LOGGER.info("Sign key generated in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
                 Cluster savedCluster;
@@ -823,20 +823,6 @@ public class AmbariClusterService implements ClusterService {
                 }
                 return null;
             });
-        }
-    }
-
-    private void generateSignKeys(Gateway gateway) {
-        if (gateway != null) {
-            if (gateway.getSignCert() == null) {
-                KeyPair identityKey = PkiUtil.generateKeypair();
-                KeyPair signKey = PkiUtil.generateKeypair();
-                X509Certificate cert = PkiUtil.cert(identityKey, "signing", signKey);
-
-                gateway.setSignKey(PkiUtil.convert(identityKey.getPrivate()));
-                gateway.setSignPub(PkiUtil.convert(identityKey.getPublic()));
-                gateway.setSignCert(PkiUtil.convert(cert));
-            }
         }
     }
 
