@@ -2,8 +2,6 @@ package com.sequenceiq.cloudbreak.controller;
 
 import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
 
-import java.util.Optional;
-
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -13,7 +11,6 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.model.ClusterRequest;
-import com.sequenceiq.cloudbreak.api.model.InstanceGroupRequest;
 import com.sequenceiq.cloudbreak.api.model.StackRequest;
 import com.sequenceiq.cloudbreak.api.model.StackResponse;
 import com.sequenceiq.cloudbreak.api.model.StackValidationRequest;
@@ -146,7 +143,7 @@ public class StackCreatorService {
         StatedImage imgFromCatalog = imageService.determineImageFromCatalog(stackRequest.getImageId(), platformString,
                 stackRequest.getImageCatalog(), blueprint, forceBaseImage(stackRequest.getClusterRequest()));
 
-        fillInstanceMetadata(stackRequest, stack);
+        fillInstanceMetadata(stack);
         start = System.currentTimeMillis();
 
         stack = stackService.create(user, stack, platformString, imgFromCatalog);
@@ -165,20 +162,13 @@ public class StackCreatorService {
         return response;
     }
 
-    private void fillInstanceMetadata(StackRequest stackRequest, Stack stack) {
+    private void fillInstanceMetadata(Stack stack) {
         long privateIdNumber = 0;
         for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
-            Optional<InstanceGroupRequest> foundInstanceGroupRequest = stackRequest.getInstanceGroups().stream()
-                    .filter(instanceGroupRequest -> instanceGroup.getGroupName().equals(instanceGroupRequest.getGroup())).findAny();
-            if (foundInstanceGroupRequest.isPresent()) {
-                for (int i = 0; i < foundInstanceGroupRequest.get().getNodeCount(); i++) {
-                    InstanceMetaData instanceMetaData = new InstanceMetaData();
-                    instanceMetaData.setPrivateId(privateIdNumber);
-                    instanceMetaData.setInstanceStatus(com.sequenceiq.cloudbreak.api.model.InstanceStatus.REQUESTED);
-                    instanceMetaData.setInstanceGroup(instanceGroup);
-                    instanceGroup.getInstanceMetaDataSet().add(instanceMetaData);
-                    privateIdNumber++;
-                }
+            for (InstanceMetaData instanceMetaData : instanceGroup.getAllInstanceMetaData()) {
+                instanceMetaData.setPrivateId(privateIdNumber);
+                instanceMetaData.setInstanceStatus(com.sequenceiq.cloudbreak.api.model.InstanceStatus.REQUESTED);
+                privateIdNumber++;
             }
         }
     }
