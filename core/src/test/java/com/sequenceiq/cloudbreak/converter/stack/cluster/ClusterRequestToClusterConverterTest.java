@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.converter.stack.cluster;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
@@ -20,7 +19,6 @@ import org.springframework.core.convert.ConversionService;
 import com.sequenceiq.cloudbreak.api.model.FileSystemRequest;
 import com.sequenceiq.cloudbreak.api.model.KerberosRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRequest;
-import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.GatewayJson;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.converter.AbstractJsonConverterTest;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
@@ -55,7 +53,7 @@ public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterT
     @Test
     public void testConvert() {
         // GIVEN
-        given(conversionService.convert(any(GatewayJson.class), eq(Gateway.class))).willReturn(new Gateway());
+        given(conversionService.convert(any(ClusterRequest.class), eq(Gateway.class))).willReturn(new Gateway());
         // WHEN
         Cluster result = underTest.convert(getRequest("cluster.json"));
         // THEN
@@ -68,7 +66,7 @@ public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterT
     public void testConvertWithFileSystemDetails() {
         // GIVEN
         Gateway gateway = new Gateway();
-        given(conversionService.convert(any(GatewayJson.class), eq(Gateway.class))).willReturn(gateway);
+        given(conversionService.convert(any(ClusterRequest.class), eq(Gateway.class))).willReturn(gateway);
         given(conversionService.convert(any(KerberosRequest.class), eq(KerberosConfig.class))).willReturn(new KerberosConfig());
         given(conversionService.convert(any(FileSystemRequest.class), eq(FileSystem.class))).willReturn(new FileSystem());
         // WHEN
@@ -90,33 +88,6 @@ public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterT
                 "ambariStackDetails", "fileSystem", "certDir", "rdsConfigs", "ldapConfig", "attributes", "blueprintCustomProperties", "uptime",
                 "kerberosConfig", "ambariSecurityMasterKey", "proxyConfig", "extendedBlueprintText", "gateway"));
         assertNull(result.getGateway());
-    }
-
-    @Test
-    public void testGatewayPathConversionWhenNoPathInGatewayJson() {
-        Gateway gateway = new Gateway();
-        given(conversionService.convert(any(GatewayJson.class), eq(Gateway.class))).willReturn(gateway);
-        ClusterRequest clusterRequest = getRequest("cluster-with-file-system.json");
-
-        Cluster result = underTest.convert(clusterRequest);
-
-        assertEquals(result.getName(), result.getGateway().getPath());
-        assertEquals('/' + result.getGateway().getPath() + "/sso/api/v1/websso", result.getGateway().getSsoProvider());
-    }
-
-    @Test
-    public void testGatewayPathConversionWhenPathIsInGatewayJson() {
-        String gatewayPath = "gatewayPath";
-        GatewayJson gatewayJson = new GatewayJson();
-        gatewayJson.setPath(gatewayPath);
-        given(conversionService.convert(any(GatewayJson.class), eq(Gateway.class))).willReturn(new Gateway());
-        ClusterRequest clusterRequest = getRequest("cluster-with-file-system.json");
-        clusterRequest.setGateway(gatewayJson);
-
-        Cluster result = underTest.convert(clusterRequest);
-
-        assertEquals(gatewayPath, result.getGateway().getPath());
-        assertEquals('/' + result.getGateway().getPath() + "/sso/api/v1/websso", result.getGateway().getSsoProvider());
     }
 
     @Override

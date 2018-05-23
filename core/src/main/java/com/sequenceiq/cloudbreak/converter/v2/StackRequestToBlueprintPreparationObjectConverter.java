@@ -38,6 +38,7 @@ import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
@@ -106,12 +107,14 @@ public class StackRequestToBlueprintPreparationObjectConverter extends AbstractC
             Blueprint blueprint = getBlueprint(source, identityUser);
             BlueprintStackInfo blueprintStackInfo = stackInfoService.blueprintStackInfo(blueprint.getBlueprintText());
             Set<HostgroupView> hostgroupViews = getHostgroupViews(source);
+            Gateway gateway = getConversionService().convert(source, Gateway.class);
             BlueprintView blueprintView = new BlueprintView(blueprint.getBlueprintText(), blueprintStackInfo.getVersion(), blueprintStackInfo.getType());
             GeneralClusterConfigs generalClusterConfigs = generalClusterConfigsProvider.generalClusterConfigs(source, identityUser);
             BlueprintPreparationObject.Builder builder = BlueprintPreparationObject.Builder.builder()
                     .withFlexSubscription(flexSubscription)
                     .withRdsConfigs(rdsConfigs)
                     .withHostgroupViews(hostgroupViews)
+                    .withGateway(gateway)
                     .withBlueprintView(blueprintView)
                     .withStackRepoDetailsHdpVersion(blueprintStackInfo.getVersion())
                     .withFileSystemConfigurationView(fileSystemConfigurationView)
@@ -191,6 +194,7 @@ public class StackRequestToBlueprintPreparationObjectConverter extends AbstractC
         FileSystemConfigurationView fileSystemConfigurationView = null;
         if (source.getCluster().getFileSystem() != null) {
             FileSystem fileSystem = getConversionService().convert(source.getCluster().getFileSystem(), FileSystem.class);
+
             FileSystemConfiguration fileSystemConfiguration = fileSystemConfigurationProvider.fileSystemConfiguration(fileSystem, null);
             fileSystemConfigurationView = new FileSystemConfigurationView(fileSystemConfiguration, fileSystem.isDefaultFs());
         }

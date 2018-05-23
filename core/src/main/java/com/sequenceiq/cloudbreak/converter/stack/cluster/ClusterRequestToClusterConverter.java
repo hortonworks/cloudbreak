@@ -17,7 +17,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.api.model.CustomContainerRequest;
 import com.sequenceiq.cloudbreak.api.model.FileSystemBase;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRequest;
-import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.GatewayJson;
 import com.sequenceiq.cloudbreak.controller.exception.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.ClusterAttributes;
@@ -78,24 +77,12 @@ public class ClusterRequestToClusterConverter extends AbstractConversionServiceA
     }
 
     private void convertGateway(ClusterRequest source, Cluster cluster) {
-        GatewayJson gatewayJson = source.getGateway();
-        if (gatewayJson != null) {
-            Gateway gateway = getConversionService().convert(gatewayJson, Gateway.class);
+        if (source.getGateway() != null) {
+            Gateway gateway = getConversionService().convert(source, Gateway.class);
             if (gateway != null) {
-                setGatewayPathAndSsoProvider(source, gatewayJson, gateway);
                 cluster.setGateway(gateway);
                 gateway.setCluster(cluster);
             }
-        }
-    }
-
-    private void setGatewayPathAndSsoProvider(ClusterRequest source, GatewayJson gatewayJson, Gateway gateway) {
-        gateway.setPath(source.getName());
-        if (gatewayJson.getPath() != null) {
-            gateway.setPath(gatewayJson.getPath());
-        }
-        if (gateway.getSsoProvider() == null) {
-            gateway.setSsoProvider('/' + gateway.getPath() + "/sso/api/v1/websso");
         }
     }
 
