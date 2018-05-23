@@ -95,7 +95,7 @@ public class AccountPreferencesValidator {
         Long userTimeToLive = preferences.getUserTimeToLive();
         if (needToValidateField(userTimeToLive)) {
             IdentityUser identityUser = userDetailsService.getDetails(owner, UserFilterField.USERID);
-            long now = Calendar.getInstance().getTimeInMillis();
+            long now = getTimeInMillis();
             long userActiveTime = now - identityUser.getCreated().getTime();
             if (userActiveTime > userTimeToLive) {
                 throw new AccountPreferencesValidationFailed("The user demo time is expired!");
@@ -105,12 +105,16 @@ public class AccountPreferencesValidator {
 
     public void validateClusterTimeToLive(Long created, Long clusterTimeToLive) throws AccountPreferencesValidationFailed {
         if (needToValidateField(clusterTimeToLive)) {
-            long now = Calendar.getInstance().getTimeInMillis();
+            long now = getTimeInMillis();
             long clusterRunningTime = now - created;
             if (clusterRunningTime > clusterTimeToLive) {
                 throw new AccountPreferencesValidationFailed("The maximum running time that is configured for the account is exceeded by the cluster!");
             }
         }
+    }
+
+    long getTimeInMillis() {
+        return Calendar.getInstance().getTimeInMillis();
     }
 
     private boolean needToValidateField(Long field) {
