@@ -4,9 +4,11 @@ include:
 {% if grains['os_family'] == 'RedHat' %}
   - gateway.repo
 {% endif %}
-
 {% if grains['os_family'] == 'Debian' %}
-  - gateway.repo.debian
+  - gateway.repo-debian
+{% endif %}
+{% if grains['os_family'] == 'Suse' %}
+  - gateway.repo-suse
 {% endif %}
 
 knox:
