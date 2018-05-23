@@ -84,8 +84,9 @@ public class ScalingRequest implements Runnable {
             cloudbreakClient.stackV1Endpoint().put(stackId, updateStackJson);
             history = historyService.createEntry(ScalingStatus.SUCCESS, "Upscale successfully triggered", totalNodes, policy);
         } catch (RuntimeException e) {
-            history = historyService.createEntry(ScalingStatus.FAILED, "Couldn't trigger upscaling due to: " + e.getMessage(), totalNodes, policy);
-            LOGGER.error("Error adding nodes to cluster", e);
+            String statusReason = "Couldn't trigger upscaling due to: " + e.getMessage();
+            history = historyService.createEntry(ScalingStatus.FAILED, statusReason, totalNodes, policy);
+            LOGGER.error(statusReason, e);
         } finally {
             if (history != null) {
                 notificationSender.send(history);
@@ -111,8 +112,9 @@ public class ScalingRequest implements Runnable {
             cloudbreakClient.clusterEndpoint().put(stackId, updateClusterJson);
             history = historyService.createEntry(ScalingStatus.SUCCESS, "Downscale successfully triggered", totalNodes, policy);
         } catch (Exception e) {
-            history = historyService.createEntry(ScalingStatus.FAILED, "Couldn't trigger downscaling due to: " + e.getMessage(), totalNodes, policy);
-            LOGGER.error("Error removing nodes from the cluster", e);
+            String statusReason = "Couldn't trigger downscaling due to: " + e.getMessage();
+            history = historyService.createEntry(ScalingStatus.FAILED, statusReason, totalNodes, policy);
+            LOGGER.error(statusReason, e);
         } finally {
             if (history != null) {
                 notificationSender.send(history);
