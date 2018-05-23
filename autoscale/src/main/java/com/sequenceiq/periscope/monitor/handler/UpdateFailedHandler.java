@@ -70,7 +70,7 @@ public class UpdateFailedHandler implements ApplicationListener<UpdateFailedEven
                     suspendCluster(cluster);
                 }
             } catch (Exception ex) {
-                LOGGER.warn("Cluster status could not be verified by Cloudbreak for remove.", ex);
+                LOGGER.warn("Cluster status could not be verified by Cloudbreak for remove. Original message: {}", ex.getMessage());
                 suspendCluster(cluster);
             }
             updateFailures.remove(id);
@@ -94,7 +94,7 @@ public class UpdateFailedHandler implements ApplicationListener<UpdateFailedEven
             try {
                 cbClient.clusterEndpoint().failureReport(cluster.getStackId(), failureReport);
             } catch (Exception e) {
-                LOGGER.warn("Exception during failure report", e);
+                LOGGER.warn("Exception during failure report. Original message: {}", e.getMessage());
             }
         }
     }
