@@ -10,6 +10,10 @@ import org.springframework.stereotype.Service;
 
 import com.ecwid.consul.v1.ConsulClient;
 import com.ecwid.consul.v1.OperationException;
+import com.sequenceiq.cloudbreak.api.model.GatewayType;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
+import com.sequenceiq.cloudbreak.util.StackUtil;
 
 @Service
 public class ProxyRegistrator {
@@ -29,6 +33,9 @@ public class ProxyRegistrator {
     @Inject
     private ConsulClient consulClient;
 
+    @Inject
+    private StackUtil stackUtil;
+
     @Retryable(value = OperationException.class, maxAttempts = 10, backoff = @Backoff(delay = 2000))
     public void register(String clusterName, String contextPath, String gatewayHost) {
         registerKeys(clusterName, String.format("https://%s:8443", gatewayHost), String.format("/%s/", contextPath));
@@ -37,6 +44,18 @@ public class ProxyRegistrator {
     @Retryable(value = OperationException.class, maxAttempts = 10, backoff = @Backoff(delay = 2000))
     public void remove(String clusterName) {
         removeKeys(clusterName);
+    }
+
+    public boolean isKnoxEnabled(Gateway gateway) {
+        return gateway != null && gateway.getGatewayType() == GatewayType.CENTRAL;
+    }
+
+    public void registerIfNeed(Stack stack) {
+        Gateway gateway = stack.getCluster().getGateway();
+        if (isKnoxEnabled(gateway)) {
+            String proxyIp = stackUtil.extractAmbariIp(stack);
+            register(stack.getName(), gateway.getPath(), proxyIp);
+        }
     }
 
     private void registerKeys(String clusterName, String baseUrl, String context) {

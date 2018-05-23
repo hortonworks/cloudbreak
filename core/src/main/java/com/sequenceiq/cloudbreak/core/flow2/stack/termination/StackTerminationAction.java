@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.event.resource.TerminateStackRequest;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.reactor.api.event.recipe.StackPreTerminationSuccess;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
@@ -46,7 +47,10 @@ public class StackTerminationAction extends AbstractStackTerminationAction<Stack
     @Override
     protected void doExecute(StackTerminationContext context, StackPreTerminationSuccess payload, Map<Object, Object> variables) {
         String name = context.getStack().getName();
-        proxyRegistrator.remove(name);
+        Gateway gateway = context.getStack().getCluster().getGateway();
+        if (proxyRegistrator.isKnoxEnabled(gateway)) {
+            proxyRegistrator.remove(name);
+        }
         doExecute(context);
     }
 
