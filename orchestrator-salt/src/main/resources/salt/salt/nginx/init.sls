@@ -1,3 +1,24 @@
+{% set gateway = salt['pillar.get']('gateway') %}
+
+/etc/nginx/sites-enabled/ssl.conf:
+  file.managed:
+    - makedirs: True
+    - source: salt://nginx/conf/ssl.conf
+
+# when gateway is defined, we do NOT config user facing cert and ssl for port 443, because services are available through knox on 8443
+# we still config ssl for port 9443 (for internal communication with ambari)
+{% if gateway.path is defined and gateway.path is not none %}
+
+restart_nginx_after_ssl_reconfig:
+  service.running:
+    - name: nginx
+    - enable: True
+    - watch:
+      - file: /etc/nginx/sites-enabled/ssl.conf
+
+# when gateway is NOT defined, we config user facing cert and ssl, because services are available through nginx on 443
+{% else %}
+
 add_user_facing_cert_script:
   file.managed:
     - name: /opt/salt/scripts/create-user-facing-cert.sh
@@ -20,15 +41,12 @@ generate_user_facing_cert:
     - makedirs: True
     - source: salt://nginx/conf/ssl-user-facing.conf
 
-/etc/nginx/sites-enabled/ssl.conf:
-  file.managed:
-    - makedirs: True
-    - source: salt://nginx/conf/ssl.conf
-
-restart_nginx_after_ssl_reconfig:
+restart_nginx_after_ssl_reconfig_with_user_facing:
   service.running:
     - name: nginx
     - enable: True
     - watch:
       - file: /etc/nginx/sites-enabled/ssl.conf
       - file: /etc/nginx/sites-enabled/ssl-user-facing.conf
+
+{% endif %}
