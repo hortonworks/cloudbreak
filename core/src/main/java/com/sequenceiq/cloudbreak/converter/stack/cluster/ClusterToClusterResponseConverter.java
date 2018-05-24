@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.api.model.AmbariRepoDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsResponse;
 import com.sequenceiq.cloudbreak.api.model.BlueprintInputJson;
 import com.sequenceiq.cloudbreak.api.model.BlueprintResponse;
+import com.sequenceiq.cloudbreak.api.model.ClusterExposedServiceResponse;
 import com.sequenceiq.cloudbreak.api.model.CustomContainerResponse;
 import com.sequenceiq.cloudbreak.api.model.KerberosResponse;
 import com.sequenceiq.cloudbreak.api.model.SharedServiceResponse;
@@ -119,8 +120,11 @@ public class ClusterToClusterResponseConverter extends AbstractConversionService
         clusterResponse.setExtendedBlueprintText(source.getExtendedBlueprintText() == null
                 ? source.getBlueprint().getBlueprintText() : source.getExtendedBlueprintText());
         clusterResponse.setHostGroups(convertHostGroupsToJson(source.getHostGroups()));
-        clusterResponse.setAmbariServerUrl(serviceEndpointCollector.getAmbariServerUrl(source, ambariIp));
-        clusterResponse.setServiceEndPoints(serviceEndpointCollector.collectServiceUrlsForPorts(source, ambariIp));
+        String ambariServerUrl = serviceEndpointCollector.getAmbariServerUrl(source, ambariIp);
+        clusterResponse.setAmbariServerUrl(ambariServerUrl);
+        Map<String, Collection<ClusterExposedServiceResponse>> clusterExposedServicesForTopologies =
+                serviceEndpointCollector.prepareClusterExposedServices(source, ambariIp);
+        clusterResponse.setClusterExposedServicesForTopologies(clusterExposedServicesForTopologies);
         clusterResponse.setConfigStrategy(source.getConfigStrategy());
         setExtendedBlueprintText(source, clusterResponse);
         convertRdsConfigs(source, clusterResponse);

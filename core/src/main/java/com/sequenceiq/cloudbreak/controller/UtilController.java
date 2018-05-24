@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.controller;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.UtilEndpoint;
 import com.sequenceiq.cloudbreak.api.model.AmbariDatabaseDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.AmbariDatabaseTestResult;
+import com.sequenceiq.cloudbreak.api.model.ExposedServiceResponse;
 import com.sequenceiq.cloudbreak.api.model.ParametersQueryRequest;
 import com.sequenceiq.cloudbreak.api.model.ParametersQueryResponse;
 import com.sequenceiq.cloudbreak.api.model.VersionCheckResult;
@@ -21,11 +23,8 @@ import com.sequenceiq.cloudbreak.api.model.rds.RdsBuildResult;
 import com.sequenceiq.cloudbreak.api.model.stack.StackMatrix;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.controller.validation.ldapconfig.LdapConfigValidator;
 import com.sequenceiq.cloudbreak.controller.validation.rds.RdsConnectionBuilder;
-import com.sequenceiq.cloudbreak.controller.validation.rds.RdsConnectionValidator;
-import com.sequenceiq.cloudbreak.repository.LdapConfigRepository;
-import com.sequenceiq.cloudbreak.repository.RdsConfigRepository;
+import com.sequenceiq.cloudbreak.converter.stack.cluster.ServiceEndpointCollector;
 import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.StackMatrixService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
@@ -34,28 +33,17 @@ import com.sequenceiq.cloudbreak.util.ClientVersionUtil;
 @Component
 public class UtilController implements UtilEndpoint {
 
-    private static final String CONNECTED = "connected";
-
-    @Inject
-    private RdsConnectionValidator rdsConnectionValidator;
-
     @Inject
     private RdsConnectionBuilder rdsConnectionBuilder;
-
-    @Inject
-    private LdapConfigValidator ldapConfigValidator;
-
-    @Inject
-    private RdsConfigRepository rdsConfigRepository;
-
-    @Inject
-    private LdapConfigRepository ldapConfigRepository;
 
     @Inject
     private StackMatrixService stackMatrixService;
 
     @Inject
     private BlueprintService blueprintService;
+
+    @Inject
+    private ServiceEndpointCollector serviceEndpointCollector;
 
     @Autowired
     private AuthenticatedUserService authenticatedUserService;
@@ -100,6 +88,12 @@ public class UtilController implements UtilEndpoint {
     @Override
     public StackMatrix getStackMatrix() {
         return stackMatrixService.getStackMatrix();
+    }
+
+    @Override
+    public Collection<ExposedServiceResponse> getKnoxServices(String blueprintName) {
+        IdentityUser cbUser = authenticatedUserService.getCbUser();
+        return serviceEndpointCollector.getKnoxServices(cbUser, blueprintName);
     }
 
     @Override

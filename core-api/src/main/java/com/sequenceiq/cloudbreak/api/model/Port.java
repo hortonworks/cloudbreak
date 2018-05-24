@@ -24,7 +24,7 @@ public class Port {
     public Port(ExposedService exposedService, String port, String localPort, String protocol, List<EndpointRule> aclRules) {
         this.localPort = localPort;
         this.port = port;
-        name = exposedService.getPortName();
+        this.name = exposedService.getPortName();
         this.protocol = protocol;
         this.aclRules = aclRules;
         this.exposedService = exposedService;

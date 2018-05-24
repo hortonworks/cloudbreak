@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v1;
 
+import java.util.Collection;
 import java.util.Set;
 
 import javax.validation.Valid;
@@ -14,6 +15,7 @@ import javax.ws.rs.core.MediaType;
 
 import com.sequenceiq.cloudbreak.api.model.AmbariDatabaseDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.AmbariDatabaseTestResult;
+import com.sequenceiq.cloudbreak.api.model.ExposedServiceResponse;
 import com.sequenceiq.cloudbreak.api.model.ParametersQueryRequest;
 import com.sequenceiq.cloudbreak.api.model.ParametersQueryResponse;
 import com.sequenceiq.cloudbreak.api.model.VersionCheckResult;
@@ -56,6 +58,12 @@ public interface UtilEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = UtilityOpDescription.STACK_MATRIX, produces = ContentType.JSON, nickname = "getStackMatrixUtil")
     StackMatrix getStackMatrix();
+
+    @GET
+    @Path("knoxservices/{blueprintName}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = UtilityOpDescription.KNOX_SERVICES, produces = ContentType.JSON, nickname = "getKnoxServices")
+    Collection<ExposedServiceResponse> getKnoxServices(@PathParam("blueprintName") String blueprintId);
 
     @POST
     @Path("custom-parameters")

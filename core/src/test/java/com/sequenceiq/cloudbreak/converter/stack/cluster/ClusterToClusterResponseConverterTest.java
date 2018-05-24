@@ -1,20 +1,23 @@
 package com.sequenceiq.cloudbreak.converter.stack.cluster;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anySet;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyLong;
-import static org.mockito.Matchers.anySet;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
-import java.util.Collections;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -30,6 +33,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.TestUtil;
+import com.sequenceiq.cloudbreak.api.model.ClusterExposedServiceResponse;
 import com.sequenceiq.cloudbreak.api.model.ConfigStrategy;
 import com.sequenceiq.cloudbreak.api.model.proxy.ProxyConfigResponse;
 import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigJson;
@@ -205,6 +209,17 @@ public class ClusterToClusterResponseConverterTest extends AbstractEntityConvert
 
     }
 
+    @Test
+    public void testExposedServices() throws IOException {
+        mockAll();
+        given(stackUtil.extractAmbariIp(any(Stack.class))).willReturn("10.0.0.1");
+        ClusterResponse clusterResponse = underTest.convert(getSource());
+        Map<String, Collection<ClusterExposedServiceResponse>> clusterExposedServicesForTopologies = clusterResponse.getClusterExposedServicesForTopologies();
+        assertEquals(1, clusterExposedServicesForTopologies.keySet().size());
+        Collection<ClusterExposedServiceResponse> topology1ServiceList = clusterExposedServicesForTopologies.get("topology1");
+        assertEquals(2, topology1ServiceList.size());
+    }
+
     @Override
     public Cluster createSource() {
         Stack stack = TestUtil.stack();
@@ -246,7 +261,24 @@ public class ClusterToClusterResponseConverterTest extends AbstractEntityConvert
         proxyConfigResponse.setId(1L);
         given(proxyConfigMapper.mapEntityToResponse(any(ProxyConfig.class))).willReturn(proxyConfigResponse);
         given(serviceEndpointCollector.getAmbariServerUrl(any(), anyString())).willReturn("http://ambari.com");
-        given(serviceEndpointCollector.collectServiceUrlsForPorts(any(), anyString())).willReturn(Collections.emptyMap());
+        Map<String, Collection<ClusterExposedServiceResponse>> exposedServiceResponseMap = new HashMap<>();
+        List<ClusterExposedServiceResponse> clusterExposedServiceResponseList = new ArrayList<>();
+        ClusterExposedServiceResponse firstClusterExposedServiceResponse = new ClusterExposedServiceResponse();
+        firstClusterExposedServiceResponse.setOpen(true);
+        firstClusterExposedServiceResponse.setServiceUrl("http://service1");
+        firstClusterExposedServiceResponse.setServiceName("serviceName1");
+        firstClusterExposedServiceResponse.setKnoxService("knoxService1");
+        firstClusterExposedServiceResponse.setDisplayName("displayName1");
+        ClusterExposedServiceResponse secondClusterExposedServiceResponse = new ClusterExposedServiceResponse();
+        clusterExposedServiceResponseList.add(firstClusterExposedServiceResponse);
+        secondClusterExposedServiceResponse.setOpen(false);
+        secondClusterExposedServiceResponse.setServiceUrl("http://service2");
+        secondClusterExposedServiceResponse.setServiceName("serviceName2");
+        secondClusterExposedServiceResponse.setKnoxService("knoxService2");
+        secondClusterExposedServiceResponse.setDisplayName("displayName2");
+        clusterExposedServiceResponseList.add(secondClusterExposedServiceResponse);
+        exposedServiceResponseMap.put("topology1", clusterExposedServiceResponseList);
+        given(serviceEndpointCollector.prepareClusterExposedServices(any(), anyString())).willReturn(exposedServiceResponseMap);
     }
 
     private StackServiceComponentDescriptor createStackServiceComponentDescriptor() {
