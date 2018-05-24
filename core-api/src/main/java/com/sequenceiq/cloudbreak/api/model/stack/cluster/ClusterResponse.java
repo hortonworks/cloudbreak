@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.api.model.stack.cluster;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -16,6 +17,7 @@ import com.sequenceiq.cloudbreak.api.model.AmbariRepoDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsResponse;
 import com.sequenceiq.cloudbreak.api.model.BlueprintInputJson;
 import com.sequenceiq.cloudbreak.api.model.BlueprintResponse;
+import com.sequenceiq.cloudbreak.api.model.ClusterExposedServiceResponse;
 import com.sequenceiq.cloudbreak.api.model.ConfigStrategy;
 import com.sequenceiq.cloudbreak.api.model.CustomContainerResponse;
 import com.sequenceiq.cloudbreak.api.model.ExecutorType;
@@ -89,8 +91,8 @@ public class ClusterResponse implements JsonEntity {
     @ApiModelProperty(ClusterModelDescription.PROXY_NAME)
     private String proxyName;
 
-    @ApiModelProperty(ClusterModelDescription.SERVICE_ENDPOINT_MAP)
-    private Map<String, String> serviceEndPoints = new HashMap<>();
+    @ApiModelProperty(ClusterModelDescription.CLUSTER_EXPOSED_SERVICES)
+    private Map<String, Collection<ClusterExposedServiceResponse>> clusterExposedServicesForTopologies;
 
     @ApiModelProperty(ClusterModelDescription.CONFIG_STRATEGY)
     private ConfigStrategy configStrategy;
@@ -268,12 +270,12 @@ public class ClusterResponse implements JsonEntity {
         this.userName = userName;
     }
 
-    public Map<String, String> getServiceEndPoints() {
-        return serviceEndPoints;
+    public Map<String, Collection<ClusterExposedServiceResponse>> getClusterExposedServicesForTopologies() {
+        return clusterExposedServicesForTopologies;
     }
 
-    public void setServiceEndPoints(Map<String, String> serviceEndPoints) {
-        this.serviceEndPoints = serviceEndPoints;
+    public void setClusterExposedServicesForTopologies(Map<String, Collection<ClusterExposedServiceResponse>> clusterExposedServicesForTopologies) {
+        this.clusterExposedServicesForTopologies = clusterExposedServicesForTopologies;
     }
 
     public ConfigStrategy getConfigStrategy() {

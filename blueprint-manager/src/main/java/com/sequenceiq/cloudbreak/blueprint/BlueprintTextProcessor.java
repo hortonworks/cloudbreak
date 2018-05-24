@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -44,6 +45,8 @@ public class BlueprintTextProcessor {
     private static final String BLUEPRINTS = "Blueprints";
 
     private static final String STACK_VERSION = "stack_version";
+
+    private static final String STACK_NAME = "stack_name";
 
     private final ObjectNode blueprint;
 
@@ -137,6 +140,14 @@ public class BlueprintTextProcessor {
             }
         }
         return currentNode.isValueNode() ? Optional.of(currentNode.textValue()) : Optional.empty();
+    }
+
+    public Set<String> getAllComponents() {
+        return getComponentsByHostGroup().entrySet()
+                .stream()
+                .flatMap(entry -> entry.getValue().stream())
+                .distinct()
+                .collect(Collectors.toSet());
     }
 
     public Set<String> getComponentsInHostGroup(String hostGroup) {
@@ -491,6 +502,16 @@ public class BlueprintTextProcessor {
             }
         }
         return this;
+    }
+
+    public String getStackName() {
+        ObjectNode blueprintsNode = (ObjectNode) blueprint.path(BLUEPRINTS);
+        return blueprintsNode.get(STACK_NAME).toString();
+    }
+
+    public String getStackVersion() {
+        ObjectNode blueprintsNode = (ObjectNode) blueprint.path(BLUEPRINTS);
+        return blueprintsNode.get(STACK_VERSION).toString();
     }
 
     public BlueprintTextProcessor modifyHdpVersion(String hdpVersion) {

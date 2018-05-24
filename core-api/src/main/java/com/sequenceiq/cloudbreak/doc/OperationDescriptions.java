@@ -212,6 +212,7 @@ public class OperationDescriptions {
         public static final String TEST_DATABASE = "tests a database connection parameters";
         public static final String CREATE_DATABASE = "create a database for the service in the RDS if the connection could be created";
         public static final String STACK_MATRIX = "returns default ambari details for distinct HDP and HDF";
+        public static final String KNOX_SERVICES = "returns supported knox services";
         public static final String CUSTOM_PARAMETERS = "returns custom parameters";
         public static final String CHECK_CLIENT_VERSION = "checks the client version";
     }
