@@ -3,7 +3,7 @@
   "ranger-admin-site": {
     "properties": {
       "ranger.sso.enabled": "true",
-      "ranger.sso.publicKey": "{{{ gateway.escSignCert }}}",
+      "ranger.sso.publicKey": "{{{ gateway.signCertWithoutHeader }}}",
       "ranger.sso.providerurl": "{{{ gateway.ssoProvider }}}",
       "ranger.audit.source.type": "solr"
     }
