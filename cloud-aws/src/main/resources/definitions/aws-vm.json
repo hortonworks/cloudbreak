@@ -1886,10 +1886,10 @@
         "configs": [
           {
             "volumeParameterType": "EPHEMERAL",
-            "minimumSize": 0,
-            "maximumSize": 0,
-            "minimumNumber": 0,
-            "maximumNumber": 0
+            "minimumSize": 475,
+            "maximumSize": 475,
+            "minimumNumber": 1,
+            "maximumNumber": 1
           },
           {
             "volumeParameterType": "MAGNETIC",
@@ -1927,10 +1927,10 @@
         "configs": [
           {
             "volumeParameterType": "EPHEMERAL",
-            "minimumSize": 0,
-            "maximumSize": 0,
-            "minimumNumber": 0,
-            "maximumNumber": 0
+            "minimumSize": 950,
+            "maximumSize": 950,
+            "minimumNumber": 1,
+            "maximumNumber": 1
           },
           {
             "volumeParameterType": "MAGNETIC",
@@ -1968,10 +1968,10 @@
         "configs": [
           {
             "volumeParameterType": "EPHEMERAL",
-            "minimumSize": 0,
-            "maximumSize": 0,
-            "minimumNumber": 0,
-            "maximumNumber": 0
+            "minimumSize": 1900,
+            "maximumSize": 1900,
+            "minimumNumber": 1,
+            "maximumNumber": 1
           },
           {
             "volumeParameterType": "MAGNETIC",
@@ -2009,10 +2009,10 @@
         "configs": [
           {
             "volumeParameterType": "EPHEMERAL",
-            "minimumSize": 0,
-            "maximumSize": 0,
-            "minimumNumber": 0,
-            "maximumNumber": 0
+            "minimumSize": 1900,
+            "maximumSize": 1900,
+            "minimumNumber": 2,
+            "maximumNumber": 2
           },
           {
             "volumeParameterType": "MAGNETIC",
@@ -2050,10 +2050,10 @@
         "configs": [
           {
             "volumeParameterType": "EPHEMERAL",
-            "minimumSize": 0,
-            "maximumSize": 0,
-            "minimumNumber": 0,
-            "maximumNumber": 0
+            "minimumSize": 1900,
+            "maximumSize": 1900,
+            "minimumNumber": 4,
+            "maximumNumber": 4
           },
           {
             "volumeParameterType": "MAGNETIC",
@@ -2091,10 +2091,10 @@
         "configs": [
           {
             "volumeParameterType": "EPHEMERAL",
-            "minimumSize": 0,
-            "maximumSize": 0,
-            "minimumNumber": 0,
-            "maximumNumber": 0
+            "minimumSize": 1900,
+            "maximumSize": 1900,
+            "minimumNumber": 8,
+            "maximumNumber": 8
           },
           {
             "volumeParameterType": "MAGNETIC",
