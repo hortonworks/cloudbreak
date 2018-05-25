@@ -15,9 +15,6 @@ public class GatewayViewTest {
     public void testInitializeGatewayView() throws JsonProcessingException {
         GatewayView gatewayView = new GatewayView(TestUtil.gatewayEnabled());
 
-        Assert.assertEquals("signcert", gatewayView.getEscSignCert());
-        Assert.assertEquals("signkey", gatewayView.getEscSignKey());
-        Assert.assertEquals("signpub", gatewayView.getEscSignPub());
         Assert.assertEquals("/path", gatewayView.getPath());
         Assert.assertEquals("simple", gatewayView.getSsoProvider());
         Assert.assertEquals("tokencert", gatewayView.getTokenCert());

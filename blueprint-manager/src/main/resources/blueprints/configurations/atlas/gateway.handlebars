@@ -5,7 +5,7 @@
       "atlas.authorizer.impl": "ranger",
 {{{/cp}}}
 {{{#if gateway}}}
-      "atlas.sso.knox.publicKey": "{{{ gateway.escSignCert }}}",
+      "atlas.sso.knox.publicKey": "{{{ gateway.signCertWithoutHeader }}}",
       "atlas.sso.knox.providerurl": "{{{ gateway.ssoProvider }}}",
       "atlas.sso.knox.enabled": "true",
       "atlas.sso.knox.browser.useragent": "Mozilla,chrome"

@@ -5,7 +5,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.StringEscapeUtils;
 import org.springframework.util.CollectionUtils;
 
 import com.sequenceiq.cloudbreak.api.model.GatewayType;
@@ -95,22 +94,6 @@ public class GatewayView {
         String cert = null;
         if (signCert != null) {
             cert = signCert.replaceAll("-----BEGIN CERTIFICATE-----|-----END CERTIFICATE-----", "").trim();
-        }
-        return cert;
-    }
-
-    public String getEscSignKey() {
-        return StringEscapeUtils.escapeJson(signKey);
-    }
-
-    public String getEscSignPub() {
-        return StringEscapeUtils.escapeJson(signPub);
-    }
-
-    public String getEscSignCert() {
-        String cert = getSignCertWithoutHeader();
-        if (cert != null) {
-            cert = StringEscapeUtils.escapeJson(cert);
         }
         return cert;
     }
