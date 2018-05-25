@@ -187,6 +187,14 @@ public class StackCommonService implements StackEndpoint {
     }
 
     @Override
+    public Response deleteInstances(Long stackId, Set<String> instanceIds) {
+        IdentityUser user = authenticatedUserService.getCbUser();
+        stackService.removeInstances(user, stackId, instanceIds);
+        return Response.status(Status.NO_CONTENT).build();
+
+    }
+
+    @Override
     public PlatformVariantsJson variants() {
         PlatformVariants pv = parameterService.getPlatformVariants();
         return conversionService.convert(pv, PlatformVariantsJson.class);

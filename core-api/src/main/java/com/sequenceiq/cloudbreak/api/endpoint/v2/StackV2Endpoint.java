@@ -196,6 +196,14 @@ public interface StackV2Endpoint extends StackEndpoint {
             nickname = "deleteInstanceStackV2")
     Response deleteInstance(@PathParam("stackId") Long stackId, @PathParam("instanceId") String instanceId);
 
+    @DELETE
+    @Path("{stackId}/deleteInstances")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Override
+    @ApiOperation(value = OperationDescriptions.StackOpDescription.DELETE_INSTANCE_BY_ID, produces = ContentType.JSON, notes = Notes.STACK_NOTES,
+            nickname = "deleteInstancesStackV2")
+    Response deleteInstances(@PathParam("stackId") Long stackId, @QueryParam("instanceIds") Set<String> instanceIds);
+
     @GET
     @Path("{id}/certificate")
     @Produces(MediaType.APPLICATION_JSON)

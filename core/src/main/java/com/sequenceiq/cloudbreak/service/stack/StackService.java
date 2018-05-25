@@ -5,8 +5,11 @@ import static com.sequenceiq.cloudbreak.api.model.Status.STOPPED;
 import static com.sequenceiq.cloudbreak.api.model.Status.STOP_REQUESTED;
 import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
 
+import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -432,6 +435,30 @@ public class StackService {
             throw new BadRequestException(String.format("Private stack (%s) only modifiable by the owner.", stackId));
         }
         flowManager.triggerStackRemoveInstance(stackId, instanceMetaData.getInstanceGroupName(), instanceMetaData.getPrivateId());
+    }
+
+    public void removeInstances(IdentityUser user, Long stackId, Set<String> instanceIds) {
+        Stack stack = get(stackId);
+        Map<String, Set<String>> groupToDiscoveryFQDNMap = new HashMap<>();
+        for (String instanceId: instanceIds) {
+            InstanceMetaData instanceMetaData = instanceMetaDataRepository.findByInstanceId(stackId, instanceId);
+            if (instanceMetaData == null) {
+                throw new NotFoundException(String.format("Metadata for instance %s not found.", instanceId));
+            }
+            if (!stack.isPublicInAccount() && !stack.getOwner().equals(user.getUserId())) {
+                throw new BadRequestException(String.format("Private stack (%s) only modifiable by the owner.", stackId));
+            }
+            if (groupToDiscoveryFQDNMap.containsKey(instanceMetaData.getInstanceGroupName())) {
+                Set<String> discoveryFQDNs = groupToDiscoveryFQDNMap.get(instanceMetaData.getInstanceGroupName());
+                discoveryFQDNs.add(instanceMetaData.getDiscoveryFQDN());
+                groupToDiscoveryFQDNMap.put(instanceMetaData.getInstanceGroupName(), discoveryFQDNs);
+            } else {
+                Set<String> discoveryFQDNs = new LinkedHashSet<>();
+                discoveryFQDNs.add(instanceMetaData.getDiscoveryFQDN());
+                groupToDiscoveryFQDNMap.put(instanceMetaData.getInstanceGroupName(), discoveryFQDNs);
+            }
+        }
+        groupToDiscoveryFQDNMap.forEach((k, v) -> flowManager.triggerStackRemoveInstances(stackId, k, v));
     }
 
     @Transactional(TxType.NEVER)
