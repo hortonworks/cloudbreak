@@ -97,7 +97,7 @@ public class ServiceEndpointCollector {
     }
 
     private Optional<String> getServiceUrlForService(ExposedService exposedService, String ambariIp, Gateway gateway, String topologyName) {
-        if (hasKnoxUrl(exposedService)) {
+        if (hasKnoxUrl(exposedService) && ambariIp != null) {
             String url = GatewayType.CENTRAL == gateway.getGatewayType()
                     ? String.format("/%s/%s%s", gateway.getPath(), topologyName, exposedService.getKnoxUrl())
                     : String.format("https://%s:%s/%s/%s%s", ambariIp, KNOX_PORT, gateway.getPath(), topologyName, exposedService.getKnoxUrl());
