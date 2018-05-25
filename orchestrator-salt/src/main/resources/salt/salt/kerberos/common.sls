@@ -53,11 +53,11 @@ install_kerberos:
 create_db:
   cmd.run:
 {% if grains['os_family'] == 'Suse' %}
-    - name: /usr/lib/mit/sbin/kdb5_util -P {{ kerberos.master_key }} -r {{ kerberos.realm }} create -s
+    - name: /usr/lib/mit/sbin/kdb5_util -P {{ kerberos.master_key }} -r {{ kerberos.realm }} create -s && touch /var/kerberos_database_created
 {% else %}
-    - name: /usr/sbin/kdb5_util -P {{ kerberos.master_key }} -r {{ kerberos.realm }} create -s
+    - name: /usr/sbin/kdb5_util -P {{ kerberos.master_key }} -r {{ kerberos.realm }} create -s && touch /var/kerberos_database_created
 {% endif %}
-    - unless: ls -la /var/kerberos/krb5kdc/principal
+    - unless: ls -la /var/kerberos_database_created
     - watch:
       - pkg: install_kerberos
     - output_loglevel: quiet
