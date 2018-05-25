@@ -155,10 +155,12 @@ cb:
             gpgkey: http://public-repo-1.hortonworks.com/ambari/centos7/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins
           debian9:
             baseurl: http://public-repo-1.hortonworks.com/ambari/debian9/2.x/updates/2.6.2.0
-            gpgkey: http://public-repo-1.hortonworks.com/ambari/debian9/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins
+            # for the GPG key we use the centos7 one, because we don't build for debian and ubuntu
+            gpgkey: http://public-repo-1.hortonworks.com/ambari/centos7/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins
           ubuntu16:
             baseurl: http://public-repo-1.hortonworks.com/ambari/ubuntu16/2.x/updates/2.6.2.0
-            gpgkey: http://public-repo-1.hortonworks.com/ambari/ubuntu16/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins
+            # for the GPG key we use the centos7 one, because we don't build for debian and ubuntu
+            gpgkey: http://public-repo-1.hortonworks.com/ambari/centos7/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins
           sles12:
             baseurl: http://public-repo-1.hortonworks.com/ambari/sles12/2.x/updates/2.6.2.0
             gpgkey: http://public-repo-1.hortonworks.com/ambari/sles12/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins
@@ -170,10 +172,12 @@ cb:
             gpgkey: http://s3.amazonaws.com/dev.hortonworks.com/ambari/centos7/2.x/BUILDS/2.7.0.0-508/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins
           debian9:
             baseurl: http://s3.amazonaws.com/dev.hortonworks.com/ambari/debian9/2.x/BUILDS/2.7.0.0-508
-            gpgkey: http://s3.amazonaws.com/dev.hortonworks.com/ambari/debian9/2.x/BUILDS/2.7.0.0-508/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins
+            # for the GPG key we use the centos7 one, because we don't build for debian and ubuntu
+            gpgkey: http://s3.amazonaws.com/dev.hortonworks.com/ambari/centos7/2.x/BUILDS/2.7.0.0-508/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins
           ubuntu16:
             baseurl: http://s3.amazonaws.com/dev.hortonworks.com/ambari/ubuntu16/2.x/BUILDS/2.7.0.0-508
-            gpgkey: http://s3.amazonaws.com/dev.hortonworks.com/ambari/ubuntu16/2.x/BUILDS/2.7.0.0-508/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins
+            # for the GPG key we use the centos7 one, because we don't build for debian and ubuntu
+            gpgkey: http://s3.amazonaws.com/dev.hortonworks.com/ambari/centos7/2.x/BUILDS/2.7.0.0-508/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins
           sles12:
             baseurl: http://s3.amazonaws.com/dev.hortonworks.com/ambari/sles12/2.x/BUILDS/2.7.0.0-508
             gpgkey: http://s3.amazonaws.com/dev.hortonworks.com/ambari/sles12/2.x/BUILDS/2.7.0.0-508/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins

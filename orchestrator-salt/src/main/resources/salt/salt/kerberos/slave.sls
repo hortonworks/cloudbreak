@@ -26,7 +26,11 @@ run_kpropd_sh_script:
 start_slave_kdc:
   service.running:
     - enable: True
+{% if grains['os_family'] == 'Debian' %}
+    - name: krb5-kdc
+{% else %}
     - name: krb5kdc
+{% endif %}
     - watch:
       - pkg: install_kerberos
 
@@ -35,6 +39,8 @@ stop_kadmin:
     - enable: False
 {% if grains['os_family'] == 'Suse' %}
     - name: kadmind
+{% elif grains['os_family'] == 'Debian' %}
+    - name: krb5-admin-server
 {% else %}
     - name: kadmin
 {% endif %}

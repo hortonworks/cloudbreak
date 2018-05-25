@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -e
 
-DATADIR=$(psql -c "show data_directory;" | grep "/data" | xargs)
-echo "Datadir: $DATADIR"
+CONFIG_DIR=$(psql -c "show config_file;" -t | sed 's/\/postgresql.conf//g' | xargs)
+echo "CONFIG_DIR: $CONFIG_DIR"
 
 {% for service, values in pillar.get('postgres', {}).items()  %}
 
@@ -14,9 +14,9 @@ echo "CREATE USER {{ values['user'] }} WITH PASSWORD '{{ values['password'] }}';
 echo "GRANT ALL PRIVILEGES ON DATABASE {{ values['user'] }} TO {{ values['database'] }};" | psql -U postgres -v "ON_ERROR_STOP=1"
 
 echo "Add access to pg_hba.conf"
-echo "host {{ values['database'] }} {{ values['user'] }} 0.0.0.0/0 md5" >> $DATADIR/pg_hba.conf
-echo "local {{ values['database'] }} {{ values['user'] }} md5" >> $DATADIR/pg_hba.conf
-echo $(date +%Y-%m-%d:%H:%M:%S) >> $DATADIR/init_{{ service }}_db_executed
+echo "host {{ values['database'] }} {{ values['user'] }} 0.0.0.0/0 md5" >> $CONFIG_DIR/pg_hba.conf
+echo "local {{ values['database'] }} {{ values['user'] }} md5" >> $CONFIG_DIR/pg_hba.conf
+echo $(date +%Y-%m-%d:%H:%M:%S) >> $CONFIG_DIR/init_{{ service }}_db_executed
 
 {% endif %}
 
