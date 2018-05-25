@@ -506,12 +506,12 @@ public class BlueprintTextProcessor {
 
     public String getStackName() {
         ObjectNode blueprintsNode = (ObjectNode) blueprint.path(BLUEPRINTS);
-        return blueprintsNode.get(STACK_NAME).toString();
+        return blueprintsNode.get(STACK_NAME).asText();
     }
 
     public String getStackVersion() {
         ObjectNode blueprintsNode = (ObjectNode) blueprint.path(BLUEPRINTS);
-        return blueprintsNode.get(STACK_VERSION).toString();
+        return blueprintsNode.get(STACK_VERSION).asText();
     }
 
     public BlueprintTextProcessor modifyHdpVersion(String hdpVersion) {
