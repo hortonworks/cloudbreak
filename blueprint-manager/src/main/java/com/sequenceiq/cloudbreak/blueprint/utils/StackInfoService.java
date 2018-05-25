@@ -21,17 +21,17 @@ public class StackInfoService {
     @Inject
     private BlueprintUtils blueprintUtils;
 
-    public boolean hdfCluster(String blueprintText) {
+    public boolean isHdfCluster(String blueprintText) {
         boolean hdfCluster;
         try {
-            hdfCluster = "HDF".equals(blueprintStackInfo(blueprintText).getType().toUpperCase());
+            hdfCluster = "HDF".equalsIgnoreCase(blueprintStackInfo(blueprintText).getType());
         } catch (BlueprintProcessingException e) {
             hdfCluster = false;
         }
         return hdfCluster;
     }
 
-    public BlueprintStackInfo blueprintStackInfo(String blueprintText) throws BlueprintProcessingException {
+    public BlueprintStackInfo blueprintStackInfo(String blueprintText) {
         try {
             JsonNode root = JsonUtil.readTree(blueprintText);
             return new BlueprintStackInfo(blueprintUtils.getBlueprintHdpVersion(root), blueprintUtils.getBlueprintStackName(root));

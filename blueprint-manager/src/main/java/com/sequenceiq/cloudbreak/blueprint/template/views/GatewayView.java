@@ -1,17 +1,17 @@
 package com.sequenceiq.cloudbreak.blueprint.template.views;
 
-import java.util.Collections;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.stream.Collectors;
-
-import org.springframework.util.CollectionUtils;
-
 import com.sequenceiq.cloudbreak.api.model.GatewayType;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.SSOType;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.GatewayTopology;
+import org.springframework.util.CollectionUtils;
+
+import javax.annotation.Nonnull;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 public class GatewayView {
 
@@ -35,7 +35,7 @@ public class GatewayView {
 
     private final Map<String, Json> gatewayTopologies;
 
-    public GatewayView(Gateway gateway) {
+    public GatewayView(@Nonnull Gateway gateway) {
         gatewayType = gateway.getGatewayType();
         path = gateway.getPath();
         if (CollectionUtils.isEmpty(gateway.getTopologies())) {

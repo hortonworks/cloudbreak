@@ -1,22 +1,5 @@
 package com.sequenceiq.cloudbreak.blueprint.smartsense;
 
-import static com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType.GATEWAY;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
-import javax.inject.Inject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -29,6 +12,21 @@ import com.sequenceiq.cloudbreak.blueprint.SmartsenseConfigurationLocator;
 import com.sequenceiq.cloudbreak.blueprint.template.views.HostgroupView;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.ha.CloudbreakNodeConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+import javax.inject.Inject;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import static com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType.GATEWAY;
 
 @Component
 public class SmartSenseConfigProvider implements BlueprintComponentConfigProvider {
@@ -67,18 +65,19 @@ public class SmartSenseConfigProvider implements BlueprintComponentConfigProvide
 
     @Override
     public BlueprintTextProcessor customTextManipulation(BlueprintPreparationObject source, BlueprintTextProcessor blueprintProcessor) {
-        String smartSenseId = source.getSmartSenseSubscriptionId().get();
+        String smartSenseId = source.getSmartSenseSubscription().get().getSubscriptionId();
         Set<String> hostGroupNames = source.getHostgroupViews().stream().map(getHostGroupNameMapper()).collect(Collectors.toSet());
         addSmartSenseServerToBp(blueprintProcessor, source.getHostgroupViews(), hostGroupNames);
-        blueprintProcessor.addComponentToHostgroups(HST_AGENT_COMPONENT, hg -> hostGroupNames.contains(hg));
-        List<BlueprintConfigurationEntry> configs = new ArrayList<>();
-        configs.addAll(getSmartSenseServerConfigs(source, smartSenseId));
+        blueprintProcessor.addComponentToHostgroups(HST_AGENT_COMPONENT, hostGroupNames::contains);
+        List<BlueprintConfigurationEntry> configs = new ArrayList<>(getSmartSenseServerConfigs(source, smartSenseId));
         return blueprintProcessor.addConfigEntries(configs, true);
     }
 
     @Override
     public boolean specialCondition(BlueprintPreparationObject source, String blueprintText) {
-        return smartsenseConfigurationLocator.smartsenseConfigurableBySubscriptionId(source.getSmartSenseSubscriptionId());
+        return smartsenseConfigurationLocator.smartsenseConfigurableBySubscriptionId(source.getSmartSenseSubscription().isPresent()
+                ? Optional.ofNullable(source.getSmartSenseSubscription().get().getSubscriptionId())
+                : Optional.empty());
     }
 
     private Function<HostgroupView, String> getHostGroupNameMapper() {
@@ -110,7 +109,7 @@ public class SmartSenseConfigProvider implements BlueprintComponentConfigProvide
             }
             LOGGER.info("Adding '{}' component to '{}' hosgroup in the Blueprint.", HST_SERVER_COMPONENT, aHostGroupName);
             final String finalAHostGroupName = aHostGroupName;
-            blueprintProcessor.addComponentToHostgroups(HST_SERVER_COMPONENT, hg -> finalAHostGroupName.equals(hg));
+            blueprintProcessor.addComponentToHostgroups(HST_SERVER_COMPONENT, finalAHostGroupName::equals);
         }
         return blueprintProcessor.asText();
     }
@@ -153,7 +152,7 @@ public class SmartSenseConfigProvider implements BlueprintComponentConfigProvide
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    @JsonPropertyOrder({ "flexSubscriptionId", "guid", "name", "parentGuid" })
+    @JsonPropertyOrder({"flexSubscriptionId", "guid", "name", "parentGuid"})
     static class HSTMetadataInstanceInfoJson {
         private final String flexSubscriptionId;
 
@@ -188,7 +187,7 @@ public class SmartSenseConfigProvider implements BlueprintComponentConfigProvide
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    @JsonPropertyOrder({ "componentId", "instanceInfo", "productId", "productVersion", "schemaVersion", "type" })
+    @JsonPropertyOrder({"componentId", "instanceInfo", "productId", "productVersion", "schemaVersion", "type"})
     static class HSTMetadataJson {
 
         private static final String SCHEMA_VERSION = "1.0.0";
@@ -203,17 +202,11 @@ public class SmartSenseConfigProvider implements BlueprintComponentConfigProvide
 
         private final String productVersion;
 
-        private final String schemaVersion;
-
-        private final String type;
-
         HSTMetadataJson(String componentId, HSTMetadataInstanceInfoJson instanceInfo, String productId, String productVersion) {
             this.componentId = componentId;
             this.instanceInfo = instanceInfo;
             this.productId = productId;
             this.productVersion = productVersion;
-            this.schemaVersion = SCHEMA_VERSION;
-            this.type = TYPE;
         }
 
         public String getComponentId() {
@@ -233,11 +226,12 @@ public class SmartSenseConfigProvider implements BlueprintComponentConfigProvide
         }
 
         public String getSchemaVersion() {
-            return schemaVersion;
+            return SCHEMA_VERSION;
         }
 
         public String getType() {
-            return type;
+            return TYPE;
         }
     }
+
 }

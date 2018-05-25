@@ -25,7 +25,7 @@ public class CentralBlueprintUpdater {
     @Inject
     private BlueprintComponentProviderProcessor blueprintComponentProviderProcessor;
 
-    public String getBlueprintText(BlueprintPreparationObject source) throws BlueprintProcessingException {
+    public String getBlueprintText(BlueprintPreparationObject source) {
         String blueprintText = source.getBlueprintView().getBlueprintText();
         try {
             blueprintText = updateBlueprintConfiguration(source, blueprintText);

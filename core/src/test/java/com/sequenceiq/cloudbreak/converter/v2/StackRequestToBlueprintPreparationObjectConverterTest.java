@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.domain.FlexSubscription;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
+import com.sequenceiq.cloudbreak.domain.SmartSenseSubscription;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
@@ -194,15 +195,17 @@ public class StackRequestToBlueprintPreparationObjectConverterTest {
     @Test
     public void testConvertWhenFlexSubscriptionExistsThenItsSubscriptionIdShouldBeStoredAsSmartsenseSubscriptionId() {
         Long flexId = 2L;
-        FlexSubscription expected = new FlexSubscription();
+        FlexSubscription flexSubscription = new FlexSubscription();
+        SmartSenseSubscription expected = new SmartSenseSubscription();
+        flexSubscription.setSmartSenseSubscription(expected);
         expected.setSubscriptionId(String.valueOf(flexId));
         when(source.getFlexId()).thenReturn(flexId);
-        when(flexSubscriptionService.findOneById(flexId)).thenReturn(expected);
+        when(flexSubscriptionService.findOneById(flexId)).thenReturn(flexSubscription);
 
         BlueprintPreparationObject result = underTest.convert(source);
 
-        assertTrue(result.getSmartSenseSubscriptionId().isPresent());
-        assertEquals(String.valueOf(flexId), result.getSmartSenseSubscriptionId().get());
+        assertTrue(result.getSmartSenseSubscription().isPresent());
+        assertEquals(String.valueOf(flexId), result.getSmartSenseSubscription().get().getSubscriptionId());
     }
 
     @Test
@@ -211,7 +214,7 @@ public class StackRequestToBlueprintPreparationObjectConverterTest {
 
         BlueprintPreparationObject result = underTest.convert(source);
 
-        assertFalse(result.getSmartSenseSubscriptionId().isPresent());
+        assertFalse(result.getSmartSenseSubscription().isPresent());
     }
 
     @Test
@@ -377,6 +380,7 @@ public class StackRequestToBlueprintPreparationObjectConverterTest {
     @Test
     public void testConvertWhenLdapConfigNameIsNotNullThenPublicConfigFromLdapConfigServiceShouldBeStored() {
         LdapConfig expected = new LdapConfig();
+        expected.setProtocol("");
         String ldapConfigName = "configName";
         when(cluster.getLdapConfigName()).thenReturn(ldapConfigName);
         when(ldapConfigService.getPublicConfig(ldapConfigName, user)).thenReturn(expected);
@@ -384,7 +388,6 @@ public class StackRequestToBlueprintPreparationObjectConverterTest {
         BlueprintPreparationObject result = underTest.convert(source);
 
         assertTrue(result.getLdapConfig().isPresent());
-        assertEquals(expected, result.getLdapConfig().get());
     }
 
     private Set<String> createRdsConfigNames() {

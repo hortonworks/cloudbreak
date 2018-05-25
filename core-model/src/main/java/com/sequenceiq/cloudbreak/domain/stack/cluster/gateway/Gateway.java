@@ -168,15 +168,14 @@ public class Gateway implements ProvisionEntity {
     }
 
     public Set<GatewayTopology> getTopologies() {
-        if (StringUtils.isNotEmpty(topologyName)) {
-            if (topologies.stream().noneMatch(t -> t.getTopologyName().equals(topologyName))) {
-                GatewayTopology gatewayTopology = new GatewayTopology();
-                gatewayTopology.setTopologyName(topologyName);
-                if (exposedServices != null && StringUtils.isNoneEmpty(exposedServices.getValue())) {
-                    gatewayTopology.setExposedServices(exposedServices);
-                }
-                topologies.add(gatewayTopology);
+        if (StringUtils.isNotEmpty(topologyName) && topologies.stream().noneMatch(t -> t.getTopologyName().equals(topologyName))) {
+            GatewayTopology gatewayTopology = new GatewayTopology();
+            gatewayTopology.setTopologyName(topologyName);
+            if (exposedServices != null && StringUtils.isNoneEmpty(exposedServices.getValue())) {
+                gatewayTopology.setExposedServices(exposedServices);
             }
+            topologies.add(gatewayTopology);
+
         }
         return topologies;
     }

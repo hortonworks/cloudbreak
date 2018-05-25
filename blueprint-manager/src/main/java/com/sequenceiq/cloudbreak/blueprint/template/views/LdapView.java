@@ -3,6 +3,8 @@ package com.sequenceiq.cloudbreak.blueprint.template.views;
 import com.sequenceiq.cloudbreak.api.model.DirectoryType;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 
+import javax.annotation.Nonnull;
+
 public class LdapView {
 
     private final String bindDn;
@@ -27,15 +29,15 @@ public class LdapView {
 
     private final String domain;
 
-    private String protocol;
+    private final String protocol;
+
+    private final String adminGroup;
+
+    private final String userDnPattern;
 
     private String connectionURL;
 
-    private String adminGroup;
-
-    private String userDnPattern;
-
-    public LdapView(LdapConfig ldapConfig) {
+    public LdapView(@Nonnull LdapConfig ldapConfig) {
         protocol = ldapConfig.getProtocol().toLowerCase();
         connectionURL = protocol + "://" + ldapConfig.getServerHost();
         if (ldapConfig.getServerPort() != null) {
