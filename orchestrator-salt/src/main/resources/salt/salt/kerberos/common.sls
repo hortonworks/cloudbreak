@@ -58,6 +58,9 @@ create_db:
     - name: /usr/sbin/kdb5_util -P {{ kerberos.master_key }} -r {{ kerberos.realm }} create -s
 {% endif %}
     - unless: ls -la /var/kerberos/krb5kdc/principal
+    - unless: ls -la /var/lib/krb5kdc/principal
+    - unless: ls -la /etc/krb5kdc/principal
+    - unless: ls -la /var/lib/kerberos/krb5kdc/principal
     - watch:
       - pkg: install_kerberos
     - output_loglevel: quiet
