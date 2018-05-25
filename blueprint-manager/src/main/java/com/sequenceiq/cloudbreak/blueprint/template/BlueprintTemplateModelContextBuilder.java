@@ -1,12 +1,5 @@
 package com.sequenceiq.cloudbreak.blueprint.template;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Optional;
-import java.util.Set;
-
 import com.sequenceiq.cloudbreak.blueprint.filesystem.BaseFileSystemConfigurationsView;
 import com.sequenceiq.cloudbreak.blueprint.nifi.HdfConfigs;
 import com.sequenceiq.cloudbreak.blueprint.template.views.BlueprintView;
@@ -18,9 +11,15 @@ import com.sequenceiq.cloudbreak.blueprint.template.views.RdsView;
 import com.sequenceiq.cloudbreak.blueprint.template.views.SharedServiceConfigsView;
 import com.sequenceiq.cloudbreak.blueprint.templates.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.blueprint.utils.ModelConverterUtils;
-import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
+
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Optional;
+import java.util.Set;
 
 public class BlueprintTemplateModelContextBuilder {
 
@@ -77,13 +76,8 @@ public class BlueprintTemplateModelContextBuilder {
         return this;
     }
 
-    public BlueprintTemplateModelContextBuilder withLdap(LdapConfig ldapConfig) {
-        ldap = Optional.ofNullable(ldapConfig == null ? null : new LdapView(ldapConfig));
-        return this;
-    }
-
-    public BlueprintTemplateModelContextBuilder withGateway(Gateway gatewayConfig) {
-        gateway = Optional.ofNullable(gatewayConfig == null ? null : new GatewayView(gatewayConfig));
+    public BlueprintTemplateModelContextBuilder withLdap(LdapView ldapView) {
+        ldap = Optional.ofNullable(ldapView);
         return this;
     }
 
@@ -92,13 +86,13 @@ public class BlueprintTemplateModelContextBuilder {
         return this;
     }
 
-    public BlueprintTemplateModelContextBuilder withGateway(GatewayView gatewayConfig) {
-        gateway = Optional.ofNullable(gatewayConfig);
+    public BlueprintTemplateModelContextBuilder withGateway(Gateway gatewayConfig) {
+        gateway = Optional.ofNullable(gatewayConfig == null ? null : new GatewayView(gatewayConfig));
         return this;
     }
 
-    public BlueprintTemplateModelContextBuilder withCustomProperty(String key, String value) {
-        customProperties.put(key, value);
+    public BlueprintTemplateModelContextBuilder withGateway(GatewayView gatewayConfig) {
+        gateway = Optional.ofNullable(gatewayConfig);
         return this;
     }
 
@@ -109,12 +103,13 @@ public class BlueprintTemplateModelContextBuilder {
         return this;
     }
 
+    public BlueprintTemplateModelContextBuilder withCustomProperty(String key, String value) {
+        customProperties.put(key, value);
+        return this;
+    }
+
     public BlueprintTemplateModelContextBuilder withHdfConfigs(HdfConfigs hdfConfigs) {
-        if (hdfConfigs == null) {
-            this.hdfConfigs = Optional.empty();
-        } else {
-            this.hdfConfigs = Optional.of(new HdfConfigView(hdfConfigs));
-        }
+        this.hdfConfigs = hdfConfigs == null ? Optional.empty() : Optional.of(new HdfConfigView(hdfConfigs));
         return this;
     }
 

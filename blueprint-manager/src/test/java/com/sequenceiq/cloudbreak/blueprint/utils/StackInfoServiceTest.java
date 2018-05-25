@@ -65,7 +65,7 @@ public class StackInfoServiceTest {
         when(blueprintUtils.getBlueprintHdpVersion(any(JsonNode.class))).thenReturn("2.6");
         when(blueprintUtils.getBlueprintStackName(any(JsonNode.class))).thenReturn("HDF");
 
-        Assert.assertTrue(stackInfoService.hdfCluster(testBlueprint));
+        Assert.assertTrue(stackInfoService.isHdfCluster(testBlueprint));
 
         verify(blueprintUtils, times(1)).getBlueprintHdpVersion(any(JsonNode.class));
         verify(blueprintUtils, times(1)).getBlueprintStackName(any(JsonNode.class));
@@ -78,7 +78,7 @@ public class StackInfoServiceTest {
         when(blueprintUtils.getBlueprintHdpVersion(any(JsonNode.class))).thenReturn("2.6");
         when(blueprintUtils.getBlueprintStackName(any(JsonNode.class))).thenReturn("HDP");
 
-        Assert.assertFalse(stackInfoService.hdfCluster(testBlueprint));
+        Assert.assertFalse(stackInfoService.isHdfCluster(testBlueprint));
 
         verify(blueprintUtils, times(1)).getBlueprintHdpVersion(any(JsonNode.class));
         verify(blueprintUtils, times(1)).getBlueprintStackName(any(JsonNode.class));
@@ -88,7 +88,7 @@ public class StackInfoServiceTest {
     public void hdfClusterWhenReadTreeThrowsException() {
         String testBlueprint = "not-a-valid-bluepint";
 
-        Assert.assertFalse(stackInfoService.hdfCluster(testBlueprint));
+        Assert.assertFalse(stackInfoService.isHdfCluster(testBlueprint));
 
         verify(blueprintUtils, times(0)).getBlueprintHdpVersion(any(JsonNode.class));
         verify(blueprintUtils, times(0)).getBlueprintStackName(any(JsonNode.class));

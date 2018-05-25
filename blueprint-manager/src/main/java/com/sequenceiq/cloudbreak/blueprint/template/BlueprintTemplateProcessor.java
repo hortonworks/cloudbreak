@@ -1,19 +1,18 @@
 package com.sequenceiq.cloudbreak.blueprint.template;
 
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
-
 import com.github.jknack.handlebars.Handlebars;
 import com.github.jknack.handlebars.TagType;
 import com.github.jknack.handlebars.Template;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintPreparationObject;
 import com.sequenceiq.cloudbreak.blueprint.HandlebarTemplate;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
 @Component
 public class BlueprintTemplateProcessor {
@@ -27,8 +26,7 @@ public class BlueprintTemplateProcessor {
         String generateBlueprint = generateBlueprintWithParameters(sourceTemplate, source, customProperties);
         long generationTime = System.currentTimeMillis() - started;
         LOGGER.info("The blueprint text processed successfully by the EL based template processor under {} ms, the text after processing is: {}",
-                generationTime,
-                JsonUtil.minify(generateBlueprint));
+                generationTime, JsonUtil.minify(generateBlueprint));
         return generateBlueprint;
     }
 
@@ -37,8 +35,7 @@ public class BlueprintTemplateProcessor {
         List<String> blueprintParameters = queryBlueprintParameters(sourceTemplate);
         long generationTime = System.currentTimeMillis() - started;
         LOGGER.info("The blueprint text processed successfully by the EL based template processor under {} ms, the parameters are: {}",
-                generationTime,
-                blueprintParameters.toString());
+                generationTime, blueprintParameters);
         return blueprintParameters;
     }
 
@@ -54,9 +51,8 @@ public class BlueprintTemplateProcessor {
         return template.collect(TagType.VAR);
     }
 
-    private Map<String, Object> prepareTemplateObject(BlueprintPreparationObject source, Map<String, Object> customProperties) throws IOException {
+    private Map<String, Object> prepareTemplateObject(BlueprintPreparationObject source, Map<String, Object> customProperties) {
         source.getFixInputs().putAll(customProperties);
-
         return new BlueprintTemplateModelContextBuilder()
                 .withLdap(source.getLdapConfig().orElse(null))
                 .withSharedServiceConfigs(source.getSharedServiceConfigs().orElse(null))

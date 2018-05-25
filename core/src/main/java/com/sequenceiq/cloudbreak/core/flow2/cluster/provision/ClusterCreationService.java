@@ -71,8 +71,9 @@ public class ClusterCreationService {
         } else if (orchestratorType.hostOrchestrator()) {
             flowMessageService.fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_RUN_SERVICES, UPDATE_IN_PROGRESS.name());
         } else {
-            LOGGER.info(String.format("Please implement %s orchestrator because it is not on classpath.", orchestrator.getType()));
-            throw new CloudbreakException(String.format("Please implement %s orchestrator because it is not on classpath.", orchestrator.getType()));
+            String message = String.format("Please implement %s orchestrator because it is not on classpath.", orchestrator.getType());
+            LOGGER.info(message);
+            throw new CloudbreakException(message);
         }
     }
 

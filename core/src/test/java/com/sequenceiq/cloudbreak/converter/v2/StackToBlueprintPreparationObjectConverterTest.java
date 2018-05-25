@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.converter.v2;
 
 import com.sequenceiq.cloudbreak.blueprint.BlueprintPreparationObject;
+import com.sequenceiq.cloudbreak.blueprint.BlueprintViewProvider;
 import com.sequenceiq.cloudbreak.blueprint.GeneralClusterConfigsProvider;
 import com.sequenceiq.cloudbreak.blueprint.filesystem.BaseFileSystemConfigurationsView;
 import com.sequenceiq.cloudbreak.blueprint.filesystem.FileSystemConfigurationProvider;
@@ -143,6 +144,9 @@ public class StackToBlueprintPreparationObjectConverterTest {
     @Mock
     private BlueprintStackInfo blueprintStackInfo;
 
+    @Mock
+    private BlueprintViewProvider blueprintViewProvider;
+
     @Before
     public void setUp() throws IOException {
         MockitoAnnotations.initMocks(this);
@@ -168,7 +172,7 @@ public class StackToBlueprintPreparationObjectConverterTest {
 
         BlueprintPreparationObject result = underTest.convert(source);
 
-        assertFalse(result.getSmartSenseSubscriptionId().isPresent());
+        assertFalse(result.getSmartSenseSubscription().isPresent());
     }
 
     @Test
@@ -180,8 +184,8 @@ public class StackToBlueprintPreparationObjectConverterTest {
 
         BlueprintPreparationObject result = underTest.convert(source);
 
-        assertTrue(result.getSmartSenseSubscriptionId().isPresent());
-        assertEquals(subscriptionId, result.getSmartSenseSubscriptionId().get());
+        assertTrue(result.getSmartSenseSubscription().isPresent());
+        assertEquals(subscriptionId, result.getSmartSenseSubscription().get().getSubscriptionId());
     }
 
     @Test
@@ -254,6 +258,7 @@ public class StackToBlueprintPreparationObjectConverterTest {
     @Test
     public void testConvertWhenClusterFromClusterServiceHasLdapConfigThenItShouldBeStored() {
         LdapConfig ldapConfig = new LdapConfig();
+        ldapConfig.setProtocol("");
         when(cluster.getLdapConfig()).thenReturn(ldapConfig);
 
         BlueprintPreparationObject result = underTest.convert(source);
@@ -317,9 +322,10 @@ public class StackToBlueprintPreparationObjectConverterTest {
     public void testConvertWhenProvidingStackAndBlueprintStackInfoThenExpectedBlueprintViewShouldBeStored() {
         String type = "HDF";
         String version = "2.6";
+        BlueprintView expected = new BlueprintView(cluster, blueprintStackInfo);
         when(blueprintStackInfo.getType()).thenReturn(type);
         when(blueprintStackInfo.getVersion()).thenReturn(version);
-        BlueprintView expected = new BlueprintView(cluster, blueprintStackInfo);
+        when(blueprintViewProvider.getBlueprintView(blueprint)).thenReturn(expected);
 
         BlueprintPreparationObject result = underTest.convert(source);
 

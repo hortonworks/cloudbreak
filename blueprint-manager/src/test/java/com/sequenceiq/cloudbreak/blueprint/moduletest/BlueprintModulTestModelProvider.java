@@ -1,13 +1,18 @@
 package com.sequenceiq.cloudbreak.blueprint.moduletest;
 
-import static com.sequenceiq.cloudbreak.TestUtil.gatewayEnabled;
-import static com.sequenceiq.cloudbreak.TestUtil.hostGroup;
-import static com.sequenceiq.cloudbreak.TestUtil.kerberosConfig;
-import static com.sequenceiq.cloudbreak.TestUtil.ldapConfig;
-import static com.sequenceiq.cloudbreak.TestUtil.rdsConfig;
-import static com.sequenceiq.cloudbreak.blueprint.filesystem.BlueprintTestUtil.generalBlueprintView;
-import static com.sequenceiq.cloudbreak.blueprint.filesystem.BlueprintTestUtil.generalClusterConfigs;
-import static com.sequenceiq.cloudbreak.blueprint.moduletest.BlueprintModulTest.BLUEPRINT_UPDATER_TEST_INPUTS;
+import com.google.common.collect.Sets;
+import com.sequenceiq.cloudbreak.api.model.DatabaseVendor;
+import com.sequenceiq.cloudbreak.api.model.ExecutorType;
+import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
+import com.sequenceiq.cloudbreak.blueprint.BlueprintPreparationObject;
+import com.sequenceiq.cloudbreak.blueprint.BlueprintPreparationObject.Builder;
+import com.sequenceiq.cloudbreak.blueprint.nifi.HdfConfigs;
+import com.sequenceiq.cloudbreak.blueprint.template.views.SharedServiceConfigsView;
+import com.sequenceiq.cloudbreak.blueprint.templates.GeneralClusterConfigs;
+import com.sequenceiq.cloudbreak.blueprint.testrepeater.TestFile;
+import com.sequenceiq.cloudbreak.domain.SmartSenseSubscription;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
+import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,67 +23,63 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.google.common.collect.Sets;
-import com.sequenceiq.cloudbreak.api.model.DatabaseVendor;
-import com.sequenceiq.cloudbreak.api.model.ExecutorType;
-import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
-import com.sequenceiq.cloudbreak.blueprint.BlueprintPreparationObject;
-import com.sequenceiq.cloudbreak.blueprint.nifi.HdfConfigs;
-import com.sequenceiq.cloudbreak.blueprint.template.views.SharedServiceConfigsView;
-import com.sequenceiq.cloudbreak.blueprint.templates.GeneralClusterConfigs;
-import com.sequenceiq.cloudbreak.blueprint.testrepeater.TestFile;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
-import com.sequenceiq.cloudbreak.util.FileReaderUtils;
+import static com.sequenceiq.cloudbreak.TestUtil.gatewayEnabled;
+import static com.sequenceiq.cloudbreak.TestUtil.hostGroup;
+import static com.sequenceiq.cloudbreak.TestUtil.kerberosConfig;
+import static com.sequenceiq.cloudbreak.TestUtil.ldapConfig;
+import static com.sequenceiq.cloudbreak.TestUtil.rdsConfig;
+import static com.sequenceiq.cloudbreak.blueprint.filesystem.BlueprintTestUtil.generalBlueprintView;
+import static com.sequenceiq.cloudbreak.blueprint.filesystem.BlueprintTestUtil.generalClusterConfigs;
+import static com.sequenceiq.cloudbreak.blueprint.moduletest.BlueprintModulTest.BLUEPRINT_UPDATER_TEST_INPUTS;
 
 class BlueprintModulTestModelProvider {
 
     private BlueprintModulTestModelProvider() {
     }
 
-    static BlueprintPreparationObject blueprintObjectWhenHiveAndRdsPresentedThenRdsHiveMetastoreShouldConfigured() throws JsonProcessingException {
+    static BlueprintPreparationObject blueprintObjectWhenHiveAndRdsPresentedThenRdsHiveMetastoreShouldConfigured() {
         return getPreparedBuilder("master")
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
                 .withRdsConfigs(new HashSet<>(Collections.singleton(rdsConfig(RdsType.HIVE))))
                 .build();
     }
 
-    static BlueprintPreparationObject blueprintObjectWhenRangerAndRdsPresentedThenRdsRangerShouldConfigured() throws JsonProcessingException {
+    static BlueprintPreparationObject blueprintObjectWhenRangerAndRdsPresentedThenRdsRangerShouldConfigured() {
         return getPreparedBuilder("master")
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
                 .withRdsConfigs(new HashSet<>(Collections.singleton(rdsConfig(RdsType.RANGER))))
                 .build();
     }
 
-    static BlueprintPreparationObject blueprintObjectWhenDruidAndRdsPresentedThenRdsDruidShouldConfigured() throws JsonProcessingException {
+    static BlueprintPreparationObject blueprintObjectWhenDruidAndRdsPresentedThenRdsDruidShouldConfigured() {
         return getPreparedBuilder()
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
                 .withRdsConfigs(new HashSet<>(Collections.singleton(rdsConfig(RdsType.DRUID))))
                 .build();
     }
 
-    static BlueprintPreparationObject blueprintObjectWhenSuperSetAndRdsPresentedThenRdsDruidShouldConfigured() throws JsonProcessingException {
+    static BlueprintPreparationObject blueprintObjectWhenSuperSetAndRdsPresentedThenRdsDruidShouldConfigured() {
         return getPreparedBuilder()
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
                 .withRdsConfigs(new HashSet<>(Collections.singleton(rdsConfig(RdsType.SUPERSET))))
                 .build();
     }
 
-    static BlueprintPreparationObject blueprintObjectWhenDruidSuperSetAndRdsPresentedThenRdsDruidShouldConfigured() throws JsonProcessingException {
+    static BlueprintPreparationObject blueprintObjectWhenDruidSuperSetAndRdsPresentedThenRdsDruidShouldConfigured() {
         return getPreparedBuilder()
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
                 .withRdsConfigs(new HashSet<>(Collections.singleton(rdsConfig(RdsType.SUPERSET))))
                 .build();
     }
 
-    static BlueprintPreparationObject blueprintObjectWhenLdapPresentedThenRangerAndHadoopLdapShouldConfigured() throws JsonProcessingException {
+    static BlueprintPreparationObject blueprintObjectWhenLdapPresentedThenRangerAndHadoopLdapShouldConfigured() {
         return getPreparedBuilder("master")
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
                 .withLdapConfig(ldapConfig())
                 .build();
     }
 
-    static BlueprintPreparationObject bpObjectWithThreeHostAndLdapRangerConfigured() throws JsonProcessingException {
+    static BlueprintPreparationObject bpObjectWithThreeHostAndLdapRangerConfigured() {
         return getPreparedBuilder()
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
                 .withRdsConfigs(new HashSet<>(Collections.singleton(rdsConfig(RdsType.RANGER))))
@@ -86,7 +87,7 @@ class BlueprintModulTestModelProvider {
                 .build();
     }
 
-    static BlueprintPreparationObject blueprintObjectWhenKerberosPresentedThenKerberosShouldConfigured() throws JsonProcessingException {
+    static BlueprintPreparationObject blueprintObjectWhenKerberosPresentedThenKerberosShouldConfigured() {
         GeneralClusterConfigs configWithGateWay = generalClusterConfigs();
         configWithGateWay.setGatewayInstanceMetadataPresented(true);
         return getPreparedBuilder("master", "slave_1")
@@ -96,19 +97,19 @@ class BlueprintModulTestModelProvider {
                 .build();
     }
 
-    static BlueprintPreparationObject blueprintObjectWithZepelinAndHdp26PresentedThenZeppelinShouldConfigured() throws JsonProcessingException {
+    static BlueprintPreparationObject blueprintObjectWithZepelinAndHdp26PresentedThenZeppelinShouldConfigured() {
         return getPreparedBuilder("master")
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
                 .build();
     }
 
-    static BlueprintPreparationObject blueprintObjectWithZepelinAndHdp25PresentedThenZeppelinShouldConfigured() throws JsonProcessingException {
+    static BlueprintPreparationObject blueprintObjectWithZepelinAndHdp25PresentedThenZeppelinShouldConfigured() {
         return getPreparedBuilder("master")
                 .withBlueprintView(generalBlueprintView("", "2.5", "HDP"))
                 .build();
     }
 
-    static BlueprintPreparationObject blueprintObjectWhenNifiAndHdfPresentedThenHdfShouldConfigured() throws JsonProcessingException {
+    static BlueprintPreparationObject blueprintObjectWhenNifiAndHdfPresentedThenHdfShouldConfigured() {
         return getPreparedBuilder("master", "slave_1")
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDF"))
                 .withHdfConfigs(new HdfConfigs("<property name=\"Node Identity 10.0.0.1\">CN=10.0.0.1, OU=NIFI</property>",
@@ -117,7 +118,7 @@ class BlueprintModulTestModelProvider {
                 .build();
     }
 
-    static BlueprintPreparationObject blueprintObjectWhenNifiAndHdfAndLdapPresentedThenHdfShouldConfigured() throws JsonProcessingException {
+    static BlueprintPreparationObject blueprintObjectWhenNifiAndHdfAndLdapPresentedThenHdfShouldConfigured() {
         return getPreparedBuilder("master", "slave_1")
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDF"))
                 .withLdapConfig(ldapConfig())
@@ -127,27 +128,27 @@ class BlueprintModulTestModelProvider {
                 .build();
     }
 
-    static BlueprintPreparationObject blueprintObjectWhenHiveInteractivePresentedTheLlapShouldConfigured() throws JsonProcessingException {
+    static BlueprintPreparationObject blueprintObjectWhenHiveInteractivePresentedTheLlapShouldConfigured() {
         GeneralClusterConfigs conf = generalClusterConfigs();
         conf.setNodeCount(5);
-        return BlueprintPreparationObject.Builder.builder()
+        return Builder.builder()
                 .withGeneralClusterConfigs(conf)
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
                 .withHostgroups(getHostGroups("master"))
                 .build();
     }
 
-    static BlueprintPreparationObject blueprintObjectWhenNothingSpecialThere() throws JsonProcessingException {
+    static BlueprintPreparationObject blueprintObjectWhenNothingSpecialThere() {
         GeneralClusterConfigs conf = generalClusterConfigs();
         conf.setNodeCount(5);
-        return BlueprintPreparationObject.Builder.builder()
+        return Builder.builder()
                 .withGeneralClusterConfigs(conf)
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
                 .withHostgroups(getHostGroups("master", "slave_1"))
                 .build();
     }
 
-    static BlueprintPreparationObject blueprintObjectWhenLdapConfiguredWithRdsRanger() throws JsonProcessingException {
+    static BlueprintPreparationObject blueprintObjectWhenLdapConfiguredWithRdsRanger() {
         return getPreparedBuilder("master")
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
                 .withRdsConfigs(new HashSet<>(Collections.singleton(rdsConfig(RdsType.RANGER))))
@@ -155,7 +156,7 @@ class BlueprintModulTestModelProvider {
                 .build();
     }
 
-    static BlueprintPreparationObject blueprintObjectWhenLdapConfiguredWithOracleRdsRanger() throws JsonProcessingException {
+    static BlueprintPreparationObject blueprintObjectWhenLdapConfiguredWithOracleRdsRanger() {
         return getPreparedBuilder()
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
                 .withRdsConfigs(new HashSet<>(Collections.singleton(rdsConfig(RdsType.RANGER, DatabaseVendor.ORACLE11))))
@@ -163,22 +164,22 @@ class BlueprintModulTestModelProvider {
                 .build();
     }
 
-    static BlueprintPreparationObject blueprintObjectWhenRdsConfiguredWithRdsOozie() throws JsonProcessingException {
+    static BlueprintPreparationObject blueprintObjectWhenRdsConfiguredWithRdsOozie() {
         return getPreparedBuilder()
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
                 .withRdsConfigs(new HashSet<>(Collections.singleton(rdsConfig(RdsType.OOZIE))))
                 .build();
     }
 
-    static BlueprintPreparationObject blueprintObjectWhenWebhcatConfigured() throws JsonProcessingException {
+    static BlueprintPreparationObject blueprintObjectWhenWebhcatConfigured() {
         return getPreparedBuilder("master")
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
                 .build();
     }
 
-    static BlueprintPreparationObject blueprintObjectWhenSharedServiceConfigured() throws JsonProcessingException {
+    static BlueprintPreparationObject blueprintObjectWhenSharedServiceConfigured() {
         GeneralClusterConfigs configs = generalClusterConfigs();
-        return BlueprintPreparationObject.Builder.builder()
+        return Builder.builder()
                 .withHostgroups(getHostGroups("master", "worker", "compute"))
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
                 .withRdsConfigs(Sets.newHashSet(rdsConfig(RdsType.RANGER), rdsConfig(RdsType.HIVE)))
@@ -188,9 +189,9 @@ class BlueprintModulTestModelProvider {
                 .build();
     }
 
-    static BlueprintPreparationObject blueprintObjectWhenDefaultBlueprintConfigured() throws JsonProcessingException {
+    static BlueprintPreparationObject blueprintObjectWhenDefaultBlueprintConfigured() {
         GeneralClusterConfigs configs = generalClusterConfigs();
-        return BlueprintPreparationObject.Builder.builder()
+        return Builder.builder()
                 .withHostgroups(getHostGroups("master", "worker", "compute"))
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
                 .withRdsConfigs(Sets.newHashSet(rdsConfig(RdsType.RANGER), rdsConfig(RdsType.HIVE)))
@@ -202,7 +203,7 @@ class BlueprintModulTestModelProvider {
     static BlueprintPreparationObject blueprintObjectWhenDlmBlueprintConfigured(String inputFileName) throws IOException {
         GeneralClusterConfigs configs = generalClusterConfigs();
         TestFile testFile = getTestFile(getFileName(BLUEPRINT_UPDATER_TEST_INPUTS, inputFileName));
-        return BlueprintPreparationObject.Builder.builder()
+        return Builder.builder()
                 .withHostgroups(getHostGroups("master", "worker", "compute"))
                 .withBlueprintView(generalBlueprintView(testFile.getFileContent(), "2.6", "HDP"))
                 .withRdsConfigs(Sets.newHashSet(rdsConfig(RdsType.BEACON)))
@@ -212,7 +213,7 @@ class BlueprintModulTestModelProvider {
                 .build();
     }
 
-    static BlueprintPreparationObject blueprintObjectWhenCustomPropertiesBlueprintConfigured() throws IOException {
+    static BlueprintPreparationObject blueprintObjectWhenCustomPropertiesBlueprintConfigured() {
         Map<String, Object> customProperties = new HashMap<>();
 
         customProperties.put("hadoop.security.group.mapping.ldap.url", "10.1.1.2");
@@ -230,7 +231,7 @@ class BlueprintModulTestModelProvider {
         customProperties.put("custom-core-site", customPropertiesInner);
 
         GeneralClusterConfigs configs = generalClusterConfigs();
-        return BlueprintPreparationObject.Builder.builder()
+        return Builder.builder()
                 .withHostgroups(getHostGroups("master", "slave_1"))
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
                 .withGeneralClusterConfigs(configs)
@@ -238,7 +239,7 @@ class BlueprintModulTestModelProvider {
                 .build();
     }
 
-    static BlueprintPreparationObject blueprintObjectWhenLdapAndDruidRdsConfigured() throws JsonProcessingException {
+    static BlueprintPreparationObject blueprintObjectWhenLdapAndDruidRdsConfigured() {
         return getPreparedBuilder()
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
                 .withRdsConfigs(new HashSet<>(Collections.singleton(rdsConfig(RdsType.DRUID))))
@@ -246,20 +247,20 @@ class BlueprintModulTestModelProvider {
                 .build();
     }
 
-    static BlueprintPreparationObject blueprintObjectWhenAtlasPresentedShouldConfigured() throws JsonProcessingException {
+    static BlueprintPreparationObject blueprintObjectWhenAtlasPresentedShouldConfigured() {
         return getPreparedBuilder("master")
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
                 .build();
     }
 
-    static BlueprintPreparationObject blueprintObjectWhenAtlasAndLdapPresentedThenBothShouldConfigured() throws JsonProcessingException {
+    static BlueprintPreparationObject blueprintObjectWhenAtlasAndLdapPresentedThenBothShouldConfigured() {
         return getPreparedBuilder("master")
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
                 .withLdapConfig(ldapConfig())
                 .build();
     }
 
-    static BlueprintPreparationObject blueprintObjectForHbaseConfigurationForTwoHosts() throws JsonProcessingException {
+    static BlueprintPreparationObject blueprintObjectForHbaseConfigurationForTwoHosts() {
         return getPreparedBuilder("master", "slave_1")
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
                 .withHdfConfigs(new HdfConfigs("<property name=\"Node Identity 10.0.0.1\">CN=10.0.0.1, OU=NIFI</property>",
@@ -268,25 +269,27 @@ class BlueprintModulTestModelProvider {
                 .build();
     }
 
-    static BlueprintPreparationObject blueprintObjectWhereExecutioTypeHasConfiguredAsContainer() throws JsonProcessingException {
+    static BlueprintPreparationObject blueprintObjectWhereExecutioTypeHasConfiguredAsContainer() {
         GeneralClusterConfigs configs = generalClusterConfigs();
         configs.setExecutorType(ExecutorType.CONTAINER);
-        return BlueprintPreparationObject.Builder.builder()
+        return Builder.builder()
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
                 .withHostgroups(getHostGroups("master", "slave_1"))
                 .withGeneralClusterConfigs(configs)
                 .build();
     }
 
-    static BlueprintPreparationObject   blueprintObjectWhereSmartSenseHasConfigured() throws JsonProcessingException {
+    static BlueprintPreparationObject blueprintObjectWhereSmartSenseHasConfigured() {
+        SmartSenseSubscription smartSenseSubscription = new SmartSenseSubscription();
+        smartSenseSubscription.setSubscriptionId("A-99900000-C-00000000");
         return getPreparedBuilder("master", "slave_1")
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
-                .withSmartSenseSubscriptionId("A-99900000-C-00000000")
+                .withSmartSenseSubscription(smartSenseSubscription)
                 .build();
     }
 
-    static BlueprintPreparationObject.Builder getPreparedBuilder(String... hostNames) throws JsonProcessingException {
-        return BlueprintPreparationObject.Builder.builder()
+    static Builder getPreparedBuilder(String... hostNames) {
+        return Builder.builder()
                 .withGeneralClusterConfigs(generalClusterConfigs())
                 .withHostgroups(hostNames.length == 0 ? getHostGroups() : getHostGroups(hostNames));
     }
@@ -308,7 +311,7 @@ class BlueprintModulTestModelProvider {
     }
 
     public static String getFileName(String folder, String filename) {
-        return folder + "/" + filename + ".bp";
+        return folder + '/' + filename + ".bp";
     }
 
     private static Optional<SharedServiceConfigsView> datalakeSharedServiceConfig() {

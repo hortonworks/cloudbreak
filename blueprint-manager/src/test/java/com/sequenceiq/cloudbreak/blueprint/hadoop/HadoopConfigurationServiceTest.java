@@ -1,12 +1,9 @@
 package com.sequenceiq.cloudbreak.blueprint.hadoop;
 
 import static java.util.Collections.emptyMap;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-
-import java.io.IOException;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -22,6 +19,7 @@ import com.sequenceiq.cloudbreak.blueprint.ConfigService;
 import com.sequenceiq.cloudbreak.blueprint.configuration.HostgroupConfigurations;
 import com.sequenceiq.cloudbreak.blueprint.configuration.SiteConfigurations;
 import com.sequenceiq.cloudbreak.blueprint.template.views.BlueprintView;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
 
 @RunWith(MockitoJUnitRunner.class)
 public class HadoopConfigurationServiceTest {
@@ -33,7 +31,7 @@ public class HadoopConfigurationServiceTest {
     private ConfigService configService;
 
     @Test
-    public void testConfigure() throws IOException {
+    public void testConfigure() {
         BlueprintPreparationObject source = Builder.builder()
                 .build();
         BlueprintTextProcessor blueprintTextProcessor = mock(BlueprintTextProcessor.class);
@@ -41,8 +39,9 @@ public class HadoopConfigurationServiceTest {
         when(configService.getHostGroupConfiguration(blueprintTextProcessor, source.getHostgroupViews())).thenReturn(emptyMap());
         when(configService.getComponentsByHostGroup(blueprintTextProcessor, source.getHostgroupViews())).thenReturn(emptyMap());
 
-        when(blueprintTextProcessor.extendBlueprintHostGroupConfiguration(any(HostgroupConfigurations.class), anyBoolean())).thenReturn(blueprintTextProcessor);
-        when(blueprintTextProcessor.extendBlueprintGlobalConfiguration(any(SiteConfigurations.class), anyBoolean())).thenReturn(blueprintTextProcessor);
+        when(blueprintTextProcessor.extendBlueprintHostGroupConfiguration(any(HostgroupConfigurations.class), any(Boolean.class)))
+                .thenReturn(blueprintTextProcessor);
+        when(blueprintTextProcessor.extendBlueprintGlobalConfiguration(any(SiteConfigurations.class), any(Boolean.class))).thenReturn(blueprintTextProcessor);
 
         BlueprintTextProcessor actual = underTest.customTextManipulation(source, blueprintTextProcessor);
 
@@ -68,4 +67,11 @@ public class HadoopConfigurationServiceTest {
         boolean actual = underTest.specialCondition(source, "blueprintText");
         Assert.assertFalse(actual);
     }
+
+    private Blueprint prepareBlueprintForBuilder(String text, String version, String type) {
+        Blueprint blueprint = new Blueprint();
+        blueprint.setBlueprintText(text);
+        return blueprint;
+    }
+
 }

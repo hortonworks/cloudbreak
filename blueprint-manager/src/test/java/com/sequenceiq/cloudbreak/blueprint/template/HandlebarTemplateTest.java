@@ -1,26 +1,5 @@
 package com.sequenceiq.cloudbreak.blueprint.template;
 
-import static com.sequenceiq.cloudbreak.TestUtil.ldapConfig;
-import static com.sequenceiq.cloudbreak.blueprint.filesystem.BlueprintTestUtil.adlsFileSystemConfiguration;
-import static com.sequenceiq.cloudbreak.blueprint.filesystem.BlueprintTestUtil.emptyStorageLocationViews;
-import static com.sequenceiq.cloudbreak.blueprint.filesystem.BlueprintTestUtil.gcsFileSystemConfiguration;
-import static com.sequenceiq.cloudbreak.blueprint.filesystem.BlueprintTestUtil.s3FileSystemConfiguration;
-import static com.sequenceiq.cloudbreak.blueprint.filesystem.BlueprintTestUtil.storageLocationViews;
-import static com.sequenceiq.cloudbreak.blueprint.filesystem.BlueprintTestUtil.wasbSecureFileSystemConfiguration;
-import static com.sequenceiq.cloudbreak.blueprint.filesystem.BlueprintTestUtil.wasbUnSecureFileSystemConfiguration;
-import static com.sequenceiq.cloudbreak.util.FileReaderUtils.readFileFromClasspath;
-
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.github.jknack.handlebars.Handlebars;
 import com.github.jknack.handlebars.Template;
@@ -31,10 +10,31 @@ import com.sequenceiq.cloudbreak.api.model.ExecutorType;
 import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
 import com.sequenceiq.cloudbreak.blueprint.nifi.HdfConfigs;
 import com.sequenceiq.cloudbreak.blueprint.template.views.BlueprintView;
+import com.sequenceiq.cloudbreak.blueprint.template.views.LdapView;
 import com.sequenceiq.cloudbreak.blueprint.template.views.SharedServiceConfigsView;
 import com.sequenceiq.cloudbreak.blueprint.templates.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.common.model.OrchestratorType;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
+import org.junit.Assert;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+
+import static com.sequenceiq.cloudbreak.TestUtil.ldapConfig;
+import static com.sequenceiq.cloudbreak.blueprint.filesystem.BlueprintTestUtil.adlsFileSystemConfiguration;
+import static com.sequenceiq.cloudbreak.blueprint.filesystem.BlueprintTestUtil.emptyStorageLocationViews;
+import static com.sequenceiq.cloudbreak.blueprint.filesystem.BlueprintTestUtil.gcsFileSystemConfiguration;
+import static com.sequenceiq.cloudbreak.blueprint.filesystem.BlueprintTestUtil.s3FileSystemConfiguration;
+import static com.sequenceiq.cloudbreak.blueprint.filesystem.BlueprintTestUtil.storageLocationViews;
+import static com.sequenceiq.cloudbreak.blueprint.filesystem.BlueprintTestUtil.wasbSecureFileSystemConfiguration;
+import static com.sequenceiq.cloudbreak.blueprint.filesystem.BlueprintTestUtil.wasbUnSecureFileSystemConfiguration;
+import static com.sequenceiq.cloudbreak.util.FileReaderUtils.readFileFromClasspath;
 
 @RunWith(Parameterized.class)
 public class HandlebarTemplateTest {
@@ -402,20 +402,20 @@ public class HandlebarTemplateTest {
                 .build();
     }
 
-    public static Map<String, Object> ldapConfigWhenLdapPresentedThenShouldReturnWithLdapConfig() throws JsonProcessingException {
+    public static Map<String, Object> ldapConfigWhenLdapPresentedThenShouldReturnWithLdapConfig() {
         return new BlueprintTemplateModelContextBuilder()
-                .withLdap(ldapConfig())
+                .withLdap(new LdapView(ldapConfig()))
                 .withGateway(TestUtil.gatewayEnabled())
                 .build();
     }
 
-    public static Map<String, Object> enabledGateway() throws JsonProcessingException {
+    public static Map<String, Object> enabledGateway() {
         return new BlueprintTemplateModelContextBuilder()
                 .withGateway(TestUtil.gatewayEnabled())
                 .build();
     }
 
-    public static Map<String, Object> enabledGatewayWithRanger() throws JsonProcessingException {
+    public static Map<String, Object> enabledGatewayWithRanger() {
         return new BlueprintTemplateModelContextBuilder()
                 .withGateway(TestUtil.gatewayEnabled())
                 .withComponents(Sets.newHashSet("RANGER_ADMIN"))
@@ -514,7 +514,7 @@ public class HandlebarTemplateTest {
 
         return new BlueprintTemplateModelContextBuilder()
                 .withGeneralClusterConfigs(generalClusterConfigs)
-                .withLdap(ldapConfig())
+                .withLdap(new LdapView(ldapConfig()))
                 .withFixInputs(properties)
                 .withHdfConfigs(new HdfConfigs("nifigtargets", "nifigtargets", "nifigtargets",
                         withProxyHost ? Optional.of("nifiproxyhost") : Optional.empty()))
@@ -545,7 +545,7 @@ public class HandlebarTemplateTest {
 
     private static Object hiveWhenLdapPresentedThenShouldReturnWithLdapConfigs() {
         return new BlueprintTemplateModelContextBuilder()
-                .withLdap(ldapConfig())
+                .withLdap(new LdapView(ldapConfig()))
                 .build();
     }
 
@@ -554,13 +554,13 @@ public class HandlebarTemplateTest {
                 .build();
     }
 
-    public static Map<String, Object> sSConfigWhenSSAndDatalakePresentedThenShouldReturnWithSSDatalakeConfig() throws JsonProcessingException {
+    public static Map<String, Object> sSConfigWhenSSAndDatalakePresentedThenShouldReturnWithSSDatalakeConfig() {
         return new BlueprintTemplateModelContextBuilder()
                 .withSharedServiceConfigs(datalakeSharedServiceConfig().get())
                 .build();
     }
 
-    public static Map<String, Object> sSConfigWhenNoSSAndDatalakePresentedThenShouldReturnWithoutSSDatalakeConfig() throws JsonProcessingException {
+    public static Map<String, Object> sSConfigWhenNoSSAndDatalakePresentedThenShouldReturnWithoutSSDatalakeConfig() {
         Map<String, Object> fixInputs = new HashMap<>();
         fixInputs.put("REMOTE_CLUSTER_NAME", "datalake-1");
         fixInputs.put("policymgr_external_url", "10.1.1.1:6080");
@@ -570,28 +570,28 @@ public class HandlebarTemplateTest {
                 .build();
     }
 
-    public static Map<String, Object> rangerRdsConfigWhenRdsPresentedThenShouldReturnWithPostgresRdsConfig() throws JsonProcessingException {
+    public static Map<String, Object> rangerRdsConfigWhenRdsPresentedThenShouldReturnWithPostgresRdsConfig() {
         RDSConfig rdsConfig = TestUtil.rdsConfig(RdsType.RANGER, DatabaseVendor.POSTGRES);
         return new BlueprintTemplateModelContextBuilder()
                 .withRdsConfigs(Sets.newHashSet(rdsConfig))
                 .build();
     }
 
-    public static Map<String, Object> rangerRdsConfigWhenRdsPresentedThenShouldReturnWithMySQLRdsConfig() throws JsonProcessingException {
+    public static Map<String, Object> rangerRdsConfigWhenRdsPresentedThenShouldReturnWithMySQLRdsConfig() {
         RDSConfig rdsConfig = TestUtil.rdsConfig(RdsType.RANGER, DatabaseVendor.MYSQL);
         return new BlueprintTemplateModelContextBuilder()
                 .withRdsConfigs(Sets.newHashSet(rdsConfig))
                 .build();
     }
 
-    public static Map<String, Object> rangerRdsConfigWhenRdsPresentedThenShouldReturnWitOracle11hRdsConfig() throws JsonProcessingException {
+    public static Map<String, Object> rangerRdsConfigWhenRdsPresentedThenShouldReturnWitOracle11hRdsConfig() {
         RDSConfig rdsConfig = TestUtil.rdsConfig(RdsType.RANGER, DatabaseVendor.ORACLE11);
         return new BlueprintTemplateModelContextBuilder()
                 .withRdsConfigs(Sets.newHashSet(rdsConfig))
                 .build();
     }
 
-    public static Map<String, Object> rangerRdsConfigWhenRdsPresentedThenShouldReturnWitOracle12hRdsConfig() throws JsonProcessingException {
+    public static Map<String, Object> rangerRdsConfigWhenRdsPresentedThenShouldReturnWitOracle12hRdsConfig() {
         RDSConfig rdsConfig = TestUtil.rdsConfig(RdsType.RANGER, DatabaseVendor.ORACLE12);
         return new BlueprintTemplateModelContextBuilder()
                 .withRdsConfigs(Sets.newHashSet(rdsConfig))

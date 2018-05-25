@@ -5,12 +5,15 @@ import com.sequenceiq.cloudbreak.blueprint.nifi.HdfConfigs;
 import com.sequenceiq.cloudbreak.blueprint.template.views.BlueprintView;
 import com.sequenceiq.cloudbreak.blueprint.template.views.GatewayView;
 import com.sequenceiq.cloudbreak.blueprint.template.views.HostgroupView;
+import com.sequenceiq.cloudbreak.blueprint.template.views.LdapView;
 import com.sequenceiq.cloudbreak.blueprint.template.views.SharedServiceConfigsView;
+import com.sequenceiq.cloudbreak.blueprint.template.views.SmartSenseSubscriptionView;
 import com.sequenceiq.cloudbreak.blueprint.templates.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.domain.FlexSubscription;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
+import com.sequenceiq.cloudbreak.domain.SmartSenseSubscription;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
@@ -33,9 +36,9 @@ public class BlueprintPreparationObject {
 
     private final Set<HostgroupView> hostgroupViews;
 
-    private final Optional<String> smartSenseSubscriptionId;
+    private final Optional<SmartSenseSubscriptionView> smartSenseSubscription;
 
-    private final Optional<LdapConfig> ldapConfig;
+    private final Optional<LdapView> ldapConfig;
 
     private final Optional<SharedServiceConfigsView> sharedServiceConfigs;
 
@@ -53,11 +56,11 @@ public class BlueprintPreparationObject {
 
     private final Map<String, Object> fixInputs;
 
-    private BlueprintPreparationObject(BlueprintPreparationObject.Builder builder) {
+    private BlueprintPreparationObject(Builder builder) {
         rdsConfigs = builder.rdsConfigs;
         hostgroupViews = builder.hostgroupViews;
         stackRepoDetailsHdpVersion = builder.stackRepoDetailsHdpVersion;
-        smartSenseSubscriptionId = builder.smartSenseSubscriptionId;
+        smartSenseSubscription = builder.smartSenseSubscription;
         ldapConfig = builder.ldapConfig;
         hdfConfigs = builder.hdfConfigs;
         gatewayView = builder.gatewayView;
@@ -83,11 +86,11 @@ public class BlueprintPreparationObject {
         return stackRepoDetailsHdpVersion;
     }
 
-    public Optional<String> getSmartSenseSubscriptionId() {
-        return smartSenseSubscriptionId;
+    public Optional<SmartSenseSubscriptionView> getSmartSenseSubscription() {
+        return smartSenseSubscription;
     }
 
-    public Optional<LdapConfig> getLdapConfig() {
+    public Optional<LdapView> getLdapConfig() {
         return ldapConfig;
     }
 
@@ -139,9 +142,9 @@ public class BlueprintPreparationObject {
 
         private Optional<String> stackRepoDetailsHdpVersion = Optional.empty();
 
-        private Optional<String> smartSenseSubscriptionId = Optional.empty();
+        private Optional<SmartSenseSubscriptionView> smartSenseSubscription = Optional.empty();
 
-        private Optional<LdapConfig> ldapConfig = Optional.empty();
+        private Optional<LdapView> ldapConfig = Optional.empty();
 
         private Optional<HdfConfigs> hdfConfigs = Optional.empty();
 
@@ -167,8 +170,10 @@ public class BlueprintPreparationObject {
             return new Builder();
         }
 
-        public Builder withSmartSenseSubscriptionId(String smartSenseSubscriptionId) {
-            this.smartSenseSubscriptionId = Optional.ofNullable(smartSenseSubscriptionId);
+        public Builder withSmartSenseSubscription(SmartSenseSubscription smartSenseSubscription) {
+            if (smartSenseSubscription != null) {
+                this.smartSenseSubscription = Optional.of(new SmartSenseSubscriptionView(smartSenseSubscription));
+            }
             return this;
         }
 
@@ -203,12 +208,12 @@ public class BlueprintPreparationObject {
         }
 
         public Builder withFileSystemConfigurationView(BaseFileSystemConfigurationsView fileSystemView) {
-            this.fileSystemView =  Optional.ofNullable(fileSystemView);
+            this.fileSystemView = Optional.ofNullable(fileSystemView);
             return this;
         }
 
         public Builder withLdapConfig(LdapConfig ldapConfig) {
-            this.ldapConfig = Optional.ofNullable(ldapConfig);
+            this.ldapConfig = ldapConfig != null ? Optional.of(new LdapView(ldapConfig)) : Optional.empty();
             return this;
         }
 
@@ -223,14 +228,7 @@ public class BlueprintPreparationObject {
         }
 
         public Builder withGateway(Gateway gateway) {
-            if (gateway != null) {
-                gatewayView = new GatewayView(gateway);
-            }
-            return this;
-        }
-
-        public Builder withGatewayView(GatewayView gatewayView) {
-            this.gatewayView = gatewayView;
+            gatewayView = gateway != null ? new GatewayView(gateway) : null;
             return this;
         }
 

@@ -3,14 +3,13 @@ package com.sequenceiq.cloudbreak.converter.v2;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintPreparationObject;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintPreparationObject.Builder;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessingException;
+import com.sequenceiq.cloudbreak.blueprint.BlueprintViewProvider;
 import com.sequenceiq.cloudbreak.blueprint.GeneralClusterConfigsProvider;
 import com.sequenceiq.cloudbreak.blueprint.filesystem.BaseFileSystemConfigurationsView;
 import com.sequenceiq.cloudbreak.blueprint.filesystem.FileSystemConfigurationProvider;
 import com.sequenceiq.cloudbreak.blueprint.nifi.HdfConfigProvider;
 import com.sequenceiq.cloudbreak.blueprint.nifi.HdfConfigs;
 import com.sequenceiq.cloudbreak.blueprint.sharedservice.SharedServiceConfigsViewProvider;
-import com.sequenceiq.cloudbreak.blueprint.template.views.BlueprintView;
-import com.sequenceiq.cloudbreak.blueprint.templates.BlueprintStackInfo;
 import com.sequenceiq.cloudbreak.blueprint.utils.StackInfoService;
 import com.sequenceiq.cloudbreak.cloud.model.StackInputs;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
@@ -83,6 +82,9 @@ public class StackToBlueprintPreparationObjectConverter extends AbstractConversi
     @Inject
     private SharedServiceConfigsViewProvider sharedServiceConfigProvider;
 
+    @Inject
+    private BlueprintViewProvider blueprintViewProvider;
+
     @Override
     public BlueprintPreparationObject convert(Stack source) {
         try {
@@ -94,12 +96,10 @@ public class StackToBlueprintPreparationObjectConverter extends AbstractConversi
             String stackRepoDetailsHdpVersion = hdpRepo != null ? hdpRepo.getHdpVersion() : null;
             Map<String, List<InstanceMetaData>> groupInstances = instanceGroupMetadataCollector.collectMetadata(source);
             HdfConfigs hdfConfigs = hdfConfigProvider.createHdfConfig(cluster.getHostGroups(), groupInstances, cluster.getBlueprint().getBlueprintText());
-            BlueprintStackInfo blueprintStackInfo = stackInfoService.blueprintStackInfo(cluster.getBlueprint().getBlueprintText());
             BaseFileSystemConfigurationsView fileSystemConfigurationView = getFileSystemConfigurationView(source, fileSystem);
             IdentityUser identityUser = userDetailsService.getDetails(cluster.getOwner(), UserFilterField.USERID);
             Stack dataLakeStack = getDataLakeStack(source);
             StackInputs stackInputs = getStackInputs(source);
-
             Map<String, Object> fixInputs = stackInputs.getFixInputs() == null ? new HashMap<>() : stackInputs.getFixInputs();
             fixInputs.putAll(stackInputs.getDatalakeInputs() == null ? new HashMap<>() : stackInputs.getDatalakeInputs());
 
@@ -110,11 +110,11 @@ public class StackToBlueprintPreparationObjectConverter extends AbstractConversi
                     .withGateway(cluster.getGateway())
                     .withCustomInputs(stackInputs.getCustomInputs() == null ? new HashMap<>() : stackInputs.getCustomInputs())
                     .withFixInputs(fixInputs)
-                    .withBlueprintView(new BlueprintView(cluster, blueprintStackInfo))
+                    .withBlueprintView(blueprintViewProvider.getBlueprintView(cluster.getBlueprint()))
                     .withStackRepoDetailsHdpVersion(stackRepoDetailsHdpVersion)
                     .withFileSystemConfigurationView(fileSystemConfigurationView)
                     .withGeneralClusterConfigs(generalClusterConfigsProvider.generalClusterConfigs(source, cluster, identityUser))
-                    .withSmartSenseSubscriptionId(aDefault.isPresent() ? aDefault.get().getSubscriptionId() : null)
+                    .withSmartSenseSubscription(aDefault.isPresent() ? aDefault.get() : null)
                     .withLdapConfig(ldapConfig)
                     .withHdfConfigs(hdfConfigs)
                     .withKerberosConfig(cluster.isSecure() ? cluster.getKerberosConfig() : null)

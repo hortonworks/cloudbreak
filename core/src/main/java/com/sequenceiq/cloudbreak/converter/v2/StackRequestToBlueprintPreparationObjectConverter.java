@@ -30,6 +30,7 @@ import com.sequenceiq.cloudbreak.domain.FlexSubscription;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
+import com.sequenceiq.cloudbreak.domain.SmartSenseSubscription;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
@@ -108,7 +109,7 @@ public class StackRequestToBlueprintPreparationObjectConverter extends AbstractC
             IdentityUser identityUser = userDetailsService.getDetails(source.getOwner(), UserFilterField.USERID);
             Credential credential = credentialService.get(source.getGeneral().getCredentialName(), identityUser.getAccount());
             Optional<FlexSubscription> flexSubscription = getFlexSubscription(source);
-            Optional<String> smartsenseSubscriptionId = getSmartsenseSubscriptionId(flexSubscription);
+            SmartSenseSubscription smartsenseSubscription = flexSubscription.isPresent() ? flexSubscription.get().getSmartSenseSubscription() : null;
             KerberosConfig kerberosConfig = getKerberosConfig(source);
             LdapConfig ldapConfig = getLdapConfig(source, identityUser);
             BaseFileSystemConfigurationsView fileSystemConfigurationView = getFileSystemConfigurationView(source, credential);
@@ -128,7 +129,7 @@ public class StackRequestToBlueprintPreparationObjectConverter extends AbstractC
                     .withStackRepoDetailsHdpVersion(blueprintStackInfo.getVersion())
                     .withFileSystemConfigurationView(fileSystemConfigurationView)
                     .withGeneralClusterConfigs(generalClusterConfigs)
-                    .withSmartSenseSubscriptionId(smartsenseSubscriptionId.orElse(null))
+                    .withSmartSenseSubscription(smartsenseSubscription)
                     .withLdapConfig(ldapConfig)
                     .withKerberosConfig(kerberosConfig);
 
