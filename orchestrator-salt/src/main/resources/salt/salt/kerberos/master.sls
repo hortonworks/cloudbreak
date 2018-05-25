@@ -35,11 +35,28 @@ remove_kprop_acl:
   file.absent:
     - name: /var/kerberos/krb5kdc/kpropd.acl
 
+{% if grains['os_family'] == 'Debian' %}
+create_krb5_admin_server_script:
+  file.managed:
+    - name: /opt/salt/krb5-admin-server.sh
+    - source: salt://kerberos/scripts/krb5-admin-server.sh
+    - mode: 755
+
+fix_krb5-admin-server_service_file:
+  cmd.run:
+    - name: bash -x /opt/salt/krb5-admin-server.sh 2>&1 | tee -a /var/log/krb5-admin-server.sh.log && exit ${PIPESTATUS[0]}
+    - shell: /bin/bash
+    - require:
+      - file: create_krb5_admin_server_script
+{% endif %}
+
 start_kadmin:
   service.running:
     - enable: True
 {% if grains['os_family'] == 'Suse' %}
     - name: kadmind
+{% elif grains['os_family'] == 'Debian' %}
+    - name: krb5-admin-server
 {% else %}
     - name: kadmin
 {% endif %}
@@ -49,7 +66,11 @@ start_kadmin:
 start_master_kdc:
   service.running:
     - enable: True
+{% if grains['os_family'] == 'Debian' %}
+    - name: krb5-kdc
+{% else %}
     - name: krb5kdc
+{% endif %}
     - watch:
       - pkg: install_kerberos
 

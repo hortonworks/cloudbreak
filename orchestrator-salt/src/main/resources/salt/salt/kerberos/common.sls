@@ -5,11 +5,22 @@ haveged:
   service.running:
     - enable: True
 
+{% if grains['os_family'] == 'Suse' %}
 install_kerberos:
   pkg.installed:
     - pkgs:
       - krb5-server
-{% if grains['os_family'] != 'Suse' %}
+{% elif grains['os_family'] == 'Debian' %}
+install_kerberos:
+  pkg.installed:
+    - pkgs:
+      - krb5-kdc
+      - krb5-admin-server
+{% else %}
+install_kerberos:
+  pkg.installed:
+    - pkgs:
+      - krb5-server
       - krb5-libs
       - krb5-workstation
 {% endif %}
@@ -19,11 +30,13 @@ install_kerberos:
   file.symlink:
       - target: /var/lib/kerberos
       - force: True
+{% endif %}
 
-/run/user/0:
-  file.directory:
-    - user: root
-    - group: root
+{% if grains['os_family'] == 'Debian' %}
+/var/kerberos:
+  file.symlink:
+      - target: /etc
+      - force: True
 {% endif %}
 
 {% if kerberos.url is none or kerberos.url == '' %}

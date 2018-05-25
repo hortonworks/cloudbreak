@@ -5,7 +5,7 @@ export RECIPE_NAME=$2
 
 echo "--------- Executing script: /opt/scripts/${RECIPE_TYPE}/${RECIPE_NAME} at $(date) ---------" >> /var/log/recipes/${RECIPE_TYPE}/${RECIPE_NAME}.log
 
-sh -x /opt/scripts/${RECIPE_TYPE}/${RECIPE_NAME} 2>&1 | tee -a /var/log/recipes/${RECIPE_TYPE}/${RECIPE_NAME}.log
+bash -x /opt/scripts/${RECIPE_TYPE}/${RECIPE_NAME} 2>&1 | tee -a /var/log/recipes/${RECIPE_TYPE}/${RECIPE_NAME}.log
 
 export EXIT_CODE=${PIPESTATUS[0]}
 
