@@ -26,6 +26,8 @@ public class OrchestratorBootstrapRunner implements Callable<Boolean> {
 
     private static final int SEC_IN_MIN = 60;
 
+    private static final int MAX_RETRY_ON_ERROR = 10;
+
     private final OrchestratorBootstrap orchestratorBootstrap;
 
     private final Map<String, String> mdcMap;
@@ -38,20 +40,23 @@ public class OrchestratorBootstrapRunner implements Callable<Boolean> {
 
     private final int sleepTime;
 
+    private final int maxRetryOnError;
+
     public OrchestratorBootstrapRunner(OrchestratorBootstrap orchestratorBootstrap, ExitCriteria exitCriteria,
             ExitCriteriaModel exitCriteriaModel, Map<String, String> mdcReplica) {
-        this(orchestratorBootstrap, exitCriteria, exitCriteriaModel, mdcReplica, MAX_RETRY_COUNT, SLEEP_TIME);
+        this(orchestratorBootstrap, exitCriteria, exitCriteriaModel, mdcReplica, MAX_RETRY_COUNT, SLEEP_TIME, MAX_RETRY_ON_ERROR);
     }
 
     public OrchestratorBootstrapRunner(OrchestratorBootstrap orchestratorBootstrap, ExitCriteria exitCriteria,
             ExitCriteriaModel exitCriteriaModel, Map<String, String> mdcReplica,
-            int maxRetryCount, int sleepTime) {
+            int maxRetryCount, int sleepTime, int maxRetryOnError) {
         this.orchestratorBootstrap = orchestratorBootstrap;
         mdcMap = mdcReplica;
         this.exitCriteria = exitCriteria;
         this.exitCriteriaModel = exitCriteriaModel;
         this.maxRetryCount = maxRetryCount;
         this.sleepTime = sleepTime;
+        this.maxRetryOnError = maxRetryOnError;
     }
 
     @Override
@@ -113,6 +118,7 @@ public class OrchestratorBootstrapRunner implements Callable<Boolean> {
                         type, retryCount, maxRetryCount, elapsedTime, totalElapsedTime, actualException, orchestratorBootstrap);
                 retryCount++;
                 if (retryCount <= maxRetryCount) {
+                    retryCount = reducedRetryCountOnError(retryCount);
                     trySleeping();
                 } else {
                     success = Boolean.FALSE;
@@ -121,6 +127,10 @@ public class OrchestratorBootstrapRunner implements Callable<Boolean> {
         }
 
         return new ImmutablePair<>(success, actualException);
+    }
+
+    private int reducedRetryCountOnError(int retryCount) {
+        return maxRetryCount - retryCount > maxRetryOnError ? maxRetryCount - maxRetryOnError : retryCount;
     }
 
     private void trySleeping() {

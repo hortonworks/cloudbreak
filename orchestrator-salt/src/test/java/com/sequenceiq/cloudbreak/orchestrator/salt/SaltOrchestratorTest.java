@@ -114,7 +114,7 @@ public class SaltOrchestratorTest {
     public void bootstrapTest() throws Exception {
         whenNew(SaltBootstrap.class).withAnyArguments().thenReturn(mock(SaltBootstrap.class));
         whenNew(OrchestratorBootstrapRunner.class)
-                .withArguments(any(OrchestratorBootstrap.class), any(ExitCriteria.class), any(ExitCriteriaModel.class), isNull(), anyInt(), anyInt())
+                .withArguments(any(OrchestratorBootstrap.class), any(ExitCriteria.class), any(ExitCriteriaModel.class), isNull(), anyInt(), anyInt(), anyInt())
                 .thenReturn(mock(OrchestratorBootstrapRunner.class));
 
         saltOrchestrator.init(parallelOrchestratorComponentRunner, exitCriteria);
@@ -125,10 +125,10 @@ public class SaltOrchestratorTest {
         verify(parallelOrchestratorComponentRunner, times(4)).submit(any(OrchestratorBootstrapRunner.class));
 
         verifyNew(OrchestratorBootstrapRunner.class, times(1))
-                .withArguments(any(SaltBootstrap.class), eq(exitCriteria), eq(exitCriteriaModel), any(), anyInt(), anyInt());
+                .withArguments(any(SaltBootstrap.class), eq(exitCriteria), eq(exitCriteriaModel), any(), anyInt(), anyInt(), anyInt());
         // salt.zip, master_sign.pem, master_sign.pub
         verifyNew(OrchestratorBootstrapRunner.class, times(3))
-                .withArguments(any(SaltUpload.class), eq(exitCriteria), eq(exitCriteriaModel), any(), anyInt(), anyInt());
+                .withArguments(any(SaltUpload.class), eq(exitCriteria), eq(exitCriteriaModel), any(), anyInt(), anyInt(), anyInt());
         verifyNew(SaltBootstrap.class, times(1)).withArguments(eq(saltConnector), eq(Collections.singletonList(gatewayConfig)), eq(targets),
             eq(bootstrapParams));
     }
@@ -137,7 +137,7 @@ public class SaltOrchestratorTest {
     public void bootstrapNewNodesTest() throws Exception {
         whenNew(SaltBootstrap.class).withAnyArguments().thenReturn(mock(SaltBootstrap.class));
         whenNew(OrchestratorBootstrapRunner.class)
-                .withArguments(any(OrchestratorBootstrap.class), any(ExitCriteria.class), any(ExitCriteriaModel.class), isNull(), anyInt(), anyInt())
+                .withArguments(any(OrchestratorBootstrap.class), any(ExitCriteria.class), any(ExitCriteriaModel.class), isNull(), anyInt(), anyInt(), anyInt())
                 .thenReturn(mock(OrchestratorBootstrapRunner.class));
         BootstrapParams bootstrapParams = mock(BootstrapParams.class);
 
@@ -145,7 +145,7 @@ public class SaltOrchestratorTest {
         saltOrchestrator.bootstrapNewNodes(Collections.singletonList(gatewayConfig), targets, targets, null, bootstrapParams, exitCriteriaModel);
 
         verifyNew(OrchestratorBootstrapRunner.class, times(1))
-                .withArguments(any(SaltBootstrap.class), eq(exitCriteria), eq(exitCriteriaModel), any(), anyInt(), anyInt());
+                .withArguments(any(SaltBootstrap.class), eq(exitCriteria), eq(exitCriteriaModel), any(), anyInt(), anyInt(), anyInt());
         verifyNew(SaltBootstrap.class, times(1)).withArguments(eq(saltConnector),
             eq(Collections.singletonList(gatewayConfig)), eq(targets), eq(bootstrapParams));
     }
@@ -154,7 +154,7 @@ public class SaltOrchestratorTest {
     public void runServiceTest() throws Exception {
         whenNew(SaltBootstrap.class).withAnyArguments().thenReturn(mock(SaltBootstrap.class));
         whenNew(OrchestratorBootstrapRunner.class)
-                .withArguments(any(OrchestratorBootstrap.class), any(ExitCriteria.class), any(ExitCriteriaModel.class), isNull(), anyInt(), anyInt())
+                .withArguments(any(OrchestratorBootstrap.class), any(ExitCriteria.class), any(ExitCriteriaModel.class), isNull(), anyInt(), anyInt(), anyInt())
                 .thenReturn(mock(OrchestratorBootstrapRunner.class));
         PillarSave pillarSave = mock(PillarSave.class);
         whenNew(PillarSave.class).withAnyArguments().thenReturn(pillarSave);
@@ -184,7 +184,7 @@ public class SaltOrchestratorTest {
 
         // verify pillar save
         verifyNew(OrchestratorBootstrapRunner.class, times(1))
-                .withArguments(eq(pillarSave), eq(exitCriteria), eq(exitCriteriaModel), any(), anyInt(), anyInt());
+                .withArguments(eq(pillarSave), eq(exitCriteria), eq(exitCriteriaModel), any(), anyInt(), anyInt(), anyInt());
 
         // verify ambari server role
         verifyNew(GrainAddRunner.class, times(1)).withArguments(eq(Sets.newHashSet(gatewayConfig.getPrivateAddress())),
@@ -205,13 +205,13 @@ public class SaltOrchestratorTest {
         verifyNew(SaltCommandTracker.class, times(4)).withArguments(eq(saltConnector), eq(addRemoveGrainRunner));
         // verify two OrchestratorBootstrapRunner call with rolechecker command tracker
         verifyNew(OrchestratorBootstrapRunner.class, times(4))
-                .withArguments(eq(roleCheckerSaltCommandTracker), eq(exitCriteria), eq(exitCriteriaModel), any(), anyInt(), anyInt());
+                .withArguments(eq(roleCheckerSaltCommandTracker), eq(exitCriteria), eq(exitCriteriaModel), any(), anyInt(), anyInt(), anyInt());
 
         // verify syncgrains command
         verifyNew(SyncGrainsRunner.class, times(1)).withArguments(eq(allNodes), eq(targets));
         verifyNew(SaltCommandTracker.class, times(1)).withArguments(eq(saltConnector), eq(syncGrainsRunner));
         verifyNew(OrchestratorBootstrapRunner.class, times(1))
-                .withArguments(eq(syncGrainsCheckerSaltCommandTracker), eq(exitCriteria), eq(exitCriteriaModel), any(), anyInt(), anyInt());
+                .withArguments(eq(syncGrainsCheckerSaltCommandTracker), eq(exitCriteria), eq(exitCriteriaModel), any(), anyInt(), anyInt(), anyInt());
 
         // verify run new service
         verifyNew(HighStateRunner.class, atLeastOnce()).withArguments(eq(allNodes),

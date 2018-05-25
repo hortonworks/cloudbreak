@@ -78,6 +78,9 @@ public class SaltOrchestrator implements HostOrchestrator {
     @Value("${cb.max.salt.new.service.retry:90}")
     private int maxRetry;
 
+    @Value("${cb.max.salt.new.service.retry.onerror:10}")
+    private int maxRetryOnError;
+
     @Value("${cb.max.salt.recipe.execution.retry:90}")
     private int maxRetryRecipe;
 
@@ -545,7 +548,7 @@ public class SaltOrchestrator implements HostOrchestrator {
     }
 
     private Callable<Boolean> runner(OrchestratorBootstrap bootstrap, ExitCriteria exitCriteria, ExitCriteriaModel exitCriteriaModel, int maxRetry) {
-        return new OrchestratorBootstrapRunner(bootstrap, exitCriteria, exitCriteriaModel, MDC.getCopyOfContextMap(), maxRetry, SLEEP_TIME);
+        return new OrchestratorBootstrapRunner(bootstrap, exitCriteria, exitCriteriaModel, MDC.getCopyOfContextMap(), maxRetry, SLEEP_TIME, maxRetryOnError);
     }
 
     private void uploadSaltConfig(SaltConnector saltConnector, Set<String> targets, ExitCriteriaModel exitCriteriaModel)
