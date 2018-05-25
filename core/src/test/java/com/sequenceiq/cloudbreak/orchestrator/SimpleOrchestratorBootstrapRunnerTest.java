@@ -32,7 +32,7 @@ public class SimpleOrchestratorBootstrapRunnerTest {
         OrchestratorBootstrapRunner runner = new OrchestratorBootstrapRunner(new MockBootstrapRunner(-1),
                 new MockExitCriteria(),
                 new MockExitCriteriaModel(),
-                MDC.getCopyOfContextMap(), 2, 1);
+                MDC.getCopyOfContextMap(), 2, 1, 2);
         Boolean result = null;
         try {
             result = runner.call();
