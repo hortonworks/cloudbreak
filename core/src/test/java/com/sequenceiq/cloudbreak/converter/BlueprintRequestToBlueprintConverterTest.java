@@ -1,7 +1,9 @@
 package com.sequenceiq.cloudbreak.converter;
 
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyObject;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
@@ -17,6 +19,7 @@ import org.junit.rules.ExpectedException;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
 
 import com.sequenceiq.cloudbreak.api.model.BlueprintRequest;
 import com.sequenceiq.cloudbreak.blueprint.utils.BlueprintUtils;
@@ -37,8 +40,8 @@ public class BlueprintRequestToBlueprintConverterTest extends AbstractJsonConver
     @Mock
     private JsonHelper jsonHelper;
 
-    @Mock
-    private BlueprintUtils blueprintUtils;
+    @Spy
+    private BlueprintUtils blueprintUtils = new BlueprintUtils();
 
     @Mock
     private MissingResourceNameGenerator missingResourceNameGenerator;
@@ -46,8 +49,8 @@ public class BlueprintRequestToBlueprintConverterTest extends AbstractJsonConver
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        when(blueprintUtils.countHostGroups(anyObject())).thenReturn(2);
-        when(blueprintUtils.getBlueprintName(anyObject())).thenReturn("bpname");
+        doReturn(2).when(blueprintUtils).countHostGroups(any());
+        doReturn("bpname").when(blueprintUtils).getBlueprintName(any());
     }
 
     @Test
@@ -69,11 +72,6 @@ public class BlueprintRequestToBlueprintConverterTest extends AbstractJsonConver
         Blueprint result = underTest.convert(getRequest("stack/blueprint-filled-tags.json"));
         assertAllFieldsNotNull(result, Collections.singletonList("inputParameters"));
         Assert.assertTrue(result.getTags().getMap().size() > 1);
-    }
-
-    @Test(expected = BadRequestException.class)
-    public void testWithNonAlphaNumericHostGroupName() {
-        underTest.convert(getRequest("stack/blueprint-non-alpha-numeric-host-group-name.json"));
     }
 
     @Test
@@ -123,10 +121,9 @@ public class BlueprintRequestToBlueprintConverterTest extends AbstractJsonConver
 
     @Test
     public void testConvertWhenUnableToObtainTheBlueprintNameFromTheProvidedBlueprintTextThenExceptionWouldCome() {
-        when(blueprintUtils.getBlueprintName(any())).thenAnswer(invocation -> {
+        doAnswer(invocation -> {
             throw new IOException("some message");
-        });
-
+        }).when(blueprintUtils).getBlueprintName(any());
         thrown.expect(BadRequestException.class);
         thrown.expectMessage("Invalid Blueprint: Failed to parse JSON.");
 
@@ -135,10 +132,9 @@ public class BlueprintRequestToBlueprintConverterTest extends AbstractJsonConver
 
     @Test
     public void testConvertWhenUnableToObtainHostGroupCountThenExceptionWouldCome() {
-        when(blueprintUtils.countHostGroups(any())).thenAnswer(invocation -> {
+        doAnswer(invocation -> {
             throw new IOException("some message");
-        });
-
+        }).when(blueprintUtils).countHostGroups(any());
         thrown.expect(BadRequestException.class);
         thrown.expectMessage("Invalid Blueprint: Failed to parse JSON.");
 
@@ -156,6 +152,17 @@ public class BlueprintRequestToBlueprintConverterTest extends AbstractJsonConver
         thrown.expectMessage("Invalid tag(s) in the Blueprint: Unable to parse JSON.");
 
         underTest.convert(request);
+    }
+
+    @Test(expected = BadRequestException.class)
+    public void testWithInvalidDashInHostgroupName() {
+        underTest.convert(getRequest("stack/blueprint-hostgroup-name-with-dash.json"));
+    }
+
+    @Test
+    public void testWithInvalidUnderscoreInHostgroupName() {
+        Blueprint result = underTest.convert(getRequest("stack/blueprint-hostgroup-name-with-underscore.json"));
+        assertNotNull(result);
     }
 
     @Override

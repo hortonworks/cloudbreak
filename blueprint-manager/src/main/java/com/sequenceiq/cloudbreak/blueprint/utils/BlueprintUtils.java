@@ -8,9 +8,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -25,6 +27,9 @@ public class BlueprintUtils {
     @Inject
     private JsonHelper jsonHelper;
 
+    // regex for alphanumeric characters and underscores
+    private final Pattern validHostGroupNamePattern = Pattern.compile("^\\w+$");
+
     public String readDefaultBlueprintFromFile(String[] split) throws IOException {
         return FileReaderUtils.readFileFromClasspath(String.format("defaults/blueprints/%s.bp", split.length == 2 ? split[1] : split[0]));
     }
@@ -37,6 +42,10 @@ public class BlueprintUtils {
             hostGroupCount++;
         }
         return hostGroupCount;
+    }
+
+    public boolean isValidHostGroupName(String hostGroupName) {
+        return StringUtils.isNotEmpty(hostGroupName) && validHostGroupNamePattern.matcher(hostGroupName).matches();
     }
 
     public String getBlueprintName(JsonNode root) {

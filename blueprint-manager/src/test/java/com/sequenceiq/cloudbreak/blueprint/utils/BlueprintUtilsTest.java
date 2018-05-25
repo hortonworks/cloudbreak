@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.blueprint.utils;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -104,7 +106,7 @@ public class BlueprintUtilsTest {
         String blueprintStrings = "EDW-ETL: Apache Hive, Apache Spark 2=hdp26-etl-edw-spark2=test1";
 
         String[] split = blueprintStrings.split("=");
-        Assert.assertFalse(underTest.isBlueprintNamePreConfigured(blueprintStrings, split));
+        assertFalse(underTest.isBlueprintNamePreConfigured(blueprintStrings, split));
     }
 
     @Test
@@ -112,7 +114,7 @@ public class BlueprintUtilsTest {
         String blueprintStrings = "EDW-ETL: Apache Hive, Apache Spark 2=hdp26-etl-edw-spark2";
 
         String[] split = blueprintStrings.split("=");
-        Assert.assertTrue(underTest.isBlueprintNamePreConfigured(blueprintStrings, split));
+        assertTrue(underTest.isBlueprintNamePreConfigured(blueprintStrings, split));
     }
 
     @Test
@@ -120,7 +122,7 @@ public class BlueprintUtilsTest {
         String blueprintStrings = "hdp26-etl-edw-spark2";
 
         String[] split = blueprintStrings.split("=");
-        Assert.assertTrue(underTest.isBlueprintNamePreConfigured(blueprintStrings, split));
+        assertTrue(underTest.isBlueprintNamePreConfigured(blueprintStrings, split));
     }
 
     @Test
@@ -129,5 +131,30 @@ public class BlueprintUtilsTest {
         List<BlueprintParameter> blueprintParameters = underTest.prepareInputs(inputs);
 
         Assert.assertNotNull(blueprintParameters);
+    }
+
+    @Test
+    public void testIsValidHostGroupNameWithNull() {
+        assertFalse(underTest.isValidHostGroupName(null));
+    }
+
+    @Test
+    public void testIsValidHostGroupNameWithEmpty() {
+        assertFalse(underTest.isValidHostGroupName(""));
+    }
+
+    @Test
+    public void testIsValidHostGroupNameWithUnderScores() {
+        assertTrue(underTest.isValidHostGroupName("host_group_123"));
+    }
+
+    @Test
+    public void testIsValidHostGroupNameWithDashes() {
+        assertFalse(underTest.isValidHostGroupName("host-group-123"));
+    }
+
+    @Test
+    public void testIsValidHostGroupNameWithMaster() {
+        assertTrue(underTest.isValidHostGroupName("master"));
     }
 }
