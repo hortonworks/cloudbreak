@@ -95,6 +95,7 @@ CB_JAVA_OPTS - Extra Java options for Autoscale and Cloudbreak
 CB_LOG_LEVEL - Log level of the Cloudbreak service
 CB_DEFAULT_GATEWAY_CIDR - Cidr for default security rules
 CB_MAX_SALT_NEW_SERVICE_RETRY - Salt orchestrator max retry count
+CB_MAX_SALT_NEW_SERVICE_RETRY_ONERROR - Salt orchestrator max retry count in case of error
 CB_MAX_SALT_RECIPE_EXECUTION_RETRY - Salt orchestrator max retry count for recipes
 CB_PLATFORM_DEFAULT_REGIONS - Comma separated list of default regions by platform (AWS:eu-west-1)
 CB_PRODUCT_ID - SmartSense product ID

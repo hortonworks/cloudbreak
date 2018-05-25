@@ -487,6 +487,7 @@ cloudbreak:
         - CB_ENABLEDPLATFORMS
         - "CB_ENABLED_LINUX_TYPES=redhat6,redhat7,centos6,centos7,amazonlinux"
         - CB_MAX_SALT_NEW_SERVICE_RETRY
+        - CB_MAX_SALT_NEW_SERVICE_RETRY_ONERROR
         - CB_MAX_SALT_RECIPE_EXECUTION_RETRY
         - CB_INSTANCE_UUID
         - CB_INSTANCE_NODE_ID

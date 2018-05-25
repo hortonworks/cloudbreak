@@ -240,6 +240,7 @@ cloudbreak-conf-defaults() {
     env-import CB_AWS_DEFAULT_INBOUND_SECURITY_GROUP ""
     env-import CB_AWS_VPC ""
     env-import CB_MAX_SALT_NEW_SERVICE_RETRY 90
+    env-import CB_MAX_SALT_NEW_SERVICE_RETRY_ONERROR 10
     env-import CB_MAX_SALT_RECIPE_EXECUTION_RETRY 90
     env-import CB_LOG_LEVEL "INFO"
     env-import CB_PORT 8080
