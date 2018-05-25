@@ -148,9 +148,9 @@ public class BlueprintRequestToBlueprintConverter extends AbstractConversionServ
             JsonNode hostGroupName = hostGroup.path("name");
             if (isTextPropertyMissing(hostGroupName)) {
                 throw new BadRequestException("Validation error: one of the 'host_groups' has no name.");
-            } else if (!StringUtils.isAlphanumeric(hostGroupName.asText())) {
-                throw new BadRequestException(String.format("Validation error: '%s' is not a valid host group name. Host group name must be alphanumeric.",
-                        hostGroupName.asText()));
+            } else if (!blueprintUtils.isValidHostGroupName(hostGroupName.asText())) {
+                throw new BadRequestException(String.format("Validation error: '%s' is not a valid host group name. Host group name "
+                        + "must be alphanumeric with underscores ('_').", hostGroupName.asText()));
             }
             validateComponentsInHostgroup(hostGroup, hostGroupName.asText());
         }
