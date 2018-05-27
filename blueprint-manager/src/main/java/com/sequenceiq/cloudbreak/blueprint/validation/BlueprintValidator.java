@@ -95,12 +95,7 @@ public class BlueprintValidator {
             Map<String, HostGroup> hostGroupMap = createHostGroupMap(Collections.singleton(hostGroup));
             for (JsonNode hostGroupNode : hostGroupsNode) {
                 if (hostGroup.getName().equals(hostGroupNode.get("name").asText())) {
-                    hostGroup.getConstraint().setHostCount(hostGroup.getConstraint().getHostCount() + adjustment);
-                    try {
-                        validateHostGroup(hostGroupNode, hostGroupMap, new HashMap<>());
-                    } finally {
-                        hostGroup.getConstraint().setHostCount(hostGroup.getConstraint().getHostCount() - adjustment);
-                    }
+                    validateHostGroup(hostGroupNode, hostGroupMap, new HashMap<>(), adjustment);
                     break;
                 }
             }
@@ -132,11 +127,16 @@ public class BlueprintValidator {
 
     private void validateHostGroup(JsonNode hostGroupNode, Map<String, HostGroup> hostGroupMap,
         Map<String, BlueprintServiceComponent> blueprintServiceComponentMap) {
+        validateHostGroup(hostGroupNode, hostGroupMap, blueprintServiceComponentMap, 0);
+    }
+
+    private void validateHostGroup(JsonNode hostGroupNode, Map<String, HostGroup> hostGroupMap,
+            Map<String, BlueprintServiceComponent> blueprintServiceComponentMap, int adjustment) {
         String hostGroupName = getHostGroupName(hostGroupNode);
         HostGroup hostGroup = getHostGroup(hostGroupMap, hostGroupName);
         JsonNode componentsNode = getComponentsNode(hostGroupNode);
         for (JsonNode componentNode : componentsNode) {
-            validateComponent(componentNode, hostGroup, blueprintServiceComponentMap);
+            validateComponent(componentNode, hostGroup, blueprintServiceComponentMap, adjustment);
         }
     }
 
@@ -152,17 +152,18 @@ public class BlueprintValidator {
         return hostGroupNode.get("components");
     }
 
-    private void validateComponent(JsonNode componentNode, HostGroup hostGroup, Map<String, BlueprintServiceComponent> blueprintServiceComponentMap) {
+    private void validateComponent(JsonNode componentNode, HostGroup hostGroup, Map<String, BlueprintServiceComponent> blueprintServiceComponentMap,
+        int adjusment) {
         String componentName = componentNode.get("name").asText();
         StackServiceComponentDescriptor componentDescriptor = stackServiceComponentDescs.get(componentName);
         if (componentDescriptor != null) {
-            validateComponentCardinality(componentDescriptor, hostGroup);
+            validateComponentCardinality(componentDescriptor, hostGroup, adjusment);
             updateBlueprintServiceComponentMap(componentDescriptor, hostGroup, blueprintServiceComponentMap);
         }
     }
 
-    private void validateComponentCardinality(StackServiceComponentDescriptor componentDescriptor, HostGroup hostGroup) {
-        int nodeCount = hostGroup.getConstraint().getHostCount();
+    private void validateComponentCardinality(StackServiceComponentDescriptor componentDescriptor, HostGroup hostGroup, int adjustment) {
+        int nodeCount = hostGroup.getConstraint().getHostCount() + adjustment;
         int minCardinality = componentDescriptor.getMinCardinality();
         int maxCardinality = componentDescriptor.getMaxCardinality();
         if (componentDescriptor.isMaster() && !isNodeCountCorrect(nodeCount, minCardinality, maxCardinality)) {

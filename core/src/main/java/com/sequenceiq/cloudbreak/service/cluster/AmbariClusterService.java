@@ -72,7 +72,6 @@ import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.ClusterComponent;
-import com.sequenceiq.cloudbreak.domain.Constraint;
 import com.sequenceiq.cloudbreak.domain.Gateway;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
@@ -292,14 +291,6 @@ public class AmbariClusterService implements ClusterService {
         cluster = clusterRepository.save(cluster);
         LOGGER.info("Updated cluster: [ambariIp: '{}'].", ambariClientConfig.getApiAddress());
         return cluster;
-    }
-
-    @Override
-    public void updateHostCountWithAdjustment(Long clusterId, String hostGroupName, Integer adjustment) {
-        HostGroup hostGroup = hostGroupService.getByClusterIdAndName(clusterId, hostGroupName);
-        Constraint constraint = hostGroup.getConstraint();
-        constraint.setHostCount(constraint.getHostCount() + adjustment);
-        constraintRepository.save(constraint);
     }
 
     @Override
@@ -617,14 +608,10 @@ public class AmbariClusterService implements ClusterService {
     public Cluster updateClusterMetadata(Long stackId) {
         Stack stack = stackService.getById(stackId);
         AmbariClient ambariClient = getAmbariClient(stack);
-        Map<String, Integer> hostGroupCounter = new HashMap<>();
         Set<HostMetadata> hosts = hostMetadataRepository.findHostsInCluster(stack.getCluster().getId());
         Map<String, String> hostStatuses = ambariClient.getHostStatuses();
         for (HostMetadata host : hosts) {
             if (hostStatuses.containsKey(host.getHostName())) {
-                String hgName = host.getHostGroup().getName();
-                Integer hgCounter = hostGroupCounter.getOrDefault(hgName, 0) + 1;
-                hostGroupCounter.put(hgName, hgCounter);
                 HostMetadataState newState = HostMetadataState.HEALTHY.name().equals(hostStatuses.get(host.getHostName()))
                     ? HostMetadataState.HEALTHY : HostMetadataState.UNHEALTHY;
                 boolean stateChanged = updateHostMetadataByHostState(stack, host.getHostName(), newState);
@@ -633,21 +620,7 @@ public class AmbariClusterService implements ClusterService {
                 }
             }
         }
-        hostGroupCounter(stack.getCluster().getId(), hostGroupCounter);
         return stack.getCluster();
-    }
-
-    private void hostGroupCounter(Long clusterId, Map<String, Integer> hostGroupCounter) {
-        LOGGER.info("Counted hostgroups: {}", hostGroupCounter);
-        Set<HostGroup> hostGroups = hostGroupService.getByCluster(clusterId);
-        for (HostGroup hostGroup : hostGroups) {
-            Integer hgCounter = hostGroupCounter.getOrDefault(hostGroup.getName(), 0);
-            if (!hgCounter.equals(hostGroup.getConstraint().getHostCount())) {
-                hostGroup.getConstraint().setHostCount(hgCounter);
-                constraintRepository.save(hostGroup.getConstraint());
-                LOGGER.info("Updated HostCount for hostgroup: {}, counter: {}", hostGroup.getName(), hgCounter);
-            }
-        }
     }
 
     private void updateInstanceMetadataStateToRegistered(Long stackId, HostMetadata host) {

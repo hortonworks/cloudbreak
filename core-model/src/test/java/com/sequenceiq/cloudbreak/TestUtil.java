@@ -439,7 +439,6 @@ public class TestUtil {
         InstanceGroup instanceGroup = instanceGroup(1L, name, InstanceGroupType.CORE, gcpTemplate(1L), count);
         Constraint constraint = new Constraint();
         constraint.setInstanceGroup(instanceGroup);
-        constraint.setHostCount(instanceGroup.getNodeCount());
         hostGroup.setConstraint(constraint);
         hostGroup.setCluster(cluster(blueprint(), stack(), 1L));
         hostGroup.setRecoveryMode(RecoveryMode.MANUAL);

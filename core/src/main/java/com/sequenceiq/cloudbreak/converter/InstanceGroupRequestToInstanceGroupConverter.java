@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.converter;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import javax.inject.Inject;
 
 import org.springframework.security.access.AccessDeniedException;
@@ -8,6 +11,7 @@ import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupRequest;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.json.Json;
@@ -56,6 +60,13 @@ public class InstanceGroupRequestToInstanceGroupConverter extends AbstractConver
         } catch (JsonProcessingException ignored) {
             instanceGroup.setAttributes(null);
         }
+        Set<InstanceMetaData> instanceMetaDataSet = new HashSet<>();
+        for (int i = 0; i < json.getNodeCount(); i++) {
+            InstanceMetaData instanceMetaData = new InstanceMetaData();
+            instanceMetaData.setInstanceGroup(instanceGroup);
+            instanceMetaDataSet.add(instanceMetaData);
+        }
+        instanceGroup.setInstanceMetaData(instanceMetaDataSet);
 
         return instanceGroup;
     }
