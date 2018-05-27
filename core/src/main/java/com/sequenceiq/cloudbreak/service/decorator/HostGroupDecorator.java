@@ -175,7 +175,6 @@ public class HostGroupDecorator {
                 throw new BadRequestException(String.format("The 'hostCount' of host group '%s' constraint could not be more than '%s'!", subject.getName(),
                         instanceGroupNodeCount));
             }
-            hostGroup.getConstraint().setHostCount(constraint.getHostCount());
             hostGroup.setName(subject.getName());
             return hostGroup;
         } else {

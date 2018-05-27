@@ -95,7 +95,6 @@ public class AmbariClusterUpscaleService {
         for (Entry<String, List<String>> hostsPerHostGroupEntry : hostsPerHostGroup.entrySet()) {
             allHosts.addAll(hostsPerHostGroupEntry.getValue());
         }
-        clusterService.updateHostCountWithAdjustment(stack.getCluster().getId(), hostGroupName, allHosts.size());
         instanceMetadataService.updateInstanceStatus(stack.getInstanceGroups(), InstanceStatus.UNREGISTERED, allHosts);
         ambariClusterConnector.waitForHosts(stackService.getByIdWithLists(stackId));
     }

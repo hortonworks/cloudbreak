@@ -511,7 +511,6 @@ public class BlueprintValidatorTest {
         HostGroup group = new HostGroup();
         group.setName(groupName);
         Constraint constraint = new Constraint();
-        constraint.setHostCount(instanceGroup.getNodeCount());
         constraint.setInstanceGroup(instanceGroup);
         group.setConstraint(constraint);
         return group;

@@ -12,11 +12,10 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRequest;
-import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.StackRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.StackValidationRequest;
+import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.StackInputs;
@@ -31,11 +30,11 @@ import com.sequenceiq.cloudbreak.controller.validation.template.TemplateValidato
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.StackValidation;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.StackValidation;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.ClusterCreationSetupService;
@@ -168,7 +167,7 @@ public class StackCreatorService {
         StatedImage imgFromCatalog = imageService.determineImageFromCatalog(stackRequest.getImageId(), platformString,
                 stackRequest.getImageCatalog(), blueprint, shouldUseBaseImage(stackRequest.getClusterRequest()), stackRequest.getOs());
 
-        fillInstanceMetadata(stackRequest, stack);
+        fillInstanceMetadata(stack);
         start = System.currentTimeMillis();
 
         stack = stackService.create(user, stack, platformString, imgFromCatalog);
@@ -188,20 +187,13 @@ public class StackCreatorService {
         return response;
     }
 
-    private void fillInstanceMetadata(StackRequest stackRequest, Stack stack) {
+    private void fillInstanceMetadata(Stack stack) {
         long privateIdNumber = 0;
         for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
-            Optional<InstanceGroupRequest> foundInstanceGroupRequest = stackRequest.getInstanceGroups().stream()
-                    .filter(instanceGroupRequest -> instanceGroup.getGroupName().equals(instanceGroupRequest.getGroup())).findAny();
-            if (foundInstanceGroupRequest.isPresent()) {
-                for (int i = 0; i < foundInstanceGroupRequest.get().getNodeCount(); i++) {
-                    InstanceMetaData instanceMetaData = new InstanceMetaData();
-                    instanceMetaData.setPrivateId(privateIdNumber);
-                    instanceMetaData.setInstanceStatus(InstanceStatus.REQUESTED);
-                    instanceMetaData.setInstanceGroup(instanceGroup);
-                    instanceGroup.getInstanceMetaDataSet().add(instanceMetaData);
-                    privateIdNumber++;
-                }
+            for (InstanceMetaData instanceMetaData : instanceGroup.getAllInstanceMetaData()) {
+                instanceMetaData.setPrivateId(privateIdNumber);
+                instanceMetaData.setInstanceStatus(InstanceStatus.REQUESTED);
+                privateIdNumber++;
             }
         }
     }

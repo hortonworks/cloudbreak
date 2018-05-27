@@ -24,8 +24,6 @@ public class Constraint implements ProvisionEntity {
     @ManyToOne
     private ConstraintTemplate constraintTemplate;
 
-    private Integer hostCount;
-
     public Long getId() {
         return id;
     }
@@ -51,10 +49,6 @@ public class Constraint implements ProvisionEntity {
     }
 
     public Integer getHostCount() {
-        return hostCount;
-    }
-
-    public void setHostCount(Integer hostCount) {
-        this.hostCount = hostCount;
+        return instanceGroup.getNodeCount();
     }
 }
