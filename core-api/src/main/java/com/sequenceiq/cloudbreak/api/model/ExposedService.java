@@ -10,10 +10,9 @@ import com.google.common.collect.ImmutableList;
 
 public enum ExposedService {
 
-    ALL("ALL", "ALL", "", ""),
+    ALL("Every Service", "ALL", "", ""),
 
     AMBARI("Ambari", "AMBARI_SERVER", "AMBARI", "/ambari/"),
-    AMBARIUI("Ambari", "AMBARI_SERVER", "AMBARIUI", "/ambari/"),
     WEBHDFS("WebHDFS", "NAMENODE", "WEBHDFS", "/webhdfs/"),
     NAMENODE("Name Node", "NAMENODE", "HDFSUI", "/hdfs/"),
     RESOURCEMANAGER_WEB("Resource Manager", "RESOURCEMANAGER", "YARNUI", "/yarn/"),
@@ -22,9 +21,8 @@ public enum ExposedService {
     HIVE_SERVER_INTERACTIVE("Hive Server Interactive", "HIVE_SERVER_INTERACTIVE", "HIVE_INTERACTIVE", ""),
     ATLAS("Atlas", "ATLAS_SERVER", "ATLAS", "/atlas/"),
     SPARK_HISTORY_SERVER("Spark History Server", "SPARK_JOBHISTORYSERVER", "SPARKHISTORYUI", "/sparkhistory/"),
-    ZEPPELIN_WEB_SOCKET("Zeppelin Web Socket", "ZEPPELIN_MASTER", "ZEPPELINWS", ""),
-    ZEPPELIN_UI("Zeppelin UI", "ZEPPELIN_MASTER", "ZEPPELINUI", "/zeppelin/"),
-    RANGER("Ranger Admin UI", "RANGER_ADMIN", "RANGERUI", "/ranger/"),
+    ZEPPELIN("Zeppelin", "ZEPPELIN_MASTER", "ZEPPELIN", "/zeppelin/"),
+    RANGER("Ranger", "RANGER_ADMIN", "RANGERUI", "/ranger/"),
     DP_PROFILER_AGENT("DP Profiler Agent", "DP_PROFILER_AGENT", "PROFILER-AGENT", ""),
     BEACON_SERVER("Beacon", "BEACON_SERVER", "BEACON", "");
 
