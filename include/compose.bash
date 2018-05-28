@@ -158,7 +158,10 @@ compose-generate-check-diff() {
                 debug "expected change:"
                 (diff $compose_delme_path docker-compose.yml || true) | debug-cat
             fi
-            return 1
+
+            if [[ !"$CBD_FORCE_START" ]]; then
+                return 1
+            fi
         fi
     fi
     return 0
