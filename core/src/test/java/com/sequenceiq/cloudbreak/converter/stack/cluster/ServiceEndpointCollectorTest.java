@@ -190,12 +190,12 @@ public class ServiceEndpointCollectorTest {
         when(blueprintTextProcessor.getStackName()).thenReturn("HDF");
         when(blueprintTextProcessor.getStackVersion()).thenReturn("3.2");
         exposedServiceResponses = underTest.getKnoxServices(mock(IdentityUser.class), "blueprint");
-        assertEquals(2, exposedServiceResponses.size());
+        assertEquals(1, exposedServiceResponses.size());
 
         when(blueprintTextProcessor.getStackName()).thenReturn("HDP");
         when(blueprintTextProcessor.getStackVersion()).thenReturn("2.6");
         exposedServiceResponses = underTest.getKnoxServices(mock(IdentityUser.class), "blueprint");
-        assertEquals(2, exposedServiceResponses.size());
+        assertEquals(1, exposedServiceResponses.size());
     }
 
     private GatewayTopology gatewayTopology(String name, ExposedService... services) {

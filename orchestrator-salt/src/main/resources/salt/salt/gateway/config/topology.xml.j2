@@ -108,17 +108,10 @@
         <role>AMBARI</role>
         <url>http://{{ salt['grains.get']('fqdn') }}:8080</url>
     </service>
-    {%- endif %}
-
-    {% if 'ZEPPELIN_MASTER' in salt['pillar.get']('gateway:location') -%}
-    {% if 'ZEPPELINWS' in exposed -%}
     <service>
-        <role>ZEPPELINWS</role>
-        {% for hostloc in salt['pillar.get']('gateway:location')['ZEPPELIN_MASTER'] -%}
-        <url>ws://{{ hostloc }}:9995/ws</url>
-        {%- endfor %}
+        <role>AMBARIUI</role>
+        <url>http://{{ salt['grains.get']('fqdn') }}:8080</url>
     </service>
-    {%- endif %}
     {%- endif %}
 
     {% if 'RANGER_ADMIN' in salt['pillar.get']('gateway:location') -%}
@@ -175,14 +168,6 @@
     {%- endif %}
     {%- endif %}
 
-    {% if 'AMBARIUI' in exposed -%}
-    <!-- https://{{ salt['grains.get']('gateway-address')[0] }}:8443/gateway/hdc/ambari/ -->
-    <service>
-        <role>AMBARIUI</role>
-        <url>http://{{ salt['grains.get']('fqdn') }}:8080</url>
-    </service>
-    {%- endif %}
-
     {% if 'RESOURCEMANAGER' in salt['pillar.get']('gateway:location') -%}
     {% if 'YARNUI' in exposed -%}
     <!-- https://{{ salt['grains.get']('gateway-address')[0] }}:8443/gateway/hdc/yarn/ -->
@@ -220,12 +205,18 @@
     {%- endif %}
 
     {% if 'ZEPPELIN_MASTER' in salt['pillar.get']('gateway:location') -%}
-    {% if 'ZEPPELINUI' in exposed -%}
+    {% if 'ZEPPELIN' in exposed -%}
     <!-- https://{{ salt['grains.get']('gateway-address')[0] }}:8443/gateway/hdc/zeppelin/ -->
     <service>
         <role>ZEPPELINUI</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['ZEPPELIN_MASTER'] -%}
         <url>http://{{ hostloc }}:9995</url>
+        {%- endfor %}
+    </service>
+    <service>
+        <role>ZEPPELINWS</role>
+        {% for hostloc in salt['pillar.get']('gateway:location')['ZEPPELIN_MASTER'] -%}
+        <url>ws://{{ hostloc }}:9995/ws</url>
         {%- endfor %}
     </service>
     {%- endif %}
