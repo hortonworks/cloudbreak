@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.collect.Multimap;
 import com.sequenceiq.cloudbreak.orchestrator.OrchestratorBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
+import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorInProgressException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorTerminateException;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Compound;
@@ -62,7 +63,7 @@ public class SaltJobIdTracker implements OrchestratorBootstrap {
         }
         if (JobState.IN_PROGRESS.equals(saltJobRunner.getJobState())) {
             String jobIsRunningMessage = String.format("Job: %s is running currently. Details: %s", saltJobRunner.getJid(), buildErrorMessage());
-            throw new CloudbreakOrchestratorFailedException(jobIsRunningMessage);
+            throw new CloudbreakOrchestratorInProgressException(jobIsRunningMessage);
         }
         if (JobState.FAILED == saltJobRunner.getJobState() || JobState.AMBIGUOUS == saltJobRunner.getJobState()) {
             throw new CloudbreakOrchestratorFailedException(buildErrorMessage());
