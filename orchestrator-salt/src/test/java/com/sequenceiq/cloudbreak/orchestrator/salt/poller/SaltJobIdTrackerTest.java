@@ -31,6 +31,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
+import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorInProgressException;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Target;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.JobId;
@@ -72,7 +73,7 @@ public class SaltJobIdTrackerTest {
         try {
             saltJobIdTracker.call();
             fail("should throw exception");
-        } catch (CloudbreakOrchestratorFailedException e) {
+        } catch (CloudbreakOrchestratorInProgressException e) {
             assertThat(e.getMessage(), both(containsString("jobId='" + jobId + '\'')).and(containsString("is running")));
         }
         PowerMockito.verifyStatic(SaltStates.class);
@@ -100,7 +101,7 @@ public class SaltJobIdTrackerTest {
         try {
             saltJobIdTracker.call();
             fail("should throw exception");
-        } catch (CloudbreakOrchestratorFailedException e) {
+        } catch (CloudbreakOrchestratorInProgressException e) {
             assertThat(e.getMessage(), both(containsString("jobId='" + jobId + '\'')).and(containsString("is running")));
         }
         PowerMockito.verifyStatic(SaltStates.class);
@@ -140,7 +141,7 @@ public class SaltJobIdTrackerTest {
         SaltJobIdTracker saltJobIdTracker = new SaltJobIdTracker(saltConnector, saltJobRunner);
         try {
             saltJobIdTracker.call();
-        } catch (CloudbreakOrchestratorFailedException e) {
+        } catch (CloudbreakOrchestratorInProgressException e) {
             assertThat(e.getMessage(), both(containsString("jobId='" + jobId + '\'')).and(containsString("is running")));
         }
 

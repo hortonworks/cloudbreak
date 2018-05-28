@@ -3,13 +3,13 @@ package com.sequenceiq.cloudbreak.orchestrator;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
-import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorCancelledException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
+import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorInProgressException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorTerminateException;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
@@ -65,30 +65,17 @@ public class OrchestratorBootstrapRunner implements Callable<Boolean> {
             MDC.setContextMap(mdcMap);
         }
 
-        ImmutablePair<Boolean, Exception> result = doCall();
-
-        if (!Boolean.TRUE.equals(result.getLeft())) {
-            String cause = null;
-            if (result.getRight() != null) {
-                cause = result.getRight().getMessage();
-            }
-            String messageTemplate = result.getLeft() == null
-                    ? "Timeout: Orchestrator component failed to finish in %f mins, last message: %s"
-                    : "Failed: Orchestrator component went failed in %f mins, message: %s";
-            String errorMessage = String.format(messageTemplate, (double) maxRetryCount * SLEEP_TIME / MS_IN_SEC / SEC_IN_MIN, cause);
-            LOGGER.error(errorMessage);
-            throw new CloudbreakOrchestratorFailedException(errorMessage);
-        }
-        return Boolean.TRUE;
+        return doCall();
     }
 
-    private ImmutablePair<Boolean, Exception> doCall() throws CloudbreakOrchestratorCancelledException, InterruptedException {
+    private Boolean doCall() throws CloudbreakOrchestratorCancelledException, CloudbreakOrchestratorFailedException {
         Boolean success = null;
         int retryCount = 1;
+        int errorCount = 1;
         Exception actualException = null;
         String type = orchestratorBootstrap.getClass().getSimpleName().replace("Bootstrap", "");
         long initialStartTime = System.currentTimeMillis();
-        while (success == null && retryCount <= maxRetryCount) {
+        while (success == null && belowAttemptThreshold(retryCount, errorCount)) {
             if (isExitNeeded()) {
                 LOGGER.error(exitCriteria.exitMessage());
                 throw new CloudbreakOrchestratorCancelledException(exitCriteria.exitMessage());
@@ -97,28 +84,35 @@ public class OrchestratorBootstrapRunner implements Callable<Boolean> {
             try {
                 LOGGER.info("Calling orchestrator bootstrap: {}, additional info: {}", type, orchestratorBootstrap);
                 orchestratorBootstrap.call();
-                long elapsedTime = System.currentTimeMillis() - startTime;
-                long totalElapsedTime = System.currentTimeMillis() - initialStartTime;
-                success = true;
-                LOGGER.info("Orchestrator component {} successfully started! Elapsed time: {} ms, Total elapsed time: {} ms, "
-                        + "additional info: {}", type, elapsedTime, totalElapsedTime, orchestratorBootstrap);
+                success = Boolean.TRUE;
+                String elapsedTimeLog = createElapseTimeLog(initialStartTime, startTime);
+                LOGGER.info("Orchestrator component {} successfully started! {}, "
+                        + "additional info: {}", type, elapsedTimeLog, orchestratorBootstrap);
             } catch (CloudbreakOrchestratorTerminateException te) {
                 actualException = te;
-                long elapsedTime = System.currentTimeMillis() - startTime;
-                long totalElapsedTime = System.currentTimeMillis() - initialStartTime;
-                success = false;
-                LOGGER.info("Failed to execute orchestrator component {}! Elapsed time: {} ms, Total elapsed time: {} ms, "
-                        + "additional info: {}", type, elapsedTime, totalElapsedTime, orchestratorBootstrap);
-            } catch (Exception ex) {
+                success = Boolean.FALSE;
+                String elapsedTimeLog = createElapseTimeLog(initialStartTime, startTime);
+                LOGGER.info("Failed to execute orchestrator component {}! {}, "
+                        + "additional info: {}", type, elapsedTimeLog, orchestratorBootstrap);
+            } catch (CloudbreakOrchestratorInProgressException ex) {
                 actualException = ex;
-                long elapsedTime = System.currentTimeMillis() - startTime;
-                long totalElapsedTime = System.currentTimeMillis() - initialStartTime;
-                LOGGER.warn("Orchestrator component {} failed to start, retrying [{}/{}] Elapsed time: {} ms, "
-                                + "Total elapsed time: {} ms, Reason: {}, additional info: {}",
-                        type, retryCount, maxRetryCount, elapsedTime, totalElapsedTime, actualException, orchestratorBootstrap);
+                String elapsedTimeLog = createElapseTimeLog(initialStartTime, startTime);
+                LOGGER.warn("Orchestrator component {} start in progress, retrying [{}/{}] {}, Reason: {}, additional info: {}",
+                        type, retryCount, maxRetryCount, elapsedTimeLog, actualException, orchestratorBootstrap);
                 retryCount++;
                 if (retryCount <= maxRetryCount) {
-                    retryCount = reducedRetryCountOnError(retryCount);
+                    trySleeping();
+                } else {
+                    success = Boolean.FALSE;
+                }
+            } catch (Exception ex) {
+                actualException = ex;
+                String elapsedTimeLog = createElapseTimeLog(initialStartTime, startTime);
+                LOGGER.warn("Orchestrator component {} failed to start, retrying [{}/{}], error count [{}/{}]. {}, Reason: {}, additional info: {}",
+                        type, retryCount, maxRetryCount, errorCount, maxRetryOnError, elapsedTimeLog, actualException, orchestratorBootstrap);
+                retryCount++;
+                errorCount++;
+                if (belowAttemptThreshold(retryCount, errorCount)) {
                     trySleeping();
                 } else {
                     success = Boolean.FALSE;
@@ -126,11 +120,35 @@ public class OrchestratorBootstrapRunner implements Callable<Boolean> {
             }
         }
 
-        return new ImmutablePair<>(success, actualException);
+        return checkResult(success, retryCount, actualException);
     }
 
-    private int reducedRetryCountOnError(int retryCount) {
-        return maxRetryCount - retryCount > maxRetryOnError ? maxRetryCount - maxRetryOnError : retryCount;
+    private String createElapseTimeLog(long initialStartTime, long startTime) {
+        long elapsedTime = System.currentTimeMillis() - startTime;
+        long totalElapsedTime = System.currentTimeMillis() - initialStartTime;
+        String elapsedTimeTemplate = "Elapsed time: %d ms, Total elapsed time: %d ms";
+        return String.format(elapsedTimeTemplate, elapsedTime, totalElapsedTime);
+    }
+
+    private Boolean checkResult(Boolean success, int retryCount, Exception actualException) throws CloudbreakOrchestratorFailedException {
+        if (Boolean.TRUE.equals(success)) {
+            return success;
+        }
+
+        String cause = null;
+        if (actualException != null) {
+            cause = actualException.getMessage();
+        }
+        String messageTemplate = success == null
+                ? "Timeout: Orchestrator component failed to finish in %f mins, last message: %s"
+                : "Failed: Orchestrator component went failed in %f mins, message: %s";
+        String errorMessage = String.format(messageTemplate, (double) retryCount * SLEEP_TIME / MS_IN_SEC / SEC_IN_MIN, cause);
+        LOGGER.error(errorMessage);
+        throw new CloudbreakOrchestratorFailedException(errorMessage);
+    }
+
+    private boolean belowAttemptThreshold(int retryCount, int errorCount) {
+        return retryCount <= maxRetryCount && errorCount <= maxRetryOnError;
     }
 
     private void trySleeping() {
