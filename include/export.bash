@@ -109,7 +109,11 @@ archive-directory() {
 anonymize-exported-files() {
     cloudbreak-config
     
-    docker run -e ACCOUNT_ID=$AWS_ACCOUNT_ID \
+    info "Anonymization started."
+
+    ! docker run -e ACCOUNT_ID=$AWS_ACCOUNT_ID \
+        -e CB_SMARTSENSE_CONFIGURE='true' \
+        -e CB_SMARTSENSE_COLLECT_DIAG_BUNDLE='true' \
         -e CB_VERSION=$(echo $(bin-version)) \
         -e CB_SMARTSENSE_ID='A-99903636-C-36363636' \
         -e CB_SMARTSENSE_CLUSTER_NAME_PREFIX \
@@ -129,10 +133,19 @@ anonymize-exported-files() {
         -v $(pwd)/$2:/var/lib/cloudbreak-deployment/hst_bundle \
         --dns=$PRIVATE_IP \
         -p 9001:9000 \
-        --entrypoint "/var/lib/smartsense/cb-export.sh" \
-        $DOCKER_IMAGE_CBD_SMARTSENSE:$DOCKER_TAG_CBD_SMARTSENSE
+        $DOCKER_IMAGE_CBD_SMARTSENSE:$DOCKER_TAG_CBD_SMARTSENSE &> /dev/null
     
     rm -rf cfg
     rm -rf hst_bundle
-    info "Anonymization finished."
+
+    local collectioncount=$(ls $2 | wc -l)
+    if [[ $(( collectioncount + 0 )) = 0 ]]; then
+        error "Anonymization failed."
+        rm -rf $1
+        rm -rf $2
+        return -1
+    else
+        info "Anonymization finished."
+    fi
+
 }
