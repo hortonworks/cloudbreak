@@ -85,7 +85,6 @@ dependencies {
     compile group: 'com.google.code.findbugs',      name: 'annotations',                    version: '3.0.1'
     compile group: 'org.mapstruct',                 name: 'mapstruct-jdk8',                 version: mapstructVersion
     compileOnly group: 'org.mapstruct',             name: 'mapstruct-processor',            version: mapstructVersion
-    compile group: 'com.zaxxer',                    name: 'HikariCP',                       version: '2.6.1'
 
     annotationProcessor     group: 'org.mapstruct',                 name: 'mapstruct-processor',            version: mapstructVersion
 
