@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.cloud.credential.CredentialNotifier;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContextBuilder;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.InvalidGcpContextException;
+import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredentialStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CredentialStatus;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
@@ -39,6 +40,7 @@ public class GcpCredentialConnector implements CredentialConnector {
     @Override
     public CloudCredentialStatus verify(@Nonnull AuthenticatedContext authenticatedContext) {
         LOGGER.info("Verify credential: {}", authenticatedContext.getCloudCredential());
+        GcpStackUtil.prepareCredential(authenticatedContext.getCloudCredential());
         GcpContext gcpContext = gcpContextBuilder.contextInit(authenticatedContext.getCloudContext(), authenticatedContext, null, null, false);
         try {
             checkGcpContextValidity(gcpContext);
