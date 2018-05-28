@@ -197,6 +197,7 @@ public class GcpCloudProvider extends CloudProviderHelper {
 
     public Map<String, Object> gcpCredentialDetails() {
         Map<String, Object> map = new HashMap<>();
+        map.put("selector", "credential-p12");
         map.put("projectId", getTestParameter().get("integrationtest.gcpcredential.projectId"));
         map.put("serviceAccountId", getTestParameter().get("integrationtest.gcpcredential.serviceAccountId"));
         map.put("serviceAccountPrivateKey", getTestParameter().get("integrationtest.gcpcredential.p12File")
@@ -207,6 +208,7 @@ public class GcpCloudProvider extends CloudProviderHelper {
 
     public Map<String, Object> gcpCredentialDetailsEmptyP12File() {
         Map<String, Object> map = new HashMap<>();
+        map.put("selector", "credential-p12");
         map.put("projectId", getTestParameter().get("integrationtest.gcpcredential.projectId"));
         map.put("serviceAccountId", getTestParameter().get("integrationtest.gcpcredential.serviceAccountId"));
         map.put("serviceAccountPrivateKey", "");
@@ -216,6 +218,7 @@ public class GcpCloudProvider extends CloudProviderHelper {
 
     public Map<String, Object> gcpCredentialDetailsEmptyProjectId() {
         Map<String, Object> map = new HashMap<>();
+        map.put("selector", "credential-p12");
         map.put("projectId", "");
         map.put("serviceAccountId", getTestParameter().get("integrationtest.gcpcredential.serviceAccountId"));
         map.put("serviceAccountPrivateKey", getTestParameter().get("integrationtest.gcpcredential.p12File")
@@ -226,6 +229,7 @@ public class GcpCloudProvider extends CloudProviderHelper {
 
     public Map<String, Object> gcpCredentialDetailsEmptyServiceAccount() {
         Map<String, Object> map = new HashMap<>();
+        map.put("selector", "credential-p12");
         map.put("projectId", getTestParameter().get("integrationtest.gcpcredential.projectId"));
         map.put("serviceAccountId", "");
         map.put("serviceAccountPrivateKey", getTestParameter().get("integrationtest.gcpcredential.p12File")
