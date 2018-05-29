@@ -13,6 +13,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.stack.sync.StackSyncEvent.STA
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -107,6 +108,13 @@ public class ReactorFlowManager {
     public void triggerStackRemoveInstance(Long stackId, String hostGroup, Long privateId) {
         String selector = FlowChainTriggers.FULL_DOWNSCALE_TRIGGER_EVENT;
         ClusterAndStackDownscaleTriggerEvent event = new ClusterAndStackDownscaleTriggerEvent(selector, stackId, hostGroup, Collections.singleton(privateId),
+                ScalingType.DOWNSCALE_TOGETHER, new Promise<>());
+        notify(selector, event);
+    }
+
+    public void triggerStackRemoveInstances(Long stackId, String hostGroup, Set<Long> privateIds) {
+        String selector = FlowChainTriggers.FULL_DOWNSCALE_TRIGGER_EVENT;
+        ClusterAndStackDownscaleTriggerEvent event = new ClusterAndStackDownscaleTriggerEvent(selector, stackId, hostGroup, privateIds,
                 ScalingType.DOWNSCALE_TOGETHER, new Promise<>());
         notify(selector, event);
     }

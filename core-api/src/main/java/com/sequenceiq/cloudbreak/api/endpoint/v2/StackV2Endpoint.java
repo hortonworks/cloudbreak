@@ -33,6 +33,7 @@ import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
 import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.doc.Notes;
+import com.sequenceiq.cloudbreak.doc.OperationDescriptions;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription;
 
 import io.swagger.annotations.Api;
@@ -203,6 +204,14 @@ public interface StackV2Endpoint extends StackEndpoint {
     @ApiOperation(value = StackOpDescription.DELETE_INSTANCE_BY_ID, produces = ContentType.JSON, notes = Notes.STACK_NOTES,
             nickname = "deleteInstanceStackV2")
     Response deleteInstance(@PathParam("stackId") Long stackId, @PathParam("instanceId") String instanceId);
+
+    @DELETE
+    @Path("{stackId}/deleteInstances")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Override
+    @ApiOperation(value = OperationDescriptions.StackOpDescription.DELETE_INSTANCE_BY_ID, produces = ContentType.JSON, notes = Notes.STACK_NOTES,
+            nickname = "deleteInstancesStackV2")
+    Response deleteInstances(@PathParam("stackId") Long stackId, @QueryParam("instanceIds") Set<String> instanceIds);
 
     @GET
     @Path("{id}/certificate")
