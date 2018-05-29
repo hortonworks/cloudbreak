@@ -25,13 +25,13 @@ public class StackRequestValidator implements Validator<StackRequest> {
     }
 
     @Override
-    public ValidationResult validate(StackRequest stackRequest) {
+    public ValidationResult validate(StackRequest subject) {
         ValidationResultBuilder validationBuilder = ValidationResult.builder();
-        if (CollectionUtils.isEmpty(stackRequest.getInstanceGroups())) {
+        if (CollectionUtils.isEmpty(subject.getInstanceGroups())) {
             validationBuilder.error("Stack request must contain instance groups.");
         }
-        validateHostgroupInstanceGroupMapping(stackRequest, validationBuilder);
-        validateTemplates(stackRequest, validationBuilder);
+        validateHostgroupInstanceGroupMapping(subject, validationBuilder);
+        validateTemplates(subject, validationBuilder);
         return validationBuilder.build();
     }
 

@@ -2,9 +2,9 @@
 <topology>
     <gateway>
 
-        {% if 'NONE' == salt['pillar.get']('gateway:ssotype') -%}
-
         <!-- {{ exposed }} -->
+
+        {% if 'NONE' == salt['pillar.get']('gateway:ssotype') -%}
 
         <provider>
             <role>authentication</role>

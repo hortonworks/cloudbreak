@@ -75,9 +75,8 @@ public class ServiceEndpointCollector {
                 if (gateway != null) {
                     Optional<GatewayTopology> gatewayTopologyWithAmbari = getGatewayTopologyWithAmbari(gateway);
                     Optional<String> ambariUrl = gatewayTopologyWithAmbari.map(gt -> getAmbariUrlFromGatewayTopology(ambariIp, gateway, gt));
-                    if (ambariUrl.isPresent()) {
-                        return ambariUrl.get();
-                    }
+                    // when knox gateway is enabled, but ambari is not exposed, there is no available ambari URL
+                    return ambariUrl.orElse("");
                 }
                 return String.format("https://%s/ambari/", ambariIp);
             }

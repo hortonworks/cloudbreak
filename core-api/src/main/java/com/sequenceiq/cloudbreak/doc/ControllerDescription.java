@@ -9,6 +9,7 @@ public class ControllerDescription {
     public static final String TOPOLOGY_DESCRIPTION = "Operations on topologies";
     public static final String STACK_DESCRIPTION = "Operations on stacks";
     public static final String CLUSTER_DESCRIPTION = "Operations on clusters";
+    public static final String GATEWAY_DESCRIPTION = "Operations on gateways";
     public static final String CLUSTER_TEMPLATE_DESCRIPTION = "Operations on clusters templates";
     public static final String RECIPE_DESCRIPTION = "Operations on recipes";
     public static final String USAGES_DESCRIPTION = "Operations on usages";

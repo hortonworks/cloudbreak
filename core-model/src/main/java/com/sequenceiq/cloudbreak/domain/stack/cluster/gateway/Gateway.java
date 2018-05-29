@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.domain.stack.cluster.gateway;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -69,6 +70,22 @@ public class Gateway implements ProvisionEntity {
     private String signCert;
 
     private String tokenCert;
+
+    public Gateway copy() {
+        Gateway gateway = new Gateway();
+        gateway.setTopologies(topologies.stream().map(GatewayTopology::copy).collect(Collectors.toSet()));
+        gateway.setTokenCert(tokenCert);
+        gateway.setSignCert(signCert);
+        gateway.setSignKey(signKey);
+        gateway.setPath(path);
+        gateway.setGatewayType(gatewayType);
+        gateway.setSsoType(ssoType);
+        gateway.setCluster(cluster);
+        gateway.setId(id);
+        gateway.setSignPub(signPub);
+        gateway.setSsoProvider(ssoProvider);
+        return gateway;
+    }
 
     public Long getId() {
         return id;

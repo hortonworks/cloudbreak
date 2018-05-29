@@ -1,14 +1,11 @@
 package com.sequenceiq.cloudbreak.converter.stack.cluster.gateway;
 
-import java.util.List;
-
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.sequenceiq.cloudbreak.api.model.ExposedService;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.GatewayTopologyJson;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
@@ -33,19 +30,14 @@ public class GatewayTopologyJsonToGatewayTopologyConverter extends AbstractConve
         }
         GatewayTopology gatewayTopology = new GatewayTopology();
         gatewayTopology.setTopologyName(source.getTopologyName());
-        convertExposedServices(gatewayTopology, source.getExposedServices());
+        convertExposedServices(gatewayTopology, source);
         return gatewayTopology;
     }
 
-    private void convertExposedServices(GatewayTopology gatewayTopology, List<String> exposedServiceList) {
+    private void convertExposedServices(GatewayTopology gatewayTopology, GatewayTopologyJson source) {
         try {
-            if (!CollectionUtils.isEmpty(exposedServiceList)) {
-                ExposedServices exposedServices = new ExposedServices();
-                if (exposedServiceList.contains(ExposedService.ALL.name())) {
-                    exposedServices.setServices(ExposedService.getAllKnoxExposed());
-                } else {
-                    exposedServices.setServices(exposedServiceList);
-                }
+            if (!CollectionUtils.isEmpty(source.getExposedServices())) {
+                ExposedServices exposedServices = getConversionService().convert(source, ExposedServices.class);
                 gatewayTopology.setExposedServices(new Json(exposedServices));
             }
         } catch (JsonProcessingException e) {

@@ -33,6 +33,15 @@ public class GatewayTopology implements ProvisionEntity {
     @Column(columnDefinition = "TEXT")
     private Json exposedServices;
 
+    public GatewayTopology copy() {
+        GatewayTopology gatewayTopology = new GatewayTopology();
+        gatewayTopology.setId(id);
+        gatewayTopology.setTopologyName(topologyName);
+        gatewayTopology.setExposedServices(exposedServices);
+        gatewayTopology.setGateway(gateway);
+        return gatewayTopology;
+    }
+
     public Long getId() {
         return id;
     }

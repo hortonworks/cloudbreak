@@ -19,12 +19,12 @@ public class GatewayTopologyJsonValidator implements Validator<GatewayTopologyJs
     }
 
     @Override
-    public ValidationResult validate(GatewayTopologyJson target) {
+    public ValidationResult validate(GatewayTopologyJson subject) {
         ValidationResult topologyNameResult = ValidationResult.builder()
-                .ifError(() -> StringUtils.isBlank(target.getTopologyName()), "topologyName must be set in gateway topology.")
+                .ifError(() -> StringUtils.isBlank(subject.getTopologyName()), "topologyName must be set in gateway topology.")
                 .build();
 
-        return Optional.ofNullable(target.getExposedServices())
+        return Optional.ofNullable(subject.getExposedServices())
                 .map(exposedServiceListValidator::validate)
                 .map(vr -> vr.merge(topologyNameResult))
                 .orElse(topologyNameResult);

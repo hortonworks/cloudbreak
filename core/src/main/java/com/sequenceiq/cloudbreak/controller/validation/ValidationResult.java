@@ -44,6 +44,10 @@ public class ValidationResult {
         return formattedErrors;
     }
 
+    public boolean hasError() {
+        return state == ERROR;
+    }
+
     public enum State {
         VALID, ERROR
     }

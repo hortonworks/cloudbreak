@@ -10343,7 +10343,6 @@ definitions:
         description: "Knox SSO type"
         enum:
         - "SSO_PROVIDER"
-        - "SSO_CONSUMER"
         - "NONE"
     example:
       path: "path"

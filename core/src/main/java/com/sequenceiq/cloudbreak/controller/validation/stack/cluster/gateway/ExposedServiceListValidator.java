@@ -13,8 +13,8 @@ import com.sequenceiq.cloudbreak.controller.validation.Validator;
 public class ExposedServiceListValidator implements Validator<List<String>> {
 
     @Override
-    public ValidationResult validate(List<String> exposedServices) {
-        List<String> invalidKnoxServices = exposedServices.stream()
+    public ValidationResult validate(List<String> subject) {
+        List<String> invalidKnoxServices = subject.stream()
                 .filter(es -> !ExposedService.isKnoxExposed(es))
                 .filter(es -> !ExposedService.ALL.getServiceName().equalsIgnoreCase(es))
                 .collect(Collectors.toList());
