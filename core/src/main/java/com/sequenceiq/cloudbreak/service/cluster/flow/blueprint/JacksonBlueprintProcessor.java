@@ -162,6 +162,11 @@ public class JacksonBlueprintProcessor implements BlueprintProcessor {
         }
     }
 
+    public boolean componentExistsInHostGroup(String component, String blueprintText, String hostGroup) {
+        Set<String> componentsInHostGroup = getComponentsInHostGroup(blueprintText, hostGroup);
+        return componentsInHostGroup.stream().anyMatch(component::equals);
+    }
+
     @Override
     public boolean componentExistsInBlueprint(String component, String blueprintText) {
         boolean componentExists = false;

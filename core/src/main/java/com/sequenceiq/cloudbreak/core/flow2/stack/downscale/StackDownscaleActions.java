@@ -107,7 +107,7 @@ public class StackDownscaleActions {
         return new AbstractStackFailureAction<StackDownscaleState, StackDownscaleEvent>() {
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) throws Exception {
-                stackDownscaleService.handleStackDownscaleError(payload.getException());
+                stackDownscaleService.handleStackDownscaleError(context, payload.getException());
                 sendEvent(context);
             }
 
