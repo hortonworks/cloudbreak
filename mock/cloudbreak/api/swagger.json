@@ -8721,7 +8721,7 @@
         "ssoType" : {
           "type" : "string",
           "description" : "Knox SSO type",
-          "enum" : [ "SSO_PROVIDER", "SSO_CONSUMER", "NONE" ]
+          "enum" : [ "SSO_PROVIDER", "NONE" ]
         }
       }
     },

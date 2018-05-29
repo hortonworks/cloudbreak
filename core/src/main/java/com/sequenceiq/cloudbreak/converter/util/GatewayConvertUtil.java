@@ -28,6 +28,18 @@ public class GatewayConvertUtil {
     @Inject
     private ConversionService conversionService;
 
+    public void setTopologies(GatewayJson source, Gateway gateway) {
+        if (isLegacyGatewayRequest(source)) {
+            setLegacyTopology(gateway, source.getTopologyName(), source.getExposedServices());
+        } else {
+            setTopologyList(gateway, source.getTopologies());
+        }
+    }
+
+    public boolean isLegacyGatewayRequest(GatewayJson source) {
+        return StringUtils.isNotBlank(source.getTopologyName()) || !CollectionUtils.isEmpty(source.getExposedServices());
+    }
+
     public void setTopologyList(Gateway gateway, Collection<GatewayTopologyJson> topologies) {
         if (!CollectionUtils.isEmpty(topologies)) {
             Set<GatewayTopology> gatewayTopologies = topologies.stream()
@@ -82,23 +94,10 @@ public class GatewayConvertUtil {
         }
     }
 
-    public void setTopologies(GatewayJson source, Gateway gateway) {
-        if (isLegacyGatewayRequest(source)) {
-            setLegacyTopology(gateway, source.getTopologyName(), source.getExposedServices());
-        } else {
-            setTopologyList(gateway, source.getTopologies());
-        }
-    }
-
-    public boolean isLegacyGatewayRequest(GatewayJson source) {
-        return StringUtils.isNotBlank(source.getTopologyName()) || !CollectionUtils.isEmpty(source.getExposedServices());
-    }
-
     private GatewayTopology doLegacyConversion(String topologyName, List<String> exposedServices) {
         GatewayTopologyJson legacyTopology = new GatewayTopologyJson();
         legacyTopology.setTopologyName(topologyName);
         legacyTopology.setExposedServices(exposedServices);
         return conversionService.convert(legacyTopology, GatewayTopology.class);
     }
-
 }

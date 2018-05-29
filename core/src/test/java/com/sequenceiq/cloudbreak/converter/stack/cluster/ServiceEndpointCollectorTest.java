@@ -28,6 +28,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.model.ClusterExposedServiceResponse;
 import com.sequenceiq.cloudbreak.api.model.ExposedService;
@@ -40,12 +41,14 @@ import com.sequenceiq.cloudbreak.blueprint.validation.BlueprintValidator;
 import com.sequenceiq.cloudbreak.blueprint.validation.StackServiceComponentDescriptors;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
-import com.sequenceiq.cloudbreak.controller.validation.stack.cluster.gateway.GatewayTopologyJsonValidator;
-import com.sequenceiq.cloudbreak.converter.stack.cluster.gateway.GatewayTopologyJsonToGatewayTopologyConverter;
+import com.sequenceiq.cloudbreak.controller.validation.stack.cluster.gateway.ExposedServiceListValidator;
+import com.sequenceiq.cloudbreak.converter.stack.cluster.gateway.GatewayTopologyJsonToExposedServicesConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
+import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.ExposedServices;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.GatewayTopology;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
@@ -74,15 +77,14 @@ public class ServiceEndpointCollectorTest {
     private final ServiceEndpointCollector underTest = new ServiceEndpointCollector();
 
     @Mock
-    private GatewayTopologyJsonValidator gatewayTopologyJsonValidator;
+    private ExposedServiceListValidator exposedServiceListValidator;
 
     @InjectMocks
-    private final GatewayTopologyJsonToGatewayTopologyConverter topologyConverter = new GatewayTopologyJsonToGatewayTopologyConverter();
+    private final GatewayTopologyJsonToExposedServicesConverter exposedServicesConverter = new GatewayTopologyJsonToExposedServicesConverter();
 
     @Before
     public void setup() {
-        when(gatewayTopologyJsonValidator.validate(any(GatewayTopologyJson.class)))
-                .thenReturn(ValidationResult.builder().build());
+        when(exposedServiceListValidator.validate(any())).thenReturn(ValidationResult.builder().build());
     }
 
     @Test
@@ -111,7 +113,7 @@ public class ServiceEndpointCollectorTest {
         cluster.getGateway().setTopologies(Sets.newHashSet(topology1, topology2));
 
         String result = underTest.getAmbariServerUrl(cluster, AMBARI_IP);
-        assertEquals("https://127.0.0.1/ambari/", result);
+        assertEquals("", result);
     }
 
     @Test
@@ -199,10 +201,18 @@ public class ServiceEndpointCollectorTest {
     }
 
     private GatewayTopology gatewayTopology(String name, ExposedService... services) {
-        GatewayTopologyJson topologyJson1 = new GatewayTopologyJson();
-        topologyJson1.setTopologyName(name);
-        topologyJson1.setExposedServices(Arrays.stream(services).map(ExposedService::getKnoxService).collect(Collectors.toList()));
-        return topologyConverter.convert(topologyJson1);
+        try {
+            GatewayTopologyJson gatewayTopologyJson = new GatewayTopologyJson();
+            gatewayTopologyJson.setTopologyName(name);
+            gatewayTopologyJson.setExposedServices(Arrays.stream(services).map(ExposedService::getKnoxService).collect(Collectors.toList()));
+            ExposedServices exposedServices = exposedServicesConverter.convert(gatewayTopologyJson);
+            GatewayTopology gatewayTopology = new GatewayTopology();
+            gatewayTopology.setTopologyName(name);
+            gatewayTopology.setExposedServices(new Json(exposedServices));
+            return gatewayTopology;
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private Cluster clusterkWithOrchestrator(String orchestratorType) {

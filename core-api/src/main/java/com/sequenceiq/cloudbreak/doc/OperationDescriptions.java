@@ -108,6 +108,11 @@ public class OperationDescriptions {
         public static final String REPAIR_CLUSTER = "repair the cluster";
     }
 
+    public static class GatewayOpDescription {
+
+        public static final String UPDATE_GATEWAY_TOPOLOGIES = "update topologies of a gateway";
+    }
+
     public static class ClusterTemplateOpDescription {
         public static final String POST_PRIVATE = "create cluster template as private resource";
         public static final String POST_PUBLIC = "create cluster template as public resource";

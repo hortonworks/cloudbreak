@@ -3,6 +3,9 @@ package com.sequenceiq.cloudbreak.converter.stack.cluster.gateway;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -13,8 +16,10 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.core.convert.ConversionService;
 
 import com.sequenceiq.cloudbreak.api.model.ExposedService;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.GatewayTopologyJson;
@@ -32,11 +37,21 @@ public class GatewayTopologyJsonToGatewayTopologyConverterTest {
     @Rule
     public final ExpectedException thrown = ExpectedException.none();
 
+    @Mock
+    private ConversionService conversionService;
+
     @Spy
-    private GatewayTopologyJsonValidator validator = new GatewayTopologyJsonValidator(new ExposedServiceListValidator());
+    private final GatewayTopologyJsonValidator validator = new GatewayTopologyJsonValidator(new ExposedServiceListValidator());
 
     @InjectMocks
     private final GatewayTopologyJsonToGatewayTopologyConverter underTest = new GatewayTopologyJsonToGatewayTopologyConverter();
+
+    @Spy
+    private final ExposedServiceListValidator exposedServiceListValidator = new ExposedServiceListValidator();
+
+    @InjectMocks
+    private final GatewayTopologyJsonToExposedServicesConverter gatewayTopologyJsonToExposedServicesConverter
+            = new GatewayTopologyJsonToExposedServicesConverter();
 
     @Test
     public void testConvertWithNoTopologyName() {
@@ -63,6 +78,8 @@ public class GatewayTopologyJsonToGatewayTopologyConverterTest {
         GatewayTopologyJson gatewayTopologyJson = new GatewayTopologyJson();
         gatewayTopologyJson.setTopologyName(TOPOLOGY_NAME);
         gatewayTopologyJson.setExposedServices(Collections.singletonList(ExposedService.ALL.getServiceName()));
+        ExposedServices expectedExposedServices = gatewayTopologyJsonToExposedServicesConverter.convert(gatewayTopologyJson);
+        when(conversionService.convert(any(GatewayTopologyJson.class), eq(ExposedServices.class))).thenReturn(expectedExposedServices);
 
         GatewayTopology result = underTest.convert(gatewayTopologyJson);
 

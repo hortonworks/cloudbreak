@@ -31,6 +31,8 @@ public class Notes {
             + "They are built based on a Blueprint (running the components and services specified) and on "
             + "a configured infrastructure Stack. Once a cluster is created and launched, it can be used the usual"
             + " way as any Hadoop cluster. We suggest to start with the Cluster's Ambari UI for an overview of your cluster.";
+    public static final String GATEWAY_NOTES = "Gateway is an Apache Knox Gateway, which is an Application Gateway for interacting with REST APIs and"
+            + "UIs of Apache Hadoop deployments. Provides Authentication and other services.";
     public static final String CLUSTER_TEMPLATE_NOTES = "Cluster templates are stored cluster configurations, which configurations are reusable any time";
     public static final String RECIPE_NOTES = "Recipes are basically script extensions to a cluster that run on a set of nodes"
             + " before or after the Ambari cluster installation.";

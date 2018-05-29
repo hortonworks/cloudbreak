@@ -13,12 +13,12 @@ import com.sequenceiq.cloudbreak.controller.validation.Validator;
 public class TemplateRequestValidator implements Validator<TemplateRequest> {
 
     @Override
-    public ValidationResult validate(TemplateRequest request) {
+    public ValidationResult validate(TemplateRequest subject) {
         ValidationResultBuilder resultBuilder = ValidationResult.builder();
-        if (Objects.isNull(request)) {
+        if (Objects.isNull(subject)) {
             resultBuilder.error("Template request cannot be null in the instance group request.");
         } else {
-            resultBuilder.ifError(() -> request.getRootVolumeSize() != null && request.getRootVolumeSize() < 1,
+            resultBuilder.ifError(() -> subject.getRootVolumeSize() != null && subject.getRootVolumeSize() < 1,
                     "Root volume size cannot be smaller than 1 gigabyte.");
         }
         return resultBuilder.build();

@@ -24,9 +24,12 @@ import com.sequenceiq.cloudbreak.api.model.ConfigsRequest;
 import com.sequenceiq.cloudbreak.api.model.ConfigsResponse;
 import com.sequenceiq.cloudbreak.api.model.FailureReport;
 import com.sequenceiq.cloudbreak.api.model.UpdateClusterJson;
+import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.GatewayJson;
+import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.UpdateGatewayTopologiesJson;
 import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.doc.Notes;
+import com.sequenceiq.cloudbreak.doc.OperationDescriptions;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions.ClusterOpDescription;
 
 import io.swagger.annotations.Api;
@@ -115,4 +118,11 @@ public interface ClusterV1Endpoint {
     @ApiOperation(value = ClusterOpDescription.REPAIR_CLUSTER, produces = ContentType.JSON, notes = Notes.CLUSTER_REPAIR_NOTES,
             nickname = "repairCluster")
     Response repairCluster(@PathParam("id") Long stackId, ClusterRepairRequest clusterRepairRequest);
+
+    @PUT
+    @Path("{id}/cluster/gateway")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = OperationDescriptions.GatewayOpDescription.UPDATE_GATEWAY_TOPOLOGIES, produces = ContentType.JSON, notes = Notes.GATEWAY_NOTES,
+            nickname = "updateGatewayTopologies")
+    GatewayJson updateGatewayTopologies(@PathParam("id") Long stackId, @NotNull UpdateGatewayTopologiesJson request);
 }

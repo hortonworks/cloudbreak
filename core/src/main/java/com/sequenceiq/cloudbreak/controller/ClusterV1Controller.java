@@ -23,6 +23,8 @@ import com.sequenceiq.cloudbreak.api.model.ConfigsRequest;
 import com.sequenceiq.cloudbreak.api.model.ConfigsResponse;
 import com.sequenceiq.cloudbreak.api.model.FailureReport;
 import com.sequenceiq.cloudbreak.api.model.UpdateClusterJson;
+import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.GatewayJson;
+import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.UpdateGatewayTopologiesJson;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.StackInputs;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
@@ -35,6 +37,7 @@ import com.sequenceiq.cloudbreak.service.ClusterCreationSetupService;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
+import com.sequenceiq.cloudbreak.service.cluster.gateway.GatewayService;
 import com.sequenceiq.cloudbreak.service.sharedservice.SharedServiceConfigProvider;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
@@ -64,6 +67,9 @@ public class ClusterV1Controller implements ClusterV1Endpoint {
 
     @Autowired
     private SharedServiceConfigProvider sharedServiceConfigProvider;
+
+    @Autowired
+    private GatewayService gatewayService;
 
     @Override
     public ClusterResponse post(Long stackId, ClusterRequest request) throws Exception {
@@ -154,5 +160,10 @@ public class ClusterV1Controller implements ClusterV1Endpoint {
     public Response repairCluster(Long stackId, ClusterRepairRequest clusterRepairRequest) {
         clusterService.repairCluster(stackId, clusterRepairRequest.getHostGroups(), clusterRepairRequest.isRemoveOnly());
         return Response.accepted().build();
+    }
+
+    @Override
+    public GatewayJson updateGatewayTopologies(Long stackId, UpdateGatewayTopologiesJson request) {
+        return gatewayService.updateGatewayTopologies(stackId, request);
     }
 }
