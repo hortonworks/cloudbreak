@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.stack;
 
 import static com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceMetadataType.CORE;
 import static com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceMetadataType.GATEWAY;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyLong;
@@ -25,6 +26,7 @@ import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.security.access.AccessDeniedException;
 
+import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
@@ -58,7 +60,11 @@ public class StackServiceTest {
 
     private static final String INSTANCE_ID = "instanceId";
 
+    private static final String INSTANCE_ID2 = "instanceId2";
+
     private static final String INSTANCE_PUBLIC_IP = "2.2.2.2";
+
+    private static final String INSTANCE_PUBLIC_IP2 = "3.3.3.3";
 
     private static final String OWNER = "1234567";
 
@@ -94,6 +100,9 @@ public class StackServiceTest {
 
     @Mock
     private InstanceMetaData instanceMetaData;
+
+    @Mock
+    private InstanceMetaData instanceMetaData2;
 
     @Mock
     private IdentityUser user;
@@ -154,6 +163,30 @@ public class StackServiceTest {
     }
 
     @Test
+    public void testRemoveInstancesWhenTheInstancesAreCoreTypeAndUserHasRightToTerminateThenProcessWouldBeSuccessful() {
+        when(stackRepository.findOne(STACK_ID)).thenReturn(stack);
+        when(instanceMetaDataRepository.findByInstanceId(STACK_ID, INSTANCE_ID)).thenReturn(instanceMetaData);
+        when(instanceMetaDataRepository.findByInstanceId(STACK_ID, INSTANCE_ID2)).thenReturn(instanceMetaData2);
+        when(stack.isPublicInAccount()).thenReturn(true);
+        when(stack.getOwner()).thenReturn(OWNER);
+        when(user.getUserId()).thenReturn(USER_ID);
+        when(instanceMetaData.getPublicIp()).thenReturn(INSTANCE_PUBLIC_IP);
+        when(instanceMetaData.getInstanceMetadataType()).thenReturn(CORE);
+        when(instanceMetaData2.getPublicIp()).thenReturn(INSTANCE_PUBLIC_IP2);
+        when(instanceMetaData2.getInstanceMetadataType()).thenReturn(CORE);
+        doNothing().when(downscaleValidatorService).checkInstanceIsTheAmbariServerOrNot(INSTANCE_PUBLIC_IP, CORE);
+        doNothing().when(downscaleValidatorService).checkUserHasRightToTerminateInstance(true, OWNER, USER_ID, STACK_ID);
+
+        underTest.removeInstances(user, STACK_ID, Sets.newHashSet(INSTANCE_ID, INSTANCE_ID2));
+        verify(instanceMetaDataRepository, times(2)).findByInstanceId(eq(STACK_ID), anyString());
+        verify(downscaleValidatorService, times(1)).checkInstanceIsTheAmbariServerOrNot(INSTANCE_PUBLIC_IP, CORE);
+        verify(downscaleValidatorService, times(1)).checkInstanceIsTheAmbariServerOrNot(INSTANCE_PUBLIC_IP2, CORE);
+        verify(downscaleValidatorService, times(2)).checkUserHasRightToTerminateInstance(true, OWNER, USER_ID,
+                STACK_ID);
+        verify(flowManager, times(1)).triggerStackRemoveInstances(eq(STACK_ID), anyMap());
+    }
+
+    @Test
     public void testRemoveInstanceWhenTheHostIsGatewayTypeThenWeShoulNotAllowTerminationWithException() {
         String exceptionMessage = String.format("Downscale for node [public IP: %s] is prohibited because it maintains the Ambari server", INSTANCE_PUBLIC_IP);
         when(stackRepository.findOne(STACK_ID)).thenReturn(stack);
@@ -166,6 +199,26 @@ public class StackServiceTest {
         expectedException.expectMessage(exceptionMessage);
 
         underTest.removeInstance(user, STACK_ID, INSTANCE_ID);
+        verify(instanceMetaDataRepository, times(1)).findByInstanceId(STACK_ID, INSTANCE_ID);
+        verify(downscaleValidatorService, times(1)).checkInstanceIsTheAmbariServerOrNot(INSTANCE_PUBLIC_IP, GATEWAY);
+        verify(downscaleValidatorService, times(0)).checkUserHasRightToTerminateInstance(anyBoolean(), anyString(), anyString(),
+                anyLong());
+        verify(flowManager, times(0)).triggerStackRemoveInstance(anyLong(), anyString(), anyLong());
+    }
+
+    @Test
+    public void testRemoveInstancesWhenOneHostIsGatewayTypeThenWeShoulNotAllowTerminationWithException() {
+        String exceptionMessage = String.format("Downscale for node [public IP: %s] is prohibited because it maintains the Ambari server", INSTANCE_PUBLIC_IP);
+        when(stackRepository.findOne(STACK_ID)).thenReturn(stack);
+        when(instanceMetaDataRepository.findByInstanceId(STACK_ID, INSTANCE_ID)).thenReturn(instanceMetaData);
+        when(instanceMetaData.getInstanceMetadataType()).thenReturn(GATEWAY);
+        when(instanceMetaData.getPublicIp()).thenReturn(INSTANCE_PUBLIC_IP);
+        doThrow(new BadRequestException(exceptionMessage)).when(downscaleValidatorService).checkInstanceIsTheAmbariServerOrNot(INSTANCE_PUBLIC_IP, GATEWAY);
+
+        expectedException.expect(BadRequestException.class);
+        expectedException.expectMessage(exceptionMessage);
+
+        underTest.removeInstances(user, STACK_ID, Sets.newHashSet(INSTANCE_ID, INSTANCE_ID2));
         verify(instanceMetaDataRepository, times(1)).findByInstanceId(STACK_ID, INSTANCE_ID);
         verify(downscaleValidatorService, times(1)).checkInstanceIsTheAmbariServerOrNot(INSTANCE_PUBLIC_IP, GATEWAY);
         verify(downscaleValidatorService, times(0)).checkUserHasRightToTerminateInstance(anyBoolean(), anyString(), anyString(),

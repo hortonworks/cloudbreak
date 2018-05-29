@@ -11,6 +11,8 @@ public class FlowChainTriggers {
 
     public static final String FULL_DOWNSCALE_TRIGGER_EVENT = "FULL_DOWNSCALE_TRIGGER_EVENT";
 
+    public static final String FULL_DOWNSCALE_MULTIHOSTGROUP_TRIGGER_EVENT = "FULL_DOWNSCALE_MULTIHOSTGROUP_TRIGGER_EVENT";
+
     public static final String FULL_START_TRIGGER_EVENT = "FULL_START_TRIGGER_EVENT";
 
     public static final String FULL_STOP_TRIGGER_EVENT = "FULL_STOP_TRIGGER_EVENT";

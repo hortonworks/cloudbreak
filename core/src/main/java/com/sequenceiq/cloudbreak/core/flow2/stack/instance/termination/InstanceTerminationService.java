@@ -15,16 +15,18 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.cloud.event.resource.RemoveInstanceResult;
+import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
 import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
+import com.sequenceiq.cloudbreak.service.stack.flow.ScalingFailedException;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackScalingService;
 
 @Service
@@ -54,6 +56,8 @@ public class InstanceTerminationService {
                 HostMetadata hostMetadata = hostMetadataRepository.findHostInClusterByName(stack.getCluster().getId(), hostName);
                 if (hostMetadata == null) {
                     LOGGER.info("Nothing to remove since hostmetadata is null");
+                } else if (HostMetadataState.HEALTHY.equals(hostMetadata.getHostMetadataState())) {
+                    throw new ScalingFailedException(String.format("Host (%s) is in HEALTHY state. Cannot be removed.", hostName));
                 }
             }
             if (hostName != null) {
