@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.cloud.gcp.GcpResourceException;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
+import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
@@ -40,8 +41,8 @@ public class GcpDiskResourceBuilder extends AbstractGcpComputeBuilder {
     }
 
     @Override
-    public List<CloudResource> build(GcpContext context, long privateId, AuthenticatedContext auth, Group group, Image image,
-            List<CloudResource> buildableResources, Map<String, String> tags) throws Exception {
+    public List<CloudResource> build(GcpContext context, long privateId, AuthenticatedContext auth, Group group,
+            List<CloudResource> buildableResources, CloudStack cloudStack) throws Exception {
         String projectId = context.getProjectId();
         Location location = context.getLocation();
 
@@ -51,12 +52,12 @@ public class GcpDiskResourceBuilder extends AbstractGcpComputeBuilder {
         disk.setKind(GcpDiskType.HDD.getUrl(projectId, location.getAvailabilityZone()));
 
         Map<String, String> customTags = new HashMap<>();
-        customTags.putAll(tags);
+        customTags.putAll(cloudStack.getTags());
         customTags.putAll(defaultCostTaggingService.prepareDiskTagging());
         disk.setLabels(customTags);
 
         Insert insDisk = context.getCompute().disks().insert(projectId, location.getAvailabilityZone().value(), disk);
-        insDisk.setSourceImage(GcpStackUtil.getAmbariImage(projectId, image.getImageName()));
+        insDisk.setSourceImage(GcpStackUtil.getAmbariImage(projectId, cloudStack.getImage().getImageName()));
         try {
             Operation operation = insDisk.execute();
             if (operation.getHttpErrorStatusCode() != null) {

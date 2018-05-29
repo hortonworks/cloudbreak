@@ -199,7 +199,7 @@ public class AzureTemplateBuilderTest {
         groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security, null,
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE));
 
-        cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString(),
+        cloudStack = new CloudStack(groups, network, image, null, parameters, tags, azureTemplateBuilder.getTemplateString(),
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey());
         azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy);
         //WHEN
@@ -230,7 +230,7 @@ public class AzureTemplateBuilderTest {
         userDefinedTags.put("testtagkey1", "testtagvalue1");
         userDefinedTags.put("testtagkey2", "testtagvalue2");
 
-        cloudStack = new CloudStack(groups, network, image, parameters, userDefinedTags, azureTemplateBuilder.getTemplateString(),
+        cloudStack = new CloudStack(groups, network, image, null, parameters, userDefinedTags, azureTemplateBuilder.getTemplateString(),
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey());
         azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy);
         //WHEN
@@ -248,7 +248,7 @@ public class AzureTemplateBuilderTest {
 
     @Test
     public void buildNoPublicIpNoFirewallButExistingNetwork() {
-        assumeTrue(isTemplateVarsionGreaterOrEqualThan("1.16.5"));
+        assumeTrue(isTemplateVersionGreaterOrEqualThan("1.16.5"));
         //GIVEN
         when(azureUtils.isExistingNetwork(any())).thenReturn(true);
         when(azureUtils.getCustomNetworkId(any())).thenReturn("existingNetworkName");
@@ -266,7 +266,7 @@ public class AzureTemplateBuilderTest {
 
         groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security, null,
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE));
-        cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString(),
+        cloudStack = new CloudStack(groups, network, image, null, parameters, tags, azureTemplateBuilder.getTemplateString(),
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey());
         azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy);
 
@@ -295,7 +295,7 @@ public class AzureTemplateBuilderTest {
 
         groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security, null,
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE));
-        cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString(),
+        cloudStack = new CloudStack(groups, network, image, null, parameters, tags, azureTemplateBuilder.getTemplateString(),
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey());
         azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy);
 
@@ -324,7 +324,7 @@ public class AzureTemplateBuilderTest {
 
         groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security, null,
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE));
-        cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString(),
+        cloudStack = new CloudStack(groups, network, image, null, parameters, tags, azureTemplateBuilder.getTemplateString(),
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey());
         azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy);
 
@@ -353,7 +353,7 @@ public class AzureTemplateBuilderTest {
 
         groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security, null,
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE));
-        cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString(),
+        cloudStack = new CloudStack(groups, network, image, null, parameters, tags, azureTemplateBuilder.getTemplateString(),
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey());
         azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy);
 
@@ -379,7 +379,7 @@ public class AzureTemplateBuilderTest {
 
         groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security, null,
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE));
-        cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString(),
+        cloudStack = new CloudStack(groups, network, image, null, parameters, tags, azureTemplateBuilder.getTemplateString(),
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey());
         azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy);
 
@@ -405,7 +405,7 @@ public class AzureTemplateBuilderTest {
 
         groups.add(new Group(name, InstanceGroupType.GATEWAY, Collections.singletonList(instance), security, null,
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE));
-        cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString(),
+        cloudStack = new CloudStack(groups, network, image, null, parameters, tags, azureTemplateBuilder.getTemplateString(),
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey());
         azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy);
 
@@ -431,7 +431,7 @@ public class AzureTemplateBuilderTest {
 
         groups.add(new Group(name, InstanceGroupType.GATEWAY, Collections.singletonList(instance), security, null,
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE));
-        cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString(),
+        cloudStack = new CloudStack(groups, network, image, null, parameters, tags, azureTemplateBuilder.getTemplateString(),
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey());
         azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy);
 
@@ -459,7 +459,7 @@ public class AzureTemplateBuilderTest {
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE));
         groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security, null,
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE));
-        cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString(),
+        cloudStack = new CloudStack(groups, network, image, null, parameters, tags, azureTemplateBuilder.getTemplateString(),
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey());
         azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy);
 
@@ -488,7 +488,7 @@ public class AzureTemplateBuilderTest {
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE));
         groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security, null,
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE));
-        cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString(),
+        cloudStack = new CloudStack(groups, network, image, null, parameters, tags, azureTemplateBuilder.getTemplateString(),
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey());
         azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy);
 
@@ -520,7 +520,7 @@ public class AzureTemplateBuilderTest {
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE));
         groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security, null,
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE));
-        cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString(),
+        cloudStack = new CloudStack(groups, network, image, null, parameters, tags, azureTemplateBuilder.getTemplateString(),
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey());
         azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy);
 
@@ -550,7 +550,7 @@ public class AzureTemplateBuilderTest {
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE));
         groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security, null,
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE));
-        cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString(),
+        cloudStack = new CloudStack(groups, network, image, null, parameters, tags, azureTemplateBuilder.getTemplateString(),
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey());
         azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy);
 
@@ -578,7 +578,7 @@ public class AzureTemplateBuilderTest {
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE));
         groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security, null,
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE));
-        cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString(),
+        cloudStack = new CloudStack(groups, network, image, null, parameters, tags, azureTemplateBuilder.getTemplateString(),
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey());
         azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy);
 
@@ -606,7 +606,7 @@ public class AzureTemplateBuilderTest {
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE));
         groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security, null,
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE));
-        cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString(),
+        cloudStack = new CloudStack(groups, network, image, null, parameters, tags, azureTemplateBuilder.getTemplateString(),
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey());
         azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy);
 
@@ -634,7 +634,7 @@ public class AzureTemplateBuilderTest {
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE));
         groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security, null,
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE));
-        cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString(),
+        cloudStack = new CloudStack(groups, network, image, null, parameters, tags, azureTemplateBuilder.getTemplateString(),
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey());
         azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy);
 
@@ -664,7 +664,7 @@ public class AzureTemplateBuilderTest {
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE));
         groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security, null,
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE));
-        cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString(),
+        cloudStack = new CloudStack(groups, network, image, null, parameters, tags, azureTemplateBuilder.getTemplateString(),
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey());
         azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy);
 
@@ -687,7 +687,7 @@ public class AzureTemplateBuilderTest {
         return new CloudCredential(1L, "test", parameters);
     }
 
-    private boolean isTemplateVarsionGreaterOrEqualThan(String version) {
+    private boolean isTemplateVersionGreaterOrEqualThan(String version) {
         if (LATEST_TEMPLATE_PATH.equals(templatePath)) {
             return true;
         }

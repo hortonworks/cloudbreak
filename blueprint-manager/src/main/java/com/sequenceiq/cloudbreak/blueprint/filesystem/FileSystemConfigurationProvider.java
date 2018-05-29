@@ -7,7 +7,6 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.model.FileSystemConfiguration;
-import com.sequenceiq.cloudbreak.api.model.FileSystemType;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
@@ -23,9 +22,8 @@ public class FileSystemConfigurationProvider {
     public FileSystemConfiguration fileSystemConfiguration(FileSystem fs, Stack stack) throws IOException {
         FileSystemConfiguration fileSystemConfiguration = null;
         if (fs != null) {
-            FileSystemType fileSystemType = FileSystemType.valueOf(fs.getType());
             String json = JsonUtil.writeValueAsString(fs.getProperties());
-            fileSystemConfiguration = JsonUtil.readValue(json, fileSystemType.getClazz());
+            fileSystemConfiguration = JsonUtil.readValue(json, fs.getType().getClazz());
             if (stack != null) {
                 fileSystemConfiguration = decorateFsConfigurationProperties(fileSystemConfiguration, stack);
             }

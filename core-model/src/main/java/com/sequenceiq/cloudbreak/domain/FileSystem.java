@@ -5,6 +5,8 @@ import java.util.Map;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -12,6 +14,8 @@ import javax.persistence.Id;
 import javax.persistence.MapKeyColumn;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+
+import com.sequenceiq.cloudbreak.api.model.FileSystemType;
 
 @Entity
 @Table(name = "filesystem")
@@ -26,7 +30,8 @@ public class FileSystem implements ProvisionEntity {
     private String name;
 
     @Column(nullable = false)
-    private String type;
+    @Enumerated(EnumType.STRING)
+    private FileSystemType type;
 
     @Column
     private boolean defaultFs;
@@ -51,7 +56,7 @@ public class FileSystem implements ProvisionEntity {
     public FileSystem() {
     }
 
-    public FileSystem(String name, String type, boolean defaultFs) {
+    public FileSystem(String name, FileSystemType type, boolean defaultFs) {
         this.name = name;
         this.type = type;
         this.defaultFs = defaultFs;
@@ -73,11 +78,11 @@ public class FileSystem implements ProvisionEntity {
         this.name = name;
     }
 
-    public String getType() {
+    public FileSystemType getType() {
         return type;
     }
 
-    public void setType(String type) {
+    public void setType(FileSystemType type) {
         this.type = type;
     }
 

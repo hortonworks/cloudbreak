@@ -29,9 +29,9 @@ import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
+import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
-import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackConstants;
@@ -48,8 +48,8 @@ public class OpenStackInstanceBuilder extends AbstractOpenStackComputeResourceBu
     private static final Logger LOGGER = LoggerFactory.getLogger(OpenStackInstanceBuilder.class);
 
     @Override
-    public List<CloudResource> build(OpenStackContext context, long privateId, AuthenticatedContext auth, Group group, Image image,
-            List<CloudResource> buildableResource, Map<String, String> tags) {
+    public List<CloudResource> build(OpenStackContext context, long privateId, AuthenticatedContext auth, Group group,
+            List<CloudResource> buildableResource, CloudStack cloudStack) {
         CloudResource resource = buildableResource.get(0);
         try {
             OSClient<?> osClient = createOSClient(auth);
@@ -57,9 +57,9 @@ public class OpenStackInstanceBuilder extends AbstractOpenStackComputeResourceBu
             CloudResource port = getPort(context.getComputeResources(privateId));
             KeystoneCredentialView osCredential = new KeystoneCredentialView(auth);
             NovaInstanceView novaInstanceView = new NovaInstanceView(context.getName(), template, group.getType(), group.getLoginUserName());
-            String imageId = osClient.imagesV2().list(Collections.singletonMap("name", image.getImageName())).get(0).getId();
+            String imageId = osClient.imagesV2().list(Collections.singletonMap("name", cloudStack.getImage().getImageName())).get(0).getId();
             LOGGER.info("Selected image id: {}", imageId);
-            Map<String, String> metadata = mergeMetadata(novaInstanceView.getMetadataMap(), tags);
+            Map<String, String> metadata = mergeMetadata(novaInstanceView.getMetadataMap(), cloudStack.getTags());
             ServerCreateBuilder serverCreateBuilder = Builders.server()
                     .name(resource.getName())
                     .image(imageId)
@@ -67,7 +67,7 @@ public class OpenStackInstanceBuilder extends AbstractOpenStackComputeResourceBu
                     .keypairName(osCredential.getKeyPairName())
                     .addMetadata(metadata)
                     .addNetworkPort(port.getStringParameter(OpenStackConstants.PORT_ID))
-                    .userData(new String(Base64.encodeBase64(image.getUserDataByType(group.getType()).getBytes())));
+                    .userData(new String(Base64.encodeBase64(cloudStack.getImage().getUserDataByType(group.getType()).getBytes())));
             BlockDeviceMappingBuilder blockDeviceMappingBuilder = Builders.blockDeviceMapping()
                     .uuid(imageId)
                     .sourceType(BDMSourceType.IMAGE)

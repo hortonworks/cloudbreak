@@ -24,17 +24,20 @@ public class CloudStack {
 
     private final String publicKey;
 
+    private final CloudFileSystem cloudFileSystem;
+
     private final Map<String, String> parameters;
 
     private final Map<String, String> tags;
 
     private final InstanceAuthentication instanceAuthentication;
 
-    public CloudStack(Collection<Group> groups, Network network, Image image, Map<String, String> parameters, Map<String, String> tags, String template,
-            InstanceAuthentication instanceAuthentication, String loginUserName, String publicKey) {
+    public CloudStack(Collection<Group> groups, Network network, Image image, CloudFileSystem cloudFileSystem, Map<String, String> parameters,
+            Map<String, String> tags, String template, InstanceAuthentication instanceAuthentication, String loginUserName, String publicKey) {
         this.groups = ImmutableList.copyOf(groups);
         this.network = network;
         this.image = image;
+        this.cloudFileSystem = cloudFileSystem;
         this.parameters = ImmutableMap.copyOf(parameters);
         this.tags = ImmutableMap.copyOf(tags);
         this.template = template;
@@ -71,12 +74,17 @@ public class CloudStack {
         return instanceAuthentication;
     }
 
+    public CloudFileSystem getCloudFileSystem() {
+        return cloudFileSystem;
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder("CloudStack{");
         sb.append("groups=").append(groups);
         sb.append(", network=").append(network);
         sb.append(", image=").append(image);
+        sb.append(", cloudFileSystem=").append(cloudFileSystem);
         sb.append('}');
         return sb.toString();
     }

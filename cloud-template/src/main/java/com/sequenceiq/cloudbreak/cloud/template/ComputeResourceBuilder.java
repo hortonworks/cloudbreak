@@ -1,12 +1,12 @@
 package com.sequenceiq.cloudbreak.cloud.template;
 
 import java.util.List;
-import java.util.Map;
 
 import com.sequenceiq.cloudbreak.cloud.CloudPlatformAware;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
+import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
@@ -46,7 +46,7 @@ public interface ComputeResourceBuilder<C extends ResourceBuilderContext> extend
 
     /**
      * Create the reference {@link CloudResource} objects with proper resource naming to persist them into the DB. In the next phase these objects
-     * will be provided to the {@link #build(ResourceBuilderContext, long, AuthenticatedContext, Group, Image, List, Map)} method to actually create these
+     * will be provided to the {@link #build(ResourceBuilderContext, long, AuthenticatedContext, Group, List, CloudStack)} method to actually create these
      * resources on the cloud provider. In case the resource creation fails it will be rolled back using the resource name as a reference. To provide
      * resource names implement the {@link com.sequenceiq.cloudbreak.cloud.service.ResourceNameService} interface and inject it to the implementation
      * using {@link javax.inject.Inject}.
@@ -75,18 +75,16 @@ public interface ComputeResourceBuilder<C extends ResourceBuilderContext> extend
      * @param group             Compute resources which are required for a deployment. Each group represents an instance group in Cloudbreak. One group contains
      *                          multiple instance templates for the same instance type so this method supposed to create for 1 template at a time, because it
      *                          will be called as many times as there are templates in the group.
-     * @param image             Base cloud image for the deployment.
      * @param buildableResource Resources created earlier by the {@link #create(ResourceBuilderContext, long, AuthenticatedContext, Group, Image)}. If this
      *                          builder is responsible to create the instance the list will contain 1 resource. It does not contain all the required resources
      *                          for the instance, like the attached disks or network interface. Those resources should be retrievable from the context object
      *                          by private id.
-     * @param tags              Tags will be set on the created compute resources
+     * @param cloudStack        The entire cloud stack object for deployment
      * @return Returns the created cloud resources which can be extended with extra information since the object itself is a dynamic model. These objects
      * will be passed along with the extra information if it's provided so later it can be used to track the status of the deployment.
      * @throws Exception Exception can be thrown if the resource creation request fails for some reason and then the resources will be rolled back.
      */
-    List<CloudResource> build(C context, long privateId, AuthenticatedContext auth, Group group, Image image, List<CloudResource> buildableResource,
-            Map<String, String> tags)
+    List<CloudResource> build(C context, long privateId, AuthenticatedContext auth, Group group, List<CloudResource> buildableResource, CloudStack cloudStack)
             throws Exception;
 
     /**

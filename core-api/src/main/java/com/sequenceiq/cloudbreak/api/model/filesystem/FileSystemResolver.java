@@ -35,7 +35,8 @@ public final class FileSystemResolver {
         return fileSystemParameters;
     }
 
-    public static void setFSV2RequestFileSystemParamsByNameAndProperties(String fileSystemType, Map<String, String> properties, FileSystemV2Request request) {
+    public static void setFSV2RequestFileSystemParamsByNameAndProperties(FileSystemType fileSystemType, Map<String, String> properties,
+            FileSystemV2Request request) {
         FileSystemParameters fileSystemParameters = fillFileSystemParamsByItsType(fileSystemType, properties);
         if (fileSystemParameters.getType() == FileSystemType.ADLS) {
             request.setAdls((AdlsFileSystemParameters) fileSystemParameters);
@@ -48,11 +49,11 @@ public final class FileSystemResolver {
         }
     }
 
-    private static FileSystemParameters fillFileSystemParamsByItsType(String fileSystemType, Map<String, String> properties) {
+    private static FileSystemParameters fillFileSystemParamsByItsType(FileSystemType fileSystemType, Map<String, String> properties) {
         FileSystemParameters fileSystemParameters;
         if (fileSystemType != null) {
             switch (fileSystemType) {
-                case "ADLS":
+                case ADLS:
                     AdlsFileSystemParameters adls = new AdlsFileSystemParameters();
                     adls.setTenantId(chooseProperty(properties, AdlsFileSystemConfiguration.TENANT_ID, AdlsFileSystemParameters.TENANT_ID));
                     adls.setCredential(chooseProperty(properties, AdlsFileSystemConfiguration.ACCESS_KEY, AdlsFileSystemParameters.CREDENTIAL));
@@ -60,20 +61,20 @@ public final class FileSystemResolver {
                     adls.setAccountName(chooseProperty(properties, FileSystemConfiguration.ACCOUNT_NAME, AdlsFileSystemParameters.ACCOUNT_NAME));
                     fileSystemParameters = adls;
                     break;
-                case "GCS":
+                case GCS:
                     GcsFileSystemParameters gcs = new GcsFileSystemParameters();
                     gcs.setServiceAccountEmail(properties.get(GcsFileSystemParameters.SERVICE_ACCOUNT_EMAIL));
                     gcs.setProjectId(properties.get(GcsFileSystemParameters.PROJECT_ID));
                     gcs.setDefaultBucketName(properties.get(GcsFileSystemParameters.DEFAULT_BUCKET_NAME));
                     fileSystemParameters = gcs;
                     break;
-                case "WASB":
+                case WASB:
                     WasbFileSystemParameters wasb = new WasbFileSystemParameters();
                     wasb.setAccountName(properties.get(WasbFileSystemParameters.ACCOUNT_NAME));
                     wasb.setAccountKey(properties.get(WasbFileSystemParameters.ACCOUNT_KEY));
                     fileSystemParameters = wasb;
                     break;
-                case "S3":
+                case S3:
                     S3FileSystemParameters s3 = new S3FileSystemParameters();
                     s3.setInstanceProfile(properties.get(S3FileSystemParameters.INSTANCE_PROFILE));
                     fileSystemParameters = s3;

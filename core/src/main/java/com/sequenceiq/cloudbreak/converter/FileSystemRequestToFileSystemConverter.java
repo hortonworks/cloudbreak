@@ -22,7 +22,7 @@ public class FileSystemRequestToFileSystemConverter extends AbstractConversionSe
     public FileSystem convert(FileSystemRequest source) {
         FileSystem fs = new FileSystem();
         fs.setName(nameGenerator.generateName(FILESYSTEM));
-        fs.setType(source.getType().name());
+        fs.setType(source.getType());
         fs.setDefaultFs(source.isDefaultFs());
         if (source.getProperties() != null) {
             fs.setProperties(source.getProperties());

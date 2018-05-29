@@ -28,6 +28,7 @@ import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpResourceNameService;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
+import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
@@ -63,8 +64,8 @@ public class GcpAttachedDiskResourceBuilder extends AbstractGcpComputeBuilder {
     }
 
     @Override
-    public List<CloudResource> build(GcpContext context, long privateId, AuthenticatedContext auth, Group group, Image image,
-            List<CloudResource> buildableResource, Map<String, String> tags) throws Exception {
+    public List<CloudResource> build(GcpContext context, long privateId, AuthenticatedContext auth, Group group,
+            List<CloudResource> buildableResource, CloudStack cloudStack) throws Exception {
         CloudInstance instance = group.getReferenceInstanceConfiguration();
         InstanceTemplate template = instance.getTemplate();
         Volume volume = template.getVolumes().get(0);
@@ -76,7 +77,7 @@ public class GcpAttachedDiskResourceBuilder extends AbstractGcpComputeBuilder {
         Compute compute = context.getCompute();
         Collection<Future<Void>> futures = new ArrayList<>();
         for (CloudResource cloudResource : buildableResource) {
-            Disk disk = createDisk(volume, projectId, location.getAvailabilityZone(), cloudResource.getName(), tags);
+            Disk disk = createDisk(volume, projectId, location.getAvailabilityZone(), cloudResource.getName(), cloudStack.getTags());
             Future<Void> submit = intermediateBuilderExecutor.submit(() -> {
                 Insert insDisk = compute.disks().insert(projectId, location.getAvailabilityZone().value(), disk);
                 try {

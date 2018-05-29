@@ -34,7 +34,7 @@ public class FileSystemV2RequestToFileSystemConverter extends AbstractConversion
         fileSystem.setAccount(user.getAccount());
         fileSystem.setDescription(source.getDescription());
         FileSystemParameters fileSystemProperties = FileSystemResolver.decideFileSystemFromFileSystemV2Request(source);
-        fileSystem.setType(fileSystemProperties.getType().name());
+        fileSystem.setType(fileSystemProperties.getType());
         fileSystem.setProperties(fileSystemProperties.getAsMap());
         return fileSystem;
     }

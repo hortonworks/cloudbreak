@@ -86,7 +86,7 @@ public class ParameterGenerator {
         Network network = new Network(subnet);
         network.putParameter("publicNetId", "028ffc0c-63c5-4ca0-802a-3ac753eaf76c");
 
-        return new CloudStack(groups, network, image, new HashMap<>(), new HashMap<>(), null, instanceAuthentication,
+        return new CloudStack(groups, network, image, null, new HashMap<>(), new HashMap<>(), null, instanceAuthentication,
                 instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey());
     }
 

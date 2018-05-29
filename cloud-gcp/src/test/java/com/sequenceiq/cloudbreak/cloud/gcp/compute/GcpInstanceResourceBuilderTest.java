@@ -1,7 +1,11 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.compute;
 
+import static java.util.Collections.singletonMap;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.verify;
@@ -37,9 +41,11 @@ import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpResourceNameService;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.CloudFileSystem;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource.Builder;
+import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceAuthentication;
@@ -68,6 +74,8 @@ public class GcpInstanceResourceBuilderTest {
     private List<Volume> volumes;
 
     private Image image;
+
+    private CloudStack cloudStack;
 
     private Security security;
 
@@ -123,6 +131,8 @@ public class GcpInstanceResourceBuilderTest {
         GcpResourceNameService resourceNameService = new GcpResourceNameService();
         ReflectionTestUtils.setField(resourceNameService, "maxResourceNameLength", 50);
         ReflectionTestUtils.setField(builder, "resourceNameService", resourceNameService);
+        cloudStack = new CloudStack(Collections.emptyList(), null, image, null, Collections.emptyMap(), Collections.emptyMap(), null,
+                null, null, null);
     }
 
     @Test
@@ -134,12 +144,12 @@ public class GcpInstanceResourceBuilderTest {
 
         // WHEN
         when(compute.instances()).thenReturn(instances);
-        when(instances.insert(anyString(), anyString(), instanceArg.capture())).thenReturn(insert);
+        when(instances.insert(anyString(), anyString(), any(Instance.class))).thenReturn(insert);
         when(insert.setPrettyPrint(anyBoolean())).thenReturn(insert);
         when(insert.execute()).thenReturn(operation);
         when(defaultCostTaggingService.prepareInstanceTagging()).thenReturn(new HashMap<>());
 
-        builder.build(context, privateId, authenticatedContext, group, image, buildableResources, Collections.emptyMap());
+        builder.build(context, privateId, authenticatedContext, group, buildableResources, cloudStack);
 
         // THEN
         verify(compute).instances();
@@ -156,12 +166,12 @@ public class GcpInstanceResourceBuilderTest {
 
         // WHEN
         when(compute.instances()).thenReturn(instances);
-        when(instances.insert(anyString(), anyString(), instanceArg.capture())).thenReturn(insert);
+        when(instances.insert(anyString(), anyString(), any(Instance.class))).thenReturn(insert);
         when(insert.setPrettyPrint(anyBoolean())).thenReturn(insert);
         when(insert.execute()).thenReturn(operation);
         when(defaultCostTaggingService.prepareInstanceTagging()).thenReturn(new HashMap<>());
 
-        builder.build(context, privateId, authenticatedContext, group, image, buildableResources, Collections.emptyMap());
+        builder.build(context, privateId, authenticatedContext, group, buildableResources, cloudStack);
 
         // THEN
         verify(compute).instances();
@@ -178,17 +188,65 @@ public class GcpInstanceResourceBuilderTest {
 
         // WHEN
         when(compute.instances()).thenReturn(instances);
-        when(instances.insert(anyString(), anyString(), instanceArg.capture())).thenReturn(insert);
+        when(instances.insert(anyString(), anyString(), any(Instance.class))).thenReturn(insert);
         when(insert.setPrettyPrint(anyBoolean())).thenReturn(insert);
         when(insert.execute()).thenReturn(operation);
         when(defaultCostTaggingService.prepareInstanceTagging()).thenReturn(new HashMap<>());
 
-        builder.build(context, privateId, authenticatedContext, group, image, buildableResources, Collections.emptyMap());
+        builder.build(context, privateId, authenticatedContext, group, buildableResources, cloudStack);
 
         // THEN
         verify(compute).instances();
         verify(instances).insert(anyString(), anyString(), instanceArg.capture());
         assertFalse(instanceArg.getValue().getScheduling().getPreemptible());
+    }
+
+    @Test
+    public void extraxtServiceAccountWhenServiceEmailEmpty() throws Exception {
+        // GIVEN
+        Group group = newGroupWithParams(ImmutableMap.of());
+        List<CloudResource> buildableResources = builder.create(context, privateId, authenticatedContext, group, image);
+        context.addComputeResources(0L, buildableResources);
+
+        // WHEN
+        when(compute.instances()).thenReturn(instances);
+        when(instances.insert(anyString(), anyString(), any(Instance.class))).thenReturn(insert);
+        when(insert.setPrettyPrint(anyBoolean())).thenReturn(insert);
+        when(insert.execute()).thenReturn(operation);
+        when(defaultCostTaggingService.prepareInstanceTagging()).thenReturn(new HashMap<>());
+
+        builder.build(context, privateId, authenticatedContext, group, buildableResources, cloudStack);
+
+        // THEN
+        verify(compute).instances();
+        verify(instances).insert(anyString(), anyString(), instanceArg.capture());
+        assertNull(instanceArg.getValue().getServiceAccounts());
+    }
+
+    @Test
+    public void extraxtServiceAccountWhenServiceEmailNotEmpty() throws Exception {
+        // GIVEN
+        Group group = newGroupWithParams(ImmutableMap.of());
+        List<CloudResource> buildableResources = builder.create(context, privateId, authenticatedContext, group, image);
+        context.addComputeResources(0L, buildableResources);
+
+        String email = "service@email.com";
+        CloudStack cloudStack = new CloudStack(Collections.emptyList(), null, image, new CloudFileSystem(singletonMap("serviceAccountEmail", email)),
+                Collections.emptyMap(), Collections.emptyMap(), null, null, null, null);
+
+        // WHEN
+        when(compute.instances()).thenReturn(instances);
+        when(instances.insert(anyString(), anyString(), any(Instance.class))).thenReturn(insert);
+        when(insert.setPrettyPrint(anyBoolean())).thenReturn(insert);
+        when(insert.execute()).thenReturn(operation);
+        when(defaultCostTaggingService.prepareInstanceTagging()).thenReturn(new HashMap<>());
+
+        builder.build(context, privateId, authenticatedContext, group, buildableResources, cloudStack);
+
+        // THEN
+        verify(compute).instances();
+        verify(instances).insert(anyString(), anyString(), instanceArg.capture());
+        assertEquals(instanceArg.getValue().getServiceAccounts().get(0).getEmail(), email);
     }
 
     public Group newGroupWithParams(Map<String, Object> params) {

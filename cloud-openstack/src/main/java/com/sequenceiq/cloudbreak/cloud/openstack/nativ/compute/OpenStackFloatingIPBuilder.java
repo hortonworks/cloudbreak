@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.cloud.openstack.nativ.compute;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 import org.openstack4j.api.OSClient;
 import org.openstack4j.api.exceptions.OS4JException;
@@ -13,8 +12,8 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
+import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
-import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackConstants;
 import com.sequenceiq.cloudbreak.cloud.openstack.nativ.OpenStackResourceException;
 import com.sequenceiq.cloudbreak.cloud.openstack.nativ.context.OpenStackContext;
@@ -23,8 +22,8 @@ import com.sequenceiq.cloudbreak.common.type.ResourceType;
 @Service
 public class OpenStackFloatingIPBuilder extends AbstractOpenStackComputeResourceBuilder {
     @Override
-    public List<CloudResource> build(OpenStackContext context, long privateId, AuthenticatedContext auth, Group group, Image image,
-            List<CloudResource> buildableResource, Map<String, String> tags) {
+    public List<CloudResource> build(OpenStackContext context, long privateId, AuthenticatedContext auth, Group group,
+            List<CloudResource> buildableResource, CloudStack cloudStack) {
         CloudResource resource = buildableResource.get(0);
         try {
             String publicNetId = context.getStringParameter(OpenStackConstants.PUBLIC_NET_ID);

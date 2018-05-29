@@ -41,7 +41,7 @@ public class FileSystemToFileSystemResponseConverterTest {
         FileSystem fileSystem = new FileSystem();
         fileSystem.setId(FILE_SYSTEM_ID);
         fileSystem.setName(FILE_SYSTEM_NAME);
-        fileSystem.setType(EXAMPLE_FILE_SYSTEM_TYPE.name());
+        fileSystem.setType(EXAMPLE_FILE_SYSTEM_TYPE);
         fileSystem.setDefaultFs(EXAMPLE_IS_DEFAULT_FS_VALUE);
         fileSystem.setProperties(FILE_SYSTEM_PROPERTIES_AS_MAP);
         return fileSystem;

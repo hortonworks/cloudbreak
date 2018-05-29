@@ -75,7 +75,7 @@ public class FileSystemV2RequestToFileSystemConverterTest {
         FileSystem result = underTest.convert(request);
 
         checkWhetherTheBasicDataHasPassedOrNot(request, result);
-        assertEquals(FileSystemType.ADLS.name(), result.getType());
+        assertEquals(FileSystemType.ADLS, result.getType());
         assertEquals(adlsFileSystemParameters.getAsMap(), result.getProperties());
         verify(authenticatedUserService, times(1)).getCbUser();
     }
@@ -92,7 +92,7 @@ public class FileSystemV2RequestToFileSystemConverterTest {
         FileSystem result = underTest.convert(request);
 
         checkWhetherTheBasicDataHasPassedOrNot(request, result);
-        assertEquals(FileSystemType.GCS.name(), result.getType());
+        assertEquals(FileSystemType.GCS, result.getType());
         assertEquals(gcsFileSystemParameters.getAsMap(), result.getProperties());
         verify(authenticatedUserService, times(1)).getCbUser();
     }
@@ -108,7 +108,7 @@ public class FileSystemV2RequestToFileSystemConverterTest {
         FileSystem result = underTest.convert(request);
 
         checkWhetherTheBasicDataHasPassedOrNot(request, result);
-        assertEquals(FileSystemType.WASB.name(), result.getType());
+        assertEquals(FileSystemType.WASB, result.getType());
         assertEquals(wasbFileSystemParameters.getAsMap(), result.getProperties());
         verify(authenticatedUserService, times(1)).getCbUser();
     }
