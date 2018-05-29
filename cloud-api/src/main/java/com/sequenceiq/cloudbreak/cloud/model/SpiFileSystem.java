@@ -5,7 +5,7 @@ import java.util.Map.Entry;
 
 import com.sequenceiq.cloudbreak.cloud.model.generic.DynamicModel;
 
-public class FileSystem extends DynamicModel {
+public class SpiFileSystem extends DynamicModel {
 
     private String name;
 
@@ -13,7 +13,7 @@ public class FileSystem extends DynamicModel {
 
     private boolean defaultFs;
 
-    public FileSystem(String name, String type, boolean defaultFs, Map<String, String> parameters) {
+    public SpiFileSystem(String name, String type, boolean defaultFs, Map<String, String> parameters) {
         this.name = name;
         this.type = type;
         this.defaultFs = defaultFs;

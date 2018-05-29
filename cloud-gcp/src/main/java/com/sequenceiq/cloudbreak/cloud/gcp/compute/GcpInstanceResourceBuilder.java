@@ -1,9 +1,10 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.compute;
 
+import static java.util.Collections.singletonList;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,6 +15,7 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.compute.Compute;
@@ -28,6 +30,7 @@ import com.google.api.services.compute.model.Metadata.Items;
 import com.google.api.services.compute.model.NetworkInterface;
 import com.google.api.services.compute.model.Operation;
 import com.google.api.services.compute.model.Scheduling;
+import com.google.api.services.compute.model.ServiceAccount;
 import com.google.api.services.compute.model.Tags;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -38,6 +41,7 @@ import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
+import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
@@ -52,6 +56,8 @@ import com.sequenceiq.cloudbreak.common.type.ResourceType;
 public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GcpInstanceResourceBuilder.class);
+
+    private static final String SERVICE_ACCOUNT_EMAIL = "serviceAccountEmail";
 
     private static final String GCP_DISK_TYPE = "PERSISTENT";
 
@@ -68,12 +74,12 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
     public List<CloudResource> create(GcpContext context, long privateId, AuthenticatedContext auth, Group group, Image image) {
         CloudContext cloudContext = auth.getCloudContext();
         String resourceName = getResourceNameService().resourceName(resourceType(), cloudContext.getName(), group.getName(), privateId);
-        return Collections.singletonList(createNamedResource(resourceType(), resourceName));
+        return singletonList(createNamedResource(resourceType(), resourceName));
     }
 
     @Override
-    public List<CloudResource> build(GcpContext context, long privateId, AuthenticatedContext auth, Group group, Image image,
-            List<CloudResource> buildableResource, Map<String, String> customTags) throws Exception {
+    public List<CloudResource> build(GcpContext context, long privateId, AuthenticatedContext auth, Group group, List<CloudResource> buildableResource,
+            CloudStack cloudStack) throws Exception {
         InstanceTemplate template = group.getReferenceInstanceConfiguration().getTemplate();
         String projectId = context.getProjectId();
         Location location = context.getLocation();
@@ -94,6 +100,7 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
         instance.setNetworkInterfaces(getNetworkInterface(context.getNetworkResources(), computeResources, location.getRegion(), group, compute, projectId,
                 noPublicIp));
         instance.setDisks(listOfDisks);
+        instance.setServiceAccounts(extractServiceAccounts(cloudStack));
         Scheduling scheduling = new Scheduling();
         boolean preemptible = false;
         if (template.getParameter(PREEMPTIBLE, Boolean.class) != null) {
@@ -115,9 +122,9 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
 
         tagList.add(GcpStackUtil.getClusterTag(auth.getCloudContext()));
         tagList.add(GcpStackUtil.getGroupClusterTag(auth.getCloudContext(), group));
-        customTags.forEach((key, value) -> tagList.add(key + '-' + value));
+        cloudStack.getTags().forEach((key, value) -> tagList.add(key + '-' + value));
 
-        labels.putAll(customTags);
+        labels.putAll(cloudStack.getTags());
         tags.setItems(tagList);
 
         instance.setTags(tags);
@@ -136,7 +143,7 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
 
         Items startupScript = new Items();
         startupScript.setKey("startup-script");
-        startupScript.setValue(image.getUserDataByType(group.getType()));
+        startupScript.setValue(cloudStack.getImage().getUserDataByType(group.getType()));
 
         metadata.getItems().add(sshMetaData);
         metadata.getItems().add(startupScript);
@@ -150,10 +157,21 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
             if (operation.getHttpErrorStatusCode() != null) {
                 throw new GcpResourceException(operation.getHttpErrorMessage(), resourceType(), buildableResource.get(0).getName());
             }
-            return Collections.singletonList(createOperationAwareCloudResource(buildableResource.get(0), operation));
+            return singletonList(createOperationAwareCloudResource(buildableResource.get(0), operation));
         } catch (GoogleJsonResponseException e) {
             throw new GcpResourceException(checkException(e), resourceType(), buildableResource.get(0).getName());
         }
+    }
+
+    private List<ServiceAccount> extractServiceAccounts(CloudStack cloudStack) {
+        if (cloudStack.getCloudFileSystem() == null) {
+            return null;
+        }
+
+        String email = cloudStack.getCloudFileSystem().getProperties().get(SERVICE_ACCOUNT_EMAIL);
+        return StringUtils.isEmpty(email) ? null : singletonList(new ServiceAccount()
+                .setEmail(email)
+                .setScopes(singletonList("https://www.googleapis.com/auth/cloud-platform")));
     }
 
     @Override
@@ -178,10 +196,10 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
             boolean finished = operation == null || GcpStackUtil.isOperationFinished(operation);
             InstanceStatus status = finished ? context.isBuild() ? InstanceStatus.STARTED : InstanceStatus.STOPPED : InstanceStatus.IN_PROGRESS;
             LOGGER.info("Instance: {} status: {}", instances, status);
-            return Collections.singletonList(new CloudVmInstanceStatus(cloudInstance, status));
+            return singletonList(new CloudVmInstanceStatus(cloudInstance, status));
         } catch (Exception ignored) {
             LOGGER.info("Failed to check instance state of {}", cloudInstance);
-            return Collections.singletonList(new CloudVmInstanceStatus(cloudInstance, InstanceStatus.IN_PROGRESS));
+            return singletonList(new CloudVmInstanceStatus(cloudInstance, InstanceStatus.IN_PROGRESS));
         }
     }
 
@@ -249,7 +267,7 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
                 Addresses.Get getReservedIp = compute.addresses().get(projectId, region.value(), reservedIp.get(0).getName());
                 accessConfig.setNatIP(getReservedIp.execute().getAddress());
             }
-            networkInterface.setAccessConfigs(Collections.singletonList(accessConfig));
+            networkInterface.setAccessConfigs(singletonList(accessConfig));
         }
 
         if (subnet.isEmpty()) {
@@ -259,7 +277,7 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
             networkInterface.setSubnetwork(
                     String.format("https://www.googleapis.com/compute/v1/projects/%s/regions/%s/subnetworks/%s", projectId, region.value(), networkName));
         }
-        return Collections.singletonList(networkInterface);
+        return singletonList(networkInterface);
     }
 
     private List<CloudResource> filterResourcesByType(Iterable<CloudResource> resources, ResourceType resourceType) {
@@ -284,7 +302,7 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
                 Operation operation = stopRequest ? compute.instances().stop(projectId, availabilityZone, instanceId).setPrettyPrint(true).execute()
                         : compute.instances().start(projectId, availabilityZone, instanceId).setPrettyPrint(true).execute();
                 CloudInstance operationAwareCloudInstance = createOperationAwareCloudInstance(instance, operation);
-                return checkInstances(context, auth, Collections.singletonList(operationAwareCloudInstance)).get(0);
+                return checkInstances(context, auth, singletonList(operationAwareCloudInstance)).get(0);
             } else {
                 LOGGER.info("Instance {} is not in {} state - won't start it.", state, instanceId);
                 return null;

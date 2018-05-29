@@ -27,9 +27,9 @@ import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
-import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.template.ComputeResourceBuilder;
 import com.sequenceiq.cloudbreak.cloud.template.context.ResourceBuilderContext;
@@ -53,14 +53,14 @@ public class ComputeResourceService {
     @Inject
     private CloudFailureHandler cloudFailureHandler;
 
-    public List<CloudResourceStatus> buildResourcesForLaunch(ResourceBuilderContext ctx, AuthenticatedContext auth, Iterable<Group> groups, Image image,
-            Map<String, String> tags, AdjustmentType adjustmentType, Long threshold) {
-        return new ResourceBuilder(ctx, auth).buildResources(groups, image, false, tags, adjustmentType, threshold);
+    public List<CloudResourceStatus> buildResourcesForLaunch(ResourceBuilderContext ctx, AuthenticatedContext auth, CloudStack cloudStack,
+            AdjustmentType adjustmentType, Long threshold) {
+        return new ResourceBuilder(ctx, auth).buildResources(cloudStack, cloudStack.getGroups(), false, adjustmentType, threshold);
     }
 
-    public List<CloudResourceStatus> buildResourcesForUpscale(ResourceBuilderContext ctx, AuthenticatedContext auth, Iterable<Group> groups, Image image,
-            Map<String, String> tags) {
-        return new ResourceBuilder(ctx, auth).buildResources(groups, image, true, tags, AdjustmentType.BEST_EFFORT, null);
+    public List<CloudResourceStatus> buildResourcesForUpscale(ResourceBuilderContext ctx, AuthenticatedContext auth, CloudStack cloudStack,
+            Iterable<Group> groups) {
+        return new ResourceBuilder(ctx, auth).buildResources(cloudStack, groups, true, AdjustmentType.BEST_EFFORT, null);
     }
 
     public List<CloudResourceStatus> deleteResources(ResourceBuilderContext context, AuthenticatedContext auth,
@@ -207,8 +207,8 @@ public class ComputeResourceService {
             this.auth = auth;
         }
 
-        public List<CloudResourceStatus> buildResources(Iterable<Group> groups, Image image, Boolean upscale, Map<String, String> tags,
-                AdjustmentType adjustmentType, Long threshold) {
+        public List<CloudResourceStatus> buildResources(CloudStack cloudStack, Iterable<Group> groups, Boolean upscale, AdjustmentType adjustmentType,
+                Long threshold) {
             List<CloudResourceStatus> results = new ArrayList<>();
             int fullNodeCount = getFullNodeCount(groups);
 
@@ -218,7 +218,7 @@ public class ComputeResourceService {
             for (Group group : getOrderedCopy(groups)) {
                 List<CloudInstance> instances = group.getInstances();
                 for (CloudInstance instance : instances) {
-                    ResourceCreateThread thread = createThread(ResourceCreateThread.NAME, instance.getTemplate().getPrivateId(), group, ctx, auth, image, tags);
+                    ResourceCreateThread thread = createThread(ResourceCreateThread.NAME, instance.getTemplate().getPrivateId(), group, ctx, auth, cloudStack);
                     Future<ResourceRequestResult<List<CloudResourceStatus>>> future = resourceBuilderExecutor.submit(thread);
                     futures.add(future);
                     if (isRequestFullWithCloudPlatform(builders.size(), futures.size(), ctx)) {

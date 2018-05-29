@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Future;
 
 import javax.inject.Inject;
@@ -22,6 +21,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
+import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
@@ -61,8 +61,8 @@ public class OpenStackAttachedDiskResourceBuilder extends AbstractOpenStackCompu
     }
 
     @Override
-    public List<CloudResource> build(OpenStackContext context, long privateId, AuthenticatedContext auth, Group group, Image image,
-            List<CloudResource> buildableResource, Map<String, String> tags) throws Exception {
+    public List<CloudResource> build(OpenStackContext context, long privateId, AuthenticatedContext auth, Group group,
+            List<CloudResource> buildableResource, CloudStack cloudStack) throws Exception {
         List<CloudResource> resources = new ArrayList<>();
         List<CloudResource> syncedResources = Collections.synchronizedList(resources);
         Collection<Future<Void>> futures = new ArrayList<>();

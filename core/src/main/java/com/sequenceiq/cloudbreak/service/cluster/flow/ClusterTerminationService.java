@@ -176,9 +176,9 @@ public class ClusterTerminationService {
 
     private void deleteFileSystemResources(Long stackId, FileSystem fileSystem) {
         try {
-            FileSystemConfigurator fsConfigurator = fileSystemConfigurators.get(FileSystemType.valueOf(fileSystem.getType()));
+            FileSystemConfigurator fsConfigurator = fileSystemConfigurators.get(fileSystem.getType());
             String json = writeValueAsString(fileSystem.getProperties());
-            FileSystemConfiguration fsConfiguration = readValue(json, FileSystemType.valueOf(fileSystem.getType()).getClazz());
+            FileSystemConfiguration fsConfiguration = readValue(json, fileSystem.getType().getClazz());
             fsConfiguration.addProperty(FileSystemConfiguration.STORAGE_CONTAINER, "cloudbreak" + stackId);
             fsConfigurator.deleteResources(fsConfiguration);
         } catch (IOException e) {

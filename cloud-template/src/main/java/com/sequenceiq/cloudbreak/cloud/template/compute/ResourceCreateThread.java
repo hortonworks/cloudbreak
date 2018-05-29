@@ -6,7 +6,6 @@ import static java.lang.String.format;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Callable;
 
 import javax.inject.Inject;
@@ -19,8 +18,8 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
-import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
@@ -61,18 +60,14 @@ public class ResourceCreateThread implements Callable<ResourceRequestResult<List
 
     private final AuthenticatedContext auth;
 
-    private final Image image;
+    private final CloudStack cloudStack;
 
-    private final Map<String, String> tags;
-
-    public ResourceCreateThread(long privateId, Group group, ResourceBuilderContext context, AuthenticatedContext auth, Image image,
-            Map<String, String> tags) {
+    public ResourceCreateThread(long privateId, Group group, ResourceBuilderContext context, AuthenticatedContext auth, CloudStack cloudStack) {
         this.privateId = privateId;
         this.group = group;
         this.context = context;
         this.auth = auth;
-        this.image = image;
-        this.tags = tags;
+        this.cloudStack = cloudStack;
     }
 
     @Override
@@ -82,7 +77,7 @@ public class ResourceCreateThread implements Callable<ResourceRequestResult<List
         try {
             for (ComputeResourceBuilder builder : resourceBuilders.compute(auth.getCloudContext().getPlatform())) {
                 LOGGER.info("Building {} resources of {} instance group", builder.resourceType(), group.getName());
-                List<CloudResource> cloudResources = builder.create(context, privateId, auth, group, image);
+                List<CloudResource> cloudResources = builder.create(context, privateId, auth, group, cloudStack.getImage());
                 if (!cloudResources.isEmpty()) {
                     buildableResources.addAll(cloudResources);
                     createResource(auth, cloudResources);
@@ -92,7 +87,7 @@ public class ResourceCreateThread implements Callable<ResourceRequestResult<List
                         throw new CancellationException(format("Building of %s has been cancelled", cloudResources));
                     }
 
-                    List<CloudResource> resources = builder.build(context, privateId, auth, group, image, cloudResources, tags);
+                    List<CloudResource> resources = builder.build(context, privateId, auth, group, cloudResources, cloudStack);
                     updateResource(auth, resources);
                     context.addComputeResources(privateId, resources);
                     PollTask<List<CloudResourceStatus>> task = resourcePollTaskFactory.newPollResourceTask(builder, auth, resources, context, true);

@@ -48,7 +48,7 @@ import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
-import com.sequenceiq.cloudbreak.cloud.model.FileSystem;
+import com.sequenceiq.cloudbreak.cloud.model.SpiFileSystem;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceAuthentication;
@@ -264,7 +264,7 @@ public class AwsSetup implements Setup {
     }
 
     @Override
-    public void validateFileSystem(CloudCredential credential, FileSystem fileSystem) {
+    public void validateFileSystem(CloudCredential credential, SpiFileSystem spiFileSystem) {
     }
 
     private void validateExistingKeyPair(InstanceAuthentication instanceAuthentication, AwsCredentialView credentialView, String region) {

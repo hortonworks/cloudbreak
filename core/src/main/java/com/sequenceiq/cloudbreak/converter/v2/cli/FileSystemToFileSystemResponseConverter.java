@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.converter.v2.cli;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.FileSystemResponse;
-import com.sequenceiq.cloudbreak.api.model.FileSystemType;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 
@@ -15,7 +14,7 @@ public class FileSystemToFileSystemResponseConverter extends AbstractConversionS
         FileSystemResponse response = new FileSystemResponse();
         response.setId(source.getId());
         response.setName(source.getName());
-        response.setType(FileSystemType.valueOf(source.getType()));
+        response.setType(source.getType());
         response.setDefaultFs(source.isDefaultFs());
         response.setProperties(source.getProperties());
         return response;

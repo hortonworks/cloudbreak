@@ -38,7 +38,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource.Builder;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
-import com.sequenceiq.cloudbreak.cloud.model.FileSystem;
+import com.sequenceiq.cloudbreak.cloud.model.SpiFileSystem;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.common.service.DefaultCostTaggingService;
@@ -144,16 +144,16 @@ public class AzureSetup implements Setup {
     }
 
     @Override
-    public void validateFileSystem(CloudCredential credential, FileSystem fileSystem) throws Exception {
-        String fileSystemType = fileSystem.getType();
+    public void validateFileSystem(CloudCredential credential, SpiFileSystem spiFileSystem) throws Exception {
+        String fileSystemType = spiFileSystem.getType();
         if (fileSystemType.equalsIgnoreCase(FileSystemType.ADLS.name())) {
-            validateAdlsFileSystem(credential, fileSystem);
+            validateAdlsFileSystem(credential, spiFileSystem);
         } else {
-            validateWasbFileSystem(fileSystem, fileSystemType);
+            validateWasbFileSystem(spiFileSystem, fileSystemType);
         }
     }
 
-    private void validateWasbFileSystem(FileSystem fileSystem, String fileSystemType) throws URISyntaxException, InvalidKeyException, StorageException {
+    private void validateWasbFileSystem(SpiFileSystem fileSystem, String fileSystemType) throws URISyntaxException, InvalidKeyException, StorageException {
         String accountName = fileSystem.getParameter(FileSystemConfiguration.ACCOUNT_NAME, String.class);
         String accountKey = fileSystem.getParameter(FileSystemConfiguration.ACCOUNT_KEY, String.class);
         String connectionString = "DefaultEndpointsProtocol=https;AccountName=" + accountName + ";AccountKey=" + accountKey;
@@ -170,7 +170,7 @@ public class AzureSetup implements Setup {
         }
     }
 
-    private void validateAdlsFileSystem(CloudCredential credential, FileSystem fileSystem) {
+    private void validateAdlsFileSystem(CloudCredential credential, SpiFileSystem fileSystem) {
 
         Map<String, Object> credentialAttributes = credential.getParameters();
         String clientSecret = String.valueOf(credentialAttributes.get(AdlsFileSystemConfiguration.CREDENTIAL_SECRET_KEY));

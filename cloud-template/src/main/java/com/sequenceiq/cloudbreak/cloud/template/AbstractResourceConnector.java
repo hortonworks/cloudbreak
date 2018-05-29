@@ -68,8 +68,7 @@ public abstract class AbstractResourceConnector implements ResourceConnector<Lis
         cloudResourceStatuses.addAll(groupStatuses);
 
         //compute
-        List<CloudResourceStatus> computeStatuses = computeResourceService.buildResourcesForLaunch(context, auth, stack.getGroups(), stack.getImage(),
-                stack.getTags(), adjustmentType, threshold);
+        List<CloudResourceStatus> computeStatuses = computeResourceService.buildResourcesForLaunch(context, auth, stack, adjustmentType, threshold);
         cloudResourceStatuses.addAll(computeStatuses);
 
         return cloudResourceStatuses;
@@ -114,7 +113,7 @@ public abstract class AbstractResourceConnector implements ResourceConnector<Lis
         context.addGroupResources(scalingGroup.getName(), groupResourceService.getGroupResources(platform, resources));
 
         //compute
-        return computeResourceService.buildResourcesForUpscale(context, auth, Collections.singletonList(scalingGroup), stack.getImage(), stack.getTags());
+        return computeResourceService.buildResourcesForUpscale(context, auth, stack, Collections.singletonList(scalingGroup));
     }
 
     @Override

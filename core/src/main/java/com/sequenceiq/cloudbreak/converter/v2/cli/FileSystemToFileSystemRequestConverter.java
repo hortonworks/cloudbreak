@@ -5,7 +5,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.FileSystemRequest;
-import com.sequenceiq.cloudbreak.api.model.FileSystemType;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 
@@ -19,7 +18,7 @@ public class FileSystemToFileSystemRequestConverter extends AbstractConversionSe
         FileSystemRequest fileSystemRequest = new FileSystemRequest();
         fileSystemRequest.setName(source.getName());
         fileSystemRequest.setProperties(source.getProperties());
-        fileSystemRequest.setType(FileSystemType.valueOf(source.getType()));
+        fileSystemRequest.setType(source.getType());
         return fileSystemRequest;
     }
 
