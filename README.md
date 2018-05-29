@@ -243,3 +243,8 @@ Gradle is used for build and dependency management. Gradle wrapper is added to C
 ```
 ./gradlew clean build
 ```
+
+## Additional infos:
+
+> * [Retrieve OAuth Bearer Token via Cloudbreak REST API](https://github.com/hortonworks/cloudbreak/blob/docs/docs/common/retrieve_oauth_token.md)
+> * [Cloudbreak Service Provider Interface (SPI)](https://github.com/hortonworks/cloudbreak/blob/docs/docs/spi.md)
