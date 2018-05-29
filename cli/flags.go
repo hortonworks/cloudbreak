@@ -294,6 +294,13 @@ var (
 			Usage: "location of the blueprint file",
 		},
 	}
+	FlCloudStorageTypeOptional = StringFlag{
+		RequiredFlag: OPTIONAL,
+		StringFlag: cli.StringFlag{
+			Name:  "cloud-storage",
+			Usage: "type of the cloud storage [wasb/WASB, adls/ADLS, s3/S3, gcs/GCS]",
+		},
+	}
 	FlExecutionType = StringFlag{
 		RequiredFlag: REQUIRED,
 		StringFlag: cli.StringFlag{

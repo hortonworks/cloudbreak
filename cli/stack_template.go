@@ -40,32 +40,32 @@ var stackClient = func(server, userName, password, authType string) getPublicSta
 
 func GenerateAwsStackTemplate(c *cli.Context) error {
 	cloud.SetProviderType(cloud.AWS)
-	return printTemplate(*generateStackTemplateImpl(getNetworkMode(c), c.String, c.Bool, getBlueprintClient))
+	return printTemplate(*generateStackTemplateImpl(getNetworkMode(c), c.String, c.Bool, getBlueprintClient, getCloudStorageType(c, c.String)))
 }
 
 func GenerateAzureStackTemplate(c *cli.Context) error {
 	cloud.SetProviderType(cloud.AZURE)
-	return printTemplate(*generateStackTemplateImpl(getNetworkMode(c), c.String, c.Bool, getBlueprintClient))
+	return printTemplate(*generateStackTemplateImpl(getNetworkMode(c), c.String, c.Bool, getBlueprintClient, getCloudStorageType(c, c.String)))
 }
 
 func GenerateGcpStackTemplate(c *cli.Context) error {
 	cloud.SetProviderType(cloud.GCP)
-	return printTemplate(*generateStackTemplateImpl(getNetworkMode(c), c.String, c.Bool, getBlueprintClient))
+	return printTemplate(*generateStackTemplateImpl(getNetworkMode(c), c.String, c.Bool, getBlueprintClient, getCloudStorageType(c, c.String)))
 }
 
 func GenerateOpenstackStackTemplate(c *cli.Context) error {
 	cloud.SetProviderType(cloud.OPENSTACK)
-	return printTemplate(*generateStackTemplateImpl(getNetworkMode(c), c.String, c.Bool, getBlueprintClient))
+	return printTemplate(*generateStackTemplateImpl(getNetworkMode(c), c.String, c.Bool, getBlueprintClient, getCloudStorageType(c, c.String)))
 }
 
 func GenerateYarnStackTemplate(c *cli.Context) error {
 	cloud.SetProviderType(cloud.YARN)
-	return printTemplate(*generateStackTemplateImpl(getNetworkMode(c), c.String, c.Bool, getBlueprintClient))
+	return printTemplate(*generateStackTemplateImpl(getNetworkMode(c), c.String, c.Bool, getBlueprintClient, getCloudStorageType(c, c.String)))
 }
 
 func GenerateAtachedStackTemplate(c *cli.Context) error {
 	checkRequiredFlagsAndArguments(c)
-	return generateAttachedtackTemplateImpl(c.String, c.Bool, stackClient)
+	return generateAttachedtackTemplateImpl(c.String, c.Bool, stackClient, getCloudStorageType(c, c.String))
 }
 
 func getNetworkMode(c *cli.Context) cloud.NetworkMode {
@@ -83,6 +83,30 @@ func getNetworkMode(c *cli.Context) cloud.NetworkMode {
 	}
 }
 
+func getCloudStorageType(c *cli.Context, stringFinder func(string) string) cloud.CloudStorageType {
+	storageType := stringFinder(FlCloudStorageTypeOptional.Name)
+	switch storageType {
+	case "adls":
+		return cloud.ADLS
+	case "ADLS":
+		return cloud.ADLS
+	case "wasb":
+		return cloud.WASB
+	case "WASB":
+		return cloud.WASB
+	case "gcs":
+		return cloud.GCS
+	case "GCS":
+		return cloud.GCS
+	case "s3":
+		return cloud.S3
+	case "S3":
+		return cloud.S3
+	default:
+		return cloud.NO_CLOUD_STORAGE
+	}
+}
+
 func getString(skippedFields map[string]bool, fieldName string, defaultValue string) string {
 	if _, skipped := skippedFields[fieldName]; skipped {
 		return ""
@@ -97,7 +121,7 @@ func getStringPointer(skippedFields map[string]bool, fieldName string, defaultVa
 	return &defaultValue
 }
 
-func generateStackTemplateImpl(mode cloud.NetworkMode, stringFinder func(string) string, boolFinder func(string) bool, getBlueprintClient func(string, string, string, string) getPublicBlueprint) *models_cloudbreak.StackV2Request {
+func generateStackTemplateImpl(mode cloud.NetworkMode, stringFinder func(string) string, boolFinder func(string) bool, getBlueprintClient func(string, string, string, string) getPublicBlueprint, storageType cloud.CloudStorageType) *models_cloudbreak.StackV2Request {
 	provider := cloud.GetProvider()
 	skippedFields := provider.SkippedFields()
 
@@ -122,7 +146,7 @@ func generateStackTemplateImpl(mode cloud.NetworkMode, stringFinder func(string)
 		StackAuthentication: &models_cloudbreak.StackAuthentication{PublicKey: "____"},
 	}
 
-	extendTemplateWithOptionalBlocks(&template, boolFinder)
+	extendTemplateWithOptionalBlocks(&template, boolFinder, storageType)
 
 	nodes := defaultNodes
 	if bpName := stringFinder(FlBlueprintNameOptional.Name); len(bpName) != 0 {
@@ -147,7 +171,7 @@ func generateStackTemplateImpl(mode cloud.NetworkMode, stringFinder func(string)
 	return &template
 }
 
-func generateAttachedtackTemplateImpl(stringFinder func(string) string, boolFinder func(string) bool, getStackClient func(string, string, string, string) getPublicStack) error {
+func generateAttachedtackTemplateImpl(stringFinder func(string) string, boolFinder func(string) bool, getStackClient func(string, string, string, string) getPublicStack, storageType cloud.CloudStorageType) error {
 
 	datalake := fetchStack(stringFinder(FlWithSourceCluster.Name), stackClient(stringFinder(FlServerOptional.Name), stringFinder(FlUsername.Name), stringFinder(FlPassword.Name), stringFinder(FlAuthTypeOptional.Name)))
 	isSharedServiceReady, _ := datalake.Cluster.Blueprint.Tags["shared_services_ready"].(bool)
@@ -157,7 +181,7 @@ func generateAttachedtackTemplateImpl(stringFinder func(string) string, boolFind
 		utils.LogErrorMessageAndExit("Datalake must be available state")
 	} else {
 		cloud.SetProviderType(cloud.CloudType(datalake.CloudPlatform))
-		attachedClusterTemplate := generateStackTemplateImpl(cloud.EXISTING_NETWORK_EXISTING_SUBNET, stringFinder, boolFinder, getBlueprintClient)
+		attachedClusterTemplate := generateStackTemplateImpl(cloud.EXISTING_NETWORK_EXISTING_SUBNET, stringFinder, boolFinder, getBlueprintClient, storageType)
 		attachedClusterTemplate.Placement.Region = &datalake.Region
 		attachedClusterTemplate.Placement.AvailabilityZone = datalake.AvailabilityZone
 		attachedClusterTemplate.General.CredentialName = datalake.Credential.Name
@@ -227,7 +251,7 @@ func getNodesByBlueprint(bp []byte) []cloud.Node {
 	return resp
 }
 
-func extendTemplateWithOptionalBlocks(template *models_cloudbreak.StackV2Request, boolFinder func(string) bool) {
+func extendTemplateWithOptionalBlocks(template *models_cloudbreak.StackV2Request, boolFinder func(string) bool, storageType cloud.CloudStorageType) {
 	if withCustomDomain := boolFinder(FlWithCustomDomainOptional.Name); withCustomDomain {
 		template.CustomDomain = &models_cloudbreak.CustomDomainSettings{
 			CustomDomain:            "____",
@@ -286,6 +310,43 @@ func extendTemplateWithOptionalBlocks(template *models_cloudbreak.StackV2Request
 			Password:   "____",
 			Descriptor: "____",
 			Krb5Conf:   "____",
+		}
+	}
+	extendTemplateWithStorageType(template, storageType)
+}
+
+func extendTemplateWithStorageType(template *models_cloudbreak.StackV2Request, storageType cloud.CloudStorageType) {
+	if storageType == cloud.WASB {
+		template.Cluster.CloudStorage = &models_cloudbreak.CloudStorageRequest{
+			Wasb: &models_cloudbreak.WasbCloudStorageParameters{
+				AccountKey:  &(&types.S{S: "____"}).S,
+				AccountName: &(&types.S{S: "____"}).S,
+				Secure:      &(&types.B{B: false}).B,
+			},
+			Locations: []*models_cloudbreak.StorageLocationRequest{},
+		}
+	} else if storageType == cloud.ADLS {
+		template.Cluster.CloudStorage = &models_cloudbreak.CloudStorageRequest{
+			Adls: &models_cloudbreak.AdlsCloudStorageParameters{
+				AccountName: &(&types.S{S: "____"}).S,
+				ClientID:    &(&types.S{S: "____"}).S,
+				Credential:  &(&types.S{S: "____"}).S,
+			},
+			Locations: []*models_cloudbreak.StorageLocationRequest{},
+		}
+	} else if storageType == cloud.S3 {
+		template.Cluster.CloudStorage = &models_cloudbreak.CloudStorageRequest{
+			S3: &models_cloudbreak.S3CloudStorageParameters{
+				InstanceProfile: &(&types.S{S: "____"}).S,
+			},
+			Locations: []*models_cloudbreak.StorageLocationRequest{},
+		}
+	} else if storageType == cloud.GCS {
+		template.Cluster.CloudStorage = &models_cloudbreak.CloudStorageRequest{
+			Gcs: &models_cloudbreak.GcsCloudStorageParameters{
+				ServiceAccountEmail: &(&types.S{S: "____"}).S,
+			},
+			Locations: []*models_cloudbreak.StorageLocationRequest{},
 		}
 	}
 }

@@ -25,6 +25,16 @@ const (
 	NO_NETWORK
 )
 
+type CloudStorageType int
+
+const (
+	WASB CloudStorageType = iota
+	ADLS
+	S3
+	GCS
+	NO_CLOUD_STORAGE
+)
+
 const (
 	REGION_FIELD            = "region"
 	AVAILABILITY_ZONE_FIELD = "availabilityZone"
