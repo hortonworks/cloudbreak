@@ -15,6 +15,8 @@ public interface BlueprintProcessor {
 
     Set<String> getHostGroupsWithComponent(String blueprintText, String component);
 
+    boolean componentExistsInHostGroup(String component, String blueprintText, String hostGroup);
+
     boolean componentExistsInBlueprint(String component, String blueprintText);
 
     String removeComponentFromBlueprint(String component, String blueprintText);
