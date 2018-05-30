@@ -4,7 +4,7 @@ Cloudbreak already supports multiple cloud platforms and provides an easy way to
  
  * The [cloud-aws](https://github.com/hortonworks/cloudbreak/tree/master/cloud-aws) module integrates Amazon Web Services
  * The [cloud-gcp](https://github.com/hortonworks/cloudbreak/tree/master/cloud-gcp) module integrates Google Cloud Platform
- * The [cloud-arm](https://github.com/hortonworks/cloudbreak/tree/master/cloud-arm) module integrates Microsoft Azure
+ * The [cloud-azure](https://github.com/hortonworks/cloudbreak/tree/master/cloud-azure) module integrates Microsoft Azure
  * The [cloud-openstack](https://github.com/hortonworks/cloudbreak/tree/master/cloud-openstack) module integrates OpenStack
 
 The SPI interface is event-based, it scales well, and is decoupled from Cloudbreak. The core of Cloudbreak uses [EventBus](http://projectreactor.io/) to communicate with the providers, but the complexity of event handling is hidden from the provider implementation.
@@ -46,7 +46,7 @@ dependencies {
 }
 ```
 
-The entry point for the provider is the  [CloudConnector](https://github.com/hortonworks/cloudbreak/blob/master/cloud-api/src/main/java/com/hortonworks/cloudbreak/cloud/CloudConnector.java) interface and every interface that needs to be implemented is reachable trough this interface.
+The entry point for the provider is the  [CloudConnector](https://github.com/hortonworks/cloudbreak/blob/master/cloud-api/src/main/java/com/sequenceiq/cloudbreak/cloud/CloudConnector.java) interface and every interface that needs to be implemented is reachable trough this interface.
 
 ###Individual Resource Based Deployments
 
