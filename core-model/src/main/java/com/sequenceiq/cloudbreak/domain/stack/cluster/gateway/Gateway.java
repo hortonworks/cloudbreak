@@ -58,7 +58,7 @@ public class Gateway implements ProvisionEntity {
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private SSOType ssoType = SSOType.NONE;
+    private SSOType ssoType = SSOType.PROXY;
 
     private String ssoProvider;
 

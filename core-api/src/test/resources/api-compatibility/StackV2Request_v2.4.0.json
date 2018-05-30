@@ -111,18 +111,6 @@
     "ambari": {
       "blueprintId": 0,
       "blueprintName": "string",
-      "gateway": {
-        "enableGateway": false,
-        "path": "string",
-        "topologyName": "string",
-        "exposedServices": [
-          "string"
-        ],
-        "ssoProvider": "string",
-        "tokenCert": "string",
-        "gatewayType": "CENTRAL",
-        "ssoType": "SSO_PROVIDER"
-      },
       "enableSecurity": false,
       "userName": "string",
       "password": "string",

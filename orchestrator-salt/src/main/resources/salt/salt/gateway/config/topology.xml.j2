@@ -4,7 +4,7 @@
 
         <!-- {{ exposed }} -->
 
-        {% if 'NONE' == salt['pillar.get']('gateway:ssotype') -%}
+        {% if 'PROXY' == salt['pillar.get']('gateway:ssotype') -%}
 
         <provider>
             <role>authentication</role>
