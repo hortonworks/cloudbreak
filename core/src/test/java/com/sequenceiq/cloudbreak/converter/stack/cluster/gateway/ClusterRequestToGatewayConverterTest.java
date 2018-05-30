@@ -1,32 +1,39 @@
 package com.sequenceiq.cloudbreak.converter.stack.cluster.gateway;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.verify;
+import static org.junit.Assert.assertFalse;
 
 import java.util.Collections;
+import java.util.List;
 
+import javax.inject.Inject;
+
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Spy;
-import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.core.convert.ConversionService;
+import org.mockito.MockitoAnnotations;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import com.sequenceiq.cloudbreak.api.model.ExposedService;
 import com.sequenceiq.cloudbreak.api.model.GatewayType;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.GatewayJson;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.GatewayTopologyJson;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.SSOType;
+import com.sequenceiq.cloudbreak.conf.ConversionConfig;
+import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.controller.validation.stack.cluster.gateway.ExposedServiceListValidator;
+import com.sequenceiq.cloudbreak.controller.validation.stack.cluster.gateway.GatewayJsonValidator;
+import com.sequenceiq.cloudbreak.controller.validation.stack.cluster.gateway.GatewayTopologyJsonValidator;
 import com.sequenceiq.cloudbreak.converter.util.GatewayConvertUtil;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(classes = {ClusterRequestToGatewayConverter.class, ConversionConfig.class, GatewayConvertUtil.class,
+        GatewayJsonValidator.class, GatewayTopologyJsonToGatewayTopologyConverter.class, GatewayTopologyJsonValidator.class,
+        ExposedServiceListValidator.class})
 public class ClusterRequestToGatewayConverterTest {
 
     private static final String DEPRECATED_TOPOLOGY = "deprecated topology";
@@ -40,28 +47,22 @@ public class ClusterRequestToGatewayConverterTest {
     @Rule
     public final ExpectedException thrown = ExpectedException.none();
 
-    @Mock
-    private ConversionService conversionService;
+    @Inject
+    private ClusterRequestToGatewayConverter underTest;
 
-    @Spy
-    private GatewayConvertUtil gatewayConvertUtil;
-
-    @InjectMocks
-    private final ClusterRequestToGatewayConverter underTest = new ClusterRequestToGatewayConverter();
+    @Before
+    public void setup() {
+        MockitoAnnotations.initMocks(this);
+    }
 
     @Test
     public void testConvertSsoType() {
         GatewayJson source = new GatewayJson();
+        source.setTopologies(getTopologies());
 
         Gateway result = underTest.convert(generateClusterRequest(source));
 
         assertEquals(SSOType.PROXY, result.getSsoType());
-    }
-
-    private ClusterRequest generateClusterRequest(GatewayJson source) {
-        ClusterRequest cluster = new ClusterRequest();
-        cluster.setGateway(source);
-        return cluster;
     }
 
     @Test
@@ -72,6 +73,7 @@ public class ClusterRequestToGatewayConverterTest {
         source.setSsoType(SSOType.PROXY_SSO);
         source.setTokenCert(TOKEN_CERT);
         source.setGatewayType(GatewayType.CENTRAL);
+        source.setTopologies(getTopologies());
 
         Gateway result = underTest.convert(generateClusterRequest(source));
 
@@ -96,21 +98,38 @@ public class ClusterRequestToGatewayConverterTest {
         GatewayTopologyJson topology1 = new GatewayTopologyJson();
         topology1.setTopologyName("topology1");
         source.setTopologies(Collections.singletonList(topology1));
-        doNothing().when(gatewayConvertUtil).setTopologyList(any(), any());
-        underTest.convert(generateClusterRequest(source));
 
-        verify(gatewayConvertUtil).setTopologyList(any(), any());
+        Gateway result = underTest.convert(generateClusterRequest(source));
+
+        assertFalse(result.getTopologies().isEmpty());
     }
 
     @Test
-    public void testConvertLegacyGatewayWithAllExposed() {
+    public void testConvertLegacyGatewayWithoutExposed() {
         GatewayJson source = new GatewayJson();
         source.setEnableGateway(true);
-        source.setTopologyName("topology1");
-        source.setExposedServices(Collections.singletonList(ExposedService.ALL.getServiceName()));
-        doNothing().when(gatewayConvertUtil).setLegacyTopology(any(), any(), any());
-        underTest.convert(generateClusterRequest(source));
+        source.setTopologyName(DEPRECATED_TOPOLOGY);
+        Gateway result = underTest.convert(generateClusterRequest(source));
 
-        verify(gatewayConvertUtil).setLegacyTopology(any(), any(), any());
+        assertEquals(result.getTopologies().iterator().next().getTopologyName(), DEPRECATED_TOPOLOGY);
+    }
+
+    @Test(expected = BadRequestException.class)
+    public void testThrowsExceptionWhenRequestIsInvalid() {
+        GatewayJson source = new GatewayJson();
+
+        underTest.convert(generateClusterRequest(source));
+    }
+
+    private List<GatewayTopologyJson> getTopologies() {
+        GatewayTopologyJson gatewayTopologyJson = new GatewayTopologyJson();
+        gatewayTopologyJson.setTopologyName("topologyName");
+        return Collections.singletonList(gatewayTopologyJson);
+    }
+
+    private ClusterRequest generateClusterRequest(GatewayJson source) {
+        ClusterRequest cluster = new ClusterRequest();
+        cluster.setGateway(source);
+        return cluster;
     }
 }

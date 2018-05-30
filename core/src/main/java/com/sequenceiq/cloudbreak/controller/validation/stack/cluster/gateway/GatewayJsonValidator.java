@@ -9,6 +9,7 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.GatewayJson;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.GatewayTopologyJson;
@@ -26,26 +27,40 @@ public class GatewayJsonValidator implements Validator<GatewayJson> {
     @Override
     public ValidationResult validate(GatewayJson subject) {
         ValidationResultBuilder validationResultBuilder = ValidationResult.builder();
+        if (noTopologyIsDefined(subject)) {
+            return validationResultBuilder.error("No topology is defined in gateway request. Please define a topology in "
+                    + "'gateway.topologies'.").build();
+        }
         if (shouldCheckTopologyNames(subject)) {
-
-            List<String> topologyNames = subject.getTopologies().stream()
-                    .map(GatewayTopologyJson::getTopologyName)
-                    .collect(Collectors.toList());
-
-            Set<String> uniqueNames = new HashSet<>(topologyNames);
-            uniqueNames.stream().forEach(topologyNames::remove);
-
-            return validationResultBuilder
-                    .ifError(() -> !topologyNames.isEmpty(),
-                            "There are duplicate topology names is gateway.topologies! "
-                            + "All topology name should be unique for a gateway. Duplicates are: "
-                            + topologyNames.stream().collect(Collectors.joining(", ")))
-                    .build();
+            validateTopologyNames(subject, validationResultBuilder);
         }
         return validationResultBuilder.build();
     }
 
+    private boolean noTopologyIsDefined(GatewayJson subject) {
+        boolean noTopologyListIsDefined = CollectionUtils.isEmpty(subject.getTopologies());
+        return noDeprecatedTopologyIsDefined(subject) && noTopologyListIsDefined;
+    }
+
+    private boolean noDeprecatedTopologyIsDefined(GatewayJson subject) {
+        return CollectionUtils.isEmpty(subject.getExposedServices()) && StringUtils.isEmpty(subject.getTopologyName());
+    }
+
     private boolean shouldCheckTopologyNames(GatewayJson subject) {
         return !gatewayConvertUtil.isLegacyGatewayRequest(subject) && !CollectionUtils.isEmpty(subject.getTopologies());
+    }
+
+    private void validateTopologyNames(GatewayJson subject, ValidationResultBuilder validationResultBuilder) {
+        List<String> topologyNames = subject.getTopologies().stream()
+                .map(GatewayTopologyJson::getTopologyName)
+                .collect(Collectors.toList());
+
+        Set<String> uniqueNames = new HashSet<>(topologyNames);
+        uniqueNames.stream().forEach(topologyNames::remove);
+
+        validationResultBuilder.ifError(() -> !topologyNames.isEmpty(),
+                "There are duplicate topology names is gateway.topologies! "
+                        + "All topology name should be unique for a gateway. Duplicates are: "
+                        + topologyNames.stream().collect(Collectors.joining(", ")));
     }
 }
