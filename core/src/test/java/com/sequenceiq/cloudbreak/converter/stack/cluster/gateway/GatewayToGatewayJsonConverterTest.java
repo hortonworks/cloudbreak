@@ -53,7 +53,7 @@ public class GatewayToGatewayJsonConverterTest {
         Gateway gateway = new Gateway();
         gateway.setPath(PATH);
         gateway.setSsoProvider(SSO_PROVIDER);
-        gateway.setSsoType(SSOType.SSO_PROVIDER);
+        gateway.setSsoType(SSOType.PROXY_SSO);
         gateway.setGatewayType(GatewayType.CENTRAL);
         gateway.setTokenCert(TOKEN_CERT);
         gateway.setSignKey(SIGN_KEY);
@@ -62,7 +62,7 @@ public class GatewayToGatewayJsonConverterTest {
 
         GatewayJson result = underTest.convert(gateway);
 
-        assertEquals(SSOType.SSO_PROVIDER, result.getSsoType());
+        assertEquals(SSOType.PROXY_SSO, result.getSsoType());
         assertEquals(TOKEN_CERT, result.getTokenCert());
         assertEquals(GatewayType.CENTRAL, result.getGatewayType());
         assertTrue(CollectionUtils.isEmpty(result.getExposedServices()));

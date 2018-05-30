@@ -55,7 +55,7 @@ public class ClusterRequestToGatewayConverterTest {
 
         Gateway result = underTest.convert(generateClusterRequest(source));
 
-        assertEquals(SSOType.NONE, result.getSsoType());
+        assertEquals(SSOType.PROXY, result.getSsoType());
     }
 
     private ClusterRequest generateClusterRequest(GatewayJson source) {
@@ -69,13 +69,13 @@ public class ClusterRequestToGatewayConverterTest {
         GatewayJson source = new GatewayJson();
         source.setPath(PATH);
         source.setSsoProvider(SSO_PROVIDER);
-        source.setSsoType(SSOType.SSO_PROVIDER);
+        source.setSsoType(SSOType.PROXY_SSO);
         source.setTokenCert(TOKEN_CERT);
         source.setGatewayType(GatewayType.CENTRAL);
 
         Gateway result = underTest.convert(generateClusterRequest(source));
 
-        assertEquals(SSOType.SSO_PROVIDER, result.getSsoType());
+        assertEquals(SSOType.PROXY_SSO, result.getSsoType());
         assertEquals(TOKEN_CERT, result.getTokenCert());
         assertEquals(GatewayType.CENTRAL, result.getGatewayType());
     }
