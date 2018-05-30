@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.downscale;
 
 import static com.sequenceiq.cloudbreak.api.model.Status.AVAILABLE;
+import static com.sequenceiq.cloudbreak.api.model.Status.UPDATE_FAILED;
 import static com.sequenceiq.cloudbreak.api.model.Status.UPDATE_IN_PROGRESS;
 import static java.util.stream.Collectors.toList;
 
@@ -19,9 +20,10 @@ import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackDownscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
+import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
@@ -90,7 +92,9 @@ public class StackDownscaleService {
         usageService.scaleUsagesForStack(stack.getId(), instanceGroupName, nodeCount);
     }
 
-    public void handleStackDownscaleError(Exception errorDetails) {
+    public void handleStackDownscaleError(StackFailureContext context, Exception errorDetails) {
         LOGGER.error("Exception during the downscaling of stack", errorDetails);
+        flowMessageService.fireEventAndLog(context.getStackView().getId(), Msg.STACK_DOWNSCALE_FAILED, UPDATE_FAILED.name());
+        stackUpdater.updateStackStatus(context.getStackView().getId(), DetailedStackStatus.DOWNSCALE_FAILED);
     }
 }

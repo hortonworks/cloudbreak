@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.net.util.SubnetUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -310,25 +311,27 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
         resourcesToRemove.put(ATTACHED_DISK_STORAGE_NAME, attachedDiskStorageName);
         try {
             VirtualMachine virtualMachine = client.getVirtualMachine(stackName, instanceId);
-            List<String> networkInterfaceIds = virtualMachine.networkInterfaceIds();
-            Collection<String> networkInterfacesNames = new ArrayList<>();
-            Collection<String> publicIpAddressNames = new ArrayList<>();
-            for (String interfaceId : networkInterfaceIds) {
-                NetworkInterface networkInterface = client.getNetworkInterfaceById(interfaceId);
-                String interfaceName = networkInterface.name();
-                networkInterfacesNames.add(interfaceName);
-                Collection<String> ipNames = new HashSet<>();
-                for (NicIPConfiguration ipConfiguration : networkInterface.ipConfigurations().values()) {
-                    if (ipConfiguration.publicIPAddressId() != null && ipConfiguration.getPublicIPAddress().name() != null) {
-                        ipNames.add(ipConfiguration.getPublicIPAddress().name());
+            if (virtualMachine != null) {
+                List<String> networkInterfaceIds = virtualMachine.networkInterfaceIds();
+                List<String> networkInterfacesNames = new ArrayList<>();
+                List<String> publicIpAddressNames = new ArrayList<>();
+                for (String interfaceId : networkInterfaceIds) {
+                    NetworkInterface networkInterface = client.getNetworkInterfaceById(interfaceId);
+                    String interfaceName = networkInterface.name();
+                    networkInterfacesNames.add(interfaceName);
+                    Collection<String> ipNames = new HashSet<>();
+                    for (NicIPConfiguration ipConfiguration : networkInterface.ipConfigurations().values()) {
+                        if (ipConfiguration.publicIPAddressId() != null && ipConfiguration.getPublicIPAddress().name() != null) {
+                            ipNames.add(ipConfiguration.getPublicIPAddress().name());
+                        }
                     }
+                    publicIpAddressNames.addAll(ipNames);
                 }
-                publicIpAddressNames.addAll(ipNames);
-            }
-            resourcesToRemove.put(NETWORK_INTERFACES_NAMES, networkInterfacesNames);
-            resourcesToRemove.put(PUBLIC_ADDRESS_NAME, publicIpAddressNames);
+                resourcesToRemove.put(NETWORK_INTERFACES_NAMES, networkInterfacesNames);
+                resourcesToRemove.put(PUBLIC_ADDRESS_NAME, publicIpAddressNames);
 
-            collectRemovableDisks(resourcesToRemove, virtualMachine);
+                collectRemovableDisks(resourcesToRemove, virtualMachine);
+            }
         } catch (CloudException e) {
             if (e.response().code() != AzureConstants.NOT_FOUND) {
                 throw new CloudConnectorException(e.body().message(), e);
@@ -378,11 +381,12 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
                 deallocateVirtualMachine(client, stackName, instanceId);
                 deleteVirtualMachine(client, stackName, instanceId);
                 if (instanceResources != null) {
-                    deleteNetworkInterfaces(client, stackName, (Iterable<String>) instanceResources.get(NETWORK_INTERFACES_NAMES));
-                    deletePublicIps(client, stackName, (Iterable<String>) instanceResources.get(PUBLIC_ADDRESS_NAME));
-                    deleteDisk((Iterable<String>) instanceResources.get(STORAGE_PROFILE_DISK_NAMES), client, resourceGroupName,
+                    deleteNetworkInterfaces(client, stackName,
+                            CollectionUtils.emptyIfNull((Collection<String>) instanceResources.get(NETWORK_INTERFACES_NAMES)));
+                    deletePublicIps(client, stackName, CollectionUtils.emptyIfNull((Collection<String>) instanceResources.get(PUBLIC_ADDRESS_NAME)));
+                    deleteDisk(CollectionUtils.emptyIfNull((Collection<String>) instanceResources.get(STORAGE_PROFILE_DISK_NAMES)), client, resourceGroupName,
                             (String) instanceResources.get(ATTACHED_DISK_STORAGE_NAME), diskContainer);
-                    deleteManagedDisks((Iterable<String>) instanceResources.get(MANAGED_DISK_IDS), client);
+                    deleteManagedDisks(CollectionUtils.emptyIfNull((Collection<String>) instanceResources.get(MANAGED_DISK_IDS)), client);
                     if (azureStorage.getArmAttachedStorageOption(stack.getParameters()) == ArmAttachedStorageOption.PER_VM) {
                         azureStorage.deleteStorage(client, (String) instanceResources.get(ATTACHED_DISK_STORAGE_NAME), resourceGroupName);
                     }
@@ -426,13 +430,13 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
         }
     }
 
-    private void deleteManagedDisks(Iterable<String> managedDiskIds, AzureClient azureClient) {
+    private void deleteManagedDisks(Collection<String> managedDiskIds, AzureClient azureClient) {
         for (String managedDiskId : managedDiskIds) {
             azureClient.deleteManagedDisk(managedDiskId);
         }
     }
 
-    private void deleteDisk(Iterable<String> storageProfileDiskNames, AzureClient azureClient, String resourceGroup, String storageName, String container) {
+    private void deleteDisk(Collection<String> storageProfileDiskNames, AzureClient azureClient, String resourceGroup, String storageName, String container) {
         for (String storageProfileDiskName : storageProfileDiskNames) {
             try {
                 azureClient.deleteBlobInStorageContainer(resourceGroup, storageName, container, storageProfileDiskName);
@@ -447,7 +451,7 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
         }
     }
 
-    private void deleteNetworkInterfaces(AzureClient client, String stackName, Iterable<String> networkInterfacesNames)
+    private void deleteNetworkInterfaces(AzureClient client, String stackName, Collection<String> networkInterfacesNames)
             throws CloudConnectorException {
         for (String networkInterfacesName : networkInterfacesNames) {
             try {
@@ -462,7 +466,7 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
         }
     }
 
-    private void deletePublicIps(AzureClient client, String stackName, Iterable<String> publicIpNames) {
+    private void deletePublicIps(AzureClient client, String stackName, Collection<String> publicIpNames) {
         for (String publicIpName : publicIpNames) {
             try {
                 if (client.getPublicIpAddress(stackName, publicIpName) != null) {
