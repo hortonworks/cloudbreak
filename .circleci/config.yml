@@ -15,7 +15,7 @@ jobs:
       - store_test_results:
           path: tests/
       - store_artifacts:
-          path: tests/test-result.tap
+          path: tests/aruba/test-result.html
 
 workflows:
   version: 2

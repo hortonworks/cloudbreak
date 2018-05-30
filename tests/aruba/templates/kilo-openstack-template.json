@@ -24,10 +24,6 @@
         "verify": false,
         "enableGplRepo": false
       },
-      "gateway": {
-        "enableGateway": false,
-        "gatewayType": "INDIVIDUAL"
-      },
       "validateBlueprint": false,
       "ambariSecurityMasterKey": ""
     }

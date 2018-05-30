@@ -18,7 +18,7 @@ RSpec.describe 'Image catalog test cases', :type => :aruba do
   
   it "Imagecatalog - Create" do 
     with_environment 'DEBUG' => '1' do
-      result = cb.imagecatalog.create.name(@image_catalog_name).url(@image_catalog_url).build(false)   
+      result = cb.imagecatalog.create.name(@image_catalog_name).url(@image_catalog_url).build  
       expect(result.stderr).to include("create imagecatalog took")    
     end
   end
@@ -26,7 +26,7 @@ RSpec.describe 'Image catalog test cases', :type => :aruba do
   it "Imagecatalog - Create - Invalid Url" do 
   	skip("BUG-97072")
     with_environment 'DEBUG' => '1' do
-      result = cb.imagecatalog.create.name(@image_catalog_name).url("http://www.google.com").build(false)   
+      result = cb.imagecatalog.create.name(@image_catalog_name).url("http://www.google.com").build
       expect(result.stderr).to include("create imagecatalog took")    
     end
   end 
@@ -34,13 +34,13 @@ RSpec.describe 'Image catalog test cases', :type => :aruba do
   it "Imagecatalog - Create - Invalid json" do 
   	skip("BUG-97072")
     with_environment 'DEBUG' => '1' do
-      result = cb.imagecatalog.create.name(@image_catalog_name).url(@imagecatalog_invalid_json ).build(false)   
+      result = cb.imagecatalog.create.name(@image_catalog_name).url(@imagecatalog_invalid_json ).build 
       expect(result.stderr).to include("error")    
     end
   end  
 
   it "Imagecatalog - List" do
-    result = cb.imagecatalog.list.build(false)   
+    result = cb.imagecatalog.list.build
     expect(result.exit_status).to eql 0
 
     JSON.parse(result.stdout).each do |s|    
@@ -54,7 +54,7 @@ RSpec.describe 'Image catalog test cases', :type => :aruba do
 
   it "Imagecatalog - Set default" do 
     with_environment 'DEBUG' => '1' do
-      result = cb.imagecatalog.set_default.name(@image_catalog_name).build(false)   
+      result = cb.imagecatalog.set_default.name(@image_catalog_name).build  
       expect(result.stderr).to include("set default imagecatalog took")    
     end
   end                

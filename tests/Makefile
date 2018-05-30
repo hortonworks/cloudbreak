@@ -6,7 +6,7 @@ define run_test
     bats --tap e2e/${1}.bats | tee ${1}-result.tap
 endef
 
-all: cbm docker-integration-test stop-cbm generate-xunit-result
+all: cbm docker-integration-test-aruba stop-cbm
 
 cbm: download-s3
 	GIT_VERSION=$(GIT_VERSION) GIT_TAG=$(GIT_TAG) ./scripts/cbm.sh
@@ -41,3 +41,6 @@ clean: stop-cbm clean-test-result
 
 download-s3:
 	curl -k https://s3-eu-central-1.amazonaws.com/cloudbreak-swagger/swagger-$(GIT_VERSION).json -o swagger.json
+
+docker-integration-test-aruba:
+	./scripts/docker-integration-test-aruba.sh

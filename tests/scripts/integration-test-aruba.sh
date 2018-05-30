@@ -18,4 +18,4 @@ source /usr/share/rvm/scripts/rvm
 
 cd work/aruba
 
-rspec spec/integration/*.rb 
+rspec -f RspecJunitFormatter -o test-result.xml -f h spec/integration/*.rb | tee test-result.html | ruby -n spec/common/integration_formatter.rb

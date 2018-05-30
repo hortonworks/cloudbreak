@@ -20,7 +20,7 @@ docker run -it \
     --net=host \
     -v "${HOME}/project/build/Linux":/usr/local/bin \
     -v $(pwd):/work \
-    halmy/aruba-rspec /work/scripts/integration-test-aruba.sh
+    halmy/aruba-rspec:1.0 /work/scripts/integration-test-aruba.sh
 RESULT=$?
 
 echo
