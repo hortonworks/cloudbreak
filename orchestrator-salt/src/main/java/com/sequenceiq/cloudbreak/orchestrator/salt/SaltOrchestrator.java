@@ -78,7 +78,7 @@ public class SaltOrchestrator implements HostOrchestrator {
     @Value("${cb.max.salt.new.service.retry:90}")
     private int maxRetry;
 
-    @Value("${cb.max.salt.new.service.retry.onerror:10}")
+    @Value("${cb.max.salt.new.service.retry.onerror:20}")
     private int maxRetryOnError;
 
     @Value("${cb.max.salt.recipe.execution.retry:90}")
@@ -494,7 +494,7 @@ public class SaltOrchestrator implements HostOrchestrator {
     private void runNewService(SaltConnector sc, BaseSaltJobRunner baseSaltJobRunner, ExitCriteriaModel exitCriteriaModel, int maxRetry, boolean retryOnFail)
             throws ExecutionException, InterruptedException {
         OrchestratorBootstrap saltJobIdTracker = new SaltJobIdTracker(sc, baseSaltJobRunner, retryOnFail);
-        Callable<Boolean> saltJobRunBootstrapRunner = runner(saltJobIdTracker, exitCriteria, exitCriteriaModel, maxRetry);
+        Callable<Boolean> saltJobRunBootstrapRunner = runner(saltJobIdTracker, exitCriteria, exitCriteriaModel, maxRetry, true);
         Future<Boolean> saltJobRunBootstrapFuture = parallelOrchestratorComponentRunner.submit(saltJobRunBootstrapRunner);
         saltJobRunBootstrapFuture.get();
     }
@@ -544,11 +544,13 @@ public class SaltOrchestrator implements HostOrchestrator {
     }
 
     private Callable<Boolean> runner(OrchestratorBootstrap bootstrap, ExitCriteria exitCriteria, ExitCriteriaModel exitCriteriaModel) {
-        return runner(bootstrap, exitCriteria, exitCriteriaModel, maxRetry);
+        return runner(bootstrap, exitCriteria, exitCriteriaModel, maxRetry, false);
     }
 
-    private Callable<Boolean> runner(OrchestratorBootstrap bootstrap, ExitCriteria exitCriteria, ExitCriteriaModel exitCriteriaModel, int maxRetry) {
-        return new OrchestratorBootstrapRunner(bootstrap, exitCriteria, exitCriteriaModel, MDC.getCopyOfContextMap(), maxRetry, SLEEP_TIME, maxRetryOnError);
+    private Callable<Boolean> runner(OrchestratorBootstrap bootstrap, ExitCriteria exitCriteria, ExitCriteriaModel exitCriteriaModel, int maxRetry,
+            boolean usingErrorCount) {
+        return new OrchestratorBootstrapRunner(bootstrap, exitCriteria, exitCriteriaModel, MDC.getCopyOfContextMap(), maxRetry, SLEEP_TIME,
+                usingErrorCount ? maxRetryOnError : maxRetry);
     }
 
     private void uploadSaltConfig(SaltConnector saltConnector, Set<String> targets, ExitCriteriaModel exitCriteriaModel)
