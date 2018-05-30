@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.api.model.StatusRequest;
 import com.sequenceiq.cloudbreak.api.model.UpdateClusterJson;
 import com.sequenceiq.cloudbreak.api.model.UpdateStackJson;
 import com.sequenceiq.cloudbreak.api.model.UserNamePasswordJson;
+import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRepairRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintPreparationObject;
 import com.sequenceiq.cloudbreak.blueprint.CentralBlueprintUpdater;
@@ -39,6 +40,7 @@ import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.ClusterCommonService;
 import com.sequenceiq.cloudbreak.service.OperationRetryService;
 import com.sequenceiq.cloudbreak.service.StackCommonService;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterCache;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
@@ -72,6 +74,9 @@ public class StackV2Controller extends NotificationController implements StackV2
 
     @Autowired
     private OperationRetryService operationRetryService;
+
+    @Autowired
+    private ClusterService clusterService;
 
     @Override
     public Set<StackResponse> getPrivates() {
@@ -167,16 +172,6 @@ public class StackV2Controller extends NotificationController implements StackV2
     }
 
     @Override
-    public Response putRepair(String name) {
-        IdentityUser user = authenticatedUserService.getCbUser();
-        Stack stack = stackService.getPublicStack(name, user);
-        UpdateStackJson updateStackJson = new UpdateStackJson();
-        updateStackJson.setStatus(StatusRequest.REPAIR_FAILED_NODES);
-        updateStackJson.setWithClusterEvent(true);
-        return stackCommonService.put(stack.getId(), updateStackJson);
-    }
-
-    @Override
     public Response putReinstall(String name, ReinstallRequestV2 reinstallRequestV2) {
         IdentityUser user = authenticatedUserService.getCbUser();
         reinstallRequestV2.setAccount(user.getAccount());
@@ -264,5 +259,13 @@ public class StackV2Controller extends NotificationController implements StackV2
         IdentityUser user = authenticatedUserService.getCbUser();
         Stack stack = stackService.getPublicStack(stackName, user);
         operationRetryService.retry(stack);
+    }
+
+    @Override
+    public Response repairCluster(String name, ClusterRepairRequest clusterRepairRequest) {
+        IdentityUser user = authenticatedUserService.getCbUser();
+        Stack stack = stackService.getPublicStack(name, user);
+        clusterService.repairCluster(stack.getId(), clusterRepairRequest.getHostGroups(), clusterRepairRequest.isRemoveOnly());
+        return Response.accepted().build();
     }
 }
