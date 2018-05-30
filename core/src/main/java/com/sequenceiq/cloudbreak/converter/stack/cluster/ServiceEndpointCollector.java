@@ -26,6 +26,7 @@ import com.sequenceiq.cloudbreak.api.model.ClusterExposedServiceResponse;
 import com.sequenceiq.cloudbreak.api.model.ExposedService;
 import com.sequenceiq.cloudbreak.api.model.ExposedServiceResponse;
 import com.sequenceiq.cloudbreak.api.model.GatewayType;
+import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.SSOType;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessorFactory;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.cloud.VersionComparator;
@@ -84,6 +85,39 @@ public class ServiceEndpointCollector {
         return null;
     }
 
+    public Map<String, Collection<ClusterExposedServiceResponse>> prepareClusterExposedServices(Cluster cluster, String ambariIp) {
+        BlueprintTextProcessor blueprintTextProcessor = new BlueprintProcessorFactory().get(cluster.getBlueprint().getBlueprintText());
+        Set<String> componentsInBlueprint = blueprintTextProcessor.getAllComponents();
+        Collection<ExposedService> knownExposedServices = ExposedService.knoxServicesForComponents(componentsInBlueprint);
+
+        Gateway gateway = cluster.getGateway();
+        Map<String, Collection<ClusterExposedServiceResponse>> clusterExposedServiceMap = new HashMap<>();
+        if (gateway != null) {
+            for (GatewayTopology gatewayTopology : gateway.getTopologies()) {
+                List<ClusterExposedServiceResponse> clusterExposedServiceResponses = new ArrayList<>();
+                Set<String> exposedServicesInTopology = gateway.getTopologies().stream()
+                        .flatMap(this::getExposedServiceStream)
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toSet());
+                for (ExposedService exposedService : knownExposedServices) {
+                    ClusterExposedServiceResponse clusterExposedServiceResponse = new ClusterExposedServiceResponse();
+                    clusterExposedServiceResponse.setMode(exposedService.isSSOSupported() ? gateway.getSsoType() : SSOType.PROXY);
+                    clusterExposedServiceResponse.setDisplayName(exposedService.getPortName());
+                    clusterExposedServiceResponse.setKnoxService(exposedService.getKnoxService());
+                    clusterExposedServiceResponse.setServiceName(exposedService.getServiceName());
+                    Optional<String> serviceUrlForService = getServiceUrlForService(exposedService, ambariIp,
+                            gateway, gatewayTopology.getTopologyName());
+                    serviceUrlForService.ifPresent(clusterExposedServiceResponse::setServiceUrl);
+                    clusterExposedServiceResponse.setOpen(isExposed(exposedService, exposedServicesInTopology));
+                    clusterExposedServiceResponses.add(clusterExposedServiceResponse);
+                }
+                clusterExposedServiceMap.put(gatewayTopology.getTopologyName(), clusterExposedServiceResponses);
+            }
+        }
+
+        return clusterExposedServiceMap;
+    }
+
     private Stream<String> getExposedServiceStream(GatewayTopology gatewayTopology) {
         if (gatewayTopology.getExposedServices() != null && gatewayTopology.getExposedServices().getValue() != null) {
             try {
@@ -126,37 +160,5 @@ public class ServiceEndpointCollector {
         return GatewayType.CENTRAL == gateway.getGatewayType()
                 ? String.format("/%s/%s/ambari/", gateway.getPath(), gt.getTopologyName())
                 : String.format("https://%s:%s/%s/%s/ambari/", ambariIp, KNOX_PORT, gateway.getPath(), gt.getTopologyName());
-    }
-
-    public Map<String, Collection<ClusterExposedServiceResponse>> prepareClusterExposedServices(Cluster cluster, String ambariIp) {
-        BlueprintTextProcessor blueprintTextProcessor = new BlueprintProcessorFactory().get(cluster.getBlueprint().getBlueprintText());
-        Set<String> componentsInBlueprint = blueprintTextProcessor.getAllComponents();
-        Collection<ExposedService> knownExposedServices = ExposedService.knoxServicesForComponents(componentsInBlueprint);
-
-        Gateway gateway = cluster.getGateway();
-        Map<String, Collection<ClusterExposedServiceResponse>> clusterExposedServiceMap = new HashMap<>();
-        if (gateway != null) {
-            for (GatewayTopology gatewayTopology : gateway.getTopologies()) {
-                List<ClusterExposedServiceResponse> clusterExposedServiceResponses = new ArrayList<>();
-                Set<String> exposedServicesInTopology = gateway.getTopologies().stream()
-                        .flatMap(this::getExposedServiceStream)
-                        .filter(Objects::nonNull)
-                        .collect(Collectors.toSet());
-                for (ExposedService exposedService : knownExposedServices) {
-                    ClusterExposedServiceResponse clusterExposedServiceResponse = new ClusterExposedServiceResponse();
-                    clusterExposedServiceResponse.setDisplayName(exposedService.getPortName());
-                    clusterExposedServiceResponse.setKnoxService(exposedService.getKnoxService());
-                    clusterExposedServiceResponse.setServiceName(exposedService.getServiceName());
-                    Optional<String> serviceUrlForService = getServiceUrlForService(exposedService, ambariIp,
-                            gateway, gatewayTopology.getTopologyName());
-                    serviceUrlForService.ifPresent(clusterExposedServiceResponse::setServiceUrl);
-                    clusterExposedServiceResponse.setOpen(isExposed(exposedService, exposedServicesInTopology));
-                    clusterExposedServiceResponses.add(clusterExposedServiceResponse);
-                }
-                clusterExposedServiceMap.put(gatewayTopology.getTopologyName(), clusterExposedServiceResponses);
-            }
-        }
-
-        return clusterExposedServiceMap;
     }
 }

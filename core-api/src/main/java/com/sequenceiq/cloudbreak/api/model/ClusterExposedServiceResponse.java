@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.api.model;
 
+import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.SSOType;
+
 public class ClusterExposedServiceResponse implements JsonEntity {
 
     private String serviceName;
@@ -11,6 +13,8 @@ public class ClusterExposedServiceResponse implements JsonEntity {
     private String serviceUrl;
 
     private boolean open;
+
+    private SSOType mode;
 
     public String getServiceName() {
         return serviceName;
@@ -52,6 +56,14 @@ public class ClusterExposedServiceResponse implements JsonEntity {
         this.open = open;
     }
 
+    public SSOType getMode() {
+        return mode;
+    }
+
+    public void setMode(SSOType mode) {
+        this.mode = mode;
+    }
+
     @Override
     public String toString() {
         return "ClusterExposedServiceResponse{"
@@ -60,6 +72,7 @@ public class ClusterExposedServiceResponse implements JsonEntity {
                 + ", knoxService='" + knoxService + '\''
                 + ", serviceUrl='" + serviceUrl + '\''
                 + ", open=" + open
+                + ", mode=" + mode
                 + '}';
     }
 }
