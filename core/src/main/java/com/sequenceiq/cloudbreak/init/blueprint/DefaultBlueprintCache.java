@@ -4,11 +4,14 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.SerializationUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,19 +19,24 @@ import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.sequenceiq.cloudbreak.api.model.BlueprintRequest;
+import com.sequenceiq.cloudbreak.blueprint.utils.BlueprintUtils;
 import com.sequenceiq.cloudbreak.converter.BlueprintRequestToBlueprintConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.BlueprintInputParameters;
 import com.sequenceiq.cloudbreak.domain.json.Json;
-import com.sequenceiq.cloudbreak.blueprint.utils.BlueprintUtils;
 
 @Service
 public class DefaultBlueprintCache {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultBlueprintCache.class);
 
+    private final Map<String, Blueprint> defaultBlueprints = new HashMap<>();
+
     @Value("#{'${cb.blueprint.defaults:}'.split(';')}")
-    private List<String> blueprintArray;
+    private List<String> releasedBlueprints;
+
+    @Value("#{'${cb.blueprint.internal:}'.split(';')}")
+    private List<String> internalBlueprints;
 
     @Inject
     private BlueprintUtils blueprintUtils;
@@ -36,15 +44,14 @@ public class DefaultBlueprintCache {
     @Inject
     private BlueprintRequestToBlueprintConverter converter;
 
-    private final Map<String, Blueprint> defaultBlueprints = new HashMap<>();
-
     @PostConstruct
     public void loadBlueprintsFromFile() {
-        for (String blueprintStrings : blueprintArray) {
+        List<String> blueprints = blueprints();
+        for (String blueprintText : blueprints) {
             try {
-                String[] split = blueprintStrings.split("=");
-                if (blueprintUtils.isBlueprintNamePreConfigured(blueprintStrings, split)) {
-                    LOGGER.info("Load default validation '{}'.", blueprintStrings);
+                String[] split = blueprintText.split("=");
+                if (blueprintUtils.isBlueprintNamePreConfigured(blueprintText, split)) {
+                    LOGGER.info("Load default validation '{}'.", blueprintText);
                     BlueprintRequest blueprintJson = new BlueprintRequest();
                     blueprintJson.setName(split[0].trim());
                     JsonNode jsonNode = blueprintUtils.convertStringToJsonNode(blueprintUtils.readDefaultBlueprintFromFile(split));
@@ -72,7 +79,8 @@ public class DefaultBlueprintCache {
         return result;
     }
 
-    public List<String> blueprintArray() {
-        return blueprintArray;
+    private List<String> blueprints() {
+        return Stream.concat(releasedBlueprints.stream().filter(StringUtils::isNoneBlank),
+                internalBlueprints.stream().filter(StringUtils::isNoneBlank)).collect(Collectors.toList());
     }
 }
