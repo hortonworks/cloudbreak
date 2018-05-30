@@ -24,7 +24,6 @@ import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Lists;
-import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceProfileStrategy;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.DiskType;
@@ -38,17 +37,13 @@ import com.sequenceiq.cloudbreak.cloud.model.TagSpecification;
 import com.sequenceiq.cloudbreak.cloud.model.VmRecommendations;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
-import com.sequenceiq.cloudbreak.cloud.service.CloudbreakResourceReaderService;
 import com.sequenceiq.cloudbreak.common.type.OrchestratorConstants;
+import com.sequenceiq.cloudbreak.service.CloudbreakResourceReaderService;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 @Service
 public class AwsPlatformParameters implements PlatformParameters {
     public static final String DEDICATED_INSTANCES = "dedicatedInstances";
-
-    public static final String INSTANCE_PROFILE_STRATEGY = "instanceProfileStrategy";
-
-    public static final String INSTANCE_PROFILE = "instanceProfile";
 
     private static final Integer START_LABEL = 97;
 
@@ -138,9 +133,6 @@ public class AwsPlatformParameters implements PlatformParameters {
         List<StackParamValidation> additionalStackParameterValidations = Lists.newArrayList();
         additionalStackParameterValidations.add(new StackParamValidation(TTL, false, String.class, Optional.of("^[0-9]*$")));
         additionalStackParameterValidations.add(new StackParamValidation(DEDICATED_INSTANCES, false, Boolean.class, Optional.empty()));
-        additionalStackParameterValidations.add(new StackParamValidation(INSTANCE_PROFILE_STRATEGY, false, InstanceProfileStrategy.class,
-                Optional.empty()));
-        additionalStackParameterValidations.add(new StackParamValidation(INSTANCE_PROFILE, false, String.class, Optional.empty()));
         return additionalStackParameterValidations;
     }
 

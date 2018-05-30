@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -15,11 +16,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.api.model.ParametersQueryResponse;
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessorFactory;
 import com.sequenceiq.cloudbreak.blueprint.CentralBlueprintParameterQueryService;
 import com.sequenceiq.cloudbreak.blueprint.configuration.SiteConfigurations;
+import com.sequenceiq.cloudbreak.blueprint.filesystem.FileSystemConfigQueryObject;
+import com.sequenceiq.cloudbreak.blueprint.filesystem.query.ConfigQueryEntry;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
@@ -170,14 +172,22 @@ public class BlueprintService {
         }
     }
 
-    public ParametersQueryResponse queryCustomParameters(String name, IdentityUser user) {
+    public Set<String> queryCustomParameters(String name, IdentityUser user) {
         Blueprint blueprint = getPublicBlueprint(name, user);
-        Map<String, String> result = new HashMap<>();
-        for (String customParameter : centralBlueprintParameterQueryService.queryCustomParameters(blueprint.getBlueprintText())) {
-            result.put(customParameter, "");
-        }
-        ParametersQueryResponse parametersQueryResponse = new ParametersQueryResponse();
-        parametersQueryResponse.setCustom(result);
-        return parametersQueryResponse;
+        return centralBlueprintParameterQueryService.queryCustomParameters(blueprint.getBlueprintText());
+    }
+
+    public List<ConfigQueryEntry> queryFileSystemParameters(String blueprintName, String clusterName,
+            String storageName, String fileSystemType, IdentityUser user) {
+        Blueprint blueprint = getPublicBlueprint(blueprintName, user);
+
+        FileSystemConfigQueryObject fileSystemConfigQueryObject = FileSystemConfigQueryObject.Builder.builder()
+                .withClusterName(clusterName)
+                .withStorageName(storageName)
+                .withBlueprintText(blueprint.getBlueprintText())
+                .withFileSystemType(fileSystemType)
+                .build();
+
+        return centralBlueprintParameterQueryService.queryFileSystemParameters(fileSystemConfigQueryObject);
     }
 }

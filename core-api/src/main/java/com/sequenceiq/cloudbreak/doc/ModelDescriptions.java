@@ -86,6 +86,7 @@ public class ModelDescriptions {
     public static class StackModelDescription {
         public static final String STACK_ID = "id of the stack";
         public static final String CUSTOM = "Custom parameters as a json";
+        public static final String ENTRIES = "Entries parameters as a json";
         public static final String IMAGE = "image of the stack";
         public static final String STACK_NAME = "name of the stack";
         public static final String REGION = "region of the stack";
@@ -128,6 +129,7 @@ public class ModelDescriptions {
         public static final String VPC_ID = "cluster vpc id";
         public static final String SUBNET_ID = "cluster subnet id";
         public static final String FILE_SYSTEM = "external file system configuration";
+        public static final String CLOUD_STORAGE = "external cloud storage configuration";
         public static final String INSTANCE_GROUPS = "collection of instance groupst";
         public static final String IMAGE_SETTINGS = "settings for custom images";
         public static final String IMAGE_CATALOG = "custom image catalog URL";
@@ -172,6 +174,7 @@ public class ModelDescriptions {
         public static final String SHARED_SERVICE_REQUEST = "Shared service request";
         public static final String VALIDATE_BLUEPRINT = "blueprint validation";
         public static final String SHARED_SERVICE = "shared service for a specific stack";
+        public static final String FILESYSTEM = "filesystem for a specific stack";
         public static final String HOURS = "duration - how long the cluster is running in hours";
         public static final String MINUTES = "duration - how long the cluster is running in minutes (minus hours)";
         public static final String EMAIL_TO = "send email to the requested address";
@@ -208,6 +211,7 @@ public class ModelDescriptions {
         public static final String UPTIME = "duration - how long the cluster is running in milliseconds";
         public static final String PROXY_NAME = "proxy configuration name for the cluster";
         public static final String PROXY_CONFIG_ID = "proxy configuration id for the cluster";
+        public static final String LOCATIONS = "cloud storage locations";
     }
 
     public static class GatewayModelDescription {
@@ -318,6 +322,7 @@ public class ModelDescriptions {
         public static final String TYPE = "type of the filesystem";
         public static final String DEFAULT = "true if fs.defaultFS should point to this filesystem";
         public static final String PROPERTIES = "configuration of the filesystem access as key-value pairs";
+        public static final String LOCATIONS = "configuration of the filesystem location";
     }
 
     public static class RecipeModelDescription {
@@ -529,6 +534,11 @@ public class ModelDescriptions {
 
     public static class RepositoryConfigValidationDescription {
         public static final String FIELDS = "Indicates the request's value with the same key is valid and reachable by Cloudbreak or not";
+    }
+
+    public static class UtilDescription {
+        public static final String STORAGE_NAME = "Storage name of the path";
+        public static final String FILESYTEM_TYPE = "Type of filesystem";
     }
 
     public static class ProxyConfigModelDescription {

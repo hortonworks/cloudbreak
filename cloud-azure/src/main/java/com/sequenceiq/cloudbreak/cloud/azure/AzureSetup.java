@@ -26,9 +26,7 @@ import com.microsoft.azure.storage.blob.CloudBlobContainer;
 import com.microsoft.azure.storage.blob.CopyState;
 import com.microsoft.azure.storage.blob.CopyStatus;
 import com.microsoft.azure.storage.blob.ListBlobItem;
-import com.sequenceiq.cloudbreak.api.model.AdlsFileSystemConfiguration;
-import com.sequenceiq.cloudbreak.api.model.FileSystemConfiguration;
-import com.sequenceiq.cloudbreak.api.model.FileSystemType;
+import com.sequenceiq.cloudbreak.api.model.filesystem.FileSystemType;
 import com.sequenceiq.cloudbreak.cloud.Setup;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureCredentialView;
@@ -40,6 +38,8 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource.Builder;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.SpiFileSystem;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
+import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudAdlsView;
+import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudWasbView;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.common.service.DefaultCostTaggingService;
 import com.sequenceiq.cloudbreak.common.type.ImageStatus;
@@ -145,17 +145,18 @@ public class AzureSetup implements Setup {
 
     @Override
     public void validateFileSystem(CloudCredential credential, SpiFileSystem spiFileSystem) throws Exception {
-        String fileSystemType = spiFileSystem.getType();
-        if (fileSystemType.equalsIgnoreCase(FileSystemType.ADLS.name())) {
+        FileSystemType fileSystemType = spiFileSystem.getType();
+        if (FileSystemType.ADLS.equals(fileSystemType)) {
             validateAdlsFileSystem(credential, spiFileSystem);
         } else {
-            validateWasbFileSystem(spiFileSystem, fileSystemType);
+            validateWasbFileSystem(spiFileSystem);
         }
     }
 
-    private void validateWasbFileSystem(SpiFileSystem fileSystem, String fileSystemType) throws URISyntaxException, InvalidKeyException, StorageException {
-        String accountName = fileSystem.getParameter(FileSystemConfiguration.ACCOUNT_NAME, String.class);
-        String accountKey = fileSystem.getParameter(FileSystemConfiguration.ACCOUNT_KEY, String.class);
+    private void validateWasbFileSystem(SpiFileSystem fileSystem) throws URISyntaxException, InvalidKeyException, StorageException {
+        CloudWasbView cloudFileSystem = (CloudWasbView) fileSystem.getCloudFileSystem();
+        String accountName = cloudFileSystem.getAccountName();
+        String accountKey = cloudFileSystem.getAccountKey();
         String connectionString = "DefaultEndpointsProtocol=https;AccountName=" + accountName + ";AccountKey=" + accountKey;
         CloudStorageAccount storageAccount = CloudStorageAccount.parse(connectionString);
         CloudBlobClient blobClient = storageAccount.createCloudBlobClient();
@@ -171,13 +172,13 @@ public class AzureSetup implements Setup {
     }
 
     private void validateAdlsFileSystem(CloudCredential credential, SpiFileSystem fileSystem) {
-
         Map<String, Object> credentialAttributes = credential.getParameters();
-        String clientSecret = String.valueOf(credentialAttributes.get(AdlsFileSystemConfiguration.CREDENTIAL_SECRET_KEY));
-        String subscriptionId = String.valueOf(credentialAttributes.get(AdlsFileSystemConfiguration.SUBSCRIPTION_ID));
-        String clientId =  String.valueOf(credentialAttributes.get(AdlsFileSystemConfiguration.ACCESS_KEY));
-        String tenantId = fileSystem.getStringParameter(AdlsFileSystemConfiguration.TENANT_ID);
-        String accountName = fileSystem.getStringParameter(FileSystemConfiguration.ACCOUNT_NAME);
+        CloudAdlsView cloudFileSystem = (CloudAdlsView) fileSystem.getCloudFileSystem();
+        String clientSecret = String.valueOf(credentialAttributes.get(CloudAdlsView.CREDENTIAL_SECRET_KEY));
+        String subscriptionId = String.valueOf(credentialAttributes.get(CloudAdlsView.SUBSCRIPTION_ID));
+        String clientId =  String.valueOf(credentialAttributes.get(CloudAdlsView.ACCESS_KEY));
+        String tenantId = cloudFileSystem.getTenantId();
+        String accountName = cloudFileSystem.getAccountName();
 
         ApplicationTokenCredentials creds = new ApplicationTokenCredentials(clientId, tenantId, clientSecret, AzureEnvironment.AZURE);
         DataLakeStoreAccountManagementClient adlsClient = new DataLakeStoreAccountManagementClientImpl(creds);

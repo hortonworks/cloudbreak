@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.cloud.aws;
 
-import java.net.URLDecoder;
 import java.util.Collections;
 import java.util.List;
 
@@ -25,21 +24,8 @@ import com.amazonaws.services.ec2.model.DescribeSubnetsResult;
 import com.amazonaws.services.ec2.model.InternetGateway;
 import com.amazonaws.services.ec2.model.InternetGatewayAttachment;
 import com.amazonaws.services.ec2.model.Subnet;
-import com.amazonaws.services.identitymanagement.AmazonIdentityManagement;
-import com.amazonaws.services.identitymanagement.model.AttachedPolicy;
-import com.amazonaws.services.identitymanagement.model.GetPolicyRequest;
-import com.amazonaws.services.identitymanagement.model.GetPolicyResult;
-import com.amazonaws.services.identitymanagement.model.GetRolePolicyRequest;
-import com.amazonaws.services.identitymanagement.model.GetRolePolicyResult;
-import com.amazonaws.services.identitymanagement.model.GetRoleRequest;
-import com.amazonaws.services.identitymanagement.model.ListAttachedRolePoliciesRequest;
-import com.amazonaws.services.identitymanagement.model.ListAttachedRolePoliciesResult;
-import com.amazonaws.services.identitymanagement.model.ListRolePoliciesRequest;
-import com.amazonaws.services.identitymanagement.model.ListRolePoliciesResult;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.sequenceiq.cloudbreak.cloud.Setup;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
-import com.sequenceiq.cloudbreak.cloud.aws.view.AwsInstanceProfileView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsInstanceView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsNetworkView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -56,7 +42,6 @@ import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.common.type.ImageStatus;
 import com.sequenceiq.cloudbreak.common.type.ImageStatusResult;
-import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 @Component
 public class AwsSetup implements Setup {
@@ -109,11 +94,6 @@ public class AwsSetup implements Setup {
         AwsCredentialView credentialView = new AwsCredentialView(ac.getCloudCredential());
         String region = ac.getCloudContext().getLocation().getRegion().value();
         verifySpotInstances(stack);
-        AwsCredentialView awsCredentialView = new AwsCredentialView(ac.getCloudCredential());
-        AwsInstanceProfileView awsInstanceProfileView = new AwsInstanceProfileView(stack);
-        if (awsClient.roleBasedCredential(awsCredentialView) && awsInstanceProfileView.isCreateInstanceProfile()) {
-            validateInstanceProfileCreation(awsCredentialView);
-        }
         if (awsNetworkView.isExistingVPC()) {
             try {
                 AmazonEC2Client amazonEC2Client = awsClient.createAccess(credentialView, region);
@@ -150,80 +130,6 @@ public class AwsSetup implements Setup {
                 }
             }
         }
-    }
-
-    private void validateInstanceProfileCreation(AwsCredentialView awsCredentialView) {
-        GetRoleRequest roleRequest = new GetRoleRequest();
-        String roleName = awsCredentialView.getRoleArn().split("/")[1];
-        LOGGER.info("Start validate {} role for S3 access.", roleName);
-        roleRequest.withRoleName(roleName);
-        AmazonIdentityManagement client = awsClient.createAmazonIdentityManagement(awsCredentialView);
-        try {
-            ListRolePoliciesRequest listRolePoliciesRequest = new ListRolePoliciesRequest();
-            listRolePoliciesRequest.setRoleName(roleName);
-            ListRolePoliciesResult listRolePoliciesResult = client.listRolePolicies(listRolePoliciesRequest);
-            for (String s : listRolePoliciesResult.getPolicyNames()) {
-                if (checkIamOrS3Statement(roleName, client, s)) {
-                    LOGGER.info("Validation successful for s3 or iam access.");
-                    return;
-                }
-            }
-            ListAttachedRolePoliciesRequest listAttachedRolePoliciesRequest = new ListAttachedRolePoliciesRequest();
-            listAttachedRolePoliciesRequest.setRoleName(roleName);
-            ListAttachedRolePoliciesResult listAttachedRolePoliciesResult = client.listAttachedRolePolicies(listAttachedRolePoliciesRequest);
-            for (AttachedPolicy attachedPolicy : listAttachedRolePoliciesResult.getAttachedPolicies()) {
-                if (checkIamOrS3Access(client, attachedPolicy)) {
-                    LOGGER.info("Validation successful for s3 or iam access.");
-                    return;
-                }
-            }
-        } catch (AmazonServiceException ase) {
-            if (ase.getStatusCode() == UNAUTHORIZED) {
-                String policyMEssage = "Could not get policies on the role because the arn role do not have enough permission: %s";
-                LOGGER.info(String.format(policyMEssage, ase.getErrorMessage()));
-                throw new CloudConnectorException(String.format(policyMEssage, ase.getErrorMessage()));
-            } else {
-                LOGGER.info(ase.getMessage());
-                throw new CloudConnectorException(ase.getErrorMessage());
-            }
-        } catch (Exception e) {
-            LOGGER.info(e.getMessage());
-            throw new CloudConnectorException(e.getMessage());
-        }
-        LOGGER.info("Could not get policies on the role because the arn role do not have enough permission.");
-        throw new CloudConnectorException("Could not get policies on the role because the arn role do not have enough permission.");
-    }
-
-    private boolean checkIamOrS3Statement(String roleName, AmazonIdentityManagement client, String s) throws Exception {
-        GetRolePolicyRequest getRolePolicyRequest = new GetRolePolicyRequest();
-        getRolePolicyRequest.setRoleName(roleName);
-        getRolePolicyRequest.setPolicyName(s);
-        GetRolePolicyResult rolePolicy = client.getRolePolicy(getRolePolicyRequest);
-        String decode = URLDecoder.decode(rolePolicy.getPolicyDocument(), "UTF-8");
-        JsonNode object = JsonUtil.readTree(decode);
-        JsonNode statement = object.get("Statement");
-        for (int i = 0; i < statement.size(); i++) {
-            JsonNode action = statement.get(i).get("Action");
-            for (int j = 0; j < action.size(); j++) {
-                String actionEntry = action.get(j).textValue().replaceAll(" ", "").toLowerCase();
-                if ("iam:createrole".equals(actionEntry) || "iam:*".equals(actionEntry)) {
-                    LOGGER.info("Role has able to operate on iam resources: {}.", action.get(j));
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    private boolean checkIamOrS3Access(AmazonIdentityManagement client, AttachedPolicy attachedPolicy) {
-        GetPolicyRequest getRolePolicyRequest = new GetPolicyRequest();
-        getRolePolicyRequest.setPolicyArn(attachedPolicy.getPolicyArn());
-        GetPolicyResult policy = client.getPolicy(getRolePolicyRequest);
-        if (policy.getPolicy().getArn().toLowerCase().contains("iam")) {
-            LOGGER.info("Role has policy for iam resources: {}.", policy.getPolicy().getArn());
-            return true;
-        }
-        return false;
     }
 
     private void validateExistingSubnet(AwsNetworkView awsNetworkView, AmazonEC2 amazonEC2Client) {

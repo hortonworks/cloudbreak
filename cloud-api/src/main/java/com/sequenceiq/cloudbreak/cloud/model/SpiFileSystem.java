@@ -1,25 +1,24 @@
 package com.sequenceiq.cloudbreak.cloud.model;
 
-import java.util.Map;
-import java.util.Map.Entry;
-
+import com.sequenceiq.cloudbreak.api.model.filesystem.FileSystemType;
+import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudFileSystemView;
 import com.sequenceiq.cloudbreak.cloud.model.generic.DynamicModel;
 
 public class SpiFileSystem extends DynamicModel {
 
     private String name;
 
-    private String type;
+    private FileSystemType type;
 
     private boolean defaultFs;
 
-    public SpiFileSystem(String name, String type, boolean defaultFs, Map<String, String> parameters) {
+    private CloudFileSystemView cloudFileSystem;
+
+    public SpiFileSystem(String name, FileSystemType type, boolean defaultFs, CloudFileSystemView cloudFileSystem) {
         this.name = name;
         this.type = type;
         this.defaultFs = defaultFs;
-        for (Entry<String, String> entry : parameters.entrySet()) {
-            putParameter(entry.getKey(), entry.getValue());
-        }
+        this.cloudFileSystem = cloudFileSystem;
     }
 
     public String getName() {
@@ -30,11 +29,11 @@ public class SpiFileSystem extends DynamicModel {
         this.name = name;
     }
 
-    public String getType() {
+    public FileSystemType getType() {
         return type;
     }
 
-    public void setType(String type) {
+    public void setType(FileSystemType type) {
         this.type = type;
     }
 
@@ -44,6 +43,14 @@ public class SpiFileSystem extends DynamicModel {
 
     public void setDefaultFs(boolean defaultFs) {
         this.defaultFs = defaultFs;
+    }
+
+    public CloudFileSystemView getCloudFileSystem() {
+        return cloudFileSystem;
+    }
+
+    public void setCloudFileSystem(CloudFileSystemView cloudFileSystem) {
+        this.cloudFileSystem = cloudFileSystem;
     }
 
     @Override

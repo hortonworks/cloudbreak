@@ -18,6 +18,8 @@ import com.sequenceiq.cloudbreak.api.model.AmbariDatabaseTestResult;
 import com.sequenceiq.cloudbreak.api.model.ExposedServiceResponse;
 import com.sequenceiq.cloudbreak.api.model.ParametersQueryRequest;
 import com.sequenceiq.cloudbreak.api.model.ParametersQueryResponse;
+import com.sequenceiq.cloudbreak.api.model.StructuredParameterQueriesResponse;
+import com.sequenceiq.cloudbreak.api.model.StructuredParametersQueryRequest;
 import com.sequenceiq.cloudbreak.api.model.VersionCheckResult;
 import com.sequenceiq.cloudbreak.api.model.rds.RDSBuildRequest;
 import com.sequenceiq.cloudbreak.api.model.rds.RdsBuildResult;
@@ -70,5 +72,11 @@ public interface UtilEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = UtilityOpDescription.CUSTOM_PARAMETERS, produces = ContentType.JSON, nickname = "getCustomParameters")
     ParametersQueryResponse getCustomParameters(ParametersQueryRequest parametersQueryRequest);
+
+    @POST
+    @Path("filesystem-parameters")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = UtilityOpDescription.FILE_SYSTEM_PARAMETERS, produces = ContentType.JSON, nickname = "getFileSystemParameters")
+    StructuredParameterQueriesResponse getFileSystemParameters(StructuredParametersQueryRequest structuredParametersQueryRequest);
 
 }

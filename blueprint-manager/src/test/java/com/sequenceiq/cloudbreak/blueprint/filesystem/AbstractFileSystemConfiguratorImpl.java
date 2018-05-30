@@ -5,12 +5,12 @@ import java.util.Collections;
 import java.util.List;
 
 import com.sequenceiq.cloudbreak.api.model.ExecutionType;
-import com.sequenceiq.cloudbreak.api.model.FileSystemConfiguration;
-import com.sequenceiq.cloudbreak.api.model.FileSystemType;
 import com.sequenceiq.cloudbreak.api.model.RecipeType;
+import com.sequenceiq.cloudbreak.blueprint.filesystem.adls.AdlsFileSystemConfigurationsView;
 import com.sequenceiq.cloudbreak.domain.Credential;
+import com.sequenceiq.cloudbreak.api.model.filesystem.FileSystemType;
 
-public class AbstractFileSystemConfiguratorImpl extends AbstractFileSystemConfigurator<FileSystemConfiguration> {
+public class AbstractFileSystemConfiguratorImpl extends AbstractFileSystemConfigurator<AdlsFileSystemConfigurationsView> {
 
     @Override
     protected List<FileSystemScriptConfig> getScriptConfigs(Credential credential) {
@@ -35,6 +35,11 @@ public class AbstractFileSystemConfiguratorImpl extends AbstractFileSystemConfig
 
     @Override
     public FileSystemType getFileSystemType() {
+        return null;
+    }
+
+    @Override
+    public String getProtocol() {
         return null;
     }
 }

@@ -1,29 +1,12 @@
 package com.sequenceiq.cloudbreak.converter.stack.cluster;
 
-import static com.sequenceiq.cloudbreak.domain.ClusterAttributes.CUSTOM_QUEUE;
-import static com.sequenceiq.cloudbreak.logger.ReplaceUtil.anonymize;
-
-import java.io.IOException;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
-import javax.inject.Inject;
-
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
-
 import com.sequenceiq.cloudbreak.api.model.AmbariRepoDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsResponse;
 import com.sequenceiq.cloudbreak.api.model.BlueprintInputJson;
 import com.sequenceiq.cloudbreak.api.model.BlueprintResponse;
 import com.sequenceiq.cloudbreak.api.model.ClusterExposedServiceResponse;
 import com.sequenceiq.cloudbreak.api.model.CustomContainerResponse;
+import com.sequenceiq.cloudbreak.api.model.FileSystemResponse;
 import com.sequenceiq.cloudbreak.api.model.KerberosResponse;
 import com.sequenceiq.cloudbreak.api.model.SharedServiceResponse;
 import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigResponse;
@@ -51,6 +34,22 @@ import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
+import javax.inject.Inject;
+import java.io.IOException;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+
+import static com.sequenceiq.cloudbreak.domain.ClusterAttributes.CUSTOM_QUEUE;
+import static com.sequenceiq.cloudbreak.logger.ReplaceUtil.anonymize;
 
 @Component
 public class ClusterToClusterResponseConverter extends AbstractConversionServiceAwareConverter<Cluster, ClusterResponse> {
@@ -93,14 +92,10 @@ public class ClusterToClusterResponseConverter extends AbstractConversionService
 
     @Override
     public ClusterResponse convert(Cluster source) {
-        try {
-            return doConvert(source);
-        } catch (IllegalAccessException | InstantiationException e) {
-            throw new RuntimeException(e);
-        }
+        return doConvert(source);
     }
 
-    private ClusterResponse doConvert(Cluster source) throws IllegalAccessException, InstantiationException {
+    private ClusterResponse doConvert(Cluster source) {
         ClusterResponse clusterResponse = new ClusterResponse();
         clusterResponse.setId(source.getId());
         clusterResponse.setName(source.getName());
@@ -137,6 +132,7 @@ public class ClusterToClusterResponseConverter extends AbstractConversionService
         clusterResponse.setCreationFinished(source.getCreationFinished());
         convertKerberosConfig(source, clusterResponse);
         decorateResponseWithProxyConfig(source, clusterResponse);
+        addFilesystem(source, clusterResponse);
         addSharedServiceResponse(source, clusterResponse);
         return clusterResponse;
     }
@@ -185,6 +181,12 @@ public class ClusterToClusterResponseConverter extends AbstractConversionService
             } else {
                 clusterResponse.setCustomQueue("default");
             }
+        }
+    }
+
+    private void addFilesystem(Cluster source, ClusterResponse clusterResponse) {
+        if (source.getFileSystem() != null) {
+            clusterResponse.setFileSystemResponse(getConversionService().convert(source.getFileSystem(), FileSystemResponse.class));
         }
     }
 

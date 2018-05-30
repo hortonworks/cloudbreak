@@ -49,6 +49,7 @@ import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
+import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudGcsView;
 import com.sequenceiq.cloudbreak.common.service.DefaultCostTaggingService;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 
@@ -164,11 +165,11 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
     }
 
     private List<ServiceAccount> extractServiceAccounts(CloudStack cloudStack) {
-        if (cloudStack.getCloudFileSystem() == null) {
+        if (!cloudStack.getFileSystem().isPresent()) {
             return null;
         }
-
-        String email = cloudStack.getCloudFileSystem().getProperties().get(SERVICE_ACCOUNT_EMAIL);
+        CloudGcsView cloudFileSystem = (CloudGcsView) cloudStack.getFileSystem().get().getCloudFileSystem();
+        String email = cloudFileSystem.getServiceAccountEmail();
         return StringUtils.isEmpty(email) ? null : singletonList(new ServiceAccount()
                 .setEmail(email)
                 .setScopes(singletonList("https://www.googleapis.com/auth/cloud-platform")));

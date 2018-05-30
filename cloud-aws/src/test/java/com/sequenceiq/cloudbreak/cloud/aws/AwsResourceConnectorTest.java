@@ -84,8 +84,8 @@ public class AwsResourceConnectorTest {
         networkParameters.put("vpcId", "vpc-12345678");
         networkParameters.put("internetGatewayId", "igw-12345678");
         Network network = new Network(new Subnet(null), networkParameters);
-        CloudStack cloudStack = new CloudStack(singletonList(group1), network, null, null, emptyMap(), emptyMap(), null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey());
+        CloudStack cloudStack = new CloudStack(singletonList(group1), network, null, emptyMap(), emptyMap(), null,
+                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), null);
         AuthenticatedContext authenticatedContext = mock(AuthenticatedContext.class);
         CloudContext cloudContext = mock(CloudContext.class);
         Location location = mock(Location.class);
@@ -132,8 +132,8 @@ public class AwsResourceConnectorTest {
         networkParameters.put("vpcId", "vpc-12345678");
         networkParameters.put("internetGatewayId", "igw-12345678");
         Network network = new Network(new Subnet(null), networkParameters);
-        CloudStack cloudStack = new CloudStack(singletonList(group1), network, null, null, emptyMap(), emptyMap(), null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey());
+        CloudStack cloudStack = new CloudStack(singletonList(group1), network, null, emptyMap(), emptyMap(), null,
+                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), null);
         AuthenticatedContext authenticatedContext = mock(AuthenticatedContext.class);
         CloudContext cloudContext = mock(CloudContext.class);
         Location location = mock(Location.class);
@@ -176,8 +176,8 @@ public class AwsResourceConnectorTest {
         networkParameters.put("vpcId", "vpc-12345678");
         networkParameters.put("internetGatewayId", "igw-12345678");
         Network network = new Network(new Subnet(null), networkParameters);
-        CloudStack cloudStack = new CloudStack(singletonList(group1), network, null, null, emptyMap(), emptyMap(), null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey());
+        CloudStack cloudStack = new CloudStack(singletonList(group1), network, null, emptyMap(), emptyMap(), null,
+                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), null);
         AuthenticatedContext authenticatedContext = mock(AuthenticatedContext.class);
         CloudContext cloudContext = mock(CloudContext.class);
         Location location = mock(Location.class);
@@ -220,8 +220,8 @@ public class AwsResourceConnectorTest {
         networkParameters.put("vpcId", "vpc-12345678");
         networkParameters.put("internetGatewayId", "igw-12345678");
         Network network = new Network(new Subnet(null), networkParameters);
-        CloudStack cloudStack = new CloudStack(singletonList(group1), network, null, null, emptyMap(), emptyMap(), null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey());
+        CloudStack cloudStack = new CloudStack(singletonList(group1), network, null, emptyMap(), emptyMap(), null,
+                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), null);
         AuthenticatedContext authenticatedContext = mock(AuthenticatedContext.class);
         CloudContext cloudContext = mock(CloudContext.class);
         Location location = mock(Location.class);
@@ -264,8 +264,8 @@ public class AwsResourceConnectorTest {
         networkParameters.put("vpcId", "vpc-12345678");
         networkParameters.put("internetGatewayId", "igw-12345678");
         Network network = new Network(new Subnet(null), networkParameters);
-        CloudStack cloudStack = new CloudStack(singletonList(group1), network, null, null, emptyMap(), emptyMap(), null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey());
+        CloudStack cloudStack = new CloudStack(singletonList(group1), network, null, emptyMap(), emptyMap(), null,
+                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), null);
         AuthenticatedContext authenticatedContext = mock(AuthenticatedContext.class);
         CloudContext cloudContext = mock(CloudContext.class);
         Location location = mock(Location.class);
@@ -302,8 +302,8 @@ public class AwsResourceConnectorTest {
         networkParameters.put("vpcId", "vpc-12345678");
         networkParameters.put("internetGatewayId", "igw-12345678");
         Network network = new Network(new Subnet(null), networkParameters);
-        CloudStack cloudStack = new CloudStack(singletonList(group1), network, null, null, emptyMap(), emptyMap(), null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey());
+        CloudStack cloudStack = new CloudStack(singletonList(group1), network, null, emptyMap(), emptyMap(), null,
+                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), null);
         AuthenticatedContext authenticatedContext = mock(AuthenticatedContext.class);
         CloudContext cloudContext = mock(CloudContext.class);
         Location location = mock(Location.class);
@@ -338,8 +338,8 @@ public class AwsResourceConnectorTest {
         networkParameters.put("vpcId", "vpc-12345678");
         networkParameters.put("internetGatewayId", "igw-12345678");
         Network network = new Network(new Subnet(null), networkParameters);
-        CloudStack cloudStack = new CloudStack(singletonList(group1), network, null, null, emptyMap(), emptyMap(), null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey());
+        CloudStack cloudStack = new CloudStack(singletonList(group1), network, null, emptyMap(), emptyMap(), null,
+                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), null);
         AuthenticatedContext authenticatedContext = mock(AuthenticatedContext.class);
         CloudContext cloudContext = mock(CloudContext.class);
         Location location = mock(Location.class);
@@ -382,8 +382,8 @@ public class AwsResourceConnectorTest {
         networkParameters.put("vpcId", "vpc-12345678");
         networkParameters.put("internetGatewayId", "igw-12345678");
         Network network = new Network(new Subnet(null), networkParameters);
-        CloudStack cloudStack = new CloudStack(singletonList(group1), network, null, null, emptyMap(), emptyMap(), null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey());
+        CloudStack cloudStack = new CloudStack(singletonList(group1), network, null, emptyMap(), emptyMap(), null,
+                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), null);
         AuthenticatedContext authenticatedContext = mock(AuthenticatedContext.class);
         CloudContext cloudContext = mock(CloudContext.class);
         Location location = mock(Location.class);
@@ -426,8 +426,8 @@ public class AwsResourceConnectorTest {
         networkParameters.put("vpcId", "vpc-12345678");
         networkParameters.put("internetGatewayId", "igw-12345678");
         Network network = new Network(new Subnet(null), networkParameters);
-        CloudStack cloudStack = new CloudStack(singletonList(group1), network, null, null, emptyMap(), emptyMap(), null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey());
+        CloudStack cloudStack = new CloudStack(singletonList(group1), network, null, emptyMap(), emptyMap(), null,
+                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), null);
         AuthenticatedContext authenticatedContext = mock(AuthenticatedContext.class);
         CloudContext cloudContext = mock(CloudContext.class);
         Location location = mock(Location.class);
@@ -479,8 +479,8 @@ public class AwsResourceConnectorTest {
         networkParameters.put("vpcId", "vpc-12345678");
         networkParameters.put("internetGatewayId", "igw-12345678");
         Network network = new Network(new Subnet(null), networkParameters);
-        CloudStack cloudStack = new CloudStack(singletonList(group1), network, null, null, emptyMap(), emptyMap(), null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey());
+        CloudStack cloudStack = new CloudStack(singletonList(group1), network, null, emptyMap(), emptyMap(), null,
+                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), null);
         AuthenticatedContext authenticatedContext = mock(AuthenticatedContext.class);
         CloudContext cloudContext = mock(CloudContext.class);
         Location location = mock(Location.class);
@@ -531,8 +531,8 @@ public class AwsResourceConnectorTest {
         networkParameters.put("vpcId", "vpc-12345678");
         networkParameters.put("internetGatewayId", "igw-12345678");
         Network network = new Network(new Subnet(null), networkParameters);
-        CloudStack cloudStack = new CloudStack(singletonList(group1), network, null, null, emptyMap(), emptyMap(), null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey());
+        CloudStack cloudStack = new CloudStack(singletonList(group1), network, null, emptyMap(), emptyMap(), null,
+                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), null);
         AuthenticatedContext authenticatedContext = mock(AuthenticatedContext.class);
         CloudContext cloudContext = mock(CloudContext.class);
         Location location = mock(Location.class);
@@ -583,8 +583,8 @@ public class AwsResourceConnectorTest {
         networkParameters.put("vpcId", "vpc-12345678");
         networkParameters.put("internetGatewayId", "igw-12345678");
         Network network = new Network(new Subnet(null), networkParameters);
-        CloudStack cloudStack = new CloudStack(singletonList(group1), network, null, null, emptyMap(), emptyMap(), null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey());
+        CloudStack cloudStack = new CloudStack(singletonList(group1), network, null, emptyMap(), emptyMap(), null,
+                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), null);
         AuthenticatedContext authenticatedContext = mock(AuthenticatedContext.class);
         CloudContext cloudContext = mock(CloudContext.class);
         Location location = mock(Location.class);
@@ -635,8 +635,8 @@ public class AwsResourceConnectorTest {
         networkParameters.put("vpcId", "vpc-12345678");
         networkParameters.put("internetGatewayId", "igw-12345678");
         Network network = new Network(new Subnet(null), networkParameters);
-        CloudStack cloudStack = new CloudStack(singletonList(group1), network, null, null, emptyMap(), emptyMap(), null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey());
+        CloudStack cloudStack = new CloudStack(singletonList(group1), network, null, emptyMap(), emptyMap(), null,
+                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), null);
         AuthenticatedContext authenticatedContext = mock(AuthenticatedContext.class);
         CloudContext cloudContext = mock(CloudContext.class);
         Location location = mock(Location.class);
@@ -681,8 +681,8 @@ public class AwsResourceConnectorTest {
         networkParameters.put("vpcId", "vpc-12345678");
         networkParameters.put("internetGatewayId", "igw-12345678");
         Network network = new Network(new Subnet(null), networkParameters);
-        CloudStack cloudStack = new CloudStack(singletonList(group1), network, null, null, emptyMap(), emptyMap(), null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey());
+        CloudStack cloudStack = new CloudStack(singletonList(group1), network, null, emptyMap(), emptyMap(), null,
+                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), null);
         AuthenticatedContext authenticatedContext = mock(AuthenticatedContext.class);
         CloudContext cloudContext = mock(CloudContext.class);
         Location location = mock(Location.class);

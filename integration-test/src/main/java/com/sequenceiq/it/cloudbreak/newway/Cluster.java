@@ -12,7 +12,7 @@ import com.sequenceiq.cloudbreak.api.model.ExecutorType;
 import com.sequenceiq.cloudbreak.api.model.FileSystemRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.AmbariV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.ClusterV2Request;
-import com.sequenceiq.cloudbreak.api.model.v2.FileSystemV2Request;
+import com.sequenceiq.cloudbreak.api.model.v2.CloudStorageRequest;
 import com.sequenceiq.it.IntegrationTestContext;
 
 public class Cluster extends Entity {
@@ -79,7 +79,7 @@ public class Cluster extends Entity {
     }
 
     public Cluster withFileSystem(FileSystemRequest fileSystemRequest) {
-        request.setFileSystem(conversionService.convert(fileSystemRequest, FileSystemV2Request.class));
+        request.setCloudStorage(conversionService.convert(fileSystemRequest, CloudStorageRequest.class));
         return this;
     }
 

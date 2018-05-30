@@ -43,7 +43,6 @@ public class AzureCredentialCreationTest extends AbstractCloudbreakIntegrationTe
         accessKey = StringUtils.hasLength(accessKey) ? accessKey : defaultAccesKey;
 
         // WHEN
-        // TODO publicInAccount
         CredentialRequest credentialRequest = new CredentialRequest();
         credentialRequest.setName(credentialName);
         credentialRequest.setDescription("Azure credential for integartion test");

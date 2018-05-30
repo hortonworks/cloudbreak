@@ -7,12 +7,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import com.sequenceiq.cloudbreak.api.model.FileSystemConfiguration;
 import com.sequenceiq.cloudbreak.common.model.recipe.RecipeScript;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
-public abstract class AbstractFileSystemConfigurator<T extends FileSystemConfiguration> implements FileSystemConfigurator<T> {
+public abstract class AbstractFileSystemConfigurator<T extends BaseFileSystemConfigurationsView> implements FileSystemConfigurator<T> {
 
     @Override
     public List<RecipeScript> getScripts(Credential credential, T fsConfig) {
