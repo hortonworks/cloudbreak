@@ -3,37 +3,44 @@ package com.sequenceiq.cloudbreak.converter.v2;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import org.junit.Before;
+import javax.inject.Inject;
+
 import org.junit.Test;
-import org.mockito.InjectMocks;
-import org.mockito.MockitoAnnotations;
-import org.mockito.Spy;
+import org.junit.runner.RunWith;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.GatewayJson;
 import com.sequenceiq.cloudbreak.api.model.v2.AmbariV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.ClusterV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.GeneralSettings;
 import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
+import com.sequenceiq.cloudbreak.conf.ConversionConfig;
+import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.controller.validation.stack.cluster.gateway.GatewayJsonValidator;
 import com.sequenceiq.cloudbreak.converter.util.GatewayConvertUtil;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(classes = {StackV2RequestToGatewayConverter.class, ConversionConfig.class, GatewayConvertUtil.class,
+        GatewayJsonValidator.class})
 public class StackV2RequestToGatewayConverterTest {
 
-    @Spy
-    private GatewayConvertUtil convertUtil;
-
-    @InjectMocks
+    @Inject
     private StackV2RequestToGatewayConverter converter;
 
-    @Before
-    public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
+    @Test(expected = BadRequestException.class)
+    public void testWithInvalidGatewayRequest() {
+        GatewayJson gatewayJson = new GatewayJson();
+        StackV2Request source = generateStackV2Request(gatewayJson, "funnyCluster");
+        converter.convert(source);
     }
 
     @Test
     public void shouldGenerateSignCertWhenConvertingFromStackV2Request() {
-        GatewayJson gateWayJson =  new GatewayJson();
-        StackV2Request source = generateStackV2Request(gateWayJson, "funnyCluster");
+        GatewayJson gatewayJson = new GatewayJson();
+        gatewayJson.setTopologyName("anyName");
+        StackV2Request source = generateStackV2Request(gatewayJson, "funnyCluster");
         Gateway result = converter.convert(source);
         assertTrue(result.getSignCert().startsWith("-----BEGIN CERTIFICATE-----"));
         assertTrue(result.getSignCert().endsWith("-----END CERTIFICATE-----\n"));
@@ -41,8 +48,9 @@ public class StackV2RequestToGatewayConverterTest {
 
     @Test
     public void shouldCreateCorrectSsoUrlWhenClusterNameisProvided() {
-        GatewayJson gateWayJson =  new GatewayJson();
-        StackV2Request source = generateStackV2Request(gateWayJson, "funnyCluster");
+        GatewayJson gatewayJson = new GatewayJson();
+        gatewayJson.setTopologyName("anyName");
+        StackV2Request source = generateStackV2Request(gatewayJson, "funnyCluster");
         Gateway result = converter.convert(source);
         assertEquals("/funnyCluster/sso/api/v1/websso", result.getSsoProvider());
     }
@@ -59,5 +67,4 @@ public class StackV2RequestToGatewayConverterTest {
         source.setGeneral(generalConfig);
         return source;
     }
-
 }

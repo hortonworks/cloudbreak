@@ -19,7 +19,6 @@ public class GatewayToGatewayJsonConverter extends AbstractConversionServiceAwar
     @Override
     public GatewayJson convert(Gateway gateway) {
         GatewayJson gatewayJson = new GatewayJson();
-        gatewayJson.setEnableGateway(true);
         gatewayJson.setPath(gateway.getPath());
         gatewayJson.setTokenCert(gateway.getTokenCert());
         gatewayJson.setSsoProvider(gateway.getSsoProvider());

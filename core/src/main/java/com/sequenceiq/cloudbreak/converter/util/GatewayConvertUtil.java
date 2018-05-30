@@ -40,30 +40,8 @@ public class GatewayConvertUtil {
         return StringUtils.isNotBlank(source.getTopologyName()) || !CollectionUtils.isEmpty(source.getExposedServices());
     }
 
-    public void setTopologyList(Gateway gateway, Collection<GatewayTopologyJson> topologies) {
-        if (!CollectionUtils.isEmpty(topologies)) {
-            Set<GatewayTopology> gatewayTopologies = topologies.stream()
-                    .map(g -> conversionService.convert(g, GatewayTopology.class))
-                    .collect(Collectors.toSet());
-            gateway.setTopologies(gatewayTopologies);
-            gatewayTopologies.forEach(g -> g.setGateway(gateway));
-        }
-    }
-
-    public void setLegacyTopology(Gateway gateway, String topologyName, List<String> exposedServices) {
-        if (StringUtils.isEmpty(topologyName)) {
-            topologyName = "services";
-        }
-        GatewayTopology gatewayTopology = CollectionUtils.isEmpty(exposedServices)
-                ? new GatewayTopology()
-                : doLegacyConversion(topologyName, exposedServices);
-        gatewayTopology.setTopologyName(topologyName);
-        gatewayTopology.setGateway(gateway);
-        gateway.setTopologies(Collections.singleton(gatewayTopology));
-    }
-
-    public void setGatewayPathAndSsoProvider(String name, GatewayJson gatewayJson, Gateway gateway) {
-        gateway.setPath(name);
+    public void setGatewayPathAndSsoProvider(String clusterName, GatewayJson gatewayJson, Gateway gateway) {
+        gateway.setPath(clusterName);
         if (gatewayJson.getPath() != null) {
             gateway.setPath(gatewayJson.getPath());
         }
@@ -92,6 +70,28 @@ public class GatewayConvertUtil {
                 gateway.setSignCert(PkiUtil.convert(cert));
             }
         }
+    }
+
+    private void setTopologyList(Gateway gateway, Collection<GatewayTopologyJson> topologies) {
+        if (!CollectionUtils.isEmpty(topologies)) {
+            Set<GatewayTopology> gatewayTopologies = topologies.stream()
+                    .map(g -> conversionService.convert(g, GatewayTopology.class))
+                    .collect(Collectors.toSet());
+            gateway.setTopologies(gatewayTopologies);
+            gatewayTopologies.forEach(g -> g.setGateway(gateway));
+        }
+    }
+
+    private void setLegacyTopology(Gateway gateway, String topologyName, List<String> exposedServices) {
+        if (StringUtils.isEmpty(topologyName)) {
+            topologyName = "services";
+        }
+        GatewayTopology gatewayTopology = CollectionUtils.isEmpty(exposedServices)
+                ? new GatewayTopology()
+                : doLegacyConversion(topologyName, exposedServices);
+        gatewayTopology.setTopologyName(topologyName);
+        gatewayTopology.setGateway(gateway);
+        gateway.setTopologies(Collections.singleton(gatewayTopology));
     }
 
     private GatewayTopology doLegacyConversion(String topologyName, List<String> exposedServices) {

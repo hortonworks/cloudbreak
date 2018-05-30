@@ -4,27 +4,28 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
+import java.util.Collections;
+
+import javax.inject.Inject;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Spy;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.GatewayJson;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.GatewayTopologyJson;
+import com.sequenceiq.cloudbreak.conf.ConversionConfig;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult.State;
 import com.sequenceiq.cloudbreak.converter.util.GatewayConvertUtil;
 
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(classes = {GatewayJsonValidator.class, ConversionConfig.class, GatewayConvertUtil.class})
 public class GatewayJsonValidatorTest {
 
-    @Spy
-    private GatewayConvertUtil gatewayConvertUtil;
-
-    @InjectMocks
-    private final GatewayJsonValidator underTest = new GatewayJsonValidator();
+    @Inject
+    private GatewayJsonValidator underTest;
 
     @Test
     public void testValidationWithNameDuplicates() {
@@ -52,6 +53,24 @@ public class GatewayJsonValidatorTest {
         GatewayTopologyJson topology3 = new GatewayTopologyJson();
         topology3.setTopologyName("Citrone");
         gatewayJson.setTopologies(Arrays.asList(topology1, topology2, topology3));
+        ValidationResult result = underTest.validate(gatewayJson);
+
+        assertEquals(State.VALID, result.getState());
+    }
+
+    @Test
+    public void testValidationWithMissingTopology() {
+        GatewayJson gatewayJson = new GatewayJson();
+        ValidationResult result = underTest.validate(gatewayJson);
+
+        assertEquals(State.ERROR, result.getState());
+        assertTrue(result.getFormattedErrors().contains("No topology is defined in gateway request."));
+    }
+
+    @Test
+    public void testValidationWithDeprecatedExposedServices() {
+        GatewayJson gatewayJson = new GatewayJson();
+        gatewayJson.setExposedServices(Collections.singletonList("ALL"));
         ValidationResult result = underTest.validate(gatewayJson);
 
         assertEquals(State.VALID, result.getState());
