@@ -24,6 +24,7 @@ public enum Msg {
     STACK_UPSCALE_FINISHED("stack.upscale.finished"),
     STACK_DOWNSCALE_INSTANCES("stack.downscale.instances"),
     STACK_DOWNSCALE_SUCCESS("stack.downscale.success"),
+    STACK_DOWNSCALE_FAILED("stack.downscale.failed"),
     STACK_SELECT_FOR_DOWNSCALE("stack.select.for.downscale"),
     STACK_STOP_REQUESTED("stack.stop.requested"),
     STACK_PROVISIONING("stack.provisioning"),

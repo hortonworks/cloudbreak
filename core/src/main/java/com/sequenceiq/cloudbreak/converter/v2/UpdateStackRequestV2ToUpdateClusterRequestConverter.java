@@ -5,8 +5,9 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.HostGroupAdjustmentJson;
-import com.sequenceiq.cloudbreak.api.model.UpdateClusterJson;
 import com.sequenceiq.cloudbreak.api.model.StackScaleRequestV2;
+import com.sequenceiq.cloudbreak.api.model.UpdateClusterJson;
+import com.sequenceiq.cloudbreak.blueprint.BlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.Cluster;
@@ -29,9 +30,11 @@ public class UpdateStackRequestV2ToUpdateClusterRequestConverter extends Abstrac
         Cluster oneByStackId = clusterRepository.findOneByStackId(source.getStackId());
         HostGroup hostGroup = hostGroupRepository.findHostGroupInClusterByName(oneByStackId.getId(), source.getGroup());
         if (hostGroup != null) {
+            String blueprintText = oneByStackId.getBlueprint().getBlueprintText();
+            boolean dataNodeComponentInHostGroup = new BlueprintTextProcessor(blueprintText).componentExistsInHostGroup("DATANODE", hostGroup.getName());
             HostGroupAdjustmentJson hostGroupAdjustmentJson = new HostGroupAdjustmentJson();
             hostGroupAdjustmentJson.setWithStackUpdate(true);
-            hostGroupAdjustmentJson.setValidateNodeCount(true);
+            hostGroupAdjustmentJson.setValidateNodeCount(dataNodeComponentInHostGroup);
             hostGroupAdjustmentJson.setHostGroup(source.getGroup());
             int scaleNumber = source.getDesiredCount() - hostGroup.getHostMetadata().size();
             hostGroupAdjustmentJson.setScalingAdjustment(scaleNumber);

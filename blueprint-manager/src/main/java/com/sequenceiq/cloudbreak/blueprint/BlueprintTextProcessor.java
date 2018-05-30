@@ -458,6 +458,11 @@ public class BlueprintTextProcessor {
         }
     }
 
+    public boolean componentExistsInHostGroup(String component, String hostGroup) {
+        Set<String> componentsInHostGroup = getComponentsInHostGroup(hostGroup);
+        return componentsInHostGroup.stream().anyMatch(component::equals);
+    }
+
     public boolean componentExistsInBlueprint(String component) {
         boolean componentExists = false;
         ArrayNode hostGroupsNode = getArrayFromObjectNodeByPath(blueprint, HOST_GROUPS_NODE);
