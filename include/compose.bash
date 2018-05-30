@@ -284,6 +284,7 @@ registrator:
     image: gliderlabs/registrator:$DOCKER_TAG_REGISTRATOR
     links:
         - consul
+    restart: on-failure
     command: consul://consul:8500
 
 logsink:
