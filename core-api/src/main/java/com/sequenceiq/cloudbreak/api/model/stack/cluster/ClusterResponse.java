@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.api.model.ClusterExposedServiceResponse;
 import com.sequenceiq.cloudbreak.api.model.ConfigStrategy;
 import com.sequenceiq.cloudbreak.api.model.CustomContainerResponse;
 import com.sequenceiq.cloudbreak.api.model.ExecutorType;
+import com.sequenceiq.cloudbreak.api.model.FileSystemResponse;
 import com.sequenceiq.cloudbreak.api.model.JsonEntity;
 import com.sequenceiq.cloudbreak.api.model.KerberosResponse;
 import com.sequenceiq.cloudbreak.api.model.SharedServiceResponse;
@@ -148,6 +149,9 @@ public class ClusterResponse implements JsonEntity {
 
     @ApiModelProperty(ClusterModelDescription.SHARED_SERVICE)
     private SharedServiceResponse sharedServiceResponse;
+
+    @ApiModelProperty(ClusterModelDescription.FILESYSTEM)
+    private FileSystemResponse fileSystemResponse;
 
     public String getDescription() {
         return description;
@@ -445,5 +449,13 @@ public class ClusterResponse implements JsonEntity {
 
     public void setSharedServiceResponse(SharedServiceResponse sharedServiceResponse) {
         this.sharedServiceResponse = sharedServiceResponse;
+    }
+
+    public FileSystemResponse getFileSystemResponse() {
+        return fileSystemResponse;
+    }
+
+    public void setFileSystemResponse(FileSystemResponse fileSystemResponse) {
+        this.fileSystemResponse = fileSystemResponse;
     }
 }

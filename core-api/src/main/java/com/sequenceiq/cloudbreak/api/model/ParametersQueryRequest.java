@@ -23,4 +23,5 @@ public class ParametersQueryRequest implements JsonEntity {
     public void setBlueprintName(String blueprintName) {
         this.blueprintName = blueprintName;
     }
+
 }

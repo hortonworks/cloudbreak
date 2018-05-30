@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.blueprint.filesystem.gcs;
 
 import static com.sequenceiq.cloudbreak.api.model.ExecutionType.ALL_NODES;
 import static com.sequenceiq.cloudbreak.api.model.ExecutionType.ONE_NODE;
-import static com.sequenceiq.cloudbreak.api.model.FileSystemType.GCS;
+import static com.sequenceiq.cloudbreak.api.model.filesystem.FileSystemType.GCS;
 import static com.sequenceiq.cloudbreak.api.model.RecipeType.POST_AMBARI_START;
 import static com.sequenceiq.cloudbreak.api.model.RecipeType.POST_CLUSTER_INSTALL;
 
@@ -15,14 +15,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.model.FileSystemType;
-import com.sequenceiq.cloudbreak.api.model.GcsFileSystemConfiguration;
+import com.sequenceiq.cloudbreak.api.model.filesystem.FileSystemType;
 import com.sequenceiq.cloudbreak.blueprint.filesystem.AbstractFileSystemConfigurator;
 import com.sequenceiq.cloudbreak.blueprint.filesystem.FileSystemScriptConfig;
 import com.sequenceiq.cloudbreak.domain.Credential;
 
 @Component
-public class GcsFileSystemConfigurator extends AbstractFileSystemConfigurator<GcsFileSystemConfiguration> {
+public class GcsFileSystemConfigurator extends AbstractFileSystemConfigurator<GcsFileSystemConfigurationsView> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GcsFileSystemConfigurator.class);
 
@@ -48,5 +47,10 @@ public class GcsFileSystemConfigurator extends AbstractFileSystemConfigurator<Gc
     @Override
     public FileSystemType getFileSystemType() {
         return GCS;
+    }
+
+    @Override
+    public String getProtocol() {
+        return GCS.getProtocol();
     }
 }

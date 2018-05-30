@@ -47,9 +47,11 @@ public class StackTerminationAction extends AbstractStackTerminationAction<Stack
     @Override
     protected void doExecute(StackTerminationContext context, StackPreTerminationSuccess payload, Map<Object, Object> variables) {
         String name = context.getStack().getName();
-        Gateway gateway = context.getStack().getCluster().getGateway();
-        if (proxyRegistrator.isKnoxEnabled(gateway)) {
-            proxyRegistrator.remove(name);
+        if (context.getStack().getCluster() != null) {
+            Gateway gateway = context.getStack().getCluster().getGateway();
+            if (proxyRegistrator.isKnoxEnabled(gateway)) {
+                proxyRegistrator.remove(name);
+            }
         }
         doExecute(context);
     }

@@ -32,7 +32,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfigs;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
-import com.sequenceiq.cloudbreak.cloud.service.CloudbreakResourceReaderService;
+import com.sequenceiq.cloudbreak.service.CloudbreakResourceReaderService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AwsPlatformResourcesTest {

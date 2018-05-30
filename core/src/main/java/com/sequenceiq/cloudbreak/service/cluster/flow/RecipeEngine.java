@@ -15,11 +15,12 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.model.ExecutorType;
-import com.sequenceiq.cloudbreak.api.model.FileSystemType;
 import com.sequenceiq.cloudbreak.api.model.RecipeType;
+import com.sequenceiq.cloudbreak.api.model.filesystem.FileSystemType;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessorFactory;
 import com.sequenceiq.cloudbreak.blueprint.SmartsenseConfigurationLocator;
+import com.sequenceiq.cloudbreak.blueprint.filesystem.FileSystemConfigurationsViewProvider;
 import com.sequenceiq.cloudbreak.blueprint.filesystem.FileSystemConfigurator;
 import com.sequenceiq.cloudbreak.blueprint.smartsense.SmartSenseConfigProvider;
 import com.sequenceiq.cloudbreak.common.model.recipe.RecipeScript;
@@ -31,6 +32,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
+import com.sequenceiq.cloudbreak.service.filesystem.FileSystemResolver;
 import com.sequenceiq.cloudbreak.service.smartsense.SmartSenseSubscriptionService;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
@@ -64,6 +66,12 @@ public class RecipeEngine {
 
     @Inject
     private SmartSenseSubscriptionService smartSenseSubscriptionService;
+
+    @Inject
+    private FileSystemResolver fileSystemResolver;
+
+    @Inject
+    private FileSystemConfigurationsViewProvider fileSystemConfigurationsViewProvider;
 
     public void uploadRecipes(Stack stack, Set<HostGroup> hostGroups) throws CloudbreakException {
         Orchestrator orchestrator = stack.getOrchestrator();

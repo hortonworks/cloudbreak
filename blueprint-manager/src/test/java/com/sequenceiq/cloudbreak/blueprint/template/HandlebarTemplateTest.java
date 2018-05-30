@@ -1,5 +1,12 @@
 package com.sequenceiq.cloudbreak.blueprint.template;
 
+import static com.sequenceiq.cloudbreak.blueprint.filesystem.BlueprintTestUtil.adlsFileSystemConfiguration;
+import static com.sequenceiq.cloudbreak.blueprint.filesystem.BlueprintTestUtil.emptyStorageLocationViews;
+import static com.sequenceiq.cloudbreak.blueprint.filesystem.BlueprintTestUtil.gcsFileSystemConfiguration;
+import static com.sequenceiq.cloudbreak.blueprint.filesystem.BlueprintTestUtil.s3FileSystemConfiguration;
+import static com.sequenceiq.cloudbreak.blueprint.filesystem.BlueprintTestUtil.storageLocationViews;
+import static com.sequenceiq.cloudbreak.blueprint.filesystem.BlueprintTestUtil.wasbSecureFileSystemConfiguration;
+import static com.sequenceiq.cloudbreak.blueprint.filesystem.BlueprintTestUtil.wasbUnSecureFileSystemConfiguration;
 import static com.sequenceiq.cloudbreak.util.FileReaderUtils.readFileFromClasspath;
 
 import java.io.IOException;
@@ -23,7 +30,6 @@ import com.sequenceiq.cloudbreak.api.model.ExecutorType;
 import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
 import com.sequenceiq.cloudbreak.blueprint.nifi.HdfConfigs;
 import com.sequenceiq.cloudbreak.blueprint.template.views.BlueprintView;
-import com.sequenceiq.cloudbreak.blueprint.template.views.FileSystemConfigurationView;
 import com.sequenceiq.cloudbreak.blueprint.template.views.SharedServiceConfigsView;
 import com.sequenceiq.cloudbreak.blueprint.templates.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.common.model.OrchestratorType;
@@ -59,24 +65,28 @@ public class HandlebarTemplateTest {
                         objectWithoutEverything()},
 
                 // ADLS
-                {"blueprints/configurations/hadoop/adls.handlebars", "configurations/hadoop/adls.json",
+                {"blueprints/configurations/filesystem/adls.handlebars", "configurations/filesystem/adls.json",
                         adlsNotDefaultFileSystemConfigs()},
-                {"blueprints/configurations/hadoop/adls.handlebars", "configurations/hadoop/adls-default.json",
-                        adlsDefaultFileSystemConfigs()},
+                {"blueprints/configurations/filesystem/adls.handlebars", "configurations/filesystem/adls-default.json",
+                        adlsFileSystemConfigsWithStorageLocation()},
 
                 // WASB
-                {"blueprints/configurations/hadoop/wasb.handlebars", "configurations/hadoop/wasb.json",
+                {"blueprints/configurations/filesystem/wasb.handlebars", "configurations/filesystem/wasb.json",
                         wasbNotDefaultFileSystemConfigs()},
-                {"blueprints/configurations/hadoop/wasb.handlebars", "configurations/hadoop/wasb-secure-default.json",
-                        wasbSecureDefaultFileSystemConfigs()},
-                {"blueprints/configurations/hadoop/wasb.handlebars", "configurations/hadoop/wasb-unsecure-default.json",
-                        wasbUnSecureDefaultFileSystemConfigs()},
+                {"blueprints/configurations/filesystem/wasb.handlebars", "configurations/filesystem/wasb-secure-default.json",
+                        wasbSecureFileSystemConfigsWithStorageLocations()},
+                {"blueprints/configurations/filesystem/wasb.handlebars", "configurations/filesystem/wasb-unsecure-default.json",
+                        wasbUnSecureDefaultFileSystemConfigsWithStorageLocations()},
 
                 // GCS
-                {"blueprints/configurations/hadoop/gcs.handlebars", "configurations/hadoop/gcs.json",
-                        gcsNotDefaultFileSystemConfigs()},
-                {"blueprints/configurations/hadoop/gcs.handlebars", "configurations/hadoop/gcs-default.json",
-                        gcsDefaultFileSystemConfigs()},
+                {"blueprints/configurations/filesystem/gcs.handlebars", "configurations/filesystem/gcs.json",
+                        gcsFileSystemConfigs()},
+                {"blueprints/configurations/filesystem/gcs.handlebars", "configurations/filesystem/gcs-default.json",
+                        gcsFileSystemConfigsWithStorageLocations()},
+
+                // S3
+                {"blueprints/configurations/filesystem/s3.handlebars", "configurations/filesystem/s3.json",
+                        s3FileSystemConfigsWithStorageLocations()},
 
                 // LLAP
                 {"blueprints/configurations/llap/global.handlebars", "configurations/llap/global.json",
@@ -247,17 +257,17 @@ public class HandlebarTemplateTest {
         generalClusterConfigs.setPassword("cloudbreak123!");
 
         return new BlueprintTemplateModelContextBuilder()
-                .withFileSystemConfigs(new FileSystemConfigurationView(TestUtil.adlsFileSystemConfiguration()))
+                .withFileSystemConfigs(adlsFileSystemConfiguration(emptyStorageLocationViews()))
                 .withGeneralClusterConfigs(generalClusterConfigs)
                 .build();
     }
 
-    public static Map<String, Object> adlsDefaultFileSystemConfigs() {
+    public static Map<String, Object> adlsFileSystemConfigsWithStorageLocation() {
         GeneralClusterConfigs generalClusterConfigs = new GeneralClusterConfigs();
         generalClusterConfigs.setPassword("cloudbreak123!");
 
         return new BlueprintTemplateModelContextBuilder()
-                .withFileSystemConfigs(new FileSystemConfigurationView(TestUtil.adlsFileSystemConfiguration(), true))
+                .withFileSystemConfigs(adlsFileSystemConfiguration(storageLocationViews()))
                 .withGeneralClusterConfigs(generalClusterConfigs)
                 .build();
     }
@@ -267,47 +277,57 @@ public class HandlebarTemplateTest {
         generalClusterConfigs.setPassword("cloudbreak123!");
 
         return new BlueprintTemplateModelContextBuilder()
-                .withFileSystemConfigs(new FileSystemConfigurationView(TestUtil.wasbSecureFileSystemConfiguration()))
+                .withFileSystemConfigs(wasbSecureFileSystemConfiguration(emptyStorageLocationViews()))
                 .withGeneralClusterConfigs(generalClusterConfigs)
                 .build();
     }
 
-    public static Map<String, Object> wasbSecureDefaultFileSystemConfigs() {
+    public static Map<String, Object> wasbSecureFileSystemConfigsWithStorageLocations() {
         GeneralClusterConfigs generalClusterConfigs = new GeneralClusterConfigs();
         generalClusterConfigs.setPassword("cloudbreak123!");
 
         return new BlueprintTemplateModelContextBuilder()
-                .withFileSystemConfigs(new FileSystemConfigurationView(TestUtil.wasbSecureFileSystemConfiguration(), true))
+                .withFileSystemConfigs(wasbSecureFileSystemConfiguration(storageLocationViews()))
                 .withGeneralClusterConfigs(generalClusterConfigs)
                 .build();
     }
 
-    public static Map<String, Object> wasbUnSecureDefaultFileSystemConfigs() {
+    public static Map<String, Object> wasbUnSecureDefaultFileSystemConfigsWithStorageLocations() {
         GeneralClusterConfigs generalClusterConfigs = new GeneralClusterConfigs();
         generalClusterConfigs.setPassword("cloudbreak123!");
 
         return new BlueprintTemplateModelContextBuilder()
-                .withFileSystemConfigs(new FileSystemConfigurationView(TestUtil.wasbUnSecureFileSystemConfiguration(), true))
+                .withFileSystemConfigs(wasbUnSecureFileSystemConfiguration(storageLocationViews()))
                 .withGeneralClusterConfigs(generalClusterConfigs)
                 .build();
     }
 
-    public static Map<String, Object> gcsNotDefaultFileSystemConfigs() {
+    public static Map<String, Object> gcsFileSystemConfigs() {
         GeneralClusterConfigs generalClusterConfigs = new GeneralClusterConfigs();
         generalClusterConfigs.setPassword("cloudbreak123!");
 
         return new BlueprintTemplateModelContextBuilder()
-                .withFileSystemConfigs(new FileSystemConfigurationView(TestUtil.gcsFileSystemConfiguration()))
+                .withFileSystemConfigs(gcsFileSystemConfiguration(emptyStorageLocationViews()))
                 .withGeneralClusterConfigs(generalClusterConfigs)
                 .build();
     }
 
-    public static Map<String, Object> gcsDefaultFileSystemConfigs() {
+    public static Map<String, Object> gcsFileSystemConfigsWithStorageLocations() {
         GeneralClusterConfigs generalClusterConfigs = new GeneralClusterConfigs();
         generalClusterConfigs.setPassword("cloudbreak123!");
 
         return new BlueprintTemplateModelContextBuilder()
-                .withFileSystemConfigs(new FileSystemConfigurationView(TestUtil.gcsFileSystemConfiguration(), true))
+                .withFileSystemConfigs(gcsFileSystemConfiguration(storageLocationViews()))
+                .withGeneralClusterConfigs(generalClusterConfigs)
+                .build();
+    }
+
+    public static Map<String, Object> s3FileSystemConfigsWithStorageLocations() {
+        GeneralClusterConfigs generalClusterConfigs = new GeneralClusterConfigs();
+        generalClusterConfigs.setPassword("cloudbreak123!");
+
+        return new BlueprintTemplateModelContextBuilder()
+                .withFileSystemConfigs(s3FileSystemConfiguration(storageLocationViews()))
                 .withGeneralClusterConfigs(generalClusterConfigs)
                 .build();
     }

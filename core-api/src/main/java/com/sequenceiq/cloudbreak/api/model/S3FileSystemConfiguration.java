@@ -5,9 +5,7 @@ import javax.validation.constraints.NotNull;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class S3FileSystemConfiguration extends FileSystemConfiguration {
-
-    public static final String INSTANCE_PROFILE = "instanceProfile";
+public class S3FileSystemConfiguration implements JsonEntity {
 
     @NotNull
     private String instanceProfile;

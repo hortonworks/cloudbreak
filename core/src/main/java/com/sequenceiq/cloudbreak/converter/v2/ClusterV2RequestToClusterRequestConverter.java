@@ -30,8 +30,8 @@ public class ClusterV2RequestToClusterRequestConverter extends AbstractConversio
         cluster.setExecutorType(source.getExecutorType());
         cluster.setEmailNeeded(source.getEmailNeeded());
         cluster.setEmailTo(source.getEmailTo());
-        if (source.getFileSystem() != null) {
-            cluster.setFileSystem(getConversionService().convert(source.getFileSystem(), FileSystemRequest.class));
+        if (source.getCloudStorage() != null) {
+            cluster.setFileSystem(getConversionService().convert(source.getCloudStorage(), FileSystemRequest.class));
         }
             cluster.setName(source.getName());
         if (source.getRdsConfigNames() != null && !source.getRdsConfigNames().isEmpty()) {

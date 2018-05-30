@@ -1,24 +1,8 @@
 package com.sequenceiq.cloudbreak.converter.spi;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-
-import javax.inject.Inject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
-
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.blueprint.VolumeUtils;
-import com.sequenceiq.cloudbreak.cloud.model.CloudFileSystem;
+import com.sequenceiq.cloudbreak.blueprint.filesystem.FileSystemConfigurationsViewProvider;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
@@ -30,6 +14,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.PortDefinition;
 import com.sequenceiq.cloudbreak.cloud.model.Security;
 import com.sequenceiq.cloudbreak.cloud.model.SecurityRule;
+import com.sequenceiq.cloudbreak.cloud.model.SpiFileSystem;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.cloud.model.StackTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Subnet;
@@ -46,6 +31,27 @@ import com.sequenceiq.cloudbreak.repository.SecurityRuleRepository;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.stack.DefaultRootVolumeSizeProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.convert.ConversionService;
+import org.springframework.stereotype.Component;
+
+import javax.inject.Inject;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+
+import static com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceStatus.REQUESTED;
+import static com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.CREATE_REQUESTED;
+import static com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.DELETE_REQUESTED;
 
 @Component
 public class StackToCloudStackConverter {
@@ -63,6 +69,13 @@ public class StackToCloudStackConverter {
 
     @Inject
     private DefaultRootVolumeSizeProvider defaultRootVolumeSizeProvider;
+
+    @Inject
+    private FileSystemConfigurationsViewProvider fileSystemConfigurationsViewProvider;
+
+    @Autowired
+    @Qualifier("conversionService")
+    private ConversionService conversionService;
 
     public CloudStack convert(Stack stack) {
         return convert(stack, Collections.emptySet());
@@ -87,108 +100,14 @@ public class StackToCloudStackConverter {
         Network network = buildNetwork(stack);
         StackTemplate stackTemplate = componentConfigProvider.getStackTemplate(stack.getId());
         InstanceAuthentication instanceAuthentication = buildInstanceAuthentication(stack.getStackAuthentication());
+        SpiFileSystem cloudFileSystem = buildCloudFileSystem(stack);
         String template = null;
         if (stackTemplate != null) {
             template = stackTemplate.getTemplate();
         }
 
-        FileSystem fileSystem = stack.getCluster().getFileSystem();
-        CloudFileSystem cloudFileSystem = null;
-        if (fileSystem != null) {
-            cloudFileSystem = new CloudFileSystem(fileSystem.getProperties());
-        }
-
-        return new CloudStack(instanceGroups, network, image, cloudFileSystem, stack.getParameters(), getUserDefinedTags(stack), template,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey());
-    }
-
-    public Map<String, String> getUserDefinedTags(Stack stack) {
-        Map<String, String> result = Maps.newHashMap();
-        try {
-            if (stack.getTags() != null) {
-                StackTags stackTag = stack.getTags().get(StackTags.class);
-                Map<String, String> userDefined = stackTag.getUserDefinedTags();
-                Map<String, String> defaultTags = stackTag.getDefaultTags();
-                if (userDefined != null) {
-                    result.putAll(userDefined);
-                }
-                if (defaultTags != null) {
-                    result.putAll(defaultTags);
-                }
-            }
-        } catch (IOException e) {
-            LOGGER.warn("Exception during converting user defined tags.", e);
-        }
-        return result;
-    }
-
-    public List<Group> buildInstanceGroups(List<InstanceGroup> instanceGroups, StackAuthentication stackAuthentication,
-            Collection<String> deleteRequests) {
-        // sort by name to avoid shuffling the different instance groups
-        Collections.sort(instanceGroups);
-        List<Group> groups = new ArrayList<>();
-        for (InstanceGroup instanceGroup : instanceGroups) {
-            if (instanceGroup.getTemplate() != null) {
-                CloudInstance skeleton = null;
-                List<CloudInstance> instances = new ArrayList<>();
-                Template template = instanceGroup.getTemplate();
-                // existing instances
-                for (InstanceMetaData metaData : instanceGroup.getNotDeletedInstanceMetaDataSet()) {
-                    InstanceStatus status = getInstanceStatus(metaData, deleteRequests);
-                    instances.add(buildInstance(metaData, template, stackAuthentication, instanceGroup.getGroupName(), metaData.getPrivateId(), status));
-                }
-                if (instanceGroup.getNodeCount() == 0) {
-                    skeleton = buildInstance(null, template, stackAuthentication, instanceGroup.getGroupName(), 0L,
-                            InstanceStatus.CREATE_REQUESTED);
-                }
-                Json attributes = instanceGroup.getAttributes();
-                InstanceAuthentication instanceAuthentication = buildInstanceAuthentication(stackAuthentication);
-                Map<String, Object> fields = attributes == null ? Collections.emptyMap() : attributes.getMap();
-
-                Integer rootVolumeSize = instanceGroup.getTemplate().getRootVolumeSize();
-                if (Objects.isNull(rootVolumeSize)) {
-                    rootVolumeSize = defaultRootVolumeSizeProvider.getForPlatform(instanceGroup.getTemplate().cloudPlatform());
-                }
-
-                groups.add(
-                        new Group(instanceGroup.getGroupName(),
-                                instanceGroup.getInstanceGroupType(),
-                                instances,
-                                buildSecurity(instanceGroup),
-                                skeleton,
-                                fields,
-                                instanceAuthentication,
-                                instanceAuthentication.getLoginUserName(),
-                                instanceAuthentication.getPublicKey(),
-                                rootVolumeSize)
-                );
-            }
-        }
-        return groups;
-    }
-
-    private Security buildSecurity(InstanceGroup ig) {
-        List<SecurityRule> rules = new ArrayList<>();
-        if (ig.getSecurityGroup() == null) {
-            return new Security(rules, null);
-        }
-        Long id = ig.getSecurityGroup().getId();
-        List<com.sequenceiq.cloudbreak.domain.SecurityRule> securityRules = securityRuleRepository.findAllBySecurityGroupId(id);
-        for (com.sequenceiq.cloudbreak.domain.SecurityRule securityRule : securityRules) {
-            List<PortDefinition> portDefinitions = new ArrayList<>();
-            for (String actualPort : securityRule.getPorts()) {
-                String[] segments = actualPort.split("-");
-                if (segments.length > 1) {
-                    portDefinitions.add(new PortDefinition(segments[0], segments[1]));
-                } else {
-                    portDefinitions.add(new PortDefinition(segments[0], segments[0]));
-                }
-            }
-
-            rules.add(new SecurityRule(securityRule.getCidr(), portDefinitions.toArray(new PortDefinition[portDefinitions.size()]),
-                    securityRule.getProtocol()));
-        }
-        return new Security(rules, ig.getSecurityGroup().getSecurityGroupId());
+        return new CloudStack(instanceGroups, network, image, stack.getParameters(), getUserDefinedTags(stack), template,
+                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), cloudFileSystem);
     }
 
     public List<CloudInstance> buildInstances(Stack stack) {
@@ -222,14 +141,7 @@ public class StackToCloudStackConverter {
         return new CloudInstance(id, instanceTemplate, instanceAuthentication, params);
     }
 
-    public InstanceAuthentication buildInstanceAuthentication(StackAuthentication stackAuthentication) {
-        return new InstanceAuthentication(
-                stackAuthentication.getPublicKey(),
-                stackAuthentication.getPublicKeyId(),
-                stackAuthentication.getLoginUserName());
-    }
-
-    public InstanceTemplate buildInstanceTemplate(Template template, String name, Long privateId, InstanceStatus status) {
+    InstanceTemplate buildInstanceTemplate(Template template, String name, Long privateId, InstanceStatus status) {
         Json attributes = template.getAttributes();
         Map<String, Object> fields = attributes == null ? Collections.emptyMap() : attributes.getMap();
         List<Volume> volumes = new ArrayList<>();
@@ -238,6 +150,113 @@ public class StackToCloudStackConverter {
             volumes.add(volume);
         }
         return new InstanceTemplate(template.getInstanceType(), name, privateId, volumes, status, fields, template.getId());
+    }
+
+    private Map<String, String> getUserDefinedTags(Stack stack) {
+        Map<String, String> result = Maps.newHashMap();
+        try {
+            if (stack.getTags() != null) {
+                StackTags stackTag = stack.getTags().get(StackTags.class);
+                Map<String, String> userDefined = stackTag.getUserDefinedTags();
+                Map<String, String> defaultTags = stackTag.getDefaultTags();
+                if (userDefined != null) {
+                    result.putAll(userDefined);
+                }
+                if (defaultTags != null) {
+                    result.putAll(defaultTags);
+                }
+            }
+        } catch (IOException e) {
+            LOGGER.warn("Exception during converting user defined tags.", e);
+        }
+        return result;
+    }
+
+    private List<Group> buildInstanceGroups(List<InstanceGroup> instanceGroups, StackAuthentication stackAuthentication,
+                                            Collection<String> deleteRequests) {
+        // sort by name to avoid shuffling the different instance groups
+        Collections.sort(instanceGroups);
+        List<Group> groups = new ArrayList<>();
+        for (InstanceGroup instanceGroup : instanceGroups) {
+            if (instanceGroup.getTemplate() != null) {
+                CloudInstance skeleton = null;
+                List<CloudInstance> instances = new ArrayList<>();
+                Template template = instanceGroup.getTemplate();
+                // existing instances
+                for (InstanceMetaData metaData : instanceGroup.getNotDeletedInstanceMetaDataSet()) {
+                    InstanceStatus status = getInstanceStatus(metaData, deleteRequests);
+                    instances.add(buildInstance(metaData, template, stackAuthentication, instanceGroup.getGroupName(), metaData.getPrivateId(), status));
+                }
+                if (instanceGroup.getNodeCount() == 0) {
+                    skeleton = buildInstance(null, template, stackAuthentication, instanceGroup.getGroupName(), 0L,
+                            CREATE_REQUESTED);
+                }
+                Json attributes = instanceGroup.getAttributes();
+                InstanceAuthentication instanceAuthentication = buildInstanceAuthentication(stackAuthentication);
+                Map<String, Object> fields = attributes == null ? Collections.emptyMap() : attributes.getMap();
+
+                Integer rootVolumeSize = instanceGroup.getTemplate().getRootVolumeSize();
+                if (Objects.isNull(rootVolumeSize)) {
+                    rootVolumeSize = defaultRootVolumeSizeProvider.getForPlatform(instanceGroup.getTemplate().cloudPlatform());
+                }
+
+                groups.add(
+                        new Group(instanceGroup.getGroupName(),
+                                instanceGroup.getInstanceGroupType(),
+                                instances,
+                                buildSecurity(instanceGroup),
+                                skeleton,
+                                fields,
+                                instanceAuthentication,
+                                instanceAuthentication.getLoginUserName(),
+                                instanceAuthentication.getPublicKey(),
+                                rootVolumeSize)
+                );
+            }
+        }
+        return groups;
+    }
+
+    private InstanceAuthentication buildInstanceAuthentication(StackAuthentication stackAuthentication) {
+        return new InstanceAuthentication(
+                stackAuthentication.getPublicKey(),
+                stackAuthentication.getPublicKeyId(),
+                stackAuthentication.getLoginUserName());
+    }
+
+    private Security buildSecurity(InstanceGroup ig) {
+        List<SecurityRule> rules = new ArrayList<>();
+        if (ig.getSecurityGroup() == null) {
+            return new Security(rules, null);
+        }
+        Long id = ig.getSecurityGroup().getId();
+        List<com.sequenceiq.cloudbreak.domain.SecurityRule> securityRules = securityRuleRepository.findAllBySecurityGroupId(id);
+        for (com.sequenceiq.cloudbreak.domain.SecurityRule securityRule : securityRules) {
+            List<PortDefinition> portDefinitions = new ArrayList<>();
+            for (String actualPort : securityRule.getPorts()) {
+                String[] segments = actualPort.split("-");
+                if (segments.length > 1) {
+                    portDefinitions.add(new PortDefinition(segments[0], segments[1]));
+                } else {
+                    portDefinitions.add(new PortDefinition(segments[0], segments[0]));
+                }
+            }
+
+            rules.add(new SecurityRule(securityRule.getCidr(), portDefinitions.toArray(new PortDefinition[portDefinitions.size()]),
+                    securityRule.getProtocol()));
+        }
+        return new Security(rules, ig.getSecurityGroup().getSecurityGroupId());
+    }
+
+    private SpiFileSystem buildCloudFileSystem(Stack stack) {
+        SpiFileSystem cloudFileSystem = null;
+        if (stack.getCluster() != null) {
+            FileSystem fileSystem = stack.getCluster().getFileSystem();
+            if (fileSystem != null) {
+                cloudFileSystem = conversionService.convert(fileSystem, SpiFileSystem.class);
+            }
+        }
+        return cloudFileSystem;
     }
 
     private Network buildNetwork(Stack stack) {
@@ -253,9 +272,15 @@ public class StackToCloudStackConverter {
     }
 
     private InstanceStatus getInstanceStatus(InstanceMetaData metaData, Collection<String> deleteRequests) {
-        return deleteRequests.contains(metaData.getInstanceId()) ? InstanceStatus.DELETE_REQUESTED
-                : metaData.getInstanceStatus() == com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceStatus.REQUESTED ? InstanceStatus.CREATE_REQUESTED
-                : InstanceStatus.CREATED;
+        InstanceStatus status;
+        if (deleteRequests.contains(metaData.getInstanceId())) {
+            status = DELETE_REQUESTED;
+        } else if (metaData.getInstanceStatus() == REQUESTED) {
+            status = CREATE_REQUESTED;
+        } else {
+            status = InstanceStatus.CREATED;
+        }
+        return status;
     }
 
 }

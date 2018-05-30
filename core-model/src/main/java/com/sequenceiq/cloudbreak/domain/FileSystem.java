@@ -1,21 +1,19 @@
 package com.sequenceiq.cloudbreak.domain;
 
-import java.util.Map;
-
 import javax.persistence.Column;
-import javax.persistence.ElementCollection;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.MapKeyColumn;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
-import com.sequenceiq.cloudbreak.api.model.FileSystemType;
+import com.sequenceiq.cloudbreak.api.model.filesystem.FileSystemType;
+import com.sequenceiq.cloudbreak.domain.json.Json;
+import com.sequenceiq.cloudbreak.domain.json.JsonToString;
 
 @Entity
 @Table(name = "filesystem")
@@ -36,11 +34,6 @@ public class FileSystem implements ProvisionEntity {
     @Column
     private boolean defaultFs;
 
-    @ElementCollection(fetch = FetchType.EAGER)
-    @MapKeyColumn(name = "key")
-    @Column(name = "value", columnDefinition = "TEXT", length = 100000)
-    private Map<String, String> properties;
-
     @Column(nullable = false)
     private String owner;
 
@@ -53,13 +46,15 @@ public class FileSystem implements ProvisionEntity {
     @Column(nullable = false)
     private String description;
 
-    public FileSystem() {
-    }
+    @Convert(converter = JsonToString.class)
+    @Column(columnDefinition = "TEXT")
+    private Json configurations;
 
-    public FileSystem(String name, FileSystemType type, boolean defaultFs) {
-        this.name = name;
-        this.type = type;
-        this.defaultFs = defaultFs;
+    @Convert(converter = JsonToString.class)
+    @Column(columnDefinition = "TEXT")
+    private Json locations;
+
+    public FileSystem() {
     }
 
     public Long getId() {
@@ -94,14 +89,6 @@ public class FileSystem implements ProvisionEntity {
         this.defaultFs = defaultFs;
     }
 
-    public Map<String, String> getProperties() {
-        return properties;
-    }
-
-    public void setProperties(Map<String, String> properties) {
-        this.properties = properties;
-    }
-
     public String getOwner() {
         return owner;
     }
@@ -134,4 +121,19 @@ public class FileSystem implements ProvisionEntity {
         this.description = description;
     }
 
+    public Json getLocations() {
+        return locations;
+    }
+
+    public void setLocations(Json locations) {
+        this.locations = locations;
+    }
+
+    public Json getConfigurations() {
+        return configurations;
+    }
+
+    public void setConfigurations(Json configurations) {
+        this.configurations = configurations;
+    }
 }

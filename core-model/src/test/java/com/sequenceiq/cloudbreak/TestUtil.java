@@ -23,19 +23,15 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.api.model.AdjustmentType;
-import com.sequenceiq.cloudbreak.api.model.AdlsFileSystemConfiguration;
 import com.sequenceiq.cloudbreak.api.model.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.model.DirectoryType;
 import com.sequenceiq.cloudbreak.api.model.ExecutorType;
-import com.sequenceiq.cloudbreak.api.model.FileSystemConfiguration;
 import com.sequenceiq.cloudbreak.api.model.GatewayType;
-import com.sequenceiq.cloudbreak.api.model.GcsFileSystemConfiguration;
 import com.sequenceiq.cloudbreak.api.model.RecipeType;
 import com.sequenceiq.cloudbreak.api.model.RecoveryMode;
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.model.Status;
-import com.sequenceiq.cloudbreak.api.model.WasbFileSystemConfiguration;
 import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceMetadataType;
@@ -59,6 +55,8 @@ import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.domain.SecurityRule;
 import com.sequenceiq.cloudbreak.domain.SmartSenseSubscription;
+import com.sequenceiq.cloudbreak.domain.StorageLocation;
+import com.sequenceiq.cloudbreak.domain.StorageLocations;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.json.JsonToString;
@@ -687,41 +685,24 @@ public class TestUtil {
 
     }
 
-    public static FileSystemConfiguration gcsFileSystemConfiguration() {
-        GcsFileSystemConfiguration gcsFileSystemConfiguration = new GcsFileSystemConfiguration();
-        gcsFileSystemConfiguration.setDefaultBucketName("hortonworks");
-        gcsFileSystemConfiguration.setProjectId("test-id");
-        gcsFileSystemConfiguration.setServiceAccountEmail("serviceaccountemail");
-        return gcsFileSystemConfiguration;
+    public static StorageLocations emptyStorageLocations() {
+        return new StorageLocations();
     }
 
-    public static FileSystemConfiguration wasbSecureFileSystemConfiguration() {
-        WasbFileSystemConfiguration wasbFileSystemConfiguration = new WasbFileSystemConfiguration();
-        wasbFileSystemConfiguration.setAccountKey("accountkey");
-        wasbFileSystemConfiguration.setAccountName("accountname");
-        wasbFileSystemConfiguration.addProperty("container", "wasb-container");
-        wasbFileSystemConfiguration.setSecure(true);
-        return wasbFileSystemConfiguration;
+    public static StorageLocations storageLocations() {
+        StorageLocations storageLocations = new StorageLocations();
+        for (int i = 0; i < 10; i++) {
+            storageLocations.getLocations().add(storageLocation(i));
+        }
+        return storageLocations;
     }
 
-    public static FileSystemConfiguration wasbUnSecureFileSystemConfiguration() {
-        WasbFileSystemConfiguration wasbFileSystemConfiguration = new WasbFileSystemConfiguration();
-        wasbFileSystemConfiguration.setAccountKey("accountkey");
-        wasbFileSystemConfiguration.setAccountName("accountname");
-        wasbFileSystemConfiguration.addProperty("container", "wasb-container");
-        wasbFileSystemConfiguration.setSecure(false);
-        return wasbFileSystemConfiguration;
-    }
-
-    public static FileSystemConfiguration adlsFileSystemConfiguration() {
-        AdlsFileSystemConfiguration adlsFileSystemConfiguration = new AdlsFileSystemConfiguration();
-        adlsFileSystemConfiguration.setClientId("clientid");
-        adlsFileSystemConfiguration.setAccountName("accountname");
-        adlsFileSystemConfiguration.setCredential("1");
-        adlsFileSystemConfiguration.setTenantId("tenantid");
-        adlsFileSystemConfiguration.addProperty("adl.events.tracking.clustertype", "normal-cluster-type");
-        adlsFileSystemConfiguration.addProperty("adl.events.tracking.clustername", "normal-cluster");
-        return adlsFileSystemConfiguration;
+    public static StorageLocation storageLocation(int i) {
+        StorageLocation storageLocation = new StorageLocation();
+        storageLocation.setValue(i + "_test/test/end");
+        storageLocation.setProperty(i + "_property");
+        storageLocation.setConfigFile(i + "_file");
+        return storageLocation;
     }
 
     private static Json getEmptyJson() {

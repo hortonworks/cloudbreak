@@ -1,8 +1,10 @@
 package com.sequenceiq.cloudbreak.blueprint.filesystem;
 
+import static com.sequenceiq.cloudbreak.blueprint.filesystem.BlueprintTestUtil.adlsFileSystem;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -12,8 +14,8 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import com.sequenceiq.cloudbreak.api.model.ExecutionType;
-import com.sequenceiq.cloudbreak.api.model.FileSystemConfiguration;
 import com.sequenceiq.cloudbreak.api.model.RecipeType;
+import com.sequenceiq.cloudbreak.blueprint.filesystem.adls.AdlsFileSystemConfigurationsView;
 import com.sequenceiq.cloudbreak.common.model.recipe.RecipeScript;
 import com.sequenceiq.cloudbreak.domain.Credential;
 
@@ -28,8 +30,8 @@ public class AbstractFileSystemConfiguratorTest {
     public void testGetScripts() {
         Credential credential = new Credential();
         credential.setId(0L);
-        FileSystemConfiguration fsConfig = new FileSystemConfiguration();
-        List<RecipeScript> actual = underTest.getScripts(credential, fsConfig);
+        AdlsFileSystemConfigurationsView adlsFileSystemConfigurationsView = new AdlsFileSystemConfigurationsView(adlsFileSystem(), new HashSet<>(), false);
+        List<RecipeScript> actual = underTest.getScripts(credential, adlsFileSystemConfigurationsView);
 
         List<RecipeScript> expected = singletonList(new RecipeScript("echo 'newContent'", ExecutionType.ALL_NODES, RecipeType.POST_AMBARI_START));
         Assert.assertEquals(expected, actual);
@@ -39,8 +41,8 @@ public class AbstractFileSystemConfiguratorTest {
     public void testGetScriptsWhenNoReplace() {
         Credential credential = new Credential();
         credential.setId(1L);
-        FileSystemConfiguration fsConfig = new FileSystemConfiguration();
-        List<RecipeScript> actual = underTest.getScripts(credential, fsConfig);
+        AdlsFileSystemConfigurationsView adlsFileSystemConfigurationsView = new AdlsFileSystemConfigurationsView(adlsFileSystem(), new HashSet<>(), false);
+        List<RecipeScript> actual = underTest.getScripts(credential, adlsFileSystemConfigurationsView);
 
         List<RecipeScript> expected = singletonList(new RecipeScript("echo '$replace'", ExecutionType.ALL_NODES, RecipeType.POST_AMBARI_START));
         Assert.assertEquals(expected, actual);
@@ -50,26 +52,28 @@ public class AbstractFileSystemConfiguratorTest {
     public void testGetScriptsWhenFileNotFound() {
         Credential credential = new Credential();
         credential.setId(2L);
-        FileSystemConfiguration fsConfig = new FileSystemConfiguration();
+        AdlsFileSystemConfigurationsView adlsFileSystemConfigurationsView = new AdlsFileSystemConfigurationsView(adlsFileSystem(), new HashSet<>(), false);
 
         thrown.expectMessage("Filesystem configuration scripts cannot be read.");
         thrown.expect(FileSystemConfigException.class);
 
-        underTest.getScripts(credential, fsConfig);
+        underTest.getScripts(credential, adlsFileSystemConfigurationsView);
     }
 
     @Test
     public void testCreateResource() {
-        FileSystemConfiguration fsConfig = new FileSystemConfiguration();
-        Map<String, String> actual = underTest.createResources(fsConfig);
+        AdlsFileSystemConfigurationsView adlsFileSystemConfigurationsView = new AdlsFileSystemConfigurationsView(adlsFileSystem(), new HashSet<>(), false);
+
+        Map<String, String> actual = underTest.createResources(adlsFileSystemConfigurationsView);
 
         Assert.assertEquals(emptyMap(), actual);
     }
 
     @Test
     public void testDelteResource() {
-        FileSystemConfiguration fsConfig = new FileSystemConfiguration();
-        Map<String, String> actual = underTest.deleteResources(fsConfig);
+        AdlsFileSystemConfigurationsView adlsFileSystemConfigurationsView = new AdlsFileSystemConfigurationsView(adlsFileSystem(), new HashSet<>(), false);
+
+        Map<String, String> actual = underTest.deleteResources(adlsFileSystemConfigurationsView);
 
         Assert.assertEquals(emptyMap(), actual);
     }

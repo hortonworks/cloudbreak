@@ -84,7 +84,7 @@ import com.sequenceiq.cloudbreak.cloud.model.ZoneVmSpecifications;
 import com.sequenceiq.cloudbreak.cloud.model.view.PlatformResourceSecurityGroupFilterView;
 import com.sequenceiq.cloudbreak.cloud.model.view.PlatformResourceSshKeyFilterView;
 import com.sequenceiq.cloudbreak.cloud.model.view.PlatformResourceVpcFilterView;
-import com.sequenceiq.cloudbreak.cloud.service.CloudbreakResourceReaderService;
+import com.sequenceiq.cloudbreak.service.CloudbreakResourceReaderService;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 

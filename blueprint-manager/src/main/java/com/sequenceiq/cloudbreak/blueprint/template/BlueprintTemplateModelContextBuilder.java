@@ -7,18 +7,15 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 
-import com.sequenceiq.cloudbreak.api.model.FileSystemType;
+import com.sequenceiq.cloudbreak.blueprint.filesystem.BaseFileSystemConfigurationsView;
 import com.sequenceiq.cloudbreak.blueprint.nifi.HdfConfigs;
 import com.sequenceiq.cloudbreak.blueprint.template.views.BlueprintView;
-import com.sequenceiq.cloudbreak.blueprint.template.views.FileSystemConfigurationView;
 import com.sequenceiq.cloudbreak.blueprint.template.views.GatewayView;
 import com.sequenceiq.cloudbreak.blueprint.template.views.GeneralClusterConfigsView;
 import com.sequenceiq.cloudbreak.blueprint.template.views.HdfConfigView;
 import com.sequenceiq.cloudbreak.blueprint.template.views.LdapView;
 import com.sequenceiq.cloudbreak.blueprint.template.views.RdsView;
 import com.sequenceiq.cloudbreak.blueprint.template.views.SharedServiceConfigsView;
-import com.sequenceiq.cloudbreak.blueprint.template.views.filesystem.FileSystemView;
-import com.sequenceiq.cloudbreak.blueprint.template.views.filesystem.FileSystemViewFactory;
 import com.sequenceiq.cloudbreak.blueprint.templates.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.blueprint.utils.ModelConverterUtils;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
@@ -31,7 +28,7 @@ public class BlueprintTemplateModelContextBuilder {
 
     private final Map<String, RdsView> rds = new HashMap<>();
 
-    private final Map<String, FileSystemView> fileSystemConfig = new HashMap<>();
+    private final Map<String, BaseFileSystemConfigurationsView> fileSystemConfig = new HashMap<>();
 
     private Optional<LdapView> ldap = Optional.empty();
 
@@ -67,17 +64,16 @@ public class BlueprintTemplateModelContextBuilder {
         return this;
     }
 
-    public BlueprintTemplateModelContextBuilder withFileSystemConfigs(FileSystemConfigurationView fileSystemConfigurationView) {
-        if (fileSystemConfigurationView != null && fileSystemConfigurationView.getFileSystemConfiguration() != null) {
+    public BlueprintTemplateModelContextBuilder withFileSystemConfigs(BaseFileSystemConfigurationsView fileSystemConfigurationView) {
+        if (fileSystemConfigurationView != null) {
             withFileSystemConfigurationView(fileSystemConfigurationView);
         }
         return this;
     }
 
-    private BlueprintTemplateModelContextBuilder withFileSystemConfigurationView(FileSystemConfigurationView fileSystemConfigurationView) {
-        FileSystemView fileSystemView = FileSystemViewFactory.convertToFileSystem(fileSystemConfigurationView);
-        String componentName = FileSystemType.fromClass(fileSystemConfigurationView.getFileSystemConfiguration().getClass()).name().toLowerCase();
-        fileSystemConfig.put(componentName, fileSystemView);
+    private BlueprintTemplateModelContextBuilder withFileSystemConfigurationView(BaseFileSystemConfigurationsView fileSystemConfigurationView) {
+        String componentName = fileSystemConfigurationView.getType().toLowerCase();
+        fileSystemConfig.put(componentName, fileSystemConfigurationView);
         return this;
     }
 
