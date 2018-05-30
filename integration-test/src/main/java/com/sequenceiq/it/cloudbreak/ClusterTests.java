@@ -75,6 +75,28 @@ public class ClusterTests extends CloudbreakTest {
                 "check ambari is running and components available");
     }
 
+    @Test(dataProvider = "providernameblueprintimageos", priority = 10)
+    public void testCreateNewClusterWithOs(CloudProvider cloudProvider, String clusterName, String blueprintName, String os) throws Exception {
+        given(CloudbreakClient.isCreated());
+        given(cloudProvider.aValidCredential());
+        given(Cluster.request()
+                        .withAmbariRequest(cloudProvider.ambariRequestWithBlueprintName(blueprintName)),
+                "a cluster request");
+        given(ImageSettings.request()
+                .withImageCatalog("")
+                .withOs(os));
+        given(cloudProvider.aValidStackRequest()
+                .withName(clusterName), "a stack request");
+        when(Stack.post(), "post the stack request");
+        then(Stack.waitAndCheckClusterAndStackAvailabilityStatus(),
+                "wait and check availability");
+        then(Stack.checkClusterHasAmbariRunning(
+                getTestParameter().get(CloudProviderHelper.DEFAULT_AMBARI_PORT),
+                getTestParameter().get(CloudProviderHelper.DEFAULT_AMBARI_USER),
+                getTestParameter().get(CloudProviderHelper.DEFAULT_AMBARI_PASSWORD)),
+                "check ambari is running and components available");
+    }
+
     @Test(dataProvider = "providernamehostgroupdesiredno", priority = 20)
     public void testScaleCluster(CloudProvider cloudProvider, String clusterName, String hostgroupName, int desiredCount) throws Exception {
         given(CloudbreakClient.isCreated());
@@ -144,6 +166,18 @@ public class ClusterTests extends CloudbreakTest {
         String image = getImageId(provider, imageDescription);
         return new Object[][]{
                 {cloudProvider, clusterName, blueprint, image}
+        };
+    }
+
+    @DataProvider(name = "providernameblueprintimageos")
+    public Object[][] providerAndImageOs() {
+        String blueprint = getTestParameter().get("blueprintName");
+        String provider = getTestParameter().get("provider").toLowerCase();
+        String imageOs = getTestParameter().get("imageos");
+        CloudProvider cloudProvider = CloudProviderHelper.providerFactory(provider, getTestParameter());
+        String clusterName = getTestParameter().get("clusterName");
+        return new Object[][]{
+                {cloudProvider, clusterName, blueprint, imageOs}
         };
     }
 

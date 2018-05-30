@@ -1,8 +1,8 @@
 package com.sequenceiq.it.cloudbreak.newway;
 
-import com.sequenceiq.it.IntegrationTestContext;
-
 import java.util.function.Function;
+
+import com.sequenceiq.it.IntegrationTestContext;
 
 public class ImageSettings extends Entity {
     public static final String IMAGESETTINGS_REQUEST = "IMAGESETTINGS_REQUEST";
@@ -33,6 +33,11 @@ public class ImageSettings extends Entity {
 
     public ImageSettings withImageId(String imageId) {
         request.setImageId(imageId);
+        return this;
+    }
+
+    public ImageSettings withOs(String os) {
+        request.setOs(os);
         return this;
     }
 
