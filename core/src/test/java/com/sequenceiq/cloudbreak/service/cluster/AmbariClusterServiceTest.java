@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.service.cluster;
 import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.when;
 
 import java.util.HashSet;
@@ -15,7 +15,6 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.api.model.DatabaseVendor;
@@ -28,15 +27,16 @@ import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.TransactionService;
+import com.sequenceiq.cloudbreak.service.TransactionService.TransactionCallback;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterTerminationService;
@@ -80,14 +80,14 @@ public class AmbariClusterServiceTest {
     @Mock
     private ReactorFlowManager flowManager;
 
-    @Spy
+    @Mock
     private TransactionService transactionService;
 
     @InjectMocks
     private AmbariClusterService ambariClusterService;
 
     @Before
-    public void setup() throws CloudbreakException {
+    public void setup() throws CloudbreakException, TransactionExecutionException {
         Cluster cluster = new Cluster();
         cluster.setId(1L);
         cluster.setBlueprint(new Blueprint());
@@ -103,15 +103,16 @@ public class AmbariClusterServiceTest {
         when(clusterComponentConfigProvider.store(any(ClusterComponent.class))).thenAnswer(invocation -> invocation.getArgument(0));
         when(clusterComponentConfigProvider.getComponent(any(Long.class), any(ComponentType.class))).thenReturn(new ClusterComponent());
         when(blueprintService.get(any(Long.class))).thenReturn(cluster.getBlueprint());
+        doAnswer(invocation -> ((TransactionCallback) invocation.getArgument(0)).get()).when(transactionService).required(any());
     }
 
     @Test
     public void testRecreateFailNotEmbeddedDb() throws TransactionExecutionException {
-        thrown.expectCause(equalTo(new BadRequestException("Ambari doesn't support resetting external DB automatically."
+        thrown.expect(equalTo(new BadRequestException("Ambari doesn't support resetting external DB automatically."
                 + " To reset Ambari Server schema you must first drop and then create it using DDL scripts from /var/lib/ambari-server/resources")));
         RDSConfig rdsConfig = new RDSConfig();
         rdsConfig.setDatabaseEngine(DatabaseVendor.POSTGRES);
-        when(rdsConfigService.findByClusterIdAndType(nullable(String.class), nullable(String.class), any(Long.class), eq(RdsType.AMBARI))).thenReturn(rdsConfig);
+        when(rdsConfigService.findByClusterIdAndType(nullable(String.class), nullable(String.class), any(Long.class), any(RdsType.class))).thenReturn(rdsConfig);
         ambariClusterService.recreate(1L, 1L, new HashSet<>(), false, new StackRepoDetails(), null, null);
     }
 

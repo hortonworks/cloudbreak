@@ -8,6 +8,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyCollection;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -55,6 +56,7 @@ import com.sequenceiq.cloudbreak.ha.CloudbreakNodeConfig;
 import com.sequenceiq.cloudbreak.repository.CloudbreakNodeRepository;
 import com.sequenceiq.cloudbreak.repository.FlowLogRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.service.TransactionService.TransactionCallback;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.ha.FlowDistributor;
 import com.sequenceiq.cloudbreak.service.ha.HeartbeatService;
@@ -97,6 +99,9 @@ public class HeartbeatServiceTest {
     @Mock
     private StackRepository stackRepository;
 
+    @Mock
+    private TransactionService transactionService;
+
     @Captor
     private ArgumentCaptor<String> stringCaptor;
 
@@ -104,11 +109,17 @@ public class HeartbeatServiceTest {
     private ArgumentCaptor<List<FlowLog>> flowLogListCaptor;
 
     @Before
-    public void init() {
+    public void init() throws TransactionExecutionException {
         when(cloudbreakNodeConfig.isNodeIdSpecified()).thenReturn(true);
         when(cloudbreakNodeConfig.getId()).thenReturn(MY_ID);
         ReflectionTestUtils.setField(heartbeatService, "heartbeatThresholdRate", 70000);
-        ReflectionTestUtils.setField(heartbeatService, "transactionService", new TransactionService());
+        doAnswer(invocation -> {
+            try {
+                return ((TransactionCallback) invocation.getArgument(0)).get();
+            } catch (RuntimeException e) {
+                throw new TransactionExecutionException("", e);
+            }
+        }).when(transactionService).required(any());
     }
 
     @Test
