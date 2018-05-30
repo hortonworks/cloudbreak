@@ -218,4 +218,14 @@ public class RDSConfigJsonValidatorTest {
                 .buildConstraintViolationWithTemplate("The length of the connectorJarUrl has to be in range of 0 to 150");
     }
 
+    @Test
+    public void testIsValidWhenConnectorJarUrlIsEmptyThenTrueReturns() {
+        when(json.getConnectionURL()).thenReturn(VALID_CONNECTION_URL);
+        when(json.getName()).thenReturn(VALID_NAME);
+        when(json.getType()).thenReturn(TEST_TYPE);
+        when(json.getConnectorJarUrl()).thenReturn(null);
+
+        assertTrue(underTets.isValid(json, constraintValidatorContext));
+    }
+
 }
