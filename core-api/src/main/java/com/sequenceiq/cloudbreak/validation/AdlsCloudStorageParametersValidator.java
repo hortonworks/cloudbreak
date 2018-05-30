@@ -1,11 +1,10 @@
 package com.sequenceiq.cloudbreak.validation;
 
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
-
+import com.sequenceiq.cloudbreak.api.model.v2.filesystem.AdlsCloudStorageParameters;
 import org.apache.commons.lang3.StringUtils;
 
-import com.sequenceiq.cloudbreak.api.model.v2.filesystem.AdlsCloudStorageParameters;
+import javax.validation.ConstraintValidator;
+import javax.validation.ConstraintValidatorContext;
 
 public class AdlsCloudStorageParametersValidator implements ConstraintValidator<ValidAdlsCloudStorageParameters, AdlsCloudStorageParameters> {
 

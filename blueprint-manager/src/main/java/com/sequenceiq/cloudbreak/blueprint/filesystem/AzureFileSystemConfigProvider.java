@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.blueprint.filesystem;
 
+
 import static com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudAdlsView.TENANT_ID;
 
 import org.slf4j.Logger;

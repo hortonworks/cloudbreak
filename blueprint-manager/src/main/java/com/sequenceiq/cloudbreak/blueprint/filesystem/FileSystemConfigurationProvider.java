@@ -1,12 +1,5 @@
 package com.sequenceiq.cloudbreak.blueprint.filesystem;
 
-import java.io.IOException;
-import java.util.Optional;
-
-import javax.inject.Inject;
-
-import org.springframework.stereotype.Service;
-
 import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
@@ -14,6 +7,11 @@ import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import org.springframework.stereotype.Service;
+
+import javax.inject.Inject;
+import java.io.IOException;
+import java.util.Optional;
 
 @Service
 public class FileSystemConfigurationProvider {
@@ -38,7 +36,7 @@ public class FileSystemConfigurationProvider {
     }
 
     private BaseFileSystemConfigurationsView fileSystemConfiguration(FileSystem fs, Long stackId, String uuid, Credential credential,
-            String platformVariant, Optional<Resource> resource) throws IOException {
+                                                                     String platformVariant, Optional<Resource> resource) throws IOException {
         BaseFileSystemConfigurationsView fileSystemConfiguration = null;
         if (fs != null) {
             fileSystemConfiguration = fileSystemConfigurationsViewProvider.propagateConfigurationsView(fs);

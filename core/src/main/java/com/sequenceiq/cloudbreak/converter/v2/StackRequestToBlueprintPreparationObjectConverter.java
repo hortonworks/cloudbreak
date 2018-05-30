@@ -6,6 +6,7 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import com.sequenceiq.cloudbreak.blueprint.BlueprintPreparationObject.Builder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -119,7 +120,7 @@ public class StackRequestToBlueprintPreparationObjectConverter extends AbstractC
             Gateway gateway = getConversionService().convert(source, Gateway.class);
             BlueprintView blueprintView = new BlueprintView(blueprint.getBlueprintText(), blueprintStackInfo.getVersion(), blueprintStackInfo.getType());
             GeneralClusterConfigs generalClusterConfigs = generalClusterConfigsProvider.generalClusterConfigs(source, identityUser);
-            BlueprintPreparationObject.Builder builder = BlueprintPreparationObject.Builder.builder()
+            Builder builder = Builder.builder()
                     .withFlexSubscription(flexSubscription)
                     .withRdsConfigs(rdsConfigs)
                     .withHostgroupViews(hostgroupViews)
@@ -144,20 +145,16 @@ public class StackRequestToBlueprintPreparationObjectConverter extends AbstractC
 
             }
             return builder.build();
-        } catch (BlueprintProcessingException e) {
-            throw new CloudbreakServiceException(e.getMessage(), e);
-        } catch (IOException e) {
+        } catch (BlueprintProcessingException | IOException e) {
             throw new CloudbreakServiceException(e.getMessage(), e);
         }
     }
 
     private Blueprint getBlueprint(StackV2Request source, IdentityUser identityUser) {
         Blueprint blueprint;
-        if (Strings.isNullOrEmpty(source.getCluster().getAmbari().getBlueprintName())) {
-            blueprint = blueprintService.get(source.getCluster().getAmbari().getBlueprintId());
-        } else {
-            blueprint = blueprintService.get(source.getCluster().getAmbari().getBlueprintName(), identityUser.getAccount());
-        }
+        blueprint = Strings.isNullOrEmpty(source.getCluster().getAmbari().getBlueprintName())
+                ? blueprintService.get(source.getCluster().getAmbari().getBlueprintId())
+                : blueprintService.get(source.getCluster().getAmbari().getBlueprintName(), identityUser.getAccount());
         return blueprint;
     }
 
