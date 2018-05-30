@@ -225,6 +225,7 @@ cloudbreak-conf-defaults() {
     if [[ ! -z "$CB_BLUEPRINT_DEFAULTS"  ]]; then
         env-import CB_BLUEPRINT_DEFAULTS
     fi;
+    env-import CB_BLUEPRINT_INTERNAL ""
     if [[ ! -z "$CB_TEMPLATE_DEFAULTS" ]]; then
         env-import CB_TEMPLATE_DEFAULTS
     fi;
