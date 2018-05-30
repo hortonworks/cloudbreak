@@ -6,9 +6,8 @@ import java.util.regex.Pattern;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
-import org.apache.commons.lang3.StringUtils;
+import org.springframework.util.StringUtils;
 
-import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigJson;
 
 public class RDSConfigJsonValidator implements ConstraintValidator<ValidRDSConfigJson, RDSConfigJson> {
@@ -87,10 +86,10 @@ public class RDSConfigJsonValidator implements ConstraintValidator<ValidRDSConfi
     }
 
     private boolean isConnectorJarUrlValid(String connectorJarUrl) {
-        if (!Strings.isNullOrEmpty(connectorJarUrl) && !connectorJarUrl.matches("^http[s]?://[\\w-/?=+&:,#.]*")) {
+        if (!StringUtils.isEmpty(connectorJarUrl) && !connectorJarUrl.matches("^http[s]?://[\\w-/?=+&:,#.]*")) {
             failMessage = "The URL must be proper and valid!";
             return false;
-        } else if (!Strings.isNullOrEmpty(connectorJarUrl) && connectorJarUrl.length() > MAX_CONNECTOR_JAR_URL_LENGTH) {
+        } else if (!StringUtils.isEmpty(connectorJarUrl) && connectorJarUrl.length() > MAX_CONNECTOR_JAR_URL_LENGTH) {
             failMessage = "The length of the connectorJarUrl has to be in range of 0 to 150";
             return false;
         }
