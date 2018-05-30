@@ -9,6 +9,7 @@ import static org.mockito.Matchers.anyMap;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isNull;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -48,6 +49,7 @@ import com.sequenceiq.cloudbreak.domain.StateStatus;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.repository.FlowLogRepository;
 import com.sequenceiq.cloudbreak.service.TransactionService;
+import com.sequenceiq.cloudbreak.service.TransactionService.TransactionCallback;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.flowlog.FlowLogService;
 
@@ -120,6 +122,7 @@ public class Flow2HandlerTest {
     @Mock
     private FlowChainHandler flowChainHandler;
 
+    @Mock
     private TransactionService transactionService;
 
     private FlowState flowState;
@@ -129,15 +132,14 @@ public class Flow2HandlerTest {
     private final Payload payload = () -> 1L;
 
     @Before
-    public void setUp() {
+    public void setUp() throws TransactionExecutionException {
         underTest = new Flow2Handler();
-        transactionService = new TransactionService();
-        ReflectionTestUtils.setField(underTest, "transactionService", transactionService);
         MockitoAnnotations.initMocks(this);
         Map<String, Object> headers = new HashMap<>();
         headers.put(Flow2Handler.FLOW_ID, FLOW_ID);
         dummyEvent = new Event<>(new Headers(headers), payload);
         flowState = new OwnFlowState();
+        doAnswer(invocation -> ((TransactionCallback) invocation.getArgument(0)).get()).when(transactionService).required(any());
     }
 
     @Test

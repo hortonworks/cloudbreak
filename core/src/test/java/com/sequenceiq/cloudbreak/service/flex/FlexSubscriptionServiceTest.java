@@ -2,7 +2,9 @@ package com.sequenceiq.cloudbreak.service.flex;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -15,13 +17,13 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
 
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.FlexSubscription;
 import com.sequenceiq.cloudbreak.domain.SmartSenseSubscription;
 import com.sequenceiq.cloudbreak.repository.FlexSubscriptionRepository;
 import com.sequenceiq.cloudbreak.service.TransactionService;
+import com.sequenceiq.cloudbreak.service.TransactionService.TransactionCallback;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 
 public class FlexSubscriptionServiceTest {
@@ -29,15 +31,16 @@ public class FlexSubscriptionServiceTest {
     @Mock
     private FlexSubscriptionRepository flexRepo;
 
-    @Spy
+    @Mock
     private TransactionService transactionService;
 
     @InjectMocks
     private FlexSubscriptionService underTest;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() throws TransactionExecutionException {
         initMocks(this);
+        doAnswer(invocation -> ((TransactionCallback) invocation.getArgument(0)).get()).when(transactionService).required(any());
     }
 
     @Test(expected = BadRequestException.class)
