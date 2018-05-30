@@ -1,0 +1,19 @@
+{
+  "networks": {
+    "RegionOne": [
+      {
+        "name": "PROVIDER_NET_172.22.64.0/18",
+        "id": "a5ad7a1d-d3a6-4180-8d61-07a23f6fb449",
+        "subnets": {
+          "0404bf21-db5f-4987-8576-e65a4a99b14e": "PROVIDER_SUBNET_172.22.64.0/18"
+        },
+        "properties": {
+          "providerPhyNet": null,
+          "providerSegID": null,
+          "tenantId": "e68fc02fc33c497385a96b3d8b9e8b16",
+          "networkType": null
+        }
+      }
+    ]
+  }
+}

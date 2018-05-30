@@ -1,0 +1,227 @@
+{
+  "maxNumberOfClusters": 0,
+  "maxNumberOfNodesPerCluster": 0,
+  "maxNumberOfClustersPerUser": 0,
+  "allowedInstanceTypes": [],
+  "clusterTimeToLive": 0,
+  "userTimeToLive": 0,
+  "platforms": null,
+  "smartsenseEnabled": true,
+  "defaultTags": {},
+  "supportedExternalDatabases": [
+    {
+      "name": "SUPERSET",
+      "displayName": "Superset",
+      "databases": [
+        {
+          "databaseName": "POSTGRES",
+          "displayName": "Postgres",
+          "jdbcPrefix": "postgresql",
+          "versions": []
+        },
+        {
+          "databaseName": "MYSQL",
+          "displayName": "MySQL",
+          "jdbcPrefix": "mysql",
+          "versions": []
+        }
+      ]
+    },
+    {
+      "name": "DRUID",
+      "displayName": "Druid",
+      "databases": [
+        {
+          "databaseName": "MYSQL",
+          "displayName": "MySQL",
+          "jdbcPrefix": "mysql",
+          "versions": []
+        },
+        {
+          "databaseName": "POSTGRES",
+          "displayName": "Postgres",
+          "jdbcPrefix": "postgresql",
+          "versions": []
+        }
+      ]
+    },
+    {
+      "name": "OTHER",
+      "displayName": "Other",
+      "databases": [
+        {
+          "databaseName": "POSTGRES",
+          "displayName": "Postgres",
+          "jdbcPrefix": "postgresql",
+          "versions": []
+        },
+        {
+          "databaseName": "ORACLE11",
+          "displayName": "Oracle 11g",
+          "jdbcPrefix": "oracle",
+          "versions": [
+            "11",
+            "oracle11",
+            "oracle11g",
+            "11g"
+          ]
+        },
+        {
+          "databaseName": "ORACLE12",
+          "displayName": "Oracle 12c",
+          "jdbcPrefix": "oracle",
+          "versions": [
+            "12",
+            "oracle12c",
+            "12c",
+            "oracle12"
+          ]
+        },
+        {
+          "databaseName": "MYSQL",
+          "displayName": "MySQL",
+          "jdbcPrefix": "mysql",
+          "versions": []
+        }
+      ]
+    },
+    {
+      "name": "AMBARI",
+      "displayName": "Ambari",
+      "databases": [
+        {
+          "databaseName": "POSTGRES",
+          "displayName": "Postgres",
+          "jdbcPrefix": "postgresql",
+          "versions": []
+        },
+        {
+          "databaseName": "MYSQL",
+          "displayName": "MySQL",
+          "jdbcPrefix": "mysql",
+          "versions": []
+        }
+      ]
+    },
+    {
+      "name": "RANGER",
+      "displayName": "Ranger",
+      "databases": [
+        {
+          "databaseName": "MYSQL",
+          "displayName": "MySQL",
+          "jdbcPrefix": "mysql",
+          "versions": []
+        },
+        {
+          "databaseName": "ORACLE12",
+          "displayName": "Oracle 12c",
+          "jdbcPrefix": "oracle",
+          "versions": [
+            "12",
+            "oracle12c",
+            "12c",
+            "oracle12"
+          ]
+        },
+        {
+          "databaseName": "ORACLE11",
+          "displayName": "Oracle 11g",
+          "jdbcPrefix": "oracle",
+          "versions": [
+            "11",
+            "oracle11",
+            "oracle11g",
+            "11g"
+          ]
+        },
+        {
+          "databaseName": "POSTGRES",
+          "displayName": "Postgres",
+          "jdbcPrefix": "postgresql",
+          "versions": []
+        }
+      ]
+    },
+    {
+      "name": "HIVE",
+      "displayName": "Hive",
+      "databases": [
+        {
+          "databaseName": "MYSQL",
+          "displayName": "MySQL",
+          "jdbcPrefix": "mysql",
+          "versions": []
+        },
+        {
+          "databaseName": "ORACLE12",
+          "displayName": "Oracle 12c",
+          "jdbcPrefix": "oracle",
+          "versions": [
+            "12",
+            "oracle12c",
+            "12c",
+            "oracle12"
+          ]
+        },
+        {
+          "databaseName": "POSTGRES",
+          "displayName": "Postgres",
+          "jdbcPrefix": "postgresql",
+          "versions": []
+        },
+        {
+          "databaseName": "ORACLE11",
+          "displayName": "Oracle 11g",
+          "jdbcPrefix": "oracle",
+          "versions": [
+            "11",
+            "oracle11",
+            "oracle11g",
+            "11g"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "OOZIE",
+      "displayName": "Oozie",
+      "databases": [
+        {
+          "databaseName": "ORACLE12",
+          "displayName": "Oracle 12c",
+          "jdbcPrefix": "oracle",
+          "versions": [
+            "12",
+            "oracle12c",
+            "12c",
+            "oracle12"
+          ]
+        },
+        {
+          "databaseName": "ORACLE11",
+          "displayName": "Oracle 11g",
+          "jdbcPrefix": "oracle",
+          "versions": [
+            "11",
+            "oracle11",
+            "oracle11g",
+            "11g"
+          ]
+        },
+        {
+          "databaseName": "MYSQL",
+          "displayName": "MySQL",
+          "jdbcPrefix": "mysql",
+          "versions": []
+        },
+        {
+          "databaseName": "POSTGRES",
+          "displayName": "Postgres",
+          "jdbcPrefix": "postgresql",
+          "versions": []
+        }
+      ]
+    }
+  ]
+}

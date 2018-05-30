@@ -1,0 +1,83 @@
+[
+  {
+    "cloudPlatform": "OPENSTACK",
+    "parameters": {
+      "encrypted": false
+    },
+    "description": "",
+    "volumeType": "HDD",
+    "instanceType": "cloudbreak",
+    "customInstanceType": null,
+    "topologyId": null,
+    "name": "taef3eebf-c93c-49c9-af5d-37d1ec97d160",
+    "id": 1,
+    "volumeCount": 0,
+    "volumeSize": 100,
+    "public": false
+  },
+  {
+    "cloudPlatform": "AWS",
+    "parameters": {
+      "encrypted": false
+    },
+    "description": "",
+    "volumeType": "standard",
+    "instanceType": "m4.xlarge",
+    "customInstanceType": null,
+    "topologyId": null,
+    "name": "tb9d8d756-81e4-471f-a7a9-a188fa1ce85b",
+    "id": 2,
+    "volumeCount": 1,
+    "volumeSize": 100,
+    "public": false
+  },
+  {
+    "cloudPlatform": "AWS",
+    "parameters": {
+      "encrypted": false
+    },
+    "description": "",
+    "volumeType": "standard",
+    "instanceType": "m4.4xlarge",
+    "customInstanceType": null,
+    "topologyId": null,
+    "name": "t7b01713b-522e-41b6-bbfc-5c60da63d050",
+    "id": 3,
+    "volumeCount": 1,
+    "volumeSize": 100,
+    "public": false
+  },
+  {
+    "cloudPlatform": "AZURE",
+    "parameters": {
+      "encrypted": false,
+      "managedDisk": true
+    },
+    "description": "",
+    "volumeType": "Standard_LRS",
+    "instanceType": "Standard_D3_v2",
+    "customInstanceType": null,
+    "topologyId": null,
+    "name": "t38826b32-a741-473a-9ab9-0510b4fd7829",
+    "id": 4,
+    "volumeCount": 1,
+    "volumeSize": 100,
+    "public": false
+  },
+  {
+    "cloudPlatform": "GCP",
+    "parameters": {
+      "encrypted": false
+    },
+    "description": "",
+    "volumeType": "pd-standard",
+    "instanceType": "n1-standard-4",
+    "customInstanceType": null,
+    "topologyId": null,
+    "name": "t2c7d1a00-45f0-4dca-a6bd-ac992e761d90",
+    "id": 5,
+    "volumeCount": 1,
+    "volumeSize": 100,
+    "public": false
+  }
+]

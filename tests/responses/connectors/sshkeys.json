@@ -1,0 +1,51 @@
+{
+  "sshKeys": {
+    "RegionOne": [
+      {
+        "name": "consul-keypair",
+        "properties": {
+          "createdAt": null,
+          "fingerprint": "b9:2e:e8:ab:e6:47:4f:03:1c:af:a5:13:bf:4d:5b:7c",
+          "id": null,
+          "publicKey": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC0Rfl2G2vDs6yc19RxCqReunFgpYj+ucyLobpTCBtfDwzIbJot2Fmife6M42mBtiTmAK6x8kcUEeab6CB4MUzsqF7vGTFUjwWirG/XU5pYXFUBhi8xzey+KS9KVrQ+UuKJh/AN9iSQeMV+rgT1yF5+etVH+bK1/37QCKp3+mCqjFzPyQOrvkGZv4sYyRwX7BKBLleQmIVWpofpjT7BfcCxH877RzC5YMIi65aBc82Dl6tH6OEiP7mzByU52yvH6JFuwZ/9fWj1vXCWJzxx2w0F1OU8Zwg8gNNzL+SVb9+xfBE7xBHMpYFg72hBWPh862Ce36F4NZd3MpWMSjMmpDPh"
+        }
+      },
+      {
+        "name": "seq-master",
+        "properties": {
+          "createdAt": null,
+          "fingerprint": "b9:2e:e8:ab:e6:47:4f:03:1c:af:a5:13:bf:4d:5b:7c",
+          "id": null,
+          "publicKey": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC0Rfl2G2vDs6yc19RxCqReunFgpYj+ucyLobpTCBtfDwzIbJot2Fmife6M42mBtiTmAK6x8kcUEeab6CB4MUzsqF7vGTFUjwWirG/XU5pYXFUBhi8xzey+KS9KVrQ+UuKJh/AN9iSQeMV+rgT1yF5+etVH+bK1/37QCKp3+mCqjFzPyQOrvkGZv4sYyRwX7BKBLleQmIVWpofpjT7BfcCxH877RzC5YMIi65aBc82Dl6tH6OEiP7mzByU52yvH6JFuwZ/9fWj1vXCWJzxx2w0F1OU8Zwg8gNNzL+SVb9+xfBE7xBHMpYFg72hBWPh862Ce36F4NZd3MpWMSjMmpDPh"
+        }
+      },
+      {
+        "name": "dominika-kp",
+        "properties": {
+          "createdAt": null,
+          "fingerprint": "99:8c:ab:54:0c:a9:c8:2b:10:0e:ce:a6:c1:52:7b:d9",
+          "id": null,
+          "publicKey": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCS0iTjaiF5YeEaoMVh37I64zKsekW6pQR/Fc5onHfA6AVce5YpT2T63NlWUApTnzlqKFpMdlpL7uvnebvpS3iz/qTcbwtlItGgHmAZCbGK1uYggn5cCt//Gk2Ytvz6ip6B2GiGjCukSQosQfhhLXjZjI7x9sFm2oU5BVbjm1UiePtNn9IHfgXoGiEP9a0tNtzGte+XGD+1FyMs6TGLmHivWAQLXlFVtXZGE19ag0uO/0rJ+D2s+5lRnrOmcy2k5E55LvMqZRNAtdZS/ctD3v/pkPOSeQy9N3RU65RCJhYNQWt2zSpVIG699y5Ks3uVLUAnxVIHOzFXG2Z45J/6w6rR"
+        }
+      },
+      {
+        "name": "gabo-consul-keypair",
+        "properties": {
+          "createdAt": null,
+          "fingerprint": "b9:2e:e8:ab:e6:47:4f:03:1c:af:a5:13:bf:4d:5b:7c",
+          "id": null,
+          "publicKey": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC0Rfl2G2vDs6yc19RxCqReunFgpYj+ucyLobpTCBtfDwzIbJot2Fmife6M42mBtiTmAK6x8kcUEeab6CB4MUzsqF7vGTFUjwWirG/XU5pYXFUBhi8xzey+KS9KVrQ+UuKJh/AN9iSQeMV+rgT1yF5+etVH+bK1/37QCKp3+mCqjFzPyQOrvkGZv4sYyRwX7BKBLleQmIVWpofpjT7BfcCxH877RzC5YMIi65aBc82Dl6tH6OEiP7mzByU52yvH6JFuwZ/9fWj1vXCWJzxx2w0F1OU8Zwg8gNNzL+SVb9+xfBE7xBHMpYFg72hBWPh862Ce36F4NZd3MpWMSjMmpDPh"
+        }
+      },
+      {
+        "name": "gabo",
+        "properties": {
+          "createdAt": null,
+          "fingerprint": "88:6b:29:2b:ea:3c:83:d3:e0:72:ec:b9:75:c7:e1:4a",
+          "id": null,
+          "publicKey": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDG769Bxc1rfGJrIBowJLOJlXnBHMPTZBQ2dz6jua69O9iQzDKwDc6w2U15WdNWd3GELOZzNLeUEDT0IxbC34+IUIxaPj4djhrFIRldShn5KorvjMxm0Tyi7g2B+qv/Av/fExYxkkzhDHJxGi2AcBG+jY82Wgtu0gxlODhQNtax0e44W10Jmzh1GcpHh2v3Hk6LIO159teM3Rt3f64D7QGRtNzT9NDv34UGGkEnZG5yP8N0wffGd440L1d/kBZRKhDOfDCGjHSK4rVkLYa9+Td2PU2064W1589A9UQH+bwS82oD7xnoPk1tv+O7lFOAmCe80trc7o/ECBxCtQoGqsnJ2OqUn3FPsq+nxUDR/uqbA4oDskF1enOCqzkruMPGp0oABZeV+p9BHPKHRWwO2oysYRaAhx+RwpD2Fi94dCSkgDNTUpsXA+oCsVmceJ8XP1g6cYKploaQSMUUFm7cvQQOdEVqDXwt99hIwtiX+d1/rZRJAweoAB1ac8qAwELDOboKg9YhWHfoRzx63YjiEReE2IgeElr+d/3Y6YgNgU0GhLXQL10dkRvjoMrbpWrjUvQZwuat4qietCemsqrOabtNMWB3JntLcPqEdCNOkf2t5vESv7lhSbOHMsVsskVLjSZqvW97r0iex4+I7de914cBWMoXq/iW1Nz+/HTZHYemEw== gkozma@hortonworks.com"
+        }
+      }
+    ]
+  }
+}

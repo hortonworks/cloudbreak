@@ -1,0 +1,17 @@
+{
+  "securityGroups" : {
+    "key" : [ {
+      "groupName" : "groupName",
+      "groupId" : "groupId",
+      "properties" : {
+        "key" : "{}"
+      }
+    }, {
+      "groupName" : "groupName",
+      "groupId" : "groupId",
+      "properties" : {
+        "key" : "{}"
+      }
+    } ]
+  }
+}

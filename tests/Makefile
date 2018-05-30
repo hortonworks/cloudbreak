@@ -8,7 +8,7 @@ endef
 
 all: cbm docker-integration-test stop-cbm generate-xunit-result
 
-cbm:
+cbm: download-s3
 	GIT_VERSION=$(GIT_VERSION) GIT_TAG=$(GIT_TAG) ./scripts/cbm.sh
 
 integration-test:
@@ -38,3 +38,6 @@ clean-test-result:
 	rm -f test-result.tap
 
 clean: stop-cbm clean-test-result
+
+download-s3:
+	curl -k https://s3-eu-central-1.amazonaws.com/cloudbreak-swagger/swagger-$(GIT_VERSION).json -o swagger.json

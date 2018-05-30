@@ -1,0 +1,8 @@
+{
+  "AZURE": true,
+  "OPENSTACK": true,
+  "GCP": true,
+  "AWS": true,
+  "YARN": false,
+  "MOCK": false
+}

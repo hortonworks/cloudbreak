@@ -89,11 +89,10 @@ cloudbreak:
     ports:
         - 8080:8080
     dns: 172.17.0.1
-    log_opt:
-        max-size: "10M"
-        max-file: "5"
-    image: hortonworks/cloudbreak-mock:${GIT_VERSION}
-    command: bash
+    volumes:
+      - ./swagger.json:/cbm/api/swagger.json
+      - ./responses:/cbm/responses
+    image: hortonworks/cloud-swagger-mock
 
 sultans:
     environment:
@@ -129,3 +128,12 @@ sultans:
         max-size: "10M"
         max-file: "5"
     image: hortonworks/hdc-auth:2.1.0-dev.374
+
+#test:
+#    volumes:
+#     - .:/work
+#     - ../build/Linux:/usr/local/bin
+#    working_dir: /work
+#    net: host
+#    image: afarsang/docker-bats-jq
+#    command: ./scripts/integration-test.sh 
