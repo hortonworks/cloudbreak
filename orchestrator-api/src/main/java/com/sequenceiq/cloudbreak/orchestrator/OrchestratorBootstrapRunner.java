@@ -26,7 +26,7 @@ public class OrchestratorBootstrapRunner implements Callable<Boolean> {
 
     private static final int SEC_IN_MIN = 60;
 
-    private static final int MAX_RETRY_ON_ERROR = 10;
+    private static final int MAX_RETRY_ON_ERROR = 20;
 
     private final OrchestratorBootstrap orchestratorBootstrap;
 
