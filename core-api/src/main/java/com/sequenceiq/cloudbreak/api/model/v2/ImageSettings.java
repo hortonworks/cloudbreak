@@ -41,4 +41,8 @@ public class ImageSettings implements JsonEntity {
     public String getOs() {
         return os;
     }
+
+    public void setOs(String os) {
+        this.os = os;
+    }
 }
