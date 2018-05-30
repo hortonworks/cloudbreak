@@ -49,7 +49,6 @@ public class KerberosBlueprintService implements BlueprintComponentConfigProvide
                 blueprintProcessor.replaceConfiguration("krb5-conf", kerberosConfig.getKrb5Conf());
             }
         } else {
-            // TODO this won't work on yarn, but it doesn't work anyway
             extendBlueprintWithKerberos(blueprintProcessor, kerberosConfig, source.getGeneralClusterConfigs().getAmbariIp(), REALM, DOMAIN, null);
         }
         return blueprintProcessor;

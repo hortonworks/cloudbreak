@@ -12,6 +12,7 @@ import com.github.jknack.handlebars.Handlebars;
 import com.github.jknack.handlebars.TagType;
 import com.github.jknack.handlebars.Template;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintPreparationObject;
+import com.sequenceiq.cloudbreak.blueprint.HandlebarTemplate;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 @Component
@@ -43,13 +44,13 @@ public class BlueprintTemplateProcessor {
 
     private String generateBlueprintWithParameters(String sourceTemplate, BlueprintPreparationObject source, Map<String, Object> customProperties)
             throws IOException {
-        Template template = handlebars.compileInline(sourceTemplate, "{{{", "}}}");
+        Template template = handlebars.compileInline(sourceTemplate, HandlebarTemplate.DEFAULT_PREFIX.key(), HandlebarTemplate.DEFAULT_POSTFIX.key());
         return template.apply(prepareTemplateObject(source, customProperties));
     }
 
     private List<String> queryBlueprintParameters(String sourceTemplate)
             throws IOException {
-        Template template = handlebars.compileInline(sourceTemplate, "{{{", "}}}");
+        Template template = handlebars.compileInline(sourceTemplate, HandlebarTemplate.DEFAULT_PREFIX.key(), HandlebarTemplate.DEFAULT_POSTFIX.key());
         return template.collect(TagType.VAR);
     }
 

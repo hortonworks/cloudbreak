@@ -10,7 +10,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -286,7 +285,6 @@ public class FileSystemConfigServiceTest {
         fileSystem.setDescription("some description");
         fileSystem.setDefaultFs(true);
         fileSystem.setPublicInAccount(true);
-        fileSystem.setProperties(new LinkedHashMap<>());
         return fileSystem;
     }
 

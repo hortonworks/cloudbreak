@@ -41,8 +41,8 @@ public class ClusterV2Request implements JsonEntity {
     @ApiModelProperty(ClusterModelDescription.PROXY_NAME)
     private String proxyName;
 
-    @ApiModelProperty(StackModelDescription.FILE_SYSTEM)
-    private FileSystemV2Request fileSystem;
+    @ApiModelProperty(StackModelDescription.CLOUD_STORAGE)
+    private CloudStorageRequest cloudStorage;
 
     @ApiModelProperty(ClusterModelDescription.EXECUTOR_TYPE)
     private ExecutorType executorType = ExecutorType.DEFAULT;
@@ -92,12 +92,12 @@ public class ClusterV2Request implements JsonEntity {
         this.name = name;
     }
 
-    public FileSystemV2Request getFileSystem() {
-        return fileSystem;
+    public CloudStorageRequest getCloudStorage() {
+        return cloudStorage;
     }
 
-    public void setFileSystem(FileSystemV2Request fileSystem) {
-        this.fileSystem = fileSystem;
+    public void setCloudStorage(CloudStorageRequest cloudStorage) {
+        this.cloudStorage = cloudStorage;
     }
 
     public ExecutorType getExecutorType() {

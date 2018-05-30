@@ -1,33 +1,5 @@
 package com.sequenceiq.cloudbreak.converter.stack.cluster;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anySet;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.springframework.core.convert.ConversionService;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -63,6 +35,33 @@ import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariViewProvider;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.springframework.core.convert.ConversionService;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anySet;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 public class ClusterToClusterResponseConverterTest extends AbstractEntityConverterTest<Cluster> {
 
@@ -150,7 +149,7 @@ public class ClusterToClusterResponseConverterTest extends AbstractEntityConvert
         assertEquals(1L, (long) result.getId());
         assertAllFieldsNotNull(result, Lists.newArrayList("cluster", "ambariStackDetails", "rdsConfigId", "blueprintCustomProperties",
                 "blueprint", "rdsConfigs", "ldapConfig", "exposedKnoxServices", "customContainers",
-                "ambariRepoDetailsJson", "ambariDatabaseDetails", "creationFinished", "kerberosResponse"));
+                "ambariRepoDetailsJson", "ambariDatabaseDetails", "creationFinished", "kerberosResponse", "fileSystemResponse"));
     }
 
     @Test
@@ -215,9 +214,9 @@ public class ClusterToClusterResponseConverterTest extends AbstractEntityConvert
         given(stackUtil.extractAmbariIp(any(Stack.class))).willReturn("10.0.0.1");
         ClusterResponse clusterResponse = underTest.convert(getSource());
         Map<String, Collection<ClusterExposedServiceResponse>> clusterExposedServicesForTopologies = clusterResponse.getClusterExposedServicesForTopologies();
-        assertEquals(1, clusterExposedServicesForTopologies.keySet().size());
+        assertEquals(1L, clusterExposedServicesForTopologies.keySet().size());
         Collection<ClusterExposedServiceResponse> topology1ServiceList = clusterExposedServicesForTopologies.get("topology1");
-        assertEquals(2, topology1ServiceList.size());
+        assertEquals(2L, topology1ServiceList.size());
     }
 
     @Override

@@ -2,7 +2,6 @@ package com.sequenceiq.it.cloudbreak.filesystem;
 
 import static com.sequenceiq.it.cloudbreak.CloudbreakITContextConstants.FSREQUEST;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -13,7 +12,8 @@ import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.model.FileSystemRequest;
-import com.sequenceiq.cloudbreak.api.model.FileSystemType;
+import com.sequenceiq.cloudbreak.api.model.v2.filesystem.AdlsCloudStorageParameters;
+import com.sequenceiq.cloudbreak.api.model.v2.filesystem.GcsCloudStorageParameters;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.AbstractCloudbreakIntegrationTest;
 import com.sequenceiq.it.cloudbreak.CloudbreakITContextConstants;
@@ -36,32 +36,34 @@ public class FilesystemConfigureTest extends AbstractCloudbreakIntegrationTest {
         Map<String, String> cloudProviderParams = itContext.getContextParam(CloudbreakITContextConstants.CLOUDPROVIDER_PARAMETERS, Map.class);
         // WHEN
         FileSystemRequest fsRequest = new FileSystemRequest();
-        fsRequest.setProperties(createRequestProperties(cloudProviderParams, fsName));
-        fsRequest.setType(FileSystemType.valueOf(filesystemType));
+        fsRequest = createRequestProperties(cloudProviderParams, fsName, fsRequest, filesystemType);
         fsRequest.setName("it-fs");
         fsRequest.setDefaultFs(false);
         // THEN
         getItContext().putContextParam(FSREQUEST, fsRequest);
     }
 
-    protected static Map<String, String> createRequestProperties(Map<String, String> cloudProviderParams, String fsName) {
-        Map<String, String> requestProperties = new HashMap<>();
+    protected static FileSystemRequest createRequestProperties(Map<String, String> cloudProviderParams, String fsName,
+            FileSystemRequest fsRequest, String filesystemType) {
         switch (cloudProviderParams.get("cloudProvider")) {
             case "AZURE":
-                requestProperties.put("accountName", fsName);
-                requestProperties.put("accountKey", cloudProviderParams.get("accountKeyWasb"));
-                requestProperties.put("tenantId", cloudProviderParams.get("tenantId"));
+                AdlsCloudStorageParameters adlsCloudStorageParameters = new AdlsCloudStorageParameters();
+                adlsCloudStorageParameters.setAccountName(fsName);
+                adlsCloudStorageParameters.setClientId(cloudProviderParams.get("accountKeyWasb"));
+                adlsCloudStorageParameters.setTenantId(cloudProviderParams.get("tenantId"));
+                fsRequest.setAdls(adlsCloudStorageParameters);
+                fsRequest.setType(filesystemType);
                 break;
             case "GCP":
-                requestProperties.put("projectId", cloudProviderParams.get("projectId"));
-                requestProperties.put("serviceAccountEmail", cloudProviderParams.get("serviceAccountId"));
-                requestProperties.put("privateKeyEncoded", cloudProviderParams.get("p12File"));
-                requestProperties.put("defaultBucketName", fsName);
+                GcsCloudStorageParameters gcsCloudStorageParameters = new GcsCloudStorageParameters();
+                gcsCloudStorageParameters.setServiceAccountEmail(cloudProviderParams.get("serviceAccountId"));
+                fsRequest.setGcs(gcsCloudStorageParameters);
+                fsRequest.setType(filesystemType);
                 break;
             default:
                 LOGGER.info("CloudProvider {} is not supported!", cloudProviderParams.get("cloudProvider"));
                 break;
             }
-        return requestProperties;
+        return fsRequest;
     }
 }

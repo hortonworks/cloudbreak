@@ -197,7 +197,7 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
                     .withExistingSubnetCidr(existingSubnet ? getExistingSubnetCidr(ac, stack) : null)
                     .withExistingSubnetIds(existingSubnet ? awsNetworkView.getSubnetList() : null)
                     .mapPublicIpOnLaunch(mapPublicIpOnLaunch)
-                    .withEnableInstanceProfile(awsInstanceProfileView.isEnableInstanceProfileStrategy())
+                    .withEnableInstanceProfile(awsInstanceProfileView.isInstanceProfileAvailable())
                     .withInstanceProfileAvailable(awsInstanceProfileView.isInstanceProfileAvailable())
                     .withTemplate(stack.getTemplate())
                     .withDefaultSubnet(subnet);
@@ -219,7 +219,6 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
         }
 
         AmazonAutoScalingClient amazonASClient = awsClient.createAutoScalingClient(credentialView, regionName);
-        saveS3AccessRoleArn(ac, stack, cFStackName, cfClient, resourceNotifier);
         saveGeneratedSubnet(ac, stack, cFStackName, cfClient, resourceNotifier);
         List<CloudResource> cloudResources = getCloudResources(ac, stack, cFStackName, cfClient, amazonEC2Client, amazonASClient, mapPublicIpOnLaunch);
         return check(ac, cloudResources);
@@ -284,16 +283,6 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
             }
         }
         return cloudResources;
-    }
-
-    private void saveS3AccessRoleArn(AuthenticatedContext ac, CloudStack stack, String cFStackName, AmazonCloudFormation client,
-            PersistenceNotifier resourceNotifier) {
-        AwsInstanceProfileView awsInstanceProfileView = new AwsInstanceProfileView(stack);
-        if (awsInstanceProfileView.isEnableInstanceProfileStrategy() && !awsInstanceProfileView.isInstanceProfileAvailable()) {
-            String s3AccessRoleArn = getCreatedS3AccessRoleArn(cFStackName, client);
-            CloudResource s3AccessRoleArnCloudResource = new Builder().type(ResourceType.S3_ACCESS_ROLE_ARN).name(s3AccessRoleArn).build();
-            resourceNotifier.notifyAllocation(s3AccessRoleArnCloudResource, ac.getCloudContext());
-        }
     }
 
     private void saveGeneratedSubnet(AuthenticatedContext ac, CloudStack stack, String cFStackName, AmazonCloudFormation client,
@@ -426,7 +415,7 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
                 new Parameter().withParameterKey("AMI").withParameterValue(stack.getImage().getImageName()),
                 new Parameter().withParameterKey("RootDeviceName").withParameterValue(getRootDeviceName(ac, stack))
         ));
-        if (awsInstanceProfileView.isUseExistingInstanceProfile() && awsInstanceProfileView.isEnableInstanceProfileStrategy()) {
+        if (awsInstanceProfileView.isInstanceProfileAvailable()) {
             parameters.add(new Parameter().withParameterKey("InstanceProfile").withParameterValue(awsInstanceProfileView.getInstanceProfile()));
         }
         if (ac.getCloudContext().getLocation().getAvailabilityZone().value() != null) {

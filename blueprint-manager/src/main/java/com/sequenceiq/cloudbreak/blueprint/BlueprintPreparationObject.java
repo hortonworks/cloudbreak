@@ -6,20 +6,20 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import com.sequenceiq.cloudbreak.blueprint.filesystem.BaseFileSystemConfigurationsView;
 import com.sequenceiq.cloudbreak.blueprint.nifi.HdfConfigs;
 import com.sequenceiq.cloudbreak.blueprint.template.views.BlueprintView;
-import com.sequenceiq.cloudbreak.blueprint.template.views.FileSystemConfigurationView;
 import com.sequenceiq.cloudbreak.blueprint.template.views.GatewayView;
 import com.sequenceiq.cloudbreak.blueprint.template.views.HostgroupView;
 import com.sequenceiq.cloudbreak.blueprint.template.views.SharedServiceConfigsView;
 import com.sequenceiq.cloudbreak.blueprint.templates.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.domain.FlexSubscription;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 
 public class BlueprintPreparationObject {
 
@@ -43,7 +43,7 @@ public class BlueprintPreparationObject {
 
     private final Optional<HdfConfigs> hdfConfigs;
 
-    private final Optional<FileSystemConfigurationView> fileSystemView;
+    private final Optional<BaseFileSystemConfigurationsView> fileSystemView;
 
     private final Optional<KerberosConfig> kerberosConfig;
 
@@ -103,7 +103,7 @@ public class BlueprintPreparationObject {
         return kerberosConfig;
     }
 
-    public Optional<FileSystemConfigurationView> getFileSystemConfigurationView() {
+    public Optional<BaseFileSystemConfigurationsView> getFileSystemConfigurationView() {
         return fileSystemView;
     }
 
@@ -145,7 +145,7 @@ public class BlueprintPreparationObject {
 
         private Optional<HdfConfigs> hdfConfigs = Optional.empty();
 
-        private Optional<FileSystemConfigurationView> fileSystemView = Optional.empty();
+        private Optional<BaseFileSystemConfigurationsView> fileSystemView = Optional.empty();
 
         private GatewayView gatewayView;
 
@@ -202,7 +202,7 @@ public class BlueprintPreparationObject {
             return this;
         }
 
-        public Builder withFileSystemConfigurationView(FileSystemConfigurationView fileSystemView) {
+        public Builder withFileSystemConfigurationView(BaseFileSystemConfigurationsView fileSystemView) {
             this.fileSystemView =  Optional.ofNullable(fileSystemView);
             return this;
         }

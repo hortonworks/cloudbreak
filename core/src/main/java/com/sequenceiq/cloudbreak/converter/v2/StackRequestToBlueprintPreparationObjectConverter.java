@@ -12,17 +12,17 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.model.ConfigsResponse;
-import com.sequenceiq.cloudbreak.api.model.FileSystemConfiguration;
 import com.sequenceiq.cloudbreak.api.model.SharedServiceRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.InstanceGroupV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintPreparationObject;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessingException;
 import com.sequenceiq.cloudbreak.blueprint.GeneralClusterConfigsProvider;
+import com.sequenceiq.cloudbreak.blueprint.filesystem.BaseFileSystemConfigurationsView;
 import com.sequenceiq.cloudbreak.blueprint.filesystem.FileSystemConfigurationProvider;
+import com.sequenceiq.cloudbreak.blueprint.filesystem.FileSystemConfigurationsViewProvider;
 import com.sequenceiq.cloudbreak.blueprint.sharedservice.SharedServiceConfigsViewProvider;
 import com.sequenceiq.cloudbreak.blueprint.template.views.BlueprintView;
-import com.sequenceiq.cloudbreak.blueprint.template.views.FileSystemConfigurationView;
 import com.sequenceiq.cloudbreak.blueprint.template.views.HostgroupView;
 import com.sequenceiq.cloudbreak.blueprint.template.views.SharedServiceConfigsView;
 import com.sequenceiq.cloudbreak.blueprint.templates.BlueprintStackInfo;
@@ -32,6 +32,7 @@ import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.service.user.UserFilterField;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.FlexSubscription;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
@@ -42,6 +43,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
+import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.filesystem.FileSystemConfigService;
 import com.sequenceiq.cloudbreak.service.flex.FlexSubscriptionService;
 import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
@@ -77,6 +79,9 @@ public class StackRequestToBlueprintPreparationObjectConverter extends AbstractC
     private BlueprintService blueprintService;
 
     @Inject
+    private CredentialService credentialService;
+
+    @Inject
     private FileSystemConfigurationProvider fileSystemConfigurationProvider;
 
     @Inject
@@ -94,15 +99,19 @@ public class StackRequestToBlueprintPreparationObjectConverter extends AbstractC
     @Inject
     private AuthenticatedUserService authenticatedUserService;
 
+    @Inject
+    private FileSystemConfigurationsViewProvider fileSystemConfigurationsViewProvider;
+
     @Override
     public BlueprintPreparationObject convert(StackV2Request source) {
         try {
             IdentityUser identityUser = userDetailsService.getDetails(source.getOwner(), UserFilterField.USERID);
+            Credential credential = credentialService.get(source.getGeneral().getCredentialName(), identityUser.getAccount());
             FlexSubscription flexSubscription = getFlexSubscription(source);
             String smartsenseSubscriptionId = getSmartsenseSubscriptionId(source, flexSubscription);
             KerberosConfig kerberosConfig = getKerberosConfig(source);
             LdapConfig ldapConfig = getLdapConfig(source, identityUser);
-            FileSystemConfigurationView fileSystemConfigurationView = getFileSystemConfigurationView(source);
+            BaseFileSystemConfigurationsView fileSystemConfigurationView = getFileSystemConfigurationView(source, credential);
             Set<RDSConfig> rdsConfigs = getRdsConfigs(source, identityUser);
             Blueprint blueprint = getBlueprint(source, identityUser);
             BlueprintStackInfo blueprintStackInfo = stackInfoService.blueprintStackInfo(blueprint.getBlueprintText());
@@ -190,13 +199,11 @@ public class StackRequestToBlueprintPreparationObjectConverter extends AbstractC
         return rdsConfigs;
     }
 
-    private FileSystemConfigurationView getFileSystemConfigurationView(StackV2Request source) throws IOException {
-        FileSystemConfigurationView fileSystemConfigurationView = null;
-        if (source.getCluster().getFileSystem() != null) {
-            FileSystem fileSystem = getConversionService().convert(source.getCluster().getFileSystem(), FileSystem.class);
-
-            FileSystemConfiguration fileSystemConfiguration = fileSystemConfigurationProvider.fileSystemConfiguration(fileSystem, null);
-            fileSystemConfigurationView = new FileSystemConfigurationView(fileSystemConfiguration, fileSystem.isDefaultFs());
+    private BaseFileSystemConfigurationsView getFileSystemConfigurationView(StackV2Request source, Credential credential) throws IOException {
+        BaseFileSystemConfigurationsView fileSystemConfigurationView = null;
+        if (source.getCluster().getCloudStorage() != null) {
+            FileSystem fileSystem = getConversionService().convert(source.getCluster().getCloudStorage(), FileSystem.class);
+            fileSystemConfigurationView = fileSystemConfigurationProvider.fileSystemConfiguration(fileSystem, source, credential);
         }
         return fileSystemConfigurationView;
     }

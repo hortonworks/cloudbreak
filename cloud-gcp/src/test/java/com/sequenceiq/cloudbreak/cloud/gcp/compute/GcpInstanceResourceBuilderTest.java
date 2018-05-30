@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.compute;
 
-import static java.util.Collections.singletonMap;
+import static java.util.Collections.emptyMap;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
@@ -33,6 +33,7 @@ import com.google.api.services.compute.Compute.Instances.Insert;
 import com.google.api.services.compute.model.Instance;
 import com.google.api.services.compute.model.Operation;
 import com.google.common.collect.ImmutableMap;
+import com.sequenceiq.cloudbreak.api.model.filesystem.FileSystemType;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
@@ -41,7 +42,6 @@ import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpResourceNameService;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
-import com.sequenceiq.cloudbreak.cloud.model.CloudFileSystem;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource.Builder;
@@ -56,7 +56,9 @@ import com.sequenceiq.cloudbreak.cloud.model.PortDefinition;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.Security;
 import com.sequenceiq.cloudbreak.cloud.model.SecurityRule;
+import com.sequenceiq.cloudbreak.cloud.model.SpiFileSystem;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
+import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudGcsView;
 import com.sequenceiq.cloudbreak.common.service.DefaultCostTaggingService;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 
@@ -131,8 +133,8 @@ public class GcpInstanceResourceBuilderTest {
         GcpResourceNameService resourceNameService = new GcpResourceNameService();
         ReflectionTestUtils.setField(resourceNameService, "maxResourceNameLength", 50);
         ReflectionTestUtils.setField(builder, "resourceNameService", resourceNameService);
-        cloudStack = new CloudStack(Collections.emptyList(), null, image, null, Collections.emptyMap(), Collections.emptyMap(), null,
-                null, null, null);
+        cloudStack = new CloudStack(Collections.emptyList(), null, image, emptyMap(), emptyMap(), null,
+                null, null, null, null);
     }
 
     @Test
@@ -231,8 +233,12 @@ public class GcpInstanceResourceBuilderTest {
         context.addComputeResources(0L, buildableResources);
 
         String email = "service@email.com";
-        CloudStack cloudStack = new CloudStack(Collections.emptyList(), null, image, new CloudFileSystem(singletonMap("serviceAccountEmail", email)),
-                Collections.emptyMap(), Collections.emptyMap(), null, null, null, null);
+        CloudGcsView cloudGcsView = new CloudGcsView();
+        cloudGcsView.setServiceAccountEmail(email);
+
+        CloudStack cloudStack = new CloudStack(Collections.emptyList(), null, image,
+                emptyMap(), emptyMap(), null, null, null, null,
+                new SpiFileSystem("test", FileSystemType.GCS, false, cloudGcsView));
 
         // WHEN
         when(compute.instances()).thenReturn(instances);
