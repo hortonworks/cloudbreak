@@ -21,10 +21,14 @@ import (
 
 type GatewayJSON struct {
 
-	// [DEPRECATED] enableGateway is no longer needed to determine if gateway needs to be launched or not. Presence of gateway definition in request is suffucicient.
+	// [DEPRECATED] 'enableGateway' is no longer needed to determine if gateway needs to be launched or not.
+	// Presence of gateway definition in request is suffucicient. This value is only used in legacy requests,
+	// when 'topologyName' or 'exposedServices' is defined in the root of Gateway, instead of using topologies.
+	// When it is a legacy request and 'enableGateway' is set to 'false', gateway will not be saved and created.
 	EnableGateway *bool `json:"enableGateway,omitempty"`
 
-	// [DEPRECATED] Use the 'exposed Knox services' inside the 'gateway' part of the request.
+	// [DEPRECATED] Use the 'exposedServices' inside the 'topologies' part of the request.
+	// If 'exposedServices' is specified, other deprecated properties ('topologyName' and 'enableGateway') will be used as well, and 'topologies' will be ignored.
 	ExposedServices []string `json:"exposedServices"`
 
 	// Knox gateway type
@@ -45,7 +49,8 @@ type GatewayJSON struct {
 	// Topology definitions of the gateway.
 	Topologies []*GatewayTopologyJSON `json:"topologies"`
 
-	// [DEPRECATED] Use the 'Knox topology name' inside the 'gateway' part of the request.
+	// [DEPRECATED] Use the 'topologyName' inside the 'topologies' part of the request.
+	// If 'topologyName' is specified, other deprecated properties ('exposedServices' and 'enableGateway') will be used as well, and 'topologies' will be ignored.
 	TopologyName string `json:"topologyName,omitempty"`
 }
 

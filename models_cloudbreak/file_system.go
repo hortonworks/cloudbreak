@@ -76,7 +76,7 @@ var fileSystemTypeTypePropEnum []interface{}
 
 func init() {
 	var res []string
-	if err := json.Unmarshal([]byte(`["WASB_INTEGRATED","GCS","WASB","ADLS"]`), &res); err != nil {
+	if err := json.Unmarshal([]byte(`["WASB_INTEGRATED","GCS","WASB","ADLS","S3"]`), &res); err != nil {
 		panic(err)
 	}
 	for _, v := range res {
@@ -93,6 +93,8 @@ const (
 	FileSystemTypeWASB string = "WASB"
 	// FileSystemTypeADLS captures enum value "ADLS"
 	FileSystemTypeADLS string = "ADLS"
+	// FileSystemTypeS3 captures enum value "S3"
+	FileSystemTypeS3 string = "S3"
 )
 
 // prop value enum

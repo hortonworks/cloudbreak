@@ -12,6 +12,7 @@ import (
 
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
+	"github.com/go-openapi/validate"
 )
 
 // ImagesResponse images response
@@ -27,6 +28,10 @@ type ImagesResponse struct {
 
 	// hdp images
 	HdpImages []*ImageResponse `json:"hdpImages"`
+
+	// supported versions
+	// Unique: true
+	SupportedVersions []string `json:"supportedVersions"`
 }
 
 /* polymorph ImagesResponse baseImages false */
@@ -34,6 +39,8 @@ type ImagesResponse struct {
 /* polymorph ImagesResponse hdfImages false */
 
 /* polymorph ImagesResponse hdpImages false */
+
+/* polymorph ImagesResponse supportedVersions false */
 
 // Validate validates this images response
 func (m *ImagesResponse) Validate(formats strfmt.Registry) error {
@@ -50,6 +57,11 @@ func (m *ImagesResponse) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateHdpImages(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateSupportedVersions(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -136,6 +148,19 @@ func (m *ImagesResponse) validateHdpImages(formats strfmt.Registry) error {
 			}
 		}
 
+	}
+
+	return nil
+}
+
+func (m *ImagesResponse) validateSupportedVersions(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.SupportedVersions) { // not required
+		return nil
+	}
+
+	if err := validate.UniqueItems("supportedVersions", "body", m.SupportedVersions); err != nil {
+		return err
 	}
 
 	return nil

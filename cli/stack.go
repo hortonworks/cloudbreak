@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	log "github.com/Sirupsen/logrus"
@@ -220,8 +221,16 @@ func RepairStack(c *cli.Context) {
 
 	cbClient := NewCloudbreakHTTPClientFromContext(c)
 	name := c.String(FlName.Name)
-	log.Infof("[RepairStack] repairing stack, name: %s", name)
-	err := cbClient.Cloudbreak.V2stacks.PutrepairStackV2(v2stacks.NewPutrepairStackV2Params().WithName(name))
+	log.Infof("[RepairStack] repairing stack, id: %s", name)
+
+	hostGroups := strings.Split(c.String(FlHostGroups.Name), ",")
+	removeOnly := c.Bool(FlRemoveOnly.Name)
+
+	var request models_cloudbreak.ClusterRepairRequest
+	request.HostGroups = hostGroups
+	request.RemoveOnly = &removeOnly
+
+	err := cbClient.Cloudbreak.V2stacks.RepairClusterV2(v2stacks.NewRepairClusterV2Params().WithName(name).WithBody(&request))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}

@@ -613,12 +613,12 @@ func main() {
 				},
 				{
 					Name:   "repair",
-					Usage:  "repaires a cluster",
+					Usage:  "repairs a cluster",
 					Before: ConfigRead,
-					Flags:  cb.NewFlagBuilder().AddFlags(cb.FlName, cb.FlWaitOptional).AddAuthenticationFlags().AddOutputFlag().Build(),
+					Flags:  cb.NewFlagBuilder().AddFlags(cb.FlName, cb.FlHostGroups, cb.FlRemoveOnly, cb.FlWaitOptional).AddAuthenticationFlags().AddOutputFlag().Build(),
 					Action: cb.RepairStack,
 					BashComplete: func(c *cli.Context) {
-						for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlName, cb.FlWaitOptional).AddAuthenticationFlags().AddOutputFlag().Build() {
+						for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlName, cb.FlHostGroups, cb.FlRemoveOnly, cb.FlWaitOptional).AddAuthenticationFlags().AddOutputFlag().Build() {
 							printFlagCompletion(f)
 						}
 					},

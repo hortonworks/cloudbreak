@@ -54,6 +54,9 @@ build-docker:
 build-darwin:
 	GOOS=darwin CGO_ENABLED=0 go build -a ${LDFLAGS_NOVER} -o build/Darwin/${BINARY} main.go
 
+dev-debug-darwin:
+	GOOS=darwin CGO_ENABLED=0 go build -a ${LDFLAGS_NOVER} -o /usr/local/bin/${BINARY} main.go
+
 build-linux:
 	GOOS=linux CGO_ENABLED=0 go build -a ${LDFLAGS_NOVER} -o build/Linux/${BINARY} main.go
 

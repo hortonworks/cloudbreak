@@ -33,7 +33,7 @@ type ClusterV2Request struct {
 	ExecutorType string `json:"executorType,omitempty"`
 
 	// external file system configuration
-	FileSystem *FileSystem `json:"fileSystem,omitempty"`
+	FileSystem *FileSystemV2Request `json:"fileSystem,omitempty"`
 
 	// LDAP config name for the cluster
 	LdapConfigName string `json:"ldapConfigName,omitempty"`

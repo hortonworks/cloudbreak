@@ -55,6 +55,9 @@ type ClusterResponse struct {
 	// name of the cluster
 	Cluster string `json:"cluster,omitempty"`
 
+	// cluster exposed services for topologies
+	ClusterExposedServicesForTopologies map[string][]ClusterExposedServiceResponse `json:"clusterExposedServicesForTopologies,omitempty"`
+
 	// config recommendation strategy
 	ConfigStrategy string `json:"configStrategy,omitempty"`
 
@@ -118,9 +121,6 @@ type ClusterResponse struct {
 	// secure
 	Secure *bool `json:"secure,omitempty"`
 
-	// most important services in the cluster
-	ServiceEndPoints map[string]string `json:"serviceEndPoints,omitempty"`
-
 	// shared service for a specific stack
 	SharedServiceResponse *SharedServiceResponse `json:"sharedServiceResponse,omitempty"`
 
@@ -158,6 +158,8 @@ type ClusterResponse struct {
 /* polymorph ClusterResponse blueprintInputs false */
 
 /* polymorph ClusterResponse cluster false */
+
+/* polymorph ClusterResponse clusterExposedServicesForTopologies false */
 
 /* polymorph ClusterResponse configStrategy false */
 
@@ -199,8 +201,6 @@ type ClusterResponse struct {
 
 /* polymorph ClusterResponse secure false */
 
-/* polymorph ClusterResponse serviceEndPoints false */
-
 /* polymorph ClusterResponse sharedServiceResponse false */
 
 /* polymorph ClusterResponse status false */
@@ -236,6 +236,11 @@ func (m *ClusterResponse) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateBlueprintInputs(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateClusterExposedServicesForTopologies(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -403,6 +408,19 @@ func (m *ClusterResponse) validateBlueprintInputs(formats strfmt.Registry) error
 			}
 		}
 
+	}
+
+	return nil
+}
+
+func (m *ClusterResponse) validateClusterExposedServicesForTopologies(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.ClusterExposedServicesForTopologies) { // not required
+		return nil
+	}
+
+	if err := validate.Required("clusterExposedServicesForTopologies", "body", m.ClusterExposedServicesForTopologies); err != nil {
+		return err
 	}
 
 	return nil

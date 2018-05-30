@@ -55,6 +55,9 @@ type AutoscaleClusterResponse struct {
 	// name of the cluster
 	Cluster string `json:"cluster,omitempty"`
 
+	// cluster exposed services for topologies
+	ClusterExposedServicesForTopologies map[string][]ClusterExposedServiceResponse `json:"clusterExposedServicesForTopologies,omitempty"`
+
 	// config recommendation strategy
 	ConfigStrategy string `json:"configStrategy,omitempty"`
 
@@ -121,9 +124,6 @@ type AutoscaleClusterResponse struct {
 	// secure
 	Secure *bool `json:"secure,omitempty"`
 
-	// most important services in the cluster
-	ServiceEndPoints map[string]string `json:"serviceEndPoints,omitempty"`
-
 	// shared service for a specific stack
 	SharedServiceResponse *SharedServiceResponse `json:"sharedServiceResponse,omitempty"`
 
@@ -161,6 +161,8 @@ type AutoscaleClusterResponse struct {
 /* polymorph AutoscaleClusterResponse blueprintInputs false */
 
 /* polymorph AutoscaleClusterResponse cluster false */
+
+/* polymorph AutoscaleClusterResponse clusterExposedServicesForTopologies false */
 
 /* polymorph AutoscaleClusterResponse configStrategy false */
 
@@ -204,8 +206,6 @@ type AutoscaleClusterResponse struct {
 
 /* polymorph AutoscaleClusterResponse secure false */
 
-/* polymorph AutoscaleClusterResponse serviceEndPoints false */
-
 /* polymorph AutoscaleClusterResponse sharedServiceResponse false */
 
 /* polymorph AutoscaleClusterResponse status false */
@@ -241,6 +241,11 @@ func (m *AutoscaleClusterResponse) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateBlueprintInputs(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateClusterExposedServicesForTopologies(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -408,6 +413,19 @@ func (m *AutoscaleClusterResponse) validateBlueprintInputs(formats strfmt.Regist
 			}
 		}
 
+	}
+
+	return nil
+}
+
+func (m *AutoscaleClusterResponse) validateClusterExposedServicesForTopologies(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.ClusterExposedServicesForTopologies) { // not required
+		return nil
+	}
+
+	if err := validate.Required("clusterExposedServicesForTopologies", "body", m.ClusterExposedServicesForTopologies); err != nil {
+		return err
 	}
 
 	return nil

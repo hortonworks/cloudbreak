@@ -6,12 +6,11 @@ package models_cloudbreak
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
-	"strconv"
-
 	strfmt "github.com/go-openapi/strfmt"
 
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
+	"github.com/go-openapi/validate"
 )
 
 // StackDescriptor stack descriptor
@@ -26,7 +25,7 @@ type StackDescriptor struct {
 	MinAmbari string `json:"minAmbari,omitempty"`
 
 	// mpacks
-	Mpacks []*ManagementPackEntry `json:"mpacks"`
+	Mpacks map[string][]ManagementPackEntry `json:"mpacks,omitempty"`
 
 	// repo
 	Repo *StackRepoDetailsJSON `json:"repo,omitempty"`
@@ -95,22 +94,8 @@ func (m *StackDescriptor) validateMpacks(formats strfmt.Registry) error {
 		return nil
 	}
 
-	for i := 0; i < len(m.Mpacks); i++ {
-
-		if swag.IsZero(m.Mpacks[i]) { // not required
-			continue
-		}
-
-		if m.Mpacks[i] != nil {
-
-			if err := m.Mpacks[i].Validate(formats); err != nil {
-				if ve, ok := err.(*errors.Validation); ok {
-					return ve.ValidateName("mpacks" + "." + strconv.Itoa(i))
-				}
-				return err
-			}
-		}
-
+	if err := validate.Required("mpacks", "body", m.Mpacks); err != nil {
+		return err
 	}
 
 	return nil

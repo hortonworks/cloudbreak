@@ -715,6 +715,36 @@ func (a *Client) PutsyncStackV2(params *PutsyncStackV2Params) error {
 }
 
 /*
+RepairClusterV2 repairs the cluster
+
+Removing the failed nodes and starting new nodes to substitute them.
+*/
+func (a *Client) RepairClusterV2(params *RepairClusterV2Params) error {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewRepairClusterV2Params()
+	}
+
+	_, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "repairClusterV2",
+		Method:             "POST",
+		PathPattern:        "/v2/stacks/{name}/manualrepair",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &RepairClusterV2Reader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return err
+	}
+	return nil
+
+}
+
+/*
 RetryStack retries stack and cluster provisioning of failed stack
 
 Failed or interrupted stack and cluster operations can be retried, after the cause of the failure was eliminated. The operations will continue at the state, where the previous process failed.

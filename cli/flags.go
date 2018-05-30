@@ -744,6 +744,20 @@ var (
 			Usage: "source cluster to use as datalake",
 		},
 	}
+	FlHostGroups = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "host-groups",
+			Usage: "comma separated list of hostgroups where the failed nodes will be repaired",
+		},
+	}
+	FlRemoveOnly = BoolFlag{
+		RequiredFlag: OPTIONAL,
+		BoolFlag: cli.BoolFlag{
+			Name:  "remove-only",
+			Usage: "the failed nodes will only be removed, otherwise the failed nodes will be removed and new nodes will be started.",
+		},
+	}
 )
 
 type RequiredFlag struct {
@@ -757,6 +771,11 @@ type StringFlag struct {
 
 type BoolFlag struct {
 	cli.BoolFlag
+	RequiredFlag
+}
+
+type IntFlag struct {
+	cli.IntFlag
 	RequiredFlag
 }
 

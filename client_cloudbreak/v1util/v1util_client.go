@@ -109,6 +109,34 @@ func (a *Client) GetCustomParameters(params *GetCustomParametersParams) (*GetCus
 }
 
 /*
+GetKnoxServices returns supported knox services
+*/
+func (a *Client) GetKnoxServices(params *GetKnoxServicesParams) (*GetKnoxServicesOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetKnoxServicesParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "getKnoxServices",
+		Method:             "GET",
+		PathPattern:        "/v1/util/knoxservices/{blueprintName}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &GetKnoxServicesReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*GetKnoxServicesOK), nil
+
+}
+
+/*
 GetStackMatrixUtil returns default ambari details for distinct h d p and h d f
 */
 func (a *Client) GetStackMatrixUtil(params *GetStackMatrixUtilParams) (*GetStackMatrixUtilOK, error) {
