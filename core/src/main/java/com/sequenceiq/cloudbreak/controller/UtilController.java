@@ -1,21 +1,5 @@
 package com.sequenceiq.cloudbreak.controller;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.inject.Inject;
-import javax.validation.Valid;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.convert.ConversionService;
-import org.springframework.stereotype.Component;
-
 import com.sequenceiq.cloudbreak.api.endpoint.v1.UtilEndpoint;
 import com.sequenceiq.cloudbreak.api.model.AmbariDatabaseDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.AmbariDatabaseTestResult;
@@ -26,6 +10,7 @@ import com.sequenceiq.cloudbreak.api.model.StructuredParameterQueriesResponse;
 import com.sequenceiq.cloudbreak.api.model.StructuredParameterQueryResponse;
 import com.sequenceiq.cloudbreak.api.model.StructuredParametersQueryRequest;
 import com.sequenceiq.cloudbreak.api.model.VersionCheckResult;
+import com.sequenceiq.cloudbreak.api.model.filesystem.CloudStorageSupportedResponse;
 import com.sequenceiq.cloudbreak.api.model.rds.RDSBuildRequest;
 import com.sequenceiq.cloudbreak.api.model.rds.RdsBuildResult;
 import com.sequenceiq.cloudbreak.api.model.stack.StackMatrix;
@@ -37,7 +22,22 @@ import com.sequenceiq.cloudbreak.converter.stack.cluster.ServiceEndpointCollecto
 import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.StackMatrixService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
+import com.sequenceiq.cloudbreak.service.filesystem.FileSystemSupportMatrixService;
 import com.sequenceiq.cloudbreak.util.ClientVersionUtil;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.convert.ConversionService;
+import org.springframework.stereotype.Component;
+
+import javax.inject.Inject;
+import javax.validation.Valid;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @Component
 public class UtilController implements UtilEndpoint {
@@ -56,6 +56,9 @@ public class UtilController implements UtilEndpoint {
 
     @Autowired
     private AuthenticatedUserService authenticatedUserService;
+
+    @Autowired
+    private FileSystemSupportMatrixService fileSystemSupportMatrixService;
 
     @Autowired
     @Qualifier("conversionService")
@@ -107,6 +110,11 @@ public class UtilController implements UtilEndpoint {
     public Collection<ExposedServiceResponse> getKnoxServices(String blueprintName) {
         IdentityUser cbUser = authenticatedUserService.getCbUser();
         return serviceEndpointCollector.getKnoxServices(cbUser, blueprintName);
+    }
+
+    @Override
+    public Collection<CloudStorageSupportedResponse> getCloudStorageMatrix(String stackVersion) {
+        return fileSystemSupportMatrixService.getCloudStorageMatrix(stackVersion);
     }
 
     @Override

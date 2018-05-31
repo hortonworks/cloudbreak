@@ -1,9 +1,9 @@
 package com.sequenceiq.cloudbreak.blueprint.filesystem.query;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import java.util.HashSet;
 import java.util.Set;
-
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ConfigQueryEntry {
@@ -90,13 +90,13 @@ public class ConfigQueryEntry {
 
     public ConfigQueryEntry copy() {
         ConfigQueryEntry configQueryEntry = new ConfigQueryEntry();
-        configQueryEntry.setProtocol(getProtocol());
-        configQueryEntry.setDefaultPath(getDefaultPath());
-        configQueryEntry.setPropertyFile(getPropertyFile());
-        configQueryEntry.setDescription(getDescription());
-        configQueryEntry.setPropertyDisplayName(getPropertyDisplayName());
-        configQueryEntry.setRelatedService(getRelatedService());
-        configQueryEntry.setPropertyName(getPropertyName());
+        configQueryEntry.protocol = protocol;
+        configQueryEntry.defaultPath = defaultPath;
+        configQueryEntry.propertyFile = propertyFile;
+        configQueryEntry.description = description;
+        configQueryEntry.propertyDisplayName = propertyDisplayName;
+        configQueryEntry.relatedService = relatedService;
+        configQueryEntry.propertyName = propertyName;
         return configQueryEntry;
     }
 }

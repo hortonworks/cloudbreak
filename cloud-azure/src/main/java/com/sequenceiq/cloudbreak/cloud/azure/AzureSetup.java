@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
 import static com.sequenceiq.cloudbreak.cloud.azure.AzureStorage.IMAGES_CONTAINER;
+import static com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudAdlsView.TENANT_ID;
 
 import java.net.URISyntaxException;
 import java.net.UnknownHostException;
@@ -13,6 +14,7 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import com.microsoft.azure.AzureEnvironment;
 import com.microsoft.azure.credentials.ApplicationTokenCredentials;
@@ -176,8 +178,8 @@ public class AzureSetup implements Setup {
         CloudAdlsView cloudFileSystem = (CloudAdlsView) fileSystem.getCloudFileSystem();
         String clientSecret = String.valueOf(credentialAttributes.get(CloudAdlsView.CREDENTIAL_SECRET_KEY));
         String subscriptionId = String.valueOf(credentialAttributes.get(CloudAdlsView.SUBSCRIPTION_ID));
-        String clientId =  String.valueOf(credentialAttributes.get(CloudAdlsView.ACCESS_KEY));
-        String tenantId = cloudFileSystem.getTenantId();
+        String clientId = String.valueOf(credentialAttributes.get(CloudAdlsView.ACCESS_KEY));
+        String tenantId = StringUtils.isEmpty(cloudFileSystem.getTenantId()) ? credential.getStringParameter(TENANT_ID) : cloudFileSystem.getTenantId();
         String accountName = cloudFileSystem.getAccountName();
 
         ApplicationTokenCredentials creds = new ApplicationTokenCredentials(clientId, tenantId, clientSecret, AzureEnvironment.AZURE);

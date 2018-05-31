@@ -2,9 +2,12 @@ package com.sequenceiq.cloudbreak.api.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+
+import java.util.Objects;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonInclude(Include.NON_NULL)
 public class StructuredParameterQueryResponse implements JsonEntity {
 
     private String propertyName;
@@ -76,4 +79,29 @@ public class StructuredParameterQueryResponse implements JsonEntity {
     public void setPropertyDisplayName(String propertyDisplayName) {
         this.propertyDisplayName = propertyDisplayName;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof StructuredParameterQueryResponse)) {
+            return false;
+        }
+        StructuredParameterQueryResponse that = (StructuredParameterQueryResponse) o;
+        return Objects.equals(getPropertyName(), that.getPropertyName())
+                && Objects.equals(getDescription(), that.getDescription())
+                && Objects.equals(getDefaultPath(), that.getDefaultPath())
+                && Objects.equals(getRelatedService(), that.getRelatedService())
+                && Objects.equals(getPropertyFile(), that.getPropertyFile())
+                && Objects.equals(getProtocol(), that.getProtocol())
+                && Objects.equals(getPropertyDisplayName(), that.getPropertyDisplayName());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getPropertyName(), getDescription(), getDefaultPath(), getRelatedService(), getPropertyFile(), getProtocol(),
+                getPropertyDisplayName());
+    }
+
 }

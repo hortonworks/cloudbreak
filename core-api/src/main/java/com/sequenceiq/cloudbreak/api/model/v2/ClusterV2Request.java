@@ -41,6 +41,7 @@ public class ClusterV2Request implements JsonEntity {
     @ApiModelProperty(ClusterModelDescription.PROXY_NAME)
     private String proxyName;
 
+    @Valid
     @ApiModelProperty(StackModelDescription.CLOUD_STORAGE)
     private CloudStorageRequest cloudStorage;
 

@@ -1,10 +1,12 @@
 package com.sequenceiq.cloudbreak.api.model.filesystem;
 
-import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.ANY;
-import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE;
-
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+import java.util.Objects;
+
+import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.ANY;
+import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE;
 
 @JsonAutoDetect(fieldVisibility = ANY, getterVisibility = NONE, setterVisibility = NONE)
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -16,7 +18,6 @@ public class WasbFileSystem extends BaseFileSystem {
 
     private boolean secure;
 
-    //TODO do it
     private String storageContainerName;
 
     public String getAccountKey() {
@@ -50,4 +51,25 @@ public class WasbFileSystem extends BaseFileSystem {
     public void setStorageContainerName(String storageContainerName) {
         this.storageContainerName = storageContainerName;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof WasbFileSystem)) {
+            return false;
+        }
+        WasbFileSystem that = (WasbFileSystem) o;
+        return isSecure() == that.isSecure()
+                && Objects.equals(getAccountKey(), that.getAccountKey())
+                && Objects.equals(getAccountName(), that.getAccountName())
+                && Objects.equals(getStorageContainerName(), that.getStorageContainerName());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getAccountKey(), getAccountName(), isSecure(), getStorageContainerName());
+    }
+
 }

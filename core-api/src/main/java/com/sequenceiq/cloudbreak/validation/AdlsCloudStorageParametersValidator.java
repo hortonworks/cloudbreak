@@ -1,10 +1,13 @@
 package com.sequenceiq.cloudbreak.validation;
 
-import com.sequenceiq.cloudbreak.api.model.v2.filesystem.AdlsCloudStorageParameters;
-import org.apache.commons.lang3.StringUtils;
+import java.util.regex.Pattern;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
+
+import org.apache.commons.lang3.StringUtils;
+
+import com.sequenceiq.cloudbreak.api.model.v2.filesystem.AdlsCloudStorageParameters;
 
 public class AdlsCloudStorageParametersValidator implements ConstraintValidator<ValidAdlsCloudStorageParameters, AdlsCloudStorageParameters> {
 
@@ -22,17 +25,23 @@ public class AdlsCloudStorageParametersValidator implements ConstraintValidator<
 
     @Override
     public boolean isValid(AdlsCloudStorageParameters value, ConstraintValidatorContext context) {
-        boolean result;
+        boolean result = false;
         if (!isAccountNameValid(value.getAccountName())) {
             ValidatorUtil.addConstraintViolation(context, failMessage, PROPERTY_MODEL_VALUE);
-            result = false;
+        } else if (clientIdOrCredentialEmpty(value)) {
+            ValidatorUtil.addConstraintViolation(context, "Client ID and Credential should be fill together only!", PROPERTY_MODEL_VALUE);
         } else if (value.getTenantId() == null) {
             ValidatorUtil.addConstraintViolation(context, "Tenant ID should not be null!", PROPERTY_MODEL_VALUE);
-            result = false;
         } else {
             result = true;
         }
         return result;
+    }
+
+    protected boolean clientIdOrCredentialEmpty(AdlsCloudStorageParameters value) {
+        boolean clientIdEmpty = StringUtils.isNoneEmpty(value.getClientId());
+        boolean credentialEmpty = StringUtils.isNoneEmpty(value.getCredential());
+        return clientIdEmpty != credentialEmpty;
     }
 
     private boolean isAccountNameValid(String accountName) {
@@ -43,7 +52,7 @@ public class AdlsCloudStorageParametersValidator implements ConstraintValidator<
                     MAX_ACCOUNT_NAME_LENGTH,
                     StringUtils.length(accountName));
             result = false;
-        } else if (!accountName.matches("^[a-z0-9]$")) {
+        } else if (!Pattern.matches("^[a-z0-9]*", accountName)) {
             failMessage = "Account name must contain only numbers and lowercase letters";
             result = false;
         } else {
@@ -53,7 +62,8 @@ public class AdlsCloudStorageParametersValidator implements ConstraintValidator<
     }
 
     private boolean isLengthMatches(String text) {
-        return StringUtils.length(text) >= MIN_ACCOUNT_NAME_LENGTH && StringUtils.length(text) <= MAX_ACCOUNT_NAME_LENGTH;
+        int length = StringUtils.length(text);
+        return length >= MIN_ACCOUNT_NAME_LENGTH && length <= MAX_ACCOUNT_NAME_LENGTH;
     }
 
 }
