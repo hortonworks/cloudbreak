@@ -59,7 +59,7 @@ public class CloudStorageRequestToFileSystemConverter extends AbstractConversion
             storageLocations.setLocations(locations);
             fileSystem.setLocations(new Json(storageLocations));
         } catch (JsonProcessingException ignored) {
-            throw new BadRequestException("Storage locations could not be parsed: " + source);
+            throw new BadRequestException(String.format("Storage locations could not be parsed: %s", source));
         }
         BaseFileSystem baseFileSystem = null;
         if (source.getAdls() != null) {

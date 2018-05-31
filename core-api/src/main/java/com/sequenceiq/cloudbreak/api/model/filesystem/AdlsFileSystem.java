@@ -1,10 +1,12 @@
 package com.sequenceiq.cloudbreak.api.model.filesystem;
 
-import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.ANY;
-import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE;
-
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+import java.util.Objects;
+
+import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.ANY;
+import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE;
 
 @JsonAutoDetect(fieldVisibility = ANY, getterVisibility = NONE, setterVisibility = NONE)
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -50,4 +52,23 @@ public class AdlsFileSystem extends BaseFileSystem {
         this.tenantId = tenantId;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof AdlsFileSystem)) {
+            return false;
+        }
+        AdlsFileSystem that = (AdlsFileSystem) o;
+        return Objects.equals(getAccountName(), that.getAccountName())
+                && Objects.equals(getClientId(), that.getClientId())
+                && Objects.equals(getCredential(), that.getCredential())
+                && Objects.equals(getTenantId(), that.getTenantId());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getAccountName(), getClientId(), getCredential(), getTenantId());
+    }
 }

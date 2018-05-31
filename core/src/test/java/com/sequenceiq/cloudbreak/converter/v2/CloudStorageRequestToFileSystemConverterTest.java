@@ -1,22 +1,5 @@
 package com.sequenceiq.cloudbreak.converter.v2;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import javax.ws.rs.BadRequestException;
-
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.springframework.core.convert.ConversionService;
-
 import com.sequenceiq.cloudbreak.api.model.filesystem.AdlsFileSystem;
 import com.sequenceiq.cloudbreak.api.model.filesystem.FileSystemType;
 import com.sequenceiq.cloudbreak.api.model.filesystem.GcsFileSystem;
@@ -32,6 +15,24 @@ import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.MissingResourceNameGenerator;
 import com.sequenceiq.cloudbreak.service.filesystem.FileSystemResolver;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.springframework.core.convert.ConversionService;
+
+import javax.ws.rs.BadRequestException;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 public class CloudStorageRequestToFileSystemConverterTest {
 
@@ -92,7 +93,7 @@ public class CloudStorageRequestToFileSystemConverterTest {
 
         FileSystem result = underTest.convert(request);
 
-        checkWhetherTheBasicDataHasPassedOrNot(request, result);
+        checkWhetherTheBasicDataHasPassedOrNot(result);
         assertEquals(FileSystemType.ADLS, result.getType());
         verify(authenticatedUserService, times(1)).getCbUser();
         verify(fileSystemResolver, times(1)).propagateConfiguration(request);
@@ -112,7 +113,7 @@ public class CloudStorageRequestToFileSystemConverterTest {
 
         FileSystem result = underTest.convert(request);
 
-        checkWhetherTheBasicDataHasPassedOrNot(request, result);
+        checkWhetherTheBasicDataHasPassedOrNot(result);
         assertEquals(FileSystemType.GCS, result.getType());
         verify(authenticatedUserService, times(1)).getCbUser();
         verify(fileSystemResolver, times(1)).propagateConfiguration(request);
@@ -133,7 +134,7 @@ public class CloudStorageRequestToFileSystemConverterTest {
 
         FileSystem result = underTest.convert(request);
 
-        checkWhetherTheBasicDataHasPassedOrNot(request, result);
+        checkWhetherTheBasicDataHasPassedOrNot(result);
         assertEquals(FileSystemType.WASB, result.getType());
         verify(authenticatedUserService, times(1)).getCbUser();
         verify(fileSystemResolver, times(1)).propagateConfiguration(request);
@@ -143,18 +144,20 @@ public class CloudStorageRequestToFileSystemConverterTest {
     public void testConvertWhenNoFileSystemParameterInstanceHasPassedThroughTheRequestThenExceptionShouldComeIndicatingThatTheFileSystemTypeIsUndecidable() {
         CloudStorageRequest request = createV2Request();
         String message = "Unable to decide file system, none of the supported file system type has provided!";
+        when(fileSystemResolver.propagateConfiguration(request)).thenThrow(new BadRequestException(message));
 
         expectedException.expect(BadRequestException.class);
         expectedException.expectMessage(message);
-        when(fileSystemResolver.propagateConfiguration(request)).thenThrow(new BadRequestException(message));
 
         underTest.convert(request);
         verify(authenticatedUserService, times(1)).getCbUser();
     }
 
-    private void checkWhetherTheBasicDataHasPassedOrNot(CloudStorageRequest request, FileSystem fileSystem) {
-        assertEquals(USER_ID, fileSystem.getOwner());
+    private void checkWhetherTheBasicDataHasPassedOrNot(FileSystem fileSystem) {
         assertEquals(USER_ACCOUNT, fileSystem.getAccount());
+        assertEquals(USER_ID, fileSystem.getOwner());
+        assertFalse(fileSystem.isDefaultFs());
+        assertNotNull(fileSystem.getName());
     }
 
     private CloudStorageRequest createV2Request() {

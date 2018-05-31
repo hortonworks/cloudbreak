@@ -5,6 +5,8 @@ import com.sequenceiq.cloudbreak.validation.ValidWasbCloudStorageParameters;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
+import java.util.Objects;
+
 @ApiModel
 @ValidWasbCloudStorageParameters
 public class WasbCloudStorageParameters implements CloudStorageParameters {
@@ -45,6 +47,25 @@ public class WasbCloudStorageParameters implements CloudStorageParameters {
     @Override
     public FileSystemType getType() {
         return FileSystemType.WASB;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof WasbCloudStorageParameters)) {
+            return false;
+        }
+        WasbCloudStorageParameters that = (WasbCloudStorageParameters) o;
+        return isSecure() == that.isSecure()
+                && Objects.equals(getAccountKey(), that.getAccountKey())
+                && Objects.equals(getAccountName(), that.getAccountName());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getAccountKey(), getAccountName(), isSecure());
     }
 
 }
