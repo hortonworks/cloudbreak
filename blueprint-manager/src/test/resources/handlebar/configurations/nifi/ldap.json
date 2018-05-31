@@ -1,0 +1,14 @@
+{
+
+  "nifi-properties": {
+    "nifi.security.user.login.identity.provider": "ldap-provider",
+    "nifi.security.user.authorizer": "managed-authorizer"
+  },
+  "nifi-login-identity-providers-env": {
+    "content": "<test>"
+  },
+  "nifi-authorizers-env": {
+    "content": "<test1>"
+  }
+
+}

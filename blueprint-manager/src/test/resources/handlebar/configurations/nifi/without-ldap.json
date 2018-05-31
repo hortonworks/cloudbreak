@@ -1,0 +1,7 @@
+{
+
+  "nifi-properties": {
+    "nifi.security.user.login.identity.provider": "kerberos-provider"
+  }
+
+}

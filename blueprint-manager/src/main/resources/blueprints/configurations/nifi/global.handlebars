@@ -1,12 +1,7 @@
 {
-{{{#eq blueprint.type 'HDF'}}}
   "nifi-ambari-ssl-config": {
     "content": "{{{ hdf.nodeEntities }}}",
     "nifi.initial.admin.identity": "{{{ general.userName }}}"
-  },
-  "nifi-registry-ambari-ssl-config": {
-    "content": "{{{ hdf.registryNodeEntities }}}",
-    "nifi.registry.initial.admin.identity": "{{{ general.userName }}}"
   },
 {{{#if hdf.proxyHosts}}}
   "nifi-properties": {
@@ -17,5 +12,4 @@
     "metrics_grafana_username": "{{{ general.userName }}}",
     "metrics_grafana_password": "{{{ general.password }}}"
   }
-{{{/eq}}}
 }

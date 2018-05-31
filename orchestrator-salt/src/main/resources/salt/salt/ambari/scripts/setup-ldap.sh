@@ -1,4 +1,4 @@
-#/bin/bash
+#!/bin/bash
 
 set -ex
 
@@ -8,7 +8,7 @@ yes n | ambari-server setup-ldap \
   --ldap-secondary-url="{{ ldap.serverHost }}:{{ ldap.serverPort }}" \
   --ldap-ssl="{{ ambari.secure_ldap }}" \
   --ldap-user-class="{{ ldap.userObjectClass }}" \
-  --ldap-user-attr="{{ ldap.groupNameAttribute }}" \
+  --ldap-user-attr="{{ ldap.userNameAttribute }}" \
   --ldap-group-class="{{ ldap.groupObjectClass }}" \
   --ldap-group-attr="{{ ldap.groupNameAttribute }}" \
   --ldap-member-attr="{{ ldap.groupMemberAttribute }}" \

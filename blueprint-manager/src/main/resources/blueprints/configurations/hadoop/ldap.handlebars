@@ -1,4 +1,5 @@
 {
+{{{#neq blueprint.type 'HDF'}}}
 {{{#if ldap}}}
   "core-site": {
     "hadoop.security.group.mapping": "org.apache.hadoop.security.LdapGroupsMapping",
@@ -13,4 +14,5 @@
     "hadoop.security.group.mapping.ldap.search.attr.member": "{{{ ldap.groupMemberAttribute }}}"
   }
 {{{/if}}}
+{{{/neq}}}
 }

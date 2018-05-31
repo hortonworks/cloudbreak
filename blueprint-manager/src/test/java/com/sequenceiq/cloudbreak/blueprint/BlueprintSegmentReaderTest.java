@@ -37,8 +37,8 @@ public class BlueprintSegmentReaderTest {
         Map<ServiceName, TemplateFiles> serviceFiles = underTest.collectAllServiceFile();
         Map<ServiceName, TemplateFiles> settingsFiles = underTest.collectAllSettingsFile();
 
-        Assert.assertEquals(1, configFiles.size());
-        Assert.assertEquals(18, serviceFiles.size());
+        Assert.assertEquals(3, configFiles.size());
+        Assert.assertEquals(19, serviceFiles.size());
         Assert.assertEquals(1, settingsFiles.size());
     }
 }

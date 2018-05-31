@@ -17,7 +17,6 @@
       {
         "nifi-properties": {
           "nifi.sensitive.props.key": "changemeplease",
-          "nifi.security.user.login.identity.provider": "kerberos-provider",
           "nifi.security.identity.mapping.pattern.kerb": "^(.*?)@(.*?)$",
           "nifi.security.identity.mapping.value.kerb": "$1"
         }
@@ -38,7 +37,6 @@
       {
         "nifi-registry-properties": {
           "nifi.registry.sensitive.props.key": "changemeplease",
-          "nifi.registry.security.user.login.identity.provider": "kerberos-provider",
           "nifi.registry.security.identity.mapping.pattern.kerb": "^(.*?)@(.*?)$",
           "nifi.registry.security.identity.mapping.value.kerb": "$1"
         }
@@ -71,9 +69,6 @@
             "name": "METRICS_GRAFANA"
           },
           {
-            "name": "ZOOKEEPER_SERVER"
-          },
-          {
             "name": "ZOOKEEPER_CLIENT"
           }
         ],
@@ -93,6 +88,21 @@
           }
         ],
         "cardinality": "1+"
+      },
+      {
+        "name": "ZooKeeper",
+        "components": [
+          {
+            "name": "ZOOKEEPER_SERVER"
+          },
+          {
+            "name": "METRICS_MONITOR"
+          },
+          {
+            "name": "ZOOKEEPER_CLIENT"
+          }
+        ],
+        "cardinality": "3+"
       }
     ]
   }

@@ -8,12 +8,15 @@ public class HdfConfigView {
 
     private String registryNodeEntities;
 
+    private String nodeUserEntities;
+
     private String proxyHosts;
 
     public HdfConfigView(HdfConfigs hdfConfigs) {
         this.nodeEntities = hdfConfigs.getNodeEntities();
         this.proxyHosts = hdfConfigs.getProxyHosts().orElse(null);
         this.registryNodeEntities = hdfConfigs.getRegistryNodeEntities();
+        this.nodeUserEntities = hdfConfigs.getNodeUserEntities();
     }
 
     public String getNodeEntities() {
@@ -22,6 +25,10 @@ public class HdfConfigView {
 
     public String getRegistryNodeEntities() {
         return registryNodeEntities;
+    }
+
+    public String getNodeUserEntities() {
+        return nodeUserEntities;
     }
 
     public String getProxyHosts() {
