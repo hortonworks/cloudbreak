@@ -13,6 +13,7 @@ import static com.sequenceiq.cloudbreak.blueprint.moduletest.BlueprintModulTestM
 import static com.sequenceiq.cloudbreak.blueprint.moduletest.BlueprintModulTestModelProvider.blueprintObjectWhenLdapAndDruidRdsConfigured;
 import static com.sequenceiq.cloudbreak.blueprint.moduletest.BlueprintModulTestModelProvider.blueprintObjectWhenLdapConfiguredWithRdsRanger;
 import static com.sequenceiq.cloudbreak.blueprint.moduletest.BlueprintModulTestModelProvider.blueprintObjectWhenLdapPresentedThenRangerAndHadoopLdapShouldConfigured;
+import static com.sequenceiq.cloudbreak.blueprint.moduletest.BlueprintModulTestModelProvider.blueprintObjectWhenNifiAndHdfAndLdapPresentedThenHdfShouldConfigured;
 import static com.sequenceiq.cloudbreak.blueprint.moduletest.BlueprintModulTestModelProvider.blueprintObjectWhenNifiAndHdfPresentedThenHdfShouldConfigured;
 import static com.sequenceiq.cloudbreak.blueprint.moduletest.BlueprintModulTestModelProvider.blueprintObjectWhenNothingSpecialThere;
 import static com.sequenceiq.cloudbreak.blueprint.moduletest.BlueprintModulTestModelProvider.blueprintObjectWhenRangerAndRdsPresentedThenRdsRangerShouldConfigured;
@@ -88,6 +89,8 @@ public class BlueprintModulTest extends CentralBlueprintContext {
                 blueprintObjectWithZepelinAndHdp25PresentedThenZeppelinShouldConfigured() });
         params.add(new Object[] { "hdf", "hdf",
                 blueprintObjectWhenNifiAndHdfPresentedThenHdfShouldConfigured() });
+        params.add(new Object[] { "hdf", "hdf-ldap",
+                blueprintObjectWhenNifiAndHdfAndLdapPresentedThenHdfShouldConfigured() });
         params.add(new Object[] { "llap", "llap",
                 blueprintObjectWhenHiveInteractivePresentedTheLlapShouldConfigured() });
         params.add(new Object[] { "hbase", "hbase",

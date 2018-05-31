@@ -35,7 +35,8 @@ public class HdfConfigProvider {
             .map(fqdn -> String.format("<property name=\"Node Identity %s\">CN=%s, OU=NIFI</property>", index.addAndGet(1), fqdn))
             .collect(Collectors.joining());
         String registryNodeEntities = nodeEntities.replaceAll("Node Identity", "NiFi Identity");
-        return new HdfConfigs(nodeEntities, registryNodeEntities, getProxyHostsParameter(nifiIgs, blueprintTextProcessor, groupInstances));
+        String nodeUserEntities = nodeEntities.replaceAll("Node Identity", "Initial User Identity");
+        return new HdfConfigs(nodeEntities, registryNodeEntities, nodeUserEntities, getProxyHostsParameter(nifiIgs, blueprintTextProcessor, groupInstances));
     }
 
     private BlueprintTextProcessor createTextProcessor(String blueprintText) {

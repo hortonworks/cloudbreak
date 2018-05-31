@@ -8,12 +8,15 @@ public class HdfConfigs {
 
     private String registryNodeEntities;
 
+    private String nodeUserEntities;
+
     private Optional<String> proxyHosts;
 
-    public HdfConfigs(String nodeEntities, String registryNodeEntities, Optional<String> proxyHosts) {
+    public HdfConfigs(String nodeEntities, String registryNodeEntities, String nodeUserEntities, Optional<String> proxyHosts) {
         this.nodeEntities = nodeEntities;
         this.proxyHosts = proxyHosts;
         this.registryNodeEntities = registryNodeEntities;
+        this.nodeUserEntities = nodeUserEntities;
     }
 
     public String getNodeEntities() {
@@ -22,6 +25,10 @@ public class HdfConfigs {
 
     public String getRegistryNodeEntities() {
         return registryNodeEntities;
+    }
+
+    public String getNodeUserEntities() {
+        return nodeUserEntities;
     }
 
     public Optional<String> getProxyHosts() {

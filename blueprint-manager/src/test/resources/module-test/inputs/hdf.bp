@@ -52,6 +52,9 @@
           "name": "NIFI_CA"
         },
         {
+          "name": "NIFI_REGISTRY_MASTER"
+        },
+        {
           "name": "METRICS_COLLECTOR"
         },
         {

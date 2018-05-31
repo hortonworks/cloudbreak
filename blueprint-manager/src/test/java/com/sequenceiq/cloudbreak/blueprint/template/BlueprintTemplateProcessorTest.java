@@ -123,7 +123,8 @@ public class BlueprintTemplateProcessorTest {
         Map<String, Object> properties = new HashMap<>();
         properties.put("S3_BUCKET", "testbucket");
         HdfConfigs hdfConfigs = new HdfConfigs("<property name=\"Node Identity 1\">CN=hostname-2, OU=NIFI</property>",
-            "<property name=\"Nifi Identity 1\">CN=hostname-2, OU=NIFI</property>", Optional.empty());
+                "<property name=\"Nifi Identity 1\">CN=hostname-2, OU=NIFI</property>",
+                "<property name=\"Nifi Identity 1\">CN=hostname-2, OU=NIFI</property>", Optional.empty());
 
         BlueprintPreparationObject blueprintPreparationObject = BlueprintPreparationObject.Builder.builder()
                 .withRdsConfigs(cluster.getRdsConfigs())

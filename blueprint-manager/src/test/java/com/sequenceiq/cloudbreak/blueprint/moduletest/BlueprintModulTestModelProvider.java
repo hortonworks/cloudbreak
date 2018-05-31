@@ -112,7 +112,18 @@ class BlueprintModulTestModelProvider {
         return getPreparedBuilder("master", "slave_1")
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDF"))
                 .withHdfConfigs(new HdfConfigs("<property name=\"Node Identity 10.0.0.1\">CN=10.0.0.1, OU=NIFI</property>",
-                    "<property name=\"Node Identity 10.0.0.1\">CN=10.0.0.1, OU=NIFI</property>", Optional.empty()))
+                        "<property name=\"Node Identity 10.0.0.1\">CN=10.0.0.1, OU=NIFI</property>",
+                        "<property name=\"Node Identity 10.0.0.1\">CN=10.0.0.1, OU=NIFI</property>", Optional.empty()))
+                .build();
+    }
+
+    static BlueprintPreparationObject blueprintObjectWhenNifiAndHdfAndLdapPresentedThenHdfShouldConfigured() throws JsonProcessingException {
+        return getPreparedBuilder("master", "slave_1")
+                .withBlueprintView(generalBlueprintView("", "2.6", "HDF"))
+                .withLdapConfig(ldapConfig())
+                .withHdfConfigs(new HdfConfigs("<property name=\"Node Identity 10.0.0.1\">CN=10.0.0.1, OU=NIFI</property>",
+                        "<property name=\"Node Identity 10.0.0.1\">CN=10.0.0.1, OU=NIFI</property>",
+                        "<property name=\"Node Identity 10.0.0.1\">CN=10.0.0.1, OU=NIFI</property>", Optional.empty()))
                 .build();
     }
 
@@ -252,7 +263,8 @@ class BlueprintModulTestModelProvider {
         return getPreparedBuilder("master", "slave_1")
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
                 .withHdfConfigs(new HdfConfigs("<property name=\"Node Identity 10.0.0.1\">CN=10.0.0.1, OU=NIFI</property>",
-                    "<property name=\"Node Identity 10.0.0.1\">CN=10.0.0.1, OU=NIFI</property>", Optional.empty()))
+                        "<property name=\"Node Identity 10.0.0.1\">CN=10.0.0.1, OU=NIFI</property>",
+                        "<property name=\"Node Identity 10.0.0.1\">CN=10.0.0.1, OU=NIFI</property>", Optional.empty()))
                 .build();
     }
 

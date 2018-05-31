@@ -63,6 +63,13 @@
       }
     },
     {
+      "nifi-registry-properties": {
+        "properties": {
+          "nifi.registry.security.user.login.identity.provider": "kerberos-provider"
+        }
+      }
+    },
+    {
       "cluster-env": {
         "properties": {
           "recovery_enabled": "true",
@@ -77,6 +84,9 @@
       "components": [
         {
           "name": "NIFI_CA"
+        },
+        {
+          "name": "NIFI_REGISTRY_MASTER"
         },
         {
           "name": "METRICS_COLLECTOR"

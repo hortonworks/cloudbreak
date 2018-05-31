@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.blueprint.template;
 
+import static com.sequenceiq.cloudbreak.TestUtil.ldapConfig;
 import static com.sequenceiq.cloudbreak.util.FileReaderUtils.readFileFromClasspath;
 
 import java.io.IOException;
@@ -87,8 +88,20 @@ public class HandlebarTemplateTest {
                         nifiConfigWhenHdfPresentedThenShouldReturnWithNifiConfig(false)},
                 {"blueprints/configurations/nifi/global.handlebars", "configurations/nifi/global-with-hdf-full.json",
                         nifiConfigWhenHdfPresentedThenShouldReturnWithNifiConfig(true)},
-                {"blueprints/configurations/nifi/global.handlebars", "configurations/nifi/global-without-hdf.json",
-                        nifiConfigWhenHdfNotPresentedThenShouldReturnWithNotNifiConfig()},
+                {"blueprints/configurations/nifi/ldap.handlebars", "configurations/nifi/ldap.json",
+                        nifiConfigWhenHdfAndLdapPresentedThenShouldReturnWithNifiAndLdapConfig(false)},
+                {"blueprints/configurations/nifi/ldap.handlebars", "configurations/nifi/without-ldap.json",
+                        nifiConfigWhenHdfPresentedThenShouldReturnWithNifiConfig(true)},
+
+                // NIFI_REGISTRY
+                {"blueprints/configurations/nifi_registry/global.handlebars", "configurations/nifi_registry/global-with-hdf-nifitargets.json",
+                        nifiConfigWhenHdfPresentedThenShouldReturnWithNifiConfig(false)},
+                {"blueprints/configurations/nifi_registry/global.handlebars", "configurations/nifi_registry/global-with-hdf-full.json",
+                        nifiConfigWhenHdfPresentedThenShouldReturnWithNifiConfig(true)},
+                {"blueprints/configurations/nifi_registry/ldap.handlebars", "configurations/nifi_registry/ldap.json",
+                        nifiConfigWhenHdfAndLdapPresentedThenShouldReturnWithNifiAndLdapConfig(false)},
+                {"blueprints/configurations/nifi_registry/ldap.handlebars", "configurations/nifi_registry/without-ldap.json",
+                        nifiConfigWhenHdfPresentedThenShouldReturnWithNifiConfig(true)},
 
                 // YARN
                 {"blueprints/configurations/yarn/global.handlebars", "configurations/yarn/global-without-container.json",
@@ -371,7 +384,8 @@ public class HandlebarTemplateTest {
 
     public static Map<String, Object> ldapConfigWhenLdapPresentedThenShouldReturnWithLdapConfig() throws JsonProcessingException {
         return new BlueprintTemplateModelContextBuilder()
-                .withLdap(TestUtil.ldapConfig())
+                .withLdap(ldapConfig())
+                .withGateway(TestUtil.gatewayEnabled())
                 .build();
     }
 
@@ -458,7 +472,31 @@ public class HandlebarTemplateTest {
 
         return new BlueprintTemplateModelContextBuilder()
                 .withGeneralClusterConfigs(generalClusterConfigs)
-                .withHdfConfigs(new HdfConfigs("nifigtargets", "nifigtargets",
+                .withHdfConfigs(new HdfConfigs("nifigtargets", "nifigtargets", "nifigtargets",
+                        withProxyHost ? Optional.of("nifiproxyhost") : Optional.empty()))
+                .withBlueprintView(blueprintView)
+                .build();
+    }
+
+    public static Map<String, Object> nifiConfigWhenHdfAndLdapPresentedThenShouldReturnWithNifiAndLdapConfig(boolean withProxyHost) {
+        GeneralClusterConfigs generalClusterConfigs = new GeneralClusterConfigs();
+        generalClusterConfigs.setPassword("adminPassword");
+        generalClusterConfigs.setUserName("lastname");
+        generalClusterConfigs.setIdentityUserEmail("admin@example.com");
+
+        BlueprintView blueprintView = new BlueprintView("blueprintText", "2.6", "HDF");
+
+        Map<String, Object> properties = new HashMap<>();
+        properties.put("blueprints_basics_nifi_registry_identity_providers", "<test>");
+        properties.put("blueprints_basics_nifi_registry_authorizers", "<test1>");
+        properties.put("blueprints_basics_nifi_identity_providers", "<test>");
+        properties.put("blueprints_basics_nifi_authorizers", "<test1>");
+
+        return new BlueprintTemplateModelContextBuilder()
+                .withGeneralClusterConfigs(generalClusterConfigs)
+                .withLdap(ldapConfig())
+                .withFixInputs(properties)
+                .withHdfConfigs(new HdfConfigs("nifigtargets", "nifigtargets", "nifigtargets",
                         withProxyHost ? Optional.of("nifiproxyhost") : Optional.empty()))
                 .withBlueprintView(blueprintView)
                 .build();
@@ -474,7 +512,7 @@ public class HandlebarTemplateTest {
 
         return new BlueprintTemplateModelContextBuilder()
                 .withGeneralClusterConfigs(generalClusterConfigs)
-                .withHdfConfigs(new HdfConfigs("nifigtargets", "nifigtargets", Optional.empty()))
+                .withHdfConfigs(new HdfConfigs("nifigtargets", "nifigtargets", "nifigtargets", Optional.empty()))
                 .withBlueprintView(blueprintView)
                 .build();
     }
@@ -487,7 +525,7 @@ public class HandlebarTemplateTest {
 
     private static Object hiveWhenLdapPresentedThenShouldReturnWithLdapConfigs() {
         return new BlueprintTemplateModelContextBuilder()
-                .withLdap(TestUtil.ldapConfig())
+                .withLdap(ldapConfig())
                 .build();
     }
 

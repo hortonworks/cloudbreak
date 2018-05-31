@@ -1,0 +1,14 @@
+{
+
+  "nifi-registry-properties": {
+    "nifi.registry.security.identity.provider": "ldap-provider",
+    "nifi.registry.security.authorizer": "managed-authorizer"
+  },
+  "nifi-registry-identity-providers-env": {
+    "content": "<test>"
+  },
+  "nifi-registry-authorizers-env": {
+    "content": "<test1>"
+  }
+
+}
