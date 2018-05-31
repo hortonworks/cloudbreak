@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.api.model.ParametersQueryResponse;
 import com.sequenceiq.cloudbreak.api.model.StructuredParameterQueriesResponse;
 import com.sequenceiq.cloudbreak.api.model.StructuredParametersQueryRequest;
 import com.sequenceiq.cloudbreak.api.model.VersionCheckResult;
+import com.sequenceiq.cloudbreak.api.model.filesystem.CloudStorageSupportedResponse;
 import com.sequenceiq.cloudbreak.api.model.rds.RDSBuildRequest;
 import com.sequenceiq.cloudbreak.api.model.rds.RdsBuildResult;
 import com.sequenceiq.cloudbreak.api.model.stack.StackMatrix;
@@ -66,6 +67,13 @@ public interface UtilEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = UtilityOpDescription.KNOX_SERVICES, produces = ContentType.JSON, nickname = "getKnoxServices")
     Collection<ExposedServiceResponse> getKnoxServices(@PathParam("blueprintName") String blueprintId);
+
+    @GET
+    @Path("cloudstoragematrix")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = UtilityOpDescription.CLOUD_STORAGE_MATRIX, produces = ContentType.JSON, nickname = "getCloudStorageMatrix",
+            notes = "Define stack version at least at patch level eg. 2.6.0")
+    Collection<CloudStorageSupportedResponse> getCloudStorageMatrix(@QueryParam("stackVersion") String stackVersion);
 
     @POST
     @Path("custom-parameters")
