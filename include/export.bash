@@ -48,7 +48,7 @@ export-prerequisites() {
     fi
 
     printf "\n### Open ports\n" >> $out
-    ! docker run --rm --network=host alpine:3.7 netstat -tulnp >> $out
+    ! docker run --rm --name=cbreak_export_netstat --network=host alpine:3.7 netstat -tulnp >> $out
 
     if command_exists iptables; then
         printf "\n### IPTABLES\n" >> $out
@@ -108,7 +108,7 @@ archive-directory() {
 
 anonymize-exported-files() {
     cloudbreak-config
-    
+
     info "Anonymization started."
 
     ! docker run -e ACCOUNT_ID=$AWS_ACCOUNT_ID \
@@ -128,6 +128,7 @@ anonymize-exported-files() {
         -e SMARTSENSE_UPLOAD_USERNAME \
         -e SMARTSENSE_UPLOAD_PASSWORD \
         --rm \
+        --name=cbreak_export_smartsense \
         -v $(pwd):/var/lib/cloudbreak-deployment \
         -v $(pwd)/$1:/var/lib/cloudbreak-deployment/cfg \
         -v $(pwd)/$2:/var/lib/cloudbreak-deployment/hst_bundle \
