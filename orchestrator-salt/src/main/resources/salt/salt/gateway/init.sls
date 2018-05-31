@@ -1,8 +1,20 @@
 {%- from 'gateway/settings.sls' import gateway with context %}
 
+{% if salt['pillar.get']('hdp:stack:vdf-url') != None %}
+
+generate_repo_from_vdf_script:
+  file.managed:
+    - name: /opt/salt/generate-repo-for-os-from-vdf.sh
+    - source: salt://gateway/scripts/generate-repo-for-os-from-vdf.sh
+    - skip_verify: True
+    - makedirs: True
+    - mode: 755
+
+{% endif %}
+
 include:
 {% if grains['os_family'] == 'RedHat' %}
-  - gateway.repo
+  - gateway.repo-redhat
 {% endif %}
 {% if grains['os_family'] == 'Debian' %}
   - gateway.repo-debian
@@ -27,17 +39,37 @@ knox:
 /usr/hdp/current/knox-server/conf/topologies/manager.xml:
   file.absent
 
+{% if grains['os_family'] == 'Debian' %}
+
+/usr/hdp/current/knox-server:
+  file.directory:
+    - user: knox
+    - group: knox
+    - recurse:
+      - user
+      - group
+
+/var/lib/knox:
+  file.directory:
+    - user: knox
+    - group: knox
+    - recurse:
+      - user
+      - group
+
+{% endif %}
+
 knox-master-secret:
   cmd.run:
     - name: /usr/hdp/current/knox-server/bin/knoxcli.sh create-master --master '{{ salt['pillar.get']('gateway:mastersecret') }}'
-    - user: knox
+    - runas: knox
     - creates: /usr/hdp/current/knox-server/data/security/master
     - output_loglevel: quiet
 
 knox-create-cert:
   cmd.run:
     - name: /usr/hdp/current/knox-server/bin/knoxcli.sh create-cert --hostname {{ salt['grains.get']('gateway-address')[0] }}
-    - user: knox
+    - runas: knox
     - creates: /usr/hdp/current/knox-server/data/security/keystores/gateway.jks
 
 /usr/hdp/current/knox-server/data/security/keystores/signkey.pem:
@@ -45,12 +77,14 @@ knox-create-cert:
     - user: knox
     - group: hadoop
     - contents_pillar: gateway:signkey
+    - makedirs: True
 
 /usr/hdp/current/knox-server/data/security/keystores/signcert.pem:
   file.managed:
     - user: knox
     - group: hadoop
     - contents_pillar: gateway:signcert
+    - makedirs: True
 
 # openssl pkcs12 -export -in cert.pem -inkey key.pem -out signing.p12 -name signing-identity -password pass:admin
 # keytool -importkeystore -deststorepass admin1 -destkeypass admin1 -destkeystore signing.jks -srckeystore signing.p12 -srcstoretype PKCS12 -srcstorepass admin -alias signing-identity
@@ -58,14 +92,14 @@ knox-create-cert:
 knox-create-sign-pkcs12:
   cmd.run:
     - name: cd /usr/hdp/current/knox-server/data/security/keystores/ && openssl pkcs12 -export -in signcert.pem -inkey signkey.pem -out signing.p12 -name signing-identity -password pass:{{ salt['pillar.get']('gateway:mastersecret') }}
-    - user: knox
+    - runas: knox
     - creates: /usr/hdp/current/knox-server/data/security/keystores/signing.p12
     - output_loglevel: quiet
 
 knox-create-sign-jks:
   cmd.run:
     - name: cd /usr/hdp/current/knox-server/data/security/keystores/ && keytool -importkeystore -deststorepass {{ salt['pillar.get']('gateway:mastersecret') }} -destkeypass {{ salt['pillar.get']('gateway:mastersecret') }} -destkeystore signing.jks -srckeystore signing.p12 -srcstoretype PKCS12 -srcstorepass {{ salt['pillar.get']('gateway:mastersecret') }} -alias signing-identity
-    - user: knox
+    - runas: knox
     - creates: /usr/hdp/current/knox-server/data/security/keystores/signing.jks
     - output_loglevel: quiet
 
@@ -208,24 +242,5 @@ start-knox-gateway:
   service.running:
     - enable: True
     - name: knox-gateway
-
-{% endif %}
-
-{% if salt['pillar.get']('hdp:stack:vdf-url') != None %}
-
-add_vdf_parse_script_agent:
-  file.managed:
-    - name: /opt/salt/extract-repo-url-from-vdf.sh
-    - source: salt://gateway/yum/scripts/extract-repo-url-from-vdf.sh
-    - skip_verify: True
-    - makedirs: True
-    - mode: 755
-
-run_vdf_parse_script_agent:
-  cmd.run:
-    - name: sh -x /opt/salt/extract-repo-url-from-vdf.sh {{ salt['pillar.get']('hdp:stack:vdf-url') }} | tee -a /var/log/add_vdf_parse_script_agent.log && exit ${PIPESTATUS[0]}
-    - unless: ls /var/log/add_vdf_parse_script_agent.log
-    - require:
-      - file: add_vdf_parse_script_agent
 
 {% endif %}
