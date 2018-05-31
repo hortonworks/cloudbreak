@@ -1,10 +1,13 @@
 package com.sequenceiq.cloudbreak.validation;
 
-import com.sequenceiq.cloudbreak.api.model.v2.filesystem.WasbCloudStorageParameters;
-import org.apache.commons.lang3.StringUtils;
+import java.util.regex.Pattern;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
+
+import org.apache.commons.lang3.StringUtils;
+
+import com.sequenceiq.cloudbreak.api.model.v2.filesystem.WasbCloudStorageParameters;
 
 public class WasbCloudStorageParametersValidator implements ConstraintValidator<ValidWasbCloudStorageParameters, WasbCloudStorageParameters> {
 
@@ -40,7 +43,7 @@ public class WasbCloudStorageParametersValidator implements ConstraintValidator<
                     MAX_ACCOUNT_NAME_LENGTH,
                     StringUtils.length(accountName));
             result = false;
-        } else if (!accountName.matches("^[a-z0-9]$")) {
+        } else if (!Pattern.matches("^[a-z0-9]*", accountName)) {
             failMessage = "Account name must contain only numbers and lowercase letters";
             result = false;
         } else {

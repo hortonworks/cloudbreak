@@ -1,7 +1,10 @@
 package com.sequenceiq.cloudbreak.api.model;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
+
+import javax.validation.Valid;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -17,6 +20,7 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonInclude(Include.NON_NULL)
 public class FileSystemRequest extends FileSystemBase {
 
+    @Valid
     @ApiModelProperty(ModelDescriptions.FileSystem.LOCATIONS)
     private Set<StorageLocationRequest> locations = new HashSet<>();
 
@@ -27,4 +31,22 @@ public class FileSystemRequest extends FileSystemBase {
     public void setLocations(Set<StorageLocationRequest> locations) {
         this.locations = locations;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof FileSystemRequest)) {
+            return false;
+        }
+        FileSystemRequest that = (FileSystemRequest) o;
+        return Objects.equals(getLocations(), that.getLocations());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getLocations());
+    }
+
 }

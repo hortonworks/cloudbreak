@@ -1,14 +1,16 @@
 package com.sequenceiq.cloudbreak.api.model;
 
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.api.model.v2.filesystem.AdlsCloudStorageParameters;
 import com.sequenceiq.cloudbreak.api.model.v2.filesystem.GcsCloudStorageParameters;
 import com.sequenceiq.cloudbreak.api.model.v2.filesystem.S3CloudStorageParameters;
 import com.sequenceiq.cloudbreak.api.model.v2.filesystem.WasbCloudStorageParameters;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.FileSystem;
-import io.swagger.annotations.ApiModelProperty;
 
-import javax.validation.constraints.NotNull;
+import io.swagger.annotations.ApiModelProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public abstract class FileSystemBase implements JsonEntity {
@@ -24,15 +26,19 @@ public abstract class FileSystemBase implements JsonEntity {
     @ApiModelProperty(FileSystem.DEFAULT)
     private boolean defaultFs;
 
+    @Valid
     @ApiModelProperty
     private AdlsCloudStorageParameters adls;
 
+    @Valid
     @ApiModelProperty
     private WasbCloudStorageParameters wasb;
 
+    @Valid
     @ApiModelProperty
     private GcsCloudStorageParameters gcs;
 
+    @Valid
     @ApiModelProperty
     private S3CloudStorageParameters s3;
 

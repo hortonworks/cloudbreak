@@ -1,9 +1,13 @@
 package com.sequenceiq.cloudbreak.blueprint.filesystem;
 
+
+import static com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudAdlsView.TENANT_ID;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import com.sequenceiq.cloudbreak.blueprint.filesystem.adls.AdlsFileSystemConfigurationsView;
 import com.sequenceiq.cloudbreak.blueprint.filesystem.wasb.WasbFileSystemConfigurationsView;
@@ -30,13 +34,20 @@ public class AzureFileSystemConfigProvider {
         // we have to lookup secret key from the credential because it is not stored in client side
         if (fsConfiguration instanceof AdlsFileSystemConfigurationsView) {
             String adlsTrackingTag = (cbVersion != null) ? ADLS_TRACKING_CLUSTERNAME_VALUE + '-' + cbVersion : ADLS_TRACKING_CLUSTERNAME_VALUE;
-            String credentialString = String.valueOf(credential.getAttributes().getMap().get(CREDENTIAL_SECRET_KEY));
-            String clientId = String.valueOf(credential.getAttributes().getMap().get(ACCESS_KEY));
-            ((AdlsFileSystemConfigurationsView) fsConfiguration).setCredential(credentialString);
-            ((AdlsFileSystemConfigurationsView) fsConfiguration).setClientId(clientId);
-            ((AdlsFileSystemConfigurationsView) fsConfiguration).setAdlsTrackingClusterNameKey(uuid);
-            ((AdlsFileSystemConfigurationsView) fsConfiguration).setAdlsTrackingClusterTypeKey(adlsTrackingTag);
-            ((AdlsFileSystemConfigurationsView) fsConfiguration).setResourceGroupName(resourceGroupName);
+            AdlsFileSystemConfigurationsView fileSystemConfigurationsView = (AdlsFileSystemConfigurationsView) fsConfiguration;
+            if (StringUtils.isEmpty(fileSystemConfigurationsView.getClientId())) {
+                String credentialString = String.valueOf(credential.getAttributes().getMap().get(CREDENTIAL_SECRET_KEY));
+                String clientId = String.valueOf(credential.getAttributes().getMap().get(ACCESS_KEY));
+                fileSystemConfigurationsView.setCredential(credentialString);
+                fileSystemConfigurationsView.setClientId(clientId);
+            }
+            if (StringUtils.isEmpty(fileSystemConfigurationsView.getTenantId())) {
+                String tenantId = String.valueOf(credential.getAttributes().getMap().get(TENANT_ID));
+                fileSystemConfigurationsView.setTenantId(tenantId);
+            }
+            fileSystemConfigurationsView.setAdlsTrackingClusterNameKey(uuid);
+            fileSystemConfigurationsView.setAdlsTrackingClusterTypeKey(adlsTrackingTag);
+            fileSystemConfigurationsView.setResourceGroupName(resourceGroupName);
         } else if (fsConfiguration instanceof WasbFileSystemConfigurationsView) {
             ((WasbFileSystemConfigurationsView) fsConfiguration).setResourceGroupName(resourceGroupName);
         }

@@ -8,6 +8,8 @@ public class CloudAdlsView extends CloudFileSystemView {
 
     public static final String ACCESS_KEY = "accessKey";
 
+    public static final String TENANT_ID = "tenantId";
+
     private String accountName;
 
     private String clientId;

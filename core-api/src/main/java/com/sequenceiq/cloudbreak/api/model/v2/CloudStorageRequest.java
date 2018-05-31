@@ -3,6 +3,8 @@ package com.sequenceiq.cloudbreak.api.model.v2;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.validation.Valid;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -21,18 +23,23 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonInclude(Include.NON_NULL)
 public class CloudStorageRequest implements JsonEntity {
 
+    @Valid
     @ApiModelProperty
     private AdlsCloudStorageParameters adls;
 
+    @Valid
     @ApiModelProperty
     private WasbCloudStorageParameters wasb;
 
+    @Valid
     @ApiModelProperty
     private GcsCloudStorageParameters gcs;
 
+    @Valid
     @ApiModelProperty
     private S3CloudStorageParameters s3;
 
+    @Valid
     @ApiModelProperty(value = ModelDescriptions.ClusterModelDescription.LOCATIONS)
     private Set<StorageLocationRequest> locations = new HashSet<>();
 
