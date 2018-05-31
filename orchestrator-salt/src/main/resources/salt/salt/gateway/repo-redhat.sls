@@ -11,21 +11,16 @@ create_repo_from_vdf:
 
 {% else %}
 
-HDP:
-  pkgrepo.managed:
-    - humanname: {{ salt['pillar.get']('hdp:stack:repoid') }}
-    - baseurl: "{{ salt['pillar.get']('hdp:stack:sles12') }}"
-    - gpgcheck: 0
-    - enabled: 1
-    - path: /
+/etc/yum.repos.d/HDP.repo:
+  file.managed:
+    - replace: False
+    - source: salt://gateway/yum/hdp.repo
+    - template: jinja
 
-
-HDP-UTILS:
-  pkgrepo.managed:
-    - humanname: {{ salt['pillar.get']('hdp:util:repoid') }}
-    - baseurl: "{{ salt['pillar.get']('hdp:util:sles12') }}"
-    - gpgcheck: 0
-    - enabled: 1
-    - path: /
+/etc/yum.repos.d/HDP-UTILS.repo:
+  file.managed:
+    - replace: False
+    - source: salt://gateway/yum/hdp-utils.repo
+    - template: jinja
 
 {% endif %}
