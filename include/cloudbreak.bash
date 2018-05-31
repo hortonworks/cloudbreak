@@ -1,6 +1,6 @@
 
 cloudbreak-config() {
-  : ${BRIDGE_IP:=$(docker run --label cbreak.sidekick=true alpine sh -c 'ip ro | grep default | cut -d" " -f 3')}
+  : ${BRIDGE_IP:=$(docker run --rm --name=cbreak_cbd_bridgeip --label cbreak.sidekick=true alpine sh -c 'ip ro | grep default | cut -d" " -f 3')}
   env-import PRIVATE_IP $BRIDGE_IP
   env-import DOCKER_MACHINE ""
   cloudbreak-conf-tags
@@ -39,7 +39,7 @@ cloudbreak-conf-tags() {
 
     env-import DOCKER_TAG_POSTGRES 9.6.1-alpine
     env-import DOCKER_TAG_LOGROTATE 1.0.1
-    env-import DOCKER_TAG_CBD_SMARTSENSE 0.13.0
+    env-import DOCKER_TAG_CBD_SMARTSENSE 0.13.1
 
     env-import DOCKER_IMAGE_CLOUDBREAK hortonworks/cloudbreak
     env-import DOCKER_IMAGE_CLOUDBREAK_WEB hortonworks/hdc-web
