@@ -5,6 +5,8 @@ parameters:
   awsRegion: us-west-1
   awsAvailabilityZone: us-west-1a
   awsCredentialName: autotesting-clusters-aws
+listeners:
+  - com.sequenceiq.it.cloudbreak.newway.listener.FirstLastTestExecutionBehaviour
 tests:
   - name: "aws base image datascience"
     preserveOrder: true

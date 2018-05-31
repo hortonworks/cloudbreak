@@ -10,7 +10,6 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import com.sequenceiq.it.cloudbreak.newway.log.ReportListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -35,6 +34,7 @@ import org.uncommons.reportng.HTMLReporter;
 import org.uncommons.reportng.JUnitXMLReporter;
 
 import com.sequenceiq.it.cloudbreak.config.ITProps;
+import com.sequenceiq.it.cloudbreak.newway.listener.ReportListener;
 
 @EnableAutoConfiguration(exclude = {DataSourceAutoConfiguration.class, DataSourceTransactionManagerAutoConfiguration.class,
         HibernateJpaAutoConfiguration.class})

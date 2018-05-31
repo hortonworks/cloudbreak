@@ -3,6 +3,8 @@ parallel: tests
 threadCount: 4
 parameters:
   gcpCredentialName: autotesting-clusters-gcp
+listeners:
+  - com.sequenceiq.it.cloudbreak.newway.listener.FirstLastTestExecutionBehaviour
 tests:
   - name: "gcp prewarm image edw edwetl"
     preserveOrder: true

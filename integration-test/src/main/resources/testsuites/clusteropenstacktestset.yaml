@@ -3,6 +3,8 @@ parallel: tests
 threadCount: 3
 parameters:
   openstackCredentialName: autotesting-clusters-os
+listeners:
+  - com.sequenceiq.it.cloudbreak.newway.listener.FirstLastTestExecutionBehaviour
 tests:
   - name: "openstack base image datascience"
     preserveOrder: true
