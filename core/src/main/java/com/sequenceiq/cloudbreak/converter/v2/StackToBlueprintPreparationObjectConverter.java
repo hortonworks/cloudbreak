@@ -125,9 +125,7 @@ public class StackToBlueprintPreparationObjectConverter extends AbstractConversi
                     .withKerberosConfig(cluster.isSecure() ? cluster.getKerberosConfig() : null)
                     .withSharedServiceConfigs(sharedServiceConfigProvider.createSharedServiceConfigs(source, dataLakeStack))
                     .build();
-        } catch (BlueprintProcessingException e) {
-            throw new CloudbreakServiceException(e.getMessage(), e);
-        } catch (IOException e) {
+        } catch (BlueprintProcessingException | IOException e) {
             throw new CloudbreakServiceException(e.getMessage(), e);
         }
     }

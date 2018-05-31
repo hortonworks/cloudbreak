@@ -6,10 +6,10 @@
   },
 {{{/each}}}
   "core-site": {
-    "dfs.adls.oauth2.access.token.provider.type": "ClientCredential",
-    "dfs.adls.oauth2.client.id": "{{{ fileSystemConfigs.adls.clientId }}}",
-    "dfs.adls.oauth2.credential": "{{{ fileSystemConfigs.adls.credential }}}",
-    "dfs.adls.oauth2.refresh.url": "https://login.microsoftonline.com/{{{ fileSystemConfigs.adls.tenantId }}}/oauth2/token",
+    "fs.adl.oauth2.access.token.provider.type": "ClientCredential",
+    "fs.adl.oauth2.client.id": "{{{ fileSystemConfigs.adls.clientId }}}",
+    "fs.adl.oauth2.credential": "{{{ fileSystemConfigs.adls.credential }}}",
+    "fs.adl.oauth2.refresh.url": "https://login.microsoftonline.com/{{{ fileSystemConfigs.adls.tenantId }}}/oauth2/token",
     "fs.AbstractFileSystem.adl.impl": "org.apache.hadoop.fs.adl.Adl",
     "fs.adl.impl": "org.apache.hadoop.fs.adl.AdlFileSystem",
     "fs.adls.oauth2.resource": "https://management.core.windows.net/",

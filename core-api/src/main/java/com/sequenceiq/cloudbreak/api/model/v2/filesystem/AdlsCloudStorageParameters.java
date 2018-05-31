@@ -1,21 +1,31 @@
 package com.sequenceiq.cloudbreak.api.model.v2.filesystem;
 
+import javax.validation.constraints.NotNull;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.cloudbreak.api.model.filesystem.FileSystemType;
-import com.sequenceiq.cloudbreak.validation.ValidAdlsCloudStorageParameters;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel
-@ValidAdlsCloudStorageParameters
+//@ValidAdlsCloudStorageParameters
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(Include.NON_NULL)
 public class AdlsCloudStorageParameters implements CloudStorageParameters {
 
     @ApiModelProperty
+    @NotNull
     private String accountName;
 
     @ApiModelProperty
+    @NotNull
     private String clientId;
 
     @ApiModelProperty
+    @NotNull
     private String credential;
 
     @ApiModelProperty
