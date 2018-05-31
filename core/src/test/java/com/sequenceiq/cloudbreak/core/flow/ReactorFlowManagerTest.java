@@ -103,8 +103,10 @@ public class ReactorFlowManagerTest {
         underTest.triggerClusterUpscale(stackId, hostGroupAdjustment);
         underTest.triggerClusterDownscale(stackId, hostGroupAdjustment);
         underTest.triggerClusterSync(stackId);
+        underTest.triggerClusterSyncWithoutCheck(stackId);
         underTest.triggerStackSync(stackId);
         underTest.triggerFullSync(stackId);
+        underTest.triggerFullSyncWithoutCheck(stackId);
         underTest.triggerClusterCredentialReplace(stackId, "admin", "admin1");
         underTest.triggerClusterCredentialUpdate(stackId, "admin1");
         underTest.triggerClusterTermination(stackId, false, false);
