@@ -249,14 +249,14 @@ public class CloudbreakCleanupService implements ApplicationListener<ContextRefr
             for (Stack stack : stacksToSync) {
                 LOGGER.info("Triggering full sync on stack [name: {}, id: {}].", stack.getName(), stack.getId());
                 fireEvent(stack);
-                flowManager.triggerFullSync(stack.getId());
+                flowManager.triggerFullSyncWithoutCheck(stack.getId());
             }
 
             for (Cluster cluster : clustersToSync) {
                 Stack stack = cluster.getStack();
                 LOGGER.info("Triggering sync on cluster [name: {}, id: {}].", cluster.getName(), cluster.getId());
                 fireEvent(stack);
-                flowManager.triggerClusterSync(stack.getId());
+                flowManager.triggerClusterSyncWithoutCheck(stack.getId());
             }
         } catch (OptimisticLockingFailureException | FlowsAlreadyRunningException e) {
             LOGGER.error("Cannot trigger sync on stacks. Maybe another node is already syncing them?", e);

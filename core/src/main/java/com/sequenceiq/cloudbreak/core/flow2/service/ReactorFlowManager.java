@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 
 import javax.inject.Inject;
 
@@ -188,9 +189,19 @@ public class ReactorFlowManager {
         notify(selector, new StackEvent(selector, stackId));
     }
 
+    public void triggerClusterSyncWithoutCheck(Long stackId) {
+        String selector = CLUSTER_SYNC_EVENT.event();
+        notifyWithoutCheck(selector, new StackEvent(selector, stackId));
+    }
+
     public void triggerFullSync(Long stackId) {
         String selector = FlowChainTriggers.FULL_SYNC_TRIGGER_EVENT;
         notify(selector, new StackEvent(selector, stackId));
+    }
+
+    public void triggerFullSyncWithoutCheck(Long stackId) {
+        String selector = FlowChainTriggers.FULL_SYNC_TRIGGER_EVENT;
+        notifyWithoutCheck(selector, new StackEvent(selector, stackId));
     }
 
     public void triggerClusterTermination(Long stackId, Boolean withStackDelete, Boolean deleteDependencies) {
@@ -225,6 +236,14 @@ public class ReactorFlowManager {
     }
 
     private void notify(String selector, Acceptable acceptable) {
+        notify(selector, acceptable, stackService::get);
+    }
+
+    private void notifyWithoutCheck(String selector, Acceptable acceptable) {
+        notify(selector, acceptable, stackService::getById);
+    }
+
+    private void notify(String selector, Acceptable acceptable, Function<Long, Stack> getStackFn) {
         Event<Acceptable> event = eventFactory.createEventWithErrHandler(acceptable);
         reactor.notify(selector, event);
         try {
@@ -233,11 +252,12 @@ public class ReactorFlowManager {
                 accepted = event.getData().accepted().await(WAIT_FOR_ACCEPT, TimeUnit.SECONDS);
             }
             if (accepted == null || !accepted) {
-                Stack stack = stackService.get(event.getData().getStackId());
+                Stack stack = getStackFn.apply(event.getData().getStackId());
                 throw new FlowsAlreadyRunningException(String.format("Stack %s has flows under operation, request not allowed.", stack.getName()));
             }
         } catch (InterruptedException e) {
             throw new CloudbreakApiException(e.getMessage());
         }
+
     }
 }
