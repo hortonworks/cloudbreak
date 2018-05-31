@@ -3,6 +3,8 @@ parallel: tests
 threadCount: 4
 parameters:
   azureCredentialName: autotesting-clusters-azure
+listeners:
+  - com.sequenceiq.it.cloudbreak.newway.listener.FirstLastTestExecutionBehaviour
 tests:
   - name: "azure prewarm image edwetl"
     preserveOrder: true
