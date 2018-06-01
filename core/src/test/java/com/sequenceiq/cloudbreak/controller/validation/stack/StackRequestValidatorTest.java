@@ -11,6 +11,8 @@ import java.util.stream.Collectors;
 import org.junit.Test;
 
 import com.google.common.collect.Sets;
+import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
+import com.sequenceiq.cloudbreak.api.model.KerberosRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupRequest;
@@ -92,6 +94,50 @@ public class StackRequestValidatorTest {
         assertEquals(2, validationResult.getErrors().size());
     }
 
+    @Test
+    public void testHdfWithKerberosAndLdapIsInvalid() {
+        StackRequest request = getHdfStackRequest();
+        request.getClusterRequest().setKerberos(new KerberosRequest());
+        request.getClusterRequest().setLdapConfigName("ldap");
+        assertEquals(State.ERROR, underTest.validate(request).getState());
+    }
+
+    @Test
+    public void testHdfWithKerberosIsValid() {
+        StackRequest request = getHdfStackRequest();
+        request.getClusterRequest().setKerberos(new KerberosRequest());
+        assertEquals(State.VALID, underTest.validate(request).getState());
+    }
+
+    @Test
+    public void testHdfWithLdapIsValid() {
+        StackRequest request = getHdfStackRequest();
+        request.getClusterRequest().setLdapConfigName("ldap");
+        assertEquals(State.VALID, underTest.validate(request).getState());
+    }
+
+    @Test
+    public void testHdpWithKerberosAndLdapIsValid() {
+        StackRequest request = getHdpStackRequest();
+        request.getClusterRequest().setKerberos(new KerberosRequest());
+        request.getClusterRequest().setLdapConfigName("ldap");
+        assertEquals(State.VALID, underTest.validate(request).getState());
+    }
+
+    @Test
+    public void testHdpWithKerberosIsValid() {
+        StackRequest request = getHdpStackRequest();
+        request.getClusterRequest().setKerberos(new KerberosRequest());
+        assertEquals(State.VALID, underTest.validate(request).getState());
+    }
+
+    @Test
+    public void testHdpWithLdapIsValid() {
+        StackRequest request = getHdpStackRequest();
+        request.getClusterRequest().setLdapConfigName("ldap");
+        assertEquals(State.VALID, underTest.validate(request).getState());
+    }
+
     private StackRequest stackRequestWithInstanceAndHostGroups(Set<String> instanceGroups, Set<String> hostGroups) {
         List<InstanceGroupRequest> instanceGroupList = instanceGroups.stream()
                 .map(ig -> getInstanceGroupRequest(new TemplateRequest(), ig))
@@ -109,6 +155,25 @@ public class StackRequestValidatorTest {
         clusterRequest.setHostGroups(hostGroupSet);
 
         return getStackRequest(instanceGroupList, clusterRequest);
+    }
+
+    private StackRequest getHdfStackRequest() {
+        return getStackRequest("HDF");
+    }
+
+    private StackRequest getHdpStackRequest() {
+        return getStackRequest("HDP");
+    }
+
+    private StackRequest getStackRequest(String stackType) {
+        TemplateRequest templateRequest = new TemplateRequest();
+        templateRequest.setRootVolumeSize(10);
+        InstanceGroupRequest instanceGroupRequest = getInstanceGroupRequest(templateRequest, "master");
+        ClusterRequest clusterRequest = getClusterRequest();
+        AmbariStackDetailsJson ambariStackDetailsJson = new AmbariStackDetailsJson();
+        ambariStackDetailsJson.setStack(stackType);
+        clusterRequest.setAmbariStackDetails(ambariStackDetailsJson);
+        return getStackRequest(Collections.singletonList(instanceGroupRequest), clusterRequest);
     }
 
     private StackRequest stackRequestWithRootVolumeSize(Integer rootVolumeSize) {
