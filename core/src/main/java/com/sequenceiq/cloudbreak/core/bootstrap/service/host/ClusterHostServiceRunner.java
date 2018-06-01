@@ -121,6 +121,9 @@ public class ClusterHostServiceRunner {
     @Inject
     private StackUtil stackUtil;
 
+    @Inject
+    private BlueprintPortConfigCollector blueprintPortConfigCollector;
+
     public void runAmbariServices(Stack stack, Cluster cluster) throws CloudbreakException {
         try {
             Set<Node> nodes = stackUtil.collectNodes(stack);
@@ -304,6 +307,10 @@ public class ClusterHostServiceRunner {
             gateway.put("tokencert", clusterGateway.getTokenCert());
             List<Map<String, Object>> topologies = getTopologies(clusterGateway);
             gateway.put("topologies", topologies);
+            if (cluster.getBlueprint() != null) {
+                Map<String, Integer> servicePorts = blueprintPortConfigCollector.getServicePorts(cluster.getBlueprint());
+                gateway.put("ports", servicePorts);
+            }
         }
 
         gateway.put("kerberos", cluster.isSecure());

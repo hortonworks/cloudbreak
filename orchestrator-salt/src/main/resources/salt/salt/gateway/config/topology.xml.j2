@@ -97,7 +97,7 @@
     <service>
         <role>WEBHDFS</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['NAMENODE'] -%}
-        <url>http://{{ hostloc }}:50070/webhdfs</url>
+        <url>http://{{ hostloc }}:{{ ports['WEBHDFS'] }}/webhdfs</url>
         {%- endfor %}
     </service>
     {%- endif %}
@@ -106,11 +106,11 @@
     {% if 'AMBARI' in exposed -%}
     <service>
         <role>AMBARI</role>
-        <url>http://{{ salt['grains.get']('fqdn') }}:8080</url>
+        <url>http://{{ salt['grains.get']('fqdn') }}:{{ ports['AMBARI'] }}</url>
     </service>
     <service>
         <role>AMBARIUI</role>
-        <url>http://{{ salt['grains.get']('fqdn') }}:8080</url>
+        <url>http://{{ salt['grains.get']('fqdn') }}:{{ ports['AMBARI'] }}</url>
     </service>
     {%- endif %}
 
@@ -119,7 +119,7 @@
     <service>
         <role>RANGER</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['RANGER_ADMIN'] -%}
-        <url>http://{{ hostloc }}:6080</url>
+        <url>http://{{ hostloc }}:{{ ports['RANGERUI'] }}</url>
         {%- endfor %}
     </service>
     {%- endif %}
@@ -134,7 +134,7 @@
     <service>
         <role>HIVE</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['HIVE_SERVER'] -%}
-        <url>http://{{ hostloc }}:10001/cliservice</url>
+        <url>http://{{ hostloc }}:{{ ports['HIVE'] }}/cliservice</url>
         {%- endfor %}
     </service>
     {%- endif %}
@@ -149,7 +149,7 @@
     <service>
         <role>HIVE</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['HIVE_SERVER_INTERACTIVE'] -%}
-        <url>http://{{ hostloc }}:10501/cliservice</url>
+        <url>http://{{ hostloc }}:{{ ports['HIVE_INTERACTIVE'] }}/cliservice</url>
         {%- endfor %}
     </service>
     {%- endif %}
@@ -162,7 +162,7 @@
     <service>
         <role>HDFSUI</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['NAMENODE'] -%}
-        <url>http://{{ hostloc }}:50070</url>
+        <url>http://{{ hostloc }}:{{ ports['HDFSUI'] }}</url>
         {%- endfor %}
     </service>
     {%- endif %}
@@ -174,7 +174,7 @@
     <service>
         <role>YARNUI</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['RESOURCEMANAGER'] -%}
-        <url>http://{{ hostloc }}:8088</url>
+        <url>http://{{ hostloc }}:{{ ports['YARNUI'] }}</url>
         {%- endfor %}
     </service>
     {%- endif %}
@@ -186,7 +186,7 @@
     <service>
         <role>JOBHISTORYUI</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['HISTORYSERVER'] -%}
-        <url>http://{{ hostloc }}:19888</url>
+        <url>http://{{ hostloc }}:{{ ports['JOBHISTORYUI'] }}</url>
         {%- endfor %}
     </service>
     {%- endif %}
@@ -198,7 +198,7 @@
     <service>
         <role>SPARKHISTORYUI</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['SPARK_JOBHISTORYSERVER'] -%}
-        <url>http://{{ hostloc }}:18080/</url>
+        <url>http://{{ hostloc }}:{{ ports['SPARKHISTORYUI'] }}/</url>
         {%- endfor %}
     </service>
     {%- endif %}
@@ -210,7 +210,7 @@
     <service>
         <role>ZEPPELINUI</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['ZEPPELIN_MASTER'] -%}
-        <url>http://{{ hostloc }}:9995</url>
+        <url>http://{{ hostloc }}:{{ ports['ZEPPELIN'] }}</url>
         {%- endfor %}
     </service>
     <service>
@@ -228,7 +228,7 @@
     <service>
         <role>RANGERUI</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['RANGER_ADMIN'] -%}
-        <url>http://{{ hostloc }}:6080</url>
+        <url>http://{{ hostloc }}:{{ ports['RANGERUI'] }}</url>
         {%- endfor %}
     </service>
     {%- endif %}
@@ -240,14 +240,14 @@
     <service>
         <role>ATLAS</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['ATLAS_SERVER'] -%}
-        <url>http://{{ hostloc }}:21000</url>
+        <url>http://{{ hostloc }}:{{ ports['ATLAS'] }}</url>
         {%- endfor %}
     </service>
 
     <service>
         <role>ATLAS-API</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['ATLAS_SERVER'] -%}
-        <url>http://{{ hostloc }}:21000</url>
+        <url>http://{{ hostloc }}:{{ ports['ATLAS'] }}</url>
         {%- endfor %}
     </service>
     {%- endif %}
@@ -258,7 +258,7 @@
     <service>
         <role>PROFILER-AGENT</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['DP_PROFILER_AGENT'] -%}
-        <url>http://{{ hostloc }}:21900</url>
+        <url>http://{{ hostloc }}:{{ ports['PROFILER-AGENT'] }}</url>
         {%- endfor %}
     </service>
     {%- endif %}
@@ -269,7 +269,7 @@
     <service>
         <role>BEACON</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['BEACON_SERVER'] -%}
-        <url>http://{{ hostloc }}:25968</url>
+        <url>http://{{ hostloc }}:{{ ports['BEACON'] }}</url>
         {%- endfor %}
     </service>
     {%- endif %}
