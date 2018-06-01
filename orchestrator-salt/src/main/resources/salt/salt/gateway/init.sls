@@ -138,6 +138,7 @@ knox-create-sign-jks:
     - template: jinja
     - context:
       exposed: {{ topology.exposed }}
+      ports: {{ salt['pillar.get']('gateway:ports') }}
     - user: knox
     - group: knox
 
