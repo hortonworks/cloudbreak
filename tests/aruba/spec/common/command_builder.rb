@@ -13,21 +13,38 @@ class CommandBuilder
 		return tmp
 	end
 
-  def build(tmp=true)
+  # def build(tmp=true)
+  #   command_to_run = CommandBuilder.cmd.gsub("_", "-")
+  #   result = run(command_to_run)
+  #   result.stop
+  #   if (result.stderr.to_s.include? "error") or (result.stderr.to_s.include? "Error") or (result.stderr.to_s.include? "ERROR")
+  #     html_print do 
+  #       puts command_to_run
+  #       puts result.stdout
+  #       puts result.stderr
+  #     end     
+  #   else
+  #     html_print do 
+  #       puts command_to_run
+  #     end       
+  #   end
+  #   CommandBuilder.cmd = "cb "     
+  #   return result  
+  # end
+
+  def build(with_print=true)
     command_to_run = CommandBuilder.cmd.gsub("_", "-")
     result = run(command_to_run)
     result.stop
-    if (result.stderr.to_s.include? "error") or (result.stderr.to_s.include? "Error") or (result.stderr.to_s.include? "ERROR")
-      html_print do 
+    html_print do
+      if with_print
         puts command_to_run
+      end 
+      if (result.stderr.to_s.downcase.include? "error") 
         puts result.stdout
-        puts result.stdout
-      end     
-    else
-      html_print do 
-        puts command_to_run
-      end       
-    end
+        puts result.stderr  
+      end  
+    end  
     CommandBuilder.cmd = "cb "     
     return result  
   end

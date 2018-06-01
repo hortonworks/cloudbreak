@@ -1,6 +1,7 @@
 require 'aruba/rspec'
 require "rspec/json_expectations"
 require 'json'
+require 'date'
 require "common/command_builder.rb"
 require "oauth"
 

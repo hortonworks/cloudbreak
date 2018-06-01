@@ -8,4 +8,4 @@ export PATH=$(pwd):$PATH
 
 cb configure --server $BASE_URL --username $USERNAME_CLI --password $PASSWORD_CLI
 
-rspec spec/e2e/*.rb --format RspecJunitFormatter -o junit.xml --format h > out.html
+rspec -f RspecJunitFormatter -o junit.xml -f h $CLI_TEST_FILES | tee out.html | ruby -n spec/common/integration_formatter.rb

@@ -30,15 +30,14 @@ RSpec.shared_context "shared helpers", :a => :b do
   end              
 
   def wait_for_status(cb, cluster_name, status, cnt_max = 100, sleep_duration = 15)
+    puts "Waiting for status: " + status + "..."
     sleep 5
     cnt=0
     json = get_cluster_json(cb, cluster_name)
     current_status = json["status"]
     status_reason = failure_checker(json)
-    puts ("current stack status before while: " + current_status)
     while (cnt < 100 and status != current_status and !status_reason.to_s.downcase.include? "failed") do
       current_status = status_check(cb, cluster_name)
-      puts ("stack " + current_status)
       sleep 15
       cnt=cnt + 1
     end
@@ -51,15 +50,14 @@ RSpec.shared_context "shared helpers", :a => :b do
   end
 
   def wait_for_status_cluster(cb, cluster_name, status, cnt_max = 100, sleep_duration = 15)
+    puts "Waiting for cluster status: " + status + "..."
     sleep 5
     cnt=0
     json = get_cluster_json(cb, cluster_name)
     current_status = json["cluster"]["status"]
     status_reason = failure_checker(json)
-    puts ("current cluster status before while: " + current_status)
     while (cnt < 100 and status != current_status and !status_reason.to_s.downcase.include? "failed") do
       current_status = status_check_cluster(cb, cluster_name)
-      puts ("cluster " + current_status)
       sleep 15
       cnt=cnt + 1
     end
@@ -79,7 +77,7 @@ RSpec.shared_context "shared helpers", :a => :b do
       sleep sleep_duration
       cnt=cnt + 1
     end
-    return cluster_exists(cluster_name)
+    return cluster_exists(cb, cluster_name)
   end 
 
   def cluster_exists(cb, cluster_name)

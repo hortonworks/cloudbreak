@@ -17,8 +17,7 @@ RSpec.describe 'Cloud test cases', :type => :aruba do
   before(:all) do
     @credential_created = (cb.credential.create.openstack.keystone_v2.name(@os_credential_name + "-cloud").tenant_user(ENV['OS_V2_USERNAME']).
         tenant_password(ENV['OS_V2_PASSWORD']).tenant_name(ENV['OS_V2_TENANT_NAME']).endpoint(ENV['OS_V2_ENDPOINT']).build).stderr.empty?
-        result = cb.cloud.regions.credential(@os_credential_name + "-cloud").build
-    
+    result = cb.cloud.regions.credential(@os_credential_name + "-cloud").build
     @os_region = get_region(result.stdout)
   end
   
@@ -28,18 +27,18 @@ RSpec.describe 'Cloud test cases', :type => :aruba do
   end 
 
   it "Cloud - Availability zones list" do 
-      result = cb.cloud.availability_zones.credential(@os_credential_name + "-cloud").region(@os_region).build
-      expect(result.exit_status).to eql 0
-      JSON.parse(result.stdout).each do |s| 
-        expect(s).to include_json(
-          Name: /.*/  
-        ) 
-      end
+    result = cb.cloud.availability_zones.credential(@os_credential_name + "-cloud").region(@os_region).build
+    expect(result.exit_status).to eql 0
+    JSON.parse(result.stdout).each do |s| 
+      expect(s).to include_json(
+         Name: /.*/  
+      ) 
+    end
   end
 
-   it "Cloud - Instances list" do 
-      result = cb.cloud.instances.credential(@os_credential_name + "-cloud").region(@os_region).build
-      expect(result.exit_status).to eql 0
+  it "Cloud - Instances list" do 
+    result = cb.cloud.instances.credential(@os_credential_name + "-cloud").region(@os_region).build
+    expect(result.exit_status).to eql 0
   end 
 
   it "Cloud - Volumes list AWS" do 

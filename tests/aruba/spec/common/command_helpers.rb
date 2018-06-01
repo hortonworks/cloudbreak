@@ -82,6 +82,7 @@ RSpec.shared_context "shared command helpers", :a => :b do
 
   def get_region(result)
     json = JSON.parse(result)
+    expect(json.empty?).to be_falsy
     json.each  do |a|
       return a["Name"]
     end
@@ -97,7 +98,17 @@ RSpec.shared_context "shared command helpers", :a => :b do
     f = File.open(File.dirname(__FILE__) + "/../../tmp/aruba/" + file_name,"w")
     f.write(json)
     f.close
-  end      
+  end 
+
+  def get_cluster_info(cb, cluster_name)
+    json = get_cluster_json(cb, cluster_name)
+    expect(json.empty?).to be_falsy
+      html_print do 
+        puts "\nCLUSTER INFORMATION:"
+        puts "Cluster Name:    " + json["name"].to_s
+        puts "Stack Id:        " + json["id"].to_s + "\n"     
+      end   
+  end  
 
   let(:shared_let) { {'arbitrary' => 'object'} } 
   subject do
