@@ -458,6 +458,7 @@ public class ModelDescriptions {
         public static final String BIND_DN = "bind distinguished name for connection test and group search (e.g. cn=admin,dc=example,dc=org)";
         public static final String BIND_PASSWORD = "password for the provided bind DN";
         public static final String USER_SEARCH_BASE = "template for user search for authentication (e.g. dc=hadoop,dc=apache,dc=org)";
+        public static final String USER_DN_PATTERN = "template for pattern based user search for authentication (e.g. cn={0},dc=hadoop,dc=apache,dc=org)";
         public static final String GROUP_SEARCH_BASE = "template for group search for authorization (e.g. dc=hadoop,dc=apache,dc=org)";
         public static final String USER_NAME_ATTRIBUTE = "attribute name for simplified search filter (e.g. sAMAccountName in case of AD, UID or cn for LDAP).";
         public static final String DOMAIN = "domain in LDAP server (e.g. ad.seq.com).";

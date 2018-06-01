@@ -41,6 +41,10 @@ public abstract class LdapConfigBase implements JsonEntity {
     @ApiModelProperty(value = LdapConfigModelDescription.USER_SEARCH_BASE, required = true)
     private String userSearchBase;
 
+    @NotNull
+    @ApiModelProperty(value = LdapConfigModelDescription.USER_DN_PATTERN, required = true)
+    private String userDnPattern;
+
     @ApiModelProperty(LdapConfigModelDescription.GROUP_SEARCH_BASE)
     private String groupSearchBase;
 
@@ -186,5 +190,13 @@ public abstract class LdapConfigBase implements JsonEntity {
 
     public void setAdminGroup(String adminGroup) {
         this.adminGroup = adminGroup;
+    }
+
+    public String getUserDnPattern() {
+        return userDnPattern;
+    }
+
+    public void setUserDnPattern(String userDnPattern) {
+        this.userDnPattern = userDnPattern;
     }
 }

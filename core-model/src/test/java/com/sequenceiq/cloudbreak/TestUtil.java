@@ -492,6 +492,7 @@ public class TestUtil {
         config.setDescription(DUMMY_DESCRIPTION);
         config.setPublicInAccount(true);
         config.setUserSearchBase("cn=users,dc=example,dc=org");
+        config.setUserDnPattern("cn={0},cn=users,dc=example,dc=org");
         config.setGroupSearchBase("cn=groups,dc=example,dc=org");
         config.setBindDn("cn=admin,dc=example,dc=org");
         config.setBindPassword("admin");
