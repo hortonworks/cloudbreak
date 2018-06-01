@@ -8,19 +8,15 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import javax.ws.rs.ProcessingException;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.core.Response;
+import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Answers;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.powermock.reflect.Whitebox;
-import org.springframework.http.HttpStatus;
 
 import com.sequenceiq.cloudbreak.api.model.repositoryconfig.RepoConfigValidationRequest;
 import com.sequenceiq.cloudbreak.api.model.repositoryconfig.RepoConfigValidationResponse;
@@ -29,23 +25,16 @@ import com.sequenceiq.cloudbreak.common.service.url.UrlAccessValidationService;
 @RunWith(MockitoJUnitRunner.class)
 public class RepositoryConfigValidationServiceTest {
 
+    private static final String RPM_REPO_REPODATA_PATH = "/repodata/repomd.xml";
+
     @Mock
-    private Response response;
-
-    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
-    private Client client;
-
     private UrlAccessValidationService urlAccessValidationService;
 
     @InjectMocks
     private RepositoryConfigValidationService underTest;
 
     @Before
-    public void setUp() throws Exception {
-        urlAccessValidationService = new UrlAccessValidationService();
-        Whitebox.setInternalState(urlAccessValidationService, "client", client);
-        Whitebox.setInternalState(underTest, "urlAccessValidationService", urlAccessValidationService);
-        when(client.target(anyString()).request().head()).thenReturn(response);
+    public void setUp() {
     }
 
     @Test
@@ -74,15 +63,15 @@ public class RepositoryConfigValidationServiceTest {
     }
 
     @Test
-    public void testValidateForAmbariBaseUrlWhenTheUrlIsReachable() {
-        when(response.getStatus()).thenReturn(HttpStatus.OK.value());
+    public void testValidateForAmbariBaseUrlWhenTheRPMRepoIsReachable() {
         String ambariBaseUrl = "http://s3.amazonaws.com/dev.hortonworks.com/ambari/centos6/2.x/BUILDS/2.6.1.0-143";
         RepoConfigValidationRequest request = new RepoConfigValidationRequest();
         request.setAmbariBaseUrl(ambariBaseUrl);
+        when(urlAccessValidationService.isAccessible(anyString())).thenReturn(true);
 
         RepoConfigValidationResponse result = underTest.validate(request);
 
-        verify(client, times(1)).target(ambariBaseUrl + "/ambari.repo");
+        verify(urlAccessValidationService, times(1)).isAccessible(anyString());
         assertTrue(result.getAmbariBaseUrl());
         assertNull(result.getAmbariGpgKeyUrl());
         assertNull(result.getVersionDefinitionFileUrl());
@@ -92,73 +81,174 @@ public class RepositoryConfigValidationServiceTest {
     }
 
     @Test
-    public void testValidateForAmbariBaseUrlWhenTheUrlIsNotReachable() {
-        when(response.getStatus()).thenReturn(HttpStatus.NOT_FOUND.value());
-        String ambariBaseUrl = "http://s3.amazonaws.com/dev.hortonworks.com/ambari/centos6/2.x/BUILDS/2.6.1.0-143";
+    public void testValidateForAmbariBaseUrlWhenTheDebRepoIsReachable() {
+        String ambariBaseUrl = "http://s3.amazonaws.com/dev.hortonworks.com/ambari/ubuntu14/2.x/BUILDS/2.6.1.0-143";
         RepoConfigValidationRequest request = new RepoConfigValidationRequest();
         request.setAmbariBaseUrl(ambariBaseUrl);
+        String rpmRepoDataTarget = ambariBaseUrl + RPM_REPO_REPODATA_PATH;
+        String debRepoDataTarget = ambariBaseUrl + "/dists/Ambari/InRelease";
+        when(urlAccessValidationService.isAccessible(rpmRepoDataTarget)).thenReturn(false);
+        when(urlAccessValidationService.isAccessible(debRepoDataTarget)).thenReturn(true);
 
         RepoConfigValidationResponse result = underTest.validate(request);
 
-        verify(client, times(1)).target(ambariBaseUrl + "/ambari.repo");
+        ArgumentCaptor<String> argumentCaptor = ArgumentCaptor.forClass(String.class);
+        verify(urlAccessValidationService, times(2)).isAccessible(argumentCaptor.capture());
+        List<String> arguments = argumentCaptor.getAllValues();
+        assertTrue(arguments.contains(rpmRepoDataTarget));
+        assertTrue(arguments.contains(debRepoDataTarget));
+        assertTrue(result.getAmbariBaseUrl());
+    }
+
+    @Test
+    public void testValidateForAmbariBaseUrlWhenNoRPMOrDebRepoIsReachable() {
+        String ambariBaseUrl = "http://s3.amazonaws.com/dev.hortonworks.com/ambari/centos6/2.x/BUILDS/2.6.1.0-143";
+        RepoConfigValidationRequest request = new RepoConfigValidationRequest();
+        request.setAmbariBaseUrl(ambariBaseUrl);
+        when(urlAccessValidationService.isAccessible(anyString())).thenReturn(false);
+
+        RepoConfigValidationResponse result = underTest.validate(request);
+
+        String rpmRepoDataTarget = ambariBaseUrl + RPM_REPO_REPODATA_PATH;
+        String debRepoDataTarget = ambariBaseUrl + "/dists/Ambari/InRelease";
+        ArgumentCaptor<String> argumentCaptor = ArgumentCaptor.forClass(String.class);
+        verify(urlAccessValidationService, times(2)).isAccessible(argumentCaptor.capture());
+        List<String> arguments = argumentCaptor.getAllValues();
+        assertTrue(arguments.contains(rpmRepoDataTarget));
+        assertTrue(arguments.contains(debRepoDataTarget));
         assertFalse(result.getAmbariBaseUrl());
-        assertNull(result.getAmbariGpgKeyUrl());
-        assertNull(result.getVersionDefinitionFileUrl());
-        assertNull(result.getMpackUrl());
-        assertNull(result.getStackBaseURL());
-        assertNull(result.getUtilsBaseURL());
     }
 
     @Test
     public void testValidateForAmbariGpgKeyUrlWhenTheUrlIsReachable() {
-        when(response.getStatus()).thenReturn(HttpStatus.OK.value());
         String ambariGpgKeyUrl = "http://s3.amazonaws.com/dev.hortonworks.com/ambari/centos6/2.x/BUILDS/2.6.1.0-143/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins";
         RepoConfigValidationRequest request = new RepoConfigValidationRequest();
         request.setAmbariGpgKeyUrl(ambariGpgKeyUrl);
+        when(urlAccessValidationService.isAccessible(ambariGpgKeyUrl)).thenReturn(true);
 
         RepoConfigValidationResponse result = underTest.validate(request);
 
-        verify(client, times(1)).target(ambariGpgKeyUrl);
+        verify(urlAccessValidationService, times(1)).isAccessible(ambariGpgKeyUrl);
         assertTrue(result.getAmbariGpgKeyUrl());
     }
 
     @Test
     public void testValidateForAmbariGpgUrlWhenTheUrlIsNotReachable() {
-        when(response.getStatus()).thenReturn(HttpStatus.NOT_FOUND.value());
         String ambariGpgKeyUrl = "http://s3.amazonaws.com/dev.hortonworks.com/ambari/centos6/2.x/BUILDS/2.6.1.0-143/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins";
         RepoConfigValidationRequest request = new RepoConfigValidationRequest();
         request.setAmbariGpgKeyUrl(ambariGpgKeyUrl);
+        when(urlAccessValidationService.isAccessible(ambariGpgKeyUrl)).thenReturn(false);
 
         RepoConfigValidationResponse result = underTest.validate(request);
 
-        verify(client, times(1)).target(ambariGpgKeyUrl);
+        verify(urlAccessValidationService, times(1)).isAccessible(ambariGpgKeyUrl);
         assertFalse(result.getAmbariGpgKeyUrl());
     }
 
     @Test
-    public void testValidateForStackBaseUrlWhenTheItIsReachable() {
-        when(client.target(anyString()).request().head()).thenReturn(response);
-        when(response.getStatus()).thenReturn(HttpStatus.OK.value());
-        String stackBaseUrl = "http://public-repo-1.hortonworks.com/HDP/centos6/2.x/updates/2.5.5.0/";
+    public void testValidateForStackBaseUrlWhenRPMRepoIsReachable() {
+        String stackBaseUrl = "http://public-repo-1.hortonworks.com/HDP/centos6/2.x/updates/2.5.5.0";
         RepoConfigValidationRequest request = new RepoConfigValidationRequest();
         request.setStackBaseURL(stackBaseUrl);
+        String rpmRepoDataTarget = stackBaseUrl + RPM_REPO_REPODATA_PATH;
+        when(urlAccessValidationService.isAccessible(rpmRepoDataTarget)).thenReturn(true);
 
         RepoConfigValidationResponse result = underTest.validate(request);
 
-        verify(client, times(1)).target(stackBaseUrl + "hdp.repo");
+        verify(urlAccessValidationService, times(1)).isAccessible(rpmRepoDataTarget);
         assertTrue(result.getStackBaseURL());
     }
 
     @Test
-    public void testValidateForStackBaseUrlWhenTheTheRestClientThrowProcessingException() {
-        when(response.getStatus()).thenThrow(new ProcessingException("Something went wrong"));
-        String stackBaseUrl = "http://public-repo-1.hortonworks.com/HDP/centos6/2.x/updates/2.5.5.0/";
+    public void testValidateForStackBaseUrlWhenDebRepoIsReachable() {
+        String stackBaseUrl = "http://public-repo-1.hortonworks.com/HDP/ubuntu14/2.x/updates/2.5.5.0";
+        String rpmRepoDataTarget = stackBaseUrl + RPM_REPO_REPODATA_PATH;
+        String debRepoDataTarget = stackBaseUrl + "/dists/HDP/InRelease";
         RepoConfigValidationRequest request = new RepoConfigValidationRequest();
         request.setStackBaseURL(stackBaseUrl);
+        when(urlAccessValidationService.isAccessible(rpmRepoDataTarget)).thenReturn(false);
+        when(urlAccessValidationService.isAccessible(debRepoDataTarget)).thenReturn(true);
 
         RepoConfigValidationResponse result = underTest.validate(request);
 
-        verify(client, times(1)).target(stackBaseUrl + "hdp.repo");
+        ArgumentCaptor<String> argumentCaptor = ArgumentCaptor.forClass(String.class);
+        verify(urlAccessValidationService, times(2)).isAccessible(argumentCaptor.capture());
+        List<String> arguments = argumentCaptor.getAllValues();
+        assertTrue(arguments.contains(rpmRepoDataTarget));
+        assertTrue(arguments.contains(debRepoDataTarget));
+        assertTrue(result.getStackBaseURL());
+    }
+
+    @Test
+    public void testValidateForStackBaseUrlWhenNoRepoIsAvailable() {
+        String stackBaseUrl = "http://public-repo-1.hortonworks.com/HDP/ubuntu14/2.x/updates/2.5.5.0";
+        RepoConfigValidationRequest request = new RepoConfigValidationRequest();
+        request.setStackBaseURL(stackBaseUrl);
+        when(urlAccessValidationService.isAccessible(anyString())).thenReturn(false);
+
+        RepoConfigValidationResponse result = underTest.validate(request);
+
+        ArgumentCaptor<String> argumentCaptor = ArgumentCaptor.forClass(String.class);
+        verify(urlAccessValidationService, times(2)).isAccessible(argumentCaptor.capture());
+        List<String> arguments = argumentCaptor.getAllValues();
+        String rpmRepoDataTarget = stackBaseUrl + RPM_REPO_REPODATA_PATH;
+        String debRepoDataTarget = stackBaseUrl + "/dists/HDP/InRelease";
+        assertTrue(arguments.contains(rpmRepoDataTarget));
+        assertTrue(arguments.contains(debRepoDataTarget));
         assertFalse(result.getStackBaseURL());
+    }
+
+    @Test
+    public void testValidateForStackUtilsBaseUrlWhenRPMRepoIsReachable() {
+        String hdpUtilsBaseUrl = "http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.21/repos/sles12";
+        RepoConfigValidationRequest request = new RepoConfigValidationRequest();
+        request.setUtilsBaseURL(hdpUtilsBaseUrl);
+        String rpmRepoDataTarget = hdpUtilsBaseUrl + RPM_REPO_REPODATA_PATH;
+        when(urlAccessValidationService.isAccessible(rpmRepoDataTarget)).thenReturn(true);
+
+        RepoConfigValidationResponse result = underTest.validate(request);
+
+        verify(urlAccessValidationService, times(1)).isAccessible(rpmRepoDataTarget);
+        assertTrue(result.getUtilsBaseURL());
+    }
+
+    @Test
+    public void testValidateForStackUtilsBaseUrlWhenDebRepoIsReachable() {
+        String utilsBaseUrl = "http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.21/repos/ubuntu14";
+        String rpmRepoDataTarget = utilsBaseUrl + RPM_REPO_REPODATA_PATH;
+        String debRepoDataTarget = utilsBaseUrl + "/dists/HDP-UTILS/InRelease";
+        RepoConfigValidationRequest request = new RepoConfigValidationRequest();
+        request.setUtilsBaseURL(utilsBaseUrl);
+        when(urlAccessValidationService.isAccessible(rpmRepoDataTarget)).thenReturn(false);
+        when(urlAccessValidationService.isAccessible(debRepoDataTarget)).thenReturn(true);
+
+        RepoConfigValidationResponse result = underTest.validate(request);
+
+        ArgumentCaptor<String> argumentCaptor = ArgumentCaptor.forClass(String.class);
+        verify(urlAccessValidationService, times(2)).isAccessible(argumentCaptor.capture());
+        List<String> arguments = argumentCaptor.getAllValues();
+        assertTrue(arguments.contains(rpmRepoDataTarget));
+        assertTrue(arguments.contains(debRepoDataTarget));
+        assertTrue(result.getUtilsBaseURL());
+    }
+
+    @Test
+    public void testValidateForStackUtilsBaseUrlWhenNoRepoIsAvailable() {
+        String utilsBaseUrl = "http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.21/repos/sles12";
+        String rpmRepoDataTarget = utilsBaseUrl + RPM_REPO_REPODATA_PATH;
+        String debRepoDataTarget = utilsBaseUrl + "/dists/HDP-UTILS/InRelease";
+        RepoConfigValidationRequest request = new RepoConfigValidationRequest();
+        request.setUtilsBaseURL(utilsBaseUrl);
+        when(urlAccessValidationService.isAccessible(rpmRepoDataTarget)).thenReturn(false);
+        when(urlAccessValidationService.isAccessible(debRepoDataTarget)).thenReturn(false);
+
+        RepoConfigValidationResponse result = underTest.validate(request);
+
+        ArgumentCaptor<String> argumentCaptor = ArgumentCaptor.forClass(String.class);
+        verify(urlAccessValidationService, times(2)).isAccessible(argumentCaptor.capture());
+        List<String> arguments = argumentCaptor.getAllValues();
+        assertTrue(arguments.contains(rpmRepoDataTarget));
+        assertTrue(arguments.contains(debRepoDataTarget));
+        assertFalse(result.getUtilsBaseURL());
     }
 }
