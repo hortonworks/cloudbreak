@@ -5,8 +5,9 @@ parameters:
   openstackCredentialName: autotesting-clusters-os
 listeners:
   - com.sequenceiq.it.cloudbreak.newway.listener.FirstLastTestExecutionBehaviour
+  - com.sequenceiq.it.cloudbreak.newway.listener.GatekeeperBehaviour
 tests:
-  - name: "openstack base image datascience"
+  - name: "openstack base image datascience gatekeeper"
     preserveOrder: true
     parameters:
       clusterName: os-base-datasci
@@ -14,6 +15,7 @@ tests:
       blueprintName: "Data Science: Apache Spark 2, Apache Zeppelin"
       image: base
       instancegroupName: worker
+      isGatekeeper: true
     classes:
       - name: com.sequenceiq.it.cloudbreak.ClusterTests
         includedMethods:

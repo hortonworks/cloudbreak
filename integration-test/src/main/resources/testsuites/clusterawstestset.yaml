@@ -7,8 +7,9 @@ parameters:
   awsCredentialName: autotesting-clusters-aws
 listeners:
   - com.sequenceiq.it.cloudbreak.newway.listener.FirstLastTestExecutionBehaviour
+  - com.sequenceiq.it.cloudbreak.newway.listener.GatekeeperBehaviour
 tests:
-  - name: "aws base image datascience"
+  - name: "aws base image datascience gatekeeper"
     preserveOrder: true
     parameters:
       clusterName: aws-base-datasci
@@ -16,6 +17,7 @@ tests:
       blueprintName: "Data Science: Apache Spark 2, Apache Zeppelin"
       image: base
       instancegroupName: worker
+      isGatekeeper: true
     classes:
       - name: com.sequenceiq.it.cloudbreak.ClusterTests
         includedMethods:
