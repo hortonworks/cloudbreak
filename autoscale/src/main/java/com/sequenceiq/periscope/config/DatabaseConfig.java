@@ -39,6 +39,9 @@ public class DatabaseConfig {
     @Value("${periscope.db.env.db:periscopedb}")
     private String dbName;
 
+    @Value("${periscope.db.env.poolsize:10}")
+    private int poolSize;
+
     @Value("${periscope.db.env.schema:" + DatabaseUtil.DEFAULT_SCHEMA_NAME + '}')
     private String dbSchemaName;
 
@@ -70,6 +73,7 @@ public class DatabaseConfig {
         config.setJdbcUrl(String.format("jdbc:postgresql://%s/%s?currentSchema=%s", databaseAddress, dbName, dbSchemaName));
         config.setUsername(dbUser);
         config.setPassword(dbPassword);
+        config.setMaximumPoolSize(poolSize);
         return new HikariDataSource(config);
     }
 
