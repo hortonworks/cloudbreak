@@ -5,6 +5,7 @@ parameters:
   gcpCredentialName: autotesting-clusters-gcp
 listeners:
   - com.sequenceiq.it.cloudbreak.newway.listener.FirstLastTestExecutionBehaviour
+  - com.sequenceiq.it.cloudbreak.newway.listener.StructuredEventsReporterOnFailingCluster
 tests:
   - name: "gcp prewarm image edw edwetl"
     preserveOrder: true

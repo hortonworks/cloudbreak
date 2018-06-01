@@ -25,7 +25,7 @@ import com.sequenceiq.it.cloudbreak.SshService;
 public class Stack extends StackEntity {
     private static final Logger LOGGER = LoggerFactory.getLogger(Stack.class);
 
-    static Function<IntegrationTestContext, Stack> getTestContextStack(String key) {
+    public static Function<IntegrationTestContext, Stack> getTestContextStack(String key) {
         return (testContext) -> testContext.getContextParam(key, Stack.class);
     }
 
