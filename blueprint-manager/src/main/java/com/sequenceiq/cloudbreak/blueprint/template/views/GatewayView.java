@@ -21,6 +21,8 @@ public class GatewayView {
 
     private final SSOType ssoType;
 
+    private final boolean ssoConfigured;
+
     private final String ssoProvider;
 
     private final String signKey;
@@ -43,6 +45,7 @@ public class GatewayView {
                     .collect(Collectors.toMap(GatewayTopology::getTopologyName, GatewayTopology::getExposedServices));
         }
         ssoType = gateway.getSsoType();
+        ssoConfigured = SSOType.PROXY_SSO.equals(gateway.getSsoType());
         ssoProvider = gateway.getSsoProvider();
         signKey = gateway.getSignKey();
         signPub = gateway.getSignPub();
@@ -76,6 +79,10 @@ public class GatewayView {
 
     public String getSsoProvider() {
         return ssoProvider;
+    }
+
+    public boolean isSsoConfigured() {
+        return ssoConfigured;
     }
 
     public String getSignKey() {

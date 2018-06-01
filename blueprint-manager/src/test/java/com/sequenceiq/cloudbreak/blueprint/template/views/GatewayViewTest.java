@@ -21,7 +21,7 @@ public class GatewayViewTest {
         Assert.assertEquals("topology", gatewayView.getTopologyName());
         Assert.assertEquals(new Json("{}"), gatewayView.getExposedServices());
         Assert.assertEquals(GatewayType.CENTRAL, gatewayView.getGatewayType());
-        Assert.assertEquals(SSOType.PROXY, gatewayView.getSsoType());
+        Assert.assertEquals(SSOType.PROXY_SSO, gatewayView.getSsoType());
     }
 
 }

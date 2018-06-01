@@ -37,6 +37,7 @@ import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.api.model.WasbFileSystemConfiguration;
 import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
+import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.SSOType;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceMetadataType;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceStatus;
@@ -668,6 +669,7 @@ public class TestUtil {
         setGatewayTopology(gateway);
         gateway.setPath("/path");
         gateway.setSsoProvider("simple");
+        gateway.setSsoType(SSOType.PROXY_SSO);
         gateway.setGatewayType(GatewayType.CENTRAL);
         gateway.setSignCert("signcert");
         gateway.setSignKey("signkey");
