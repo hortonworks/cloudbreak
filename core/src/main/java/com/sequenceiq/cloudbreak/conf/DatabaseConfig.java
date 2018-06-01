@@ -23,6 +23,7 @@ import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
+import com.sequenceiq.cloudbreak.ha.CloudbreakNodeConfig;
 import com.sequenceiq.cloudbreak.util.DatabaseUtil;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
@@ -30,6 +31,7 @@ import com.zaxxer.hikari.HikariDataSource;
 @Configuration
 @EnableTransactionManagement
 public class DatabaseConfig {
+
     @Value("${cb.db.env.user:}")
     private String dbUser;
 
@@ -61,6 +63,9 @@ public class DatabaseConfig {
     @Named("databaseAddress")
     private String databaseAddress;
 
+    @Inject
+    private CloudbreakNodeConfig cloudbreakNodeConfig;
+
     @Bean
     public DataSource dataSource() throws SQLException {
         DatabaseUtil.createSchemaIfNeeded("postgresql", databaseAddress, dbName, dbUser, dbPassword, dbSchemaName);
@@ -69,6 +74,9 @@ public class DatabaseConfig {
             config.addDataSourceProperty("ssl", "true");
             config.addDataSourceProperty("sslfactory", "org.postgresql.ssl.SingleCertValidatingFactory");
             config.addDataSourceProperty("sslfactoryarg", "file://" + certFile);
+        }
+        if (cloudbreakNodeConfig.isNodeIdSpecified()) {
+            config.addDataSourceProperty("ApplicationName", cloudbreakNodeConfig.getId());
         }
         config.setJdbcUrl(String.format("jdbc:postgresql://%s/%s?currentSchema=%s", databaseAddress, dbName, dbSchemaName));
         config.setUsername(dbUser);

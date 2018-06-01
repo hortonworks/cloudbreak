@@ -24,12 +24,14 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import com.sequenceiq.cloudbreak.util.DatabaseUtil;
+import com.sequenceiq.periscope.service.ha.PeriscopeNodeConfig;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
 @Configuration
 @EnableTransactionManagement
 public class DatabaseConfig {
+
     @Value("${periscope.db.env.user:postgres}")
     private String dbUser;
 
@@ -61,6 +63,9 @@ public class DatabaseConfig {
     @Named("databaseAddress")
     private String databaseAddress;
 
+    @Inject
+    private PeriscopeNodeConfig periscopeNodeConfig;
+
     @Bean
     public DataSource dataSource() throws SQLException {
         DatabaseUtil.createSchemaIfNeeded("postgresql", databaseAddress, dbName, dbUser, dbPassword, dbSchemaName);
@@ -69,6 +74,9 @@ public class DatabaseConfig {
             config.addDataSourceProperty("ssl", "true");
             config.addDataSourceProperty("sslfactory", "org.postgresql.ssl.SingleCertValidatingFactory");
             config.addDataSourceProperty("sslfactoryarg", "file://" + certFile);
+        }
+        if (periscopeNodeConfig.isNodeIdSpecified()) {
+            config.addDataSourceProperty("ApplicationName", periscopeNodeConfig.getId());
         }
         config.setJdbcUrl(String.format("jdbc:postgresql://%s/%s?currentSchema=%s", databaseAddress, dbName, dbSchemaName));
         config.setUsername(dbUser);
