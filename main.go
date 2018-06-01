@@ -67,35 +67,34 @@ func ConfigRead(c *cli.Context) error {
 			set(cb.FlAuthTypeOptional.Name, authType)
 		}
 	}
-
-	if len(server) == 0 || len(username) == 0 || len(password) == 0 {
-		if err != nil {
-			log.Error(fmt.Sprintf("configuration is not set, see: cb configure --help or provide the following flags: %v",
-				[]string{"--" + cb.FlServerOptional.Name, "--" + cb.FlUsername.Name, "--" + cb.FlPassword.Name}))
-			os.Exit(1)
-		}
-
-		PrintConfig(*config)
-
-		if len(server) == 0 {
-			set(cb.FlServerOptional.Name, config.Server)
-		}
-		if len(username) == 0 {
-			set(cb.FlUsername.Name, config.Username)
-		}
-		if len(password) == 0 {
-			if len(config.Password) == 0 {
-				fmt.Print("Enter Password: ")
-				bytePassword, err := terminal.ReadPassword(int(syscall.Stdin))
-				fmt.Println()
-				if err != nil {
-					utils.LogErrorAndExit(err)
-				}
-				set(cb.FlPassword.Name, string(bytePassword))
-			} else {
-				set(cb.FlPassword.Name, config.Password)
+	PrintConfig(*config)
+	if len(server) == 0 {
+		set(cb.FlServerOptional.Name, config.Server)
+	}
+	if len(username) == 0 {
+		set(cb.FlUsername.Name, config.Username)
+	}
+	if len(password) == 0 {
+		if len(config.Password) == 0 {
+			fmt.Print("Enter Password: ")
+			bytePassword, err := terminal.ReadPassword(int(syscall.Stdin))
+			fmt.Println()
+			if err != nil {
+				utils.LogErrorAndExit(err)
 			}
+			set(cb.FlPassword.Name, string(bytePassword))
+		} else {
+			set(cb.FlPassword.Name, config.Password)
 		}
+	}
+
+	server = c.String(cb.FlServerOptional.Name)
+	username = c.String(cb.FlUsername.Name)
+	password = c.String(cb.FlPassword.Name)
+	if len(server) == 0 || len(username) == 0 || len(password) == 0 {
+		log.Error(fmt.Sprintf("configuration is not set, see: cb configure --help or provide the following flags: %v",
+			[]string{"--" + cb.FlServerOptional.Name, "--" + cb.FlUsername.Name, "--" + cb.FlPassword.Name}))
+		os.Exit(1)
 	}
 	return nil
 }
