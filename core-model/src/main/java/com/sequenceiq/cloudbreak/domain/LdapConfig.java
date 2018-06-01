@@ -61,6 +61,8 @@ public class LdapConfig implements ProvisionEntity {
     @Column(nullable = false)
     private String userSearchBase;
 
+    private String userDnPattern;
+
     private String userNameAttribute;
 
     private String userObjectClass;
@@ -243,5 +245,13 @@ public class LdapConfig implements ProvisionEntity {
 
     public void setAdminGroup(String adminGroup) {
         this.adminGroup = adminGroup;
+    }
+
+    public String getUserDnPattern() {
+        return userDnPattern;
+    }
+
+    public void setUserDnPattern(String userDnPattern) {
+        this.userDnPattern = userDnPattern;
     }
 }

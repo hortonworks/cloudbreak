@@ -33,6 +33,7 @@ public class LdapConfigRequestToLdapConfigConverter extends AbstractConversionSe
         config.setProtocol(json.getProtocol());
         config.setGroupSearchBase(json.getGroupSearchBase());
         config.setUserSearchBase(json.getUserSearchBase());
+        config.setUserDnPattern(json.getUserDnPattern());
         config.setUserNameAttribute(json.getUserNameAttribute());
         config.setDomain(json.getDomain());
         config.setDirectoryType(json.getDirectoryType() != null ? json.getDirectoryType() : DirectoryType.LDAP);
