@@ -8,6 +8,7 @@ parameters:
 listeners:
   - com.sequenceiq.it.cloudbreak.newway.listener.FirstLastTestExecutionBehaviour
   - com.sequenceiq.it.cloudbreak.newway.listener.GatekeeperBehaviour
+  - com.sequenceiq.it.cloudbreak.newway.listener.StructuredEventsReporterOnFailingCluster
 tests:
   - name: "aws base image datascience gatekeeper"
     preserveOrder: true
