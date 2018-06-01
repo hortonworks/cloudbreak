@@ -27,7 +27,7 @@ public class RepositoryConfigValidationService {
 
             String ambariBaseUrl = request.getAmbariBaseUrl();
             if (isNoneEmpty(ambariBaseUrl)) {
-                result.setAmbariBaseUrl(validateUrl(ambariBaseUrl, "ambari.repo", client));
+                result.setAmbariBaseUrl(repoUrlAvailable(client, ambariBaseUrl, "Ambari"));
             }
 
             String ambariGpgKeyUrl = request.getAmbariGpgKeyUrl();
@@ -37,12 +37,12 @@ public class RepositoryConfigValidationService {
 
             String stackBaseURL = request.getStackBaseURL();
             if (isNoneEmpty(stackBaseURL)) {
-                result.setStackBaseURL(validateUrl(stackBaseURL, "hdp.repo", client));
+                result.setStackBaseURL(repoUrlAvailable(client, stackBaseURL, "HDP"));
             }
 
             String utilsBaseURL = request.getUtilsBaseURL();
             if (isNoneEmpty(utilsBaseURL)) {
-                result.setUtilsBaseURL(validateUrl(utilsBaseURL, "hdp-utils.repo", client));
+                result.setUtilsBaseURL(repoUrlAvailable(client, utilsBaseURL, "HDP-UTILS"));
             }
 
             String versionDefinitionFileUrl = request.getVersionDefinitionFileUrl();
@@ -56,6 +56,19 @@ public class RepositoryConfigValidationService {
             }
         }
         return result;
+    }
+
+    private boolean repoUrlAvailable(Client client, String ambariBaseUrl, String service) {
+        return rpmRepoAvailable(client, ambariBaseUrl) || debRepoAvailable(client, ambariBaseUrl, service);
+    }
+
+    private Boolean debRepoAvailable(Client client, String stackBaseURL, String serviceName) {
+        String urlExtension = String.format("dists/%s/InRelease", serviceName);
+        return validateUrl(stackBaseURL, urlExtension, client);
+    }
+
+    private Boolean rpmRepoAvailable(Client client, String stackBaseURL) {
+        return validateUrl(stackBaseURL, "repodata/repomd.xml", client);
     }
 
     Client createRestClient() {
