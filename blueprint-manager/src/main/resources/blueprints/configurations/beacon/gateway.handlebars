@@ -1,10 +1,10 @@
 {
-{{{#if gateway}}}
+{{{#if-true gateway.ssoConfigured}}}
   "beacon-security-site": {
     "properties": {
       "beacon.sso.knox.authentication.enabled": "true",
       "beacon.sso.knox.publicKey": "{{{ gateway.signCertWithoutHeader }}}"
     }
   }
-{{{/if}}}
+{{{/if-true}}}
 }

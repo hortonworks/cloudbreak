@@ -1,5 +1,5 @@
 {
-{{{#if gateway}}}
+{{{#if-true gateway.ssoConfigured}}}
   "ranger-admin-site": {
     "properties": {
       "ranger.sso.enabled": "true",
@@ -8,5 +8,5 @@
       "ranger.audit.source.type": "solr"
     }
   }
-{{{/if}}}
+{{{/if-true}}}
 }
