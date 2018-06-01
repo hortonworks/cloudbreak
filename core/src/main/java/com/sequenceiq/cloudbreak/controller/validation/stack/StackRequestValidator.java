@@ -3,14 +3,16 @@ package com.sequenceiq.cloudbreak.controller.validation.stack;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import com.google.common.collect.Sets;
+import com.sequenceiq.cloudbreak.api.model.TemplateRequest;
+import com.sequenceiq.cloudbreak.api.model.stack.StackRequest;
+import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupBase;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupBase;
-import com.sequenceiq.cloudbreak.api.model.stack.StackRequest;
-import com.sequenceiq.cloudbreak.api.model.TemplateRequest;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.cloudbreak.controller.validation.Validator;
@@ -32,7 +34,21 @@ public class StackRequestValidator implements Validator<StackRequest> {
         }
         validateHostgroupInstanceGroupMapping(subject, validationBuilder);
         validateTemplates(subject, validationBuilder);
+        validateHdfStackHaveOnlyKerberosOrLdap(subject.getClusterRequest(), validationBuilder);
         return validationBuilder.build();
+    }
+
+    private void validateHdfStackHaveOnlyKerberosOrLdap(ClusterRequest clusterRequest, ValidationResultBuilder resultBuilder) {
+        if (clusterRequest != null && clusterRequest.getAmbariStackDetails() != null
+                && "HDF".equalsIgnoreCase(clusterRequest.getAmbariStackDetails().getStack())
+                && containsLdapConfig(clusterRequest)
+                && clusterRequest.getKerberos() != null) {
+            resultBuilder.error("HDF stack request must not contain both LDAP and Kerberos configuration");
+        }
+    }
+
+    private boolean containsLdapConfig(ClusterRequest clusterRequest) {
+        return clusterRequest.getLdapConfig() != null || clusterRequest.getLdapConfigId() != null || StringUtils.isNotBlank(clusterRequest.getLdapConfigName());
     }
 
     private void validateHostgroupInstanceGroupMapping(StackRequest stackRequest, ValidationResultBuilder validationBuilder) {
