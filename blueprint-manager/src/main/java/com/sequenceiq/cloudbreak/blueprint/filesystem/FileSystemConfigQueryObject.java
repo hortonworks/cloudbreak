@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.blueprint.filesystem;
 
+import java.util.Optional;
+
 public class FileSystemConfigQueryObject {
 
     private final String clusterName;
@@ -10,11 +12,14 @@ public class FileSystemConfigQueryObject {
 
     private final String fileSystemType;
 
+    private final Optional<String> accountName;
+
     private FileSystemConfigQueryObject(FileSystemConfigQueryObject.Builder builder) {
         this.storageName = builder.storageName;
         this.clusterName = builder.clusterName;
         this.blueprintText = builder.blueprintText;
         this.fileSystemType = builder.fileSystemType;
+        this.accountName = builder.accountName;
     }
 
     public String getClusterName() {
@@ -33,6 +38,10 @@ public class FileSystemConfigQueryObject {
         return fileSystemType;
     }
 
+    public Optional<String> getAccountName() {
+        return accountName;
+    }
+
     public static class Builder {
 
         private String clusterName;
@@ -42,6 +51,8 @@ public class FileSystemConfigQueryObject {
         private String blueprintText;
 
         private String fileSystemType;
+
+        private Optional<String> accountName = Optional.empty();
 
         public static Builder builder() {
             return new Builder();
@@ -64,6 +75,11 @@ public class FileSystemConfigQueryObject {
 
         public Builder withFileSystemType(String fileSystemType) {
             this.fileSystemType = fileSystemType;
+            return this;
+        }
+
+        public Builder withAccountName(String accountName) {
+            this.accountName = Optional.ofNullable(accountName);
             return this;
         }
 

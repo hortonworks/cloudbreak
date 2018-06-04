@@ -6,23 +6,26 @@ public enum FileSystemType {
      * @deprecated Wasb integrated is no longer supported
      */
     @Deprecated
-    WASB_INTEGRATED(WasbIntegratedFileSystem.class, "wasb"),
+    WASB_INTEGRATED(WasbIntegratedFileSystem.class, "wasb", "{{{ storageName }}}@{{{ accountName }}}.blob.core.windows.net"),
 
-    GCS(GcsFileSystem.class, "gs"),
+    GCS(GcsFileSystem.class, "gs", "{{{ storageName }}}/{{{ clusterName }}}"),
 
-    WASB(WasbFileSystem.class, "wasb"),
+    WASB(WasbFileSystem.class, "wasb", "{{{ storageName }}}@{{{ accountName }}}.blob.core.windows.net"),
 
-    ADLS(AdlsFileSystem.class, "adl"),
+    ADLS(AdlsFileSystem.class, "adl", "{{{ accountName }}}.azuredatalakestore.net"),
 
-    S3(S3FileSystem.class, "s3a");
+    S3(S3FileSystem.class, "s3a", "{{{ storageName }}}/{{{ clusterName }}}");
 
     private final Class<? extends BaseFileSystem> clazz;
 
     private final String protocol;
 
-    FileSystemType(Class<? extends BaseFileSystem> clazz, String protocol) {
+    private final String defaultPath;
+
+    FileSystemType(Class<? extends BaseFileSystem> clazz, String protocol, String defaultPath) {
         this.clazz = clazz;
         this.protocol = protocol;
+        this.defaultPath = defaultPath;
     }
 
     public Class<? extends BaseFileSystem> getClazz() {
@@ -31,6 +34,10 @@ public enum FileSystemType {
 
     public String getProtocol() {
         return protocol;
+    }
+
+    public String getDefaultPath() {
+        return defaultPath;
     }
 
     public static FileSystemType fromClass(Class clazz) {

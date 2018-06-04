@@ -16,6 +16,9 @@ public class StructuredParametersQueryRequest extends ParametersQueryRequest {
     @ApiModelProperty(value = ModelDescriptions.StackModelDescription.STACK_NAME, required = true)
     private String clusterName;
 
+    @ApiModelProperty(value = ModelDescriptions.UtilDescription.ACCOUNT_NAME)
+    private String accountName;
+
     @NotNull
     @ApiModelProperty(value = ModelDescriptions.UtilDescription.STORAGE_NAME, required = true)
     private String storageName;
@@ -23,6 +26,14 @@ public class StructuredParametersQueryRequest extends ParametersQueryRequest {
     @NotNull
     @ApiModelProperty(value = ModelDescriptions.UtilDescription.FILESYTEM_TYPE, required = true)
     private String fileSystemType;
+
+    public String getAccountName() {
+        return accountName;
+    }
+
+    public void setAccountName(String accountName) {
+        this.accountName = accountName;
+    }
 
     public String getClusterName() {
         return clusterName;

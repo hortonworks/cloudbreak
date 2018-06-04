@@ -4,7 +4,7 @@
       "propertyName": "hive.metastore.warehouse.dir",
       "propertyFile": "hive-site",
       "description": "Hive stores the table data for managed tables in the Hive warehouse directory in HDFS",
-      "defaultPath": "{{{ storageName }}}/{{{ clusterName }}}/apps/hive/warehouse",
+      "defaultPath": "{{{ defaultPath }}}/apps/hive/warehouse",
       "propertyDisplayName": "Hive Warehouse Directory",
       "relatedService": "HIVE_METASTORE",
       "supportedStorages": ["ADLS", "WASB", "S3", "GCS"]
@@ -13,7 +13,7 @@
       "propertyName": "xasecure.audit.destination.hdfs.dir",
       "propertyFile": "ranger-env",
       "description": "This is the HDFS Directory where audit logs should be stored",
-      "defaultPath": "{{{ storageName }}}/{{{ clusterName }}}/apps/ranger/audit/{{{ clusterName }}}",
+      "defaultPath": "{{{ defaultPath }}}/apps/ranger/audit/{{{ clusterName }}}",
       "propertyDisplayName": "Ranger Audit Logs",
       "relatedService": "RANGER_ADMIN",
       "supportedStorages": ["ADLS", "WASB", "S3", "GCS"]

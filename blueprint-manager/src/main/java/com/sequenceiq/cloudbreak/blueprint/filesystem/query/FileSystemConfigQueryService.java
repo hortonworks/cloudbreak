@@ -69,12 +69,13 @@ public class FileSystemConfigQueryService {
                 filtered.addAll(collectedEntries);
             }
         }
-        String fileSystemType = request.getFileSystemType();
-        String protocol = FileSystemType.valueOf(fileSystemType).getProtocol();
+        String fileSystemTypeRequest = request.getFileSystemType();
+        FileSystemType fileSystemType = FileSystemType.valueOf(fileSystemTypeRequest);
+        Map<String, String> templateObject = getTemplateObject(request, fileSystemType.getProtocol());
         for (ConfigQueryEntry configQueryEntry : filtered) {
             try {
-                configQueryEntry.setProtocol(protocol);
-                configQueryEntry.setDefaultPath(generateConfigWithParameters(request, protocol, configQueryEntry.getDefaultPath()));
+                configQueryEntry.setProtocol(fileSystemType.getProtocol());
+                configQueryEntry.setDefaultPath(generateConfigWithParameters(configQueryEntry.getDefaultPath(), fileSystemType, templateObject));
             } catch (IOException e) {
                 configQueryEntry.setDefaultPath(configQueryEntry.getDefaultPath());
             }
@@ -83,14 +84,22 @@ public class FileSystemConfigQueryService {
         return filtered;
     }
 
-    private String generateConfigWithParameters(FileSystemConfigQueryObject fileSystemConfigQueryObject, String protocol, String sourceTemplate)
-            throws IOException {
+    private String generateConfigWithParameters(String sourceTemplate, FileSystemType fileSystemType, Map<String, String> templateObject) throws IOException {
+        String defaultPath = fileSystemType.getDefaultPath();
+        Template defaultPathtemplate = handlebars.compileInline(defaultPath, HandlebarTemplate.DEFAULT_PREFIX.key(), HandlebarTemplate.DEFAULT_POSTFIX.key());
+        templateObject.put("defaultPath", defaultPathtemplate.apply(templateObject));
         Template template = handlebars.compileInline(sourceTemplate, HandlebarTemplate.DEFAULT_PREFIX.key(), HandlebarTemplate.DEFAULT_POSTFIX.key());
+        return template.apply(templateObject);
+    }
+
+    private Map<String, String> getTemplateObject(FileSystemConfigQueryObject fileSystemConfigQueryObject, String protocol) {
         Map<String, String> templateObject = new HashMap<>();
         templateObject.put("clusterName", fileSystemConfigQueryObject.getClusterName());
         templateObject.put("storageName", fileSystemConfigQueryObject.getStorageName());
         templateObject.put("blueprintText", fileSystemConfigQueryObject.getBlueprintText());
+        templateObject.put("accountName", fileSystemConfigQueryObject.getAccountName().orElse("default-account-name"));
         templateObject.put("protocol", protocol);
-        return template.apply(templateObject);
+        return templateObject;
     }
+
 }
