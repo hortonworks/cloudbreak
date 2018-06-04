@@ -75,8 +75,8 @@ public class FileSystemConfigQueryServiceTest {
         Assert.assertTrue(hiveMetastore.isPresent());
         Assert.assertTrue(rangerAdmin.isPresent());
 
-        Assert.assertEquals(hiveMetastore.get().getDefaultPath(), "hwx-remote/bigCluster/apps/hive/warehouse");
-        Assert.assertEquals(rangerAdmin.get().getDefaultPath(), "hwx-remote/bigCluster/apps/ranger/audit/bigCluster");
+        Assert.assertEquals("default-account-name.azuredatalakestore.net/apps/hive/warehouse", hiveMetastore.get().getDefaultPath());
+        Assert.assertEquals("default-account-name.azuredatalakestore.net/apps/ranger/audit/bigCluster", rangerAdmin.get().getDefaultPath());
     }
 
     @Test
@@ -97,7 +97,7 @@ public class FileSystemConfigQueryServiceTest {
 
         Assert.assertFalse(hiveMetastore.isPresent());
         Assert.assertTrue(rangerAdmin.isPresent());
-        Assert.assertEquals(rangerAdmin.get().getDefaultPath(), "hwx-remote/bigCluster/apps/ranger/audit/bigCluster");
+        Assert.assertEquals("default-account-name.azuredatalakestore.net/apps/ranger/audit/bigCluster", rangerAdmin.get().getDefaultPath());
     }
 
     @Test
@@ -118,7 +118,7 @@ public class FileSystemConfigQueryServiceTest {
 
         Assert.assertTrue(hiveMetastore.isPresent());
         Assert.assertFalse(rangerAdmin.isPresent());
-        Assert.assertEquals(hiveMetastore.get().getDefaultPath(), "hwx-remote/bigCluster/apps/hive/warehouse");
+        Assert.assertEquals("default-account-name.azuredatalakestore.net/apps/hive/warehouse", hiveMetastore.get().getDefaultPath());
     }
 
     @Test

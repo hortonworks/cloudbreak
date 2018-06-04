@@ -539,6 +539,7 @@ public class ModelDescriptions {
 
     public static class UtilDescription {
         public static final String STORAGE_NAME = "Storage name of the path";
+        public static final String ACCOUNT_NAME = "Account name of the path";
         public static final String FILESYTEM_TYPE = "Type of filesystem";
     }
 
