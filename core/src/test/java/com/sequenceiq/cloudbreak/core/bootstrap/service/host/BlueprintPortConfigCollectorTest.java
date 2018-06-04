@@ -10,18 +10,12 @@ import javax.inject.Inject;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import com.sequenceiq.cloudbreak.FileReaderUtil;
 import com.sequenceiq.cloudbreak.api.model.ExposedService;
-import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessorFactory;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.BlueprintPortConfigCollector.PortConfig;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = {BlueprintPortConfigCollector.class, BlueprintProcessorFactory.class})
 public class BlueprintPortConfigCollectorTest {
 
     private static final int HIVE_PORT = 123;
@@ -31,7 +25,7 @@ public class BlueprintPortConfigCollectorTest {
     private static final int YARN_PORT = 321;
 
     @Inject
-    private BlueprintPortConfigCollector underTest;
+    private BlueprintPortConfigCollector underTest = new BlueprintPortConfigCollector();
 
     @Before
     public void setup() {
@@ -51,6 +45,22 @@ public class BlueprintPortConfigCollectorTest {
         assertEquals(HIVE_PORT, result.get(ExposedService.HIVE_SERVER.getKnoxService()).intValue());
         assertEquals(ZEPPELIN_PORT, result.get(ExposedService.ZEPPELIN.getKnoxService()).intValue());
         assertEquals(YARN_PORT, result.get(ExposedService.RESOURCEMANAGER_WEB.getKnoxService()).intValue());
+        assertEquals(ExposedService.BEACON_SERVER.getDefaultPort(), result.get(ExposedService.BEACON_SERVER.getKnoxService()));
+        assertEquals(ExposedService.AMBARI.getDefaultPort(), result.get(ExposedService.AMBARI.getKnoxService()));
+        assertEquals(ExposedService.RANGER.getDefaultPort(), result.get(ExposedService.RANGER.getKnoxService()));
+        assertEquals(ExposedService.ATLAS.getDefaultPort(), result.get(ExposedService.ATLAS.getKnoxService()));
+        assertEquals(ExposedService.SPARK_HISTORY_SERVER.getDefaultPort(), result.get(ExposedService.SPARK_HISTORY_SERVER.getKnoxService()));
+    }
+
+    @Test
+    public void testWithissingConfigArray() {
+        String blueprintText = FileReaderUtil.readResourceFile(this, "test-blueprint-no-config.json");
+        Blueprint blueprint = new Blueprint();
+        blueprint.setBlueprintText(blueprintText);
+        Map<String, Integer> result = underTest.getServicePorts(blueprint);
+        assertEquals(ExposedService.HIVE_SERVER.getDefaultPort(), result.get(ExposedService.HIVE_SERVER.getKnoxService()));
+        assertEquals(ExposedService.ZEPPELIN.getDefaultPort(), result.get(ExposedService.ZEPPELIN.getKnoxService()));
+        assertEquals(ExposedService.RESOURCEMANAGER_WEB.getDefaultPort(), result.get(ExposedService.RESOURCEMANAGER_WEB.getKnoxService()));
         assertEquals(ExposedService.BEACON_SERVER.getDefaultPort(), result.get(ExposedService.BEACON_SERVER.getKnoxService()));
         assertEquals(ExposedService.AMBARI.getDefaultPort(), result.get(ExposedService.AMBARI.getKnoxService()));
         assertEquals(ExposedService.RANGER.getDefaultPort(), result.get(ExposedService.RANGER.getKnoxService()));

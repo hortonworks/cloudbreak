@@ -21,47 +21,6 @@
       "component_settings": []
     }
   ],
-  "configurations": [
-    {
-      "hive-site": {
-        "properties": {
-          "hive.server2.thrift.http.port": 123,
-          "hive.exec.compress.output": "true",
-          "hive.merge.mapfiles": "true",
-          "hive.server2.tez.initialize.default.sessions": "true",
-          "hive.server2.transport.mode": "http"
-        }
-      }
-    },
-    {
-      "zeppelin-config": {
-        "zeppelin.server.port": "213"
-      }
-    },
-    {
-      "yarn-site": {
-        "yarn.resourcemanager.webapp.address": "http://localhost:321",
-        "yarn.acl.enable": "true"
-      }
-    },
-    {
-      "hdfs-site": {
-        "dfs.namenode.safemode.threshold-pct": "0.99"
-      }
-    },
-    {
-      "mapred-site": {
-        "mapreduce.job.reduce.slowstart.completedmaps": "0.7",
-        "mapreduce.map.output.compress": "true",
-        "mapreduce.output.fileoutputformat.compress": "true"
-      }
-    },
-    {
-      "core-site": {
-        "fs.trash.interval": "4320"
-      }
-    }
-  ],
   "host_groups": [
     {
       "name": "master",

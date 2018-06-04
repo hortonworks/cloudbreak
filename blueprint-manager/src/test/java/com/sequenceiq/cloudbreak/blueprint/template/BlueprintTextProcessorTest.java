@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.blueprint.template;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -10,10 +11,10 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -55,7 +56,7 @@ public class BlueprintTextProcessorTest {
         String result = underTest.get(testBlueprint).addConfigEntries(configurationEntries, true).asText();
 
         JsonNode configNode = JsonUtil.readTree(result).path("configurations");
-        Assert.assertFalse(configNode.isMissingNode());
+        assertFalse(configNode.isMissingNode());
     }
 
     @Test
@@ -65,7 +66,7 @@ public class BlueprintTextProcessorTest {
 
         JsonNode configNode = JsonUtil.readTree(result).path("Blueprints");
         String stackVersion = configNode.get("stack_version").asText();
-        Assert.assertEquals("2.2", stackVersion);
+        assertEquals("2.2", stackVersion);
     }
 
     @Test
@@ -75,7 +76,7 @@ public class BlueprintTextProcessorTest {
 
         JsonNode configNode = JsonUtil.readTree(result).path("Blueprints");
         String stackVersion = configNode.get("stack_version").asText();
-        Assert.assertEquals("2.6", stackVersion);
+        assertEquals("2.6", stackVersion);
     }
 
     @Test
@@ -86,7 +87,7 @@ public class BlueprintTextProcessorTest {
         String result = underTest.get(testBlueprint).addConfigEntries(configurationEntries, true).asText();
 
         JsonNode coreSiteNode = JsonUtil.readTree(result).findPath("core-site");
-        Assert.assertFalse(coreSiteNode.isMissingNode());
+        assertFalse(coreSiteNode.isMissingNode());
     }
 
     @Test
@@ -98,10 +99,10 @@ public class BlueprintTextProcessorTest {
         String result = underTest.get(testBlueprint).addConfigEntries(configurationEntries, true).asText();
 
         String configValue1 = JsonUtil.readTree(result).findPath("core-site").findPath("fs.AbstractFileSystem.wasb.impl").textValue();
-        Assert.assertEquals("org.apache.hadoop.fs.azure.Wasb", configValue1);
+        assertEquals("org.apache.hadoop.fs.azure.Wasb", configValue1);
 
         String configValue2 = JsonUtil.readTree(result).findPath("hdfs-site").findPath("dfs.blocksize").textValue();
-        Assert.assertEquals("134217728", configValue2);
+        assertEquals("134217728", configValue2);
     }
 
     @Test
@@ -113,16 +114,16 @@ public class BlueprintTextProcessorTest {
         String result = underTest.get(testBlueprint).addConfigEntries(configurationEntries, true).asText();
 
         String configValue1 = JsonUtil.readTree(result).findPath("core-site").path("fs.AbstractFileSystem.wasb.impl").textValue();
-        Assert.assertEquals("org.apache.hadoop.fs.azure.Wasb", configValue1);
+        assertEquals("org.apache.hadoop.fs.azure.Wasb", configValue1);
 
         String configValue2 = JsonUtil.readTree(result).findPath("core-site").path("io.serializations").textValue();
-        Assert.assertEquals("org.apache.hadoop.io.serializer.WritableSerialization", configValue2);
+        assertEquals("org.apache.hadoop.io.serializer.WritableSerialization", configValue2);
 
         String configValue3 = JsonUtil.readTree(result).findPath("core-site").path("fs.trash.interval").textValue();
-        Assert.assertEquals("360", configValue3);
+        assertEquals("360", configValue3);
 
         String configValue4 = JsonUtil.readTree(result).findPath("core-site").path("io.file.buffer.size").textValue();
-        Assert.assertEquals("131072", configValue4);
+        assertEquals("131072", configValue4);
     }
 
     @Test
@@ -134,16 +135,16 @@ public class BlueprintTextProcessorTest {
         String result = underTest.get(testBlueprint).addConfigEntries(configurationEntries, true).asText();
 
         String configValue1 = JsonUtil.readTree(result).findPath("core-site").path("properties").path("fs.AbstractFileSystem.wasb.impl").textValue();
-        Assert.assertEquals("org.apache.hadoop.fs.azure.Wasb", configValue1);
+        assertEquals("org.apache.hadoop.fs.azure.Wasb", configValue1);
 
         String configValue2 = JsonUtil.readTree(result).findPath("core-site").path("properties").path("io.serializations").textValue();
-        Assert.assertEquals("org.apache.hadoop.io.serializer.WritableSerialization", configValue2);
+        assertEquals("org.apache.hadoop.io.serializer.WritableSerialization", configValue2);
 
         String configValue3 = JsonUtil.readTree(result).findPath("core-site").path("properties").path("fs.trash.interval").textValue();
-        Assert.assertEquals("360", configValue3);
+        assertEquals("360", configValue3);
 
         String configValue4 = JsonUtil.readTree(result).findPath("core-site").path("properties").path("io.file.buffer.size").textValue();
-        Assert.assertEquals("131072", configValue4);
+        assertEquals("131072", configValue4);
     }
 
     @Test
@@ -155,16 +156,16 @@ public class BlueprintTextProcessorTest {
         String result = underTest.get(testBlueprint).addConfigEntries(configurationEntries, true).asText();
 
         String configValue1 = JsonUtil.readTree(result).findPath("core-site").path("properties").path("fs.defaultFS").textValue();
-        Assert.assertEquals("wasb://cloudbreak@dduihoab6jt1jl.cloudapp.net", configValue1);
+        assertEquals("wasb://cloudbreak@dduihoab6jt1jl.cloudapp.net", configValue1);
 
         String configValue2 = JsonUtil.readTree(result).findPath("core-site").path("properties").path("io.serializations").textValue();
-        Assert.assertEquals("org.apache.hadoop.io.serializer.WritableSerialization", configValue2);
+        assertEquals("org.apache.hadoop.io.serializer.WritableSerialization", configValue2);
 
         String configValue3 = JsonUtil.readTree(result).findPath("core-site").path("properties").path("fs.trash.interval").textValue();
-        Assert.assertEquals("360", configValue3);
+        assertEquals("360", configValue3);
 
         String configValue4 = JsonUtil.readTree(result).findPath("core-site").path("properties").path("io.file.buffer.size").textValue();
-        Assert.assertEquals("131072", configValue4);
+        assertEquals("131072", configValue4);
     }
 
     @Test
@@ -176,16 +177,16 @@ public class BlueprintTextProcessorTest {
         String result = underTest.get(testBlueprint).addConfigEntries(configurationEntries, false).asText();
 
         String configValue1 = JsonUtil.readTree(result).findPath("core-site").path("properties").path("fs.defaultFS").textValue();
-        Assert.assertEquals("hdfs://%HOSTGROUP::host_group_master_1%:8020", configValue1);
+        assertEquals("hdfs://%HOSTGROUP::host_group_master_1%:8020", configValue1);
 
         String configValue2 = JsonUtil.readTree(result).findPath("core-site").path("properties").path("io.serializations").textValue();
-        Assert.assertEquals("org.apache.hadoop.io.serializer.WritableSerialization", configValue2);
+        assertEquals("org.apache.hadoop.io.serializer.WritableSerialization", configValue2);
 
         String configValue3 = JsonUtil.readTree(result).findPath("core-site").path("properties").path("fs.trash.interval").textValue();
-        Assert.assertEquals("360", configValue3);
+        assertEquals("360", configValue3);
 
         String configValue4 = JsonUtil.readTree(result).findPath("core-site").path("properties").path("io.file.buffer.size").textValue();
-        Assert.assertEquals("131072", configValue4);
+        assertEquals("131072", configValue4);
     }
 
     @Test
@@ -197,17 +198,17 @@ public class BlueprintTextProcessorTest {
         String result = underTest.get(testBlueprint).addConfigEntries(configurationEntries, false).asText();
 
         String configValue1 = JsonUtil.readTree(result).findPath("core-site").path("fs.defaultFS").textValue();
-        Assert.assertEquals("wasb://cloudbreak@dduihoab6jt1jl.cloudapp.net", configValue1);
+        assertEquals("wasb://cloudbreak@dduihoab6jt1jl.cloudapp.net", configValue1);
 
         String configValue2 = JsonUtil.readTree(result).findPath("core-site").path("io.serializations").textValue();
-        Assert.assertEquals("org.apache.hadoop.io.serializer.WritableSerialization", configValue2);
+        assertEquals("org.apache.hadoop.io.serializer.WritableSerialization", configValue2);
     }
 
     @Test
     public void testRemoveComponentFromBlueprint() throws Exception {
         String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints-jackson/test-bp-without-config-block.bp");
         String result = underTest.get(testBlueprint).removeComponentFromBlueprint("NAGIOS_SERVER").asText();
-        Assert.assertFalse(result.contains("NAGIOS_SERVER"));
+        assertFalse(result.contains("NAGIOS_SERVER"));
     }
 
     @Test
@@ -233,7 +234,7 @@ public class BlueprintTextProcessorTest {
         expected.add("MAPREDUCE2_CLIENT");
         expected.add("ZOOKEEPER_CLIENT");
 
-        Assert.assertEquals(expected, result);
+        assertEquals(expected, result);
     }
 
     @Test
@@ -250,7 +251,7 @@ public class BlueprintTextProcessorTest {
 
         String result = underTest.get(testBlueprint).addComponentToHostgroups("HST_SERVER", Collections.singletonList("slave_1")).asText();
 
-        Assert.assertTrue(underTest.get(result).componentExistsInBlueprint("HST_SERVER"));
+        assertTrue(underTest.get(result).componentExistsInBlueprint("HST_SERVER"));
     }
 
     @Test
@@ -263,7 +264,7 @@ public class BlueprintTextProcessorTest {
         Iterator<JsonNode> hostGroups = JsonUtil.readTree(result).path(HOST_GROUPS_NODE).elements();
         while (hostGroups.hasNext()) {
             JsonNode hostGroup = hostGroups.next();
-            Assert.assertTrue(componentExistsInHostgroup(componentToAdd, hostGroup));
+            assertTrue(componentExistsInHostgroup(componentToAdd, hostGroup));
         }
     }
 
@@ -275,7 +276,7 @@ public class BlueprintTextProcessorTest {
 
         String result = underTest.get(testBlueprint).addComponentToHostgroups(componentToAdd, Collections.singletonList("master")).asText();
 
-        Assert.assertEquals(testBlueprint.replaceAll("\\s", ""), result);
+        assertEquals(testBlueprint.replaceAll("\\s", ""), result);
     }
 
     @Test
@@ -286,7 +287,7 @@ public class BlueprintTextProcessorTest {
         configs.add(new BlueprintConfigurationEntry("zeppelin-env", "shiro_ini_content", "changed"));
         String result = underTest.get(testBlueprint).addConfigEntries(configs, false).asText();
 
-        Assert.assertEquals(testBlueprint.replaceAll("\\s", ""), result);
+        assertEquals(testBlueprint.replaceAll("\\s", ""), result);
     }
 
     @Test
@@ -300,7 +301,7 @@ public class BlueprintTextProcessorTest {
         configs.add(new BlueprintConfigurationEntry("cluster-env", "recovery_type", "AUTO_START"));
         String result = underTest.get(testBlueprint).addSettingsEntries(configs, false).asText();
 
-        Assert.assertEquals(res.replaceAll("\\s", ""), result.replaceAll("\\s", ""));
+        assertEquals(res.replaceAll("\\s", ""), result.replaceAll("\\s", ""));
     }
 
     @Test
@@ -315,7 +316,7 @@ public class BlueprintTextProcessorTest {
         configs.add(new BlueprintConfigurationEntry("cluster-env", "recovery_type", "AUTO_START"));
         String result = underTest.get(testBlueprint).addSettingsEntries(configs, false).asText();
 
-        Assert.assertEquals(res.replaceAll("\\s", ""), result.replaceAll("\\s", ""));
+        assertEquals(res.replaceAll("\\s", ""), result.replaceAll("\\s", ""));
     }
 
     @Test
@@ -325,8 +326,8 @@ public class BlueprintTextProcessorTest {
         // WHEN
         Optional<String> value = underTest.get(testBlueprint).pathValue("configurations", "core-site", "properties", "fs.trash.interval");
         //THEN
-        Assert.assertTrue(value.isPresent());
-        Assert.assertEquals(value.get(), "360");
+        assertTrue(value.isPresent());
+        assertEquals(value.get(), "360");
     }
 
     @Test
@@ -336,7 +337,7 @@ public class BlueprintTextProcessorTest {
         // WHEN
         Optional<String> value = underTest.get(testBlueprint).pathValue("configuration", "core-site", "properties", "fs.trash.interval");
         //THEN
-        Assert.assertFalse(value.isPresent());
+        assertFalse(value.isPresent());
     }
 
     @Test
@@ -346,7 +347,7 @@ public class BlueprintTextProcessorTest {
         // WHEN
         Optional<String> value = underTest.get(testBlueprint).pathValue("configuration");
         //THEN
-        Assert.assertFalse(value.isPresent());
+        assertFalse(value.isPresent());
     }
 
     @Test
@@ -356,7 +357,7 @@ public class BlueprintTextProcessorTest {
         // WHEN
         Optional<String> value = underTest.get(testBlueprint).pathValue("configuration", "core-site");
         //THEN
-        Assert.assertFalse(value.isPresent());
+        assertFalse(value.isPresent());
     }
 
     public static String skipLine(String originalBlueprint, String toSkipString) {
@@ -428,6 +429,15 @@ public class BlueprintTextProcessorTest {
             boolean result = underTest.get(testBlueprint).isAllConfigurationExistsInPathUnderConfigurationNode(hivaConfigurations);
             assertFalse(result);
         }
+    }
+
+    @Test
+    public void testGetConfigurationEntries() throws IOException {
+        String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints-jackson/bp-config-properties.bp");
+        Map<String, Map<String, String>> result = underTest.get(testBlueprint).getConfigurationEntries();
+        assertEquals(11, result.size());
+        assertEquals("true", result.get("hive-site").get("hive.exec.compress.output"));
+        assertEquals("0.7", result.get("mapred-site").get("mapreduce.job.reduce.slowstart.completedmaps"));
     }
 
     private boolean componentExistsInHostgroup(String component, JsonNode hostGroupNode) {

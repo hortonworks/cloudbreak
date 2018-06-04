@@ -51,7 +51,7 @@ public enum ExposedService {
     }
 
     public static Collection<ExposedService> knoxServicesForComponents(Collection<String> components) {
-        Collection<ExposedService> supportedKnoxServices = ExposedService.filterSupportedKnoxServices();
+        Collection<ExposedService> supportedKnoxServices = filterSupportedKnoxServices();
         return supportedKnoxServices.stream()
                 .filter(exposedService ->
                         components.contains(exposedService.getServiceName())

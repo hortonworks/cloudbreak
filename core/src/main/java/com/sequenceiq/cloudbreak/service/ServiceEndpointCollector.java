@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.converter.stack.cluster;
+package com.sequenceiq.cloudbreak.service;
 
 import static com.sequenceiq.cloudbreak.common.type.OrchestratorConstants.YARN;
 
@@ -20,7 +20,7 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.model.ClusterExposedServiceResponse;
 import com.sequenceiq.cloudbreak.api.model.ExposedService;
@@ -38,7 +38,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.GatewayTopology;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 
-@Component
+@Service
 public class ServiceEndpointCollector {
 
     private static final int KNOX_PORT = 8443;
@@ -51,10 +51,15 @@ public class ServiceEndpointCollector {
     @Inject
     private BlueprintProcessorFactory blueprintProcessorFactory;
 
+    @Inject
+    private AmbariHaComponentFilter ambariHaComponentFilter;
+
     public Collection<ExposedServiceResponse> getKnoxServices(IdentityUser cbUser, String blueprintName) {
         Blueprint blueprint = blueprintService.getByName(blueprintName, cbUser);
         BlueprintTextProcessor blueprintTextProcessor = blueprintProcessorFactory.get(blueprint.getBlueprintText());
         Set<String> blueprintComponents = blueprintTextProcessor.getAllComponents();
+        Set<String> haComponents = ambariHaComponentFilter.getHaComponents(blueprintTextProcessor);
+        blueprintComponents.removeAll(haComponents);
         String stackName = blueprintTextProcessor.getStackName();
         String stackVersion = blueprintTextProcessor.getStackVersion();
         VersionComparator versionComparator = new VersionComparator();

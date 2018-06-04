@@ -1,0 +1,314 @@
+{
+  "configurations": [
+    {
+      "core-site": {
+        "properties": {
+          "fs.defaultFS": "hdfs://mycluster",
+          "hadoop.proxyuser.yarn.hosts": "%HOSTGROUP::master_rm1%,%HOSTGROUP::master_nn1_rm2%",
+          "ha.zookeeper.quorum": "%HOSTGROUP::master_nn2%:2181,%HOSTGROUP::master_rm1%:2181,%HOSTGROUP::master_nn1_rm2%:2181"
+        }
+      }
+    },
+    {
+      "hbase-site": {
+        "properties": {
+          "hbase.rootdir": "hdfs://mycluster/apps/hbase/data"
+        }
+      }
+    },
+    {
+    "hdfs-site": {
+        "properties": {
+          "dfs.nameservices": "mycluster",
+          "dfs.namenode.http-address.mycluster.nn1": "%HOSTGROUP::master_nn1_rm2%:50070",
+          "dfs.namenode.http-address.mycluster.nn2": "%HOSTGROUP::master_nn2%:50070",
+          "dfs.namenode.https-address.mycluster.nn1": "%HOSTGROUP::master_nn1_rm2%:50470",
+          "dfs.namenode.https-address.mycluster.nn2": "%HOSTGROUP::master_nn2%:50470",
+          "dfs.namenode.rpc-address.mycluster.nn2": "%HOSTGROUP::master_nn2%:8020",
+          "dfs.namenode.rpc-address.mycluster.nn1": "%HOSTGROUP::master_nn1_rm2%:8020",
+          "dfs.namenode.shared.edits.dir": "qjournal://%HOSTGROUP::master_nn1_rm2%:8485;%HOSTGROUP::master_nn2%:8485/mycluster",
+          "dfs.namenode.checkpoint.edits.dir": "${dfs.namenode.checkpoint.dir}",
+          "dfs.ha.fencing.methods": "shell(/bin/true)",
+          "dfs.ha.namenodes.mycluster": "nn1,nn2",
+          "dfs.ha.automatic-failover.enabled": "false",
+          "dfs.client.failover.proxy.provider.mycluster": "org.apache.hadoop.hdfs.server.namenode.ha.ConfiguredFailoverProxyProvider"
+        }
+      }
+    },
+    {
+      "yarn-site": {
+        "properties": {
+          "hadoop.registry.rm.enabled": "false",
+          "hadoop.registry.zk.quorum": "%HOSTGROUP::master_nn1_rm2%:2181,%HOSTGROUP::master_nn2%:2181,%HOSTGROUP::master_rm1%:2181",
+          "yarn.log.server.url": "http://%HOSTGROUP::master_nn1_rm2%:19888/jobhistory/logs",
+          "yarn.resourcemanager.zk-address": "%HOSTGROUP::master_nn2%:2181,%HOSTGROUP::master_rm1%:2181,%HOSTGROUP::master_nn1_rm2%:2181",
+          "yarn.resourcemanager.hostname": "%HOSTGROUP::master_rm1%",
+          "yarn.resourcemanager.address": "%HOSTGROUP::master_rm1%:8050",
+          "yarn.resourcemanager.hostname.rm2": "%HOSTGROUP::master_nn1_rm2%",
+          "yarn.resourcemanager.hostname.rm1": "%HOSTGROUP::master_rm1%",
+          "yarn.resourcemanager.webapp.address": "%HOSTGROUP::master_rm1%:8088",
+          "yarn.resourcemanager.webapp.address.rm2": "%HOSTGROUP::master_nn1_rm2%:8088",
+          "yarn.resourcemanager.webapp.address.rm1": "%HOSTGROUP::master_rm1%:8088",
+          "yarn.resourcemanager.cluster-id": "yarn-cluster",
+          "yarn.resourcemanager.admin.address": "%HOSTGROUP::master_rm1%:8141",
+          "yarn.resourcemanager.resource-tracker.address": "%HOSTGROUP::master_rm1%:8025",
+          "yarn.resourcemanager.scheduler.class": "org.apache.hadoop.yarn.server.resourcemanager.scheduler.capacity.CapacityScheduler",
+          "yarn.resourcemanager.scheduler.address": "%HOSTGROUP::master_rm1%:8030",
+          "yarn.resourcemanager.recovery.enabled": "true",
+          "yarn.resourcemanager.ha.automatic-failover.zk-base-path": "/yarn-leader-election",
+          "yarn.resourcemanager.ha.enabled": "true",
+          "yarn.resourcemanager.ha.rm-ids": "rm1,rm2",
+          "yarn.resourcemanager.webapp.https.address": "%HOSTGROUP::master_rm1%:8090",
+          "yarn.timeline-service.webapp.https.address": "%HOSTGROUP::master_nn2%:8190",
+          "yarn.timeline-service.address": "%HOSTGROUP::master_nn2%:10200",
+          "yarn.resourcemanager.webapp.https.address.rm2": "%HOSTGROUP::master_nn1_rm2%:8090",
+          "yarn.resourcemanager.webapp.https.address.rm1": "%HOSTGROUP::master_rm1%:8090",
+          "yarn.resourcemanager.store.class": "org.apache.hadoop.yarn.server.resourcemanager.recovery.ZKRMStateStore",
+          "yarn.timeline-service.webapp.address": "%HOSTGROUP::master_nn2%:8188"
+        }
+      }
+    }
+  ],
+  "host_groups": [
+    {
+      "components": [
+        {
+          "name": "SPARK_CLIENT"
+        },
+        {
+          "name": "YARN_CLIENT"
+        },
+        {
+          "name": "HDFS_CLIENT"
+        },
+        {
+          "name": "SQOOP"
+        },
+        {
+          "name": "METRICS_MONITOR"
+        },
+        {
+          "name": "TEZ_CLIENT"
+        },
+        {
+          "name": "ZOOKEEPER_CLIENT"
+        },
+        {
+          "name": "HCAT"
+        },
+        {
+          "name": "PIG"
+        },
+        {
+          "name": "MAPREDUCE2_CLIENT"
+        },
+        {
+          "name": "SLIDER"
+        },
+        {
+          "name": "HBASE_CLIENT"
+        },
+        {
+          "name": "JOURNALNODE"
+        },
+        {
+          "name": "HIVE_CLIENT"
+        },
+        {
+          "name": "METRICS_COLLECTOR"
+        },
+        {
+          "name": "ATLAS_SERVER"
+        }
+      ],
+      "configurations": [],
+      "name": "master_gw",
+      "cardinality": "1"
+    },
+    {
+      "components": [
+        {
+          "name": "YARN_CLIENT"
+        },
+        {
+          "name": "HDFS_CLIENT"
+        },
+        {
+          "name": "ZKFC"
+        },
+        {
+          "name": "HISTORYSERVER"
+        },
+        {
+          "name": "METRICS_MONITOR"
+        },
+        {
+          "name": "NAMENODE"
+        },
+        {
+          "name": "TEZ_CLIENT"
+        },
+        {
+          "name": "MAPREDUCE2_CLIENT"
+        },
+        {
+          "name": "ZOOKEEPER_SERVER"
+        },
+        {
+          "name": "JOURNALNODE"
+        },
+        {
+          "name": "RESOURCEMANAGER"
+        },
+        {
+          "name": "ATLAS_SERVER"
+        }
+      ],
+      "configurations": [],
+      "name": "master_nn1_rm2",
+      "cardinality": "1"
+    },
+    {
+      "components": [
+        {
+          "name": "YARN_CLIENT"
+        },
+        {
+          "name": "HDFS_CLIENT"
+        },
+        {
+          "name": "HIVE_SERVER"
+        },
+        {
+          "name": "STORM_UI_SERVER"
+        },
+        {
+          "name": "METRICS_MONITOR"
+        },
+        {
+          "name": "HIVE_METASTORE"
+        },
+        {
+          "name": "TEZ_CLIENT"
+        },
+        {
+          "name": "NIMBUS"
+        },
+        {
+          "name": "ZOOKEEPER_CLIENT"
+        },
+        {
+          "name": "PIG"
+        },
+        {
+          "name": "WEBHCAT_SERVER"
+        },
+        {
+          "name": "MAPREDUCE2_CLIENT"
+        },
+        {
+          "name": "ZOOKEEPER_SERVER"
+        },
+        {
+          "name": "SPARK_JOBHISTORYSERVER"
+        },
+        {
+          "name": "HIVE_CLIENT"
+        },
+        {
+          "name": "RESOURCEMANAGER"
+        }
+      ],
+      "configurations": [],
+      "name": "master_rm1",
+      "cardinality": "1"
+    },
+    {
+      "components": [
+        {
+          "name": "YARN_CLIENT"
+        },
+        {
+          "name": "HDFS_CLIENT"
+        },
+        {
+          "name": "ZKFC"
+        },
+        {
+          "name": "METRICS_MONITOR"
+        },
+        {
+          "name": "HBASE_MASTER"
+        },
+        {
+          "name": "NAMENODE"
+        },
+        {
+          "name": "TEZ_CLIENT"
+        },
+        {
+          "name": "MAPREDUCE2_CLIENT"
+        },
+        {
+          "name": "ZOOKEEPER_SERVER"
+        },
+        {
+          "name": "HBASE_CLIENT"
+        },
+        {
+          "name": "JOURNALNODE"
+        },
+        {
+          "name": "APP_TIMELINE_SERVER"
+        },
+        {
+          "name": "DRPC_SERVER"
+        }
+      ],
+      "configurations": [],
+      "name": "master_nn2",
+      "cardinality": "1"
+    },
+    {
+      "components": [
+        {
+          "name": "KAFKA_BROKER"
+        },
+        {
+          "name": "HDFS_CLIENT"
+        },
+        {
+          "name": "METRICS_MONITOR"
+        },
+        {
+          "name": "SUPERVISOR"
+        }
+      ],
+      "configurations": [],
+      "name": "streaming"
+    },
+    {
+      "components": [
+        {
+          "name": "NODEMANAGER"
+        },
+        {
+          "name": "HBASE_REGIONSERVER"
+        },
+        {
+          "name": "DATANODE"
+        },
+        {
+          "name": "METRICS_MONITOR"
+        }
+      ],
+      "configurations": [],
+      "name": "worker"
+    }
+  ],
+  "Blueprints": {
+    "blueprint_name": "nn-rm-hbase-ha",
+    "stack_name": "HDP",
+    "stack_version": "2.6"
+  }
+}

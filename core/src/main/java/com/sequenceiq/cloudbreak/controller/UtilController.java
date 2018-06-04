@@ -34,7 +34,7 @@ import com.sequenceiq.cloudbreak.blueprint.filesystem.query.ConfigQueryEntry;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.validation.rds.RdsConnectionBuilder;
-import com.sequenceiq.cloudbreak.converter.stack.cluster.ServiceEndpointCollector;
+import com.sequenceiq.cloudbreak.service.ServiceEndpointCollector;
 import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.StackMatrixService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
