@@ -33,6 +33,8 @@ public class LdapView {
 
     private String adminGroup;
 
+    private String userDnPattern;
+
     public LdapView(LdapConfig ldapConfig) {
         protocol = ldapConfig.getProtocol().toLowerCase();
         connectionURL = protocol + "://" + ldapConfig.getServerHost();
@@ -50,6 +52,7 @@ public class LdapView {
         groupObjectClass = ldapConfig.getGroupObjectClass();
         groupMemberAttribute = ldapConfig.getGroupMemberAttribute();
         domain = ldapConfig.getDomain();
+        userDnPattern = ldapConfig.getUserDnPattern();
         adminGroup = ldapConfig.getAdminGroup();
     }
 
@@ -114,5 +117,9 @@ public class LdapView {
 
     public String getAdminGroup() {
         return adminGroup;
+    }
+
+    public String getUserDnPattern() {
+        return userDnPattern;
     }
 }

@@ -8,7 +8,7 @@ admin = {{{ general.password }}}
 [main]
 {{{#if ldap }}}
 ldapRealm = org.apache.shiro.realm.ldap.JndiLdapRealm
-ldapRealm.userDnTemplate = cn={0},{{{ ldap.userSearchBase }}}
+ldapRealm.userDnTemplate = {{{ ldap.userDnPattern }}}
 ldapRealm.contextFactory.url = {{{ ldap.connectionURL }}}
 ldapRealm.contextFactory.authenticationMechanism = SIMPLE
 {{{/if}}}
