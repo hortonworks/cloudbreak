@@ -1,11 +1,5 @@
 package com.sequenceiq.cloudbreak.blueprint;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-
 import com.sequenceiq.cloudbreak.blueprint.filesystem.BaseFileSystemConfigurationsView;
 import com.sequenceiq.cloudbreak.blueprint.nifi.HdfConfigs;
 import com.sequenceiq.cloudbreak.blueprint.template.views.BlueprintView;
@@ -20,6 +14,12 @@ import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
+
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
 public class BlueprintPreparationObject {
 
@@ -54,21 +54,21 @@ public class BlueprintPreparationObject {
     private final Map<String, Object> fixInputs;
 
     private BlueprintPreparationObject(BlueprintPreparationObject.Builder builder) {
-        this.rdsConfigs = builder.rdsConfigs;
-        this.hostgroupViews = builder.hostgroupViews;
-        this.stackRepoDetailsHdpVersion = builder.stackRepoDetailsHdpVersion;
-        this.smartSenseSubscriptionId = builder.smartSenseSubscriptionId;
-        this.ldapConfig = builder.ldapConfig;
-        this.hdfConfigs = builder.hdfConfigs;
-        this.gatewayView = builder.gatewayView;
-        this.fileSystemView = builder.fileSystemView;
-        this.kerberosConfig = builder.kerberosConfig;
-        this.blueprintView = builder.blueprintView;
-        this.generalClusterConfigs = builder.generalClusterConfigs;
-        this.flexSubscription = builder.flexSubscription;
-        this.sharedServiceConfigs = builder.sharedServiceConfigs;
-        this.customInputs = builder.customInputs;
-        this.fixInputs = builder.fixInputs;
+        rdsConfigs = builder.rdsConfigs;
+        hostgroupViews = builder.hostgroupViews;
+        stackRepoDetailsHdpVersion = builder.stackRepoDetailsHdpVersion;
+        smartSenseSubscriptionId = builder.smartSenseSubscriptionId;
+        ldapConfig = builder.ldapConfig;
+        hdfConfigs = builder.hdfConfigs;
+        gatewayView = builder.gatewayView;
+        fileSystemView = builder.fileSystemView;
+        kerberosConfig = builder.kerberosConfig;
+        blueprintView = builder.blueprintView;
+        generalClusterConfigs = builder.generalClusterConfigs;
+        flexSubscription = builder.flexSubscription;
+        sharedServiceConfigs = builder.sharedServiceConfigs;
+        customInputs = builder.customInputs;
+        fixInputs = builder.fixInputs;
     }
 
     public Set<RDSConfig> getRdsConfigs() {
@@ -181,10 +181,10 @@ public class BlueprintPreparationObject {
             for (HostGroup hostGroup : hostGroups) {
                 InstanceGroup instanceGroup = hostGroup.getConstraint().getInstanceGroup();
                 if (instanceGroup != null) {
-                    this.hostgroupViews.add(new HostgroupView(hostGroup.getName(), 1,
+                    hostgroupViews.add(new HostgroupView(hostGroup.getName(), 1,
                             instanceGroup.getInstanceGroupType(), instanceGroup.getNodeCount()));
                 } else {
-                    this.hostgroupViews.add(new HostgroupView(hostGroup.getName()));
+                    hostgroupViews.add(new HostgroupView(hostGroup.getName()));
                 }
 
             }
@@ -224,7 +224,7 @@ public class BlueprintPreparationObject {
 
         public Builder withGateway(Gateway gateway) {
             if (gateway != null) {
-                this.gatewayView = new GatewayView(gateway);
+                gatewayView = new GatewayView(gateway);
             }
             return this;
         }
@@ -250,7 +250,7 @@ public class BlueprintPreparationObject {
         }
 
         public Builder withSharedServiceConfigs(SharedServiceConfigsView sharedServiceConfigsView) {
-            this.sharedServiceConfigs = Optional.ofNullable(sharedServiceConfigsView);
+            sharedServiceConfigs = Optional.ofNullable(sharedServiceConfigsView);
             return this;
         }
 
