@@ -8,8 +8,10 @@ import java.util.Objects;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceMetadataType;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 
 @Component
 public class StackDownscaleValidatorService {
@@ -24,6 +26,12 @@ public class StackDownscaleValidatorService {
     public void checkUserHasRightToTerminateInstance(boolean publicInAccount, String owner, String userId, Long stackId) {
         if (!publicInAccount && !Objects.equals(owner, userId)) {
             throw new AccessDeniedException(String.format("Private stack (%s) is only modifiable by the owner.", stackId));
+        }
+    }
+
+    public void checkClusterInValidStatus(Cluster cluster) {
+        if (cluster.getStatus() == Status.STOPPED) {
+            throw new BadRequestException("Cluster is in Stopped status. Please start the cluster for downscale.");
         }
     }
 

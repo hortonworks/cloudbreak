@@ -438,7 +438,7 @@ public class StackService {
 
     public void removeInstance(@Nonnull IdentityUser user, Long stackId, String instanceId) {
         Stack stack = get(stackId);
-        InstanceMetaData metaData = validateInstanceForDownscale(user, stackId, instanceId, stack);
+        InstanceMetaData metaData = validateInstanceForDownscale(user, instanceId, stack);
         flowManager.triggerStackRemoveInstance(stackId, metaData.getInstanceGroupName(), metaData.getPrivateId());
     }
 
@@ -446,8 +446,8 @@ public class StackService {
         Stack stack = get(stackId);
         authorizationService.hasWritePermission(stack);
         Map<String, Set<Long>> instanceIdsByHostgroupMap = new HashMap<>();
-        for (String instanceId: instanceIds) {
-            InstanceMetaData metaData = validateInstanceForDownscale(user, stackId, instanceId, stack);
+        for (String instanceId : instanceIds) {
+            InstanceMetaData metaData = validateInstanceForDownscale(user, instanceId, stack);
             instanceIdsByHostgroupMap.computeIfAbsent(metaData.getInstanceGroupName(), s -> new LinkedHashSet<>()).add(metaData.getPrivateId());
         }
         flowManager.triggerStackRemoveInstances(stackId, instanceIdsByHostgroupMap);
@@ -480,13 +480,14 @@ public class StackService {
         }
     }
 
-    private InstanceMetaData validateInstanceForDownscale(@Nonnull IdentityUser user, Long stackId, String instanceId, Stack stack) {
-        InstanceMetaData metaData = instanceMetaDataRepository.findByInstanceId(stackId, instanceId);
+    private InstanceMetaData validateInstanceForDownscale(@Nonnull IdentityUser user, String instanceId, Stack stack) {
+        InstanceMetaData metaData = instanceMetaDataRepository.findByInstanceId(stack.getId(), instanceId);
         if (metaData == null) {
             throw new NotFoundException(String.format("Metadata for instance %s has not found.", instanceId));
         }
         downscaleValidatorService.checkInstanceIsTheAmbariServerOrNot(metaData.getPublicIp(), metaData.getInstanceMetadataType());
-        downscaleValidatorService.checkUserHasRightToTerminateInstance(stack.isPublicInAccount(), stack.getOwner(), user.getUserId(), stackId);
+        downscaleValidatorService.checkUserHasRightToTerminateInstance(stack.isPublicInAccount(), stack.getOwner(), user.getUserId(), stack.getId());
+        downscaleValidatorService.checkClusterInValidStatus(stack.getCluster());
         return metaData;
     }
 
