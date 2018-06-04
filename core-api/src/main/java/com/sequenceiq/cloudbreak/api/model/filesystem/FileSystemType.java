@@ -12,7 +12,7 @@ public enum FileSystemType {
 
     WASB(WasbFileSystem.class, "wasb", "{{{ storageName }}}@{{{ accountName }}}.blob.core.windows.net"),
 
-    ADLS(AdlsFileSystem.class, "adl", "{{{ accountName }}}.azuredatalakestore.net"),
+    ADLS(AdlsFileSystem.class, "adl", "{{{ accountName }}}.azuredatalakestore.net/{{{ storageName }}}"),
 
     S3(S3FileSystem.class, "s3a", "{{{ storageName }}}/{{{ clusterName }}}");
 
