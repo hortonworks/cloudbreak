@@ -7,9 +7,12 @@ import org.testng.ITestNGMethod;
 import org.testng.ITestResult;
 import org.testng.SkipException;
 
-public class FirstLastTestExecutionBehaviour implements IInvokedMethodListener {
+public class FirstLastTestExecutionBehaviour extends CheckedListener implements IInvokedMethodListener {
     @Override
     public void beforeInvocation(IInvokedMethod method, ITestResult testResult) {
+        if (!isThisSuiteListener(testResult)) {
+            return;
+        }
         if (method.isTestMethod()) {
             ITestNGMethod thisMethod = method.getTestMethod();
             ITestNGMethod[] allTestMethods = testResult.getTestContext().getAllTestMethods();

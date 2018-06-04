@@ -10,7 +10,7 @@ import org.testng.ISuiteResult;
 import org.testng.ITestNGMethod;
 import org.testng.ITestResult;
 
-public class GatekeeperBehaviour implements IInvokedMethodListener {
+public class GatekeeperBehaviour extends CheckedListener implements IInvokedMethodListener {
 
     private static final String IS_GATEKEEPER = "isGatekeeper";
 
@@ -20,6 +20,9 @@ public class GatekeeperBehaviour implements IInvokedMethodListener {
 
     @Override
     public void beforeInvocation(IInvokedMethod method, ITestResult testResult) {
+        if (!isThisSuiteListener(testResult)) {
+            return;
+        }
         if (method.isTestMethod()) {
             ITestNGMethod thisMethod = method.getTestMethod();
             ITestNGMethod[] allTestMethods = testResult.getTestContext().getAllTestMethods();
