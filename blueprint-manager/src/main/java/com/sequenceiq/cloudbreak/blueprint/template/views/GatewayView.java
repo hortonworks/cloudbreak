@@ -45,7 +45,7 @@ public class GatewayView {
                     .collect(Collectors.toMap(GatewayTopology::getTopologyName, GatewayTopology::getExposedServices));
         }
         ssoType = gateway.getSsoType();
-        ssoConfigured = SSOType.PROXY_SSO.equals(gateway.getSsoType());
+        ssoConfigured = SSOType.SSO_PROVIDER.equals(gateway.getSsoType());
         ssoProvider = gateway.getSsoProvider();
         signKey = gateway.getSignKey();
         signPub = gateway.getSignPub();

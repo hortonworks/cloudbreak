@@ -667,7 +667,7 @@ public class TestUtil {
         setGatewayTopology(gateway);
         gateway.setPath("/path");
         gateway.setSsoProvider("simple");
-        gateway.setSsoType(SSOType.PROXY_SSO);
+        gateway.setSsoType(SSOType.SSO_PROVIDER);
         gateway.setGatewayType(GatewayType.CENTRAL);
         gateway.setSignCert("signcert");
         gateway.setSignKey("signkey");

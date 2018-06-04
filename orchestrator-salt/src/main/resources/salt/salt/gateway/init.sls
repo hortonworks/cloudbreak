@@ -144,7 +144,7 @@ knox-create-sign-jks:
 
 {% endfor %}
 
-{% if 'PROXY_SSO' == salt['pillar.get']('gateway:ssotype') %}
+{% if 'SSO_PROVIDER' == salt['pillar.get']('gateway:ssotype') %}
 
 /usr/hdp/current/knox-server/conf/topologies/sso.xml:
   file.managed:

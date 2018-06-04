@@ -54,7 +54,7 @@ public class GatewayConvertUtil {
         if (source.getGatewayType() != null) {
             gateway.setGatewayType(source.getGatewayType());
         }
-        gateway.setSsoType(source.getSsoType() != null ? source.getSsoType() : SSOType.PROXY);
+        gateway.setSsoType(source.getSsoType() != null ? source.getSsoType() : SSOType.NONE);
         gateway.setTokenCert(source.getTokenCert());
     }
 

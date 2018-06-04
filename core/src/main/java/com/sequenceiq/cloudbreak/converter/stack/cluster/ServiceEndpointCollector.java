@@ -101,7 +101,7 @@ public class ServiceEndpointCollector {
                         .collect(Collectors.toSet());
                 for (ExposedService exposedService : knownExposedServices) {
                     ClusterExposedServiceResponse clusterExposedServiceResponse = new ClusterExposedServiceResponse();
-                    clusterExposedServiceResponse.setMode(exposedService.isSSOSupported() ? gateway.getSsoType() : SSOType.PROXY);
+                    clusterExposedServiceResponse.setMode(exposedService.isSSOSupported() ? gateway.getSsoType() : SSOType.NONE);
                     clusterExposedServiceResponse.setDisplayName(exposedService.getPortName());
                     clusterExposedServiceResponse.setKnoxService(exposedService.getKnoxService());
                     clusterExposedServiceResponse.setServiceName(exposedService.getServiceName());

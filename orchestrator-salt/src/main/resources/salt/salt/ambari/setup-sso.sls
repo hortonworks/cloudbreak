@@ -1,6 +1,6 @@
 {%- from 'ambari/settings.sls' import ambari with context %}
 
-{% if ambari.gateway.ssotype is defined and ambari.gateway.ssotype is not none and ambari.gateway.ssotype == 'PROXY_SSO' %}
+{% if ambari.gateway.ssotype is defined and ambari.gateway.ssotype is not none and ambari.gateway.ssotype == 'SSO_PROVIDER' %}
 
 ambari_sso_enabled:
   file.append:
