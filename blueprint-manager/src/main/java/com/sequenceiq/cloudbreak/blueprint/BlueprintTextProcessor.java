@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.blueprint;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -18,6 +19,7 @@ import javax.annotation.Nonnull;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.MissingNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -47,6 +49,8 @@ public class BlueprintTextProcessor {
     private static final String STACK_VERSION = "stack_version";
 
     private static final String STACK_NAME = "stack_name";
+
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     private final ObjectNode blueprint;
 
@@ -88,6 +92,27 @@ public class BlueprintTextProcessor {
             }
         }
         return this;
+    }
+
+    public Map<String, Map<String, String>> getConfigurationEntries() {
+        if (!blueprint.has("configurations")) {
+            return Collections.emptyMap();
+        }
+        Map<String, Map<String, String>> configurations = new HashMap<>();
+        JsonNode configurationsArray = blueprint.get("configurations");
+        for (JsonNode config : configurationsArray) {
+            Map<String, Object> configMap = objectMapper.convertValue(config, Map.class);
+            if (!configMap.isEmpty()) {
+                Map<String, Object> configElements = (Map<String, Object>) configMap.values().iterator().next();
+                if (configElements.containsKey("properties")) {
+                    configElements = (Map<String, Object>) configElements.get("properties");
+                }
+                Map<String, String> configValues = new HashMap<>();
+                configElements.forEach((k, v) -> configValues.put(k, v.toString()));
+                configurations.put(configMap.keySet().iterator().next(), configValues);
+            }
+        }
+        return configurations;
     }
 
     public BlueprintTextProcessor addSettingsEntries(List<BlueprintConfigurationEntry> configurationEntries, boolean override) {
@@ -287,7 +312,7 @@ public class BlueprintTextProcessor {
     }
 
     private void putAllSettingsIfAbsent(ArrayNode siteNode, List<SiteConfiguration> siteList) {
-        for (SiteConfiguration conf :siteList) {
+        for (SiteConfiguration conf : siteList) {
             ObjectNode replace = findBestMatch(siteNode, conf);
             if (replace != null) {
                 continue;
@@ -298,7 +323,7 @@ public class BlueprintTextProcessor {
     }
 
     private void putAllSettings(ArrayNode siteNode, List<SiteConfiguration> siteList) {
-        for (SiteConfiguration conf :siteList) {
+        for (SiteConfiguration conf : siteList) {
             ObjectNode replace = findBestMatch(siteNode, conf);
             if (replace == null) {
                 replace = siteNode.addObject();

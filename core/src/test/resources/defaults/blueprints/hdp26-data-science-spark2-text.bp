@@ -137,6 +137,9 @@
           },
           {
             "name": "ZOOKEEPER_SERVER"
+          },
+          {
+            "name": "ATLAS_SERVER"
           }
         ],
         "cardinality": "1"
@@ -165,6 +168,9 @@
           },
           {
             "name": "NODEMANAGER"
+          },
+          {
+            "name": "ATLAS_SERVER"
           }
         ],
         "cardinality": "1+"

@@ -7,23 +7,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import javax.inject.Inject;
-
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.sequenceiq.cloudbreak.api.model.ExposedService;
-import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessorFactory;
+import com.sequenceiq.cloudbreak.blueprint.BlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 
 @Component
 @ConfigurationProperties
 public class BlueprintPortConfigCollector {
-
-    @Inject
-    private BlueprintProcessorFactory blueprintProcessorFactory;
 
     // injected by Spring using the setter, but setting a default value here in case config were missing
     private List<PortConfig> blueprintServicePorts = new ArrayList<>();
@@ -36,44 +30,41 @@ public class BlueprintPortConfigCollector {
     }
 
     private void collectConfiguredPorts(Blueprint blueprint, Map<String, Integer> collectedPorts) {
-        JsonNode configurationsArray = blueprintProcessorFactory.get(blueprint.getBlueprintText())
-                .getBlueprint().get("configurations");
+        Map<String, Map<String, String>> configurations = new BlueprintTextProcessor(blueprint.getBlueprintText()).getConfigurationEntries();
         blueprintServicePorts.forEach(portConfig -> {
-            Optional<Integer> configuredPort = getConfiguredPortForService(portConfig, configurationsArray);
+            Optional<Integer> configuredPort = getConfiguredPortForService(portConfig, configurations);
             ExposedService exposedService = ExposedService.valueOf(portConfig.getService());
             configuredPort.ifPresent(integer -> collectedPorts.put(exposedService.getKnoxService(), integer));
         });
     }
 
-    private Optional<Integer> getConfiguredPortForService(PortConfig portConfig, JsonNode configurationsArray) {
-        for (JsonNode config : configurationsArray) {
-            if (config.has(portConfig.getConfigName())) {
-                JsonNode configJson = config.get(portConfig.getConfigName());
-                if (portConfig.isPortKeySet()) {
-                    return Optional.ofNullable(configJson.get(portConfig.getPortKey()))
-                            .map(portValue -> getPortFromPortString(portConfig.getService(), portValue));
-                } else {
-                    return Optional.ofNullable(configJson.get(portConfig.getHostKey()))
-                            .map(hostValue -> getPortFromHost(portConfig.getService(), hostValue.asText()));
-                }
+    private Optional<Integer> getConfiguredPortForService(PortConfig portConfig, Map<String, Map<String, String>> configurations) {
+        if (configurations.containsKey(portConfig.getConfigName())) {
+            Map<String, String> configuration = configurations.get(portConfig.getConfigName());
+            if (portConfig.isPortKeySet()) {
+                return Optional.ofNullable(configuration.get(portConfig.getPortKey()))
+                        .map(portValue -> getPortFromPortString(portConfig.getService(), portValue));
+            } else {
+                return Optional.ofNullable(configuration.get(portConfig.getHostKey()))
+                        .map(hostValue -> getPortFromHost(portConfig.getService(), hostValue));
             }
         }
         return Optional.empty();
     }
 
-    private Integer getPortFromPortString(String service, JsonNode portValue) {
+    private Integer getPortFromPortString(String service, String portValue) {
         try {
-            return Integer.parseInt(portValue.asText());
+            return Integer.valueOf(portValue);
         } catch (NumberFormatException e) {
             throw new IllegalArgumentException(String.format("In the blueprint '%s' service has invalid port config. "
-                    + "Port value is: '%s'.", service, portValue.asText()), e);
+                    + "Port value is: '%s'.", service, portValue), e);
         }
     }
 
     private Integer getPortFromHost(String service, String host) {
         try {
             String portString = StringUtils.substringAfterLast(host, ":");
-            return Integer.parseInt(portString);
+            return Integer.valueOf(portString);
         } catch (NumberFormatException e) {
             throw new IllegalArgumentException(String.format("In the blueprint '%s' service has invalid host config. "
                     + "Host value is: '%s'.", service, host), e);

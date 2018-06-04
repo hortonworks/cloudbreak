@@ -1,13 +1,16 @@
-
 {
   "Blueprints": {
-    "blueprint_name": "hdp26-data-science-spark2",
+    "blueprint_name": "hdp26-edw-analytics",
     "stack_name": "HDP",
     "stack_version": "2.6"
   },
   "settings": [
     {
-      "recovery_settings": []
+      "recovery_settings": [
+        {
+          "recovery_enabled": "true"
+        }
+      ]
     },
     {
       "service_settings": [
@@ -23,30 +26,42 @@
   ],
   "configurations": [
     {
-      "hive-site": {
+      "hive-interactive-env": {
         "properties": {
-          "hive.server2.thrift.http.port": 123,
-          "hive.exec.compress.output": "true",
-          "hive.merge.mapfiles": "true",
-          "hive.server2.tez.initialize.default.sessions": "true",
-          "hive.server2.transport.mode": "http"
+          "enable_hive_interactive": "true",
+          "num_llap_nodes": "2"
         }
       }
     },
     {
-      "zeppelin-config": {
-        "zeppelin.server.port": "213"
-      }
-    },
-    {
-      "yarn-site": {
-        "yarn.resourcemanager.webapp.address": "http://localhost:321",
-        "yarn.acl.enable": "true"
+      "core-site": {
+        "fs.trash.interval": "4320"
       }
     },
     {
       "hdfs-site": {
         "dfs.namenode.safemode.threshold-pct": "0.99"
+      }
+    },
+    {
+      "hive-interactive-site": {
+        "hive.exec.orc.split.strategy": "BI",
+        "hive.stats.fetch.bitvector": "true",
+        "hive.metastore.rawstore.impl": "org.apache.hadoop.hive.metastore.cache.CachedStore"
+      }
+    },
+    {
+      "hive-site": {
+        "properties": {
+          "hive.exec.compress.output": "true",
+          "hive.merge.mapfiles": "true",
+          "hive.server2.tez.initialize.default.sessions": "true",
+          "hive.server2.transport.mode": "http",
+          "javax.jdo.option.ConnectionURL": "jdbc:postgresql://localhost:5432/hive",
+          "javax.jdo.option.ConnectionDriverName": "org.postgresql.Driver",
+          "javax.jdo.option.ConnectionUserName": "hive",
+          "javax.jdo.option.ConnectionPassword": "hiveSecurePassword"
+        }
       }
     },
     {
@@ -57,8 +72,32 @@
       }
     },
     {
-      "core-site": {
-        "fs.trash.interval": "4320"
+      "tez-site": {
+        "tez.runtime.shuffle.parallel.copies": "4",
+        "tez.runtime.enable.final-merge.in.output": "false",
+        "tez.am.am-rm.heartbeat.interval-ms.max": "2000"
+      }
+    },
+    {
+      "yarn-site": {
+        "yarn.acl.enable": "true"
+      }
+    },
+    {
+      "zeppelin-shiro-ini": {
+        "shiro_ini_content": "\n[users]\n# List of users with their password allowed to access Zeppelin.\n# To use a different strategy (LDAP / Database / ...) check the shiro doc at http://shiro.apache.org/configuration.html#Configuration-INISections\n\nadmin = admin\n\n# Sample LDAP configuration, for user Authentication, currently tested for single Realm\n[main]\nsessionManager = org.apache.shiro.web.session.mgt.DefaultWebSessionManager\nsecurityManager.sessionManager = $sessionManager\n# 86,400,000 milliseconds = 24 hour\nsecurityManager.sessionManager.globalSessionTimeout = 86400000\nshiro.loginUrl = /api/login\n\n[urls]\n# anon means the access is anonymous.\n# authcBasic means Basic Auth Security\n# To enfore security, comment the line below and uncomment the next one\n/api/version = anon\n#/** = anon\n/** = authc"
+      }
+    },
+    {
+      "hive-env": {
+        "hive_database": "Existing PostgreSQL Database",
+        "hive_database_type": "postgres"
+      }
+    },
+    {
+      "cluster-env": {
+        "recovery_enabled": "true",
+        "recovery_type": "AUTO_START"
       }
     }
   ],
@@ -89,7 +128,13 @@
           "name": "HIVE_SERVER"
         },
         {
+          "name": "HIVE_SERVER_INTERACTIVE"
+        },
+        {
           "name": "JOURNALNODE"
+        },
+        {
+          "name": "LIVY_SERVER"
         },
         {
           "name": "MAPREDUCE2_CLIENT"
@@ -113,22 +158,13 @@
           "name": "SECONDARY_NAMENODE"
         },
         {
-          "name": "LIVY_SERVER"
-        },
-        {
-          "name": "SPARK2_CLIENT"
-        },
-        {
-          "name": "SPARK2_JOBHISTORYSERVER"
+          "name": "SLIDER"
         },
         {
           "name": "SPARK_CLIENT"
         },
         {
           "name": "SPARK_JOBHISTORYSERVER"
-        },
-        {
-          "name": "SQOOP"
         },
         {
           "name": "TEZ_CLIENT"
@@ -162,9 +198,6 @@
           "name": "TEZ_CLIENT"
         },
         {
-          "name": "SPARK2_CLIENT"
-        },
-        {
           "name": "SPARK_CLIENT"
         },
         {
@@ -188,9 +221,6 @@
         },
         {
           "name": "TEZ_CLIENT"
-        },
-        {
-          "name": "SPARK2_CLIENT"
         },
         {
           "name": "SPARK_CLIENT"

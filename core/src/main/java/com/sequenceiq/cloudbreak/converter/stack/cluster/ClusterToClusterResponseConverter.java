@@ -30,6 +30,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.json.JsonHelper;
 import com.sequenceiq.cloudbreak.service.ClusterComponentConfigProvider;
+import com.sequenceiq.cloudbreak.service.ServiceEndpointCollector;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;

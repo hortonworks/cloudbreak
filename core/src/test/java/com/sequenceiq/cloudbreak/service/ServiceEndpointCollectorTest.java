@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.converter.stack.cluster;
+package com.sequenceiq.cloudbreak.service;
 
 import static com.sequenceiq.cloudbreak.api.model.ExposedService.AMBARI;
 import static com.sequenceiq.cloudbreak.api.model.ExposedService.ATLAS;
@@ -26,6 +26,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -72,6 +73,9 @@ public class ServiceEndpointCollectorTest {
 
     @Mock
     private StackServiceComponentDescriptors mockStackDescriptors;
+
+    @Spy
+    private AmbariHaComponentFilter ambariHaComponentFilter;
 
     @InjectMocks
     private final ServiceEndpointCollector underTest = new ServiceEndpointCollector();
