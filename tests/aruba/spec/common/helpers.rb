@@ -83,6 +83,7 @@ RSpec.shared_context "shared helpers", :a => :b do
   def cluster_exists(cb, cluster_name)
     cluster_is_found = false
     result = cb.cluster.list.build(false)
+    expect(result.stdout.empty?).to be_falsy
     json_output = JSON.parse(result.stdout)
     json_output.each do |s|
       if s["Name"] == cluster_name

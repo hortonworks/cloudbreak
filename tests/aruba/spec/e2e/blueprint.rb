@@ -14,6 +14,22 @@ RSpec.describe 'Blueprint test cases', :type => :aruba do
   include_context "shared command helpers"    
   include_context "shared vars"
 
+  before(:all) do
+    @blueprint_exist = blueprint_list_with_check(@blueprint_name_url)
+    if @blueprint_exist
+      result = cb.blueprint.delete.name(@blueprint_name_url).build
+      expect(result.exit_status).to eql 0
+    end  
+  end
+
+  before(:all) do
+    @blueprint_exist = blueprint_list_with_check(@blueprint_name_file)
+    if @blueprint_exist
+      result = cb.blueprint.delete.name(@blueprint_name_file).build
+      expect(result.exit_status).to eql 0
+    end  
+  end  
+
   it "Blueprint - Create from url - Describe - Delete " do 
     bp_create_describe_delete(cb, @blueprint_name_url) do
       cb.blueprint.create.from_url.name(@blueprint_name_url).url(@blueprint_url).build
@@ -41,7 +57,9 @@ RSpec.describe 'Blueprint test cases', :type => :aruba do
   it "Blueprint - Describe a default blueprint" do
     result = cb.blueprint.describe.name(@default_blueprint_name).build 
     expect(result.exit_status).to eql 0
-    expect(JSON.parse(result.stdout)).to include_json(
+    expect(result.stdout.empty?).to be_falsy 
+    json = JSON.parse(result.stdout)
+    expect(json).to include_json(
       Name: /.*/,
       Description: /.*/,  
       HDPVersion: /.*/,
@@ -53,15 +71,16 @@ RSpec.describe 'Blueprint test cases', :type => :aruba do
   it "Blueprint - List - All existing" do
     result = cb.blueprint.list.build 
     expect(result.exit_status).to eql 0
-
-    JSON.parse(result.stdout).each do |s|    
+    expect(result.stdout.empty?).to be_falsy
+    json = JSON.parse(result.stdout)
+    json.each do |s|    
       expect(s).to include_json(
         Name: /.*/,
         Description: /.*/,  
         HDPVersion: /.*/,
         HostgroupCount: /.*/,
         Tags: /.*/     
-    )
+      )
     end       
   end              
 end  

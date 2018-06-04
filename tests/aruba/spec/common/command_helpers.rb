@@ -51,9 +51,8 @@ RSpec.shared_context "shared command helpers", :a => :b do
     result = cb.credential.describe.name(cred_name).build 
     expect(result.exit_status).to eql 0
 
-    # To do
-    # result = credential_list(cred_name)
-    # expect(result).to be_truthy            
+    result = credential_list_with_check(cred_name)
+    expect(result).to be_truthy            
 
     result = cb.credential.delete.name(cred_name).build 
     expect(result.exit_status).to eql 0        
@@ -64,8 +63,11 @@ RSpec.shared_context "shared command helpers", :a => :b do
 
     result = cb.recipe.list.build 
     expect(result.exit_status).to eql 0 
+    
+    expect(result.stdout.empty?).to be_falsy
+    json = JSON.parse(result.stdout)
 
-    JSON.parse(result.stdout).each do |s|
+    json.each do |s|
        if s["Name"] == recipe_name
         got_recipe = true
         return true
@@ -80,9 +82,74 @@ RSpec.shared_context "shared command helpers", :a => :b do
     return false  
   end
 
+  def recipe_exist(json, recipe_name)
+    got_recipe = false
+    json.each do |s|
+       if s["Name"] == recipe_name
+        got_recipe = true
+        return true
+       end
+    end
+    return false   
+  end  
+
+  def blueprint_list_with_check(bp_name) 
+    got_bp = false
+
+    result = cb.blueprint.list.build 
+    expect(result.exit_status).to eql 0 
+    
+    expect(result.stdout.empty?).to be_falsy
+    json = JSON.parse(result.stdout)
+
+    json.each do |s|
+       if s["Name"] == bp_name
+        got_bp = true
+        return true
+       end
+    end 
+    return false  
+  end
+
+  def credential_list_with_check(cred_name) 
+    got_cred = false
+
+    result = cb.credential.list.build 
+    expect(result.exit_status).to eql 0 
+    
+    expect(result.stdout.empty?).to be_falsy
+    json = JSON.parse(result.stdout)
+
+    json.each do |s|
+       if s["Name"] == cred_name
+        got_cred = true
+        return true
+       end
+    end 
+    return false  
+  end
+
+  def imagecat_list_with_check(ic_name) 
+    got_ic = false
+
+    result = cb.imagecatalog.list.build 
+    expect(result.exit_status).to eql 0 
+    
+    expect(result.stdout.empty?).to be_falsy
+    json = JSON.parse(result.stdout)
+
+    json.each do |s|
+       if s["Name"] == ic_name
+        got_cred = true
+        return true
+       end
+    end 
+    return false  
+  end          
+
   def get_region(result)
+    expect(result.empty?).to be_falsy
     json = JSON.parse(result)
-    expect(json.empty?).to be_falsy
     json.each  do |a|
       return a["Name"]
     end

@@ -18,7 +18,7 @@ RSpec.describe 'Image catalog test cases', :type => :aruba do
   
   it "Imagecatalog - Create" do 
     with_environment 'DEBUG' => '1' do
-      result = cb.imagecatalog.create.name(@image_catalog_name).url(@image_catalog_url).build  
+      result = cb.imagecatalog.create.name(@image_catalog_name).url(@image_catalog_url).build(false)  
       expect(result.stderr).to include("create imagecatalog took")    
     end
   end
@@ -26,7 +26,7 @@ RSpec.describe 'Image catalog test cases', :type => :aruba do
   it "Imagecatalog - Create - Invalid Url" do 
   	skip("BUG-97072")
     with_environment 'DEBUG' => '1' do
-      result = cb.imagecatalog.create.name(@image_catalog_name).url("http://www.google.com").build
+      result = cb.imagecatalog.create.name(@image_catalog_name).url("http://www.google.com").build(false)
       expect(result.stderr).to include("create imagecatalog took")    
     end
   end 
@@ -34,15 +34,15 @@ RSpec.describe 'Image catalog test cases', :type => :aruba do
   it "Imagecatalog - Create - Invalid json" do 
   	skip("BUG-97072")
     with_environment 'DEBUG' => '1' do
-      result = cb.imagecatalog.create.name(@image_catalog_name).url(@imagecatalog_invalid_json ).build 
+      result = cb.imagecatalog.create.name(@image_catalog_name).url(@imagecatalog_invalid_json ).build(false) 
       expect(result.stderr).to include("error")    
     end
   end  
 
   it "Imagecatalog - List" do
-    result = cb.imagecatalog.list.build
+    result = cb.imagecatalog.list.build(false)
     expect(result.exit_status).to eql 0
-
+    expect(result.stdout.empty?).to be_falsy
     JSON.parse(result.stdout).each do |s|    
       expect(s).to include_json(
       Name: /.*/,
@@ -54,7 +54,7 @@ RSpec.describe 'Image catalog test cases', :type => :aruba do
 
   it "Imagecatalog - Set default" do 
     with_environment 'DEBUG' => '1' do
-      result = cb.imagecatalog.set_default.name(@image_catalog_name).build  
+      result = cb.imagecatalog.set_default.name(@image_catalog_name).build(false)  
       expect(result.stderr).to include("set default imagecatalog took")    
     end
   end                

@@ -15,9 +15,21 @@ RSpec.describe 'Custer operation test cases', :type => :aruba do
   include_context "shared vars"
   
   before(:all) do
-    @credential_created = (cb.credential.create.openstack.keystone_v2.name(@os_credential_name).tenant_user(ENV['OS_V2_USERNAME']).
-       tenant_password(ENV['OS_V2_PASSWORD']).tenant_name(ENV['OS_V2_TENANT_NAME']).endpoint(ENV['OS_V2_ENDPOINT']).build).stderr.empty?
+    @credential_exist = credential_list_with_check(@os_credential_name) 
+    if !(@credential_exist)
+        @credential_created = (cb.credential.create.openstack.keystone_v2.name(@os_credential_name).tenant_user(ENV['OS_V2_USERNAME']).
+          tenant_password(ENV['OS_V2_PASSWORD']).tenant_name(ENV['OS_V2_TENANT_NAME']).endpoint(ENV['OS_V2_ENDPOINT']).build).stderr.empty?
+    end
   end
+
+  before(:all) do
+    @cluster_exist = cluster_exists(cb, @os_cluster_name)
+    if (@cluster_exist)
+      result = cb.cluster.delete.name(@os_cluster_name).build
+      expect(result).to be_successfully_executed
+      expect(wait_for_cluster_deleted(cb, @os_cluster_name)).to be_falsy      
+    end
+  end  
   
   before(:each) do
     skip("Credential creation failed") unless @credential_created 
@@ -93,7 +105,8 @@ RSpec.describe 'Custer operation test cases', :type => :aruba do
 
   it "Generate reinstall template" do 
     result = cb.cluster.generate_reinstall_template.name(@os_cluster_name).blueprint_name(@default_blueprint_name).build
-    expect(result.exit_status).to eql 0  
+    expect(result.exit_status).to eql 0 
+    expect(result.stdout.empty?).to be_falsy 
     expect(JSON.parse(result.stdout)["blueprintName"]).to eq(@default_blueprint_name.gsub("'",""))    
   end           
 end
