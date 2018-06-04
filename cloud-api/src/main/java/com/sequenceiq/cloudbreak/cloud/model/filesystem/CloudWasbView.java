@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.model.filesystem;
 
+import java.util.Objects;
+
 public class CloudWasbView extends CloudFileSystemView {
 
     private String accountKey;
@@ -44,4 +46,25 @@ public class CloudWasbView extends CloudFileSystemView {
     public void setResourceGroupName(String resourceGroupName) {
         this.resourceGroupName = resourceGroupName;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof CloudWasbView)) {
+            return false;
+        }
+        CloudWasbView that = (CloudWasbView) o;
+        return isSecure() == that.isSecure()
+                && Objects.equals(getAccountKey(), that.getAccountKey())
+                && Objects.equals(getAccountName(), that.getAccountName())
+                && Objects.equals(getResourceGroupName(), that.getResourceGroupName());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getAccountKey(), getAccountName(), isSecure(), getResourceGroupName());
+    }
+
 }

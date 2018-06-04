@@ -1,18 +1,7 @@
 package com.sequenceiq.cloudbreak.converter.v2;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
-import javax.inject.Inject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
-
 import com.sequenceiq.cloudbreak.blueprint.BlueprintPreparationObject;
+import com.sequenceiq.cloudbreak.blueprint.BlueprintPreparationObject.Builder;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessingException;
 import com.sequenceiq.cloudbreak.blueprint.GeneralClusterConfigsProvider;
 import com.sequenceiq.cloudbreak.blueprint.filesystem.BaseFileSystemConfigurationsView;
@@ -43,11 +32,17 @@ import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.smartsense.SmartSenseSubscriptionService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
+import org.springframework.stereotype.Component;
+
+import javax.inject.Inject;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @Component
 public class StackToBlueprintPreparationObjectConverter extends AbstractConversionServiceAwareConverter<Stack, BlueprintPreparationObject> {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(StackToBlueprintPreparationObjectConverter.class);
 
     @Inject
     private HostGroupService hostGroupService;
@@ -108,7 +103,7 @@ public class StackToBlueprintPreparationObjectConverter extends AbstractConversi
             Map<String, Object> fixInputs = stackInputs.getFixInputs() == null ? new HashMap<>() : stackInputs.getFixInputs();
             fixInputs.putAll(stackInputs.getDatalakeInputs() == null ? new HashMap<>() : stackInputs.getDatalakeInputs());
 
-            return BlueprintPreparationObject.Builder.builder()
+            return Builder.builder()
                     .withFlexSubscription(source.getFlexSubscription())
                     .withRdsConfigs(postgresConfigService.createRdsConfigIfNeeded(source, cluster))
                     .withHostgroups(hostGroupService.getByCluster(cluster.getId()))

@@ -1,13 +1,14 @@
 package com.sequenceiq.cloudbreak.blueprint.template.views;
 
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
 import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessingException;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.blueprint.templates.BlueprintStackInfo;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 
 public class BlueprintView {
 
@@ -23,14 +24,14 @@ public class BlueprintView {
         this.blueprintText = blueprintText;
         this.type = type;
         this.version = version;
-        this.components = prepareComponents(blueprintText);
+        components = prepareComponents(blueprintText);
     }
 
     public BlueprintView(Cluster cluster, BlueprintStackInfo blueprintStackInfo) {
-        this.blueprintText = cluster.getBlueprint().getBlueprintText();
-        this.type = blueprintStackInfo.getType();
-        this.version = blueprintStackInfo.getVersion();
-        this.components = prepareComponents(cluster.getBlueprint().getBlueprintText());
+        blueprintText = cluster.getBlueprint().getBlueprintText();
+        type = blueprintStackInfo.getType();
+        version = blueprintStackInfo.getVersion();
+        components = prepareComponents(cluster.getBlueprint().getBlueprintText());
     }
 
     private Set<String> prepareComponents(String blueprintText) {
@@ -66,7 +67,7 @@ public class BlueprintView {
     }
 
     public boolean isHdf() {
-        return "HDF".equals(type.toUpperCase());
+        return "HDF".equalsIgnoreCase(type);
     }
 
     public String getBlueprintText() {
@@ -80,4 +81,25 @@ public class BlueprintView {
     public void setComponents(Set<String> components) {
         this.components = components;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof BlueprintView)) {
+            return false;
+        }
+        BlueprintView that = (BlueprintView) o;
+        return Objects.equals(getBlueprintText(), that.getBlueprintText())
+                && Objects.equals(getVersion(), that.getVersion())
+                && Objects.equals(getType(), that.getType())
+                && Objects.equals(getComponents(), that.getComponents());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getBlueprintText(), getVersion(), getType(), getComponents());
+    }
+
 }
