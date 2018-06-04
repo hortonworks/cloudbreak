@@ -1,11 +1,5 @@
 package com.sequenceiq.cloudbreak.converter.v2;
 
-import javax.inject.Inject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
-
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.GatewayJson;
 import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
@@ -14,11 +8,12 @@ import com.sequenceiq.cloudbreak.controller.validation.stack.cluster.gateway.Gat
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.converter.util.GatewayConvertUtil;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
+import org.springframework.stereotype.Component;
+
+import javax.inject.Inject;
 
 @Component
 public class StackV2RequestToGatewayConverter extends AbstractConversionServiceAwareConverter<StackV2Request, Gateway> {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(StackV2RequestToGatewayConverter.class);
 
     @Inject
     private GatewayConvertUtil convertUtil;

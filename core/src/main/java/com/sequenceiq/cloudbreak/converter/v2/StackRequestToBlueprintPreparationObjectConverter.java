@@ -1,15 +1,5 @@
 package com.sequenceiq.cloudbreak.converter.v2;
 
-import java.io.IOException;
-import java.util.HashSet;
-import java.util.Set;
-
-import javax.inject.Inject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
-
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.model.ConfigsResponse;
 import com.sequenceiq.cloudbreak.api.model.SharedServiceRequest;
@@ -53,11 +43,16 @@ import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.sharedservice.SharedServiceConfigProvider;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
+import org.springframework.stereotype.Component;
+
+import javax.inject.Inject;
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
 
 @Component
 public class StackRequestToBlueprintPreparationObjectConverter extends AbstractConversionServiceAwareConverter<StackV2Request, BlueprintPreparationObject> {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(StackRequestToBlueprintPreparationObjectConverter.class);
 
     @Inject
     private FlexSubscriptionService flexSubscriptionService;
@@ -112,8 +107,8 @@ public class StackRequestToBlueprintPreparationObjectConverter extends AbstractC
         try {
             IdentityUser identityUser = userDetailsService.getDetails(source.getOwner(), UserFilterField.USERID);
             Credential credential = credentialService.get(source.getGeneral().getCredentialName(), identityUser.getAccount());
-            FlexSubscription flexSubscription = getFlexSubscription(source);
-            String smartsenseSubscriptionId = getSmartsenseSubscriptionId(source, flexSubscription);
+            Optional<FlexSubscription> flexSubscription = getFlexSubscription(source);
+            Optional<String> smartsenseSubscriptionId = getSmartsenseSubscriptionId(flexSubscription);
             KerberosConfig kerberosConfig = getKerberosConfig(source);
             LdapConfig ldapConfig = getLdapConfig(source, identityUser);
             BaseFileSystemConfigurationsView fileSystemConfigurationView = getFileSystemConfigurationView(source, credential);
@@ -125,7 +120,7 @@ public class StackRequestToBlueprintPreparationObjectConverter extends AbstractC
             BlueprintView blueprintView = new BlueprintView(blueprint.getBlueprintText(), blueprintStackInfo.getVersion(), blueprintStackInfo.getType());
             GeneralClusterConfigs generalClusterConfigs = generalClusterConfigsProvider.generalClusterConfigs(source, identityUser);
             Builder builder = Builder.builder()
-                    .withFlexSubscription(flexSubscription)
+                    .withFlexSubscription(flexSubscription.orElse(null))
                     .withRdsConfigs(rdsConfigs)
                     .withHostgroupViews(hostgroupViews)
                     .withGateway(gateway)
@@ -133,7 +128,7 @@ public class StackRequestToBlueprintPreparationObjectConverter extends AbstractC
                     .withStackRepoDetailsHdpVersion(blueprintStackInfo.getVersion())
                     .withFileSystemConfigurationView(fileSystemConfigurationView)
                     .withGeneralClusterConfigs(generalClusterConfigs)
-                    .withSmartSenseSubscriptionId(smartsenseSubscriptionId)
+                    .withSmartSenseSubscriptionId(smartsenseSubscriptionId.orElse(null))
                     .withLdapConfig(ldapConfig)
                     .withKerberosConfig(kerberosConfig);
 
@@ -162,20 +157,16 @@ public class StackRequestToBlueprintPreparationObjectConverter extends AbstractC
         return blueprint;
     }
 
-    private FlexSubscription getFlexSubscription(StackV2Request source) {
-        FlexSubscription flexSubscription = null;
-        if (source.getFlexId() != null) {
-            flexSubscription = flexSubscriptionService.findOneById(source.getFlexId());
-        }
-        return flexSubscription;
+    private Optional<FlexSubscription> getFlexSubscription(StackV2Request source) {
+        return source.getFlexId() != null
+                ? Optional.ofNullable(flexSubscriptionService.findOneById(source.getFlexId()))
+                : Optional.empty();
     }
 
-    private String getSmartsenseSubscriptionId(StackV2Request source, FlexSubscription flexSubscription) {
-        String smartsenseSubscriptionId = null;
-        if (source.getFlexId() != null) {
-            smartsenseSubscriptionId = flexSubscription.getSubscriptionId();
-        }
-        return smartsenseSubscriptionId;
+    private Optional<String> getSmartsenseSubscriptionId(Optional<FlexSubscription> flexSubscription) {
+        return flexSubscription.isPresent()
+                ? Optional.ofNullable(flexSubscription.get().getSubscriptionId())
+                : Optional.empty();
     }
 
     private Set<HostgroupView> getHostgroupViews(StackV2Request source) {
