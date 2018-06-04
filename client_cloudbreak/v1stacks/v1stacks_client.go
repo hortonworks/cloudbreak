@@ -85,6 +85,36 @@ func (a *Client) DeleteInstanceStack(params *DeleteInstanceStackParams) error {
 }
 
 /*
+DeleteInstancesStack deletes instance resource from stack
+
+Stacks are template instances - a running cloud infrastructure created based on a template. Stacks are always launched on behalf of a cloud user account. Stacks support a wide range of resources, allowing you to build a highly available, reliable, and scalable infrastructure for your application needs.
+*/
+func (a *Client) DeleteInstancesStack(params *DeleteInstancesStackParams) error {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewDeleteInstancesStackParams()
+	}
+
+	_, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "deleteInstancesStack",
+		Method:             "DELETE",
+		PathPattern:        "/v1/stacks/{stackId}/deleteInstances",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &DeleteInstancesStackReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return err
+	}
+	return nil
+
+}
+
+/*
 DeletePrivateStack deletes private stack by name
 
 Stacks are template instances - a running cloud infrastructure created based on a template. Stacks are always launched on behalf of a cloud user account. Stacks support a wide range of resources, allowing you to build a highly available, reliable, and scalable infrastructure for your application needs.
@@ -741,6 +771,36 @@ func (a *Client) StatusStack(params *StatusStackParams) (*StatusStackOK, error) 
 		return nil, err
 	}
 	return result.(*StatusStackOK), nil
+
+}
+
+/*
+UpdateGatewayTopologies updates topologies of a gateway
+
+Gateway is an Apache Knox Gateway, which is an Application Gateway for interacting with REST APIs andUIs of Apache Hadoop deployments. Provides Authentication and other services.
+*/
+func (a *Client) UpdateGatewayTopologies(params *UpdateGatewayTopologiesParams) (*UpdateGatewayTopologiesOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewUpdateGatewayTopologiesParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "updateGatewayTopologies",
+		Method:             "PUT",
+		PathPattern:        "/v1/stacks/{id}/cluster/gateway",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &UpdateGatewayTopologiesReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*UpdateGatewayTopologiesOK), nil
 
 }
 

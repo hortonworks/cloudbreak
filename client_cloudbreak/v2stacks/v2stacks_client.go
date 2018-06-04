@@ -55,6 +55,36 @@ func (a *Client) DeleteInstanceStackV2(params *DeleteInstanceStackV2Params) erro
 }
 
 /*
+DeleteInstancesStackV2 deletes instance resource from stack
+
+Stacks are template instances - a running cloud infrastructure created based on a template. Stacks are always launched on behalf of a cloud user account. Stacks support a wide range of resources, allowing you to build a highly available, reliable, and scalable infrastructure for your application needs.
+*/
+func (a *Client) DeleteInstancesStackV2(params *DeleteInstancesStackV2Params) error {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewDeleteInstancesStackV2Params()
+	}
+
+	_, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "deleteInstancesStackV2",
+		Method:             "DELETE",
+		PathPattern:        "/v2/stacks/{stackId}/deleteInstances",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &DeleteInstancesStackV2Reader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return err
+	}
+	return nil
+
+}
+
+/*
 DeletePrivateStackV2 deletes private stack by name
 
 Stacks are template instances - a running cloud infrastructure created based on a template. Stacks are always launched on behalf of a cloud user account. Stacks support a wide range of resources, allowing you to build a highly available, reliable, and scalable infrastructure for your application needs.
@@ -554,36 +584,6 @@ func (a *Client) PutreinstallStackV2(params *PutreinstallStackV2Params) error {
 		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &PutreinstallStackV2Reader{formats: a.formats},
-		Context:            params.Context,
-		Client:             params.HTTPClient,
-	})
-	if err != nil {
-		return err
-	}
-	return nil
-
-}
-
-/*
-PutrepairStackV2 updates stack by name
-
-Stacks are template instances - a running cloud infrastructure created based on a template. Stacks are always launched on behalf of a cloud user account. Stacks support a wide range of resources, allowing you to build a highly available, reliable, and scalable infrastructure for your application needs.
-*/
-func (a *Client) PutrepairStackV2(params *PutrepairStackV2Params) error {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewPutrepairStackV2Params()
-	}
-
-	_, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "putrepairStackV2",
-		Method:             "PUT",
-		PathPattern:        "/v2/stacks/repair/{name}",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
-		Params:             params,
-		Reader:             &PutrepairStackV2Reader{formats: a.formats},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})

@@ -74,6 +74,10 @@ type LdapConfigRequest struct {
 	// Minimum: 1
 	ServerPort *int32 `json:"serverPort"`
 
+	// template for pattern based user search for authentication (e.g. cn={0},dc=hadoop,dc=apache,dc=org)
+	// Required: true
+	UserDnPattern *string `json:"userDnPattern"`
+
 	// attribute name for simplified search filter (e.g. sAMAccountName in case of AD, UID or cn for LDAP).
 	UserNameAttribute string `json:"userNameAttribute,omitempty"`
 
@@ -112,6 +116,8 @@ type LdapConfigRequest struct {
 /* polymorph LdapConfigRequest serverHost false */
 
 /* polymorph LdapConfigRequest serverPort false */
+
+/* polymorph LdapConfigRequest userDnPattern false */
 
 /* polymorph LdapConfigRequest userNameAttribute false */
 
@@ -154,6 +160,11 @@ func (m *LdapConfigRequest) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateServerPort(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateUserDnPattern(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -286,6 +297,15 @@ func (m *LdapConfigRequest) validateServerPort(formats strfmt.Registry) error {
 	}
 
 	if err := validate.MaximumInt("serverPort", "body", int64(*m.ServerPort), 65535, false); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *LdapConfigRequest) validateUserDnPattern(formats strfmt.Registry) error {
+
+	if err := validate.Required("userDnPattern", "body", m.UserDnPattern); err != nil {
 		return err
 	}
 

@@ -6,6 +6,9 @@ import (
 	"crypto/tls"
 	"errors"
 	"fmt"
+	"strconv"
+	"strings"
+
 	log "github.com/Sirupsen/logrus"
 	"github.com/hortonworks/cb-cli/cli/utils"
 	"github.com/hortonworks/cb-cli/client_cloudbreak/v1ldap"
@@ -13,12 +16,10 @@ import (
 	"github.com/urfave/cli"
 	"golang.org/x/text/encoding/unicode"
 	ldaputils "gopkg.in/ldap.v2"
-	"strconv"
-	"strings"
 )
 
 var LdapHeader = []string{"Name", "Server", "Domain", "BindDn", "DirectoryType",
-	"UserSearchBase", "UserNameAttribute", "UserObjectClass",
+	"UserSearchBase", "UserDnPattern", "UserNameAttribute", "UserObjectClass",
 	"GroupMemberAttribute", "GroupNameAttribute", "GroupObjectClass", "GroupSearchBase"}
 
 type ldap struct {
@@ -28,6 +29,7 @@ type ldap struct {
 	BindDn               string `json:"BindDn" yaml:"BindDn"`
 	DirectoryType        string `json:"DirectoryType" yaml:"DirectoryType"`
 	UserSearchBase       string `json:"UserSearchBase" yaml:"UserSearchBase"`
+	UserDnPattern        string `json:"UserDnPattern" yaml:"UserDnPattern"`
 	UserNameAttribute    string `json:"UserNameAttribute,omitempty" yaml:"UserNameAttribute,omitempty"`
 	UserObjectClass      string `json:"UserObjectClass,omitempty" yaml:"UserObjectClass,omitempty"`
 	GroupMemberAttribute string `json:"GroupMemberAttribute,omitempty" yaml:"GroupMemberAttribute,omitempty"`
@@ -38,7 +40,7 @@ type ldap struct {
 }
 
 func (l *ldap) DataAsStringArray() []string {
-	return []string{l.Name, l.Server, l.Domain, l.BindDn, l.DirectoryType, l.UserSearchBase, l.UserNameAttribute,
+	return []string{l.Name, l.Server, l.Domain, l.BindDn, l.DirectoryType, l.UserSearchBase, l.UserDnPattern, l.UserNameAttribute,
 		l.UserObjectClass, l.GroupMemberAttribute, l.GroupNameAttribute, l.GroupObjectClass, l.GroupSearchBase}
 }
 
@@ -80,6 +82,7 @@ func CreateLDAP(c *cli.Context) error {
 
 	directoryType := c.String(FlLdapDirectoryType.Name)
 	userSearchBase := c.String(FlLdapUserSearchBase.Name)
+	userDnPattern := c.String(FlLdapUserDnPattern.Name)
 	userNameAttribute := c.String(FlLdapUserNameAttribute.Name)
 	userObjectClass := c.String(FlLdapUserObjectClass.Name)
 
@@ -102,11 +105,11 @@ func CreateLDAP(c *cli.Context) error {
 	cbClient := NewCloudbreakHTTPClientFromContext(c)
 
 	return createLDAPImpl(cbClient.Cloudbreak.V1ldap, int32(serverPort), name, server, protocol, domain, bindDn, bindPassword, directoryType,
-		userSearchBase, userNameAttribute, userObjectClass, groupSearchBase, groupMemberAttribute, groupNameAttribute, groupObjectClass, adminGroup, public)
+		userSearchBase, userDnPattern, userNameAttribute, userObjectClass, groupSearchBase, groupMemberAttribute, groupNameAttribute, groupObjectClass, adminGroup, public)
 }
 
 func createLDAPImpl(ldapClient ldapClient, port int32, name, server, protocol, domain, bindDn, bindPassword, directoryType,
-	userSearchBase, userNameAttribute, userObjectClass, groupSearchBase, groupMemberAttribute, groupNameAttribute,
+	userSearchBase, userDnPattern, userNameAttribute, userObjectClass, groupSearchBase, groupMemberAttribute, groupNameAttribute,
 	groupObjectClass, adminGroup string, public bool) error {
 	defer utils.TimeTrack(time.Now(), "create ldap")
 
@@ -121,6 +124,7 @@ func createLDAPImpl(ldapClient ldapClient, port int32, name, server, protocol, d
 		BindPassword:         &bindPassword,
 		DirectoryType:        directoryType,
 		UserSearchBase:       &userSearchBase,
+		UserDnPattern:        &userDnPattern,
 		UserNameAttribute:    userNameAttribute,
 		UserObjectClass:      userObjectClass,
 		GroupMemberAttribute: groupMemberAttribute,
@@ -176,6 +180,7 @@ func listLdapsImpl(ldapClient ldapClient, writer func([]string, []utils.Row)) er
 			BindDn:               utils.SafeStringConvert(l.BindDn),
 			DirectoryType:        l.DirectoryType,
 			UserSearchBase:       utils.SafeStringConvert(l.UserSearchBase),
+			UserDnPattern:        utils.SafeStringConvert(l.UserDnPattern),
 			UserNameAttribute:    l.UserNameAttribute,
 			UserObjectClass:      l.UserObjectClass,
 			GroupMemberAttribute: l.GroupMemberAttribute,

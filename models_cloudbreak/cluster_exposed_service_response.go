@@ -6,10 +6,13 @@ package models_cloudbreak
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"encoding/json"
+
 	strfmt "github.com/go-openapi/strfmt"
 
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
+	"github.com/go-openapi/validate"
 )
 
 // ClusterExposedServiceResponse cluster exposed service response
@@ -22,6 +25,9 @@ type ClusterExposedServiceResponse struct {
 
 	// knox service
 	KnoxService string `json:"knoxService,omitempty"`
+
+	// mode
+	Mode string `json:"mode,omitempty"`
 
 	// open
 	Open *bool `json:"open,omitempty"`
@@ -37,6 +43,8 @@ type ClusterExposedServiceResponse struct {
 
 /* polymorph ClusterExposedServiceResponse knoxService false */
 
+/* polymorph ClusterExposedServiceResponse mode false */
+
 /* polymorph ClusterExposedServiceResponse open false */
 
 /* polymorph ClusterExposedServiceResponse serviceName false */
@@ -47,9 +55,55 @@ type ClusterExposedServiceResponse struct {
 func (m *ClusterExposedServiceResponse) Validate(formats strfmt.Registry) error {
 	var res []error
 
+	if err := m.validateMode(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+var clusterExposedServiceResponseTypeModePropEnum []interface{}
+
+func init() {
+	var res []string
+	if err := json.Unmarshal([]byte(`["PROXY_SSO","PROXY"]`), &res); err != nil {
+		panic(err)
+	}
+	for _, v := range res {
+		clusterExposedServiceResponseTypeModePropEnum = append(clusterExposedServiceResponseTypeModePropEnum, v)
+	}
+}
+
+const (
+	// ClusterExposedServiceResponseModePROXYSSO captures enum value "PROXY_SSO"
+	ClusterExposedServiceResponseModePROXYSSO string = "PROXY_SSO"
+	// ClusterExposedServiceResponseModePROXY captures enum value "PROXY"
+	ClusterExposedServiceResponseModePROXY string = "PROXY"
+)
+
+// prop value enum
+func (m *ClusterExposedServiceResponse) validateModeEnum(path, location string, value string) error {
+	if err := validate.Enum(path, location, value, clusterExposedServiceResponseTypeModePropEnum); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *ClusterExposedServiceResponse) validateMode(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Mode) { // not required
+		return nil
+	}
+
+	// value enum
+	if err := m.validateModeEnum("mode", "body", m.Mode); err != nil {
+		return err
+	}
+
 	return nil
 }
 

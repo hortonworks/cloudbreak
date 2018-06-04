@@ -421,6 +421,13 @@ var (
 			Usage: "ldap user search base (e.g: CN=Users,DC=ad,DC=cb,DC=com)",
 		},
 	}
+	FlLdapUserDnPattern = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "ldap-user-dn-pattern",
+			Usage: "ldap userDnPattern (e.g: CN={0},DC=ad,DC=cb,DC=com)",
+		},
+	}
 	FlLdapGroupSearchBase = StringFlag{
 		RequiredFlag: REQUIRED,
 		StringFlag: cli.StringFlag{
