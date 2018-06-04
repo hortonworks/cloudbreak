@@ -80,7 +80,7 @@ public class PlatformParametersTest {
 
         @Override
         public TagSpecification tagSpecification() {
-            return new TagSpecification(1, 256, "keyValidator", 256, "valueValidator");
+            return new TagSpecification(1, 5, 256, "keyValidator", 5, 256, "valueValidator");
         }
 
         @Override
