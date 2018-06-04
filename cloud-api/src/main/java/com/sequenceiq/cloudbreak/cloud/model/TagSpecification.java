@@ -4,19 +4,26 @@ public class TagSpecification {
 
     private final Integer maxAmount;
 
-    private final Integer keyLength;
+    private final Integer minKeyLength;
+
+    private final Integer maxKeyLength;
 
     private final String keyValidator;
 
-    private final Integer valueLength;
+    private final Integer minValueLength;
+
+    private final Integer maxValueLength;
 
     private final String valueValidator;
 
-    public TagSpecification(Integer maxAmount, Integer keyLength, String keyValidator, Integer valueLength, String valueValidator) {
+    public TagSpecification(Integer maxAmount, Integer minKeyLength, Integer maxKeyLength, String keyValidator, Integer minValueLength,
+            Integer maxValueLength, String valueValidator) {
         this.maxAmount = maxAmount;
-        this.keyLength = keyLength;
+        this.minKeyLength = minKeyLength;
+        this.maxKeyLength = maxKeyLength;
         this.keyValidator = keyValidator;
-        this.valueLength = valueLength;
+        this.maxValueLength = maxValueLength;
+        this.minValueLength = minValueLength;
         this.valueValidator = valueValidator;
     }
 
@@ -24,19 +31,27 @@ public class TagSpecification {
         return maxAmount;
     }
 
-    public Integer getKeyLength() {
-        return keyLength;
+    public Integer getMaxKeyLength() {
+        return maxKeyLength;
     }
 
     public String getKeyValidator() {
         return keyValidator;
     }
 
-    public Integer getValueLength() {
-        return valueLength;
+    public Integer getMaxValueLength() {
+        return maxValueLength;
     }
 
     public String getValueValidator() {
         return valueValidator;
+    }
+
+    public Integer getMinKeyLength() {
+        return minKeyLength;
+    }
+
+    public Integer getMinValueLength() {
+        return minValueLength;
     }
 }

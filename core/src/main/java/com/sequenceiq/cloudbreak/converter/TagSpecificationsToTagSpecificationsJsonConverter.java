@@ -27,9 +27,13 @@ public class TagSpecificationsToTagSpecificationsJsonConverter
             if (ts != null) {
                 specification = new HashMap<>();
                 specification.put("maxAmount", ts.getMaxAmount());
-                specification.put("keyLength", ts.getKeyLength());
+                specification.put("minKeyLength", ts.getMinKeyLength());
+                specification.put("maxKeyLength", ts.getMaxKeyLength());
+                specification.put("keyLength", ts.getMaxKeyLength());
                 specification.put("keyValidator", ts.getKeyValidator());
-                specification.put("valueLength", ts.getValueLength());
+                specification.put("minValueLength", ts.getMinValueLength());
+                specification.put("maxValueLength", ts.getMaxValueLength());
+                specification.put("valueLength", ts.getMaxValueLength());
                 specification.put("valueValidator", ts.getValueValidator());
             }
             specifications.put(p.value(), specification);

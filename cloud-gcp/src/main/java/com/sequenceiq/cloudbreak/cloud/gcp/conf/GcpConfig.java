@@ -12,20 +12,26 @@ public class GcpConfig {
     @Value("${cb.gcp.tag.amount:64}")
     private Integer maxAmount;
 
-    @Value("${cb.gcp.tag.key.length:63}")
-    private Integer keyLength;
+    @Value("${cb.gcp.tag.key.min.length:1}")
+    private Integer minKeyLength;
+
+    @Value("${cb.gcp.tag.key.max.length:63}")
+    private Integer maxKeyLength;
 
     @Value("${cb.gcp.tag.key.validator:^([a-z]+)([a-z\\d-]+)$}")
     private String keyValidator;
 
-    @Value("${cb.gcp.tag.value.length:63}")
-    private Integer valueLength;
+    @Value("${cb.gcp.tag.value.min.length:1}")
+    private Integer minValueLength;
+
+    @Value("${cb.gcp.tag.value.max.length:63}")
+    private Integer maxValueLength;
 
     @Value("${cb.gcp.tag.value.validator:^([a-z0-9]+)([a-z\\d-]+)$}")
     private String valueValidator;
 
     @Bean(name = "GcpTagSpecification")
     public TagSpecification getTagSpecification() {
-        return new TagSpecification(maxAmount, keyLength, keyValidator, valueLength, valueValidator);
+        return new TagSpecification(maxAmount, minKeyLength, maxKeyLength, keyValidator, minValueLength, maxValueLength, valueValidator);
     }
 }
