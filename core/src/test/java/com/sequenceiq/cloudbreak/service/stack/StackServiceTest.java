@@ -30,6 +30,7 @@ import org.springframework.security.access.AccessDeniedException;
 
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
+import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
@@ -41,6 +42,7 @@ import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.StackAuthentication;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
@@ -158,6 +160,7 @@ public class StackServiceTest {
         when(instanceMetaDataRepository.findByInstanceId(STACK_ID, INSTANCE_ID)).thenReturn(instanceMetaData);
         when(stack.isPublicInAccount()).thenReturn(true);
         when(stack.getOwner()).thenReturn(OWNER);
+        when(stack.getId()).thenReturn(STACK_ID);
         when(user.getUserId()).thenReturn(USER_ID);
         when(instanceMetaData.getPublicIp()).thenReturn(INSTANCE_PUBLIC_IP);
         when(instanceMetaData.getInstanceMetadataType()).thenReturn(CORE);
@@ -179,6 +182,7 @@ public class StackServiceTest {
         when(stack.isPublicInAccount()).thenReturn(true);
         when(stack.getOwner()).thenReturn(OWNER);
         when(user.getUserId()).thenReturn(USER_ID);
+        when(stack.getId()).thenReturn(STACK_ID);
         when(instanceMetaData.getPublicIp()).thenReturn(INSTANCE_PUBLIC_IP);
         when(instanceMetaData.getInstanceMetadataType()).thenReturn(CORE);
         when(instanceMetaData2.getPublicIp()).thenReturn(INSTANCE_PUBLIC_IP2);
@@ -201,6 +205,7 @@ public class StackServiceTest {
         when(stackRepository.findOne(STACK_ID)).thenReturn(stack);
         when(instanceMetaDataRepository.findByInstanceId(STACK_ID, INSTANCE_ID)).thenReturn(instanceMetaData);
         when(instanceMetaData.getInstanceMetadataType()).thenReturn(GATEWAY);
+        when(stack.getId()).thenReturn(STACK_ID);
         when(instanceMetaData.getPublicIp()).thenReturn(INSTANCE_PUBLIC_IP);
         doThrow(new BadRequestException(exceptionMessage)).when(downscaleValidatorService).checkInstanceIsTheAmbariServerOrNot(INSTANCE_PUBLIC_IP, GATEWAY);
 
@@ -219,6 +224,7 @@ public class StackServiceTest {
     public void testRemoveInstancesWhenOneHostIsGatewayTypeThenWeShoulNotAllowTerminationWithException() {
         String exceptionMessage = String.format("Downscale for node [public IP: %s] is prohibited because it maintains the Ambari server", INSTANCE_PUBLIC_IP);
         when(stackRepository.findOne(STACK_ID)).thenReturn(stack);
+        when(stack.getId()).thenReturn(STACK_ID);
         when(instanceMetaDataRepository.findByInstanceId(STACK_ID, INSTANCE_ID)).thenReturn(instanceMetaData);
         when(instanceMetaData.getInstanceMetadataType()).thenReturn(GATEWAY);
         when(instanceMetaData.getPublicIp()).thenReturn(INSTANCE_PUBLIC_IP);
@@ -245,6 +251,7 @@ public class StackServiceTest {
         when(stack.isPublicInAccount()).thenReturn(false);
         when(stack.getOwner()).thenReturn(owner);
         when(user.getUserId()).thenReturn(userId);
+        when(stack.getId()).thenReturn(STACK_ID);
         when(instanceMetaData.getPublicIp()).thenReturn(INSTANCE_PUBLIC_IP);
         when(instanceMetaData.getInstanceMetadataType()).thenReturn(CORE);
         doNothing().when(downscaleValidatorService).checkInstanceIsTheAmbariServerOrNot(INSTANCE_PUBLIC_IP, CORE);
@@ -265,6 +272,7 @@ public class StackServiceTest {
     @Test
     public void testWhenInstanceMetaDataIsNullThenExceptionWouldThrown() {
         when(stackRepository.findOne(STACK_ID)).thenReturn(stack);
+        when(stack.getId()).thenReturn(STACK_ID);
         when(instanceMetaDataRepository.findByInstanceId(STACK_ID, INSTANCE_ID)).thenReturn(null);
         doNothing().when(authorizationService).hasReadPermission(stack);
 
@@ -272,6 +280,22 @@ public class StackServiceTest {
         expectedException.expectMessage(String.format("Metadata for instance %s has not found.", INSTANCE_ID));
 
         underTest.removeInstance(user, STACK_ID, INSTANCE_ID);
+    }
+
+    @Test
+    public void testWhenInstanceWhenValidateClusterStatus() {
+        Stack stack = new Stack();
+        stack.setId(STACK_ID);
+        Cluster cluster = new Cluster();
+        stack.setCluster(cluster);
+        cluster.setStatus(Status.STOPPED);
+        when(stackRepository.findOne(STACK_ID)).thenReturn(stack);
+        when(instanceMetaDataRepository.findByInstanceId(STACK_ID, INSTANCE_ID)).thenReturn(mock(InstanceMetaData.class));
+//        doNothing().when(authorizationService).hasReadPermission(stack);
+
+        underTest.removeInstance(user, STACK_ID, INSTANCE_ID);
+
+        verify(downscaleValidatorService, times(1)).checkClusterInValidStatus(cluster);
     }
 
     @Test
