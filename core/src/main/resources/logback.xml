@@ -45,4 +45,9 @@
         <appender-ref ref="STDOUT"/>
     </logger>
 
+    <logger name="com.zaxxer" level="${CB_LOG_LEVEL:-INFO}" additivity="false">
+        <appender-ref ref="CB_NODEID_BASED"/>
+        <appender-ref ref="STDOUT"/>
+    </logger>
+
 </configuration>
