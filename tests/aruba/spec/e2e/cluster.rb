@@ -19,6 +19,8 @@ RSpec.describe 'Custer operation test cases', :type => :aruba do
     if !(@credential_exist)
         @credential_created = (cb.credential.create.openstack.keystone_v2.name(@os_credential_name).tenant_user(ENV['OS_V2_USERNAME']).
           tenant_password(ENV['OS_V2_PASSWORD']).tenant_name(ENV['OS_V2_TENANT_NAME']).endpoint(ENV['OS_V2_ENDPOINT']).build).stderr.empty?
+    else
+      @credential_created = true
     end
   end
 
@@ -71,12 +73,11 @@ RSpec.describe 'Custer operation test cases', :type => :aruba do
 
       result = wait_for_status_cluster(cb, @os_cluster_name, "UPDATE_IN_PROGRESS")
       expect(result).to eq("UPDATE_IN_PROGRESS")
-
-      result = wait_for_status_cluster(cb, @os_cluster_name, "AVAILABLE")
-      expect(result).to eq("AVAILABLE")               
-
-      result = wait_for_status_cluster(cb, @os_cluster_name, "AVAILABLE")
-      expect(result).to eq("AVAILABLE")    
+      
+      for i in 0..5
+        result = wait_for_status_cluster(cb, @os_cluster_name, "AVAILABLE")
+        expect(result).to eq("AVAILABLE")               
+      end   
     end
   end
 
@@ -88,9 +89,10 @@ RSpec.describe 'Custer operation test cases', :type => :aruba do
       result = wait_for_status(cb, @os_cluster_name, "UPDATE_IN_PROGRESS")
       expect(result).to eq("UPDATE_IN_PROGRESS")
 
-      result = wait_for_status(cb, @os_cluster_name, "AVAILABLE")
-      expect(result).to eq("AVAILABLE")
-
+      for i in 0..2
+        result = wait_for_status(cb, @os_cluster_name, "AVAILABLE")
+        expect(result).to eq("AVAILABLE")               
+      end   
     end
   end
 
@@ -99,6 +101,7 @@ RSpec.describe 'Custer operation test cases', :type => :aruba do
   end
 
   it "Change ambari password" do    
+    skip_if(cb, @os_cluster_name, "AVAILABLE", "Test is skipped because of cluster is not AVAILABLE")
     result = cb.cluster.change_ambari_password.name(@os_cluster_name).ambari_user(@ambari_user).old_password(@ambari_password).new_password("admintemp").build
     expect(result.exit_status).to eql 0          
   end
