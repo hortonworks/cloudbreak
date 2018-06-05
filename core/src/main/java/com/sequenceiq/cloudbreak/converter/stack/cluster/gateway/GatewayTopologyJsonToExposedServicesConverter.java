@@ -14,12 +14,16 @@ import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.controller.validation.stack.cluster.gateway.ExposedServiceListValidator;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.ExposedServices;
+import com.sequenceiq.cloudbreak.service.AmbariHaComponentFilter;
 
 @Component
 public class GatewayTopologyJsonToExposedServicesConverter extends AbstractConversionServiceAwareConverter<GatewayTopologyJson, ExposedServices> {
 
     @Inject
     private ExposedServiceListValidator exposedServiceListValidator;
+
+    @Inject
+    private AmbariHaComponentFilter ambariHaComponentFilter;
 
     @Override
     public ExposedServices convert(GatewayTopologyJson source) {
@@ -30,7 +34,6 @@ public class GatewayTopologyJsonToExposedServicesConverter extends AbstractConve
             if (validationResult.hasError()) {
                 throw new BadRequestException(validationResult.getFormattedErrors());
             }
-
             if (exposedServiceList.contains(ExposedService.ALL.name())) {
                 exposedServices.setServices(ExposedService.getAllKnoxExposed());
             } else {

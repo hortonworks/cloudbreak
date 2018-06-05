@@ -30,7 +30,7 @@ public class GatewayJson implements JsonEntity {
      */
     @Deprecated
     @ApiModelProperty(GatewayModelDescription.ENABLE_KNOX_GATEWAY)
-    private boolean enableGateway;
+    private Boolean enableGateway;
 
     @ApiModelProperty(GatewayModelDescription.KNOX_PATH)
     private String path;
@@ -134,11 +134,15 @@ public class GatewayJson implements JsonEntity {
         this.topologies = topologies;
     }
 
-    public boolean isEnableGateway() {
+    public boolean hasGatewayEnabled() {
+        return enableGateway != null;
+    }
+
+    public Boolean isEnableGateway() {
         return enableGateway;
     }
 
-    public void setEnableGateway(boolean enableGateway) {
+    public void setEnableGateway(Boolean enableGateway) {
         this.enableGateway = enableGateway;
     }
 }

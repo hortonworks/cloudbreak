@@ -6,6 +6,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Collections;
 import java.util.Optional;
 
 import org.junit.Assert;
@@ -16,16 +17,18 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.core.convert.ConversionService;
 
-import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRequest;
+import com.sequenceiq.cloudbreak.FileReaderUtil;
 import com.sequenceiq.cloudbreak.api.model.ConnectedClusterRequest;
+import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRequest;
 import com.sequenceiq.cloudbreak.blueprint.validation.BlueprintValidator;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.controller.validation.ldapconfig.LdapConfigValidator;
 import com.sequenceiq.cloudbreak.controller.validation.rds.RdsConnectionValidator;
 import com.sequenceiq.cloudbreak.converter.mapper.AmbariDatabaseMapper;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.service.AmbariHaComponentFilter;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariConfigurationService;
@@ -82,19 +85,16 @@ public class ClusterDecoratorTest {
     private SharedServiceConfigProvider sharedServiceConfigProvider;
 
     @Mock
-    private Cluster subject;
-
-    @Mock
     private ClusterRequest request;
-
-    @Mock
-    private Blueprint blueprint;
 
     @Mock
     private IdentityUser user;
 
     @Mock
     private Stack stack;
+
+    @Mock
+    private AmbariHaComponentFilter ambariHaComponentFilter;
 
     @Before
     public void setUp() {
@@ -104,13 +104,17 @@ public class ClusterDecoratorTest {
     @Test
     public void testDecorateIfMethodCalledThenSharedServiceConfigProviderShouldBeCalledOnceToConfigureTheCluster() {
         Cluster expectedClusterInstance = new Cluster();
+        Blueprint blueprint = new Blueprint();
+        String blueprintText = FileReaderUtil.readResourceFile(this, "ha-components.bp");
+        blueprint.setBlueprintText(blueprintText);
         when(request.getConnectedCluster()).thenReturn(mock(ConnectedClusterRequest.class));
         when(sharedServiceConfigProvider.configureCluster(any(Cluster.class), any(IdentityUser.class), any(ConnectedClusterRequest.class)))
                 .thenReturn(expectedClusterInstance);
         when(ambariConfigurationService.createDefaultRdsConfigIfNeeded(any(Stack.class), any(Cluster.class))).thenReturn(Optional.empty());
-        when(clusterProxyDecorator.prepareProxyConfig(any(Cluster.class), any(IdentityUser.class), any(), any(Stack.class))).thenReturn(subject);
+        when(clusterProxyDecorator.prepareProxyConfig(any(Cluster.class), any(IdentityUser.class), any(), any(Stack.class))).thenReturn(expectedClusterInstance);
+        when(ambariHaComponentFilter.getHaComponents(any())).thenReturn(Collections.emptySet());
 
-        Cluster result = underTest.decorate(subject, request, blueprint, user, stack);
+        Cluster result = underTest.decorate(expectedClusterInstance, request, blueprint, user, stack);
 
         Assert.assertEquals(expectedClusterInstance, result);
         verify(sharedServiceConfigProvider, times(1)).configureCluster(any(Cluster.class), any(IdentityUser.class),

@@ -75,4 +75,23 @@ public class GatewayJsonValidatorTest {
 
         assertEquals(State.VALID, result.getState());
     }
+
+    @Test
+    public void testValidationWithFalseGatewayEnabled() {
+        GatewayJson gatewayJson = new GatewayJson();
+        gatewayJson.setEnableGateway(false);
+        ValidationResult result = underTest.validate(gatewayJson);
+
+        assertEquals(State.VALID, result.getState());
+    }
+
+    @Test
+    public void testValidationWithNullGatewayEnabled() {
+        GatewayJson gatewayJson = new GatewayJson();
+        gatewayJson.setEnableGateway(null);
+        gatewayJson.setExposedServices(Collections.singletonList("ALL"));
+        ValidationResult result = underTest.validate(gatewayJson);
+
+        assertEquals(State.VALID, result.getState());
+    }
 }
