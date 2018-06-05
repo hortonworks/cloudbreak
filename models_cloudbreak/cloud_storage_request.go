@@ -6,45 +6,49 @@ package models_cloudbreak
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"strconv"
+
 	strfmt "github.com/go-openapi/strfmt"
 
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
+	"github.com/go-openapi/validate"
 )
 
-// FileSystemV2Request file system v2 request
-// swagger:model FileSystemV2Request
+// CloudStorageRequest cloud storage request
+// swagger:model CloudStorageRequest
 
-type FileSystemV2Request struct {
+type CloudStorageRequest struct {
 
 	// adls
-	Adls *AdlsFileSystemParameters `json:"adls,omitempty"`
-
-	// description
-	Description string `json:"description,omitempty"`
+	Adls *AdlsCloudStorageParameters `json:"adls,omitempty"`
 
 	// gcs
-	Gcs *GcsFileSystemParameters `json:"gcs,omitempty"`
+	Gcs *GcsCloudStorageParameters `json:"gcs,omitempty"`
+
+	// cloud storage locations
+	// Unique: true
+	Locations []*StorageLocationRequest `json:"locations"`
 
 	// s3
-	S3 *S3FileSystemParameters `json:"s3,omitempty"`
+	S3 *S3CloudStorageParameters `json:"s3,omitempty"`
 
 	// wasb
-	Wasb *WasbFileSystemParameters `json:"wasb,omitempty"`
+	Wasb *WasbCloudStorageParameters `json:"wasb,omitempty"`
 }
 
-/* polymorph FileSystemV2Request adls false */
+/* polymorph CloudStorageRequest adls false */
 
-/* polymorph FileSystemV2Request description false */
+/* polymorph CloudStorageRequest gcs false */
 
-/* polymorph FileSystemV2Request gcs false */
+/* polymorph CloudStorageRequest locations false */
 
-/* polymorph FileSystemV2Request s3 false */
+/* polymorph CloudStorageRequest s3 false */
 
-/* polymorph FileSystemV2Request wasb false */
+/* polymorph CloudStorageRequest wasb false */
 
-// Validate validates this file system v2 request
-func (m *FileSystemV2Request) Validate(formats strfmt.Registry) error {
+// Validate validates this cloud storage request
+func (m *CloudStorageRequest) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateAdls(formats); err != nil {
@@ -53,6 +57,11 @@ func (m *FileSystemV2Request) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateGcs(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateLocations(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -73,7 +82,7 @@ func (m *FileSystemV2Request) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *FileSystemV2Request) validateAdls(formats strfmt.Registry) error {
+func (m *CloudStorageRequest) validateAdls(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Adls) { // not required
 		return nil
@@ -92,7 +101,7 @@ func (m *FileSystemV2Request) validateAdls(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *FileSystemV2Request) validateGcs(formats strfmt.Registry) error {
+func (m *CloudStorageRequest) validateGcs(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Gcs) { // not required
 		return nil
@@ -111,7 +120,38 @@ func (m *FileSystemV2Request) validateGcs(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *FileSystemV2Request) validateS3(formats strfmt.Registry) error {
+func (m *CloudStorageRequest) validateLocations(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Locations) { // not required
+		return nil
+	}
+
+	if err := validate.UniqueItems("locations", "body", m.Locations); err != nil {
+		return err
+	}
+
+	for i := 0; i < len(m.Locations); i++ {
+
+		if swag.IsZero(m.Locations[i]) { // not required
+			continue
+		}
+
+		if m.Locations[i] != nil {
+
+			if err := m.Locations[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("locations" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
+	}
+
+	return nil
+}
+
+func (m *CloudStorageRequest) validateS3(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.S3) { // not required
 		return nil
@@ -130,7 +170,7 @@ func (m *FileSystemV2Request) validateS3(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *FileSystemV2Request) validateWasb(formats strfmt.Registry) error {
+func (m *CloudStorageRequest) validateWasb(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Wasb) { // not required
 		return nil
@@ -150,7 +190,7 @@ func (m *FileSystemV2Request) validateWasb(formats strfmt.Registry) error {
 }
 
 // MarshalBinary interface implementation
-func (m *FileSystemV2Request) MarshalBinary() ([]byte, error) {
+func (m *CloudStorageRequest) MarshalBinary() ([]byte, error) {
 	if m == nil {
 		return nil, nil
 	}
@@ -158,8 +198,8 @@ func (m *FileSystemV2Request) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (m *FileSystemV2Request) UnmarshalBinary(b []byte) error {
-	var res FileSystemV2Request
+func (m *CloudStorageRequest) UnmarshalBinary(b []byte) error {
+	var res CloudStorageRequest
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}

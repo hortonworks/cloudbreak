@@ -70,7 +70,7 @@ var clusterExposedServiceResponseTypeModePropEnum []interface{}
 
 func init() {
 	var res []string
-	if err := json.Unmarshal([]byte(`["PROXY_SSO","PROXY"]`), &res); err != nil {
+	if err := json.Unmarshal([]byte(`["SSO_PROVIDER","NONE"]`), &res); err != nil {
 		panic(err)
 	}
 	for _, v := range res {
@@ -79,10 +79,10 @@ func init() {
 }
 
 const (
-	// ClusterExposedServiceResponseModePROXYSSO captures enum value "PROXY_SSO"
-	ClusterExposedServiceResponseModePROXYSSO string = "PROXY_SSO"
-	// ClusterExposedServiceResponseModePROXY captures enum value "PROXY"
-	ClusterExposedServiceResponseModePROXY string = "PROXY"
+	// ClusterExposedServiceResponseModeSSOPROVIDER captures enum value "SSO_PROVIDER"
+	ClusterExposedServiceResponseModeSSOPROVIDER string = "SSO_PROVIDER"
+	// ClusterExposedServiceResponseModeNONE captures enum value "NONE"
+	ClusterExposedServiceResponseModeNONE string = "NONE"
 )
 
 // prop value enum

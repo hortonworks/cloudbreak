@@ -156,7 +156,7 @@ var gatewayJsonTypeSsoTypePropEnum []interface{}
 
 func init() {
 	var res []string
-	if err := json.Unmarshal([]byte(`["PROXY_SSO","PROXY"]`), &res); err != nil {
+	if err := json.Unmarshal([]byte(`["SSO_PROVIDER","NONE"]`), &res); err != nil {
 		panic(err)
 	}
 	for _, v := range res {
@@ -165,10 +165,10 @@ func init() {
 }
 
 const (
-	// GatewayJSONSsoTypePROXYSSO captures enum value "PROXY_SSO"
-	GatewayJSONSsoTypePROXYSSO string = "PROXY_SSO"
-	// GatewayJSONSsoTypePROXY captures enum value "PROXY"
-	GatewayJSONSsoTypePROXY string = "PROXY"
+	// GatewayJSONSsoTypeSSOPROVIDER captures enum value "SSO_PROVIDER"
+	GatewayJSONSsoTypeSSOPROVIDER string = "SSO_PROVIDER"
+	// GatewayJSONSsoTypeNONE captures enum value "NONE"
+	GatewayJSONSsoTypeNONE string = "NONE"
 )
 
 // prop value enum

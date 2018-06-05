@@ -79,6 +79,9 @@ type ClusterResponse struct {
 	// ambari blueprint JSON, set this or the url field
 	ExtendedBlueprintText string `json:"extendedBlueprintText,omitempty"`
 
+	// filesystem for a specific stack
+	FileSystemResponse *FileSystemResponse `json:"fileSystemResponse,omitempty"`
+
 	// gateway
 	Gateway *GatewayJSON `json:"gateway,omitempty"`
 
@@ -175,6 +178,8 @@ type ClusterResponse struct {
 
 /* polymorph ClusterResponse extendedBlueprintText false */
 
+/* polymorph ClusterResponse fileSystemResponse false */
+
 /* polymorph ClusterResponse gateway false */
 
 /* polymorph ClusterResponse hostGroups false */
@@ -256,6 +261,11 @@ func (m *ClusterResponse) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateExecutorType(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateFileSystemResponse(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -526,6 +536,25 @@ func (m *ClusterResponse) validateExecutorType(formats strfmt.Registry) error {
 	// value enum
 	if err := m.validateExecutorTypeEnum("executorType", "body", m.ExecutorType); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func (m *ClusterResponse) validateFileSystemResponse(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.FileSystemResponse) { // not required
+		return nil
+	}
+
+	if m.FileSystemResponse != nil {
+
+		if err := m.FileSystemResponse.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("fileSystemResponse")
+			}
+			return err
+		}
 	}
 
 	return nil

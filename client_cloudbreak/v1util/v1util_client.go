@@ -81,6 +81,36 @@ func (a *Client) CreateRDSDatabaseUtil(params *CreateRDSDatabaseUtilParams) (*Cr
 }
 
 /*
+GetCloudStorageMatrix returns supported cloud storage for stack version
+
+Define stack version at least at patch level eg. 2.6.0
+*/
+func (a *Client) GetCloudStorageMatrix(params *GetCloudStorageMatrixParams) (*GetCloudStorageMatrixOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetCloudStorageMatrixParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "getCloudStorageMatrix",
+		Method:             "GET",
+		PathPattern:        "/v1/util/cloudstoragematrix",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &GetCloudStorageMatrixReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*GetCloudStorageMatrixOK), nil
+
+}
+
+/*
 GetCustomParameters returns custom parameters
 */
 func (a *Client) GetCustomParameters(params *GetCustomParametersParams) (*GetCustomParametersOK, error) {
@@ -105,6 +135,34 @@ func (a *Client) GetCustomParameters(params *GetCustomParametersParams) (*GetCus
 		return nil, err
 	}
 	return result.(*GetCustomParametersOK), nil
+
+}
+
+/*
+GetFileSystemParameters returns filesystem parameters
+*/
+func (a *Client) GetFileSystemParameters(params *GetFileSystemParametersParams) (*GetFileSystemParametersOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetFileSystemParametersParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "getFileSystemParameters",
+		Method:             "POST",
+		PathPattern:        "/v1/util/filesystem-parameters",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &GetFileSystemParametersReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*GetFileSystemParametersOK), nil
 
 }
 

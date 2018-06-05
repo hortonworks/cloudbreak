@@ -15,10 +15,10 @@ import (
 	"github.com/go-openapi/validate"
 )
 
-// FileSystem file system
-// swagger:model FileSystem
+// FileSystemResponse file system response
+// swagger:model FileSystemResponse
 
-type FileSystem struct {
+type FileSystemResponse struct {
 
 	// adls
 	Adls *AdlsCloudStorageParameters `json:"adls,omitempty"`
@@ -29,9 +29,13 @@ type FileSystem struct {
 	// gcs
 	Gcs *GcsCloudStorageParameters `json:"gcs,omitempty"`
 
+	// id of the resource
+	// Required: true
+	ID *int64 `json:"id"`
+
 	// configuration of the filesystem location
 	// Unique: true
-	Locations []*StorageLocationRequest `json:"locations"`
+	Locations []*StorageLocationResponse `json:"locations"`
 
 	// name of the filesystem
 	// Required: true
@@ -48,24 +52,26 @@ type FileSystem struct {
 	Wasb *WasbCloudStorageParameters `json:"wasb,omitempty"`
 }
 
-/* polymorph FileSystem adls false */
+/* polymorph FileSystemResponse adls false */
 
-/* polymorph FileSystem defaultFs false */
+/* polymorph FileSystemResponse defaultFs false */
 
-/* polymorph FileSystem gcs false */
+/* polymorph FileSystemResponse gcs false */
 
-/* polymorph FileSystem locations false */
+/* polymorph FileSystemResponse id false */
 
-/* polymorph FileSystem name false */
+/* polymorph FileSystemResponse locations false */
 
-/* polymorph FileSystem s3 false */
+/* polymorph FileSystemResponse name false */
 
-/* polymorph FileSystem type false */
+/* polymorph FileSystemResponse s3 false */
 
-/* polymorph FileSystem wasb false */
+/* polymorph FileSystemResponse type false */
 
-// Validate validates this file system
-func (m *FileSystem) Validate(formats strfmt.Registry) error {
+/* polymorph FileSystemResponse wasb false */
+
+// Validate validates this file system response
+func (m *FileSystemResponse) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateAdls(formats); err != nil {
@@ -74,6 +80,11 @@ func (m *FileSystem) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateGcs(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateID(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -109,7 +120,7 @@ func (m *FileSystem) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *FileSystem) validateAdls(formats strfmt.Registry) error {
+func (m *FileSystemResponse) validateAdls(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Adls) { // not required
 		return nil
@@ -128,7 +139,7 @@ func (m *FileSystem) validateAdls(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *FileSystem) validateGcs(formats strfmt.Registry) error {
+func (m *FileSystemResponse) validateGcs(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Gcs) { // not required
 		return nil
@@ -147,7 +158,16 @@ func (m *FileSystem) validateGcs(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *FileSystem) validateLocations(formats strfmt.Registry) error {
+func (m *FileSystemResponse) validateID(formats strfmt.Registry) error {
+
+	if err := validate.Required("id", "body", m.ID); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *FileSystemResponse) validateLocations(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Locations) { // not required
 		return nil
@@ -178,7 +198,7 @@ func (m *FileSystem) validateLocations(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *FileSystem) validateName(formats strfmt.Registry) error {
+func (m *FileSystemResponse) validateName(formats strfmt.Registry) error {
 
 	if err := validate.Required("name", "body", m.Name); err != nil {
 		return err
@@ -187,7 +207,7 @@ func (m *FileSystem) validateName(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *FileSystem) validateS3(formats strfmt.Registry) error {
+func (m *FileSystemResponse) validateS3(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.S3) { // not required
 		return nil
@@ -206,7 +226,7 @@ func (m *FileSystem) validateS3(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *FileSystem) validateType(formats strfmt.Registry) error {
+func (m *FileSystemResponse) validateType(formats strfmt.Registry) error {
 
 	if err := validate.Required("type", "body", m.Type); err != nil {
 		return err
@@ -215,7 +235,7 @@ func (m *FileSystem) validateType(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *FileSystem) validateWasb(formats strfmt.Registry) error {
+func (m *FileSystemResponse) validateWasb(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Wasb) { // not required
 		return nil
@@ -235,7 +255,7 @@ func (m *FileSystem) validateWasb(formats strfmt.Registry) error {
 }
 
 // MarshalBinary interface implementation
-func (m *FileSystem) MarshalBinary() ([]byte, error) {
+func (m *FileSystemResponse) MarshalBinary() ([]byte, error) {
 	if m == nil {
 		return nil, nil
 	}
@@ -243,8 +263,8 @@ func (m *FileSystem) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (m *FileSystem) UnmarshalBinary(b []byte) error {
-	var res FileSystem
+func (m *FileSystemResponse) UnmarshalBinary(b []byte) error {
+	var res FileSystemResponse
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}

@@ -79,6 +79,9 @@ type AutoscaleClusterResponse struct {
 	// ambari blueprint JSON, set this or the url field
 	ExtendedBlueprintText string `json:"extendedBlueprintText,omitempty"`
 
+	// filesystem for a specific stack
+	FileSystemResponse *FileSystemResponse `json:"fileSystemResponse,omitempty"`
+
 	// gateway
 	Gateway *GatewayJSON `json:"gateway,omitempty"`
 
@@ -178,6 +181,8 @@ type AutoscaleClusterResponse struct {
 
 /* polymorph AutoscaleClusterResponse extendedBlueprintText false */
 
+/* polymorph AutoscaleClusterResponse fileSystemResponse false */
+
 /* polymorph AutoscaleClusterResponse gateway false */
 
 /* polymorph AutoscaleClusterResponse hostGroups false */
@@ -261,6 +266,11 @@ func (m *AutoscaleClusterResponse) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateExecutorType(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateFileSystemResponse(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -531,6 +541,25 @@ func (m *AutoscaleClusterResponse) validateExecutorType(formats strfmt.Registry)
 	// value enum
 	if err := m.validateExecutorTypeEnum("executorType", "body", m.ExecutorType); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func (m *AutoscaleClusterResponse) validateFileSystemResponse(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.FileSystemResponse) { // not required
+		return nil
+	}
+
+	if m.FileSystemResponse != nil {
+
+		if err := m.FileSystemResponse.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("fileSystemResponse")
+			}
+			return err
+		}
 	}
 
 	return nil

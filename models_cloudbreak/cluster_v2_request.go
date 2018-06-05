@@ -23,6 +23,9 @@ type ClusterV2Request struct {
 	// ambari specific requests
 	Ambari *AmbariV2Request `json:"ambari,omitempty"`
 
+	// external cloud storage configuration
+	CloudStorage *CloudStorageRequest `json:"cloudStorage,omitempty"`
+
 	// send email about the result of the cluster installation
 	EmailNeeded *bool `json:"emailNeeded,omitempty"`
 
@@ -31,9 +34,6 @@ type ClusterV2Request struct {
 
 	// executor type of cluster
 	ExecutorType string `json:"executorType,omitempty"`
-
-	// external file system configuration
-	FileSystem *FileSystemV2Request `json:"fileSystem,omitempty"`
 
 	// LDAP config name for the cluster
 	LdapConfigName string `json:"ldapConfigName,omitempty"`
@@ -51,13 +51,13 @@ type ClusterV2Request struct {
 
 /* polymorph ClusterV2Request ambari false */
 
+/* polymorph ClusterV2Request cloudStorage false */
+
 /* polymorph ClusterV2Request emailNeeded false */
 
 /* polymorph ClusterV2Request emailTo false */
 
 /* polymorph ClusterV2Request executorType false */
-
-/* polymorph ClusterV2Request fileSystem false */
 
 /* polymorph ClusterV2Request ldapConfigName false */
 
@@ -76,12 +76,12 @@ func (m *ClusterV2Request) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
-	if err := m.validateExecutorType(formats); err != nil {
+	if err := m.validateCloudStorage(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
 
-	if err := m.validateFileSystem(formats); err != nil {
+	if err := m.validateExecutorType(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -113,6 +113,25 @@ func (m *ClusterV2Request) validateAmbari(formats strfmt.Registry) error {
 		if err := m.Ambari.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("ambari")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (m *ClusterV2Request) validateCloudStorage(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.CloudStorage) { // not required
+		return nil
+	}
+
+	if m.CloudStorage != nil {
+
+		if err := m.CloudStorage.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("cloudStorage")
 			}
 			return err
 		}
@@ -157,25 +176,6 @@ func (m *ClusterV2Request) validateExecutorType(formats strfmt.Registry) error {
 	// value enum
 	if err := m.validateExecutorTypeEnum("executorType", "body", m.ExecutorType); err != nil {
 		return err
-	}
-
-	return nil
-}
-
-func (m *ClusterV2Request) validateFileSystem(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.FileSystem) { // not required
-		return nil
-	}
-
-	if m.FileSystem != nil {
-
-		if err := m.FileSystem.Validate(formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("fileSystem")
-			}
-			return err
-		}
 	}
 
 	return nil
