@@ -169,6 +169,12 @@ var (
 			Name: "service-account-private-key-file",
 		},
 	}
+	FlServiceAccountJsonFile = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name: "service-account-json-file",
+		},
+	}
 	FlTenantUser = StringFlag{
 		RequiredFlag: REQUIRED,
 		StringFlag: cli.StringFlag{

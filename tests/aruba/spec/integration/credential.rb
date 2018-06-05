@@ -52,7 +52,7 @@ RSpec.describe 'Credential test cases', :type => :aruba do
     it "Credential - Create - GCP" do 
     with_environment 'DEBUG' => '1' do
    	  create_p12("temp.p12")   	
-      result = cb.credential.create.gcp.name("cli-gcp").project_id(@gcp_project_id).service_account_id(@gcp_service_account_id).
+      result = cb.credential.create.gcp.p12_based.name("cli-gcp").project_id(@gcp_project_id).service_account_id(@gcp_service_account_id).
       service_account_private_key_file("temp.p12").build(false)
       expect(result.exit_status).to eql 0
       expect(result.stderr).to include("credential created")    

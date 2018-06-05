@@ -790,15 +790,33 @@ func main() {
 							},
 						},
 						{
-							Name:   "gcp",
-							Usage:  "creates a new gcp credential",
-							Before: ConfigRead,
-							Flags:  cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlProjectId, cb.FlServiceAccountId, cb.FlServiceAccountPrivateKeyFile).AddAuthenticationFlags().Build(),
-							Action: cb.CreateGcpCredential,
-							BashComplete: func(c *cli.Context) {
-								for _, f := range cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlProjectId, cb.FlServiceAccountId, cb.FlServiceAccountPrivateKeyFile).AddAuthenticationFlags().Build() {
-									printFlagCompletion(f)
-								}
+							Name:  "gcp",
+							Usage: "creates a new gcp credential",
+							Subcommands: []cli.Command{
+								{
+									Name:   "p12-based",
+									Usage:  "creates a new P12 based gcp credential",
+									Before: ConfigRead,
+									Flags:  cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlProjectId, cb.FlServiceAccountId, cb.FlServiceAccountPrivateKeyFile).AddAuthenticationFlags().Build(),
+									Action: cb.CreateGcpCredential,
+									BashComplete: func(c *cli.Context) {
+										for _, f := range cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlProjectId, cb.FlServiceAccountId, cb.FlServiceAccountPrivateKeyFile).AddAuthenticationFlags().Build() {
+											printFlagCompletion(f)
+										}
+									},
+								},
+								{
+									Name:   "json-based",
+									Usage:  "creates a new JSON based gcp credential",
+									Before: ConfigRead,
+									Flags:  cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlServiceAccountJsonFile).AddAuthenticationFlags().Build(),
+									Action: cb.CreateGcpCredential,
+									BashComplete: func(c *cli.Context) {
+										for _, f := range cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlServiceAccountJsonFile).AddAuthenticationFlags().Build() {
+											printFlagCompletion(f)
+										}
+									},
+								},
 							},
 						},
 						{
@@ -900,15 +918,33 @@ func main() {
 							},
 						},
 						{
-							Name:   "gcp",
-							Usage:  "modify an existing gcp credential",
-							Before: ConfigRead,
-							Flags:  cb.NewFlagBuilder().AddFlags(cb.FlName, cb.FlDescriptionOptional, cb.FlProjectId, cb.FlServiceAccountId, cb.FlServiceAccountPrivateKeyFile).AddAuthenticationFlags().Build(),
-							Action: cb.ModifyGcpCredential,
-							BashComplete: func(c *cli.Context) {
-								for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlName, cb.FlDescriptionOptional, cb.FlProjectId, cb.FlServiceAccountId, cb.FlServiceAccountPrivateKeyFile).AddAuthenticationFlags().Build() {
-									printFlagCompletion(f)
-								}
+							Name:  "gcp",
+							Usage: "modify an existing gcp credential",
+							Subcommands: []cli.Command{
+								{
+									Name:   "p12-based",
+									Usage:  "modify a P12 based gcp credential",
+									Before: ConfigRead,
+									Flags:  cb.NewFlagBuilder().AddFlags(cb.FlName, cb.FlDescriptionOptional, cb.FlProjectId, cb.FlServiceAccountId, cb.FlServiceAccountPrivateKeyFile).AddAuthenticationFlags().Build(),
+									Action: cb.ModifyGcpCredential,
+									BashComplete: func(c *cli.Context) {
+										for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlName, cb.FlDescriptionOptional, cb.FlProjectId, cb.FlServiceAccountId, cb.FlServiceAccountPrivateKeyFile).AddAuthenticationFlags().Build() {
+											printFlagCompletion(f)
+										}
+									},
+								},
+								{
+									Name:   "json-based",
+									Usage:  "modify a JSON based gcp credential",
+									Before: ConfigRead,
+									Flags:  cb.NewFlagBuilder().AddFlags(cb.FlName, cb.FlDescriptionOptional, cb.FlServiceAccountJsonFile).AddAuthenticationFlags().Build(),
+									Action: cb.ModifyGcpCredential,
+									BashComplete: func(c *cli.Context) {
+										for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlName, cb.FlDescriptionOptional, cb.FlServiceAccountJsonFile).AddAuthenticationFlags().Build() {
+											printFlagCompletion(f)
+										}
+									},
+								},
 							},
 						},
 						{

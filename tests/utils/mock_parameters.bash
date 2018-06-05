@@ -87,7 +87,7 @@ AWS_ARGS_KEY="--name ${AWS_CREDENTIAL_NAME}-key --access-key ${AWS_ACCESS_KEY_ID
 AWS_ARGS_ROLE="--name ${AWS_CREDENTIAL_NAME}-role --role-arn  ${AWS_ROLE_ARN}"
 OS_ARGS_V2="--name ${OS_CREDENTIAL_NAME}-v2 --tenant-user ${OS_USERNAME} --tenant-password ${OS_PASSWORD} --tenant-name ${OS_TENANT_NAME} --endpoint ${OS_V2_ENDPOINT}"
 OS_ARGS_V3="--name ${OS_CREDENTIAL_NAME}-v3 --tenant-user ${OS_USERNAME} --tenant-password ${OS_PASSWORD} --user-domain ${OS_USER_DOMAIN} --endpoint ${OS_V3_ENDPOINT}"
-GCP_ARGS="--name ${GCP_CREDENTIAL_NAME} --project-id ${GCP_PROJECT_ID} --service-account-id ${GCP_ACCOUNT_EMAIL} --service-account-private-key-file ${P12_PATH}"
+GCP_ARGS="p12-based --name ${GCP_CREDENTIAL_NAME} --project-id ${GCP_PROJECT_ID} --service-account-id ${GCP_ACCOUNT_EMAIL} --service-account-private-key-file ${P12_PATH}"
 ARM_ARGS="--name ${ARM_CREDENTIAL_NAME} --subscription-id ${ARM_SUBSCRIPTION_ID} --tenant-id ${ARM_TENANT_ID} --app-id ${ARM_APP_ID} --app-password ${ARM_PASSWORD}"
 
 COMMON_ARGS_WO_CLUSTER=" --server ${BASE_URL} --username ${USERNAME_CLI} --password ${PASSWORD_CLI}  "
