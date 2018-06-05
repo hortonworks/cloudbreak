@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.converter.stack.cluster.gateway;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 import java.util.Collections;
 import java.util.List;
@@ -119,6 +121,38 @@ public class ClusterRequestToGatewayConverterTest {
         GatewayJson source = new GatewayJson();
 
         underTest.convert(generateClusterRequest(source));
+    }
+
+    @Test
+    public void testWithFalseGatewayEnabled() {
+        GatewayJson source = new GatewayJson();
+        source.setEnableGateway(false);
+        source.setTopologyName(DEPRECATED_TOPOLOGY);
+        Gateway result = underTest.convert(generateClusterRequest(source));
+
+        assertNull(result);
+    }
+
+    @Test
+    public void testWithNullGatewayEnabled() {
+        GatewayJson source = new GatewayJson();
+        source.setEnableGateway(null);
+        source.setTopologyName(DEPRECATED_TOPOLOGY);
+        Gateway result = underTest.convert(generateClusterRequest(source));
+
+        assertNotNull(result);
+        assertEquals(DEPRECATED_TOPOLOGY, result.getTopologies().iterator().next().getTopologyName());
+    }
+
+    @Test
+    public void testWithEnableFalseAndDefinedTopologyInList() {
+        GatewayJson source = new GatewayJson();
+        source.setEnableGateway(false);
+        source.setTopologies(getTopologies());
+        Gateway result = underTest.convert(generateClusterRequest(source));
+
+        assertNotNull(result);
+        assertEquals("topologyName", result.getTopologies().iterator().next().getTopologyName());
     }
 
     private List<GatewayTopologyJson> getTopologies() {

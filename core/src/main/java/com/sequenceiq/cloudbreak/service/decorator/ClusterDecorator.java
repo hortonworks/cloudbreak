@@ -1,9 +1,11 @@
 package com.sequenceiq.cloudbreak.service.decorator;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
@@ -14,10 +16,12 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Strings;
-import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRequest;
-import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupRequest;
+import com.sequenceiq.cloudbreak.api.model.ExposedService;
 import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigRequest;
 import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigRequest;
+import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRequest;
+import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupRequest;
+import com.sequenceiq.cloudbreak.blueprint.BlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.blueprint.validation.BlueprintValidator;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
@@ -25,11 +29,14 @@ import com.sequenceiq.cloudbreak.controller.validation.ldapconfig.LdapConfigVali
 import com.sequenceiq.cloudbreak.controller.validation.rds.RdsConnectionValidator;
 import com.sequenceiq.cloudbreak.converter.mapper.AmbariDatabaseMapper;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
+import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.ExposedServices;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
+import com.sequenceiq.cloudbreak.service.AmbariHaComponentFilter;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariConfigurationService;
@@ -85,6 +92,9 @@ public class ClusterDecorator {
     @Inject
     private SharedServiceConfigProvider sharedServiceConfigProvider;
 
+    @Inject
+    private AmbariHaComponentFilter ambariHaComponentFilter;
+
     public Cluster decorate(@Nonnull Cluster subject, @Nonnull ClusterRequest request, Blueprint blueprint, @Nonnull IdentityUser user, @Nonnull Stack stack) {
         prepareBlueprint(subject, request, user, stack, Optional.ofNullable(blueprint));
         prepareHostGroups(stack, user, subject, request.getHostGroups());
@@ -117,10 +127,31 @@ public class ClusterDecorator {
             } else if (!Strings.isNullOrEmpty(request.getBlueprintName())) {
                 subject.setBlueprint(blueprintService.get(request.getBlueprintName(), user.getAccount()));
             } else {
-                throw new BadRequestException("Blueprint does not configured for the cluster!");
+                throw new BadRequestException("Blueprint is not configured for the cluster!");
             }
         }
+        removeHaComponentsFromGatewayTopologies(subject);
         subject.setTopologyValidation(request.getValidateBlueprint());
+    }
+
+    // because KNOX does not support them
+    private void removeHaComponentsFromGatewayTopologies(Cluster subject) {
+        Set<String> haComponents = ambariHaComponentFilter.getHaComponents(new BlueprintTextProcessor(subject.getBlueprint().getBlueprintText()));
+        Set<String> haKnoxServices = ExposedService.filterSupportedKnoxServices().stream()
+                .filter(es -> haComponents.contains(es.getServiceName()))
+                .map(ExposedService::getKnoxService)
+                .collect(Collectors.toSet());
+        if (subject.getGateway() != null) {
+            subject.getGateway().getTopologies().forEach(topology -> {
+                try {
+                    ExposedServices exposedServicesOfTopology = topology.getExposedServices().get(ExposedServices.class);
+                    exposedServicesOfTopology.getServices().removeAll(haKnoxServices);
+                    topology.setExposedServices(new Json(exposedServicesOfTopology));
+                } catch (IOException e) {
+                    LOGGER.warn("This exception should never occur.", e);
+                }
+            });
+        }
     }
 
     private void prepareLdap(Cluster subject, IdentityUser user, Stack stack, Optional<Long> ldapConfigId, Optional<LdapConfigRequest> ldapConfigRequest,
