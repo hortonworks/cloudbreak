@@ -28,6 +28,7 @@ import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.GatewayJson;
 import com.sequenceiq.cloudbreak.api.model.v2.AmbariV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.ClusterV2Request;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.converter.util.CloudStorageValidationUtil;
 import com.sequenceiq.cloudbreak.service.sharedservice.SharedServiceConfigProvider;
 
 public class ClusterV2RequestToClusterRequestConverterTest {
@@ -43,6 +44,9 @@ public class ClusterV2RequestToClusterRequestConverterTest {
 
     @Mock
     private ConversionService conversionService;
+
+    @Mock
+    private CloudStorageValidationUtil cloudStorageValidationUtil;
 
     @Before
     public void setUp() {

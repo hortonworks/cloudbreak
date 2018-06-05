@@ -1,16 +1,19 @@
 package com.sequenceiq.cloudbreak.converter.v2;
 
+import java.util.HashSet;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Component;
+
 import com.sequenceiq.cloudbreak.api.model.ConnectedClusterRequest;
 import com.sequenceiq.cloudbreak.api.model.FileSystemRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.AmbariV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.ClusterV2Request;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
+import com.sequenceiq.cloudbreak.converter.util.CloudStorageValidationUtil;
 import com.sequenceiq.cloudbreak.service.sharedservice.SharedServiceConfigProvider;
-import org.springframework.stereotype.Component;
-
-import javax.inject.Inject;
-import java.util.HashSet;
 
 @Component
 public class ClusterV2RequestToClusterRequestConverter extends AbstractConversionServiceAwareConverter<ClusterV2Request, ClusterRequest> {
@@ -18,16 +21,19 @@ public class ClusterV2RequestToClusterRequestConverter extends AbstractConversio
     @Inject
     private SharedServiceConfigProvider sharedServiceConfigProvider;
 
+    @Inject
+    private CloudStorageValidationUtil cloudStorageValidationUtil;
+
     @Override
     public ClusterRequest convert(ClusterV2Request source) {
         ClusterRequest cluster = new ClusterRequest();
         cluster.setExecutorType(source.getExecutorType());
         cluster.setEmailNeeded(source.getEmailNeeded());
         cluster.setEmailTo(source.getEmailTo());
-        if (source.getCloudStorage() != null) {
+        if (cloudStorageValidationUtil.isCloudStorageConfigured(source.getCloudStorage())) {
             cluster.setFileSystem(getConversionService().convert(source.getCloudStorage(), FileSystemRequest.class));
         }
-            cluster.setName(source.getName());
+        cluster.setName(source.getName());
         if (source.getRdsConfigNames() != null && !source.getRdsConfigNames().isEmpty()) {
             cluster.setRdsConfigNames(source.getRdsConfigNames());
         }
@@ -58,5 +64,4 @@ public class ClusterV2RequestToClusterRequestConverter extends AbstractConversio
         cluster.setHostGroups(new HashSet<>());
         return cluster;
     }
-
 }
