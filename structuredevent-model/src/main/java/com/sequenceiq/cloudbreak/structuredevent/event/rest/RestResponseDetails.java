@@ -5,8 +5,8 @@ import java.util.Map;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.sequenceiq.cloudbreak.structuredevent.json.AnonymizingBase64Serializer;
 import com.sequenceiq.cloudbreak.structuredevent.json.Base64Deserializer;
-import com.sequenceiq.cloudbreak.structuredevent.json.Base64Serializer;
 
 public class RestResponseDetails implements Serializable {
     private Integer statusCode;
@@ -17,7 +17,7 @@ public class RestResponseDetails implements Serializable {
 
     private Map<String, String> cookies;
 
-    @JsonSerialize(using = Base64Serializer.class)
+    @JsonSerialize(using = AnonymizingBase64Serializer.class)
     @JsonDeserialize(using = Base64Deserializer.class)
     private String body;
 
