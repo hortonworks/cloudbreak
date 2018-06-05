@@ -62,7 +62,8 @@ public class ClusterTests extends CloudbreakTest {
                 .withImageId(imageId));
         given(HostGroups.request()
                 .addHostGroup(cloudProvider.hostgroup("Services", InstanceGroupType.GATEWAY, 1))
-                .addHostGroup(cloudProvider.hostgroup("NiFi", InstanceGroupType.CORE, 1)));
+                .addHostGroup(cloudProvider.hostgroup("NiFi", InstanceGroupType.CORE, 1))
+                .addHostGroup(cloudProvider.hostgroup("ZooKeeper", InstanceGroupType.CORE, 1)));
         given(cloudProvider.aValidStackRequest()
                 .withName(clusterName), "a stack request");
         when(Stack.post(), "post the stack request");
