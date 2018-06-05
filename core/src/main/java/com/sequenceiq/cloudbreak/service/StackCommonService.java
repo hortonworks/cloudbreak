@@ -19,15 +19,15 @@ import com.sequenceiq.cloudbreak.api.model.AmbariAddressJson;
 import com.sequenceiq.cloudbreak.api.model.AutoscaleStackResponse;
 import com.sequenceiq.cloudbreak.api.model.CertificateResponse;
 import com.sequenceiq.cloudbreak.api.model.PlatformVariantsJson;
+import com.sequenceiq.cloudbreak.api.model.UpdateStackJson;
 import com.sequenceiq.cloudbreak.api.model.stack.StackRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.StackValidationRequest;
-import com.sequenceiq.cloudbreak.api.model.UpdateStackJson;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformVariants;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
-import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.StackCreatorService;
+import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.validation.filesystem.FileSystemValidator;
 import com.sequenceiq.cloudbreak.controller.validation.stack.StackRequestValidator;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
@@ -82,11 +82,11 @@ public class StackCommonService implements StackEndpoint {
     @Qualifier("conversionService")
     private ConversionService conversionService;
 
-    public StackResponse postPrivate(StackRequest stackRequest) throws Exception {
+    public StackResponse postPrivate(StackRequest stackRequest) {
         return stackCreatorService.createStack(authenticatedUserService.getCbUser(), stackRequest, false);
     }
 
-    public StackResponse postPublic(StackRequest stackRequest) throws Exception {
+    public StackResponse postPublic(StackRequest stackRequest) {
         return stackCreatorService.createStack(authenticatedUserService.getCbUser(), stackRequest, true);
     }
 

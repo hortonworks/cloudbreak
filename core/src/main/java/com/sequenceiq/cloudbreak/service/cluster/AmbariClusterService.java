@@ -196,71 +196,67 @@ public class AmbariClusterService implements ClusterService {
     private SharedServiceConfigProvider sharedServiceConfigProvider;
 
     @Override
-    public Cluster create(IdentityUser user, Stack stack, Cluster cluster, List<ClusterComponent> components) {
+    public Cluster create(IdentityUser user, Stack stack, Cluster cluster, List<ClusterComponent> components) throws Exception {
         LOGGER.info("Cluster requested [BlueprintId: {}]", cluster.getBlueprint().getId());
         String stackName = stack.getName();
         if (stack.getCluster() != null) {
             throw new BadRequestException(String.format("A cluster is already created on this stack! [cluster: '%s']", stack.getCluster().getName()));
         }
-        try {
-            return transactionService.required(() -> {
-                long start = System.currentTimeMillis();
-                if (clusterRepository.findByNameInAccount(cluster.getName(), user.getAccount()) != null) {
-                    throw new DuplicateKeyValueException(APIResourceType.CLUSTER, cluster.getName());
-                }
-                LOGGER.info("Cluster name collision check took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+        return transactionService.required(() -> {
+            long start = System.currentTimeMillis();
+            if (clusterRepository.findByNameInAccount(cluster.getName(), user.getAccount()) != null) {
+                throw new DuplicateKeyValueException(APIResourceType.CLUSTER, cluster.getName());
+            }
+            LOGGER.info("Cluster name collision check took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
-                if (Status.CREATE_FAILED.equals(stack.getStatus())) {
-                    throw new BadRequestException("Stack creation failed, cannot create cluster.");
-                }
+            if (Status.CREATE_FAILED.equals(stack.getStatus())) {
+                throw new BadRequestException("Stack creation failed, cannot create cluster.");
+            }
 
+            start = System.currentTimeMillis();
+            for (HostGroup hostGroup : cluster.getHostGroups()) {
+                constraintRepository.save(hostGroup.getConstraint());
+            }
+            LOGGER.info("Host group constrainst saved in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+
+            start = System.currentTimeMillis();
+            if (cluster.getFileSystem() != null) {
+                cluster.setFileSystem(fileSystemConfigService.create(user, cluster.getFileSystem()));
+            }
+            LOGGER.info("Filesystem config saved in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+
+            if (cluster.getKerberosConfig() != null) {
+                kerberosConfigRepository.save(cluster.getKerberosConfig());
+            }
+            cluster.setStack(stack);
+            cluster.setOwner(user.getUserId());
+            cluster.setAccount(user.getAccount());
+            stack.setCluster(cluster);
+
+            start = System.currentTimeMillis();
+            gateWayUtil.generateSignKeys(cluster.getGateway());
+            LOGGER.info("Sign key generated in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+
+            Cluster savedCluster;
+            try {
                 start = System.currentTimeMillis();
-                for (HostGroup hostGroup : cluster.getHostGroups()) {
-                    constraintRepository.save(hostGroup.getConstraint());
-                }
-                LOGGER.info("Host group constrainst saved in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+                savedCluster = clusterRepository.save(cluster);
+                LOGGER.info("Cluster object saved in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
-                start = System.currentTimeMillis();
-                if (cluster.getFileSystem() != null) {
-                    cluster.setFileSystem(fileSystemConfigService.create(user, cluster.getFileSystem()));
+                clusterComponentConfigProvider.store(components, savedCluster);
+            } catch (DataIntegrityViolationException ex) {
+                String msg = String.format("Error with resource [%s], error: [%s]", APIResourceType.CLUSTER, getProperSqlErrorMessage(ex));
+                throw new BadRequestException(msg);
+            }
+            if (stack.isAvailable()) {
+                flowManager.triggerClusterInstall(stack.getId());
+                InMemoryStateStore.putCluster(savedCluster.getId(), statusToPollGroupConverter.convert(savedCluster.getStatus()));
+                if (InMemoryStateStore.getStack(stack.getId()) == null) {
+                    InMemoryStateStore.putStack(stack.getId(), statusToPollGroupConverter.convert(stack.getStatus()));
                 }
-                LOGGER.info("Filesystem config saved in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
-
-                if (cluster.getKerberosConfig() != null) {
-                    kerberosConfigRepository.save(cluster.getKerberosConfig());
-                }
-                cluster.setStack(stack);
-                cluster.setOwner(user.getUserId());
-                cluster.setAccount(user.getAccount());
-                stack.setCluster(cluster);
-
-                start = System.currentTimeMillis();
-                gateWayUtil.generateSignKeys(cluster.getGateway());
-                LOGGER.info("Sign key generated in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
-
-                Cluster savedCluster;
-                try {
-                    start = System.currentTimeMillis();
-                    savedCluster = clusterRepository.save(cluster);
-                    LOGGER.info("Cluster object saved in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
-
-                    clusterComponentConfigProvider.store(components, savedCluster);
-                } catch (DataIntegrityViolationException ex) {
-                    String msg = String.format("Error with resource [%s], error: [%s]", APIResourceType.CLUSTER, getProperSqlErrorMessage(ex));
-                    throw new BadRequestException(msg);
-                }
-                if (stack.isAvailable()) {
-                    flowManager.triggerClusterInstall(stack.getId());
-                    InMemoryStateStore.putCluster(savedCluster.getId(), statusToPollGroupConverter.convert(savedCluster.getStatus()));
-                    if (InMemoryStateStore.getStack(stack.getId()) == null) {
-                        InMemoryStateStore.putStack(stack.getId(), statusToPollGroupConverter.convert(stack.getStatus()));
-                    }
-                }
-                return savedCluster;
-            });
-        } catch (TransactionExecutionException e) {
-            throw (RuntimeException) e.getCause();
-        }
+            }
+            return savedCluster;
+        });
     }
 
     private boolean isMultipleGateway(Stack stack) {

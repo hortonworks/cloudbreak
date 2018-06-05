@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.service.stack;
 import static com.sequenceiq.cloudbreak.api.model.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.model.Status.STOPPED;
 import static com.sequenceiq.cloudbreak.api.model.Status.STOP_REQUESTED;
-import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -24,7 +23,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
@@ -42,7 +40,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudbreakDetails;
 import com.sequenceiq.cloudbreak.cloud.model.StackTemplate;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
-import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.exception.CloudbreakApiException;
@@ -82,7 +79,6 @@ import com.sequenceiq.cloudbreak.repository.StackViewRepository;
 import com.sequenceiq.cloudbreak.service.AuthorizationService;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
-import com.sequenceiq.cloudbreak.service.StackUnderOperationService;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
@@ -189,9 +185,6 @@ public class StackService {
 
     @Inject
     private TransactionService transactionService;
-
-    @Inject
-    private StackUnderOperationService stackUnderOperationService;
 
     public Set<StackResponse> retrievePrivateStacks(IdentityUser user) {
         return convertStacks(stackRepository.findForUserWithLists(user.getUserId()));
@@ -345,82 +338,69 @@ public class StackService {
         String stackName = stack.getName();
         MDCBuilder.buildMdcContext(stack);
         try {
-            return transactionService.required(() -> {
-                Stack savedStack;
-                try {
-                    if (!stack.getStackAuthentication().passwordAuthenticationRequired()
-                            && !Strings.isNullOrEmpty(stack.getStackAuthentication().getPublicKey())) {
-                        long start = System.currentTimeMillis();
-                        rsaPublicKeyValidator.validate(stack.getStackAuthentication().getPublicKey());
-                        LOGGER.info("RSA key has been validated in {} ms fot stack {}", System.currentTimeMillis() - start, stackName);
-                    }
-                    if (stack.getOrchestrator() != null) {
-                        orchestratorRepository.save(stack.getOrchestrator());
-                    }
-                    stack.getStackAuthentication().setLoginUserName(SSH_USER_CB);
-
-                    long start = System.currentTimeMillis();
-                    String template = connector.getTemplate(stack);
-                    LOGGER.info("Get cluster template took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
-
-                    start = System.currentTimeMillis();
-                    savedStack = stackRepository.save(stack);
-                    LOGGER.info("Stackrepository save took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
-
-                    start = System.currentTimeMillis();
-                    addTemplateForStack(savedStack, template);
-                    LOGGER.info("Save cluster template took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
-
-                    start = System.currentTimeMillis();
-                    addCloudbreakDetailsForStack(savedStack);
-                    LOGGER.info("Add Cloudbreak template took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
-
-                    MDCBuilder.buildMdcContext(savedStack);
-
-                    start = System.currentTimeMillis();
-                    instanceGroupRepository.save(savedStack.getInstanceGroups());
-                    LOGGER.info("Instance groups saved in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
-
-                    start = System.currentTimeMillis();
-                    instanceMetaDataRepository.save(savedStack.getInstanceMetaDataAsList());
-                    LOGGER.info("Instance metadatas saved in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
-
-                    start = System.currentTimeMillis();
-                    SecurityConfig securityConfig = tlsSecurityService.storeSSHKeys();
-                    LOGGER.info("Generating SSH keys took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
-
-                    start = System.currentTimeMillis();
-                    securityConfig.setSaltPassword(PasswordUtil.generatePassword());
-                    securityConfig.setSaltBootPassword(PasswordUtil.generatePassword());
-                    securityConfig.setKnoxMasterSecret(PasswordUtil.generatePassword());
-                    LOGGER.info("Generating salt passwords took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
-
-                    securityConfig.setStack(savedStack);
-                    start = System.currentTimeMillis();
-                    securityConfigRepository.save(securityConfig);
-                    LOGGER.info("Security config save took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
-                    savedStack.setSecurityConfig(securityConfig);
-
-                    start = System.currentTimeMillis();
-                    imageService.create(savedStack, platformString, connector.getPlatformParameters(savedStack), imgFromCatalog);
-                    LOGGER.info("Image creation took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
-                } catch (CloudbreakImageNotFoundException e) {
-                    LOGGER.error("Cloudbreak Image not found", e);
-                    throw new CloudbreakApiException(e.getMessage(), e);
-                } catch (CloudbreakImageCatalogException e) {
-                    LOGGER.error("Cloudbreak Image Catalog error", e);
-                    throw new CloudbreakApiException(e.getMessage(), e);
-                }
-                return savedStack;
-            });
-        } catch (TransactionExecutionException e) {
-            stackUnderOperationService.off();
-            if (e.getCause() instanceof DataIntegrityViolationException) {
-                String msg = String.format("Error with resource [%s], error: [%s]",
-                        APIResourceType.STACK, getProperSqlErrorMessage((DataIntegrityViolationException) e.getCause()));
-                throw new BadRequestException(msg);
+            if (!stack.getStackAuthentication().passwordAuthenticationRequired()
+                    && !Strings.isNullOrEmpty(stack.getStackAuthentication().getPublicKey())) {
+                long start = System.currentTimeMillis();
+                rsaPublicKeyValidator.validate(stack.getStackAuthentication().getPublicKey());
+                LOGGER.info("RSA key has been validated in {} ms fot stack {}", System.currentTimeMillis() - start, stackName);
             }
-            throw (RuntimeException) e.getCause();
+            if (stack.getOrchestrator() != null) {
+                orchestratorRepository.save(stack.getOrchestrator());
+            }
+            stack.getStackAuthentication().setLoginUserName(SSH_USER_CB);
+
+            long start = System.currentTimeMillis();
+            String template = connector.getTemplate(stack);
+            LOGGER.info("Get cluster template took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+
+            start = System.currentTimeMillis();
+            Stack savedStack = stackRepository.save(stack);
+            LOGGER.info("Stackrepository save took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+
+            start = System.currentTimeMillis();
+            addTemplateForStack(savedStack, template);
+            LOGGER.info("Save cluster template took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+
+            start = System.currentTimeMillis();
+            addCloudbreakDetailsForStack(savedStack);
+            LOGGER.info("Add Cloudbreak template took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+
+            MDCBuilder.buildMdcContext(savedStack);
+
+            start = System.currentTimeMillis();
+            instanceGroupRepository.save(savedStack.getInstanceGroups());
+            LOGGER.info("Instance groups saved in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+
+            start = System.currentTimeMillis();
+            instanceMetaDataRepository.save(savedStack.getInstanceMetaDataAsList());
+            LOGGER.info("Instance metadatas saved in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+
+            start = System.currentTimeMillis();
+            SecurityConfig securityConfig = tlsSecurityService.storeSSHKeys();
+            LOGGER.info("Generating SSH keys took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+
+            start = System.currentTimeMillis();
+            securityConfig.setSaltPassword(PasswordUtil.generatePassword());
+            securityConfig.setSaltBootPassword(PasswordUtil.generatePassword());
+            securityConfig.setKnoxMasterSecret(PasswordUtil.generatePassword());
+            LOGGER.info("Generating salt passwords took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+
+            securityConfig.setStack(savedStack);
+            start = System.currentTimeMillis();
+            securityConfigRepository.save(securityConfig);
+            LOGGER.info("Security config save took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+            savedStack.setSecurityConfig(securityConfig);
+
+            start = System.currentTimeMillis();
+            imageService.create(savedStack, platformString, connector.getPlatformParameters(savedStack), imgFromCatalog);
+            LOGGER.info("Image creation took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+            return savedStack;
+        } catch (CloudbreakImageNotFoundException e) {
+            LOGGER.error("Cloudbreak Image not found", e);
+            throw new CloudbreakApiException(e.getMessage(), e);
+        } catch (CloudbreakImageCatalogException e) {
+            LOGGER.error("Cloudbreak Image Catalog error", e);
+            throw new CloudbreakApiException(e.getMessage(), e);
         }
     }
 

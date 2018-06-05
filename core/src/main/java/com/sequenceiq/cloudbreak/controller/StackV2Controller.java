@@ -235,17 +235,17 @@ public class StackV2Controller extends NotificationController implements StackV2
     }
 
     @Override
-    public StackResponse postPrivate(StackV2Request stackRequest) throws Exception {
+    public StackResponse postPrivate(StackV2Request stackRequest) {
         return stackCommonService.postPrivate(conversionService.convert(stackRequest, StackRequest.class));
     }
 
     @Override
-    public StackResponse postPublic(StackV2Request stackRequest) throws Exception {
+    public StackResponse postPublic(StackV2Request stackRequest) {
         return stackCommonService.postPublic(conversionService.convert(stackRequest, StackRequest.class));
     }
 
     @Override
-    public GeneratedBlueprintResponse postStackForBlueprint(StackV2Request stackRequest) throws Exception {
+    public GeneratedBlueprintResponse postStackForBlueprint(StackV2Request stackRequest) {
         IdentityUser user = authenticatedUserService.getCbUser();
         stackRequest.setAccount(user.getAccount());
         stackRequest.setOwner(user.getUserId());

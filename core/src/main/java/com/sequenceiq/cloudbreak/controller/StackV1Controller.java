@@ -36,12 +36,12 @@ public class StackV1Controller extends NotificationController implements StackV1
     private StackCommonService stackCommonService;
 
     @Override
-    public StackResponse postPrivate(StackRequest stackRequest) throws Exception {
+    public StackResponse postPrivate(StackRequest stackRequest) {
         return stackCommonService.postPrivate(stackRequest);
     }
 
     @Override
-    public StackResponse postPublic(StackRequest stackRequest) throws Exception {
+    public StackResponse postPublic(StackRequest stackRequest) {
         return stackCommonService.postPublic(stackRequest);
     }
 

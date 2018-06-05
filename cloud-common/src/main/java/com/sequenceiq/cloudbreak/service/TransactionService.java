@@ -112,6 +112,10 @@ public class TransactionService {
         public TransactionExecutionException(String message, Throwable cause) {
             super(message, cause);
         }
+
+        public TransactionExecutionException(Throwable cause) {
+            this(cause.getMessage(), cause);
+        }
     }
 
     public static class TransactionRuntimeExecutionException extends RuntimeException {
