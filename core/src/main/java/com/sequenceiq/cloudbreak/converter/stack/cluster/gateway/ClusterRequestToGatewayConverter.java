@@ -29,8 +29,7 @@ public class ClusterRequestToGatewayConverter extends AbstractConversionServiceA
         if (validationResult.hasError()) {
             throw new BadRequestException(validationResult.getFormattedErrors());
         }
-        boolean legacyGatewayRequest = gatewayConvertUtil.isLegacyGatewayRequest(gatewayJson);
-        if (legacyGatewayRequest && !gatewayJson.isEnableGateway()) {
+        if (gatewayConvertUtil.isDisabledLegacyGateway(gatewayJson)) {
             return null;
         }
         Gateway gateway = new Gateway();

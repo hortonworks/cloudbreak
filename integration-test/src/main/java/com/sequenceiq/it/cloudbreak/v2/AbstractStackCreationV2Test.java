@@ -10,9 +10,7 @@ import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.GatewayJson;
 import com.sequenceiq.cloudbreak.api.model.KerberosRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.StackAuthenticationRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.AmbariV2Request;
@@ -102,9 +100,6 @@ public class AbstractStackCreationV2Test extends AbstractCloudbreakIntegrationTe
         ambariV2Request.setBlueprintName(blueprintName);
         ambariV2Request.setUserName(itContext.getContextParam(CloudbreakITContextConstants.AMBARI_USER_ID));
         ambariV2Request.setPassword(itContext.getContextParam(CloudbreakITContextConstants.AMBARI_PASSWORD_ID));
-        GatewayJson gatewayJson = new GatewayJson();
-        gatewayJson.setExposedServices(ImmutableList.of("ALL"));
-        ambariV2Request.setGateway(gatewayJson);
         if (enableSecurity) {
             ambariV2Request.setEnableSecurity(enableSecurity);
             KerberosRequest kerberosRequest = new KerberosRequest();

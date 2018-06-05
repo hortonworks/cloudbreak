@@ -27,6 +27,9 @@ public class GatewayJsonValidator implements Validator<GatewayJson> {
     @Override
     public ValidationResult validate(GatewayJson subject) {
         ValidationResultBuilder validationResultBuilder = ValidationResult.builder();
+        if (gatewayConvertUtil.isDisabledLegacyGateway(subject)) {
+            return validationResultBuilder.build();
+        }
         if (noTopologyIsDefined(subject)) {
             return validationResultBuilder.error("No topology is defined in gateway request. Please define a topology in "
                     + "'gateway.topologies'.").build();
@@ -47,7 +50,7 @@ public class GatewayJsonValidator implements Validator<GatewayJson> {
     }
 
     private boolean shouldCheckTopologyNames(GatewayJson subject) {
-        return !gatewayConvertUtil.isLegacyGatewayRequest(subject) && !CollectionUtils.isEmpty(subject.getTopologies());
+        return !gatewayConvertUtil.isLegacyTopologyRequest(subject) && !CollectionUtils.isEmpty(subject.getTopologies());
     }
 
     private void validateTopologyNames(GatewayJson subject, ValidationResultBuilder validationResultBuilder) {
