@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.structuredevent.converter;
 
+import java.util.Optional;
+
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
@@ -99,7 +101,8 @@ public class ClusterToClusterDetailsConverter extends AbstractConversionServiceA
         StackRepoDetails stackRepoDetails = clusterComponentConfigProvider.getHDPRepo(cluster.getId());
         if (stackRepoDetails != null) {
             clusterDetails.setClusterType(stackRepoDetails.getStack().get(StackRepoDetails.REPO_ID_TAG));
-            clusterDetails.setClusterVersion(stackRepoDetails.getHdpVersion());
+            Optional<String> version = Optional.ofNullable(stackRepoDetails.getStack().get(StackRepoDetails.REPOSITORY_VERSION));
+            clusterDetails.setClusterVersion(version.orElse(stackRepoDetails.getHdpVersion()));
         }
     }
 }
