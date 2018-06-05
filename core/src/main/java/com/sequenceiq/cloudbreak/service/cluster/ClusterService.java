@@ -25,7 +25,7 @@ import com.sequenceiq.cloudbreak.service.TransactionService;
 
 public interface ClusterService {
 
-    Cluster create(IdentityUser user, Stack stack, Cluster clusterRequest, List<ClusterComponent> component);
+    Cluster create(IdentityUser user, Stack stack, Cluster clusterRequest, List<ClusterComponent> component) throws Exception;
 
     void delete(Long stackId, Boolean withStackDelete, Boolean deleteDependencies);
 

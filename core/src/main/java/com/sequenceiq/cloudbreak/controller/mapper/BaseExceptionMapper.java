@@ -26,7 +26,7 @@ abstract class BaseExceptionMapper<E extends Throwable> implements ExceptionMapp
     }
 
     protected Object getEntity(E exception) {
-        return new ExceptionResult(exception.getMessage());
+        return new ExceptionResult(getErrorMessage(exception));
     }
 
     protected boolean logException() {
