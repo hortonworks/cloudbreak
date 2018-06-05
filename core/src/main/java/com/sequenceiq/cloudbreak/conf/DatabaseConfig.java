@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.conf;
 
+import static java.util.concurrent.TimeUnit.MINUTES;
+import static java.util.concurrent.TimeUnit.SECONDS;
+
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.sql.SQLException;
@@ -41,8 +44,17 @@ public class DatabaseConfig {
     @Value("${cb.db.env.db:}")
     private String dbName;
 
-    @Value("${cb.db.env.poolsize:10}")
+    @Value("${cb.db.env.poolsize:30}")
     private int poolSize;
+
+    @Value("${cb.db.env.connectiontimeout:30}")
+    private long connectionTimeout;
+
+    @Value("${cb.db.env.minidle:2}")
+    private int minimumIdle;
+
+    @Value("${cb.db.env.idletimeout:10}")
+    private long idleTimeout;
 
     @Value("${cb.db.env.schema:" + DatabaseUtil.DEFAULT_SCHEMA_NAME + '}')
     private String dbSchemaName;
@@ -82,6 +94,9 @@ public class DatabaseConfig {
         config.setUsername(dbUser);
         config.setPassword(dbPassword);
         config.setMaximumPoolSize(poolSize);
+        config.setMinimumIdle(minimumIdle);
+        config.setConnectionTimeout(SECONDS.toMillis(connectionTimeout));
+        config.setIdleTimeout(MINUTES.toMillis(idleTimeout));
         return new HikariDataSource(config);
     }
 
