@@ -29,14 +29,14 @@ public class GatewayConvertUtil {
     private ConversionService conversionService;
 
     public void setTopologies(GatewayJson source, Gateway gateway) {
-        if (isLegacyGatewayRequest(source)) {
+        if (isLegacyTopologyRequest(source)) {
             setLegacyTopology(gateway, source.getTopologyName(), source.getExposedServices());
         } else {
             setTopologyList(gateway, source.getTopologies());
         }
     }
 
-    public boolean isLegacyGatewayRequest(GatewayJson source) {
+    public boolean isLegacyTopologyRequest(GatewayJson source) {
         return StringUtils.isNotBlank(source.getTopologyName()) || !CollectionUtils.isEmpty(source.getExposedServices());
     }
 
@@ -70,6 +70,10 @@ public class GatewayConvertUtil {
                 gateway.setSignCert(PkiUtil.convert(cert));
             }
         }
+    }
+
+    public boolean isDisabledLegacyGateway(GatewayJson gatewayJson) {
+        return gatewayJson.hasGatewayEnabled() && !gatewayJson.isEnableGateway();
     }
 
     private void setTopologyList(Gateway gateway, Collection<GatewayTopologyJson> topologies) {
