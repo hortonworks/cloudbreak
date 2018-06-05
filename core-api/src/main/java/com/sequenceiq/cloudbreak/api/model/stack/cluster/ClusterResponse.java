@@ -33,8 +33,8 @@ import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupResponse;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
-import com.sequenceiq.cloudbreak.json.Base64Deserializer;
-import com.sequenceiq.cloudbreak.json.Base64Serializer;
+import com.sequenceiq.cloudbreak.structuredevent.json.Base64Deserializer;
+import com.sequenceiq.cloudbreak.structuredevent.json.Base64Serializer;
 
 import io.swagger.annotations.ApiModelProperty;
 

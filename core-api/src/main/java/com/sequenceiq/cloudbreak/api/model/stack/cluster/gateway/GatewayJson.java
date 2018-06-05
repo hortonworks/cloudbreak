@@ -10,8 +10,8 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.sequenceiq.cloudbreak.api.model.GatewayType;
 import com.sequenceiq.cloudbreak.api.model.JsonEntity;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.GatewayModelDescription;
-import com.sequenceiq.cloudbreak.json.Base64Deserializer;
-import com.sequenceiq.cloudbreak.json.Base64Serializer;
+import com.sequenceiq.cloudbreak.structuredevent.json.Base64Deserializer;
+import com.sequenceiq.cloudbreak.structuredevent.json.Base64Serializer;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
