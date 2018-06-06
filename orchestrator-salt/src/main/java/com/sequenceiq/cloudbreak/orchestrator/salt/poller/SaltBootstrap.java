@@ -64,7 +64,7 @@ public class SaltBootstrap implements OrchestratorBootstrap {
             LOGGER.info("SaltBootstrap responses: {}", responses);
             for (GenericResponse genericResponse : responses.getResponses()) {
                 if (genericResponse.getStatusCode() != HttpStatus.OK.value()) {
-                    LOGGER.info("Failed to distributed salt run to: " + genericResponse.getAddress());
+                    LOGGER.info("Failed to distributed salt run to: {}, error: {}", genericResponse.getAddress(), genericResponse.getErrorText());
                     String address = genericResponse.getAddress().split(":")[0];
                     failedTargets.addAll(originalTargets.stream().filter(a -> a.getPrivateIp().equals(address)).collect(Collectors.toList()));
                 }

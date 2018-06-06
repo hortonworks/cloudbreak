@@ -48,7 +48,7 @@ public class GenericResponse {
     }
 
     public String getErrorText() {
-        return errorText;
+        return errorText != null ? errorText : "";
     }
 
     public void setErrorText(String errorText) {
