@@ -8,11 +8,17 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 public class KeystoneCredentialView {
     public static final String CB_KEYSTONE_V2 = "cb-keystone-v2";
 
+    public static final String CB_KEYSTONE_V3 = "cb-keystone-v3";
+
     public static final String CB_KEYSTONE_V3_DEFAULT_SCOPE = "cb-keystone-v3-default-scope";
 
     public static final String CB_KEYSTONE_V3_PROJECT_SCOPE = "cb-keystone-v3-project-scope";
 
     public static final String CB_KEYSTONE_V3_DOMAIN_SCOPE = "cb-keystone-v3-domain-scope";
+
+    public static final String CB_KEY_KEYSTONE_VERSION = "keystoneVersion";
+
+    public static final String CB_KEY_KEYSTONE_AUTH_SCOPE = "keystoneAuthScope";
 
     private static final String CB_KEYPAIR_NAME = "cb";
 
@@ -75,10 +81,10 @@ public class KeystoneCredentialView {
     }
 
     public String getScope() {
-        return cloudCredential.getParameter("keystoneAuthScope", String.class);
+        return cloudCredential.getParameter(CB_KEY_KEYSTONE_AUTH_SCOPE, String.class);
     }
 
     public String getVersion() {
-        return cloudCredential.getParameter("keystoneVersion", String.class);
+        return cloudCredential.getParameter(CB_KEY_KEYSTONE_VERSION, String.class);
     }
 }

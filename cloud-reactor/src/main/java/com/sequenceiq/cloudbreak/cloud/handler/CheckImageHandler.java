@@ -47,7 +47,7 @@ public class CheckImageHandler implements CloudPlatformEventHandler<CheckImageRe
         CloudContext cloudContext = request.getCloudContext();
         try {
             CloudConnector connector = cloudPlatformConnectors.get(request.getCloudContext().getPlatformVariant());
-            AuthenticatedContext auth = connector.authentication().authenticate(cloudContext, request.getCloudCredential());
+            AuthenticatedContext auth = connector.authentication().authenticate(cloudContext, request.getCloudCredential(), false);
             Image image = request.getImage();
             CloudStack stack = request.getStack();
             ImageStatusResult progress = connector.setup().checkImageStatus(auth, stack, image);

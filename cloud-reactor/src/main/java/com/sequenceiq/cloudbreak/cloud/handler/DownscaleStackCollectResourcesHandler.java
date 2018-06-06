@@ -39,7 +39,7 @@ public class DownscaleStackCollectResourcesHandler implements CloudPlatformEvent
         try {
             CloudContext cloudContext = request.getCloudContext();
             CloudConnector connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
-            AuthenticatedContext ac = connector.authentication().authenticate(cloudContext, request.getCloudCredential());
+            AuthenticatedContext ac = connector.authentication().authenticate(cloudContext, request.getCloudCredential(), false);
             Object resourcesToScale = connector.resources().collectResourcesToRemove(ac, request.getCloudStack(),
                     request.getCloudResources(), request.getInstances());
             LOGGER.info("Collect resources successfully finished for {}", cloudContext);

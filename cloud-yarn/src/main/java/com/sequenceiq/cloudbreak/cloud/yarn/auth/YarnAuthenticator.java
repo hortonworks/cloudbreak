@@ -13,7 +13,7 @@ import com.sequenceiq.cloudbreak.cloud.yarn.YarnConstants;
 @Service
 public class YarnAuthenticator implements Authenticator {
     @Override
-    public AuthenticatedContext authenticate(CloudContext cloudContext, CloudCredential cloudCredential) {
+    public AuthenticatedContext authenticate(CloudContext cloudContext, CloudCredential cloudCredential, boolean verification) {
         return new AuthenticatedContext(cloudContext, cloudCredential);
     }
 

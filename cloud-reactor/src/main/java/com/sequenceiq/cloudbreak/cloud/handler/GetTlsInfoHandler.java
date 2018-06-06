@@ -43,7 +43,7 @@ public class GetTlsInfoHandler implements CloudPlatformEventHandler<GetTlsInfoRe
             CloudCredential cloudCredential = tlsInfoRequest.getCloudCredential();
             CloudConnector connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
             CloudStack cloudStack = tlsInfoRequest.getCloudStack();
-            AuthenticatedContext ac = connector.authentication().authenticate(cloudContext, cloudCredential);
+            AuthenticatedContext ac = connector.authentication().authenticate(cloudContext, cloudCredential, false);
             TlsInfo tlsInfo = connector.resources().getTlsInfo(ac, cloudStack);
             GetTlsInfoResult getTlsInfoResult = new GetTlsInfoResult(tlsInfoRequest, tlsInfo);
             tlsInfoRequest.getResult().onNext(getTlsInfoResult);

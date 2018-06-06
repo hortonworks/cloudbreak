@@ -9,10 +9,12 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.cloud.Authenticator;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackConstants;
+import com.sequenceiq.cloudbreak.cloud.openstack.view.KeystoneCredentialView;
 
 @Service
 public class OpenStackAuthenticator implements Authenticator {
@@ -33,8 +35,14 @@ public class OpenStackAuthenticator implements Authenticator {
     }
 
     @Override
-    public AuthenticatedContext authenticate(CloudContext cloudContext, CloudCredential cloudCredential) {
+    public AuthenticatedContext authenticate(CloudContext cloudContext, CloudCredential cloudCredential, boolean verification) {
         LOGGER.info("Authenticating to openstack ...");
+        KeystoneCredentialView keystoneCredentialView = openStackClient.createKeystoneCredential(cloudCredential);
+        if (verification && KeystoneCredentialView.CB_KEYSTONE_V3.equals(keystoneCredentialView.getVersion())
+                && KeystoneCredentialView.CB_KEYSTONE_V3_DEFAULT_SCOPE.equals(keystoneCredentialView.getScope())) {
+            throw new CloudConnectorException("Creation of Openstack Keystone credentials with default scope is not supported");
+        }
         return openStackClient.createAuthenticatedContext(cloudContext, cloudCredential);
     }
+
 }

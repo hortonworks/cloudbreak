@@ -39,7 +39,7 @@ public class CredentialVerificationHandler implements CloudPlatformEventHandler<
             AuthenticatedContext ac;
             CloudCredentialStatus cloudCredentialStatus;
             try {
-                ac = connector.authentication().authenticate(request.getCloudContext(), request.getCloudCredential());
+                ac = connector.authentication().authenticate(request.getCloudContext(), request.getCloudCredential(), true);
                 cloudCredentialStatus = connector.credentials().verify(ac);
             } catch (CredentialVerificationException e) {
                 String errorMessage = e.getMessage();

@@ -41,7 +41,7 @@ public class PrepareImageHandler implements CloudPlatformEventHandler<PrepareIma
         CloudContext cloudContext = request.getCloudContext();
         try {
             CloudConnector connector = cloudPlatformConnectors.get(request.getCloudContext().getPlatformVariant());
-            AuthenticatedContext auth = connector.authentication().authenticate(cloudContext, request.getCloudCredential());
+            AuthenticatedContext auth = connector.authentication().authenticate(cloudContext, request.getCloudCredential(), false);
             Image image = request.getImage();
             CloudStack stack = request.getStack();
             connector.setup().prepareImage(auth, stack, image);

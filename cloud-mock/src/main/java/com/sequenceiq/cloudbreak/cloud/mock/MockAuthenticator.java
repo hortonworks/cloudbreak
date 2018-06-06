@@ -17,7 +17,7 @@ public class MockAuthenticator implements Authenticator {
     private static final Logger LOGGER = LoggerFactory.getLogger(MockAuthenticator.class);
 
     @Override
-    public AuthenticatedContext authenticate(CloudContext cloudContext, CloudCredential cloudCredential) {
+    public AuthenticatedContext authenticate(CloudContext cloudContext, CloudCredential cloudCredential, boolean verification) {
         LOGGER.info("Authenticating to mock ...");
         return new AuthenticatedContext(cloudContext, cloudCredential);
     }

@@ -42,7 +42,7 @@ public class ProvisionValidationHandler implements CloudPlatformEventHandler<Val
         ValidationResult result;
         try {
             CloudConnector connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
-            AuthenticatedContext ac = connector.authentication().authenticate(request.getCloudContext(), request.getCloudCredential());
+            AuthenticatedContext ac = connector.authentication().authenticate(request.getCloudContext(), request.getCloudCredential(), false);
             CloudStack cloudStack = request.getCloudStack();
             for (Validator v : connector.validators()) {
                 v.validate(ac, cloudStack);

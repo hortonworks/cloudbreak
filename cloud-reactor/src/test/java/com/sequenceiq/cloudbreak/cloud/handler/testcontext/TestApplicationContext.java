@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.handler.testcontext;
 
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyList;
 import static org.mockito.Matchers.anyLong;
@@ -136,7 +137,7 @@ public class TestApplicationContext {
         when(cloudConnector.credentials()).thenReturn(credentialConnector);
         when(credentialConnector.create(any(AuthenticatedContext.class))).thenReturn(new CloudCredentialStatus(null, CredentialStatus.CREATED));
         when(credentialConnector.delete(any(AuthenticatedContext.class))).thenReturn(new CloudCredentialStatus(null, CredentialStatus.DELETED));
-        when(authenticator.authenticate(any(), any())).thenReturn(g.createAuthenticatedContext());
+        when(authenticator.authenticate(any(), any(), anyBoolean())).thenReturn(g.createAuthenticatedContext());
         when(cloudConnector.platform()).thenReturn(Platform.platform("TESTCONNECTOR"));
         when(cloudConnector.variant()).thenReturn(Variant.variant("TESTVARIANT"));
         when(cloudConnector.resources()).thenReturn(resourceConnector);

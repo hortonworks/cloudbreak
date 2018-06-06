@@ -16,8 +16,9 @@ public interface Authenticator extends CloudPlatformAware {
      *
      * @param cloudContext    the context containing information to identify which stack (cluster) is affected
      * @param cloudCredential credentials for the given platform
+     * @param verification    authentication is used to verify credentials during creating credentials
      * @return authenticated context object, shall contain a the authenticated client object. The client object needs to be threadsafe.
      */
-    AuthenticatedContext authenticate(CloudContext cloudContext, CloudCredential cloudCredential);
+    AuthenticatedContext authenticate(CloudContext cloudContext, CloudCredential cloudCredential, boolean verification);
 
 }

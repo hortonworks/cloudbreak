@@ -32,9 +32,10 @@ public class AwsAuthenticator implements Authenticator {
     }
 
     @Override
-    public AuthenticatedContext authenticate(CloudContext cloudContext, CloudCredential cloudCredential) {
+    public AuthenticatedContext authenticate(CloudContext cloudContext, CloudCredential cloudCredential, boolean verification) {
         LOGGER.info("Authenticating to aws ...");
         awsClient.checkAwsEnvironmentVariables(cloudCredential);
         return awsClient.createAuthenticatedContext(cloudContext, cloudCredential);
     }
+
 }
