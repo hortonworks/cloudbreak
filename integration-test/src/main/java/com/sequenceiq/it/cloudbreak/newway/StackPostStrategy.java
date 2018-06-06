@@ -9,6 +9,7 @@ import javax.ws.rs.WebApplicationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sequenceiq.cloudbreak.api.model.v2.AmbariV2Request;
 import com.sequenceiq.it.IntegrationTestContext;
 
 public class StackPostStrategy implements Strategy {
@@ -28,6 +29,15 @@ public class StackPostStrategy implements Strategy {
         Cluster cluster = Cluster.getTestContextCluster().apply(integrationTestContext);
         if (cluster != null && stackEntity.getRequest().getCluster() == null) {
             stackEntity.getRequest().setCluster(cluster.getRequest());
+        }
+
+        Kerberos kerberos = Kerberos.getTestContextCluster().apply(integrationTestContext);
+        boolean updateKerberos = stackEntity.getRequest().getCluster() != null && stackEntity.getRequest().getCluster().getAmbari() != null
+                && stackEntity.getRequest().getCluster().getAmbari().getKerberos() == null;
+        if (kerberos != null && updateKerberos) {
+            AmbariV2Request ambariReq = stackEntity.getRequest().getCluster().getAmbari();
+            ambariReq.setEnableSecurity(true);
+            ambariReq.setKerberos(kerberos.getRequest());
         }
 
         ImageSettings imageSettings = ImageSettings.getTestContextImageSettings().apply(integrationTestContext);
