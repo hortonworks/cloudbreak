@@ -36,6 +36,7 @@ import com.sequenceiq.cloudbreak.controller.mapper.SpringAccessDeniedExceptionMa
 import com.sequenceiq.cloudbreak.controller.mapper.SpringBadRequestExceptionMapper;
 import com.sequenceiq.cloudbreak.controller.mapper.SubscriptionAlreadyExistExceptionMapper;
 import com.sequenceiq.cloudbreak.controller.mapper.TerminationFailedExceptionMapper;
+import com.sequenceiq.cloudbreak.controller.mapper.TransactionRuntimeExecutionExceptionMapper;
 import com.sequenceiq.cloudbreak.controller.mapper.TypeMismatchExceptionMapper;
 import com.sequenceiq.cloudbreak.controller.mapper.UnsupportedOperationFailedExceptionMapper;
 import com.sequenceiq.cloudbreak.controller.mapper.WebApplicaitonExceptionMapper;
@@ -115,6 +116,7 @@ public class EndpointConfig extends ResourceConfig {
         register(TerminationFailedExceptionMapper.class);
         register(WebApplicaitonExceptionMapper.class);
         register(GetCloudParameterExceptionMapper.class);
+        register(TransactionRuntimeExecutionExceptionMapper.class);
 
         register(RuntimeExceptionMapper.class);
         register(DefaultExceptionMapper.class);
