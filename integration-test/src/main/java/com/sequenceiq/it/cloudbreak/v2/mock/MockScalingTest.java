@@ -58,11 +58,9 @@ public class MockScalingTest extends StackScalingV2Test {
         super.testStackScaling(hostGroup, desiredCount, checkAmbari);
         // THEN
         ScalingMock scalingMock = getItContext().getContextParam(CloudbreakV2Constants.MOCK_SERVER, ScalingMock.class);
-        String clusterName = getItContext().getContextParam(CloudbreakV2Constants.STACK_NAME);
         String stackId = getItContext().getContextParam(CloudbreakITContextConstants.STACK_ID);
         StackV2Request stackV2Request = getItContext().getContextParam(CloudbreakV2Constants.STACK_CREATION_REQUEST, StackV2Request.class);
-        boolean securityEnabled = stackV2Request.getCluster().getAmbari().getEnableSecurity();
-        scalingMock.verifyV2Calls(clusterName, ScalingUtil.getNodeCountStack(getCloudbreakClient().stackV2Endpoint(), stackId), securityEnabled);
+        scalingMock.verifyV2Calls(stackV2Request.getCluster(), ScalingUtil.getNodeCountStack(getCloudbreakClient().stackV2Endpoint(), stackId));
     }
 
     @AfterClass

@@ -64,6 +64,7 @@ tests:
       mockPort: 9443
       publicKeyId: seq-master
       enableSecurity: true
+      enableGateway: false
       kerberosMasterKey: masterkey
       kerberosAdmin: admin
       kerberosPassword: admin
