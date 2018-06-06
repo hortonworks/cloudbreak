@@ -4,6 +4,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
+import javax.transaction.Transactional;
+
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -13,6 +15,7 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 
 @EntityType(entityClass = InstanceMetaData.class)
+@Transactional(Transactional.TxType.REQUIRED)
 public interface InstanceMetaDataRepository extends CrudRepository<InstanceMetaData, Long> {
 
     Set<InstanceMetaData> findAllByInstanceIdIn(Iterable<String> instanceId);

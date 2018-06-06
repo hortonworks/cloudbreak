@@ -3,6 +3,8 @@ package com.sequenceiq.cloudbreak.repository;
 import java.util.Collection;
 import java.util.Set;
 
+import javax.transaction.Transactional;
+
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -11,6 +13,7 @@ import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.Topology;
 
 @EntityType(entityClass = Credential.class)
+@Transactional(Transactional.TxType.REQUIRED)
 public interface CredentialRepository extends CrudRepository<Credential, Long> {
 
     @Override

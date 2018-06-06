@@ -77,7 +77,7 @@ public class OrchestratorBootstrapRunner implements Callable<Boolean> {
         long initialStartTime = System.currentTimeMillis();
         while (success == null && belowAttemptThreshold(retryCount, errorCount)) {
             if (isExitNeeded()) {
-                LOGGER.error(exitCriteria.exitMessage());
+                LOGGER.info(exitCriteria.exitMessage());
                 throw new CloudbreakOrchestratorCancelledException(exitCriteria.exitMessage());
             }
             long startTime = System.currentTimeMillis();
