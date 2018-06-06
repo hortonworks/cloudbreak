@@ -206,8 +206,8 @@ public class SaltConnector implements Closeable {
                 .filter(genericResponse -> !ACCEPTED_STATUSES.contains(genericResponse.getStatusCode())).collect(Collectors.toList());
         if (!failedResponses.isEmpty()) {
             failedResponseErrorLog(failedResponses);
-            String failedNodeAddresses = failedResponses.stream().map(GenericResponse::getAddress).collect(Collectors.joining(","));
-            throw new CloudbreakOrchestratorFailedException("Hostname resolution failed for nodes: " + failedNodeAddresses);
+            String nodeErrors = failedResponses.stream().map(gr -> gr.getAddress() + ": " + gr.getErrorText()).collect(Collectors.joining(","));
+            throw new CloudbreakOrchestratorFailedException("Hostname resolution failed for nodes: " + nodeErrors);
         }
         return responses.getResponses().stream().collect(Collectors.toMap(GenericResponse::getAddress, GenericResponse::getStatus));
     }
@@ -217,7 +217,8 @@ public class SaltConnector implements Closeable {
         failedResponsesErrorMessage.append("Failed response from salt bootstrap, endpoint: ").append(BOOT_HOSTNAME_ENDPOINT);
         for (GenericResponse failedResponse : failedResponses) {
             failedResponsesErrorMessage.append('\n').append("Status code: ").append(failedResponse.getStatusCode());
-            failedResponsesErrorMessage.append(" Error message: ").append(failedResponse.getStatus());
+            failedResponsesErrorMessage.append(" Status: ").append(failedResponse.getStatus());
+            failedResponsesErrorMessage.append(" Error message: ").append(failedResponse.getErrorText());
         }
         LOGGER.error(failedResponsesErrorMessage.toString());
     }
