@@ -95,7 +95,7 @@ public class BlueprintService {
         blueprint.setOwner(user.getUserId());
         blueprint.setAccount(user.getAccount());
         if (properties != null && !properties.isEmpty()) {
-            LOGGER.info("Extend validation with the following properties: {}", properties);
+            LOGGER.info("Extend blueprint with the following properties: {}", properties);
             Map<String, Map<String, String>> configs = new HashMap<>(properties.size());
             for (Map<String, Map<String, String>> property : properties) {
                 for (Entry<String, Map<String, String>> entry : property.entrySet()) {
@@ -109,7 +109,7 @@ public class BlueprintService {
             }
             String extendedBlueprint = blueprintProcessorFactory.get(blueprint.getBlueprintText())
                     .extendBlueprintGlobalConfiguration(SiteConfigurations.fromMap(configs), false).asText();
-            LOGGER.info("Extended validation result: {}", extendedBlueprint);
+            LOGGER.info("Extended blueprint result: {}", extendedBlueprint);
             blueprint.setBlueprintText(extendedBlueprint);
         }
         try {
@@ -161,7 +161,7 @@ public class BlueprintService {
         authorizationService.hasWritePermission(blueprint);
         if (!clusterRepository.countByBlueprint(blueprint).equals(0L)) {
             throw new BadRequestException(String.format(
-                    "There are clusters associated with validation '%s'. Please remove these before deleting the validation.", blueprint.getId()));
+                    "There are clusters associated with blueprint '%s'. Please remove these before deleting the blueprint.", blueprint.getId()));
         }
         if (ResourceStatus.USER_MANAGED.equals(blueprint.getStatus())) {
             blueprintRepository.delete(blueprint);
