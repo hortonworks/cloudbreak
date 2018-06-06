@@ -51,14 +51,14 @@ func TestKeystoneV3(t *testing.T) {
 
 	actualMap, _ := provider.GetCredentialParameters(stringFinder, nil)
 
-	if actualMap["selector"] != "cb-keystone-v3-default-scope" {
-		t.Errorf("selector not match cb-keystone-v3-default-scope == %s", actualMap["selector"])
+	if actualMap["selector"] != "cb-keystone-v3-project-scope" {
+		t.Errorf("selector not match cb-keystone-v3-project-scope == %s", actualMap["selector"])
 	}
 	if actualMap["keystoneVersion"] != KEYSTONE_V3 {
 		t.Errorf("keystoneVersion not match %s == %s", KEYSTONE_V3, actualMap["keystoneVersion"])
 	}
-	if actualMap["keystoneAuthScope"] != "cb-keystone-v3-default-scope" {
-		t.Errorf("keystoneAuthScope not match cb-keystone-v3-default-scope == %s", actualMap["keystoneAuthScope"])
+	if actualMap["keystoneAuthScope"] != "cb-keystone-v3-project-scope" {
+		t.Errorf("keystoneAuthScope not match cb-keystone-v3-project-scope == %s", actualMap["keystoneAuthScope"])
 	}
 }
 
