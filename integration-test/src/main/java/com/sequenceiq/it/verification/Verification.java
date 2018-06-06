@@ -88,7 +88,7 @@ public class Verification {
         if (exactTimes != null) {
             if (exactTimes != times) {
                 logRequests();
-                fail(path + " request didn't invoked exactly " + exactTimes + " times, invoked " + times + " times");
+                fail(path + " request should have been invoked exactly " + exactTimes + " times, but it was invoked " + times + " times");
             }
         }
     }
@@ -97,7 +97,7 @@ public class Verification {
         if (atLeast != null) {
             if (times < atLeast) {
                 logRequests();
-                fail(path + " request didn't invoked at least " + atLeast + " times, invoked " + times + " times");
+                fail(path + " request should have been invoked at least " + atLeast + " times, but it was invoked " + times + " times");
             }
         }
     }

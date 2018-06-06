@@ -22,6 +22,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.sequenceiq.cloudbreak.api.model.v2.ClusterV2Request;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 import com.sequenceiq.cloudbreak.orchestrator.model.GenericResponse;
@@ -46,6 +47,8 @@ import spark.Service;
 @Scope("prototype")
 public class ScalingMock extends MockServer {
     public static final String NAME = "ScalingMock";
+
+    private int grainsBaseAppendCount = 8;
 
     public ScalingMock(int mockPort, int sshPort, Map<String, CloudVmMetaDataStatus> instanceMap) {
         super(mockPort, sshPort, instanceMap);
@@ -115,7 +118,8 @@ public class ScalingMock extends MockServer {
         sparkService.post(MOCK_ROOT + "/cloud_metadata_statuses", new CloudMetaDataStatuses(instanceMap), gson()::toJson);
         sparkService.post(MOCK_ROOT + "/cloud_instance_statuses", new CloudVmInstanceStatuses(instanceMap), gson()::toJson);
         sparkService.post(MOCK_ROOT + "/terminate_instances", (request, response) -> {
-            List<CloudInstance> cloudInstances = new Gson().fromJson(request.body(), new TypeToken<List<CloudInstance>>() { }.getType());
+            List<CloudInstance> cloudInstances = new Gson().fromJson(request.body(), new TypeToken<List<CloudInstance>>() {
+            }.getType());
             cloudInstances.forEach(cloudInstance -> terminateInstance(instanceMap, cloudInstance.getInstanceId()));
             return null;
         }, gson()::toJson);
@@ -170,13 +174,48 @@ public class ScalingMock extends MockServer {
         sparkService.post(AMBARI_API_ROOT + "/users", new EmptyAmbariResponse());
     }
 
-    public void verifyV2Calls(String clusterName, int desiredCount, boolean securityEnabled) {
+    public void verifyV2Calls(ClusterV2Request cluster, int desiredCount) {
         int scalingAdjustment = desiredCount - getNumberOfServers();
-        verifyV1Calls(clusterName, scalingAdjustment, securityEnabled);
+        String clusterName = cluster.getName();
+        verifyDownScale(clusterName, scalingAdjustment);
+        verifyUpScale(clusterName, scalingAdjustment);
+        if (isUpScale(scalingAdjustment)) {
+            verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=grains.append").exactTimes(calculateGrainsAppendCount(cluster)).verify();
+        }
     }
 
-    public void verifyV1Calls(String clusterName, int scalingAdjustment, boolean securityEnabled) {
-        if (scalingAdjustment < 0) {
+    public void verifyV1Calls(String clusterName, int scalingAdjustment) {
+        verifyDownScale(clusterName, scalingAdjustment);
+        verifyUpScale(clusterName, scalingAdjustment);
+        if (isUpScale(scalingAdjustment)) {
+            verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=grains.append").exactTimes(8).verify();
+        }
+    }
+
+    private void verifyUpScale(String clusterName, int scalingAdjustment) {
+        if (isUpScale(scalingAdjustment)) {
+            verify(MOCK_ROOT + "/cloud_instance_statuses", "POST").exactTimes(1).verify();
+            verify(MOCK_ROOT + "/cloud_metadata_statuses", "POST").bodyContains("CREATE_REQUESTED", scalingAdjustment).exactTimes(1).verify();
+            verify(SALT_BOOT_ROOT + "/health", "GET").atLeast(1).verify();
+            verify(SALT_BOOT_ROOT + "/salt/action/distribute", "POST").atLeast(1).verify();
+            verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=network.ipaddrs").exactTimes(1).verify();
+            verify(SALT_API_ROOT + "/run", "POST").bodyContains("arg=roles&arg=ambari_server").exactTimes(2).verify();
+            verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=saltutil.sync_grains").atLeast(2).verify();
+            verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=mine.update").atLeast(1).verify();
+            verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=state.highstate").exactTimes(2).verify();
+
+            verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=grains.remove").exactTimes(2).verify();
+            verify(SALT_BOOT_ROOT + "/hostname/distribute", "POST").bodyRegexp("^.*\\[([\"0-9\\.]+([,]{0,1})){" + scalingAdjustment + "}\\].*")
+                    .exactTimes(1).verify();
+            verify(SALT_BOOT_ROOT + "/salt/server/pillar/distribute", "POST").bodyContains("/nodes/hosts.sls").exactTimes(1).verify();
+            verify(AMBARI_API_ROOT + "/hosts", "GET").atLeast(1).verify();
+            verify(AMBARI_API_ROOT + "/clusters", "GET").exactTimes(1).verify();
+            verify(AMBARI_API_ROOT + "/clusters/" + clusterName, "GET").atLeast(1).verify();
+        }
+    }
+
+    private void verifyDownScale(String clusterName, int scalingAdjustment) {
+        if (isDownScale(scalingAdjustment)) {
             int adjustment = Math.abs(scalingAdjustment);
             verifyRegexpPath(AMBARI_API_ROOT + "/blueprints/.*", "GET").atLeast(1).verify();
             verify(AMBARI_API_ROOT + "/clusters/" + clusterName + "/configurations/service_config_versions", "GET").atLeast(1).verify();
@@ -194,24 +233,30 @@ public class ScalingMock extends MockServer {
             verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=key.delete").exactTimes(1).verify();
             verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=manage.status").exactTimes(1).verify();
             verify(MOCK_ROOT + "/terminate_instances", "POST").exactTimes(1).verify();
-        } else {
-            verify(MOCK_ROOT + "/cloud_instance_statuses", "POST").exactTimes(1).verify();
-            verify(MOCK_ROOT + "/cloud_metadata_statuses", "POST").bodyContains("CREATE_REQUESTED", scalingAdjustment).exactTimes(1).verify();
-            verify(SALT_BOOT_ROOT + "/health", "GET").atLeast(1).verify();
-            verify(SALT_BOOT_ROOT + "/salt/action/distribute", "POST").atLeast(1).verify();
-            verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=network.ipaddrs").exactTimes(1).verify();
-            verify(SALT_API_ROOT + "/run", "POST").bodyContains("arg=roles&arg=ambari_server").exactTimes(2).verify();
-            verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=saltutil.sync_grains").atLeast(2).verify();
-            verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=mine.update").atLeast(1).verify();
-            verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=state.highstate").exactTimes(2).verify();
-            verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=grains.append").exactTimes(securityEnabled ? 9 : 8).verify();
-            verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=grains.remove").exactTimes(2).verify();
-            verify(SALT_BOOT_ROOT + "/hostname/distribute", "POST").bodyRegexp("^.*\\[([\"0-9\\.]+([,]{0,1})){" + scalingAdjustment + "}\\].*")
-                    .exactTimes(1).verify();
-            verify(SALT_BOOT_ROOT + "/salt/server/pillar/distribute", "POST").bodyContains("/nodes/hosts.sls").exactTimes(1).verify();
-            verify(AMBARI_API_ROOT + "/hosts", "GET").atLeast(1).verify();
-            verify(AMBARI_API_ROOT + "/clusters", "GET").exactTimes(1).verify();
-            verify(AMBARI_API_ROOT + "/clusters/" + clusterName, "GET").atLeast(1).verify();
         }
     }
+
+    private boolean isDownScale(int scalingAdjustment) {
+        return scalingAdjustment < 0;
+    }
+
+    private boolean isUpScale(int scalingAdjustment) {
+        return !isDownScale(scalingAdjustment);
+    }
+
+    private int calculateGrainsAppendCount(ClusterV2Request cluster) {
+        boolean securityEnabled = cluster.getAmbari().getEnableSecurity();
+        boolean gatewayEnabled = false;
+        if (cluster.getAmbari().getGateway() != null) {
+            gatewayEnabled = !cluster.getAmbari().getGateway().getTopologies().isEmpty();
+        }
+        if (securityEnabled) {
+            grainsBaseAppendCount++;
+        }
+        if (gatewayEnabled) {
+            grainsBaseAppendCount++;
+        }
+        return grainsBaseAppendCount;
+    }
+
 }
