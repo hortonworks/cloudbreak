@@ -4,6 +4,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
+import javax.transaction.Transactional;
+
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -15,6 +17,7 @@ import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.ProxyConfig;
 
 @EntityType(entityClass = Cluster.class)
+@Transactional(Transactional.TxType.REQUIRED)
 public interface ClusterRepository extends CrudRepository<Cluster, Long> {
 
     Cluster findById(@Param("id") Long id);

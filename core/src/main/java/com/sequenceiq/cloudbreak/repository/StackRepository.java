@@ -3,6 +3,8 @@ package com.sequenceiq.cloudbreak.repository;
 import java.util.List;
 import java.util.Set;
 
+import javax.transaction.Transactional;
+
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -14,6 +16,7 @@ import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 
 @EntityType(entityClass = Stack.class)
+@Transactional(Transactional.TxType.REQUIRED)
 public interface StackRepository extends CrudRepository<Stack, Long> {
 
     @Query("SELECT s from Stack s LEFT JOIN FETCH s.resources LEFT JOIN FETCH s.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData "

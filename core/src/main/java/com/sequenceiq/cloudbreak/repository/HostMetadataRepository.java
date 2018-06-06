@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.repository;
 
 import java.util.Set;
 
+import javax.transaction.Transactional;
+
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -9,6 +11,7 @@ import org.springframework.data.repository.query.Param;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 
 @EntityType(entityClass = HostMetadata.class)
+@Transactional(Transactional.TxType.REQUIRED)
 public interface HostMetadataRepository extends CrudRepository<HostMetadata, Long> {
 
     @Query("SELECT h FROM HostMetadata h WHERE h.hostGroup.cluster.id= :clusterId")

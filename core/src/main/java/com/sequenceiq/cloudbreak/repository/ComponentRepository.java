@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.repository;
 
 import java.util.Set;
 
+import javax.transaction.Transactional;
+
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -10,6 +12,7 @@ import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.domain.stack.Component;
 
 @EntityType(entityClass = Component.class)
+@Transactional(Transactional.TxType.REQUIRED)
 public interface ComponentRepository extends CrudRepository<Component, Long> {
 
     @Query("SELECT cv FROM Component cv WHERE cv.stack.id = :stackId AND cv.componentType = :componentType AND cv.name = :name")

@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.repository;
 
+import javax.transaction.Transactional;
+
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -9,6 +11,7 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 
 @EntityType(entityClass = InstanceGroup.class)
+@Transactional(Transactional.TxType.REQUIRED)
 public interface InstanceGroupRepository extends CrudRepository<InstanceGroup, Long> {
 
     @Override

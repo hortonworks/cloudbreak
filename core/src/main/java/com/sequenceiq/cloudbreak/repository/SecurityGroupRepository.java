@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.repository;
 
 import java.util.Set;
 
+import javax.transaction.Transactional;
+
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -9,6 +11,7 @@ import org.springframework.data.repository.query.Param;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 
 @EntityType(entityClass = SecurityGroup.class)
+@Transactional(Transactional.TxType.REQUIRED)
 public interface SecurityGroupRepository extends CrudRepository<SecurityGroup, Long> {
 
     @Query("SELECT r FROM SecurityGroup r LEFT JOIN FETCH r.securityRules WHERE r.id= :id")
