@@ -25,13 +25,17 @@ public class GherkinTest extends AbstractTestNGSpringContextTests {
     }
 
     protected void given(Entity entity, String message) throws Exception {
-        Log.log("Given " + message);
-        entity.create(itContext);
-        itContext.putContextParam(entity.getEntityId(), entity);
+        if (entity != null) {
+            Log.log("Given " + message);
+            entity.create(itContext);
+            itContext.putContextParam(entity.getEntityId(), entity);
+        }
     }
 
     protected void given(Entity entity) throws Exception {
-        given(entity, entity.getEntityId());
+        if (entity != null) {
+            given(entity, entity.getEntityId());
+        }
     }
 
     protected void when(Action<?> action, String message) throws Exception {
