@@ -148,7 +148,9 @@ public class ServiceEndpointCollectorTest {
     public void testPrepareClusterExposedServices() {
         Cluster cluster = clusterkWithOrchestrator("ANY");
         GatewayTopology topology1 = gatewayTopology("topology1", AMBARI, ATLAS);
+        topology1.setGateway(cluster.getGateway());
         GatewayTopology topology2 = gatewayTopology("topology2", BEACON_SERVER, HIVE_SERVER, WEBHDFS);
+        topology2.setGateway(cluster.getGateway());
         cluster.getGateway().setTopologies(Sets.newHashSet(topology1, topology2));
         cluster.getGateway().setGatewayType(GatewayType.INDIVIDUAL);
 
@@ -179,6 +181,19 @@ public class ServiceEndpointCollectorTest {
             assertFalse(sparkHistoryUI.get().isOpen());
         } else {
             Assert.fail("no SPARKHISTORYUI in returned exposed services for topology2");
+        }
+
+        Optional<ClusterExposedServiceResponse> hiveServer =
+                topology2ClusterExposedServiceResponses.stream().filter(service -> "HIVE".equals(service.getKnoxService())).findFirst();
+        if (hiveServer.isPresent()) {
+            assertEquals("jdbc:hive2://10.0.0.1:8443/;ssl=true;sslTrustStore=/cert/gateway.jks;trustStorePassword=${GATEWAY_JKS_PASSWORD};"
+                    + "transportMode=http;httpPath=gateway-path/topology2/hive", hiveServer.get().getServiceUrl());
+            assertEquals("HIVE", hiveServer.get().getKnoxService());
+            assertEquals("Hive Server", hiveServer.get().getDisplayName());
+            assertEquals("HIVE_SERVER", hiveServer.get().getServiceName());
+            assertTrue(hiveServer.get().isOpen());
+        } else {
+            Assert.fail("no HIVE in returned exposed services for topology2");
         }
     }
 
