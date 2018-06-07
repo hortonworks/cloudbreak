@@ -136,10 +136,14 @@ public class ServiceEndpointCollector {
 
     private Optional<String> getServiceUrlForService(ExposedService exposedService, String ambariIp, Gateway gateway, String topologyName) {
         if (hasKnoxUrl(exposedService) && ambariIp != null) {
-            String url = GatewayType.CENTRAL == gateway.getGatewayType()
-                    ? String.format("/%s/%s%s", gateway.getPath(), topologyName, exposedService.getKnoxUrl())
-                    : String.format("https://%s:%s/%s/%s%s", ambariIp, KNOX_PORT, gateway.getPath(), topologyName, exposedService.getKnoxUrl());
-            return Optional.of(url);
+            if (ExposedService.HIVE_SERVER.equals(exposedService) || ExposedService.HIVE_SERVER_INTERACTIVE.equals(exposedService)) {
+                return getHiveJdbcUrl(gateway, ambariIp);
+            } else {
+                String url = GatewayType.CENTRAL == gateway.getGatewayType()
+                        ? String.format("/%s/%s%s", gateway.getPath(), topologyName, exposedService.getKnoxUrl())
+                        : String.format("https://%s:%s/%s/%s%s", ambariIp, KNOX_PORT, gateway.getPath(), topologyName, exposedService.getKnoxUrl());
+                return Optional.of(url);
+            }
         }
         return Optional.empty();
     }
@@ -153,11 +157,19 @@ public class ServiceEndpointCollector {
     }
 
     private Optional<GatewayTopology> getGatewayTopologyWithAmbari(Gateway gateway) {
+        return getGatewayTopology(ExposedService.AMBARI, gateway);
+    }
+
+    private Optional<GatewayTopology> getGatewayTopologyWithHive(Gateway gateway) {
+        return getGatewayTopology(ExposedService.HIVE_SERVER, gateway);
+    }
+
+    private Optional<GatewayTopology> getGatewayTopology(ExposedService exposedService, Gateway gateway) {
         return gateway.getTopologies().stream()
                 .filter(gt -> getExposedServiceStream(gt)
-                        .anyMatch(es -> ExposedService.AMBARI.getServiceName().equalsIgnoreCase(es)
-                                || ExposedService.AMBARI.name().equalsIgnoreCase(es)
-                                || ExposedService.AMBARI.getKnoxService().equalsIgnoreCase(es)))
+                        .anyMatch(es -> exposedService.getServiceName().equalsIgnoreCase(es)
+                                || exposedService.name().equalsIgnoreCase(es)
+                                || exposedService.getKnoxService().equalsIgnoreCase(es)))
                 .findFirst();
     }
 
@@ -165,5 +177,16 @@ public class ServiceEndpointCollector {
         return GatewayType.CENTRAL == gateway.getGatewayType()
                 ? String.format("/%s/%s/ambari/", gateway.getPath(), gt.getTopologyName())
                 : String.format("https://%s:%s/%s/%s/ambari/", ambariIp, KNOX_PORT, gateway.getPath(), gt.getTopologyName());
+    }
+
+    private Optional<String> getHiveJdbcUrl(Gateway gateway, String ambariIp) {
+        return getGatewayTopologyWithHive(gateway)
+                .map(gt -> getHiveJdbcUrlFromGatewayTopology(ambariIp, gt));
+    }
+
+    private String getHiveJdbcUrlFromGatewayTopology(String ambariIp, GatewayTopology gt) {
+        Gateway gateway = gt.getGateway();
+        return String.format("jdbc:hive2://%s:%s/;ssl=true;sslTrustStore=/cert/gateway.jks;trustStorePassword=${GATEWAY_JKS_PASSWORD};"
+                + "transportMode=http;httpPath=%s/%s/hive", ambariIp, KNOX_PORT, gateway.getPath(), gt.getTopologyName());
     }
 }
