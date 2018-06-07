@@ -16,6 +16,8 @@ public interface CredentialRepository extends CrudRepository<Credential, Long> {
     @Override
     Credential findOne(@Param("id") Long id);
 
+    Set<Credential> findAllByCloudPlatform(@Param("cloudPlatform") String cloudPlatform);
+
     @Query("SELECT b FROM Credential b WHERE b.name= :name AND b.account= :account AND b.archived IS FALSE")
     Credential findOneByName(@Param("name") String name, @Param("account") String account);
 
