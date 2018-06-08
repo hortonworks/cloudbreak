@@ -212,38 +212,62 @@ public class ImageCatalogServiceTest {
 
     @Test
     public void testGetImagesWhenLatestVersionDoesntExistInCatalogShouldReturnWithReleasedVersionIfExists() throws Exception {
+        String catalogJson = FileReaderUtils.readFileFromClasspath("com/sequenceiq/cloudbreak/service/image/cb-prod-image-catalog.json");
+        CloudbreakImageCatalogV2 catalog = JsonUtil.readValue(catalogJson, CloudbreakImageCatalogV2.class);
+        when(imageCatalogProvider.getImageCatalogV2("")).thenReturn(catalog);
+
         ImageCatalog imageCatalog = new ImageCatalog();
         imageCatalog.setImageCatalogUrl("");
         imageCatalog.setImageCatalogName("default");
         StatedImages images = underTest.getImages(imageCatalog, "aws", "2.6.0");
 
         boolean match = images.getImages().getHdpImages().stream()
-                .anyMatch(img -> img.getUuid().equals("2.5.0.2-65-5288855d-d7b9-4b90-b326-ab4b168cf581-2.6.0.1-145"));
-        Assert.assertTrue("Result doesn't contain the required Ambari image with id.", match);
+                .anyMatch(img -> img.getUuid().equals("63cdb3bc-28a6-4cea-67e4-9842fdeeaefb"));
+        Assert.assertTrue("Result doesn't contain the required base image with id.", match);
     }
 
     @Test
     public void testGetImagesWhenLatestDevVersionDoesntExistInCatalogShouldReturnWithReleasedVersionIfExists() throws Exception {
+        String catalogJson = FileReaderUtils.readFileFromClasspath("com/sequenceiq/cloudbreak/service/image/cb-dev-image-catalog.json");
+        CloudbreakImageCatalogV2 catalog = JsonUtil.readValue(catalogJson, CloudbreakImageCatalogV2.class);
+        when(imageCatalogProvider.getImageCatalogV2("")).thenReturn(catalog);
+
         ImageCatalog imageCatalog = new ImageCatalog();
         imageCatalog.setImageCatalogUrl("");
         imageCatalog.setImageCatalogName("default");
         StatedImages images = underTest.getImages(imageCatalog, "aws", "2.6.0-dev.132");
 
         boolean match = images.getImages().getHdpImages().stream()
-                .anyMatch(img -> img.getUuid().equals("2.5.0.2-65-5288855d-d7b9-4b90-b326-ab4b168cf581-2.6.0.1-145"));
-        Assert.assertTrue("Result doesn't contain the required Ambari image with id.", match);
+                .anyMatch(img -> img.getUuid().equals("b150efce-33ac-49c9-7206-7f148d162744"));
+        Assert.assertTrue("Result doesn't contain the required base image with id.", match);
     }
 
     @Test
     public void testGetImagesWhenLatestRcVersionDoesntExistInCatalogShouldReturnWithReleasedVersionIfExists() throws Exception {
+        String catalogJson = FileReaderUtils.readFileFromClasspath("com/sequenceiq/cloudbreak/service/image/cb-rc-image-catalog.json");
+        CloudbreakImageCatalogV2 catalog = JsonUtil.readValue(catalogJson, CloudbreakImageCatalogV2.class);
+        when(imageCatalogProvider.getImageCatalogV2("")).thenReturn(catalog);
+
         ImageCatalog imageCatalog = new ImageCatalog();
         imageCatalog.setImageCatalogUrl("");
         imageCatalog.setImageCatalogName("default");
         StatedImages images = underTest.getImages(imageCatalog, "aws", "2.6.0-rc.13");
 
         boolean match = images.getImages().getHdpImages().stream()
-                .anyMatch(img -> img.getUuid().equals("2.5.0.2-65-5288855d-d7b9-4b90-b326-ab4b168cf581-2.6.0.1-145"));
-        Assert.assertTrue("Result doesn't contain the required Ambari image with id.", match);
+                .anyMatch(img -> img.getUuid().equals("bbc63453-086c-4bf7-4337-a04c37d51b68"));
+        Assert.assertTrue("Result doesn't contain the required base image with id.", match);
+    }
+
+    @Test(expected = BadRequestException.class)
+    public void testGetImagesWhenLatestRcVersionDoesntExistInDevCatalogShouldThrow() throws Exception {
+        String catalogJson = FileReaderUtils.readFileFromClasspath("com/sequenceiq/cloudbreak/service/image/cb-dev-image-catalog.json");
+        CloudbreakImageCatalogV2 catalog = JsonUtil.readValue(catalogJson, CloudbreakImageCatalogV2.class);
+        when(imageCatalogProvider.getImageCatalogV2("")).thenReturn(catalog);
+
+        ImageCatalog imageCatalog = new ImageCatalog();
+        imageCatalog.setImageCatalogUrl("");
+        imageCatalog.setImageCatalogName("default");
+        underTest.getImages(imageCatalog, "aws", "2.6.0-rc.13");
     }
 
     @Test

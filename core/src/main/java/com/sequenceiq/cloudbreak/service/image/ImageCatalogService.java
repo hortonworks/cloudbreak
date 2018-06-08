@@ -446,6 +446,7 @@ public class ImageCatalogService {
         return new PrefixMatchImages(vMImageUUIDs, defaultVMImageUUIDs, supportedVersions);
     }
 
+    //CHECKSTYLE:OFF
     private Set<CloudbreakVersion> previousCbVersion(String releasedVersion, Collection<CloudbreakVersion> cloudbreakVersions) {
         List<String> versions = cloudbreakVersions.stream()
                 .map(CloudbreakVersion::getVersions)
@@ -453,21 +454,26 @@ public class ImageCatalogService {
                 .distinct()
                 .collect(Collectors.toList());
 
-        versions = versions.stream().sorted((o1, o2) -> new SemanticVersionComparator().compare(o2, o1)).collect(Collectors.toList());
+        try {
+            versions = versions.stream().sorted((o1, o2) -> new SemanticVersionComparator().compare(o2, o1)).collect(Collectors.toList());
 
-        Predicate<String> ealierVersionPredicate = ver -> new SemanticVersionComparator().compare(ver, releasedVersion) == -1;
-        Predicate<String> releaseVersionPredicate = ver -> extractCbVersion(EXTENDED_UNRELEASED_VERSION_PATTERN, ver).equals(ver);
-        Predicate<String> versionHasImagesPredicate = ver -> accumulateImageCount(cloudbreakVersions) > 0;
-        Optional<String> applicableVersion = versions.stream()
-                .filter(ealierVersionPredicate)
-                .filter(releaseVersionPredicate)
-                .filter(versionHasImagesPredicate)
-                .findAny();
+            Predicate<String> ealierVersionPredicate = ver -> new SemanticVersionComparator().compare(ver, releasedVersion) == -1;
+            Predicate<String> releaseVersionPredicate = ver -> extractCbVersion(EXTENDED_UNRELEASED_VERSION_PATTERN, ver).equals(ver);
+            Predicate<String> versionHasImagesPredicate = ver -> accumulateImageCount(cloudbreakVersions) > 0;
+            Optional<String> applicableVersion = versions.stream()
+                    .filter(ealierVersionPredicate)
+                    .filter(releaseVersionPredicate)
+                    .filter(versionHasImagesPredicate)
+                    .findAny();
 
-        return applicableVersion
-                .map(ver -> cloudbreakVersions.stream().filter(cbVer -> cbVer.getVersions().contains(ver)).collect(Collectors.toSet()))
-                .orElse(Collections.emptySet());
+            return applicableVersion
+                    .map(ver -> cloudbreakVersions.stream().filter(cbVer -> cbVer.getVersions().contains(ver)).collect(Collectors.toSet()))
+                    .orElse(Collections.emptySet());
+        } catch (IllegalArgumentException e) {
+            throw new BadRequestException("Image catalog versions are not supported by this Cloudbreak version.");
+        }
     }
+    //CHECKSTYLE:ON
 
     private Integer accumulateImageCount(Collection<CloudbreakVersion> cloudbreakVersions) {
         return cloudbreakVersions.stream()

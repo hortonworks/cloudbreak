@@ -11,8 +11,13 @@ public class SemanticVersionComparator implements Comparator<String>, Serializab
     @Override
     public int compare(String ver1, String ver2) {
         Function<String, String[]> segmentize = (ver) -> ver.split("\\.");
-        if (segmentize.apply(ver1).length < SEGMENT_COUNT || segmentize.apply(ver1).length < SEGMENT_COUNT) {
+        int ver1SegmentCount = segmentize.apply(ver1).length;
+        int ver2SegmentCount = segmentize.apply(ver2).length;
+        if (ver1SegmentCount < SEGMENT_COUNT || ver2SegmentCount < SEGMENT_COUNT) {
             throw new IllegalArgumentException("Version must conform to the following format: MAJOR.MINOR.PATCH");
+        }
+        if (ver1SegmentCount != ver2SegmentCount) {
+            throw new IllegalArgumentException(String.format("Segment count mismatch in the provided versions. [%s, %s]", ver1SegmentCount, ver2SegmentCount));
         }
 
         Function<String, Integer> takeMajorSegment =
@@ -45,7 +50,7 @@ public class SemanticVersionComparator implements Comparator<String>, Serializab
             return Integer.compare(ver1Patch, ver2Patch);
         }
 
-        if (segmentize.apply(ver1).length == SEGMENT_COUNT) {
+        if (ver1SegmentCount == SEGMENT_COUNT) {
             return 0;
         }
 
