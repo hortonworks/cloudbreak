@@ -1,0 +1,4387 @@
+{
+  "images": {
+    "base-images": [
+      {
+        "date": "2017-10-13",
+        "description": "Cloudbreak official base image",
+        "images": {
+          "aws": {
+            "ap-northeast-1": "ami-78e9311e",
+            "ap-northeast-2": "ami-84b613ea",
+            "ap-southeast-1": "ami-75226716",
+            "ap-southeast-2": "ami-92ce23f0",
+            "eu-central-1": "ami-d95be5b6",
+            "eu-west-1": "ami-46429e3f",
+            "sa-east-1": "ami-86d5abea",
+            "us-east-1": "ami-51a2742b",
+            "us-west-1": "ami-21ccfe41",
+            "us-west-2": "ami-2a1cdc52"
+          }
+        },
+        "os": "amazonlinux",
+        "os_type": "redhat6",
+        "uuid": "44b140a4-bd0b-457d-b174-e988bee3ca47"
+      },
+      {
+        "date": "2017-10-13",
+        "description": "Cloudbreak official base image",
+        "images": {
+          "azure": {
+            "Australia East": "https://hwxaustraliaeast.blob.core.windows.net/images/hdc-hdp--1710161226.vhd",
+            "Australia South East": "https://hwxaustralisoutheast.blob.core.windows.net/images/hdc-hdp--1710161226.vhd",
+            "Brazil South": "https://sequenceiqbrazilsouth2.blob.core.windows.net/images/hdc-hdp--1710161226.vhd",
+            "Canada Central": "https://sequenceiqcanadacentral.blob.core.windows.net/images/hdc-hdp--1710161226.vhd",
+            "Canada East": "https://sequenceiqcanadaeast.blob.core.windows.net/images/hdc-hdp--1710161226.vhd",
+            "Central India": "https://hwxcentralindia.blob.core.windows.net/images/hdc-hdp--1710161226.vhd",
+            "Central US": "https://sequenceiqcentralus2.blob.core.windows.net/images/hdc-hdp--1710161226.vhd",
+            "East Asia": "https://sequenceiqeastasia2.blob.core.windows.net/images/hdc-hdp--1710161226.vhd",
+            "East US": "https://sequenceiqeastus12.blob.core.windows.net/images/hdc-hdp--1710161226.vhd",
+            "East US 2": "https://sequenceiqeastus22.blob.core.windows.net/images/hdc-hdp--1710161226.vhd",
+            "Japan East": "https://sequenceiqjapaneast2.blob.core.windows.net/images/hdc-hdp--1710161226.vhd",
+            "Japan West": "https://sequenceiqjapanwest2.blob.core.windows.net/images/hdc-hdp--1710161226.vhd",
+            "Korea Central": "https://hwxkoreacentral.blob.core.windows.net/images/hdc-hdp--1710161226.vhd",
+            "Korea South": "https://hwxkoreasouth.blob.core.windows.net/images/hdc-hdp--1710161226.vhd",
+            "North Central US": "https://sequenceiqorthcentralus2.blob.core.windows.net/images/hdc-hdp--1710161226.vhd",
+            "North Europe": "https://sequenceiqnortheurope2.blob.core.windows.net/images/hdc-hdp--1710161226.vhd",
+            "South Central US": "https://sequenceiqouthcentralus2.blob.core.windows.net/images/hdc-hdp--1710161226.vhd",
+            "South East Asia": "https://sequenceiqsoutheastasia2.blob.core.windows.net/images/hdc-hdp--1710161226.vhd",
+            "South India": "https://hwxsouthindia.blob.core.windows.net/images/hdc-hdp--1710161226.vhd",
+            "UK South": "https://hwxsouthuk.blob.core.windows.net/images/hdc-hdp--1710161226.vhd",
+            "UK West": "https://hwxwestuk.blob.core.windows.net/images/hdc-hdp--1710161226.vhd",
+            "West Central US": "https://hwxwestcentralus.blob.core.windows.net/images/hdc-hdp--1710161226.vhd",
+            "West Europe": "https://sequenceiqwesteurope2.blob.core.windows.net/images/hdc-hdp--1710161226.vhd",
+            "West India": "https://hwxwestindia.blob.core.windows.net/images/hdc-hdp--1710161226.vhd",
+            "West US": "https://sequenceiqwestus2.blob.core.windows.net/images/hdc-hdp--1710161226.vhd",
+            "West US 2": "https://hwxwestus2.blob.core.windows.net/images/hdc-hdp--1710161226.vhd"
+          },
+          "gcp": {
+            "default": "sequenceiqimage/hdc-hdp--1710161226.tar.gz"
+          },
+          "openstack": {
+            "default": "hdc-hdp--1710161226"
+          }
+        },
+        "os": "centos7",
+        "os_type": "redhat7",
+        "uuid": "f6e778fc-7f17-4535-9021-515351df3691"
+      },
+      {
+        "date": "2017-11-10",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "openstack": {
+            "default": "hdc-hdp--1711101841"
+          }
+        },
+        "os": "centos7",
+        "os_type": "redhat7",
+        "uuid": "3f66bdad-5f59-4460-6182-0359c2cf7f1b"
+      },
+      {
+        "date": "2017-11-16",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "aws": {
+            "ap-northeast-1": "ami-9271c0f4",
+            "ap-northeast-2": "ami-4dd37423",
+            "ap-southeast-1": "ami-bd9acfde",
+            "ap-southeast-2": "ami-869e75e4",
+            "eu-central-1": "ami-7069e91f",
+            "eu-west-1": "ami-590ba020",
+            "sa-east-1": "ami-92ccb6fe",
+            "us-east-1": "ami-95d251ef",
+            "us-west-1": "ami-d8ba83b8",
+            "us-west-2": "ami-d273a3aa"
+          }
+        },
+        "os": "amazonlinux",
+        "os_type": "redhat6",
+        "uuid": "3c7598a4-ebd6-4a02-5638-882f5c7f7add"
+      },
+      {
+        "date": "2017-11-17",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "gcp": {
+            "default": "sequenceiqimage/hdc-hdp--1711170803.tar.gz"
+          }
+        },
+        "os": "centos7",
+        "os_type": "redhat7",
+        "uuid": "99d1bab8-2a40-4b4a-531a-447030b54e0f"
+      },
+      {
+        "date": "2017-11-17",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "gcp": {
+            "default": "sequenceiqimage/hdc-hdp--1711171550.tar.gz"
+          }
+        },
+        "os": "centos7",
+        "os_type": "redhat7",
+        "uuid": "9d657d5d-b80c-4a17-6f4d-847061ef3f71"
+      },
+      {
+        "date": "2017-11-17",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "gcp": {
+            "default": "sequenceiqimage/hdc-hdp--1711171616.tar.gz"
+          }
+        },
+        "os": "centos7",
+        "os_type": "redhat7",
+        "uuid": "685f5067-743e-43a5-7d5e-c5d30f5fefe4"
+      },
+      {
+        "date": "2018-01-25",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "aws": {
+            "ap-northeast-1": "ami-d32a46b5",
+            "ap-northeast-2": "ami-8e983be0",
+            "ap-southeast-1": "ami-b42e55c8",
+            "ap-southeast-2": "ami-836c92e1",
+            "eu-central-1": "ami-23c9514c",
+            "eu-west-1": "ami-d61f79af",
+            "sa-east-1": "ami-ac622ec0",
+            "us-east-1": "ami-86784afc",
+            "us-west-1": "ami-88929fe8",
+            "us-west-2": "ami-e03f8098"
+          }
+        },
+        "os": "amazonlinux",
+        "os_type": "redhat6",
+        "uuid": "b2ddd547-bd16-4c49-703c-ce0ae1eec188"
+      },
+      {
+        "date": "2018-01-26",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "aws": {
+            "ap-northeast-1": "ami-faec809c",
+            "ap-northeast-2": "ami-fc69ca92",
+            "ap-southeast-1": "ami-5ebdc622",
+            "ap-southeast-2": "ami-b449b7d6",
+            "eu-central-1": "ami-e1ba228e",
+            "eu-west-1": "ami-49ddbb30",
+            "sa-east-1": "ami-4182ce2d",
+            "us-east-1": "ami-72e5d808",
+            "us-west-1": "ami-1b48447b",
+            "us-west-2": "ami-54bc022c"
+          }
+        },
+        "os": "amazonlinux",
+        "os_type": "redhat6",
+        "uuid": "cab28152-f5e1-43e1-5107-9e7bbed33eef"
+      },
+      {
+        "date": "2018-01-26",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "openstack": {
+            "default": "cb-hdp--1801261636"
+          }
+        },
+        "os": "centos7",
+        "os_type": "redhat7",
+        "uuid": "fb57e3aa-fddd-45bd-68a8-bc2526ab0f56"
+      },
+      {
+        "date": "2018-01-31",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "azure": {
+            "Australia East": "https://hwxaustraliaeast.blob.core.windows.net/images/cb-hdp--1801311614.vhd",
+            "Australia South East": "https://hwxaustralisoutheast.blob.core.windows.net/images/cb-hdp--1801311614.vhd",
+            "Brazil South": "https://sequenceiqbrazilsouth2.blob.core.windows.net/images/cb-hdp--1801311614.vhd",
+            "Canada Central": "https://sequenceiqcanadacentral.blob.core.windows.net/images/cb-hdp--1801311614.vhd",
+            "Canada East": "https://sequenceiqcanadaeast.blob.core.windows.net/images/cb-hdp--1801311614.vhd",
+            "Central India": "https://hwxcentralindia.blob.core.windows.net/images/cb-hdp--1801311614.vhd",
+            "Central US": "https://sequenceiqcentralus2.blob.core.windows.net/images/cb-hdp--1801311614.vhd",
+            "East Asia": "https://sequenceiqeastasia2.blob.core.windows.net/images/cb-hdp--1801311614.vhd",
+            "East US": "https://sequenceiqeastus12.blob.core.windows.net/images/cb-hdp--1801311614.vhd",
+            "East US 2": "https://sequenceiqeastus22.blob.core.windows.net/images/cb-hdp--1801311614.vhd",
+            "Japan East": "https://sequenceiqjapaneast2.blob.core.windows.net/images/cb-hdp--1801311614.vhd",
+            "Japan West": "https://sequenceiqjapanwest2.blob.core.windows.net/images/cb-hdp--1801311614.vhd",
+            "Korea Central": "https://hwxkoreacentral.blob.core.windows.net/images/cb-hdp--1801311614.vhd",
+            "Korea South": "https://hwxkoreasouth.blob.core.windows.net/images/cb-hdp--1801311614.vhd",
+            "North Central US": "https://sequenceiqorthcentralus2.blob.core.windows.net/images/cb-hdp--1801311614.vhd",
+            "North Europe": "https://sequenceiqnortheurope2.blob.core.windows.net/images/cb-hdp--1801311614.vhd",
+            "South Central US": "https://sequenceiqouthcentralus2.blob.core.windows.net/images/cb-hdp--1801311614.vhd",
+            "South East Asia": "https://sequenceiqsoutheastasia2.blob.core.windows.net/images/cb-hdp--1801311614.vhd",
+            "South India": "https://hwxsouthindia.blob.core.windows.net/images/cb-hdp--1801311614.vhd",
+            "UK South": "https://hwxsouthuk.blob.core.windows.net/images/cb-hdp--1801311614.vhd",
+            "UK West": "https://hwxwestuk.blob.core.windows.net/images/cb-hdp--1801311614.vhd",
+            "West Central US": "https://hwxwestcentralus.blob.core.windows.net/images/cb-hdp--1801311614.vhd",
+            "West Europe": "https://sequenceiqwesteurope2.blob.core.windows.net/images/cb-hdp--1801311614.vhd",
+            "West India": "https://hwxwestindia.blob.core.windows.net/images/cb-hdp--1801311614.vhd",
+            "West US": "https://sequenceiqwestus2.blob.core.windows.net/images/cb-hdp--1801311614.vhd",
+            "West US 2": "https://hwxwestus2.blob.core.windows.net/images/cb-hdp--1801311614.vhd"
+          }
+        },
+        "os": "centos7",
+        "os_type": "redhat7",
+        "uuid": "e5c17a3b-fa72-41be-724b-28e5bbb880cc"
+      },
+      {
+        "date": "2018-01-17",
+        "description": "Yarn image",
+        "images": {
+          "yarn": {
+            "default": "registry.eng.hortonworks.com/tkiss/cloudbreak-centos7:latest"
+          }
+        },
+        "os": "centos7",
+        "os_type": "redhat7",
+        "uuid": "685f5067-743e-43a5-7d5e-c5d30f5fefe0"
+      },
+      {
+        "date": "2018-03-01",
+        "description": "Yarn image v2",
+        "images": {
+          "yarn": {
+            "default": "registry.eng.hortonworks.com/khorvath/cloudbreak-centos7:latest"
+          }
+        },
+        "os": "centos7",
+        "os_type": "redhat7",
+        "uuid": "685f5067-743e-43a5-7d5e-c5d30f5fefff"
+      },
+      {
+        "date": "2018-03-29",
+        "description": "Yarn image v3",
+        "images": {
+          "yarn": {
+            "default": "registry.eng.hortonworks.com/pdarvasi/cloudbreak-centos7:latest"
+          }
+        },
+        "os": "centos7",
+        "os_type": "redhat7",
+        "uuid": "609a7f43-fb5b-480b-af79-eb71791c705b"
+      },
+      {
+        "date": "2018-05-24",
+        "description": "Yarn image v4",
+        "images": {
+          "yarn": {
+            "default": "registry.eng.hortonworks.com/cloudbreak/centos-7:2018-05-24"
+          }
+        },
+        "os": "centos7",
+        "os_type": "redhat7",
+        "uuid": "d4d57241-0be9-4ebf-9e00-5baea7bbed49"
+      },
+      {
+        "date": "2018-06-07",
+        "description": "Yarn image v5",
+        "images": {
+          "yarn": {
+            "default": "registry.eng.hortonworks.com/cloudbreak/centos-7:2018-06-07"
+          }
+        },
+        "os": "centos7",
+        "os_type": "redhat7",
+        "uuid": "10b2d61d-ce9b-4f12-a682-ff0e230e677b"
+      },
+      {
+        "date": "2018-02-14",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "azure": {
+            "Australia East": "https://hwxaustraliaeast.blob.core.windows.net/images/cb-hdp--1802141532.vhd",
+            "Australia South East": "https://hwxaustralisoutheast.blob.core.windows.net/images/cb-hdp--1802141532.vhd",
+            "Brazil South": "https://sequenceiqbrazilsouth2.blob.core.windows.net/images/cb-hdp--1802141532.vhd",
+            "Canada Central": "https://sequenceiqcanadacentral.blob.core.windows.net/images/cb-hdp--1802141532.vhd",
+            "Canada East": "https://sequenceiqcanadaeast.blob.core.windows.net/images/cb-hdp--1802141532.vhd",
+            "Central India": "https://hwxcentralindia.blob.core.windows.net/images/cb-hdp--1802141532.vhd",
+            "Central US": "https://sequenceiqcentralus2.blob.core.windows.net/images/cb-hdp--1802141532.vhd",
+            "East Asia": "https://sequenceiqeastasia2.blob.core.windows.net/images/cb-hdp--1802141532.vhd",
+            "East US": "https://sequenceiqeastus12.blob.core.windows.net/images/cb-hdp--1802141532.vhd",
+            "East US 2": "https://sequenceiqeastus22.blob.core.windows.net/images/cb-hdp--1802141532.vhd",
+            "Japan East": "https://sequenceiqjapaneast2.blob.core.windows.net/images/cb-hdp--1802141532.vhd",
+            "Japan West": "https://sequenceiqjapanwest2.blob.core.windows.net/images/cb-hdp--1802141532.vhd",
+            "Korea Central": "https://hwxkoreacentral.blob.core.windows.net/images/cb-hdp--1802141532.vhd",
+            "Korea South": "https://hwxkoreasouth.blob.core.windows.net/images/cb-hdp--1802141532.vhd",
+            "North Central US": "https://sequenceiqorthcentralus2.blob.core.windows.net/images/cb-hdp--1802141532.vhd",
+            "North Europe": "https://sequenceiqnortheurope2.blob.core.windows.net/images/cb-hdp--1802141532.vhd",
+            "South Central US": "https://sequenceiqouthcentralus2.blob.core.windows.net/images/cb-hdp--1802141532.vhd",
+            "South East Asia": "https://sequenceiqsoutheastasia2.blob.core.windows.net/images/cb-hdp--1802141532.vhd",
+            "South India": "https://hwxsouthindia.blob.core.windows.net/images/cb-hdp--1802141532.vhd",
+            "UK South": "https://hwxsouthuk.blob.core.windows.net/images/cb-hdp--1802141532.vhd",
+            "UK West": "https://hwxwestuk.blob.core.windows.net/images/cb-hdp--1802141532.vhd",
+            "West Central US": "https://hwxwestcentralus.blob.core.windows.net/images/cb-hdp--1802141532.vhd",
+            "West Europe": "https://sequenceiqwesteurope2.blob.core.windows.net/images/cb-hdp--1802141532.vhd",
+            "West India": "https://hwxwestindia.blob.core.windows.net/images/cb-hdp--1802141532.vhd",
+            "West US": "https://sequenceiqwestus2.blob.core.windows.net/images/cb-hdp--1802141532.vhd",
+            "West US 2": "https://hwxwestus2.blob.core.windows.net/images/cb-hdp--1802141532.vhd"
+          }
+        },
+        "os": "centos7",
+        "os_type": "redhat7",
+        "uuid": "a99d040b-c8ea-488b-5fa7-d526e22600e1"
+      },
+      {
+        "date": "2018-02-15",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "gcp": {
+            "default": "sequenceiqimage/cb-hdp--1802151155.tar.gz"
+          }
+        },
+        "os": "centos7",
+        "os_type": "redhat7",
+        "uuid": "4ae5ad91-3157-457f-6f64-5f07bc7aa10c"
+      },
+      {
+        "date": "2018-02-22",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "aws": {
+            "ap-northeast-1": "ami-97afd5f1",
+            "ap-northeast-2": "ami-e9d07d87",
+            "ap-south-1": "ami-9498c4fb",
+            "ap-southeast-1": "ami-c7d799bb",
+            "ap-southeast-2": "ami-7cd7101e",
+            "ca-central-1": "ami-49d2552d",
+            "eu-central-1": "ami-65294b0a",
+            "eu-west-1": "ami-033294abb484ef868",
+            "eu-west-2": "ami-17fd1970",
+            "eu-west-3": "ami-e276c09f",
+            "sa-east-1": "ami-3d387051",
+            "us-east-1": "ami-4939da34",
+            "us-east-2": "ami-c85c6bad",
+            "us-west-1": "ami-d29890b2",
+            "us-west-2": "ami-4675fa3e"
+          }
+        },
+        "os": "amazonlinux",
+        "os_type": "redhat6",
+        "uuid": "218378ab-3b05-4b9f-679e-4da55b9f3ebe"
+      },
+      {
+        "date": "2018-02-28",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "openstack": {
+            "default": "cb-hdp--1802281721"
+          }
+        },
+        "os": "centos7",
+        "os_type": "redhat7",
+        "uuid": "5006a6bc-8b75-473c-6201-e63222fe23e8"
+      },
+      {
+        "date": "2018-02-28",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "aws": {
+            "ap-northeast-1": "ami-3a52135c",
+            "ap-northeast-2": "ami-6a75d804",
+            "ap-south-1": "ami-dc603fb3",
+            "ap-southeast-1": "ami-ee9dd692",
+            "ap-southeast-2": "ami-801fd9e2",
+            "ca-central-1": "ami-65931401",
+            "eu-central-1": "ami-48335f27",
+            "eu-west-1": "ami-0a7de85b1363e08c7",
+            "eu-west-2": "ami-827490e5",
+            "eu-west-3": "ami-307acc4d",
+            "sa-east-1": "ami-5749023b",
+            "us-east-1": "ami-20e2175d",
+            "us-east-2": "ami-6aeadd0f",
+            "us-west-1": "ami-42929922",
+            "us-west-2": "ami-7b26ae03"
+          }
+        },
+        "os": "amazonlinux",
+        "os_type": "redhat6",
+        "uuid": "8c293a49-0a40-4113-739d-8b0f39667789"
+      },
+      {
+        "date": "2018-03-01",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "openstack": {
+            "default": "cb-hdp--1803010958"
+          }
+        },
+        "os": "centos7",
+        "os_type": "redhat7",
+        "uuid": "349757cc-83f5-4846-52eb-f2545f247551"
+      },
+      {
+        "date": "2018-03-01",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "gcp": {
+            "default": "sequenceiqimage/cb-hdp--1803011043.tar.gz"
+          }
+        },
+        "os": "centos7",
+        "os_type": "redhat7",
+        "uuid": "674b6e55-73a7-4cb6-5895-b3ec4fd3893d"
+      },
+      {
+        "date": "2018-03-01",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "azure": {
+            "Australia East": "https://hwxaustraliaeast.blob.core.windows.net/images/cb-hdp--1803011151.vhd",
+            "Australia South East": "https://hwxaustralisoutheast.blob.core.windows.net/images/cb-hdp--1803011151.vhd",
+            "Brazil South": "https://sequenceiqbrazilsouth2.blob.core.windows.net/images/cb-hdp--1803011151.vhd",
+            "Canada Central": "https://sequenceiqcanadacentral.blob.core.windows.net/images/cb-hdp--1803011151.vhd",
+            "Canada East": "https://sequenceiqcanadaeast.blob.core.windows.net/images/cb-hdp--1803011151.vhd",
+            "Central India": "https://hwxcentralindia.blob.core.windows.net/images/cb-hdp--1803011151.vhd",
+            "Central US": "https://sequenceiqcentralus2.blob.core.windows.net/images/cb-hdp--1803011151.vhd",
+            "East Asia": "https://sequenceiqeastasia2.blob.core.windows.net/images/cb-hdp--1803011151.vhd",
+            "East US": "https://sequenceiqeastus12.blob.core.windows.net/images/cb-hdp--1803011151.vhd",
+            "East US 2": "https://sequenceiqeastus22.blob.core.windows.net/images/cb-hdp--1803011151.vhd",
+            "Japan East": "https://sequenceiqjapaneast2.blob.core.windows.net/images/cb-hdp--1803011151.vhd",
+            "Japan West": "https://sequenceiqjapanwest2.blob.core.windows.net/images/cb-hdp--1803011151.vhd",
+            "Korea Central": "https://hwxkoreacentral.blob.core.windows.net/images/cb-hdp--1803011151.vhd",
+            "Korea South": "https://hwxkoreasouth.blob.core.windows.net/images/cb-hdp--1803011151.vhd",
+            "North Central US": "https://sequenceiqorthcentralus2.blob.core.windows.net/images/cb-hdp--1803011151.vhd",
+            "North Europe": "https://sequenceiqnortheurope2.blob.core.windows.net/images/cb-hdp--1803011151.vhd",
+            "South Central US": "https://sequenceiqouthcentralus2.blob.core.windows.net/images/cb-hdp--1803011151.vhd",
+            "South East Asia": "https://sequenceiqsoutheastasia2.blob.core.windows.net/images/cb-hdp--1803011151.vhd",
+            "South India": "https://hwxsouthindia.blob.core.windows.net/images/cb-hdp--1803011151.vhd",
+            "UK South": "https://hwxsouthuk.blob.core.windows.net/images/cb-hdp--1803011151.vhd",
+            "UK West": "https://hwxwestuk.blob.core.windows.net/images/cb-hdp--1803011151.vhd",
+            "West Central US": "https://hwxwestcentralus.blob.core.windows.net/images/cb-hdp--1803011151.vhd",
+            "West Europe": "https://sequenceiqwesteurope2.blob.core.windows.net/images/cb-hdp--1803011151.vhd",
+            "West India": "https://hwxwestindia.blob.core.windows.net/images/cb-hdp--1803011151.vhd",
+            "West US": "https://sequenceiqwestus2.blob.core.windows.net/images/cb-hdp--1803011151.vhd",
+            "West US 2": "https://hwxwestus2.blob.core.windows.net/images/cb-hdp--1803011151.vhd"
+          }
+        },
+        "os": "centos7",
+        "os_type": "redhat7",
+        "uuid": "442b672c-0198-4d73-4f48-4342f501ec2a"
+      },
+      {
+        "date": "2018-03-21",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "openstack": {
+            "default": "cb-hdp--1803211203"
+          }
+        },
+        "os": "centos7",
+        "os_type": "redhat7",
+        "uuid": "74d99079-f5d0-4470-78b3-11ceaf944069"
+      },
+      {
+        "date": "2018-03-21",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "aws": {
+            "ap-northeast-1": "ami-c81f4fae",
+            "ap-northeast-2": "ami-8a3a96e4",
+            "ap-south-1": "ami-90154eff",
+            "ap-southeast-1": "ami-c7d28fbb",
+            "ap-southeast-2": "ami-d5b17cb7",
+            "ca-central-1": "ami-b1da5cd5",
+            "eu-central-1": "ami-b785d55c",
+            "eu-west-1": "ami-09177881271d7c119",
+            "eu-west-2": "ami-6c2fc90b",
+            "eu-west-3": "ami-4e328433",
+            "sa-east-1": "ami-b55b0fd9",
+            "us-east-1": "ami-406bbf3d",
+            "us-east-2": "ami-dd5c6db8",
+            "us-west-1": "ami-8de5f2ed",
+            "us-west-2": "ami-351a864d"
+          }
+        },
+        "os": "amazonlinux",
+        "os_type": "redhat6",
+        "uuid": "0f575e42-9d90-4f85-5f8a-bdced2221dc3"
+      },
+      {
+        "date": "2018-03-21",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "azure": {
+            "Australia East": "https://hwxaustraliaeast.blob.core.windows.net/images/cb-hdp--1803211203.vhd",
+            "Australia South East": "https://hwxaustralisoutheast.blob.core.windows.net/images/cb-hdp--1803211203.vhd",
+            "Brazil South": "https://sequenceiqbrazilsouth2.blob.core.windows.net/images/cb-hdp--1803211203.vhd",
+            "Canada Central": "https://sequenceiqcanadacentral.blob.core.windows.net/images/cb-hdp--1803211203.vhd",
+            "Canada East": "https://sequenceiqcanadaeast.blob.core.windows.net/images/cb-hdp--1803211203.vhd",
+            "Central India": "https://hwxcentralindia.blob.core.windows.net/images/cb-hdp--1803211203.vhd",
+            "Central US": "https://sequenceiqcentralus2.blob.core.windows.net/images/cb-hdp--1803211203.vhd",
+            "East Asia": "https://sequenceiqeastasia2.blob.core.windows.net/images/cb-hdp--1803211203.vhd",
+            "East US": "https://sequenceiqeastus12.blob.core.windows.net/images/cb-hdp--1803211203.vhd",
+            "East US 2": "https://sequenceiqeastus22.blob.core.windows.net/images/cb-hdp--1803211203.vhd",
+            "Japan East": "https://sequenceiqjapaneast2.blob.core.windows.net/images/cb-hdp--1803211203.vhd",
+            "Japan West": "https://sequenceiqjapanwest2.blob.core.windows.net/images/cb-hdp--1803211203.vhd",
+            "Korea Central": "https://hwxkoreacentral.blob.core.windows.net/images/cb-hdp--1803211203.vhd",
+            "Korea South": "https://hwxkoreasouth.blob.core.windows.net/images/cb-hdp--1803211203.vhd",
+            "North Central US": "https://sequenceiqorthcentralus2.blob.core.windows.net/images/cb-hdp--1803211203.vhd",
+            "North Europe": "https://sequenceiqnortheurope2.blob.core.windows.net/images/cb-hdp--1803211203.vhd",
+            "South Central US": "https://sequenceiqouthcentralus2.blob.core.windows.net/images/cb-hdp--1803211203.vhd",
+            "South East Asia": "https://sequenceiqsoutheastasia2.blob.core.windows.net/images/cb-hdp--1803211203.vhd",
+            "South India": "https://hwxsouthindia.blob.core.windows.net/images/cb-hdp--1803211203.vhd",
+            "UK South": "https://hwxsouthuk.blob.core.windows.net/images/cb-hdp--1803211203.vhd",
+            "UK West": "https://hwxwestuk.blob.core.windows.net/images/cb-hdp--1803211203.vhd",
+            "West Central US": "https://hwxwestcentralus.blob.core.windows.net/images/cb-hdp--1803211203.vhd",
+            "West Europe": "https://sequenceiqwesteurope2.blob.core.windows.net/images/cb-hdp--1803211203.vhd",
+            "West India": "https://hwxwestindia.blob.core.windows.net/images/cb-hdp--1803211203.vhd",
+            "West US": "https://sequenceiqwestus2.blob.core.windows.net/images/cb-hdp--1803211203.vhd",
+            "West US 2": "https://hwxwestus2.blob.core.windows.net/images/cb-hdp--1803211203.vhd"
+          }
+        },
+        "os": "centos7",
+        "os_type": "redhat7",
+        "uuid": "233a3a99-023d-468d-44d4-2d1330e81bab"
+      },
+      {
+        "date": "2018-03-21",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "gcp": {
+            "default": "sequenceiqimage/cb-hdp--1803211746.tar.gz"
+          }
+        },
+        "os": "centos7",
+        "os_type": "redhat7",
+        "uuid": "4102fae2-5de9-4bbd-4c6c-de663c87f6d0"
+      },
+      {
+        "date": "2018-03-22",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "openstack": {
+            "default": "cb-hdp--1803221046"
+          }
+        },
+        "os": "centos7",
+        "os_type": "redhat7",
+        "uuid": "083f7289-876f-4267-436b-ece5504adb06"
+      },
+      {
+        "date": "2018-05-14",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "aws": {
+            "ap-northeast-1": "ami-a47084db",
+            "ap-northeast-2": "ami-9eaf07f0",
+            "ap-south-1": "ami-3d133152",
+            "ap-southeast-1": "ami-e5fbcd99",
+            "ap-southeast-2": "ami-3a5b8d58",
+            "ca-central-1": "ami-7abe3e1e",
+            "eu-central-1": "ami-ed436c06",
+            "eu-west-1": "ami-2764545e",
+            "eu-west-2": "ami-13e80574",
+            "eu-west-3": "ami-b48c3dc9",
+            "sa-east-1": "ami-0c702c60",
+            "us-east-1": "ami-95da4eea",
+            "us-east-2": "ami-8dbb86e8",
+            "us-west-1": "ami-49657c29",
+            "us-west-2": "ami-1accbf62"
+          }
+        },
+        "os": "amazonlinux2",
+        "os_type": "amazonlinux2",
+        "uuid": "a2a75ab9-d4a0-4531-6e2b-b36b7493ffcd"
+      },
+      {
+        "date": "2018-05-14",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "aws": {
+            "ap-northeast-1": "ami-ee7d8991",
+            "ap-northeast-2": "ami-a0a109ce",
+            "ap-south-1": "ami-513e1c3e",
+            "ap-southeast-1": "ami-09e7d175",
+            "ap-southeast-2": "ami-27469045",
+            "ca-central-1": "ami-88bf3fec",
+            "eu-central-1": "ami-6f5b7484",
+            "eu-west-1": "ami-8a6c5cf3",
+            "eu-west-2": "ami-09ea076e",
+            "eu-west-3": "ami-c68938bb",
+            "sa-east-1": "ami-3b732f57",
+            "us-east-1": "ami-6591051a",
+            "us-east-2": "ami-42bb8627",
+            "us-west-1": "ami-301b0250",
+            "us-west-2": "ami-063e4c7e"
+          }
+        },
+        "os": "sles12",
+        "os_type": "sles12",
+        "uuid": "686742c8-9c3d-47b2-4bc4-57afd70a6e48"
+      },
+      {
+        "date": "2018-05-14",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "azure": {
+            "Australia East": "https://hwxaustraliaeast.blob.core.windows.net/images/cb-hdp--1805141056.vhd",
+            "Australia South East": "https://hwxaustralisoutheast.blob.core.windows.net/images/cb-hdp--1805141056.vhd",
+            "Brazil South": "https://sequenceiqbrazilsouth2.blob.core.windows.net/images/cb-hdp--1805141056.vhd",
+            "Canada Central": "https://sequenceiqcanadacentral.blob.core.windows.net/images/cb-hdp--1805141056.vhd",
+            "Canada East": "https://sequenceiqcanadaeast.blob.core.windows.net/images/cb-hdp--1805141056.vhd",
+            "Central India": "https://hwxcentralindia.blob.core.windows.net/images/cb-hdp--1805141056.vhd",
+            "Central US": "https://sequenceiqcentralus2.blob.core.windows.net/images/cb-hdp--1805141056.vhd",
+            "East Asia": "https://sequenceiqeastasia2.blob.core.windows.net/images/cb-hdp--1805141056.vhd",
+            "East US": "https://sequenceiqeastus12.blob.core.windows.net/images/cb-hdp--1805141056.vhd",
+            "East US 2": "https://sequenceiqeastus22.blob.core.windows.net/images/cb-hdp--1805141056.vhd",
+            "Japan East": "https://sequenceiqjapaneast2.blob.core.windows.net/images/cb-hdp--1805141056.vhd",
+            "Japan West": "https://sequenceiqjapanwest2.blob.core.windows.net/images/cb-hdp--1805141056.vhd",
+            "Korea Central": "https://hwxkoreacentral.blob.core.windows.net/images/cb-hdp--1805141056.vhd",
+            "Korea South": "https://hwxkoreasouth.blob.core.windows.net/images/cb-hdp--1805141056.vhd",
+            "North Central US": "https://sequenceiqorthcentralus2.blob.core.windows.net/images/cb-hdp--1805141056.vhd",
+            "North Europe": "https://sequenceiqnortheurope2.blob.core.windows.net/images/cb-hdp--1805141056.vhd",
+            "South Central US": "https://sequenceiqouthcentralus2.blob.core.windows.net/images/cb-hdp--1805141056.vhd",
+            "South East Asia": "https://sequenceiqsoutheastasia2.blob.core.windows.net/images/cb-hdp--1805141056.vhd",
+            "South India": "https://hwxsouthindia.blob.core.windows.net/images/cb-hdp--1805141056.vhd",
+            "UK South": "https://hwxsouthuk.blob.core.windows.net/images/cb-hdp--1805141056.vhd",
+            "UK West": "https://hwxwestuk.blob.core.windows.net/images/cb-hdp--1805141056.vhd",
+            "West Central US": "https://hwxwestcentralus.blob.core.windows.net/images/cb-hdp--1805141056.vhd",
+            "West Europe": "https://sequenceiqwesteurope2.blob.core.windows.net/images/cb-hdp--1805141056.vhd",
+            "West India": "https://hwxwestindia.blob.core.windows.net/images/cb-hdp--1805141056.vhd",
+            "West US": "https://sequenceiqwestus2.blob.core.windows.net/images/cb-hdp--1805141056.vhd",
+            "West US 2": "https://hwxwestus2.blob.core.windows.net/images/cb-hdp--1805141056.vhd"
+          }
+        },
+        "os": "sles12",
+        "os_type": "sles12",
+        "uuid": "cc83d9c9-efa0-40e4-781c-6a19c5068d54"
+      },
+      {
+        "date": "2018-05-14",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "gcp": {
+            "default": "sequenceiqimage/cb-hdp--1805141635.tar.gz"
+          }
+        },
+        "os": "sles12",
+        "os_type": "sles12",
+        "uuid": "d0fe9c43-e4f6-450a-4e47-c248be26f5b1"
+      },
+      {
+        "date": "2018-05-25",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "aws": {
+            "ap-northeast-1": "ami-0e6b9471",
+            "ap-northeast-2": "ami-cde04ba3",
+            "ap-south-1": "ami-b87758d7",
+            "ap-southeast-1": "ami-9b576be7",
+            "ap-southeast-2": "ami-dfc417bd",
+            "ca-central-1": "ami-cac043ae",
+            "eu-central-1": "ami-3fd4ffd4",
+            "eu-west-1": "ami-fbd1e882",
+            "eu-west-2": "ami-77f81410",
+            "eu-west-3": "ami-9165d4ec",
+            "sa-east-1": "ami-6347190f",
+            "us-east-1": "ami-af5130d0",
+            "us-east-2": "ami-a6b985c3",
+            "us-west-1": "ami-2d607b4d",
+            "us-west-2": "ami-7bfc8503"
+          }
+        },
+        "os": "ubuntu16",
+        "os_type": "ubuntu16",
+        "uuid": "5b60b723-4beb-40b0-5cba-47ea9c9b6e53"
+      },
+      {
+        "date": "2018-05-25",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "gcp": {
+            "default": "sequenceiqimage/cb-hdp--1805252022.tar.gz"
+          }
+        },
+        "os": "ubuntu16",
+        "os_type": "ubuntu16",
+        "uuid": "9423731d-2e44-4617-7971-4a1b3ddac131"
+      },
+      {
+        "date": "2018-05-25",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "openstack": {
+            "default": "cb-hdp--1805252042"
+          }
+        },
+        "os": "ubuntu16",
+        "os_type": "ubuntu16",
+        "uuid": "10cec554-9d7f-4ecf-5575-df9290f61f8b"
+      },
+      {
+        "date": "2018-05-25",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "azure": {
+            "Australia East": "https://hwxaustraliaeast.blob.core.windows.net/images/cb-hdp--1805252219.vhd",
+            "Australia South East": "https://hwxaustralisoutheast.blob.core.windows.net/images/cb-hdp--1805252219.vhd",
+            "Brazil South": "https://sequenceiqbrazilsouth2.blob.core.windows.net/images/cb-hdp--1805252219.vhd",
+            "Canada Central": "https://sequenceiqcanadacentral.blob.core.windows.net/images/cb-hdp--1805252219.vhd",
+            "Canada East": "https://sequenceiqcanadaeast.blob.core.windows.net/images/cb-hdp--1805252219.vhd",
+            "Central India": "https://hwxcentralindia.blob.core.windows.net/images/cb-hdp--1805252219.vhd",
+            "Central US": "https://sequenceiqcentralus2.blob.core.windows.net/images/cb-hdp--1805252219.vhd",
+            "East Asia": "https://sequenceiqeastasia2.blob.core.windows.net/images/cb-hdp--1805252219.vhd",
+            "East US": "https://sequenceiqeastus12.blob.core.windows.net/images/cb-hdp--1805252219.vhd",
+            "East US 2": "https://sequenceiqeastus22.blob.core.windows.net/images/cb-hdp--1805252219.vhd",
+            "Japan East": "https://sequenceiqjapaneast2.blob.core.windows.net/images/cb-hdp--1805252219.vhd",
+            "Japan West": "https://sequenceiqjapanwest2.blob.core.windows.net/images/cb-hdp--1805252219.vhd",
+            "Korea Central": "https://hwxkoreacentral.blob.core.windows.net/images/cb-hdp--1805252219.vhd",
+            "Korea South": "https://hwxkoreasouth.blob.core.windows.net/images/cb-hdp--1805252219.vhd",
+            "North Central US": "https://sequenceiqorthcentralus2.blob.core.windows.net/images/cb-hdp--1805252219.vhd",
+            "North Europe": "https://sequenceiqnortheurope2.blob.core.windows.net/images/cb-hdp--1805252219.vhd",
+            "South Central US": "https://sequenceiqouthcentralus2.blob.core.windows.net/images/cb-hdp--1805252219.vhd",
+            "South East Asia": "https://sequenceiqsoutheastasia2.blob.core.windows.net/images/cb-hdp--1805252219.vhd",
+            "South India": "https://hwxsouthindia.blob.core.windows.net/images/cb-hdp--1805252219.vhd",
+            "UK South": "https://hwxsouthuk.blob.core.windows.net/images/cb-hdp--1805252219.vhd",
+            "UK West": "https://hwxwestuk.blob.core.windows.net/images/cb-hdp--1805252219.vhd",
+            "West Central US": "https://hwxwestcentralus.blob.core.windows.net/images/cb-hdp--1805252219.vhd",
+            "West Europe": "https://sequenceiqwesteurope2.blob.core.windows.net/images/cb-hdp--1805252219.vhd",
+            "West India": "https://hwxwestindia.blob.core.windows.net/images/cb-hdp--1805252219.vhd",
+            "West US": "https://sequenceiqwestus2.blob.core.windows.net/images/cb-hdp--1805252219.vhd",
+            "West US 2": "https://hwxwestus2.blob.core.windows.net/images/cb-hdp--1805252219.vhd"
+          }
+        },
+        "os": "ubuntu16",
+        "os_type": "ubuntu16",
+        "uuid": "d70ffcd5-26ea-4a51-4db3-962ef1f15822"
+      }
+    ],
+    "hdf-images": [
+      {
+        "date": "2018-04-03",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "openstack": {
+            "default": "cb-hdp-31-1804032231"
+          }
+        },
+        "os": "centos7",
+        "os_type": "redhat7",
+        "uuid": "7c3f6976-5342-4e4d-6c2f-bb1feefe8dc5",
+        "stack-details": {
+          "repo": {
+            "stack": {
+              "redhat7": "http://public-repo-1.hortonworks.com/HDF/centos7/3.x/updates/3.1.1.0",
+              "repoid": "HDF-3.1",
+              "repository-version": "3.1.1.0-35",
+              "vdf-url": "http://public-repo-1.hortonworks.com/HDF/centos7/3.x/updates/3.1.1.0/HDF-3.1.1.0-35.xml"
+            },
+            "util": {
+              "redhat7": "http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.21/repos/centos7",
+              "repoid": "HDP-UTILS-1.1.0.21"
+            }
+          },
+          "version": "3.1.1.0",
+          "mpacks": [
+            {
+              "mpack_url": "http://public-repo-1.hortonworks.com/HDF/centos7/3.x/updates/3.1.1.0/tars/hdf_ambari_mp/hdf-ambari-mpack-3.1.1.0-35.tar.gz"
+            }
+          ]
+        },
+        "repo": {
+          "redhat7": "http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.6.1.3"
+        },
+        "version": "2.6.1.3"
+      },
+      {
+        "date": "2018-04-04",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "aws": {
+            "ap-northeast-1": "ami-55fee929",
+            "ap-northeast-2": "ami-d759f6b9",
+            "ap-south-1": "ami-171d3878",
+            "ap-southeast-1": "ami-82c59ffe",
+            "ap-southeast-2": "ami-6ab07e08",
+            "ca-central-1": "ami-c26ceaa6",
+            "eu-central-1": "ami-6ba0ff80",
+            "eu-west-1": "ami-0eac3fc65a6850acb",
+            "eu-west-2": "ami-8f06e7e8",
+            "eu-west-3": "ami-dc06b0a1",
+            "sa-east-1": "ami-6f481e03",
+            "us-east-1": "ami-4779d43a",
+            "us-east-2": "ami-db4979be",
+            "us-west-1": "ami-c57767a5",
+            "us-west-2": "ami-57e98d2f"
+          }
+        },
+        "os": "amazonlinux",
+        "os_type": "redhat6",
+        "uuid": "36c32682-3e5b-49db-5c0f-d332c614b27d",
+        "stack-details": {
+          "repo": {
+            "stack": {
+              "redhat6": "http://public-repo-1.hortonworks.com/HDF/centos6/3.x/updates/3.1.1.0",
+              "repoid": "HDF-3.1",
+              "repository-version": "3.1.1.0-35",
+              "vdf-url": "http://public-repo-1.hortonworks.com/HDF/centos6/3.x/updates/3.1.1.0/HDF-3.1.1.0-35.xml"
+            },
+            "util": {
+              "redhat6": "http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.21/repos/centos6",
+              "repoid": "HDP-UTILS-1.1.0.21"
+            }
+          },
+          "version": "3.1.1.0",
+          "mpacks": [
+            {
+              "mpack_url": "http://public-repo-1.hortonworks.com/HDF/centos6/3.x/updates/3.1.1.0/tars/hdf_ambari_mp/hdf-ambari-mpack-3.1.1.0-35.tar.gz"
+            }
+          ]
+        },
+        "repo": {
+          "redhat6": "http://public-repo-1.hortonworks.com/ambari/centos6/2.x/updates/2.6.1.3"
+        },
+        "version": "2.6.1.3"
+      },
+      {
+        "date": "2018-04-04",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "azure": {
+            "Australia East": "https://hwxaustraliaeast.blob.core.windows.net/images/cb-hdp-31-1804041515.vhd",
+            "Australia South East": "https://hwxaustralisoutheast.blob.core.windows.net/images/cb-hdp-31-1804041515.vhd",
+            "Brazil South": "https://sequenceiqbrazilsouth2.blob.core.windows.net/images/cb-hdp-31-1804041515.vhd",
+            "Canada Central": "https://sequenceiqcanadacentral.blob.core.windows.net/images/cb-hdp-31-1804041515.vhd",
+            "Canada East": "https://sequenceiqcanadaeast.blob.core.windows.net/images/cb-hdp-31-1804041515.vhd",
+            "Central India": "https://hwxcentralindia.blob.core.windows.net/images/cb-hdp-31-1804041515.vhd",
+            "Central US": "https://sequenceiqcentralus2.blob.core.windows.net/images/cb-hdp-31-1804041515.vhd",
+            "East Asia": "https://sequenceiqeastasia2.blob.core.windows.net/images/cb-hdp-31-1804041515.vhd",
+            "East US": "https://sequenceiqeastus12.blob.core.windows.net/images/cb-hdp-31-1804041515.vhd",
+            "East US 2": "https://sequenceiqeastus22.blob.core.windows.net/images/cb-hdp-31-1804041515.vhd",
+            "Japan East": "https://sequenceiqjapaneast2.blob.core.windows.net/images/cb-hdp-31-1804041515.vhd",
+            "Japan West": "https://sequenceiqjapanwest2.blob.core.windows.net/images/cb-hdp-31-1804041515.vhd",
+            "Korea Central": "https://hwxkoreacentral.blob.core.windows.net/images/cb-hdp-31-1804041515.vhd",
+            "Korea South": "https://hwxkoreasouth.blob.core.windows.net/images/cb-hdp-31-1804041515.vhd",
+            "North Central US": "https://sequenceiqorthcentralus2.blob.core.windows.net/images/cb-hdp-31-1804041515.vhd",
+            "North Europe": "https://sequenceiqnortheurope2.blob.core.windows.net/images/cb-hdp-31-1804041515.vhd",
+            "South Central US": "https://sequenceiqouthcentralus2.blob.core.windows.net/images/cb-hdp-31-1804041515.vhd",
+            "South East Asia": "https://sequenceiqsoutheastasia2.blob.core.windows.net/images/cb-hdp-31-1804041515.vhd",
+            "South India": "https://hwxsouthindia.blob.core.windows.net/images/cb-hdp-31-1804041515.vhd",
+            "UK South": "https://hwxsouthuk.blob.core.windows.net/images/cb-hdp-31-1804041515.vhd",
+            "UK West": "https://hwxwestuk.blob.core.windows.net/images/cb-hdp-31-1804041515.vhd",
+            "West Central US": "https://hwxwestcentralus.blob.core.windows.net/images/cb-hdp-31-1804041515.vhd",
+            "West Europe": "https://sequenceiqwesteurope2.blob.core.windows.net/images/cb-hdp-31-1804041515.vhd",
+            "West India": "https://hwxwestindia.blob.core.windows.net/images/cb-hdp-31-1804041515.vhd",
+            "West US": "https://sequenceiqwestus2.blob.core.windows.net/images/cb-hdp-31-1804041515.vhd",
+            "West US 2": "https://hwxwestus2.blob.core.windows.net/images/cb-hdp-31-1804041515.vhd"
+          }
+        },
+        "os": "centos7",
+        "os_type": "redhat7",
+        "uuid": "865ad52e-9ce0-4229-4dc9-c17969a12c68",
+        "stack-details": {
+          "repo": {
+            "stack": {
+              "redhat7": "http://public-repo-1.hortonworks.com/HDF/centos7/3.x/updates/3.1.1.0",
+              "repoid": "HDF-3.1",
+              "repository-version": "3.1.1.0-35",
+              "vdf-url": "http://public-repo-1.hortonworks.com/HDF/centos7/3.x/updates/3.1.1.0/HDF-3.1.1.0-35.xml"
+            },
+            "util": {
+              "redhat7": "http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.21/repos/centos7",
+              "repoid": "HDP-UTILS-1.1.0.21"
+            }
+          },
+          "version": "3.1.1.0",
+          "mpacks": [
+            {
+              "mpack_url": "http://public-repo-1.hortonworks.com/HDF/centos7/3.x/updates/3.1.1.0/tars/hdf_ambari_mp/hdf-ambari-mpack-3.1.1.0-35.tar.gz"
+            }
+          ]
+        },
+        "repo": {
+          "redhat7": "http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.6.1.3"
+        },
+        "version": "2.6.1.3"
+      },
+      {
+        "date": "2018-04-04",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "gcp": {
+            "default": "sequenceiqimage/cb-hdp-31-1804042017.tar.gz"
+          }
+        },
+        "os": "centos7",
+        "os_type": "redhat7",
+        "uuid": "5484f48f-14d0-4535-4e35-4d7418ddc8cd",
+        "stack-details": {
+          "repo": {
+            "stack": {
+              "redhat7": "http://public-repo-1.hortonworks.com/HDF/centos7/3.x/updates/3.1.1.0",
+              "repoid": "HDF-3.1",
+              "repository-version": "3.1.1.0-35",
+              "vdf-url": "http://public-repo-1.hortonworks.com/HDF/centos7/3.x/updates/3.1.1.0/HDF-3.1.1.0-35.xml"
+            },
+            "util": {
+              "redhat7": "http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.21/repos/centos7",
+              "repoid": "HDP-UTILS-1.1.0.21"
+            }
+          },
+          "version": "3.1.1.0",
+          "mpacks": [
+            {
+              "mpack_url": "http://public-repo-1.hortonworks.com/HDF/centos7/3.x/updates/3.1.1.0/tars/hdf_ambari_mp/hdf-ambari-mpack-3.1.1.0-35.tar.gz"
+            }
+          ]
+        },
+        "repo": {
+          "redhat7": "http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.6.1.3"
+        },
+        "version": "2.6.1.3"
+      },
+      {
+        "date": "2018-05-24",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "gcp": {
+            "default": "sequenceiqimage/cb-hdp-31-1805241145.tar.gz"
+          }
+        },
+        "os": "centos7",
+        "os_type": "redhat7",
+        "uuid": "2a22d80d-619f-42e5-5832-503667a6ece6",
+        "stack-details": {
+          "repo": {
+            "stack": {
+              "redhat7": "http://public-repo-1.hortonworks.com/HDF/centos7/3.x/updates/3.1.1.0",
+              "repoid": "HDF-3.1",
+              "repository-version": "3.1.1.0-35",
+              "vdf-url": "http://public-repo-1.hortonworks.com/HDF/centos7/3.x/updates/3.1.1.0/HDF-3.1.1.0-35.xml"
+            },
+            "util": {
+              "redhat7": "http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.21/repos/centos7",
+              "repoid": "HDP-UTILS-1.1.0.21"
+            }
+          },
+          "version": "3.1.1.0",
+          "mpacks": [
+            {
+              "mpack_url": "http://public-repo-1.hortonworks.com/HDF/centos7/3.x/updates/3.1.1.0/tars/hdf_ambari_mp/hdf-ambari-mpack-3.1.1.0-35.tar.gz"
+            }
+          ]
+        },
+        "repo": {
+          "redhat7": "http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.6.2.0"
+        },
+        "version": "2.6.2.0"
+      },
+      {
+        "date": "2018-05-25",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "openstack": {
+            "default": "cb-hdp-31-1805251001"
+          }
+        },
+        "os": "centos7",
+        "os_type": "redhat7",
+        "uuid": "53804202-685b-4c63-7e28-4dc98eb0a2d8",
+        "stack-details": {
+          "repo": {
+            "stack": {
+              "redhat7": "http://public-repo-1.hortonworks.com/HDF/centos7/3.x/updates/3.1.1.0",
+              "repoid": "HDF-3.1",
+              "repository-version": "3.1.1.0-35",
+              "vdf-url": "http://public-repo-1.hortonworks.com/HDF/centos7/3.x/updates/3.1.1.0/HDF-3.1.1.0-35.xml"
+            },
+            "util": {
+              "redhat7": "http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.21/repos/centos7",
+              "repoid": "HDP-UTILS-1.1.0.21"
+            }
+          },
+          "version": "3.1.1.0",
+          "mpacks": [
+            {
+              "mpack_url": "http://public-repo-1.hortonworks.com/HDF/centos7/3.x/updates/3.1.1.0/tars/hdf_ambari_mp/hdf-ambari-mpack-3.1.1.0-35.tar.gz"
+            }
+          ]
+        },
+        "repo": {
+          "redhat7": "http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.6.2.0"
+        },
+        "version": "2.6.2.0"
+      },
+      {
+        "date": "2018-05-25",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "aws": {
+            "ap-northeast-1": "ami-b332cdcc",
+            "ap-northeast-2": "ami-f7ec4799",
+            "ap-south-1": "ami-936847fc",
+            "ap-southeast-1": "ami-fa7e4286",
+            "ap-southeast-2": "ami-afaf7ccd",
+            "ca-central-1": "ami-ad3ebec9",
+            "eu-central-1": "ami-30c2e9db",
+            "eu-west-1": "ami-ed013894",
+            "eu-west-2": "ami-2fe70b48",
+            "eu-west-3": "ami-2b52e356",
+            "sa-east-1": "ami-fa4e1096",
+            "us-east-1": "ami-5fd4b220",
+            "us-east-2": "ami-bebd81db",
+            "us-west-1": "ami-9f170cff",
+            "us-west-2": "ami-0085fc78"
+          }
+        },
+        "os": "amazonlinux",
+        "os_type": "redhat6",
+        "uuid": "cfb97179-9a3b-42f5-60e7-58fcfea2ec9a",
+        "stack-details": {
+          "repo": {
+            "stack": {
+              "redhat6": "http://public-repo-1.hortonworks.com/HDF/centos6/3.x/updates/3.1.1.0",
+              "repoid": "HDF-3.1",
+              "repository-version": "3.1.1.0-35",
+              "vdf-url": "http://public-repo-1.hortonworks.com/HDF/centos6/3.x/updates/3.1.1.0/HDF-3.1.1.0-35.xml"
+            },
+            "util": {
+              "redhat6": "http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.21/repos/centos6",
+              "repoid": "HDP-UTILS-1.1.0.21"
+            }
+          },
+          "version": "3.1.1.0",
+          "mpacks": [
+            {
+              "mpack_url": "http://public-repo-1.hortonworks.com/HDF/centos7/3.x/updates/3.1.1.0/tars/hdf_ambari_mp/hdf-ambari-mpack-3.1.1.0-35.tar.gz"
+            }
+          ]
+        },
+        "repo": {
+          "redhat6": "http://public-repo-1.hortonworks.com/ambari/centos6/2.x/updates/2.6.2.0"
+        },
+        "version": "2.6.2.0"
+      },
+      {
+        "date": "2018-05-25",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "azure": {
+            "Australia East": "https://hwxaustraliaeast.blob.core.windows.net/images/cb-hdp-31-1805251144.vhd",
+            "Australia South East": "https://hwxaustralisoutheast.blob.core.windows.net/images/cb-hdp-31-1805251144.vhd",
+            "Brazil South": "https://sequenceiqbrazilsouth2.blob.core.windows.net/images/cb-hdp-31-1805251144.vhd",
+            "Canada Central": "https://sequenceiqcanadacentral.blob.core.windows.net/images/cb-hdp-31-1805251144.vhd",
+            "Canada East": "https://sequenceiqcanadaeast.blob.core.windows.net/images/cb-hdp-31-1805251144.vhd",
+            "Central India": "https://hwxcentralindia.blob.core.windows.net/images/cb-hdp-31-1805251144.vhd",
+            "Central US": "https://sequenceiqcentralus2.blob.core.windows.net/images/cb-hdp-31-1805251144.vhd",
+            "East Asia": "https://sequenceiqeastasia2.blob.core.windows.net/images/cb-hdp-31-1805251144.vhd",
+            "East US": "https://sequenceiqeastus12.blob.core.windows.net/images/cb-hdp-31-1805251144.vhd",
+            "East US 2": "https://sequenceiqeastus22.blob.core.windows.net/images/cb-hdp-31-1805251144.vhd",
+            "Japan East": "https://sequenceiqjapaneast2.blob.core.windows.net/images/cb-hdp-31-1805251144.vhd",
+            "Japan West": "https://sequenceiqjapanwest2.blob.core.windows.net/images/cb-hdp-31-1805251144.vhd",
+            "Korea Central": "https://hwxkoreacentral.blob.core.windows.net/images/cb-hdp-31-1805251144.vhd",
+            "Korea South": "https://hwxkoreasouth.blob.core.windows.net/images/cb-hdp-31-1805251144.vhd",
+            "North Central US": "https://sequenceiqorthcentralus2.blob.core.windows.net/images/cb-hdp-31-1805251144.vhd",
+            "North Europe": "https://sequenceiqnortheurope2.blob.core.windows.net/images/cb-hdp-31-1805251144.vhd",
+            "South Central US": "https://sequenceiqouthcentralus2.blob.core.windows.net/images/cb-hdp-31-1805251144.vhd",
+            "South East Asia": "https://sequenceiqsoutheastasia2.blob.core.windows.net/images/cb-hdp-31-1805251144.vhd",
+            "South India": "https://hwxsouthindia.blob.core.windows.net/images/cb-hdp-31-1805251144.vhd",
+            "UK South": "https://hwxsouthuk.blob.core.windows.net/images/cb-hdp-31-1805251144.vhd",
+            "UK West": "https://hwxwestuk.blob.core.windows.net/images/cb-hdp-31-1805251144.vhd",
+            "West Central US": "https://hwxwestcentralus.blob.core.windows.net/images/cb-hdp-31-1805251144.vhd",
+            "West Europe": "https://sequenceiqwesteurope2.blob.core.windows.net/images/cb-hdp-31-1805251144.vhd",
+            "West India": "https://hwxwestindia.blob.core.windows.net/images/cb-hdp-31-1805251144.vhd",
+            "West US": "https://sequenceiqwestus2.blob.core.windows.net/images/cb-hdp-31-1805251144.vhd",
+            "West US 2": "https://hwxwestus2.blob.core.windows.net/images/cb-hdp-31-1805251144.vhd"
+          }
+        },
+        "os": "centos7",
+        "os_type": "redhat7",
+        "uuid": "fdd38205-2f40-4893-6703-3badf2213ef3",
+        "stack-details": {
+          "repo": {
+            "stack": {
+              "redhat7": "http://public-repo-1.hortonworks.com/HDF/centos7/3.x/updates/3.1.1.0",
+              "repoid": "HDF-3.1",
+              "repository-version": "3.1.1.0-35",
+              "vdf-url": "http://public-repo-1.hortonworks.com/HDF/centos7/3.x/updates/3.1.1.0/HDF-3.1.1.0-35.xml"
+            },
+            "util": {
+              "redhat7": "http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.21/repos/centos7",
+              "repoid": "HDP-UTILS-1.1.0.21"
+            }
+          },
+          "version": "3.1.1.0",
+          "mpacks": [
+            {
+              "mpack_url": "http://public-repo-1.hortonworks.com/HDF/centos7/3.x/updates/3.1.1.0/tars/hdf_ambari_mp/hdf-ambari-mpack-3.1.1.0-35.tar.gz"
+            }
+          ]
+        },
+        "repo": {
+          "redhat7": "http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.6.2.0"
+        },
+        "version": "2.6.2.0"
+      },
+      {
+        "date": "2018-05-25",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "azure": {
+            "Australia East": "https://hwxaustraliaeast.blob.core.windows.net/images/cb-hdp-31-1805251144.vhd",
+            "Australia South East": "https://hwxaustralisoutheast.blob.core.windows.net/images/cb-hdp-31-1805251144.vhd",
+            "Brazil South": "https://sequenceiqbrazilsouth2.blob.core.windows.net/images/cb-hdp-31-1805251144.vhd",
+            "Canada Central": "https://sequenceiqcanadacentral.blob.core.windows.net/images/cb-hdp-31-1805251144.vhd",
+            "Canada East": "https://sequenceiqcanadaeast.blob.core.windows.net/images/cb-hdp-31-1805251144.vhd",
+            "Central India": "https://hwxcentralindia.blob.core.windows.net/images/cb-hdp-31-1805251144.vhd",
+            "Central US": "https://sequenceiqcentralus2.blob.core.windows.net/images/cb-hdp-31-1805251144.vhd",
+            "East Asia": "https://sequenceiqeastasia2.blob.core.windows.net/images/cb-hdp-31-1805251144.vhd",
+            "East US": "https://sequenceiqeastus12.blob.core.windows.net/images/cb-hdp-31-1805251144.vhd",
+            "East US 2": "https://sequenceiqeastus22.blob.core.windows.net/images/cb-hdp-31-1805251144.vhd",
+            "Japan East": "https://sequenceiqjapaneast2.blob.core.windows.net/images/cb-hdp-31-1805251144.vhd",
+            "Japan West": "https://sequenceiqjapanwest2.blob.core.windows.net/images/cb-hdp-31-1805251144.vhd",
+            "Korea Central": "https://hwxkoreacentral.blob.core.windows.net/images/cb-hdp-31-1805251144.vhd",
+            "Korea South": "https://hwxkoreasouth.blob.core.windows.net/images/cb-hdp-31-1805251144.vhd",
+            "North Central US": "https://sequenceiqorthcentralus2.blob.core.windows.net/images/cb-hdp-31-1805251144.vhd",
+            "North Europe": "https://sequenceiqnortheurope2.blob.core.windows.net/images/cb-hdp-31-1805251144.vhd",
+            "South Central US": "https://sequenceiqouthcentralus2.blob.core.windows.net/images/cb-hdp-31-1805251144.vhd",
+            "South East Asia": "https://sequenceiqsoutheastasia2.blob.core.windows.net/images/cb-hdp-31-1805251144.vhd",
+            "South India": "https://hwxsouthindia.blob.core.windows.net/images/cb-hdp-31-1805251144.vhd",
+            "UK South": "https://hwxsouthuk.blob.core.windows.net/images/cb-hdp-31-1805251144.vhd",
+            "UK West": "https://hwxwestuk.blob.core.windows.net/images/cb-hdp-31-1805251144.vhd",
+            "West Central US": "https://hwxwestcentralus.blob.core.windows.net/images/cb-hdp-31-1805251144.vhd",
+            "West Europe": "https://sequenceiqwesteurope2.blob.core.windows.net/images/cb-hdp-31-1805251144.vhd",
+            "West India": "https://hwxwestindia.blob.core.windows.net/images/cb-hdp-31-1805251144.vhd",
+            "West US": "https://sequenceiqwestus2.blob.core.windows.net/images/cb-hdp-31-1805251144.vhd",
+            "West US 2": "https://hwxwestus2.blob.core.windows.net/images/cb-hdp-31-1805251144.vhd"
+          }
+        },
+        "os": "centos7",
+        "os_type": "redhat7",
+        "uuid": "95182b68-201a-441c-760c-241531c5fd6f",
+        "stack-details": {
+          "repo": {
+            "stack": {
+              "redhat7": "http://public-repo-1.hortonworks.com/HDF/centos7/3.x/updates/3.1.1.0",
+              "repoid": "HDF-3.1",
+              "repository-version": "3.1.1.0-35",
+              "vdf-url": "http://public-repo-1.hortonworks.com/HDF/centos7/3.x/updates/3.1.1.0/HDF-3.1.1.0-35.xml"
+            },
+            "util": {
+              "redhat7": "http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.21/repos/centos7",
+              "repoid": "HDP-UTILS-1.1.0.21"
+            }
+          },
+          "version": "3.1.1.0",
+          "mpacks": [
+            {
+              "mpack_url": "http://public-repo-1.hortonworks.com/HDF/centos7/3.x/updates/3.1.1.0/tars/hdf_ambari_mp/hdf-ambari-mpack-3.1.1.0-35.tar.gz"
+            }
+          ]
+        },
+        "repo": {
+          "redhat7": "http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.6.2.0"
+        },
+        "version": "2.6.2.0"
+      },
+      {
+        "date": "2018-06-07",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "aws": {
+            "ap-northeast-1": "ami-f3c8088c",
+            "ap-northeast-2": "ami-84e14bea",
+            "ap-south-1": "ami-1fd9f070",
+            "ap-southeast-1": "ami-1b340e67",
+            "ap-southeast-2": "ami-c4875ba6",
+            "ca-central-1": "ami-aa4ac9ce",
+            "eu-central-1": "ami-c2a99f29",
+            "eu-west-1": "ami-a75c5cde",
+            "eu-west-2": "ami-293cd34e",
+            "eu-west-3": "ami-3b209146",
+            "sa-east-1": "ami-38722a54",
+            "us-east-1": "ami-d53a45aa",
+            "us-east-2": "ami-1196a974",
+            "us-west-1": "ami-4725c024",
+            "us-west-2": "ami-10a3e568"
+          }
+        },
+        "os": "amazonlinux",
+        "os_type": "redhat6",
+        "uuid": "4cb0d894-d8b4-437d-41b7-45bba382391c",
+        "stack-details": {
+          "repo": {
+            "stack": {
+              "redhat6": "http://public-repo-1.hortonworks.com/HDF/centos6/3.x/updates/3.1.2.0",
+              "repoid": "HDF-3.1",
+              "repository-version": "3.1.2.0-7",
+              "vdf-url": "http://public-repo-1.hortonworks.com/HDF/centos6/3.x/updates/3.1.2.0/HDF-3.1.2.0-7.xml"
+            },
+            "util": {
+              "redhat6": "http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/centos6",
+              "repoid": "HDP-UTILS-1.1.0.22"
+            }
+          },
+          "version": "3.1.2.0",
+          "mpacks": [
+            {
+              "mpack_url": "http://public-repo-1.hortonworks.com/HDF/centos7/3.x/updates/3.1.2.0/tars/hdf_ambari_mp/hdf-ambari-mpack-3.1.2.0-7.tar.gz"
+            }
+          ]
+        },
+        "repo": {
+          "redhat6": "http://public-repo-1.hortonworks.com/ambari/centos6/2.x/updates/2.6.2.0"
+        },
+        "version": "2.6.2.0"
+      },
+      {
+        "date": "2018-06-07",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "openstack": {
+            "default": "cb-hdp-31-1806071712"
+          }
+        },
+        "os": "centos7",
+        "os_type": "redhat7",
+        "uuid": "84464c3a-f2cd-411d-736a-4e3c567cdeab",
+        "stack-details": {
+          "repo": {
+            "stack": {
+              "redhat7": "http://public-repo-1.hortonworks.com/HDF/centos7/3.x/updates/3.1.2.0",
+              "repoid": "HDF-3.1",
+              "repository-version": "3.1.2.0-7",
+              "vdf-url": "http://public-repo-1.hortonworks.com/HDF/centos7/3.x/updates/3.1.2.0/HDF-3.1.2.0-7.xml"
+            },
+            "util": {
+              "redhat7": "http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/centos7",
+              "repoid": "HDP-UTILS-1.1.0.22"
+            }
+          },
+          "version": "3.1.2.0",
+          "mpacks": [
+            {
+              "mpack_url": "http://public-repo-1.hortonworks.com/HDF/centos7/3.x/updates/3.1.2.0/tars/hdf_ambari_mp/hdf-ambari-mpack-3.1.2.0-7.tar.gz"
+            }
+          ]
+        },
+        "repo": {
+          "redhat7": "http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.6.2.0"
+        },
+        "version": "2.6.2.0"
+      },
+      {
+        "date": "2018-06-07",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "gcp": {
+            "default": "sequenceiqimage/cb-hdp-31-1806071626.tar.gz"
+          }
+        },
+        "os": "centos7",
+        "os_type": "redhat7",
+        "uuid": "48fa90e0-b196-4fb2-6c57-aa9ffae02245",
+        "stack-details": {
+          "repo": {
+            "stack": {
+              "redhat7": "http://public-repo-1.hortonworks.com/HDF/centos7/3.x/updates/3.1.2.0",
+              "repoid": "HDF-3.1",
+              "repository-version": "3.1.2.0-7",
+              "vdf-url": "http://public-repo-1.hortonworks.com/HDF/centos7/3.x/updates/3.1.2.0/HDF-3.1.2.0-7.xml"
+            },
+            "util": {
+              "redhat7": "http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/centos7",
+              "repoid": "HDP-UTILS-1.1.0.22"
+            }
+          },
+          "version": "3.1.2.0",
+          "mpacks": [
+            {
+              "mpack_url": "http://public-repo-1.hortonworks.com/HDF/centos7/3.x/updates/3.1.2.0/tars/hdf_ambari_mp/hdf-ambari-mpack-3.1.2.0-7.tar.gz"
+            }
+          ]
+        },
+        "repo": {
+          "redhat7": "http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.6.2.0"
+        },
+        "version": "2.6.2.0"
+      }
+    ],
+    "hdp-images": [
+      {
+        "date": "2018-01-15",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "azure": {
+            "Australia East": "https://hwxaustraliaeast.blob.core.windows.net/images/cb-hdp-26-1801151714.vhd",
+            "Australia South East": "https://hwxaustralisoutheast.blob.core.windows.net/images/cb-hdp-26-1801151714.vhd",
+            "Brazil South": "https://sequenceiqbrazilsouth2.blob.core.windows.net/images/cb-hdp-26-1801151714.vhd",
+            "Canada Central": "https://sequenceiqcanadacentral.blob.core.windows.net/images/cb-hdp-26-1801151714.vhd",
+            "Canada East": "https://sequenceiqcanadaeast.blob.core.windows.net/images/cb-hdp-26-1801151714.vhd",
+            "Central India": "https://hwxcentralindia.blob.core.windows.net/images/cb-hdp-26-1801151714.vhd",
+            "Central US": "https://sequenceiqcentralus2.blob.core.windows.net/images/cb-hdp-26-1801151714.vhd",
+            "East Asia": "https://sequenceiqeastasia2.blob.core.windows.net/images/cb-hdp-26-1801151714.vhd",
+            "East US": "https://sequenceiqeastus12.blob.core.windows.net/images/cb-hdp-26-1801151714.vhd",
+            "East US 2": "https://sequenceiqeastus22.blob.core.windows.net/images/cb-hdp-26-1801151714.vhd",
+            "Japan East": "https://sequenceiqjapaneast2.blob.core.windows.net/images/cb-hdp-26-1801151714.vhd",
+            "Japan West": "https://sequenceiqjapanwest2.blob.core.windows.net/images/cb-hdp-26-1801151714.vhd",
+            "Korea Central": "https://hwxkoreacentral.blob.core.windows.net/images/cb-hdp-26-1801151714.vhd",
+            "Korea South": "https://hwxkoreasouth.blob.core.windows.net/images/cb-hdp-26-1801151714.vhd",
+            "North Central US": "https://sequenceiqorthcentralus2.blob.core.windows.net/images/cb-hdp-26-1801151714.vhd",
+            "North Europe": "https://sequenceiqnortheurope2.blob.core.windows.net/images/cb-hdp-26-1801151714.vhd",
+            "South Central US": "https://sequenceiqouthcentralus2.blob.core.windows.net/images/cb-hdp-26-1801151714.vhd",
+            "South East Asia": "https://sequenceiqsoutheastasia2.blob.core.windows.net/images/cb-hdp-26-1801151714.vhd",
+            "South India": "https://hwxsouthindia.blob.core.windows.net/images/cb-hdp-26-1801151714.vhd",
+            "UK South": "https://hwxsouthuk.blob.core.windows.net/images/cb-hdp-26-1801151714.vhd",
+            "UK West": "https://hwxwestuk.blob.core.windows.net/images/cb-hdp-26-1801151714.vhd",
+            "West Central US": "https://hwxwestcentralus.blob.core.windows.net/images/cb-hdp-26-1801151714.vhd",
+            "West Europe": "https://sequenceiqwesteurope2.blob.core.windows.net/images/cb-hdp-26-1801151714.vhd",
+            "West India": "https://hwxwestindia.blob.core.windows.net/images/cb-hdp-26-1801151714.vhd",
+            "West US": "https://sequenceiqwestus2.blob.core.windows.net/images/cb-hdp-26-1801151714.vhd",
+            "West US 2": "https://hwxwestus2.blob.core.windows.net/images/cb-hdp-26-1801151714.vhd"
+          }
+        },
+        "os": "centos7",
+        "os_type": "redhat7",
+        "uuid": "4bdc8d67-3479-44ee-5a38-cd5e5b2e59bb",
+        "stack-details": {
+          "repo": {
+            "stack": {
+              "redhat7": "http://public-repo-1.hortonworks.com/HDP/centos7/2.x/updates/2.6.3.0",
+              "repoid": "HDP-2.6",
+              "repository-version": "2.6.3.0-235",
+              "vdf-url": "http://public-repo-1.hortonworks.com/HDP/centos7/2.x/updates/2.6.3.0/HDP-2.6.3.0-235.xml"
+            },
+            "util": {
+              "redhat7": "http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.21/repos/centos7",
+              "repoid": "HDP-UTILS-1.1.0.21"
+            }
+          },
+          "version": "2.6.3.0"
+        },
+        "repo": {
+          "redhat7": "http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.6.0.0"
+        },
+        "version": "2.6.0.0"
+      },
+      {
+        "date": "2018-01-16",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "azure": {
+            "Australia East": "https://hwxaustraliaeast.blob.core.windows.net/images/cb-hdp-26-1801161426.vhd",
+            "Australia South East": "https://hwxaustralisoutheast.blob.core.windows.net/images/cb-hdp-26-1801161426.vhd",
+            "Brazil South": "https://sequenceiqbrazilsouth2.blob.core.windows.net/images/cb-hdp-26-1801161426.vhd",
+            "Canada Central": "https://sequenceiqcanadacentral.blob.core.windows.net/images/cb-hdp-26-1801161426.vhd",
+            "Canada East": "https://sequenceiqcanadaeast.blob.core.windows.net/images/cb-hdp-26-1801161426.vhd",
+            "Central India": "https://hwxcentralindia.blob.core.windows.net/images/cb-hdp-26-1801161426.vhd",
+            "Central US": "https://sequenceiqcentralus2.blob.core.windows.net/images/cb-hdp-26-1801161426.vhd",
+            "East Asia": "https://sequenceiqeastasia2.blob.core.windows.net/images/cb-hdp-26-1801161426.vhd",
+            "East US": "https://sequenceiqeastus12.blob.core.windows.net/images/cb-hdp-26-1801161426.vhd",
+            "East US 2": "https://sequenceiqeastus22.blob.core.windows.net/images/cb-hdp-26-1801161426.vhd",
+            "Japan East": "https://sequenceiqjapaneast2.blob.core.windows.net/images/cb-hdp-26-1801161426.vhd",
+            "Japan West": "https://sequenceiqjapanwest2.blob.core.windows.net/images/cb-hdp-26-1801161426.vhd",
+            "Korea Central": "https://hwxkoreacentral.blob.core.windows.net/images/cb-hdp-26-1801161426.vhd",
+            "Korea South": "https://hwxkoreasouth.blob.core.windows.net/images/cb-hdp-26-1801161426.vhd",
+            "North Central US": "https://sequenceiqorthcentralus2.blob.core.windows.net/images/cb-hdp-26-1801161426.vhd",
+            "North Europe": "https://sequenceiqnortheurope2.blob.core.windows.net/images/cb-hdp-26-1801161426.vhd",
+            "South Central US": "https://sequenceiqouthcentralus2.blob.core.windows.net/images/cb-hdp-26-1801161426.vhd",
+            "South East Asia": "https://sequenceiqsoutheastasia2.blob.core.windows.net/images/cb-hdp-26-1801161426.vhd",
+            "South India": "https://hwxsouthindia.blob.core.windows.net/images/cb-hdp-26-1801161426.vhd",
+            "UK South": "https://hwxsouthuk.blob.core.windows.net/images/cb-hdp-26-1801161426.vhd",
+            "UK West": "https://hwxwestuk.blob.core.windows.net/images/cb-hdp-26-1801161426.vhd",
+            "West Central US": "https://hwxwestcentralus.blob.core.windows.net/images/cb-hdp-26-1801161426.vhd",
+            "West Europe": "https://sequenceiqwesteurope2.blob.core.windows.net/images/cb-hdp-26-1801161426.vhd",
+            "West India": "https://hwxwestindia.blob.core.windows.net/images/cb-hdp-26-1801161426.vhd",
+            "West US": "https://sequenceiqwestus2.blob.core.windows.net/images/cb-hdp-26-1801161426.vhd",
+            "West US 2": "https://hwxwestus2.blob.core.windows.net/images/cb-hdp-26-1801161426.vhd"
+          }
+        },
+        "os": "centos7",
+        "os_type": "redhat7",
+        "uuid": "d7777157-a625-405b-6e84-67a8ef1ad404",
+        "stack-details": {
+          "repo": {
+            "stack": {
+              "redhat7": "http://public-repo-1.hortonworks.com/HDP/centos7/2.x/updates/2.6.3.0",
+              "repoid": "HDP-2.6",
+              "repository-version": "2.6.3.0-235",
+              "vdf-url": "http://public-repo-1.hortonworks.com/HDP/centos7/2.x/updates/2.6.3.0/HDP-2.6.3.0-235.xml"
+            },
+            "util": {
+              "redhat7": "http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.21/repos/centos7",
+              "repoid": "HDP-UTILS-1.1.0.21"
+            }
+          },
+          "version": "2.6.3.0"
+        },
+        "repo": {
+          "redhat7": "http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.6.0.0"
+        },
+        "version": "2.6.0.0"
+      },
+      {
+        "date": "2018-01-16",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "aws": {
+            "ap-northeast-1": "ami-9e96fbf8",
+            "ap-northeast-2": "ami-208c2f4e",
+            "ap-southeast-1": "ami-8af28af6",
+            "ap-southeast-2": "ami-9316e8f1",
+            "eu-central-1": "ami-bc0b92d3",
+            "eu-west-1": "ami-0eb0d777",
+            "sa-east-1": "ami-865b17ea",
+            "us-east-1": "ami-11c5f56b",
+            "us-west-1": "ami-5cf6fb3c",
+            "us-west-2": "ami-63ab141b"
+          }
+        },
+        "os": "amazonlinux",
+        "os_type": "redhat6",
+        "uuid": "305c40c2-270b-436d-5f3d-b6e0b92d88f7",
+        "stack-details": {
+          "repo": {
+            "stack": {
+              "redhat6": "http://public-repo-1.hortonworks.com/HDP/centos7/2.x/updates/2.6.3.0",
+              "repoid": "HDP-2.6",
+              "repository-version": "2.6.3.0-235",
+              "vdf-url": "http://public-repo-1.hortonworks.com/HDP/centos7/2.x/updates/2.6.3.0/HDP-2.6.3.0-235.xml"
+            },
+            "util": {
+              "redhat6": "http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.21/repos/centos7",
+              "repoid": "HDP-UTILS-1.1.0.21"
+            }
+          },
+          "version": "2.6.3.0"
+        },
+        "repo": {
+          "redhat6": "http://public-repo-1.hortonworks.com/ambari/centos6/2.x/updates/2.6.0.0"
+        },
+        "version": "2.6.0.0"
+      },
+      {
+        "date": "2018-01-17",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "openstack": {
+            "default": "cb-hdp-26-1801172228"
+          }
+        },
+        "os": "centos7",
+        "os_type": "redhat7",
+        "uuid": "071794f4-d005-4f33-4ce2-3ea5c3ec1d58",
+        "stack-details": {
+          "repo": {
+            "stack": {
+              "redhat7": "http://public-repo-1.hortonworks.com/HDP/centos7/2.x/updates/2.6.3.0",
+              "repoid": "HDP-2.6",
+              "repository-version": "2.6.3.0-235",
+              "vdf-url": "http://public-repo-1.hortonworks.com/HDP/centos7/2.x/updates/2.6.3.0/HDP-2.6.3.0-235.xml"
+            },
+            "util": {
+              "redhat7": "http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.21/repos/centos7",
+              "repoid": "HDP-UTILS-1.1.0.21"
+            }
+          },
+          "version": "2.6.3.0"
+        },
+        "repo": {
+          "redhat7": "http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.6.0.0"
+        },
+        "version": "2.6.0.0"
+      },
+      {
+        "date": "2018-02-06",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "openstack": {
+            "default": "cb-hdp-26-1802061409"
+          }
+        },
+        "os": "centos7",
+        "os_type": "redhat7",
+        "uuid": "7325f106-ab4f-481f-70a4-a5c5e5a18d3c",
+        "stack-details": {
+          "repo": {
+            "stack": {
+              "redhat7": "http://public-repo-1.hortonworks.com/HDP/centos7/2.x/updates/2.6.4.0",
+              "repoid": "HDP-2.6",
+              "repository-version": "2.6.4.0-91",
+              "vdf-url": "http://public-repo-1.hortonworks.com/HDP/centos7/2.x/updates/2.6.4.0/HDP-2.6.4.0-91.xml"
+            },
+            "util": {
+              "redhat7": "http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/centos7",
+              "repoid": "HDP-UTILS-1.1.0.22"
+            }
+          },
+          "version": "2.6.4.0"
+        },
+        "repo": {
+          "redhat7": "http://private-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.6.1.2-2"
+        },
+        "version": "2.6.1.2-2"
+      },
+      {
+        "date": "2018-02-09",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "openstack": {
+            "default": "cb-hdp-26-1802090220"
+          }
+        },
+        "os": "centos7",
+        "os_type": "redhat7",
+        "uuid": "6c626ab8-5089-40d1-5c98-327b8dfe6bfb",
+        "stack-details": {
+          "repo": {
+            "stack": {
+              "redhat7": "http://public-repo-1.hortonworks.com/HDP/centos7/2.x/updates/2.6.4.0",
+              "repoid": "HDP-2.6",
+              "repository-version": "2.6.4.0-91",
+              "vdf-url": "http://public-repo-1.hortonworks.com/HDP/centos7/2.x/updates/2.6.4.0/HDP-2.6.4.0-91.xml"
+            },
+            "util": {
+              "redhat7": "http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/centos7",
+              "repoid": "HDP-UTILS-1.1.0.22"
+            }
+          },
+          "version": "2.6.4.0"
+        },
+        "repo": {
+          "redhat7": "http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.6.1.3"
+        },
+        "version": "2.6.1.3"
+      },
+      {
+        "date": "2018-02-09",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "azure": {
+            "Australia East": "https://hwxaustraliaeast.blob.core.windows.net/images/cb-hdp-26-1802091922.vhd",
+            "Australia South East": "https://hwxaustralisoutheast.blob.core.windows.net/images/cb-hdp-26-1802091922.vhd",
+            "Brazil South": "https://sequenceiqbrazilsouth2.blob.core.windows.net/images/cb-hdp-26-1802091922.vhd",
+            "Canada Central": "https://sequenceiqcanadacentral.blob.core.windows.net/images/cb-hdp-26-1802091922.vhd",
+            "Canada East": "https://sequenceiqcanadaeast.blob.core.windows.net/images/cb-hdp-26-1802091922.vhd",
+            "Central India": "https://hwxcentralindia.blob.core.windows.net/images/cb-hdp-26-1802091922.vhd",
+            "Central US": "https://sequenceiqcentralus2.blob.core.windows.net/images/cb-hdp-26-1802091922.vhd",
+            "East Asia": "https://sequenceiqeastasia2.blob.core.windows.net/images/cb-hdp-26-1802091922.vhd",
+            "East US": "https://sequenceiqeastus12.blob.core.windows.net/images/cb-hdp-26-1802091922.vhd",
+            "East US 2": "https://sequenceiqeastus22.blob.core.windows.net/images/cb-hdp-26-1802091922.vhd",
+            "Japan East": "https://sequenceiqjapaneast2.blob.core.windows.net/images/cb-hdp-26-1802091922.vhd",
+            "Japan West": "https://sequenceiqjapanwest2.blob.core.windows.net/images/cb-hdp-26-1802091922.vhd",
+            "Korea Central": "https://hwxkoreacentral.blob.core.windows.net/images/cb-hdp-26-1802091922.vhd",
+            "Korea South": "https://hwxkoreasouth.blob.core.windows.net/images/cb-hdp-26-1802091922.vhd",
+            "North Central US": "https://sequenceiqorthcentralus2.blob.core.windows.net/images/cb-hdp-26-1802091922.vhd",
+            "North Europe": "https://sequenceiqnortheurope2.blob.core.windows.net/images/cb-hdp-26-1802091922.vhd",
+            "South Central US": "https://sequenceiqouthcentralus2.blob.core.windows.net/images/cb-hdp-26-1802091922.vhd",
+            "South East Asia": "https://sequenceiqsoutheastasia2.blob.core.windows.net/images/cb-hdp-26-1802091922.vhd",
+            "South India": "https://hwxsouthindia.blob.core.windows.net/images/cb-hdp-26-1802091922.vhd",
+            "UK South": "https://hwxsouthuk.blob.core.windows.net/images/cb-hdp-26-1802091922.vhd",
+            "UK West": "https://hwxwestuk.blob.core.windows.net/images/cb-hdp-26-1802091922.vhd",
+            "West Central US": "https://hwxwestcentralus.blob.core.windows.net/images/cb-hdp-26-1802091922.vhd",
+            "West Europe": "https://sequenceiqwesteurope2.blob.core.windows.net/images/cb-hdp-26-1802091922.vhd",
+            "West India": "https://hwxwestindia.blob.core.windows.net/images/cb-hdp-26-1802091922.vhd",
+            "West US": "https://sequenceiqwestus2.blob.core.windows.net/images/cb-hdp-26-1802091922.vhd",
+            "West US 2": "https://hwxwestus2.blob.core.windows.net/images/cb-hdp-26-1802091922.vhd"
+          }
+        },
+        "os": "centos7",
+        "os_type": "redhat7",
+        "uuid": "25248377-87c2-4077-7097-bd4fb8912afc",
+        "stack-details": {
+          "repo": {
+            "stack": {
+              "redhat7": "http://public-repo-1.hortonworks.com/HDP/centos7/2.x/updates/2.6.4.0",
+              "repoid": "HDP-2.6",
+              "repository-version": "2.6.4.0-91",
+              "vdf-url": "http://public-repo-1.hortonworks.com/HDP/centos7/2.x/updates/2.6.4.0/HDP-2.6.4.0-91.xml"
+            },
+            "util": {
+              "redhat7": "http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/centos7",
+              "repoid": "HDP-UTILS-1.1.0.22"
+            }
+          },
+          "version": "2.6.4.0"
+        },
+        "repo": {
+          "redhat7": "http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.6.1.3"
+        },
+        "version": "2.6.1.3"
+      },
+      {
+        "date": "2018-02-13",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "aws": {
+            "ap-northeast-1": "ami-afeb99c9",
+            "ap-northeast-2": "ami-b048eade",
+            "ap-south-1": "ami-72ffad1d",
+            "ap-southeast-1": "ami-0a743676",
+            "ap-southeast-2": "ami-50905532",
+            "ca-central-1": "ami-6c018508",
+            "eu-central-1": "ami-5099ff3f",
+            "eu-west-1": "ami-f0a7d689",
+            "eu-west-2": "ami-2338dd44",
+            "eu-west-3": "ami-2b982e56",
+            "sa-east-1": "ami-66074e0a",
+            "us-east-1": "ami-b7c7d5cd",
+            "us-east-2": "ami-b8f5c1dd",
+            "us-west-1": "ami-586e6738",
+            "us-west-2": "ami-8c59d9f4"
+          }
+        },
+        "os": "amazonlinux",
+        "os_type": "redhat6",
+        "uuid": "b150efce-33ac-49c9-7206-7f148d162744",
+        "stack-details": {
+          "repo": {
+            "stack": {
+              "redhat6": "http://public-repo-1.hortonworks.com/HDP/centos6/2.x/updates/2.6.4.0",
+              "repoid": "HDP-2.6",
+              "repository-version": "2.6.4.0-91",
+              "vdf-url": "http://public-repo-1.hortonworks.com/HDP/centos6/2.x/updates/2.6.4.0/HDP-2.6.4.0-91.xml"
+            },
+            "util": {
+              "redhat6": "http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/centos6",
+              "repoid": "HDP-UTILS-1.1.0.22"
+            }
+          },
+          "version": "2.6.4.0"
+        },
+        "repo": {
+          "redhat6": "http://public-repo-1.hortonworks.com/ambari/centos6/2.x/updates/2.6.1.3"
+        },
+        "version": "2.6.1.3"
+      },
+      {
+        "date": "2018-02-14",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "gcp": {
+            "default": "sequenceiqimage/cb-hdp-26-1802141305.tar.gz"
+          }
+        },
+        "os": "centos7",
+        "os_type": "redhat7",
+        "uuid": "ec25976c-1f18-4b4c-7c4b-3b19f3eac8e4",
+        "stack-details": {
+          "repo": {
+            "stack": {
+              "redhat7": "http://public-repo-1.hortonworks.com/HDP/centos7/2.x/updates/2.6.4.0",
+              "repoid": "HDP-2.6",
+              "repository-version": "2.6.4.0-91",
+              "vdf-url": "http://public-repo-1.hortonworks.com/HDP/centos7/2.x/updates/2.6.4.0/HDP-2.6.4.0-91.xml"
+            },
+            "util": {
+              "redhat7": "http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/centos7",
+              "repoid": "HDP-UTILS-1.1.0.22"
+            }
+          },
+          "version": "2.6.4.0"
+        },
+        "repo": {
+          "redhat7": "http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.6.1.3"
+        },
+        "version": "2.6.1.3"
+      },
+      {
+        "date": "2018-02-19",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "azure": {
+            "Australia East": "https://hwxaustraliaeast.blob.core.windows.net/images/cb-hdp-26-1802191153.vhd",
+            "Australia South East": "https://hwxaustralisoutheast.blob.core.windows.net/images/cb-hdp-26-1802191153.vhd",
+            "Brazil South": "https://sequenceiqbrazilsouth2.blob.core.windows.net/images/cb-hdp-26-1802191153.vhd",
+            "Canada Central": "https://sequenceiqcanadacentral.blob.core.windows.net/images/cb-hdp-26-1802191153.vhd",
+            "Canada East": "https://sequenceiqcanadaeast.blob.core.windows.net/images/cb-hdp-26-1802191153.vhd",
+            "Central India": "https://hwxcentralindia.blob.core.windows.net/images/cb-hdp-26-1802191153.vhd",
+            "Central US": "https://sequenceiqcentralus2.blob.core.windows.net/images/cb-hdp-26-1802191153.vhd",
+            "East Asia": "https://sequenceiqeastasia2.blob.core.windows.net/images/cb-hdp-26-1802191153.vhd",
+            "East US": "https://sequenceiqeastus12.blob.core.windows.net/images/cb-hdp-26-1802191153.vhd",
+            "East US 2": "https://sequenceiqeastus22.blob.core.windows.net/images/cb-hdp-26-1802191153.vhd",
+            "Japan East": "https://sequenceiqjapaneast2.blob.core.windows.net/images/cb-hdp-26-1802191153.vhd",
+            "Japan West": "https://sequenceiqjapanwest2.blob.core.windows.net/images/cb-hdp-26-1802191153.vhd",
+            "Korea Central": "https://hwxkoreacentral.blob.core.windows.net/images/cb-hdp-26-1802191153.vhd",
+            "Korea South": "https://hwxkoreasouth.blob.core.windows.net/images/cb-hdp-26-1802191153.vhd",
+            "North Central US": "https://sequenceiqorthcentralus2.blob.core.windows.net/images/cb-hdp-26-1802191153.vhd",
+            "North Europe": "https://sequenceiqnortheurope2.blob.core.windows.net/images/cb-hdp-26-1802191153.vhd",
+            "South Central US": "https://sequenceiqouthcentralus2.blob.core.windows.net/images/cb-hdp-26-1802191153.vhd",
+            "South East Asia": "https://sequenceiqsoutheastasia2.blob.core.windows.net/images/cb-hdp-26-1802191153.vhd",
+            "South India": "https://hwxsouthindia.blob.core.windows.net/images/cb-hdp-26-1802191153.vhd",
+            "UK South": "https://hwxsouthuk.blob.core.windows.net/images/cb-hdp-26-1802191153.vhd",
+            "UK West": "https://hwxwestuk.blob.core.windows.net/images/cb-hdp-26-1802191153.vhd",
+            "West Central US": "https://hwxwestcentralus.blob.core.windows.net/images/cb-hdp-26-1802191153.vhd",
+            "West Europe": "https://sequenceiqwesteurope2.blob.core.windows.net/images/cb-hdp-26-1802191153.vhd",
+            "West India": "https://hwxwestindia.blob.core.windows.net/images/cb-hdp-26-1802191153.vhd",
+            "West US": "https://sequenceiqwestus2.blob.core.windows.net/images/cb-hdp-26-1802191153.vhd",
+            "West US 2": "https://hwxwestus2.blob.core.windows.net/images/cb-hdp-26-1802191153.vhd"
+          }
+        },
+        "os": "centos7",
+        "os_type": "redhat7",
+        "uuid": "68ce5282-92fa-4824-54b6-9c5fa2782de1",
+        "stack-details": {
+          "repo": {
+            "stack": {
+              "redhat7": "http://private-repo-1.hortonworks.com/HDP/centos7/2.x/updates/2.6.4.5-1",
+              "repoid": "HDP-2.6",
+              "repository-version": "2.6.4.5-1",
+              "vdf-url": "http://s3.amazonaws.com/dev.hortonworks.com/HDP/centos7/2.x/BUILDS/2.6.4.5-1/HDP-2.6.4.5-1.xml"
+            },
+            "util": {
+              "redhat7": "http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/centos7",
+              "repoid": "HDP-UTILS-1.1.0.22"
+            }
+          },
+          "version": "2.6.4.5-1"
+        },
+        "repo": {
+          "redhat7": "http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.6.1.3"
+        },
+        "version": "2.6.1.3"
+      },
+      {
+        "date": "2018-02-19",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "gcp": {
+            "default": "sequenceiqimage/cb-hdp-26-1802191839.tar.gz"
+          }
+        },
+        "os": "centos7",
+        "os_type": "redhat7",
+        "uuid": "501f741a-82fd-443a-7fe2-1d54f31a6cc8",
+        "stack-details": {
+          "repo": {
+            "stack": {
+              "redhat7": "http://private-repo-1.hortonworks.com/HDP/centos7/2.x/updates/2.6.4.5-1",
+              "repoid": "HDP-2.6",
+              "repository-version": "2.6.4.5-1",
+              "vdf-url": "http://s3.amazonaws.com/dev.hortonworks.com/HDP/centos7/2.x/BUILDS/2.6.4.5-1/HDP-2.6.4.5-1.xml"
+            },
+            "util": {
+              "redhat7": "http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/centos7",
+              "repoid": "HDP-UTILS-1.1.0.22"
+            }
+          },
+          "version": "2.6.4.5-1"
+        },
+        "repo": {
+          "redhat7": "http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.6.1.3"
+        },
+        "version": "2.6.1.3"
+      },
+      {
+        "date": "2018-02-19",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "openstack": {
+            "default": "cb-hdp-26-1802191948"
+          }
+        },
+        "os": "centos7",
+        "os_type": "redhat7",
+        "uuid": "fe5381bd-7db4-47f7-6792-78f025089728",
+        "stack-details": {
+          "repo": {
+            "stack": {
+              "redhat7": "http://private-repo-1.hortonworks.com/HDP/centos7/2.x/updates/2.6.4.5-1",
+              "repoid": "HDP-2.6",
+              "repository-version": "2.6.4.5-1",
+              "vdf-url": "http://s3.amazonaws.com/dev.hortonworks.com/HDP/centos7/2.x/BUILDS/2.6.4.5-1/HDP-2.6.4.5-1.xml"
+            },
+            "util": {
+              "redhat7": "http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/centos7",
+              "repoid": "HDP-UTILS-1.1.0.22"
+            }
+          },
+          "version": "2.6.4.5-1"
+        },
+        "repo": {
+          "redhat7": "http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.6.1.3"
+        },
+        "version": "2.6.1.3"
+      },
+      {
+        "date": "2018-02-19",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "aws": {
+            "ap-northeast-1": "ami-c12951a7",
+            "ap-northeast-2": "ami-3afd5054",
+            "ap-south-1": "ami-7f194510",
+            "ap-southeast-1": "ami-f27e318e",
+            "ap-southeast-2": "ami-7416d216",
+            "ca-central-1": "ami-5d30b439",
+            "eu-central-1": "ami-4ecdad21",
+            "eu-west-1": "ami-6ff48816",
+            "eu-west-2": "ami-e2b15585",
+            "eu-west-3": "ami-cf8335b2",
+            "sa-east-1": "ami-cffdb4a3",
+            "us-east-1": "ami-54d13529",
+            "us-east-2": "ami-4082b625",
+            "us-west-1": "ami-4a737b2a",
+            "us-west-2": "ami-6b33be13"
+          }
+        },
+        "os": "amazonlinux",
+        "os_type": "redhat6",
+        "uuid": "654eb655-6c6d-42b8-406e-925662a1bb85",
+        "stack-details": {
+          "repo": {
+            "stack": {
+              "redhat6": "http://private-repo-1.hortonworks.com/HDP/centos6/2.x/updates/2.6.4.5-1",
+              "repoid": "HDP-2.6",
+              "repository-version": "2.6.4.5-1",
+              "vdf-url": "http://s3.amazonaws.com/dev.hortonworks.com/HDP/centos6/2.x/BUILDS/2.6.4.5-1/HDP-2.6.4.5-1.xml"
+            },
+            "util": {
+              "redhat6": "http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/centos6",
+              "repoid": "HDP-UTILS-1.1.0.22"
+            }
+          },
+          "version": "2.6.4.5-1"
+        },
+        "repo": {
+          "redhat6": "http://public-repo-1.hortonworks.com/ambari/centos6/2.x/updates/2.6.1.3"
+        },
+        "version": "2.6.1.3"
+      },
+      {
+        "date": "2018-02-22",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "aws": {
+            "ap-northeast-1": "ami-c93c46af",
+            "ap-northeast-2": "ami-6cd87502",
+            "ap-south-1": "ami-6c752903",
+            "ap-southeast-1": "ami-3396d84f",
+            "ap-southeast-2": "ami-92ad6af0",
+            "ca-central-1": "ami-f8c84f9c",
+            "eu-central-1": "ami-afc1a2c0",
+            "eu-west-1": "ami-ee2a5397",
+            "eu-west-2": "ami-42ea0e25",
+            "eu-west-3": "ami-808d3bfd",
+            "sa-east-1": "ami-5c551d30",
+            "us-east-1": "ami-4ca04331",
+            "us-east-2": "ami-61546304",
+            "us-west-1": "ami-2cf1f94c",
+            "us-west-2": "ami-eebb3496"
+          }
+        },
+        "os": "amazonlinux",
+        "os_type": "redhat6",
+        "uuid": "870e3f4d-7836-4087-7a7e-fbb47de0ac6b",
+        "stack-details": {
+          "repo": {
+            "stack": {
+              "redhat6": "http://public-repo-1.hortonworks.com/HDP/centos6/2.x/updates/2.6.4.0",
+              "repoid": "HDP-2.6",
+              "repository-version": "2.6.4.0-91",
+              "vdf-url": "http://public-repo-1.hortonworks.com/HDP/centos6/2.x/updates/2.6.4.0/HDP-2.6.4.0-91.xml"
+            },
+            "util": {
+              "redhat6": "http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/centos6",
+              "repoid": "HDP-UTILS-1.1.0.22"
+            }
+          },
+          "version": "2.6.4.0"
+        },
+        "repo": {
+          "redhat6": "http://public-repo-1.hortonworks.com/ambari/centos6/2.x/updates/2.6.1.3"
+        },
+        "version": "2.6.1.3"
+      },
+      {
+        "date": "2018-02-26",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "gcp": {
+            "default": "sequenceiqimage/cb-hdp-26-1802260837.tar.gz"
+          }
+        },
+        "os": "centos7",
+        "os_type": "redhat7",
+        "uuid": "bb718adf-b52b-428a-5a4e-e2cf9d231ab1",
+        "stack-details": {
+          "repo": {
+            "stack": {
+              "redhat7": "http://private-repo-1.hortonworks.com/HDP/centos7/2.x/updates/2.6.4.5-2",
+              "repoid": "HDP-2.6",
+              "repository-version": "2.6.4.5-2",
+              "vdf-url": "http://private-repo-1.hortonworks.com/HDP/centos7/2.x/updates/2.6.4.5-2/HDP-2.6.4.5-2.xml"
+            },
+            "util": {
+              "redhat7": "http://private-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/centos7",
+              "repoid": "HDP-UTILS-1.1.0.22"
+            }
+          },
+          "version": "2.6.4.5-2"
+        },
+        "repo": {
+          "redhat7": "http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.6.1.3"
+        },
+        "version": "2.6.1.3"
+      },
+      {
+        "date": "2018-02-26",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "openstack": {
+            "default": "cb-hdp-26-1802262358"
+          }
+        },
+        "os": "centos7",
+        "os_type": "redhat7",
+        "uuid": "7a8a5a85-3cea-4eb8-5c7d-aa2429d49a66",
+        "stack-details": {
+          "repo": {
+            "stack": {
+              "redhat7": "http://private-repo-1.hortonworks.com/HDP/centos7/2.x/updates/2.6.4.5-2",
+              "repoid": "HDP-2.6",
+              "repository-version": "2.6.4.5-2",
+              "vdf-url": "http://private-repo-1.hortonworks.com/HDP/centos7/2.x/updates/2.6.4.5-2/HDP-2.6.4.5-2.xml"
+            },
+            "util": {
+              "redhat7": "http://private-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/centos7",
+              "repoid": "HDP-UTILS-1.1.0.22"
+            }
+          },
+          "version": "2.6.4.5-2"
+        },
+        "repo": {
+          "redhat7": "http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.6.1.3"
+        },
+        "version": "2.6.1.3"
+      },
+      {
+        "date": "2018-02-26",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "azure": {
+            "Australia East": "https://hwxaustraliaeast.blob.core.windows.net/images/cb-hdp-26-1802261613.vhd",
+            "Australia South East": "https://hwxaustralisoutheast.blob.core.windows.net/images/cb-hdp-26-1802261613.vhd",
+            "Brazil South": "https://sequenceiqbrazilsouth2.blob.core.windows.net/images/cb-hdp-26-1802261613.vhd",
+            "Canada Central": "https://sequenceiqcanadacentral.blob.core.windows.net/images/cb-hdp-26-1802261613.vhd",
+            "Canada East": "https://sequenceiqcanadaeast.blob.core.windows.net/images/cb-hdp-26-1802261613.vhd",
+            "Central India": "https://hwxcentralindia.blob.core.windows.net/images/cb-hdp-26-1802261613.vhd",
+            "Central US": "https://sequenceiqcentralus2.blob.core.windows.net/images/cb-hdp-26-1802261613.vhd",
+            "East Asia": "https://sequenceiqeastasia2.blob.core.windows.net/images/cb-hdp-26-1802261613.vhd",
+            "East US": "https://sequenceiqeastus12.blob.core.windows.net/images/cb-hdp-26-1802261613.vhd",
+            "East US 2": "https://sequenceiqeastus22.blob.core.windows.net/images/cb-hdp-26-1802261613.vhd",
+            "Japan East": "https://sequenceiqjapaneast2.blob.core.windows.net/images/cb-hdp-26-1802261613.vhd",
+            "Japan West": "https://sequenceiqjapanwest2.blob.core.windows.net/images/cb-hdp-26-1802261613.vhd",
+            "Korea Central": "https://hwxkoreacentral.blob.core.windows.net/images/cb-hdp-26-1802261613.vhd",
+            "Korea South": "https://hwxkoreasouth.blob.core.windows.net/images/cb-hdp-26-1802261613.vhd",
+            "North Central US": "https://sequenceiqorthcentralus2.blob.core.windows.net/images/cb-hdp-26-1802261613.vhd",
+            "North Europe": "https://sequenceiqnortheurope2.blob.core.windows.net/images/cb-hdp-26-1802261613.vhd",
+            "South Central US": "https://sequenceiqouthcentralus2.blob.core.windows.net/images/cb-hdp-26-1802261613.vhd",
+            "South East Asia": "https://sequenceiqsoutheastasia2.blob.core.windows.net/images/cb-hdp-26-1802261613.vhd",
+            "South India": "https://hwxsouthindia.blob.core.windows.net/images/cb-hdp-26-1802261613.vhd",
+            "UK South": "https://hwxsouthuk.blob.core.windows.net/images/cb-hdp-26-1802261613.vhd",
+            "UK West": "https://hwxwestuk.blob.core.windows.net/images/cb-hdp-26-1802261613.vhd",
+            "West Central US": "https://hwxwestcentralus.blob.core.windows.net/images/cb-hdp-26-1802261613.vhd",
+            "West Europe": "https://sequenceiqwesteurope2.blob.core.windows.net/images/cb-hdp-26-1802261613.vhd",
+            "West India": "https://hwxwestindia.blob.core.windows.net/images/cb-hdp-26-1802261613.vhd",
+            "West US": "https://sequenceiqwestus2.blob.core.windows.net/images/cb-hdp-26-1802261613.vhd",
+            "West US 2": "https://hwxwestus2.blob.core.windows.net/images/cb-hdp-26-1802261613.vhd"
+          }
+        },
+        "os": "centos7",
+        "os_type": "redhat7",
+        "uuid": "1bf6a2af-501a-4161-4cb2-f942d5e6ab24",
+        "stack-details": {
+          "repo": {
+            "stack": {
+              "redhat7": "http://private-repo-1.hortonworks.com/HDP/centos7/2.x/updates/2.6.4.5-2",
+              "repoid": "HDP-2.6",
+              "repository-version": "2.6.4.5-2",
+              "vdf-url": "http://private-repo-1.hortonworks.com/HDP/centos7/2.x/updates/2.6.4.5-2/HDP-2.6.4.5-2.xml"
+            },
+            "util": {
+              "redhat7": "http://private-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/centos7",
+              "repoid": "HDP-UTILS-1.1.0.22"
+            }
+          },
+          "version": "2.6.4.5-2"
+        },
+        "repo": {
+          "redhat7": "http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.6.1.3"
+        },
+        "version": "2.6.1.3"
+      },
+      {
+        "date": "2018-02-27",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "aws": {
+            "ap-northeast-1": "ami-eafdba8c",
+            "ap-northeast-2": "ami-58933e36",
+            "ap-south-1": "ami-965d02f9",
+            "ap-southeast-1": "ami-39d49c45",
+            "ap-southeast-2": "ami-a7c600c5",
+            "ca-central-1": "ami-8dfd7ae9",
+            "eu-central-1": "ami-bbbbd6d4",
+            "eu-west-1": "ami-0ed174bb99f2f35f6",
+            "eu-west-2": "ami-aa0aeecd",
+            "eu-west-3": "ami-a27ec8df",
+            "sa-east-1": "ami-3d044f51",
+            "us-east-1": "ami-04a84379",
+            "us-east-2": "ami-b5f2c5d0",
+            "us-west-1": "ami-b1d0dbd1",
+            "us-west-2": "ami-31ec6449"
+          }
+        },
+        "os": "amazonlinux",
+        "os_type": "redhat6",
+        "uuid": "afec663b-fe7a-437d-73ee-c155d8f36b1f",
+        "stack-details": {
+          "repo": {
+            "stack": {
+              "redhat6": "http://private-repo-1.hortonworks.com/HDP/centos6/2.x/updates/2.6.4.5-2",
+              "repoid": "HDP-2.6",
+              "repository-version": "2.6.4.5-2",
+              "vdf-url": "http://private-repo-1.hortonworks.com/HDP/centos6/2.x/updates/2.6.4.5-2/HDP-2.6.4.5-2.xml"
+            },
+            "util": {
+              "redhat6": "http://private-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/centos6",
+              "repoid": "HDP-UTILS-1.1.0.22"
+            }
+          },
+          "version": "2.6.4.5-2"
+        },
+        "repo": {
+          "redhat6": "http://public-repo-1.hortonworks.com/ambari/centos6/2.x/updates/2.6.1.3"
+        },
+        "version": "2.6.1.3"
+      },
+      {
+        "date": "2018-03-01",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "azure": {
+            "Australia East": "https://hwxaustraliaeast.blob.core.windows.net/images/cb-hdp-26-1803011303.vhd",
+            "Australia South East": "https://hwxaustralisoutheast.blob.core.windows.net/images/cb-hdp-26-1803011303.vhd",
+            "Brazil South": "https://sequenceiqbrazilsouth2.blob.core.windows.net/images/cb-hdp-26-1803011303.vhd",
+            "Canada Central": "https://sequenceiqcanadacentral.blob.core.windows.net/images/cb-hdp-26-1803011303.vhd",
+            "Canada East": "https://sequenceiqcanadaeast.blob.core.windows.net/images/cb-hdp-26-1803011303.vhd",
+            "Central India": "https://hwxcentralindia.blob.core.windows.net/images/cb-hdp-26-1803011303.vhd",
+            "Central US": "https://sequenceiqcentralus2.blob.core.windows.net/images/cb-hdp-26-1803011303.vhd",
+            "East Asia": "https://sequenceiqeastasia2.blob.core.windows.net/images/cb-hdp-26-1803011303.vhd",
+            "East US": "https://sequenceiqeastus12.blob.core.windows.net/images/cb-hdp-26-1803011303.vhd",
+            "East US 2": "https://sequenceiqeastus22.blob.core.windows.net/images/cb-hdp-26-1803011303.vhd",
+            "Japan East": "https://sequenceiqjapaneast2.blob.core.windows.net/images/cb-hdp-26-1803011303.vhd",
+            "Japan West": "https://sequenceiqjapanwest2.blob.core.windows.net/images/cb-hdp-26-1803011303.vhd",
+            "Korea Central": "https://hwxkoreacentral.blob.core.windows.net/images/cb-hdp-26-1803011303.vhd",
+            "Korea South": "https://hwxkoreasouth.blob.core.windows.net/images/cb-hdp-26-1803011303.vhd",
+            "North Central US": "https://sequenceiqorthcentralus2.blob.core.windows.net/images/cb-hdp-26-1803011303.vhd",
+            "North Europe": "https://sequenceiqnortheurope2.blob.core.windows.net/images/cb-hdp-26-1803011303.vhd",
+            "South Central US": "https://sequenceiqouthcentralus2.blob.core.windows.net/images/cb-hdp-26-1803011303.vhd",
+            "South East Asia": "https://sequenceiqsoutheastasia2.blob.core.windows.net/images/cb-hdp-26-1803011303.vhd",
+            "South India": "https://hwxsouthindia.blob.core.windows.net/images/cb-hdp-26-1803011303.vhd",
+            "UK South": "https://hwxsouthuk.blob.core.windows.net/images/cb-hdp-26-1803011303.vhd",
+            "UK West": "https://hwxwestuk.blob.core.windows.net/images/cb-hdp-26-1803011303.vhd",
+            "West Central US": "https://hwxwestcentralus.blob.core.windows.net/images/cb-hdp-26-1803011303.vhd",
+            "West Europe": "https://sequenceiqwesteurope2.blob.core.windows.net/images/cb-hdp-26-1803011303.vhd",
+            "West India": "https://hwxwestindia.blob.core.windows.net/images/cb-hdp-26-1803011303.vhd",
+            "West US": "https://sequenceiqwestus2.blob.core.windows.net/images/cb-hdp-26-1803011303.vhd",
+            "West US 2": "https://hwxwestus2.blob.core.windows.net/images/cb-hdp-26-1803011303.vhd"
+          }
+        },
+        "os": "centos7",
+        "os_type": "redhat7",
+        "uuid": "3f68857e-a3fb-42b0-751d-00082b69403f",
+        "stack-details": {
+          "repo": {
+            "stack": {
+              "redhat7": "http://private-repo-1.hortonworks.com/HDP/centos7/2.x/updates/2.6.4.5-2",
+              "repoid": "HDP-2.6",
+              "repository-version": "2.6.4.5-2",
+              "vdf-url": "http://private-repo-1.hortonworks.com/HDP/centos7/2.x/updates/2.6.4.5-2/HDP-2.6.4.5-2.xml"
+            },
+            "util": {
+              "redhat7": "http://private-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/centos7",
+              "repoid": "HDP-UTILS-1.1.0.22"
+            }
+          },
+          "version": "2.6.4.5-2"
+        },
+        "repo": {
+          "redhat7": "http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.6.1.3"
+        },
+        "version": "2.6.1.3"
+      },
+      {
+        "date": "2018-03-01",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "gcp": {
+            "default": "sequenceiqimage/cb-hdp-26-1803011423.tar.gz"
+          }
+        },
+        "os": "centos7",
+        "os_type": "redhat7",
+        "uuid": "ce3fbfcd-f65a-4aec-6e69-30aad309d1da",
+        "stack-details": {
+          "repo": {
+            "stack": {
+              "redhat7": "http://private-repo-1.hortonworks.com/HDP/centos7/2.x/updates/2.6.4.5-2",
+              "repoid": "HDP-2.6",
+              "repository-version": "2.6.4.5-2",
+              "vdf-url": "http://private-repo-1.hortonworks.com/HDP/centos7/2.x/updates/2.6.4.5-2/HDP-2.6.4.5-2.xml"
+            },
+            "util": {
+              "redhat7": "http://private-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/centos7",
+              "repoid": "HDP-UTILS-1.1.0.22"
+            }
+          },
+          "version": "2.6.4.5-2"
+        },
+        "repo": {
+          "redhat7": "http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.6.1.3"
+        },
+        "version": "2.6.1.3"
+      },
+      {
+        "date": "2018-03-01",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "openstack": {
+            "default": "cb-hdp-26-1803011524"
+          }
+        },
+        "os": "centos7",
+        "os_type": "redhat7",
+        "uuid": "1c530f28-8beb-4589-5cc1-12f8effea412",
+        "stack-details": {
+          "repo": {
+            "stack": {
+              "redhat7": "http://private-repo-1.hortonworks.com/HDP/centos7/2.x/updates/2.6.4.5-2",
+              "repoid": "HDP-2.6",
+              "repository-version": "2.6.4.5-2",
+              "vdf-url": "http://private-repo-1.hortonworks.com/HDP/centos7/2.x/updates/2.6.4.5-2/HDP-2.6.4.5-2.xml"
+            },
+            "util": {
+              "redhat7": "http://private-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/centos7",
+              "repoid": "HDP-UTILS-1.1.0.22"
+            }
+          },
+          "version": "2.6.4.5-2"
+        },
+        "repo": {
+          "redhat7": "http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.6.1.3"
+        },
+        "version": "2.6.1.3"
+      },
+      {
+        "date": "2018-03-01",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "aws": {
+            "ap-northeast-1": "ami-3be5a45d",
+            "ap-northeast-2": "ami-c44de0aa",
+            "ap-south-1": "ami-40bbe42f",
+            "ap-southeast-1": "ami-690b4115",
+            "ap-southeast-2": "ami-ab5096c9",
+            "ca-central-1": "ami-2b90174f",
+            "eu-central-1": "ami-9a412df5",
+            "eu-west-1": "ami-0edbaad003fac3456",
+            "eu-west-2": "ami-e947a38e",
+            "eu-west-3": "ami-097acc74",
+            "sa-east-1": "ami-916922fd",
+            "us-east-1": "ami-ad42b6d0",
+            "us-east-2": "ami-b1d8efd4",
+            "us-west-1": "ami-08414b68",
+            "us-west-2": "ami-2eb63d56"
+          }
+        },
+        "os": "amazonlinux",
+        "os_type": "redhat6",
+        "uuid": "433025f0-16bb-4b83-5ef7-fb795a9fc8ab",
+        "stack-details": {
+          "repo": {
+            "stack": {
+              "redhat6": "http://private-repo-1.hortonworks.com/HDP/centos6/2.x/updates/2.6.4.5-2",
+              "repoid": "HDP-2.6",
+              "repository-version": "2.6.4.5-2",
+              "vdf-url": "http://private-repo-1.hortonworks.com/HDP/centos6/2.x/updates/2.6.4.5-2/HDP-2.6.4.5-2.xml"
+            },
+            "util": {
+              "redhat6": "http://private-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/centos6",
+              "repoid": "HDP-UTILS-1.1.0.22"
+            }
+          },
+          "version": "2.6.4.5-2"
+        },
+        "repo": {
+          "redhat6": "http://public-repo-1.hortonworks.com/ambari/centos6/2.x/updates/2.6.1.3"
+        },
+        "version": "2.6.1.3"
+      },
+      {
+        "date": "2018-03-11",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "aws": {
+            "ap-northeast-1": "ami-d60149b0",
+            "ap-northeast-2": "ami-b0d478de",
+            "ap-south-1": "ami-7d4f1612",
+            "ap-southeast-1": "ami-57fea82b",
+            "ap-southeast-2": "ami-20834042",
+            "ca-central-1": "ami-e872f58c",
+            "eu-central-1": "ami-56d4bd39",
+            "eu-west-1": "ami-053107ca5138d750e",
+            "eu-west-2": "ami-0508ef62",
+            "eu-west-3": "ami-2c5deb51",
+            "sa-east-1": "ami-53d79d3f",
+            "us-east-1": "ami-75bf7808",
+            "us-east-2": "ami-061e2863",
+            "us-west-1": "ami-df9e8bbf",
+            "us-west-2": "ami-00f66778"
+          }
+        },
+        "os": "amazonlinux",
+        "os_type": "redhat6",
+        "uuid": "47bd7385-cb96-4c52-5372-b51886d73bfc",
+        "stack-details": {
+          "repo": {
+            "stack": {
+              "redhat6": "http://127.0.0.1:18080/hdp/amazonlinux/HDP-2.6.4.5-2",
+              "repoid": "HDP-2.6",
+              "repository-version": "2.6.4.5-2",
+              "vdf-url": "http://127.0.0.1:18080/HDP-2.6.4.5-2.xml"
+            },
+            "util": {
+              "redhat6": "http://127.0.0.1:18080/hdp/amazonlinux/HDP-UTILS-1.1.0.22",
+              "repoid": "HDP-UTILS-1.1.0.22"
+            }
+          },
+          "version": "2.6.4.5-2"
+        },
+        "repo": {
+          "redhat6": "http://127.0.0.1:18080/ambari/amazonlinux/ambari-2.6.1.3"
+        },
+        "version": "2.6.1.3"
+      },
+      {
+        "date": "2018-03-12",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "aws": {
+            "ap-northeast-1": "ami-6ac1890c",
+            "ap-northeast-2": "ami-3caa0652",
+            "ap-south-1": "ami-56663f39",
+            "ap-southeast-1": "ami-054a1b79",
+            "ap-southeast-2": "ami-f4b17296",
+            "ca-central-1": "ami-16068172",
+            "eu-central-1": "ami-b77911d8",
+            "eu-west-1": "ami-0351fae130aca8ee5",
+            "eu-west-2": "ami-f918ff9e",
+            "eu-west-3": "ami-115deb6c",
+            "sa-east-1": "ami-50f7bd3c",
+            "us-east-1": "ami-781fd905",
+            "us-east-2": "ami-2a0f394f",
+            "us-west-1": "ami-a0a6b3c0",
+            "us-west-2": "ami-1e4edf66"
+          }
+        },
+        "os": "amazonlinux",
+        "os_type": "redhat6",
+        "uuid": "3f5df151-c0d5-4c7d-69d9-5be39af9a3cf",
+        "stack-details": {
+          "repo": {
+            "stack": {
+              "redhat6": "http://127.0.0.1:18080/hdp/amazonlinux/HDP-2.6.4.5-2",
+              "repoid": "HDP-2.6",
+              "repository-version": "2.6.4.5-2",
+              "vdf-url": "http://127.0.0.1:18080/HDP-2.6.4.5-2.xml"
+            },
+            "util": {
+              "redhat6": "http://127.0.0.1:18080/hdp/amazonlinux/HDP-UTILS-1.1.0.22",
+              "repoid": "HDP-UTILS-1.1.0.22"
+            }
+          },
+          "version": "2.6.4.5-2"
+        },
+        "repo": {
+          "redhat6": "http://127.0.0.1:18080/ambari/amazonlinux/ambari-2.6.1.3"
+        },
+        "version": "2.6.1.3"
+      },
+      {
+        "date": "2018-03-13",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "aws": {
+            "ap-northeast-1": "ami-4a82c92c",
+            "ap-northeast-2": "ami-11bb177f",
+            "ap-south-1": "ami-3dbbe252",
+            "ap-southeast-1": "ami-1ad98866",
+            "ap-southeast-2": "ami-8be221e9",
+            "ca-central-1": "ami-cf0186ab",
+            "eu-central-1": "ami-a38ee6cc",
+            "eu-west-1": "ami-01de76686de5e3698",
+            "eu-west-2": "ami-c77592a0",
+            "eu-west-3": "ami-2458ee59",
+            "sa-east-1": "ami-6c085d00",
+            "us-east-1": "ami-cf9858b2",
+            "us-east-2": "ami-42fdcb27",
+            "us-west-1": "ami-06756166",
+            "us-west-2": "ami-95f565ed"
+          }
+        },
+        "os": "amazonlinux",
+        "os_type": "redhat6",
+        "uuid": "3459e698-40ee-40db-6757-e667f0282406",
+        "stack-details": {
+          "repo": {
+            "stack": {
+              "redhat6": "http://127.0.0.1:28080/hdp/amazonlinux/HDP-2.6.4.5-2",
+              "repoid": "HDP-2.6",
+              "repository-version": "2.6.4.5-2",
+              "vdf-url": "http://127.0.0.1:28080/HDP-2.6.4.5-2.xml"
+            },
+            "util": {
+              "redhat6": "http://127.0.0.1:28080/hdp/amazonlinux/HDP-UTILS-1.1.0.22",
+              "repoid": "HDP-UTILS-1.1.0.22"
+            }
+          },
+          "version": "2.6.4.5-2"
+        },
+        "repo": {
+          "redhat6": "http://127.0.0.1:28080/ambari/amazonlinux/ambari-2.6.1.3"
+        },
+        "version": "2.6.1.3"
+      },
+      {
+        "date": "2018-03-13",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "openstack": {
+            "default": "cb-hdp-26-1803131343"
+          }
+        },
+        "os": "centos7",
+        "os_type": "redhat7",
+        "uuid": "60d95b10-d687-4022-48d8-01b3e565e155",
+        "stack-details": {
+          "repo": {
+            "stack": {
+              "redhat7": "http://127.0.0.1:28080/hdp/centos7/HDP-2.6.4.5-2",
+              "repoid": "HDP-2.6",
+              "repository-version": "2.6.4.5-2",
+              "vdf-url": "http://127.0.0.1:28080/HDP-2.6.4.5-2.xml"
+            },
+            "util": {
+              "redhat7": "http://127.0.0.1:28080/hdp/centos7/HDP-UTILS-1.1.0.22",
+              "repoid": "HDP-UTILS-1.1.0.22"
+            }
+          },
+          "version": "2.6.4.5-2"
+        },
+        "repo": {
+          "redhat7": "http://127.0.0.1:28080/ambari/centos7/ambari-2.6.1.3"
+        },
+        "version": "2.6.1.3"
+      },
+      {
+        "date": "2018-03-14",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "aws": {
+            "ap-northeast-1": "ami-2c501a4a",
+            "ap-northeast-2": "ami-9c8f23f2",
+            "ap-south-1": "ami-a4c990cb",
+            "ap-southeast-1": "ami-e4550598",
+            "ap-southeast-2": "ami-c126e5a3",
+            "ca-central-1": "ami-7816911c",
+            "eu-central-1": "ami-d42c47bb",
+            "eu-west-1": "ami-0731bed82d7f5808c",
+            "eu-west-2": "ami-184fa87f",
+            "eu-west-3": "ami-5d58ee20",
+            "sa-east-1": "ami-2d540141",
+            "us-east-1": "ami-9b34f7e6",
+            "us-east-2": "ami-fad4e29f",
+            "us-west-1": "ami-8d0317ed",
+            "us-west-2": "ami-2413835c"
+          }
+        },
+        "os": "amazonlinux",
+        "os_type": "redhat6",
+        "uuid": "bbc63453-086c-4bf7-4337-a04c37d51b68",
+        "stack-details": {
+          "repo": {
+            "stack": {
+              "redhat6": "http://127.0.0.1:28080/hdp/amazonlinux/HDP-2.6.4.5-2",
+              "repoid": "HDP-2.6",
+              "repository-version": "2.6.4.5-2",
+              "vdf-url": "http://127.0.0.1:28080/HDP-2.6.4.5-2.xml"
+            },
+            "util": {
+              "redhat6": "http://127.0.0.1:28080/hdp/amazonlinux/HDP-UTILS-1.1.0.22",
+              "repoid": "HDP-UTILS-1.1.0.22"
+            }
+          },
+          "version": "2.6.4.5-2"
+        },
+        "repo": {
+          "redhat6": "http://127.0.0.1:28080/ambari/amazonlinux/ambari-2.6.1.3"
+        },
+        "version": "2.6.1.3"
+      },
+      {
+        "date": "2018-03-14",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "azure": {
+            "Australia East": "https://hwxaustraliaeast.blob.core.windows.net/images/cb-hdp-26-1803141129.vhd",
+            "Australia South East": "https://hwxaustralisoutheast.blob.core.windows.net/images/cb-hdp-26-1803141129.vhd",
+            "Brazil South": "https://sequenceiqbrazilsouth2.blob.core.windows.net/images/cb-hdp-26-1803141129.vhd",
+            "Canada Central": "https://sequenceiqcanadacentral.blob.core.windows.net/images/cb-hdp-26-1803141129.vhd",
+            "Canada East": "https://sequenceiqcanadaeast.blob.core.windows.net/images/cb-hdp-26-1803141129.vhd",
+            "Central India": "https://hwxcentralindia.blob.core.windows.net/images/cb-hdp-26-1803141129.vhd",
+            "Central US": "https://sequenceiqcentralus2.blob.core.windows.net/images/cb-hdp-26-1803141129.vhd",
+            "East Asia": "https://sequenceiqeastasia2.blob.core.windows.net/images/cb-hdp-26-1803141129.vhd",
+            "East US": "https://sequenceiqeastus12.blob.core.windows.net/images/cb-hdp-26-1803141129.vhd",
+            "East US 2": "https://sequenceiqeastus22.blob.core.windows.net/images/cb-hdp-26-1803141129.vhd",
+            "Japan East": "https://sequenceiqjapaneast2.blob.core.windows.net/images/cb-hdp-26-1803141129.vhd",
+            "Japan West": "https://sequenceiqjapanwest2.blob.core.windows.net/images/cb-hdp-26-1803141129.vhd",
+            "Korea Central": "https://hwxkoreacentral.blob.core.windows.net/images/cb-hdp-26-1803141129.vhd",
+            "Korea South": "https://hwxkoreasouth.blob.core.windows.net/images/cb-hdp-26-1803141129.vhd",
+            "North Central US": "https://sequenceiqorthcentralus2.blob.core.windows.net/images/cb-hdp-26-1803141129.vhd",
+            "North Europe": "https://sequenceiqnortheurope2.blob.core.windows.net/images/cb-hdp-26-1803141129.vhd",
+            "South Central US": "https://sequenceiqouthcentralus2.blob.core.windows.net/images/cb-hdp-26-1803141129.vhd",
+            "South East Asia": "https://sequenceiqsoutheastasia2.blob.core.windows.net/images/cb-hdp-26-1803141129.vhd",
+            "South India": "https://hwxsouthindia.blob.core.windows.net/images/cb-hdp-26-1803141129.vhd",
+            "UK South": "https://hwxsouthuk.blob.core.windows.net/images/cb-hdp-26-1803141129.vhd",
+            "UK West": "https://hwxwestuk.blob.core.windows.net/images/cb-hdp-26-1803141129.vhd",
+            "West Central US": "https://hwxwestcentralus.blob.core.windows.net/images/cb-hdp-26-1803141129.vhd",
+            "West Europe": "https://sequenceiqwesteurope2.blob.core.windows.net/images/cb-hdp-26-1803141129.vhd",
+            "West India": "https://hwxwestindia.blob.core.windows.net/images/cb-hdp-26-1803141129.vhd",
+            "West US": "https://sequenceiqwestus2.blob.core.windows.net/images/cb-hdp-26-1803141129.vhd",
+            "West US 2": "https://hwxwestus2.blob.core.windows.net/images/cb-hdp-26-1803141129.vhd"
+          }
+        },
+        "os": "centos7",
+        "os_type": "redhat7",
+        "uuid": "cbec4fbc-833d-42b2-6ee4-d94ccab87f53",
+        "stack-details": {
+          "repo": {
+            "stack": {
+              "redhat7": "http://127.0.0.1:28080/hdp/centos7/HDP-2.6.4.5-2",
+              "repoid": "HDP-2.6",
+              "repository-version": "2.6.4.5-2",
+              "vdf-url": "http://127.0.0.1:28080/HDP-2.6.4.5-2.xml"
+            },
+            "util": {
+              "redhat7": "http://127.0.0.1:28080/hdp/centos7/HDP-UTILS-1.1.0.22",
+              "repoid": "HDP-UTILS-1.1.0.22"
+            }
+          },
+          "version": "2.6.4.5-2"
+        },
+        "repo": {
+          "redhat7": "http://127.0.0.1:28080/ambari/centos7/ambari-2.6.1.3"
+        },
+        "version": "2.6.1.3"
+      },
+      {
+        "date": "2018-03-14",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "azure": {
+            "Australia East": "https://hwxaustraliaeast.blob.core.windows.net/images/cb-hdp-26-1803141719.vhd",
+            "Australia South East": "https://hwxaustralisoutheast.blob.core.windows.net/images/cb-hdp-26-1803141719.vhd",
+            "Brazil South": "https://sequenceiqbrazilsouth2.blob.core.windows.net/images/cb-hdp-26-1803141719.vhd",
+            "Canada Central": "https://sequenceiqcanadacentral.blob.core.windows.net/images/cb-hdp-26-1803141719.vhd",
+            "Canada East": "https://sequenceiqcanadaeast.blob.core.windows.net/images/cb-hdp-26-1803141719.vhd",
+            "Central India": "https://hwxcentralindia.blob.core.windows.net/images/cb-hdp-26-1803141719.vhd",
+            "Central US": "https://sequenceiqcentralus2.blob.core.windows.net/images/cb-hdp-26-1803141719.vhd",
+            "East Asia": "https://sequenceiqeastasia2.blob.core.windows.net/images/cb-hdp-26-1803141719.vhd",
+            "East US": "https://sequenceiqeastus12.blob.core.windows.net/images/cb-hdp-26-1803141719.vhd",
+            "East US 2": "https://sequenceiqeastus22.blob.core.windows.net/images/cb-hdp-26-1803141719.vhd",
+            "Japan East": "https://sequenceiqjapaneast2.blob.core.windows.net/images/cb-hdp-26-1803141719.vhd",
+            "Japan West": "https://sequenceiqjapanwest2.blob.core.windows.net/images/cb-hdp-26-1803141719.vhd",
+            "Korea Central": "https://hwxkoreacentral.blob.core.windows.net/images/cb-hdp-26-1803141719.vhd",
+            "Korea South": "https://hwxkoreasouth.blob.core.windows.net/images/cb-hdp-26-1803141719.vhd",
+            "North Central US": "https://sequenceiqorthcentralus2.blob.core.windows.net/images/cb-hdp-26-1803141719.vhd",
+            "North Europe": "https://sequenceiqnortheurope2.blob.core.windows.net/images/cb-hdp-26-1803141719.vhd",
+            "South Central US": "https://sequenceiqouthcentralus2.blob.core.windows.net/images/cb-hdp-26-1803141719.vhd",
+            "South East Asia": "https://sequenceiqsoutheastasia2.blob.core.windows.net/images/cb-hdp-26-1803141719.vhd",
+            "South India": "https://hwxsouthindia.blob.core.windows.net/images/cb-hdp-26-1803141719.vhd",
+            "UK South": "https://hwxsouthuk.blob.core.windows.net/images/cb-hdp-26-1803141719.vhd",
+            "UK West": "https://hwxwestuk.blob.core.windows.net/images/cb-hdp-26-1803141719.vhd",
+            "West Central US": "https://hwxwestcentralus.blob.core.windows.net/images/cb-hdp-26-1803141719.vhd",
+            "West Europe": "https://sequenceiqwesteurope2.blob.core.windows.net/images/cb-hdp-26-1803141719.vhd",
+            "West India": "https://hwxwestindia.blob.core.windows.net/images/cb-hdp-26-1803141719.vhd",
+            "West US": "https://sequenceiqwestus2.blob.core.windows.net/images/cb-hdp-26-1803141719.vhd",
+            "West US 2": "https://hwxwestus2.blob.core.windows.net/images/cb-hdp-26-1803141719.vhd"
+          }
+        },
+        "os": "centos7",
+        "os_type": "redhat7",
+        "uuid": "d62e62aa-fe5f-47ec-74ff-b510f3d416e0",
+        "stack-details": {
+          "repo": {
+            "stack": {
+              "redhat7": "http://127.0.0.1:28080/hdp/centos7/HDP-2.6.4.5-2",
+              "repoid": "HDP-2.6",
+              "repository-version": "2.6.4.5-2",
+              "vdf-url": "http://127.0.0.1:28080/HDP-2.6.4.5-2.xml"
+            },
+            "util": {
+              "redhat7": "http://127.0.0.1:28080/hdp/centos7/HDP-UTILS-1.1.0.22",
+              "repoid": "HDP-UTILS-1.1.0.22"
+            }
+          },
+          "version": "2.6.4.5-2"
+        },
+        "repo": {
+          "redhat7": "http://127.0.0.1:28080/ambari/centos7/ambari-2.6.1.3"
+        },
+        "version": "2.6.1.3"
+      },
+      {
+        "date": "2018-03-14",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "openstack": {
+            "default": "cb-hdp-26-1803141919"
+          }
+        },
+        "os": "centos7",
+        "os_type": "redhat7",
+        "uuid": "cf050d5d-6c74-4664-64a2-ce297fd1065a",
+        "stack-details": {
+          "repo": {
+            "stack": {
+              "redhat7": "http://127.0.0.1:28080/hdp/centos7/HDP-2.6.4.5-2",
+              "repoid": "HDP-2.6",
+              "repository-version": "2.6.4.5-2",
+              "vdf-url": "http://127.0.0.1:28080/HDP-2.6.4.5-2.xml"
+            },
+            "util": {
+              "redhat7": "http://127.0.0.1:28080/hdp/centos7/HDP-UTILS-1.1.0.22",
+              "repoid": "HDP-UTILS-1.1.0.22"
+            }
+          },
+          "version": "2.6.4.5-2"
+        },
+        "repo": {
+          "redhat7": "http://127.0.0.1:28080/ambari/centos7/ambari-2.6.1.3"
+        },
+        "version": "2.6.1.3"
+      },
+      {
+        "date": "2018-03-21",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "gcp": {
+            "default": "sequenceiqimage/cb-hdp-26-1803211813.tar.gz"
+          }
+        },
+        "os": "centos7",
+        "os_type": "redhat7",
+        "uuid": "b454d096-2705-4630-4fa8-7dd3e6d9fe73",
+        "stack-details": {
+          "repo": {
+            "stack": {
+              "redhat7": "http://127.0.0.1:28080/hdp/centos7/HDP-2.6.4.5-2",
+              "repoid": "HDP-2.6",
+              "repository-version": "2.6.4.5-2",
+              "vdf-url": "http://127.0.0.1:28080/HDP-2.6.4.5-2.xml"
+            },
+            "util": {
+              "redhat7": "http://127.0.0.1:28080/hdp/centos7/HDP-UTILS-1.1.0.22",
+              "repoid": "HDP-UTILS-1.1.0.22"
+            }
+          },
+          "version": "2.6.4.5-2"
+        },
+        "repo": {
+          "redhat7": "http://127.0.0.1:28080/ambari/centos7/ambari-2.6.1.3"
+        },
+        "version": "2.6.1.3"
+      },
+      {
+        "date": "2018-03-30",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "openstack": {
+            "default": "cb-hdp-26-1803301748"
+          }
+        },
+        "os": "centos7",
+        "os_type": "redhat7",
+        "uuid": "650ab648-0d82-4115-7ef0-0f15f894aea0",
+        "stack-details": {
+          "repo": {
+            "stack": {
+              "redhat7": "http://private-repo-1.hortonworks.com/HDP/centos7/2.x/updates/2.6.4.5-2",
+              "repoid": "HDP-2.6",
+              "repository-version": "2.6.4.5-2",
+              "vdf-url": "http://private-repo-1.hortonworks.com/HDP/centos7/2.x/updates/2.6.4.5-2/HDP-2.6.4.5-2.xml"
+            },
+            "util": {
+              "redhat7": "http://private-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/centos7",
+              "repoid": "HDP-UTILS-1.1.0.22"
+            }
+          },
+          "version": "2.6.4.5-2"
+        },
+        "repo": {
+          "redhat7": "http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.6.1.3"
+        },
+        "version": "2.6.1.3"
+      },
+      {
+        "date": "2018-04-11",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "gcp": {
+            "default": "sequenceiqimage/cb-hdp-26-1804112002.tar.gz"
+          }
+        },
+        "os": "centos7",
+        "os_type": "redhat7",
+        "uuid": "7151d565-5b96-4d07-75ee-11b9cd2573cd",
+        "stack-details": {
+          "repo": {
+            "stack": {
+              "redhat7": "http://s3.amazonaws.com/dev.hortonworks.com/HDP/centos7/2.x/BUILDS/2.6.5.0-231",
+              "repoid": "HDP-2.6",
+              "repository-version": "2.6.5.0-231",
+              "vdf-url": "http://s3.amazonaws.com/dev.hortonworks.com/HDP/centos7/2.x/BUILDS/2.6.5.0-231/HDP-2.6.5.0-231.xml"
+            },
+            "util": {
+              "redhat7": "http://s3.amazonaws.com/dev.hortonworks.com/HDP-UTILS-1.1.0.22/repos/centos7",
+              "repoid": "HDP-UTILS-1.1.0.22"
+            }
+          },
+          "version": "2.6.5.0-231"
+        },
+        "repo": {
+          "redhat7": "http://s3.amazonaws.com/dev.hortonworks.com/ambari/centos7/2.x/BUILDS/2.6.2.0-107"
+        },
+        "version": "2.6.2.0-107"
+      },
+      {
+        "date": "2018-04-12",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "azure": {
+            "Australia East": "https://hwxaustraliaeast.blob.core.windows.net/images/cb-hdp-26-1804121019.vhd",
+            "Australia South East": "https://hwxaustralisoutheast.blob.core.windows.net/images/cb-hdp-26-1804121019.vhd",
+            "Brazil South": "https://sequenceiqbrazilsouth2.blob.core.windows.net/images/cb-hdp-26-1804121019.vhd",
+            "Canada Central": "https://sequenceiqcanadacentral.blob.core.windows.net/images/cb-hdp-26-1804121019.vhd",
+            "Canada East": "https://sequenceiqcanadaeast.blob.core.windows.net/images/cb-hdp-26-1804121019.vhd",
+            "Central India": "https://hwxcentralindia.blob.core.windows.net/images/cb-hdp-26-1804121019.vhd",
+            "Central US": "https://sequenceiqcentralus2.blob.core.windows.net/images/cb-hdp-26-1804121019.vhd",
+            "East Asia": "https://sequenceiqeastasia2.blob.core.windows.net/images/cb-hdp-26-1804121019.vhd",
+            "East US": "https://sequenceiqeastus12.blob.core.windows.net/images/cb-hdp-26-1804121019.vhd",
+            "East US 2": "https://sequenceiqeastus22.blob.core.windows.net/images/cb-hdp-26-1804121019.vhd",
+            "Japan East": "https://sequenceiqjapaneast2.blob.core.windows.net/images/cb-hdp-26-1804121019.vhd",
+            "Japan West": "https://sequenceiqjapanwest2.blob.core.windows.net/images/cb-hdp-26-1804121019.vhd",
+            "Korea Central": "https://hwxkoreacentral.blob.core.windows.net/images/cb-hdp-26-1804121019.vhd",
+            "Korea South": "https://hwxkoreasouth.blob.core.windows.net/images/cb-hdp-26-1804121019.vhd",
+            "North Central US": "https://sequenceiqorthcentralus2.blob.core.windows.net/images/cb-hdp-26-1804121019.vhd",
+            "North Europe": "https://sequenceiqnortheurope2.blob.core.windows.net/images/cb-hdp-26-1804121019.vhd",
+            "South Central US": "https://sequenceiqouthcentralus2.blob.core.windows.net/images/cb-hdp-26-1804121019.vhd",
+            "South East Asia": "https://sequenceiqsoutheastasia2.blob.core.windows.net/images/cb-hdp-26-1804121019.vhd",
+            "South India": "https://hwxsouthindia.blob.core.windows.net/images/cb-hdp-26-1804121019.vhd",
+            "UK South": "https://hwxsouthuk.blob.core.windows.net/images/cb-hdp-26-1804121019.vhd",
+            "UK West": "https://hwxwestuk.blob.core.windows.net/images/cb-hdp-26-1804121019.vhd",
+            "West Central US": "https://hwxwestcentralus.blob.core.windows.net/images/cb-hdp-26-1804121019.vhd",
+            "West Europe": "https://sequenceiqwesteurope2.blob.core.windows.net/images/cb-hdp-26-1804121019.vhd",
+            "West India": "https://hwxwestindia.blob.core.windows.net/images/cb-hdp-26-1804121019.vhd",
+            "West US": "https://sequenceiqwestus2.blob.core.windows.net/images/cb-hdp-26-1804121019.vhd",
+            "West US 2": "https://hwxwestus2.blob.core.windows.net/images/cb-hdp-26-1804121019.vhd"
+          }
+        },
+        "os": "centos7",
+        "os_type": "redhat7",
+        "uuid": "3df48664-88fa-4c41-5dff-a9d9958f45bd",
+        "stack-details": {
+          "repo": {
+            "stack": {
+              "redhat7": "http://s3.amazonaws.com/dev.hortonworks.com/HDP/centos7/2.x/BUILDS/2.6.5.0-231",
+              "repoid": "HDP-2.6",
+              "repository-version": "2.6.5.0-231",
+              "vdf-url": "http://s3.amazonaws.com/dev.hortonworks.com/HDP/centos7/2.x/BUILDS/2.6.5.0-231/HDP-2.6.5.0-231.xml"
+            },
+            "util": {
+              "redhat7": "http://s3.amazonaws.com/dev.hortonworks.com/HDP-UTILS-1.1.0.22/repos/centos7",
+              "repoid": "HDP-UTILS-1.1.0.22"
+            }
+          },
+          "version": "2.6.5.0-231"
+        },
+        "repo": {
+          "redhat7": "http://s3.amazonaws.com/dev.hortonworks.com/ambari/centos7/2.x/BUILDS/2.6.2.0-107"
+        },
+        "version": "2.6.2.0-107"
+      },
+      {
+        "date": "2018-04-12",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "gcp": {
+            "default": "sequenceiqimage/cb-hdp-26-1804121516.tar.gz"
+          }
+        },
+        "os": "centos7",
+        "os_type": "redhat7",
+        "uuid": "060b84f2-9ebf-46ce-485a-b8572605f5d0",
+        "stack-details": {
+          "repo": {
+            "stack": {
+              "redhat7": "http://s3.amazonaws.com/dev.hortonworks.com/HDP/centos7/2.x/BUILDS/2.6.5.0-231",
+              "repoid": "HDP-2.6",
+              "repository-version": "2.6.5.0-231",
+              "vdf-url": "http://s3.amazonaws.com/dev.hortonworks.com/HDP/centos7/2.x/BUILDS/2.6.5.0-231/HDP-2.6.5.0-231.xml"
+            },
+            "util": {
+              "redhat7": "http://s3.amazonaws.com/dev.hortonworks.com/HDP-UTILS-1.1.0.22/repos/centos7",
+              "repoid": "HDP-UTILS-1.1.0.22"
+            }
+          },
+          "version": "2.6.5.0-231"
+        },
+        "repo": {
+          "redhat7": "http://s3.amazonaws.com/dev.hortonworks.com/ambari/centos7/2.x/BUILDS/2.6.2.0-107"
+        },
+        "version": "2.6.2.0-107"
+      },
+      {
+        "date": "2018-04-25",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "aws": {
+            "ap-northeast-1": "ami-d45fb8ab",
+            "ap-northeast-2": "ami-5ced4432",
+            "ap-south-1": "ami-b44f6edb",
+            "ap-southeast-1": "ami-143e1168",
+            "ap-southeast-2": "ami-a94882cb",
+            "ca-central-1": "ami-400b8a24",
+            "eu-central-1": "ami-e4b99e0f",
+            "eu-west-1": "ami-8195b8f8",
+            "eu-west-2": "ami-6508eb02",
+            "eu-west-3": "ami-eac87997",
+            "sa-east-1": "ami-9a92c1f6",
+            "us-east-1": "ami-5f398e20",
+            "us-east-2": "ami-b44270d1",
+            "us-west-1": "ami-7c8f921c",
+            "us-west-2": "ami-54aac22c"
+          }
+        },
+        "os": "amazonlinux",
+        "os_type": "redhat6",
+        "uuid": "63cdb3bc-28a6-4cea-67e4-9842fdeeaefb",
+        "stack-details": {
+          "repo": {
+            "stack": {
+              "redhat6": "http://private-repo-1.hortonworks.com/HDP/centos6/2.x/updates/2.6.4.5-2",
+              "repoid": "HDP-2.6",
+              "repository-version": "2.6.4.5-2",
+              "vdf-url": "http://private-repo-1.hortonworks.com/HDP/centos6/2.x/updates/2.6.4.5-2/HDP-2.6.4.5-2.xml"
+            },
+            "util": {
+              "redhat6": "http://private-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/centos6",
+              "repoid": "HDP-UTILS-1.1.0.22"
+            }
+          },
+          "version": "2.6.4.5-2"
+        },
+        "repo": {
+          "redhat6": "http://public-repo-1.hortonworks.com/ambari/centos6/2.x/updates/2.6.1.3"
+        },
+        "version": "2.6.1.3"
+      },
+      {
+        "date": "2018-04-25",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "azure": {
+            "Australia East": "https://hwxaustraliaeast.blob.core.windows.net/images/cb-hdp-26-1804251539.vhd",
+            "Australia South East": "https://hwxaustralisoutheast.blob.core.windows.net/images/cb-hdp-26-1804251539.vhd",
+            "Brazil South": "https://sequenceiqbrazilsouth2.blob.core.windows.net/images/cb-hdp-26-1804251539.vhd",
+            "Canada Central": "https://sequenceiqcanadacentral.blob.core.windows.net/images/cb-hdp-26-1804251539.vhd",
+            "Canada East": "https://sequenceiqcanadaeast.blob.core.windows.net/images/cb-hdp-26-1804251539.vhd",
+            "Central India": "https://hwxcentralindia.blob.core.windows.net/images/cb-hdp-26-1804251539.vhd",
+            "Central US": "https://sequenceiqcentralus2.blob.core.windows.net/images/cb-hdp-26-1804251539.vhd",
+            "East Asia": "https://sequenceiqeastasia2.blob.core.windows.net/images/cb-hdp-26-1804251539.vhd",
+            "East US": "https://sequenceiqeastus12.blob.core.windows.net/images/cb-hdp-26-1804251539.vhd",
+            "East US 2": "https://sequenceiqeastus22.blob.core.windows.net/images/cb-hdp-26-1804251539.vhd",
+            "Japan East": "https://sequenceiqjapaneast2.blob.core.windows.net/images/cb-hdp-26-1804251539.vhd",
+            "Japan West": "https://sequenceiqjapanwest2.blob.core.windows.net/images/cb-hdp-26-1804251539.vhd",
+            "Korea Central": "https://hwxkoreacentral.blob.core.windows.net/images/cb-hdp-26-1804251539.vhd",
+            "Korea South": "https://hwxkoreasouth.blob.core.windows.net/images/cb-hdp-26-1804251539.vhd",
+            "North Central US": "https://sequenceiqorthcentralus2.blob.core.windows.net/images/cb-hdp-26-1804251539.vhd",
+            "North Europe": "https://sequenceiqnortheurope2.blob.core.windows.net/images/cb-hdp-26-1804251539.vhd",
+            "South Central US": "https://sequenceiqouthcentralus2.blob.core.windows.net/images/cb-hdp-26-1804251539.vhd",
+            "South East Asia": "https://sequenceiqsoutheastasia2.blob.core.windows.net/images/cb-hdp-26-1804251539.vhd",
+            "South India": "https://hwxsouthindia.blob.core.windows.net/images/cb-hdp-26-1804251539.vhd",
+            "UK South": "https://hwxsouthuk.blob.core.windows.net/images/cb-hdp-26-1804251539.vhd",
+            "UK West": "https://hwxwestuk.blob.core.windows.net/images/cb-hdp-26-1804251539.vhd",
+            "West Central US": "https://hwxwestcentralus.blob.core.windows.net/images/cb-hdp-26-1804251539.vhd",
+            "West Europe": "https://sequenceiqwesteurope2.blob.core.windows.net/images/cb-hdp-26-1804251539.vhd",
+            "West India": "https://hwxwestindia.blob.core.windows.net/images/cb-hdp-26-1804251539.vhd",
+            "West US": "https://sequenceiqwestus2.blob.core.windows.net/images/cb-hdp-26-1804251539.vhd",
+            "West US 2": "https://hwxwestus2.blob.core.windows.net/images/cb-hdp-26-1804251539.vhd"
+          }
+        },
+        "os": "centos7",
+        "os_type": "redhat7",
+        "uuid": "6c5613ea-090c-4515-6537-464ad6ebfb24",
+        "stack-details": {
+          "repo": {
+            "stack": {
+              "redhat7": "http://private-repo-1.hortonworks.com/HDP/centos7/2.x/updates/2.6.4.5-2",
+              "repoid": "HDP-2.6",
+              "repository-version": "2.6.4.5-2",
+              "vdf-url": "http://private-repo-1.hortonworks.com/HDP/centos7/2.x/updates/2.6.4.5-2/HDP-2.6.4.5-2.xml"
+            },
+            "util": {
+              "redhat7": "http://private-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/centos7",
+              "repoid": "HDP-UTILS-1.1.0.22"
+            }
+          },
+          "version": "2.6.4.5-2"
+        },
+        "repo": {
+          "redhat7": "http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.6.1.3"
+        },
+        "version": "2.6.1.3"
+      },
+      {
+        "date": "2018-04-25",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "gcp": {
+            "default": "sequenceiqimage/cb-hdp-26-1804252310.tar.gz"
+          }
+        },
+        "os": "centos7",
+        "os_type": "redhat7",
+        "uuid": "5a25167d-656a-4621-4755-0e8e6381e4fe",
+        "stack-details": {
+          "repo": {
+            "stack": {
+              "redhat7": "http://private-repo-1.hortonworks.com/HDP/centos7/2.x/updates/2.6.4.5-2",
+              "repoid": "HDP-2.6",
+              "repository-version": "2.6.4.5-2",
+              "vdf-url": "http://private-repo-1.hortonworks.com/HDP/centos7/2.x/updates/2.6.4.5-2/HDP-2.6.4.5-2.xml"
+            },
+            "util": {
+              "redhat7": "http://private-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/centos7",
+              "repoid": "HDP-UTILS-1.1.0.22"
+            }
+          },
+          "version": "2.6.4.5-2"
+        },
+        "repo": {
+          "redhat7": "http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.6.1.3"
+        },
+        "version": "2.6.1.3"
+      },
+      {
+        "date": "2018-04-26",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "openstack": {
+            "default": "cb-hdp-26-1804261534"
+          }
+        },
+        "os": "centos7",
+        "os_type": "redhat7",
+        "uuid": "0e8af1c8-5c30-454b-55b0-19f33e8c0be5",
+        "stack-details": {
+          "repo": {
+            "stack": {
+              "redhat7": "http://private-repo-1.hortonworks.com/HDP/centos7/2.x/updates/2.6.4.5-2",
+              "repoid": "HDP-2.6",
+              "repository-version": "2.6.4.5-2",
+              "vdf-url": "http://private-repo-1.hortonworks.com/HDP/centos7/2.x/updates/2.6.4.5-2/HDP-2.6.4.5-2.xml"
+            },
+            "util": {
+              "redhat7": "http://private-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/centos7",
+              "repoid": "HDP-UTILS-1.1.0.22"
+            }
+          },
+          "version": "2.6.4.5-2"
+        },
+        "repo": {
+          "redhat7": "http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.6.1.3"
+        },
+        "version": "2.6.1.3"
+      },
+      {
+        "date": "2018-05-16",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "azure": {
+            "Australia East": "https://hwxaustraliaeast.blob.core.windows.net/images/cb-hdp-26-1805161539.vhd",
+            "Australia South East": "https://hwxaustralisoutheast.blob.core.windows.net/images/cb-hdp-26-1805161539.vhd",
+            "Brazil South": "https://sequenceiqbrazilsouth2.blob.core.windows.net/images/cb-hdp-26-1805161539.vhd",
+            "Canada Central": "https://sequenceiqcanadacentral.blob.core.windows.net/images/cb-hdp-26-1805161539.vhd",
+            "Canada East": "https://sequenceiqcanadaeast.blob.core.windows.net/images/cb-hdp-26-1805161539.vhd",
+            "Central India": "https://hwxcentralindia.blob.core.windows.net/images/cb-hdp-26-1805161539.vhd",
+            "Central US": "https://sequenceiqcentralus2.blob.core.windows.net/images/cb-hdp-26-1805161539.vhd",
+            "East Asia": "https://sequenceiqeastasia2.blob.core.windows.net/images/cb-hdp-26-1805161539.vhd",
+            "East US": "https://sequenceiqeastus12.blob.core.windows.net/images/cb-hdp-26-1805161539.vhd",
+            "East US 2": "https://sequenceiqeastus22.blob.core.windows.net/images/cb-hdp-26-1805161539.vhd",
+            "Japan East": "https://sequenceiqjapaneast2.blob.core.windows.net/images/cb-hdp-26-1805161539.vhd",
+            "Japan West": "https://sequenceiqjapanwest2.blob.core.windows.net/images/cb-hdp-26-1805161539.vhd",
+            "Korea Central": "https://hwxkoreacentral.blob.core.windows.net/images/cb-hdp-26-1805161539.vhd",
+            "Korea South": "https://hwxkoreasouth.blob.core.windows.net/images/cb-hdp-26-1805161539.vhd",
+            "North Central US": "https://sequenceiqorthcentralus2.blob.core.windows.net/images/cb-hdp-26-1805161539.vhd",
+            "North Europe": "https://sequenceiqnortheurope2.blob.core.windows.net/images/cb-hdp-26-1805161539.vhd",
+            "South Central US": "https://sequenceiqouthcentralus2.blob.core.windows.net/images/cb-hdp-26-1805161539.vhd",
+            "South East Asia": "https://sequenceiqsoutheastasia2.blob.core.windows.net/images/cb-hdp-26-1805161539.vhd",
+            "South India": "https://hwxsouthindia.blob.core.windows.net/images/cb-hdp-26-1805161539.vhd",
+            "UK South": "https://hwxsouthuk.blob.core.windows.net/images/cb-hdp-26-1805161539.vhd",
+            "UK West": "https://hwxwestuk.blob.core.windows.net/images/cb-hdp-26-1805161539.vhd",
+            "West Central US": "https://hwxwestcentralus.blob.core.windows.net/images/cb-hdp-26-1805161539.vhd",
+            "West Europe": "https://sequenceiqwesteurope2.blob.core.windows.net/images/cb-hdp-26-1805161539.vhd",
+            "West India": "https://hwxwestindia.blob.core.windows.net/images/cb-hdp-26-1805161539.vhd",
+            "West US": "https://sequenceiqwestus2.blob.core.windows.net/images/cb-hdp-26-1805161539.vhd",
+            "West US 2": "https://hwxwestus2.blob.core.windows.net/images/cb-hdp-26-1805161539.vhd"
+          }
+        },
+        "os": "centos7",
+        "os_type": "redhat7",
+        "uuid": "21046d2b-68e6-4b95-6861-5b3cd79fc223",
+        "stack-details": {
+          "repo": {
+            "stack": {
+              "redhat7": "http://public-repo-1.hortonworks.com/HDP/centos7/2.x/updates/2.6.5.0",
+              "repoid": "HDP-2.6",
+              "repository-version": "2.6.5.0-292",
+              "vdf-url": "http://public-repo-1.hortonworks.com/HDP/centos7/2.x/updates/2.6.5.0/HDP-2.6.5.0-292.xml"
+            },
+            "util": {
+              "redhat7": "http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/centos7",
+              "repoid": "HDP-UTILS-1.1.0.22"
+            }
+          },
+          "version": "2.6.5.0"
+        },
+        "repo": {
+          "redhat7": "http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.6.2.0"
+        },
+        "version": "2.6.2.0"
+      },
+      {
+        "date": "2018-05-17",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "openstack": {
+            "default": "cb-hdp-26-1805171052"
+          }
+        },
+        "os": "centos7",
+        "os_type": "redhat7",
+        "uuid": "f2dfe452-dd49-4885-5058-7d198d3e3d5c",
+        "stack-details": {
+          "repo": {
+            "stack": {
+              "redhat7": "http://public-repo-1.hortonworks.com/HDP/centos7/2.x/updates/2.6.5.0",
+              "repoid": "HDP-2.6",
+              "repository-version": "2.6.5.0-292",
+              "vdf-url": "http://public-repo-1.hortonworks.com/HDP/centos7/2.x/updates/2.6.5.0/HDP-2.6.5.0-292.xml"
+            },
+            "util": {
+              "redhat7": "http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/centos7",
+              "repoid": "HDP-UTILS-1.1.0.22"
+            }
+          },
+          "version": "2.6.5.0"
+        },
+        "repo": {
+          "redhat7": "http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.6.2.0"
+        },
+        "version": "2.6.2.0"
+      },
+      {
+        "date": "2018-05-17",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "aws": {
+            "ap-northeast-1": "ami-a2e312dd",
+            "ap-northeast-2": "ami-4f69c121",
+            "ap-south-1": "ami-75002d1a",
+            "ap-southeast-1": "ami-215d6d5d",
+            "ap-southeast-2": "ami-fa06d798",
+            "ca-central-1": "ami-f56beb91",
+            "eu-central-1": "ami-23e4cac8",
+            "eu-west-1": "ami-5313212a",
+            "eu-west-2": "ami-c43cd1a3",
+            "eu-west-3": "ami-9172c3ec",
+            "sa-east-1": "ami-2be2be47",
+            "us-east-1": "ami-bf198ac0",
+            "us-east-2": "ami-25685440",
+            "us-west-1": "ami-b7839ad7",
+            "us-west-2": "ami-d7f68baf"
+          }
+        },
+        "os": "amazonlinux",
+        "os_type": "redhat6",
+        "uuid": "02510145-0943-42a3-7271-8d19e5f87917",
+        "stack-details": {
+          "repo": {
+            "stack": {
+              "redhat6": "http://public-repo-1.hortonworks.com/HDP/centos6/2.x/updates/2.6.5.0",
+              "repoid": "HDP-2.6",
+              "repository-version": "2.6.5.0-292",
+              "vdf-url": "http://public-repo-1.hortonworks.com/HDP/centos6/2.x/updates/2.6.5.0/HDP-2.6.5.0-292.xml"
+            },
+            "util": {
+              "redhat6": "http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/centos6",
+              "repoid": "HDP-UTILS-1.1.0.22"
+            }
+          },
+          "version": "2.6.5.0"
+        },
+        "repo": {
+          "redhat6": "http://public-repo-1.hortonworks.com/ambari/centos6/2.x/updates/2.6.2.0"
+        },
+        "version": "2.6.2.0"
+      },
+      {
+        "date": "2018-05-17",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "gcp": {
+            "default": "sequenceiqimage/cb-hdp-26-1805171250.tar.gz"
+          }
+        },
+        "os": "centos7",
+        "os_type": "redhat7",
+        "uuid": "14eacf1a-cd53-452c-5ecc-0ae227054b00",
+        "stack-details": {
+          "repo": {
+            "stack": {
+              "redhat7": "http://public-repo-1.hortonworks.com/HDP/centos7/2.x/updates/2.6.5.0",
+              "repoid": "HDP-2.6",
+              "repository-version": "2.6.5.0-292",
+              "vdf-url": "http://public-repo-1.hortonworks.com/HDP/centos7/2.x/updates/2.6.5.0/HDP-2.6.5.0-292.xml"
+            },
+            "util": {
+              "redhat7": "http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/centos7",
+              "repoid": "HDP-UTILS-1.1.0.22"
+            }
+          },
+          "version": "2.6.5.0"
+        },
+        "repo": {
+          "redhat7": "http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.6.2.0"
+        },
+        "version": "2.6.2.0"
+      },
+      {
+        "date": "2018-05-17",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "aws": {
+            "ap-northeast-1": "ami-a2e312dd",
+            "ap-northeast-2": "ami-4f69c121",
+            "ap-south-1": "ami-75002d1a",
+            "ap-southeast-1": "ami-215d6d5d",
+            "ap-southeast-2": "ami-fa06d798",
+            "ca-central-1": "ami-f56beb91",
+            "eu-central-1": "ami-23e4cac8",
+            "eu-west-1": "ami-5313212a",
+            "eu-west-2": "ami-c43cd1a3",
+            "eu-west-3": "ami-9172c3ec",
+            "sa-east-1": "ami-2be2be47",
+            "us-east-1": "ami-bf198ac0",
+            "us-east-2": "ami-25685440",
+            "us-west-1": "ami-b7839ad7",
+            "us-west-2": "ami-d7f68baf"
+          }
+        },
+        "os": "amazonlinux",
+        "os_type": "redhat6",
+        "uuid": "a9d97195-f4c2-4c07-449b-e21ae34649a0",
+        "stack-details": {
+          "repo": {
+            "stack": {
+              "redhat6": "http://public-repo-1.hortonworks.com/HDP/centos6/2.x/updates/2.6.5.0",
+              "repoid": "HDP-2.6",
+              "repository-version": "2.6.5.0-292",
+              "vdf-url": "http://public-repo-1.hortonworks.com/HDP/centos6/2.x/updates/2.6.5.0/HDP-2.6.5.0-292.xml"
+            },
+            "util": {
+              "redhat6": "http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/centos6",
+              "repoid": "HDP-UTILS-1.1.0.22"
+            }
+          },
+          "version": "2.6.5.0"
+        },
+        "repo": {
+          "redhat6": "http://public-repo-1.hortonworks.com/ambari/centos6/2.x/updates/2.6.2.0"
+        },
+        "version": "2.6.2.0"
+      },
+      {
+        "date": "2018-05-17",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "aws": {
+            "ap-northeast-1": "ami-a2e312dd",
+            "ap-northeast-2": "ami-4f69c121",
+            "ap-south-1": "ami-75002d1a",
+            "ap-southeast-1": "ami-215d6d5d",
+            "ap-southeast-2": "ami-fa06d798",
+            "ca-central-1": "ami-f56beb91",
+            "eu-central-1": "ami-23e4cac8",
+            "eu-west-1": "ami-5313212a",
+            "eu-west-2": "ami-c43cd1a3",
+            "eu-west-3": "ami-9172c3ec",
+            "sa-east-1": "ami-2be2be47",
+            "us-east-1": "ami-bf198ac0",
+            "us-east-2": "ami-25685440",
+            "us-west-1": "ami-b7839ad7",
+            "us-west-2": "ami-d7f68baf"
+          }
+        },
+        "os": "amazonlinux",
+        "os_type": "redhat6",
+        "uuid": "aea6c9e1-f775-47f2-574b-c320504c1e02",
+        "stack-details": {
+          "repo": {
+            "stack": {
+              "redhat6": "http://public-repo-1.hortonworks.com/HDP/centos6/2.x/updates/2.6.5.0",
+              "repoid": "HDP-2.6",
+              "repository-version": "2.6.5.0-292",
+              "vdf-url": "http://public-repo-1.hortonworks.com/HDP/centos6/2.x/updates/2.6.5.0/HDP-2.6.5.0-292.xml"
+            },
+            "util": {
+              "redhat6": "http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/centos6",
+              "repoid": "HDP-UTILS-1.1.0.22"
+            }
+          },
+          "version": "2.6.5.0"
+        },
+        "repo": {
+          "redhat6": "http://public-repo-1.hortonworks.com/ambari/centos6/2.x/updates/2.6.2.0"
+        },
+        "version": "2.6.2.0"
+      }
+    ]
+  },
+  "versions": {
+    "cloudbreak": [
+      {
+        "images": [
+          "f6e778fc-7f17-4535-9021-515351df3691",
+          "3f66bdad-5f59-4460-6182-0359c2cf7f1b",
+          "44b140a4-bd0b-457d-b174-e988bee3ca47",
+          "3c7598a4-ebd6-4a02-5638-882f5c7f7add",
+          "99d1bab8-2a40-4b4a-531a-447030b54e0f",
+          "9d657d5d-b80c-4a17-6f4d-847061ef3f71",
+          "685f5067-743e-43a5-7d5e-c5d30f5fefe4",
+          "4bdc8d67-3479-44ee-5a38-cd5e5b2e59bb",
+          "d7777157-a625-405b-6e84-67a8ef1ad404",
+          "305c40c2-270b-436d-5f3d-b6e0b92d88f7",
+          "071794f4-d005-4f33-4ce2-3ea5c3ec1d58",
+          "b2ddd547-bd16-4c49-703c-ce0ae1eec188",
+          "cab28152-f5e1-43e1-5107-9e7bbed33eef",
+          "fb57e3aa-fddd-45bd-68a8-bc2526ab0f56",
+          "e5c17a3b-fa72-41be-724b-28e5bbb880cc",
+          "7325f106-ab4f-481f-70a4-a5c5e5a18d3c"
+        ],
+        "defaults": null,
+        "versions": [
+          "2.1.0-dev.386",
+          "2.1.0-dev.387",
+          "2.1.0-dev.388",
+          "2.1.0-dev.389",
+          "2.1.0-dev.390",
+          "2.1.0-dev.391",
+          "2.1.0-dev.392",
+          "2.1.0-dev.393",
+          "2.1.0-dev.394",
+          "2.1.0-dev.395",
+          "2.1.0-dev.396",
+          "2.1.0-dev.397",
+          "2.1.0-dev.398",
+          "2.1.0-dev.399",
+          "2.1.0-dev.400",
+          "2.1.0-dev.401",
+          "2.1.0-dev.402",
+          "2.1.0-dev.403",
+          "2.1.0-dev.404",
+          "2.1.0-dev.405",
+          "2.1.0-dev.406",
+          "2.1.0-dev.407",
+          "2.1.0-dev.408",
+          "2.1.0-dev.409",
+          "2.1.0-dev.410",
+          "2.1.0-dev.411",
+          "2.1.0-dev.412",
+          "2.1.0-dev.413",
+          "2.1.0-dev.414",
+          "2.1.0-dev.415",
+          "2.1.0-dev.416",
+          "2.1.0-dev.417",
+          "2.1.0-dev.418",
+          "2.1.0-dev.419",
+          "2.1.0-dev.420",
+          "2.1.0-dev.421",
+          "2.2.0-dev.1",
+          "2.2.0-dev.2",
+          "2.2.0-dev.3",
+          "2.2.0-dev.4",
+          "2.2.0-dev.5",
+          "2.2.0-dev.6",
+          "2.2.0-dev.7",
+          "2.2.0-dev.8",
+          "2.2.0-dev.9",
+          "2.2.0-dev.10",
+          "2.2.0-dev.11",
+          "2.2.0-dev.12",
+          "2.2.0-dev.13",
+          "2.2.0-dev.14",
+          "2.2.0-dev.15",
+          "2.2.0-dev.16",
+          "2.2.0-dev.17",
+          "2.2.0-dev.18",
+          "2.2.0-dev.19",
+          "2.2.0-dev.20",
+          "2.2.0-dev.21",
+          "2.2.0-dev.22",
+          "2.2.0-dev.23",
+          "2.2.0-dev.24",
+          "2.2.0-dev.25",
+          "2.2.0-dev.26",
+          "2.2.0-dev.27",
+          "2.2.0-dev.28",
+          "2.2.0-dev.29",
+          "2.2.0-dev.30",
+          "2.2.0-dev.31",
+          "2.2.0-dev.32",
+          "2.2.0-dev.33",
+          "2.2.0-dev.34",
+          "2.2.0-dev.35",
+          "2.2.0-dev.36",
+          "2.2.0-dev.37",
+          "2.2.0-dev.38",
+          "2.2.0-dev.39",
+          "2.2.0-dev.40",
+          "2.2.0-dev.41",
+          "2.2.0-dev.42",
+          "2.2.0-dev.43",
+          "2.2.0-dev.44",
+          "2.2.0-dev.45",
+          "2.2.0-dev.46",
+          "2.2.0-dev.47",
+          "2.2.0-dev.48",
+          "2.2.0-dev.49",
+          "2.2.0-dev.50",
+          "2.2.0-dev.51",
+          "2.2.0-dev.52",
+          "2.2.0-dev.53",
+          "2.2.0-dev.54",
+          "2.2.0-dev.55",
+          "2.2.0-dev.56",
+          "2.2.0-dev.57",
+          "2.2.0-dev.58",
+          "2.2.0-dev.59",
+          "2.2.0-dev.60",
+          "2.2.0-dev.61",
+          "2.2.0-dev.62",
+          "2.2.0-dev.63",
+          "2.2.0-dev.64",
+          "2.2.0-dev.69",
+          "2.2.0-dev.70",
+          "2.2.0-dev.71",
+          "2.2.0-dev.72",
+          "2.2.0-dev.73",
+          "2.2.0-dev.74",
+          "2.2.0-dev.75",
+          "2.2.0-dev.76",
+          "2.2.0-dev.77",
+          "2.2.0-dev.78",
+          "2.2.0-dev.79",
+          "2.2.0-dev.80",
+          "2.2.0-dev.81",
+          "2.2.0-dev.82",
+          "2.2.0-dev.83",
+          "2.2.0-dev.84",
+          "2.2.0-dev.85",
+          "2.2.0-dev.86",
+          "2.2.0-dev.87",
+          "2.2.0-dev.88",
+          "2.2.0-dev.89",
+          "2.2.0-dev.90",
+          "2.2.0-dev.91",
+          "2.2.0-dev.92",
+          "2.2.0-dev.93",
+          "2.2.0-dev.94",
+          "2.2.0-dev.95",
+          "2.2.0-dev.96",
+          "2.2.0-dev.97",
+          "2.2.0-dev.98",
+          "2.2.0-dev.99",
+          "2.2.0-dev.100",
+          "2.2.0-dev.101",
+          "2.2.0-dev.102",
+          "2.2.0-dev.103",
+          "2.2.0-dev.104",
+          "2.2.0-dev.105",
+          "2.2.0-dev.106",
+          "2.2.0-dev.107",
+          "2.2.0-dev.108",
+          "2.2.0-dev.109",
+          "2.2.0-dev.110",
+          "2.2.0-dev.111",
+          "2.2.0-dev.112",
+          "2.2.0-dev.113",
+          "2.2.0-dev.114",
+          "2.2.0-dev.115",
+          "2.2.0-dev.116",
+          "2.2.0-dev.117",
+          "2.2.0-dev.118",
+          "2.2.0-dev.119",
+          "2.2.0-dev.120",
+          "2.2.0-dev.121",
+          "2.2.0-dev.122",
+          "2.2.0-dev.123",
+          "2.2.0-dev.124",
+          "2.2.0-dev.125",
+          "2.2.0-dev.126",
+          "2.2.0-dev.127",
+          "2.2.0-dev.128",
+          "2.2.0-dev.129",
+          "2.2.0-dev.130",
+          "2.2.0-dev.131",
+          "2.2.0-dev.132",
+          "2.2.0-dev.133",
+          "2.2.0-dev.134",
+          "2.2.0-dev.135",
+          "2.2.0-dev.136",
+          "2.2.0-dev.137",
+          "2.2.0-dev.138",
+          "2.2.0-dev.139",
+          "2.2.0-dev.140",
+          "2.2.0-dev.141",
+          "2.2.0-dev.142",
+          "2.2.0-dev.143",
+          "2.2.0-dev.144",
+          "2.2.0-dev.145",
+          "2.2.0-dev.146",
+          "2.2.0-dev.147",
+          "2.2.0-dev.148",
+          "2.2.0-dev.149",
+          "2.2.0-dev.150",
+          "2.2.0-dev.151",
+          "2.2.0-dev.152",
+          "2.2.0-dev.153",
+          "2.2.0-dev.154",
+          "2.2.0-dev.155",
+          "2.2.0-dev.156",
+          "2.2.0-dev.157",
+          "2.3.0-dev.1",
+          "2.3.0-dev.2",
+          "2.3.0-dev.3",
+          "2.3.0-dev.4",
+          "2.3.0-dev.5",
+          "2.3.0-dev.6",
+          "2.3.0-dev.7",
+          "2.3.0-dev.8",
+          "2.3.0-dev.9",
+          "2.3.0-dev.10",
+          "2.3.0-dev.11",
+          "2.3.0-dev.12",
+          "2.3.0-dev.13",
+          "2.3.0-dev.14",
+          "2.3.0-dev.15",
+          "2.3.0-dev.16",
+          "2.3.0-dev.17",
+          "2.3.0-dev.18",
+          "2.3.0-dev.19",
+          "2.3.0-dev.20",
+          "2.3.0-dev.21",
+          "2.3.0-dev.22",
+          "2.3.0-dev.23",
+          "2.3.0-dev.24",
+          "2.3.0-dev.25",
+          "2.3.0-dev.26",
+          "2.3.0-dev.27",
+          "2.3.0-dev.28",
+          "2.3.0-dev.29",
+          "2.3.0-dev.30",
+          "2.3.0-dev.33",
+          "2.3.0-dev.34",
+          "2.3.0-dev.35",
+          "2.3.0-dev.36",
+          "2.3.0-dev.37",
+          "2.3.0-dev.38",
+          "2.3.0-dev.39",
+          "2.3.0-dev.40",
+          "2.3.0-dev.41",
+          "2.3.0-dev.42",
+          "2.3.0-dev.43",
+          "2.3.0-dev.44",
+          "2.3.0-dev.45",
+          "2.3.0-dev.46",
+          "2.3.0-dev.47",
+          "2.3.0-dev.48",
+          "2.3.0-dev.49",
+          "2.3.0-dev.50",
+          "2.3.0-dev.51",
+          "2.3.0-dev.52",
+          "2.3.0-dev.53",
+          "2.3.0-dev.54",
+          "2.3.0-dev.55",
+          "2.3.0-dev.56",
+          "2.3.0-dev.57",
+          "2.3.0-dev.58",
+          "2.3.0-dev.59",
+          "2.3.0-dev.60",
+          "2.3.0-dev.61",
+          "2.3.0-dev.62",
+          "2.3.0-dev.63",
+          "2.3.0-dev.64",
+          "2.3.0-dev.65",
+          "2.4.0-dev.1",
+          "2.4.0-dev.2",
+          "2.4.0-dev.3",
+          "2.4.0-dev.4",
+          "2.4.0-dev.5",
+          "2.4.0-dev.6",
+          "2.4.0-dev.7",
+          "2.4.0-dev.8",
+          "2.4.0-dev.9",
+          "2.4.0-dev.10",
+          "2.4.0-dev.11",
+          "2.4.0-dev.12",
+          "2.4.0-dev.13",
+          "2.4.0-dev.14",
+          "2.4.0-dev.15",
+          "2.4.0-dev.16",
+          "2.4.0-dev.17",
+          "2.4.0-dev.18",
+          "2.4.0-dev.19",
+          "2.4.0-dev.20",
+          "2.4.0-dev.21",
+          "2.4.0-dev.22",
+          "2.4.0-dev.23",
+          "2.4.0-dev.24",
+          "2.4.0-dev.25",
+          "2.4.0-dev.26",
+          "2.4.0-dev.27",
+          "2.4.0-dev.28",
+          "2.4.0-dev.29",
+          "2.4.0-dev.30",
+          "2.4.0-dev.31",
+          "2.4.0-dev.32",
+          "2.4.0-dev.33",
+          "2.4.0-dev.34",
+          "2.4.0-dev.35",
+          "2.4.0-dev.36",
+          "2.4.0-dev.37",
+          "2.4.0-dev.38",
+          "2.4.0-dev.39",
+          "2.4.0-dev.40",
+          "2.4.0-dev.41",
+          "2.4.0-dev.42",
+          "2.4.0-dev.43",
+          "2.4.0-dev.44",
+          "2.4.0-dev.45",
+          "2.4.0-dev.46",
+          "2.4.0-dev.47",
+          "2.4.0-dev.48",
+          "2.4.0-dev.49",
+          "2.4.0-dev.50",
+          "2.4.0-dev.51",
+          "2.4.0-dev.52",
+          "2.4.0-dev.53",
+          "2.4.0-dev.54",
+          "2.4.0-dev.55",
+          "2.4.0-dev.56",
+          "2.4.0-dev.57",
+          "2.4.0-dev.58",
+          "2.4.0-dev.59",
+          "2.4.0-dev.60",
+          "2.4.0-dev.61",
+          "2.4.0-dev.62",
+          "2.4.0-dev.63",
+          "2.4.0-dev.64",
+          "2.4.0-dev.65",
+          "2.4.0-dev.66",
+          "2.4.0-dev.67",
+          "2.4.0-dev.68",
+          "2.4.0-dev.69",
+          "2.4.0-dev.70",
+          "2.4.0-dev.71",
+          "2.4.0-dev.72",
+          "2.4.0-dev.74",
+          "2.4.0-dev.75",
+          "2.4.0-dev.76",
+          "2.4.0-dev.77",
+          "2.4.0-dev.78",
+          "2.4.0-dev.79",
+          "2.4.0-dev.80",
+          "2.4.0-dev.81",
+          "2.4.0-dev.82",
+          "2.4.0-dev.84",
+          "2.4.0-dev.85",
+          "2.4.0-dev.86",
+          "2.4.0-dev.87",
+          "2.4.0-dev.88",
+          "2.4.0-dev.89",
+          "2.4.0-dev.90",
+          "2.4.0-dev.91",
+          "2.4.0-dev.92",
+          "2.4.0-dev.93",
+          "2.4.0-dev.94",
+          "2.4.0-dev.95",
+          "2.4.0-dev.96",
+          "2.4.0-dev.97",
+          "2.4.0-dev.98",
+          "2.4.0-dev.99",
+          "2.4.0-dev.100",
+          "2.4.0-dev.101",
+          "2.4.0-dev.102",
+          "2.4.0-dev.103",
+          "2.4.0-dev.104",
+          "2.4.0-dev.105",
+          "2.4.0-dev.106",
+          "2.4.0-dev.107",
+          "2.4.0-dev.108",
+          "2.4.0-dev.109",
+          "2.4.0-dev.110",
+          "2.4.0-dev.111",
+          "2.4.0-dev.112",
+          "2.4.0-dev.113",
+          "2.4.0-dev.114",
+          "2.4.0-dev.115",
+          "2.4.0-dev.116",
+          "2.4.0-dev.117",
+          "2.4.0-dev.119",
+          "2.4.0-dev.120",
+          "2.4.0-dev.121",
+          "2.4.0-dev.123",
+          "2.4.0-dev.124",
+          "2.4.0-dev.125",
+          "2.4.0-dev.126",
+          "2.4.0-dev.127",
+          "2.4.0-dev.128",
+          "2.4.0-dev.129",
+          "2.4.0-dev.130",
+          "2.4.0-dev.131",
+          "2.4.0-dev.132",
+          "2.4.0-dev.133",
+          "2.4.0-dev.134",
+          "2.4.0-dev.135",
+          "2.4.0-dev.136",
+          "2.4.0-dev.137",
+          "2.4.0-dev.139",
+          "2.4.0-dev.140",
+          "2.4.0-dev.141",
+          "2.4.0-dev.142",
+          "2.4.0-dev.143",
+          "2.4.0-dev.144",
+          "2.4.0-dev.145",
+          "2.4.0-dev.146",
+          "2.4.0-dev.147",
+          "2.4.0-dev.148",
+          "2.4.0-dev.149",
+          "2.4.0-dev.158",
+          "2.4.0-dev.159",
+          "2.4.0-dev.160",
+          "2.4.0-dev.161",
+          "2.4.0-dev.162",
+          "2.4.0-dev.163",
+          "2.4.0-dev.164",
+          "2.4.0-dev.165",
+          "2.4.0-dev.166",
+          "2.4.0-dev.167",
+          "2.4.0-dev.173",
+          "2.4.0-dev.174"
+        ]
+      },
+      {
+        "images": [
+          "685f5067-743e-43a5-7d5e-c5d30f5fefe0",
+          "cab28152-f5e1-43e1-5107-9e7bbed33eef",
+          "fb57e3aa-fddd-45bd-68a8-bc2526ab0f56",
+          "e5c17a3b-fa72-41be-724b-28e5bbb880cc",
+          "6c626ab8-5089-40d1-5c98-327b8dfe6bfb",
+          "25248377-87c2-4077-7097-bd4fb8912afc",
+          "b150efce-33ac-49c9-7206-7f148d162744",
+          "ec25976c-1f18-4b4c-7c4b-3b19f3eac8e4",
+          "a99d040b-c8ea-488b-5fa7-d526e22600e1",
+          "4ae5ad91-3157-457f-6f64-5f07bc7aa10c",
+          "68ce5282-92fa-4824-54b6-9c5fa2782de1",
+          "501f741a-82fd-443a-7fe2-1d54f31a6cc8",
+          "fe5381bd-7db4-47f7-6792-78f025089728",
+          "654eb655-6c6d-42b8-406e-925662a1bb85",
+          "870e3f4d-7836-4087-7a7e-fbb47de0ac6b",
+          "7a8a5a85-3cea-4eb8-5c7d-aa2429d49a66",
+          "afec663b-fe7a-437d-73ee-c155d8f36b1f",
+          "bb718adf-b52b-428a-5a4e-e2cf9d231ab1",
+          "1bf6a2af-501a-4161-4cb2-f942d5e6ab24",
+          "218378ab-3b05-4b9f-679e-4da55b9f3ebe",
+          "5006a6bc-8b75-473c-6201-e63222fe23e8",
+          "8c293a49-0a40-4113-739d-8b0f39667789",
+          "349757cc-83f5-4846-52eb-f2545f247551",
+          "674b6e55-73a7-4cb6-5895-b3ec4fd3893d",
+          "442b672c-0198-4d73-4f48-4342f501ec2a",
+          "3f68857e-a3fb-42b0-751d-00082b69403f",
+          "ce3fbfcd-f65a-4aec-6e69-30aad309d1da",
+          "1c530f28-8beb-4589-5cc1-12f8effea412",
+          "433025f0-16bb-4b83-5ef7-fb795a9fc8ab"
+        ],
+        "defaults": null,
+        "versions": [
+          "2.4.0-dev.181",
+          "2.4.0-dev.188",
+          "2.4.0-dev.190",
+          "2.4.0-dev.191",
+          "2.4.0-dev.192",
+          "2.4.0-dev.193",
+          "2.4.0-dev.194",
+          "2.4.0-dev.195",
+          "2.4.0-dev.196",
+          "2.4.0-dev.197",
+          "2.4.0-dev.198",
+          "2.4.0-dev.199",
+          "2.4.0-dev.200",
+          "2.4.0-dev.201",
+          "2.4.0-dev.202",
+          "2.4.0-dev.203",
+          "2.4.0-dev.204",
+          "2.4.0-dev.205",
+          "2.4.0-dev.206",
+          "2.4.0-dev.207",
+          "2.4.0-dev.208",
+          "2.4.0-dev.209",
+          "2.4.0-dev.210",
+          "2.4.0-dev.211",
+          "2.4.0-dev.212",
+          "2.4.0-dev.213",
+          "2.4.0-dev.214",
+          "2.4.0-dev.215",
+          "2.4.0-dev.216",
+          "2.4.0-dev.217",
+          "2.4.0-dev.218",
+          "2.4.0-dev.219",
+          "2.4.0-dev.220",
+          "2.4.0-dev.221",
+          "2.4.0-dev.222",
+          "2.4.0-dev.223",
+          "2.4.0-dev.224",
+          "2.4.0-dev.225",
+          "2.4.0-dev.226",
+          "2.4.0-dev.227",
+          "2.4.0-dev.228",
+          "2.4.0-dev.229",
+          "2.4.0-dev.230",
+          "2.4.0-dev.231",
+          "2.4.0-dev.232",
+          "2.4.0-dev.233",
+          "2.4.0-dev.234",
+          "2.4.0-dev.235",
+          "2.4.0-dev.236",
+          "2.4.0-dev.237",
+          "2.4.0-dev.238",
+          "2.4.0-dev.239",
+          "2.4.0-dev.240",
+          "2.4.0-dev.241",
+          "2.4.0-dev.242",
+          "2.4.0-dev.243",
+          "2.4.0-dev.244",
+          "2.4.0-dev.245",
+          "2.4.0-dev.246",
+          "2.4.0-dev.247",
+          "2.4.0-dev.248",
+          "2.4.0-dev.249",
+          "2.4.0-dev.250",
+          "2.4.0-dev.251",
+          "2.4.0-dev.252",
+          "2.4.0-dev.253",
+          "2.4.0-dev.254",
+          "2.4.0-dev.255",
+          "2.4.0-dev.256",
+          "2.5.0-dev.1",
+          "2.5.0-dev.2",
+          "2.5.0-dev.3",
+          "2.5.0-dev.4",
+          "2.5.0-dev.5",
+          "2.5.0-dev.6",
+          "2.5.0-dev.7",
+          "2.5.0-dev.8",
+          "2.5.0-dev.9",
+          "2.5.0-dev.10",
+          "2.5.0-dev.11",
+          "2.5.0-dev.12",
+          "2.5.0-dev.13",
+          "2.5.0-dev.14",
+          "2.5.0-dev.15",
+          "2.5.0-dev.16",
+          "2.5.0-dev.17",
+          "2.5.0-dev.18",
+          "2.5.0-dev.19",
+          "2.5.0-dev.20",
+          "2.5.0-dev.21",
+          "2.5.0-dev.22",
+          "2.5.0-dev.23",
+          "2.5.0-dev.24",
+          "2.5.0-dev.25",
+          "2.5.0-dev.26",
+          "2.5.0-dev.27",
+          "2.5.0-dev.28",
+          "2.5.0-dev.29",
+          "2.5.0-dev.30",
+          "2.5.0-dev.31",
+          "2.5.0-dev.32",
+          "2.5.0-dev.33",
+          "2.5.0-dev.34",
+          "2.5.0-dev.35",
+          "2.5.0-dev.36",
+          "2.5.0-dev.37",
+          "2.5.0-dev.38",
+          "2.5.0-dev.39",
+          "2.5.0-dev.40",
+          "2.5.0-dev.41",
+          "2.5.0-dev.42",
+          "2.5.0-dev.43",
+          "2.5.0-dev.44",
+          "2.5.0-dev.45",
+          "2.5.0-dev.46",
+          "2.5.0-dev.47",
+          "2.5.0-dev.48",
+          "2.5.0-dev.49",
+          "2.5.0-dev.50",
+          "2.5.0-dev.51",
+          "2.5.0-dev.52",
+          "2.5.0-dev.53",
+          "2.5.0-dev.54",
+          "2.5.0-dev.55",
+          "2.5.0-dev.56",
+          "2.5.0-dev.57",
+          "2.5.0-dev.58",
+          "2.5.0-dev.59",
+          "2.5.0-dev.60",
+          "2.5.0-dev.61",
+          "2.5.0-dev.62",
+          "2.5.0-dev.63",
+          "2.5.0-dev.64",
+          "2.5.0-dev.65",
+          "2.5.0-dev.66",
+          "2.5.0-dev.67",
+          "2.5.0-dev.68",
+          "2.5.0-dev.69"
+        ]
+      },
+      {
+        "images": [
+          "685f5067-743e-43a5-7d5e-c5d30f5fefe0",
+          "cab28152-f5e1-43e1-5107-9e7bbed33eef",
+          "fb57e3aa-fddd-45bd-68a8-bc2526ab0f56",
+          "e5c17a3b-fa72-41be-724b-28e5bbb880cc",
+          "6c626ab8-5089-40d1-5c98-327b8dfe6bfb",
+          "25248377-87c2-4077-7097-bd4fb8912afc",
+          "b150efce-33ac-49c9-7206-7f148d162744",
+          "ec25976c-1f18-4b4c-7c4b-3b19f3eac8e4",
+          "a99d040b-c8ea-488b-5fa7-d526e22600e1",
+          "4ae5ad91-3157-457f-6f64-5f07bc7aa10c",
+          "68ce5282-92fa-4824-54b6-9c5fa2782de1",
+          "501f741a-82fd-443a-7fe2-1d54f31a6cc8",
+          "fe5381bd-7db4-47f7-6792-78f025089728",
+          "654eb655-6c6d-42b8-406e-925662a1bb85",
+          "870e3f4d-7836-4087-7a7e-fbb47de0ac6b",
+          "7a8a5a85-3cea-4eb8-5c7d-aa2429d49a66",
+          "afec663b-fe7a-437d-73ee-c155d8f36b1f",
+          "bb718adf-b52b-428a-5a4e-e2cf9d231ab1",
+          "1bf6a2af-501a-4161-4cb2-f942d5e6ab24",
+          "218378ab-3b05-4b9f-679e-4da55b9f3ebe",
+          "5006a6bc-8b75-473c-6201-e63222fe23e8",
+          "8c293a49-0a40-4113-739d-8b0f39667789",
+          "349757cc-83f5-4846-52eb-f2545f247551",
+          "674b6e55-73a7-4cb6-5895-b3ec4fd3893d",
+          "442b672c-0198-4d73-4f48-4342f501ec2a",
+          "3f68857e-a3fb-42b0-751d-00082b69403f",
+          "ce3fbfcd-f65a-4aec-6e69-30aad309d1da",
+          "1c530f28-8beb-4589-5cc1-12f8effea412",
+          "433025f0-16bb-4b83-5ef7-fb795a9fc8ab",
+          "685f5067-743e-43a5-7d5e-c5d30f5fefff",
+          "47bd7385-cb96-4c52-5372-b51886d73bfc",
+          "3f5df151-c0d5-4c7d-69d9-5be39af9a3cf",
+          "3459e698-40ee-40db-6757-e667f0282406",
+          "60d95b10-d687-4022-48d8-01b3e565e155",
+          "bbc63453-086c-4bf7-4337-a04c37d51b68",
+          "cbec4fbc-833d-42b2-6ee4-d94ccab87f53",
+          "d62e62aa-fe5f-47ec-74ff-b510f3d416e0",
+          "cf050d5d-6c74-4664-64a2-ce297fd1065a",
+          "74d99079-f5d0-4470-78b3-11ceaf944069",
+          "0f575e42-9d90-4f85-5f8a-bdced2221dc3",
+          "233a3a99-023d-468d-44d4-2d1330e81bab",
+          "4102fae2-5de9-4bbd-4c6c-de663c87f6d0",
+          "b454d096-2705-4630-4fa8-7dd3e6d9fe73",
+          "083f7289-876f-4267-436b-ece5504adb06",
+          "609a7f43-fb5b-480b-af79-eb71791c705b",
+          "650ab648-0d82-4115-7ef0-0f15f894aea0",
+          "7c3f6976-5342-4e4d-6c2f-bb1feefe8dc5",
+          "36c32682-3e5b-49db-5c0f-d332c614b27d",
+          "865ad52e-9ce0-4229-4dc9-c17969a12c68",
+          "5484f48f-14d0-4535-4e35-4d7418ddc8cd",
+          "7151d565-5b96-4d07-75ee-11b9cd2573cd",
+          "3df48664-88fa-4c41-5dff-a9d9958f45bd",
+          "060b84f2-9ebf-46ce-485a-b8572605f5d0",
+          "63cdb3bc-28a6-4cea-67e4-9842fdeeaefb",
+          "6c5613ea-090c-4515-6537-464ad6ebfb24",
+          "5a25167d-656a-4621-4755-0e8e6381e4fe",
+          "0e8af1c8-5c30-454b-55b0-19f33e8c0be5",
+          "a2a75ab9-d4a0-4531-6e2b-b36b7493ffcd",
+          "686742c8-9c3d-47b2-4bc4-57afd70a6e48",
+          "d4d57241-0be9-4ebf-9e00-5baea7bbed49",
+          "cc83d9c9-efa0-40e4-781c-6a19c5068d54",
+          "d0fe9c43-e4f6-450a-4e47-c248be26f5b1",
+          "f2dfe452-dd49-4885-5058-7d198d3e3d5c",
+          "02510145-0943-42a3-7271-8d19e5f87917",
+          "14eacf1a-cd53-452c-5ecc-0ae227054b00"
+        ],
+        "defaults": [
+          "609a7f43-fb5b-480b-af79-eb71791c705b",
+          "0f575e42-9d90-4f85-5f8a-bdced2221dc3",
+          "233a3a99-023d-468d-44d4-2d1330e81bab",
+          "4102fae2-5de9-4bbd-4c6c-de663c87f6d0",
+          "083f7289-876f-4267-436b-ece5504adb06",
+          "7c3f6976-5342-4e4d-6c2f-bb1feefe8dc5",
+          "36c32682-3e5b-49db-5c0f-d332c614b27d",
+          "865ad52e-9ce0-4229-4dc9-c17969a12c68",
+          "5484f48f-14d0-4535-4e35-4d7418ddc8cd",
+          "63cdb3bc-28a6-4cea-67e4-9842fdeeaefb",
+          "6c5613ea-090c-4515-6537-464ad6ebfb24",
+          "d4d57241-0be9-4ebf-9e00-5baea7bbed49",
+          "5a25167d-656a-4621-4755-0e8e6381e4fe",
+          "0e8af1c8-5c30-454b-55b0-19f33e8c0be5",
+          "f2dfe452-dd49-4885-5058-7d198d3e3d5c",
+          "02510145-0943-42a3-7271-8d19e5f87917",
+          "14eacf1a-cd53-452c-5ecc-0ae227054b00"
+        ],
+        "versions": [
+          "2.5.0-dev.52",
+          "2.5.0-dev.69",
+          "2.5.0-dev.70",
+          "2.5.0-dev.71",
+          "2.5.0-dev.72",
+          "2.5.0-dev.73",
+          "2.5.0-dev.74",
+          "2.5.0-dev.75",
+          "2.5.0-dev.76",
+          "2.5.0-dev.77",
+          "2.5.0-dev.78",
+          "2.5.0-dev.79",
+          "2.5.0-dev.80",
+          "2.5.0-dev.81",
+          "2.5.0-dev.82",
+          "2.5.0-dev.83",
+          "2.5.0-dev.84",
+          "2.5.0-dev.85",
+          "2.5.0-dev.86",
+          "2.5.0-dev.87",
+          "2.5.0-dev.88",
+          "2.5.0-dev.89",
+          "2.5.0-dev.90",
+          "2.5.0-dev.91",
+          "2.5.0-dev.92",
+          "2.5.0-dev.93",
+          "2.5.0-dev.94",
+          "2.5.0-dev.95",
+          "2.5.0-dev.96",
+          "2.5.0-dev.97",
+          "2.5.0-dev.98",
+          "2.5.0-dev.99",
+          "2.5.0-dev.100",
+          "2.5.0-dev.101",
+          "2.5.0-dev.102",
+          "2.5.0-dev.103",
+          "2.5.0-dev.104",
+          "2.5.0-dev.105",
+          "2.5.0-dev.106",
+          "2.5.0-dev.107",
+          "2.5.0-dev.108",
+          "2.5.0-dev.109",
+          "2.5.0-dev.110",
+          "2.5.0-dev.111",
+          "2.5.0-dev.112",
+          "2.5.0-dev.113",
+          "2.5.0-dev.114",
+          "2.5.0-dev.115",
+          "2.5.0-dev.116",
+          "2.5.0-dev.117",
+          "2.5.0-dev.118",
+          "2.5.0-dev.119",
+          "2.5.0-dev.120",
+          "2.5.0-dev.121",
+          "2.5.0-dev.122",
+          "2.5.0-dev.123",
+          "2.5.0-dev.124",
+          "2.5.0-dev.125",
+          "2.5.0-dev.126",
+          "2.5.0-dev.127",
+          "2.5.0-dev.128",
+          "2.5.0-dev.129",
+          "2.5.0-dev.130",
+          "2.5.0-dev.131",
+          "2.5.0-dev.132",
+          "2.5.0-dev.133",
+          "2.5.0-dev.134",
+          "2.5.0-dev.135",
+          "2.5.0-dev.136",
+          "2.5.0-dev.137",
+          "2.5.0-dev.138",
+          "2.5.0-dev.139",
+          "2.5.0-dev.140",
+          "2.5.0-dev.141",
+          "2.5.0-dev.142",
+          "2.5.0-dev.143",
+          "2.5.0-dev.144",
+          "2.5.0-dev.145",
+          "2.5.0-dev.146",
+          "2.5.0-dev.147",
+          "2.6.0-dev.1",
+          "2.6.0-dev.2",
+          "2.6.0-dev.3",
+          "2.6.0-dev.4",
+          "2.6.0-dev.5",
+          "2.6.0-dev.6",
+          "2.6.0-dev.7",
+          "2.6.0-dev.8",
+          "2.6.0-dev.9",
+          "2.6.0-dev.10",
+          "2.6.0-dev.11",
+          "2.6.0-dev.12",
+          "2.6.0-dev.13",
+          "2.6.0-dev.14",
+          "2.6.0-dev.15",
+          "2.6.0-dev.16",
+          "2.6.0-dev.17",
+          "2.6.0-dev.21",
+          "2.5.0-dev.149",
+          "2.6.0-dev.22",
+          "2.6.0-dev.23",
+          "2.6.0-dev.24",
+          "2.6.0-dev.25",
+          "2.6.0-dev.26",
+          "2.6.0-dev.27",
+          "2.6.0-dev.29",
+          "2.6.0-dev.30",
+          "2.6.0-dev.31",
+          "2.6.0-dev.33",
+          "2.6.0-dev.34",
+          "2.6.0-dev.35",
+          "2.6.0-dev.36",
+          "2.6.0-dev.37",
+          "2.6.0-dev.38",
+          "2.6.0-dev.39",
+          "2.6.0-dev.40",
+          "2.6.0-dev.41",
+          "2.6.0-dev.42",
+          "2.6.0-dev.43",
+          "2.6.0-dev.44",
+          "2.6.0-dev.45",
+          "2.6.0-dev.46",
+          "2.6.0-dev.47",
+          "2.6.0-dev.48",
+          "2.6.0-dev.49",
+          "2.5.0-dev.153",
+          "2.6.0-dev.50",
+          "2.6.0-dev.51",
+          "2.6.0-dev.52",
+          "2.6.0-dev.53",
+          "2.6.0-dev.54",
+          "2.6.0-dev.55",
+          "2.6.0-dev.56",
+          "2.6.0-dev.57",
+          "2.6.0-dev.58",
+          "2.6.0-dev.59",
+          "2.6.0-dev.60",
+          "2.6.0-dev.61",
+          "2.6.0-dev.62",
+          "2.6.0-dev.63",
+          "2.6.0-dev.64",
+          "2.6.0-dev.65",
+          "2.6.0-dev.66",
+          "2.6.0-dev.67",
+          "2.6.0-dev.68",
+          "2.6.0-dev.69",
+          "2.6.0-dev.70",
+          "2.6.0-dev.71",
+          "2.6.0-dev.72",
+          "2.6.0-dev.73",
+          "2.6.0-dev.74",
+          "2.6.0-dev.75",
+          "2.6.0-dev.76",
+          "2.6.0-dev.77",
+          "2.6.0-dev.79",
+          "2.6.0-dev.80",
+          "2.6.0-dev.81",
+          "2.6.0-dev.82",
+          "2.6.0-dev.83",
+          "2.6.0-dev.84",
+          "2.6.0-dev.85",
+          "2.6.0-dev.86",
+          "2.6.0-dev.88",
+          "2.6.0-dev.89",
+          "2.6.0-dev.90",
+          "2.6.0-dev.91",
+          "2.6.0-dev.92",
+          "2.6.0-dev.93",
+          "2.6.0-dev.94",
+          "2.6.0-dev.95",
+          "2.6.0-dev.96",
+          "2.6.0-dev.97",
+          "2.6.0-dev.98",
+          "2.6.0-dev.99",
+          "2.6.0-dev.100",
+          "2.6.0-dev.101",
+          "2.6.0-dev.102",
+          "2.6.0-dev.103",
+          "2.6.0-dev.106",
+          "2.6.0-dev.107",
+          "2.6.0-dev.108",
+          "2.6.0-dev.109",
+          "2.6.0-dev.110",
+          "2.6.0-dev.111",
+          "2.6.0-dev.112",
+          "2.6.0-dev.113",
+          "2.6.0-dev.114",
+          "2.6.0-dev.115",
+          "2.6.0-dev.116",
+          "2.6.0-dev.117",
+          "2.6.0-dev.118",
+          "2.6.0-dev.119",
+          "2.6.0-dev.120",
+          "2.6.0-dev.121",
+          "2.6.0-dev.122",
+          "2.6.0-dev.123",
+          "2.6.0-dev.124"
+        ]
+      },
+      {
+        "images": [
+          "609a7f43-fb5b-480b-af79-eb71791c705b",
+          "0f575e42-9d90-4f85-5f8a-bdced2221dc3",
+          "233a3a99-023d-468d-44d4-2d1330e81bab",
+          "4102fae2-5de9-4bbd-4c6c-de663c87f6d0",
+          "083f7289-876f-4267-436b-ece5504adb06",
+          "a2a75ab9-d4a0-4531-6e2b-b36b7493ffcd",
+          "686742c8-9c3d-47b2-4bc4-57afd70a6e48",
+          "cc83d9c9-efa0-40e4-781c-6a19c5068d54",
+          "d0fe9c43-e4f6-450a-4e47-c248be26f5b1",
+          "7c3f6976-5342-4e4d-6c2f-bb1feefe8dc5",
+          "36c32682-3e5b-49db-5c0f-d332c614b27d",
+          "865ad52e-9ce0-4229-4dc9-c17969a12c68",
+          "5484f48f-14d0-4535-4e35-4d7418ddc8cd",
+          "63cdb3bc-28a6-4cea-67e4-9842fdeeaefb",
+          "6c5613ea-090c-4515-6537-464ad6ebfb24",
+          "5a25167d-656a-4621-4755-0e8e6381e4fe",
+          "0e8af1c8-5c30-454b-55b0-19f33e8c0be5",
+          "21046d2b-68e6-4b95-6861-5b3cd79fc223",
+          "f2dfe452-dd49-4885-5058-7d198d3e3d5c",
+          "02510145-0943-42a3-7271-8d19e5f87917",
+          "14eacf1a-cd53-452c-5ecc-0ae227054b00",
+          "a9d97195-f4c2-4c07-449b-e21ae34649a0",
+          "d4d57241-0be9-4ebf-9e00-5baea7bbed49",
+          "aea6c9e1-f775-47f2-574b-c320504c1e02",
+          "2a22d80d-619f-42e5-5832-503667a6ece6",
+          "53804202-685b-4c63-7e28-4dc98eb0a2d8",
+          "cfb97179-9a3b-42f5-60e7-58fcfea2ec9a",
+          "fdd38205-2f40-4893-6703-3badf2213ef3",
+          "5b60b723-4beb-40b0-5cba-47ea9c9b6e53",
+          "9423731d-2e44-4617-7971-4a1b3ddac131",
+          "10cec554-9d7f-4ecf-5575-df9290f61f8b",
+          "d70ffcd5-26ea-4a51-4db3-962ef1f15822",
+          "e2216edc-8612-4fd0-538e-20ebf53400ae",
+          "10b2d61d-ce9b-4f12-a682-ff0e230e677b",
+          "d68b3892-e0bf-4369-5d5a-40904048ac5c",
+          "7befda57-cc29-4a4d-610a-a557618e9cb2",
+          "b4ad12d0-7e42-449e-7ed6-794b1bdc5a9c",
+          "95182b68-201a-441c-760c-241531c5fd6f",
+          "4cb0d894-d8b4-437d-41b7-45bba382391c",
+          "84464c3a-f2cd-411d-736a-4e3c567cdeab",
+          "48fa90e0-b196-4fb2-6c57-aa9ffae02245"
+        ],
+        "defaults": [
+          "609a7f43-fb5b-480b-af79-eb71791c705b",
+          "d4d57241-0be9-4ebf-9e00-5baea7bbed49",
+          "0f575e42-9d90-4f85-5f8a-bdced2221dc3",
+          "233a3a99-023d-468d-44d4-2d1330e81bab",
+          "4102fae2-5de9-4bbd-4c6c-de663c87f6d0",
+          "083f7289-876f-4267-436b-ece5504adb06",
+          "7c3f6976-5342-4e4d-6c2f-bb1feefe8dc5",
+          "36c32682-3e5b-49db-5c0f-d332c614b27d",
+          "865ad52e-9ce0-4229-4dc9-c17969a12c68",
+          "5484f48f-14d0-4535-4e35-4d7418ddc8cd",
+          "63cdb3bc-28a6-4cea-67e4-9842fdeeaefb",
+          "6c5613ea-090c-4515-6537-464ad6ebfb24",
+          "5a25167d-656a-4621-4755-0e8e6381e4fe",
+          "0e8af1c8-5c30-454b-55b0-19f33e8c0be5",
+          "21046d2b-68e6-4b95-6861-5b3cd79fc223",
+          "f2dfe452-dd49-4885-5058-7d198d3e3d5c",
+          "02510145-0943-42a3-7271-8d19e5f87917",
+          "14eacf1a-cd53-452c-5ecc-0ae227054b00",
+          "a9d97195-f4c2-4c07-449b-e21ae34649a0",
+          "2a22d80d-619f-42e5-5832-503667a6ece6",
+          "53804202-685b-4c63-7e28-4dc98eb0a2d8",
+          "cfb97179-9a3b-42f5-60e7-58fcfea2ec9a",
+          "fdd38205-2f40-4893-6703-3badf2213ef3",
+          "e2216edc-8612-4fd0-538e-20ebf53400ae",
+          "10b2d61d-ce9b-4f12-a682-ff0e230e677b",
+          "d68b3892-e0bf-4369-5d5a-40904048ac5c",
+          "7befda57-cc29-4a4d-610a-a557618e9cb2",
+          "b4ad12d0-7e42-449e-7ed6-794b1bdc5a9c",
+          "95182b68-201a-441c-760c-241531c5fd6f",
+          "4cb0d894-d8b4-437d-41b7-45bba382391c",
+          "84464c3a-f2cd-411d-736a-4e3c567cdeab",
+          "48fa90e0-b196-4fb2-6c57-aa9ffae02245"
+        ],
+        "versions": [
+          "2.7.0-dev.1",
+          "2.7.0-dev.2",
+          "2.7.0-dev.3",
+          "2.7.0-dev.4",
+          "2.7.0-dev.5",
+          "2.7.0-dev.6",
+          "2.7.0-dev.7",
+          "2.7.0-dev.8",
+          "2.7.0-dev.9",
+          "2.7.0-dev.10",
+          "2.7.0-dev.11",
+          "2.7.0-dev.12",
+          "2.7.0-dev.13",
+          "2.7.0-dev.14",
+          "2.7.0-dev.15",
+          "2.7.0-dev.16",
+          "2.7.0-dev.17",
+          "2.7.0-dev.18",
+          "2.7.0-dev.19",
+          "2.7.0-dev.20",
+          "2.7.0-dev.21",
+          "2.7.0-dev.22",
+          "2.7.0-dev.23",
+          "2.7.0-dev.24",
+          "2.7.0-dev.25",
+          "2.7.0-dev.26",
+          "2.7.0-dev.27",
+          "2.7.0-dev.28",
+          "2.7.0-dev.29",
+          "2.7.0-dev.30",
+          "2.7.0-dev.31",
+          "2.7.0-dev.32",
+          "2.7.0-dev.33",
+          "2.7.0-dev.35",
+          "2.7.0-dev.36",
+          "2.7.0-dev.37",
+          "2.7.0-dev.39",
+          "2.7.0-dev.40",
+          "2.7.0-dev.42",
+          "2.7.0-dev.43",
+          "2.7.0-dev.44",
+          "2.7.0-dev.45",
+          "2.7.0-dev.46",
+          "2.7.0-dev.47",
+          "2.7.0-dev.48",
+          "2.7.0-dev.49",
+          "2.7.0-dev.50",
+          "2.7.0-dev.51",
+          "2.7.0-dev.52",
+          "2.7.0-dev.53",
+          "2.7.0-dev.54",
+          "2.7.0-dev.55",
+          "2.7.0-dev.56",
+          "2.7.0-dev.57",
+          "2.7.0-dev.58",
+          "2.7.0-dev.59",
+          "2.7.0-dev.60",
+          "2.7.0-dev.61",
+          "2.7.0-dev.62",
+          "2.7.0-dev.63",
+          "2.7.0-dev.64",
+          "2.7.0-dev.65",
+          "2.7.0-dev.66",
+          "2.7.0-dev.67",
+          "2.7.0-dev.68",
+          "2.7.0-dev.69",
+          "2.7.0-dev.70",
+          "2.7.0-dev.71",
+          "2.7.0-dev.72",
+          "2.7.0-dev.74",
+          "2.7.0-dev.75",
+          "2.7.0-dev.76",
+          "2.7.0-dev.77",
+          "2.7.0-dev.78",
+          "2.7.0-dev.79",
+          "2.7.0-dev.80",
+          "2.7.0-dev.81",
+          "2.7.0-dev.82",
+          "2.7.0-dev.83",
+          "2.7.0-dev.84",
+          "2.7.0-dev.85",
+          "2.7.0-dev.86",
+          "2.7.0-dev.87",
+          "2.7.0-dev.88",
+          "2.7.0-dev.89",
+          "2.7.0-dev.90",
+          "2.7.0-dev.92",
+          "2.7.0-dev.93",
+          "2.7.0-dev.94",
+          "2.7.0-dev.95",
+          "2.7.0-dev.96",
+          "2.7.0-dev.97",
+          "2.7.0-dev.98",
+          "2.7.0-dev.99",
+          "2.7.0-dev.100",
+          "2.7.0-dev.101",
+          "2.7.0-dev.102",
+          "2.7.0-dev.103",
+          "2.7.0-dev.104",
+          "2.7.0-dev.105",
+          "2.7.0-dev.106",
+          "2.7.0-dev.107",
+          "2.7.0-dev.108",
+          "2.7.0-dev.109",
+          "2.7.0-dev.110",
+          "2.7.0-dev.111",
+          "2.7.0-dev.112",
+          "2.7.0-dev.113",
+          "2.7.0-dev.114",
+          "2.7.0-dev.115",
+          "2.7.0-dev.116",
+          "2.7.0-dev.117",
+          "2.7.0-dev.118",
+          "2.7.0-dev.119",
+          "2.7.0-dev.120",
+          "2.7.0-dev.121",
+          "2.7.0-dev.122",
+          "2.7.0-dev.123",
+          "2.7.0-dev.124",
+          "2.7.0-dev.125",
+          "2.7.0-dev.126",
+          "2.7.0-dev.127",
+          "2.7.0-dev.128",
+          "2.7.0-dev.129",
+          "2.7.0-dev.142",
+          "2.7.0-dev.143",
+          "2.7.0-dev.144",
+          "2.7.0-dev.145",
+          "2.7.0-dev.146",
+          "2.7.0-dev.147",
+          "2.7.0-dev.148",
+          "2.7.0-dev.149",
+          "2.7.0-dev.150",
+          "2.7.0-dev.151",
+          "2.7.0-dev.152",
+          "2.7.0-dev.153",
+          "2.7.0-dev.154",
+          "2.7.0-dev.155",
+          "2.7.0-dev.156",
+          "2.7.0-dev.157",
+          "2.7.0-dev.158",
+          "2.7.0-dev.159",
+          "2.7.0-dev.160",
+          "2.7.0-dev.161",
+          "2.7.0-dev.162",
+          "2.7.0-dev.163",
+          "2.7.0-dev.164",
+          "2.7.0-dev.165",
+          "2.7.0-dev.166",
+          "2.7.0-dev.167",
+          "2.7.0-dev.168",
+          "2.7.0-dev.169",
+          "2.7.0-dev.170",
+          "2.7.0-dev.171",
+          "2.7.0-dev.172",
+          "2.7.0-dev.173",
+          "2.7.0-dev.174",
+          "2.7.0-dev.175",
+          "2.7.0-dev.176",
+          "2.7.0-dev.177",
+          "2.7.0-dev.178",
+          "2.7.0-dev.179",
+          "2.7.0-dev.180",
+          "2.7.0-dev.181",
+          "2.7.0-dev.182",
+          "2.7.0-dev.183",
+          "2.7.0-dev.184",
+          "2.7.0-dev.185",
+          "2.7.0-dev.186",
+          "2.7.0-dev.187",
+          "2.7.0-dev.188",
+          "2.7.0-dev.189",
+          "2.7.0-dev.190",
+          "2.7.0-dev.191",
+          "2.7.0-dev.192",
+          "2.7.0-dev.193",
+          "2.7.0-dev.194",
+          "2.7.0-dev.195",
+          "2.7.0-dev.196",
+          "2.7.0-dev.197",
+          "2.7.0-dev.198",
+          "2.7.0-dev.199",
+          "2.7.0-dev.200",
+          "2.7.0-dev.201",
+          "2.7.0-dev.202",
+          "2.7.0-dev.203",
+          "2.7.0-dev.204",
+          "2.7.0-dev.205",
+          "2.7.0-dev.206",
+          "2.7.0-dev.207",
+          "2.7.0-dev.208",
+          "2.7.0-dev.209",
+          "2.7.0-dev.210",
+          "2.7.0-dev.211",
+          "2.7.0-dev.212",
+          "2.7.0-dev.213",
+          "2.7.0-dev.214",
+          "2.7.0-dev.215",
+          "2.7.0-dev.216",
+          "2.7.0-dev.217",
+          "2.7.0-dev.218",
+          "2.7.0-dev.219",
+          "2.7.0-dev.220",
+          "2.7.0-dev.221",
+          "2.7.0-dev.222",
+          "2.7.0-dev.223",
+          "2.7.0-dev.224",
+          "2.7.0-dev.225",
+          "2.7.0-dev.226",
+          "2.7.0-dev.227",
+          "2.7.0-dev.228",
+          "2.7.0-dev.229",
+          "2.7.0-dev.230",
+          "2.7.0-dev.231",
+          "2.7.0-dev.232",
+          "2.7.0-dev.233",
+          "2.7.0-dev.234",
+          "2.7.0-dev.235",
+          "2.7.0-dev.236",
+          "2.7.0-dev.237",
+          "2.7.0-dev.238",
+          "2.7.0-dev.239",
+          "2.7.0-dev.240",
+          "2.7.0-dev.241",
+          "2.7.0-dev.242",
+          "2.7.0-dev.243",
+          "2.7.0-dev.244",
+          "2.7.0-dev.245",
+          "2.7.0-dev.246",
+          "2.7.0-dev.247",
+          "2.7.0-dev.248",
+          "2.7.0-dev.249",
+          "2.7.0-dev.250",
+          "2.7.0-dev.251",
+          "2.7.0-dev.252",
+          "2.7.0-dev.253",
+          "2.8.0-dev.1",
+          "2.8.0-dev.2",
+          "2.8.0-dev.4",
+          "2.8.0-dev.5",
+          "2.8.0-dev.6",
+          "2.8.0-dev.7",
+          "2.8.0-dev.8",
+          "2.8.0-dev.9",
+          "2.8.0-dev.10"
+        ]
+      }
+    ]
+  }
+}
