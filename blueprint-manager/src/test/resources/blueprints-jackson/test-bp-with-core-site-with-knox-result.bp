@@ -11,6 +11,9 @@
     {
       "name": "master",
       "components": [
+        {
+          "name": "KNOX_GATEWAY"
+        }
       ],
       "cardinality": "1"
     },
@@ -23,6 +26,9 @@
     {
       "name": "slave_2",
       "components": [
+       {
+         "name": "KNOX_GATEWAY"
+       }
       ],
       "cardinality": "2"
     }

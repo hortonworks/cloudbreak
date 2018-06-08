@@ -6,7 +6,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -18,7 +17,6 @@ import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Maps;
-import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
@@ -49,7 +47,6 @@ public class BlueprintValidator {
                 validateHostGroup(hostGroupNode, hostGroupMap, blueprintServiceComponentMap);
             }
             validateBlueprintServiceComponents(blueprintServiceComponentMap);
-            validateKnoxWithKerberos(cluster, instanceGroups, blueprintServiceComponentMap);
         } catch (IOException e) {
             throw new BlueprintValidationException(String.format("Blueprint [%s] can not be parsed from JSON.", blueprint.getId()), e);
         }
@@ -203,27 +200,6 @@ public class BlueprintValidator {
             blueprintServiceComponentMap.put(componentName, blueprintServiceComponent);
         } else {
             blueprintServiceComponent.update(hostGroup);
-        }
-    }
-
-    private void validateKnoxWithKerberos(Cluster cluster, Collection<InstanceGroup> instanceGroups, Map<String, BlueprintServiceComponent> componentMap) {
-        if (cluster != null && cluster.isSecure() && cluster.getGateway() != null) {
-            List<String> missingNodes = instanceGroups.stream()
-                .filter(s -> {
-                    if (!s.getInstanceGroupType().equals(InstanceGroupType.GATEWAY)) {
-                        return false;
-                    }
-                    return componentMap.values().stream()
-                        .filter(c -> c.getHostgroups().contains(s.getGroupName()))
-                        .noneMatch(c -> c.getName().equals(KNOX));
-                })
-                .map(InstanceGroup::getGroupName)
-                .collect(Collectors.toList());
-            if (!missingNodes.isEmpty()) {
-                Collections.sort(missingNodes);
-                throw new BlueprintValidationException("In case of Knox and Kerberos each 'Ambari Server' node must include the 'KNOX_GATEWAY' service. "
-                    + "The following host groups are missing the service: " + String.join(",", missingNodes));
-            }
         }
     }
 }
