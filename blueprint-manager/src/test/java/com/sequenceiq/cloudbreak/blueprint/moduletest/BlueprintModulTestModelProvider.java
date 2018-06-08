@@ -1,5 +1,23 @@
 package com.sequenceiq.cloudbreak.blueprint.moduletest;
 
+import static com.sequenceiq.cloudbreak.TestUtil.gatewayEnabled;
+import static com.sequenceiq.cloudbreak.TestUtil.hostGroup;
+import static com.sequenceiq.cloudbreak.TestUtil.kerberosConfig;
+import static com.sequenceiq.cloudbreak.TestUtil.ldapConfig;
+import static com.sequenceiq.cloudbreak.TestUtil.rdsConfig;
+import static com.sequenceiq.cloudbreak.blueprint.filesystem.BlueprintTestUtil.generalBlueprintView;
+import static com.sequenceiq.cloudbreak.blueprint.filesystem.BlueprintTestUtil.generalClusterConfigs;
+import static com.sequenceiq.cloudbreak.blueprint.moduletest.BlueprintModulTest.BLUEPRINT_UPDATER_TEST_INPUTS;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.model.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.model.ExecutorType;
@@ -13,24 +31,6 @@ import com.sequenceiq.cloudbreak.blueprint.testrepeater.TestFile;
 import com.sequenceiq.cloudbreak.domain.SmartSenseSubscription;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-
-import static com.sequenceiq.cloudbreak.TestUtil.gatewayEnabled;
-import static com.sequenceiq.cloudbreak.TestUtil.hostGroup;
-import static com.sequenceiq.cloudbreak.TestUtil.kerberosConfig;
-import static com.sequenceiq.cloudbreak.TestUtil.ldapConfig;
-import static com.sequenceiq.cloudbreak.TestUtil.rdsConfig;
-import static com.sequenceiq.cloudbreak.blueprint.filesystem.BlueprintTestUtil.generalBlueprintView;
-import static com.sequenceiq.cloudbreak.blueprint.filesystem.BlueprintTestUtil.generalClusterConfigs;
-import static com.sequenceiq.cloudbreak.blueprint.moduletest.BlueprintModulTest.BLUEPRINT_UPDATER_TEST_INPUTS;
 
 class BlueprintModulTestModelProvider {
 
@@ -131,6 +131,7 @@ class BlueprintModulTestModelProvider {
     static BlueprintPreparationObject blueprintObjectWhenHiveInteractivePresentedTheLlapShouldConfigured() {
         GeneralClusterConfigs conf = generalClusterConfigs();
         conf.setNodeCount(5);
+
         return Builder.builder()
                 .withGeneralClusterConfigs(conf)
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
@@ -191,8 +192,13 @@ class BlueprintModulTestModelProvider {
 
     static BlueprintPreparationObject blueprintObjectWhenDefaultBlueprintConfigured() {
         GeneralClusterConfigs configs = generalClusterConfigs();
+
+        Set<HostGroup> groups = getHostGroups("master", "worker", "compute");
+        for (HostGroup hostGroup : groups) {
+            hostGroup.getConstraint().getInstanceGroup().getTemplate().setVolumeCount(5);
+        }
         return Builder.builder()
-                .withHostgroups(getHostGroups("master", "worker", "compute"))
+                .withHostgroups(groups)
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
                 .withRdsConfigs(Sets.newHashSet(rdsConfig(RdsType.RANGER), rdsConfig(RdsType.HIVE)))
                 .withLdapConfig(ldapConfig())
