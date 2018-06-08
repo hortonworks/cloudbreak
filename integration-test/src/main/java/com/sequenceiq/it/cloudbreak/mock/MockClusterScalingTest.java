@@ -99,7 +99,7 @@ public class MockClusterScalingTest extends AbstractCloudbreakIntegrationTest {
                 itContext.getContextParam(CloudbreakITContextConstants.AMBARI_PASSWORD_ID), false);
 
         ScalingMock scalingMock = getItContext().getContextParam(CloudbreakV2Constants.MOCK_SERVER, ScalingMock.class);
-        scalingMock.verifyV1Calls(CLUSTER_NAME, scalingAdjustment, false);
+        scalingMock.verifyV1Calls(CLUSTER_NAME, scalingAdjustment);
     }
 
     @AfterClass

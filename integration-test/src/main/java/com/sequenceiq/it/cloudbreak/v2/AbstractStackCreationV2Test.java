@@ -1,6 +1,9 @@
 package com.sequenceiq.it.cloudbreak.v2;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.util.StringUtils;
@@ -11,8 +14,11 @@ import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
 import com.google.common.collect.Lists;
+import com.sequenceiq.cloudbreak.api.model.GatewayType;
 import com.sequenceiq.cloudbreak.api.model.KerberosRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.StackAuthenticationRequest;
+import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.GatewayJson;
+import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.GatewayTopologyJson;
 import com.sequenceiq.cloudbreak.api.model.v2.AmbariV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.ClusterV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.GeneralSettings;
@@ -82,9 +88,9 @@ public class AbstractStackCreationV2Test extends AbstractCloudbreakIntegrationTe
     }
 
     @BeforeMethod(dependsOnGroups = "V2StackCreationInit")
-    @Parameters({"blueprintName", "enableSecurity", "kerberosMasterKey", "kerberosAdmin", "kerberosPassword"})
+    @Parameters({"blueprintName", "enableSecurity", "kerberosMasterKey", "kerberosAdmin", "kerberosPassword", "enableGateway"})
     public void ambariParameters(@Optional("") String blueprintName, @Optional("false") boolean enableSecurity,
-            @Optional String kerberosMasterKey, @Optional String kerberosAdmin, @Optional String kerberosPassword) {
+            @Optional String kerberosMasterKey, @Optional String kerberosAdmin, @Optional String kerberosPassword, @Optional("true") boolean enableGateway) {
         IntegrationTestContext itContext = getItContext();
         blueprintName = StringUtils.hasText(blueprintName) ? blueprintName : itContext.getContextParam(CloudbreakV2Constants.BLUEPRINT_NAME);
 
@@ -94,12 +100,18 @@ public class AbstractStackCreationV2Test extends AbstractCloudbreakIntegrationTe
 
         StackV2Request stackV2Request = itContext.getContextParam(CloudbreakV2Constants.STACK_CREATION_REQUEST, StackV2Request.class);
         ClusterV2Request clusterV2Request = new ClusterV2Request();
+        clusterV2Request.setName(stackV2Request.getGeneral().getName());
         stackV2Request.setCluster(clusterV2Request);
         AmbariV2Request ambariV2Request = new AmbariV2Request();
         clusterV2Request.setAmbari(ambariV2Request);
         ambariV2Request.setBlueprintName(blueprintName);
         ambariV2Request.setUserName(itContext.getContextParam(CloudbreakITContextConstants.AMBARI_USER_ID));
         ambariV2Request.setPassword(itContext.getContextParam(CloudbreakITContextConstants.AMBARI_PASSWORD_ID));
+        if (enableGateway) {
+            GatewayJson gatewayJson = generateGatewayJson();
+            stackV2Request.getCluster().getAmbari().setGateway(gatewayJson);
+            ambariV2Request.setGateway(gatewayJson);
+        }
         if (enableSecurity) {
             ambariV2Request.setEnableSecurity(enableSecurity);
             KerberosRequest kerberosRequest = new KerberosRequest();
@@ -135,5 +147,31 @@ public class AbstractStackCreationV2Test extends AbstractCloudbreakIntegrationTe
         networkRequest.setSubnetCIDR(subnetCidr);
         stackV2Request.setNetwork(networkRequest);
         return networkRequest;
+    }
+
+    private GatewayJson generateGatewayJson() {
+        GatewayJson gatewayJson = new GatewayJson();
+        gatewayJson.setPath("knox-path");
+        GatewayTopologyJson gatewayTopologyJson = new GatewayTopologyJson();
+        gatewayTopologyJson.setTopologyName("db-proxy");
+        gatewayTopologyJson.setExposedServices(Arrays.asList(
+                "AMBARI",
+                "WEBHDFS",
+                "HDFSUI",
+                "YARNUI",
+                "JOBHISTORYUI",
+                "HIVE",
+                "HIVE_INTERACTIVE",
+                "ATLAS",
+                "SPARKHISTORYUI",
+                "ZEPPELIN",
+                "RANGERUI",
+                "PROFILER-AGENT",
+                "BEACON"));
+        List<GatewayTopologyJson> gatewayTopologyJsons = Collections.singletonList(gatewayTopologyJson);
+        gatewayJson.setTopologies(gatewayTopologyJsons);
+        gatewayJson.setSsoProvider("SSO_PROVIDER");
+        gatewayJson.setGatewayType(GatewayType.INDIVIDUAL);
+        return gatewayJson;
     }
 }
