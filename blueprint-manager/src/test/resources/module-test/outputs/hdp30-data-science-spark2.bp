@@ -216,18 +216,18 @@
       "configurations": [
         {
           "hdfs-site": {
-            "dfs.datanode.data.dir": "/hadoopfs/fs1/hdfs/datanode"
+            "dfs.datanode.data.dir": "/hadoopfs/fs1/hdfs/datanode,/hadoopfs/fs2/hdfs/datanode,/hadoopfs/fs3/hdfs/datanode,/hadoopfs/fs4/hdfs/datanode,/hadoopfs/fs5/hdfs/datanode"
           }
         },
         {
           "yarn-site": {
-            "yarn.nodemanager.local-dirs": "/hadoopfs/fs1/yarn/nodemanager",
-            "yarn.nodemanager.log-dirs": "/hadoopfs/fs1/yarn/nodemanager/log"
+            "yarn.nodemanager.local-dirs": "/hadoopfs/fs1/yarn/nodemanager,/hadoopfs/fs2/yarn/nodemanager,/hadoopfs/fs3/yarn/nodemanager,/hadoopfs/fs4/yarn/nodemanager,/hadoopfs/fs5/yarn/nodemanager",
+            "yarn.nodemanager.log-dirs": "/hadoopfs/fs1/yarn/nodemanager/log,/hadoopfs/fs2/yarn/nodemanager/log,/hadoopfs/fs3/yarn/nodemanager/log,/hadoopfs/fs4/yarn/nodemanager/log,/hadoopfs/fs5/yarn/nodemanager/log"
           }
         },
         {
           "core-site": {
-            "fs.s3a.buffer.dir": "/hadoopfs/fs1/s3-${user.name}"
+            "fs.s3a.buffer.dir": "/hadoopfs/fs1/s3-${user.name},/hadoopfs/fs2/s3-${user.name},/hadoopfs/fs3/s3-${user.name},/hadoopfs/fs4/s3-${user.name},/hadoopfs/fs5/s3-${user.name}"
           }
         }
       ],
@@ -258,18 +258,18 @@
       "configurations": [
         {
           "hdfs-site": {
-            "dfs.datanode.data.dir": "/hadoopfs/fs1/hdfs/datanode"
+            "dfs.datanode.data.dir": "/hadoopfs/fs1/hdfs/datanode,/hadoopfs/fs2/hdfs/datanode,/hadoopfs/fs3/hdfs/datanode,/hadoopfs/fs4/hdfs/datanode,/hadoopfs/fs5/hdfs/datanode"
           }
         },
         {
           "yarn-site": {
-            "yarn.nodemanager.local-dirs": "/hadoopfs/fs1/yarn/nodemanager",
-            "yarn.nodemanager.log-dirs": "/hadoopfs/fs1/yarn/nodemanager/log"
+            "yarn.nodemanager.local-dirs": "/hadoopfs/fs1/yarn/nodemanager,/hadoopfs/fs2/yarn/nodemanager,/hadoopfs/fs3/yarn/nodemanager,/hadoopfs/fs4/yarn/nodemanager,/hadoopfs/fs5/yarn/nodemanager",
+            "yarn.nodemanager.log-dirs": "/hadoopfs/fs1/yarn/nodemanager/log,/hadoopfs/fs2/yarn/nodemanager/log,/hadoopfs/fs3/yarn/nodemanager/log,/hadoopfs/fs4/yarn/nodemanager/log,/hadoopfs/fs5/yarn/nodemanager/log"
           }
         },
         {
           "core-site": {
-            "fs.s3a.buffer.dir": "/hadoopfs/fs1/s3-${user.name}"
+            "fs.s3a.buffer.dir": "/hadoopfs/fs1/s3-${user.name},/hadoopfs/fs2/s3-${user.name},/hadoopfs/fs3/s3-${user.name},/hadoopfs/fs4/s3-${user.name},/hadoopfs/fs5/s3-${user.name}"
           }
         }
       ],
@@ -297,13 +297,13 @@
       "configurations": [
         {
           "yarn-site": {
-            "yarn.nodemanager.local-dirs": "/hadoopfs/fs1/yarn/nodemanager",
-            "yarn.nodemanager.log-dirs": "/hadoopfs/fs1/yarn/nodemanager/log"
+            "yarn.nodemanager.local-dirs": "/hadoopfs/fs1/yarn/nodemanager,/hadoopfs/fs2/yarn/nodemanager,/hadoopfs/fs3/yarn/nodemanager,/hadoopfs/fs4/yarn/nodemanager,/hadoopfs/fs5/yarn/nodemanager",
+            "yarn.nodemanager.log-dirs": "/hadoopfs/fs1/yarn/nodemanager/log,/hadoopfs/fs2/yarn/nodemanager/log,/hadoopfs/fs3/yarn/nodemanager/log,/hadoopfs/fs4/yarn/nodemanager/log,/hadoopfs/fs5/yarn/nodemanager/log"
           }
         },
         {
           "core-site": {
-            "fs.s3a.buffer.dir": "/hadoopfs/fs1/s3-${user.name}"
+            "fs.s3a.buffer.dir": "/hadoopfs/fs1/s3-${user.name},/hadoopfs/fs2/s3-${user.name},/hadoopfs/fs3/s3-${user.name},/hadoopfs/fs4/s3-${user.name},/hadoopfs/fs5/s3-${user.name}"
           }
         }
       ],

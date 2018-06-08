@@ -1,5 +1,11 @@
 package com.sequenceiq.cloudbreak.blueprint;
 
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+
 import com.sequenceiq.cloudbreak.blueprint.filesystem.BaseFileSystemConfigurationsView;
 import com.sequenceiq.cloudbreak.blueprint.nifi.HdfConfigs;
 import com.sequenceiq.cloudbreak.blueprint.template.views.BlueprintView;
@@ -17,12 +23,6 @@ import com.sequenceiq.cloudbreak.domain.SmartSenseSubscription;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
-
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
 
 public class BlueprintPreparationObject {
 
@@ -186,7 +186,8 @@ public class BlueprintPreparationObject {
             for (HostGroup hostGroup : hostGroups) {
                 InstanceGroup instanceGroup = hostGroup.getConstraint().getInstanceGroup();
                 if (instanceGroup != null) {
-                    hostgroupViews.add(new HostgroupView(hostGroup.getName(), 1,
+                    int volumeCount = instanceGroup.getTemplate() == null ? 1 : instanceGroup.getTemplate().getVolumeCount();
+                    hostgroupViews.add(new HostgroupView(hostGroup.getName(), volumeCount,
                             instanceGroup.getInstanceGroupType(), instanceGroup.getNodeCount()));
                 } else {
                     hostgroupViews.add(new HostgroupView(hostGroup.getName()));

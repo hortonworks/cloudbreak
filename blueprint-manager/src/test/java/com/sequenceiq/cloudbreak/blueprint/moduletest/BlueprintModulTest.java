@@ -1,26 +1,5 @@
 package com.sequenceiq.cloudbreak.blueprint.moduletest;
 
-import com.sequenceiq.cloudbreak.blueprint.BlueprintPreparationObject;
-import com.sequenceiq.cloudbreak.blueprint.testrepeater.TestFile;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameter;
-import org.junit.runners.Parameterized.Parameters;
-import org.skyscreamer.jsonassert.JSONParser;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.boot.test.context.SpringBootTestContextBootstrapper;
-import org.springframework.test.context.BootstrapWith;
-import org.springframework.test.context.TestContextManager;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-
 import static com.sequenceiq.cloudbreak.blueprint.moduletest.BlueprintModulTestModelProvider.blueprintObjectForHbaseConfigurationForTwoHosts;
 import static com.sequenceiq.cloudbreak.blueprint.moduletest.BlueprintModulTestModelProvider.blueprintObjectWhenAtlasAndLdapPresentedThenBothShouldConfigured;
 import static com.sequenceiq.cloudbreak.blueprint.moduletest.BlueprintModulTestModelProvider.blueprintObjectWhenAtlasPresentedShouldConfigured;
@@ -50,6 +29,28 @@ import static com.sequenceiq.cloudbreak.blueprint.moduletest.BlueprintModulTestM
 import static net.javacrumbs.jsonunit.JsonAssert.assertJsonEquals;
 import static net.javacrumbs.jsonunit.JsonAssert.when;
 import static net.javacrumbs.jsonunit.core.Option.IGNORING_ARRAY_ORDER;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameter;
+import org.junit.runners.Parameterized.Parameters;
+import org.skyscreamer.jsonassert.JSONParser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.boot.test.context.SpringBootTestContextBootstrapper;
+import org.springframework.test.context.BootstrapWith;
+import org.springframework.test.context.TestContextManager;
+
+import com.sequenceiq.cloudbreak.blueprint.BlueprintPreparationObject;
+import com.sequenceiq.cloudbreak.blueprint.testrepeater.TestFile;
 
 @RunWith(Parameterized.class)
 @BootstrapWith(SpringBootTestContextBootstrapper.class)
