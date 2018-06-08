@@ -5,6 +5,8 @@ import static com.sequenceiq.cloudbreak.TestUtil.hostGroup;
 import static com.sequenceiq.cloudbreak.TestUtil.kerberosConfig;
 import static com.sequenceiq.cloudbreak.TestUtil.ldapConfig;
 import static com.sequenceiq.cloudbreak.TestUtil.rdsConfig;
+import static com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType.CORE;
+import static com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType.GATEWAY;
 import static com.sequenceiq.cloudbreak.blueprint.filesystem.BlueprintTestUtil.generalBlueprintView;
 import static com.sequenceiq.cloudbreak.blueprint.filesystem.BlueprintTestUtil.generalClusterConfigs;
 import static com.sequenceiq.cloudbreak.blueprint.moduletest.BlueprintModulTest.BLUEPRINT_UPDATER_TEST_INPUTS;
@@ -25,6 +27,7 @@ import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintPreparationObject;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintPreparationObject.Builder;
 import com.sequenceiq.cloudbreak.blueprint.nifi.HdfConfigs;
+import com.sequenceiq.cloudbreak.blueprint.template.views.HostgroupView;
 import com.sequenceiq.cloudbreak.blueprint.template.views.SharedServiceConfigsView;
 import com.sequenceiq.cloudbreak.blueprint.templates.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.blueprint.testrepeater.TestFile;
@@ -90,8 +93,14 @@ class BlueprintModulTestModelProvider {
     static BlueprintPreparationObject blueprintObjectWhenKerberosPresentedThenKerberosShouldConfigured() {
         GeneralClusterConfigs configWithGateWay = generalClusterConfigs();
         configWithGateWay.setGatewayInstanceMetadataPresented(true);
+        Set<HostgroupView> hostGroupsView = new HashSet<>();
+        HostgroupView hg1 = new HostgroupView("master", 0, GATEWAY, 2);
+        HostgroupView hg2 = new HostgroupView("slave_1", 0, CORE, 2);
+        hostGroupsView.add(hg1);
+        hostGroupsView.add(hg2);
         return getPreparedBuilder("master", "slave_1")
                 .withGeneralClusterConfigs(configWithGateWay)
+                .withHostgroupViews(hostGroupsView)
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
                 .withKerberosConfig(kerberosConfig())
                 .build();
@@ -131,7 +140,6 @@ class BlueprintModulTestModelProvider {
     static BlueprintPreparationObject blueprintObjectWhenHiveInteractivePresentedTheLlapShouldConfigured() {
         GeneralClusterConfigs conf = generalClusterConfigs();
         conf.setNodeCount(5);
-
         return Builder.builder()
                 .withGeneralClusterConfigs(conf)
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
