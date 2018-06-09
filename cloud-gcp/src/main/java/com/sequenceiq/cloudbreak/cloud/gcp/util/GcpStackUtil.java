@@ -122,7 +122,11 @@ public final class GcpStackUtil {
     }
 
     public static String getProjectId(CloudCredential credential) {
-        return credential.getParameter(PROJECT_ID, String.class).toLowerCase().replaceAll("[^A-Za-z0-9 ]", "-");
+        String projectId = credential.getParameter(PROJECT_ID, String.class);
+        if (projectId == null) {
+            throw new CredentialVerificationException("Missing Project Id from GCP Credential");
+        }
+        return projectId.toLowerCase().replaceAll("[^A-Za-z0-9 ]", "-");
     }
 
     public static CloudCredential prepareCredential(CloudCredential credential) {
