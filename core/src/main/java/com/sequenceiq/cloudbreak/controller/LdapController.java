@@ -126,6 +126,13 @@ public class LdapController extends NotificationController implements LdapConfig
         return ldapTestResult;
     }
 
+    @Override
+    public LdapConfigRequest getRequestFromName(String name) {
+        IdentityUser user = authenticatedUserService.getCbUser();
+        LdapConfig ldapConfig = ldapConfigService.getPublicConfig(name, user);
+        return conversionService.convert(ldapConfig, LdapConfigRequest.class);
+    }
+
     private LdapConfigResponse createConfig(IdentityUser user, LdapConfigRequest request, boolean publicInAccount) {
         LdapConfig config = conversionService.convert(request, LdapConfig.class);
         config.setPublicInAccount(publicInAccount);
