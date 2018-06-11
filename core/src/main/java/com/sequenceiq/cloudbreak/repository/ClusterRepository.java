@@ -1,18 +1,17 @@
 package com.sequenceiq.cloudbreak.repository;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
-
+import com.sequenceiq.cloudbreak.api.model.Status;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.LdapConfig;
+import com.sequenceiq.cloudbreak.domain.ProxyConfig;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
-import com.sequenceiq.cloudbreak.api.model.Status;
-import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.domain.LdapConfig;
-import com.sequenceiq.cloudbreak.domain.ProxyConfig;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
 
 @EntityType(entityClass = Cluster.class)
 public interface ClusterRepository extends CrudRepository<Cluster, Long> {
@@ -37,9 +36,9 @@ public interface ClusterRepository extends CrudRepository<Cluster, Long> {
     @Query("SELECT c FROM Cluster c inner join c.rdsConfigs rc WHERE rc.id= :id")
     Set<Cluster> findAllClustersByRDSConfig(@Param("id") Long rdsConfigId);
 
-    Long countByBlueprint(Blueprint blueprint);
+    List<Cluster> findByLdapConfig(LdapConfig ldapConfig);
 
-    Long countByLdapConfig(LdapConfig ldapConfig);
+    Long countByBlueprint(Blueprint blueprint);
 
     Long countByProxyConfig(ProxyConfig proxyConfig);
 }
