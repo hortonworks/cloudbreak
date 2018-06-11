@@ -416,10 +416,10 @@ public class StackService {
         delete(stack, forced, deleteDependencies);
     }
 
-    public void removeInstance(@Nonnull IdentityUser user, Long stackId, String instanceId) {
+    public void removeInstance(@Nonnull IdentityUser user, Long stackId, String instanceId, boolean forced) {
         Stack stack = get(stackId);
         InstanceMetaData metaData = validateInstanceForDownscale(user, instanceId, stack);
-        flowManager.triggerStackRemoveInstance(stackId, metaData.getInstanceGroupName(), metaData.getPrivateId());
+        flowManager.triggerStackRemoveInstance(stackId, metaData.getInstanceGroupName(), metaData.getPrivateId(), forced);
     }
 
     public void removeInstances(IdentityUser user, Long stackId, Set<String> instanceIds) {
