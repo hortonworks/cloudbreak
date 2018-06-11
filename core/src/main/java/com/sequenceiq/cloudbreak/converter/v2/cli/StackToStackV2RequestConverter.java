@@ -104,9 +104,11 @@ public class StackToStackV2RequestConverter extends AbstractConversionServiceAwa
     private InstanceGroupV2Request collectInformationsFromActualHostgroup(Stack source, InstanceGroup instanceGroup,
             InstanceGroupV2Request instanceGroupV2Request) {
         HostGroup actualHostgroup = null;
-        for (HostGroup hostGroup : source.getCluster().getHostGroups()) {
-            if (hostGroup.getName().equals(instanceGroup.getGroupName())) {
-                actualHostgroup = hostGroup;
+        if (source.getCluster() != null) {
+            for (HostGroup hostGroup : source.getCluster().getHostGroups()) {
+                if (hostGroup.getName().equals(instanceGroup.getGroupName())) {
+                    actualHostgroup = hostGroup;
+                }
             }
         }
         if (actualHostgroup != null) {
