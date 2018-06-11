@@ -1,13 +1,5 @@
 package com.sequenceiq.cloudbreak.service.rdsconfig;
 
-import java.util.Set;
-
-import javax.inject.Inject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-
 import com.google.common.base.Preconditions;
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
@@ -16,10 +8,19 @@ import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.RdsConfigRepository;
 import com.sequenceiq.cloudbreak.service.AuthorizationService;
 import com.sequenceiq.cloudbreak.util.NameUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
+import javax.inject.Inject;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 @Service
 public class RdsConfigService {
@@ -143,9 +144,17 @@ public class RdsConfigService {
     }
 
     private void checkRdsConfigNotAssociated(RDSConfig rdsConfig) {
-        if (!clusterRepository.findAllClustersByRDSConfig(rdsConfig.getId()).isEmpty()) {
+        List<Cluster> clustersWithProvidedRds = new ArrayList<>(clusterRepository.findAllClustersByRDSConfig(rdsConfig.getId()));
+        if (!clustersWithProvidedRds.isEmpty()) {
+            StringBuilder clusters = new StringBuilder();
+            clusters.append('[');
+            for (int i = 0; i < clustersWithProvidedRds.size() - 1; i++) {
+                clusters.append(clustersWithProvidedRds.get(i).getName()).append(", ");
+            }
+            clusters.append(clustersWithProvidedRds.get(clustersWithProvidedRds.size() - 1).getName()).append(']');
             throw new BadRequestException(String.format(
-                    "There are clusters associated with RDS config '%s'. Please remove these before deleting the RDS configuration.", rdsConfig.getId()));
+                    "There are clusters associated with RDS config '%s'. Please remove these before deleting the RDS configuration. "
+                            + "The following clusters are using this RDS: %s", rdsConfig.getName(), clusters.toString()));
         }
     }
 
