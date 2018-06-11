@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import javax.inject.Inject;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
 
@@ -105,15 +106,18 @@ public class LdapConfigService {
         authorizationService.hasWritePermission(ldapConfig);
         List<Cluster> clustersWithLdap = clusterRepository.findByLdapConfig(ldapConfig);
         if (!clustersWithLdap.isEmpty()) {
-            StringBuilder ldaps = new StringBuilder();
-            ldaps.append('[');
-            for (int i = 0; i < clustersWithLdap.size() - 1; i++) {
-                ldaps.append(clustersWithLdap.get(i).getName()).append(", ");
+            if (clustersWithLdap.size() > 1) {
+                String clusters = clustersWithLdap
+                        .stream()
+                        .map(Cluster::getName)
+                        .collect(Collectors.joining(", "));
+                throw new BadRequestException(String.format(
+                        "There are clusters associated with LDAP config '%s'. Please remove these before deleting the LDAP config. "
+                                + "The following clusters are using this LDAP: [%s]", ldapConfig.getName(), clusters));
+            } else {
+                throw new BadRequestException(String.format("There is a cluster ['%s'] which uses LDAP config '%s'. Please remove this "
+                        + "cluster before deleting the LDAP config", clustersWithLdap.get(0).getName(), ldapConfig.getName()));
             }
-            ldaps.append(clustersWithLdap.get(clustersWithLdap.size() - 1).getName()).append(']');
-            throw new BadRequestException(String.format(
-                    "There are clusters associated with LDAP config '%s'. Please remove these before deleting the LDAP config. "
-                            + "The following clusters are using this LDAP: %s", ldapConfig.getName(), ldaps.toString()));
         }
         ldapConfigRepository.delete(ldapConfig);
     }
