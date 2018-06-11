@@ -24,11 +24,11 @@ import com.sequenceiq.cloudbreak.api.model.AutoscaleStackResponse;
 import com.sequenceiq.cloudbreak.api.model.CertificateResponse;
 import com.sequenceiq.cloudbreak.api.model.GeneratedBlueprintResponse;
 import com.sequenceiq.cloudbreak.api.model.PlatformVariantsJson;
-import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;
-import com.sequenceiq.cloudbreak.api.model.stack.StackValidationRequest;
 import com.sequenceiq.cloudbreak.api.model.ReinstallRequestV2;
-import com.sequenceiq.cloudbreak.api.model.stack.StackScaleRequestV2;
 import com.sequenceiq.cloudbreak.api.model.UserNamePasswordJson;
+import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;
+import com.sequenceiq.cloudbreak.api.model.stack.StackScaleRequestV2;
+import com.sequenceiq.cloudbreak.api.model.stack.StackValidationRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRepairRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
 import com.sequenceiq.cloudbreak.doc.ContentType;
@@ -197,7 +197,9 @@ public interface StackV2Endpoint extends StackEndpoint {
     @Override
     @ApiOperation(value = StackOpDescription.DELETE_INSTANCE_BY_ID, produces = ContentType.JSON, notes = Notes.STACK_NOTES,
             nickname = "deleteInstanceStackV2")
-    Response deleteInstance(@PathParam("stackId") Long stackId, @PathParam("instanceId") String instanceId);
+    Response deleteInstance(@PathParam("stackId") Long stackId,
+            @PathParam("instanceId") String instanceId,
+            @QueryParam("forced") @DefaultValue("false") boolean forced);
 
     @DELETE
     @Path("{stackId}/deleteInstances")

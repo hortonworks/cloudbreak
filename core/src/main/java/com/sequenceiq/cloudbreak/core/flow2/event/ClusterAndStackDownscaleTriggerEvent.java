@@ -15,8 +15,8 @@ public class ClusterAndStackDownscaleTriggerEvent extends ClusterDownscaleTrigge
     }
 
     public ClusterAndStackDownscaleTriggerEvent(String selector, Long stackId, String hostGroup, Set<Long> privateIds, ScalingType scalingType,
-            Promise<Boolean> accepted) {
-        super(selector, stackId, hostGroup, privateIds, accepted);
+            Promise<Boolean> accepted, ClusterDownscaleDetails details) {
+        super(selector, stackId, hostGroup, privateIds, accepted, details);
         this.scalingType = scalingType;
     }
 
