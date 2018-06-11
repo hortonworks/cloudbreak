@@ -71,6 +71,10 @@ public class Gateway implements ProvisionEntity {
 
     private String tokenCert;
 
+    // It is not used anyomore, other than to support Cloudbreak upgrade-ability (e.g. frm 2.4 to 2.7)
+    // It is set to false by hibernate when loading old gateways created with previous CB versions
+    private boolean enableGateway = true;
+
     public Gateway copy() {
         Gateway gateway = new Gateway();
         gateway.setTopologies(topologies.stream().map(GatewayTopology::copy).collect(Collectors.toSet()));
@@ -182,5 +186,10 @@ public class Gateway implements ProvisionEntity {
 
     public void setTopologies(Set<GatewayTopology> topologies) {
         this.topologies = topologies;
+    }
+
+    // to support Cloudbreak upgrade-ability (e.g. frm 2.4 to 2.7)
+    public boolean isGatewayEnabled() {
+        return enableGateway;
     }
 }
