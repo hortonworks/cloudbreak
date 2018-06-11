@@ -422,7 +422,7 @@ public class StackService {
         delete(stack, forced, deleteDependencies);
     }
 
-    public void removeInstance(IdentityUser user, Long stackId, String instanceId) {
+    public void removeInstance(IdentityUser user, Long stackId, String instanceId, boolean forced) {
         Stack stack = get(stackId);
         InstanceMetaData instanceMetaData = instanceMetaDataRepository.findByInstanceId(stackId, instanceId);
         if (instanceMetaData == null) {
@@ -431,7 +431,7 @@ public class StackService {
         if (!stack.isPublicInAccount() && !stack.getOwner().equals(user.getUserId())) {
             throw new BadRequestException(String.format("Private stack (%s) only modifiable by the owner.", stackId));
         }
-        flowManager.triggerStackRemoveInstance(stackId, instanceMetaData.getInstanceGroupName(), instanceMetaData.getPrivateId());
+        flowManager.triggerStackRemoveInstance(stackId, instanceMetaData.getInstanceGroupName(), instanceMetaData.getPrivateId(), forced);
     }
 
     @Transactional(TxType.NEVER)

@@ -98,7 +98,12 @@ public class StackV1Controller extends NotificationController implements StackV1
 
     @Override
     public Response deleteInstance(Long stackId, String instanceId) {
-        return stackCommonService.deleteInstance(stackId, instanceId);
+        return stackCommonService.deleteInstance(stackId, instanceId, false);
+    }
+
+    @Override
+    public Response deleteInstance(Long stackId, String instanceId, boolean forced) {
+        return stackCommonService.deleteInstance(stackId, instanceId, forced);
     }
 
     @Override

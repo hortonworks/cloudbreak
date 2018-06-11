@@ -181,8 +181,13 @@ public class StackCommonService implements StackEndpoint {
 
     @Override
     public Response deleteInstance(Long stackId, String instanceId) {
+        return deleteInstance(stackId, instanceId, false);
+    }
+
+    @Override
+    public Response deleteInstance(Long stackId, String instanceId, boolean forced) {
         IdentityUser user = authenticatedUserService.getCbUser();
-        stackService.removeInstance(user, stackId, instanceId);
+        stackService.removeInstance(user, stackId, instanceId, forced);
         return Response.status(Status.NO_CONTENT).build();
     }
 

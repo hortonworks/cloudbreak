@@ -42,7 +42,11 @@ public interface StackEndpoint {
 
     PlatformVariantsJson variants();
 
-    Response deleteInstance(@PathParam("stackId") Long stackId, @PathParam("instanceId") String instanceId);
+    default Response deleteInstance(@PathParam("stackId") Long stackId, @PathParam("instanceId") String instanceId) {
+        return deleteInstance(stackId, instanceId, false);
+    }
+
+    Response deleteInstance(@PathParam("stackId") Long stackId, @PathParam("instanceId") String instanceId, @QueryParam("forced") boolean forced);
 
     CertificateResponse getCertificate(@PathParam("id") Long stackId);
 
