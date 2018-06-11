@@ -1,13 +1,13 @@
 package com.sequenceiq.cloudbreak.controller.mapper;
 
 import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.ext.Provider;
 
+import org.springframework.stereotype.Component;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 
 import com.sequenceiq.cloudbreak.controller.json.ExceptionResult;
 
-@Provider
+@Component
 public class HttpRequestMethodNotSupportedExceptionMapper extends BaseExceptionMapper<HttpRequestMethodNotSupportedException> {
 
     @Override
@@ -18,5 +18,10 @@ public class HttpRequestMethodNotSupportedExceptionMapper extends BaseExceptionM
     @Override
     Status getResponseStatus() {
         return Status.BAD_REQUEST;
+    }
+
+    @Override
+    public Class<HttpRequestMethodNotSupportedException> supportedType() {
+        return HttpRequestMethodNotSupportedException.class;
     }
 }

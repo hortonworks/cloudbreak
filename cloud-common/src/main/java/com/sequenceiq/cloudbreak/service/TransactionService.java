@@ -11,6 +11,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.common.exception.WrapperException;
+
 @Service
 public class TransactionService {
 
@@ -118,9 +120,13 @@ public class TransactionService {
         }
     }
 
-    public static class TransactionRuntimeExecutionException extends RuntimeException {
+    public static class TransactionRuntimeExecutionException extends RuntimeException implements WrapperException {
         public TransactionRuntimeExecutionException(TransactionExecutionException cause) {
             super(cause);
+        }
+
+        public Throwable getRootCause() {
+            return getCause().getCause();
         }
     }
 

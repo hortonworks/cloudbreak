@@ -1,11 +1,12 @@
 package com.sequenceiq.cloudbreak.controller.mapper;
 
 import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.ext.Provider;
+
+import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.controller.exception.SmartSenseConfigurationNotFoundException;
 
-@Provider
+@Component
 public class SmartSenseNotFoundExceptionMapper extends BaseExceptionMapper<SmartSenseConfigurationNotFoundException> {
 
     @Override
@@ -14,7 +15,12 @@ public class SmartSenseNotFoundExceptionMapper extends BaseExceptionMapper<Smart
     }
 
     @Override
-    protected boolean logException() {
+    protected boolean isLogException() {
         return false;
+    }
+
+    @Override
+    public Class<SmartSenseConfigurationNotFoundException> supportedType() {
+        return SmartSenseConfigurationNotFoundException.class;
     }
 }
