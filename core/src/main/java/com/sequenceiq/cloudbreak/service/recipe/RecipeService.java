@@ -1,25 +1,26 @@
 package com.sequenceiq.cloudbreak.service.recipe;
 
-import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
-
-import java.util.Collection;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import javax.inject.Inject;
-
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.stereotype.Service;
-
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.Recipe;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
 import com.sequenceiq.cloudbreak.repository.RecipeRepository;
 import com.sequenceiq.cloudbreak.service.AuthorizationService;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.stereotype.Service;
+
+import javax.inject.Inject;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
 
 @Service
 public class RecipeService {
@@ -102,9 +103,20 @@ public class RecipeService {
 
     private void delete(Recipe recipe) {
         authorizationService.hasWritePermission(recipe);
-        if (!hostGroupRepository.findAllHostGroupsByRecipe(recipe.getId()).isEmpty()) {
-            throw new BadRequestException(String.format(
-                    "There are clusters associated with recipe '%s'. Please remove these before deleting the recipe.", recipe.getId()));
+        List<HostGroup> hostGroupsWithRecipe = new ArrayList<>(hostGroupRepository.findAllHostGroupsByRecipe(recipe.getId()));
+        if (!hostGroupsWithRecipe.isEmpty()) {
+            if (hostGroupsWithRecipe.size() > 1) {
+                String clusters = hostGroupsWithRecipe
+                        .stream()
+                        .map(hostGroup -> hostGroup.getCluster().getName())
+                        .collect(Collectors.joining(", "));
+                throw new BadRequestException(String.format(
+                        "There are clusters associated with recipe '%s'. Please remove these before deleting the recipe. "
+                                + "The following clusters are using this recipe: [%s]", recipe.getId(), clusters));
+            } else {
+                throw new BadRequestException(String.format("There is a cluster ['%s'] which uses recipe '%s'. Please remove this "
+                        + "cluster before deleting the recipe", hostGroupsWithRecipe.get(0).getCluster().getName(), recipe.getName()));
+            }
         }
         recipeRepository.delete(recipe);
     }
