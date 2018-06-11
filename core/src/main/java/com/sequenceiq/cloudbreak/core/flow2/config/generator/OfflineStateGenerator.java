@@ -386,6 +386,11 @@ public class OfflineStateGenerator {
         }
 
         @Override
+        public Set<Stack> findByNetwork(Network network) {
+            return null;
+        }
+
+        @Override
         public <S extends Stack> S save(S entity) {
             return null;
         }

@@ -8,6 +8,8 @@ import org.springframework.data.repository.query.Param;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 
+import java.util.Set;
+
 @EntityType(entityClass = InstanceGroup.class)
 public interface InstanceGroupRepository extends CrudRepository<InstanceGroup, Long> {
 
@@ -18,5 +20,5 @@ public interface InstanceGroupRepository extends CrudRepository<InstanceGroup, L
     @Query("SELECT i from InstanceGroup i WHERE i.stack.id = :stackId AND i.groupName = :groupName")
     InstanceGroup findOneByGroupNameInStack(@Param("stackId") Long stackId, @Param("groupName") String groupName);
 
-    Long countBySecurityGroup(SecurityGroup securityGroup);
+    Set<InstanceGroup> findBySecurityGroup(SecurityGroup securityGroup);
 }

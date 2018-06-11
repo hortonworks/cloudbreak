@@ -1,16 +1,5 @@
 package com.sequenceiq.cloudbreak.service.securitygroup;
 
-import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
-
-import java.util.Set;
-
-import javax.inject.Inject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.stereotype.Service;
-
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
@@ -18,10 +7,23 @@ import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
 import com.sequenceiq.cloudbreak.repository.SecurityGroupRepository;
 import com.sequenceiq.cloudbreak.service.AuthorizationService;
 import com.sequenceiq.cloudbreak.util.NameUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.stereotype.Service;
+
+import javax.inject.Inject;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
 
 @Service
 public class SecurityGroupService {
@@ -98,10 +100,22 @@ public class SecurityGroupService {
 
     private void delete(SecurityGroup securityGroup) {
         authorizationService.hasWritePermission(securityGroup);
-        if (!instanceGroupRepository.countBySecurityGroup(securityGroup).equals(0L)) {
-            throw new BadRequestException(String.format(
-                    "There are clusters associated with SecurityGroup '%s'(ID:'%s'). Please remove these before deleting the SecurityGroup.",
-                    securityGroup.getName(), securityGroup.getId()));
+        List<InstanceGroup> instanceGroupsWithThisSecurityGroup = new ArrayList<>(instanceGroupRepository.findBySecurityGroup(securityGroup));
+        if (!instanceGroupsWithThisSecurityGroup.isEmpty()) {
+            if (instanceGroupsWithThisSecurityGroup.size() > 1) {
+                String clusters = instanceGroupsWithThisSecurityGroup
+                        .stream()
+                        .map(instanceGroup -> instanceGroup.getStack().getCluster().getName())
+                        .collect(Collectors.joining(", "));
+                throw new BadRequestException(String.format(
+                        "There are clusters associated with SecurityGroup '%s'(ID:'%s'). Please remove these before deleting the SecurityGroup. "
+                                + "The following clusters are using this SecurityGroup: [%s]",
+                        securityGroup.getName(), securityGroup.getId(), clusters));
+            } else {
+                throw new BadRequestException(String.format("There is a cluster ['%s'] which uses SecurityGroup '%s'(ID:'%s'). Please remove this "
+                                + "cluster before deleting the SecurityGroup",
+                        instanceGroupsWithThisSecurityGroup.get(0).getStack().getCluster().getName(), securityGroup.getName(), securityGroup.getId()));
+            }
         }
         if (ResourceStatus.USER_MANAGED.equals(securityGroup.getStatus())) {
             groupRepository.delete(securityGroup);

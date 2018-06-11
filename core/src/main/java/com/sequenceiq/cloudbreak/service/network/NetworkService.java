@@ -1,16 +1,5 @@
 package com.sequenceiq.cloudbreak.service.network;
 
-import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
-
-import java.util.Set;
-
-import javax.inject.Inject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.stereotype.Service;
-
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
@@ -18,10 +7,23 @@ import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.Network;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.repository.NetworkRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.AuthorizationService;
 import com.sequenceiq.cloudbreak.util.NameUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.stereotype.Service;
+
+import javax.inject.Inject;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
 
 @Service
 public class NetworkService {
@@ -103,10 +105,21 @@ public class NetworkService {
 
     private void delete(Network network) {
         authorizationService.hasWritePermission(network);
-        if (!stackRepository.countByNetwork(network).equals(0L)) {
-            throw new BadRequestException(String.format(
-                    "There are clusters associated with network '%s'(ID:'%s'). Please remove these before deleting the network.",
-                    network.getName(), network.getId()));
+        List<Stack> stacksWithThisNetwork = new ArrayList<>(stackRepository.findByNetwork(network));
+        if (!stacksWithThisNetwork.isEmpty()) {
+            if (stacksWithThisNetwork.size() > 1) {
+                String clusters = stacksWithThisNetwork
+                        .stream()
+                        .map(stack -> stack.getCluster().getName())
+                        .collect(Collectors.joining(", "));
+                throw new BadRequestException(String.format(
+                        "There are clusters associated with network '%s'(ID:'%s'). Please remove these before deleting the network. "
+                                + "The following clusters are using this network: [%s]", network.getName(), network.getId(), clusters));
+            } else {
+                throw new BadRequestException(String.format("There is a cluster ['%s'] which uses network '%s'(ID:'%s'). Please remove this "
+                        + "cluster before deleting the network", stacksWithThisNetwork.get(0).getCluster().getName(), network.getName(), network.getId()));
+            }
+
         }
         if (ResourceStatus.USER_MANAGED.equals(network.getStatus())) {
             networkRepository.delete(network);

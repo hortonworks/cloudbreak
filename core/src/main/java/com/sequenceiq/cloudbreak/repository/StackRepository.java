@@ -1,17 +1,16 @@
 package com.sequenceiq.cloudbreak.repository;
 
-import java.util.List;
-import java.util.Set;
-
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.CrudRepository;
-import org.springframework.data.repository.query.Param;
-
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.FlexSubscription;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.query.Param;
+
+import java.util.List;
+import java.util.Set;
 
 @EntityType(entityClass = Stack.class)
 public interface StackRepository extends CrudRepository<Stack, Long> {
@@ -96,4 +95,7 @@ public interface StackRepository extends CrudRepository<Stack, Long> {
     Long countByCredential(Credential credential);
 
     Long countByNetwork(Network network);
+
+    Set<Stack> findByNetwork(Network network);
+
 }
