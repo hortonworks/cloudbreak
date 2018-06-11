@@ -21,6 +21,7 @@ import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class RdsConfigService {
@@ -146,15 +147,18 @@ public class RdsConfigService {
     private void checkRdsConfigNotAssociated(RDSConfig rdsConfig) {
         List<Cluster> clustersWithProvidedRds = new ArrayList<>(clusterRepository.findAllClustersByRDSConfig(rdsConfig.getId()));
         if (!clustersWithProvidedRds.isEmpty()) {
-            StringBuilder clusters = new StringBuilder();
-            clusters.append('[');
-            for (int i = 0; i < clustersWithProvidedRds.size() - 1; i++) {
-                clusters.append(clustersWithProvidedRds.get(i).getName()).append(", ");
+            if (clustersWithProvidedRds.size() > 1) {
+                String clusters = clustersWithProvidedRds
+                        .stream()
+                        .map(Cluster::getName)
+                        .collect(Collectors.joining(", "));
+                throw new BadRequestException(String.format(
+                        "There are clusters associated with RDS config '%s'. Please remove these before deleting the RDS configuration. "
+                                + "The following clusters are using this RDS: [%s]", rdsConfig.getName(), clusters));
+            } else {
+                throw new BadRequestException(String.format("There is a cluster ['%s'] which uses RDS config '%s'. Please remove this "
+                        + "cluster before deleting the RDS", clustersWithProvidedRds.get(0).getName(), rdsConfig.getName()));
             }
-            clusters.append(clustersWithProvidedRds.get(clustersWithProvidedRds.size() - 1).getName()).append(']');
-            throw new BadRequestException(String.format(
-                    "There are clusters associated with RDS config '%s'. Please remove these before deleting the RDS configuration. "
-                            + "The following clusters are using this RDS: %s", rdsConfig.getName(), clusters.toString()));
         }
     }
 
