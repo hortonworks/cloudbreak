@@ -131,6 +131,13 @@ public class RdsConfigController extends NotificationController implements RdsCo
         return rdsTestResult;
     }
 
+    @Override
+    public RDSConfigRequest getRequestFromName(String name) {
+        IdentityUser user = authenticatedUserService.getCbUser();
+        RDSConfig rdsConfig = rdsConfigService.getPublicRdsConfig(name, user);
+        return conversionService.convert(rdsConfig, RDSConfigRequest.class);
+    }
+
     private RDSConfigResponse createRdsConfig(IdentityUser user, RDSConfigRequest rdsConfigJson, boolean publicInAccount) {
         RDSConfig rdsConfig = conversionService.convert(rdsConfigJson, RDSConfig.class);
         rdsConfig.setPublicInAccount(publicInAccount);

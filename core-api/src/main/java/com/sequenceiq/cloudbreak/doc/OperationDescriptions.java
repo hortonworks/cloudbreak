@@ -207,6 +207,7 @@ public class OperationDescriptions {
         public static final String DELETE_PUBLIC_BY_NAME = "delete public (owned) or private LDAP config by name";
         public static final String DELETE_BY_ID = "delete LDAP config by id";
         public static final String POST_CONNECTION_TEST = "test that the connection could be established of an existing or new LDAP config";
+        public static final String GET_REQUEST = "get request";
     }
 
     public static class UtilityOpDescription {
@@ -236,6 +237,7 @@ public class OperationDescriptions {
         public static final String DELETE_PUBLIC_BY_NAME = "delete public (owned) or private RDS configuration by name";
         public static final String DELETE_BY_ID = "delete RDS configuration by id";
         public static final String POST_CONNECTION_TEST = "test RDS connectivity";
+        public static final String GET_REQUEST = "get request";
     }
 
     public static class ProxyConfigOpDescription {

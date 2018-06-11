@@ -105,4 +105,11 @@ public interface RdsConfigEndpoint {
     @ApiOperation(value = RdsConfigOpDescription.POST_CONNECTION_TEST, produces = ContentType.JSON, notes = Notes.RDSCONFIG_NOTES,
             nickname = "testRdsConnection")
     RdsTestResult testRdsConnection(@Valid RDSTestRequest rdsTestRequest);
+
+    @GET
+    @Path("{name}/request")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = RdsConfigOpDescription.GET_REQUEST, produces = ContentType.JSON, notes = Notes.RDSCONFIG_NOTES,
+            nickname = "getRdsRequestFromName")
+    RDSConfigRequest getRequestFromName(@PathParam("name") String name);
 }
