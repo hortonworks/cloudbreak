@@ -161,7 +161,7 @@ public class BlueprintService {
         authorizationService.hasWritePermission(blueprint);
         if (!clusterRepository.countByBlueprint(blueprint).equals(0L)) {
             throw new BadRequestException(String.format(
-                    "There are clusters associated with blueprint '%s'. Please remove these before deleting the blueprint.", blueprint.getId()));
+                    "There are clusters associated with blueprint '%s'. Please remove these before deleting the blueprint.", blueprint.getName()));
         }
         if (ResourceStatus.USER_MANAGED.equals(blueprint.getStatus())) {
             blueprintRepository.delete(blueprint);
