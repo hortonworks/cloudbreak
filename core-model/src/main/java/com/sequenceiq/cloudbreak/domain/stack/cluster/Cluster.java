@@ -48,10 +48,10 @@ import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
 import com.sequenceiq.cloudbreak.domain.ProxyConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.json.EncryptedJsonToString;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.json.JsonToString;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 
@@ -173,7 +173,7 @@ public class Cluster implements ProvisionEntity {
     private ProxyConfig proxyConfig;
 
     public boolean hasGateway() {
-        return gateway != null;
+        return gateway != null && gateway.isGatewayEnabled();
     }
 
     public Stack getStack() {
@@ -421,7 +421,7 @@ public class Cluster implements ProvisionEntity {
     }
 
     public Gateway getGateway() {
-        return gateway;
+        return hasGateway() ? gateway : null;
     }
 
     public void setGateway(Gateway gateway) {
