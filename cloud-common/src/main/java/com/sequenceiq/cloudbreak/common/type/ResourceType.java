@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.common.type;
 
 public enum ResourceType {
     // AWS
-    CLOUDFORMATION_STACK,
+    CLOUDFORMATION_STACK(CommonResourceType.TEMPLATE),
     AWS_RESERVED_IP,
     S3_ACCESS_ROLE_ARN,
     AWS_SUBNET,
@@ -10,7 +10,7 @@ public enum ResourceType {
     AWS_VPC,
 
     // OPENSTACK
-    HEAT_STACK,
+    HEAT_STACK(CommonResourceType.TEMPLATE),
     OPENSTACK_ATTACHED_DISK,
     OPENSTACK_NETWORK,
     OPENSTACK_SUBNET,
@@ -36,11 +36,25 @@ public enum ResourceType {
     AZURE_SUBNET,
 
     // ARM
-    ARM_TEMPLATE,
+    ARM_TEMPLATE(CommonResourceType.TEMPLATE),
 
     // YARN
-    YARN_APPLICATION,
+    YARN_APPLICATION(CommonResourceType.TEMPLATE),
 
     // MOCK
-    MOCK_INSTANCE
+    MOCK_INSTANCE;
+
+    private CommonResourceType commonResourceType;
+
+    ResourceType() {
+        this(CommonResourceType.RESOURCE);
+    }
+
+    ResourceType(CommonResourceType commonResourceType) {
+        this.commonResourceType = commonResourceType;
+    }
+
+    public CommonResourceType getCommonResourceType() {
+        return commonResourceType;
+    }
 }
