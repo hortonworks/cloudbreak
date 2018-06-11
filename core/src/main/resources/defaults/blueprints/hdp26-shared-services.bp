@@ -67,27 +67,6 @@
           }
         ],
         "cardinality": "1"
-      },
-      {
-        "name": "worker",
-        "configurations": [
-        ],
-        "components": [
-          {
-            "name": "METRICS_MONITOR"
-          }
-        ],
-        "cardinality": "1+"
-      },
-      {
-        "name": "compute",
-        "configurations": [],
-        "components": [
-          {
-            "name": "METRICS_MONITOR"
-          }
-        ],
-        "cardinality": "1+"
       }
     ]
   }
