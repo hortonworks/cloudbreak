@@ -44,10 +44,10 @@ public class DownscaleFlowEventChainFactory implements FlowEventChainFactory<Clu
         ClusterScaleTriggerEvent cste;
         if (event.getPrivateIds() == null) {
             cste = new ClusterDownscaleTriggerEvent(DECOMMISSION_EVENT.event(), event.getStackId(), event.getHostGroupName(),
-                    event.getAdjustment(), event.accepted());
+                    event.getAdjustment(), event.accepted(), event.getDetails());
         } else {
             cste = new ClusterDownscaleTriggerEvent(DECOMMISSION_EVENT.event(), event.getStackId(), event.getHostGroupName(),
-                    event.getPrivateIds(), event.accepted());
+                    event.getPrivateIds(), event.accepted(), event.getDetails());
         }
         flowEventChain.add(cste);
         if (event.getScalingType() == ScalingType.DOWNSCALE_TOGETHER) {

@@ -17,6 +17,7 @@ import org.springframework.util.CollectionUtils;
 import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.model.Status;
+import com.sequenceiq.cloudbreak.core.flow2.event.ClusterDownscaleDetails;
 import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
@@ -50,7 +51,7 @@ public class ClusterDownscaleService {
     @Inject
     private HostGroupService hostGroupService;
 
-    public void clusterDownscaleStarted(long stackId, String hostGroupName, Integer scalingAdjustment, Set<Long> privateIds) {
+    public void clusterDownscaleStarted(long stackId, String hostGroupName, Integer scalingAdjustment, Set<Long> privateIds, ClusterDownscaleDetails details) {
         flowMessageService.fireEventAndLog(stackId, Msg.AMBARI_CLUSTER_SCALING_DOWN, Status.UPDATE_IN_PROGRESS.name());
         clusterService.updateClusterStatusByStackId(stackId, Status.UPDATE_IN_PROGRESS);
         if (scalingAdjustment != null) {
@@ -61,7 +62,8 @@ public class ClusterDownscaleService {
             LOGGER.info("Decommissioning {} hosts from host group '{}'", privateIds, hostGroupName);
             Stack stack = stackService.getByIdWithLists(stackId);
             List<String> decomissionedHostNames = stackService.getHostNamesForPrivateIds(stack.getInstanceMetaDataAsList(), privateIds);
-            flowMessageService.fireInstanceGroupEventAndLog(stackId, Msg.AMBARI_CLUSTER_REMOVING_NODE_FROM_HOSTGROUP, Status.UPDATE_IN_PROGRESS.name(),
+            Msg message = details.isForced() ? Msg.AMBARI_CLUSTER_FORCE_REMOVING_NODE_FROM_HOSTGROUP : Msg.AMBARI_CLUSTER_REMOVING_NODE_FROM_HOSTGROUP;
+            flowMessageService.fireInstanceGroupEventAndLog(stackId, message, Status.UPDATE_IN_PROGRESS.name(),
                     hostGroupName, decomissionedHostNames, hostGroupName);
         }
     }

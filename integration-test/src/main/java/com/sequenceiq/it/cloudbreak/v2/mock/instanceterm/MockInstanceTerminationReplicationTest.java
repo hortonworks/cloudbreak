@@ -54,7 +54,7 @@ public class MockInstanceTerminationReplicationTest extends AbstractCloudbreakIn
         int before = getInstanceMetaData(stackResponse, hostGroupName).size();
         String instanceId = getInstanceId(stackResponse, hostGroupName);
 
-        getCloudbreakClient().stackV2Endpoint().deleteInstance(stackResponse.getId(), instanceId);
+        getCloudbreakClient().stackV2Endpoint().deleteInstance(stackResponse.getId(), instanceId, false);
         Map<String, String> desiredStatuses = new HashMap<>();
         desiredStatuses.put("status", "AVAILABLE");
         desiredStatuses.put("clusterStatus", "AVAILABLE");

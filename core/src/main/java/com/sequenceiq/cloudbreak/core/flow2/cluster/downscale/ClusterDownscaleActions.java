@@ -34,9 +34,9 @@ public class ClusterDownscaleActions {
             @Override
             protected void doExecute(ClusterViewContext context, ClusterDownscaleTriggerEvent payload, Map<Object, Object> variables) throws Exception {
                 clusterDownscaleService.clusterDownscaleStarted(context.getStackId(), payload.getHostGroupName(), payload.getAdjustment(),
-                        payload.getPrivateIds());
+                        payload.getPrivateIds(), payload.getDetails());
                 CollectDownscaleCandidatesRequest request = new CollectDownscaleCandidatesRequest(context.getStackId(), payload.getHostGroupName(),
-                        payload.getAdjustment(), payload.getPrivateIds());
+                        payload.getAdjustment(), payload.getPrivateIds(), payload.getDetails());
                 sendEvent(context.getFlowId(), request.selector(), request);
             }
         };
@@ -47,7 +47,8 @@ public class ClusterDownscaleActions {
         return new AbstractClusterAction<CollectDownscaleCandidatesResult>(CollectDownscaleCandidatesResult.class) {
             @Override
             protected void doExecute(ClusterViewContext context, CollectDownscaleCandidatesResult payload, Map<Object, Object> variables) throws Exception {
-                DecommissionRequest request = new DecommissionRequest(context.getStackId(), payload.getHostGroupName(), payload.getPrivateIds());
+                DecommissionRequest request = new DecommissionRequest(context.getStackId(), payload.getHostGroupName(), payload.getPrivateIds(),
+                        payload.getRequest().getDetails());
                 sendEvent(context.getFlowId(), request.selector(), request);
             }
         };

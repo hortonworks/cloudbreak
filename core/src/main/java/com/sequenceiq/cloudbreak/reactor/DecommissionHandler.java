@@ -67,11 +67,11 @@ public class DecommissionHandler implements ReactorEventHandler<DecommissionRequ
             Set<String> hostNames = getHostNamesForPrivateIds(request, stack);
             Map<String, HostMetadata> hostsToRemove = ambariDecommissioner.collectHostsToRemove(stack, request.getHostGroupName(), hostNames);
             Set<String> decomissionedHostNames;
-            if (!hostsToRemove.isEmpty()) {
+            if (skipAmbariDecomission(request, hostsToRemove)) {
+                decomissionedHostNames = hostNames;
+            } else {
                 executePreTerminationRecipes(stack, request.getHostGroupName(), hostsToRemove.keySet());
                 decomissionedHostNames = ambariDecommissioner.decommissionAmbariNodes(stack, hostsToRemove);
-            } else {
-                decomissionedHostNames = hostNames;
             }
             PollingResult orchestratorRemovalPollingResult = ambariDecommissioner.removeHostsFromOrchestrator(stack, new ArrayList<>(decomissionedHostNames));
             if (!isSuccess(orchestratorRemovalPollingResult)) {
@@ -82,6 +82,10 @@ public class DecommissionHandler implements ReactorEventHandler<DecommissionRequ
             result = new DecommissionResult(e.getMessage(), e, request);
         }
         eventBus.notify(result.selector(), new Event<>(event.getHeaders(), result));
+    }
+
+    private boolean skipAmbariDecomission(DecommissionRequest request, Map<String, HostMetadata> hostsToRemove) {
+        return hostsToRemove.isEmpty() || request.getDetails() != null && request.getDetails().isForced();
     }
 
     private Set<String> getHostNamesForPrivateIds(DecommissionRequest request, Stack stack) {
