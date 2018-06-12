@@ -1,11 +1,5 @@
 package com.sequenceiq.cloudbreak.converter;
 
-import static com.sequenceiq.cloudbreak.common.type.APIResourceType.FILESYSTEM;
-
-import javax.inject.Inject;
-
-import org.springframework.stereotype.Component;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.api.model.FileSystemRequest;
 import com.sequenceiq.cloudbreak.api.model.filesystem.AdlsFileSystem;
@@ -20,6 +14,11 @@ import com.sequenceiq.cloudbreak.domain.StorageLocation;
 import com.sequenceiq.cloudbreak.domain.StorageLocations;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.service.MissingResourceNameGenerator;
+import org.springframework.stereotype.Component;
+
+import javax.inject.Inject;
+
+import static com.sequenceiq.cloudbreak.common.type.APIResourceType.FILESYSTEM;
 
 @Component
 public class FileSystemRequestToFileSystemConverter extends AbstractConversionServiceAwareConverter<FileSystemRequest, FileSystem> {
@@ -51,8 +50,10 @@ public class FileSystemRequestToFileSystemConverter extends AbstractConversionSe
             throw new BadRequestException("Storage configuration could not be parsed: " + source, e);
         }
         StorageLocations storageLocations = new StorageLocations();
-        for (StorageLocationRequest storageLocationRequest : source.getLocations()) {
-            storageLocations.getLocations().add(getConversionService().convert(storageLocationRequest, StorageLocation.class));
+        if (source.getLocations() != null && !source.getLocations().isEmpty()) {
+            for (StorageLocationRequest storageLocationRequest : source.getLocations()) {
+                storageLocations.getLocations().add(getConversionService().convert(storageLocationRequest, StorageLocation.class));
+            }
         }
         try {
             fs.setLocations(new Json(storageLocations));

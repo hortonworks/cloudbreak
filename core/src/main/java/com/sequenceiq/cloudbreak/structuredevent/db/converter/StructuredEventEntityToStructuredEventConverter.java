@@ -14,6 +14,7 @@ import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.StructuredEventEntity;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEvent;
+import com.sequenceiq.cloudbreak.structuredevent.event.StructuredFlowErrorEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredFlowEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredNotificationEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredRestCallEvent;
@@ -28,6 +29,7 @@ public class StructuredEventEntityToStructuredEventConverter extends AbstractCon
     @PostConstruct
     public void init() {
         classes.put(StructuredFlowEvent.class.getSimpleName(), StructuredFlowEvent.class);
+        classes.put(StructuredFlowErrorEvent.class.getSimpleName(), StructuredFlowErrorEvent.class);
         classes.put(StructuredNotificationEvent.class.getSimpleName(), StructuredNotificationEvent.class);
         classes.put(StructuredRestCallEvent.class.getSimpleName(), StructuredRestCallEvent.class);
     }
