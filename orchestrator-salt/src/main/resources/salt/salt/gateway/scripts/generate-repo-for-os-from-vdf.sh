@@ -74,7 +74,7 @@ function generateDebianRepoIfPresent(){
     local repoName=$2
     if [ -n "$repoUrl" ]
       then
-        generateDebianRepo $hdp_repo $repoName > "/etc/apt/sources.list.d/$repoName.list"
+        generateDebianRepo $repoUrl $repoName > "/etc/apt/sources.list.d/$repoName.list"
     fi
 }
 
@@ -83,7 +83,7 @@ function generateYumRepoIfPresent(){
     local repoName=$2
     if [ -n "$repoUrl" ]
       then
-        generateYumRepo $hdp_repo $repoName > "/etc/yum.repos.d/$repoName.repo"
+        generateYumRepo $repoUrl $repoName > "/etc/yum.repos.d/$repoName.repo"
     fi
 }
 
@@ -92,7 +92,7 @@ function generateZypperRepoIfPresent(){
     local repoName=$2
     if [ -n "$repoUrl" ]
       then
-        generateZypperRepo $hdp_repo $repoName > "/etc/zypp/repos.d/$repoName.repo"
+        generateZypperRepo $repoUrl $repoName > "/etc/zypp/repos.d/$repoName.repo"
     fi
 }
 
