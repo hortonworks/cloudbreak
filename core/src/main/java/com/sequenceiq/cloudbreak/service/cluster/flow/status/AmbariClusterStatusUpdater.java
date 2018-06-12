@@ -55,6 +55,7 @@ public class AmbariClusterStatusUpdater {
             HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfigForPrimaryGateway(stackId, cluster.getAmbariIp());
             AmbariClient ambariClient = ambariClientProvider.getAmbariClient(clientConfig, stack.getGatewayPort(), cluster);
             ClusterStatus clusterStatus = clusterStatusFactory.createClusterStatus(ambariClient, blueprintName);
+            LOGGER.info("Ambari cluster status: [{}] Status reason: [{}]", clusterStatus.name(), clusterStatus.getStatusReason());
             updateClusterStatus(stackId, stack.getStatus(), cluster, clusterStatus);
 
         }
@@ -84,7 +85,7 @@ public class AmbariClusterStatusUpdater {
     }
 
     private boolean isUpdateEnabled(ClusterStatus clusterStatus) {
-        return clusterStatus == ClusterStatus.STARTED || clusterStatus == ClusterStatus.INSTALLED;
+        return clusterStatus == ClusterStatus.STARTED || clusterStatus == ClusterStatus.INSTALLED || clusterStatus == ClusterStatus.AMBIGUOUS;
     }
 
     private boolean updateClusterStatus(Long stackId, Cluster cluster, Status newClusterStatus) {
