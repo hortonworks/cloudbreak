@@ -75,6 +75,19 @@ public class AmbariClusterStatusUpdaterTest {
     }
 
     @Test
+    public void testUpdateClusterStatusShouldUpdateStackStatusWhenThereAreStoppedServices() throws CloudbreakSecuritySetupException {
+        // GIVEN
+        Stack stack = createStack(Status.AVAILABLE, Status.UPDATE_FAILED);
+        BDDMockito.given(ambariClientProvider.getAmbariClient(BDDMockito.any(HttpClientConfig.class), BDDMockito.anyInt(), BDDMockito.any(Cluster.class)))
+                .willReturn(ambariClient);
+        BDDMockito.given(clusterStatusFactory.createClusterStatus(ambariClient, TEST_BLUEPRINT)).willReturn(ClusterStatus.AMBIGUOUS);
+        // WHEN
+        underTest.updateClusterStatus(stack, stack.getCluster());
+        // THEN
+        BDDMockito.verify(clusterService, BDDMockito.times(1)).updateClusterStatusByStackId(stack.getId(), Status.AVAILABLE);
+    }
+
+    @Test
     public void testUpdateClusterStatusShouldOnlyNotifyWhenStackStatusNotChanged() throws CloudbreakSecuritySetupException {
         // GIVEN
         Stack stack = createStack(Status.AVAILABLE, Status.AVAILABLE);
