@@ -37,7 +37,7 @@
   },
   "EU (Paris)": {
     "zoneid": "eu-west-3",
-    "defaultvm": "m4.4xlarge"
+    "defaultvm": "m5.xlarge"
   },
   "EU (London)": {
     "zoneid": "eu-west-2",
