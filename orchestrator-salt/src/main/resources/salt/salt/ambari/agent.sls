@@ -8,7 +8,7 @@ ambari-agent:
   pkg.installed:
     - require:
       - sls: ambari.repo
-{% if grains['os_family'] == 'Suse' %}
+{% if grains['os_family'] == 'Suse' or grains['os_family'] == 'Debian' %}
     - skip_verify: True
 {% endif %}
 
