@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow.status;
 
+import static org.mockito.Matchers.anyList;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -39,6 +41,7 @@ public class AmbariClusterStatusFactoryTest {
     public void setUp() {
         underTest = new AmbariClusterStatusFactory();
         MockitoAnnotations.initMocks(this);
+        BDDMockito.given(ambariClient.getComponentsCategory(anyList())).willReturn(createComponentCategories());
     }
 
     @Test
