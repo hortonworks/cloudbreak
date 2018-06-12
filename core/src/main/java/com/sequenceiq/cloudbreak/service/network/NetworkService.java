@@ -45,7 +45,7 @@ public class NetworkService {
         try {
             return networkRepository.save(network);
         } catch (DataIntegrityViolationException ex) {
-            String msg = String.format("Error with resource [%s], error: [%s]", APIResourceType.NETWORK, getProperSqlErrorMessage(ex));
+            String msg = String.format("Error with resource [%s], %s", APIResourceType.NETWORK, getProperSqlErrorMessage(ex));
             throw new BadRequestException(msg);
         }
     }

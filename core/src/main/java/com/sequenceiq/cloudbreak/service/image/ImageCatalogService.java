@@ -213,7 +213,7 @@ public class ImageCatalogService {
             }
             return imageCatalogRepository.save(imageCatalog);
         } catch (DataIntegrityViolationException ex) {
-            String msg = String.format("Error with resource [%s], error: [%s]", APIResourceType.IMAGE_CATALOG, getProperSqlErrorMessage(ex));
+            String msg = String.format("Error with resource [%s], %s", APIResourceType.IMAGE_CATALOG, getProperSqlErrorMessage(ex));
             throw new BadRequestException(msg);
         }
     }

@@ -116,7 +116,7 @@ public class BlueprintService {
         try {
             savedBlueprint = blueprintRepository.save(blueprint);
         } catch (DataIntegrityViolationException ex) {
-            String msg = String.format("Error with resource [%s], error: [%s]", APIResourceType.BLUEPRINT, getProperSqlErrorMessage(ex));
+            String msg = String.format("Error with resource [%s], %s", APIResourceType.BLUEPRINT, getProperSqlErrorMessage(ex));
             throw new BadRequestException(msg);
         }
         return savedBlueprint;

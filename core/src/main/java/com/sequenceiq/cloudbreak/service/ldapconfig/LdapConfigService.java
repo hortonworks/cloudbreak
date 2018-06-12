@@ -38,7 +38,7 @@ public class LdapConfigService {
         try {
             return ldapConfigRepository.save(ldapConfig);
         } catch (DataIntegrityViolationException ex) {
-            String msg = String.format("Error with resource [%s], error: [%s]", APIResourceType.LDAP_CONFIG, getProperSqlErrorMessage(ex));
+            String msg = String.format("Error with resource [%s], %s", APIResourceType.LDAP_CONFIG, getProperSqlErrorMessage(ex));
             throw new BadRequestException(msg);
         }
     }

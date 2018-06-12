@@ -40,7 +40,7 @@ public class RecipeService {
         try {
             return recipeRepository.save(recipe);
         } catch (DataIntegrityViolationException ex) {
-            String msg = String.format("Error with resource [%s], error: [%s]", APIResourceType.RECIPE, getProperSqlErrorMessage(ex));
+            String msg = String.format("Error with resource [%s], %s", APIResourceType.RECIPE, getProperSqlErrorMessage(ex));
             throw new BadRequestException(msg);
         }
     }

@@ -45,7 +45,7 @@ public class SecurityGroupService {
         try {
             return groupRepository.save(securityGroup);
         } catch (DataIntegrityViolationException ex) {
-            String msg = String.format("Error with resource [%s], error: [%s]", APIResourceType.SECURITY_GROUP, getProperSqlErrorMessage(ex));
+            String msg = String.format("Error with resource [%s], %s", APIResourceType.SECURITY_GROUP, getProperSqlErrorMessage(ex));
             throw new BadRequestException(msg);
         }
     }

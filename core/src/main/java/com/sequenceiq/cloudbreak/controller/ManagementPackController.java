@@ -107,7 +107,7 @@ public class ManagementPackController extends NotificationController implements 
             mpack = mpackService.create(user, mpack);
             notify(user, ResourceEvent.MANAGEMENT_PACK_CREATED);
         } catch (DataIntegrityViolationException ex) {
-            String msg = String.format("Error with resource [%s], error: [%s]", APIResourceType.MANAGEMENT_PACK, getProperSqlErrorMessage(ex));
+            String msg = String.format("Error with resource [%s], %s", APIResourceType.MANAGEMENT_PACK, getProperSqlErrorMessage(ex));
             throw new BadRequestException(msg);
         }
         return conversionService.convert(mpack, ManagementPackResponse.class);

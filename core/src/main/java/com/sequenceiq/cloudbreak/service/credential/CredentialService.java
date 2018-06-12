@@ -153,7 +153,7 @@ public class CredentialService {
             userProfileCredentialHandler.createProfilePreparation(credential);
             sendCredentialNotification(credential, resourceEvent);
         } catch (DataIntegrityViolationException ex) {
-            String msg = String.format("Error with resource [%s], error: [%s]", APIResourceType.CREDENTIAL, getProperSqlErrorMessage(ex));
+            String msg = String.format("Error with resource [%s], %s", APIResourceType.CREDENTIAL, getProperSqlErrorMessage(ex));
             throw new BadRequestException(msg);
         }
         return savedCredential;

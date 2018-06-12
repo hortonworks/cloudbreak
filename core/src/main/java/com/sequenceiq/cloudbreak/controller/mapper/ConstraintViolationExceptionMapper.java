@@ -1,11 +1,12 @@
 package com.sequenceiq.cloudbreak.controller.mapper;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.Provider;
-
-import com.sequenceiq.cloudbreak.controller.json.ValidationResult;
 
 @Provider
 public class ConstraintViolationExceptionMapper extends SendNotificationExceptionMapper<ConstraintViolationException> {
@@ -25,15 +26,11 @@ public class ConstraintViolationExceptionMapper extends SendNotificationExceptio
 
     @Override
     protected Object getEntity(ConstraintViolationException exception) {
-        ValidationResult result = new ValidationResult();
+        List<String> result = new ArrayList<>();
         for (ConstraintViolation<?> violation : exception.getConstraintViolations()) {
-            String key = "";
-            if (violation.getPropertyPath() != null) {
-                key = violation.getPropertyPath().toString();
-            }
-            result.addValidationError(key, violation.getMessage());
+            result.add(violation.getMessage());
         }
-        return result;
+        return String.join("\n", result);
     }
 
     @Override

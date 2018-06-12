@@ -245,7 +245,7 @@ public class AmbariClusterService implements ClusterService {
 
                 clusterComponentConfigProvider.store(components, savedCluster);
             } catch (DataIntegrityViolationException ex) {
-                String msg = String.format("Error with resource [%s], error: [%s]", APIResourceType.CLUSTER, getProperSqlErrorMessage(ex));
+                String msg = String.format("Error with resource [%s], %s", APIResourceType.CLUSTER, getProperSqlErrorMessage(ex));
                 throw new BadRequestException(msg);
             }
             if (stack.isAvailable()) {
