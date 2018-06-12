@@ -7,7 +7,7 @@ LDFLAGS_NOVER=-ldflags "-X github.com/hortonworks/cb-cli/cli.Version=snapshot -X
 GOFILES_NOVENDOR = $(shell find . -type f -name '*.go' -not -path "./vendor/*" -not -path "./.git/*")
 CB_IP = $(shell echo \${IP})
 ifeq ($(CB_IP),)
-        CB_IP = 192.168.64.1
+        CB_IP = 192.168.99.1
 endif
 CB_PORT = $(shell echo \${PORT})
 ifeq ($(CB_PORT),)

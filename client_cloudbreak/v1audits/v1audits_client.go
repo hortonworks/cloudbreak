@@ -25,6 +25,34 @@ type Client struct {
 }
 
 /*
+GetAuditEvent get audit event API
+*/
+func (a *Client) GetAuditEvent(params *GetAuditEventParams) (*GetAuditEventOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetAuditEventParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "getAuditEvent",
+		Method:             "GET",
+		PathPattern:        "/v1/audits/event/{auditId}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &GetAuditEventReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*GetAuditEventOK), nil
+
+}
+
+/*
 GetAuditEvents get audit events API
 */
 func (a *Client) GetAuditEvents(params *GetAuditEventsParams) (*GetAuditEventsOK, error) {
@@ -49,6 +77,34 @@ func (a *Client) GetAuditEvents(params *GetAuditEventsParams) (*GetAuditEventsOK
 		return nil, err
 	}
 	return result.(*GetAuditEventsOK), nil
+
+}
+
+/*
+GetAuditEventsZip get audit events zip API
+*/
+func (a *Client) GetAuditEventsZip(params *GetAuditEventsZipParams) error {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetAuditEventsZipParams()
+	}
+
+	_, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "getAuditEventsZip",
+		Method:             "GET",
+		PathPattern:        "/v1/audits/events/zip/{resourceType}/{resourceId}",
+		ProducesMediaTypes: []string{"application/octet-stream"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &GetAuditEventsZipReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return err
+	}
+	return nil
 
 }
 

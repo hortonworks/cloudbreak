@@ -1508,6 +1508,36 @@ func main() {
 			},
 		},
 		{
+			Name:  "audit",
+			Usage: "audits related operations",
+			Subcommands: []cli.Command{
+				{
+					Name:   "list",
+					Usage:  "list audit for a resource",
+					Flags:  cb.NewFlagBuilder().AddFlags(cb.FlResourceType, cb.FlResourceID).AddOutputFlag().AddAuthenticationFlags().Build(),
+					Before: ConfigRead,
+					Action: cb.ListAudits,
+					BashComplete: func(c *cli.Context) {
+						for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlResourceType, cb.FlResourceID).AddOutputFlag().AddAuthenticationFlags().Build() {
+							printFlagCompletion(f)
+						}
+					},
+				},
+				{
+					Name:   "show",
+					Usage:  "show audit entry",
+					Flags:  cb.NewFlagBuilder().AddFlags(cb.FlAuditID).AddOutputFlag().AddAuthenticationFlags().Build(),
+					Before: ConfigRead,
+					Action: cb.ShowAudit,
+					BashComplete: func(c *cli.Context) {
+						for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlAuditID).AddOutputFlag().AddAuthenticationFlags().Build() {
+							printFlagCompletion(f)
+						}
+					},
+				},
+			},
+		},
+		{
 			Name:  "recipe",
 			Usage: "recipe related operations",
 			Subcommands: []cli.Command{

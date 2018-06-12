@@ -17,6 +17,9 @@ import (
 
 type AuditEvent struct {
 
+	// audit Id
+	AuditID int64 `json:"auditId,omitempty"`
+
 	// duration
 	Duration int64 `json:"duration,omitempty"`
 
@@ -35,6 +38,8 @@ type AuditEvent struct {
 	// status
 	Status string `json:"status,omitempty"`
 }
+
+/* polymorph AuditEvent auditId false */
 
 /* polymorph AuditEvent duration false */
 
