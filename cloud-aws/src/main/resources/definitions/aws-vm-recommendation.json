@@ -1,7 +1,7 @@
 {
   "master": {
     "type": "master",
-    "flavor": "m4.2xlarge",
+    "flavor": "m5.2xlarge",
     "cardinality": 1,
     "volumeType": "SSD",
     "volumeCount": 1,
@@ -9,7 +9,7 @@
   },
   "worker": {
     "type": "worker",
-    "flavor": "m4.xlarge",
+    "flavor": "m5.xlarge",
     "cardinality": 3,
     "volumeType": "EPHEMERAL",
     "volumeCount": 1,
