@@ -7,3 +7,6 @@ ambari-server:
   pkg.installed:
     - require:
       - sls: ambari.repo
+{% if grains['os_family'] == 'Debian' %}
+    - skip_verify: True
+{% endif %}
