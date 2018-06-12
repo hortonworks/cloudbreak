@@ -70,7 +70,7 @@ public class ClusterTemplateService {
         try {
             savedClusterTemplate = clusterTemplateRepository.save(clusterTemplate);
         } catch (DataIntegrityViolationException ex) {
-            String msg = String.format("Error with resource [%s], error: [%s]", APIResourceType.CLUSTER_TEMPLATE, getProperSqlErrorMessage(ex));
+            String msg = String.format("Error with resource [%s], %s", APIResourceType.CLUSTER_TEMPLATE, getProperSqlErrorMessage(ex));
             throw new BadRequestException(msg);
         }
         return savedClusterTemplate;

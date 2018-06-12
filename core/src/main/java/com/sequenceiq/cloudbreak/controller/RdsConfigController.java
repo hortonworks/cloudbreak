@@ -145,7 +145,7 @@ public class RdsConfigController extends NotificationController implements RdsCo
             rdsConfig = rdsConfigService.create(user, rdsConfig);
             notify(user, ResourceEvent.RDS_CONFIG_CREATED);
         } catch (DataIntegrityViolationException ex) {
-            String msg = String.format("Error with resource [%s], error: [%s]", APIResourceType.RDS_CONFIG, getProperSqlErrorMessage(ex));
+            String msg = String.format("Error with resource [%s], %s", APIResourceType.RDS_CONFIG, getProperSqlErrorMessage(ex));
             throw new BadRequestException(msg);
         }
         return conversionService.convert(rdsConfig, RDSConfigResponse.class);

@@ -63,7 +63,7 @@ public class SmartSenseSubscriptionService {
             LOGGER.info("SmartSense subscription has been created: {}", subscription);
             return subscription;
         } catch (DataIntegrityViolationException ex) {
-            String msg = String.format("Error with resource [%s], error: [%s]", APIResourceType.SMARTSENSE_SUBSCRIPTION, getProperSqlErrorMessage(ex));
+            String msg = String.format("Error with resource [%s], %s", APIResourceType.SMARTSENSE_SUBSCRIPTION, getProperSqlErrorMessage(ex));
             throw new BadRequestException(msg);
         }
     }

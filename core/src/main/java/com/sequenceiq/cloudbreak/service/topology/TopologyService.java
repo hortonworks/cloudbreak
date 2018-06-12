@@ -68,7 +68,7 @@ public class TopologyService {
         try {
             savedTopology = topologyRepository.save(topology);
         } catch (DataIntegrityViolationException ex) {
-            String msg = String.format("Error with resource [%s], error: [%s]", APIResourceType.TOPOLOGY, getProperSqlErrorMessage(ex));
+            String msg = String.format("Error with resource [%s], %s", APIResourceType.TOPOLOGY, getProperSqlErrorMessage(ex));
             throw new BadRequestException(msg);
         }
         return savedTopology;

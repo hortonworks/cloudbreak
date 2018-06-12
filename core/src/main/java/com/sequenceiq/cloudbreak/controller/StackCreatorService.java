@@ -206,7 +206,7 @@ public class StackCreatorService {
         } catch (TransactionExecutionException e) {
             stackUnderOperationService.off();
             if (e.getCause() instanceof DataIntegrityViolationException) {
-                String msg = String.format("Error with resource [%s], error: [%s]",
+                String msg = String.format("Error with resource [%s], %s",
                         APIResourceType.STACK, getProperSqlErrorMessage((DataIntegrityViolationException) e.getCause()));
                 throw new BadRequestException(msg);
             }
