@@ -1,21 +1,5 @@
 package com.sequenceiq.cloudbreak.service.blueprint;
 
-import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
-
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
-import javax.inject.Inject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.stereotype.Service;
-
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessorFactory;
 import com.sequenceiq.cloudbreak.blueprint.CentralBlueprintParameterQueryService;
@@ -28,10 +12,27 @@ import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.service.AuthorizationService;
 import com.sequenceiq.cloudbreak.util.NameUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.stereotype.Service;
+
+import javax.inject.Inject;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
 
 @Service
 public class BlueprintService {
@@ -159,9 +160,20 @@ public class BlueprintService {
 
     private void delete(Blueprint blueprint) {
         authorizationService.hasWritePermission(blueprint);
-        if (!clusterRepository.countByBlueprint(blueprint).equals(0L)) {
-            throw new BadRequestException(String.format(
-                    "There are clusters associated with blueprint '%s'. Please remove these before deleting the blueprint.", blueprint.getName()));
+        List<Cluster> clustersWithThisBlueprint = new ArrayList<>(clusterRepository.findByBlueprint(blueprint));
+        if (!clustersWithThisBlueprint.isEmpty()) {
+            if (clustersWithThisBlueprint.size() > 1) {
+                String clusters = clustersWithThisBlueprint
+                        .stream()
+                        .map(Cluster::getName)
+                        .collect(Collectors.joining(", "));
+                throw new BadRequestException(String.format(
+                        "There are clusters associated with blueprint '%s'. Please remove these before deleting the blueprint. "
+                                + "The following clusters are using this blueprint: [%s]", blueprint.getName(), clusters));
+            } else {
+                throw new BadRequestException(String.format("There is a cluster ['%s'] which uses blueprint '%s'. Please remove this "
+                        + "cluster before deleting the blueprint", clustersWithThisBlueprint.get(0).getName(), blueprint.getName()));
+            }
         }
         if (ResourceStatus.USER_MANAGED.equals(blueprint.getStatus())) {
             blueprintRepository.delete(blueprint);

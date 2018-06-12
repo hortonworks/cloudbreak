@@ -66,7 +66,7 @@ public interface StackRepository extends CrudRepository<Stack, Long> {
     Stack findByNameInAccountOrOwner(@Param("name") String name, @Param("account") String account, @Param("owner") String owner);
 
     @Query("SELECT c FROM Stack c LEFT JOIN FETCH c.resources LEFT JOIN FETCH c.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData "
-        + "WHERE c.name= :name and c.account= :account")
+            + "WHERE c.name= :name and c.account= :account")
     Stack findByNameInAccountWithLists(@Param("name") String name, @Param("account") String account);
 
     @Query("SELECT c FROM Stack c WHERE c.name= :name and c.account= :account")
@@ -99,4 +99,7 @@ public interface StackRepository extends CrudRepository<Stack, Long> {
     Long countByCredential(Credential credential);
 
     Long countByNetwork(Network network);
+
+    Set<Stack> findByNetwork(Network network);
+
 }

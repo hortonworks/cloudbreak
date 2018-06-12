@@ -42,7 +42,10 @@ public interface ClusterRepository extends CrudRepository<Cluster, Long> {
 
     List<Cluster> findByLdapConfig(LdapConfig ldapConfig);
 
+    Set<Cluster> findByBlueprint(Blueprint blueprint);
+
     Long countByBlueprint(Blueprint blueprint);
 
-    Long countByProxyConfig(ProxyConfig proxyConfig);
+    Set<Cluster> findByProxyConfig(ProxyConfig proxyConfig);
+
 }

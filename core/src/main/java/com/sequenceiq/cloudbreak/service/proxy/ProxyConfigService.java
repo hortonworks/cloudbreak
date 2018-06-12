@@ -1,21 +1,23 @@
 package com.sequenceiq.cloudbreak.service.proxy;
 
-import java.util.Set;
-
-import javax.inject.Inject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.ProxyConfig;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.ProxyConfigRepository;
 import com.sequenceiq.cloudbreak.service.AuthorizationService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
+import javax.inject.Inject;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class ProxyConfigService {
@@ -106,9 +108,20 @@ public class ProxyConfigService {
 
     private void delete(ProxyConfig proxyConfig) {
         authorizationService.hasWritePermission(proxyConfig);
-        if (clusterRepository.countByProxyConfig(proxyConfig) != 0L) {
-            throw new BadRequestException(String.format(
-                    "There are clusters associated with proxy config '%s'. Please remove these before deleting the proxy configuration.", proxyConfig.getId()));
+        List<Cluster> clustersWithThisProxy = new ArrayList<>(clusterRepository.findByProxyConfig(proxyConfig));
+        if (!clustersWithThisProxy.isEmpty()) {
+            if (clustersWithThisProxy.size() > 1) {
+                String clusters = clustersWithThisProxy
+                        .stream()
+                        .map(Cluster::getName)
+                        .collect(Collectors.joining(", "));
+                throw new BadRequestException(String.format(
+                        "There are clusters associated with proxy config '%s'. Please remove these before deleting the proxy configuration. "
+                                + "The following clusters are using this proxy configuration: [%s]", proxyConfig.getName(), clusters));
+            } else {
+                throw new BadRequestException(String.format("There is a cluster ['%s'] which uses proxy configuration '%s'. Please remove this "
+                        + "cluster before deleting the proxy configuration", clustersWithThisProxy.get(0).getName(), proxyConfig.getName()));
+            }
         }
         proxyConfigRepository.delete(proxyConfig);
     }
