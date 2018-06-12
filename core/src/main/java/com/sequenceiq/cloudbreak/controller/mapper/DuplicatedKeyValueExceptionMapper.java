@@ -1,12 +1,13 @@
 package com.sequenceiq.cloudbreak.controller.mapper;
 
 import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.ext.Provider;
+
+import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.controller.json.ExceptionResult;
 import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
 
-@Provider
+@Component
 public class DuplicatedKeyValueExceptionMapper extends BaseExceptionMapper<DuplicateKeyValueException> {
 
     @Override
@@ -23,5 +24,10 @@ public class DuplicatedKeyValueExceptionMapper extends BaseExceptionMapper<Dupli
         return String.format("The %s name '%s' is already taken, please choose a different one",
                 exception.getResourceType().toString().toLowerCase(),
                 exception.getValue());
+    }
+
+    @Override
+    public Class<DuplicateKeyValueException> supportedType() {
+        return DuplicateKeyValueException.class;
     }
 }

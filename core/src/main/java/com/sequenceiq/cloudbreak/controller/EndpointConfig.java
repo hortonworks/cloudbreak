@@ -11,35 +11,7 @@ import org.springframework.stereotype.Component;
 
 import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.CoreApi;
-import com.sequenceiq.cloudbreak.controller.mapper.AccessDeniedExceptionMapper;
-import com.sequenceiq.cloudbreak.controller.mapper.AuthenticationCredentialsNotFoundExceptionMapper;
-import com.sequenceiq.cloudbreak.controller.mapper.BadRequestExceptionMapper;
-import com.sequenceiq.cloudbreak.controller.mapper.CloudbreakApiExceptionMapper;
-import com.sequenceiq.cloudbreak.controller.mapper.ConstraintViolationExceptionMapper;
-import com.sequenceiq.cloudbreak.controller.mapper.ConversionFailedExceptionMapper;
-import com.sequenceiq.cloudbreak.controller.mapper.DataIntegrityViolationExceptionMapper;
-import com.sequenceiq.cloudbreak.controller.mapper.DefaultExceptionMapper;
-import com.sequenceiq.cloudbreak.controller.mapper.DuplicatedKeyValueExceptionMapper;
-import com.sequenceiq.cloudbreak.controller.mapper.EntityNotFoundExceptionMapper;
-import com.sequenceiq.cloudbreak.controller.mapper.GetCloudParameterExceptionMapper;
-import com.sequenceiq.cloudbreak.controller.mapper.HibernateConstraintViolationExceptionMapper;
-import com.sequenceiq.cloudbreak.controller.mapper.HttpMediaTypeNotSupportedExceptionMapper;
-import com.sequenceiq.cloudbreak.controller.mapper.HttpMessageNotReadableExceptionMapper;
-import com.sequenceiq.cloudbreak.controller.mapper.HttpRequestMethodNotSupportedExceptionMapper;
-import com.sequenceiq.cloudbreak.controller.mapper.MethodArgumentNotValidExceptionMapper;
-import com.sequenceiq.cloudbreak.controller.mapper.NotFoundExceptionMapper;
-import com.sequenceiq.cloudbreak.controller.mapper.OperationExceptionMapper;
-import com.sequenceiq.cloudbreak.controller.mapper.RuntimeExceptionMapper;
-import com.sequenceiq.cloudbreak.controller.mapper.SmartSenseNotFoundExceptionMapper;
-import com.sequenceiq.cloudbreak.controller.mapper.SmartSenseSubscriptionAccessDeniedMapper;
-import com.sequenceiq.cloudbreak.controller.mapper.SpringAccessDeniedExceptionMapper;
-import com.sequenceiq.cloudbreak.controller.mapper.SpringBadRequestExceptionMapper;
-import com.sequenceiq.cloudbreak.controller.mapper.SubscriptionAlreadyExistExceptionMapper;
-import com.sequenceiq.cloudbreak.controller.mapper.TerminationFailedExceptionMapper;
-import com.sequenceiq.cloudbreak.controller.mapper.TransactionRuntimeExecutionExceptionMapper;
-import com.sequenceiq.cloudbreak.controller.mapper.TypeMismatchExceptionMapper;
-import com.sequenceiq.cloudbreak.controller.mapper.UnsupportedOperationFailedExceptionMapper;
-import com.sequenceiq.cloudbreak.controller.mapper.WebApplicaitonExceptionMapper;
+import com.sequenceiq.cloudbreak.controller.mapper.CompositeExceptionMapper;
 import com.sequenceiq.cloudbreak.filter.MDCContextFilter;
 import com.sequenceiq.cloudbreak.structuredevent.rest.StructuredEventFilter;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
@@ -90,36 +62,7 @@ public class EndpointConfig extends ResourceConfig {
     }
 
     private void registerExceptionMappers() {
-        register(OperationExceptionMapper.class);
-        register(AccessDeniedExceptionMapper.class);
-        register(AuthenticationCredentialsNotFoundExceptionMapper.class);
-        register(BadRequestExceptionMapper.class);
-        register(CloudbreakApiExceptionMapper.class);
-        register(ConstraintViolationExceptionMapper.class);
-        register(ConversionFailedExceptionMapper.class);
-        register(DuplicatedKeyValueExceptionMapper.class);
-        register(EntityNotFoundExceptionMapper.class);
-        register(HttpMediaTypeNotSupportedExceptionMapper.class);
-        register(HttpMessageNotReadableExceptionMapper.class);
-        register(HttpRequestMethodNotSupportedExceptionMapper.class);
-        register(MethodArgumentNotValidExceptionMapper.class);
-        register(NotFoundExceptionMapper.class);
-        register(SmartSenseNotFoundExceptionMapper.class);
-        register(SmartSenseSubscriptionAccessDeniedMapper.class);
-        register(SpringAccessDeniedExceptionMapper.class);
-        register(SpringBadRequestExceptionMapper.class);
-        register(SubscriptionAlreadyExistExceptionMapper.class);
-        register(TypeMismatchExceptionMapper.class);
-        register(UnsupportedOperationFailedExceptionMapper.class);
-        register(HibernateConstraintViolationExceptionMapper.class);
-        register(DataIntegrityViolationExceptionMapper.class);
-        register(TerminationFailedExceptionMapper.class);
-        register(WebApplicaitonExceptionMapper.class);
-        register(GetCloudParameterExceptionMapper.class);
-        register(TransactionRuntimeExecutionExceptionMapper.class);
-
-        register(RuntimeExceptionMapper.class);
-        register(DefaultExceptionMapper.class);
+        register(CompositeExceptionMapper.class);
     }
 
     private void registerEndpoints() {

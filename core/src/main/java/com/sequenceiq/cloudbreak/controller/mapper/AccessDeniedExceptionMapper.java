@@ -1,15 +1,21 @@
 package com.sequenceiq.cloudbreak.controller.mapper;
 
+import java.nio.file.AccessDeniedException;
+
 import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.ext.Provider;
 
-import org.springframework.security.access.AccessDeniedException;
+import org.springframework.stereotype.Component;
 
-@Provider
+@Component
 public class AccessDeniedExceptionMapper extends BaseExceptionMapper<AccessDeniedException> {
 
     @Override
     Status getResponseStatus() {
         return Status.FORBIDDEN;
+    }
+
+    @Override
+    public Class<AccessDeniedException> supportedType() {
+        return AccessDeniedException.class;
     }
 }

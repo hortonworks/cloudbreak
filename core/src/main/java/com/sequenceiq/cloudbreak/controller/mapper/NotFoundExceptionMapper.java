@@ -1,15 +1,21 @@
 package com.sequenceiq.cloudbreak.controller.mapper;
 
 import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.ext.Provider;
+
+import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 
-@Provider
+@Component
 public class NotFoundExceptionMapper extends BaseExceptionMapper<NotFoundException> {
 
     @Override
     Status getResponseStatus() {
         return Status.NOT_FOUND;
+    }
+
+    @Override
+    public Class<NotFoundException> supportedType() {
+        return NotFoundException.class;
     }
 }
