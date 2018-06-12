@@ -1,23 +1,24 @@
 package com.sequenceiq.cloudbreak.service.ldapconfig;
 
-import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
-
-import java.util.Set;
-
-import javax.inject.Inject;
-
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.stereotype.Service;
-
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.LdapConfigRepository;
 import com.sequenceiq.cloudbreak.service.AuthorizationService;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.stereotype.Service;
+
+import javax.inject.Inject;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
 
 @Service
 public class LdapConfigService {
@@ -103,9 +104,20 @@ public class LdapConfigService {
 
     private void delete(LdapConfig ldapConfig) {
         authorizationService.hasWritePermission(ldapConfig);
-        if (!clusterRepository.countByLdapConfig(ldapConfig).equals(0L)) {
-            throw new BadRequestException(String.format(
-                    "There are clusters associated with LDAP config '%s'. Please remove these before deleting the LDAP config.", ldapConfig.getId()));
+        List<Cluster> clustersWithLdap = clusterRepository.findByLdapConfig(ldapConfig);
+        if (!clustersWithLdap.isEmpty()) {
+            if (clustersWithLdap.size() > 1) {
+                String clusters = clustersWithLdap
+                        .stream()
+                        .map(Cluster::getName)
+                        .collect(Collectors.joining(", "));
+                throw new BadRequestException(String.format(
+                        "There are clusters associated with LDAP config '%s'. Please remove these before deleting the LDAP config. "
+                                + "The following clusters are using this LDAP: [%s]", ldapConfig.getName(), clusters));
+            } else {
+                throw new BadRequestException(String.format("There is a cluster ['%s'] which uses LDAP config '%s'. Please remove this "
+                        + "cluster before deleting the LDAP config", clustersWithLdap.get(0).getName(), ldapConfig.getName()));
+            }
         }
         ldapConfigRepository.delete(ldapConfig);
     }

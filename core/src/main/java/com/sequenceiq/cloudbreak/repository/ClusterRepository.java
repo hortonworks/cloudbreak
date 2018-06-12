@@ -12,9 +12,9 @@ import org.springframework.data.repository.query.Param;
 
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.ProxyConfig;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 
 @EntityType(entityClass = Cluster.class)
 @Transactional(Transactional.TxType.REQUIRED)
@@ -40,9 +40,9 @@ public interface ClusterRepository extends CrudRepository<Cluster, Long> {
     @Query("SELECT c FROM Cluster c inner join c.rdsConfigs rc WHERE rc.id= :id")
     Set<Cluster> findAllClustersByRDSConfig(@Param("id") Long rdsConfigId);
 
-    Long countByBlueprint(Blueprint blueprint);
+    List<Cluster> findByLdapConfig(LdapConfig ldapConfig);
 
-    Long countByLdapConfig(LdapConfig ldapConfig);
+    Long countByBlueprint(Blueprint blueprint);
 
     Long countByProxyConfig(ProxyConfig proxyConfig);
 }

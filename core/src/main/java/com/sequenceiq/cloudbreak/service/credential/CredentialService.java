@@ -1,22 +1,5 @@
 package com.sequenceiq.cloudbreak.service.credential;
 
-import static com.sequenceiq.cloudbreak.util.NameUtil.generateArchiveName;
-import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
-
-import java.util.Date;
-import java.util.Map;
-import java.util.Set;
-
-import javax.inject.Inject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.retry.annotation.Backoff;
-import org.springframework.retry.annotation.Retryable;
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.stereotype.Service;
-
 import com.sequenceiq.cloudbreak.api.model.CloudbreakEventsJson;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
@@ -28,10 +11,26 @@ import com.sequenceiq.cloudbreak.repository.CredentialRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.AuthorizationService;
 import com.sequenceiq.cloudbreak.service.account.AccountPreferencesService;
+import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.notification.Notification;
 import com.sequenceiq.cloudbreak.service.notification.NotificationSender;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderCredentialAdapter;
 import com.sequenceiq.cloudbreak.service.user.UserProfileCredentialHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.stereotype.Service;
+
+import javax.inject.Inject;
+import java.util.Date;
+import java.util.Map;
+import java.util.Set;
+
+import static com.sequenceiq.cloudbreak.util.NameUtil.generateArchiveName;
+import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
 
 @Service
 public class CredentialService {
@@ -58,6 +57,9 @@ public class CredentialService {
 
     @Inject
     private NotificationSender notificationSender;
+
+    @Inject
+    private CloudbreakMessagesService messagesService;
 
     public Set<Credential> retrievePrivateCredentials(IdentityUser user) {
         return credentialRepository.findForUser(user.getUserId());
@@ -161,7 +163,7 @@ public class CredentialService {
         CloudbreakEventsJson notification = new CloudbreakEventsJson();
         notification.setEventType(resourceEvent.name());
         notification.setEventTimestamp(new Date().getTime());
-        notification.setEventMessage(resourceEvent.getMessage());
+        notification.setEventMessage(messagesService.getMessage(resourceEvent.getMessage()));
         notification.setOwner(credential.getOwner());
         notification.setAccount(credential.getAccount());
         notification.setCloud(credential.cloudPlatform());

@@ -27,7 +27,7 @@ public class GcpConfig {
     @Value("${cb.gcp.tag.value.max.length:63}")
     private Integer maxValueLength;
 
-    @Value("${cb.gcp.tag.value.validator:^([a-z0-9]+)([a-z\\d-]+)$}")
+    @Value("${cb.gcp.tag.value.validator:^([a-z\\d]+)$}")
     private String valueValidator;
 
     @Bean(name = "GcpTagSpecification")

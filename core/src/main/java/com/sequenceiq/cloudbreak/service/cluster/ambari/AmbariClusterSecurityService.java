@@ -15,12 +15,13 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.PollingResult;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
@@ -28,6 +29,8 @@ import com.sequenceiq.cloudbreak.service.cluster.api.ClusterSecurityService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariOperationService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+
+import groovyx.net.http.HttpResponseException;
 
 @Service
 public class AmbariClusterSecurityService implements ClusterSecurityService {
@@ -66,7 +69,7 @@ public class AmbariClusterSecurityService implements ClusterSecurityService {
             AmbariClient ambariClient = clientFactory.getAmbariClient(stack, stack.getCluster());
             Map<String, Integer> operationRequests = new HashMap<>();
             Stream.of("ZOOKEEPER", "HDFS", "YARN", "MAPREDUCE2", "KERBEROS").forEach(s -> {
-                int opId = s.equals("ZOOKEEPER") ? ambariClient.startService(s) : ambariClient.stopService(s);
+                int opId = s.equals("ZOOKEEPER") ? ambariClient.startService(s) : stopServiceIfAvailable(ambariClient, s);
                 if (opId != -1) {
                     operationRequests.put(s + "_SERVICE_STATE", opId);
                 }
@@ -81,6 +84,20 @@ public class AmbariClusterSecurityService implements ClusterSecurityService {
             throw cancellationException;
         } catch (Exception e) {
             throw new AmbariOperationFailedException(e.getMessage(), e);
+        }
+    }
+
+    private int stopServiceIfAvailable(AmbariClient ambariClient, String s) {
+        try {
+            return ambariClient.stopService(s);
+        } catch (Exception e) {
+            //because groovy does not declare the throws
+            if (e instanceof HttpResponseException && ((HttpResponseException) e).getResponse().getStatus() == HttpStatus.NOT_FOUND.value()) {
+                LOGGER.info("Cannot stop service [{}], becasue it does not exists.", s);
+                return -1;
+            } else {
+                throw e;
+            }
         }
     }
 

@@ -135,7 +135,7 @@ public class ClusterTerminationService {
     }
 
     public void finalizeClusterTermination(Long clusterId) throws TransactionExecutionException {
-        Cluster cluster = clusterRepository.findById(clusterId);
+        Cluster cluster = clusterRepository.findOneWithLists(clusterId);
         Set<RDSConfig> rdsConfigs = cluster.getRdsConfigs();
         Long stackId = cluster.getStack().getId();
         String terminatedName = cluster.getName() + DELIMITER + new Date().getTime();
