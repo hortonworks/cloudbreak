@@ -56,7 +56,7 @@ public class GetSSHFingerprintsHandler implements CloudPlatformEventHandler<GetS
             CloudContext cloudContext = fingerprintsRequest.getCloudContext();
             CloudInstance cloudInstance = fingerprintsRequest.getCloudInstance();
             CloudConnector connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
-            AuthenticatedContext ac = connector.authentication().authenticate(cloudContext, fingerprintsRequest.getCloudCredential());
+            AuthenticatedContext ac = connector.authentication().authenticate(cloudContext, fingerprintsRequest.getCloudCredential(), false);
             GetSSHFingerprintsResult fingerprintsResult;
             try {
                 String initialConsoleOutput = connector.instances().getConsoleOutput(ac, cloudInstance);

@@ -59,7 +59,7 @@ public class LaunchStackHandler implements CloudPlatformEventHandler<LaunchStack
         CloudContext cloudContext = request.getCloudContext();
         try {
             CloudConnector connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
-            AuthenticatedContext ac = connector.authentication().authenticate(cloudContext, request.getCloudCredential());
+            AuthenticatedContext ac = connector.authentication().authenticate(cloudContext, request.getCloudCredential(), false);
             List<CloudResourceStatus> resourceStatus = connector.resources().launch(ac, request.getCloudStack(), persistenceNotifier,
                     request.getAdjustmentType(), request.getThreshold());
             List<CloudResource> resources = ResourceLists.transform(resourceStatus);

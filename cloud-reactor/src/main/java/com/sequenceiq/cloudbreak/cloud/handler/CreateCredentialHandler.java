@@ -42,7 +42,7 @@ public class CreateCredentialHandler implements CloudPlatformEventHandler<Create
         CloudContext cloudContext = request.getCloudContext();
         try {
             CloudConnector connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
-            AuthenticatedContext ac = connector.authentication().authenticate(cloudContext, request.getCloudCredential());
+            AuthenticatedContext ac = connector.authentication().authenticate(cloudContext, request.getCloudCredential(), false);
             CloudCredentialStatus credentialStatus = connector.credentials().create(ac);
             if (CredentialStatus.FAILED == credentialStatus.getStatus()) {
                 if (credentialStatus.getException() != null) {
