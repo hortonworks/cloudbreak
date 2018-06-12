@@ -1,5 +1,5 @@
-export-logs() {
-    declare desc="Exports and anonymizes logs for fault analysis. Usage: cbd export-logs [archive_name]"
+create-bundle() {
+    declare desc="Exports and anonymizes logs for fault analysis. Usage: cbd create-bundle [archive_name]"
     declare archivename=$1
     if [[ -z $archivename ]] || [[ "/" == $archivename ]]; then
         archivename="cbd_export_$(date +%s)"
