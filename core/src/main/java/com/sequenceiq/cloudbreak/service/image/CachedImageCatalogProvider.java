@@ -44,7 +44,7 @@ public class CachedImageCatalogProvider {
     @Value("${cb.etc.config.dir}")
     private String etcConfigDir;
 
-    @Value("${cb.enabled.linux.types}")
+    @Value("#{'${cb.enabled.linux.types}'.split(',')}")
     private List<String> enabledLinuxTypes;
 
     @Inject
@@ -52,10 +52,10 @@ public class CachedImageCatalogProvider {
 
     @Cacheable(cacheNames = "imageCatalogCache", key = "#catalogUrl")
     public CloudbreakImageCatalogV2 getImageCatalogV2(String catalogUrl) throws CloudbreakImageCatalogException {
-        CloudbreakImageCatalogV2 catalog = null;
+        CloudbreakImageCatalogV2 catalog;
         if (catalogUrl == null) {
             LOGGER.warn("No image catalog was defined!");
-            return catalog;
+            return null;
         }
 
         try {

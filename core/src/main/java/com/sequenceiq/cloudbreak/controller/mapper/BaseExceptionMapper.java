@@ -34,4 +34,6 @@ abstract class BaseExceptionMapper<E extends Throwable> implements ExceptionMapp
     }
 
     abstract Status getResponseStatus();
+
+    abstract Class<E> getExceptionType();
 }

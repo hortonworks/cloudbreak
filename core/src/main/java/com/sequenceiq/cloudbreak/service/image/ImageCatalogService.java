@@ -332,7 +332,7 @@ public class ImageCatalogService {
                 imageCatalog.getImageCatalogUrl(), platforms, cbVersion);
         StatedImages images;
         CloudbreakImageCatalogV2 imageCatalogV2 = imageCatalogProvider.getImageCatalogV2(imageCatalog.getImageCatalogUrl());
-        Set<String> suppertedVersions = Collections.singleton(cbVersion);
+        Set<String> suppertedVersions;
         if (imageCatalogV2 != null) {
             Set<String> vMImageUUIDs = new HashSet<>();
             Set<String> defaultVMImageUUIDs = new HashSet<>();

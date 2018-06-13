@@ -1,12 +1,13 @@
 package com.sequenceiq.cloudbreak.controller.mapper;
 
 import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.ext.Provider;
+
+import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.controller.json.ExceptionResult;
 import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
 
-@Provider
+@Component
 public class DuplicatedKeyValueExceptionMapper extends BaseExceptionMapper<DuplicateKeyValueException> {
 
     @Override
@@ -17,6 +18,11 @@ public class DuplicatedKeyValueExceptionMapper extends BaseExceptionMapper<Dupli
     @Override
     Status getResponseStatus() {
         return Status.CONFLICT;
+    }
+
+    @Override
+    Class<DuplicateKeyValueException> getExceptionType() {
+        return DuplicateKeyValueException.class;
     }
 
     public static String errorMessage(DuplicateKeyValueException exception) {
