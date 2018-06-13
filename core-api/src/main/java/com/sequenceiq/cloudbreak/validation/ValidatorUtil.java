@@ -13,4 +13,8 @@ public class ValidatorUtil {
                 .addConstraintViolation();
     }
 
+    public static void addConstraintViolationAsStatus(ConstraintValidatorContext context, String message) {
+        addConstraintViolation(context, message, "status");
+    }
+
 }

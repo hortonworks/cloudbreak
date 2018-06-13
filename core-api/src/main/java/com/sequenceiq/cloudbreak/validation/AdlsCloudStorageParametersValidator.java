@@ -28,17 +28,15 @@ public class AdlsCloudStorageParametersValidator implements ConstraintValidator<
         boolean result = false;
         if (!isAccountNameValid(value.getAccountName())) {
             ValidatorUtil.addConstraintViolation(context, failMessage, PROPERTY_MODEL_VALUE);
-        } else if (clientIdOrCredentialEmpty(value)) {
+        } else if (isClientIdOrCredentialEmpty(value)) {
             ValidatorUtil.addConstraintViolation(context, "Client ID and Credential should be fill together only!", PROPERTY_MODEL_VALUE);
-        } else if (value.getTenantId() == null) {
-            ValidatorUtil.addConstraintViolation(context, "Tenant ID should not be null!", PROPERTY_MODEL_VALUE);
         } else {
             result = true;
         }
         return result;
     }
 
-    protected boolean clientIdOrCredentialEmpty(AdlsCloudStorageParameters value) {
+    private boolean isClientIdOrCredentialEmpty(AdlsCloudStorageParameters value) {
         boolean clientIdEmpty = StringUtils.isNoneEmpty(value.getClientId());
         boolean credentialEmpty = StringUtils.isNoneEmpty(value.getCredential());
         return clientIdEmpty != credentialEmpty;
