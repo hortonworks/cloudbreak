@@ -33,6 +33,7 @@ tests:
       clusterName: aws-base-edwan
       provider: aws
       blueprintName: "EDW-Analytics: Apache Hive 2 LLAP, Apache Zeppelin"
+      workerInstanceCount: 3
       image: base
       instancegroupName: worker
     classes:
@@ -97,6 +98,7 @@ tests:
       clusterName: aws-prewarm-edwan
       provider: aws
       blueprintName: "EDW-Analytics: Apache Hive 2 LLAP, Apache Zeppelin"
+      workerInstanceCount: 3
       image: hdp
       instancegroupName: worker
     classes:
