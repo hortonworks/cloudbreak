@@ -18,9 +18,11 @@ public class AutoscaleClusterRequest extends ClusterBaseJson {
     @ApiModelProperty(ClusterJsonsProperties.ENABLE_AUTOSCALING)
     private boolean enableAutoscaling;
 
+    @Valid
     @ApiModelProperty(ClusterJsonsProperties.METRIC_ALERTS)
     private List<MetricAlertRequest> metricAlerts;
 
+    @Valid
     @ApiModelProperty(ClusterJsonsProperties.TIME_ALERTS)
     private List<TimeAlertRequest> timeAlerts;
 

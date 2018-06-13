@@ -4,6 +4,7 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -13,6 +14,7 @@ import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupAdjustmen
 import com.sequenceiq.cloudbreak.api.model.UpdateClusterJson;
 import com.sequenceiq.cloudbreak.api.model.UpdateStackJson;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
+import com.sequenceiq.cloudbreak.common.type.ScalingHardLimitsService;
 import com.sequenceiq.periscope.api.model.ScalingStatus;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.History;
@@ -44,6 +46,9 @@ public class ScalingRequest implements Runnable {
     @Inject
     private HttpNotificationSender notificationSender;
 
+    @Autowired
+    private ScalingHardLimitsService scalingHardLimitsService;
+
     public ScalingRequest(Cluster cluster, ScalingPolicy policy, int totalNodes, int desiredNodeCount) {
         this.cluster = cluster;
         this.policy = policy;
@@ -67,6 +72,11 @@ public class ScalingRequest implements Runnable {
     }
 
     private void scaleUp(int scalingAdjustment, int totalNodes) {
+        if (scalingHardLimitsService.isViolatingMaxUpscaleStepInNodeCount(scalingAdjustment)) {
+            LOGGER.info("Upscale requested for {} nodes. Upscaling with the maximum allowed of {} node(s)",
+                    scalingAdjustment, scalingHardLimitsService.getMaxUpscaleStepInNodeCount());
+            scalingAdjustment = scalingHardLimitsService.getMaxUpscaleStepInNodeCount();
+        }
         String hostGroup = policy.getHostGroup();
         String ambari = cluster.getHost();
         AmbariAddressJson ambariAddressJson = new AmbariAddressJson();
