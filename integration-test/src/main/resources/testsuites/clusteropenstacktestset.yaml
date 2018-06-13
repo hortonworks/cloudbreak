@@ -31,6 +31,7 @@ tests:
       clusterName: os-base-edwan
       provider: openstack
       blueprintName: "EDW-Analytics: Apache Hive 2 LLAP, Apache Zeppelin"
+      workerInstanceCount: 3
       image: base
       instancegroupName: worker
     classes:
@@ -95,6 +96,7 @@ tests:
       clusterName: os-prewarm-edwan
       provider: openstack
       blueprintName: "EDW-Analytics: Apache Hive 2 LLAP, Apache Zeppelin"
+      workerInstanceCount: 3
       image: hdp
       instancegroupName: worker
     classes:

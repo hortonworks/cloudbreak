@@ -36,6 +36,12 @@ public abstract class CloudProviderHelper extends CloudProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CloudProviderHelper.class);
 
+    private static final String MASTER_INSTANCE_COUNT = "masterInstanceCount";
+
+    private static final String WORKER_INSTANCE_COUNT = "workerInstanceCount";
+
+    private static final String COMPUTE_INSTANCE_COUNT = "computeInstanceCount";
+
     private final TestParameter testParameter;
 
     private String clusterNamePostfix;
@@ -165,41 +171,41 @@ public abstract class CloudProviderHelper extends CloudProvider {
     }
 
     InstanceGroupV2Request master(String securityGroupId) {
-        return hostgroup("master", InstanceGroupType.GATEWAY, 1, securityGroupId);
+        return hostgroup("master", InstanceGroupType.GATEWAY, determineInstanceCount(MASTER_INSTANCE_COUNT), securityGroupId);
     }
 
     InstanceGroupV2Request compute(String securityGroupId) {
-        return hostgroup("compute", InstanceGroupType.CORE, 1, securityGroupId);
+        return hostgroup("compute", InstanceGroupType.CORE, determineInstanceCount(COMPUTE_INSTANCE_COUNT), securityGroupId);
 
     }
 
     InstanceGroupV2Request worker(String securityGroupId) {
-        return hostgroup("worker", InstanceGroupType.CORE, 1, securityGroupId);
+        return hostgroup("worker", InstanceGroupType.CORE, determineInstanceCount(WORKER_INSTANCE_COUNT), securityGroupId);
 
     }
 
     InstanceGroupV2Request master() {
-        return hostgroup("master", InstanceGroupType.GATEWAY, 1);
+        return hostgroup("master", InstanceGroupType.GATEWAY, determineInstanceCount(MASTER_INSTANCE_COUNT));
     }
 
     InstanceGroupV2Request compute() {
-        return hostgroup("compute", InstanceGroupType.CORE, 1);
+        return hostgroup("compute", InstanceGroupType.CORE, determineInstanceCount(COMPUTE_INSTANCE_COUNT));
     }
 
     InstanceGroupV2Request worker() {
-        return hostgroup("worker", InstanceGroupType.CORE, 1);
+        return hostgroup("worker", InstanceGroupType.CORE, determineInstanceCount(WORKER_INSTANCE_COUNT));
     }
 
     InstanceGroupV2Request master(Set<String> recipes) {
-        return hostgroup("master", InstanceGroupType.GATEWAY, 1, recipes);
+        return hostgroup("master", InstanceGroupType.GATEWAY, determineInstanceCount(MASTER_INSTANCE_COUNT), recipes);
     }
 
     InstanceGroupV2Request compute(Set<String> recipes) {
-        return hostgroup("compute", InstanceGroupType.CORE, 1, recipes);
+        return hostgroup("compute", InstanceGroupType.CORE, determineInstanceCount(COMPUTE_INSTANCE_COUNT), recipes);
     }
 
     InstanceGroupV2Request worker(Set<String> recipes) {
-        return hostgroup("worker", InstanceGroupType.CORE, 1, recipes);
+        return hostgroup("worker", InstanceGroupType.CORE, determineInstanceCount(WORKER_INSTANCE_COUNT), recipes);
     }
 
     public InstanceGroupV2Request hostgroup(String groupName, InstanceGroupType groupType, int nodeCount, String securityGroupId) {
@@ -264,5 +270,16 @@ public abstract class CloudProviderHelper extends CloudProvider {
     @Override
     public String getClusterNamePostfix() {
         return clusterNamePostfix;
+    }
+
+    private int determineInstanceCount(String key) {
+        String instanceCount = testParameter.get(key);
+        int instanceCountInt;
+        try {
+            instanceCountInt = Integer.parseInt(instanceCount);
+        } catch (NumberFormatException e) {
+            instanceCountInt = 1;
+        }
+        return instanceCountInt;
     }
 }
