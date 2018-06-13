@@ -416,6 +416,10 @@ public class StackService {
         delete(stack, forced, deleteDependencies);
     }
 
+    public void removeInstance(@Nonnull IdentityUser user, Long stackId, String instanceId) {
+        removeInstance(user, stackId, instanceId, false);
+    }
+
     public void removeInstance(@Nonnull IdentityUser user, Long stackId, String instanceId, boolean forced) {
         Stack stack = get(stackId);
         InstanceMetaData metaData = validateInstanceForDownscale(user, instanceId, stack);

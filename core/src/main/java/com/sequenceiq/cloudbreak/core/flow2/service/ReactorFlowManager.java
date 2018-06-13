@@ -108,6 +108,10 @@ public class ReactorFlowManager {
         notify(selector, new StackSyncTriggerEvent(selector, stackId, true));
     }
 
+    public void triggerStackRemoveInstance(Long stackId, String hostGroup, Long privateId) {
+        triggerStackRemoveInstance(stackId, hostGroup, privateId, false);
+    }
+
     public void triggerStackRemoveInstance(Long stackId, String hostGroup, Long privateId, boolean forced) {
         String selector = FlowChainTriggers.FULL_DOWNSCALE_TRIGGER_EVENT;
         ClusterDownscaleDetails details = new ClusterDownscaleDetails(forced);
