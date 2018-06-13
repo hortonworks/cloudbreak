@@ -23,8 +23,8 @@ public class RdsRequestValidator implements ConstraintValidator<ValidRds, RDSCon
 
         Optional<SupportedExternalDatabaseServiceEntry> serviceEntry = SupportedDatabaseProvider.supportedExternalDatabases()
                 .stream()
-                .filter(item -> item.getName().toLowerCase().equals(request.getType().toLowerCase())
-                        || item.getDisplayName().toLowerCase().equals(request.getType().toLowerCase()))
+                .filter(item -> item.getName().equalsIgnoreCase(request.getType())
+                        || item.getDisplayName().equalsIgnoreCase(request.getType()))
                 .findFirst();
 
         if (!serviceEntry.isPresent()) {
