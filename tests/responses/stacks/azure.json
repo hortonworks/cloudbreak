@@ -9,7 +9,7 @@
   "ambariVersion": "2.6.0.0",
   "hdpVersion": "2.6.3.0-235",
   "parameters": {
-    "encryptStorage": "false"
+    "encryptStorage": "true"
   },
   "customDomain": null,
   "customHostname": null,

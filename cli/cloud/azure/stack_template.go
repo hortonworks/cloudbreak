@@ -16,7 +16,7 @@ func (p *AzureProvider) GetNetworkParamatersTemplate(mode cloud.NetworkMode) map
 }
 
 func (p *AzureProvider) GetParamatersTemplate() map[string]interface{} {
-	return map[string]interface{}{"encryptStorage": "false"}
+	return map[string]interface{}{"encryptStorage": "true"}
 }
 
 func (p *AzureProvider) GetInstanceGroupParamatersTemplate(node cloud.Node) map[string]interface{} {
