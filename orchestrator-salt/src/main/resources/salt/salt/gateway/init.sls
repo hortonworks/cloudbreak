@@ -24,9 +24,11 @@ include:
 {% endif %}
 
 knox:
-  pkg.installed:
 {% if grains['os_family'] == 'Debian' %}
+  pkg.installed:
     - skip_verify: True
+{% else %}
+  pkg.installed
 {% endif %}
 
 /var/run/knox:
