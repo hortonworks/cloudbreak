@@ -1,18 +1,22 @@
 package com.sequenceiq.cloudbreak.repository;
 
+import java.util.List;
+import java.util.Set;
+
+import javax.transaction.Transactional;
+
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.query.Param;
+
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.FlexSubscription;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.CrudRepository;
-import org.springframework.data.repository.query.Param;
-
-import java.util.List;
-import java.util.Set;
 
 @EntityType(entityClass = Stack.class)
+@Transactional(Transactional.TxType.REQUIRED)
 public interface StackRepository extends CrudRepository<Stack, Long> {
 
     @Query("SELECT s from Stack s LEFT JOIN FETCH s.resources LEFT JOIN FETCH s.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData "
@@ -62,7 +66,7 @@ public interface StackRepository extends CrudRepository<Stack, Long> {
     Stack findByNameInAccountOrOwner(@Param("name") String name, @Param("account") String account, @Param("owner") String owner);
 
     @Query("SELECT c FROM Stack c LEFT JOIN FETCH c.resources LEFT JOIN FETCH c.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData "
-        + "WHERE c.name= :name and c.account= :account")
+            + "WHERE c.name= :name and c.account= :account")
     Stack findByNameInAccountWithLists(@Param("name") String name, @Param("account") String account);
 
     @Query("SELECT c FROM Stack c WHERE c.name= :name and c.account= :account")

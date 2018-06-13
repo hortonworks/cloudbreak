@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.repository;
 
 import java.util.Set;
 
+import javax.transaction.Transactional;
+
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -9,6 +11,7 @@ import org.springframework.data.repository.query.Param;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 
 @EntityType(entityClass = RDSConfig.class)
+@Transactional(Transactional.TxType.REQUIRED)
 public interface RdsConfigRepository extends CrudRepository<RDSConfig, Long> {
 
     @Query("SELECT r FROM RDSConfig r LEFT JOIN FETCH r.clusters WHERE r.owner= :user AND r.status = 'USER_MANAGED'")

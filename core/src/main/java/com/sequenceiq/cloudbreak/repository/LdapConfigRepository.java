@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.repository;
 
 import java.util.Set;
 
+import javax.transaction.Transactional;
+
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -9,6 +11,7 @@ import org.springframework.data.repository.query.Param;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 
 @EntityType(entityClass = LdapConfig.class)
+@Transactional(Transactional.TxType.REQUIRED)
 public interface LdapConfigRepository extends CrudRepository<LdapConfig, Long> {
 
     @Query("SELECT c FROM LdapConfig c WHERE c.name= :name and c.account= :account")

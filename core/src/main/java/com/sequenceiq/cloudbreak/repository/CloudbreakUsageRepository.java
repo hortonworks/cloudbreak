@@ -3,6 +3,8 @@ package com.sequenceiq.cloudbreak.repository;
 import java.util.Date;
 import java.util.List;
 
+import javax.transaction.Transactional;
+
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -11,6 +13,7 @@ import org.springframework.data.repository.query.Param;
 import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
 
 @EntityType(entityClass = CloudbreakUsage.class)
+@Transactional(Transactional.TxType.REQUIRED)
 public interface CloudbreakUsageRepository extends CrudRepository<CloudbreakUsage, Long>, JpaSpecificationExecutor {
 
     @Query("SELECT u FROM CloudbreakUsage u WHERE u.stackId = :stackId AND u.status = 'OPEN'")

@@ -104,7 +104,7 @@ public class PillarSave implements OrchestratorBootstrap {
             LOGGER.info("Salt pillar save responses: {}", responses);
             for (GenericResponse genericResponse : responses.getResponses()) {
                 if (genericResponse.getStatusCode() != HttpStatus.OK.value()) {
-                    LOGGER.info("Failed pillar save attempt to: " + genericResponse.getAddress());
+                    LOGGER.info("Failed pillar save attempt to: {}, error: {}", genericResponse.getAddress(), genericResponse.getErrorText());
                     String address = genericResponse.getAddress().split(":")[0];
                     failedTargets.addAll(originalTargets.stream().filter(a -> a.equals(address)).collect(Collectors.toList()));
                 }

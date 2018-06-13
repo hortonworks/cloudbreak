@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.repository;
 
 import java.util.Set;
 
+import javax.transaction.Transactional;
+
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -10,6 +12,7 @@ import org.springframework.data.repository.query.Param;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 
 @EntityType(entityClass = HostGroup.class)
+@Transactional(Transactional.TxType.REQUIRED)
 public interface HostGroupRepository extends CrudRepository<HostGroup, Long> {
 
     @EntityGraph(value = "HostGroup.constraint.instanceGroup.instanceMetaData", type = EntityGraph.EntityGraphType.LOAD)

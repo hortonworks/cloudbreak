@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.repository;
 
 import java.util.Set;
 
+import javax.transaction.Transactional;
+
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -9,6 +11,7 @@ import org.springframework.data.repository.query.Param;
 import com.sequenceiq.cloudbreak.domain.ManagementPack;
 
 @EntityType(entityClass = ManagementPack.class)
+@Transactional(Transactional.TxType.REQUIRED)
 public interface ManagementPackRepository extends CrudRepository<ManagementPack, Long> {
     ManagementPack findOneById(Long id);
 

@@ -17,6 +17,7 @@ import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
 import com.sequenceiq.it.cloudbreak.newway.Cluster;
 import com.sequenceiq.it.cloudbreak.newway.HostGroups;
 import com.sequenceiq.it.cloudbreak.newway.ImageSettings;
+import com.sequenceiq.it.cloudbreak.newway.Kerberos;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
 import com.sequenceiq.it.cloudbreak.newway.StackOperation;
 import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProvider;
@@ -77,9 +78,11 @@ public class ClusterTests extends CloudbreakTest {
     }
 
     @Test(dataProvider = "providernameblueprintimageos", priority = 10)
-    public void testCreateNewClusterWithOs(CloudProvider cloudProvider, String clusterName, String blueprintName, String os) throws Exception {
+    public void testCreateNewClusterWithOs(CloudProvider cloudProvider, String clusterName, String blueprintName, String os, Kerberos kerberos)
+            throws Exception {
         given(CloudbreakClient.isCreated());
         given(cloudProvider.aValidCredential());
+        given(kerberos);
         given(Cluster.request()
                         .withAmbariRequest(cloudProvider.ambariRequestWithBlueprintName(blueprintName)),
                 "a cluster request");
@@ -177,8 +180,12 @@ public class ClusterTests extends CloudbreakTest {
         String imageOs = getTestParameter().get("imageos");
         CloudProvider cloudProvider = CloudProviderHelper.providerFactory(provider, getTestParameter());
         String clusterName = getTestParameter().get("clusterName");
+        Kerberos kerberos = Kerberos.request()
+                .withMasterKey(Kerberos.DEFAULT_MASTERKEY)
+                .withAdmin(Kerberos.DEFAULT_ADMIN_USER)
+                .withPassword(Kerberos.DEFAULT_ADMIN_PASSWORD);
         return new Object[][]{
-                {cloudProvider, clusterName, blueprint, imageOs}
+                {cloudProvider, clusterName, blueprint, imageOs, kerberos}
         };
     }
 

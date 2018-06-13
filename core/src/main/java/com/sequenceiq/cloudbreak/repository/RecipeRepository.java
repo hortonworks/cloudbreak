@@ -3,6 +3,8 @@ package com.sequenceiq.cloudbreak.repository;
 import java.util.Collection;
 import java.util.Set;
 
+import javax.transaction.Transactional;
+
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -11,6 +13,7 @@ import com.sequenceiq.cloudbreak.api.model.RecipeType;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 
 @EntityType(entityClass = Recipe.class)
+@Transactional(Transactional.TxType.REQUIRED)
 public interface RecipeRepository extends CrudRepository<Recipe, Long> {
 
     @Query("SELECT r FROM Recipe r WHERE r.name= :name AND r.account= :account")

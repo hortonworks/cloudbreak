@@ -10,6 +10,8 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.model.SpecialParameters;
@@ -84,6 +86,7 @@ public class CloudParameterService {
     @Inject
     private CredentialToExtendedCloudCredentialConverter credentialToExtendedCloudCredentialConverter;
 
+    @Retryable(value = GetCloudParameterException.class, maxAttempts = 5, backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000))
     public PlatformVariants getPlatformVariants() {
         LOGGER.debug("Get platform variants");
         GetPlatformVariantsRequest getPlatformVariantsRequest = new GetPlatformVariantsRequest();
@@ -93,7 +96,7 @@ public class CloudParameterService {
             LOGGER.info("Platform variants result: {}", res);
             if (res.getStatus().equals(EventStatus.FAILED)) {
                 LOGGER.error("Failed to get platform variants", res.getErrorDetails());
-                throw new OperationException(res.getErrorDetails());
+                throw new GetCloudParameterException(res.getErrorDetails());
             }
             return res.getPlatformVariants();
         } catch (InterruptedException e) {
@@ -114,6 +117,7 @@ public class CloudParameterService {
         return null;
     }
 
+    @Retryable(value = GetCloudParameterException.class, maxAttempts = 5, backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000))
     public PlatformDisks getDiskTypes() {
         LOGGER.debug("Get platform disktypes");
         GetDiskTypesRequest getDiskTypesRequest = new GetDiskTypesRequest();
@@ -123,7 +127,7 @@ public class CloudParameterService {
             LOGGER.info("Platform disk types result: {}", res);
             if (res.getStatus().equals(EventStatus.FAILED)) {
                 LOGGER.error("Failed to get platform disk types", res.getErrorDetails());
-                throw new OperationException(res.getErrorDetails());
+                throw new GetCloudParameterException(res.getErrorDetails());
             }
             return res.getPlatformDisks();
         } catch (InterruptedException e) {
@@ -132,6 +136,7 @@ public class CloudParameterService {
         }
     }
 
+    @Retryable(value = GetCloudParameterException.class, maxAttempts = 5, backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000))
     public PlatformRegions getRegions() {
         LOGGER.debug("Get platform regions");
         GetPlatformRegionsRequest getPlatformRegionsRequest = new GetPlatformRegionsRequest();
@@ -141,7 +146,7 @@ public class CloudParameterService {
             LOGGER.info("Platform regions result: {}", res);
             if (res.getStatus().equals(EventStatus.FAILED)) {
                 LOGGER.error("Failed to get platform regions", res.getErrorDetails());
-                throw new OperationException(res.getErrorDetails());
+                throw new GetCloudParameterException(res.getErrorDetails());
             }
             return res.getPlatformRegions();
         } catch (InterruptedException e) {
@@ -150,6 +155,7 @@ public class CloudParameterService {
         }
     }
 
+    @Retryable(value = GetCloudParameterException.class, maxAttempts = 5, backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000))
     public PlatformOrchestrators getOrchestrators() {
         LOGGER.debug("Get platform orchestrators");
         GetPlatformOrchestratorsRequest getPlatformOrchestratorsRequest = new GetPlatformOrchestratorsRequest();
@@ -159,7 +165,7 @@ public class CloudParameterService {
             LOGGER.info("Platform orchestrators result: {}", res);
             if (res.getStatus().equals(EventStatus.FAILED)) {
                 LOGGER.error("Failed to get platform orchestrators", res.getErrorDetails());
-                throw new OperationException(res.getErrorDetails());
+                throw new GetCloudParameterException(res.getErrorDetails());
             }
             return res.getPlatformOrchestrators();
         } catch (InterruptedException e) {
@@ -168,6 +174,7 @@ public class CloudParameterService {
         }
     }
 
+    @Retryable(value = GetCloudParameterException.class, maxAttempts = 5, backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000))
     public Map<Platform, PlatformParameters> getPlatformParameters() {
         LOGGER.debug("Get platform parameters for");
         PlatformParametersRequest parametersRequest = new PlatformParametersRequest();
@@ -177,7 +184,7 @@ public class CloudParameterService {
             LOGGER.info("Platform parameter result: {}", res);
             if (res.getStatus().equals(EventStatus.FAILED)) {
                 LOGGER.error("Failed to get platform parameters", res.getErrorDetails());
-                throw new OperationException(res.getErrorDetails());
+                throw new GetCloudParameterException(res.getErrorDetails());
             }
             return res.getPlatformParameters();
         } catch (InterruptedException e) {
@@ -186,6 +193,7 @@ public class CloudParameterService {
         }
     }
 
+    @Retryable(value = GetCloudParameterException.class, maxAttempts = 5, backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000))
     public CloudNetworks getCloudNetworks(Credential credential, String region, String variant, Map<String, String> filters) {
         LOGGER.debug("Get platform cloudnetworks");
 
@@ -207,6 +215,7 @@ public class CloudParameterService {
         }
     }
 
+    @Retryable(value = GetCloudParameterException.class, maxAttempts = 5, backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000))
     public CloudSshKeys getCloudSshKeys(Credential credential, String region, String variant, Map<String, String> filters) {
         LOGGER.debug("Get platform sshkeys");
         ExtendedCloudCredential cloudCredential = credentialToExtendedCloudCredentialConverter.convert(credential);
@@ -227,6 +236,7 @@ public class CloudParameterService {
         }
     }
 
+    @Retryable(value = GetCloudParameterException.class, maxAttempts = 5, backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000))
     public CloudSecurityGroups getSecurityGroups(Credential credential, String region, String variant, Map<String, String> filters) {
         LOGGER.debug("Get platform securitygroups");
 
@@ -254,6 +264,7 @@ public class CloudParameterService {
         return new SpecialParameters(specialParameters);
     }
 
+    @Retryable(value = GetCloudParameterException.class, maxAttempts = 5, backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000))
     public VmRecommendations getRecommendation(String platform) {
         LOGGER.debug("Get platform vm recommendation");
         GetVirtualMachineRecommendtaionRequest getVirtualMachineRecommendtaionRequest = new GetVirtualMachineRecommendtaionRequest(platform);
@@ -263,7 +274,7 @@ public class CloudParameterService {
             LOGGER.info("Platform vm recommendation result: {}", res);
             if (res.getStatus().equals(EventStatus.FAILED)) {
                 LOGGER.error("Failed to get platform vm recommendation", res.getErrorDetails());
-                throw new OperationException(res.getErrorDetails());
+                throw new GetCloudParameterException(res.getErrorDetails());
             }
             return res.getRecommendations();
         } catch (InterruptedException e) {
@@ -272,6 +283,7 @@ public class CloudParameterService {
         }
     }
 
+    @Retryable(value = GetCloudParameterException.class, maxAttempts = 5, backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000))
     public CloudVmTypes getVmTypesV2(Credential credential, String region, String variant, Map<String, String> filters) {
         LOGGER.debug("Get platform vmtypes");
         ExtendedCloudCredential cloudCredential = credentialToExtendedCloudCredentialConverter.convert(credential);
@@ -283,7 +295,7 @@ public class CloudParameterService {
             LOGGER.info("Platform vmtypes result: {}", res);
             if (res.getStatus().equals(EventStatus.FAILED)) {
                 LOGGER.error("Failed to get platform vmtypes", res.getErrorDetails());
-                throw new GetCloudParameterException("Failed to VM types for the cloud provider", res.getErrorDetails());
+                throw new GetCloudParameterException("Failed to get VM types for the cloud provider", res.getErrorDetails());
             }
             return res.getCloudVmTypes();
         } catch (InterruptedException e) {
@@ -292,6 +304,7 @@ public class CloudParameterService {
         }
     }
 
+    @Retryable(value = GetCloudParameterException.class, maxAttempts = 5, backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000))
     public CloudRegions getRegionsV2(Credential credential, String region, String variant, Map<String, String> filters) {
         LOGGER.debug("Get platform regions");
         ExtendedCloudCredential cloudCredential = credentialToExtendedCloudCredentialConverter.convert(credential);
@@ -312,6 +325,7 @@ public class CloudParameterService {
         }
     }
 
+    @Retryable(value = GetCloudParameterException.class, maxAttempts = 5, backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000))
     public CloudGateWays getGateways(Credential credential, String region, String variant, Map<String, String> filters) {
         LOGGER.debug("Get platform gateways");
         ExtendedCloudCredential cloudCredential = credentialToExtendedCloudCredentialConverter.convert(credential);
@@ -332,6 +346,7 @@ public class CloudParameterService {
         }
     }
 
+    @Retryable(value = GetCloudParameterException.class, maxAttempts = 5, backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000))
     public CloudIpPools getPublicIpPools(Credential credential, String region, String variant, Map<String, String> filters) {
         LOGGER.debug("Get platform publicIpPools");
         ExtendedCloudCredential cloudCredential = credentialToExtendedCloudCredentialConverter.convert(credential);
@@ -352,6 +367,7 @@ public class CloudParameterService {
         }
     }
 
+    @Retryable(value = GetCloudParameterException.class, maxAttempts = 5, backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000))
     public CloudAccessConfigs getCloudAccessConfigs(Credential credential, String region, String variant, Map<String, String> filters) {
         LOGGER.debug("Get platform accessConfigs");
         ExtendedCloudCredential cloudCredential = credentialToExtendedCloudCredentialConverter.convert(credential);
@@ -372,6 +388,7 @@ public class CloudParameterService {
         }
     }
 
+    @Retryable(value = GetCloudParameterException.class, maxAttempts = 5, backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000))
     public Map<String, InstanceGroupParameterResponse> getInstanceGroupParameters(Credential credential, Set<InstanceGroupParameterRequest> instanceGroups) {
         LOGGER.debug("Get platform getInstanceGroupParameters");
         ExtendedCloudCredential cloudCredential = credentialToExtendedCloudCredentialConverter.convert(credential);
