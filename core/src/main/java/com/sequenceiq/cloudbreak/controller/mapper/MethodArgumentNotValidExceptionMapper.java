@@ -6,7 +6,7 @@ import javax.ws.rs.ext.Provider;
 import org.springframework.messaging.handler.annotation.support.MethodArgumentNotValidException;
 import org.springframework.validation.FieldError;
 
-import com.sequenceiq.cloudbreak.controller.json.ValidationResult;
+import com.sequenceiq.cloudbreak.json.ValidationResult;
 
 @Provider
 public class MethodArgumentNotValidExceptionMapper extends BaseExceptionMapper<MethodArgumentNotValidException> {

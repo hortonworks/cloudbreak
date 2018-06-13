@@ -7,14 +7,10 @@ public class ValidatorUtil {
     private ValidatorUtil() {
     }
 
-    public static void addConstraintViolation(ConstraintValidatorContext context, String message, String propertyModel) {
-        context.buildConstraintViolationWithTemplate(message)
+    public static ConstraintValidatorContext addConstraintViolation(ConstraintValidatorContext context, String message, String propertyModel) {
+        return context.buildConstraintViolationWithTemplate(message)
                 .addPropertyNode(propertyModel)
                 .addConstraintViolation();
-    }
-
-    public static void addConstraintViolationAsStatus(ConstraintValidatorContext context, String message) {
-        addConstraintViolation(context, message, "status");
     }
 
 }
