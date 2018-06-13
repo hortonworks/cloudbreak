@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.cloud.event.Selectable;
 import com.sequenceiq.cloudbreak.common.type.ScalingType;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.repair.ChangePrimaryGatewayEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterAndStackDownscaleTriggerEvent;
+import com.sequenceiq.cloudbreak.core.flow2.event.ClusterDownscaleDetails;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackAndClusterUpscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
@@ -74,7 +75,7 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
             Stack stack = stackService.getByIdWithLists(event.getStackId());
             Set<Long> privateIdsForHostNames = stackService.getPrivateIdsForHostNames(stack.getInstanceMetaDataAsList(), hostNames);
             flowChainTriggers.add(new ClusterAndStackDownscaleTriggerEvent(FlowChainTriggers.FULL_DOWNSCALE_TRIGGER_EVENT, event.getStackId(),
-                    hostGroupName, Sets.newHashSet(privateIdsForHostNames), ScalingType.DOWNSCALE_TOGETHER, event.accepted()));
+                    hostGroupName, Sets.newHashSet(privateIdsForHostNames), ScalingType.DOWNSCALE_TOGETHER, event.accepted(), new ClusterDownscaleDetails()));
             if (!event.isRemoveOnly()) {
                 flowChainTriggers.add(new StackAndClusterUpscaleTriggerEvent(FlowChainTriggers.FULL_UPSCALE_TRIGGER_EVENT, event.getStackId(),
                         hostGroupName, hostNames.size(), ScalingType.UPSCALE_TOGETHER, Sets.newHashSet(hostNames)));
