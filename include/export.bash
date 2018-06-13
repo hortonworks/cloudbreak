@@ -1,5 +1,5 @@
-export-logs() {
-    declare desc="Exports and anonymizes logs for fault analysis. Usage: cbd export-logs [archive_name]"
+create-bundle() {
+    declare desc="Exports and anonymizes logs for fault analysis. Usage: cbd create-bundle [archive_name]"
     declare archivename=$1
     if [[ -z $archivename ]] || [[ "/" == $archivename ]]; then
         archivename="cbd_export_$(date +%s)"
@@ -24,9 +24,7 @@ export-logs() {
 }
 
 export-psql-history() {
-    local psqlcmd="docker exec -t cbreak_commondb_1 cat /var/lib/postgresql/.psql_history"
-
-    ! $($psqlcmd) > "$1/.psql_history"
+    ! docker exec -t cbreak_commondb_1 cat /var/lib/postgresql/.psql_history > "$1/.psql_history"
     check-export-success "$1/.psql_history"
 }
 
@@ -108,7 +106,6 @@ archive-directory() {
 
 anonymize-exported-files() {
     cloudbreak-config
-
     info "Anonymization started."
 
     ! docker run -e ACCOUNT_ID=$AWS_ACCOUNT_ID \
