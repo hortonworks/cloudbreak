@@ -1,11 +1,12 @@
 package com.sequenceiq.cloudbreak.controller.mapper;
 
 import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.ext.Provider;
+
+import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.controller.json.ExceptionResult;
 
-@Provider
+@Component
 public class RuntimeExceptionMapper extends BaseExceptionMapper<RuntimeException> {
 
     @Override
@@ -16,5 +17,10 @@ public class RuntimeExceptionMapper extends BaseExceptionMapper<RuntimeException
     @Override
     Status getResponseStatus() {
         return Status.INTERNAL_SERVER_ERROR;
+    }
+
+    @Override
+    Class<RuntimeException> getExceptionType() {
+        return RuntimeException.class;
     }
 }
