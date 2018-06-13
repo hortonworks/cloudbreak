@@ -36,7 +36,10 @@ public class FileSystemToFileSystemResponseConverter extends AbstractConversionS
         response.setLocations(getStorageLocationRequests(source));
         try {
             if (source.getType().isAdls()) {
-                response.setAdls(getConversionService().convert(source.getConfigurations().get(AdlsFileSystem.class), AdlsCloudStorageParameters.class));
+                AdlsCloudStorageParameters adls = getConversionService()
+                        .convert(source.getConfigurations().get(AdlsFileSystem.class), AdlsCloudStorageParameters.class);
+                adls.setCredential(null);
+                response.setAdls(adls);
             } else if (source.getType().isGcs()) {
                 response.setGcs(getConversionService().convert(source.getConfigurations().get(GcsFileSystem.class), GcsCloudStorageParameters.class));
             } else if (source.getType().isS3()) {
