@@ -104,7 +104,7 @@ public class StackScalingService {
 
             }
         } else {
-            LOGGER.info("Host cannot be deleted because it is not exist: {}", instanceMetaData.getInstanceId());
+            LOGGER.info("Host cannot be deleted because it does not exist: {}", instanceMetaData.getInstanceId());
             eventService.fireCloudbreakEvent(stack.getId(), Status.AVAILABLE.name(),
                     cloudbreakMessagesService.getMessage(Msg.STACK_SCALING_HOST_NOT_FOUND.code(),
                             Collections.singletonList(instanceMetaData.getInstanceId())));
@@ -115,7 +115,7 @@ public class StackScalingService {
     public int updateRemovedResourcesState(Stack stack, Collection<String> instanceIds, InstanceGroup instanceGroup) throws TransactionExecutionException {
         return transactionService.required(() -> {
             int nodesRemoved = 0;
-            for (InstanceMetaData instanceMetaData : instanceGroup.getNotDeletedInstanceMetaDataSet()) {
+            for (InstanceMetaData instanceMetaData : instanceGroup.getNotTerminatedInstanceMetaDataSet()) {
                 if (instanceIds.contains(instanceMetaData.getInstanceId())) {
                     long timeInMillis = Calendar.getInstance().getTimeInMillis();
                     instanceMetaData.setTerminationDate(timeInMillis);

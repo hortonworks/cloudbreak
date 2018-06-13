@@ -27,6 +27,9 @@ public interface FlowLogRepository extends CrudRepository<FlowLog, Long> {
             + "AND fl.flowType = 'com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationFlowConfig'")
     Set<Long> findTerminatingStacksByCloudbreakNodeId(@Param("cloudbreakNodeId") String cloudbreakNodeId);
 
+    @Query("SELECT DISTINCT fl.flowId, fl.stackId, fl.cloudbreakNodeId FROM FlowLog fl WHERE fl.stateStatus = 'PENDING'")
+    List<Object[]> findAllPending();
+
     @Modifying
     @Query("UPDATE FlowLog fl SET fl.finalized = true WHERE fl.flowId = :flowId")
     void finalizeByFlowId(@Param("flowId") String flowId);
