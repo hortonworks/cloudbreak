@@ -115,8 +115,6 @@ public class ClusterToClusterResponseConverter extends AbstractConversionService
         clusterResponse.setUserName(source.getUserName());
         clusterResponse.setExecutorType(source.getExecutorType());
         clusterResponse.setDescription(source.getDescription() == null ? "" : source.getDescription());
-        clusterResponse.setExtendedBlueprintText(source.getExtendedBlueprintText() == null
-                ? source.getBlueprint().getBlueprintText() : source.getExtendedBlueprintText());
         clusterResponse.setHostGroups(convertHostGroupsToJson(source.getHostGroups()));
         String ambariServerUrl = serviceEndpointCollector.getAmbariServerUrl(source, ambariIp);
         clusterResponse.setAmbariServerUrl(ambariServerUrl);
@@ -150,9 +148,7 @@ public class ClusterToClusterResponseConverter extends AbstractConversionService
     }
 
     private <R extends ClusterResponse> void setExtendedBlueprintText(Cluster source, R clusterResponse) {
-        if (StringUtils.isEmpty(source.getExtendedBlueprintText())) {
-            clusterResponse.setExtendedBlueprintText(anonymize(source.getBlueprint().getBlueprintText()));
-        } else {
+        if (StringUtils.isNoneEmpty(source.getExtendedBlueprintText())) {
             clusterResponse.setExtendedBlueprintText(anonymize(source.getExtendedBlueprintText()));
         }
     }

@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.converter.stack.cluster;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anySet;
@@ -150,7 +151,7 @@ public class ClusterToClusterResponseConverterTest extends AbstractEntityConvert
         // THEN
         assertEquals(1L, (long) result.getId());
         assertAllFieldsNotNull(result, Lists.newArrayList("cluster", "ambariStackDetails", "rdsConfigId", "blueprintCustomProperties",
-                "blueprint", "rdsConfigs", "ldapConfig", "exposedKnoxServices", "customContainers",
+                "blueprint", "rdsConfigs", "ldapConfig", "exposedKnoxServices", "customContainers", "extendedBlueprintText",
                 "ambariRepoDetailsJson", "ambariDatabaseDetails", "creationFinished", "kerberosResponse", "fileSystemResponse"));
     }
 
@@ -194,7 +195,7 @@ public class ClusterToClusterResponseConverterTest extends AbstractEntityConvert
         // WHEN
         ClusterResponse clusterResponse = underTest.convert(getSource());
         // THEN
-        assertEquals("{\"host_groups\":[{\"name\":\"slave_1\",\"components\":[{\"name\":\"DATANODE\"}]}]}", clusterResponse.getExtendedBlueprintText());
+        assertNull(clusterResponse.getExtendedBlueprintText());
 
     }
 
