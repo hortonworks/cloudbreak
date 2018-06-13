@@ -1,5 +1,26 @@
 package com.sequenceiq.cloudbreak.blueprint.template;
 
+import static com.sequenceiq.cloudbreak.TestUtil.ldapConfig;
+import static com.sequenceiq.cloudbreak.blueprint.filesystem.BlueprintTestUtil.adlsFileSystemConfiguration;
+import static com.sequenceiq.cloudbreak.blueprint.filesystem.BlueprintTestUtil.emptyStorageLocationViews;
+import static com.sequenceiq.cloudbreak.blueprint.filesystem.BlueprintTestUtil.gcsFileSystemConfiguration;
+import static com.sequenceiq.cloudbreak.blueprint.filesystem.BlueprintTestUtil.s3FileSystemConfiguration;
+import static com.sequenceiq.cloudbreak.blueprint.filesystem.BlueprintTestUtil.storageLocationViews;
+import static com.sequenceiq.cloudbreak.blueprint.filesystem.BlueprintTestUtil.wasbSecureFileSystemConfiguration;
+import static com.sequenceiq.cloudbreak.blueprint.filesystem.BlueprintTestUtil.wasbUnSecureFileSystemConfiguration;
+import static com.sequenceiq.cloudbreak.util.FileReaderUtils.readFileFromClasspath;
+
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+
+import org.junit.Assert;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.github.jknack.handlebars.Handlebars;
 import com.github.jknack.handlebars.Template;
@@ -15,26 +36,6 @@ import com.sequenceiq.cloudbreak.blueprint.template.views.SharedServiceConfigsVi
 import com.sequenceiq.cloudbreak.blueprint.templates.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.common.model.OrchestratorType;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-
-import static com.sequenceiq.cloudbreak.TestUtil.ldapConfig;
-import static com.sequenceiq.cloudbreak.blueprint.filesystem.BlueprintTestUtil.adlsFileSystemConfiguration;
-import static com.sequenceiq.cloudbreak.blueprint.filesystem.BlueprintTestUtil.emptyStorageLocationViews;
-import static com.sequenceiq.cloudbreak.blueprint.filesystem.BlueprintTestUtil.gcsFileSystemConfiguration;
-import static com.sequenceiq.cloudbreak.blueprint.filesystem.BlueprintTestUtil.s3FileSystemConfiguration;
-import static com.sequenceiq.cloudbreak.blueprint.filesystem.BlueprintTestUtil.storageLocationViews;
-import static com.sequenceiq.cloudbreak.blueprint.filesystem.BlueprintTestUtil.wasbSecureFileSystemConfiguration;
-import static com.sequenceiq.cloudbreak.blueprint.filesystem.BlueprintTestUtil.wasbUnSecureFileSystemConfiguration;
-import static com.sequenceiq.cloudbreak.util.FileReaderUtils.readFileFromClasspath;
 
 @RunWith(Parameterized.class)
 public class HandlebarTemplateTest {
@@ -183,12 +184,17 @@ public class HandlebarTemplateTest {
                         hiveWhenLdapPresentedThenShouldReturnWithLdapConfigs()},
                 {"blueprints/configurations/hive_server/ldap.handlebars", "configurations/hive_server/hive-without-ldap.json",
                         hiveWhenLdapNotPresentedThenShouldReturnWithoutLdapConfigs()},
+                {"blueprints/configurations/hive_server/shared_service.handlebars", "configurations/hive_server/shared-service-attached.json",
+                        sSConfigWhenNoSSAndDatalakePresentedThenShouldReturnWithoutSSDatalakeConfig()},
 
                 // HIVE_SERVER_INTERACTIVE
                 {"blueprints/configurations/hive_server_interactive/ldap.handlebars", "configurations/hive_server_interactive/hive-with-ldap.json",
                         hiveWhenLdapPresentedThenShouldReturnWithLdapConfigs()},
                 {"blueprints/configurations/hive_server_interactive/ldap.handlebars", "configurations/hive_server_interactive/hive-without-ldap.json",
                         hiveWhenLdapNotPresentedThenShouldReturnWithoutLdapConfigs()},
+                {"blueprints/configurations/hive_server_interactive/shared_service.handlebars",
+                        "configurations/hive_server_interactive/shared-service-attached.json",
+                        sSConfigWhenNoSSAndDatalakePresentedThenShouldReturnWithoutSSDatalakeConfig()},
 
                 // DP_ROFILER_AGENT
                 {"blueprints/configurations/dp_profiler/global.handlebars", "configurations/dp_profiler/profiler.json",
@@ -562,7 +568,7 @@ public class HandlebarTemplateTest {
 
     public static Map<String, Object> sSConfigWhenNoSSAndDatalakePresentedThenShouldReturnWithoutSSDatalakeConfig() {
         Map<String, Object> fixInputs = new HashMap<>();
-        fixInputs.put("REMOTE_CLUSTER_NAME", "datalake-1");
+        fixInputs.put("remoteClusterName", "datalake-1");
         fixInputs.put("policymgr_external_url", "10.1.1.1:6080");
         return new BlueprintTemplateModelContextBuilder()
                 .withSharedServiceConfigs(attachedClusterSharedServiceConfig().get())
