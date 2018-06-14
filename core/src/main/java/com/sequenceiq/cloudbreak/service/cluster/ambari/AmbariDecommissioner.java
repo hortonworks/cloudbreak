@@ -50,13 +50,13 @@ import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ContainerOrche
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.HostOrchestratorResolver;
 import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.Container;
+import com.sequenceiq.cloudbreak.domain.Orchestrator;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.domain.Orchestrator;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.orchestrator.container.ContainerOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
@@ -163,6 +163,9 @@ public class AmbariDecommissioner {
 
     @Inject
     private FlowMessageService flowMessageService;
+
+    @Inject
+    private AmbariDecommissionTimeCalculator ambariDecommissionTimeCalculator;
 
     @PostConstruct
     public void init() {
@@ -356,18 +359,21 @@ public class AmbariDecommissioner {
         for (HostGroup hostGroup : hostGroups) {
             Collection<HostMetadata> removableHostsInHostGroup = hostGroupWithInstances.get(hostGroup.getId());
             if (removableHostsInHostGroup != null && !removableHostsInHostGroup.isEmpty()) {
-                int replication = hostGroupNodesAreDataNodes(blueprintMap, hostGroup.getName())
-                        ? getReplicationFactor(ambariClient, hostGroup.getName())
-                        : NO_REPLICATION;
-                List<HostMetadata> filteredHostList = hostFilterService.filterHostsForDecommission(cluster, removableHostsInHostGroup, hostGroup.getName());
-                if (filteredHostList.size() < removableHostsInHostGroup.size()) {
+                String hostGroupName = hostGroup.getName();
+                List<HostMetadata> hostListForDecommission = hostFilterService.filterHostsForDecommission(cluster, removableHostsInHostGroup, hostGroupName);
+                boolean hostGroupContainsDatanode = hostGroupNodesAreDataNodes(blueprintMap, hostGroupName);
+                int replication = hostGroupContainsDatanode ?  getReplicationFactor(ambariClient, hostGroupName) : NO_REPLICATION;
+                if (hostListForDecommission.size() < removableHostsInHostGroup.size()) {
                     List<HostMetadata> notRecommendedRemovableNodes = removableHostsInHostGroup.stream()
-                            .filter(hostMetadata -> !filteredHostList.contains(hostMetadata))
+                            .filter(hostMetadata -> !hostListForDecommission.contains(hostMetadata))
                             .collect(Collectors.toList());
                     throw new NotRecommendedNodeRemovalException("Following nodes shouldn't be removed from the cluster: "
                             + notRecommendedRemovableNodes.stream().map(HostMetadata::getHostName).collect(Collectors.toList()));
                 }
                 verifyNodeCount(replication, removableHostsInHostGroup.size(), hostGroup.getHostMetadata().size(), 0);
+                if (hostGroupContainsDatanode) {
+                    calculateDecommissioningTime(stack, hostListForDecommission, ambariClient);
+                }
             }
         }
     }
@@ -417,6 +423,7 @@ public class AmbariDecommissioner {
             );
         }
 
+        ambariDecommissionTimeCalculator.calculateDecommissioningTime(stack, filteredHostList, dfsSpace, usedSpace);
         flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_SELECT_FOR_DOWNSCALE, AVAILABLE.name(), selectedNodes.keySet());
         return convert(selectedNodes, filteredHostList);
     }
@@ -640,5 +647,15 @@ public class AmbariDecommissioner {
             }
         }
         return services;
+    }
+
+    private void calculateDecommissioningTime(Stack stack, Collection<HostMetadata> filteredHostList, AmbariClient ambariClient) {
+        Map<String, Map<Long, Long>> dfsSpace = getDFSSpace(stack, ambariClient);
+        Map<String, Long> sortedAscending = sortByUsedSpace(dfsSpace, false);
+        Map<String, Long> usedSpaceByHostname = sortedAscending.entrySet().stream()
+                .filter(entry -> filteredHostList.stream().anyMatch(hm -> hm.getHostName().equalsIgnoreCase(entry.getKey())))
+                .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
+        long usedSpace = getSelectedUsage(usedSpaceByHostname);
+        ambariDecommissionTimeCalculator.calculateDecommissioningTime(stack, filteredHostList, dfsSpace, usedSpace);
     }
 }

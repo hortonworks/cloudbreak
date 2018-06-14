@@ -3,6 +3,8 @@ package com.sequenceiq.cloudbreak.service.cluster.flow;
 import static org.hamcrest.Matchers.hasEntry;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doAnswer;
@@ -59,11 +61,14 @@ import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
+import com.sequenceiq.cloudbreak.service.PollingResult;
+import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariClientProvider;
 import com.sequenceiq.cloudbreak.service.cluster.NotEnoughNodeException;
 import com.sequenceiq.cloudbreak.service.cluster.NotRecommendedNodeRemovalException;
 import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariConfigurationService;
+import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariDecommissionTimeCalculator;
 import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariDecommissioner;
 import com.sequenceiq.cloudbreak.service.cluster.filter.ConfigParam;
 import com.sequenceiq.cloudbreak.service.cluster.filter.HostFilterService;
@@ -107,6 +112,12 @@ public class AmbariDecommissionerTest {
 
     @Mock
     private HostFilterService hostFilterService;
+
+    @Mock
+    private AmbariDecommissionTimeCalculator ambariDecommissionTimeCalculator;
+
+    @Mock
+    private PollingService<AmbariClientPollerObject> ambariClientPollingService;
 
     @Test
     public void testSelectNodesWhenHasOneUnhealthyNodeAndShouldSelectOne() {
@@ -225,7 +236,7 @@ public class AmbariDecommissionerTest {
     }
 
     @Test
-    public void testVerifyNodesAreRemovableWithReplicationFactory() throws CloudbreakSecuritySetupException {
+    public void testVerifyNodesAreRemovableWithReplicationFactor() {
 
         String ipAddress = "192.18.256.1";
         int gatewayPort = 1234;
@@ -269,6 +280,7 @@ public class AmbariDecommissionerTest {
         when(ambariClient.getBlueprintMap(ambariName)).thenReturn(blueprintMap);
         when(configurationService.getConfiguration(ambariClient, slaveHostGroup.getName()))
                 .thenReturn(Collections.singletonMap(ConfigParam.DFS_REPLICATION.key(), "3"));
+        when(ambariClientPollingService.pollWithTimeoutSingleFailure(any(), any(), anyInt(), anyInt())).thenReturn(PollingResult.SUCCESS);
 
         List<InstanceMetaData> removableNodes =
                 slaveInstanceGroup.getAllInstanceMetaData().stream()
@@ -283,6 +295,8 @@ public class AmbariDecommissionerTest {
         }).when(hostFilterService).filterHostsForDecommission(any(), any(), any());
 
         underTest.verifyNodesAreRemovable(stack, removableNodes);
+
+        verify(ambariDecommissionTimeCalculator).calculateDecommissioningTime(any(), any(), any(), anyLong());
     }
 
     @Test
@@ -461,6 +475,7 @@ public class AmbariDecommissionerTest {
         when(ambariClient.getBlueprintMap(ambariName)).thenReturn(blueprintMap);
         when(configurationService.getConfiguration(ambariClient, slaveHostGroup.getName()))
                 .thenReturn(Collections.singletonMap(ConfigParam.DFS_REPLICATION.key(), replication));
+        when(ambariClientPollingService.pollWithTimeoutSingleFailure(any(), any(), anyInt(), anyInt())).thenReturn(PollingResult.SUCCESS);
 
         List<InstanceMetaData> removableNodes =
                 slaveInstanceGroup.getAllInstanceMetaData().stream()
@@ -475,6 +490,8 @@ public class AmbariDecommissionerTest {
         }).when(hostFilterService).filterHostsForDecommission(any(), any(), any());
 
         underTest.verifyNodesAreRemovable(stack, removableNodes);
+
+        verify(ambariDecommissionTimeCalculator).calculateDecommissioningTime(any(), any(), any(), anyLong());
     }
 
     @Test
