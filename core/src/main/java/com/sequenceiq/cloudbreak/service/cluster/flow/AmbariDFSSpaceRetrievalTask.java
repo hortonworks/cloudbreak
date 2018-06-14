@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow;
 
+import java.util.Collections;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -16,7 +17,7 @@ public class AmbariDFSSpaceRetrievalTask extends ClusterBasedStatusCheckerTask<A
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AmbariDFSSpaceRetrievalTask.class);
 
-    private Map<String, Map<Long, Long>> dfsSpace;
+    private Map<String, Map<Long, Long>> dfsSpace = Collections.emptyMap();
 
     @Override
     public boolean checkStatus(AmbariClientPollerObject ambariClientPollerObject) {

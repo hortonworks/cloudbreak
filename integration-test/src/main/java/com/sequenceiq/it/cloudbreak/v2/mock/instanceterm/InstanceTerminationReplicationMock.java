@@ -73,6 +73,23 @@ public class InstanceTerminationReplicationMock extends MockServer {
             response.type("text/plain");
             return responseFromJsonFile("blueprint/" + request.params("blueprintname") + ".bp");
         });
+        sparkService.get(AMBARI_API_ROOT + "/clusters/:clusterName/services/HDFS/components/NAMENODE", (request, response) -> {
+            response.type("text/plain");
+            ObjectNode rootNode = JsonNodeFactory.instance.objectNode();
+            ObjectNode nameNode = rootNode.putObject("metrics").putObject("dfs").putObject("namenode");
+            ObjectNode liveNodesRoot = JsonNodeFactory.instance.objectNode();
+
+            for (CloudVmMetaDataStatus status : instanceMap.values()) {
+                ObjectNode node = liveNodesRoot.putObject(HostNameUtil.generateHostNameByIp(status.getMetaData().getPrivateIp()));
+                node.put("remaining", "10000000");
+                node.put("usedSpace", Integer.toString(100000));
+                node.put("adminState", "In Service");
+            }
+
+            nameNode.put("LiveNodes", liveNodesRoot.toString());
+            nameNode.put("DecomNodes", "{}");
+            return rootNode;
+        });
     }
 
     public void addMockEndpoints() {
