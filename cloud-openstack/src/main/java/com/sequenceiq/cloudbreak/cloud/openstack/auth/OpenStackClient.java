@@ -3,6 +3,10 @@ package com.sequenceiq.cloudbreak.cloud.openstack.auth;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
 import static com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackConstants.FACING;
+import static com.sequenceiq.cloudbreak.type.OpenStackCredentialV3ScopeConstants.CB_KEYSTONE_V3_DEFAULT_SCOPE;
+import static com.sequenceiq.cloudbreak.type.OpenStackCredentialV3ScopeConstants.CB_KEYSTONE_V3_DOMAIN_SCOPE;
+import static com.sequenceiq.cloudbreak.type.OpenStackCredentialV3ScopeConstants.CB_KEYSTONE_V3_PROJECT_SCOPE;
+import static com.sequenceiq.cloudbreak.type.OpenStackCredentialVersionConstants.CB_KEYSTONE_V2;
 
 import java.util.HashSet;
 import java.util.List;
@@ -116,12 +120,12 @@ public class OpenStackClient {
 
     public boolean isV2Keystone(AuthenticatedContext authenticatedContext) {
         KeystoneCredentialView osCredential = createKeystoneCredential(authenticatedContext);
-        return osCredential.getVersion().equals(KeystoneCredentialView.CB_KEYSTONE_V2);
+        return CB_KEYSTONE_V2.equals(osCredential.getVersion());
     }
 
     public boolean isV2Keystone(CloudCredential cloudCredential) {
         KeystoneCredentialView osCredential = createKeystoneCredential(cloudCredential);
-        return osCredential.getVersion().equals(KeystoneCredentialView.CB_KEYSTONE_V2);
+        return CB_KEYSTONE_V2.equals(osCredential.getVersion());
     }
 
     public KeystoneCredentialView createKeystoneCredential(CloudCredential cloudCredential) {
@@ -188,7 +192,7 @@ public class OpenStackClient {
     private Access createAccess(CloudCredential cloudCredential) {
         KeystoneCredentialView osCredential = createKeystoneCredential(cloudCredential);
 
-        if (KeystoneCredentialView.CB_KEYSTONE_V2.equals(osCredential.getVersion())) {
+        if (CB_KEYSTONE_V2.equals(osCredential.getVersion())) {
             Access access = OSFactory.builderV2().withConfig(config).endpoint(osCredential.getEndpoint())
                     .credentials(osCredential.getUserName(), osCredential.getPassword())
                     .tenantName(osCredential.getTenantName())
@@ -205,18 +209,18 @@ public class OpenStackClient {
             return null;
         }
         switch (osCredential.getScope()) {
-            case KeystoneCredentialView.CB_KEYSTONE_V3_DEFAULT_SCOPE:
+            case CB_KEYSTONE_V3_DEFAULT_SCOPE:
                 return OSFactory.builderV3().withConfig(config).endpoint(osCredential.getEndpoint())
                         .credentials(osCredential.getUserName(), osCredential.getPassword(), Identifier.byName(osCredential.getUserDomain()))
                         .authenticate()
                         .getToken();
-            case KeystoneCredentialView.CB_KEYSTONE_V3_DOMAIN_SCOPE:
+            case CB_KEYSTONE_V3_DOMAIN_SCOPE:
                 return OSFactory.builderV3().withConfig(config).endpoint(osCredential.getEndpoint())
                         .credentials(osCredential.getUserName(), osCredential.getPassword(), Identifier.byName(osCredential.getUserDomain()))
                         .scopeToDomain(Identifier.byName(osCredential.getDomainName()))
                         .authenticate()
                         .getToken();
-            case KeystoneCredentialView.CB_KEYSTONE_V3_PROJECT_SCOPE:
+            case CB_KEYSTONE_V3_PROJECT_SCOPE:
                 return OSFactory.builderV3().withConfig(config).endpoint(osCredential.getEndpoint())
                         .credentials(osCredential.getUserName(), osCredential.getPassword(), Identifier.byName(osCredential.getUserDomain()))
                         .scopeToProject(Identifier.byName(osCredential.getProjectName()), Identifier.byName(osCredential.getProjectDomain()))
