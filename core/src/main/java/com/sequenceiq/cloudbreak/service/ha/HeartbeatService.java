@@ -212,19 +212,30 @@ public class HeartbeatService {
         if (!stackIds.isEmpty()) {
             LOGGER.info("Check if there are termination flows for the following stack ids: {}", stackIds);
             List<Object[]> stackStatuses = stackRepository.findStackStatuses(stackIds);
+            Set<Long> terminatingStacksByCurrentNode = findTerminatingStacksForCurrentNode();
             for (Object[] ss : stackStatuses) {
                 if (DELETE_STATUSES.contains(ss[1])) {
                     Long stackId = (Long) ss[0];
-                    Set<String> runningFlowIds = flowLogRepository.findAllRunningNonTerminationFlowIdsByStackId(stackId);
-                    if (hasRunningNonTerminationFlowOnThisNode(runningFlowIds)) {
-                        LOGGER.info("Found termination flow on a different node for stack: {}", stackId);
-                        cancelRunningFlow(stackId);
-                    } else {
-                        cleanupInMemoryStore(stackId);
+                    if (isStackTerminationExecutedByAnotherNode(stackId, terminatingStacksByCurrentNode)) {
+                        Set<String> runningFlowIds = flowLogRepository.findAllRunningNonTerminationFlowIdsByStackId(stackId);
+                        if (hasRunningNonTerminationFlowOnThisNode(runningFlowIds)) {
+                            LOGGER.info("Found termination flow on a different node for stack: {}", stackId);
+                            cancelRunningFlow(stackId);
+                        } else {
+                            cleanupInMemoryStore(stackId);
+                        }
                     }
                 }
             }
         }
+    }
+
+    private boolean isStackTerminationExecutedByAnotherNode(Long stackId, Set<Long> terminatingStacksByCurrentNode) {
+        return !terminatingStacksByCurrentNode.contains(stackId);
+    }
+
+    private Set<Long> findTerminatingStacksForCurrentNode() {
+        return flowLogRepository.findTerminatingStacksByCloudbreakNodeId(cloudbreakNodeConfig.getId());
     }
 
     /**

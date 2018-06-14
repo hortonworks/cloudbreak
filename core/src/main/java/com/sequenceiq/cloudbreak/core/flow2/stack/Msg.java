@@ -79,6 +79,7 @@ public enum Msg {
     AMBARI_CLUSTER_UPGRADE_FAILED("ambari.cluster.upgrade.failed"),
     AMBARI_CLUSTER_UPGRADE_FINISHED("ambari.cluster.upgrade.finished"),
     AMBARI_CLUSTER_REMOVING_NODE_FROM_HOSTGROUP("ambari.cluster.removing.node.from.hostgroup"),
+    AMBARI_CLUSTER_FORCE_REMOVING_NODE_FROM_HOSTGROUP("ambari.cluster.force.removing.node.from.hostgroup"),
     AMBARI_CLUSTER_GATEWAY_CHANGE("ambari.cluster.gateway.change"),
     AMBARI_CLUSTER_GATEWAY_CHANGED_SUCCESSFULLY("ambari.cluster.gateway.changed.successfully"),
     AMBARI_CLUSTER_GATEWAY_CHANGE_FAILED("ambari.cluster.gateway.change.failed"),

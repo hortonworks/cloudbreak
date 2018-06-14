@@ -34,6 +34,7 @@ import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.EphemeralClusterEve
 import com.sequenceiq.cloudbreak.core.flow2.cluster.termination.ClusterTerminationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterAndStackDownscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterCredentialChangeTriggerEvent;
+import com.sequenceiq.cloudbreak.core.flow2.event.ClusterDownscaleDetails;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterScaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.MultiHostgroupClusterAndStackDownscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackAndClusterUpscaleTriggerEvent;
@@ -108,9 +109,14 @@ public class ReactorFlowManager {
     }
 
     public void triggerStackRemoveInstance(Long stackId, String hostGroup, Long privateId) {
+        triggerStackRemoveInstance(stackId, hostGroup, privateId, false);
+    }
+
+    public void triggerStackRemoveInstance(Long stackId, String hostGroup, Long privateId, boolean forced) {
         String selector = FlowChainTriggers.FULL_DOWNSCALE_TRIGGER_EVENT;
+        ClusterDownscaleDetails details = new ClusterDownscaleDetails(forced);
         ClusterAndStackDownscaleTriggerEvent event = new ClusterAndStackDownscaleTriggerEvent(selector, stackId, hostGroup, Collections.singleton(privateId),
-                ScalingType.DOWNSCALE_TOGETHER, new Promise<>());
+                ScalingType.DOWNSCALE_TOGETHER, new Promise<>(), details);
         notify(selector, event);
     }
 
