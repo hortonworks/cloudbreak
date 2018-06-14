@@ -458,9 +458,13 @@ public class StackService {
     }
 
     public void removeInstance(@Nonnull IdentityUser user, Long stackId, String instanceId) {
+        removeInstance(user, stackId, instanceId, false);
+    }
+
+    public void removeInstance(@Nonnull IdentityUser user, Long stackId, String instanceId, boolean forced) {
         Stack stack = get(stackId);
         InstanceMetaData metaData = validateInstanceForDownscale(user, instanceId, stack);
-        flowManager.triggerStackRemoveInstance(stackId, metaData.getInstanceGroupName(), metaData.getPrivateId());
+        flowManager.triggerStackRemoveInstance(stackId, metaData.getInstanceGroupName(), metaData.getPrivateId(), forced);
     }
 
     public void removeInstances(IdentityUser user, Long stackId, Set<String> instanceIds) {

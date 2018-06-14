@@ -52,8 +52,9 @@ public class CollectDownscaleCandidatesHandler implements ReactorEventHandler<Co
                 List<InstanceMetaData> notDeletedNodes = instanceMetaDataList.stream()
                         .filter(instanceMetaData -> !instanceMetaData.isTerminated() && !instanceMetaData.isDeletedOnProvider())
                         .collect(Collectors.toList());
-
-                ambariDecommissioner.verifyNodesAreRemovable(stack, notDeletedNodes);
+                if (!request.getDetails().isForced()) {
+                    ambariDecommissioner.verifyNodesAreRemovable(stack, notDeletedNodes);
+                }
             }
             result = new CollectDownscaleCandidatesResult(request, privateIds);
         } catch (Exception e) {

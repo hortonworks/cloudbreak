@@ -24,6 +24,7 @@ import org.springframework.util.CollectionUtils;
 import com.sequenceiq.cloudbreak.api.model.ExecutorType;
 import com.sequenceiq.cloudbreak.api.model.ExposedService;
 import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
+import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.SSOType;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessorFactory;
 import com.sequenceiq.cloudbreak.blueprint.kerberos.KerberosDetailService;
 import com.sequenceiq.cloudbreak.blueprint.template.views.RdsView;
@@ -295,6 +296,9 @@ public class ClusterHostServiceRunner {
         gateway.put("address", gatewayConfig.getPublicAddress());
         gateway.put("username", cluster.getUserName());
         gateway.put("password", cluster.getPassword());
+
+        // for cloudbreak upgradeability
+        gateway.put("ssotype", SSOType.NONE);
 
         Gateway clusterGateway = cluster.getGateway();
         if (clusterGateway != null) {
