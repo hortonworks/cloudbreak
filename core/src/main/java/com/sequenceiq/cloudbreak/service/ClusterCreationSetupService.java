@@ -196,9 +196,12 @@ public class ClusterCreationSetupService {
             AmbariRepoDetailsJson ambariRepoDetailsJson, Optional<Component> stackImageComponent, Cluster cluster) throws IOException {
         Json json;
         if (!stackAmbariRepoConfig.isPresent()) {
+            JsonNode bluePrintJson = JsonUtil.readTree(cluster.getBlueprint().getBlueprintText());
+            String stackVersion = blueprintUtils.getBlueprintStackVersion(bluePrintJson);
+            String stackName = blueprintUtils.getBlueprintStackName(bluePrintJson);
             AmbariRepo ambariRepo = ambariRepoDetailsJson != null
                     ? conversionService.convert(ambariRepoDetailsJson, AmbariRepo.class)
-                    : defaultAmbariRepoService.getDefault(getOsType(stackImageComponent));
+                    : defaultAmbariRepoService.getDefault(getOsType(stackImageComponent), stackName, stackVersion);
             if (ambariRepo == null) {
                 throw new BadRequestException(String.format("Couldn't determine Ambari repo for the stack: %s", cluster.getStack().getName()));
             }
@@ -290,7 +293,7 @@ public class ClusterCreationSetupService {
         try {
             JsonNode root = getBlueprintJsonNode(blueprint, request, user);
             if (root != null) {
-                String stackVersion = blueprintUtils.getBlueprintHdpVersion(root);
+                String stackVersion = blueprintUtils.getBlueprintStackVersion(root);
                 String stackName = blueprintUtils.getBlueprintStackName(root);
                 if ("HDF".equalsIgnoreCase(stackName)) {
                     LOGGER.info("Stack name is HDF, use the default HDF repo for version: " + stackVersion);

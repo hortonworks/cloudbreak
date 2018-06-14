@@ -242,17 +242,12 @@ public class StackCreatorService {
 
     private Stack prepareSharedServiceIfNeed(StackRequest stackRequest, Stack stack, String stackName) {
         if (stackRequest.getClusterRequest() != null && stackRequest.getClusterRequest().getConnectedCluster() != null) {
-            try {
-                long start = System.currentTimeMillis();
-                Optional<StackInputs> stackInputs = sharedServiceConfigProvider.prepareDatalakeConfigs(stack.getCluster().getBlueprint(), stack);
-                if (stackInputs.isPresent()) {
-                    stack = sharedServiceConfigProvider.updateStackinputs(stackInputs.get(), stack);
-                }
-                LOGGER.info("Cluster object and its dependencies has been created in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
-            } catch (BadRequestException e) {
-                stackService.delete(stack);
-                throw e;
+            long start = System.currentTimeMillis();
+            Optional<StackInputs> stackInputs = sharedServiceConfigProvider.prepareDatalakeConfigs(stack.getCluster().getBlueprint(), stack);
+            if (stackInputs.isPresent()) {
+                stack = sharedServiceConfigProvider.updateStackinputs(stackInputs.get(), stack);
             }
+            LOGGER.info("Cluster object and its dependencies has been created in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
         }
         return stack;
     }
@@ -260,15 +255,10 @@ public class StackCreatorService {
     private void createClusterIfNeed(IdentityUser user, StackRequest stackRequest, Stack stack, String stackName, Blueprint blueprint)
             throws CloudbreakImageNotFoundException, IOException, TransactionExecutionException {
         if (stackRequest.getClusterRequest() != null) {
-            try {
-                long start = System.currentTimeMillis();
-                Cluster cluster = clusterCreationService.prepare(stackRequest.getClusterRequest(), stack, blueprint, user);
-                LOGGER.info("Cluster object and its dependencies has been created in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
-                stack.setCluster(cluster);
-            } catch (BadRequestException e) {
-                stackService.delete(stack);
-                throw e;
-            }
+            long start = System.currentTimeMillis();
+            Cluster cluster = clusterCreationService.prepare(stackRequest.getClusterRequest(), stack, blueprint, user);
+            LOGGER.info("Cluster object and its dependencies has been created in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+            stack.setCluster(cluster);
         }
     }
 
