@@ -16,7 +16,7 @@
 {% set username = salt['pillar.get']('ambari:username') %}
 {% set password = salt['pillar.get']('ambari:password') %}
 {% set security_master_key = salt['pillar.get']('ambari:securityMasterKey') %}
-{% if salt['pillar.get']('ldap:protocol').startswith('ldaps') %}
+{% if salt['pillar.get']('ldap:protocol').lower().startswith('ldaps') %}
   {% set secure_ldap = 'true' %}
 {% else %}
   {% set secure_ldap = 'false' %}
