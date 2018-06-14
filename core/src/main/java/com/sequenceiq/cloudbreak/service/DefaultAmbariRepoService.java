@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service;
 
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -35,7 +36,7 @@ public class DefaultAmbariRepoService {
 
     public AmbariRepo getDefault(String osType, String clusterType, String clusterVersion) {
         StackMatrix stackMatrix = stackMatrixService.getStackMatrix();
-        Map<String, StackDescriptor> stackDescriptorMap = null;
+        Map<String, StackDescriptor> stackDescriptorMap;
 
         if (clusterType != null) {
             switch (clusterType) {
@@ -48,13 +49,15 @@ public class DefaultAmbariRepoService {
                 default:
                     stackDescriptorMap = stackMatrix.getHdp();
             }
+        } else {
+            stackDescriptorMap = stackMatrix.getHdp();
         }
 
         if (stackDescriptorMap != null) {
             Optional<Entry<String, StackDescriptor>> descriptorEntry = stackDescriptorMap.entrySet().stream()
                     .filter(stackDescriptorEntry ->
                             clusterVersion == null || clusterVersion.equals(stackDescriptorEntry.getKey()))
-                    .findFirst();
+                    .max(Comparator.comparing(Entry::getKey));
             if (descriptorEntry.isPresent()) {
                 Entry<String, StackDescriptor> stackDescriptorEntry = descriptorEntry.get();
                 AmbariInfoJson ambariInfoJson = stackDescriptorEntry.getValue().getAmbari();
@@ -62,7 +65,7 @@ public class DefaultAmbariRepoService {
                 ambariRepo.setPredefined(false);
                 ambariRepo.setVersion(ambariInfoJson.getVersion());
                 ambariRepo.setBaseUrl(ambariInfoJson.getRepo().get(osType).getBaseUrl());
-                ambariRepo.setBaseUrl(ambariInfoJson.getRepo().get(osType).getGpgKeyUrl());
+                ambariRepo.setGpgKeyUrl(ambariInfoJson.getRepo().get(osType).getGpgKeyUrl());
                 return ambariRepo;
             }
         }
