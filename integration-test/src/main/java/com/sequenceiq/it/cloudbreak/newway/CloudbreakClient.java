@@ -1,12 +1,12 @@
 package com.sequenceiq.it.cloudbreak.newway;
 
-import java.util.function.Function;
-
+import com.sequenceiq.cloudbreak.client.CloudbreakClient.CloudbreakClientBuilder;
+import com.sequenceiq.cloudbreak.client.ConfigKey;
+import com.sequenceiq.it.IntegrationTestContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sequenceiq.cloudbreak.client.CloudbreakClient.CloudbreakClientBuilder;
-import com.sequenceiq.it.IntegrationTestContext;
+import java.util.function.Function;
 
 public class CloudbreakClient extends Entity {
     public static final String CLOUDBREAK_CLIENT = "CLOUDBREAK_CLIENT";
@@ -43,7 +43,7 @@ public class CloudbreakClient extends Entity {
 
     public static CloudbreakClient isCreated() {
         CloudbreakClient client = new CloudbreakClient();
-        client.setCreationStrategy(CloudbreakClient::singletonCloudbreakClient);
+        client.setCreationStrategy(CloudbreakClient::createProxyCloudbreakClient);
         return client;
     }
 
@@ -63,19 +63,16 @@ public class CloudbreakClient extends Entity {
         clientEntity.cloudbreakClient = client;
     }
 
-    public static synchronized void singletonCloudbreakClient(IntegrationTestContext integrationTestContext, Entity entity) {
+    private static synchronized void createProxyCloudbreakClient(IntegrationTestContext integrationTestContext, Entity entity) {
         CloudbreakClient clientEntity = (CloudbreakClient) entity;
         if (singletonCloudbreakClient == null) {
-            singletonCloudbreakClient = new CloudbreakClientBuilder(
+            singletonCloudbreakClient = new ProxyCloudbreakClient(
                     integrationTestContext.getContextParam(CloudbreakTest.CLOUDBREAK_SERVER_ROOT),
                     integrationTestContext.getContextParam(CloudbreakTest.IDENTITY_URL),
-                    "cloudbreak_shell")
-                    .withCertificateValidation(false)
-                    .withDebug(true)
-                    .withCredential(integrationTestContext.getContextParam(CloudbreakTest.USER),
-                            integrationTestContext.getContextParam(CloudbreakTest.PASSWORD))
-                    .withIgnorePreValidation(true)
-                    .build();
+                    integrationTestContext.getContextParam(CloudbreakTest.USER),
+                    integrationTestContext.getContextParam(CloudbreakTest.PASSWORD),
+                    "cloudbreak_shell",
+                    new ConfigKey(false, true, true));
         }
         clientEntity.cloudbreakClient = singletonCloudbreakClient;
     }

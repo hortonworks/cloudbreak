@@ -15,7 +15,7 @@ public class Log {
         StringWriter writer = new StringWriter();
         mapper.writeValue(writer, jsonObject);
 
-        Reporter.log(message + writer.toString());
+        Reporter.log(message + writer);
     }
 
     public static void log(String message) {

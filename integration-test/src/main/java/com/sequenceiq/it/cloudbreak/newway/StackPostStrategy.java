@@ -1,16 +1,13 @@
 package com.sequenceiq.it.cloudbreak.newway;
 
-import static com.sequenceiq.it.cloudbreak.newway.CloudbreakClient.getTestContextCloudbreakClient;
-import static com.sequenceiq.it.cloudbreak.newway.log.Log.log;
-import static com.sequenceiq.it.cloudbreak.newway.log.Log.logJSON;
-
-import javax.ws.rs.WebApplicationException;
-
+import com.sequenceiq.cloudbreak.api.model.v2.AmbariV2Request;
+import com.sequenceiq.it.IntegrationTestContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sequenceiq.cloudbreak.api.model.v2.AmbariV2Request;
-import com.sequenceiq.it.IntegrationTestContext;
+import static com.sequenceiq.it.cloudbreak.newway.CloudbreakClient.getTestContextCloudbreakClient;
+import static com.sequenceiq.it.cloudbreak.newway.log.Log.log;
+import static com.sequenceiq.it.cloudbreak.newway.log.Log.logJSON;
 
 public class StackPostStrategy implements Strategy {
     private static final Logger LOGGER = LoggerFactory.getLogger(StackPostStrategy.class);
@@ -52,15 +49,10 @@ public class StackPostStrategy implements Strategy {
 
         log(" Name:\n" + stackEntity.getRequest().getGeneral().getName());
         logJSON(" Stack post request:\n", stackEntity.getRequest());
-        try {
-            stackEntity.setResponse(
-                    client.getCloudbreakClient()
-                            .stackV2Endpoint()
-                            .postPrivate(stackEntity.getRequest()));
-        } catch (WebApplicationException e) {
-            logJSON(" Stack post response:\n", e.getResponse().readEntity(String.class));
-            throw e;
-        }
+        stackEntity.setResponse(
+                client.getCloudbreakClient()
+                        .stackV2Endpoint()
+                        .postPrivate(stackEntity.getRequest()));
         logJSON(" Stack post response:\n", stackEntity.getResponse());
         log(" ID:\n" + stackEntity.getResponse().getId());
     }
