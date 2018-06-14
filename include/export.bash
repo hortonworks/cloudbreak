@@ -139,9 +139,9 @@ anonymize-exported-files() {
     local collectioncount=$(ls $2 | wc -l)
     if [[ $(( collectioncount + 0 )) = 0 ]]; then
         error "Anonymization failed."
-        rm -rf $1
-        rm -rf $2
-        return -1
+        cp -r $1/ $2/
+        cp -r logs $2
+        cp -r etc $2
     else
         info "Anonymization finished."
     fi
