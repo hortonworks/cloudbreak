@@ -52,7 +52,7 @@ public class BlueprintUtils {
         return root.get("Blueprints").get("blueprint_name").asText();
     }
 
-    public String getBlueprintHdpVersion(JsonNode root) {
+    public String getBlueprintStackVersion(JsonNode root) {
         return root.get("Blueprints").get("stack_version").asText();
     }
 

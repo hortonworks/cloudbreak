@@ -36,12 +36,12 @@ public class StackInfoServiceTest {
     public void blueprintStackInfoWhenWeCanDetectTheStackInfoAndStackVersion() throws IOException {
         String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints-jackson/bp-kerberized-test.bp");
 
-        when(blueprintUtils.getBlueprintHdpVersion(any(JsonNode.class))).thenReturn("2.6");
+        when(blueprintUtils.getBlueprintStackVersion(any(JsonNode.class))).thenReturn("2.6");
         when(blueprintUtils.getBlueprintStackName(any(JsonNode.class))).thenReturn("HDP");
 
         stackInfoService.blueprintStackInfo(testBlueprint);
 
-        verify(blueprintUtils, times(1)).getBlueprintHdpVersion(any(JsonNode.class));
+        verify(blueprintUtils, times(1)).getBlueprintStackVersion(any(JsonNode.class));
         verify(blueprintUtils, times(1)).getBlueprintStackName(any(JsonNode.class));
     }
 
@@ -54,7 +54,7 @@ public class StackInfoServiceTest {
 
         stackInfoService.blueprintStackInfo(testBlueprint);
 
-        verify(blueprintUtils, times(0)).getBlueprintHdpVersion(any(JsonNode.class));
+        verify(blueprintUtils, times(0)).getBlueprintStackVersion(any(JsonNode.class));
         verify(blueprintUtils, times(0)).getBlueprintStackName(any(JsonNode.class));
     }
 
@@ -62,12 +62,12 @@ public class StackInfoServiceTest {
     public void hdfClusterWhenWeCanDetectTheStackInfoAndStackVersionAndTypeIsHDFThenShouldReturnTrue() throws IOException {
         String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints-jackson/bp-kerberized-test.bp");
 
-        when(blueprintUtils.getBlueprintHdpVersion(any(JsonNode.class))).thenReturn("2.6");
+        when(blueprintUtils.getBlueprintStackVersion(any(JsonNode.class))).thenReturn("2.6");
         when(blueprintUtils.getBlueprintStackName(any(JsonNode.class))).thenReturn("HDF");
 
         Assert.assertTrue(stackInfoService.isHdfCluster(testBlueprint));
 
-        verify(blueprintUtils, times(1)).getBlueprintHdpVersion(any(JsonNode.class));
+        verify(blueprintUtils, times(1)).getBlueprintStackVersion(any(JsonNode.class));
         verify(blueprintUtils, times(1)).getBlueprintStackName(any(JsonNode.class));
     }
 
@@ -75,12 +75,12 @@ public class StackInfoServiceTest {
     public void hdfClusterWhenWeCanDetectTheStackInfoAndStackVersionAndTypeIsHDPThenShouldReturnFalse() throws IOException {
         String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints-jackson/bp-kerberized-test.bp");
 
-        when(blueprintUtils.getBlueprintHdpVersion(any(JsonNode.class))).thenReturn("2.6");
+        when(blueprintUtils.getBlueprintStackVersion(any(JsonNode.class))).thenReturn("2.6");
         when(blueprintUtils.getBlueprintStackName(any(JsonNode.class))).thenReturn("HDP");
 
         Assert.assertFalse(stackInfoService.isHdfCluster(testBlueprint));
 
-        verify(blueprintUtils, times(1)).getBlueprintHdpVersion(any(JsonNode.class));
+        verify(blueprintUtils, times(1)).getBlueprintStackVersion(any(JsonNode.class));
         verify(blueprintUtils, times(1)).getBlueprintStackName(any(JsonNode.class));
     }
 
@@ -90,7 +90,7 @@ public class StackInfoServiceTest {
 
         Assert.assertFalse(stackInfoService.isHdfCluster(testBlueprint));
 
-        verify(blueprintUtils, times(0)).getBlueprintHdpVersion(any(JsonNode.class));
+        verify(blueprintUtils, times(0)).getBlueprintStackVersion(any(JsonNode.class));
         verify(blueprintUtils, times(0)).getBlueprintStackName(any(JsonNode.class));
     }
 }
