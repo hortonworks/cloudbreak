@@ -81,7 +81,7 @@ public class CloudbreakClient {
 
     private EndpointWrapperHolder endpointWrapperHolder;
 
-    private CloudbreakClient(String cloudbreakAddress, String identityServerAddress, String user, String password, String clientId, ConfigKey configKey) {
+    protected CloudbreakClient(String cloudbreakAddress, String identityServerAddress, String user, String password, String clientId, ConfigKey configKey) {
         client = RestClientUtil.get(configKey);
         this.cloudbreakAddress = cloudbreakAddress;
         identityClient = new IdentityClient(identityServerAddress, clientId, configKey);
@@ -92,7 +92,7 @@ public class CloudbreakClient {
                 identityServerAddress, clientId, configKey);
     }
 
-    private CloudbreakClient(String cloudbreakAddress, String identityServerAddress, String secret, String clientId, ConfigKey configKey) {
+    protected CloudbreakClient(String cloudbreakAddress, String identityServerAddress, String secret, String clientId, ConfigKey configKey) {
         client = RestClientUtil.get(configKey);
         this.cloudbreakAddress = cloudbreakAddress;
         identityClient = new IdentityClient(identityServerAddress, clientId, configKey);
@@ -214,11 +214,11 @@ public class CloudbreakClient {
         return ExpiringMap.builder().variableExpiration().expirationPolicy(ExpirationPolicy.CREATED).build();
     }
 
-    private synchronized <T> T refreshIfNeededAndGet(Class<T> clazz) {
+    protected synchronized <T> T refreshIfNeededAndGet(Class<T> clazz) {
         return refreshIfNeededAndGet(clazz, false);
     }
 
-    private synchronized <T> T refreshIfNeededAndGet(@Nullable Class<T> clazz, boolean forced) {
+    protected synchronized <T> T refreshIfNeededAndGet(@Nullable Class<T> clazz, boolean forced) {
         String token = tokenCache.get(TOKEN_KEY);
         if (token == null || endpointWrapperHolder == null) {
             AccessToken accessToken;
@@ -235,7 +235,7 @@ public class CloudbreakClient {
                 .findFirst().get();
     }
 
-    private void refreshEndpointWrapperHolder(String token) {
+    protected void refreshEndpointWrapperHolder(String token) {
         MultivaluedMap<String, Object> headers = new MultivaluedHashMap<>();
         headers.add("Authorization", "Bearer " + token);
         webTarget = client.target(cloudbreakAddress).path(CoreApi.API_ROOT_CONTEXT);

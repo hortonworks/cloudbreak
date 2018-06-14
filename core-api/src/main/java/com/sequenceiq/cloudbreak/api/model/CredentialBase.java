@@ -75,4 +75,16 @@ public abstract class CredentialBase implements JsonEntity {
     public void setTopologyId(Long topologyId) {
         this.topologyId = topologyId;
     }
+
+    @Override
+    public String toString() {
+        return "CredentialBase{"
+                + "name='" + name + '\''
+                + ", cloudPlatform='" + cloudPlatform + '\''
+                + ", parameters=" + parameters
+                + ", description='" + description + '\''
+                + ", topologyId=" + topologyId
+                + '}';
+    }
+
 }
