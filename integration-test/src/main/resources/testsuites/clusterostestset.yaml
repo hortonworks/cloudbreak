@@ -22,6 +22,22 @@ tests:
           - testStopCluster
           - testStartCluster
           - testTerminateCluster
+  - name: "aws base image datascience on redhat7"
+    preserveOrder: true
+    parameters:
+      clusterName: aws-redhat7-datasci
+      provider: aws
+      blueprintName: "Data Science: Apache Spark 2, Apache Zeppelin"
+      imageos: redhat7
+      instancegroupName: worker
+    classes:
+      - name: com.sequenceiq.it.cloudbreak.ClusterTests
+        includedMethods:
+          - testCreateNewClusterWithOs
+          - testScaleCluster
+          - testStopCluster
+          - testStartCluster
+          - testTerminateCluster
   - name: "aws base image edw analytics on ubuntu"
     preserveOrder: true
     parameters:
