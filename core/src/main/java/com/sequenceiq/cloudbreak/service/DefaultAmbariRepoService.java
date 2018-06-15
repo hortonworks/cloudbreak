@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -17,6 +19,9 @@ import com.sequenceiq.cloudbreak.cloud.model.component.AmbariInfo;
 public class DefaultAmbariRepoService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultAmbariRepoService.class);
+
+    @Inject
+    private StackMatrixService stackMatrixService;
 
     private Map<String, AmbariInfo> entries = new HashMap<>();
 

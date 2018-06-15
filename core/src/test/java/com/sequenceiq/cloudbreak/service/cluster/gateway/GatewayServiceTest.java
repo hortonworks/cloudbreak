@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Supplier;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -48,7 +49,6 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.GatewayTopology;
 import com.sequenceiq.cloudbreak.repository.GatewayRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.TransactionService;
-import com.sequenceiq.cloudbreak.service.TransactionService.TransactionCallback;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -88,7 +88,7 @@ public class GatewayServiceTest {
 
     @Before
     public void setUp() throws TransactionExecutionException {
-        doAnswer(invocation -> ((TransactionCallback) invocation.getArgument(0)).get()).when(transactionService).required(any());
+        doAnswer(invocation -> ((Supplier) invocation.getArgument(0)).get()).when(transactionService).required(any());
     }
 
     @Test

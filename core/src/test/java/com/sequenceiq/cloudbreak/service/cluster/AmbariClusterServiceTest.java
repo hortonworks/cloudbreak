@@ -7,6 +7,7 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.when;
 
 import java.util.HashSet;
+import java.util.function.Supplier;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -36,7 +37,6 @@ import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.TransactionService;
-import com.sequenceiq.cloudbreak.service.TransactionService.TransactionCallback;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterTerminationService;
@@ -103,7 +103,7 @@ public class AmbariClusterServiceTest {
         when(clusterComponentConfigProvider.store(any(ClusterComponent.class))).thenAnswer(invocation -> invocation.getArgument(0));
         when(clusterComponentConfigProvider.getComponent(any(Long.class), any(ComponentType.class))).thenReturn(new ClusterComponent());
         when(blueprintService.get(any(Long.class))).thenReturn(cluster.getBlueprint());
-        doAnswer(invocation -> ((TransactionCallback) invocation.getArgument(0)).get()).when(transactionService).required(any());
+        doAnswer(invocation -> ((Supplier) invocation.getArgument(0)).get()).when(transactionService).required(any());
     }
 
     @Test

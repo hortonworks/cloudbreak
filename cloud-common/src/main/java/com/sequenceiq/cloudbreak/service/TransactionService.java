@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service;
 
 import java.util.Arrays;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -26,7 +27,7 @@ public class TransactionService {
     @Inject
     private Clock clock;
 
-    public <T> T required(TransactionCallback<T> callback) throws TransactionExecutionException {
+    public <T> T required(Supplier<T> callback) throws TransactionExecutionException {
         long start = clock.getCurrentTime();
         try {
             return transactionExecutorService.required(callback);
@@ -37,7 +38,7 @@ public class TransactionService {
         }
     }
 
-    public <T> T requiresNew(TransactionCallback<T> callback) throws TransactionExecutionException {
+    public <T> T requiresNew(Supplier<T> callback) throws TransactionExecutionException {
         long start = clock.getCurrentTime();
         try {
             return transactionExecutorService.requiresNew(callback);
@@ -48,7 +49,7 @@ public class TransactionService {
         }
     }
 
-    public <T> T mandatory(TransactionCallback<T> callback) throws TransactionExecutionException {
+    public <T> T mandatory(Supplier<T> callback) throws TransactionExecutionException {
         long start = clock.getCurrentTime();
         try {
             return transactionExecutorService.mandatory(callback);
@@ -59,7 +60,7 @@ public class TransactionService {
         }
     }
 
-    public <T> T supports(TransactionCallback<T> callback) throws TransactionExecutionException {
+    public <T> T supports(Supplier<T> callback) throws TransactionExecutionException {
         long start = clock.getCurrentTime();
         try {
             return transactionExecutorService.supports(callback);
@@ -70,7 +71,7 @@ public class TransactionService {
         }
     }
 
-    public <T> T notSupported(TransactionCallback<T> callback) throws TransactionExecutionException {
+    public <T> T notSupported(Supplier<T> callback) throws TransactionExecutionException {
         long start = clock.getCurrentTime();
         try {
             return transactionExecutorService.notSupported(callback);
@@ -81,7 +82,7 @@ public class TransactionService {
         }
     }
 
-    public <T> T never(TransactionCallback<T> callback) throws TransactionExecutionException {
+    public <T> T never(Supplier<T> callback) throws TransactionExecutionException {
         long start = clock.getCurrentTime();
         try {
             return transactionExecutorService.never(callback);
@@ -103,18 +104,14 @@ public class TransactionService {
         }
     }
 
-    @FunctionalInterface
-    public interface TransactionCallback<T> {
-        T get() throws TransactionExecutionException;
-    }
-
     public static class TransactionExecutionException extends Exception {
-        public TransactionExecutionException(String message, Throwable cause) {
+        public TransactionExecutionException(String message, RuntimeException cause) {
             super(message, cause);
         }
 
-        public TransactionExecutionException(Throwable cause) {
-            this(cause.getMessage(), cause);
+        @Override
+        public RuntimeException getCause() {
+            return (RuntimeException) super.getCause();
         }
     }
 
@@ -132,32 +129,32 @@ public class TransactionService {
         }
 
         @Transactional(TxType.REQUIRED)
-        public <T> T required(TransactionCallback<T> callback) throws TransactionExecutionException {
+        public <T> T required(Supplier<T> callback) {
             return callback.get();
         }
 
         @Transactional(TxType.REQUIRES_NEW)
-        public <T> T requiresNew(TransactionCallback<T> callback) throws TransactionExecutionException {
+        public <T> T requiresNew(Supplier<T> callback) {
             return callback.get();
         }
 
         @Transactional(TxType.MANDATORY)
-        public <T> T mandatory(TransactionCallback<T> callback) throws TransactionExecutionException {
+        public <T> T mandatory(Supplier<T> callback) {
             return callback.get();
         }
 
         @Transactional(TxType.SUPPORTS)
-        public <T> T supports(TransactionCallback<T> callback) throws TransactionExecutionException {
+        public <T> T supports(Supplier<T> callback) {
             return callback.get();
         }
 
         @Transactional(TxType.NOT_SUPPORTED)
-        public <T> T notSupported(TransactionCallback<T> callback) throws TransactionExecutionException {
+        public <T> T notSupported(Supplier<T> callback) {
             return callback.get();
         }
 
         @Transactional(TxType.NEVER)
-        public <T> T never(TransactionCallback<T> callback) throws TransactionExecutionException {
+        public <T> T never(Supplier<T> callback) {
             return callback.get();
         }
     }

@@ -21,11 +21,11 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
-import com.sequenceiq.cloudbreak.service.TransactionService;
+import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 
 public interface ClusterService {
 
-    Cluster create(IdentityUser user, Stack stack, Cluster clusterRequest, List<ClusterComponent> component) throws Exception;
+    Cluster create(IdentityUser user, Stack stack, Cluster clusterRequest, List<ClusterComponent> component) throws TransactionExecutionException;
 
     void delete(Long stackId, Boolean withStackDelete, Boolean deleteDependencies);
 
@@ -49,7 +49,7 @@ public interface ClusterService {
 
     Cluster updateClusterStatusByStackId(Long stackId, Status status);
 
-    Cluster updateClusterStatusByStackIdOutOfTransaction(Long stackId, Status status) throws TransactionService.TransactionExecutionException;
+    Cluster updateClusterStatusByStackIdOutOfTransaction(Long stackId, Status status) throws TransactionExecutionException;
 
     Cluster updateCluster(Cluster cluster);
 
@@ -58,7 +58,7 @@ public interface ClusterService {
     Cluster updateClusterMetadata(Long stackId);
 
     Cluster recreate(Long stackId, Long blueprintId, Set<HostGroup> hostGroups, boolean validateBlueprint, StackRepoDetails stackRepoDetails,
-            String kerberosPassword, String kerberosPrincipal) throws TransactionService.TransactionExecutionException;
+            String kerberosPassword, String kerberosPrincipal) throws TransactionExecutionException;
 
     void updateUserNamePassword(Long stackId, UserNamePasswordJson userNamePasswordJson);
 
@@ -68,7 +68,7 @@ public interface ClusterService {
 
     ConfigsResponse retrieveOutputs(Long stackId, Set<BlueprintParameterJson> requests) throws IOException;
 
-    void upgrade(Long stackId, AmbariRepo ambariRepo) throws TransactionService.TransactionExecutionException;
+    void upgrade(Long stackId, AmbariRepo ambariRepo) throws TransactionExecutionException;
 
     Map<String, String> getHostStatuses(Long stackId);
 
