@@ -31,13 +31,13 @@ import com.sequenceiq.it.spark.ITResponse;
 import com.sequenceiq.it.spark.ambari.AmbariCheckResponse;
 import com.sequenceiq.it.spark.ambari.AmbariClusterRequestsResponse;
 import com.sequenceiq.it.spark.ambari.AmbariClusterResponse;
-import com.sequenceiq.it.spark.ambari.AmbariClustersHostsResponse;
 import com.sequenceiq.it.spark.ambari.AmbariHostsResponse;
 import com.sequenceiq.it.spark.ambari.AmbariServicesComponentsResponse;
 import com.sequenceiq.it.spark.ambari.AmbariStatusResponse;
 import com.sequenceiq.it.spark.ambari.AmbariVersionDefinitionResponse;
 import com.sequenceiq.it.spark.ambari.EmptyAmbariClusterResponse;
 import com.sequenceiq.it.spark.ambari.EmptyAmbariResponse;
+import com.sequenceiq.it.spark.ambari.v2.AmbariCategorizedHostComponentStateResponse;
 import com.sequenceiq.it.spark.salt.SaltApiRunPostResponse;
 import com.sequenceiq.it.spark.spi.CloudMetaDataStatuses;
 import com.sequenceiq.it.util.HostNameUtil;
@@ -104,7 +104,7 @@ public class StackCreationMock extends MockServer {
         sparkService.put(AMBARI_API_ROOT + "/users/admin", new EmptyAmbariResponse());
         sparkService.get(AMBARI_API_ROOT + "/check", new AmbariCheckResponse());
         sparkService.post(AMBARI_API_ROOT + "/users", new EmptyAmbariResponse());
-        sparkService.get(AMBARI_API_ROOT + "/clusters/:cluster/hosts", new AmbariClustersHostsResponse(instanceMap, "SUCCESSFUL"));
+        sparkService.get(AMBARI_API_ROOT + "/clusters/:cluster/hosts", new AmbariCategorizedHostComponentStateResponse(instanceMap));
         sparkService.put(AMBARI_API_ROOT + "/stacks/HDP/versions/:version/operating_systems/:os/repositories/:hdpversion",
                 new AmbariVersionDefinitionResponse());
         sparkService.get(AMBARI_API_ROOT + "/version_definitions", new AmbariVersionDefinitionResponse());
