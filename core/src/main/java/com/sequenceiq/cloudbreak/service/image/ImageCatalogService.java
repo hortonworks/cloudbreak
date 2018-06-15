@@ -446,7 +446,6 @@ public class ImageCatalogService {
         return new PrefixMatchImages(vMImageUUIDs, defaultVMImageUUIDs, supportedVersions);
     }
 
-    //CHECKSTYLE:OFF
     private Set<CloudbreakVersion> previousCbVersion(String releasedVersion, Collection<CloudbreakVersion> cloudbreakVersions) {
         List<String> versions = cloudbreakVersions.stream()
                 .map(CloudbreakVersion::getVersions)
@@ -473,7 +472,6 @@ public class ImageCatalogService {
             throw new BadRequestException("Image catalog versions are not supported by this Cloudbreak version.");
         }
     }
-    //CHECKSTYLE:ON
 
     private Integer accumulateImageCount(Collection<CloudbreakVersion> cloudbreakVersions) {
         return cloudbreakVersions.stream()
