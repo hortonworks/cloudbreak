@@ -56,7 +56,6 @@ import com.sequenceiq.cloudbreak.ha.CloudbreakNodeConfig;
 import com.sequenceiq.cloudbreak.repository.CloudbreakNodeRepository;
 import com.sequenceiq.cloudbreak.repository.FlowLogRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
-import com.sequenceiq.cloudbreak.service.TransactionService.TransactionCallback;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.ha.FlowDistributor;
 import com.sequenceiq.cloudbreak.service.ha.HeartbeatService;
@@ -115,7 +114,7 @@ public class HeartbeatServiceTest {
         ReflectionTestUtils.setField(heartbeatService, "heartbeatThresholdRate", 70000);
         doAnswer(invocation -> {
             try {
-                return ((TransactionCallback) invocation.getArgument(0)).get();
+                return ((Supplier) invocation.getArgument(0)).get();
             } catch (RuntimeException e) {
                 throw new TransactionExecutionException("", e);
             }

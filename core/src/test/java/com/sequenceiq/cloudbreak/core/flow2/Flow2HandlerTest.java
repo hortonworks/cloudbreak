@@ -19,6 +19,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -49,7 +50,6 @@ import com.sequenceiq.cloudbreak.domain.StateStatus;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.repository.FlowLogRepository;
 import com.sequenceiq.cloudbreak.service.TransactionService;
-import com.sequenceiq.cloudbreak.service.TransactionService.TransactionCallback;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.flowlog.FlowLogService;
 
@@ -139,7 +139,7 @@ public class Flow2HandlerTest {
         headers.put(Flow2Handler.FLOW_ID, FLOW_ID);
         dummyEvent = new Event<>(new Headers(headers), payload);
         flowState = new OwnFlowState();
-        doAnswer(invocation -> ((TransactionCallback) invocation.getArgument(0)).get()).when(transactionService).required(any());
+        doAnswer(invocation -> ((Supplier) invocation.getArgument(0)).get()).when(transactionService).required(any());
     }
 
     @Test
