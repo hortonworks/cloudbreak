@@ -196,7 +196,7 @@ public class AmbariClusterService implements ClusterService {
     private SharedServiceConfigProvider sharedServiceConfigProvider;
 
     @Override
-    public Cluster create(IdentityUser user, Stack stack, Cluster cluster, List<ClusterComponent> components) throws Exception {
+    public Cluster create(IdentityUser user, Stack stack, Cluster cluster, List<ClusterComponent> components) throws TransactionExecutionException {
         LOGGER.info("Cluster requested [BlueprintId: {}]", cluster.getBlueprint().getId());
         String stackName = stack.getName();
         if (stack.getCluster() != null) {

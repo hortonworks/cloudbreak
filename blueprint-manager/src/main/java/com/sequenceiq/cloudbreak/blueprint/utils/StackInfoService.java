@@ -34,7 +34,7 @@ public class StackInfoService {
     public BlueprintStackInfo blueprintStackInfo(String blueprintText) {
         try {
             JsonNode root = JsonUtil.readTree(blueprintText);
-            return new BlueprintStackInfo(blueprintUtils.getBlueprintHdpVersion(root), blueprintUtils.getBlueprintStackName(root));
+            return new BlueprintStackInfo(blueprintUtils.getBlueprintStackVersion(root), blueprintUtils.getBlueprintStackName(root));
         } catch (IOException e) {
             String message = String.format("Unable to detect BlueprintStackInfo from the source blueprint which was: %s.", blueprintText);
             LOGGER.warn(message);

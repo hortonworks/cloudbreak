@@ -112,7 +112,7 @@ public class ImageService {
                 try {
                     JsonNode root = JsonUtil.readTree(blueprint.getBlueprintText());
                     clusterType = blueprintUtils.getBlueprintStackName(root);
-                    clusterVersion = blueprintUtils.getBlueprintHdpVersion(root);
+                    clusterVersion = blueprintUtils.getBlueprintStackVersion(root);
                 } catch (IOException ex) {
                     LOGGER.warn("Can not initiate default hdp info: ", ex);
                 }

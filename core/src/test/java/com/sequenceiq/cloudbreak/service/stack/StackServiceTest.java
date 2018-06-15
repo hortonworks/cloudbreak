@@ -18,6 +18,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.function.Supplier;
+
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -149,7 +151,7 @@ public class StackServiceTest {
 
     @Before
     public void setup() throws TransactionService.TransactionExecutionException {
-        doAnswer(invocation -> ((TransactionService.TransactionCallback) invocation.getArgument(0)).get()).when(transactionService).required(any());
+        doAnswer(invocation -> ((Supplier) invocation.getArgument(0)).get()).when(transactionService).required(any());
     }
 
     @Test

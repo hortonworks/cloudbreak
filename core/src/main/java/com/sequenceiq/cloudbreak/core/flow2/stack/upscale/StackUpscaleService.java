@@ -119,14 +119,18 @@ public class StackUpscaleService {
     public Set<String> finishExtendMetadata(Stack stack, String instanceGroupName, CollectMetadataResult payload) throws TransactionExecutionException {
         return transactionService.required(() -> {
             List<CloudVmMetaDataStatus> coreInstanceMetaData = payload.getResults();
-            int newinstances = metadataSetupService.saveInstanceMetaData(stack, coreInstanceMetaData, CREATED);
+            int newInstances = metadataSetupService.saveInstanceMetaData(stack, coreInstanceMetaData, CREATED);
             Set<String> upscaleCandidateAddresses = new HashSet<>();
             for (CloudVmMetaDataStatus cloudVmMetaDataStatus : coreInstanceMetaData) {
                 upscaleCandidateAddresses.add(cloudVmMetaDataStatus.getMetaData().getPrivateIp());
             }
             InstanceGroup instanceGroup = instanceGroupRepository.findOneByGroupNameInStack(stack.getId(), instanceGroupName);
-            int nodeCount = instanceGroup.getNodeCount() + newinstances;
-            clusterService.updateClusterStatusByStackIdOutOfTransaction(stack.getId(), AVAILABLE);
+            int nodeCount = instanceGroup.getNodeCount() + newInstances;
+            try {
+                clusterService.updateClusterStatusByStackIdOutOfTransaction(stack.getId(), AVAILABLE);
+            } catch (TransactionExecutionException e) {
+                throw e.getCause();
+            }
             eventService.fireCloudbreakEvent(stack.getId(), BillingStatus.BILLING_CHANGED.name(),
                 messagesService.getMessage("stack.metadata.setup.billing.changed"));
             flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_METADATA_EXTEND, AVAILABLE.name());
