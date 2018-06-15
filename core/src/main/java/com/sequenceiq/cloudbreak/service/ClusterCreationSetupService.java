@@ -55,6 +55,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariRepositoryVersionService;
@@ -130,11 +131,13 @@ public class ClusterCreationSetupService {
         mpackValidator.validateMpacks(request, user);
     }
 
-    public Cluster prepare(ClusterRequest request, Stack stack, IdentityUser user) throws Exception {
+    public Cluster prepare(ClusterRequest request, Stack stack, IdentityUser user) throws IOException, CloudbreakImageNotFoundException,
+            TransactionExecutionException {
         return prepare(request, stack, null, user);
     }
 
-    public Cluster prepare(ClusterRequest request, Stack stack, Blueprint blueprint, IdentityUser user) throws Exception {
+    public Cluster prepare(ClusterRequest request, Stack stack, Blueprint blueprint, IdentityUser user) throws IOException, CloudbreakImageNotFoundException,
+            TransactionExecutionException {
         String stackName = stack.getName();
 
         long start = System.currentTimeMillis();

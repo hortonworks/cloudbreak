@@ -12,6 +12,7 @@ import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.function.Supplier;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -23,7 +24,6 @@ import com.sequenceiq.cloudbreak.domain.FlexSubscription;
 import com.sequenceiq.cloudbreak.domain.SmartSenseSubscription;
 import com.sequenceiq.cloudbreak.repository.FlexSubscriptionRepository;
 import com.sequenceiq.cloudbreak.service.TransactionService;
-import com.sequenceiq.cloudbreak.service.TransactionService.TransactionCallback;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 
 public class FlexSubscriptionServiceTest {
@@ -40,7 +40,7 @@ public class FlexSubscriptionServiceTest {
     @Before
     public void setUp() throws TransactionExecutionException {
         initMocks(this);
-        doAnswer(invocation -> ((TransactionCallback) invocation.getArgument(0)).get()).when(transactionService).required(any());
+        doAnswer(invocation -> ((Supplier) invocation.getArgument(0)).get()).when(transactionService).required(any());
     }
 
     @Test(expected = BadRequestException.class)

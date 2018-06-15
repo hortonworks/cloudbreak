@@ -22,10 +22,10 @@ import com.sequenceiq.cloudbreak.cloud.model.component.AmbariInfo;
 @ConfigurationProperties("cb.ambari")
 public class DefaultAmbariRepoService {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultAmbariRepoService.class);
+
     @Inject
     private StackMatrixService stackMatrixService;
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultAmbariRepoService.class);
 
     private Map<String, AmbariInfo> entries = new HashMap<>();
 

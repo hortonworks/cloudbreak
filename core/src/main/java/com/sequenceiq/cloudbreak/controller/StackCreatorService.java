@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.controller;
 import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
 import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
 
+import java.io.IOException;
 import java.util.Optional;
 
 import javax.inject.Inject;
@@ -186,7 +187,7 @@ public class StackCreatorService {
                     imgFromCatalog = imageService.determineImageFromCatalog(stackRequest.getImageId(), platformString,
                             stackRequest.getImageCatalog(), blueprint, shouldUseBaseImage(stackRequest.getClusterRequest()), stackRequest.getOs());
                 } catch (CloudbreakImageNotFoundException | CloudbreakImageCatalogException e) {
-                    throw new RuntimeException(e);
+                    throw new RuntimeException(e.getMessage(), e);
                 }
 
                 fillInstanceMetadata(stack);
@@ -197,8 +198,8 @@ public class StackCreatorService {
 
                 try {
                     createClusterIfNeed(user, stackRequest, stack, stackName, blueprint);
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
+                } catch (CloudbreakImageNotFoundException | IOException | TransactionExecutionException e) {
+                    throw new RuntimeException(e.getMessage(), e);
                 }
                 prepareSharedServiceIfNeed(stackRequest, stack, stackName);
                 return stack;
@@ -206,8 +207,8 @@ public class StackCreatorService {
         } catch (TransactionExecutionException e) {
             stackUnderOperationService.off();
             if (e.getCause() instanceof DataIntegrityViolationException) {
-                String msg = String.format("Error with resource [%s], error: [%s]",
-                        APIResourceType.STACK, getProperSqlErrorMessage((DataIntegrityViolationException) e.getCause()));
+                String msg = String.format("Error with resource [%s], error: [%s]", APIResourceType.STACK,
+                        getProperSqlErrorMessage((DataIntegrityViolationException) e.getCause()));
                 throw new BadRequestException(msg);
             }
             throw new TransactionRuntimeExecutionException(e);
@@ -239,7 +240,7 @@ public class StackCreatorService {
         return clusterRequest.getAmbariRepoDetailsJson() != null || clusterRequest.getAmbariStackDetails() != null;
     }
 
-    private Stack prepareSharedServiceIfNeed(StackRequest stackRequest, Stack stack, String stackName) throws TransactionService.TransactionExecutionException {
+    private Stack prepareSharedServiceIfNeed(StackRequest stackRequest, Stack stack, String stackName) {
         if (stackRequest.getClusterRequest() != null && stackRequest.getClusterRequest().getConnectedCluster() != null) {
             long start = System.currentTimeMillis();
             Optional<StackInputs> stackInputs = sharedServiceConfigProvider.prepareDatalakeConfigs(stack.getCluster().getBlueprint(), stack);
@@ -251,11 +252,8 @@ public class StackCreatorService {
         return stack;
     }
 
-    private boolean forceBaseImage(ClusterRequest clusterRequest) {
-        return clusterRequest.getAmbariRepoDetailsJson() != null;
-    }
-
-    private void createClusterIfNeed(IdentityUser user, StackRequest stackRequest, Stack stack, String stackName, Blueprint blueprint) throws Exception {
+    private void createClusterIfNeed(IdentityUser user, StackRequest stackRequest, Stack stack, String stackName, Blueprint blueprint)
+            throws CloudbreakImageNotFoundException, IOException, TransactionExecutionException {
         if (stackRequest.getClusterRequest() != null) {
             long start = System.currentTimeMillis();
             Cluster cluster = clusterCreationService.prepare(stackRequest.getClusterRequest(), stack, blueprint, user);
