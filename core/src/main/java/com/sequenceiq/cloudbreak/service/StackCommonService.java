@@ -9,7 +9,6 @@ import javax.ws.rs.core.Response.Status;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
@@ -26,6 +25,7 @@ import com.sequenceiq.cloudbreak.api.model.stack.StackValidationRequest;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformVariants;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.common.type.ScalingHardLimitsService;
 import com.sequenceiq.cloudbreak.controller.StackCreatorService;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.validation.filesystem.FileSystemValidator;
@@ -45,38 +45,41 @@ public class StackCommonService implements StackEndpoint {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StackCommonService.class);
 
-    @Autowired
+    @Inject
     private StackService stackService;
 
-    @Autowired
+    @Inject
     private TlsSecurityService tlsSecurityService;
 
-    @Autowired
+    @Inject
     private StackDecorator stackDecorator;
 
-    @Autowired
+    @Inject
     private AccountPreferencesValidator accountPreferencesValidator;
 
-    @Autowired
+    @Inject
     private CloudParameterService parameterService;
 
-    @Autowired
+    @Inject
     private FileSystemValidator fileSystemValidator;
 
-    @Autowired
+    @Inject
     private AuthenticatedUserService authenticatedUserService;
 
-    @Autowired
+    @Inject
     private StackRequestValidator stackValidator;
 
-    @Autowired
+    @Inject
     private CredentialToCloudCredentialConverter credentialToCloudCredentialConverter;
 
-    @Autowired
+    @Inject
     private ClusterCreationSetupService clusterCreationService;
 
     @Inject
     private StackCreatorService stackCreatorService;
+
+    @Inject
+    private ScalingHardLimitsService scalingHardLimitsService;
 
     @Inject
     @Qualifier("conversionService")
@@ -149,6 +152,7 @@ public class StackCommonService implements StackEndpoint {
             stackService.updateStatus(id, updateRequest.getStatus(), updateRequest.getWithClusterEvent());
         } else {
             Integer scalingAdjustment = updateRequest.getInstanceGroupAdjustment().getScalingAdjustment();
+            validateHardLimits(scalingAdjustment);
             validateAccountPreferences(id, scalingAdjustment);
             stackService.updateNodeCount(id, updateRequest.getInstanceGroupAdjustment(), updateRequest.getWithClusterEvent());
         }
@@ -210,6 +214,13 @@ public class StackCommonService implements StackEndpoint {
             accountPreferencesValidator.validate(stackId, scalingAdjustment);
         } catch (AccountPreferencesValidationException e) {
             throw new BadRequestException(e.getMessage(), e);
+        }
+    }
+
+    private void validateHardLimits(Integer scalingAdjustment) {
+        if (scalingHardLimitsService.isViolatingMaxUpscaleStepInNodeCount(scalingAdjustment)) {
+            throw new BadRequestException(String.format("Upscaling by more than %d nodes is not supported",
+                    scalingHardLimitsService.getMaxUpscaleStepInNodeCount()));
         }
     }
 }

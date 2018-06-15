@@ -2,15 +2,17 @@ package com.sequenceiq.periscope.api.model;
 
 import javax.validation.constraints.Pattern;
 
+import com.sequenceiq.periscope.api.endpoint.validator.ValidScalingPolicy;
 import com.sequenceiq.periscope.doc.ApiDescription.ScalingPolicyJsonProperties;
 
 import io.swagger.annotations.ApiModelProperty;
 
+@ValidScalingPolicy
 public class ScalingPolicyBase implements Json {
 
     @ApiModelProperty(ScalingPolicyJsonProperties.NAME)
     @Pattern(regexp = "(^[a-zA-Z][-a-zA-Z0-9]*$)",
-            message = "The name can only contain alphanumeric characters and hyphens and has start with an alphanumeric character")
+            message = "The name can only contain alphanumeric characters and hyphens and has to start with an alphanumeric character")
     private String name;
 
     @ApiModelProperty(ScalingPolicyJsonProperties.ADJUSTMENTTYPE)

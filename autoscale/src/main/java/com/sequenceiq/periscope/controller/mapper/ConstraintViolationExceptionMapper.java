@@ -5,21 +5,27 @@ import javax.validation.ConstraintViolationException;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.Provider;
 
-import com.sequenceiq.periscope.api.model.ExceptionResult;
+import com.sequenceiq.cloudbreak.json.ValidationResult;
 
 @Provider
 public class ConstraintViolationExceptionMapper extends BaseExceptionMapper<ConstraintViolationException> {
 
     @Override
     protected Object getEntity(ConstraintViolationException exception) {
-        for (ConstraintViolation<?> violation : exception.getConstraintViolations()) {
-            return new ExceptionResult(violation.getMessage());
-        }
-        return new ExceptionResult(exception.getMessage());
+        ValidationResult validationResult = new ValidationResult();
+        exception.getConstraintViolations()
+                .forEach(violation -> addValidationError(violation, validationResult));
+        return validationResult;
     }
 
     @Override
     Status getResponseStatus() {
         return Status.BAD_REQUEST;
     }
+
+    private void addValidationError(ConstraintViolation<?> violation, ValidationResult validationResult) {
+        String propertyPath = violation.getPropertyPath() != null ? violation.getPropertyPath().toString() : "";
+        validationResult.addValidationError(propertyPath, violation.getMessage());
+    }
+
 }

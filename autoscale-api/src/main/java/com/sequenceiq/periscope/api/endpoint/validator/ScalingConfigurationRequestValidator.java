@@ -19,15 +19,18 @@ public class ScalingConfigurationRequestValidator implements ConstraintValidator
             validRequest = false;
             String message = "The specified ScalingConfiguration is not valid because the minimum cluster size can not be more than"
                     + " maximum cluster size.";
-            ValidatorUtil.addConstraintViolationAsStatus(context, message);
+            ValidatorUtil.addConstraintViolation(context, message, "minSize")
+                    .disableDefaultConstraintViolation();
         } else if (request.getMaxSize() < 0) {
             validRequest = false;
             String message = "The specified ScalingConfiguration is not valid because the maximum size smaller than zero.";
-            ValidatorUtil.addConstraintViolationAsStatus(context, message);
+            ValidatorUtil.addConstraintViolation(context, message, "maxSize")
+                    .disableDefaultConstraintViolation();
         } else if (request.getMinSize() < 0) {
             validRequest = false;
             String message = "The specified ScalingConfiguration is not valid because the minimum size smaller than zero.";
-            ValidatorUtil.addConstraintViolationAsStatus(context, message);
+            ValidatorUtil.addConstraintViolation(context, message, "minSize")
+                    .disableDefaultConstraintViolation();
         }
         return validRequest;
     }

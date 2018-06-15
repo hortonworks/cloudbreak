@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.controller.json;
+package com.sequenceiq.cloudbreak.json;
 
 import java.util.HashMap;
 import java.util.Map;
