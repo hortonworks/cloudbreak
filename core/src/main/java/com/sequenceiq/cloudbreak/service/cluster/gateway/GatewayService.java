@@ -66,10 +66,9 @@ public class GatewayService {
                 throw new TransactionRuntimeExecutionException(e);
             }
         }
-
     }
 
-    private GatewayJson tryUpdatingGateway(Long stackId, UpdateGatewayTopologiesJson request) throws TransactionExecutionException {
+    private GatewayJson tryUpdatingGateway(Long stackId, UpdateGatewayTopologiesJson request) {
         Stack stack = stackRepository.findOne(stackId);
         validateRequest(stackId, request, stack);
         Gateway gateway = stack.getCluster().getGateway();
@@ -78,7 +77,7 @@ public class GatewayService {
         try {
             reactorFlowManager.triggerEphemeralUpdate(stackId);
         } catch (FlowsAlreadyRunningException e) {
-            transactionService.required(() -> revertTopologyUpdate(stackId, currentTopologies));
+            revertTopologyUpdate(stackId, currentTopologies);
             throw e;
         }
         return conversionService.convert(gateway, GatewayJson.class);
@@ -120,16 +119,13 @@ public class GatewayService {
                 .findFirst();
     }
 
-    private Void revertTopologyUpdate(Long stackId, Set<GatewayTopology> topologiesToBeReverted) {
+    private void revertTopologyUpdate(Long stackId, Set<GatewayTopology> topologiesToBeReverted) {
         Stack stack = stackRepository.findOne(stackId);
         Gateway gateway = stack.getCluster().getGateway();
-        topologiesToBeReverted.stream().forEach(revert -> {
-            gateway.getTopologies().stream()
-                    .filter(topology -> topology.getTopologyName().equals(revert.getTopologyName()))
-                    .findFirst()
-                    .ifPresent(topology -> topology.setExposedServices(revert.getExposedServices()));
-        });
+        topologiesToBeReverted.forEach(revert -> gateway.getTopologies().stream()
+                .filter(topology -> topology.getTopologyName().equals(revert.getTopologyName()))
+                .findFirst()
+                .ifPresent(topology -> topology.setExposedServices(revert.getExposedServices())));
         gatewayRepository.save(gateway);
-        return null;
     }
 }

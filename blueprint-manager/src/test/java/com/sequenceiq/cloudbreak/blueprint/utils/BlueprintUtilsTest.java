@@ -76,7 +76,7 @@ public class BlueprintUtilsTest {
 
         JsonNode root = JsonUtil.readTree(blueprint);
 
-        Assert.assertEquals("2.5", underTest.getBlueprintHdpVersion(root));
+        Assert.assertEquals("2.5", underTest.getBlueprintStackVersion(root));
     }
 
     @Test
