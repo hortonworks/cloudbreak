@@ -61,12 +61,14 @@ public class DefaultAmbariRepoService {
             if (descriptorEntry.isPresent()) {
                 Entry<String, StackDescriptor> stackDescriptorEntry = descriptorEntry.get();
                 AmbariInfoJson ambariInfoJson = stackDescriptorEntry.getValue().getAmbari();
-                AmbariRepo ambariRepo = new AmbariRepo();
-                ambariRepo.setPredefined(false);
-                ambariRepo.setVersion(ambariInfoJson.getVersion());
-                ambariRepo.setBaseUrl(ambariInfoJson.getRepo().get(osType).getBaseUrl());
-                ambariRepo.setGpgKeyUrl(ambariInfoJson.getRepo().get(osType).getGpgKeyUrl());
-                return ambariRepo;
+                if (ambariInfoJson.getRepo().get(osType) != null) {
+                    AmbariRepo ambariRepo = new AmbariRepo();
+                    ambariRepo.setPredefined(false);
+                    ambariRepo.setVersion(ambariInfoJson.getVersion());
+                    ambariRepo.setBaseUrl(ambariInfoJson.getRepo().get(osType).getBaseUrl());
+                    ambariRepo.setGpgKeyUrl(ambariInfoJson.getRepo().get(osType).getGpgKeyUrl());
+                    return ambariRepo;
+                }
             }
         }
 

@@ -93,6 +93,18 @@ public class DefaultAmbariRepoServiceTest {
     }
 
     @Test
+    public void testDefaultAmbariRepoWithOSWhichDoesNotExists() {
+        AmbariRepo ambariRepo = defaultAmbariRepoService.getDefault("ubuntu", "HDP", "2.7");
+        assertNull(ambariRepo);
+    }
+
+    @Test
+    public void testDefaultAmbariRepoWithStackTypeWhichDoesNotExists() {
+        AmbariRepo ambariRepo = defaultAmbariRepoService.getDefault("redhat7", "NA", "2.7");
+        assertNull(ambariRepo);
+    }
+
+    @Test
     public void testDefaultAmbariRepoWithHDPWhichExists() {
         AmbariRepo ambariRepo = defaultAmbariRepoService.getDefault("redhat6", "HDP", "2.7");
         assertEquals("2.6", ambariRepo.getVersion());
@@ -100,6 +112,14 @@ public class DefaultAmbariRepoServiceTest {
         assertEquals("http://redhat6-gpg/2.6", ambariRepo.getGpgKeyUrl());
 
         ambariRepo = defaultAmbariRepoService.getDefault("redhat7", "HDP", "3.0");
+        assertEquals("2.7", ambariRepo.getVersion());
+        assertEquals("http://redhat7-base/2.7", ambariRepo.getBaseUrl());
+        assertEquals("http://redhat7-gpg/2.7", ambariRepo.getGpgKeyUrl());
+    }
+
+    @Test
+    public void testDefaultAmbariRepoWithHDFWhichExists() {
+        AmbariRepo ambariRepo = defaultAmbariRepoService.getDefault("redhat7", "HDF", "3.1");
         assertEquals("2.7", ambariRepo.getVersion());
         assertEquals("http://redhat7-base/2.7", ambariRepo.getBaseUrl());
         assertEquals("http://redhat7-gpg/2.7", ambariRepo.getGpgKeyUrl());
