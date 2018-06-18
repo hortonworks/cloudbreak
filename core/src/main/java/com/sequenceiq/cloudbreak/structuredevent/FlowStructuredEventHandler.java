@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.structuredevent;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.messaging.Message;
 import org.springframework.statemachine.StateMachine;
@@ -17,6 +19,7 @@ import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEvent;
 @Component
 @Scope("prototype")
 public class FlowStructuredEventHandler<S, E> extends StateMachineListenerAdapter<S, E> {
+    private static final Logger LOGGER = LoggerFactory.getLogger(FlowStructuredEventHandler.class);
 
     @Inject
     private StructuredEventClient structuredEventClient;
@@ -67,25 +70,29 @@ public class FlowStructuredEventHandler<S, E> extends StateMachineListenerAdapte
 
     @Override
     public void transition(Transition<S, E> transition) {
-        State<S, E> from = transition.getSource();
-        State<S, E> to = transition.getTarget();
-        Trigger<S, E> trigger = transition.getTrigger();
-        Long currentTime = System.currentTimeMillis();
-        String fromId = from != null ? from.getId().toString() : "unknown";
-        String toId = to != null ? to.getId().toString() : "unknown";
-        String eventId = trigger != null ? trigger.getEvent().toString() : "unknown";
-        Boolean detailed = toId.equals(initState.toString()) || toId.equals(finalState.toString());
-        FlowDetails flowDetails = new FlowDetails("", flowType, "", flowId,  fromId, toId, eventId,
-                lastStateChange == -1L ? -1L : currentTime - lastStateChange);
-        StructuredEvent structuredEvent;
-        if (exception == null) {
-            structuredEvent = structuredFlowEventFactory.createStucturedFlowEvent(stackId, flowDetails, detailed);
-        } else {
-            structuredEvent = structuredFlowEventFactory.createStucturedFlowEvent(stackId, flowDetails, true, exception);
-            exception = null;
+        try {
+            State<S, E> from = transition.getSource();
+            State<S, E> to = transition.getTarget();
+            Trigger<S, E> trigger = transition.getTrigger();
+            Long currentTime = System.currentTimeMillis();
+            String fromId = from != null ? from.getId().toString() : "unknown";
+            String toId = to != null ? to.getId().toString() : "unknown";
+            String eventId = trigger != null ? trigger.getEvent().toString() : "unknown";
+            Boolean detailed = toId.equals(initState.toString()) || toId.equals(finalState.toString());
+            FlowDetails flowDetails = new FlowDetails("", flowType, "", flowId, fromId, toId, eventId,
+                    lastStateChange == -1L ? -1L : currentTime - lastStateChange);
+            StructuredEvent structuredEvent;
+            if (exception == null) {
+                structuredEvent = structuredFlowEventFactory.createStucturedFlowEvent(stackId, flowDetails, detailed);
+            } else {
+                structuredEvent = structuredFlowEventFactory.createStucturedFlowEvent(stackId, flowDetails, true, exception);
+                exception = null;
+            }
+            structuredEventClient.sendStructuredEvent(structuredEvent);
+            lastStateChange = currentTime;
+        } catch (RuntimeException ex) {
+            LOGGER.warn("Error happened during structured flow event generation! The event won't be stored!", ex);
         }
-        structuredEventClient.sendStructuredEvent(structuredEvent);
-        lastStateChange = currentTime;
     }
 
     @Override
