@@ -3,7 +3,6 @@ package com.sequenceiq.it.cloudbreak.v2;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.springframework.util.StringUtils;
@@ -14,7 +13,7 @@ import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
 import com.google.common.collect.Lists;
-import com.sequenceiq.cloudbreak.api.model.GatewayType;
+import com.sequenceiq.cloudbreak.api.model.ExposedService;
 import com.sequenceiq.cloudbreak.api.model.KerberosRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.StackAuthenticationRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.GatewayJson;
@@ -108,9 +107,7 @@ public class AbstractStackCreationV2Test extends AbstractCloudbreakIntegrationTe
         ambariV2Request.setUserName(itContext.getContextParam(CloudbreakITContextConstants.AMBARI_USER_ID));
         ambariV2Request.setPassword(itContext.getContextParam(CloudbreakITContextConstants.AMBARI_PASSWORD_ID));
         if (enableGateway) {
-            GatewayJson gatewayJson = generateGatewayJson();
-            stackV2Request.getCluster().getAmbari().setGateway(gatewayJson);
-            ambariV2Request.setGateway(gatewayJson);
+            addGatewayRequest(stackV2Request, ambariV2Request);
         }
         if (enableSecurity) {
             ambariV2Request.setEnableSecurity(enableSecurity);
@@ -120,6 +117,20 @@ public class AbstractStackCreationV2Test extends AbstractCloudbreakIntegrationTe
             kerberosRequest.setPassword(kerberosPassword);
             ambariV2Request.setKerberos(kerberosRequest);
         }
+    }
+
+    private void addGatewayRequest(StackV2Request stackV2Request, AmbariV2Request ambariV2Request) {
+        GatewayJson gatewayJson = new GatewayJson();
+        gatewayJson.setPath("gateway-path");
+        GatewayTopologyJson topology1 = new GatewayTopologyJson();
+        topology1.setTopologyName("topology1");
+        topology1.setExposedServices(Collections.singletonList(ExposedService.AMBARI.getKnoxService()));
+        GatewayTopologyJson topology2 = new GatewayTopologyJson();
+        topology2.setTopologyName("topology2");
+        topology2.setExposedServices(Collections.singletonList(ExposedService.ALL.getServiceName()));
+        gatewayJson.setTopologies(Arrays.asList(topology1, topology2));
+        stackV2Request.getCluster().getAmbari().setGateway(gatewayJson);
+        ambariV2Request.setGateway(gatewayJson);
     }
 
     @Test
@@ -147,31 +158,5 @@ public class AbstractStackCreationV2Test extends AbstractCloudbreakIntegrationTe
         networkRequest.setSubnetCIDR(subnetCidr);
         stackV2Request.setNetwork(networkRequest);
         return networkRequest;
-    }
-
-    private GatewayJson generateGatewayJson() {
-        GatewayJson gatewayJson = new GatewayJson();
-        gatewayJson.setPath("knox-path");
-        GatewayTopologyJson gatewayTopologyJson = new GatewayTopologyJson();
-        gatewayTopologyJson.setTopologyName("db-proxy");
-        gatewayTopologyJson.setExposedServices(Arrays.asList(
-                "AMBARI",
-                "WEBHDFS",
-                "HDFSUI",
-                "YARNUI",
-                "JOBHISTORYUI",
-                "HIVE",
-                "HIVE_INTERACTIVE",
-                "ATLAS",
-                "SPARKHISTORYUI",
-                "ZEPPELIN",
-                "RANGERUI",
-                "PROFILER-AGENT",
-                "BEACON"));
-        List<GatewayTopologyJson> gatewayTopologyJsons = Collections.singletonList(gatewayTopologyJson);
-        gatewayJson.setTopologies(gatewayTopologyJsons);
-        gatewayJson.setSsoProvider("SSO_PROVIDER");
-        gatewayJson.setGatewayType(GatewayType.INDIVIDUAL);
-        return gatewayJson;
     }
 }

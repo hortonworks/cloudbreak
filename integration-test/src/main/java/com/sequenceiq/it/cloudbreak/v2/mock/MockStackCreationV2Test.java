@@ -59,6 +59,9 @@ public class MockStackCreationV2Test extends AbstractStackCreationV2Test {
             KerberosRequest kerberosRequest = ambariV2Request.getKerberos();
             stackCreationMock.verifyKerberosCalls(stackName, kerberosRequest.getAdmin(), kerberosRequest.getPassword());
         }
+        if (ambariV2Request.getGateway() != null) {
+            stackCreationMock.verifyGatewayCalls();
+        }
     }
 
     @AfterClass

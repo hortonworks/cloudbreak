@@ -202,6 +202,19 @@ public class StackCreationMock extends MockServer {
         verify(SALT_BOOT_ROOT + "/file/distribute", "POST").exactTimes(4).verify();
     }
 
+    public void verifyGatewayCalls() {
+        verify(SALT_BOOT_ROOT + "/salt/server/pillar/distribute", "POST")
+                .bodyContains("\"path\":\"/gateway/init.sls\"")
+                .bodyContains("\"ssoprovider\":\"/gateway-path/sso/api/v1/websso\"")
+                .bodyContains("\"ports\":{\"SPARKHISTORYUI\":18080,\"HDFSUI\":50070,\"YARNUI\":8088,\"AMBARI\":8080,\"JOBHISTORYUI\":19888,"
+                        + "\"HIVE_INTERACTIVE\":10501,\"BEACON\":25968,\"ATLAS\":21000,\"HIVE\":10001,\"RANGERUI\":6080,"
+                        + "\"PROFILER-AGENT\":21900,\"ZEPPELIN\":9995,\"WEBHDFS\":50070}")
+                .bodyContains("{\"name\":\"topology1\",\"exposed\":[\"AMBARI\"]}")
+                .bodyContains("{\"name\":\"topology2\",\"exposed\":[\"AMBARI\",\"WEBHDFS\",\"HDFSUI\",\"YARNUI\",\"JOBHISTORYUI\""
+                        + ",\"HIVE\",\"HIVE_INTERACTIVE\",\"ATLAS\",\"SPARKHISTORYUI\",\"ZEPPELIN\",\"RANGERUI\",\"PROFILER-AGENT\",\"BEACON\"]}")
+                .verify();
+    }
+
     public void verifyKerberosCalls(String clusterName, String kerberosAdmin, String kerberosPassword) {
         verify(SALT_API_ROOT + "/run", "POST")
                 .bodyContains("fun=grains.append")
