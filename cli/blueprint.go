@@ -40,6 +40,7 @@ func CreateBlueprintFromUrl(c *cli.Context) {
 		c.String(FlName.Name),
 		c.String(FlDescriptionOptional.Name),
 		c.Bool(FlPublicOptional.Name),
+		c.Bool(FlDlOptional.Name),
 		utils.ReadContentFromURL(urlLocation, new(http.Client)))
 }
 
@@ -54,16 +55,19 @@ func CreateBlueprintFromFile(c *cli.Context) {
 		c.String(FlName.Name),
 		c.String(FlDescriptionOptional.Name),
 		c.Bool(FlPublicOptional.Name),
+		c.Bool(FlDlOptional.Name),
 		utils.ReadFile(fileLocation))
 }
 
-func createBlueprintImpl(client blueprintClient, name string, description string, public bool, ambariBlueprint []byte) *models_cloudbreak.BlueprintResponse {
+func createBlueprintImpl(client blueprintClient, name string, description string, public bool, dl bool, ambariBlueprint []byte) *models_cloudbreak.BlueprintResponse {
 	defer utils.TimeTrack(time.Now(), "create blueprint")
+	tags := map[string]interface{}{"shared_services_ready": dl}
 	bpRequest := &models_cloudbreak.BlueprintRequest{
 		Name:            &name,
 		Description:     &description,
 		AmbariBlueprint: base64.StdEncoding.EncodeToString(ambariBlueprint),
 		Inputs:          make([]*models_cloudbreak.BlueprintParameter, 0),
+		Tags:            tags,
 	}
 	var blueprint *models_cloudbreak.BlueprintResponse
 	if public {

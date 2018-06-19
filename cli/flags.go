@@ -133,6 +133,13 @@ var (
 			Usage: "public in account",
 		},
 	}
+	FlDlOptional = BoolFlag{
+		RequiredFlag: OPTIONAL,
+		BoolFlag: cli.BoolFlag{
+			Name:  "datalake",
+			Usage: "marks the blueprint with Data Lake Ready tag",
+		},
+	}
 	FlRoleARN = StringFlag{
 		RequiredFlag: REQUIRED,
 		StringFlag: cli.StringFlag{

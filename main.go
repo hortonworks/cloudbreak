@@ -176,24 +176,24 @@ func main() {
 					Subcommands: []cli.Command{
 						{
 							Name:   "from-url",
-							Flags:  cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlURL).AddAuthenticationFlags().Build(),
+							Flags:  cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlURL, cb.FlDlOptional).AddAuthenticationFlags().Build(),
 							Before: ConfigRead,
 							Action: cb.CreateBlueprintFromUrl,
 							Usage:  "creates a blueprint by downloading it from a URL location",
 							BashComplete: func(c *cli.Context) {
-								for _, f := range cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlURL).AddAuthenticationFlags().Build() {
+								for _, f := range cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlURL, cb.FlDlOptional).AddAuthenticationFlags().Build() {
 									printFlagCompletion(f)
 								}
 							},
 						},
 						{
 							Name:   "from-file",
-							Flags:  cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlFile).AddAuthenticationFlags().Build(),
+							Flags:  cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlFile, cb.FlDlOptional).AddAuthenticationFlags().Build(),
 							Before: ConfigRead,
 							Action: cb.CreateBlueprintFromFile,
 							Usage:  "creates a blueprint by reading it from a local file",
 							BashComplete: func(c *cli.Context) {
-								for _, f := range cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlFile).AddAuthenticationFlags().Build() {
+								for _, f := range cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlFile, cb.FlDlOptional).AddAuthenticationFlags().Build() {
 									printFlagCompletion(f)
 								}
 							},
