@@ -119,7 +119,7 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
         try {
             handle(key, payload, flowId, flowChainId);
         } catch (TransactionExecutionException e) {
-            LOGGER.error("Failed update last flow log status and save new flow log entry.");
+            LOGGER.error("Failed update last flow log status and save new flow log entry.", e);
             runningFlows.remove(flowId);
         }
     }

@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.repository;
 
 import javax.transaction.Transactional;
+import java.util.List;
 
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -21,4 +22,7 @@ public interface ResourceRepository extends CrudRepository<Resource, Long> {
 
     @Query("SELECT r FROM Resource r WHERE r.stack.id = :stackId AND (r.resourceName = :resource OR r.resourceReference = :resource)")
     Resource findByStackIdAndResourceNameOrReference(@Param("stackId") Long stackId, @Param("resource") String resource);
+
+    @Query("SELECT r FROM Resource r WHERE r.stack.id = :stackId")
+    List<Resource> findAllByStackId(@Param("stackId") long stackId);
 }

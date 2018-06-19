@@ -47,7 +47,6 @@ import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
-import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.stack.connector.OperationException;
 import com.sequenceiq.cloudbreak.service.stack.flow.MetadataSetupService;
 import com.sequenceiq.cloudbreak.service.stack.flow.TlsSetupService;
@@ -74,9 +73,6 @@ public class StackUpscaleService {
     private ClusterService clusterService;
 
     @Inject
-    private CloudbreakMessagesService messagesService;
-
-    @Inject
     private CloudbreakEventService eventService;
 
     @Inject
@@ -97,7 +93,12 @@ public class StackUpscaleService {
     public void startAddInstances(Stack stack, Integer scalingAdjustment) {
         String statusReason = format("Adding %s new instance(s) to the infrastructure.", scalingAdjustment);
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.ADDING_NEW_INSTANCES, statusReason);
-        flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_ADDING_INSTANCES, UPDATE_IN_PROGRESS.name(), scalingAdjustment);
+    }
+
+    public void addInstanceFireEventAndLog(Stack stack, Integer scalingAdjustment) {
+        flowMessageService.fireEventAndLog(stack.getId(),
+                flowMessageService.message(Msg.STACK_ADDING_INSTANCES, scalingAdjustment),
+                UPDATE_IN_PROGRESS.name());
     }
 
     public void finishAddInstances(StackScalingFlowContext context, UpscaleStackResult payload) {
@@ -132,7 +133,7 @@ public class StackUpscaleService {
                 throw e.getCause();
             }
             eventService.fireCloudbreakEvent(stack.getId(), BillingStatus.BILLING_CHANGED.name(),
-                messagesService.getMessage("stack.metadata.setup.billing.changed"));
+                    flowMessageService.message(Msg.STACK_METADATA_SETUP_BILLING_CHANGED));
             flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_METADATA_EXTEND, AVAILABLE.name());
             usageService.scaleUsagesForStack(stack.getId(), instanceGroupName, nodeCount);
 
@@ -180,7 +181,7 @@ public class StackUpscaleService {
             if (!cloudResourceStatus.isFailed()) {
                 CloudResource cloudResource = cloudResourceStatus.getCloudResource();
                 Resource resource = new Resource(cloudResource.getType(), cloudResource.getName(), cloudResource.getReference(), cloudResource.getStatus(),
-                    stack, null);
+                        stack, null);
                 retSet.add(resource);
             }
         }

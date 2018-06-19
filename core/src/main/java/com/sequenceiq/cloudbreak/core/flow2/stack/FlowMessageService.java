@@ -22,15 +22,20 @@ public class FlowMessageService {
     @Inject
     private CloudbreakEventService cloudbreakEventService;
 
-    public void fireEventAndLog(Long stackId, Msg msgCode, String eventType, Object... args) {
-        LOGGER.debug("{} [STACK_FLOW_STEP].", msgCode);
-        String message = messagesService.getMessage(msgCode.code(), Arrays.asList(args));
+    public void fireEventAndLog(Long stackId, String message, String eventType) {
         cloudbreakEventService.fireCloudbreakEvent(stackId, eventType, message);
     }
 
+    public void fireEventAndLog(Long stackId, Msg msgCode, String eventType, Object... args) {
+        cloudbreakEventService.fireCloudbreakEvent(stackId, eventType, message(msgCode, args));
+    }
+
     public void fireInstanceGroupEventAndLog(Long stackId, Msg msgCode, String eventType, String instanceGroup, Object... args) {
+        cloudbreakEventService.fireCloudbreakInstanceGroupEvent(stackId, eventType, message(msgCode, args), instanceGroup);
+    }
+
+    public String message(Msg msgCode, Object... args) {
         LOGGER.debug("{} [STACK_FLOW_STEP].", msgCode);
-        String message = messagesService.getMessage(msgCode.code(), Arrays.asList(args));
-        cloudbreakEventService.fireCloudbreakInstanceGroupEvent(stackId, eventType, message, instanceGroup);
+        return messagesService.getMessage(msgCode.code(), Arrays.asList(args));
     }
 }
