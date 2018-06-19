@@ -44,6 +44,7 @@ import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.validation.filesystem.FileSystemValidator;
 import com.sequenceiq.cloudbreak.controller.validation.mpack.ManagementPackValidator;
+import com.sequenceiq.cloudbreak.controller.validation.rds.RdsConfigValidator;
 import com.sequenceiq.cloudbreak.converter.AmbariStackDetailsJsonToStackRepoDetailsConverter;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
@@ -114,6 +115,9 @@ public class ClusterCreationSetupService {
     @Inject
     private ManagementPackValidator mpackValidator;
 
+    @Inject
+    private RdsConfigValidator rdsConfigValidator;
+
     public void validate(ClusterRequest request, Stack stack, IdentityUser user) {
         validate(request, null, stack, user);
     }
@@ -129,6 +133,7 @@ public class ClusterCreationSetupService {
         }
         fileSystemValidator.validateFileSystem(stack.cloudPlatform(), credential, request.getFileSystem());
         mpackValidator.validateMpacks(request, user);
+        rdsConfigValidator.validateRdsConfigs(request, user);
     }
 
     public Cluster prepare(ClusterRequest request, Stack stack, IdentityUser user) throws IOException, CloudbreakImageNotFoundException,

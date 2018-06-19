@@ -31,7 +31,20 @@ public class DefaultAmbariRepoService {
     private Map<String, AmbariInfo> entries = new HashMap<>();
 
     public AmbariRepo getDefault(String osType) {
-        return getDefault(osType, null, null);
+        for (Entry<String, AmbariInfo> ambariEntry : entries.entrySet()) {
+            AmbariInfo ambariInfo = ambariEntry.getValue();
+            if (ambariInfo.getRepo().get(osType) == null) {
+                LOGGER.info(String.format("Missing Ambari (%s) repo information for os: %s", ambariInfo.getVersion(), osType));
+                continue;
+            }
+            AmbariRepo ambariRepo = new AmbariRepo();
+            ambariRepo.setPredefined(Boolean.FALSE);
+            ambariRepo.setVersion(ambariInfo.getVersion());
+            ambariRepo.setBaseUrl(ambariInfo.getRepo().get(osType).getBaseurl());
+            ambariRepo.setGpgKeyUrl(ambariInfo.getRepo().get(osType).getGpgkey());
+            return ambariRepo;
+        }
+        return null;
     }
 
     public AmbariRepo getDefault(String osType, String clusterType, String clusterVersion) {
