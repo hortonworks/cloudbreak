@@ -23,8 +23,11 @@ import com.sequenceiq.cloudbreak.cloud.event.resource.UpscaleStackRequest;
 import com.sequenceiq.cloudbreak.cloud.event.resource.UpscaleStackResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
+import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
+import com.sequenceiq.cloudbreak.cloud.transform.ResourceLists;
 import com.sequenceiq.cloudbreak.common.type.MetricType;
 import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
@@ -34,9 +37,9 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.downscale.StackScalingFlowContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.BootstrapNewNodesRequest;
@@ -45,6 +48,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.resource.ExtendHostMetadataRe
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.ExtendHostMetadataResult;
 import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
+import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetadataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
@@ -71,6 +75,9 @@ public class StackUpscaleActions {
     private InstanceMetaDataToCloudInstanceConverter metadataConverter;
 
     @Inject
+    private ResourceService resourceService;
+
+    @Inject
     private StackService stackService;
 
     @Bean(name = "ADD_INSTANCES_STATE")
@@ -85,21 +92,37 @@ public class StackUpscaleActions {
 
             @Override
             protected void doExecute(StackScalingFlowContext context, StackScaleTriggerEvent payload, Map<Object, Object> variables) {
-                stackUpscaleService.startAddInstances(context.getStack(), payload.getAdjustment());
-                sendEvent(context);
+                int instanceCountToCreate = getInstanceCountToCreate(context.getStack(), payload.getInstanceGroup(), payload.getAdjustment());
+                stackUpscaleService.addInstanceFireEventAndLog(context.getStack(), payload.getAdjustment());
+                if (instanceCountToCreate > 0) {
+                    stackUpscaleService.startAddInstances(context.getStack(), payload.getAdjustment());
+                    sendEvent(context);
+                } else {
+                    List<CloudResourceStatus> list = resourceService.getAllAsCloudResourceStatus(payload.getStackId());
+                    CloudStack stack = cloudStackConverter.convert(stackService.getByIdWithLists(payload.getStackId()));
+                    UpscaleStackRequest<UpscaleStackResult> request =
+                            new UpscaleStackRequest<>(context.getCloudContext(), context.getCloudCredential(), stack, ResourceLists.transform(list));
+                    UpscaleStackResult result = new UpscaleStackResult(request, ResourceStatus.CREATED, list);
+                    sendEvent(context.getFlowId(), result.selector(), result);
+                }
             }
 
             @Override
             protected Selectable createRequest(StackScalingFlowContext context) {
                 LOGGER.debug("Assembling upscale stack event for stack: {}", context.getStack());
                 List<CloudInstance> newInstances = stackUpscaleService.buildNewInstances(context.getStack(), context.getInstanceGroupName(),
-                        context.getAdjustment());
+                        getInstanceCountToCreate(context.getStack(), context.getInstanceGroupName(), context.getAdjustment()));
                 Stack updatedStack = instanceMetadataService.saveInstanceAndGetUpdatedStack(context.getStack(), newInstances);
                 List<CloudResource> resources = cloudResourceConverter.convert(context.getStack().getResources());
                 CloudStack updatedCloudStack = cloudStackConverter.convert(updatedStack);
                 return new UpscaleStackRequest<UpscaleStackResult>(context.getCloudContext(), context.getCloudCredential(), updatedCloudStack, resources);
             }
         };
+    }
+
+    private int getInstanceCountToCreate(Stack stack, String instanceGroupName, int adjusment) {
+        Set<InstanceMetaData> instanceMetadata = instanceMetadataService.unusedInstancesInInstanceGroupByName(stack.getId(), instanceGroupName);
+        return adjusment - instanceMetadata.size();
     }
 
     @Bean(name = "ADD_INSTANCES_FINISHED_STATE")
@@ -131,8 +154,13 @@ public class StackUpscaleActions {
             protected Selectable createRequest(StackScalingFlowContext context) {
                 List<CloudResource> cloudResources = cloudResourceConverter.convert(context.getStack().getResources());
                 List<CloudInstance> allKnownInstances = cloudStackConverter.buildInstances(context.getStack());
+                Set<String> instanceMetaData = instanceMetadataService.unusedInstancesInInstanceGroupByName(context.getStack().getId(),
+                        context.getInstanceGroupName()).stream()
+                        .map(InstanceMetaData::getInstanceId)
+                        .collect(Collectors.toSet());
                 List<CloudInstance> newCloudInstances = allKnownInstances.stream()
-                        .filter(cloudInstance -> InstanceStatus.CREATE_REQUESTED.equals(cloudInstance.getTemplate().getStatus()))
+                        .filter(cloudInstance -> InstanceStatus.CREATE_REQUESTED.equals(cloudInstance.getTemplate().getStatus())
+                                || instanceMetaData.contains(cloudInstance.getInstanceId()))
                         .collect(Collectors.toList());
                 return new CollectMetadataRequest(context.getCloudContext(), context.getCloudCredential(), cloudResources, newCloudInstances, allKnownInstances);
             }
