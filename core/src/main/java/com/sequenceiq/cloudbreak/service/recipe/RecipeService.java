@@ -12,6 +12,8 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
@@ -28,6 +30,8 @@ import com.sequenceiq.cloudbreak.service.AuthorizationService;
 
 @Service
 public class RecipeService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(RecipeService.class);
 
     @Inject
     private RecipeRepository recipeRepository;
@@ -50,9 +54,7 @@ public class RecipeService {
     }
 
     public Recipe get(Long id) {
-        Recipe recipe = recipeRepository.findById(id).orElseThrow(notFound("Recipe", id));
-        authorizationService.hasReadPermission(recipe);
-        return recipe;
+        return recipeRepository.findById(id).orElseThrow(notFound("Recipe", id));
     }
 
     public Set<Recipe> retrievePrivateRecipes(IdentityUser user) {
@@ -65,39 +67,44 @@ public class RecipeService {
     }
 
     public Recipe getPrivateRecipe(String name, IdentityUser user) {
-        Recipe recipe = Optional.ofNullable(recipeRepository.findByNameForUser(name, user.getUserId()))
+        return Optional.ofNullable(recipeRepository.findByNameForUser(name, user.getUserId()))
                 .orElseThrow(notFound("Recipe", name));
-        return recipe;
     }
 
     public Set<Recipe> getPublicRecipes(IdentityUser user, Collection<String> recipeNames) {
         Set<Recipe> recipes = recipeRepository.findByNameInAccount(recipeNames, user.getAccount());
         if (recipeNames.size() != recipes.size()) {
-            Set<String> foundRecipes = recipes.stream().map(Recipe::getName).collect(Collectors.toSet());
-            String missingRecipes = recipeNames.stream().filter(r -> !foundRecipes.contains(r)).collect(Collectors.joining(","));
-            throw new NotFoundException(String.format("Recipes '%s' not found.", missingRecipes));
+            throw new NotFoundException(String.format("Recipes '%s' not found.", collectMissingRecipeNames(recipes, recipeNames)));
         }
         return recipes;
     }
 
+    private String collectMissingRecipeNames(Set<Recipe> recipes, Collection<String> recipeNames) {
+        Set<String> foundRecipes = recipes.stream().map(Recipe::getName).collect(Collectors.toSet());
+        return recipeNames.stream().filter(r -> !foundRecipes.contains(r)).collect(Collectors.joining(","));
+    }
+
     public Recipe getPublicRecipe(String name, IdentityUser user) {
-        Recipe recipe = Optional.ofNullable(recipeRepository.findByNameInAccount(name, user.getAccount()))
+        return Optional.ofNullable(recipeRepository.findByNameInAccount(name, user.getAccount()))
                 .orElseThrow(notFound("Recipe", name));
-        return recipe;
     }
 
     public void delete(Long id, IdentityUser user) {
-        delete(get(id));
+        deleteImpl(get(id));
     }
 
     public void delete(String name, IdentityUser user) {
         Recipe recipe = Optional.ofNullable(recipeRepository.findByNameInAccount(name, user.getAccount()))
                 .orElseThrow(notFound("Recipe", name));
-        delete(recipe);
+        deleteImpl(recipe);
     }
 
-    private void delete(Recipe recipe) {
-        authorizationService.hasWritePermission(recipe);
+    public void delete(Recipe recipe) {
+        deleteImpl(recipe);
+    }
+
+    private void deleteImpl(Recipe recipe) {
+        LOGGER.info("Deleting recipe. {} - {}", new Object[]{recipe.getId(), recipe.getName()});
         List<HostGroup> hostGroupsWithRecipe = new ArrayList<>(hostGroupRepository.findAllHostGroupsByRecipe(recipe.getId()));
         if (!hostGroupsWithRecipe.isEmpty()) {
             if (hostGroupsWithRecipe.size() > 1) {

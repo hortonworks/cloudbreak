@@ -16,7 +16,6 @@ import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.ClusterTemplate;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.ClusterTemplateRepository;
@@ -46,18 +45,11 @@ public class ClusterTemplateService {
     }
 
     public ClusterTemplate get(Long id) {
-        ClusterTemplate clusterTemplate = clusterTemplateRepository.findById(id).orElseThrow(notFound("ClusterTemplate", id));
-        authorizationService.hasReadPermission(clusterTemplate);
-        return clusterTemplate;
+        return clusterTemplateRepository.findById(id).orElseThrow(notFound("ClusterTemplate", id));
     }
 
     public ClusterTemplate getByName(String name, IdentityUser user) {
-        ClusterTemplate clusterTemplate = clusterTemplateRepository.findByNameInAccount(name, user.getAccount(), user.getUserId());
-        if (clusterTemplate == null) {
-            throw new NotFoundException(String.format("Blueprint '%s' not found.", name));
-        }
-        authorizationService.hasReadPermission(clusterTemplate);
-        return clusterTemplate;
+        return clusterTemplateRepository.findByNameInAccount(name, user.getAccount(), user.getUserId());
     }
 
     public ClusterTemplate create(IdentityUser user, ClusterTemplate clusterTemplate) {
@@ -76,33 +68,19 @@ public class ClusterTemplateService {
 
     public void delete(Long id, IdentityUser user) {
         ClusterTemplate clusterTemplate = clusterTemplateRepository.findByIdInAccount(id, user.getAccount());
-        if (clusterTemplate == null) {
-            throw new NotFoundException(String.format("ClusterTemplate '%s' not found.", id));
-        }
         delete(clusterTemplate);
     }
 
     public ClusterTemplate getPublicClusterTemplate(String name, IdentityUser user) {
-        ClusterTemplate clusterTemplate = clusterTemplateRepository.findOneByName(name, user.getAccount());
-        if (clusterTemplate == null) {
-            throw new NotFoundException(String.format("ClusterTemplate '%s' not found.", name));
-        }
-        return clusterTemplate;
+        return clusterTemplateRepository.findOneByName(name, user.getAccount());
     }
 
     public ClusterTemplate getPrivateClusterTemplate(String name, IdentityUser user) {
-        ClusterTemplate clusterTemplate = clusterTemplateRepository.findByNameInUser(name, user.getUserId());
-        if (clusterTemplate == null) {
-            throw new NotFoundException(String.format("ClusterTemplate '%s' not found.", name));
-        }
-        return clusterTemplate;
+        return clusterTemplateRepository.findByNameInUser(name, user.getUserId());
     }
 
     public void delete(String name, IdentityUser user) {
         ClusterTemplate clusterTemplate = clusterTemplateRepository.findByNameInAccount(name, user.getAccount(), user.getUserId());
-        if (clusterTemplate == null) {
-            throw new NotFoundException(String.format("ClusterTemplate '%s' not found.", name));
-        }
         delete(clusterTemplate);
     }
 
@@ -111,7 +89,7 @@ public class ClusterTemplateService {
     }
 
     private void delete(ClusterTemplate clusterTemplate) {
-        authorizationService.hasWritePermission(clusterTemplate);
+        LOGGER.info("Deleting cluster-template with name: {}", clusterTemplate.getName());
         clusterTemplateRepository.delete(clusterTemplate);
     }
 }

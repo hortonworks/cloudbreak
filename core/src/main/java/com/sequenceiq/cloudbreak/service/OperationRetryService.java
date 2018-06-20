@@ -30,12 +30,7 @@ public class OperationRetryService {
     @Inject
     private FlowLogRepository flowLogRepository;
 
-    @Inject
-    private AuthorizationService authorizationService;
-
     public void retry(Stack stack) {
-        authorizationService.hasWritePermission(stack);
-
         List<FlowLog> flowLogs = flowLogRepository.findAllByStackIdOrderByCreatedDesc(stack.getId());
         if (isFlowPending(flowLogs)) {
             LOGGER.info("Retry cannot be performed, because there is already an active flow. stackId: {}", stack.getId());

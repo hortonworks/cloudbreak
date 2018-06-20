@@ -124,7 +124,7 @@ public class StackCommonService implements StackEndpoint {
 
     @Override
     public Map<String, Object> status(Long id) {
-        return conversionService.convert(stackService.get(id), Map.class);
+        return conversionService.convert(stackService.getById(id), Map.class);
     }
 
     @Override
@@ -166,7 +166,7 @@ public class StackCommonService implements StackEndpoint {
 
     @Override
     public StackResponse getStackForAmbari(AmbariAddressJson json) {
-        return stackService.get(json.getAmbariAddress());
+        return stackService.getByAmbariAddress(json.getAmbariAddress());
     }
 
     @Override

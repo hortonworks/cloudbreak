@@ -17,7 +17,6 @@ import com.sequenceiq.cloudbreak.api.model.TopologyResponse;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.domain.Topology;
-import com.sequenceiq.cloudbreak.repository.TopologyRepository;
 import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.topology.TopologyService;
 
@@ -29,9 +28,6 @@ public class TopologyController extends NotificationController implements Topolo
     private TopologyService topologyService;
 
     @Autowired
-    private TopologyRepository topologyRepository;
-
-    @Autowired
     @Qualifier("conversionService")
     private ConversionService conversionService;
 
@@ -41,7 +37,7 @@ public class TopologyController extends NotificationController implements Topolo
     @Override
     public Set<TopologyResponse> getPublics() {
         IdentityUser user = authenticatedUserService.getCbUser();
-        Set<Topology> stacks = topologyRepository.findAllInAccount(user.getAccount());
+        Set<Topology> stacks = topologyService.findAllInAccount(user.getAccount());
 
         return convert(stacks);
     }

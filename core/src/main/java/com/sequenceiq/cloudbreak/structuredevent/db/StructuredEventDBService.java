@@ -32,7 +32,7 @@ public class StructuredEventDBService implements StructuredEventService {
 
     @Override
     public <T extends StructuredEvent> List<T> getEventsForUserWithType(String userId, String eventType) {
-        List<StructuredEventEntity> events = structuredEventRepository.findByUserIdAndEventType(userId, eventType);
+        List<StructuredEventEntity> events = structuredEventRepository.findByOwnerAndEventType(userId, eventType);
         return events != null ? (List<T>) conversionService.convert(events,
                 TypeDescriptor.forObject(events),
                 TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(StructuredEvent.class))) : Collections.emptyList();
@@ -48,7 +48,7 @@ public class StructuredEventDBService implements StructuredEventService {
 
     @Override
     public <T extends StructuredEvent> List<T> getEventsForUserWithTypeAndResourceId(String userId, String eventType, String resourceType, Long resourceId) {
-        List<StructuredEventEntity> events = structuredEventRepository.findByUserIdAndEventTypeAndResourceTypeAndResourceId(userId, eventType, resourceType,
+        List<StructuredEventEntity> events = structuredEventRepository.findByOwnerAndEventTypeAndResourceTypeAndResourceId(userId, eventType, resourceType,
                 resourceId);
         return events != null ? (List<T>) conversionService.convert(events,
                 TypeDescriptor.forObject(events),
@@ -60,7 +60,7 @@ public class StructuredEventDBService implements StructuredEventService {
         List<StructuredEventEntity> events = Lists.newArrayList();
         for (String eventType : eventTypes) {
             for (Entry<String, Long> resId : resourceIds.entrySet()) {
-                events.addAll(structuredEventRepository.findByUserIdAndEventTypeAndResourceTypeAndResourceId(
+                events.addAll(structuredEventRepository.findByOwnerAndEventTypeAndResourceTypeAndResourceId(
                         userId, eventType, resId.getKey(), resId.getValue()));
             }
         }

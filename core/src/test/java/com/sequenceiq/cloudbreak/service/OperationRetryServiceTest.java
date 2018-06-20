@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.service;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -19,15 +18,14 @@ import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.security.access.AccessDeniedException;
 
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.core.flow2.Flow2Handler;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.FlowLog;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.StateStatus;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.repository.FlowLogRepository;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -143,12 +141,5 @@ public class OperationRetryServiceTest {
 
     private long getOffsettedCreated(int minutes) {
         return BASE_DATE_TIME.plusMinutes(minutes).toEpochSecond(ZoneOffset.UTC);
-    }
-
-    @Test(expected = AccessDeniedException.class)
-    public void retryNoWritePermission() {
-        doThrow(new AccessDeniedException("No write rights")).when(authorizationService).hasWritePermission(stackMock);
-
-        underTest.retry(stackMock);
     }
 }

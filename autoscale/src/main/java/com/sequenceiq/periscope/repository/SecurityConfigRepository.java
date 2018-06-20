@@ -1,11 +1,15 @@
 package com.sequenceiq.periscope.repository;
 
-import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
+import com.sequenceiq.cloudbreak.aspect.BaseRepository;
+import com.sequenceiq.cloudbreak.aspect.HasPermission;
+import com.sequenceiq.cloudbreak.service.EntityType;
 import com.sequenceiq.periscope.domain.SecurityConfig;
 
-public interface SecurityConfigRepository extends CrudRepository<SecurityConfig, Long> {
+@HasPermission
+@EntityType(entityClass = SecurityConfig.class)
+public interface SecurityConfigRepository extends BaseRepository<SecurityConfig, Long> {
 
     SecurityConfig findByClusterId(@Param("id") Long id);
 }

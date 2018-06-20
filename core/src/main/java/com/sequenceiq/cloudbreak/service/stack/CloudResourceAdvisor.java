@@ -102,10 +102,10 @@ public class CloudResourceAdvisor {
 
     private Blueprint getBlueprint(String blueprintName, Long blueprintId, IdentityUser cbUser) {
         Blueprint bp;
-        try {
+        if (blueprintId != null) {
             LOGGER.debug("Try to get validation by id: {}.", blueprintId);
             bp = blueprintService.get(blueprintId);
-        } catch (NumberFormatException e) {
+        } else {
             LOGGER.debug("Try to get validation by name: {}.", blueprintName);
             bp = blueprintService.getByName(blueprintName, cbUser);
         }

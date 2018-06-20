@@ -2,11 +2,13 @@ package com.sequenceiq.cloudbreak.repository;
 
 import javax.transaction.Transactional;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-
+import com.sequenceiq.cloudbreak.aspect.DisablePermission;
+import com.sequenceiq.cloudbreak.aspect.DisabledBaseRepository;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
+import com.sequenceiq.cloudbreak.service.EntityType;
 
 @EntityType(entityClass = Gateway.class)
 @Transactional(Transactional.TxType.REQUIRED)
-public interface GatewayRepository extends JpaRepository<Gateway, Long> {
+@DisablePermission
+public interface GatewayRepository extends DisabledBaseRepository<Gateway, Long> {
 }

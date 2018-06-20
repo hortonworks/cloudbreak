@@ -27,6 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
@@ -151,7 +152,7 @@ public class ImageCatalogService {
         ImageCatalog imageCatalog = null;
         try {
             imageCatalog = get(name);
-        } catch (NotFoundException ignore) {
+        } catch (AccessDeniedException | NotFoundException ignore) {
 
         }
 
@@ -214,7 +215,6 @@ public class ImageCatalogService {
             throw new BadRequestException(String.format("%s cannot be deleted because it is an environment default image catalog.", name));
         }
         ImageCatalog imageCatalog = get(name);
-        authorizationService.hasWritePermission(imageCatalog);
         imageCatalog.setArchived(true);
         setImageCatalogAsDefault(null);
         imageCatalog.setImageCatalogName(generateArchiveName(name));
@@ -249,8 +249,6 @@ public class ImageCatalogService {
             ImageCatalog imageCatalog = get(name);
             checkImageCatalog(imageCatalog, name);
 
-            authorizationService.hasWritePermission(imageCatalog);
-
             setImageCatalogAsDefault(imageCatalog);
 
             return imageCatalog;
@@ -269,9 +267,7 @@ public class ImageCatalogService {
     }
 
     public ImageCatalog update(ImageCatalog source) {
-
         ImageCatalog imageCatalog = findImageCatalog(source.getId());
-        authorizationService.hasReadPermission(imageCatalog);
         checkImageCatalog(imageCatalog, source.getId());
         imageCatalog.setImageCatalogName(source.getImageCatalogName());
         imageCatalog.setImageCatalogUrl(source.getImageCatalogUrl());

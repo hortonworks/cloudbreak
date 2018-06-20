@@ -31,9 +31,8 @@ import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
 import com.sequenceiq.cloudbreak.domain.FlexSubscription;
 import com.sequenceiq.cloudbreak.domain.SmartSenseSubscription;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
-import com.sequenceiq.cloudbreak.repository.FlexSubscriptionRepository;
-import com.sequenceiq.cloudbreak.service.flex.FlexSubscriptionService;
 import com.sequenceiq.cloudbreak.ha.CloudbreakNodeConfig;
+import com.sequenceiq.cloudbreak.service.flex.FlexSubscriptionService;
 import com.sequenceiq.cloudbreak.service.smartsense.SmartSenseSubscriptionService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
@@ -63,9 +62,6 @@ public class FlexUsageGenerator {
 
     @Inject
     private StackService stackService;
-
-    @Inject
-    private FlexSubscriptionRepository flexSubscriptionRepository;
 
     @Inject
     private CloudbreakNodeConfig cloudbreakNodeConfig;
@@ -167,8 +163,8 @@ public class FlexUsageGenerator {
             creationTime = formatInstant(Instant.ofEpochMilli(bumpToMillis(controllerCreated)), FLEX_TIME_ZONE_FORMAT_PATTERN);
         }
         cbdComponentInstance.setCreationTime(creationTime);
-        FlexSubscription usedForController = Optional.ofNullable(flexSubscriptionRepository.findFirstByUsedForController(true))
-                .orElse(flexSubscriptionRepository.findFirstByIsDefault(true));
+        FlexSubscription usedForController = Optional.ofNullable(flexSubscriptionService.findFirstByUsedForController(true))
+                .orElse(flexSubscriptionService.findFirstByIsDefault(true));
         cbdComponentInstance.setFlexSubscriptionId(usedForController == null ? "" : usedForController.getSubscriptionId());
         cbdComponentInstance.setUsageDate(formatInstant(Instant.ofEpochMilli(fromDate), FLEX_USAGE_DAY_FORMAT_PATTERN));
         return cbdComponentInstance;

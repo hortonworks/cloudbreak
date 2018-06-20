@@ -21,14 +21,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import com.sequenceiq.cloudbreak.api.model.SmartSenseSubscriptionJson;
+import com.sequenceiq.cloudbreak.aspect.PermissionType;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.exception.SmartSenseConfigurationNotFoundException;
 import com.sequenceiq.cloudbreak.domain.SmartSenseSubscription;
-import com.sequenceiq.cloudbreak.repository.FlexSubscriptionRepository;
 import com.sequenceiq.cloudbreak.repository.SmartSenseSubscriptionRepository;
 import com.sequenceiq.cloudbreak.service.AuthorizationService;
+import com.sequenceiq.cloudbreak.service.flex.FlexSubscriptionService;
 
 @Service
 public class SmartSenseSubscriptionService {
@@ -36,10 +37,10 @@ public class SmartSenseSubscriptionService {
     private static final Logger LOGGER = LoggerFactory.getLogger(SmartSenseSubscriptionService.class);
 
     @Inject
-    private SmartSenseSubscriptionRepository repository;
+    private SmartSenseSubscriptionRepository smartSenseSubscriptionRepository;
 
     @Inject
-    private FlexSubscriptionRepository flexSubscriptionRepository;
+    private FlexSubscriptionService flexSubscriptionService;
 
     @Inject
     private AuthorizationService authorizationService;
@@ -55,12 +56,12 @@ public class SmartSenseSubscriptionService {
     }
 
     public SmartSenseSubscription create(SmartSenseSubscription subscription) {
-        long count = repository.count();
+        long count = smartSenseSubscriptionRepository.count();
         if (count != 0L) {
             throw new BadRequestException("Only one SmartSense subscription is allowed by deployment.");
         }
         try {
-            subscription = repository.save(subscription);
+            subscription = smartSenseSubscriptionRepository.save(subscription);
             LOGGER.info("SmartSense subscription has been created: {}", subscription);
             return subscription;
         } catch (DataIntegrityViolationException ex) {
@@ -70,41 +71,35 @@ public class SmartSenseSubscriptionService {
     }
 
     public SmartSenseSubscription update(SmartSenseSubscription subscription) {
-        return repository.save(subscription);
+        return smartSenseSubscriptionRepository.save(subscription);
     }
 
     public void delete(SmartSenseSubscription subscription) {
-        authorizationService.hasWritePermission(subscription);
-        if (!flexSubscriptionRepository.countBySmartSenseSubscription(subscription).equals(0L)) {
+        if (!flexSubscriptionService.hasBySmartSenseSubscription(subscription)) {
             throw new BadRequestException("Subscription could not be deleted, because it is assigned to Flex subscription(s).");
         }
-        repository.delete(subscription);
+        smartSenseSubscriptionRepository.delete(subscription);
         LOGGER.info("SmartSense subscription has been deleted: {}", subscription);
     }
 
     public void delete(Long id) {
-        SmartSenseSubscription subscription = repository.findOneById(id);
+        SmartSenseSubscription subscription = smartSenseSubscriptionRepository.findById(id).orElseThrow(notFound("SmartSense subscription", id));
         delete(subscription);
     }
 
     public void delete(String subscriptionId, IdentityUser cbUser) {
-        SmartSenseSubscription subscription = repository.findBySubscriptionIdAndAccount(subscriptionId, cbUser.getAccount());
+        SmartSenseSubscription subscription = smartSenseSubscriptionRepository.findBySubscriptionIdAndAccount(subscriptionId, cbUser.getAccount());
         delete(subscription);
     }
 
     public SmartSenseSubscription findById(Long id) {
         LOGGER.debug("Looking for SmartSense subscription with id: {}", id);
-        return repository.findById(id).orElseThrow(notFound("SmartSense subscription", id));
-    }
-
-    public SmartSenseSubscription findOneById(Long id) {
-        LOGGER.debug("Looking for one SmartSense subscription with id: {}", id);
-        return repository.findOneById(id);
+        return smartSenseSubscriptionRepository.findById(id).orElseThrow(notFound("SmartSense subscription", id));
     }
 
     public Optional<SmartSenseSubscription> getDefault() {
         LOGGER.debug("Get the SmartSense subscription");
-        Iterator<SmartSenseSubscription> subscriptions = repository.findAll().iterator();
+        Iterator<SmartSenseSubscription> subscriptions = smartSenseSubscriptionRepository.findAll().iterator();
         return subscriptions.hasNext() ? Optional.of(subscriptions.next()) : Optional.empty();
     }
 
@@ -115,7 +110,9 @@ public class SmartSenseSubscriptionService {
     }
 
     private Optional<SmartSenseSubscription> obtainSmartSenseSubscription(IdentityUser cbUser) {
-        Optional<SmartSenseSubscription> subscription = Optional.ofNullable(repository.findByAccountAndOwner(cbUser.getAccount(), cbUser.getUserId()));
+        Optional<SmartSenseSubscription> subscription = Optional.ofNullable(
+                smartSenseSubscriptionRepository.findByAccountAndOwner(cbUser.getAccount(), cbUser.getUserId())
+        );
         if (subscription.isPresent()) {
             upgradeDefaultSmartSenseSubscription(subscription.get());
         } else {
@@ -129,13 +126,13 @@ public class SmartSenseSubscriptionService {
         if (!StringUtils.isEmpty(defaultSmartsenseId) && !defaultSmartsenseId.equals(subscription.getSubscriptionId())) {
             LOGGER.info("Upgrading default SmartSense subscription");
             subscription.setSubscriptionId(defaultSmartsenseId);
-            repository.save(subscription);
+            smartSenseSubscriptionRepository.save(subscription);
         }
     }
 
     private void checkSmartSenseSubscriptionAuthorization(Optional<SmartSenseSubscription> subscription) {
         try {
-            authorizationService.hasReadPermission(subscription.orElseThrow(() -> new SmartSenseConfigurationNotFoundException("Not Found")));
+            authorizationService.hasPermission(subscription.orElseThrow(SmartSenseConfigurationNotFoundException::new), PermissionType.READ.name());
         } catch (AccessDeniedException | SmartSenseConfigurationNotFoundException issue) {
             String message = "Unable to identify SmartSense subscription for the user.";
             LOGGER.warn(message);
@@ -153,7 +150,7 @@ public class SmartSenseSubscriptionService {
             newSubscription.setAccount(cbUser.getAccount());
             newSubscription.setOwner(cbUser.getUserId());
             newSubscription.setPublicInAccount(true);
-            repository.save(newSubscription);
+            smartSenseSubscriptionRepository.save(newSubscription);
         }
         return newSubscription;
     }

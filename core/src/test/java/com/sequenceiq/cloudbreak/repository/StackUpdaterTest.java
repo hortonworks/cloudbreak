@@ -8,8 +8,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.Optional;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -20,7 +18,9 @@ import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.converter.scheduler.StatusToPollGroupConverter;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class StackUpdaterTest {
@@ -29,7 +29,7 @@ public class StackUpdaterTest {
     private StackStatusRepository stackStatusRepository;
 
     @Mock
-    private StackRepository stackRepository;
+    private StackService stackService;
 
     @Mock
     private CloudbreakEventService cloudbreakEventService;
@@ -48,8 +48,8 @@ public class StackUpdaterTest {
         Stack stack = TestUtil.stack();
 
         DetailedStackStatus newStatus = DetailedStackStatus.DELETE_COMPLETED;
-        when(stackRepository.findById(anyLong())).thenReturn(Optional.of(stack));
-        when(stackRepository.save(any(Stack.class))).thenReturn(stack);
+        when(stackService.getById(anyLong())).thenReturn(stack);
+        when(stackService.save(any(Stack.class))).thenReturn(stack);
 
         Stack newStack = underTest.updateStackStatus(1L, DetailedStackStatus.DELETE_COMPLETED);
         assertEquals(newStatus.getStatus(), newStack.getStatus());
@@ -63,8 +63,8 @@ public class StackUpdaterTest {
 
         DetailedStackStatus newStatus = DetailedStackStatus.DELETE_COMPLETED;
         String newStatusReason = "test";
-        when(stackRepository.findById(anyLong())).thenReturn(Optional.of(stack));
-        when(stackRepository.save(any(Stack.class))).thenReturn(stack);
+        when(stackService.getById(anyLong())).thenReturn(stack);
+        when(stackService.save(any(Stack.class))).thenReturn(stack);
 
         Stack newStack = underTest.updateStackStatus(1L, newStatus, newStatusReason);
         assertEquals(newStatus.getStatus(), newStack.getStatus());

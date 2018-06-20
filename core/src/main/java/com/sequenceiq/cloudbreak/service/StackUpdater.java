@@ -1,6 +1,4 @@
-package com.sequenceiq.cloudbreak.repository;
-
-import static com.sequenceiq.cloudbreak.controller.exception.NotFoundException.notFound;
+package com.sequenceiq.cloudbreak.service;
 
 import javax.inject.Inject;
 
@@ -13,12 +11,15 @@ import com.sequenceiq.cloudbreak.converter.scheduler.StatusToPollGroupConverter;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
+import com.sequenceiq.cloudbreak.repository.ResourceRepository;
+import com.sequenceiq.cloudbreak.repository.SecurityConfigRepository;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @Component
 public class StackUpdater {
 
     @Inject
-    private StackRepository stackRepository;
+    private StackService stackService;
 
     @Inject
     private ResourceRepository resourceRepository;
@@ -40,13 +41,12 @@ public class StackUpdater {
     public void updateStackSecurityConfig(Stack stack, SecurityConfig securityConfig) {
         securityConfig = securityConfigRepository.save(securityConfig);
         stack.setSecurityConfig(securityConfig);
-        stackRepository.save(stack);
+        stackService.save(stack);
     }
 
     private Stack doUpdateStackStatus(Long stackId, DetailedStackStatus detailedStatus, String statusReason) {
+        Stack stack = stackService.getById(stackId);
         Status status = detailedStatus.getStatus();
-        Stack stack = stackRepository.findById(stackId)
-                .orElseThrow(notFound("Stack", stackId));
         if (!stack.isDeleteCompleted()) {
             stack.setStackStatus(new StackStatus(stack, status, statusReason, detailedStatus));
             if (status.isRemovableStatus()) {
@@ -57,7 +57,7 @@ public class StackUpdater {
             } else {
                 InMemoryStateStore.putStack(stackId, statusToPollGroupConverter.convert(status));
             }
-            stack = stackRepository.save(stack);
+            stack = stackService.save(stack);
         }
         return stack;
     }

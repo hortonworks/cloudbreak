@@ -78,7 +78,7 @@ public class SharedServiceConfigProvider {
     public Optional<StackInputs> prepareDatalakeConfigs(Blueprint blueprint, Stack publicStack) {
         try {
             if (publicStack.getDatalakeId() != null) {
-                ConfigsResponse configsResponse = retrieveOutputs(stackService.get(publicStack.getDatalakeId()), blueprint, publicStack.getName());
+                ConfigsResponse configsResponse = retrieveOutputs(stackService.getById(publicStack.getDatalakeId()), blueprint, publicStack.getName());
                 StackInputs stackInputs = publicStack.getInputs().get(StackInputs.class);
                 stackInputs.setDatalakeInputs(configsResponse.getDatalakeInputs());
                 stackInputs.setFixInputs(configsResponse.getFixInputs());
@@ -86,8 +86,8 @@ public class SharedServiceConfigProvider {
                 return Optional.ofNullable(stackInputs);
             }
         } catch (IOException e) {
-            LOGGER.error("Could not propagate cluster input parameters", e);
-            throw new BadRequestException("Could not propagate cluster input parameters: " + e.getMessage());
+            LOGGER.warn("Could not propagate cluster input parameters");
+            throw new BadRequestException("Could not propagate cluster input parameters: " + e.getMessage(), e);
         }
         return Optional.empty();
     }
@@ -170,7 +170,7 @@ public class SharedServiceConfigProvider {
     }
 
     private Stack queryStack(IdentityUser user, Long sourceClusterId, Optional<String> sourceClusterName) {
-        return sourceClusterName.isPresent() ? stackService.getPublicStack(sourceClusterName.get(), user) : stackService.get(sourceClusterId);
+        return sourceClusterName.isPresent() ? stackService.getPublicStack(sourceClusterName.get(), user) : stackService.getById(sourceClusterId);
     }
 
     private void setupLdap(Cluster requestedCluster, Stack publicStack) {

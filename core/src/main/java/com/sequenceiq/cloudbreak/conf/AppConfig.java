@@ -164,6 +164,7 @@ public class AppConfig implements ResourceLoaderAware {
             }
         });
         registration.addUrlPatterns("/*");
+        registration.setName("turnOnStackUnderOperationService");
         return registration;
     }
 

@@ -49,7 +49,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.resource.ExtendHostMetadataRe
 import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
-import com.sequenceiq.cloudbreak.service.stack.InstanceMetadataService;
+import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @Configuration
@@ -60,7 +60,7 @@ public class StackUpscaleActions {
     private ResourceToCloudResourceConverter cloudResourceConverter;
 
     @Inject
-    private InstanceMetadataService instanceMetadataService;
+    private InstanceMetaDataService instanceMetaDataService;
 
     @Inject
     private StackUpscaleService stackUpscaleService;
@@ -112,7 +112,7 @@ public class StackUpscaleActions {
                 LOGGER.debug("Assembling upscale stack event for stack: {}", context.getStack());
                 List<CloudInstance> newInstances = stackUpscaleService.buildNewInstances(context.getStack(), context.getInstanceGroupName(),
                         getInstanceCountToCreate(context.getStack(), context.getInstanceGroupName(), context.getAdjustment()));
-                Stack updatedStack = instanceMetadataService.saveInstanceAndGetUpdatedStack(context.getStack(), newInstances);
+                Stack updatedStack = instanceMetaDataService.saveInstanceAndGetUpdatedStack(context.getStack(), newInstances);
                 List<CloudResource> resources = cloudResourceConverter.convert(context.getStack().getResources());
                 CloudStack updatedCloudStack = cloudStackConverter.convert(updatedStack);
                 return new UpscaleStackRequest<UpscaleStackResult>(context.getCloudContext(), context.getCloudCredential(), updatedCloudStack, resources);
@@ -121,7 +121,7 @@ public class StackUpscaleActions {
     }
 
     private int getInstanceCountToCreate(Stack stack, String instanceGroupName, int adjusment) {
-        Set<InstanceMetaData> instanceMetadata = instanceMetadataService.unusedInstancesInInstanceGroupByName(stack.getId(), instanceGroupName);
+        Set<InstanceMetaData> instanceMetadata = instanceMetaDataService.unusedInstancesInInstanceGroupByName(stack.getId(), instanceGroupName);
         return adjusment - instanceMetadata.size();
     }
 
@@ -154,7 +154,7 @@ public class StackUpscaleActions {
             protected Selectable createRequest(StackScalingFlowContext context) {
                 List<CloudResource> cloudResources = cloudResourceConverter.convert(context.getStack().getResources());
                 List<CloudInstance> allKnownInstances = cloudStackConverter.buildInstances(context.getStack());
-                Set<String> instanceMetaData = instanceMetadataService.unusedInstancesInInstanceGroupByName(context.getStack().getId(),
+                Set<String> instanceMetaData = instanceMetaDataService.unusedInstancesInInstanceGroupByName(context.getStack().getId(),
                         context.getInstanceGroupName()).stream()
                         .map(InstanceMetaData::getInstanceId)
                         .collect(Collectors.toSet());

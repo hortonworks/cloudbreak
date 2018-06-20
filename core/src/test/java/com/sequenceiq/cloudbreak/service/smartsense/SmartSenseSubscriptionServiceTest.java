@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.service.smartsense;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.doNothing;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -15,11 +14,13 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
+import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.TestUtil;
+import com.sequenceiq.cloudbreak.aspect.PermissionType;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.SmartSenseSubscription;
 import com.sequenceiq.cloudbreak.repository.SmartSenseSubscriptionRepository;
@@ -55,7 +56,6 @@ public class SmartSenseSubscriptionServiceTest {
     public void getDefaultForUserWhenDefaultSmartSenseIdIsSpecifiedAndDefaultSubscriptionCouldNotBeFound() {
         ReflectionTestUtils.setField(underTest, "defaultSmartsenseId", DEPLOYMENT_SMARTSENSE_ID);
         when(repository.findByAccountAndOwner(user.getAccount(), user.getUserId())).thenReturn(null);
-        doNothing().when(authorizationService).hasReadPermission(any(SmartSenseSubscription.class));
 
         SmartSenseSubscription result = underTest.getDefaultForUser(user);
 
@@ -68,7 +68,6 @@ public class SmartSenseSubscriptionServiceTest {
         ReflectionTestUtils.setField(underTest, "defaultSmartsenseId", DEPLOYMENT_SMARTSENSE_ID, String.class);
         SmartSenseSubscription smartSenseSubscription = createSmartSenseSubscription();
         when(repository.findByAccountAndOwner(user.getAccount(), user.getUserId())).thenReturn(smartSenseSubscription);
-        doNothing().when(authorizationService).hasReadPermission(smartSenseSubscription);
 
         SmartSenseSubscription result = underTest.getDefaultForUser(user);
 
@@ -90,12 +89,10 @@ public class SmartSenseSubscriptionServiceTest {
     public void getDefaultForUserWhenDefaultSmartSenseIdIsNotSpecifiedAndDefaultSubscriptionCouldBeFound() {
         SmartSenseSubscription smartSenseSubscription = createSmartSenseSubscription();
         when(repository.findByAccountAndOwner(user.getAccount(), user.getUserId())).thenReturn(smartSenseSubscription);
-        doNothing().when(authorizationService).hasReadPermission(smartSenseSubscription);
 
         SmartSenseSubscription result = underTest.getDefaultForUser(user);
 
         Assert.assertEquals(smartSenseSubscription, result);
-        verify(authorizationService, times(1)).hasReadPermission(smartSenseSubscription);
     }
 
     @Test
@@ -103,13 +100,13 @@ public class SmartSenseSubscriptionServiceTest {
         SmartSenseSubscription smartSenseSubscription = createSmartSenseSubscription();
         String exceptionMessage = "Unable to identify SmartSense subscription for the user.";
         when(repository.findByAccountAndOwner(user.getAccount(), user.getUserId())).thenReturn(smartSenseSubscription);
-        doThrow(new AccessDeniedException(exceptionMessage)).when(authorizationService).hasReadPermission(smartSenseSubscription);
+        doThrow(new AccessDeniedException(exceptionMessage)).when(authorizationService).hasPermission(smartSenseSubscription, PermissionType.READ.name());
 
         thrown.expect(SmartSenseSubscriptionAccessDeniedException.class);
         thrown.expectMessage(exceptionMessage);
 
         underTest.getDefaultForUser(user);
-        verify(authorizationService, times(1)).hasReadPermission(ArgumentMatchers.<SmartSenseSubscription>any());
+        verify(authorizationService, times(1)).hasPermission(Matchers.<SmartSenseSubscription>any(), anyString());
     }
 
     @Test
@@ -118,12 +115,10 @@ public class SmartSenseSubscriptionServiceTest {
         SmartSenseSubscription subscription = createSmartSenseSubscription();
         subscription.setSubscriptionId(DEPLOYMENT_SMARTSENSE_ID);
         when(repository.findByAccountAndOwner(user.getAccount(), user.getUserId())).thenReturn(subscription);
-        doNothing().when(authorizationService).hasReadPermission(subscription);
 
         SmartSenseSubscription result = underTest.getDefaultForUser(user);
 
         Assert.assertEquals("The given SmartSenseSubscription instance has got a unexpected update", subscription, result);
-        verify(authorizationService, times(1)).hasReadPermission(ArgumentMatchers.<SmartSenseSubscription>any());
     }
 
     private SmartSenseSubscription createSmartSenseSubscription() {

@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.repository;
+package com.sequenceiq.cloudbreak.service;
 
 import java.util.Date;
 

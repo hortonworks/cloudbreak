@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v1.RdsConfigEndpoint;
@@ -121,8 +122,8 @@ public class RdsConfigController extends NotificationController implements RdsCo
             try {
                 RDSConfig config = rdsConfigService.getByName(existingRDSConfigName, authenticatedUserService.getCbUser());
                 rdsTestResult = testRDSConnectivity(config);
-            } catch (NotFoundException e) {
-                rdsTestResult.setConnectionResult("not found");
+            } catch (AccessDeniedException | NotFoundException e) {
+                rdsTestResult.setConnectionResult("not found or access is denied");
             }
         } else {
             RDSConfig rdsConfig = conversionService.convert(rdsTestRequest.getRdsConfig(), RDSConfig.class);
@@ -160,8 +161,12 @@ public class RdsConfigController extends NotificationController implements RdsCo
     private RdsTestResult testRDSConnectivity(RDSConfig rdsConfig) {
         RdsTestResult rdsTestResult = new RdsTestResult();
         try {
-            rdsConnectionValidator.validateRdsConnection(rdsConfig);
-            rdsTestResult.setConnectionResult("connected");
+            if (rdsConfig == null) {
+                rdsTestResult.setConnectionResult("not found");
+            } else {
+                rdsConnectionValidator.validateRdsConnection(rdsConfig);
+                rdsTestResult.setConnectionResult("connected");
+            }
         } catch (RuntimeException e) {
             rdsTestResult.setConnectionResult(e.getMessage());
         }

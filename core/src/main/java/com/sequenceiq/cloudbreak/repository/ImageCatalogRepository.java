@@ -5,15 +5,18 @@ import java.util.List;
 import javax.transaction.Transactional;
 
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.security.access.prepost.PostAuthorize;
 
+import com.sequenceiq.cloudbreak.aspect.BaseRepository;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
+import com.sequenceiq.cloudbreak.aspect.HasPermission;
+import com.sequenceiq.cloudbreak.service.EntityType;
 
 @EntityType(entityClass = ImageCatalog.class)
 @Transactional(Transactional.TxType.REQUIRED)
-public interface ImageCatalogRepository extends CrudRepository<ImageCatalog, Long> {
+@HasPermission
+public interface ImageCatalogRepository extends BaseRepository<ImageCatalog, Long> {
 
     @PostAuthorize("hasPermission(returnObject,'read')")
     @Query("SELECT ic FROM ImageCatalog ic WHERE ic.imageCatalogName = :name AND ic.archived is false AND "

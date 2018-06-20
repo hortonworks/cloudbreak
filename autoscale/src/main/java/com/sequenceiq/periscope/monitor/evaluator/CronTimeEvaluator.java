@@ -58,7 +58,7 @@ public class CronTimeEvaluator extends AbstractEventPublisher implements Evaluat
 
     @Override
     public void run() {
-        Cluster cluster = clusterService.find(clusterId);
+        Cluster cluster = clusterService.findById(clusterId);
         MDCBuilder.buildMdcContext(cluster);
         publishIfNeeded(alertRepository.findAllByCluster(clusterId));
     }

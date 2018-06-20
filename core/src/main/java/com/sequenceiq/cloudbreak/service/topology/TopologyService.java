@@ -54,13 +54,11 @@ public class TopologyService {
     private AuthorizationService authorizationService;
 
     public Topology get(Long id) {
-        Topology topology = getById(id);
-        authorizationService.hasReadPermission(topology);
-        return topology;
+        return topologyRepository.findById(id).orElseThrow(notFound("Topology", id));
     }
 
-    public Topology getById(Long id) {
-        return topologyRepository.findById(id).orElseThrow(notFound("Topology", id));
+    public Set<Topology> findAllInAccount(String account) {
+        return topologyRepository.findAllInAccount(account);
     }
 
     public Topology create(IdentityUser user, Topology topology) {
@@ -84,7 +82,6 @@ public class TopologyService {
     }
 
     private void delete(Topology topology) {
-        authorizationService.hasWritePermission(topology);
         Set<Credential> credentialsByTopology = credentialRepository.findByTopology(topology);
         Set<Template> templatesByTopology = templateRepository.findByTopology(topology);
         Set<Network> networksByTopology = networkRepository.findByTopology(topology);
@@ -96,7 +93,7 @@ public class TopologyService {
             String message = String.format("The following topology ['%s'] is used by the following resource(s): %s", topology.getName(), conflicts);
             throw new BadRequestException(message);
         }
-        LOGGER.debug("Deleting topology. {} - {}", topology.getId(), topology.getName());
+        LOGGER.info("Deleting topology. {} - {}", topology.getId(), topology.getName());
         Date now = new Date();
         String terminatedName = topology.getName() + DELIMITER + now.getTime();
         topology.setName(terminatedName);

@@ -9,6 +9,7 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -37,7 +38,7 @@ public class UserProfileService {
     }
 
     public UserProfile getOrCreate(String account, String owner, String userName) {
-        UserProfile userProfile = userProfileRepository.findOneByOwnerAndAccount(account, owner);
+        UserProfile userProfile = getSilently(account, owner);
         if (userProfile == null) {
             userProfile = new UserProfile();
             userProfile.setAccount(account);
@@ -50,6 +51,14 @@ public class UserProfileService {
             userProfile = userProfileRepository.save(userProfile);
         }
         return userProfile;
+    }
+
+    private UserProfile getSilently(String account, String owner) {
+        try {
+            return userProfileRepository.findOneByOwnerAndAccount(account, owner);
+        } catch (AccessDeniedException ignore) {
+            return null;
+        }
     }
 
     public UserProfile save(UserProfile userProfile) {

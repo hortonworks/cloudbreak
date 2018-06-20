@@ -7,14 +7,17 @@ import javax.transaction.Transactional;
 
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
+import com.sequenceiq.cloudbreak.aspect.BaseRepository;
 import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
+import com.sequenceiq.cloudbreak.aspect.HasPermission;
+import com.sequenceiq.cloudbreak.service.EntityType;
 
 @EntityType(entityClass = CloudbreakUsage.class)
 @Transactional(Transactional.TxType.REQUIRED)
-public interface CloudbreakUsageRepository extends CrudRepository<CloudbreakUsage, Long>, JpaSpecificationExecutor {
+@HasPermission
+public interface CloudbreakUsageRepository extends BaseRepository<CloudbreakUsage, Long>, JpaSpecificationExecutor {
 
     @Query("SELECT u FROM CloudbreakUsage u WHERE u.stackId = :stackId AND u.status = 'OPEN'")
     List<CloudbreakUsage> findOpensForStack(@Param("stackId") Long stackId);

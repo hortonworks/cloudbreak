@@ -24,12 +24,12 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.model.CloudbreakEventsJson;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
-import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.notification.Notification;
 import com.sequenceiq.cloudbreak.service.notification.NotificationSender;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -42,7 +42,7 @@ public class UptimeNotifierTest {
     private ClusterRepository clusterRepository;
 
     @Mock
-    private StackRepository stackRepository;
+    private StackService stackService;
 
     @Mock
     private NotificationSender notificationSender;
@@ -62,7 +62,7 @@ public class UptimeNotifierTest {
 
         when(clusterRepository.findByStatuses(any())).thenReturn(Collections.singletonList(clusters.get(0)));
         Stack stack1 = TestUtil.stack();
-        when(stackRepository.findStackForCluster(anyLong())).thenReturn(stack1);
+        when(stackService.getForCluster(anyLong())).thenReturn(stack1);
 
         underTest.sendUptime();
 
@@ -85,7 +85,7 @@ public class UptimeNotifierTest {
 
         Stack stack2 = TestUtil.stack();
         stack2.setCluster(clusters.get(0));
-        when(stackRepository.findStackForCluster(anyLong())).thenReturn(stack2);
+        when(stackService.getForCluster(anyLong())).thenReturn(stack2);
 
         underTest.sendUptime();
 
@@ -109,7 +109,7 @@ public class UptimeNotifierTest {
         Stack stack2 = TestUtil.stack();
         stack2.setCluster(clusters.get(0));
         stack2.setCredential(null);
-        when(stackRepository.findStackForCluster(anyLong())).thenReturn(stack2);
+        when(stackService.getForCluster(anyLong())).thenReturn(stack2);
 
         underTest.sendUptime();
 

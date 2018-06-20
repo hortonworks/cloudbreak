@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.template;
 
 import static com.sequenceiq.cloudbreak.controller.exception.NotFoundException.notFound;
+import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
 
 import java.util.Collection;
 import java.util.List;
@@ -11,6 +12,7 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
@@ -20,10 +22,9 @@ import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.repository.TemplateRepository;
 import com.sequenceiq.cloudbreak.service.AuthorizationService;
-import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.util.NameUtil;
 
 @Service
@@ -38,7 +39,7 @@ public class TemplateService {
     private TemplateRepository templateRepository;
 
     @Inject
-    private StackRepository stackRepository;
+    private StackService stackService;
 
     @Inject
     private AuthorizationService authorizationService;
@@ -53,9 +54,7 @@ public class TemplateService {
     }
 
     public Template get(Long id) {
-        Template template = templateRepository.findById(id).orElseThrow(notFound("Template", id));
-        authorizationService.hasReadPermission(template);
-        return template;
+        return templateRepository.findById(id).orElseThrow(notFound("Template", id));
     }
 
     public Template create(IdentityUser user, Template template) {
@@ -65,8 +64,9 @@ public class TemplateService {
         template.setAccount(user.getAccount());
         try {
             savedTemplate = templateRepository.save(template);
-        } catch (Exception ex) {
-            throw new DuplicateKeyValueException(APIResourceType.TEMPLATE, template.getName(), ex);
+        } catch (DataIntegrityViolationException ex) {
+            String msg = String.format("Error with resource [%s], %s", APIResourceType.BLUEPRINT, getProperSqlErrorMessage(ex));
+            throw new BadRequestException(msg, ex);
         }
         return savedTemplate;
     }
@@ -83,10 +83,8 @@ public class TemplateService {
     }
 
     public Template getPublicTemplate(String name, IdentityUser user) {
-        Template template = Optional.ofNullable(templateRepository.findOneByName(name, user.getAccount()))
+        return Optional.ofNullable(templateRepository.findOneByName(name, user.getAccount()))
                 .orElseThrow(notFound("Template", name));
-        authorizationService.hasReadPermission(template);
-        return template;
     }
 
     public void delete(String templateName, IdentityUser user) {
@@ -95,10 +93,9 @@ public class TemplateService {
         delete(template);
     }
 
-    private void delete(Template template) {
-        authorizationService.hasWritePermission(template);
-        LOGGER.debug("Deleting template. {} - {}", new Object[]{template.getId(), template.getName()});
-        List<Stack> allStackForTemplate = stackRepository.findAllStackForTemplate(template.getId());
+    public void delete(Template template) {
+        LOGGER.info("Deleting template. {} - {}", new Object[]{template.getId(), template.getName()});
+        List<Stack> allStackForTemplate = stackService.getAllForTemplate(template.getId());
         if (allStackForTemplate.isEmpty()) {
             template.setTopology(null);
             if (ResourceStatus.USER_MANAGED.equals(template.getStatus())) {

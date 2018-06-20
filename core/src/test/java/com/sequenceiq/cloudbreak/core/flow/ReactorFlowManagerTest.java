@@ -64,7 +64,7 @@ public class ReactorFlowManagerTest {
         Acceptable acceptable = new TestAcceptable();
         Stack stack = TestUtil.stack();
         stack.setCluster(TestUtil.cluster());
-        when(stackService.get(anyLong())).thenReturn(stack);
+        when(stackService.getById(anyLong())).thenReturn(stack);
         when(eventFactory.createEventWithErrHandler(anyObject())).thenReturn(new Event<>(acceptable));
     }
 
@@ -128,7 +128,7 @@ public class ReactorFlowManagerTest {
         Stack stack = TestUtil.stack();
         stack.setCluster(TestUtil.cluster());
         stack.getCluster().setSecure(true);
-        when(stackService.get(anyLong())).thenReturn(stack);
+        when(stackService.getById(anyLong())).thenReturn(stack);
 
         underTest.triggerClusterTermination(1L, false, false);
 
@@ -147,7 +147,7 @@ public class ReactorFlowManagerTest {
         Stack stack = TestUtil.stack();
         stack.setCluster(TestUtil.cluster());
         stack.getCluster().setSecure(true);
-        when(stackService.get(anyLong())).thenReturn(stack);
+        when(stackService.getById(anyLong())).thenReturn(stack);
 
         underTest.triggerClusterTermination(1L, true, false);
 

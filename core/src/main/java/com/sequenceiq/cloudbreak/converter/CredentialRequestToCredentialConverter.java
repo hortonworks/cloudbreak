@@ -41,7 +41,7 @@ public class CredentialRequestToCredentialConverter extends AbstractConversionSe
             }
         }
         if (source.getTopologyId() != null) {
-            credential.setTopology(topologyService.getById(source.getTopologyId()));
+            credential.setTopology(topologyService.get(source.getTopologyId()));
         }
         return credential;
     }

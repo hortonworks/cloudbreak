@@ -25,7 +25,7 @@ import com.sequenceiq.cloudbreak.service.flex.FlexSubscriptionService;
 public class FlexSubscriptionController implements FlexSubscriptionEndpoint {
 
     @Inject
-    private FlexSubscriptionService flexService;
+    private FlexSubscriptionService flexSubscriptionService;
 
     @Inject
     private AuthenticatedUserService authenticatedUserService;
@@ -38,26 +38,26 @@ public class FlexSubscriptionController implements FlexSubscriptionEndpoint {
 
     @Override
     public FlexSubscriptionResponse get(Long id) {
-        FlexSubscription flexSubscription = flexService.findOneById(id);
+        FlexSubscription flexSubscription = flexSubscriptionService.get(id);
         return toJsonConverter.convert(flexSubscription);
     }
 
     @Override
     public void delete(Long id) {
-        flexService.delete(id);
+        flexSubscriptionService.delete(id);
     }
 
     @Override
     public void deletePublic(String name) {
         IdentityUser cbUser = authenticatedUserService.getCbUser();
-        FlexSubscription subscription = flexService.findByNameInAccount(name, cbUser.getUserId(), cbUser.getAccount());
-        flexService.delete(subscription);
+        FlexSubscription subscription = flexSubscriptionService.findByNameInAccount(name, cbUser.getUserId(), cbUser.getAccount());
+        flexSubscriptionService.delete(subscription);
     }
 
     @Override
     public void deletePrivate(String name) {
-        FlexSubscription subscription = flexService.findOneByName(name);
-        flexService.delete(subscription);
+        FlexSubscription subscription = flexSubscriptionService.findOneByName(name);
+        flexSubscriptionService.delete(subscription);
     }
 
     @Override
@@ -72,27 +72,27 @@ public class FlexSubscriptionController implements FlexSubscriptionEndpoint {
     @Override
     public List<FlexSubscriptionResponse> getPublics() {
         IdentityUser identityUser = authenticatedUserService.getCbUser();
-        List<FlexSubscription> subscriptions = flexService.findPublicInAccountForUser(identityUser);
+        List<FlexSubscription> subscriptions = flexSubscriptionService.findPublicInAccountForUser(identityUser);
         return toJsonConverter.convert(subscriptions);
     }
 
     @Override
     public FlexSubscriptionResponse getPublic(String name) {
         IdentityUser identityUser = authenticatedUserService.getCbUser();
-        FlexSubscription subscription = flexService.findByNameInAccount(name, identityUser.getUserId(), identityUser.getAccount());
+        FlexSubscription subscription = flexSubscriptionService.findByNameInAccount(name, identityUser.getUserId(), identityUser.getAccount());
         return toJsonConverter.convert(subscription);
     }
 
     @Override
     public void setDefaultInAccount(String name) {
         IdentityUser identityUser = authenticatedUserService.getCbUser();
-        flexService.setDefaultFlexSubscription(name, identityUser);
+        flexSubscriptionService.setDefaultFlexSubscription(name, identityUser);
     }
 
     @Override
     public void setUsedForControllerInAccount(String name) {
         IdentityUser identityUser = authenticatedUserService.getCbUser();
-        flexService.setUsedForControllerFlexSubscription(name, identityUser);
+        flexSubscriptionService.setUsedForControllerFlexSubscription(name, identityUser);
     }
 
     @Override
@@ -107,28 +107,28 @@ public class FlexSubscriptionController implements FlexSubscriptionEndpoint {
     @Override
     public List<FlexSubscriptionResponse> getPrivates() {
         IdentityUser identityUser = authenticatedUserService.getCbUser();
-        List<FlexSubscription> subscriptions = flexService.findByOwner(identityUser.getUserId());
+        List<FlexSubscription> subscriptions = flexSubscriptionService.findByOwner(identityUser.getUserId());
         return toJsonConverter.convert(subscriptions);
     }
 
     @Override
     public FlexSubscriptionResponse getPrivate(String name) {
-        FlexSubscription subscription = flexService.findOneByName(name);
+        FlexSubscription subscription = flexSubscriptionService.findOneByName(name);
         return toJsonConverter.convert(subscription);
     }
 
     @Override
     public void setDefaultInAccount(Long id) {
         IdentityUser identityUser = authenticatedUserService.getCbUser();
-        FlexSubscription flexSubscription = flexService.findOneById(id);
-        flexService.setDefaultFlexSubscription(flexSubscription.getName(), identityUser);
+        FlexSubscription flexSubscription = flexSubscriptionService.get(id);
+        flexSubscriptionService.setDefaultFlexSubscription(flexSubscription.getName(), identityUser);
     }
 
     @Override
     public void setUsedForControllerInAccount(Long id) {
         IdentityUser identityUser = authenticatedUserService.getCbUser();
-        FlexSubscription flexSubscription = flexService.findOneById(id);
-        flexService.setUsedForControllerFlexSubscription(flexSubscription.getName(), identityUser);
+        FlexSubscription flexSubscription = flexSubscriptionService.get(id);
+        flexSubscriptionService.setUsedForControllerFlexSubscription(flexSubscription.getName(), identityUser);
     }
 
     private FlexSubscriptionResponse createFlexSubscription(FlexSubscriptionRequest json, boolean publicInAccount) throws TransactionExecutionException {
@@ -137,7 +137,7 @@ public class FlexSubscriptionController implements FlexSubscriptionEndpoint {
         subscription.setAccount(identityUser.getAccount());
         subscription.setOwner(identityUser.getUserId());
         subscription.setPublicInAccount(publicInAccount);
-        subscription = flexService.create(subscription);
+        subscription = flexSubscriptionService.create(subscription);
         return toJsonConverter.convert(subscription);
     }
 }

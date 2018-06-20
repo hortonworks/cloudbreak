@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -10,7 +11,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.SmartSenseSubscriptionEndpoint;
 import com.sequenceiq.cloudbreak.api.model.SmartSenseSubscriptionJson;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
@@ -47,7 +47,7 @@ public class SmartSenseSubscriptionController implements SmartSenseSubscriptionE
 
     @Override
     public SmartSenseSubscriptionJson get(Long id) {
-        SmartSenseSubscription subscription = smartSenseSubService.findOneById(id);
+        SmartSenseSubscription subscription = smartSenseSubService.findById(id);
         return toJsonConverter.convert(subscription);
     }
 
@@ -75,7 +75,7 @@ public class SmartSenseSubscriptionController implements SmartSenseSubscriptionE
 
     @Override
     public List<SmartSenseSubscriptionJson> getPublics() {
-        List<SmartSenseSubscription> result = Lists.newArrayList();
+        List<SmartSenseSubscription> result = new ArrayList<>();
         smartSenseSubService.getDefault().ifPresent(result::add);
         return toJsonConverter.convert(result);
     }

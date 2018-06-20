@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.service.ha;
 
-import static com.sequenceiq.cloudbreak.controller.exception.NotFoundException.notFound;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -38,13 +36,13 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.ha.CloudbreakNodeConfig;
 import com.sequenceiq.cloudbreak.repository.CloudbreakNodeRepository;
 import com.sequenceiq.cloudbreak.repository.FlowLogRepository;
-import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.Clock;
 import com.sequenceiq.cloudbreak.service.Retry;
 import com.sequenceiq.cloudbreak.service.Retry.ActionWentFailException;
 import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.metrics.MetricService;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @Service
 public class HeartbeatService {
@@ -81,7 +79,7 @@ public class HeartbeatService {
     private FlowChains flowChains;
 
     @Inject
-    private StackRepository stackRepository;
+    private StackService stackService;
 
     @Inject
     private ReactorFlowManager reactorFlowManager;
@@ -212,7 +210,7 @@ public class HeartbeatService {
         Set<Long> stackIds = InMemoryStateStore.getAllStackId();
         if (!stackIds.isEmpty()) {
             LOGGER.info("Check if there are termination flows for the following stack ids: {}", stackIds);
-            List<Object[]> stackStatuses = stackRepository.findStackStatuses(stackIds);
+            List<Object[]> stackStatuses = stackService.getStatuses(stackIds);
             Set<Long> terminatingStacksByCurrentNode = findTerminatingStacksForCurrentNode();
             for (Object[] ss : stackStatuses) {
                 if (DELETE_STATUSES.contains(ss[1])) {
@@ -246,7 +244,7 @@ public class HeartbeatService {
     private List<FlowLog> getInvalidFlows(Collection<FlowLog> flowLogs) {
         Set<Long> stackIds = flowLogs.stream().map(FlowLog::getStackId).distinct().collect(Collectors.toSet());
         if (!stackIds.isEmpty()) {
-            Set<Long> deletingStackIds = stackRepository.findStackStatuses(stackIds).stream()
+            Set<Long> deletingStackIds = stackService.getStatuses(stackIds).stream()
                     .filter(ss -> DELETE_STATUSES.contains(ss[1])).map(ss -> (Long) ss[0]).collect(Collectors.toSet());
             if (!deletingStackIds.isEmpty()) {
                 return flowLogs.stream()
@@ -286,7 +284,7 @@ public class HeartbeatService {
 
     private void cleanupInMemoryStore(Long stackId) {
         LOGGER.info("All running flows has been canceled for stack: {}. Remove id from memory store.", stackId);
-        Stack stack = stackRepository.findById(stackId).orElseThrow(notFound("Stack", stackId));
+        Stack stack = stackService.getById(stackId);
         InMemoryStateStore.deleteStack(stackId);
         if (stack.getCluster() != null) {
             InMemoryStateStore.deleteCluster(stack.getCluster().getId());

@@ -162,7 +162,7 @@ public class StackRequestToBlueprintPreparationObjectConverter extends AbstractC
 
     private Optional<FlexSubscription> getFlexSubscription(StackV2Request source) {
         return source.getFlexId() != null
-                ? Optional.ofNullable(flexSubscriptionService.findOneById(source.getFlexId()))
+                ? Optional.ofNullable(flexSubscriptionService.get(source.getFlexId()))
                 : Optional.empty();
     }
 

@@ -46,7 +46,7 @@ public class NetworkRequestToNetworkConverter extends AbstractConversionServiceA
             }
         }
         if (source.getTopologyId() != null) {
-            network.setTopology(topologyService.getById(source.getTopologyId()));
+            network.setTopology(topologyService.get(source.getTopologyId()));
         }
         return network;
     }

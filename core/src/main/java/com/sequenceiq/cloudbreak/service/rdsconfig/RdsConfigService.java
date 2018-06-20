@@ -12,6 +12,7 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import com.google.common.base.Preconditions;
@@ -47,22 +48,18 @@ public class RdsConfigService {
     }
 
     public RDSConfig getPrivateRdsConfig(String name, IdentityUser user) {
-        RDSConfig rdsConfig = Optional.ofNullable(rdsConfigRepository.findByNameInUser(name, user.getUserId()))
+        return Optional.ofNullable(rdsConfigRepository.findByNameInUser(name, user.getUserId()))
                 .orElseThrow(notFound("RDS configuration", name));
-        return rdsConfig;
     }
 
     public RDSConfig getPublicRdsConfig(String name, IdentityUser user) {
-        RDSConfig rdsConfig = Optional.ofNullable(rdsConfigRepository.findByNameBasedOnAccount(name, user.getAccount(), user.getUserId()))
+        return Optional.ofNullable(rdsConfigRepository.findByNameBasedOnAccount(name, user.getAccount(), user.getUserId()))
                 .orElseThrow(notFound("RDS configuration", name));
-        return rdsConfig;
     }
 
     public RDSConfig getByName(String name, IdentityUser user) {
-        RDSConfig rdsConfig = Optional.ofNullable(rdsConfigRepository.findOneByName(name, user.getAccount()))
+        return Optional.ofNullable(rdsConfigRepository.findOneByName(name, user.getAccount()))
                 .orElseThrow(notFound("RDS configuration", name));
-        authorizationService.hasReadPermission(rdsConfig);
-        return rdsConfig;
     }
 
     public Set<RDSConfig> retrieveAccountRdsConfigs(IdentityUser user) {
@@ -71,9 +68,7 @@ public class RdsConfigService {
     }
 
     public RDSConfig get(Long id) {
-        RDSConfig rdsConfig = rdsConfigRepository.findById(id).orElseThrow(notFound("RDS configuration", id));
-        authorizationService.hasReadPermission(rdsConfig);
-        return rdsConfig;
+        return rdsConfigRepository.findById(id).orElseThrow(notFound("RDS configuration", id));
     }
 
     public void delete(Long id, IdentityUser user) {
@@ -105,7 +100,7 @@ public class RdsConfigService {
     public RDSConfig createIfNotExists(IdentityUser user, RDSConfig rdsConfig) {
         try {
             return getPrivateRdsConfig(rdsConfig.getName(), user);
-        } catch (NotFoundException ignored) {
+        } catch (AccessDeniedException | NotFoundException ignored) {
             return create(user, rdsConfig);
         }
     }
@@ -127,7 +122,6 @@ public class RdsConfigService {
     }
 
     private void delete(RDSConfig rdsConfig) {
-        authorizationService.hasWritePermission(rdsConfig);
         checkRdsConfigNotAssociated(rdsConfig);
         if (ResourceStatus.USER_MANAGED.equals(rdsConfig.getStatus())) {
             rdsConfigRepository.delete(rdsConfig);
@@ -137,6 +131,7 @@ public class RdsConfigService {
     }
 
     private void checkRdsConfigNotAssociated(RDSConfig rdsConfig) {
+        LOGGER.info("Deleting rds configuration with name: {}", rdsConfig.getName());
         List<Cluster> clustersWithProvidedRds = new ArrayList<>(clusterRepository.findAllClustersByRDSConfig(rdsConfig.getId()));
         if (!clustersWithProvidedRds.isEmpty()) {
             if (clustersWithProvidedRds.size() > 1) {

@@ -4,7 +4,6 @@ import static com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole.ADMIN
 import static com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole.USER;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -24,7 +23,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
-import org.springframework.security.access.AccessDeniedException;
 
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
@@ -81,7 +79,6 @@ public class FileSystemConfigServiceTest {
     @Test
     public void testCreateWhenUserHasRightToCreateAndProvideValidFileSystemThenAnotherOneWithSameDataAndFilledIdShouldReturn() {
         FileSystem expected = createFileSystem();
-        doNothing().when(authService).hasWritePermission(expected);
         when(fileSystemRepository.save(expected)).thenAnswer((Answer<FileSystem>) this::setIdForCreatedFileSystemEntry);
 
         FileSystem actual = underTest.create(user, expected);
@@ -89,45 +86,16 @@ public class FileSystemConfigServiceTest {
         Assert.assertEquals(TEST_FILES_SYSTEM_ID, actual.getId());
         Assert.assertEquals(USER_ACCOUNT, actual.getAccount());
         Assert.assertEquals(USER_ID, actual.getOwner());
-        verify(authService, times(1)).hasWritePermission(expected);
         verify(fileSystemRepository, times(1)).save(expected);
-    }
-
-    @Test
-    public void testCreateWhenUserHasNoWriteAccessThenNothinWillCatchTheIncomingException() {
-        doThrow(new AccessDeniedException(TEST_ACCESS_DENIED_EXCEPTION_MESSAGE)).when(authService).hasWritePermission(fileSystem);
-
-        expectedException.expect(AccessDeniedException.class);
-        expectedException.expectMessage(TEST_ACCESS_DENIED_EXCEPTION_MESSAGE);
-
-        underTest.create(user, fileSystem);
-
-        verify(authService, times(1)).hasWritePermission(fileSystem);
     }
 
     @Test
     public void testGetPrivateFileSystemWhenUserHasRightToGetFileSystemThenItShouldReturn() {
         when(fileSystemRepository.findByNameAndOwner(TEST_FILE_SYSTEM_NAME, USER_ID)).thenReturn(fileSystem);
-        doNothing().when(authService).hasReadPermission(fileSystem);
 
         FileSystem actual = underTest.getPrivateFileSystem(TEST_FILE_SYSTEM_NAME, user);
 
         Assert.assertEquals(fileSystem, actual);
-        verify(authService, times(1)).hasReadPermission(fileSystem);
-        verify(fileSystemRepository, times(1)).findByNameAndOwner(TEST_FILE_SYSTEM_NAME, USER_ID);
-    }
-
-    @Test
-    public void testGetPrivateFileSystemWhenUserHasNoReadAccessThenNothinWillCatchTheIncomingException() {
-        when(fileSystemRepository.findByNameAndOwner(TEST_FILE_SYSTEM_NAME, USER_ID)).thenReturn(fileSystem);
-        doThrow(new AccessDeniedException(TEST_ACCESS_DENIED_EXCEPTION_MESSAGE)).when(authService).hasReadPermission(fileSystem);
-
-        expectedException.expect(AccessDeniedException.class);
-        expectedException.expectMessage(TEST_ACCESS_DENIED_EXCEPTION_MESSAGE);
-
-        underTest.getPrivateFileSystem(TEST_FILE_SYSTEM_NAME, user);
-
-        verify(authService, times(1)).hasReadPermission(fileSystem);
         verify(fileSystemRepository, times(1)).findByNameAndOwner(TEST_FILE_SYSTEM_NAME, USER_ID);
     }
 
@@ -184,14 +152,12 @@ public class FileSystemConfigServiceTest {
     @Test
     public void testDeleteByIdWhenUserHasRightToDeleteAndThereIsARecordWithIdThenDeleteOperationWouldBeCalled() {
         when(fileSystemRepository.findById(TEST_FILES_SYSTEM_ID)).thenReturn(Optional.of(fileSystem));
-        doNothing().when(authService).hasWritePermission(fileSystem);
-        doNothing().when(fileSystemRepository).delete(fileSystem);
+        doNothing().when(fileSystemRepository).deleteById(TEST_FILES_SYSTEM_ID);
 
         underTest.delete(TEST_FILES_SYSTEM_ID, user);
 
         verify(fileSystemRepository, times(1)).findById(TEST_FILES_SYSTEM_ID);
-        verify(authService, times(1)).hasWritePermission(fileSystem);
-        verify(fileSystemRepository, times(1)).delete(fileSystem);
+        verify(fileSystemRepository, times(1)).delete(any());
     }
 
     @Test
@@ -208,31 +174,14 @@ public class FileSystemConfigServiceTest {
     }
 
     @Test
-    public void testDeleteByIdWhenUserHasNoWriteAccessToDeleteThenAccessDeniedShouldComeAndNothingCatchesIt() {
-        when(fileSystemRepository.findById(TEST_FILES_SYSTEM_ID)).thenReturn(Optional.of(fileSystem));
-        doThrow(new AccessDeniedException(TEST_ACCESS_DENIED_EXCEPTION_MESSAGE)).when(authService).hasWritePermission(fileSystem);
-
-        expectedException.expect(AccessDeniedException.class);
-        expectedException.expectMessage(TEST_ACCESS_DENIED_EXCEPTION_MESSAGE);
-
-        underTest.delete(TEST_FILES_SYSTEM_ID, user);
-
-        verify(fileSystemRepository, times(1)).findById(TEST_FILES_SYSTEM_ID);
-        verify(authService, times(1)).hasWritePermission(fileSystem);
-        verify(fileSystemRepository, times(0)).delete(fileSystem);
-    }
-
-    @Test
     public void testDeleteByNameWhenUserHasRightToDeleteAndThereIsARecordWithNameThenDeleteOperationWouldBeCalled() {
         when(fileSystemRepository.findByNameAndAccountAndOwner(TEST_FILE_SYSTEM_NAME, USER_ACCOUNT, USER_ID)).thenReturn(fileSystem);
-        doNothing().when(authService).hasWritePermission(fileSystem);
-        doNothing().when(fileSystemRepository).delete(fileSystem);
+        doNothing().when(fileSystemRepository).deleteById(TEST_FILES_SYSTEM_ID);
 
         underTest.delete(TEST_FILE_SYSTEM_NAME, user);
 
         verify(fileSystemRepository, times(1)).findByNameAndAccountAndOwner(TEST_FILE_SYSTEM_NAME, USER_ACCOUNT, USER_ID);
-        verify(authService, times(1)).hasWritePermission(fileSystem);
-        verify(fileSystemRepository, times(1)).delete(fileSystem);
+        verify(fileSystemRepository, times(1)).delete(any());
     }
 
     @Test
@@ -245,21 +194,6 @@ public class FileSystemConfigServiceTest {
         underTest.delete(TEST_FILE_SYSTEM_NAME, user);
 
         verify(fileSystemRepository, times(1)).findByNameAndAccountAndOwner(TEST_FILE_SYSTEM_NAME, USER_ACCOUNT, USER_ID);
-        verify(fileSystemRepository, times(0)).delete(any(FileSystem.class));
-    }
-
-    @Test
-    public void testDeleteByNameWhenUserHasNoWriteAccessToDeleteThenAccessDeniedShouldComeAndNothingCatchesIt() {
-        when(fileSystemRepository.findByNameAndAccountAndOwner(TEST_FILE_SYSTEM_NAME, USER_ACCOUNT, USER_ID)).thenReturn(fileSystem);
-        doThrow(new AccessDeniedException(TEST_ACCESS_DENIED_EXCEPTION_MESSAGE)).when(authService).hasWritePermission(fileSystem);
-
-        expectedException.expect(AccessDeniedException.class);
-        expectedException.expectMessage(TEST_ACCESS_DENIED_EXCEPTION_MESSAGE);
-
-        underTest.delete(TEST_FILE_SYSTEM_NAME, user);
-
-        verify(fileSystemRepository, times(1)).findById(TEST_FILES_SYSTEM_ID);
-        verify(authService, times(1)).hasWritePermission(fileSystem);
         verify(fileSystemRepository, times(0)).delete(any(FileSystem.class));
     }
 

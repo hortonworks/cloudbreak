@@ -52,14 +52,14 @@ import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
-import com.sequenceiq.cloudbreak.repository.StackUpdater;
+import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.notification.Notification;
 import com.sequenceiq.cloudbreak.service.notification.NotificationSender;
-import com.sequenceiq.cloudbreak.service.stack.InstanceMetadataService;
+import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.connector.OperationException;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderConnectorAdapter;
@@ -99,7 +99,7 @@ public class StackCreationService {
     private InstanceGroupRepository instanceGroupRepository;
 
     @Inject
-    private InstanceMetadataService instanceMetadataService;
+    private InstanceMetaDataService instanceMetaDataService;
 
     @Inject
     private MetadataSetupService metadatSetupService;
@@ -132,7 +132,7 @@ public class StackCreationService {
         Stack stack = context.getStack();
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.CREATING_INFRASTRUCTURE, "Creating infrastructure");
         flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_PROVISIONING, CREATE_IN_PROGRESS.name());
-        instanceMetadataService.saveInstanceRequests(stack, context.getCloudStack().getGroups());
+        instanceMetaDataService.saveInstanceRequests(stack, context.getCloudStack().getGroups());
     }
 
     public Stack provisioningFinished(StackContext context, LaunchStackResult result, Map<Object, Object> variables) {
@@ -296,7 +296,7 @@ public class StackCreationService {
             Long privateId = status.getPrivateId();
             if (privateId != null && status.isFailed() && !failedResources.containsKey(privateId) && groupPrivateIds.contains(privateId)) {
                 failedResources.put(privateId, status);
-                instanceMetadataService.deleteInstanceRequest(stackId, privateId);
+                instanceMetaDataService.deleteInstanceRequest(stackId, privateId);
             }
         }
         return new ArrayList<>(failedResources.values());

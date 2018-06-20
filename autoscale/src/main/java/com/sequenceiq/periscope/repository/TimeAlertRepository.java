@@ -1,22 +1,24 @@
 package com.sequenceiq.periscope.repository;
 
 import java.util.List;
-import java.util.Optional;
 
-import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
-import org.springframework.security.access.prepost.PostAuthorize;
 
+import com.sequenceiq.cloudbreak.aspect.BaseRepository;
+import com.sequenceiq.cloudbreak.aspect.ConditionType;
+import com.sequenceiq.cloudbreak.aspect.HasPermission;
+import com.sequenceiq.cloudbreak.aspect.PermissionType;
+import com.sequenceiq.cloudbreak.service.EntityType;
 import com.sequenceiq.periscope.domain.TimeAlert;
 
-public interface TimeAlertRepository extends CrudRepository<TimeAlert, Long> {
+@HasPermission
+@EntityType(entityClass = TimeAlert.class)
+public interface TimeAlertRepository extends BaseRepository<TimeAlert, Long> {
 
-    @Override
-    @PostAuthorize("hasPermission(returnObject,'read')")
-    Optional<TimeAlert> findById(@Param("id") Long id);
-
-    @PostAuthorize("hasPermission(returnObject,'read')")
     TimeAlert findByCluster(@Param("alertId") Long alertId, @Param("clusterId") Long clusterId);
 
     List<TimeAlert> findAllByCluster(@Param("clusterId") Long clusterId);
+
+    @HasPermission(condition = ConditionType.PRE, targetIndex = 0, permission = PermissionType.WRITE)
+    void delete(Long id);
 }

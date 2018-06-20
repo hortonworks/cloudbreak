@@ -1,9 +1,9 @@
 package com.sequenceiq.cloudbreak.controller;
 
-import javax.transaction.Transactional;
-import javax.transaction.Transactional.TxType;
 import java.util.Optional;
 
+import javax.transaction.Transactional;
+import javax.transaction.Transactional.TxType;
 import javax.ws.rs.core.Response;
 
 import org.slf4j.Logger;
@@ -16,20 +16,20 @@ import org.springframework.stereotype.Controller;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.ClusterV1Endpoint;
 import com.sequenceiq.cloudbreak.api.model.AmbariRepoDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.AutoscaleClusterResponse;
-import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRepairRequest;
-import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRequest;
-import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterResponse;
 import com.sequenceiq.cloudbreak.api.model.ConfigsRequest;
 import com.sequenceiq.cloudbreak.api.model.ConfigsResponse;
 import com.sequenceiq.cloudbreak.api.model.FailureReport;
 import com.sequenceiq.cloudbreak.api.model.UpdateClusterJson;
+import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRepairRequest;
+import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRequest;
+import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.GatewayJson;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.UpdateGatewayTopologiesJson;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.StackInputs;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.ClusterCommonService;
@@ -88,7 +88,7 @@ public class ClusterV1Controller implements ClusterV1Endpoint {
 
     @Override
     public ClusterResponse get(Long stackId) {
-        Stack stack = stackService.get(stackId);
+        Stack stack = stackService.getById(stackId);
         ClusterResponse cluster = clusterService.retrieveClusterForCurrentUser(stackId, ClusterResponse.class);
         String clusterJson = clusterService.getClusterJson(stack.getAmbariIp(), stackId);
         return clusterService.getClusterResponse(cluster, clusterJson);
@@ -122,7 +122,7 @@ public class ClusterV1Controller implements ClusterV1Endpoint {
 
     @Override
     public void delete(Long stackId, Boolean withStackDelete, Boolean deleteDependencies) {
-        Stack stack = stackService.get(stackId);
+        Stack stack = stackService.getById(stackId);
         MDCBuilder.buildMdcContext(stack);
         clusterService.delete(stackId, withStackDelete, deleteDependencies);
     }
@@ -139,7 +139,7 @@ public class ClusterV1Controller implements ClusterV1Endpoint {
 
     @Override
     public Response upgradeCluster(Long stackId, AmbariRepoDetailsJson ambariRepoDetails) {
-        Stack stack = stackService.get(stackId);
+        Stack stack = stackService.getById(stackId);
         MDCBuilder.buildMdcContext(stack);
         AmbariRepo ambariRepo = conversionService.convert(ambariRepoDetails, AmbariRepo.class);
         try {

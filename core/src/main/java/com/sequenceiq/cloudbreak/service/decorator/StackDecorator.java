@@ -226,7 +226,7 @@ public class StackDecorator {
 
     private void prepareNetwork(Stack subject, Object networkId) {
         if (networkId != null) {
-            subject.setNetwork(networkService.getById((Long) networkId));
+            subject.setNetwork(networkService.get((Long) networkId));
             if (subject.getOrchestrator() != null && (subject.getOrchestrator().getApiEndpoint() != null || subject.getOrchestrator().getType() == null)) {
                 throw new BadRequestException("Orchestrator cannot be configured for the stack!");
             }
@@ -348,7 +348,7 @@ public class StackDecorator {
 
     private void prepareFlexSubscription(Stack subject, Long flexId) {
         if (flexId != null) {
-            FlexSubscription flexSubscription = flexSubscriptionService.findOneById(flexId);
+            FlexSubscription flexSubscription = flexSubscriptionService.get(flexId);
             subject.setFlexSubscription(flexSubscription);
         }
     }

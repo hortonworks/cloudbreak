@@ -56,7 +56,7 @@ public class AmbariClusterHostServiceTypeTest {
 
     @InjectMocks
     @Spy
-    private final AmbariClusterService underTest = new AmbariClusterService();
+    private final ClusterService underTest = new ClusterService();
 
     @Mock
     private StackService stackService;
@@ -97,7 +97,7 @@ public class AmbariClusterHostServiceTypeTest {
         stack = TestUtil.stack();
         cluster = TestUtil.cluster(TestUtil.blueprint(), stack, 1L);
         stack.setCluster(cluster);
-        when(stackService.get(anyLong())).thenReturn(stack);
+        when(stackService.getById(anyLong())).thenReturn(stack);
         when(stackService.getByIdWithLists(anyLong())).thenReturn(stack);
         given(tlsSecurityService.buildTLSClientConfigForPrimaryGateway(anyLong(), anyString())).willReturn(new HttpClientConfig("", "", "/tmp", "/tmp"));
     }

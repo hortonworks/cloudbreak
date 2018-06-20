@@ -41,7 +41,7 @@ public class ScalingHandler implements ApplicationListener<ScalingEvent> {
     @Override
     public void onApplicationEvent(ScalingEvent event) {
         BaseAlert alert = event.getAlert();
-        Cluster cluster = clusterService.find(alert.getCluster().getId());
+        Cluster cluster = clusterService.findById(alert.getCluster().getId());
         MDCBuilder.buildMdcContext(cluster);
         scale(cluster, alert.getScalingPolicy());
     }

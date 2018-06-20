@@ -146,7 +146,7 @@ public class SharedServiceConfigProviderTest {
 
         when(connectedClusterRequest.getSourceClusterName()).thenReturn(null);
         when(connectedClusterRequest.getSourceClusterId()).thenReturn(TEST_LONG_VALUE);
-        when(stackService.get(TEST_LONG_VALUE)).thenReturn(publicStack);
+        when(stackService.getById(TEST_LONG_VALUE)).thenReturn(publicStack);
         when(publicStack.getId()).thenReturn(TEST_LONG_VALUE);
         when(clusterService.getById(TEST_LONG_VALUE)).thenReturn(sourceCluster);
         when(publicStackCluster.getId()).thenReturn(TEST_LONG_VALUE);
@@ -161,7 +161,7 @@ public class SharedServiceConfigProviderTest {
 
         Assert.assertEquals(ldapConfig, result.getLdapConfig());
         Assert.assertTrue(result.getRdsConfigs().isEmpty());
-        verify(stackService, times(1)).get(TEST_LONG_VALUE);
+        verify(stackService, times(1)).getById(TEST_LONG_VALUE);
         verify(stackService, times(0)).getPublicStack(anyString(), any(IdentityUser.class));
     }
 
@@ -187,7 +187,7 @@ public class SharedServiceConfigProviderTest {
 
         Assert.assertEquals(ldapConfig, result.getLdapConfig());
         Assert.assertTrue(result.getRdsConfigs().isEmpty());
-        verify(stackService, times(0)).get(TEST_LONG_VALUE);
+        verify(stackService, times(0)).getById(TEST_LONG_VALUE);
         verify(stackService, times(1)).getPublicStack(clusterName, user);
     }
 
@@ -199,7 +199,7 @@ public class SharedServiceConfigProviderTest {
 
         when(connectedClusterRequest.getSourceClusterName()).thenReturn(null);
         when(connectedClusterRequest.getSourceClusterId()).thenReturn(TEST_LONG_VALUE);
-        when(stackService.get(TEST_LONG_VALUE)).thenReturn(publicStack);
+        when(stackService.getById(TEST_LONG_VALUE)).thenReturn(publicStack);
         when(publicStack.getId()).thenReturn(TEST_LONG_VALUE);
         when(publicStackCluster.getId()).thenReturn(TEST_LONG_VALUE);
         when(publicStack.getCluster()).thenReturn(publicStackCluster);
@@ -223,7 +223,7 @@ public class SharedServiceConfigProviderTest {
 
         when(connectedClusterRequest.getSourceClusterName()).thenReturn(null);
         when(connectedClusterRequest.getSourceClusterId()).thenReturn(TEST_LONG_VALUE);
-        when(stackService.get(TEST_LONG_VALUE)).thenReturn(publicStack);
+        when(stackService.getById(TEST_LONG_VALUE)).thenReturn(publicStack);
         when(publicStack.getId()).thenReturn(TEST_LONG_VALUE);
         when(publicStackCluster.getId()).thenReturn(TEST_LONG_VALUE);
         when(publicStack.getCluster()).thenReturn(publicStackCluster);
@@ -237,7 +237,7 @@ public class SharedServiceConfigProviderTest {
         underTest.configureCluster(requestedCluster, user, connectedClusterRequest);
 
         verify(clusterService, times(1)).getById(TEST_LONG_VALUE);
-        verify(stackService, times(1)).get(TEST_LONG_VALUE);    }
+        verify(stackService, times(1)).getById(TEST_LONG_VALUE);    }
 
     @Test
     public void testConfigureClusterWhenBlueprintAttributesisNotNullButItsValueIsNullThenBlueprintParameterJsonsShouldBeEmpty() throws IOException {
@@ -246,7 +246,7 @@ public class SharedServiceConfigProviderTest {
 
         when(connectedClusterRequest.getSourceClusterName()).thenReturn(null);
         when(connectedClusterRequest.getSourceClusterId()).thenReturn(TEST_LONG_VALUE);
-        when(stackService.get(TEST_LONG_VALUE)).thenReturn(publicStack);
+        when(stackService.getById(TEST_LONG_VALUE)).thenReturn(publicStack);
         when(publicStack.getId()).thenReturn(TEST_LONG_VALUE);
         when(publicStackCluster.getId()).thenReturn(TEST_LONG_VALUE);
         when(publicStack.getCluster()).thenReturn(publicStackCluster);
@@ -261,7 +261,7 @@ public class SharedServiceConfigProviderTest {
         underTest.configureCluster(requestedCluster, user, connectedClusterRequest);
 
         verify(clusterService, times(1)).getById(TEST_LONG_VALUE);
-        verify(stackService, times(1)).get(TEST_LONG_VALUE);
+        verify(stackService, times(1)).getById(TEST_LONG_VALUE);
     }
 
     @Test
@@ -271,7 +271,7 @@ public class SharedServiceConfigProviderTest {
 
         when(connectedClusterRequest.getSourceClusterName()).thenReturn(null);
         when(connectedClusterRequest.getSourceClusterId()).thenReturn(TEST_LONG_VALUE);
-        when(stackService.get(TEST_LONG_VALUE)).thenReturn(publicStack);
+        when(stackService.getById(TEST_LONG_VALUE)).thenReturn(publicStack);
         when(publicStack.getId()).thenReturn(TEST_LONG_VALUE);
         when(publicStackCluster.getId()).thenReturn(TEST_LONG_VALUE);
         when(publicStack.getCluster()).thenReturn(publicStackCluster);
@@ -286,7 +286,7 @@ public class SharedServiceConfigProviderTest {
         underTest.configureCluster(requestedCluster, user, connectedClusterRequest);
 
         verify(clusterService, times(1)).getById(TEST_LONG_VALUE);
-        verify(stackService, times(1)).get(TEST_LONG_VALUE);    }
+        verify(stackService, times(1)).getById(TEST_LONG_VALUE);    }
 
     @Test
     public void testConfigureClusterWhenBlueprintAttributesisNotNullAndItsValueIsNotEmptyThenBlueprintParameterJsonsShouldNotBeEmpty() throws IOException {
@@ -297,7 +297,7 @@ public class SharedServiceConfigProviderTest {
 
         when(connectedClusterRequest.getSourceClusterName()).thenReturn(null);
         when(connectedClusterRequest.getSourceClusterId()).thenReturn(TEST_LONG_VALUE);
-        when(stackService.get(TEST_LONG_VALUE)).thenReturn(publicStack);
+        when(stackService.getById(TEST_LONG_VALUE)).thenReturn(publicStack);
         when(publicStack.getId()).thenReturn(TEST_LONG_VALUE);
         when(publicStackCluster.getId()).thenReturn(TEST_LONG_VALUE);
         when(publicStack.getCluster()).thenReturn(publicStackCluster);

@@ -3,12 +3,14 @@ package com.sequenceiq.cloudbreak.repository;
 
 import javax.transaction.Transactional;
 
-import org.springframework.data.repository.CrudRepository;
-
+import com.sequenceiq.cloudbreak.aspect.DisabledBaseRepository;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
+import com.sequenceiq.cloudbreak.aspect.DisablePermission;
+import com.sequenceiq.cloudbreak.service.EntityType;
 
 @EntityType(entityClass = Orchestrator.class)
 @Transactional(Transactional.TxType.REQUIRED)
-public interface OrchestratorRepository extends CrudRepository<Orchestrator, Long> {
+@DisablePermission
+public interface OrchestratorRepository extends DisabledBaseRepository<Orchestrator, Long> {
 
 }

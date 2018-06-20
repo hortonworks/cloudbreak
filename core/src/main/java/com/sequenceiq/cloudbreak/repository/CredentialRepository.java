@@ -6,15 +6,18 @@ import java.util.Set;
 import javax.transaction.Transactional;
 
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
+import com.sequenceiq.cloudbreak.aspect.BaseRepository;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.Topology;
+import com.sequenceiq.cloudbreak.aspect.HasPermission;
+import com.sequenceiq.cloudbreak.service.EntityType;
 
 @EntityType(entityClass = Credential.class)
 @Transactional(Transactional.TxType.REQUIRED)
-public interface CredentialRepository extends CrudRepository<Credential, Long> {
+@HasPermission
+public interface CredentialRepository extends BaseRepository<Credential, Long> {
 
     Set<Credential> findAllByCloudPlatform(@Param("cloudPlatform") String cloudPlatform);
 

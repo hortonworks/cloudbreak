@@ -51,7 +51,7 @@ public class MetricEvaluator extends AbstractEventPublisher implements Evaluator
 
     @Override
     public void run() {
-        Cluster cluster = clusterService.find(clusterId);
+        Cluster cluster = clusterService.findById(clusterId);
         MDCBuilder.buildMdcContext(cluster);
         AmbariClient ambariClient = ambariClientProvider.createAmbariClient(cluster);
         try {
