@@ -28,7 +28,7 @@ public class SimpleAccountPreferencesServiceTest {
     private static final String OPENSTACK = "OPENSTACK";
 
     @InjectMocks
-    private final SimpleAccountPreferencesService underTest = new SimpleAccountPreferencesService();
+    private final AccountPreferencesService underTest = new AccountPreferencesService();
 
     @Spy
     private final List<CloudConstant> cloudConstants = new ArrayList<>();
@@ -44,7 +44,7 @@ public class SimpleAccountPreferencesServiceTest {
 
     @Test
     public void testEnabledPlatformsWhenEnabledPlatformsIsEmpty() {
-        ReflectionTestUtils.setField(underTest, SimpleAccountPreferencesService.class, "enabledPlatforms", "", null);
+        ReflectionTestUtils.setField(underTest, AccountPreferencesService.class, "enabledPlatforms", "", null);
         Set<String> actual = underTest.enabledPlatforms();
 
         assertThat(actual, containsInAnyOrder(AWS, OPENSTACK));
@@ -52,7 +52,7 @@ public class SimpleAccountPreferencesServiceTest {
 
     @Test
     public void testEnabledPlatformsWhenEnabledPlatformsIsNotEmpty() {
-        ReflectionTestUtils.setField(underTest, SimpleAccountPreferencesService.class, "enabledPlatforms", "AWS,PL1,PL2", null);
+        ReflectionTestUtils.setField(underTest, AccountPreferencesService.class, "enabledPlatforms", "AWS,PL1,PL2", null);
         Set<String> actual = underTest.enabledPlatforms();
 
         assertThat(actual, containsInAnyOrder(AWS, "PL1", "PL2"));

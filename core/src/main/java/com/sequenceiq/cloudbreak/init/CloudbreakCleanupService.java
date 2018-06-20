@@ -37,8 +37,7 @@ import com.sequenceiq.cloudbreak.ha.CloudbreakNodeConfig;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.FlowLogRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
-import com.sequenceiq.cloudbreak.repository.StackRepository;
-import com.sequenceiq.cloudbreak.repository.StackUpdater;
+import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.credential.CredentialMigrationService;
@@ -46,6 +45,7 @@ import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.flowlog.FlowLogService;
 import com.sequenceiq.cloudbreak.service.ha.HeartbeatService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.AmbariDatabaseToRdsConfigMigrationService;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.usages.UsageService;
 
 @Component
@@ -57,7 +57,7 @@ public class CloudbreakCleanupService implements ApplicationListener<ContextRefr
     private CloudbreakNodeConfig cloudbreakNodeConfig;
 
     @Inject
-    private StackRepository stackRepository;
+    private StackService stackService;
 
     @Inject
     private StackUpdater stackUpdater;
@@ -118,7 +118,7 @@ public class CloudbreakCleanupService implements ApplicationListener<ContextRefr
     }
 
     private List<Stack> resetStackStatus(Collection<Long> excludeStackIds) {
-        return stackRepository.findByStatuses(Arrays.asList(UPDATE_REQUESTED, UPDATE_IN_PROGRESS, WAIT_FOR_SYNC, START_IN_PROGRESS, STOP_IN_PROGRESS))
+        return stackService.getByStatuses(Arrays.asList(UPDATE_REQUESTED, UPDATE_IN_PROGRESS, WAIT_FOR_SYNC, START_IN_PROGRESS, STOP_IN_PROGRESS))
                 .stream().filter(s -> !excludeStackIds.contains(s.getId()) || WAIT_FOR_SYNC.equals(s.getStatus()))
                 .peek(s -> {
                     if (!WAIT_FOR_SYNC.equals(s.getStatus())) {

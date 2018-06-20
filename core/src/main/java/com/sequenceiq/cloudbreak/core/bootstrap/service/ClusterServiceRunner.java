@@ -27,12 +27,12 @@ import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.orchestrator.container.DockerContainer;
-import com.sequenceiq.cloudbreak.repository.StackUpdater;
+import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
-import com.sequenceiq.cloudbreak.service.stack.InstanceMetadataService;
+import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @Component
@@ -52,7 +52,7 @@ public class ClusterServiceRunner {
     private OrchestratorTypeResolver orchestratorTypeResolver;
 
     @Inject
-    private InstanceMetadataService instanceMetadataService;
+    private InstanceMetaDataService instanceMetaDataService;
 
     @Inject
     private TlsSecurityService tlsSecurityService;
@@ -132,7 +132,7 @@ public class ClusterServiceRunner {
         Map<InstanceGroupType, InstanceStatus> newStatusByGroupType = new EnumMap<>(InstanceGroupType.class);
         newStatusByGroupType.put(InstanceGroupType.GATEWAY, InstanceStatus.REGISTERED);
         newStatusByGroupType.put(InstanceGroupType.CORE, InstanceStatus.UNREGISTERED);
-        instanceMetadataService.updateInstanceStatus(stack.getInstanceGroups(), newStatusByGroupType);
+        instanceMetaDataService.updateInstanceStatus(stack.getInstanceGroups(), newStatusByGroupType);
         return tlsSecurityService.buildTLSClientConfigForPrimaryGateway(stack.getId(), gatewayPublicIp);
     }
 }

@@ -17,7 +17,6 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.ProxyConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
@@ -39,49 +38,38 @@ public class ProxyConfigService {
     private AuthorizationService authorizationService;
 
     public Set<ProxyConfig> retrievePrivateProxyConfigs(IdentityUser user) {
-        Set<ProxyConfig> proxyConfigs = proxyConfigRepository.findAllByOwner(user.getUserId());
-        authorizationService.hasReadPermission(proxyConfigs);
-        return proxyConfigs;
+        return proxyConfigRepository.findAllByOwner(user.getUserId());
     }
 
     public ProxyConfig getPrivateProxyConfig(String name, IdentityUser user) {
-        ProxyConfig proxyConfig = Optional.ofNullable(proxyConfigRepository.findByNameAndOwner(name, user.getUserId()))
+        return Optional.ofNullable(proxyConfigRepository.findByNameAndOwner(name, user.getUserId()))
                 .orElseThrow(notFound("Proxy configuration", name));
-        authorizationService.hasReadPermission(proxyConfig);
-        return proxyConfig;
     }
 
     public ProxyConfig getPublicProxyConfig(String name, IdentityUser user) {
-        ProxyConfig proxyConfig = Optional.ofNullable(proxyConfigRepository.findByNameAndAccount(name, user.getAccount()))
+        return Optional.ofNullable(proxyConfigRepository.findByNameAndAccount(name, user.getAccount()))
                 .orElseThrow(notFound("Proxy configuration", name));
-        authorizationService.hasReadPermission(proxyConfig);
-        return proxyConfig;
     }
 
     public Set<ProxyConfig> retrieveAccountProxyConfigs(IdentityUser user) {
         Set<ProxyConfig> proxyConfigs = user.getRoles().contains(IdentityUserRole.ADMIN) ? proxyConfigRepository.findAllByAccount(user.getAccount())
                 : proxyConfigRepository.findPublicInAccountForUser(user.getUserId(), user.getAccount());
-        authorizationService.hasReadPermission(proxyConfigs);
         return proxyConfigs;
     }
 
     public ProxyConfig get(Long id) {
-        ProxyConfig proxyConfig = proxyConfigRepository.findById(id).orElseThrow(notFound("Proxy configuration", id));
-        authorizationService.hasReadPermission(proxyConfig);
-        return proxyConfig;
+        return proxyConfigRepository.findById(id).orElseThrow(notFound("Proxy configuration", id));
     }
 
     public void delete(Long id, IdentityUser user) {
         ProxyConfig proxyConfig = Optional.ofNullable(proxyConfigRepository.findByIdAndAccount(id, user.getAccount()))
                 .orElseThrow(notFound("Proxy configuration", id));
-        authorizationService.hasWritePermission(proxyConfig);
         delete(proxyConfig);
     }
 
     public void delete(String name, IdentityUser user) {
         ProxyConfig proxyConfig = Optional.ofNullable(proxyConfigRepository.findByNameBasedOnAccount(name, user.getAccount(), user.getUserId()))
                 .orElseThrow(notFound("Proxy configuration", name));
-        authorizationService.hasWritePermission(proxyConfig);
         delete(proxyConfig);
     }
 
@@ -92,16 +80,8 @@ public class ProxyConfigService {
         return proxyConfigRepository.save(proxyConfig);
     }
 
-    public ProxyConfig createIfNotExists(IdentityUser user, ProxyConfig proxyConfig) {
-        try {
-            return getPrivateProxyConfig(proxyConfig.getName(), user);
-        } catch (NotFoundException ignored) {
-            return create(user, proxyConfig);
-        }
-    }
-
     private void delete(ProxyConfig proxyConfig) {
-        authorizationService.hasWritePermission(proxyConfig);
+        LOGGER.info("Deleting proxy configuration with name: {}", proxyConfig.getName());
         List<Cluster> clustersWithThisProxy = new ArrayList<>(clusterRepository.findByProxyConfig(proxyConfig));
         if (!clustersWithThisProxy.isEmpty()) {
             if (clustersWithThisProxy.size() > 1) {

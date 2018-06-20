@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.converter.stack;
 
+import static com.sequenceiq.cloudbreak.converter.util.ExceptionMessageFormatterUtil.formatAccessDeniedMessage;
+
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -9,14 +11,13 @@ import javax.inject.Inject;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupRequest;
-import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupRequest;
 import com.sequenceiq.cloudbreak.api.model.NetworkRequest;
 import com.sequenceiq.cloudbreak.api.model.SpecialParameters;
 import com.sequenceiq.cloudbreak.api.model.stack.StackValidationRequest;
+import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupRequest;
+import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupRequest;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
@@ -24,10 +25,10 @@ import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConvert
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Constraint;
 import com.sequenceiq.cloudbreak.domain.Credential;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.stack.StackValidation;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.network.NetworkService;
@@ -58,24 +59,18 @@ public class StackValidationRequestToStackValidationConverter extends AbstractCo
         Set<InstanceGroup> instanceGroups = convertInstanceGroups(stackValidationRequest.getInstanceGroups());
         stackValidation.setInstanceGroups(instanceGroups);
         stackValidation.setHostGroups(convertHostGroupsFromJson(instanceGroups, stackValidationRequest.getHostGroups()));
-        try {
-            validateBlueprint(stackValidationRequest, stackValidation);
-        } catch (AccessDeniedException e) {
-            throw new AccessDeniedException(
-                    String.format("Access to validation '%s' is denied or validation doesn't exist.", stackValidationRequest.getBlueprintId()), e);
-        }
-        try {
-            validateCredential(stackValidationRequest, stackValidation);
-        } catch (AccessDeniedException e) {
-            throw new AccessDeniedException(
-                    String.format("Access to credential '%s' is denied or credential doesn't exist.", stackValidationRequest.getCredentialId()), e);
-        }
-        try {
-            validateNetwork(stackValidationRequest.getNetworkId(), stackValidationRequest.getNetwork(), stackValidation);
-        } catch (AccessDeniedException e) {
-            throw new AccessDeniedException(
-                    String.format("Access to network '%s' is denied or network doesn't exist.", stackValidationRequest.getNetworkId()), e);
-        }
+
+        formatAccessDeniedMessage(
+                () -> validateBlueprint(stackValidationRequest, stackValidation), "blueprint", stackValidationRequest.getBlueprintId()
+        );
+        formatAccessDeniedMessage(
+                () -> validateCredential(stackValidationRequest, stackValidation), "credential", stackValidationRequest.getCredentialId()
+        );
+        formatAccessDeniedMessage(
+                () -> validateNetwork(stackValidationRequest.getNetworkId(), stackValidationRequest.getNetwork(), stackValidation),
+                "network",
+                stackValidationRequest.getNetworkId()
+        );
         return stackValidation;
     }
 

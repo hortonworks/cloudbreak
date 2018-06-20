@@ -36,7 +36,7 @@ public class HttpNotificationSender {
         n.setEventType("PERISCOPE_HISTORY");
         n.setHistoryRecord(history);
         n.setEventTimestamp(new Date());
-        n.setOwner(history.getUserId());
+        n.setOwner(history.getUser());
         return n;
     }
 

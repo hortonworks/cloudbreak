@@ -4,13 +4,15 @@ import java.util.List;
 
 import javax.transaction.Transactional;
 
-import org.springframework.data.repository.CrudRepository;
-
+import com.sequenceiq.cloudbreak.aspect.DisabledBaseRepository;
 import com.sequenceiq.cloudbreak.domain.Subscription;
+import com.sequenceiq.cloudbreak.aspect.DisablePermission;
+import com.sequenceiq.cloudbreak.service.EntityType;
 
 @EntityType(entityClass = Subscription.class)
 @Transactional(Transactional.TxType.REQUIRED)
-public interface SubscriptionRepository extends CrudRepository<Subscription, Long> {
+@DisablePermission
+public interface SubscriptionRepository extends DisabledBaseRepository<Subscription, Long> {
 
     List<Subscription> findByClientIdAndEndpoint(String clientId, String endpoint);
 }

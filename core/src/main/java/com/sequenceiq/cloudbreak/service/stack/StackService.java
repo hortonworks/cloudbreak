@@ -31,11 +31,13 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.model.AutoscaleStackResponse;
 import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
+import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.api.model.StatusRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
+import com.sequenceiq.cloudbreak.aspect.PermissionType;
 import com.sequenceiq.cloudbreak.blueprint.validation.BlueprintValidator;
 import com.sequenceiq.cloudbreak.cloud.model.CloudbreakDetails;
 import com.sequenceiq.cloudbreak.cloud.model.StackTemplate;
@@ -51,6 +53,9 @@ import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ContainerOrchestratorResolver;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.Credential;
+import com.sequenceiq.cloudbreak.domain.FlexSubscription;
+import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.StopRestrictionReason;
@@ -75,15 +80,16 @@ import com.sequenceiq.cloudbreak.repository.OrchestratorRepository;
 import com.sequenceiq.cloudbreak.repository.SecurityConfigRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.repository.StackStatusRepository;
-import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackViewRepository;
 import com.sequenceiq.cloudbreak.service.AuthorizationService;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
+import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
-import com.sequenceiq.cloudbreak.service.cluster.AmbariClusterService;
+import com.sequenceiq.cloudbreak.service.TransactionService.TransactionRuntimeExecutionException;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.credential.OpenSshPublicKeyValidator;
 import com.sequenceiq.cloudbreak.service.decorator.StackResponseDecorator;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
@@ -120,7 +126,7 @@ public class StackService {
     private ImageService imageService;
 
     @Inject
-    private AmbariClusterService ambariClusterService;
+    private ClusterService ambariClusterService;
 
     @Inject
     private ClusterRepository clusterRepository;
@@ -203,7 +209,7 @@ public class StackService {
                     ? convertStacks(stackRepository.findAllInAccountWithLists(user.getAccount()))
                     : convertStacks(stackRepository.findPublicInAccountForUser(user.getUserId(), user.getAccount())));
         } catch (TransactionExecutionException e) {
-            throw new TransactionService.TransactionRuntimeExecutionException(e);
+            throw new TransactionRuntimeExecutionException(e);
         }
     }
 
@@ -219,7 +225,6 @@ public class StackService {
         try {
             return transactionService.required(() -> {
                 Stack stack = getByIdWithLists(id);
-                authorizationService.hasReadPermission(stack);
                 StackResponse stackResponse = conversionService.convert(stack, StackResponse.class);
                 stackResponse = stackResponseDecorator.decorate(stackResponse, stack, entry);
                 return stackResponse;
@@ -233,7 +238,6 @@ public class StackService {
         try {
             return transactionService.required(() -> {
                 Stack stack = stackRepository.findById(id).orElseThrow(notFound("Stack", id));
-                authorizationService.hasReadPermission(stack);
                 return stack;
             });
         } catch (TransactionExecutionException e) {
@@ -243,13 +247,19 @@ public class StackService {
 
     @PreAuthorize("#oauth2.hasScope('cloudbreak.autoscale')")
     public Stack getForAutoscale(Long id) {
-        return stackRepository.findById(id).orElseThrow(notFound("Stack", id));
+        return getById(id);
     }
 
     @PreAuthorize("#oauth2.hasScope('cloudbreak.autoscale')")
     public Set<AutoscaleStackResponse> getAllForAutoscale() {
-        Set<Stack> aliveOnes = stackRepository.findAliveOnes();
-        return convertStacksForAutoscale(aliveOnes);
+        try {
+            return transactionService.required(() -> {
+                Set<Stack> aliveOnes = stackRepository.findAliveOnes();
+                return convertStacksForAutoscale(aliveOnes);
+            });
+        } catch (TransactionExecutionException e) {
+            throw new TransactionRuntimeExecutionException(e);
+        }
     }
 
     public Set<Stack> findClustersConnectedToDatalake(Long stackId) {
@@ -276,41 +286,28 @@ public class StackService {
         return stackStatusRepository.findFirstByStackIdOrderByCreatedDesc(stackId);
     }
 
-    public StackResponse get(String ambariAddress) {
+    public StackResponse getByAmbariAddress(String ambariAddress) {
         try {
-            return transactionService.required(() -> {
-                Stack stack = stackRepository.findByAmbari(ambariAddress);
-                if (stack == null) {
-                    throw new NotFoundException(String.format("Stack not found by Ambari address: '%s' not found", ambariAddress));
-                }
-                return conversionService.convert(stack, StackResponse.class);
-            });
+            return transactionService.required(() -> conversionService.convert(stackRepository.findByAmbari(ambariAddress), StackResponse.class));
         } catch (TransactionExecutionException e) {
-            throw new TransactionService.TransactionRuntimeExecutionException(e);
+            throw new TransactionRuntimeExecutionException(e);
         }
     }
 
     public Stack getPrivateStack(String name, IdentityUser identityUser) {
-        Stack stack = stackRepository.findByNameInUser(name, identityUser.getUserId());
-        if (stack == null) {
-            throw new NotFoundException(String.format(STACK_NOT_FOUND_EXCEPTION_FORMAT_TEXT, name));
-        }
-        return stack;
+        return stackRepository.findByNameInUser(name, identityUser.getUserId());
     }
 
     public StackResponse getPrivateStackJsonByName(String name, IdentityUser identityUser, Collection<String> entries) {
         try {
             return transactionService.required(() -> {
                 Stack stack = stackRepository.findByNameInUserWithLists(name, identityUser.getUserId());
-                if (stack == null) {
-                    throw new NotFoundException(String.format(STACK_NOT_FOUND_EXCEPTION_FORMAT_TEXT, name));
-                }
                 StackResponse stackResponse = conversionService.convert(stack, StackResponse.class);
                 stackResponse = stackResponseDecorator.decorate(stackResponse, stack, entries);
                 return stackResponse;
             });
         } catch (TransactionExecutionException e) {
-            throw new TransactionService.TransactionRuntimeExecutionException(e);
+            throw new TransactionRuntimeExecutionException(e);
         }
     }
 
@@ -318,48 +315,30 @@ public class StackService {
         try {
             return transactionService.required(() -> {
                 Stack stack = stackRepository.findByNameInAccountWithLists(name, identityUser.getAccount());
-                if (stack == null) {
-                    throw new NotFoundException(String.format(STACK_NOT_FOUND_EXCEPTION_FORMAT_TEXT, name));
-                }
-                authorizationService.hasReadPermission(stack);
                 StackResponse stackResponse = conversionService.convert(stack, StackResponse.class);
                 stackResponse = stackResponseDecorator.decorate(stackResponse, stack, entries);
                 return stackResponse;
             });
         } catch (TransactionExecutionException e) {
-            throw new TransactionService.TransactionRuntimeExecutionException(e);
+            throw new TransactionRuntimeExecutionException(e);
         }
     }
 
     public StackV2Request getStackRequestByName(String name, IdentityUser identityUser) {
         try {
-            return transactionService.required(() -> {
-                Stack stack = stackRepository.findByNameInAccountWithLists(name, identityUser.getAccount());
-                if (stack == null) {
-                    throw new NotFoundException(String.format(STACK_NOT_FOUND_EXCEPTION_FORMAT_TEXT, name));
-                }
-                authorizationService.hasReadPermission(stack);
-                return conversionService.convert(stack, StackV2Request.class);
-            });
+            return transactionService.required(() ->
+                    conversionService.convert(stackRepository.findByNameInAccountWithLists(name, identityUser.getAccount()), StackV2Request.class));
         } catch (TransactionExecutionException e) {
-            throw new TransactionService.TransactionRuntimeExecutionException(e);
+            throw new TransactionRuntimeExecutionException(e);
         }
     }
 
     public Stack getPublicStack(String name, IdentityUser identityUser) {
-        Stack stack = stackRepository.findByNameInAccount(name, identityUser.getAccount());
-        if (stack == null) {
-            throw new NotFoundException(String.format(STACK_NOT_FOUND_EXCEPTION_FORMAT_TEXT, name));
-        }
-        authorizationService.hasReadPermission(stack);
-        return stack;
+        return stackRepository.findByNameInAccount(name, identityUser.getAccount());
     }
 
     public void delete(String name, IdentityUser user, Boolean forced, Boolean deleteDependencies) {
         Stack stack = stackRepository.findByNameInAccountOrOwner(name, user.getAccount(), user.getUserId());
-        if (stack == null) {
-            throw new NotFoundException(String.format(STACK_NOT_FOUND_EXCEPTION_FORMAT_TEXT, name));
-        }
         delete(stack, forced, deleteDependencies);
     }
 
@@ -443,9 +422,6 @@ public class StackService {
 
     public void delete(Long id, IdentityUser user, Boolean forced, Boolean deleteDependencies) {
         Stack stack = stackRepository.findByIdInAccount(id, user.getAccount());
-        if (stack == null) {
-            throw new NotFoundException(String.format(STACK_NOT_FOUND_BY_ID_EXCEPTION_FORMAT_TEXT, id));
-        }
         delete(stack, forced, deleteDependencies);
     }
 
@@ -454,14 +430,13 @@ public class StackService {
     }
 
     public void removeInstance(@Nonnull IdentityUser user, Long stackId, String instanceId, boolean forced) {
-        Stack stack = get(stackId);
+        Stack stack = getById(stackId);
         InstanceMetaData metaData = validateInstanceForDownscale(user, instanceId, stack);
         flowManager.triggerStackRemoveInstance(stackId, metaData.getInstanceGroupName(), metaData.getPrivateId(), forced);
     }
 
     public void removeInstances(IdentityUser user, Long stackId, Set<String> instanceIds) {
-        Stack stack = get(stackId);
-        authorizationService.hasWritePermission(stack);
+        Stack stack = getById(stackId);
         Map<String, Set<Long>> instanceIdsByHostgroupMap = new HashMap<>();
         for (String instanceId : instanceIds) {
             InstanceMetaData metaData = validateInstanceForDownscale(user, instanceId, stack);
@@ -626,7 +601,7 @@ public class StackService {
                 return null;
             });
         } catch (TransactionExecutionException e) {
-            throw new TransactionService.TransactionRuntimeExecutionException(e);
+            throw new TransactionRuntimeExecutionException(e);
         }
 
     }
@@ -705,8 +680,18 @@ public class StackService {
         return stackRepository.findAllAlive();
     }
 
-    public List<Stack> getAllAliveAndProvisioned() {
-        return stackRepository.findAllAliveAndProvisioned();
+    public List<Stack> getByStatuses(List<Status> statuses) {
+        return stackRepository.findByStatuses(statuses);
+    }
+
+    public long countByCredential(Credential credential) {
+        Long count = stackRepository.countByCredential(credential);
+        return count == null ? 0L : count;
+    }
+
+    public long countByFlexSubscription(FlexSubscription subscription) {
+        Long count = stackRepository.countByFlexSubscription(subscription);
+        return count == null ? 0L : count;
     }
 
     private void validateScalingAdjustment(InstanceGroupAdjustmentJson instanceGroupAdjustmentJson, Stack stack) {
@@ -770,7 +755,7 @@ public class StackService {
     }
 
     private void delete(Stack stack, Boolean forced, Boolean deleteDependencies) {
-        authorizationService.hasWritePermission(stack);
+        authorizationService.hasPermission(stack, PermissionType.WRITE.name());
         LOGGER.info("Stack delete requested.");
         if (!stack.isDeleteCompleted()) {
             flowManager.triggerTermination(stack.getId(), forced, deleteDependencies);
@@ -797,6 +782,26 @@ public class StackService {
         } catch (JsonProcessingException e) {
             LOGGER.error("Could not create Cloudbreak details component.", e);
         }
+    }
+
+    public List<Object[]> getStatuses(Set<Long> stackIds) {
+        return stackRepository.findStackStatuses(stackIds);
+    }
+
+    public Set<Stack> getByNetwork(Network network) {
+        return stackRepository.findByNetwork(network);
+    }
+
+    public List<Stack> getAllForTemplate(Long id) {
+        return stackRepository.findAllStackForTemplate(id);
+    }
+
+    public List<Stack> getAllAliveAndProvisioned() {
+        return stackRepository.findAllAliveAndProvisioned();
+    }
+
+    public Stack getForCluster(Long id) {
+        return stackRepository.findStackForCluster(id);
     }
 
     private enum Msg {

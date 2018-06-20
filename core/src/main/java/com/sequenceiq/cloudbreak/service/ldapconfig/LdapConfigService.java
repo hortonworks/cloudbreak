@@ -9,6 +9,8 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
@@ -16,7 +18,6 @@ import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
@@ -25,6 +26,8 @@ import com.sequenceiq.cloudbreak.service.AuthorizationService;
 
 @Service
 public class LdapConfigService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(LdapConfigService.class);
 
     @Inject
     private LdapConfigRepository ldapConfigRepository;
@@ -47,18 +50,11 @@ public class LdapConfigService {
     }
 
     public LdapConfig get(Long id) {
-        LdapConfig ldapConfig = ldapConfigRepository.findById(id).orElseThrow(notFound("LdapConfig", id));
-        authorizationService.hasReadPermission(ldapConfig);
-        return ldapConfig;
+        return ldapConfigRepository.findById(id).orElseThrow(notFound("LdapConfig", id));
     }
 
     public LdapConfig getByName(String name, IdentityUser user) {
-        LdapConfig ldapConfig = ldapConfigRepository.findByNameInAccount(name, user.getAccount());
-        if (ldapConfig == null) {
-            throw new NotFoundException(String.format("LdapConfig '%s' not found", name));
-        }
-        authorizationService.hasReadPermission(ldapConfig);
-        return ldapConfig;
+        return ldapConfigRepository.findByNameInAccount(name, user.getAccount());
     }
 
     public Set<LdapConfig> retrievePrivateConfigs(IdentityUser user) {
@@ -71,19 +67,11 @@ public class LdapConfigService {
     }
 
     public LdapConfig getPrivateConfig(String name, IdentityUser user) {
-        LdapConfig ldapConfig = ldapConfigRepository.findByNameForUser(name, user.getUserId());
-        if (ldapConfig == null) {
-            throw new NotFoundException(String.format("LdapConfig '%s' not found.", name));
-        }
-        return ldapConfig;
+        return ldapConfigRepository.findByNameForUser(name, user.getUserId());
     }
 
     public LdapConfig getPublicConfig(String name, IdentityUser user) {
-        LdapConfig ldapConfig = ldapConfigRepository.findByNameInAccount(name, user.getAccount());
-        if (ldapConfig == null) {
-            throw new NotFoundException(String.format("LdapConfig '%s' not found.", name));
-        }
-        return ldapConfig;
+        return ldapConfigRepository.findByNameInAccount(name, user.getAccount());
     }
 
     public void delete(Long id) {
@@ -96,14 +84,11 @@ public class LdapConfigService {
 
     public void delete(String name, IdentityUser user) {
         LdapConfig ldapConfig = ldapConfigRepository.findByNameInAccount(name, user.getAccount());
-        if (ldapConfig == null) {
-            throw new NotFoundException(String.format("LdapConfig '%s' not found.", name));
-        }
         delete(ldapConfig);
     }
 
     private void delete(LdapConfig ldapConfig) {
-        authorizationService.hasWritePermission(ldapConfig);
+        LOGGER.info("Deleting ldap configuration with name: {}", ldapConfig.getName());
         List<Cluster> clustersWithLdap = clusterRepository.findByLdapConfig(ldapConfig);
         if (!clustersWithLdap.isEmpty()) {
             if (clustersWithLdap.size() > 1) {

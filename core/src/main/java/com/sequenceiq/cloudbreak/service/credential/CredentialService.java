@@ -35,6 +35,7 @@ import com.sequenceiq.cloudbreak.service.account.AccountPreferencesService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.notification.Notification;
 import com.sequenceiq.cloudbreak.service.notification.NotificationSender;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderCredentialAdapter;
 import com.sequenceiq.cloudbreak.service.user.UserProfileCredentialHandler;
 
@@ -45,6 +46,9 @@ public class CredentialService {
 
     @Inject
     private CredentialRepository credentialRepository;
+
+    @Inject
+    private StackService stackService;
 
     @Inject
     private StackRepository stackRepository;
@@ -79,10 +83,8 @@ public class CredentialService {
     }
 
     public Credential get(Long id) {
-        Credential credential = credentialRepository.findById(id)
+        return credentialRepository.findById(id)
                 .orElseThrow(accessDenied(String.format("Access is denied: Credential not found by id '%d'.", id)));
-        authorizationService.hasReadPermission(credential);
-        return credential;
     }
 
     public Supplier<AccessDeniedException> accessDenied(String accessDeniedMessage) {
@@ -90,17 +92,13 @@ public class CredentialService {
     }
 
     public Credential get(Long id, String account) {
-        Credential credential = Optional.ofNullable(credentialRepository.findByIdInAccount(id, account))
+        return Optional.ofNullable(credentialRepository.findByIdInAccount(id, account))
                 .orElseThrow(accessDenied(String.format("Access is denied: Credential not found by id '%d' in %s account.", id, account)));
-        authorizationService.hasReadPermission(credential);
-        return credential;
     }
 
     public Credential get(String name, String account) {
-        Credential credential = Optional.ofNullable(credentialRepository.findOneByName(name, account))
+        return Optional.ofNullable(credentialRepository.findOneByName(name, account))
                 .orElseThrow(accessDenied(String.format("Access is denied: Credential not found by name '%s' in %s account.", name, account)));
-        authorizationService.hasReadPermission(credential);
-        return credential;
     }
 
     public Map<String, String> interactiveLogin(IdentityUser user, Credential credential) {
@@ -121,7 +119,6 @@ public class CredentialService {
         LOGGER.debug("Modifying credential: [User: '{}', Account: '{}']", user.getUsername(), user.getAccount());
         Credential credentialToModify = credential.isPublicInAccount() ? getPublicCredential(credential.getName(), user)
                 : getPrivateCredential(credential.getName(), user);
-        authorizationService.hasWritePermission(credentialToModify);
         if (!credentialToModify.cloudPlatform().equals(credential.cloudPlatform())) {
             throw new BadRequestException("Modifying credential platform is forbidden");
         }
@@ -175,17 +172,13 @@ public class CredentialService {
     }
 
     public Credential getPublicCredential(String name, IdentityUser user) {
-        Credential credential = Optional.ofNullable(credentialRepository.findOneByName(name, user.getAccount()))
+        return Optional.ofNullable(credentialRepository.findOneByName(name, user.getAccount()))
                 .orElseThrow(accessDenied(String.format("Access is denied: Credential not found by name '%s'", name)));
-        authorizationService.hasReadPermission(credential);
-        return credential;
     }
 
     public Credential getPrivateCredential(String name, IdentityUser user) {
-        Credential credential = Optional.ofNullable(credentialRepository.findByNameInUser(name, user.getUserId()))
+        return Optional.ofNullable(credentialRepository.findByNameInUser(name, user.getUserId()))
                 .orElseThrow(accessDenied(String.format("Access is denied: Credential not found by name '%s'.", name)));
-        authorizationService.hasReadPermission(credential);
-        return credential;
     }
 
     public void delete(Long id, IdentityUser user) {
@@ -205,7 +198,6 @@ public class CredentialService {
     }
 
     private void delete(Credential credential) {
-        authorizationService.hasWritePermission(credential);
         Set<Stack> stacksForCredential = stackRepository.findByCredential(credential);
         if (!stacksForCredential.isEmpty()) {
             String clusters;

@@ -126,4 +126,8 @@ public class ClusterComponentConfigProvider {
             LOGGER.debug("Components({}) have been deleted for cluster : {}", componentsByClusterId.size(), clusterId);
         }
     }
+
+    public Set<ClusterComponent> findByComponentType(ComponentType componentType) {
+        return componentRepository.findByComponentType(componentType);
+    }
 }

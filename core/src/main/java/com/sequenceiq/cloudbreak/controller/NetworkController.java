@@ -62,7 +62,7 @@ public class NetworkController extends NotificationController implements Network
 
     @Override
     public NetworkResponse get(Long id) {
-        Network network = networkService.getById(id);
+        Network network = networkService.get(id);
         return convert(network);
     }
 

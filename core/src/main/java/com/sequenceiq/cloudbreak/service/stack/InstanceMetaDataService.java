@@ -7,6 +7,9 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType;
@@ -14,13 +17,15 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 
 @Service
-public class InstanceMetadataService {
+public class InstanceMetaDataService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(InstanceMetaDataService.class);
 
     @Inject
     private InstanceMetaDataRepository instanceMetaDataRepository;
@@ -106,5 +111,15 @@ public class InstanceMetadataService {
             }
         }
         return null;
+    }
+
+    public InstanceMetaData
+    getPrimaryGatewayInstanceMetadata(long stackId) {
+        try {
+            return instanceMetaDataRepository.getPrimaryGatewayInstanceMetadata(stackId);
+        } catch (AccessDeniedException ignore) {
+            LOGGER.info("No primary gateway for stack [{}]", stackId);
+            return null;
+        }
     }
 }

@@ -4,13 +4,15 @@ import java.util.Set;
 
 import javax.transaction.Transactional;
 
-import org.springframework.data.repository.CrudRepository;
-
+import com.sequenceiq.cloudbreak.aspect.BaseRepository;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
+import com.sequenceiq.cloudbreak.aspect.HasPermission;
+import com.sequenceiq.cloudbreak.service.EntityType;
 
 @EntityType(entityClass = FileSystem.class)
 @Transactional(Transactional.TxType.REQUIRED)
-public interface FileSystemRepository extends CrudRepository<FileSystem, Long> {
+@HasPermission
+public interface FileSystemRepository extends BaseRepository<FileSystem, Long> {
 
     Set<FileSystem> findByOwner(String owner);
 

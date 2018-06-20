@@ -4,13 +4,16 @@ import javax.transaction.Transactional;
 
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.CrudRepository;
 
+import com.sequenceiq.cloudbreak.aspect.DisablePermission;
+import com.sequenceiq.cloudbreak.aspect.DisabledBaseRepository;
 import com.sequenceiq.cloudbreak.domain.FlowChainLog;
+import com.sequenceiq.cloudbreak.service.EntityType;
 
 @EntityType(entityClass = FlowChainLog.class)
 @Transactional(Transactional.TxType.REQUIRED)
-public interface FlowChainLogRepository extends CrudRepository<FlowChainLog, Long> {
+@DisablePermission
+public interface FlowChainLogRepository extends DisabledBaseRepository<FlowChainLog, Long> {
 
     FlowChainLog findFirstByFlowChainIdOrderByCreatedDesc(String flowChainId);
 

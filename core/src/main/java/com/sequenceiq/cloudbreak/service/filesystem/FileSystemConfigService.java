@@ -31,20 +31,15 @@ public class FileSystemConfigService {
 
     public FileSystem create(@Nonnull IdentityUser user, @Nonnull FileSystem fileSystem) {
         setUserDataRelatedFields(user, fileSystem);
-        authService.hasWritePermission(fileSystem);
         return fileSystemRepository.save(fileSystem);
     }
 
     public FileSystem getPrivateFileSystem(String name, @Nonnull IdentityUser user) {
-        FileSystem fileSystem = fileSystemRepository.findByNameAndOwner(name, user.getUserId());
-        authService.hasReadPermission(fileSystem);
-        return fileSystem;
+        return fileSystemRepository.findByNameAndOwner(name, user.getUserId());
     }
 
     public FileSystem get(Long id) {
-        FileSystem fileSystem = getFileSystem(id);
-        authService.hasReadPermission(fileSystem);
-        return fileSystem;
+        return getFileSystem(id);
     }
 
     public Set<FileSystem> retrieveAccountFileSystems(@Nonnull IdentityUser user) {
@@ -56,7 +51,6 @@ public class FileSystemConfigService {
     public void delete(Long id, IdentityUser user) {
         FileSystem fileSystem = getFileSystem(id);
         setUserDataRelatedFields(user, fileSystem);
-        authService.hasWritePermission(fileSystem);
         fileSystemRepository.delete(fileSystem);
     }
 
@@ -64,7 +58,6 @@ public class FileSystemConfigService {
         FileSystem fileSystem = Optional.ofNullable(fileSystemRepository.findByNameAndAccountAndOwner(name, user.getAccount(), user.getUserId()))
                 .orElseThrow(notFound("Record", name));
         setUserDataRelatedFields(user, fileSystem);
-        authService.hasWritePermission(fileSystem);
         fileSystemRepository.delete(fileSystem);
     }
 

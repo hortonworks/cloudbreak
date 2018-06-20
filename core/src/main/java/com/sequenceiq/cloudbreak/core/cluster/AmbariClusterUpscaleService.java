@@ -31,7 +31,7 @@ import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariClusterConnector;
 import com.sequenceiq.cloudbreak.service.cluster.flow.RecipeEngine;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
-import com.sequenceiq.cloudbreak.service.stack.InstanceMetadataService;
+import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @Service
@@ -57,7 +57,7 @@ public class AmbariClusterUpscaleService {
     private AmbariClusterConnector ambariClusterConnector;
 
     @Inject
-    private InstanceMetadataService instanceMetadataService;
+    private InstanceMetaDataService instanceMetaDataService;
 
     @Inject
     private HostGroupService hostGroupService;
@@ -95,7 +95,7 @@ public class AmbariClusterUpscaleService {
         for (Entry<String, List<String>> hostsPerHostGroupEntry : hostsPerHostGroup.entrySet()) {
             allHosts.addAll(hostsPerHostGroupEntry.getValue());
         }
-        instanceMetadataService.updateInstanceStatus(stack.getInstanceGroups(), InstanceStatus.UNREGISTERED, allHosts);
+        instanceMetaDataService.updateInstanceStatus(stack.getInstanceGroups(), InstanceStatus.UNREGISTERED, allHosts);
         ambariClusterConnector.waitForHosts(stackService.getByIdWithLists(stackId));
     }
 

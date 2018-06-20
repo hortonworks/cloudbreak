@@ -7,18 +7,21 @@ import java.util.Set;
 import javax.transaction.Transactional;
 
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
 import com.sequenceiq.cloudbreak.api.model.Status;
+import com.sequenceiq.cloudbreak.aspect.BaseRepository;
+import com.sequenceiq.cloudbreak.aspect.HasPermission;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.ProxyConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.service.EntityType;
 
 @EntityType(entityClass = Cluster.class)
 @Transactional(Transactional.TxType.REQUIRED)
-public interface ClusterRepository extends CrudRepository<Cluster, Long> {
+@HasPermission
+public interface ClusterRepository extends BaseRepository<Cluster, Long> {
 
     Cluster findOneByStackId(long stackId);
 
@@ -40,7 +43,7 @@ public interface ClusterRepository extends CrudRepository<Cluster, Long> {
 
     List<Cluster> findByLdapConfig(LdapConfig ldapConfig);
 
-    Set<Cluster> findByBlueprint(Blueprint blueprint);
+    List<Cluster> findByBlueprint(Blueprint blueprint);
 
     Long countByBlueprint(Blueprint blueprint);
 

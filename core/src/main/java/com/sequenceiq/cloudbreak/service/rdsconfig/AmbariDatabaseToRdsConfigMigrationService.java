@@ -18,11 +18,11 @@ import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariDatabase;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.converter.mapper.AmbariDatabaseMapper;
+import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
-import com.sequenceiq.cloudbreak.domain.RDSConfig;
-import com.sequenceiq.cloudbreak.repository.ClusterComponentRepository;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
+import com.sequenceiq.cloudbreak.service.ClusterComponentConfigProvider;
 
 @Service
 public class AmbariDatabaseToRdsConfigMigrationService {
@@ -35,13 +35,13 @@ public class AmbariDatabaseToRdsConfigMigrationService {
     private AmbariDatabaseMapper ambariDatabaseMapper;
 
     @Inject
-    private ClusterComponentRepository clusterComponentRepository;
+    private ClusterComponentConfigProvider clusterComponentConfigProvider;
 
     @Inject
     private ClusterRepository clusterRepository;
 
     public void migrateAmbariDatabaseClusterComponentsToRdsConfig() {
-        Set<ClusterComponent> clusterComponents = clusterComponentRepository.findByComponentType(ComponentType.AMBARI_DATABASE_DETAILS);
+        Set<ClusterComponent> clusterComponents = clusterComponentConfigProvider.findByComponentType(ComponentType.AMBARI_DATABASE_DETAILS);
         LOGGER.info("Mapping of AmbariDatabaseClusterComponents to RdsConfig. {} components to map", clusterComponents.size());
         clusterComponents.forEach(this::migrateClusterComponent);
     }
@@ -62,7 +62,7 @@ public class AmbariDatabaseToRdsConfigMigrationService {
 
     private void markClusterComponentAsMigrated(ClusterComponent component) {
         component.setComponentType(ComponentType.AMBARI_DATABASE_DETAILS_MIGRATED);
-        clusterComponentRepository.save(component);
+        clusterComponentConfigProvider.store(component);
         LOGGER.debug("Component migration finished with id [{}]", component.getId());
     }
 

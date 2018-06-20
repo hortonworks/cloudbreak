@@ -6,14 +6,17 @@ import java.util.Set;
 import javax.transaction.Transactional;
 
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
+import com.sequenceiq.cloudbreak.aspect.BaseRepository;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
+import com.sequenceiq.cloudbreak.aspect.HasPermission;
+import com.sequenceiq.cloudbreak.service.EntityType;
 
 @EntityType(entityClass = SecurityGroup.class)
 @Transactional(Transactional.TxType.REQUIRED)
-public interface SecurityGroupRepository extends CrudRepository<SecurityGroup, Long> {
+@HasPermission
+public interface SecurityGroupRepository extends BaseRepository<SecurityGroup, Long> {
 
     @Override
     @Query("SELECT r FROM SecurityGroup r LEFT JOIN FETCH r.securityRules WHERE r.id= :id")

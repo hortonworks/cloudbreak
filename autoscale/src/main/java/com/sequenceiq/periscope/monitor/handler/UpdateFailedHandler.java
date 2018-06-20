@@ -48,7 +48,7 @@ public class UpdateFailedHandler implements ApplicationListener<UpdateFailedEven
     @Override
     public void onApplicationEvent(UpdateFailedEvent event) {
         long id = event.getClusterId();
-        Cluster cluster = clusterService.find(id);
+        Cluster cluster = clusterService.findById(id);
         MDCBuilder.buildMdcContext(cluster);
         Integer failed = updateFailures.get(id);
         if (failed == null) {

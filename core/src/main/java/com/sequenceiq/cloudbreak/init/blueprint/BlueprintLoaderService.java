@@ -19,7 +19,7 @@ import org.springframework.stereotype.Service;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
+import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 
 @Service
 public class BlueprintLoaderService {
@@ -29,7 +29,7 @@ public class BlueprintLoaderService {
     private DefaultBlueprintCache defaultBlueprintCache;
 
     @Inject
-    private BlueprintRepository blueprintRepository;
+    private BlueprintService blueprintService;
 
     public boolean addingDefaultBlueprintsAreNecessaryForTheUser(Collection<Blueprint> blueprints) {
         Map<String, Blueprint> defaultBlueprints = defaultBlueprintCache.defaultBlueprints();
@@ -62,7 +62,7 @@ public class BlueprintLoaderService {
 
     private Iterable<Blueprint> getResultSetFromUpdateAndOriginalBlueprints(Iterable<Blueprint> blueprints, Iterable<Blueprint> blueprintsWhichAreMissing) {
         LOGGER.info("Updating blueprints which should be modified.");
-        Iterable<Blueprint> savedBlueprints = blueprintRepository.saveAll(blueprintsWhichAreMissing);
+        Iterable<Blueprint> savedBlueprints = blueprintService.save(blueprintsWhichAreMissing);
         LOGGER.info("Finished to update blueprints which should be modified.");
         Map<String, Blueprint> resultBlueprints = new HashMap<>();
         for (Blueprint blueprint : blueprints) {

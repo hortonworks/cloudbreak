@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 import com.google.common.base.Preconditions;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
-import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.ManagementPack;
 import com.sequenceiq.cloudbreak.repository.ManagementPackRepository;
 import com.sequenceiq.cloudbreak.service.AuthorizationService;
@@ -31,28 +30,15 @@ public class ManagementPackService {
     }
 
     public ManagementPack getPrivateManagementPack(String name, IdentityUser user) {
-        ManagementPack mpack = mpackRepository.findOneByNameAndOwner(name, user.getUserId());
-        if (mpack == null) {
-            throw new NotFoundException(String.format("Management pack '%s' not found.", name));
-        }
-        return mpack;
+        return mpackRepository.findOneByNameAndOwner(name, user.getUserId());
     }
 
     public ManagementPack getPublicManagementPack(String name, IdentityUser user) {
-        ManagementPack mpack = mpackRepository.findOneByNameBasedOnAccount(name, user.getAccount(), user.getUserId());
-        if (mpack == null) {
-            throw new NotFoundException(String.format("Management pack '%s' not found.", name));
-        }
-        return mpack;
+        return mpackRepository.findOneByNameBasedOnAccount(name, user.getAccount(), user.getUserId());
     }
 
     public ManagementPack getByName(String name, IdentityUser user) {
-        ManagementPack mpack = mpackRepository.findOneByNameAndAccount(name, user.getAccount());
-        if (mpack == null) {
-            throw new NotFoundException(String.format("Management pack '%s' not found.", name));
-        }
-        authorizationService.hasReadPermission(mpack);
-        return mpack;
+        return mpackRepository.findOneByNameAndAccount(name, user.getAccount());
     }
 
     public Set<ManagementPack> retrieveAccountManagementPacks(IdentityUser user) {
@@ -61,27 +47,16 @@ public class ManagementPackService {
     }
 
     public ManagementPack get(Long id) {
-        ManagementPack mpack = mpackRepository.findOneById(id);
-        if (mpack == null) {
-            throw new NotFoundException(String.format("Management pack '%s' not found.", id));
-        }
-        authorizationService.hasReadPermission(mpack);
-        return mpack;
+        return mpackRepository.findOneById(id);
     }
 
     public void delete(Long id, IdentityUser user) {
         ManagementPack mpack = mpackRepository.findOneByIdAndAccount(id, user.getAccount());
-        if (mpack == null) {
-            throw new NotFoundException(String.format("Management pack '%s' not found.", id));
-        }
         delete(mpack);
     }
 
     public void delete(String name, IdentityUser user) {
         ManagementPack mpack = mpackRepository.findOneByNameBasedOnAccount(name, user.getAccount(), user.getUserId());
-        if (mpack == null) {
-            throw new NotFoundException(String.format("Management pack '%s' not found.", name));
-        }
         delete(mpack);
     }
 
@@ -100,7 +75,7 @@ public class ManagementPackService {
     }
 
     private void delete(ManagementPack mpack) {
-        authorizationService.hasWritePermission(mpack);
+        LOGGER.info("Deleting Management Pack. {} - {}", new Object[]{mpack.getId(), mpack.getName()});
         mpackRepository.delete(mpack);
     }
 }

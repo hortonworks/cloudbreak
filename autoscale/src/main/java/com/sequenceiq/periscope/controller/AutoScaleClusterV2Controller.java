@@ -32,49 +32,42 @@ public class AutoScaleClusterV2Controller implements AutoScaleClusterV2Endpoint 
     @Override
     public AutoscaleClusterResponse modifyByCloudbreakCluster(AutoscaleClusterRequest ambariServer, Long stackId) {
         Cluster cluster = clusterService.findOneByStackId(stackId);
-        authorizationService.hasWritePermission(cluster);
         return autoScaleClusterCommonService.modifyCluster(ambariServer, cluster.getId());
     }
 
     @Override
     public AutoscaleClusterResponse getByCloudbreakCluster(Long stackId) {
         Cluster cluster = clusterService.findOneByStackId(stackId);
-        authorizationService.hasReadPermission(cluster);
         return autoScaleClusterCommonService.getCluster(cluster.getId());
     }
 
     @Override
     public void deleteByCloudbreakCluster(Long stackId) {
         Cluster cluster = clusterService.findOneByStackId(stackId);
-        authorizationService.hasWritePermission(cluster);
         autoScaleClusterCommonService.deleteCluster(cluster.getId());
     }
 
     @Override
     public AutoscaleClusterResponse runByCloudbreakCluster(Long stackId) {
         Cluster cluster = clusterService.findOneByStackId(stackId);
-        authorizationService.hasWritePermission(cluster);
         return autoScaleClusterCommonService.setState(cluster.getId(), StateJson.running());
     }
 
     @Override
     public AutoscaleClusterResponse suspendByCloudbreakCluster(Long stackId) {
         Cluster cluster = clusterService.findOneByStackId(stackId);
-        authorizationService.hasWritePermission(cluster);
         return autoScaleClusterCommonService.setState(cluster.getId(), StateJson.suspended());
     }
 
     @Override
     public AutoscaleClusterResponse enableAutoscaleStateByCloudbreakCluster(Long stackId) {
         Cluster cluster = clusterService.findOneByStackId(stackId);
-        authorizationService.hasWritePermission(cluster);
         return autoScaleClusterCommonService.setAutoscaleState(cluster.getId(), AutoscaleClusterState.enable());
     }
 
     @Override
     public AutoscaleClusterResponse disableAutoscaleStateByCloudbreakCluster(Long stackId) {
         Cluster cluster = clusterService.findOneByStackId(stackId);
-        authorizationService.hasWritePermission(cluster);
         return autoScaleClusterCommonService.setAutoscaleState(cluster.getId(), AutoscaleClusterState.disable());
     }
 

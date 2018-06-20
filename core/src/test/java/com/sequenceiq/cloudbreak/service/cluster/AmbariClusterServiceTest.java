@@ -85,7 +85,7 @@ public class AmbariClusterServiceTest {
     private TransactionService transactionService;
 
     @InjectMocks
-    private AmbariClusterService ambariClusterService;
+    private ClusterService clusterService;
 
     @Before
     public void setup() throws CloudbreakException, TransactionExecutionException {
@@ -114,11 +114,11 @@ public class AmbariClusterServiceTest {
         RDSConfig rdsConfig = new RDSConfig();
         rdsConfig.setDatabaseEngine(DatabaseVendor.POSTGRES);
         when(rdsConfigService.findByClusterIdAndType(nullable(String.class), nullable(String.class), any(Long.class), any(RdsType.class))).thenReturn(rdsConfig);
-        ambariClusterService.recreate(1L, 1L, new HashSet<>(), false, new StackRepoDetails(), null, null);
+        clusterService.recreate(1L, 1L, new HashSet<>(), false, new StackRepoDetails(), null, null);
     }
 
     @Test
     public void testRecreateSuccess() throws TransactionExecutionException {
-        ambariClusterService.recreate(1L, 1L, new HashSet<>(), false, new StackRepoDetails(), null, null);
+        clusterService.recreate(1L, 1L, new HashSet<>(), false, new StackRepoDetails(), null, null);
     }
 }

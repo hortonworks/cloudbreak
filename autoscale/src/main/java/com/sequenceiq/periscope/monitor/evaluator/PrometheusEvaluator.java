@@ -56,7 +56,7 @@ public class PrometheusEvaluator extends AbstractEventPublisher implements Evalu
     @Override
     public void run() {
         try {
-            Cluster cluster = clusterService.find(clusterId);
+            Cluster cluster = clusterService.findById(clusterId);
             MDCBuilder.buildMdcContext(cluster);
 
             TlsConfiguration tlsConfig = tlsSecurityService.getConfiguration(cluster);

@@ -62,7 +62,7 @@ public class ClusterCommonService {
     private ClusterCreationSetupService clusterCreationSetupService;
 
     public Response put(Long stackId, UpdateClusterJson updateJson) {
-        Stack stack = stackService.get(stackId);
+        Stack stack = stackService.getById(stackId);
         MDCBuilder.buildMdcContext(stack);
         UserNamePasswordJson userNamePasswordJson = updateJson.getUserNamePasswordJson();
         if (userNamePasswordJson != null) {

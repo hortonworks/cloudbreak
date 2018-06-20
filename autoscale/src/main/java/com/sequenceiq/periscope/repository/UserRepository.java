@@ -1,12 +1,14 @@
 package com.sequenceiq.periscope.repository;
 
-import org.springframework.data.repository.CrudRepository;
-import org.springframework.data.repository.query.Param;
-
+import com.sequenceiq.cloudbreak.aspect.BaseRepository;
+import com.sequenceiq.cloudbreak.aspect.HasPermission;
+import com.sequenceiq.cloudbreak.service.EntityType;
 import com.sequenceiq.periscope.domain.PeriscopeUser;
 
-public interface UserRepository extends CrudRepository<PeriscopeUser, String> {
+@HasPermission
+@EntityType(entityClass = PeriscopeUser.class)
+public interface UserRepository extends BaseRepository<PeriscopeUser, String> {
 
-    PeriscopeUser findOneByName(@Param("email") String email);
+    PeriscopeUser findByEmail(String email);
 
 }

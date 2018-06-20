@@ -1,29 +1,30 @@
 package com.sequenceiq.cloudbreak.service.network;
 
-import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
-import com.sequenceiq.cloudbreak.common.type.APIResourceType;
-import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
-import com.sequenceiq.cloudbreak.domain.Network;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.repository.NetworkRepository;
-import com.sequenceiq.cloudbreak.repository.StackRepository;
-import com.sequenceiq.cloudbreak.service.AuthorizationService;
-import com.sequenceiq.cloudbreak.util.NameUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.stereotype.Service;
+import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
 
-import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.stereotype.Service;
+
+import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
+import com.sequenceiq.cloudbreak.common.type.APIResourceType;
+import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.domain.Network;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.repository.NetworkRepository;
+import com.sequenceiq.cloudbreak.service.AuthorizationService;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.util.NameUtil;
 
 @Service
 public class NetworkService {
@@ -33,7 +34,7 @@ public class NetworkService {
     private NetworkRepository networkRepository;
 
     @Inject
-    private StackRepository stackRepository;
+    private StackService stackService;
 
     @Inject
     private AuthorizationService authorizationService;
@@ -51,47 +52,27 @@ public class NetworkService {
     }
 
     public Network get(Long id) {
-        Network network = getById(id);
-        authorizationService.hasReadPermission(network);
-        return network;
-    }
-
-    public Network getById(Long id) {
-        Network network = networkRepository.findOneById(id);
-        if (network == null) {
-            throw new NotFoundException(String.format("Network '%s' not found", id));
-        }
-        return network;
+        return networkRepository.findOneById(id);
     }
 
     public Network getPrivateNetwork(String name, IdentityUser user) {
-        Network network = networkRepository.findByNameForUser(name, user.getUserId());
-        if (network == null) {
-            throw new NotFoundException(String.format("Network '%s' not found", name));
-        }
-        return network;
+        return networkRepository.findByNameForUser(name, user.getUserId());
     }
 
     public Network getPublicNetwork(String name, IdentityUser user) {
-        Network network = networkRepository.findByNameInAccount(name, user.getAccount());
-        if (network == null) {
-            throw new NotFoundException(String.format("Network '%s' not found", name));
-        }
-        return network;
+        return networkRepository.findByNameInAccount(name, user.getAccount());
     }
 
     public void delete(Long id, IdentityUser user) {
-        LOGGER.info("Deleting network with id: {}", id);
-        delete(get(id));
+        deleteImpl(get(id));
     }
 
     public void delete(String name, IdentityUser user) {
-        LOGGER.info("Deleting network with name: {}", name);
-        Network network = networkRepository.findByNameInAccount(name, user.getAccount());
-        if (network == null) {
-            throw new NotFoundException(String.format("Network '%s' not found.", name));
-        }
-        delete(network);
+        deleteImpl(networkRepository.findByNameInAccount(name, user.getAccount()));
+    }
+
+    public void delete(Network network) {
+        deleteImpl(network);
     }
 
     public Set<Network> retrievePrivateNetworks(IdentityUser user) {
@@ -103,9 +84,9 @@ public class NetworkService {
                 : networkRepository.findPublicInAccountForUser(user.getUserId(), user.getAccount());
     }
 
-    private void delete(Network network) {
-        authorizationService.hasWritePermission(network);
-        List<Stack> stacksWithThisNetwork = new ArrayList<>(stackRepository.findByNetwork(network));
+    private void deleteImpl(Network network) {
+        LOGGER.info("Deleting network with name: {}", network.getName());
+        List<Stack> stacksWithThisNetwork = new ArrayList<>(stackService.getByNetwork(network));
         if (!stacksWithThisNetwork.isEmpty()) {
             if (stacksWithThisNetwork.size() > 1) {
                 String clusters = stacksWithThisNetwork

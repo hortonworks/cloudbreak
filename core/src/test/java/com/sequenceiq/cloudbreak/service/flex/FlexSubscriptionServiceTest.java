@@ -29,7 +29,7 @@ import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecution
 public class FlexSubscriptionServiceTest {
 
     @Mock
-    private FlexSubscriptionRepository flexRepo;
+    private FlexSubscriptionRepository flexSubscriptionRepository;
 
     @Mock
     private TransactionService transactionService;
@@ -45,7 +45,7 @@ public class FlexSubscriptionServiceTest {
 
     @Test(expected = BadRequestException.class)
     public void testCreateShouldThrowBadRequestWhenSubscriptionExistsWithTheSameName() throws TransactionExecutionException {
-        when(flexRepo.countByNameAndAccount(anyString(), anyString())).thenReturn(1L);
+        when(flexSubscriptionRepository.countByNameAndAccount(anyString(), anyString())).thenReturn(1L);
         FlexSubscription subscription = getFlexSubscription("testFlexSubscription", "FLEX-000000000");
 
         underTest.create(subscription);
@@ -53,8 +53,8 @@ public class FlexSubscriptionServiceTest {
 
     @Test(expected = BadRequestException.class)
     public void testCreateShouldThrowBadRequestWhenSubscriptionExistsWithTheSameSubscriptionIdentifier() throws TransactionExecutionException {
-        when(flexRepo.countByNameAndAccount(anyString(), anyString())).thenReturn(0L);
-        when(flexRepo.countBySubscriptionId(anyString())).thenReturn(1L);
+        when(flexSubscriptionRepository.countByNameAndAccount(anyString(), anyString())).thenReturn(0L);
+        when(flexSubscriptionRepository.countBySubscriptionId(anyString())).thenReturn(1L);
         FlexSubscription subscription = getFlexSubscription("testFlexSubscription1", "FLEX-000000001");
 
         underTest.create(subscription);
@@ -62,34 +62,34 @@ public class FlexSubscriptionServiceTest {
 
     @Test
     public void testCreateShouldSetDefaultFlagsForTheFirstSavedSubscription() throws TransactionExecutionException {
-        when(flexRepo.countByNameAndAccount(anyString(), anyString())).thenReturn(0L);
-        when(flexRepo.countBySubscriptionId(anyString())).thenReturn(0L);
+        when(flexSubscriptionRepository.countByNameAndAccount(anyString(), anyString())).thenReturn(0L);
+        when(flexSubscriptionRepository.countBySubscriptionId(anyString())).thenReturn(0L);
         FlexSubscription subscription = getFlexSubscription("testFlexSubscription", "FLEX-000000000", false, false);
-        when(flexRepo.save(subscription)).thenReturn(subscription);
-        when(flexRepo.findAllByAccount(anyString())).thenReturn(Collections.singletonList(subscription));
+        when(flexSubscriptionRepository.save(subscription)).thenReturn(subscription);
+        when(flexSubscriptionRepository.findAllByAccount(anyString())).thenReturn(Collections.singletonList(subscription));
 
         FlexSubscription result = underTest.create(subscription);
 
-        verify(flexRepo, times(1)).save(subscription);
-        verify(flexRepo, times(1)).saveAll(Collections.singletonList(result));
+        verify(flexSubscriptionRepository, times(1)).save(subscription);
+        verify(flexSubscriptionRepository, times(1)).saveAll(Collections.singletonList(result));
         assertTrue(result.isDefault());
         assertTrue(result.isUsedForController());
     }
 
     @Test
     public void testCreateShouldUpdateDefaultFlagsOfOldSubscriptionsWhenNewSubscriptionRequiresDefaultFlags() throws TransactionExecutionException {
-        when(flexRepo.countByNameAndAccount(anyString(), anyString())).thenReturn(0L);
-        when(flexRepo.countBySubscriptionId(anyString())).thenReturn(0L);
+        when(flexSubscriptionRepository.countByNameAndAccount(anyString(), anyString())).thenReturn(0L);
+        when(flexSubscriptionRepository.countBySubscriptionId(anyString())).thenReturn(0L);
         FlexSubscription subscription = getFlexSubscription("testFlexSubscription", "FLEX-000000000", true, true);
         FlexSubscription subscription1 = getFlexSubscription("testFlexSubscription1", "FLEX-000000001", true, true);
-        when(flexRepo.save(subscription)).thenReturn(subscription);
-        when(flexRepo.findAllByAccount(anyString())).thenReturn(Arrays.asList(subscription1, subscription));
+        when(flexSubscriptionRepository.save(subscription)).thenReturn(subscription);
+        when(flexSubscriptionRepository.findAllByAccount(anyString())).thenReturn(Arrays.asList(subscription1, subscription));
 
         FlexSubscription result = underTest.create(subscription);
 
-        verify(flexRepo, times(1)).save(subscription);
+        verify(flexSubscriptionRepository, times(1)).save(subscription);
 
-        verify(flexRepo, times(1)).saveAll(Arrays.asList(subscription1, result));
+        verify(flexSubscriptionRepository, times(1)).saveAll(Arrays.asList(subscription1, result));
         assertTrue(result.isDefault());
         assertTrue(result.isUsedForController());
         assertFalse(subscription1.isDefault());
@@ -99,17 +99,16 @@ public class FlexSubscriptionServiceTest {
     @Test
     public void testCreateShouldUpdateUsedForControllerFlagOfOldSubscriptionsWhenNewSubscriptionCreatedAsUsedForController()
             throws TransactionExecutionException {
-        when(flexRepo.countByNameAndAccount(anyString(), anyString())).thenReturn(0L);
-        when(flexRepo.countBySubscriptionId(anyString())).thenReturn(0L);
+        when(flexSubscriptionRepository.countByNameAndAccount(anyString(), anyString())).thenReturn(0L);
+        when(flexSubscriptionRepository.countBySubscriptionId(anyString())).thenReturn(0L);
         FlexSubscription subscription = getFlexSubscription("testFlexSubscription", "FLEX-000000000", true, false);
         FlexSubscription subscription1 = getFlexSubscription("testFlexSubscription1", "FLEX-000000001", true, true);
-        when(flexRepo.save(subscription)).thenReturn(subscription);
-        when(flexRepo.findAllByAccount(anyString())).thenReturn(Arrays.asList(subscription1, subscription));
+        when(flexSubscriptionRepository.save(subscription)).thenReturn(subscription);
+        when(flexSubscriptionRepository.findAllByAccount(anyString())).thenReturn(Arrays.asList(subscription1, subscription));
 
         FlexSubscription result = underTest.create(subscription);
-
-        verify(flexRepo, times(1)).save(subscription);
-        verify(flexRepo, times(1)).saveAll(Arrays.asList(subscription1, result));
+        verify(flexSubscriptionRepository, times(1)).save(subscription);
+        verify(flexSubscriptionRepository, times(1)).saveAll(Arrays.asList(subscription1, result));
         assertFalse(result.isDefault());
         assertTrue(result.isUsedForController());
         assertTrue(subscription1.isDefault());
@@ -118,17 +117,17 @@ public class FlexSubscriptionServiceTest {
 
     @Test
     public void testCreateShouldUpdateDefaultFlagOfOldSubscriptionsWhenNewSubscriptionCreatedAsDefault() throws TransactionExecutionException {
-        when(flexRepo.countByNameAndAccount(anyString(), anyString())).thenReturn(0L);
-        when(flexRepo.countBySubscriptionId(anyString())).thenReturn(0L);
+        when(flexSubscriptionRepository.countByNameAndAccount(anyString(), anyString())).thenReturn(0L);
+        when(flexSubscriptionRepository.countBySubscriptionId(anyString())).thenReturn(0L);
         FlexSubscription subscription = getFlexSubscription("testFlexSubscription", "FLEX-000000000", false, true);
         FlexSubscription subscription1 = getFlexSubscription("testFlexSubscription1", "FLEX-000000001", true, true);
-        when(flexRepo.save(subscription)).thenReturn(subscription);
-        when(flexRepo.findAllByAccount(anyString())).thenReturn(Arrays.asList(subscription1, subscription));
+        when(flexSubscriptionRepository.save(subscription)).thenReturn(subscription);
+        when(flexSubscriptionRepository.findAllByAccount(anyString())).thenReturn(Arrays.asList(subscription1, subscription));
 
         FlexSubscription result = underTest.create(subscription);
 
-        verify(flexRepo, times(1)).save(subscription);
-        verify(flexRepo, times(1)).saveAll(Arrays.asList(subscription1, result));
+        verify(flexSubscriptionRepository, times(1)).save(subscription);
+        verify(flexSubscriptionRepository, times(1)).saveAll(Arrays.asList(subscription1, result));
         assertTrue(result.isDefault());
         assertFalse(result.isUsedForController());
         assertFalse(subscription1.isDefault());

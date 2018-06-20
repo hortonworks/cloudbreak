@@ -1,21 +1,18 @@
 package com.sequenceiq.periscope.repository;
 
-import java.util.Optional;
 import java.util.Set;
 
-import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
-import org.springframework.security.access.prepost.PostAuthorize;
 
+import com.sequenceiq.cloudbreak.aspect.BaseRepository;
+import com.sequenceiq.cloudbreak.aspect.HasPermission;
+import com.sequenceiq.cloudbreak.service.EntityType;
 import com.sequenceiq.periscope.domain.PrometheusAlert;
 
-public interface PrometheusAlertRepository extends CrudRepository<PrometheusAlert, Long> {
+@HasPermission
+@EntityType(entityClass = PrometheusAlert.class)
+public interface PrometheusAlertRepository extends BaseRepository<PrometheusAlert, Long> {
 
-    @Override
-    @PostAuthorize("hasPermission(returnObject,'read')")
-    Optional<PrometheusAlert> findById(@Param("id") Long id);
-
-    @PostAuthorize("hasPermission(returnObject,'read')")
     PrometheusAlert findByCluster(@Param("alertId") Long alertId, @Param("clusterId") Long clusterId);
 
     Set<PrometheusAlert> findAllByCluster(@Param("clusterId") Long clusterId);

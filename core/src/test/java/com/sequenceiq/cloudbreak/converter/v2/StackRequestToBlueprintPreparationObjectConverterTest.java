@@ -177,7 +177,7 @@ public class StackRequestToBlueprintPreparationObjectConverterTest {
         Long flexId = 2L;
         FlexSubscription expected = new FlexSubscription();
         when(source.getFlexId()).thenReturn(flexId);
-        when(flexSubscriptionService.findOneById(flexId)).thenReturn(expected);
+        when(flexSubscriptionService.get(flexId)).thenReturn(expected);
 
         BlueprintPreparationObject result = underTest.convert(source);
 
@@ -202,7 +202,7 @@ public class StackRequestToBlueprintPreparationObjectConverterTest {
         flexSubscription.setSmartSenseSubscription(expected);
         expected.setSubscriptionId(String.valueOf(flexId));
         when(source.getFlexId()).thenReturn(flexId);
-        when(flexSubscriptionService.findOneById(flexId)).thenReturn(flexSubscription);
+        when(flexSubscriptionService.get(flexId)).thenReturn(flexSubscription);
 
         BlueprintPreparationObject result = underTest.convert(source);
 

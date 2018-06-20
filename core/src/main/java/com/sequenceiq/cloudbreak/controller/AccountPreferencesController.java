@@ -28,7 +28,7 @@ import com.sequenceiq.cloudbreak.service.account.ScheduledAccountPreferencesVali
 public class AccountPreferencesController implements AccountPreferencesEndpoint {
 
     @Autowired
-    private AccountPreferencesService service;
+    private AccountPreferencesService accountPreferencesService;
 
     @Autowired
     private ScheduledAccountPreferencesValidator validator;
@@ -43,30 +43,30 @@ public class AccountPreferencesController implements AccountPreferencesEndpoint 
     @Override
     public AccountPreferencesResponse get() {
         IdentityUser user = authenticatedUserService.getCbUser();
-        AccountPreferences preferences = service.getOneByAccount(user);
+        AccountPreferences preferences = accountPreferencesService.getByUser(user);
         return convert(preferences);
     }
 
     @Override
     public AccountPreferencesResponse put(AccountPreferencesRequest updateRequest) {
         IdentityUser user = authenticatedUserService.getCbUser();
-        return convert(service.saveOne(user, convert(updateRequest)));
+        return convert(accountPreferencesService.saveOne(user, convert(updateRequest)));
     }
 
     @Override
     public AccountPreferencesResponse post(AccountPreferencesRequest updateRequest) {
         IdentityUser user = authenticatedUserService.getCbUser();
-        return convert(service.saveOne(user, convert(updateRequest)));
+        return convert(accountPreferencesService.saveOne(user, convert(updateRequest)));
     }
 
     @Override
     public Map<String, Boolean> isPlatformSelectionDisabled() {
-        return ImmutableMap.of("disabled", service.isPlatformSelectionDisabled());
+        return ImmutableMap.of("disabled", accountPreferencesService.isPlatformSelectionDisabled());
     }
 
     @Override
     public Map<String, Boolean> platformEnablement() {
-        return service.platformEnablement();
+        return accountPreferencesService.platformEnablement();
     }
 
     @Override

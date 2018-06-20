@@ -35,8 +35,9 @@ public class StructuredEventEntity {
     @Column(nullable = false)
     private String account;
 
-    @Column(nullable = false)
-    private String userId;
+    // inconsistent name, the authorization cannot find the "userId" field
+    @Column(nullable = false, name = "userid")
+    private String owner;
 
     @Convert(converter = JsonToString.class)
     @Column(columnDefinition = "TEXT")
@@ -90,12 +91,12 @@ public class StructuredEventEntity {
         this.account = account;
     }
 
-    public String getUserId() {
-        return userId;
+    public String getOwner() {
+        return owner;
     }
 
-    public void setUserId(String userId) {
-        this.userId = userId;
+    public void setOwner(String owner) {
+        this.owner = owner;
     }
 
     public Json getStructuredEventJson() {

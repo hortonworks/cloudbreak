@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.service.eventbus;
+package com.sequenceiq.cloudbreak.service;
 
 import java.util.HashMap;
 import java.util.List;
@@ -7,40 +7,24 @@ import java.util.Map;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.core.convert.ConversionService;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import com.sequenceiq.cloudbreak.cloud.service.Persister;
-import com.sequenceiq.cloudbreak.repository.EntityType;
-
-public abstract class AbstractCloudPersisterService<T> implements Persister<T> {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractCloudPersisterService.class);
-
+@Service
+public class RepositoryLookupService {
     @Inject
     private List<CrudRepository<?, ?>> repositoryList;
-
-    @Inject
-    @Qualifier("conversionService")
-    private ConversionService conversionService;
 
     private final Map<Class<?>, CrudRepository<?, ?>> repositoryMap = new HashMap<>();
 
     @PostConstruct
-    public void checkRepoMap() {
+    private void checkRepoMap() {
         if (CollectionUtils.isEmpty(repositoryList)) {
             throw new IllegalStateException("No repositories provided!");
         } else {
             fillRepositoryMap();
         }
-    }
-
-    protected ConversionService getConversionService() {
-        return conversionService;
     }
 
     private void fillRepositoryMap() {
@@ -58,7 +42,7 @@ public abstract class AbstractCloudPersisterService<T> implements Persister<T> {
         return annotation.entityClass();
     }
 
-    protected <R> R getRepositoryForEntity(Class<?> clazz) {
+    public <R> R getRepositoryForEntity(Class<?> clazz) {
         R repo = (R) repositoryMap.get(clazz);
         if (repo == null) {
             throw new IllegalStateException("No repository found for the entityClass:" + clazz);

@@ -57,7 +57,7 @@ public class TemplateRequestToTemplateConverter extends AbstractConversionServic
             }
         }
         if (source.getTopologyId() != null) {
-            template.setTopology(topologyService.getById(source.getTopologyId()));
+            template.setTopology(topologyService.get(source.getTopologyId()));
         }
         return template;
     }

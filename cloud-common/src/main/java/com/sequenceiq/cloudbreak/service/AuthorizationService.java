@@ -10,13 +10,8 @@ public class AuthorizationService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AuthorizationService.class);
 
-    @PreAuthorize("hasPermission(#target,'read')")
-    public void hasReadPermission(Object target) {
-        LOGGER.debug("User has permission to read resource: {}", target);
-    }
-
-    @PreAuthorize("hasPermission(#target,'write')")
-    public void hasWritePermission(Object target) {
-        LOGGER.debug("User has permission to write resource: {}", target);
+    @PreAuthorize("hasPermission(#target,#permission)")
+    public void hasPermission(Object target, String permission) {
+        LOGGER.debug("User has permission to {} resource: {}", permission, target);
     }
 }

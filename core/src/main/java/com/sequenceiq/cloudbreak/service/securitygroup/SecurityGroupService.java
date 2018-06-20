@@ -54,30 +54,24 @@ public class SecurityGroupService {
     }
 
     public SecurityGroup get(Long id) {
-        SecurityGroup securityGroup = groupRepository.findById(id).orElseThrow(notFound("SecurityGroup", id));
-        authorizationService.hasReadPermission(securityGroup);
-        return securityGroup;
+        return groupRepository.findById(id).orElseThrow(notFound("SecurityGroup", id));
     }
 
     public SecurityGroup getPrivateSecurityGroup(String name, IdentityUser user) {
-        SecurityGroup securityGroup = Optional.ofNullable(groupRepository.findByNameForUser(name, user.getUserId()))
+        return Optional.ofNullable(groupRepository.findByNameForUser(name, user.getUserId()))
                 .orElseThrow(notFound("SecurityGroup", name));
-        return securityGroup;
     }
 
     public SecurityGroup getPublicSecurityGroup(String name, IdentityUser user) {
-        SecurityGroup securityGroup = Optional.ofNullable(groupRepository.findByNameInAccount(name, user.getAccount()))
+        return Optional.ofNullable(groupRepository.findByNameInAccount(name, user.getAccount()))
                 .orElseThrow(notFound("SecurityGroup", name));
-        return securityGroup;
     }
 
     public void delete(Long id, IdentityUser user) {
-        LOGGER.info("Deleting SecurityGroup with id: {}", id);
         delete(get(id));
     }
 
     public void delete(String name, IdentityUser user) {
-        LOGGER.info("Deleting SecurityGroup with name: {}", name);
         SecurityGroup securityGroup = Optional.ofNullable(groupRepository.findByNameInAccount(name, user.getAccount()))
                 .orElseThrow(notFound("SecurityGroup", name));
         delete(securityGroup);
@@ -92,8 +86,8 @@ public class SecurityGroupService {
                 : groupRepository.findPublicInAccountForUser(user.getUserId(), user.getAccount());
     }
 
-    private void delete(SecurityGroup securityGroup) {
-        authorizationService.hasWritePermission(securityGroup);
+    public void delete(SecurityGroup securityGroup) {
+        LOGGER.info("Deleting SecurityGroup with name: {}", securityGroup.getName());
         List<InstanceGroup> instanceGroupsWithThisSecurityGroup = new ArrayList<>(instanceGroupRepository.findBySecurityGroup(securityGroup));
         if (!instanceGroupsWithThisSecurityGroup.isEmpty()) {
             if (instanceGroupsWithThisSecurityGroup.size() > 1) {
