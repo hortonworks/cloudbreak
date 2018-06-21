@@ -86,7 +86,7 @@ public class CachedImageCatalogProvider {
     }
 
     private CloudbreakImageCatalogV2 filterImagesByOsType(CloudbreakImageCatalogV2 catalog) {
-        if (CollectionUtils.isEmpty(enabledLinuxTypes) || Objects.isNull(catalog) || Objects.isNull(catalog.getImages())) {
+        if (CollectionUtils.isEmpty(getEnabledLinuxTypes()) || Objects.isNull(catalog) || Objects.isNull(catalog.getImages())) {
             return catalog;
         }
 
@@ -109,7 +109,11 @@ public class CachedImageCatalogProvider {
     }
 
     private Predicate<Image> enabledOsPredicate() {
-        return img -> enabledLinuxTypes.stream().anyMatch(img.getOs()::equalsIgnoreCase);
+        return img -> getEnabledLinuxTypes().stream().anyMatch(img.getOs()::equalsIgnoreCase);
+    }
+
+    private List<String> getEnabledLinuxTypes() {
+        return enabledLinuxTypes.stream().filter(StringUtils::isNoneBlank).collect(Collectors.toList());
     }
 
     private CloudbreakImageCatalogV2 checkResponse(WebTarget target, Response response) throws CloudbreakImageCatalogException {
