@@ -23,6 +23,4 @@ docker run -it \
     halmy/aruba-rspec:1.0 /work/scripts/integration-test-aruba.sh
 RESULT=$?
 
-echo
-
-exit $RESULT
+cat aruba/test-result.html | grep -e ".*script.*totals.*failure" | cut -d ',' -f 2 | grep -e " 0"

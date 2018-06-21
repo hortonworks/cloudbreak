@@ -1,6 +1,5 @@
 require "common/e2e_vars.rb"
 require "common/mock_vars.rb"
-require "common/helpers.rb"
 require "common/command_helpers.rb"
 require "e2e/spec_helper"
 
@@ -11,9 +10,8 @@ define_method(:cb) do
 end
 
 RSpec.describe 'Image catalog test cases', :type => :aruba do
-  include_context "shared helpers"
-  include_context "shared command helpers"    
-  include_context "shared vars"
+  include_context "shared command helpers"
+  include_context "e2e shared vars"       
   include_context "mock shared vars"  
   
   it "Imagecatalog - Create" do 
@@ -24,7 +22,7 @@ RSpec.describe 'Image catalog test cases', :type => :aruba do
   end
 
   it "Imagecatalog - Create - Invalid Url" do 
-  	skip("BUG-97072")
+    skip("BUG-97072")
     with_environment 'DEBUG' => '1' do
       result = cb.imagecatalog.create.name(@image_catalog_name).url("http://www.google.com").build(false)
       expect(result.stderr).to include("create imagecatalog took")    
@@ -32,7 +30,7 @@ RSpec.describe 'Image catalog test cases', :type => :aruba do
   end 
 
   it "Imagecatalog - Create - Invalid json" do 
-  	skip("BUG-97072")
+    skip("BUG-97072")
     with_environment 'DEBUG' => '1' do
       result = cb.imagecatalog.create.name(@image_catalog_name).url(@imagecatalog_invalid_json ).build(false) 
       expect(result.stderr).to include("error")    

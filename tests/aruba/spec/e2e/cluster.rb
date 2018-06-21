@@ -1,5 +1,5 @@
 require "common/e2e_vars.rb"
-require "common/helpers.rb"
+require "common/cluster_helpers.rb"
 require "common/command_helpers.rb"
 require "e2e/spec_helper"
 
@@ -10,23 +10,27 @@ define_method(:cb) do
 end
 
 RSpec.describe 'Custer operation test cases', :type => :aruba do
-  include_context "shared helpers"
+  include_context "shared cluster helpers"
   include_context "shared command helpers"
-  include_context "shared vars"
-  
+  include_context "e2e shared vars"
+
   before(:all) do
-    @credential_exist = credential_list_with_check(@os_credential_name) 
-    if !(@credential_exist)
-        @credential_created = (cb.credential.create.openstack.keystone_v2.name(@os_credential_name).tenant_user(ENV['OS_V2_USERNAME']).
-          tenant_password(ENV['OS_V2_PASSWORD']).tenant_name(ENV['OS_V2_TENANT_NAME']).endpoint(ENV['OS_V2_ENDPOINT']).build).stderr.empty?
+    result = list_with_name_exists(@os_credential_name)  do
+      cb.credential.list.build
+    end
+    if !(result[0])
+      @credential_created = (cb.credential.create.openstack.keystone_v2.name(@os_credential_name).tenant_user(ENV['OS_V2_USERNAME']).
+      tenant_password(ENV['OS_V2_PASSWORD']).tenant_name(ENV['OS_V2_TENANT_NAME']).endpoint(ENV['OS_V2_ENDPOINT']).builds).stderr.empty?
     else
       @credential_created = true
     end
   end
 
   before(:all) do
-    @cluster_exist = cluster_exists(cb, @os_cluster_name)
-    if (@cluster_exist)
+    result = list_with_name_exists(@os_cluster_name)  do
+      cb.cluster.list.build
+    end
+    if (result[0])
       result = cb.cluster.delete.name(@os_cluster_name).build
       expect(result).to be_successfully_executed
       expect(wait_for_cluster_deleted(cb, @os_cluster_name)).to be_falsy      
@@ -97,7 +101,10 @@ RSpec.describe 'Custer operation test cases', :type => :aruba do
   end
 
   it "List clusters - checking created cluster" do
-    expect(cluster_exists(cb, @os_cluster_name)).to be_truthy
+    result = list_with_name_exists(@os_cluster_name)  do
+      cb.cluster.list.build
+    end       
+    expect(result[0]).to be_truthy
   end
 
   it "Change ambari password" do    

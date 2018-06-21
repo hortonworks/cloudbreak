@@ -34,6 +34,7 @@ var openstack = require('./stacks/openstack.json');
 var templates = require('./templates/qa-templates.json');
 var profile = require('./users/default-profile.json');
 var matrix = require('./utilsmatrix.json');
+var mpacks = require('./mpacks/mpacks.json');
 
 const OK = 200;
 
@@ -135,6 +136,9 @@ responses.postPrivateStackV2= responseObject(openstack, OK);
 responses.getPrivateStackV2= responseObject(openstack, OK);
 responses.getStackV2= responseObject(openstack, OK);
 responses.getPlatformSecurityGroups= responseObject(securitygroups, OK);
+responses.postPublicManagementPack = responseObject(mpacks, OK);
+responses.postPrivateManagementPack = responseObject(mpacks, OK);
+
 responses.postRepositoryConfigsValidation= responseObject({
   "utilsBaseURL" : true,
   "ambariGpgKeyUrl" : true,

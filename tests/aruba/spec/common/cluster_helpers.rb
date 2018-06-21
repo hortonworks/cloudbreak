@@ -1,4 +1,4 @@
-RSpec.shared_context "shared helpers", :a => :b do
+RSpec.shared_context "shared cluster helpers", :a => :b do
   before { @some_var = :some_value }
 
   def status_check(cb, cluster_name)
@@ -73,25 +73,15 @@ RSpec.shared_context "shared helpers", :a => :b do
     cnt=0
     current_status=true
     while (cnt < cnt_max and current_status) do
-      current_status = cluster_exists(cb, cluster_name)
+      result = list_with_name_exists(cluster_name) do
+        cb.cluster.list.build 
+      end
+      current_status = result[0]   
       sleep sleep_duration
       cnt=cnt + 1
     end
-    return cluster_exists(cb, cluster_name)
+    return current_status
   end 
-
-  def cluster_exists(cb, cluster_name)
-    cluster_is_found = false
-    result = cb.cluster.list.build(false)
-    expect(result.stdout.empty?).to be_falsy
-    json_output = JSON.parse(result.stdout)
-    json_output.each do |s|
-      if s["Name"] == cluster_name
-        cluster_is_found = true
-      end
-    end  
-    return cluster_is_found       
-  end
 
   def skip_if(cb, cluster_name, status, reason)
     if status_check(cb, cluster_name) != status 

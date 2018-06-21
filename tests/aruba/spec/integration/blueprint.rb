@@ -1,5 +1,4 @@
 require "common/e2e_vars.rb"
-require "common/helpers.rb"
 require "common/command_helpers.rb"
 require "integration/spec_helper"
 
@@ -10,9 +9,8 @@ define_method(:cb) do
 end
 
 RSpec.describe 'Blueprint test cases', :type => :aruba do
-  include_context "shared helpers"
   include_context "shared command helpers"    
-  include_context "shared vars"
+  include_context "e2e shared vars"
 
   it "Blueprint - Create from url" do 
     with_environment 'DEBUG' => '1' do
@@ -34,11 +32,13 @@ RSpec.describe 'Blueprint test cases', :type => :aruba do
     expect(result.stderr).to include("error") 
   end
 
-  it "Blueprint - Create from file - Describe - Delete " do 
-    bp_create_describe_delete(cb, @blueprint_name_file) do
-      cb.blueprint.create.from_file.name(@blueprint_name_file).file(@blueprint_file).build(false) 
-    end 
-  end 
+  it "Blueprint - Create from file" do 
+    with_environment 'DEBUG' => '1' do
+      result = cb.blueprint.create.from_file.name(@blueprint_name_file).file(@blueprint_file).build(false) 
+      expect(result.exit_status).to eql 0
+      expect(result.stderr).to include("blueprint created")    
+    end
+  end     
 
   it "Blueprint - Describe a default blueprint" do
     result = cb.blueprint.describe.name(@default_blueprint_name).build(false)

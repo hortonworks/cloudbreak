@@ -20,28 +20,31 @@ RSpec.shared_context "shared command helpers", :a => :b do
     expect(result.exit_status).to eql 0
 
     result = cb.blueprint.describe.name(blueprint_name).build 
-    expect(result.exit_status).to eql 0    
+    expect(result.exit_status).to eql 0 
+
+    result = list_with_name_exists(blueprint_name) do
+      cb.blueprint.list.build
+    end
+    expect(result[0]).to be_truthy       
 
     result = cb.blueprint.delete.name(blueprint_name).build 
     expect(result.exit_status).to eql 0        
   end 
 
-   def recipe_create_describe_list_delete(cb, recipe_name, mock= false, &block)
+   def recipe_create_describe_list_delete(cb, recipe_name, &block)
     result = block.call
     expect(result.exit_status).to eql 0
 
     result = cb.recipe.describe.name(recipe_name).build 
     expect(result.exit_status).to eql 0
 
-    if mock 
-      result = cb.recipe.list.build 
-      expect(result.exit_status).to eql 0   
-    else   
-      result = recipe_list_with_check(recipe_name)
-      expect(result).to be_truthy
-    end             
+    result = list_with_name_exists(recipe_name) do
+      cb.recipe.list.build
+    end
+    expect(result[0]).to be_truthy
+
     result = cb.recipe.delete.name(recipe_name).build 
-    expect(result.exit_status).to eql 0        
+    expect(result.exit_status).to eql 0                
   end
 
   def credential_create_describe_list_delete(cb, cred_name, &block)
@@ -51,101 +54,40 @@ RSpec.shared_context "shared command helpers", :a => :b do
     result = cb.credential.describe.name(cred_name).build 
     expect(result.exit_status).to eql 0
 
-    result = credential_list_with_check(cred_name)
-    expect(result).to be_truthy            
+    result = list_with_name_exists(cred_name) do
+      cb.credential.list.build
+    end
+    expect(result[0]).to be_truthy        
 
     result = cb.credential.delete.name(cred_name).build 
     expect(result.exit_status).to eql 0        
   end
 
-  def recipe_list_with_check(recipe_name) 
-    got_recipe = false
-
-    result = cb.recipe.list.build 
-    expect(result.exit_status).to eql 0 
-    
-    expect(result.stdout.empty?).to be_falsy
-    json = JSON.parse(result.stdout)
-
+  def json_has_name(json, name)
     json.each do |s|
-       if s["Name"] == recipe_name
-        got_recipe = true
-        return true
-       end
-          
-      expect(s).to include_json(
-        Name: /.*/,
-        Description: /.*/,  
-        ExecutionType: /.*/     
-    )
-    end 
-    return false  
-  end
-
-  def recipe_exist(json, recipe_name)
-    got_recipe = false
-    json.each do |s|
-       if s["Name"] == recipe_name
-        got_recipe = true
-        return true
+      if s["Name"] == name
+        return true, json
        end
     end
-    return false   
+    return false, json   
   end  
+         
 
-  def blueprint_list_with_check(bp_name) 
-    got_bp = false
-
-    result = cb.blueprint.list.build 
-    expect(result.exit_status).to eql 0 
-    
-    expect(result.stdout.empty?).to be_falsy
-    json = JSON.parse(result.stdout)
-
-    json.each do |s|
-       if s["Name"] == bp_name
-        got_bp = true
-        return true
-       end
-    end 
-    return false  
+  def list_with_name_exists(name, &block) 
+    json = list_parse do
+      block.call  
+    end
+    return json_has_name(json, name)
   end
 
-  def credential_list_with_check(cred_name) 
-    got_cred = false
-
-    result = cb.credential.list.build 
-    expect(result.exit_status).to eql 0 
-    
+  def list_parse(&block) 
+    result = block.call
+    expect(result.exit_status).to eql 0     
     expect(result.stdout.empty?).to be_falsy
     json = JSON.parse(result.stdout)
-
-    json.each do |s|
-       if s["Name"] == cred_name
-        got_cred = true
-        return true
-       end
-    end 
-    return false  
+    return json
   end
 
-  def imagecat_list_with_check(ic_name) 
-    got_ic = false
-
-    result = cb.imagecatalog.list.build 
-    expect(result.exit_status).to eql 0 
-    
-    expect(result.stdout.empty?).to be_falsy
-    json = JSON.parse(result.stdout)
-
-    json.each do |s|
-       if s["Name"] == ic_name
-        got_cred = true
-        return true
-       end
-    end 
-    return false  
-  end          
 
   def get_region(result)
     expect(result.empty?).to be_falsy
@@ -155,17 +97,11 @@ RSpec.shared_context "shared command helpers", :a => :b do
     end
   end
 
-  def create_p12(file_name)
-    result = run("touch " + file_name)
-    result.stop
-    expect(result.exit_status).to eql 0       
-  end
-
-  def create_valid_json(file_name, json)
+  def create_test_file(file_name, content = "")
     f = File.open(File.dirname(__FILE__) + "/../../tmp/aruba/" + file_name,"w")
-    f.write(json)
+    f.write(content)
     f.close
-  end 
+  end    
 
   def get_cluster_info(cb, cluster_name)
     json = get_cluster_json(cb, cluster_name)

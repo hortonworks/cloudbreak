@@ -1,5 +1,4 @@
 require "common/e2e_vars.rb"
-require "common/helpers.rb"
 require "common/command_helpers.rb"
 require "e2e/spec_helper"
 
@@ -10,17 +9,19 @@ define_method(:cb) do
 end
 
 RSpec.describe 'Image catalog test cases', :type => :aruba do
-  include_context "shared helpers"
   include_context "shared command helpers"    
-  include_context "shared vars"
-  
+  include_context "e2e shared vars"
+
   before(:all) do
-    @ic_exist = imagecat_list_with_check(@image_catalog_name) 
-    if (@ic_exist)
+    result = list_with_name_exists(@image_catalog_name) do
+      cb.imagecatalog.list.build
+    end
+    if (result[0])
       result = cb.imagecatalog.delete.name(@image_catalog_name).build
       expect(result.exit_status).to eql 0 
     end
-  end   
+  end
+
   after(:all) do 
     result = cb.imagecatalog.set_default.name(@image_catalog_name_default).build
     expect(result.exit_status).to eql 0    

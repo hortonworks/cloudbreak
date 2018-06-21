@@ -1,5 +1,4 @@
 require "common/e2e_vars.rb"
-require "common/helpers.rb"
 require "common/command_helpers.rb"
 require "e2e/spec_helper"
 
@@ -10,9 +9,8 @@ define_method(:cb) do
 end
 
 RSpec.describe 'Recipe test cases', :type => :aruba do
-  include_context "shared helpers"
   include_context "shared command helpers"    
-  include_context "shared vars"
+  include_context "e2e shared vars"
 
   before(:all) do
     result = cb.recipe.list.build 
@@ -23,8 +21,9 @@ RSpec.describe 'Recipe test cases', :type => :aruba do
 
     @recipe_types.each  do |type|
       r_name = "cli-" + type + "-u"
-      @recipe_exist = recipe_exist(recipe_list_json, r_name)
-      if (@recipe_exist == true)
+      recipe_exist = json_has_name(recipe_list_json, r_name)
+   
+      if (recipe_exist[0] == true)
         result = cb.recipe.delete.name(r_name).build
         expect(result.exit_status).to eql 0 
       end
@@ -40,8 +39,9 @@ RSpec.describe 'Recipe test cases', :type => :aruba do
 
     @recipe_types.each  do |type|
       r_name = "cli-" + type + "-f"
-      @recipe_exist = recipe_exist(recipe_list_json, r_name)
-      if (@recipe_exist)
+      recipe_exist = json_has_name(recipe_list_json, r_name)
+   
+      if (recipe_exist[0] == true)
         result = cb.recipe.delete.name(r_name).build
         expect(result.exit_status).to eql 0 
       end

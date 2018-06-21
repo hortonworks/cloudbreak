@@ -1,5 +1,4 @@
 require "common/e2e_vars.rb"
-require "common/helpers.rb"
 require "common/command_helpers.rb"
 require "e2e/spec_helper"
 
@@ -10,9 +9,8 @@ define_method(:cb) do
 end
 
 RSpec.describe 'Cluster test cases', :type => :aruba do
-  include_context "shared helpers"
   include_context "shared command helpers"    
-  include_context "shared vars"
+  include_context "e2e shared vars"
 
 
   it "Cluster - List" do
