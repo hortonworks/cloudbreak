@@ -32,7 +32,7 @@ public class ProxyHandler<I> implements InvocationHandler {
                     ? String.format("Method ['%s.%s'] called with args:%n", method.getDeclaringClass().toString().split(" ")[1], method.getName())
                     : String.format("Method ['%s'] called with args:%n", method.getName());
             log(initLogMessage);
-            log(String.join(", ", Arrays.stream(args).map(Object::toString).collect(Collectors.toList())));
+            log(String.join(", ", Arrays.stream(args).map(o -> o == null ? "null" : o.toString()).collect(Collectors.toList())));
         }
     }
 }
