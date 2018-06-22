@@ -117,4 +117,8 @@ public class StackEntity extends AbstractCloudbreakEntity<StackV2Request, StackR
         getRequest().setAmbariVersion(version);
         return this;
     }
+
+    public boolean hasCluster() {
+        return getRequest().getCluster() != null;
+    }
 }

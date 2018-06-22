@@ -18,6 +18,7 @@ import javax.ws.rs.core.Response.Status.Family;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.testng.Assert;
@@ -33,6 +34,7 @@ import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
+import com.sequenceiq.cloudbreak.client.RestClientUtil;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.periscope.api.endpoint.v1.HistoryEndpoint;
 import com.sequenceiq.periscope.api.model.AutoscaleClusterHistoryResponse;
@@ -169,10 +171,19 @@ public class CloudbreakUtil {
         checkClusterAvailability(stackResponse, port, stackId, ambariUser, ambariPassowrd, checkAmbari);
     }
 
+    public static void checkClusterAvailabilityThroughGateway(StackEndpoint stackV2Endpoint, String stackId, String ambariUser, String ambariPassowrd) {
+        StackResponse stackResponse = stackV2Endpoint.get(Long.valueOf(stackId), new HashSet<>());
+        checkStackStatusForClusterAvailability(stackResponse);
+
+        String ambariServerUrl = stackResponse.getCluster().getAmbariServerUrl();
+        Assert.assertNotNull(ambariServerUrl, "The Ambari URL is not available!");
+        Response response = RestClientUtil.get().target(ambariServerUrl).request().get();
+        Assert.assertEquals(HttpStatus.OK.value(), response.getStatus(), "Ambari is not available!");
+    }
+
     private static void checkClusterAvailability(StackResponse stackResponse, String port, String stackId, String ambariUser, String ambariPassowrd,
             boolean checkAmbari) {
-        Assert.assertEquals(stackResponse.getCluster().getStatus(), Status.AVAILABLE, "The cluster hasn't been started!");
-        Assert.assertEquals(stackResponse.getStatus(), Status.AVAILABLE, "The stack hasn't been started!");
+        checkStackStatusForClusterAvailability(stackResponse);
 
         String ambariIp = stackResponse.getCluster().getAmbariServerIp();
         Assert.assertNotNull(ambariIp, "The Ambari IP is not available!");
@@ -183,6 +194,11 @@ public class CloudbreakUtil {
             Assert.assertEquals(ambariClient.getClusterHosts().size(), getNodeCount(stackResponse),
                     "The number of cluster nodes in the stack differs from the number of nodes registered in ambari");
         }
+    }
+
+    private static void checkStackStatusForClusterAvailability(StackResponse stackResponse) {
+        Assert.assertEquals(stackResponse.getCluster().getStatus(), Status.AVAILABLE, "The cluster hasn't been started!");
+        Assert.assertEquals(stackResponse.getStatus(), Status.AVAILABLE, "The stack hasn't been started!");
     }
 
     public static void checkClusterStopped(StackEndpoint stackV2Endpoint, String port, String stackId, String ambariUser, String ambariPassword) {
@@ -249,7 +265,8 @@ public class CloudbreakUtil {
             }
 
             retryCount++;
-        } while (!checkStatuses(currentStatuses, desiredStatuses) && !checkFailedStatuses(currentStatuses) && retryCount < MAX_RETRY);
+        }
+        while (!checkStatuses(currentStatuses, desiredStatuses) && !checkFailedStatuses(currentStatuses) && retryCount < MAX_RETRY);
 
         LOGGER.info("Status(es) {} for {} are in desired status(es) {}", desiredStatuses.keySet(), stackId, currentStatuses.values());
         if (currentStatuses.values().stream().anyMatch(cs -> cs.contains("FAILED")) || checkNotExpectedDelete(currentStatuses, desiredStatuses)) {

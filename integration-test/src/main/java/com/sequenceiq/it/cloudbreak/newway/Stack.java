@@ -128,6 +128,16 @@ public class Stack extends StackEntity {
         });
     }
 
+    public static Assertion<Stack> checkClusterHasAmbariRunningThroughKnox(String ambariUser, String ambariPassword) {
+        return assertThis((stack, context) -> {
+            CloudbreakClient client = CloudbreakClient.getTestContextCloudbreakClient().apply(context);
+            CloudbreakUtil.checkClusterAvailabilityThroughGateway(client.getCloudbreakClient().stackV2Endpoint(),
+                    stack.getResponse().getId().toString(),
+                    ambariUser,
+                    ambariPassword);
+        });
+    }
+
     public static Assertion<Stack> checkRecipes(String [] searchOnHost, String[] files, String privateKey, String sshCommand, Integer require) {
         return assertThis((stack, t) -> {
             List<String> ips = new ArrayList<>();
