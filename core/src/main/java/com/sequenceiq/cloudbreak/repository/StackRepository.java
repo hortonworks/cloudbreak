@@ -90,7 +90,8 @@ public interface StackRepository extends CrudRepository<Stack, Long> {
     List<Stack> findByStatuses(@Param("statuses") List<Status> statuses);
 
     @Query("SELECT s FROM Stack s LEFT JOIN FETCH s.cluster LEFT JOIN FETCH s.credential LEFT JOIN FETCH s.network LEFT JOIN FETCH s.orchestrator "
-            + "LEFT JOIN FETCH s.stackStatus LEFT JOIN FETCH s.securityConfig LEFT JOIN FETCH s.failurePolicy WHERE s.stackStatus.status <> 'DELETE_COMPLETED' "
+            + "LEFT JOIN FETCH s.stackStatus LEFT JOIN FETCH s.securityConfig LEFT JOIN FETCH s.failurePolicy LEFT JOIN FETCH"
+            + " s.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData WHERE s.stackStatus.status <> 'DELETE_COMPLETED' "
             + "AND s.stackStatus.status <> 'DELETE_IN_PROGRESS'")
     Set<Stack> findAliveOnes();
 
