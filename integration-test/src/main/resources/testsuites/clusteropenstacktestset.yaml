@@ -25,6 +25,23 @@ tests:
           - testStopCluster
           - testStartCluster
           - testTerminateCluster
+  - name: "openstack cluster with knox gateway"
+    preserveOrder: true
+    parameters:
+      clusterName: os-base-datasci-knox-gw
+      provider: openstack
+      blueprintName: "Data Science: Apache Spark 2, Apache Zeppelin"
+      image: base
+      instancegroupName: worker
+      isGatekeeper: true
+    classes:
+      - name: com.sequenceiq.it.cloudbreak.ClusterTests
+        includedMethods:
+          - testCreateNewClusterWithKnox
+          - testScaleCluster
+          - testStopCluster
+          - testStartCluster
+          - testTerminateCluster
   - name: "openstack base image EDW-Analytics"
     preserveOrder: true
     parameters:

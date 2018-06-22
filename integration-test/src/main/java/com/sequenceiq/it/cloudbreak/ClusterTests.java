@@ -1,5 +1,6 @@
 package com.sequenceiq.it.cloudbreak;
 
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -11,10 +12,13 @@ import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.model.imagecatalog.ImageResponse;
 import com.sequenceiq.cloudbreak.api.model.imagecatalog.ImagesResponse;
+import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.SSOType;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
 import com.sequenceiq.it.cloudbreak.newway.Cluster;
+import com.sequenceiq.it.cloudbreak.newway.ClusterGateway;
+import com.sequenceiq.it.cloudbreak.newway.GatewayTopology;
 import com.sequenceiq.it.cloudbreak.newway.HostGroups;
 import com.sequenceiq.it.cloudbreak.newway.ImageSettings;
 import com.sequenceiq.it.cloudbreak.newway.Kerberos;
@@ -99,6 +103,36 @@ public class ClusterTests extends CloudbreakTest {
                 getTestParameter().get(CloudProviderHelper.DEFAULT_AMBARI_USER),
                 getTestParameter().get(CloudProviderHelper.DEFAULT_AMBARI_PASSWORD)),
                 "check ambari is running and components available");
+    }
+
+    @Test(dataProvider = "providernameblueprintimage", priority = 10)
+    public void testCreateNewClusterWithKnox(CloudProvider cloudProvider, String clusterName, String blueprintName, String imageId) throws Exception {
+        given(CloudbreakClient.isCreated());
+        given(cloudProvider.aValidCredential());
+        given(Cluster.request()
+                        .withAmbariRequest(cloudProvider.ambariRequestWithBlueprintName(blueprintName)),
+                "a cluster request");
+        given(ImageSettings.request()
+                .withImageCatalog("")
+                .withImageId(imageId));
+        given(ClusterGateway.request()
+                .withPath("test-gateway")
+                .withSsoType(SSOType.NONE)
+                .withTopology(GatewayTopology.request()
+                        .withName("test-topology")
+                        .withExposedServices(Collections.singletonList("ALL"))
+                )
+        );
+        given(cloudProvider.aValidStackRequest().withName(clusterName), "a stack request");
+
+        when(Stack.post(), "post the stack request");
+
+        then(Stack.waitAndCheckClusterAndStackAvailabilityStatus(),
+                "wait and check availability");
+        then(Stack.checkClusterHasAmbariRunningThroughKnox(
+                getTestParameter().get(CloudProviderHelper.DEFAULT_AMBARI_USER),
+                getTestParameter().get(CloudProviderHelper.DEFAULT_AMBARI_PASSWORD)),
+                "check if ambari is available through knox");
     }
 
     @Test(dataProvider = "providernamehostgroupdesiredno", priority = 20)

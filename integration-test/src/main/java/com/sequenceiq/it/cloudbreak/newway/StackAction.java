@@ -5,7 +5,12 @@ import com.sequenceiq.it.cloudbreak.newway.log.Log;
 
 import java.io.IOException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class StackAction {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(StackAction.class);
 
     private StackAction() {
     }
@@ -47,7 +52,9 @@ public class StackAction {
     public static void createInGiven(IntegrationTestContext integrationTestContext, Entity entity) throws Exception {
         try {
             get(integrationTestContext, entity);
+            // TODO: Exception class is too wide. A narrower exception should be caught (e.g. NotFound or something like that.)
         } catch (Exception e) {
+            LOGGER.info("Failed to get stack. Trying to create it.", e);
             new StackPostStrategy().doAction(integrationTestContext, entity);
         }
     }

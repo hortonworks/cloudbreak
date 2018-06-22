@@ -1,6 +1,7 @@
 package com.sequenceiq.it.cloudbreak.newway;
 
 import com.sequenceiq.cloudbreak.api.model.v2.AmbariV2Request;
+import com.sequenceiq.cloudbreak.api.model.v2.ClusterV2Request;
 import com.sequenceiq.it.IntegrationTestContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,6 +36,17 @@ public class StackPostStrategy implements Strategy {
             AmbariV2Request ambariReq = stackEntity.getRequest().getCluster().getAmbari();
             ambariReq.setEnableSecurity(true);
             ambariReq.setKerberos(kerberos.getRequest());
+        }
+
+        ClusterGateway clusterGateway = ClusterGateway.getTestContextGateway().apply(integrationTestContext);
+        if (clusterGateway != null) {
+            if (stackEntity.hasCluster()) {
+                ClusterV2Request clusterV2Request = stackEntity.getRequest().getCluster();
+                AmbariV2Request ambariV2Request = clusterV2Request.getAmbari();
+                if (ambariV2Request != null) {
+                    ambariV2Request.setGateway(clusterGateway.getRequest());
+                }
+            }
         }
 
         ImageSettings imageSettings = ImageSettings.getTestContextImageSettings().apply(integrationTestContext);
