@@ -10,6 +10,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -90,11 +91,12 @@ public class ClusterTerminationService {
     private FileSystemConfigurationsViewProvider fileSystemConfigurationsViewProvider;
 
     public Boolean deleteClusterComponents(Long clusterId) {
-        Cluster cluster = clusterRepository.findById(clusterId);
-        if (cluster == null) {
+        Optional<Cluster> clusterOpt = clusterRepository.findById(clusterId);
+        if (!clusterOpt.isPresent()) {
             LOGGER.warn("Failed to delete containers of cluster (id:'{}'), because the cluster could not be found in the database.", clusterId);
             return Boolean.TRUE;
         }
+        Cluster cluster = clusterOpt.get();
         OrchestratorType orchestratorType;
         try {
             orchestratorType = orchestratorTypeResolver.resolveType(cluster.getStack().getOrchestrator().getType());
@@ -120,7 +122,7 @@ public class ClusterTerminationService {
                         .map(c -> new ContainerInfo(c.getContainerId(), c.getName(), c.getHost(), c.getImage())).collect(Collectors.toList());
                 containerOrchestrator.deleteContainer(containerInfo, credential);
                 transactionService.required(() -> {
-                    containerRepository.delete(containers);
+                    containerRepository.deleteAll(containers);
                     deleteClusterHostGroupsWithItsMetadata(cluster);
                     return null;
                 });
@@ -169,8 +171,8 @@ public class ClusterTerminationService {
                 constraintsToDelete.add(constraint);
             }
         }
-        hostGroupRepository.delete(hostGroups);
-        constraintRepository.delete(constraintsToDelete);
+        hostGroupRepository.deleteAll(hostGroups);
+        constraintRepository.deleteAll(constraintsToDelete);
         cluster.getHostGroups().clear();
         cluster.getContainers().clear();
         clusterRepository.save(cluster);

@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.eventbus;
 
+import static com.sequenceiq.cloudbreak.controller.exception.NotFoundException.notFound;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -28,7 +30,7 @@ public class CloudResourcePersisterService extends AbstractCloudPersisterService
                     cloudResource.getName(), cloudResource.getType().name(), stackId);
             return notification;
         }
-        resource.setStack(getStackRepository().findOne(stackId));
+        resource.setStack(getStackRepository(stackId));
         resourceRepository.save(resource);
         return notification;
     }
@@ -42,7 +44,7 @@ public class CloudResourcePersisterService extends AbstractCloudPersisterService
         Resource persistedResource = repository.findByStackIdAndNameAndType(stackId, cloudResource.getName(), cloudResource.getType());
         Resource resource = getConversionService().convert(cloudResource, Resource.class);
         updateWithPersistedFields(resource, persistedResource);
-        resource.setStack(getStackRepository().findOne(stackId));
+        resource.setStack(getStackRepository(stackId));
         repository.save(resource);
         return notification;
     }
@@ -65,8 +67,9 @@ public class CloudResourcePersisterService extends AbstractCloudPersisterService
         return null;
     }
 
-    private StackRepository getStackRepository() {
-        return getRepositoryForEntity(Stack.class);
+    private Stack getStackRepository(Long stackId) {
+        StackRepository stackRepository = getRepositoryForEntity(Stack.class);
+        return stackRepository.findById(stackId).orElseThrow(notFound("Stack", stackId));
     }
 
     private ResourceRepository getResourceRepository() {

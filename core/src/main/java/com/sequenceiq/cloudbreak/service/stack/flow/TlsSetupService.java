@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.stack.flow;
 
+import static com.sequenceiq.cloudbreak.controller.exception.NotFoundException.notFound;
+
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 
@@ -18,8 +20,8 @@ import com.google.common.io.BaseEncoding;
 import com.sequenceiq.cloudbreak.client.CertificateTrustManager.SavingX509TrustManager;
 import com.sequenceiq.cloudbreak.client.PkiUtil;
 import com.sequenceiq.cloudbreak.client.RestClientUtil;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
@@ -63,12 +65,17 @@ public class TlsSetupService {
             nginxTarget.path("/").request().get();
             X509Certificate[] chain = x509TrustManager.getChain();
             String serverCert = PkiUtil.convert(chain[0]);
-            InstanceMetaData metaData = instanceMetaDataRepository.findOne(gwInstance.getId());
+            InstanceMetaData metaData = getInstanceMetaData(gwInstance);
             metaData.setServerCert(BaseEncoding.base64().encode(serverCert.getBytes()));
             instanceMetaDataRepository.save(metaData);
         } catch (Exception e) {
             throw new CloudbreakException("Failed to retrieve the server's certificate", e);
         }
+    }
+
+    private InstanceMetaData getInstanceMetaData(InstanceMetaData gwInstance) {
+        return instanceMetaDataRepository.findById(gwInstance.getId())
+                .orElseThrow(notFound("Instance metadata", gwInstance.getId()));
     }
 
 }

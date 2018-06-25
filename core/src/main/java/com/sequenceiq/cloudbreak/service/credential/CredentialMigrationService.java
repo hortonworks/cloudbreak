@@ -40,7 +40,7 @@ public class CredentialMigrationService {
             }
         }
         if (!updatedCredentials.isEmpty()) {
-            credentialRepository.save(updatedCredentials);
+            credentialRepository.saveAll(updatedCredentials);
         }
     }
 }

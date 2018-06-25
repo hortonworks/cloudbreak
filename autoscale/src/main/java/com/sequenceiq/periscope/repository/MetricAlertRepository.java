@@ -1,6 +1,7 @@
 package com.sequenceiq.periscope.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -10,9 +11,9 @@ import com.sequenceiq.periscope.domain.MetricAlert;
 
 public interface MetricAlertRepository extends CrudRepository<MetricAlert, Long> {
 
-    @PostAuthorize("hasPermission(returnObject,'read')")
     @Override
-    MetricAlert findOne(@Param("id") Long id);
+    @PostAuthorize("hasPermission(returnObject,'read')")
+    Optional<MetricAlert> findById(@Param("id") Long id);
 
     @PostAuthorize("hasPermission(returnObject,'read')")
     MetricAlert findByCluster(@Param("alertId") Long alertId, @Param("clusterId") Long clusterId);

@@ -14,9 +14,6 @@ import com.sequenceiq.cloudbreak.domain.ConstraintTemplate;
 @Transactional(Transactional.TxType.REQUIRED)
 public interface ConstraintTemplateRepository extends CrudRepository<ConstraintTemplate, Long> {
 
-    @Override
-    ConstraintTemplate findOne(@Param("id") Long id);
-
     @Query("SELECT t FROM ConstraintTemplate t WHERE t.owner= :user AND deleted IS NOT TRUE AND t.status <> 'DEFAULT_DELETED'")
     Set<ConstraintTemplate> findForUser(@Param("user") String user);
 

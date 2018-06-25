@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.domain;
 import java.util.Set;
 
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -14,10 +15,9 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
-import org.hibernate.annotations.Type;
-
 import com.sequenceiq.cloudbreak.api.model.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
+import com.sequenceiq.cloudbreak.domain.converter.EncryptionConverter;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 
 @Entity
@@ -42,11 +42,11 @@ public class RDSConfig implements ProvisionEntity {
     @Column(nullable = false)
     private String connectionDriver;
 
-    @Type(type = "encrypted_string")
+    @Convert(converter = EncryptionConverter.class)
     @Column(nullable = false)
     private String connectionUserName;
 
-    @Type(type = "encrypted_string")
+    @Convert(converter = EncryptionConverter.class)
     @Column(nullable = false)
     private String connectionPassword;
 

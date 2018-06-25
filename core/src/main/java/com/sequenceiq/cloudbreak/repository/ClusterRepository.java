@@ -20,8 +20,6 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 @Transactional(Transactional.TxType.REQUIRED)
 public interface ClusterRepository extends CrudRepository<Cluster, Long> {
 
-    Cluster findById(@Param("id") Long id);
-
     Cluster findOneByStackId(long stackId);
 
     @Query("SELECT c FROM Cluster c LEFT JOIN FETCH c.hostGroups LEFT JOIN FETCH c.containers LEFT JOIN FETCH c.components "

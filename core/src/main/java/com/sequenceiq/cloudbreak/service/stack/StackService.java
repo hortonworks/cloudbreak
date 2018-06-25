@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.service.stack;
 import static com.sequenceiq.cloudbreak.api.model.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.model.Status.STOPPED;
 import static com.sequenceiq.cloudbreak.api.model.Status.STOP_REQUESTED;
+import static com.sequenceiq.cloudbreak.controller.exception.NotFoundException.notFound;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -100,6 +101,8 @@ public class StackService {
     private static final Logger LOGGER = LoggerFactory.getLogger(StackService.class);
 
     private static final String STACK_NOT_FOUND_EXCEPTION_FORMAT_TEXT = "Stack '%s' has not found";
+
+    private static final String STACK_NOT_FOUND_BY_ID_EXCEPTION_FORMAT_TEXT = "Stack not found by id '%d'";
 
     @Inject
     private StackRepository stackRepository;
@@ -225,10 +228,7 @@ public class StackService {
     public Stack get(Long id) {
         try {
             return transactionService.required(() -> {
-                Stack stack = stackRepository.findOne(id);
-                if (stack == null) {
-                    throw new NotFoundException(String.format(STACK_NOT_FOUND_EXCEPTION_FORMAT_TEXT, id));
-                }
+                Stack stack = stackRepository.findById(id).orElseThrow(notFound("Stack", id));
                 authorizationService.hasReadPermission(stack);
                 return stack;
             });
@@ -239,11 +239,7 @@ public class StackService {
 
     @PreAuthorize("#oauth2.hasScope('cloudbreak.autoscale')")
     public Stack getForAutoscale(Long id) {
-        Stack stack = stackRepository.findOne(id);
-        if (stack == null) {
-            throw new NotFoundException(String.format(STACK_NOT_FOUND_EXCEPTION_FORMAT_TEXT, id));
-        }
-        return stack;
+        return stackRepository.findById(id).orElseThrow(notFound("Stack", id));
     }
 
     @PreAuthorize("#oauth2.hasScope('cloudbreak.autoscale')")
@@ -259,25 +255,17 @@ public class StackService {
     public Stack getByIdWithLists(Long id) {
         Stack retStack = stackRepository.findOneWithLists(id);
         if (retStack == null) {
-            throw new NotFoundException(String.format(STACK_NOT_FOUND_EXCEPTION_FORMAT_TEXT, id));
+            throw new NotFoundException(String.format(STACK_NOT_FOUND_BY_ID_EXCEPTION_FORMAT_TEXT, id));
         }
         return retStack;
     }
 
     public Stack getById(Long id) {
-        Stack retStack = stackRepository.findOne(id);
-        if (retStack == null) {
-            throw new NotFoundException(String.format(STACK_NOT_FOUND_EXCEPTION_FORMAT_TEXT, id));
-        }
-        return retStack;
+        return stackRepository.findById(id).orElseThrow(notFound("Stack", id));
     }
 
     public StackView getByIdView(Long id) {
-        StackView retStack = stackViewRepository.findOne(id);
-        if (retStack == null) {
-            throw new NotFoundException(String.format(STACK_NOT_FOUND_EXCEPTION_FORMAT_TEXT, id));
-        }
-        return retStack;
+        return stackViewRepository.findById(id).orElseThrow(notFound("Stack", id));
     }
 
     public StackStatus getCurrentStatusByStackId(long stackId) {
@@ -409,11 +397,11 @@ public class StackService {
             MDCBuilder.buildMdcContext(savedStack);
 
             start = System.currentTimeMillis();
-            instanceGroupRepository.save(savedStack.getInstanceGroups());
+            instanceGroupRepository.saveAll(savedStack.getInstanceGroups());
             LOGGER.info("Instance groups saved in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
             start = System.currentTimeMillis();
-            instanceMetaDataRepository.save(savedStack.getInstanceMetaDataAsList());
+            instanceMetaDataRepository.saveAll(savedStack.getInstanceMetaDataAsList());
             LOGGER.info("Instance metadatas saved in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
             start = System.currentTimeMillis();
@@ -452,7 +440,7 @@ public class StackService {
     public void delete(Long id, IdentityUser user, Boolean forced, Boolean deleteDependencies) {
         Stack stack = stackRepository.findByIdInAccount(id, user.getAccount());
         if (stack == null) {
-            throw new NotFoundException(String.format(STACK_NOT_FOUND_EXCEPTION_FORMAT_TEXT, id));
+            throw new NotFoundException(String.format(STACK_NOT_FOUND_BY_ID_EXCEPTION_FORMAT_TEXT, id));
         }
         delete(stack, forced, deleteDependencies);
     }
@@ -713,6 +701,10 @@ public class StackService {
         return stackRepository.findAllAlive();
     }
 
+    public List<Stack> getAllAliveAndProvisioned() {
+        return stackRepository.findAllAliveAndProvisioned();
+    }
+
     private void validateScalingAdjustment(InstanceGroupAdjustmentJson instanceGroupAdjustmentJson, Stack stack) {
         if (0 == instanceGroupAdjustmentJson.getScalingAdjustment()) {
             throw new BadRequestException(String.format("Requested scaling adjustment on stack '%s' is 0. Nothing to do.", stack.getName()));
@@ -768,7 +760,7 @@ public class StackService {
 
     public void delete(Stack stack) throws TransactionExecutionException {
         transactionService.required(() -> {
-            stackRepository.delete(stack.getId());
+            stackRepository.delete(stack);
             return null;
         });
     }

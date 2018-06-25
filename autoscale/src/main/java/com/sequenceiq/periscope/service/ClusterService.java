@@ -1,9 +1,11 @@
 package com.sequenceiq.periscope.service;
 
 import static com.sequenceiq.periscope.api.model.ClusterState.RUNNING;
+import static com.sequenceiq.periscope.service.NotFoundException.notFound;
 import static org.springframework.util.StringUtils.isEmpty;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.StreamSupport;
 
 import javax.inject.Inject;
@@ -93,7 +95,7 @@ public class ClusterService {
     }
 
     public Cluster findOneById(Long clusterId) {
-        return clusterRepository.findOne(clusterId);
+        return clusterRepository.findById(clusterId).orElseThrow(notFound("Cluster", clusterId));
     }
 
     public Cluster findOneByStackId(Long stackId) {
@@ -105,7 +107,7 @@ public class ClusterService {
     }
 
     public Cluster find(Long clusterId) {
-        return clusterRepository.findById(clusterId);
+        return clusterRepository.findById(clusterId).orElseThrow(notFound("Cluster", clusterId));
     }
 
     public void removeOne(Long clusterId) {
@@ -175,11 +177,8 @@ public class ClusterService {
     }
 
     private PeriscopeUser createUserIfAbsent(PeriscopeUser user) {
-        PeriscopeUser periscopeUser = userRepository.findOne(user.getId());
-        if (periscopeUser == null) {
-            periscopeUser = userRepository.save(user);
-        }
-        return periscopeUser;
+        Optional<PeriscopeUser> periscopeUserOpt = userRepository.findById(user.getId());
+        return periscopeUserOpt.orElse(userRepository.save(user));
     }
 
     private void addPrometheusAlertsToConsul(Cluster cluster) {

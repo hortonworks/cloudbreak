@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.filesystem;
 
+import static com.sequenceiq.cloudbreak.controller.exception.NotFoundException.notFound;
+
 import java.util.Optional;
 import java.util.Set;
 
@@ -10,15 +12,12 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
-import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.repository.FileSystemRepository;
 import com.sequenceiq.cloudbreak.service.AuthorizationService;
 
 @Service
 public class FileSystemConfigService {
-
-    private static final String NO_RECORD_FOUND_FORMAT_MESS = "No record found for %s:%s";
 
     @Inject
     private FileSystemRepository fileSystemRepository;
@@ -43,8 +42,7 @@ public class FileSystemConfigService {
     }
 
     public FileSystem get(Long id) {
-        FileSystem fileSystem = Optional.ofNullable(fileSystemRepository.findOne(id))
-                .orElseThrow(() -> new NotFoundException(String.format(NO_RECORD_FOUND_FORMAT_MESS, "id", id)));
+        FileSystem fileSystem = getFileSystem(id);
         authService.hasReadPermission(fileSystem);
         return fileSystem;
     }
@@ -56,19 +54,22 @@ public class FileSystemConfigService {
     }
 
     public void delete(Long id, IdentityUser user) {
-        FileSystem fileSystem = Optional.ofNullable(fileSystemRepository.findOne(id))
-                .orElseThrow(() -> new NotFoundException(String.format(NO_RECORD_FOUND_FORMAT_MESS, "id", id)));
+        FileSystem fileSystem = getFileSystem(id);
         setUserDataRelatedFields(user, fileSystem);
         authService.hasWritePermission(fileSystem);
-        fileSystemRepository.delete(id);
+        fileSystemRepository.delete(fileSystem);
     }
 
     public void delete(String name, @Nonnull IdentityUser user) {
         FileSystem fileSystem = Optional.ofNullable(fileSystemRepository.findByNameAndAccountAndOwner(name, user.getAccount(), user.getUserId()))
-                .orElseThrow(() -> new NotFoundException(String.format(NO_RECORD_FOUND_FORMAT_MESS, "name", name)));
+                .orElseThrow(notFound("Record", name));
         setUserDataRelatedFields(user, fileSystem);
         authService.hasWritePermission(fileSystem);
-        fileSystemRepository.delete(fileSystem.getId());
+        fileSystemRepository.delete(fileSystem);
+    }
+
+    private FileSystem getFileSystem(Long id) {
+        return fileSystemRepository.findById(id).orElseThrow(notFound("Record", id));
     }
 
     private void setUserDataRelatedFields(IdentityUser user, FileSystem fileSystem) {

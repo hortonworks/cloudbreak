@@ -7,6 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -397,32 +398,32 @@ public class OfflineStateGenerator {
 
         @Override
         public <S extends Stack> S save(S entity) {
-            return null;
+            return entity;
         }
 
         @Override
-        public <S extends Stack> Iterable<S> save(Iterable<S> entities) {
-            return null;
+        public <S extends Stack> Iterable<S> saveAll(Iterable<S> entities) {
+            return entities;
         }
 
         @Override
-        public Stack findOne(Long aLong) {
-            return new Stack();
+        public Optional<Stack> findById(Long aLong) {
+            return Optional.empty();
         }
 
         @Override
-        public boolean exists(Long aLong) {
+        public boolean existsById(Long aLong) {
             return false;
         }
 
         @Override
         public Iterable<Stack> findAll() {
-            return null;
+            return Collections.emptyList();
         }
 
         @Override
-        public Iterable<Stack> findAll(Iterable<Long> longs) {
-            return null;
+        public Iterable<Stack> findAllById(Iterable<Long> longs) {
+            return Collections.emptyList();
         }
 
         @Override
@@ -431,7 +432,7 @@ public class OfflineStateGenerator {
         }
 
         @Override
-        public void delete(Long aLong) {
+        public void deleteById(Long aLong) {
 
         }
 
@@ -441,7 +442,7 @@ public class OfflineStateGenerator {
         }
 
         @Override
-        public void delete(Iterable<? extends Stack> entities) {
+        public void deleteAll(Iterable<? extends Stack> entities) {
 
         }
 

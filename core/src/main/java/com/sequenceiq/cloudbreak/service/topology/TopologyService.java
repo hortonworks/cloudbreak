@@ -1,17 +1,16 @@
 package com.sequenceiq.cloudbreak.service.topology;
 
+import static com.sequenceiq.cloudbreak.controller.exception.NotFoundException.notFound;
 import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
 
 import java.util.Date;
-import java.util.stream.Collectors;
+import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.inject.Inject;
 
-import com.sequenceiq.cloudbreak.domain.Credential;
-import com.sequenceiq.cloudbreak.domain.Network;
-import com.sequenceiq.cloudbreak.domain.Template;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -20,7 +19,9 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.domain.Credential;
+import com.sequenceiq.cloudbreak.domain.Network;
+import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.Topology;
 import com.sequenceiq.cloudbreak.repository.CredentialRepository;
 import com.sequenceiq.cloudbreak.repository.NetworkRepository;
@@ -36,8 +37,6 @@ public class TopologyService {
     private static final Logger LOGGER = LoggerFactory.getLogger(TopologyService.class);
 
     private static final String DELIMITER = "_";
-
-    private static final String TOPOLOGY_NOT_FOUND_MSG = "Topology '%s' not found.";
 
     @Inject
     private TopologyRepository topologyRepository;
@@ -61,12 +60,7 @@ public class TopologyService {
     }
 
     public Topology getById(Long id) {
-        Topology topology = topologyRepository.findOne(id);
-        if (topology == null) {
-            throw new NotFoundException(String.format(TOPOLOGY_NOT_FOUND_MSG, id));
-        } else {
-            return topology;
-        }
+        return topologyRepository.findById(id).orElseThrow(notFound("Topology", id));
     }
 
     public Topology create(IdentityUser user, Topology topology) {
@@ -84,10 +78,8 @@ public class TopologyService {
     }
 
     public void delete(Long topologyId, IdentityUser user) {
-        Topology topology = topologyRepository.findByIdInAccount(topologyId, user.getAccount());
-        if (topology == null) {
-            throw new NotFoundException(String.format(TOPOLOGY_NOT_FOUND_MSG, topologyId));
-        }
+        Topology topology = Optional.ofNullable(topologyRepository.findByIdInAccount(topologyId, user.getAccount()))
+                .orElseThrow(notFound("Topology", topologyId));
         delete(topology);
     }
 

@@ -19,11 +19,11 @@ import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.annotations.Type;
 
 import com.sequenceiq.cloudbreak.api.model.GatewayType;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.SSOType;
 import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
+import com.sequenceiq.cloudbreak.domain.converter.EncryptionConverter;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.json.JsonToString;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -62,7 +62,7 @@ public class Gateway implements ProvisionEntity {
 
     private String ssoProvider;
 
-    @Type(type = "encrypted_string")
+    @Convert(converter = EncryptionConverter.class)
     private String signKey;
 
     private String signPub;

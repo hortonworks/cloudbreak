@@ -1,5 +1,8 @@
 package com.sequenceiq.periscope.service.ha;
 
+import static com.sequenceiq.periscope.service.NotFoundException.notFound;
+import static java.lang.String.format;
+
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Iterator;
@@ -102,7 +105,8 @@ public class LeaderElectionService {
                 try {
                     transactionService.required(() -> {
                         periscopeNodeRepository.deallocateLeader();
-                        PeriscopeNode me = periscopeNodeRepository.findOne(periscopeNodeConfig.getId());
+                        PeriscopeNode me = periscopeNodeRepository.findById(periscopeNodeConfig.getId())
+                                .orElseThrow(notFound("Periscope node", periscopeNodeConfig.getId()));
                         me.setLeader(true);
                         periscopeNodeRepository.save(me);
                         return null;
@@ -111,7 +115,7 @@ public class LeaderElectionService {
                     LOGGER.info("Failed to select node as leader, something went wrong. Message: {}", e.getMessage());
                     return;
                 }
-                LOGGER.info(String.format("Selected %s as leader", periscopeNodeConfig.getId()));
+                LOGGER.info(format("Selected %s as leader", periscopeNodeConfig.getId()));
                 timer.schedule(new TimerTask() {
                     @Override
                     public void run() {
@@ -133,7 +137,7 @@ public class LeaderElectionService {
     private void reallocateOrphanClusters(List<PeriscopeNode> activeNodes) {
         if (activeNodes.stream().noneMatch(n -> n.isLeader() && n.getUuid().equals(periscopeNodeConfig.getId()))) {
             Optional<PeriscopeNode> leader = activeNodes.stream().filter(PeriscopeNode::isLeader).findFirst();
-            LOGGER.info(String.format("Leader is %s, let's drop leader scope", leader.isPresent() ? leader.get().getUuid() : "-"));
+            LOGGER.info(format("Leader is %s, let's drop leader scope", leader.isPresent() ? leader.get().getUuid() : "-"));
             resetTimer();
             return;
         }
@@ -146,13 +150,13 @@ public class LeaderElectionService {
                     iterator = activeNodes.iterator();
                 }
                 if (isExecutionOfMissedTimeBasedAlertsNeeded(cluster)) {
-                    LOGGER.info(String.format("Executing missed alerts on cluster %s", cluster.getId()));
+                    LOGGER.info(format("Executing missed alerts on cluster %s", cluster.getId()));
                     executeMissedTimeBasedAlerts(cluster);
                 }
                 cluster.setPeriscopeNodeId(iterator.next().getUuid());
-                LOGGER.info(String.format("Allocationg cluster %s to node %s", cluster.getId(), cluster.getPeriscopeNodeId()));
+                LOGGER.info(format("Allocationg cluster %s to node %s", cluster.getId(), cluster.getPeriscopeNodeId()));
             }
-            clusterRepository.save(orphanClusters);
+            clusterRepository.saveAll(orphanClusters);
         }
     }
 

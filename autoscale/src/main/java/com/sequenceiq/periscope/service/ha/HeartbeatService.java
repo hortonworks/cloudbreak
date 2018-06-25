@@ -1,7 +1,5 @@
 package com.sequenceiq.periscope.service.ha;
 
-import java.util.Optional;
-
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
@@ -60,7 +58,7 @@ public class HeartbeatService {
             try {
                 retryService.testWith2SecDelayMax5Times(() -> {
                     try {
-                        PeriscopeNode self = Optional.ofNullable(periscopeNodeRepository.findOne(nodeId)).orElse(new PeriscopeNode(nodeId));
+                        PeriscopeNode self = periscopeNodeRepository.findById(nodeId).orElse(new PeriscopeNode(nodeId));
                         self.setLastUpdated(clock.getCurrentTime());
                         if (unLeaderIt) {
                             self.setLeader(false);

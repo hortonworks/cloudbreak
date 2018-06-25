@@ -256,7 +256,7 @@ public class StackSyncService {
                 } else {
                     if (ambariClusterConnector.available(stack)) {
                         if (ambariDecommissioner.deleteHostFromAmbari(stack, hostMetadata)) {
-                            hostMetadataRepository.delete(hostMetadata.getId());
+                            hostMetadataRepository.delete(hostMetadata);
                             eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(),
                                     cloudbreakMessagesService.getMessage(Msg.STACK_SYNC_HOST_DELETED.code(),
                                             Collections.singletonList(instanceMetaData.getDiscoveryFQDN())));

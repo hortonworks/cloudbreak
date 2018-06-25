@@ -91,7 +91,7 @@ public class StackV2RequestToStackRequestConverterTest {
         when(authenticatedUserService.getCbUser()).thenReturn(cbUser);
         when(credentialService.get(anyString(), any())).thenReturn(credential);
         when(credential.cloudPlatform()).thenReturn(CLOUD_PLATFORM);
-        when(conversionService.convert(any(), any())).thenReturn(NETWORK_REQUEST);
+        when(conversionService.convert(any(NetworkV2Request.class), any())).thenReturn(NETWORK_REQUEST);
     }
 
     @Test

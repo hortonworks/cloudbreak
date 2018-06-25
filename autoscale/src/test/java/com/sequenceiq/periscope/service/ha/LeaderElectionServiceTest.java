@@ -157,7 +157,7 @@ public class LeaderElectionServiceTest {
 
         verify(transactionService, times(2)).required(any(Supplier.class));
         verify(clusterRepository, times(1)).findAllByPeriscopeNodeIdNotInOrPeriscopeNodeIdIsNull(any(List.class));
-        verify(clusterRepository, times(1)).save(any(List.class));
+        verify(clusterRepository, times(1)).saveAll(any(List.class));
     }
 
     @Test

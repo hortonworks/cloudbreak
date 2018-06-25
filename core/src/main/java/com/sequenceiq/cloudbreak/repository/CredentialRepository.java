@@ -16,9 +16,6 @@ import com.sequenceiq.cloudbreak.domain.Topology;
 @Transactional(Transactional.TxType.REQUIRED)
 public interface CredentialRepository extends CrudRepository<Credential, Long> {
 
-    @Override
-    Credential findOne(@Param("id") Long id);
-
     Set<Credential> findAllByCloudPlatform(@Param("cloudPlatform") String cloudPlatform);
 
     @Query("SELECT b FROM Credential b WHERE b.name= :name AND b.account= :account AND b.archived IS FALSE")

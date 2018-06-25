@@ -44,10 +44,9 @@ public class StackScalingServiceTest {
         InstanceMetaData instanceMetaData = mock(InstanceMetaData.class);
         when(instanceMetaData.getInstanceId()).thenReturn("i-1234567");
         HostMetadata hostMetadata = mock(HostMetadata.class);
-        when(hostMetadata.getId()).thenReturn(456L);
 
         stackScalingService.removeHostmetadataIfExists(stack, instanceMetaData, hostMetadata);
 
-        verify(hostMetadataRepository).delete(456L);
+        verify(hostMetadataRepository).delete(hostMetadata);
     }
 }

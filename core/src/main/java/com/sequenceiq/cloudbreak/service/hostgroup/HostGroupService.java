@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.hostgroup;
 
+import static com.sequenceiq.cloudbreak.controller.exception.NotFoundException.notFound;
+
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -68,9 +70,10 @@ public class HostGroupService {
     }
 
     public HostMetadata updateHostMetaDataStatus(Long id, HostMetadataState status) {
-        HostMetadata metaData = hostMetadataRepository.findOne(id);
-        metaData.setHostMetadataState(status);
-        return hostMetadataRepository.save(metaData);
+        HostMetadata hostMetadata = hostMetadataRepository.findById(id)
+                .orElseThrow(notFound("HostMetadata", id));
+        hostMetadata.setHostMetadataState(status);
+        return hostMetadataRepository.save(hostMetadata);
     }
 
     public Set<HostGroup> saveOrUpdateWithMetadata(Collection<HostGroup> hostGroups, Cluster cluster) throws TransactionExecutionException {

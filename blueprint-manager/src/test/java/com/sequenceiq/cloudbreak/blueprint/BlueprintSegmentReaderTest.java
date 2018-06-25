@@ -8,7 +8,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.boot.context.embedded.AnnotationConfigEmbeddedWebApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.blueprint.templates.ServiceName;
@@ -20,8 +20,7 @@ public class BlueprintSegmentReaderTest {
     @InjectMocks
     private final BlueprintSegmentReader underTest = new BlueprintSegmentReader();
 
-    private final AnnotationConfigEmbeddedWebApplicationContext annotationConfigEmbeddedWebApplicationContext =
-            new AnnotationConfigEmbeddedWebApplicationContext();
+    private AnnotationConfigApplicationContext annotationConfigEmbeddedWebApplicationContext = new AnnotationConfigApplicationContext();
 
     @Before
     public void setup() {

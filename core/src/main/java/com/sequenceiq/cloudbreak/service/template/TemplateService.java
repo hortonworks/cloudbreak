@@ -1,7 +1,10 @@
 package com.sequenceiq.cloudbreak.service.template;
 
+import static com.sequenceiq.cloudbreak.controller.exception.NotFoundException.notFound;
+
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -15,7 +18,6 @@ import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
@@ -29,6 +31,8 @@ public class TemplateService {
     private static final Logger LOGGER = LoggerFactory.getLogger(TemplateService.class);
 
     private static final String TEMPLATE_NOT_FOUND_MSG = "Template '%s' not found.";
+
+    private static final String TEMPLATE_NOT_FOUND_BY_ID_MSG = "Template not found by id '%d'.";
 
     @Inject
     private TemplateRepository templateRepository;
@@ -49,10 +53,7 @@ public class TemplateService {
     }
 
     public Template get(Long id) {
-        Template template = templateRepository.findOne(id);
-        if (template == null) {
-            throw new NotFoundException(String.format(TEMPLATE_NOT_FOUND_MSG, id));
-        }
+        Template template = templateRepository.findById(id).orElseThrow(notFound("Template", id));
         authorizationService.hasReadPermission(template);
         return template;
     }
@@ -71,36 +72,26 @@ public class TemplateService {
     }
 
     public void delete(Long templateId, IdentityUser user) {
-        Template template = templateRepository.findByIdInAccount(templateId, user.getAccount());
-        if (template == null) {
-            throw new NotFoundException(String.format(TEMPLATE_NOT_FOUND_MSG, templateId));
-        }
+        Template template = Optional.ofNullable(templateRepository.findByIdInAccount(templateId, user.getAccount()))
+                .orElseThrow(notFound("Template", templateId));
         delete(template);
     }
 
     public Template getPrivateTemplate(String name, IdentityUser user) {
-        Template template = templateRepository.findByNameInUser(name, user.getUserId());
-        if (template == null) {
-            throw new NotFoundException(String.format(TEMPLATE_NOT_FOUND_MSG, name));
-        } else {
-            return template;
-        }
+        return Optional.ofNullable(templateRepository.findByNameInUser(name, user.getUserId()))
+                .orElseThrow(notFound("Template", name));
     }
 
     public Template getPublicTemplate(String name, IdentityUser user) {
-        Template template = templateRepository.findOneByName(name, user.getAccount());
-        if (template == null) {
-            throw new NotFoundException(String.format(TEMPLATE_NOT_FOUND_MSG, name));
-        }
+        Template template = Optional.ofNullable(templateRepository.findOneByName(name, user.getAccount()))
+                .orElseThrow(notFound("Template", name));
         authorizationService.hasReadPermission(template);
         return template;
     }
 
     public void delete(String templateName, IdentityUser user) {
-        Template template = templateRepository.findByNameInAccount(templateName, user.getAccount(), user.getUserId());
-        if (template == null) {
-            throw new NotFoundException(String.format(TEMPLATE_NOT_FOUND_MSG, templateName));
-        }
+        Template template = Optional.ofNullable(templateRepository.findByNameInAccount(templateName, user.getAccount(), user.getUserId()))
+                .orElseThrow(notFound("Template", templateName));
         delete(template);
     }
 

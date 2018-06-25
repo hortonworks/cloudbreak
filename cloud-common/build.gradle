@@ -25,6 +25,9 @@ dependencies {
     compile group: 'org.springframework.security.oauth',    name: 'spring-security-oauth2',         version: springOauthVersion
     compile group: 'org.springframework.security',          name: 'spring-security-jwt',            version: '1.0.8.RELEASE'
     compile group: 'org.springframework.retry',             name: 'spring-retry',                   version: '1.1.4.RELEASE'
+    compile group: 'org.springframework.boot',              name: 'spring-boot-starter-actuator',   version: springBootVersion
+    compile group: 'io.micrometer',                         name: 'micrometer-core',                version: '1.0.5'
+    compile group: 'io.micrometer',                         name: 'micrometer-registry-prometheus', version: '1.0.5'
     compile group: 'net.sf.ehcache',                        name: 'ehcache',                        version: '2.8.3'
     compile group: 'com.fasterxml.jackson.core',            name: 'jackson-databind',               version: jacksonVersion
     compile group: 'commons-io',                            name: 'commons-io',                     version: '2.4'
@@ -38,7 +41,7 @@ dependencies {
     compile group: 'org.glassfish.jersey.media',            name: 'jersey-media-multipart',         version: jerseyCoreVersion
     compile group: 'org.glassfish.jersey.ext',              name: 'jersey-proxy-client',            version: jerseyCoreVersion
     compile group: 'org.glassfish.jersey.connectors',       name: 'jersey-apache-connector',        version: jerseyCoreVersion
-    compile group: 'org.postgresql',                        name: 'postgresql',                     version: '9.4.1212'
+    compile group: 'org.postgresql',                        name: 'postgresql',                     version: postgreSQLVersion
     compile group: 'com.sequenceiq',                        name: 'consul-api',                     version: '1.10'
     compile group: 'org.apache.commons',                    name: 'commons-lang3',                  version: apacheCommonsLangVersion
     compile group: 'org.jasypt',                            name: 'jasypt-hibernate4',              version: jasyptVersion

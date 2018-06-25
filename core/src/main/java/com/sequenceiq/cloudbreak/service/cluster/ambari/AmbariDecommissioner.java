@@ -198,7 +198,7 @@ public class AmbariDecommissioner {
         if (!unhealthyHosts.isEmpty()) {
             for (Entry<String, HostMetadata> host : unhealthyHosts.entrySet()) {
                 deleteHostFromAmbari(host.getValue(), runningComponents, ambariClient);
-                hostMetadataRepository.delete(host.getValue().getId());
+                hostMetadataRepository.delete(host.getValue());
                 deletedHosts.add(host.getKey());
             }
         }
@@ -485,7 +485,7 @@ public class AmbariDecommissioner {
                         .map(input -> new ContainerInfo(input.getContainerId(), input.getName(), input.getHost(), input.getImage()))
                         .collect(Collectors.toList());
                 containerOrchestrator.deleteContainer(containersToDelete, credential);
-                containerRepository.delete(containers);
+                containerRepository.deleteAll(containers);
                 return waitForHostsToLeave(stack, hostNames);
             } else if (orchestratorType.hostOrchestrator()) {
                 HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());

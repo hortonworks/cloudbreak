@@ -62,7 +62,7 @@ public class BlueprintLoaderService {
 
     private Iterable<Blueprint> getResultSetFromUpdateAndOriginalBlueprints(Iterable<Blueprint> blueprints, Iterable<Blueprint> blueprintsWhichAreMissing) {
         LOGGER.info("Updating blueprints which should be modified.");
-        Iterable<Blueprint> savedBlueprints = blueprintRepository.save(blueprintsWhichAreMissing);
+        Iterable<Blueprint> savedBlueprints = blueprintRepository.saveAll(blueprintsWhichAreMissing);
         LOGGER.info("Finished to update blueprints which should be modified.");
         Map<String, Blueprint> resultBlueprints = new HashMap<>();
         for (Blueprint blueprint : blueprints) {

@@ -56,9 +56,9 @@ public class AmbariClusterCreationSuccessHandlerTest {
         stack.getInstanceGroups().forEach(instanceGroup -> instanceMetaDataList.addAll(instanceGroup.getAllInstanceMetaData()));
 
         when(clusterService.updateCluster(cluster)).thenReturn(cluster);
-        when(instanceMetadataRepository.save(anyCollection())).thenReturn(instanceMetaDataList);
+        when(instanceMetadataRepository.saveAll(anyCollection())).thenReturn(instanceMetaDataList);
         when(hostMetadataRepository.findHostsInCluster(cluster.getId())).thenReturn(hostMetadataList);
-        when(hostMetadataRepository.save(anyCollection())).thenReturn(hostMetadataList);
+        when(hostMetadataRepository.saveAll(anyCollection())).thenReturn(hostMetadataList);
 
         underTest.handleClusterCreationSuccess(stack, cluster);
 
@@ -68,13 +68,13 @@ public class AmbariClusterCreationSuccessHandlerTest {
         assertNotNull(clusterCaptor.getValue().getUpSince());
 
         ArgumentCaptor<List<InstanceMetaData>> instanceMetadataCaptor = ArgumentCaptor.forClass(List.class);
-        verify(instanceMetadataRepository, times(1)).save(instanceMetadataCaptor.capture());
+        verify(instanceMetadataRepository, times(1)).saveAll(instanceMetadataCaptor.capture());
         for (InstanceMetaData instanceMetaData : instanceMetadataCaptor.getValue()) {
             Assert.assertEquals(InstanceStatus.REGISTERED, instanceMetaData.getInstanceStatus());
         }
 
         ArgumentCaptor<List<HostMetadata>> hostMetadataCaptor = ArgumentCaptor.forClass(List.class);
-        verify(hostMetadataRepository, times(1)).save(hostMetadataCaptor.capture());
+        verify(hostMetadataRepository, times(1)).saveAll(hostMetadataCaptor.capture());
         for (HostMetadata hostMetadata : hostMetadataCaptor.getValue()) {
             Assert.assertEquals(HostMetadataState.HEALTHY, hostMetadata.getHostMetadataState());
         }

@@ -22,9 +22,6 @@ import javax.ws.rs.client.Client;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.actuate.autoconfigure.ExportMetricWriter;
-import org.springframework.boot.actuate.metrics.jmx.JmxMetricWriter;
-import org.springframework.boot.actuate.metrics.writer.MetricWriter;
 import org.springframework.boot.env.PropertySourceLoader;
 import org.springframework.boot.env.YamlPropertySourceLoader;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
@@ -32,12 +29,12 @@ import org.springframework.context.ResourceLoaderAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.env.PropertySource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.core.task.AsyncTaskExecutor;
-import org.springframework.jmx.export.MBeanExporter;
 import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -48,12 +45,12 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.api.model.filesystem.FileSystemType;
 import com.sequenceiq.cloudbreak.blueprint.filesystem.FileSystemConfigurator;
+import com.sequenceiq.cloudbreak.blueprint.validation.StackServiceComponentDescriptor;
+import com.sequenceiq.cloudbreak.blueprint.validation.StackServiceComponentDescriptors;
 import com.sequenceiq.cloudbreak.client.ConfigKey;
 import com.sequenceiq.cloudbreak.client.IdentityClient;
 import com.sequenceiq.cloudbreak.client.RestClientUtil;
 import com.sequenceiq.cloudbreak.concurrent.MDCCleanerTaskDecorator;
-import com.sequenceiq.cloudbreak.blueprint.validation.StackServiceComponentDescriptor;
-import com.sequenceiq.cloudbreak.blueprint.validation.StackServiceComponentDescriptors;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteria;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ExecutorBasedParallelOrchestratorComponentRunner;
 import com.sequenceiq.cloudbreak.orchestrator.container.ContainerOrchestrator;
@@ -134,10 +131,14 @@ public class AppConfig implements ResourceLoaderAware {
         ResourcePatternResolver patternResolver = new PathMatchingResourcePatternResolver();
         PropertySourceLoader load = new YamlPropertySourceLoader();
         for (Resource resource : patternResolver.getResources("classpath*:*-images.yml")) {
-            environment.getPropertySources().addLast(load.load(resource.getFilename(), resource, null));
+            for (PropertySource<?> propertySource : load.load(resource.getFilename(), resource)) {
+                environment.getPropertySources().addLast(propertySource);
+            }
         }
         for (Resource resource : loadEtcResources()) {
-            environment.getPropertySources().addFirst(load.load(resource.getFilename(), resource, null));
+            for (PropertySource<?> propertySource : load.load(resource.getFilename(), resource)) {
+                environment.getPropertySources().addFirst(propertySource);
+            }
         }
     }
 
@@ -149,16 +150,6 @@ public class AppConfig implements ResourceLoaderAware {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
-    }
-
-    @Bean
-    @ExportMetricWriter
-    /*
-     * Prometheus is not capable to scrape json metrics so we need to expose the actuator metrics to jmx. Every
-     * counter and gauge metrics are exposed too.
-     */
-    public MetricWriter metricWriter(MBeanExporter exporter) {
-        return new JmxMetricWriter(exporter);
     }
 
     @Bean

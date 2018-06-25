@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.api.model.Status.REQUESTED;
 import static com.sequenceiq.cloudbreak.api.model.Status.START_REQUESTED;
 import static com.sequenceiq.cloudbreak.api.model.Status.STOP_REQUESTED;
 import static com.sequenceiq.cloudbreak.api.model.Status.UPDATE_REQUESTED;
+import static com.sequenceiq.cloudbreak.controller.exception.NotFoundException.notFound;
 import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
 
 import java.io.IOException;
@@ -293,7 +294,7 @@ public class AmbariClusterService implements ClusterService {
 
     @Override
     public Cluster updateAmbariClientConfig(Long clusterId, HttpClientConfig ambariClientConfig) {
-        Cluster cluster = clusterRepository.findById(clusterId);
+        Cluster cluster = getCluster(clusterId);
         cluster.setAmbariIp(ambariClientConfig.getApiAddress());
         cluster = clusterRepository.save(cluster);
         LOGGER.info("Updated cluster: [ambariIp: '{}'].", ambariClientConfig.getApiAddress());
@@ -520,7 +521,7 @@ public class AmbariClusterService implements ClusterService {
             if (!changedHosts.isEmpty()) {
                 LOGGER.info(recoveryMessage);
                 eventService.fireCloudbreakEvent(cluster.getStack().getId(), "RECOVERY", recoveryMessage);
-                hostMetadataRepository.save(changedHosts);
+                hostMetadataRepository.saveAll(changedHosts);
             }
             return null;
         });
@@ -659,7 +660,8 @@ public class AmbariClusterService implements ClusterService {
 
     @Override
     public void cleanupKerberosCredential(Long clusterId) {
-        cleanupKerberosCredential(clusterRepository.findById(clusterId));
+        Cluster cluster = getCluster(clusterId);
+        cleanupKerberosCredential(cluster);
     }
 
     @Override
@@ -711,7 +713,7 @@ public class AmbariClusterService implements ClusterService {
             }
             if (containerOrchestrator) {
                 clusterTerminationService.deleteClusterComponents(cluster.getId());
-                cluster = clusterRepository.findById(stack.getCluster().getId());
+                cluster = getCluster(stack);
             }
 
             try {
@@ -738,18 +740,19 @@ public class AmbariClusterService implements ClusterService {
     }
 
     private Cluster getCluster(Stack stack) {
-        Cluster cluster = clusterRepository.findById(stack.getCluster().getId());
-        if (cluster == null) {
-            throw new BadRequestException(String.format("Cluster does not exist on stack with '%s' id.", stack.getId()));
-        }
-        return cluster;
+        return getCluster(stack.getCluster().getId());
+    }
+
+    private Cluster getCluster(Long clusterId) {
+        return clusterRepository.findById(clusterId)
+                .orElseThrow(notFound("Cluster", clusterId));
     }
 
     @Override
     public void upgrade(Long stackId, AmbariRepo ambariRepoUpgrade) throws TransactionExecutionException {
         if (ambariRepoUpgrade != null) {
             Stack stack = stackService.getByIdWithLists(stackId);
-            Cluster cluster = clusterRepository.findById(stack.getCluster().getId());
+            Cluster cluster = getCluster(stack);
             if (cluster == null) {
                 throw new BadRequestException(String.format("Cluster does not exist on stack with '%s' id.", stackId));
             }
@@ -925,7 +928,7 @@ public class AmbariClusterService implements ClusterService {
     }
 
     @Override
-    public Cluster  getById(Long id) {
+    public Cluster getById(Long id) {
         Cluster cluster = clusterRepository.findOneWithLists(id);
         if (cluster == null) {
             throw new NotFoundException(String.format("Cluster '%s' not found", id));

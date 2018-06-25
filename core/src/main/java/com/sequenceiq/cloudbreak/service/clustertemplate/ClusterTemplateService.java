@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.clustertemplate;
 
+import static com.sequenceiq.cloudbreak.controller.exception.NotFoundException.notFound;
 import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
 
 import java.util.Set;
@@ -45,10 +46,7 @@ public class ClusterTemplateService {
     }
 
     public ClusterTemplate get(Long id) {
-        ClusterTemplate clusterTemplate = clusterTemplateRepository.findOne(id);
-        if (clusterTemplate == null) {
-            throw new NotFoundException(String.format("ClusterTemplate '%s' not found.", id));
-        }
+        ClusterTemplate clusterTemplate = clusterTemplateRepository.findById(id).orElseThrow(notFound("ClusterTemplate", id));
         authorizationService.hasReadPermission(clusterTemplate);
         return clusterTemplate;
     }
@@ -109,7 +107,7 @@ public class ClusterTemplateService {
     }
 
     public Iterable<ClusterTemplate> save(Iterable<ClusterTemplate> entities) {
-        return clusterTemplateRepository.save(entities);
+        return clusterTemplateRepository.saveAll(entities);
     }
 
     private void delete(ClusterTemplate clusterTemplate) {

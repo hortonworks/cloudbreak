@@ -11,6 +11,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.LinkedHashSet;
+import java.util.Optional;
 import java.util.Set;
 
 import org.junit.Assert;
@@ -33,7 +34,7 @@ import com.sequenceiq.cloudbreak.service.AuthorizationService;
 
 public class FileSystemConfigServiceTest {
 
-    private static final String NOT_FOUND_EXCEPTION_MESSAGE = "No record found for %s:%s";
+    private static final String NOT_FOUND_EXCEPTION_MESSAGE = "Record '%s' not found.";
 
     private static final String NO_SUCH_FS_BY_ID_FORMAT_MESSAGE = "There is no such file system with the id of [%s]";
 
@@ -134,24 +135,24 @@ public class FileSystemConfigServiceTest {
     public void testGetWhenDatabaseHasEntryWithProvidedIdThenThatactualShouldReturn() {
         FileSystem expected = createFileSystem();
         fileSystem.setId(TEST_FILES_SYSTEM_ID);
-        when(fileSystemRepository.findOne(TEST_FILES_SYSTEM_ID)).thenReturn(expected);
+        when(fileSystemRepository.findById(TEST_FILES_SYSTEM_ID)).thenReturn(Optional.of(expected));
 
         FileSystem actual = underTest.get(TEST_FILES_SYSTEM_ID);
 
         Assert.assertEquals(expected, actual);
         Assert.assertEquals(expected.getId(), actual.getId());
-        verify(fileSystemRepository, times(1)).findOne(TEST_FILES_SYSTEM_ID);
+        verify(fileSystemRepository, times(1)).findById(TEST_FILES_SYSTEM_ID);
     }
 
     @Test
     public void testGetWhenThereIsNoEntryWithGivenIdThenFileSystemConfigExceptionShouldComeInsteadOfNull() {
-        when(fileSystemRepository.findOne(NOT_EXISTING_ID)).thenReturn(null);
+        when(fileSystemRepository.findById(NOT_EXISTING_ID)).thenReturn(Optional.ofNullable(null));
 
         expectedException.expect(NotFoundException.class);
-        expectedException.expectMessage(String.format(NOT_FOUND_EXCEPTION_MESSAGE, "id", NOT_EXISTING_ID));
+        expectedException.expectMessage(String.format(NOT_FOUND_EXCEPTION_MESSAGE, NOT_EXISTING_ID));
 
         underTest.get(NOT_EXISTING_ID);
-        verify(fileSystemRepository, times(1)).findOne(NOT_EXISTING_ID);
+        verify(fileSystemRepository, times(1)).findById(NOT_EXISTING_ID);
     }
 
     @Test
@@ -182,33 +183,33 @@ public class FileSystemConfigServiceTest {
 
     @Test
     public void testDeleteByIdWhenUserHasRightToDeleteAndThereIsARecordWithIdThenDeleteOperationWouldBeCalled() {
-        when(fileSystemRepository.findOne(TEST_FILES_SYSTEM_ID)).thenReturn(fileSystem);
+        when(fileSystemRepository.findById(TEST_FILES_SYSTEM_ID)).thenReturn(Optional.of(fileSystem));
         doNothing().when(authService).hasWritePermission(fileSystem);
-        doNothing().when(fileSystemRepository).delete(TEST_FILES_SYSTEM_ID);
+        doNothing().when(fileSystemRepository).delete(fileSystem);
 
         underTest.delete(TEST_FILES_SYSTEM_ID, user);
 
-        verify(fileSystemRepository, times(1)).findOne(TEST_FILES_SYSTEM_ID);
+        verify(fileSystemRepository, times(1)).findById(TEST_FILES_SYSTEM_ID);
         verify(authService, times(1)).hasWritePermission(fileSystem);
-        verify(fileSystemRepository, times(1)).delete(TEST_FILES_SYSTEM_ID);
+        verify(fileSystemRepository, times(1)).delete(fileSystem);
     }
 
     @Test
     public void testDeleteByIdWhenThereIsNoRecordToDeleteWithIdThenExceptionWouldComeAndNothingCatchesIt() {
-        when(fileSystemRepository.findOne(NOT_EXISTING_ID)).thenReturn(null);
+        when(fileSystemRepository.findById(NOT_EXISTING_ID)).thenReturn(Optional.ofNullable(null));
 
         expectedException.expect(NotFoundException.class);
-        expectedException.expectMessage(String.format(NOT_FOUND_EXCEPTION_MESSAGE, "id", NOT_EXISTING_ID));
+        expectedException.expectMessage(String.format(NOT_FOUND_EXCEPTION_MESSAGE, NOT_EXISTING_ID));
 
         underTest.delete(NOT_EXISTING_ID, user);
 
-        verify(fileSystemRepository, times(1)).findOne(NOT_EXISTING_ID);
-        verify(fileSystemRepository, times(0)).delete(NOT_EXISTING_ID);
+        verify(fileSystemRepository, times(1)).findById(NOT_EXISTING_ID);
+        verify(fileSystemRepository, times(0)).delete(any());
     }
 
     @Test
     public void testDeleteByIdWhenUserHasNoWriteAccessToDeleteThenAccessDeniedShouldComeAndNothingCatchesIt() {
-        when(fileSystemRepository.findOne(TEST_FILES_SYSTEM_ID)).thenReturn(fileSystem);
+        when(fileSystemRepository.findById(TEST_FILES_SYSTEM_ID)).thenReturn(Optional.of(fileSystem));
         doThrow(new AccessDeniedException(TEST_ACCESS_DENIED_EXCEPTION_MESSAGE)).when(authService).hasWritePermission(fileSystem);
 
         expectedException.expect(AccessDeniedException.class);
@@ -216,22 +217,22 @@ public class FileSystemConfigServiceTest {
 
         underTest.delete(TEST_FILES_SYSTEM_ID, user);
 
-        verify(fileSystemRepository, times(1)).findOne(TEST_FILES_SYSTEM_ID);
+        verify(fileSystemRepository, times(1)).findById(TEST_FILES_SYSTEM_ID);
         verify(authService, times(1)).hasWritePermission(fileSystem);
-        verify(fileSystemRepository, times(0)).delete(TEST_FILES_SYSTEM_ID);
+        verify(fileSystemRepository, times(0)).delete(fileSystem);
     }
 
     @Test
     public void testDeleteByNameWhenUserHasRightToDeleteAndThereIsARecordWithNameThenDeleteOperationWouldBeCalled() {
         when(fileSystemRepository.findByNameAndAccountAndOwner(TEST_FILE_SYSTEM_NAME, USER_ACCOUNT, USER_ID)).thenReturn(fileSystem);
         doNothing().when(authService).hasWritePermission(fileSystem);
-        doNothing().when(fileSystemRepository).delete(TEST_FILES_SYSTEM_ID);
+        doNothing().when(fileSystemRepository).delete(fileSystem);
 
         underTest.delete(TEST_FILE_SYSTEM_NAME, user);
 
         verify(fileSystemRepository, times(1)).findByNameAndAccountAndOwner(TEST_FILE_SYSTEM_NAME, USER_ACCOUNT, USER_ID);
         verify(authService, times(1)).hasWritePermission(fileSystem);
-        verify(fileSystemRepository, times(1)).delete(TEST_FILES_SYSTEM_ID);
+        verify(fileSystemRepository, times(1)).delete(fileSystem);
     }
 
     @Test
@@ -239,12 +240,12 @@ public class FileSystemConfigServiceTest {
         when(fileSystemRepository.findByNameAndAccountAndOwner(TEST_FILE_SYSTEM_NAME, USER_ACCOUNT, USER_ID)).thenReturn(null);
 
         expectedException.expect(NotFoundException.class);
-        expectedException.expectMessage(String.format(NOT_FOUND_EXCEPTION_MESSAGE, "name", TEST_FILE_SYSTEM_NAME));
+        expectedException.expectMessage(String.format(NOT_FOUND_EXCEPTION_MESSAGE, TEST_FILE_SYSTEM_NAME));
 
         underTest.delete(TEST_FILE_SYSTEM_NAME, user);
 
         verify(fileSystemRepository, times(1)).findByNameAndAccountAndOwner(TEST_FILE_SYSTEM_NAME, USER_ACCOUNT, USER_ID);
-        verify(fileSystemRepository, times(0)).delete(any(Long.class));
+        verify(fileSystemRepository, times(0)).delete(any(FileSystem.class));
     }
 
     @Test
@@ -257,9 +258,9 @@ public class FileSystemConfigServiceTest {
 
         underTest.delete(TEST_FILE_SYSTEM_NAME, user);
 
-        verify(fileSystemRepository, times(1)).findOne(TEST_FILES_SYSTEM_ID);
+        verify(fileSystemRepository, times(1)).findById(TEST_FILES_SYSTEM_ID);
         verify(authService, times(1)).hasWritePermission(fileSystem);
-        verify(fileSystemRepository, times(0)).delete(any(Long.class));
+        verify(fileSystemRepository, times(0)).delete(any(FileSystem.class));
     }
 
     private FileSystem setIdForCreatedFileSystemEntry(InvocationOnMock invocation) {

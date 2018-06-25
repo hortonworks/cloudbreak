@@ -17,7 +17,7 @@ test:
     - INTEGRATIONTEST_UAA_USER=admin@example.com
     - INTEGRATIONTEST_UAA_PASSWORD=cloudbreak
     - CLOUDBREAK_URL=cloudbreak.service.consul:8080
-    - SPRING_CONFIG_LOCATION=/it/it-application.yml
+    - SPRING_CONFIG_LOCATION=classpath:/application.yml,/it/it-application.yml
     - INTEGRATIONTEST_SUITEFILES
     - INTEGRATIONTEST_AWSCREDENTIAL_ROLEARN=${AWS_ROLE_ARN}
     - INTEGRATIONTEST_AWSCREDENTIAL_SECRETKEY=${AWS_SECRET_ACCESS_KEY}
@@ -42,7 +42,7 @@ test:
     - INTEGRATIONTEST_PROXYCONFIG_PROXYPASSWORD
     - AWS_ACCESS_KEY_ID
     - AWS_SECRET_ACCESS_KEY
-  image: java:8
+  image: openjdk:10.0.1
 swagger-diff:
   dns:
   volumes:

@@ -1,6 +1,7 @@
 package com.sequenceiq.periscope.domain;
 
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -12,7 +13,8 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 import org.apache.commons.codec.binary.Base64;
-import org.hibernate.annotations.Type;
+
+import com.sequenceiq.cloudbreak.domain.converter.EncryptionConverter;
 
 @Entity
 @Table(name = "SecurityConfig")
@@ -24,15 +26,15 @@ public class SecurityConfig {
     @SequenceGenerator(name = "securityconfig_generator", sequenceName = "securityconfig_id_seq", allocationSize = 1)
     private Long id;
 
-    @Type(type = "encrypted_string")
+    @Convert(converter = EncryptionConverter.class)
     @Column(columnDefinition = "TEXT")
     private String clientKey;
 
-    @Type(type = "encrypted_string")
+    @Convert(converter = EncryptionConverter.class)
     @Column(columnDefinition = "TEXT")
     private String clientCert;
 
-    @Type(type = "encrypted_string")
+    @Convert(converter = EncryptionConverter.class)
     @Column(columnDefinition = "TEXT")
     private String serverCert;
 

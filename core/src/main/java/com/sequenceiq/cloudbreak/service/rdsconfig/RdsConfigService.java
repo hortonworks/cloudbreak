@@ -1,5 +1,19 @@
 package com.sequenceiq.cloudbreak.service.rdsconfig;
 
+import static com.sequenceiq.cloudbreak.controller.exception.NotFoundException.notFound;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
 import com.google.common.base.Preconditions;
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
@@ -13,15 +27,6 @@ import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.RdsConfigRepository;
 import com.sequenceiq.cloudbreak.service.AuthorizationService;
 import com.sequenceiq.cloudbreak.util.NameUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-
-import javax.inject.Inject;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 public class RdsConfigService {
@@ -42,26 +47,20 @@ public class RdsConfigService {
     }
 
     public RDSConfig getPrivateRdsConfig(String name, IdentityUser user) {
-        RDSConfig rdsConfig = rdsConfigRepository.findByNameInUser(name, user.getUserId());
-        if (rdsConfig == null) {
-            throw new NotFoundException(String.format("RDS configuration '%s' not found.", name));
-        }
+        RDSConfig rdsConfig = Optional.ofNullable(rdsConfigRepository.findByNameInUser(name, user.getUserId()))
+                .orElseThrow(notFound("RDS configuration", name));
         return rdsConfig;
     }
 
     public RDSConfig getPublicRdsConfig(String name, IdentityUser user) {
-        RDSConfig rdsConfig = rdsConfigRepository.findByNameBasedOnAccount(name, user.getAccount(), user.getUserId());
-        if (rdsConfig == null) {
-            throw new NotFoundException(String.format("RDS configuration '%s' not found.", name));
-        }
+        RDSConfig rdsConfig = Optional.ofNullable(rdsConfigRepository.findByNameBasedOnAccount(name, user.getAccount(), user.getUserId()))
+                .orElseThrow(notFound("RDS configuration", name));
         return rdsConfig;
     }
 
     public RDSConfig getByName(String name, IdentityUser user) {
-        RDSConfig rdsConfig = rdsConfigRepository.findOneByName(name, user.getAccount());
-        if (rdsConfig == null) {
-            throw new NotFoundException(String.format("RDS configuration '%s' not found.", name));
-        }
+        RDSConfig rdsConfig = Optional.ofNullable(rdsConfigRepository.findOneByName(name, user.getAccount()))
+                .orElseThrow(notFound("RDS configuration", name));
         authorizationService.hasReadPermission(rdsConfig);
         return rdsConfig;
     }
@@ -72,27 +71,20 @@ public class RdsConfigService {
     }
 
     public RDSConfig get(Long id) {
-        RDSConfig rdsConfig = rdsConfigRepository.findById(id);
-        if (rdsConfig == null) {
-            throw new NotFoundException(String.format("RDS configuration '%s' not found.", id));
-        }
+        RDSConfig rdsConfig = rdsConfigRepository.findById(id).orElseThrow(notFound("RDS configuration", id));
         authorizationService.hasReadPermission(rdsConfig);
         return rdsConfig;
     }
 
     public void delete(Long id, IdentityUser user) {
-        RDSConfig rdsConfig = rdsConfigRepository.findByIdInAccount(id, user.getAccount());
-        if (rdsConfig == null) {
-            throw new NotFoundException(String.format("RDS configuration '%s' not found.", id));
-        }
+        RDSConfig rdsConfig = Optional.ofNullable(rdsConfigRepository.findByIdInAccount(id, user.getAccount()))
+                .orElseThrow(notFound("RDS configuration", id));
         delete(rdsConfig);
     }
 
     public void delete(String name, IdentityUser user) {
-        RDSConfig rdsConfig = rdsConfigRepository.findByNameBasedOnAccount(name, user.getAccount(), user.getUserId());
-        if (rdsConfig == null) {
-            throw new NotFoundException(String.format("RDS configuration '%s' not found.", name));
-        }
+        RDSConfig rdsConfig = Optional.ofNullable(rdsConfigRepository.findByNameBasedOnAccount(name, user.getAccount(), user.getUserId()))
+                .orElseThrow(notFound("RDS configuration", name));
         delete(rdsConfig);
     }
 

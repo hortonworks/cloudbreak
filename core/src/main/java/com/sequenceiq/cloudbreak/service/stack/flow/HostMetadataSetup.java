@@ -50,7 +50,7 @@ public class HostMetadataSetup {
         if (!orchestratorTypeResolver.resolveType(stack.getOrchestrator()).containerOrchestrator()) {
             Set<InstanceMetaData> allInstanceMetaData = stack.getNotDeletedInstanceMetaDataSet();
             updateWithHostData(stack, stack.getNotDeletedInstanceMetaDataSet());
-            instanceMetaDataRepository.save(allInstanceMetaData);
+            instanceMetaDataRepository.saveAll(allInstanceMetaData);
         }
     }
 
@@ -62,7 +62,7 @@ public class HostMetadataSetup {
                     .filter(instanceMetaData -> newAddresses.contains(instanceMetaData.getPrivateIp()))
                     .collect(Collectors.toSet());
             updateWithHostData(stack, newInstanceMetadata);
-            instanceMetaDataRepository.save(newInstanceMetadata);
+            instanceMetaDataRepository.saveAll(newInstanceMetadata);
         }
     }
 

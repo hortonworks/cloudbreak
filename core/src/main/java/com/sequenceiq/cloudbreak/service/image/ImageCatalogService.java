@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.image;
 
+import static com.sequenceiq.cloudbreak.controller.exception.NotFoundException.notFound;
 import static com.sequenceiq.cloudbreak.service.image.StatedImage.statedImage;
 import static com.sequenceiq.cloudbreak.service.image.StatedImages.statedImages;
 import static com.sequenceiq.cloudbreak.util.NameUtil.generateArchiveName;
@@ -246,7 +247,7 @@ public class ImageCatalogService {
         ImageCatalog imageCatalog;
         IdentityUser user = authenticatedUserService.getCbUser();
         imageCatalog = imageCatalogRepository.findAllPublicInAccount(user.getAccount(), user.getUserId()).isEmpty() ? getCloudbreakDefaultImageCatalog()
-                : imageCatalogRepository.findOne(id);
+                : findImageCatalog(id);
         return imageCatalog;
     }
 
@@ -279,12 +280,16 @@ public class ImageCatalogService {
 
     public ImageCatalog update(ImageCatalog source) {
 
-        ImageCatalog imageCatalog = imageCatalogRepository.findOne(source.getId());
+        ImageCatalog imageCatalog = findImageCatalog(source.getId());
         authorizationService.hasReadPermission(imageCatalog);
         checkImageCatalog(imageCatalog, source.getId());
         imageCatalog.setImageCatalogName(source.getImageCatalogName());
         imageCatalog.setImageCatalogUrl(source.getImageCatalogUrl());
         return create(imageCatalog);
+    }
+
+    private ImageCatalog findImageCatalog(Long id) {
+        return imageCatalogRepository.findById(id).orElseThrow(notFound("Image catalog", id));
     }
 
     private void checkImageCatalog(ImageCatalog imageCatalog, Object filter) {

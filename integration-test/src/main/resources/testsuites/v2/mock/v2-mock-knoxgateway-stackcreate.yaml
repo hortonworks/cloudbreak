@@ -1,4 +1,4 @@
-name: Mock_V2_Kerberized_StackCreation_Scaling_Test
+name: Mock_V2_KnoxGateway_StackCreation_Test
 parameters:
   cloudProvider: MOCK
   region: Europe

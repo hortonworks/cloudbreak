@@ -26,10 +26,10 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.ExposedServices;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.GatewayTopology;
 import com.sequenceiq.cloudbreak.repository.GatewayRepository;
-import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionRuntimeExecutionException;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @Service
 public class GatewayService {
@@ -37,7 +37,7 @@ public class GatewayService {
     private static final Logger LOGGER = LoggerFactory.getLogger(GatewayService.class);
 
     @Inject
-    private StackRepository stackRepository;
+    private StackService stackService;
 
     @Inject
     private GatewayRepository gatewayRepository;
@@ -69,7 +69,7 @@ public class GatewayService {
     }
 
     private GatewayJson tryUpdatingGateway(Long stackId, UpdateGatewayTopologiesJson request) {
-        Stack stack = stackRepository.findOne(stackId);
+        Stack stack = stackService.getById(stackId);
         validateRequest(stackId, request, stack);
         Gateway gateway = stack.getCluster().getGateway();
         Set<GatewayTopology> currentTopologies = copyTopologies(gateway);
@@ -120,7 +120,7 @@ public class GatewayService {
     }
 
     private void revertTopologyUpdate(Long stackId, Set<GatewayTopology> topologiesToBeReverted) {
-        Stack stack = stackRepository.findOne(stackId);
+        Stack stack = stackService.getById(stackId);
         Gateway gateway = stack.getCluster().getGateway();
         topologiesToBeReverted.forEach(revert -> gateway.getTopologies().stream()
                 .filter(topology -> topology.getTopologyName().equals(revert.getTopologyName()))

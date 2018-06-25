@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.domain;
 
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -9,7 +10,7 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
-import org.hibernate.annotations.Type;
+import com.sequenceiq.cloudbreak.domain.converter.EncryptionConverter;
 
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"account", "name"}))
@@ -45,7 +46,7 @@ public class ProxyConfig implements ProvisionEntity {
     private String userName;
 
     @Column
-    @Type(type = "encrypted_string")
+    @Convert(converter = EncryptionConverter.class)
     private String password;
 
     @Column(nullable = false)

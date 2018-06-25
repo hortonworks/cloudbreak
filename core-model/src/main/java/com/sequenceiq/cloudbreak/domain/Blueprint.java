@@ -12,9 +12,8 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
-import org.hibernate.annotations.Type;
-
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
+import com.sequenceiq.cloudbreak.domain.converter.EncryptionConverter;
 import com.sequenceiq.cloudbreak.domain.json.EncryptedJsonToString;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.json.JsonToString;
@@ -31,7 +30,7 @@ public class Blueprint implements ProvisionEntity {
     @Column(nullable = false)
     private String name;
 
-    @Type(type = "encrypted_string")
+    @Convert(converter = EncryptionConverter.class)
     @Column(length = 1000000, columnDefinition = "TEXT", nullable = false)
     private String blueprintText;
 

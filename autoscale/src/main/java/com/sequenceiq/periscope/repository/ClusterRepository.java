@@ -1,6 +1,7 @@
 package com.sequenceiq.periscope.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -15,11 +16,9 @@ public interface ClusterRepository extends CrudRepository<Cluster, Long> {
 
     @Override
     @PostAuthorize("hasPermission(returnObject,'read')")
-    Cluster findOne(@Param("id") Long id);
+    Optional<Cluster> findById(@Param("id") Long id);
 
     Cluster findByStackId(@Param("stackId") Long stackId);
-
-    Cluster findById(Long id);
 
     List<Cluster> findByUserId(String id);
 

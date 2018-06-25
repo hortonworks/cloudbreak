@@ -8,15 +8,24 @@ buildscript {
   }
 }
 
-jar {
-  baseName = 'cloudbreak-integration-test'
-  archiveName = 'cloudbreak-integration-test.jar'
-}
-
 apply plugin: 'org.springframework.boot'
+apply plugin: 'io.spring.dependency-management'
 
 springBoot {
-  mainClass = 'com.sequenceiq.it.IntegrationTestApp'
+  mainClassName = 'com.sequenceiq.it.IntegrationTestApp'
+}
+
+bootRun {
+  systemProperty 'spring.profiles.active', System.properties['spring.profiles.active']
+  systemProperty 'spring.config.location', System.properties['spring.config.location']
+  if (project.hasProperty('jvmArgs')) {
+    jvmArgs += project.jvmArgs.split("\\s+").toList()
+  }
+}
+
+bootJar {
+  baseName = 'cloudbreak-integration-test'
+  archiveName = 'cloudbreak-integration-test.jar'
 }
 
 task runMockServer(type:JavaExec) {
@@ -46,6 +55,8 @@ dependencies {
   compile (group: 'com.amazonaws',                name: 'aws-java-sdk',                   version: awsSdkVersion) {
     exclude group: 'commons-logging'
   }
+  compile group: 'com.google.code.gson',          name: 'gson',                           version: '2.6.2'
+  compile group: 'org.codehaus.groovy',           name: 'groovy-all',                     version: '2.5.0'
   compile (group: 'com.microsoft.azure',          name: 'azure',                          version: azureSdkVersion) { exclude group: 'org.slf4j' }
   compile group:  'com.google.apis',              name: 'google-api-services-compute',    version: 'v1-rev133-1.22.0'
   compile group: 'com.google.apis',               name: 'google-api-services-storage',    version: 'v1-rev94-1.22.0'
@@ -53,7 +64,7 @@ dependencies {
   compile group: 'com.microsoft.azure',           name: 'azure-data-lake-store-sdk',      version: '2.1.5'
   compile group:  'org.springframework.boot',     name: 'spring-boot-starter',            version: springBootVersion
   compile group:  'org.springframework.boot',     name: 'spring-boot-starter-test',       version: springBootVersion
-  compile group:  'org.springframework',          name: 'spring-web',                     version: springFrameworkVersion
+  compile group:  'org.springframework.boot',     name: 'spring-boot-starter-web',        version: springBootVersion
   compile group:  'org.springframework',          name: 'spring-context-support',         version: springFrameworkVersion
   compile group:  'org.apache.velocity',          name: 'velocity',                       version: '1.7'
   compile group:  'com.hierynomus',               name: 'sshj',                           version: '0.15.0'
@@ -74,7 +85,7 @@ dependencies {
   }
   compile group: 'com.google.code.findbugs',      name: 'annotations',                    version: '3.0.1'
   runtime group: 'com.google.inject',             name: 'guice',                          version: '3.0'
-  runtime group: 'org.hibernate',                 name: 'hibernate-validator',            version: hibernateValidatorVersion
+  runtime group: 'javax.xml.bind',                name: 'jaxb-api', version: '2.3.0'
 }
 
 task buildInfo(type: BuildInfoTask) {

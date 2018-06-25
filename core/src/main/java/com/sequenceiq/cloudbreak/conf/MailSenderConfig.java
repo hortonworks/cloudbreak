@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Properties;
 
+import javax.mail.Session;
 import javax.mail.internet.MimeMessage;
 
 import org.slf4j.Logger;
@@ -109,12 +110,12 @@ public class MailSenderConfig {
 
         @Override
         public MimeMessage createMimeMessage() {
-            return null;
+            return new DummyMimeMessage();
         }
 
         @Override
         public MimeMessage createMimeMessage(InputStream contentStream) throws MailException {
-            return null;
+            return new DummyMimeMessage();
         }
 
         @Override
@@ -145,6 +146,13 @@ public class MailSenderConfig {
         @Override
         public void send(SimpleMailMessage[] simpleMessages) throws MailException {
             logger.info(msg);
+        }
+    }
+
+    private static final class DummyMimeMessage extends MimeMessage {
+
+        private DummyMimeMessage() {
+            super((Session) null);
         }
     }
 

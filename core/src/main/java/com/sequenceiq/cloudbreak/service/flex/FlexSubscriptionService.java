@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.flex;
 
+import static com.sequenceiq.cloudbreak.controller.exception.NotFoundException.notFound;
+
 import java.util.Collection;
 import java.util.List;
 import java.util.function.BiConsumer;
@@ -65,18 +67,15 @@ public class FlexSubscriptionService {
     }
 
     public void delete(Long id) {
-        FlexSubscription subscription = flexRepo.findById(id);
+        FlexSubscription subscription = getSubscription(id);
+        authorizationService.hasWritePermission(subscription);
         delete(subscription);
     }
 
-    public FlexSubscription findById(Long id) {
-        LOGGER.info("Looking for Flex subscription with id: {}", id);
-        return flexRepo.findOne(id);
-    }
-
     public FlexSubscription findOneById(Long id) {
-        LOGGER.info("Looking for one Flex subscription with id: {}", id);
-        return flexRepo.findById(id);
+        FlexSubscription subscription = getSubscription(id);
+        authorizationService.hasReadPermission(subscription);
+        return subscription;
     }
 
     public List<FlexSubscription> findByOwner(String owner) {
@@ -108,6 +107,10 @@ public class FlexSubscriptionService {
         setFlexSubscriptionFlag(name, identityUser, FlexSubscription::setUsedForController);
     }
 
+    private FlexSubscription getSubscription(Long id) {
+        return flexRepo.findById(id).orElseThrow(notFound("Flex Subscription", id));
+    }
+
     private void setSubscriptionAsDefaultIfNeeded(FlexSubscription subscription, Collection<FlexSubscription> allInAccount) {
         if (allInAccount.stream().allMatch(subscription::equals)) {
             subscription.setDefault(true);
@@ -124,14 +127,14 @@ public class FlexSubscriptionService {
             if (subscription.isUsedForController()) {
                 setFlagOnFlexSubscriptionCollection(subscription.getName(), FlexSubscription::setUsedForController, allInAccount);
             }
-            flexRepo.save(allInAccount);
+            flexRepo.saveAll(allInAccount);
         }
     }
 
     private void setFlexSubscriptionFlag(String name, IdentityUser identityUser, BiConsumer<FlexSubscription, Boolean> setter) {
         List<FlexSubscription> allInAccount = flexRepo.findAllByAccount(identityUser.getAccount());
         setFlagOnFlexSubscriptionCollection(name, setter, allInAccount);
-        flexRepo.save(allInAccount);
+        flexRepo.saveAll(allInAccount);
     }
 
     private void setFlagOnFlexSubscriptionCollection(String name, BiConsumer<FlexSubscription, Boolean> setter, Collection<FlexSubscription> allInAccount) {

@@ -18,8 +18,11 @@ import org.springframework.core.convert.ConversionService;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.model.ConstraintJson;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupResponse;
+import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostMetadataResponse;
 import com.sequenceiq.cloudbreak.converter.AbstractEntityConverterTest;
+import com.sequenceiq.cloudbreak.domain.Constraint;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 
 public class HostGroupToJsonEntityConverterTest extends AbstractEntityConverterTest<HostGroup> {
 
@@ -33,7 +36,8 @@ public class HostGroupToJsonEntityConverterTest extends AbstractEntityConverterT
     public void setUp() {
         underTest = new HostGroupToHostGroupResponseConverter();
         MockitoAnnotations.initMocks(this);
-        when(conversionService.convert(any(), any())).thenReturn(new ConstraintJson());
+        when(conversionService.convert(any(Constraint.class), any())).thenReturn(new ConstraintJson());
+        when(conversionService.convert(any(HostMetadata.class), any())).thenReturn(new HostMetadataResponse());
     }
 
     @Test

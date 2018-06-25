@@ -7,6 +7,7 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.when;
 
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 import org.junit.Before;
@@ -95,7 +96,7 @@ public class AmbariClusterServiceTest {
         Stack stack = new Stack();
         stack.setOrchestrator(new Orchestrator());
         stack.setCluster(cluster);
-        when(clusterRepository.findById(any(Long.class))).thenReturn(cluster);
+        when(clusterRepository.findById(any(Long.class))).thenReturn(Optional.of(cluster));
         when(stackService.getByIdWithLists(any(Long.class))).thenReturn(stack);
         when(orchestratorTypeResolver.resolveType(nullable(Orchestrator.class))).thenReturn(OrchestratorType.HOST);
         when(orchestratorTypeResolver.resolveType(nullable(String.class))).thenReturn(OrchestratorType.HOST);

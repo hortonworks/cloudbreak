@@ -8,6 +8,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Optional;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -46,7 +48,7 @@ public class StackUpdaterTest {
         Stack stack = TestUtil.stack();
 
         DetailedStackStatus newStatus = DetailedStackStatus.DELETE_COMPLETED;
-        when(stackRepository.findOne(anyLong())).thenReturn(stack);
+        when(stackRepository.findById(anyLong())).thenReturn(Optional.of(stack));
         when(stackRepository.save(any(Stack.class))).thenReturn(stack);
 
         Stack newStack = underTest.updateStackStatus(1L, DetailedStackStatus.DELETE_COMPLETED);
@@ -61,7 +63,7 @@ public class StackUpdaterTest {
 
         DetailedStackStatus newStatus = DetailedStackStatus.DELETE_COMPLETED;
         String newStatusReason = "test";
-        when(stackRepository.findOne(anyLong())).thenReturn(stack);
+        when(stackRepository.findById(anyLong())).thenReturn(Optional.of(stack));
         when(stackRepository.save(any(Stack.class))).thenReturn(stack);
 
         Stack newStack = underTest.updateStackStatus(1L, newStatus, newStatusReason);

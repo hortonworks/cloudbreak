@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.domain;
 
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -10,8 +11,7 @@ import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
-import org.hibernate.annotations.Type;
-
+import com.sequenceiq.cloudbreak.domain.converter.EncryptionConverter;
 import com.sequenceiq.cloudbreak.type.KerberosType;
 
 @Entity
@@ -26,34 +26,34 @@ public class KerberosConfig implements ProvisionEntity {
     @Enumerated(EnumType.STRING)
     private KerberosType type;
 
-    @Type(type = "encrypted_string")
+    @Convert(converter = EncryptionConverter.class)
     @Column(name = "kerberosmasterkey")
     private String masterKey;
 
-    @Type(type = "encrypted_string")
+    @Convert(converter = EncryptionConverter.class)
     @Column(name = "kerberosadmin")
     private String admin;
 
-    @Type(type = "encrypted_string")
+    @Convert(converter = EncryptionConverter.class)
     @Column(name = "kerberospassword")
     private String password;
 
-    @Type(type = "encrypted_string")
+    @Convert(converter = EncryptionConverter.class)
     @Column(name = "kerberosurl")
     private String url;
 
-    @Type(type = "encrypted_string")
+    @Convert(converter = EncryptionConverter.class)
     @Column(name = "kdcadminurl")
     private String adminUrl;
 
-    @Type(type = "encrypted_string")
+    @Convert(converter = EncryptionConverter.class)
     @Column(name = "kerberosrealm")
     private String realm;
 
     @Column(name = "kerberostcpallowed")
     private Boolean tcpAllowed;
 
-    @Type(type = "encrypted_string")
+    @Convert(converter = EncryptionConverter.class)
     @Column(name = "kerberosprincipal")
     private String principal;
 
@@ -63,11 +63,11 @@ public class KerberosConfig implements ProvisionEntity {
     @Column(name = "kerberoscontainerdn")
     private String containerDn;
 
-    @Type(type = "encrypted_string")
+    @Convert(converter = EncryptionConverter.class)
     @Column(name = "kerberosdescriptor", columnDefinition = "TEXT")
     private String descriptor;
 
-    @Type(type = "encrypted_string")
+    @Convert(converter = EncryptionConverter.class)
     @Column(name = "krb5conf", columnDefinition = "TEXT")
     private String krb5Conf;
 

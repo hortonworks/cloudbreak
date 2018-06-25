@@ -15,9 +15,6 @@ import com.sequenceiq.cloudbreak.domain.Topology;
 @Transactional(Transactional.TxType.REQUIRED)
 public interface TemplateRepository extends CrudRepository<Template, Long> {
 
-    @Override
-    Template findOne(@Param("id") Long id);
-
     @Query("SELECT t FROM Template t WHERE t.owner= :user AND deleted IS NOT TRUE AND t.status <> 'DEFAULT_DELETED'")
     Set<Template> findForUser(@Param("user") String user);
 
@@ -40,9 +37,6 @@ public interface TemplateRepository extends CrudRepository<Template, Long> {
 
     @Query("SELECT t FROM Template t WHERE t.owner= :owner and t.name= :name AND deleted IS NOT TRUE AND t.status <> 'DEFAULT_DELETED'")
     Template findByNameInUser(@Param("name") String name, @Param("owner") String owner);
-
-    @Query("SELECT t FROM Template t WHERE t.account= :account AND (t.status = 'DEFAULT_DELETED' OR t.status = 'DEFAULT')")
-    Set<Template> findAllDefaultInAccount(@Param("account") String account);
 
     Long countByTopology(Topology topology);
 

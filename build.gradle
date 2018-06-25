@@ -16,7 +16,7 @@ buildscript {
 
 plugins {
   id 'org.ajoberstar.grgit' version '2.1.0'
-  id "com.github.spotbugs" version "1.6.1"
+  id "com.github.spotbugs" version "1.6.2"
 }
 
 if (project.hasProperty("reckon.scope")) {
@@ -48,8 +48,8 @@ subprojects {
   apply plugin: 'checkstyle'
   apply plugin: 'com.github.spotbugs'
 
-  sourceCompatibility = 1.8
-  targetCompatibility = 1.8
+  sourceCompatibility = 10
+  targetCompatibility = 10
 
   configurations {
     deployerJars

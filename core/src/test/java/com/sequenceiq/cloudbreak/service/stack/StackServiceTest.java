@@ -18,6 +18,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Optional;
 import java.util.function.Supplier;
 
 import org.junit.Before;
@@ -157,7 +158,7 @@ public class StackServiceTest {
 
     @Test
     public void testRemoveInstanceWhenTheInstanceIsCoreTypeAndUserHasRightToTerminateThenThenProcessWouldBeSuccessful() {
-        when(stackRepository.findOne(STACK_ID)).thenReturn(stack);
+        when(stackRepository.findById(STACK_ID)).thenReturn(Optional.of(stack));
         when(instanceMetaDataRepository.findByInstanceId(STACK_ID, INSTANCE_ID)).thenReturn(instanceMetaData);
         when(stack.isPublicInAccount()).thenReturn(true);
         when(stack.getOwner()).thenReturn(OWNER);
@@ -177,7 +178,7 @@ public class StackServiceTest {
 
     @Test
     public void testRemoveInstancesWhenTheInstancesAreCoreTypeAndUserHasRightToTerminateThenProcessWouldBeSuccessful() {
-        when(stackRepository.findOne(STACK_ID)).thenReturn(stack);
+        when(stackRepository.findById(STACK_ID)).thenReturn(Optional.of(stack));
         when(instanceMetaDataRepository.findByInstanceId(STACK_ID, INSTANCE_ID)).thenReturn(instanceMetaData);
         when(instanceMetaDataRepository.findByInstanceId(STACK_ID, INSTANCE_ID2)).thenReturn(instanceMetaData2);
         when(stack.isPublicInAccount()).thenReturn(true);
@@ -203,7 +204,7 @@ public class StackServiceTest {
     @Test
     public void testRemoveInstanceWhenTheHostIsGatewayTypeThenWeShoulNotAllowTerminationWithException() {
         String exceptionMessage = String.format("Downscale for node [public IP: %s] is prohibited because it maintains the Ambari server", INSTANCE_PUBLIC_IP);
-        when(stackRepository.findOne(STACK_ID)).thenReturn(stack);
+        when(stackRepository.findById(STACK_ID)).thenReturn(Optional.of(stack));
         when(instanceMetaDataRepository.findByInstanceId(STACK_ID, INSTANCE_ID)).thenReturn(instanceMetaData);
         when(instanceMetaData.getInstanceMetadataType()).thenReturn(GATEWAY);
         when(stack.getId()).thenReturn(STACK_ID);
@@ -224,7 +225,7 @@ public class StackServiceTest {
     @Test
     public void testRemoveInstancesWhenOneHostIsGatewayTypeThenWeShoulNotAllowTerminationWithException() {
         String exceptionMessage = String.format("Downscale for node [public IP: %s] is prohibited because it maintains the Ambari server", INSTANCE_PUBLIC_IP);
-        when(stackRepository.findOne(STACK_ID)).thenReturn(stack);
+        when(stackRepository.findById(STACK_ID)).thenReturn(Optional.of(stack));
         when(stack.getId()).thenReturn(STACK_ID);
         when(instanceMetaDataRepository.findByInstanceId(STACK_ID, INSTANCE_ID)).thenReturn(instanceMetaData);
         when(instanceMetaData.getInstanceMetadataType()).thenReturn(GATEWAY);
@@ -247,7 +248,7 @@ public class StackServiceTest {
         String exceptionMessage = "Private stack (%s) is only modifiable by the owner.";
         String userId = "222";
         String owner = "111";
-        when(stackRepository.findOne(STACK_ID)).thenReturn(stack);
+        when(stackRepository.findById(STACK_ID)).thenReturn(Optional.of(stack));
         when(instanceMetaDataRepository.findByInstanceId(STACK_ID, INSTANCE_ID)).thenReturn(instanceMetaData);
         when(stack.isPublicInAccount()).thenReturn(false);
         when(stack.getOwner()).thenReturn(owner);
@@ -272,7 +273,7 @@ public class StackServiceTest {
 
     @Test
     public void testWhenInstanceMetaDataIsNullThenExceptionWouldThrown() {
-        when(stackRepository.findOne(STACK_ID)).thenReturn(stack);
+        when(stackRepository.findById(STACK_ID)).thenReturn(Optional.of(stack));
         when(stack.getId()).thenReturn(STACK_ID);
         when(instanceMetaDataRepository.findByInstanceId(STACK_ID, INSTANCE_ID)).thenReturn(null);
         doNothing().when(authorizationService).hasReadPermission(stack);
@@ -290,7 +291,7 @@ public class StackServiceTest {
         Cluster cluster = new Cluster();
         stack.setCluster(cluster);
         cluster.setStatus(Status.STOPPED);
-        when(stackRepository.findOne(STACK_ID)).thenReturn(stack);
+        when(stackRepository.findById(STACK_ID)).thenReturn(Optional.of(stack));
         when(instanceMetaDataRepository.findByInstanceId(STACK_ID, INSTANCE_ID)).thenReturn(mock(InstanceMetaData.class));
 //        doNothing().when(authorizationService).hasReadPermission(stack);
 
@@ -301,10 +302,10 @@ public class StackServiceTest {
 
     @Test
     public void testWhenStackCouldNotFindByItsIdThenExceptionWouldThrown() {
-        when(stackRepository.findOne(STACK_ID)).thenReturn(null);
+        when(stackRepository.findById(STACK_ID)).thenReturn(Optional.ofNullable(null));
 
         expectedException.expect(NotFoundException.class);
-        expectedException.expectMessage(String.format("Stack '%s' has not found", STACK_ID));
+        expectedException.expectMessage(String.format("Stack '%d' not found", STACK_ID));
 
         underTest.get(STACK_ID);
     }
