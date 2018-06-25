@@ -381,6 +381,11 @@ public class OfflineStateGenerator {
         }
 
         @Override
+        public Set<Stack> findByCredential(Credential credential) {
+            return null;
+        }
+
+        @Override
         public Long countByNetwork(Network network) {
             return null;
         }

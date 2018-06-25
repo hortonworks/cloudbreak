@@ -45,4 +45,6 @@ public interface TemplateRepository extends CrudRepository<Template, Long> {
     Set<Template> findAllDefaultInAccount(@Param("account") String account);
 
     Long countByTopology(Topology topology);
+
+    Set<Template> findByTopology(Topology topology);
 }
