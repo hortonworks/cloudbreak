@@ -146,7 +146,7 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
                         flow.initialize();
                         flowLogService.save(flowId, flowChainId, key, payload, null, flowConfig.getClass(), flow.getCurrentState());
                         acceptFlow(payload);
-                        pruneMDCContext(flowId);
+                        logFlowId(flowId);
                         runningFlows.put(flow, flowChainId);
                         flow.sendEvent(key, payload);
                     }
@@ -261,9 +261,8 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
         return event.getHeaders().get(FLOW_CHAIN_ID);
     }
 
-    private void pruneMDCContext(String flowId) {
+    private void logFlowId(String flowId) {
         String trackingId = MDCBuilder.getMdcContextMap().get(LoggerContextKey.TRACKING_ID.toString());
         LOGGER.info("Flow has been created with id: '{}' and the related tracking id: '{}'.", flowId, trackingId);
-        MDCBuilder.addTrackingIdToMdcContext("");
     }
 }
