@@ -1,5 +1,12 @@
 package com.sequenceiq.cloudbreak.service.credential;
 
+import java.util.Date;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import javax.inject.Inject;
+
 import com.sequenceiq.cloudbreak.api.model.CloudbreakEventsJson;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
@@ -7,6 +14,7 @@ import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.Credential;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.repository.CredentialRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.AuthorizationService;
@@ -23,11 +31,6 @@ import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
-
-import javax.inject.Inject;
-import java.util.Date;
-import java.util.Map;
-import java.util.Set;
 
 import static com.sequenceiq.cloudbreak.util.NameUtil.generateArchiveName;
 import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
@@ -210,8 +213,22 @@ public class CredentialService {
 
     private void delete(Credential credential) {
         authorizationService.hasWritePermission(credential);
-        if (!stackRepository.countByCredential(credential).equals(0L)) {
-            throw new BadRequestException(String.format("Credential '%d' is in use, cannot be deleted.", credential.getId()));
+        Set<Stack> stacksForCredential = stackRepository.findByCredential(credential);
+        if (!stacksForCredential.isEmpty()) {
+            String clusters;
+            String message;
+            if (stacksForCredential.size() > 1) {
+                clusters = stacksForCredential.stream()
+                        .map(Stack::getName)
+                        .collect(Collectors.joining(", "));
+                message = "There are clusters associated with credential config '%s'. Please remove these before deleting the credential. "
+                        + "The following clusters are using this credential: [%s]";
+            } else {
+                clusters = stacksForCredential.iterator().next().getName();
+                message = "There is a cluster associated with credential config '%s'. Please remove before deleting the credential. "
+                        + "The following cluster is using this credential: [%s]";
+            }
+            throw new BadRequestException(String.format(message, credential.getName(), clusters));
         }
         userProfileCredentialHandler.destroyProfilePreparation(credential);
         archiveCredential(credential);

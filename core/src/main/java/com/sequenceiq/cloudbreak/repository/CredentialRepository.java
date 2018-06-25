@@ -51,4 +51,6 @@ public interface CredentialRepository extends CrudRepository<Credential, Long> {
     Credential findByNameInUser(@Param("name") String name, @Param("owner") String owner);
 
     Long countByTopology(Topology topology);
+
+    Set<Credential> findByTopology(Topology topology);
 }

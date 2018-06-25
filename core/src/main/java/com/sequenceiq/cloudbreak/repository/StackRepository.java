@@ -99,8 +99,9 @@ public interface StackRepository extends CrudRepository<Stack, Long> {
 
     Long countByCredential(Credential credential);
 
+    Set<Stack> findByCredential(Credential credential);
+
     Long countByNetwork(Network network);
 
     Set<Stack> findByNetwork(Network network);
-
 }

@@ -43,4 +43,6 @@ public interface NetworkRepository extends CrudRepository<Network, Long> {
     Set<Network> findAllDefaultInAccount(@Param("account") String account);
 
     Long countByTopology(Topology topology);
+
+    Set<Network> findByTopology(Topology topology);
 }
