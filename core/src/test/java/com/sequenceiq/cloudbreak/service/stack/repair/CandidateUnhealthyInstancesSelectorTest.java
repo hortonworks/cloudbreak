@@ -17,10 +17,9 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType;
-import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 
@@ -45,7 +44,7 @@ public class CandidateUnhealthyInstancesSelectorTest {
     }
 
     @Test
-    public void shouldSelectInstancesWithUnknownStatus() throws CloudbreakSecuritySetupException {
+    public void shouldSelectInstancesWithUnknownStatus() {
         Map<String, String> hostStatuses = new HashMap<>();
         hostStatuses.put("ip-10-0-0-1.ec2.internal", "HEALTHY");
         hostStatuses.put("ip-10-0-0-2.ec2.internal", "UNKNOWN");
@@ -60,13 +59,13 @@ public class CandidateUnhealthyInstancesSelectorTest {
 
         Set<InstanceMetaData> candidateUnhealthyInstances = undertest.selectCandidateUnhealthyInstances(stack.getId());
 
-        assertEquals(2, candidateUnhealthyInstances.size());
+        assertEquals(2L, candidateUnhealthyInstances.size());
         assertTrue(candidateUnhealthyInstances.contains(imd1));
         assertTrue(candidateUnhealthyInstances.contains(imd2));
     }
 
     @Test
-    public void shouldReturnEmptyListIfAllInstancesHealthy() throws CloudbreakSecuritySetupException {
+    public void shouldReturnEmptyListIfAllInstancesHealthy() {
         Map<String, String> hostStatuses = new HashMap<>();
         hostStatuses.put("ip-10-0-0-1.ec2.internal", "HEALTHY");
         hostStatuses.put("ip-10-0-0-3.ec2.internal", "HEALTHY");
@@ -79,7 +78,7 @@ public class CandidateUnhealthyInstancesSelectorTest {
     }
 
     @Test
-    public void shouldRemoveNonCoreGroupNodes() throws CloudbreakSecuritySetupException {
+    public void shouldRemoveNonCoreGroupNodes() {
         Map<String, String> hostStatuses = new HashMap<>();
         hostStatuses.put("ip-10-0-0-1.ec2.internal", "HEALTHY");
         hostStatuses.put("ip-10-0-0-2.ec2.internal", "UNKNOWN");
@@ -97,7 +96,7 @@ public class CandidateUnhealthyInstancesSelectorTest {
 
         Set<InstanceMetaData> candidateUnhealthyInstances = undertest.selectCandidateUnhealthyInstances(stack.getId());
 
-        assertEquals(2, candidateUnhealthyInstances.size());
+        assertEquals(2L, candidateUnhealthyInstances.size());
         assertTrue(candidateUnhealthyInstances.contains(imd1));
         assertTrue(candidateUnhealthyInstances.contains(imd2));
     }

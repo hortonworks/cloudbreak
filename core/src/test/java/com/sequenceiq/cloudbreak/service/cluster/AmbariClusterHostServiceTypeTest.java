@@ -35,7 +35,6 @@ import com.sequenceiq.cloudbreak.blueprint.validation.BlueprintValidator;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.converter.scheduler.StatusToPollGroupConverter;
-import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -150,7 +149,7 @@ public class AmbariClusterHostServiceTypeTest {
     }
 
     @Test
-    public void testUpdateHostsDoesntAcceptZeroScalingAdjustments() throws Exception {
+    public void testUpdateHostsDoesntAcceptZeroScalingAdjustments() {
         // GIVEN
         HostGroupAdjustmentJson hga1 = new HostGroupAdjustmentJson();
         hga1.setHostGroup("slave_1");
@@ -165,7 +164,7 @@ public class AmbariClusterHostServiceTypeTest {
     }
 
     @Test
-    public void testUpdateHostsDoesntAcceptScalingAdjustmentsWithDifferentSigns() throws Exception {
+    public void testUpdateHostsDoesntAcceptScalingAdjustmentsWithDifferentSigns() {
         // GIVEN
         HostGroupAdjustmentJson hga1 = new HostGroupAdjustmentJson();
         hga1.setHostGroup("slave_1");
@@ -181,7 +180,7 @@ public class AmbariClusterHostServiceTypeTest {
     }
 
     @Test
-    public void testUpdateHostsForDownscaleFilterAllHosts() throws CloudbreakSecuritySetupException {
+    public void testUpdateHostsForDownscaleFilterAllHosts() {
         HostGroupAdjustmentJson json = new HostGroupAdjustmentJson();
         json.setHostGroup("slave_1");
         json.setScalingAdjustment(-1);
@@ -198,16 +197,15 @@ public class AmbariClusterHostServiceTypeTest {
     }
 
     @Test
-    public void testUpdateHostsForDownscaleCannotGoBelowReplication() throws CloudbreakSecuritySetupException {
+    public void testUpdateHostsForDownscaleCannotGoBelowReplication() {
         HostGroupAdjustmentJson json = new HostGroupAdjustmentJson();
         json.setHostGroup("slave_1");
         json.setScalingAdjustment(-1);
         HostMetadata metadata1 = mock(HostMetadata.class);
         HostMetadata metadata2 = mock(HostMetadata.class);
         HostMetadata metadata3 = mock(HostMetadata.class);
-        Set<HostMetadata> hostsMetaData = new HashSet<>();
         List<HostMetadata> hostsMetadataList = asList(metadata1, metadata2, metadata3);
-        hostsMetaData.addAll(hostsMetadataList);
+        Set<HostMetadata> hostsMetaData = new HashSet<>(hostsMetadataList);
         HostGroup hostGroup = new HostGroup();
         hostGroup.setHostMetadata(hostsMetaData);
         hostGroup.setName("slave_1");
@@ -220,7 +218,7 @@ public class AmbariClusterHostServiceTypeTest {
     }
 
     @Test
-    public void testUpdateHostsForDownscaleFilterOneHost() throws CloudbreakSecuritySetupException {
+    public void testUpdateHostsForDownscaleFilterOneHost() {
         HostGroupAdjustmentJson json = new HostGroupAdjustmentJson();
         json.setHostGroup("slave_1");
         json.setScalingAdjustment(-1);
@@ -241,16 +239,15 @@ public class AmbariClusterHostServiceTypeTest {
     }
 
     @Test
-    public void testUpdateHostsForDownscaleSelectNodesWithLessData() throws CloudbreakSecuritySetupException {
+    public void testUpdateHostsForDownscaleSelectNodesWithLessData() {
         HostGroupAdjustmentJson json = new HostGroupAdjustmentJson();
         json.setHostGroup("slave_1");
         json.setScalingAdjustment(-1);
         HostMetadata metadata1 = mock(HostMetadata.class);
         HostMetadata metadata2 = mock(HostMetadata.class);
         HostMetadata metadata3 = mock(HostMetadata.class);
-        Set<HostMetadata> hostsMetaData = new HashSet<>();
         List<HostMetadata> hostsMetadataList = asList(metadata1, metadata2, metadata3);
-        hostsMetaData.addAll(hostsMetadataList);
+        Set<HostMetadata> hostsMetaData = new HashSet<>(hostsMetadataList);
         HostGroup hostGroup = new HostGroup();
         hostGroup.setHostMetadata(hostsMetaData);
         hostGroup.setName("slave_1");
@@ -263,7 +260,7 @@ public class AmbariClusterHostServiceTypeTest {
     }
 
     @Test
-    public void testUpdateHostsForDownscaleSelectMultipleNodesWithLessData() throws Exception {
+    public void testUpdateHostsForDownscaleSelectMultipleNodesWithLessData() {
         HostGroupAdjustmentJson json = new HostGroupAdjustmentJson();
         json.setHostGroup("slave_1");
         json.setScalingAdjustment(-2);
@@ -271,9 +268,8 @@ public class AmbariClusterHostServiceTypeTest {
         HostMetadata metadata2 = mock(HostMetadata.class);
         HostMetadata metadata3 = mock(HostMetadata.class);
         HostMetadata metadata4 = mock(HostMetadata.class);
-        Set<HostMetadata> hostsMetaData = new HashSet<>();
         List<HostMetadata> hostsMetadataList = asList(metadata1, metadata2, metadata3, metadata4);
-        hostsMetaData.addAll(hostsMetadataList);
+        Set<HostMetadata> hostsMetaData = new HashSet<>(hostsMetadataList);
         HostGroup hostGroup = new HostGroup();
         hostGroup.setHostMetadata(hostsMetaData);
         hostGroup.setName("slave_1");
@@ -286,16 +282,15 @@ public class AmbariClusterHostServiceTypeTest {
     }
 
     @Test
-    public void testUpdateHostsForDownscaleWhenRemainingSpaceIsNotEnough() throws Exception {
+    public void testUpdateHostsForDownscaleWhenRemainingSpaceIsNotEnough() {
         HostGroupAdjustmentJson json = new HostGroupAdjustmentJson();
         json.setHostGroup("slave_1");
         json.setScalingAdjustment(-1);
         HostMetadata metadata1 = mock(HostMetadata.class);
         HostMetadata metadata2 = mock(HostMetadata.class);
         HostMetadata metadata3 = mock(HostMetadata.class);
-        Set<HostMetadata> hostsMetaData = new HashSet<>();
         List<HostMetadata> hostsMetadataList = asList(metadata1, metadata2, metadata3);
-        hostsMetaData.addAll(hostsMetadataList);
+        Set<HostMetadata> hostsMetaData = new HashSet<>(hostsMetadataList);
         HostGroup hostGroup = new HostGroup();
         hostGroup.setHostMetadata(hostsMetaData);
         hostGroup.setName("slave_1");

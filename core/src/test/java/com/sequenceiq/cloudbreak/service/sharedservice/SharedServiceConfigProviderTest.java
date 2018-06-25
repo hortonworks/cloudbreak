@@ -213,7 +213,7 @@ public class SharedServiceConfigProviderTest {
 
         Cluster result = underTest.configureCluster(requestedCluster, user, connectedClusterRequest);
 
-        Assert.assertEquals(2, result.getRdsConfigs().size());
+        Assert.assertEquals(2L, result.getRdsConfigs().size());
         result.getRdsConfigs().forEach(rdsConfig -> Assert.assertNotEquals(DEFAULT, rdsConfig.getStatus()));
     }
 
@@ -293,7 +293,7 @@ public class SharedServiceConfigProviderTest {
         Cluster requestedCluster = createBarelyConfiguredRequestedCluster();
         Json mockBlueprintAttributes = mock(Json.class);
         BlueprintInputParameters inputParameters = new BlueprintInputParameters();
-        inputParameters.setParameters(createBlueprintParameters(3));
+        inputParameters.setParameters(createBlueprintParameters());
 
         when(connectedClusterRequest.getSourceClusterName()).thenReturn(null);
         when(connectedClusterRequest.getSourceClusterId()).thenReturn(TEST_LONG_VALUE);
@@ -332,9 +332,9 @@ public class SharedServiceConfigProviderTest {
         return configs;
     }
 
-    private List<BlueprintParameter> createBlueprintParameters(int quantity) {
-        List<BlueprintParameter> parameters = new ArrayList<>(quantity);
-        for (int i = 0; i < quantity; i++) {
+    private List<BlueprintParameter> createBlueprintParameters() {
+        List<BlueprintParameter> parameters = new ArrayList<>(3);
+        for (int i = 0; i < 3; i++) {
             BlueprintParameter parameter = new BlueprintParameter();
             parameter.setName("name");
             parameter.setReferenceConfiguration("configuration reference content");

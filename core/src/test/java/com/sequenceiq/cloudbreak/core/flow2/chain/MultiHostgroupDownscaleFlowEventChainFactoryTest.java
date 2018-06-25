@@ -20,7 +20,7 @@ import reactor.rx.Promise;
 
 public class MultiHostgroupDownscaleFlowEventChainFactoryTest {
 
-    private MultiHostgroupDownscaleFlowEventChainFactory underTest = new MultiHostgroupDownscaleFlowEventChainFactory();
+    private final MultiHostgroupDownscaleFlowEventChainFactory underTest = new MultiHostgroupDownscaleFlowEventChainFactory();
 
     @Test
     public void testInitEvent() {
@@ -35,7 +35,7 @@ public class MultiHostgroupDownscaleFlowEventChainFactoryTest {
         MultiHostgroupClusterAndStackDownscaleTriggerEvent event = new MultiHostgroupClusterAndStackDownscaleTriggerEvent("selector", 1L,
                 instanceIdsByHostgroupMap, ScalingType.DOWNSCALE_TOGETHER, new Promise<>());
         Queue<Selectable> queue = underTest.createFlowTriggerEventQueue(event);
-        assertEquals(4, queue.size());
+        assertEquals(4L, queue.size());
         assertEquals(DECOMMISSION_EVENT.event(), queue.poll().selector());
         assertEquals(STACK_DOWNSCALE_EVENT.event(), queue.poll().selector());
         assertEquals(DECOMMISSION_EVENT.event(), queue.poll().selector());

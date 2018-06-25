@@ -26,7 +26,7 @@ import com.sequenceiq.cloudbreak.service.smartsense.SmartSenseSubscriptionServic
 public class SmartSenseSubscriptionControllerTest {
 
     @Rule
-    public ExpectedException thrown = ExpectedException.none();
+    public final ExpectedException thrown = ExpectedException.none();
 
     @InjectMocks
     private SmartSenseSubscriptionController underTest;

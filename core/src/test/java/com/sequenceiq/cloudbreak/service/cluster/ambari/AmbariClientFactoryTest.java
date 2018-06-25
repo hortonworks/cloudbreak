@@ -17,9 +17,8 @@ import org.mockito.junit.MockitoJUnitRunner;
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
-import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariClientProvider;
 
@@ -36,10 +35,10 @@ public class AmbariClientFactoryTest {
     private TlsSecurityService tlsSecurityService;
 
     @InjectMocks
-    private AmbariClientFactory underTest = new AmbariClientFactory();
+    private final AmbariClientFactory underTest = new AmbariClientFactory();
 
     @Test
-    public void testGetDefaultAmbariClientWhenEverythingWorksFine() throws CloudbreakSecuritySetupException {
+    public void testGetDefaultAmbariClientWhenEverythingWorksFine() {
         Stack stack = TestUtil.stack();
         HttpClientConfig httpClientConfig = new HttpClientConfig(stack.getAmbariIp());
         AmbariClient ambariClient = Mockito.mock(AmbariClient.class);
@@ -56,7 +55,7 @@ public class AmbariClientFactoryTest {
     }
 
     @Test
-    public void testGetDefaultAmbariClientWhenExceptionOccuredWhichIsCloudbreakSecuritySetupException() throws CloudbreakSecuritySetupException {
+    public void testGetDefaultAmbariClientWhenExceptionOccuredWhichIsCloudbreakSecuritySetupException() {
         Stack stack = TestUtil.stack();
         HttpClientConfig httpClientConfig = new HttpClientConfig(stack.getAmbariIp());
         AmbariClient ambariClient = Mockito.mock(AmbariClient.class);
@@ -76,7 +75,7 @@ public class AmbariClientFactoryTest {
     }
 
     @Test
-    public void testGetAmbariClientWhenEverythingWorksFine() throws CloudbreakSecuritySetupException {
+    public void testGetAmbariClientWhenEverythingWorksFine() {
         Stack stack = TestUtil.stack();
         Cluster cluster = TestUtil.cluster();
         stack.setCluster(cluster);
@@ -95,7 +94,7 @@ public class AmbariClientFactoryTest {
     }
 
     @Test
-    public void testGetAmbariClientWhenExceptionOccuredWhichIsCloudbreakSecuritySetupException() throws CloudbreakSecuritySetupException {
+    public void testGetAmbariClientWhenExceptionOccuredWhichIsCloudbreakSecuritySetupException() {
         Stack stack = TestUtil.stack();
         Cluster cluster = TestUtil.cluster();
         stack.setCluster(cluster);
@@ -117,7 +116,7 @@ public class AmbariClientFactoryTest {
     }
 
     @Test
-    public void testGetAmbariClientWithUsernameAndPasswordWhenEverythingWorksFine() throws CloudbreakSecuritySetupException {
+    public void testGetAmbariClientWithUsernameAndPasswordWhenEverythingWorksFine() {
         Stack stack = TestUtil.stack();
         Cluster cluster = TestUtil.cluster();
         stack.setCluster(cluster);
@@ -138,8 +137,7 @@ public class AmbariClientFactoryTest {
     }
 
     @Test
-    public void testGetAmbariClientWithUsernameAndPasswordWhenExceptionOccuredWhichIsCloudbreakSecuritySetupException()
-            throws CloudbreakSecuritySetupException {
+    public void testGetAmbariClientWithUsernameAndPasswordWhenExceptionOccuredWhichIsCloudbreakSecuritySetupException() {
         Stack stack = TestUtil.stack();
         Cluster cluster = TestUtil.cluster();
         String userName = "userName";

@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.api.model.filesystem.FileSystemType;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessorFactory;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.blueprint.filesystem.FileSystemConfigQueryObject;
+import com.sequenceiq.cloudbreak.blueprint.filesystem.FileSystemConfigQueryObject.Builder;
 import com.sequenceiq.cloudbreak.service.CloudbreakResourceReaderService;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
@@ -58,8 +59,8 @@ public class FileSystemConfigQueryServiceTest {
 
     @Test
     public void testWhenHiveMetasoreAndRangerAdminIsPresentedThenShouldReturnWithBothConfigs() {
-        prepareBlueprintProcessorFactoryMock(new String[]{HIVE_METASTORE, RANGER_ADMIN});
-        FileSystemConfigQueryObject fileSystemConfigQueryObject = FileSystemConfigQueryObject.Builder.builder()
+        prepareBlueprintProcessorFactoryMock(HIVE_METASTORE, RANGER_ADMIN);
+        FileSystemConfigQueryObject fileSystemConfigQueryObject = Builder.builder()
                 .withStorageName(STORAGE_NAME)
                 .withClusterName(CLUSTER_NAME)
                 .withBlueprintText(BLUEPRINT_TEXT)
@@ -67,7 +68,7 @@ public class FileSystemConfigQueryServiceTest {
                 .build();
         List<ConfigQueryEntry> bigCluster = underTest.queryParameters(fileSystemConfigQueryObject);
 
-        Assert.assertEquals(2, bigCluster.size());
+        Assert.assertEquals(2L, bigCluster.size());
 
         Optional<ConfigQueryEntry> hiveMetastore = serviceEntry(bigCluster, HIVE_METASTORE);
         Optional<ConfigQueryEntry> rangerAdmin = serviceEntry(bigCluster, RANGER_ADMIN);
@@ -81,8 +82,8 @@ public class FileSystemConfigQueryServiceTest {
 
     @Test
     public void testWhenOnlyRangerAdminIsPresentedThenShouldReturnWithOnlyRangerAdminConfigs() {
-        prepareBlueprintProcessorFactoryMock(new String[]{RANGER_ADMIN});
-        FileSystemConfigQueryObject fileSystemConfigQueryObject = FileSystemConfigQueryObject.Builder.builder()
+        prepareBlueprintProcessorFactoryMock(RANGER_ADMIN);
+        FileSystemConfigQueryObject fileSystemConfigQueryObject = Builder.builder()
                 .withStorageName(STORAGE_NAME)
                 .withClusterName(CLUSTER_NAME)
                 .withBlueprintText(BLUEPRINT_TEXT)
@@ -90,7 +91,7 @@ public class FileSystemConfigQueryServiceTest {
                 .build();
         List<ConfigQueryEntry> bigCluster = underTest.queryParameters(fileSystemConfigQueryObject);
 
-        Assert.assertEquals(1, bigCluster.size());
+        Assert.assertEquals(1L, bigCluster.size());
 
         Optional<ConfigQueryEntry> hiveMetastore = serviceEntry(bigCluster, HIVE_METASTORE);
         Optional<ConfigQueryEntry> rangerAdmin = serviceEntry(bigCluster, RANGER_ADMIN);
@@ -102,8 +103,8 @@ public class FileSystemConfigQueryServiceTest {
 
     @Test
     public void testWhenOnlyHiveMetastoreIsPresentedThenShouldReturnWithOnlyHiveMetastoreConfigs() {
-        prepareBlueprintProcessorFactoryMock(new String[]{HIVE_METASTORE});
-        FileSystemConfigQueryObject fileSystemConfigQueryObject = FileSystemConfigQueryObject.Builder.builder()
+        prepareBlueprintProcessorFactoryMock(HIVE_METASTORE);
+        FileSystemConfigQueryObject fileSystemConfigQueryObject = Builder.builder()
                 .withStorageName(STORAGE_NAME)
                 .withClusterName(CLUSTER_NAME)
                 .withBlueprintText(BLUEPRINT_TEXT)
@@ -111,7 +112,7 @@ public class FileSystemConfigQueryServiceTest {
                 .build();
         List<ConfigQueryEntry> bigCluster = underTest.queryParameters(fileSystemConfigQueryObject);
 
-        Assert.assertEquals(1, bigCluster.size());
+        Assert.assertEquals(1L, bigCluster.size());
 
         Optional<ConfigQueryEntry> hiveMetastore = serviceEntry(bigCluster, HIVE_METASTORE);
         Optional<ConfigQueryEntry> rangerAdmin = serviceEntry(bigCluster, RANGER_ADMIN);
@@ -123,8 +124,8 @@ public class FileSystemConfigQueryServiceTest {
 
     @Test
     public void testWhenHiveMetastoreAndRangerAdminIsNotPresentedThenShouldReturnWithOutThoseConfigs() {
-        prepareBlueprintProcessorFactoryMock(new String[]{});
-        FileSystemConfigQueryObject fileSystemConfigQueryObject = FileSystemConfigQueryObject.Builder.builder()
+        prepareBlueprintProcessorFactoryMock();
+        FileSystemConfigQueryObject fileSystemConfigQueryObject = Builder.builder()
                 .withStorageName(STORAGE_NAME)
                 .withClusterName(CLUSTER_NAME)
                 .withBlueprintText(BLUEPRINT_TEXT)
@@ -132,7 +133,7 @@ public class FileSystemConfigQueryServiceTest {
                 .build();
         List<ConfigQueryEntry> bigCluster = underTest.queryParameters(fileSystemConfigQueryObject);
 
-        Assert.assertEquals(0, bigCluster.size());
+        Assert.assertEquals(0L, bigCluster.size());
 
         Optional<ConfigQueryEntry> hiveMetastore = serviceEntry(bigCluster, HIVE_METASTORE);
         Optional<ConfigQueryEntry> rangerAdmin = serviceEntry(bigCluster, RANGER_ADMIN);

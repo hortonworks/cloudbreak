@@ -30,7 +30,7 @@ public class AwsTagPreparationServiceTest {
         ReflectionTestUtils.setField(awsTagPreparationService, "customCloudformationTags", Lists.asList("test2:abc", new String[]{"test3:def"}));
         awsTagPreparationService.init();
         Collection<Tag> tags = awsTagPreparationService.prepareTags(authenticatedContext(), Maps.newHashMap());
-        Assert.assertEquals(4, tags.size());
+        Assert.assertEquals(4L, tags.size());
     }
 
     @Test
@@ -41,7 +41,7 @@ public class AwsTagPreparationServiceTest {
         Map<String, String> userDefined = Maps.newHashMap();
         userDefined.put("userdefinedkey", "userdefinedvalue");
         Collection<Tag> tags = awsTagPreparationService.prepareTags(authenticatedContext(), userDefined);
-        Assert.assertEquals(5, tags.size());
+        Assert.assertEquals(5L, tags.size());
     }
 
     @Test
@@ -50,7 +50,7 @@ public class AwsTagPreparationServiceTest {
         ReflectionTestUtils.setField(awsTagPreparationService, "customCloudformationTags", new ArrayList<>());
         awsTagPreparationService.init();
         Collection<Tag> tags = awsTagPreparationService.prepareTags(authenticatedContext(), Maps.newHashMap());
-        Assert.assertEquals(2, tags.size());
+        Assert.assertEquals(2L, tags.size());
     }
 
     @Test
@@ -59,7 +59,7 @@ public class AwsTagPreparationServiceTest {
         ReflectionTestUtils.setField(awsTagPreparationService, "customCloudformationTags", new ArrayList<>());
         awsTagPreparationService.init();
         Collection<Tag> tags = awsTagPreparationService.prepareTags(authenticatedContext(), Maps.newHashMap());
-        Assert.assertEquals(1, tags.size());
+        Assert.assertEquals(1L, tags.size());
     }
 
     private AuthenticatedContext authenticatedContext() {

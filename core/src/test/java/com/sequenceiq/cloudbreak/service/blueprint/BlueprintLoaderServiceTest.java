@@ -95,7 +95,7 @@ public class BlueprintLoaderServiceTest {
     public void testLoadBlueprintsForTheSpecifiedUserWhenOneNewDefaultExistThenRepositoryShouldUpdateOnlyOneBlueprint() {
         Map<String, Blueprint> stringBlueprintMap = generateCacheData(3, 1);
         Set<Blueprint> blueprints = generateDatabaseData(3);
-        ArgumentCaptor<Set> argumentCaptor = ArgumentCaptor.forClass(Set.class);
+        ArgumentCaptor<Set<Blueprint>> argumentCaptor = ArgumentCaptor.forClass(Set.class);
 
         Blueprint blueprint = stringBlueprintMap.get("multi-node-hdfs-yarn3");
         Set<Blueprint> resultList = new HashSet<>();
@@ -106,22 +106,22 @@ public class BlueprintLoaderServiceTest {
         Collection<Blueprint> resultSet = underTest.loadBlueprintsForTheSpecifiedUser(identityUser(), blueprints);
         verify(blueprintRepository).save(argumentCaptor.capture());
 
-        Assert.assertEquals(1, argumentCaptor.getAllValues().size());
-        Assert.assertEquals(4, resultSet.size());
+        Assert.assertEquals(1L, argumentCaptor.getAllValues().size());
+        Assert.assertEquals(4L, resultSet.size());
     }
 
     @Test
     public void testLoadBlueprintsForTheSpecifiedUserIsNewOneAndNoDefaultBlueprintAddedThenAllDefaultShouldBeAdd() {
         Map<String, Blueprint> stringBlueprintMap = generateCacheData(3);
         Set<Blueprint> blueprints = generateDatabaseData(0);
-        ArgumentCaptor<Set> argumentCaptor = ArgumentCaptor.forClass(Set.class);
+        ArgumentCaptor<Set<Blueprint>> argumentCaptor = ArgumentCaptor.forClass(Set.class);
         when(blueprintRepository.save(anySet())).thenReturn(stringBlueprintMap.values());
 
         Collection<Blueprint> resultSet = underTest.loadBlueprintsForTheSpecifiedUser(identityUser(), blueprints);
         verify(blueprintRepository).save(argumentCaptor.capture());
 
-        Assert.assertEquals(3, argumentCaptor.getValue().size());
-        Assert.assertEquals(3, resultSet.size());
+        Assert.assertEquals(3L, argumentCaptor.getValue().size());
+        Assert.assertEquals(3L, resultSet.size());
     }
 
     @Test
@@ -130,7 +130,7 @@ public class BlueprintLoaderServiceTest {
         Set<Blueprint> blueprints = generateDatabaseData(3);
 
         Collection<Blueprint> resultSet = underTest.loadBlueprintsForTheSpecifiedUser(identityUser(), blueprints);
-        Assert.assertEquals(3, resultSet.size());
+        Assert.assertEquals(3L, resultSet.size());
     }
 
     private Map<String, Blueprint> generateCacheData(int cacheSize) {
@@ -158,7 +158,7 @@ public class BlueprintLoaderServiceTest {
 
     public static Blueprint createBlueprint(ResourceStatus resourceStatus, int index) {
         Blueprint blueprint = new Blueprint();
-        blueprint.setId(Long.valueOf(index));
+        blueprint.setId((long) index);
         blueprint.setAmbariName("test-validation" + index);
         blueprint.setBlueprintText(JSON + index);
         blueprint.setHostGroupCount(3);

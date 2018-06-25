@@ -6,6 +6,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
 import org.mockito.InjectMocks;
 
 @RunWith(Parameterized.class)
@@ -14,16 +15,16 @@ public class AzurePremiumInstanceTest {
     @InjectMocks
     private final AzurePremiumValidatorService underTest = new AzurePremiumValidatorService();
 
-    private String instanceType;
+    private final String instanceType;
 
-    private boolean premiumInstance;
+    private final boolean premiumInstance;
 
     public AzurePremiumInstanceTest(String instanceType, boolean premiumInstance) {
         this.instanceType = instanceType;
         this.premiumInstance = premiumInstance;
     }
 
-    @Parameterized.Parameters(name = "{index}: instanceType is premium({0})={1}")
+    @Parameters(name = "{index}: instanceType is premium({0})={1}")
     public static Iterable<Object[]> data() {
         return Arrays.asList(new Object[][]{
                 {"Standard_A4", false},
@@ -177,6 +178,6 @@ public class AzurePremiumInstanceTest {
 
     @Test
     public void testPremiumInstanceWhichDependsOnThePremiumVariable() {
-        Assert.assertEquals(this.premiumInstance, underTest.validPremiumConfiguration(this.instanceType));
+        Assert.assertEquals(premiumInstance, underTest.validPremiumConfiguration(instanceType));
     }
 }

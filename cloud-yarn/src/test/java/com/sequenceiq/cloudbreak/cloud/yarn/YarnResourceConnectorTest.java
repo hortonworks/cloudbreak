@@ -39,10 +39,8 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
-import com.sequenceiq.cloudbreak.cloud.model.InstanceAuthentication;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
-import com.sequenceiq.cloudbreak.cloud.model.Security;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.yarn.auth.YarnClientUtil;
 import com.sequenceiq.cloudbreak.cloud.yarn.client.YarnClient;
@@ -101,7 +99,7 @@ public class YarnResourceConnectorTest {
     private InstanceTemplate instanceTemplateMock;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         ReflectionTestUtils.setField(underTest, "maxResourceNameLength", 3);
     }
 
@@ -132,7 +130,7 @@ public class YarnResourceConnectorTest {
         ArgumentCaptor<ApplicationDetailRequest> requestCaptor = ArgumentCaptor.forClass(ApplicationDetailRequest.class);
 
         setUpHappyPath(createRequestCaptor, requestCaptor);
-        setUpStackParameters(YARN_QUEUE, YARN_LIFE_TIME);
+        setUpStackParameters();
 
         List<Group> groupList = IntStream.range(0, 2).mapToObj(this::createGroup).collect(Collectors.toList());
         when(stackMock.getGroups()).thenReturn(groupList);
@@ -140,8 +138,8 @@ public class YarnResourceConnectorTest {
         when(stackMock.getPublicKey()).thenReturn(PUBLIC_KEY);
         when(imageMock.getUserDataByType(InstanceGroupType.CORE)).thenReturn(USER_DATA);
         when(cloudInstanceMock.getTemplate()).thenReturn(instanceTemplateMock);
-        when(instanceTemplateMock.getParameter(PlatformParametersConsts.CUSTOM_INSTANCETYPE_CPUS, Integer.class)).thenReturn(Integer.valueOf(2));
-        when(instanceTemplateMock.getParameter(PlatformParametersConsts.CUSTOM_INSTANCETYPE_MEMORY, Integer.class)).thenReturn(Integer.valueOf(4096));
+        when(instanceTemplateMock.getParameter(PlatformParametersConsts.CUSTOM_INSTANCETYPE_CPUS, Integer.class)).thenReturn(2);
+        when(instanceTemplateMock.getParameter(PlatformParametersConsts.CUSTOM_INSTANCETYPE_MEMORY, Integer.class)).thenReturn(4096);
 
         List<CloudResourceStatus> cloudResourceStatusList = underTest.launch(authenticatedContextMock,
                 stackMock, persistenceNotifierMock, AdjustmentType.EXACT, Long.MAX_VALUE);
@@ -155,7 +153,7 @@ public class YarnResourceConnectorTest {
     }
 
     private void assertCloudResourceStatusList(List<CloudResourceStatus> cloudResourceStatusList) {
-        assertEquals(1, cloudResourceStatusList.size());
+        assertEquals(1L, cloudResourceStatusList.size());
         assertEquals(YARN_APPLICATION, cloudResourceStatusList.get(0).getCloudResource().getType());
         assertEquals(CommonStatus.CREATED, cloudResourceStatusList.get(0).getCloudResource().getStatus());
         assertEquals("n-1", cloudResourceStatusList.get(0).getCloudResource().getName());
@@ -166,19 +164,14 @@ public class YarnResourceConnectorTest {
         String name = "group_" + groupNum;
         InstanceGroupType type = InstanceGroupType.CORE;
         Collection<CloudInstance> instances = Lists.newArrayList(cloudInstanceMock, cloudInstanceMock);
-        Security security = null;
-        CloudInstance skeleton = null;
-        InstanceAuthentication instanceAuthentication = null;
-        String loginUserName = null;
-        String publicKey = null;
 
-        return new Group(name, type, instances, security, skeleton, instanceAuthentication, loginUserName, publicKey, 50);
+        return new Group(name, type, instances, null, null, null, null, null, 50);
     }
 
-    private void setUpStackParameters(String yarnQueue, Integer yarnLifeTime) {
+    private void setUpStackParameters() {
         Map<String, String> parameters = new HashMap<>();
-        parameters.put(YarnConstants.YARN_QUEUE_PARAMETER, yarnQueue);
-        parameters.put(YarnConstants.YARN_LIFETIME_PARAMETER, yarnLifeTime.toString());
+        parameters.put(YarnConstants.YARN_QUEUE_PARAMETER, YARN_QUEUE);
+        parameters.put(YarnConstants.YARN_LIFETIME_PARAMETER, YARN_LIFE_TIME.toString());
         when(stackMock.getParameters()).thenReturn(parameters);
     }
 
@@ -220,7 +213,7 @@ public class YarnResourceConnectorTest {
     }
 
     private void assertConfigurationFiles(YarnComponent yarnComponent) {
-        assertEquals(1, yarnComponent.getConfiguration().getFiles().size());
+        assertEquals(1L, yarnComponent.getConfiguration().getFiles().size());
         ConfigFile configFile = yarnComponent.getConfiguration().getFiles().get(0);
         assertEquals(ConfigFileType.PROPERTIES.name(), configFile.getType());
         assertEquals("/etc/cloudbreak-config.props", configFile.getDestFile());
@@ -230,7 +223,7 @@ public class YarnResourceConnectorTest {
 
     private void assertConfigurationProperties(int groupNum, YarnComponent yarnComponent) {
         Map<String, String> properties = yarnComponent.getConfiguration().getProperties();
-        assertEquals(5, properties.size());
+        assertEquals(5L, properties.size());
         assertEquals("true", properties.get("conf.cb-conf.per.component"));
         assertEquals('\'' + USER_DATA_BASE64 + '\'', properties.get("site.cb-conf.userData"));
         assertEquals('\'' + LOGIN_USER_NAME + '\'', properties.get("site.cb-conf.sshUser"));

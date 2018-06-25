@@ -25,6 +25,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -119,16 +120,16 @@ public class AzureTemplateBuilderTest {
 
     private final Map<String, String> tags = new HashMap<>();
 
-    private String templatePath;
+    private final String templatePath;
 
-    private Map<String, String> defaultTags = new HashMap<>();
+    private final Map<String, String> defaultTags = new HashMap<>();
 
     public AzureTemplateBuilderTest(String templatePath) {
         this.templatePath = templatePath;
     }
 
-    @Parameterized.Parameters(name = "{0}")
-    public static Iterable<? extends Object> getTemplatesPath() {
+    @Parameters(name = "{0}")
+    public static Iterable<?> getTemplatesPath() {
         List<String> templates = Lists.newArrayList(LATEST_TEMPLATE_PATH);
         File[] templateFiles = new File(AzureTemplateBuilderTest.class.getClassLoader().getResource("templates").getPath()).listFiles();
         List<String> olderTemplates = Arrays.stream(templateFiles).map(file -> {
@@ -170,7 +171,7 @@ public class AzureTemplateBuilderTest {
         image = new Image("cb-centos66-amb200-2015-05-25", userData, "redhat6", "redhat6", "", "default", "default-id");
         cloudContext = new CloudContext(7899L, "thisisaverylongazureresourcenamewhichneedstobeshortened", "dummy1", "dummy2", "test",
                 Location.location(Region.region("EU"), new AvailabilityZone("availabilityZone")));
-        azureCredentialView = new AzureCredentialView(cloudCredential("siq-haas"));
+        azureCredentialView = new AzureCredentialView(cloudCredential());
         azureStorageView = new AzureStorageView(azureCredentialView, cloudContext, azureStorage, null);
 
         azureSubnetStrategy = AzureSubnetStrategy.getAzureSubnetStrategy(FILL, Collections.singletonList("existingSubnet"),
@@ -248,7 +249,7 @@ public class AzureTemplateBuilderTest {
 
     @Test
     public void buildNoPublicIpNoFirewallButExistingNetwork() {
-        assumeTrue(isTemplateVersionGreaterOrEqualThan("1.16.5"));
+        assumeTrue(isTemplateVersionGreaterOrEqualThan());
         //GIVEN
         when(azureUtils.isExistingNetwork(any())).thenReturn(true);
         when(azureUtils.getCustomNetworkId(any())).thenReturn("existingNetworkName");
@@ -343,7 +344,7 @@ public class AzureTemplateBuilderTest {
     }
 
     @Test
-    public void buildWithInstanceGroupTypeCore() throws Exception {
+    public void buildWithInstanceGroupTypeCore() {
         //GIVEN
         Network network = new Network(new Subnet("testSubnet"));
         Map<String, String> parameters = new HashMap<>();
@@ -369,7 +370,7 @@ public class AzureTemplateBuilderTest {
     }
 
     @Test
-    public void buildWithInstanceGroupTypeCoreShouldNotContainsGatewayCustomData() throws Exception {
+    public void buildWithInstanceGroupTypeCoreShouldNotContainsGatewayCustomData() {
         //GIVEN
         Network network = new Network(new Subnet("testSubnet"));
         Map<String, String> parameters = new HashMap<>();
@@ -395,7 +396,7 @@ public class AzureTemplateBuilderTest {
     }
 
     @Test
-    public void buildWithInstanceGroupTypeGateway() throws Exception {
+    public void buildWithInstanceGroupTypeGateway() {
         //GIVEN
         Network network = new Network(new Subnet("testSubnet"));
         Map<String, String> parameters = new HashMap<>();
@@ -421,7 +422,7 @@ public class AzureTemplateBuilderTest {
     }
 
     @Test
-    public void buildWithInstanceGroupTypeGatewayShouldNotContainsCoreCustomData() throws Exception {
+    public void buildWithInstanceGroupTypeGatewayShouldNotContainsCoreCustomData() {
         //GIVEN
         Network network = new Network(new Subnet("testSubnet"));
         Map<String, String> parameters = new HashMap<>();
@@ -447,7 +448,7 @@ public class AzureTemplateBuilderTest {
     }
 
     @Test
-    public void buildWithInstanceGroupTypeGatewayAndCore() throws Exception {
+    public void buildWithInstanceGroupTypeGatewayAndCore() {
         //GIVEN
         Network network = new Network(new Subnet("testSubnet"));
         Map<String, String> parameters = new HashMap<>();
@@ -509,7 +510,7 @@ public class AzureTemplateBuilderTest {
         when(azureUtils.isExistingNetwork(any())).thenReturn(true);
         when(azureUtils.getCustomNetworkId(any())).thenReturn("existingNetworkName");
         when(azureUtils.getCustomResourceGroupName(any())).thenReturn("existingResourceGroup");
-        when(azureUtils.getCustomSubnetIds(any())).thenReturn(Arrays.asList("existingSubnet"));
+        when(azureUtils.getCustomSubnetIds(any())).thenReturn(Collections.singletonList("existingSubnet"));
         Network network = new Network(new Subnet("testSubnet"));
         Map<String, String> parameters = new HashMap<>();
         parameters.put("persistentStorage", "persistentStorageTest");
@@ -681,18 +682,18 @@ public class AzureTemplateBuilderTest {
         assertThat(templateString, containsString("[concat('datadisk', 'm0', '2')]"));
     }
 
-    private CloudCredential cloudCredential(String projectId) {
+    private CloudCredential cloudCredential() {
         Map<String, Object> parameters = new HashMap<>();
-        parameters.put("projectId", projectId);
+        parameters.put("projectId", "siq-haas");
         return new CloudCredential(1L, "test", parameters);
     }
 
-    private boolean isTemplateVersionGreaterOrEqualThan(String version) {
+    private boolean isTemplateVersionGreaterOrEqualThan() {
         if (LATEST_TEMPLATE_PATH.equals(templatePath)) {
             return true;
         }
         String[] splittedName = templatePath.split("-");
         String templateVersion = splittedName[splittedName.length - 1].replaceAll("\\.ftl", "");
-        return Version.versionCompare(templateVersion, version) > -1;
+        return Version.versionCompare(templateVersion, "1.16.5") > -1;
     }
 }

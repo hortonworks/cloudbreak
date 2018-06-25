@@ -22,14 +22,14 @@ public class CloudStorageValidationUtilTest {
     public void testIsCloudStorageConfiguredWhenCloudStorageNull() {
         boolean actual = underTest.isCloudStorageConfigured(null);
 
-        Assert.assertEquals(false, actual);
+        Assert.assertFalse(actual);
     }
 
     @Test
     public void testIsCloudStorageConfiguredWhenCloudStorageNotNull() {
         boolean actual = underTest.isCloudStorageConfigured(new CloudStorageRequest());
 
-        Assert.assertEquals(false, actual);
+        Assert.assertFalse(actual);
     }
 
     @Test
@@ -38,7 +38,7 @@ public class CloudStorageValidationUtilTest {
         cloudStorageRequest.setAdls(new AdlsCloudStorageParameters());
         boolean actual = underTest.isCloudStorageConfigured(cloudStorageRequest);
 
-        Assert.assertEquals(true, actual);
+        Assert.assertTrue(actual);
     }
 
     @Test
@@ -47,7 +47,7 @@ public class CloudStorageValidationUtilTest {
         cloudStorageRequest.setWasb(new WasbCloudStorageParameters());
         boolean actual = underTest.isCloudStorageConfigured(cloudStorageRequest);
 
-        Assert.assertEquals(true, actual);
+        Assert.assertTrue(actual);
     }
 
     @Test
@@ -56,7 +56,7 @@ public class CloudStorageValidationUtilTest {
         cloudStorageRequest.setS3(new S3CloudStorageParameters());
         boolean actual = underTest.isCloudStorageConfigured(cloudStorageRequest);
 
-        Assert.assertEquals(true, actual);
+        Assert.assertTrue(actual);
     }
 
     @Test
@@ -65,6 +65,6 @@ public class CloudStorageValidationUtilTest {
         cloudStorageRequest.setGcs(new GcsCloudStorageParameters());
         boolean actual = underTest.isCloudStorageConfigured(cloudStorageRequest);
 
-        Assert.assertEquals(true, actual);
+        Assert.assertTrue(actual);
     }
 }

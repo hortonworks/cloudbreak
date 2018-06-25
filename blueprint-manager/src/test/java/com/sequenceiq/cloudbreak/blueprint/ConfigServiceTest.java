@@ -169,7 +169,7 @@ public class ConfigServiceTest {
         underTest.collectBlueprintConfigIfNeed(config);
 
         Map<String, String> hiveSite = config.get("hive-sites");
-        Assert.assertEquals(4, hiveSite.size());
+        Assert.assertEquals(4L, hiveSite.size());
         Assert.assertEquals("value", hiveSite.get("key"));
 
         Assert.assertNotNull(config.get("other-sites"));
@@ -193,7 +193,7 @@ public class ConfigServiceTest {
         underTest.collectBlueprintConfigIfNeed(config);
 
         Map<String, String> hiveSite = config.get("hive-sites");
-        Assert.assertEquals(1, hiveSite.size());
+        Assert.assertEquals(1L, hiveSite.size());
         Assert.assertNull(config.get("other-sites"));
     }
 
@@ -274,7 +274,7 @@ public class ConfigServiceTest {
     }
 
     @Test
-    public void testGetHostGroupConfigurationWhenConfigUpdateIsNotNeed() throws IOException {
+    public void testGetHostGroupConfigurationWhenConfigUpdateIsNotNeed() {
         HostgroupView hostGroup = new HostgroupView("hostGroupName");
         BlueprintTextProcessor blueprintTextProcessor = mock(BlueprintTextProcessor.class);
 
@@ -286,7 +286,7 @@ public class ConfigServiceTest {
     }
 
     @Test
-    public void testGetHostGroupConfigurationWhenHostGroupsIsEmpty() throws IOException {
+    public void testGetHostGroupConfigurationWhenHostGroupsIsEmpty() {
         BlueprintTextProcessor blueprintTextProcessor = mock(BlueprintTextProcessor.class);
 
         Map<String, Map<String, Map<String, String>>> actual = underTest.getHostGroupConfiguration(blueprintTextProcessor, emptyList());

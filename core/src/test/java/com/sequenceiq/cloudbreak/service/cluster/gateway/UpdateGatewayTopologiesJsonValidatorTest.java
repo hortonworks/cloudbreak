@@ -60,7 +60,7 @@ public class UpdateGatewayTopologiesJsonValidatorTest {
     public void testWithNullStack() {
         Validator<GatewayTopologyJson> mockValidator = subject -> ValidationResult.builder().build();
 
-        UpdateGatewayTopologiesJsonValidator underTest = new UpdateGatewayTopologiesJsonValidator(mockValidator, 0, null);
+        UpdateGatewayTopologiesJsonValidator underTest = new UpdateGatewayTopologiesJsonValidator(mockValidator, 0L, null);
         ValidationResult validationResult = underTest.validate(getRequest());
 
         assertEquals(State.ERROR, validationResult.getState());

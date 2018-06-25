@@ -13,14 +13,14 @@ public class ArtifactTest {
     private static final String ID = "company/foo:test";
 
     @Test
-    public void testType() throws Exception {
+    public void testType() {
         Artifact artifact = new Artifact();
         artifact.setType(TYPE);
         assertEquals(TYPE, artifact.getType());
     }
 
     @Test
-    public void testId() throws Exception {
+    public void testId() {
         Artifact artifact = new Artifact();
         artifact.setId(ID);
         assertEquals(ID, artifact.getId());

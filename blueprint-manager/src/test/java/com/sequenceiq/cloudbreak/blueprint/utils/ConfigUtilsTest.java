@@ -38,7 +38,7 @@ import com.sequenceiq.cloudbreak.blueprint.template.views.HostgroupView;
 public class ConfigUtilsTest {
 
     @Rule
-    public ExpectedException expectedException = ExpectedException.none();
+    public final ExpectedException expectedException = ExpectedException.none();
 
     @InjectMocks
     private final ConfigUtils underTest = new ConfigUtils();
@@ -68,9 +68,9 @@ public class ConfigUtilsTest {
     public void testGetPropertiesWhenGlobal() {
         Map<String, List<ConfigProperty>> globalConfig = new HashMap<>();
         ConfigProperty configProperty = new ConfigProperty("global-name", "global-dir", "global-prefix");
-        globalConfig.put("global-key", Arrays.asList(configProperty));
+        globalConfig.put("global-key", Collections.singletonList(configProperty));
 
-        ServiceConfig serviceConfig = new ServiceConfig("service", Arrays.asList("NODE1"), globalConfig, emptyMap());
+        ServiceConfig serviceConfig = new ServiceConfig("service", Collections.singletonList("NODE1"), globalConfig, emptyMap());
         Collection<String> hostComponents = Arrays.asList("NODE1", "NODE2");
 
         when(hadoopConfigurationUtils.getValue(configProperty, serviceConfig.getServiceName(), true, 1)).thenReturn("value");
@@ -87,9 +87,9 @@ public class ConfigUtilsTest {
     public void testGetPropertiesWhenNotGlobal() {
         Map<String, List<ConfigProperty>> hostConfig = new HashMap<>();
         ConfigProperty configProperty = new ConfigProperty("host-name", "host-dir", "host-prefix");
-        hostConfig.put("host-key", Arrays.asList(configProperty));
+        hostConfig.put("host-key", Collections.singletonList(configProperty));
 
-        ServiceConfig serviceConfig = new ServiceConfig("service", Arrays.asList("NODE1"), emptyMap(), hostConfig);
+        ServiceConfig serviceConfig = new ServiceConfig("service", Collections.singletonList("NODE1"), emptyMap(), hostConfig);
         Collection<String> hostComponents = Arrays.asList("NODE1", "NODE2");
 
         when(hadoopConfigurationUtils.getValue(configProperty, serviceConfig.getServiceName(), false, 1)).thenReturn("value");
@@ -106,9 +106,9 @@ public class ConfigUtilsTest {
     public void testGetPropertiesWhenValueIsNull() {
         Map<String, List<ConfigProperty>> hostConfig = new HashMap<>();
         ConfigProperty configProperty = new ConfigProperty("host-name", "host-dir", "host-prefix");
-        hostConfig.put("host-key", Arrays.asList(configProperty));
+        hostConfig.put("host-key", Collections.singletonList(configProperty));
 
-        ServiceConfig serviceConfig = new ServiceConfig("service", Arrays.asList("NODE1"), emptyMap(), hostConfig);
+        ServiceConfig serviceConfig = new ServiceConfig("service", Collections.singletonList("NODE1"), emptyMap(), hostConfig);
         Collection<String> hostComponents = Arrays.asList("NODE1", "NODE2");
 
         when(hadoopConfigurationUtils.getValue(configProperty, serviceConfig.getServiceName(), false, 1)).thenReturn(null);
@@ -121,7 +121,7 @@ public class ConfigUtilsTest {
 
     @Test
     public void testGetPropertiesWhenHostComponentsDoesNotContainsRelatedService() {
-        ServiceConfig serviceConfig = new ServiceConfig("service", Arrays.asList("NODE1"), emptyMap(), emptyMap());
+        ServiceConfig serviceConfig = new ServiceConfig("service", Collections.singletonList("NODE1"), emptyMap(), emptyMap());
         Collection<String> hostComponents = Arrays.asList("OTHER_NODE1", "OTHER_NODE2");
 
         Map<String, Map<String, String>> actual = underTest.getProperties(serviceConfig, false, 1, hostComponents);

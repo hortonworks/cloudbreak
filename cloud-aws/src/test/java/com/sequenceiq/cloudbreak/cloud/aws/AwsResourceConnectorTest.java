@@ -102,7 +102,7 @@ public class AwsResourceConnectorTest {
 
         when(authenticatedContext.getCloudContext()).thenReturn(cloudContext);
         when(cloudContext.getLocation()).thenReturn(location);
-        when(cloudContext.getName()).thenReturn(new String(new byte[]{100}));
+        when(cloudContext.getName()).thenReturn(new String(new byte[]{(byte) 100}));
         when(location.getRegion()).thenReturn(Region.region("eu-west-1"));
         when(awsClient.createAccess(any(), any())).thenReturn(ec2Client);
         when(ec2Client.describeVpcs(any())).thenReturn(describeVpcsResult);
@@ -148,7 +148,7 @@ public class AwsResourceConnectorTest {
 
         when(authenticatedContext.getCloudContext()).thenReturn(cloudContext);
         when(cloudContext.getLocation()).thenReturn(location);
-        when(cloudContext.getName()).thenReturn(new String(new byte[]{23}));
+        when(cloudContext.getName()).thenReturn(new String(new byte[]{(byte) 23}));
         when(location.getRegion()).thenReturn(Region.region("eu-west-1"));
         when(awsClient.createAccess(any(), any())).thenReturn(ec2Client);
         when(ec2Client.describeVpcs(any())).thenReturn(describeVpcsResult);
@@ -192,7 +192,7 @@ public class AwsResourceConnectorTest {
 
         when(authenticatedContext.getCloudContext()).thenReturn(cloudContext);
         when(cloudContext.getLocation()).thenReturn(location);
-        when(cloudContext.getName()).thenReturn(new String(new byte[]{76}));
+        when(cloudContext.getName()).thenReturn(new String(new byte[]{(byte) 76}));
         when(location.getRegion()).thenReturn(Region.region("eu-west-1"));
         when(awsClient.createAccess(any(), any())).thenReturn(ec2Client);
         when(ec2Client.describeVpcs(any())).thenReturn(describeVpcsResult);
@@ -236,7 +236,7 @@ public class AwsResourceConnectorTest {
 
         when(authenticatedContext.getCloudContext()).thenReturn(cloudContext);
         when(cloudContext.getLocation()).thenReturn(location);
-        when(cloudContext.getName()).thenReturn(new String(new byte[]{15}));
+        when(cloudContext.getName()).thenReturn(new String(new byte[]{(byte) 15}));
         when(location.getRegion()).thenReturn(Region.region("eu-west-1"));
         when(awsClient.createAccess(any(), any())).thenReturn(ec2Client);
         when(ec2Client.describeVpcs(any())).thenReturn(describeVpcsResult);
@@ -354,7 +354,7 @@ public class AwsResourceConnectorTest {
 
         when(authenticatedContext.getCloudContext()).thenReturn(cloudContext);
         when(cloudContext.getLocation()).thenReturn(location);
-        when(cloudContext.getName()).thenReturn(new String(new byte[]{15}));
+        when(cloudContext.getName()).thenReturn(new String(new byte[]{(byte) 15}));
         when(location.getRegion()).thenReturn(Region.region("eu-west-1"));
         when(awsClient.createAccess(any(), any())).thenReturn(ec2Client);
         when(ec2Client.describeVpcs(any())).thenReturn(describeVpcsResult);
@@ -398,7 +398,7 @@ public class AwsResourceConnectorTest {
 
         when(authenticatedContext.getCloudContext()).thenReturn(cloudContext);
         when(cloudContext.getLocation()).thenReturn(location);
-        when(cloudContext.getName()).thenReturn(new String(new byte[]{16}));
+        when(cloudContext.getName()).thenReturn(new String(new byte[]{(byte) 16}));
         when(location.getRegion()).thenReturn(Region.region("eu-west-1"));
         when(awsClient.createAccess(any(), any())).thenReturn(ec2Client);
         when(ec2Client.describeVpcs(any())).thenReturn(describeVpcsResult);
@@ -446,7 +446,7 @@ public class AwsResourceConnectorTest {
 
         when(authenticatedContext.getCloudContext()).thenReturn(cloudContext);
         when(cloudContext.getLocation()).thenReturn(location);
-        when(cloudContext.getName()).thenReturn(new String(new byte[]{15}));
+        when(cloudContext.getName()).thenReturn(new String(new byte[]{(byte) 15}));
         when(location.getRegion()).thenReturn(Region.region("eu-west-1"));
         when(awsClient.createAccess(any(), any())).thenReturn(ec2Client);
         when(ec2Client.describeVpcs(any())).thenReturn(describeVpcsResult);
@@ -499,7 +499,7 @@ public class AwsResourceConnectorTest {
 
         when(authenticatedContext.getCloudContext()).thenReturn(cloudContext);
         when(cloudContext.getLocation()).thenReturn(location);
-        when(cloudContext.getName()).thenReturn(new String(new byte[]{(byte) 200, (byte) 200, (byte) 200, (byte) 200, (byte) 200, (byte) 200, (byte) 83}));
+        when(cloudContext.getName()).thenReturn(new String(new byte[]{(byte) 127, (byte) 127, (byte) 127, (byte) 127, (byte) 127, (byte) 127, (byte) 83}));
         when(location.getRegion()).thenReturn(Region.region("eu-west-1"));
         when(awsClient.createAccess(any(), any())).thenReturn(ec2Client);
         when(ec2Client.describeVpcs(any())).thenReturn(describeVpcsResult);
@@ -551,7 +551,7 @@ public class AwsResourceConnectorTest {
 
         when(authenticatedContext.getCloudContext()).thenReturn(cloudContext);
         when(cloudContext.getLocation()).thenReturn(location);
-        when(cloudContext.getName()).thenReturn(new String(new byte[]{4}));
+        when(cloudContext.getName()).thenReturn(new String(new byte[]{(byte) 4}));
         when(location.getRegion()).thenReturn(Region.region("eu-west-1"));
         when(awsClient.createAccess(any(), any())).thenReturn(ec2Client);
         when(ec2Client.describeVpcs(any())).thenReturn(describeVpcsResult);
@@ -603,7 +603,7 @@ public class AwsResourceConnectorTest {
 
         when(authenticatedContext.getCloudContext()).thenReturn(cloudContext);
         when(cloudContext.getLocation()).thenReturn(location);
-        when(cloudContext.getName()).thenReturn(new String(new byte[]{(byte) 200, (byte) 200, (byte) 200, (byte) 172}));
+        when(cloudContext.getName()).thenReturn(new String(new byte[]{(byte) 127, (byte) 127, (byte) 127, (byte) 127}));
         when(location.getRegion()).thenReturn(Region.region("eu-west-1"));
         when(awsClient.createAccess(any(), any())).thenReturn(ec2Client);
         when(ec2Client.describeVpcs(any())).thenReturn(describeVpcsResult);
@@ -647,7 +647,7 @@ public class AwsResourceConnectorTest {
 
         when(authenticatedContext.getCloudContext()).thenReturn(cloudContext);
         when(cloudContext.getLocation()).thenReturn(location);
-        when(cloudContext.getName()).thenReturn(new String(new byte[]{7}));
+        when(cloudContext.getName()).thenReturn(new String(new byte[]{(byte) 7}));
         when(location.getRegion()).thenReturn(Region.region("eu-west-1"));
         when(awsClient.createAccess(any(), any())).thenReturn(ec2Client);
         when(ec2Client.describeVpcs(any())).thenReturn(describeVpcsResult);
@@ -717,11 +717,7 @@ public class AwsResourceConnectorTest {
     }
 
     private String incrementIp(String ip) {
-        return incrementIp(ip, 256);
-    }
-
-    private String incrementIp(String ip, int num) {
-        int ipValue = InetAddresses.coerceToInteger(InetAddresses.forString(ip)) + num;
+        int ipValue = InetAddresses.coerceToInteger(InetAddresses.forString(ip)) + 256;
         return InetAddresses.fromInteger(ipValue).getHostAddress();
     }
 

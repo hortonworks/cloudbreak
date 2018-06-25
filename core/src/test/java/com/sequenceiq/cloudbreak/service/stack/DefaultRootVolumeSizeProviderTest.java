@@ -44,7 +44,7 @@ public class DefaultRootVolumeSizeProviderTest {
     public void testNoPropertySetForKnownPlatform() {
         underTest = new DefaultRootVolumeSizeProvider(mockConnectors, environment);
         int rootVolumeSize = underTest.getForPlatform("AWS");
-        assertEquals(50, rootVolumeSize);
+        assertEquals(50L, rootVolumeSize);
     }
 
     @Test
@@ -52,13 +52,13 @@ public class DefaultRootVolumeSizeProviderTest {
         System.setProperty("cb.platform.default.rootVolumeSize.GCP", "100");
         underTest = new DefaultRootVolumeSizeProvider(mockConnectors, environment);
         int rootVolumeSize = underTest.getForPlatform("gcp");
-        assertEquals(100, rootVolumeSize);
+        assertEquals(100L, rootVolumeSize);
     }
 
     @Test
     public void testWithUnknownPlatform() {
         underTest = new DefaultRootVolumeSizeProvider(mockConnectors, environment);
         int rootVolumeSize = underTest.getForPlatform("UNKNOWN_PLATFORM");
-        assertEquals(50, rootVolumeSize);
+        assertEquals(50L, rootVolumeSize);
     }
 }

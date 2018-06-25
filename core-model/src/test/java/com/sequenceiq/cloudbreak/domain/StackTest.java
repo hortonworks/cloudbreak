@@ -7,10 +7,9 @@ import java.util.Set;
 
 import org.junit.Test;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.domain.json.JsonToString;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 
 public class StackTest {
 
@@ -27,7 +26,7 @@ public class StackTest {
     }
 
     @Test
-    public void infrastructureShouldNotBeStoppableForSpotInstances() throws JsonProcessingException {
+    public void infrastructureShouldNotBeStoppableForSpotInstances() {
         Stack stack = new Stack();
         stack.setCloudPlatform("AWS");
         Set<InstanceGroup> groups = new HashSet<>();

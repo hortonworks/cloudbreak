@@ -65,7 +65,8 @@ public class HdfConfigProviderTest {
         StringBuilder expectedNodeEntities = new StringBuilder();
         int i = 0;
         for (InstanceMetaData instance : groupInstanes.get("master")) {
-            expectedNodeEntities.append("<property name=\"Node Identity " + ++i + "\">CN=" + instance.getDiscoveryFQDN() + ", OU=NIFI</property>");
+            expectedNodeEntities.append("<property name=\"Node Identity ").append(++i).append("\">CN=").append(instance.getDiscoveryFQDN())
+                    .append(", OU=NIFI</property>");
         }
         Assert.assertEquals(expectedNodeEntities.toString(), hdfConfigs.getNodeEntities());
         Assert.assertEquals(Optional.of(groupInstanes.get("master").stream().map(im -> im.getPublicIp() + ":9091").collect(Collectors.joining(","))),

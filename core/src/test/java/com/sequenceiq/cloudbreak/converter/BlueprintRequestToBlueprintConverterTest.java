@@ -32,7 +32,7 @@ import com.sequenceiq.cloudbreak.service.MissingResourceNameGenerator;
 public class BlueprintRequestToBlueprintConverterTest extends AbstractJsonConverterTest<BlueprintRequest> {
 
     @Rule
-    public ExpectedException thrown = ExpectedException.none();
+    public final ExpectedException thrown = ExpectedException.none();
 
     @InjectMocks
     private BlueprintRequestToBlueprintConverter underTest;
@@ -41,7 +41,7 @@ public class BlueprintRequestToBlueprintConverterTest extends AbstractJsonConver
     private JsonHelper jsonHelper;
 
     @Spy
-    private BlueprintUtils blueprintUtils = new BlueprintUtils();
+    private final BlueprintUtils blueprintUtils = new BlueprintUtils();
 
     @Mock
     private MissingResourceNameGenerator missingResourceNameGenerator;
@@ -75,7 +75,7 @@ public class BlueprintRequestToBlueprintConverterTest extends AbstractJsonConver
     }
 
     @Test
-    public void testConvertWhenUrlIsNotEmptyButInvalidThenExceptionWouldCome() throws IOException {
+    public void testConvertWhenUrlIsNotEmptyButInvalidThenExceptionWouldCome() {
         String wrongUrl = "some wrong content for url";
         BlueprintRequest request = getRequest("stack/blueprint.json");
         request.setUrl(wrongUrl);

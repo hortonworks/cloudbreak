@@ -14,6 +14,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.ambari.client.AmbariClient;
+import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariAdapter.ClusterStatusResult;
 import com.sequenceiq.cloudbreak.service.cluster.flow.status.ClusterStatus;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -40,42 +41,42 @@ public class AmbariAdapterTest {
     @Test
     public void testCreateClusterStatusShouldReturnAvailabelStackWithStoppedClusterWhenAllServerComponentsAreInstalled() {
         BDDMockito.given(ambariClient.getHostComponentsStatesCategorized()).willReturn(createHostComponentsStates("INSTALLED"));
-        AmbariAdapter.ClusterStatusResult actualResult = underTest.getClusterStatusHostComponentMap(ambariClient);
+        ClusterStatusResult actualResult = underTest.getClusterStatusHostComponentMap(ambariClient);
         Assert.assertEquals(ClusterStatus.INSTALLED, actualResult.getClusterStatus());
     }
 
     @Test
     public void testCreateClusterStatusShouldReturnAvailableClusterWhenAllServerComponentsAreStarted() {
         BDDMockito.given(ambariClient.getHostComponentsStatesCategorized()).willReturn(createHostComponentsStates("STARTED"));
-        AmbariAdapter.ClusterStatusResult actualResult = underTest.getClusterStatusHostComponentMap(ambariClient);
+        ClusterStatusResult actualResult = underTest.getClusterStatusHostComponentMap(ambariClient);
         Assert.assertEquals(ClusterStatus.STARTED, actualResult.getClusterStatus());
     }
 
     @Test
     public void testCreateClusterStatusShouldReturnInstallingStatusWhenOneServerComponentIsBeingInstalled() {
         BDDMockito.given(ambariClient.getHostComponentsStatesCategorized()).willReturn(createInstallingHostComponentsStates());
-        AmbariAdapter.ClusterStatusResult actualResult = underTest.getClusterStatusHostComponentMap(ambariClient);
+        ClusterStatusResult actualResult = underTest.getClusterStatusHostComponentMap(ambariClient);
         Assert.assertEquals(ClusterStatus.INSTALLING, actualResult.getClusterStatus());
     }
 
     @Test
     public void testCreateClusterStatusShouldReturnAmbiguousWhenThereAreStartedAndInstalledComps() {
         BDDMockito.given(ambariClient.getHostComponentsStatesCategorized()).willReturn(createInstalledAndStartedHostComponentsStates());
-        AmbariAdapter.ClusterStatusResult actualResult = underTest.getClusterStatusHostComponentMap(ambariClient);
+        ClusterStatusResult actualResult = underTest.getClusterStatusHostComponentMap(ambariClient);
         Assert.assertEquals(ClusterStatus.AMBIGUOUS, actualResult.getClusterStatus());
     }
 
     @Test
     public void testCreateClusterStatusShouldReturnAmbiguousStatusWhenThereAreCompsInUnsupportedStates() {
         BDDMockito.given(ambariClient.getHostComponentsStatesCategorized()).willReturn(createHostComponentsStates("Unsupported"));
-        AmbariAdapter.ClusterStatusResult actualResult = underTest.getClusterStatusHostComponentMap(ambariClient);
+        ClusterStatusResult actualResult = underTest.getClusterStatusHostComponentMap(ambariClient);
         Assert.assertEquals(ClusterStatus.AMBIGUOUS, actualResult.getClusterStatus());
     }
 
     @Test(expected = RuntimeException.class)
     public void testCreateClusterStatusShouldReturnUnknownWhenAmbariThrowsException() {
         BDDMockito.given(ambariClient.getHostComponentsStatesCategorized()).willThrow(new RuntimeException());
-        AmbariAdapter.ClusterStatusResult actualResult = underTest.getClusterStatusHostComponentMap(ambariClient);
+        ClusterStatusResult actualResult = underTest.getClusterStatusHostComponentMap(ambariClient);
         Assert.assertEquals(ClusterStatus.UNKNOWN, actualResult.getClusterStatus());
     }
 

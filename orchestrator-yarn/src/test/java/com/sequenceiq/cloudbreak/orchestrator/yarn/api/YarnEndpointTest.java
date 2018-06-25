@@ -7,7 +7,7 @@ import org.junit.Test;
 public class YarnEndpointTest {
 
     @Test
-    public void testRemoveLeadingAndTrailingSlash() throws Exception {
+    public void testRemoveLeadingAndTrailingSlash() {
         String testString = "//test/";
         String expectedString = "test";
         YarnEndpoint yarnEndpoint = new YarnEndpoint("", "");

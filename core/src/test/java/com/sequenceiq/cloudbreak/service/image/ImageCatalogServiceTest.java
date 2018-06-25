@@ -50,7 +50,7 @@ public class ImageCatalogServiceTest {
     public static final String ACCOUNT = "account";
 
     @Rule
-    public ExpectedException thrown = ExpectedException.none();
+    public final ExpectedException thrown = ExpectedException.none();
 
     @Mock
     private ImageCatalogProvider imageCatalogProvider;
@@ -74,7 +74,7 @@ public class ImageCatalogServiceTest {
     private ImageCatalogService underTest;
 
     @Spy
-    private List<CloudConstant> constants = new ArrayList<>();
+    private final List<CloudConstant> constants = new ArrayList<>();
 
     @Before
     public void beforeTest() throws Exception {
@@ -85,17 +85,7 @@ public class ImageCatalogServiceTest {
         IdentityUser user = getIdentityUser();
         when(authenticatedUserService.getCbUser()).thenReturn(user);
 
-        constants.addAll(Collections.singletonList(new CloudConstant() {
-            @Override
-            public Platform platform() {
-                return Platform.platform("AWS");
-            }
-
-            @Override
-            public Variant variant() {
-                return Variant.variant("AWS");
-            }
-        }));
+        constants.addAll(Collections.singletonList(new AwsCloudConstant()));
 
         ReflectionTestUtils.setField(underTest, ImageCatalogService.class, "defaultCatalogUrl", "http://localhost/imagecatalog-url", null);
         ReflectionTestUtils.setField(underTest, ImageCatalogService.class, "cbVersion", "unspecified", null);
@@ -179,7 +169,7 @@ public class ImageCatalogServiceTest {
         StatedImages images = underTest.getImages(imageCatalog, "aws", cbVersion);
 
         boolean exactImageIdMatch = images.getImages().getHdpImages().stream()
-                .anyMatch(img -> img.getUuid().equals("2.5.1.9-4-ccbb32dc-6c9f-43f1-8a09-64b598fda733-2.6.1.4-2"));
+                .anyMatch(img -> "2.5.1.9-4-ccbb32dc-6c9f-43f1-8a09-64b598fda733-2.6.1.4-2".equals(img.getUuid()));
         Assert.assertTrue("Result doesn't contain the required Ambari image with id.", exactImageIdMatch);
     }
 
@@ -191,14 +181,14 @@ public class ImageCatalogServiceTest {
         imageCatalog.setImageCatalogName("default");
         StatedImages images = underTest.getImages(imageCatalog, ImmutableSet.of("aws", "azure"), cbVersion);
         boolean awsAndAzureWerePresentedInTheTest = false;
-        Assert.assertEquals(2, images.getImages().getHdpImages().size());
+        Assert.assertEquals(2L, images.getImages().getHdpImages().size());
         for (Image image : images.getImages().getHdpImages()) {
             boolean containsAws = images.getImages().getHdpImages().stream()
                     .anyMatch(img -> img.getImageSetsByProvider().entrySet().stream().anyMatch(
-                            platformImages -> platformImages.getKey().equals("aws")));
+                            platformImages -> "aws".equals(platformImages.getKey())));
             boolean containsAzure = images.getImages().getHdpImages().stream()
                     .anyMatch(img -> img.getImageSetsByProvider().entrySet().stream().anyMatch(
-                            platformImages -> platformImages.getKey().equals("azure_rm")));
+                            platformImages -> "azure_rm".equals(platformImages.getKey())));
             if (image.getImageSetsByProvider().size() == 2) {
                 awsAndAzureWerePresentedInTheTest = true;
                 Assert.assertTrue("Result doesn't contain the required Ambari image with id.", containsAws && containsAzure);
@@ -222,7 +212,7 @@ public class ImageCatalogServiceTest {
         StatedImages images = underTest.getImages(imageCatalog, "aws", "2.6.0");
 
         boolean match = images.getImages().getHdpImages().stream()
-                .anyMatch(img -> img.getUuid().equals("63cdb3bc-28a6-4cea-67e4-9842fdeeaefb"));
+                .anyMatch(img -> "63cdb3bc-28a6-4cea-67e4-9842fdeeaefb".equals(img.getUuid()));
         Assert.assertTrue("Result doesn't contain the required base image with id.", match);
     }
 
@@ -238,7 +228,7 @@ public class ImageCatalogServiceTest {
         StatedImages images = underTest.getImages(imageCatalog, "aws", "2.6.0-dev.132");
 
         boolean match = images.getImages().getHdpImages().stream()
-                .anyMatch(img -> img.getUuid().equals("b150efce-33ac-49c9-7206-7f148d162744"));
+                .anyMatch(img -> "b150efce-33ac-49c9-7206-7f148d162744".equals(img.getUuid()));
         Assert.assertTrue("Result doesn't contain the required base image with id.", match);
     }
 
@@ -254,7 +244,7 @@ public class ImageCatalogServiceTest {
         StatedImages images = underTest.getImages(imageCatalog, "aws", "2.6.0-rc.13");
 
         boolean match = images.getImages().getHdpImages().stream()
-                .anyMatch(img -> img.getUuid().equals("bbc63453-086c-4bf7-4337-a04c37d51b68"));
+                .anyMatch(img -> "bbc63453-086c-4bf7-4337-a04c37d51b68".equals(img.getUuid()));
         Assert.assertTrue("Result doesn't contain the required base image with id.", match);
     }
 
@@ -278,7 +268,7 @@ public class ImageCatalogServiceTest {
         StatedImages images = underTest.getImages(imageCatalog, "aws", "1.16.4-dev.132");
 
         boolean match = images.getImages().getHdpImages().stream()
-                .anyMatch(img -> img.getUuid().equals("2.5.1.9-4-ccbb32dc-6c9f-43f1-8a09-64b598fda733-2.6.1.4-2"));
+                .anyMatch(img -> "2.5.1.9-4-ccbb32dc-6c9f-43f1-8a09-64b598fda733-2.6.1.4-2".equals(img.getUuid()));
         Assert.assertTrue("Result doesn't contain the required Ambari image with id.", match);
     }
 
@@ -290,7 +280,7 @@ public class ImageCatalogServiceTest {
         StatedImages images = underTest.getImages(imageCatalog, "aws", "1.16.4-rc.13");
 
         boolean match = images.getImages().getHdpImages().stream()
-                .anyMatch(img -> img.getUuid().equals("2.5.1.9-4-ccbb32dc-6c9f-43f1-8a09-64b598fda733-2.6.1.4-2"));
+                .anyMatch(img -> "2.5.1.9-4-ccbb32dc-6c9f-43f1-8a09-64b598fda733-2.6.1.4-2".equals(img.getUuid()));
         Assert.assertTrue("Result doesn't contain the required Ambari image with id.", match);
     }
 
@@ -302,11 +292,11 @@ public class ImageCatalogServiceTest {
         StatedImages images = underTest.getImages(imageCatalog, "aws", "2.1.0-dev.4000");
 
         boolean hdfImgMatch = images.getImages().getHdfImages().stream()
-                .anyMatch(ambariImage -> ambariImage.getUuid().equals("9958938a-1261-48e2-aff9-dbcb2cebf6cd"));
+                .anyMatch(ambariImage -> "9958938a-1261-48e2-aff9-dbcb2cebf6cd".equals(ambariImage.getUuid()));
         boolean hdpImgMatch = images.getImages().getHdpImages().stream()
-                .anyMatch(ambariImage -> ambariImage.getUuid().equals("2.5.0.2-65-5288855d-d7b9-4b90-b326-ab4b168cf581-2.6.0.1-145"));
+                .anyMatch(ambariImage -> "2.5.0.2-65-5288855d-d7b9-4b90-b326-ab4b168cf581-2.6.0.1-145".equals(ambariImage.getUuid()));
         boolean baseImgMatch = images.getImages().getBaseImages().stream()
-                .anyMatch(ambariImage -> ambariImage.getUuid().equals("f6e778fc-7f17-4535-9021-515351df3691"));
+                .anyMatch(ambariImage -> "f6e778fc-7f17-4535-9021-515351df3691".equals(ambariImage.getUuid()));
         Assert.assertTrue("Result doesn't contain the required Ambari image with id.", hdfImgMatch && hdpImgMatch && baseImgMatch);
     }
 
@@ -318,8 +308,8 @@ public class ImageCatalogServiceTest {
         StatedImages images = underTest.getImages(imageCatalog, "aws", "2.0.0-rc.4");
 
         boolean allMatch = images.getImages().getHdpImages().stream()
-                .allMatch(img -> img.getUuid().equals("2.4.2.2-1-9e3ccdca-fa64-42eb-ab29-b1450767bbd8-2.5.0.1-265")
-                        || img.getUuid().equals("2.5.1.9-4-ccbb32dc-6c9f-43f1-8a09-64b598fda733-2.6.1.4-2"));
+                .allMatch(img -> "2.4.2.2-1-9e3ccdca-fa64-42eb-ab29-b1450767bbd8-2.5.0.1-265".equals(img.getUuid())
+                        || "2.5.1.9-4-ccbb32dc-6c9f-43f1-8a09-64b598fda733-2.6.1.4-2".equals(img.getUuid()));
         Assert.assertTrue("Result doesn't contain the required Ambari image with id.", allMatch);
     }
 
@@ -330,7 +320,7 @@ public class ImageCatalogServiceTest {
         imageCatalog.setImageCatalogName("default");
         StatedImages images = underTest.getImages(imageCatalog, "AWS", "1.16.4");
         boolean exactImageIdMatch = images.getImages().getHdpImages().stream()
-                .anyMatch(img -> img.getUuid().equals("2.5.1.9-4-ccbb32dc-6c9f-43f1-8a09-64b598fda733-2.6.1.4-2"));
+                .anyMatch(img -> "2.5.1.9-4-ccbb32dc-6c9f-43f1-8a09-64b598fda733-2.6.1.4-2".equals(img.getUuid()));
         Assert.assertTrue("Result doesn't contain the required Ambari image with id for the platform.", exactImageIdMatch);
     }
 
@@ -388,7 +378,7 @@ public class ImageCatalogServiceTest {
         verify(imageCatalogRepository, times(1)).save(imageCatalog);
 
         Assert.assertTrue(imageCatalog.isArchived());
-        Assert.assertTrue(imageCatalog.getImageCatalogName().startsWith(name) && imageCatalog.getImageCatalogName().indexOf("_") == name.length());
+        Assert.assertTrue(imageCatalog.getImageCatalogName().startsWith(name) && imageCatalog.getImageCatalogName().indexOf('_') == name.length());
     }
 
     @Test
@@ -422,5 +412,17 @@ public class ImageCatalogServiceTest {
 
         Assert.assertEquals(actual.getImageCatalogName(), name);
         Assert.assertNull(actual.getId());
+    }
+
+    private static class AwsCloudConstant implements CloudConstant {
+        @Override
+        public Platform platform() {
+            return Platform.platform("AWS");
+        }
+
+        @Override
+        public Variant variant() {
+            return Variant.variant("AWS");
+        }
     }
 }

@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.ha;
 
 import static org.junit.Assert.assertEquals;
 
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -35,10 +36,10 @@ public class EvenFlowDistributorTest {
         List<CloudbreakNode> nodes = getClusterNodes();
         List<String> flowLogs = getFlowIds(9);
         Map<CloudbreakNode, List<String>> result = flowDistributor.distribute(flowLogs, nodes);
-        assertEquals(3, result.get(nodes.get(0)).size());
-        assertEquals(2, result.get(nodes.get(1)).size());
-        assertEquals(2, result.get(nodes.get(2)).size());
-        assertEquals(2, result.get(nodes.get(3)).size());
+        assertEquals(3L, result.get(nodes.get(0)).size());
+        assertEquals(2L, result.get(nodes.get(1)).size());
+        assertEquals(2L, result.get(nodes.get(2)).size());
+        assertEquals(2L, result.get(nodes.get(3)).size());
     }
 
     @Test
@@ -46,10 +47,10 @@ public class EvenFlowDistributorTest {
         List<CloudbreakNode> nodes = getClusterNodes();
         List<String> flowLogs = getFlowIds(12);
         Map<CloudbreakNode, List<String>> result = flowDistributor.distribute(flowLogs, nodes);
-        assertEquals(3, result.get(nodes.get(0)).size());
-        assertEquals(3, result.get(nodes.get(1)).size());
-        assertEquals(3, result.get(nodes.get(2)).size());
-        assertEquals(3, result.get(nodes.get(3)).size());
+        assertEquals(3L, result.get(nodes.get(0)).size());
+        assertEquals(3L, result.get(nodes.get(1)).size());
+        assertEquals(3L, result.get(nodes.get(2)).size());
+        assertEquals(3L, result.get(nodes.get(3)).size());
     }
 
     @Test
@@ -58,9 +59,9 @@ public class EvenFlowDistributorTest {
         nodes.remove(3);
         List<String> flowLogs = getFlowIds(12);
         Map<CloudbreakNode, List<String>> result = flowDistributor.distribute(flowLogs, nodes);
-        assertEquals(4, result.get(nodes.get(0)).size());
-        assertEquals(4, result.get(nodes.get(1)).size());
-        assertEquals(4, result.get(nodes.get(2)).size());
+        assertEquals(4L, result.get(nodes.get(0)).size());
+        assertEquals(4L, result.get(nodes.get(1)).size());
+        assertEquals(4L, result.get(nodes.get(2)).size());
     }
 
     @Test
@@ -69,9 +70,9 @@ public class EvenFlowDistributorTest {
         nodes.remove(3);
         List<String> flowLogs = getFlowIds(11);
         Map<CloudbreakNode, List<String>> result = flowDistributor.distribute(flowLogs, nodes);
-        assertEquals(4, result.get(nodes.get(0)).size());
-        assertEquals(4, result.get(nodes.get(1)).size());
-        assertEquals(3, result.get(nodes.get(2)).size());
+        assertEquals(4L, result.get(nodes.get(0)).size());
+        assertEquals(4L, result.get(nodes.get(1)).size());
+        assertEquals(3L, result.get(nodes.get(2)).size());
     }
 
     @Test
@@ -79,7 +80,7 @@ public class EvenFlowDistributorTest {
         CloudbreakNode node = new CloudbreakNode(MY_ID);
         List<String> flowLogs = getFlowIds(11);
         Map<CloudbreakNode, List<String>> result = flowDistributor.distribute(flowLogs, Collections.singletonList(node));
-        assertEquals(11, result.get(node).size());
+        assertEquals(11L, result.get(node).size());
     }
 
     private List<CloudbreakNode> getClusterNodes() {
@@ -97,7 +98,7 @@ public class EvenFlowDistributorTest {
 
     private List<FlowLog> getFlowLogs(int flowCount) {
         List<FlowLog> flows = new ArrayList<>();
-        Random random = new Random(System.currentTimeMillis());
+        Random random = new SecureRandom();
         int flowId = random.nextInt(5000);
         long stackId = random.nextLong();
         for (int i = 0; i < flowCount; i++) {

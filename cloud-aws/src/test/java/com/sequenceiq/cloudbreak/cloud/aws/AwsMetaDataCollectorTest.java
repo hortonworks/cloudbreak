@@ -128,7 +128,7 @@ public class AwsMetaDataCollectorTest {
         AuthenticatedContext ac = authenticatedContext();
         List<CloudVmMetaDataStatus> statuses = awsMetadataCollector.collect(ac, null, vms, vms);
 
-        Assert.assertEquals(1, statuses.size());
+        Assert.assertEquals(1L, statuses.size());
         Assert.assertEquals("i-1", statuses.get(0).getCloudVmInstanceStatus().getCloudInstance().getInstanceId());
         Assert.assertEquals("privateIp", statuses.get(0).getMetaData().getPrivateIp());
         Assert.assertEquals("publicIp", statuses.get(0).getMetaData().getPublicIp());
@@ -180,7 +180,7 @@ public class AwsMetaDataCollectorTest {
         AuthenticatedContext ac = authenticatedContext();
         List<CloudVmMetaDataStatus> statuses = awsMetadataCollector.collect(ac, null, vms, Collections.emptyList());
 
-        Assert.assertEquals(3, statuses.size());
+        Assert.assertEquals(3L, statuses.size());
         Assert.assertEquals("i-0", statuses.get(0).getCloudVmInstanceStatus().getCloudInstance().getInstanceId());
         Assert.assertEquals("privateIp0", statuses.get(0).getMetaData().getPrivateIp());
         Assert.assertEquals("publicIp0", statuses.get(0).getMetaData().getPublicIp());
@@ -237,7 +237,7 @@ public class AwsMetaDataCollectorTest {
         AuthenticatedContext ac = authenticatedContext();
         List<CloudVmMetaDataStatus> statuses = awsMetadataCollector.collect(ac, null, vms, vms);
 
-        Assert.assertEquals(2, statuses.size());
+        Assert.assertEquals(2L, statuses.size());
         Assert.assertTrue(statuses.stream().anyMatch(predicate -> "i-1".equals(predicate.getCloudVmInstanceStatus().getCloudInstance().getInstanceId())));
         Assert.assertTrue(statuses.stream().anyMatch(predicate -> "privateIp1".equals(predicate.getMetaData().getPrivateIp())));
         Assert.assertTrue(statuses.stream().anyMatch(predicate -> "publicIp1".equals(predicate.getMetaData().getPublicIp())));
@@ -294,7 +294,7 @@ public class AwsMetaDataCollectorTest {
         AuthenticatedContext ac = authenticatedContext();
         List<CloudVmMetaDataStatus> statuses = awsMetadataCollector.collect(ac, null, newVms, everyVms);
 
-        Assert.assertEquals(1, statuses.size());
+        Assert.assertEquals(1L, statuses.size());
         Assert.assertTrue(statuses.stream().anyMatch(predicate -> "i-2".equals(predicate.getCloudVmInstanceStatus().getCloudInstance().getInstanceId())));
         Assert.assertTrue(statuses.stream().anyMatch(predicate -> "privateIp2".equals(predicate.getMetaData().getPrivateIp())));
         Assert.assertTrue(statuses.stream().anyMatch(predicate -> "publicIp2".equals(predicate.getMetaData().getPublicIp())));
@@ -310,7 +310,7 @@ public class AwsMetaDataCollectorTest {
     private AuthenticatedContext authenticatedContext() {
         Location location = Location.location(Region.region("region"), AvailabilityZone.availabilityZone("az"));
         CloudContext cloudContext = new CloudContext(5L, "name", "platform", "owner", "variant", location);
-        CloudCredential cc = new CloudCredential(1L, null, null);
-        return new AuthenticatedContext(cloudContext, cc);
+        CloudCredential credential = new CloudCredential(1L, null, null);
+        return new AuthenticatedContext(cloudContext, credential);
     }
 }

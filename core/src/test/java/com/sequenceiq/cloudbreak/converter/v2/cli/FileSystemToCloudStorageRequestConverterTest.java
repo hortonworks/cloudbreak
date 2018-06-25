@@ -1,29 +1,5 @@
 package com.sequenceiq.cloudbreak.converter.v2.cli;
 
-import com.sequenceiq.cloudbreak.api.model.filesystem.AdlsFileSystem;
-import com.sequenceiq.cloudbreak.api.model.filesystem.GcsFileSystem;
-import com.sequenceiq.cloudbreak.api.model.filesystem.S3FileSystem;
-import com.sequenceiq.cloudbreak.api.model.filesystem.WasbFileSystem;
-import com.sequenceiq.cloudbreak.api.model.v2.CloudStorageRequest;
-import com.sequenceiq.cloudbreak.api.model.v2.StorageLocationRequest;
-import com.sequenceiq.cloudbreak.api.model.v2.filesystem.AdlsCloudStorageParameters;
-import com.sequenceiq.cloudbreak.api.model.v2.filesystem.GcsCloudStorageParameters;
-import com.sequenceiq.cloudbreak.api.model.v2.filesystem.S3CloudStorageParameters;
-import com.sequenceiq.cloudbreak.api.model.v2.filesystem.WasbCloudStorageParameters;
-import com.sequenceiq.cloudbreak.domain.FileSystem;
-import com.sequenceiq.cloudbreak.domain.StorageLocation;
-import com.sequenceiq.cloudbreak.domain.StorageLocations;
-import com.sequenceiq.cloudbreak.domain.json.Json;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.springframework.core.convert.ConversionService;
-
-import java.io.IOException;
-import java.util.Collections;
-
 import static com.sequenceiq.cloudbreak.api.model.filesystem.FileSystemType.ADLS;
 import static com.sequenceiq.cloudbreak.api.model.filesystem.FileSystemType.GCS;
 import static com.sequenceiq.cloudbreak.api.model.filesystem.FileSystemType.S3;
@@ -38,6 +14,31 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import java.io.IOException;
+import java.util.Collections;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.springframework.core.convert.ConversionService;
+
+import com.sequenceiq.cloudbreak.api.model.filesystem.AdlsFileSystem;
+import com.sequenceiq.cloudbreak.api.model.filesystem.GcsFileSystem;
+import com.sequenceiq.cloudbreak.api.model.filesystem.S3FileSystem;
+import com.sequenceiq.cloudbreak.api.model.filesystem.WasbFileSystem;
+import com.sequenceiq.cloudbreak.api.model.v2.CloudStorageRequest;
+import com.sequenceiq.cloudbreak.api.model.v2.StorageLocationRequest;
+import com.sequenceiq.cloudbreak.api.model.v2.filesystem.AdlsCloudStorageParameters;
+import com.sequenceiq.cloudbreak.api.model.v2.filesystem.GcsCloudStorageParameters;
+import com.sequenceiq.cloudbreak.api.model.v2.filesystem.S3CloudStorageParameters;
+import com.sequenceiq.cloudbreak.api.model.v2.filesystem.WasbCloudStorageParameters;
+import com.sequenceiq.cloudbreak.domain.FileSystem;
+import com.sequenceiq.cloudbreak.domain.StorageLocation;
+import com.sequenceiq.cloudbreak.domain.StorageLocations;
+import com.sequenceiq.cloudbreak.domain.json.Json;
 
 public class FileSystemToCloudStorageRequestConverterTest {
 

@@ -26,7 +26,7 @@ public class AmbariClusterConnectorTest {
     private AmbariClusterSecurityService ambariClusterSecurityService;
 
     @InjectMocks
-    private AmbariClusterConnector underTest = new AmbariClusterConnector();
+    private final AmbariClusterConnector underTest = new AmbariClusterConnector();
 
     @Test
     public void testClusterModificationServiceShouldReturnWithInjectedBean() {

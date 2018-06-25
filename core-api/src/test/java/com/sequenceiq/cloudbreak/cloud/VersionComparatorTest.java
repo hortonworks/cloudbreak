@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.cloud;
 
-import java.io.IOException;
-
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -18,35 +16,35 @@ public class VersionComparatorTest {
     }
 
     @Test
-    public void testEquals() throws IOException {
-        Assert.assertEquals(0, underTest.compare(new VersionString("2.4.0.0-770"), new VersionString("2.4.0.0-770")));
+    public void testEquals() {
+        Assert.assertEquals(0L, underTest.compare(new VersionString("2.4.0.0-770"), new VersionString("2.4.0.0-770")));
     }
 
     @Test
-    public void testGreater() throws IOException {
-        Assert.assertEquals(1, underTest.compare(new VersionString("2.4.0.0-880"), new VersionString("2.4.0.0-770")));
-        Assert.assertEquals(1, underTest.compare(new VersionString("2.4.0.0-1000"), new VersionString("2.4.0.0-770")));
-        Assert.assertEquals(1, underTest.compare(new VersionString("2.5.0.0-1000"), new VersionString("2.4.0.0-1000")));
-        Assert.assertEquals(1, underTest.compare(new VersionString("2.15.0.0-1000"), new VersionString("2.5.0.0-1000")));
+    public void testGreater() {
+        Assert.assertEquals(1L, underTest.compare(new VersionString("2.4.0.0-880"), new VersionString("2.4.0.0-770")));
+        Assert.assertEquals(1L, underTest.compare(new VersionString("2.4.0.0-1000"), new VersionString("2.4.0.0-770")));
+        Assert.assertEquals(1L, underTest.compare(new VersionString("2.5.0.0-1000"), new VersionString("2.4.0.0-1000")));
+        Assert.assertEquals(1L, underTest.compare(new VersionString("2.15.0.0-1000"), new VersionString("2.5.0.0-1000")));
     }
 
     @Test
-    public void testGreaterNonEqualLength() throws IOException {
-        Assert.assertEquals(1, underTest.compare(new VersionString("2.4.0.0"), new VersionString("2.4.0.0-770")));
-        Assert.assertEquals(1, underTest.compare(new VersionString("2.5.0.0"), new VersionString("2.5.0.0-770")));
+    public void testGreaterNonEqualLength() {
+        Assert.assertEquals(1L, underTest.compare(new VersionString("2.4.0.0"), new VersionString("2.4.0.0-770")));
+        Assert.assertEquals(1L, underTest.compare(new VersionString("2.5.0.0"), new VersionString("2.5.0.0-770")));
     }
 
     @Test
-    public void testSmaller() throws IOException {
-        Assert.assertEquals(-1, underTest.compare(new VersionString("2.4.0.0-770"), new VersionString("2.4.0.0-880")));
-        Assert.assertEquals(-1, underTest.compare(new VersionString("2.4.0.0-770"), new VersionString("2.4.0.0-1000")));
-        Assert.assertEquals(-1, underTest.compare(new VersionString("2.4.0.0-1000"), new VersionString("2.5.0.0-1000")));
-        Assert.assertEquals(-1, underTest.compare(new VersionString("2.5.0.0-1000"), new VersionString("2.15.0.0-1000")));
+    public void testSmaller() {
+        Assert.assertEquals(-1L, underTest.compare(new VersionString("2.4.0.0-770"), new VersionString("2.4.0.0-880")));
+        Assert.assertEquals(-1L, underTest.compare(new VersionString("2.4.0.0-770"), new VersionString("2.4.0.0-1000")));
+        Assert.assertEquals(-1L, underTest.compare(new VersionString("2.4.0.0-1000"), new VersionString("2.5.0.0-1000")));
+        Assert.assertEquals(-1L, underTest.compare(new VersionString("2.5.0.0-1000"), new VersionString("2.15.0.0-1000")));
     }
 
     @Test
-    public void testSmallerNonEqualLength() throws IOException {
-        Assert.assertEquals(-1, underTest.compare(new VersionString("2.4.0.0"), new VersionString("2.5.0.0-770")));
+    public void testSmallerNonEqualLength() {
+        Assert.assertEquals(-1L, underTest.compare(new VersionString("2.4.0.0"), new VersionString("2.5.0.0-770")));
     }
 
     private static class VersionString implements Versioned {

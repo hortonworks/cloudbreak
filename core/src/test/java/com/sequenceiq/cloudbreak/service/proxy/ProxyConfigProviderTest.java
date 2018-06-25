@@ -41,8 +41,8 @@ public class ProxyConfigProviderTest {
         ProxyConfig proxyConfig = new ProxyConfig();
         Map<String, Object> properties = testProxyCore(proxyConfig);
 
-        assertTrue(StringUtils.isNotBlank((String) properties.get("host")));
-        assertTrue(StringUtils.isNotBlank((String) properties.get("protocol")));
+        assertTrue(StringUtils.isNotBlank((CharSequence) properties.get("host")));
+        assertTrue(StringUtils.isNotBlank((CharSequence) properties.get("protocol")));
         assertNotNull(properties.get("port"));
         assertFalse(properties.containsKey("user"));
         assertFalse(properties.containsKey("password"));
@@ -72,8 +72,8 @@ public class ProxyConfigProviderTest {
         proxyConfig.setUserName("test");
         proxyConfig.setPassword("test");
         Map<String, Object> properties = testProxyCore(proxyConfig);
-        assertTrue(StringUtils.isNotBlank((String) properties.get("user")));
-        assertTrue(StringUtils.isNotBlank((String) properties.get("password")));
+        assertTrue(StringUtils.isNotBlank((CharSequence) properties.get("user")));
+        assertTrue(StringUtils.isNotBlank((CharSequence) properties.get("password")));
     }
 
     private Map<String, Object> testProxyCore(ProxyConfig proxyConfig) {

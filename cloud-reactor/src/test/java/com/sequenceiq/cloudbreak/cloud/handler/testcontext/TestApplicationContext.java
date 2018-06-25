@@ -84,7 +84,7 @@ public class TestApplicationContext {
     private MetadataCollector collector;
 
     @Mock
-    private ResourceConnector resourceConnector;
+    private ResourceConnector<Object> resourceConnector;
 
     @Mock
     private InstanceConnector instanceConnector;
@@ -93,7 +93,7 @@ public class TestApplicationContext {
     private PersistenceNotifier persistenceNotifier;
 
     @Mock
-    private Persister persister;
+    private Persister<?> persister;
 
     @Inject
     private ParameterGenerator g;
@@ -175,7 +175,7 @@ public class TestApplicationContext {
     }
 
     @Bean
-    public Persister getPersister() {
+    public Persister<?> getPersister() {
         return persister;
     }
 

@@ -16,10 +16,10 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 @RunWith(MockitoJUnitRunner.class)
 public class MockPlatformResourcesTest {
 
-    private MockPlatformResources underTest = new MockPlatformResources();
+    private final MockPlatformResources underTest = new MockPlatformResources();
 
     @Test
-    public void getDefaultRegionWhenNoDefaultFoundForMockProviderThenShouldReturnWithTheFirstElement() throws Exception {
+    public void getDefaultRegionWhenNoDefaultFoundForMockProviderThenShouldReturnWithTheFirstElement() {
         ReflectionTestUtils.setField(underTest, "defaultRegions", "AWS:eu-west-1");
         underTest.init();
         CloudRegions regions = underTest.regions(new CloudCredential(1L, "mock"), region("mock"), new HashMap<>());
@@ -27,7 +27,7 @@ public class MockPlatformResourcesTest {
     }
 
     @Test
-    public void getDefaultRegionWhenDefaultFoundForMockProviderThenShouldReturnWithDefaultElement() throws Exception {
+    public void getDefaultRegionWhenDefaultFoundForMockProviderThenShouldReturnWithDefaultElement() {
         ReflectionTestUtils.setField(underTest, "defaultRegions", "AWS:eu-west-1,MOCK:Europe");
         underTest.init();
         CloudRegions regions = underTest.regions(new CloudCredential(1L, "mock"), region("mock"), new HashMap<>());

@@ -35,7 +35,7 @@ public class GcpResourceExceptionTest {
     }
 
     @Test
-    public void testShouldMessageBeWellFormattedWhenUsingLongConstructor() throws Exception {
+    public void testShouldMessageBeWellFormattedWhenUsingLongConstructor() {
         //GIVEN
 
         //WHEN

@@ -14,6 +14,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.BDDMockito;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -84,7 +85,7 @@ public class BlueprintValidatorTest {
         Set<InstanceGroup> instanceGroups = createInstanceGroups();
         Set<HostGroup> hostGroups = createHostGroups(instanceGroups);
         IOException expectedException = new IOException("");
-        BDDMockito.given(objectMapper.readTree(BDDMockito.anyString())).willThrow(expectedException);
+        BDDMockito.given(objectMapper.readTree(ArgumentMatchers.anyString())).willThrow(expectedException);
         thrown.expect(BlueprintValidationException.class);
         thrown.expectMessage("Blueprint [null] can not be parsed from JSON.");
         thrown.expectCause(is(expectedException));
@@ -114,7 +115,7 @@ public class BlueprintValidatorTest {
         Blueprint blueprint = createBlueprint();
         Set<InstanceGroup> instanceGroups = createInstanceGroups();
         Set<HostGroup> hostGroups = createHostGroups(instanceGroups);
-        instanceGroups.add(createInstanceGroup("gateway", 0, 1));
+        instanceGroups.add(createInstanceGroup("gateway", 0L, 1));
         JsonNode blueprintJsonTree = createJsonTreeWithIllegalGroup();
         BDDMockito.given(objectMapper.readTree(BLUEPRINT_STRING)).willReturn(blueprintJsonTree);
         thrown.expect(BlueprintValidationException.class);
@@ -130,7 +131,7 @@ public class BlueprintValidatorTest {
         Blueprint blueprint = createBlueprint();
         Set<InstanceGroup> instanceGroups = createInstanceGroups();
         Set<HostGroup> hostGroups = createHostGroups(instanceGroups);
-        instanceGroups.add(createInstanceGroup("gateway", 0, 1));
+        instanceGroups.add(createInstanceGroup("gateway", 0L, 1));
         JsonNode blueprintJsonTree = createJsonTreeWithTooMuchGroup();
         BDDMockito.given(objectMapper.readTree(BLUEPRINT_STRING)).willReturn(blueprintJsonTree);
         thrown.expect(BlueprintValidationException.class);
@@ -161,7 +162,7 @@ public class BlueprintValidatorTest {
         Blueprint blueprint = createBlueprint();
         Set<InstanceGroup> instanceGroups = createInstanceGroups();
         Set<HostGroup> hostGroups = createHostGroups(instanceGroups);
-        instanceGroups.add(createInstanceGroup("gateway", 0, 1));
+        instanceGroups.add(createInstanceGroup("gateway", 0L, 1));
         JsonNode blueprintJsonTree = createJsonTreeWithComponentInMoreGroups();
         BDDMockito.given(objectMapper.readTree(BLUEPRINT_STRING)).willReturn(blueprintJsonTree);
         thrown.expect(BlueprintValidationException.class);
@@ -177,7 +178,7 @@ public class BlueprintValidatorTest {
         Blueprint blueprint = createBlueprint();
         Set<InstanceGroup> instanceGroups = createInstanceGroups();
         Set<HostGroup> hostGroups = createHostGroups(instanceGroups);
-        instanceGroups.add(createInstanceGroup("gateway", 0, 1));
+        instanceGroups.add(createInstanceGroup("gateway", 0L, 1));
         JsonNode blueprintJsonTree = createJsonTreeWithComponentIsLess();
         BDDMockito.given(objectMapper.readTree(BLUEPRINT_STRING)).willReturn(blueprintJsonTree);
         thrown.expect(BlueprintValidationException.class);
@@ -193,7 +194,7 @@ public class BlueprintValidatorTest {
         Blueprint blueprint = createBlueprint();
         Set<InstanceGroup> instanceGroups = createInstanceGroups();
         Set<HostGroup> hostGroups = createHostGroups(instanceGroups);
-        instanceGroups.add(createInstanceGroup("gateway", 0, 1));
+        instanceGroups.add(createInstanceGroup("gateway", 0L, 1));
         JsonNode blueprintJsonTree = createJsonTree();
         BDDMockito.given(objectMapper.readTree(BLUEPRINT_STRING)).willReturn(blueprintJsonTree);
         // WHEN
@@ -207,7 +208,7 @@ public class BlueprintValidatorTest {
         Blueprint blueprint = createBlueprint();
         Set<InstanceGroup> instanceGroups = createInstanceGroups();
         Set<HostGroup> hostGroups = createHostGroups(instanceGroups);
-        instanceGroups.add(createInstanceGroup("gateway", 0, 1));
+        instanceGroups.add(createInstanceGroup("gateway", 0L, 1));
         JsonNode blueprintJsonTree = createJsonTreeWithUnknownComponent();
         BDDMockito.given(objectMapper.readTree(BLUEPRINT_STRING)).willReturn(blueprintJsonTree);
         // WHEN
@@ -220,7 +221,7 @@ public class BlueprintValidatorTest {
         // GIVEN
         Blueprint blueprint = createBlueprint();
         JsonNode blueprintJsonTree = createJsonTree();
-        InstanceGroup instanceGroup = createInstanceGroup(GROUP3, 0, 3);
+        InstanceGroup instanceGroup = createInstanceGroup(GROUP3, 0L, 3);
         HostGroup hostGroup = createHostGroup(instanceGroup.getGroupName(), instanceGroup);
         BDDMockito.given(objectMapper.readTree(BLUEPRINT_STRING)).willReturn(blueprintJsonTree);
         thrown.expect(BlueprintValidationException.class);
@@ -235,7 +236,7 @@ public class BlueprintValidatorTest {
         // GIVEN
         Blueprint blueprint = createBlueprint();
         JsonNode blueprintJsonTree = createJsonTree();
-        InstanceGroup instanceGroup = createInstanceGroup(GROUP3, 0, 1);
+        InstanceGroup instanceGroup = createInstanceGroup(GROUP3, 0L, 1);
         HostGroup hostGroup = createHostGroup(instanceGroup.getGroupName(), instanceGroup);
         BDDMockito.given(objectMapper.readTree(BLUEPRINT_STRING)).willReturn(blueprintJsonTree);
         thrown.expect(BlueprintValidationException.class);
@@ -250,7 +251,7 @@ public class BlueprintValidatorTest {
         // GIVEN
         Blueprint blueprint = createBlueprint();
         JsonNode blueprintJsonTree = createJsonTree();
-        InstanceGroup instanceGroup = createInstanceGroup(GROUP3, 0, 2);
+        InstanceGroup instanceGroup = createInstanceGroup(GROUP3, 0L, 2);
         HostGroup hostGroup = createHostGroup(instanceGroup.getGroupName(), instanceGroup);
         BDDMockito.given(objectMapper.readTree(BLUEPRINT_STRING)).willReturn(blueprintJsonTree);
         // WHEN
@@ -274,17 +275,13 @@ public class BlueprintValidatorTest {
 
     private Set<InstanceGroup> createInstanceGroups() {
         Set<InstanceGroup> groups = Sets.newHashSet();
-        groups.add(createInstanceGroup(GROUP1, 0, 1));
-        groups.add(createInstanceGroup(GROUP2, 1, 2));
-        groups.add(createInstanceGroup(GROUP3, 3, 3));
+        groups.add(createInstanceGroup(GROUP1, 0L, 1));
+        groups.add(createInstanceGroup(GROUP2, 1L, 2));
+        groups.add(createInstanceGroup(GROUP3, 3L, 3));
         return groups;
     }
 
     private InstanceGroup createInstanceGroup(String groupName, long startingPrivateNumber, int nodeCount) {
-        return createInstanceGroup(groupName, startingPrivateNumber, nodeCount, InstanceGroupType.CORE);
-    }
-
-    private InstanceGroup createInstanceGroup(String groupName, long startingPrivateNumber, int nodeCount, InstanceGroupType instanceGroupType) {
         InstanceGroup group = new InstanceGroup();
         group.setGroupName(groupName);
         Set<InstanceMetaData> instanceMetaDataSet = new HashSet<>();
@@ -297,7 +294,7 @@ public class BlueprintValidatorTest {
             startingPrivateNumber++;
         }
         group.setInstanceMetaData(instanceMetaDataSet);
-        group.setInstanceGroupType(instanceGroupType);
+        group.setInstanceGroupType(InstanceGroupType.CORE);
         return group;
     }
 

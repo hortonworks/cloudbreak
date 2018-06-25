@@ -214,9 +214,9 @@ class BlueprintModulTestModelProvider {
                 .build();
     }
 
-    static BlueprintPreparationObject blueprintObjectWhenDlmBlueprintConfigured(String inputFileName) throws IOException {
+    static BlueprintPreparationObject blueprintObjectWhenDlmBlueprintConfigured() throws IOException {
         GeneralClusterConfigs configs = generalClusterConfigs();
-        TestFile testFile = getTestFile(getFileName(BLUEPRINT_UPDATER_TEST_INPUTS, inputFileName));
+        TestFile testFile = getTestFile(getFileName(BLUEPRINT_UPDATER_TEST_INPUTS, "dlm"));
         return Builder.builder()
                 .withHostgroups(getHostGroups("master", "worker", "compute"))
                 .withBlueprintView(generalBlueprintView(testFile.getFileContent(), "2.6", "HDP"))
@@ -305,26 +305,22 @@ class BlueprintModulTestModelProvider {
     static Builder getPreparedBuilder(String... hostNames) {
         return Builder.builder()
                 .withGeneralClusterConfigs(generalClusterConfigs())
-                .withHostgroups(hostNames.length == 0 ? getHostGroups() : getHostGroups(hostNames));
-    }
-
-    private static Set<HostGroup> getHostGroups() {
-        return getHostGroups("master", "worker", "compute");
+                .withHostgroups(hostNames.length == 0 ? getHostGroups("master", "worker", "compute") : getHostGroups(hostNames));
     }
 
     private static Set<HostGroup> getHostGroups(String... names) {
-        final Set<HostGroup> hostGroups = new HashSet<>(names.length);
+        Set<HostGroup> hostGroups = new HashSet<>(names.length);
         for (String name : names) {
             hostGroups.add(hostGroup(name));
         }
         return hostGroups;
     }
 
-    public static TestFile getTestFile(String fileName) throws IOException {
+    static TestFile getTestFile(String fileName) throws IOException {
         return new TestFile(new File(fileName).toPath(), FileReaderUtils.readFileFromClasspath(fileName));
     }
 
-    public static String getFileName(String folder, String filename) {
+    static String getFileName(String folder, String filename) {
         return folder + '/' + filename + ".bp";
     }
 

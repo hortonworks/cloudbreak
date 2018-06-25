@@ -76,6 +76,6 @@ public class DefaultCloudbreakUsagesRetrievalHostServiceTypeTest {
         List<CloudbreakUsage> result = underTest.findUsagesFor(filterParameters);
         // THEN
         verify(cloudbreakUsageRepository, times(1)).findAll(any(Specification.class));
-        assertEquals(0, result.size());
+        assertEquals(0L, result.size());
     }
 }

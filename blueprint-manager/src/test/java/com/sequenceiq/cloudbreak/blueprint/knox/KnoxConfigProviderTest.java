@@ -26,7 +26,7 @@ import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 public class KnoxConfigProviderTest {
 
-    private KnoxConfigProvider configProvider = new KnoxConfigProvider();
+    private final KnoxConfigProvider configProvider = new KnoxConfigProvider();
 
     @Test
     public void extendBluePrintWithKnoxGatewayForMaster() throws IOException {

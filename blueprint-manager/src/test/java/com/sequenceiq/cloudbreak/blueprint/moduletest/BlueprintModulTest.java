@@ -71,8 +71,6 @@ public class BlueprintModulTest extends CentralBlueprintContext {
     @Parameter(2)
     public BlueprintPreparationObject testData;
 
-    private TestContextManager testContextManager;
-
     @Parameters(name = "{index}: module-test/inputs/{0}.bp should equals module-test/outputs/{1}.bp")
     public static Collection<Object[]> data() throws IOException {
         Collection<Object[]> params = new ArrayList<>();
@@ -137,7 +135,7 @@ public class BlueprintModulTest extends CentralBlueprintContext {
         params.add(new Object[]{"hdp30-data-science-spark2", "hdp30-data-science-spark2",
                 blueprintObjectWhenDefaultBlueprintConfigured()});
         params.add(new Object[]{"dlm", "dlm",
-                blueprintObjectWhenDlmBlueprintConfigured("dlm")});
+                blueprintObjectWhenDlmBlueprintConfigured()});
         params.add(new Object[]{"custom-properties", "custom-properties",
                 blueprintObjectWhenCustomPropertiesBlueprintConfigured()});
         return params;
@@ -145,7 +143,7 @@ public class BlueprintModulTest extends CentralBlueprintContext {
 
     @Before
     public void setUp() throws Exception {
-        testContextManager = new TestContextManager(getClass());
+        TestContextManager testContextManager = new TestContextManager(getClass());
         testContextManager.prepareTestInstance(this);
     }
 
@@ -160,7 +158,7 @@ public class BlueprintModulTest extends CentralBlueprintContext {
         JSONObject expected = toJSON(outputFile.getFileContent());
         JSONObject resultBlueprintText = toJSON(getUnderTest().getBlueprintText(blueprintPreparationObject));
         StringBuilder messageBuilder = new StringBuilder();
-        messageBuilder.append("The result has not matched with the expected output " + outputFile.getFileName());
+        messageBuilder.append("The result has not matched with the expected output ").append(outputFile.getFileName());
         messageBuilder.append("\nexpected:\n");
         messageBuilder.append(expected);
         messageBuilder.append("\nactual:\n");

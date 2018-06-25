@@ -14,7 +14,7 @@ import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariRepositoryVersionS
 public class AmbariRepositoryVersionServiceTest {
 
     @InjectMocks
-    private AmbariRepositoryVersionService underTest = new AmbariRepositoryVersionService();
+    private final AmbariRepositoryVersionService underTest = new AmbariRepositoryVersionService();
 
     @Test
     public void testIsNewerOrEqualAmbariApi() {

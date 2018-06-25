@@ -39,7 +39,7 @@ public class BlueprintTestUtil {
         generalClusterConfigs.setUserName("username");
         generalClusterConfigs.setPassword("Passw0rd");
         generalClusterConfigs.setNodeCount(1);
-        generalClusterConfigs.setPrimaryGatewayInstanceDiscoveryFQDN(Optional.ofNullable("fqdn.loal.com"));
+        generalClusterConfigs.setPrimaryGatewayInstanceDiscoveryFQDN(Optional.of("fqdn.loal.com"));
         generalClusterConfigs.setIdentityUserEmail(IDENTITY_USER_EMAIL);
         return generalClusterConfigs;
     }
@@ -57,7 +57,7 @@ public class BlueprintTestUtil {
         generalClusterConfigs.setPassword(cluster.getPassword());
         generalClusterConfigs.setNodeCount(1);
         generalClusterConfigs.setIdentityUserEmail(IDENTITY_USER_EMAIL);
-        generalClusterConfigs.setPrimaryGatewayInstanceDiscoveryFQDN(Optional.ofNullable("fqdn.loal.com"));
+        generalClusterConfigs.setPrimaryGatewayInstanceDiscoveryFQDN(Optional.of("fqdn.loal.com"));
         return generalClusterConfigs;
     }
 

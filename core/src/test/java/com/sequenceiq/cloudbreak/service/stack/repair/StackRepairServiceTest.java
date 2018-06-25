@@ -134,7 +134,7 @@ public class StackRepairServiceTest {
 
         @Override
         public boolean matches(StackRepairFlowSubmitter argument) {
-            StackRepairFlowSubmitter stackRepairFlowSubmitter = (StackRepairFlowSubmitter) argument;
+            StackRepairFlowSubmitter stackRepairFlowSubmitter = argument;
             return stackRepairFlowSubmitter.getStackId().equals(expectedStackId) && expectedInstances.equals(stackRepairFlowSubmitter.getUnhealthyInstances());
         }
     }

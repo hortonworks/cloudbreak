@@ -51,7 +51,7 @@ public class TemplateDecoratorTest {
     private static final String VOLUME_TYPE = "volumeType";
 
     @InjectMocks
-    private TemplateDecorator underTest = new TemplateDecorator();
+    private final TemplateDecorator underTest = new TemplateDecorator();
 
     @Mock
     private CloudParameterService cloudParameterService;
@@ -98,8 +98,8 @@ public class TemplateDecoratorTest {
 
         Template actual = underTest.decorate(cloudCredential, template, REGION, AVAILABILITY_ZONE, VARIANT);
 
-        Assert.assertEquals(maximumNumber, actual.getVolumeCount().longValue());
-        Assert.assertEquals(maximumSize, actual.getVolumeSize().longValue());
+        assertEquals(maximumNumber, actual.getVolumeCount().longValue());
+        assertEquals(maximumSize, actual.getVolumeSize().longValue());
     }
 
     @Test
@@ -158,7 +158,7 @@ public class TemplateDecoratorTest {
         template.setRootVolumeSize(70);
 
         Template actual = underTest.decorate(cloudCredential, template, REGION, AVAILABILITY_ZONE, VARIANT);
-        assertEquals(70, (long) actual.getRootVolumeSize());
+        assertEquals(70L, (long) actual.getRootVolumeSize());
     }
 
     @Test
@@ -168,7 +168,7 @@ public class TemplateDecoratorTest {
         when(defaultRootVolumeSizeProvider.getForPlatform(any())).thenReturn(100);
 
         Template actual = underTest.decorate(cloudCredential, template, REGION, AVAILABILITY_ZONE, VARIANT);
-        assertEquals(100, (long) actual.getRootVolumeSize());
+        assertEquals(100L, (long) actual.getRootVolumeSize());
     }
 
     private Template initTemplate() {

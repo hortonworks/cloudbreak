@@ -11,14 +11,14 @@ public class CreateApplicationResponseTest {
     private static final String STATE = "ACCEPTED";
 
     @Test
-    public void testUri() throws Exception {
+    public void testUri() {
         CreateApplicationResponse createApplicationResponse = new CreateApplicationResponse();
         createApplicationResponse.setUri(URI);
         assertEquals(URI, createApplicationResponse.getUri());
     }
 
     @Test
-    public void testState() throws Exception {
+    public void testState() {
         CreateApplicationResponse createApplicationResponse = new CreateApplicationResponse();
         createApplicationResponse.setState(STATE);
         assertEquals(STATE, createApplicationResponse.getState());

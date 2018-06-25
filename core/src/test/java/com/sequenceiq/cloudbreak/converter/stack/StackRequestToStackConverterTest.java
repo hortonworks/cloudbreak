@@ -103,7 +103,7 @@ public class StackRequestToStackConverterTest extends AbstractJsonConverterTest<
         assertEquals("YARN", stack.getRegion());
     }
 
-    @SuppressFBWarnings(value = "DLS_DEAD_LOCAL_STORE")
+    @SuppressFBWarnings("DLS_DEAD_LOCAL_STORE")
     @Test
     public void testConvertWithNoGateway() throws CloudbreakException {
         initMocks();

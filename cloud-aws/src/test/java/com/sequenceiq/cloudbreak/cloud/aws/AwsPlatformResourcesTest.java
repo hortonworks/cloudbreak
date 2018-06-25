@@ -61,7 +61,7 @@ public class AwsPlatformResourcesTest {
     }
 
     @Test
-    public void collectAccessConfigsWhenUserIsUnathorizedToGetInfoThenItShouldReturnEmptyList() throws Exception {
+    public void collectAccessConfigsWhenUserIsUnathorizedToGetInfoThenItShouldReturnEmptyList() {
         AmazonServiceException amazonServiceException = new AmazonServiceException("unauthorized.");
         amazonServiceException.setStatusCode(403);
 
@@ -74,11 +74,11 @@ public class AwsPlatformResourcesTest {
         CloudAccessConfigs cloudAccessConfigs =
                 underTest.accessConfigs(new CloudCredential(1L, "aws-credential"), region("London"), new HashMap<>());
 
-        Assert.assertEquals(0, cloudAccessConfigs.getCloudAccessConfigs().size());
+        Assert.assertEquals(0L, cloudAccessConfigs.getCloudAccessConfigs().size());
     }
 
     @Test
-    public void collectAccessConfigsWhenUserGetAmazonExceptionToGetInfoThenItShouldReturnEmptyList() throws Exception {
+    public void collectAccessConfigsWhenUserGetAmazonExceptionToGetInfoThenItShouldReturnEmptyList() {
         AmazonServiceException amazonServiceException = new AmazonServiceException("Amazon problem.");
         amazonServiceException.setStatusCode(404);
         amazonServiceException.setErrorMessage("Amazon problem.");
@@ -92,11 +92,11 @@ public class AwsPlatformResourcesTest {
         CloudAccessConfigs cloudAccessConfigs =
                 underTest.accessConfigs(new CloudCredential(1L, "aws-credential"), region("London"), new HashMap<>());
 
-        Assert.assertEquals(0, cloudAccessConfigs.getCloudAccessConfigs().size());
+        Assert.assertEquals(0L, cloudAccessConfigs.getCloudAccessConfigs().size());
     }
 
     @Test
-    public void collectAccessConfigsWhenUserGetServiceExceptionToGetInfoThenItShouldReturnEmptyList() throws Exception {
+    public void collectAccessConfigsWhenUserGetServiceExceptionToGetInfoThenItShouldReturnEmptyList() {
         BadRequestException badRequestException = new BadRequestException("BadRequestException problem.");
 
         when(awsClient.createAmazonIdentityManagement(any(AwsCredentialView.class))).thenReturn(amazonCFClient);
@@ -108,11 +108,11 @@ public class AwsPlatformResourcesTest {
         CloudAccessConfigs cloudAccessConfigs =
                 underTest.accessConfigs(new CloudCredential(1L, "aws-credential"), region("London"), new HashMap<>());
 
-        Assert.assertEquals(0, cloudAccessConfigs.getCloudAccessConfigs().size());
+        Assert.assertEquals(0L, cloudAccessConfigs.getCloudAccessConfigs().size());
     }
 
     @Test
-    public void collectAccessConfigsWhenWeGetBackInfoThenItShouldReturnListWithElements() throws Exception {
+    public void collectAccessConfigsWhenWeGetBackInfoThenItShouldReturnListWithElements() {
         ListInstanceProfilesResult listInstanceProfilesResult = new ListInstanceProfilesResult();
 
         Set<InstanceProfile> instanceProfileSet = new HashSet<>();
@@ -129,7 +129,7 @@ public class AwsPlatformResourcesTest {
         CloudAccessConfigs cloudAccessConfigs =
                 underTest.accessConfigs(new CloudCredential(1L, "aws-credential"), region("London"), new HashMap<>());
 
-        Assert.assertEquals(4, cloudAccessConfigs.getCloudAccessConfigs().size());
+        Assert.assertEquals(4L, cloudAccessConfigs.getCloudAccessConfigs().size());
     }
 
     private InstanceProfile instanceProfile(int i) {

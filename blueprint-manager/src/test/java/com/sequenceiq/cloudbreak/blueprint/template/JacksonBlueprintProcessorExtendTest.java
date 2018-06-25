@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.blueprint.template;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.Map;
 
 import org.junit.Assert;
@@ -19,7 +18,7 @@ public class JacksonBlueprintProcessorExtendTest {
     private final BlueprintProcessorFactory underTest = new BlueprintProcessorFactory();
 
     @Test
-    public void testExtendBlueprintWithConfiguration() throws URISyntaxException, IOException {
+    public void testExtendBlueprintWithConfiguration() throws IOException {
         String json = FileReaderUtils.readFileFromClasspath("extend-blueprint/blueprint.json");
         String expected = FileReaderUtils.readFileFromClasspath("extend-blueprint/blueprint-config.json");
 

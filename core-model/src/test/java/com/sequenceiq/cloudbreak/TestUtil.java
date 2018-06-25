@@ -76,11 +76,11 @@ import com.sequenceiq.cloudbreak.type.KerberosType;
 
 public class TestUtil {
 
-    public static final String DUMMY_DESCRIPTION = "dummyDescription";
+    private static final String DUMMY_DESCRIPTION = "dummyDescription";
 
-    public static final String DUMMY_SECURITY_GROUP_ID = "dummySecurityGroupId";
+    private static final String DUMMY_SECURITY_GROUP_ID = "dummySecurityGroupId";
 
-    public static final String N1_HIGHCPU_16_INSTANCE = "n1-highcpu-16";
+    private static final String N1_HIGHCPU_16_INSTANCE = "n1-highcpu-16";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TestUtil.class);
 
@@ -89,7 +89,7 @@ public class TestUtil {
     private TestUtil() {
     }
 
-    public static Path getFilePath(Class clazz, String fileName) {
+    public static Path getFilePath(Class<?> clazz, String fileName) {
         try {
             URL resource = clazz.getResource(fileName);
             return Paths.get(resource.toURI());
@@ -542,7 +542,7 @@ public class TestUtil {
         cloudbreakUsage.setId(id);
         cloudbreakUsage.setInstanceGroup("master");
         cloudbreakUsage.setAccount("account");
-        cloudbreakUsage.setCosts(2d);
+        cloudbreakUsage.setCosts(2.0D);
         cloudbreakUsage.setDay(new Date());
         cloudbreakUsage.setInstanceHours(1L);
         cloudbreakUsage.setInstanceType("xlarge");

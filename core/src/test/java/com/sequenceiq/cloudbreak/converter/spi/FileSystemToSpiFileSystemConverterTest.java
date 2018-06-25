@@ -1,26 +1,5 @@
 package com.sequenceiq.cloudbreak.converter.spi;
 
-import com.sequenceiq.cloudbreak.api.model.filesystem.AdlsFileSystem;
-import com.sequenceiq.cloudbreak.api.model.filesystem.GcsFileSystem;
-import com.sequenceiq.cloudbreak.api.model.filesystem.S3FileSystem;
-import com.sequenceiq.cloudbreak.api.model.filesystem.WasbFileSystem;
-import com.sequenceiq.cloudbreak.cloud.model.SpiFileSystem;
-import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudAdlsView;
-import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudFileSystemView;
-import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudGcsView;
-import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudS3View;
-import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudWasbView;
-import com.sequenceiq.cloudbreak.domain.FileSystem;
-import com.sequenceiq.cloudbreak.domain.json.Json;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.springframework.core.convert.ConversionService;
-
-import java.io.IOException;
-
 import static com.sequenceiq.cloudbreak.api.model.filesystem.FileSystemType.ADLS;
 import static com.sequenceiq.cloudbreak.api.model.filesystem.FileSystemType.GCS;
 import static com.sequenceiq.cloudbreak.api.model.filesystem.FileSystemType.S3;
@@ -30,6 +9,27 @@ import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+
+import java.io.IOException;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.springframework.core.convert.ConversionService;
+
+import com.sequenceiq.cloudbreak.api.model.filesystem.AdlsFileSystem;
+import com.sequenceiq.cloudbreak.api.model.filesystem.GcsFileSystem;
+import com.sequenceiq.cloudbreak.api.model.filesystem.S3FileSystem;
+import com.sequenceiq.cloudbreak.api.model.filesystem.WasbFileSystem;
+import com.sequenceiq.cloudbreak.cloud.model.SpiFileSystem;
+import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudAdlsView;
+import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudGcsView;
+import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudS3View;
+import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudWasbView;
+import com.sequenceiq.cloudbreak.domain.FileSystem;
+import com.sequenceiq.cloudbreak.domain.json.Json;
 
 public class FileSystemToSpiFileSystemConverterTest {
 
@@ -58,9 +58,9 @@ public class FileSystemToSpiFileSystemConverterTest {
     public void testConvertWhenTypeIsAdlsThenCloudFileSystemViewShouldAlsoAdlsType() throws IOException {
         when(fileSystem.getType()).thenReturn(ADLS);
         AdlsFileSystem adls = mock(AdlsFileSystem.class);
-        CloudFileSystemView expected = mock(CloudAdlsView.class);
+        CloudAdlsView expected = mock(CloudAdlsView.class);
         when(configuration.get(AdlsFileSystem.class)).thenReturn(adls);
-        when(conversionService.convert(adls, CloudAdlsView.class)).thenReturn((CloudAdlsView) expected);
+        when(conversionService.convert(adls, CloudAdlsView.class)).thenReturn(expected);
 
         SpiFileSystem result = underTest.convert(fileSystem);
 
@@ -73,9 +73,9 @@ public class FileSystemToSpiFileSystemConverterTest {
     public void testConvertWhenTypeIsGcsThenCloudFileSystemViewShouldAlsoGcsType() throws IOException {
         when(fileSystem.getType()).thenReturn(GCS);
         GcsFileSystem adls = mock(GcsFileSystem.class);
-        CloudFileSystemView expected = mock(CloudGcsView.class);
+        CloudGcsView expected = mock(CloudGcsView.class);
         when(configuration.get(GcsFileSystem.class)).thenReturn(adls);
-        when(conversionService.convert(adls, CloudGcsView.class)).thenReturn((CloudGcsView) expected);
+        when(conversionService.convert(adls, CloudGcsView.class)).thenReturn(expected);
 
         SpiFileSystem result = underTest.convert(fileSystem);
 
@@ -88,9 +88,9 @@ public class FileSystemToSpiFileSystemConverterTest {
     public void testConvertWhenTypeIsS3ThenCloudFileSystemViewShouldAlsoS3Type() throws IOException {
         when(fileSystem.getType()).thenReturn(S3);
         S3FileSystem adls = mock(S3FileSystem.class);
-        CloudFileSystemView expected = mock(CloudS3View.class);
+        CloudS3View expected = mock(CloudS3View.class);
         when(configuration.get(S3FileSystem.class)).thenReturn(adls);
-        when(conversionService.convert(adls, CloudS3View.class)).thenReturn((CloudS3View) expected);
+        when(conversionService.convert(adls, CloudS3View.class)).thenReturn(expected);
 
         SpiFileSystem result = underTest.convert(fileSystem);
 
@@ -103,9 +103,9 @@ public class FileSystemToSpiFileSystemConverterTest {
     public void testConvertWhenTypeIsWasbThenCloudFileSystemViewShouldAlsoWasbType() throws IOException {
         when(fileSystem.getType()).thenReturn(WASB);
         WasbFileSystem adls = mock(WasbFileSystem.class);
-        CloudFileSystemView expected = mock(CloudWasbView.class);
+        CloudWasbView expected = mock(CloudWasbView.class);
         when(configuration.get(WasbFileSystem.class)).thenReturn(adls);
-        when(conversionService.convert(adls, CloudWasbView.class)).thenReturn((CloudWasbView) expected);
+        when(conversionService.convert(adls, CloudWasbView.class)).thenReturn(expected);
 
         SpiFileSystem result = underTest.convert(fileSystem);
 

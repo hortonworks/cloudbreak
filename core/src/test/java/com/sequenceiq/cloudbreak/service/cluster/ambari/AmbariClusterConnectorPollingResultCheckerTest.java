@@ -18,7 +18,7 @@ public class AmbariClusterConnectorPollingResultCheckerTest {
     public final ExpectedException thrown = ExpectedException.none();
 
     @InjectMocks
-    private AmbariClusterConnectorPollingResultChecker underTest = new AmbariClusterConnectorPollingResultChecker();
+    private final AmbariClusterConnectorPollingResultChecker underTest = new AmbariClusterConnectorPollingResultChecker();
 
     @Test
     public void testCheckPollingResultWhenExited() throws ClusterException {

@@ -87,12 +87,13 @@ public class ComponentLocatorServiceTest {
         return hg;
     }
 
-    private <T> Set<T> set(T... array) {
+    @SafeVarargs
+    private final <T> Set<T> set(T... array) {
         return new HashSet<>(Arrays.asList(array));
     }
 
     @Test
-    public void getComponentLocation() throws Exception {
+    public void getComponentLocation() {
 
         Map<String, List<String>> expected = Maps.newHashMap();
         expected.put("RESOURCEMANAGER", ImmutableList.of("myhost1"));
@@ -100,7 +101,7 @@ public class ComponentLocatorServiceTest {
         expected.put("NAMENODE", ImmutableList.of("myhost2"));
 
         Map<String, List<String>> result = underTest.getComponentLocation(cluster, new HashSet<>(ExposedService.getAllServiceName()));
-        Assert.assertEquals(3, result.size());
+        Assert.assertEquals(3L, result.size());
         Assert.assertEquals(expected, result);
     }
 

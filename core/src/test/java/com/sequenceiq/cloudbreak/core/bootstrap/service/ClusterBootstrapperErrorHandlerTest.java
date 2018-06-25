@@ -21,17 +21,16 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceStatus;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.orchestrator.container.ContainerOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
@@ -123,31 +122,25 @@ public class ClusterBootstrapperErrorHandlerTest {
         when(resourceRepository.findByStackIdAndNameAndType(nullable(Long.class), nullable(String.class), nullable(ResourceType.class)))
                 .thenReturn(new Resource());
         when(connector.removeInstances(any(Stack.class), anySet(), anyString())).thenReturn(new HashSet<>());
-        when(instanceMetaDataRepository.findNotTerminatedByPrivateAddress(anyLong(), anyString())).thenAnswer(new Answer<InstanceMetaData>() {
-            @Override
-            public InstanceMetaData answer(InvocationOnMock invocation) {
-                Object[] args = invocation.getArguments();
-                String ip = (String) args[1];
-                for (InstanceMetaData instanceMetaData : stack.getNotDeletedInstanceMetaDataSet()) {
-                    if (instanceMetaData.getPrivateIp().equals(ip)) {
-                        return instanceMetaData;
-                    }
+        when(instanceMetaDataRepository.findNotTerminatedByPrivateAddress(anyLong(), anyString())).thenAnswer((Answer<InstanceMetaData>) invocation -> {
+            Object[] args = invocation.getArguments();
+            String ip = (String) args[1];
+            for (InstanceMetaData instanceMetaData : stack.getNotDeletedInstanceMetaDataSet()) {
+                if (instanceMetaData.getPrivateIp().equals(ip)) {
+                    return instanceMetaData;
                 }
-                return null;
             }
+            return null;
         });
-        when(instanceGroupRepository.findOneByGroupNameInStack(anyLong(), anyString())).thenAnswer(new Answer<InstanceGroup>() {
-            @Override
-            public InstanceGroup answer(InvocationOnMock invocation) {
-                Object[] args = invocation.getArguments();
-                String name = (String) args[1];
-                for (InstanceMetaData instanceMetaData : stack.getNotDeletedInstanceMetaDataSet()) {
-                    if (instanceMetaData.getInstanceGroup().getGroupName().equals(name)) {
-                        return instanceMetaData.getInstanceGroup();
-                    }
+        when(instanceGroupRepository.findOneByGroupNameInStack(anyLong(), anyString())).thenAnswer((Answer<InstanceGroup>) invocation -> {
+            Object[] args = invocation.getArguments();
+            String name = (String) args[1];
+            for (InstanceMetaData instanceMetaData : stack.getNotDeletedInstanceMetaDataSet()) {
+                if (instanceMetaData.getInstanceGroup().getGroupName().equals(name)) {
+                    return instanceMetaData.getInstanceGroup();
                 }
-                return null;
             }
+            return null;
         });
         underTest.terminateFailedNodes(null, orchestrator, TestUtil.stack(),
                 new GatewayConfig("10.0.0.1", "198.0.0.1", "10.0.0.1", 8443, false), prepareNodes(stack));

@@ -42,7 +42,7 @@ public class HostGroupToJsonEntityConverterTest extends AbstractEntityConverterT
         // WHEN
         HostGroupResponse result = underTest.convert(getSource());
         // THEN
-        assertEquals(1, result.getMetadata().size());
+        assertEquals(1L, result.getMetadata().size());
         assertTrue(result.getRecipeIds().contains(1L));
         assertEquals("dummyName", result.getName());
         assertAllFieldsNotNull(result);
@@ -55,7 +55,7 @@ public class HostGroupToJsonEntityConverterTest extends AbstractEntityConverterT
         // WHEN
         HostGroupResponse result = underTest.convert(getSource());
         // THEN
-        assertEquals(1, result.getMetadata().size());
+        assertEquals(1L, result.getMetadata().size());
         assertFalse(result.getRecipeIds().contains(1L));
         assertEquals("dummyName", result.getName());
         assertAllFieldsNotNull(result);

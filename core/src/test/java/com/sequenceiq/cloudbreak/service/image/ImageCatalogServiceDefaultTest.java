@@ -12,6 +12,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -29,19 +30,19 @@ import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 @RunWith(Parameterized.class)
 public class ImageCatalogServiceDefaultTest {
-    private String catalogFile;
+    private final String catalogFile;
 
-    private String provider;
+    private final String provider;
 
-    private String expectedImageId;
+    private final String expectedImageId;
 
-    private String cbVersion;
+    private final String cbVersion;
 
-    private String clusterType;
+    private final String clusterType;
 
-    private String clusterVersion;
+    private final String clusterVersion;
 
-    private String os;
+    private final String os;
 
     @Mock
     private ImageCatalogProvider imageCatalogProvider;
@@ -72,7 +73,7 @@ public class ImageCatalogServiceDefaultTest {
         this.os = os;
     }
 
-    @Parameterized.Parameters
+    @Parameters
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][] {
                 { "com/sequenceiq/cloudbreak/service/image/default-hdp-imagecatalog.json", "aws", "HDP", "2.6", "latest-hdp", "5.0.0", "" },

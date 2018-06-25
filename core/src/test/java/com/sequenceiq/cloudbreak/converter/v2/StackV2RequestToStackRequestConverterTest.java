@@ -134,7 +134,7 @@ public class StackV2RequestToStackRequestConverterTest {
     public void testConvertIfTheProvidedParametersFieldHasContentThenTheSameKeyValuePairsShouldBeInTheReturnObjectParametersField() {
         StackV2Request source = createStackV2Request();
         makeCbUserReturnNullsAsUsedFields();
-        Map<String, String> parameters = createMap(GENERAL_TEST_QUANTITY);
+        Map<String, String> parameters = createMap();
         source.setParameters(parameters);
 
         StackRequest result = underTest.convert(source);
@@ -203,9 +203,9 @@ public class StackV2RequestToStackRequestConverterTest {
         StackV2Request source = createStackV2Request();
         makeCbUserReturnNullsAsUsedFields();
         Tags tags = new Tags();
-        tags.setApplicationTags(createMap(GENERAL_TEST_QUANTITY));
-        tags.setDefaultTags(createMap(GENERAL_TEST_QUANTITY));
-        tags.setUserDefinedTags(createMap(GENERAL_TEST_QUANTITY));
+        tags.setApplicationTags(createMap());
+        tags.setDefaultTags(createMap());
+        tags.setUserDefinedTags(createMap());
         source.setTags(tags);
 
         StackRequest result = underTest.convert(source);
@@ -238,8 +238,8 @@ public class StackV2RequestToStackRequestConverterTest {
     public void testConvertWhenThereAreSomeDataInInstanceGroupsThenTheExpectedOnesShouldBeInTheResultInstance() {
         StackV2Request source = createStackV2Request();
         makeCbUserReturnNullsAsUsedFields();
-        List<InstanceGroupV2Request> instanceGroupV2Requests = createInstanceGroupV2Request(2);
-        List<InstanceGroupRequest> instanceGroupRequest = createInstanceGroupRequest(2);
+        List<InstanceGroupV2Request> instanceGroupV2Requests = createInstanceGroupV2Request();
+        List<InstanceGroupRequest> instanceGroupRequest = createInstanceGroupRequest();
         when(conversionService.convert(instanceGroupV2Requests.get(0), InstanceGroupRequest.class)).thenReturn(instanceGroupRequest.get(0));
         when(conversionService.convert(instanceGroupV2Requests.get(1), InstanceGroupRequest.class)).thenReturn(instanceGroupRequest.get(1));
         source.setInstanceGroups(instanceGroupV2Requests);
@@ -430,9 +430,9 @@ public class StackV2RequestToStackRequestConverterTest {
     public void testConvertWhenClusterIsNotNullAndTheInstanceGroupIsNotEmptyButTheClusterIsNotConfiguredBySharedServiceConfigProvider() {
         StackV2Request source = createStackV2Request();
         source.setCluster(createClusterV2Request());
-        List<InstanceGroupV2Request> instanceGroupV2Requests = createInstanceGroupV2Request(2);
-        List<HostGroupRequest> hostGroupRequest = createHostGroupRequests(2);
-        List<InstanceGroupRequest> instanceGroupRequest = createInstanceGroupRequest(2);
+        List<InstanceGroupV2Request> instanceGroupV2Requests = createInstanceGroupV2Request();
+        List<HostGroupRequest> hostGroupRequest = createHostGroupRequests();
+        List<InstanceGroupRequest> instanceGroupRequest = createInstanceGroupRequest();
         when(conversionService.convert(instanceGroupV2Requests.get(0), InstanceGroupRequest.class)).thenReturn(instanceGroupRequest.get(0));
         when(conversionService.convert(instanceGroupV2Requests.get(0), HostGroupRequest.class)).thenReturn(hostGroupRequest.get(0));
         when(conversionService.convert(instanceGroupV2Requests.get(1), InstanceGroupRequest.class)).thenReturn(instanceGroupRequest.get(1));
@@ -488,25 +488,25 @@ public class StackV2RequestToStackRequestConverterTest {
         return request;
     }
 
-    private List<InstanceGroupV2Request> createInstanceGroupV2Request(int quantity) {
-        List<InstanceGroupV2Request> requests = new ArrayList<>(quantity);
-        for (int i = 0; i < quantity; i++) {
+    private List<InstanceGroupV2Request> createInstanceGroupV2Request() {
+        List<InstanceGroupV2Request> requests = new ArrayList<>(2);
+        for (int i = 0; i < 2; i++) {
             requests.add(new InstanceGroupV2Request());
         }
         return requests;
     }
 
-    private List<InstanceGroupRequest> createInstanceGroupRequest(int quantity) {
-        List<InstanceGroupRequest> requests = new ArrayList<>(quantity);
-        for (int i = 0; i < quantity; i++) {
+    private List<InstanceGroupRequest> createInstanceGroupRequest() {
+        List<InstanceGroupRequest> requests = new ArrayList<>(2);
+        for (int i = 0; i < 2; i++) {
             requests.add(new InstanceGroupRequest());
         }
         return requests;
     }
 
-    private List<HostGroupRequest> createHostGroupRequests(int quantity) {
-        List<HostGroupRequest> requests = new ArrayList<>(quantity);
-        for (int i = 0; i < quantity; i++) {
+    private List<HostGroupRequest> createHostGroupRequests() {
+        List<HostGroupRequest> requests = new ArrayList<>(2);
+        for (int i = 0; i < 2; i++) {
             requests.add(new HostGroupRequest());
         }
         return requests;
@@ -519,9 +519,9 @@ public class StackV2RequestToStackRequestConverterTest {
         return generalSettings;
     }
 
-    private Map<String, String> createMap(int quantity) {
-        Map<String, String> params = new LinkedHashMap<>(quantity);
-        for (int i = 0; i < quantity; i++) {
+    private Map<String, String> createMap() {
+        Map<String, String> params = new LinkedHashMap<>(GENERAL_TEST_QUANTITY);
+        for (int i = 0; i < GENERAL_TEST_QUANTITY; i++) {
             params.put(String.valueOf(i), String.format("some_value_%s", String.valueOf(i)));
         }
         return params;

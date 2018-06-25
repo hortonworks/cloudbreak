@@ -15,7 +15,7 @@ public class AmbariStackValidatorTest {
     @Mock
     private ConstraintValidatorContext constraintValidatorContext;
 
-    private AmbariStackValidator ambariStackValidator = new AmbariStackValidator();
+    private final AmbariStackValidator ambariStackValidator = new AmbariStackValidator();
 
     @Test
     public void testHdp22() {

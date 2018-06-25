@@ -19,7 +19,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
-import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterDownscaleDetails;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.CollectDownscaleCandidatesRequest;
@@ -34,13 +33,13 @@ import reactor.bus.EventBus;
 @RunWith(org.mockito.junit.MockitoJUnitRunner.class)
 public class CollectDownscaleCandidatesHandlerTest {
 
-    private Long stackId = 11L;
+    private static final String HOST_GROUP_NAME = "master";
 
-    private Long privateId = 1342L;
+    private static final Long STACK_ID = 11L;
 
-    private String hostGroupName = "master";
+    private static final Long PRIVATE_ID = 1342L;
 
-    private Integer scalingAdjustment = -1;
+    private static final Integer SCALING_ADJUSTMENT = -1;
 
     @Mock
     private EventBus eventBus;
@@ -58,30 +57,30 @@ public class CollectDownscaleCandidatesHandlerTest {
     public void testFlowWithPrivateIds() throws CloudbreakException {
         //given
         Stack stack = generateStackData();
-        when(stackService.getByIdWithLists(stackId)).thenReturn(stack);
-        Event<CollectDownscaleCandidatesRequest> event = generateTestDataEvent(Collections.singleton(privateId));
+        when(stackService.getByIdWithLists(STACK_ID)).thenReturn(stack);
+        Event<CollectDownscaleCandidatesRequest> event = generateTestDataEvent(Collections.singleton(PRIVATE_ID));
         //when
         testedClass.accept(event);
         //then
-        ArgumentCaptor<Event> capturedEvent = ArgumentCaptor.forClass(Event.class);
+        ArgumentCaptor<Event<CollectDownscaleCandidatesResult>> capturedEvent = ArgumentCaptor.forClass(Event.class);
         verify(eventBus).notify((Object) any(), capturedEvent.capture());
         Event<CollectDownscaleCandidatesResult> submittedEvent = capturedEvent.getValue();
         CollectDownscaleCandidatesResult submittedResult = submittedEvent.getData();
         assertNotNull(submittedResult);
-        verify(ambariDecommissioner, never()).collectDownscaleCandidates(stack, hostGroupName, scalingAdjustment);
+        verify(ambariDecommissioner, never()).collectDownscaleCandidates(stack, HOST_GROUP_NAME, SCALING_ADJUSTMENT);
 
     }
 
     @Test
-    public void downScaleNotForced() throws CloudbreakSecuritySetupException {
+    public void downScaleNotForced() {
         //given
         Stack stack = generateStackData();
-        Event<CollectDownscaleCandidatesRequest> event = generateTestDataEvent(Collections.singleton(privateId));
-        when(stackService.getByIdWithLists(stackId)).thenReturn(stack);
+        Event<CollectDownscaleCandidatesRequest> event = generateTestDataEvent(Collections.singleton(PRIVATE_ID));
+        when(stackService.getByIdWithLists(STACK_ID)).thenReturn(stack);
         //when
         testedClass.accept(event);
         //then
-        ArgumentCaptor<Event> capturedEvent = ArgumentCaptor.forClass(Event.class);
+        ArgumentCaptor<Event<CollectDownscaleCandidatesResult>> capturedEvent = ArgumentCaptor.forClass(Event.class);
         verify(eventBus).notify((Object) any(), capturedEvent.capture());
         Event<CollectDownscaleCandidatesResult> submittedEvent = capturedEvent.getValue();
         CollectDownscaleCandidatesResult submittedResult = submittedEvent.getData();
@@ -91,15 +90,15 @@ public class CollectDownscaleCandidatesHandlerTest {
     }
 
     @Test
-    public void downScaleForcedForced() throws CloudbreakSecuritySetupException {
+    public void downScaleForcedForced() {
         //given
         Stack stack = generateStackData();
-        Event<CollectDownscaleCandidatesRequest> event = generateTestDataEvent(Collections.singleton(privateId), new ClusterDownscaleDetails(true));
-        when(stackService.getByIdWithLists(stackId)).thenReturn(stack);
+        Event<CollectDownscaleCandidatesRequest> event = generateTestDataEvent(Collections.singleton(PRIVATE_ID), new ClusterDownscaleDetails(true));
+        when(stackService.getByIdWithLists(STACK_ID)).thenReturn(stack);
         //when
         testedClass.accept(event);
         //then
-        ArgumentCaptor<Event> capturedEvent = ArgumentCaptor.forClass(Event.class);
+        ArgumentCaptor<Event<CollectDownscaleCandidatesResult>> capturedEvent = ArgumentCaptor.forClass(Event.class);
         verify(eventBus).notify((Object) any(), capturedEvent.capture());
         Event<CollectDownscaleCandidatesResult> submittedEvent = capturedEvent.getValue();
         CollectDownscaleCandidatesResult submittedResult = submittedEvent.getData();
@@ -113,13 +112,13 @@ public class CollectDownscaleCandidatesHandlerTest {
     }
 
     private Event<CollectDownscaleCandidatesRequest> generateTestDataEvent(Set<Long> privateIds) {
-        CollectDownscaleCandidatesRequest request = new CollectDownscaleCandidatesRequest(stackId, hostGroupName, scalingAdjustment, privateIds,
+        CollectDownscaleCandidatesRequest request = new CollectDownscaleCandidatesRequest(STACK_ID, HOST_GROUP_NAME, SCALING_ADJUSTMENT, privateIds,
                 new ClusterDownscaleDetails());
         return new Event<>(request);
     }
 
     private Event<CollectDownscaleCandidatesRequest> generateTestDataEvent(Set<Long> privateIds, ClusterDownscaleDetails details) {
-        CollectDownscaleCandidatesRequest request = new CollectDownscaleCandidatesRequest(stackId, hostGroupName, scalingAdjustment, privateIds, details);
+        CollectDownscaleCandidatesRequest request = new CollectDownscaleCandidatesRequest(STACK_ID, HOST_GROUP_NAME, SCALING_ADJUSTMENT, privateIds, details);
         return new Event<>(request);
     }
 }

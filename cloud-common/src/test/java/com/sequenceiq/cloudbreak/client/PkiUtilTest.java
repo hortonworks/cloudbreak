@@ -12,7 +12,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 public class PkiUtilTest {
 
     @Test
-    public void generateCert() throws Exception {
+    public void generateCert() {
         KeyPair identityKey = PkiUtil.generateKeypair();
         KeyPair signKey = PkiUtil.generateKeypair();
 

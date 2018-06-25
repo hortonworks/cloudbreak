@@ -1,16 +1,15 @@
 package com.sequenceiq.cloudbreak.cloud.openstack.auth;
 
-import static com.google.common.collect.Lists.newArrayList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openstack4j.api.OSClient;
 import org.openstack4j.api.compute.ComputeService;
@@ -21,7 +20,10 @@ import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 @RunWith(MockitoJUnitRunner.class)
 public class OpenStackClientTest {
 
-    private OpenStackClient underTest = new OpenStackClient();
+    private final OpenStackClient underTest = new OpenStackClient();
+
+    @Mock
+    private org.openstack4j.model.compute.ext.AvailabilityZone availabilityZone;
 
     @Test
     public void testGetZones() {
@@ -29,15 +31,15 @@ public class OpenStackClientTest {
         ComputeService computeService = mock(ComputeService.class);
         ZoneService zoneService = mock(ZoneService.class);
 
-        List availabilityZones = newArrayList(availabilityZone("zone1"));
-
+        when(availabilityZone.getZoneName()).thenReturn("zone1");
         when(osClient.compute()).thenReturn(computeService);
         when(computeService.zones()).thenReturn(zoneService);
+        List availabilityZones = Collections.singletonList(availabilityZone);
         when(zoneService.list()).thenReturn(availabilityZones);
 
         List<AvailabilityZone> actual = underTest.getZones(osClient, "region");
 
-        Assert.assertEquals(1, actual.size());
+        Assert.assertEquals(1L, actual.size());
         Assert.assertEquals("zone1", actual.get(0).value());
     }
 
@@ -53,26 +55,6 @@ public class OpenStackClientTest {
 
         List<AvailabilityZone> actual = underTest.getZones(osClient, "region");
 
-        Assert.assertEquals(0, actual.size());
+        Assert.assertEquals(0L, actual.size());
     }
-
-    private org.openstack4j.model.compute.ext.AvailabilityZone availabilityZone(String name) {
-        return new org.openstack4j.model.compute.ext.AvailabilityZone() {
-            @Override
-            public ZoneState getZoneState() {
-                return null;
-            }
-
-            @Override
-            public Map<String, Map<String, ? extends NovaService>> getHosts() {
-                return null;
-            }
-
-            @Override
-            public String getZoneName() {
-                return name;
-            }
-        };
-    }
-
 }

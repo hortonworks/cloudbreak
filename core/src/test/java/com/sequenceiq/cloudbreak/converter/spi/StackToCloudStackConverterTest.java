@@ -1,5 +1,35 @@
 package com.sequenceiq.cloudbreak.converter.spi;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.springframework.core.convert.ConversionService;
+
 import com.sequenceiq.cloudbreak.blueprint.filesystem.FileSystemConfigurationsViewProvider;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
@@ -22,35 +52,6 @@ import com.sequenceiq.cloudbreak.repository.SecurityRuleRepository;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.stack.DefaultRootVolumeSizeProvider;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.springframework.core.convert.ConversionService;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 public class StackToCloudStackConverterTest {
 
@@ -66,8 +67,10 @@ public class StackToCloudStackConverterTest {
 
     private static final String TEST_NAME = "name";
 
+    private static final String[] EMPTY_STRING = new String[0];
+
     @Rule
-    public ExpectedException expectedException = ExpectedException.none();
+    public final ExpectedException expectedException = ExpectedException.none();
 
     @InjectMocks
     private StackToCloudStackConverter underTest;
@@ -384,7 +387,7 @@ public class StackToCloudStackConverterTest {
         List<SecurityRule> securityRules = new ArrayList<>(1);
         SecurityRule securityRule = mock(SecurityRule.class);
         securityRules.add(securityRule);
-        when(securityRule.getPorts()).thenReturn(new String[0]);
+        when(securityRule.getPorts()).thenReturn(EMPTY_STRING);
         Set<InstanceGroup> instanceGroups = new LinkedHashSet<>();
         InstanceGroup instanceGroup = mock(InstanceGroup.class);
         instanceGroups.add(instanceGroup);
@@ -704,7 +707,7 @@ public class StackToCloudStackConverterTest {
         return stackAuthentication;
     }
 
-    private <T extends Object> Map<String, T> createMap(String keyPrefix) {
+    private <T> Map<String, T> createMap(String keyPrefix) {
         Map<String, T> map = new LinkedHashMap<>(GENERAL_TEST_QUANTITY);
         for (int i = 0; i < GENERAL_TEST_QUANTITY; i++) {
             map.put(String.format("%s-key-%s", keyPrefix, i), (T) String.format("key-%s", i));

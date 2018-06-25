@@ -11,12 +11,15 @@ import static org.mockito.MockitoAnnotations.initMocks;
 import java.util.Arrays;
 
 import javax.validation.ConstraintValidatorContext;
+import javax.validation.ConstraintValidatorContext.ConstraintViolationBuilder;
+import javax.validation.ConstraintValidatorContext.ConstraintViolationBuilder.NodeBuilderCustomizableContext;
 
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
 import org.mockito.Mock;
 
 import com.sequenceiq.cloudbreak.api.model.DatabaseVendor;
@@ -30,18 +33,18 @@ public class RdsRequestValidatorTest {
     private ConstraintValidatorContext constraintValidatorContext;
 
     @Mock
-    private ConstraintValidatorContext.ConstraintViolationBuilder constraintViolationBuilder;
+    private ConstraintViolationBuilder constraintViolationBuilder;
 
     @Mock
-    private ConstraintValidatorContext.ConstraintViolationBuilder.NodeBuilderCustomizableContext nodeBuilderCustomizableContext;
+    private NodeBuilderCustomizableContext nodeBuilderCustomizableContext;
 
-    private RdsRequestValidator rdsRequestValidator = new RdsRequestValidator();
+    private final RdsRequestValidator rdsRequestValidator = new RdsRequestValidator();
 
-    private String serviceName;
+    private final String serviceName;
 
-    private DatabaseVendor databaseVendor;
+    private final DatabaseVendor databaseVendor;
 
-    private boolean result;
+    private final boolean result;
 
     public RdsRequestValidatorTest(String serviceName, DatabaseVendor databaseVendor, boolean result) {
         this.serviceName = serviceName;
@@ -57,7 +60,7 @@ public class RdsRequestValidatorTest {
         when(nodeBuilderCustomizableContext.addConstraintViolation()).thenReturn(constraintValidatorContext);
     }
 
-    @Parameterized.Parameters(name = "{index}: service: {0} database: {1} should return {2}")
+    @Parameters(name = "{index}: service: {0} database: {1} should return {2}")
     public static Iterable<Object[]> data() {
         return Arrays.asList(new Object[][] {
                 { "HIVE",      POSTGRES,    true },

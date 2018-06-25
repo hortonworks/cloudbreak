@@ -93,7 +93,7 @@ public class AccountPreferencesValidatorTest {
     public void testValidateShouldThrowExceptionWhenTheNumberOfClusterInAccountIsGreaterOrEqualThanTheAccountMaximum()
             throws AccountPreferencesValidationException {
         when(preferences.getMaxNumberOfClusters()).thenReturn(400L);
-        Set stacks = Mockito.mock(Set.class);
+        Set<Stack> stacks = Mockito.mock(Set.class);
         when(stackService.retrieveAccountStacks(anyString())).thenReturn(stacks);
         when(stacks.size()).thenReturn(400);
         thrown.expect(AccountPreferencesValidationException.class);
@@ -105,7 +105,7 @@ public class AccountPreferencesValidatorTest {
     @Test
     public void testValidateShouldNotThrowExceptionWhenTheNumberOfClusterInAccountIsLessThanTheAccountMaximum() throws AccountPreferencesValidationException {
         when(preferences.getMaxNumberOfClusters()).thenReturn(400L);
-        Set stacks = Mockito.mock(Set.class);
+        Set<Stack> stacks = Mockito.mock(Set.class);
         when(stackService.retrieveAccountStacks(anyString())).thenReturn(stacks);
         when(stacks.size()).thenReturn(200);
 
@@ -116,7 +116,7 @@ public class AccountPreferencesValidatorTest {
     public void testValidateShouldThrowExceptionWhenTheNumberOfClusterInAccountForAUserIsGreaterOrEqualThanTheAccountMaximum()
             throws AccountPreferencesValidationException {
         when(preferences.getMaxNumberOfClustersPerUser()).thenReturn(4L);
-        Set stacks = Mockito.mock(Set.class);
+        Set<Stack> stacks = Mockito.mock(Set.class);
         when(stackService.retrieveOwnerStacks(anyString())).thenReturn(stacks);
         when(stacks.size()).thenReturn(4);
         thrown.expect(AccountPreferencesValidationException.class);
@@ -129,7 +129,7 @@ public class AccountPreferencesValidatorTest {
     public void testValidateShouldNotThrowExceptionWhenTheNumberOfClusterInAccountForAUserIsLessThanTheAccountMaximum()
             throws AccountPreferencesValidationException {
         when(preferences.getMaxNumberOfClustersPerUser()).thenReturn(4L);
-        Set stacks = Mockito.mock(Set.class);
+        Set<Stack> stacks = Mockito.mock(Set.class);
         when(stackService.retrieveOwnerStacks(anyString())).thenReturn(stacks);
         when(stacks.size()).thenReturn(2);
 
@@ -154,7 +154,7 @@ public class AccountPreferencesValidatorTest {
     @Test
     public void testValidateShouldThrowExceptionWhenTheUserDemoTimeExpiredAtMidnight() throws AccountPreferencesValidationException {
         Calendar calendar = Calendar.getInstance();
-        calendar.set(2018, 4, 23, 0, 35);
+        calendar.set(2018, Calendar.MAY, 23, 0, 35);
         when(underTest.getTimeInMillis()).thenReturn(calendar.getTimeInMillis());
         calendar.add(Calendar.HOUR_OF_DAY, -1);
         when(preferences.getUserTimeToLive()).thenReturn(40000L);
@@ -170,7 +170,7 @@ public class AccountPreferencesValidatorTest {
     @Test
     public void testValidateShouldThrowExceptionWhenTheUserDemoTimeExpiredOneHourBeforeMidnight() throws AccountPreferencesValidationException {
         Calendar calendar = Calendar.getInstance();
-        calendar.set(2018, 4, 22, 23, 35);
+        calendar.set(2018, Calendar.MAY, 22, 23, 35);
         when(underTest.getTimeInMillis()).thenReturn(calendar.getTimeInMillis());
         calendar.add(Calendar.HOUR_OF_DAY, -1);
         when(preferences.getUserTimeToLive()).thenReturn(40000L);

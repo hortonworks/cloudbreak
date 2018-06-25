@@ -15,7 +15,7 @@ public class AmbariRepoValidatorTest {
     @Mock
     private ConstraintValidatorContext constraintValidatorContext;
 
-    private AmbariRepoValidator ambariRepoValidator = new AmbariRepoValidator();
+    private final AmbariRepoValidator ambariRepoValidator = new AmbariRepoValidator();
 
     @Test
     public void testAmbari24() {

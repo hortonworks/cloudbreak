@@ -34,7 +34,7 @@ public class AmbariSmartSenseCapturerTest {
     private SmartSenseSubscriptionService smartSenseSubscriptionService;
 
     @InjectMocks
-    private AmbariSmartSenseCapturer underTest = new AmbariSmartSenseCapturer();
+    private final AmbariSmartSenseCapturer underTest = new AmbariSmartSenseCapturer();
 
     @Test
     public void testCaptureWhenNoTriggerNeedsToBeDone() {

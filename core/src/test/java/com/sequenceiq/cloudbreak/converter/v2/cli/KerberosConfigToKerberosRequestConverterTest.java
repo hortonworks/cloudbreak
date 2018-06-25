@@ -11,7 +11,7 @@ import com.sequenceiq.cloudbreak.type.KerberosType;
 
 public class KerberosConfigToKerberosRequestConverterTest extends AbstractConverterTest {
 
-    private KerberosConfigToKerberosRequestConverter underTest = new KerberosConfigToKerberosRequestConverter();
+    private final KerberosConfigToKerberosRequestConverter underTest = new KerberosConfigToKerberosRequestConverter();
 
     @Test
     public void testCbManaged() {

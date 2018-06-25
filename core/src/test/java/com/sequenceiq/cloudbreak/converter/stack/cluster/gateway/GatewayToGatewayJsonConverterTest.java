@@ -69,6 +69,6 @@ public class GatewayToGatewayJsonConverterTest {
         assertTrue(StringUtils.isEmpty(result.getTopologyName()));
         assertEquals(SSO_PROVIDER, result.getSsoProvider());
         assertEquals(PATH, result.getPath());
-        assertEquals(2, result.getTopologies().size());
+        assertEquals(2L, result.getTopologies().size());
     }
 }

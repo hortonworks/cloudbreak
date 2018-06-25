@@ -31,7 +31,7 @@ public class LaunchStackComponentTest extends AbstractComponentTest<LaunchStackR
     }
 
     @Override
-    protected CloudPlatformRequest getRequest() {
+    protected CloudPlatformRequest<LaunchStackResult> getRequest() {
         return new LaunchStackRequest(g().createCloudContext(), g().createCloudCredential(), g().createCloudStack(), AdjustmentType.BEST_EFFORT, 0L);
     }
 }

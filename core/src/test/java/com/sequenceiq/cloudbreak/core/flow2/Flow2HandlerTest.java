@@ -26,7 +26,6 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.BDDMockito;
 import org.mockito.InjectMocks;
-import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.context.ApplicationContext;
@@ -87,7 +86,7 @@ public class Flow2HandlerTest {
     private FlowRegister runningFlows;
 
     @Mock
-    private FlowConfiguration flowConfig;
+    private FlowConfiguration<?> flowConfig;
 
     @Mock
     private FlowChains flowChains;
@@ -108,10 +107,10 @@ public class Flow2HandlerTest {
     private StateMachine<? extends FlowState, ? extends FlowEvent> stateMachine;
 
     @Mock
-    private StateMachineAccessor stateMachineAccessor;
+    private StateMachineAccessor<? extends FlowState, ? extends FlowEvent> stateMachineAccessor;
 
     @Mock
-    private StateMachineAccess stateMachineAccess;
+    private StateMachineAccess<? extends FlowState, ? extends FlowEvent> stateMachineAccess;
 
     @Mock
     private ExtendedState extendedState;
@@ -139,12 +138,12 @@ public class Flow2HandlerTest {
         headers.put(Flow2Handler.FLOW_ID, FLOW_ID);
         dummyEvent = new Event<>(new Headers(headers), payload);
         flowState = new OwnFlowState();
-        doAnswer(invocation -> ((Supplier) invocation.getArgument(0)).get()).when(transactionService).required(any());
+        doAnswer(invocation -> ((Supplier<?>) invocation.getArgument(0)).get()).when(transactionService).required(any());
     }
 
     @Test
     public void testNewFlow() {
-        BDDMockito.<FlowConfiguration>given(flowConfigurationMap.get(any())).willReturn(flowConfig);
+        BDDMockito.<FlowConfiguration<?>>given(flowConfigurationMap.get(any())).willReturn(flowConfig);
         given(flowConfig.createFlow(anyString(), anyLong())).willReturn(flow);
         given(flowConfig.getFlowTriggerCondition()).willReturn(flowTriggerCondition);
         given(flowTriggerCondition.isFlowTriggerable(anyLong())).willReturn(true);
@@ -166,12 +165,12 @@ public class Flow2HandlerTest {
         underTest.accept(event);
         verify(flowConfigurationMap, times(1)).get(anyString());
         verify(runningFlows, times(0)).put(any(Flow.class), isNull(String.class));
-        verify(flowLogService, times(0)).save(anyString(), anyString(), anyString(), any(Payload.class), anyMap(), Matchers.<Class>any(), any(FlowState.class));
+        verify(flowLogService, times(0)).save(anyString(), anyString(), anyString(), any(Payload.class), anyMap(), any(), any(FlowState.class));
     }
 
     @Test
     public void testExistingFlow() {
-        BDDMockito.<FlowConfiguration>given(flowConfigurationMap.get(any())).willReturn(flowConfig);
+        BDDMockito.<FlowConfiguration<?>>given(flowConfigurationMap.get(any())).willReturn(flowConfig);
         given(runningFlows.get(anyString())).willReturn(flow);
         given(flow.getCurrentState()).willReturn(flowState);
         given(flow.getFlowId()).willReturn(FLOW_ID);
@@ -184,10 +183,10 @@ public class Flow2HandlerTest {
 
     @Test
     public void testExistingFlowNotFound() {
-        BDDMockito.<FlowConfiguration>given(flowConfigurationMap.get(any())).willReturn(flowConfig);
+        BDDMockito.<FlowConfiguration<?>>given(flowConfigurationMap.get(any())).willReturn(flowConfig);
         dummyEvent.setKey("KEY");
         underTest.accept(dummyEvent);
-        verify(flowLogService, times(0)).save(anyString(), anyString(), anyString(), any(Payload.class), anyMap(), Matchers.<Class>any(), any(FlowState.class));
+        verify(flowLogService, times(0)).save(anyString(), anyString(), anyString(), any(Payload.class), anyMap(), any(), any(FlowState.class));
         verify(flow, times(0)).sendEvent(anyString(), any());
     }
 
@@ -366,11 +365,6 @@ public class Flow2HandlerTest {
     }
 
     private static class OwnFlowState implements FlowState {
-        @Override
-        public Class<? extends AbstractAction<?, ?, ?, ?>> action() {
-            return null;
-        }
-
         @Override
         public String name() {
             return null;

@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.blueprint.filesystem;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -15,18 +14,18 @@ public class AbstractFileSystemConfiguratorImpl extends AbstractFileSystemConfig
     @Override
     protected List<FileSystemScriptConfig> getScriptConfigs(Credential credential) {
 
-        if (credential.getId() == 1) {
-            return Arrays.asList(new FileSystemScriptConfig("file-system-config.script",
+        if (credential.getId() == 1L) {
+            return Collections.singletonList(new FileSystemScriptConfig("file-system-config.script",
                     RecipeType.POST_AMBARI_START,
                     ExecutionType.ALL_NODES,
                     Collections.emptyMap()));
-        } else if (credential.getId() == 2) {
-            return Arrays.asList(new FileSystemScriptConfig("file-system-config-not-found",
+        } else if (credential.getId() == 2L) {
+            return Collections.singletonList(new FileSystemScriptConfig("file-system-config-not-found",
                     RecipeType.POST_AMBARI_START,
                     ExecutionType.ALL_NODES,
                     Collections.emptyMap()));
         } else {
-            return Arrays.asList(new FileSystemScriptConfig("file-system-config.script",
+            return Collections.singletonList(new FileSystemScriptConfig("file-system-config.script",
                     RecipeType.POST_AMBARI_START,
                     ExecutionType.ALL_NODES,
                     Collections.singletonMap("replace", "newContent")));

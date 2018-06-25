@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.model.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintPreparationObject;
+import com.sequenceiq.cloudbreak.blueprint.BlueprintPreparationObject.Builder;
 import com.sequenceiq.cloudbreak.blueprint.nifi.HdfConfigs;
 import com.sequenceiq.cloudbreak.blueprint.template.views.BlueprintView;
 import com.sequenceiq.cloudbreak.blueprint.templates.BlueprintStackInfo;
@@ -49,7 +50,7 @@ public class BlueprintTemplateProcessorTest {
         Map<String, Object> properties = new HashMap<>();
         properties.put("S3_BUCKET", "testbucket");
 
-        BlueprintPreparationObject blueprintPreparationObject = BlueprintPreparationObject.Builder.builder()
+        BlueprintPreparationObject blueprintPreparationObject = Builder.builder()
                 .withRdsConfigs(cluster.getRdsConfigs())
                 .withGateway(cluster.getGateway())
                 .withLdapConfig(cluster.getLdapConfig())
@@ -91,7 +92,7 @@ public class BlueprintTemplateProcessorTest {
         properties.put("S3_BUCKET", "testbucket");
         properties.put("custom", json.getMap());
 
-        BlueprintPreparationObject blueprintPreparationObject = BlueprintPreparationObject.Builder.builder()
+        BlueprintPreparationObject blueprintPreparationObject = Builder.builder()
                 .withRdsConfigs(cluster.getRdsConfigs())
                 .withGateway(cluster.getGateway())
                 .withLdapConfig(cluster.getLdapConfig())
@@ -126,7 +127,7 @@ public class BlueprintTemplateProcessorTest {
                 "<property name=\"Nifi Identity 1\">CN=hostname-2, OU=NIFI</property>",
                 "<property name=\"Nifi Identity 1\">CN=hostname-2, OU=NIFI</property>", Optional.empty());
 
-        BlueprintPreparationObject blueprintPreparationObject = BlueprintPreparationObject.Builder.builder()
+        BlueprintPreparationObject blueprintPreparationObject = Builder.builder()
                 .withRdsConfigs(cluster.getRdsConfigs())
                 .withGateway(cluster.getGateway())
                 .withLdapConfig(cluster.getLdapConfig())
@@ -148,7 +149,7 @@ public class BlueprintTemplateProcessorTest {
         Cluster cluster = cluster();
         BlueprintStackInfo blueprintStackInfo =  new BlueprintStackInfo("hdp", "2.4");
 
-        BlueprintPreparationObject blueprintPreparationObject = BlueprintPreparationObject.Builder.builder()
+        BlueprintPreparationObject blueprintPreparationObject = Builder.builder()
                 .withRdsConfigs(cluster.getRdsConfigs())
                 .withGateway(cluster.getGateway())
                 .withLdapConfig(cluster.getLdapConfig())
@@ -173,7 +174,7 @@ public class BlueprintTemplateProcessorTest {
         Cluster cluster = cluster();
         BlueprintStackInfo blueprintStackInfo =  new BlueprintStackInfo("hdp", "2.4");
 
-        BlueprintPreparationObject blueprintPreparationObject = BlueprintPreparationObject.Builder.builder()
+        BlueprintPreparationObject blueprintPreparationObject = Builder.builder()
                 .withRdsConfigs(cluster.getRdsConfigs())
                 .withGateway(cluster.getGateway())
                 .withLdapConfig(cluster.getLdapConfig())
@@ -198,7 +199,7 @@ public class BlueprintTemplateProcessorTest {
         Cluster cluster = cluster();
         BlueprintStackInfo blueprintStackInfo =  new BlueprintStackInfo("hdp", "2.4");
 
-        BlueprintPreparationObject blueprintPreparationObject = BlueprintPreparationObject.Builder.builder()
+        BlueprintPreparationObject blueprintPreparationObject = Builder.builder()
                 .withRdsConfigs(cluster.getRdsConfigs())
                 .withGateway(cluster.getGateway())
                 .withLdapConfig(cluster.getLdapConfig())
@@ -221,7 +222,7 @@ public class BlueprintTemplateProcessorTest {
         cluster.getRdsConfigs().add(rdsConfig("customRds"));
         BlueprintStackInfo blueprintStackInfo =  new BlueprintStackInfo("hdp", "2.4");
 
-        BlueprintPreparationObject blueprintPreparationObject = BlueprintPreparationObject.Builder.builder()
+        BlueprintPreparationObject blueprintPreparationObject = Builder.builder()
                 .withBlueprintView(new BlueprintView(testBlueprint, blueprintStackInfo.getVersion(), blueprintStackInfo.getType()))
                 .withRdsConfigs(cluster.getRdsConfigs())
                 .withGeneralClusterConfigs(generalClusterConfigs(cluster))

@@ -157,7 +157,7 @@ public class ServiceEndpointCollectorTest {
         Map<String, Collection<ClusterExposedServiceResponse>> clusterExposedServicesMap =
                 underTest.prepareClusterExposedServices(cluster, "10.0.0.1");
 
-        assertEquals(2, clusterExposedServicesMap.keySet().size());
+        assertEquals(2L, clusterExposedServicesMap.keySet().size());
         Collection<ClusterExposedServiceResponse> topology2ClusterExposedServiceResponses = clusterExposedServicesMap.get(topology2.getTopologyName());
         Optional<ClusterExposedServiceResponse> webHDFS =
                 topology2ClusterExposedServiceResponses.stream().filter(service -> "WEBHDFS".equals(service.getKnoxService())).findFirst();
@@ -206,17 +206,17 @@ public class ServiceEndpointCollectorTest {
         when(blueprintTextProcessor.getStackName()).thenReturn("HDF");
         when(blueprintTextProcessor.getStackVersion()).thenReturn("3.1");
         Collection<ExposedServiceResponse> exposedServiceResponses = underTest.getKnoxServices(mock(IdentityUser.class), "blueprint");
-        assertEquals(0, exposedServiceResponses.size());
+        assertEquals(0L, exposedServiceResponses.size());
 
         when(blueprintTextProcessor.getStackName()).thenReturn("HDF");
         when(blueprintTextProcessor.getStackVersion()).thenReturn("3.2");
         exposedServiceResponses = underTest.getKnoxServices(mock(IdentityUser.class), "blueprint");
-        assertEquals(1, exposedServiceResponses.size());
+        assertEquals(1L, exposedServiceResponses.size());
 
         when(blueprintTextProcessor.getStackName()).thenReturn("HDP");
         when(blueprintTextProcessor.getStackVersion()).thenReturn("2.6");
         exposedServiceResponses = underTest.getKnoxServices(mock(IdentityUser.class), "blueprint");
-        assertEquals(1, exposedServiceResponses.size());
+        assertEquals(1L, exposedServiceResponses.size());
     }
 
     private GatewayTopology gatewayTopology(String name, ExposedService... services) {

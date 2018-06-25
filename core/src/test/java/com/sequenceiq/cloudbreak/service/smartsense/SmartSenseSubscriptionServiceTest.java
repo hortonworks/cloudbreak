@@ -13,8 +13,8 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
-import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -32,7 +32,7 @@ public class SmartSenseSubscriptionServiceTest {
     private static final String OLD_SMARTSENSE_ID = "A-99900000-C-88888888";
 
     @Rule
-    public ExpectedException thrown = ExpectedException.none();
+    public final ExpectedException thrown = ExpectedException.none();
 
     @Mock
     private SmartSenseSubscriptionRepository repository;
@@ -59,7 +59,7 @@ public class SmartSenseSubscriptionServiceTest {
 
         SmartSenseSubscription result = underTest.getDefaultForUser(user);
 
-        verify(repository, times(1)).save(Matchers.<SmartSenseSubscription>any());
+        verify(repository, times(1)).save(ArgumentMatchers.<SmartSenseSubscription>any());
         Assert.assertEquals(DEPLOYMENT_SMARTSENSE_ID, result.getSubscriptionId());
     }
 
@@ -72,7 +72,7 @@ public class SmartSenseSubscriptionServiceTest {
 
         SmartSenseSubscription result = underTest.getDefaultForUser(user);
 
-        verify(repository, times(1)).save(Matchers.<SmartSenseSubscription>any());
+        verify(repository, times(1)).save(ArgumentMatchers.<SmartSenseSubscription>any());
         Assert.assertEquals(DEPLOYMENT_SMARTSENSE_ID, result.getSubscriptionId());
     }
 
@@ -109,7 +109,7 @@ public class SmartSenseSubscriptionServiceTest {
         thrown.expectMessage(exceptionMessage);
 
         underTest.getDefaultForUser(user);
-        verify(authorizationService, times(1)).hasReadPermission(Matchers.<SmartSenseSubscription>any());
+        verify(authorizationService, times(1)).hasReadPermission(ArgumentMatchers.<SmartSenseSubscription>any());
     }
 
     @Test
@@ -123,7 +123,7 @@ public class SmartSenseSubscriptionServiceTest {
         SmartSenseSubscription result = underTest.getDefaultForUser(user);
 
         Assert.assertEquals("The given SmartSenseSubscription instance has got a unexpected update", subscription, result);
-        verify(authorizationService, times(1)).hasReadPermission(Matchers.<SmartSenseSubscription>any());
+        verify(authorizationService, times(1)).hasReadPermission(ArgumentMatchers.<SmartSenseSubscription>any());
     }
 
     private SmartSenseSubscription createSmartSenseSubscription() {

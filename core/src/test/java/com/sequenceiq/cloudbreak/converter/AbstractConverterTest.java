@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.converter;
 
-import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 
 import java.lang.reflect.Field;
 import java.util.List;
@@ -28,7 +28,7 @@ public class AbstractConverterTest {
     private void assertFieldNotNull(Object obj, Field field) {
         try {
             field.setAccessible(true);
-            assertFalse("Field '" + field.getName() + "' is null.", field.get(obj) == null);
+            assertNotNull("Field '" + field.getName() + "' is null.", field.get(obj));
         } catch (IllegalAccessException | IllegalArgumentException e) {
             throw new TestException(e.getMessage());
         }

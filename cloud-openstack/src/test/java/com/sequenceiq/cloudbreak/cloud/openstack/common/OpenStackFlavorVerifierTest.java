@@ -30,7 +30,7 @@ import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 public class OpenStackFlavorVerifierTest {
 
     @InjectMocks
-    private OpenStackFlavorVerifier underTest = new OpenStackFlavorVerifier();
+    private final OpenStackFlavorVerifier underTest = new OpenStackFlavorVerifier();
 
     @Mock
     private OSClient<?> osClient;

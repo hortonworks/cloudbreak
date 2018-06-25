@@ -13,6 +13,7 @@ import org.springframework.test.context.BootstrapWith;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import com.sequenceiq.cloudbreak.blueprint.BlueprintPreparationObject;
+import com.sequenceiq.cloudbreak.blueprint.BlueprintPreparationObject.Builder;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessingException;
 import com.sequenceiq.cloudbreak.blueprint.filesystem.BlueprintTestUtil;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
@@ -22,7 +23,7 @@ import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 public class CentralBlueprintUpdaterNegativeInputTest extends CentralBlueprintContext {
 
     @Rule
-    public ExpectedException expectedException = ExpectedException.none();
+    public final ExpectedException expectedException = ExpectedException.none();
 
     @Test
     public void testForNotExistingHostGroupNameComesFromModel() throws IOException {
@@ -61,7 +62,7 @@ public class CentralBlueprintUpdaterNegativeInputTest extends CentralBlueprintCo
         getUnderTest().getBlueprintText(model);
     }
 
-    private BlueprintPreparationObject.Builder getExtendedPreparedBlueprintBuilder(String fileName, String... hosts) throws IOException {
+    private Builder getExtendedPreparedBlueprintBuilder(String fileName, String... hosts) throws IOException {
         return getPreparedBuilder(hosts)
                 .withBlueprintView(BlueprintTestUtil.generalBlueprintView(getBlueprintTextFromFile(fileName), "2.6", "HDP"));
     }

@@ -51,7 +51,7 @@ public class CachedRemoteTokenServiceTest {
     }
 
     @Test
-    public void testLoadAuthenticationForInvalidMacKeyUsed() throws IOException {
+    public void testLoadAuthenticationForInvalidMacKeyUsed() {
         CachedRemoteTokenService tokenService = new CachedRemoteTokenService("clientId", "clientSecret", "http://localhost:8089", "alma", identityClient);
         try {
             tokenService.loadAuthentication(token);

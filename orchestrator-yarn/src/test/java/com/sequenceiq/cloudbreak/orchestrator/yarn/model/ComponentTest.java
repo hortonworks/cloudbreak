@@ -46,6 +46,6 @@ public class ComponentTest {
         List<Dependency> dependencies = new ArrayList<>();
         dependencies.add(dependency);
         component.setDependencies(dependencies);
-        assertEquals(1, component.getDependencies().size());
+        assertEquals(1L, component.getDependencies().size());
     }
 }

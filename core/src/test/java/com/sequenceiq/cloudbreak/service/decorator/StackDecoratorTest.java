@@ -56,7 +56,7 @@ public class StackDecoratorTest {
             + "RDS and a properly configured LDAP also. One of them may be missing";
 
     @Rule
-    public ExpectedException thrown = ExpectedException.none();
+    public final ExpectedException thrown = ExpectedException.none();
 
     @InjectMocks
     private StackDecorator underTest;

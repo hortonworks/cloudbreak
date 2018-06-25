@@ -7,6 +7,7 @@ public final class GeneratorFactory {
     private GeneratorFactory() {
     }
 
+    @SafeVarargs
     public static <T> Generator<T> list(T... values) {
         return new ListGenerator<>(asList(values));
     }

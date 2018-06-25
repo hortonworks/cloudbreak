@@ -6,7 +6,9 @@ import static com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltClientType.
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInAnyOrder;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
@@ -102,7 +104,7 @@ public class SaltStatesTest {
         InputStream responseStream = SaltStatesTest.class.getResourceAsStream("/jid_response.json");
         String response = IOUtils.toString(responseStream);
         responseStream.close();
-        Map responseMap = new ObjectMapper().readValue(response, Map.class);
+        Map<?, ?> responseMap = new ObjectMapper().readValue(response, Map.class);
         when(saltConnector.run(eq("jobs.lookup_jid"), any(), any(), eq("jid"), any())).thenReturn(responseMap);
 
         Multimap<String, String> jidInfo = SaltStates.jidInfo(saltConnector, jobId, target, StateType.HIGH);
@@ -125,7 +127,7 @@ public class SaltStatesTest {
 
         InputStream responseStream = SaltStatesTest.class.getResourceAsStream("/jid_simple_response.json");
         String response = IOUtils.toString(responseStream);
-        Map responseMap = new ObjectMapper().readValue(response, Map.class);
+        Map<?, ?> responseMap = new ObjectMapper().readValue(response, Map.class);
 
         when(saltConnector.run(eq("jobs.lookup_jid"), any(), any(), eq("jid"), any())).thenReturn(responseMap);
 
@@ -153,11 +155,11 @@ public class SaltStatesTest {
         runningJobsResponse.setResult(result);
         when(saltConnector.run(eq("jobs.active"), any(), eq(RunningJobsResponse.class))).thenReturn(runningJobsResponse);
         boolean running = SaltStates.jobIsRunning(saltConnector, jid);
-        assertEquals(true, running);
+        assertTrue(running);
 
         resultMap.clear();
         running = SaltStates.jobIsRunning(saltConnector, jid);
-        assertEquals(false, running);
+        assertFalse(running);
     }
 
     @Test

@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.service.resource;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -41,13 +40,13 @@ public class ResourceServiceTest {
         Mockito.when(resourceRepository.findAllByStackId(1L)).thenReturn(resources);
         List<CloudResourceStatus> actual = underTest.getAllAsCloudResourceStatus(1L);
 
-        Assert.assertEquals(0, actual.size());
+        Assert.assertEquals(0L, actual.size());
     }
 
     @Test
     public void testGetAllAsCloudResourceStatusWhenHasResource() {
         Resource resource = new Resource();
-        List<Resource> resources = Arrays.asList(resource);
+        List<Resource> resources = Collections.singletonList(resource);
 
         CloudResource cloudResource = CloudResource.builder()
                 .type(ResourceType.HEAT_STACK)
@@ -61,7 +60,7 @@ public class ResourceServiceTest {
 
         List<CloudResourceStatus> actual = underTest.getAllAsCloudResourceStatus(1L);
 
-        Assert.assertEquals(1, actual.size());
+        Assert.assertEquals(1L, actual.size());
         Assert.assertEquals(cloudResource, actual.get(0).getCloudResource());
         Assert.assertEquals(ResourceStatus.CREATED, actual.get(0).getStatus());
     }

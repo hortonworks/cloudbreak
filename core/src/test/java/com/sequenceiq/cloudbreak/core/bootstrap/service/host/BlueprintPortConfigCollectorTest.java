@@ -25,7 +25,7 @@ public class BlueprintPortConfigCollectorTest {
     private static final int YARN_PORT = 321;
 
     @Inject
-    private BlueprintPortConfigCollector underTest = new BlueprintPortConfigCollector();
+    private final BlueprintPortConfigCollector underTest = new BlueprintPortConfigCollector();
 
     @Before
     public void setup() {

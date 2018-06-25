@@ -72,7 +72,7 @@ public class AmbariClusterSecurityServiceTest {
     private AmbariPollingServiceProvider ambariPollingServiceProvider;
 
     @InjectMocks
-    private AmbariClusterSecurityService underTest = new AmbariClusterSecurityService();
+    private final AmbariClusterSecurityService underTest = new AmbariClusterSecurityService();
 
     @Test
     public void testApiReplaceUserNamePasswordWhenEverythingWorks() throws CloudbreakException {

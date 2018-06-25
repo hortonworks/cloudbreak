@@ -16,7 +16,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 public class TemplateParameterFilterTest {
 
     @InjectMocks
-    private TemplateParameterFilter underTest = new TemplateParameterFilter();
+    private final TemplateParameterFilter underTest = new TemplateParameterFilter();
 
     @Test
     public void testTemplateFilterWhenWeShouldReturnWithTheRelatedProperties() {
@@ -35,8 +35,7 @@ public class TemplateParameterFilterTest {
         int inputSize = 20;
         List<String> testData = generateTestData("hadoop", inputSize);
 
-        List<String> hadoop = new ArrayList<>();
-        hadoop = generateTestData("hadoop", inputSize, hadoop);
+        List<String> hadoop = generateTestData("hadoop", inputSize, new ArrayList<>());
 
         Set<String> result = underTest.queryForCustomParameters(testData);
 

@@ -152,7 +152,7 @@ public class BlueprintToBlueprintResponseConverterTest extends AbstractEntityCon
         BlueprintResponse result = underTest.convert(source);
 
         Assert.assertFalse(result.getInputs().isEmpty());
-        Assert.assertEquals(1, result.getInputs().size());
+        Assert.assertEquals(1L, result.getInputs().size());
         for (BlueprintParameterJson blueprintParameterJson : result.getInputs()) {
             Assert.assertEquals(nameValue, blueprintParameterJson.getName());
             Assert.assertEquals(descriptionValue, blueprintParameterJson.getDescription());
