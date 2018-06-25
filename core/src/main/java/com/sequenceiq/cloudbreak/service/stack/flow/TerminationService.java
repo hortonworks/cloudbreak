@@ -108,6 +108,6 @@ public class TerminationService {
             metaData.setInstanceStatus(InstanceStatus.TERMINATED);
             instanceMetaDatas.add(metaData);
         }
-        instanceMetaDataRepository.save(instanceMetaDatas);
+        instanceMetaDataRepository.saveAll(instanceMetaDatas);
     }
 }

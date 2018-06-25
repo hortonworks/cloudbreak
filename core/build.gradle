@@ -22,6 +22,7 @@ plugins {
 }
 
 apply plugin: 'org.springframework.boot'
+apply plugin: 'io.spring.dependency-management'
 apply plugin: 'info.solidsoft.pitest'
 
 bootRun {
@@ -33,96 +34,187 @@ bootRun {
 }
 
 springBoot {
-    mainClass = 'com.sequenceiq.cloudbreak.CloudbreakApplication'
+    mainClassName = 'com.sequenceiq.cloudbreak.CloudbreakApplication'
 }
 
-jar {
+bootJar {
     baseName = 'cloudbreak'
     archiveName = 'cloudbreak.jar'
 }
 
-dependencies {
-    compile group: 'org.springframework.retry',     name: 'spring-retry',                   version: '1.2.0.RELEASE'
-    compile group: 'org.springframework.boot',      name: 'spring-boot-starter',            version: springBootVersion
-    compile group: 'org.springframework.boot',      name: 'spring-boot-starter-web',        version: springBootVersion
-    compile group: 'org.springframework.boot',      name: 'spring-boot-starter-actuator',   version: springBootVersion
-    compile group: 'org.springframework.boot',      name: 'spring-boot-starter-data-jpa',   version: springBootVersion
-    compile group: 'org.springframework.boot',      name: 'spring-boot-starter-websocket',  version: springBootVersion
-    compile group: 'org.springframework.boot',      name: 'spring-boot-starter-aop',        version: springBootVersion
-    compile group: 'org.springframework.boot',      name: 'spring-boot-starter-freemarker', version: springBootVersion
-    compile group: 'org.springframework.boot',      name: 'spring-boot-starter-security',   version: springBootVersion
-    compile group: 'org.springframework.boot',      name: 'spring-boot-starter-jersey',     version: springBootVersion
-    compile (group: 'org.springframework.statemachine', name: 'spring-statemachine-core', version: '1.0.1.RELEASE') { exclude group: 'org.springframework' }
-    compile group: 'org.springframework.security.oauth', name: 'spring-security-oauth2',    version: springOauthVersion
-    compile group: 'io.projectreactor',             name: 'reactor-core',                   version: eventBusVersion
-    compile group: 'io.projectreactor',             name: 'reactor-bus',                    version: eventBusVersion
-    compile group: 'org.hibernate',                 name: 'hibernate-validator',            version: hibernateValidatorVersion
-    compile group: 'org.hibernate',                 name: 'hibernate-core',                 version: hibernateCoreVersion
-    compile group: 'org.apache.commons',            name: 'commons-lang3',                  version: apacheCommonsLangVersion
-    compile group: 'org.freemarker',                name: 'freemarker',                     version: freemarkerVersion
-    compile group: 'org.postgresql',                name: 'postgresql',                     version: '9.4.1212'
-    compile group: 'org.codehaus.jettison',         name: 'jettison',                       version: '1.3.5'
-    compile group: 'com.thoughtworks.xstream',      name: 'xstream',                        version: '1.4.7'
-    compile group: 'com.github.fommil',             name: 'openssh',                        version: '1.0'
-    compile group: 'javax.mail',                    name: 'mail',                           version: '1.5.0-b01'
-    compile group: 'org.bouncycastle',              name: 'bcprov-jdk15on',                 version: bouncycastleVersion
-    compile group: 'org.bouncycastle',              name: 'bcpkix-jdk15on',                 version: bouncycastleVersion
-    compile group: 'org.glassfish.jersey.media',    name: 'jersey-media-multipart',         version: jerseyCoreVersion
-
-    compile group: 'io.springfox',                  name: 'springfox-swagger2',             version: '2.5.0'
-    compile group: 'io.springfox',                  name: 'springfox-core',                 version: '2.5.0'
-    compile group: 'io.springfox',                  name: 'springfox-swagger-ui',           version: '2.5.0'
-
-
-    compile group: 'org.springframework.kafka',     name: 'spring-kafka',                   version: '2.1.2.RELEASE'
-    compile group: 'io.swagger',                    name: 'swagger-jersey2-jaxrs',          version: swaggerVersion
-    compile group: 'com.google.http-client',        name: 'google-http-client-jackson2',    version: '1.22.0'
-    compile (group: 'com.google.oauth-client',      name: 'google-oauth-client-jetty',      version: '1.22.0')   { exclude module: 'servlet-api' }
-    compile group: 'dnsjava',                       name: 'dnsjava',                        version: '2.1.7'
-    compile group: 'com.icegreen',                  name: 'greenmail',                      version: '1.4.1'
-    compile group: 'org.mybatis',                   name: 'mybatis-migrations',             version: '3.2.0'
-    compile group: 'com.cedarsoftware',             name: 'json-io',                        version: '4.9.12'
-    compile group: 'com.google.code.findbugs',      name: 'annotations',                    version: '3.0.1'
-    compile group: 'org.mapstruct',                 name: 'mapstruct-jdk8',                 version: mapstructVersion
-    compileOnly group: 'org.mapstruct',             name: 'mapstruct-processor',            version: mapstructVersion
-    compile group: 'com.zaxxer',                    name: 'HikariCP',                       version: '2.6.1'
-
-    annotationProcessor     group: 'org.mapstruct',                 name: 'mapstruct-processor',            version: mapstructVersion
-
-    compile project(':core-model')
-    compile project(':orchestrator-api')
-    compile project(':cloud-reactor-api')
-    compile project(':cloud-reactor')
-    compile project(':structuredevent-model')
-    compile project(':blueprint-manager')
-
-    runtime project(':orchestrator-salt')
-    runtime project(':orchestrator-yarn')
-    runtime project(':cloud-reactor')
-    runtime project(':cloud-openstack')
-    runtime project(':cloud-gcp')
-    runtime project(':cloud-aws')
-    runtime project(':cloud-mock')
-    runtime project(':cloud-azure')
-    runtime project(':cloud-yarn')
-
-
-    runtime     group: 'activation',                name: 'activation',                     version: '1.0.2'
-
-    testCompile (group: 'org.powermock',             name: 'powermock-module-junit4',        version: powermockVersion)
-    testCompile (group: 'org.powermock',             name: 'powermock-api-mockito2',          version: powermockVersion) {
-        exclude group: 'org.hamcrest'
+dependencyManagement {
+  dependencies {
+    dependencySet(group: 'org.springframework.boot', version: springBootVersion) {
+      entry 'spring-boot-starter'
+      entry 'spring-boot-starter-web'
+      entry 'spring-boot-starter-actuator'
+      entry 'spring-boot-starter-data-jpa'
+      entry 'spring-boot-starter-websocket'
+      entry 'spring-boot-starter-aop'
+      entry 'spring-boot-starter-freemarker'
+      entry 'spring-boot-starter-security'
+      entry 'spring-boot-starter-jersey'
+      entry 'spring-boot-starter-test'
+      entry 'spring-boot-starter-freemarker'
     }
-    testCompile group: 'org.mockito',              name: 'mockito-core',                   version: mockitoVersion
-    testCompile project(path: ':core-model', configuration: 'tests')
-    testCompile group: 'org.springframework.boot', name:'spring-boot-starter-test',        version:springBootVersion
-    testCompile group: 'org.springframework.boot', name:'spring-boot-starter-freemarker',  version:springBootVersion
-    testCompile group: 'com.jayway.restassured',   name: 'rest-assured',                   version: '2.3.4'
-    testCompile group: 'com.jayway.restassured',   name: 'json-path',                      version: '2.3.4'
+
+    dependencySet(group: 'io.projectreactor', version: eventBusVersion) {
+      entry 'reactor-core'
+      entry 'reactor-bus'
+    }
+
+    dependencySet(group: 'io.springfox', version: '2.5.0') {
+      entry 'springfox-swagger2'
+      entry 'springfox-core'
+      entry 'springfox-swagger-ui'
+    }
+
+    dependencySet(group: 'org.bouncycastle',  version: bouncycastleVersion) {
+      entry 'bcprov-jdk15on'
+      entry 'bcpkix-jdk15on'
+    }
+
+    dependencySet(group: 'org.mapstruct', version: mapstructVersion) {
+      entry 'mapstruct-jdk8'
+      entry 'mapstruct-processor'
+      entry 'mapstruct-processor'
+    }
+
+    dependencySet(group: 'com.jayway.restassured',  version: '2.3.4') {
+      entry 'rest-assured'
+      entry 'json-path'
+    }
+
+    dependencySet(group: 'org.powermock', version: powermockVersion) {
+      entry 'powermock-module-junit4'
+      entry('powermock-api-mockito2') {
+        exclude group: 'org.hamcrest'
+      }
+    }
+
+    dependency (group: 'org.springframework.statemachine',  name: 'spring-statemachine-core',  version: '1.0.1.RELEASE') {
+      exclude group: 'org.springframework'
+    }
+
+    dependency (group: 'com.google.oauth-client',      name: 'google-oauth-client-jetty',      version: '1.22.0') {
+      exclude module: 'servlet-api'
+    }
+
+    dependency group: 'activation',                    name: 'activation',                     version: '1.0.2'
+
+    dependency group: 'com.google.code.findbugs',      name: 'annotations',                    version: '3.0.1'
+    dependency group: 'com.google.http-client',        name: 'google-http-client-jackson2',    version: '1.22.0'
+    dependency group: 'com.icegreen',                  name: 'greenmail',                      version: '1.4.1'
+    dependency group: 'com.cedarsoftware',             name: 'json-io',                        version: '4.9.12'
+    dependency group: 'com.thoughtworks.xstream',      name: 'xstream',                        version: '1.4.7'
+    dependency group: 'com.github.fommil',             name: 'openssh',                        version: '1.0'
+
+    dependency group: 'io.swagger',                    name: 'swagger-jersey2-jaxrs',          version: swaggerVersion
+    dependency group: 'javax.mail',                    name: 'mail',                           version: '1.5.0-b01'
+    dependency group: 'dnsjava',                       name: 'dnsjava',                        version: '2.1.7'
+
+    dependency group: 'org.springframework.kafka',          name: 'spring-kafka',              version: '2.1.2.RELEASE'
+    dependency group: 'org.springframework.retry',          name: 'spring-retry',              version: '1.2.0.RELEASE'
+    dependency group: 'org.springframework.security.oauth', name: 'spring-security-oauth2',    version: springOauthVersion
+
+    dependency group: 'com.google.code.gson',               name: 'gson',                      version: '2.6.2'
+    dependency group: 'org.codehaus.groovy',                name: 'groovy-all',                version: '2.5.0'
+    dependency group: 'org.freemarker',                     name: 'freemarker',                version: freemarkerVersion
+    dependency group: 'org.postgresql',                     name: 'postgresql',                version: postgreSQLVersion
+    dependency group: 'org.codehaus.jettison',              name: 'jettison',                  version: '1.3.5'
+    dependency group: 'org.glassfish.jersey.media',         name: 'jersey-media-multipart',    version: jerseyCoreVersion
+    dependency group: 'javax.xml.bind',                          name: 'jaxb-api',             version: '2.3.0'
+    dependency group: 'org.mybatis',                             name: 'mybatis-migrations',   version: '3.2.0'
+    dependency group: 'org.mockito',                             name: 'mockito-core',         version: mockitoVersion
+  }
+}
+
+dependencies {
+  compile group: 'com.google.code.gson',          name: 'gson'
+  compile group: 'org.codehaus.groovy',           name: 'groovy-all'
+
+  compile group: 'org.springframework.boot',      name: 'spring-boot-starter'
+  compile group: 'org.springframework.boot',      name: 'spring-boot-starter-web'
+  compile group: 'org.springframework.boot',      name: 'spring-boot-starter-actuator'
+  compile group: 'org.springframework.boot',      name: 'spring-boot-starter-data-jpa'
+  compile group: 'org.springframework.boot',      name: 'spring-boot-starter-websocket'
+  compile group: 'org.springframework.boot',      name: 'spring-boot-starter-aop'
+  compile group: 'org.springframework.boot',      name: 'spring-boot-starter-freemarker'
+  compile group: 'org.springframework.boot',      name: 'spring-boot-starter-security'
+  compile group: 'org.springframework.boot',      name: 'spring-boot-starter-jersey'
+
+  compile group: 'org.springframework.kafka',          name: 'spring-kafka'
+  compile group: 'org.springframework.retry',          name: 'spring-retry'
+  compile group: 'org.springframework.statemachine',   name: 'spring-statemachine-core'
+  compile group: 'org.springframework.security.oauth', name: 'spring-security-oauth2'
+
+  compile group: 'io.projectreactor',             name: 'reactor-core'
+  compile group: 'io.projectreactor',             name: 'reactor-bus'
+
+  compile group: 'org.freemarker',                name: 'freemarker'
+  compile group: 'org.postgresql',                name: 'postgresql'
+  compile group: 'org.codehaus.jettison',         name: 'jettison'
+  compile group: 'org.bouncycastle',              name: 'bcprov-jdk15on'
+  compile group: 'org.bouncycastle',              name: 'bcpkix-jdk15on'
+  compile group: 'org.glassfish.jersey.media',    name: 'jersey-media-multipart'
+  compile group: 'org.mybatis',                   name: 'mybatis-migrations'
+  compile group: 'org.mapstruct',                 name: 'mapstruct-jdk8'
+
+  compileOnly group: 'org.mapstruct',             name: 'mapstruct-processor'
+
+  compile group: 'com.google.oauth-client',       name: 'google-oauth-client-jetty'
+  compile group: 'com.google.code.findbugs',      name: 'annotations'
+  compile group: 'com.google.http-client',        name: 'google-http-client-jackson2'
+  compile group: 'com.cedarsoftware',             name: 'json-io'
+  compile group: 'com.thoughtworks.xstream',      name: 'xstream'
+  compile group: 'com.github.fommil',             name: 'openssh'
+  compile group: 'com.icegreen',                  name: 'greenmail'
+
+  compile group: 'javax.mail',                    name: 'mail'
+  compile group: 'javax.xml.bind',                name: 'jaxb-api'
+  compile group: 'dnsjava',                       name: 'dnsjava'
+
+  compile group: 'io.springfox',                  name: 'springfox-swagger2'
+  compile group: 'io.springfox',                  name: 'springfox-core'
+  compile group: 'io.springfox',                  name: 'springfox-swagger-ui'
+
+  compile group: 'io.swagger',                    name: 'swagger-jersey2-jaxrs'
+
+  annotationProcessor group: 'org.mapstruct',     name: 'mapstruct-processor'
+
+  compile project(':core-model')
+  compile project(':orchestrator-api')
+  compile project(':cloud-reactor-api')
+  compile project(':cloud-reactor')
+  compile project(':structuredevent-model')
+  compile project(':blueprint-manager')
+
+  runtime project(':orchestrator-salt')
+  runtime project(':orchestrator-salt')
+  runtime project(':orchestrator-yarn')
+  runtime project(':cloud-reactor')
+  runtime project(':cloud-openstack')
+  runtime project(':cloud-gcp')
+  runtime project(':cloud-aws')
+  runtime project(':cloud-mock')
+  runtime project(':cloud-azure')
+  runtime project(':cloud-yarn')
+
+  runtime group: 'activation',                    name: 'activation'
+
+  testCompile project(path: ':core-model', configuration: 'tests')
+
+  testCompile group: 'org.powermock',            name: 'powermock-module-junit4'
+  testCompile group: 'org.powermock',            name: 'powermock-api-mockito2'
+  testCompile group: 'org.mockito',              name: 'mockito-core'
+  testCompile group: 'org.springframework.boot', name: 'spring-boot-starter-test'
+  testCompile group: 'org.springframework.boot', name: 'spring-boot-starter-freemarker'
+  testCompile group: 'com.jayway.restassured',   name: 'rest-assured'
+  testCompile group: 'com.jayway.restassured',   name: 'json-path'
 }
 
 jacoco {
-    toolVersion = "0.7.1.201405082137"
+    toolVersion = "0.8.1"
     reportsDir = file("$buildDir/reports/jacoco")
 }
 
@@ -165,7 +257,7 @@ compileJava {
             '-Amapstruct.suppressGeneratorVersionInfoComment=true'
     ]
 
-    generatedSourcesDestinationDir = "$projectDir/src/main/generated"
+    options.annotationProcessorGeneratedSourcesDirectory = file("$projectDir/src/main/generated")
 }
 
 compileJava.doFirst {

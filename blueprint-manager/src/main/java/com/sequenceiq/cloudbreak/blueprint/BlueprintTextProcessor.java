@@ -21,6 +21,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.MissingNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.sequenceiq.cloudbreak.blueprint.configuration.HostgroupConfiguration;
@@ -56,7 +57,7 @@ public class BlueprintTextProcessor {
 
     public BlueprintTextProcessor(@Nonnull String blueprintText) {
         try {
-            blueprint = (ObjectNode) JsonUtil.readTree(blueprintText);
+            blueprint = Optional.ofNullable((ObjectNode) JsonUtil.readTree(blueprintText)).orElse(new ObjectNode(JsonNodeFactory.instance));
         } catch (IOException e) {
             throw new BlueprintProcessingException("Failed to parse blueprint text.", e);
         }

@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.ha;
 
+import static com.sequenceiq.cloudbreak.controller.exception.NotFoundException.notFound;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -7,7 +9,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -32,8 +33,8 @@ import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationFlowConfig;
 import com.sequenceiq.cloudbreak.domain.CloudbreakNode;
 import com.sequenceiq.cloudbreak.domain.FlowLog;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.StateStatus;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.ha.CloudbreakNodeConfig;
 import com.sequenceiq.cloudbreak.repository.CloudbreakNodeRepository;
 import com.sequenceiq.cloudbreak.repository.FlowLogRepository;
@@ -102,7 +103,7 @@ public class HeartbeatService {
             try {
                 retryService.testWith2SecDelayMax5Times(() -> {
                     try {
-                        CloudbreakNode self = Optional.ofNullable(cloudbreakNodeRepository.findOne(nodeId)).orElse(new CloudbreakNode(nodeId));
+                        CloudbreakNode self = cloudbreakNodeRepository.findById(nodeId).orElse(new CloudbreakNode(nodeId));
                         self.setLastUpdated(clock.getCurrentTime());
                         cloudbreakNodeRepository.save(self);
                         return Boolean.TRUE;
@@ -181,7 +182,7 @@ public class HeartbeatService {
                             updatedFlowLogs.add(flowLog);
                         }));
             }
-            transactionService.required(() -> flowLogRepository.save(updatedFlowLogs));
+            transactionService.required(() -> flowLogRepository.saveAll(updatedFlowLogs));
         }
         return failedNodes;
     }
@@ -197,7 +198,7 @@ public class HeartbeatService {
                     .collect(Collectors.toList());
             LOGGER.info("Cleanup nodes from the DB: {}", cleanupNodes);
             transactionService.required(() -> {
-                cloudbreakNodeRepository.delete(cleanupNodes);
+                cloudbreakNodeRepository.deleteAll(cleanupNodes);
                 return null;
             });
         }
@@ -285,7 +286,7 @@ public class HeartbeatService {
 
     private void cleanupInMemoryStore(Long stackId) {
         LOGGER.info("All running flows has been canceled for stack: {}. Remove id from memory store.", stackId);
-        Stack stack = stackRepository.findOne(stackId);
+        Stack stack = stackRepository.findById(stackId).orElseThrow(notFound("Stack", stackId));
         InMemoryStateStore.deleteStack(stackId);
         if (stack.getCluster() != null) {
             InMemoryStateStore.deleteCluster(stack.getCluster().getId());

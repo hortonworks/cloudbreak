@@ -1,9 +1,9 @@
 package com.sequenceiq.it.cloudbreak.newway;
 
+import java.io.IOException;
+
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.newway.log.Log;
-
-import java.io.IOException;
 
 class BlueprintAction {
 
@@ -22,6 +22,8 @@ class BlueprintAction {
                 client.getCloudbreakClient()
                         .blueprintEndpoint()
                         .postPrivate(blueprintEntity.getRequest()));
+
+        integrationTestContext.putCleanUpParam(blueprintEntity.getName(), blueprintEntity.getResponse().getId());
     }
 
     public static void get(IntegrationTestContext integrationTestContext, Entity entity) throws IOException {
@@ -62,7 +64,9 @@ class BlueprintAction {
         Log.log(" delete "
                 .concat(blueprintEntity.getName())
                 .concat(" private blueprint with Name. "));
-        client.getCloudbreakClient().blueprintEndpoint().deletePrivate(blueprintEntity.getName());
+
+        Long id = integrationTestContext.getCleanUpParameter(blueprintEntity.getName(), Long.class);
+        client.getCloudbreakClient().blueprintEndpoint().delete(id);
     }
 
     public static void createInGiven(IntegrationTestContext integrationTestContext, Entity entity) {

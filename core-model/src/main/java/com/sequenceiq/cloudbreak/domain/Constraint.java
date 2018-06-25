@@ -14,8 +14,8 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 @Table(name = "hostgroup_constraint")
 public class Constraint implements ProvisionEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO, generator = "constraint_template_generator")
-    @SequenceGenerator(name = "constraint_template_generator", sequenceName = "hostgroup_constraint_id_seq", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "hostgroup_constraint_template_generator")
+    @SequenceGenerator(name = "hostgroup_constraint_template_generator", sequenceName = "hostgroup_constraint_id_seq", allocationSize = 1)
     private Long id;
 
     @ManyToOne

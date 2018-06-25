@@ -71,7 +71,7 @@ public class FlexSubscriptionServiceTest {
         FlexSubscription result = underTest.create(subscription);
 
         verify(flexRepo, times(1)).save(subscription);
-        verify(flexRepo, times(1)).save(Collections.singletonList(result));
+        verify(flexRepo, times(1)).saveAll(Collections.singletonList(result));
         assertTrue(result.isDefault());
         assertTrue(result.isUsedForController());
     }
@@ -89,7 +89,7 @@ public class FlexSubscriptionServiceTest {
 
         verify(flexRepo, times(1)).save(subscription);
 
-        verify(flexRepo, times(1)).save(Arrays.asList(subscription1, result));
+        verify(flexRepo, times(1)).saveAll(Arrays.asList(subscription1, result));
         assertTrue(result.isDefault());
         assertTrue(result.isUsedForController());
         assertFalse(subscription1.isDefault());
@@ -109,7 +109,7 @@ public class FlexSubscriptionServiceTest {
         FlexSubscription result = underTest.create(subscription);
 
         verify(flexRepo, times(1)).save(subscription);
-        verify(flexRepo, times(1)).save(Arrays.asList(subscription1, result));
+        verify(flexRepo, times(1)).saveAll(Arrays.asList(subscription1, result));
         assertFalse(result.isDefault());
         assertTrue(result.isUsedForController());
         assertTrue(subscription1.isDefault());
@@ -128,7 +128,7 @@ public class FlexSubscriptionServiceTest {
         FlexSubscription result = underTest.create(subscription);
 
         verify(flexRepo, times(1)).save(subscription);
-        verify(flexRepo, times(1)).save(Arrays.asList(subscription1, result));
+        verify(flexRepo, times(1)).saveAll(Arrays.asList(subscription1, result));
         assertTrue(result.isDefault());
         assertFalse(result.isUsedForController());
         assertFalse(subscription1.isDefault());

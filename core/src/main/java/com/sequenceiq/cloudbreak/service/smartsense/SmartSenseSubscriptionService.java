@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.smartsense;
 
+import static com.sequenceiq.cloudbreak.controller.exception.NotFoundException.notFound;
 import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
 
 import java.util.Iterator;
@@ -92,17 +93,17 @@ public class SmartSenseSubscriptionService {
     }
 
     public SmartSenseSubscription findById(Long id) {
-        LOGGER.info("Looking for SmartSense subscription with id: {}", id);
-        return repository.findOne(id);
+        LOGGER.debug("Looking for SmartSense subscription with id: {}", id);
+        return repository.findById(id).orElseThrow(notFound("SmartSense subscription", id));
     }
 
     public SmartSenseSubscription findOneById(Long id) {
-        LOGGER.info("Looking for one SmartSense subscription with id: {}", id);
+        LOGGER.debug("Looking for one SmartSense subscription with id: {}", id);
         return repository.findOneById(id);
     }
 
     public Optional<SmartSenseSubscription> getDefault() {
-        LOGGER.info("Get the SmartSense subscription");
+        LOGGER.debug("Get the SmartSense subscription");
         Iterator<SmartSenseSubscription> subscriptions = repository.findAll().iterator();
         return subscriptions.hasNext() ? Optional.of(subscriptions.next()) : Optional.empty();
     }

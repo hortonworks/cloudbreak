@@ -122,7 +122,7 @@ public class ClusterComponentConfigProvider {
         Set<ClusterComponent> componentsByClusterId = componentRepository.findComponentByClusterId(clusterId);
         if (!componentsByClusterId.isEmpty()) {
             LOGGER.debug("Components({}) are going to be deleted for cluster: {}", componentsByClusterId.size(), clusterId);
-            componentRepository.delete(componentsByClusterId);
+            componentRepository.deleteAll(componentsByClusterId);
             LOGGER.debug("Components({}) have been deleted for cluster : {}", componentsByClusterId.size(), clusterId);
         }
     }

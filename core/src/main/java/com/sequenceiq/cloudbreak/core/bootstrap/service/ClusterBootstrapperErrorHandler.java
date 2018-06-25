@@ -138,7 +138,7 @@ public class ClusterBootstrapperErrorHandler {
     private void deleteInstanceResourceFromDatabase(Stack stack, InstanceMetaData instanceMetaData) {
         Resource resource = resourceRepository.findByStackIdAndNameAndType(stack.getId(), instanceMetaData.getInstanceId(), null);
         if (resource != null) {
-            resourceRepository.delete(resource.getId());
+            resourceRepository.delete(resource);
         }
     }
 }

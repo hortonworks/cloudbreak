@@ -14,9 +14,6 @@ import com.sequenceiq.cloudbreak.domain.ClusterTemplate;
 @Transactional(Transactional.TxType.REQUIRED)
 public interface ClusterTemplateRepository extends CrudRepository<ClusterTemplate, Long> {
 
-    @Override
-    ClusterTemplate findOne(@Param("id") Long id);
-
     @Query("SELECT b FROM ClusterTemplate b WHERE b.name= :name and b.account= :account")
     ClusterTemplate findOneByName(@Param("name") String name, @Param("account") String account);
 

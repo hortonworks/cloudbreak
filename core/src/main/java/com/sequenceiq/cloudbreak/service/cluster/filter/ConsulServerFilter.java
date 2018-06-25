@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.cluster.filter;
 
+import static com.sequenceiq.cloudbreak.controller.exception.NotFoundException.notFound;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -26,7 +28,7 @@ public class ConsulServerFilter implements HostFilter {
     @Override
     public List<HostMetadata> filter(long clusterId, Map<String, String> config, List<HostMetadata> hosts) {
         List<HostMetadata> copy = new ArrayList<>(hosts);
-        Cluster cluster = clusterRepository.findById(clusterId);
+        Cluster cluster = getCluster(clusterId);
         for (HostMetadata host : hosts) {
             InstanceMetaData instanceMetaData = instanceMetadataRepository.findHostInStack(cluster.getStack().getId(), host.getHostName());
             if (instanceMetaData != null && instanceMetaData.getConsulServer()) {
@@ -36,4 +38,7 @@ public class ConsulServerFilter implements HostFilter {
         return copy;
     }
 
+    private Cluster getCluster(long clusterId) {
+        return clusterRepository.findById(clusterId).orElseThrow(notFound("Cluster", clusterId));
+    }
 }

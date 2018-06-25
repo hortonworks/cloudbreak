@@ -1,5 +1,6 @@
 package com.sequenceiq.periscope.service;
 
+import static com.sequenceiq.periscope.service.NotFoundException.notFound;
 import static org.springframework.ui.freemarker.FreeMarkerTemplateUtils.processTemplateIntoString;
 
 import java.util.ArrayList;
@@ -98,10 +99,10 @@ public class AlertService {
     }
 
     public void deleteMetricAlert(Long clusterId, Long alertId) {
-        metricAlertRepository.findByCluster(alertId, clusterId);
-        Cluster cluster = clusterRepository.findById(clusterId);
+        MetricAlert metricAlert = metricAlertRepository.findByCluster(alertId, clusterId);
+        Cluster cluster = getClusterById(clusterId);
         cluster.setMetricAlerts(removeMetricAlert(cluster, alertId));
-        metricAlertRepository.delete(alertId);
+        metricAlertRepository.delete(metricAlert);
         clusterRepository.save(cluster);
     }
 
@@ -143,9 +144,9 @@ public class AlertService {
 
     public void deleteTimeAlert(Long clusterId, Long alertId) {
         Cluster cluster = clusterService.findOneById(clusterId);
-        timeAlertRepository.findByCluster(alertId, clusterId);
+        TimeAlert timeAlert = timeAlertRepository.findByCluster(alertId, clusterId);
         cluster.setTimeAlerts(removeTimeAlert(cluster, alertId));
-        timeAlertRepository.delete(alertId);
+        timeAlertRepository.delete(timeAlert);
         clusterRepository.save(cluster);
     }
 
@@ -244,11 +245,11 @@ public class AlertService {
 
     public void deletePrometheusAlert(Long clusterId, Long alertId) {
         PrometheusAlert alert = prometheusAlertRepository.findByCluster(alertId, clusterId);
-        Cluster cluster = clusterRepository.findById(clusterId);
+        Cluster cluster = getClusterById(clusterId);
         consulKeyValueService.deleteAlert(cluster, alert);
         Set<PrometheusAlert> alerts = cluster.getPrometheusAlerts().stream().filter(a -> !a.getId().equals(alertId)).collect(Collectors.toSet());
         cluster.setPrometheusAlerts(alerts);
-        prometheusAlertRepository.delete(alertId);
+        prometheusAlertRepository.delete(alert);
         clusterRepository.save(cluster);
         LOGGER.info("Prometheus alert '{}' has been deleted for cluster 'ID:{}'", alert.getName(), cluster.getId());
     }
@@ -264,6 +265,10 @@ public class AlertService {
 
     public Set<PrometheusAlert> getPrometheusAlerts(Long clusterId) {
         return prometheusAlertRepository.findAllByCluster(clusterId);
+    }
+
+    private Cluster getClusterById(Long clusterId) {
+        return clusterRepository.findById(clusterId).orElseThrow(notFound("Cluster", clusterId));
     }
 
     private String getAlertDefinition(CommonService client, String name) throws Exception {

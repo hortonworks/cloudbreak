@@ -1,12 +1,10 @@
 package com.sequenceiq.cloudbreak.service.metrics;
 
-import javax.annotation.PostConstruct;
-import javax.inject.Inject;
+import java.util.HashMap;
+import java.util.Map;
 
-import org.springframework.boot.actuate.metrics.CounterService;
-import org.springframework.boot.actuate.metrics.GaugeService;
-import org.springframework.boot.actuate.metrics.writer.Delta;
-import org.springframework.boot.actuate.metrics.writer.MetricWriter;
+import javax.annotation.PostConstruct;
+
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
@@ -14,32 +12,25 @@ import com.sequenceiq.cloudbreak.common.type.MetricType;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 
+import io.micrometer.core.instrument.Metrics;
+
 @Service
 public class MetricService {
 
     private static final String METRIC_PREFIX = "cloudbreak.";
 
-    private static final String JMX_COUNTER_TYPE = "counter.";
-
-    @Inject
-    private MetricWriter metricWriter;
-
-    @Inject
-    private CounterService counterService;
-
-    @Inject
-    private GaugeService gaugeService;
+    private Map<String, Double> gaugeCache = new HashMap<>();
 
     @PostConstruct
     public void init() {
         for (MetricType metricType : MetricType.values()) {
             String metricName = metricType.getMetricName();
             if (metricName.startsWith("stack") || metricName.startsWith("cluster")) {
-                initJmxMetricCounter(metricName, CloudConstants.AWS);
-                initJmxMetricCounter(metricName, CloudConstants.AZURE);
-                initJmxMetricCounter(metricName, CloudConstants.GCP);
-                initJmxMetricCounter(metricName, CloudConstants.OPENSTACK);
-                initJmxMetricCounter(metricName, CloudConstants.YARN);
+                initMicrometerMetricCounter(metricName, CloudConstants.AWS);
+                initMicrometerMetricCounter(metricName, CloudConstants.AZURE);
+                initMicrometerMetricCounter(metricName, CloudConstants.GCP);
+                initMicrometerMetricCounter(metricName, CloudConstants.OPENSTACK);
+                initMicrometerMetricCounter(metricName, CloudConstants.YARN);
             }
         }
     }
@@ -90,15 +81,17 @@ public class MetricService {
      * @param value  Metric value
      */
     public void submit(String metric, double value) {
-        gaugeService.submit(METRIC_PREFIX + metric.toLowerCase(), value);
+        String metricName = METRIC_PREFIX + metric.toLowerCase();
+        gaugeCache.put(metricName, value);
+        Metrics.gauge(metricName, gaugeCache, cache -> cache.getOrDefault(metricName, 0d));
     }
 
     private void incrementMetricCounter(String metric) {
-        counterService.increment(METRIC_PREFIX + metric.toLowerCase());
+        Metrics.counter(METRIC_PREFIX + metric.toLowerCase()).increment();
     }
 
-    private void initJmxMetricCounter(String metric, String cloudPlatform) {
-        metricWriter.increment(new Delta<>(JMX_COUNTER_TYPE + METRIC_PREFIX + getMetricNameWithPlatform(metric, cloudPlatform), 0));
+    private void initMicrometerMetricCounter(String metric, String cloudPlatform) {
+        Metrics.counter(METRIC_PREFIX + getMetricNameWithPlatform(metric, cloudPlatform)).increment(0);
     }
 
     private String getMetricNameWithPlatform(MetricType metric, String cloudPlatform) {

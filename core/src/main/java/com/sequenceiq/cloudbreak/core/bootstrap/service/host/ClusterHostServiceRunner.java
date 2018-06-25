@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.core.bootstrap.service.host;
 
+import static com.sequenceiq.cloudbreak.controller.exception.NotFoundException.notFound;
 import static com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedModel;
 import static java.util.Collections.singletonMap;
 
@@ -276,7 +277,7 @@ public class ClusterHostServiceRunner {
     private void saveSharedRangerService(Stack stack, Map<String, SaltPillarProperties> servicePillar) {
         Long datalakeId = stack.getDatalakeId();
         if (datalakeId != null) {
-            StackView dataLakeStack = stackViewRepository.findOne(datalakeId);
+            StackView dataLakeStack = getStackView(datalakeId);
             Cluster dataLakeCluster = clusterRepository.findOneWithLists(dataLakeStack.getClusterView().getId());
             Set<String> groupNames = blueprintProcessorFactory.get(dataLakeCluster.getBlueprint().getBlueprintText()).getHostGroupsWithComponent("RANGER_ADMIN");
             List<HostGroup> groups = dataLakeCluster.getHostGroups().stream().filter(hg -> groupNames.contains(hg.getName())).collect(Collectors.toList());
@@ -289,6 +290,10 @@ public class ClusterHostServiceRunner {
             servicePillar.put("datalake-services", new SaltPillarProperties("/datalake/init.sls",
                     singletonMap("datalake-services", singletonMap("ranger", rangerMap))));
         }
+    }
+
+    private StackView getStackView(Long datalakeId) {
+        return stackViewRepository.findById(datalakeId).orElseThrow(notFound("Stack view", datalakeId));
     }
 
     private void saveGatewayPillar(GatewayConfig gatewayConfig, Cluster cluster, Map<String, SaltPillarProperties> servicePillar) throws IOException {

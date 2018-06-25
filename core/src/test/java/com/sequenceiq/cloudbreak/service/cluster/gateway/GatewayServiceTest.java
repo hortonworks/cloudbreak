@@ -47,9 +47,9 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.ExposedServices;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.GatewayTopology;
 import com.sequenceiq.cloudbreak.repository.GatewayRepository;
-import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class GatewayServiceTest {
@@ -60,7 +60,7 @@ public class GatewayServiceTest {
     public final ExpectedException thrown = ExpectedException.none();
 
     @Mock
-    private StackRepository stackRepository;
+    private StackService stackService;
 
     @Mock
     private GatewayRepository gatewayRepository;
@@ -103,7 +103,7 @@ public class GatewayServiceTest {
     public void testWithNonExistingStack() {
         thrown.expect(BadRequestException.class);
         thrown.expectMessage("Stack with id '0' does not exist.");
-        when(stackRepository.findOne(anyLong())).thenReturn(null);
+        when(stackService.getById(anyLong())).thenReturn(null);
 
         underTest.updateGatewayTopologies(STACK_ID, getRequest());
     }
@@ -111,7 +111,7 @@ public class GatewayServiceTest {
     @Test
     public void testWithFlowRunning() throws IOException {
         doThrow(FlowsAlreadyRunningException.class).when(reactorFlowManager).triggerEphemeralUpdate(anyLong());
-        when(stackRepository.findOne(anyLong())).thenReturn(getStack());
+        when(stackService.getById(anyLong())).thenReturn(getStack());
         when(conversionService.convert(any(GatewayTopologyJson.class), eq(ExposedServices.class)))
                 .thenAnswer((Answer<ExposedServices>) invocation -> {
                     GatewayTopologyJson topologyJson = invocation.getArgument(0);

@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.service.constraint;
 
 
+import static com.sequenceiq.cloudbreak.controller.exception.NotFoundException.notFound;
+
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -32,6 +34,8 @@ public class ConstraintTemplateService {
 
     private static final String CONSTRAINT_NOT_FOUND_MSG = "Constraint template '%s' not found.";
 
+    private static final String CONSTRAINT_NOT_FOUND_BY_ID_MSG = "Constraint template not found by id: '%d'.";
+
     @Inject
     private ConstraintTemplateRepository constraintTemplateRepository;
 
@@ -51,10 +55,8 @@ public class ConstraintTemplateService {
     }
 
     public ConstraintTemplate get(Long id) {
-        ConstraintTemplate constraintTemplate = constraintTemplateRepository.findOne(id);
-        if (constraintTemplate == null) {
-            throw new NotFoundException(String.format(CONSTRAINT_NOT_FOUND_MSG, id));
-        }
+        ConstraintTemplate constraintTemplate = constraintTemplateRepository.findById(id)
+                .orElseThrow(notFound("Constraint", id));
         authorizationService.hasReadPermission(constraintTemplate);
         return constraintTemplate;
     }
@@ -81,7 +83,7 @@ public class ConstraintTemplateService {
     public void delete(Long id, IdentityUser user) {
         ConstraintTemplate constraintTemplate = constraintTemplateRepository.findByIdInAccount(id, user.getAccount());
         if (constraintTemplate == null) {
-            throw new NotFoundException(String.format(CONSTRAINT_NOT_FOUND_MSG, id));
+            throw new NotFoundException(String.format(CONSTRAINT_NOT_FOUND_BY_ID_MSG, id));
         }
         delete(constraintTemplate);
     }

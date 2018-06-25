@@ -1,5 +1,17 @@
 package com.sequenceiq.cloudbreak.service.ldapconfig;
 
+import static com.sequenceiq.cloudbreak.controller.exception.NotFoundException.notFound;
+import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
+
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import javax.inject.Inject;
+
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.stereotype.Service;
+
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
@@ -10,15 +22,6 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.LdapConfigRepository;
 import com.sequenceiq.cloudbreak.service.AuthorizationService;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.stereotype.Service;
-
-import javax.inject.Inject;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
 
 @Service
 public class LdapConfigService {
@@ -44,10 +47,7 @@ public class LdapConfigService {
     }
 
     public LdapConfig get(Long id) {
-        LdapConfig ldapConfig = ldapConfigRepository.findOne(id);
-        if (ldapConfig == null) {
-            throw new NotFoundException(String.format("LdapConfig '%s' not found", id));
-        }
+        LdapConfig ldapConfig = ldapConfigRepository.findById(id).orElseThrow(notFound("LdapConfig", id));
         authorizationService.hasReadPermission(ldapConfig);
         return ldapConfig;
     }

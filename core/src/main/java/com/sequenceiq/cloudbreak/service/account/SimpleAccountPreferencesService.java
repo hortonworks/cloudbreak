@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.account;
 
+import static com.sequenceiq.cloudbreak.controller.exception.NotFoundException.notFound;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -53,7 +55,7 @@ public class SimpleAccountPreferencesService implements AccountPreferencesServic
 
     @Override
     public AccountPreferences get(Long id) {
-        return repository.findOne(id);
+        return repository.findById(id).orElseThrow(notFound("Account preferences", id));
     }
 
     @Override
@@ -108,11 +110,9 @@ public class SimpleAccountPreferencesService implements AccountPreferencesServic
 
     @Override
     public AccountPreferences getOneById(Long id, IdentityUser user) {
-        AccountPreferences accountPreferences = repository.findOne(id);
+        AccountPreferences accountPreferences = get(id);
         if (!user.getRoles().contains(IdentityUserRole.ADMIN)) {
             throw new BadRequestException("AccountPreferences are only available for admin users!");
-        } else if (accountPreferences == null) {
-            throw new BadRequestException(String.format("AccountPreferences could not find with id: %s", id));
         } else if (!accountPreferences.getAccount().equals(user.getAccount())) {
             throw new BadRequestException("AccountPreferences are only available for the owner admin user!");
         }

@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.repository;
 
+import static com.sequenceiq.cloudbreak.controller.exception.NotFoundException.notFound;
+
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
@@ -42,8 +44,9 @@ public class StackUpdater {
     }
 
     private Stack doUpdateStackStatus(Long stackId, DetailedStackStatus detailedStatus, String statusReason) {
-        Stack stack = stackRepository.findOne(stackId);
         Status status = detailedStatus.getStatus();
+        Stack stack = stackRepository.findById(stackId)
+                .orElseThrow(notFound("Stack", stackId));
         if (!stack.isDeleteCompleted()) {
             stack.setStackStatus(new StackStatus(stack, status, statusReason, detailedStatus));
             if (status.isRemovableStatus()) {

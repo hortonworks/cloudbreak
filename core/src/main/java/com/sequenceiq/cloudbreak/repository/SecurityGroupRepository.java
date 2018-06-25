@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.repository;
 
+import java.util.Optional;
 import java.util.Set;
 
 import javax.transaction.Transactional;
@@ -14,8 +15,9 @@ import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 @Transactional(Transactional.TxType.REQUIRED)
 public interface SecurityGroupRepository extends CrudRepository<SecurityGroup, Long> {
 
+    @Override
     @Query("SELECT r FROM SecurityGroup r LEFT JOIN FETCH r.securityRules WHERE r.id= :id")
-    SecurityGroup findById(@Param("id") Long id);
+    Optional<SecurityGroup> findById(@Param("id") Long id);
 
     @Query("SELECT r FROM SecurityGroup r LEFT JOIN FETCH r.securityRules WHERE r.name= :name AND r.owner= :owner AND r.status <> 'DEFAULT_DELETED'")
     SecurityGroup findByNameForUser(@Param("name") String name, @Param("owner") String userId);

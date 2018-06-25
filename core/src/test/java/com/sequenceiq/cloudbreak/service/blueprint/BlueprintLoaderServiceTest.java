@@ -101,10 +101,10 @@ public class BlueprintLoaderServiceTest {
         Set<Blueprint> resultList = new HashSet<>();
         resultList.add(blueprint);
 
-        when(blueprintRepository.save(resultList)).thenReturn(resultList);
+        when(blueprintRepository.saveAll(resultList)).thenReturn(resultList);
 
         Collection<Blueprint> resultSet = underTest.loadBlueprintsForTheSpecifiedUser(identityUser(), blueprints);
-        verify(blueprintRepository).save(argumentCaptor.capture());
+        verify(blueprintRepository).saveAll(argumentCaptor.capture());
 
         Assert.assertEquals(1L, argumentCaptor.getAllValues().size());
         Assert.assertEquals(4L, resultSet.size());
@@ -115,10 +115,10 @@ public class BlueprintLoaderServiceTest {
         Map<String, Blueprint> stringBlueprintMap = generateCacheData(3);
         Set<Blueprint> blueprints = generateDatabaseData(0);
         ArgumentCaptor<Set<Blueprint>> argumentCaptor = ArgumentCaptor.forClass(Set.class);
-        when(blueprintRepository.save(anySet())).thenReturn(stringBlueprintMap.values());
+        when(blueprintRepository.saveAll(anySet())).thenReturn(stringBlueprintMap.values());
 
         Collection<Blueprint> resultSet = underTest.loadBlueprintsForTheSpecifiedUser(identityUser(), blueprints);
-        verify(blueprintRepository).save(argumentCaptor.capture());
+        verify(blueprintRepository).saveAll(argumentCaptor.capture());
 
         Assert.assertEquals(3L, argumentCaptor.getValue().size());
         Assert.assertEquals(3L, resultSet.size());

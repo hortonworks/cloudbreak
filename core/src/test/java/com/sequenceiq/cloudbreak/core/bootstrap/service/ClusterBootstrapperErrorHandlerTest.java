@@ -150,7 +150,7 @@ public class ClusterBootstrapperErrorHandlerTest {
         verify(instanceMetaDataRepository, times(3)).save(any(InstanceMetaData.class));
         verify(connector, times(3)).removeInstances(any(Stack.class), anySet(), anyString());
         verify(resourceRepository, times(3)).findByStackIdAndNameAndType(anyLong(), anyString(), nullable(ResourceType.class));
-        verify(resourceRepository, times(3)).delete(nullable(Long.class));
+        verify(resourceRepository, times(3)).delete(nullable(Resource.class));
         verify(instanceGroupRepository, times(3)).findOneByGroupNameInStack(anyLong(), anyString());
 
     }

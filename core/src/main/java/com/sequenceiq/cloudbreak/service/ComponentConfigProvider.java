@@ -116,7 +116,7 @@ public class ComponentConfigProvider {
         Set<Component> componentsByStackId = componentRepository.findComponentByStackId(stackId);
         if (!componentsByStackId.isEmpty()) {
             LOGGER.debug("Components({}) are going to be deleted for stack: {}", componentsByStackId.size(), stackId);
-            componentRepository.delete(componentsByStackId);
+            componentRepository.deleteAll(componentsByStackId);
             LOGGER.debug("Components({}) have been deleted for stack : {}", componentsByStackId.size(), stackId);
         }
     }

@@ -159,7 +159,7 @@ public class HeartbeatServiceTest {
 
         heartbeatService.scheduledFlowDistribution();
 
-        verify(flowLogRepository).save(flowLogListCaptor.capture());
+        verify(flowLogRepository).saveAll(flowLogListCaptor.capture());
         List<FlowLog> updatedFlows = flowLogListCaptor.getValue();
         assertEquals(myNewFlowLogs.size(), updatedFlows.size());
         for (FlowLog updatedFlow : updatedFlows) {
@@ -211,7 +211,7 @@ public class HeartbeatServiceTest {
 
         heartbeatService.scheduledFlowDistribution();
 
-        verify(flowLogRepository).save(flowLogListCaptor.capture());
+        verify(flowLogRepository).saveAll(flowLogListCaptor.capture());
         List<FlowLog> updatedFlows = flowLogListCaptor.getValue();
         assertEquals(myNewFlowLogs.size(), updatedFlows.size());
         for (FlowLog updatedFlow : updatedFlows) {
@@ -272,7 +272,7 @@ public class HeartbeatServiceTest {
 
         heartbeatService.scheduledFlowDistribution();
 
-        verify(flowLogRepository).save(flowLogListCaptor.capture());
+        verify(flowLogRepository).saveAll(flowLogListCaptor.capture());
         List<FlowLog> updatedFlows = flowLogListCaptor.getValue();
         assertEquals(myNewFlowLogs.size(), updatedFlows.size());
         for (FlowLog updatedFlow : updatedFlows) {
@@ -337,7 +337,7 @@ public class HeartbeatServiceTest {
 
         heartbeatService.scheduledFlowDistribution();
 
-        verify(flowLogRepository).save(flowLogListCaptor.capture());
+        verify(flowLogRepository).saveAll(flowLogListCaptor.capture());
         List<FlowLog> updatedFlows = flowLogListCaptor.getValue();
         assertEquals(myNewFlowLogs.size(), updatedFlows.size());
         for (FlowLog updatedFlow : updatedFlows) {
@@ -382,7 +382,7 @@ public class HeartbeatServiceTest {
 
         when(runningFlows.get(any())).thenReturn(null);
 
-        when(flowLogRepository.save(anyCollection())).thenThrow(new OptimisticLockingFailureException("Someone already distributed the flows.."));
+        when(flowLogRepository.saveAll(anyCollection())).thenThrow(new OptimisticLockingFailureException("Someone already distributed the flows.."));
 
         heartbeatService.scheduledFlowDistribution();
 
@@ -422,7 +422,7 @@ public class HeartbeatServiceTest {
 
         when(runningFlows.get(any())).thenReturn(null);
 
-        when(flowLogRepository.save(anyCollection())).thenThrow(new OptimisticLockingFailureException("Someone already distributed the flows.."));
+        when(flowLogRepository.saveAll(anyCollection())).thenThrow(new OptimisticLockingFailureException("Someone already distributed the flows.."));
 
         heartbeatService.scheduledFlowDistribution();
 
@@ -543,7 +543,7 @@ public class HeartbeatServiceTest {
         List<CloudbreakNode> cloudbreakNodes = heartbeatService.distributeFlows();
 
         ArgumentCaptor<Collection<FlowLog>> updatedLogsCaptor = ArgumentCaptor.forClass(Collection.class);
-        verify(flowLogRepository, times(1)).save(updatedLogsCaptor.capture());
+        verify(flowLogRepository, times(1)).saveAll(updatedLogsCaptor.capture());
         Collection<FlowLog> updatedFlowLogs = updatedLogsCaptor.getValue();
         assertTrue(updatedFlowLogs.stream()
                 .map(FlowLog::getStateStatus)

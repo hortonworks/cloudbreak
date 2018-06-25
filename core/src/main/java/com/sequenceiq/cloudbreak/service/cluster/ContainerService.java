@@ -16,7 +16,7 @@ public class ContainerService {
     private ContainerRepository containerRepository;
 
     public Iterable<Container> save(Iterable<Container> containers) {
-        return containerRepository.save(containers);
+        return containerRepository.saveAll(containers);
     }
 
     public Set<Container> findContainersInCluster(Long clusterId) {

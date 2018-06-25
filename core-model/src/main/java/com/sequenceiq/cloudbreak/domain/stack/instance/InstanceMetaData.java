@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.domain.stack.instance;
 
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -11,11 +12,11 @@ import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 
 import org.apache.commons.codec.binary.Base64;
-import org.hibernate.annotations.Type;
 
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceMetadataType;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceStatus;
 import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
+import com.sequenceiq.cloudbreak.domain.converter.EncryptionConverter;
 
 @Entity
 public class InstanceMetaData implements ProvisionEntity {
@@ -41,7 +42,7 @@ public class InstanceMetaData implements ProvisionEntity {
 
     private String discoveryFQDN;
 
-    @Type(type = "encrypted_string")
+    @Convert(converter = EncryptionConverter.class)
     @Column(columnDefinition = "TEXT")
     private String serverCert;
 

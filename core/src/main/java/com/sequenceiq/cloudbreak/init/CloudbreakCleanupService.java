@@ -200,7 +200,7 @@ public class CloudbreakCleanupService implements ApplicationListener<ContextRefr
                 flowLog.setCloudbreakNodeId(nodeId);
             }
             transactionService.required(() -> {
-                flowLogRepository.save(flowLogs);
+                flowLogRepository.saveAll(flowLogs);
                 return null;
             });
         }
@@ -241,7 +241,7 @@ public class CloudbreakCleanupService implements ApplicationListener<ContextRefr
     private Set<FlowLog> getMyFlowLogs() throws TransactionExecutionException {
         Set<FlowLog> myFlowLogs = flowLogRepository.findAllByCloudbreakNodeId(cloudbreakNodeConfig.getId());
         myFlowLogs.forEach(fl -> fl.setCreated(fl.getCreated() + 1));
-        transactionService.required(() -> flowLogRepository.save(myFlowLogs));
+        transactionService.required(() -> flowLogRepository.saveAll(myFlowLogs));
         return myFlowLogs;
     }
 

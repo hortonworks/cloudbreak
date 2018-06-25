@@ -10,7 +10,7 @@ import javax.ws.rs.client.ClientBuilder;
 import org.apache.http.ssl.SSLContexts;
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.client.ClientProperties;
-import org.glassfish.jersey.filter.LoggingFilter;
+import org.glassfish.jersey.logging.LoggingFeature;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,9 +38,9 @@ public class RestClientUtil {
 
     public static Client createClient(String serverCert, String clientCert, String clientKey, boolean debug, Class<?> debugClass) throws Exception {
         SSLContext sslContext = SSLContexts.custom()
-            .loadTrustMaterial(KeyStoreUtil.createTrustStore(serverCert), null)
-            .loadKeyMaterial(KeyStoreUtil.createKeyStore(clientCert, clientKey), "consul".toCharArray())
-            .build();
+                .loadTrustMaterial(KeyStoreUtil.createTrustStore(serverCert), null)
+                .loadKeyMaterial(KeyStoreUtil.createKeyStore(clientCert, clientKey), "consul".toCharArray())
+                .build();
         return createClient(sslContext, debug, debugClass);
     }
 
@@ -55,7 +55,8 @@ public class RestClientUtil {
         builder.hostnameVerifier(CertificateTrustManager.hostnameVerifier());
 
         if (debug) {
-            builder = builder.register(new LoggingFilter(java.util.logging.Logger.getLogger(debugClass.getName()), true));
+            builder = builder.property(LoggingFeature.LOGGING_FEATURE_VERBOSITY_CLIENT, LoggingFeature.Verbosity.PAYLOAD_ANY)
+                    .property(LoggingFeature.LOGGING_FEATURE_LOGGER_LEVEL_CLIENT, "FINE");
         }
 
         Client client = builder.build();
@@ -73,7 +74,8 @@ public class RestClientUtil {
         ClientBuilder builder = ClientBuilder.newBuilder().withConfig(config);
 
         if (configKey.isDebug()) {
-            builder = builder.register(new LoggingFilter(java.util.logging.Logger.getLogger(RestClientUtil.class.getName()), true));
+            builder = builder.property(LoggingFeature.LOGGING_FEATURE_VERBOSITY_CLIENT, LoggingFeature.Verbosity.PAYLOAD_ANY)
+                    .property(LoggingFeature.LOGGING_FEATURE_LOGGER_LEVEL_CLIENT, "FINE");
         }
 
         if (!configKey.isSecure()) {

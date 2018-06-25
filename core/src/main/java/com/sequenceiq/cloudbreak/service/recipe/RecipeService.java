@@ -1,5 +1,20 @@
 package com.sequenceiq.cloudbreak.service.recipe;
 
+import static com.sequenceiq.cloudbreak.controller.exception.NotFoundException.notFound;
+import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import javax.inject.Inject;
+
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.stereotype.Service;
+
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
@@ -10,17 +25,6 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
 import com.sequenceiq.cloudbreak.repository.RecipeRepository;
 import com.sequenceiq.cloudbreak.service.AuthorizationService;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.stereotype.Service;
-
-import javax.inject.Inject;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
 
 @Service
 public class RecipeService {
@@ -46,10 +50,7 @@ public class RecipeService {
     }
 
     public Recipe get(Long id) {
-        Recipe recipe = recipeRepository.findOne(id);
-        if (recipe == null) {
-            throw new NotFoundException(String.format("Recipe '%s' not found", id));
-        }
+        Recipe recipe = recipeRepository.findById(id).orElseThrow(notFound("Recipe", id));
         authorizationService.hasReadPermission(recipe);
         return recipe;
     }
@@ -64,10 +65,8 @@ public class RecipeService {
     }
 
     public Recipe getPrivateRecipe(String name, IdentityUser user) {
-        Recipe recipe = recipeRepository.findByNameForUser(name, user.getUserId());
-        if (recipe == null) {
-            throw new NotFoundException(String.format("Recipe '%s' not found.", name));
-        }
+        Recipe recipe = Optional.ofNullable(recipeRepository.findByNameForUser(name, user.getUserId()))
+                .orElseThrow(notFound("Recipe", name));
         return recipe;
     }
 
@@ -82,10 +81,8 @@ public class RecipeService {
     }
 
     public Recipe getPublicRecipe(String name, IdentityUser user) {
-        Recipe recipe = recipeRepository.findByNameInAccount(name, user.getAccount());
-        if (recipe == null) {
-            throw new NotFoundException(String.format("Recipe '%s' not found.", name));
-        }
+        Recipe recipe = Optional.ofNullable(recipeRepository.findByNameInAccount(name, user.getAccount()))
+                .orElseThrow(notFound("Recipe", name));
         return recipe;
     }
 
@@ -94,10 +91,8 @@ public class RecipeService {
     }
 
     public void delete(String name, IdentityUser user) {
-        Recipe recipe = recipeRepository.findByNameInAccount(name, user.getAccount());
-        if (recipe == null) {
-            throw new NotFoundException(String.format("Recipe '%s' not found.", name));
-        }
+        Recipe recipe = Optional.ofNullable(recipeRepository.findByNameInAccount(name, user.getAccount()))
+                .orElseThrow(notFound("Recipe", name));
         delete(recipe);
     }
 

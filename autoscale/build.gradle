@@ -10,12 +10,8 @@ buildscript {
     }
 }
 
-jar {
-    baseName = 'periscope'
-    archiveName = 'periscope.jar'
-}
-
 apply plugin: 'org.springframework.boot'
+apply plugin: 'io.spring.dependency-management'
 apply plugin: 'info.solidsoft.pitest'
 
 bootRun {
@@ -26,54 +22,112 @@ bootRun {
     }
 }
 
+bootJar {
+  baseName = 'periscope'
+  archiveName = 'periscope.jar'
+}
+
 springBoot {
-    mainClass = 'com.sequenceiq.periscope.PeriscopeApplication'
+    mainClassName = 'com.sequenceiq.periscope.PeriscopeApplication'
+}
+
+dependencyManagement {
+  dependencies {
+    dependencySet(group: 'org.springframework.boot', version: springBootVersion) {
+      entry 'spring-boot-starter'
+      entry 'spring-boot-starter-web'
+      entry 'spring-boot-starter-actuator'
+      entry 'spring-boot-starter-data-jpa'
+      entry 'spring-boot-starter-aop'
+      entry 'spring-boot-starter-freemarker'
+      entry 'spring-boot-starter-security'
+      entry 'spring-boot-starter-jersey'
+      entry 'spring-boot-starter-test'
+      entry 'spring-boot-starter-freemarker'
+    }
+
+    dependencySet(group: 'io.springfox', version: '2.5.0') {
+      entry 'springfox-swagger2'
+      entry 'springfox-core'
+      entry 'springfox-swagger-ui'
+    }
+
+    dependencySet (group: 'org.powermock', version: powermockVersion) {
+      entry 'powermock-module-junit4'
+      entry('powermock-api-mockito2') {
+        exclude group: 'org.hamcrest'
+      }
+    }
+
+    dependency group: 'io.swagger',                    name: 'swagger-jersey2-jaxrs',          version: swaggerVersion
+    dependency group: 'javax.mail',                    name: 'mail',                           version: '1.5.0-b01'
+    dependency group: 'dnsjava',                       name: 'dnsjava',                        version: '2.1.7'
+    dependency group: 'net.sf.ehcache',                name: 'ehcache',                        version: '2.8.3'
+    dependency group: 'javax.xml.bind',                name: 'jaxb-api',                       version: '2.3.0'
+    dependency group: 'com.sun.xml.bind',              name: 'jaxb-impl',                      version: '2.3.0'
+    dependency group: 'org.glassfish.jaxb',            name: 'jaxb-runtime',                   version: '2.3.0'
+
+    dependency group: 'org.springframework.security.oauth', name: 'spring-security-oauth2',    version: springOauthVersion
+
+    dependency group: 'com.google.code.gson',               name: 'gson',                      version: '2.6.2'
+    dependency group: 'org.codehaus.groovy',                name: 'groovy-all',                version: '2.5.0'
+    dependency group: 'org.apache.hadoop',                  name: 'hadoop-yarn-api',           version: hadoopVersion
+    dependency group: 'org.freemarker',                     name: 'freemarker',                version: freemarkerVersion
+    dependency group: 'org.quartz-scheduler',               name: 'quartz',                    version: '2.3.0'
+    dependency group: 'org.postgresql',                     name: 'postgresql',                version: postgreSQLVersion
+    dependency group: 'org.mybatis',                        name: 'mybatis-migrations',        version: '3.2.0'
+    dependency group: 'org.mockito',                        name: 'mockito-core',              version: mockitoVersion
+    dependency group: 'com.openpojo',                       name: 'openpojo',                  version: '0.8.10'
+    dependency group: 'org.ow2.asm',                        name: 'asm',                       version: '6.2'
+  }
 }
 
 dependencies {
+  compile("com.sequenceiq:${ambariClientName}:${ambariClientVersion}") {
+      exclude group: 'org.slf4j';
+  }
 
-    compile("com.sequenceiq:${ambariClientName}:${ambariClientVersion}") {
-        exclude group: 'org.slf4j';
-    }
-    compile group: 'org.springframework.boot',           name: 'spring-boot-starter-jersey',             version: springBootVersion
-    compile group: 'org.springframework.boot',           name: 'spring-boot-starter',                    version: springBootVersion
-    compile group: 'org.springframework.boot',           name: 'spring-boot-starter-web',                version: springBootVersion
-    compile group: 'org.springframework.boot',           name: 'spring-boot-starter-security',           version: springBootVersion
-    compile group: 'org.springframework.boot',           name: 'spring-boot-starter-data-jpa',           version: springBootVersion
-    compile group: 'org.springframework.boot',           name: 'spring-boot-starter-actuator',           version: springBootVersion
-    compile group: 'org.springframework.boot',           name: 'spring-boot-starter-freemarker',         version: springBootVersion
-    compile group: 'org.springframework.boot',           name: 'spring-boot-starter-jersey',             version: springBootVersion
-    compile group: 'org.springframework.security.oauth', name: 'spring-security-oauth2',                 version: springOauthVersion
-    compile group: 'org.apache.commons',            name: 'commons-lang3',                          version: apacheCommonsLangVersion
-    compile group: 'org.apache.hadoop',             name: 'hadoop-yarn-api',                        version: hadoopVersion
+  compile group: 'org.springframework.boot',           name: 'spring-boot-starter'
+  compile group: 'org.springframework.boot',           name: 'spring-boot-starter-web'
+  compile group: 'org.springframework.boot',           name: 'spring-boot-starter-security'
+  compile group: 'org.springframework.boot',           name: 'spring-boot-starter-data-jpa'
+  compile group: 'org.springframework.boot',           name: 'spring-boot-starter-actuator'
+  compile group: 'org.springframework.boot',           name: 'spring-boot-starter-freemarker'
+  compile group: 'org.springframework.boot',           name: 'spring-boot-starter-jersey'
 
-    compile group: 'org.freemarker',                name: 'freemarker',                             version : freemarkerVersion
-    compile group: 'javax.mail',                    name: 'mail',                                   version: '1.5.0-b01'
-    compile group: 'joda-time',                     name: 'joda-time',                              version: '2.5'
-    compile group: 'net.sf.ehcache',                name: 'ehcache',                                version: '2.8.3'
-    compile group: 'org.postgresql',                name: 'postgresql',                             version: '9.4.1212'
-    compile group: 'org.hibernate',                 name: 'hibernate-validator',                    version: hibernateValidatorVersion
-    compile group: 'org.quartz-scheduler',          name: 'quartz',                                 version: '2.3.0'
-    compile group: 'dnsjava',                       name: 'dnsjava',                                version: '2.1.7'
-    compile group: 'org.mybatis',                   name: 'mybatis-migrations',                     version: '3.2.0'
+  compile group: 'org.springframework.security.oauth', name: 'spring-security-oauth2'
 
-    compile group: 'io.springfox',                  name: 'springfox-swagger2',                     version: '2.5.0'
-    compile group: 'io.springfox',                  name: 'springfox-core',                         version: '2.5.0'
-    compile group: 'io.springfox',                  name: 'springfox-swagger-ui',                   version: '2.5.0'
+  compile group: 'com.google.code.gson',          name: 'gson'
+  compile group: 'org.codehaus.groovy',           name: 'groovy-all'
+  compile group: 'org.apache.hadoop',             name: 'hadoop-yarn-api'
+  compile group: 'org.freemarker',                name: 'freemarker'
+  compile group: 'org.postgresql',                name: 'postgresql'
+  compile group: 'org.mybatis',                   name: 'mybatis-migrations'
+  compile group: 'org.quartz-scheduler',          name: 'quartz'
 
-    compile group: 'io.swagger',                    name: 'swagger-jersey2-jaxrs',                  version: swaggerVersion
-    testCompile group: 'junit',                     name: 'junit',                                  version: '4.11'
-    testCompile group: 'org.mockito',               name: 'mockito-core',                           version: mockitoVersion
-    testCompile group: 'org.springframework',       name: 'spring-test',                            version: springFrameworkVersion
-    testCompile group: 'org.springframework.boot',  name: 'spring-boot-starter-test',               version: springBootVersion
-    testCompile group: 'com.openpojo',              name: 'openpojo',                               version: '0.8.10'
-    testCompile (group: 'org.powermock',            name: 'powermock-module-junit4',                version: powermockVersion)
-    testCompile (group: 'org.powermock',            name: 'powermock-api-mockito2',                 version: powermockVersion) {
-      exclude group: 'org.hamcrest'
-    }
+  compile group: 'javax.mail',                    name: 'mail'
+  compile group: 'dnsjava',                       name: 'dnsjava'
+  compile group: 'net.sf.ehcache',                name: 'ehcache'
 
-    compile project(':core-api')
-    compile project(':autoscale-api')
+  compile group: 'io.springfox',                  name: 'springfox-swagger2'
+  compile group: 'io.springfox',                  name: 'springfox-core'
+  compile group: 'io.springfox',                  name: 'springfox-swagger-ui'
+
+  compile group: 'io.swagger',                    name: 'swagger-jersey2-jaxrs'
+
+  runtime group: 'javax.xml.bind',                name: 'jaxb-api'
+  runtime group: 'com.sun.xml.bind',              name: 'jaxb-impl'
+  runtime group: 'org.glassfish.jaxb',            name: 'jaxb-runtime'
+
+  testCompile group: 'org.springframework.boot',  name: 'spring-boot-starter-test'
+  testCompile group: 'org.mockito',               name: 'mockito-core'
+  testCompile group: 'org.powermock',             name: 'powermock-module-junit4'
+  testCompile group: 'org.powermock',             name: 'powermock-api-mockito2'
+  testCompile group: 'org.ow2.asm',               name: 'asm'
+  testCompile group: 'com.openpojo',              name: 'openpojo'
+
+  compile project(':core-api')
+  compile project(':autoscale-api')
 }
 
 task buildInfo(type: BuildInfoTask) {

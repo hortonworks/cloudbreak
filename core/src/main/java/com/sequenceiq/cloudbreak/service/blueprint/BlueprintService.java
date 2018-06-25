@@ -1,5 +1,24 @@
 package com.sequenceiq.cloudbreak.service.blueprint;
 
+import static com.sequenceiq.cloudbreak.controller.exception.NotFoundException.notFound;
+import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.stereotype.Service;
+
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessorFactory;
 import com.sequenceiq.cloudbreak.blueprint.CentralBlueprintParameterQueryService;
@@ -17,22 +36,6 @@ import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.service.AuthorizationService;
 import com.sequenceiq.cloudbreak.util.NameUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.stereotype.Service;
-
-import javax.inject.Inject;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
 
 @Service
 public class BlueprintService {
@@ -64,10 +67,7 @@ public class BlueprintService {
     }
 
     public Blueprint get(Long id) {
-        Blueprint blueprint = blueprintRepository.findOne(id);
-        if (blueprint == null) {
-            throw new NotFoundException(String.format("Blueprint '%s' not found.", id));
-        }
+        Blueprint blueprint = blueprintRepository.findById(id).orElseThrow(notFound("Blueprint", id));
         authorizationService.hasReadPermission(blueprint);
         return blueprint;
     }
@@ -155,7 +155,7 @@ public class BlueprintService {
     }
 
     public Iterable<Blueprint> save(Iterable<Blueprint> entities) {
-        return blueprintRepository.save(entities);
+        return blueprintRepository.saveAll(entities);
     }
 
     private void delete(Blueprint blueprint) {
