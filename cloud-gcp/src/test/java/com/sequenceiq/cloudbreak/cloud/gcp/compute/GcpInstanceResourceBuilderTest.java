@@ -125,7 +125,7 @@ public class GcpInstanceResourceBuilderTest {
         String serviceAccountId = GcpStackUtil.getServiceAccountId(cloudCredential);
         authenticatedContext = new AuthenticatedContext(cloudContext, cloudCredential);
         context = new GcpContext(cloudContext.getName(), location, projectId, serviceAccountId, compute, false, 30, false);
-        List<CloudResource> networkResources = Arrays.asList(new Builder().type(ResourceType.GCP_NETWORK).name("network-test").build());
+        List<CloudResource> networkResources = Collections.singletonList(new Builder().type(ResourceType.GCP_NETWORK).name("network-test").build());
         context.addNetworkResources(networkResources);
         operation = new Operation();
         operation.setName("operation");

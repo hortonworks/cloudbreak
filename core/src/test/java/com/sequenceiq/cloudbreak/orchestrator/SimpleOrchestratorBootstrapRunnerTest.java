@@ -47,7 +47,7 @@ public class SimpleOrchestratorBootstrapRunnerTest {
 
         private int count;
 
-        private int retryOk = 2;
+        private final int retryOk;
 
         private MockBootstrapRunner(int retryOk) {
             this.retryOk = retryOk;

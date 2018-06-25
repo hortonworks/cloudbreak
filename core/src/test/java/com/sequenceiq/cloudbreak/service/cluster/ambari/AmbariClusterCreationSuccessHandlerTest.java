@@ -43,7 +43,7 @@ public class AmbariClusterCreationSuccessHandlerTest {
     private HostMetadataRepository hostMetadataRepository;
 
     @InjectMocks
-    private AmbariClusterCreationSuccessHandler underTest = new AmbariClusterCreationSuccessHandler();
+    private final AmbariClusterCreationSuccessHandler underTest = new AmbariClusterCreationSuccessHandler();
 
     @Test
     public void testHandleClusterCreationSuccessWhenEverythingGoesFine() {
@@ -51,9 +51,9 @@ public class AmbariClusterCreationSuccessHandlerTest {
         Cluster cluster = TestUtil.cluster();
 
         Set<HostMetadata> hostMetadataList = new HashSet<>();
-        cluster.getHostGroups().forEach(hostGroup -> hostGroup.getHostMetadata().forEach(hostMetadataList::add));
+        cluster.getHostGroups().forEach(hostGroup -> hostMetadataList.addAll(hostGroup.getHostMetadata()));
         List<InstanceMetaData> instanceMetaDataList = new ArrayList<>();
-        stack.getInstanceGroups().forEach(instanceGroup -> instanceGroup.getAllInstanceMetaData().forEach(instanceMetaDataList::add));
+        stack.getInstanceGroups().forEach(instanceGroup -> instanceMetaDataList.addAll(instanceGroup.getAllInstanceMetaData()));
 
         when(clusterService.updateCluster(cluster)).thenReturn(cluster);
         when(instanceMetadataRepository.save(anyCollection())).thenReturn(instanceMetaDataList);
@@ -67,15 +67,15 @@ public class AmbariClusterCreationSuccessHandlerTest {
         assertNotNull(clusterCaptor.getValue().getCreationFinished());
         assertNotNull(clusterCaptor.getValue().getUpSince());
 
-        ArgumentCaptor<List> instanceMetadataCaptor = ArgumentCaptor.forClass(List.class);
+        ArgumentCaptor<List<InstanceMetaData>> instanceMetadataCaptor = ArgumentCaptor.forClass(List.class);
         verify(instanceMetadataRepository, times(1)).save(instanceMetadataCaptor.capture());
-        for (InstanceMetaData instanceMetaData : (List<InstanceMetaData>) instanceMetadataCaptor.getValue()) {
+        for (InstanceMetaData instanceMetaData : instanceMetadataCaptor.getValue()) {
             Assert.assertEquals(InstanceStatus.REGISTERED, instanceMetaData.getInstanceStatus());
         }
 
-        ArgumentCaptor<List> hostMetadataCaptor = ArgumentCaptor.forClass(List.class);
+        ArgumentCaptor<List<HostMetadata>> hostMetadataCaptor = ArgumentCaptor.forClass(List.class);
         verify(hostMetadataRepository, times(1)).save(hostMetadataCaptor.capture());
-        for (HostMetadata hostMetadata : (List<HostMetadata>) hostMetadataCaptor.getValue()) {
+        for (HostMetadata hostMetadata : hostMetadataCaptor.getValue()) {
             Assert.assertEquals(HostMetadataState.HEALTHY, hostMetadata.getHostMetadataState());
         }
 

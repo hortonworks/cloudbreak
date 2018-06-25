@@ -25,7 +25,7 @@ public class GatewayTopologyJsonValidatorTest {
 
         ValidationResult result = underTest.validate(gatewayTopologyJson);
 
-        assertEquals(1, result.getErrors().size());
+        assertEquals(1L, result.getErrors().size());
         assertTrue(result.getErrors().get(0).contains("topologyName must be set in gateway topology."));
     }
 
@@ -46,7 +46,7 @@ public class GatewayTopologyJsonValidatorTest {
 
         ValidationResult result = underTest.validate(gatewayTopologyJson);
 
-        assertEquals(1, result.getErrors().size());
+        assertEquals(1L, result.getErrors().size());
         assertTrue(result.getErrors().get(0).contains("topologyName must be set in gateway topology."));
     }
 
@@ -71,7 +71,7 @@ public class GatewayTopologyJsonValidatorTest {
         ValidationResult result = underTest.validate(gatewayTopologyJson);
 
         assertEquals(State.ERROR, result.getState());
-        assertEquals(1, result.getErrors().size());
+        assertEquals(1L, result.getErrors().size());
         assertTrue(result.getErrors().get(0).contains(invalidService));
     }
 
@@ -84,7 +84,7 @@ public class GatewayTopologyJsonValidatorTest {
         ValidationResult result = underTest.validate(gatewayTopologyJson);
 
         assertEquals(State.ERROR, result.getState());
-        assertEquals(2, result.getErrors().size());
+        assertEquals(2L, result.getErrors().size());
         assertTrue(result.getErrors().get(0).contains(invalidService));
         assertTrue(result.getErrors().get(1).contains("topologyName must be set in gateway topology."));
     }

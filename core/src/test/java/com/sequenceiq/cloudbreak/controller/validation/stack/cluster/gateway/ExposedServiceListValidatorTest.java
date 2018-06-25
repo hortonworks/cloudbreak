@@ -32,7 +32,7 @@ public class ExposedServiceListValidatorTest {
         ValidationResult result = underTest.validate(services);
 
         assertEquals(State.ERROR, result.getState());
-        assertEquals(1, result.getErrors().size());
+        assertEquals(1L, result.getErrors().size());
         assertTrue(result.getErrors().get(0).contains(invalidService));
     }
 }

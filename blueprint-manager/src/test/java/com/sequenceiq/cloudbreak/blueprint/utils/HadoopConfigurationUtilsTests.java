@@ -20,7 +20,7 @@ import com.sequenceiq.cloudbreak.blueprint.template.views.HostgroupView;
 public class HadoopConfigurationUtilsTests {
 
     @Rule
-    public ExpectedException expectedException = ExpectedException.none();
+    public final ExpectedException expectedException = ExpectedException.none();
 
     private final HadoopConfigurationUtils underTest = new HadoopConfigurationUtils();
 
@@ -69,7 +69,7 @@ public class HadoopConfigurationUtilsTests {
 
         String actual = underTest.getValue(configProperty, "serviceName", false, 0);
 
-        Assert.assertEquals(null, actual);
+        Assert.assertNull(actual);
     }
 
     @Test
@@ -88,7 +88,7 @@ public class HadoopConfigurationUtilsTests {
 
         String actual = underTest.getValue(configProperty, "serviceName", false, -1);
 
-        Assert.assertEquals(null, actual);
+        Assert.assertNull(actual);
     }
 
     @Test
@@ -97,6 +97,6 @@ public class HadoopConfigurationUtilsTests {
 
         String actual = underTest.getValue(configProperty, "serviceName", false, -1);
 
-        Assert.assertEquals(null, actual);
+        Assert.assertNull(actual);
     }
 }

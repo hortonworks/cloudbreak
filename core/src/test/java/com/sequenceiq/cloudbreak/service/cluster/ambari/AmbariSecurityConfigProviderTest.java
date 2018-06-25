@@ -18,7 +18,7 @@ public class AmbariSecurityConfigProviderTest {
     public final ExpectedException thrown = ExpectedException.none();
 
     @InjectMocks
-    private AmbariSecurityConfigProvider underTest = new AmbariSecurityConfigProvider();
+    private final AmbariSecurityConfigProvider underTest = new AmbariSecurityConfigProvider();
 
     @Test
     public void testGetAmbariUserNameWhenCloudbreakAmbariUserNameIsNullThenShouldReturnUserName() {

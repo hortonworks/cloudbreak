@@ -10,18 +10,21 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
-import org.junit.BeforeClass;
+import org.junit.Before;
 import org.junit.Test;
 
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.RunnerInfo;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 public class JidInfoResponseTransformerTest {
-    private static Map saltResponseData;
 
-    @BeforeClass
-    public static void setUp() throws Exception {
-        populateTestData("/jid_real_response.json", saltResponseData);
+    private Map<String, List<Map<String, Object>>> saltResponseData;
+
+    @Before
+    public void setUp() throws IOException {
+        try (InputStream responseStream = JidInfoResponseTransformerTest.class.getResourceAsStream("/jid_real_response.json")) {
+            saltResponseData = JsonUtil.readValue(IOUtils.toString(responseStream), HashMap.class);
+        }
     }
 
     @Test
@@ -55,12 +58,6 @@ public class JidInfoResponseTransformerTest {
         assertEquals("No changes needed to be made", noExtraInfo.getComment());
         assertEquals("null", noExtraInfo.getStderr());
         assertEquals("\nComment: No changes needed to be made", noExtraInfo.getErrorResultSummary());
-    }
-
-    private static void populateTestData(String path, Map data) throws IOException {
-        try (InputStream responseStream = JidInfoResponseTransformerTest.class.getResourceAsStream(path)) {
-            saltResponseData = JsonUtil.readValue(IOUtils.toString(responseStream), HashMap.class);
-        }
     }
 }
 

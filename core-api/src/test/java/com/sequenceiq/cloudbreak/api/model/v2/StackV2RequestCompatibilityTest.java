@@ -23,12 +23,12 @@ public class StackV2RequestCompatibilityTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StackV2RequestCompatibilityTest.class);
 
-    private ObjectMapper mapper = new ObjectMapper();
+    private final ObjectMapper mapper = new ObjectMapper();
 
     private Validator validator;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         Configuration<?> cfg = Validation.byDefaultProvider().configure();
         cfg.messageInterpolator(new ParameterMessageInterpolator());
         validator = cfg.buildValidatorFactory().getValidator();
@@ -38,9 +38,9 @@ public class StackV2RequestCompatibilityTest {
     public void testApiCompatibility2dot4() throws IOException {
         StackV2Request request = mapper.readValue(new ClassPathResource("api-compatibility/StackV2Request_v2.4.0.json").getURL(), StackV2Request.class);
         Set<ConstraintViolation<StackV2Request>> violations = validator.validate(request);
-        if (violations.size() > 0) {
+        if (!violations.isEmpty()) {
             LOGGER.warn("violations: {}", violations);
         }
-        assertEquals(0, violations.size());
+        assertEquals(0L, violations.size());
     }
 }

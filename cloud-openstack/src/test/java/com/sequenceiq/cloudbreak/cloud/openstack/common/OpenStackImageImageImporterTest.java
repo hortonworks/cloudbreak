@@ -16,7 +16,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.openstack4j.api.OSClient;
 import org.openstack4j.api.image.v2.ImageService;
 import org.openstack4j.api.image.v2.TaskService;
-import org.openstack4j.model.image.v2.Task;
+import org.openstack4j.model.image.v2.Task.TaskStatus;
 import org.openstack4j.openstack.image.v2.domain.GlanceTask;
 
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
@@ -26,7 +26,7 @@ import com.sequenceiq.cloudbreak.common.service.url.UrlAccessValidationService;
 public class OpenStackImageImageImporterTest {
 
     @InjectMocks
-    private OpenStackImageImporter underTest = new OpenStackImageImporter();
+    private final OpenStackImageImporter underTest = new OpenStackImageImporter();
 
     @Mock
     private OSClient<?> osClient;
@@ -56,7 +56,7 @@ public class OpenStackImageImageImporterTest {
     @Test
     public void testImportSuccess() {
         GlanceTask task = Mockito.mock(GlanceTask.class);
-        when(task.getStatus()).thenReturn(Task.TaskStatus.SUCCESS);
+        when(task.getStatus()).thenReturn(TaskStatus.SUCCESS);
         when(taskService.create(any())).thenReturn(task);
         underTest.importImage(osClient, "myimage");
     }
@@ -77,7 +77,7 @@ public class OpenStackImageImageImporterTest {
     public void testImportFailure() {
         try {
             GlanceTask task = Mockito.mock(GlanceTask.class);
-            when(task.getStatus()).thenReturn(Task.TaskStatus.FAILURE);
+            when(task.getStatus()).thenReturn(TaskStatus.FAILURE);
             when(task.getMessage()).thenReturn("USEFUL ERRROR MESSAGE");
             when(taskService.create(any())).thenReturn(task);
             underTest.importImage(osClient, "myimage");

@@ -13,6 +13,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
 
 import com.sequenceiq.cloudbreak.api.model.rds.OracleParameters;
 import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigRequest;
@@ -20,16 +21,16 @@ import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigRequest;
 @RunWith(Parameterized.class)
 public class DatabaseVendorTest {
 
-    private RDSConfigRequest rdsConfigRequest;
+    private final RDSConfigRequest rdsConfigRequest;
 
-    private Optional<DatabaseVendor> expected;
+    private final Optional<DatabaseVendor> expected;
 
     public DatabaseVendorTest(RDSConfigRequest rdsConfigRequest, DatabaseVendor expected) {
         this.rdsConfigRequest = rdsConfigRequest;
         this.expected = Optional.ofNullable(expected);
     }
 
-    @Parameterized.Parameters(name = "{index}: databaseVendorTest({0})={1}")
+    @Parameters(name = "{index}: databaseVendorTest({0})={1}")
     public static Iterable<Object[]> data() {
         return Arrays.asList(new Object[][]{
                 {rdsConfigRequest("jdbc:postgresql://test.eu-west-1.rds.amazonaws.com:5432/druidricsi"), POSTGRES},
@@ -77,9 +78,9 @@ public class DatabaseVendorTest {
 
     @Test
     public void test() {
-        Optional<DatabaseVendor> databaseVendor = DatabaseVendor.getVendorByJdbcUrl(this.rdsConfigRequest);
+        Optional<DatabaseVendor> databaseVendor = DatabaseVendor.getVendorByJdbcUrl(rdsConfigRequest);
         Assert.assertEquals(String.format("DatabaseVendorTest.getVendorByJdbcUrl returned with %s and the expected was %s for testdata %s",
-                databaseVendor, this.expected, this.rdsConfigRequest.getConnectionURL()), this.expected, databaseVendor);
+                databaseVendor, expected, rdsConfigRequest.getConnectionURL()), expected, databaseVendor);
     }
 
 }

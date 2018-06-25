@@ -19,6 +19,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -77,16 +78,16 @@ public class CloudFormationTemplateBuilderTest {
 
     private String existingSubnetCidr;
 
-    private String templatePath;
+    private final String templatePath;
 
-    private Map<String, String> defaultTags = new HashMap<>();
+    private final Map<String, String> defaultTags = new HashMap<>();
 
     public CloudFormationTemplateBuilderTest(String templatePath) {
         this.templatePath = templatePath;
     }
 
-    @Parameterized.Parameters(name = "{0}")
-    public static Iterable<? extends Object> getTemplatesPath() {
+    @Parameters(name = "{0}")
+    public static Iterable<?> getTemplatesPath() {
         List<String> templates = Lists.newArrayList(LATEST_AWS_CLOUD_FORMATION_TEMPLATE_PATH);
         File[] templateFiles = new File(CloudFormationTemplateBuilderTest.class.getClassLoader().getResource("templates").getPath()).listFiles();
         List<String> olderTemplates = Arrays.stream(templateFiles).map(file -> {
@@ -149,23 +150,17 @@ public class CloudFormationTemplateBuilderTest {
     }
 
     @Test
-    public void buildTestInstanceGroupsAndRootVolumeSize() throws Exception {
-        //GIVEN
-        boolean existingVPC = true;
-        boolean existingIGW = true;
-        boolean mapPublicIpOnLaunch = true;
-        boolean enableInstanceProfile = true;
-        boolean instanceProfileAvailable = true;
+    public void buildTestInstanceGroupsAndRootVolumeSize() {
         //WHEN
         modelContext = new ModelContext()
                 .withAuthenticatedContext(authenticatedContext)
                 .withStack(cloudStack)
-                .withExistingVpc(existingVPC)
-                .withExistingIGW(existingIGW)
-                .withExistingSubnetCidr(Lists.newArrayList(existingSubnetCidr))
-                .mapPublicIpOnLaunch(mapPublicIpOnLaunch)
-                .withEnableInstanceProfile(enableInstanceProfile)
-                .withInstanceProfileAvailable(instanceProfileAvailable)
+                .withExistingVpc(true)
+                .withExistingIGW(true)
+                .withExistingSubnetCidr(Collections.singletonList(existingSubnetCidr))
+                .mapPublicIpOnLaunch(true)
+                .withEnableInstanceProfile(true)
+                .withInstanceProfileAvailable(true)
                 .withTemplate(awsCloudFormationTemplate);
         when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
 
@@ -180,23 +175,17 @@ public class CloudFormationTemplateBuilderTest {
     }
 
     @Test
-    public void buildTestWithVPCAndIGWAndPublicIpOnLaunchAndInstanceProfileAndRole() throws Exception {
-        //GIVEN
-        boolean existingVPC = true;
-        boolean existingIGW = true;
-        boolean mapPublicIpOnLaunch = true;
-        boolean enableInstanceProfile = true;
-        boolean instanceProfileAvailable = true;
+    public void buildTestWithVPCAndIGWAndPublicIpOnLaunchAndInstanceProfileAndRole() {
         //WHEN
         modelContext = new ModelContext()
                 .withAuthenticatedContext(authenticatedContext)
                 .withStack(cloudStack)
-                .withExistingVpc(existingVPC)
-                .withExistingIGW(existingIGW)
-                .withExistingSubnetCidr(Lists.newArrayList(existingSubnetCidr))
-                .mapPublicIpOnLaunch(mapPublicIpOnLaunch)
-                .withEnableInstanceProfile(enableInstanceProfile)
-                .withInstanceProfileAvailable(instanceProfileAvailable)
+                .withExistingVpc(true)
+                .withExistingIGW(true)
+                .withExistingSubnetCidr(Collections.singletonList(existingSubnetCidr))
+                .mapPublicIpOnLaunch(true)
+                .withEnableInstanceProfile(true)
+                .withInstanceProfileAvailable(true)
                 .withTemplate(awsCloudFormationTemplate);
         when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
 
@@ -214,24 +203,17 @@ public class CloudFormationTemplateBuilderTest {
     }
 
     @Test
-    public void buildTestWithVPCAndIGWAndPublicIpOnLaunchAndRoleWithoutInstanceProfile() throws Exception {
-        //GIVEN
-        boolean existingVPC = true;
-        boolean existingIGW = true;
-        boolean mapPublicIpOnLaunch = true;
-        boolean enableInstanceProfile = false;
-        boolean instanceProfileAvailable = true;
-
+    public void buildTestWithVPCAndIGWAndPublicIpOnLaunchAndRoleWithoutInstanceProfile() {
         //WHEN
         modelContext = new ModelContext()
                 .withAuthenticatedContext(authenticatedContext)
                 .withStack(cloudStack)
-                .withExistingVpc(existingVPC)
-                .withExistingIGW(existingIGW)
-                .withExistingSubnetCidr(Lists.newArrayList(existingSubnetCidr))
-                .mapPublicIpOnLaunch(mapPublicIpOnLaunch)
-                .withEnableInstanceProfile(enableInstanceProfile)
-                .withInstanceProfileAvailable(instanceProfileAvailable)
+                .withExistingVpc(true)
+                .withExistingIGW(true)
+                .withExistingSubnetCidr(Collections.singletonList(existingSubnetCidr))
+                .mapPublicIpOnLaunch(true)
+                .withEnableInstanceProfile(false)
+                .withInstanceProfileAvailable(true)
                 .withTemplate(awsCloudFormationTemplate);
         when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
 
@@ -249,24 +231,17 @@ public class CloudFormationTemplateBuilderTest {
     }
 
     @Test
-    public void buildTestWithVPCAndIGWAndPublicIpOnLaunchAndInstanceProfileWithoutRole() throws Exception {
-        //GIVEN
-        boolean existingVPC = true;
-        boolean existingIGW = true;
-        boolean mapPublicIpOnLaunch = true;
-        boolean enableInstanceProfile = true;
-        boolean instanceProfileAvailable = false;
-
+    public void buildTestWithVPCAndIGWAndPublicIpOnLaunchAndInstanceProfileWithoutRole() {
         //WHEN
         modelContext = new ModelContext()
                 .withAuthenticatedContext(authenticatedContext)
                 .withStack(cloudStack)
-                .withExistingVpc(existingVPC)
-                .withExistingIGW(existingIGW)
-                .withExistingSubnetCidr(Lists.newArrayList(existingSubnetCidr))
-                .mapPublicIpOnLaunch(mapPublicIpOnLaunch)
-                .withEnableInstanceProfile(enableInstanceProfile)
-                .withInstanceProfileAvailable(instanceProfileAvailable)
+                .withExistingVpc(true)
+                .withExistingIGW(true)
+                .withExistingSubnetCidr(Collections.singletonList(existingSubnetCidr))
+                .mapPublicIpOnLaunch(true)
+                .withEnableInstanceProfile(true)
+                .withInstanceProfileAvailable(false)
                 .withTemplate(awsCloudFormationTemplate);
         when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
 
@@ -284,24 +259,17 @@ public class CloudFormationTemplateBuilderTest {
     }
 
     @Test
-    public void buildTestWithVPCAndIGWAndPublicIpOnLaunchWithoutInstanceProfileAndRole() throws Exception {
-        //GIVEN
-        boolean existingVPC = true;
-        boolean existingIGW = true;
-        boolean mapPublicIpOnLaunch = true;
-        boolean enableInstanceProfile = false;
-        boolean instanceProfileAvailable = false;
-
+    public void buildTestWithVPCAndIGWAndPublicIpOnLaunchWithoutInstanceProfileAndRole() {
         //WHEN
         modelContext = new ModelContext()
                 .withAuthenticatedContext(authenticatedContext)
                 .withStack(cloudStack)
-                .withExistingVpc(existingVPC)
-                .withExistingIGW(existingIGW)
-                .withExistingSubnetCidr(Lists.newArrayList(existingSubnetCidr))
-                .mapPublicIpOnLaunch(mapPublicIpOnLaunch)
-                .withEnableInstanceProfile(enableInstanceProfile)
-                .withInstanceProfileAvailable(instanceProfileAvailable)
+                .withExistingVpc(true)
+                .withExistingIGW(true)
+                .withExistingSubnetCidr(Collections.singletonList(existingSubnetCidr))
+                .mapPublicIpOnLaunch(true)
+                .withEnableInstanceProfile(false)
+                .withInstanceProfileAvailable(false)
                 .withTemplate(awsCloudFormationTemplate);
         when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
 
@@ -319,24 +287,17 @@ public class CloudFormationTemplateBuilderTest {
     }
 
     @Test
-    public void buildTestWithVPCAndIGWAndInstanceProfileAndRoleWithoutPublicIpOnLaunch() throws Exception {
-        //GIVEN
-        boolean existingVPC = true;
-        boolean existingIGW = true;
-        boolean mapPublicIpOnLaunch = false;
-        boolean enableInstanceProfile = true;
-        boolean instanceProfileAvailable = true;
-
+    public void buildTestWithVPCAndIGWAndInstanceProfileAndRoleWithoutPublicIpOnLaunch() {
         //WHEN
         modelContext = new ModelContext()
                 .withAuthenticatedContext(authenticatedContext)
                 .withStack(cloudStack)
-                .withExistingVpc(existingVPC)
-                .withExistingIGW(existingIGW)
-                .withExistingSubnetCidr(Lists.newArrayList(existingSubnetCidr))
-                .mapPublicIpOnLaunch(mapPublicIpOnLaunch)
-                .withEnableInstanceProfile(enableInstanceProfile)
-                .withInstanceProfileAvailable(instanceProfileAvailable)
+                .withExistingVpc(true)
+                .withExistingIGW(true)
+                .withExistingSubnetCidr(Collections.singletonList(existingSubnetCidr))
+                .mapPublicIpOnLaunch(false)
+                .withEnableInstanceProfile(true)
+                .withInstanceProfileAvailable(true)
                 .withTemplate(awsCloudFormationTemplate);
         when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
 
@@ -354,24 +315,17 @@ public class CloudFormationTemplateBuilderTest {
     }
 
     @Test
-    public void buildTestWithVPCAndIGWAndRoleWithoutPublicIpOnLaunchAndInstanceProfile() throws Exception {
-        //GIVEN
-        boolean existingVPC = true;
-        boolean existingIGW = true;
-        boolean mapPublicIpOnLaunch = false;
-        boolean enableInstanceProfile = false;
-        boolean instanceProfileAvailable = true;
-
+    public void buildTestWithVPCAndIGWAndRoleWithoutPublicIpOnLaunchAndInstanceProfile() {
         //WHEN
         modelContext = new ModelContext()
                 .withAuthenticatedContext(authenticatedContext)
                 .withStack(cloudStack)
-                .withExistingVpc(existingVPC)
-                .withExistingIGW(existingIGW)
-                .withExistingSubnetCidr(Lists.newArrayList(existingSubnetCidr))
-                .mapPublicIpOnLaunch(mapPublicIpOnLaunch)
-                .withEnableInstanceProfile(enableInstanceProfile)
-                .withInstanceProfileAvailable(instanceProfileAvailable)
+                .withExistingVpc(true)
+                .withExistingIGW(true)
+                .withExistingSubnetCidr(Collections.singletonList(existingSubnetCidr))
+                .mapPublicIpOnLaunch(false)
+                .withEnableInstanceProfile(false)
+                .withInstanceProfileAvailable(true)
                 .withTemplate(awsCloudFormationTemplate);
         when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
 
@@ -389,23 +343,17 @@ public class CloudFormationTemplateBuilderTest {
     }
 
     @Test
-    public void buildTestWithVPCAndIGWAndInstanceProfileWithoutPublicIpOnLaunchAndRole() throws Exception {
-        //GIVEN
-        boolean existingVPC = true;
-        boolean existingIGW = true;
-        boolean mapPublicIpOnLaunch = false;
-        boolean enableInstanceProfile = true;
-        boolean instanceProfileAvailable = false;
+    public void buildTestWithVPCAndIGWAndInstanceProfileWithoutPublicIpOnLaunchAndRole() {
         //WHEN
         modelContext = new ModelContext()
                 .withAuthenticatedContext(authenticatedContext)
                 .withStack(cloudStack)
-                .withExistingVpc(existingVPC)
-                .withExistingIGW(existingIGW)
-                .withExistingSubnetCidr(Lists.newArrayList(existingSubnetCidr))
-                .mapPublicIpOnLaunch(mapPublicIpOnLaunch)
-                .withEnableInstanceProfile(enableInstanceProfile)
-                .withInstanceProfileAvailable(instanceProfileAvailable)
+                .withExistingVpc(true)
+                .withExistingIGW(true)
+                .withExistingSubnetCidr(Collections.singletonList(existingSubnetCidr))
+                .mapPublicIpOnLaunch(false)
+                .withEnableInstanceProfile(true)
+                .withInstanceProfileAvailable(false)
                 .withTemplate(awsCloudFormationTemplate);
         when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
 
@@ -423,24 +371,17 @@ public class CloudFormationTemplateBuilderTest {
     }
 
     @Test
-    public void buildTestWithVPCAndIGWWithoutPublicIpOnLaunchAndInstanceProfileAndRole() throws Exception {
-        //GIVEN
-        boolean existingVPC = true;
-        boolean existingIGW = true;
-        boolean mapPublicIpOnLaunch = false;
-        boolean enableInstanceProfile = false;
-        boolean instanceProfileAvailable = false;
-
+    public void buildTestWithVPCAndIGWWithoutPublicIpOnLaunchAndInstanceProfileAndRole() {
         //WHEN
         modelContext = new ModelContext()
                 .withAuthenticatedContext(authenticatedContext)
                 .withStack(cloudStack)
-                .withExistingVpc(existingVPC)
-                .withExistingIGW(existingIGW)
-                .withExistingSubnetCidr(Lists.newArrayList(existingSubnetCidr))
-                .mapPublicIpOnLaunch(mapPublicIpOnLaunch)
-                .withEnableInstanceProfile(enableInstanceProfile)
-                .withInstanceProfileAvailable(instanceProfileAvailable)
+                .withExistingVpc(true)
+                .withExistingIGW(true)
+                .withExistingSubnetCidr(Collections.singletonList(existingSubnetCidr))
+                .mapPublicIpOnLaunch(false)
+                .withEnableInstanceProfile(false)
+                .withInstanceProfileAvailable(false)
                 .withTemplate(awsCloudFormationTemplate);
         when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
 
@@ -458,24 +399,17 @@ public class CloudFormationTemplateBuilderTest {
     }
 
     @Test
-    public void buildTestWithVPCAndInstanceProfileAndRoleWithoutIGWAndPublicIpOnLaunch() throws Exception {
-        //GIVEN
-        boolean existingVPC = true;
-        boolean existingIGW = false;
-        boolean mapPublicIpOnLaunch = false;
-        boolean enableInstanceProfile = true;
-        boolean instanceProfileAvailable = true;
-
+    public void buildTestWithVPCAndInstanceProfileAndRoleWithoutIGWAndPublicIpOnLaunch() {
         //WHEN
         modelContext = new ModelContext()
                 .withAuthenticatedContext(authenticatedContext)
                 .withStack(cloudStack)
-                .withExistingVpc(existingVPC)
-                .withExistingIGW(existingIGW)
-                .withExistingSubnetCidr(Lists.newArrayList(existingSubnetCidr))
-                .mapPublicIpOnLaunch(mapPublicIpOnLaunch)
-                .withEnableInstanceProfile(enableInstanceProfile)
-                .withInstanceProfileAvailable(instanceProfileAvailable)
+                .withExistingVpc(true)
+                .withExistingIGW(false)
+                .withExistingSubnetCidr(Collections.singletonList(existingSubnetCidr))
+                .mapPublicIpOnLaunch(false)
+                .withEnableInstanceProfile(true)
+                .withInstanceProfileAvailable(true)
                 .withTemplate(awsCloudFormationTemplate);
         when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
 
@@ -493,24 +427,17 @@ public class CloudFormationTemplateBuilderTest {
     }
 
     @Test
-    public void buildTestWithVPCAndRoleWithoutIGWAndPublicIpOnLaunchAndInstanceProfile() throws Exception {
-        //GIVEN
-        boolean existingVPC = true;
-        boolean existingIGW = false;
-        boolean mapPublicIpOnLaunch = false;
-        boolean enableInstanceProfile = false;
-        boolean instanceProfileAvailable = true;
-
+    public void buildTestWithVPCAndRoleWithoutIGWAndPublicIpOnLaunchAndInstanceProfile() {
         //WHEN
         modelContext = new ModelContext()
                 .withAuthenticatedContext(authenticatedContext)
                 .withStack(cloudStack)
-                .withExistingVpc(existingVPC)
-                .withExistingIGW(existingIGW)
-                .withExistingSubnetCidr(Lists.newArrayList(existingSubnetCidr))
-                .mapPublicIpOnLaunch(mapPublicIpOnLaunch)
-                .withEnableInstanceProfile(enableInstanceProfile)
-                .withInstanceProfileAvailable(instanceProfileAvailable)
+                .withExistingVpc(true)
+                .withExistingIGW(false)
+                .withExistingSubnetCidr(Collections.singletonList(existingSubnetCidr))
+                .mapPublicIpOnLaunch(false)
+                .withEnableInstanceProfile(false)
+                .withInstanceProfileAvailable(true)
                 .withTemplate(awsCloudFormationTemplate);
         when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
 
@@ -528,24 +455,17 @@ public class CloudFormationTemplateBuilderTest {
     }
 
     @Test
-    public void buildTestWithVPCAndInstanceProfileWithoutIGWAndPublicIpOnLaunchAndRole() throws Exception {
-        //GIVEN
-        boolean existingVPC = true;
-        boolean existingIGW = false;
-        boolean mapPublicIpOnLaunch = false;
-        boolean enableInstanceProfile = true;
-        boolean instanceProfileAvailable = false;
-
+    public void buildTestWithVPCAndInstanceProfileWithoutIGWAndPublicIpOnLaunchAndRole() {
         //WHEN
         modelContext = new ModelContext()
                 .withAuthenticatedContext(authenticatedContext)
                 .withStack(cloudStack)
-                .withExistingVpc(existingVPC)
-                .withExistingIGW(existingIGW)
-                .withExistingSubnetCidr(Lists.newArrayList(existingSubnetCidr))
-                .mapPublicIpOnLaunch(mapPublicIpOnLaunch)
-                .withEnableInstanceProfile(enableInstanceProfile)
-                .withInstanceProfileAvailable(instanceProfileAvailable)
+                .withExistingVpc(true)
+                .withExistingIGW(false)
+                .withExistingSubnetCidr(Collections.singletonList(existingSubnetCidr))
+                .mapPublicIpOnLaunch(false)
+                .withEnableInstanceProfile(true)
+                .withInstanceProfileAvailable(false)
                 .withTemplate(awsCloudFormationTemplate);
         when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
 
@@ -563,24 +483,17 @@ public class CloudFormationTemplateBuilderTest {
     }
 
     @Test
-    public void buildTestWithVPCWithoutIGWAndPublicIpOnLaunchAndInstanceProfileAndRole() throws Exception {
-        //GIVEN
-        boolean existingVPC = true;
-        boolean existingIGW = false;
-        boolean mapPublicIpOnLaunch = false;
-        boolean enableInstanceProfile = false;
-        boolean instanceProfileAvailable = false;
-
+    public void buildTestWithVPCWithoutIGWAndPublicIpOnLaunchAndInstanceProfileAndRole() {
         //WHEN
         modelContext = new ModelContext()
                 .withAuthenticatedContext(authenticatedContext)
                 .withStack(cloudStack)
-                .withExistingVpc(existingVPC)
-                .withExistingIGW(existingIGW)
-                .withExistingSubnetCidr(Lists.newArrayList(existingSubnetCidr))
-                .mapPublicIpOnLaunch(mapPublicIpOnLaunch)
-                .withEnableInstanceProfile(enableInstanceProfile)
-                .withInstanceProfileAvailable(instanceProfileAvailable)
+                .withExistingVpc(true)
+                .withExistingIGW(false)
+                .withExistingSubnetCidr(Collections.singletonList(existingSubnetCidr))
+                .mapPublicIpOnLaunch(false)
+                .withEnableInstanceProfile(false)
+                .withInstanceProfileAvailable(false)
                 .withTemplate(awsCloudFormationTemplate);
         when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
 
@@ -598,24 +511,17 @@ public class CloudFormationTemplateBuilderTest {
     }
 
     @Test
-    public void buildTestWithInstanceProfileAndRoleWithoutVPCAndIGWAndPublicIpOnLaunch() throws Exception {
-        //GIVEN
-        boolean existingVPC = false;
-        boolean existingIGW = false;
-        boolean mapPublicIpOnLaunch = false;
-        boolean enableInstanceProfile = true;
-        boolean instanceProfileAvailable = true;
-
+    public void buildTestWithInstanceProfileAndRoleWithoutVPCAndIGWAndPublicIpOnLaunch() {
         //WHEN
         modelContext = new ModelContext()
                 .withAuthenticatedContext(authenticatedContext)
                 .withStack(cloudStack)
-                .withExistingVpc(existingVPC)
-                .withExistingIGW(existingIGW)
-                .withExistingSubnetCidr(Lists.newArrayList(existingSubnetCidr))
-                .mapPublicIpOnLaunch(mapPublicIpOnLaunch)
-                .withEnableInstanceProfile(enableInstanceProfile)
-                .withInstanceProfileAvailable(instanceProfileAvailable)
+                .withExistingVpc(false)
+                .withExistingIGW(false)
+                .withExistingSubnetCidr(Collections.singletonList(existingSubnetCidr))
+                .mapPublicIpOnLaunch(false)
+                .withEnableInstanceProfile(true)
+                .withInstanceProfileAvailable(true)
                 .withTemplate(awsCloudFormationTemplate);
         when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
 
@@ -633,24 +539,17 @@ public class CloudFormationTemplateBuilderTest {
     }
 
     @Test
-    public void buildTestWithInstanceProfileWithoutVPCAndIGWAndPublicIpOnLaunchAndRole() throws Exception {
-        //GIVEN
-        boolean existingVPC = false;
-        boolean existingIGW = false;
-        boolean mapPublicIpOnLaunch = false;
-        boolean enableInstanceProfile = true;
-        boolean instanceProfileAvailable = false;
-
+    public void buildTestWithInstanceProfileWithoutVPCAndIGWAndPublicIpOnLaunchAndRole() {
         //WHEN
         modelContext = new ModelContext()
                 .withAuthenticatedContext(authenticatedContext)
                 .withStack(cloudStack)
-                .withExistingVpc(existingVPC)
-                .withExistingIGW(existingIGW)
-                .withExistingSubnetCidr(Lists.newArrayList(existingSubnetCidr))
-                .mapPublicIpOnLaunch(mapPublicIpOnLaunch)
-                .withEnableInstanceProfile(enableInstanceProfile)
-                .withInstanceProfileAvailable(instanceProfileAvailable)
+                .withExistingVpc(false)
+                .withExistingIGW(false)
+                .withExistingSubnetCidr(Collections.singletonList(existingSubnetCidr))
+                .mapPublicIpOnLaunch(false)
+                .withEnableInstanceProfile(true)
+                .withInstanceProfileAvailable(false)
                 .withTemplate(awsCloudFormationTemplate);
         when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
 
@@ -668,24 +567,17 @@ public class CloudFormationTemplateBuilderTest {
     }
 
     @Test
-    public void buildTestWithRoleWithoutVPCAndIGWAndPublicIpOnLaunchAndInstanceProfile() throws Exception {
-        //GIVEN
-        boolean existingVPC = false;
-        boolean existingIGW = false;
-        boolean mapPublicIpOnLaunch = false;
-        boolean enableInstanceProfile = false;
-        boolean instanceProfileAvailable = true;
-
+    public void buildTestWithRoleWithoutVPCAndIGWAndPublicIpOnLaunchAndInstanceProfile() {
         //WHEN
         modelContext = new ModelContext()
                 .withAuthenticatedContext(authenticatedContext)
                 .withStack(cloudStack)
-                .withExistingVpc(existingVPC)
-                .withExistingIGW(existingIGW)
-                .withExistingSubnetCidr(Lists.newArrayList(existingSubnetCidr))
-                .mapPublicIpOnLaunch(mapPublicIpOnLaunch)
-                .withEnableInstanceProfile(enableInstanceProfile)
-                .withInstanceProfileAvailable(instanceProfileAvailable)
+                .withExistingVpc(false)
+                .withExistingIGW(false)
+                .withExistingSubnetCidr(Collections.singletonList(existingSubnetCidr))
+                .mapPublicIpOnLaunch(false)
+                .withEnableInstanceProfile(false)
+                .withInstanceProfileAvailable(true)
                 .withTemplate(awsCloudFormationTemplate);
         when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
 
@@ -703,25 +595,20 @@ public class CloudFormationTemplateBuilderTest {
     }
 
     @Test
-    public void buildTestWithoutVPCAndIGWAndPublicIpOnLaunchAndInstanceProfileAndRole() throws Exception {
+    public void buildTestWithoutVPCAndIGWAndPublicIpOnLaunchAndInstanceProfileAndRole() {
         //GIVEN
-        boolean existingVPC = false;
-        boolean existingIGW = false;
-        boolean mapPublicIpOnLaunch = false;
-        boolean enableInstanceProfile = false;
-        boolean instanceProfileAvailable = false;
         when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
 
         //WHEN
         modelContext = new ModelContext()
                 .withAuthenticatedContext(authenticatedContext)
                 .withStack(cloudStack)
-                .withExistingVpc(existingVPC)
-                .withExistingIGW(existingIGW)
-                .withExistingSubnetCidr(Lists.newArrayList(existingSubnetCidr))
-                .mapPublicIpOnLaunch(mapPublicIpOnLaunch)
-                .withEnableInstanceProfile(enableInstanceProfile)
-                .withInstanceProfileAvailable(instanceProfileAvailable)
+                .withExistingVpc(false)
+                .withExistingIGW(false)
+                .withExistingSubnetCidr(Collections.singletonList(existingSubnetCidr))
+                .mapPublicIpOnLaunch(false)
+                .withEnableInstanceProfile(false)
+                .withInstanceProfileAvailable(false)
                 .withTemplate(awsCloudFormationTemplate);
         when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
 
@@ -741,8 +628,7 @@ public class CloudFormationTemplateBuilderTest {
     private AuthenticatedContext authenticatedContext() {
         Location location = Location.location(Region.region("region"), AvailabilityZone.availabilityZone("az"));
         CloudContext cloudContext = new CloudContext(5L, "name", "platform", "owner", "variant", location);
-        CloudCredential cc = new CloudCredential(1L, null);
-        return new AuthenticatedContext(cloudContext, cc);
+        CloudCredential credential = new CloudCredential(1L, null);
+        return new AuthenticatedContext(cloudContext, credential);
     }
-
 }

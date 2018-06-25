@@ -29,7 +29,7 @@ public class AmbariUserHandlerTest {
     private AmbariClientFactory ambariClientFactory;
 
     @InjectMocks
-    private AmbariUserHandler underTest = new AmbariUserHandler();
+    private final AmbariUserHandler underTest = new AmbariUserHandler();
 
     @Test
     public void testCreateAmbariUserWhenNoExceptionOccuredThenEverythingShouldWorksFine() throws CloudbreakException {

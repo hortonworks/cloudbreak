@@ -79,7 +79,7 @@ public class AbstractActionTest {
     }
 
     @Test
-    public void testExecute() throws Exception {
+    public void testExecute() {
         stateMachine.sendEvent(new GenericMessage<>(Event.DOIT, Collections.singletonMap(Flow2Handler.FLOW_ID, FLOW_ID)));
         verify(underTest, times(1)).createFlowContext(eq(FLOW_ID), any(StateContext.class), nullable(Payload.class));
         verify(underTest, times(1)).doExecute(any(CommonContext.class), nullable(Payload.class), any(Map.class));
@@ -90,7 +90,7 @@ public class AbstractActionTest {
     }
 
     @Test
-    public void testFailedExecute() throws Exception {
+    public void testFailedExecute() {
         RuntimeException exception = new UnsupportedOperationException("");
         Mockito.doThrow(exception).when(underTest).doExecute(any(CommonContext.class), nullable(Payload.class), any());
         stateMachine.sendEvent(new GenericMessage<>(Event.DOIT, Collections.singletonMap(Flow2Handler.FLOW_ID, FLOW_ID)));
@@ -130,7 +130,7 @@ public class AbstractActionTest {
         }
 
         @Override
-        public void doExecute(CommonContext context, Payload payload, Map<Object, Object> variables) throws Exception {
+        public void doExecute(CommonContext context, Payload payload, Map<Object, Object> variables) {
         }
 
         @Override

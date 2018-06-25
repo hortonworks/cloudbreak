@@ -66,7 +66,7 @@ public class GatewayTopologyJsonToExposedServicesConverterTest {
 
         ExposedServices exposedServices = underTest.convert(gatewayTopologyJson);
 
-        assertEquals(1, exposedServices.getServices().size());
+        assertEquals(1L, exposedServices.getServices().size());
         assertEquals(AMBARI, exposedServices.getServices().get(0));
     }
 }

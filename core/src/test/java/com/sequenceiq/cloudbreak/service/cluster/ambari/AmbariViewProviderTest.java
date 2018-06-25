@@ -31,7 +31,7 @@ public class AmbariViewProviderTest {
     private ClusterRepository clusterRepository;
 
     @InjectMocks
-    private AmbariViewProvider underTest = new AmbariViewProvider();
+    private final AmbariViewProvider underTest = new AmbariViewProvider();
 
     @Test
     public void testProvideViewInformationWhenEverythingWorksFine() {

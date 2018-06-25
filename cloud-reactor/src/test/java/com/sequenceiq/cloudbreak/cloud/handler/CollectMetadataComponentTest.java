@@ -16,7 +16,7 @@ public class CollectMetadataComponentTest extends AbstractComponentTest<CollectM
     public void testCollectMetadata() {
         CollectMetadataResult result = sendCloudRequest();
 
-        assertEquals(1, result.getResults().size());
+        assertEquals(1L, result.getResults().size());
         assertEquals(InstanceStatus.IN_PROGRESS, result.getResults().get(0).getCloudVmInstanceStatus().getStatus());
         assertNull(result.getErrorDetails());
     }
@@ -27,7 +27,7 @@ public class CollectMetadataComponentTest extends AbstractComponentTest<CollectM
     }
 
     @Override
-    protected CloudPlatformRequest getRequest() {
+    protected CloudPlatformRequest<CollectMetadataResult> getRequest() {
         return new CollectMetadataRequest(
                 g().createCloudContext(),
                 g().createCloudCredential(),

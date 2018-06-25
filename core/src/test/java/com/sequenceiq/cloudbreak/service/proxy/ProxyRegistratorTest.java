@@ -24,7 +24,7 @@ import com.sequenceiq.cloudbreak.util.StackUtil;
 public class ProxyRegistratorTest {
 
     @InjectMocks
-    private ProxyRegistrator underTest = new ProxyRegistrator();
+    private final ProxyRegistrator underTest = new ProxyRegistrator();
 
     @Mock
     private StackUtil stackUtil;
@@ -39,7 +39,7 @@ public class ProxyRegistratorTest {
 
         boolean actual = underTest.isKnoxEnabled(gateway);
 
-        Assert.assertEquals(actual, true);
+        Assert.assertTrue(actual);
     }
 
     @Test
@@ -49,14 +49,14 @@ public class ProxyRegistratorTest {
 
         boolean actual = underTest.isKnoxEnabled(gateway);
 
-        Assert.assertEquals(actual, false);
+        Assert.assertFalse(actual);
     }
 
     @Test
     public void testIsKnoxEnabledIsFalseWhenGatewayNull() {
         boolean actual = underTest.isKnoxEnabled(null);
 
-        Assert.assertEquals(actual, false);
+        Assert.assertFalse(actual);
     }
 
     @Test

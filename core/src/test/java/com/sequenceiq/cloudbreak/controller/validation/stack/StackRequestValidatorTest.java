@@ -89,7 +89,7 @@ public class StackRequestValidatorTest {
 
         ValidationResult validationResult = underTest.validate(stackRequest);
         assertEquals(State.ERROR, validationResult.getState());
-        assertEquals(2, validationResult.getErrors().size());
+        assertEquals(2L, validationResult.getErrors().size());
     }
 
     private StackRequest stackRequestWithInstanceAndHostGroups(Set<String> instanceGroups, Set<String> hostGroups) {

@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.domain.json;
 
 import java.io.IOException;
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.Map;
 
 import org.junit.Assert;
@@ -15,7 +15,7 @@ public class JsonTest {
 
     @Test
     public void testMembers() throws JsonProcessingException {
-        Map<InstanceGroupType, String> userData = new HashMap<>();
+        Map<InstanceGroupType, String> userData = new EnumMap<>(InstanceGroupType.class);
         userData.put(InstanceGroupType.CORE, "CORE");
         Image image = new Image("cb-centos66-amb200-2015-05-25", userData, "redhat6", "redhat6", "", "default", "default-id");
         Json json = new Json(image);
@@ -27,7 +27,7 @@ public class JsonTest {
     // The reason for this to check whether serialisetion-deserialisation-serialisation results the same json
     @Test
     public void testMultipleSerialisation() throws IOException {
-        Map<InstanceGroupType, String> userData = new HashMap<>();
+        Map<InstanceGroupType, String> userData = new EnumMap<>(InstanceGroupType.class);
         userData.put(InstanceGroupType.CORE, "CORE");
         Image image = new Image("cb-centos66-amb200-2015-05-25", userData, "redhat6", "redhat6", "", "default", "default-id");
         Json json = new Json(image);
@@ -39,7 +39,7 @@ public class JsonTest {
 
     @Test
     public void testMultipleSerialisationWithOtherConstructorOfImage() throws IOException {
-        Map<InstanceGroupType, String> userData = new HashMap<>();
+        Map<InstanceGroupType, String> userData = new EnumMap<>(InstanceGroupType.class);
         userData.put(InstanceGroupType.CORE, "CORE");
         Image image = new Image("cb-centos66-amb200-2015-05-25", userData, "redhat6", "redhat6", "", "default", "default-id");
         Json json = new Json(image);

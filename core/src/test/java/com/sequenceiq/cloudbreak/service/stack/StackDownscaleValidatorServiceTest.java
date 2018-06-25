@@ -30,7 +30,7 @@ public class StackDownscaleValidatorServiceTest {
     private static final String ACCESS_DENIED_EXCEPTION_MESSAGE = String.format("Private stack (%s) is only modifiable by the owner.", STACK_ID);
 
     @Rule
-    public ExpectedException expectedException = ExpectedException.none();
+    public final ExpectedException expectedException = ExpectedException.none();
 
     @Mock(answer = Answers.CALLS_REAL_METHODS)
     private StackDownscaleValidatorService underTest;

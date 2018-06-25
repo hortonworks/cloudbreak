@@ -15,13 +15,13 @@ public class GcpResourceNameServiceTest {
     private ResourceNameService subject;
 
         @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         subject = new GcpResourceNameService();
         ReflectionTestUtils.setField(subject, "maxResourceNameLength", Integer.parseInt(MAX_RESOURCE_NAME_LENGTH));
     }
 
     @Test
-    public void shouldGenerateNetworkResourceNameWhenStackNameProvided() throws Exception {
+    public void shouldGenerateNetworkResourceNameWhenStackNameProvided() {
         // GIVEN
         String[] parts = {"gcp Network"};
 
@@ -30,11 +30,11 @@ public class GcpResourceNameServiceTest {
 
         // THEN
         Assert.assertNotNull("The generated name must not be null!", networkResourceName);
-        Assert.assertTrue("The timestamp must be appended", networkResourceName.split("-").length == 2);
+        Assert.assertEquals("The timestamp must be appended", 2L, networkResourceName.split("-").length);
     }
 
     @Test
-    public void shouldGenerateFirewallInternalResourceNameWhenStackNameProvided() throws Exception {
+    public void shouldGenerateFirewallInternalResourceNameWhenStackNameProvided() {
         // GIVEN
         String stackName = "dummy #stack_name?";
 
@@ -43,12 +43,12 @@ public class GcpResourceNameServiceTest {
 
         // THEN
         Assert.assertNotNull("The generated name must not be null!", resourceName);
-        Assert.assertTrue("The timestamp must be appended", resourceName.split("-").length == 3);
+        Assert.assertEquals("The timestamp must be appended", 3L, resourceName.split("-").length);
         Assert.assertEquals("The resource name suffix is not the expected one!", "internal", resourceName.split("-")[1]);
     }
 
     @Test
-    public void shouldGenerateFirewallInResourceNameWhenStackNameProvided() throws Exception {
+    public void shouldGenerateFirewallInResourceNameWhenStackNameProvided() {
         // GIVEN
         String stackName = "dummy #stack_name?";
 
@@ -57,12 +57,12 @@ public class GcpResourceNameServiceTest {
 
         // THEN
         Assert.assertNotNull("The generated name must not be null!", resourceName);
-        Assert.assertTrue("The timestamp must be appended", resourceName.split("-").length == 3);
+        Assert.assertEquals("The timestamp must be appended", 3L, resourceName.split("-").length);
         Assert.assertEquals("The resource name suffix is not the expected one!", "in", resourceName.split("-")[1]);
     }
 
     @Test
-    public void shouldShortenReservedIpResourceNameWhenLongResourceNameProvided() throws Exception {
+    public void shouldShortenReservedIpResourceNameWhenLongResourceNameProvided() {
         //GIVEN
         Object[] parts = {"thisisaverylongtextwhichneedstobeshortenedbythespecificmethod",
                 "thisisaverylonginstanceGroup", 8999};
@@ -72,7 +72,7 @@ public class GcpResourceNameServiceTest {
 
         // THEN
         Assert.assertNotNull("The generated name must not be null!", resourceName);
-        Assert.assertTrue("The timestamp must be appended!", resourceName.split("-").length == 4);
+        Assert.assertEquals("The timestamp must be appended!", 4L, resourceName.split("-").length);
         Assert.assertEquals("The resource name suffix is not the excepted one!", "thisisaverylongtextw", resourceName.split("-")[0]);
         Assert.assertEquals("The instance group name is not the excepted one!", "t", resourceName.split("-")[1]);
         Assert.assertEquals("The private id is not the excepted one!", "8999", resourceName.split("-")[2]);
@@ -80,7 +80,7 @@ public class GcpResourceNameServiceTest {
     }
 
     @Test
-    public void shouldGenerateGcpAttachedDiskResourceWhenPartsProvided() throws Exception {
+    public void shouldGenerateGcpAttachedDiskResourceWhenPartsProvided() {
         // GIVEN
         Object[] parts = {"stack", "group", 3, 2};
 
@@ -89,14 +89,14 @@ public class GcpResourceNameServiceTest {
 
         // THEN
         Assert.assertNotNull("The generated name must not be null!", resourceName);
-        Assert.assertTrue("The timestamp must be appended", resourceName.split("-").length == 5);
+        Assert.assertEquals("The timestamp must be appended", 5L, resourceName.split("-").length);
         Assert.assertTrue("The resource name is not the expected one!", resourceName.startsWith("stack-g-3-2"));
 
 
     }
 
     @Test
-    public void shouldShortenGcpInstanceNameWhenLongResourceNameProvided() throws Exception {
+    public void shouldShortenGcpInstanceNameWhenLongResourceNameProvided() {
         //GIVEN
         Object[] parts = {"thisisaverylongtextwhichneedstobeshortenedbythespecificmethod",
                 "thisisaverylonginstanceGroup", 8999};
@@ -106,7 +106,7 @@ public class GcpResourceNameServiceTest {
 
         //THEN
         Assert.assertNotNull("The generated name must not be null!", resourceName);
-        Assert.assertTrue("The timestamp must be appended!", resourceName.split("-").length == 4);
+        Assert.assertEquals("The timestamp must be appended!", 4L, resourceName.split("-").length);
         Assert.assertEquals("The resource name suffix is not the excepted one!", "thisisaverylongtextw", resourceName.split("-")[0]);
         Assert.assertEquals("The instance group name is not the excepted one!", "t", resourceName.split("-")[1]);
         Assert.assertEquals("The private is not the excepted one!", "8999", resourceName.split("-")[2]);
@@ -114,7 +114,7 @@ public class GcpResourceNameServiceTest {
     }
 
     @Test
-    public void shouldShortenGcpInstanceGroupNameWhenLongResourceNameProvided() throws Exception {
+    public void shouldShortenGcpInstanceGroupNameWhenLongResourceNameProvided() {
         //GIVEN
         Object[] parts = {"stackname", "thisisareallylonginstancenamewhichwillbeshortenedbythemethod", 8999};
 
@@ -124,7 +124,7 @@ public class GcpResourceNameServiceTest {
 
         //THEN
         Assert.assertNotNull("The generated name must not be null!", resourceName);
-        Assert.assertTrue("The timestamp must be appended!", resourceName.split("-").length == 4);
+        Assert.assertEquals("The timestamp must be appended!", 4L, resourceName.split("-").length);
         Assert.assertEquals("The resource name suffix is not the excepted one!", "stackname", resourceName.split("-")[0]);
         Assert.assertEquals("The instance group name is not the excepted one!", "t", resourceName.split("-")[1]);
         Assert.assertEquals("The private is not the excepted one!", "8999", resourceName.split("-")[2]);

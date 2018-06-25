@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.blueprint.testrepeater;
 
 import java.util.Iterator;
 
+import javax.validation.constraints.NotNull;
+
 public class SyncingIterable<T> implements Iterable<T> {
 
     private final Iterable<T> values;
@@ -15,6 +17,7 @@ public class SyncingIterable<T> implements Iterable<T> {
     }
 
     @Override
+    @NotNull
     public Iterator<T> iterator() {
         return new Iterator<T>() {
             private final Iterator<T> delegate = values.iterator();

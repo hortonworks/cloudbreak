@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.websocket;
 
 import static com.sequenceiq.cloudbreak.common.type.CloudConstants.GCP;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyLong;
@@ -65,12 +66,12 @@ public class UptimeNotifierTest {
 
         underTest.sendUptime();
 
-        ArgumentCaptor<Notification> argument1 = ArgumentCaptor.forClass(Notification.class);
+        ArgumentCaptor<Notification<CloudbreakEventsJson>> argument1 = ArgumentCaptor.forClass(Notification.class);
         verify(notificationSender).send(argument1.capture());
         Notification<CloudbreakEventsJson> notification = argument1.getValue();
         assertEquals(GCP, notification.getNotification().getCloud());
         assertEquals("null", notification.getNotification().getBlueprintName());
-        assertEquals(null, notification.getNotification().getBlueprintId());
+        assertNull(notification.getNotification().getBlueprintId());
 
         verify(notificationSender, times(1)).send(any(Notification.class));
     }
@@ -88,12 +89,12 @@ public class UptimeNotifierTest {
 
         underTest.sendUptime();
 
-        ArgumentCaptor<Notification> argument2 = ArgumentCaptor.forClass(Notification.class);
+        ArgumentCaptor<Notification<CloudbreakEventsJson>> argument2 = ArgumentCaptor.forClass(Notification.class);
         verify(notificationSender).send(argument2.capture());
         Notification<CloudbreakEventsJson> notification = argument2.getValue();
         assertEquals(GCP, notification.getNotification().getCloud());
         assertEquals("multi-node-yarn", notification.getNotification().getBlueprintName());
-        assertEquals(Long.valueOf(1), notification.getNotification().getBlueprintId());
+        assertEquals(Long.valueOf(1L), notification.getNotification().getBlueprintId());
 
         verify(notificationSender, times(1)).send(any(Notification.class));
     }
@@ -112,12 +113,12 @@ public class UptimeNotifierTest {
 
         underTest.sendUptime();
 
-        ArgumentCaptor<Notification> argument2 = ArgumentCaptor.forClass(Notification.class);
+        ArgumentCaptor<Notification<CloudbreakEventsJson>> argument2 = ArgumentCaptor.forClass(Notification.class);
         verify(notificationSender).send(argument2.capture());
         Notification<CloudbreakEventsJson> notification = argument2.getValue();
         assertEquals("null", notification.getNotification().getCloud());
         assertEquals("multi-node-yarn", notification.getNotification().getBlueprintName());
-        assertEquals(Long.valueOf(1), notification.getNotification().getBlueprintId());
+        assertEquals(Long.valueOf(1L), notification.getNotification().getBlueprintId());
 
         verify(notificationSender, times(1)).send(any(Notification.class));
     }

@@ -35,7 +35,7 @@ public class InstanceGroupMetadataCollectorTest {
     private InstanceMetaDataRepository instanceMetadataRepository;
 
     @InjectMocks
-    private InstanceGroupMetadataCollector underTest = new InstanceGroupMetadataCollector();
+    private final InstanceGroupMetadataCollector underTest = new InstanceGroupMetadataCollector();
 
     @Test
     public void testCollectFqdnsWhenMetadataAvailable() {
@@ -48,7 +48,7 @@ public class InstanceGroupMetadataCollectorTest {
 
         Map<String, List<InstanceMetaData>> stringListMap = underTest.collectMetadata(stack);
 
-        Assert.assertEquals(3, stringListMap.size());
+        Assert.assertEquals(3L, stringListMap.size());
         Assert.assertTrue(stringListMap.keySet().containsAll(Sets.newHashSet("is1", "is2", "is3")));
 
         verify(instanceMetadataRepository, times(3)).findAliveInstancesInInstanceGroup(anyLong());

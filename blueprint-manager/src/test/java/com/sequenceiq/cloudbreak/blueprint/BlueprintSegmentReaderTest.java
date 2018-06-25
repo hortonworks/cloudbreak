@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.blueprint;
 
-import java.io.IOException;
 import java.util.Map;
 
 import org.junit.Assert;
@@ -21,10 +20,11 @@ public class BlueprintSegmentReaderTest {
     @InjectMocks
     private final BlueprintSegmentReader underTest = new BlueprintSegmentReader();
 
-    private AnnotationConfigEmbeddedWebApplicationContext annotationConfigEmbeddedWebApplicationContext = new AnnotationConfigEmbeddedWebApplicationContext();
+    private final AnnotationConfigEmbeddedWebApplicationContext annotationConfigEmbeddedWebApplicationContext =
+            new AnnotationConfigEmbeddedWebApplicationContext();
 
     @Before
-    public void setup() throws IOException {
+    public void setup() {
         ReflectionTestUtils.setField(underTest, "resourceLoader", annotationConfigEmbeddedWebApplicationContext);
         ReflectionTestUtils.setField(underTest, "blueprintTemplatePath", "blueprints/configurations");
         ReflectionTestUtils.setField(underTest, "basicTemplatePath", "blueprints/basics");
@@ -37,8 +37,8 @@ public class BlueprintSegmentReaderTest {
         Map<ServiceName, TemplateFiles> serviceFiles = underTest.collectAllServiceFile();
         Map<ServiceName, TemplateFiles> settingsFiles = underTest.collectAllSettingsFile();
 
-        Assert.assertEquals(3, configFiles.size());
-        Assert.assertEquals(20, serviceFiles.size());
-        Assert.assertEquals(1, settingsFiles.size());
+        Assert.assertEquals(3L, configFiles.size());
+        Assert.assertEquals(20L, serviceFiles.size());
+        Assert.assertEquals(1L, settingsFiles.size());
     }
 }

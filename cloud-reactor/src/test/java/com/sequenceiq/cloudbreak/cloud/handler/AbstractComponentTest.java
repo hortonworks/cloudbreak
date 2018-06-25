@@ -15,6 +15,7 @@ import reactor.bus.EventBus;
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes = TestApplicationContext.class)
 public abstract class AbstractComponentTest<T> {
+
     @Inject
     private EventBus eb;
 
@@ -22,14 +23,14 @@ public abstract class AbstractComponentTest<T> {
     private ParameterGenerator g;
 
     protected T sendCloudRequest() {
-        CloudPlatformRequest request = getRequest();
+        CloudPlatformRequest<T> request = getRequest();
         return sendCloudRequest(request);
     }
 
-    protected T sendCloudRequest(CloudPlatformRequest request) {
+    protected T sendCloudRequest(CloudPlatformRequest<T> request) {
         eb.notify(getTopicName(), Event.wrap(request));
         try {
-            return (T) request.await();
+            return request.await();
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
@@ -37,7 +38,7 @@ public abstract class AbstractComponentTest<T> {
 
     protected abstract String getTopicName();
 
-    protected abstract CloudPlatformRequest getRequest();
+    protected abstract CloudPlatformRequest<T> getRequest();
 
     protected ParameterGenerator g() {
         return g;

@@ -81,7 +81,7 @@ public class Flow2ConfigTest {
         List<RetryableFlowConfiguration<?>> retryableFlowConfigurations = Lists.newArrayList(stackCreationFlowConfig, clusterCreationFlowConfig);
         List<String> failHandledEvents = underTest.failHandledEvents(retryableFlowConfigurations);
 
-        ArrayList<String> expected = Lists.newArrayList(stackCreationFlowConfig.getFailHandledEvent().event(),
+        List<String> expected = Lists.newArrayList(stackCreationFlowConfig.getFailHandledEvent().event(),
                 clusterCreationFlowConfig.getFailHandledEvent().event());
         assertEquals(expected, failHandledEvents);
     }

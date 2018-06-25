@@ -264,7 +264,7 @@ public class BlueprintTextProcessorTest {
         Iterator<JsonNode> hostGroups = JsonUtil.readTree(result).path(HOST_GROUPS_NODE).elements();
         while (hostGroups.hasNext()) {
             JsonNode hostGroup = hostGroups.next();
-            assertTrue(componentExistsInHostgroup(componentToAdd, hostGroup));
+            assertTrue(isComponentExistsInHostgroup(componentToAdd, hostGroup));
         }
     }
 
@@ -435,12 +435,12 @@ public class BlueprintTextProcessorTest {
     public void testGetConfigurationEntries() throws IOException {
         String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints-jackson/bp-config-properties.bp");
         Map<String, Map<String, String>> result = underTest.get(testBlueprint).getConfigurationEntries();
-        assertEquals(11, result.size());
+        assertEquals(11L, result.size());
         assertEquals("true", result.get("hive-site").get("hive.exec.compress.output"));
         assertEquals("0.7", result.get("mapred-site").get("mapreduce.job.reduce.slowstart.completedmaps"));
     }
 
-    private boolean componentExistsInHostgroup(String component, JsonNode hostGroupNode) {
+    private boolean isComponentExistsInHostgroup(String component, JsonNode hostGroupNode) {
         boolean componentExists = false;
         Iterator<JsonNode> components = hostGroupNode.path("components").elements();
         while (components.hasNext()) {

@@ -25,7 +25,7 @@ public class MockContainerOrchestrator implements ContainerOrchestrator {
     }
 
     @Override
-    public void init(ParallelOrchestratorComponentRunner parallelOrchestratorComponentRunner, ExitCriteria exitCriteria) {
+    public void init(ParallelOrchestratorComponentRunner runner, ExitCriteria exitCriteria) {
     }
 
     @Override
@@ -37,7 +37,7 @@ public class MockContainerOrchestrator implements ContainerOrchestrator {
     }
 
     @Override
-    public void validateApiEndpoint(OrchestrationCredential cred) throws CloudbreakOrchestratorException {
+    public void validateApiEndpoint(OrchestrationCredential cred) {
     }
 
     @Override
@@ -55,7 +55,7 @@ public class MockContainerOrchestrator implements ContainerOrchestrator {
     }
 
     @Override
-    public void deleteContainer(List<ContainerInfo> containerInfos, OrchestrationCredential cred) throws CloudbreakOrchestratorException {
+    public void deleteContainer(List<ContainerInfo> containerInfos, OrchestrationCredential cred) {
     }
 
     @Override

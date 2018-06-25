@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.blueprint.testrepeater;
 
 import java.util.Iterator;
 
+import javax.validation.constraints.NotNull;
+
 public class CrossProductIterable<A, B> implements Iterable<Tuple<A, B>> {
 
     private final Iterable<A> as;
@@ -14,6 +16,7 @@ public class CrossProductIterable<A, B> implements Iterable<Tuple<A, B>> {
     }
 
     @Override
+    @NotNull
     public Iterator<Tuple<A, B>> iterator() {
         return new CrossProductIterator(as, bs);
     }

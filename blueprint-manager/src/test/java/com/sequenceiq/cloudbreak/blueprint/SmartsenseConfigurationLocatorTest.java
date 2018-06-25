@@ -17,23 +17,22 @@ import com.sequenceiq.cloudbreak.domain.SmartSenseSubscription;
 @RunWith(MockitoJUnitRunner.class)
 public class SmartsenseConfigurationLocatorTest {
 
+    private static final String SMARTSENSE_ID = "11111-22222-33333-44444";
+
     @Rule
     public final ExpectedException thrown = ExpectedException.none();
 
     @InjectMocks
     private SmartsenseConfigurationLocator underTest;
 
-    private String smartsenseId = "11111-22222-33333-44444";
-
-    private Optional<String> defaultSmartsenseId = Optional.of(smartsenseId);
+    private final Optional<String> defaultSmartsenseId = Optional.of(SMARTSENSE_ID);
 
     private Optional<SmartSenseSubscription> defaultSmartsenseSubscription;
 
     @Before
     public void before() {
-
         SmartSenseSubscription smartSenseSubscription = new SmartSenseSubscription();
-        smartSenseSubscription.setSubscriptionId(smartsenseId);
+        smartSenseSubscription.setSubscriptionId(SMARTSENSE_ID);
         defaultSmartsenseSubscription = Optional.of(smartSenseSubscription);
     }
 

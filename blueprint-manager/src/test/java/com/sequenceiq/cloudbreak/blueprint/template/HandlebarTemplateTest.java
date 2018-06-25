@@ -20,8 +20,8 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.github.jknack.handlebars.Handlebars;
 import com.github.jknack.handlebars.Template;
 import com.google.common.collect.Sets;
@@ -40,13 +40,13 @@ import com.sequenceiq.cloudbreak.domain.RDSConfig;
 @RunWith(Parameterized.class)
 public class HandlebarTemplateTest {
 
-    private Handlebars handlebars = HandlebarUtils.handlebars();
+    private final Handlebars handlebars = HandlebarUtils.handlebars();
 
-    private String input;
+    private final String input;
 
-    private String output;
+    private final String output;
 
-    private Map<String, Object> model;
+    private final Map<String, Object> model;
 
     public HandlebarTemplateTest(String input, String output, Map<String, Object> model) {
         this.input = input;
@@ -54,8 +54,8 @@ public class HandlebarTemplateTest {
         this.model = model;
     }
 
-    @Parameterized.Parameters(name = "{index}: templateTest {0} with handlebar where the expected file is  {1}")
-    public static Iterable<Object[]> data() throws JsonProcessingException {
+    @Parameters(name = "{index}: templateTest {0} with handlebar where the expected file is  {1}")
+    public static Iterable<Object[]> data() {
         return Arrays.asList(new Object[][]{
 
                 // HADOOP

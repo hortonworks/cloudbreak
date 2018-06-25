@@ -7,7 +7,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.Map;
 
 import org.junit.Before;
@@ -55,8 +55,8 @@ public class DefaultBlueprintCacheTest {
     @Test
     public void testEmptyValues() {
         // GIVEN
-        Whitebox.setInternalState(underTest, "releasedBlueprints", Arrays.asList(""));
-        Whitebox.setInternalState(underTest, "internalBlueprints", Arrays.asList(" "));
+        Whitebox.setInternalState(underTest, "releasedBlueprints", Collections.singletonList(""));
+        Whitebox.setInternalState(underTest, "internalBlueprints", Collections.singletonList(" "));
 
         // WHEN
         underTest.loadBlueprintsFromFile();
@@ -69,15 +69,15 @@ public class DefaultBlueprintCacheTest {
     @Test
     public void testOnlyReleasedBps() {
         // GIVEN
-        Whitebox.setInternalState(underTest, "releasedBlueprints", Arrays.asList("Description1=bp1"));
-        Whitebox.setInternalState(underTest, "internalBlueprints", Arrays.asList(" "));
+        Whitebox.setInternalState(underTest, "releasedBlueprints", Collections.singletonList("Description1=bp1"));
+        Whitebox.setInternalState(underTest, "internalBlueprints", Collections.singletonList(" "));
 
         // WHEN
         underTest.loadBlueprintsFromFile();
         Map<String, Blueprint> defaultBlueprints = underTest.defaultBlueprints();
 
         // WHEN
-        assertEquals(1, defaultBlueprints.size());
+        assertEquals(1L, defaultBlueprints.size());
         assertEquals("Description1", defaultBlueprints.get("bp1").getDescription());
     }
 

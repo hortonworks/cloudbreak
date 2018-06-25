@@ -73,7 +73,7 @@ public class StackToBlueprintPreparationObjectConverterTest {
     private static final String TEST_BLUEPRINT_TEXT = "{}";
 
     @Rule
-    public ExpectedException expectedException = ExpectedException.none();
+    public final ExpectedException expectedException = ExpectedException.none();
 
     @InjectMocks
     private StackToBlueprintPreparationObjectConverter underTest;

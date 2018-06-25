@@ -1,5 +1,24 @@
 package com.sequenceiq.cloudbreak.converter;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.Collection;
+import java.util.Collections;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.springframework.core.convert.ConversionService;
+
 import com.sequenceiq.cloudbreak.api.model.FileSystemRequest;
 import com.sequenceiq.cloudbreak.api.model.filesystem.AdlsFileSystem;
 import com.sequenceiq.cloudbreak.api.model.filesystem.FileSystemType;
@@ -13,24 +32,6 @@ import com.sequenceiq.cloudbreak.api.model.v2.filesystem.WasbCloudStorageParamet
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.service.MissingResourceNameGenerator;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.springframework.core.convert.ConversionService;
-
-import java.util.ArrayList;
-import java.util.Collections;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 public class FileSystemRequestToFileSystemConverterTest {
 
@@ -132,7 +133,7 @@ public class FileSystemRequestToFileSystemConverterTest {
         FileSystem result = underTest.convert(request);
 
         assertTrue(result.getLocations().getMap().containsKey("locations"));
-        assertTrue(ArrayList.class.cast(result.getLocations().getMap().get("locations")).isEmpty());
+        assertTrue(((Collection<?>) result.getLocations().getMap().get("locations")).isEmpty());
     }
 
 }

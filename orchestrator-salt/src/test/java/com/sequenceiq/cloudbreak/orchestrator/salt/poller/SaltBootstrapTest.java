@@ -2,8 +2,8 @@ package com.sequenceiq.cloudbreak.orchestrator.salt.poller;
 
 import static org.hamcrest.core.IsNot.not;
 import static org.hamcrest.core.StringContains.containsString;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -19,7 +19,7 @@ import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mockito;
+import org.mockito.ArgumentMatchers;
 import org.springframework.http.HttpStatus;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -54,10 +54,10 @@ public class SaltBootstrapTest {
         GenericResponses genericResponses = new GenericResponses();
         genericResponses.setResponses(Collections.singletonList(response));
 
-        when(saltConnector.action(Mockito.any(SaltAction.class))).thenReturn(genericResponses);
+        when(saltConnector.action(ArgumentMatchers.any(SaltAction.class))).thenReturn(genericResponses);
 
         minionIpAddressesResponse = new MinionIpAddressesResponse();
-        when(saltConnector.run(Mockito.any(), Mockito.eq("network.ipaddrs"), Mockito.any(), Mockito.any()))
+        when(saltConnector.run(ArgumentMatchers.any(), ArgumentMatchers.eq("network.ipaddrs"), ArgumentMatchers.any(), ArgumentMatchers.any()))
                 .thenReturn(minionIpAddressesResponse);
     }
 
@@ -104,7 +104,7 @@ public class SaltBootstrapTest {
             saltBootstrap.call();
             fail("should throw exception");
         } catch (Exception e) {
-            assertTrue(CloudbreakOrchestratorFailedException.class.getSimpleName().equals(e.getClass().getSimpleName()));
+            assertEquals(CloudbreakOrchestratorFailedException.class.getSimpleName(), e.getClass().getSimpleName());
             assertThat(e.getMessage(), containsString("10.0.0.3"));
             assertThat(e.getMessage(), not(containsString("10.0.0.2")));
             assertThat(e.getMessage(), not(containsString("10.0.0.1")));

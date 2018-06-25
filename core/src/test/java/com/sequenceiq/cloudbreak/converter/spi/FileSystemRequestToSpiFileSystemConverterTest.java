@@ -36,7 +36,7 @@ public class FileSystemRequestToSpiFileSystemConverterTest {
     private static final String TEST_NAME = "testname";
 
     @Rule
-    public ExpectedException expectedException = ExpectedException.none();
+    public final ExpectedException expectedException = ExpectedException.none();
 
     @InjectMocks
     private FileSystemRequestToSpiFileSystemConverter underTest;
@@ -55,9 +55,9 @@ public class FileSystemRequestToSpiFileSystemConverterTest {
 
     @Test
     public void testConvertWhenAdlsNotNullThenCloudAdlsShouldBeInReturningObject() {
-        CloudStorageParameters adls = mock(AdlsCloudStorageParameters.class);
+        AdlsCloudStorageParameters adls = mock(AdlsCloudStorageParameters.class);
         CloudAdlsView expected = mock(CloudAdlsView.class);
-        when(request.getAdls()).thenReturn((AdlsCloudStorageParameters) adls);
+        when(request.getAdls()).thenReturn(adls);
         when(request.getType()).thenReturn(FileSystemType.ADLS.name());
         when(conversionService.convert(adls, CloudAdlsView.class)).thenReturn(expected);
 
@@ -74,9 +74,9 @@ public class FileSystemRequestToSpiFileSystemConverterTest {
 
     @Test
     public void testConvertWhenGcsNotNullThenCloudGcsShouldBeInReturningObject() {
-        CloudStorageParameters gcs = mock(GcsCloudStorageParameters.class);
+        GcsCloudStorageParameters gcs = mock(GcsCloudStorageParameters.class);
         CloudGcsView expected = mock(CloudGcsView.class);
-        when(request.getGcs()).thenReturn((GcsCloudStorageParameters) gcs);
+        when(request.getGcs()).thenReturn(gcs);
         when(request.getType()).thenReturn(FileSystemType.GCS.name());
         when(conversionService.convert(gcs, CloudGcsView.class)).thenReturn(expected);
 
@@ -93,9 +93,9 @@ public class FileSystemRequestToSpiFileSystemConverterTest {
 
     @Test
     public void testConvertWhenS3NotNullThenCloudS3ShouldBeInReturningObject() {
-        CloudStorageParameters s3 = mock(S3CloudStorageParameters.class);
+        S3CloudStorageParameters s3 = mock(S3CloudStorageParameters.class);
         CloudS3View expected = mock(CloudS3View.class);
-        when(request.getS3()).thenReturn((S3CloudStorageParameters) s3);
+        when(request.getS3()).thenReturn(s3);
         when(request.getType()).thenReturn(FileSystemType.S3.name());
         when(conversionService.convert(s3, CloudS3View.class)).thenReturn(expected);
 
@@ -112,9 +112,9 @@ public class FileSystemRequestToSpiFileSystemConverterTest {
 
     @Test
     public void testConvertWhenWasbNotNullThenCloudWasbShouldBeInReturningObject() {
-        CloudStorageParameters wasb = mock(WasbCloudStorageParameters.class);
+        WasbCloudStorageParameters wasb = mock(WasbCloudStorageParameters.class);
         CloudWasbView expected = mock(CloudWasbView.class);
-        when(request.getWasb()).thenReturn((WasbCloudStorageParameters) wasb);
+        when(request.getWasb()).thenReturn(wasb);
         when(request.getType()).thenReturn(WASB.name());
         when(conversionService.convert(wasb, CloudWasbView.class)).thenReturn(expected);
 

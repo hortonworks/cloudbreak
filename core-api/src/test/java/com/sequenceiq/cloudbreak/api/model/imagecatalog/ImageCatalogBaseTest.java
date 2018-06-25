@@ -19,7 +19,7 @@ public class ImageCatalogBaseTest {
     private Validator validator;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         Configuration<?> cfg = Validation.byDefaultProvider().configure();
         cfg.messageInterpolator(new ParameterMessageInterpolator());
         validator = cfg.buildValidatorFactory().getValidator();
@@ -31,7 +31,7 @@ public class ImageCatalogBaseTest {
         i.setName("testname");
         i.setUrl("http://protocol.com");
         Set<ConstraintViolation<ImageCatalogBase>> violations = validator.validate(i);
-        assertEquals(0, violations.size());
+        assertEquals(0L, violations.size());
     }
 
     @Test
@@ -40,7 +40,7 @@ public class ImageCatalogBaseTest {
         i.setName("testname");
         i.setUrl("http://protocol.com");
         Set<ConstraintViolation<ImageCatalogBase>> violations = validator.validate(i);
-        assertEquals(0, violations.size());
+        assertEquals(0L, violations.size());
     }
 
     @Test
@@ -49,7 +49,7 @@ public class ImageCatalogBaseTest {
         i.setName("testname");
         i.setUrl("ftp://protocol.com");
         Set<ConstraintViolation<ImageCatalogBase>> violations = validator.validate(i);
-        assertEquals(1, violations.size());
+        assertEquals(1L, violations.size());
         ConstraintViolation<ImageCatalogBase> v = violations.toArray(new ConstraintViolation[1])[0];
         assertTrue(v.getMessage().startsWith("The URL should start with the protocol"));
     }
@@ -60,7 +60,7 @@ public class ImageCatalogBaseTest {
         i.setName("testname");
         i.setUrl("without.protocol.com");
         Set<ConstraintViolation<ImageCatalogBase>> violations = validator.validate(i);
-        assertEquals(1, violations.size());
+        assertEquals(1L, violations.size());
         ConstraintViolation<ImageCatalogBase> v = violations.toArray(new ConstraintViolation[1])[0];
         assertTrue(v.getMessage().startsWith("The URL should start with the protocol"));
     }

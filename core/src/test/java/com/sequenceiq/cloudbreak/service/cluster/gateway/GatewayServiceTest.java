@@ -88,7 +88,7 @@ public class GatewayServiceTest {
 
     @Before
     public void setUp() throws TransactionExecutionException {
-        doAnswer(invocation -> ((Supplier) invocation.getArgument(0)).get()).when(transactionService).required(any());
+        doAnswer(invocation -> ((Supplier<?>) invocation.getArgument(0)).get()).when(transactionService).required(any());
     }
 
     @Test
@@ -114,13 +114,13 @@ public class GatewayServiceTest {
         when(stackRepository.findOne(anyLong())).thenReturn(getStack());
         when(conversionService.convert(any(GatewayTopologyJson.class), eq(ExposedServices.class)))
                 .thenAnswer((Answer<ExposedServices>) invocation -> {
-                    GatewayTopologyJson topologyJson = GatewayTopologyJson.class.cast(invocation.getArgument(0));
+                    GatewayTopologyJson topologyJson = invocation.getArgument(0);
                     return exposedServicesConverter.convert(topologyJson);
                 });
 
         List<Gateway> gatewayRepositoryInvocations = new ArrayList<>();
         when(gatewayRepository.save(any(Gateway.class))).thenAnswer((Answer<Gateway>) invocation -> {
-            Gateway gatewayCopy = Gateway.class.cast(invocation.getArgument(0)).copy();
+            Gateway gatewayCopy = ((Gateway) invocation.getArgument(0)).copy();
             gatewayRepositoryInvocations.add(gatewayCopy);
             return gatewayCopy;
         });
@@ -128,7 +128,7 @@ public class GatewayServiceTest {
         try {
             underTest.updateGatewayTopologies(STACK_ID, getRequest());
         } catch (FlowsAlreadyRunningException e) {
-            assertEquals(2, gatewayRepositoryInvocations.size());
+            assertEquals(2L, gatewayRepositoryInvocations.size());
             assertInitialSave(gatewayRepositoryInvocations);
             assertRevertSave(gatewayRepositoryInvocations);
             return;
@@ -145,7 +145,7 @@ public class GatewayServiceTest {
         GatewayTopology initialTop2 = getTopologyByName("top2", initialSave);
         ExposedServices initialServicesTop2 = initialTop2.getExposedServices().get(ExposedServices.class);
         assertTrue(initialServicesTop2.getServices().containsAll(Arrays.asList("WEBHDFS", "HDFSUI")));
-        assertEquals(2, initialServicesTop2.getServices().size());
+        assertEquals(2L, initialServicesTop2.getServices().size());
     }
 
     private void assertRevertSave(List<Gateway> gatewayRepositoryInvocations) throws IOException {
@@ -153,12 +153,12 @@ public class GatewayServiceTest {
         GatewayTopology revertTop1 = getTopologyByName("top1", revertSave);
         ExposedServices revertServicesTop1 = revertTop1.getExposedServices().get(ExposedServices.class);
         assertTrue(revertServicesTop1.getServices().containsAll(Arrays.asList("AMBARI", "ZEPPELIN")));
-        assertEquals(2, revertServicesTop1.getServices().size());
+        assertEquals(2L, revertServicesTop1.getServices().size());
 
         GatewayTopology revertTop2 = getTopologyByName("top2", revertSave);
         ExposedServices revertServicesTop2 = revertTop2.getExposedServices().get(ExposedServices.class);
         assertTrue(revertServicesTop2.getServices().containsAll(Arrays.asList("WEBHDFS", "HDFSUI")));
-        assertEquals(2, revertServicesTop2.getServices().size());
+        assertEquals(2L, revertServicesTop2.getServices().size());
     }
 
     private GatewayTopology getTopologyByName(String name, Gateway initialSave) {

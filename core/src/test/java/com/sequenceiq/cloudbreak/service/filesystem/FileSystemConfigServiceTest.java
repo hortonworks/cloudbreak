@@ -52,7 +52,7 @@ public class FileSystemConfigServiceTest {
     private static final int TEST_QUANTITY = 3;
 
     @Rule
-    public ExpectedException expectedException = ExpectedException.none();
+    public final ExpectedException expectedException = ExpectedException.none();
 
     @InjectMocks
     private FileSystemConfigService underTest;
@@ -156,7 +156,7 @@ public class FileSystemConfigServiceTest {
 
     @Test
     public void testRetrieveAccountFileSystemsWhenUserHasAdminRoleThenSearchWouldBeExecutedByOnlyAccount() {
-        Set<FileSystem> expectedFileSystems = createFileSystems(TEST_QUANTITY);
+        Set<FileSystem> expectedFileSystems = createFileSystems();
         when(user.getRoles()).thenReturn(Collections.singleton(ADMIN));
         when(fileSystemRepository.findByAccount(USER_ACCOUNT)).thenReturn(expectedFileSystems);
 
@@ -169,7 +169,7 @@ public class FileSystemConfigServiceTest {
 
     @Test
     public void testRetrieveAccountFileSystemsWhenUserHasNotAdminRoleThenSearchWouldBeExecutedByAccountAndOwner() {
-        Set<FileSystem> expectedFileSystems = createFileSystems(TEST_QUANTITY);
+        Set<FileSystem> expectedFileSystems = createFileSystems();
         when(user.getRoles()).thenReturn(Collections.singleton(USER));
         when(fileSystemRepository.findByAccountAndOwner(USER_ACCOUNT, USER_ID)).thenReturn(expectedFileSystems);
 
@@ -268,9 +268,9 @@ public class FileSystemConfigServiceTest {
         return fileSystem;
     }
 
-    private Set<FileSystem> createFileSystems(int quantity) {
-        Set<FileSystem> fileSystems = new LinkedHashSet<>(quantity);
-        for (int i = 0; i < quantity; i++) {
+    private Set<FileSystem> createFileSystems() {
+        Set<FileSystem> fileSystems = new LinkedHashSet<>(TEST_QUANTITY);
+        for (int i = 0; i < TEST_QUANTITY; i++) {
             fileSystems.add(createFileSystem(String.valueOf(i)));
         }
         return fileSystems;

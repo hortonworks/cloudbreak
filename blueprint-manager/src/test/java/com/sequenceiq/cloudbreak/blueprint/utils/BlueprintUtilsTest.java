@@ -58,7 +58,7 @@ public class BlueprintUtilsTest {
 
         JsonNode root = JsonUtil.readTree(blueprint);
 
-        Assert.assertEquals(2, underTest.countHostGroups(root));
+        Assert.assertEquals(2L, underTest.countHostGroups(root));
     }
 
     @Test

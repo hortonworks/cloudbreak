@@ -9,6 +9,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import javax.validation.ConstraintValidatorContext;
+import javax.validation.ConstraintValidatorContext.ConstraintViolationBuilder;
+import javax.validation.ConstraintValidatorContext.ConstraintViolationBuilder.NodeBuilderCustomizableContext;
 
 import org.junit.Test;
 
@@ -41,9 +43,9 @@ public class CredentialRequestValidatorTest {
 
     private static final String OPENSTACK = "OPENSTACK";
 
-    private CredentialRequestValidator underTest = new CredentialRequestValidator();
+    private final CredentialRequestValidator underTest = new CredentialRequestValidator();
 
-    private ConstraintValidatorContext context = createContextMock();
+    private final ConstraintValidatorContext context = createContextMock();
 
     @Test
     public void testCloudProvidersThatAreValid() {
@@ -87,9 +89,9 @@ public class CredentialRequestValidatorTest {
 
     private ConstraintValidatorContext createContextMock() {
         ConstraintValidatorContext contextMock = mock(ConstraintValidatorContext.class);
-        ConstraintValidatorContext.ConstraintViolationBuilder constraintViolationBuilderMock = mock(ConstraintValidatorContext.ConstraintViolationBuilder.class);
-        ConstraintValidatorContext.ConstraintViolationBuilder.NodeBuilderCustomizableContext nodeBuilderContextMock
-                = mock(ConstraintValidatorContext.ConstraintViolationBuilder.NodeBuilderCustomizableContext.class);
+        ConstraintViolationBuilder constraintViolationBuilderMock = mock(ConstraintViolationBuilder.class);
+        NodeBuilderCustomizableContext nodeBuilderContextMock
+                = mock(NodeBuilderCustomizableContext.class);
 
         when(contextMock.buildConstraintViolationWithTemplate(anyString()))
                 .thenReturn(constraintViolationBuilderMock);
@@ -127,9 +129,8 @@ public class CredentialRequestValidatorTest {
             return this;
         }
 
-        OpenStackCredentialBuilder withKeystoneVersionV3() {
+        void withKeystoneVersionV3() {
             getRequest().getParameters().put(CREDENTIAL_REQUEST_KEYSTONE_VERSION_KEY, KEYSTONE_V3);
-            return this;
         }
     }
 

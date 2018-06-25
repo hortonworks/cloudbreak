@@ -32,7 +32,7 @@ public class StackV2RequestToGatewayConverterTest {
     @Test(expected = BadRequestException.class)
     public void testWithInvalidGatewayRequest() {
         GatewayJson gatewayJson = new GatewayJson();
-        StackV2Request source = generateStackV2Request(gatewayJson, "funnyCluster");
+        StackV2Request source = generateStackV2Request(gatewayJson);
         converter.convert(source);
     }
 
@@ -40,7 +40,7 @@ public class StackV2RequestToGatewayConverterTest {
     public void shouldGenerateSignCertWhenConvertingFromStackV2Request() {
         GatewayJson gatewayJson = new GatewayJson();
         gatewayJson.setTopologyName("anyName");
-        StackV2Request source = generateStackV2Request(gatewayJson, "funnyCluster");
+        StackV2Request source = generateStackV2Request(gatewayJson);
         Gateway result = converter.convert(source);
         assertTrue(result.getSignCert().startsWith("-----BEGIN CERTIFICATE-----"));
         assertTrue(result.getSignCert().endsWith("-----END CERTIFICATE-----\n"));
@@ -50,18 +50,18 @@ public class StackV2RequestToGatewayConverterTest {
     public void shouldCreateCorrectSsoUrlWhenClusterNameisProvided() {
         GatewayJson gatewayJson = new GatewayJson();
         gatewayJson.setTopologyName("anyName");
-        StackV2Request source = generateStackV2Request(gatewayJson, "funnyCluster");
+        StackV2Request source = generateStackV2Request(gatewayJson);
         Gateway result = converter.convert(source);
         assertEquals("/funnyCluster/sso/api/v1/websso", result.getSsoProvider());
     }
 
-    private StackV2Request generateStackV2Request(GatewayJson gateWayJson, String clusterName) {
+    private StackV2Request generateStackV2Request(GatewayJson gateWayJson) {
         AmbariV2Request ambariV2Request = new AmbariV2Request();
         ambariV2Request.setGateway(gateWayJson);
         ClusterV2Request clusterRequest = new ClusterV2Request();
         clusterRequest.setAmbari(ambariV2Request);
         GeneralSettings generalConfig = new GeneralSettings();
-        generalConfig.setName(clusterName);
+        generalConfig.setName("funnyCluster");
         StackV2Request source = new StackV2Request();
         source.setCluster(clusterRequest);
         source.setGeneral(generalConfig);

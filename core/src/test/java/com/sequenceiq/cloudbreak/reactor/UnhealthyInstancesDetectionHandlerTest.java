@@ -18,9 +18,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.reactor.api.event.EventSelectorUtil;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.UnhealthyInstancesDetectionRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.UnhealthyInstancesDetectionResult;
@@ -50,11 +49,11 @@ public class UnhealthyInstancesDetectionHandlerTest {
     private UnhealthyInstancesDetectionHandler unhealthyInstancesDetectionHandler;
 
     @Test
-    public void shouldNotInvokeFinalizerIfNoCandidateUnhealthyInstancesWereSelected() throws CloudbreakSecuritySetupException {
+    public void shouldNotInvokeFinalizerIfNoCandidateUnhealthyInstancesWereSelected() {
 
         long stackId = 1L;
         UnhealthyInstancesDetectionRequest unhealthyInstancesDetectionRequest = new UnhealthyInstancesDetectionRequest(stackId);
-        Event event = mock(Event.class);
+        Event<UnhealthyInstancesDetectionRequest> event = mock(Event.class);
         when(event.getData()).thenReturn(unhealthyInstancesDetectionRequest);
 
         Stack stack = mock(Stack.class);
@@ -71,10 +70,10 @@ public class UnhealthyInstancesDetectionHandlerTest {
     }
 
     @Test
-    public void shouldCreateResponseWithExactInstances() throws CloudbreakSecuritySetupException {
+    public void shouldCreateResponseWithExactInstances() {
         long stackId = 1L;
         UnhealthyInstancesDetectionRequest unhealthyInstancesDetectionRequest = new UnhealthyInstancesDetectionRequest(stackId);
-        Event event = mock(Event.class);
+        Event<UnhealthyInstancesDetectionRequest> event = mock(Event.class);
         when(event.getData()).thenReturn(unhealthyInstancesDetectionRequest);
 
         Stack stack = mock(Stack.class);
@@ -111,17 +110,12 @@ public class UnhealthyInstancesDetectionHandlerTest {
 
         @Override
         public String toString() {
-            if (errorMessage == null) {
-                return "";
-            } else {
-                return errorMessage;
-            }
+            return errorMessage == null ? "" : errorMessage;
         }
 
         @Override
-        public boolean matches(Event<UnhealthyInstancesDetectionResult> argument) {
-            Event event = (Event) argument;
-            UnhealthyInstancesDetectionResult payload = (UnhealthyInstancesDetectionResult) event.getData();
+        public boolean matches(Event<UnhealthyInstancesDetectionResult> event) {
+            UnhealthyInstancesDetectionResult payload = event.getData();
             Set<String> unhealthyInstanceIds = payload.getUnhealthyInstanceIds();
             if (unhealthyInstanceIds.size() != expectedUnhealthyIds.size()) {
                 errorMessage = String.format("Sizes don't match, expected=%d, actual=%d",

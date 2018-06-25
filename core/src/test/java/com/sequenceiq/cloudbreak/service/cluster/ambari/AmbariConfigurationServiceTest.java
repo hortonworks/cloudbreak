@@ -31,7 +31,7 @@ public class AmbariConfigurationServiceTest {
 
     @Mock
     @edu.umd.cs.findbugs.annotations.SuppressWarnings("URF_UNREAD_FIELD")
-    private AmbariDatabaseMapper ambariDatabaseMapper = Mappers.getMapper(AmbariDatabaseMapper.class);
+    private final AmbariDatabaseMapper ambariDatabaseMapper = Mappers.getMapper(AmbariDatabaseMapper.class);
 
     @InjectMocks
     private AmbariConfigurationService ambariConfigurationService;

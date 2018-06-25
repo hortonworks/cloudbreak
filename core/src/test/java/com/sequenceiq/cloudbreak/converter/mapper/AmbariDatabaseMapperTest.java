@@ -53,8 +53,8 @@ public class AmbariDatabaseMapperTest {
     @Test
     public void testMapConnectionUrl() {
         String url = mapper.mapConnectionUrl(json);
-        assertEquals("jdbc:postgresql://" + json.getHost() + ":"
-                + json.getPort() + "/" + json.getName(), url);
+        assertEquals("jdbc:postgresql://" + json.getHost() + ':'
+                + json.getPort() + '/' + json.getName(), url);
     }
 
     @Test

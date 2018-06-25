@@ -14,6 +14,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintPreparationObject;
+import com.sequenceiq.cloudbreak.blueprint.BlueprintPreparationObject.Builder;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessorFactory;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.blueprint.filesystem.BlueprintTestUtil;
@@ -47,7 +48,7 @@ public class KerberosBlueprintServiceTest {
         Blueprint blueprint = TestUtil.blueprint("name", expectedBlueprint);
         Stack stack = TestUtil.stack();
         Cluster cluster = TestUtil.cluster(blueprint, stack, 1L, TestUtil.kerberosConfig());
-        BlueprintPreparationObject object = BlueprintPreparationObject.Builder.builder()
+        BlueprintPreparationObject object = Builder.builder()
                 .withKerberosConfig(cluster.getKerberosConfig())
                 .withGeneralClusterConfigs(BlueprintTestUtil.generalClusterConfigs())
                 .build();
@@ -71,7 +72,7 @@ public class KerberosBlueprintServiceTest {
         generalClusterConfigs.setPrimaryGatewayInstanceDiscoveryFQDN(Optional.of("test-1-1"));
         generalClusterConfigs.setGatewayInstanceMetadataPresented(false);
 
-        BlueprintPreparationObject object = BlueprintPreparationObject.Builder.builder()
+        BlueprintPreparationObject object = Builder.builder()
                 .withKerberosConfig(cluster.getKerberosConfig())
                 .withGeneralClusterConfigs(generalClusterConfigs)
                 .build();
@@ -99,7 +100,7 @@ public class KerberosBlueprintServiceTest {
         kerberosConfig.setKrb5Conf("{\"krb5-conf\":{\"properties\":{\"domains\":\".domains.bp\",\"manage_krb5_conf\":\"true\",\"content\":\"content.bp\"}}}");
         kerberosConfig.setTcpAllowed(true);
         Cluster cluster = TestUtil.cluster(blueprint, stack, 1L, kerberosConfig);
-        BlueprintPreparationObject object = BlueprintPreparationObject.Builder.builder()
+        BlueprintPreparationObject object = Builder.builder()
                 .withKerberosConfig(cluster.getKerberosConfig())
                 .withGeneralClusterConfigs(BlueprintTestUtil.generalClusterConfigs())
                 .build();
@@ -135,7 +136,7 @@ public class KerberosBlueprintServiceTest {
         generalClusterConfigs.setGatewayInstanceMetadataPresented(false);
 
         Cluster cluster = TestUtil.cluster(blueprint, stack, 1L, kerberosConfig);
-        BlueprintPreparationObject object = BlueprintPreparationObject.Builder.builder()
+        BlueprintPreparationObject object = Builder.builder()
                 .withKerberosConfig(cluster.getKerberosConfig())
                 .withGeneralClusterConfigs(generalClusterConfigs)
                 .build();

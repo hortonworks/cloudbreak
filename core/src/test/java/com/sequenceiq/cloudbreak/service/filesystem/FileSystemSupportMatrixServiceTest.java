@@ -38,9 +38,7 @@ public class FileSystemSupportMatrixServiceTest {
     public void testWithVersion265() {
         Set<CloudStorageSupportedResponse> matrix = underTest.getCloudStorageMatrix("2.6.5");
         assertEquals(3L, matrix.size());
-        matrix.forEach(response -> {
-            assertTrue(response.getFileSystemType().size() > 0);
-        });
+        matrix.forEach(response -> assertTrue(!response.getFileSystemType().isEmpty()));
         assertEquals(2L,
                 matrix.stream().filter(response -> "AZURE".equalsIgnoreCase(response.getProvider())).findFirst().get().getFileSystemType().size());
     }
@@ -49,9 +47,7 @@ public class FileSystemSupportMatrixServiceTest {
     public void testWithVersion260() {
         Set<CloudStorageSupportedResponse> matrix = underTest.getCloudStorageMatrix("2.6.0");
         assertEquals(2L, matrix.size());
-        matrix.forEach(response -> {
-            assertTrue(response.getFileSystemType().size() > 0);
-        });
+        matrix.forEach(response -> assertTrue(!response.getFileSystemType().isEmpty()));
         assertEquals(2L,
                 matrix.stream().filter(response -> "AZURE".equalsIgnoreCase(response.getProvider())).findFirst().get().getFileSystemType().size());
     }
@@ -66,9 +62,7 @@ public class FileSystemSupportMatrixServiceTest {
     public void testWithVersion300() {
         Set<CloudStorageSupportedResponse> matrix = underTest.getCloudStorageMatrix("3.0.0");
         assertEquals(3L, matrix.size());
-        matrix.forEach(response -> {
-            assertTrue(response.getFileSystemType().size() > 0);
-        });
+        matrix.forEach(response -> assertTrue(!response.getFileSystemType().isEmpty()));
         assertEquals(2L,
                 matrix.stream().filter(response -> "AZURE".equalsIgnoreCase(response.getProvider())).findFirst().get().getFileSystemType().size());
     }

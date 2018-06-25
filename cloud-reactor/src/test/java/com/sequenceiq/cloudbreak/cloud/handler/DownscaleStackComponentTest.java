@@ -17,7 +17,7 @@ public class DownscaleStackComponentTest extends AbstractComponentTest<Downscale
         DownscaleStackResult result = sendCloudRequest();
 
         assertEquals(EventStatus.OK, result.getStatus());
-        assertEquals(1, result.getDownscaledResources().size());
+        assertEquals(1L, result.getDownscaledResources().size());
         assertNull(result.getErrorDetails());
     }
 
@@ -27,7 +27,7 @@ public class DownscaleStackComponentTest extends AbstractComponentTest<Downscale
     }
 
     @Override
-    protected CloudPlatformRequest getRequest() {
+    protected CloudPlatformRequest<DownscaleStackResult> getRequest() {
         return new DownscaleStackRequest(
                 g().createCloudContext(),
                 g().createCloudCredential(),

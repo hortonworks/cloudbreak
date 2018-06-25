@@ -18,6 +18,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintPreparationObject;
+import com.sequenceiq.cloudbreak.blueprint.BlueprintPreparationObject.Builder;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessorFactory;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
@@ -41,7 +42,7 @@ public class HbaseConfigProviderTest {
     public void testCustomTextManipulationWhenThereAreMissingHbaseClients() throws IOException {
         String blueprintText = FileReaderUtils.readFileFromClasspath("blueprints-jackson/bp-kerberized-test.bp");
 
-        BlueprintPreparationObject object = BlueprintPreparationObject.Builder.builder().build();
+        BlueprintPreparationObject object = Builder.builder().build();
         Set<String> masters = Sets.newHashSet("master", "slave_1", "slave_2", "compute");
         Set<String> clients = Sets.newHashSet("slave_1", "slave_2", "compute_1");
         Set<String> missing = Sets.newHashSet("master", "compute");
@@ -63,7 +64,7 @@ public class HbaseConfigProviderTest {
     public void testCustomTextManipulationWhenThereAreNoMissingHbaseClients() throws IOException {
         String blueprintText = FileReaderUtils.readFileFromClasspath("blueprints-jackson/bp-kerberized-test.bp");
 
-        BlueprintPreparationObject object = BlueprintPreparationObject.Builder.builder().build();
+        BlueprintPreparationObject object = Builder.builder().build();
         Set<String> masters = Sets.newHashSet("master", "slave_1", "slave_2", "compute");
         Set<String> clients = Sets.newHashSet("master", "slave_1", "slave_2", "compute");
         Set<String> missing = Sets.newHashSet();
@@ -81,7 +82,7 @@ public class HbaseConfigProviderTest {
     }
 
     @Test
-    public void testComponentsWhenThereCallingShouldReturnHbaseMaster() throws IOException {
+    public void testComponentsWhenThereCallingShouldReturnHbaseMaster() {
         Set<String> masters = Sets.newHashSet("HBASE_MASTER");
 
         Set<String> components = underTest.components();

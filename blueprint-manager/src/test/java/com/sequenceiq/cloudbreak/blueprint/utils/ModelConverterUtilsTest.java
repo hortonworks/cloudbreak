@@ -8,8 +8,8 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
 import net.sf.json.JSONObject;
@@ -21,14 +21,14 @@ public class ModelConverterUtilsTest {
 
     public static final String MAP_CONVERTER_OUTPUTS = "model-converter-test/outputs/";
 
-    private String fileName;
+    private final String fileName;
 
     public ModelConverterUtilsTest(String fileName) {
         this.fileName = fileName;
     }
 
-    @Parameterized.Parameters(name = "{index}: modelConverterUtilsTest with file: {0}")
-    public static Iterable<Object[]> data() throws JsonProcessingException {
+    @Parameters(name = "{index}: modelConverterUtilsTest with file: {0}")
+    public static Iterable<Object[]> data() {
         return Arrays.asList(new Object[][]{
                 {"test_1.json"},
                 {"test_2.json"},

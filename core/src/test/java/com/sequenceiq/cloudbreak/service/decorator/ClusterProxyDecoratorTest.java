@@ -28,7 +28,7 @@ import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigService;
 public class ClusterProxyDecoratorTest {
 
     @InjectMocks
-    private ClusterProxyDecorator clusterProxyDecorator = new ClusterProxyDecorator();
+    private final ClusterProxyDecorator clusterProxyDecorator = new ClusterProxyDecorator();
 
     @Mock
     private ProxyConfigMapper mapper;
@@ -36,9 +36,9 @@ public class ClusterProxyDecoratorTest {
     @Mock
     private ProxyConfigService service;
 
-    private IdentityUser identityUser = new IdentityUser("test", "test", "test", null, "test", "test", new Date());
+    private final IdentityUser identityUser = new IdentityUser("test", "test", "test", null, "test", "test", new Date());
 
-    private Stack stack = new Stack();
+    private final Stack stack = new Stack();
 
     private Cluster cluster;
 

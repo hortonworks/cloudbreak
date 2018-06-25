@@ -43,17 +43,16 @@ import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceStatus;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.common.model.OrchestratorType;
 import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
-import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.HostOrchestratorResolver;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.Orchestrator;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.domain.Orchestrator;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
@@ -73,10 +72,10 @@ import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 public class AmbariDecommissionerTest {
 
     @Rule
-    public ExpectedException thrown = ExpectedException.none();
+    public final ExpectedException thrown = ExpectedException.none();
 
     @InjectMocks
-    private AmbariDecommissioner underTest = new AmbariDecommissioner();
+    private final AmbariDecommissioner underTest = new AmbariDecommissioner();
 
     @Mock
     private TlsSecurityService tlsSecurityService;
@@ -125,7 +124,7 @@ public class AmbariDecommissionerTest {
 
         Map<String, Long> selectedNodes = underTest.selectNodes(ascendingNodes, nodes, 1);
 
-        assertEquals(1, selectedNodes.size());
+        assertEquals(1L, selectedNodes.size());
         assertEquals(hostname1, selectedNodes.keySet().stream().findFirst().get());
     }
 
@@ -149,7 +148,7 @@ public class AmbariDecommissionerTest {
 
         Map<String, Long> selectedNodes = underTest.selectNodes(ascendingNodes, nodes, 2);
 
-        assertEquals(2, selectedNodes.size());
+        assertEquals(2L, selectedNodes.size());
         Assert.assertTrue(selectedNodes.keySet().containsAll(Arrays.asList(hostname1, hostname2)));
     }
 
@@ -179,7 +178,7 @@ public class AmbariDecommissionerTest {
 
         Map<String, Long> selectedNodes = underTest.selectNodes(ascendingNodes, nodes, 2);
 
-        assertEquals(2, selectedNodes.size());
+        assertEquals(2L, selectedNodes.size());
         Assert.assertTrue(selectedNodes.keySet().containsAll(Arrays.asList(hostname1, hostname2)));
     }
 
@@ -202,7 +201,7 @@ public class AmbariDecommissionerTest {
 
         Map<String, Long> selectedNodes = underTest.selectNodes(ascendingNodes, nodes, 1);
 
-        assertEquals(1, selectedNodes.size());
+        assertEquals(1L, selectedNodes.size());
         Assert.assertTrue(selectedNodes.keySet().contains(hostname2));
     }
 
@@ -220,12 +219,12 @@ public class AmbariDecommissionerTest {
 
         Map<String, Long> selectedNodes = underTest.selectNodes(ascendingNodes, nodes, 1);
 
-        assertEquals(1, selectedNodes.size());
+        assertEquals(1L, selectedNodes.size());
         Assert.assertTrue(selectedNodes.keySet().contains(hostname1));
     }
 
     @Test
-    public void testVerifyNodesAreRemovableWithReplicationFactory() throws CloudbreakSecuritySetupException {
+    public void testVerifyNodesAreRemovableWithReplicationFactory() {
 
         String ipAddress = "192.18.256.1";
         int gatewayPort = 1234;
@@ -244,7 +243,7 @@ public class AmbariDecommissionerTest {
         stack.setGatewayPort(gatewayPort);
         stack.setId(100L);
 
-        InstanceGroup masterInstanceGroup = getMasterInstanceGroup(5);
+        InstanceGroup masterInstanceGroup = getMasterInstanceGroup();
         InstanceGroup slaveInstanceGroup = getSlaveInstanceGroup(100);
         stack.setInstanceGroups(Sets.newHashSet(masterInstanceGroup, slaveInstanceGroup));
 
@@ -272,7 +271,7 @@ public class AmbariDecommissionerTest {
 
         List<InstanceMetaData> removableNodes =
                 slaveInstanceGroup.getAllInstanceMetaData().stream()
-                        .filter(instanceMetaData -> instanceMetaData.getPrivateId() < 3)
+                        .filter(instanceMetaData -> instanceMetaData.getPrivateId() < 3L)
                         .collect(Collectors.toList());
 
         doAnswer(invocation -> {
@@ -286,7 +285,7 @@ public class AmbariDecommissionerTest {
     }
 
     @Test
-    public void testVerifyNodesAreRemovableFilterOutNodes() throws CloudbreakSecuritySetupException {
+    public void testVerifyNodesAreRemovableFilterOutNodes() {
 
         String ipAddress = "192.18.256.1";
         int gatewayPort = 1234;
@@ -305,7 +304,7 @@ public class AmbariDecommissionerTest {
         stack.setGatewayPort(gatewayPort);
         stack.setId(100L);
 
-        InstanceGroup masterInstanceGroup = getMasterInstanceGroup(5);
+        InstanceGroup masterInstanceGroup = getMasterInstanceGroup();
         InstanceGroup slaveInstanceGroup = getSlaveInstanceGroup(100);
         stack.setInstanceGroups(Sets.newHashSet(masterInstanceGroup, slaveInstanceGroup));
 
@@ -333,7 +332,7 @@ public class AmbariDecommissionerTest {
 
         List<InstanceMetaData> removableNodes =
                 slaveInstanceGroup.getAllInstanceMetaData().stream()
-                        .filter(instanceMetaData -> instanceMetaData.getPrivateId() < 3)
+                        .filter(instanceMetaData -> instanceMetaData.getPrivateId() < 3L)
                         .collect(Collectors.toList());
 
         doAnswer(invocation -> {
@@ -351,7 +350,7 @@ public class AmbariDecommissionerTest {
     }
 
     @Test
-    public void testVerifyNodesAreRemovableWithReplicationFactoryVerificationFailBecauseReplication() throws CloudbreakSecuritySetupException {
+    public void testVerifyNodesAreRemovableWithReplicationFactoryVerificationFailBecauseReplication() {
 
         String ipAddress = "192.18.256.1";
         int gatewayPort = 1234;
@@ -371,7 +370,7 @@ public class AmbariDecommissionerTest {
         stack.setGatewayPort(gatewayPort);
         stack.setId(100L);
 
-        InstanceGroup masterInstanceGroup = getMasterInstanceGroup(5);
+        InstanceGroup masterInstanceGroup = getMasterInstanceGroup();
         InstanceGroup slaveInstanceGroup = getSlaveInstanceGroup(10);
         stack.setInstanceGroups(Sets.newHashSet(masterInstanceGroup, slaveInstanceGroup));
 
@@ -399,7 +398,7 @@ public class AmbariDecommissionerTest {
 
         List<InstanceMetaData> removableNodes =
                 slaveInstanceGroup.getAllInstanceMetaData().stream()
-                        .filter(instanceMetaData -> instanceMetaData.getPrivateId() < 9)
+                        .filter(instanceMetaData -> instanceMetaData.getPrivateId() < 9L)
                         .collect(Collectors.toList());
 
         doAnswer(invocation -> {
@@ -436,7 +435,7 @@ public class AmbariDecommissionerTest {
         stack.setGatewayPort(gatewayPort);
         stack.setId(100L);
 
-        InstanceGroup masterInstanceGroup = getMasterInstanceGroup(5);
+        InstanceGroup masterInstanceGroup = getMasterInstanceGroup();
         InstanceGroup slaveInstanceGroup = getSlaveInstanceGroup(10);
         stack.setInstanceGroups(Sets.newHashSet(masterInstanceGroup, slaveInstanceGroup));
 
@@ -464,7 +463,7 @@ public class AmbariDecommissionerTest {
 
         List<InstanceMetaData> removableNodes =
                 slaveInstanceGroup.getAllInstanceMetaData().stream()
-                        .filter(instanceMetaData -> instanceMetaData.getPrivateId() < 9)
+                        .filter(instanceMetaData -> instanceMetaData.getPrivateId() < 9L)
                         .collect(Collectors.toList());
 
         doAnswer(invocation -> {
@@ -490,7 +489,7 @@ public class AmbariDecommissionerTest {
         HostOrchestrator hostOrchestrator = mock(HostOrchestrator.class);
         when(hostOrchestratorResolver.get(any())).thenReturn(hostOrchestrator);
 
-        InstanceGroup masterInstanceGroup = getMasterInstanceGroup(5);
+        InstanceGroup masterInstanceGroup = getMasterInstanceGroup();
         InstanceGroup slaveInstanceGroup = getSlaveInstanceGroup(100);
         stack.setInstanceGroups(Sets.newHashSet(masterInstanceGroup, slaveInstanceGroup));
 
@@ -501,7 +500,7 @@ public class AmbariDecommissionerTest {
 
         verify(hostOrchestrator, times(1)).tearDown(any(), stringStringCaptor.capture());
         Map<String, String> privateIPsByFQDN = stringStringCaptor.getValue();
-        assertEquals(privateIPsByFQDN.keySet().size(), 2);
+        assertEquals(privateIPsByFQDN.keySet().size(), 2L);
         assertThat(privateIPsByFQDN, hasEntry("10-0-1-50.example.com", "10.0.1.50"));
         assertThat(privateIPsByFQDN, hasEntry("10-0-1-62.example.com", "10.0.1.62"));
     }
@@ -521,19 +520,19 @@ public class AmbariDecommissionerTest {
         return hostGroup;
     }
 
-    private InstanceGroup getMasterInstanceGroup(int nodeCount) {
+    private InstanceGroup getMasterInstanceGroup() {
         InstanceGroup masterInstanceGroup = new InstanceGroup();
         masterInstanceGroup.setGroupName("master_1");
         masterInstanceGroup.setInstanceGroupType(InstanceGroupType.GATEWAY);
         masterInstanceGroup.setInstanceMetaData(new HashSet<>());
-        for (int i = 0; i < nodeCount; i++) {
+        for (int i = 0; i < 5; i++) {
             InstanceMetaData instanceMetaData = new InstanceMetaData();
             instanceMetaData.setInstanceStatus(InstanceStatus.REGISTERED);
             instanceMetaData.setInstanceMetadataType(InstanceMetadataType.GATEWAY);
             instanceMetaData.setAmbariServer(true);
             instanceMetaData.setDiscoveryFQDN("10-0-0-" + i + ".example.com");
             instanceMetaData.setPrivateIp("10.0.0." + i);
-            instanceMetaData.setPrivateId(1000 + (long) i);
+            instanceMetaData.setPrivateId(1000L + i);
             instanceMetaData.setInstanceGroup(masterInstanceGroup);
             masterInstanceGroup.getInstanceMetaDataSet().add(instanceMetaData);
         }

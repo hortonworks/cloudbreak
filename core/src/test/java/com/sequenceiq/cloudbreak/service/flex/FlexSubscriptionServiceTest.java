@@ -40,7 +40,7 @@ public class FlexSubscriptionServiceTest {
     @Before
     public void setUp() throws TransactionExecutionException {
         initMocks(this);
-        doAnswer(invocation -> ((Supplier) invocation.getArgument(0)).get()).when(transactionService).required(any());
+        doAnswer(invocation -> ((Supplier<?>) invocation.getArgument(0)).get()).when(transactionService).required(any());
     }
 
     @Test(expected = BadRequestException.class)
@@ -71,7 +71,7 @@ public class FlexSubscriptionServiceTest {
         FlexSubscription result = underTest.create(subscription);
 
         verify(flexRepo, times(1)).save(subscription);
-        verify(flexRepo, times(1)).save(Arrays.asList(result));
+        verify(flexRepo, times(1)).save(Collections.singletonList(result));
         assertTrue(result.isDefault());
         assertTrue(result.isUsedForController());
     }

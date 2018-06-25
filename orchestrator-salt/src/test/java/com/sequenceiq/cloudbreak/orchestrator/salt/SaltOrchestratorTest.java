@@ -234,9 +234,9 @@ public class SaltOrchestratorTest {
         MinionStatusSaltResponse minionStatusSaltResponse = new MinionStatusSaltResponse();
         List<MinionStatus> minionStatusList = new ArrayList<>();
         MinionStatus minionStatus = new MinionStatus();
-        ArrayList<String> upNodes = Lists.newArrayList("10-0-0-1.example.com", "10-0-0-2.example.com", "10-0-0-3.example.com");
+        List<String> upNodes = Lists.newArrayList("10-0-0-1.example.com", "10-0-0-2.example.com", "10-0-0-3.example.com");
         minionStatus.setUp(upNodes);
-        ArrayList<String> downNodes = Lists.newArrayList("10-0-0-4.example.com", "10-0-0-5.example.com");
+        List<String> downNodes = Lists.newArrayList("10-0-0-4.example.com", "10-0-0-5.example.com");
         minionStatus.setDown(downNodes);
         minionStatusList.add(minionStatus);
         minionStatusSaltResponse.setResult(minionStatusList);
@@ -269,7 +269,7 @@ public class SaltOrchestratorTest {
             saltOrchestrator.tearDown(Collections.singletonList(gatewayConfig), privateIpsByFQDN);
             fail();
         } catch (CloudbreakOrchestratorFailedException e) {
-            assertTrue(NullPointerException.class.isInstance(e.getCause()));
+            assertTrue(e.getCause() instanceof NullPointerException);
         }
     }
 

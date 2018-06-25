@@ -70,7 +70,7 @@ public class StackToStackResponseConverterTest extends AbstractEntityConverterTe
     public void setUp() throws CloudbreakImageNotFoundException {
         underTest = new StackToStackResponseConverter();
         MockitoAnnotations.initMocks(this);
-        when(imageService.getImage(anyLong())).thenReturn(new Image("cb-centos66-amb200-2015-05-25", new HashMap<>(), "redhat6",
+        when(imageService.getImage(anyLong())).thenReturn(new Image("cb-centos66-amb200-2015-05-25", Collections.emptyMap(), "redhat6",
             "redhat6", "", "default", "default-id"));
         when(componentConfigProvider.getCloudbreakDetails(anyLong())).thenReturn(new CloudbreakDetails("version"));
         when(componentConfigProvider.getStackTemplate(anyLong())).thenReturn(new StackTemplate("{}", "version"));

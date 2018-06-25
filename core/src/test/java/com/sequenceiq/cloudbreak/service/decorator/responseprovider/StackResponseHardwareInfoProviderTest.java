@@ -48,7 +48,7 @@ public class StackResponseHardwareInfoProviderTest {
 
         StackResponse actual = underTest.providerEntriesToStackResponse(stack, new StackResponse());
 
-        Assert.assertEquals(0, actual.getHardwareInfos().size());
+        Assert.assertEquals(0L, actual.getHardwareInfos().size());
     }
 
     @Test
@@ -59,7 +59,7 @@ public class StackResponseHardwareInfoProviderTest {
 
         StackResponse actual = underTest.providerEntriesToStackResponse(stack, new StackResponse());
 
-        Assert.assertEquals(0, actual.getHardwareInfos().size());
+        Assert.assertEquals(0L, actual.getHardwareInfos().size());
     }
 
     @Test
@@ -71,7 +71,7 @@ public class StackResponseHardwareInfoProviderTest {
 
         StackResponse actual = underTest.providerEntriesToStackResponse(stack, new StackResponse());
 
-        Assert.assertEquals(1, actual.getHardwareInfos().size());
+        Assert.assertEquals(1L, actual.getHardwareInfos().size());
 
         Mockito.verify(hostMetadataRepository, Mockito.times(0)).findHostInClusterByName(anyLong(), anyString());
         Mockito.verify(conversionService, Mockito.times(1)).convert(instanceMetaData, InstanceMetaDataJson.class);
@@ -87,7 +87,7 @@ public class StackResponseHardwareInfoProviderTest {
 
         StackResponse actual = underTest.providerEntriesToStackResponse(stack, new StackResponse());
 
-        Assert.assertEquals(1, actual.getHardwareInfos().size());
+        Assert.assertEquals(1L, actual.getHardwareInfos().size());
 
         Mockito.verify(hostMetadataRepository, Mockito.times(0)).findHostInClusterByName(anyLong(), anyString());
         Mockito.verify(conversionService, Mockito.times(1)).convert(instanceMetaData, InstanceMetaDataJson.class);
@@ -108,7 +108,7 @@ public class StackResponseHardwareInfoProviderTest {
         StackResponse stackResponse = new StackResponse();
         StackResponse actual = underTest.providerEntriesToStackResponse(stack, stackResponse);
 
-        Assert.assertEquals(1, actual.getHardwareInfos().size());
+        Assert.assertEquals(1L, actual.getHardwareInfos().size());
 
         Mockito.verify(hostMetadataRepository, Mockito.times(1)).findHostInClusterByName(1L, "fqdn");
         Mockito.verify(conversionService, Mockito.times(1)).convert(instanceMetaData, InstanceMetaDataJson.class);
@@ -126,7 +126,7 @@ public class StackResponseHardwareInfoProviderTest {
 
         StackResponse actual = underTest.providerEntriesToStackResponse(stack, new StackResponse());
 
-        Assert.assertEquals(2, actual.getHardwareInfos().size());
+        Assert.assertEquals(2L, actual.getHardwareInfos().size());
 
         Mockito.verify(hostMetadataRepository, Mockito.times(0)).findHostInClusterByName(anyLong(), anyString());
         Mockito.verify(conversionService, Mockito.times(2)).convert(any(InstanceMetaData.class), eq(InstanceMetaDataJson.class));
@@ -155,7 +155,7 @@ public class StackResponseHardwareInfoProviderTest {
 
         StackResponse actual = underTest.providerEntriesToStackResponse(stack, new StackResponse());
 
-        Assert.assertEquals(1, actual.getHardwareInfos().size());
+        Assert.assertEquals(1L, actual.getHardwareInfos().size());
 
         Mockito.verify(hostMetadataRepository, Mockito.times(1)).findHostInClusterByName(1L, "fqdn");
         Mockito.verify(conversionService, Mockito.times(1)).convert(instanceMetaData, InstanceMetaDataJson.class);

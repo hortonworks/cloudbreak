@@ -102,7 +102,7 @@ public class AmbariClusterSetupServiceTest {
     private AmbariSmartSenseCapturer ambariSmartSenseCapturer;
 
     @InjectMocks
-    private AmbariClusterSetupService underTest = new AmbariClusterSetupService();
+    private final AmbariClusterSetupService underTest = new AmbariClusterSetupService();
 
     @Test
     public void testApiAvailableWhenPollerReturnTrueThenApiShouldBeAvailable() throws CloudbreakSecuritySetupException {

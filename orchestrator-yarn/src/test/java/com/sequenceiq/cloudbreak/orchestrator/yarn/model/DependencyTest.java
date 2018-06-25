@@ -11,7 +11,7 @@ public class DependencyTest {
     private static final String ITEM = "item";
 
     @Test
-    public void testItem() throws Exception {
+    public void testItem() {
         Dependency dependency = new Dependency();
         dependency.setItem(ITEM);
         assertEquals(ITEM, dependency.getItem());

@@ -25,13 +25,13 @@ public class SimpleAccountPreferencesServiceTest {
 
     public static final String AWS = "AWS";
 
-    public static final String OPENSTACK = "OPENSTACK";
+    private static final String OPENSTACK = "OPENSTACK";
 
     @InjectMocks
     private final SimpleAccountPreferencesService underTest = new SimpleAccountPreferencesService();
 
     @Spy
-    private List<CloudConstant> cloudConstants = new ArrayList<>();
+    private final List<CloudConstant> cloudConstants = new ArrayList<>();
 
     @Before
     public void setup() {
@@ -39,17 +39,7 @@ public class SimpleAccountPreferencesServiceTest {
     }
 
     private CloudConstant createCloudConstant(String name) {
-        return new CloudConstant() {
-            @Override
-            public Platform platform() {
-                return Platform.platform(name);
-            }
-
-            @Override
-            public Variant variant() {
-                return Variant.variant(name);
-            }
-        };
+        return new TestCloudConstant(name);
     }
 
     @Test
@@ -66,5 +56,23 @@ public class SimpleAccountPreferencesServiceTest {
         Set<String> actual = underTest.enabledPlatforms();
 
         assertThat(actual, containsInAnyOrder(AWS, "PL1", "PL2"));
+    }
+
+    private static class TestCloudConstant implements CloudConstant {
+        private final String name;
+
+        TestCloudConstant(String name) {
+            this.name = name;
+        }
+
+        @Override
+        public Platform platform() {
+            return Platform.platform(name);
+        }
+
+        @Override
+        public Variant variant() {
+            return Variant.variant(name);
+        }
     }
 }

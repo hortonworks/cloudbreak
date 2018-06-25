@@ -60,49 +60,51 @@ public class UserDataBuilderTest {
         Assert.assertEquals(expectedCoreScript, userdata.get(InstanceGroupType.CORE));
     }
 
-    public PlatformParameters getPlatformParameters() {
-        return new PlatformParameters() {
-            @Override
-            public ScriptParams scriptParams() {
-                return new ScriptParams("sd", 98);
-            }
+    private PlatformParameters getPlatformParameters() {
+        return new TestPlatformParameters();
+    }
 
-            @Override
-            public DiskTypes diskTypes() {
-                return new DiskTypes(new ArrayList<>(), DiskType.diskType(""), new HashMap<>(), new HashMap<>());
-            }
+    private static class TestPlatformParameters implements PlatformParameters {
+        @Override
+        public ScriptParams scriptParams() {
+            return new ScriptParams("sd", 98);
+        }
 
-            @Override
-            public String resourceDefinition(String resource) {
-                return "";
-            }
+        @Override
+        public DiskTypes diskTypes() {
+            return new DiskTypes(new ArrayList<>(), DiskType.diskType(""), new HashMap<>(), new HashMap<>());
+        }
 
-            @Override
-            public List<StackParamValidation> additionalStackParameters() {
-                return new ArrayList<>();
-            }
+        @Override
+        public String resourceDefinition(String resource) {
+            return "";
+        }
 
-            @Override
-            public PlatformOrchestrator orchestratorParams() {
-                return new PlatformOrchestrator(Collections.singleton(orchestrator(OrchestratorConstants.SALT)),
-                    orchestrator(OrchestratorConstants.SALT));
-            }
+        @Override
+        public List<StackParamValidation> additionalStackParameters() {
+            return new ArrayList<>();
+        }
 
-            @Override
-            public TagSpecification tagSpecification() {
-                return null;
-            }
+        @Override
+        public PlatformOrchestrator orchestratorParams() {
+            return new PlatformOrchestrator(Collections.singleton(orchestrator(OrchestratorConstants.SALT)),
+                orchestrator(OrchestratorConstants.SALT));
+        }
 
-            @Override
-            public VmRecommendations recommendedVms() {
-                return null;
-            }
+        @Override
+        public TagSpecification tagSpecification() {
+            return null;
+        }
 
-            @Override
-            public String platforName() {
-                return "TEST";
-            }
+        @Override
+        public VmRecommendations recommendedVms() {
+            return null;
+        }
 
-        };
+        @Override
+        public String platforName() {
+            return "TEST";
+        }
+
     }
 }

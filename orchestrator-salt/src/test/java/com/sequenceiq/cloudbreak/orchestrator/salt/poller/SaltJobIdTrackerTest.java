@@ -192,108 +192,110 @@ public class SaltJobIdTrackerTest {
     @Test
     public void callWithInProgressAndMissingNodes() throws Exception {
         String jobId = "1";
-        SaltConnector saltConnector = Mockito.mock(SaltConnector.class);
+        try (SaltConnector saltConnector = Mockito.mock(SaltConnector.class)) {
 
-        SaltJobRunner saltJobRunner = Mockito.mock(BaseSaltJobRunner.class);
-        when(saltJobRunner.getJid()).thenReturn(JobId.jobId(jobId));
-        when(saltJobRunner.getJobState()).thenCallRealMethod();
-        doCallRealMethod().when(saltJobRunner).setJobState(any());
-        when(saltJobRunner.getNodesWithError()).thenCallRealMethod();
-        doCallRealMethod().when(saltJobRunner).setNodesWithError(any());
-        when(saltJobRunner.submit(any(SaltConnector.class))).thenReturn(jobId);
-        saltJobRunner.setJobState(JobState.IN_PROGRESS);
+            SaltJobRunner saltJobRunner = Mockito.mock(BaseSaltJobRunner.class);
+            when(saltJobRunner.getJid()).thenReturn(JobId.jobId(jobId));
+            when(saltJobRunner.getJobState()).thenCallRealMethod();
+            doCallRealMethod().when(saltJobRunner).setJobState(any());
+            when(saltJobRunner.getNodesWithError()).thenCallRealMethod();
+            doCallRealMethod().when(saltJobRunner).setNodesWithError(any());
+            when(saltJobRunner.submit(any(SaltConnector.class))).thenReturn(jobId);
+            saltJobRunner.setJobState(JobState.IN_PROGRESS);
 
-        Set<String> targets = new HashSet<>();
-        targets.add("10.0.0.1");
-        targets.add("10.0.0.2");
-        targets.add("10.0.0.3");
-        when(saltJobRunner.getTarget()).thenReturn(targets);
+            Set<String> targets = new HashSet<>();
+            targets.add("10.0.0.1");
+            targets.add("10.0.0.2");
+            targets.add("10.0.0.3");
+            when(saltJobRunner.getTarget()).thenReturn(targets);
 
-        Multimap<String, String> missingNodesWithReason = ArrayListMultimap.create();
-        String missingMachine = "10.0.0.1";
-        String errorMessage = "error happened";
-        missingNodesWithReason.put(missingMachine, errorMessage);
+            Multimap<String, String> missingNodesWithReason = ArrayListMultimap.create();
+            String missingMachine = "10.0.0.1";
+            String errorMessage = "error happened";
+            missingNodesWithReason.put(missingMachine, errorMessage);
 
-        PowerMockito.mockStatic(SaltStates.class);
-        PowerMockito.when(SaltStates.jobIsRunning(any(), any())).thenReturn(false);
-        PowerMockito.when(SaltStates.jidInfo(any(SaltConnector.class), anyString(), any(Target.class), any())).thenReturn(missingNodesWithReason);
+            PowerMockito.mockStatic(SaltStates.class);
+            PowerMockito.when(SaltStates.jobIsRunning(any(), any())).thenReturn(false);
+            PowerMockito.when(SaltStates.jidInfo(any(SaltConnector.class), anyString(), any(Target.class), any())).thenReturn(missingNodesWithReason);
 
-        try {
-            new SaltJobIdTracker(saltConnector, saltJobRunner).call();
-            fail("should throw exception");
-        } catch (CloudbreakOrchestratorFailedException e) {
-            assertThat(e.getMessage(), both(containsString(missingMachine)).and(containsString(errorMessage)));
+            try {
+                new SaltJobIdTracker(saltConnector, saltJobRunner).call();
+                fail("should throw exception");
+            } catch (CloudbreakOrchestratorFailedException e) {
+                assertThat(e.getMessage(), both(containsString(missingMachine)).and(containsString(errorMessage)));
+            }
+
+            PowerMockito.verifyStatic(SaltStates.class);
+            SaltStates.jobIsRunning(any(), eq(jobId));
+            checkTargets(targets, targetCaptor.getAllValues());
         }
-
-        PowerMockito.verifyStatic(SaltStates.class);
-        SaltStates.jobIsRunning(any(), eq(jobId));
-        checkTargets(targets, targetCaptor.getAllValues());
     }
 
     @Test
     public void callWithInProgressAndMissingNodesAndNoRetryOnFail() throws Exception {
         String jobId = "1";
-        SaltConnector saltConnector = Mockito.mock(SaltConnector.class);
+        try (SaltConnector saltConnector = Mockito.mock(SaltConnector.class)) {
 
-        SaltJobRunner saltJobRunner = Mockito.mock(BaseSaltJobRunner.class);
-        when(saltJobRunner.getJid()).thenReturn(JobId.jobId(jobId));
-        when(saltJobRunner.getJobState()).thenCallRealMethod();
-        doCallRealMethod().when(saltJobRunner).setJobState(any());
+            SaltJobRunner saltJobRunner = Mockito.mock(BaseSaltJobRunner.class);
+            when(saltJobRunner.getJid()).thenReturn(JobId.jobId(jobId));
+            when(saltJobRunner.getJobState()).thenCallRealMethod();
+            doCallRealMethod().when(saltJobRunner).setJobState(any());
 
-        Multimap<String, String> missingNodesWithReason = ArrayListMultimap.create();
-        String missingMachine = "10.0.0.1";
-        String errorMessage = "error happened";
-        missingNodesWithReason.put(missingMachine, errorMessage);
-        when(saltJobRunner.getNodesWithError()).thenReturn(missingNodesWithReason);
-        when(saltJobRunner.submit(any(SaltConnector.class))).thenReturn(jobId);
-        saltJobRunner.setJobState(JobState.FAILED);
+            Multimap<String, String> missingNodesWithReason = ArrayListMultimap.create();
+            String missingMachine = "10.0.0.1";
+            String errorMessage = "error happened";
+            missingNodesWithReason.put(missingMachine, errorMessage);
+            when(saltJobRunner.getNodesWithError()).thenReturn(missingNodesWithReason);
+            when(saltJobRunner.submit(any(SaltConnector.class))).thenReturn(jobId);
+            saltJobRunner.setJobState(JobState.FAILED);
 
-        Set<String> targets = Sets.newHashSet("10.0.0.1", "10.0.0.2", "10.0.0.3");
-        when(saltJobRunner.getTarget()).thenReturn(targets);
+            Set<String> targets = Sets.newHashSet("10.0.0.1", "10.0.0.2", "10.0.0.3");
+            when(saltJobRunner.getTarget()).thenReturn(targets);
 
-        try {
-            new SaltJobIdTracker(saltConnector, saltJobRunner, false).call();
-            fail("should throw exception");
-        } catch (CloudbreakOrchestratorTerminateException e) {
-            assertThat(e.getMessage(), both(containsString(missingMachine)).and(containsString(errorMessage)));
+            try {
+                new SaltJobIdTracker(saltConnector, saltJobRunner, false).call();
+                fail("should throw exception");
+            } catch (CloudbreakOrchestratorTerminateException e) {
+                assertThat(e.getMessage(), both(containsString(missingMachine)).and(containsString(errorMessage)));
+            }
+
+            checkTargets(targets, targetCaptor.getAllValues());
         }
-
-        checkTargets(targets, targetCaptor.getAllValues());
     }
 
     @Test
     public void callWithNotStartedAndSlsWithError() throws Exception {
         String jobId = "1";
-        SaltConnector saltConnector = Mockito.mock(SaltConnector.class);
+        try (SaltConnector saltConnector = Mockito.mock(SaltConnector.class)) {
 
-        SaltJobRunner saltJobRunner = Mockito.mock(BaseSaltJobRunner.class);
-        when(saltJobRunner.getJid()).thenReturn(JobId.jobId(jobId));
-        when(saltJobRunner.getJobState()).thenCallRealMethod();
-        doCallRealMethod().when(saltJobRunner).setJobState(any());
-        when(saltJobRunner.getNodesWithError()).thenCallRealMethod();
-        doCallRealMethod().when(saltJobRunner).setNodesWithError(any());
-        when(saltJobRunner.submit(any(SaltConnector.class))).thenReturn(jobId);
-        saltJobRunner.setJobState(JobState.NOT_STARTED);
+            SaltJobRunner saltJobRunner = Mockito.mock(BaseSaltJobRunner.class);
+            when(saltJobRunner.getJid()).thenReturn(JobId.jobId(jobId));
+            when(saltJobRunner.getJobState()).thenCallRealMethod();
+            doCallRealMethod().when(saltJobRunner).setJobState(any());
+            when(saltJobRunner.getNodesWithError()).thenCallRealMethod();
+            doCallRealMethod().when(saltJobRunner).setNodesWithError(any());
+            when(saltJobRunner.submit(any(SaltConnector.class))).thenReturn(jobId);
+            saltJobRunner.setJobState(JobState.NOT_STARTED);
 
-        Set<String> targets = Sets.newHashSet("10.0.0.1", "10.0.0.2", "10.0.0.3");
-        when(saltJobRunner.getTarget()).thenReturn(targets);
+            Set<String> targets = Sets.newHashSet("10.0.0.1", "10.0.0.2", "10.0.0.3");
+            when(saltJobRunner.getTarget()).thenReturn(targets);
 
-        PowerMockito.mockStatic(SaltStates.class);
-        PowerMockito.when(SaltStates.jobIsRunning(any(), any())).thenReturn(false);
-        PowerMockito.when(SaltStates.jidInfo(any(SaltConnector.class), anyString(), any(Target.class), any()))
-                .thenThrow(new RuntimeException("Salt execution went wrong: saltErrorDetails"));
+            PowerMockito.mockStatic(SaltStates.class);
+            PowerMockito.when(SaltStates.jobIsRunning(any(), any())).thenReturn(false);
+            PowerMockito.when(SaltStates.jidInfo(any(SaltConnector.class), anyString(), any(Target.class), any()))
+                    .thenThrow(new RuntimeException("Salt execution went wrong: saltErrorDetails"));
 
-        try {
-            new SaltJobIdTracker(saltConnector, saltJobRunner).call();
-            fail("should throw exception");
-        } catch (CloudbreakOrchestratorFailedException e) {
-            assertThat(e.getMessage(), containsString("Salt execution went wrong: saltErrorDetails"));
-            assertThat(e.getMessage(),  not(containsString("Exception")));
+            try {
+                new SaltJobIdTracker(saltConnector, saltJobRunner).call();
+                fail("should throw exception");
+            } catch (CloudbreakOrchestratorFailedException e) {
+                assertThat(e.getMessage(), containsString("Salt execution went wrong: saltErrorDetails"));
+                assertThat(e.getMessage(), not(containsString("Exception")));
+            }
+
+            PowerMockito.verifyStatic(SaltStates.class);
+            SaltStates.jobIsRunning(any(), eq(jobId));
+            checkTargets(targets, targetCaptor.getAllValues());
         }
-
-        PowerMockito.verifyStatic(SaltStates.class);
-        SaltStates.jobIsRunning(any(), eq(jobId));
-        checkTargets(targets, targetCaptor.getAllValues());
     }
-
 }

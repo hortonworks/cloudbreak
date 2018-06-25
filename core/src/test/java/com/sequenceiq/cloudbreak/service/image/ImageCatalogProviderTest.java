@@ -13,9 +13,11 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.ws.rs.client.Client;
-import javax.ws.rs.client.Invocation;
+import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status.Family;
+import javax.ws.rs.core.Response.StatusType;
 
 import org.apache.commons.io.FileUtils;
 import org.assertj.core.util.Lists;
@@ -74,16 +76,16 @@ public class ImageCatalogProviderTest {
     private WebTarget webTargetMock;
 
     @Mock
-    private Invocation.Builder builderMock;
+    private Builder builderMock;
 
     @Mock
     private Response responseMock;
 
     @Mock
-    private Response.StatusType statusTypeMock;
+    private StatusType statusTypeMock;
 
     @Spy
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Test
     public void testReadImageCatalogFromFile() throws Exception {
@@ -119,7 +121,7 @@ public class ImageCatalogProviderTest {
     }
 
     @Test
-    public void testImageCatalogErrorWhenNull() throws CloudbreakImageCatalogException {
+    public void testImageCatalogErrorWhenNull() {
         String path = getPath(CB_IMAGE_CATALOG_NULL_FIELD_JSON);
         ReflectionTestUtils.setField(underTest, "etcConfigDir", path);
         ReflectionTestUtils.setField(underTest, "enabledLinuxTypes", Collections.emptyList());
@@ -134,13 +136,12 @@ public class ImageCatalogProviderTest {
         try {
             return TestUtil.getFilePath(getClass(), catalogUrl).getParent().toString();
         } catch (Exception e) {
-
             throw new RuntimeException(String.format("Catalog JSON cannot be read: %s", catalogUrl), e);
         }
     }
 
     @Test
-    public void testImageCatalogValid() throws CloudbreakImageCatalogException, IOException {
+    public void testImageCatalogValid() throws CloudbreakImageCatalogException {
         String path = getPath(CB_IMAGE_CATALOG_VALID_JSON);
         ReflectionTestUtils.setField(underTest, "etcConfigDir", path);
         ReflectionTestUtils.setField(underTest, "enabledLinuxTypes", Collections.emptyList());
@@ -213,7 +214,7 @@ public class ImageCatalogProviderTest {
         when(webTargetMock.request()).thenReturn(builderMock);
         when(builderMock.get()).thenReturn(responseMock);
         when(responseMock.getStatusInfo()).thenReturn(statusTypeMock);
-        when(statusTypeMock.getFamily()).thenReturn(Response.Status.Family.SUCCESSFUL);
+        when(statusTypeMock.getFamily()).thenReturn(Family.SUCCESSFUL);
         when(responseMock.readEntity(String.class)).thenReturn(FileUtils.readFileToString(Paths.get(path, CB_IMAGE_CATALOG_V2_JSON).toFile()));
 
         ReflectionTestUtils.setField(underTest, "etcConfigDir", path);
@@ -229,7 +230,7 @@ public class ImageCatalogProviderTest {
     }
 
     @Test(expected = CloudbreakImageCatalogException.class)
-    public void testHttpImageCatalogNotValidJson() throws CloudbreakImageCatalogException, IOException {
+    public void testHttpImageCatalogNotValidJson() throws CloudbreakImageCatalogException {
         PowerMockito.mockStatic(RestClientUtil.class);
 
         String path = getPath(CB_IMAGE_CATALOG_VALID_JSON);
@@ -240,7 +241,7 @@ public class ImageCatalogProviderTest {
         when(webTargetMock.request()).thenReturn(builderMock);
         when(builderMock.get()).thenReturn(responseMock);
         when(responseMock.getStatusInfo()).thenReturn(statusTypeMock);
-        when(statusTypeMock.getFamily()).thenReturn(Response.Status.Family.SUCCESSFUL);
+        when(statusTypeMock.getFamily()).thenReturn(Family.SUCCESSFUL);
         when(responseMock.readEntity(String.class)).thenReturn("image catalog");
 
         ReflectionTestUtils.setField(underTest, "etcConfigDir", path);
@@ -250,7 +251,7 @@ public class ImageCatalogProviderTest {
     }
 
     @Test
-    public void testImageCatalogWithEmptyCloudBreakVersions() throws CloudbreakImageCatalogException, IOException {
+    public void testImageCatalogWithEmptyCloudBreakVersions() {
         String path = getPath(CB_IMAGE_CATALOG_EMPTY_CLOUDBREAK_VERSIONS_JSON);
         ReflectionTestUtils.setField(underTest, "etcConfigDir", path);
         ReflectionTestUtils.setField(underTest, "enabledLinuxTypes", Collections.emptyList());
@@ -261,17 +262,17 @@ public class ImageCatalogProviderTest {
     }
 
     @Test
-    public void testImageCatalogFilterNullImages() throws CloudbreakImageCatalogException, IOException {
+    public void testImageCatalogFilterNullImages() throws CloudbreakImageCatalogException {
         String path = getPath(CB_IMAGE_CATALOG_FILTER_NULL_IMAGES_JSON);
         ReflectionTestUtils.setField(underTest, "etcConfigDir", path);
         ReflectionTestUtils.setField(underTest, "enabledLinuxTypes", Collections.emptyList());
 
         CloudbreakImageCatalogV2 imageCatalogV2 = underTest.getImageCatalogV2(CB_IMAGE_CATALOG_FILTER_NULL_IMAGES_JSON);
-        assertEquals(1, imageCatalogV2.getImages().getBaseImages().get(0).getImageSetsByProvider().values().size());
+        assertEquals(1L, imageCatalogV2.getImages().getBaseImages().get(0).getImageSetsByProvider().values().size());
     }
 
     @Test
-    public void testImageCatalogWithoutHdfImages() throws CloudbreakImageCatalogException, IOException {
+    public void testImageCatalogWithoutHdfImages() throws CloudbreakImageCatalogException {
         String path = getPath(CB_IMAGE_CATALOG_WITHOUT_HDF_IMAGES);
         ReflectionTestUtils.setField(underTest, "etcConfigDir", path);
         ReflectionTestUtils.setField(underTest, "enabledLinuxTypes", Collections.emptyList());
@@ -281,7 +282,7 @@ public class ImageCatalogProviderTest {
     }
 
     @Test
-    public void testImageCatalogWithoutHdpImages() throws CloudbreakImageCatalogException, IOException {
+    public void testImageCatalogWithoutHdpImages() throws CloudbreakImageCatalogException {
         String path = getPath(CB_IMAGE_CATALOG_WITHOUT_HDP_IMAGES);
         ReflectionTestUtils.setField(underTest, "etcConfigDir", path);
         ReflectionTestUtils.setField(underTest, "enabledLinuxTypes", Collections.emptyList());
@@ -291,7 +292,7 @@ public class ImageCatalogProviderTest {
     }
 
     @Test
-    public void testImageCatalogWithoutBaseImages() throws CloudbreakImageCatalogException, IOException {
+    public void testImageCatalogWithoutBaseImages() throws CloudbreakImageCatalogException {
         String path = getPath(CB_IMAGE_CATALOG_WITHOUT_BASE_IMAGES);
         ReflectionTestUtils.setField(underTest, "etcConfigDir", path);
         ReflectionTestUtils.setField(underTest, "enabledLinuxTypes", Collections.emptyList());

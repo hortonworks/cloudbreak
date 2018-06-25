@@ -69,8 +69,8 @@ public class StackMatrixServiceTest {
 
         StackMatrix stackMatrix = stackMatrixService.getStackMatrix();
 
-        assertEquals(2, stackMatrix.getHdf().size());
-        assertEquals(3, stackMatrix.getHdp().size());
+        assertEquals(2L, stackMatrix.getHdf().size());
+        assertEquals(3L, stackMatrix.getHdp().size());
 
         assertEquals("2.6", stackMatrix.getHdf().get("3.1").getMinAmbari());
         assertEquals("3.1.2.0", stackMatrix.getHdf().get("3.1").getVersion());
@@ -99,8 +99,8 @@ public class StackMatrixServiceTest {
 
         StackMatrix stackMatrix = stackMatrixService.getStackMatrix();
 
-        assertEquals(2, stackMatrix.getHdf().size());
-        assertEquals(3, stackMatrix.getHdp().size());
+        assertEquals(2L, stackMatrix.getHdf().size());
+        assertEquals(3L, stackMatrix.getHdp().size());
 
         assertEquals("2.6", stackMatrix.getHdf().get("3.1").getMinAmbari());
         assertEquals("3.1.2.0", stackMatrix.getHdf().get("3.1").getVersion());

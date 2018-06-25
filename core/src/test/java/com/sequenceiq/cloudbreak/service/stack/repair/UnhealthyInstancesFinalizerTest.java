@@ -73,7 +73,7 @@ public class UnhealthyInstancesFinalizerTest {
 
         Set<String> unhealthyInstances = underTest.finalizeUnhealthyInstances(stack, candidateUnhealthyInstances);
 
-        assertEquals(1, unhealthyInstances.size());
+        assertEquals(1L, unhealthyInstances.size());
         assertTrue(unhealthyInstances.contains(instanceId2));
     }
 
@@ -102,18 +102,17 @@ public class UnhealthyInstancesFinalizerTest {
 
         Set<String> unhealthyInstances = underTest.finalizeUnhealthyInstances(stack, candidateUnhealthyInstances);
 
-        assertEquals(2, unhealthyInstances.size());
+        assertEquals(2L, unhealthyInstances.size());
         assertTrue(unhealthyInstances.contains(instanceId1));
         assertTrue(unhealthyInstances.contains(instanceId2));
     }
 
-    private CloudVmInstanceStatus setupCloudVmInstanceStatus(
+    private void setupCloudVmInstanceStatus(
             CloudInstance cloudInstance1, InstanceStatus stopped, List<CloudVmInstanceStatus> cloudVmInstanceStatusList) {
         CloudVmInstanceStatus status1 = mock(CloudVmInstanceStatus.class);
         when(status1.getCloudInstance()).thenReturn(cloudInstance1);
         when(status1.getStatus()).thenReturn(stopped);
         cloudVmInstanceStatusList.add(status1);
-        return status1;
     }
 
     private CloudInstance setupCloudInstance(String instanceId, List<CloudInstance> cloudInstances) {
@@ -123,10 +122,9 @@ public class UnhealthyInstancesFinalizerTest {
         return cloudInstance;
     }
 
-    private InstanceMetaData setupInstanceMetaData(String instanceId, Set<InstanceMetaData> candidateUnhealthyInstances) {
+    private void setupInstanceMetaData(String instanceId, Set<InstanceMetaData> candidateUnhealthyInstances) {
         InstanceMetaData imd1 = mock(InstanceMetaData.class);
         when(imd1.getInstanceId()).thenReturn(instanceId);
         candidateUnhealthyInstances.add(imd1);
-        return imd1;
     }
 }

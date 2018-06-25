@@ -47,7 +47,7 @@ public class CloudStorageRequestToFileSystemConverterTest {
     private static final boolean EXAMPLE_IS_DEFAULT_FS_VALUE = true;
 
     @Rule
-    public ExpectedException expectedException = ExpectedException.none();
+    public final ExpectedException expectedException = ExpectedException.none();
 
     @InjectMocks
     private CloudStorageRequestToFileSystemConverter underTest;

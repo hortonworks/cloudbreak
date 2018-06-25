@@ -35,16 +35,16 @@ public class CentralBlueprintContext {
     }
 
     @Configuration
-    @ComponentScan({"com.sequenceiq.cloudbreak.blueprint"})
+    @ComponentScan("com.sequenceiq.cloudbreak.blueprint")
     public static class SpringConfig {
 
         @Inject
-        private List<FileSystemConfigurator> fileSystemConfigurators;
+        private List<FileSystemConfigurator<?>> fileSystemConfigurators;
 
         @Bean
-        public Map<FileSystemType, FileSystemConfigurator> fileSystemConfigurators() {
-            Map<FileSystemType, FileSystemConfigurator> map = new EnumMap<>(FileSystemType.class);
-            for (FileSystemConfigurator fileSystemConfigurator : fileSystemConfigurators) {
+        public Map<FileSystemType, FileSystemConfigurator<?>> fileSystemConfigurators() {
+            Map<FileSystemType, FileSystemConfigurator<?>> map = new EnumMap<>(FileSystemType.class);
+            for (FileSystemConfigurator<?> fileSystemConfigurator : fileSystemConfigurators) {
                 map.put(fileSystemConfigurator.getFileSystemType(), fileSystemConfigurator);
             }
             return map;

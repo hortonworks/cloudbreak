@@ -19,7 +19,7 @@ public class UpscaleStackComponentTest extends AbstractComponentTest<UpscaleStac
 
 
         assertEquals(ResourceStatus.UPDATED, result.getResourceStatus());
-        assertEquals(1, result.getResults().size());
+        assertEquals(1L, result.getResults().size());
         assertEquals(ResourceStatus.UPDATED, result.getResults().get(0).getStatus());
         assertFalse(result.isFailed());
         assertNull(result.getErrorDetails());
@@ -31,7 +31,7 @@ public class UpscaleStackComponentTest extends AbstractComponentTest<UpscaleStac
     }
 
     @Override
-    protected CloudPlatformRequest getRequest() {
-        return new UpscaleStackRequest(g().createCloudContext(), g().createCloudCredential(), g().createCloudStack(), g().createCloudResourceList());
+    protected CloudPlatformRequest<UpscaleStackResult> getRequest() {
+        return new UpscaleStackRequest<>(g().createCloudContext(), g().createCloudCredential(), g().createCloudStack(), g().createCloudResourceList());
     }
 }

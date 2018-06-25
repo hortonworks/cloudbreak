@@ -20,14 +20,14 @@ public class RetryUtilTest {
     private final ExceptionCheckTask exceptionCheck = mock(ExceptionCheckTask.class);
 
     @Test
-    public void testRunWithoutException() throws Exception {
+    public void testRunWithoutException() {
         runRetryTask();
         verify(task, times(1)).run();
         verify(error, times(0)).run(new Exception());
     }
 
     @Test
-    public void testRunWithoutExceptionCheckOk() throws Exception {
+    public void testRunWithoutExceptionCheckOk() {
         when(check.check()).thenReturn(true);
         runRetryTaskWithCheck();
         verify(task, times(1)).run();
@@ -36,7 +36,7 @@ public class RetryUtilTest {
     }
 
     @Test
-    public void testRunWithoutExceptionCheckNok() throws Exception {
+    public void testRunWithoutExceptionCheckNok() {
         when(check.check()).thenReturn(false);
         runRetryTaskWithCheck();
         verify(task, times(3)).run();
@@ -45,7 +45,7 @@ public class RetryUtilTest {
     }
 
     @Test
-    public void testRunWithRecoverableException() throws Exception {
+    public void testRunWithRecoverableException() {
         when(exceptionCheck.check(any())).thenReturn(true);
         doThrow(new IllegalArgumentException()).when(task).run();
         runRetryTaskWithExceptionCheck();
@@ -55,7 +55,7 @@ public class RetryUtilTest {
     }
 
     @Test
-    public void testRunWithNotRecoverableException() throws Exception {
+    public void testRunWithNotRecoverableException() {
         when(exceptionCheck.check(any())).thenReturn(false);
         doThrow(new NullPointerException()).when(task).run();
         runRetryTaskWithExceptionCheck();

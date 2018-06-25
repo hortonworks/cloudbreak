@@ -91,66 +91,77 @@ public class CloudPlatformConnectorsTest {
     }
 
     private CloudConnector getConnector(String platform, String variant) {
-        return new CloudConnector() {
-            @Override
-            public Authenticator authentication() {
-                return null;
-            }
+        return new FakeCloudConnector(variant, platform);
+    }
 
-            @Override
-            public Setup setup() {
-                return null;
-            }
+    private static class FakeCloudConnector implements CloudConnector {
+        private final String variant;
 
-            @Override
-            public List<Validator> validators() {
-                return Collections.emptyList();
-            }
+        private final String platform;
 
-            @Override
-            public CredentialConnector credentials() {
-                return null;
-            }
+        FakeCloudConnector(String variant, String platform) {
+            this.variant = variant;
+            this.platform = platform;
+        }
 
-            @Override
-            public ResourceConnector resources() {
-                return null;
-            }
+        @Override
+        public Authenticator authentication() {
+            return null;
+        }
 
-            @Override
-            public InstanceConnector instances() {
-                return null;
-            }
+        @Override
+        public Setup setup() {
+            return null;
+        }
 
-            @Override
-            public MetadataCollector metadata() {
-                return null;
-            }
+        @Override
+        public List<Validator> validators() {
+            return Collections.emptyList();
+        }
 
-            @Override
-            public PlatformParameters parameters() {
-                return null;
-            }
+        @Override
+        public CredentialConnector credentials() {
+            return null;
+        }
 
-            @Override
-            public PlatformResources platformResources() {
-                return null;
-            }
+        @Override
+        public ResourceConnector<Object> resources() {
+            return null;
+        }
 
-            @Override
-            public CloudConstant cloudConstant() {
-                return null;
-            }
+        @Override
+        public InstanceConnector instances() {
+            return null;
+        }
 
-            @Override
-            public Variant variant() {
-                return Variant.variant(variant);
-            }
+        @Override
+        public MetadataCollector metadata() {
+            return null;
+        }
 
-            @Override
-            public Platform platform() {
-                return Platform.platform(platform);
-            }
-        };
+        @Override
+        public PlatformParameters parameters() {
+            return null;
+        }
+
+        @Override
+        public PlatformResources platformResources() {
+            return null;
+        }
+
+        @Override
+        public CloudConstant cloudConstant() {
+            return null;
+        }
+
+        @Override
+        public Variant variant() {
+            return Variant.variant(variant);
+        }
+
+        @Override
+        public Platform platform() {
+            return Platform.platform(platform);
+        }
     }
 }

@@ -22,6 +22,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.google.common.collect.Lists;
+import com.sequenceiq.cloudbreak.blueprint.BlueprintPreparationObject.Builder;
 import com.sequenceiq.cloudbreak.blueprint.template.BlueprintTemplateProcessor;
 import com.sequenceiq.cloudbreak.blueprint.templates.ServiceName;
 import com.sequenceiq.cloudbreak.blueprint.templates.TemplateFiles;
@@ -47,7 +48,7 @@ public class BlueprintSegmentProcessorTest {
 
     private String expectedBlueprint;
 
-    private BlueprintPreparationObject object = BlueprintPreparationObject.Builder.builder().build();
+    private final BlueprintPreparationObject object = Builder.builder().build();
 
     @Before
     public void before() throws IOException {

@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.orchestrator.yarn.converter;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertNotNull;
 
 import org.junit.Test;
 
@@ -18,6 +18,6 @@ public class JsonToCreateApplicationResponseConverterTest {
     public void testConvert() throws Exception {
         JsonToCreateApplicationResponseConverter jsonToCreateApplicationResponseConverter = new JsonToCreateApplicationResponseConverter();
         CreateApplicationResponse createApplicationResponse = jsonToCreateApplicationResponseConverter.convert(JSON_RESPONSE);
-        assertTrue(createApplicationResponse != null);
+        assertNotNull(createApplicationResponse);
     }
 }

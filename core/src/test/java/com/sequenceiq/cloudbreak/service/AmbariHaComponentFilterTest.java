@@ -20,7 +20,7 @@ public class AmbariHaComponentFilterTest {
         String blueprintText = FileReaderUtil.readResourceFile(this, "ha-components.bp");
         Set<String> haComponents = underTest.getHaComponents(new BlueprintTextProcessor(blueprintText));
 
-        assertEquals(2, haComponents.size());
+        assertEquals(2L, haComponents.size());
         assertTrue(haComponents.contains(ExposedService.ATLAS.getServiceName()));
         assertTrue(haComponents.contains(ExposedService.RESOURCEMANAGER_WEB.getServiceName()));
     }
