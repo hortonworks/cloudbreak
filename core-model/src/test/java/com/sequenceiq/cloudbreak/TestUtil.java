@@ -677,6 +677,19 @@ public class TestUtil {
         return gateway;
     }
 
+    public static Gateway gatewayEnabledWithoutSSOAndWithRanger() {
+        Gateway gateway = new Gateway();
+        setGatewayTopology(gateway);
+        gateway.setPath("/path");
+        gateway.setSsoType(SSOType.NONE);
+        gateway.setGatewayType(GatewayType.CENTRAL);
+        gateway.setSignCert("signcert");
+        gateway.setSignKey("signkey");
+        gateway.setTokenCert("tokencert");
+        gateway.setSignPub("signpub");
+        return gateway;
+    }
+
     public static Stack setSpotInstances(Stack stack) {
         if (stack.cloudPlatform().equals(AWS)) {
             for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
