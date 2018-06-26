@@ -40,7 +40,7 @@ public class SharedServiceTest extends CloudbreakTest {
     private static final String ATTACHED_CLUSTER_NAME = "attached-cluster";
 
     @Test(dataProvider = "providerAndBlueprintAndClusterNameForDatalake")
-    public void testDatalakeClusterCreation(CloudProvider cloudProvider, String clusterName, String blueprintName) throws Exception {
+    public void testADatalakeClusterCreation(CloudProvider cloudProvider, String clusterName, String blueprintName) throws Exception {
         given(CloudbreakClient.isCreated());
         given(cloudProvider.aValidCredential());
         given(RangerRdsConfig.isCreatedWithParameters(getTestParameter()));
@@ -67,7 +67,7 @@ public class SharedServiceTest extends CloudbreakTest {
     }
 
     @Test(dataProvider = "providerAndBlueprintAndClusterNameForAttachedCluster")
-    public void testAttachedClusterToDatalakeCluster(CloudProvider cloudProvider, String clusterName, String datalakeClusterName, String blueprintName)
+    public void testClusterAttachedToDatalakeCluster(CloudProvider cloudProvider, String clusterName, String datalakeClusterName, String blueprintName)
             throws Exception {
         given(CloudbreakClient.isCreated());
         given(cloudProvider.aValidCredential());
