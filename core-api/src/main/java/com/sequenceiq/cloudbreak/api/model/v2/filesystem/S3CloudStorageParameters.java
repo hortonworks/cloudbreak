@@ -4,6 +4,7 @@ import java.util.Objects;
 
 import javax.validation.constraints.NotNull;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.api.model.filesystem.FileSystemType;
 import com.sequenceiq.cloudbreak.validation.ValidS3CloudStorageParameters;
 
@@ -12,11 +13,18 @@ import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel
 @ValidS3CloudStorageParameters
+@JsonIgnoreProperties(ignoreUnknown = true, value = "type")
 public class S3CloudStorageParameters implements CloudStorageParameters {
 
     @ApiModelProperty
     @NotNull
     private String instanceProfile;
+
+    @ApiModelProperty(hidden = true)
+    @Override
+    public FileSystemType getType() {
+        return FileSystemType.S3;
+    }
 
     public String getInstanceProfile() {
         return instanceProfile;
@@ -24,12 +32,6 @@ public class S3CloudStorageParameters implements CloudStorageParameters {
 
     public void setInstanceProfile(String instanceProfile) {
         this.instanceProfile = instanceProfile;
-    }
-
-    @ApiModelProperty(hidden = true)
-    @Override
-    public FileSystemType getType() {
-        return FileSystemType.S3;
     }
 
     @Override

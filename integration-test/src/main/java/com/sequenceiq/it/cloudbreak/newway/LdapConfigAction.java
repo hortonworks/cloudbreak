@@ -31,7 +31,7 @@ public class LdapConfigAction {
         ldapconfigEntity.setResponse(
                 client.getCloudbreakClient()
                         .ldapConfigEndpoint()
-                        .getPrivate(ldapconfigEntity.getEntityId()));
+                        .getPrivate(ldapconfigEntity.getRequest().getName()));
         logJSON(" get ldap config response: ", ldapconfigEntity.getResponse());
     }
 
@@ -75,7 +75,11 @@ public class LdapConfigAction {
     }
 
     public static void createInGiven(IntegrationTestContext integrationTestContext, Entity entity) throws Exception {
-        post(integrationTestContext, entity);
+        try {
+            get(integrationTestContext, entity);
+        } catch (Exception e) {
+            post(integrationTestContext, entity);
+        }
     }
 
     static void createDeleteInGiven(IntegrationTestContext integrationTestContext, Entity entity) throws Exception {

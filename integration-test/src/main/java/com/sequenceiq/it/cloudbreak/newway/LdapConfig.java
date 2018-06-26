@@ -3,13 +3,10 @@ package com.sequenceiq.it.cloudbreak.newway;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
-import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigRequest;
 import com.sequenceiq.it.IntegrationTestContext;
 
 public class LdapConfig extends LdapConfigEntity {
     private static final String LDAPCONFIG = "LdapCONFIG";
-
-    private final LdapConfigRequest ldapConfigRequest = new LdapConfigRequest();
 
     private LdapConfig() {
         super(LDAPCONFIG);
@@ -25,10 +22,6 @@ public class LdapConfig extends LdapConfigEntity {
 
     public static LdapConfig request() {
         return new LdapConfig();
-    }
-
-    public LdapConfigRequest getRequest() {
-        return ldapConfigRequest;
     }
 
     public static LdapConfig isCreated() {
@@ -74,4 +67,12 @@ public class LdapConfig extends LdapConfigEntity {
     public static Assertion<LdapConfig> assertThis(BiConsumer<LdapConfig, IntegrationTestContext> check) {
         return new Assertion<>(getTestContext(GherkinTest.RESULT), check);
     }
+
+    public static LdapConfig isCreatedWithParameters(TestParameter testParameter) {
+        LdapConfig ldapConfig = new LdapConfig();
+        ldapConfig.setRequest(LdapConfigRequestDataCollector.createLdapRequestWithProperties(testParameter));
+        ldapConfig.setCreationStrategy(LdapConfigAction::createInGiven);
+        return ldapConfig;
+    }
+
 }

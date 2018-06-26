@@ -3,16 +3,17 @@ package com.sequenceiq.it.cloudbreak.newway;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
-import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigRequest;
 import com.sequenceiq.it.IntegrationTestContext;
 
 public class RdsConfig extends RdsConfigEntity {
     private static final String RDSCONFIG = "RDSCONFIG";
 
-    private final RDSConfigRequest rdsConfigRequest = new RDSConfigRequest();
-
-    private RdsConfig() {
+    protected RdsConfig() {
         super(RDSCONFIG);
+    }
+
+    protected RdsConfig(String newId) {
+        super(newId);
     }
 
     private static Function<IntegrationTestContext, RdsConfig> getTestContext(String key) {
@@ -25,10 +26,6 @@ public class RdsConfig extends RdsConfigEntity {
 
     public static RdsConfig request() {
         return new RdsConfig();
-    }
-
-    public RDSConfigRequest getRequest() {
-        return rdsConfigRequest;
     }
 
     public static RdsConfig isCreated() {

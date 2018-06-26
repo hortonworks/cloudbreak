@@ -4,13 +4,16 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.sequenceiq.cloudbreak.api.model.stack.StackAuthenticationRequest;
+import com.sequenceiq.cloudbreak.api.model.v2.CloudStorageRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.NetworkV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.TemplateV2Request;
 import com.sequenceiq.it.cloudbreak.newway.Credential;
 import com.sequenceiq.it.cloudbreak.newway.CredentialEntity;
+import com.sequenceiq.it.cloudbreak.newway.Stack;
 import com.sequenceiq.it.cloudbreak.newway.TestParameter;
 
 public class AzureCloudProvider extends CloudProviderHelper {
+
     public static final String AZURE = "azure";
 
     public static final String AZURE_CAPITAL = "AZURE";
@@ -49,6 +52,16 @@ public class AzureCloudProvider extends CloudProviderHelper {
 
     @Override
     public String availabilityZone() {
+        return null;
+    }
+
+    @Override
+    public Stack aValidDatalakeStackIsCreated() {
+        return null;
+    }
+
+    @Override
+    public CloudStorageRequest fileSystemForDatalake() {
         return null;
     }
 
