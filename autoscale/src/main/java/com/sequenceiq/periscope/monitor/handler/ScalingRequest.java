@@ -2,6 +2,7 @@ package com.sequenceiq.periscope.monitor.handler;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
@@ -26,6 +27,8 @@ import com.sequenceiq.periscope.service.HistoryService;
 public class ScalingRequest implements Runnable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ScalingRequest.class);
+
+    private static final int STATUSREASON_MAX_LENGTH = 255;
 
     private final int desiredNodeCount;
 
@@ -62,7 +65,7 @@ public class ScalingRequest implements Runnable {
                 scaleDown(scalingAdjustment, totalNodes);
             }
         } catch (RuntimeException e) {
-            LOGGER.error("Cannot retrieve an oauth token from the identity server", e);
+            LOGGER.error("Error while executing ScaleRequest", e);
         }
     }
 
@@ -71,7 +74,8 @@ public class ScalingRequest implements Runnable {
         String ambari = cluster.getHost();
         AmbariAddressJson ambariAddressJson = new AmbariAddressJson();
         ambariAddressJson.setAmbariAddress(ambari);
-        History history = null;
+        String statusReason = null;
+        ScalingStatus scalingStatus = null;
         try {
             LOGGER.info("Sending request to add {} instance(s) into host group '{}', triggered policy '{}'", scalingAdjustment, hostGroup, policy.getName());
             Long stackId = cloudbreakClient.stackV1Endpoint().getStackForAmbari(ambariAddressJson).getId();
@@ -82,14 +86,14 @@ public class ScalingRequest implements Runnable {
             instanceGroupAdjustmentJson.setInstanceGroup(hostGroup);
             updateStackJson.setInstanceGroupAdjustment(instanceGroupAdjustmentJson);
             cloudbreakClient.stackV1Endpoint().put(stackId, updateStackJson);
-            history = historyService.createEntry(ScalingStatus.SUCCESS, "Upscale successfully triggered", totalNodes, policy);
+            scalingStatus = ScalingStatus.SUCCESS;
+            statusReason = "Upscale successfully triggered";
         } catch (RuntimeException e) {
-            history = historyService.createEntry(ScalingStatus.FAILED, "Couldn't trigger upscaling due to: " + e.getMessage(), totalNodes, policy);
-            LOGGER.error("Error adding nodes to cluster", e);
+            scalingStatus = ScalingStatus.FAILED;
+            statusReason = "Couldn't trigger upscaling due to: " + e.getMessage();
+            LOGGER.error(statusReason, e);
         } finally {
-            if (history != null) {
-                notificationSender.send(history);
-            }
+            createHistoryAndNotify(totalNodes, statusReason, scalingStatus);
         }
     }
 
@@ -98,7 +102,8 @@ public class ScalingRequest implements Runnable {
         String ambari = cluster.getHost();
         AmbariAddressJson ambariAddressJson = new AmbariAddressJson();
         ambariAddressJson.setAmbariAddress(ambari);
-        History history = null;
+        String statusReason = null;
+        ScalingStatus scalingStatus = null;
         try {
             LOGGER.info("Sending request to remove {} node(s) from host group '{}', triggered policy '{}'", scalingAdjustment, hostGroup, policy.getName());
             Long stackId = cloudbreakClient.stackV1Endpoint().getStackForAmbari(ambariAddressJson).getId();
@@ -109,15 +114,19 @@ public class ScalingRequest implements Runnable {
             hostGroupAdjustmentJson.setHostGroup(hostGroup);
             updateClusterJson.setHostGroupAdjustment(hostGroupAdjustmentJson);
             cloudbreakClient.clusterEndpoint().put(stackId, updateClusterJson);
-            history = historyService.createEntry(ScalingStatus.SUCCESS, "Downscale successfully triggered", totalNodes, policy);
+            scalingStatus = ScalingStatus.SUCCESS;
+            statusReason = "Downscale successfully triggered";
         } catch (Exception e) {
-            history = historyService.createEntry(ScalingStatus.FAILED, "Couldn't trigger downscaling due to: " + e.getMessage(), totalNodes, policy);
-            LOGGER.error("Error removing nodes from the cluster", e);
+            scalingStatus = ScalingStatus.FAILED;
+            statusReason = "Couldn't trigger downscaling due to: " + e.getMessage();
+            LOGGER.error(statusReason, e);
         } finally {
-            if (history != null) {
-                notificationSender.send(history);
-            }
+            createHistoryAndNotify(totalNodes, statusReason, scalingStatus);
         }
     }
 
+    private void createHistoryAndNotify(int totalNodes, String statusReason, ScalingStatus scalingStatus) {
+        History history = historyService.createEntry(scalingStatus, StringUtils.substring(statusReason, 0, STATUSREASON_MAX_LENGTH), totalNodes, policy);
+        notificationSender.send(history);
+    }
 }
