@@ -15,7 +15,7 @@ tests:
     classes:
       - name: com.sequenceiq.it.cloudbreak.SharedServiceTest
         includedMethods:
-          - testDatalakeClusterCreation
-          - testAttachedClusterToDatalakeCluster
+          - testADatalakeClusterCreation
+          - testClusterAttachedToDatalakeCluster
           - testTerminateAttachedCluster
           - testTerminateDatalakeCluster

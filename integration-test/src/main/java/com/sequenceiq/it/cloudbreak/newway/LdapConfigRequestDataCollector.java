@@ -1,5 +1,6 @@
 package com.sequenceiq.it.cloudbreak.newway;
 
+import com.sequenceiq.cloudbreak.api.model.DirectoryType;
 import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigRequest;
 
 import java.util.Optional;
@@ -24,6 +25,9 @@ public class LdapConfigRequestDataCollector {
         request.setGroupObjectClass(getParam("NN_LDAP_GROUP_OBJECT_CLASS", testParametert));
         request.setGroupMemberAttribute(getParam("NN_LDAP_GROUP_MEMBER_ATTRIBUTE", testParametert));
         request.setName(getParam("NN_LDAP", testParametert));
+        request.setAdminGroup(getParam("NN_LDAP_ADMIN_GROUP", testParametert));
+        request.setDirectoryType(DirectoryType.valueOf(getParam("NN_LDAP_DIRECTORY_TYPE", testParametert)));
+        request.setProtocol(getParam("NN_LDAP_SERVER_PROTOCOL", testParametert));
         return request;
     }
 
