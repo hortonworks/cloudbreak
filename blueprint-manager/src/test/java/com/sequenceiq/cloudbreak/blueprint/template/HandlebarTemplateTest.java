@@ -241,6 +241,8 @@ public class HandlebarTemplateTest {
                 // ATLAS
                 {"blueprints/configurations/atlas/gateway.handlebars", "configurations/atlas/enable-gateway.json",
                         enabledGateway()},
+                {"blueprints/configurations/atlas/gateway.handlebars", "configurations/atlas/enable-gateway-without-sso-and-with-ranger.json",
+                        enabledGatewayWithoutSSOAndWithRanger()},
                 {"blueprints/configurations/atlas/gateway.handlebars", "configurations/atlas/disable-gateway.json",
                         objectWithoutEverything()},
                 {"blueprints/configurations/atlas/gateway.handlebars", "configurations/atlas/enable-gateway-with-ranger.json",
@@ -418,6 +420,13 @@ public class HandlebarTemplateTest {
     public static Map<String, Object> enabledGateway() {
         return new BlueprintTemplateModelContextBuilder()
                 .withGateway(TestUtil.gatewayEnabled())
+                .build();
+    }
+
+    public static Map<String, Object> enabledGatewayWithoutSSOAndWithRanger() {
+        return new BlueprintTemplateModelContextBuilder()
+                .withGateway(TestUtil.gatewayEnabledWithoutSSOAndWithRanger())
+                .withComponents(Sets.newHashSet("RANGER_ADMIN"))
                 .build();
     }
 
