@@ -6,6 +6,7 @@ import java.util.Set;
 
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.model.v2.AmbariV2Request;
+import com.sequenceiq.cloudbreak.api.model.v2.CloudStorageRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.InstanceGroupV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.NetworkV2Request;
 import com.sequenceiq.it.cloudbreak.newway.CredentialEntity;
@@ -68,4 +69,8 @@ public abstract class CloudProvider {
     public abstract List<InstanceGroupV2Request> instanceGroups(String securityGroupId);
 
     public abstract List<InstanceGroupV2Request> instanceGroups(Set<String> recipes);
+
+    public abstract Stack aValidDatalakeStackIsCreated();
+
+    public abstract CloudStorageRequest fileSystemForDatalake();
 }

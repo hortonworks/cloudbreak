@@ -4,13 +4,16 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.sequenceiq.cloudbreak.api.model.stack.StackAuthenticationRequest;
+import com.sequenceiq.cloudbreak.api.model.v2.CloudStorageRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.NetworkV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.TemplateV2Request;
 import com.sequenceiq.it.cloudbreak.newway.Credential;
 import com.sequenceiq.it.cloudbreak.newway.CredentialEntity;
+import com.sequenceiq.it.cloudbreak.newway.Stack;
 import com.sequenceiq.it.cloudbreak.newway.TestParameter;
 
 public class GcpCloudProvider extends CloudProviderHelper {
+
     public static final String GCP = "gcp";
 
     public static final String GCP_CAPITAL = "GCP";
@@ -51,6 +54,16 @@ public class GcpCloudProvider extends CloudProviderHelper {
         String availabilityZoneParam = getTestParameter().get("gcpAvailabilityZone");
 
         return availabilityZoneParam == null ? availabilityZone : availabilityZoneParam;
+    }
+
+    @Override
+    public Stack aValidDatalakeStackIsCreated() {
+        return null;
+    }
+
+    @Override
+    public CloudStorageRequest fileSystemForDatalake() {
+        return null;
     }
 
     @Override

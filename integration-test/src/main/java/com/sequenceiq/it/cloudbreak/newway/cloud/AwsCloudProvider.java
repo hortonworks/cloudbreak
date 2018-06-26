@@ -1,14 +1,21 @@
 package com.sequenceiq.it.cloudbreak.newway.cloud;
 
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Set;
 
 import com.sequenceiq.cloudbreak.api.model.stack.StackAuthenticationRequest;
+import com.sequenceiq.cloudbreak.api.model.v2.CloudStorageRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.NetworkV2Request;
+import com.sequenceiq.cloudbreak.api.model.v2.StorageLocationRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.TemplateV2Request;
+import com.sequenceiq.cloudbreak.api.model.v2.filesystem.S3CloudStorageParameters;
 import com.sequenceiq.it.cloudbreak.newway.Credential;
 import com.sequenceiq.it.cloudbreak.newway.CredentialEntity;
+import com.sequenceiq.it.cloudbreak.newway.Stack;
 import com.sequenceiq.it.cloudbreak.newway.TestParameter;
+import org.apache.commons.lang3.NotImplementedException;
 
 public class AwsCloudProvider extends CloudProviderHelper {
 
@@ -77,6 +84,16 @@ public class AwsCloudProvider extends CloudProviderHelper {
         String availabilityZoneParam = getTestParameter().get("awsAvailabilityZone");
 
         return availabilityZoneParam == null ? availabilityZone : availabilityZoneParam;
+    }
+
+    @Override
+    public Stack aValidDatalakeStackIsCreated() {
+        throw new NotImplementedException("Unimplemented operation!");
+    }
+
+    @Override
+    public CloudStorageRequest fileSystemForDatalake() {
+        throw new NotImplementedException("Unimplemented operation!");
     }
 
     @Override
@@ -245,5 +262,32 @@ public class AwsCloudProvider extends CloudProviderHelper {
         map.put("secretKey", "123456789ABCDEFGHIJKLMNOP0123456789=ABC+");
 
         return map;
+    }
+
+    private S3CloudStorageParameters s3CloudStorage() {
+        S3CloudStorageParameters s3 = new S3CloudStorageParameters();
+        s3.setInstanceProfile(getTestParameter().get("NN_AWS_INSTANCE_PROFILE"));
+        return s3;
+    }
+
+    private Set<StorageLocationRequest> defaultDatalakeStorageLocationsForProvider(String clusterName) {
+        Set<StorageLocationRequest> request = new LinkedHashSet<>(2);
+        request.add(createLocation(
+                String.format("s3a://%s/%s/apps/hive/warehouse", getTestParameter().get("NN_AWS_S3_BUCKET_NAME"), clusterName),
+                "hive-site",
+                "hive.metastore.warehouse.dir"));
+        request.add(createLocation(
+                String.format("s3a://%s/%s/apps/ranger/audit/%S", getTestParameter().get("NN_AWS_S3_BUCKET_NAME"), clusterName, clusterName),
+                "ranger-env",
+                "xasecure.audit.destination.hdfs.dir"));
+        return request;
+    }
+
+    private StorageLocationRequest createLocation(String value, String propertyFile, String propertyName) {
+        StorageLocationRequest location = new StorageLocationRequest();
+        location.setValue(value);
+        location.setPropertyFile(propertyFile);
+        location.setPropertyName(propertyName);
+        return location;
     }
 }

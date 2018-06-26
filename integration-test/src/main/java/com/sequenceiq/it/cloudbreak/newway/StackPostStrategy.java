@@ -18,6 +18,7 @@ public class StackPostStrategy implements Strategy {
         StackEntity stackEntity = (StackEntity) entity;
         CloudbreakClient client = getTestContextCloudbreakClient().apply(integrationTestContext);
 
+
         Credential credential = Credential.getTestContextCredential().apply(integrationTestContext);
 
         if (credential != null && stackEntity.getRequest().getGeneral().getCredentialName() == null) {

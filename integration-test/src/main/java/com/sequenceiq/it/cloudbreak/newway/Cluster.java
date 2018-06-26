@@ -5,14 +5,14 @@ import java.util.function.Function;
 
 import javax.inject.Inject;
 
+import com.sequenceiq.cloudbreak.api.model.SharedServiceRequest;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.convert.ConversionService;
 
 import com.sequenceiq.cloudbreak.api.model.ExecutorType;
-import com.sequenceiq.cloudbreak.api.model.FileSystemRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.AmbariV2Request;
-import com.sequenceiq.cloudbreak.api.model.v2.ClusterV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.CloudStorageRequest;
+import com.sequenceiq.cloudbreak.api.model.v2.ClusterV2Request;
 import com.sequenceiq.it.IntegrationTestContext;
 
 public class Cluster extends Entity {
@@ -78,11 +78,6 @@ public class Cluster extends Entity {
         return this;
     }
 
-    public Cluster withFileSystem(FileSystemRequest fileSystemRequest) {
-        request.setCloudStorage(conversionService.convert(fileSystemRequest, CloudStorageRequest.class));
-        return this;
-    }
-
     public Cluster withLdapConfigName(String ldap) {
         request.setLdapConfigName(ldap);
         return this;
@@ -95,6 +90,18 @@ public class Cluster extends Entity {
 
     public Cluster withRdsConfigNames(Set<String> names) {
         request.setRdsConfigNames(names);
+        return this;
+    }
+
+    public Cluster withCloudStorage(CloudStorageRequest cloudStorage) {
+        request.setCloudStorage(cloudStorage);
+        return this;
+    }
+
+    public Cluster withSharedService(String datalakeClusterName) {
+        SharedServiceRequest sharedServiceRequest = new SharedServiceRequest();
+        sharedServiceRequest.setSharedCluster(datalakeClusterName);
+        request.setSharedService(sharedServiceRequest);
         return this;
     }
 

@@ -31,7 +31,7 @@ public class RdsConfigAction {
         rdsconfigEntity.setResponse(
                 client.getCloudbreakClient()
                         .rdsConfigEndpoint()
-                        .getPrivate(rdsconfigEntity.getEntityId()));
+                        .getPrivate(rdsconfigEntity.getRequest().getName()));
         logJSON(" get rds config response: ", rdsconfigEntity.getResponse());
     }
 
@@ -75,7 +75,11 @@ public class RdsConfigAction {
     }
 
     public static void createInGiven(IntegrationTestContext integrationTestContext, Entity entity) throws Exception {
-        post(integrationTestContext, entity);
+        try {
+            get(integrationTestContext, entity);
+        } catch (Exception e) {
+            post(integrationTestContext, entity);
+        }
     }
 
     static void createDeleteInGiven(IntegrationTestContext integrationTestContext, Entity entity) throws Exception {
