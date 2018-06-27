@@ -37,6 +37,11 @@ springBoot {
     mainClassName = 'com.sequenceiq.cloudbreak.CloudbreakApplication'
 }
 
+jar {
+    baseName = 'cloudbreak'
+    archiveName = 'cloudbreak.jar'
+}
+
 bootJar {
     baseName = 'cloudbreak'
     archiveName = 'cloudbreak.jar'
