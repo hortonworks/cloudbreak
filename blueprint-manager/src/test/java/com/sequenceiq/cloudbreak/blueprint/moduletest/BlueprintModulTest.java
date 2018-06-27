@@ -7,6 +7,7 @@ import static com.sequenceiq.cloudbreak.blueprint.moduletest.BlueprintModulTestM
 import static com.sequenceiq.cloudbreak.blueprint.moduletest.BlueprintModulTestModelProvider.blueprintObjectWhenDefaultBlueprintConfigured;
 import static com.sequenceiq.cloudbreak.blueprint.moduletest.BlueprintModulTestModelProvider.blueprintObjectWhenDlmBlueprintConfigured;
 import static com.sequenceiq.cloudbreak.blueprint.moduletest.BlueprintModulTestModelProvider.blueprintObjectWhenDruidAndRdsPresentedThenRdsDruidShouldConfigured;
+import static com.sequenceiq.cloudbreak.blueprint.moduletest.BlueprintModulTestModelProvider.blueprintObjectWhenDuplicatedStorageLocationKey;
 import static com.sequenceiq.cloudbreak.blueprint.moduletest.BlueprintModulTestModelProvider.blueprintObjectWhenHiveAndRdsPresentedThenRdsHiveMetastoreShouldConfigured;
 import static com.sequenceiq.cloudbreak.blueprint.moduletest.BlueprintModulTestModelProvider.blueprintObjectWhenHiveInteractivePresentedTheLlapShouldConfigured;
 import static com.sequenceiq.cloudbreak.blueprint.moduletest.BlueprintModulTestModelProvider.blueprintObjectWhenKerberosPresentedThenKerberosShouldConfigured;
@@ -140,6 +141,8 @@ public class BlueprintModulTest extends CentralBlueprintContext {
                 blueprintObjectWhenDlmBlueprintConfigured("dlm")});
         params.add(new Object[]{"custom-properties", "custom-properties",
                 blueprintObjectWhenCustomPropertiesBlueprintConfigured()});
+        params.add(new Object[]{"s3-duplicated-key", "s3-duplicated-key",
+                blueprintObjectWhenDuplicatedStorageLocationKey("s3-duplicated-key")});
         return params;
     }
 

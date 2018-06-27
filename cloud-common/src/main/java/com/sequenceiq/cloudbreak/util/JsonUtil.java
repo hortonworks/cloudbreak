@@ -14,6 +14,8 @@ import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import net.sf.json.JSONObject;
+
 public class JsonUtil {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
@@ -40,6 +42,16 @@ public class JsonUtil {
 
     public static JsonNode readTree(String content) throws IOException {
         return MAPPER.readTree(content);
+    }
+
+    public static JsonNode readTreeByArray(String content) throws IOException {
+        JSONObject jsonObject;
+        try {
+            jsonObject = JSONObject.fromObject(content);
+        } catch (Exception e) {
+            jsonObject = new JSONObject();
+        }
+        return MAPPER.readTree(jsonObject.toString());
     }
 
     public static JsonNode createJsonTree(Map<String, Object> map) {

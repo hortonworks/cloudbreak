@@ -24,7 +24,11 @@ public class SiteConfigurations implements Iterable<SiteConfiguration> {
     }
 
     public void addSiteConfiguration(SiteConfiguration c) {
-        config.put(c.getName(), c);
+        if (config.containsKey(c.getName())) {
+            config.get(c.getName()).getProperties().putAll(c.getProperties());
+        } else {
+            config.put(c.getName(), c);
+        }
     }
 
     public void addSiteConfiguration(String name, Map<String, String> properties) {
