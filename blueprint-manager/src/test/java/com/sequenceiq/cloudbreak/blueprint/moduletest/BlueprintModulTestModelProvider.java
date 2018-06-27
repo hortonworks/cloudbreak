@@ -13,6 +13,8 @@ import static com.sequenceiq.cloudbreak.blueprint.moduletest.BlueprintModulTest.
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -21,11 +23,15 @@ import java.util.Optional;
 import java.util.Set;
 
 import com.google.common.collect.Sets;
+import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.model.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.model.ExecutorType;
+import com.sequenceiq.cloudbreak.api.model.filesystem.S3FileSystem;
 import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintPreparationObject;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintPreparationObject.Builder;
+import com.sequenceiq.cloudbreak.blueprint.filesystem.StorageLocationView;
+import com.sequenceiq.cloudbreak.blueprint.filesystem.s3.S3FileSystemConfigurationsView;
 import com.sequenceiq.cloudbreak.blueprint.nifi.HdfConfigs;
 import com.sequenceiq.cloudbreak.blueprint.template.views.HostgroupView;
 import com.sequenceiq.cloudbreak.blueprint.template.views.SharedServiceConfigsView;
@@ -225,6 +231,24 @@ class BlueprintModulTestModelProvider {
                 .withGateway(gatewayEnabled())
                 .withGeneralClusterConfigs(configs)
                 .build();
+    }
+
+    static BlueprintPreparationObject blueprintObjectWhenDuplicatedStorageLocationKey(String inputFileName) throws IOException {
+        GeneralClusterConfigs configs = generalClusterConfigs();
+        TestFile testFile = getTestFile(getFileName(BLUEPRINT_UPDATER_TEST_INPUTS, inputFileName));
+        return Builder.builder()
+                .withHostgroups(getHostGroups("master"))
+                .withBlueprintView(generalBlueprintView(testFile.getFileContent(), "2.6", "HDP"))
+                .withGeneralClusterConfigs(configs)
+                .withFileSystemConfigurationView(new S3FileSystemConfigurationsView(new S3FileSystem(), duplicatedLocationsKey(), false))
+                .build();
+    }
+
+    private static Collection<StorageLocationView> duplicatedLocationsKey() {
+        StorageLocationView storageLocationView = new StorageLocationView(TestUtil.storageLocation("hive-site", 0));
+        StorageLocationView storageLocationView2 = new StorageLocationView(TestUtil.storageLocation("hive-site", 1));
+        StorageLocationView storageLocationView3 = new StorageLocationView(TestUtil.storageLocation("core-site", 1));
+        return Arrays.asList(storageLocationView, storageLocationView2, storageLocationView3);
     }
 
     static BlueprintPreparationObject blueprintObjectWhenCustomPropertiesBlueprintConfigured() {

@@ -6,6 +6,7 @@ import static com.sequenceiq.cloudbreak.blueprint.filesystem.BlueprintTestUtil.e
 import static com.sequenceiq.cloudbreak.blueprint.filesystem.BlueprintTestUtil.gcsFileSystemConfiguration;
 import static com.sequenceiq.cloudbreak.blueprint.filesystem.BlueprintTestUtil.s3FileSystemConfiguration;
 import static com.sequenceiq.cloudbreak.blueprint.filesystem.BlueprintTestUtil.storageLocationViews;
+import static com.sequenceiq.cloudbreak.blueprint.filesystem.BlueprintTestUtil.storageLocationViewsWithDuplicatedKey;
 import static com.sequenceiq.cloudbreak.blueprint.filesystem.BlueprintTestUtil.wasbSecureFileSystemConfiguration;
 import static com.sequenceiq.cloudbreak.blueprint.filesystem.BlueprintTestUtil.wasbUnSecureFileSystemConfiguration;
 import static com.sequenceiq.cloudbreak.util.FileReaderUtils.readFileFromClasspath;
@@ -250,8 +251,10 @@ public class HandlebarTemplateTest {
                 {"blueprints/configurations/atlas/ldap.handlebars", "configurations/atlas/atlas-with-ldap.json",
                         ldapConfigWhenLdapPresentedThenShouldReturnWithLdapConfig()},
                 {"blueprints/configurations/atlas/ldap.handlebars", "configurations/atlas/atlas-without-ldap.json",
-                        withoutLdapConfigWhenLdapNotPresentedThenShouldReturnWithoutLdapConfig()}
+                        withoutLdapConfigWhenLdapNotPresentedThenShouldReturnWithoutLdapConfig()},
 
+                {"blueprints/configurations/filesystem/s3.handlebars", "configurations/filesystem/s3-duplicated-key.json",
+                        s3FileSystemConfigsWithStorageLocationsAndDuplicatedKey()}
         });
     }
 
@@ -349,6 +352,16 @@ public class HandlebarTemplateTest {
 
         return new BlueprintTemplateModelContextBuilder()
                 .withFileSystemConfigs(s3FileSystemConfiguration(storageLocationViews()))
+                .withGeneralClusterConfigs(generalClusterConfigs)
+                .build();
+    }
+
+    public static Map<String, Object> s3FileSystemConfigsWithStorageLocationsAndDuplicatedKey() {
+        GeneralClusterConfigs generalClusterConfigs = new GeneralClusterConfigs();
+        generalClusterConfigs.setPassword("cloudbreak123!");
+
+        return new BlueprintTemplateModelContextBuilder()
+                .withFileSystemConfigs(s3FileSystemConfiguration(storageLocationViewsWithDuplicatedKey()))
                 .withGeneralClusterConfigs(generalClusterConfigs)
                 .build();
     }
