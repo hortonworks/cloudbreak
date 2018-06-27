@@ -1,8 +1,7 @@
 package com.sequenceiq.it.cloudbreak.newway.cloud;
 
-import java.util.HashMap;
-import java.util.Map;
-
+import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigRequest;
+import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
 import com.sequenceiq.cloudbreak.api.model.stack.StackAuthenticationRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.CloudStorageRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.NetworkV2Request;
@@ -11,6 +10,13 @@ import com.sequenceiq.it.cloudbreak.newway.Credential;
 import com.sequenceiq.it.cloudbreak.newway.CredentialEntity;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
 import com.sequenceiq.it.cloudbreak.newway.TestParameter;
+
+import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Set;
+
+import static com.sequenceiq.it.cloudbreak.newway.RDSConfigRequestDataCollector.createRdsRequestWithProperties;
 
 public class GcpCloudProvider extends CloudProviderHelper {
 
@@ -206,6 +212,19 @@ public class GcpCloudProvider extends CloudProviderHelper {
         NetworkV2Request network = new NetworkV2Request();
         network.setParameters(subnetProperties());
         return network;
+    }
+
+    @Override
+    public Set<RDSConfigRequest> getRdsRequestsFor(RdsType... rdsTypes) {
+        Set<RDSConfigRequest> requests = new LinkedHashSet<>();
+        if (rdsTypes != null) {
+            for (RdsType rdsType : rdsTypes) {
+                if (rdsType != null) {
+                    requests.add(createRdsRequestWithProperties(getTestParameter(), rdsType, GCP_CAPITAL));
+                }
+            }
+        }
+        return requests;
     }
 
     public Map<String, Object> gcpCredentialDetails() {

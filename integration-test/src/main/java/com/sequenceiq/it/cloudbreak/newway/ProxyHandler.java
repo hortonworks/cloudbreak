@@ -36,8 +36,8 @@ public class ProxyHandler<I> implements InvocationHandler {
         if (args != null) {
             String[] declaringClass = method.getDeclaringClass().toString().split(" ");
             String initLogMessage = declaringClass.length == 2
-                    ? String.format("Method ['%s.%s'] called with args:%n", method.getDeclaringClass().toString().split(" ")[1], method.getName())
-                    : String.format("Method ['%s'] called with args:%n", method.getName());
+                    ? String.format("Method ['%s.%s'] called with args: ", method.getDeclaringClass().toString().split(" ")[1], method.getName())
+                    : String.format("Method ['%s'] called with args: ", method.getName());
             log(initLogMessage);
             log(String.join(", ", Arrays.stream(args).map(o -> o == null ? "null" : o.toString()).collect(Collectors.toList())));
         }

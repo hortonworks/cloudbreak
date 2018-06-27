@@ -1,12 +1,13 @@
 package com.sequenceiq.it.cloudbreak.newway;
 
 import static com.sequenceiq.cloudbreak.api.model.rds.RdsType.HIVE;
+import static com.sequenceiq.it.cloudbreak.newway.cloud.GcpCloudProvider.GCP;
 
-public class HiveRdsConfig extends RdsConfig {
+public class HiveRdsConfigForGcp extends RdsConfig {
 
-    private static final String HIVE_RDS_CONFIG = "HIVE_RDS_CONFIG";
+    private static final String HIVE_RDS_CONFIG = "GCP_HIVE_RDS_CONFIG";
 
-    private HiveRdsConfig() {
+    private HiveRdsConfigForGcp() {
         super(HIVE_RDS_CONFIG);
     }
 
@@ -27,8 +28,8 @@ public class HiveRdsConfig extends RdsConfig {
     }
 
     public static RdsConfig isCreatedWithParameters(TestParameter testParameter) {
-        RdsConfig hive = new HiveRdsConfig();
-        hive.setRequest(RDSConfigRequestDataCollector.createRdsRequestWithProperties(testParameter, HIVE));
+        RdsConfig hive = new HiveRdsConfigForGcp();
+        hive.setRequest(RDSConfigRequestDataCollector.createRdsRequestWithProperties(testParameter, HIVE, GCP));
         hive.setCreationStrategy(RdsConfigAction::createInGiven);
         return hive;
     }

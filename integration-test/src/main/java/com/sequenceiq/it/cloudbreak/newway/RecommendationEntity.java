@@ -4,9 +4,10 @@ import com.sequenceiq.cloudbreak.api.model.RecommendationRequestJson;
 import com.sequenceiq.cloudbreak.api.model.RecommendationResponse;
 
 public class RecommendationEntity extends AbstractCloudbreakEntity<RecommendationRequestJson, RecommendationResponse> {
-    public static final String RECOMMENDATION = "RECOMMENDATION";
 
-    RecommendationEntity(String newId) {
+    static final String RECOMMENDATION = "RECOMMENDATION";
+
+    private RecommendationEntity(String newId) {
         super(newId);
         setRequest(new RecommendationRequestJson());
     }

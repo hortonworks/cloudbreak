@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigRequest;
+import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.model.v2.AmbariV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.CloudStorageRequest;
@@ -14,6 +16,7 @@ import com.sequenceiq.it.cloudbreak.newway.Stack;
 import com.sequenceiq.it.cloudbreak.newway.StackEntity;
 
 public abstract class CloudProvider {
+
     public static final String CREDENTIAL_DEFAULT_DESCRIPTION = "test credential";
 
     public abstract StackEntity aValidStackRequest();
@@ -73,4 +76,6 @@ public abstract class CloudProvider {
     public abstract Stack aValidDatalakeStackIsCreated();
 
     public abstract CloudStorageRequest fileSystemForDatalake();
+
+    public abstract Set<RDSConfigRequest> getRdsRequestsFor(RdsType... rdsTypes);
 }
