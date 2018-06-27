@@ -23,6 +23,7 @@ public abstract class ProxyConfigBase implements JsonEntity {
             message = "The name can only contain lowercase alphanumeric characters and hyphens and has start with an alphanumeric character")
     private String name;
 
+    @Size(max = 1000, message = "The length of the description cannot be longer than 1000 character")
     @ApiModelProperty(ModelDescriptions.DESCRIPTION)
     private String description;
 
