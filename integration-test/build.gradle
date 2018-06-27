@@ -23,6 +23,11 @@ bootRun {
   }
 }
 
+jar {
+  baseName = 'cloudbreak-integration-test'
+  archiveName = 'cloudbreak-integration-test.jar'
+}
+
 bootJar {
   baseName = 'cloudbreak-integration-test'
   archiveName = 'cloudbreak-integration-test.jar'

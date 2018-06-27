@@ -22,6 +22,11 @@ bootRun {
     }
 }
 
+jar {
+  baseName = 'periscope'
+  archiveName = 'periscope.jar'
+}
+
 bootJar {
   baseName = 'periscope'
   archiveName = 'periscope.jar'
