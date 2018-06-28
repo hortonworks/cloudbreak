@@ -82,7 +82,7 @@ public class AmbariAgentHealthEvaluator extends AbstractEventPublisher implement
                 }
             }
         } catch (Exception e) {
-            LOGGER.warn(String.format("Failed to retrieve '%s' alerts. Original message: %s", AMBARI_AGENT_HEARTBEAT, e.getMessage()));
+            LOGGER.warn("Failed to retrieve '{}' alerts. Original message: {}", AMBARI_AGENT_HEARTBEAT, e.getMessage());
             publishEvent(new UpdateFailedEvent(clusterId));
         }
     }

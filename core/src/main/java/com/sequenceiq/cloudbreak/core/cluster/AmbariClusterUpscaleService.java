@@ -88,7 +88,7 @@ public class AmbariClusterUpscaleService {
             }
             clusterService.updateHostMetadata(stack.getCluster().getId(), hostsPerHostGroup, HostMetadataState.SERVICES_RUNNING);
         } else {
-            LOGGER.info(String.format("Please implement %s orchestrator because it is not on classpath.", orchestrator.getType()));
+            LOGGER.info("Please implement {} orchestrator because it is not on classpath.", orchestrator.getType());
             throw new CloudbreakException(String.format("Please implement %s orchestrator because it is not on classpath.", orchestrator.getType()));
         }
         Set<String> allHosts = new HashSet<>();

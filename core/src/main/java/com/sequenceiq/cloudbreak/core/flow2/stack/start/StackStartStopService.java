@@ -74,9 +74,8 @@ public class StackStartStopService {
     public void finishStackStart(StackStartStopContext context, List<CloudVmMetaDataStatus> coreInstanceMetaData) {
         Stack stack = context.getStack();
         if (coreInstanceMetaData.size() != stack.getFullNodeCount()) {
-            LOGGER.warn(String.format(
-                    "Size of the collected metadata set does not equal the node count of the stack. [metadata size=%s] [nodecount=%s]",
-                    coreInstanceMetaData.size(), stack.getFullNodeCount()));
+            LOGGER.warn("Size of the collected metadata set does not equal the node count of the stack. [metadata size={}] [nodecount={}]",
+                    coreInstanceMetaData.size(), stack.getFullNodeCount());
         }
         metadatSetupService.saveInstanceMetaData(stack, coreInstanceMetaData, null);
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.STARTED, "Cluster infrastructure started successfully.");

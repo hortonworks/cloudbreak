@@ -114,7 +114,7 @@ public class HeartbeatService {
                     }
                 });
             } catch (ActionWentFailException af) {
-                LOGGER.error(String.format("Failed to update the heartbeat timestamp 5 times for node %s: %s", nodeId, af.getMessage()));
+                LOGGER.error("Failed to update the heartbeat timestamp 5 times for node {}: {}", nodeId, af.getMessage());
                 cancelEveryFlowWithoutDbUpdate();
             }
 

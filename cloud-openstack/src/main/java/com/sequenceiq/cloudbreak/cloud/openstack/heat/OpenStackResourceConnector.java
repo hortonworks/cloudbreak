@@ -272,7 +272,7 @@ public class OpenStackResourceConnector implements ResourceConnector<Object> {
                 deleteKeyPair(authenticatedContext, client);
             }
         } catch (ActionWentFailException ignored) {
-            LOGGER.info(String.format("Stack not found with name: %s", resource.getName()));
+            LOGGER.info("Stack not found with name: {}", resource.getName());
         }
     }
 

@@ -65,11 +65,11 @@ public class ClusterCreationEvaluator implements Runnable {
                 createCluster(stack, resolvedAmbari);
             }
         } catch (AmbariHealtCheckException ahf) {
-            LOGGER.warn(String.format("Ambari health check failed for Cloudbreak stack: %s (ID:%s). Original message: %s",
-                    stack.getStackId(), stack.getName(), ahf.getMessage()));
+            LOGGER.warn("Ambari health check failed for Cloudbreak stack: {} (ID:{}). Original message: {}", stack.getStackId(), stack.getName(),
+                    ahf.getMessage());
         } catch (TlsConfigurationException ex) {
-            LOGGER.warn(String.format("Could not prepare TLS configuration for Cloudbreak stack: %s (ID:%s). Original message: %s",
-                    stack.getStackId(), stack.getName(), ex.getMessage()));
+            LOGGER.warn("Could not prepare TLS configuration for Cloudbreak stack: {} (ID:{}). Original message: {}", stack.getStackId(), stack.getName(),
+                    ex.getMessage());
         } catch (Exception ex) {
             LOGGER.error(String.format("Could not create cluster for Cloudbreak stack: %s (ID:%s)", stack.getStackId(), stack.getName()), ex);
         }
