@@ -1,3 +1,5 @@
+import org.ajoberstar.grgit.Grgit
+
 buildscript {
   repositories {
     mavenCentral()
@@ -93,37 +95,28 @@ dependencies {
   runtime group: 'javax.xml.bind',                name: 'jaxb-api', version: '2.3.0'
 }
 
-task buildInfo(type: BuildInfoTask) {
-  destination = file("$buildDir")
-  applicationPropertiesPath = "$buildDir"
-  basename = jar.baseName
-  buildVersion = version
-}
+processResources {
+  String baseName = jar.baseName
 
-compileJava.dependsOn buildInfo
+  String buildVersion = version
+  if (buildVersion.contains("+") || buildVersion == "unspecified") {
+    def grgit = Grgit.open(currentDir: project.projectDir)
+    buildVersion = grgit.describe()
+    println "buildVersion from git: " + buildVersion
+  }
 
-class BuildInfoTask extends DefaultTask {
-  File destination = new File("build.info")
-  String applicationPropertiesPath
-  String basename
-  String buildVersion
+  String activeProfile = "dev"
+  if (buildVersion.contains("dev") || buildVersion.equals("unspecified")) {
+    activeProfile = "dev"
+  } else if (buildVersion.contains("rc")) {
+    activeProfile = "rc"
+  } else {
+    activeProfile = "prod"
+  }
 
-  @TaskAction
-  def writeBuildInfo() {
-    destination.mkdirs()
-    File applicationDestination = new File(applicationPropertiesPath + "/resources/main")
-    applicationDestination.mkdirs()
-    new File(destination, "build.info").withWriter { out ->
-      [
-              "ARTIFACT_BASENAME=" + basename,
-              "ARTIFACT_VERSION=" + buildVersion,
-      ].each { out.println it }
-    }
-    new File(applicationDestination, "application.properties").withWriter { out ->
-      [
-              "info.app.name=" + basename,
-              "info.app.version=" + buildVersion
-      ].each { out.println it }
-    }
+  def expandProperties = ["name": baseName, "version": buildVersion, "profile": activeProfile]
+  inputs.properties(expandProperties)
+  filesMatching("application.properties") {
+    expand(expandProperties)
   }
 }
