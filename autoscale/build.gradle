@@ -172,3 +172,5 @@ processResources {
     expand(expandProperties)
   }
 }
+
+task buildInfo(dependsOn: processResources)
