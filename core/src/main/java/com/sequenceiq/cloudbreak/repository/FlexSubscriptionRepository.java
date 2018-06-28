@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.repository;
 
 import java.util.List;
-import java.util.Optional;
 
 import javax.transaction.Transactional;
 
@@ -16,9 +15,6 @@ import com.sequenceiq.cloudbreak.domain.SmartSenseSubscription;
 @EntityType(entityClass = FlexSubscription.class)
 @Transactional(Transactional.TxType.REQUIRED)
 public interface FlexSubscriptionRepository extends CrudRepository<FlexSubscription, Long> {
-
-    @PostAuthorize("hasPermission(returnObject,'read')")
-    Optional<FlexSubscription> findById(Long id);
 
     @PostAuthorize("hasPermission(returnObject,'read')")
     FlexSubscription findByName(String name);
