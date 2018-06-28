@@ -16,7 +16,7 @@ public class UserProfileCredentialHandler {
     private UserProfileService userProfileService;
 
     public void createProfilePreparation(Credential credential) {
-        UserProfile userProfile = userProfileService.get(credential.getAccount(), credential.getOwner());
+        UserProfile userProfile = userProfileService.getOrCreate(credential.getAccount(), credential.getOwner());
         if (userProfile != null && userProfile.getCredential() == null) {
             userProfile.setCredential(credential);
             userProfileService.save(userProfile);

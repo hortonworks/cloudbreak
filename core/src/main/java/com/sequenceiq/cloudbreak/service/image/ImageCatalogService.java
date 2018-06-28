@@ -499,7 +499,7 @@ public class ImageCatalogService {
 
     @Nonnull private ImageCatalog getDefaultImageCatalog() {
         IdentityUser user = authenticatedUserService.getCbUser();
-        ImageCatalog imageCatalog = userProfileService.get(user.getAccount(), user.getUserId()).getImageCatalog();
+        ImageCatalog imageCatalog = userProfileService.getOrCreate(user.getAccount(), user.getUserId()).getImageCatalog();
         if (imageCatalog == null) {
             imageCatalog = new ImageCatalog();
             imageCatalog.setImageCatalogUrl(defaultCatalogUrl);
@@ -518,7 +518,7 @@ public class ImageCatalogService {
 
     private UserProfile getUserProfile() {
         IdentityUser cbUser = authenticatedUserService.getCbUser();
-        return userProfileService.get(cbUser.getAccount(), cbUser.getUserId(), cbUser.getUsername());
+        return userProfileService.getOrCreate(cbUser.getAccount(), cbUser.getUserId(), cbUser.getUsername());
     }
 
     private Optional<Image> getLatestImageDefaultPreferred(List<Image> images) {
