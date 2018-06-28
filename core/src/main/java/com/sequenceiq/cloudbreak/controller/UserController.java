@@ -52,7 +52,7 @@ public class UserController implements UserEndpoint {
     @Override
     public UserProfileResponse getProfile() {
         IdentityUser user = authenticatedUserService.getCbUser();
-        UserProfile userProfile = userProfileService.get(user.getAccount(), user.getUserId(), user.getUsername());
+        UserProfile userProfile = userProfileService.getOrCreate(user.getAccount(), user.getUserId(), user.getUsername());
         return conversionService.convert(userProfile, UserProfileResponse.class);
     }
 
