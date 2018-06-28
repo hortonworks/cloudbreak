@@ -18,7 +18,7 @@ public class AuthenticatedUserService {
 
     public PeriscopeUser getPeriscopeUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null) {
+        if (authentication instanceof OAuth2Authentication) {
             OAuth2Authentication oauth = (OAuth2Authentication) authentication;
             if (oauth.getUserAuthentication() != null) {
                 String username = (String) authentication.getPrincipal();
