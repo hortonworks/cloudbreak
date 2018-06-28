@@ -445,7 +445,7 @@ public class BlueprintTextProcessor {
     private SiteSettingsConfigurations convertTextToSettings(String config) {
         try {
             SiteSettingsConfigurations result = SiteSettingsConfigurations.getEmptyConfiguration();
-            ObjectNode root = (ObjectNode) JsonUtil.readTree(config);
+            ObjectNode root = (ObjectNode) JsonUtil.readTreeByArray(config);
 
             for (Iterator<Map.Entry<String, JsonNode>> sites = root.fields(); sites.hasNext();) {
                 Map.Entry<String, JsonNode> site = sites.next();
@@ -471,27 +471,38 @@ public class BlueprintTextProcessor {
     private SiteConfigurations convertTextToConfiguration(String config) {
         try {
             SiteConfigurations result = SiteConfigurations.getEmptyConfiguration();
-            ObjectNode root = (ObjectNode) JsonUtil.readTree(config);
+            ObjectNode root = (ObjectNode) JsonUtil.readTreeByArray(config);
 
             for (Iterator<Map.Entry<String, JsonNode>> sites = root.fields(); sites.hasNext();) {
                 Map.Entry<String, JsonNode> site = sites.next();
-                ObjectNode siteNode = (ObjectNode) site.getValue();
-                JsonNode properties = siteNode.findValue(PROPERTIES_NODE);
-                if (properties != null) {
-                    siteNode = (ObjectNode) properties;
-                }
-                Map<String, String> siteprops = new HashMap<>();
-                for (Iterator<Map.Entry<String, JsonNode>> props = siteNode.fields(); props.hasNext();) {
-                    Map.Entry<String, JsonNode> prop = props.next();
-                    siteprops.put(prop.getKey(), prop.getValue().textValue());
-                }
-                if (!siteprops.isEmpty()) {
-                    result.addSiteConfiguration(site.getKey(), siteprops);
+                if (site.getValue().isArray()) {
+                    ArrayNode siteArray = (ArrayNode) site.getValue();
+                    for (JsonNode siteNodeElement : siteArray) {
+                        prepareObjectNodeForSiteConfiguration(result, site, (ObjectNode) siteNodeElement);
+                    }
+                } else {
+                    prepareObjectNodeForSiteConfiguration(result, site, (ObjectNode) site.getValue());
                 }
             }
             return result;
         } catch (IOException e) {
             throw new BlueprintProcessingException("Failed to parse configuration ('" + config + "').", e);
+        }
+    }
+
+    private void prepareObjectNodeForSiteConfiguration(SiteConfigurations result, Map.Entry<String, JsonNode> site, ObjectNode siteNodeElement) {
+        ObjectNode siteNode = siteNodeElement;
+        JsonNode properties = siteNode.findValue(PROPERTIES_NODE);
+        if (properties != null) {
+            siteNode = (ObjectNode) properties;
+        }
+        Map<String, String> siteprops = new HashMap<>();
+        for (Iterator<Map.Entry<String, JsonNode>> props = siteNode.fields(); props.hasNext();) {
+            Map.Entry<String, JsonNode> prop = props.next();
+            siteprops.put(prop.getKey(), prop.getValue().textValue());
+        }
+        if (!siteprops.isEmpty()) {
+            result.addSiteConfiguration(site.getKey(), siteprops);
         }
     }
 

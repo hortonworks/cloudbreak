@@ -721,6 +721,14 @@ public class TestUtil {
         return storageLocation;
     }
 
+    public static StorageLocation storageLocation(String configFile, int i) {
+        StorageLocation storageLocation = new StorageLocation();
+        storageLocation.setValue("random.value." + i);
+        storageLocation.setProperty("random.property." + i);
+        storageLocation.setConfigFile(configFile);
+        return storageLocation;
+    }
+
     private static Json getEmptyJson() {
         try {
             return new Json("");

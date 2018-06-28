@@ -282,6 +282,19 @@ public class JacksonBlueprintProcessorExtendTest {
     }
 
     @Test
+    public void testAddConfigArrayEntryStringToBlueprint() throws IOException {
+        String json = FileReaderUtils.readFileFromClasspath("extend-blueprint/blueprint.json");
+        String expected = FileReaderUtils.readFileFromClasspath("extend-blueprint/blueprint-array-config.json");
+        String config = FileReaderUtils.readFileFromClasspath("extend-blueprint/config-array.json");
+
+        String result = underTest.get(json).addConfigEntryStringToBlueprint(config, false).asText();
+
+        JsonNode expectedNode = JsonUtil.readTree(expected);
+        JsonNode resultNode = JsonUtil.readTree(result);
+        Assert.assertEquals(expectedNode, resultNode);
+    }
+
+    @Test
     public void testAddSettingsEntryStringToBlueprint() throws IOException {
         String json = FileReaderUtils.readFileFromClasspath("extend-blueprint/blueprint.json");
         String expected = FileReaderUtils.readFileFromClasspath("extend-blueprint/blueprint-settings.json");

@@ -12,9 +12,9 @@ public abstract class BaseFileSystemConfigurationsView implements ProvisionEntit
 
     private Collection<StorageLocationView> locations;
 
-    public BaseFileSystemConfigurationsView(String storageContainer, boolean deafultFs, Collection<StorageLocationView> locations) {
+    public BaseFileSystemConfigurationsView(String storageContainer, boolean defaultFs, Collection<StorageLocationView> locations) {
         this.storageContainer = storageContainer;
-        this.defaultFs = deafultFs;
+        this.defaultFs = defaultFs;
         this.locations = locations;
     }
 

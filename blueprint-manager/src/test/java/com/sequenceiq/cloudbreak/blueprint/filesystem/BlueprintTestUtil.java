@@ -136,6 +136,15 @@ public class BlueprintTestUtil {
         return storageLocations;
     }
 
+    public static List<StorageLocationView> storageLocationViewsWithDuplicatedKey() {
+        List<StorageLocationView> storageLocations = new ArrayList<>();
+        storageLocations.add(storageLocationView(storageLocation(0)));
+        StorageLocation storageLocation = storageLocation(1);
+        storageLocation.setConfigFile("0_file");
+        storageLocations.add(storageLocationView(storageLocation));
+        return storageLocations;
+    }
+
     public static StorageLocation storageLocation(int i) {
         StorageLocation storageLocation = new StorageLocation();
         storageLocation.setValue(i + "_test/test/end");
