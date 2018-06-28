@@ -190,7 +190,11 @@ public class StackService {
     private TransactionService transactionService;
 
     public Set<StackResponse> retrievePrivateStacks(IdentityUser user) {
-        return convertStacks(stackRepository.findForUserWithLists(user.getUserId()));
+        try {
+            return transactionService.required(() -> convertStacks(stackRepository.findForUserWithLists(user.getUserId())));
+        } catch (TransactionExecutionException e) {
+            throw new TransactionService.TransactionRuntimeExecutionException(e);
+        }
     }
 
     public Set<StackResponse> retrieveAccountStacks(IdentityUser user) {

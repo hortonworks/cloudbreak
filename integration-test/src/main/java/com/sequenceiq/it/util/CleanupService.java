@@ -33,7 +33,7 @@ public class CleanupService {
             return;
         }
         cleanedUp = true;
-        cloudbreakClient.stackV1Endpoint()
+        cloudbreakClient.stackV2Endpoint()
                 .getPrivates()
                 .stream()
                 .filter(stack -> stack.getName().startsWith("it-"))
@@ -135,7 +135,7 @@ public class CleanupService {
     public boolean deleteStack(CloudbreakClient cloudbreakClient, String stackId) {
         boolean result = false;
         if (stackId != null) {
-            cloudbreakClient.stackV1Endpoint().delete(Long.valueOf(stackId), false, false);
+            cloudbreakClient.stackV2Endpoint().delete(Long.valueOf(stackId), false, false);
             result = true;
         }
         return result;
