@@ -22,8 +22,8 @@ public class SubscriptionService {
     public Long subscribe(Subscription subscription) {
         List<Subscription> clientSubscriptions = subscriptionRepository.findByClientIdAndEndpoint(subscription.getClientId(), subscription.getEndpoint());
         if (!clientSubscriptions.isEmpty()) {
-            LOGGER.info(String.format("Subscription already exists for this client with the same endpoint [client: '%s', endpoint: '%s']",
-                    subscription.getClientId(), subscription.getEndpoint()));
+            LOGGER.info("Subscription already exists for this client with the same endpoint [client: '{}', endpoint: '{}']",
+                    subscription.getClientId(), subscription.getEndpoint());
             return clientSubscriptions.get(0).getId();
         }
         return subscriptionRepository.save(subscription).getId();

@@ -64,7 +64,7 @@ public class AmbariClientProvider {
                     clientConfig.getClientCert(), clientConfig.getClientKey(), clientConfig.getServerCert(), proxyHost, proxyPort);
             }
         } else {
-            LOGGER.info(String.format("Creating Ambari client with 2-way-ssl to connect to host:port: %s:%s", clientConfig.getApiAddress(), httpsPort));
+            LOGGER.info("Creating Ambari client with 2-way-ssl to connect to host:port: {}:{}", clientConfig.getApiAddress(), httpsPort);
             return new AmbariClient(clientConfig.getApiAddress(), Integer.toString(httpsPort),
                 ambariUserName, ambariPassword, clientConfig.getClientCert(), clientConfig.getClientKey(), clientConfig.getServerCert());
         }
@@ -95,8 +95,8 @@ public class AmbariClientProvider {
                     clientConfig.getClientCert(), clientConfig.getClientKey(), clientConfig.getServerCert(), proxyHost, proxyPort);
             }
         } else {
-            LOGGER.info(String.format("Creating Ambari client with default "
-                + "credentials with 2-way-ssl to connect to host:port: %s:%s", clientConfig.getApiAddress(), httpsPort));
+            LOGGER.info("Creating Ambari client with default credentials with 2-way-ssl to connect to host:port: {}:{}",
+                    clientConfig.getApiAddress(), httpsPort);
             return new AmbariClient(clientConfig.getApiAddress(), Integer.toString(httpsPort),
                 "admin", "admin", clientConfig.getClientCert(), clientConfig.getClientKey(), clientConfig.getServerCert());
         }

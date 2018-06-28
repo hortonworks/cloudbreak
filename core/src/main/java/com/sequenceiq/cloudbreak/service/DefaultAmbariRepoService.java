@@ -34,7 +34,7 @@ public class DefaultAmbariRepoService {
         for (Entry<String, AmbariInfo> ambariEntry : entries.entrySet()) {
             AmbariInfo ambariInfo = ambariEntry.getValue();
             if (ambariInfo.getRepo().get(osType) == null) {
-                LOGGER.info(String.format("Missing Ambari (%s) repo information for os: %s", ambariInfo.getVersion(), osType));
+                LOGGER.info("Missing Ambari ({}) repo information for os: {}", ambariInfo.getVersion(), osType);
                 continue;
             }
             AmbariRepo ambariRepo = new AmbariRepo();

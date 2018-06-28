@@ -120,7 +120,7 @@ public class AzureSetup implements Setup {
                 return new ImageStatusResult(ImageStatus.CREATE_FAILED, 0);
             } else {
                 int percentage = (int) (((double) copyState.getBytesCopied() * ImageStatusResult.COMPLETED) / copyState.getTotalBytes());
-                LOGGER.info(String.format("CopyStatus Pending %s byte/%s byte: %.4s %%", copyState.getTotalBytes(), copyState.getBytesCopied(), percentage));
+                LOGGER.info("CopyStatus Pending {} byte/{} byte: %.4s %%", copyState.getTotalBytes(), copyState.getBytesCopied(), percentage);
                 return new ImageStatusResult(ImageStatus.IN_PROGRESS, percentage);
             }
         } catch (RuntimeException ignored) {

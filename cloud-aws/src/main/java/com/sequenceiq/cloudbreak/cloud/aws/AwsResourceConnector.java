@@ -229,7 +229,7 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
             AwsCredentialView awsCredential = new AwsCredentialView(ac.getCloudCredential());
             try {
                 String region = ac.getCloudContext().getLocation().getRegion().value();
-                LOGGER.info(String.format("Importing public key to %s region on AWS", region));
+                LOGGER.info("Importing public key to {} region on AWS", region);
                 AmazonEC2Client client = awsClient.createAccess(awsCredential, region);
                 String keyPairName = awsClient.getKeyPairName(ac);
                 ImportKeyPairRequest importKeyPairRequest = new ImportKeyPairRequest(keyPairName, stack.getInstanceAuthentication().getPublicKey());
@@ -498,7 +498,7 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
                     return Boolean.TRUE;
                 });
             } catch (ActionWentFailException ignored) {
-                LOGGER.info(String.format("Stack not found with name: %s", cFStackName));
+                LOGGER.info("Stack not found with name: {}", cFStackName);
                 AmazonEC2Client amazonEC2Client = awsClient.createAccess(credentialView, regionName);
                 releaseReservedIp(amazonEC2Client, resources);
                 return Collections.emptyList();

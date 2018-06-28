@@ -37,7 +37,7 @@ public class CloudbreakUsageToCloudbreakUsageJsonConverter extends AbstractConve
         try {
             cbUser = userDetailsService.getDetails(entity.getOwner(), UserFilterField.USERID).getUsername();
         } catch (Exception ignored) {
-            LOGGER.warn(String.format("Expected user was not found with '%s' id. Maybe it was deleted by the admin user.", entity.getOwner()));
+            LOGGER.warn("Expected user was not found with '{}' id. Maybe it was deleted by the admin user.", entity.getOwner());
             cbUser = entity.getOwner();
         }
         json.setOwner(entity.getOwner());
