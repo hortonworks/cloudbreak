@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Predicate;
@@ -74,7 +75,7 @@ public class CachedImageCatalogProvider {
             cleanAndValidateMaps(catalog);
             catalog = filterImagesByOsType(catalog);
             long timeOfParse = System.currentTimeMillis() - started;
-            LOGGER.info("ImageCatalog has been get and parsed from '{}' and took '{}' ms.", catalogUrl, timeOfParse);
+            LOGGER.debug("ImageCatalog has been get and parsed from '{}' and took '{}' ms.", catalogUrl, timeOfParse);
         } catch (RuntimeException e) {
             throw new CloudbreakImageCatalogException("Failed to get image catalog", e);
         } catch (JsonMappingException e) {
@@ -86,6 +87,7 @@ public class CachedImageCatalogProvider {
     }
 
     private CloudbreakImageCatalogV2 filterImagesByOsType(CloudbreakImageCatalogV2 catalog) {
+        LOGGER.debug("Filtering images by OS type {}", getEnabledLinuxTypes());
         if (CollectionUtils.isEmpty(getEnabledLinuxTypes()) || Objects.isNull(catalog) || Objects.isNull(catalog.getImages())) {
             return catalog;
         }
@@ -101,11 +103,18 @@ public class CachedImageCatalogProvider {
     }
 
     private List<Image> filterImages(List<Image> imageList, Predicate<Image> predicate) {
-        return Optional.ofNullable(imageList)
-                .orElse(Collections.emptyList())
-                .stream()
-                .filter(predicate)
-                .collect(Collectors.toList());
+        Map<Boolean, List<Image>> partitionedImages = Optional.ofNullable(imageList).orElse(Collections.emptyList()).stream()
+                .collect(Collectors.partitioningBy(predicate));
+        if (hasFiltered(partitionedImages)) {
+            LOGGER.debug("Used filter linuxTypes: | {} | Images filtered: {}",
+                    getEnabledLinuxTypes(),
+                    partitionedImages.get(false).stream().map(img -> img.shortOsDescriptionFormat()).collect(Collectors.joining(", ")));
+        }
+        return partitionedImages.get(true);
+    }
+
+    private boolean hasFiltered(Map<Boolean, List<Image>> partitioned) {
+        return !partitioned.get(false).isEmpty();
     }
 
     private Predicate<Image> enabledOsPredicate() {

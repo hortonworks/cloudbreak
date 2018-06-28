@@ -108,4 +108,11 @@ public class Image {
                 + ", default='" + defaultImage + '\''
                 + '}';
     }
+
+    public String shortOsDescriptionFormat() {
+        return "Image{"
+                + "uuid='" + uuid + '\''
+                + ", os='" + os + '\''
+                + '}';
+    }
 }
