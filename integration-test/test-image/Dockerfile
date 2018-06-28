@@ -1,4 +1,4 @@
-FROM hortonworks/cloudbreak
+FROM hortonworks/cloudbreak:2.4.2
 
 ADD cloudbreak.jar /
 
