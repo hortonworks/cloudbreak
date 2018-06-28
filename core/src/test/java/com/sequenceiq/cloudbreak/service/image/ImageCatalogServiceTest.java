@@ -29,11 +29,11 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV2;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
-import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.domain.UserProfile;
 import com.sequenceiq.cloudbreak.repository.ImageCatalogRepository;
+import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.AuthorizationService;
 import com.sequenceiq.cloudbreak.service.account.AccountPreferencesService;
 import com.sequenceiq.cloudbreak.service.user.UserProfileService;
@@ -57,6 +57,9 @@ public class ImageCatalogServiceTest {
 
     @Mock
     private AuthenticatedUserService authenticatedUserService;
+
+    @Spy
+    private ImageCatalogVersionFilter versionFilter;
 
     @Mock
     private AuthorizationService authorizationService;
@@ -88,7 +91,11 @@ public class ImageCatalogServiceTest {
         constants.addAll(Collections.singletonList(new AwsCloudConstant()));
 
         ReflectionTestUtils.setField(underTest, ImageCatalogService.class, "defaultCatalogUrl", "http://localhost/imagecatalog-url", null);
-        ReflectionTestUtils.setField(underTest, ImageCatalogService.class, "cbVersion", "unspecified", null);
+        setMockedCbVersion("cbVersion", "unspecified");
+    }
+
+    private void setMockedCbVersion(String cbVersion, String versionValue) {
+        ReflectionTestUtils.setField(underTest, ImageCatalogService.class, cbVersion, versionValue, String.class);
     }
 
     private IdentityUser getIdentityUser() {
@@ -105,7 +112,7 @@ public class ImageCatalogServiceTest {
         CloudbreakImageCatalogV2 catalog = JsonUtil.readValue(catalogJson, CloudbreakImageCatalogV2.class);
         when(imageCatalogProvider.getImageCatalogV2("http://localhost/imagecatalog-url")).thenReturn(catalog);
         when(userProfileService.get(user.getAccount(), user.getUserId())).thenReturn(userProfile);
-        ReflectionTestUtils.setField(underTest, ImageCatalogService.class, "cbVersion", "2.1.0-dev.100", null);
+        setMockedCbVersion("cbVersion", "2.1.0-dev.100");
 
         StatedImage image = underTest.getLatestBaseImageDefaultPreferred("AWS", null);
         Assert.assertEquals("7aca1fa6-980c-44e2-a75e-3144b18a5993", image.getImage().getUuid());
@@ -121,7 +128,7 @@ public class ImageCatalogServiceTest {
         CloudbreakImageCatalogV2 catalog = JsonUtil.readValue(catalogJson, CloudbreakImageCatalogV2.class);
         when(imageCatalogProvider.getImageCatalogV2("http://localhost/imagecatalog-url")).thenReturn(catalog);
         when(userProfileService.get(user.getAccount(), user.getUserId())).thenReturn(userProfile);
-        ReflectionTestUtils.setField(underTest, ImageCatalogService.class, "cbVersion", "2.1.0-dev.200", null);
+        setMockedCbVersion("cbVersion", "2.1.0-dev.200");
 
         StatedImage image = underTest.getLatestBaseImageDefaultPreferred("AWS", null);
         Assert.assertEquals("7aca1fa6-980c-44e2-a75e-3144b18a5993", image.getImage().getUuid());
@@ -137,7 +144,7 @@ public class ImageCatalogServiceTest {
         CloudbreakImageCatalogV2 catalog = JsonUtil.readValue(catalogJson, CloudbreakImageCatalogV2.class);
         when(imageCatalogProvider.getImageCatalogV2("http://localhost/imagecatalog-url")).thenReturn(catalog);
         when(userProfileService.get(user.getAccount(), user.getUserId())).thenReturn(userProfile);
-        ReflectionTestUtils.setField(underTest, ImageCatalogService.class, "cbVersion", "2.1.0-dev.1", null);
+        setMockedCbVersion("cbVersion", "2.1.0-dev.1");
 
         StatedImage image = underTest.getLatestBaseImageDefaultPreferred("AWS", null);
         Assert.assertEquals("7aca1fa6-980c-44e2-a75e-3144b18a5993", image.getImage().getUuid());
@@ -153,7 +160,7 @@ public class ImageCatalogServiceTest {
         CloudbreakImageCatalogV2 catalog = JsonUtil.readValue(catalogJson, CloudbreakImageCatalogV2.class);
         when(imageCatalogProvider.getImageCatalogV2("http://localhost/imagecatalog-url")).thenReturn(catalog);
         when(userProfileService.get(user.getAccount(), user.getUserId())).thenReturn(userProfile);
-        ReflectionTestUtils.setField(underTest, ImageCatalogService.class, "cbVersion", "2.1.0-dev.2", null);
+        setMockedCbVersion("cbVersion", "2.1.0-dev.2");
 
         StatedImage image = underTest.getLatestBaseImageDefaultPreferred("AWS", null);
         Assert.assertEquals("f6e778fc-7f17-4535-9021-515351df3691", image.getImage().getUuid());
@@ -277,7 +284,7 @@ public class ImageCatalogServiceTest {
         ImageCatalog imageCatalog = new ImageCatalog();
         imageCatalog.setImageCatalogUrl("");
         imageCatalog.setImageCatalogName("default");
-        StatedImages images = underTest.getImages(imageCatalog, "aws", "1.16.4-rc.13");
+        StatedImages images = underTest.getImages(imageCatalog, "aws",  "1.16.4-rc.13");
 
         boolean match = images.getImages().getHdpImages().stream()
                 .anyMatch(img -> "2.5.1.9-4-ccbb32dc-6c9f-43f1-8a09-64b598fda733-2.6.1.4-2".equals(img.getUuid()));

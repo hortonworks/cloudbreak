@@ -38,4 +38,13 @@ public class CloudbreakVersion {
     public List<String> getImageIds() {
         return imageIds;
     }
+
+    @Override
+    public String toString() {
+        return "CloudbreakVersion{"
+                + "versions=" + versions
+                + ", defaults=" + defaults
+                + ", imageIds=" + imageIds
+                + '}';
+    }
 }
