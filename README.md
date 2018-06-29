@@ -1,22 +1,22 @@
 # Cloudbreak
 
-[![Build Status][circle-ci-badge]][circle-ci]
+[![CircleCI](https://circleci.com/gh/hortonworks/cloudbreak.svg?style=svg)](https://circleci.com/gh/hortonworks/cloudbreak)
 [![Maintainability](https://api.codeclimate.com/v1/badges/566493a63aaaf0c61bd4/maintainability)](https://codeclimate.com/github/hortonworks/cloudbreak/maintainability)
-![Build Status][docker-io]
-
-[circle-ci-badge]: https://img.shields.io/circleci/project/github/hortonworks/cloudbreak.svg
-[circle-ci]: https://img.shields.io/circleci/project/github/hortonworks/cloudbreak/master.svg
-[docker-io]: https://img.shields.io/docker/pulls/hortonworks/cloudbreak.svg
+[![Build Automated](https://img.shields.io/docker/automated/hortonworks/cloudbreak.svg)](https://hub.docker.com/r/hortonworks/cloudbreak/)
+[![Build Pulls](https://img.shields.io/docker/pulls/hortonworks/cloudbreak.svg)](https://hub.docker.com/r/hortonworks/cloudbreak/)
+[![Build Status](https://img.shields.io/docker/build/hortonworks/cloudbreak.svg)](https://hub.docker.com/r/hortonworks/cloudbreak/)
+[![Swagger Cloudbreak API](https://img.shields.io/swagger/valid/2.0/https/raw.githubusercontent.com/hortonworks/cloudbreak/master/mock/cloudbreak/api/swagger.json.svg)](https://github.com/hortonworks/cloudbreak/blob/fix-readme/mock/cloudbreak/api/swagger.json)
+[![Licence](https://img.shields.io/github/license/hortonworks/cloudbreak.svg)](https://github.com/hortonworks/cloudbreak/blob/fix-readme/LICENSE)
 
 * Website: https://hortonworks.com/open-source/cloudbreak/
-* Documentation: https://docs.hortonworks.com/HDPDocuments/Cloudbreak/Cloudbreak-2.4.1/index.html
+* Documentation: https://docs.hortonworks.com/HDPDocuments/Cloudbreak/Cloudbreak-2.7.0/index.html
 
 # Local Development Setup
 As of now this document is focusing on setting up your development environment on OSX. You'll need brew to install certain components in case you don't have them already. To get brew please follow the install instructions on the brew homepage: https://brew.sh
 
-As a prerequisite you need to have Java installed. You can get it with the following command:
+As a prerequisite you need to have Java 10 installed. You can get it with the following command:
 ```
-brew cask install java8
+brew cask install java
 ```
 
 You'll need a Hypervisor too. Cloudbreak-Deployer has built-in xhyve setup option, but some of us use VirtualBox instead. Cloudbreak-Deployer works with both, it's up to you which one you prefer.
@@ -135,7 +135,26 @@ Go to https://github.com/hortonworks/cloudbreak, Either clone or download the re
 ### Project settings in IDEA
 
 In IDEA set your SDK to your Java version under:
-Configure -> Project Defaults -> Project Structure -> Project SDK
+
+Set project SDK
+```
+File -> Project Structure -> Project Settings -> Project -> Project SDK -> 10
+```
+
+Set project Language level
+```
+File -> Project Structure -> Project Settings -> Project -> Project Language Level -> 10
+```
+
+Set Gradle JVM
+```
+IntelliJ IDEA -> Preferences -> Build, Execution, Deployment -> Gradle -> Gradle JVM -> 10
+```
+
+Set Gradle Runner
+```
+IntelliJ IDEA -> Preferences -> Build, Execution, Deployment -> Gradle -> Runner -> [x] Delegate IDE build/run actions to gradle
+```
 
 Cloudbreak can be imported into IDEA as gradle project by specifying the cloudbreak repo root under Import Project. Once it is done, you need to import the proper code formatter by using the __File -> Import Settings...__ menu and selecting the `idea_settings.jar` located in the `config/idea` directory in Cloudbreak git repository.
 
@@ -166,7 +185,7 @@ In order to be able to determine the local Cloudbreak version automatically, a `
 3. Click on `Add` in the `Before launch` panel
 4. Select `Run Gradle Task` with the following parameters
     1. `Gradle project`: cloudbreak:core
-    2. `Tasks`: buildInfo
+    2. `Tasks`: processResources
 5. Confirm and restart the application
     
 ## Command line
