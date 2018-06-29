@@ -4,7 +4,16 @@
     {% set is_systemd = True %}
 {% endif %}
 
-{%- set server_address = salt['mine.get']('G@roles:ambari_server', 'network.ipaddrs', expr_form = 'compound').values()[0][0] %}
+{% set server_address = [] %}
+{%- for host, host_ips in salt['mine.get']('G@roles:ambari_server', 'network.ipaddrs', expr_form = 'compound').items() %}
+  {%- for ip, args in pillar.get('hosts', {}).items() %}
+    {% if ip in host_ips %}
+      {% do server_address.append(ip) %}
+    {% endif %}
+  {%- endfor %}
+{%- endfor %}
+{% set server_address = server_address[0] %}
+
 {% set is_gpl_repo_enabled = salt['pillar.get']('ambari:gpl:enabled') %}
 {% set is_container_executor = salt['pillar.get']('docker:enableContainerExecutor') %}
 {% set version = salt['pillar.get']('ambari:repo:version') %}

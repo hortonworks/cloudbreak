@@ -1,4 +1,5 @@
 {%- from 'consul/settings.sls' import consul with context %}
+{%- from 'ambari/settings.sls' import ambari with context %}
 
 /etc/unbound/conf.d/01-consul.conf:
   file.managed:
@@ -6,7 +7,7 @@
     - source: salt://unbound/config/01-consul.conf
     - template: jinja
     - context:
-        consul_server_address: {{ salt['mine.get']('G@roles:ambari_server', 'network.ipaddrs', expr_form = 'compound').values()[0][0] }}
+        consul_server_address: {{ ambari.server_address }}
 
 /etc/unbound/conf.d/00-cluster.conf:
   file.managed:
