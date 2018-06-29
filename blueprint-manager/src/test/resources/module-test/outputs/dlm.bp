@@ -211,7 +211,8 @@
       "beacon-security-site": {
         "properties": {
           "beacon.sso.knox.authentication.enabled": "true",
-          "beacon.sso.knox.publicKey": "signcert"
+          "beacon.sso.knox.publicKey": "signcert",
+          "beacon.sso.knox.providerurl": "simple"
         }
       }
     },
