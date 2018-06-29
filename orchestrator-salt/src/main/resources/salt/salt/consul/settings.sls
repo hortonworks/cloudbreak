@@ -9,12 +9,15 @@
 
 {% set node_name = salt['grains.get']('nodename') %}
 
-{%- set ipList = salt['mine.get']('G@roles:ambari_server or G@roles:ambari_server_standby', 'network.ipaddrs', expr_form = 'compound').values() %}
-{% set bootstrap_expect =  ipList|length %}
 {% set servers = [] %}
-{% for ips in ipList %}
-    {% do servers.append(ips[0]) %}
-{% endfor %}
+{%- for host, host_ips in salt['mine.get']('G@roles:ambari_server or G@roles:ambari_server_standby', 'network.ipaddrs', expr_form = 'compound').items() %}
+  {%- for ip, args in pillar.get('hosts', {}).items() %}
+    {% if ip in host_ips %}
+      {% do servers.append(ip) %}
+    {% endif %}
+  {%- endfor %}
+{%- endfor %}
+{% set bootstrap_expect =  servers|length %}
 
 {% set consul = {} %}
 {% do consul.update({
