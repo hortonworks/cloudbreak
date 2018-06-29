@@ -2,5 +2,6 @@
 
 : ${ADDITIONAL_DOCKER_BUILD_COMMAND:=""}
 
+docker pull openjdk:10-jdk
 echo -e "\n\033[1;96m--- build cloudbreak in docker container\033[0m\n"
-docker run -i --rm $ADDITIONAL_DOCKER_BUILD_COMMAND -v $(pwd)/../:/tmp/prj:rw java:openjdk-8 /tmp/prj/gradlew -b /tmp/prj/build.gradle clean build -x test
+docker run -i --rm $ADDITIONAL_DOCKER_BUILD_COMMAND -v $(pwd)/../:/tmp/prj:rw openjdk:10-jdk /tmp/prj/gradlew -b /tmp/prj/build.gradle clean build -x test
