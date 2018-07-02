@@ -8,10 +8,13 @@
 {% set clusterPassword = salt['pillar.get']('kerberos:clusterPassword') %}
 
 {% set servers = [] %}
-{%- set ipList = salt['mine.get']('G@roles:kerberos_server_master or G@roles:kerberos_server_slave', 'network.ipaddrs', expr_form = 'compound').values() %}
-{% for ips in ipList %}
-    {% do servers.append(salt['pillar.get']('hosts')[ips[0]]['fqdn']) %}
-{% endfor %}
+{%- for host, host_ips in salt['mine.get']('G@roles:kerberos_server_master or G@roles:kerberos_server_slave', 'network.ipaddrs', expr_form = 'compound').items() %}
+  {%- for ip, args in pillar.get('hosts', {}).items() %}
+    {% if ip in host_ips %}
+      {% do servers.append(args['fqdn']) %}
+    {% endif %}
+  {%- endfor %}
+{%- endfor %}
 
 {% set enable_iprop = 'false' %}
 {% if servers|length > 1 %}
