@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.metrics;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
@@ -13,6 +14,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 
 import io.micrometer.core.instrument.Metrics;
+import io.micrometer.core.instrument.Tag;
 
 @Service
 public class MetricService {
@@ -81,9 +83,15 @@ public class MetricService {
      * @param value  Metric value
      */
     public void submit(String metric, double value) {
+        submit(metric, value, new HashMap<>());
+    }
+
+    public void submit(String metric, double value, Map<String, String> labels) {
         String metricName = METRIC_PREFIX + metric.toLowerCase();
         gaugeCache.put(metricName, value);
-        Metrics.gauge(metricName, gaugeCache, cache -> cache.getOrDefault(metricName, 0d));
+
+        Iterable<Tag> tags = labels.entrySet().stream().map(label -> Tag.of(label.getKey(), label.getValue().toLowerCase())).collect(Collectors.toList());
+        Metrics.gauge(metricName, tags, gaugeCache, cache -> cache.getOrDefault(metricName, 0d));
     }
 
     private void incrementMetricCounter(String metric) {
