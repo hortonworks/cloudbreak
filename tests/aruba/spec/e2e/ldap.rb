@@ -35,7 +35,7 @@ RSpec.describe 'Ldap test cases', :type => :aruba do
     .ldap_group_member_attribute(@ldap_group_member_attribute) 
     .ldap_group_name_attribute(@ldap_group_name_attribute) 
     .ldap_group_object_class(@ldap_group_object_class)
-    .ldap_group_search_base(@ldap_group_search_base).build()
+    .ldap_group_search_base(@ldap_group_search_base).builds()
     
     expect(result.exit_status).to eql 0 
   end 
