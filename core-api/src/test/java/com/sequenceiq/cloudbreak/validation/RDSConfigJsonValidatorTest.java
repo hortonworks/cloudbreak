@@ -28,9 +28,11 @@ public class RDSConfigJsonValidatorTest {
 
     private static final String TEST_TYPE = "HIVE";
 
-    private static final int INVOKED_ONCE = 1;
+    private static final int NOT_EVEN_ONCE = 0;
 
-    private RDSConfigJsonValidator underTets;
+    private static final int ONCE = 1;
+
+    private RDSConfigJsonValidator underTest;
 
     @Mock
     private ConstraintValidatorContext constraintValidatorContext;
@@ -46,7 +48,7 @@ public class RDSConfigJsonValidatorTest {
 
     @Before
     public void setUp() {
-        underTets = new RDSConfigJsonValidator();
+        underTest = new RDSConfigJsonValidator();
         initMocks(this);
         when(constraintValidatorContext.buildConstraintViolationWithTemplate(anyString())).thenReturn(constraintViolationBuilder);
         when(constraintViolationBuilder.addPropertyNode(anyString())).thenReturn(nodeBuilderCustomizableContext);
@@ -60,7 +62,97 @@ public class RDSConfigJsonValidatorTest {
         when(json.getType()).thenReturn(TEST_TYPE);
         when(json.getConnectorJarUrl()).thenReturn(VALID_JAR_URL);
 
-        assertTrue(underTets.isValid(json, constraintValidatorContext));
+        assertTrue(underTest.isValid(json, constraintValidatorContext));
+    }
+
+    @Test
+    public void testIsValidWhenConnectionUrlContainsHyphenInMiddleInDatabaseNameThenTrueReturns() {
+        when(json.getConnectionURL()).thenReturn("jdbc:postgresql://somedb.c8uqzbscgqmb.eu-west-1.rds.amazonaws.com:5432/mydb-asd");
+        when(json.getName()).thenReturn(VALID_NAME);
+        when(json.getType()).thenReturn(TEST_TYPE);
+        when(json.getConnectorJarUrl()).thenReturn(VALID_JAR_URL);
+
+        assertTrue(underTest.isValid(json, constraintValidatorContext));
+        verify(constraintValidatorContext, times(NOT_EVEN_ONCE)).buildConstraintViolationWithTemplate(anyString());
+    }
+
+    @Test
+    public void testIsValidWhenConnectionUrlContainsHyphenAtTheEndInDatabaseNameThenTrueReturns() {
+        when(json.getConnectionURL()).thenReturn("jdbc:postgresql://somedb.c8uqzbscgqmb.eu-west-1.rds.amazonaws.com:5432/mydbasd-");
+        when(json.getName()).thenReturn(VALID_NAME);
+        when(json.getType()).thenReturn(TEST_TYPE);
+        when(json.getConnectorJarUrl()).thenReturn(VALID_JAR_URL);
+
+        assertTrue(underTest.isValid(json, constraintValidatorContext));
+        verify(constraintValidatorContext, times(NOT_EVEN_ONCE)).buildConstraintViolationWithTemplate(anyString());
+    }
+
+    @Test
+    public void testIsValidWhenConnectionUrlContainsHyphenAtStartInDatabaseNameThenFalseReturns() {
+        when(json.getConnectionURL()).thenReturn("jdbc:postgresql://somedb.c8uqzbscgqmb.eu-west-1.rds.amazonaws.com:5432/-mydbasd");
+        when(json.getName()).thenReturn(VALID_NAME);
+        when(json.getType()).thenReturn(TEST_TYPE);
+        when(json.getConnectorJarUrl()).thenReturn(VALID_JAR_URL);
+
+        assertFalse(underTest.isValid(json, constraintValidatorContext));
+        verify(constraintValidatorContext, times(ONCE))
+                .buildConstraintViolationWithTemplate("Wrong host, port or table name. Valid form: host:1234/tablename or host:1234:tablename");
+    }
+
+    @Test
+    public void testIsValidWhenConnectionUrlContainsHyphenAtDifferentPlacesInDatabaseNameThenTrueReturns() {
+        when(json.getConnectionURL()).thenReturn("jdbc:postgresql://somedb.c8uqzbscgqmb.eu-west-1.rds.amazonaws.com:5432/my-db-asd");
+        when(json.getName()).thenReturn(VALID_NAME);
+        when(json.getType()).thenReturn(TEST_TYPE);
+        when(json.getConnectorJarUrl()).thenReturn(VALID_JAR_URL);
+
+        assertTrue(underTest.isValid(json, constraintValidatorContext));
+        verify(constraintValidatorContext, times(NOT_EVEN_ONCE)).buildConstraintViolationWithTemplate(anyString());
+    }
+
+    @Test
+    public void testIsValidWhenConnectionUrlContainsDoubleHyphenInDatabaseNameThenTrueReturns() {
+        when(json.getConnectionURL()).thenReturn("jdbc:postgresql://somedb.c8uqzbscgqmb.eu-west-1.rds.amazonaws.com:5432/mydb--asd");
+        when(json.getName()).thenReturn(VALID_NAME);
+        when(json.getType()).thenReturn(TEST_TYPE);
+        when(json.getConnectorJarUrl()).thenReturn(VALID_JAR_URL);
+
+        assertTrue(underTest.isValid(json, constraintValidatorContext));
+        verify(constraintValidatorContext, times(NOT_EVEN_ONCE)).buildConstraintViolationWithTemplate(anyString());
+    }
+
+    @Test
+    public void testIsValidWhenConnectionUrlEndsWithDoubleHyphenInDatabaseNameThenTrueReturns() {
+        when(json.getConnectionURL()).thenReturn("jdbc:postgresql://somedb.c8uqzbscgqmb.eu-west-1.rds.amazonaws.com:5432/mydbasd--");
+        when(json.getName()).thenReturn(VALID_NAME);
+        when(json.getType()).thenReturn(TEST_TYPE);
+        when(json.getConnectorJarUrl()).thenReturn(VALID_JAR_URL);
+
+        assertTrue(underTest.isValid(json, constraintValidatorContext));
+        verify(constraintValidatorContext, times(NOT_EVEN_ONCE)).buildConstraintViolationWithTemplate(anyString());
+    }
+
+    @Test
+    public void testIsValidWhenConnectionUrlContainsDoubleAndSingleHyphenInDifferentPlacesInDatabaseNameThenTrueReturns() {
+        when(json.getConnectionURL()).thenReturn("jdbc:postgresql://somedb.c8uqzbscgqmb.eu-west-1.rds.amazonaws.com:5432/my--db-asd");
+        when(json.getName()).thenReturn(VALID_NAME);
+        when(json.getType()).thenReturn(TEST_TYPE);
+        when(json.getConnectorJarUrl()).thenReturn(VALID_JAR_URL);
+
+        assertTrue(underTest.isValid(json, constraintValidatorContext));
+        verify(constraintValidatorContext, times(NOT_EVEN_ONCE)).buildConstraintViolationWithTemplate(anyString());
+    }
+
+    @Test
+    public void testIsValidWhenConnectionUrlHasDatabaseNameWhichContainsOnlyHyphenThenFalseReturns() {
+        when(json.getConnectionURL()).thenReturn("jdbc:postgresql://somedb.c8uqzbscgqmb.eu-west-1.rds.amazonaws.com:5432/-");
+        when(json.getName()).thenReturn(VALID_NAME);
+        when(json.getType()).thenReturn(TEST_TYPE);
+        when(json.getConnectorJarUrl()).thenReturn(VALID_JAR_URL);
+
+        assertFalse(underTest.isValid(json, constraintValidatorContext));
+        verify(constraintValidatorContext, times(ONCE))
+                .buildConstraintViolationWithTemplate("Wrong host, port or table name. Valid form: host:1234/tablename or host:1234:tablename");
     }
 
     @Test
@@ -70,8 +162,8 @@ public class RDSConfigJsonValidatorTest {
         when(json.getType()).thenReturn(TEST_TYPE);
         when(json.getConnectorJarUrl()).thenReturn(VALID_JAR_URL);
 
-        assertFalse(underTets.isValid(json, constraintValidatorContext));
-        verify(constraintValidatorContext, times(INVOKED_ONCE))
+        assertFalse(underTest.isValid(json, constraintValidatorContext));
+        verify(constraintValidatorContext, times(ONCE))
                 .buildConstraintViolationWithTemplate("Unknown separator. Valid formation: jdbc:postgresql://host:1234/tablename "
                         + "or jdbc:oracle:thin:@host:1234:tablename");
     }
@@ -83,8 +175,8 @@ public class RDSConfigJsonValidatorTest {
         when(json.getType()).thenReturn(TEST_TYPE);
         when(json.getConnectorJarUrl()).thenReturn(VALID_JAR_URL);
 
-        assertFalse(underTets.isValid(json, constraintValidatorContext));
-        verify(constraintValidatorContext, times(INVOKED_ONCE))
+        assertFalse(underTest.isValid(json, constraintValidatorContext));
+        verify(constraintValidatorContext, times(ONCE))
                 .buildConstraintViolationWithTemplate("Unsupported database type. Supported databases: PostgreSQL, Oracle, MySQL.");
     }
 
@@ -95,8 +187,8 @@ public class RDSConfigJsonValidatorTest {
         when(json.getType()).thenReturn(TEST_TYPE);
         when(json.getConnectorJarUrl()).thenReturn(VALID_JAR_URL);
 
-        assertFalse(underTets.isValid(json, constraintValidatorContext));
-        verify(constraintValidatorContext, times(INVOKED_ONCE))
+        assertFalse(underTest.isValid(json, constraintValidatorContext));
+        verify(constraintValidatorContext, times(ONCE))
                 .buildConstraintViolationWithTemplate("Unsupported database type. Supported databases: PostgreSQL, Oracle, MySQL.");
     }
 
@@ -107,8 +199,8 @@ public class RDSConfigJsonValidatorTest {
         when(json.getType()).thenReturn(TEST_TYPE);
         when(json.getConnectorJarUrl()).thenReturn(VALID_JAR_URL);
 
-        assertFalse(underTets.isValid(json, constraintValidatorContext));
-        verify(constraintValidatorContext, times(INVOKED_ONCE))
+        assertFalse(underTest.isValid(json, constraintValidatorContext));
+        verify(constraintValidatorContext, times(ONCE))
                 .buildConstraintViolationWithTemplate("Wrong host, port or table name. Valid form: host:1234/tablename or host:1234:tablename");
     }
 
@@ -119,8 +211,8 @@ public class RDSConfigJsonValidatorTest {
         when(json.getType()).thenReturn(TEST_TYPE);
         when(json.getConnectorJarUrl()).thenReturn(VALID_JAR_URL);
 
-        assertFalse(underTets.isValid(json, constraintValidatorContext));
-        verify(constraintValidatorContext, times(INVOKED_ONCE))
+        assertFalse(underTest.isValid(json, constraintValidatorContext));
+        verify(constraintValidatorContext, times(ONCE))
                 .buildConstraintViolationWithTemplate("Wrong host, port or table name. Valid form: host:1234/tablename or host:1234:tablename");
     }
 
@@ -131,8 +223,8 @@ public class RDSConfigJsonValidatorTest {
         when(json.getType()).thenReturn(TEST_TYPE);
         when(json.getConnectorJarUrl()).thenReturn(VALID_JAR_URL);
 
-        assertFalse(underTets.isValid(json, constraintValidatorContext));
-        verify(constraintValidatorContext, times(INVOKED_ONCE))
+        assertFalse(underTest.isValid(json, constraintValidatorContext));
+        verify(constraintValidatorContext, times(ONCE))
                 .buildConstraintViolationWithTemplate("The name can only contain lowercase alphanumeric characters and hyphens "
                         + "and has start with an alphanumeric character");
     }
@@ -144,8 +236,8 @@ public class RDSConfigJsonValidatorTest {
         when(json.getType()).thenReturn(TEST_TYPE);
         when(json.getConnectorJarUrl()).thenReturn(VALID_JAR_URL);
 
-        assertFalse(underTets.isValid(json, constraintValidatorContext));
-        verify(constraintValidatorContext, times(INVOKED_ONCE)).buildConstraintViolationWithTemplate("The length of the name has to be in range of 4 to 50");
+        assertFalse(underTest.isValid(json, constraintValidatorContext));
+        verify(constraintValidatorContext, times(ONCE)).buildConstraintViolationWithTemplate("The length of the name has to be in range of 4 to 50");
     }
 
     @Test
@@ -155,8 +247,8 @@ public class RDSConfigJsonValidatorTest {
         when(json.getType()).thenReturn(TEST_TYPE);
         when(json.getConnectorJarUrl()).thenReturn(VALID_JAR_URL);
 
-        assertFalse(underTets.isValid(json, constraintValidatorContext));
-        verify(constraintValidatorContext, times(INVOKED_ONCE)).buildConstraintViolationWithTemplate("The length of the name has to be in range of 4 to 50");
+        assertFalse(underTest.isValid(json, constraintValidatorContext));
+        verify(constraintValidatorContext, times(ONCE)).buildConstraintViolationWithTemplate("The length of the name has to be in range of 4 to 50");
     }
 
     @Test
@@ -166,8 +258,8 @@ public class RDSConfigJsonValidatorTest {
         when(json.getType()).thenReturn("ab?cd-_:2ds");
         when(json.getConnectorJarUrl()).thenReturn(VALID_JAR_URL);
 
-        assertFalse(underTets.isValid(json, constraintValidatorContext));
-        verify(constraintValidatorContext, times(INVOKED_ONCE))
+        assertFalse(underTest.isValid(json, constraintValidatorContext));
+        verify(constraintValidatorContext, times(ONCE))
                 .buildConstraintViolationWithTemplate("The type can only contain alphanumeric characters and hyphens "
                         + "and has start with an alphanumeric character. The length of the name has to be in range of 3 to 12");
     }
@@ -179,8 +271,8 @@ public class RDSConfigJsonValidatorTest {
         when(json.getType()).thenReturn("RA");
         when(json.getConnectorJarUrl()).thenReturn(VALID_JAR_URL);
 
-        assertFalse(underTets.isValid(json, constraintValidatorContext));
-        verify(constraintValidatorContext, times(INVOKED_ONCE)).buildConstraintViolationWithTemplate("The length of the type has to be in range of 3 to 12");
+        assertFalse(underTest.isValid(json, constraintValidatorContext));
+        verify(constraintValidatorContext, times(ONCE)).buildConstraintViolationWithTemplate("The length of the type has to be in range of 3 to 12");
     }
 
     @Test
@@ -190,8 +282,8 @@ public class RDSConfigJsonValidatorTest {
         when(json.getType()).thenReturn("SOMETYPEVALUEWHICHISTOOLONG");
         when(json.getConnectorJarUrl()).thenReturn(VALID_JAR_URL);
 
-        assertFalse(underTets.isValid(json, constraintValidatorContext));
-        verify(constraintValidatorContext, times(INVOKED_ONCE)).buildConstraintViolationWithTemplate("The length of the type has to be in range of 3 to 12");
+        assertFalse(underTest.isValid(json, constraintValidatorContext));
+        verify(constraintValidatorContext, times(ONCE)).buildConstraintViolationWithTemplate("The length of the type has to be in range of 3 to 12");
     }
 
     @Test
@@ -201,8 +293,8 @@ public class RDSConfigJsonValidatorTest {
         when(json.getType()).thenReturn(TEST_TYPE);
         when(json.getConnectorJarUrl()).thenReturn("some invalid url input, like: ttps://someurl.com");
 
-        assertFalse(underTets.isValid(json, constraintValidatorContext));
-        verify(constraintValidatorContext, times(INVOKED_ONCE)).buildConstraintViolationWithTemplate("The URL must be proper and valid!");
+        assertFalse(underTest.isValid(json, constraintValidatorContext));
+        verify(constraintValidatorContext, times(ONCE)).buildConstraintViolationWithTemplate("The URL must be proper and valid!");
     }
 
     @Test
@@ -213,8 +305,8 @@ public class RDSConfigJsonValidatorTest {
         when(json.getConnectorJarUrl()).thenReturn("https://someurlwhichistoolongtoprocessorstoreorwhateverbutthislengthshoulddefinitelyleadthevalidation"
                 + "processtofailedsoyoucantestthevalidationwhiththis.com");
 
-        assertFalse(underTets.isValid(json, constraintValidatorContext));
-        verify(constraintValidatorContext, times(INVOKED_ONCE))
+        assertFalse(underTest.isValid(json, constraintValidatorContext));
+        verify(constraintValidatorContext, times(ONCE))
                 .buildConstraintViolationWithTemplate("The length of the connectorJarUrl has to be in range of 0 to 150");
     }
 
@@ -225,7 +317,7 @@ public class RDSConfigJsonValidatorTest {
         when(json.getType()).thenReturn(TEST_TYPE);
         when(json.getConnectorJarUrl()).thenReturn(null);
 
-        assertTrue(underTets.isValid(json, constraintValidatorContext));
+        assertTrue(underTest.isValid(json, constraintValidatorContext));
     }
 
 }
