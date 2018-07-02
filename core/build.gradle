@@ -234,6 +234,13 @@ jacocoTestReport {
 test {
 }
 
+task buildInfo(type: BuildInfoTask, dependsOn: processResources) {
+    destination = file("$buildDir")
+    applicationPropertiesPath = "$buildDir"
+    basename = jar.baseName
+    buildVersion = version
+}
+
 task execute(type: JavaExec) {
     if (project.hasProperty('mainClass')) {
         main = mainClass
@@ -247,6 +254,7 @@ sourceSets {
     }
 }
 
+compileJava.dependsOn buildInfo
 compileJava {
     options.compilerArgs = [
             '-Amapstruct.unmappedTargetPolicy=ERROR',
@@ -266,30 +274,55 @@ compileJava.doFirst {
     }
 }
 
-processResources {
-  String baseName = jar.baseName
+class BuildInfoTask extends DefaultTask {
+    File destination = new File("build.info")
+    String applicationPropertiesPath
+    String basename
+    String buildVersion
 
-  String buildVersion = version
-  if (buildVersion.contains("+") || buildVersion == "unspecified") {
-    def grgit = Grgit.open(currentDir: project.projectDir)
-    buildVersion = grgit.describe()
-    println "buildVersion from git: " + buildVersion
-  }
+    @TaskAction
+    def writeBuildInfo() {
+        List<File> applicationDestinations = []
 
-  String activeProfile = "dev"
-  if (buildVersion.contains("dev") || buildVersion.equals("unspecified")) {
-    activeProfile = "dev"
-  } else if (buildVersion.contains("rc")) {
-    activeProfile = "rc"
-  } else {
-    activeProfile = "prod"
-  }
+        applicationDestinations += project.file("out/production/resources")
+        applicationDestinations += new File(applicationPropertiesPath + "/resources/main")
 
-  def expandProperties = ["name": baseName, "version": buildVersion, "profile": activeProfile]
-  inputs.properties(expandProperties)
-  filesMatching("application.properties") {
-    expand(expandProperties)
-  }
+        destination.mkdirs()
+
+        // if using dev environment this condition is true
+        if (buildVersion.contains("+") || buildVersion == "unspecified") {
+            def grgit = Grgit.open(currentDir: project.projectDir)
+            buildVersion = grgit.describe()
+            println "buildVersion from git: " + buildVersion
+        }
+        String activeProfile = determineActiveProfile()
+        new File(destination, "build.info").withWriter { out ->
+            [
+                    "ARTIFACT_BASENAME=" + basename,
+                    "ARTIFACT_VERSION=" + buildVersion,
+            ].each { out.println it }
+        }
+        applicationDestinations.each {
+            it.mkdirs()
+            new File(it, "application.properties").withWriter { out ->
+                [
+                        "info.app.name=" + basename,
+                        "info.app.version=" + buildVersion,
+                        "spring.profiles.active=" + activeProfile
+                ].each { out.println it }
+            }
+        }
+    }
+
+    private String determineActiveProfile() {
+        String activeProfile = "dev"
+        if (buildVersion.contains("dev") || buildVersion.equals("unspecified")) {
+            activeProfile = "dev"
+        } else if (buildVersion.contains("rc")) {
+            activeProfile = "rc"
+        } else {
+            activeProfile = "prod"
+        }
+        return activeProfile
+    }
 }
-
-task buildInfo(dependsOn: processResources)

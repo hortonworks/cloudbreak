@@ -151,11 +151,6 @@ Set Gradle JVM
 IntelliJ IDEA -> Preferences -> Build, Execution, Deployment -> Gradle -> Gradle JVM -> 10
 ```
 
-Set Gradle Runner
-```
-IntelliJ IDEA -> Preferences -> Build, Execution, Deployment -> Gradle -> Runner -> [x] Delegate IDE build/run actions to gradle
-```
-
 Cloudbreak can be imported into IDEA as gradle project by specifying the cloudbreak repo root under Import Project. Once it is done, you need to import the proper code formatter by using the __File -> Import Settings...__ menu and selecting the `idea_settings.jar` located in the `config/idea` directory in Cloudbreak git repository.
 
 To launch the Cloudbreak application execute the `com.sequenceiq.cloudbreak.CloudbreakApplication` class  (Set 'Use classpath of module' to `core_main`) with the following VM options:
@@ -185,7 +180,7 @@ In order to be able to determine the local Cloudbreak version automatically, a `
 3. Click on `Add` in the `Before launch` panel
 4. Select `Run Gradle Task` with the following parameters
     1. `Gradle project`: cloudbreak:core
-    2. `Tasks`: processResources
+    2. `Tasks`: buildInfo
 5. Confirm and restart the application
     
 ## Command line
