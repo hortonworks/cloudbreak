@@ -47,7 +47,7 @@ public class RDSConfigJsonValidator implements ConstraintValidator<ValidRDSConfi
     }
 
     private boolean isConnectionUrlValid(String url) {
-        if (!url.matches("^(jdbc:(oracle|mysql|postgresql)(:(.*))?):(@|//)(.*?):(\\d*)[:/](\\w+)")) {
+        if (!url.matches("^(jdbc:(oracle|mysql|postgresql)(:(.*))?):(@|//)(.*?):(\\d*)[:/](\\w+)(-*\\w*)*")) {
             if (!isSupportedDatabseType(url)) {
                 failMessage = "Unsupported database type. Supported databases: PostgreSQL, Oracle, MySQL.";
             } else if (!isValidSeparator(url)) {
