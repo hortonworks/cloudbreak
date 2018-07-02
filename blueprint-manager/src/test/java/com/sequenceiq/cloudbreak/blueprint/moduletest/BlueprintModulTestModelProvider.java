@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.blueprint.moduletest;
 
+import static com.sequenceiq.cloudbreak.TestUtil.adConfig;
 import static com.sequenceiq.cloudbreak.TestUtil.gatewayEnabled;
 import static com.sequenceiq.cloudbreak.TestUtil.hostGroup;
 import static com.sequenceiq.cloudbreak.TestUtil.kerberosConfig;
@@ -88,6 +89,13 @@ class BlueprintModulTestModelProvider {
                 .build();
     }
 
+    static BlueprintPreparationObject blueprintObjectWhenADPresentedThenRangerAndHadoopADShouldConfigured() {
+        return getPreparedBuilder("master")
+                .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
+                .withLdapConfig(adConfig())
+                .build();
+    }
+
     static BlueprintPreparationObject bpObjectWithThreeHostAndLdapRangerConfigured() {
         return getPreparedBuilder()
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
@@ -171,6 +179,14 @@ class BlueprintModulTestModelProvider {
                 .build();
     }
 
+    static BlueprintPreparationObject blueprintObjectWhenADConfiguredWithRdsRanger() {
+        return getPreparedBuilder("master")
+                .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
+                .withRdsConfigs(new HashSet<>(Collections.singleton(rdsConfig(RdsType.RANGER))))
+                .withLdapConfig(adConfig())
+                .build();
+    }
+
     static BlueprintPreparationObject blueprintObjectWhenLdapConfiguredWithOracleRdsRanger() {
         return getPreparedBuilder()
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
@@ -220,7 +236,7 @@ class BlueprintModulTestModelProvider {
                 .build();
     }
 
-    static BlueprintPreparationObject blueprintObjectWhenDlmBlueprintConfigured(String inputFileName) throws IOException {
+    static BlueprintPreparationObject blueprintObjectWhenDlmBlueprintConfiguredAndLdap(String inputFileName) throws IOException {
         GeneralClusterConfigs configs = generalClusterConfigs();
         TestFile testFile = getTestFile(getFileName(BLUEPRINT_UPDATER_TEST_INPUTS, inputFileName));
         return Builder.builder()
@@ -228,6 +244,19 @@ class BlueprintModulTestModelProvider {
                 .withBlueprintView(generalBlueprintView(testFile.getFileContent(), "2.6", "HDP"))
                 .withRdsConfigs(Sets.newHashSet(rdsConfig(RdsType.BEACON)))
                 .withLdapConfig(ldapConfig())
+                .withGateway(gatewayEnabled())
+                .withGeneralClusterConfigs(configs)
+                .build();
+    }
+
+    static BlueprintPreparationObject blueprintObjectWhenDlmBlueprintConfiguredAndAD(String inputFileName) throws IOException {
+        GeneralClusterConfigs configs = generalClusterConfigs();
+        TestFile testFile = getTestFile(getFileName(BLUEPRINT_UPDATER_TEST_INPUTS, inputFileName));
+        return Builder.builder()
+                .withHostgroups(getHostGroups("master", "worker", "compute"))
+                .withBlueprintView(generalBlueprintView(testFile.getFileContent(), "2.6", "HDP"))
+                .withRdsConfigs(Sets.newHashSet(rdsConfig(RdsType.BEACON)))
+                .withLdapConfig(adConfig())
                 .withGateway(gatewayEnabled())
                 .withGeneralClusterConfigs(configs)
                 .build();
@@ -295,6 +324,13 @@ class BlueprintModulTestModelProvider {
         return getPreparedBuilder("master")
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
                 .withLdapConfig(ldapConfig())
+                .build();
+    }
+
+    static BlueprintPreparationObject blueprintObjectWhenAtlasAndADPresentedThenBothShouldConfigured() {
+        return getPreparedBuilder("master")
+                .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
+                .withLdapConfig(adConfig())
                 .build();
     }
 

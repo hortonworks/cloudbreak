@@ -1,11 +1,15 @@
 package com.sequenceiq.cloudbreak.blueprint.moduletest;
 
 import static com.sequenceiq.cloudbreak.blueprint.moduletest.BlueprintModulTestModelProvider.blueprintObjectForHbaseConfigurationForTwoHosts;
+import static com.sequenceiq.cloudbreak.blueprint.moduletest.BlueprintModulTestModelProvider.blueprintObjectWhenADConfiguredWithRdsRanger;
+import static com.sequenceiq.cloudbreak.blueprint.moduletest.BlueprintModulTestModelProvider.blueprintObjectWhenADPresentedThenRangerAndHadoopADShouldConfigured;
+import static com.sequenceiq.cloudbreak.blueprint.moduletest.BlueprintModulTestModelProvider.blueprintObjectWhenAtlasAndADPresentedThenBothShouldConfigured;
 import static com.sequenceiq.cloudbreak.blueprint.moduletest.BlueprintModulTestModelProvider.blueprintObjectWhenAtlasAndLdapPresentedThenBothShouldConfigured;
 import static com.sequenceiq.cloudbreak.blueprint.moduletest.BlueprintModulTestModelProvider.blueprintObjectWhenAtlasPresentedShouldConfigured;
 import static com.sequenceiq.cloudbreak.blueprint.moduletest.BlueprintModulTestModelProvider.blueprintObjectWhenCustomPropertiesBlueprintConfigured;
 import static com.sequenceiq.cloudbreak.blueprint.moduletest.BlueprintModulTestModelProvider.blueprintObjectWhenDefaultBlueprintConfigured;
-import static com.sequenceiq.cloudbreak.blueprint.moduletest.BlueprintModulTestModelProvider.blueprintObjectWhenDlmBlueprintConfigured;
+import static com.sequenceiq.cloudbreak.blueprint.moduletest.BlueprintModulTestModelProvider.blueprintObjectWhenDlmBlueprintConfiguredAndAD;
+import static com.sequenceiq.cloudbreak.blueprint.moduletest.BlueprintModulTestModelProvider.blueprintObjectWhenDlmBlueprintConfiguredAndLdap;
 import static com.sequenceiq.cloudbreak.blueprint.moduletest.BlueprintModulTestModelProvider.blueprintObjectWhenDruidAndRdsPresentedThenRdsDruidShouldConfigured;
 import static com.sequenceiq.cloudbreak.blueprint.moduletest.BlueprintModulTestModelProvider.blueprintObjectWhenDuplicatedStorageLocationKey;
 import static com.sequenceiq.cloudbreak.blueprint.moduletest.BlueprintModulTestModelProvider.blueprintObjectWhenHiveAndRdsPresentedThenRdsHiveMetastoreShouldConfigured;
@@ -85,6 +89,8 @@ public class BlueprintModulTest extends CentralBlueprintContext {
                 blueprintObjectWhenDruidAndRdsPresentedThenRdsDruidShouldConfigured()});
         params.add(new Object[]{"ranger", "ldap-with-ranger-hadoop",
                 blueprintObjectWhenLdapPresentedThenRangerAndHadoopLdapShouldConfigured()});
+        params.add(new Object[]{"ranger", "ad-with-ranger-hadoop",
+                blueprintObjectWhenADPresentedThenRangerAndHadoopADShouldConfigured()});
         params.add(new Object[]{"kerberos", "kerberos",
                 blueprintObjectWhenKerberosPresentedThenKerberosShouldConfigured()});
         params.add(new Object[]{"zeppelin-2-6", "zeppelin-2-6",
@@ -101,12 +107,16 @@ public class BlueprintModulTest extends CentralBlueprintContext {
                 blueprintObjectWhenNothingSpecialThere()});
         params.add(new Object[]{"ranger", "ldap-with-rds-ranger",
                 blueprintObjectWhenLdapConfiguredWithRdsRanger()});
+        params.add(new Object[]{"ranger", "ad-with-rds-ranger",
+                blueprintObjectWhenADConfiguredWithRdsRanger()});
         params.add(new Object[]{"druid", "ldap-with-rds-druid",
                 blueprintObjectWhenLdapAndDruidRdsConfigured()});
         params.add(new Object[]{"atlas", "atlas-without-ldap",
                 blueprintObjectWhenAtlasPresentedShouldConfigured()});
         params.add(new Object[]{"atlas", "atlas-with-ldap",
                 blueprintObjectWhenAtlasAndLdapPresentedThenBothShouldConfigured()});
+        params.add(new Object[]{"atlas", "atlas-with-ad",
+                blueprintObjectWhenAtlasAndADPresentedThenBothShouldConfigured()});
         params.add(new Object[]{"hbase-master-in-all-host", "hbase-master-in-all-host",
                 blueprintObjectForHbaseConfigurationForTwoHosts()});
         params.add(new Object[]{"one-hbase-master-one-client-in-different-host", "one-hbase-master-one-client-in-different-host",
@@ -137,8 +147,10 @@ public class BlueprintModulTest extends CentralBlueprintContext {
                 blueprintObjectWhenDefaultBlueprintConfigured()});
         params.add(new Object[]{"hdp30-data-science-spark2", "hdp30-data-science-spark2",
                 blueprintObjectWhenDefaultBlueprintConfigured()});
-        params.add(new Object[]{"dlm", "dlm",
-                blueprintObjectWhenDlmBlueprintConfigured("dlm")});
+        params.add(new Object[]{"dlm", "ldap-dlm",
+                blueprintObjectWhenDlmBlueprintConfiguredAndLdap("dlm")});
+        params.add(new Object[]{"dlm", "ad-dlm",
+                blueprintObjectWhenDlmBlueprintConfiguredAndAD("dlm")});
         params.add(new Object[]{"custom-properties", "custom-properties",
                 blueprintObjectWhenCustomPropertiesBlueprintConfigured()});
         params.add(new Object[]{"s3-duplicated-key", "s3-duplicated-key",
