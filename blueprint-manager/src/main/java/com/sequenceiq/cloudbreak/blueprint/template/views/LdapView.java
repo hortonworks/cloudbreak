@@ -1,9 +1,9 @@
 package com.sequenceiq.cloudbreak.blueprint.template.views;
 
+import javax.annotation.Nonnull;
+
 import com.sequenceiq.cloudbreak.api.model.DirectoryType;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
-
-import javax.annotation.Nonnull;
 
 public class LdapView {
 
@@ -83,6 +83,10 @@ public class LdapView {
             return "ad";
         }
         return "ldap";
+    }
+
+    public boolean isLdap() {
+        return directoryType != DirectoryType.ACTIVE_DIRECTORY;
     }
 
     public String getUserSearchBase() {

@@ -25,7 +25,7 @@
     {
       "ranger-admin-site": {
         "properties": {
-          "ranger.authentication.method": "ACTIVE_DIRECTORY",
+          "ranger.authentication.method": "LDAP",
           "ranger.ldap.user.dnpattern": "cn={0},cn=users,dc=example,dc=org",
           "ranger.ldap.ad.domain": " ",
           "ranger.ldap.ad.user.searchfilter": "(cn={0})",
