@@ -111,8 +111,8 @@ public class ImageCatalogServiceTest {
         String catalogJson = FileReaderUtils.readFileFromClasspath("com/sequenceiq/cloudbreak/service/image/cb-image-catalog-v2.json");
         CloudbreakImageCatalogV2 catalog = JsonUtil.readValue(catalogJson, CloudbreakImageCatalogV2.class);
         when(imageCatalogProvider.getImageCatalogV2("http://localhost/imagecatalog-url")).thenReturn(catalog);
-        when(userProfileService.get(user.getAccount(), user.getUserId())).thenReturn(userProfile);
-        setMockedCbVersion("cbVersion", "2.1.0-dev.100");
+        when(userProfileService.getOrCreate(user.getAccount(), user.getUserId())).thenReturn(userProfile);
+        ReflectionTestUtils.setField(underTest, ImageCatalogService.class, "cbVersion", "2.1.0-dev.100", null);
 
         StatedImage image = underTest.getLatestBaseImageDefaultPreferred("AWS", null);
         Assert.assertEquals("7aca1fa6-980c-44e2-a75e-3144b18a5993", image.getImage().getUuid());
@@ -127,8 +127,8 @@ public class ImageCatalogServiceTest {
         String catalogJson = FileReaderUtils.readFileFromClasspath("com/sequenceiq/cloudbreak/service/image/cb-image-catalog-v2.json");
         CloudbreakImageCatalogV2 catalog = JsonUtil.readValue(catalogJson, CloudbreakImageCatalogV2.class);
         when(imageCatalogProvider.getImageCatalogV2("http://localhost/imagecatalog-url")).thenReturn(catalog);
-        when(userProfileService.get(user.getAccount(), user.getUserId())).thenReturn(userProfile);
-        setMockedCbVersion("cbVersion", "2.1.0-dev.200");
+        when(userProfileService.getOrCreate(user.getAccount(), user.getUserId())).thenReturn(userProfile);
+        ReflectionTestUtils.setField(underTest, ImageCatalogService.class, "cbVersion", "2.1.0-dev.200", null);
 
         StatedImage image = underTest.getLatestBaseImageDefaultPreferred("AWS", null);
         Assert.assertEquals("7aca1fa6-980c-44e2-a75e-3144b18a5993", image.getImage().getUuid());
@@ -143,8 +143,8 @@ public class ImageCatalogServiceTest {
         String catalogJson = FileReaderUtils.readFileFromClasspath("com/sequenceiq/cloudbreak/service/image/cb-image-catalog-v2.json");
         CloudbreakImageCatalogV2 catalog = JsonUtil.readValue(catalogJson, CloudbreakImageCatalogV2.class);
         when(imageCatalogProvider.getImageCatalogV2("http://localhost/imagecatalog-url")).thenReturn(catalog);
-        when(userProfileService.get(user.getAccount(), user.getUserId())).thenReturn(userProfile);
-        setMockedCbVersion("cbVersion", "2.1.0-dev.1");
+        when(userProfileService.getOrCreate(user.getAccount(), user.getUserId())).thenReturn(userProfile);
+        ReflectionTestUtils.setField(underTest, ImageCatalogService.class, "cbVersion", "2.1.0-dev.1", null);
 
         StatedImage image = underTest.getLatestBaseImageDefaultPreferred("AWS", null);
         Assert.assertEquals("7aca1fa6-980c-44e2-a75e-3144b18a5993", image.getImage().getUuid());
@@ -159,8 +159,8 @@ public class ImageCatalogServiceTest {
         String catalogJson = FileReaderUtils.readFileFromClasspath("com/sequenceiq/cloudbreak/service/image/cb-image-catalog-v2.json");
         CloudbreakImageCatalogV2 catalog = JsonUtil.readValue(catalogJson, CloudbreakImageCatalogV2.class);
         when(imageCatalogProvider.getImageCatalogV2("http://localhost/imagecatalog-url")).thenReturn(catalog);
-        when(userProfileService.get(user.getAccount(), user.getUserId())).thenReturn(userProfile);
-        setMockedCbVersion("cbVersion", "2.1.0-dev.2");
+        when(userProfileService.getOrCreate(user.getAccount(), user.getUserId())).thenReturn(userProfile);
+        ReflectionTestUtils.setField(underTest, ImageCatalogService.class, "cbVersion", "2.1.0-dev.2", null);
 
         StatedImage image = underTest.getLatestBaseImageDefaultPreferred("AWS", null);
         Assert.assertEquals("f6e778fc-7f17-4535-9021-515351df3691", image.getImage().getUuid());
@@ -379,7 +379,7 @@ public class ImageCatalogServiceTest {
         imageCatalog.setArchived(false);
         when(authenticatedUserService.getCbUser()).thenReturn(user);
         when(imageCatalogRepository.findByName(name, user.getUserId(), user.getAccount())).thenReturn(imageCatalog);
-        when(userProfileService.get(user.getAccount(), user.getUserId(), user.getUsername())).thenReturn(userProfile);
+        when(userProfileService.getOrCreate(user.getAccount(), user.getUserId(), user.getUsername())).thenReturn(userProfile);
         underTest.delete(name);
 
         verify(imageCatalogRepository, times(1)).save(imageCatalog);

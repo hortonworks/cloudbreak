@@ -32,11 +32,11 @@ public class UserProfileService {
     @Inject
     private CredentialService credentialService;
 
-    public UserProfile get(String account, String owner) {
-        return get(account, owner, null);
+    public UserProfile getOrCreate(String account, String owner) {
+        return getOrCreate(account, owner, null);
     }
 
-    public UserProfile get(String account, String owner, String userName) {
+    public UserProfile getOrCreate(String account, String owner, String userName) {
         UserProfile userProfile = userProfileRepository.findOneByOwnerAndAccount(account, owner);
         if (userProfile == null) {
             userProfile = new UserProfile();
@@ -69,7 +69,7 @@ public class UserProfileService {
     }
 
     public void put(UserProfileRequest request, IdentityUser user) {
-        UserProfile userProfile = get(user.getAccount(), user.getUserId(), user.getUsername());
+        UserProfile userProfile = getOrCreate(user.getAccount(), user.getUserId(), user.getUsername());
         if (request.getCredentialId() != null) {
             Credential credential = credentialService.get(request.getCredentialId(), userProfile.getAccount());
             userProfile.setCredential(credential);

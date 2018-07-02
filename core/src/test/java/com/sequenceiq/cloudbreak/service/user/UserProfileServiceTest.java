@@ -42,7 +42,7 @@ public class UserProfileServiceTest {
         ArgumentCaptor<UserProfile> userProfileCaptor = ArgumentCaptor.forClass(UserProfile.class);
         String account = "account1";
         String owner = "123-123-123";
-        userProfileService.get(account, owner);
+        userProfileService.getOrCreate(account, owner);
         verify(userProfileRepository).save(userProfileCaptor.capture());
 
         UserProfile capturedProfile = userProfileCaptor.getValue();
@@ -55,7 +55,7 @@ public class UserProfileServiceTest {
         ArgumentCaptor<UserProfile> userProfileCaptor = ArgumentCaptor.forClass(UserProfile.class);
         String account = "account1";
         String owner = "123-123-123";
-        UserProfile returnedUserProfile = userProfileService.get(account, owner);
+        UserProfile returnedUserProfile = userProfileService.getOrCreate(account, owner);
         verify(userProfileRepository).save(userProfileCaptor.capture());
 
         UserProfile capturedProfile = userProfileCaptor.getValue();
@@ -73,7 +73,7 @@ public class UserProfileServiceTest {
         String account = "account1";
         String owner = "123-123-123";
         String username = "test@hortonworks.com";
-        UserProfile returnedUserProfile = userProfileService.get(account, owner, username);
+        UserProfile returnedUserProfile = userProfileService.getOrCreate(account, owner, username);
         verify(userProfileRepository).save(userProfileCaptor.capture());
 
         UserProfile capturedProfile = userProfileCaptor.getValue();
@@ -98,7 +98,7 @@ public class UserProfileServiceTest {
         when(userProfileRepository.save(any(UserProfile.class))).thenReturn(new UserProfile());
 
         ArgumentCaptor<UserProfile> userProfileCaptor = ArgumentCaptor.forClass(UserProfile.class);
-        UserProfile returnedUserProfile = userProfileService.get(account, owner, username);
+        UserProfile returnedUserProfile = userProfileService.getOrCreate(account, owner, username);
         verify(userProfileRepository).save(userProfileCaptor.capture());
 
         UserProfile capturedProfile = userProfileCaptor.getValue();
@@ -120,7 +120,7 @@ public class UserProfileServiceTest {
         when(userProfileRepository.findOneByOwnerAndAccount(anyString(), anyString())).thenReturn(foundProfile);
         when(userProfileRepository.save(any(UserProfile.class))).thenReturn(new UserProfile());
 
-        UserProfile returnedUserProfile = userProfileService.get(account, owner);
+        UserProfile returnedUserProfile = userProfileService.getOrCreate(account, owner);
         verify(userProfileRepository, never()).save(any(UserProfile.class));
 
         assertEquals(account, returnedUserProfile.getAccount());
@@ -143,7 +143,7 @@ public class UserProfileServiceTest {
         when(userProfileRepository.findOneByOwnerAndAccount(anyString(), anyString())).thenReturn(foundProfile);
         when(userProfileRepository.save(any(UserProfile.class))).thenReturn(new UserProfile());
 
-        UserProfile returnedUserProfile = userProfileService.get(account, owner);
+        UserProfile returnedUserProfile = userProfileService.getOrCreate(account, owner);
         verify(userProfileRepository, never()).save(any(UserProfile.class));
 
         assertNotNull(returnedUserProfile);

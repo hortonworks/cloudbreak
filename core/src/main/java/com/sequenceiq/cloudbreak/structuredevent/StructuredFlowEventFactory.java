@@ -1,17 +1,17 @@
 package com.sequenceiq.cloudbreak.structuredevent;
 
 import javax.inject.Inject;
+import javax.transaction.Transactional;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.UserProfile;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.ha.CloudbreakNodeConfig;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.user.UserProfileService;
@@ -26,7 +26,7 @@ import com.sequenceiq.cloudbreak.structuredevent.event.StructuredFlowEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredNotificationEvent;
 
 @Component
-@Transactional(readOnly = true)
+@Transactional
 public class StructuredFlowEventFactory {
 
     @Inject
@@ -50,7 +50,7 @@ public class StructuredFlowEventFactory {
 
     public StructuredFlowEvent createStucturedFlowEvent(Long stackId, FlowDetails flowDetails, Boolean detailed, Exception exception) {
         Stack stack = stackService.getById(stackId);
-        UserProfile userProfile = userProfileService.get(stack.getAccount(), stack.getOwner());
+        UserProfile userProfile = userProfileService.getOrCreate(stack.getAccount(), stack.getOwner());
         OperationDetails operationDetails = new OperationDetails("FLOW", "STACK", stackId, stack.getAccount(), stack.getOwner(),
                 userProfile.getUserName(), cloudbreakNodeConfig.getId(), cbVersion);
         StackDetails stackDetails = null;
@@ -71,7 +71,7 @@ public class StructuredFlowEventFactory {
 
     public StructuredNotificationEvent createStructuredNotificationEvent(Long stackId, String notificationType, String message, String instanceGroupName) {
         Stack stack = stackService.getById(stackId);
-        UserProfile userProfile = userProfileService.get(stack.getAccount(), stack.getOwner());
+        UserProfile userProfile = userProfileService.getOrCreate(stack.getAccount(), stack.getOwner());
         OperationDetails operationDetails = new OperationDetails("NOTIFICATION", "STACK", stackId, stack.getAccount(), stack.getOwner(),
                 userProfile.getUserName(), cloudbreakNodeConfig.getInstanceUUID(), cbVersion);
         NotificationDetails notificationDetails = new NotificationDetails();
