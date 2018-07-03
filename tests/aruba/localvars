@@ -1,0 +1,27 @@
+# You have to update the values according to your settings
+
+export AWS_ROLE_ARN=arn:aws:iam::test:role/test
+
+export OS_V2_USERNAME=test
+export OS_V2_PASSWORD=test
+export OS_V2_TENANT_NAME=test
+export OS_V2_ENDPOINT=http://test:5000/v2.0 
+
+export INTEGRATIONTEST_RDSCONFIG_RDSCONNECTIONURL=jdbc:postgresql://test:5432/test
+export INTEGRATIONTEST_RDSCONFIG_RDSUSER=test
+export INTEGRATIONTEST_RDSCONFIG_RDSPASSWORD=test
+
+export INTEGRATIONTEST_LDAPCONFIG_LDAPSERVERHOST=test.amazonaws.com
+export INTEGRATIONTEST_LDAPCONFIG_BINDPASSWORD=test
+
+export INTEGRATIONTEST_PROXYCONFIG_PROXYHOST=test
+export INTEGRATIONTEST_PROXYCONFIG_PROXYUSER=test
+export INTEGRATIONTEST_PROXYCONFIG_PROXYPASSWORD=test
+
+export BASE_URL=https://qa-cloud-canary.eng.hortonworks.com
+export USERNAME_CLI=test@example.com
+export PASSWORD_CLI=test
+
+export WORKSPACE=/Users/mhalmy/Work/cb-cli
+export TARGET_CBD_VERSION=2.8.0-dev.85
+export CLI_TEST_FILES=spec/e2e/proxy.rb

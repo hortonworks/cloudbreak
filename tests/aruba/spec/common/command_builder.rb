@@ -11,20 +11,18 @@ class CommandBuilder
     else
           CommandBuilder.cmd += m.to_s + " "
     end
+    CommandBuilder.cmd = CommandBuilder.cmd.gsub("_", "-")
     return tmp
   end
 
   def build(with_print=true)
-    command_to_run = CommandBuilder.cmd.gsub("_", "-")
-    return builder(with_print, command_to_run, command_to_run)
+    return builder(with_print, CommandBuilder.cmd, CommandBuilder.cmd)
   end
 
   def builds(with_print=true)
     str_to_print = ""
     flag=false
-    command_to_run = CommandBuilder.cmd.gsub("_", "-")
     command_to_print = CommandBuilder.cmd.split(" ")
-
     command_to_print.each do |s|
       if flag
         str_to_print = str_to_print + "***** "
@@ -37,7 +35,7 @@ class CommandBuilder
       end
     end
 
-    builder(with_print, command_to_run, str_to_print)
+    builder(with_print, CommandBuilder.cmd, str_to_print)
   end
 
  def builder(with_print, command_to_run, command_to_print)

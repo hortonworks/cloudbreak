@@ -3,7 +3,6 @@ require "rspec/json_expectations"
 require 'json'
 require 'date'
 require "common/command_builder.rb"
-require "oauth"
 
 def html_print(&blk)
   puts "<pre>"

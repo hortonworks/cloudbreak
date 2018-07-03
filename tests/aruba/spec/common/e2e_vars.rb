@@ -3,6 +3,7 @@ RSpec.shared_context "e2e shared vars", :a => :b do
   @os_cluster_name = "cli-os-cluster"  	
   @os_credential_name = "cli-os-cluster" 
   @cli_input_json = "../../templates/kilo-openstack-template.json"
+  @aws_credential_name = "cli-aws-cred" 
 
   @ambari_user = "admin"
   @ambari_password = 'Admin123!@#\"'

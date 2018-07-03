@@ -26,7 +26,7 @@ RSpec.describe 'Cluster test cases', :type => :aruba do
         ClusterStatus: /.*/     
     )
     end       
-  end  
+  end     
 
   it "Cluster - Create" do 
     with_environment 'DEBUG' => '1' do
@@ -122,9 +122,9 @@ RSpec.describe 'Cluster test cases', :type => :aruba do
     end   
   end
 
-    xit "Cluster - Repair - Success" do 
+    it "Cluster - Repair - Success" do 
     with_environment 'DEBUG' => '1' do
-      result = cb.cluster.repair.name("asdfg").build(false)
+      result = cb.cluster.repair.name("asdfg").host_groups("test").build(false)
       expect(result.exit_status).to eql 0
       expect(result.stderr).to include("stack repaired")          
     end
@@ -132,12 +132,12 @@ RSpec.describe 'Cluster test cases', :type => :aruba do
 
    xit "Cluster - Repair - Failure" do 
     with_environment 'DEBUG' => '1' do
-      result = cb.cluster.repair.name("azstatus").build(false) 
+      result = cb.cluster.repair.name("azstatus").host_groups("test").build(false)
       expect(result.exit_status).to eql 1
       expect(result.stderr).to include("Stack 'azstatus' not found")          
     end   
-  end
-
+  end      
+  
     it "Cluster - Scale - Success" do 
     with_environment 'DEBUG' => '1' do
       result = cb.cluster.scale.name("climock").group_name("hgroup").desired_node_count(3).build(false)             
@@ -165,28 +165,32 @@ RSpec.describe 'Cluster test cases', :type => :aruba do
     it "Cluster - Generate template - AWS - New network" do 
     with_environment 'DEBUG' => '1' do
       result = cb.cluster.generate_template.aws.new_network.build(false)
-      expect(result.exit_status).to eql 0        
+      expect(result.exit_status).to eql 0
+      expect(result.stdout.empty?).to be_falsy        
     end
   end
 
     it "Cluster - Generate template - AWS - Existing network" do 
     with_environment 'DEBUG' => '1' do
       result = cb.cluster.generate_template.aws.existing_network.build(false)
-      expect(result.exit_status).to eql 0        
+      expect(result.exit_status).to eql 0
+      expect(result.stdout.empty?).to be_falsy        
     end
   end 
 
     it "Cluster - Generate template - AWS - New subnet" do 
     with_environment 'DEBUG' => '1' do
       result = cb.cluster.generate_template.aws.existing_subnet.build(false)
-      expect(result.exit_status).to eql 0        
+      expect(result.exit_status).to eql 0
+      expect(result.stdout.empty?).to be_falsy        
     end
   end     
 
     it "Cluster - Generate template - Azure - New network" do 
     with_environment 'DEBUG' => '1' do
       result = cb.cluster.generate_template.azure.new_network.build(false)  
-      expect(result.exit_status).to eql 0        
+      expect(result.exit_status).to eql 0
+      expect(result.stdout.empty?).to be_falsy        
     end
   end
 
@@ -194,49 +198,87 @@ RSpec.describe 'Cluster test cases', :type => :aruba do
     it "Cluster - Generate template - Azure - New subnet" do 
     with_environment 'DEBUG' => '1' do
       result = cb.cluster.generate_template.azure.existing_subnet.build(false) 
-      expect(result.exit_status).to eql 0        
+      expect(result.exit_status).to eql 0
+      expect(result.stdout.empty?).to be_falsy        
     end
   end
 
     it "Cluster - Generate template - Gcp - New network" do 
     with_environment 'DEBUG' => '1' do
       result = cb.cluster.generate_template.gcp.new_network.build(false)
-      expect(result.exit_status).to eql 0        
+      expect(result.exit_status).to eql 0
+      expect(result.stdout.empty?).to be_falsy        
     end
   end
 
     it "Cluster - Generate template - Gcp - Existing network" do 
     with_environment 'DEBUG' => '1' do
       result = cb.cluster.generate_template.gcp.existing_network.build(false) 
-      expect(result.exit_status).to eql 0        
+      expect(result.exit_status).to eql 0 
+      expect(result.stdout.empty?).to be_falsy       
     end
   end 
 
     it "Cluster - Generate template - Gcp - New subnet" do 
     with_environment 'DEBUG' => '1' do
       result = cb.cluster.generate_template.gcp.existing_subnet.build(false)
-      expect(result.exit_status).to eql 0        
+      expect(result.exit_status).to eql 0
+      expect(result.stdout.empty?).to be_falsy        
     end
   end 
 
     it "Cluster - Generate template - Openstack - New network" do 
     with_environment 'DEBUG' => '1' do
       result = cb.cluster.generate_template.openstack.new_network.build(false) 
-      expect(result.exit_status).to eql 0        
+      expect(result.exit_status).to eql 0
+      expect(result.stdout.empty?).to be_falsy        
     end
   end
 
     it "Cluster - Generate template - Openstack - Existing network" do 
     with_environment 'DEBUG' => '1' do
       result = cb.cluster.generate_template.openstack.existing_network.build(false) 
-      expect(result.exit_status).to eql 0        
+      expect(result.exit_status).to eql 0 
+      expect(result.stdout.empty?).to be_falsy       
     end
   end 
 
     it "Cluster - Generate template - Openstack - New subnet" do 
     with_environment 'DEBUG' => '1' do
       result = cb.cluster.generate_template.openstack.existing_subnet.build(false)
-      expect(result.exit_status).to eql 0       
+      expect(result.exit_status).to eql 0
+      expect(result.stdout.empty?).to be_falsy       
     end
-  end           
+  end 
+
+    it "Cluster - Generate re-install template " do 
+    with_environment 'DEBUG' => '1' do
+      result = cb.cluster.generate_reinstall_template.name("test").blueprint_name("test").build(false)
+      expect(result.exit_status).to eql 0 
+      expect(result.stdout.empty?).to be_falsy      
+    end
+  end
+
+    it "Cluster - Generate attached cluster template " do 
+    with_environment 'DEBUG' => '1' do
+      result = cb.cluster.generate_attached_cluster_template.source_cluster("dl-ok").blueprint_name("test").build(false)
+      expect(result.exit_status).to eql 0
+      expect(result.stdout.empty?).to be_falsy 
+    end
+  end
+
+    it "Cluster - Generate attached cluster template - Not datalake cluster" do 
+    with_environment 'DEBUG' => '1' do
+      result = cb.cluster.generate_attached_cluster_template.source_cluster("test").blueprint_name("test").build(false)
+      expect(result.exit_status).to eql 1
+      expect(result.stderr).to include("error")        
+    end
+  end  
+
+    it "Cluster - Re-try " do 
+    with_environment 'DEBUG' => '1' do
+      result = cb.cluster.retry.name("test").build(false)
+      expect(result.exit_status).to eql 0 
+    end
+  end                 
 end  

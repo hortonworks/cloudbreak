@@ -35,6 +35,9 @@ docker-integration-test:
 docker-e2e-test:
 	./scripts/run-e2e-test.sh
 
+docker-e2e-test-local:
+	./scripts/docker-e2e-test-aruba-local.sh
+
 run-e2e-suite:
 	$(call run_test,${test})
 

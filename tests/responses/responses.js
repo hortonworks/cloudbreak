@@ -31,6 +31,7 @@ var aws = require('./stacks/aws.json');
 var azure = require('./stacks/azure.json');
 var gcp = require('./stacks/gcp.json');
 var openstack = require('./stacks/openstack.json');
+var datalake = require('./stacks/datalake.json');
 var templates = require('./templates/qa-templates.json');
 var profile = require('./users/default-profile.json');
 var matrix = require('./utilsmatrix.json');
@@ -53,7 +54,8 @@ var responseObjectWithCondition = function(payload, code, conditionText) {
 }
 
 var stackResponses = responseObjectWithCondition({"message":"Stack 'az404' not found"}, 404, "return params['name'].value === 'az404';");
-stackResponses = addResponseObject(stackResponses, openstack, OK, "return params['name'].value !== 'az404';");
+stackResponses = addResponseObject(stackResponses, openstack, OK, "return (params['name'].value !== 'az404' && params['name'].value !== 'dl-ok')");
+stackResponses = addResponseObject(stackResponses, datalake, OK, "return params['name'].value === 'dl-ok';");
 
 var stackOperationResponses = responseObjectWithCondition({"message":"Stack 'azstatus' not found"}, 404, "return params['name'].value === 'azstatus';");
 stackOperationResponses = addResponseObject(stackOperationResponses,null, OK , "return params['name'].value !== 'azstatus';");
