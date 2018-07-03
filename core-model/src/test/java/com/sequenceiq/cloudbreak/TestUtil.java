@@ -501,6 +501,31 @@ public class TestUtil {
         config.setDomain("ad.hdc.com");
         config.setServerPort(389);
         config.setProtocol("ldap");
+        config.setDirectoryType(DirectoryType.LDAP);
+        config.setUserObjectClass("person");
+        config.setGroupObjectClass("groupOfNames");
+        config.setGroupNameAttribute("cn");
+        config.setGroupMemberAttribute("member");
+        config.setAdminGroup("ambariadmins");
+        return config;
+    }
+
+    public static LdapConfig adConfig() {
+        LdapConfig config = new LdapConfig();
+        config.setId(1L);
+        config.setName(DUMMY_NAME);
+        config.setDescription(DUMMY_DESCRIPTION);
+        config.setPublicInAccount(true);
+        config.setUserSearchBase("cn=users,dc=example,dc=org");
+        config.setUserDnPattern("cn={0},cn=users,dc=example,dc=org");
+        config.setGroupSearchBase("cn=groups,dc=example,dc=org");
+        config.setBindDn("cn=admin,dc=example,dc=org");
+        config.setBindPassword("admin");
+        config.setServerHost("localhost");
+        config.setUserNameAttribute("cn=admin,dc=example,dc=org");
+        config.setDomain("ad.hdc.com");
+        config.setServerPort(389);
+        config.setProtocol("ldap");
         config.setDirectoryType(DirectoryType.ACTIVE_DIRECTORY);
         config.setUserObjectClass("person");
         config.setGroupObjectClass("groupOfNames");

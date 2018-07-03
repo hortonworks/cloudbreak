@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.blueprint.template;
 
+import static com.sequenceiq.cloudbreak.TestUtil.adConfig;
 import static com.sequenceiq.cloudbreak.TestUtil.ldapConfig;
 import static com.sequenceiq.cloudbreak.blueprint.filesystem.BlueprintTestUtil.adlsFileSystemConfiguration;
 import static com.sequenceiq.cloudbreak.blueprint.filesystem.BlueprintTestUtil.emptyStorageLocationViews;
@@ -250,6 +251,8 @@ public class HandlebarTemplateTest {
                         enabledGatewayWithRanger()},
                 {"blueprints/configurations/atlas/ldap.handlebars", "configurations/atlas/atlas-with-ldap.json",
                         ldapConfigWhenLdapPresentedThenShouldReturnWithLdapConfig()},
+                {"blueprints/configurations/atlas/ldap.handlebars", "configurations/atlas/atlas-with-ad.json",
+                        ldapConfigWhenLdapPresentedThenShouldReturnWithAdConfig()},
                 {"blueprints/configurations/atlas/ldap.handlebars", "configurations/atlas/atlas-without-ldap.json",
                         withoutLdapConfigWhenLdapNotPresentedThenShouldReturnWithoutLdapConfig()},
 
@@ -426,6 +429,13 @@ public class HandlebarTemplateTest {
     public static Map<String, Object> ldapConfigWhenLdapPresentedThenShouldReturnWithLdapConfig() {
         return new BlueprintTemplateModelContextBuilder()
                 .withLdap(new LdapView(ldapConfig()))
+                .withGateway(TestUtil.gatewayEnabled())
+                .build();
+    }
+
+    public static Map<String, Object> ldapConfigWhenLdapPresentedThenShouldReturnWithAdConfig() {
+        return new BlueprintTemplateModelContextBuilder()
+                .withLdap(new LdapView(adConfig()))
                 .withGateway(TestUtil.gatewayEnabled())
                 .build();
     }

@@ -2,7 +2,7 @@
 
   "ranger-admin-site": {
     "properties": {
-      "ranger.authentication.method": "ACTIVE_DIRECTORY",
+      "ranger.authentication.method": "LDAP",
       "ranger.ldap.ad.domain": " ",
       "ranger.ldap.ad.url": "ldap://localhost:389",
       "ranger.ldap.ad.bind.dn": "cn=admin,dc=example,dc=org",

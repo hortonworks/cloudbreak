@@ -18,8 +18,6 @@
       "ranger-env": {
         "properties": {
           "ranger_admin_password": "Passw0rd",
-          "ranger_privelege_user_jdbc_url": "jdbc:postgresql://10.1.1.1:5432",
-          "create_db_dbuser": "false",
           "admin_password": "Passw0rd"
         }
       }
@@ -27,7 +25,7 @@
     {
       "ranger-admin-site": {
         "properties": {
-          "ranger.authentication.method": "LDAP",
+          "ranger.authentication.method": "ACTIVE_DIRECTORY",
           "ranger.ldap.user.dnpattern": "cn={0},cn=users,dc=example,dc=org",
           "ranger.ldap.ad.domain": " ",
           "ranger.ldap.ad.user.searchfilter": "(cn={0})",
@@ -38,22 +36,10 @@
           "ranger.ldap.user.searchfilter": "(cn={0})",
           "ranger.ldap.url": "ldap://localhost:389",
           "ranger.ldap.ad.url": "ldap://localhost:389",
-          "ranger.jpa.jdbc.driver": "org.postgresql.Driver",
           "ranger.ldap.ad.base.dn": "cn=users,dc=example,dc=org",
           "ranger.ldap.base.dn": "cn=users,dc=example,dc=org",
           "ranger.ldap.group.searchbase": "cn=groups,dc=example,dc=org",
           "ranger.ldap.group.roleattribute": "cn"
-        }
-      }
-    },
-    {
-      "admin-properties": {
-        "properties": {
-          "DB_FLAVOR": "POSTGRES",
-          "db_name": "ranger",
-          "db_user": "heyitsme",
-          "db_host": "10.1.1.1:5432",
-          "db_password": "iamsoosecure"
         }
       }
     },
