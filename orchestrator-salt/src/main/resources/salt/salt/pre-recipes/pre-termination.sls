@@ -20,6 +20,7 @@ run_pre_termination_script_{{ script_name }}:
     - onlyif:
       - ls /opt/scripts/pre-termination/{{ script_name }}
     - unless: ls /var/log/recipes/pre-termination-{{ script_name }}.log
+    - timeout: 600
 {% endfor %}
 {% endif %}
 

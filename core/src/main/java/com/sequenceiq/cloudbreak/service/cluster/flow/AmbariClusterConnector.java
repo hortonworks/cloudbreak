@@ -103,6 +103,7 @@ import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.ZeppelinConfigPr
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.template.BlueprintTemplateProcessor;
 import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemConfigurator;
 import com.sequenceiq.cloudbreak.service.cluster.flow.kerberos.KerberosBlueprintService;
+import com.sequenceiq.cloudbreak.service.cluster.flow.recipe.RecipeEngine;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;

@@ -52,7 +52,7 @@ public class SaltJobIdTracker implements OrchestratorBootstrap {
         } else if (!retryOnFail && JobState.FAILED == saltJobRunner.getJobState()) {
             String jobId = saltJobRunner.getJid().getJobId();
             LOGGER.info("Job: {} failed. Terminate execution on these targets: {}", jobId, saltJobRunner.getTarget());
-            throw new CloudbreakOrchestratorTerminateException(buildErrorMessage());
+            throw new CloudbreakOrchestratorTerminateException(buildErrorMessage(), saltJobRunner.getNodesWithError());
         } else if (JobState.FAILED == saltJobRunner.getJobState() || JobState.AMBIGUOUS == saltJobRunner.getJobState()) {
             String jobId = saltJobRunner.getJid().getJobId();
             LOGGER.info("Job: {} failed in the previous time. Trigger again with these targets: {}", jobId, saltJobRunner.getTarget());
@@ -62,10 +62,10 @@ public class SaltJobIdTracker implements OrchestratorBootstrap {
         }
         if (JobState.IN_PROGRESS.equals(saltJobRunner.getJobState())) {
             String jobIsRunningMessage = String.format("Job: %s is running currently. Details: %s", saltJobRunner.getJid(), buildErrorMessage());
-            throw new CloudbreakOrchestratorFailedException(jobIsRunningMessage);
+            throw new CloudbreakOrchestratorFailedException(jobIsRunningMessage, saltJobRunner.getNodesWithError());
         }
         if (JobState.FAILED == saltJobRunner.getJobState() || JobState.AMBIGUOUS == saltJobRunner.getJobState()) {
-            throw new CloudbreakOrchestratorFailedException(buildErrorMessage());
+            throw new CloudbreakOrchestratorFailedException(buildErrorMessage(), saltJobRunner.getNodesWithError());
         }
         LOGGER.info("Job (jid: {}) was finished. Triggering next salt event.", saltJobRunner.getJid().getJobId());
         return true;

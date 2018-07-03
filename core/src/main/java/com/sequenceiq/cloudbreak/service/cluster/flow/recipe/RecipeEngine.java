@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.service.cluster.flow;
+package com.sequenceiq.cloudbreak.service.cluster.flow.recipe;
 
 import static com.sequenceiq.cloudbreak.common.type.OrchestratorConstants.SALT;
 
