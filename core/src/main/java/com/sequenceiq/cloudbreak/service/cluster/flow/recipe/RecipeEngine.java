@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.service.cluster.flow;
+package com.sequenceiq.cloudbreak.service.cluster.flow.recipe;
 
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.model.ExecutorType;
