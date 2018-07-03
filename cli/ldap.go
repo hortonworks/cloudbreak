@@ -6,6 +6,7 @@ import (
 	"crypto/tls"
 	"errors"
 	"fmt"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -95,10 +96,12 @@ func CreateLDAP(c *cli.Context) error {
 	server := c.String(FlLdapServer.Name)
 	public := c.Bool(FlPublicOptional.Name)
 
-	portSeparatorIndex := strings.LastIndex(server, ":")
-	if (!strings.Contains(server, "ldap://") && !strings.Contains(server, "ldaps://")) || portSeparatorIndex == -1 {
+	ldapRegexp := regexp.MustCompile("^(?:ldap://|ldaps://)[a-z0-9-.]+:\\d+$")
+	if !ldapRegexp.MatchString(server) {
 		utils.LogErrorMessageAndExit("Invalid ldap server address format, e.g: ldaps://10.0.0.1:389")
 	}
+
+	portSeparatorIndex := strings.LastIndex(server, ":")
 	serverPort, _ := strconv.Atoi(server[portSeparatorIndex+1:])
 	protocol := server[0:strings.Index(server, ":")]
 
