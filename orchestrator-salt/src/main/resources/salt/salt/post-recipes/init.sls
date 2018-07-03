@@ -18,6 +18,7 @@ run_post_script_{{ script_name }}:
     - onlyif:
       - ls /opt/scripts/post/{{ script_name }}
     - unless: ls /var/log/recipes/post-{{ script_name }}.log
+    - timeout: 600
 {% endfor %}
 {% endif %}
 
@@ -37,6 +38,7 @@ run_post_cluster_install_script_{{ script_name }}:
     - onlyif:
       - ls /opt/scripts/post-cluster-install/{{ script_name }}
     - unless: ls /var/log/recipes/post-cluster-install-{{ script_name }}.log
+    - timeout: 600
 {% endfor %}
 {% endif %}
 

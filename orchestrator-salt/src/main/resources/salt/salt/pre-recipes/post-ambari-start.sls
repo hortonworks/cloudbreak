@@ -22,6 +22,7 @@ run_pre_script_{{ script_name }}:
     - onlyif:
       - ls /opt/scripts/pre/{{ script_name }}
     - unless: ls /var/log/recipes/pre-{{ script_name }}.log
+    - timeout: 600
 {% endfor %}
 {% endif %}
 
@@ -41,6 +42,7 @@ run_post_ambari_start_script_{{ script_name }}:
     - onlyif:
       - ls /opt/scripts/post-ambari-start/{{ script_name }}
     - unless: ls /var/log/recipes/post-ambari-start-{{ script_name }}.log
+    - timeout: 600
 {% endfor %}
 {% endif %}
 

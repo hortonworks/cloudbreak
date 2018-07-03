@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.service.cluster.flow;
+package com.sequenceiq.cloudbreak.service.cluster.flow.recipe;
 
 import java.util.ArrayList;
 import java.util.List;

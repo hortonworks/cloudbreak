@@ -1,7 +1,7 @@
-package com.sequenceiq.cloudbreak.service.cluster.flow;
+package com.sequenceiq.cloudbreak.service.cluster.flow.recipe;
 
 import static com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedModel;
-import static com.sequenceiq.cloudbreak.service.cluster.flow.RecipeEngine.DEFAULT_RECIPES;
+import static com.sequenceiq.cloudbreak.service.cluster.flow.recipe.RecipeEngine.DEFAULT_RECIPES;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -27,14 +27,18 @@ import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.orchestrator.model.RecipeModel;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
+import com.sequenceiq.cloudbreak.service.cluster.flow.recipe.RecipeExecutionFailureCollector.RecipeExecutionFailure;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
+import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
+import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 
 @Component
@@ -55,14 +59,24 @@ public class OrchestratorRecipeExecutor {
     @Inject
     private StackUtil stackUtil;
 
+    @Inject
+    private HostGroupService hostGroupService;
+
+    @Inject
+    private InstanceGroupService instanceGroupService;
+
+    @Inject
+    private RecipeExecutionFailureCollector recipeExecutionFailureCollector;
+
     public void uploadRecipes(Stack stack, Set<HostGroup> hostGroups) throws CloudbreakException {
         HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
-        Map<String, List<RecipeModel>> recipeMap = hostGroups.stream().filter(hg -> !hg.getRecipes().isEmpty())
-                .collect(Collectors.toMap(HostGroup::getName, h -> convert(h.getRecipes())));
+        Map<HostGroup, List<RecipeModel>> recipeMap = getHostgroupToRecipeMap(hostGroups);
+        Map<String, List<RecipeModel>> hostnameToRecipeMap = recipeMap.entrySet().stream()
+                .collect(Collectors.toMap(e -> e.getKey().getName(), Entry::getValue));
         List<GatewayConfig> allGatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
-        recipesEvent(stack.getId(), stack.getStatus(), recipeMap);
+        recipesEvent(stack.getId(), stack.getStatus(), hostnameToRecipeMap);
         try {
-            hostOrchestrator.uploadRecipes(allGatewayConfigs, recipeMap, clusterDeletionBasedModel(stack.getId(), stack.getCluster().getId()));
+            hostOrchestrator.uploadRecipes(allGatewayConfigs, hostnameToRecipeMap, clusterDeletionBasedModel(stack.getId(), stack.getCluster().getId()));
         } catch (CloudbreakOrchestratorFailedException e) {
             throw new CloudbreakException(e);
         }
@@ -73,9 +87,10 @@ public class OrchestratorRecipeExecutor {
         GatewayConfig gatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
         try {
             hostOrchestrator.postAmbariStartRecipes(gatewayConfig, stackUtil.collectNodes(stack),
-                clusterDeletionBasedModel(stack.getId(), stack.getCluster().getId()));
+                    clusterDeletionBasedModel(stack.getId(), stack.getCluster().getId()));
         } catch (CloudbreakOrchestratorFailedException e) {
-            throw new CloudbreakException(e);
+            String message = getRecipeExecutionFaiureMessage(stack, e);
+            throw new CloudbreakException(message, e);
         }
     }
 
@@ -109,8 +124,40 @@ public class OrchestratorRecipeExecutor {
             hostOrchestrator.postInstallRecipes(gatewayConfig, stackUtil.collectNodes(stack),
                     clusterDeletionBasedModel(stack.getId(), stack.getCluster().getId()));
         } catch (CloudbreakOrchestratorFailedException e) {
-            throw new CloudbreakException(e);
+            String message = getRecipeExecutionFaiureMessage(stack, e);
+            throw new CloudbreakException(message, e);
         }
+    }
+
+    private String getRecipeExecutionFaiureMessage(Stack stack, CloudbreakOrchestratorFailedException e) {
+        if (!canProcessExecutionFailure(e)) {
+            return e.getMessage();
+        }
+        Map<HostGroup, List<RecipeModel>> recipeMap = getHostgroupToRecipeMap(hostGroupService.getByCluster(stack.getCluster().getId()));
+        Set<RecipeExecutionFailure> failures = recipeExecutionFailureCollector.collectErrors((CloudbreakOrchestratorException) e.getCause().getCause(),
+                recipeMap, instanceGroupService.findByStackId(stack.getId()));
+        StringBuilder message = new StringBuilder("Failed to execute recipe(s): ");
+        failures.forEach(failure ->
+                message.append("Recipe: '")
+                        .append(failure.getRecipe().getName())
+                        .append("' - \n")
+                        .append("Hostgroup: '")
+                        .append(failure.getInstanceMetaData().getInstanceGroup().getGroupName())
+                        .append("' - \n")
+                        .append("Instance: '")
+                        .append(failure.getInstanceMetaData().getDiscoveryFQDN())
+                        .append("\'  |||  \n")
+        );
+        return message.toString();
+    }
+
+    private boolean canProcessExecutionFailure(CloudbreakOrchestratorFailedException e) {
+        return e.getCause() != null && e.getCause().getCause() != null && e.getCause().getCause() instanceof CloudbreakOrchestratorException;
+    }
+
+    private Map<HostGroup, List<RecipeModel>> getHostgroupToRecipeMap(Set<HostGroup> hostGroups) {
+        return hostGroups.stream().filter(hg -> !hg.getRecipes().isEmpty())
+                .collect(Collectors.toMap(h -> h, h -> convert(h.getRecipes())));
     }
 
     private List<RecipeModel> convert(Set<Recipe> recipes) {
