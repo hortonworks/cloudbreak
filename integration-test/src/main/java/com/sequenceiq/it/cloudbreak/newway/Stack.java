@@ -26,7 +26,7 @@ public class Stack extends StackEntity {
     private static final Logger LOGGER = LoggerFactory.getLogger(Stack.class);
 
     public static Function<IntegrationTestContext, Stack> getTestContextStack(String key) {
-        return (testContext) -> testContext.getContextParam(key, Stack.class);
+        return testContext -> testContext.getContextParam(key, Stack.class);
     }
 
     static Function<IntegrationTestContext, Stack> getTestContextStack() {
@@ -34,7 +34,7 @@ public class Stack extends StackEntity {
     }
 
     static Function<IntegrationTestContext, Stack> getNewStack() {
-        return (testContext) -> new Stack();
+        return testContext -> new Stack();
     }
 
     public static Stack request() {

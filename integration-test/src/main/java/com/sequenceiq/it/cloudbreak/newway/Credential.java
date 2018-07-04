@@ -8,7 +8,7 @@ import com.sequenceiq.it.IntegrationTestContext;
 public class Credential extends CredentialEntity {
 
     public static Function<IntegrationTestContext, Credential> getTestContextCredential(String key) {
-        return (testContext) -> testContext.getContextParam(key, Credential.class);
+        return testContext -> testContext.getContextParam(key, Credential.class);
     }
 
     public static Function<IntegrationTestContext, Credential> getTestContextCredential() {
@@ -16,7 +16,7 @@ public class Credential extends CredentialEntity {
     }
 
     static Function<IntegrationTestContext, Credential> getNew() {
-        return (testContext) -> new Credential();
+        return testContext -> new Credential();
     }
 
     public static Credential request() {

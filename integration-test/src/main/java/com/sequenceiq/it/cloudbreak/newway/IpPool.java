@@ -88,11 +88,11 @@ public class IpPool extends Entity {
     }
 
     private static Function<IntegrationTestContext, IpPool> getTestContext(String key) {
-        return (testContext) -> testContext.getContextParam(key, IpPool.class);
+        return testContext -> testContext.getContextParam(key, IpPool.class);
     }
 
     static Function<IntegrationTestContext, IpPool> getNew() {
-        return (testContext) -> new IpPool();
+        return testContext -> new IpPool();
     }
 
     public static IpPool request() {

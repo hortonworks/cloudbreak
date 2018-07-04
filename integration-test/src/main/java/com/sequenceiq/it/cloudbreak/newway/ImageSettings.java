@@ -42,7 +42,7 @@ public class ImageSettings extends Entity {
     }
 
     public static Function<IntegrationTestContext, ImageSettings> getTestContextImageSettings(String key) {
-        return (testContext) -> testContext.getContextParam(key, ImageSettings.class);
+        return testContext -> testContext.getContextParam(key, ImageSettings.class);
     }
 
     public static Function<IntegrationTestContext, ImageSettings> getTestContextImageSettings() {
@@ -50,7 +50,7 @@ public class ImageSettings extends Entity {
     }
 
     public static Function<IntegrationTestContext, ImageSettings> getNewImageSettings() {
-        return (testContext) -> new ImageSettings();
+        return testContext -> new ImageSettings();
     }
 
     public static ImageSettings request(String key) {

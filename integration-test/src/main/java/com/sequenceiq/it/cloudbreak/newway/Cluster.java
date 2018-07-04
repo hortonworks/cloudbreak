@@ -114,7 +114,7 @@ public class Cluster extends Entity {
     }
 
     public static Function<IntegrationTestContext, Cluster> getNewCluster() {
-        return (testContext) -> new Cluster();
+        return testContext -> new Cluster();
     }
 
     public static Cluster request(String key) {

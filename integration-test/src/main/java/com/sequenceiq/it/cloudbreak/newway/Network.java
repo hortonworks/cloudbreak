@@ -8,7 +8,7 @@ import com.sequenceiq.it.IntegrationTestContext;
 public class Network extends NetworkEntity {
 
     public static Function<IntegrationTestContext, Network> getTestContextNetwork(String key) {
-        return (testContext) -> testContext.getContextParam(key, Network.class);
+        return testContext -> testContext.getContextParam(key, Network.class);
     }
 
     public static Function<IntegrationTestContext, Network> getTestContextNetwork() {
@@ -16,7 +16,7 @@ public class Network extends NetworkEntity {
     }
 
     static Function<IntegrationTestContext, Network> getNew() {
-        return (testContext) -> new Network();
+        return testContext -> new Network();
     }
 
     public static Network request() {

@@ -83,11 +83,11 @@ public class SshKey extends Entity {
     }
 
     static Function<IntegrationTestContext, SshKey> getTestContext(String key) {
-        return (testContext) -> testContext.getContextParam(key, SshKey.class);
+        return testContext -> testContext.getContextParam(key, SshKey.class);
     }
 
     static Function<IntegrationTestContext, SshKey> getNew() {
-        return (testContext) -> new SshKey();
+        return testContext -> new SshKey();
     }
 
     public static SshKey request() {

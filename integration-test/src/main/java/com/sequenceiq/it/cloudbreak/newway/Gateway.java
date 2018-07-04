@@ -83,11 +83,11 @@ public class Gateway extends Entity {
     }
 
     static Function<IntegrationTestContext, Gateway> getTestContext(String key) {
-        return (testContext) -> testContext.getContextParam(key, Gateway.class);
+        return testContext -> testContext.getContextParam(key, Gateway.class);
     }
 
     static Function<IntegrationTestContext, Gateway> getNew() {
-        return (testContext) -> new Gateway();
+        return testContext -> new Gateway();
     }
 
     public static Gateway request() {

@@ -17,11 +17,11 @@ public class RdsConfig extends RdsConfigEntity {
     }
 
     private static Function<IntegrationTestContext, RdsConfig> getTestContext(String key) {
-        return (testContext) -> testContext.getContextParam(key, RdsConfig.class);
+        return testContext -> testContext.getContextParam(key, RdsConfig.class);
     }
 
     static Function<IntegrationTestContext, RdsConfig> getNew() {
-        return (testContext) -> new RdsConfig();
+        return testContext -> new RdsConfig();
     }
 
     public static RdsConfig request() {

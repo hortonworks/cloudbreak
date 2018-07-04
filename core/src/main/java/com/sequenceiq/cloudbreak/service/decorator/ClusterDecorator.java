@@ -134,7 +134,8 @@ public class ClusterDecorator {
     private void removeHaComponentsFromGatewayTopologies(Cluster subject) {
         Set<String> haComponents = ambariHaComponentFilter.getHaComponents(new BlueprintTextProcessor(subject.getBlueprint().getBlueprintText()));
         Set<String> haKnoxServices = ExposedService.filterSupportedKnoxServices().stream()
-                .filter(es -> haComponents.contains(es.getServiceName()))
+                .filter(es -> haComponents.contains(es.getServiceName())
+                        && !ExposedService.RANGER.getServiceName().equalsIgnoreCase(es.getServiceName()))
                 .map(ExposedService::getKnoxService)
                 .collect(Collectors.toSet());
         if (subject.getGateway() != null) {

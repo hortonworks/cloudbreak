@@ -1,5 +1,15 @@
 package com.sequenceiq.it.cloudbreak;
 
+import java.util.Collection;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Objects;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.testng.Assert;
+import org.testng.annotations.Test;
+
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
 import com.sequenceiq.it.cloudbreak.newway.DiskTypes;
@@ -9,15 +19,6 @@ import com.sequenceiq.it.cloudbreak.newway.cloud.AzureCloudProvider;
 import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProvider;
 import com.sequenceiq.it.cloudbreak.newway.cloud.GcpCloudProvider;
 import com.sequenceiq.it.cloudbreak.newway.cloud.OpenstackCloudProvider;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.testng.Assert;
-import org.testng.annotations.Test;
-
-import java.util.Collection;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Objects;
 
 public class DiskTypeTests extends CloudbreakTest {
 
@@ -181,7 +182,7 @@ public class DiskTypeTests extends CloudbreakTest {
                 (disktype, t) -> {
                     Collection<String> diskTypes = disktype.getByFilterResponses();
 
-                    diskTypes.forEach((diskType) -> LOGGER.debug(provider.getPlatform() + " Disk Type is ::: {}", diskType));
+                    diskTypes.forEach(diskType -> LOGGER.debug(provider.getPlatform() + " Disk Type is ::: {}", diskType));
                     Assert.assertFalse(diskTypes.isEmpty(), "Disk Type should be present in response!");
                 }), provider.getPlatform() + " Disk Type should be part of the response."
         );
@@ -198,7 +199,7 @@ public class DiskTypeTests extends CloudbreakTest {
                 (disktype, t) -> {
                     Collection<String> diskTypes = disktype.getByFilterResponses();
 
-                    diskTypes.forEach((diskType) -> LOGGER.debug(provider.getPlatform() + " Disk Type is ::: {}", diskType));
+                    diskTypes.forEach(diskType -> LOGGER.debug(provider.getPlatform() + " Disk Type is ::: {}", diskType));
                     Assert.assertFalse(diskTypes.isEmpty(), "Disk Type should be present in response!");
                 }), provider.getPlatform() + " Disk Type should be part of the response."
         );
@@ -215,7 +216,7 @@ public class DiskTypeTests extends CloudbreakTest {
                 (disktype, t) -> {
                     Collection<String> diskTypes = disktype.getByFilterResponses();
 
-                    diskTypes.forEach((diskType) -> LOGGER.debug(provider.getPlatform() + " Disk Type is ::: {}", diskType));
+                    diskTypes.forEach(diskType -> LOGGER.debug(provider.getPlatform() + " Disk Type is ::: {}", diskType));
                     Assert.assertFalse(diskTypes.isEmpty(), "Disk Type should be present in response!");
                 }), provider.getPlatform() + " Disk Type should be part of the response."
         );
@@ -232,7 +233,7 @@ public class DiskTypeTests extends CloudbreakTest {
                 (disktype, t) -> {
                     Collection<String> diskTypes = disktype.getByFilterResponses();
 
-                    diskTypes.forEach((diskType) -> LOGGER.debug(provider.getPlatform() + " Disk Type is ::: {}", diskType));
+                    diskTypes.forEach(diskType -> LOGGER.debug(provider.getPlatform() + " Disk Type is ::: {}", diskType));
                     Assert.assertFalse(diskTypes.isEmpty(), "Disk Type should be present in response!");
                 }), provider.getPlatform() + " Disk Type should be part of the response."
         );
@@ -247,7 +248,7 @@ public class DiskTypeTests extends CloudbreakTest {
                 (disktype, t) -> {
                     Collection<String> diskTypes = disktype.getByFilterResponses();
 
-                    diskTypes.forEach((diskType) -> LOGGER.debug("YARN Disk Type is ::: {}", diskType));
+                    diskTypes.forEach(diskType -> LOGGER.debug("YARN Disk Type is ::: {}", diskType));
                     Assert.assertTrue(diskTypes.isEmpty(), "Disk Type should be present in response!");
                 }), "YARN Disk Type should be part of the response."
         );
