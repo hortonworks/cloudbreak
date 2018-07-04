@@ -21,6 +21,7 @@ run_pre_ambari_start_script_{{ script_name }}:
     - onlyif:
       - test -f /opt/scripts/pre-ambari-start/{{ script_name }}
       - test ! -f /var/log/recipes/pre-ambari-start/{{ script_name }}.success
+      - timeout: 600
 {% endfor %}
 {% endif %}
 

@@ -87,7 +87,7 @@ public class ClusterHostServiceRunner {
     private GatewayConfigService gatewayConfigService;
 
     @Inject
-    private HostGroupRepository hostGroupRepository;
+    private HostGroupService hostGroupService;
 
     @Inject
     private InstanceMetaDataRepository instanceMetaDataRepository;
@@ -123,8 +123,12 @@ public class ClusterHostServiceRunner {
     private StackUtil stackUtil;
 
     @Inject
+    private RecipeEngine recipeEngine;
+
+    @Inject
     private BlueprintPortConfigCollector blueprintPortConfigCollector;
 
+    @Transactional
     public void runAmbariServices(Stack stack, Cluster cluster) throws CloudbreakException {
         try {
             Set<Node> nodes = stackUtil.collectNodes(stack);
@@ -132,11 +136,14 @@ public class ClusterHostServiceRunner {
             GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
             List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
             SaltConfig saltConfig = createSaltConfig(stack, cluster, primaryGatewayConfig, gatewayConfigs);
-            hostOrchestrator.runService(gatewayConfigs, nodes, saltConfig, clusterDeletionBasedModel(stack.getId(), cluster.getId()));
+            ExitCriteriaModel exitCriteriaModel = clusterDeletionBasedModel(stack.getId(), cluster.getId());
+            hostOrchestrator.initServiceRun(gatewayConfigs, nodes, saltConfig, exitCriteriaModel);
+            recipeEngine.executePreAmbariStartRecipes(stack, hostGroupService.getByCluster(cluster.getId()));
+            hostOrchestrator.runService(gatewayConfigs, nodes, saltConfig, exitCriteriaModel);
         } catch (CloudbreakOrchestratorCancelledException e) {
             throw new CancellationException(e.getMessage());
         } catch (CloudbreakOrchestratorException | IOException e) {
-            throw new CloudbreakException(e);
+            throw new CloudbreakException(e.getMessage(), e);
         }
     }
 
@@ -369,7 +376,7 @@ public class ClusterHostServiceRunner {
     }
 
     private Map<String, String> collectUpscaleCandidates(Long clusterId, String hostGroupName, Integer adjustment) {
-        HostGroup hostGroup = hostGroupRepository.findHostGroupInClusterByName(clusterId, hostGroupName);
+        HostGroup hostGroup = hostGroupService.getByClusterIdAndName(clusterId, hostGroupName);
         if (hostGroup.getConstraint().getInstanceGroup() != null) {
             Long instanceGroupId = hostGroup.getConstraint().getInstanceGroup().getId();
             Map<String, String> hostNames = new HashMap<>();

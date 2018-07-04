@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.service.cluster.flow;
+package com.sequenceiq.cloudbreak.service.cluster.flow.recipe;
 
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.model.ExecutorType;
@@ -93,12 +93,23 @@ public class RecipeEngine {
         }
     }
 
-    public void executePostAmbariStartRecipes(Stack stack, Iterable<HostGroup> hostGroups) throws CloudbreakException {
+    public void executePreAmbariStartRecipes(Stack stack, Set<HostGroup> hostGroups) throws CloudbreakException {
         Orchestrator orchestrator = stack.getOrchestrator();
-        if (recipesSupportedOnOrchestrator(orchestrator)
-            && (recipesFound(hostGroups) || (stack.getCluster() != null && stack.getCluster().getLdapConfig() != null))) {
+        if (shouldExecuteRecipeOnStack(stack, hostGroups, orchestrator)) {
+            orchestratorRecipeExecutor.preAmbariStartRecipes(stack);
+        }
+    }
+
+    public void executePostAmbariStartRecipes(Stack stack, Set<HostGroup> hostGroups) throws CloudbreakException {
+        Orchestrator orchestrator = stack.getOrchestrator();
+        if (shouldExecuteRecipeOnStack(stack, hostGroups, orchestrator)) {
             orchestratorRecipeExecutor.postAmbariStartRecipes(stack);
         }
+    }
+
+    private boolean shouldExecuteRecipeOnStack(Stack stack, Set<HostGroup> hostGroups, Orchestrator orchestrator) throws CloudbreakException {
+        return ((stack.getCluster() != null && stack.getCluster().getLdapConfig() != null) || recipesFound(hostGroups))
+                && recipesSupportedOnOrchestrator(orchestrator);
     }
 
     public void executePreTerminationRecipes(Stack stack, Iterable<HostGroup> hostGroups) throws CloudbreakException {
