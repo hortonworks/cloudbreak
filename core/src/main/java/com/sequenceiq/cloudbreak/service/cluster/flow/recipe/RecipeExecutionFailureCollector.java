@@ -22,6 +22,15 @@ import com.sequenceiq.cloudbreak.orchestrator.model.RecipeModel;
 @Component
 public class RecipeExecutionFailureCollector {
 
+    public boolean canProcessExecutionFailure(Exception e) {
+        if (e.getCause() != null && e.getCause() instanceof CloudbreakOrchestratorException) {
+            return !((CloudbreakOrchestratorException) e.getCause()).getNodesWithErrors().isEmpty();
+        } else if (e.getCause() != null && e.getCause().getCause() != null && e.getCause().getCause() instanceof CloudbreakOrchestratorException) {
+            return !((CloudbreakOrchestratorException) e.getCause().getCause()).getNodesWithErrors().isEmpty();
+        }
+        return false;
+    }
+
     public Set<RecipeExecutionFailure> collectErrors(CloudbreakOrchestratorException exception,
             Map<HostGroup, List<RecipeModel>> hostgroupToRecipeMap, Set<InstanceGroup> instanceGroups) {
 
