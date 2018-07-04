@@ -14,6 +14,8 @@
     - makedirs: True
     - source: salt://unbound/config/00-cluster.conf
     - template: jinja
+    - context:
+        ambari_server_address: {{ ambari.server_address }}
 
 /etc/dhcp/dhclient.d/google_hostname.sh:
   file.managed:

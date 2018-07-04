@@ -1,5 +1,17 @@
 package com.sequenceiq.it.cloudbreak.newway.cloud;
 
+import static com.sequenceiq.it.cloudbreak.newway.cloud.HostGroupType.COMPUTE;
+import static com.sequenceiq.it.cloudbreak.newway.cloud.HostGroupType.MASTER;
+import static com.sequenceiq.it.cloudbreak.newway.cloud.HostGroupType.WORKER;
+
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.sequenceiq.cloudbreak.api.model.SecurityRuleRequest;
 import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigRequest;
 import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigRequest;
@@ -19,17 +31,6 @@ import com.sequenceiq.it.cloudbreak.newway.RDSConfigRequestDataCollector;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
 import com.sequenceiq.it.cloudbreak.newway.StackEntity;
 import com.sequenceiq.it.cloudbreak.newway.TestParameter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
-
-import static com.sequenceiq.it.cloudbreak.newway.cloud.HostGroupType.COMPUTE;
-import static com.sequenceiq.it.cloudbreak.newway.cloud.HostGroupType.MASTER;
-import static com.sequenceiq.it.cloudbreak.newway.cloud.HostGroupType.WORKER;
 
 public abstract class CloudProviderHelper extends CloudProvider {
 
@@ -110,8 +111,6 @@ public abstract class CloudProviderHelper extends CloudProvider {
                 .withStackAuthentication(stackauth());
     }
 
-    // TODO: 2018. 06. 19. aValidDatalakeStackRequest
-
     @Override
     public Stack aValidStackIsCreated() {
         return (Stack) Stack.isCreated()
@@ -122,8 +121,6 @@ public abstract class CloudProviderHelper extends CloudProvider {
                 .withNetwork(newNetwork())
                 .withStackAuthentication(stackauth());
     }
-
-    // TODO: 2018. 06. 19. aValidDatalakeStackIsCreated
 
     abstract StackAuthenticationRequest stackauth();
 
