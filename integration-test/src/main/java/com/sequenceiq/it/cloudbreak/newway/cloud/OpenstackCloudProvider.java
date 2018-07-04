@@ -97,7 +97,7 @@ public class OpenstackCloudProvider extends CloudProviderHelper {
         String instanceTypeParam = getTestParameter().get("openstackInstanceType");
         t.setInstanceType(instanceTypeParam == null ? instanceTypeDefaultValue : instanceTypeParam);
 
-        int volumeCountDefault = 1;
+        int volumeCountDefault = 0;
         String volumeCountParam = getTestParameter().get("openstackInstanceVolumeCount");
         t.setVolumeCount(volumeCountParam == null ? volumeCountDefault : Integer.parseInt(volumeCountParam));
 
