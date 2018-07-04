@@ -384,7 +384,8 @@ public class CloudParameterService {
             LOGGER.info("Platform instanceGroupParameterResult result: {}", res);
             if (res.getStatus().equals(EventStatus.FAILED)) {
                 LOGGER.error("Failed to get platform instanceGroupParameterResult", res.getErrorDetails());
-                throw new GetCloudParameterException("Failed to instance group parameters for the cloud provider", res.getErrorDetails());
+                throw new GetCloudParameterException(String.format("Failed to instance group parameters for the cloud provider: %s", res.getStatusReason()),
+                        res.getErrorDetails());
             }
             return res.getInstanceGroupParameterResponses();
         } catch (InterruptedException e) {

@@ -29,7 +29,6 @@ public class AzureStackView {
             AzureSubnetStrategy subnetStrategy) {
         for (Group group : groupList) {
             String groupName = group.getType().name();
-            List<AzureInstanceView> existingInstances = groups.computeIfAbsent(groupName, k -> new ArrayList<>());
             AzureInstanceGroupView instanceGroupView;
             Map<?, ?> asMap = group.getParameter("availabilitySet", HashMap.class);
             if (asMap != null) {
@@ -44,14 +43,17 @@ public class AzureStackView {
             } else {
                 instanceGroupView = new AzureInstanceGroupView(group.getName(), group.getRootVolumeSize());
             }
-            for (CloudInstance instance : group.getInstances()) {
-                InstanceTemplate template = instance.getTemplate();
-                String attachedDiskStorageName = armStorageView.getAttachedDiskStorageName(template);
-                boolean managedDisk = !Boolean.FALSE.equals(instance.getTemplate().getParameter("managedDisk", Boolean.class));
-                AzureInstanceView azureInstance = new AzureInstanceView(stackName, stackNamePrefixLength, instance, group.getType(), attachedDiskStorageName,
-                        template.getVolumeType(), group.getName(), instanceGroupView.getAvailabilitySetName(), managedDisk,
-                        getInstanceSubnetId(instance, subnetStrategy), group.getRootVolumeSize());
-                existingInstances.add(azureInstance);
+            if (!group.getInstances().isEmpty()) {
+                List<AzureInstanceView> existingInstances = groups.computeIfAbsent(groupName, k -> new ArrayList<>());
+                for (CloudInstance instance : group.getInstances()) {
+                    InstanceTemplate template = instance.getTemplate();
+                    String attachedDiskStorageName = armStorageView.getAttachedDiskStorageName(template);
+                    boolean managedDisk = !Boolean.FALSE.equals(instance.getTemplate().getParameter("managedDisk", Boolean.class));
+                    AzureInstanceView azureInstance = new AzureInstanceView(stackName, stackNamePrefixLength, instance, group.getType(),
+                            attachedDiskStorageName, template.getVolumeType(), group.getName(), instanceGroupView.getAvailabilitySetName(), managedDisk,
+                            getInstanceSubnetId(instance, subnetStrategy), group.getRootVolumeSize());
+                    existingInstances.add(azureInstance);
+                }
             }
             boolean managedDisk = !Boolean.FALSE.equals(group.getReferenceInstanceConfiguration().getTemplate()
                     .getParameter("managedDisk", Boolean.class));
