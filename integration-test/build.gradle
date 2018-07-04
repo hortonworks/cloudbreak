@@ -33,6 +33,10 @@ jar {
 bootJar {
   baseName = 'cloudbreak-integration-test'
   archiveName = 'cloudbreak-integration-test.jar'
+  manifest {
+    def grgit = Grgit.open(currentDir: project.projectDir)
+    attributes "Implementation-Version": grgit.describe()
+  }
 }
 
 task runMockServer(type:JavaExec) {

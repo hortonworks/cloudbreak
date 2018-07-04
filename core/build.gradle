@@ -45,6 +45,10 @@ jar {
 bootJar {
     baseName = 'cloudbreak'
     archiveName = 'cloudbreak.jar'
+    manifest {
+      def grgit = Grgit.open(currentDir: project.projectDir)
+      attributes "Implementation-Version": grgit.describe()
+    }
 }
 
 dependencyManagement {

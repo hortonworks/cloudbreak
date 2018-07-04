@@ -30,6 +30,10 @@ jar {
 bootJar {
   baseName = 'periscope'
   archiveName = 'periscope.jar'
+  manifest {
+    def grgit = Grgit.open(currentDir: project.projectDir)
+    attributes "Implementation-Version": grgit.describe()
+  }
 }
 
 springBoot {
