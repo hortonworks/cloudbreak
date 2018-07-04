@@ -2,8 +2,6 @@ package com.sequenceiq.it.cloudbreak.newway.cloud;
 
 import com.sequenceiq.cloudbreak.api.model.SecurityRuleRequest;
 import com.sequenceiq.cloudbreak.api.model.ldap.LdapConfigRequest;
-import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigRequest;
-import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
 import com.sequenceiq.cloudbreak.api.model.stack.StackAuthenticationRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.model.v2.AmbariV2Request;
@@ -15,7 +13,6 @@ import com.sequenceiq.it.cloudbreak.newway.CredentialEntity;
 import com.sequenceiq.it.cloudbreak.newway.LdapConfigRequestDataCollector;
 import com.sequenceiq.it.cloudbreak.newway.Network;
 import com.sequenceiq.it.cloudbreak.newway.NetworkEntity;
-import com.sequenceiq.it.cloudbreak.newway.RDSConfigRequestDataCollector;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
 import com.sequenceiq.it.cloudbreak.newway.StackEntity;
 import com.sequenceiq.it.cloudbreak.newway.TestParameter;
@@ -23,7 +20,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -202,6 +198,7 @@ public abstract class CloudProviderHelper extends CloudProvider {
         req.setUserName(testParameter.get(DEFAULT_AMBARI_USER));
         req.setPassword(testParameter.get(DEFAULT_AMBARI_PASSWORD));
         req.setBlueprintName(name);
+        req.setValidateBlueprint(false);
         return req;
     }
 
@@ -296,40 +293,6 @@ public abstract class CloudProviderHelper extends CloudProvider {
     // TODO: 2018. 06. 19. ide az rds és ldap konfigokat CloudProviderből
     public LdapConfigRequest getLdap() {
         return LdapConfigRequestDataCollector.createLdapRequestWithProperties(testParameter);
-    }
-
-    public Set<RDSConfigRequest> getRdsRequestsFor(RdsType... providers) {
-        Set<RDSConfigRequest> requests = new LinkedHashSet<>();
-        if (providers != null) {
-            for (RdsType provider : providers) {
-                switch (provider) {
-                    case RANGER:
-                        requests.add(RDSConfigRequestDataCollector.createRdsRequestWithProperties(testParameter, RdsType.RANGER));
-                        break;
-                    case HIVE:
-                        requests.add(RDSConfigRequestDataCollector.createRdsRequestWithProperties(testParameter, RdsType.HIVE));
-                        break;
-                    case AMBARI:
-                        requests.add(RDSConfigRequestDataCollector.createRdsRequestWithProperties(testParameter, RdsType.AMBARI));
-                        break;
-                    case DRUID:
-                        requests.add(RDSConfigRequestDataCollector.createRdsRequestWithProperties(testParameter, RdsType.DRUID));
-                        break;
-                    case OOZIE:
-                        requests.add(RDSConfigRequestDataCollector.createRdsRequestWithProperties(testParameter, RdsType.OOZIE));
-                        break;
-                    case SUPERSET:
-                        requests.add(RDSConfigRequestDataCollector.createRdsRequestWithProperties(testParameter, RdsType.SUPERSET));
-                        break;
-                    case BEACON:
-                        requests.add(RDSConfigRequestDataCollector.createRdsRequestWithProperties(testParameter, RdsType.BEACON));
-                        break;
-                    default:
-                        break;
-                }
-            }
-        }
-        return requests;
     }
 
     public TestParameter getTestParameter() {

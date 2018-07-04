@@ -6,9 +6,13 @@ import com.sequenceiq.it.IntegrationTestContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import static com.sequenceiq.it.cloudbreak.newway.CloudbreakClient.getTestContextCloudbreakClient;
 import static com.sequenceiq.it.cloudbreak.newway.log.Log.log;
 import static com.sequenceiq.it.cloudbreak.newway.log.Log.logJSON;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 public class StackPostStrategy implements Strategy {
     private static final Logger LOGGER = LoggerFactory.getLogger(StackPostStrategy.class);
@@ -26,8 +30,25 @@ public class StackPostStrategy implements Strategy {
         }
 
         Cluster cluster = Cluster.getTestContextCluster().apply(integrationTestContext);
-        if (cluster != null && stackEntity.getRequest().getCluster() == null) {
-            stackEntity.getRequest().setCluster(cluster.getRequest());
+        if (cluster != null) {
+            if (stackEntity.getRequest().getCluster() == null) {
+                stackEntity.getRequest().setCluster(cluster.getRequest());
+            }
+            if (cluster.getRequest().getCloudStorage().getS3() != null && isEmpty(cluster.getRequest().getCloudStorage().getS3().getInstanceProfile())) {
+                AccessConfig accessConfig = AccessConfig.getTestContextAccessConfig().apply(integrationTestContext);
+                List<String> arns = accessConfig
+                        .getResponse()
+                        .getAccessConfigs()
+                        .stream()
+                        .map(accessConfigJson -> accessConfigJson.getProperties().get("arn").toString())
+                        .sorted()
+                        .distinct()
+                        .collect(Collectors.toList());
+                cluster.getRequest().getCloudStorage().getS3().setInstanceProfile(arns.get(0));
+            } else if (cluster.getRequest().getCloudStorage().getGcs() != null && credential != null) {
+                cluster.getRequest().getCloudStorage().getGcs()
+                        .setServiceAccountEmail(credential.getResponse().getParameters().get("serviceAccountId").toString());
+            }
         }
 
         Kerberos kerberos = Kerberos.getTestContextCluster().apply(integrationTestContext);

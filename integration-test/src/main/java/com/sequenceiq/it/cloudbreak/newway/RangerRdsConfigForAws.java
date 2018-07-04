@@ -1,12 +1,13 @@
 package com.sequenceiq.it.cloudbreak.newway;
 
 import static com.sequenceiq.cloudbreak.api.model.rds.RdsType.RANGER;
+import static com.sequenceiq.it.cloudbreak.newway.cloud.AwsCloudProvider.AWS;
 
-public class RangerRdsConfig extends RdsConfig {
+public class RangerRdsConfigForAws extends RdsConfig {
 
-    private static final String RANGER_RDS_CONFIG = "RANGER_RDS_CONFIG";
+    private static final String RANGER_RDS_CONFIG = "AWS_RANGER_DB_CONFIG";
 
-    private RangerRdsConfig() {
+    private RangerRdsConfigForAws() {
         super(RANGER_RDS_CONFIG);
     }
 
@@ -27,8 +28,8 @@ public class RangerRdsConfig extends RdsConfig {
     }
 
     public static RdsConfig isCreatedWithParameters(TestParameter testParameter) {
-        RdsConfig ranger = new RangerRdsConfig();
-        ranger.setRequest(RDSConfigRequestDataCollector.createRdsRequestWithProperties(testParameter, RANGER));
+        RdsConfig ranger = new RangerRdsConfigForAws();
+        ranger.setRequest(RDSConfigRequestDataCollector.createRdsRequestWithProperties(testParameter, RANGER, AWS));
         ranger.setCreationStrategy(RdsConfigAction::createInGiven);
         return ranger;
     }

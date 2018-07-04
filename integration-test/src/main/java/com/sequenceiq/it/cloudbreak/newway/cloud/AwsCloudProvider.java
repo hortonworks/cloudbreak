@@ -1,10 +1,7 @@
 package com.sequenceiq.it.cloudbreak.newway.cloud;
 
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Set;
-
+import com.sequenceiq.cloudbreak.api.model.rds.RDSConfigRequest;
+import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
 import com.sequenceiq.cloudbreak.api.model.stack.StackAuthenticationRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.CloudStorageRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.NetworkV2Request;
@@ -16,6 +13,13 @@ import com.sequenceiq.it.cloudbreak.newway.CredentialEntity;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
 import com.sequenceiq.it.cloudbreak.newway.TestParameter;
 import org.apache.commons.lang3.NotImplementedException;
+
+import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Set;
+
+import static com.sequenceiq.it.cloudbreak.newway.RDSConfigRequestDataCollector.createRdsRequestWithProperties;
 
 public class AwsCloudProvider extends CloudProviderHelper {
 
@@ -262,6 +266,19 @@ public class AwsCloudProvider extends CloudProviderHelper {
         map.put("secretKey", "123456789ABCDEFGHIJKLMNOP0123456789=ABC+");
 
         return map;
+    }
+
+    @Override
+    public Set<RDSConfigRequest> getRdsRequestsFor(RdsType... rdsTypes) {
+        Set<RDSConfigRequest> requests = new LinkedHashSet<>();
+        if (rdsTypes != null) {
+            for (RdsType rdsType : rdsTypes) {
+                if (rdsType != null) {
+                    requests.add(createRdsRequestWithProperties(getTestParameter(), rdsType, AWS_CAPITAL));
+                }
+            }
+        }
+        return requests;
     }
 
     private S3CloudStorageParameters s3CloudStorage() {
