@@ -210,9 +210,23 @@
         <module name="MissingSwitchDefault" />
 
         <!-- Makes suppression comments available -->
-        <module name="FileContentsHolder" />
+        <!--<module name="FileContentsHolder" />-->
 
-
+        <!-- Suppressions -->
+        <module name="SuppressionCommentFilter">
+            <!-- javadoc is not required for enum items -->
+            <property name="offCommentFormat" value="ENUM ITEMS START" />
+            <property name="onCommentFormat" value="ENUM ITEMS END" />
+            <property name="checkFormat" value="JavadocVariable" />
+        </module>
+        <module name="SuppressionCommentFilter">
+            <property name="offCommentFormat" value="BEGIN GENERATED CODE"/>
+            <property name="onCommentFormat" value="END GENERATED CODE"/>
+        </module>
+        <module name="SuppressionCommentFilter">
+            <property name="offCommentFormat" value="CHECKSTYLE:OFF"/>
+            <property name="onCommentFormat" value="CHECKSTYLE:ON"/>
+        </module>
     </module>
 
     <!-- Deprecation -->
@@ -310,21 +324,6 @@
     </module>
     <!-- -->
 
-    <!-- Suppressions -->
-    <module name="SuppressionCommentFilter">
-        <!-- javadoc is not required for enum items -->
-        <property name="offCommentFormat" value="ENUM ITEMS START" />
-        <property name="onCommentFormat" value="ENUM ITEMS END" />
-        <property name="checkFormat" value="JavadocVariable" />
-    </module>
-    <module name="SuppressionCommentFilter">
-        <property name="offCommentFormat" value="BEGIN GENERATED CODE"/>
-        <property name="onCommentFormat" value="END GENERATED CODE"/>
-    </module>
-    <module name="SuppressionCommentFilter">
-        <property name="offCommentFormat" value="CHECKSTYLE:OFF"/>
-        <property name="onCommentFormat" value="CHECKSTYLE:ON"/>
-    </module>
     <module name="SuppressionFilter">
         <property name="file" value="${config_loc}/checkstyle-suppressions.xml" />
     </module>

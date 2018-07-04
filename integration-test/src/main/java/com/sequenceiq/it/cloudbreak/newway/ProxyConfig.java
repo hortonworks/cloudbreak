@@ -16,11 +16,11 @@ public class ProxyConfig extends ProxyConfigEntity {
     }
 
     private static Function<IntegrationTestContext, ProxyConfig> getTestContext(String key) {
-        return (testContext) -> testContext.getContextParam(key, ProxyConfig.class);
+        return testContext -> testContext.getContextParam(key, ProxyConfig.class);
     }
 
     static Function<IntegrationTestContext, ProxyConfig> getNew() {
-        return (testContext) -> new ProxyConfig();
+        return testContext -> new ProxyConfig();
     }
 
     public static ProxyConfig request() {

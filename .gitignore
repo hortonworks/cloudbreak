@@ -6,7 +6,12 @@
 .gradle
 .vscode
 gradle
+
+# IDEA
 .idea
+*.ipr
+*.iws
+
 .vscode
 .nb-gradle-properties
 .nb-gradle

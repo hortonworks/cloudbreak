@@ -13,11 +13,11 @@ public class LdapConfig extends LdapConfigEntity {
     }
 
     private static Function<IntegrationTestContext, LdapConfig> getTestContext(String key) {
-        return (testContext) -> testContext.getContextParam(key, LdapConfig.class);
+        return testContext -> testContext.getContextParam(key, LdapConfig.class);
     }
 
     static Function<IntegrationTestContext, LdapConfig> getNew() {
-        return (testContext) -> new LdapConfig();
+        return testContext -> new LdapConfig();
     }
 
     public static LdapConfig request() {

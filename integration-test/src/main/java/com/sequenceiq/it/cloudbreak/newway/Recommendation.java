@@ -8,11 +8,11 @@ import java.util.function.Function;
 public class Recommendation extends RecommendationEntity {
 
     static Function<IntegrationTestContext, Recommendation> getTestContext(String key) {
-        return (testContext) -> testContext.getContextParam(key, Recommendation.class);
+        return testContext -> testContext.getContextParam(key, Recommendation.class);
     }
 
     static Function<IntegrationTestContext, Recommendation> getNew() {
-        return (testContext) -> new Recommendation();
+        return testContext -> new Recommendation();
     }
 
     public static Recommendation request() {

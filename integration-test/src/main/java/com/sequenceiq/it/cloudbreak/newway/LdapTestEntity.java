@@ -19,7 +19,7 @@ public class LdapTestEntity extends AbstractCloudbreakEntity<LdapValidationReque
     }
 
     private static Function<IntegrationTestContext, LdapTest> getTestContext(String key) {
-        return (testContext) -> testContext.getContextParam(key, LdapTest.class);
+        return testContext -> testContext.getContextParam(key, LdapTest.class);
     }
 
     public LdapTestEntity withBindPassword(String bindPassword) {

@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.api.model.ExposedService;
 import com.sequenceiq.cloudbreak.api.model.rds.RdsType;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.SSOType;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessorFactory;
+import com.sequenceiq.cloudbreak.blueprint.BlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.blueprint.kerberos.KerberosDetailService;
 import com.sequenceiq.cloudbreak.blueprint.template.views.RdsView;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
@@ -303,14 +304,20 @@ public class ClusterHostServiceRunner {
         if (datalakeId != null) {
             StackView dataLakeStack = getStackView(datalakeId);
             Cluster dataLakeCluster = clusterRepository.findOneWithLists(dataLakeStack.getClusterView().getId());
-            Set<String> groupNames = blueprintProcessorFactory.get(dataLakeCluster.getBlueprint().getBlueprintText()).getHostGroupsWithComponent("RANGER_ADMIN");
+            BlueprintTextProcessor blueprintTextProcessor = blueprintProcessorFactory.get(dataLakeCluster.getBlueprint().getBlueprintText());
+
+            Set<String> groupNames = blueprintTextProcessor.getHostGroupsWithComponent("RANGER_ADMIN");
             List<HostGroup> groups = dataLakeCluster.getHostGroups().stream().filter(hg -> groupNames.contains(hg.getName())).collect(Collectors.toList());
             Set<String> hostNames = new HashSet<>();
             groups.forEach(hg -> hostNames.addAll(hostGroupService.getByClusterIdAndName(dataLakeCluster.getId(), hg.getName())
                     .getHostMetadata().stream().map(HostMetadata::getHostName).collect(Collectors.toList())));
+
+            Map<String, String> rangerAdminConfigs = blueprintTextProcessor.getConfigurationEntries().get("ranger-admin-site");
+            String rangerPort = rangerAdminConfigs.getOrDefault("ranger.service.http.port", "6080");
+
             Map<String, Object> rangerMap = new HashMap<>();
             rangerMap.put("servers", hostNames);
-            rangerMap.put("port", "6080");
+            rangerMap.put("port", rangerPort);
             servicePillar.put("datalake-services", new SaltPillarProperties("/datalake/init.sls",
                     singletonMap("datalake-services", singletonMap("ranger", rangerMap))));
         }

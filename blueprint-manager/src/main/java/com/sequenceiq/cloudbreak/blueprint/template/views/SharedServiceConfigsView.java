@@ -8,6 +8,8 @@ public class SharedServiceConfigsView {
 
     private boolean datalakeCluster;
 
+    private String rangerAdminPort;
+
     public String getRangerAdminPassword() {
         return rangerAdminPassword;
     }
@@ -30,5 +32,13 @@ public class SharedServiceConfigsView {
 
     public void setDatalakeCluster(boolean datalakeCluster) {
         this.datalakeCluster = datalakeCluster;
+    }
+
+    public String getRangerAdminPort() {
+        return rangerAdminPort;
+    }
+
+    public void setRangerAdminPort(String rangerAdminPort) {
+        this.rangerAdminPort = rangerAdminPort;
     }
 }

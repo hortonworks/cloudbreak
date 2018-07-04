@@ -59,6 +59,7 @@ public class ServiceEndpointCollector {
         BlueprintTextProcessor blueprintTextProcessor = blueprintProcessorFactory.get(blueprint.getBlueprintText());
         Set<String> blueprintComponents = blueprintTextProcessor.getAllComponents();
         Set<String> haComponents = ambariHaComponentFilter.getHaComponents(blueprintTextProcessor);
+        haComponents.remove(ExposedService.RANGER.getServiceName());
         blueprintComponents.removeAll(haComponents);
         String stackName = blueprintTextProcessor.getStackName();
         String stackVersion = blueprintTextProcessor.getStackVersion();

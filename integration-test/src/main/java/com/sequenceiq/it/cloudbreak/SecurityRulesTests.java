@@ -60,7 +60,7 @@ public class SecurityRulesTests extends CloudbreakTest {
                 (securityrules, t) -> {
                     List<SecurityRuleResponse> getewaysList = securityrules.getResponse().getGateway();
 
-                    getewaysList.forEach((gateway) -> LOGGER.debug(" Security Rule gateway is ::: {}", gateway.getPorts()));
+                    getewaysList.forEach(gateway -> LOGGER.debug(" Security Rule gateway is ::: {}", gateway.getPorts()));
                     Assert.assertFalse(getewaysList.isEmpty(), "Security Rule Gateways should be present in response!");
                 }), " Security Rule Gateways should be part of the response."
         );
@@ -75,7 +75,7 @@ public class SecurityRulesTests extends CloudbreakTest {
                 (securityrules, t) -> {
                     List<SecurityRuleResponse> coresList = securityrules.getResponse().getCore();
 
-                    coresList.forEach((core) -> LOGGER.debug(" Security Rule core is ::: {}", core.getId()));
+                    coresList.forEach(core -> LOGGER.debug(" Security Rule core is ::: {}", core.getId()));
                     Assert.assertTrue(coresList.isEmpty(), "Security Rule Cores should be present in response!");
                 }), " Security Rule Cores should be part of the response."
         );
@@ -91,7 +91,7 @@ public class SecurityRulesTests extends CloudbreakTest {
                     String expectedPort = setCustomGatewaysResponses(securityrules);
                     List<SecurityRuleResponse> gatewaysList = securityrules.getResponse().getGateway();
 
-                    gatewaysList.forEach((gateway) -> {
+                    gatewaysList.forEach(gateway -> {
                         LOGGER.debug(" Security Rule custom gateway is ::: {}", gateway.getPorts());
                         Assert.assertEquals(gateway.getPorts(), expectedPort, "Security Rule custom Gateways should be present in response!");
                     });

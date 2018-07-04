@@ -749,6 +749,7 @@ public class HandlebarTemplateTest {
         SharedServiceConfigsView sharedServiceConfigsView = new SharedServiceConfigsView();
         sharedServiceConfigsView.setAttachedCluster(true);
         sharedServiceConfigsView.setRangerAdminPassword("cloudbreak123!");
+        sharedServiceConfigsView.setRangerAdminPort("6080");
         return Optional.of(sharedServiceConfigsView);
     }
 }

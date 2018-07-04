@@ -10,7 +10,7 @@ public class SemanticVersionComparator implements Comparator<String>, Serializab
 
     @Override
     public int compare(String ver1, String ver2) {
-        Function<String, String[]> segmentize = (ver) -> ver.split("\\.");
+        Function<String, String[]> segmentize = ver -> ver.split("\\.");
         int ver1SegmentCount = segmentize.apply(ver1).length;
         int ver2SegmentCount = segmentize.apply(ver2).length;
         if (ver1SegmentCount < SEGMENT_COUNT || ver2SegmentCount < SEGMENT_COUNT) {
@@ -21,13 +21,13 @@ public class SemanticVersionComparator implements Comparator<String>, Serializab
         }
 
         Function<String, Integer> takeMajorSegment =
-                (ver) -> Integer.parseInt(segmentize.apply(ver)[SemanticVersionSegments.MAJOR.ordinal()]);
+                ver -> Integer.parseInt(segmentize.apply(ver)[SemanticVersionSegments.MAJOR.ordinal()]);
         Function<String, Integer> takeMinorSegment =
-                (ver) -> Integer.parseInt(segmentize.apply(ver)[SemanticVersionSegments.MINOR.ordinal()]);
+                ver -> Integer.parseInt(segmentize.apply(ver)[SemanticVersionSegments.MINOR.ordinal()]);
         Function<String, Integer> takePatchSegment =
-                (ver) -> Integer.parseInt(segmentize.apply(ver)[SemanticVersionSegments.PATCH.ordinal()].split("-")[0]);
+                ver -> Integer.parseInt(segmentize.apply(ver)[SemanticVersionSegments.PATCH.ordinal()].split("-")[0]);
         Function<String, Integer> takeExtensionSegment =
-                (ver) -> Integer.parseInt(segmentize.apply(ver)[SemanticVersionSegments.EXTENSION.ordinal()].split("-")[0]);
+                ver -> Integer.parseInt(segmentize.apply(ver)[SemanticVersionSegments.EXTENSION.ordinal()].split("-")[0]);
 
         int ver1Major = takeMajorSegment.apply(ver1);
         int ver2Major = takeMajorSegment.apply(ver2);
