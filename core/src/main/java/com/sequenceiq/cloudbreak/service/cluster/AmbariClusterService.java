@@ -458,31 +458,37 @@ public class AmbariClusterService implements ClusterService {
 
     @Override
     public void repairCluster(Long stackId, List<String> repairedHostGroups, boolean removeOnly) {
-        Stack stack = stackService.get(stackId);
-        Cluster cluster = stack.getCluster();
-        Set<HostGroup> hostGroups = hostGroupService.getByCluster(cluster.getId());
-
         Map<String, List<String>> failedNodeMap = new HashMap<>();
-        for (HostGroup hg : hostGroups) {
-            List<String> failedNodes = new ArrayList<>();
-            if (repairedHostGroups.contains(hg.getName()) && hg.getRecoveryMode() == RecoveryMode.MANUAL) {
-                for (HostMetadata hmd : hg.getHostMetadata()) {
-                    if (hmd.getHostMetadataState() == HostMetadataState.UNHEALTHY) {
-                        validateRepair(stack, hmd);
-                        if (!failedNodeMap.containsKey(hg.getName())) {
-                            failedNodeMap.put(hg.getName(), failedNodes);
+        try {
+            Stack stack = transactionService.required(() -> {
+                Stack inTransactionStack = stackService.get(stackId);
+                Cluster cluster = inTransactionStack.getCluster();
+                Set<HostGroup> hostGroups = hostGroupService.getByCluster(cluster.getId());
+                for (HostGroup hg : hostGroups) {
+                    List<String> failedNodes = new ArrayList<>();
+                    if (repairedHostGroups.contains(hg.getName()) && hg.getRecoveryMode() == RecoveryMode.MANUAL) {
+                        for (HostMetadata hmd : hg.getHostMetadata()) {
+                            if (hmd.getHostMetadataState() == HostMetadataState.UNHEALTHY) {
+                                validateRepair(inTransactionStack, hmd);
+                                if (!failedNodeMap.containsKey(hg.getName())) {
+                                    failedNodeMap.put(hg.getName(), failedNodes);
+                                }
+                                failedNodes.add(hmd.getHostName());
+                            }
                         }
-                        failedNodes.add(hmd.getHostName());
                     }
                 }
+                return inTransactionStack;
+            });
+            if (!failedNodeMap.isEmpty()) {
+                flowManager.triggerClusterRepairFlow(stackId, failedNodeMap, removeOnly);
+                String recoveryMessage = cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_MANUALRECOVERY_REQUESTED.code(),
+                        Collections.singletonList(repairedHostGroups));
+                LOGGER.info(recoveryMessage);
+                eventService.fireCloudbreakEvent(stack.getId(), "RECOVERY", recoveryMessage);
             }
-        }
-        if (!failedNodeMap.isEmpty()) {
-            flowManager.triggerClusterRepairFlow(stackId, failedNodeMap, removeOnly);
-            String recoveryMessage = cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_MANUALRECOVERY_REQUESTED.code(),
-                Collections.singletonList(repairedHostGroups));
-            LOGGER.info(recoveryMessage);
-            eventService.fireCloudbreakEvent(stack.getId(), "RECOVERY", recoveryMessage);
+        } catch (TransactionExecutionException e) {
+            throw new TransactionRuntimeExecutionException(e);
         }
     }
 
@@ -505,7 +511,7 @@ public class AmbariClusterService implements ClusterService {
     }
 
     private void updateChangedHosts(Cluster cluster, Map<String, HostMetadata> failedHostMetadata, HostMetadataState healthyState,
-        HostMetadataState unhealthyState, String recoveryMessage) throws TransactionExecutionException {
+            HostMetadataState unhealthyState, String recoveryMessage) throws TransactionExecutionException {
         Set<HostMetadata> hosts = hostMetadataRepository.findHostsInCluster(cluster.getId());
         Collection<HostMetadata> changedHosts = new HashSet<>();
         transactionService.required(() -> {
@@ -543,10 +549,10 @@ public class AmbariClusterService implements ClusterService {
                 eventService.fireCloudbreakEvent(stack.getId(), stack.getStatus().name(), statusDesc);
             } else if (!cluster.isClusterReadyForStart() && !cluster.isStartFailed()) {
                 throw new BadRequestException(
-                    String.format("Cannot update the status of cluster '%s' to STARTED, because it isn't in STOPPED state.", cluster.getId()));
+                        String.format("Cannot update the status of cluster '%s' to STARTED, because it isn't in STOPPED state.", cluster.getId()));
             } else if (!stack.isAvailable() && !cluster.isStartFailed()) {
                 throw new BadRequestException(
-                    String.format("Cannot update the status of cluster '%s' to STARTED, because the stack is not AVAILABLE", cluster.getId()));
+                        String.format("Cannot update the status of cluster '%s' to STARTED, because the stack is not AVAILABLE", cluster.getId()));
             } else {
                 updateClusterStatusByStackId(stack.getId(), START_REQUESTED);
                 flowManager.triggerClusterStart(stack.getId());
@@ -562,13 +568,13 @@ public class AmbariClusterService implements ClusterService {
             eventService.fireCloudbreakEvent(stack.getId(), stack.getStatus().name(), statusDesc);
         } else if (reason != StopRestrictionReason.NONE) {
             throw new BadRequestException(
-                String.format("Cannot stop a cluster '%s'. Reason: %s", cluster.getId(), reason.getReason()));
+                    String.format("Cannot stop a cluster '%s'. Reason: %s", cluster.getId(), reason.getReason()));
         } else if (!cluster.isClusterReadyForStop() && !cluster.isStopFailed()) {
             throw new BadRequestException(
-                String.format("Cannot update the status of cluster '%s' to STOPPED, because it isn't in AVAILABLE state.", cluster.getId()));
+                    String.format("Cannot update the status of cluster '%s' to STOPPED, because it isn't in AVAILABLE state.", cluster.getId()));
         } else if (!stack.isStackReadyForStop() && !stack.isStopFailed()) {
             throw new BadRequestException(
-                String.format("Cannot update the status of cluster '%s' to STARTED, because the stack is not AVAILABLE", cluster.getId()));
+                    String.format("Cannot update the status of cluster '%s' to STARTED, because the stack is not AVAILABLE", cluster.getId()));
         } else if (cluster.isAvailable() || cluster.isStopFailed()) {
             updateClusterStatusByStackId(stack.getId(), STOP_REQUESTED);
             flowManager.triggerClusterStop(stack.getId());
@@ -864,8 +870,8 @@ public class AmbariClusterService implements ClusterService {
             for (Entry<String, String> entry : categories.entrySet()) {
                 if (entry.getValue().equalsIgnoreCase(MASTER_CATEGORY)) {
                     throw new BadRequestException(
-                        String.format("Cannot downscale the '%s' hostGroupAdjustment group, because it contains a '%s' component", hostGroup,
-                            entry.getKey()));
+                            String.format("Cannot downscale the '%s' hostGroupAdjustment group, because it contains a '%s' component", hostGroup,
+                                    entry.getKey()));
                 }
             }
         } catch (IOException e) {
@@ -877,8 +883,8 @@ public class AmbariClusterService implements ClusterService {
         Set<InstanceMetaData> unusedHostsInInstanceGroup = instanceMetadataRepository.findUnusedHostsInInstanceGroup(instanceGroup.getId());
         if (unusedHostsInInstanceGroup.size() < scalingAdjustment) {
             throw new BadRequestException(String.format(
-                "There are %s unregistered instances in instance group '%s'. %s more instances needed to complete this request.",
-                unusedHostsInInstanceGroup.size(), instanceGroup.getGroupName(), scalingAdjustment - unusedHostsInInstanceGroup.size()));
+                    "There are %s unregistered instances in instance group '%s'. %s more instances needed to complete this request.",
+                    unusedHostsInInstanceGroup.size(), instanceGroup.getGroupName(), scalingAdjustment - unusedHostsInInstanceGroup.size()));
         }
     }
 
@@ -901,8 +907,8 @@ public class AmbariClusterService implements ClusterService {
         HostGroup hostGroup = hostGroupService.getByClusterIdAndName(stack.getCluster().getId(), hostGroupAdjustment.getHostGroup());
         if (hostGroup == null) {
             throw new BadRequestException(String.format(
-                "Invalid host group: cluster '%s' does not contain a host group named '%s'.",
-                stack.getCluster().getName(), hostGroupAdjustment.getHostGroup()));
+                    "Invalid host group: cluster '%s' does not contain a host group named '%s'.",
+                    stack.getCluster().getName(), hostGroupAdjustment.getHostGroup()));
         }
         return hostGroup;
     }
@@ -916,7 +922,7 @@ public class AmbariClusterService implements ClusterService {
             hostMetadata.setHostMetadataState(newState);
             hostMetadataRepository.save(hostMetadata);
             eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(),
-                cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_HOST_STATUS_UPDATED.code(), Arrays.asList(hostName, newState.name())));
+                    cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_HOST_STATUS_UPDATED.code(), Arrays.asList(hostName, newState.name())));
         }
         return stateChanged;
     }
