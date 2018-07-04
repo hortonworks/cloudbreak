@@ -22,8 +22,11 @@ import (
 // NewDeleteInstanceStackParams creates a new DeleteInstanceStackParams object
 // with the default values initialized.
 func NewDeleteInstanceStackParams() *DeleteInstanceStackParams {
-	var ()
+	var (
+		forcedDefault = bool(false)
+	)
 	return &DeleteInstanceStackParams{
+		Forced: &forcedDefault,
 
 		timeout: cr.DefaultTimeout,
 	}
@@ -32,8 +35,11 @@ func NewDeleteInstanceStackParams() *DeleteInstanceStackParams {
 // NewDeleteInstanceStackParamsWithTimeout creates a new DeleteInstanceStackParams object
 // with the default values initialized, and the ability to set a timeout on a request
 func NewDeleteInstanceStackParamsWithTimeout(timeout time.Duration) *DeleteInstanceStackParams {
-	var ()
+	var (
+		forcedDefault = bool(false)
+	)
 	return &DeleteInstanceStackParams{
+		Forced: &forcedDefault,
 
 		timeout: timeout,
 	}
@@ -42,8 +48,11 @@ func NewDeleteInstanceStackParamsWithTimeout(timeout time.Duration) *DeleteInsta
 // NewDeleteInstanceStackParamsWithContext creates a new DeleteInstanceStackParams object
 // with the default values initialized, and the ability to set a context for a request
 func NewDeleteInstanceStackParamsWithContext(ctx context.Context) *DeleteInstanceStackParams {
-	var ()
+	var (
+		forcedDefault = bool(false)
+	)
 	return &DeleteInstanceStackParams{
+		Forced: &forcedDefault,
 
 		Context: ctx,
 	}
@@ -52,8 +61,11 @@ func NewDeleteInstanceStackParamsWithContext(ctx context.Context) *DeleteInstanc
 // NewDeleteInstanceStackParamsWithHTTPClient creates a new DeleteInstanceStackParams object
 // with the default values initialized, and the ability to set a custom HTTPClient for a request
 func NewDeleteInstanceStackParamsWithHTTPClient(client *http.Client) *DeleteInstanceStackParams {
-	var ()
+	var (
+		forcedDefault = bool(false)
+	)
 	return &DeleteInstanceStackParams{
+		Forced:     &forcedDefault,
 		HTTPClient: client,
 	}
 }
@@ -63,6 +75,8 @@ for the delete instance stack operation typically these are written to a http.Re
 */
 type DeleteInstanceStackParams struct {
 
+	/*Forced*/
+	Forced *bool
 	/*InstanceID*/
 	InstanceID string
 	/*StackID*/
@@ -106,6 +120,17 @@ func (o *DeleteInstanceStackParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
+// WithForced adds the forced to the delete instance stack params
+func (o *DeleteInstanceStackParams) WithForced(forced *bool) *DeleteInstanceStackParams {
+	o.SetForced(forced)
+	return o
+}
+
+// SetForced adds the forced to the delete instance stack params
+func (o *DeleteInstanceStackParams) SetForced(forced *bool) {
+	o.Forced = forced
+}
+
 // WithInstanceID adds the instanceID to the delete instance stack params
 func (o *DeleteInstanceStackParams) WithInstanceID(instanceID string) *DeleteInstanceStackParams {
 	o.SetInstanceID(instanceID)
@@ -135,6 +160,22 @@ func (o *DeleteInstanceStackParams) WriteToRequest(r runtime.ClientRequest, reg 
 		return err
 	}
 	var res []error
+
+	if o.Forced != nil {
+
+		// query param forced
+		var qrForced bool
+		if o.Forced != nil {
+			qrForced = *o.Forced
+		}
+		qForced := swag.FormatBool(qrForced)
+		if qForced != "" {
+			if err := r.SetQueryParam("forced", qForced); err != nil {
+				return err
+			}
+		}
+
+	}
 
 	// path param instanceId
 	if err := r.SetPathParam("instanceId", o.InstanceID); err != nil {

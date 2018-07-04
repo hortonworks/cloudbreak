@@ -187,6 +187,7 @@ func generateAttachedtackTemplateImpl(stringFinder func(string) string, boolFind
 		attachedClusterTemplate.General.CredentialName = datalake.Credential.Name
 		attachedClusterTemplate.Network = cloud.GetProvider().GenerateNetworkRequestFromNetworkResponse(datalake.Network)
 		attachedClusterTemplate.Cluster.LdapConfigName = *datalake.Cluster.LdapConfig.Name
+		attachedClusterTemplate.Cluster.CloudStorage = generateCloudStorage(datalake.Cluster.FileSystemResponse)
 		for _, rds := range datalake.Cluster.RdsConfigs {
 			if *rds.Type == "RANGER" || *rds.Type == "HIVE" {
 				attachedClusterTemplate.Cluster.RdsConfigNames = append(attachedClusterTemplate.Cluster.RdsConfigNames, *rds.Name)
@@ -199,6 +200,28 @@ func generateAttachedtackTemplateImpl(stringFinder func(string) string, boolFind
 		return printTemplate(*attachedClusterTemplate)
 	}
 	return nil
+}
+
+func generateCloudStorage(datalake *models_cloudbreak.FileSystemResponse) *models_cloudbreak.CloudStorageRequest {
+	return &models_cloudbreak.CloudStorageRequest{
+		S3:        datalake.S3,
+		Adls:      datalake.Adls,
+		Gcs:       datalake.Gcs,
+		Wasb:      datalake.Wasb,
+		Locations: generateLocations(datalake.Locations),
+	}
+}
+
+func generateLocations(datalake []*models_cloudbreak.StorageLocationResponse) []*models_cloudbreak.StorageLocationRequest {
+	result := make([]*models_cloudbreak.StorageLocationRequest, len(datalake))
+	for i, loc := range datalake {
+		result[i] = &models_cloudbreak.StorageLocationRequest{
+			PropertyFile: loc.PropertyFile,
+			PropertyName: loc.PropertyName,
+			Value:        loc.Value,
+		}
+	}
+	return result
 }
 
 func printTemplate(template models_cloudbreak.StackV2Request) error {
