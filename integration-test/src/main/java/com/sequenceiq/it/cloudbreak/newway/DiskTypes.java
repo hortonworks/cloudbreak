@@ -8,11 +8,11 @@ import java.util.function.Function;
 public class DiskTypes extends DiskTypesEntity {
 
     static Function<IntegrationTestContext, DiskTypes> getTestContext(String key) {
-        return (testContext) -> testContext.getContextParam(key, DiskTypes.class);
+        return testContext -> testContext.getContextParam(key, DiskTypes.class);
     }
 
     static Function<IntegrationTestContext, DiskTypes> getNew() {
-        return (testContext) -> new DiskTypes();
+        return testContext -> new DiskTypes();
     }
 
     public static DiskTypes request() {

@@ -37,7 +37,7 @@ public class Region extends Entity {
     }
 
     static Function<IntegrationTestContext, Region> getTestContextRegion(String key) {
-        return (testContext) -> testContext.getContextParam(key, Region.class);
+        return testContext -> testContext.getContextParam(key, Region.class);
     }
 
     public static Function<IntegrationTestContext, Region> getTestContextRegion() {
@@ -45,7 +45,7 @@ public class Region extends Entity {
     }
 
     static Function<IntegrationTestContext, Region> getNew() {
-        return (testContext) -> new Region();
+        return testContext -> new Region();
     }
 
     public static Region request() {

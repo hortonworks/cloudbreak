@@ -48,13 +48,13 @@ public class GatekeeperBehaviour extends CheckedListener implements IInvokedMeth
     }
 
     private boolean anyTestsSkippedBecauseOfGatekeeper(IResultMap skippedTests) {
-        return skippedTests.getAllResults().stream().anyMatch((result) -> {
+        return skippedTests.getAllResults().stream().anyMatch(result -> {
             return result.getThrowable() instanceof GatekeeperException;
         });
     }
 
     private boolean hasFailedGatekeeperTest(Map<String, ISuiteResult> results) {
-        return results.values().stream().anyMatch((iSuiteResult) -> {
+        return results.values().stream().anyMatch(iSuiteResult -> {
             return iSuiteResult.getTestContext().getFailedTests().size() != 0
                     && Objects.equals(iSuiteResult.getTestContext().getCurrentXmlTest().getParameter(IS_GATEKEEPER), TRUE);
         });

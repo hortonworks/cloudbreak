@@ -96,7 +96,7 @@ cb:
     defaultLifeTime: -1
 
   blueprint:
-     defaults: "EDW-ETL: Apache Hive, Apache Spark 2=hdp26-etl-edw-spark2;EDW-Analytics: Apache Hive 2 LLAP, Apache Zeppelin=hdp26-edw-analytics;Data Science: Apache Spark 2, Apache Zeppelin=hdp26-data-science-spark2;Flow Management: Apache NiFi, Apache NiFi Registry=hdf31-flow-management;Messaging Management: Apache Kafka=hdf31-messaging-kafka;Data Lake: Apache Ranger, Apache Hive Metastore=hdp26-shared-services"
+     defaults: "EDW-ETL: Apache Hive, Apache Spark 2=hdp26-etl-edw-spark2;EDW-Analytics: Apache Hive 2 LLAP, Apache Zeppelin=hdp26-edw-analytics;Data Science: Apache Spark 2, Apache Zeppelin=hdp26-data-science-spark2;Flow Management: Apache NiFi, Apache NiFi Registry=hdf31-flow-management;Messaging Management: Apache Kafka=hdf31-messaging-kafka;Data Lake: Apache Ranger, Apache Hive Metastore=hdp26-shared-services;Data Lake: Apache Ranger, Apache Hive Metastore HA=hdp26-shared-services-ha"
      internal: "HDP 3.0 - Data Science: Apache Spark 2, Apache Zeppelin=hdp30-data-science-spark2"
   template.defaults: minviable-gcp,minviable-azure-managed-disks,minviable-aws
   custom.user.data: |
@@ -347,3 +347,6 @@ blueprintServicePorts:
   - service: RESOURCEMANAGER_WEB
     configName: yarn-site
     hostKey: yarn.resourcemanager.webapp.address
+  - service: RANGER
+    configName: ranger-admin-site
+    portKey: ranger.service.http.port

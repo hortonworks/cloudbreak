@@ -37,7 +37,7 @@ public class StackOperation extends AbstractCloudbreakEntity<StackScaleRequestV2
     }
 
     static Function<IntegrationTestContext, StackOperation> getTestContextStackOperation(String key) {
-        return (testContext) -> testContext.getContextParam(key, StackOperation.class);
+        return testContext -> testContext.getContextParam(key, StackOperation.class);
     }
 
     static Function<IntegrationTestContext, StackOperation> getTestContextStackOperation() {

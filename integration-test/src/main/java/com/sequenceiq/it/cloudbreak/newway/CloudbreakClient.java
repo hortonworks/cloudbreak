@@ -1,12 +1,13 @@
 package com.sequenceiq.it.cloudbreak.newway;
 
-import com.sequenceiq.cloudbreak.client.CloudbreakClient.CloudbreakClientBuilder;
-import com.sequenceiq.cloudbreak.client.ConfigKey;
-import com.sequenceiq.it.IntegrationTestContext;
+import java.util.function.Function;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.function.Function;
+import com.sequenceiq.cloudbreak.client.CloudbreakClient.CloudbreakClientBuilder;
+import com.sequenceiq.cloudbreak.client.ConfigKey;
+import com.sequenceiq.it.IntegrationTestContext;
 
 public class CloudbreakClient extends Entity {
     public static final String CLOUDBREAK_CLIENT = "CLOUDBREAK_CLIENT";
@@ -34,7 +35,7 @@ public class CloudbreakClient extends Entity {
     }
 
     public static Function<IntegrationTestContext, CloudbreakClient> getTestContextCloudbreakClient(String key) {
-        return (testContext) -> testContext.getContextParam(key, CloudbreakClient.class);
+        return testContext -> testContext.getContextParam(key, CloudbreakClient.class);
     }
 
     public static Function<IntegrationTestContext, CloudbreakClient> getTestContextCloudbreakClient() {

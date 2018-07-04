@@ -64,7 +64,7 @@ public class Networks extends Entity {
     }
 
     private static Function<IntegrationTestContext, Networks> getTestContext(String key) {
-        return (testContext) -> testContext.getContextParam(key, Networks.class);
+        return testContext -> testContext.getContextParam(key, Networks.class);
     }
 
     public static Networks request() {

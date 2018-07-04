@@ -8,11 +8,11 @@ import java.util.function.Function;
 public class SecurityRules extends SecurityRulesEntity {
 
     static Function<IntegrationTestContext, SecurityRules> getTestContext(String key) {
-        return (testContext) -> testContext.getContextParam(key, SecurityRules.class);
+        return testContext -> testContext.getContextParam(key, SecurityRules.class);
     }
 
     static Function<IntegrationTestContext, SecurityRules> getNew() {
-        return (testContext) -> new SecurityRules();
+        return testContext -> new SecurityRules();
     }
 
     public static SecurityRules request() {

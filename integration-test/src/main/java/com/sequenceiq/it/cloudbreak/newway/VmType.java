@@ -7,11 +7,11 @@ import java.util.function.Function;
 
 public class VmType extends VmTypeEntity {
     static Function<IntegrationTestContext, VmType> getTestContext(String key) {
-        return (testContext) -> testContext.getContextParam(key, VmType.class);
+        return testContext -> testContext.getContextParam(key, VmType.class);
     }
 
     static Function<IntegrationTestContext, VmType> getNew() {
-        return (testContext) -> new VmType();
+        return testContext -> new VmType();
     }
 
     public static VmType request() {

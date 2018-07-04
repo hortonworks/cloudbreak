@@ -35,7 +35,7 @@ public class HostGroups extends Entity {
     }
 
     public static Function<IntegrationTestContext, HostGroups> getTestContextHostGroups(String key) {
-        return (testContext) -> testContext.getContextParam(key, HostGroups.class);
+        return testContext -> testContext.getContextParam(key, HostGroups.class);
     }
 
     public static Function<IntegrationTestContext, HostGroups> getTestContextHostGroups() {
@@ -43,7 +43,7 @@ public class HostGroups extends Entity {
     }
 
     public static Function<IntegrationTestContext, HostGroups> getNewHostGroups() {
-        return (testContext) -> new HostGroups();
+        return testContext -> new HostGroups();
     }
 
     public static HostGroups request(String key) {

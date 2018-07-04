@@ -16,11 +16,11 @@ public class LdapTest extends LdapTestEntity {
     }
 
     private static Function<IntegrationTestContext, LdapTest> getTestContext(String key) {
-        return (testContext) -> testContext.getContextParam(key, LdapTest.class);
+        return testContext -> testContext.getContextParam(key, LdapTest.class);
     }
 
     static Function<IntegrationTestContext, LdapTest> getNew() {
-        return (testContext) -> new LdapTest();
+        return testContext -> new LdapTest();
     }
 
     public static LdapTest request() {

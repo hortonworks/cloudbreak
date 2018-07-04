@@ -8,11 +8,11 @@ import com.sequenceiq.it.IntegrationTestContext;
 public class Blueprint extends BlueprintEntity {
 
     static Function<IntegrationTestContext, Blueprint> getTestContext(String key) {
-        return (testContext) -> testContext.getContextParam(key, Blueprint.class);
+        return testContext -> testContext.getContextParam(key, Blueprint.class);
     }
 
     static Function<IntegrationTestContext, Blueprint> getNew() {
-        return (testContext) -> new Blueprint();
+        return testContext -> new Blueprint();
     }
 
     public static Blueprint request() {

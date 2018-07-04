@@ -8,11 +8,11 @@ import com.sequenceiq.it.IntegrationTestContext;
 public class ImageCatalog extends ImageCatalogEntity {
 
     static Function<IntegrationTestContext, ImageCatalog> getTestContext(String key) {
-        return (testContext) -> testContext.getContextParam(key, ImageCatalog.class);
+        return testContext -> testContext.getContextParam(key, ImageCatalog.class);
     }
 
     static Function<IntegrationTestContext, ImageCatalog> getNew() {
-        return (testContext) -> new ImageCatalog();
+        return testContext -> new ImageCatalog();
     }
 
     public static ImageCatalog request() {
