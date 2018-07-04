@@ -84,6 +84,7 @@ public enum Msg {
     AMBARI_CLUSTER_GATEWAY_CHANGE("ambari.cluster.gateway.change"),
     AMBARI_CLUSTER_GATEWAY_CHANGED_SUCCESSFULLY("ambari.cluster.gateway.changed.successfully"),
     AMBARI_CLUSTER_GATEWAY_CHANGE_FAILED("ambari.cluster.gateway.change.failed"),
+    AMBARI_CLUSTER_DECOMMISSIONING_TIME("ambari.cluster.decommissioning.time"),
     STACK_IMAGE_SETUP("stack.image.setup");
 
     private final String code;

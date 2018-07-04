@@ -16,10 +16,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.reactor.api.event.EventSelectorUtil;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.DecommissionRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.DecommissionResult;
@@ -62,10 +62,11 @@ public class DecommissionHandler implements ReactorEventHandler<DecommissionRequ
     public void accept(Event<DecommissionRequest> event) {
         DecommissionRequest request = event.getData();
         DecommissionResult result;
+        String hostGroupName = request.getHostGroupName();
         try {
             Stack stack = stackService.getByIdWithLists(request.getStackId());
             Set<String> hostNames = getHostNamesForPrivateIds(request, stack);
-            Map<String, HostMetadata> hostsToRemove = ambariDecommissioner.collectHostsToRemove(stack, request.getHostGroupName(), hostNames);
+            Map<String, HostMetadata> hostsToRemove = ambariDecommissioner.collectHostsToRemove(stack, hostGroupName, hostNames);
             Set<String> decomissionedHostNames;
             if (skipAmbariDecomission(request, hostsToRemove)) {
                 decomissionedHostNames = hostNames;
