@@ -82,11 +82,35 @@ public class OrchestratorRecipeExecutor {
         }
     }
 
+    public void preAmbariStartRecipes(Stack stack) throws CloudbreakException {
+        HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
+        GatewayConfig gatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
+        try {
+            hostOrchestrator.preAmbariStartRecipes(gatewayConfig, stackUtil.collectNodes(stack),
+                    clusterDeletionBasedModel(stack.getId(), stack.getCluster().getId()));
+        } catch (CloudbreakOrchestratorFailedException e) {
+            String message = getRecipeExecutionFaiureMessage(stack, e);
+            throw new CloudbreakException(message);
+        }
+    }
+
     public void postAmbariStartRecipes(Stack stack) throws CloudbreakException {
         HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
         GatewayConfig gatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
         try {
             hostOrchestrator.postAmbariStartRecipes(gatewayConfig, stackUtil.collectNodes(stack),
+                    clusterDeletionBasedModel(stack.getId(), stack.getCluster().getId()));
+        } catch (CloudbreakOrchestratorFailedException e) {
+            String message = getRecipeExecutionFaiureMessage(stack, e);
+            throw new CloudbreakException(message, e);
+        }
+    }
+
+    public void postInstall(Stack stack) throws CloudbreakException {
+        HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
+        GatewayConfig gatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
+        try {
+            hostOrchestrator.postInstallRecipes(gatewayConfig, stackUtil.collectNodes(stack),
                     clusterDeletionBasedModel(stack.getId(), stack.getCluster().getId()));
         } catch (CloudbreakOrchestratorFailedException e) {
             String message = getRecipeExecutionFaiureMessage(stack, e);
@@ -103,26 +127,13 @@ public class OrchestratorRecipeExecutor {
     }
 
     public void preTerminationRecipesOnNodes(Stack stack, Set<Node> nodes) throws CloudbreakException {
-
         if (stack.getCluster() == null) {
             throw new NotFoundException("Cluster does not found, pre-termination will not be run.");
         }
-
         HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
         GatewayConfig gatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
         try {
             hostOrchestrator.preTerminationRecipes(gatewayConfig, nodes, clusterDeletionBasedModel(stack.getId(), stack.getCluster().getId()));
-        } catch (CloudbreakOrchestratorFailedException e) {
-            throw new CloudbreakException(e);
-        }
-    }
-
-    public void postInstall(Stack stack) throws CloudbreakException {
-        HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
-        GatewayConfig gatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
-        try {
-            hostOrchestrator.postInstallRecipes(gatewayConfig, stackUtil.collectNodes(stack),
-                    clusterDeletionBasedModel(stack.getId(), stack.getCluster().getId()));
         } catch (CloudbreakOrchestratorFailedException e) {
             String message = getRecipeExecutionFaiureMessage(stack, e);
             throw new CloudbreakException(message, e);
@@ -130,7 +141,7 @@ public class OrchestratorRecipeExecutor {
     }
 
     private String getRecipeExecutionFaiureMessage(Stack stack, CloudbreakOrchestratorFailedException e) {
-        if (!canProcessExecutionFailure(e)) {
+        if (!recipeExecutionFailureCollector.canProcessExecutionFailure(e)) {
             return e.getMessage();
         }
         Map<HostGroup, List<RecipeModel>> recipeMap = getHostgroupToRecipeMap(hostGroupService.getByCluster(stack.getCluster().getId()));
@@ -149,10 +160,6 @@ public class OrchestratorRecipeExecutor {
                         .append("\'  |||  \n")
         );
         return message.toString();
-    }
-
-    private boolean canProcessExecutionFailure(CloudbreakOrchestratorFailedException e) {
-        return e.getCause() != null && e.getCause().getCause() != null && e.getCause().getCause() instanceof CloudbreakOrchestratorException;
     }
 
     private Map<HostGroup, List<RecipeModel>> getHostgroupToRecipeMap(Set<HostGroup> hostGroups) {

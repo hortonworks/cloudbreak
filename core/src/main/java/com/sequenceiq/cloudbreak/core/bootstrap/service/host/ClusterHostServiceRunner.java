@@ -44,7 +44,7 @@ import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
-import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
+import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.ClusterComponentConfigProvider;
@@ -55,6 +55,8 @@ import com.sequenceiq.cloudbreak.service.cluster.AmbariSecurityConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.BlueprintProcessor;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.HiveConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.flow.kerberos.KerberosDetailService;
+import com.sequenceiq.cloudbreak.service.cluster.flow.recipe.RecipeEngine;
+import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 
 @Component
@@ -70,7 +72,7 @@ public class ClusterHostServiceRunner {
     private GatewayConfigService gatewayConfigService;
 
     @Inject
-    private HostGroupRepository hostGroupRepository;
+    private HostGroupService hostGroupService;
 
     @Inject
     private InstanceMetaDataRepository instanceMetaDataRepository;
@@ -99,6 +101,9 @@ public class ClusterHostServiceRunner {
     @Inject
     private StackUtil stackUtil;
 
+    @Inject
+    private RecipeEngine recipeEngine;
+
     @Transactional
     public void runAmbariServices(Stack stack, Cluster cluster) throws CloudbreakException {
         try {
@@ -107,11 +112,14 @@ public class ClusterHostServiceRunner {
             GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
             List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
             SaltConfig saltConfig = createSaltConfig(stack, cluster, primaryGatewayConfig, gatewayConfigs);
-            hostOrchestrator.runService(gatewayConfigs, nodes, saltConfig, clusterDeletionBasedModel(stack.getId(), cluster.getId()));
+            ExitCriteriaModel exitCriteriaModel = clusterDeletionBasedModel(stack.getId(), cluster.getId());
+            hostOrchestrator.initServiceRun(gatewayConfigs, nodes, saltConfig, exitCriteriaModel);
+            recipeEngine.executePreAmbariStartRecipes(stack, hostGroupService.getByCluster(cluster.getId()));
+            hostOrchestrator.runService(gatewayConfigs, nodes, saltConfig, exitCriteriaModel);
         } catch (CloudbreakOrchestratorCancelledException e) {
             throw new CancellationException(e.getMessage());
         } catch (CloudbreakOrchestratorException | IOException e) {
-            throw new CloudbreakException(e);
+            throw new CloudbreakException(e.getMessage(), e);
         }
     }
 
@@ -273,7 +281,9 @@ public class ClusterHostServiceRunner {
             HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
             List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
             SaltConfig saltConfig = createSaltConfig(stack, cluster, gatewayConfigService.getPrimaryGatewayConfig(stack), gatewayConfigs);
-            hostOrchestrator.runService(gatewayConfigs, allNodes, saltConfig, clusterDeletionBasedModel(stack.getId(), cluster.getId()));
+            ExitCriteriaModel exitCriteriaModel = clusterDeletionBasedModel(stack.getId(), cluster.getId());
+            hostOrchestrator.initServiceRun(gatewayConfigs, allNodes, saltConfig, exitCriteriaModel);
+            hostOrchestrator.runService(gatewayConfigs, allNodes, saltConfig, exitCriteriaModel);
         } catch (CloudbreakOrchestratorCancelledException e) {
             throw new CancellationException(e.getMessage());
         } catch (CloudbreakOrchestratorException | IOException e) {
@@ -283,7 +293,7 @@ public class ClusterHostServiceRunner {
     }
 
     private Map<String, String> collectUpscaleCandidates(Long clusterId, String hostGroupName, Integer adjustment) {
-        HostGroup hostGroup = hostGroupRepository.findHostGroupInClusterByName(clusterId, hostGroupName);
+        HostGroup hostGroup = hostGroupService.getByClusterIdAndName(clusterId, hostGroupName);
         if (hostGroup.getConstraint().getInstanceGroup() != null) {
             Long instanceGroupId = hostGroup.getConstraint().getInstanceGroup().getId();
             Map<String, String> hostNames = new HashMap<>();

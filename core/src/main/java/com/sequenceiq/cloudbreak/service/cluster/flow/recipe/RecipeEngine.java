@@ -89,11 +89,29 @@ public class RecipeEngine {
         }
     }
 
+    public void executePreAmbariStartRecipes(Stack stack, Set<HostGroup> hostGroups) throws CloudbreakException {
+        Orchestrator orchestrator = stack.getOrchestrator();
+        if (shouldExecuteRecipeOnStack(stack, hostGroups, orchestrator)) {
+            orchestratorRecipeExecutor.preAmbariStartRecipes(stack);
+        }
+    }
+
     public void executePostAmbariStartRecipes(Stack stack, Set<HostGroup> hostGroups) throws CloudbreakException {
         Orchestrator orchestrator = stack.getOrchestrator();
-        if (recipesSupportedOnOrchestrator(orchestrator)
-            && (recipesFound(hostGroups) || (stack.getCluster() != null && stack.getCluster().getLdapConfig() != null))) {
+        if (shouldExecuteRecipeOnStack(stack, hostGroups, orchestrator)) {
             orchestratorRecipeExecutor.postAmbariStartRecipes(stack);
+        }
+    }
+
+    private boolean shouldExecuteRecipeOnStack(Stack stack, Set<HostGroup> hostGroups, Orchestrator orchestrator) throws CloudbreakException {
+        return ((stack.getCluster() != null && stack.getCluster().getLdapConfig() != null) || recipesFound(hostGroups))
+                && recipesSupportedOnOrchestrator(orchestrator);
+    }
+
+    public void executePostInstall(Stack stack) throws CloudbreakException {
+        Orchestrator orchestrator = stack.getOrchestrator();
+        if (recipesSupportedOnOrchestrator(orchestrator)) {
+            orchestratorRecipeExecutor.postInstall(stack);
         }
     }
 
@@ -108,13 +126,6 @@ public class RecipeEngine {
         Orchestrator orchestrator = stack.getOrchestrator();
         if (recipesFound(hostGroups, RecipeType.PRE_TERMINATION) && recipesSupportedOnOrchestrator(orchestrator)) {
             orchestratorRecipeExecutor.preTerminationRecipes(stack, hostNames);
-        }
-    }
-
-    public void executePostInstall(Stack stack) throws CloudbreakException {
-        Orchestrator orchestrator = stack.getOrchestrator();
-        if (recipesSupportedOnOrchestrator(orchestrator)) {
-            orchestratorRecipeExecutor.postInstall(stack);
         }
     }
 
