@@ -32,6 +32,7 @@ gradle/wrapper/
 cloudbreak-shell.log
 cloud-break.cbh
 *.class
+.java-version
 
 .mtj.tmp/
 
