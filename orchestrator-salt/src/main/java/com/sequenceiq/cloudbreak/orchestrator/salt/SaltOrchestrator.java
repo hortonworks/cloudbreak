@@ -140,9 +140,8 @@ public class SaltOrchestrator implements HostOrchestrator {
 
     @SuppressFBWarnings("REC_CATCH_EXCEPTION")
     @Override
-    public void runService(List<GatewayConfig> allGateway, Set<Node> allNodes, SaltConfig saltConfig, ExitCriteriaModel exitModel)
+    public void initServiceRun(List<GatewayConfig> allGateway, Set<Node> allNodes, SaltConfig saltConfig, ExitCriteriaModel exitModel)
             throws CloudbreakOrchestratorException {
-        LOGGER.info("Run Services on nodes: {}", allNodes);
         GatewayConfig primaryGateway = getPrimaryGatewayConfig(allGateway);
         Set<String> gatewayTargets = getGatewayPrivateIps(allGateway);
         String ambariServerAddress = primaryGateway.getPrivateAddress();
@@ -197,6 +196,23 @@ public class SaltOrchestrator implements HostOrchestrator {
 
             runSaltCommand(sc, new SyncGrainsRunner(all, allNodes), exitModel);
             runSaltCommand(sc, new MineUpdateRunner(gatewayTargets, allNodes), exitModel);
+        } catch (Exception e) {
+            LOGGER.error("Error occurred during ambari bootstrap", e);
+            if (e instanceof ExecutionException && e.getCause() instanceof CloudbreakOrchestratorFailedException) {
+                throw (CloudbreakOrchestratorFailedException) e.getCause();
+            }
+            throw new CloudbreakOrchestratorFailedException(e);
+        }
+    }
+
+    @SuppressFBWarnings("REC_CATCH_EXCEPTION")
+    @Override
+    public void runService(List<GatewayConfig> allGateway, Set<Node> allNodes, SaltConfig saltConfig, ExitCriteriaModel exitModel)
+            throws CloudbreakOrchestratorException {
+        LOGGER.info("Run Services on nodes: {}", allNodes);
+        GatewayConfig primaryGateway = getPrimaryGatewayConfig(allGateway);
+        try (SaltConnector sc = new SaltConnector(primaryGateway, restDebug)) {
+            Set<String> all = allNodes.stream().map(Node::getPrivateIp).collect(Collectors.toSet());
             runNewService(sc, new HighStateRunner(all, allNodes), exitModel);
         } catch (Exception e) {
             LOGGER.error("Error occurred during ambari bootstrap", e);
@@ -416,21 +432,31 @@ public class SaltOrchestrator implements HostOrchestrator {
     }
 
     @Override
-    public void postAmbariStartRecipes(GatewayConfig gatewayConfig, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel)
+    public void preAmbariStartRecipes(GatewayConfig gatewayConfig, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorFailedException {
-        executeRecipes(gatewayConfig, allNodes, exitCriteriaModel, RecipeExecutionPhase.POST_AMBARI_START);
+        LOGGER.info("Executing pre-ambari-start recipes.");
+        executeRecipes(gatewayConfig, allNodes, exitCriteriaModel, RecipeExecutionPhase.PRE_AMBARI_START);
     }
 
     @Override
-    public void preTerminationRecipes(GatewayConfig gatewayConfig, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel)
+    public void postAmbariStartRecipes(GatewayConfig gatewayConfig, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorFailedException {
-        executeRecipes(gatewayConfig, allNodes, exitCriteriaModel, RecipeExecutionPhase.PRE_TERMINATION);
+        LOGGER.info("Executing post-ambari-start recipes.");
+        executeRecipes(gatewayConfig, allNodes, exitCriteriaModel, RecipeExecutionPhase.POST_AMBARI_START);
     }
 
     @Override
     public void postInstallRecipes(GatewayConfig gatewayConfig, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorFailedException {
+        LOGGER.info("Executing post-cluster-install recipes.");
         executeRecipes(gatewayConfig, allNodes, exitCriteriaModel, RecipeExecutionPhase.POST_CLUSTER_INSTALL);
+    }
+
+    @Override
+    public void preTerminationRecipes(GatewayConfig gatewayConfig, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel)
+            throws CloudbreakOrchestratorFailedException {
+        LOGGER.info("Executing pre-termination recipes.");
+        executeRecipes(gatewayConfig, allNodes, exitCriteriaModel, RecipeExecutionPhase.PRE_TERMINATION);
     }
 
     @Override
