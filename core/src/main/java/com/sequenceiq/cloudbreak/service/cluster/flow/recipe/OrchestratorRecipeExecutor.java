@@ -21,11 +21,13 @@ import org.springframework.stereotype.Component;
 import com.google.api.client.util.Joiner;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
-import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.HostOrchestratorResolver;
+import com.sequenceiq.cloudbreak.domain.Recipe;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
@@ -34,6 +36,7 @@ import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.orchestrator.model.RecipeModel;
+import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.recipe.RecipeExecutionFailureCollector.RecipeExecutionFailure;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
@@ -123,7 +126,7 @@ public class OrchestratorRecipeExecutor {
         preTerminationRecipesOnNodes(stack, stackUtil.collectNodes(stack));
     }
 
-    public void preTerminationRecipes(Stack stack, Collection<String> hostNames) throws CloudbreakException {
+    public void preTerminationRecipes(Stack stack, Set<String> hostNames) throws CloudbreakException {
         preTerminationRecipesOnNodes(stack, collectNodes(stack, hostNames));
     }
 
@@ -148,19 +151,18 @@ public class OrchestratorRecipeExecutor {
         Map<HostGroup, List<RecipeModel>> recipeMap = getHostgroupToRecipeMap(hostGroupService.getByCluster(stack.getCluster().getId()));
         Set<RecipeExecutionFailure> failures = recipeExecutionFailureCollector.collectErrors((CloudbreakOrchestratorException) e.getCause().getCause(),
                 recipeMap, instanceGroupService.findByStackId(stack.getId()));
-        StringBuilder message = new StringBuilder("Failed to execute recipe(s): ");
-        failures.forEach(failure ->
-                message.append("Recipe: '")
-                        .append(failure.getRecipe().getName())
-                        .append("' - \n")
-                        .append("Hostgroup: '")
-                        .append(failure.getInstanceMetaData().getInstanceGroup().getGroupName())
-                        .append("' - \n")
-                        .append("Instance: '")
-                        .append(failure.getInstanceMetaData().getDiscoveryFQDN())
-                        .append("\'  |||  \n")
+        StringBuilder messagePrefix = new StringBuilder("Failed to execute recipe(s): \n");
+        String message = failures.stream().map(failure -> new StringBuilder("Recipe: '")
+                .append(failure.getRecipe().getName())
+                .append("' - \n")
+                .append("Hostgroup: '")
+                .append(failure.getInstanceMetaData().getInstanceGroup().getGroupName())
+                .append("' - \n")
+                .append("Instance: '")
+                .append(failure.getInstanceMetaData().getDiscoveryFQDN())
+                .toString()).collect(Collectors.joining("   ---||---   ")
         );
-        return message.toString();
+        return messagePrefix.append(message).toString();
     }
 
     private Map<HostGroup, List<RecipeModel>> getHostgroupToRecipeMap(Set<HostGroup> hostGroups) {
@@ -168,7 +170,7 @@ public class OrchestratorRecipeExecutor {
                 .collect(Collectors.toMap(h -> h, h -> convert(h.getRecipes())));
     }
 
-    private List<RecipeModel> convert(Iterable<Recipe> recipes) {
+    private List<RecipeModel> convert(Set<Recipe> recipes) {
         List<RecipeModel> result = new ArrayList<>();
         for (Recipe recipe : recipes) {
             String decodedContent = new String(Base64.decodeBase64(recipe.getContent()));
@@ -178,7 +180,7 @@ public class OrchestratorRecipeExecutor {
         return result;
     }
 
-    private Set<Node> collectNodes(Stack stack, Collection<String> hostNames) {
+    private Set<Node> collectNodes(Stack stack, Set<String> hostNames) {
         Set<Node> agents = new HashSet<>();
         for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
             for (InstanceMetaData im : instanceGroup.getNotDeletedInstanceMetaDataSet()) {
