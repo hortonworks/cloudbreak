@@ -8,10 +8,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
-
-import java.util.Set;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 
 @EntityType(entityClass = InstanceGroup.class)
 public interface InstanceGroupRepository extends CrudRepository<InstanceGroup, Long> {

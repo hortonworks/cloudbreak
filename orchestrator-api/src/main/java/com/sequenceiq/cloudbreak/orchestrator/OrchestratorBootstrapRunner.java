@@ -148,8 +148,8 @@ public class OrchestratorBootstrapRunner implements Callable<Boolean> {
         String errorMessage = String.format(messageTemplate, (double) retryCount * SLEEP_TIME / MS_IN_SEC / SEC_IN_MIN, cause);
         LOGGER.error(errorMessage);
         Multimap<String, String> nodesWithErrors = ArrayListMultimap.create();
-        if (result.right instanceof CloudbreakOrchestratorException) {
-            nodesWithErrors = ((CloudbreakOrchestratorException) result.right).getNodesWithErrors();
+        if (actualException instanceof CloudbreakOrchestratorException) {
+            nodesWithErrors = ((CloudbreakOrchestratorException) actualException).getNodesWithErrors();
         }
         throw new CloudbreakOrchestratorFailedException(errorMessage, nodesWithErrors);
     }
