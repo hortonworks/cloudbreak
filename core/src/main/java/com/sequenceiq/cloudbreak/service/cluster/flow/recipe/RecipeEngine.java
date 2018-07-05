@@ -133,30 +133,6 @@ public class RecipeEngine {
         }
     }
 
-    public void executePostInstall(Stack stack) throws CloudbreakException {
-        Orchestrator orchestrator = stack.getOrchestrator();
-        if (recipesSupportedOnOrchestrator(orchestrator)) {
-            orchestratorRecipeExecutor.postInstall(stack);
-        }
-    }
-
-    private void addFsRecipes(Stack stack, Set<HostGroup> hostGroups) throws CloudbreakException {
-        String orchestrator = stack.getOrchestrator().getType();
-        if (SALT.equals(orchestrator)) {
-            Cluster cluster = stack.getCluster();
-            String blueprintText = cluster.getBlueprint().getBlueprintText();
-            FileSystem fs = cluster.getFileSystem();
-            if (fs != null) {
-                try {
-                    addFsRecipesToHostGroups(stack.getCredential(), hostGroups, blueprintText, fs);
-                } catch (IOException e) {
-                    throw new CloudbreakException("can not add FS recipes to host groups", e);
-                }
-            }
-            addHDFSRecipe(cluster, blueprintText, hostGroups);
-        }
-    }
-
     private void addContainerExecutorScripts(Stack stack, Set<HostGroup> hostGroups) {
         try {
             Cluster cluster = stack.getCluster();
