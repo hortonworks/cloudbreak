@@ -38,7 +38,7 @@ import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.PollingResult;
 import com.sequenceiq.cloudbreak.service.cluster.api.ClusterModificationService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariOperationService;
-import com.sequenceiq.cloudbreak.service.cluster.flow.RecipeEngine;
+import com.sequenceiq.cloudbreak.service.cluster.flow.recipe.RecipeEngine;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.util.AmbariClientExceptionUtil;
