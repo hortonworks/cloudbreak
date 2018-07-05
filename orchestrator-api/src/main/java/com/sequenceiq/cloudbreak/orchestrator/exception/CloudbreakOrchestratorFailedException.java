@@ -1,9 +1,14 @@
 package com.sequenceiq.cloudbreak.orchestrator.exception;
 
-public class CloudbreakOrchestratorFailedException extends CloudbreakOrchestratorException {
+import com.google.common.collect.Multimap;
 
+public class CloudbreakOrchestratorFailedException extends CloudbreakOrchestratorException {
     public CloudbreakOrchestratorFailedException(String message) {
         super(message);
+    }
+
+    public CloudbreakOrchestratorFailedException(String message, Multimap<String, String> nodesWithErrors) {
+        super(message, nodesWithErrors);
     }
 
     public CloudbreakOrchestratorFailedException(String message, Throwable cause) {

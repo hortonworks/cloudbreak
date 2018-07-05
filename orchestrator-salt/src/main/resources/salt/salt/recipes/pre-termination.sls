@@ -21,6 +21,7 @@ run_pre_termination_script_{{ script_name }}:
     - onlyif:
       - test -f /opt/scripts/pre-termination/{{ script_name }}
       - test ! -f /var/log/recipes/pre-termination/{{ script_name }}.success
+    - timeout: 600
 {% endfor %}
 {% endif %}
 

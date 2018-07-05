@@ -1,4 +1,16 @@
-package com.sequenceiq.cloudbreak.service.cluster.flow;
+package com.sequenceiq.cloudbreak.service.cluster.flow.recipe;
+
+import java.io.IOException;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Set;
+
+import javax.annotation.Resource;
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.model.ExecutorType;
@@ -17,21 +29,9 @@ import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.smartsense.SmartSenseSubscriptionService;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
-
-import javax.annotation.Resource;
-import javax.inject.Inject;
-import java.io.IOException;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
-import java.util.Set;
 
 @Component
 public class RecipeEngine {
@@ -80,7 +80,7 @@ public class RecipeEngine {
         }
     }
 
-    public void uploadUpscaleRecipes(Stack stack, HostGroup hostGroup, Set<HostMetadata> metaDatas, Collection<HostGroup> hostGroups)
+    public void uploadUpscaleRecipes(Stack stack, HostGroup hostGroup, Set<HostGroup> hostGroups)
             throws CloudbreakException {
         Orchestrator orchestrator = stack.getOrchestrator();
         if (recipesSupportedOnOrchestrator(orchestrator)) {
@@ -93,12 +93,23 @@ public class RecipeEngine {
         }
     }
 
-    public void executePostAmbariStartRecipes(Stack stack, Iterable<HostGroup> hostGroups) throws CloudbreakException {
+    public void executePreAmbariStartRecipes(Stack stack, Set<HostGroup> hostGroups) throws CloudbreakException {
         Orchestrator orchestrator = stack.getOrchestrator();
-        if (recipesSupportedOnOrchestrator(orchestrator)
-            && (recipesFound(hostGroups) || (stack.getCluster() != null && stack.getCluster().getLdapConfig() != null))) {
+        if (shouldExecuteRecipeOnStack(stack, hostGroups, orchestrator)) {
+            orchestratorRecipeExecutor.preAmbariStartRecipes(stack);
+        }
+    }
+
+    public void executePostAmbariStartRecipes(Stack stack, Set<HostGroup> hostGroups) throws CloudbreakException {
+        Orchestrator orchestrator = stack.getOrchestrator();
+        if (shouldExecuteRecipeOnStack(stack, hostGroups, orchestrator)) {
             orchestratorRecipeExecutor.postAmbariStartRecipes(stack);
         }
+    }
+
+    private boolean shouldExecuteRecipeOnStack(Stack stack, Set<HostGroup> hostGroups, Orchestrator orchestrator) throws CloudbreakException {
+        return ((stack.getCluster() != null && stack.getCluster().getLdapConfig() != null) || recipesFound(hostGroups))
+                && recipesSupportedOnOrchestrator(orchestrator);
     }
 
     public void executePreTerminationRecipes(Stack stack, Iterable<HostGroup> hostGroups) throws CloudbreakException {
@@ -108,7 +119,7 @@ public class RecipeEngine {
         }
     }
 
-    public void executePreTerminationRecipes(Stack stack, Iterable<HostGroup> hostGroups, Collection<String> hostNames) throws CloudbreakException {
+    public void executePreTerminationRecipes(Stack stack, Iterable<HostGroup> hostGroups, Set<String> hostNames) throws CloudbreakException {
         Orchestrator orchestrator = stack.getOrchestrator();
         if (recipesFound(hostGroups, RecipeType.PRE_TERMINATION) && recipesSupportedOnOrchestrator(orchestrator)) {
             orchestratorRecipeExecutor.preTerminationRecipes(stack, hostNames);
