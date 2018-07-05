@@ -28,6 +28,8 @@ public class OrchestratorBootstrapRunner implements Callable<Boolean> {
 
     private static final int MAX_RETRY_ON_ERROR = 20;
 
+    private static final int MINIMUM_DISPLAYED_TIME_IN_MIN = 1;
+
     private final OrchestratorBootstrap orchestratorBootstrap;
 
     private final Map<String, String> mdcMap;
@@ -140,9 +142,10 @@ public class OrchestratorBootstrapRunner implements Callable<Boolean> {
             cause = actualException.getMessage();
         }
         String messageTemplate = success == null
-                ? "Timeout: Orchestrator component failed to finish in %f mins, last message: %s"
-                : "Failed: Orchestrator component went failed in %f mins, message: %s";
-        String errorMessage = String.format(messageTemplate, (double) retryCount * SLEEP_TIME / MS_IN_SEC / SEC_IN_MIN, cause);
+                ? "Timeout: Orchestrator component failed to finish in %d min(s), last message: %s"
+                : "Failed: Orchestrator component went failed in %d min(s), message: %s";
+        long elapsedTimeRounded = Math.max(Math.round((double) retryCount * SLEEP_TIME / MS_IN_SEC / SEC_IN_MIN), MINIMUM_DISPLAYED_TIME_IN_MIN);
+        String errorMessage = String.format(messageTemplate, elapsedTimeRounded, cause);
         LOGGER.error(errorMessage);
         throw new CloudbreakOrchestratorFailedException(errorMessage);
     }
