@@ -123,13 +123,13 @@ cb:
     port: 5432
 
   ambari:
-    version: 2.6.2.0
+    version: 2.6.2.2
     repo:
       redhat6:
-        baseurl: http://public-repo-1.hortonworks.com/ambari/centos6/2.x/updates/2.6.2.0
+        baseurl: http://public-repo-1.hortonworks.com/ambari/centos6/2.x/updates/2.6.2.2
         gpgkey: http://public-repo-1.hortonworks.com/ambari/centos6/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins
       redhat7:
-        baseurl: http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.6.2.0
+        baseurl: http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.6.2.2
         gpgkey: http://public-repo-1.hortonworks.com/ambari/centos7/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins
     database:
       vendor: embedded
