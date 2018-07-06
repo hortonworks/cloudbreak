@@ -13,7 +13,6 @@ import com.sequenceiq.cloudbreak.aspect.DisablePermission;
 import com.sequenceiq.cloudbreak.aspect.DisabledBaseRepository;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.service.EntityType;
 
 @EntityType(entityClass = InstanceGroup.class)

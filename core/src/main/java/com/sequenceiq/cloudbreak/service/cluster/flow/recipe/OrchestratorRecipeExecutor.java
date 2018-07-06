@@ -149,7 +149,7 @@ public class OrchestratorRecipeExecutor {
         Set<RecipeExecutionFailure> failures = recipeExecutionFailureCollector.collectErrors((CloudbreakOrchestratorException) e.getCause().getCause(),
                 recipeMap, instanceGroupService.findByStackId(stack.getId()));
         StringBuilder messagePrefix = new StringBuilder("Failed to execute recipe(s): \n");
-        String message = failures.stream().map(failure -> new StringBuilder("Recipe: '")
+        String message = failures.stream().map(failure -> new StringBuilder("[Recipe: '")
                 .append(failure.getRecipe().getName())
                 .append("' - \n")
                 .append("Hostgroup: '")
@@ -157,7 +157,8 @@ public class OrchestratorRecipeExecutor {
                 .append("' - \n")
                 .append("Instance: '")
                 .append(failure.getInstanceMetaData().getDiscoveryFQDN())
-                .toString()).collect(Collectors.joining("   ---||---   ")
+                .append(']')
+                .toString()).collect(Collectors.joining(" ---------------------------------------------- ")
         );
         return messagePrefix.append(message).toString();
     }
