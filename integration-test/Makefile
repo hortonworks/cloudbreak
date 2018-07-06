@@ -56,4 +56,4 @@ cbd-delete:
 	./scripts/cbd-delete.sh
 
 upload-s3:
-    echo "Not supported"
+	echo "Not supported"
