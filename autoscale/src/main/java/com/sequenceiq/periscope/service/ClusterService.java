@@ -94,10 +94,6 @@ public class ClusterService {
         return clusterRepository.findByUserId(user.getId());
     }
 
-    public Cluster findOneById(Long clusterId) {
-        return clusterRepository.findById(clusterId).orElseThrow(notFound("Cluster", clusterId));
-    }
-
     public Cluster findOneByStackId(Long stackId) {
         return clusterRepository.findByStackId(stackId);
     }
@@ -108,11 +104,6 @@ public class ClusterService {
 
     public Cluster findById(Long clusterId) {
         return clusterRepository.findById(clusterId).orElseThrow(notFound("Cluster", clusterId));
-    }
-
-    public void removeOne(Long clusterId) {
-        Cluster cluster = findById(clusterId);
-        clusterRepository.delete(cluster);
     }
 
     public void removeById(Long clusterId) {

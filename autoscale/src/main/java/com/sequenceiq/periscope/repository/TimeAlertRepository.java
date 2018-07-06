@@ -5,9 +5,7 @@ import java.util.List;
 import org.springframework.data.repository.query.Param;
 
 import com.sequenceiq.cloudbreak.aspect.BaseRepository;
-import com.sequenceiq.cloudbreak.aspect.ConditionType;
 import com.sequenceiq.cloudbreak.aspect.HasPermission;
-import com.sequenceiq.cloudbreak.aspect.PermissionType;
 import com.sequenceiq.cloudbreak.service.EntityType;
 import com.sequenceiq.periscope.domain.TimeAlert;
 
@@ -18,7 +16,4 @@ public interface TimeAlertRepository extends BaseRepository<TimeAlert, Long> {
     TimeAlert findByCluster(@Param("alertId") Long alertId, @Param("clusterId") Long clusterId);
 
     List<TimeAlert> findAllByCluster(@Param("clusterId") Long clusterId);
-
-    @HasPermission(condition = ConditionType.PRE, targetIndex = 0, permission = PermissionType.WRITE)
-    void delete(Long id);
 }

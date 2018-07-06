@@ -110,9 +110,7 @@ public class SmartSenseSubscriptionService {
     }
 
     private Optional<SmartSenseSubscription> obtainSmartSenseSubscription(IdentityUser cbUser) {
-        Optional<SmartSenseSubscription> subscription = Optional.ofNullable(
-                smartSenseSubscriptionRepository.findByAccountAndOwner(cbUser.getAccount(), cbUser.getUserId())
-        );
+        Optional<SmartSenseSubscription> subscription = getByAccountAndOwnerSilently(cbUser);
         if (subscription.isPresent()) {
             upgradeDefaultSmartSenseSubscription(subscription.get());
         } else {
@@ -120,6 +118,15 @@ public class SmartSenseSubscriptionService {
             subscription = Optional.ofNullable(createSubscriptionFromIdentityUser(cbUser));
         }
         return subscription;
+    }
+
+    private Optional<SmartSenseSubscription> getByAccountAndOwnerSilently(IdentityUser cbUser) {
+        try {
+            return Optional.ofNullable(smartSenseSubscriptionRepository.findByAccountAndOwner(cbUser.getAccount(), cbUser.getUserId()));
+        } catch (AccessDeniedException ignore) {
+            return Optional.empty();
+        }
+
     }
 
     private void upgradeDefaultSmartSenseSubscription(SmartSenseSubscription subscription) {

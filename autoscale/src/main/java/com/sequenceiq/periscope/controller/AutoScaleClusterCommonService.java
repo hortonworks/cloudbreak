@@ -90,7 +90,7 @@ public class AutoScaleClusterCommonService {
     public void deleteCluster(Long clusterId) {
         PeriscopeUser user = authenticatedUserService.getPeriscopeUser();
         MDCBuilder.buildMdcContext(user, clusterId);
-        clusterService.removeOne(clusterId);
+        clusterService.removeById(clusterId);
     }
 
     public AutoscaleClusterResponse setState(Long clusterId, StateJson stateJson) {
