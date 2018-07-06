@@ -172,7 +172,9 @@ public class ClusterHostServiceRunner {
             HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
             List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
             SaltConfig saltConfig = createSaltConfig(stack, cluster, gatewayConfigService.getPrimaryGatewayConfig(stack), gatewayConfigs);
-            hostOrchestrator.runService(gatewayConfigs, allNodes, saltConfig, clusterDeletionBasedModel(stack.getId(), cluster.getId()));
+            ExitCriteriaModel exitCriteriaModel = clusterDeletionBasedModel(stack.getId(), cluster.getId());
+            hostOrchestrator.initServiceRun(gatewayConfigs, allNodes, saltConfig, exitCriteriaModel);
+            hostOrchestrator.runService(gatewayConfigs, allNodes, saltConfig, exitCriteriaModel);
         } catch (CloudbreakOrchestratorCancelledException e) {
             throw new CancellationException(e.getMessage());
         } catch (CloudbreakOrchestratorException | IOException e) {
