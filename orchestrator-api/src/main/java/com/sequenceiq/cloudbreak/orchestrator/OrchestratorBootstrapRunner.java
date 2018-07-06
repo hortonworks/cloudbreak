@@ -7,7 +7,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorCancelledException;
+import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorInProgressException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorTerminateException;
@@ -147,7 +150,11 @@ public class OrchestratorBootstrapRunner implements Callable<Boolean> {
         long elapsedTimeRounded = Math.max(Math.round((double) retryCount * SLEEP_TIME / MS_IN_SEC / SEC_IN_MIN), MINIMUM_DISPLAYED_TIME_IN_MIN);
         String errorMessage = String.format(messageTemplate, elapsedTimeRounded, cause);
         LOGGER.error(errorMessage);
-        throw new CloudbreakOrchestratorFailedException(errorMessage);
+        Multimap<String, String> nodesWithErrors = ArrayListMultimap.create();
+        if (actualException instanceof CloudbreakOrchestratorException) {
+            nodesWithErrors = ((CloudbreakOrchestratorException) actualException).getNodesWithErrors();
+        }
+        throw new CloudbreakOrchestratorFailedException(errorMessage, nodesWithErrors);
     }
 
     private boolean belowAttemptThreshold(int retryCount, int errorCount) {

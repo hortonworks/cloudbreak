@@ -62,7 +62,7 @@ base:
     - match: grain
     - smartsense
 
-  'roles:ambari*':
+  'recipes:pre-ambari-start':
     - match: grain
     - recipes.pre-ambari-start
 

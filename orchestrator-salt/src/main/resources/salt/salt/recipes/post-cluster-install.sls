@@ -21,6 +21,7 @@ run_post_cluster_install_script_{{ script_name }}:
     - onlyif:
       - test -f /opt/scripts/post-cluster-install/{{ script_name }}
       - test ! -f /var/log/recipes/post-cluster-install/{{ script_name }}.success
+    - timeout: 600
 {% endfor %}
 {% endif %}
 

@@ -32,7 +32,6 @@ import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintPreparationObject;
 import com.sequenceiq.cloudbreak.blueprint.CentralBlueprintUpdater;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
-import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
@@ -42,9 +41,10 @@ import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.PollingResult;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
+import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariAdapter.ClusterStatusResult;
 import com.sequenceiq.cloudbreak.service.cluster.api.ClusterSetupService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariOperationService;
-import com.sequenceiq.cloudbreak.service.cluster.flow.RecipeEngine;
+import com.sequenceiq.cloudbreak.service.cluster.flow.recipe.RecipeEngine;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
@@ -186,13 +186,13 @@ public class AmbariClusterSetupService implements ClusterSetupService {
 
     private String constructClusterFailedMessage(Long clusterId, AmbariClient ambariClient) {
         String ambariClusterInstallFailedMsg = cloudbreakMessagesService.getMessage(AMBARI_CLUSTER_INSTALL_FAILED.code());
-        AmbariAdapter.ClusterStatusResult clusterStatusResult = ambariAdapter.getClusterStatusHostComponentMap(ambariClient);
+        ClusterStatusResult clusterStatusResult = ambariAdapter.getClusterStatusHostComponentMap(ambariClient);
         LOGGER.error("There are not started services. Cluster: [{}], services: [{}]", clusterId, clusterStatusResult.getComponentsInStatus());
         return String.format("%s Not started services: [%s]", ambariClusterInstallFailedMsg, clusterStatusResult.getComponentsInStatus());
     }
 
     @Override
-    public void waitForHosts(Stack stack) throws CloudbreakSecuritySetupException {
+    public void waitForHosts(Stack stack) {
         ambariPollingServiceProvider
                 .hostsPollingService(
                         stack,
@@ -216,7 +216,7 @@ public class AmbariClusterSetupService implements ClusterSetupService {
     }
 
     @Override
-    public boolean available(Stack stack) throws CloudbreakSecuritySetupException {
+    public boolean available(Stack stack) {
         AmbariClient ambariClient = clientFactory.getAmbariClient(stack, stack.getCluster());
         return ambariPollingServiceProvider.isAmbariAvailable(stack, ambariClient);
     }
