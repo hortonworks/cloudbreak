@@ -138,7 +138,7 @@ public class AlertService {
     }
 
     public void deleteTimeAlert(Long clusterId, Long alertId) {
-        Cluster cluster = clusterService.findOneById(clusterId);
+        Cluster cluster = clusterService.findById(clusterId);
         TimeAlert timeAlert = timeAlertRepository.findByCluster(alertId, clusterId);
         cluster.setTimeAlerts(removeTimeAlert(cluster, alertId));
         timeAlertRepository.delete(timeAlert);
