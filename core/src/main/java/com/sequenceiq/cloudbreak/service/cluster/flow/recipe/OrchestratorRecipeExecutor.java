@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBa
 import static com.sequenceiq.cloudbreak.service.cluster.flow.recipe.RecipeEngine.DEFAULT_RECIPES;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -19,20 +20,20 @@ import org.springframework.stereotype.Component;
 
 import com.google.api.client.util.Joiner;
 import com.sequenceiq.cloudbreak.api.model.Status;
-import com.sequenceiq.cloudbreak.controller.NotFoundException;
-import com.sequenceiq.cloudbreak.core.CloudbreakException;
+import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.HostOrchestratorResolver;
-import com.sequenceiq.cloudbreak.domain.HostGroup;
-import com.sequenceiq.cloudbreak.domain.InstanceGroup;
-import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Recipe;
-import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.orchestrator.model.RecipeModel;
+import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.recipe.RecipeExecutionFailureCollector.RecipeExecutionFailure;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
@@ -147,19 +148,18 @@ public class OrchestratorRecipeExecutor {
         Map<HostGroup, List<RecipeModel>> recipeMap = getHostgroupToRecipeMap(hostGroupService.getByCluster(stack.getCluster().getId()));
         Set<RecipeExecutionFailure> failures = recipeExecutionFailureCollector.collectErrors((CloudbreakOrchestratorException) e.getCause().getCause(),
                 recipeMap, instanceGroupService.findByStackId(stack.getId()));
-        StringBuilder message = new StringBuilder("Failed to execute recipe(s): ");
-        failures.forEach(failure ->
-                message.append("Recipe: '")
-                        .append(failure.getRecipe().getName())
-                        .append("' - \n")
-                        .append("Hostgroup: '")
-                        .append(failure.getInstanceMetaData().getInstanceGroup().getGroupName())
-                        .append("' - \n")
-                        .append("Instance: '")
-                        .append(failure.getInstanceMetaData().getDiscoveryFQDN())
-                        .append("\'  |||  \n")
+        StringBuilder messagePrefix = new StringBuilder("Failed to execute recipe(s): \n");
+        String message = failures.stream().map(failure -> new StringBuilder("Recipe: '")
+                .append(failure.getRecipe().getName())
+                .append("' - \n")
+                .append("Hostgroup: '")
+                .append(failure.getInstanceMetaData().getInstanceGroup().getGroupName())
+                .append("' - \n")
+                .append("Instance: '")
+                .append(failure.getInstanceMetaData().getDiscoveryFQDN())
+                .toString()).collect(Collectors.joining("   ---||---   ")
         );
-        return message.toString();
+        return messagePrefix.append(message).toString();
     }
 
     private Map<HostGroup, List<RecipeModel>> getHostgroupToRecipeMap(Set<HostGroup> hostGroups) {
@@ -192,7 +192,7 @@ public class OrchestratorRecipeExecutor {
     private void recipesEvent(Long stackId, Status status, Map<String, List<RecipeModel>> recipeMap) {
         List<String> recipes = new ArrayList<>();
         for (Entry<String, List<RecipeModel>> entry : recipeMap.entrySet()) {
-            List<String> recipeNamesPerHostgroup = new ArrayList<>(entry.getValue().size());
+            Collection<String> recipeNamesPerHostgroup = new ArrayList<>(entry.getValue().size());
             for (RecipeModel rm : entry.getValue()) {
                 //filter out default recipes
                 if (!DEFAULT_RECIPES.contains(rm.getName())) {
