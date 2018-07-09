@@ -123,36 +123,42 @@ public class TransactionService {
 
     @Service
     @Transactional
-    private static class TransactionExecutorService {
+    private static class TransactionExecutorServiceProd implements TransactionExecutorService {
 
-        TransactionExecutorService() {
+        TransactionExecutorServiceProd() {
         }
 
+        @Override
         @Transactional(TxType.REQUIRED)
         public <T> T required(Supplier<T> callback) {
             return callback.get();
         }
 
+        @Override
         @Transactional(TxType.REQUIRES_NEW)
         public <T> T requiresNew(Supplier<T> callback) {
             return callback.get();
         }
 
+        @Override
         @Transactional(TxType.MANDATORY)
         public <T> T mandatory(Supplier<T> callback) {
             return callback.get();
         }
 
+        @Override
         @Transactional(TxType.SUPPORTS)
         public <T> T supports(Supplier<T> callback) {
             return callback.get();
         }
 
+        @Override
         @Transactional(TxType.NOT_SUPPORTED)
         public <T> T notSupported(Supplier<T> callback) {
             return callback.get();
         }
 
+        @Override
         @Transactional(TxType.NEVER)
         public <T> T never(Supplier<T> callback) {
             return callback.get();

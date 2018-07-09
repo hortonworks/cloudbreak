@@ -5,24 +5,25 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.AmbariAddressJson;
-import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupAdjustmentJson;
-import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.api.model.UpdateClusterJson;
 import com.sequenceiq.cloudbreak.api.model.UpdateStackJson;
+import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupAdjustmentJson;
+import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.cloudbreak.common.type.ScalingHardLimitsService;
 import com.sequenceiq.periscope.api.model.ScalingStatus;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.History;
+import com.sequenceiq.periscope.domain.MetricType;
 import com.sequenceiq.periscope.domain.ScalingPolicy;
 import com.sequenceiq.periscope.log.MDCBuilder;
 import com.sequenceiq.periscope.notification.HttpNotificationSender;
 import com.sequenceiq.periscope.service.HistoryService;
+import com.sequenceiq.periscope.service.MetricService;
 
 @Component("ScalingRequest")
 @Scope("prototype")
@@ -49,8 +50,11 @@ public class ScalingRequest implements Runnable {
     @Inject
     private HttpNotificationSender notificationSender;
 
-    @Autowired
+    @Inject
     private ScalingHardLimitsService scalingHardLimitsService;
+
+    @Inject
+    private MetricService metricService;
 
     public ScalingRequest(Cluster cluster, ScalingPolicy policy, int totalNodes, int desiredNodeCount) {
         this.cluster = cluster;
@@ -75,6 +79,7 @@ public class ScalingRequest implements Runnable {
     }
 
     private void scaleUp(int scalingAdjustment, int totalNodes) {
+        metricService.incrementCounter(MetricType.CLUSTER_UPSCALE_TRIGGERED);
         if (scalingHardLimitsService.isViolatingMaxUpscaleStepInNodeCount(scalingAdjustment)) {
             LOGGER.info("Upscale requested for {} nodes. Upscaling with the maximum allowed of {} node(s)",
                     scalingAdjustment, scalingHardLimitsService.getMaxUpscaleStepInNodeCount());
@@ -98,16 +103,19 @@ public class ScalingRequest implements Runnable {
             cloudbreakClient.stackV1Endpoint().put(stackId, updateStackJson);
             scalingStatus = ScalingStatus.SUCCESS;
             statusReason = "Upscale successfully triggered";
+            metricService.incrementCounter(MetricType.CLUSTER_UPSCALE_SUCCESSFUL);
         } catch (RuntimeException e) {
             scalingStatus = ScalingStatus.FAILED;
             statusReason = "Couldn't trigger upscaling due to: " + e.getMessage();
             LOGGER.error(statusReason, e);
+            metricService.incrementCounter(MetricType.CLUSTER_UPSCALE_FAILED);
         } finally {
             createHistoryAndNotify(totalNodes, statusReason, scalingStatus);
         }
     }
 
     private void scaleDown(int scalingAdjustment, int totalNodes) {
+        metricService.incrementCounter(MetricType.CLUSTER_DOWNSCALE_TRIGGERED);
         String hostGroup = policy.getHostGroup();
         String ambari = cluster.getHost();
         AmbariAddressJson ambariAddressJson = new AmbariAddressJson();
@@ -126,8 +134,10 @@ public class ScalingRequest implements Runnable {
             cloudbreakClient.clusterEndpoint().put(stackId, updateClusterJson);
             scalingStatus = ScalingStatus.SUCCESS;
             statusReason = "Downscale successfully triggered";
+            metricService.incrementCounter(MetricType.CLUSTER_DOWNSCALE_SUCCESSFUL);
         } catch (Exception e) {
             scalingStatus = ScalingStatus.FAILED;
+            metricService.incrementCounter(MetricType.CLUSTER_DOWNSCALE_FAILED);
             statusReason = "Couldn't trigger downscaling due to: " + e.getMessage();
             LOGGER.error(statusReason, e);
         } finally {
