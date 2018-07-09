@@ -5,8 +5,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 
 import org.junit.Assert;
@@ -30,6 +32,7 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.domain.UserProfile;
 import com.sequenceiq.cloudbreak.repository.ImageCatalogRepository;
@@ -87,6 +90,7 @@ public class ImageCatalogServiceTest {
 
         IdentityUser user = getIdentityUser();
         when(authenticatedUserService.getCbUser()).thenReturn(user);
+        when(accountPreferencesService.enabledPlatforms()).thenReturn(new HashSet<>(Arrays.asList("AZURE", "AWS", "GCP", "OPENSTACK")));
 
         constants.addAll(Collections.singletonList(new AwsCloudConstant()));
 
@@ -336,12 +340,11 @@ public class ImageCatalogServiceTest {
         ImageCatalog imageCatalog = new ImageCatalog();
         imageCatalog.setImageCatalogUrl("");
         imageCatalog.setImageCatalogName("default");
-        StatedImages images = underTest.getImages(imageCatalog, "owncloud", "1.16.4");
 
-        boolean noMatch = images.getImages().getBaseImages().isEmpty()
-                && images.getImages().getHdpImages().isEmpty()
-                && images.getImages().getHdfImages().isEmpty();
-        Assert.assertTrue("Result contains no Ambari Image for the version and platform.", noMatch);
+        thrown.expectMessage("Platform(s) owncloud are not supported by the current catalog");
+        thrown.expect(CloudbreakImageCatalogException.class);
+
+        underTest.getImages(imageCatalog, "owncloud", "1.16.4");
     }
 
     @Test

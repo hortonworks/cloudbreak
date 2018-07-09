@@ -4,3 +4,4 @@ export CB_JAVA_OPTS='-Xmx4G -Drest.debug=true -Dmock.spi.endpoint=https://test.s
 export UAA_DEFAULT_SECRET=cbsecret2015
 export UAA_DEFAULT_USER_PW=cloudbreak
 export REMOVE_CONTAINER=
+export CB_ENABLEDPLATFORMS=AZURE,AWS,GCP,OPENSTACK,YARN,MOCK

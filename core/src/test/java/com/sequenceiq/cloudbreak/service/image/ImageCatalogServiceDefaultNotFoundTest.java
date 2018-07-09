@@ -2,8 +2,10 @@ package com.sequenceiq.cloudbreak.service.image;
 
 import static org.mockito.Mockito.when;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -21,12 +23,15 @@ import com.sequenceiq.cloudbreak.domain.UserProfile;
 import com.sequenceiq.cloudbreak.repository.ImageCatalogRepository;
 import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.AuthorizationService;
+import com.sequenceiq.cloudbreak.service.account.AccountPreferencesService;
 import com.sequenceiq.cloudbreak.service.user.UserProfileService;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ImageCatalogServiceDefaultNotFoundTest {
+    private static final String[] PROVIDERS = {"aws", "azure", "openstack", "gcp"};
+
     @Mock
     private ImageCatalogProvider imageCatalogProvider;
 
@@ -45,6 +50,9 @@ public class ImageCatalogServiceDefaultNotFoundTest {
     @Mock
     private ImageCatalogRepository imageCatalogRepository;
 
+    @Mock
+    private AccountPreferencesService accountPreferencesService;
+
     @InjectMocks
     private ImageCatalogService underTest;
 
@@ -53,6 +61,7 @@ public class ImageCatalogServiceDefaultNotFoundTest {
         String catalogJson = FileReaderUtils.readFileFromClasspath("com/sequenceiq/cloudbreak/service/image/no-default-imagecatalog.json");
         CloudbreakImageCatalogV2 catalog = JsonUtil.readValue(catalogJson, CloudbreakImageCatalogV2.class);
         when(imageCatalogProvider.getImageCatalogV2("")).thenReturn(catalog);
+        when(accountPreferencesService.enabledPlatforms()).thenReturn(new HashSet<>(Arrays.asList(PROVIDERS)));
 
         IdentityUser user = getIdentityUser();
         when(authenticatedUserService.getCbUser()).thenReturn(user);

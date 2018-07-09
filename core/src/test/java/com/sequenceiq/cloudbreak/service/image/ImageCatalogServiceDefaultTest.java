@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -25,12 +26,15 @@ import com.sequenceiq.cloudbreak.domain.UserProfile;
 import com.sequenceiq.cloudbreak.repository.ImageCatalogRepository;
 import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.AuthorizationService;
+import com.sequenceiq.cloudbreak.service.account.AccountPreferencesService;
 import com.sequenceiq.cloudbreak.service.user.UserProfileService;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 @RunWith(Parameterized.class)
 public class ImageCatalogServiceDefaultTest {
+    private static final String[] PROVIDERS = {"aws", "azure", "openstack", "gcp"};
+
     private final String catalogFile;
 
     private final String provider;
@@ -62,6 +66,9 @@ public class ImageCatalogServiceDefaultTest {
 
     @Mock
     private ImageCatalogRepository imageCatalogRepository;
+
+    @Mock
+    private AccountPreferencesService accountPreferencesService;
 
     @InjectMocks
     private ImageCatalogService underTest;
@@ -110,6 +117,7 @@ public class ImageCatalogServiceDefaultTest {
         String catalogJson = FileReaderUtils.readFileFromClasspath(catalogFile);
         CloudbreakImageCatalogV2 catalog = JsonUtil.readValue(catalogJson, CloudbreakImageCatalogV2.class);
         when(imageCatalogProvider.getImageCatalogV2("")).thenReturn(catalog);
+        when(accountPreferencesService.enabledPlatforms()).thenReturn(new HashSet<>(Arrays.asList(PROVIDERS)));
 
         IdentityUser user = getIdentityUser();
         when(authenticatedUserService.getCbUser()).thenReturn(user);

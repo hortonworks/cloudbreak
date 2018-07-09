@@ -235,17 +235,11 @@ public class ImageCatalogTests extends CloudbreakTest {
                 "check image catalog name in request");
     }
 
-    @Test
+    @Test(expectedExceptions = ForbiddenException.class)
     public void testGetImageCatalogByInvalidProvider() throws Exception {
         given(CloudbreakClient.isCreated());
         getItContext().putContextParam(CLOUDPROVIDER, INVALID_PROVIDER_NAME);
         when(ImageCatalog.getImagesByProvider(), "get the imagecatalog by invalid provider");
-        then(ImageCatalog.assertThis(
-                (imageCatalog, t) -> {
-                    Assert.assertTrue(imageCatalog.getResponseByProvider().getBaseImages().isEmpty());
-                    Assert.assertTrue(imageCatalog.getResponseByProvider().getHdfImages().isEmpty());
-                    Assert.assertTrue(imageCatalog.getResponseByProvider().getHdpImages().isEmpty());
-                }), "check no base/hdf/hdp images are listed");
     }
 
     @Test
