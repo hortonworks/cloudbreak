@@ -149,17 +149,12 @@ public class ImageCatalogService {
     }
 
     public StatedImages getImages(String name, Set<String> providers) throws CloudbreakImageCatalogException {
-        ImageCatalog imageCatalog = null;
         try {
-            imageCatalog = get(name);
+            ImageCatalog imageCatalog = get(name);
+            return getImages(imageCatalog, providers, cbVersion);
         } catch (AccessDeniedException | NotFoundException ignore) {
-
+            throw new CloudbreakImageCatalogException(String.format("The %s catalog does not exist or does not belongs to your account.", name));
         }
-
-        if (imageCatalog == null) {
-            return statedImages(emptyImages(), null, null);
-        }
-        return getImages(imageCatalog, providers, cbVersion);
     }
 
     public StatedImage getImage(String imageId) throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {

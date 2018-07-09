@@ -21,6 +21,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.google.common.collect.ImmutableSet;
@@ -29,7 +30,6 @@ import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV2;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
-import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
@@ -361,15 +361,14 @@ public class ImageCatalogServiceTest {
 
     @Test
     public void testGetImagesWhenCustomImageCatalogDoesNotExists() throws Exception {
-        when(imageCatalogRepository.findByName("name", "userId", "account")).thenReturn(null);
-        Images images = underTest.getImages("name", "aws").getImages();
+        when(imageCatalogRepository.findByName("verycool", "userId", "account")).thenThrow(new AccessDeniedException("denied"));
+
+        thrown.expectMessage("The verycool catalog does not exist or does not belongs to your account.");
+        thrown.expect(CloudbreakImageCatalogException.class);
+
+        underTest.getImages("verycool", "aws").getImages();
 
         verify(imageCatalogProvider, times(0)).getImageCatalogV2("");
-
-        Assert.assertTrue("Base images should be empty!", images.getBaseImages().isEmpty());
-        Assert.assertTrue("HDF images should be empty!", images.getHdfImages().isEmpty());
-        Assert.assertTrue("HDP images should be empty!", images.getHdpImages().isEmpty());
-
     }
 
     @Test

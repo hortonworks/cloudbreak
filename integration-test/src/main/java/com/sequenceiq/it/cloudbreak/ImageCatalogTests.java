@@ -242,7 +242,7 @@ public class ImageCatalogTests extends CloudbreakTest {
         when(ImageCatalog.getImagesByProvider(), "get the imagecatalog by invalid provider");
     }
 
-    @Test
+    @Test(expectedExceptions = ForbiddenException.class)
     public void testGetByInvalidProviderFromImageCatalog() throws Exception {
         given(CloudbreakClient.isCreated());
         getItContext().putContextParam(CLOUDPROVIDER, INVALID_PROVIDER_NAME);
@@ -264,8 +264,6 @@ public class ImageCatalogTests extends CloudbreakTest {
         given(ImageCatalog.request()
                 .withName("asdfghj987x"));
         when(ImageCatalog.getImagesByProviderFromImageCatalog(), " get by invalid provider from image catalog");
-        then(ImageCatalog.assertThis(
-                (imageCatalog, t) -> Assert.assertNull(imageCatalog.getResponseByProvider())), "check no response");
     }
 
     @Test(expectedExceptions = ForbiddenException.class)
@@ -274,8 +272,6 @@ public class ImageCatalogTests extends CloudbreakTest {
         given(ImageCatalog.request()
                 .withName(DEFAULT_IMAGECATALOG_NAME + "sss"));
         when(ImageCatalog.getRequestFromName(), " get request of not existing image catalog");
-        then(ImageCatalog.assertThis(
-                (imageCatalog, t) -> Assert.assertNotNull(imageCatalog.getRequestByName())), "check request is empty");
     }
 
     @AfterSuite
