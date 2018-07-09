@@ -38,6 +38,7 @@ import com.sequenceiq.periscope.monitor.evaluator.CronTimeEvaluator;
 import com.sequenceiq.periscope.repository.ClusterRepository;
 import com.sequenceiq.periscope.repository.PeriscopeNodeRepository;
 import com.sequenceiq.periscope.service.DateTimeService;
+import com.sequenceiq.periscope.service.MetricService;
 import com.sequenceiq.periscope.service.StackCollectorService;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -78,6 +79,9 @@ public class LeaderElectionServiceTest {
 
     @Mock
     private CronTimeEvaluator cronTimeEvaluator;
+
+    @Mock
+    private MetricService metricService;
 
     @Before
     public void init() {

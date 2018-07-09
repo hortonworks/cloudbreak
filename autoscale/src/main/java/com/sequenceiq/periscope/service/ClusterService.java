@@ -8,24 +8,31 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.StreamSupport;
 
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.periscope.api.model.ClusterState;
 import com.sequenceiq.periscope.api.model.ScalingConfigurationRequest;
 import com.sequenceiq.periscope.domain.Ambari;
 import com.sequenceiq.periscope.domain.Cluster;
+import com.sequenceiq.periscope.domain.MetricType;
 import com.sequenceiq.periscope.domain.PeriscopeUser;
 import com.sequenceiq.periscope.domain.SecurityConfig;
 import com.sequenceiq.periscope.model.AmbariStack;
 import com.sequenceiq.periscope.repository.ClusterRepository;
 import com.sequenceiq.periscope.repository.SecurityConfigRepository;
 import com.sequenceiq.periscope.repository.UserRepository;
+import com.sequenceiq.periscope.service.ha.PeriscopeNodeConfig;
 
 @Service
 public class ClusterService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClusterService.class);
 
     @Inject
     private ClusterRepository clusterRepository;
@@ -39,8 +46,19 @@ public class ClusterService {
     @Inject
     private AlertService alertService;
 
+    @Inject
+    private PeriscopeNodeConfig periscopeNodeConfig;
+
+    @Inject
+    private MetricService metricService;
+
     public Cluster create(PeriscopeUser user, AmbariStack stack, ClusterState clusterState) {
         return create(new Cluster(), user, stack, clusterState);
+    }
+
+    @PostConstruct
+    protected void init() {
+        calculateClusterStateMetrics();
     }
 
     public Cluster create(Cluster cluster, PeriscopeUser user, AmbariStack stack, ClusterState clusterState) {
@@ -58,6 +76,7 @@ public class ClusterService {
             securityConfig.setCluster(cluster);
             securityConfigRepository.save(securityConfig);
         }
+        calculateClusterStateMetrics();
         return cluster;
     }
 
@@ -87,6 +106,7 @@ public class ClusterService {
         }
         cluster = save(cluster);
         addPrometheusAlertsToConsul(cluster);
+        calculateClusterStateMetrics();
         return cluster;
     }
 
@@ -109,6 +129,7 @@ public class ClusterService {
     public void removeById(Long clusterId) {
         Cluster cluster = findById(clusterId);
         clusterRepository.delete(cluster);
+        calculateClusterStateMetrics();
     }
 
     public Cluster updateScalingConfiguration(Long clusterId, ScalingConfigurationRequest scalingConfiguration) {
@@ -130,16 +151,24 @@ public class ClusterService {
 
     public Cluster setState(Long clusterId, ClusterState state) {
         Cluster cluster = findById(clusterId);
-        cluster.setState(state);
         addPrometheusAlertsToConsul(cluster);
-        return clusterRepository.save(cluster);
+        return setState(cluster, state);
+    }
+
+    public Cluster setState(Cluster cluster, ClusterState state) {
+        cluster.setState(state);
+        cluster = clusterRepository.save(cluster);
+        calculateClusterStateMetrics();
+        return cluster;
     }
 
     public Cluster setAutoscaleState(Long clusterId, boolean enableAutoscaling) {
         Cluster cluster = findById(clusterId);
         cluster.setAutoscalingEnabled(enableAutoscaling);
         addPrometheusAlertsToConsul(cluster);
-        return clusterRepository.save(cluster);
+        cluster = clusterRepository.save(cluster);
+        calculateClusterStateMetrics();
+        return cluster;
     }
 
     public List<Cluster> findAllByStateAndNode(ClusterState state, String nodeId) {
@@ -178,4 +207,11 @@ public class ClusterService {
         }
     }
 
+    private void calculateClusterStateMetrics() {
+        metricService.submitGauge(MetricType.CLUSTER_STATE_ACTIVE,
+                clusterRepository.countByStateAndAutoscalingEnabledAndPeriscopeNodeId(ClusterState.RUNNING, true, periscopeNodeConfig.getId()));
+        metricService.submitGauge(MetricType.CLUSTER_STATE_SUSPENDED,
+                clusterRepository.countByStateAndAutoscalingEnabledAndPeriscopeNodeId(ClusterState.SUSPENDED, true, periscopeNodeConfig.getId()));
+    }
 }
+

@@ -80,8 +80,7 @@ public class UpdateFailedHandler implements ApplicationListener<UpdateFailedEven
     }
 
     private void suspendCluster(Cluster cluster) {
-        cluster.setState(ClusterState.SUSPENDED);
-        clusterService.save(cluster);
+        clusterService.setState(cluster, ClusterState.SUSPENDED);
         LOGGER.info("Suspend cluster monitoring due to failing update attempts");
     }
 
