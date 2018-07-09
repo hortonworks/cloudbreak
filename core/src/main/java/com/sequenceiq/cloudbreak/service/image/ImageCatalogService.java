@@ -322,6 +322,7 @@ public class ImageCatalogService {
         LOGGER.info("Determine images for imageCatalogUrl: '{}', platforms: '{}' and Cloudbreak version: '{}'.",
                 imageCatalog.getImageCatalogUrl(), platforms, cbVersion);
         StatedImages images;
+        validateRequestPlatforms(platforms);
         CloudbreakImageCatalogV2 imageCatalogV2 = imageCatalogProvider.getImageCatalogV2(imageCatalog.getImageCatalogUrl());
         Set<String> suppertedVersions;
         if (imageCatalogV2 != null) {
@@ -361,6 +362,18 @@ public class ImageCatalogService {
                     imageCatalog.getImageCatalogName());
         }
         return images;
+    }
+
+    public void validateRequestPlatforms(Set<String> platforms) throws CloudbreakImageCatalogException {
+        Set<String> collect = platforms.stream()
+                .filter(requestedPlatform -> accountPreferencesService.enabledPlatforms().stream()
+                        .filter(enabledPlatform -> enabledPlatform.equalsIgnoreCase(requestedPlatform))
+                        .collect(Collectors.toSet()).isEmpty())
+                .collect(Collectors.toSet());
+        if (!collect.isEmpty()) {
+            throw new CloudbreakImageCatalogException(String.format("Platform(s) %s are not supported by the current catalog",
+                    org.apache.commons.lang3.StringUtils.join(collect, ",")));
+        }
     }
 
     public Images propagateImagesIfRequested(String name, boolean withImages) {
