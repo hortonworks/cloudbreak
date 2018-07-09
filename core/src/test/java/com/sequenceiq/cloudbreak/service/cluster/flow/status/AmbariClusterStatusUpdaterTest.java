@@ -100,6 +100,18 @@ public class AmbariClusterStatusUpdaterTest {
         BDDMockito.verify(clusterService, BDDMockito.times(0)).updateClusterStatusByStackId(BDDMockito.any(Long.class), BDDMockito.any(Status.class));
     }
 
+    @Test
+    public void testUpdateClusterStatusShouldUpdateWhenStackStatusStopped() {
+        // GIVEN
+        Stack stack = createStack(Status.STOPPED, Status.AVAILABLE);
+        BDDMockito.given(ambariClientProvider.getAmbariClient(BDDMockito.nullable(HttpClientConfig.class),
+                BDDMockito.nullable(Integer.class), BDDMockito.any(Cluster.class))).willThrow(new RuntimeException("ex"));
+        // WHEN
+        underTest.updateClusterStatus(stack, stack.getCluster());
+        // THEN
+        BDDMockito.verify(clusterService, BDDMockito.times(1)).updateClusterStatusByStackId(BDDMockito.any(Long.class), BDDMockito.eq(stack.getStatus()));
+    }
+
     private Stack createStack(Status stackStatus) {
         Stack stack = new Stack();
         stack.setId(TEST_STACK_ID);
