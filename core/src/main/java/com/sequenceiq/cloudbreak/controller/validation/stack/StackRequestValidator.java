@@ -1,22 +1,37 @@
 package com.sequenceiq.cloudbreak.controller.validation.stack;
 
+import static com.sequenceiq.cloudbreak.api.model.Status.AVAILABLE;
+
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import com.google.common.collect.Sets;
+import com.sequenceiq.cloudbreak.api.model.TemplateRequest;
+import com.sequenceiq.cloudbreak.api.model.stack.StackRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupBase;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupBase;
-import com.sequenceiq.cloudbreak.api.model.stack.StackRequest;
-import com.sequenceiq.cloudbreak.api.model.TemplateRequest;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.cloudbreak.controller.validation.Validator;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 
 @Component
 public class StackRequestValidator implements Validator<StackRequest> {
+
+    @Inject
+    private ClusterService clusterService;
+
+    @Inject
+    private StackRepository stackRepository;
 
     private final Validator<TemplateRequest> templateRequestValidator;
 
@@ -32,6 +47,7 @@ public class StackRequestValidator implements Validator<StackRequest> {
         }
         validateHostgroupInstanceGroupMapping(subject, validationBuilder);
         validateTemplates(subject, validationBuilder);
+        validateSharedService(subject, validationBuilder);
         return validationBuilder.build();
     }
 
@@ -68,6 +84,21 @@ public class StackRequestValidator implements Validator<StackRequest> {
                 .map(i -> templateRequestValidator.validate(i.getTemplate()))
                 .reduce(ValidationResult::merge)
                 .ifPresent(resultBuilder::merge);
+    }
+
+    private void validateSharedService(StackRequest stackRequest, ValidationResultBuilder validationBuilder) {
+        if (stackRequest.getClusterToAttach() != null) {
+            Optional<Stack> stack = Optional.ofNullable(stackRepository.findOne(stackRequest.getClusterToAttach()));
+            if (stack.isPresent() && !AVAILABLE.equals(stack.get().getStatus())) {
+                Optional<Cluster> cluster = Optional.ofNullable(clusterService.retrieveClusterByStackId(stackRequest.getClusterToAttach()));
+                if (cluster.isPresent() && !AVAILABLE.equals(cluster.get().getStatus())) {
+                    validationBuilder.error("Ambari installation in progress or some of it's components has failed. "
+                            + "Please check Ambari before trying to attach cluster to datalake");
+                }
+            } else {
+                validationBuilder.error("Unable to attach to datalake because it doesn't exists or it's infrastructure is not ready");
+            }
+        }
     }
 }
 
