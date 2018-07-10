@@ -44,11 +44,13 @@ public abstract class AbstractRdsConfigProvider {
         if (isRdsConfigNeeded(cluster.getBlueprint())) {
             Set<RDSConfig> rdsConfigs = createPostgresRdsConfigIfNeeded(stack, cluster);
             RDSConfig rdsConfig = rdsConfigs.stream().filter(rdsConfig1 -> rdsConfig1.getType().equalsIgnoreCase(getRdsType().name())).findFirst().get();
-            Map<String, Object> postgres = new HashMap<>();
-            postgres.put("database", getDb());
-            postgres.put("user", getDbUser());
-            postgres.put("password", rdsConfig.getConnectionPassword());
-            return Collections.singletonMap(getPillarKey(), postgres);
+            if (rdsConfig.getStatus() == ResourceStatus.DEFAULT) {
+                Map<String, Object> postgres = new HashMap<>();
+                postgres.put("database", getDb());
+                postgres.put("user", getDbUser());
+                postgres.put("password", rdsConfig.getConnectionPassword());
+                return Collections.singletonMap(getPillarKey(), postgres);
+            }
         }
         return Collections.emptyMap();
     }
