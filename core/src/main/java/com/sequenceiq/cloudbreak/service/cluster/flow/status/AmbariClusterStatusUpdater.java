@@ -44,6 +44,10 @@ public class AmbariClusterStatusUpdater {
 
     public void updateClusterStatus(Stack stack, Cluster cluster) {
         if (isStackOrClusterStatusInvalid(stack, cluster)) {
+            if (stack.isStackInStopPhase() && cluster != null) {
+                updateClusterStatus(stack.getId(), cluster, stack.getStatus());
+                cluster.setStatus(stack.getStatus());
+            }
             String msg = cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_COULD_NOT_SYNC.code(), Arrays.asList(stack.getStatus(),
                     cluster == null ? "" : cluster.getStatus()));
             LOGGER.warn(msg);

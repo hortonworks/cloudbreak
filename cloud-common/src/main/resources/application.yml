@@ -164,20 +164,20 @@ cb:
   ambari:
     entries:
       2.6:
-        version: 2.6.2.0
+        version: 2.6.2.2
         repo:
           redhat6:
-            baseurl: http://public-repo-1.hortonworks.com/ambari/centos6/2.x/updates/2.6.2.0
+            baseurl: http://public-repo-1.hortonworks.com/ambari/centos6/2.x/updates/2.6.2.2
             gpgkey: http://public-repo-1.hortonworks.com/ambari/centos6/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins
           redhat7:
-            baseurl: http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.6.2.0
+            baseurl: http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.6.2.2
             gpgkey: http://public-repo-1.hortonworks.com/ambari/centos7/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins
           debian9:
-            baseurl: http://public-repo-1.hortonworks.com/ambari/debian9/2.x/updates/2.6.2.0
+            baseurl: http://public-repo-1.hortonworks.com/ambari/debian9/2.x/updates/2.6.2.2
           ubuntu16:
-            baseurl: http://public-repo-1.hortonworks.com/ambari/ubuntu16/2.x/updates/2.6.2.0
+            baseurl: http://public-repo-1.hortonworks.com/ambari/ubuntu16/2.x/updates/2.6.2.2
           sles12:
-            baseurl: http://public-repo-1.hortonworks.com/ambari/sles12/2.x/updates/2.6.2.0
+            baseurl: http://public-repo-1.hortonworks.com/ambari/sles12/2.x/updates/2.6.2.2
             gpgkey: http://public-repo-1.hortonworks.com/ambari/sles12/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins
       2.7:
         version: 2.7.0.0-508
