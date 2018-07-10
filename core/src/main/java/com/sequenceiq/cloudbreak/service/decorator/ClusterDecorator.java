@@ -39,7 +39,6 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.service.AmbariHaComponentFilter;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
-import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariConfigurationService;
 import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.sharedservice.SharedServiceConfigProvider;
@@ -82,9 +81,6 @@ public class ClusterDecorator {
 
     @Inject
     private ClusterProxyDecorator clusterProxyDecorator;
-
-    @Inject
-    private AmbariConfigurationService ambariConfigurationService;
 
     @Inject
     private AmbariDatabaseMapper ambariDatabaseMapper;
@@ -195,8 +191,6 @@ public class ClusterDecorator {
                     stack.isPublicInAccount());
             subject.getRdsConfigs().add(rdsConfigService.createIfNotExists(user, rdsConfig));
         }
-
-        ambariConfigurationService.createDefaultRdsConfigIfNeeded(stack, subject).ifPresent(rdsConfig -> subject.getRdsConfigs().add(rdsConfig));
     }
 
     private void prepareHostGroups(Stack stack, IdentityUser user, Cluster cluster, Iterable<HostGroupRequest> hostGroupsJsons) {
