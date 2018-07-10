@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.cloud.PlatformResources;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfigs;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.CloudEncryptionKeys;
 import com.sequenceiq.cloudbreak.cloud.model.CloudGateWays;
 import com.sequenceiq.cloudbreak.cloud.model.CloudIpPools;
 import com.sequenceiq.cloudbreak.cloud.model.CloudNetworks;
@@ -176,6 +177,11 @@ public class MockPlatformResources implements PlatformResources {
     @Override
     public CloudAccessConfigs accessConfigs(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
         return new CloudAccessConfigs(new HashSet<>());
+    }
+
+    @Override
+    public CloudEncryptionKeys encryptionKeys(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
+        return new CloudEncryptionKeys(new HashSet<>());
     }
 
     private Region getRegionByName(String name) {

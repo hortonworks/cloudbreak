@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.aws;
 
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 
@@ -28,10 +29,15 @@ import com.amazonaws.services.identitymanagement.AmazonIdentityManagement;
 import com.amazonaws.services.identitymanagement.model.InstanceProfile;
 import com.amazonaws.services.identitymanagement.model.ListInstanceProfilesResult;
 import com.amazonaws.services.identitymanagement.model.Role;
+import com.amazonaws.services.kms.AWSKMSClient;
+import com.amazonaws.services.kms.model.KeyListEntry;
+import com.amazonaws.services.kms.model.ListKeysRequest;
+import com.amazonaws.services.kms.model.ListKeysResult;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfigs;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.CloudEncryptionKeys;
 import com.sequenceiq.cloudbreak.service.CloudbreakResourceReaderService;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -54,6 +60,9 @@ public class AwsPlatformResourcesTest {
 
     @Mock
     private AmazonIdentityManagement amazonCFClient;
+
+    @Mock
+    private AWSKMSClient awskmsClient;
 
     @Before
     public void setUp() {
@@ -132,6 +141,27 @@ public class AwsPlatformResourcesTest {
         Assert.assertEquals(4L, cloudAccessConfigs.getCloudAccessConfigs().size());
     }
 
+    @Test
+    public void collectEncryptionKeysWhenWeGetBackInfoThenItShouldReturnListWithElements() {
+        ListKeysResult listKeysResult = new ListKeysResult();
+
+        Set<KeyListEntry> listEntries = new HashSet<>();
+        listEntries.add(keyListEntry(1));
+        listEntries.add(keyListEntry(2));
+        listEntries.add(keyListEntry(3));
+        listEntries.add(keyListEntry(4));
+
+        listKeysResult.setKeys(listEntries);
+
+        when(awsClient.createAWSKMS(any(AwsCredentialView.class), anyString())).thenReturn(awskmsClient);
+        when(awskmsClient.listKeys(any(ListKeysRequest.class))).thenReturn(listKeysResult);
+
+        CloudEncryptionKeys cloudEncryptionKeys =
+                underTest.encryptionKeys(new CloudCredential(1L, "aws-credential"), region("London"), new HashMap<>());
+
+        Assert.assertEquals(4L, cloudEncryptionKeys.getCloudEncryptionKeys().size());
+    }
+
     private InstanceProfile instanceProfile(int i) {
         InstanceProfile instanceProfile = new InstanceProfile();
         instanceProfile.setArn(String.format("arn-%s", i));
@@ -143,5 +173,12 @@ public class AwsPlatformResourcesTest {
         role.setRoleName(String.format("roleArn-%s", i));
         roles.add(role);
         return instanceProfile;
+    }
+
+    private KeyListEntry keyListEntry(int i) {
+        KeyListEntry keyListEntry = new KeyListEntry();
+        keyListEntry.setKeyArn(String.format("key-%s", i));
+        keyListEntry.setKeyId(String.format("%s", i));
+        return keyListEntry;
     }
 }

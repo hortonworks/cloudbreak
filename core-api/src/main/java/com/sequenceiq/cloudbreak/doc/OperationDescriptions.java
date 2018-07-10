@@ -291,6 +291,7 @@ public class OperationDescriptions {
         public static final String GET_GATEWAYS = "retrive gateways with properties";
         public static final String GET_IPPOOLS = "retrive ip pools with properties";
         public static final String GET_ACCESSCONFIGS = "retrive access configs with properties";
+        public static final String GET_ENCRYPTIONKEYS = "retrive encryption keys with properties";
     }
 
     public static class SettingsOpDescription {

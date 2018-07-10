@@ -5,6 +5,7 @@ import java.util.Map;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfigs;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.CloudEncryptionKeys;
 import com.sequenceiq.cloudbreak.cloud.model.CloudGateWays;
 import com.sequenceiq.cloudbreak.cloud.model.CloudIpPools;
 import com.sequenceiq.cloudbreak.cloud.model.CloudNetworks;
@@ -82,6 +83,14 @@ public interface PlatformResources {
      * @return the {@link CloudAccessConfigs} contains every accessrole
      */
     CloudAccessConfigs accessConfigs(CloudCredential cloudCredential, Region region, Map<String, String> filters);
+
+    /**
+     * Return the encryptionKeys
+     * @param region region of the resources (if null then the method will query every region)
+     * @param filters the filter statement
+     * @return the {@link CloudEncryptionKeys} contains every encryption key
+     */
+    CloudEncryptionKeys encryptionKeys(CloudCredential cloudCredential, Region region, Map<String, String> filters);
 
     default boolean regionMatch(Region actualRegion, Region expectedRegion) {
         return expectedRegion == null || Strings.isNullOrEmpty(expectedRegion.value()) || actualRegion.value().equals(expectedRegion.value());
