@@ -87,20 +87,20 @@ public class AzureClient {
 
     private final String subscriptionId;
 
-    public AzureClient(String tenantId, String clientId, String secretKey, String subscriptionId) {
+    public AzureClient(String tenantId, String clientId, String secretKey, String subscriptionId, LogLevel logLevel) {
         this.tenantId = tenantId;
         this.clientId = clientId;
         this.secretKey = secretKey;
         this.subscriptionId = subscriptionId;
-        connect();
+        connect(logLevel);
     }
 
-    private void connect() {
+    private void connect(LogLevel logLevel) {
         AzureTokenCredentials creds = new ApplicationTokenCredentials(clientId, tenantId, secretKey, AzureEnvironment.AZURE)
                 .withDefaultSubscriptionId(subscriptionId);
         azure = Azure
                 .configure()
-                .withLogLevel(LogLevel.BASIC)
+                .withLogLevel(logLevel)
                 .authenticate(creds)
                 .withSubscription(subscriptionId);
     }
