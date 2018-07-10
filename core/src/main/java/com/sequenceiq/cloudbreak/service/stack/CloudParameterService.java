@@ -25,6 +25,8 @@ import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformCloudGatewaysRe
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformCloudGatewaysResult;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformCloudIpPoolsRequest;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformCloudIpPoolsResult;
+import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformEncryptionKeysRequest;
+import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformEncryptionKeysResult;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformInstanceGroupParameterRequest;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformInstanceGroupParameterResult;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformNetworksRequest;
@@ -48,6 +50,7 @@ import com.sequenceiq.cloudbreak.cloud.event.platform.GetVirtualMachineRecommend
 import com.sequenceiq.cloudbreak.cloud.event.platform.PlatformParametersRequest;
 import com.sequenceiq.cloudbreak.cloud.event.platform.PlatformParametersResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfigs;
+import com.sequenceiq.cloudbreak.cloud.model.CloudEncryptionKeys;
 import com.sequenceiq.cloudbreak.cloud.model.CloudGateWays;
 import com.sequenceiq.cloudbreak.cloud.model.CloudIpPools;
 import com.sequenceiq.cloudbreak.cloud.model.CloudNetworks;
@@ -95,7 +98,7 @@ public class CloudParameterService {
             GetPlatformVariantsResult res = getPlatformVariantsRequest.await();
             LOGGER.info("Platform variants result: {}", res);
             if (res.getStatus().equals(EventStatus.FAILED)) {
-                LOGGER.error("Failed to get platform variants", res.getErrorDetails());
+                LOGGER.warn("Failed to get platform variants", res.getErrorDetails());
                 throw new GetCloudParameterException(res.getErrorDetails());
             }
             return res.getPlatformVariants();
@@ -126,7 +129,7 @@ public class CloudParameterService {
             GetDiskTypesResult res = getDiskTypesRequest.await();
             LOGGER.info("Platform disk types result: {}", res);
             if (res.getStatus().equals(EventStatus.FAILED)) {
-                LOGGER.error("Failed to get platform disk types", res.getErrorDetails());
+                LOGGER.warn("Failed to get platform disk types", res.getErrorDetails());
                 throw new GetCloudParameterException(res.getErrorDetails());
             }
             return res.getPlatformDisks();
@@ -145,7 +148,7 @@ public class CloudParameterService {
             GetPlatformRegionsResult res = getPlatformRegionsRequest.await();
             LOGGER.info("Platform regions result: {}", res);
             if (res.getStatus().equals(EventStatus.FAILED)) {
-                LOGGER.error("Failed to get platform regions", res.getErrorDetails());
+                LOGGER.warn("Failed to get platform regions", res.getErrorDetails());
                 throw new GetCloudParameterException(res.getErrorDetails());
             }
             return res.getPlatformRegions();
@@ -164,7 +167,7 @@ public class CloudParameterService {
             GetPlatformOrchestratorsResult res = getPlatformOrchestratorsRequest.await();
             LOGGER.info("Platform orchestrators result: {}", res);
             if (res.getStatus().equals(EventStatus.FAILED)) {
-                LOGGER.error("Failed to get platform orchestrators", res.getErrorDetails());
+                LOGGER.warn("Failed to get platform orchestrators", res.getErrorDetails());
                 throw new GetCloudParameterException(res.getErrorDetails());
             }
             return res.getPlatformOrchestrators();
@@ -183,7 +186,7 @@ public class CloudParameterService {
             PlatformParametersResult res = parametersRequest.await();
             LOGGER.info("Platform parameter result: {}", res);
             if (res.getStatus().equals(EventStatus.FAILED)) {
-                LOGGER.error("Failed to get platform parameters", res.getErrorDetails());
+                LOGGER.warn("Failed to get platform parameters", res.getErrorDetails());
                 throw new GetCloudParameterException(res.getErrorDetails());
             }
             return res.getPlatformParameters();
@@ -205,7 +208,7 @@ public class CloudParameterService {
             GetPlatformNetworksResult res = getPlatformNetworksRequest.await();
             LOGGER.info("Platform networks types result: {}", res);
             if (res.getStatus().equals(EventStatus.FAILED)) {
-                LOGGER.error("Failed to get platform networks", res.getErrorDetails());
+                LOGGER.warn("Failed to get platform networks", res.getErrorDetails());
                 throw new GetCloudParameterException("Failed to get networks for the cloud provider", res.getErrorDetails());
             }
             return res.getCloudNetworks();
@@ -226,7 +229,7 @@ public class CloudParameterService {
             GetPlatformSshKeysResult res = getPlatformSshKeysRequest.await();
             LOGGER.info("Platform sshkeys types result: {}", res);
             if (res.getStatus().equals(EventStatus.FAILED)) {
-                LOGGER.error("Failed to get platform sshkeys", res.getErrorDetails());
+                LOGGER.warn("Failed to get platform sshkeys", res.getErrorDetails());
                 throw new GetCloudParameterException("Failed to get SSH keys for the cloud provider", res.getErrorDetails());
             }
             return res.getCloudSshKeys();
@@ -248,7 +251,7 @@ public class CloudParameterService {
             GetPlatformSecurityGroupsResult res = getPlatformSecurityGroupsRequest.await();
             LOGGER.info("Platform securitygroups types result: {}", res);
             if (res.getStatus().equals(EventStatus.FAILED)) {
-                LOGGER.error("Failed to get platform securitygroups", res.getErrorDetails());
+                LOGGER.warn("Failed to get platform securitygroups", res.getErrorDetails());
                 throw new GetCloudParameterException("Failed to get security groups for the cloud provider", res.getErrorDetails());
             }
             return res.getCloudSecurityGroups();
@@ -273,7 +276,7 @@ public class CloudParameterService {
             GetVirtualMachineRecommendationResponse res = getVirtualMachineRecommendtaionRequest.await();
             LOGGER.info("Platform vm recommendation result: {}", res);
             if (res.getStatus().equals(EventStatus.FAILED)) {
-                LOGGER.error("Failed to get platform vm recommendation", res.getErrorDetails());
+                LOGGER.warn("Failed to get platform vm recommendation", res.getErrorDetails());
                 throw new GetCloudParameterException(res.getErrorDetails());
             }
             return res.getRecommendations();
@@ -294,7 +297,7 @@ public class CloudParameterService {
             GetPlatformVmTypesResult res = getPlatformVmTypesRequest.await();
             LOGGER.info("Platform vmtypes result: {}", res);
             if (res.getStatus().equals(EventStatus.FAILED)) {
-                LOGGER.error("Failed to get platform vmtypes", res.getErrorDetails());
+                LOGGER.warn("Failed to get platform vmtypes", res.getErrorDetails());
                 throw new GetCloudParameterException("Failed to get VM types for the cloud provider", res.getErrorDetails());
             }
             return res.getCloudVmTypes();
@@ -315,6 +318,7 @@ public class CloudParameterService {
             GetPlatformRegionsResultV2 res = getPlatformRegionsRequest.await();
             LOGGER.info("Platform regions result: {}", res);
             if (res.getStatus().equals(EventStatus.FAILED)) {
+                LOGGER.warn("Failed to get platform regions", res.getErrorDetails());
                 throw new GetCloudParameterException("Failed to get regions from the cloud provider due to network issues or invalid credential",
                         res.getErrorDetails());
             }
@@ -336,7 +340,7 @@ public class CloudParameterService {
             GetPlatformCloudGatewaysResult res = getPlatformCloudGatewaysRequest.await();
             LOGGER.info("Platform gateways result: {}", res);
             if (res.getStatus().equals(EventStatus.FAILED)) {
-                LOGGER.error("Failed to get platform gateways", res.getErrorDetails());
+                LOGGER.warn("Failed to get platform gateways", res.getErrorDetails());
                 throw new GetCloudParameterException("Failed to get gateways for the cloud provider", res.getErrorDetails());
             }
             return res.getCloudGateWays();
@@ -357,7 +361,7 @@ public class CloudParameterService {
             GetPlatformCloudIpPoolsResult res = getPlatformCloudIpPoolsRequest.await();
             LOGGER.info("Platform publicIpPools result: {}", res);
             if (res.getStatus().equals(EventStatus.FAILED)) {
-                LOGGER.error("Failed to get platform publicIpPools", res.getErrorDetails());
+                LOGGER.warn("Failed to get platform publicIpPools", res.getErrorDetails());
                 throw new GetCloudParameterException("Failed to get public IP pools for the cloud provider", res.getErrorDetails());
             }
             return res.getCloudIpPools();
@@ -378,12 +382,33 @@ public class CloudParameterService {
             GetPlatformCloudAccessConfigsResult res = getPlatformCloudAccessConfigsRequest.await();
             LOGGER.info("Platform accessConfigs result: {}", res);
             if (res.getStatus().equals(EventStatus.FAILED)) {
-                LOGGER.error("Failed to get platform accessConfigs", res.getErrorDetails());
+                LOGGER.warn("Failed to get platform accessConfigs", res.getErrorDetails());
                 throw new GetCloudParameterException("Failed to get access configs for the cloud provider", res.getErrorDetails());
             }
             return res.getCloudAccessConfigs();
         } catch (InterruptedException e) {
             LOGGER.error("Error while getting the platform accessConfigs", e);
+            throw new OperationException(e);
+        }
+    }
+
+    @Retryable(value = GetCloudParameterException.class, maxAttempts = 5, backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000))
+    public CloudEncryptionKeys getCloudEncryptionKeys(Credential credential, String region, String variant, Map<String, String> filters) {
+        LOGGER.debug("Get platform encryptionKeys");
+        ExtendedCloudCredential cloudCredential = credentialToExtendedCloudCredentialConverter.convert(credential);
+        GetPlatformEncryptionKeysRequest getPlatformEncryptionKeysRequest =
+                new GetPlatformEncryptionKeysRequest(cloudCredential, cloudCredential, variant, region, filters);
+        eventBus.notify(getPlatformEncryptionKeysRequest.selector(), Event.wrap(getPlatformEncryptionKeysRequest));
+        try {
+            GetPlatformEncryptionKeysResult res = getPlatformEncryptionKeysRequest.await();
+            LOGGER.info("Platform encryptionKeys result: {}", res);
+            if (res.getStatus().equals(EventStatus.FAILED)) {
+                LOGGER.warn("Failed to get platform encryptionKeys", res.getErrorDetails());
+                throw new GetCloudParameterException("Failed to get encryption keys for the cloud provider", res.getErrorDetails());
+            }
+            return res.getCloudEncryptionKeys();
+        } catch (InterruptedException e) {
+            LOGGER.error("Error while getting the platform encryptionKeys", e);
             throw new OperationException(e);
         }
     }
@@ -400,7 +425,7 @@ public class CloudParameterService {
             GetPlatformInstanceGroupParameterResult res = getPlatformInstanceGroupParameterRequest.await();
             LOGGER.info("Platform instanceGroupParameterResult result: {}", res);
             if (res.getStatus().equals(EventStatus.FAILED)) {
-                LOGGER.error("Failed to get platform instanceGroupParameterResult", res.getErrorDetails());
+                LOGGER.warn("Failed to get platform instanceGroupParameterResult", res.getErrorDetails());
                 throw new GetCloudParameterException(String.format("Failed to instance group parameters for the cloud provider: %s", res.getStatusReason()),
                         res.getErrorDetails());
             }

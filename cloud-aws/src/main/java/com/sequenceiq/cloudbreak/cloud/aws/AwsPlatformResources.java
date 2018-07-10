@@ -48,6 +48,10 @@ import com.amazonaws.services.ec2.model.Vpc;
 import com.amazonaws.services.identitymanagement.AmazonIdentityManagement;
 import com.amazonaws.services.identitymanagement.model.InstanceProfile;
 import com.amazonaws.services.identitymanagement.model.ListInstanceProfilesResult;
+import com.amazonaws.services.kms.AWSKMS;
+import com.amazonaws.services.kms.model.KeyListEntry;
+import com.amazonaws.services.kms.model.ListKeysRequest;
+import com.amazonaws.services.kms.model.ListKeysResult;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.cloud.PlatformResources;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
@@ -56,6 +60,8 @@ import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfig;
 import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfigs;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.CloudEncryptionKey;
+import com.sequenceiq.cloudbreak.cloud.model.CloudEncryptionKeys;
 import com.sequenceiq.cloudbreak.cloud.model.CloudGateWay;
 import com.sequenceiq.cloudbreak.cloud.model.CloudGateWays;
 import com.sequenceiq.cloudbreak.cloud.model.CloudIpPools;
@@ -432,16 +438,49 @@ public class AwsPlatformResources implements PlatformResources {
         } catch (AmazonServiceException ase) {
             if (ase.getStatusCode() == UNAUTHORIZED) {
                 String policyMessage = "Could not get instance profile roles because the user does not have enough permission.";
-                LOGGER.info(policyMessage + ase);
+                LOGGER.warn(policyMessage + ase);
                 throw new CloudConnectorException(policyMessage, ase);
             } else {
-                LOGGER.error(queryFailedMessage, ase);
+                LOGGER.warn(queryFailedMessage, ase);
                 throw new CloudConnectorException(queryFailedMessage + ase.getMessage(), ase);
             }
         } catch (Exception e) {
-            LOGGER.error(queryFailedMessage, e);
+            LOGGER.warn(queryFailedMessage, e);
             throw new CloudConnectorException(queryFailedMessage + e.getMessage(), e);
         }
         return cloudAccessConfigs;
+    }
+
+    @Override
+    public CloudEncryptionKeys encryptionKeys(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
+        String queryFailedMessage = "Could not get encryption keys from Amazon: ";
+
+        CloudEncryptionKeys cloudEncryptionKeys = new CloudEncryptionKeys(new HashSet<>());
+        AwsCredentialView awsCredentialView = new AwsCredentialView(cloudCredential);
+        AWSKMS client = awsClient.createAWSKMS(awsCredentialView, region.value());
+        try {
+            ListKeysRequest listKeysRequest = new ListKeysRequest();
+            ListKeysResult listKeysResult = client.listKeys(listKeysRequest);
+            for (KeyListEntry keyListEntry : listKeysResult.getKeys()) {
+                cloudEncryptionKeys.getCloudEncryptionKeys().add(
+                        new CloudEncryptionKey(
+                                keyListEntry.getKeyArn(),
+                                keyListEntry.getKeyId(),
+                                new HashMap<>()));
+            }
+        } catch (AmazonServiceException ase) {
+            if (ase.getStatusCode() == UNAUTHORIZED) {
+                String policyMessage = "Could not get encryption keys because the user does not have enough permission.";
+                LOGGER.warn(policyMessage + ase);
+                throw new CloudConnectorException(policyMessage, ase);
+            } else {
+                LOGGER.warn(queryFailedMessage, ase);
+                throw new CloudConnectorException(queryFailedMessage + ase.getMessage(), ase);
+            }
+        } catch (Exception e) {
+            LOGGER.warn(queryFailedMessage, e);
+            throw new CloudConnectorException(queryFailedMessage + e.getMessage(), e);
+        }
+        return cloudEncryptionKeys;
     }
 }

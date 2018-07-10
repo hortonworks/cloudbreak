@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
+import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.auth.InstanceProfileCredentialsProvider;
 import com.amazonaws.regions.RegionUtils;
@@ -21,6 +22,8 @@ import com.amazonaws.services.cloudformation.AmazonCloudFormationClient;
 import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.identitymanagement.AmazonIdentityManagement;
 import com.amazonaws.services.identitymanagement.AmazonIdentityManagementClient;
+import com.amazonaws.services.kms.AWSKMS;
+import com.amazonaws.services.kms.AWSKMSClientBuilder;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
@@ -68,6 +71,23 @@ public class AwsClient {
         return isRoleAssumeRequired(awsCredential)
                 ? new AmazonIdentityManagementClient(credentialClient.retrieveCachedSessionCredentials(awsCredential))
                 : new AmazonIdentityManagementClient(createAwsCredentials(awsCredential));
+    }
+
+    public AWSKMS createAWSKMS(AwsCredentialView awsCredential, String regionName) {
+        return AWSKMSClientBuilder.standard()
+                    .withCredentials(getAwsStaticCredentialsProvider(awsCredential))
+                    .withRegion(regionName)
+                    .build();
+    }
+
+    public AWSStaticCredentialsProvider getAwsStaticCredentialsProvider(AwsCredentialView awsCredential) {
+        AWSStaticCredentialsProvider awsStaticCredentialsProvider;
+        if (isRoleAssumeRequired(awsCredential)) {
+            awsStaticCredentialsProvider = new AWSStaticCredentialsProvider(credentialClient.retrieveCachedSessionCredentials(awsCredential));
+        } else {
+            awsStaticCredentialsProvider = new AWSStaticCredentialsProvider(createAwsCredentials(awsCredential));
+        }
+        return awsStaticCredentialsProvider;
     }
 
     public AmazonCloudFormationClient createCloudFormationClient(AwsCredentialView awsCredential, String regionName) {
