@@ -13,6 +13,9 @@ public class PropertySpecification {
     @JsonProperty("Price")
     private Double price;
 
+    @JsonProperty("encryption_supported")
+    private Boolean encryptionSupported;
+
     public String getMemory() {
         return memory;
     }
@@ -35,5 +38,13 @@ public class PropertySpecification {
 
     public void setPrice(Double price) {
         this.price = price;
+    }
+
+    public Boolean getEncryptionSupported() {
+        return encryptionSupported;
+    }
+
+    public void setEncryptionSupported(Boolean encryptionSupported) {
+        this.encryptionSupported = encryptionSupported;
     }
 }

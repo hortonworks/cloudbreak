@@ -13,6 +13,8 @@ public class VmTypeMeta {
 
     public static final String PRICE = "Price";
 
+    public static final String VOLUME_ENCRYPTION_SUPPORTED = "EncryptionSupported";
+
     private VolumeParameterConfig magneticConfig;
 
     private VolumeParameterConfig autoAttachedConfig;
@@ -191,6 +193,11 @@ public class VmTypeMeta {
 
         public VmTypeMetaBuilder withPrice(Double price) {
             properties.put(PRICE, price.toString());
+            return this;
+        }
+
+        public VmTypeMetaBuilder withVolumeEncryptionSupport(boolean supportEncryption) {
+            properties.put(VOLUME_ENCRYPTION_SUPPORTED, String.valueOf(supportEncryption));
             return this;
         }
 
