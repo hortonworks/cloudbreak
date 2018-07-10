@@ -69,6 +69,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudSshKeys;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.ConfigSpecification;
 import com.sequenceiq.cloudbreak.cloud.model.DisplayName;
+import com.sequenceiq.cloudbreak.cloud.model.PropertySpecification;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.RegionDisplayNameSpecification;
 import com.sequenceiq.cloudbreak.cloud.model.RegionDisplayNameSpecifications;
@@ -136,10 +137,11 @@ public class AwsPlatformResources implements PlatformResources {
         try {
             VmsSpecification oVms = JsonUtil.readValue(vm, VmsSpecification.class);
             for (VmSpecification vmSpecification : oVms.getItems()) {
+                PropertySpecification properties = vmSpecification.getMetaSpecification().getProperties();
                 VmTypeMetaBuilder builder = VmTypeMetaBuilder.builder()
-                        .withCpuAndMemory(vmSpecification.getMetaSpecification().getProperties().getCpu(),
-                                vmSpecification.getMetaSpecification().getProperties().getMemory())
-                        .withPrice(vmSpecification.getMetaSpecification().getProperties().getPrice());
+                        .withCpuAndMemory(properties.getCpu(), properties.getMemory())
+                        .withPrice(properties.getPrice())
+                        .withVolumeEncryptionSupport(properties.getEncryptionSupported());
                 for (ConfigSpecification configSpecification : vmSpecification.getMetaSpecification().getConfigSpecification()) {
                     addConfig(builder, configSpecification);
                 }
