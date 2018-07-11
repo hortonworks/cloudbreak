@@ -88,7 +88,7 @@ public class StackRequestValidator implements Validator<StackRequest> {
 
     private void validateSharedService(StackRequest stackRequest, ValidationResultBuilder validationBuilder) {
         if (stackRequest.getClusterToAttach() != null) {
-            Optional<Stack> stack = Optional.ofNullable(stackRepository.findOneWithLists(stackRequest.getClusterToAttach()));
+            Optional<Stack> stack = stackRepository.findById(stackRequest.getClusterToAttach());
             if (stack.isPresent() && !AVAILABLE.equals(stack.get().getStatus())) {
                 Optional<Cluster> cluster = Optional.ofNullable(clusterService.retrieveClusterByStackId(stackRequest.getClusterToAttach()));
                 if (cluster.isPresent() && !AVAILABLE.equals(cluster.get().getStatus())) {
