@@ -79,6 +79,7 @@ set_sles_sdk_priority_in_service_azure:
 set_sles_sdk_priority_in_repo:
   cmd.run:
     - name: zypper mr -p 100 SLE-SDK12-SP3-Pool
+    - onlyif: zypper lr | grep -q SLE-SDK12-SP3-Pool
 
 import_ambari_repo_key:
   cmd.run:
