@@ -196,11 +196,9 @@ cb:
             baseurl: http://s3.amazonaws.com/dev.hortonworks.com/ambari/amazonlinux2/2.x/BUILDS/2.7.0.0-508
             gpgkey: http://s3.amazonaws.com/dev.hortonworks.com/ambari/amazonlinux2/2.x/BUILDS/2.7.0.0-508/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins
     database:
-      databaseEngine: EMBEDDED
-      host: localhost
       port: 5432
-      name: postgres
-      username: ambari
+      user: ambari
+      db: ambari
 
   hdp:
     entries:

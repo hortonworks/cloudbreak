@@ -7,7 +7,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
-import java.util.Optional;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -31,7 +30,6 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.service.AmbariHaComponentFilter;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
-import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariConfigurationService;
 import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.sharedservice.SharedServiceConfigProvider;
@@ -76,9 +74,6 @@ public class ClusterDecoratorTest {
     private ClusterProxyDecorator clusterProxyDecorator;
 
     @Mock
-    private AmbariConfigurationService ambariConfigurationService;
-
-    @Mock
     private AmbariDatabaseMapper ambariDatabaseMapper;
 
     @Mock
@@ -110,7 +105,6 @@ public class ClusterDecoratorTest {
         when(request.getConnectedCluster()).thenReturn(mock(ConnectedClusterRequest.class));
         when(sharedServiceConfigProvider.configureCluster(any(Cluster.class), any(IdentityUser.class), any(ConnectedClusterRequest.class)))
                 .thenReturn(expectedClusterInstance);
-        when(ambariConfigurationService.createDefaultRdsConfigIfNeeded(any(Stack.class), any(Cluster.class))).thenReturn(Optional.empty());
         when(clusterProxyDecorator.prepareProxyConfig(any(Cluster.class), any(IdentityUser.class), any(), any(Stack.class))).thenReturn(expectedClusterInstance);
         when(ambariHaComponentFilter.getHaComponents(any())).thenReturn(Collections.emptySet());
 

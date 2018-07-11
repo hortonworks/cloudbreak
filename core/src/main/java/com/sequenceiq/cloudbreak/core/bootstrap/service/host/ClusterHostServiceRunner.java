@@ -239,6 +239,8 @@ public class ClusterHostServiceRunner {
         servicePillar.put("ambari-gpl-repo", new SaltPillarProperties("/ambari/gpl.sls", singletonMap("ambari", singletonMap("gpl", singletonMap("enabled",
                 clusterComponentConfigProvider.getHDPRepo(cluster.getId()).isEnableGplRepo())))));
 
+        postgresConfigService.decorateServicePillarWithPostgresIfNeeded(servicePillar, stack, cluster);
+
         decoratePillarWithAmbariDatabase(cluster, servicePillar);
 
         saveLdapPillar(cluster.getLdapConfig(), servicePillar);
@@ -253,8 +255,6 @@ public class ClusterHostServiceRunner {
             Map<String, Object> smartSenseCredentials = smartSenseCredentialConfigService.getCredentials();
             servicePillar.put("smartsense-credentials", new SaltPillarProperties("/smartsense/credentials.sls", smartSenseCredentials));
         }
-
-        postgresConfigService.decorateServicePillarWithPostgresIfNeeded(servicePillar, stack, cluster);
 
         proxyConfigProvider.decoratePillarWithProxyDataIfNeeded(servicePillar, cluster);
 
