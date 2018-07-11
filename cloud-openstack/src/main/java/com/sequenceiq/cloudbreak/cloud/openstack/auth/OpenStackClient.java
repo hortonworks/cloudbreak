@@ -61,7 +61,7 @@ public class OpenStackClient {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OpenStackClient.class);
 
-    @Value("${cb.openstack.api.debug:}")
+    @Value("${cb.openstack.api.debug:true}")
     private boolean debug;
 
     @Value("${cb.openstack.disable.ssl.verification:false}")
