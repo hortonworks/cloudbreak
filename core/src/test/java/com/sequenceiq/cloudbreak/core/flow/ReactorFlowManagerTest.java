@@ -105,6 +105,7 @@ public class ReactorFlowManagerTest {
         underTest.triggerStackRepairFlow(STACK_ID, new UnhealthyInstances());
         underTest.triggerClusterRepairFlow(STACK_ID, new HashMap<>(), true);
         underTest.triggerEphemeralUpdate(STACK_ID);
+        underTest.triggerStackImageUpdate(STACK_ID, "asdf", null, null);
 
         // Not start from 0 because flow cancellations
         int count = 5;
@@ -152,6 +153,16 @@ public class ReactorFlowManagerTest {
         underTest.triggerClusterTermination(1L, true, false);
 
         verify(reactor).notify(eq(FlowChainTriggers.PROPER_TERMINATION_TRIGGER_EVENT), any(Event.class));
+    }
+
+    @Test
+    public void testtriggerStackImageUpdate() {
+        long stackId = 1L;
+        String imageID = "imageID";
+        String imageCatalogName = "imageCatalogName";
+        String imageCatalogUrl = "imageCatalogUrl";
+        underTest.triggerStackImageUpdate(stackId, imageID, imageCatalogName, imageCatalogUrl);
+        verify(reactor).notify(eq(FlowChainTriggers.STACK_IMAGE_UPDATE_TRIGGER_EVENT), any(Event.class));
     }
 
     private static class TestAcceptable implements Acceptable {

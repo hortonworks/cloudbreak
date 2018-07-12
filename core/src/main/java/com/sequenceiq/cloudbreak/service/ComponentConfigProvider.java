@@ -120,4 +120,12 @@ public class ComponentConfigProvider {
             LOGGER.debug("Components({}) have been deleted for stack : {}", componentsByStackId.size(), stackId);
         }
     }
+
+    public void replaceImageComponentWithNew(Component component) {
+        Component componentEntity = componentRepository.findComponentByStackIdComponentTypeName(component.getStack().getId(), component.getComponentType(),
+                component.getName());
+        componentEntity.setAttributes(component.getAttributes());
+        componentEntity.setName(component.getName());
+        componentRepository.save(componentEntity);
+    }
 }

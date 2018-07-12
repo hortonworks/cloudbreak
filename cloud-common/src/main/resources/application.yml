@@ -328,7 +328,11 @@ cb:
     cache.ttl: 15
 
   instance:
-    packages: kernel,salt,python,hdp-select,ambari-agent
+    packages:
+      all: kernel,salt,python,hdp-select,ambari-agent
+      mandatory:
+        base: salt,salt-bootstrap
+        prewarmed: hdp-select,ambari-agent
     saltboot:
       versionCommand: "salt-bootstrap version"
       packageName: salt-bootstrap

@@ -11,6 +11,7 @@ public enum ResourceType {
     AWS_SNAPSHOT,
     AWS_ENCRYPTED_VOLUME,
     AWS_ENCRYPTED_AMI,
+    AWS_LAUNCHCONFIGURATION,
 
     // OPENSTACK
     HEAT_STACK(CommonResourceType.TEMPLATE),

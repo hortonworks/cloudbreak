@@ -107,4 +107,8 @@ public class NovaInstanceView {
     public String getLoginUserName() {
         return loginUserName;
     }
+
+    public String getImageId() {
+        return instance.getImageId();
+    }
 }

@@ -37,6 +37,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.SpiFileSystem;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.cloud.model.StackTemplate;
+import com.sequenceiq.cloudbreak.converter.InstanceMetadataToImageIdConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
@@ -104,6 +105,9 @@ public class StackToCloudStackConverterTest {
 
     @Mock
     private com.sequenceiq.cloudbreak.domain.Network stackNetwork;
+
+    @Mock
+    private InstanceMetadataToImageIdConverter instanceMetadataToImageIdConverter;
 
     @Before
     public void setUp() {

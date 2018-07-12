@@ -105,6 +105,10 @@ public class Image {
         return packageVersions == null ? new HashMap<>() : packageVersions;
     }
 
+    public boolean isPrewarmed() {
+        return stackDetails != null && stackDetails.getRepo() != null && stackDetails.getRepo().getStack() != null;
+    }
+
     @Override
     public String toString() {
         return "Image{"

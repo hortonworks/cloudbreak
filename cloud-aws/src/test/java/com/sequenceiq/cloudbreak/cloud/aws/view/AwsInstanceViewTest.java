@@ -19,7 +19,7 @@ public class AwsInstanceViewTest {
         map.put("type", "CUSTOM");
 
         InstanceTemplate instanceTemplate = new InstanceTemplate("", "", 0L, Collections.emptyList(), InstanceStatus.STARTED,
-                map, 0L);
+                map, 0L, "imageId");
 
         AwsInstanceView actual = new AwsInstanceView(instanceTemplate);
 

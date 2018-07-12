@@ -62,11 +62,11 @@ public class TestApplicationContext {
 
     private final CloudInstance cloudInstance = new CloudInstance("instanceId",
             new InstanceTemplate("flavor", "groupName", 1L, Collections.emptyList(),
-                    InstanceStatus.CREATE_REQUESTED, new HashMap<>(), 0L), instanceAuthentication);
+                    InstanceStatus.CREATE_REQUESTED, new HashMap<>(), 0L, "imageId"), instanceAuthentication);
 
     private final CloudInstance cloudInstanceBad = new CloudInstance("instanceIdBad",
             new InstanceTemplate("flavor", "groupName", 1L, Collections.emptyList(),
-                    InstanceStatus.CREATE_REQUESTED, new HashMap<>(), 1L), instanceAuthentication);
+                    InstanceStatus.CREATE_REQUESTED, new HashMap<>(), 1L, "imageId"), instanceAuthentication);
 
     @Mock
     private CloudPlatformConnectors cloudPlatformConnectors;

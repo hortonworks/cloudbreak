@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -13,8 +14,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,6 +25,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceMetadataType;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
@@ -42,8 +46,14 @@ public class InstanceMetadataUpdater {
 
     private Pattern saltBootstrapVersionPattern = Pattern.compile("Version: (.*)");
 
-    @Value("#{'${cb.instance.packages}'.split(',')}")
+    @Value("#{'${cb.instance.packages.all}'.split(',')}")
     private String[] packages;
+
+    @Value("#{'${cb.instance.packages.mandatory.base}'.split(',')}")
+    private List<String> mandatoryBasePackages;
+
+    @Value("#{'${cb.instance.packages.mandatory.prewarmed}'.split(',')}")
+    private List<String> mandatoryPrewarmedPackages;
 
     @Value("${cb.instance.saltboot.versionCommand}")
     private String saltBootstrapVersionCmd;
@@ -65,6 +75,15 @@ public class InstanceMetadataUpdater {
 
     @Inject
     private CloudbreakMessagesService cloudbreakMessagesService;
+
+    private List<String> mandatoryPackages;
+
+    @PostConstruct
+    private void setup() {
+        List<String> mandatoryPackages = Lists.newArrayList(mandatoryBasePackages);
+        mandatoryPackages.addAll(mandatoryPrewarmedPackages);
+        this.mandatoryPackages = Collections.unmodifiableList(mandatoryPackages);
+    }
 
     public void updatePackageVersionsOnAllInstances(Stack stack) throws Exception {
         Boolean enableKnox = stack.getCluster().getGateway() != null;
@@ -91,11 +110,21 @@ public class InstanceMetadataUpdater {
             }
         }
         List<String> packagesWithMultipleVersions = collectPackagesWithMultipleVersions(instanceMetaDataSet);
-        if (packagesWithMultipleVersions.size() > 0) {
+        if (!packagesWithMultipleVersions.isEmpty()) {
             cloudbreakEventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(),
                     cloudbreakMessagesService.getMessage(Msg.PACKAGES_ON_INSTANCES_ARE_DIFFERENT.code(),
                             Collections.singletonList(packagesWithMultipleVersions.stream().collect(Collectors.joining(",")))));
 
+        }
+
+        Map<String, List<String>> instancesWithMissingPackageVersions = collectInstancesWithMissingPackageVersions(instanceMetaDataSet);
+        if (!instancesWithMissingPackageVersions.isEmpty()) {
+            cloudbreakEventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(),
+                    cloudbreakMessagesService.getMessage(Msg.PACKAGE_VERSIONS_ON_INSTANCES_ARE_MISSING.code(),
+                            Collections.singletonList(instancesWithMissingPackageVersions.entrySet().stream()
+                                    .map(entry -> String.format("Instance ID: [%s] Packages without version: [%s]",
+                                            entry.getKey(), StringUtils.join(entry.getValue(), ",")))
+                                    .collect(Collectors.joining(" * ")))));
         }
     }
 
@@ -121,6 +150,38 @@ public class InstanceMetadataUpdater {
         }
     }
 
+    public Map<String, List<String>> collectInstancesWithMissingPackageVersions(Collection<InstanceMetaData> instanceMetaDatas) {
+        Map<String, List<String>> instancesWithMissingPackagVersions = new HashMap<>();
+
+        for (InstanceMetaData instanceMetaData : instanceMetaDatas) {
+            try {
+                Image image = instanceMetaData.getImage().get(Image.class);
+                Set<String> packages = image.getPackageVersions().keySet();
+                List<String> missingPackageVersions = Lists.newArrayList(mandatoryPackages);
+                missingPackageVersions.removeAll(packages);
+                if (!missingPackageVersions.isEmpty()) {
+                    instancesWithMissingPackagVersions.put(instanceMetaData.getInstanceId(), missingPackageVersions);
+                }
+            } catch (IOException e) {
+                LOGGER.warn("Missing image information for instance: " + instanceMetaData.getInstanceId(), e);
+            }
+        }
+
+        return instancesWithMissingPackagVersions;
+    }
+
+    public List<String> getMandatoryPackages() {
+        return mandatoryPackages;
+    }
+
+    public List<String> getMandatoryBasePackages() {
+        return mandatoryBasePackages;
+    }
+
+    public List<String> getMandatoryPrewarmedPackages() {
+        return mandatoryPrewarmedPackages;
+    }
+
     private String parseSaltBootstrapVersion(String versionCommandOutput) {
         Matcher matcher = saltBootstrapVersionPattern.matcher(versionCommandOutput);
         String result = "UNKNOWN";
@@ -135,8 +196,9 @@ public class InstanceMetadataUpdater {
                 image.getImageCatalogName(), image.getImageId(), packageVersionsOnHost);
     }
 
-    private enum Msg {
-        PACKAGES_ON_INSTANCES_ARE_DIFFERENT("ambari.cluster.sync.instance.different.packages");
+    public enum Msg {
+        PACKAGES_ON_INSTANCES_ARE_DIFFERENT("ambari.cluster.sync.instance.different.packages"),
+        PACKAGE_VERSIONS_ON_INSTANCES_ARE_MISSING("ambari.cluster.sync.instance.missing.package.versions");
 
         private final String code;
 

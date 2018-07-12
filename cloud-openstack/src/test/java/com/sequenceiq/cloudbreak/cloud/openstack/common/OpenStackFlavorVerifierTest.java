@@ -91,7 +91,7 @@ public class OpenStackFlavorVerifierTest {
     }
 
     private Group createGroup(String flavor) {
-        InstanceTemplate template = new InstanceTemplate(flavor, null, null, new ArrayList<>(), null, null, null);
+        InstanceTemplate template = new InstanceTemplate(flavor, null, null, new ArrayList<>(), null, null, null, null);
         CloudInstance skeleton = new CloudInstance("id1", template, null);
 
         Group group = new Group("name", InstanceGroupType.GATEWAY, new ArrayList<>(), null, skeleton,

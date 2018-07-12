@@ -39,6 +39,7 @@ import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.autoscaling.AmazonAutoScaling;
 import com.amazonaws.services.autoscaling.AmazonAutoScalingClient;
 import com.amazonaws.services.autoscaling.model.AutoScalingGroup;
+import com.amazonaws.services.autoscaling.model.DeleteLaunchConfigurationRequest;
 import com.amazonaws.services.autoscaling.model.DescribeAutoScalingGroupsRequest;
 import com.amazonaws.services.autoscaling.model.DetachInstancesRequest;
 import com.amazonaws.services.autoscaling.model.ResumeProcessesRequest;
@@ -101,6 +102,7 @@ import com.sequenceiq.cloudbreak.cloud.model.TlsInfo;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
+import com.sequenceiq.cloudbreak.common.type.CommonResourceType;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 import com.sequenceiq.cloudbreak.service.Retry;
 import com.sequenceiq.cloudbreak.service.Retry.ActionWentFailException;
@@ -169,6 +171,9 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
     @Inject
     @Qualifier("DefaultRetryService")
     private Retry retryService;
+
+    @Inject
+    private AwsImageUpdateService awsImageUpdateService;
 
     @Override
     public List<CloudResourceStatus> launch(AuthenticatedContext ac, CloudStack stack, PersistenceNotifier resourceNotifier,
@@ -527,6 +532,7 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
             releaseReservedIp(amazonEC2Client, resources);
             cleanupEncryptedResources(ac, resources, regionName, amazonEC2Client);
             deleteKeyPair(ac, stack);
+            deleteLaunchConfiguration(resources, ac);
         } else if (resources != null) {
             AmazonEC2Client amazonEC2Client = awsClient.createAccess(credentialView, regionName);
             releaseReservedIp(amazonEC2Client, resources);
@@ -540,6 +546,14 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
     private void cleanupEncryptedResources(AuthenticatedContext ac, List<CloudResource> resources, String regionName, AmazonEC2Client amazonEC2Client) {
         encryptedSnapshotService.deleteResources(ac, amazonEC2Client, resources);
         encryptedImageCopyService.deleteResources(regionName, amazonEC2Client, resources);
+    }
+
+    private void deleteLaunchConfiguration(List<CloudResource> resources, AuthenticatedContext ac) {
+        AmazonAutoScalingClient autoScalingClient = awsClient.createAutoScalingClient(new AwsCredentialView(ac.getCloudCredential()),
+                ac.getCloudContext().getLocation().getRegion().value());
+        resources.stream().filter(cloudResource -> cloudResource.getType() == ResourceType.AWS_LAUNCHCONFIGURATION).forEach(cloudResource ->
+                autoScalingClient.deleteLaunchConfiguration(
+                        new DeleteLaunchConfigurationRequest().withLaunchConfigurationName(cloudResource.getName())));
     }
 
     private void deleteKeyPair(AuthenticatedContext ac, CloudStack stack) {
@@ -614,7 +628,20 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
 
     @Override
     public List<CloudResourceStatus> update(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources) {
-        return new ArrayList<>();
+        ArrayList<CloudResourceStatus> cloudResourceStatuses = new ArrayList<>();
+        if (!resources.isEmpty() && resources.stream().anyMatch(resource -> CommonResourceType.TEMPLATE == resource.getType().getCommonResourceType()
+                && StringUtils.isNotBlank(resource.getStringParameter(CloudResource.IMAGE)))) {
+
+            List<CloudResource> launchConfigurationResources = resources.stream()
+                    .filter(resource -> CommonResourceType.TEMPLATE == resource.getType().getCommonResourceType()
+                            && StringUtils.isNotBlank(resource.getStringParameter(CloudResource.IMAGE))).collect(Collectors.toList());
+
+            CloudResource cfResource = resources.stream().filter(resource -> ResourceType.CLOUDFORMATION_STACK == resource.getType()).findFirst().orElseThrow();
+            awsImageUpdateService.updateImage(authenticatedContext, stack, cfResource);
+
+            launchConfigurationResources.forEach(cloudResource -> cloudResourceStatuses.add(new CloudResourceStatus(cloudResource, ResourceStatus.UPDATED)));
+        }
+        return cloudResourceStatuses;
     }
 
     @Override
