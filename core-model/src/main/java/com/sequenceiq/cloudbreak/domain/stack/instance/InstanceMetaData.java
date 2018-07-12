@@ -36,6 +36,8 @@ public class InstanceMetaData implements ProvisionEntity {
 
     private String instanceId;
 
+    private String imageId;
+
     private Boolean ambariServer;
 
     private Boolean consulServer;
@@ -266,5 +268,13 @@ public class InstanceMetaData implements ProvisionEntity {
 
     public void setInstanceName(String instanceName) {
         this.instanceName = instanceName;
+    }
+
+    public String getImageId() {
+        return imageId;
+    }
+
+    public void setImageId(String imageId) {
+        this.imageId = imageId;
     }
 }
