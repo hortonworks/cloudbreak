@@ -12,10 +12,11 @@ import com.sequenceiq.cloudbreak.cloud.model.InstanceAuthentication;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.converter.InstanceMetadataToImageIdConverter;
 import com.sequenceiq.cloudbreak.domain.StackAuthentication;
 import com.sequenceiq.cloudbreak.domain.Template;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 
 @Component
 public class InstanceMetaDataToCloudInstanceConverter extends AbstractConversionServiceAwareConverter<InstanceMetaData, CloudInstance> {
@@ -23,14 +24,18 @@ public class InstanceMetaDataToCloudInstanceConverter extends AbstractConversion
     @Inject
     private StackToCloudStackConverter stackToCloudStackConverter;
 
+    @Inject
+    private InstanceMetadataToImageIdConverter instanceMetadataToImageIdConverter;
+
     @Override
     public CloudInstance convert(InstanceMetaData metaDataEnity) {
         InstanceGroup group = metaDataEnity.getInstanceGroup();
         Template template = metaDataEnity.getInstanceGroup().getTemplate();
         StackAuthentication stackAuthentication = group.getStack().getStackAuthentication();
         InstanceStatus status = getInstanceStatus(metaDataEnity);
-        InstanceTemplate instanceTemplate = stackToCloudStackConverter.buildInstanceTemplate(
-                template, group.getGroupName(), metaDataEnity.getPrivateId(), status);
+        String imageId = instanceMetadataToImageIdConverter.convert(metaDataEnity);
+        InstanceTemplate instanceTemplate = stackToCloudStackConverter.buildInstanceTemplate(template, group.getGroupName(), metaDataEnity.getPrivateId(),
+                status, imageId);
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication(
                 stackAuthentication.getPublicKey(),
                 stackAuthentication.getPublicKeyId(),

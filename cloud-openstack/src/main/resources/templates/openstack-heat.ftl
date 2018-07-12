@@ -102,7 +102,11 @@ ${core_user_data}
   ambari_${agent.instanceId}:
     type: OS::Nova::Server
     properties:
+      <#if agent.imageId?has_content>
+      image: ${agent.imageId}
+      <#else>
       image: { get_param: image_id }
+      </#if>
       name: ${agent.name}
       admin_user: ${agent.loginUserName}
       flavor: ${agent.flavor}

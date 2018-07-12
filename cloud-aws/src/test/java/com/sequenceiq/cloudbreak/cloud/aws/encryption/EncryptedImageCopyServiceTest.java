@@ -93,7 +93,8 @@ public class EncryptedImageCopyServiceTest {
 
     @Test
     public void testCreateEncryptedImagesWhenNoEncryptionIsRequired() {
-        InstanceTemplate temp = new InstanceTemplate("medium", "groupName", 0L, emptyList(), InstanceStatus.CREATE_REQUESTED, Map.of("encrypted", false), 0L);
+        InstanceTemplate temp = new InstanceTemplate("medium", "groupName", 0L, emptyList(), InstanceStatus.CREATE_REQUESTED,
+                Map.of("encrypted", false), 0L, "imageId");
         CloudInstance instance = new CloudInstance("SOME_ID", temp, null);
         List<Group> groups = new ArrayList<>();
         groups.add(new Group("master", InstanceGroupType.GATEWAY, singletonList(instance), null, null, null, null, null, null, 30));
@@ -108,7 +109,8 @@ public class EncryptedImageCopyServiceTest {
     @Test
     public void testCreateEncryptedImagesWhenEveryGroupNeedToBeEncryptedWithTheDefaultKmsKey()
             throws InterruptedException, ExecutionException, TimeoutException {
-        InstanceTemplate temp = new InstanceTemplate("medium", "groupName", 0L, emptyList(), InstanceStatus.CREATE_REQUESTED, Map.of("encrypted", true), 0L);
+        InstanceTemplate temp = new InstanceTemplate("medium", "groupName", 0L, emptyList(), InstanceStatus.CREATE_REQUESTED,
+                Map.of("encrypted", true), 0L, "imageId");
         CloudInstance instance = new CloudInstance("SOME_ID", temp, null);
         List<Group> groups = new ArrayList<>();
         groups.add(new Group("master", InstanceGroupType.GATEWAY, singletonList(instance), null, null, null, null, null, null, 30));
@@ -134,7 +136,7 @@ public class EncryptedImageCopyServiceTest {
     public void testCreateEncryptedImagesWhenEveryGroupNeedToBeEncryptedWithCustomKmsKey()
             throws InterruptedException, ExecutionException, TimeoutException {
         InstanceTemplate temp = new InstanceTemplate("medium", "groupName", 0L, emptyList(), InstanceStatus.CREATE_REQUESTED,
-                Map.of("encrypted", true, "key", "arn:aws:kms:eu-west-1:980678888888:key/7e9173f2-6ac8"), 0L);
+                Map.of("encrypted", true, "key", "arn:aws:kms:eu-west-1:980678888888:key/7e9173f2-6ac8"), 0L, "imageId");
         CloudInstance instance = new CloudInstance("SOME_ID", temp, null);
         List<Group> groups = new ArrayList<>();
         groups.add(new Group("master", InstanceGroupType.GATEWAY, singletonList(instance), null, null, null, null, null, null, 30));
@@ -164,12 +166,12 @@ public class EncryptedImageCopyServiceTest {
         List<Group> groups = new ArrayList<>();
 
         InstanceTemplate temp = new InstanceTemplate("medium", "master", 0L, emptyList(), InstanceStatus.CREATE_REQUESTED,
-                Map.of("encrypted", true, "key", "arn:aws:kms:eu-west-1:980678888888:key/7e9173f2-6ac8"), 0L);
+                Map.of("encrypted", true, "key", "arn:aws:kms:eu-west-1:980678888888:key/7e9173f2-6ac8"), 0L, "imageId");
         CloudInstance instance = new CloudInstance("SOME_ID", temp, null);
         groups.add(new Group("master", InstanceGroupType.GATEWAY, singletonList(instance), null, null, null, null, null, null, 30));
 
         InstanceTemplate temp2 = new InstanceTemplate("medium", "worker", 1L, emptyList(), InstanceStatus.CREATE_REQUESTED,
-                Map.of("encrypted", true, "key", "arn:aws:kms:eu-west-1:980678888888:key/almafa23-6ac8"), 1L);
+                Map.of("encrypted", true, "key", "arn:aws:kms:eu-west-1:980678888888:key/almafa23-6ac8"), 1L, "imageId");
         CloudInstance instance2 = new CloudInstance("SECOND_ID", temp2, null);
         groups.add(new Group("worker", InstanceGroupType.CORE, singletonList(instance2), null, null, null, null, null, null, 30));
 
@@ -200,17 +202,17 @@ public class EncryptedImageCopyServiceTest {
         List<Group> groups = new ArrayList<>();
 
         InstanceTemplate temp = new InstanceTemplate("medium", "master", 0L, emptyList(), InstanceStatus.CREATE_REQUESTED,
-                Map.of("encrypted", true, "key", "arn:aws:kms:eu-west-1:980678888888:key/7e9173f2-6ac8"), 0L);
+                Map.of("encrypted", true, "key", "arn:aws:kms:eu-west-1:980678888888:key/7e9173f2-6ac8"), 0L, "imageId");
         CloudInstance instance = new CloudInstance("SOME_ID", temp, null);
         groups.add(new Group("master", InstanceGroupType.GATEWAY, singletonList(instance), null, null, null, null, null, null, 30));
 
         InstanceTemplate temp2 = new InstanceTemplate("medium", "worker", 1L, emptyList(), InstanceStatus.CREATE_REQUESTED,
-                Map.of("encrypted", true, "key", "arn:aws:kms:eu-west-1:980678888888:key/almafa23-6ac8"), 1L);
+                Map.of("encrypted", true, "key", "arn:aws:kms:eu-west-1:980678888888:key/almafa23-6ac8"), 1L, "imageId");
         CloudInstance instance2 = new CloudInstance("SECOND_ID", temp2, null);
         groups.add(new Group("worker", InstanceGroupType.CORE, singletonList(instance2), null, null, null, null, null, null, 30));
 
         InstanceTemplate unencryptedTemp = new InstanceTemplate("medium", "worker", 1L, emptyList(), InstanceStatus.CREATE_REQUESTED,
-                Map.of("encrypted", false), 1L);
+                Map.of("encrypted", false), 1L, "imageId");
         CloudInstance unencryptedInstance = new CloudInstance("UNENCRYPTED_ID", unencryptedTemp, null);
         groups.add(new Group("compute", InstanceGroupType.CORE, singletonList(unencryptedInstance), null, null, null, null, null, null, 30));
 

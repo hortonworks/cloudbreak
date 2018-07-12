@@ -1,5 +1,28 @@
 package com.sequenceiq.cloudbreak.converter.spi;
 
+import static com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceStatus.REQUESTED;
+import static com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.CREATE_REQUESTED;
+import static com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.DELETE_REQUESTED;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.convert.ConversionService;
+import org.springframework.stereotype.Component;
+
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.blueprint.VolumeUtils;
 import com.sequenceiq.cloudbreak.blueprint.filesystem.FileSystemConfigurationsViewProvider;
@@ -19,6 +42,7 @@ import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.cloud.model.StackTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Subnet;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
+import com.sequenceiq.cloudbreak.converter.InstanceMetadataToImageIdConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.StackAuthentication;
@@ -31,27 +55,6 @@ import com.sequenceiq.cloudbreak.repository.SecurityRuleRepository;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.stack.DefaultRootVolumeSizeProvider;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.core.convert.ConversionService;
-import org.springframework.stereotype.Component;
-
-import javax.inject.Inject;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-
-import static com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceStatus.REQUESTED;
-import static com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.CREATE_REQUESTED;
-import static com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.DELETE_REQUESTED;
 
 @Component
 public class StackToCloudStackConverter {
@@ -72,6 +75,9 @@ public class StackToCloudStackConverter {
 
     @Inject
     private FileSystemConfigurationsViewProvider fileSystemConfigurationsViewProvider;
+
+    @Inject
+    private InstanceMetadataToImageIdConverter instanceMetadataToImageIdConverter;
 
     @Autowired
     @Qualifier("conversionService")
@@ -125,8 +131,9 @@ public class StackToCloudStackConverter {
         String hostName = instanceMetaData == null ? null : instanceMetaData.getShortHostname();
         String subnetId = instanceMetaData == null ? null : instanceMetaData.getSubnetId();
         String instanceName = instanceMetaData == null ? null : instanceMetaData.getInstanceName();
+        String instanceImageId = instanceMetaData == null ? null : instanceMetadataToImageIdConverter.convert(instanceMetaData);
 
-        InstanceTemplate instanceTemplate = buildInstanceTemplate(template, name, privateId, status);
+        InstanceTemplate instanceTemplate = buildInstanceTemplate(template, name, privateId, status, instanceImageId);
         InstanceAuthentication instanceAuthentication = buildInstanceAuthentication(stackAuthentication);
         Map<String, Object> params = new HashMap<>();
         if (hostName != null) {
@@ -141,7 +148,7 @@ public class StackToCloudStackConverter {
         return new CloudInstance(id, instanceTemplate, instanceAuthentication, params);
     }
 
-    InstanceTemplate buildInstanceTemplate(Template template, String name, Long privateId, InstanceStatus status) {
+    InstanceTemplate buildInstanceTemplate(Template template, String name, Long privateId, InstanceStatus status, String instanceImageId) {
         Json attributes = template.getAttributes();
         Map<String, Object> fields = attributes == null ? Collections.emptyMap() : attributes.getMap();
         List<Volume> volumes = new ArrayList<>();
@@ -149,7 +156,7 @@ public class StackToCloudStackConverter {
             Volume volume = new Volume(VolumeUtils.VOLUME_PREFIX + (i + 1), template.getVolumeType(), template.getVolumeSize());
             volumes.add(volume);
         }
-        return new InstanceTemplate(template.getInstanceType(), name, privateId, volumes, status, fields, template.getId());
+        return new InstanceTemplate(template.getInstanceType(), name, privateId, volumes, status, fields, template.getId(), instanceImageId);
     }
 
     private Map<String, String> getUserDefinedTags(Stack stack) {

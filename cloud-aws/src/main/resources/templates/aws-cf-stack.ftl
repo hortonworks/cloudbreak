@@ -291,7 +291,7 @@
     </#if>
 
     <#list instanceGroups as group>
-	"AmbariNodes${group.groupName?replace('_', '')}" : {
+	"${group.autoScalingGroupName}" : {
       "Type" : "AWS::AutoScaling::AutoScalingGroup",
       <#if !existingSubnet>
       "DependsOn" : [ "PublicSubnetRouteTableAssociation", "PublicRoute" ],

@@ -369,7 +369,11 @@
                            },
                            <#if instance.managedDisk == true>
                            "imageReference": {
+                               <#if instance.customImageId?? && instance.customImageId?has_content>
+                               "id": "${instance.customImageId}"
+                               <#else>
                                "id": "${customImageId}"
+                               </#if>
                            },
                            </#if>
                            "dataDisks": [

@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
 import com.sequenceiq.cloudbreak.cloud.event.setup.CheckImageResult;
+import com.sequenceiq.cloudbreak.core.flow2.FlowEvent;
 import com.sequenceiq.cloudbreak.core.flow2.PayloadConverter;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.provision.PrepareImageResultToStackEventConverter;
@@ -70,7 +71,11 @@ public class CheckImageAction extends AbstractStackCreationAction<StackEvent> {
 
     @Override
     protected Selectable createRequest(StackContext context) {
-        return new StackEvent(StackCreationEvent.IMAGE_COPY_FINISHED_EVENT.event(), context.getStack().getId());
+        return new StackEvent(getFinishedEvent().event(), context.getStack().getId());
+    }
+
+    protected FlowEvent getFinishedEvent() {
+        return StackCreationEvent.IMAGE_COPY_FINISHED_EVENT;
     }
 
     @Override
@@ -79,8 +84,12 @@ public class CheckImageAction extends AbstractStackCreationAction<StackEvent> {
     }
 
     private void repeat(StackContext context) {
-        timer.submit(aLong -> sendEvent(context.getFlowId(), new StackEvent(StackCreationEvent.IMAGE_COPY_CHECK_EVENT.event(),
+        timer.submit(aLong -> sendEvent(context.getFlowId(), new StackEvent(getRepeatEvent().event(),
                 context.getStack().getId())), REPEAT_TIME, TimeUnit.MILLISECONDS);
+    }
+
+    protected FlowEvent getRepeatEvent() {
+        return StackCreationEvent.IMAGE_COPY_CHECK_EVENT;
     }
 
     private int getFaultNum(Map<Object, Object> variables) {

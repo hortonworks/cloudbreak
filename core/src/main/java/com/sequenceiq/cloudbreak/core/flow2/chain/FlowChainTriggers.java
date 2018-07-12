@@ -29,6 +29,8 @@ public class FlowChainTriggers {
 
     public static final String EPHEMERAL_CLUSTERS_UPDATE_TRIGGER_EVENT = "EPHEMERAL_CLUSTERS_UPDATE_TRIGGER_EVENT";
 
+    public static final String STACK_IMAGE_UPDATE_TRIGGER_EVENT = "STACK_IMAGE_UPDATE_TRIGGER_EVENT";
+
     private FlowChainTriggers() {
     }
 }

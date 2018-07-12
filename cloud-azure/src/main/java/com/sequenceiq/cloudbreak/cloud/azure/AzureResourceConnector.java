@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.net.util.SubnetUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,6 +50,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource.Builder;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
+import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.TlsInfo;
@@ -100,8 +102,7 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
         String resourceGroupName = azureUtils.getResourceGroupName(ac.getCloudContext());
         AzureClient client = ac.getParameter(AzureClient.class);
 
-        AzureStackView azureStackView = getAzureStack(azureCredentialView, ac.getCloudContext(), stack,
-                getNumberOfAvailableIPsInSubnets(client, stack.getNetwork()));
+        AzureStackView azureStackView = getAzureStack(azureCredentialView, stack, getNumberOfAvailableIPsInSubnets(client, stack.getNetwork()), ac);
 
         String customImageId = azureStorage.getCustomImageId(client, ac, stack);
         String template = azureTemplateBuilder.build(stackName, customImageId, azureCredentialView, azureStackView, ac.getCloudContext(), stack);
@@ -229,8 +230,8 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
 
         String stackName = azureUtils.getStackName(authenticatedContext.getCloudContext());
 
-        AzureStackView azureStackView = getAzureStack(azureCredentialView, authenticatedContext.getCloudContext(), stack,
-                getNumberOfAvailableIPsInSubnets(client, stack.getNetwork()));
+        AzureStackView azureStackView = getAzureStack(azureCredentialView, stack,
+                getNumberOfAvailableIPsInSubnets(client, stack.getNetwork()), authenticatedContext);
 
         String customImageId = azureStorage.getCustomImageId(client, authenticatedContext, stack);
         String template = azureTemplateBuilder.build(stackName, customImageId, azureCredentialView, azureStackView,
@@ -410,11 +411,30 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
         return azureTemplateBuilder.getTemplateString();
     }
 
-    private AzureStackView getAzureStack(AzureCredentialView azureCredentialView, CloudContext cloudContext, CloudStack cloudStack,
-            Map<String, Integer> availableIPs) {
-        return new AzureStackView(cloudContext.getName(), stackNamePrefixLength, cloudStack.getGroups(), new AzureStorageView(azureCredentialView, cloudContext,
+    private AzureStackView getAzureStack(AzureCredentialView azureCredentialView, CloudStack cloudStack,
+            Map<String, Integer> availableIPs, AuthenticatedContext ac) {
+        Map<String, String> customImageNamePerInstance = getcustomImageNamePerInstance(ac, cloudStack);
+        return new AzureStackView(ac.getCloudContext().getName(), stackNamePrefixLength, cloudStack.getGroups(), new AzureStorageView(azureCredentialView,
+                ac.getCloudContext(),
                 azureStorage, azureStorage.getArmAttachedStorageOption(cloudStack.getParameters())),
-                AzureSubnetStrategy.getAzureSubnetStrategy(FILL, azureUtils.getCustomSubnetIds(cloudStack.getNetwork()), availableIPs));
+                AzureSubnetStrategy.getAzureSubnetStrategy(FILL, azureUtils.getCustomSubnetIds(cloudStack.getNetwork()), availableIPs),
+                customImageNamePerInstance);
+    }
+
+    private Map<String, String> getcustomImageNamePerInstance(AuthenticatedContext ac, CloudStack cloudStack) {
+        AzureClient client = ac.getParameter(AzureClient.class);
+        Map<String, String> imageNameMap = new HashMap<>();
+        Map<String, String> customImageNamePerInstance = new HashMap<>();
+        for (Group group : cloudStack.getGroups()) {
+            for (CloudInstance instance : group.getInstances()) {
+                String imageId = instance.getTemplate().getImageId();
+                if (StringUtils.isNotBlank(imageId)) {
+                    String imageCustomName = imageNameMap.computeIfAbsent(imageId, s -> azureStorage.getCustomImageId(client, ac, cloudStack, imageId));
+                    customImageNamePerInstance.put(instance.getInstanceId(), imageCustomName);
+                }
+            }
+        }
+        return customImageNamePerInstance;
     }
 
     private void deleteContainer(AzureClient azureClient, String resourceGroup, String storageName, String container) {
