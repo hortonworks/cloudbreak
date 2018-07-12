@@ -29,7 +29,7 @@ public class AwsTagPreparationServiceTest {
         ReflectionTestUtils.setField(awsTagPreparationService, "defaultCloudformationTag", "test1");
         ReflectionTestUtils.setField(awsTagPreparationService, "customCloudformationTags", Lists.asList("test2:abc", new String[]{"test3:def"}));
         awsTagPreparationService.init();
-        Collection<Tag> tags = awsTagPreparationService.prepareTags(authenticatedContext(), Maps.newHashMap());
+        Collection<Tag> tags = awsTagPreparationService.prepareCloudformationTags(authenticatedContext(), Maps.newHashMap());
         Assert.assertEquals(4L, tags.size());
     }
 
@@ -40,7 +40,7 @@ public class AwsTagPreparationServiceTest {
         awsTagPreparationService.init();
         Map<String, String> userDefined = Maps.newHashMap();
         userDefined.put("userdefinedkey", "userdefinedvalue");
-        Collection<Tag> tags = awsTagPreparationService.prepareTags(authenticatedContext(), userDefined);
+        Collection<Tag> tags = awsTagPreparationService.prepareCloudformationTags(authenticatedContext(), userDefined);
         Assert.assertEquals(5L, tags.size());
     }
 
@@ -49,7 +49,7 @@ public class AwsTagPreparationServiceTest {
         ReflectionTestUtils.setField(awsTagPreparationService, "defaultCloudformationTag", "test1");
         ReflectionTestUtils.setField(awsTagPreparationService, "customCloudformationTags", new ArrayList<>());
         awsTagPreparationService.init();
-        Collection<Tag> tags = awsTagPreparationService.prepareTags(authenticatedContext(), Maps.newHashMap());
+        Collection<Tag> tags = awsTagPreparationService.prepareCloudformationTags(authenticatedContext(), Maps.newHashMap());
         Assert.assertEquals(2L, tags.size());
     }
 
@@ -58,7 +58,7 @@ public class AwsTagPreparationServiceTest {
         ReflectionTestUtils.setField(awsTagPreparationService, "defaultCloudformationTag", "");
         ReflectionTestUtils.setField(awsTagPreparationService, "customCloudformationTags", new ArrayList<>());
         awsTagPreparationService.init();
-        Collection<Tag> tags = awsTagPreparationService.prepareTags(authenticatedContext(), Maps.newHashMap());
+        Collection<Tag> tags = awsTagPreparationService.prepareCloudformationTags(authenticatedContext(), Maps.newHashMap());
         Assert.assertEquals(1L, tags.size());
     }
 

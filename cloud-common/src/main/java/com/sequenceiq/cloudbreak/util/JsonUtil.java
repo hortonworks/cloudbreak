@@ -38,6 +38,10 @@ public class JsonUtil {
         return MAPPER.readValue(content, valueType);
     }
 
+    public static <T> T readValue(Map<String, Object> map, Class<T> valueType) {
+        return MAPPER.convertValue(map, valueType);
+    }
+
     public static String writeValueAsString(Object object) throws JsonProcessingException {
         return MAPPER.writeValueAsString(object);
     }

@@ -8,6 +8,7 @@ public enum ResourceType {
     AWS_SUBNET,
     AWS_S3_ROLE,
     AWS_VPC,
+    AWS_SNAPSHOT,
 
     // OPENSTACK
     HEAT_STACK(CommonResourceType.TEMPLATE),

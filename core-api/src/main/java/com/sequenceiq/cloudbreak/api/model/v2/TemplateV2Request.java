@@ -8,6 +8,10 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.cloudbreak.api.model.CustomInstanceType;
 import com.sequenceiq.cloudbreak.api.model.JsonEntity;
+import com.sequenceiq.cloudbreak.api.model.v2.template.AwsTemplateParameters;
+import com.sequenceiq.cloudbreak.api.model.v2.template.AzureTemplateParameters;
+import com.sequenceiq.cloudbreak.api.model.v2.template.GcpTemplateParameters;
+import com.sequenceiq.cloudbreak.api.model.v2.template.OpenStackTemplateParameters;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.TemplateModelDescription;
 
 import io.swagger.annotations.ApiModel;
@@ -30,6 +34,18 @@ public class TemplateV2Request implements JsonEntity {
     @ApiModelProperty(TemplateModelDescription.PARAMETERS)
     private Map<String, Object> parameters = new HashMap<>();
 
+    @ApiModelProperty(TemplateModelDescription.AWS_PARAMETERS)
+    private AwsTemplateParameters awsTemplateParameters;
+
+    @ApiModelProperty(TemplateModelDescription.GCP_PARAMETERS)
+    private GcpTemplateParameters gcpTemlateParameters;
+
+    @ApiModelProperty(TemplateModelDescription.AZURE_PARAMETERS)
+    private AzureTemplateParameters azureTemplateParameters;
+
+    @ApiModelProperty(TemplateModelDescription.OPEN_STACK_PARAMETERS)
+    private OpenStackTemplateParameters openStackTemplateParameters;
+
     @ApiModelProperty(TemplateModelDescription.VOLUME_TYPE)
     private String volumeType;
 
@@ -38,6 +54,38 @@ public class TemplateV2Request implements JsonEntity {
 
     @ApiModelProperty(TemplateModelDescription.CUSTOM_INSTANCE_TYPE)
     private CustomInstanceType customInstanceType;
+
+    public AwsTemplateParameters getAwsTemplateParameters() {
+        return awsTemplateParameters;
+    }
+
+    public void setAwsTemplateParameters(AwsTemplateParameters awsTemplateParameters) {
+        this.awsTemplateParameters = awsTemplateParameters;
+    }
+
+    public GcpTemplateParameters getGcpTemlateParameters() {
+        return gcpTemlateParameters;
+    }
+
+    public void setGcpTemlateParameters(GcpTemplateParameters gcpTemlateParameters) {
+        this.gcpTemlateParameters = gcpTemlateParameters;
+    }
+
+    public AzureTemplateParameters getAzureTemplateParameters() {
+        return azureTemplateParameters;
+    }
+
+    public void setAzureTemplateParameters(AzureTemplateParameters azureTemplateParameters) {
+        this.azureTemplateParameters = azureTemplateParameters;
+    }
+
+    public OpenStackTemplateParameters getOpenStackTemplateParameters() {
+        return openStackTemplateParameters;
+    }
+
+    public void setOpenStackTemplateParameters(OpenStackTemplateParameters openStackTemplateParameters) {
+        this.openStackTemplateParameters = openStackTemplateParameters;
+    }
 
     public Integer getVolumeSize() {
         return volumeSize;
