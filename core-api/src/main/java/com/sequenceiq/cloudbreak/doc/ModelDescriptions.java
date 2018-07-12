@@ -49,6 +49,16 @@ public class ModelDescriptions {
         public static final String INSTANCE_TYPE = "type of the instance";
         public static final String CUSTOM_INSTANCE_TYPE = "custom instancetype definition";
         public static final String PARAMETERS = "cloud specific parameters for template";
+        public static final String AWS_PARAMETERS = "aws specific parameters for template";
+        public static final String GCP_PARAMETERS = "gcp specific parameters for template";
+        public static final String OPEN_STACK_PARAMETERS = "open stack specific parameters for template";
+        public static final String AZURE_PARAMETERS = "azure specific parameters for template";
+        public static final String AWS_SPOT_PRICE = "spot price for aws";
+        public static final String AZURE_PRIVATE_ID = "private id for azure";
+        public static final String ENCRYPTION = "encryption for vm";
+        public static final String ENCRYPTION_TYPE = "encryption type for vm (DEFAULT|CUSTOM|NONE)";
+        public static final String ENCRYPTION_KEY = "encryption key for vm";
+        public static final String ENCRYPTED = "should encrypt the vm";
     }
 
     public static class ConstraintTemplateModelDescription {

@@ -43,20 +43,36 @@ public class AwsTagPreparationService {
         }
     }
 
-    public Collection<Tag> prepareTags(AuthenticatedContext ac, Map<String, String> userDefinedTags) {
-        Collection<Tag> tags = new ArrayList<>();
-        tags.add(prepareTag(CLOUDBREAK_CLUSTER_TAG, ac.getCloudContext().getName()));
+    public Collection<com.amazonaws.services.cloudformation.model.Tag> prepareCloudformationTags(AuthenticatedContext ac, Map<String, String> userDefinedTags) {
+        Collection<com.amazonaws.services.cloudformation.model.Tag> tags = new ArrayList<>();
+        tags.add(prepareCloudformationTag(CLOUDBREAK_CLUSTER_TAG, ac.getCloudContext().getName()));
         if (!Strings.isNullOrEmpty(defaultCloudformationTag)) {
-            tags.add(prepareTag(CLOUDBREAK_ID, defaultCloudformationTag));
+            tags.add(prepareCloudformationTag(CLOUDBREAK_ID, defaultCloudformationTag));
         }
         tags.addAll(Stream.concat(customTags.entrySet().stream(), userDefinedTags.entrySet().stream())
-                .map(entry -> prepareTag(entry.getKey(), entry.getValue()))
+                .map(entry -> prepareCloudformationTag(entry.getKey(), entry.getValue()))
                 .collect(Collectors.toList()));
         return tags;
     }
 
-    private com.amazonaws.services.cloudformation.model.Tag prepareTag(String key, String value) {
+    public Collection<com.amazonaws.services.ec2.model.Tag> prepareEc2Tags(AuthenticatedContext ac, Map<String, String> userDefinedTags) {
+        Collection<com.amazonaws.services.ec2.model.Tag> tags = new ArrayList<>();
+        tags.add(prepareEc2Tag(CLOUDBREAK_CLUSTER_TAG, ac.getCloudContext().getName()));
+        if (!Strings.isNullOrEmpty(defaultCloudformationTag)) {
+            tags.add(prepareEc2Tag(CLOUDBREAK_ID, defaultCloudformationTag));
+        }
+        tags.addAll(Stream.concat(customTags.entrySet().stream(), userDefinedTags.entrySet().stream())
+                .map(entry -> prepareEc2Tag(entry.getKey(), entry.getValue()))
+                .collect(Collectors.toList()));
+        return tags;
+    }
+
+    private com.amazonaws.services.cloudformation.model.Tag prepareCloudformationTag(String key, String value) {
         return new com.amazonaws.services.cloudformation.model.Tag().withKey(key).withValue(value);
+    }
+
+    private com.amazonaws.services.ec2.model.Tag prepareEc2Tag(String key, String value) {
+        return new com.amazonaws.services.ec2.model.Tag().withKey(key).withValue(value);
     }
 
 }

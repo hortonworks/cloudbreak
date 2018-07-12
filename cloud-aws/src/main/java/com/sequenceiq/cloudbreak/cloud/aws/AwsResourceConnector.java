@@ -17,10 +17,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -58,6 +60,7 @@ import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.Address;
 import com.amazonaws.services.ec2.model.AssociateAddressRequest;
 import com.amazonaws.services.ec2.model.DeleteKeyPairRequest;
+import com.amazonaws.services.ec2.model.DeleteSnapshotRequest;
 import com.amazonaws.services.ec2.model.DescribeAddressesRequest;
 import com.amazonaws.services.ec2.model.DescribeAddressesResult;
 import com.amazonaws.services.ec2.model.DescribeImagesRequest;
@@ -192,7 +195,7 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
                     .withAuthenticatedContext(ac)
                     .withStack(stack)
                     .withExistingVpc(existingVPC)
-                    .withSnapshotId(getEbsSnapshotIdIfNeeded(ac, stack))
+                    .withSnapshotId(getEbsSnapshotIdIfNeeded(ac, stack, resourceNotifier))
                     .withExistingIGW(awsNetworkView.isExistingIGW())
                     .withExistingSubnetCidr(existingSubnet ? getExistingSubnetCidr(ac, stack) : null)
                     .withExistingSubnetIds(existingSubnet ? awsNetworkView.getSubnetList() : null)
@@ -261,7 +264,7 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
                 .withStackName(cFStackName)
                 .withOnFailure(OnFailure.DO_NOTHING)
                 .withTemplateBody(cfTemplate)
-                .withTags(awsTagPreparationService.prepareTags(ac, stack.getTags()))
+                .withTags(awsTagPreparationService.prepareCloudformationTags(ac, stack.getTags()))
                 .withCapabilities(CAPABILITY_IAM)
                 .withParameters(getStackParameters(ac, stack, cFStackName, subnet));
     }
@@ -518,6 +521,7 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
             }
             AmazonEC2Client amazonEC2Client = awsClient.createAccess(credentialView, regionName);
             releaseReservedIp(amazonEC2Client, resources);
+            deleteSnapshots(ac, amazonEC2Client, resources);
             deleteKeyPair(ac, stack);
         } else if (resources != null) {
             AmazonEC2Client amazonEC2Client = awsClient.createAccess(credentialView, regionName);
@@ -527,6 +531,22 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
             LOGGER.info("No resources to release.");
         }
         return check(ac, resources);
+    }
+
+    private void deleteSnapshots(AuthenticatedContext ac, AmazonEC2Client client, List<CloudResource> resources) {
+        LOGGER.info("Deleting stack: {}", ac.getCloudContext().getId());
+        if (resources != null && !resources.isEmpty()) {
+            Set<CloudResource> stackResources = getSnapshots(resources);
+            for (CloudResource stackResource : stackResources) {
+                try {
+                    DeleteSnapshotRequest deleteSnapshotRequest = new DeleteSnapshotRequest().withSnapshotId(stackResource.getName());
+                    client.deleteSnapshot(deleteSnapshotRequest);
+                } catch (Exception e) {
+                    String errorMessage = String.format("Failed to delete snapshot [id:'%s'], detailed message: %s", stackResource.getName(), e.getMessage());
+                    LOGGER.warn(errorMessage, e);
+                }
+            }
+        }
     }
 
     private void deleteKeyPair(AuthenticatedContext ac, CloudStack stack) {
@@ -540,7 +560,7 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
             } catch (Exception e) {
                 String errorMessage = String.format("Failed to delete public key [roleArn:'%s', region: '%s'], detailed message: %s",
                         awsCredential.getRoleArn(), region, e.getMessage());
-                LOGGER.error(errorMessage, e);
+                LOGGER.warn(errorMessage, e);
             }
         }
     }
@@ -780,6 +800,16 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
         return null;
     }
 
+    private Set<CloudResource> getSnapshots(Iterable<CloudResource> cloudResources) {
+        Set<CloudResource> collectedResources = new HashSet<>();
+        for (CloudResource cloudResource : cloudResources) {
+            if (cloudResource.getType().equals(ResourceType.AWS_SNAPSHOT)) {
+                collectedResources.add(cloudResource);
+            }
+        }
+        return collectedResources;
+    }
+
     private CloudResource getReservedIp(Iterable<CloudResource> cloudResources) {
         for (CloudResource cloudResource : cloudResources) {
             if (cloudResource.getType().equals(ResourceType.AWS_RESERVED_IP)) {
@@ -887,11 +917,11 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
         return low <= currentAddress && currentAddress <= high;
     }
 
-    private Map<String, String> getEbsSnapshotIdIfNeeded(AuthenticatedContext ac, CloudStack cloudStack) {
+    private Map<String, String> getEbsSnapshotIdIfNeeded(AuthenticatedContext ac, CloudStack cloudStack, PersistenceNotifier resourceNotifier) {
         Map<String, String> snapshotIdMap = new HashMap<>();
         for (Group group : cloudStack.getGroups()) {
             if (encryptedSnapshotPreparator.isEncryptedVolumeRequested(group)) {
-                Optional<String> snapshot = encryptedSnapshotPreparator.createSnapshotIfNeeded(ac, group);
+                Optional<String> snapshot = encryptedSnapshotPreparator.createSnapshotIfNeeded(ac, cloudStack, group, resourceNotifier);
                 if (snapshot.isPresent()) {
                     snapshotIdMap.put(group.getName(), snapshot.orElse(null));
                 } else {
