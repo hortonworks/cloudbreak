@@ -40,11 +40,13 @@ public class BaseSecurityGroupCommands implements BaseCommands, SecurityGroupCom
         try {
             Map<String, String> tcpRules = new HashMap<>();
             Map<String, String> udpRules = new HashMap<>();
-            for (Map<String, String> rule : rules.getRules()) {
-                if ("tcp".equals(rule.get("protocol"))) {
-                    tcpRules.put(rule.get("subnet"), rule.get("ports"));
-                } else {
-                    udpRules.put(rule.get("subnet"), rule.get("ports"));
+            if (rules != null) {
+                for (Map<String, String> rule : rules.getRules()) {
+                    if ("tcp".equals(rule.get("protocol"))) {
+                        tcpRules.put(rule.get("subnet"), rule.get("ports"));
+                    } else {
+                        udpRules.put(rule.get("subnet"), rule.get("ports"));
+                    }
                 }
             }
             Long id;

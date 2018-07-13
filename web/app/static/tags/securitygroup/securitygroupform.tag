@@ -146,7 +146,7 @@
                     <div class="form-group" ng-class="{ 'has-error': securitygroupForm_2.securityGroupId.$dirty && securitygroupForm_2.securityGroupId.$invalid }">
                         <label class="col-sm-3 control-label" for="securityGroupId">{{msg.security_group_id_label}}</label>
                         <div class="col-sm-9">
-                            <input type="text" class="form-control" name="securityGroupId" ng-model="securitygroup.securityGroupId" required id="securityGroupId" placeholder="{{msg.security_group_id_placeholder}}" ng-pattern="/^sg-[a-zA-Z0-9]*$/">
+                            <input type="text" class="form-control" name="securityGroupId" ng-model="securitygroup.securityGroupId" required id="securityGroupId" placeholder="{{msg.security_group_id_placeholder}}">
                         </div>
                         <!-- .col-sm-9 -->
                     </div>
