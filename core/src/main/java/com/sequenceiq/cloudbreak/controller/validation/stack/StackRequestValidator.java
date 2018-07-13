@@ -89,14 +89,16 @@ public class StackRequestValidator implements Validator<StackRequest> {
     private void validateSharedService(StackRequest stackRequest, ValidationResultBuilder validationBuilder) {
         if (stackRequest.getClusterToAttach() != null) {
             Optional<Stack> stack = stackRepository.findById(stackRequest.getClusterToAttach());
-            if (stack.isPresent() && !AVAILABLE.equals(stack.get().getStatus())) {
+            if (stack.isPresent() && AVAILABLE.equals(stack.get().getStatus())) {
                 Optional<Cluster> cluster = Optional.ofNullable(clusterService.retrieveClusterByStackId(stackRequest.getClusterToAttach()));
                 if (cluster.isPresent() && !AVAILABLE.equals(cluster.get().getStatus())) {
                     validationBuilder.error("Ambari installation in progress or some of it's components has failed. "
-                            + "Please check Ambari before trying to attach cluster to datalake");
+                            + "Please check Ambari before trying to attach cluster to datalake.");
                 }
-            } else {
-                validationBuilder.error("Unable to attach to datalake because it doesn't exists or it's infrastructure is not ready");
+            } else if (stack.isPresent() && !AVAILABLE.equals(stack.get().getStatus())) {
+                validationBuilder.error("Unable to attach to datalake because it's infrastructure is not ready.");
+            } else if (!stack.isPresent()) {
+                validationBuilder.error("Unable to attach to datalake because it doesn't exists.");
             }
         }
     }
