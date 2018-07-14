@@ -104,7 +104,7 @@ func getOAuth2Token(identityUrl string, username string, password string, client
 	resp, err := c.Do(req)
 
 	if resp == nil && err == nil {
-		return "", errors.New(fmt.Sprintf("Unkown error while connnecting to %s as user: %s", identityUrl, username))
+		return "", errors.New(fmt.Sprintf("Unknown error while connnecting to %s as user: %s", identityUrl, username))
 	}
 
 	if resp == nil || resp.StatusCode >= 400 {

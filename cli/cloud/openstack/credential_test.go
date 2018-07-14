@@ -90,6 +90,6 @@ func TestValidateAndGetInvalidValue(t *testing.T) {
 	_, err := validateAndGet("not-valid", []string{"valid1", "valid2"})
 
 	if err == nil {
-		t.Error("error doesn't occured")
+		t.Error("error doesn't occurred")
 	}
 }

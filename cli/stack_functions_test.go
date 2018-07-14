@@ -64,7 +64,7 @@ func TestWaitForOperationToFinishImplFailedStack(t *testing.T) {
 	client := getStackFailedClient{}
 	waitForOperationToFinishImpl(int64(1), SKIP, AVAILABLE, client)
 
-	t.Error("Exit not happend")
+	t.Error("Exit not happened")
 }
 
 func TestWaitForOperationToFinishImplFailedCluster(t *testing.T) {
@@ -81,5 +81,5 @@ func TestWaitForOperationToFinishImplFailedCluster(t *testing.T) {
 	client := getStackFailedClient{}
 	waitForOperationToFinishImpl(int64(1), AVAILABLE, SKIP, client)
 
-	t.Error("Exit not happend")
+	t.Error("Exit not happened")
 }

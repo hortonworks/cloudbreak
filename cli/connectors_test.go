@@ -21,7 +21,7 @@ func (*mockConnectorsClient) GetRegionsByCredentialID(params *v2connectors.GetRe
 			"region": "region-name",
 		},
 		AvailabilityZones: map[string][]string{
-			"region": []string{"av0", "av1"},
+			"region": {"av0", "av1"},
 		},
 	}
 	return &v2connectors.GetRegionsByCredentialIDOK{Payload: resp}, nil
@@ -95,9 +95,9 @@ type mockInstanceTypesClient struct {
 func (*mockInstanceTypesClient) GetVMTypesByCredentialID(*v2connectors.GetVMTypesByCredentialIDParams) (*v2connectors.GetVMTypesByCredentialIDOK, error) {
 	resp := &models_cloudbreak.PlatformVmtypesResponse{
 		VMTypes: map[string]models_cloudbreak.VirtualMachinesResponse{
-			"region-a": models_cloudbreak.VirtualMachinesResponse{
+			"region-a": {
 				VirtualMachines: []*models_cloudbreak.VMTypeJSON{
-					&models_cloudbreak.VMTypeJSON{
+					{
 						Value: "machine",
 						VMTypeMetaJSON: &models_cloudbreak.VMTypeMetaJSON{
 							Properties: map[string]string{

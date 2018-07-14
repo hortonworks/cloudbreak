@@ -16,7 +16,7 @@ type mockRdsClient struct {
 
 func (*mockRdsClient) GetPublicsRds(params *v1rdsconfigs.GetPublicsRdsParams) (*v1rdsconfigs.GetPublicsRdsOK, error) {
 	resp := []*models_cloudbreak.RDSConfigResponse{
-		&models_cloudbreak.RDSConfigResponse{
+		{
 			Name:             &(&types.S{S: "test"}).S,
 			ConnectionURL:    &(&types.S{S: "connectionURL"}).S,
 			DatabaseEngine:   &(&types.S{S: "databaseEngine"}).S,

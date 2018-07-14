@@ -23,6 +23,9 @@ deps: deps-errcheck
 deps-errcheck:
 	go get -u github.com/kisielk/errcheck
 
+formatcheck:
+	([ -z "$(shell gofmt -d $(GOFILES_NOVENDOR))" ]) || (echo "Source is unformatted"; exit 1)
+
 format:
 	@gofmt -w ${GOFILES_NOVENDOR}
 
@@ -43,7 +46,7 @@ coverage-html:
 	@go tool cover -html=fmt
 	@rm -f fmt
 
-build: errcheck format vet test build-darwin build-linux build-windows
+build: errcheck formatcheck vet test build-darwin build-linux build-windows
 
 build-version: errcheck format vet test build-darwin-version build-linux-version build-windows-version
 

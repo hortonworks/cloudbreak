@@ -489,7 +489,7 @@ func convertLdapEntryToGroupSearchResult(entries []*ldaputils.Entry) []ldapGroup
 
 func connectLdap(ldapServer, bindUser, bindPassword string, secure bool) *ldaputils.Conn {
 	var ldap *ldaputils.Conn = nil
-	var err error = nil
+	var err error
 	if secure {
 		ldap, err = ldaputils.DialTLS("tcp", ldapServer, &tls.Config{InsecureSkipVerify: true})
 	} else {
