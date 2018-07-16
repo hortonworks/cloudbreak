@@ -9,6 +9,8 @@ public enum ResourceType {
     AWS_S3_ROLE,
     AWS_VPC,
     AWS_SNAPSHOT,
+    AWS_ENCRYPTED_VOLUME,
+    AWS_ENCRYPTED_AMI,
 
     // OPENSTACK
     HEAT_STACK(CommonResourceType.TEMPLATE),

@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.aws.task;
 
+import java.util.Collection;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -45,6 +46,10 @@ public class AwsPollTaskFactory {
 
     public PollTask<Boolean> newCreateSnapshotReadyStatusCheckerTask(AuthenticatedContext authenticatedContext, String snapshotId, AmazonEC2Client ec2Client) {
         return createPollTask(CreateSnapshotReadyStatusCheckerTask.NAME, authenticatedContext, snapshotId, ec2Client);
+    }
+
+    public PollTask<Boolean> newAMICopyStatusCheckerTask(AuthenticatedContext authenticatedContext, Collection<String> imageIds, AmazonEC2Client client) {
+        return createPollTask(AMICopyStatusCheckerTask.NAME, authenticatedContext, imageIds, client);
     }
 
     @SuppressWarnings("unchecked")

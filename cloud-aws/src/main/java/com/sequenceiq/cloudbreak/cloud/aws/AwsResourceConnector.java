@@ -17,12 +17,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -60,7 +58,6 @@ import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.Address;
 import com.amazonaws.services.ec2.model.AssociateAddressRequest;
 import com.amazonaws.services.ec2.model.DeleteKeyPairRequest;
-import com.amazonaws.services.ec2.model.DeleteSnapshotRequest;
 import com.amazonaws.services.ec2.model.DescribeAddressesRequest;
 import com.amazonaws.services.ec2.model.DescribeAddressesResult;
 import com.amazonaws.services.ec2.model.DescribeImagesRequest;
@@ -83,6 +80,8 @@ import com.sequenceiq.cloudbreak.api.model.AdjustmentType;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationTemplateBuilder.ModelContext;
+import com.sequenceiq.cloudbreak.cloud.aws.encryption.EncryptedImageCopyService;
+import com.sequenceiq.cloudbreak.cloud.aws.encryption.EncryptedSnapshotService;
 import com.sequenceiq.cloudbreak.cloud.aws.task.AwsPollTaskFactory;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsInstanceProfileView;
@@ -156,7 +155,10 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
     private AwsTagPreparationService awsTagPreparationService;
 
     @Inject
-    private EncryptedSnapshotPreparator encryptedSnapshotPreparator;
+    private EncryptedSnapshotService encryptedSnapshotService;
+
+    @Inject
+    private EncryptedImageCopyService encryptedImageCopyService;
 
     @Value("${cb.aws.vpc:}")
     private String cloudbreakVpc;
@@ -203,7 +205,8 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
                     .withEnableInstanceProfile(awsInstanceProfileView.isInstanceProfileAvailable())
                     .withInstanceProfileAvailable(awsInstanceProfileView.isInstanceProfileAvailable())
                     .withTemplate(stack.getTemplate())
-                    .withDefaultSubnet(subnet);
+                    .withDefaultSubnet(subnet)
+                    .withEncryptedAMIByGroupName(encryptedImageCopyService.createEncryptedImages(ac, stack, resourceNotifier));
             String cfTemplate = cloudFormationTemplateBuilder.build(modelContext);
             LOGGER.debug("CloudFormationTemplate: {}", cfTemplate);
             cfClient.createStack(createCreateStackRequest(ac, stack, cFStackName, subnet, cfTemplate));
@@ -521,7 +524,8 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
             }
             AmazonEC2Client amazonEC2Client = awsClient.createAccess(credentialView, regionName);
             releaseReservedIp(amazonEC2Client, resources);
-            deleteSnapshots(ac, amazonEC2Client, resources);
+            encryptedSnapshotService.deleteResources(ac, amazonEC2Client, resources);
+            encryptedImageCopyService.deleteResources(regionName, amazonEC2Client, resources);
             deleteKeyPair(ac, stack);
         } else if (resources != null) {
             AmazonEC2Client amazonEC2Client = awsClient.createAccess(credentialView, regionName);
@@ -531,22 +535,6 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
             LOGGER.info("No resources to release.");
         }
         return check(ac, resources);
-    }
-
-    private void deleteSnapshots(AuthenticatedContext ac, AmazonEC2Client client, List<CloudResource> resources) {
-        LOGGER.info("Deleting stack: {}", ac.getCloudContext().getId());
-        if (resources != null && !resources.isEmpty()) {
-            Set<CloudResource> stackResources = getSnapshots(resources);
-            for (CloudResource stackResource : stackResources) {
-                try {
-                    DeleteSnapshotRequest deleteSnapshotRequest = new DeleteSnapshotRequest().withSnapshotId(stackResource.getName());
-                    client.deleteSnapshot(deleteSnapshotRequest);
-                } catch (Exception e) {
-                    String errorMessage = String.format("Failed to delete snapshot [id:'%s'], detailed message: %s", stackResource.getName(), e.getMessage());
-                    LOGGER.warn(errorMessage, e);
-                }
-            }
-        }
     }
 
     private void deleteKeyPair(AuthenticatedContext ac, CloudStack stack) {
@@ -800,16 +788,6 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
         return null;
     }
 
-    private Set<CloudResource> getSnapshots(Iterable<CloudResource> cloudResources) {
-        Set<CloudResource> collectedResources = new HashSet<>();
-        for (CloudResource cloudResource : cloudResources) {
-            if (cloudResource.getType().equals(ResourceType.AWS_SNAPSHOT)) {
-                collectedResources.add(cloudResource);
-            }
-        }
-        return collectedResources;
-    }
-
     private CloudResource getReservedIp(Iterable<CloudResource> cloudResources) {
         for (CloudResource cloudResource : cloudResources) {
             if (cloudResource.getType().equals(ResourceType.AWS_RESERVED_IP)) {
@@ -920,8 +898,8 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
     private Map<String, String> getEbsSnapshotIdIfNeeded(AuthenticatedContext ac, CloudStack cloudStack, PersistenceNotifier resourceNotifier) {
         Map<String, String> snapshotIdMap = new HashMap<>();
         for (Group group : cloudStack.getGroups()) {
-            if (encryptedSnapshotPreparator.isEncryptedVolumeRequested(group)) {
-                Optional<String> snapshot = encryptedSnapshotPreparator.createSnapshotIfNeeded(ac, cloudStack, group, resourceNotifier);
+            if (encryptedSnapshotService.isEncryptedVolumeRequested(group)) {
+                Optional<String> snapshot = encryptedSnapshotService.createSnapshotIfNeeded(ac, cloudStack, group, resourceNotifier);
                 if (snapshot.isPresent()) {
                     snapshotIdMap.put(group.getName(), snapshot.orElse(null));
                 } else {

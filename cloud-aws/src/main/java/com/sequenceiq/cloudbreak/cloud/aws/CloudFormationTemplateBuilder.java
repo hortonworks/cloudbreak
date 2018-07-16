@@ -44,6 +44,7 @@ public class CloudFormationTemplateBuilder {
         for (Group group : context.stack.getGroups()) {
             AwsInstanceView awsInstanceView = new AwsInstanceView(group.getReferenceInstanceConfiguration().getTemplate());
             String snapshotId = context.snapshotId.get(group.getName());
+            String encryptedAMI = context.encryptedAMIByGroupName.get(group.getName());
             AwsGroupView groupView = new AwsGroupView(
                     group.getInstancesSize(),
                     group.getType().name(),
@@ -60,7 +61,8 @@ public class CloudFormationTemplateBuilder {
                     getSubnetIds(context.existingSubnetIds, i, group, multigw),
                     awsInstanceView.isKmsEnabled(),
                     awsInstanceView.getKmsKey(),
-                    snapshotId);
+                    snapshotId,
+                    encryptedAMI);
             awsGroupViews.add(groupView);
             if (group.getType() == InstanceGroupType.GATEWAY) {
                 awsGatewayGroupViews.add(groupView);
@@ -135,6 +137,8 @@ public class CloudFormationTemplateBuilder {
 
         private Map<String, String> snapshotId = new HashMap<>();
 
+        private Map<String, String> encryptedAMIByGroupName = new HashMap<>();
+
         public ModelContext withAuthenticatedContext(AuthenticatedContext ac) {
             this.ac = ac;
             return this;
@@ -192,6 +196,11 @@ public class CloudFormationTemplateBuilder {
 
         public ModelContext withSnapshotId(Map<String, String> snapshotId) {
             this.snapshotId = snapshotId;
+            return this;
+        }
+
+        public ModelContext withEncryptedAMIByGroupName(Map<String, String> encryptedAMIByGroupName) {
+            this.encryptedAMIByGroupName.putAll(encryptedAMIByGroupName);
             return this;
         }
 
