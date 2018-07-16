@@ -339,6 +339,18 @@ func main() {
 					},
 				},
 				{
+					Name:   "change-image",
+					Usage:  "changes image of cluster - will be used when creating new instances or repairing failed ones",
+					Before: ConfigRead,
+					Flags:  cb.NewFlagBuilder().AddFlags(cb.FlName, cb.FlImageId, cb.FlImageCatalogOptional).AddAuthenticationFlags().Build(),
+					Action: cb.ChangeImage,
+					BashComplete: func(c *cli.Context) {
+						for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlName, cb.FlImageId).AddAuthenticationFlags().Build() {
+							printFlagCompletion(f)
+						}
+					},
+				},
+				{
 					Name:        "create",
 					Usage:       "creates a new cluster",
 					Description: `use 'cb cluster generate-template' for cluster request JSON generation`,

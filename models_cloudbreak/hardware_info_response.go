@@ -6,10 +6,13 @@ package models_cloudbreak
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"encoding/json"
+
 	strfmt "github.com/go-openapi/strfmt"
 
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
+	"github.com/go-openapi/validate"
 )
 
 // HardwareInfoResponse hardware info response
@@ -17,27 +20,134 @@ import (
 
 type HardwareInfoResponse struct {
 
-	// metadata of hosts
-	HostMetadata *HostMetadata `json:"hostMetadata,omitempty"`
+	// ambari server address
+	AmbariServer *bool `json:"ambariServer,omitempty"`
 
-	// metadata of instances
-	InstanceMetaData *InstanceMetaData `json:"instanceMetaData,omitempty"`
+	// the fully qualified domain name of the node in the service discovery cluster
+	DiscoveryFQDN string `json:"discoveryFQDN,omitempty"`
+
+	// name of the host group
+	// Required: true
+	GroupName *string `json:"groupName"`
+
+	// image catalog name
+	ImageCatalogName string `json:"imageCatalogName,omitempty"`
+
+	// image catalog Url
+	ImageCatalogURL string `json:"imageCatalogUrl,omitempty"`
+
+	// image Id
+	ImageID string `json:"imageId,omitempty"`
+
+	// image name
+	ImageName string `json:"imageName,omitempty"`
+
+	// name of the instance group
+	InstanceGroup string `json:"instanceGroup,omitempty"`
+
+	// id of the instance
+	InstanceID string `json:"instanceId,omitempty"`
+
+	// type of the instance
+	InstanceMetadataType string `json:"instanceMetadataType,omitempty"`
+
+	// status of the instance
+	InstanceStatus string `json:"instanceStatus,omitempty"`
+
+	// name of the resource
+	// Required: true
+	Name *string `json:"name"`
+
+	// os
+	Os string `json:"os,omitempty"`
+
+	// os type
+	OsType string `json:"osType,omitempty"`
+
+	// package versions
+	PackageVersions map[string]string `json:"packageVersions,omitempty"`
+
+	// private ip of the insctance
+	PrivateIP string `json:"privateIp,omitempty"`
+
+	// public ip of the instance
+	PublicIP string `json:"publicIp,omitempty"`
+
+	// ssh port
+	SSHPort int32 `json:"sshPort,omitempty"`
+
+	// state of the host
+	State string `json:"state,omitempty"`
+
+	// instancegroup related template
+	Template *TemplateResponse `json:"template,omitempty"`
 }
 
-/* polymorph HardwareInfoResponse hostMetadata false */
+/* polymorph HardwareInfoResponse ambariServer false */
 
-/* polymorph HardwareInfoResponse instanceMetaData false */
+/* polymorph HardwareInfoResponse discoveryFQDN false */
+
+/* polymorph HardwareInfoResponse groupName false */
+
+/* polymorph HardwareInfoResponse imageCatalogName false */
+
+/* polymorph HardwareInfoResponse imageCatalogUrl false */
+
+/* polymorph HardwareInfoResponse imageId false */
+
+/* polymorph HardwareInfoResponse imageName false */
+
+/* polymorph HardwareInfoResponse instanceGroup false */
+
+/* polymorph HardwareInfoResponse instanceId false */
+
+/* polymorph HardwareInfoResponse instanceMetadataType false */
+
+/* polymorph HardwareInfoResponse instanceStatus false */
+
+/* polymorph HardwareInfoResponse name false */
+
+/* polymorph HardwareInfoResponse os false */
+
+/* polymorph HardwareInfoResponse osType false */
+
+/* polymorph HardwareInfoResponse packageVersions false */
+
+/* polymorph HardwareInfoResponse privateIp false */
+
+/* polymorph HardwareInfoResponse publicIp false */
+
+/* polymorph HardwareInfoResponse sshPort false */
+
+/* polymorph HardwareInfoResponse state false */
+
+/* polymorph HardwareInfoResponse template false */
 
 // Validate validates this hardware info response
 func (m *HardwareInfoResponse) Validate(formats strfmt.Registry) error {
 	var res []error
 
-	if err := m.validateHostMetadata(formats); err != nil {
+	if err := m.validateGroupName(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
 
-	if err := m.validateInstanceMetaData(formats); err != nil {
+	if err := m.validateInstanceMetadataType(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateInstanceStatus(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateName(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateTemplate(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -48,36 +158,133 @@ func (m *HardwareInfoResponse) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *HardwareInfoResponse) validateHostMetadata(formats strfmt.Registry) error {
+func (m *HardwareInfoResponse) validateGroupName(formats strfmt.Registry) error {
 
-	if swag.IsZero(m.HostMetadata) { // not required
-		return nil
-	}
-
-	if m.HostMetadata != nil {
-
-		if err := m.HostMetadata.Validate(formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("hostMetadata")
-			}
-			return err
-		}
+	if err := validate.Required("groupName", "body", m.GroupName); err != nil {
+		return err
 	}
 
 	return nil
 }
 
-func (m *HardwareInfoResponse) validateInstanceMetaData(formats strfmt.Registry) error {
+var hardwareInfoResponseTypeInstanceMetadataTypePropEnum []interface{}
 
-	if swag.IsZero(m.InstanceMetaData) { // not required
+func init() {
+	var res []string
+	if err := json.Unmarshal([]byte(`["GATEWAY","GATEWAY_PRIMARY","CORE"]`), &res); err != nil {
+		panic(err)
+	}
+	for _, v := range res {
+		hardwareInfoResponseTypeInstanceMetadataTypePropEnum = append(hardwareInfoResponseTypeInstanceMetadataTypePropEnum, v)
+	}
+}
+
+const (
+	// HardwareInfoResponseInstanceMetadataTypeGATEWAY captures enum value "GATEWAY"
+	HardwareInfoResponseInstanceMetadataTypeGATEWAY string = "GATEWAY"
+	// HardwareInfoResponseInstanceMetadataTypeGATEWAYPRIMARY captures enum value "GATEWAY_PRIMARY"
+	HardwareInfoResponseInstanceMetadataTypeGATEWAYPRIMARY string = "GATEWAY_PRIMARY"
+	// HardwareInfoResponseInstanceMetadataTypeCORE captures enum value "CORE"
+	HardwareInfoResponseInstanceMetadataTypeCORE string = "CORE"
+)
+
+// prop value enum
+func (m *HardwareInfoResponse) validateInstanceMetadataTypeEnum(path, location string, value string) error {
+	if err := validate.Enum(path, location, value, hardwareInfoResponseTypeInstanceMetadataTypePropEnum); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *HardwareInfoResponse) validateInstanceMetadataType(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.InstanceMetadataType) { // not required
 		return nil
 	}
 
-	if m.InstanceMetaData != nil {
+	// value enum
+	if err := m.validateInstanceMetadataTypeEnum("instanceMetadataType", "body", m.InstanceMetadataType); err != nil {
+		return err
+	}
 
-		if err := m.InstanceMetaData.Validate(formats); err != nil {
+	return nil
+}
+
+var hardwareInfoResponseTypeInstanceStatusPropEnum []interface{}
+
+func init() {
+	var res []string
+	if err := json.Unmarshal([]byte(`["REQUESTED","CREATED","UNREGISTERED","REGISTERED","DECOMMISSIONED","TERMINATED","DELETED_ON_PROVIDER_SIDE","FAILED","STOPPED"]`), &res); err != nil {
+		panic(err)
+	}
+	for _, v := range res {
+		hardwareInfoResponseTypeInstanceStatusPropEnum = append(hardwareInfoResponseTypeInstanceStatusPropEnum, v)
+	}
+}
+
+const (
+	// HardwareInfoResponseInstanceStatusREQUESTED captures enum value "REQUESTED"
+	HardwareInfoResponseInstanceStatusREQUESTED string = "REQUESTED"
+	// HardwareInfoResponseInstanceStatusCREATED captures enum value "CREATED"
+	HardwareInfoResponseInstanceStatusCREATED string = "CREATED"
+	// HardwareInfoResponseInstanceStatusUNREGISTERED captures enum value "UNREGISTERED"
+	HardwareInfoResponseInstanceStatusUNREGISTERED string = "UNREGISTERED"
+	// HardwareInfoResponseInstanceStatusREGISTERED captures enum value "REGISTERED"
+	HardwareInfoResponseInstanceStatusREGISTERED string = "REGISTERED"
+	// HardwareInfoResponseInstanceStatusDECOMMISSIONED captures enum value "DECOMMISSIONED"
+	HardwareInfoResponseInstanceStatusDECOMMISSIONED string = "DECOMMISSIONED"
+	// HardwareInfoResponseInstanceStatusTERMINATED captures enum value "TERMINATED"
+	HardwareInfoResponseInstanceStatusTERMINATED string = "TERMINATED"
+	// HardwareInfoResponseInstanceStatusDELETEDONPROVIDERSIDE captures enum value "DELETED_ON_PROVIDER_SIDE"
+	HardwareInfoResponseInstanceStatusDELETEDONPROVIDERSIDE string = "DELETED_ON_PROVIDER_SIDE"
+	// HardwareInfoResponseInstanceStatusFAILED captures enum value "FAILED"
+	HardwareInfoResponseInstanceStatusFAILED string = "FAILED"
+	// HardwareInfoResponseInstanceStatusSTOPPED captures enum value "STOPPED"
+	HardwareInfoResponseInstanceStatusSTOPPED string = "STOPPED"
+)
+
+// prop value enum
+func (m *HardwareInfoResponse) validateInstanceStatusEnum(path, location string, value string) error {
+	if err := validate.Enum(path, location, value, hardwareInfoResponseTypeInstanceStatusPropEnum); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *HardwareInfoResponse) validateInstanceStatus(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.InstanceStatus) { // not required
+		return nil
+	}
+
+	// value enum
+	if err := m.validateInstanceStatusEnum("instanceStatus", "body", m.InstanceStatus); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *HardwareInfoResponse) validateName(formats strfmt.Registry) error {
+
+	if err := validate.Required("name", "body", m.Name); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *HardwareInfoResponse) validateTemplate(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Template) { // not required
+		return nil
+	}
+
+	if m.Template != nil {
+
+		if err := m.Template.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("instanceMetaData")
+				return ve.ValidateName("template")
 			}
 			return err
 		}

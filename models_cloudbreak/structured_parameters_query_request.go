@@ -21,10 +21,6 @@ type StructuredParametersQueryRequest struct {
 	// Account name of the path
 	AccountName string `json:"accountName,omitempty"`
 
-	// Attached cluster
-	// Required: true
-	AttachedCluster bool `json:"attachedCluster"`
-
 	// gathered from blueprintName field from the blueprint JSON
 	// Required: true
 	BlueprintName *string `json:"blueprintName"`
@@ -44,8 +40,6 @@ type StructuredParametersQueryRequest struct {
 
 /* polymorph StructuredParametersQueryRequest accountName false */
 
-/* polymorph StructuredParametersQueryRequest attachedCluster false */
-
 /* polymorph StructuredParametersQueryRequest blueprintName false */
 
 /* polymorph StructuredParametersQueryRequest clusterName false */
@@ -57,11 +51,6 @@ type StructuredParametersQueryRequest struct {
 // Validate validates this structured parameters query request
 func (m *StructuredParametersQueryRequest) Validate(formats strfmt.Registry) error {
 	var res []error
-
-	if err := m.validateAttachedCluster(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
 
 	if err := m.validateBlueprintName(formats); err != nil {
 		// prop
@@ -86,15 +75,6 @@ func (m *StructuredParametersQueryRequest) Validate(formats strfmt.Registry) err
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
-	return nil
-}
-
-func (m *StructuredParametersQueryRequest) validateAttachedCluster(formats strfmt.Registry) error {
-
-	if err := validate.Required("attachedCluster", "body", bool(m.AttachedCluster)); err != nil {
-		return err
-	}
-
 	return nil
 }
 

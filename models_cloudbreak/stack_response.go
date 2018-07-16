@@ -84,7 +84,7 @@ type StackResponse struct {
 
 	// hardware information where pairing hostmetadata with instancemetadata
 	// Unique: true
-	HardwareInfos []*HardwareInfoResponse `json:"hardwareInfos"`
+	HardwareInfoGroups []*HardwareInfoGroupResponse `json:"hardwareInfoGroups"`
 
 	// specific version of HDP
 	HdpVersion string `json:"hdpVersion,omitempty"`
@@ -191,7 +191,7 @@ type StackResponse struct {
 
 /* polymorph StackResponse gatewayPort false */
 
-/* polymorph StackResponse hardwareInfos false */
+/* polymorph StackResponse hardwareInfoGroups false */
 
 /* polymorph StackResponse hdpVersion false */
 
@@ -272,7 +272,7 @@ func (m *StackResponse) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
-	if err := m.validateHardwareInfos(formats); err != nil {
+	if err := m.validateHardwareInfoGroups(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -472,27 +472,27 @@ func (m *StackResponse) validateFlexSubscription(formats strfmt.Registry) error 
 	return nil
 }
 
-func (m *StackResponse) validateHardwareInfos(formats strfmt.Registry) error {
+func (m *StackResponse) validateHardwareInfoGroups(formats strfmt.Registry) error {
 
-	if swag.IsZero(m.HardwareInfos) { // not required
+	if swag.IsZero(m.HardwareInfoGroups) { // not required
 		return nil
 	}
 
-	if err := validate.UniqueItems("hardwareInfos", "body", m.HardwareInfos); err != nil {
+	if err := validate.UniqueItems("hardwareInfoGroups", "body", m.HardwareInfoGroups); err != nil {
 		return err
 	}
 
-	for i := 0; i < len(m.HardwareInfos); i++ {
+	for i := 0; i < len(m.HardwareInfoGroups); i++ {
 
-		if swag.IsZero(m.HardwareInfos[i]) { // not required
+		if swag.IsZero(m.HardwareInfoGroups[i]) { // not required
 			continue
 		}
 
-		if m.HardwareInfos[i] != nil {
+		if m.HardwareInfoGroups[i] != nil {
 
-			if err := m.HardwareInfos[i].Validate(formats); err != nil {
+			if err := m.HardwareInfoGroups[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
-					return ve.ValidateName("hardwareInfos" + "." + strconv.Itoa(i))
+					return ve.ValidateName("hardwareInfoGroups" + "." + strconv.Itoa(i))
 				}
 				return err
 			}

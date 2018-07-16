@@ -595,6 +595,13 @@ var (
 			Usage: "name of the imagecatalog",
 		},
 	}
+	FlImageCatalogOptional = StringFlag{
+		RequiredFlag: OPTIONAL,
+		StringFlag: cli.StringFlag{
+			Name:  "imagecatalog",
+			Usage: "name of the imagecatalog",
+		},
+	}
 	FlImageId = StringFlag{
 		RequiredFlag: REQUIRED,
 		StringFlag: cli.StringFlag{

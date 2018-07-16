@@ -57,6 +57,21 @@ func CreateStack(c *cli.Context) {
 	}
 }
 
+func ChangeImage(c *cli.Context) {
+	checkRequiredFlagsAndArguments(c)
+	cbClient := NewCloudbreakHTTPClientFromContext(c)
+
+	imageId := c.String(FlImageId.Name)
+	imageCatalogName := c.String(FlImageCatalog.Name)
+	clusterName := c.String(FlName.Name)
+	log.Infof("[ChangeImage] changing image for stack stack, name: %s, imageid: %s, imageCatalog: %s", clusterName, imageId, imageCatalogName)
+	req := models_cloudbreak.StackImageChangeRequest{ImageCatalogName: imageCatalogName, ImageID: &imageId}
+	err := cbClient.Cloudbreak.V2stacks.ChangeImage(v2stacks.NewChangeImageParams().WithName(clusterName).WithBody(&req))
+	if err != nil {
+		utils.LogErrorAndExit(err)
+	}
+}
+
 func assembleStackRequest(c *cli.Context) *models_cloudbreak.StackV2Request {
 	path := c.String(FlInputJson.Name)
 	if _, err := os.Stat(path); os.IsNotExist(err) {
