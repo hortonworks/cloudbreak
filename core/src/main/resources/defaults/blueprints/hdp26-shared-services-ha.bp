@@ -28,7 +28,7 @@
     "configurations": [],
     "host_groups": [
       {
-        "name": "master",
+        "name": "master1",
         "configurations": [
         ],
         "components": [
@@ -69,7 +69,7 @@
         "cardinality": "1"
       },
       {
-        "name": "master_ha",
+        "name": "master2",
         "configurations": [],
         "components": [
           {
