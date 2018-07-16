@@ -312,7 +312,7 @@ public class ClusterHostServiceRunner {
             groups.forEach(hg -> hostNames.addAll(hostGroupService.getByClusterIdAndName(dataLakeCluster.getId(), hg.getName())
                     .getHostMetadata().stream().map(HostMetadata::getHostName).collect(Collectors.toList())));
 
-            Map<String, String> rangerAdminConfigs = blueprintTextProcessor.getConfigurationEntries().get("ranger-admin-site");
+            Map<String, String> rangerAdminConfigs = blueprintTextProcessor.getConfigurationEntries().getOrDefault("ranger-admin-site", new HashMap<>());
             String rangerPort = rangerAdminConfigs.getOrDefault("ranger.service.http.port", "6080");
 
             Map<String, Object> rangerMap = new HashMap<>();
