@@ -469,7 +469,7 @@ public class Stack implements ProvisionEntity {
         List<InstanceMetaData> metadataList = new ArrayList<>();
         for (InstanceGroup instanceGroup : instanceGroups) {
             if (InstanceGroupType.GATEWAY.equals(instanceGroup.getInstanceGroupType())) {
-                metadataList.addAll(instanceGroup.getNotDeletedInstanceMetaDataSet());
+                metadataList.addAll(instanceGroup.getNotTerminatedInstanceMetaDataSet());
             }
         }
         return metadataList;
