@@ -348,9 +348,7 @@
             <#else>
             "Ebs" : {
             <#if group.ebsEncrypted == true>
-              <#if group.kmsKeyDefined == true>
               "SnapshotId" : "${group.snapshotId}",
-              </#if>
             <#else>
               "Encrypted" : false,
             </#if>
@@ -361,7 +359,11 @@
       	  }
 			</#list>
       	],
+      	<#if group.ebsEncrypted == true>
+      	"ImageId"        : "${group.encryptedAMI}",
+        <#else>
         "ImageId"        : { "Ref" : "AMI" },
+        </#if>
         <#if group.cloudSecurityId??>
         "SecurityGroups" : [ "${group.cloudSecurityId}" ],
         <#else>
