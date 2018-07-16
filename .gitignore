@@ -49,3 +49,5 @@ cloudbreak.log
 cloudbreak-log/*.log
 autoscale-log/
 core/cloudbreak-log/
+
+.deps/

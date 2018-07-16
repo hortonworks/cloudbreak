@@ -9,7 +9,7 @@ buildscript {
   dependencies {
     classpath 'org.ajoberstar:grgit:2.1.0'
     classpath 'info.solidsoft.gradle.pitest:gradle-pitest-plugin:1.1.11'
-    classpath 'org.ajoberstar.reckon:reckon-gradle:0.4.0'
+    classpath 'org.ajoberstar.reckon:reckon-gradle:0.8.0'
     classpath 'com.smokejumperit.gradle.license:Gradle-License-Report:0.0.2'
   }
 }
@@ -22,8 +22,8 @@ plugins {
 if (project.hasProperty("reckon.scope")) {
   apply plugin: "org.ajoberstar.reckon"
   reckon {
-    normal = scopeFromProp()
-    preRelease = stageFromProp('dev', 'rc', 'final')
+    scopeFromProp()
+    stageFromProp('dev', 'rc', 'final')
   }
 }
 
@@ -114,6 +114,12 @@ subprojects {
   }
 
   task allDeps(type: DependencyReportTask) {}
+
+  task status {
+    doLast {
+      println grgit.status()
+    }
+  }
 
   repositories {
     mavenCentral()
