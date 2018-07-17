@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.model.catalog;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -30,6 +31,8 @@ public class Image {
 
     private boolean defaultImage;
 
+    private Map<String, String> packageVersions;
+
     @JsonCreator
     public Image(
             @JsonProperty(value = "date", required = true) String date,
@@ -40,7 +43,8 @@ public class Image {
             @JsonProperty("repo") Map<String, String> repo,
             @JsonProperty(value = "images", required = true) Map<String, Map<String, String>> imageSetsByProvider,
             @JsonProperty("stack-details") StackDetails stackDetails,
-            @JsonProperty("os_type") String osType) {
+            @JsonProperty("os_type") String osType,
+            @JsonProperty("package-versions") Map<String, String> packageVersions) {
         this.date = date;
         this.description = description;
         this.os = os;
@@ -50,6 +54,7 @@ public class Image {
         this.imageSetsByProvider = imageSetsByProvider;
         this.stackDetails = stackDetails;
         this.osType = osType;
+        this.packageVersions = packageVersions;
     }
 
     public String getDate() {
@@ -96,6 +101,10 @@ public class Image {
         return defaultImage;
     }
 
+    public Map<String, String> getPackageVersions() {
+        return packageVersions == null ? new HashMap<>() : packageVersions;
+    }
+
     @Override
     public String toString() {
         return "Image{"
@@ -106,6 +115,7 @@ public class Image {
                 + ", osType='" + osType + '\''
                 + ", version='" + version + '\''
                 + ", default='" + defaultImage + '\''
+                + ", packageVersions='" + packageVersions + '\''
                 + '}';
     }
 

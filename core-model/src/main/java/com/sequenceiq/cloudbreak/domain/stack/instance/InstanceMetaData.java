@@ -17,10 +17,11 @@ import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceMetadataType;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceStatus;
 import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
 import com.sequenceiq.cloudbreak.domain.converter.EncryptionConverter;
+import com.sequenceiq.cloudbreak.domain.json.Json;
+import com.sequenceiq.cloudbreak.domain.json.JsonToString;
 
 @Entity
 public class InstanceMetaData implements ProvisionEntity {
-
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "instancemetadata_generator")
     @SequenceGenerator(name = "instancemetadata_generator", sequenceName = "instancemetadata_id_seq", allocationSize = 1)
@@ -36,7 +37,9 @@ public class InstanceMetaData implements ProvisionEntity {
 
     private String instanceId;
 
-    private String imageId;
+    @Convert(converter = JsonToString.class)
+    @Column(columnDefinition = "TEXT")
+    private Json image;
 
     private Boolean ambariServer;
 
@@ -270,11 +273,11 @@ public class InstanceMetaData implements ProvisionEntity {
         this.instanceName = instanceName;
     }
 
-    public String getImageId() {
-        return imageId;
+    public Json getImage() {
+        return image;
     }
 
-    public void setImageId(String imageId) {
-        this.imageId = imageId;
+    public void setImage(Json image) {
+        this.image = image;
     }
 }
