@@ -356,8 +356,16 @@ public class ClusterHostServiceRunner {
         gateway.put("kerberos", cluster.isSecure());
         gateway.put("mastersecret", cluster.getStack().getSecurityConfig().getKnoxMasterSecret());
         Map<String, List<String>> serviceLocation = componentLocator.getComponentLocation(cluster, new HashSet<>(ExposedService.getAllServiceName()));
+
+        List<String> rangerLocations = serviceLocation.get(ExposedService.RANGER.getServiceName());
+        serviceLocation.put(ExposedService.RANGER.getServiceName(), getSingleRangerGatewayUrl(gatewayConfig.getHostname(), rangerLocations));
+
         gateway.put("location", serviceLocation);
         servicePillar.put("gateway", new SaltPillarProperties("/gateway/init.sls", singletonMap("gateway", gateway)));
+    }
+
+    private List<String> getSingleRangerGatewayUrl(String primaryGatewayUrl, List<String> rangerLocations) {
+        return rangerLocations.contains(primaryGatewayUrl) ? List.of(primaryGatewayUrl) : List.of(rangerLocations.iterator().next());
     }
 
     private List<Map<String, Object>> getTopologies(Gateway clusterGateway) throws IOException {
