@@ -11,10 +11,32 @@ import io.swagger.annotations.ApiModelProperty;
 @ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
-public class AwsTemplateParameters extends BaseTemplateParameter {
+public class AwsParameters extends BaseTemplateParameter {
 
     @ApiModelProperty(TemplateModelDescription.AWS_SPOT_PRICE)
     private Double spotPrice;
+
+    @ApiModelProperty(TemplateModelDescription.ENCRYPTION)
+    private Encryption encryption;
+
+    @ApiModelProperty(TemplateModelDescription.ENCRYPTED)
+    private Boolean encrypted;
+
+    public Encryption getEncryption() {
+        return encryption;
+    }
+
+    public void setEncryption(Encryption encryption) {
+        this.encryption = encryption;
+    }
+
+    public Boolean isEncrypted() {
+        return encrypted;
+    }
+
+    public void setEncrypted(Boolean encrypted) {
+        this.encrypted = encrypted;
+    }
 
     public Double getSpotPrice() {
         return spotPrice;
@@ -24,8 +46,4 @@ public class AwsTemplateParameters extends BaseTemplateParameter {
         this.spotPrice = spotPrice;
     }
 
-    @Override
-    public TemplatePlatformType type() {
-        return TemplatePlatformType.AWS;
-    }
 }

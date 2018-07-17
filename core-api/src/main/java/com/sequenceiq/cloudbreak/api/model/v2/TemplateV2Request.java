@@ -8,10 +8,11 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.cloudbreak.api.model.CustomInstanceType;
 import com.sequenceiq.cloudbreak.api.model.JsonEntity;
-import com.sequenceiq.cloudbreak.api.model.v2.template.AwsTemplateParameters;
-import com.sequenceiq.cloudbreak.api.model.v2.template.AzureTemplateParameters;
-import com.sequenceiq.cloudbreak.api.model.v2.template.GcpTemplateParameters;
-import com.sequenceiq.cloudbreak.api.model.v2.template.OpenStackTemplateParameters;
+import com.sequenceiq.cloudbreak.api.model.v2.template.AwsParameters;
+import com.sequenceiq.cloudbreak.api.model.v2.template.AzureParameters;
+import com.sequenceiq.cloudbreak.api.model.v2.template.GcpParameters;
+import com.sequenceiq.cloudbreak.api.model.v2.template.OpenStackParameters;
+import com.sequenceiq.cloudbreak.api.model.v2.template.YarnParameters;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.TemplateModelDescription;
 
 import io.swagger.annotations.ApiModel;
@@ -35,16 +36,19 @@ public class TemplateV2Request implements JsonEntity {
     private Map<String, Object> parameters = new HashMap<>();
 
     @ApiModelProperty(TemplateModelDescription.AWS_PARAMETERS)
-    private AwsTemplateParameters awsTemplateParameters;
+    private AwsParameters awsParameters;
 
     @ApiModelProperty(TemplateModelDescription.GCP_PARAMETERS)
-    private GcpTemplateParameters gcpTemlateParameters;
+    private GcpParameters gcpTemlateParameters;
 
     @ApiModelProperty(TemplateModelDescription.AZURE_PARAMETERS)
-    private AzureTemplateParameters azureTemplateParameters;
+    private AzureParameters azureParameters;
 
-    @ApiModelProperty(TemplateModelDescription.OPEN_STACK_PARAMETERS)
-    private OpenStackTemplateParameters openStackTemplateParameters;
+    @ApiModelProperty(TemplateModelDescription.OPENSTACK_PARAMETERS)
+    private OpenStackParameters openStackParameters;
+
+    @ApiModelProperty(TemplateModelDescription.YARN_PARAMETERS)
+    private YarnParameters yarnParameters;
 
     @ApiModelProperty(TemplateModelDescription.VOLUME_TYPE)
     private String volumeType;
@@ -55,36 +59,36 @@ public class TemplateV2Request implements JsonEntity {
     @ApiModelProperty(TemplateModelDescription.CUSTOM_INSTANCE_TYPE)
     private CustomInstanceType customInstanceType;
 
-    public AwsTemplateParameters getAwsTemplateParameters() {
-        return awsTemplateParameters;
+    public AwsParameters getAwsParameters() {
+        return awsParameters;
     }
 
-    public void setAwsTemplateParameters(AwsTemplateParameters awsTemplateParameters) {
-        this.awsTemplateParameters = awsTemplateParameters;
+    public void setAwsParameters(AwsParameters awsParameters) {
+        this.awsParameters = awsParameters;
     }
 
-    public GcpTemplateParameters getGcpTemlateParameters() {
+    public GcpParameters getGcpTemlateParameters() {
         return gcpTemlateParameters;
     }
 
-    public void setGcpTemlateParameters(GcpTemplateParameters gcpTemlateParameters) {
+    public void setGcpTemlateParameters(GcpParameters gcpTemlateParameters) {
         this.gcpTemlateParameters = gcpTemlateParameters;
     }
 
-    public AzureTemplateParameters getAzureTemplateParameters() {
-        return azureTemplateParameters;
+    public AzureParameters getAzureParameters() {
+        return azureParameters;
     }
 
-    public void setAzureTemplateParameters(AzureTemplateParameters azureTemplateParameters) {
-        this.azureTemplateParameters = azureTemplateParameters;
+    public void setAzureParameters(AzureParameters azureParameters) {
+        this.azureParameters = azureParameters;
     }
 
-    public OpenStackTemplateParameters getOpenStackTemplateParameters() {
-        return openStackTemplateParameters;
+    public OpenStackParameters getOpenStackParameters() {
+        return openStackParameters;
     }
 
-    public void setOpenStackTemplateParameters(OpenStackTemplateParameters openStackTemplateParameters) {
-        this.openStackTemplateParameters = openStackTemplateParameters;
+    public void setOpenStackParameters(OpenStackParameters openStackParameters) {
+        this.openStackParameters = openStackParameters;
     }
 
     public Integer getVolumeSize() {
@@ -141,5 +145,13 @@ public class TemplateV2Request implements JsonEntity {
 
     public void setRootVolumeSize(Integer rootVolumeSize) {
         this.rootVolumeSize = rootVolumeSize;
+    }
+
+    public YarnParameters getYarnParameters() {
+        return yarnParameters;
+    }
+
+    public void setYarnParameters(YarnParameters yarnParameters) {
+        this.yarnParameters = yarnParameters;
     }
 }
