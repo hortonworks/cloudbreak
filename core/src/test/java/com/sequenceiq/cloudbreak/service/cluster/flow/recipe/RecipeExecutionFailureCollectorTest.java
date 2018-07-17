@@ -43,7 +43,9 @@ public class RecipeExecutionFailureCollectorTest {
                 "Command \"sh -x /opt/scripts/post-ambari-start/failingRecipe1 2>&1 | tee -a /var/log/recipes/post-ambari-start-failingRecipe1 && "
                         + "exit ${PIPESTATUS[0]}\" run",
                 "Command \"sh -x /opt/scripts/pre-ambari-start/failingRecipe2 2>&1 | tee -a /var/log/recipes/pre-ambari-start-failingRecipe2.log && "
-                        + "exit ${PIPESTATUS[0]}\" run"
+                        + "exit ${PIPESTATUS[0]}\" run",
+                "Comment: One or more requisite failed: postgresql.init-services-db, postgresql.configure-listen-address",
+                "Comment: One or more requisite failed: postgresql.init-services-db, postgresql.configure-listen-address"
         ));
         nodesWithErrors.put("host-10-0-0-3.openstacklocal",
                 "Command \"sh -x /opt/scripts/post-ambari-start/failingRecipe1 2>&1 |"
