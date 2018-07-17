@@ -8,20 +8,27 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceMetadataType;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstanceMetaData;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
+import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
+import com.sequenceiq.cloudbreak.domain.json.Json;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
+import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.service.image.ImageService;
 
 @Service
 public class MetadataSetupService {
+    @Inject
+    private ImageService imageService;
 
     @Inject
     private InstanceGroupRepository instanceGroupRepository;
@@ -30,62 +37,68 @@ public class MetadataSetupService {
     private InstanceMetaDataRepository instanceMetaDataRepository;
 
     public int saveInstanceMetaData(Stack stack, Iterable<CloudVmMetaDataStatus> cloudVmMetaDataStatusList, InstanceStatus status) {
-        int newInstances = 0;
-        boolean ambariServerFound = false;
-        Set<InstanceMetaData> allInstanceMetadata = instanceMetaDataRepository.findNotTerminatedForStack(stack.getId());
-        boolean primaryIgSelected = allInstanceMetadata.stream().anyMatch(imd -> imd.getInstanceMetadataType() == InstanceMetadataType.GATEWAY_PRIMARY);
-        for (CloudVmMetaDataStatus cloudVmMetaDataStatus : cloudVmMetaDataStatusList) {
-            CloudInstance cloudInstance = cloudVmMetaDataStatus.getCloudVmInstanceStatus().getCloudInstance();
-            CloudInstanceMetaData md = cloudVmMetaDataStatus.getMetaData();
-            long timeInMillis = Calendar.getInstance().getTimeInMillis();
-            Long privateId = cloudInstance.getTemplate().getPrivateId();
-            String instanceId = cloudInstance.getInstanceId();
-            InstanceMetaData instanceMetaDataEntry = createInstanceMetadataIfAbsent(allInstanceMetadata, privateId, instanceId);
-            if (instanceMetaDataEntry.getInstanceId() == null) {
-                newInstances++;
-            }
-            // CB 1.0.x clusters do not have private id thus we cannot correlate them with instance groups thus keep the original one
-            InstanceGroup ig = instanceMetaDataEntry.getInstanceGroup();
-            String group = ig == null ? cloudInstance.getTemplate().getGroupName() : ig.getGroupName();
-            InstanceGroup instanceGroup = instanceGroupRepository.findOneByGroupNameInStack(stack.getId(), group);
-            instanceMetaDataEntry.setPrivateIp(md.getPrivateIp());
-            instanceMetaDataEntry.setPublicIp(md.getPublicIp());
-            instanceMetaDataEntry.setSshPort(md.getSshPort());
-            instanceMetaDataEntry.setLocalityIndicator(md.getLocalityIndicator());
-            instanceMetaDataEntry.setInstanceGroup(instanceGroup);
-            instanceMetaDataEntry.setInstanceId(instanceId);
-            instanceMetaDataEntry.setPrivateId(privateId);
-            instanceMetaDataEntry.setStartDate(timeInMillis);
-            instanceMetaDataEntry.setSubnetId(cloudInstance.getStringParameter(CloudInstance.SUBNET_ID));
-            instanceMetaDataEntry.setInstanceName(cloudInstance.getStringParameter(CloudInstance.INSTANCE_NAME));
-            if (instanceMetaDataEntry.getInstanceMetadataType() == null) {
-                if (ig != null) {
-                    if (InstanceGroupType.GATEWAY.equals(ig.getInstanceGroupType())) {
-                        if (!primaryIgSelected) {
-                            primaryIgSelected = true;
-                            instanceMetaDataEntry.setInstanceMetadataType(InstanceMetadataType.GATEWAY_PRIMARY);
+        try {
+            int newInstances = 0;
+            boolean ambariServerFound = false;
+            Set<InstanceMetaData> allInstanceMetadata = instanceMetaDataRepository.findNotTerminatedForStack(stack.getId());
+            boolean primaryIgSelected = allInstanceMetadata.stream().anyMatch(imd -> imd.getInstanceMetadataType() == InstanceMetadataType.GATEWAY_PRIMARY);
+            Json imageJson = new Json(imageService.getImage(stack.getId()));
+            for (CloudVmMetaDataStatus cloudVmMetaDataStatus : cloudVmMetaDataStatusList) {
+                CloudInstance cloudInstance = cloudVmMetaDataStatus.getCloudVmInstanceStatus().getCloudInstance();
+                CloudInstanceMetaData md = cloudVmMetaDataStatus.getMetaData();
+                long timeInMillis = Calendar.getInstance().getTimeInMillis();
+                Long privateId = cloudInstance.getTemplate().getPrivateId();
+                String instanceId = cloudInstance.getInstanceId();
+                InstanceMetaData instanceMetaDataEntry = createInstanceMetadataIfAbsent(allInstanceMetadata, privateId, instanceId);
+                if (instanceMetaDataEntry.getInstanceId() == null) {
+                    newInstances++;
+                }
+                // CB 1.0.x clusters do not have private id thus we cannot correlate them with instance groups thus keep the original one
+                InstanceGroup ig = instanceMetaDataEntry.getInstanceGroup();
+                String group = ig == null ? cloudInstance.getTemplate().getGroupName() : ig.getGroupName();
+                InstanceGroup instanceGroup = instanceGroupRepository.findOneByGroupNameInStack(stack.getId(), group);
+                instanceMetaDataEntry.setPrivateIp(md.getPrivateIp());
+                instanceMetaDataEntry.setPublicIp(md.getPublicIp());
+                instanceMetaDataEntry.setSshPort(md.getSshPort());
+                instanceMetaDataEntry.setLocalityIndicator(md.getLocalityIndicator());
+                instanceMetaDataEntry.setInstanceGroup(instanceGroup);
+                instanceMetaDataEntry.setInstanceId(instanceId);
+                instanceMetaDataEntry.setPrivateId(privateId);
+                instanceMetaDataEntry.setStartDate(timeInMillis);
+                instanceMetaDataEntry.setSubnetId(cloudInstance.getStringParameter(CloudInstance.SUBNET_ID));
+                instanceMetaDataEntry.setInstanceName(cloudInstance.getStringParameter(CloudInstance.INSTANCE_NAME));
+                if (instanceMetaDataEntry.getInstanceMetadataType() == null) {
+                    if (ig != null) {
+                        if (InstanceGroupType.GATEWAY.equals(ig.getInstanceGroupType())) {
+                            if (!primaryIgSelected) {
+                                primaryIgSelected = true;
+                                instanceMetaDataEntry.setInstanceMetadataType(InstanceMetadataType.GATEWAY_PRIMARY);
+                            } else {
+                                instanceMetaDataEntry.setInstanceMetadataType(InstanceMetadataType.GATEWAY);
+                            }
                         } else {
-                            instanceMetaDataEntry.setInstanceMetadataType(InstanceMetadataType.GATEWAY);
+                            instanceMetaDataEntry.setInstanceMetadataType(InstanceMetadataType.CORE);
                         }
                     } else {
                         instanceMetaDataEntry.setInstanceMetadataType(InstanceMetadataType.CORE);
                     }
-                } else {
-                    instanceMetaDataEntry.setInstanceMetadataType(InstanceMetadataType.CORE);
                 }
+                if (!ambariServerFound && InstanceGroupType.GATEWAY.equals(instanceGroup.getInstanceGroupType())) {
+                    instanceMetaDataEntry.setAmbariServer(Boolean.TRUE);
+                    ambariServerFound = true;
+                } else {
+                    instanceMetaDataEntry.setAmbariServer(Boolean.FALSE);
+                }
+                if (status != null) {
+                    instanceMetaDataEntry.setInstanceStatus(status);
+                    instanceMetaDataEntry.setImage(imageJson);
+                }
+                instanceMetaDataRepository.save(instanceMetaDataEntry);
             }
-            if (!ambariServerFound && InstanceGroupType.GATEWAY.equals(instanceGroup.getInstanceGroupType())) {
-                instanceMetaDataEntry.setAmbariServer(Boolean.TRUE);
-                ambariServerFound = true;
-            } else {
-                instanceMetaDataEntry.setAmbariServer(Boolean.FALSE);
-            }
-            if (status != null) {
-                instanceMetaDataEntry.setInstanceStatus(status);
-            }
-            instanceMetaDataRepository.save(instanceMetaDataEntry);
+            return newInstances;
+        } catch (CloudbreakImageNotFoundException | JsonProcessingException ex) {
+            throw new CloudbreakServiceException("Instance metadata collection failed", ex);
         }
-        return newInstances;
     }
 
     private InstanceMetaData createInstanceMetadataIfAbsent(Iterable<InstanceMetaData> allInstanceMetadata, Long privateId, String instanceId) {
@@ -104,5 +117,4 @@ public class MetadataSetupService {
         }
         return new InstanceMetaData();
     }
-
 }

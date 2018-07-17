@@ -125,6 +125,7 @@ public class ImagesToImagesResponseJsonConverter extends AbstractConversionServi
         json.setUuid(source.getUuid());
         json.setVersion(source.getVersion());
         json.setDefaultImage(source.isDefaultImage());
+        json.setPackageVersions(source.getPackageVersions());
         if (source.getRepo() != null) {
             json.setRepo(new HashMap<>(source.getRepo()));
         } else {

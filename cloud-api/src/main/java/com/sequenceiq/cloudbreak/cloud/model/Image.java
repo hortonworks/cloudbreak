@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.model;
 import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.ANY;
 import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -29,13 +30,16 @@ public class Image {
 
     private final String imageCatalogName;
 
+    private final Map<String, String> packageVersions;
+
     public Image(@JsonProperty("imageName") String imageName,
             @JsonProperty("userdata") Map<InstanceGroupType, String> userdata,
             @JsonProperty("os") String os,
             @JsonProperty("osType") String osType,
             @JsonProperty("imageCatalogUrl") String imageCatalogUrl,
             @JsonProperty("imageCatalogName") String imageCatalogName,
-            @JsonProperty("imageId") String imageId) {
+            @JsonProperty("imageId") String imageId,
+            @JsonProperty("packageVersions") Map<String, String> packageVersions) {
         this.imageName = imageName;
         this.userdata = userdata != null ? ImmutableMap.copyOf(userdata) : null;
         this.imageCatalogUrl = imageCatalogUrl;
@@ -43,6 +47,7 @@ public class Image {
         this.osType = osType;
         this.imageCatalogName = imageCatalogName;
         this.imageId = imageId;
+        this.packageVersions = packageVersions;
     }
 
     public String getImageName() {
@@ -77,6 +82,10 @@ public class Image {
         return os;
     }
 
+    public Map<String, String> getPackageVersions() {
+        return packageVersions == null ? new HashMap<>() : packageVersions;
+    }
+
     @Override
     public String toString() {
         return "Image{"
@@ -86,6 +95,7 @@ public class Image {
                 + ", imageCatalogUrl='" + imageCatalogUrl + '\''
                 + ", imageId='" + imageId + '\''
                 + ", imageCatalogName='" + imageCatalogName + '\''
-                + ", userdata=" + userdata + '}';
+                + ", userdata=" + userdata + '\''
+                + ", packageVersions=" + packageVersions + '}';
     }
 }
