@@ -92,7 +92,7 @@
         "x1.16xlarge", 
         "x1.32xlarge"
       ], 
-      "zone": "govcloud-us", 
+      "zone": "us-gov-west-1",
       "defaultVmType": "i2.4xlarge"
     }, 
     {
