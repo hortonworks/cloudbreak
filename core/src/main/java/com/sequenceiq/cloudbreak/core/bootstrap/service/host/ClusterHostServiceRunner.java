@@ -358,14 +358,16 @@ public class ClusterHostServiceRunner {
         Map<String, List<String>> serviceLocation = componentLocator.getComponentLocation(cluster, new HashSet<>(ExposedService.getAllServiceName()));
 
         List<String> rangerLocations = serviceLocation.get(ExposedService.RANGER.getServiceName());
-        serviceLocation.put(ExposedService.RANGER.getServiceName(), getSingleRangerGatewayUrl(gatewayConfig.getHostname(), rangerLocations));
+        if (rangerLocations != null && !rangerLocations.isEmpty()) {
+            serviceLocation.put(ExposedService.RANGER.getServiceName(), getSingleRangerFqdn(gatewayConfig.getHostname(), rangerLocations));
+        }
 
         gateway.put("location", serviceLocation);
         servicePillar.put("gateway", new SaltPillarProperties("/gateway/init.sls", singletonMap("gateway", gateway)));
     }
 
-    private List<String> getSingleRangerGatewayUrl(String primaryGatewayUrl, List<String> rangerLocations) {
-        return rangerLocations.contains(primaryGatewayUrl) ? List.of(primaryGatewayUrl) : List.of(rangerLocations.iterator().next());
+    private List<String> getSingleRangerFqdn(String primaryGatewayFqdn, List<String> rangerLocations) {
+        return rangerLocations.contains(primaryGatewayFqdn) ? List.of(primaryGatewayFqdn) : List.of(rangerLocations.iterator().next());
     }
 
     private List<Map<String, Object>> getTopologies(Gateway clusterGateway) throws IOException {
