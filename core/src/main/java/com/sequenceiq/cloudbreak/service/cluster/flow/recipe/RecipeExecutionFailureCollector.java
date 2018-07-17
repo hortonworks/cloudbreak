@@ -8,6 +8,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
@@ -35,14 +36,19 @@ public class RecipeExecutionFailureCollector {
             Map<HostGroup, List<RecipeModel>> hostgroupToRecipeMap, Set<InstanceGroup> instanceGroups) {
 
         return exception.getNodesWithErrors().asMap().entrySet().stream().flatMap((Entry<String, Collection<String>> nodeWithErrors) -> {
-            Map<String, Optional<String>> errorsWithPhase = nodeWithErrors.getValue().stream().collect(Collectors.toMap(e -> e, this::getInstallPhase));
+            Map<String, Optional<String>> errorsWithPhase = nodeWithErrors.getValue().stream().collect(Collectors.toMap(
+                    e -> e,
+                    this::getInstallPhase,
+                    (phase1, phase2) -> phase1.map(Optional::of).orElse(phase2)));
             return errorsWithPhase.entrySet().stream()
                     .filter(errorWithPhase -> errorWithPhase.getValue().isPresent())
                     .map((Entry<String, Optional<String>> errorWithPhase) ->
                             StringUtils.substringBetween(errorWithPhase.getKey(), "sh -x /opt/scripts/" + errorWithPhase.getValue().get() + '/', " 2>&1 |")
                     )
-                    .collect(Collectors.toMap(recipeName -> recipeName, recipeName ->
-                            getPossibleFailingHostgroupsByRecipeName(hostgroupToRecipeMap, recipeName))
+                    .collect(Collectors.toMap(
+                            recipeName -> recipeName,
+                            recipeName -> getPossibleFailingHostgroupsByRecipeName(hostgroupToRecipeMap, recipeName),
+                            (hg1, hg2) -> Stream.concat(hg1.stream(), hg2.stream()).collect(Collectors.toSet()))
                     )
                     .entrySet().stream()
                     .flatMap((Entry<String, Set<String>> recipeWithHostgroups) -> recipeWithHostgroups.getValue().stream()
