@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -361,6 +362,25 @@ public class SaltOrchestrator implements HostOrchestrator {
                 LOGGER.error("Error occurred during salt minion tear down", e);
                 throw new CloudbreakOrchestratorFailedException(e);
             }
+        }
+    }
+
+    public Map<String, Map<String, String>> getPackageVersionsFromAllHosts(GatewayConfig gateway, String... packages)
+            throws CloudbreakOrchestratorFailedException {
+        try (SaltConnector saltConnector = new SaltConnector(gateway, restDebug)) {
+            return SaltStates.getPackageVersions(saltConnector, packages);
+        } catch (RuntimeException e) {
+            LOGGER.error("Error occurred during determine package versions: " + Arrays.deepToString(packages), e);
+            throw new CloudbreakOrchestratorFailedException(e);
+        }
+    }
+
+    public Map<String, String> runCommandOnAllHosts(GatewayConfig gateway, String command) throws CloudbreakOrchestratorFailedException {
+        try (SaltConnector saltConnector = new SaltConnector(gateway, restDebug)) {
+            return SaltStates.runCommand(saltConnector, command);
+        } catch (RuntimeException e) {
+            LOGGER.error("Error occurred during command execution: " + command, e);
+            throw new CloudbreakOrchestratorFailedException(e);
         }
     }
 
