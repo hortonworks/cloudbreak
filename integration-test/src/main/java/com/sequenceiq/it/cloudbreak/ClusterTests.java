@@ -13,7 +13,6 @@ import org.testng.annotations.Test;
 import com.sequenceiq.cloudbreak.api.model.imagecatalog.ImageResponse;
 import com.sequenceiq.cloudbreak.api.model.imagecatalog.ImagesResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.SSOType;
-import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
 import com.sequenceiq.it.cloudbreak.newway.Cluster;
@@ -26,6 +25,7 @@ import com.sequenceiq.it.cloudbreak.newway.Stack;
 import com.sequenceiq.it.cloudbreak.newway.StackOperation;
 import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProvider;
 import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProviderHelper;
+import com.sequenceiq.it.cloudbreak.newway.cloud.HostGroupType;
 
 public class ClusterTests extends CloudbreakTest {
 
@@ -66,9 +66,7 @@ public class ClusterTests extends CloudbreakTest {
                 .withImageCatalog("")
                 .withImageId(imageId));
         given(HostGroups.request()
-                .addHostGroup(cloudProvider.hostgroup("Services", InstanceGroupType.GATEWAY, 1))
-                .addHostGroup(cloudProvider.hostgroup("NiFi", InstanceGroupType.CORE, 1))
-                .addHostGroup(cloudProvider.hostgroup("ZooKeeper", InstanceGroupType.CORE, 1)));
+                .addHostGroups(cloudProvider.instanceGroups(HostGroupType.SERVICES, HostGroupType.NIFI, HostGroupType.ZOOKEEPER)));
         given(cloudProvider.aValidStackRequest()
                 .withName(clusterName), "a stack request");
         when(Stack.post(), "post the stack request");

@@ -52,7 +52,6 @@ public class RdsClusterTests extends CloudbreakTest {
             return;
         }
         cloudProvider = CloudProviderHelper.providerFactory(provider, getTestParameter());
-        cloudProvider.setClusterNamePostfix("");
     }
 
     @BeforeTest
@@ -66,7 +65,7 @@ public class RdsClusterTests extends CloudbreakTest {
                 .withConnectionPassword(rdsPassword)
                 .withConnectionURL(rdsConnectionUrl)
                 .withConnectionUserName(rdsUser)
-                .withType("HIVE"), "create rds config"
+                .withType("HIVE_CONFIG_NAME"), "create rds config"
         );
 
         rdsConfigNames.add(VALID_RDS_CONFIG);

@@ -1,11 +1,11 @@
 package com.sequenceiq.it.cloudbreak.newway;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class TestParameter {
 
@@ -26,12 +26,19 @@ public class TestParameter {
             LOGGER.info("key has not been found as property, trying as environment variable");
             valueAsProperty = Optional.ofNullable(parameters.get(key.toUpperCase().replaceAll("\\.", "_")));
         }
-        LOGGER.info("Aquiring key {} resulting: {}", key, valueAsProperty);
+        LOGGER.info(valueAsProperty.isPresent()
+                ? String.format("Aquiring key %s resulting: %s", key, valueAsProperty.get())
+                : String.format("Aquiring key %s, but no result has found.", key));
 
         if (key.startsWith(REQUIRED_KEY_PREFIX) && !valueAsProperty.isPresent()) {
             throw new MissingExpectedParameterException(key);
         }
         return valueAsProperty.isPresent() ? valueAsProperty.get() : null;
+    }
+
+    public String getWithDefault(String key, String defaultValue) {
+        Optional<String> value = Optional.ofNullable(get(key));
+        return value.orElse(defaultValue);
     }
 
     public void put(String key, String value) {

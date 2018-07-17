@@ -81,7 +81,6 @@ public class RecipeClusterTests extends CloudbreakTest {
             return;
         }
         cloudProvider = CloudProviderHelper.providerFactory(provider, getTestParameter());
-        cloudProvider.setClusterNamePostfix("");
     }
 
     @BeforeTest

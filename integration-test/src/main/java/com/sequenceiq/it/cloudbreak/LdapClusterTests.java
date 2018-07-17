@@ -68,7 +68,6 @@ public class LdapClusterTests extends CloudbreakTest {
             return;
         }
         cloudProvider = CloudProviderHelper.providerFactory(provider, getTestParameter());
-        cloudProvider.setClusterNamePostfix("");
     }
 
     @BeforeTest

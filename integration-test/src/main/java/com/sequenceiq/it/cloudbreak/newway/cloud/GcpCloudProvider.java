@@ -1,16 +1,23 @@
 package com.sequenceiq.it.cloudbreak.newway.cloud;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
+import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.stack.StackAuthenticationRequest;
-import com.sequenceiq.cloudbreak.api.model.v2.CloudStorageRequest;
+import com.sequenceiq.cloudbreak.api.model.v2.AmbariV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.NetworkV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.TemplateV2Request;
+import com.sequenceiq.it.cloudbreak.newway.Cluster;
 import com.sequenceiq.it.cloudbreak.newway.Credential;
 import com.sequenceiq.it.cloudbreak.newway.CredentialEntity;
-import com.sequenceiq.it.cloudbreak.newway.Stack;
 import com.sequenceiq.it.cloudbreak.newway.TestParameter;
+import com.sequenceiq.it.cloudbreak.parameters.RequiredInputParameters.Gcp.Database.Hive;
+import com.sequenceiq.it.cloudbreak.parameters.RequiredInputParameters.Gcp.Database.Ranger;
 
 public class GcpCloudProvider extends CloudProviderHelper {
 
@@ -34,8 +41,11 @@ public class GcpCloudProvider extends CloudProviderHelper {
 
     private static final String NETWORK_DEFAULT_DESCRIPTION = "autotesting gcp network";
 
+    private final ResourceHelper resourceHelper;
+
     public GcpCloudProvider(TestParameter testParameter) {
         super(testParameter);
+        resourceHelper = new GcpResourceHelper(testParameter, "-gcp");
     }
 
     @Override
@@ -50,28 +60,13 @@ public class GcpCloudProvider extends CloudProviderHelper {
 
     @Override
     public String availabilityZone() {
-        String availabilityZone = "europe-west1-b";
-        String availabilityZoneParam = getTestParameter().get("gcpAvailabilityZone");
+        return getTestParameter().getWithDefault("gcpAvailabilityZone", "europe-west1-b");
 
-        return availabilityZoneParam == null ? availabilityZone : availabilityZoneParam;
-    }
-
-    @Override
-    public Stack aValidDatalakeStackIsCreated() {
-        return null;
-    }
-
-    @Override
-    public CloudStorageRequest fileSystemForDatalake() {
-        return null;
     }
 
     @Override
     public String region() {
-        String region = "europe-west1";
-        String regionParam = getTestParameter().get("gcpRegion");
-
-        return regionParam == null ? region : regionParam;
+        return getTestParameter().getWithDefault("gcpRegion", "europe-west1");
     }
 
     @Override
@@ -83,32 +78,21 @@ public class GcpCloudProvider extends CloudProviderHelper {
     }
 
     @Override
-    TemplateV2Request template() {
+    public TemplateV2Request template() {
         TemplateV2Request t = new TemplateV2Request();
-        String instanceTypeDefaultValue = "n1-standard-4";
-        String instanceTypeParam = getTestParameter().get("gcpInstanceType");
-        t.setInstanceType(instanceTypeParam == null ? instanceTypeDefaultValue : instanceTypeParam);
 
-        int volumeCountDefault = 1;
-        String volumeCountParam = getTestParameter().get("gcpInstanceVolumeCount");
-        t.setVolumeCount(volumeCountParam == null ? volumeCountDefault : Integer.parseInt(volumeCountParam));
-
-        int volumeSizeDefault = 100;
-        String volumeSizeParam = getTestParameter().get("gcpInstanceVolumeSize");
-        t.setVolumeSize(volumeSizeParam == null ? volumeSizeDefault : Integer.parseInt(volumeSizeParam));
-
-        String volumeTypeDefault = "pd-standard";
-        String volumeTypeParam = getTestParameter().get("gcpInstanceVolumeType");
-        t.setVolumeType(volumeTypeParam == null ? volumeTypeDefault : volumeTypeParam);
+        t.setInstanceType(getTestParameter().getWithDefault("gcpInstanceType", "n1-standard-8"));
+        t.setVolumeCount(Integer.parseInt(getTestParameter().getWithDefault("gcpInstanceVolumeCount", "1")));
+        t.setVolumeSize(Integer.parseInt(getTestParameter().getWithDefault("gcpInstanceVolumeSize", "100")));
+        t.setVolumeType(getTestParameter().getWithDefault("gcpInstanceVolumeType", "pd-standard"));
+        t.setRootVolumeSize(Integer.parseInt(getTestParameter().getWithDefault("ROOT_VOLUME_SIZE", "100")));
 
         return t;
     }
 
     @Override
     public String getClusterName() {
-        String clustername = getTestParameter().get("gcpClusterName");
-        clustername = clustername == null ? GCP_CLUSTER_DEFAULT_NAME : clustername;
-        return clustername + getClusterNamePostfix();
+        return getTestParameter().getWithDefault("gcpClusterName", GCP_CLUSTER_DEFAULT_NAME);
     }
 
     @Override
@@ -118,38 +102,37 @@ public class GcpCloudProvider extends CloudProviderHelper {
 
     @Override
     public String getCredentialName() {
-        String credentialName = getTestParameter().get("gcpCredentialName");
-        return credentialName == null ? CREDENTIAL_DEFAULT_NAME : credentialName;
+        return getTestParameter().getWithDefault("gcpCredentialName", CREDENTIAL_DEFAULT_NAME);
     }
 
     @Override
     public String getBlueprintName() {
-        String blueprintName = getTestParameter().get("gcpBlueprintName");
-        return blueprintName == null ? BLUEPRINT_DEFAULT_NAME : blueprintName;
+        return getTestParameter().getWithDefault("gcpBlueprintName", BLUEPRINT_DEFAULT_NAME);
+
     }
 
     @Override
     public String getNetworkName() {
-        String networkName = getTestParameter().get("gcpNetworkName");
-        return networkName == null ? NETWORK_DEFAULT_NAME : networkName;
+        return getTestParameter().getWithDefault("gcpNetworkName", NETWORK_DEFAULT_NAME);
+
     }
 
     @Override
     public String getSubnetCIDR() {
-        String subnetCIDR = getTestParameter().get("gcpSubnetCIDR");
-        return subnetCIDR == null ? DEFAULT_SUBNET_CIDR : subnetCIDR;
+        return getTestParameter().getWithDefault("gcpSubnetCIDR", DEFAULT_SUBNET_CIDR);
+
     }
 
     @Override
     public String getVpcId() {
-        String vpcId = getTestParameter().get("gcpVcpId");
-        return vpcId == null ? VPC_DEFAULT_ID : vpcId;
+        return getTestParameter().getWithDefault("gcpVcpId", VPC_DEFAULT_ID);
+
     }
 
     @Override
     public String getSubnetId() {
-        String subnetId = getTestParameter().get("gcpSubnetId");
-        return subnetId == null ? SUBNET_DEFAULT_ID : subnetId;
+        return getTestParameter().getWithDefault("gcpSubnetId", SUBNET_DEFAULT_ID);
+
     }
 
     public boolean getNoFirewallRules() {
@@ -206,6 +189,44 @@ public class GcpCloudProvider extends CloudProviderHelper {
         NetworkV2Request network = new NetworkV2Request();
         network.setParameters(subnetProperties());
         return network;
+    }
+
+    @Override
+    public AmbariV2Request getAmbariRequestWithNoConfigStrategyAndEmptyMpacks(String blueprintName) {
+        var ambari = ambariRequestWithBlueprintName(blueprintName);
+        var stackDetails = new AmbariStackDetailsJson();
+        stackDetails.setMpacks(Collections.emptyList());
+        ambari.setConfigStrategy(null);
+        ambari.setAmbariStackDetails(stackDetails);
+        return ambari;
+    }
+
+    @Override
+    public ResourceHelper getResourceHelper() {
+        return resourceHelper;
+    }
+
+    @Override
+    public Cluster aValidDatalakeCluster() {
+        return Cluster.request()
+                .withAmbariRequest(ambariRequestWithBlueprintName(getDatalakeBlueprintName()))
+                .withCloudStorage(resourceHelper.getCloudStorageRequestForDatalake())
+                .withRdsConfigNames(Set.of(
+                        getTestParameter().get(Ranger.CONFIG_NAME),
+                        getTestParameter().get(Hive.CONFIG_NAME)))
+                .withLdapConfigName(resourceHelper.getLdapConfigName());
+    }
+
+    @Override
+    public Cluster aValidAttachedCluster(String datalakeClusterName) {
+        return Cluster.request()
+                .withSharedService(datalakeClusterName)
+                .withAmbariRequest(ambariRequestWithBlueprintName(getBlueprintName()))
+                .withCloudStorage(resourceHelper.getCloudStorageRequestForAttachedCluster())
+                .withRdsConfigNames(new HashSet<>(Arrays.asList(
+                        getTestParameter().get(Ranger.CONFIG_NAME),
+                        getTestParameter().get(Hive.CONFIG_NAME))))
+                .withLdapConfigName(resourceHelper.getLdapConfigName());
     }
 
     public Map<String, Object> gcpCredentialDetails() {

@@ -1,16 +1,26 @@
 package com.sequenceiq.it.cloudbreak.newway.cloud;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
+import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.stack.StackAuthenticationRequest;
-import com.sequenceiq.cloudbreak.api.model.v2.CloudStorageRequest;
+import com.sequenceiq.cloudbreak.api.model.v2.AmbariV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.NetworkV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.TemplateV2Request;
+import com.sequenceiq.it.cloudbreak.newway.Cluster;
 import com.sequenceiq.it.cloudbreak.newway.Credential;
 import com.sequenceiq.it.cloudbreak.newway.CredentialEntity;
-import com.sequenceiq.it.cloudbreak.newway.Stack;
+import com.sequenceiq.it.cloudbreak.newway.StackAction;
+import com.sequenceiq.it.cloudbreak.newway.StackCreation;
+import com.sequenceiq.it.cloudbreak.newway.StackEntity;
 import com.sequenceiq.it.cloudbreak.newway.TestParameter;
+import com.sequenceiq.it.cloudbreak.parameters.RequiredInputParameters.Azure.Database.Hive;
+import com.sequenceiq.it.cloudbreak.parameters.RequiredInputParameters.Azure.Database.Ranger;
 
 public class AzureCloudProvider extends CloudProviderHelper {
 
@@ -36,8 +46,41 @@ public class AzureCloudProvider extends CloudProviderHelper {
 
     private static final String NETWORK_DEFAULT_DESCRIPTION = "autotesting azure network";
 
+    private static final String CREDENTIAL_ACCESS_KEY_ENV_KEY = "integrationtest.azurermcredential.accessKey";
+
+    private static final String CREDENTIAL_SECRET_KEY_ENV_KEY = "integrationtest.azurermcredential.secretKey";
+
+    private static final String CREDENTIAL_TENANT_ID_ENV_KEY = "integrationtest.azurermcredential.tenantId";
+
+    private static final String CREDENTIAL_SUBSCRIPTION_ID_ENV_KEY = "integrationtest.azurermcredential.subscriptionId";
+
+    private static final String ACCESS_KEY_PARAM_KEY = "accessKey";
+
+    private static final String SECRET_KEY_PARAM_KEY = "secretKey";
+
+    private static final String SUBSCRIPTION_ID_PARAM_KEY = "subscriptionId";
+
+    private static final String TENANT_ID_PARAM_KEY = "tenantId";
+
+    private static final String GENERIC_TEST_VALUE = "12345abcdefg789";
+
+    private final ResourceHelper<?> resourceHelper;
+
     public AzureCloudProvider(TestParameter testParameter) {
         super(testParameter);
+        String storageType = testParameter.get("cloudStorageType");
+        if (storageType != null) {
+            switch (storageType.toUpperCase()) {
+                case "WASB":
+                    resourceHelper = new AzureWasbResourceHelper(testParameter, "-azure-wasb");
+                    break;
+                default:
+                    resourceHelper = new AzureAdlsResourceHelper(testParameter, "-azure-adls");
+                    break;
+            }
+        } else {
+            resourceHelper = new AzureWasbResourceHelper(testParameter, "-azure-wasb");
+        }
     }
 
     @Override
@@ -56,21 +99,8 @@ public class AzureCloudProvider extends CloudProviderHelper {
     }
 
     @Override
-    public Stack aValidDatalakeStackIsCreated() {
-        return null;
-    }
-
-    @Override
-    public CloudStorageRequest fileSystemForDatalake() {
-        return null;
-    }
-
-    @Override
     public String region() {
-        String region = "North Europe";
-        String regionParam = getTestParameter().get("azureRegion");
-
-        return regionParam == null ? region : regionParam;
+        return getTestParameter().getWithDefault("azureRegion", "North Europe");
     }
 
     @Override
@@ -82,23 +112,13 @@ public class AzureCloudProvider extends CloudProviderHelper {
     }
 
     @Override
-    TemplateV2Request template() {
+    public TemplateV2Request template() {
         TemplateV2Request t = new TemplateV2Request();
-        String instanceTypeDefaultValue = "Standard_D3_v2";
-        String instanceTypeParam = getTestParameter().get("azureInstanceType");
-        t.setInstanceType(instanceTypeParam == null ? instanceTypeDefaultValue : instanceTypeParam);
 
-        int volumeCountDefault = 1;
-        String volumeCountParam = getTestParameter().get("azureInstanceVolumeCount");
-        t.setVolumeCount(volumeCountParam == null ? volumeCountDefault : Integer.parseInt(volumeCountParam));
-
-        int volumeSizeDefault = 100;
-        String volumeSizeParam = getTestParameter().get("azureInstanceVolumeSize");
-        t.setVolumeSize(volumeSizeParam == null ? volumeSizeDefault : Integer.parseInt(volumeSizeParam));
-
-        String volumeTypeDefault = "Standard_LRS";
-        String volumeTypeParam = getTestParameter().get("azureInstanceVolumeType");
-        t.setVolumeType(volumeTypeParam == null ? volumeTypeDefault : volumeTypeParam);
+        t.setInstanceType(getTestParameter().getWithDefault("azureInstanceType", "Standard_D3_v2"));
+        t.setVolumeCount(Integer.parseInt(getTestParameter().getWithDefault("azureInstanceVolumeCount", "1")));
+        t.setVolumeSize(Integer.parseInt(getTestParameter().getWithDefault("azureInstanceVolumeSize", "100")));
+        t.setVolumeType(getTestParameter().getWithDefault("azureInstanceVolumeType", "Standard_LRS"));
 
         Map<String, Object> params = new HashMap<>();
         params.put("encrypted", "false");
@@ -109,9 +129,7 @@ public class AzureCloudProvider extends CloudProviderHelper {
 
     @Override
     public String getClusterName() {
-        String clustername = getTestParameter().get("azureClusterName");
-        clustername = clustername == null ? AZURE_CLUSTER_DEFAULT_NAME : clustername;
-        return clustername + getClusterNamePostfix();
+        return getTestParameter().getWithDefault("azureClusterName", AZURE_CLUSTER_DEFAULT_NAME);
     }
 
     @Override
@@ -121,43 +139,36 @@ public class AzureCloudProvider extends CloudProviderHelper {
 
     @Override
     public String getCredentialName() {
-        String credentialName = getTestParameter().get("azureCredentialName");
-        return credentialName == null ? CREDENTIAL_DEFAULT_NAME : credentialName;
+        return getTestParameter().getWithDefault("azureCredentialName", CREDENTIAL_DEFAULT_NAME);
     }
 
     @Override
     public String getBlueprintName() {
-        String blueprintName = getTestParameter().get("azureBlueprintName");
-        return blueprintName == null ? BLUEPRINT_DEFAULT_NAME : blueprintName;
+        return getTestParameter().getWithDefault("azureBlueprintName", BLUEPRINT_DEFAULT_NAME);
     }
 
     @Override
     public String getNetworkName() {
-        String networkName = getTestParameter().get("azureNetworkName");
-        return networkName == null ? NETWORK_DEFAULT_NAME : networkName;
+        return getTestParameter().getWithDefault("azureNetworkName", NETWORK_DEFAULT_NAME);
     }
 
     @Override
     public String getSubnetCIDR() {
-        String subnetCIDR = getTestParameter().get("azureSubnetCIDR");
-        return subnetCIDR == null ? DEFAULT_SUBNET_CIDR : subnetCIDR;
+        return getTestParameter().getWithDefault("azureSubnetCIDR", DEFAULT_SUBNET_CIDR);
     }
 
     @Override
     public String getVpcId() {
-        String vpcId = getTestParameter().get("azureVcpId");
-        return vpcId == null ? VPC_DEFAULT_ID : vpcId;
+        return getTestParameter().getWithDefault("azureVcpId", VPC_DEFAULT_ID);
     }
 
     @Override
     public String getSubnetId() {
-        String subnetId = getTestParameter().get("azureSubnetId");
-        return subnetId == null ? SUBNET_DEFAULT_ID : subnetId;
+        return getTestParameter().getWithDefault("azureSubnetId", SUBNET_DEFAULT_ID);
     }
 
     public String getResourceGroupName() {
-        String resourceGroupName = getTestParameter().get("resourceGroupName");
-        return resourceGroupName == null ? RESOURCE_GROUP_DEFAULT_NAME : resourceGroupName;
+        return getTestParameter().getWithDefault("resourceGroupName", RESOURCE_GROUP_DEFAULT_NAME);
     }
 
     public boolean getNoFirewallRules() {
@@ -211,53 +222,98 @@ public class AzureCloudProvider extends CloudProviderHelper {
         return network;
     }
 
+    @Override
+    public AmbariV2Request getAmbariRequestWithNoConfigStrategyAndEmptyMpacks(String blueprintName) {
+        var ambari = ambariRequestWithBlueprintName(blueprintName);
+        var stackDetails = new AmbariStackDetailsJson();
+        stackDetails.setMpacks(Collections.emptyList());
+        ambari.setConfigStrategy(null);
+        ambari.setAmbariStackDetails(stackDetails);
+        return ambari;
+    }
+
+    @Override
+    public ResourceHelper<?> getResourceHelper() {
+        return resourceHelper;
+    }
+
+    @Override
+    public Cluster aValidDatalakeCluster() {
+        return Cluster.request()
+                .withAmbariRequest(ambariRequestWithBlueprintName(getDatalakeBlueprintName()))
+                .withCloudStorage(resourceHelper.getCloudStorageRequestForDatalake())
+                .withRdsConfigNames(Set.of(
+                        getTestParameter().get(Ranger.CONFIG_NAME),
+                        getTestParameter().get(Hive.CONFIG_NAME)))
+                .withLdapConfigName(resourceHelper.getLdapConfigName());
+    }
+
+    @Override
+    public Cluster aValidAttachedCluster(String datalakeClusterName) {
+        return Cluster.request()
+                .withSharedService(datalakeClusterName)
+                .withAmbariRequest(ambariRequestWithBlueprintName(getBlueprintName()))
+                .withCloudStorage(resourceHelper.getCloudStorageRequestForAttachedCluster())
+                .withRdsConfigNames(new HashSet<>(Arrays.asList(
+                        getTestParameter().get(Ranger.CONFIG_NAME),
+                        getTestParameter().get(Hive.CONFIG_NAME))))
+                .withLdapConfigName(resourceHelper.getLdapConfigName());
+    }
+
     public Map<String, Object> azureCredentialDetails() {
         Map<String, Object> map = new HashMap<>();
-        map.put("accessKey", getTestParameter().get("integrationtest.azurermcredential.accessKey"));
-        map.put("secretKey", getTestParameter().get("integrationtest.azurermcredential.secretKey"));
-        map.put("subscriptionId", getTestParameter().get("integrationtest.azurermcredential.subscriptionId"));
-        map.put("tenantId", getTestParameter().get("integrationtest.azurermcredential.tenantId"));
+        map.put(ACCESS_KEY_PARAM_KEY, getTestParameter().get(CREDENTIAL_ACCESS_KEY_ENV_KEY));
+        map.put(SECRET_KEY_PARAM_KEY, getTestParameter().get(CREDENTIAL_SECRET_KEY_ENV_KEY));
+        map.put(SUBSCRIPTION_ID_PARAM_KEY, getTestParameter().get(CREDENTIAL_SUBSCRIPTION_ID_ENV_KEY));
+        map.put(TENANT_ID_PARAM_KEY, getTestParameter().get(CREDENTIAL_TENANT_ID_ENV_KEY));
 
         return map;
     }
 
     public Map<String, Object> azureCredentialDetailsInvalidAccessKey() {
         Map<String, Object> map = new HashMap<>();
-        map.put("accessKey", "12345abcdefg789");
-        map.put("secretKey", getTestParameter().get("integrationtest.azurermcredential.secretKey"));
-        map.put("subscriptionId", getTestParameter().get("integrationtest.azurermcredential.subscriptionId"));
-        map.put("tenantId", getTestParameter().get("integrationtest.azurermcredential.tenantId"));
+        map.put(ACCESS_KEY_PARAM_KEY, GENERIC_TEST_VALUE);
+        map.put(SECRET_KEY_PARAM_KEY, getTestParameter().get(CREDENTIAL_SECRET_KEY_ENV_KEY));
+        map.put(SUBSCRIPTION_ID_PARAM_KEY, getTestParameter().get(CREDENTIAL_SUBSCRIPTION_ID_ENV_KEY));
+        map.put(TENANT_ID_PARAM_KEY, getTestParameter().get(CREDENTIAL_TENANT_ID_ENV_KEY));
 
         return map;
     }
 
     public Map<String, Object> azureCredentialDetailsInvalidSecretKey() {
         Map<String, Object> map = new HashMap<>();
-        map.put("accessKey", getTestParameter().get("integrationtest.azurermcredential.accessKey"));
-        map.put("secretKey", "12345abcdefg789");
-        map.put("subscriptionId", getTestParameter().get("integrationtest.azurermcredential.subscriptionId"));
-        map.put("tenantId", getTestParameter().get("integrationtest.azurermcredential.tenantId"));
+        map.put(ACCESS_KEY_PARAM_KEY, getTestParameter().get(CREDENTIAL_ACCESS_KEY_ENV_KEY));
+        map.put(SECRET_KEY_PARAM_KEY, GENERIC_TEST_VALUE);
+        map.put(SUBSCRIPTION_ID_PARAM_KEY, getTestParameter().get(CREDENTIAL_SUBSCRIPTION_ID_ENV_KEY));
+        map.put(TENANT_ID_PARAM_KEY, getTestParameter().get(CREDENTIAL_TENANT_ID_ENV_KEY));
 
         return map;
     }
 
     public Map<String, Object> azureCredentialDetailsInvalidSubscriptionID() {
         Map<String, Object> map = new HashMap<>();
-        map.put("accessKey", getTestParameter().get("integrationtest.azurermcredential.accessKey"));
-        map.put("secretKey", getTestParameter().get("integrationtest.azurermcredential.secretKey"));
-        map.put("subscriptionId", "12345abcdefg789");
-        map.put("tenantId", getTestParameter().get("integrationtest.azurermcredential.tenantId"));
+        map.put(ACCESS_KEY_PARAM_KEY, getTestParameter().get(CREDENTIAL_ACCESS_KEY_ENV_KEY));
+        map.put(SECRET_KEY_PARAM_KEY, getTestParameter().get(CREDENTIAL_SECRET_KEY_ENV_KEY));
+        map.put(SUBSCRIPTION_ID_PARAM_KEY, GENERIC_TEST_VALUE);
+        map.put(TENANT_ID_PARAM_KEY, getTestParameter().get(CREDENTIAL_TENANT_ID_ENV_KEY));
 
         return map;
     }
 
     public Map<String, Object> azureCredentialDetailsInvalidTenantID() {
         Map<String, Object> map = new HashMap<>();
-        map.put("accessKey", getTestParameter().get("integrationtest.azurermcredential.accessKey"));
-        map.put("secretKey", getTestParameter().get("integrationtest.azurermcredential.secretKey"));
-        map.put("subscriptionId", getTestParameter().get("integrationtest.azurermcredential.subscriptionId"));
-        map.put("tenantId", "12345abcdefg789");
+        map.put(ACCESS_KEY_PARAM_KEY, getTestParameter().get(CREDENTIAL_ACCESS_KEY_ENV_KEY));
+        map.put(SECRET_KEY_PARAM_KEY, getTestParameter().get(CREDENTIAL_SECRET_KEY_ENV_KEY));
+        map.put(SUBSCRIPTION_ID_PARAM_KEY, getTestParameter().get(CREDENTIAL_SUBSCRIPTION_ID_ENV_KEY));
+        map.put(TENANT_ID_PARAM_KEY, GENERIC_TEST_VALUE);
 
         return map;
+    }
+
+    @Override
+    public StackEntity aValidAttachedStackRequest() {
+        var request = new StackCreation(aValidStackRequest());
+        request.setCreationStrategy(StackAction::determineNetworkAzureFromDatalakeStack);
+        return request.getStack();
     }
 }

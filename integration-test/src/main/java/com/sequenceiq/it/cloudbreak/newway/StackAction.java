@@ -1,14 +1,27 @@
 package com.sequenceiq.it.cloudbreak.newway;
 
-import com.sequenceiq.it.IntegrationTestContext;
-import com.sequenceiq.it.cloudbreak.newway.log.Log;
+
+import static org.springframework.util.StringUtils.isEmpty;
 
 import java.io.IOException;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sequenceiq.cloudbreak.api.model.v2.NetworkV2Request;
+import com.sequenceiq.it.IntegrationTestContext;
+import com.sequenceiq.it.cloudbreak.newway.log.Log;
+
 public class StackAction {
+    private static final String VPC_ID_KEY = "vpcId";
+
+    private static final String SUBNET_ID_KEY = "subnetId";
+
+    private static final String NETWORK_ID_KEY = "networkId";
+
+    private static final String RESOURCE_GROUP_NAME_KEY = "resourceGroupName";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StackAction.class);
 
@@ -57,5 +70,78 @@ public class StackAction {
             LOGGER.info("Failed to get stack. Trying to create it.", e);
             new StackPostStrategy().doAction(integrationTestContext, entity);
         }
+    }
+
+    public static void determineNetworkAwsFromDatalakeStack(IntegrationTestContext integrationTestContext, Entity entity) {
+        var stackEntity = (StackEntity) entity;
+        var datalakeStack = DatalakeCluster.getTestContextDatalakeCluster().apply(integrationTestContext);
+        if (isDatalakeExistAndHasNetwork(datalakeStack)) {
+            String subnetId = obtainFromNetworkParam(datalakeStack.getResponse().getNetwork().getParameters(), SUBNET_ID_KEY);
+            String networkId = obtainFromNetworkParam(datalakeStack.getResponse().getNetwork().getParameters(), NETWORK_ID_KEY);
+
+            prepareNetworkParam(stackEntity);
+            stackEntity.getRequest().getNetwork().getParameters().put(SUBNET_ID_KEY, subnetId);
+            stackEntity.getRequest().getNetwork().getParameters().put(VPC_ID_KEY, networkId);
+        } else {
+            throw new AssertionError("Datalake cluster does not cointain network or datalake cluster does not exist");
+        }
+    }
+
+    public static void determineNetworkAzureFromDatalakeStack(IntegrationTestContext integrationTestContext, Entity entity) {
+        var stackEntity = (StackEntity) entity;
+        var datalakeStack = DatalakeCluster.getTestContextDatalakeCluster().apply(integrationTestContext);
+        if (isDatalakeExistAndHasNetwork(datalakeStack)) {
+            String subnetId = obtainFromNetworkParam(datalakeStack.getResponse().getNetwork().getParameters(), SUBNET_ID_KEY);
+            String networkId = obtainFromNetworkParam(datalakeStack.getResponse().getNetwork().getParameters(), NETWORK_ID_KEY);
+
+            prepareNetworkParam(stackEntity);
+            stackEntity.getRequest().getNetwork().getParameters().put(SUBNET_ID_KEY, subnetId);
+            stackEntity.getRequest().getNetwork().getParameters().put(NETWORK_ID_KEY, networkId);
+            stackEntity.getRequest().getNetwork().getParameters().put(RESOURCE_GROUP_NAME_KEY, networkId);
+        } else {
+            throw new AssertionError("Datalake cluster does not cointain network or datalake cluster does not exist");
+        }
+    }
+
+    public static void determineNetworkFromDatalakeStack(IntegrationTestContext integrationTestContext, Entity entity) {
+        var stackEntity = (StackEntity) entity;
+        var datalakeStack = DatalakeCluster.getTestContextDatalakeCluster().apply(integrationTestContext);
+        if (isDatalakeExistAndHasNetwork(datalakeStack)) {
+            String subnetId = obtainFromNetworkParam(datalakeStack.getResponse().getNetwork().getParameters(), SUBNET_ID_KEY);
+            String networkId = obtainFromNetworkParam(datalakeStack.getResponse().getNetwork().getParameters(), NETWORK_ID_KEY);
+
+            prepareNetworkParam(stackEntity);
+            stackEntity.getRequest().getNetwork().getParameters().put(SUBNET_ID_KEY, subnetId);
+            stackEntity.getRequest().getNetwork().getParameters().put(NETWORK_ID_KEY, networkId);
+        } else {
+            throw new AssertionError("Datalake cluster does not cointain network or datalake cluster does not exist");
+        }
+    }
+
+    private static String obtainFromNetworkParam(Map<String, Object> parameters, String key) {
+        if (parameters == null) {
+            return null;
+        }
+        Object value = parameters.get(key);
+        if (isEmpty(parameters.get(key))) {
+            return null;
+        }
+
+        return value.toString();
+    }
+
+    private static void prepareNetworkParam(StackEntity stackEntity) {
+        if (stackEntity.getRequest().getNetwork() == null) {
+            var network = new NetworkV2Request();
+            stackEntity.getRequest().setNetwork(network);
+        }
+        if (stackEntity.getRequest().getNetwork().getParameters() == null) {
+            var params = new LinkedHashMap<String, Object>();
+            stackEntity.getRequest().getNetwork().setParameters(params);
+        }
+    }
+
+    private static boolean isDatalakeExistAndHasNetwork(DatalakeCluster datalakeStack) {
+        return datalakeStack != null && datalakeStack.getResponse() != null && datalakeStack.getResponse().getNetwork() != null;
     }
 }

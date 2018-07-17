@@ -25,13 +25,13 @@ public class LdapConfig extends LdapConfigEntity {
     }
 
     public static LdapConfig isCreated() {
-        LdapConfig ldapConfig = new LdapConfig();
+        var ldapConfig = new LdapConfig();
         ldapConfig.setCreationStrategy(LdapConfigAction::createInGiven);
         return ldapConfig;
     }
 
     public static LdapConfig isCreatedDeleted() {
-        LdapConfig ldapConfig = new LdapConfig();
+        var ldapConfig = new LdapConfig();
         ldapConfig.setCreationStrategy(LdapConfigAction::createDeleteInGiven);
         return ldapConfig;
     }
@@ -69,8 +69,15 @@ public class LdapConfig extends LdapConfigEntity {
     }
 
     public static LdapConfig isCreatedWithParameters(TestParameter testParameter) {
-        LdapConfig ldapConfig = new LdapConfig();
+        var ldapConfig = new LdapConfig();
         ldapConfig.setRequest(LdapConfigRequestDataCollector.createLdapRequestWithProperties(testParameter));
+        ldapConfig.setCreationStrategy(LdapConfigAction::createInGiven);
+        return ldapConfig;
+    }
+
+    public static LdapConfig isCreatedWithParametersAndName(TestParameter testParameter, String name) {
+        var ldapConfig = new LdapConfig();
+        ldapConfig.setRequest(LdapConfigRequestDataCollector.createLdapRequestWithPropertiesAndName(testParameter, name));
         ldapConfig.setCreationStrategy(LdapConfigAction::createInGiven);
         return ldapConfig;
     }

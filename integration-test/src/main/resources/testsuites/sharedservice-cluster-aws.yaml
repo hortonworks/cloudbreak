@@ -2,8 +2,8 @@ name: "AWS shared service cluster tests"
 parallel: tests
 threadCount: 4
 parameters:
-  awsRegion: us-west-1
-  awsAvailabilityZone: us-west-1a
+  awsRegion: eu-west-2
+  awsAvailabilityZone: eu-west-2a
   awsCredentialName: autotesting-clusters-aws
 listeners:
   - com.sequenceiq.it.cloudbreak.newway.listener.FirstLastTestExecutionBehaviour
@@ -13,7 +13,7 @@ tests:
   - name: "aws datalake"
     preserveOrder: true
     classes:
-      - name: com.sequenceiq.it.cloudbreak.SharedServiceTest
+      - name: com.sequenceiq.it.cloudbreak.SharedServiceAwsTest
         includedMethods:
           - testADatalakeClusterCreation
           - testClusterAttachedToDatalakeCluster

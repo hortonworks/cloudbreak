@@ -1,11 +1,11 @@
 package com.sequenceiq.it.cloudbreak.newway;
 
-import com.sequenceiq.cloudbreak.api.model.v2.InstanceGroupV2Request;
-import com.sequenceiq.it.IntegrationTestContext;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
+
+import com.sequenceiq.cloudbreak.api.model.v2.InstanceGroupV2Request;
+import com.sequenceiq.it.IntegrationTestContext;
 
 public class HostGroups extends Entity {
     public static final String HOSTGROUPS_REQUEST = "HOSTGROUPS_REQUEST";
@@ -31,6 +31,11 @@ public class HostGroups extends Entity {
 
     public HostGroups addHostGroup(InstanceGroupV2Request hostGroup) {
         request.add(hostGroup);
+        return this;
+    }
+
+    public HostGroups addHostGroups(List<InstanceGroupV2Request> hostGroups) {
+        request.addAll(hostGroups);
         return this;
     }
 
