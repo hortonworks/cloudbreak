@@ -9,10 +9,5 @@ import io.swagger.annotations.ApiModel;
 @ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
-public class GcpTemplateParameters extends BaseTemplateParameter {
-
-    @Override
-    public TemplatePlatformType type() {
-        return TemplatePlatformType.GCP;
-    }
+public class GcpParameters extends BaseTemplateParameter {
 }

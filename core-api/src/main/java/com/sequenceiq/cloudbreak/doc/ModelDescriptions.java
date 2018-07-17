@@ -51,7 +51,8 @@ public class ModelDescriptions {
         public static final String PARAMETERS = "cloud specific parameters for template";
         public static final String AWS_PARAMETERS = "aws specific parameters for template";
         public static final String GCP_PARAMETERS = "gcp specific parameters for template";
-        public static final String OPEN_STACK_PARAMETERS = "open stack specific parameters for template";
+        public static final String OPENSTACK_PARAMETERS = "openstack specific parameters for template";
+        public static final String YARN_PARAMETERS = "yarn specific parameters for template";
         public static final String AZURE_PARAMETERS = "azure specific parameters for template";
         public static final String AWS_SPOT_PRICE = "spot price for aws";
         public static final String AZURE_PRIVATE_ID = "private id for azure";

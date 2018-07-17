@@ -9,10 +9,6 @@ import io.swagger.annotations.ApiModel;
 @ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
-public class OpenStackTemplateParameters extends BaseTemplateParameter {
+public class YarnParameters extends BaseTemplateParameter {
 
-    @Override
-    public TemplatePlatformType type() {
-        return TemplatePlatformType.OS;
-    }
 }

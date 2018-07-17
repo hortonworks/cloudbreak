@@ -1,77 +1,100 @@
 package com.sequenceiq.cloudbreak.converter;
 
+import static org.mockito.Mockito.when;
+
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.springframework.core.convert.ConversionService;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.api.model.TemplateResponse;
-import com.sequenceiq.cloudbreak.api.model.v2.template.AwsTemplateParameters;
-import com.sequenceiq.cloudbreak.api.model.v2.template.AzureTemplateParameters;
+import com.sequenceiq.cloudbreak.api.model.v2.template.AwsParameters;
+import com.sequenceiq.cloudbreak.api.model.v2.template.AzureParameters;
 import com.sequenceiq.cloudbreak.api.model.v2.template.BaseTemplateParameter;
 import com.sequenceiq.cloudbreak.api.model.v2.template.Encryption;
 import com.sequenceiq.cloudbreak.api.model.v2.template.EncryptionType;
-import com.sequenceiq.cloudbreak.api.model.v2.template.GcpTemplateParameters;
-import com.sequenceiq.cloudbreak.api.model.v2.template.OpenStackTemplateParameters;
+import com.sequenceiq.cloudbreak.api.model.v2.template.GcpParameters;
+import com.sequenceiq.cloudbreak.api.model.v2.template.OpenStackParameters;
+import com.sequenceiq.cloudbreak.api.model.v2.template.YarnParameters;
+import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 
 public class TemplateToTemplateResponseConverterTest {
 
-    private final TemplateToTemplateResponseConverter underTest = new TemplateToTemplateResponseConverter();
+    @Mock
+    private ConversionService conversionService;
+
+    @InjectMocks
+    private TemplateToTemplateResponseConverter underTest;
+
+    @Before
+    public void setUp() throws JsonProcessingException {
+        MockitoAnnotations.initMocks(this);
+        when(conversionService.convert(parameters(CloudConstants.AWS).getMap(), AwsParameters.class)).thenReturn(awsParameters());
+        when(conversionService.convert(parameters(CloudConstants.YARN).getMap(), YarnParameters.class)).thenReturn(yarnParameters());
+        when(conversionService.convert(parameters(CloudConstants.AZURE).getMap(), AzureParameters.class)).thenReturn(azureParameters());
+        when(conversionService.convert(parameters(CloudConstants.GCP).getMap(), GcpParameters.class)).thenReturn(gcpParameters());
+        when(conversionService.convert(parameters(CloudConstants.OPENSTACK).getMap(), OpenStackParameters.class)).thenReturn(openStackParameters());
+    }
 
     @Test
     public void testAwsTemplateParametersWhenNotNull() throws JsonProcessingException {
 
         Template template = new Template();
-        template.setAttributes(getAwsJson());
+        template.setAttributes(parameters(CloudConstants.AWS));
 
         TemplateResponse convert = underTest.convert(template);
 
-        Assert.assertNotNull(convert.getAwsTemplateParameters());
-        Assert.assertEquals(10.0D, convert.getAwsTemplateParameters().getSpotPrice().doubleValue(), 0);
-        Assert.assertEquals("someKey", convert.getAwsTemplateParameters().getEncryption().getKey());
-        Assert.assertEquals(EncryptionType.CUSTOM.name(), convert.getAwsTemplateParameters().getEncryption().getType());
-        Assert.assertNull(convert.getAzureTemplateParameters());
+        Assert.assertNotNull(convert.getAwsParameters());
+        Assert.assertEquals(10.0D, convert.getAwsParameters().getSpotPrice().doubleValue(), 0);
+        Assert.assertEquals("someKey", convert.getAwsParameters().getEncryption().getKey());
+        Assert.assertEquals(EncryptionType.CUSTOM.name(), convert.getAwsParameters().getEncryption().getType());
+        Assert.assertNull(convert.getAzureParameters());
         Assert.assertNull(convert.getGcpTemlateParameters());
-        Assert.assertNull(convert.getOpenStackTemplateParameters());
+        Assert.assertNull(convert.getOpenStackParameters());
     }
 
     @Test
     public void testAzureTemplateParametersWhenNotNull() throws JsonProcessingException {
 
         Template template = new Template();
-        template.setAttributes(getAzureJson());
+        template.setAttributes(parameters(CloudConstants.AZURE));
 
         TemplateResponse convert = underTest.convert(template);
 
-        Assert.assertNotNull(convert.getAzureTemplateParameters());
-        Assert.assertEquals("somePrivateId", convert.getAzureTemplateParameters().getPrivateId());
+        Assert.assertNotNull(convert.getAzureParameters());
+        Assert.assertEquals("somePrivateId", convert.getAzureParameters().getPrivateId());
     }
 
     @Test
     public void testGcpTemplateParametersWhenNotNull() throws JsonProcessingException {
 
         Template template = new Template();
-        template.setAttributes(getGcpJson());
+        template.setAttributes(parameters(CloudConstants.GCP));
 
         TemplateResponse convert = underTest.convert(template);
 
         Assert.assertNotNull(convert.getGcpTemlateParameters());
-        Assert.assertNull(convert.getGcpTemlateParameters().getEncryption());
-        Assert.assertNull(convert.getGcpTemlateParameters().isEncrypted());
     }
 
     @Test
     public void testOpenStackTemplateParametersWhenNotNull() throws JsonProcessingException {
 
         Template template = new Template();
-        template.setAttributes(getOSJson());
+        template.setAttributes(parameters(CloudConstants.OPENSTACK));
 
         TemplateResponse convert = underTest.convert(template);
 
-        Assert.assertNotNull(convert.getOpenStackTemplateParameters());
+        Assert.assertNotNull(convert.getOpenStackParameters());
     }
 
     @Test
@@ -82,42 +105,44 @@ public class TemplateToTemplateResponseConverterTest {
 
         TemplateResponse convert = underTest.convert(template);
 
-        Assert.assertNull(convert.getAwsTemplateParameters());
-        Assert.assertNull(convert.getAzureTemplateParameters());
+        Assert.assertNull(convert.getAwsParameters());
+        Assert.assertNull(convert.getAzureParameters());
         Assert.assertNull(convert.getGcpTemlateParameters());
-        Assert.assertNull(convert.getOpenStackTemplateParameters());
+        Assert.assertNull(convert.getOpenStackParameters());
     }
 
-    private Json getAwsJson() throws JsonProcessingException {
-        AwsTemplateParameters templateParameters = new AwsTemplateParameters();
+    private Json parameters(String cloudConstants) throws JsonProcessingException {
+        Map<String, Object> map = new HashMap<>();
+        map.put(BaseTemplateParameter.PLATFORM_TYPE, cloudConstants);
+        return new Json(map);
+    }
+
+    private AwsParameters awsParameters() throws JsonProcessingException {
+        AwsParameters templateParameters = new AwsParameters();
         templateParameters.setSpotPrice(10.0D);
-        fillEncrypt(templateParameters);
-        return new Json(templateParameters.asMap());
-    }
-
-    private Json getOSJson() throws JsonProcessingException {
-        OpenStackTemplateParameters templateParameters = new OpenStackTemplateParameters();
-        fillEncrypt(templateParameters);
-        return new Json(templateParameters.asMap());
-    }
-
-    private Json getGcpJson() throws JsonProcessingException {
-        GcpTemplateParameters templateParameters = new GcpTemplateParameters();
-        return new Json(templateParameters.asMap());
-    }
-
-    private Json getAzureJson() throws JsonProcessingException {
-        AzureTemplateParameters templateParameters = new AzureTemplateParameters();
-        templateParameters.setPrivateId("somePrivateId");
-        fillEncrypt(templateParameters);
-        return new Json(templateParameters.asMap());
-    }
-
-    private void fillEncrypt(BaseTemplateParameter baseTemplateParameters) {
-        baseTemplateParameters.setEncrypted(true);
+        templateParameters.setEncrypted(true);
         Encryption encryption = new Encryption();
         encryption.setKey("someKey");
         encryption.setType("CUSTOM");
-        baseTemplateParameters.setEncryption(encryption);
+        templateParameters.setEncryption(encryption);
+        return templateParameters;
+    }
+
+    private OpenStackParameters openStackParameters() throws JsonProcessingException {
+        return new OpenStackParameters();
+    }
+
+    private GcpParameters gcpParameters() throws JsonProcessingException {
+        return new GcpParameters();
+    }
+
+    private AzureParameters azureParameters() throws JsonProcessingException {
+        AzureParameters templateParameters = new AzureParameters();
+        templateParameters.setPrivateId("somePrivateId");
+        return templateParameters;
+    }
+
+    private YarnParameters yarnParameters() throws JsonProcessingException {
+        return new YarnParameters();
     }
 }
