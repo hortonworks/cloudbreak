@@ -51,6 +51,10 @@ public class Stack extends StackEntity {
         return new Action<>(getTestContextStack(key), new StackPostStrategy());
     }
 
+    public static Action<Stack> post(Strategy strategy) {
+        return new Action<>(getTestContextStack(STACK), strategy);
+    }
+
     public static Action<Stack> post() {
         return post(STACK);
     }

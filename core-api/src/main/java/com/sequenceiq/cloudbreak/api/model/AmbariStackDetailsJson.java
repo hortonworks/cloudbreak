@@ -18,10 +18,10 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 public class AmbariStackDetailsJson implements JsonEntity {
-    @ApiModelProperty(value = AmbariStackDetailsDescription.STACK)
+    @ApiModelProperty(AmbariStackDetailsDescription.STACK)
     private String stack;
 
-    @ApiModelProperty(value = AmbariStackDetailsDescription.VERSION)
+    @ApiModelProperty(AmbariStackDetailsDescription.VERSION)
     private String version;
 
     @ApiModelProperty(AmbariStackDetailsDescription.OS)
@@ -42,7 +42,7 @@ public class AmbariStackDetailsJson implements JsonEntity {
     @ApiModelProperty(AmbariStackDetailsDescription.ENABLE_GPL_REPO)
     private boolean enableGplRepo;
 
-    @ApiModelProperty(value = AmbariStackDetailsDescription.VERIFY)
+    @ApiModelProperty(AmbariStackDetailsDescription.VERIFY)
     private Boolean verify;
 
     @ApiModelProperty(AmbariStackDetailsDescription.REPOSITORY_VERSION)

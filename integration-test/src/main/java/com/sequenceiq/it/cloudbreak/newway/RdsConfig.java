@@ -34,6 +34,12 @@ public class RdsConfig extends RdsConfigEntity {
         return rdsConfig;
     }
 
+    public static RdsConfig isCreated(String id) {
+        var rdsConfig = new RdsConfig();
+        rdsConfig.setCreationStrategy(RdsConfigAction::createInGiven);
+        return rdsConfig;
+    }
+
     public static RdsConfig isCreatedDeleted() {
         RdsConfig rdsConfig = new RdsConfig();
         rdsConfig.setCreationStrategy(RdsConfigAction::createDeleteInGiven);

@@ -1,8 +1,10 @@
 package com.sequenceiq.it.cloudbreak.newway;
 
-class MissingExpectedParameterException extends RuntimeException {
+import org.testng.SkipException;
 
-    MissingExpectedParameterException(String key) {
+public class MissingExpectedParameterException extends SkipException {
+
+    public MissingExpectedParameterException(String key) {
         super(String.format("Missing test parameter value for key: '%s'", key));
     }
 }

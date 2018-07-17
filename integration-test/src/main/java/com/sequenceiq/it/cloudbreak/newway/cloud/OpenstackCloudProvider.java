@@ -1,16 +1,19 @@
 package com.sequenceiq.it.cloudbreak.newway.cloud;
 
-import java.util.HashMap;
-import java.util.Map;
-
+import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.stack.StackAuthenticationRequest;
-import com.sequenceiq.cloudbreak.api.model.v2.CloudStorageRequest;
+import com.sequenceiq.cloudbreak.api.model.v2.AmbariV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.NetworkV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.TemplateV2Request;
+import com.sequenceiq.it.cloudbreak.newway.Cluster;
 import com.sequenceiq.it.cloudbreak.newway.Credential;
 import com.sequenceiq.it.cloudbreak.newway.CredentialEntity;
-import com.sequenceiq.it.cloudbreak.newway.Stack;
 import com.sequenceiq.it.cloudbreak.newway.TestParameter;
+import org.apache.commons.lang3.NotImplementedException;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 public class OpenstackCloudProvider extends CloudProviderHelper {
 
@@ -42,8 +45,11 @@ public class OpenstackCloudProvider extends CloudProviderHelper {
 
     private static final String NETWORKING_DEFAULT_OPTION = "self-service";
 
+    private final ResourceHelper<?> resourceHelper;
+
     public OpenstackCloudProvider(TestParameter testParameter) {
         super(testParameter);
+        resourceHelper = null;
     }
 
     @Override
@@ -58,28 +64,12 @@ public class OpenstackCloudProvider extends CloudProviderHelper {
 
     @Override
     public String availabilityZone() {
-        String availabilityZone = "nova";
-        String availabilityZoneParam = getTestParameter().get("openstackAvailibilityZone");
-
-        return availabilityZoneParam == null ? availabilityZone : availabilityZoneParam;
-    }
-
-    @Override
-    public Stack aValidDatalakeStackIsCreated() {
-        return null;
-    }
-
-    @Override
-    public CloudStorageRequest fileSystemForDatalake() {
-        return null;
+        return getTestParameter().getWithDefault("openstackAvailibilityZone", "nova");
     }
 
     @Override
     public String region() {
-        String region = "RegionOne";
-        String regionParam = getTestParameter().get("openstackRegion");
-
-        return regionParam == null ? region : regionParam;
+        return getTestParameter().getWithDefault("openstackRegion", "RegionOne");
     }
 
     @Override
@@ -91,32 +81,20 @@ public class OpenstackCloudProvider extends CloudProviderHelper {
     }
 
     @Override
-    TemplateV2Request template() {
+    public TemplateV2Request template() {
         TemplateV2Request t = new TemplateV2Request();
-        String instanceTypeDefaultValue = "m1.xlarge";
-        String instanceTypeParam = getTestParameter().get("openstackInstanceType");
-        t.setInstanceType(instanceTypeParam == null ? instanceTypeDefaultValue : instanceTypeParam);
 
-        int volumeCountDefault = 0;
-        String volumeCountParam = getTestParameter().get("openstackInstanceVolumeCount");
-        t.setVolumeCount(volumeCountParam == null ? volumeCountDefault : Integer.parseInt(volumeCountParam));
-
-        int volumeSizeDefault = 50;
-        String volumeSizeParam = getTestParameter().get("openstackInstanceVolumeSize");
-        t.setVolumeSize(volumeSizeParam == null ? volumeSizeDefault : Integer.parseInt(volumeSizeParam));
-
-        String volumeTypeDefault = "HDD";
-        String volumeTypeParam = getTestParameter().get("openstackInstanceVolumeType");
-        t.setVolumeType(volumeTypeParam == null ? volumeTypeDefault : volumeTypeParam);
+        t.setInstanceType(getTestParameter().getWithDefault("openstackInstanceType", "m1.xlarge"));
+        t.setVolumeCount(Integer.parseInt(getTestParameter().getWithDefault("openstackInstanceVolumeCount", "0")));
+        t.setVolumeSize(Integer.parseInt(getTestParameter().getWithDefault("openstackInstanceVolumeSize", "50")));
+        t.setVolumeType(getTestParameter().getWithDefault("openstackInstanceVolumeType", "HDD"));
 
         return t;
     }
 
     @Override
     public String getClusterName() {
-        String clustername = getTestParameter().get("openstackClusterName");
-        clustername = clustername == null ? OPENSTACK_CLUSTER_DEFAULT_NAME : clustername;
-        return clustername + getClusterNamePostfix();
+        return getTestParameter().getWithDefault("openstackClusterName", OPENSTACK_CLUSTER_DEFAULT_NAME);
     }
 
     @Override
@@ -126,58 +104,57 @@ public class OpenstackCloudProvider extends CloudProviderHelper {
 
     @Override
     public String getCredentialName() {
-        String credentialName = getTestParameter().get("openstackCredentialName");
-        return credentialName == null ? CREDENTIAL_DEFAULT_NAME : credentialName;
+        return getTestParameter().getWithDefault("openstackCredentialName", CREDENTIAL_DEFAULT_NAME);
     }
 
     @Override
     public String getBlueprintName() {
-        String blueprintName = getTestParameter().get("openstackBlueprintName");
-        return blueprintName == null ? BLUEPRINT_DEFAULT_NAME : blueprintName;
+        return getTestParameter().getWithDefault("openstackBlueprintName", BLUEPRINT_DEFAULT_NAME);
+
     }
 
     @Override
     public String getNetworkName() {
-        String networkName = getTestParameter().get("openstackNetworkName");
-        return networkName == null ? NETWORK_DEFAULT_NAME : networkName;
+        return getTestParameter().getWithDefault("openstackNetworkName", NETWORK_DEFAULT_NAME);
+
     }
 
     @Override
     public String getSubnetCIDR() {
-        String subnetCIDR = getTestParameter().get("openstackSubnetCIDR");
-        return subnetCIDR == null ? DEFAULT_SUBNET_CIDR : subnetCIDR;
+        return getTestParameter().getWithDefault("openstackSubnetCIDR", DEFAULT_SUBNET_CIDR);
+
     }
 
     @Override
     public String getVpcId() {
-        String vpcId = getTestParameter().get("openstackVcpId");
-        return vpcId == null ? VPC_DEFAULT_ID : vpcId;
+        return getTestParameter().getWithDefault("openstackVcpId", VPC_DEFAULT_ID);
+
     }
 
     @Override
     public String getSubnetId() {
-        String subnetId = getTestParameter().get("openstackSubnetId");
-        return subnetId == null ? SUBNET_DEFAULT_ID : subnetId;
+        return getTestParameter().getWithDefault("openstackSubnetId", SUBNET_DEFAULT_ID);
+
     }
 
     public String getNetworkingOption() {
-        String networkingOption = getTestParameter().get("networkingOption");
-        return networkingOption == null ? NETWORKING_DEFAULT_OPTION : networkingOption;
+        return getTestParameter().getWithDefault("networkingOption", NETWORKING_DEFAULT_OPTION);
+
     }
 
     public String getPublicNetId() {
-        String publicNetId = getTestParameter().get("publicNetId");
-        return publicNetId == null ? PUBLIC_NETWORK_ID : publicNetId;
+        return getTestParameter().getWithDefault("publicNetId", PUBLIC_NETWORK_ID);
+
     }
 
     public String getRouterId() {
-        String routerId = getTestParameter().get("routerId");
-        return routerId == null ? ROUTER_ID : routerId;
+        return getTestParameter().getWithDefault("routerId", ROUTER_ID);
+
     }
 
     public String getInternetGatewayId() {
-        String gatewayId = getTestParameter().get("openstackInternetGatewayId");
-        return gatewayId == null ? INTERNET_GATEWAY_ID : gatewayId;
+        return getTestParameter().getWithDefault("openstackInternetGatewayId", INTERNET_GATEWAY_ID);
+
     }
 
     @Override
@@ -232,6 +209,31 @@ public class OpenstackCloudProvider extends CloudProviderHelper {
         NetworkV2Request network = new NetworkV2Request();
         network.setParameters(subnetProperties());
         return network;
+    }
+
+    @Override
+    public AmbariV2Request getAmbariRequestWithNoConfigStrategyAndEmptyMpacks(String blueprintName) {
+        var ambari = ambariRequestWithBlueprintName(blueprintName);
+        var stackDetails = new AmbariStackDetailsJson();
+        stackDetails.setMpacks(Collections.emptyList());
+        ambari.setConfigStrategy(null);
+        ambari.setAmbariStackDetails(stackDetails);
+        return ambari;
+    }
+
+    @Override
+    public ResourceHelper<?> getResourceHelper() {
+        throw new NotImplementedException("Resource helper for Openstack is not implemented yet");
+    }
+
+    @Override
+    public Cluster aValidDatalakeCluster() {
+        throw new NotImplementedException("not implemented!");
+    }
+
+    @Override
+    public Cluster aValidAttachedCluster(String datalakeClusterName) {
+        throw new NotImplementedException("not implemented!");
     }
 
     public Map<String, Object> openstackCredentialDetails() {

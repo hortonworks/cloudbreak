@@ -19,7 +19,7 @@ import com.sequenceiq.it.util.LongStringGeneratorUtil;
 public class RdsConfigTests extends CloudbreakTest {
     private static final String VALID_RDS_CONFIG = "e2e-rds";
 
-    private static final String HIVE = "HIVE";
+    private static final String HIVE = "HIVE_CONFIG_NAME";
 
     private static final String SPECIAL_RDS_NAME = "a-@#$%|:&*;";
 
@@ -246,7 +246,7 @@ public class RdsConfigTests extends CloudbreakTest {
                 .withConnectionPassword(rdsPassword)
                 .withConnectionURL(rdsConnectionUrl)
                 .withConnectionUserName(rdsUser)
-                .withType("RANGER"), "create valid rds connection test no validation"
+                .withType("RANGER_CONFIG_NAME"), "create valid rds connection test no validation"
         );
         when(RdsConfig.testConnect(), "post the request");
         then(RdsConfig.assertThis(
