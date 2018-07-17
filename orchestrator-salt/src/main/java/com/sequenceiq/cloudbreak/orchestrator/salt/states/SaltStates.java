@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltClientType.
 import static com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltClientType.RUNNER;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -12,6 +13,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.CollectionUtils;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
@@ -20,9 +22,12 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Glob;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Target;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.ApplyResponse;
+import com.sequenceiq.cloudbreak.orchestrator.salt.domain.CommandExecutionResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.Minion;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.MinionIpAddressesResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.MinionStatusSaltResponse;
+import com.sequenceiq.cloudbreak.orchestrator.salt.domain.PackageVersionResponse;
+import com.sequenceiq.cloudbreak.orchestrator.salt.domain.PackageVersionsResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.PingResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.RunnerInfo;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.RunnerInfo.DurationComparator;
@@ -143,6 +148,32 @@ public class SaltStates {
             saltAction.addMinion(minion);
         }
         sc.action(saltAction);
+    }
+
+    public static Map<String, Map<String, String>> getPackageVersions(SaltConnector sc, String... packages) {
+        if (packages.length == 1) {
+            PackageVersionResponse packageVersionResponse = sc.run(Glob.ALL, "pkg.version", LOCAL, PackageVersionResponse.class, packages);
+            Map<String, String> packageVersionsMap =
+                    CollectionUtils.isEmpty(packageVersionResponse.getResult()) ? new HashMap<>() : packageVersionResponse.getResult().get(0);
+            Map<String, Map<String, String>> result = new HashMap<>();
+            for (Entry<String, String> e : packageVersionsMap.entrySet()) {
+                Map<String, String> versionMap = new HashMap<>();
+                versionMap.put(packages[0], e.getValue());
+                result.put(e.getKey(), versionMap);
+            }
+            return result;
+        } else if (packages.length > 1) {
+            PackageVersionsResponse packageVersionsResponse = sc.run(Glob.ALL, "pkg.version", LOCAL, PackageVersionsResponse.class, packages);
+            return CollectionUtils.isEmpty(packageVersionsResponse.getResult()) ? new HashMap<>() : packageVersionsResponse.getResult().get(0);
+        } else {
+            return Collections.emptyMap();
+        }
+    }
+
+    public static Map<String, String> runCommand(SaltConnector sc, String command) {
+        CommandExecutionResponse resp = sc.run(Glob.ALL, "cmd.run", LOCAL, CommandExecutionResponse.class, command);
+        List<Map<String, String>> result = resp.getResult();
+        return CollectionUtils.isEmpty(result) ? new HashMap<>() : result.get(0);
     }
 
     private static ApplyResponse applyState(SaltConnector sc, String service, Target<String> target) {
