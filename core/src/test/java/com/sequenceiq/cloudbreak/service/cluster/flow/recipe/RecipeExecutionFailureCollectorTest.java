@@ -43,7 +43,9 @@ public class RecipeExecutionFailureCollectorTest {
                 "\"Comment: Command \"/opt/scripts/recipe-runner.sh post-ambari-start failingRecipe1\" run\n"
                         + "Stdout: /opt/scripts/recipe-runner.sh post-ambari-start failingRecipe1 : Timed out after 10 seconds\"",
                 "\"Comment: Command \"/opt/scripts/recipe-runner.sh pre-ambari-start failingRecipe2\" run\n"
-                        + "Stdout: /opt/scripts/recipe-runner.sh pre-ambari-start failingRecipe2 : Timed out after 10 seconds\""
+                        + "Stdout: /opt/scripts/recipe-runner.sh pre-ambari-start failingRecipe2 : Timed out after 10 seconds\"",
+                "Comment: One or more requisite failed: postgresql.init-services-db, postgresql.configure-listen-address",
+                "Comment: One or more requisite failed: postgresql.init-services-db, postgresql.configure-listen-address"
         ));
         nodesWithErrors.put("host-10-0-0-3.openstacklocal",
                 "\"Comment: Command \"/opt/scripts/recipe-runner.sh post-ambari-start failingRecipe1\" run\n"
