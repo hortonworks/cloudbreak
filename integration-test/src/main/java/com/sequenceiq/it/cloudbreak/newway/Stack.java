@@ -12,7 +12,7 @@ import static com.sequenceiq.it.cloudbreak.CloudbreakUtil.waitAndCheckStackStatu
 
 public class Stack extends StackEntity {
 
-    static Function<IntegrationTestContext, Stack> getTestContextStack(String key) {
+    public static Function<IntegrationTestContext, Stack> getTestContextStack(String key) {
         return (testContext) -> testContext.getContextParam(key, Stack.class);
     }
 
