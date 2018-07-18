@@ -19,7 +19,6 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
@@ -50,15 +49,6 @@ public class AwsPlatformParameters implements PlatformParameters {
     private static final ScriptParams SCRIPT_PARAMS = new ScriptParams("xvd", START_LABEL);
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsPlatformParameters.class);
-
-    @Value("${cb.platform.default.regions:}")
-    private String defaultRegions;
-
-    @Value("${cb.aws.vm.parameter.definition.path:}")
-    private String awsVmParameterDefinitionPath;
-
-    @Value("${cb.aws.zone.parameter.default:eu-west-1}")
-    private String awsZoneParameterDefault;
 
     @Inject
     private CloudbreakResourceReaderService cloudbreakResourceReaderService;

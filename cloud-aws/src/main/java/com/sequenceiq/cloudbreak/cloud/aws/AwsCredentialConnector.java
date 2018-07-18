@@ -51,6 +51,10 @@ public class AwsCredentialConnector implements CredentialConnector {
         if (isNoneEmpty(smartSenseId)) {
             credential.putParameter(SMART_SENSE_ID, smartSenseId);
         }
+        if (awsCredential.isGovernmentCloudEnabled() && isNoneEmpty(roleArn)) {
+            String message = "Please only provide the 'access' and 'secret key' because role based credential is not supported by gov cloud";
+            return new CloudCredentialStatus(credential, CredentialStatus.FAILED, new Exception(message), message);
+        }
         if (isNoneEmpty(roleArn) && isNoneEmpty(accessKey) && isNoneEmpty(secretKey)) {
             String message = "Please only provide the 'role arn' or the 'access' and 'secret key'";
             return new CloudCredentialStatus(credential, CredentialStatus.FAILED, new Exception(message), message);
