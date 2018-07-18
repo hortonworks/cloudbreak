@@ -18,6 +18,16 @@ public class AwsCredentialView {
         return cloudCredential.getParameter("roleArn", String.class);
     }
 
+    public Boolean isGovernmentCloudEnabled() {
+        Object ev = cloudCredential.getParameter("govCloud", Object.class);
+        if (ev instanceof Boolean) {
+            return (Boolean) ev;
+        } else if (ev instanceof String) {
+            return Boolean.parseBoolean((String) ev);
+        }
+        return false;
+    }
+
     public String getAccessKey() {
         return cloudCredential.getParameter("accessKey", String.class);
     }

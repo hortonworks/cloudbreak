@@ -110,8 +110,8 @@ public class AwsPlatformResources implements PlatformResources {
     @Inject
     private AwsPlatformParameters awsPlatformParameters;
 
-    @Value("${cb.aws.zone.parameter.default:eu-west-1}")
-    private String awsZoneParameterDefault;
+    @Inject
+    private AwsDefaultZoneProvider awsDefaultZoneProvider;
 
     @Value("${cb.aws.vm.parameter.definition.path:}")
     private String awsVmParameterDefinitionPath;
@@ -319,7 +319,7 @@ public class AwsPlatformResources implements PlatformResources {
 
         DescribeRegionsRequest describeRegionsRequest = new DescribeRegionsRequest();
         DescribeRegionsResult describeRegionsResult = ec2Client.describeRegions(describeRegionsRequest);
-        String defaultRegion = awsZoneParameterDefault;
+        String defaultRegion = awsDefaultZoneProvider.getDefultZone(cloudCredential);
 
         for (com.amazonaws.services.ec2.model.Region awsRegion : describeRegionsResult.getRegions()) {
             if (region == null || Strings.isNullOrEmpty(region.value()) || awsRegion.getRegionName().equals(region.value())) {

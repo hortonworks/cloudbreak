@@ -35,12 +35,13 @@ import com.sequenceiq.cloudbreak.cloud.model.InstanceAuthentication;
 @Component
 public class AwsClient {
 
-    private static final String DEFAULT_REGION_NAME = "us-west-1";
-
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsClient.class);
 
     @Inject
     private AwsSessionCredentialClient credentialClient;
+
+    @Inject
+    private AwsDefaultZoneProvider awsDefaultZoneProvider;
 
     @Inject
     private AwsEnvironmentVariableChecker awsEnvironmentVariableChecker;
@@ -56,7 +57,7 @@ public class AwsClient {
     }
 
     public AmazonEC2Client createAccess(CloudCredential credential) {
-        return createAccess(new AwsCredentialView(credential), DEFAULT_REGION_NAME);
+        return createAccess(new AwsCredentialView(credential), awsDefaultZoneProvider.getDefultZone(credential));
     }
 
     public AmazonEC2Client createAccess(AwsCredentialView awsCredential, String regionName) {
