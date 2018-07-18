@@ -1,5 +1,8 @@
 name: Cluster_tests
-parallel: instances
+parallel: tests
+threadCount: 4
+listeners:
+  - com.sequenceiq.it.cloudbreak.newway.listener.StructuredEventsReporterOnFailingCluster
 parameters:
   cleanUp: false
 
