@@ -1,6 +1,6 @@
 name: "OPENSTACK cluster tests"
 parallel: tests
-threadCount: 3
+threadCount: 10
 parameters:
   openstackCredentialName: autotesting-clusters-os
 listeners:

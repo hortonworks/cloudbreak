@@ -1,6 +1,6 @@
 name: "AWS cluster tests"
 parallel: tests
-threadCount: 4
+threadCount: 10
 parameters:
   awsRegion: us-west-1
   awsAvailabilityZone: us-west-1a
