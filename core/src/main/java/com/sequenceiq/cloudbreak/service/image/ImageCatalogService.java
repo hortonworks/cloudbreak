@@ -53,7 +53,6 @@ import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.AuthorizationService;
 import com.sequenceiq.cloudbreak.service.account.AccountPreferencesService;
 import com.sequenceiq.cloudbreak.service.user.UserProfileService;
-import com.sequenceiq.cloudbreak.util.SemanticVersionComparator;
 
 @Component
 public class ImageCatalogService {
@@ -332,7 +331,7 @@ public class ImageCatalogService {
                 imageCatalog.getImageCatalogUrl(), platforms, cbVersion);
         StatedImages images;
         CloudbreakImageCatalogV2 imageCatalogV2 = imageCatalogProvider.getImageCatalogV2(imageCatalog.getImageCatalogUrl());
-        Set<String> suppertedVersions = Collections.singleton(cbVersion);
+        Set<String> suppertedVersions;
         if (imageCatalogV2 != null) {
             Set<String> vMImageUUIDs = new HashSet<>();
             Set<String> defaultVMImageUUIDs = new HashSet<>();
@@ -453,24 +452,20 @@ public class ImageCatalogService {
                 .distinct()
                 .collect(Collectors.toList());
 
-        try {
-            versions = versions.stream().sorted((o1, o2) -> new SemanticVersionComparator().compare(o2, o1)).collect(Collectors.toList());
+        versions = versions.stream().sorted((o1, o2) -> new VersionComparator().compare(() -> o2, () -> o1)).collect(Collectors.toList());
 
-            Predicate<String> ealierVersionPredicate = ver -> new SemanticVersionComparator().compare(ver, releasedVersion) == -1;
-            Predicate<String> releaseVersionPredicate = ver -> extractCbVersion(EXTENDED_UNRELEASED_VERSION_PATTERN, ver).equals(ver);
-            Predicate<String> versionHasImagesPredicate = ver -> accumulateImageCount(cloudbreakVersions) > 0;
-            Optional<String> applicableVersion = versions.stream()
-                    .filter(ealierVersionPredicate)
-                    .filter(releaseVersionPredicate)
-                    .filter(versionHasImagesPredicate)
-                    .findAny();
+        Predicate<String> ealierVersionPredicate = ver -> new VersionComparator().compare(() -> ver, () -> releasedVersion) < 0;
+        Predicate<String> releaseVersionPredicate = ver -> extractCbVersion(EXTENDED_UNRELEASED_VERSION_PATTERN, ver).equals(ver);
+        Predicate<String> versionHasImagesPredicate = ver -> accumulateImageCount(cloudbreakVersions) > 0;
+        Optional<String> applicableVersion = versions.stream()
+                .filter(ealierVersionPredicate)
+                .filter(releaseVersionPredicate)
+                .filter(versionHasImagesPredicate)
+                .findAny();
 
-            return applicableVersion
-                    .map(ver -> cloudbreakVersions.stream().filter(cbVer -> cbVer.getVersions().contains(ver)).collect(Collectors.toSet()))
-                    .orElse(Collections.emptySet());
-        } catch (IllegalArgumentException e) {
-            throw new BadRequestException("Image catalog versions are not supported by this Cloudbreak version.");
-        }
+        return applicableVersion
+                .map(ver -> cloudbreakVersions.stream().filter(cbVer -> cbVer.getVersions().contains(ver)).collect(Collectors.toSet()))
+                .orElse(Collections.emptySet());
     }
 
     private Integer accumulateImageCount(Collection<CloudbreakVersion> cloudbreakVersions) {

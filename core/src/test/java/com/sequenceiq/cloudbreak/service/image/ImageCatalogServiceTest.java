@@ -29,11 +29,11 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV2;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
-import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.domain.UserProfile;
 import com.sequenceiq.cloudbreak.repository.ImageCatalogRepository;
+import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.AuthorizationService;
 import com.sequenceiq.cloudbreak.service.account.AccountPreferencesService;
 import com.sequenceiq.cloudbreak.service.user.UserProfileService;
@@ -258,8 +258,8 @@ public class ImageCatalogServiceTest {
         Assert.assertTrue("Result doesn't contain the required base image with id.", match);
     }
 
-    @Test(expected = BadRequestException.class)
-    public void testGetImagesWhenLatestRcVersionDoesntExistInDevCatalogShouldThrow() throws Exception {
+    @Test
+    public void testGetImagesWhenSimilarRcVersionDoesntExistInDevCatalogShouldReturnWithLatestDevVersionIfExists() throws Exception {
         String catalogJson = FileReaderUtils.readFileFromClasspath("com/sequenceiq/cloudbreak/service/image/cb-dev-image-catalog.json");
         CloudbreakImageCatalogV2 catalog = JsonUtil.readValue(catalogJson, CloudbreakImageCatalogV2.class);
         when(imageCatalogProvider.getImageCatalogV2("")).thenReturn(catalog);
@@ -267,7 +267,11 @@ public class ImageCatalogServiceTest {
         ImageCatalog imageCatalog = new ImageCatalog();
         imageCatalog.setImageCatalogUrl("");
         imageCatalog.setImageCatalogName("default");
-        underTest.getImages(imageCatalog, "aws", "2.6.0-rc.13");
+        StatedImages images = underTest.getImages(imageCatalog, "aws", "2.6.0-rc.13");
+
+        boolean match = images.getImages().getHdpImages().stream()
+                .anyMatch(img -> img.getUuid().equals("bbc63453-086c-4bf7-4337-a04c37d51b68"));
+        Assert.assertTrue("Result doesn't contain the required base image with id.", match);
     }
 
     @Test
