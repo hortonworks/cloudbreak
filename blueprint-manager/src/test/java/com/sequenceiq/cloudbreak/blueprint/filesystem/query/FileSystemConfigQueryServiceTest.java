@@ -36,6 +36,8 @@ public class FileSystemConfigQueryServiceTest {
 
     private static final String RANGER_ADMIN = "RANGER_ADMIN";
 
+    private static final String HIVE_SERVER = "HIVE_SERVER";
+
     private static final String CLUSTER_NAME = "bigCluster";
 
     private static final String STORAGE_NAME = "hwx-remote";
@@ -125,6 +127,31 @@ public class FileSystemConfigQueryServiceTest {
         Assert.assertFalse(hiveMetastore.isPresent());
         Assert.assertTrue(rangerAdmin.isPresent());
         Assert.assertEquals("default-account-name.azuredatalakestore.net/hwx-remote/apps/ranger/audit/bigCluster", rangerAdmin.get().getDefaultPath());
+    }
+
+    @Test
+    public void testWhenOnlyHiveMetastoreIsPresentedAndAttachedClusterThenShouldReturnWithOnlyRangerAdminConfigs() {
+        prepareBlueprintProcessorFactoryMock(HIVE_METASTORE);
+        FileSystemConfigQueryObject fileSystemConfigQueryObject = Builder.builder()
+                .withStorageName(STORAGE_NAME)
+                .withClusterName(CLUSTER_NAME)
+                .withBlueprintText(BLUEPRINT_TEXT)
+                .withAttachedCluster(true)
+                .withFileSystemType(FileSystemType.ADLS.name())
+                .build();
+        Set<ConfigQueryEntry> bigCluster = underTest.queryParameters(fileSystemConfigQueryObject);
+
+        Assert.assertEquals(2L, bigCluster.size());
+
+        Optional<ConfigQueryEntry> hiveMetastore = serviceEntry(bigCluster, HIVE_METASTORE);
+        Optional<ConfigQueryEntry> hiveServerRangerAdmin = serviceEntry(bigCluster, HIVE_SERVER);
+
+        Assert.assertTrue(hiveMetastore.isPresent());
+        Assert.assertTrue(hiveServerRangerAdmin.isPresent());
+        Assert.assertEquals("default-account-name.azuredatalakestore.net/hwx-remote/apps/ranger/audit/bigCluster",
+                hiveServerRangerAdmin.get().getDefaultPath());
+        Assert.assertEquals("default-account-name.azuredatalakestore.net/hwx-remote/apps/hive/warehouse",
+                hiveMetastore.get().getDefaultPath());
     }
 
     @Test

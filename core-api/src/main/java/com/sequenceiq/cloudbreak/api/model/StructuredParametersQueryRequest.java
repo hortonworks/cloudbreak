@@ -27,6 +27,9 @@ public class StructuredParametersQueryRequest extends ParametersQueryRequest {
     @ApiModelProperty(value = ModelDescriptions.UtilDescription.FILESYTEM_TYPE, required = true)
     private String fileSystemType;
 
+    @ApiModelProperty(value = ModelDescriptions.UtilDescription.ATTACHED_CLUSTER, required = true)
+    private boolean attachedCluster;
+
     public String getAccountName() {
         return accountName;
     }
@@ -57,5 +60,13 @@ public class StructuredParametersQueryRequest extends ParametersQueryRequest {
 
     public void setFileSystemType(String fileSystemType) {
         this.fileSystemType = fileSystemType;
+    }
+
+    public boolean isAttachedCluster() {
+        return attachedCluster;
+    }
+
+    public void setAttachedCluster(boolean attachedCluster) {
+        this.attachedCluster = attachedCluster;
     }
 }

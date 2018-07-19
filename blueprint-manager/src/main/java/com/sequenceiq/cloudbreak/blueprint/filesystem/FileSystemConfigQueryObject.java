@@ -14,12 +14,15 @@ public class FileSystemConfigQueryObject {
 
     private final Optional<String> accountName;
 
+    private final boolean attachedCluster;
+
     private FileSystemConfigQueryObject(FileSystemConfigQueryObject.Builder builder) {
         this.storageName = builder.storageName;
         this.clusterName = builder.clusterName;
         this.blueprintText = builder.blueprintText;
         this.fileSystemType = builder.fileSystemType;
         this.accountName = builder.accountName;
+        this.attachedCluster = builder.attachedCluster;
     }
 
     public String getClusterName() {
@@ -42,6 +45,10 @@ public class FileSystemConfigQueryObject {
         return accountName;
     }
 
+    public boolean isAttachedCluster() {
+        return attachedCluster;
+    }
+
     public static class Builder {
 
         private String clusterName;
@@ -53,6 +60,8 @@ public class FileSystemConfigQueryObject {
         private String fileSystemType;
 
         private Optional<String> accountName = Optional.empty();
+
+        private boolean attachedCluster;
 
         public static Builder builder() {
             return new Builder();
@@ -80,6 +89,11 @@ public class FileSystemConfigQueryObject {
 
         public Builder withAccountName(String accountName) {
             this.accountName = Optional.ofNullable(accountName);
+            return this;
+        }
+
+        public Builder withAttachedCluster(boolean attachedCluster) {
+            this.attachedCluster = attachedCluster;
             return this;
         }
 

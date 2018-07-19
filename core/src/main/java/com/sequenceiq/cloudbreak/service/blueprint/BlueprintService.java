@@ -175,7 +175,7 @@ public class BlueprintService {
     }
 
     public Set<ConfigQueryEntry> queryFileSystemParameters(String blueprintName, String clusterName,
-            String storageName, String fileSystemType, String accountName, IdentityUser user) {
+            String storageName, String fileSystemType, String accountName, boolean attachedCluster, IdentityUser user) {
         Blueprint blueprint = getPublicBlueprint(blueprintName, user);
 
         FileSystemConfigQueryObject fileSystemConfigQueryObject = FileSystemConfigQueryObject.Builder.builder()
@@ -184,6 +184,7 @@ public class BlueprintService {
                 .withBlueprintText(blueprint.getBlueprintText())
                 .withFileSystemType(fileSystemType)
                 .withAccountName(accountName)
+                .withAttachedCluster(attachedCluster)
                 .build();
 
         return centralBlueprintParameterQueryService.queryFileSystemParameters(fileSystemConfigQueryObject);

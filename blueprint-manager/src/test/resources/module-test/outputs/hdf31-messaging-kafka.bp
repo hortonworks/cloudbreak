@@ -27,6 +27,14 @@
           "recovery_type": "AUTO_START"
         }
       }
+    },
+    {
+      "kafka-broker": {
+        "properties": {
+          "default.replication.factor": "0",
+          "offsets.topic.replication.factor": "0"
+        }
+      }
     }
   ],
   "host_groups": [

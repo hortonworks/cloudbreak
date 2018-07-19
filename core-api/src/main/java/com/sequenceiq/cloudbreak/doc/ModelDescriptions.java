@@ -559,6 +559,7 @@ public class ModelDescriptions {
         public static final String STORAGE_NAME = "Storage name of the path";
         public static final String ACCOUNT_NAME = "Account name of the path";
         public static final String FILESYTEM_TYPE = "Type of filesystem";
+        public static final String ATTACHED_CLUSTER = "Attached cluster";
     }
 
     public static class ProxyConfigModelDescription {

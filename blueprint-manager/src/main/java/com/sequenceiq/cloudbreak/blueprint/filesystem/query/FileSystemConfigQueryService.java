@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -68,6 +69,11 @@ public class FileSystemConfigQueryService {
                 filtered.addAll(collectedEntries);
             }
         }
+        List<ConfigQueryEntry> collectedEntries = configQueryEntries.getEntries()
+                .stream()
+                .filter(configQueryEntry -> configQueryEntry.isRequiredForAttachedCluster() && request.isAttachedCluster())
+                .collect(Collectors.toList());
+        filtered.addAll(collectedEntries);
         String fileSystemTypeRequest = request.getFileSystemType();
         FileSystemType fileSystemType = FileSystemType.valueOf(fileSystemTypeRequest);
         Map<String, String> templateObject = getTemplateObject(request, fileSystemType.getProtocol());
