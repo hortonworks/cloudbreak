@@ -59,6 +59,7 @@ import com.sequenceiq.cloudbreak.domain.StackAuthentication;
 import com.sequenceiq.cloudbreak.domain.StopRestrictionReason;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.json.JsonToString;
+import com.sequenceiq.cloudbreak.domain.security.Organization;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
@@ -173,6 +174,9 @@ public class Stack implements ProvisionEntity {
     private String uuid;
 
     private Long datalakeId;
+
+    @ManyToOne
+    private Organization organization;
 
     public Set<InstanceGroup> getInstanceGroups() {
         return instanceGroups;
@@ -651,5 +655,13 @@ public class Stack implements ProvisionEntity {
 
     public void setInputs(Json inputs) {
         this.inputs = inputs;
+    }
+
+    public Organization getOrganization() {
+        return organization;
+    }
+
+    public void setOrganization(Organization organization) {
+        this.organization = organization;
     }
 }

@@ -5,9 +5,12 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+
+import com.sequenceiq.cloudbreak.domain.security.Organization;
 
 @Entity
 @Table(name = "ManagementPack", uniqueConstraints = @UniqueConstraint(columnNames = {"account", "name"}))
@@ -40,6 +43,9 @@ public class ManagementPack implements ProvisionEntity {
     private String purgeList;
 
     private boolean force;
+
+    @ManyToOne
+    private Organization organization;
 
     public Long getId() {
         return id;
@@ -119,5 +125,13 @@ public class ManagementPack implements ProvisionEntity {
 
     public void setForce(boolean force) {
         this.force = force;
+    }
+
+    public Organization getOrganization() {
+        return organization;
+    }
+
+    public void setOrganization(Organization organization) {
+        this.organization = organization;
     }
 }

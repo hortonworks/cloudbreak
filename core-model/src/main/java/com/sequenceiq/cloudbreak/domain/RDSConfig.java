@@ -11,6 +11,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
@@ -18,6 +19,7 @@ import javax.persistence.UniqueConstraint;
 import com.sequenceiq.cloudbreak.api.model.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.domain.converter.EncryptionConverter;
+import com.sequenceiq.cloudbreak.domain.security.Organization;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 
 @Entity
@@ -76,6 +78,9 @@ public class RDSConfig implements ProvisionEntity {
 
     @Column
     private String connectorJarUrl;
+
+    @ManyToOne
+    private Organization organization;
 
     public Long getId() {
         return id;
@@ -203,5 +208,13 @@ public class RDSConfig implements ProvisionEntity {
 
     public void setConnectorJarUrl(String connectorJarUrl) {
         this.connectorJarUrl = connectorJarUrl;
+    }
+
+    public Organization getOrganization() {
+        return organization;
+    }
+
+    public void setOrganization(Organization organization) {
+        this.organization = organization;
     }
 }

@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.aspect.PermissionType;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
 import com.sequenceiq.cloudbreak.common.service.user.UserFilterField;
+import com.sequenceiq.cloudbreak.repository.security.UserRepository;
 import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
 
 @Service
@@ -34,6 +35,9 @@ public class OwnerBasedPermissionEvaluator implements PermissionEvaluator {
     @Inject
     @Lazy
     private UserDetailsService userDetailsService;
+
+    @Inject
+    private UserRepository userRepository;
 
     @Override
     public boolean hasPermission(Authentication authentication, Object target, Object permission) {
@@ -50,9 +54,16 @@ public class OwnerBasedPermissionEvaluator implements PermissionEvaluator {
         }
 
         IdentityUser user = userDetailsService.getDetails((String) authentication.getPrincipal(), UserFilterField.USERNAME);
+
+        // TODO: implement this properly:
+//        User cbUser = userRepository.findByEmail(user.getUserId());
+//        Set<UserOrgPermissions> organizations = cbUser.getOrganizations();
+
         Collection<?> targets = target instanceof Collection ? (Collection<?>) target : Collections.singleton(target);
         return targets.stream().allMatch(t -> {
             try {
+                // TODO: check if organization of the resource is in the list of the user's organizations
+                // TODO: also check by role: organizations.iterator().next().getRole()
                 return hasPermission(user, p, t);
             } catch (IllegalAccessException e) {
                 LOGGER.error("Object doesn't have properties to check permission with class: " + t.getClass().getCanonicalName(), e);
