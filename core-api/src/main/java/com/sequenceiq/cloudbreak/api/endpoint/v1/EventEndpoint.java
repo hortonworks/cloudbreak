@@ -16,7 +16,7 @@ import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.doc.Notes;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions.EventOpDescription;
-import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEvent;
+import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEventContainer;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -29,19 +29,19 @@ public interface EventEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = EventOpDescription.GET_BY_TIMESTAMP, produces = ContentType.JSON, notes = Notes.EVENT_NOTES,
             nickname = "getEvents")
-    List<CloudbreakEventsJson> get(@QueryParam("since") Long since);
+    List<CloudbreakEventsJson> getCloudbreakEventsSince(@QueryParam("since") Long since);
 
     @GET
     @Path("{stackId}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = EventOpDescription.GET_BY_ID, produces = ContentType.JSON, notes = Notes.EVENT_NOTES,
             nickname = "getEventsBySTackId")
-    List<CloudbreakEventsJson> getByStack(@PathParam("stackId") Long stackId);
+    List<CloudbreakEventsJson> getCloudbreakEventsByStack(@PathParam("stackId") Long stackId);
 
     @GET
     @Path("struct/{stackId}")
     @Produces(MediaType.APPLICATION_JSON)
-    List<StructuredEvent> getStructuredEvents(@PathParam("stackId") Long stackId);
+    StructuredEventContainer getStructuredEvents(@PathParam("stackId") Long stackId);
 
     @GET
     @Path("struct/zip/{stackId}")

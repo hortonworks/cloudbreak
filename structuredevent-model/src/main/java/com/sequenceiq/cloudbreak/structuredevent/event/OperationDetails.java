@@ -1,19 +1,25 @@
 package com.sequenceiq.cloudbreak.structuredevent.event;
 
 import java.io.Serializable;
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.Calendar;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class OperationDetails implements Serializable {
-    private String eventType;
+
+    private StructuredEventType eventType;
 
     private Long resourceId;
 
     private String resourceType;
 
     private Long timestamp;
+
+    private ZonedDateTime zonedDateTime;
 
     private String account;
 
@@ -28,14 +34,15 @@ public class OperationDetails implements Serializable {
     public OperationDetails() {
     }
 
-    public OperationDetails(String eventType, String resourceType, Long resourceId, String account, String userId, String userName, String cloudbreakId,
+    public OperationDetails(StructuredEventType eventType, String resourceType, Long resourceId, String account, String userId, String userName, String cloudbreakId,
             String cloudbreakVersion) {
         this(Calendar.getInstance().getTimeInMillis(), eventType, resourceType, resourceId, account, userId, userName, cloudbreakId, cloudbreakVersion);
     }
 
-    public OperationDetails(Long timestamp, String eventType, String resourceType, Long resourceId, String account, String userId, String userName,
+    public OperationDetails(Long timestamp, StructuredEventType eventType, String resourceType, Long resourceId, String account, String userId, String userName,
             String cloudbreakId, String cloudbreakVersion) {
         this.timestamp = timestamp;
+        zonedDateTime = ZonedDateTime.ofInstant(Instant.ofEpochSecond(timestamp), ZoneOffset.UTC);
         this.eventType = eventType;
         this.resourceId = resourceId;
         this.resourceType = resourceType;
@@ -46,7 +53,7 @@ public class OperationDetails implements Serializable {
         this.cloudbreakVersion = cloudbreakVersion;
     }
 
-    public void setEventType(String eventType) {
+    public void setEventType(StructuredEventType eventType) {
         this.eventType = eventType;
     }
 
@@ -82,7 +89,7 @@ public class OperationDetails implements Serializable {
         this.userName = userName;
     }
 
-    public String getEventType() {
+    public StructuredEventType getEventType() {
         return eventType;
     }
 
@@ -96,6 +103,10 @@ public class OperationDetails implements Serializable {
 
     public Long getTimestamp() {
         return timestamp;
+    }
+
+    public ZonedDateTime getZonedDateTime() {
+        return zonedDateTime;
     }
 
     public String getAccount() {

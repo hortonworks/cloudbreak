@@ -288,7 +288,7 @@ public class CloudbreakUtil {
             LOGGER.info("Waiting for event type {} and event message contains {} ...", eventType, eventMessage);
             sleep();
             EventEndpoint eventEndpoint = cloudbreakClient.eventEndpoint();
-            List<CloudbreakEventsJson> list = eventEndpoint.get(sinceTimeStamp);
+            List<CloudbreakEventsJson> list = eventEndpoint.getCloudbreakEventsSince(sinceTimeStamp);
             for (CloudbreakEventsJson event : list) {
                 if (event.getStackName().equals(stackName) && event.getEventMessage().contains(eventMessage) && event.getEventType().equals(eventType)) {
                     exitCriteria = Boolean.TRUE;
