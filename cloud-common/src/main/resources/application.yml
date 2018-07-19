@@ -327,6 +327,12 @@ cb:
     url: https://cloudbreak-imagecatalog.s3.amazonaws.com/v2-dev-cb-image-catalog.json
     cache.ttl: 15
 
+  instance:
+    packages: kernel,salt,python,hdp-select,ambari-agent
+    saltboot:
+      versionCommand: "salt-bootstrap version"
+      packageName: salt-bootstrap
+
 # configuration for BlueprintPortConfigCollector.java
 blueprintServicePorts:
   - service: HIVE_SERVER
