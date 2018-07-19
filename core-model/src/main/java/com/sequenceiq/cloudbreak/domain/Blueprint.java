@@ -8,6 +8,7 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
@@ -17,6 +18,7 @@ import com.sequenceiq.cloudbreak.domain.converter.EncryptionConverter;
 import com.sequenceiq.cloudbreak.domain.json.EncryptedJsonToString;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.json.JsonToString;
+import com.sequenceiq.cloudbreak.domain.security.Organization;
 
 @Entity
 @Table(name = "Blueprint", uniqueConstraints = @UniqueConstraint(columnNames = {"account", "name"}))
@@ -61,6 +63,9 @@ public class Blueprint implements ProvisionEntity {
     @Convert(converter = JsonToString.class)
     @Column(columnDefinition = "TEXT")
     private Json tags;
+
+    @ManyToOne
+    private Organization organization;
 
     public Json getTags() {
         return tags;
@@ -156,5 +161,13 @@ public class Blueprint implements ProvisionEntity {
 
     public void setInputParameters(Json inputParameters) {
         this.inputParameters = inputParameters;
+    }
+
+    public Organization getOrganization() {
+        return organization;
+    }
+
+    public void setOrganization(Organization organization) {
+        this.organization = organization;
     }
 }

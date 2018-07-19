@@ -31,7 +31,8 @@ public interface AmbariDatabaseMapper {
             @Mapping(target = "stackVersion", ignore = true),
             @Mapping(target = "status", expression = "java(com.sequenceiq.cloudbreak.api.model.ResourceStatus.USER_MANAGED)"),
             @Mapping(target = "type", expression = "java(com.sequenceiq.cloudbreak.api.model.rds.RdsType.AMBARI.name())"),
-            @Mapping(target = "connectorJarUrl", ignore = true)
+            @Mapping(target = "connectorJarUrl", ignore = true),
+            @Mapping(target = "organization", ignore = true)
     })
     RDSConfig mapAmbariDatabaseDetailsJsonToRdsConfig(AmbariDatabaseDetailsJson ambariDatabaseDetailsJson, Cluster cluster, @Context Stack stack,
             boolean publicInAccount);
