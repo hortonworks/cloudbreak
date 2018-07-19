@@ -7,6 +7,7 @@
       "defaultPath": "{{{ defaultPath }}}/apps/hive/warehouse",
       "propertyDisplayName": "Hive Warehouse Directory",
       "relatedService": "HIVE_METASTORE",
+      "requiredForAttachedCluster": false,
       "supportedStorages": ["ADLS", "WASB", "S3", "GCS"]
     },
     {
@@ -16,6 +17,27 @@
       "defaultPath": "{{{ defaultPath }}}/apps/ranger/audit/{{{ clusterName }}}",
       "propertyDisplayName": "Ranger Audit Logs",
       "relatedService": "RANGER_ADMIN",
+      "requiredForAttachedCluster": false,
+      "supportedStorages": ["ADLS", "WASB", "S3", "GCS"]
+    },
+    {
+      "propertyName": "xasecure.audit.destination.hdfs.dir",
+      "propertyFile": "ranger-hive-audit",
+      "description": "This is the Directory where audit logs should be stored",
+      "defaultPath": "{{{ defaultPath }}}/apps/ranger/audit/{{{ clusterName }}}",
+      "propertyDisplayName": "Ranger Audit Logs For Hive",
+      "relatedService": "HIVE_SERVER",
+      "requiredForAttachedCluster": true,
+      "supportedStorages": ["ADLS", "WASB", "S3", "GCS"]
+    },
+    {
+      "propertyName": "hbase.rootdir",
+      "propertyFile": "hbase-site",
+      "description": "The directory shared by region servers and into which HBase persists.",
+      "defaultPath": "{{{ defaultPath }}}/apps/hbase/data",
+      "propertyDisplayName": "HBase Root Directory",
+      "relatedService": "HBASE_MASTER",
+      "requiredForAttachedCluster": false,
       "supportedStorages": ["ADLS", "WASB", "S3", "GCS"]
     }
   ]

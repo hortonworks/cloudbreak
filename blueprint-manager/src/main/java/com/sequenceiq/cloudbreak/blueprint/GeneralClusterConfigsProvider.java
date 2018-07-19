@@ -1,7 +1,11 @@
 package com.sequenceiq.cloudbreak.blueprint;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+
+import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
@@ -15,6 +19,13 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 
 @Service
 public class GeneralClusterConfigsProvider {
+
+    public static final String KAFKA_BROKER = "KAFKA_BROKER";
+
+    public static final int DEFAULT_REPLICATION_FACTOR = 3;
+
+    @Inject
+    private BlueprintProcessorFactory blueprintProcessorFactory;
 
     public GeneralClusterConfigs generalClusterConfigs(Stack stack, Cluster cluster, IdentityUser identityUser) {
         boolean gatewayInstanceMetadataPresented = false;
@@ -37,6 +48,8 @@ public class GeneralClusterConfigsProvider {
         generalClusterConfigs.setUserName(cluster.getUserName());
         generalClusterConfigs.setNodeCount(stack.getFullNodeCount());
         generalClusterConfigs.setPrimaryGatewayInstanceDiscoveryFQDN(Optional.ofNullable(stack.getPrimaryGatewayInstance().getDiscoveryFQDN()));
+        generalClusterConfigs.setKafkaReplicationFactor(
+                getKafkaReplicationFactor(cluster.getBlueprint().getBlueprintText()) >= DEFAULT_REPLICATION_FACTOR ? DEFAULT_REPLICATION_FACTOR : 1);
 
         return generalClusterConfigs;
     }
@@ -65,7 +78,22 @@ public class GeneralClusterConfigsProvider {
         generalClusterConfigs.setUserName(stack.getCluster().getAmbari().getUserName());
         generalClusterConfigs.setNodeCount(nodeCount);
         generalClusterConfigs.setPrimaryGatewayInstanceDiscoveryFQDN(Optional.ofNullable("pending..."));
+        generalClusterConfigs.setKafkaReplicationFactor(1);
 
         return generalClusterConfigs;
+    }
+
+    private int getKafkaReplicationFactor(String blueprintText) {
+        int kafkaBrokerNumber = 0;
+        BlueprintTextProcessor blueprintTextProcessor = blueprintProcessorFactory.get(blueprintText);
+        Map<String, Set<String>> componentsByHostGroup = blueprintTextProcessor.getComponentsByHostGroup();
+        for (Map.Entry<String, Set<String>> hostGroup : componentsByHostGroup.entrySet()) {
+            for (String service : hostGroup.getValue()) {
+                if (KAFKA_BROKER.equals(service)) {
+                    kafkaBrokerNumber++;
+                }
+            }
+        }
+        return kafkaBrokerNumber;
     }
 }

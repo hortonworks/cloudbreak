@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.blueprint.filesystem.query;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
-
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
@@ -25,6 +24,8 @@ public class ConfigQueryEntry {
     private String protocol;
 
     private String propertyDisplayName;
+
+    private boolean requiredForAttachedCluster;
 
     private Set<String> supportedStorages = new HashSet<>();
 
@@ -92,6 +93,14 @@ public class ConfigQueryEntry {
         this.propertyDisplayName = propertyDisplayName;
     }
 
+    public boolean isRequiredForAttachedCluster() {
+        return requiredForAttachedCluster;
+    }
+
+    public void setRequiredForAttachedCluster(boolean requiredForAttachedCluster) {
+        this.requiredForAttachedCluster = requiredForAttachedCluster;
+    }
+
     public ConfigQueryEntry copy() {
         ConfigQueryEntry configQueryEntry = new ConfigQueryEntry();
         configQueryEntry.protocol = protocol;
@@ -101,6 +110,7 @@ public class ConfigQueryEntry {
         configQueryEntry.propertyDisplayName = propertyDisplayName;
         configQueryEntry.relatedService = relatedService;
         configQueryEntry.propertyName = propertyName;
+        configQueryEntry.requiredForAttachedCluster = requiredForAttachedCluster;
         return configQueryEntry;
     }
 

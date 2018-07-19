@@ -41,7 +41,8 @@ import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 @Component
 public class RecipeEngine {
 
-    public static final Set<String> DEFAULT_RECIPES = Collections.unmodifiableSet(Sets.newHashSet("hdfs-home", "smartsense-capture-schedule"));
+    public static final Set<String> DEFAULT_RECIPES = Collections.unmodifiableSet(
+            Sets.newHashSet("hdfs-home", "smartsense-capture-schedule", "prepare-s3-symlinks"));
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RecipeEngine.class);
 
@@ -77,6 +78,7 @@ public class RecipeEngine {
         if (recipesSupportedOnOrchestrator(orchestrator)) {
             addHDFSRecipe(stack, hostGroups);
             addSmartSenseRecipe(stack, hostGroups);
+            addS3SymlinkRecipe(stack, hostGroups);
             addContainerExecutorScripts(stack, hostGroups);
             boolean recipesFound = recipesFound(hostGroups);
             if (recipesFound) {
@@ -191,6 +193,27 @@ public class RecipeEngine {
             }
         } catch (IOException e) {
             LOGGER.warn("Cannot create HDFS home dir recipe", e);
+        }
+    }
+
+    private void addS3SymlinkRecipe(Stack stack, Set<HostGroup> hostGroups) {
+        try {
+            Cluster cluster = stack.getCluster();
+            String blueprintText = cluster.getBlueprint().getBlueprintText();
+            for (HostGroup hostGroup : hostGroups) {
+                if (isComponentPresent(blueprintText, "ATLAS_SERVER", hostGroup)) {
+                    String script = FileReaderUtils.readFileFromClasspath("scripts/prepare-s3-symlinks.sh")
+                            .replaceAll("\\$AMBARI_USER", cluster.getUserName())
+                            .replaceAll("\\$AMBARI_PASSWORD", cluster.getPassword())
+                            .replaceAll("\\$CLUSTER_NAME", cluster.getName());
+                    RecipeScript recipeScript = new RecipeScript(script, RecipeType.POST_CLUSTER_INSTALL);
+                    Recipe recipe = recipeBuilder.buildRecipes("prepare-s3-symlinks", Collections.singletonList(recipeScript)).get(0);
+                    hostGroup.addRecipe(recipe);
+                    break;
+                }
+            }
+        } catch (IOException e) {
+            LOGGER.warn("Cannot create s3 symlinks recipe", e);
         }
     }
 

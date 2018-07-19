@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.blueprint.template.views;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public class SharedServiceConfigsView {
 
     private String rangerAdminPassword;
@@ -9,6 +12,10 @@ public class SharedServiceConfigsView {
     private boolean datalakeCluster;
 
     private String rangerAdminPort;
+
+    private String datalakeAmbariIp;
+
+    private Set<String> datalakeComponents = new HashSet<>();
 
     public String getRangerAdminPassword() {
         return rangerAdminPassword;
@@ -40,5 +47,21 @@ public class SharedServiceConfigsView {
 
     public void setRangerAdminPort(String rangerAdminPort) {
         this.rangerAdminPort = rangerAdminPort;
+    }
+
+    public String getDatalakeAmbariIp() {
+        return datalakeAmbariIp;
+    }
+
+    public void setDatalakeAmbariIp(String datalakeAmbariIp) {
+        this.datalakeAmbariIp = datalakeAmbariIp;
+    }
+
+    public Set<String> getDatalakeComponents() {
+        return datalakeComponents;
+    }
+
+    public void setDatalakeComponents(Set<String> datalakeComponents) {
+        this.datalakeComponents = datalakeComponents;
     }
 }

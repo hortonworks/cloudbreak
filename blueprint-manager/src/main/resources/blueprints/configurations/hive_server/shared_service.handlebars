@@ -14,7 +14,8 @@
       "hive.merge.mapfiles": "true",
       "hive.server2.tez.initialize.default.sessions": "true",
       "hive.server2.transport.mode": "http",
-      "hive.metastore.transactional.event.listeners": "org.apache.hive.hcatalog.listener.DbNotificationListener"
+      "hive.metastore.transactional.event.listeners": "org.apache.hive.hcatalog.listener.DbNotificationListener"{{{#cp sharedService.datalakeComponents 'ATLAS_SERVER'}}},
+      "atlas.rest.address": "{{{ atlas.rest.address }}}"{{{/cp}}}
     }
   },
   "ranger-hive-security":{
@@ -25,8 +26,14 @@
   },
   "hive-env": {
     "properties": {
-      "hive_security_authorization": "Ranger"
+      "hive_security_authorization": "Ranger"{{{#cp sharedService.datalakeComponents 'ATLAS_SERVER'}}},
+      "hive.atlas.hook": "true"{{{/cp}}}
     }
-  }
+  }{{{#cp sharedService.datalakeComponents 'KAFKA_BROKER'}}},
+  "hive-atlas-application.properties": {
+    "properties": {
+      "atlas.kafka.bootstrap.servers": "{{{ atlas.kafka.bootstrap.servers }}}"
+    }
+  }{{{/cp}}}
 {{{/if-true}}}
 }

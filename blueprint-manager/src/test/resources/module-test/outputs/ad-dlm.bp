@@ -287,6 +287,14 @@
           "infra_solr_datadir": "/hadoopfs/fs1/infra/solr"
         }
       }
+    },
+    {
+      "kafka-broker": {
+        "properties": {
+          "default.replication.factor": "0",
+          "offsets.topic.replication.factor": "0"
+        }
+      }
     }
   ],
   "host_groups": [

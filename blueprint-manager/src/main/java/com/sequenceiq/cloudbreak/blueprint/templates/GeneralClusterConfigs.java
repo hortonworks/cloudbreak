@@ -33,6 +33,8 @@ public class GeneralClusterConfigs {
 
     private Optional<String> primaryGatewayInstanceDiscoveryFQDN = Optional.empty();
 
+    private int kafkaReplicationFactor;
+
     public GeneralClusterConfigs() {
     }
 
@@ -138,5 +140,13 @@ public class GeneralClusterConfigs {
 
     public void setIdentityUserEmail(String identityUserEmail) {
         this.identityUserEmail = identityUserEmail;
+    }
+
+    public int getKafkaReplicationFactor() {
+        return kafkaReplicationFactor;
+    }
+
+    public void setKafkaReplicationFactor(int kafkaReplicationFactor) {
+        this.kafkaReplicationFactor = kafkaReplicationFactor;
     }
 }

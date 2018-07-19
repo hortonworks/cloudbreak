@@ -141,6 +141,8 @@ public class SharedServiceConfigProvider {
 
     private void addDatalakeRequiredProperties(Set<String> datalakeProperties) {
         datalakeProperties.add("ranger.audit.solr.zookeepers");
+        datalakeProperties.add("atlas.rest.address");
+        datalakeProperties.add("atlas.kafka.bootstrap.servers");
         datalakeProperties.add("ranger_admin_username");
         datalakeProperties.add("policymgr_external_url");
     }

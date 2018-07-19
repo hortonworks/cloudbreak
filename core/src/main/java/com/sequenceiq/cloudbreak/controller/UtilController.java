@@ -141,6 +141,7 @@ public class UtilController implements UtilEndpoint {
                 structuredParametersQueryRequest.getStorageName(),
                 structuredParametersQueryRequest.getFileSystemType(),
                 structuredParametersQueryRequest.getAccountName(),
+                structuredParametersQueryRequest.isAttachedCluster(),
                 user);
         List<StructuredParameterQueryResponse> result = new ArrayList<>();
         for (ConfigQueryEntry configQueryEntry : entries) {

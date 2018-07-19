@@ -29,8 +29,7 @@
     "host_groups": [
       {
         "name": "master",
-        "configurations": [
-        ],
+        "configurations": [],
         "components": [
           {
             "name": "METRICS_COLLECTOR"
@@ -40,6 +39,9 @@
           },
           {
             "name": "ZOOKEEPER_CLIENT"
+          },
+          {
+            "name": "HISTORYSERVER"
           },
           {
             "name": "ZOOKEEPER_SERVER"
@@ -57,6 +59,30 @@
             "name": "RANGER_ADMIN"
           },
           {
+            "name": "APP_TIMELINE_SERVER"
+          },
+          {
+            "name": "JOURNALNODE"
+          },
+          {
+            "name": "KAFKA_BROKER"
+          },
+          {
+            "name": "TEZ_CLIENT"
+          },
+          {
+            "name": "YARN_CLIENT"
+          },
+          {
+            "name": "NAMENODE"
+          },
+          {
+            "name": "RESOURCEMANAGER"
+          },
+          {
+            "name": "SECONDARY_NAMENODE"
+          },
+          {
             "name": "INFRA_SOLR"
           },
           {
@@ -64,6 +90,24 @@
           },
           {
             "name": "HIVE_CLIENT"
+          },
+          {
+            "name": "ATLAS_SERVER"
+          },
+          {
+            "name": "ATLAS_CLIENT"
+          },
+          {
+            "name": "HBASE_REGIONSERVER"
+          },
+          {
+            "name": "HBASE_MASTER"
+          },
+          {
+            "name": "HBASE_CLIENT"
+          },
+          {
+            "name": "DATANODE"
           }
         ],
         "cardinality": "1"
