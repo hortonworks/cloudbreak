@@ -62,8 +62,8 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
     @Override
     public List<StructuredNotificationEvent> cloudbreakEvents(String owner, Long since) {
         List<StructuredNotificationEvent> events;
-        events = null == since ? structuredEventService.getEventsForUserWithType(owner, "NOTIFICATION")
-                : structuredEventService.getEventsForUserWithTypeSince(owner, "NOTIFICATION", since);
+        events = null == since ? structuredEventService.getEventsForUserWithType(owner, StructuredNotificationEvent.class)
+                : structuredEventService.getEventsForUserWithTypeSince(owner, StructuredNotificationEvent.class, since);
         return events;
     }
 
@@ -71,7 +71,7 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
     public List<StructuredNotificationEvent> cloudbreakEventsForStack(String owner, Long stackId) {
         List<StructuredNotificationEvent> events = new ArrayList<>();
         if (stackId != null) {
-            events = structuredEventService.getEventsForUserWithTypeAndResourceId(owner, "NOTIFICATION", "STACK", stackId);
+            events = structuredEventService.getEventsForUserWithTypeAndResourceId(owner, StructuredNotificationEvent.class, "STACK", stackId);
         }
         return events;
     }

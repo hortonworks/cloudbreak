@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.structuredevent.rest;
 
+import static com.sequenceiq.cloudbreak.structuredevent.event.StructuredEventType.REST;
+
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.FilterOutputStream;
@@ -40,6 +42,7 @@ import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.ha.CloudbreakNodeConfig;
 import com.sequenceiq.cloudbreak.structuredevent.StructuredEventClient;
 import com.sequenceiq.cloudbreak.structuredevent.event.OperationDetails;
+import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEventType;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredRestCallEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.rest.RestCallDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.rest.RestRequestDetails;
@@ -211,7 +214,7 @@ public class StructuredEventFilter implements WriterInterceptor, ContainerReques
     private OperationDetails createOperationDetails(Map<String, String> restParams, Long requestTime) {
         IdentityUser user = authenticatedUserService.getCbUser();
         String resoureceId = restParams.get(RESOURCE_ID);
-        return new OperationDetails(requestTime, "REST", restParams.get(RESOURCE_TYPE), resoureceId != null ? Long.valueOf(resoureceId) : null,
+        return new OperationDetails(requestTime, REST, restParams.get(RESOURCE_TYPE), resoureceId != null ? Long.valueOf(resoureceId) : null,
                 user != null ? user.getAccount() : "", user != null ? user.getUserId() : "", user != null ? user.getUsername() : "",
                 cloudbreakNodeConfig.getId(), cbVersion);
     }

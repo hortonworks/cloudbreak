@@ -14,10 +14,12 @@ import com.sequenceiq.cloudbreak.service.EntityType;
 @EntityType(entityClass = StructuredEventEntity.class)
 @Transactional(Transactional.TxType.REQUIRED)
 public interface StructuredEventRepository extends CrudRepository<StructuredEventEntity, Long> {
+
     List<StructuredEventEntity> findByOwnerAndEventType(String owner, String eventType);
 
     List<StructuredEventEntity> findByOwnerAndEventTypeAndResourceTypeAndResourceId(String owner, String eventType, String resourceType, Long resourceId);
 
     @Query("SELECT se from StructuredEventEntity se WHERE se.owner = :owner AND se.eventType = :eventType AND se.timestamp >= :since")
     List<StructuredEventEntity> findByUserIdAndEventTypeSince(@Param("owner") String owner, @Param("eventType") String eventType, @Param("since") Long since);
+
 }

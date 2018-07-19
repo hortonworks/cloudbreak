@@ -3,6 +3,8 @@ package com.sequenceiq.cloudbreak.domain;
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -11,6 +13,7 @@ import javax.persistence.Table;
 
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.json.JsonToString;
+import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEventType;
 
 @Entity
 @Table(name = "structuredevent")
@@ -21,7 +24,8 @@ public class StructuredEventEntity {
     private Long id;
 
     @Column(nullable = false)
-    private String eventType;
+    @Enumerated(EnumType.STRING)
+    private StructuredEventType eventType;
 
     @Column(nullable = false)
     private String resourceType;
@@ -51,11 +55,11 @@ public class StructuredEventEntity {
         this.id = id;
     }
 
-    public String getEventType() {
+    public StructuredEventType getEventType() {
         return eventType;
     }
 
-    public void setEventType(String eventType) {
+    public void setEventType(StructuredEventType eventType) {
         this.eventType = eventType;
     }
 

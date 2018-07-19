@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.structuredevent;
 
+import static com.sequenceiq.cloudbreak.structuredevent.event.StructuredEventType.FLOW;
+import static com.sequenceiq.cloudbreak.structuredevent.event.StructuredEventType.NOTIFICATION;
+
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 
@@ -26,7 +29,7 @@ import com.sequenceiq.cloudbreak.structuredevent.event.FlowDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.NotificationDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.OperationDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.StackDetails;
-import com.sequenceiq.cloudbreak.structuredevent.event.StructuredFlowErrorEvent;
+import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEventType;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredFlowEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredNotificationEvent;
 
@@ -61,7 +64,7 @@ public class StructuredFlowEventFactory {
     public StructuredFlowEvent createStucturedFlowEvent(Long stackId, FlowDetails flowDetails, Boolean detailed, Exception exception) {
         Stack stack = stackService.getById(stackId);
         UserProfile userProfile = userProfileService.getOrCreate(stack.getAccount(), stack.getOwner());
-        OperationDetails operationDetails = new OperationDetails("FLOW", "STACK", stackId, stack.getAccount(), stack.getOwner(),
+        OperationDetails operationDetails = new OperationDetails(FLOW, "STACK", stackId, stack.getAccount(), stack.getOwner(),
                 userProfile.getUserName(), cloudbreakNodeConfig.getId(), cbVersion);
         StackDetails stackDetails = null;
         ClusterDetails clusterDetails = null;
@@ -74,7 +77,7 @@ public class StructuredFlowEventFactory {
                 blueprintDetails = conversionService.convert(cluster.getBlueprint(), BlueprintDetails.class);
             }
         }
-        return exception != null ? new StructuredFlowErrorEvent(operationDetails, flowDetails, stackDetails, clusterDetails, blueprintDetails,
+        return exception != null ? new StructuredFlowEvent(operationDetails, flowDetails, stackDetails, clusterDetails, blueprintDetails,
                 ExceptionUtils.getStackTrace(exception)) : new StructuredFlowEvent(operationDetails, flowDetails, stackDetails, clusterDetails,
                 blueprintDetails);
     }
@@ -126,7 +129,7 @@ public class StructuredFlowEventFactory {
             }
         }
 
-        OperationDetails operationDetails = new OperationDetails("NOTIFICATION", "STACK", stackId, account, userId, userName,
+        OperationDetails operationDetails = new OperationDetails(NOTIFICATION, "stacks", stackId, account, userId, userName,
                 cloudbreakNodeConfig.getInstanceUUID(), cbVersion);
         return new StructuredNotificationEvent(operationDetails, notificationDetails);
     }
