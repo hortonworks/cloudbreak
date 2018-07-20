@@ -2,6 +2,7 @@
 
 : ${GIT_VERSION:=latest}
 : ${GIT_TAG:=latest}
+: ${BASE_URL:=https://127.0.0.1}
 
 set-mock-image-tag() {
     echo "GitHub First Parent Tag is: ${GIT_VERSION}"
