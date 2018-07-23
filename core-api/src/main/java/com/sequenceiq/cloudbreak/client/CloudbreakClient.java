@@ -1,5 +1,29 @@
 package com.sequenceiq.cloudbreak.client;
 
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
+
+import javax.annotation.Nullable;
+import javax.ws.rs.NotAuthorizedException;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.Form;
+import javax.ws.rs.core.MultivaluedHashMap;
+import javax.ws.rs.core.MultivaluedMap;
+
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
+import org.glassfish.jersey.client.proxy.WebResourceFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.sequenceiq.cloudbreak.api.CoreApi;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.AccountPreferencesEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.BlueprintEndpoint;
@@ -12,6 +36,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v1.FlexSubscriptionEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.ImageCatalogV1Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.LdapConfigEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.NetworkEndpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v1.OrganizationEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.ProxyConfigEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.RdsConfigEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.RecipeEndpoint;
@@ -28,30 +53,9 @@ import com.sequenceiq.cloudbreak.api.endpoint.v1.UserEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.UtilEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v2.ConnectorV2Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v2.StackV2Endpoint;
+
 import net.jodah.expiringmap.ExpirationPolicy;
 import net.jodah.expiringmap.ExpiringMap;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
-import org.glassfish.jersey.client.proxy.WebResourceFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.annotation.Nullable;
-import javax.ws.rs.NotAuthorizedException;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.Form;
-import javax.ws.rs.core.MultivaluedHashMap;
-import javax.ws.rs.core.MultivaluedMap;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 
 public class CloudbreakClient {
 
@@ -152,6 +156,10 @@ public class CloudbreakClient {
 
     public RecipeEndpoint recipeEndpoint() {
         return refreshIfNeededAndGet(RecipeEndpoint.class);
+    }
+
+    public OrganizationEndpoint organizationEndpoint() {
+        return refreshIfNeededAndGet(OrganizationEndpoint.class);
     }
 
     public RdsConfigEndpoint rdsConfigEndpoint() {

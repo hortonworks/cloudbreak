@@ -18,7 +18,8 @@ public enum APIResourceType {
     SMARTSENSE_SUBSCRIPTION("sss"),
     IMAGE_CATALOG("ic"),
     FLEX_SUBSCRIPTION("fs"),
-    MANAGEMENT_PACK("mpack");
+    MANAGEMENT_PACK("mpack"),
+    ORGANIZATION("org");
 
     private final String namePrefix;
 

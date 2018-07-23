@@ -172,6 +172,7 @@ public class SecurityConfig {
                     .antMatchers(API_ROOT_CONTEXT + "/v1/flexsubscriptions/**").access("#oauth2.hasScope('cloudbreak.stacks')")
                     .antMatchers(API_ROOT_CONTEXT + "/v1/connectors/**").access("#oauth2.hasScope('cloudbreak.credentials')")
                     .antMatchers(API_ROOT_CONTEXT + "/v2/connectors/**").access("#oauth2.hasScope('cloudbreak.credentials')")
+                    .antMatchers(API_ROOT_CONTEXT + "/v1/organizations/**").access("#oauth2.hasScope('cloudbreak.credentials')")
                     .antMatchers(API_ROOT_CONTEXT + "/v1/repositoryconfigs/**").access("#oauth2.hasScope('cloudbreak.stacks')")
                     .antMatchers(API_ROOT_CONTEXT + "/swagger.json").permitAll()
                     .antMatchers(API_ROOT_CONTEXT + "/api-docs/**").permitAll()

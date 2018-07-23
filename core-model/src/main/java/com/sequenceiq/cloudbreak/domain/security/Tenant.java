@@ -5,6 +5,7 @@ import java.util.Set;
 
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -27,6 +28,9 @@ public class Tenant implements ProvisionEntity {
 
     @Basic(optional = false)
     private String name;
+
+    @Column(length = 1000000, columnDefinition = "TEXT")
+    private String description;
 
     @OneToMany(mappedBy = "tenant", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private Set<User> users = new HashSet<>();
@@ -64,5 +68,13 @@ public class Tenant implements ProvisionEntity {
 
     public void setOrganizations(Set<Organization> organizations) {
         this.organizations = organizations;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 }
