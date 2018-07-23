@@ -1,9 +1,13 @@
 package com.sequenceiq.cloudbreak.blueprint.filesystem.query;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
+
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ConfigQueryEntry {
@@ -98,5 +102,30 @@ public class ConfigQueryEntry {
         configQueryEntry.relatedService = relatedService;
         configQueryEntry.propertyName = propertyName;
         return configQueryEntry;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || !Objects.equals(getClass(), o.getClass())) {
+            return false;
+        } else if (this == o) {
+            return true;
+        }
+
+        return EqualsBuilder.reflectionEquals(this, o);
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37)
+                .append(propertyName)
+                .append(description)
+                .append(defaultPath)
+                .append(relatedService)
+                .append(propertyFile)
+                .append(protocol)
+                .append(propertyDisplayName)
+                .append(supportedStorages)
+                .toHashCode();
     }
 }

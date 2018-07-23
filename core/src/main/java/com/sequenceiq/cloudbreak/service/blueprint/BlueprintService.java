@@ -161,7 +161,7 @@ public class BlueprintService {
         return centralBlueprintParameterQueryService.queryCustomParameters(blueprint.getBlueprintText());
     }
 
-    public List<ConfigQueryEntry> queryFileSystemParameters(String blueprintName, String clusterName,
+    public Set<ConfigQueryEntry> queryFileSystemParameters(String blueprintName, String clusterName,
             String storageName, String fileSystemType, String accountName, IdentityUser user) {
         Blueprint blueprint = getPublicBlueprint(blueprintName, user);
 

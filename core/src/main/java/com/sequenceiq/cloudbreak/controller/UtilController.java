@@ -135,7 +135,7 @@ public class UtilController implements UtilEndpoint {
     @Override
     public StructuredParameterQueriesResponse getFileSystemParameters(StructuredParametersQueryRequest structuredParametersQueryRequest) {
         IdentityUser user = authenticatedUserService.getCbUser();
-        List<ConfigQueryEntry> entries = blueprintService.queryFileSystemParameters(
+        Set<ConfigQueryEntry> entries = blueprintService.queryFileSystemParameters(
                 structuredParametersQueryRequest.getBlueprintName(),
                 structuredParametersQueryRequest.getClusterName(),
                 structuredParametersQueryRequest.getStorageName(),

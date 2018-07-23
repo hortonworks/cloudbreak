@@ -1,10 +1,9 @@
 package com.sequenceiq.cloudbreak.blueprint.filesystem.query;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -53,19 +52,19 @@ public class FileSystemConfigQueryService {
         }
     }
 
-    public List<ConfigQueryEntry> queryParameters(FileSystemConfigQueryObject request) {
-        List<ConfigQueryEntry> filtered = new ArrayList<>();
+    public Set<ConfigQueryEntry> queryParameters(FileSystemConfigQueryObject request) {
+        Set<ConfigQueryEntry> filtered = new HashSet<>();
 
         BlueprintTextProcessor blueprintTextProcessor = blueprintProcessorFactory.get(request.getBlueprintText());
         Map<String, Set<String>> componentsByHostGroup = blueprintTextProcessor.getComponentsByHostGroup();
         for (Map.Entry<String, Set<String>> serviceHostgroupEntry : componentsByHostGroup.entrySet()) {
             for (String service : serviceHostgroupEntry.getValue()) {
-                List<ConfigQueryEntry> collectedEntries = configQueryEntries.getEntries()
+                Set<ConfigQueryEntry> collectedEntries = configQueryEntries.getEntries()
                         .stream()
                         .filter(configQueryEntry -> configQueryEntry.getRelatedService().equalsIgnoreCase(service))
                         .filter(configQueryEntry -> configQueryEntry.getSupportedStorages().contains(request.getFileSystemType().toUpperCase()))
                         .map(configQueryEntry -> configQueryEntry.copy())
-                        .collect(Collectors.toList());
+                        .collect(Collectors.toSet());
                 filtered.addAll(collectedEntries);
             }
         }
@@ -80,7 +79,7 @@ public class FileSystemConfigQueryService {
                 configQueryEntry.setDefaultPath(configQueryEntry.getDefaultPath());
             }
         }
-        filtered = filtered.stream().sorted(Comparator.comparing(ConfigQueryEntry::getPropertyName)).collect(Collectors.toList());
+        filtered = filtered.stream().sorted(Comparator.comparing(ConfigQueryEntry::getPropertyName)).collect(Collectors.toSet());
         return filtered;
     }
 
