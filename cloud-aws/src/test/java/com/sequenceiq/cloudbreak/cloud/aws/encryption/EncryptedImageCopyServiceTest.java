@@ -242,8 +242,9 @@ public class EncryptedImageCopyServiceTest {
         String encryptedSnapshotId = "snap-12345678";
         Image image = new Image()
                 .withImageId(encryptedImageId)
-                .withBlockDeviceMappings(new BlockDeviceMapping()
-                        .withEbs(new EbsBlockDevice().withEncrypted(true).withSnapshotId(encryptedSnapshotId)));
+                .withBlockDeviceMappings(
+                        new BlockDeviceMapping().withDeviceName("/dev/sdb").withVirtualName("ephemeral0"),
+                        new BlockDeviceMapping().withEbs(new EbsBlockDevice().withEncrypted(true).withSnapshotId(encryptedSnapshotId)));
         when(ec2Client.describeImages(any()))
                 .thenReturn(new DescribeImagesResult().withImages(image));
 
@@ -372,8 +373,9 @@ public class EncryptedImageCopyServiceTest {
         String encryptedSnapshotId = "snap-12345678";
         Image image = new Image()
                 .withImageId(encryptedImageId)
-                .withBlockDeviceMappings(new BlockDeviceMapping()
-                        .withEbs(new EbsBlockDevice().withEncrypted(true).withSnapshotId(encryptedSnapshotId)));
+                .withBlockDeviceMappings(
+                        new BlockDeviceMapping().withDeviceName("/dev/sdb").withVirtualName("ephemeral0"),
+                        new BlockDeviceMapping().withEbs(new EbsBlockDevice().withEncrypted(true).withSnapshotId(encryptedSnapshotId)));
         when(ec2Client.describeImages(any()))
                 .thenReturn(new DescribeImagesResult().withImages(image));
         when(ec2Client.deregisterImage(any()))
@@ -410,8 +412,59 @@ public class EncryptedImageCopyServiceTest {
 
         underTest.deleteResources(DEFAULT_REGION, ec2Client, resources);
 
-        verify(ec2Client, times(1)).deleteSnapshot(any());
         verify(ec2Client, times(1)).deregisterImage(any());
+        verify(ec2Client, times(1)).deleteSnapshot(any());
+    }
+
+    @Test
+    public void testDeleteResourcesShouldDeleteMultipleSnapshotsWhenMultipleSnapshotAreLinkedToTheAMI() {
+        String encryptedImageId = "ami-87654321";
+        String encryptedSnapshotId = "snap-12345678";
+        String secondEncryptedSnapshotId = "snap-12345555";
+        Image image = new Image()
+                .withImageId(encryptedImageId)
+                .withBlockDeviceMappings(
+                        new BlockDeviceMapping().withDeviceName("/dev/sdb").withVirtualName("ephemeral0"),
+                        new BlockDeviceMapping().withEbs(new EbsBlockDevice().withEncrypted(true).withSnapshotId(encryptedSnapshotId)),
+                        new BlockDeviceMapping().withEbs(new EbsBlockDevice().withEncrypted(true).withSnapshotId(secondEncryptedSnapshotId)));
+        when(ec2Client.describeImages(any()))
+                .thenReturn(new DescribeImagesResult().withImages(image));
+
+        List<CloudResource> resources = List.of(new CloudResource.Builder()
+                .name(encryptedImageId)
+                .type(ResourceType.AWS_ENCRYPTED_AMI)
+                .build());
+
+        underTest.deleteResources(DEFAULT_REGION, ec2Client, resources);
+
+        verify(ec2Client, times(1)).deregisterImage(any());
+        verify(ec2Client, times(2)).deleteSnapshot(any());
+    }
+
+    @Test
+    public void testDeleteResourcesShouldDeleteOnlyEbsDeviceMappingsWithSnapshotWhenMultipleSnapshotAndEphemeralDevicesAreLinkedToTheAMI() {
+        String encryptedImageId = "ami-87654321";
+        String encryptedSnapshotId = "snap-12345678";
+        String secondEncryptedSnapshotId = "snap-12345555";
+        Image image = new Image()
+                .withImageId(encryptedImageId)
+                .withBlockDeviceMappings(
+                        new BlockDeviceMapping().withEbs(new EbsBlockDevice().withEncrypted(true).withSnapshotId(encryptedSnapshotId)),
+                        new BlockDeviceMapping().withEbs(new EbsBlockDevice().withEncrypted(true).withSnapshotId(secondEncryptedSnapshotId)),
+                        new BlockDeviceMapping().withDeviceName("/dev/sdb").withVirtualName("ephemeral0"),
+                        new BlockDeviceMapping().withDeviceName("/dev/sdc").withVirtualName("ephemeral1"));
+        when(ec2Client.describeImages(any()))
+                .thenReturn(new DescribeImagesResult().withImages(image));
+
+        List<CloudResource> resources = List.of(new CloudResource.Builder()
+                .name(encryptedImageId)
+                .type(ResourceType.AWS_ENCRYPTED_AMI)
+                .build());
+
+        underTest.deleteResources(DEFAULT_REGION, ec2Client, resources);
+
+        verify(ec2Client, times(1)).deregisterImage(any());
+        verify(ec2Client, times(2)).deleteSnapshot(any());
     }
 
     protected static AuthenticatedContext authenticatedContext() {

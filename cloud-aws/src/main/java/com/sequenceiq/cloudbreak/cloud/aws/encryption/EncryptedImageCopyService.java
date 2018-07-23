@@ -190,9 +190,8 @@ public class EncryptedImageCopyService {
 
         imageOptional.getBlockDeviceMappings()
                 .stream()
-                .filter(deviceMappings -> isNoneEmpty(deviceMappings.getEbs().getSnapshotId()))
-                .findFirst()
-                .ifPresent(deviceMapping -> deleteSnapshot(client, deviceMapping, encryptedImage, regionName));
+                .filter(deviceMapping -> deviceMapping.getEbs() != null && isNoneEmpty(deviceMapping.getEbs().getSnapshotId()))
+                .forEach(deviceMapping -> deleteSnapshot(client, deviceMapping, encryptedImage, regionName));
     }
 
     private void deleteSnapshot(AmazonEC2Client client, BlockDeviceMapping blockDeviceMapping, CloudResource encryptedImage, String regionName) {
