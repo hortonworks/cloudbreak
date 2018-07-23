@@ -15,13 +15,13 @@ import com.sequenceiq.cloudbreak.api.model.CloudbreakUsageJson;
 import com.sequenceiq.cloudbreak.api.model.CredentialResponse;
 import com.sequenceiq.cloudbreak.api.model.FailurePolicyResponse;
 import com.sequenceiq.cloudbreak.api.model.FlexSubscriptionResponse;
-import com.sequenceiq.cloudbreak.api.model.HardwareInfoResponse;
 import com.sequenceiq.cloudbreak.api.model.ImageJson;
-import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupResponse;
 import com.sequenceiq.cloudbreak.api.model.NetworkResponse;
 import com.sequenceiq.cloudbreak.api.model.OrchestratorResponse;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterResponse;
+import com.sequenceiq.cloudbreak.api.model.stack.hardware.HardwareInfoGroupResponse;
+import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupResponse;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
 
@@ -89,7 +89,7 @@ public class StackResponse extends StackBase {
     private Integer nodeCount;
 
     @ApiModelProperty(StackModelDescription.HARDWARE_INFO_RESPONSE)
-    private Set<HardwareInfoResponse> hardwareInfos = new HashSet<>();
+    private Set<HardwareInfoGroupResponse> hardwareInfoGroups = new HashSet<>();
 
     @ApiModelProperty(StackModelDescription.EVENTS)
     private List<CloudbreakEventsJson> cloudbreakEvents = new ArrayList<>();
@@ -242,12 +242,12 @@ public class StackResponse extends StackBase {
         this.nodeCount = nodeCount;
     }
 
-    public Set<HardwareInfoResponse> getHardwareInfos() {
-        return hardwareInfos;
+    public Set<HardwareInfoGroupResponse> getHardwareInfoGroups() {
+        return hardwareInfoGroups;
     }
 
-    public void setHardwareInfos(Set<HardwareInfoResponse> hardwareInfos) {
-        this.hardwareInfos = hardwareInfos;
+    public void setHardwareInfoGroups(Set<HardwareInfoGroupResponse> hardwareInfoGroups) {
+        this.hardwareInfoGroups = hardwareInfoGroups;
     }
 
     public List<CloudbreakEventsJson> getCloudbreakEvents() {
