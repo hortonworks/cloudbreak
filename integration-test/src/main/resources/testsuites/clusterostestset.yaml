@@ -2,8 +2,8 @@ name: "AWS cluster tests on different oses"
 parallel: tests
 threadCount: 4
 parameters:
-  awsRegion: us-west-1
-  awsAvailabilityZone: us-west-1a
+  awsRegion: eu-west-1
+  awsAvailabilityZone: eu-west-1a
   awsCredentialName: autotesting-clusters-aws
 tests:
   - name: "aws base image datascience on sles12"
