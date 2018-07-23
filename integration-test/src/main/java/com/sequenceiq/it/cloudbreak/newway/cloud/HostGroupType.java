@@ -18,12 +18,6 @@ public enum HostGroupType {
     NIFI("NiFi", InstanceGroupType.CORE, InstanceCountParameter.NIFI_INSTANCE_COUNT.getName()),
     ZOOKEEPER("ZooKeeper", InstanceGroupType.CORE, InstanceCountParameter.ZOOKEEPER_INSTANCE_COUNT.getName());
 
-    /*
-                    .addHostGroup(cloudProvider.hostgroup("Services", InstanceGroupType.GATEWAY, 1))
-                .addHostGroup(cloudProvider.hostgroup("NiFi", InstanceGroupType.CORE, 1))
-                .addHostGroup(cloudProvider.hostgroup("ZooKeeper", InstanceGroupType.CORE, 1)));
-
-     */
     private final String name;
 
     private final String countParameterName;
@@ -49,18 +43,18 @@ public enum HostGroupType {
     }
 
     InstanceGroupV2Request hostgroupRequest(CloudProvider cloudProvider, TestParameter testParameter) {
-        return hostgroup(cloudProvider, getName(), getInstanceGroupType(),
-                determineInstanceCount(getCountParameterName(), testParameter), getSecurityGroupV2Request());
+        return hostgroup(cloudProvider, name, instanceGroupType,
+                determineInstanceCount(countParameterName, testParameter), getSecurityGroupV2Request());
     }
 
     InstanceGroupV2Request hostgroupRequest(CloudProvider cloudProvider, TestParameter testParameter, Set<String> recipes) {
-        return hostgroup(cloudProvider, getName(), getInstanceGroupType(),
-                determineInstanceCount(getCountParameterName(), testParameter), recipes);
+        return hostgroup(cloudProvider, name, instanceGroupType,
+                determineInstanceCount(countParameterName, testParameter), recipes);
     }
 
     InstanceGroupV2Request hostgroupRequest(CloudProvider cloudProvider, TestParameter testParameter, String securityGroupId) {
-        return hostgroup(cloudProvider, getName(), getInstanceGroupType(),
-                determineInstanceCount(getCountParameterName(), testParameter), securityGroupId);
+        return hostgroup(cloudProvider, name, instanceGroupType,
+                determineInstanceCount(countParameterName, testParameter), securityGroupId);
     }
 
     private int determineInstanceCount(String key, TestParameter testParameter) {

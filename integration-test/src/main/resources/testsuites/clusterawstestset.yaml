@@ -141,3 +141,18 @@ tests:
           - testStopCluster
           - testStartCluster
           - testTerminateCluster
+  - name: "aws prewarm image datascience with disc encryption"
+    preserveOrder: true
+    parameters:
+      clusterName: encrypted-aws-prewarm-datasci
+      blueprintName: "Data Science: Apache Spark 2, Apache Zeppelin"
+      image: hdp
+      instancegroupName: worker
+    classes:
+      - name: com.sequenceiq.it.cloudbreak.EncryptedClusterTests
+        includedMethods:
+          - testCreateNewEncryptedCluster
+          - testScaleCluster
+          - testStopCluster
+          - testStartCluster
+          - testTerminateCluster

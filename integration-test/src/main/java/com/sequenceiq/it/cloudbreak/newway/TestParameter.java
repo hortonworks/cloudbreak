@@ -41,6 +41,11 @@ public class TestParameter {
         return value.orElse(defaultValue);
     }
 
+    public String getRequired(String key) {
+        var value = Optional.ofNullable(parameters.get(key));
+        return value.orElseThrow(() -> new MissingExpectedParameterException(key));
+    }
+
     public void put(String key, String value) {
         parameters.put(key, value);
     }
