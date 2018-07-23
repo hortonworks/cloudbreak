@@ -140,6 +140,17 @@ public class OperationDescriptions {
         public static final String GET_BY_RECIPE_NAME = "retrieve recipe request by recipe name";
     }
 
+    public static class OrganizationOpDescription {
+        public static final String POST = "create an organization";
+        public static final String GET = "retrieve organizations";
+        public static final String GET_BY_NAME = "retrieve an organization by name";
+        public static final String GET_BY_ID = "retrieve an organization by id";
+        public static final String DELETE_BY_ID = "delete an organization by id";
+        public static final String DELETE_BY_NAME = "delete an organization by name";
+        public static final String GET_REQUEST_BY_NAME = "retrieve organization request by organization name";
+        public static final String CHANGE_USERS = "change users and their permissions in the organization";
+    }
+
     public static class UsagesOpDescription {
         public static final String GET_ALL = "retrieve usages by filter parameters";
         public static final String GET_PUBLIC = "retrieve public and private (owned) usages by filter parameters";
@@ -171,6 +182,7 @@ public class OperationDescriptions {
         public static final String CURRENT_USER_DETAILS_EVICT = "remove current user from cache";
         public static final String USER_GET_PROFILE = "user related profile";
         public static final String USER_PUT_PROFILE = "modify user related profile";
+        public static final String GET_TENANT_USERS = "retrieve all users in the tenant";
     }
 
     public static class SecurityGroupOpDescription {

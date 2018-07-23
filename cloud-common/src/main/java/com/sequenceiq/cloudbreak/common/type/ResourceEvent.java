@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.common.type;
 
 public enum ResourceEvent {
+    ORGANIZATION_CREATED("resource.organization.created"),
+    ORGANIZATION_DELETED("resource.organization.deleted"),
     BLUEPRINT_CREATED("resource.blueprint.created"),
     BLUEPRINT_DELETED("resource.blueprint.deleted"),
     CREDENTIAL_CREATED("resource.credential.created"),

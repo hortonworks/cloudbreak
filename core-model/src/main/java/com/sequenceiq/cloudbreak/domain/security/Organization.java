@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.domain.security;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -20,6 +21,9 @@ public class Organization implements ProvisionEntity {
     private Long id;
 
     private String name;
+
+    @Column(length = 1000000, columnDefinition = "TEXT")
+    private String description;
 
     @ManyToOne
     private Tenant tenant;
@@ -46,5 +50,13 @@ public class Organization implements ProvisionEntity {
 
     public void setTenant(Tenant tenant) {
         this.tenant = tenant;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 }

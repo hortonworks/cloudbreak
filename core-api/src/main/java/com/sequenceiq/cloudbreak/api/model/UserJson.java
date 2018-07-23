@@ -3,14 +3,14 @@ package com.sequenceiq.cloudbreak.api.model;
 import io.swagger.annotations.ApiModel;
 
 @ApiModel("User")
-public class User {
+public class UserJson {
 
     private String username;
 
-    public User() {
+    public UserJson() {
     }
 
-    public User(String username) {
+    public UserJson(String username) {
         this.username = username;
     }
 
