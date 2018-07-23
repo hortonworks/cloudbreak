@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.blueprint;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -57,7 +56,7 @@ public class CentralBlueprintParameterQueryService {
         return blueprintParameters;
     }
 
-    public List<ConfigQueryEntry> queryFileSystemParameters(FileSystemConfigQueryObject fileSystemConfigQueryObject) throws BlueprintProcessingException {
+    public Set<ConfigQueryEntry> queryFileSystemParameters(FileSystemConfigQueryObject fileSystemConfigQueryObject) throws BlueprintProcessingException {
         return fileSystemConfigQueryService.queryParameters(fileSystemConfigQueryObject);
     }
 }

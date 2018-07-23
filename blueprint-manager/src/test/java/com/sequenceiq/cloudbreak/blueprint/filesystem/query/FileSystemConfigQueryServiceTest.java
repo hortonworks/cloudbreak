@@ -6,7 +6,6 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -66,7 +65,34 @@ public class FileSystemConfigQueryServiceTest {
                 .withBlueprintText(BLUEPRINT_TEXT)
                 .withFileSystemType(FileSystemType.ADLS.name())
                 .build();
-        List<ConfigQueryEntry> bigCluster = underTest.queryParameters(fileSystemConfigQueryObject);
+        Set<ConfigQueryEntry> bigCluster = underTest.queryParameters(fileSystemConfigQueryObject);
+
+        Assert.assertEquals(2L, bigCluster.size());
+
+        Optional<ConfigQueryEntry> hiveMetastore = serviceEntry(bigCluster, HIVE_METASTORE);
+        Optional<ConfigQueryEntry> rangerAdmin = serviceEntry(bigCluster, RANGER_ADMIN);
+
+        Assert.assertTrue(hiveMetastore.isPresent());
+        Assert.assertTrue(rangerAdmin.isPresent());
+
+        Assert.assertEquals("default-account-name.azuredatalakestore.net/hwx-remote/apps/hive/warehouse", hiveMetastore.get().getDefaultPath());
+        Assert.assertEquals("default-account-name.azuredatalakestore.net/hwx-remote/apps/ranger/audit/bigCluster", rangerAdmin.get().getDefaultPath());
+    }
+
+    @Test
+    public void testWhenHiveMetasoreAndRangerAdminIsPresentedDoubleThenShouldReturnWithBothConfigs() {
+        Map<String, Set<String>> map = new HashMap<>();
+        map.put("master", Sets.newHashSet(HIVE_METASTORE, RANGER_ADMIN));
+        map.put("slave_1", Sets.newHashSet(HIVE_METASTORE, RANGER_ADMIN));
+
+        prepareBlueprintProcessorFactoryMock(map);
+        FileSystemConfigQueryObject fileSystemConfigQueryObject = Builder.builder()
+                .withStorageName(STORAGE_NAME)
+                .withClusterName(CLUSTER_NAME)
+                .withBlueprintText(BLUEPRINT_TEXT)
+                .withFileSystemType(FileSystemType.ADLS.name())
+                .build();
+        Set<ConfigQueryEntry> bigCluster = underTest.queryParameters(fileSystemConfigQueryObject);
 
         Assert.assertEquals(2L, bigCluster.size());
 
@@ -89,7 +115,7 @@ public class FileSystemConfigQueryServiceTest {
                 .withBlueprintText(BLUEPRINT_TEXT)
                 .withFileSystemType(FileSystemType.ADLS.name())
                 .build();
-        List<ConfigQueryEntry> bigCluster = underTest.queryParameters(fileSystemConfigQueryObject);
+        Set<ConfigQueryEntry> bigCluster = underTest.queryParameters(fileSystemConfigQueryObject);
 
         Assert.assertEquals(1L, bigCluster.size());
 
@@ -110,7 +136,7 @@ public class FileSystemConfigQueryServiceTest {
                 .withBlueprintText(BLUEPRINT_TEXT)
                 .withFileSystemType(FileSystemType.ADLS.name())
                 .build();
-        List<ConfigQueryEntry> bigCluster = underTest.queryParameters(fileSystemConfigQueryObject);
+        Set<ConfigQueryEntry> bigCluster = underTest.queryParameters(fileSystemConfigQueryObject);
 
         Assert.assertEquals(1L, bigCluster.size());
 
@@ -131,7 +157,7 @@ public class FileSystemConfigQueryServiceTest {
                 .withBlueprintText(BLUEPRINT_TEXT)
                 .withFileSystemType(FileSystemType.ADLS.name())
                 .build();
-        List<ConfigQueryEntry> bigCluster = underTest.queryParameters(fileSystemConfigQueryObject);
+        Set<ConfigQueryEntry> bigCluster = underTest.queryParameters(fileSystemConfigQueryObject);
 
         Assert.assertEquals(0L, bigCluster.size());
 
@@ -142,7 +168,7 @@ public class FileSystemConfigQueryServiceTest {
         Assert.assertFalse(rangerAdmin.isPresent());
     }
 
-    private Optional<ConfigQueryEntry> serviceEntry(List<ConfigQueryEntry> configQueryEntries, String serviceName) {
+    private Optional<ConfigQueryEntry> serviceEntry(Set<ConfigQueryEntry> configQueryEntries, String serviceName) {
         return configQueryEntries.stream().filter(b -> b.getRelatedService().equals(serviceName)).findFirst();
     }
 
@@ -150,8 +176,12 @@ public class FileSystemConfigQueryServiceTest {
         Map<String, Set<String>> result = new HashMap<>();
         result.put("master", Sets.newHashSet(services));
 
+        prepareBlueprintProcessorFactoryMock(result);
+    }
+
+    private void prepareBlueprintProcessorFactoryMock(Map<String, Set<String>> entries) {
         BlueprintTextProcessor blueprintTextProcessorMock = mock(BlueprintTextProcessor.class);
-        when(blueprintTextProcessorMock.getComponentsByHostGroup()).thenReturn(result);
+        when(blueprintTextProcessorMock.getComponentsByHostGroup()).thenReturn(entries);
         when(blueprintProcessorFactory.get(anyString())).thenReturn(blueprintTextProcessorMock);
     }
 }
