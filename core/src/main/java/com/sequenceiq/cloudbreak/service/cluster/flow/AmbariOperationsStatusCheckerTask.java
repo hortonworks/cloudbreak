@@ -96,7 +96,7 @@ public class AmbariOperationsStatusCheckerTask extends ClusterBasedStatusChecker
 
     @Override
     public void handleException(Exception e) {
-        LOGGER.error("Ambari operation failed.", e);
+        LOGGER.info("Ambari operation failed.", e);
     }
 
 }

@@ -179,7 +179,7 @@ public class AmbariClusterSetupService implements ClusterSetupService {
         } catch (CancellationException cancellationException) {
             throw cancellationException;
         } catch (Exception e) {
-            LOGGER.error("Error while building the Ambari cluster. Message {}, throwable: {}", e.getMessage(), e);
+            LOGGER.info("Error while building the Ambari cluster. Message {}, throwable: {}", e.getMessage(), e);
             throw new AmbariOperationFailedException(e.getMessage(), e);
         }
     }
@@ -187,7 +187,7 @@ public class AmbariClusterSetupService implements ClusterSetupService {
     private String constructClusterFailedMessage(Long clusterId, AmbariClient ambariClient) {
         String ambariClusterInstallFailedMsg = cloudbreakMessagesService.getMessage(AMBARI_CLUSTER_INSTALL_FAILED.code());
         ClusterStatusResult clusterStatusResult = ambariAdapter.getClusterStatusHostComponentMap(ambariClient);
-        LOGGER.error("There are not started services. Cluster: [{}], services: [{}]", clusterId, clusterStatusResult.getComponentsInStatus());
+        LOGGER.info("There are not started services. Cluster: [{}], services: [{}]", clusterId, clusterStatusResult.getComponentsInStatus());
         return String.format("%s Not started services: [%s]", ambariClusterInstallFailedMsg, clusterStatusResult.getComponentsInStatus());
     }
 

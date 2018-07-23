@@ -98,14 +98,18 @@ public final class GcpStackUtil {
             return GoogleCredential.fromStream(new ByteArrayInputStream(Base64.decodeBase64(credentialJson)), httpTransport, JSON_FACTORY)
                     .createScoped(SCOPES);
         } else {
-            PrivateKey pk = SecurityUtils.loadPrivateKeyFromKeyStore(SecurityUtils.getPkcs12KeyStore(),
-                    new ByteArrayInputStream(Base64.decodeBase64(getServiceAccountPrivateKey(gcpCredential))), "notasecret", "privatekey", "notasecret");
-            return new GoogleCredential.Builder().setTransport(httpTransport)
-                    .setJsonFactory(JSON_FACTORY)
-                    .setServiceAccountId(getServiceAccountId(gcpCredential))
-                    .setServiceAccountScopes(SCOPES)
-                    .setServiceAccountPrivateKey(pk)
-                    .build();
+            try {
+                PrivateKey pk = SecurityUtils.loadPrivateKeyFromKeyStore(SecurityUtils.getPkcs12KeyStore(),
+                        new ByteArrayInputStream(Base64.decodeBase64(getServiceAccountPrivateKey(gcpCredential))), "notasecret", "privatekey", "notasecret");
+                return new GoogleCredential.Builder().setTransport(httpTransport)
+                        .setJsonFactory(JSON_FACTORY)
+                        .setServiceAccountId(getServiceAccountId(gcpCredential))
+                        .setServiceAccountScopes(SCOPES)
+                        .setServiceAccountPrivateKey(pk)
+                        .build();
+            } catch (IOException e) {
+                throw new CredentialVerificationException("Can not read private key", e);
+            }
         }
     }
 
@@ -134,8 +138,18 @@ public final class GcpStackUtil {
             String credentialJson = GcpStackUtil.getServiceAccountCredentialJson(credential);
             if (StringUtils.isNoneEmpty(credentialJson)) {
                 JsonNode credNode = JsonUtil.readTree(new String(Base64.decodeBase64(credentialJson)));
-                credential.putParameter(GcpStackUtil.PROJECT_ID, credNode.get("project_id").asText());
-                credential.putParameter(GcpStackUtil.SERVICE_ACCOUNT, credNode.get("client_email").asText());
+                JsonNode projectId = credNode.get("project_id");
+                if (projectId != null) {
+                    credential.putParameter(GcpStackUtil.PROJECT_ID, projectId.asText());
+                } else {
+                    throw new CredentialVerificationException("project_id is missing from json");
+                }
+                JsonNode clientEmail = credNode.get("client_email");
+                if (clientEmail != null) {
+                    credential.putParameter(GcpStackUtil.SERVICE_ACCOUNT, clientEmail.asText());
+                } else {
+                    throw new CredentialVerificationException("client_email is missing from json");
+                }
                 credential.putParameter(GcpStackUtil.PRIVATE_KEY, "");
             }
             return credential;

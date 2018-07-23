@@ -152,7 +152,7 @@ public class StackStartStopService {
     }
 
     private void handleError(StackView stackView, Exception exception, DetailedStackStatus detailedStackStatus, Msg msg, String logMessage) {
-        LOGGER.error(logMessage, exception);
+        LOGGER.warn(logMessage, exception);
         Status stackStatus = detailedStackStatus.getStatus();
         stackUpdater.updateStackStatus(stackView.getId(), detailedStackStatus, logMessage + exception.getMessage());
         flowMessageService.fireEventAndLog(stackView.getId(), msg, stackStatus.name(), exception.getMessage());

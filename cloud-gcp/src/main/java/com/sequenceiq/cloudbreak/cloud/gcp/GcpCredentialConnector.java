@@ -90,7 +90,8 @@ public class GcpCredentialConnector implements CredentialConnector {
      */
     private CloudCredentialStatus createFailedCloudCredentialStatusWithExc(Exception e, AuthenticatedContext authContext, Optional<String> message) {
         LOGGER.warn(String.format("Could not verify credential, detailed message: %s", e.getMessage()), e);
-        return new CloudCredentialStatus(authContext.getCloudCredential(), CredentialStatus.FAILED, e, message.orElse("Could not verify credential!"));
+        return new CloudCredentialStatus(authContext.getCloudCredential(), CredentialStatus.FAILED, e, message.orElse(
+                "Could not verify credential! " + e.getMessage()));
     }
 
     /**

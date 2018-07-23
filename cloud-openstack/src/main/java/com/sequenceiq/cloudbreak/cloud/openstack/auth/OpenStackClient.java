@@ -19,6 +19,7 @@ import javax.annotation.PostConstruct;
 
 import org.apache.commons.lang3.StringUtils;
 import org.openstack4j.api.OSClient;
+import org.openstack4j.api.exceptions.AuthenticationException;
 import org.openstack4j.api.types.Facing;
 import org.openstack4j.core.transport.Config;
 import org.openstack4j.model.common.Identifier;
@@ -37,6 +38,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.event.credential.CredentialVerificationException;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
@@ -193,12 +195,16 @@ public class OpenStackClient {
         KeystoneCredentialView osCredential = createKeystoneCredential(cloudCredential);
 
         if (CB_KEYSTONE_V2.equals(osCredential.getVersion())) {
-            Access access = OSFactory.builderV2().withConfig(config).endpoint(osCredential.getEndpoint())
-                    .credentials(osCredential.getUserName(), osCredential.getPassword())
-                    .tenantName(osCredential.getTenantName())
-                    .authenticate()
-                    .getAccess();
-            return access;
+            try {
+                return OSFactory.builderV2().withConfig(config).endpoint(osCredential.getEndpoint())
+                        .credentials(osCredential.getUserName(), osCredential.getPassword())
+                        .tenantName(osCredential.getTenantName())
+                        .authenticate()
+                        .getAccess();
+            } catch (AuthenticationException e) {
+                LOGGER.info("Openstack authentication failed", e);
+                throw new CredentialVerificationException("Authentication failed to openstack, message: " + e.getMessage(), e);
+            }
         }
         return null;
     }
