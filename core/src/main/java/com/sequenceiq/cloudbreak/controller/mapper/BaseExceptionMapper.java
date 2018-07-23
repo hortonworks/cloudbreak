@@ -1,5 +1,11 @@
 package com.sequenceiq.cloudbreak.controller.mapper;
 
+import static ch.qos.logback.classic.Level.DEBUG_INT;
+import static ch.qos.logback.classic.Level.ERROR;
+import static ch.qos.logback.classic.Level.ERROR_INT;
+import static ch.qos.logback.classic.Level.INFO_INT;
+import static ch.qos.logback.classic.Level.WARN_INT;
+
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.ExceptionMapper;
@@ -9,6 +15,8 @@ import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.cloudbreak.controller.json.ExceptionResult;
 
+import ch.qos.logback.classic.Level;
+
 abstract class BaseExceptionMapper<E extends Throwable> implements ExceptionMapper<E> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BaseExceptionMapper.class);
@@ -16,7 +24,24 @@ abstract class BaseExceptionMapper<E extends Throwable> implements ExceptionMapp
     @Override
     public Response toResponse(E exception) {
         if (logException()) {
-            LOGGER.error(getErrorMessage(exception), exception);
+            String errorMessage = getErrorMessage(exception);
+            switch (getLogLevel().levelInt) {
+                case ERROR_INT:
+                    LOGGER.error(errorMessage, exception);
+                    break;
+                case WARN_INT:
+                    LOGGER.warn(errorMessage, exception);
+                    break;
+                case INFO_INT:
+                    LOGGER.info(errorMessage, exception);
+                    break;
+                case DEBUG_INT:
+                    LOGGER.debug(errorMessage, exception);
+                    break;
+                default:
+                    LOGGER.info(errorMessage, exception);
+                    break;
+            }
         }
         return Response.status(getResponseStatus()).entity(getEntity(exception)).build();
     }
@@ -31,6 +56,10 @@ abstract class BaseExceptionMapper<E extends Throwable> implements ExceptionMapp
 
     protected boolean logException() {
         return true;
+    }
+
+    protected Level getLogLevel() {
+        return ERROR;
     }
 
     abstract Status getResponseStatus();

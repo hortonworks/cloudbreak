@@ -113,13 +113,15 @@ public class AwsCredentialConnector implements CredentialConnector {
             DescribeRegionsRequest describeRegionsRequest = new DescribeRegionsRequest();
             access.describeRegions(describeRegionsRequest);
         } catch (AmazonClientException ae) {
-            String errorMessage = "Unable to verify AWS credentials: please make sure the access key and secret key is correct";
-            LOGGER.error(errorMessage, ae);
+            String errorMessage = "Unable to verify AWS credentials: "
+                    + "please make sure the access key and secret key is correct. "
+                    + ae.getMessage();
+            LOGGER.info(errorMessage, ae);
             return new CloudCredentialStatus(cloudCredential, CredentialStatus.FAILED, ae, errorMessage);
         } catch (RuntimeException e) {
-            String errorMessage = String.format("Could not verify keys '%s': check if the keys exists and if it's created with the correct external ID",
-                    awsCredential.getAccessKey());
-            LOGGER.error(errorMessage, e);
+            String errorMessage = String.format("Could not verify keys '%s': check if the keys exists and if it's created with the correct external ID. %s",
+                    awsCredential.getAccessKey(), e.getMessage());
+            LOGGER.warn(errorMessage, e);
             return new CloudCredentialStatus(cloudCredential, CredentialStatus.FAILED, e, errorMessage);
         }
         return new CloudCredentialStatus(cloudCredential, CredentialStatus.CREATED);

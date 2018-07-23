@@ -6,6 +6,8 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 
+import ch.qos.logback.classic.Level;
+
 @Component
 public class SpringBadRequestExceptionMapper extends BaseExceptionMapper<BadRequestException> {
 
@@ -17,5 +19,10 @@ public class SpringBadRequestExceptionMapper extends BaseExceptionMapper<BadRequ
     @Override
     Class<BadRequestException> getExceptionType() {
         return BadRequestException.class;
+    }
+
+    @Override
+    protected Level getLogLevel() {
+        return Level.INFO;
     }
 }
