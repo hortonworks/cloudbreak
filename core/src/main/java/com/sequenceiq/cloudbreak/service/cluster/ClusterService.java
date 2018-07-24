@@ -417,46 +417,53 @@ public class ClusterService {
     }
 
     public void failureReport(Long stackId, List<String> failedNodes) {
-        Stack stack = stackService.getById(stackId);
-        Cluster cluster = stack.getCluster();
-        Map<String, List<String>> autoRecoveryNodesMap = new HashMap<>();
-        Map<String, HostMetadata> autoRecoveryHostMetadata = new HashMap<>();
-        Map<String, HostMetadata> failedHostMetadata = new HashMap<>();
-        for (String failedNode : failedNodes) {
-            HostMetadata hostMetadata = hostMetadataRepository.findHostInClusterByName(cluster.getId(), failedNode);
-            if (hostMetadata == null) {
-                throw new BadRequestException("No metadata information for the node: " + failedNode);
-            }
-            HostGroup hostGroup = hostMetadata.getHostGroup();
-            if (hostGroup.getRecoveryMode() == RecoveryMode.AUTO) {
-                validateRepair(stack, hostMetadata);
-            }
-            String hostGroupName = hostGroup.getName();
-            if (hostGroup.getRecoveryMode() == RecoveryMode.AUTO) {
-                List<String> nodeList = autoRecoveryNodesMap.get(hostGroupName);
-                if (nodeList == null) {
-                    validateComponentsCategory(stack, hostGroupName);
-                    nodeList = new ArrayList<>();
-                    autoRecoveryNodesMap.put(hostGroupName, nodeList);
-                }
-                nodeList.add(failedNode);
-                autoRecoveryHostMetadata.put(failedNode, hostMetadata);
-            } else if (hostGroup.getRecoveryMode() == RecoveryMode.MANUAL) {
-                failedHostMetadata.put(failedNode, hostMetadata);
-            }
-        }
         try {
-            if (!autoRecoveryNodesMap.isEmpty()) {
-                flowManager.triggerClusterRepairFlow(stackId, autoRecoveryNodesMap, false);
-                String recoveryMessage = cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_AUTORECOVERY_REQUESTED.code(),
-                        Collections.singletonList(autoRecoveryNodesMap));
-                updateChangedHosts(cluster, autoRecoveryHostMetadata, HostMetadataState.HEALTHY, HostMetadataState.WAITING_FOR_REPAIR, recoveryMessage);
-            }
-            if (!failedHostMetadata.isEmpty()) {
-                String recoveryMessage = cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_FAILED_NODES_REPORTED.code(),
-                        Collections.singletonList(failedHostMetadata.keySet()));
-                updateChangedHosts(cluster, failedHostMetadata, HostMetadataState.HEALTHY, HostMetadataState.UNHEALTHY, recoveryMessage);
-            }
+            transactionService.required(() -> {
+                Stack stack = stackService.getById(stackId);
+                Cluster cluster = stack.getCluster();
+                Map<String, List<String>> autoRecoveryNodesMap = new HashMap<>();
+                Map<String, HostMetadata> autoRecoveryHostMetadata = new HashMap<>();
+                Map<String, HostMetadata> failedHostMetadata = new HashMap<>();
+                for (String failedNode : failedNodes) {
+                    HostMetadata hostMetadata = hostMetadataRepository.findHostInClusterByName(cluster.getId(), failedNode);
+                    if (hostMetadata == null) {
+                        throw new BadRequestException("No metadata information for the node: " + failedNode);
+                    }
+                    HostGroup hostGroup = hostMetadata.getHostGroup();
+                    if (hostGroup.getRecoveryMode() == RecoveryMode.AUTO) {
+                        validateRepair(stack, hostMetadata);
+                    }
+                    String hostGroupName = hostGroup.getName();
+                    if (hostGroup.getRecoveryMode() == RecoveryMode.AUTO) {
+                        List<String> nodeList = autoRecoveryNodesMap.get(hostGroupName);
+                        if (nodeList == null) {
+                            validateComponentsCategory(stack, hostGroupName);
+                            nodeList = new ArrayList<>();
+                            autoRecoveryNodesMap.put(hostGroupName, nodeList);
+                        }
+                        nodeList.add(failedNode);
+                        autoRecoveryHostMetadata.put(failedNode, hostMetadata);
+                    } else if (hostGroup.getRecoveryMode() == RecoveryMode.MANUAL) {
+                        failedHostMetadata.put(failedNode, hostMetadata);
+                    }
+                }
+                try {
+                    if (!autoRecoveryNodesMap.isEmpty()) {
+                        flowManager.triggerClusterRepairFlow(stackId, autoRecoveryNodesMap, false);
+                        String recoveryMessage = cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_AUTORECOVERY_REQUESTED.code(),
+                                Collections.singletonList(autoRecoveryNodesMap));
+                        updateChangedHosts(cluster, autoRecoveryHostMetadata, HostMetadataState.HEALTHY, HostMetadataState.WAITING_FOR_REPAIR, recoveryMessage);
+                    }
+                    if (!failedHostMetadata.isEmpty()) {
+                        String recoveryMessage = cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_FAILED_NODES_REPORTED.code(),
+                                Collections.singletonList(failedHostMetadata.keySet()));
+                        updateChangedHosts(cluster, failedHostMetadata, HostMetadataState.HEALTHY, HostMetadataState.UNHEALTHY, recoveryMessage);
+                    }
+                } catch (TransactionExecutionException e) {
+                    throw new TransactionRuntimeExecutionException(e);
+                }
+                return null;
+            });
         } catch (TransactionExecutionException e) {
             throw new TransactionRuntimeExecutionException(e);
         }
