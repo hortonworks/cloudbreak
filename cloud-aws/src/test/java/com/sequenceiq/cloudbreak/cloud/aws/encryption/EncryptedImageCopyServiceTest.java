@@ -73,9 +73,6 @@ public class EncryptedImageCopyServiceTest {
     private SyncPollingScheduler<Boolean> syncPollingScheduler;
 
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
-    private AuthenticatedContext ac;
-
-    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private CloudStack cloudStack;
 
     @Mock

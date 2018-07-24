@@ -485,7 +485,9 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
         if (resources != null && !resources.isEmpty()) {
             AmazonCloudFormationClient cfClient = awsClient.createCloudFormationClient(credentialView, regionName);
             CloudResource stackResource = getCloudFormationStackResource(resources);
+            AmazonEC2Client amazonEC2Client = awsClient.createAccess(credentialView, regionName);
             if (stackResource == null) {
+                cleanupEncryptedResources(ac, resources, regionName, amazonEC2Client);
                 return Collections.emptyList();
             }
             String cFStackName = stackResource.getName();
@@ -505,8 +507,8 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
                 });
             } catch (ActionWentFailException ignored) {
                 LOGGER.info("Stack not found with name: {}", cFStackName);
-                AmazonEC2Client amazonEC2Client = awsClient.createAccess(credentialView, regionName);
                 releaseReservedIp(amazonEC2Client, resources);
+                cleanupEncryptedResources(ac, resources, regionName, amazonEC2Client);
                 return Collections.emptyList();
             }
             resumeAutoScalingPolicies(ac, stack);
@@ -522,10 +524,8 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
             } catch (Exception e) {
                 throw new CloudConnectorException(e.getMessage(), e);
             }
-            AmazonEC2Client amazonEC2Client = awsClient.createAccess(credentialView, regionName);
             releaseReservedIp(amazonEC2Client, resources);
-            encryptedSnapshotService.deleteResources(ac, amazonEC2Client, resources);
-            encryptedImageCopyService.deleteResources(regionName, amazonEC2Client, resources);
+            cleanupEncryptedResources(ac, resources, regionName, amazonEC2Client);
             deleteKeyPair(ac, stack);
         } else if (resources != null) {
             AmazonEC2Client amazonEC2Client = awsClient.createAccess(credentialView, regionName);
@@ -535,6 +535,11 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
             LOGGER.info("No resources to release.");
         }
         return check(ac, resources);
+    }
+
+    private void cleanupEncryptedResources(AuthenticatedContext ac, List<CloudResource> resources, String regionName, AmazonEC2Client amazonEC2Client) {
+        encryptedSnapshotService.deleteResources(ac, amazonEC2Client, resources);
+        encryptedImageCopyService.deleteResources(regionName, amazonEC2Client, resources);
     }
 
     private void deleteKeyPair(AuthenticatedContext ac, CloudStack stack) {
