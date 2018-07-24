@@ -8,7 +8,6 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.reactor.ErrorHandlerAwareReactorEventFactory;
@@ -39,9 +38,6 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
 
     @Inject
     private StructuredEventService structuredEventService;
-
-    @Inject
-    private ConversionService conversionService;
 
     @PostConstruct
     public void setup() {
