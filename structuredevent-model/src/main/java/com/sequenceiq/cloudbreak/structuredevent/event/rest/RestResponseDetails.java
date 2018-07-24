@@ -11,6 +11,8 @@ import com.sequenceiq.cloudbreak.structuredevent.json.Base64Deserializer;
 public class RestResponseDetails implements Serializable {
     private Integer statusCode;
 
+    private String statusText;
+
     private String mediaType;
 
     private Map<String, String> headers;
@@ -27,6 +29,14 @@ public class RestResponseDetails implements Serializable {
 
     public void setStatusCode(Integer statusCode) {
         this.statusCode = statusCode;
+    }
+
+    public String getStatusText() {
+        return statusText;
+    }
+
+    public void setStatusText(String statusText) {
+        this.statusText = statusText;
     }
 
     public String getMediaType() {

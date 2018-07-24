@@ -66,6 +66,6 @@ public class CloudbreakEventController implements EventEndpoint {
 
     private StructuredEventContainer getStructuredEventsForStack(Long stackId) {
         IdentityUser identityUser = authenticatedUserService.getCbUser();
-        return structuredEventService.getEventsForUserWithStackId(identityUser.getUserId(), stackId);
+        return structuredEventService.getEventsForUserWithResourceId(identityUser.getUserId(), "stacks", stackId);
     }
 }

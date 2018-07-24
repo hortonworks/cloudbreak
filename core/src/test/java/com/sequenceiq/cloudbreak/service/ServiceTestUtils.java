@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service;
 
 import static com.sequenceiq.cloudbreak.common.type.CloudConstants.AWS;
 import static com.sequenceiq.cloudbreak.common.type.CloudConstants.GCP;
+import static com.sequenceiq.cloudbreak.structuredevent.event.StructuredEventType.NOTIFICATION;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -192,8 +193,8 @@ public final class ServiceTestUtils {
         }
     }
 
-    public static StructuredNotificationEvent createEvent(Long stackId, int nodeCount, String eventStatus, Date eventTimestamp) {
-        OperationDetails operation = new OperationDetails(eventTimestamp.getTime(), "NOTIFICATION", "STACK", stackId, "account",
+    public static StructuredNotificationEvent createEvent(Long stackId, String stackName, int nodeCount, String eventStatus, Date eventTimestamp) {
+        OperationDetails operation = new OperationDetails(eventTimestamp.getTime(), NOTIFICATION, "stacks", stackId, stackName, "account",
                 "userid", "username", "cbId", "cbVersion");
         NotificationDetails notification = new NotificationDetails();
         notification.setNotificationType(eventStatus);

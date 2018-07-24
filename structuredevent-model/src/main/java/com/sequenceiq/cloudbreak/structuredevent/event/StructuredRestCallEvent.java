@@ -13,6 +13,16 @@ public class StructuredRestCallEvent extends StructuredEvent {
         this.restCall = restCall;
     }
 
+    @Override
+    public String getStatus() {
+        return String.format("%s - %s", restCall.getRestResponse().getStatusText(), restCall.getRestResponse().getStatusCode());
+    }
+
+    @Override
+    public Long getDuration() {
+        return restCall.getDuration();
+    }
+
     public RestCallDetails getRestCall() {
         return restCall;
     }

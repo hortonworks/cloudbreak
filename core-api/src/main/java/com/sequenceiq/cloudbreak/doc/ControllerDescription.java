@@ -14,6 +14,7 @@ public class ControllerDescription {
     public static final String RECIPE_DESCRIPTION = "Operations on recipes";
     public static final String USAGES_DESCRIPTION = "Operations on usages";
     public static final String EVENT_DESCRIPTION = "Operations on events";
+    public static final String AUDIT_DESCRIPTION = "Operations on audit logs";
     public static final String NETWORK_DESCRIPTION = "Operations on networks";
     public static final String SECURITY_RULE_DESCRIPTION = "Operations on security rules";
     public static final String ACCOUNT_PREFERENCES_DESCRIPTION = "Operations on account preferences";

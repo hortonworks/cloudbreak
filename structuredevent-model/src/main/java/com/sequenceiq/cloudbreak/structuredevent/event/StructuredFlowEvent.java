@@ -51,6 +51,16 @@ public class StructuredFlowEvent extends StructuredEvent {
         this(operation, flow, stack, null, null, exception);
     }
 
+    @Override
+    public String getStatus() {
+        return flow.getFlowState();
+    }
+
+    @Override
+    public Long getDuration() {
+        return flow.getDuration();
+    }
+
     public FlowDetails getFlow() {
         return flow;
     }

@@ -5,7 +5,7 @@ import java.io.Serializable;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class StructuredEvent implements Serializable {
+public abstract class StructuredEvent implements Serializable {
 
     public static final String TYPE_FIELD = "type";
 
@@ -36,4 +36,8 @@ public class StructuredEvent implements Serializable {
     public OperationDetails getOperation() {
         return operation;
     }
+
+    public abstract String getStatus();
+
+    public abstract Long getDuration();
 }
