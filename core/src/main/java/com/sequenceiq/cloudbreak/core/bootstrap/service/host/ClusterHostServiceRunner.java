@@ -64,9 +64,6 @@ import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.SmartSenseCredentialConfigService;
-import com.sequenceiq.cloudbreak.service.TransactionService;
-import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
-import com.sequenceiq.cloudbreak.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.service.blueprint.ComponentLocatorService;
 import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariSecurityConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.flow.recipe.RecipeEngine;
@@ -136,31 +133,21 @@ public class ClusterHostServiceRunner {
     @Inject
     private BlueprintPortConfigCollector blueprintPortConfigCollector;
 
-    @Inject
-    private TransactionService transactionService;
-
     public void runAmbariServices(Stack stack, Cluster cluster) {
         try {
-            transactionService.required(() -> {
-                try {
-                    Set<Node> nodes = stackUtil.collectNodes(stack);
-                    HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
-                    GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
-                    List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
-                    SaltConfig saltConfig = createSaltConfig(stack, cluster, primaryGatewayConfig, gatewayConfigs);
-                    ExitCriteriaModel exitCriteriaModel = clusterDeletionBasedModel(stack.getId(), cluster.getId());
-                    hostOrchestrator.initServiceRun(gatewayConfigs, nodes, saltConfig, exitCriteriaModel);
-                    recipeEngine.executePreAmbariStartRecipes(stack, hostGroupService.getByCluster(cluster.getId()));
-                    hostOrchestrator.runService(gatewayConfigs, nodes, saltConfig, exitCriteriaModel);
-                } catch (CloudbreakOrchestratorCancelledException e) {
-                    throw new CancellationException(e.getMessage());
-                } catch (CloudbreakOrchestratorException | IOException | CloudbreakException e) {
-                    throw new CloudbreakServiceException(e.getMessage(), e);
-                }
-                return null;
-            });
-        } catch (TransactionExecutionException e) {
-            throw new TransactionRuntimeExecutionException(e);
+            Set<Node> nodes = stackUtil.collectNodes(stack);
+            HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
+            GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
+            List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
+            SaltConfig saltConfig = createSaltConfig(stack, cluster, primaryGatewayConfig, gatewayConfigs);
+            ExitCriteriaModel exitCriteriaModel = clusterDeletionBasedModel(stack.getId(), cluster.getId());
+            hostOrchestrator.initServiceRun(gatewayConfigs, nodes, saltConfig, exitCriteriaModel);
+            recipeEngine.executePreAmbariStartRecipes(stack, hostGroupService.getByCluster(cluster.getId()));
+            hostOrchestrator.runService(gatewayConfigs, nodes, saltConfig, exitCriteriaModel);
+        } catch (CloudbreakOrchestratorCancelledException e) {
+            throw new CancellationException(e.getMessage());
+        } catch (CloudbreakOrchestratorException | IOException | CloudbreakException e) {
+            throw new CloudbreakServiceException(e.getMessage(), e);
         }
     }
 

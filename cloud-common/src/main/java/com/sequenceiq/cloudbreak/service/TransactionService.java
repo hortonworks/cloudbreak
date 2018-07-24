@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service;
 
 import java.util.Arrays;
+import java.util.LinkedHashSet;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -96,12 +97,16 @@ public class TransactionService {
     private void processTransactionDuration(long start) {
         long duration = clock.getCurrentTime() - start;
         if (TX_DURATION_ERROR < duration) {
-            LOGGER.error("Transaction duration was critical, took {}ms  at: {}", duration,
-                    String.join("\n\t", Arrays.stream(Thread.currentThread().getStackTrace()).map(StackTraceElement::toString).collect(Collectors.toSet())));
+            LOGGER.error("Transaction duration was critical, took {}ms  at: {}", duration, generateStackTrace());
+
         } else if (TX_DURATION_OK < duration) {
-            LOGGER.warn("Transaction duration was high, took {}ms at: {}", duration,
-                    String.join("\n\t", Arrays.stream(Thread.currentThread().getStackTrace()).map(StackTraceElement::toString).collect(Collectors.toSet())));
+            LOGGER.warn("Transaction duration was high, took {}ms at: {}", duration, generateStackTrace());
         }
+    }
+
+    private String generateStackTrace() {
+        return String.join("\n\t", Arrays.stream(Thread.currentThread().getStackTrace()).map(StackTraceElement::toString)
+                .collect(Collectors.toCollection(LinkedHashSet::new)));
     }
 
     public static class TransactionExecutionException extends Exception {
