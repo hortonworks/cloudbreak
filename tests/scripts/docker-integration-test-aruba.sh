@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+: ${BASE_URL:=https://127.0.0.1}
+
+export BASE_URL=$BASE_URL
+
 echo
 echo "Runnning integration tests in container"
 echo "======================================="
@@ -18,7 +22,7 @@ docker run -it \
     --rm \
     --name $TEST_CONTAINER_NAME \
     --net=host \
-    -v "${HOME}/project/build/Linux":/usr/local/bin \
+    -v $(dirname "$(pwd)")"/build/Linux":/usr/local/bin \
     -v $(pwd):/work \
     halmy/aruba-rspec:1.0 /work/scripts/integration-test-aruba.sh
 RESULT=$?

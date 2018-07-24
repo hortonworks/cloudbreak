@@ -16,6 +16,7 @@ set-mock-image-tag() {
 }
 
 set-mock-image-tag
-docker-compose up -d
+
+docker-compose -f docker-compose.yml -p cbreak up -d
 
 sleep 30s

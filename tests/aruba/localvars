@@ -18,7 +18,7 @@ export INTEGRATIONTEST_PROXYCONFIG_PROXYHOST=test
 export INTEGRATIONTEST_PROXYCONFIG_PROXYUSER=test
 export INTEGRATIONTEST_PROXYCONFIG_PROXYPASSWORD=test
 
-export BASE_URL=https://qa-cloud-canary.eng.hortonworks.com
+export BASE_URL=https://127.0.0.1
 export USERNAME_CLI=test@example.com
 export PASSWORD_CLI=test
 

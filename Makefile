@@ -136,7 +136,7 @@ integration-test: build-docker
 	make -C tests all
 
 e2e-test:
-	make -C docker-integration-test
+	make -C tests docker-e2e-test-local
 
 .DEFAULT_GOAL := build
 
