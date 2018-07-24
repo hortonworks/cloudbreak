@@ -4,15 +4,20 @@ import javax.inject.Inject;
 import javax.transaction.Transactional;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.convert.ConversionService;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.UserProfile;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.ha.CloudbreakNodeConfig;
+import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.user.UserProfileService;
 import com.sequenceiq.cloudbreak.structuredevent.event.BlueprintDetails;
@@ -29,6 +34,8 @@ import com.sequenceiq.cloudbreak.structuredevent.event.StructuredNotificationEve
 @Transactional
 public class StructuredFlowEventFactory {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(StructuredFlowEventFactory.class);
+
     @Inject
     private StackService stackService;
 
@@ -40,6 +47,9 @@ public class StructuredFlowEventFactory {
 
     @Inject
     private UserProfileService userProfileService;
+
+    @Inject
+    private AuthenticatedUserService authenticatedUserService;
 
     @Value("${info.app.version:}")
     private String cbVersion;
@@ -70,32 +80,54 @@ public class StructuredFlowEventFactory {
     }
 
     public StructuredNotificationEvent createStructuredNotificationEvent(Long stackId, String notificationType, String message, String instanceGroupName) {
-        Stack stack = stackService.getById(stackId);
-        UserProfile userProfile = userProfileService.getOrCreate(stack.getAccount(), stack.getOwner());
-        OperationDetails operationDetails = new OperationDetails("NOTIFICATION", "STACK", stackId, stack.getAccount(), stack.getOwner(),
-                userProfile.getUserName(), cloudbreakNodeConfig.getInstanceUUID(), cbVersion);
         NotificationDetails notificationDetails = new NotificationDetails();
         notificationDetails.setNotificationType(notificationType);
         notificationDetails.setNotification(message);
-        notificationDetails.setCloud(stack.cloudPlatform());
-        notificationDetails.setRegion(stack.getRegion());
-        notificationDetails.setAvailabiltyZone(stack.getAvailabilityZone());
         notificationDetails.setStackId(stackId);
-        notificationDetails.setStackName(stack.getDisplayName());
-        notificationDetails.setStackStatus(stack.getStatus().name());
-        notificationDetails.setNodeCount(stack.getNotDeletedInstanceMetaDataSet().size());
-        notificationDetails.setInstanceGroup(instanceGroupName);
-        Cluster cluster = stack.getCluster();
-        if (cluster != null) {
-            notificationDetails.setClusterId(cluster.getId());
-            notificationDetails.setClusterName(cluster.getName());
-            notificationDetails.setClusterStatus(cluster.getStatus().name());
-            Blueprint blueprint = cluster.getBlueprint();
-            if (blueprint != null) {
-                notificationDetails.setBlueprintId(blueprint.getId());
-                notificationDetails.setBlueprintName(blueprint.getAmbariName());
+
+        String account = null;
+        String userId = null;
+        String userName = null;
+
+        try {
+            Stack stack = stackService.getById(stackId);
+
+            UserProfile userProfile = userProfileService.getOrCreate(stack.getAccount(), stack.getOwner());
+            account = stack.getAccount();
+            userId = stack.getOwner();
+            userName = userProfile.getUserName();
+
+            notificationDetails.setCloud(stack.cloudPlatform());
+            notificationDetails.setRegion(stack.getRegion());
+            notificationDetails.setAvailabiltyZone(stack.getAvailabilityZone());
+            notificationDetails.setStackName(stack.getDisplayName());
+            notificationDetails.setStackStatus(stack.getStatus().name());
+            notificationDetails.setNodeCount(stack.getNotDeletedInstanceMetaDataSet().size());
+            Cluster cluster = stack.getCluster();
+            notificationDetails.setInstanceGroup(instanceGroupName);
+            if (cluster != null) {
+                notificationDetails.setClusterId(cluster.getId());
+                notificationDetails.setClusterName(cluster.getName());
+                notificationDetails.setClusterStatus(cluster.getStatus().name());
+                Blueprint blueprint = cluster.getBlueprint();
+                if (blueprint != null) {
+                    notificationDetails.setBlueprintId(blueprint.getId());
+                    notificationDetails.setBlueprintName(blueprint.getAmbariName());
+                }
+            }
+        } catch (AccessDeniedException e) {
+            IdentityUser cbUser = authenticatedUserService.getCbUser();
+            LOGGER.info("Access denied in structured notification event creation, user: {}, stack: {}",
+                    cbUser != null ? cbUser.getUsername() : "Unknown", stackId, e);
+            if (cbUser != null) {
+                account = cbUser.getAccount();
+                userId = cbUser.getUserId();
+                userName = cbUser.getUsername();
             }
         }
+
+        OperationDetails operationDetails = new OperationDetails("NOTIFICATION", "STACK", stackId, account, userId, userName,
+                cloudbreakNodeConfig.getInstanceUUID(), cbVersion);
         return new StructuredNotificationEvent(operationDetails, notificationDetails);
     }
 }
