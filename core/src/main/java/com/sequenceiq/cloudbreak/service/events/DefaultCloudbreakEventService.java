@@ -9,6 +9,7 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.convert.ConversionService;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.reactor.ErrorHandlerAwareReactorEventFactory;
@@ -50,9 +51,13 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
 
     @Override
     public void fireCloudbreakEvent(Long entityId, String eventType, String eventMessage) {
-        StructuredNotificationEvent eventData = structuredFlowEventFactory.createStructuredNotificationEvent(entityId, eventType, eventMessage, null);
-        LOGGER.info("Firing Cloudbreak event: entityId: {}, type: {}, message: {}", entityId, eventType, eventMessage);
-        reactor.notify(CLOUDBREAK_EVENT, eventFactory.createEvent(eventData));
+        try {
+            StructuredNotificationEvent eventData = structuredFlowEventFactory.createStructuredNotificationEvent(entityId, eventType, eventMessage, null);
+            LOGGER.info("Firing Cloudbreak event: entityId: {}, type: {}, message: {}", entityId, eventType, eventMessage);
+            reactor.notify(CLOUDBREAK_EVENT, eventFactory.createEvent(eventData));
+        } catch (AccessDeniedException e) {
+            LOGGER.warn("Can not send structured notification event, Access Denied", e);
+        }
     }
 
     @Override
