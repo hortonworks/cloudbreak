@@ -29,7 +29,6 @@ import com.sequenceiq.cloudbreak.structuredevent.event.FlowDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.NotificationDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.OperationDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.StackDetails;
-import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEventType;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredFlowEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredNotificationEvent;
 
@@ -64,7 +63,7 @@ public class StructuredFlowEventFactory {
     public StructuredFlowEvent createStucturedFlowEvent(Long stackId, FlowDetails flowDetails, Boolean detailed, Exception exception) {
         Stack stack = stackService.getById(stackId);
         UserProfile userProfile = userProfileService.getOrCreate(stack.getAccount(), stack.getOwner());
-        OperationDetails operationDetails = new OperationDetails(FLOW, "STACK", stackId, stack.getAccount(), stack.getOwner(),
+        OperationDetails operationDetails = new OperationDetails(FLOW, "stacks", stackId, stack.getName(), stack.getAccount(), stack.getOwner(),
                 userProfile.getUserName(), cloudbreakNodeConfig.getId(), cbVersion);
         StackDetails stackDetails = null;
         ClusterDetails clusterDetails = null;
@@ -91,6 +90,7 @@ public class StructuredFlowEventFactory {
         String account = null;
         String userId = null;
         String userName = null;
+        String stackName = null;
 
         try {
             Stack stack = stackService.getById(stackId);
@@ -99,6 +99,7 @@ public class StructuredFlowEventFactory {
             account = stack.getAccount();
             userId = stack.getOwner();
             userName = userProfile.getUserName();
+            stackName = stack.getName();
 
             notificationDetails.setCloud(stack.cloudPlatform());
             notificationDetails.setRegion(stack.getRegion());
@@ -129,7 +130,7 @@ public class StructuredFlowEventFactory {
             }
         }
 
-        OperationDetails operationDetails = new OperationDetails(NOTIFICATION, "stacks", stackId, account, userId, userName,
+        OperationDetails operationDetails = new OperationDetails(NOTIFICATION, "stacks", stackId, stackName, account, userId, userName,
                 cloudbreakNodeConfig.getInstanceUUID(), cbVersion);
         return new StructuredNotificationEvent(operationDetails, notificationDetails);
     }

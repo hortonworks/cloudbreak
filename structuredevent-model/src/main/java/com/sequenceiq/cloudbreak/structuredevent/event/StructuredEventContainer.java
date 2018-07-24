@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.structuredevent.event;
 
+import java.util.Collections;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -23,7 +24,7 @@ public class StructuredEventContainer {
     }
 
     public List<StructuredFlowEvent> getFlow() {
-        return flow;
+        return flow != null ? flow : Collections.emptyList();
     }
 
     public void setFlow(List<StructuredFlowEvent> flow) {
@@ -31,7 +32,7 @@ public class StructuredEventContainer {
     }
 
     public List<StructuredRestCallEvent> getRest() {
-        return rest;
+        return rest != null ? rest : Collections.emptyList();
     }
 
     public void setRest(List<StructuredRestCallEvent> rest) {
@@ -39,7 +40,7 @@ public class StructuredEventContainer {
     }
 
     public List<StructuredNotificationEvent> getNotification() {
-        return notification;
+        return notification != null ? notification : Collections.emptyList();
     }
 
     public void setNotification(List<StructuredNotificationEvent> notification) {

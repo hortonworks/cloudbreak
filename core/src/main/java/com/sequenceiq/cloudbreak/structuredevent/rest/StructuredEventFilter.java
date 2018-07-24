@@ -42,7 +42,6 @@ import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.ha.CloudbreakNodeConfig;
 import com.sequenceiq.cloudbreak.structuredevent.StructuredEventClient;
 import com.sequenceiq.cloudbreak.structuredevent.event.OperationDetails;
-import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEventType;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredRestCallEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.rest.RestCallDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.rest.RestRequestDetails;
@@ -213,8 +212,10 @@ public class StructuredEventFilter implements WriterInterceptor, ContainerReques
 
     private OperationDetails createOperationDetails(Map<String, String> restParams, Long requestTime) {
         IdentityUser user = authenticatedUserService.getCbUser();
+        String resoureceType = restParams.get(RESOURCE_TYPE);
         String resoureceId = restParams.get(RESOURCE_ID);
-        return new OperationDetails(requestTime, REST, restParams.get(RESOURCE_TYPE), resoureceId != null ? Long.valueOf(resoureceId) : null,
+        String resoureceName = restParams.get(RESOURCE_NAME);
+        return new OperationDetails(requestTime, REST, resoureceType, resoureceId != null ? Long.valueOf(resoureceId) : null, resoureceName,
                 user != null ? user.getAccount() : "", user != null ? user.getUserId() : "", user != null ? user.getUsername() : "",
                 cloudbreakNodeConfig.getId(), cbVersion);
     }
@@ -235,6 +236,7 @@ public class StructuredEventFilter implements WriterInterceptor, ContainerReques
     private RestResponseDetails createResponseDetails(ContainerResponseContext responseContext) {
         RestResponseDetails restResponse = new RestResponseDetails();
         restResponse.setStatusCode(responseContext.getStatus());
+        restResponse.setStatusText(responseContext.getStatusInfo().toEnum().name());
         restResponse.setCookies(responseContext.getCookies().entrySet().stream().collect(Collectors.toMap(Entry::getKey, e -> e.getValue().toString())));
         restResponse.setHeaders(responseContext.getHeaders().entrySet().stream().filter(e -> !skippedHeadersList.contains(e.getKey())).collect(
                 Collectors.toMap(Entry::getKey, e -> StringUtils.join(e.getValue(), ","))));

@@ -3,6 +3,7 @@
 
 DELETE FROM structuredevent WHERE eventtype NOT IN ('NOTIFICATION', 'FLOW', 'REST');
 
+UPDATE structuredevent SET resourcetype = 'stacks' WHERE resourcetype = 'STACK';
 
 -- //@UNDO
 -- SQL to undo the change goes here.

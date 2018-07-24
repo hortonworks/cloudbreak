@@ -10,16 +10,21 @@ import org.springframework.data.repository.query.Param;
 
 import com.sequenceiq.cloudbreak.domain.StructuredEventEntity;
 import com.sequenceiq.cloudbreak.service.EntityType;
+import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEventType;
 
 @EntityType(entityClass = StructuredEventEntity.class)
 @Transactional(Transactional.TxType.REQUIRED)
 public interface StructuredEventRepository extends CrudRepository<StructuredEventEntity, Long> {
 
-    List<StructuredEventEntity> findByOwnerAndEventType(String owner, String eventType);
+    List<StructuredEventEntity> findByOwnerAndEventType(String owner, StructuredEventType eventType);
 
-    List<StructuredEventEntity> findByOwnerAndEventTypeAndResourceTypeAndResourceId(String owner, String eventType, String resourceType, Long resourceId);
+    List<StructuredEventEntity> findByOwnerAndResourceTypeAndResourceId(String owner, String resourceType, Long resourceId);
+
+    List<StructuredEventEntity> findByOwnerAndEventTypeAndResourceTypeAndResourceId(String owner, StructuredEventType eventType,
+            String resourceType, Long resourceId);
 
     @Query("SELECT se from StructuredEventEntity se WHERE se.owner = :owner AND se.eventType = :eventType AND se.timestamp >= :since")
-    List<StructuredEventEntity> findByUserIdAndEventTypeSince(@Param("owner") String owner, @Param("eventType") String eventType, @Param("since") Long since);
+    List<StructuredEventEntity> findByUserIdAndEventTypeSince(@Param("owner") String owner, @Param("eventType") StructuredEventType eventType,
+            @Param("since") Long since);
 
 }

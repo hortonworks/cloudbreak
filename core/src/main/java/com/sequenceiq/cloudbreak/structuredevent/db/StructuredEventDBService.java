@@ -35,7 +35,7 @@ public class StructuredEventDBService implements StructuredEventService {
 
     @Override
     public <T extends StructuredEvent> List<T> getEventsForUserWithType(String userId, Class<T> eventClass) {
-        List<StructuredEventEntity> events = structuredEventRepository.findByOwnerAndEventType(userId, StructuredEventType.getByClass(eventClass).name());
+        List<StructuredEventEntity> events = structuredEventRepository.findByOwnerAndEventType(userId, StructuredEventType.getByClass(eventClass));
         return events != null ? (List<T>) conversionService.convert(events,
                 TypeDescriptor.forObject(events),
                 TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(StructuredEvent.class))) : Collections.emptyList();
@@ -44,7 +44,7 @@ public class StructuredEventDBService implements StructuredEventService {
     @Override
     public <T extends StructuredEvent> List<T> getEventsForUserWithTypeSince(String userId, Class<T> eventClass, Long since) {
         List<StructuredEventEntity> events = structuredEventRepository.findByUserIdAndEventTypeSince(userId,
-                StructuredEventType.getByClass(eventClass).name(), since);
+                StructuredEventType.getByClass(eventClass), since);
         return events != null ? (List<T>) conversionService.convert(events,
                 TypeDescriptor.forObject(events),
                 TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(StructuredEvent.class))) : Collections.emptyList();
@@ -54,19 +54,19 @@ public class StructuredEventDBService implements StructuredEventService {
     public <T extends StructuredEvent> List<T> getEventsForUserWithTypeAndResourceId(String userId,
             Class<T> eventClass, String resourceType, Long resourceId) {
         List<StructuredEventEntity> events = structuredEventRepository.findByOwnerAndEventTypeAndResourceTypeAndResourceId(userId,
-                StructuredEventType.getByClass(eventClass).name(), resourceType, resourceId);
+                StructuredEventType.getByClass(eventClass), resourceType, resourceId);
         return events != null ? (List<T>) conversionService.convert(events,
                 TypeDescriptor.forObject(events),
                 TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(StructuredEvent.class))) : Collections.emptyList();
     }
 
     @Override
-    public StructuredEventContainer getEventsForUserWithStackId(String userId, Long stackId) {
+    public StructuredEventContainer getEventsForUserWithResourceId(String userId, String resourceType, Long resourceId) {
 
-        List<StructuredRestCallEvent> rest = getEventsForUserWithTypeAndResourceId(userId, StructuredRestCallEvent.class, "stacks", stackId);
-        List<StructuredFlowEvent> flow = getEventsForUserWithTypeAndResourceId(userId, StructuredFlowEvent.class, "STACK", stackId);
+        List<StructuredRestCallEvent> rest = getEventsForUserWithTypeAndResourceId(userId, StructuredRestCallEvent.class, resourceType, resourceId);
+        List<StructuredFlowEvent> flow = getEventsForUserWithTypeAndResourceId(userId, StructuredFlowEvent.class, resourceType, resourceId);
         List<StructuredNotificationEvent> notification = getEventsForUserWithTypeAndResourceId(userId,
-                StructuredNotificationEvent.class, "STACK", stackId);
+                StructuredNotificationEvent.class, resourceType, resourceId);
 
         return new StructuredEventContainer(flow, rest, notification);
     }

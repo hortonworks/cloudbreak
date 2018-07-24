@@ -152,6 +152,7 @@ public class SecurityConfig {
                     .antMatchers(API_ROOT_CONTEXT + "/v2/stacks/ambari", API_ROOT_CONTEXT + "/v2/stacks/*/certificate", API_ROOT_CONTEXT + "/v2/stacks/all")
                     .access("#oauth2.hasScope('cloudbreak.autoscale')")
                     .antMatchers(API_ROOT_CONTEXT + "/v1/events/**").access("#oauth2.hasScope('cloudbreak.events')")
+                    .antMatchers(API_ROOT_CONTEXT + "/v1/audits/**").access("#oauth2.hasScope('cloudbreak.events')")
                     .antMatchers(API_ROOT_CONTEXT + "/v1/usages/account/**").access("#oauth2.hasScope('cloudbreak.usages.account')")
                     .antMatchers(API_ROOT_CONTEXT + "/v1/usages/user/**").access("#oauth2.hasScope('cloudbreak.usages.user')")
                     .antMatchers(API_ROOT_CONTEXT + "/v1/usages/flex/**").access("#oauth2.hasScope('cloudbreak.flex')")
