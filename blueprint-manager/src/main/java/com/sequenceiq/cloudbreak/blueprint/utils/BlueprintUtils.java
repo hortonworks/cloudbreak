@@ -16,6 +16,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.BlueprintParameter;
 import com.sequenceiq.cloudbreak.json.JsonHelper;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
@@ -85,5 +86,9 @@ public class BlueprintUtils {
             map = JsonUtil.treeToValue(tags, Map.class);
         }
         return map;
+    }
+
+    public boolean isSharedServiceReqdyBlueprint(Blueprint blueprint) {
+        return blueprint.getTags() != null && blueprint.getTags().getMap().containsKey("shared_services_ready");
     }
 }

@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessorFactory;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.blueprint.template.views.SharedServiceConfigsView;
+import com.sequenceiq.cloudbreak.blueprint.utils.BlueprintUtils;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 
@@ -20,6 +21,9 @@ public class SharedServiceConfigsViewProvider {
 
     @Inject
     private BlueprintProcessorFactory blueprintProcessorFactory;
+
+    @Inject
+    private BlueprintUtils blueprintUtils;
 
     public SharedServiceConfigsView createSharedServiceConfigs(Blueprint blueprint, String ambariPassword, Stack dataLakeStack) {
         SharedServiceConfigsView sharedServiceConfigsView = new SharedServiceConfigsView();
@@ -33,7 +37,7 @@ public class SharedServiceConfigsViewProvider {
             sharedServiceConfigsView.setAttachedCluster(true);
             sharedServiceConfigsView.setDatalakeCluster(false);
             sharedServiceConfigsView.setRangerAdminPort(rangerPort);
-        } else if (isSharedServiceReqdyBlueprint(blueprint)) {
+        } else if (blueprintUtils.isSharedServiceReqdyBlueprint(blueprint)) {
             sharedServiceConfigsView.setRangerAdminPassword(ambariPassword);
             sharedServiceConfigsView.setAttachedCluster(false);
             sharedServiceConfigsView.setDatalakeCluster(true);
@@ -50,9 +54,5 @@ public class SharedServiceConfigsViewProvider {
 
     public SharedServiceConfigsView createSharedServiceConfigs(Stack source, Stack dataLakeStack) {
         return createSharedServiceConfigs(source.getCluster().getBlueprint(), source.getCluster().getPassword(), dataLakeStack);
-    }
-
-    private boolean isSharedServiceReqdyBlueprint(Blueprint blueprint) {
-        return blueprint.getTags() != null && blueprint.getTags().getMap().containsKey("shared_services_ready");
     }
 }

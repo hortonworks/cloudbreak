@@ -50,6 +50,7 @@ import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceStatus;
+import com.sequenceiq.cloudbreak.blueprint.utils.BlueprintUtils;
 import com.sequenceiq.cloudbreak.blueprint.validation.BlueprintValidator;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
@@ -196,6 +197,9 @@ public class ClusterService {
 
     @Inject
     private SharedServiceConfigProvider sharedServiceConfigProvider;
+
+    @Inject
+    private BlueprintUtils blueprintUtils;
 
     public Cluster create(IdentityUser user, Stack stack, Cluster cluster, List<ClusterComponent> components) throws TransactionExecutionException {
         LOGGER.info("Cluster requested [BlueprintId: {}]", cluster.getBlueprint().getId());
@@ -435,14 +439,7 @@ public class ClusterService {
                     }
                     String hostGroupName = hostGroup.getName();
                     if (hostGroup.getRecoveryMode() == RecoveryMode.AUTO) {
-                        List<String> nodeList = autoRecoveryNodesMap.get(hostGroupName);
-                        if (nodeList == null) {
-                            validateComponentsCategory(stack, hostGroupName);
-                            nodeList = new ArrayList<>();
-                            autoRecoveryNodesMap.put(hostGroupName, nodeList);
-                        }
-                        nodeList.add(failedNode);
-                        autoRecoveryHostMetadata.put(failedNode, hostMetadata);
+                        prepareForAutoRecovery(stack, autoRecoveryNodesMap, autoRecoveryHostMetadata, failedNode, hostMetadata, hostGroupName);
                     } else if (hostGroup.getRecoveryMode() == RecoveryMode.MANUAL) {
                         failedHostMetadata.put(failedNode, hostMetadata);
                     }
@@ -467,6 +464,22 @@ public class ClusterService {
         } catch (TransactionExecutionException e) {
             throw new TransactionRuntimeExecutionException(e);
         }
+    }
+
+    public void prepareForAutoRecovery(Stack stack,
+            Map<String, List<String>> autoRecoveryNodesMap,
+            Map<String, HostMetadata> autoRecoveryHostMetadata,
+            String failedNode,
+            HostMetadata hostMetadata,
+            String hostGroupName) {
+        List<String> nodeList = autoRecoveryNodesMap.get(hostGroupName);
+        if (nodeList == null) {
+            validateComponentsCategory(stack, hostGroupName);
+            nodeList = new ArrayList<>();
+            autoRecoveryNodesMap.put(hostGroupName, nodeList);
+        }
+        nodeList.add(failedNode);
+        autoRecoveryHostMetadata.put(failedNode, hostMetadata);
     }
 
     public void repairCluster(Long stackId, List<String> repairedHostGroups, boolean removeOnly) {
@@ -878,7 +891,7 @@ public class ClusterService {
             AmbariClient ambariClient = getAmbariClient(stack);
             Map<String, String> categories = ambariClient.getComponentsCategory(blueprintName, hostGroup);
             for (Entry<String, String> entry : categories.entrySet()) {
-                if (entry.getValue().equalsIgnoreCase(MASTER_CATEGORY)) {
+                if (entry.getValue().equalsIgnoreCase(MASTER_CATEGORY) && !blueprintUtils.isSharedServiceReqdyBlueprint(blueprint)) {
                     throw new BadRequestException(
                             String.format("Cannot downscale the '%s' hostGroupAdjustment group, because it contains a '%s' component", hostGroup,
                                     entry.getKey()));
