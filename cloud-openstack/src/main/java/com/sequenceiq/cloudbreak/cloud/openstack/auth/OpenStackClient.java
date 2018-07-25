@@ -20,6 +20,7 @@ import javax.annotation.PostConstruct;
 import org.apache.commons.lang3.StringUtils;
 import org.openstack4j.api.OSClient;
 import org.openstack4j.api.exceptions.AuthenticationException;
+import org.openstack4j.api.exceptions.ClientResponseException;
 import org.openstack4j.api.types.Facing;
 import org.openstack4j.core.transport.Config;
 import org.openstack4j.model.common.Identifier;
@@ -201,7 +202,7 @@ public class OpenStackClient {
                         .tenantName(osCredential.getTenantName())
                         .authenticate()
                         .getAccess();
-            } catch (AuthenticationException e) {
+            } catch (AuthenticationException | ClientResponseException e) {
                 LOGGER.info("Openstack authentication failed", e);
                 throw new CredentialVerificationException("Authentication failed to openstack, message: " + e.getMessage(), e);
             }

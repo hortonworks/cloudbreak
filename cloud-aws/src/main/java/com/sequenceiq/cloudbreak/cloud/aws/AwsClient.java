@@ -28,7 +28,6 @@ import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.credential.CredentialVerificationException;
-import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceAuthentication;
 
@@ -128,9 +127,9 @@ public class AwsClient {
         AwsCredentialView awsCredential = new AwsCredentialView(credential);
         if (isRoleAssumeRequired(awsCredential)) {
             if (awsEnvironmentVariableChecker.isAwsAccessKeyAvailable() && !awsEnvironmentVariableChecker.isAwsSecretAccessKeyAvailable()) {
-                throw new CloudConnectorException("If 'AWS_ACCESS_KEY_ID' available then 'AWS_SECRET_ACCESS_KEY' must be set!");
+                throw new CredentialVerificationException("If 'AWS_ACCESS_KEY_ID' available then 'AWS_SECRET_ACCESS_KEY' must be set!");
             } else if (awsEnvironmentVariableChecker.isAwsSecretAccessKeyAvailable() && !awsEnvironmentVariableChecker.isAwsAccessKeyAvailable()) {
-                throw new CloudConnectorException("If 'AWS_SECRET_ACCESS_KEY' available then 'AWS_ACCESS_KEY_ID' must be set!");
+                throw new CredentialVerificationException("If 'AWS_SECRET_ACCESS_KEY' available then 'AWS_ACCESS_KEY_ID' must be set!");
             } else if (!awsEnvironmentVariableChecker.isAwsAccessKeyAvailable() && !awsEnvironmentVariableChecker.isAwsSecretAccessKeyAvailable()) {
                 try {
                     try (InstanceProfileCredentialsProvider provider = new InstanceProfileCredentialsProvider()) {
@@ -143,7 +142,7 @@ public class AwsClient {
                     sb.append("The 'AWS_ACCESS_KEY_ID' and 'AWS_SECRET_ACCESS_KEY' environment variables must be set ");
                     sb.append("or an instance profile role should be available.");
                     LOGGER.info(sb.toString());
-                    throw new CloudConnectorException(sb.toString());
+                    throw new CredentialVerificationException(sb.toString());
                 }
             }
         }
@@ -161,7 +160,7 @@ public class AwsClient {
         String accessKey = credentialView.getAccessKey();
         String secretKey = credentialView.getSecretKey();
         if (isEmpty(accessKey) || isEmpty(secretKey)) {
-            throw new CloudConnectorException("Missing access or secret key from the credential.");
+            throw new CredentialVerificationException("Missing access or secret key from the credential.");
         }
         return new BasicAWSCredentials(accessKey, secretKey);
     }

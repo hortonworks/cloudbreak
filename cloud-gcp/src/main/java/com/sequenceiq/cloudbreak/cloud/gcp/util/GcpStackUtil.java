@@ -87,9 +87,9 @@ public final class GcpStackUtil {
                     .setHttpRequestInitializer(credential)
                     .build();
         } catch (Exception e) {
-            LOGGER.error("Error occurred while building Google Compute access.", e);
+            LOGGER.info("Error occurred while building Google Compute access.", e);
+            throw new CredentialVerificationException("Error occurred while building Google Compute access.", e);
         }
-        return null;
     }
 
     public static GoogleCredential buildCredential(CloudCredential gcpCredential, HttpTransport httpTransport) throws IOException, GeneralSecurityException {
