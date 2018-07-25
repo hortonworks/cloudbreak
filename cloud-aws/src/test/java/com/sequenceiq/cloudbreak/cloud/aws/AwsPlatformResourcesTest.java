@@ -30,7 +30,13 @@ import com.amazonaws.services.identitymanagement.model.InstanceProfile;
 import com.amazonaws.services.identitymanagement.model.ListInstanceProfilesResult;
 import com.amazonaws.services.identitymanagement.model.Role;
 import com.amazonaws.services.kms.AWSKMSClient;
+import com.amazonaws.services.kms.model.AliasListEntry;
+import com.amazonaws.services.kms.model.DescribeKeyRequest;
+import com.amazonaws.services.kms.model.DescribeKeyResult;
 import com.amazonaws.services.kms.model.KeyListEntry;
+import com.amazonaws.services.kms.model.KeyMetadata;
+import com.amazonaws.services.kms.model.ListAliasesRequest;
+import com.amazonaws.services.kms.model.ListAliasesResult;
 import com.amazonaws.services.kms.model.ListKeysRequest;
 import com.amazonaws.services.kms.model.ListKeysResult;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
@@ -153,8 +159,23 @@ public class AwsPlatformResourcesTest {
 
         listKeysResult.setKeys(listEntries);
 
+        DescribeKeyResult describeKeyResult = new DescribeKeyResult();
+        describeKeyResult.setKeyMetadata(new KeyMetadata());
+
+        ListAliasesResult describeAliasResult = new ListAliasesResult();
+
+        Set<AliasListEntry> aliasListEntries = new HashSet<>();
+        aliasListEntries.add(aliasListEntry(1));
+        aliasListEntries.add(aliasListEntry(2));
+        aliasListEntries.add(aliasListEntry(3));
+        aliasListEntries.add(aliasListEntry(4));
+
+        describeAliasResult.setAliases(aliasListEntries);
+
         when(awsClient.createAWSKMS(any(AwsCredentialView.class), anyString())).thenReturn(awskmsClient);
         when(awskmsClient.listKeys(any(ListKeysRequest.class))).thenReturn(listKeysResult);
+        when(awskmsClient.describeKey(any(DescribeKeyRequest.class))).thenReturn(describeKeyResult);
+        when(awskmsClient.listAliases(any(ListAliasesRequest.class))).thenReturn(describeAliasResult);
 
         CloudEncryptionKeys cloudEncryptionKeys =
                 underTest.encryptionKeys(new CloudCredential(1L, "aws-credential"), region("London"), new HashMap<>());
@@ -180,5 +201,13 @@ public class AwsPlatformResourcesTest {
         keyListEntry.setKeyArn(String.format("key-%s", i));
         keyListEntry.setKeyId(String.format("%s", i));
         return keyListEntry;
+    }
+
+    private AliasListEntry aliasListEntry(int i) {
+        AliasListEntry aliasListEntry = new AliasListEntry();
+        aliasListEntry.setAliasArn(String.format("key-%s", i));
+        aliasListEntry.setAliasName(String.format("%s", i));
+        aliasListEntry.setTargetKeyId(String.format("%s", i));
+        return aliasListEntry;
     }
 }

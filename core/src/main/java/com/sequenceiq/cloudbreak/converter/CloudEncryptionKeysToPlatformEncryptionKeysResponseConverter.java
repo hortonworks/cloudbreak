@@ -19,7 +19,8 @@ public class CloudEncryptionKeysToPlatformEncryptionKeysResponseConverter
         PlatformEncryptionKeysResponse platformEncryptionKeysResponse = new PlatformEncryptionKeysResponse();
         Set<EncryptionKeyConfigJson> result = new HashSet<>();
         for (CloudEncryptionKey entry : source.getCloudEncryptionKeys()) {
-            EncryptionKeyConfigJson actual = new EncryptionKeyConfigJson(entry.getName(), entry.getId(), entry.getProperties());
+            EncryptionKeyConfigJson actual =
+                    new EncryptionKeyConfigJson(entry.getName(), entry.getId(), entry.getDescription(), entry.getDisplayName(), entry.getProperties());
             result.add(actual);
         }
         platformEncryptionKeysResponse.setEncryptionKeyConfigs(result);

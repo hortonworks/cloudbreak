@@ -9,15 +9,21 @@ public class CloudEncryptionKey {
 
     private String id;
 
+    private String displayName;
+
+    private String description;
+
     private Map<String, Object> properties = new HashMap<>();
 
     public CloudEncryptionKey() {
     }
 
-    public CloudEncryptionKey(String name, String id, Map<String, Object> properties) {
+    public CloudEncryptionKey(String name, String id, String description, String displayName, Map<String, Object> properties) {
         this.name = name;
         this.id = id;
         this.properties = properties;
+        this.description = description;
+        this.displayName = displayName;
     }
 
     public String getName() {
@@ -42,6 +48,22 @@ public class CloudEncryptionKey {
 
     public void setProperties(Map<String, Object> properties) {
         this.properties = properties;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
     }
 
     @Override
